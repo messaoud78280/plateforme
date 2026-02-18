@@ -1,0 +1,234 @@
+import { getServerSession } from "next-auth";
+import { redirect, notFound } from "next/navigation";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import Link from "next/link";
+import { AssignAgentProject } from "@/components/clients/AssignAgentProject";
+import { AssignAgentTask } from "@/components/clients/AssignAgentTask";
+
+const STATUS_LABELS: Record<string, string> = {
+  NOUVEAU: "Nouveau",
+  EN_COURS: "En cours",
+  EN_ATTENTE: "En attente",
+  TERMINE: "Terminé",
+};
+
+const TASK_STATUS_LABELS: Record<string, string> = {
+  EN_COURS: "En cours",
+  COMPLETE: "Terminée",
+  EN_ATTENTE: "En attente",
+};
+
+export default async function ClientDetailPage({
+  params,
+}: {
+  params: Promise<{ clientId: string }>;
+}) {
+  const session = await getServerSession(authOptions);
+  const { clientId } = await params;
+
+  if (!session?.user?.id) {
+    redirect("/connexion?callbackUrl=/dashboard");
+  }
+
+  const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
+  if (!isAgence) {
+    redirect("/dashboard");
+  }
+
+  const [client, projects, tasks, agents] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: clientId, role: "CLIENT" },
+      select: { id: true, name: true, email: true, company: true, phone: true },
+    }),
+    prisma.project.findMany({
+      where: { clientId },
+      include: {
+        assignedTo: { select: { id: true, name: true, email: true } },
+      },
+      orderBy: { updatedAt: "desc" },
+    }),
+    prisma.task.findMany({
+      where: { clientId },
+      include: {
+        assignedTo: { select: { id: true, name: true, email: true } },
+        project: { select: { id: true, title: true } },
+      },
+      orderBy: { updatedAt: "desc" },
+    }),
+    prisma.user.findMany({
+      where: { role: "AGENCE" },
+      select: { id: true, name: true, email: true },
+      orderBy: { name: "asc" },
+    }),
+  ]);
+
+  if (!client) notFound();
+
+  return (
+    <div className="space-y-8">
+      <Link
+        href="/dashboard/clients"
+        className="text-sm text-[#1d4ed8] hover:underline"
+      >
+        ← Retour aux clients
+      </Link>
+
+      <div className="rounded-xl border border-[#c8cdd6] bg-white p-6 shadow-sm">
+        <h1 className="text-2xl font-bold text-[#0f172a]">{client.name}</h1>
+        <p className="mt-1 text-[#334155]">{client.email}</p>
+        {client.company && (
+          <p className="mt-1 text-sm text-[#64748b]">Société : {client.company}</p>
+        )}
+        {client.phone && (
+          <p className="mt-1 text-sm text-[#64748b]">Tél. : {client.phone}</p>
+        )}
+      </div>
+
+      {/* Projets du client */}
+      <div className="rounded-xl border border-[#c8cdd6] bg-white shadow-sm">
+        <h2 className="border-b border-[#e0e4ea] px-6 py-4 text-lg font-semibold text-[#0f172a]">
+          Projets ({projects.length})
+        </h2>
+        {projects.length === 0 ? (
+          <p className="px-6 py-8 text-sm text-[#64748b]">Aucun projet pour ce client.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[500px] text-sm">
+              <thead>
+                <tr className="border-b border-[#e0e4ea] bg-[#f8f9fb] text-[#334155]">
+                  <th className="px-6 py-3 text-left font-medium">Projet</th>
+                  <th className="px-6 py-3 text-left font-medium">Statut</th>
+                  <th className="px-6 py-3 text-left font-medium">Agent assigné</th>
+                  <th className="px-6 py-3 text-right font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {projects.map((project) => (
+                  <tr key={project.id} className="border-b border-[#e0e4ea] hover:bg-[#f8f9fb]">
+                    <td className="px-6 py-3">
+                      <Link
+                        href={`/dashboard/projets/${project.id}`}
+                        className="font-medium text-[#1d4ed8] hover:underline"
+                      >
+                        {project.title}
+                      </Link>
+                    </td>
+                    <td className="px-6 py-3">
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                          project.status === "TERMINE"
+                            ? "bg-green-100 text-green-800"
+                            : project.status === "EN_COURS"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-slate-100 text-slate-700"
+                        }`}
+                      >
+                        {STATUS_LABELS[project.status] ?? project.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-3">
+                      <AssignAgentProject
+                        projectId={project.id}
+                        projectTitle={project.title}
+                        assignedToId={project.assignedToId ?? null}
+                        assignedToName={project.assignedTo?.name ?? null}
+                        agents={agents}
+                      />
+                    </td>
+                    <td className="px-6 py-3 text-right">
+                      <Link
+                        href={`/dashboard/projets/${project.id}`}
+                        className="text-[#1d4ed8] hover:underline"
+                      >
+                        Ouvrir
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Tâches du client */}
+      <div className="rounded-xl border border-[#c8cdd6] bg-white shadow-sm">
+        <h2 className="border-b border-[#e0e4ea] px-6 py-4 text-lg font-semibold text-[#0f172a]">
+          Tâches ({tasks.length})
+        </h2>
+        {tasks.length === 0 ? (
+          <p className="px-6 py-8 text-sm text-[#64748b]">Aucune tâche pour ce client.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[500px] text-sm">
+              <thead>
+                <tr className="border-b border-[#e0e4ea] bg-[#f8f9fb] text-[#334155]">
+                  <th className="px-6 py-3 text-left font-medium">Tâche</th>
+                  <th className="px-6 py-3 text-left font-medium">Projet</th>
+                  <th className="px-6 py-3 text-left font-medium">Statut</th>
+                  <th className="px-6 py-3 text-left font-medium">Agent assigné</th>
+                  <th className="px-6 py-3 text-right font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tasks.map((task) => (
+                  <tr key={task.id} className="border-b border-[#e0e4ea] hover:bg-[#f8f9fb]">
+                    <td className="px-6 py-3">
+                      <Link
+                        href={`/dashboard/taches/${task.id}`}
+                        className="font-medium text-[#1d4ed8] hover:underline"
+                      >
+                        {task.title}
+                      </Link>
+                    </td>
+                    <td className="px-6 py-3 text-[#334155]">
+                      {task.project ? (
+                        <Link
+                          href={`/dashboard/projets/${task.project.id}`}
+                          className="text-[#1d4ed8] hover:underline"
+                        >
+                          {task.project.title}
+                        </Link>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                    <td className="px-6 py-3">
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                          task.status === "COMPLETE"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-slate-100 text-slate-700"
+                        }`}
+                      >
+                        {TASK_STATUS_LABELS[task.status] ?? task.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-3">
+                      <AssignAgentTask
+                        taskId={task.id}
+                        taskTitle={task.title}
+                        assignedToId={task.assignedToId ?? null}
+                        assignedToName={task.assignedTo?.name ?? null}
+                        agents={agents}
+                      />
+                    </td>
+                    <td className="px-6 py-3 text-right">
+                      <Link
+                        href={`/dashboard/taches/${task.id}`}
+                        className="text-[#1d4ed8] hover:underline"
+                      >
+                        Ouvrir
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

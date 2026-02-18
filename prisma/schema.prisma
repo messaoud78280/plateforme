@@ -1,0 +1,269 @@
+// Plateforme d'échange Client - Agence
+// https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Utilisateurs (clients et membres de l'agence)
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(CLIENT)
+  company   String?  // ex. BelleVie Cosmétiques, TaskFlow Solutions
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  messagesSent       Message[]  @relation("SentMessages")
+  messagesReceived   Message[]  @relation("ReceivedMessages")
+  projects           Project[]  @relation("ClientProjects")
+  projectsAssigned   Project[]  @relation("AssignedProjects")
+  documents          Document[]
+  tasks              Task[]
+  tasksAssigned      Task[]     @relation("AssignedTasks")
+  taskComments       TaskComment[]
+  activities         Activity[]
+  alerts             Alert[]
+}
+
+enum UserRole {
+  CLIENT  // Client
+  AGENCE  // Agent (opérationnel)
+  MANAGER // Gérant de l'agence
+}
+
+// Projets (liés à un client) – demande avec deadline, urgence, pièces jointes
+model Project {
+  id            String         @id @default(cuid())
+  title         String
+  description   String?
+  status        ProjectStatus  @default(EN_COURS)
+  clientId      String
+  assignedToId  String?        // agent (User rôle AGENCE) en charge du projet
+  dateSouhaitee DateTime?      // date souhaitée pour le début
+  deadline      DateTime?      // deadline d'exécution
+  urgency       ProjectUrgency @default(MOYENNE)
+  notes         String?        // instructions ou détails administratifs
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  client     User       @relation("ClientProjects", fields: [clientId], references: [id], onDelete: Cascade)
+  assignedTo User?      @relation("AssignedProjects", fields: [assignedToId], references: [id], onDelete: SetNull)
+  messages   Message[]
+  documents  Document[]
+  tasks      Task[]
+  invoices   Invoice[]
+  metrics    Metric[]
+  activities Activity[]
+}
+
+enum ProjectStatus {
+  NOUVEAU
+  EN_COURS
+  EN_ATTENTE
+  TERMINE
+}
+
+enum ProjectUrgency {
+  BASSE
+  MOYENNE
+  HAUTE
+  URGENTE
+}
+
+// Messages entre client et agence
+model Message {
+  id         String   @id @default(cuid())
+  content    String
+  projectId  String
+  senderId   String
+  receiverId String
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  project  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sender   User    @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User    @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+}
+
+// Documents déposés par les clients (optionnellement liés à un projet ou une tâche)
+model Document {
+  id        String   @id @default(cuid())
+  name      String
+  category  DocumentCategory @default(AUTRE)
+  fileUrl   String
+  fileSize  Int      // en octets
+  mimeType  String?
+  status    DocumentStatus @default(EN_ATTENTE)
+  clientId  String
+  projectId String?
+  taskId    String?  // pièce jointe d'une tâche
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  client  User     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  task    Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+}
+
+enum DocumentCategory {
+  FACTURE
+  CONTRAT
+  RH
+  FISCAL
+  AUTRE
+}
+
+enum DocumentStatus {
+  EN_ATTENTE
+  EN_TRAITEMENT
+  TRAITE
+  ARCHIVE
+}
+
+// Tâches administratives (optionnellement liées à un projet)
+model Task {
+  id             String    @id @default(cuid())
+  title          String
+  description    String?
+  status         TaskStatus @default(EN_COURS)
+  clientId       String
+  projectId      String?   // projet auquel la tâche se rapporte (optionnel)
+  assignedToId   String?   // agent (User rôle AGENCE) assigné par l'agence après prise en charge
+  agencyNotes    String?   // notes de l'agence pour l'agent (consignes, rappels)
+  correctionNote String?   // note quand le responsable demande une correction
+  validatedAt    DateTime? // date de validation du travail par l'agence
+  completedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  client     User         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  project    Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  assignedTo User?        @relation("AssignedTasks", fields: [assignedToId], references: [id], onDelete: SetNull)
+  comments   TaskComment[]
+  documents  Document[]
+}
+
+enum TaskStatus {
+  EN_COURS
+  COMPLETE
+  EN_ATTENTE
+}
+
+// Commentaires sur tâches
+model TaskComment {
+  id        String   @id @default(cuid())
+  taskId    String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Factures
+model Invoice {
+  id            String        @id @default(cuid())
+  projectId     String
+  invoiceNumber String        @unique
+  amount        Decimal       @db.Decimal(10, 2)
+  status        InvoiceStatus @default(DRAFT)
+  issueDate     DateTime
+  dueDate       DateTime
+  paidDate      DateTime?
+  createdAt     DateTime      @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  CANCELLED
+}
+
+// Métriques / KPIs (pour rapports et simulation)
+model Metric {
+  id         String   @id @default(cuid())
+  projectId  String
+  metricDate DateTime
+  metricType String   // social_media, support_emails, response_time, etc.
+  metricData Json     // données flexibles
+  createdAt  DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+// Timeline activité récente
+model Activity {
+  id        String   @id @default(cuid())
+  type      String   // DOCUMENT_UPLOADED, TASK_COMPLETED, MESSAGE_SENT, etc.
+  title     String
+  detail    String?
+  clientId  String
+  projectId String?  // optionnel : lier à un projet
+  metadata  Json?    // données supplémentaires
+  createdAt DateTime @default(now())
+
+  client  User     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+}
+
+// Alertes importantes (optionnellement avec lien d'action)
+model Alert {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  level     AlertLevel @default(INFO)
+  clientId  String
+  actionUrl String?   // lien direct (ex. vers le projet pour un nouveau message)
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  client User @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+enum AlertLevel {
+  INFO
+  WARNING
+  URGENT
+}
+
+// Demandes de contact / RDV depuis le formulaire public
+model ContactRequest {
+  id                  String            @id @default(cuid())
+  structure           String
+  denominationSociale String?
+  contactName         String
+  email               String
+  phone               String?
+  formule             String?
+  message             String?
+  rdvDate             DateTime?         @db.Date
+  rdvTime             String?           // "09:00", "09:30", ...
+  sector              String?
+  howKnown            String?
+  status              ContactRequestStatus @default(NOUVEAU)
+  createdAt           DateTime          @default(now())
+
+  @@index([rdvDate, rdvTime])
+  @@index([status])
+}
+
+enum ContactRequestStatus {
+  NOUVEAU
+  CONFIRME
+  ANNULE
+}

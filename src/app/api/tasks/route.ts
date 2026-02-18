@@ -1,0 +1,98 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+
+/** GET /api/tasks – Liste des tâches du client (ou toutes si agence) */
+export async function GET(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  }
+
+  const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
+  const { searchParams } = new URL(request.url);
+  const status = searchParams.get("status") ?? undefined;
+
+  try {
+    const tasks = await prisma.task.findMany({
+      where: {
+        ...(isAgence ? {} : { clientId: session.user.id }),
+        ...(status ? { status: status as "EN_COURS" | "COMPLETE" | "EN_ATTENTE" } : {}),
+      },
+      include: {
+        project: { select: { id: true, title: true } },
+        assignedTo: { select: { id: true, name: true, email: true } },
+      },
+      orderBy: { updatedAt: "desc" },
+    });
+    return NextResponse.json(tasks);
+  } catch (e) {
+    console.error(e);
+    return NextResponse.json(
+      { error: "Erreur lors de la récupération des tâches" },
+      { status: 500 }
+    );
+  }
+}
+
+/** POST /api/tasks – Créer une tâche (réservé au client : "dépôt" de demande) */
+export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  }
+
+  if (session.user.role !== "CLIENT") {
+    return NextResponse.json(
+      { error: "Seul le client peut déposer une tâche. L’agence traite les demandes depuis la liste." },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const body = await request.json();
+    const { title, description, projectId } = body as { title: string; description?: string; projectId?: string | null };
+
+    if (!title || typeof title !== "string" || title.trim().length === 0) {
+      return NextResponse.json(
+        { error: "Le titre est requis" },
+        { status: 400 }
+      );
+    }
+
+    let projectIdValid: string | null = null;
+    if (projectId && typeof projectId === "string" && projectId.trim()) {
+      const project = await prisma.project.findFirst({
+        where: { id: projectId.trim(), clientId: session.user.id },
+      });
+      if (project) projectIdValid = project.id;
+    }
+
+    const task = await prisma.task.create({
+      data: {
+        title: title.trim(),
+        description: description?.trim() ?? null,
+        status: "EN_ATTENTE",
+        clientId: session.user.id,
+        projectId: projectIdValid,
+      },
+    });
+    return NextResponse.json(task);
+  } catch (e) {
+    const err = e as { message?: string; code?: string };
+    const msg = String(err?.message ?? "Erreur inconnue");
+    console.error("Création tâche:", e);
+    // En dev, toujours renvoyer l'erreur réelle pour débogage
+    const isDev = process.env.NODE_ENV === "development";
+    const isColumnMissing =
+      !isDev &&
+      (/column.*does not exist|Unknown column|projectId.*exist/i.test(msg) || err?.code === "P2010");
+    const message = isColumnMissing
+      ? "La base de données doit être mise à jour. Exécutez le script prisma/supabase-tasks-project-id.sql dans Supabase (voir SUPABASE-SETUP.md)."
+      : isDev
+        ? `Erreur : ${msg}`
+        : "Erreur lors de la création de la tâche.";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}

@@ -1,8 +1,67 @@
 @import "tailwindcss";
 
+/* Design system IATASK – métallique clair, épuré, futuriste */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f2f4f7;
+  --foreground: #0f172a;
+
+  /* Métallique clair (pro) */
+  --metal-50: #f8f9fb;
+  --metal-100: #eef0f4;
+  --metal-200: #e0e4ea;
+  --metal-300: #c8cdd6;
+  --metal-400: #9ca3af;
+  --metal-500: #64748b;
+  --metal-700: #334155;
+  --metal-800: #1e293b;
+  --metal-900: #0f172a;
+
+  /* Accent futuriste (bleu acier) */
+  --accent-500: #2563eb;
+  --accent-600: #1d4ed8;
+  --accent-700: #1e40af;
+
+  /* Primary (aligné accent) */
+  --primary-50: #eff6ff;
+  --primary-500: #3b82f6;
+  --primary-700: #1d4ed8;
+
+  /* Success / Warning / Error */
+  --success-500: #22c55e;
+  --warning-500: #f59e0b;
+  --error-500: #ef4444;
+
+  /* Cadres / cartes – contraste */
+  --card-bg: #ffffff;
+  --card-border: #c8cdd6;
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --card-shadow-hover: 0 8px 24px rgba(15, 23, 42, 0.08);
+
+  /* Typography */
+  --font-family: var(--font-geist-sans), "Inter", system-ui, sans-serif;
+  --heading-1: 2rem;
+  --heading-2: 1.5rem;
+  --heading-3: 1.25rem;
+  --body: 1rem;
+  --small: 0.875rem;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* Shadows – légers, pro */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 12px 28px rgba(15, 23, 42, 0.08);
+
+  /* Radius – épuré */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
 }
 
 @theme inline {
@@ -10,6 +69,18 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+/* Cadre carte – contraste métallique */
+.card-frame {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.card-frame:hover {
+  box-shadow: var(--card-shadow-hover);
+  border-color: var(--metal-400);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,5 +93,9 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-family);
+}
+
+html {
+  scroll-behavior: smooth;
 }

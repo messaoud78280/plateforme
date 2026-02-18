@@ -1,36 +1,122 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Plateforme Client - Agence
 
-## Getting Started
+Plateforme d'échange sécurisée entre vos clients et votre agence. Gestion des projets, messagerie et suivi en un seul endroit.
 
-First, run the development server:
+## Fonctionnalités
+
+- **Authentification** : Connexion et inscription avec rôles (Client / Agence)
+- **Tableau de bord** : KPIs (tâches en cours, complétées, documents en attente, temps moyen), activité récente, alertes, graphique 7 jours
+- **Mes documents** : Upload (PDF, JPG, PNG, DOCX, XLSX, max 10 Mo), liste/grille, filtres (catégorie, statut, recherche), pagination
+- **Projets** : Les clients créent des projets, l'agence les consulte
+- **Messagerie** : Échange de messages par projet entre client et agence
+
+## Démarrage rapide
+
+### Prérequis
+
+- Node.js 18+
+- npm
+- Un projet [Supabase](https://supabase.com) (gratuit)
+
+### 1. Créer un projet Supabase
+
+1. Allez sur [supabase.com](https://supabase.com) et créez un compte / projet.
+2. Dans **Project Settings → Database**, récupérez la **Connection string** (mode URI).
+3. Choisissez **Connection pooling** (port **6543**) pour l’app, et remplacez `[YOUR-PASSWORD]` par le mot de passe de la base.
+4. Dans **Project Settings → API**, notez l’**URL** et la clé **anon public** (optionnel, pour Realtime/Storage plus tard).
+
+### 2. Installation
+
+```bash
+# Installer les dépendances
+npm install
+
+# Copier la configuration
+cp .env.example .env
+
+# Renseigner dans .env :
+# - DATABASE_URL (chaîne PostgreSQL Supabase)
+# - NEXTAUTH_SECRET, NEXTAUTH_URL
+# - NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY (pour upload de documents)
+
+# Créer le bucket Supabase Storage "documents" (Storage → New bucket → nom: documents, public: oui)
+
+# Créer les tables dans Supabase
+npx prisma migrate dev --name init
+
+# Créer les comptes de démo
+npm run db:seed
+```
+
+### Lancement
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvrez [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Comptes de démo
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Rôle  | Email              | Mot de passe    |
+|-------|--------------------|-----------------|
+| Client| client@exemple.com | motdepasse123   |
+| Agence| agence@exemple.com | motdepasse123   |
 
-## Learn More
+## Configuration
 
-To learn more about Next.js, take a look at the following resources:
+### Variables d'environnement (`.env`)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | Chaîne de connexion PostgreSQL Supabase (pooler, port 6543) |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL du projet Supabase (optionnel, pour Realtime/Storage) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clé anon Supabase (optionnel) |
+| `NEXTAUTH_SECRET` | Secret des sessions (générer avec `openssl rand -base64 32`) |
+| `NEXTAUTH_URL` | URL de l’app (`http://localhost:3000` en dev) |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Production
 
-## Deploy on Vercel
+1. Générer un secret NextAuth : `openssl rand -base64 32`
+2. Mettre à jour `NEXTAUTH_URL` avec l’URL de production.
+3. La base est déjà sur Supabase (PostgreSQL hébergé).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Scripts disponibles
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Commande       | Description                    |
+|----------------|--------------------------------|
+| `npm run dev`  | Serveur de développement      |
+| `npm run build`| Build de production           |
+| `npm run start`| Démarrer en production        |
+| `npm run db:seed` | Créer les utilisateurs de démo |
+| `npm run db:studio` | Interface Prisma Studio   |
+
+## Structure du projet
+
+```
+src/
+├── app/                    # Pages et routes Next.js
+│   ├── api/               # Routes API
+│   │   ├── auth/          # Authentification (NextAuth, inscription)
+│   │   ├── messages/      # Envoi de messages
+│   │   └── projets/       # Création de projets
+│   ├── connexion/         # Page de connexion
+│   ├── inscription/       # Page d'inscription
+│   └── dashboard/         # Espace connecté
+│       └── projets/        # Liste et détail des projets
+├── components/            # Composants réutilisables
+└── lib/                   # Utilitaires (Prisma, Auth)
+prisma/
+├── schema.prisma          # Modèles de données
+├── seed.ts                # Données initiales
+└── migrations/            # Migrations SQL
+```
+
+## Technologies
+
+- **Next.js 16** - Framework React
+- **TypeScript** - Typage
+- **Supabase** - Base PostgreSQL hébergée
+- **Prisma 7** - ORM (avec adaptateur PostgreSQL)
+- **NextAuth.js** - Authentification
+- **Tailwind CSS** - Styles

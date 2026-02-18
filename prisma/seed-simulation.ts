@@ -13,12 +13,7 @@ if (!connectionString) {
   throw new Error("DATABASE_URL est requis.");
 }
 
-const adapter = new PrismaPg({
-  connectionString,
-  ssl: { rejectUnauthorized: false },
-});
-const prisma = new PrismaClient({ adapter });
-
+const prisma = new PrismaClient();
 async function main() {
   const password = await bcrypt.hash("motdepasse123", 12);
 

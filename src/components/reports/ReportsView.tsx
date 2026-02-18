@@ -98,7 +98,7 @@ export function ReportsView({ period }: { period: string }) {
               <XAxis dataKey="label" tick={{ fontSize: 12 }} />
               <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
               <Tooltip
-                formatter={(value: number) => [value, ""]}
+                formatter={(value: number | undefined) => [value ?? 0, ""]}
                 labelFormatter={(_, payload) => payload[0]?.payload?.date}
               />
               <Bar dataKey="creees" name="Créées" fill="#3b82f6" radius={[4, 4, 0, 0]} />
@@ -129,7 +129,7 @@ export function ReportsView({ period }: { period: string }) {
                     <Cell key={i} fill={entry.color} />
                   ))}
                 </Pie>
-                <PieTooltip formatter={(value: number) => [value, ""]} />
+                <PieTooltip formatter={(value: number | undefined) => [value ?? 0, ""]} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>

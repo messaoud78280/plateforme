@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
 
     // PDF
     const doc = new jsPDF();
-    const pageW = doc.getPageWidth();
+    const pageW = doc.internal.pageSize.width;
     let y = 20;
 
     doc.setFontSize(18);

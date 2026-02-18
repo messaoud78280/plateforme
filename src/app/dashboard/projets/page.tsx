@@ -1,9 +1,12 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+import type { ProjectStatus } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { CreateProjectForm } from "@/components/CreateProjectForm";
+
+const PROJECT_STATUSES: ProjectStatus[] = ["NOUVEAU", "EN_COURS", "EN_ATTENTE", "TERMINE"];
 
 const STATUS_LABELS: Record<string, string> = {
   NOUVEAU: "Nouveau",
@@ -33,10 +36,10 @@ export default async function ProjetsPage({
   const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
   const params = await searchParams;
   const search = (params.recherche ?? "").trim().toLowerCase();
-  const statusFilter = params.statut as string | undefined;
-  const validStatus =
-    statusFilter && ["NOUVEAU", "EN_COURS", "EN_ATTENTE", "TERMINE"].includes(statusFilter)
-      ? statusFilter
+  const statusFilter = params.statut;
+  const validStatus: ProjectStatus | undefined =
+    statusFilter && PROJECT_STATUSES.includes(statusFilter as ProjectStatus)
+      ? (statusFilter as ProjectStatus)
       : undefined;
 
   const where = {

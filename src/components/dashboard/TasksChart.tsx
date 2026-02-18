@@ -45,7 +45,7 @@ export function TasksChart({ tasks }: TasksChartProps) {
             <XAxis dataKey="label" tick={{ fontSize: 12 }} />
             <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
             <Tooltip
-              formatter={(value: number) => [value, ""]}
+              formatter={(value: number | undefined) => [value ?? 0, ""]}
               labelFormatter={(_, payload) => payload[0]?.payload?.date}
             />
             <Bar dataKey="creees" name="Créées" fill="#3b82f6" radius={[4, 4, 0, 0]} />

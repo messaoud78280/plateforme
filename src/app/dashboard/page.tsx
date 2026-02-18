@@ -22,7 +22,7 @@ export default async function DashboardPage() {
   let tasksEnCours = 0;
   let tasksCompleteesCeMois = 0;
   let documentsEnAttente = 0;
-  let activities: { id: string; type: string; title: string; detail: string | null; clientId: string; createdAt: Date }[] = [];
+  let activities: Awaited<ReturnType<typeof prisma.activity.findMany>> = [];
   let alerts: { id: string; title: string; message: string; level: string; read: boolean; createdAt: Date }[] = [];
   let tasksPourChart: { createdAt: Date; completedAt: Date | null; status: string }[] = [];
   let tempsMoyenJours = 0;

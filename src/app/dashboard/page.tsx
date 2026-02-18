@@ -23,7 +23,7 @@ export default async function DashboardPage() {
   let tasksCompleteesCeMois = 0;
   let documentsEnAttente = 0;
   let activities: Awaited<ReturnType<typeof prisma.activity.findMany>> = [];
-  let alerts: { id: string; title: string; message: string; level: string; read: boolean; createdAt: Date }[] = [];
+  let alerts: Awaited<ReturnType<typeof prisma.alert.findMany>> = [];
   let tasksPourChart: { createdAt: Date; completedAt: Date | null; status: string }[] = [];
   let tempsMoyenJours = 0;
   let clients: { id: string; name: string; email: string; projectsCount: number; tasksCount: number }[] = [];
@@ -74,7 +74,7 @@ export default async function DashboardPage() {
     });
     if (tasksCompletees.length > 0) {
       tempsMoyenJours =
-        tasksCompletees.reduce((acc, t) => {
+        tasksCompletees.reduce((acc: number, t: { createdAt: Date; completedAt: Date | null }) => {
           if (!t.completedAt) return acc;
           const jours = (t.completedAt.getTime() - t.createdAt.getTime()) / (1000 * 60 * 60 * 24);
           return acc + jours;
@@ -96,7 +96,7 @@ export default async function DashboardPage() {
         },
         orderBy: { name: "asc" },
       });
-      clients = clientUsers.map((u) => ({
+      clients = clientUsers.map((u: { id: string; name: string; email: string; _count: { projects: number; tasks: number } }) => ({
         id: u.id,
         name: u.name,
         email: u.email,

@@ -1,8 +1,17 @@
-import { Alert } from "@prisma/client";
 import Link from "next/link";
 
+export type AlertItem = {
+  id: string;
+  title: string;
+  message: string;
+  level: string;
+  read: boolean;
+  createdAt: Date;
+  actionUrl?: string | null;
+};
+
 interface AlertsSectionProps {
-  alerts: Alert[];
+  alerts: AlertItem[];
 }
 
 export function AlertsSection({ alerts }: AlertsSectionProps) {
@@ -40,7 +49,7 @@ export function AlertsSection({ alerts }: AlertsSectionProps) {
                 <p className="text-xs text-slate-400">
                   {new Date(a.createdAt).toLocaleString("fr-FR")}
                 </p>
-                {"actionUrl" in a && a.actionUrl && (
+                {a.actionUrl && (
                   <Link
                     href={a.actionUrl}
                     className="text-xs font-medium text-blue-600 hover:underline"

@@ -5,11 +5,21 @@ import { UserRole } from "@prisma/client";
 
 export async function POST(request: Request) {
   try {
-    const { email, password, name, role = "CLIENT" } = await request.json();
+    const body = await request.json();
+    const {
+      email,
+      password,
+      name,
+      phone,
+      company,
+      formeJuridique,
+      secteurActivite,
+      service,
+    } = body;
 
     if (!email || !password || !name) {
       return NextResponse.json(
-        { error: "Email, mot de passe et nom sont requis." },
+        { error: "Email, mot de passe et nom du contact sont requis." },
         { status: 400 }
       );
     }
@@ -32,7 +42,12 @@ export async function POST(request: Request) {
         email,
         password: hashedPassword,
         name,
-        role: role === "AGENCE" ? UserRole.AGENCE : UserRole.CLIENT,
+        role: UserRole.CLIENT, // Inscription toujours en tant que client (professionnel)
+        phone: phone || undefined,
+        company: company || undefined,
+        formeJuridique: formeJuridique || undefined,
+        secteurActivite: secteurActivite || undefined,
+        service: service || undefined,
       },
     });
 

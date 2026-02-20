@@ -4,12 +4,44 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+const FORMES_JURIDIQUES = [
+  "Profession libérale",
+  "SAS",
+  "EURL",
+  "SARL",
+  "SA",
+  "Auto-entrepreneur / Micro-entreprise",
+  "Association",
+  "SCI",
+  "Autre",
+] as const;
+
+const SECTEURS_ACTIVITE = [
+  "E-commerce",
+  "Juridique",
+  "Commercial",
+  "Réseaux sociaux / Médias",
+  "Événementiel",
+  "Agroalimentaire",
+  "Santé",
+  "BTP / Construction",
+  "Conseils / Consulting",
+  "Immobilier",
+  "Finance / Assurances",
+  "Industrie",
+  "Autre",
+] as const;
+
 export default function InscriptionPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [role, setRole] = useState<"CLIENT" | "AGENCE">("CLIENT");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [company, setCompany] = useState("");
+  const [formeJuridique, setFormeJuridique] = useState("");
+  const [secteurActivite, setSecteurActivite] = useState("");
+  const [service, setService] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
@@ -19,7 +51,16 @@ export default function InscriptionPage() {
     const res = await fetch("/api/auth/inscription", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, name, role }),
+      body: JSON.stringify({
+        email,
+        password,
+        name,
+        phone: phone || undefined,
+        company: company || undefined,
+        formeJuridique: formeJuridique || undefined,
+        secteurActivite: secteurActivite || undefined,
+        service: service || undefined,
+      }),
     });
 
     const data = await res.json();
@@ -34,22 +75,22 @@ export default function InscriptionPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
+    <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-8">
+      <div className="w-full max-w-lg rounded-2xl bg-white p-8 shadow-lg">
         <h1 className="mb-2 text-2xl font-bold text-slate-800">
-          Créer un compte
+          Créer un compte professionnel
         </h1>
         <p className="mb-8 text-slate-600">
-          Inscrivez-vous pour accéder à la plateforme
+          Inscrivez-vous pour accéder à nos services d&apos;agent administratif
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label
               htmlFor="name"
               className="mb-2 block text-sm font-medium text-slate-700"
             >
-              Nom complet
+              Nom du contact
             </label>
             <input
               id="name"
@@ -76,7 +117,102 @@ export default function InscriptionPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              placeholder="vous@exemple.com"
+              placeholder="vous@entreprise.com"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="phone"
+              className="mb-2 block text-sm font-medium text-slate-700"
+            >
+              Téléphone
+            </label>
+            <input
+              id="phone"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="06 12 34 56 78"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="company"
+              className="mb-2 block text-sm font-medium text-slate-700"
+            >
+              Raison sociale / Nom de l&apos;entreprise
+            </label>
+            <input
+              id="company"
+              type="text"
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="Exemple SAS"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="formeJuridique"
+              className="mb-2 block text-sm font-medium text-slate-700"
+            >
+              Forme juridique
+            </label>
+            <select
+              id="formeJuridique"
+              value={formeJuridique}
+              onChange={(e) => setFormeJuridique(e.target.value)}
+              className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="">Sélectionnez une forme juridique</option>
+              {FORMES_JURIDIQUES.map((f) => (
+                <option key={f} value={f}>
+                  {f}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label
+              htmlFor="secteurActivite"
+              className="mb-2 block text-sm font-medium text-slate-700"
+            >
+              Secteur d&apos;activité
+            </label>
+            <select
+              id="secteurActivite"
+              value={secteurActivite}
+              onChange={(e) => setSecteurActivite(e.target.value)}
+              className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="">Sélectionnez un secteur</option>
+              {SECTEURS_ACTIVITE.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label
+              htmlFor="service"
+              className="mb-2 block text-sm font-medium text-slate-700"
+            >
+              Service / Département
+            </label>
+            <input
+              id="service"
+              type="text"
+              value={service}
+              onChange={(e) => setService(e.target.value)}
+              className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="Ex. Direction, Comptabilité, RH..."
             />
           </div>
 
@@ -97,20 +233,6 @@ export default function InscriptionPage() {
               className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               placeholder="Minimum 6 caractères"
             />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
-              Type de compte
-            </label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value as "CLIENT" | "AGENCE")}
-              className="w-full rounded-lg border border-slate-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="CLIENT">Client</option>
-              <option value="AGENCE">Agence</option>
-            </select>
           </div>
 
           {error && (

@@ -17,8 +17,11 @@ model User {
   password  String
   name      String
   role      UserRole @default(CLIENT)
-  company   String?  // ex. BelleVie Cosmétiques, TaskFlow Solutions
+  company   String?  // Raison sociale
   phone     String?
+  formeJuridique  String?  // SAS, EURL, SARL, SA, profession libérale, etc.
+  secteurActivite String?  // e-commerce, juridique, commercial, etc.
+  service         String?  // Service / département du contact
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

@@ -22,8 +22,17 @@ function ConnexionForm() {
       redirect: false,
     });
 
-    if (result?.error) {
-      setError("Email ou mot de passe incorrect.");
+    if (!result) {
+      setError("Erreur de connexion au serveur. Vérifiez votre connexion et réessayez.");
+      return;
+    }
+
+    if (result.error) {
+      if (result.error === "CredentialsSignin") {
+        setError("Email ou mot de passe incorrect.");
+      } else {
+        setError(`Erreur de connexion (${result.error}). Vérifiez NEXTAUTH_URL et NEXTAUTH_SECRET sur Railway.`);
+      }
       return;
     }
 

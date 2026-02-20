@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { AppointmentCalendar } from "@/components/appointments/AppointmentCalendar";
 
 const STATUS_LABELS: Record<string, string> = {
   NOUVEAU: "Nouvelle",
@@ -131,6 +132,17 @@ export default async function MessagesPage() {
           )}
         </section>
       )}
+
+      {/* Calendrier de prise de RDV (type Calendly) */}
+      <section className="rounded-xl border border-[#c8cdd6] bg-white p-6 shadow-sm">
+        <h2 className="mb-4 text-lg font-semibold text-[#0f172a]">
+          Prise de rendez-vous en ligne
+        </h2>
+        <p className="mb-6 text-sm text-[#334155]">
+          Réservez un créneau, ajoutez des pièces jointes, des notes et une récurrence. Les RDV apparaissent dans les alertes avec rappel.
+        </p>
+        <AppointmentCalendar />
+      </section>
 
       <div className="rounded-xl border border-dashed border-[#c8cdd6] bg-white p-12 text-center">
         <p className="text-[#334155]">

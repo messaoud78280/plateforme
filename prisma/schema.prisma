@@ -36,6 +36,8 @@ model User {
   taskComments       TaskComment[]
   activities         Activity[]
   alerts             Alert[]
+  appointmentsOrganized Appointment[] @relation("AppointmentOrganizer")
+  appointmentsAsClient  Appointment[] @relation("AppointmentClient")
 }
 
 enum UserRole {
@@ -67,6 +69,7 @@ model Project {
   invoices   Invoice[]
   metrics    Metric[]
   activities Activity[]
+  appointments Appointment[]
 }
 
 enum ProjectStatus {
@@ -268,4 +271,50 @@ enum ContactRequestStatus {
   NOUVEAU
   CONFIRME
   ANNULE
+}
+
+// Rendez-vous (calendrier type Calendly)
+model Appointment {
+  id           String   @id @default(cuid())
+  title        String
+  startAt      DateTime
+  endAt        DateTime
+  organizerId  String   // User agence/gérant qui organise
+  clientId     String?  // User client (si connecté)
+  clientEmail  String?  // Email si prise de RDV externe
+  clientName   String?
+  projectId    String?
+  notes        String?  @db.Text
+  comments     Json?    // [{ userId, text, createdAt }]
+  recurrence   String?  // "NONE" | "WEEKLY" | "BIWEEKLY" | "MONTHLY"
+  recurrenceEndAt DateTime?
+  reminderSentAt  DateTime?
+  status       AppointmentStatus @default(CONFIRME)
+  contactRequestId String?  @unique  // Si issu d'une demande de contact
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  organizer    User     @relation("AppointmentOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
+  client       User?    @relation("AppointmentClient", fields: [clientId], references: [id], onDelete: SetNull)
+  project      Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  attachments  AppointmentAttachment[]
+}
+
+enum AppointmentStatus {
+  CONFIRME
+  ANNULE
+  TERMINE
+}
+
+// Pièces jointes sur un rendez-vous
+model AppointmentAttachment {
+  id            String @id @default(cuid())
+  appointmentId String
+  name          String
+  fileUrl       String
+  fileSize      Int
+  mimeType      String?
+  createdAt     DateTime @default(now())
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
 }

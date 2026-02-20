@@ -45,6 +45,12 @@ export default async function DashboardLayout({
             Tableau de bord
           </Link>
           <Link
+            href="/dashboard/projets"
+            className="rounded-lg px-3 py-2 text-sm font-medium text-[#334155] hover:bg-[#eef0f4] hover:text-[#0f172a]"
+          >
+            Projets
+          </Link>
+          <Link
             href="/dashboard/taches"
             className="rounded-lg px-3 py-2 text-sm font-medium text-[#334155] hover:bg-[#eef0f4] hover:text-[#0f172a]"
           >
@@ -57,10 +63,10 @@ export default async function DashboardLayout({
             Mes documents
           </Link>
           <Link
-            href="/dashboard/projets"
+            href="/dashboard/messages"
             className="rounded-lg px-3 py-2 text-sm font-medium text-[#334155] hover:bg-[#eef0f4] hover:text-[#0f172a]"
           >
-            Projets
+            Messages
           </Link>
           {(session.user?.role === "AGENCE" || session.user?.role === "MANAGER") && (
             <Link
@@ -70,12 +76,6 @@ export default async function DashboardLayout({
               Clients
             </Link>
           )}
-          <Link
-            href="/dashboard/messages"
-            className="rounded-lg px-3 py-2 text-sm font-medium text-[#334155] hover:bg-[#eef0f4] hover:text-[#0f172a]"
-          >
-            Messages
-          </Link>
           {(session.user?.role === "AGENCE" || session.user?.role === "MANAGER") && (
             <Link
               href="/dashboard/simulation"

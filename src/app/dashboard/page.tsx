@@ -8,6 +8,7 @@ import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
 import { AlertsSection } from "@/components/dashboard/AlertsSection";
 import { TasksChart } from "@/components/dashboard/TasksChart";
 import { ClientsSection } from "@/components/dashboard/ClientsSection";
+import { MessagesSection } from "@/components/dashboard/MessagesSection";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -123,6 +124,12 @@ export default async function DashboardPage() {
             : "Suivez vos documents, tâches et échanges avec l’agence."}
         </p>
       </div>
+
+      {/* Section Messages */}
+      <MessagesSection
+        isAgence={isAgence}
+        sessionUserId={session.user.id}
+      />
 
       {/* KPIs */}
       <DashboardKPIs

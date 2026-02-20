@@ -3,6 +3,42 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+export async function GET() {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+  }
+
+  try {
+    const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
+
+    const messages = await prisma.message.findMany({
+      where: {
+        OR: [
+          { receiverId: session.user.id },
+          { senderId: session.user.id },
+        ],
+      },
+      include: {
+        project: { select: { id: true, title: true } },
+        sender: { select: { id: true, name: true } },
+        receiver: { select: { id: true, name: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    });
+
+    return NextResponse.json(messages);
+  } catch (error) {
+    console.error("Erreur récupération messages:", error);
+    return NextResponse.json(
+      { error: "Erreur lors de la récupération des messages." },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
 
@@ -11,7 +47,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { projectId, content } = await request.json();
+    const { projectId, content, receiverId: bodyReceiverId } = await request.json();
 
     if (!projectId || !content?.trim()) {
       return NextResponse.json(
@@ -22,7 +58,7 @@ export async function POST(request: Request) {
 
     const project = await prisma.project.findUnique({
       where: { id: projectId },
-      select: { id: true, title: true, clientId: true },
+      include: { assignedTo: { select: { id: true } } },
     });
 
     if (!project) {
@@ -47,16 +83,49 @@ export async function POST(request: Request) {
           { status: 403 }
         );
       }
-      const agenceUser = await prisma.user.findFirst({
-        where: { role: { in: ["AGENCE", "MANAGER"] } },
-      });
-      if (!agenceUser) {
-        return NextResponse.json(
-          { error: "Aucun membre agence disponible." },
-          { status: 400 }
-        );
+      if (bodyReceiverId) {
+        const allowed = await prisma.user.findFirst({
+          where: {
+            id: bodyReceiverId,
+            role: { in: ["AGENCE", "MANAGER"] },
+          },
+        });
+        if (!allowed) {
+          return NextResponse.json(
+            { error: "Destinataire invalide." },
+            { status: 400 }
+          );
+        }
+        if (allowed.role === "AGENCE" && project.assignedToId !== bodyReceiverId) {
+          return NextResponse.json(
+            { error: "Cet agent ne suit pas ce projet." },
+            { status: 400 }
+          );
+        }
+        finalReceiverId = bodyReceiverId;
+      } else {
+        if (project.assignedToId) {
+          finalReceiverId = project.assignedToId;
+        } else {
+          const manager = await prisma.user.findFirst({
+            where: { role: "MANAGER" },
+          });
+          if (!manager) {
+            const fallback = await prisma.user.findFirst({
+              where: { role: { in: ["AGENCE", "MANAGER"] } },
+            });
+            if (!fallback) {
+              return NextResponse.json(
+                { error: "Aucun membre agence disponible." },
+                { status: 400 }
+              );
+            }
+            finalReceiverId = fallback.id;
+          } else {
+            finalReceiverId = manager.id;
+          }
+        }
       }
-      finalReceiverId = agenceUser.id;
     }
 
     const message = await prisma.message.create({

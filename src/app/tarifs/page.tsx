@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { IATASKLogo } from "@/components/IATASKLogo";
+import { BeWorkLogo } from "@/components/BeWorkLogo";
 
 const plans = [
   {
@@ -33,11 +33,11 @@ export default function TarifsPage() {
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea] py-16 px-4">
       <div className="mx-auto max-w-6xl">
         <header className="mb-12 flex justify-center">
-          <IATASKLogo size="lg" />
+          <BeWorkLogo size="lg" />
         </header>
 
         <h1 className="text-center text-3xl font-bold text-[#0f172a] md:text-4xl">
-          Les tarifs IATASK.
+          Les tarifs BeWork.
         </h1>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

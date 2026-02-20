@@ -1,4 +1,4 @@
-# Déployer la plateforme IATASK sur Railway
+# Déployer la plateforme BeWork sur Railway
 
 ## 1. Préparer le code
 
@@ -49,7 +49,7 @@ Optionnel (formulaire contact / emails) :
 | `CONTACT_EMAIL` | Email qui reçoit les demandes |
 | `RESEND_API_KEY` | Clé API Resend |
 | `RESEND_FROM_EMAIL` | Ex. noreply@votredomaine.com |
-| `RESEND_FROM_NAME` | IATASK |
+| `RESEND_FROM_NAME` | BeWork |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | Numéro WhatsApp (sans +) |
 
 ## 5. Obtenir l’URL publique et corriger NEXTAUTH_URL

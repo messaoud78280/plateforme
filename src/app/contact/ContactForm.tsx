@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { IATASKLogo } from "@/components/IATASKLogo";
+import { BeWorkLogo } from "@/components/BeWorkLogo";
 
 type TakenSlot = { date: string; time: string };
 
@@ -113,7 +113,7 @@ export default function ContactForm() {
         <div className="mx-auto max-w-2xl">
           <header className="mb-12 flex justify-center">
             <Link href="/">
-              <IATASKLogo size="lg" />
+              <BeWorkLogo size="lg" />
             </Link>
           </header>
           <div className="rounded-2xl border border-[#c8cdd6] bg-white p-8 shadow-sm">
@@ -147,7 +147,7 @@ export default function ContactForm() {
       <div className="mx-auto max-w-3xl">
         <header className="mb-10 flex items-center justify-between">
           <Link href="/">
-            <IATASKLogo size="md" />
+            <BeWorkLogo size="md" />
           </Link>
           <Link
             href="/"
@@ -393,7 +393,7 @@ export default function ContactForm() {
         </form>
 
         <p className="mt-8 text-center text-sm text-[#64748b]">
-          En envoyant ce formulaire, vous acceptez d’être recontacté par IATASK dans le cadre de votre demande.
+          En envoyant ce formulaire, vous acceptez d’être recontacté par BeWork dans le cadre de votre demande.
         </p>
       </div>
     </div>

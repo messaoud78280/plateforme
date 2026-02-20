@@ -144,7 +144,7 @@ export default async function DemandeContactPage({
 
       <div className="flex gap-4">
         <a
-          href={`mailto:${demande.email}?subject=Confirmation RDV IATASK – ${demande.structure}`}
+          href={`mailto:${demande.email}?subject=Confirmation RDV BeWork – ${demande.structure}`}
           className="rounded-lg bg-[#1d4ed8] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af]"
         >
           Répondre par email

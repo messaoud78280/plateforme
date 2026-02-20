@@ -20,8 +20,12 @@ export default async function DashboardLayout({
     <div className="min-h-screen bg-[#eef0f4]">
       <header className="border-b border-[#c8cdd6] bg-[#f8f9fb]">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <Link href="/dashboard" className="text-xl font-bold text-[#0f172a]">
-            IATASK
+          <Link
+            href="/dashboard"
+            className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-[#1d4ed8] via-[#3b82f6] to-[#60a5fa] bg-clip-text text-transparent"
+            style={{ fontFamily: "var(--font-orbitron), system-ui, sans-serif" }}
+          >
+            BeWork
           </Link>
           <div className="flex items-center gap-4">
             <OutilsCommunication />

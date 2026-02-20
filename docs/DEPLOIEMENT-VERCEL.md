@@ -1,4 +1,4 @@
-# Déployer la plateforme IATASK sur Vercel
+# Déployer la plateforme BeWork sur Vercel
 
 ## 1. Préparer le code
 
@@ -34,7 +34,7 @@ Variables optionnelles (selon vos besoins) :
 | `CONTACT_EMAIL` | Email qui reçoit les demandes de contact |
 | `RESEND_API_KEY` | Clé API Resend (envoi des emails du formulaire) |
 | `RESEND_FROM_EMAIL` | Ex. noreply@votredomaine.com |
-| `RESEND_FROM_NAME` | IATASK |
+| `RESEND_FROM_NAME` | BeWork |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | Numéro WhatsApp (sans +) |
 
 **Important :**  

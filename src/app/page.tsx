@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { IATASKLogo } from "@/components/IATASKLogo";
+import { BeWorkLogo } from "@/components/BeWorkLogo";
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
       <header className="sticky top-0 z-20 border-b border-[#c8cdd6] bg-[#f8f9fb]">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-          <Link href="/" className="shrink-0">
-            <IATASKLogo size="sm" />
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-12 px-6 py-5">
+          <Link href="/" className="shrink-0 mr-8 md:mr-12">
+            <BeWorkLogo size="sm" />
           </Link>
 
           <nav className="hidden items-center gap-8 text-sm font-medium text-[#334155] md:flex">
@@ -86,14 +86,14 @@ export default function HomePage() {
               </h1>
 
               <p className="mt-8 max-w-2xl text-pretty text-base leading-relaxed text-[#334155] md:text-lg md:leading-relaxed">
-                IATASK vous propose un service d&apos;assistants virtuels
+                BeWork vous propose un service d&apos;assistants virtuels
                 qualifiés, formés à l&apos;intelligence artificielle. Gestion
                 administrative, suivi de dossiers, documents et coordination :
                 une équipe rigoureuse et efficace à votre service.
               </p>
 
               <p className="mt-6 text-base font-semibold text-[#1e293b]">
-                IATASK, l&apos;assistant administratif pas comme les autres.
+                BeWork, l&apos;assistant administratif pas comme les autres.
               </p>
 
               <div className="mt-10 flex w-full max-w-2xl justify-center">
@@ -241,7 +241,7 @@ export default function HomePage() {
                 Une équipe triée sur le volet.
               </h2>
               <p className="mt-5 text-lg leading-relaxed text-[#334155]">
-                IATASK est une société française fondée par{" "}
+                BeWork est une société française fondée par{" "}
                 <strong className="text-slate-900">Laure Olivie</strong>, formatrice
                 IA reconnue et diplômée. Votre interlocuteur principal est notre{" "}
                 <strong className="text-slate-900">agence en région parisienne</strong>,
@@ -387,7 +387,7 @@ export default function HomePage() {
               <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#334155]">
                 Intégration transparente à vos outils : CRM, logiciels de gestion, espaces 
                 collaboratifs et messageries. Nos assistants travaillent dans votre environnement ; 
-                notre plateforme IATASK complète le dispositif pour le suivi des dossiers et la 
+                notre plateforme BeWork complète le dispositif pour le suivi des dossiers et la 
                 livraison des tâches, avec une traçabilité et une réactivité à la hauteur de vos exigences.
               </p>
             </div>
@@ -508,8 +508,8 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-6xl flex-col gap-6 text-sm text-[#334155] md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-3">
-              <IATASKLogo size="sm" />
-              <span className="text-[#0f172a]">© {new Date().getFullYear()} IATASK</span>
+              <BeWorkLogo size="sm" />
+              <span className="text-[#0f172a]">© {new Date().getFullYear()} BeWork</span>
             </div>
             <span className="text-[#64748b]">
               Société française — Agence principale : Île-de-France (Laure Olivie) — Agence secondaire : Algérie (sous direction française en temps réel)

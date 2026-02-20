@@ -99,10 +99,10 @@ export async function POST(request: NextRequest) {
   const html = `
 <!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><title>Nouvelle demande de contact IATASK</title></head>
+<head><meta charset="utf-8"><title>Nouvelle demande de contact BeWork</title></head>
 <body style="font-family: sans-serif; line-height: 1.5; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
   <h1 style="color: #0f172a;">Nouvelle demande de contact</h1>
-  <p>Une nouvelle demande a été envoyée depuis le formulaire de contact IATASK.</p>
+  <p>Une nouvelle demande a été envoyée depuis le formulaire de contact BeWork.</p>
 
   <h2 style="color: #1d4ed8; font-size: 1.1em; margin-top: 24px;">Structure</h2>
   <ul style="list-style: none; padding: 0;">
@@ -146,13 +146,13 @@ export async function POST(request: NextRequest) {
 
   if (resend && CONTACT_EMAIL?.trim()) {
     const fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
-    const fromName = process.env.RESEND_FROM_NAME || "IATASK Contact";
+    const fromName = process.env.RESEND_FROM_NAME || "BeWork Contact";
     try {
       const { error } = await resend.emails.send({
         from: `${fromName} <${fromEmail}>`,
         to: [CONTACT_EMAIL],
         replyTo: email,
-        subject: `[IATASK] Demande de contact – ${structure} – ${contactName}`,
+        subject: `[BeWork] Demande de contact – ${structure} – ${contactName}`,
         html,
       });
       if (error) console.error("Resend error:", error);

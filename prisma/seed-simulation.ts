@@ -31,7 +31,7 @@ async function main() {
     },
   });
 
-  // 2. Laure Olivie (Gérante - IATASK, donne le travail aux assistants)
+  // 2. Laure Olivie (Gérante - BeWork, donne le travail aux assistants)
   const laure = await prisma.user.upsert({
     where: { email: "laure.olivie@iatask.fr" },
     update: {},
@@ -40,7 +40,7 @@ async function main() {
       password,
       name: "Laure Olivie",
       role: UserRole.MANAGER,
-      company: "IATASK",
+      company: "BeWork",
       phone: "+33187664523",
     },
   });

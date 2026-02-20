@@ -61,9 +61,6 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 jours
   },
   secret: process.env.NEXTAUTH_SECRET,
-  // Options runtime (non typées dans next-auth@4) pour production / domaine personnalisé
-  ...({
-    trustHost: true,
-    useSecureCookies: process.env.NEXTAUTH_URL?.startsWith("https://") ?? false,
-  } as Record<string, unknown>),
-};
+  trustHost: true,
+  useSecureCookies: process.env.NEXTAUTH_URL?.startsWith("https://") ?? false,
+} as NextAuthOptions;

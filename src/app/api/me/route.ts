@@ -3,6 +3,32 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+/** GET /api/me?health=db – Vérifier la connexion Railway ↔ Supabase (sans auth) */
+export async function GET(request: NextRequest) {
+  if (request.nextUrl.searchParams.get("health") === "db") {
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      return NextResponse.json({
+        ok: true,
+        message: "Connexion à la base Supabase OK (Railway ↔ Supabase).",
+      });
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      return NextResponse.json({ ok: false, error: message }, { status: 500 });
+    }
+  }
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return NextResponse.json({ error: "Non connecté" }, { status: 401 });
+  }
+  return NextResponse.json({
+    id: session.user.id,
+    email: session.user.email,
+    name: session.user.name,
+    role: session.user.role,
+  });
+}
+
 /** PATCH /api/me – Mettre à jour le profil (nom) */
 export async function PATCH(request: NextRequest) {
   const session = await getServerSession(authOptions);

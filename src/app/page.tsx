@@ -27,31 +27,15 @@ export default function HomePage() {
             </div>
           </div>
           {/* Ligne 2 : Navigation — chaque lien sur une seule ligne */}
-          <nav className="mt-3 hidden flex-wrap items-center gap-x-6 gap-y-1 border-t border-[#e0e4ea] pt-3 text-sm font-medium text-[#334155] md:flex">
-            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#solutions">
-              Solutions
-            </a>
-            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#equipe">
-              Notre équipe
-            </a>
-            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#secteurs">
-              Secteurs
-            </a>
-            <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/tarifs">
-              Tarifs
-            </Link>
-            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#avantages">
-              Avantages
-            </a>
-            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#pourquoi-nous">
-              Pourquoi nous
-            </a>
-            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#ressources">
-              Ressources
-            </a>
-            <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/contact">
-              Contact
-            </Link>
+          <nav className="mt-3 hidden flex-wrap items-center justify-center gap-x-5 gap-y-1 border-t border-[#e0e4ea] pt-3 text-sm font-medium text-[#334155] md:flex">
+            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#solutions">Solutions</a>
+            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#equipe">Équipe</a>
+            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#secteurs">Secteurs</a>
+            <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/tarifs">Tarifs</Link>
+            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#avantages">Avantages</a>
+            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#pourquoi-nous">Pourquoi</a>
+            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#ressources">Ressources</a>
+            <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/contact">Contact</Link>
           </nav>
         </div>
       </header>

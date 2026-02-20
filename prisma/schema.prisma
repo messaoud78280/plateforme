@@ -38,6 +38,8 @@ model User {
   alerts             Alert[]
   appointmentsOrganized Appointment[] @relation("AppointmentOrganizer")
   appointmentsAsClient  Appointment[] @relation("AppointmentClient")
+  reportsAuthored       Report[]      @relation("ReportAuthor")
+  reportComments        ReportComment[]
 }
 
 enum UserRole {
@@ -70,6 +72,7 @@ model Project {
   metrics    Metric[]
   activities Activity[]
   appointments Appointment[]
+  reports Report[]
 }
 
 enum ProjectStatus {
@@ -317,4 +320,52 @@ model AppointmentAttachment {
   createdAt     DateTime @default(now())
 
   appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+}
+
+// Reporting hebdomadaire ou journalier entre client et agent
+model Report {
+  id          String      @id @default(cuid())
+  projectId   String
+  authorId    String
+  reportType  ReportType  @default(HEBDOMADAIRE)
+  periodStart DateTime    @db.Date  // début de la période couverte
+  periodEnd   DateTime    @db.Date  // fin de la période couverte
+  content     String      @db.Text
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  author      User        @relation("ReportAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  attachments ReportAttachment[]
+  comments    ReportComment[]
+}
+
+enum ReportType {
+  JOURNALIER
+  HEBDOMADAIRE
+}
+
+// Pièces jointes sur un rapport
+model ReportAttachment {
+  id        String   @id @default(cuid())
+  reportId  String
+  name      String
+  fileUrl   String
+  fileSize  Int
+  mimeType  String?
+  createdAt DateTime @default(now())
+
+  report Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+}
+
+// Commentaires sur un rapport
+model ReportComment {
+  id        String   @id @default(cuid())
+  reportId  String
+  userId    String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  report Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

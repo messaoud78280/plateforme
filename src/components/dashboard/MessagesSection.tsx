@@ -323,6 +323,12 @@ export function MessagesSection({ isAgence, sessionUserId }: MessagesSectionProp
                           >
                             {m.project.title}
                           </Link>
+                          {!isAgence && (() => {
+                            const p = projects.find((x) => x.id === m.project.id);
+                            return p?.assignedTo ? (
+                              <span className="text-slate-500">— Référent : {p.assignedTo.name}</span>
+                            ) : null;
+                          })()}
                           {!m.read && m.receiver.id === sessionUserId && (
                             <span className="rounded bg-amber-100 px-1.5 py-0.5 text-amber-800">
                               Non lu
@@ -369,7 +375,7 @@ export function MessagesSection({ isAgence, sessionUserId }: MessagesSectionProp
                   <option key={p.id} value={p.id}>
                     {p.title}
                     {!isAgence && p.assignedTo
-                      ? ` — Agent : ${p.assignedTo.name}`
+                      ? ` — Référent : ${p.assignedTo.name}`
                       : isAgence && p.client
                         ? ` — Client : ${p.client.name}`
                         : ""}

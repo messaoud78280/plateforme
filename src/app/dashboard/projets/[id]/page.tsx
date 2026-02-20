@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { MessageForm } from "@/components/MessageForm";
 import { ProjectAssignAgent } from "@/components/projects/ProjectAssignAgent";
+import { ProjectReportsSection } from "@/components/projects/ProjectReportsSection";
 
 export default async function ProjetDetailPage({
   params,
@@ -77,9 +78,14 @@ export default async function ProjetDetailPage({
             {project.description && (
               <p className="mt-2 text-slate-600">{project.description}</p>
             )}
-            <p className="mt-2 text-sm text-slate-500">
-              Client : {project.client.name}
-            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-500">
+              <span>Client : {project.client.name}</span>
+              {project.assignedTo && (
+                <span className="rounded-full bg-blue-50 px-2.5 py-0.5 font-medium text-blue-800">
+                  {isAgence ? "Agent : " : "Référent : "}{project.assignedTo.name}
+                </span>
+              )}
+            </div>
           </div>
           <span
             className={`rounded-full px-3 py-1 text-sm font-medium ${urgencyColors[project.urgency] ?? "bg-slate-100 text-slate-800"}`}
@@ -119,6 +125,9 @@ export default async function ProjetDetailPage({
           agents={agents}
           isAgence={isAgence}
         />
+
+      {/* Reporting hebdomadaire / journalier */}
+      <ProjectReportsSection projectId={project.id} isAgence={isAgence} />
 
       {project.documents.length > 0 && (
         <div className="rounded-xl border border-slate-200 bg-white p-6">

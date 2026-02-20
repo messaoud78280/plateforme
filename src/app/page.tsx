@@ -5,52 +5,54 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
       <header className="sticky top-0 z-20 border-b border-[#c8cdd6] bg-[#f8f9fb]">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-12 px-6 py-5">
-          <Link href="/" className="shrink-0 mr-8 md:mr-12">
-            <BeWorkLogo size="sm" />
-          </Link>
-
-          <nav className="hidden items-center gap-8 text-sm font-medium text-[#334155] md:flex">
-            <a className="transition-colors hover:text-[#0f172a]" href="#solutions">
+        <div className="mx-auto max-w-6xl px-6 py-4">
+          {/* Ligne 1 : Logo + boutons */}
+          <div className="flex items-center justify-between">
+            <Link href="/" className="shrink-0">
+              <BeWorkLogo size="sm" />
+            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/contact"
+                className="hidden rounded-lg border border-[#c8cdd6] bg-white px-5 py-2.5 text-sm font-medium text-[#1e293b] shadow-sm transition-all hover:border-[#9ca3af] hover:bg-[#f8f9fb] sm:inline-flex"
+              >
+                Contact
+              </Link>
+              <Link
+                href="/connexion"
+                className="rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-[#1e40af] hover:shadow-lg"
+              >
+                Accéder
+              </Link>
+            </div>
+          </div>
+          {/* Ligne 2 : Navigation — chaque lien sur une seule ligne */}
+          <nav className="mt-3 hidden flex-wrap items-center gap-x-6 gap-y-1 border-t border-[#e0e4ea] pt-3 text-sm font-medium text-[#334155] md:flex">
+            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#solutions">
               Solutions
             </a>
-            <a className="transition-colors hover:text-[#0f172a]" href="#equipe">
+            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#equipe">
               Notre équipe
             </a>
-            <a className="transition-colors hover:text-[#0f172a]" href="#secteurs">
+            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#secteurs">
               Secteurs
             </a>
-            <Link className="transition-colors hover:text-[#0f172a]" href="/tarifs">
+            <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/tarifs">
               Tarifs
             </Link>
-            <a className="transition-colors hover:text-[#0f172a]" href="#avantages">
+            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#avantages">
               Avantages
             </a>
-            <a className="transition-colors hover:text-[#0f172a]" href="#pourquoi-nous">
+            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#pourquoi-nous">
               Pourquoi nous
             </a>
-            <a className="transition-colors hover:text-[#0f172a]" href="#ressources">
+            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#ressources">
               Ressources
             </a>
-            <Link className="transition-colors hover:text-[#0f172a]" href="/contact">
+            <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/contact">
               Contact
             </Link>
           </nav>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/contact"
-              className="hidden rounded-lg border border-[#c8cdd6] bg-white px-5 py-2.5 text-sm font-medium text-[#1e293b] shadow-sm transition-all hover:border-[#9ca3af] hover:bg-[#f8f9fb] sm:inline-flex"
-            >
-              Contact
-            </Link>
-            <Link
-              href="/connexion"
-              className="rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-[#1e40af] hover:shadow-lg"
-            >
-              Accéder
-            </Link>
-          </div>
         </div>
       </header>
 

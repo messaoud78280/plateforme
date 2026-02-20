@@ -8,7 +8,6 @@ import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
 import { AlertsSection } from "@/components/dashboard/AlertsSection";
 import { TasksChart } from "@/components/dashboard/TasksChart";
 import { ClientsSection } from "@/components/dashboard/ClientsSection";
-import { MessagesSection } from "@/components/dashboard/MessagesSection";
 import { ScrollToMessages } from "@/components/ScrollToMessages";
 import { AppointmentCalendar } from "@/components/appointments/AppointmentCalendar";
 
@@ -154,11 +153,6 @@ export default async function DashboardPage() {
         className="scroll-mt-24 space-y-8"
         aria-label="RDV"
       >
-        <MessagesSection
-          isAgence={isAgence}
-          sessionUserId={session.user.id}
-        />
-
         {/* Demandes de RDV — clients : leurs demandes ; agence : lien vers page complète */}
         {isAgence ? (
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -279,6 +273,12 @@ export default async function DashboardPage() {
           className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
         >
           Projets
+        </Link>
+        <Link
+          href="/dashboard/messagerie"
+          className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
+        >
+          Messagerie
         </Link>
         <Link
           href="/dashboard/messages"

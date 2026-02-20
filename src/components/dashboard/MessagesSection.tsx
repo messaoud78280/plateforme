@@ -26,6 +26,8 @@ type ProjectItem = {
 interface MessagesSectionProps {
   isAgence: boolean;
   sessionUserId: string;
+  /** "messagerie" = page dédiée (titre Messagerie, lien "Demandes de contact et messages") */
+  variant?: "messagerie" | "rdv";
 }
 
 type Tab = "nouveaux" | "tous" | "envoyer";
@@ -38,7 +40,7 @@ function formatDate(d: string) {
   return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 }
 
-export function MessagesSection({ isAgence, sessionUserId }: MessagesSectionProps) {
+export function MessagesSection({ isAgence, sessionUserId, variant = "rdv" }: MessagesSectionProps) {
   const router = useRouter();
 
   const [messages, setMessages] = useState<MessageItem[]>([]);
@@ -187,7 +189,9 @@ export function MessagesSection({ isAgence, sessionUserId }: MessagesSectionProp
     <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
       {/* En-tête avec onglets */}
       <div className="border-b border-slate-200">
-        <h2 className="px-6 pt-4 text-lg font-semibold text-slate-800">RDV</h2>
+        <h2 className="px-6 pt-4 text-lg font-semibold text-slate-800">
+          {variant === "messagerie" ? "Messagerie" : "RDV"}
+        </h2>
         <div className="mt-3 flex gap-1 px-4">
           {tabs.map((tab) => (
             <button
@@ -442,7 +446,7 @@ export function MessagesSection({ isAgence, sessionUserId }: MessagesSectionProp
             href="/dashboard/messages"
             className="text-sm font-medium text-blue-600 hover:underline"
           >
-            Demandes de contact et RDV →
+            {variant === "messagerie" ? "Demandes de contact et messages" : "Demandes de contact et RDV"} →
           </Link>
         </div>
       )}

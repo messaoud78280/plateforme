@@ -7,7 +7,7 @@
     "dev:3001": "NODE_TLS_REJECT_UNAUTHORIZED=0 next dev --hostname 127.0.0.1 --port 3001",
     "db:push": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx prisma db push",
     "db:setup": "echo '→ Création des tables...' && npm run db:push && echo '→ Création des comptes...' && npm run db:seed && echo '→ Terminé.'",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && next build --webpack",
     "start": "next start -p ${PORT:-3000}",
     "lint": "eslint",
     "db:seed": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx prisma/seed.ts",

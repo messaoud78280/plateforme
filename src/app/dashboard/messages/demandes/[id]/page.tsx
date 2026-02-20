@@ -30,15 +30,17 @@ export default async function DemandeContactPage({
     redirect("/connexion?callbackUrl=/dashboard");
   }
   const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
-  if (!isAgence) {
-    redirect("/dashboard");
-  }
 
   const demande = await prisma.contactRequest.findUnique({
     where: { id },
   });
 
   if (!demande) notFound();
+
+  // Les clients ne peuvent voir que leurs propres demandes (email identique)
+  if (!isAgence && demande.email !== session.user?.email) {
+    notFound();
+  }
 
   const rdvLabel =
     demande.rdvDate && demande.rdvTime
@@ -143,12 +145,14 @@ export default async function DemandeContactPage({
       </div>
 
       <div className="flex gap-4">
-        <a
-          href={`mailto:${demande.email}?subject=Confirmation RDV BeWork – ${demande.structure}`}
-          className="rounded-lg bg-[#1d4ed8] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af]"
-        >
-          Répondre par email
-        </a>
+        {isAgence && (
+          <a
+            href={`mailto:${demande.email}?subject=Confirmation RDV BeWork – ${demande.structure}`}
+            className="rounded-lg bg-[#1d4ed8] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af]"
+          >
+            Répondre par email
+          </a>
+        )}
         <Link
           href="/dashboard/messages"
           className="rounded-lg border border-[#c8cdd6] bg-white px-6 py-2.5 text-sm font-medium text-[#334155] hover:bg-[#f8f9fb]"

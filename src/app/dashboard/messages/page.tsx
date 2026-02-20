@@ -21,24 +21,23 @@ export default async function MessagesPage() {
   const isAgence = session.user?.role === "AGENCE" || session.user?.role === "MANAGER";
   let contactRequests: { id: string; structure: string; contactName: string; email: string; rdvDate: Date | null; rdvTime: string | null; status: string; createdAt: Date }[] = [];
 
-  if (isAgence) {
-    try {
-      contactRequests = await prisma.contactRequest.findMany({
-        orderBy: { createdAt: "desc" },
-        select: {
-          id: true,
-          structure: true,
-          contactName: true,
-          email: true,
-          rdvDate: true,
-          rdvTime: true,
-          status: true,
-          createdAt: true,
-        },
-      });
-    } catch {
-      // Table absente ou erreur
-    }
+  try {
+    contactRequests = await prisma.contactRequest.findMany({
+      where: isAgence ? undefined : { email: session.user?.email ?? "" },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        structure: true,
+        contactName: true,
+        email: true,
+        rdvDate: true,
+        rdvTime: true,
+        status: true,
+        createdAt: true,
+      },
+    });
+  } catch {
+    // Table absente ou erreur
   }
 
   return (
@@ -52,14 +51,15 @@ export default async function MessagesPage() {
         </p>
       </div>
 
-      {isAgence && contactRequests.length >= 0 && (
-        <section className="rounded-xl border border-[#c8cdd6] bg-white shadow-sm">
+      <section className="rounded-xl border border-[#c8cdd6] bg-white shadow-sm">
           <h2 className="border-b border-[#e0e4ea] px-6 py-4 text-lg font-semibold text-[#0f172a]">
-            Demandes de contact et RDV
+            {isAgence ? "Demandes de contact et RDV" : "Mes demandes de RDV"}
           </h2>
           {contactRequests.length === 0 ? (
             <p className="px-6 py-8 text-sm text-[#64748b]">
-              Aucune demande pour le moment. Les demandes envoyées depuis la page Contact apparaîtront ici.
+              {isAgence
+                ? "Aucune demande pour le moment. Les demandes envoyées depuis la page Contact apparaîtront ici."
+                : "Aucune demande pour le moment. Vos demandes envoyées depuis la page Contact apparaîtront ici."}
             </p>
           ) : (
             <div className="overflow-x-auto">
@@ -120,7 +120,7 @@ export default async function MessagesPage() {
                             href={`/dashboard/messages/demandes/${r.id}`}
                             className="text-[#1d4ed8] hover:underline"
                           >
-                            Voir détail
+                            {isAgence ? "Voir détail" : "Détail"}
                           </Link>
                         </td>
                       </tr>
@@ -131,7 +131,6 @@ export default async function MessagesPage() {
             </div>
           )}
         </section>
-      )}
 
       {/* Calendrier de prise de RDV (type Calendly) */}
       <section className="rounded-xl border border-[#c8cdd6] bg-white p-6 shadow-sm">
@@ -146,7 +145,9 @@ export default async function MessagesPage() {
 
       <div className="rounded-xl border border-dashed border-[#c8cdd6] bg-white p-12 text-center">
         <p className="text-[#334155]">
-          Sélectionnez un projet pour voir les messages d&apos;échange avec les clients.
+          {isAgence
+            ? "Sélectionnez un projet pour voir les messages d'échange avec les clients."
+            : "Consultez vos projets pour voir les messages avec l'agence."}
         </p>
         <Link
           href="/dashboard/projets"

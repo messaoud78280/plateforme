@@ -63,7 +63,7 @@ export default async function DashboardLayout({
             Mes documents
           </Link>
           <Link
-            href="/dashboard/messages"
+            href="/dashboard#messages"
             className="rounded-lg px-3 py-2 text-sm font-medium text-[#334155] hover:bg-[#eef0f4] hover:text-[#0f172a]"
           >
             Messages

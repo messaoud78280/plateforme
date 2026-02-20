@@ -9,6 +9,7 @@ import { AlertsSection } from "@/components/dashboard/AlertsSection";
 import { TasksChart } from "@/components/dashboard/TasksChart";
 import { ClientsSection } from "@/components/dashboard/ClientsSection";
 import { MessagesSection } from "@/components/dashboard/MessagesSection";
+import { ScrollToMessages } from "@/components/ScrollToMessages";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -111,6 +112,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      <ScrollToMessages />
       {/* Carte de bienvenue */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h1 className="text-2xl font-bold text-slate-800">
@@ -126,10 +128,16 @@ export default async function DashboardPage() {
       </div>
 
       {/* Section Messages */}
-      <MessagesSection
-        isAgence={isAgence}
-        sessionUserId={session.user.id}
-      />
+      <section
+        id="messages"
+        className="scroll-mt-24"
+        aria-label="Messages"
+      >
+        <MessagesSection
+          isAgence={isAgence}
+          sessionUserId={session.user.id}
+        />
+      </section>
 
       {/* KPIs */}
       <DashboardKPIs
@@ -176,7 +184,7 @@ export default async function DashboardPage() {
           Projets
         </Link>
         <Link
-          href="/dashboard/messages"
+          href="/dashboard#messages"
           className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
         >
           Messages

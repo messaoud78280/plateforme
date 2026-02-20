@@ -28,12 +28,25 @@ interface MessagesSectionProps {
   sessionUserId: string;
 }
 
+type Tab = "nouveaux" | "tous" | "envoyer";
+
+function formatDate(d: string) {
+  const date = new Date(d);
+  const now = new Date();
+  const isToday = date.toDateString() === now.toDateString();
+  if (isToday) return date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+}
+
 export function MessagesSection({ isAgence, sessionUserId }: MessagesSectionProps) {
   const router = useRouter();
+
   const [messages, setMessages] = useState<MessageItem[]>([]);
   const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [recipients, setRecipients] = useState<{ id: string; name: string; role: string }[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<Tab>("nouveaux");
+  const [filterProject, setFilterProject] = useState<string>("");
   const [sendProject, setSendProject] = useState("");
   const [sendReceiver, setSendReceiver] = useState("");
   const [sendContent, setSendContent] = useState("");
@@ -81,10 +94,16 @@ export function MessagesSection({ isAgence, sessionUserId }: MessagesSectionProp
   const nouveauxMessages = messages.filter(
     (m) => m.receiver.id === sessionUserId && !m.read
   );
-  const anciensMessages = messages.filter(
-    (m) => m.receiver.id === sessionUserId && m.read
-  );
-  const messagesEnvoyes = messages.filter((m) => m.sender.id === sessionUserId);
+  const tousLesMessages = messages
+    .filter((m) => m.receiver.id === sessionUserId || m.sender.id === sessionUserId)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  const messagesFiltres =
+    filterProject
+      ? tousLesMessages.filter((m) => m.project.id === filterProject)
+      : tousLesMessages;
+
+  const projetsAvecMessages = [...new Set(tousLesMessages.map((m) => m.project.id))];
 
   async function markAsRead(id: string) {
     try {
@@ -141,6 +160,7 @@ export function MessagesSection({ isAgence, sessionUserId }: MessagesSectionProp
       setSendContent("");
       const refresh = await fetch("/api/messages");
       if (refresh.ok) setMessages(await refresh.json());
+      setActiveTab("tous");
       router.refresh();
     } catch {
       setError("Erreur de connexion.");
@@ -157,183 +177,269 @@ export function MessagesSection({ isAgence, sessionUserId }: MessagesSectionProp
     );
   }
 
+  const tabs: { id: Tab; label: string; badge?: number }[] = [
+    { id: "nouveaux", label: "Nouveaux", badge: nouveauxMessages.length },
+    { id: "tous", label: "Tous les messages" },
+    { id: "envoyer", label: "Envoyer" },
+  ];
+
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-semibold text-slate-800">Messages</h2>
-      <p className="mt-1 text-sm text-slate-600">
-        Consultez vos échanges et envoyez des messages.
-      </p>
-
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        {/* Nouveaux messages (alertes) */}
-        <div>
-          <h3 className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-100 text-amber-700">
-              {nouveauxMessages.length}
-            </span>
-            Nouveaux messages
-          </h3>
-          <div className="max-h-48 space-y-2 overflow-y-auto rounded-lg border border-amber-200 bg-amber-50/50 p-3">
-            {nouveauxMessages.length === 0 ? (
-              <p className="text-sm text-slate-500">Aucun nouveau message.</p>
-            ) : (
-              nouveauxMessages.map((m) => (
-                <div
-                  key={m.id}
-                  className="cursor-pointer rounded-lg border border-amber-200 bg-white p-3 transition hover:border-amber-300"
-                  onClick={() => markAsRead(m.id)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => e.key === "Enter" && markAsRead(m.id)}
-                >
-                  <p className="text-xs text-slate-500">
-                    {m.sender.name} • {m.project.title}
-                  </p>
-                  <p className="mt-1 line-clamp-2 text-sm text-slate-800">
-                    {m.content}
-                  </p>
-                  <p className="mt-2 text-xs text-slate-400">
-                    {new Date(m.createdAt).toLocaleString("fr-FR")}
-                  </p>
-                  <Link
-                    href={`/dashboard/projets/${m.project.id}`}
-                    className="mt-2 inline-block text-xs font-medium text-blue-600 hover:underline"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    Voir le projet →
-                  </Link>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Anciens messages */}
-        <div>
-          <h3 className="mb-2 text-sm font-medium text-slate-700">
-            Messages consultés
-          </h3>
-          <div className="max-h-48 space-y-2 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50/50 p-3">
-            {anciensMessages.length === 0 ? (
-              <p className="text-sm text-slate-500">Aucun message consulté.</p>
-            ) : (
-              anciensMessages.slice(0, 5).map((m) => (
-                <div
-                  key={m.id}
-                  className="rounded-lg border border-slate-200 bg-white p-3"
-                >
-                  <p className="text-xs text-slate-500">
-                    {m.sender.name} → {m.receiver.name} • {m.project.title}
-                  </p>
-                  <p className="mt-1 line-clamp-2 text-sm text-slate-700">
-                    {m.content}
-                  </p>
-                  <p className="mt-2 text-xs text-slate-400">
-                    {new Date(m.createdAt).toLocaleString("fr-FR")}
-                  </p>
-                  <Link
-                    href={`/dashboard/projets/${m.project.id}`}
-                    className="mt-2 inline-block text-xs text-blue-600 hover:underline"
-                  >
-                    Voir le projet →
-                  </Link>
-                </div>
-              ))
-            )}
-          </div>
+    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      {/* En-tête avec onglets */}
+      <div className="border-b border-slate-200">
+        <h2 className="px-6 pt-4 text-lg font-semibold text-slate-800">Messages</h2>
+        <div className="mt-3 flex gap-1 px-4">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`relative rounded-t-lg px-4 py-3 text-sm font-medium transition ${
+                activeTab === tab.id
+                  ? "bg-white text-blue-600 shadow-sm"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-800"
+              }`}
+            >
+              {tab.label}
+              {tab.badge !== undefined && tab.badge > 0 && (
+                <span className="ml-1.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-amber-500 px-1.5 text-xs font-bold text-white">
+                  {tab.badge}
+                </span>
+              )}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Envoyer un message */}
-      <div className="mt-6 border-t border-slate-200 pt-6">
-        <h3 className="mb-3 text-sm font-medium text-slate-700">
-          Envoyer un message
-        </h3>
-        <form onSubmit={handleSend} className="space-y-3">
+      <div className="p-6">
+        {/* Onglet Nouveaux */}
+        {activeTab === "nouveaux" && (
           <div>
-            <label className="block text-xs font-medium text-slate-600">
-              Projet
-            </label>
-            <select
-              value={sendProject}
-              onChange={(e) => {
-                setSendProject(e.target.value);
-                setSendReceiver("");
-              }}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              required
-            >
-              <option value="">Sélectionnez un projet</option>
-              {projects.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.title}
-                  {!isAgence && p.assignedTo
-                    ? ` (agent : ${p.assignedTo.name})`
-                    : isAgence && p.client
-                      ? ` (client : ${p.client.name})`
-                      : ""}
-                </option>
-              ))}
-            </select>
+            {nouveauxMessages.length === 0 ? (
+              <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50/50 py-12 text-center text-sm text-slate-500">
+                Aucun nouveau message. Tout est à jour.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-sm text-slate-600">
+                  Cliquez sur un message pour le marquer comme lu et accéder au projet.
+                </p>
+                {nouveauxMessages.map((m) => (
+                    <div
+                      key={m.id}
+                      className="cursor-pointer rounded-xl border-2 border-amber-200 bg-amber-50/80 p-4 transition hover:border-amber-300 hover:bg-amber-50"
+                      onClick={() => markAsRead(m.id)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => e.key === "Enter" && markAsRead(m.id)}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
+                            <span className="font-medium text-slate-800">
+                              {m.sender.name}
+                            </span>
+                            <span>•</span>
+                            <Link
+                              href={`/dashboard/projets/${m.project.id}`}
+                              className="font-medium text-blue-600 hover:underline"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {m.project.title}
+                            </Link>
+                          </div>
+                          <p className="mt-2 text-sm text-slate-800">{m.content}</p>
+                          <p className="mt-2 text-xs text-slate-400">
+                            {formatDate(m.createdAt)}
+                          </p>
+                        </div>
+                        <Link
+                          href={`/dashboard/projets/${m.project.id}`}
+                          className="shrink-0 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Voir le projet
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
+        )}
 
-          {!isAgence && recipientsForProject.length > 0 && (
+        {/* Onglet Tous les messages */}
+        {activeTab === "tous" && (
+          <div>
+            {tousLesMessages.length === 0 ? (
+              <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50/50 py-12 text-center text-sm text-slate-500">
+                Aucun message pour le moment. Envoyez un message depuis l'onglet « Envoyer ».
+              </p>
+            ) : (
+              <>
+                {projetsAvecMessages.length > 1 && (
+                  <div className="mb-4">
+                    <label className="block text-xs font-medium text-slate-600">
+                      Filtrer par projet
+                    </label>
+                    <select
+                      value={filterProject}
+                      onChange={(e) => setFilterProject(e.target.value)}
+                      className="mt-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    >
+                      <option value="">Tous les projets</option>
+                      {projetsAvecMessages.map((pid) => {
+                        const p = messages.find((m) => m.project.id === pid)?.project;
+                        return p ? (
+                          <option key={pid} value={pid}>
+                            {p.title}
+                          </option>
+                        ) : null;
+                      })}
+                    </select>
+                  </div>
+                )}
+
+                <div className="space-y-3">
+                  {messagesFiltres.map((m) => {
+                    const isFromMe = m.sender.id === sessionUserId;
+                    return (
+                      <div
+                        key={m.id}
+                        className={`rounded-xl border p-4 ${
+                          isFromMe
+                            ? "ml-4 border-blue-200 bg-blue-50/50"
+                            : "mr-4 border-slate-200 bg-slate-50/50"
+                        }`}
+                      >
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
+                          <span className="font-medium text-slate-800">
+                            {m.sender.name} → {m.receiver.name}
+                          </span>
+                          <span>•</span>
+                          <Link
+                            href={`/dashboard/projets/${m.project.id}`}
+                            className="font-medium text-blue-600 hover:underline"
+                          >
+                            {m.project.title}
+                          </Link>
+                          {!m.read && m.receiver.id === sessionUserId && (
+                            <span className="rounded bg-amber-100 px-1.5 py-0.5 text-amber-800">
+                              Non lu
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-2 text-sm text-slate-800">{m.content}</p>
+                        <p className="mt-2 text-xs text-slate-400">
+                          {formatDate(m.createdAt)}
+                        </p>
+                        <Link
+                          href={`/dashboard/projets/${m.project.id}`}
+                          className="mt-2 inline-block text-xs font-medium text-blue-600 hover:underline"
+                        >
+                          Voir le projet →
+                        </Link>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Onglet Envoyer */}
+        {activeTab === "envoyer" && (
+          <form onSubmit={handleSend} className="max-w-xl space-y-4">
             <div>
-              <label className="block text-xs font-medium text-slate-600">
-                Destinataire
+              <label className="block text-sm font-medium text-slate-700">
+                Projet
               </label>
               <select
-                value={sendReceiver}
-                onChange={(e) => setSendReceiver(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                value={sendProject}
+                onChange={(e) => {
+                  setSendProject(e.target.value);
+                  setSendReceiver("");
+                }}
+                className="mt-1 w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                 required
               >
-                <option value="">
-                  Choisir : Laure Olivie (gérante) ou l'agent du dossier
-                </option>
-                {recipientsForProject.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.name} ({r.role})
+                <option value="">Sélectionnez un projet</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.title}
+                    {!isAgence && p.assignedTo
+                      ? ` — Agent : ${p.assignedTo.name}`
+                      : isAgence && p.client
+                        ? ` — Client : ${p.client.name}`
+                        : ""}
                   </option>
                 ))}
               </select>
             </div>
-          )}
 
-          <div>
-            <label className="block text-xs font-medium text-slate-600">
-              Message
-            </label>
-            <textarea
-              value={sendContent}
-              onChange={(e) => setSendContent(e.target.value)}
-              rows={3}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              placeholder="Écrivez votre message..."
-              required
-            />
-          </div>
+            {!isAgence && recipientsForProject.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-slate-700">
+                  Destinataire
+                </label>
+                <select
+                  value={sendReceiver}
+                  onChange={(e) => setSendReceiver(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  required
+                >
+                  <option value="">
+                    Choisir : gérante ou agent du dossier
+                  </option>
+                  {recipientsForProject.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.name} — {r.role}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
-          {error && (
-            <p className="text-sm text-red-600">{error}</p>
-          )}
+            <div>
+              <label className="block text-sm font-medium text-slate-700">
+                Votre message
+              </label>
+              <textarea
+                value={sendContent}
+                onChange={(e) => setSendContent(e.target.value)}
+                rows={4}
+                className="mt-1 w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                placeholder="Écrivez votre message..."
+                required
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={sending || !sendProject || !sendContent.trim()}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-          >
-            {sending ? "Envoi..." : "Envoyer"}
-          </button>
-        </form>
+            {error && (
+              <p className="text-sm text-red-600">{error}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={sending || !sendProject || !sendContent.trim()}
+              className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              {sending ? "Envoi en cours..." : "Envoyer le message"}
+            </button>
+          </form>
+        )}
       </div>
 
-      <Link
-        href="/dashboard/messages"
-        className="mt-4 inline-block text-sm font-medium text-blue-600 hover:underline"
-      >
-        Voir tous les messages →
-      </Link>
+      {isAgence && (
+        <div className="border-t border-slate-200 px-6 py-3">
+          <Link
+            href="/dashboard/messages"
+            className="text-sm font-medium text-blue-600 hover:underline"
+          >
+            Demandes de contact et RDV →
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

@@ -2,11 +2,14 @@ import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
-// Connexion directe (port 5432) évite les erreurs "prepared statement" avec PgBouncer (port 6543).
-// Utilisez DIRECT_URL pour l'app (local + Railway) et DATABASE_URL en secours.
-const connectionUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
-if (!connectionUrl) {
-  throw new Error("DIRECT_URL ou DATABASE_URL est requis (Supabase : préférez DIRECT_URL, port 5432)");
+// DIRECT_URL = connexion directe (5432). DATABASE_URL = pooler (6543) avec ?pgbouncer=true.
+// Sur Railway, utiliser DATABASE_URL (pooler) si DIRECT_URL est vide ou invalide.
+const rawDirect = (process.env.DIRECT_URL ?? "").trim();
+const validDirect =
+  rawDirect && (rawDirect.startsWith("postgresql://") || rawDirect.startsWith("postgres://"));
+const connectionUrl = validDirect ? rawDirect : (process.env.DATABASE_URL ?? "").trim();
+if (!connectionUrl || (!connectionUrl.startsWith("postgresql://") && !connectionUrl.startsWith("postgres://"))) {
+  throw new Error("DIRECT_URL ou DATABASE_URL doit être une URL postgresql:// ou postgres:// valide.");
 }
 
 export const prisma =

@@ -43,11 +43,11 @@ export default async function MessagesPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-[#0f172a]">Messages</h1>
+        <h1 className="text-2xl font-bold text-[#0f172a]">RDV</h1>
         <p className="mt-1 text-[#334155]">
           {isAgence
-            ? "Échangez avec vos clients et consultez les demandes de contact et RDV."
-            : "Échangez avec l'agence via les projets."}
+            ? "Consultez les demandes de contact et rendez-vous, et gérez le calendrier."
+            : "Consultez vos demandes de RDV et prenez rendez-vous en ligne."}
         </p>
       </div>
 

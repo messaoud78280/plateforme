@@ -55,7 +55,7 @@ export default async function DemandeContactPage({
         href="/dashboard/messages"
         className="text-sm text-[#1d4ed8] hover:underline"
       >
-        ← Retour aux messages
+        ← Retour aux RDV
       </Link>
 
       <div className="rounded-xl border border-[#c8cdd6] bg-white shadow-sm">
@@ -157,7 +157,7 @@ export default async function DemandeContactPage({
           href="/dashboard/messages"
           className="rounded-lg border border-[#c8cdd6] bg-white px-6 py-2.5 text-sm font-medium text-[#334155] hover:bg-[#f8f9fb]"
         >
-          Retour aux messages
+          Retour aux RDV
         </Link>
       </div>
     </div>

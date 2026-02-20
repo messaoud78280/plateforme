@@ -148,11 +148,11 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Section Messages */}
+      {/* Section RDV */}
       <section
         id="messages"
         className="scroll-mt-24 space-y-8"
-        aria-label="Messages"
+        aria-label="RDV"
       >
         <MessagesSection
           isAgence={isAgence}
@@ -284,7 +284,7 @@ export default async function DashboardPage() {
           href="/dashboard/messages"
           className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
         >
-          Messages
+          RDV
         </Link>
       </div>
     </div>

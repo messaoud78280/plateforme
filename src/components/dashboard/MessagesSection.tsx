@@ -187,7 +187,7 @@ export function MessagesSection({ isAgence, sessionUserId }: MessagesSectionProp
     <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
       {/* En-tête avec onglets */}
       <div className="border-b border-slate-200">
-        <h2 className="px-6 pt-4 text-lg font-semibold text-slate-800">Messages</h2>
+        <h2 className="px-6 pt-4 text-lg font-semibold text-slate-800">RDV</h2>
         <div className="mt-3 flex gap-1 px-4">
           {tabs.map((tab) => (
             <button

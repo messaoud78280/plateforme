@@ -345,6 +345,15 @@ export default function HomePage() {
                 Des offres claires, de l&apos;assistance dédiée à la qualité professionnelle. 
                 Pas de coût caché : vous savez ce que vous payez et ce que vous obtenez.
               </p>
+              <div className="mt-6 rounded-lg border border-[#1d4ed8]/30 bg-[#eff6ff] px-5 py-4">
+                <p className="font-semibold text-[#0f172a]">
+                  Le coût réel d&apos;un assistant en CDI en France ? ~5 050 €/mois (salaire + charges + bureau + RH). 
+                  Nos assistants virtuels : à partir de 215 €/mois, tout compris — jusqu&apos;à ~75 % d&apos;économie.
+                </p>
+                <Link href="/tarifs" className="mt-3 inline-block text-sm font-medium text-[#1d4ed8] hover:underline">
+                  Voir le comparatif détaillé →
+                </Link>
+              </div>
               <ul className="mt-8 grid gap-2 sm:grid-cols-2 text-[#334155]">
                 {[
                   "Équipe dédiée et encadrée",

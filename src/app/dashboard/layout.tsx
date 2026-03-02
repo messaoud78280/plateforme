@@ -110,6 +110,12 @@ export default async function DashboardLayout({
             Rapports
           </Link>
           <Link
+            href="/contract"
+            className="rounded-lg px-3 py-2 text-sm font-medium text-[#334155] hover:bg-[#eef0f4] hover:text-[#0f172a]"
+          >
+            Contrat
+          </Link>
+          <Link
             href="/dashboard/parametres"
             className="rounded-lg px-3 py-2 text-sm font-medium text-[#334155] hover:bg-[#eef0f4] hover:text-[#0f172a]"
           >

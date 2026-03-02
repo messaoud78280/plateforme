@@ -29,6 +29,10 @@ model User {
   formeJuridique  String?  // SAS, EURL, SARL, SA, profession libérale, etc.
   secteurActivite String?  // e-commerce, juridique, commercial, etc.
   service         String?  // Service / département du contact
+  // Signature électronique du contrat (activation compte)
+  contractStatus  ContractStatus @default(PENDING)
+  signedAt        DateTime?
+  yousignSignatureRequestId String?  // ID de la demande Yousign
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -53,6 +57,11 @@ enum UserRole {
   CLIENT  // Client
   AGENCE  // Agent (opérationnel)
   MANAGER // Gérant de l'agence
+}
+
+enum ContractStatus {
+  PENDING  // En attente de signature
+  SIGNED   // Contrat signé électroniquement
 }
 
 // Projets (liés à un client) – demande avec deadline, urgence, pièces jointes

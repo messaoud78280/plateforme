@@ -2,8 +2,8 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import Link from "next/link";
-import { LogoutButton } from "@/components/LogoutButton";
 import { OutilsCommunication } from "@/components/OutilsCommunication";
+import { UserAccountDropdown } from "@/components/dashboard/UserAccountDropdown";
 
 export default async function DashboardLayout({
   children,
@@ -29,10 +29,11 @@ export default async function DashboardLayout({
           </Link>
           <div className="flex items-center gap-4">
             <OutilsCommunication />
-            <span className="text-sm text-[#334155]">
-              {session.user?.name} ({session.user?.role === "MANAGER" ? "Gérante" : session.user?.role === "AGENCE" ? "Agence" : "Client"})
-            </span>
-            <LogoutButton />
+            <UserAccountDropdown
+              userName={session.user?.name ?? null}
+              userRole={session.user?.role ?? null}
+              userCompany={(session.user as { company?: string })?.company ?? null}
+            />
           </div>
         </div>
       </header>

@@ -5,8 +5,8 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ContractSigningBlock } from "@/components/contract/ContractSigningBlock";
 
-const CONTRACT_PDF_URL =
-  process.env.CONTRACT_PDF_URL || "/contrat-bework.pdf";
+const CONTRACT_PDF_URL = process.env.CONTRACT_PDF_URL;
+const SHOW_PDF_EMBED = Boolean(CONTRACT_PDF_URL);
 
 export default async function ContractPage() {
   const session = await getServerSession(authOptions);
@@ -58,13 +58,33 @@ export default async function ContractPage() {
 
       <section className="rounded-2xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
         <h2 className="mb-4 text-lg font-semibold text-[#475569]">Document contractuel</h2>
-        <div className="aspect-[3/4] w-full overflow-hidden rounded-lg border border-[#e2e8f0] bg-[#f8fafc]">
-          <iframe
-            src={CONTRACT_PDF_URL}
-            title="Contrat BeWork"
-            className="h-full w-full"
-          />
-        </div>
+        {SHOW_PDF_EMBED ? (
+          <div className="aspect-[3/4] w-full overflow-hidden rounded-lg border border-[#e2e8f0] bg-[#f8fafc]">
+            <iframe
+              src={CONTRACT_PDF_URL}
+              title="Contrat BeWork"
+              className="h-full w-full"
+            />
+          </div>
+        ) : (
+          <div className="max-h-[60vh] overflow-y-auto rounded-lg border border-[#e2e8f0] bg-[#f8fafc] p-6 text-[#334155]">
+            <p className="mb-4 font-medium">Conditions générales d&apos;abonnement BeWork</p>
+            <p className="mb-2 text-sm">
+              En acceptant ce contrat, vous souscrivez aux services d&apos;assistance administrative
+              proposés par BeWork selon les modalités et tarifs en vigueur. L&apos;accès au tableau de bord
+              et aux prestations est conditionné à l&apos;acceptation des présentes conditions.
+            </p>
+            <p className="mb-2 text-sm">
+              Vous pouvez à tout moment consulter les conditions détaillées et le tarif sur la page
+              Tarifs du site. En cliquant sur « J&apos;accepte le contrat », vous confirmez avoir lu
+              et accepté ces conditions.
+            </p>
+            <p className="mt-4 text-xs text-[#64748b]">
+              Pour afficher un PDF à la place, ajoutez le fichier <code className="rounded bg-[#e2e8f0] px-1">public/contrat-bework.pdf</code> ou
+              définissez la variable <code className="rounded bg-[#e2e8f0] px-1">CONTRACT_PDF_URL</code>.
+            </p>
+          </div>
+        )}
         <ContractSigningBlock />
       </section>
     </div>

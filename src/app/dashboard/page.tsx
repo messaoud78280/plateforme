@@ -21,6 +21,15 @@ export default async function DashboardPage() {
   const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
   const clientId = session.user.id;
 
+  let contractStatus: "PENDING" | "SIGNED" | null = null;
+  if (!isAgence) {
+    const u = await prisma.user.findUnique({
+      where: { id: clientId },
+      select: { contractStatus: true },
+    });
+    contractStatus = u?.contractStatus ?? null;
+  }
+
   let tasksEnCours = 0;
   let tasksCompleteesCeMois = 0;
   let documentsEnAttente = 0;
@@ -146,6 +155,32 @@ export default async function DashboardPage() {
             : "Suivez vos documents, tâches et échanges avec l’agence."}
         </p>
       </div>
+
+      {/* Section Contrat — visible pour les clients, accès à la page contrat */}
+      {!isAgence && (
+        <section aria-label="Contrat" className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-800">Contrat d&apos;abonnement</h2>
+          {contractStatus === "SIGNED" ? (
+            <p className="mt-2 text-sm text-slate-600">
+              Votre contrat a été accepté. Vous pouvez le consulter à tout moment.
+            </p>
+          ) : (
+            <p className="mt-2 text-sm text-slate-600">
+              Pour accéder à l&apos;ensemble des services, veuillez lire et accepter le contrat d&apos;abonnement.
+            </p>
+          )}
+          <Link
+            href="/contract"
+            className={`mt-4 inline-block rounded-lg px-4 py-2 text-sm font-medium transition ${
+              contractStatus === "SIGNED"
+                ? "border border-slate-200 text-slate-700 hover:bg-slate-50"
+                : "bg-[#1d4ed8] text-white hover:bg-[#1e40af]"
+            }`}
+          >
+            {contractStatus === "SIGNED" ? "Voir le contrat" : "Accéder au contrat"}
+          </Link>
+        </section>
+      )}
 
       {/* Section RDV */}
       <section
@@ -285,6 +320,12 @@ export default async function DashboardPage() {
           className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
         >
           RDV
+        </Link>
+        <Link
+          href="/contract"
+          className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
+        >
+          Contrat
         </Link>
       </div>
     </div>

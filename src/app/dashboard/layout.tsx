@@ -1,7 +1,6 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { OutilsCommunication } from "@/components/OutilsCommunication";
 import { UserAccountDropdown } from "@/components/dashboard/UserAccountDropdown";
@@ -15,17 +14,6 @@ export default async function DashboardLayout({
 
   if (!session) {
     redirect("/connexion?callbackUrl=/dashboard");
-  }
-
-  // Clients : accès dashboard bloqué tant que le contrat n'est pas signé
-  if (session.user?.role === "CLIENT" && session.user?.id) {
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { contractStatus: true },
-    });
-    if (user?.contractStatus !== "SIGNED") {
-      redirect("/contract");
-    }
   }
 
   return (

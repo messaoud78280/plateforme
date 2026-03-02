@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 
 function getInitials(name: string | null | undefined): string {
@@ -13,6 +14,7 @@ function getInitials(name: string | null | undefined): string {
   return name.slice(0, 2).toUpperCase();
 }
 
+// Rouge = lien actif (page courante) ; gris = les autres
 const menuItems = [
   { label: "Mon profil", href: "/dashboard/parametres", icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" },
   { label: "Favoris", href: "#", icon: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" },
@@ -31,6 +33,7 @@ interface UserAccountDropdownProps {
 }
 
 export function UserAccountDropdown({ userName, userRole, userCompany }: UserAccountDropdownProps) {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -86,28 +89,43 @@ export function UserAccountDropdown({ userName, userRole, userCompany }: UserAcc
               </div>
             </div>
           </div>
-          <ul className="py-2">
-            {menuItems.map((item) => (
-              <li key={item.label}>
-                <Link
-                  href={item.href}
-                  onClick={(e) => {
-                    setOpen(false);
-                    if (item.href === "#") e.preventDefault();
-                  }}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#334155] transition-colors hover:bg-[#f8f9fb]"
-                  role="menuitem"
-                >
-                  <svg className="h-5 w-5 shrink-0 text-[#64748b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
-                  </svg>
-                  <span>{item.label}</span>
-                  <svg className="ml-auto h-4 w-4 text-[#94a3b8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
-              </li>
-            ))}
+          <ul className="py-1">
+            {menuItems.map((item) => {
+              const isActive = item.href !== "#" && pathname.startsWith(item.href);
+              return (
+                <li key={item.label} className="border-b border-[#e5e7eb] last:border-b-0">
+                  <Link
+                    href={item.href}
+                    onClick={(e) => {
+                      setOpen(false);
+                      if (item.href === "#") e.preventDefault();
+                    }}
+                    className={`flex items-center gap-3 px-4 py-3 text-sm transition-colors hover:bg-[#fafafa] ${
+                      isActive ? "text-[#b91c1c] font-medium" : "text-[#374151]"
+                    }`}
+                    role="menuitem"
+                  >
+                    <svg
+                      className={`h-5 w-5 shrink-0 ${isActive ? "text-[#b91c1c]" : "text-[#6b7280]"}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
+                    </svg>
+                    <span>{item.label}</span>
+                    <svg
+                      className={`ml-auto h-4 w-4 shrink-0 ${isActive ? "text-[#b91c1c]" : "text-[#9ca3af]"}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
           <div className="border-t border-[#e0e4ea] pt-2">
             <button

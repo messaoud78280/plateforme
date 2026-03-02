@@ -16,9 +16,16 @@ model User {
   email     String   @unique
   password  String
   name      String
+  civilite  String?  // Civilité : M., Mme, etc.
   role      UserRole @default(CLIENT)
   company   String?  // Raison sociale
   phone     String?
+  // Adresse de facturation (coordonnées entreprise)
+  billingAddressLine1 String?
+  billingAddressLine2 String?
+  billingCity         String?
+  billingPostalCode   String?
+  billingCountry      String?
   formeJuridique  String?  // SAS, EURL, SARL, SA, profession libérale, etc.
   secteurActivite String?  // e-commerce, juridique, commercial, etc.
   service         String?  // Service / département du contact

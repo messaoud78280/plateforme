@@ -63,12 +63,12 @@ const inclus = [
 
 const etapes = [
   {
-    title: "RDV & cadrage",
-    desc: "Échange sur vos besoins, vos process et le volume à traiter.",
+    title: "RDV & découverte",
+    desc: "Call pour comprendre vos activités, préférences, outils et volume. Proposition d’un profil sélectionné par notre équipe.",
   },
   {
     title: "Onboarding",
-    desc: "Accès aux outils, définition des process et prise en main.",
+    desc: "Cadre de démarrage : rôles, objectifs, rituels de communication. Accès aux outils et prise en main.",
   },
   {
     title: "Exécution + suivi",

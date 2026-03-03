@@ -167,8 +167,8 @@ const nonFait = [
 ];
 
 const commentCaMarche = [
-  { step: 1, title: "Cadrage", desc: "Nous définissons ensemble vos besoins, vos process et les tâches à déléguer." },
-  { step: 2, title: "Onboarding", desc: "Accès aux outils, formations et prise en main avec votre assistant dédié." },
+  { step: 1, title: "Call de découverte", desc: "Échange pour comprendre vos activités, préférences et outils. Notre équipe vous propose ensuite un profil adapté (sélection humaine, pas par algorithme)." },
+  { step: 2, title: "Onboarding", desc: "Cadre de démarrage : rôles, objectifs, rituels de communication. Accès aux outils et prise en main avec votre assistant dédié." },
   { step: 3, title: "Exécution & pilotage", desc: "Livraison des missions, points de suivi réguliers et ajustements si besoin." },
 ];
 

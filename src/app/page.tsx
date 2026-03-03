@@ -416,21 +416,21 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Processus en 4 étapes */}
+        {/* Processus : matching et onboarding */}
         <section id="processus" className="px-6 py-24 md:py-28">
           <div className="mx-auto max-w-6xl">
             <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-              Le processus de mise en place en 4 étapes
+              Processus de matching et d&apos;onboarding
             </h2>
             <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#334155]">
-              Un cadre clair pour démarrer sereinement et obtenir des résultats rapidement.
+              Un parcours structuré : découverte de vos besoins, proposition de profil par notre équipe, puis phase de démarrage avec un cadre clair.
             </p>
             <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
               {[
-                { step: "1", title: "Analyse de vos besoins", desc: "Nous analysons avec vous vos besoins, vos process et les compétences à mettre à disposition." },
-                { step: "2", title: "Sélection et présentation", desc: "Nous vous présentons des profils préqualifiés (Bac+5, formation IA, savoir-être) adaptés à votre contexte." },
-                { step: "3", title: "Validation et contrat", desc: "Vous validez le ou les profils, nous signons le cadre de collaboration et définissons les objectifs." },
-                { step: "4", title: "Onboarding et démarrage", desc: "Mise en place des outils, des rituels de suivi et démarrage opérationnel avec un encadrement dédié." },
+                { step: "1", title: "Call de découverte", desc: "Échange pour comprendre vos activités, vos préférences et les outils que vous utilisez. Pas de questionnaire automatisé : un vrai échange avec notre équipe." },
+                { step: "2", title: "Proposition de profil", desc: "L'équipe BeWork sélectionne et vous présente un ou plusieurs profils adaptés. Sélection humaine, pas par algorithme." },
+                { step: "3", title: "Validation et contrat", desc: "Vous validez le ou les profils, nous signons le cadre de collaboration et définissons les objectifs communs." },
+                { step: "4", title: "Onboarding et démarrage", desc: "Phase de démarrage avec un cadre défini : rôles, objectifs, rituels de communication. Mise en place des outils et démarrage opérationnel." },
               ].map((item) => (
                 <div key={item.step} className="card-frame rounded-lg p-6">
                   <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#1d4ed8] text-lg font-bold text-white">

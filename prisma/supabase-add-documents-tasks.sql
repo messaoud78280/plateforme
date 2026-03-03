@@ -1,10 +1,15 @@
 -- À exécuter dans Supabase SQL Editor si vous aviez déjà les tables User, Project, Message
 -- Ajoute les tables Document, Task, Activity, Alert
 
-CREATE TYPE "DocumentCategory" AS ENUM ('FACTURE', 'CONTRAT', 'RH', 'FISCAL', 'AUTRE');
-CREATE TYPE "DocumentStatus" AS ENUM ('EN_ATTENTE', 'EN_TRAITEMENT', 'TRAITE', 'ARCHIVE');
-CREATE TYPE "TaskStatus" AS ENUM ('EN_COURS', 'COMPLETE', 'EN_ATTENTE');
-CREATE TYPE "AlertLevel" AS ENUM ('INFO', 'WARNING', 'URGENT');
+-- CREATE TYPE ne supporte pas IF NOT EXISTS en PostgreSQL, on utilise des blocs DO
+DO $$ BEGIN CREATE TYPE "DocumentCategory" AS ENUM ('FACTURE', 'CONTRAT', 'RH', 'FISCAL', 'AUTRE');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE "DocumentStatus" AS ENUM ('EN_ATTENTE', 'EN_TRAITEMENT', 'TRAITE', 'ARCHIVE');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE "TaskStatus" AS ENUM ('EN_COURS', 'COMPLETE', 'EN_ATTENTE');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE "AlertLevel" AS ENUM ('INFO', 'WARNING', 'URGENT');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 CREATE TABLE "Document" (
   "id" TEXT NOT NULL,

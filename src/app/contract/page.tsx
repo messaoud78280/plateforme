@@ -79,22 +79,78 @@ export default async function ContractPage() {
             />
           </div>
         ) : (
-          <div className="max-h-[60vh] overflow-y-auto rounded-lg border border-[#e2e8f0] bg-[#f8fafc] p-6 text-[#334155]">
-            <p className="mb-4 font-medium">Conditions générales d&apos;abonnement BeWork</p>
-            <p className="mb-2 text-sm">
-              En acceptant ce contrat, vous souscrivez aux services d&apos;assistance administrative
-              proposés par BeWork selon les modalités et tarifs en vigueur. L&apos;accès au tableau de bord
-              et aux prestations est conditionné à l&apos;acceptation des présentes conditions.
-            </p>
-            <p className="mb-2 text-sm">
-              Vous pouvez à tout moment consulter les conditions détaillées et le tarif sur la page
-              Tarifs du site. En cliquant sur « J&apos;accepte le contrat », vous confirmez avoir lu
-              et accepté ces conditions.
-            </p>
-            <p className="mt-4 text-xs text-[#64748b]">
-              Pour afficher un PDF à la place, ajoutez le fichier <code className="rounded bg-[#e2e8f0] px-1">public/contrat-bework.pdf</code> ou
-              définissez la variable <code className="rounded bg-[#e2e8f0] px-1">CONTRACT_PDF_URL</code>.
-            </p>
+          <div className="max-h-[60vh] overflow-y-auto rounded-lg border border-[#e2e8f0] bg-[#f8fafc] p-6 text-[#334155] text-sm leading-relaxed">
+            <p className="mb-6 text-base font-semibold text-[#0f172a]">CONTRAT D&apos;ABONNEMENT BEWORK</p>
+
+            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">1. Présentation des parties</h3>
+            <p className="mb-4">BeWork est le prestataire de services. Le client est l&apos;entreprise utilisant la plateforme.</p>
+
+            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">2. Objet du contrat</h3>
+            <p className="mb-4">Fourniture de services d&apos;assistance administrative à distance.</p>
+
+            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">3. Description des prestations</h3>
+            <p className="mb-2">Les prestations incluent notamment : gestion des emails, organisation d&apos;agenda, création de devis et factures, suivi administratif des dossiers, relances administratives, mise en forme de documents, reporting, gestion fournisseurs, pré-comptabilité administrative. Les prestations sont limitées à des tâches administratives.</p>
+
+            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">4. Modalités de prestation</h3>
+            <p className="mb-4">Les prestations sont réalisées à distance via la plateforme BeWork.</p>
+
+            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">5. Équivalent horaire des prestations</h3>
+            <p className="mb-4">Les volumes horaires indiqués dans les offres correspondent à une estimation du temps moyen nécessaire à la réalisation des prestations. Ils ne constituent pas une mise à disposition d&apos;un salarié. Le prestataire organise librement ses ressources. Les assistants restent sous l&apos;autorité exclusive de BeWork. Le client ne dispose d&apos;aucun lien de subordination avec les assistants.</p>
+
+            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">6. Tarifs et paiement</h3>
+            <p className="mb-2">Les tarifs sont ceux affichés sur la page Tarifs du site :</p>
+            <ul className="mb-4 list-disc pl-5">
+              <li>Standard : 215 €/mois (équivalent 1h par jour, ~20h/mois)</li>
+              <li>Standard+ : 415 €/mois (équivalent 2h par jour, ~40h/mois)</li>
+              <li>Premium : 630 €/mois (équivalent 3h par jour, ~60h/mois)</li>
+              <li>Full-time : 1 230 €/mois (équivalent 8h par jour, ~160h/mois)</li>
+            </ul>
+            <p className="mb-4">Paiement mensuel d&apos;avance.</p>
+
+            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">7. Obligations du prestataire</h3>
+            <p className="mb-4">Fournir un service professionnel, assurer le suivi, respecter la confidentialité.</p>
+
+            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">8. Obligations du client</h3>
+            <p className="mb-4">Fournir les informations nécessaires, donner les accès nécessaires, respecter les délais de paiement.</p>
+
+            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">9. Confidentialité</h3>
+            <p className="mb-4">Les informations du client sont strictement confidentielles.</p>
+
+            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">10. Protection des données (RGPD)</h3>
+            <p className="mb-4">Respect du RGPD. Les données peuvent être traitées uniquement pour l&apos;exécution des prestations. Les infrastructures utilisées pour l&apos;hébergement et le traitement des données sont situées au sein de l&apos;Union européenne ou conformes aux exigences européennes.</p>
+
+            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">11. Utilisation d&apos;outils numériques et d&apos;intelligence artificielle</h3>
+            <p className="mb-4">Le prestataire peut utiliser des outils numériques et d&apos;intelligence artificielle pour améliorer l&apos;efficacité des prestations tout en respectant la confidentialité des données.</p>
+
+            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">12. Responsabilité</h3>
+            <p className="mb-4">Le prestataire est soumis à une obligation de moyens. La responsabilité du prestataire est limitée au montant des prestations payées par le client au cours des 12 derniers mois.</p>
+
+            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">13. Responsabilité des informations</h3>
+            <p className="mb-4">Le client est responsable de l&apos;exactitude et de la légalité des informations fournies.</p>
+
+            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">14. Indépendance des parties</h3>
+            <p className="mb-4">Les assistants intervenant restent sous la responsabilité exclusive de BeWork. Ils ne sont pas les salariés du client.</p>
+
+            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">15. Non-sollicitation</h3>
+            <p className="mb-4">Le client s&apos;engage à ne pas recruter un assistant intervenant dans le cadre des prestations pendant la durée du contrat et pendant 12 mois après la fin de celui-ci.</p>
+
+            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">16. Suspension du service</h3>
+            <p className="mb-4">BeWork peut suspendre les prestations en cas de non-paiement ou de violation du contrat.</p>
+
+            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">17. Durée</h3>
+            <p className="mb-4">Contrat mensuel renouvelable automatiquement.</p>
+
+            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">18. Résiliation</h3>
+            <p className="mb-4">Chaque partie peut résilier le contrat avec un préavis de 30 jours.</p>
+
+            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">19. Force majeure</h3>
+            <p className="mb-4">Aucune partie ne pourra être tenue responsable en cas de force majeure.</p>
+
+            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">20. Droit applicable</h3>
+            <p className="mb-4">Le contrat est soumis au droit français.</p>
+
+            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">21. Signature électronique</h3>
+            <p className="mb-4">L&apos;acceptation du contrat via le bouton « J&apos;accepte le contrat » constitue une signature électronique conforme au règlement européen eIDAS. La signature est horodatée et associée aux informations techniques du signataire.</p>
           </div>
         )}
         <ContractSigningBlock />

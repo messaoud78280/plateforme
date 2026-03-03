@@ -1,8 +1,11 @@
 -- Créer les tables manuellement dans Supabase (si db push échoue)
 -- À exécuter dans : Supabase → SQL Editor → New query → Coller ce script → Run
 
-CREATE TYPE "UserRole" AS ENUM ('CLIENT', 'AGENCE');
-CREATE TYPE "ProjectStatus" AS ENUM ('NOUVEAU', 'EN_COURS', 'EN_ATTENTE', 'TERMINE');
+-- CREATE TYPE ne supporte pas IF NOT EXISTS en PostgreSQL, on utilise des blocs DO
+DO $$ BEGIN CREATE TYPE "UserRole" AS ENUM ('CLIENT', 'AGENCE');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE "ProjectStatus" AS ENUM ('NOUVEAU', 'EN_COURS', 'EN_ATTENTE', 'TERMINE');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 CREATE TABLE "User" (
   "id" TEXT NOT NULL,
@@ -50,7 +53,8 @@ ALTER TABLE "Message" ADD CONSTRAINT "Message_receiverId_fkey"
   FOREIGN KEY ("receiverId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- Demandes de contact / RDV (formulaire public)
-CREATE TYPE "ContactRequestStatus" AS ENUM ('NOUVEAU', 'CONFIRME', 'ANNULE');
+DO $$ BEGIN CREATE TYPE "ContactRequestStatus" AS ENUM ('NOUVEAU', 'CONFIRME', 'ANNULE');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 CREATE TABLE "ContactRequest" (
   "id" TEXT NOT NULL,
   "structure" TEXT NOT NULL,

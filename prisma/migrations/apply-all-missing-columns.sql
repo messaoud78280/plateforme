@@ -1,5 +1,6 @@
 -- À exécuter dans Supabase : SQL Editor → New query → coller ce script → Run
 -- Ajoute toutes les colonnes manquantes sur "User" pour que la connexion fonctionne.
+-- Note : ne pas utiliser CREATE TYPE IF NOT EXISTS (non supporté), on utilise un bloc DO.
 
 -- 1. Civilité (page Votre profil)
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "civilite" TEXT;

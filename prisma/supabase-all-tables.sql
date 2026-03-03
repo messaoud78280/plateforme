@@ -6,13 +6,19 @@
 -- votre schéma est déjà en place, vous n'avez rien à exécuter.
 -- Sinon, utilisez le script idempotent : supabase-all-tables-idempotent.sql
 
--- ========== ENUMS ==========
-CREATE TYPE "UserRole" AS ENUM ('CLIENT', 'AGENCE');
-CREATE TYPE "ProjectStatus" AS ENUM ('NOUVEAU', 'EN_COURS', 'EN_ATTENTE', 'TERMINE');
-CREATE TYPE "DocumentCategory" AS ENUM ('FACTURE', 'CONTRAT', 'RH', 'FISCAL', 'AUTRE');
-CREATE TYPE "DocumentStatus" AS ENUM ('EN_ATTENTE', 'EN_TRAITEMENT', 'TRAITE', 'ARCHIVE');
-CREATE TYPE "TaskStatus" AS ENUM ('EN_COURS', 'COMPLETE', 'EN_ATTENTE');
-CREATE TYPE "AlertLevel" AS ENUM ('INFO', 'WARNING', 'URGENT');
+-- ========== ENUMS (bloc DO car CREATE TYPE IF NOT EXISTS n'existe pas en PostgreSQL) ==========
+DO $$ BEGIN CREATE TYPE "UserRole" AS ENUM ('CLIENT', 'AGENCE');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE "ProjectStatus" AS ENUM ('NOUVEAU', 'EN_COURS', 'EN_ATTENTE', 'TERMINE');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE "DocumentCategory" AS ENUM ('FACTURE', 'CONTRAT', 'RH', 'FISCAL', 'AUTRE');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE "DocumentStatus" AS ENUM ('EN_ATTENTE', 'EN_TRAITEMENT', 'TRAITE', 'ARCHIVE');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE "TaskStatus" AS ENUM ('EN_COURS', 'COMPLETE', 'EN_ATTENTE');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE "AlertLevel" AS ENUM ('INFO', 'WARNING', 'URGENT');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ========== USER ==========
 CREATE TABLE "User" (

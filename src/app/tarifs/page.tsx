@@ -192,6 +192,14 @@ export default function TarifsPage() {
               </li>
             ))}
           </ul>
+          <p className="mt-4">
+            <Link
+              href="/assistants-administratifs-taches"
+              className="text-sm font-medium text-[#1d4ed8] transition hover:underline"
+            >
+              Voir les tâches prises en charge →
+            </Link>
+          </p>
         </section>
 
         {/* Comment ça marche */}

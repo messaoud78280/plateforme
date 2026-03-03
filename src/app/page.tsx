@@ -136,6 +136,27 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Lien pilier tâches */}
+        <section className="px-6 py-8 md:py-10">
+          <div className="mx-auto max-w-6xl">
+            <div className="card-frame rounded-xl border-2 border-[#1d4ed8]/20 bg-white p-6 text-center md:p-8">
+              <p className="text-lg font-semibold text-[#0f172a]">
+                Découvrez les tâches prises en charge par nos assistants administratifs externalisés
+              </p>
+              <p className="mt-2 text-[#334155]">
+                Emails, devis, factures, relances, agenda, suivi dossiers — un catalogue complet pour les PME.
+              </p>
+              <Link
+                href="/assistants-administratifs-taches"
+                className="mt-4 inline-flex items-center gap-1 font-semibold text-[#1d4ed8] transition-colors hover:text-[#1e40af]"
+              >
+                Voir les tâches prises en charge
+                <span aria-hidden>→</span>
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* Solutions */}
         <section id="solutions" className="px-6 py-24 md:py-28">
           <div className="mx-auto max-w-6xl">
@@ -460,7 +481,7 @@ export default function HomePage() {
                   </p>
                   <p className="mt-4 text-[#334155] leading-relaxed">{r.desc}</p>
                   <Link
-                    href="/contact"
+                    href="/assistants-administratifs-taches"
                     className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-[#1d4ed8] transition-colors hover:text-[#1e40af]"
                   >
                     En savoir plus

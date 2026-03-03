@@ -58,12 +58,18 @@ export default function HomePage() {
                 >
                   Créer un compte
                 </Link>
-                <Link
-                  href="/tarifs"
-                  className="w-full rounded-lg border-2 border-[#1d4ed8] bg-transparent px-8 py-4 text-center font-semibold text-[#1d4ed8] transition-all hover:bg-[#eff6ff] sm:w-auto"
-                >
-                  Voir les tarifs
-                </Link>
+                <span className="flex w-full flex-col items-center sm:w-auto">
+                  <Link
+                    href="/tarifs"
+                    className="w-full rounded-lg border-2 border-[#1d4ed8] bg-transparent px-8 py-4 text-center font-semibold text-[#1d4ed8] transition-all hover:bg-[#eff6ff] sm:w-auto"
+                    aria-label="Voir les tarifs BeWork"
+                  >
+                    Voir les tarifs
+                  </Link>
+                  <span className="mt-1.5 block text-center text-xs text-[#64748b] sm:hidden">
+                    Dès 215€/mois – sans recrutement
+                  </span>
+                </span>
               </div>
 
               <h1 className="text-balance text-4xl font-bold leading-tight tracking-tight text-[#0f172a] md:text-6xl md:leading-tight">

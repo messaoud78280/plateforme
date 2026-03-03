@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 interface ComparatifRevealProps {
   children: React.ReactNode;
@@ -8,15 +8,25 @@ interface ComparatifRevealProps {
 
 export function ComparatifReveal({ children }: ComparatifRevealProps) {
   const [open, setOpen] = useState(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  const handleToggle = () => {
+    const next = !open;
+    setOpen(next);
+    if (next && sectionRef.current) {
+      setTimeout(() => sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+    }
+  };
 
   return (
-    <div className="mt-14">
+    <div className="mt-14" ref={sectionRef} id="tableau-comparatif">
       <p className="text-center">
         <button
           type="button"
-          onClick={() => setOpen(!open)}
-          className="inline-flex items-center gap-2 rounded-lg border-2 border-[#1d4ed8] bg-transparent px-6 py-3 font-semibold text-[#1d4ed8] transition-all hover:bg-[#eff6ff]"
+          onClick={handleToggle}
+          className="inline-flex items-center gap-2 rounded-lg border-2 border-[#1d4ed8] bg-transparent px-6 py-3 font-semibold text-[#1d4ed8] transition-all hover:bg-[#eff6ff] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2"
           aria-expanded={open}
+          aria-label={open ? "Masquer le tableau comparatif" : "Voir le tableau comparatif"}
         >
           {open ? "Masquer le tableau comparatif" : "Voir le tableau comparatif"}
           <svg
@@ -30,7 +40,7 @@ export function ComparatifReveal({ children }: ComparatifRevealProps) {
           </svg>
         </button>
       </p>
-      {open && <div className="mt-8">{children}</div>}
+      {open && <div className="mt-8 scroll-mt-24">{children}</div>}
     </div>
   );
 }

@@ -133,7 +133,7 @@ export function InformationsPersonnellesForm({ initialData }: InformationsPerson
           onChange={(e) => setBillingCountry(e.target.value)}
           disabled={status === "loading"}
           className={inputClass}
-          placeholder="Ex. France, Algérie"
+          placeholder="Ex. France, pays de résidence"
         />
       </div>
 

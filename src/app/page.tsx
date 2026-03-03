@@ -120,7 +120,7 @@ export default function HomePage() {
               {[
                 "Aucun coût de recrutement ni d'infrastructure : votre assistant est opérationnel après l'onboarding.",
                 "Main-d'œuvre qualifiée, 100% francophone, motivée et encadrée.",
-                "Même fuseau horaire qu'en France : nous travaillons avec l'Algérie pour une collaboration en temps réel.",
+                "Même fuseau horaire qu'en France : notre plateforme basée au Maghreb assure une collaboration en temps réel.",
                 "Diplômés Bac+5 minimum, formés à l'IA et aux process administratifs.",
                 "Garantie : satisfait ou remplacé rapidement.",
                 "Direction et pilotage en France pour rester au plus proche de vos attentes.",
@@ -258,7 +258,7 @@ export default function HomePage() {
                 <strong className="text-slate-900">Laure Olivie</strong>, formatrice
                 IA reconnue et diplômée. Votre interlocuteur principal est notre{" "}
                 <strong className="text-slate-900">agence en région parisienne</strong>,
-                qu&apos;elle dirige au quotidien. Une agence secondaire en Algérie
+                qu&apos;elle dirige au quotidien. Une plateforme opérationnelle basée au Maghreb
                 opère sous son pilotage et celui d&apos;expatriés français qui la
                 dirigent en temps réel, pour une qualité et une réactivité identiques.
                 Notre équipe est composée de diplômés Bac+5 minimum, expérimentés et
@@ -284,13 +284,13 @@ export default function HomePage() {
                 </div>
                 <div>
                   <p className="text-lg font-semibold text-[#0f172a]">
-                    Agence secondaire — Algérie
+                    Plateforme opérationnelle — Maghreb
                   </p>
                   <p className="mt-2 text-sm font-medium text-[#64748b]">
                     Sous direction française en temps réel
                   </p>
                   <p className="mt-3 text-[#334155] leading-relaxed">
-                    L&apos;agence en Algérie est pilotée au quotidien par Laure et
+                    La plateforme au Maghreb est pilotée au quotidien par Laure et
                     par des cadres expatriés français. Même fuseau horaire que la
                     France, même niveau d&apos;exigence : sélection Bac+5, formation
                     IA et encadrement continu pour une assistance réactive et
@@ -302,7 +302,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Pourquoi l'Algérie / Notre organisation */}
+        {/* Notre organisation */}
         <section id="pourquoi-nous" className="px-6 py-24 md:py-28">
           <div className="mx-auto max-w-6xl">
             <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
@@ -311,7 +311,7 @@ export default function HomePage() {
             <ul className="mt-8 grid gap-4 md:grid-cols-2">
               {[
                 "Interlocuteur principal en Île-de-France (Laure Olivie) : proximité et réactivité.",
-                "Agence en Algérie pilotée en temps réel par des dirigeants français expatriés.",
+                "Plateforme au Maghreb pilotée en temps réel par des dirigeants français.",
                 "Même fuseau horaire qu'en France : collaboration sans décalage.",
                 "Assistants francophones, Bac+5, formés à l'IA et encadrés en continu.",
               ].map((item, i) => (
@@ -534,7 +534,7 @@ export default function HomePage() {
               <span className="text-[#0f172a]">© {new Date().getFullYear()} BeWork</span>
             </div>
             <span className="text-[#64748b]">
-              Société française — Agence principale : Île-de-France (Laure Olivie) — Agence secondaire : Algérie (sous direction française en temps réel)
+              Société française — Agence principale : Île-de-France (Laure Olivie) — Plateforme opérationnelle : Maghreb (sous direction française en temps réel)
             </span>
           </div>
           <div className="flex flex-wrap gap-x-6 gap-y-2">

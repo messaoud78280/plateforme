@@ -31,6 +31,7 @@ export default function HomePage() {
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#solutions">Solutions</a>
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#equipe">Équipe</a>
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#secteurs">Secteurs</a>
+            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#conciergerie">Conciergerie</a>
             <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/tarifs">Tarifs</Link>
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#avantages">Avantages</a>
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#pourquoi-nous">Pourquoi</a>
@@ -357,6 +358,50 @@ export default function HomePage() {
                   {tag}
                 </span>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Service de conciergerie — sur devis, 24/24 */}
+        <section id="conciergerie" className="px-6 py-24 md:py-28">
+          <div className="card-frame mx-auto max-w-6xl rounded-xl border-2 border-[#1d4ed8]/20 bg-gradient-to-b from-white to-[#f8fafc] p-10 md:p-14">
+            <div className="flex flex-wrap items-start justify-between gap-6">
+              <div className="max-w-2xl">
+                <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
+                  Service de conciergerie
+                </h2>
+                <p className="mt-5 text-lg leading-relaxed text-[#334155]">
+                  Au-delà de l&apos;assistance administrative, BeWork propose un{" "}
+                  <strong className="text-[#0f172a]">service de conciergerie professionnelle</strong>{" "}
+                  pour répondre à vos demandes sur mesure : assistance à la réservation, organisation de déplacements,
+                  recherches spécifiques ou gestion d&apos;imprévus. Tout se fait à distance — sans nous déplacer : recherches, appels, mails et réservations en votre nom. Service personnalisé, disponible 24h/24, sur devis.
+                </p>
+                <ul className="mt-6 grid gap-2 sm:grid-cols-2 text-[#334155]">
+                  {[
+                    "Réservation hôtel & hébergement",
+                    "Location de voiture",
+                    "Réservation restaurant",
+                    "Organisation de déplacements",
+                    "Recherche & comparaison sur mesure",
+                    "Envoi de cadeaux & attentions",
+                  ].map((item, i) => (
+                    <li key={i} className="flex gap-2">
+                      <span className="text-[#1d4ed8] shrink-0">✓</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/contact"
+                  className="mt-8 inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-[#1e40af] hover:shadow-lg"
+                >
+                  Demander un devis conciergerie
+                </Link>
+              </div>
+              <div className="rounded-lg border border-[#1d4ed8]/30 bg-[#eff6ff] px-5 py-4">
+                <p className="text-sm font-semibold text-[#0f172a]">Sur devis personnalisé</p>
+                <p className="mt-1 text-sm text-[#334155]">Tarif adapté à vos besoins et au volume de demandes. 24h/24.</p>
+              </div>
             </div>
           </div>
         </section>

@@ -187,6 +187,20 @@ export default function TarifsPage() {
           <p className="mt-2 max-w-2xl mx-auto text-center text-sm text-[#334155]">
             Minimum facturé : 1 action par demande.
           </p>
+
+          {/* Conciergerie — sur devis */}
+          <div className="mt-10 rounded-xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-6 text-center">
+            <h3 className="text-xl font-bold text-[#0f172a]">Service de conciergerie</h3>
+            <p className="mt-2 text-[#334155]">
+              Réservation hôtel, voiture, restaurant, organisation de déplacements… À distance : recherches, appels et mails en votre nom, sans déplacement. Sur devis personnalisé, disponible 24h/24.
+            </p>
+            <Link
+              href="/contact"
+              className="mt-4 inline-block rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af]"
+            >
+              Demander un devis
+            </Link>
+          </div>
         </section>
 
         {/* Ce qui est inclus */}

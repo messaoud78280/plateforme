@@ -43,7 +43,7 @@ export default async function AbonnementPage() {
       </div>
       <h1 className="text-2xl font-bold text-slate-800">Suivi des actions</h1>
       <p className="text-sm text-slate-600">
-        Historique des tâches terminées avec déduction d&apos;actions. 1 action = 10 minutes. Minimum 1 action par demande.
+        Historique des tâches terminées avec déduction d&apos;actions. Minimum 1 action par demande.
       </p>
 
       <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">

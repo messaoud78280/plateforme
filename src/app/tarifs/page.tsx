@@ -175,9 +175,6 @@ export default function TarifsPage() {
                 <p className="mt-2 text-sm font-medium text-[#0f172a]">
                   {plan.actionsPerMonth} actions / mois
                 </p>
-                <p className="mt-0.5 text-xs text-[#64748b]">
-                  1 action = 10 minutes
-                </p>
                 <p className="mt-3 text-xs text-[#64748b] italic">
                   Idéal pour : {plan.idealFor}
                 </p>

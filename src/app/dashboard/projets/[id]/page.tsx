@@ -41,6 +41,9 @@ export default async function ProjetDetailPage({
   if (!project) notFound();
 
   const projectActionsUsed = actionsConsumed._sum.actionsUsed ?? 0;
+  const clientTotal = project?.client && "monthlyActionsTotal" in project.client ? (project.client as { monthlyActionsTotal: number }).monthlyActionsTotal : 0;
+  const clientUsed = project?.client && "monthlyActionsUsed" in project.client ? (project.client as { monthlyActionsUsed: number }).monthlyActionsUsed : 0;
+  const clientRemaining = Math.max(0, clientTotal - clientUsed);
 
   const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
   const canAccess =
@@ -106,6 +109,16 @@ export default async function ProjetDetailPage({
           <span className="rounded-full bg-[#1d4ed8]/10 px-3 py-1 font-medium text-[#1d4ed8]">
             Actions consommées par ce projet : {projectActionsUsed}
           </span>
+          {isAgence && (
+            <>
+              <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">
+                Actions client (mois) : {clientUsed} utilisées / {clientTotal} total
+              </span>
+              <span className="rounded-full bg-green-100 px-3 py-1 font-medium text-green-800">
+                Restantes : {clientRemaining}
+              </span>
+            </>
+          )}
         </div>
 
         <div className="mt-6 grid gap-4 border-t border-slate-100 pt-6 sm:grid-cols-2">

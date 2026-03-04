@@ -11,6 +11,8 @@ interface TaskItem {
   completedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
+  timeSpentMinutes?: number | null;
+  actionsUsed?: number | null;
   project?: { id: string; title: string } | null;
   assignedTo?: { id: string; name: string; email: string } | null;
 }
@@ -46,7 +48,8 @@ export function TaskListView({ tasks }: TaskListViewProps) {
               <th className="px-4 py-3 font-semibold text-slate-800">Statut</th>
               <th className="px-4 py-3 font-semibold text-slate-800">Création</th>
               <th className="px-4 py-3 font-semibold text-slate-800">Fin</th>
-              <th className="px-4 py-3 font-semibold text-slate-800">Actions</th>
+              <th className="px-4 py-3 font-semibold text-slate-800 text-center">Actions utilisées</th>
+              <th className="px-4 py-3 font-semibold text-slate-800">Lien</th>
             </tr>
           </thead>
           <tbody>
@@ -98,6 +101,18 @@ export function TaskListView({ tasks }: TaskListViewProps) {
                   {task.completedAt
                     ? new Date(task.completedAt).toLocaleDateString("fr-FR")
                     : "—"}
+                </td>
+                <td className="px-4 py-3 text-center">
+                  {task.actionsUsed != null && task.actionsUsed > 0 ? (
+                    <span className="font-medium text-[#1d4ed8]">
+                      {task.actionsUsed} action{task.actionsUsed > 1 ? "s" : ""}
+                      {task.timeSpentMinutes != null && (
+                        <span className="ml-1 text-slate-500 text-xs">({task.timeSpentMinutes} min)</span>
+                      )}
+                    </span>
+                  ) : (
+                    "—"
+                  )}
                 </td>
                 <td className="px-4 py-3">
                   <Link

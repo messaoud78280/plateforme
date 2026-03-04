@@ -384,12 +384,14 @@ export default async function DashboardPage() {
         >
           RDV
         </Link>
-        <Link
-          href="/contract"
-          className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
-        >
-          Contrat
-        </Link>
+        {!isAgence && (
+          <Link
+            href="/contract"
+            className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
+          >
+            Contrat
+          </Link>
+        )}
       </div>
     </div>
   );

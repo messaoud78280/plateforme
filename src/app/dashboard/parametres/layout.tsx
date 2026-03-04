@@ -15,6 +15,10 @@ export default async function ParametresLayout({
     redirect("/connexion?callbackUrl=/dashboard/parametres");
   }
 
+  if (session.user?.role === "AGENCE" || session.user?.role === "MANAGER") {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="mx-auto max-w-4xl">
       <ProfilBreadcrumb />

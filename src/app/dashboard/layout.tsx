@@ -97,24 +97,30 @@ export default async function DashboardLayout({
           >
             Rapports
           </Link>
-          <Link
-            href="/dashboard/abonnement"
-            className="rounded-lg px-3 py-2 text-sm font-medium text-[#334155] hover:bg-[#eef0f4] hover:text-[#0f172a]"
-          >
-            Abonnement
-          </Link>
-          <Link
-            href="/contract"
-            className="rounded-lg px-3 py-2 text-sm font-medium text-[#334155] hover:bg-[#eef0f4] hover:text-[#0f172a]"
-          >
-            Contrat
-          </Link>
-          <Link
-            href="/dashboard/parametres"
-            className="rounded-lg px-3 py-2 text-sm font-medium text-[#334155] hover:bg-[#eef0f4] hover:text-[#0f172a]"
-          >
-            Paramètres
-          </Link>
+          {session.user?.role === "CLIENT" && (
+            <>
+              <Link
+                href="/dashboard/abonnement"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-[#334155] hover:bg-[#eef0f4] hover:text-[#0f172a]"
+              >
+                Abonnement
+              </Link>
+              <Link
+                href="/contract"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-[#334155] hover:bg-[#eef0f4] hover:text-[#0f172a]"
+              >
+                Contrat
+              </Link>
+            </>
+          )}
+          {(session.user?.role === "CLIENT" || session.user?.role === "AGENT") && (
+            <Link
+              href="/dashboard/parametres"
+              className="rounded-lg px-3 py-2 text-sm font-medium text-[#334155] hover:bg-[#eef0f4] hover:text-[#0f172a]"
+            >
+              Paramètres
+            </Link>
+          )}
         </div>
       </nav>
       <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>

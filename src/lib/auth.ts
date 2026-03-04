@@ -38,7 +38,8 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = (user as { id: string; role: string }).role;
-        token.contractStatus = (user as unknown as { contractStatus?: string }).contractStatus;
+        const u = user as unknown as Record<string, unknown>;
+        token.contractStatus = typeof u.contractStatus === "string" ? u.contractStatus : undefined;
       }
       return token;
     },

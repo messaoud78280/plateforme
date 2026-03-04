@@ -3,20 +3,25 @@ interface BeWorkLogoProps {
   size?: "sm" | "md" | "lg";
 }
 
+/** Dégradé bleu métallique : professionnel, épuré, futuriste */
+const logoGradient =
+  "bg-gradient-to-r from-[#1e3a5f] via-[#2563eb] to-[#0ea5e9] bg-clip-text text-transparent";
+const logoShadow = "drop-shadow-[0_1px_2px_rgba(30,58,95,0.25)]";
+
 export function BeWorkLogo({
   className = "",
   size = "md",
 }: BeWorkLogoProps) {
   const textSize =
     size === "sm"
-      ? "text-lg md:text-xl"
+      ? "text-2xl md:text-3xl"
       : size === "md"
-        ? "text-xl md:text-2xl"
-        : "text-2xl md:text-3xl";
+        ? "text-3xl md:text-4xl"
+        : "text-4xl md:text-5xl";
 
   return (
     <span
-      className={`font-extrabold tracking-tight ${textSize} bg-gradient-to-r from-[#1d4ed8] via-[#3b82f6] to-[#60a5fa] bg-clip-text text-transparent drop-shadow-sm ${className}`}
+      className={`font-extrabold tracking-tight ${textSize} ${logoGradient} ${logoShadow} ${className}`}
       style={{ fontFamily: "var(--font-orbitron), system-ui, sans-serif" }}
     >
       BeWork

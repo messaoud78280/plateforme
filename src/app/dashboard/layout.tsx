@@ -22,7 +22,7 @@ export default async function DashboardLayout({
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
           <Link
             href="/dashboard"
-            className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-[#1d4ed8] via-[#3b82f6] to-[#60a5fa] bg-clip-text text-transparent"
+            className="text-2xl md:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-[#1e3a5f] via-[#2563eb] to-[#0ea5e9] bg-clip-text text-transparent drop-shadow-[0_1px_2px_rgba(30,58,95,0.25)]"
             style={{ fontFamily: "var(--font-orbitron), system-ui, sans-serif" }}
           >
             BeWork

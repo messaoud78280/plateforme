@@ -84,11 +84,11 @@ const faq = [
   { q: "Qu'est-ce qu'un périmètre ?", a: "Un périmètre correspond à un domaine de mission (ex. commercial, comptabilité, RH). Les tarifs indiqués couvrent jusqu'à 2 périmètres. Au-delà, un devis personnalisé est établi." },
   { q: "Comment sont protégées mes données ?", a: "Nous appliquons des mesures de confidentialité et de sécurité adaptées. Les données sont traitées dans un cadre strict ; nous restons à votre disposition pour toute précision sur nos engagements." },
   { q: "Quels sont les horaires et délais ?", a: "Les assistants travaillent du lundi au vendredi, alignés sur le fuseau français. Les délais de traitement dépendent du volume et de la complexité ; nous les cadrons ensemble lors du démarrage." },
-  { q: "Avec quels outils travaillez-vous ?", a: "Nous nous adaptons à vos outils : Google Workspace, Microsoft 365, CRM, messageries… Nos assistants utilisent votre environnement et la plateforme BeWork pour le suivi des dossiers." },
+  { q: "Avec quels outils travaillez-vous ?", a: "Nous nous adaptons à vos outils : Google Workspace, Microsoft 365, CRM, messageries… Nous travaillons avec des agents IA adaptés selon la tâche à effectuer. Nos assistants utilisent votre environnement et la plateforme BeWork pour le suivi des dossiers." },
   { q: "Y a-t-il un engagement ou une durée minimale ?", a: "Les conditions d'engagement et de résiliation sont précisées dans notre contrat. Contactez-nous pour en prendre connaissance." },
   { q: "Peut-on monter en charge progressivement ?", a: "Oui. Nous pouvons démarrer sur un volume limité et ajuster selon vos besoins, en cohérence avec nos offres." },
   { q: "Que se passe-t-il en cas d'absence de l'assistant ?", a: "Nous prévoyons une continuité de service et un remplacement si nécessaire. Les modalités sont détaillées dans le contrat." },
-  { q: "Comment communiquer avec mon assistant ?", a: "Email, messagerie interne, téléphone selon vos préférences. Les canaux sont définis lors de l'onboarding." },
+  { q: "Comment communiquer avec mon assistant ?", a: "Vous échangez avec votre assistant directement via notre plateforme dédiée. Messagerie interne, email ou téléphone : les canaux de communication sont définis lors de votre onboarding pour garantir une collaboration fluide et efficace." },
 ];
 
 export default function TarifsPage() {

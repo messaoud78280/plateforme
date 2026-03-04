@@ -197,7 +197,7 @@ const faqItems = [
   },
   {
     q: "Comment communiquer avec mon assistant ?",
-    a: "Email, messagerie interne (Slack, Teams), téléphone selon vos préférences. Les canaux sont définis lors de l’onboarding.",
+    a: "Vous échangez avec votre assistant directement via notre plateforme dédiée. Messagerie interne, email ou téléphone : les canaux de communication sont définis lors de votre onboarding pour garantir une collaboration fluide et efficace.",
   },
   {
     q: "Peut-on monter en charge progressivement ?",

@@ -104,9 +104,13 @@ function ConnexionForm() {
           <a href="/" className="text-blue-600 hover:underline">
             Retour à l&apos;accueil
           </a>
+          {" · "}
+          <a href="/inscription" className="text-blue-600 hover:underline">
+            Créer un compte
+          </a>
         </p>
         <p className="mt-4 text-center text-xs text-slate-400">
-          Démo : client@exemple.com / agence@exemple.com — mot de passe : motdepasse123
+          Démo : client@exemple.com / agence@exemple.com / agent@bework.fr — mot de passe : motdepasse123
         </p>
       </div>
     </div>

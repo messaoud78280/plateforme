@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { TASK_STATUS_LABELS, type TaskStatus } from "@/types";
+import { minutesToActions } from "@/lib/actions";
 import { TaskTimeline } from "./TaskTimeline";
 
 interface TaskDetailViewProps {
@@ -18,12 +19,15 @@ interface TaskDetailViewProps {
     agencyNotes?: string | null;
     correctionNote?: string | null;
     validatedAt?: Date | null;
+    timeSpentMinutes?: number | null;
+    actionsUsed?: number | null;
     assignedTo?: { id: string; name: string; email: string } | null;
     project?: { id: string; title: string } | null;
     documents?: { id: string; name: string; fileUrl: string; fileSize: number; mimeType: string | null }[];
   };
-  onStatusChange?: (newStatus: TaskStatus) => void;
+  onStatusChange?: (newStatus: TaskStatus, timeSpentMinutes?: number) => void;
   isAgence?: boolean;
+  isAgent?: boolean;
   agents?: { id: string; name: string; email: string }[];
   onAssign?: (assignedToId: string | null) => void;
   onAgencyNotesChange?: (notes: string) => void;
@@ -43,6 +47,7 @@ export function TaskDetailView({
   task,
   onStatusChange,
   isAgence,
+  isAgent = false,
   agents = [],
   onAssign,
   onAgencyNotesChange,
@@ -53,6 +58,9 @@ export function TaskDetailView({
 }: TaskDetailViewProps) {
   const [agencyNotesLocal, setAgencyNotesLocal] = useState(task.agencyNotes ?? "");
   const [savingNotes, setSavingNotes] = useState(false);
+  const [showCompleteForm, setShowCompleteForm] = useState(false);
+  const [timeSpentMinutes, setTimeSpentMinutes] = useState(10);
+  const canSetTimeOnComplete = isAgence || isAgent;
 
   const timelineEvents = [
     { label: "Création", date: task.createdAt },
@@ -97,6 +105,9 @@ export function TaskDetailView({
             <p>Créée le {new Date(task.createdAt).toLocaleDateString("fr-FR")}</p>
             {task.completedAt && (
               <p>Terminée le {new Date(task.completedAt).toLocaleDateString("fr-FR")}</p>
+            )}
+            {task.timeSpentMinutes != null && task.actionsUsed != null && (
+              <p className="text-[#1d4ed8] font-medium">{task.timeSpentMinutes} min → {task.actionsUsed} action{task.actionsUsed > 1 ? "s" : ""}</p>
             )}
           </div>
         </div>
@@ -220,10 +231,10 @@ export function TaskDetailView({
         </div>
       )}
 
-      {/* Actions statut : agence = prendre en charge / clôturer ; client = mettre en attente */}
+      {/* Actions statut : agence/agent = prendre en charge / clôturer (avec temps) ; client = mettre en attente */}
       {onStatusChange && task.status !== "COMPLETE" && (
-        <div className="flex flex-wrap gap-2">
-          {isAgence && task.status === "EN_ATTENTE" && (
+        <div className="flex flex-wrap items-end gap-4">
+          {(isAgence || isAgent) && task.status === "EN_ATTENTE" && (
             <button
               type="button"
               onClick={() => onStatusChange("EN_COURS")}
@@ -232,16 +243,48 @@ export function TaskDetailView({
               Prendre en charge
             </button>
           )}
-          {isAgence && task.status === "EN_COURS" && (
+          {(isAgence || isAgent) && task.status === "EN_COURS" && !showCompleteForm && (
             <button
               type="button"
-              onClick={() => onStatusChange("COMPLETE")}
+              onClick={() => setShowCompleteForm(true)}
               className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
             >
               Marquer comme terminée
             </button>
           )}
-          {task.status !== "EN_ATTENTE" && (
+          {(isAgence || isAgent) && task.status === "EN_COURS" && showCompleteForm && (
+            <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <label className="text-sm font-medium text-slate-700">
+                Temps passé (minutes) :
+              </label>
+              <input
+                type="number"
+                min={1}
+                max={480}
+                value={timeSpentMinutes}
+                onChange={(e) => setTimeSpentMinutes(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              />
+              <span className="text-sm text-slate-600">
+                = {minutesToActions(timeSpentMinutes)} action{minutesToActions(timeSpentMinutes) > 1 ? "s" : ""}
+              </span>
+              <button
+                type="button"
+                onClick={() => { onStatusChange("COMPLETE", timeSpentMinutes); setShowCompleteForm(false); }}
+                className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+              >
+                Valider
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowCompleteForm(false)}
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Annuler
+              </button>
+            </div>
+          )}
+          {task.status !== "EN_ATTENTE" && !(canSetTimeOnComplete && task.status === "EN_COURS" && showCompleteForm) && (
             <button
               type="button"
               onClick={() => onStatusChange("EN_ATTENTE")}
@@ -253,8 +296,8 @@ export function TaskDetailView({
         </div>
       )}
 
-      {/* Validation / Correction (agence, tâche terminée mais pas encore validée) */}
-      {isAgence && task.status === "COMPLETE" && !task.validatedAt && (
+      {/* Validation / Correction (agence uniquement, tâche terminée mais pas encore validée) */}
+      {isAgence && !isAgent && task.status === "COMPLETE" && !task.validatedAt && (
         <div className="rounded-xl border border-slate-200 bg-white p-6">
           <h2 className="mb-4 text-lg font-semibold text-slate-800">Vérifier et valider le travail</h2>
           <p className="mb-4 text-sm text-slate-600">

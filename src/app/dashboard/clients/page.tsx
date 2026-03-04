@@ -23,6 +23,9 @@ export default async function ClientsPage() {
       name: true,
       email: true,
       company: true,
+      subscriptionPlan: true,
+      monthlyActionsTotal: true,
+      monthlyActionsUsed: true,
       _count: {
         select: { projects: true, tasks: true },
       },
@@ -55,11 +58,16 @@ export default async function ClientsPage() {
                 <th className="px-6 py-4 font-semibold">Email</th>
                 <th className="px-6 py-4 font-semibold text-center">Projets</th>
                 <th className="px-6 py-4 font-semibold text-center">Tâches</th>
-                <th className="px-6 py-4 font-semibold text-right">Actions</th>
+                <th className="px-6 py-4 font-semibold text-center">Quota actions (utilisées / total)</th>
+                <th className="px-6 py-4 font-semibold text-right">Détail</th>
               </tr>
             </thead>
             <tbody>
-              {clients.map((client) => (
+              {clients.map((client) => {
+                const total = client.monthlyActionsTotal ?? 0;
+                const used = client.monthlyActionsUsed ?? 0;
+                const remaining = Math.max(0, total - used);
+                return (
                 <tr
                   key={client.id}
                   className="border-b border-[#e0e4ea] transition hover:bg-[#f8f9fb]"
@@ -77,6 +85,11 @@ export default async function ClientsPage() {
                   <td className="px-6 py-4 text-center text-[#334155]">
                     {client._count.tasks}
                   </td>
+                  <td className="px-6 py-4 text-center text-[#334155]">
+                    {total > 0 ? (
+                      <span>{used} / {total} <span className="text-[#64748b]">(reste {remaining})</span></span>
+                    ) : "—"}
+                  </td>
                   <td className="px-6 py-4 text-right">
                     <Link
                       href={`/dashboard/clients/${client.id}`}
@@ -86,7 +99,8 @@ export default async function ClientsPage() {
                     </Link>
                   </td>
                 </tr>
-              ))}
+              );
+              })}
             </tbody>
           </table>
         </div>

@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { minutesToActions, shouldResetActions, getMonthStart } from "@/lib/actions";
 
-/** PATCH /api/tasks/[id]/status – Changer le statut d'une tâche */
+/** PATCH /api/tasks/[id]/status – Changer le statut d'une tâche (optionnel: timeSpentMinutes pour COMPLETE) */
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -15,18 +16,25 @@ export async function PATCH(
 
   const { id } = await params;
   const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
+  const isAgent = session.user.role === "AGENT";
 
   try {
     const existing = await prisma.task.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json({ error: "Tâche introuvable" }, { status: 404 });
     }
-    if (!isAgence && existing.clientId !== session.user.id) {
+    const isClient = existing.clientId === session.user.id;
+    const isAssignedAgent = existing.assignedToId === session.user.id;
+    if (!isAgence && !isAgent && !isClient) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+    }
+    if (isAgent && !isAssignedAgent) {
+      return NextResponse.json({ error: "Seul l'agent assigné peut modifier cette tâche" }, { status: 403 });
     }
 
     const body = await request.json();
     const status = body?.status as "EN_COURS" | "COMPLETE" | "EN_ATTENTE" | undefined;
+    const timeSpentMinutes = typeof body?.timeSpentMinutes === "number" ? body.timeSpentMinutes : undefined;
     if (!status || !["EN_COURS", "COMPLETE", "EN_ATTENTE"].includes(status)) {
       return NextResponse.json(
         { error: "Statut invalide (EN_COURS, COMPLETE, EN_ATTENTE)" },
@@ -34,13 +42,40 @@ export async function PATCH(
       );
     }
 
+    let actionsToDeduct = 0;
+    const canSetTime = (isAgence || isAgent) && status === "COMPLETE" && timeSpentMinutes != null && timeSpentMinutes >= 0;
+    if (canSetTime) {
+      actionsToDeduct = minutesToActions(timeSpentMinutes);
+    }
+
     const task = await prisma.task.update({
       where: { id },
       data: {
         status,
         completedAt: status === "COMPLETE" ? new Date() : null,
+        ...(canSetTime
+          ? { timeSpentMinutes, actionsUsed: actionsToDeduct }
+          : {}),
       },
     });
+
+    if (actionsToDeduct > 0 && task.clientId) {
+      const client = await prisma.user.findUnique({
+        where: { id: task.clientId },
+        select: { actionsResetAt: true },
+      });
+      if (client && shouldResetActions(client.actionsResetAt ?? null)) {
+        await prisma.user.update({
+          where: { id: task.clientId },
+          data: { monthlyActionsUsed: 0, actionsResetAt: getMonthStart() },
+        });
+      }
+      await prisma.user.update({
+        where: { id: task.clientId },
+        data: { monthlyActionsUsed: { increment: actionsToDeduct } },
+      });
+    }
+
     return NextResponse.json(task);
   } catch (e) {
     console.error(e);

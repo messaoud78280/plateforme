@@ -16,6 +16,7 @@ const plans = [
     price: "215",
     detail: "Tous services inclus",
     schedule: "Lundi au vendredi 1h par jour (env. 20h par mois)",
+    actionsPerMonth: 120,
     idealFor: "TPE, tâches ponctuelles, test du service",
     badge: null as string | null,
   },
@@ -24,6 +25,7 @@ const plans = [
     price: "415",
     detail: "Tous services inclus",
     schedule: "Lundi au vendredi 2h par jour (env. 40h par mois)",
+    actionsPerMonth: 240,
     idealFor: "PME, charge administrative régulière",
     badge: "Le plus choisi" as string | null,
   },
@@ -32,6 +34,7 @@ const plans = [
     price: "630",
     detail: "Tous services inclus",
     schedule: "Lundi au vendredi 3h par jour (env. 60h par mois)",
+    actionsPerMonth: 360,
     idealFor: "Dossiers multiples, suivi exigeant",
     badge: null as string | null,
   },
@@ -40,6 +43,7 @@ const plans = [
     price: "1 230",
     detail: "Tous services inclus",
     schedule: "Lundi au vendredi 8h par jour (env. 160h par mois)",
+    actionsPerMonth: 960,
     idealFor: "Volume important, équivalent poste dédié",
     badge: null as string | null,
   },
@@ -168,6 +172,12 @@ export default function TarifsPage() {
                   </svg>
                   <span>{plan.schedule}</span>
                 </div>
+                <p className="mt-2 text-sm font-medium text-[#0f172a]">
+                  {plan.actionsPerMonth} actions / mois
+                </p>
+                <p className="mt-0.5 text-xs text-[#64748b]">
+                  1 action = 10 minutes
+                </p>
                 <p className="mt-3 text-xs text-[#64748b] italic">
                   Idéal pour : {plan.idealFor}
                 </p>
@@ -176,6 +186,9 @@ export default function TarifsPage() {
           </div>
           <p className="mt-6 max-w-2xl mx-auto text-center text-sm text-[#334155]">
             *Tarifs valables pour 2 périmètres maximum. Pour 3 périmètres ou plus, contactez-nous en France pour un tarif personnalisé.
+          </p>
+          <p className="mt-2 max-w-2xl mx-auto text-center text-sm text-[#334155]">
+            Minimum facturé : 1 action par demande.
           </p>
         </section>
 

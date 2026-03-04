@@ -17,6 +17,7 @@ export default async function TachesPage({
   }
 
   const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
+  const isAgent = session.user.role === "AGENT";
   const params = await searchParams;
   const statusFilter = params.statut as "EN_ATTENTE" | "EN_COURS" | "COMPLETE" | undefined;
   const validStatus = statusFilter && ["EN_ATTENTE", "EN_COURS", "COMPLETE"].includes(statusFilter)
@@ -27,9 +28,14 @@ export default async function TachesPage({
   let projects: { id: string; title: string }[] = [];
   try {
     if (prisma.task) {
+      const taskWhere = isAgence
+        ? {}
+        : isAgent
+          ? { assignedToId: session.user.id }
+          : { clientId: session.user.id };
       tasks = await prisma.task.findMany({
         where: {
-          ...(isAgence ? {} : { clientId: session.user.id }),
+          ...taskWhere,
           ...(validStatus ? { status: validStatus } : {}),
         },
         include: {
@@ -57,13 +63,15 @@ export default async function TachesPage({
         <p className="mt-1 text-slate-600">
           {isAgence
             ? "Tâches déposées par les clients. Cliquez sur une tâche pour la prendre en charge ou la marquer comme terminée."
-            : "Déposez vos demandes et suivez leur avancement."}
+            : isAgent
+              ? "Tâches qui vous sont assignées. Indiquez le temps passé lors de la clôture pour déduire les actions du client."
+              : "Déposez vos demandes et suivez leur avancement."}
         </p>
       </div>
 
-      {!isAgence && <DepotTacheForm projects={projects} />}
+      {session.user.role === "CLIENT" && <DepotTacheForm projects={projects} />}
 
-      {isAgence && (
+      {(isAgence || isAgent) && (
         <div className="flex flex-wrap gap-2">
           <a
             href="/dashboard/taches"

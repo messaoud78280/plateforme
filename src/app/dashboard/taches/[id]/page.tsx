@@ -30,6 +30,8 @@ export default async function TacheDetailPage({
     agencyNotes: string | null;
     correctionNote: string | null;
     validatedAt: Date | null;
+    timeSpentMinutes: number | null;
+    actionsUsed: number | null;
     assignedTo: { id: string; name: string; email: string } | null;
     project: { id: string; title: string } | null;
     documents: { id: string; name: string; fileUrl: string; fileSize: number; mimeType: string | null }[];
@@ -48,7 +50,7 @@ export default async function TacheDetailPage({
     });
     if (session.user.role === "AGENCE" || session.user.role === "MANAGER") {
       agents = await prisma.user.findMany({
-        where: { role: "AGENCE" },
+        where: { role: { in: ["AGENCE", "AGENT"] } },
         select: { id: true, name: true, email: true },
         orderBy: { name: "asc" },
       });
@@ -60,10 +62,11 @@ export default async function TacheDetailPage({
   if (!task) notFound();
 
   const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
-  const canAccess = isAgence || task.clientId === session.user.id;
+  const isAgent = session.user.role === "AGENT";
+  const canAccess = isAgence || isAgent || task.clientId === session.user.id;
   if (!canAccess) notFound();
 
-  const canEdit = isAgence || task.clientId === session.user.id;
+  const canEdit = isAgence || isAgent || task.clientId === session.user.id;
 
   return (
     <div className="space-y-6">
@@ -87,12 +90,15 @@ export default async function TacheDetailPage({
           agencyNotes: task.agencyNotes ?? null,
           correctionNote: task.correctionNote ?? null,
           validatedAt: task.validatedAt ?? null,
+          timeSpentMinutes: task.timeSpentMinutes ?? null,
+          actionsUsed: task.actionsUsed ?? null,
           assignedTo: task.assignedTo ?? null,
           project: task.project ?? null,
           documents: task.documents ?? [],
         }}
         canEdit={canEdit}
         isAgence={isAgence}
+        isAgent={isAgent}
         agents={agents}
       />
     </div>

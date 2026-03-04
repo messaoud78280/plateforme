@@ -48,6 +48,8 @@ export async function POST(request: Request) {
         formeJuridique: formeJuridique || undefined,
         secteurActivite: secteurActivite || undefined,
         service: service || undefined,
+        subscriptionPlan: "STANDARD",
+        monthlyActionsTotal: 120, // Standard : 20h = 120 actions
       },
     });
 

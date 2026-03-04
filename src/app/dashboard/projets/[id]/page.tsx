@@ -19,20 +19,28 @@ export default async function ProjetDetailPage({
     redirect("/connexion?callbackUrl=/dashboard");
   }
 
-  const project = await prisma.project.findUnique({
-    where: { id },
-    include: {
-      client: true,
-      assignedTo: { select: { id: true, name: true, email: true } },
-      messages: {
-        include: { sender: true, receiver: true },
-        orderBy: { createdAt: "asc" },
+  const [project, actionsConsumed] = await Promise.all([
+    prisma.project.findUnique({
+      where: { id },
+      include: {
+        client: true,
+        assignedTo: { select: { id: true, name: true, email: true } },
+        messages: {
+          include: { sender: true, receiver: true },
+          orderBy: { createdAt: "asc" },
+        },
+        documents: { orderBy: { createdAt: "asc" } },
       },
-      documents: { orderBy: { createdAt: "asc" } },
-    },
-  });
+    }),
+    prisma.task.aggregate({
+      where: { projectId: id, actionsUsed: { not: null } },
+      _sum: { actionsUsed: true },
+    }),
+  ]);
 
   if (!project) notFound();
+
+  const projectActionsUsed = actionsConsumed._sum.actionsUsed ?? 0;
 
   const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
   const canAccess =
@@ -91,6 +99,12 @@ export default async function ProjetDetailPage({
             className={`rounded-full px-3 py-1 text-sm font-medium ${urgencyColors[project.urgency] ?? "bg-slate-100 text-slate-800"}`}
           >
             Urgence : {urgencyLabels[project.urgency] ?? project.urgency}
+          </span>
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
+          <span className="rounded-full bg-[#1d4ed8]/10 px-3 py-1 font-medium text-[#1d4ed8]">
+            Actions consommées par ce projet : {projectActionsUsed}
           </span>
         </div>
 

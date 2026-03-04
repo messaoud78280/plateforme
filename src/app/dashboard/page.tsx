@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { shouldResetActions, getMonthStart } from "@/lib/actions";
 import { DashboardKPIs } from "@/components/dashboard/DashboardKPIs";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
 import { AlertsSection } from "@/components/dashboard/AlertsSection";
@@ -10,6 +11,7 @@ import { TasksChart } from "@/components/dashboard/TasksChart";
 import { ClientsSection } from "@/components/dashboard/ClientsSection";
 import { ScrollToMessages } from "@/components/ScrollToMessages";
 import { AppointmentCalendar } from "@/components/appointments/AppointmentCalendar";
+import { ActionsWidget } from "@/components/dashboard/ActionsWidget";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -19,15 +21,42 @@ export default async function DashboardPage() {
   }
 
   const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
+  const isClient = session.user.role === "CLIENT";
   const clientId = session.user.id;
 
   let contractStatus: "PENDING" | "SIGNED" | null = null;
-  if (!isAgence) {
+  let actionsData: { subscriptionPlan: string | null; monthlyActionsTotal: number; monthlyActionsUsed: number } | null = null;
+  if (!isAgence && isClient) {
     const u = await prisma.user.findUnique({
       where: { id: clientId },
-      select: { contractStatus: true },
+      select: {
+        contractStatus: true,
+        subscriptionPlan: true,
+        monthlyActionsTotal: true,
+        monthlyActionsUsed: true,
+        actionsResetAt: true,
+      },
     });
     contractStatus = u?.contractStatus ?? null;
+    if (u) {
+      if (shouldResetActions(u.actionsResetAt ?? null)) {
+        await prisma.user.update({
+          where: { id: clientId },
+          data: { monthlyActionsUsed: 0, actionsResetAt: getMonthStart() },
+        });
+      }
+      const after = await prisma.user.findUnique({
+        where: { id: clientId },
+        select: { monthlyActionsTotal: true, monthlyActionsUsed: true, subscriptionPlan: true },
+      });
+      if (after) {
+        actionsData = {
+          subscriptionPlan: after.subscriptionPlan ?? null,
+          monthlyActionsTotal: after.monthlyActionsTotal ?? 120,
+          monthlyActionsUsed: after.monthlyActionsUsed ?? 0,
+        };
+      }
+    }
   }
 
   let tasksEnCours = 0;
@@ -37,7 +66,16 @@ export default async function DashboardPage() {
   let alerts: Awaited<ReturnType<typeof prisma.alert.findMany>> = [];
   let tasksPourChart: { createdAt: Date; completedAt: Date | null; status: string }[] = [];
   let tempsMoyenJours = 0;
-  let clients: { id: string; name: string; email: string; projectsCount: number; tasksCount: number }[] = [];
+  let clients: {
+    id: string;
+    name: string;
+    email: string;
+    projectsCount: number;
+    tasksCount: number;
+    subscriptionPlan: string | null;
+    monthlyActionsTotal: number;
+    monthlyActionsUsed: number;
+  }[] = [];
   let contactRequestsClient: { id: string; structure: string; rdvDate: Date | null; rdvTime: string | null; status: string; createdAt: Date }[] = [];
 
   try {
@@ -104,16 +142,30 @@ export default async function DashboardPage() {
           id: true,
           name: true,
           email: true,
+          subscriptionPlan: true,
+          monthlyActionsTotal: true,
+          monthlyActionsUsed: true,
           _count: { select: { projects: true, tasks: true } },
         },
         orderBy: { name: "asc" },
       });
-      clients = clientUsers.map((u: { id: string; name: string; email: string; _count: { projects: number; tasks: number } }) => ({
+      clients = clientUsers.map((u: {
+        id: string;
+        name: string;
+        email: string;
+        subscriptionPlan: string | null;
+        monthlyActionsTotal: number | null;
+        monthlyActionsUsed: number | null;
+        _count: { projects: number; tasks: number };
+      }) => ({
         id: u.id,
         name: u.name,
         email: u.email,
         projectsCount: u._count.projects,
         tasksCount: u._count.tasks,
+        subscriptionPlan: u.subscriptionPlan ?? null,
+        monthlyActionsTotal: u.monthlyActionsTotal ?? 0,
+        monthlyActionsUsed: u.monthlyActionsUsed ?? 0,
       }));
     } catch {
       // Table User ou relations absentes
@@ -152,7 +204,9 @@ export default async function DashboardPage() {
             ? session.user?.role === "MANAGER"
               ? "Vous recevez les projets des clients. Consultez la section Clients pour attribuer un agent à un projet, une tâche ou un client."
               : "Tableau de bord agence — vue d'ensemble des clients et tâches"
-            : "Suivez vos documents, tâches et échanges avec l’agence."}
+            : session.user?.role === "AGENT"
+              ? "Tâches qui vous sont assignées. Indiquez le temps passé à la clôture pour déduire les actions du client."
+              : "Suivez vos documents, tâches et échanges avec l’agence."}
         </p>
       </div>
 
@@ -180,6 +234,15 @@ export default async function DashboardPage() {
             {contractStatus === "SIGNED" ? "Voir le contrat" : "Accéder au contrat"}
           </Link>
         </section>
+      )}
+
+      {/* Actions du mois — clients */}
+      {!isAgence && actionsData && (
+        <ActionsWidget
+          subscriptionPlan={actionsData.subscriptionPlan}
+          monthlyActionsTotal={actionsData.monthlyActionsTotal}
+          monthlyActionsUsed={actionsData.monthlyActionsUsed}
+        />
       )}
 
       {/* Section RDV */}

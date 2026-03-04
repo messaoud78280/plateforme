@@ -18,26 +18,33 @@ interface TaskDetailClientProps {
     agencyNotes?: string | null;
     correctionNote?: string | null;
     validatedAt?: Date | null;
+    timeSpentMinutes?: number | null;
+    actionsUsed?: number | null;
     assignedTo?: { id: string; name: string; email: string } | null;
     project?: { id: string; title: string } | null;
     documents?: { id: string; name: string; fileUrl: string; fileSize: number; mimeType: string | null }[];
   };
   canEdit: boolean;
   isAgence: boolean;
+  isAgent?: boolean;
   agents?: { id: string; name: string; email: string }[];
 }
 
-export function TaskDetailClient({ task, canEdit, isAgence, agents = [] }: TaskDetailClientProps) {
+export function TaskDetailClient({ task, canEdit, isAgence, isAgent = false, agents = [] }: TaskDetailClientProps) {
   const router = useRouter();
   const [correctionNote, setCorrectionNote] = useState("");
 
-  const handleStatusChange = async (newStatus: TaskStatus) => {
+  const handleStatusChange = async (newStatus: TaskStatus, timeSpentMinutes?: number) => {
     if (!canEdit) return;
     try {
+      const body: { status: TaskStatus; timeSpentMinutes?: number } = { status: newStatus };
+      if (newStatus === "COMPLETE" && typeof timeSpentMinutes === "number" && timeSpentMinutes >= 0) {
+        body.timeSpentMinutes = timeSpentMinutes;
+      }
       const res = await fetch(`/api/tasks/${task.id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify(body),
       });
       if (res.ok) router.refresh();
     } catch {
@@ -109,6 +116,7 @@ export function TaskDetailClient({ task, canEdit, isAgence, agents = [] }: TaskD
       task={task}
       onStatusChange={canEdit ? handleStatusChange : undefined}
       isAgence={isAgence}
+      isAgent={isAgent}
       agents={agents}
       onAssign={isAgence ? handleAssign : undefined}
       onAgencyNotesChange={isAgence ? handleAgencyNotes : undefined}

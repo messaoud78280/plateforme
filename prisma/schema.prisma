@@ -33,6 +33,11 @@ model User {
   contractStatus  ContractStatus @default(PENDING)
   signedAt        DateTime?
   yousignSignatureRequestId String?  // ID de la demande Yousign
+  // Facturation par actions (1 action = 10 min)
+  subscriptionPlan   String?   // STANDARD | STANDARD_PLUS | PREMIUM | FULLTIME
+  monthlyActionsTotal Int      @default(120)  // selon abonnement
+  monthlyActionsUsed  Int      @default(0)    // consommées ce mois
+  actionsResetAt      DateTime? // dernier reset (début du mois)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -55,8 +60,9 @@ model User {
 
 enum UserRole {
   CLIENT  // Client
-  AGENCE  // Agent (opérationnel)
+  AGENCE  // Agent agence (opérationnel)
   MANAGER // Gérant de l'agence
+  AGENT   // Assistante virtuelle (exécution des tâches)
 }
 
 enum ContractStatus {
@@ -168,6 +174,8 @@ model Task {
   correctionNote String?   // note quand le responsable demande une correction
   validatedAt    DateTime? // date de validation du travail par l'agence
   completedAt    DateTime?
+  timeSpentMinutes Int?    // temps réel passé (minutes) — renseigné par l'agent
+  actionsUsed      Int?    // actions déduites (ceil(min/10), min 1)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 

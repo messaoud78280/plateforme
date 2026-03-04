@@ -6,6 +6,9 @@ export interface ClientRow {
   email: string;
   projectsCount: number;
   tasksCount: number;
+  subscriptionPlan?: string | null;
+  monthlyActionsTotal?: number;
+  monthlyActionsUsed?: number;
 }
 
 interface ClientsSectionProps {
@@ -41,11 +44,16 @@ export function ClientsSection({ clients }: ClientsSectionProps) {
                 <th className="pb-3 font-medium">Email</th>
                 <th className="pb-3 font-medium text-center">Projets</th>
                 <th className="pb-3 font-medium text-center">Tâches</th>
+                <th className="pb-3 font-medium text-center">Actions</th>
                 <th className="pb-3 font-medium" aria-hidden />
               </tr>
             </thead>
             <tbody>
-              {clients.map((client) => (
+              {clients.map((client) => {
+                const total = client.monthlyActionsTotal ?? 0;
+                const used = client.monthlyActionsUsed ?? 0;
+                const remaining = Math.max(0, total - used);
+                return (
                 <tr
                   key={client.id}
                   className="border-b border-slate-100 transition hover:bg-slate-50"
@@ -58,6 +66,13 @@ export function ClientsSection({ clients }: ClientsSectionProps) {
                   <td className="py-3 text-center text-slate-600">
                     {client.tasksCount}
                   </td>
+                  <td className="py-3 text-center text-sm text-slate-600">
+                    {total > 0 ? (
+                      <span>{used} / {total} <span className="text-slate-400">(reste {remaining})</span></span>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
                   <td className="py-3 text-right">
                     <Link
                       href={`/dashboard/clients/${client.id}`}
@@ -67,7 +82,8 @@ export function ClientsSection({ clients }: ClientsSectionProps) {
                     </Link>
                   </td>
                 </tr>
-              ))}
+              );
+              })}
             </tbody>
           </table>
         </div>

@@ -15,18 +15,16 @@ const plans = [
     name: "Offre Découverte",
     price: "109",
     billing: "one_shot" as const,
-    detail: "Tous services inclus",
-    actionsIncluded: 60,
-    highlights: ["Jusqu’à 60 actions", "Sans abonnement", "Sans engagement"],
+    detail: "Tous services administratifs inclus",
+    highlights: ["Jusqu\u2019à 60 actions", "Tous services administratifs inclus", "Sans abonnement", "Sans engagement"],
     idealFor: "Tester BeWork sur un besoin ciblé",
-    badge: "Nouveau" as string | null,
+    badge: null as string | null,
   },
   {
     name: "Standard",
     price: "215",
     billing: "monthly" as const,
     detail: "Tous services inclus",
-    actionsIncluded: 120,
     highlights: ["120 actions / mois", "Tous services inclus"],
     idealFor: "TPE, charge administrative régulière",
     badge: null as string | null,
@@ -36,8 +34,7 @@ const plans = [
     price: "415",
     billing: "monthly" as const,
     detail: "Tous services inclus",
-    actionsIncluded: 240,
-    highlights: ["240 actions / mois", "Tous services inclus", "Priorité de traitement"],
+    highlights: ["240 actions / mois", "Tous services inclus", "Priorité de traitement", "Assistant administratif dédié"],
     idealFor: "PME, flux soutenu et réactivité",
     badge: "Le plus choisi" as string | null,
   },
@@ -46,8 +43,7 @@ const plans = [
     price: "630",
     billing: "monthly" as const,
     detail: "Tous services inclus",
-    actionsIncluded: 360,
-    highlights: ["360 actions / mois", "Tous services inclus", "Priorité élevée"],
+    highlights: ["360 actions / mois", "Tous services inclus", "Priorité élevée", "Assistant administratif dédié"],
     idealFor: "Dirigeants, dossiers multiples, suivi exigeant",
     badge: null as string | null,
   },
@@ -193,6 +189,51 @@ export default function TarifsPage() {
           <p className="mt-2 max-w-2xl mx-auto text-center text-sm text-[#334155]">
             Minimum facturé : 1 action par demande.
           </p>
+          <p className="mt-6 max-w-3xl mx-auto text-center text-sm text-[#64748b] leading-relaxed">
+            BeWork fournit un service d&apos;assistance administrative externalisée. Les prestations sont réalisées par notre équipe interne. Les clients achètent un volume de services administratifs et non la mise à disposition de personnel.
+          </p>
+
+          {/* Solution dédiée — Full-time */}
+          <section className="mt-12 rounded-2xl border-2 border-[#1e293b] bg-gradient-to-br from-[#0f172a] to-[#1e293b] p-8 md:p-10 text-white shadow-xl" aria-labelledby="solution-dediee-heading">
+            <h2 id="solution-dediee-heading" className="text-2xl font-bold tracking-tight md:text-3xl">
+              Besoin d&apos;un volume plus important ?
+            </h2>
+            <p className="mt-4 max-w-2xl text-[#e2e8f0] leading-relaxed">
+              Nous proposons également des solutions dédiées pour les entreprises ayant des besoins administratifs plus importants.
+            </p>
+            <div className="mt-8 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <ul className="space-y-3 text-[#e2e8f0]" role="list">
+                  {["Volume d'actions personnalisé", "Assistant administratif dédié", "Organisation adaptée à votre entreprise", "Priorité maximale"].map((item) => (
+                    <li key={item} className="flex items-center gap-2">
+                      <span className="text-[#60a5fa]" aria-hidden>✓</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-6">
+                  <p className="font-semibold text-white">Full-time</p>
+                  <p className="mt-1 text-sm text-[#cbd5e1] leading-relaxed">
+                    Une solution sur mesure pour les entreprises souhaitant externaliser une grande partie de leur gestion administrative.
+                  </p>
+                  <p className="mt-2 text-sm font-medium text-[#93c5fd]">
+                    Solution idéale pour les entreprises qui souhaitent externaliser durablement leur gestion administrative.
+                  </p>
+                </div>
+                <Link
+                  href="/contact"
+                  className="mt-6 inline-flex rounded-lg bg-white px-6 py-3 font-semibold text-[#0f172a] shadow-md transition hover:bg-[#f1f5f9] focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#1e293b]"
+                >
+                  Nous contacter
+                </Link>
+              </div>
+              <div className="shrink-0 rounded-xl border border-[#334155] bg-[#1e293b]/80 px-6 py-4 lg:ml-8">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[#94a3b8]">Solution sur mesure</p>
+                <p className="mt-1 text-lg font-bold text-white">Full-time</p>
+                <p className="mt-1 text-sm text-[#cbd5e1]">Devis personnalisé</p>
+              </div>
+            </div>
+          </section>
 
           {/* Qu’est-ce qu’une action ? */}
           <div className="mt-10 rounded-2xl border border-[#e0e4ea] bg-white p-8 shadow-sm">

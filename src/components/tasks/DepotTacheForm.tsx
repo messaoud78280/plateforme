@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 
 const ACCEPTED_EXT = ".pdf,.jpg,.jpeg,.png,.gif,.webp,.bmp,.svg,.docx,.xlsx,.xls,.csv,.txt,.mp4,.webm,.mov";
@@ -20,6 +20,62 @@ export function DepotTacheForm({ projects = [] }: DepotTacheFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [uploadProgress, setUploadProgress] = useState("");
+
+  const combinedText = useMemo(
+    () => `${title} ${description}`.trim(),
+    [title, description],
+  );
+
+  const estimatedActions = useMemo(() => {
+    if (!combinedText) return "";
+    const text = combinedText.toLowerCase();
+
+    if (text.includes("mission spécifique") || text.includes("demande complexe") || text.includes("audit")) {
+      return "sur évaluation";
+    }
+    if (text.includes("recherche approfondie") || text.includes("analyse détaillée") || text.includes("analyse detaillee")) {
+      return "3 à 4 actions";
+    }
+    if (text.includes("création") || text.includes("creation") || text.includes("document administratif") || text.includes("dossier")) {
+      return "3 actions";
+    }
+    if (
+      text.includes("comparatif") ||
+      text.includes("comparer") ||
+      text.includes("plusieurs prestataires") ||
+      text.includes("devis multiples")
+    ) {
+      return "2 à 3 actions";
+    }
+    if (
+      text.includes("coordination") ||
+      text.includes("plusieurs rendez-vous") ||
+      text.includes("plusieurs rendez vous") ||
+      text.includes("organisation de plusieurs")
+    ) {
+      return "2 actions";
+    }
+    if (
+      text.includes("réservation") ||
+      text.includes("reservation") ||
+      text.includes("hôtel") ||
+      text.includes("hotel") ||
+      text.includes("transport")
+    ) {
+      return "1 à 2 actions";
+    }
+    if (text.includes("rédaction") || text.includes("redaction") || text.includes("email professionnel")) {
+      return "2 actions";
+    }
+    if (text.includes("recherche simple") || text.includes("trouver une information") || text.includes("rechercher")) {
+      return "1 action";
+    }
+    if (text.includes("email") || text.includes("mail")) {
+      return "1 action";
+    }
+
+    return "1 à 2 actions";
+  }, [combinedText]);
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -157,6 +213,25 @@ export function DepotTacheForm({ projects = [] }: DepotTacheFormProps) {
             placeholder="Précisez le contexte, les délais ou les instructions."
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-slate-100"
           />
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <h3 className="text-sm font-semibold text-slate-800">Estimation des actions</h3>
+          <p className="mt-1 text-xs text-slate-500">
+            L’estimation est indicative et peut varier selon la complexité de la demande.
+          </p>
+          {combinedText ? (
+            <p className="mt-2 text-sm text-slate-700">
+              Estimation :{" "}
+              <span className="font-medium">
+                {estimatedActions}
+              </span>
+            </p>
+          ) : (
+            <p className="mt-2 text-sm text-slate-500">
+              Commencez à décrire votre demande pour voir une estimation.
+            </p>
+          )}
         </div>
 
         <div>

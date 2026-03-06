@@ -12,18 +12,19 @@ const segmentLabels: Record<string, string> = {
 
 export function ProfilBreadcrumb() {
   const pathname = usePathname();
-  const segment = pathname.replace("/dashboard/parametres/", "").split("/")[0];
-  const currentLabel = segment && segmentLabels[segment] ? segmentLabels[segment] : "Votre profil";
+  const segment = pathname.replace("/dashboard/parametres", "").replace(/^\//, "").split("/")[0];
+  const currentLabel = segment && segmentLabels[segment] ? segmentLabels[segment] : "Vue d'ensemble";
+  const showSegment = segment && segmentLabels[segment];
 
   return (
     <nav aria-label="Fil d'Ariane" className="mb-4 text-sm text-[#64748b]">
       <ol className="flex flex-wrap items-center gap-1">
         <li>
-          <Link href="/dashboard/parametres/informations" className="hover:text-[#0f172a]">
+          <Link href="/dashboard/parametres" className="hover:text-[#0f172a]">
             Votre profil
           </Link>
         </li>
-        {segment && segmentLabels[segment] && (
+        {showSegment && (
           <>
             <li aria-hidden>/</li>
             <li className="font-medium text-[#0f172a]">{currentLabel}</li>

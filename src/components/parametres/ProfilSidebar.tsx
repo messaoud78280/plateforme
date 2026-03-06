@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const sections = [
+  { label: "Vue d'ensemble", href: "/dashboard/parametres" },
   { label: "Informations personnelles", href: "/dashboard/parametres/informations" },
   { label: "Paramètres et préférences", href: "/dashboard/parametres/preferences" },
   { label: "Transfert d'appels", href: "/dashboard/parametres/transfert-appels" },
@@ -20,7 +21,9 @@ export function ProfilSidebar() {
       </h2>
       <ul className="space-y-0.5">
         {sections.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+          const isActive = item.href === "/dashboard/parametres"
+            ? pathname === "/dashboard/parametres"
+            : pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <li key={item.href}>
               <Link

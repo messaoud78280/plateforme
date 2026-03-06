@@ -7,44 +7,48 @@ import { StickyCtaMobile } from "@/components/tarifs/StickyCtaMobile";
 export const metadata: Metadata = {
   title: "Tarifs BeWork – Assistants administratifs virtuels dès 215€/mois",
   description:
-    "Offres Standard, Standard+, Premium et Full-time. Assistants francophones augmentés par l'IA. Pilotage en France, tarifs transparents.",
+    "Offres Découverte, Standard, Business et Premium. Tarification au quota d’actions, tous services inclus. Assistants francophones augmentés par l'IA, pilotage en France.",
 };
 
 const plans = [
   {
+    name: "Offre Découverte",
+    price: "109",
+    billing: "one_shot" as const,
+    detail: "Tous services inclus",
+    actionsIncluded: 60,
+    highlights: ["Jusqu’à 60 actions", "Sans abonnement", "Sans engagement"],
+    idealFor: "Tester BeWork sur un besoin ciblé",
+    badge: "Nouveau" as string | null,
+  },
+  {
     name: "Standard",
     price: "215",
+    billing: "monthly" as const,
     detail: "Tous services inclus",
-    schedule: "Lundi au vendredi 1h par jour (env. 20h par mois)",
-    actionsPerMonth: 120,
-    idealFor: "TPE, tâches ponctuelles, test du service",
+    actionsIncluded: 120,
+    highlights: ["120 actions / mois", "Tous services inclus"],
+    idealFor: "TPE, charge administrative régulière",
     badge: null as string | null,
   },
   {
-    name: "Standard +",
+    name: "Business",
     price: "415",
+    billing: "monthly" as const,
     detail: "Tous services inclus",
-    schedule: "Lundi au vendredi 2h par jour (env. 40h par mois)",
-    actionsPerMonth: 240,
-    idealFor: "PME, charge administrative régulière",
+    actionsIncluded: 240,
+    highlights: ["240 actions / mois", "Tous services inclus", "Priorité de traitement"],
+    idealFor: "PME, flux soutenu et réactivité",
     badge: "Le plus choisi" as string | null,
   },
   {
     name: "Premium",
     price: "630",
+    billing: "monthly" as const,
     detail: "Tous services inclus",
-    schedule: "Lundi au vendredi 3h par jour (env. 60h par mois)",
-    actionsPerMonth: 360,
-    idealFor: "Dossiers multiples, suivi exigeant",
-    badge: null as string | null,
-  },
-  {
-    name: "Full-time",
-    price: "1 230",
-    detail: "Tous services inclus",
-    schedule: "Lundi au vendredi 8h par jour (env. 160h par mois)",
-    actionsPerMonth: 960,
-    idealFor: "Volume important, équivalent poste dédié",
+    actionsIncluded: 360,
+    highlights: ["360 actions / mois", "Tous services inclus", "Priorité élevée"],
+    idealFor: "Dirigeants, dossiers multiples, suivi exigeant",
     badge: null as string | null,
   },
 ];
@@ -163,18 +167,20 @@ export default function TarifsPage() {
                   {plan.name}
                 </h3>
                 <p className="mt-4 text-2xl font-bold text-[#1d4ed8] md:text-3xl">
-                  {plan.price}€/mois*
+                  {plan.price}€
+                  {plan.billing === "monthly" && (
+                    <span className="text-base font-semibold text-[#64748b]"> / mois</span>
+                  )}
                 </p>
                 <p className="mt-2 text-sm text-[#334155]">{plan.detail}</p>
-                <div className="mt-4 flex items-start gap-2 text-sm text-[#334155]">
-                  <svg className="mt-0.5 h-5 w-5 shrink-0 text-[#64748b]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>{plan.schedule}</span>
-                </div>
-                <p className="mt-2 text-sm font-medium text-[#0f172a]">
-                  {plan.actionsPerMonth} actions / mois
-                </p>
+                <ul className="mt-4 space-y-2 text-sm text-[#334155]" role="list">
+                  {plan.highlights.map((h) => (
+                    <li key={h} className="flex items-start gap-2">
+                      <span className="mt-0.5 text-[#1d4ed8]" aria-hidden>✓</span>
+                      <span>{h}</span>
+                    </li>
+                  ))}
+                </ul>
                 <p className="mt-3 text-xs text-[#64748b] italic">
                   Idéal pour : {plan.idealFor}
                 </p>
@@ -187,6 +193,19 @@ export default function TarifsPage() {
           <p className="mt-2 max-w-2xl mx-auto text-center text-sm text-[#334155]">
             Minimum facturé : 1 action par demande.
           </p>
+
+          {/* Qu’est-ce qu’une action ? */}
+          <div className="mt-10 rounded-2xl border border-[#e0e4ea] bg-white p-8 shadow-sm">
+            <h3 className="text-xl font-bold text-[#0f172a] md:text-2xl">
+              Qu’est-ce qu’une action ?
+            </h3>
+            <p className="mt-3 text-[#334155] leading-relaxed">
+              Une action correspond à une tâche administrative simple réalisée par notre équipe (gestion d’email, recherche d’information, création de document, organisation de rendez-vous, etc.).
+            </p>
+            <p className="mt-3 text-[#334155] leading-relaxed">
+              La plupart des actions représentent environ 10 minutes de traitement administratif.
+            </p>
+          </div>
 
           {/* Conciergerie — sur devis */}
           <div className="mt-10 rounded-xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-6 text-center">
@@ -264,26 +283,27 @@ export default function TarifsPage() {
 
         {/* Tableau comparatif (révélé au clic) */}
         <ComparatifReveal>
-          {/* Tableau des offres Standard / Standard+ / Premium / Full-time */}
+          {/* Tableau des offres Découverte / Standard / Business / Premium */}
           <div className="overflow-x-auto rounded-xl border border-[#c8cdd6] bg-white">
             <table className="w-full min-w-[500px] text-left text-sm" role="grid">
               <caption className="sr-only">Comparatif des offres BeWork</caption>
               <thead>
                 <tr className="border-b border-[#e0e4ea] bg-[#f8f9fb]">
                   <th className="px-4 py-3 font-semibold text-[#0f172a]">Critère</th>
+                  <th className="px-4 py-3 font-semibold text-[#0f172a]">Découverte</th>
                   <th className="px-4 py-3 font-semibold text-[#0f172a]">Standard</th>
-                  <th className="px-4 py-3 font-semibold text-[#0f172a]">Standard +</th>
+                  <th className="px-4 py-3 font-semibold text-[#0f172a]">Business</th>
                   <th className="px-4 py-3 font-semibold text-[#0f172a]">Premium</th>
-                  <th className="px-4 py-3 font-semibold text-[#0f172a]">Full-time</th>
                 </tr>
               </thead>
               <tbody className="text-[#334155]">
-                <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Prix/mois</td><td className="px-4 py-3">215 €</td><td className="px-4 py-3">415 €</td><td className="px-4 py-3">630 €</td><td className="px-4 py-3">1 230 €</td></tr>
-                <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Heures/jour</td><td className="px-4 py-3">1h</td><td className="px-4 py-3">2h</td><td className="px-4 py-3">3h</td><td className="px-4 py-3">8h</td></tr>
-                <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Heures/mois</td><td className="px-4 py-3">~20h</td><td className="px-4 py-3">~40h</td><td className="px-4 py-3">~60h</td><td className="px-4 py-3">~160h</td></tr>
+                <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Prix</td><td className="px-4 py-3">109 €</td><td className="px-4 py-3">215 € / mois</td><td className="px-4 py-3">415 € / mois</td><td className="px-4 py-3">630 € / mois</td></tr>
+                <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Actions incluses</td><td className="px-4 py-3">Jusqu’à 60</td><td className="px-4 py-3">120 / mois</td><td className="px-4 py-3">240 / mois</td><td className="px-4 py-3">360 / mois</td></tr>
+                <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Abonnement</td><td className="px-4 py-3">Non</td><td className="px-4 py-3">Oui</td><td className="px-4 py-3">Oui</td><td className="px-4 py-3">Oui</td></tr>
+                <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Priorité de traitement</td><td className="px-4 py-3">Standard</td><td className="px-4 py-3">Standard</td><td className="px-4 py-3">Priorité</td><td className="px-4 py-3">Priorité élevée</td></tr>
                 <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Périmètres inclus</td><td colSpan={4} className="px-4 py-3">Max 2 (au-delà : devis sur mesure)</td></tr>
                 <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Support / pilotage</td><td colSpan={4} className="px-4 py-3">Pilotage en France, points de suivi réguliers</td></tr>
-                <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Canaux</td><td colSpan={4} className="px-4 py-3">Email, messagerie, téléphone selon vos besoins</td></tr>
+                <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Canaux</td><td colSpan={4} className="px-4 py-3">Plateforme dédiée, email, messagerie, téléphone selon vos besoins</td></tr>
               </tbody>
             </table>
           </div>

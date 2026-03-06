@@ -94,16 +94,16 @@ export default async function ContractPage() {
             <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">4. Modalités de prestation</h3>
             <p className="mb-4">Les prestations sont réalisées à distance via la plateforme BeWork.</p>
 
-            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">5. Équivalent horaire des prestations</h3>
-            <p className="mb-4">Les volumes horaires indiqués dans les offres correspondent à une estimation du temps moyen nécessaire à la réalisation des prestations. Ils ne constituent pas une mise à disposition d&apos;un salarié. Le prestataire organise librement ses ressources. Les assistants restent sous l&apos;autorité exclusive de BeWork. Le client ne dispose d&apos;aucun lien de subordination avec les assistants.</p>
+            <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">5. Quota d’actions inclus dans les offres</h3>
+            <p className="mb-4">Les offres BeWork sont exprimées en quota d&apos;actions administratives. Une action correspond à une tâche administrative simple réalisée par notre équipe. La plupart des actions représentent environ 10 minutes de traitement administratif. Ce quota ne constitue pas une mise à disposition d&apos;un salarié. Le prestataire organise librement ses ressources. Les assistants restent sous l&apos;autorité exclusive de BeWork. Le client ne dispose d&apos;aucun lien de subordination avec les assistants.</p>
 
             <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">6. Tarifs et paiement</h3>
             <p className="mb-2">Les tarifs sont ceux affichés sur la page Tarifs du site :</p>
             <ul className="mb-4 list-disc pl-5">
-              <li>Standard : 215 €/mois (équivalent 1h par jour, ~20h/mois)</li>
-              <li>Standard+ : 415 €/mois (équivalent 2h par jour, ~40h/mois)</li>
-              <li>Premium : 630 €/mois (équivalent 3h par jour, ~60h/mois)</li>
-              <li>Full-time : 1 230 €/mois (équivalent 8h par jour, ~160h/mois)</li>
+              <li>Offre Découverte : 109 € (jusqu&apos;à 60 actions, sans abonnement)</li>
+              <li>Standard : 215 € / mois (120 actions / mois)</li>
+              <li>Business : 415 € / mois (240 actions / mois)</li>
+              <li>Premium : 630 € / mois (360 actions / mois)</li>
             </ul>
             <p className="mb-4">Paiement mensuel d&apos;avance.</p>
 

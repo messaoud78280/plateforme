@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const PLAN_LABELS: Record<string, string> = {
   STANDARD: "Standard",
-  STANDARD_PLUS: "Standard +",
+  STANDARD_PLUS: "Business",
   PREMIUM: "Premium",
   FULLTIME: "Full-time",
 };

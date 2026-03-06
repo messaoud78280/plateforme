@@ -7,10 +7,10 @@ import { BeWorkLogo } from "@/components/BeWorkLogo";
 type TakenSlot = { date: string; time: string };
 
 const FORMULES = [
-  { id: "standard", label: "Standard (215€/mois)", value: "Standard" },
-  { id: "standard-plus", label: "Standard + (415€/mois)", value: "Standard +" },
-  { id: "premium", label: "Premium (630€/mois)", value: "Premium" },
-  { id: "fulltime", label: "Full-time (1 230€/mois)", value: "Full-time" },
+  { id: "decouverte", label: "Offre Découverte (109€ — jusqu’à 60 actions)", value: "Offre Découverte" },
+  { id: "standard", label: "Standard (215€/mois — 120 actions)", value: "Standard" },
+  { id: "business", label: "Business (415€/mois — 240 actions)", value: "Business" },
+  { id: "premium", label: "Premium (630€/mois — 360 actions)", value: "Premium" },
   { id: "sur-mesure", label: "Sur-mesure / À définir", value: "Sur-mesure" },
 ];
 

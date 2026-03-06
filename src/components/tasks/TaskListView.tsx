@@ -13,9 +13,19 @@ interface TaskItem {
   updatedAt: Date;
   timeSpentMinutes?: number | null;
   actionsUsed?: number | null;
+  category?: string | null;
+  priority?: string | null;
+  desiredDate?: Date | string | null;
+  estimatedActions?: string | null;
   project?: { id: string; title: string } | null;
   assignedTo?: { id: string; name: string; email: string } | null;
 }
+
+const PRIORITY_LABELS: Record<string, string> = {
+  STANDARD: "Standard",
+  PRIORITAIRE: "Prioritaire",
+  URGENT: "Urgent",
+};
 
 interface TaskListViewProps {
   tasks: TaskItem[];
@@ -42,13 +52,15 @@ export function TaskListView({ tasks }: TaskListViewProps) {
         <table className="w-full min-w-[600px] text-left text-sm">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50">
-              <th className="px-4 py-3 font-semibold text-slate-800">Nom</th>
+              <th className="px-4 py-3 font-semibold text-slate-800">Demande</th>
+              <th className="px-4 py-3 font-semibold text-slate-800">Catégorie</th>
+              <th className="px-4 py-3 font-semibold text-slate-800">Priorité</th>
               <th className="px-4 py-3 font-semibold text-slate-800">Projet</th>
               <th className="px-4 py-3 font-semibold text-slate-800">Référent</th>
               <th className="px-4 py-3 font-semibold text-slate-800">Statut</th>
-              <th className="px-4 py-3 font-semibold text-slate-800">Création</th>
-              <th className="px-4 py-3 font-semibold text-slate-800">Fin</th>
-              <th className="px-4 py-3 font-semibold text-slate-800 text-center">Actions utilisées</th>
+              <th className="px-4 py-3 font-semibold text-slate-800">Date</th>
+              <th className="px-4 py-3 font-semibold text-slate-800">Estimation</th>
+              <th className="px-4 py-3 font-semibold text-slate-800 text-center">Actions</th>
               <th className="px-4 py-3 font-semibold text-slate-800">Lien</th>
             </tr>
           </thead>
@@ -71,21 +83,25 @@ export function TaskListView({ tasks }: TaskListViewProps) {
                     </p>
                   )}
                 </td>
+                <td className="px-4 py-3 text-slate-600 text-xs">{task.category ?? "—"}</td>
+                <td className="px-4 py-3">
+                  {task.priority ? (
+                    <span className="text-xs text-slate-600">{PRIORITY_LABELS[task.priority] ?? task.priority}</span>
+                  ) : (
+                    "—"
+                  )}
+                </td>
                 <td className="px-4 py-3 text-slate-600">
                   {task.project ? (
-                    <Link href={`/dashboard/projets/${task.project.id}`} className="text-blue-600 hover:underline">
+                    <Link href={`/dashboard/projets/${task.project.id}`} className="text-blue-600 hover:underline text-xs">
                       {task.project.title}
                     </Link>
                   ) : (
                     "—"
                   )}
                 </td>
-                <td className="px-4 py-3 text-slate-600">
-                  {task.assignedTo ? (
-                    <span className="font-medium text-slate-800">{task.assignedTo.name}</span>
-                  ) : (
-                    "—"
-                  )}
+                <td className="px-4 py-3 text-slate-600 text-xs">
+                  {task.assignedTo ? task.assignedTo.name : "—"}
                 </td>
                 <td className="px-4 py-3">
                   <span
@@ -94,20 +110,16 @@ export function TaskListView({ tasks }: TaskListViewProps) {
                     {TASK_STATUS_LABELS[task.status]}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-slate-600">
+                <td className="px-4 py-3 text-slate-600 text-xs">
                   {new Date(task.createdAt).toLocaleDateString("fr-FR")}
                 </td>
-                <td className="px-4 py-3 text-slate-600">
-                  {task.completedAt
-                    ? new Date(task.completedAt).toLocaleDateString("fr-FR")
-                    : "—"}
-                </td>
+                <td className="px-4 py-3 text-slate-600 text-xs">{task.estimatedActions ?? "—"}</td>
                 <td className="px-4 py-3 text-center">
                   {task.actionsUsed != null && task.actionsUsed > 0 ? (
-                    <span className="font-medium text-[#1d4ed8]">
+                    <span className="font-medium text-[#1d4ed8] text-xs">
                       {task.actionsUsed} action{task.actionsUsed > 1 ? "s" : ""}
                       {task.timeSpentMinutes != null && (
-                        <span className="ml-1 text-slate-500 text-xs">({task.timeSpentMinutes} min)</span>
+                        <span className="ml-1 text-slate-500">({task.timeSpentMinutes} min)</span>
                       )}
                     </span>
                   ) : (
@@ -117,7 +129,7 @@ export function TaskListView({ tasks }: TaskListViewProps) {
                 <td className="px-4 py-3">
                   <Link
                     href={`/dashboard/taches/${task.id}`}
-                    className="text-blue-600 hover:underline"
+                    className="text-blue-600 hover:underline text-xs"
                   >
                     Voir
                   </Link>

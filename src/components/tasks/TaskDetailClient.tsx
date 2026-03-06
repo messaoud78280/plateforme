@@ -20,6 +20,10 @@ interface TaskDetailClientProps {
     validatedAt?: Date | null;
     timeSpentMinutes?: number | null;
     actionsUsed?: number | null;
+    category?: string | null;
+    priority?: string | null;
+    desiredDate?: Date | string | null;
+    estimatedActions?: string | null;
     assignedTo?: { id: string; name: string; email: string } | null;
     project?: { id: string; title: string } | null;
     documents?: { id: string; name: string; fileUrl: string; fileSize: number; mimeType: string | null }[];

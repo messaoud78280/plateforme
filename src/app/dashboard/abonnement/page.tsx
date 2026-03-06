@@ -50,11 +50,11 @@ export default async function AbonnementPage() {
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50">
+              <th className="px-4 py-3 font-semibold text-slate-800">Demande</th>
               <th className="px-4 py-3 font-semibold text-slate-800">Date</th>
-              <th className="px-4 py-3 font-semibold text-slate-800">Tâche</th>
+              <th className="px-4 py-3 font-semibold text-slate-800">Statut</th>
+              <th className="px-4 py-3 font-semibold text-slate-800">Actions utilisées</th>
               <th className="px-4 py-3 font-semibold text-slate-800">Projet</th>
-              <th className="px-4 py-3 font-semibold text-slate-800">Temps utilisé</th>
-              <th className="px-4 py-3 font-semibold text-slate-800">Actions déduites</th>
               <th className="px-4 py-3 font-semibold text-slate-800">Assistante</th>
             </tr>
           </thead>
@@ -68,13 +68,13 @@ export default async function AbonnementPage() {
             ) : (
               tasksWithActions.map((t) => (
                 <tr key={t.id} className="border-b border-slate-100">
-                  <td className="px-4 py-3 text-slate-700">
-                    {t.completedAt ? new Date(t.completedAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }) : "—"}
-                  </td>
                   <td className="px-4 py-3 font-medium text-slate-800">{t.title}</td>
-                  <td className="px-4 py-3 text-slate-600">{t.project?.title ?? "—"}</td>
-                  <td className="px-4 py-3 text-slate-600">{t.timeSpentMinutes != null ? `${t.timeSpentMinutes} min` : "—"}</td>
+                  <td className="px-4 py-3 text-slate-700">
+                    {t.completedAt ? new Date(t.completedAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" }) : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-slate-600">Terminé</td>
                   <td className="px-4 py-3 font-medium text-[#1d4ed8]">{t.actionsUsed ?? 0} action{(t.actionsUsed ?? 0) > 1 ? "s" : ""}</td>
+                  <td className="px-4 py-3 text-slate-600">{t.project?.title ?? "—"}</td>
                   <td className="px-4 py-3 text-slate-600">{t.assignedTo?.name ?? "—"}</td>
                 </tr>
               ))

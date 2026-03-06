@@ -12,9 +12,16 @@ import { ClientsSection } from "@/components/dashboard/ClientsSection";
 import { ScrollToMessages } from "@/components/ScrollToMessages";
 import { AppointmentCalendar } from "@/components/appointments/AppointmentCalendar";
 import { ActionsWidget } from "@/components/dashboard/ActionsWidget";
+import { NouvelleDemandeTrigger } from "@/components/demands/NouvelleDemandeTrigger";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ open?: string }>;
+}) {
   const session = await getServerSession(authOptions);
+  const params = await searchParams;
+  const openDemande = params?.open === "demande";
 
   if (!session?.user?.id) {
     redirect("/connexion?callbackUrl=/dashboard");
@@ -194,8 +201,10 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <ScrollToMessages />
-      {/* Carte de bienvenue */}
+      {/* Carte de bienvenue + CTA Nouvelle demande (client) */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
         <h1 className="text-2xl font-bold text-slate-800">
           Bienvenue, {session.user?.name}
         </h1>
@@ -208,6 +217,11 @@ export default async function DashboardPage() {
               ? "Tâches qui vous sont assignées. Indiquez le temps passé à la clôture pour déduire les actions du client."
               : "Suivez vos documents, tâches et échanges avec l’agence."}
         </p>
+          </div>
+          {isClient && (
+            <NouvelleDemandeTrigger initialOpen={openDemande} variant="primary" />
+          )}
+        </div>
       </div>
 
       {/* Section Contrat — visible pour les clients, accès à la page contrat */}

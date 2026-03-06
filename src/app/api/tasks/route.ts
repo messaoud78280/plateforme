@@ -52,7 +52,23 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { title, description, projectId } = body as { title: string; description?: string; projectId?: string | null };
+    const {
+      title,
+      description,
+      projectId,
+      category,
+      priority,
+      desiredDate,
+      estimatedActions,
+    } = body as {
+      title: string;
+      description?: string;
+      projectId?: string | null;
+      category?: string | null;
+      priority?: string | null;
+      desiredDate?: string | null;
+      estimatedActions?: string | null;
+    };
 
     if (!title || typeof title !== "string" || title.trim().length === 0) {
       return NextResponse.json(
@@ -69,6 +85,13 @@ export async function POST(request: NextRequest) {
       if (project) projectIdValid = project.id;
     }
 
+    const validPriority = priority && ["STANDARD", "PRIORITAIRE", "URGENT"].includes(priority) ? priority : null;
+    let desiredDateValid: Date | null = null;
+    if (desiredDate && typeof desiredDate === "string") {
+      const d = new Date(desiredDate);
+      if (!Number.isNaN(d.getTime())) desiredDateValid = d;
+    }
+
     const task = await prisma.task.create({
       data: {
         title: title.trim(),
@@ -76,6 +99,13 @@ export async function POST(request: NextRequest) {
         status: "EN_ATTENTE",
         clientId: session.user.id,
         projectId: projectIdValid,
+        category: category && typeof category === "string" && category.trim() ? category.trim() : null,
+        priority: validPriority,
+        desiredDate: desiredDateValid,
+        estimatedActions:
+          estimatedActions && typeof estimatedActions === "string" && estimatedActions.trim()
+            ? estimatedActions.trim()
+            : null,
       },
     });
     return NextResponse.json(task);

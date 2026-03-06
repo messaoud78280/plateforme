@@ -21,6 +21,10 @@ interface TaskDetailViewProps {
     validatedAt?: Date | null;
     timeSpentMinutes?: number | null;
     actionsUsed?: number | null;
+    category?: string | null;
+    priority?: string | null;
+    desiredDate?: Date | string | null;
+    estimatedActions?: string | null;
     assignedTo?: { id: string; name: string; email: string } | null;
     project?: { id: string; title: string } | null;
     documents?: { id: string; name: string; fileUrl: string; fileSize: number; mimeType: string | null }[];
@@ -118,6 +122,14 @@ export function TaskDetailView({
               {task.project.title}
             </Link>
           </p>
+        )}
+        {(task.category || task.priority || task.desiredDate || task.estimatedActions) && (
+          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
+            {task.category && <span><strong>Catégorie :</strong> {task.category}</span>}
+            {task.priority && <span><strong>Priorité :</strong> {task.priority === "URGENT" ? "Urgent" : task.priority === "PRIORITAIRE" ? "Prioritaire" : "Standard"}</span>}
+            {task.desiredDate && <span><strong>Date souhaitée :</strong> {new Date(task.desiredDate).toLocaleDateString("fr-FR")}</span>}
+            {task.estimatedActions && <span><strong>Estimation initiale :</strong> {task.estimatedActions}</span>}
+          </div>
         )}
         {task.description && (
           <p className="mt-4 text-slate-600">{task.description}</p>

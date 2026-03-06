@@ -4,11 +4,12 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { TaskListView } from "@/components/tasks/TaskListView";
 import { DepotTacheForm } from "@/components/tasks/DepotTacheForm";
+import { NouvelleDemandeTrigger } from "@/components/demands/NouvelleDemandeTrigger";
 
 export default async function TachesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ statut?: string }>;
+  searchParams: Promise<{ statut?: string; nouvelle?: string }>;
 }) {
   const session = await getServerSession(authOptions);
 
@@ -23,6 +24,7 @@ export default async function TachesPage({
   const validStatus = statusFilter && ["EN_ATTENTE", "EN_COURS", "COMPLETE"].includes(statusFilter)
     ? statusFilter
     : undefined;
+  const openNouvelleDemande = params.nouvelle === "1";
 
   let tasks: Awaited<ReturnType<typeof prisma.task.findMany>> = [];
   let projects: { id: string; title: string }[] = [];
@@ -58,15 +60,20 @@ export default async function TachesPage({
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Mes tâches</h1>
-        <p className="mt-1 text-slate-600">
-          {isAgence
-            ? "Tâches déposées par les clients. Cliquez sur une tâche pour la prendre en charge ou la marquer comme terminée."
-            : isAgent
-              ? "Tâches qui vous sont assignées. Indiquez le temps passé lors de la clôture pour déduire les actions du client."
-              : "Déposez vos demandes et suivez leur avancement."}
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Mes tâches</h1>
+          <p className="mt-1 text-slate-600">
+            {isAgence
+              ? "Tâches déposées par les clients. Cliquez sur une tâche pour la prendre en charge ou la marquer comme terminée."
+              : isAgent
+                ? "Tâches qui vous sont assignées. Indiquez le temps passé lors de la clôture pour déduire les actions du client."
+                : "Déposez vos demandes et suivez leur avancement."}
+          </p>
+        </div>
+        {session.user.role === "CLIENT" && (
+          <NouvelleDemandeTrigger initialOpen={openNouvelleDemande} variant="primary" />
+        )}
       </div>
 
       {session.user.role === "CLIENT" && <DepotTacheForm projects={projects} />}

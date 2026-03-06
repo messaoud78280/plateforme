@@ -14,22 +14,27 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        const email = credentials.email.trim().toLowerCase();
-        const user = await prisma.user.findFirst({
-          where: { email: { equals: email, mode: "insensitive" } },
-        });
+        try {
+          const email = credentials.email.trim().toLowerCase();
+          const user = await prisma.user.findFirst({
+            where: { email: { equals: email, mode: "insensitive" } },
+          });
 
-        if (!user || !(await bcrypt.compare(credentials.password, user.password))) {
+          if (!user || !(await bcrypt.compare(credentials.password, user.password))) {
+            return null;
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            contractStatus: user.contractStatus,
+          };
+        } catch (err) {
+          console.error("[Auth] Erreur base de données:", err);
           return null;
         }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          contractStatus: user.contractStatus,
-        };
       },
     }),
   ],

@@ -32,7 +32,12 @@ export default async function DashboardPage({
   const clientId = session.user.id;
 
   let contractStatus: "PENDING" | "SIGNED" | null = null;
-  let actionsData: { subscriptionPlan: string | null; monthlyActionsTotal: number; monthlyActionsUsed: number } | null = null;
+  let actionsData: {
+    subscriptionPlan: string | null;
+    monthlyActionsTotal: number;
+    monthlyActionsUsed: number;
+    renewsAt: Date | null;
+  } | null = null;
   if (!isAgence && isClient) {
     const u = await prisma.user.findUnique({
       where: { id: clientId },
@@ -45,6 +50,17 @@ export default async function DashboardPage({
       },
     });
     contractStatus = u?.contractStatus ?? null;
+    let renewsAt: Date | null = null;
+    try {
+      const sub = await prisma.subscription.findFirst({
+        where: { userId: clientId, status: "ACTIVE" },
+        orderBy: { renewsAt: "desc" },
+        select: { renewsAt: true },
+      });
+      renewsAt = sub?.renewsAt ?? null;
+    } catch {
+      // Subscription table may not exist yet
+    }
     if (u) {
       if (shouldResetActions(u.actionsResetAt ?? null)) {
         await prisma.user.update({
@@ -61,6 +77,7 @@ export default async function DashboardPage({
           subscriptionPlan: after.subscriptionPlan ?? null,
           monthlyActionsTotal: after.monthlyActionsTotal ?? 120,
           monthlyActionsUsed: after.monthlyActionsUsed ?? 0,
+          renewsAt,
         };
       }
     }
@@ -256,6 +273,7 @@ export default async function DashboardPage({
           subscriptionPlan={actionsData.subscriptionPlan}
           monthlyActionsTotal={actionsData.monthlyActionsTotal}
           monthlyActionsUsed={actionsData.monthlyActionsUsed}
+          renewsAt={actionsData.renewsAt}
         />
       )}
 

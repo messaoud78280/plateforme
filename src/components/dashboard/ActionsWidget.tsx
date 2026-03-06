@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 const PLAN_LABELS: Record<string, string> = {
+  DECOUVERTE: "Offre Découverte",
   STANDARD: "Standard",
   STANDARD_PLUS: "Business",
   PREMIUM: "Premium",
@@ -11,9 +12,10 @@ type Props = {
   subscriptionPlan: string | null;
   monthlyActionsTotal: number;
   monthlyActionsUsed: number;
+  renewsAt?: Date | string | null;
 };
 
-export function ActionsWidget({ subscriptionPlan, monthlyActionsTotal, monthlyActionsUsed }: Props) {
+export function ActionsWidget({ subscriptionPlan, monthlyActionsTotal, monthlyActionsUsed, renewsAt }: Props) {
   const remaining = Math.max(0, monthlyActionsTotal - monthlyActionsUsed);
   const percent = monthlyActionsTotal > 0 ? Math.min(100, (monthlyActionsUsed / monthlyActionsTotal) * 100) : 0;
   const hasUsage = monthlyActionsTotal > 0;
@@ -91,12 +93,36 @@ export function ActionsWidget({ subscriptionPlan, monthlyActionsTotal, monthlyAc
           </Link>
         </div>
       )}
-      <Link
-        href="/dashboard/abonnement"
-        className="mt-4 inline-block text-sm font-medium text-[#1d4ed8] hover:underline"
-      >
-        Voir le suivi des actions →
-      </Link>
+      {renewsAt && (
+        <p className="mt-3 text-xs text-slate-500">
+          Prochain renouvellement :{" "}
+          {new Date(renewsAt).toLocaleDateString("fr-FR", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })}
+        </p>
+      )}
+      <div className="mt-4 flex flex-wrap gap-3">
+        <Link
+          href="/dashboard/abonnement"
+          className="text-sm font-medium text-[#1d4ed8] hover:underline"
+        >
+          Voir le suivi des actions →
+        </Link>
+        <Link
+          href="/dashboard/abonnement/souscrire"
+          className="text-sm font-medium text-slate-600 hover:underline"
+        >
+          Changer de formule
+        </Link>
+        <Link
+          href="/dashboard/abonnement"
+          className="text-sm font-medium text-slate-600 hover:underline"
+        >
+          Gérer mon abonnement
+        </Link>
+      </div>
     </section>
   );
 }

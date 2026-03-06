@@ -56,6 +56,94 @@ model User {
   appointmentsAsClient  Appointment[] @relation("AppointmentClient")
   reportsAuthored       Report[]      @relation("ReportAuthor")
   reportComments        ReportComment[]
+  subscriptions         Subscription[]
+  payments              Payment[]
+  actionsTransactions   ActionsTransaction[]
+}
+
+// Formule / abonnement client (historique et état)
+model Subscription {
+  id         String   @id @default(cuid())
+  userId     String
+  planKey    String   // DECOUVERTE | STANDARD | STANDARD_PLUS | PREMIUM
+  status     SubscriptionStatus @default(ACTIVE)
+  startedAt DateTime @default(now())
+  renewsAt  DateTime?  // prochain renouvellement (formules mensuelles)
+  endedAt   DateTime?  // fin (résiliation ou one-shot)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments Payment[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+enum SubscriptionStatus {
+  PENDING   // en attente de paiement
+  ACTIVE    // actif
+  EXPIRED   // expiré
+  CANCELLED // résilié
+}
+
+// Paiement (historique)
+model Payment {
+  id               String        @id @default(cuid())
+  userId           String
+  subscriptionId   String?
+  planKey          String
+  amount           Decimal       @db.Decimal(10, 2)
+  currency         String        @default("EUR")
+  status           PaymentStatus @default(PENDING)
+  actionsCredited  Int           @default(0)
+  externalId       String?       // Stripe payment intent id, etc.
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([status])
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+// Historique des mouvements d'actions (crédit / débit)
+model ActionsTransaction {
+  id           String              @id @default(cuid())
+  userId       String
+  type         ActionsTransactionType
+  source       ActionsTransactionSource
+  amount       Int                 // positif = crédit, négatif = débit
+  description  String?
+  referenceId  String?             // id Payment ou autre
+  createdAt    DateTime           @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+enum ActionsTransactionType {
+  CREDIT
+  DEBIT
+  ADJUSTMENT
+}
+
+enum ActionsTransactionSource {
+  SUBSCRIPTION   // crédit souscription
+  ONE_TIME       // offre Découverte
+  RENEWAL        // renouvellement mensuel
+  ADMIN          // ajustement manuel
+  TASK_DEDUCTION // débit tâche terminée
 }
 
 enum UserRole {

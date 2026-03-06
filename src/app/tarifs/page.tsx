@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { ComparatifReveal } from "@/components/tarifs/ComparatifReveal";
 import { StickyCtaMobile } from "@/components/tarifs/StickyCtaMobile";
@@ -12,6 +14,7 @@ export const metadata: Metadata = {
 
 const plans = [
   {
+    planKey: "DECOUVERTE" as const,
     name: "Offre Découverte",
     price: "109",
     billing: "one_shot" as const,
@@ -21,6 +24,7 @@ const plans = [
     badge: null as string | null,
   },
   {
+    planKey: "STANDARD" as const,
     name: "Standard",
     price: "215",
     billing: "monthly" as const,
@@ -30,6 +34,7 @@ const plans = [
     badge: null as string | null,
   },
   {
+    planKey: "STANDARD_PLUS" as const,
     name: "Business",
     price: "415",
     billing: "monthly" as const,
@@ -39,6 +44,7 @@ const plans = [
     badge: "Le plus choisi" as string | null,
   },
   {
+    planKey: "PREMIUM" as const,
     name: "Premium",
     price: "630",
     billing: "monthly" as const,
@@ -91,7 +97,10 @@ const faq = [
   { q: "Comment communiquer avec mon assistant ?", a: "Vous échangez avec votre assistant directement via notre plateforme dédiée. Messagerie interne, email ou téléphone : les canaux de communication sont définis lors de votre onboarding pour garantir une collaboration fluide et efficace." },
 ];
 
-export default function TarifsPage() {
+export default async function TarifsPage() {
+  const session = await getServerSession(authOptions);
+  const isClient = session?.user?.role === "CLIENT";
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea] pb-24 md:pb-16">
       <header className="sticky top-0 z-20 border-b border-[#c8cdd6] bg-[#f8f9fb]/95 backdrop-blur-sm">
@@ -180,6 +189,14 @@ export default function TarifsPage() {
                 <p className="mt-3 text-xs text-[#64748b] italic">
                   Idéal pour : {plan.idealFor}
                 </p>
+                <Link
+                  href={isClient
+                    ? `/dashboard/abonnement/souscrire?plan=${plan.planKey}`
+                    : `/connexion?callbackUrl=${encodeURIComponent(`/dashboard/abonnement/souscrire?plan=${plan.planKey}`)}`}
+                  className="mt-4 block w-full rounded-lg bg-[#1d4ed8] py-2.5 text-center text-sm font-semibold text-white transition hover:bg-[#1e40af]"
+                >
+                  Choisir cette formule
+                </Link>
               </article>
             ))}
           </div>

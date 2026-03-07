@@ -75,7 +75,7 @@ export function ClientDashboardContent({
 }: ClientDashboardContentProps) {
   const remaining = Math.max(0, actionsData.monthlyActionsTotal - actionsData.monthlyActionsUsed);
   const tempsMoyenLabel =
-    tempsMoyenJours < 1 ? "Réponse moyenne : < 24h" : `Réponse moyenne : ${Math.round(tempsMoyenJours)} j`;
+    tempsMoyenJours < 1 ? "Réponse moyenne : < 2h" : `Réponse moyenne : ${Math.round(tempsMoyenJours)} j`;
 
   return (
     <div className="space-y-8 pb-12">

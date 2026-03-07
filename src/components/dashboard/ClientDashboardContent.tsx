@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ActionsWidget } from "@/components/dashboard/ActionsWidget";
 import { QuickDelegationForm } from "@/components/dashboard/QuickDelegationForm";
+import { CopiloteAdmin } from "@/components/dashboard/CopiloteAdmin";
 import { CLIENT_TASK_STATUS_LABELS, type TaskStatus } from "@/types";
 
 const DOCUMENT_CATEGORY_LABELS: Record<string, string> = {
@@ -233,28 +234,8 @@ export function ClientDashboardContent({
         </div>
       </section>
 
-      {/* Suggestions de tâches à déléguer */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-800">Suggestions de tâches à déléguer</h2>
-        <p className="mt-0.5 text-sm text-slate-500">Idées pour gagner du temps au quotidien</p>
-        <ul className="mt-4 space-y-2">
-          {[
-            { label: "Relancer factures impayées", href: "/dashboard/nouvelle-demande" },
-            { label: "Préparer devis clients", href: "/dashboard/nouvelle-demande" },
-            { label: "Rechercher fournisseurs", href: "/dashboard/nouvelle-demande" },
-          ].map((item) => (
-            <li key={item.label}>
-              <Link
-                href={item.href}
-                className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50/50 px-4 py-3 text-sm font-medium text-slate-800 transition hover:border-[#1d4ed8]/30 hover:bg-blue-50/50"
-              >
-                {item.label}
-                <span className="text-[#1d4ed8]">Déléguer →</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {/* Copilote administratif */}
+      <CopiloteAdmin />
 
       {/* Demandes récentes */}
       <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">

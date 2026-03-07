@@ -20,8 +20,22 @@ const orbitron = Orbitron({
 });
 
 export const metadata: Metadata = {
-  title: "BeWork — Assistants administratifs augmentés par l'IA",
-  description: "Service d'assistants virtuels qualifiés en France. Fondé par Laure Olivie, formatrice IA. Équipe diplômée Bac+5, rigoureuse et efficace.",
+  title: "BeWork — Assistant administratif externalisé & secrétariat à distance | Francophone",
+  description:
+    "Assistant administratif externalisé et assistant virtuel francophone pour PME et dirigeants. Secrétariat externalisé, externalisation administrative. Direction et supervision opérationnelle en France. Dès 215€/mois.",
+  keywords: [
+    "assistant administratif externalisé",
+    "assistant virtuel francophone",
+    "secrétariat externalisé",
+    "assistant administratif à distance",
+    "externalisation administrative",
+    "BeWork",
+  ],
+  openGraph: {
+    title: "BeWork — Assistant administratif externalisé & secrétariat à distance",
+    description:
+      "Assistant administratif externalisé pour PME et dirigeants. Plateforme internationale supervisée depuis la France. Dès 215€/mois.",
+  },
 };
 
 export default function RootLayout({

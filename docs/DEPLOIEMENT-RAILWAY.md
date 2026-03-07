@@ -84,3 +84,21 @@ Pour générer un secret :
 ```bash
 openssl rand -base64 32
 ```
+
+---
+
+## En cas d’« Application error » au chargement
+
+1. **Voir les logs serveur**  
+   Railway → votre projet → votre service → onglet **Deployments** → cliquer sur le dernier déploiement → **View Logs** (ou **Logs**). Regarder la section **Runtime** après le démarrage : le message d’erreur exact (et la pile d’appels) s’affiche là.
+
+2. **Vérifier les variables**  
+   - `DATABASE_URL` : URL Supabase. Pour le pooler (recommandé), utiliser le **port 6543** (mode transaction) dans l’URL fournie par Supabase (Settings → Database → Connection string → URI, mode Transaction).  
+   - `NEXTAUTH_URL` : exactement l’URL du site (ex. `https://www.bework.fr`), sans slash final.  
+   - `NEXTAUTH_SECRET` : doit être défini (générer avec `openssl rand -base64 32`).
+
+3. **Connexion Supabase**  
+   Si les logs indiquent une erreur de connexion à la base : dans Supabase (Settings → Database), prendre l’URL avec **port 6543** et `?pgbouncer=true`, et éventuellement ajouter `&sslmode=require` si requis.
+
+4. **Tables manquantes**  
+   Si l’erreur mentionne une table absente (ex. `Subscription`, `Payment`), exécuter le script SQL Supabase : `prisma/migrations/subscription-payment-actions.sql` dans le SQL Editor Supabase.

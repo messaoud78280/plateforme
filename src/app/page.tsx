@@ -28,77 +28,219 @@ export default function HomePage() {
           </div>
           {/* Ligne 2 : Navigation — chaque lien sur une seule ligne */}
           <nav className="mt-3 hidden flex-wrap items-center justify-center gap-x-5 gap-y-1 border-t border-[#e0e4ea] pt-3 text-sm font-medium text-[#334155] md:flex">
+            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#comment-ca-marche">Comment ça marche</a>
+            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#roi">Économies</a>
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#solutions">Solutions</a>
-            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#equipe">Équipe</a>
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#secteurs">Secteurs</a>
-            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#conciergerie">Conciergerie</a>
+            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#plateforme">Plateforme</a>
             <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/tarifs">Tarifs</Link>
-            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#avantages">Avantages</a>
-            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#pourquoi-nous">Pourquoi</a>
-            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#ressources">Ressources</a>
+            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#equipe">Équipe</a>
+            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#conciergerie">Conciergerie</a>
             <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/contact">Contact</Link>
           </nav>
         </div>
       </header>
 
       <main className="pt-0">
-        {/* Hero — marge suffisante pour ne jamais chevaucher le header */}
-        <section className="px-6 pt-24 pb-16 md:pt-28 md:pb-20" style={{ scrollMarginTop: "6rem" }}>
+        {/* Hero — message orienté bénéfice + CTAs + mockup */}
+        <section id="hero" className="px-6 pt-20 pb-20 md:pt-24 md:pb-24" style={{ scrollMarginTop: "6rem" }}>
           <div className="mx-auto max-w-6xl">
-            <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
-              <div className="mb-12 flex w-full flex-col items-center justify-center gap-4 sm:flex-row sm:gap-5">
-                <Link
-                  href="/connexion"
-                  className="w-full rounded-lg border border-[#1d4ed8] bg-[#1d4ed8] px-8 py-4 text-center font-semibold text-white shadow-lg transition-all hover:bg-[#1e40af] hover:shadow-xl sm:w-auto"
-                >
-                  Se connecter
-                </Link>
-                <Link
-                  href="/inscription"
-                  className="w-full rounded-lg border-2 border-[#c8cdd6] bg-white px-8 py-4 text-center font-semibold text-[#1e293b] shadow-sm transition-all hover:border-[#9ca3af] hover:bg-[#f8f9fb] sm:w-auto"
-                >
-                  Créer un compte
-                </Link>
-                <span className="flex w-full flex-col items-center sm:w-auto">
+            <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 lg:items-center">
+              <div>
+                <h1 className="text-balance text-3xl font-bold leading-tight tracking-tight text-[#0f172a] md:text-4xl lg:text-5xl">
+                  Gagnez jusqu&apos;à 20 heures par semaine grâce à un assistant administratif dédié.
+                </h1>
+                <p className="mt-6 max-w-xl text-pretty text-base leading-relaxed text-[#334155] md:text-lg">
+                  Emails, devis, factures, relances, suivi de dossiers : nos assistants francophones gèrent votre administratif pendant que vous vous concentrez sur votre activité.
+                </p>
+                <div className="mt-8 flex flex-wrap gap-4">
                   <Link
                     href="/tarifs"
-                    className="w-full rounded-lg border-2 border-[#1d4ed8] bg-transparent px-8 py-4 text-center font-semibold text-[#1d4ed8] transition-all hover:bg-[#eff6ff] sm:w-auto"
-                    aria-label="Voir les tarifs BeWork"
+                    className="inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3.5 text-center font-semibold text-white shadow-lg transition-all hover:bg-[#1e40af] hover:shadow-xl"
+                    aria-label="Découvrir les tarifs BeWork"
                   >
-                    Voir les tarifs
+                    Découvrir les tarifs
                   </Link>
-                  <span className="mt-1.5 block text-center text-xs text-[#64748b] sm:hidden">
-                    Dès 215€/mois – sans recrutement
-                  </span>
-                </span>
+                  <Link
+                    href="/contact"
+                    className="inline-flex rounded-lg border-2 border-[#1d4ed8] bg-transparent px-6 py-3.5 text-center font-semibold text-[#1d4ed8] transition-all hover:bg-[#eff6ff]"
+                  >
+                    Demander une démo
+                  </Link>
+                </div>
+                <p className="mt-6 text-sm text-[#64748b]">
+                  Plateforme internationale supervisée depuis la France. Dès 215€/mois, sans recrutement.
+                </p>
               </div>
+              {/* Mockup plateforme */}
+              <div className="relative flex justify-center lg:justify-end">
+                <div className="w-full max-w-md rounded-xl border-2 border-[#c8cdd6] bg-white p-4 shadow-xl ring-1 ring-black/5 md:max-w-lg">
+                  <div className="flex gap-2 mb-4">
+                    <span className="h-2 w-2 rounded-full bg-[#94a3b8]" />
+                    <span className="h-2 w-2 rounded-full bg-[#94a3b8]" />
+                    <span className="h-2 w-2 rounded-full bg-[#94a3b8]" />
+                  </div>
+                  <div className="space-y-3 rounded-lg bg-[#f8fafc] p-4">
+                    {["Suivi des tâches", "Messagerie avec l'assistant", "Historique des actions"].map((label, i) => (
+                      <div key={i} className="flex items-center gap-3 rounded-lg bg-white px-3 py-2 border border-[#e2e8f0]">
+                        <span className="h-2 w-2 rounded-full bg-[#1d4ed8]" />
+                        <span className="text-sm text-[#334155]">{label}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-3 text-center text-xs text-[#64748b]">Interface BeWork</p>
+                </div>
+              </div>
+            </div>
+            <div className="mt-12 flex flex-wrap justify-center gap-4">
+              <Link href="/connexion" className="text-sm font-medium text-[#1d4ed8] hover:underline">
+                Se connecter
+              </Link>
+              <Link href="/inscription" className="text-sm font-medium text-[#64748b] hover:text-[#0f172a]">
+                Créer un compte
+              </Link>
+            </div>
+          </div>
+        </section>
 
-              <h1 className="text-balance text-4xl font-bold leading-tight tracking-tight text-[#0f172a] md:text-6xl md:leading-tight">
-                Assistants administratifs augmentés par l&apos;IA. En France,
-                pour les professionnels exigeants.
-              </h1>
+        {/* Comment ça marche — 4 étapes */}
+        <section id="comment-ca-marche" className="px-6 py-16 md:py-20 bg-white/60 rounded-2xl mx-4 md:mx-6 max-w-6xl md:mx-auto scroll-mt-24" style={{ scrollMarginTop: "6rem" }}>
+          <div className="mx-auto max-w-4xl text-center mb-12">
+            <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
+              Comment ça marche
+            </h2>
+            <p className="mt-3 text-[#334155]">
+              Un parcours simple pour déléguer votre administratif en toute sérénité.
+            </p>
+          </div>
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { step: 1, title: "Vous envoyez vos tâches", icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" },
+              { step: 2, title: "Votre assistant les traite", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" },
+              { step: 3, title: "Vous suivez l'avancement sur la plateforme", icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
+              { step: 4, title: "Vous gagnez du temps sur votre activité", icon: "M12 8v4l3 3m6-3a9 10.5 0 11-21 0 10.5 0 21 0z" },
+            ].map((item) => (
+              <div key={item.step} className="card-frame rounded-xl p-6 text-center transition-transform hover:scale-[1.02]">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-[#eff6ff] text-[#1d4ed8]">
+                  <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
+                  </svg>
+                </div>
+                <span className="mt-3 block text-sm font-medium text-[#64748b]">Étape {item.step}</span>
+                <h3 className="mt-1 text-lg font-semibold text-[#0f172a]">{item.title}</h3>
+              </div>
+            ))}
+          </div>
+        </section>
 
-              <p className="mt-8 max-w-2xl text-pretty text-base leading-relaxed text-[#334155] md:text-lg md:leading-relaxed">
-                BeWork vous propose un service d&apos;assistants virtuels
-                qualifiés, formés à l&apos;intelligence artificielle. Gestion
-                administrative, suivi de dossiers, documents et coordination :
-                une équipe rigoureuse et efficace à votre service.
+        {/* ROI / Économies — comparatif */}
+        <section id="roi" className="px-6 py-16 md:py-20 scroll-mt-24" style={{ scrollMarginTop: "6rem" }}>
+          <div className="mx-auto max-w-6xl">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
+                Jusqu&apos;à 75&nbsp;% d&apos;économie par rapport à un recrutement interne
+              </h2>
+              <p className="mt-3 max-w-2xl mx-auto text-[#334155]">
+                Comparez le coût d&apos;un assistant en interne en Europe avec une solution externalisée BeWork.
               </p>
+            </div>
+            <div className="card-frame rounded-2xl border-2 border-[#1d4ed8]/20 overflow-hidden bg-white">
+              <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[#e2e8f0]">
+                <div className="p-8 md:p-10">
+                  <h3 className="text-lg font-bold text-[#0f172a]">Assistant en interne (Europe)</h3>
+                  <ul className="mt-4 space-y-2 text-[#334155]">
+                    {["Salaire brut", "Charges sociales", "Bureau & matériel", "Recrutement & formation"].map((line) => (
+                      <li key={line} className="flex items-center gap-2">
+                        <span className="text-[#94a3b8]">•</span> {line}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-6 text-2xl font-bold text-[#64748b]">~5 050 € / mois</p>
+                </div>
+                <div className="p-8 md:p-10 bg-[#eff6ff]/50">
+                  <h3 className="text-lg font-bold text-[#1d4ed8]">Assistant via BeWork</h3>
+                  <ul className="mt-4 space-y-2 text-[#334155]">
+                    {["Un seul forfait tout compris", "Aucun coût de recrutement", "Aucune charge sociale", "Plateforme incluse"].map((line) => (
+                      <li key={line} className="flex items-center gap-2">
+                        <span className="text-[#1d4ed8]">✓</span> {line}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-6 text-2xl font-bold text-[#1d4ed8]">Dès 215 € / mois</p>
+                  <Link href="/tarifs" className="mt-4 inline-block text-sm font-semibold text-[#1d4ed8] hover:underline">
+                    Voir les offres →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-              <p className="mt-6 text-base font-semibold text-[#1e293b]">
-                BeWork, l&apos;assistant administratif pas comme les autres.
-              </p>
+        {/* Ils nous font confiance — preuve sociale */}
+        <section id="confiance" className="px-6 py-16 md:py-20 bg-white/50">
+          <div className="mx-auto max-w-6xl">
+            <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl text-center mb-10">
+              Ils nous font confiance
+            </h2>
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 mb-12">
+              {[
+                { sector: "PME BTP", quote: "Une équipe réactive pour nos devis et notre suivi chantiers." },
+                { sector: "Agence immobilière", quote: "Gestion des dossiers et relances clients simplifiée." },
+                { sector: "Cabinet de conseil", quote: "Support admin qui nous permet de nous concentrer sur le conseil." },
+                { sector: "Agence de recrutement", quote: "Coordination et suivi candidats en toute sérénité." },
+              ].map((item) => (
+                <div key={item.sector} className="card-frame rounded-xl p-6">
+                  <p className="text-[#334155] leading-relaxed italic">&ldquo;{item.quote}&rdquo;</p>
+                  <p className="mt-4 text-sm font-semibold text-[#1d4ed8]">{item.sector}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-center text-sm text-[#64748b]">
+              PME, dirigeants, cabinets et agences en France, Belgique, Suisse et Luxembourg.
+            </p>
+          </div>
+        </section>
 
-              <div className="mt-10 flex w-full max-w-2xl justify-center">
-                <div className="card-frame rounded-lg border-2 border-[#1d4ed8]/30 bg-white px-8 py-4 text-center">
-                  <p className="text-lg font-semibold text-[#0f172a] md:text-xl">
-                    Nos prestations sont{" "}
-                    <span className="text-[#1d4ed8]">40 à 60&nbsp;%</span>
-                    {" "}moins chères qu&apos;en France.
-                  </p>
-                  <p className="mt-2 text-sm text-[#334155]">
-                    Qualité professionnelle, tarifs compétitifs.
-                  </p>
+        {/* Une plateforme de suivi simple et transparente */}
+        <section id="plateforme" className="px-6 py-16 md:py-20">
+          <div className="mx-auto max-w-6xl">
+            <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 lg:items-center">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
+                  Une plateforme de suivi simple et transparente
+                </h2>
+                <p className="mt-4 text-[#334155] leading-relaxed">
+                  Suivez vos tâches, échangez avec votre assistant et consultez l&apos;historique en un coup d&apos;œil.
+                </p>
+                <ul className="mt-6 space-y-3">
+                  {[
+                    "Suivi des tâches en temps réel",
+                    "Messagerie avec l'assistant dédié",
+                    "Gestion documentaire centralisée",
+                    "Historique des actions et reporting",
+                  ].map((feature, i) => (
+                    <li key={i} className="flex items-center gap-3">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8]">
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                      </span>
+                      <span className="text-[#334155]">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/tarifs" className="mt-8 inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white hover:bg-[#1e40af]">
+                  Découvrir les tarifs
+                </Link>
+              </div>
+              <div className="relative flex justify-center lg:justify-end">
+                <div className="w-full max-w-sm rounded-xl border-2 border-[#c8cdd6] bg-white p-4 shadow-lg">
+                  <div className="flex gap-2 mb-3">
+                    <span className="h-2 w-2 rounded-full bg-[#94a3b8]" /><span className="h-2 w-2 rounded-full bg-[#94a3b8]" /><span className="h-2 w-2 rounded-full bg-[#94a3b8]" />
+                  </div>
+                  <div className="space-y-2 rounded-lg bg-[#f8fafc] p-3 text-sm">
+                    {["Tâches · En cours", "Messages · 2 non lus", "Documents · À jour", "Rapport · Ce mois"].map((l, i) => (
+                      <div key={i} className="rounded bg-white px-3 py-2 border border-[#e2e8f0]">{l}</div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -121,10 +263,10 @@ export default function HomePage() {
               {[
                 "Aucun coût de recrutement ni d'infrastructure : votre assistant est opérationnel après l'onboarding.",
                 "Main-d'œuvre qualifiée, 100% francophone, motivée et encadrée.",
-                "Même fuseau horaire qu'en France : notre plateforme basée au Maghreb assure une collaboration en temps réel.",
+                "Même fuseau horaire qu'en France : plateforme internationale supervisée depuis la France pour une collaboration en temps réel.",
                 "Diplômés Bac+5 minimum, formés à l'IA et aux process administratifs.",
                 "Garantie : satisfait ou remplacé rapidement.",
-                "Direction et pilotage en France pour rester au plus proche de vos attentes.",
+                "Direction et supervision opérationnelle en France pour rester au plus proche de vos attentes.",
               ].map((item, i) => (
                 <li key={i} className="card-frame flex gap-3 rounded-lg p-5">
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#1d4ed8] text-white text-sm font-bold">
@@ -259,9 +401,8 @@ export default function HomePage() {
                 <strong className="text-slate-900">Laure Olivie</strong>, formatrice
                 IA reconnue et diplômée. Votre interlocuteur principal est notre{" "}
                 <strong className="text-slate-900">agence en région parisienne</strong>,
-                qu&apos;elle dirige au quotidien. Une plateforme opérationnelle basée au Maghreb
-                opère sous son pilotage et celui d&apos;expatriés français qui la
-                dirigent en temps réel, pour une qualité et une réactivité identiques.
+                qu&apos;elle dirige au quotidien. Une plateforme opérationnelle internationale
+                est supervisée depuis la France en temps réel, pour une qualité et une réactivité identiques.
                 Notre équipe est composée de diplômés Bac+5 minimum, expérimentés et
                 formés aux outils d&apos;intelligence artificielle.
               </p>
@@ -285,17 +426,15 @@ export default function HomePage() {
                 </div>
                 <div>
                   <p className="text-lg font-semibold text-[#0f172a]">
-                    Plateforme opérationnelle — Maghreb
+                    Plateforme opérationnelle internationale
                   </p>
                   <p className="mt-2 text-sm font-medium text-[#64748b]">
-                    Sous direction française en temps réel
+                    Supervision opérationnelle en France
                   </p>
                   <p className="mt-3 text-[#334155] leading-relaxed">
-                    La plateforme au Maghreb est pilotée au quotidien par Laure et
-                    par des cadres expatriés français. Même fuseau horaire que la
-                    France, même niveau d&apos;exigence : sélection Bac+5, formation
-                    IA et encadrement continu pour une assistance réactive et
-                    professionnelle.
+                    La plateforme est pilotée au quotidien depuis la France. Même fuseau horaire,
+                    même niveau d&apos;exigence : sélection Bac+5, formation IA et encadrement continu
+                    pour une assistance réactive et professionnelle.
                   </p>
                 </div>
               </div>
@@ -312,7 +451,7 @@ export default function HomePage() {
             <ul className="mt-8 grid gap-4 md:grid-cols-2">
               {[
                 "Interlocuteur principal en Île-de-France (Laure Olivie) : proximité et réactivité.",
-                "Plateforme au Maghreb pilotée en temps réel par des dirigeants français.",
+                "Plateforme internationale pilotée en temps réel depuis la France.",
                 "Même fuseau horaire qu'en France : collaboration sans décalage.",
                 "Assistants francophones, Bac+5, formés à l'IA et encadrés en continu.",
               ].map((item, i) => (
@@ -325,38 +464,36 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Secteurs */}
+        {/* Secteurs — cartes cliquables */}
         <section id="secteurs" className="px-6 py-24 md:py-28">
-          <div className="card-frame mx-auto max-w-6xl rounded-xl p-10 md:p-14">
+          <div className="mx-auto max-w-6xl">
             <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-              Pour les professionnels et les entreprises exigeants.
+              Des secteurs que nous connaissons bien
             </h2>
             <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#334155]">
-              Dirigeants, cadres, PME ou grands comptes : vous avez besoin
-              d&apos;une assistance administrative fiable et réactive. Nous nous
-              adaptons à votre secteur et à vos process.
+              Dirigeants, cadres, PME ou cabinets : nous nous adaptons à votre secteur et à vos process.
             </p>
-            <div className="mt-12 flex flex-wrap gap-3">
+            <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {[
-                "Dirigeants & cadres",
-                "PME & ETI",
-                "Cabinet juridique",
-                "Comptabilité & finance",
-                "Consulting",
-                "Santé",
-                "Immobilier",
-                "Associations & institutions",
-                "Profession libérale",
-                "E-commerce",
-                "Événementiel",
-                "BTP",
-              ].map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-lg border border-[#c8cdd6] bg-white px-4 py-2 text-sm font-medium text-[#334155] transition-colors hover:border-[#1d4ed8] hover:text-[#1d4ed8]"
+                { name: "BTP", desc: "Devis, suivi chantiers, coordination" },
+                { name: "Immobilier", desc: "Dossiers, relances, gestion locative" },
+                { name: "Cabinets juridiques", desc: "Administratif et suivi dossiers" },
+                { name: "PME", desc: "Assistance administrative au quotidien" },
+                { name: "Consulting", desc: "Support et livrables" },
+                { name: "E-commerce", desc: "Commandes, SAV, suivi" },
+                { name: "Agences de recrutement", desc: "Coordination et suivi candidats" },
+              ].map((sector) => (
+                <Link
+                  key={sector.name}
+                  href="/contact"
+                  className="card-frame group rounded-xl border-2 border-[#e2e8f0] bg-white p-6 text-left transition-all hover:border-[#1d4ed8] hover:shadow-md"
                 >
-                  {tag}
-                </span>
+                  <h3 className="text-lg font-semibold text-[#0f172a] group-hover:text-[#1d4ed8]">{sector.name}</h3>
+                  <p className="mt-2 text-sm text-[#64748b]">{sector.desc}</p>
+                  <span className="mt-3 inline-flex items-center text-sm font-medium text-[#1d4ed8] opacity-0 group-hover:opacity-100 transition-opacity">
+                    Nous contacter →
+                  </span>
+                </Link>
               ))}
             </div>
           </div>
@@ -538,24 +675,22 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* CTA bas */}
+        {/* CTA final */}
         <section id="contact" className="px-6 py-24 md:py-28">
-          <div className="mx-auto max-w-6xl rounded-xl border-2 border-[#c8cdd6] bg-[#0f172a] p-12 text-white shadow-lg md:p-16">
+          <div className="mx-auto max-w-6xl rounded-2xl border-2 border-[#1d4ed8]/30 bg-[#0f172a] p-12 text-white shadow-xl md:p-16">
             <div className="grid gap-12 md:grid-cols-3 md:items-center md:gap-16">
               <div className="md:col-span-2">
                 <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-                  Envie d&apos;une démo ou d&apos;un tarif personnalisé ?
+                  Prêt à déléguer votre administratif ?
                 </h2>
                 <p className="mt-6 max-w-2xl text-lg leading-relaxed text-[#94a3b8]">
-                  Dites-nous votre contexte (volume de dossiers, besoins
-                  administratifs, secteur) : notre équipe en France vous
-                  répond et vous propose l&apos;offre adaptée.
+                  Découvrez nos offres ou demandez un rendez-vous : notre équipe en France vous répond et vous propose l&apos;offre adaptée à votre activité.
                 </p>
               </div>
               <div className="flex flex-col gap-4 md:items-end">
                 <Link
                   href="/tarifs"
-                  className="inline-flex w-full justify-center rounded-lg border border-[#c8cdd6] bg-white px-8 py-4 font-semibold text-[#0f172a] shadow-md transition-all hover:bg-[#f8f9fb] md:w-auto"
+                  className="inline-flex w-full justify-center rounded-lg border-2 border-white bg-white px-8 py-4 font-semibold text-[#0f172a] shadow-md transition-all hover:bg-[#f8f9fb] md:w-auto"
                 >
                   Voir les tarifs
                 </Link>
@@ -563,7 +698,7 @@ export default function HomePage() {
                   href="/contact"
                   className="inline-flex w-full justify-center rounded-lg bg-[#1d4ed8] px-8 py-4 font-semibold text-white shadow-md transition-all hover:bg-[#1e40af] md:w-auto"
                 >
-                  Demande de contact et RDV
+                  Demander un rendez-vous
                 </Link>
               </div>
             </div>
@@ -579,7 +714,7 @@ export default function HomePage() {
               <span className="text-[#0f172a]">© {new Date().getFullYear()} BeWork</span>
             </div>
             <span className="text-[#64748b]">
-              Société française — Agence principale : Île-de-France (Laure Olivie) — Plateforme opérationnelle : Maghreb (sous direction française en temps réel)
+              Société française — Agence principale : Île-de-France (Laure Olivie) — Plateforme internationale supervisée depuis la France
             </span>
           </div>
           <div className="flex flex-wrap gap-x-6 gap-y-2">

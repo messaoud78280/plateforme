@@ -22,13 +22,14 @@ function computeEstimation(category: string, description: string): string {
   if (!text.trim()) return "";
   if (text.includes("mission spécifique") || text.includes("demande complexe") || text.includes("audit")) return "Sur évaluation";
   if (text.includes("recherche approfondie") || text.includes("analyse détaillée")) return "3 à 4 actions";
-  if (text.includes("création") || text.includes("document administratif") || text.includes("dossier")) return "3 actions";
+  if (text.includes("création") || text.includes("document administratif") || text.includes("dossier") || text.includes("documents")) return "2 à 3 actions";
   if (text.includes("comparatif") || text.includes("comparer") || text.includes("plusieurs prestataires")) return "2 à 3 actions";
-  if (text.includes("coordination") || text.includes("plusieurs rendez-vous")) return "2 actions";
+  if (text.includes("facturation") || text.includes("devis")) return "2 à 3 actions";
+  if (text.includes("suivi de dossier") || text.includes("coordination")) return "2 actions";
   if (text.includes("réservation") || text.includes("hôtel") || text.includes("transport")) return "1 à 2 actions";
   if (text.includes("rédaction") || text.includes("email professionnel")) return "2 actions";
-  if (text.includes("recherche") || text.includes("trouver") || text.includes("email")) return "1 action";
-  if (["réservation", "organisation / agenda", "gestion d'emails"].some((c) => text.includes(c))) return "1 action";
+  if (text.includes("recherche") || text.includes("trouver")) return "1 à 2 actions";
+  if (text.includes("administratif")) return "1 à 2 actions";
   return "1 à 2 actions";
 }
 
@@ -230,7 +231,7 @@ export function NouvelleDemandeModal({ open, onClose }: Props) {
                   Description détaillée *
                 </label>
                 <p className="mb-2 text-xs text-slate-500">
-                  Décrivez précisément votre besoin, le résultat attendu, les éventuelles contraintes et les délais souhaités.
+                  Décrivez clairement votre besoin, le résultat attendu et les éventuelles échéances.
                 </p>
                 <textarea
                   id="nd-description"
@@ -284,9 +285,9 @@ export function NouvelleDemandeModal({ open, onClose }: Props) {
               </div>
 
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <h3 className="text-sm font-semibold text-slate-800">Estimation des actions</h3>
+                <h3 className="text-sm font-semibold text-slate-800">Estimateur d&apos;actions</h3>
                 <p className="mt-1 text-xs text-slate-500">
-                  Cette estimation est donnée à titre indicatif et peut varier selon la complexité réelle de la demande.
+                  Cette estimation est indicative et peut varier selon la complexité réelle de la demande.
                 </p>
                 {(category || description.trim()) ? (
                   <p className="mt-2 text-sm text-slate-700">
@@ -294,7 +295,7 @@ export function NouvelleDemandeModal({ open, onClose }: Props) {
                   </p>
                 ) : (
                   <p className="mt-2 text-sm text-slate-500">
-                    Remplissez la catégorie ou la description pour voir une estimation.
+                    Remplissez la catégorie ou la description pour voir une estimation (ex. 1 à 2 actions, 2 à 3 actions, Sur évaluation).
                   </p>
                 )}
               </div>

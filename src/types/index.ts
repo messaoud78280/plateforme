@@ -72,6 +72,13 @@ export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   EN_ATTENTE: "En attente",
 };
 
+/** Libellés orientés client pour le dashboard */
+export const CLIENT_TASK_STATUS_LABELS: Record<TaskStatus, string> = {
+  EN_ATTENTE: "Reçue",
+  EN_COURS: "En cours",
+  COMPLETE: "Terminée",
+};
+
 export const DOCUMENT_CATEGORY_LABELS: Record<DocumentCategory, string> = {
   FACTURE: "Facture",
   CONTRAT: "Contrat",

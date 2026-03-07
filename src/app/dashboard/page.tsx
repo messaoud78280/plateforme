@@ -13,6 +13,7 @@ import { ScrollToMessages } from "@/components/ScrollToMessages";
 import { AppointmentCalendar } from "@/components/appointments/AppointmentCalendar";
 import { ActionsWidget } from "@/components/dashboard/ActionsWidget";
 import { NouvelleDemandeTrigger } from "@/components/demands/NouvelleDemandeTrigger";
+import { ClientDashboardContent } from "@/components/dashboard/ClientDashboardContent";
 
 export default async function DashboardPage({
   searchParams,
@@ -101,6 +102,32 @@ export default async function DashboardPage({
     monthlyActionsUsed: number;
   }[] = [];
   let contactRequestsClient: { id: string; structure: string; rdvDate: Date | null; rdvTime: string | null; status: string; createdAt: Date }[] = [];
+  let clientTasks: {
+    id: string;
+    title: string;
+    category: string | null;
+    status: string;
+    createdAt: Date;
+    actionsUsed: number | null;
+    estimatedActions: string | null;
+    assignedTo: { id: string; name: string } | null;
+  }[] = [];
+  let recentMessages: {
+    id: string;
+    content: string;
+    createdAt: Date;
+    project: { id: string; title: string };
+    sender: { id: string; name: string };
+    receiverId: string;
+  }[] = [];
+  let recentDocuments: {
+    id: string;
+    name: string;
+    createdAt: Date;
+    category: string;
+    task: { id: string; title: string } | null;
+    fileUrl: string;
+  }[] = [];
 
   try {
     const [tEnCours, tCompletees, docAttente, act, al, tasksChart] = await Promise.all([
@@ -141,6 +168,62 @@ export default async function DashboardPage({
     activities = act;
     alerts = al;
     tasksPourChart = tasksChart;
+
+    if (isClient) {
+      const [tasksList, messagesList, docsList] = await Promise.all([
+        prisma.task.findMany({
+          where: { clientId },
+          select: {
+            id: true,
+            title: true,
+            category: true,
+            status: true,
+            createdAt: true,
+            actionsUsed: true,
+            estimatedActions: true,
+            assignedTo: { select: { id: true, name: true } },
+          },
+          orderBy: { updatedAt: "desc" },
+          take: 15,
+        }),
+        prisma.message.findMany({
+          where: {
+            OR: [{ receiverId: clientId }, { senderId: clientId }],
+          },
+          include: {
+            project: { select: { id: true, title: true } },
+            sender: { select: { id: true, name: true } },
+          },
+          orderBy: { createdAt: "desc" },
+          take: 5,
+        }),
+        prisma.document.findMany({
+          where: { clientId },
+          include: {
+            task: { select: { id: true, title: true } },
+          },
+          orderBy: { createdAt: "desc" },
+          take: 5,
+        }),
+      ]);
+      clientTasks = tasksList;
+      recentMessages = messagesList.map((m) => ({
+        id: m.id,
+        content: m.content,
+        createdAt: m.createdAt,
+        project: m.project!,
+        sender: m.sender,
+        receiverId: m.receiverId,
+      }));
+      recentDocuments = docsList.map((d) => ({
+        id: d.id,
+        name: d.name,
+        createdAt: d.createdAt,
+        category: d.category,
+        task: d.task,
+        fileUrl: d.fileUrl,
+      }));
+    }
 
     const tasksCompletees = await prisma.task.findMany({
       where: { clientId, status: "COMPLETE", completedAt: { not: null } },
@@ -213,6 +296,32 @@ export default async function DashboardPage({
     } catch {
       // ignore
     }
+  }
+
+  if (isClient) {
+    return (
+      <div className="space-y-8">
+        <ClientDashboardContent
+          userName={session.user?.name ?? null}
+          openDemande={openDemande}
+          contractStatus={contractStatus}
+          actionsData={
+            actionsData ?? {
+              subscriptionPlan: null,
+              monthlyActionsTotal: 120,
+              monthlyActionsUsed: 0,
+              renewsAt: null,
+            }
+          }
+          tasksEnCours={tasksEnCours}
+          tempsMoyenJours={tempsMoyenJours}
+          clientTasks={clientTasks}
+          recentMessages={recentMessages}
+          clientId={clientId}
+          recentDocuments={recentDocuments}
+        />
+      </div>
+    );
   }
 
   return (

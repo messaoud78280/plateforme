@@ -75,6 +75,10 @@ export default async function AbonnementPage() {
 
   const activeSub = subscriptions.find((s) => s.status === "ACTIVE");
   const planName = user?.subscriptionPlan ? (getPlan(user.subscriptionPlan)?.name ?? PLAN_LABELS[user.subscriptionPlan] ?? user.subscriptionPlan) : "—";
+  const total = user?.monthlyActionsTotal ?? 0;
+  const used = user?.monthlyActionsUsed ?? 0;
+  const remaining = Math.max(0, total - used);
+  const percent = total > 0 ? Math.min(100, (used / total) * 100) : 0;
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
@@ -83,59 +87,83 @@ export default async function AbonnementPage() {
           href="/dashboard"
           className="text-sm font-medium text-slate-600 hover:text-slate-900"
         >
-          ← Tableau de bord
+          ← Dashboard
         </Link>
-        <div className="flex gap-3">
+      </div>
+
+      {/* Bloc Abonnement et actions — formule, KPIs, 3 CTA */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-slate-800">Abonnement et actions</h2>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Formule active</p>
+            <p className="mt-0.5 font-semibold text-slate-800">{planName}</p>
+          </div>
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Actions totales</p>
+            <p className="mt-0.5 font-semibold text-slate-800">{total}</p>
+          </div>
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Actions utilisées</p>
+            <p className="mt-0.5 font-semibold text-slate-800">{used}</p>
+          </div>
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Actions restantes</p>
+            <p className="mt-0.5 font-semibold text-[#1d4ed8]">{remaining}</p>
+          </div>
+        </div>
+        {activeSub?.renewsAt && (
+          <p className="mt-3 text-sm text-slate-600">
+            Date de renouvellement :{" "}
+            <span className="font-medium text-slate-800">
+              {new Date(activeSub.renewsAt).toLocaleDateString("fr-FR", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </span>
+          </p>
+        )}
+        <div className="mt-4">
+          <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200">
+            <div
+              className="h-full rounded-full bg-[#1d4ed8] transition-all"
+              style={{ width: `${percent}%` }}
+              role="progressbar"
+              aria-valuenow={used}
+              aria-valuemin={0}
+              aria-valuemax={total}
+            />
+          </div>
+          <p className="mt-1.5 text-xs text-slate-500">
+            {used} / {total} actions utilisées ce mois
+          </p>
+        </div>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <a
+            href="#suivi-actions"
+            className="inline-flex rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e40af]"
+          >
+            Voir le suivi des actions
+          </a>
           <Link
             href="/dashboard/abonnement/souscrire"
-            className="rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e40af]"
+            className="inline-flex rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
             Changer de formule
           </Link>
           <Link
-            href="/tarifs"
-            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            href="/contract"
+            className="inline-flex rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
-            Voir les tarifs
+            Gérer mon abonnement
           </Link>
         </div>
-      </div>
-
-      {/* Formule active et statut */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-800">Mon abonnement</h2>
-        <dl className="mt-4 grid gap-2 sm:grid-cols-2">
-          <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Formule active</dt>
-            <dd className="mt-0.5 font-medium text-slate-800">{planName}</dd>
-          </div>
-          <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Actions totales / utilisées</dt>
-            <dd className="mt-0.5 font-medium text-slate-800">
-              {user?.monthlyActionsTotal ?? 0} / {user?.monthlyActionsUsed ?? 0}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Statut</dt>
-            <dd className="mt-0.5">
-              <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${activeSub ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-600"}`}>
-                {activeSub ? "Actif" : "Aucun abonnement actif"}
-              </span>
-            </dd>
-          </div>
-          {activeSub?.renewsAt && (
-            <div>
-              <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Date de renouvellement</dt>
-              <dd className="mt-0.5 font-medium text-slate-800">
-                {new Date(activeSub.renewsAt).toLocaleDateString("fr-FR", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
-              </dd>
-            </div>
-          )}
-        </dl>
+        <div className="mt-3">
+          <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${activeSub ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-600"}`}>
+            {activeSub ? "Abonnement actif" : "Aucun abonnement actif"}
+          </span>
+        </div>
       </section>
 
       {/* Historique des paiements */}
@@ -231,8 +259,8 @@ export default async function AbonnementPage() {
       </section>
 
       {/* Suivi des actions (tâches) */}
-      <section>
-        <h1 className="text-2xl font-bold text-slate-800">Suivi des actions</h1>
+      <section id="suivi-actions" className="scroll-mt-6">
+        <h2 className="text-xl font-bold text-slate-800">Suivi des actions</h2>
         <p className="mt-1 text-sm text-slate-600">
           Historique des tâches terminées avec déduction d&apos;actions. Minimum 1 action par demande.
         </p>

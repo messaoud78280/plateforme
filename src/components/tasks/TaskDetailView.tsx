@@ -5,6 +5,7 @@ import Link from "next/link";
 import { TASK_STATUS_LABELS, type TaskStatus } from "@/types";
 import { minutesToActions } from "@/lib/actions";
 import { TaskTimeline } from "./TaskTimeline";
+import { ClientDemandTimeline } from "./ClientDemandTimeline";
 
 interface TaskDetailViewProps {
   task: {
@@ -135,6 +136,45 @@ export function TaskDetailView({
           <p className="mt-4 text-slate-600">{task.description}</p>
         )}
       </div>
+
+      {/* Timeline client : 5 étapes (Demande reçue → Terminée) */}
+      {!isAgence && (
+        <div className="rounded-xl border border-slate-200 bg-white p-6">
+          <h2 className="mb-6 text-lg font-semibold text-slate-800">Avancement de votre demande</h2>
+          <ClientDemandTimeline
+            status={task.status}
+            createdAt={task.createdAt}
+            completedAt={task.completedAt}
+            validatedAt={task.validatedAt ?? null}
+          />
+        </div>
+      )}
+
+      {/* Conversation liée + actions (client) */}
+      {!isAgence && (
+        <div className="rounded-xl border border-slate-200 bg-white p-6">
+          <h2 className="mb-4 text-lg font-semibold text-slate-800">Échanger et ajouter des éléments</h2>
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/dashboard/messagerie"
+              className="inline-flex items-center rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e40af]"
+            >
+              Répondre / Ouvrir la conversation
+            </Link>
+            <Link
+              href="/dashboard/documents"
+              className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Ajouter un document
+            </Link>
+          </div>
+          {task.project && (
+            <p className="mt-3 text-sm text-slate-500">
+              Conversation liée au projet : <span className="font-medium text-slate-700">{task.project.title}</span>
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Pièces jointes déposées avec la tâche */}
       {task.documents && task.documents.length > 0 && (

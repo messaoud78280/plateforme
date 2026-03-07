@@ -29,51 +29,99 @@ export default async function AbonnementPage() {
   const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
   if (isAgence) redirect("/dashboard");
 
-  const [user, tasksWithActions, subscriptions, payments, actionsTransactions] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: {
-        subscriptionPlan: true,
-        monthlyActionsTotal: true,
-        monthlyActionsUsed: true,
-        actionsResetAt: true,
-      },
-    }),
-    prisma.task.findMany({
-      where: {
-        clientId: session.user.id,
-        status: "COMPLETE",
-        actionsUsed: { not: null, gt: 0 },
-      },
-      orderBy: { completedAt: "desc" },
-      take: 100,
-      select: {
-        id: true,
-        title: true,
-        timeSpentMinutes: true,
-        actionsUsed: true,
-        completedAt: true,
-        projectId: true,
-        project: { select: { title: true } },
-        assignedTo: { select: { name: true } },
-      },
-    }),
-    prisma.subscription.findMany({
-      where: { userId: session.user.id },
-      orderBy: { createdAt: "desc" },
-      take: 20,
-    }),
-    prisma.payment.findMany({
-      where: { userId: session.user.id },
-      orderBy: { createdAt: "desc" },
-      take: 20,
-    }),
-    prisma.actionsTransaction.findMany({
-      where: { userId: session.user.id },
-      orderBy: { createdAt: "desc" },
-      take: 50,
-    }),
-  ]);
+  let user: { subscriptionPlan: string | null; monthlyActionsTotal: number | null; monthlyActionsUsed: number | null; actionsResetAt: Date | null } | null = null;
+  let tasksWithActions: Awaited<ReturnType<typeof prisma.task.findMany>> = [];
+  let subscriptions: Awaited<ReturnType<typeof prisma.subscription.findMany>> = [];
+  let payments: Awaited<ReturnType<typeof prisma.payment.findMany>> = [];
+  let actionsTransactions: Awaited<ReturnType<typeof prisma.actionsTransaction.findMany>> = [];
+
+  try {
+    const [userResult, tasksResult, subsResult, payResult, actionsResult] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: {
+          subscriptionPlan: true,
+          monthlyActionsTotal: true,
+          monthlyActionsUsed: true,
+          actionsResetAt: true,
+        },
+      }),
+      prisma.task.findMany({
+        where: {
+          clientId: session.user.id,
+          status: "COMPLETE",
+          actionsUsed: { not: null, gt: 0 },
+        },
+        orderBy: { completedAt: "desc" },
+        take: 100,
+        select: {
+          id: true,
+          title: true,
+          timeSpentMinutes: true,
+          actionsUsed: true,
+          completedAt: true,
+          projectId: true,
+          project: { select: { title: true } },
+          assignedTo: { select: { name: true } },
+        },
+      }),
+      prisma.subscription.findMany({
+        where: { userId: session.user.id },
+        orderBy: { createdAt: "desc" },
+        take: 20,
+      }),
+      prisma.payment.findMany({
+        where: { userId: session.user.id },
+        orderBy: { createdAt: "desc" },
+        take: 20,
+      }),
+      prisma.actionsTransaction.findMany({
+        where: { userId: session.user.id },
+        orderBy: { createdAt: "desc" },
+        take: 50,
+      }),
+    ]);
+    user = userResult;
+    tasksWithActions = tasksResult;
+    subscriptions = subsResult;
+    payments = payResult;
+    actionsTransactions = actionsResult;
+  } catch (err) {
+    console.error("[Abonnement] Erreur chargement données:", err);
+    // Données de base depuis User si possible
+    try {
+      user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: {
+          subscriptionPlan: true,
+          monthlyActionsTotal: true,
+          monthlyActionsUsed: true,
+          actionsResetAt: true,
+        },
+      });
+      tasksWithActions = await prisma.task.findMany({
+        where: {
+          clientId: session.user.id,
+          status: "COMPLETE",
+          actionsUsed: { not: null, gt: 0 },
+        },
+        orderBy: { completedAt: "desc" },
+        take: 100,
+        select: {
+          id: true,
+          title: true,
+          timeSpentMinutes: true,
+          actionsUsed: true,
+          completedAt: true,
+          projectId: true,
+          project: { select: { title: true } },
+          assignedTo: { select: { name: true } },
+        },
+      });
+    } catch {
+      // ignore
+    }
+  }
 
   const activeSub = subscriptions.find((s) => s.status === "ACTIVE");
   const planName = user?.subscriptionPlan ? (getPlan(user.subscriptionPlan)?.name ?? PLAN_LABELS[user.subscriptionPlan] ?? user.subscriptionPlan) : "—";

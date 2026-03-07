@@ -59,10 +59,27 @@ export async function POST(request: Request) {
       name: user.name,
       role: user.role,
     });
-  } catch (error) {
-    console.error("Erreur inscription:", error);
+  } catch (error: unknown) {
+    const err = error as { code?: string; message?: string };
+    console.error("Erreur inscription:", err?.message ?? error);
+
+    // Contrainte unique (email déjà pris malgré le findUnique)
+    if (err?.code === "P2002") {
+      return NextResponse.json(
+        { error: "Un compte existe déjà avec cet email." },
+        { status: 400 }
+      );
+    }
+    // Table ou colonne absente en base
+    if (err?.code === "P2021" || err?.code === "P2010") {
+      return NextResponse.json(
+        { error: "Configuration base de données incomplète. Contactez l'administrateur." },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { error: "Erreur lors de l'inscription." },
+      { error: "Erreur lors de l'inscription. Réessayez ou contactez le support." },
       { status: 500 }
     );
   }

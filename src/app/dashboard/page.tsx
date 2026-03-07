@@ -322,6 +322,7 @@ export default async function DashboardPage({
           recentMessages={recentMessages}
           clientId={clientId}
           recentDocuments={recentDocuments}
+          recentActivities={activities}
         />
       </div>
     );

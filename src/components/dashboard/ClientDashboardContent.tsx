@@ -58,6 +58,13 @@ type ClientDashboardContentProps = {
     task: { id: string; title: string } | null;
     fileUrl: string;
   }[];
+  recentActivities: {
+    id: string;
+    type: string;
+    title: string;
+    detail: string | null;
+    createdAt: Date;
+  }[];
 };
 
 export function ClientDashboardContent({
@@ -72,6 +79,7 @@ export function ClientDashboardContent({
   recentMessages,
   clientId,
   recentDocuments,
+  recentActivities,
 }: ClientDashboardContentProps) {
   const remaining = Math.max(0, actionsData.monthlyActionsTotal - actionsData.monthlyActionsUsed);
   const tempsMoyenLabel =
@@ -167,6 +175,97 @@ export function ClientDashboardContent({
         monthlyActionsUsed={actionsData.monthlyActionsUsed}
         renewsAt={actionsData.renewsAt}
       />
+
+      {/* Activité de votre assistant */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-slate-800">Activité de votre assistant</h2>
+        <p className="mt-0.5 text-sm text-slate-500">Dernières actions réalisées pour vous</p>
+        <ul className="mt-4 space-y-3">
+          {(
+            recentActivities.length > 0
+              ? recentActivities.map((a) => ({ id: a.id, title: a.title, detail: a.detail, createdAt: a.createdAt }))
+              : clientTasks
+                  .filter((t) => t.status === "COMPLETE")
+                  .slice(0, 5)
+                  .map((t) => ({
+                    id: t.id,
+                    title: `Demande « ${t.title} » terminée`,
+                    detail: null,
+                    createdAt: t.createdAt,
+                  }))
+          ).length === 0 ? (
+            <li className="text-sm text-slate-500">Aucune action récente. Vos demandes en cours apparaîtront ici une fois traitées.</li>
+          ) : (
+            (recentActivities.length > 0
+              ? recentActivities.map((a) => (
+                  <li key={a.id} className="flex gap-3 border-l-2 border-slate-200 pl-4">
+                    <div className="flex-1">
+                      <p className="font-medium text-slate-800">{a.title}</p>
+                      {a.detail && <p className="text-sm text-slate-500">{a.detail}</p>}
+                      <p className="mt-1 text-xs text-slate-400">
+                        {new Date(a.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    </div>
+                  </li>
+                ))
+              : clientTasks
+                  .filter((t) => t.status === "COMPLETE")
+                  .slice(0, 5)
+                  .map((t) => (
+                    <li key={t.id} className="flex gap-3 border-l-2 border-slate-200 pl-4">
+                      <div className="flex-1">
+                        <p className="font-medium text-slate-800">Demande « {t.title} » terminée</p>
+                        <p className="mt-1 text-xs text-slate-400">
+                          {new Date(t.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                      </div>
+                    </li>
+                  ))
+            )
+          )}
+        </ul>
+      </section>
+
+      {/* Temps économisé grâce à BeWork */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-slate-800">Temps économisé grâce à BeWork</h2>
+        <p className="mt-0.5 text-sm text-slate-500">Ce mois-ci</p>
+        <div className="mt-4 flex flex-wrap items-baseline gap-6">
+          <div>
+            <p className="text-2xl font-bold text-[#1d4ed8]">{actionsData.monthlyActionsUsed}</p>
+            <p className="text-sm text-slate-600">actions réalisées</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-green-700">
+              ≈ {Math.round((actionsData.monthlyActionsUsed * 10) / 60)} h
+            </p>
+            <p className="text-sm text-slate-600">économisées</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Suggestions de tâches à déléguer */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-slate-800">Suggestions de tâches à déléguer</h2>
+        <p className="mt-0.5 text-sm text-slate-500">Idées pour gagner du temps au quotidien</p>
+        <ul className="mt-4 space-y-2">
+          {[
+            { label: "Relancer factures impayées", href: "/dashboard/nouvelle-demande" },
+            { label: "Préparer devis clients", href: "/dashboard/nouvelle-demande" },
+            { label: "Rechercher fournisseurs", href: "/dashboard/nouvelle-demande" },
+          ].map((item) => (
+            <li key={item.label}>
+              <Link
+                href={item.href}
+                className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50/50 px-4 py-3 text-sm font-medium text-slate-800 transition hover:border-[#1d4ed8]/30 hover:bg-blue-50/50"
+              >
+                {item.label}
+                <span className="text-[#1d4ed8]">Déléguer →</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       {/* Bloc principal : Mes demandes en cours */}
       <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">

@@ -29,8 +29,19 @@ export default async function AbonnementPage() {
   const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
   if (isAgence) redirect("/dashboard");
 
+  type TaskWithActionsItem = {
+    id: string;
+    title: string;
+    timeSpentMinutes: number | null;
+    actionsUsed: number | null;
+    completedAt: Date | null;
+    projectId: string | null;
+    project: { title: string } | null;
+    assignedTo: { name: string } | null;
+  };
+
   let user: { subscriptionPlan: string | null; monthlyActionsTotal: number | null; monthlyActionsUsed: number | null; actionsResetAt: Date | null } | null = null;
-  let tasksWithActions: Awaited<ReturnType<typeof prisma.task.findMany>> = [];
+  let tasksWithActions: TaskWithActionsItem[] = [];
   let subscriptions: Awaited<ReturnType<typeof prisma.subscription.findMany>> = [];
   let payments: Awaited<ReturnType<typeof prisma.payment.findMany>> = [];
   let actionsTransactions: Awaited<ReturnType<typeof prisma.actionsTransaction.findMany>> = [];

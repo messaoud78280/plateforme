@@ -6,6 +6,7 @@ import { TaskDetailView } from "./TaskDetailView";
 import type { TaskStatus } from "@/types";
 
 interface TaskDetailClientProps {
+  sessionUserId: string;
   task: {
     id: string;
     title: string;
@@ -34,7 +35,7 @@ interface TaskDetailClientProps {
   agents?: { id: string; name: string; email: string }[];
 }
 
-export function TaskDetailClient({ task, canEdit, isAgence, isAgent = false, agents = [] }: TaskDetailClientProps) {
+export function TaskDetailClient({ sessionUserId, task, canEdit, isAgence, isAgent = false, agents = [] }: TaskDetailClientProps) {
   const router = useRouter();
   const [correctionNote, setCorrectionNote] = useState("");
 
@@ -117,6 +118,7 @@ export function TaskDetailClient({ task, canEdit, isAgence, isAgent = false, age
 
   return (
     <TaskDetailView
+      sessionUserId={sessionUserId}
       task={task}
       onStatusChange={canEdit ? handleStatusChange : undefined}
       isAgence={isAgence}

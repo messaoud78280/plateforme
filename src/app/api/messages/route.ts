@@ -170,6 +170,27 @@ export async function POST(request: Request) {
       }
     }
 
+    // Alerte pour le client quand l'assistant (agence) envoie un message
+    if (isAgence && finalReceiverId) {
+      try {
+        const sender = await prisma.user.findUnique({
+          where: { id: session.user.id },
+          select: { name: true },
+        });
+        const excerpt = content.trim().slice(0, 80) + (content.trim().length > 80 ? "…" : "");
+        await prisma.alert.create({
+          data: {
+            title: "Message de votre assistant",
+            message: `${sender?.name ?? "Votre assistant"} vous a répondu sur le projet « ${project.title} » : ${excerpt}`,
+            clientId: finalReceiverId,
+            actionUrl: `/dashboard/messagerie?project=${projectId}`,
+          },
+        });
+      } catch (alertErr) {
+        console.error("Création alerte (message assistant):", alertErr);
+      }
+    }
+
     return NextResponse.json(message);
   } catch (error) {
     console.error("Erreur création message:", error);

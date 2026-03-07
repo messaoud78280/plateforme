@@ -6,8 +6,10 @@ import { TASK_STATUS_LABELS, type TaskStatus } from "@/types";
 import { minutesToActions } from "@/lib/actions";
 import { TaskTimeline } from "./TaskTimeline";
 import { ClientDemandTimeline } from "./ClientDemandTimeline";
+import { TaskConversation } from "./TaskConversation";
 
 interface TaskDetailViewProps {
+  sessionUserId?: string;
   task: {
     id: string;
     title: string;
@@ -49,6 +51,7 @@ const statusColors: Record<TaskStatus, string> = {
 };
 
 export function TaskDetailView({
+  sessionUserId,
   task,
   onStatusChange,
   isAgence,
@@ -150,34 +153,61 @@ export function TaskDetailView({
         </div>
       )}
 
-      {/* Conversation liée + actions (client) */}
-      {!isAgence && (
+      {/* Conversation liée (client) : messagerie intégrée ou lien */}
+      {!isAgence && task.project && sessionUserId && (
+        <TaskConversation
+          projectId={task.project.id}
+          projectTitle={task.project.title}
+          sessionUserId={sessionUserId}
+        />
+      )}
+      {!isAgence && !task.project && (
         <div className="rounded-xl border border-slate-200 bg-white p-6">
-          <h2 className="mb-4 text-lg font-semibold text-slate-800">Échanger et ajouter des éléments</h2>
-          <div className="flex flex-wrap items-center gap-3">
-            <Link
-              href="/dashboard/messagerie"
-              className="inline-flex items-center rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e40af]"
-            >
-              Répondre / Ouvrir la conversation
-            </Link>
-            <Link
-              href="/dashboard/documents"
-              className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            >
-              Ajouter un document
-            </Link>
-          </div>
-          {task.project && (
-            <p className="mt-3 text-sm text-slate-500">
-              Conversation liée au projet : <span className="font-medium text-slate-700">{task.project.title}</span>
-            </p>
-          )}
+          <h2 className="mb-4 text-lg font-semibold text-slate-800">Conversation</h2>
+          <p className="text-sm text-slate-500">Aucun projet lié. Utilisez la messagerie pour échanger avec votre assistant.</p>
+          <Link href="/dashboard/messagerie" className="mt-3 inline-block rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e40af]">
+            Ouvrir la messagerie
+          </Link>
         </div>
       )}
 
-      {/* Pièces jointes déposées avec la tâche */}
-      {task.documents && task.documents.length > 0 && (
+      {/* Documents liés à la demande */}
+      {!isAgence && (
+        <div id="documents" className="scroll-mt-6 rounded-xl border border-slate-200 bg-white p-6">
+          <h2 className="mb-4 text-lg font-semibold text-slate-800">Documents</h2>
+          {task.documents && task.documents.length > 0 ? (
+            <ul className="space-y-2">
+              {task.documents.map((doc) => (
+                <li
+                  key={doc.id}
+                  className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 bg-slate-50 px-4 py-3"
+                >
+                  <span className="min-w-0 truncate text-sm font-medium text-slate-800">{doc.name}</span>
+                  <a
+                    href={doc.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  >
+                    Télécharger
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-slate-500">Aucun document pour le moment.</p>
+          )}
+          <Link
+            href="/dashboard/documents"
+            className="mt-4 inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Ajouter un document
+          </Link>
+        </div>
+      )}
+
+      {/* Pièces jointes (agence/agent) */}
+      {(isAgence || isAgent) && task.documents && task.documents.length > 0 && (
         <div className="rounded-xl border border-slate-200 bg-white p-6">
           <h2 className="mb-4 text-lg font-semibold text-slate-800">Pièces jointes ({task.documents.length})</h2>
           <ul className="space-y-2">

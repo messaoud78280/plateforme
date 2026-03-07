@@ -314,6 +314,7 @@ export default async function DashboardPage({
             }
           }
           tasksEnCours={tasksEnCours}
+          tasksCompleteesCeMois={tasksCompleteesCeMois}
           tempsMoyenJours={tempsMoyenJours}
           clientTasks={clientTasks}
           recentMessages={recentMessages}

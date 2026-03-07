@@ -59,6 +59,21 @@ export async function PATCH(
       },
     });
 
+    if (status === "COMPLETE" && task.clientId) {
+      try {
+        await prisma.alert.create({
+          data: {
+            title: "Demande terminée",
+            message: `Votre demande "${task.title}" a été traitée et marquée comme terminée.`,
+            clientId: task.clientId,
+            actionUrl: `/dashboard/taches/${id}`,
+          },
+        });
+      } catch {
+        // ignore si table Alert absente
+      }
+    }
+
     if (actionsToDeduct > 0 && task.clientId) {
       const client = await prisma.user.findUnique({
         where: { id: task.clientId },

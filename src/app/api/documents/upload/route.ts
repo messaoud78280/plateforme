@@ -136,6 +136,21 @@ export async function POST(request: Request) {
       },
     });
     created.push({ id: doc.id, name: doc.name });
+
+    if (taskIdTrimmed && clientId) {
+      try {
+        await prisma.alert.create({
+          data: {
+            title: "Document ajouté à votre demande",
+            message: `Un document "${file.name}" a été ajouté à l'une de vos demandes.`,
+            clientId,
+            actionUrl: `/dashboard/taches/${taskIdTrimmed}#documents`,
+          },
+        });
+      } catch {
+        // ignore si table Alert absente
+      }
+    }
   }
 
   return NextResponse.json({ created, errors });

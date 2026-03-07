@@ -29,6 +29,7 @@ type ClientDashboardContentProps = {
     renewsAt: Date | null;
   };
   tasksEnCours: number;
+  tasksCompleteesCeMois: number;
   tempsMoyenJours: number;
   clientTasks: {
     id: string;
@@ -65,6 +66,7 @@ export function ClientDashboardContent({
   contractStatus,
   actionsData,
   tasksEnCours,
+  tasksCompleteesCeMois,
   tempsMoyenJours,
   clientTasks,
   recentMessages,
@@ -131,6 +133,30 @@ export function ClientDashboardContent({
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <p className="text-sm font-medium text-slate-500">Temps moyen de traitement</p>
           <p className="mt-1 text-2xl font-bold text-slate-800">{tempsMoyenLabel}</p>
+        </div>
+      </section>
+
+      {/* Historique de productivité */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-slate-800">Temps économisé grâce à BeWork</h2>
+        <p className="mt-1 text-sm text-slate-500">
+          Votre activité sur la plateforme ce mois-ci.
+        </p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-4">
+            <p className="text-2xl font-bold text-slate-800">{tasksCompleteesCeMois}</p>
+            <p className="text-sm text-slate-500">Demandes réalisées ce mois</p>
+          </div>
+          <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-4">
+            <p className="text-2xl font-bold text-[#1d4ed8]">{actionsData.monthlyActionsUsed}</p>
+            <p className="text-sm text-slate-500">Actions réalisées</p>
+          </div>
+          <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-4">
+            <p className="text-2xl font-bold text-green-700">
+              {actionsData.monthlyActionsUsed * 10} min
+            </p>
+            <p className="text-sm text-slate-500">Temps estimé économisé</p>
+          </div>
         </div>
       </section>
 

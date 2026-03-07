@@ -1,10 +1,11 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { TaskListView } from "@/components/tasks/TaskListView";
 import { DepotTacheForm } from "@/components/tasks/DepotTacheForm";
-import { NouvelleDemandeTrigger } from "@/components/demands/NouvelleDemandeTrigger";
+import { MesDemandesList } from "@/components/tasks/MesDemandesList";
 
 export default async function TachesPage({
   searchParams,
@@ -19,12 +20,12 @@ export default async function TachesPage({
 
   const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
   const isAgent = session.user.role === "AGENT";
+  const isClient = session.user.role === "CLIENT";
   const params = await searchParams;
   const statusFilter = params.statut as "EN_ATTENTE" | "EN_COURS" | "COMPLETE" | undefined;
   const validStatus = statusFilter && ["EN_ATTENTE", "EN_COURS", "COMPLETE"].includes(statusFilter)
     ? statusFilter
     : undefined;
-  const openNouvelleDemande = params.nouvelle === "1";
 
   let tasks: Awaited<ReturnType<typeof prisma.task.findMany>> = [];
   let projects: { id: string; title: string }[] = [];
@@ -38,7 +39,7 @@ export default async function TachesPage({
       tasks = await prisma.task.findMany({
         where: {
           ...taskWhere,
-          ...(validStatus ? { status: validStatus } : {}),
+          ...(validStatus && !isClient ? { status: validStatus } : {}),
         },
         include: {
           project: { select: { id: true, title: true } },
@@ -58,6 +59,49 @@ export default async function TachesPage({
     // Table absente ou client Prisma non régénéré
   }
 
+  type TaskWithRelations = (typeof tasks)[number] & {
+    project?: { id: string; title: string } | null;
+    assignedTo?: { id: string; name: string; email: string } | null;
+    correctionNote?: string | null;
+  };
+  const clientTasksForList = isClient
+    ? (tasks as TaskWithRelations[]).map((t) => ({
+        id: t.id,
+        title: t.title,
+        description: t.description,
+        status: t.status,
+        createdAt: t.createdAt,
+        actionsUsed: t.actionsUsed,
+        estimatedActions: t.estimatedActions,
+        correctionNote: t.correctionNote ?? null,
+        project: t.project ?? null,
+        assignedTo: t.assignedTo ? { id: t.assignedTo.id, name: t.assignedTo.name } : null,
+      }))
+    : [];
+
+  if (isClient) {
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800">Mes demandes</h1>
+            <p className="mt-1 text-slate-600">
+              Suivez l&apos;avancement de vos demandes et échangez avec votre assistant.
+            </p>
+          </div>
+          <Link
+            href="/dashboard/nouvelle-demande"
+            className="rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af]"
+          >
+            Nouvelle demande
+          </Link>
+        </div>
+
+        <MesDemandesList tasks={clientTasksForList} />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -66,17 +110,12 @@ export default async function TachesPage({
           <p className="mt-1 text-slate-600">
             {isAgence
               ? "Tâches déposées par les clients. Cliquez sur une tâche pour la prendre en charge ou la marquer comme terminée."
-              : isAgent
-                ? "Tâches qui vous sont assignées. Indiquez le temps passé lors de la clôture pour déduire les actions du client."
-                : "Déposez vos demandes et suivez leur avancement."}
+              : "Tâches qui vous sont assignées. Indiquez le temps passé lors de la clôture pour déduire les actions du client."}
           </p>
         </div>
-        {session.user.role === "CLIENT" && (
-          <NouvelleDemandeTrigger initialOpen={openNouvelleDemande} variant="primary" />
-        )}
       </div>
 
-      {session.user.role === "CLIENT" && <DepotTacheForm projects={projects} />}
+      <DepotTacheForm projects={projects} />
 
       {(isAgence || isAgent) && (
         <div className="flex flex-wrap gap-2">

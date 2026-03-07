@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 type MessageItem = {
@@ -42,6 +42,8 @@ function formatDate(d: string) {
 
 export function MessagesSection({ isAgence, sessionUserId, variant = "rdv" }: MessagesSectionProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const projectFromUrl = searchParams.get("project");
 
   const [messages, setMessages] = useState<MessageItem[]>([]);
   const [projects, setProjects] = useState<ProjectItem[]>([]);
@@ -54,6 +56,7 @@ export function MessagesSection({ isAgence, sessionUserId, variant = "rdv" }: Me
   const [sendContent, setSendContent] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(projectFromUrl || "");
 
   useEffect(() => {
     async function load() {
@@ -92,6 +95,12 @@ export function MessagesSection({ isAgence, sessionUserId, variant = "rdv" }: Me
     }
     load();
   }, [isAgence]);
+
+  useEffect(() => {
+    if (projectFromUrl && projects.some((p) => p.id === projectFromUrl)) {
+      setSelectedProjectId(projectFromUrl);
+    }
+  }, [projectFromUrl, projects]);
 
   const nouveauxMessages = messages.filter(
     (m) => m.receiver.id === sessionUserId && !m.read
@@ -175,6 +184,171 @@ export function MessagesSection({ isAgence, sessionUserId, variant = "rdv" }: Me
     return (
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <p className="text-slate-500">Chargement des messages...</p>
+      </div>
+    );
+  }
+
+  const projetsAvecMessagesIds = [...new Set(tousLesMessages.map((m) => m.project.id))];
+  const conversationsList = projects.filter((p) => projetsAvecMessagesIds.includes(p.id));
+  const messagesConversation = selectedProjectId
+    ? tousLesMessages.filter((m) => m.project.id === selectedProjectId)
+    : [];
+  const selectedProject = projects.find((p) => p.id === selectedProjectId);
+  const selectedProjectRecipients = selectedProjectId
+    ? (() => {
+        const p = projects.find((x) => x.id === selectedProjectId);
+        const list: { id: string; name: string; role: string }[] = [];
+        const gerante = recipients.find((r) => r.role === "Gérante");
+        if (gerante) list.push(gerante);
+        if (p?.assignedTo)
+          list.push({ id: p.assignedTo.id, name: p.assignedTo.name, role: "Agent en charge" });
+        return list;
+      })()
+    : [];
+
+  if (!isAgence && variant === "messagerie") {
+    return (
+      <div className="flex min-h-[500px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <aside className="w-72 shrink-0 border-r border-slate-200 bg-slate-50/50">
+          <div className="p-4">
+            <h2 className="text-sm font-semibold text-slate-800">Conversations</h2>
+            <p className="mt-0.5 text-xs text-slate-500">Sélectionnez un projet pour voir les échanges.</p>
+          </div>
+          <ul className="max-h-[460px] overflow-y-auto">
+            {conversationsList.length === 0 ? (
+              <li className="px-4 py-6 text-center text-sm text-slate-500">Aucune conversation.</li>
+            ) : (
+              conversationsList.map((p) => {
+                const lastMsg = tousLesMessages.find((m) => m.project.id === p.id);
+                const unread = messages.filter(
+                  (m) => m.project.id === p.id && m.receiver.id === sessionUserId && !m.read
+                ).length;
+                return (
+                  <li key={p.id}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedProjectId(p.id)}
+                      className={`w-full border-l-2 px-4 py-3 text-left transition ${
+                        selectedProjectId === p.id
+                          ? "border-[#1d4ed8] bg-blue-50/50"
+                          : "border-transparent hover:bg-slate-100/80"
+                      }`}
+                    >
+                      <p className="truncate text-sm font-medium text-slate-800">{p.title}</p>
+                      {lastMsg && (
+                        <p className="mt-0.5 truncate text-xs text-slate-500">
+                          {lastMsg.content.slice(0, 50)}
+                          {lastMsg.content.length > 50 ? "…" : ""}
+                        </p>
+                      )}
+                      {unread > 0 && (
+                        <span className="mt-1 inline-flex rounded-full bg-amber-500 px-2 py-0.5 text-xs font-medium text-white">
+                          {unread}
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                );
+              })
+            )}
+          </ul>
+        </aside>
+        <div className="flex min-w-0 flex-1 flex-col">
+          {selectedProjectId && selectedProject ? (
+            <>
+              <div className="border-b border-slate-200 px-4 py-3">
+                <h3 className="font-semibold text-slate-800">{selectedProject.title}</h3>
+                {selectedProject.assignedTo && (
+                  <p className="text-xs text-slate-500">Référent : {selectedProject.assignedTo.name}</p>
+                )}
+              </div>
+              <div className="flex-1 space-y-3 overflow-y-auto p-4">
+                {messagesConversation.map((m) => {
+                  const isMe = m.sender.id === sessionUserId;
+                  return (
+                    <div
+                      key={m.id}
+                      className={`rounded-lg px-3 py-2 ${
+                        isMe ? "ml-8 bg-[#1d4ed8]/10" : "mr-8 bg-slate-100"
+                      }`}
+                    >
+                      <p className="text-xs font-medium text-slate-600">{m.sender.name}</p>
+                      <p className="mt-0.5 text-sm text-slate-800">{m.content}</p>
+                      <p className="mt-1 text-xs text-slate-400">{formatDate(m.createdAt)}</p>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="border-t border-slate-200 p-4">
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const content = sendContent.trim();
+                    if (!content || sending || !selectedProjectId) return;
+                    setSending(true);
+                    setError("");
+                    try {
+                      const body: { projectId: string; content: string; receiverId?: string } = {
+                        projectId: selectedProjectId,
+                        content,
+                      };
+                      if (selectedProjectRecipients.length > 0)
+                        body.receiverId = selectedProjectRecipients[0].id;
+                      const res = await fetch("/api/messages", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(body),
+                      });
+                      if (res.ok) {
+                        setSendContent("");
+                        const refresh = await fetch("/api/messages");
+                        if (refresh.ok) setMessages(await refresh.json());
+                        router.refresh();
+                      } else {
+                        const data = await res.json();
+                        setError(data.error || "Erreur envoi");
+                      }
+                    } catch {
+                      setError("Erreur de connexion.");
+                    } finally {
+                      setSending(false);
+                    }
+                  }}
+                  className="flex gap-2"
+                >
+                  <textarea
+                    value={sendContent}
+                    onChange={(e) => setSendContent(e.target.value)}
+                    placeholder="Écrire un message..."
+                    rows={2}
+                    className="min-w-0 flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-[#1d4ed8] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8]/20"
+                    disabled={sending}
+                  />
+                  <button
+                    type="submit"
+                    disabled={sending || !sendContent.trim()}
+                    className="shrink-0 rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e40af] disabled:opacity-50"
+                  >
+                    Envoyer
+                  </button>
+                </form>
+                {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+                <p className="mt-2 text-xs text-slate-500">
+                  <Link href="/dashboard/documents" className="font-medium text-[#1d4ed8] hover:underline">
+                    Envoyer un document →
+                  </Link>
+                </p>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-1 items-center justify-center p-8 text-center">
+              <p className="text-slate-500">Sélectionnez une conversation dans la liste.</p>
+              {projects.length > 0 && conversationsList.length === 0 && (
+                <p className="mt-2 text-sm text-slate-500">Envoyez un premier message depuis un projet pour démarrer une conversation.</p>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     );
   }

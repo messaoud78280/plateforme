@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import Link from "next/link";
 import { OutilsCommunication } from "@/components/OutilsCommunication";
 import { UserAccountDropdown } from "@/components/dashboard/UserAccountDropdown";
+import { NotificationsDropdown } from "@/components/dashboard/NotificationsDropdown";
 
 export default async function DashboardLayout({
   children,
@@ -27,7 +28,8 @@ export default async function DashboardLayout({
           >
             BeWork
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            {session.user?.role === "CLIENT" && <NotificationsDropdown />}
             <OutilsCommunication />
             <UserAccountDropdown
               userName={session.user?.name ?? null}

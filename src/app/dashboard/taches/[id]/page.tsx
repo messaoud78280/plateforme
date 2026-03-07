@@ -78,6 +78,7 @@ export default async function TacheDetailPage({
       </Link>
 
       <TaskDetailClient
+        sessionUserId={session.user.id}
         task={{
           id: task.id,
           title: task.title,

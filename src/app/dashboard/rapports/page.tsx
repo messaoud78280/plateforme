@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import Link from "next/link";
 import { ReportsView } from "@/components/reports/ReportsView";
+import { BackLink } from "@/components/ui/BackLink";
 
 const PERIODS = [
   { key: "7d", label: "7 jours" },
@@ -30,6 +31,7 @@ export default async function RapportsPage({
 
   return (
     <div className="space-y-6">
+      <BackLink href="/dashboard">Dashboard</BackLink>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Rapports</h1>

@@ -92,6 +92,9 @@ export async function POST(request: NextRequest) {
       if (!Number.isNaN(d.getTime())) desiredDateValid = d;
     }
 
+    const countBefore = await prisma.task.count({
+      where: { clientId: session.user.id },
+    });
     const task = await prisma.task.create({
       data: {
         title: title.trim(),
@@ -108,7 +111,7 @@ export async function POST(request: NextRequest) {
             : null,
       },
     });
-    return NextResponse.json(task);
+    return NextResponse.json({ ...task, firstRequest: countBefore === 0 });
   } catch (e) {
     const err = e as { message?: string; code?: string };
     const msg = String(err?.message ?? "Erreur inconnue");

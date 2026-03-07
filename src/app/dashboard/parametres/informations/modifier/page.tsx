@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { authOptions } from "@/lib/auth";
+import { BackLink } from "@/components/ui/BackLink";
 import { prisma } from "@/lib/prisma";
 import { InformationsPersonnellesForm } from "@/components/parametres/InformationsPersonnellesForm";
 
@@ -37,12 +37,7 @@ export default async function ModifierInformationsPage() {
         <h2 className="text-lg font-semibold text-[#475569]">
           Modifier les coordonnées personnelles
         </h2>
-        <Link
-          href="/dashboard/parametres/informations"
-          className="text-sm font-medium text-[#1d4ed8] hover:underline hover:text-[#1e40af]"
-        >
-          ← Retour aux informations
-        </Link>
+        <BackLink href="/dashboard/parametres/informations">Retour aux informations</BackLink>
       </div>
       <InformationsPersonnellesForm
         initialData={{

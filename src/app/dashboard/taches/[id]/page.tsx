@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { TaskDetailClient } from "@/components/tasks/TaskDetailClient";
+import { BackLink } from "@/components/ui/BackLink";
 
 export default async function TacheDetailPage({
   params,
@@ -70,12 +71,7 @@ export default async function TacheDetailPage({
 
   return (
     <div className="space-y-6">
-      <Link
-        href="/dashboard/taches"
-        className="text-sm text-blue-600 hover:underline"
-      >
-        ← Retour aux tâches
-      </Link>
+      <BackLink href="/dashboard/taches">Retour aux tâches</BackLink>
 
       <TaskDetailClient
         sessionUserId={session.user.id}

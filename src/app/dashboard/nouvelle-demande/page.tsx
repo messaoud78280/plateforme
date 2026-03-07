@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NouvelleDemandeForm } from "@/components/demands/NouvelleDemandeForm";
+import { BackLink } from "@/components/ui/BackLink";
 
 export default async function NouvelleDemandePage() {
   const session = await getServerSession(authOptions);
@@ -26,7 +27,8 @@ export default async function NouvelleDemandePage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-3xl space-y-4">
+      <BackLink href="/dashboard">Dashboard</BackLink>
       <NouvelleDemandeForm actionsRemaining={actionsRemaining} />
     </div>
   );

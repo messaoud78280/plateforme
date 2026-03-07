@@ -136,11 +136,11 @@ export function ClientDashboardContent({
         </div>
       </section>
 
-      {/* Historique de productivité */}
+      {/* Votre activité ce mois-ci */}
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-800">Temps économisé grâce à BeWork</h2>
+        <h2 className="text-lg font-semibold text-slate-800">Votre activité ce mois-ci</h2>
         <p className="mt-1 text-sm text-slate-500">
-          Votre activité sur la plateforme ce mois-ci.
+          Nombre de demandes, actions réalisées et temps estimé économisé.
         </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-4">

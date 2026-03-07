@@ -14,6 +14,7 @@ import { AppointmentCalendar } from "@/components/appointments/AppointmentCalend
 import { ActionsWidget } from "@/components/dashboard/ActionsWidget";
 import { NouvelleDemandeTrigger } from "@/components/demands/NouvelleDemandeTrigger";
 import { ClientDashboardContent } from "@/components/dashboard/ClientDashboardContent";
+import { BackLink } from "@/components/ui/BackLink";
 
 export default async function DashboardPage({
   searchParams,
@@ -301,6 +302,7 @@ export default async function DashboardPage({
   if (isClient) {
     return (
       <div className="space-y-8">
+        <BackLink href="/">Retour à l&apos;accueil</BackLink>
         <ClientDashboardContent
           userName={session.user?.name ?? null}
           openDemande={openDemande}
@@ -327,6 +329,7 @@ export default async function DashboardPage({
 
   return (
     <div className="space-y-8">
+      <BackLink href="/">Retour à l&apos;accueil</BackLink>
       <ScrollToMessages />
       {/* Carte de bienvenue + CTA Nouvelle demande (client) */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

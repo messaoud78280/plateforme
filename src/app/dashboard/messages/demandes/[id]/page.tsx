@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { BackLink } from "@/components/ui/BackLink";
 
 const STATUS_LABELS: Record<string, string> = {
   NOUVEAU: "Nouvelle",
@@ -51,12 +52,7 @@ export default async function DemandeContactPage({
 
   return (
     <div className="space-y-6">
-      <Link
-        href="/dashboard/messages"
-        className="text-sm text-[#1d4ed8] hover:underline"
-      >
-        ← Retour aux RDV
-      </Link>
+      <BackLink href="/dashboard/messages">Retour aux RDV</BackLink>
 
       <div className="rounded-xl border border-[#c8cdd6] bg-white shadow-sm">
         <div className="border-b border-[#e0e4ea] px-6 py-4 flex items-center justify-between">

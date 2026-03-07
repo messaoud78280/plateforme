@@ -7,6 +7,7 @@ import {
   DEMANDE_CATEGORIES,
   DEMANDE_PRIORITIES,
   DEMANDE_ESTIMATION_OPTIONS,
+  DEMANDE_TEMPLATES,
 } from "./constants";
 
 const DRAFT_KEY = "bework-nouvelle-demande-draft";
@@ -46,6 +47,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
   const [error, setError] = useState("");
   const [uploadProgress, setUploadProgress] = useState("");
   const [success, setSuccess] = useState(false);
+  const [firstRequest, setFirstRequest] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
   const [dragOver, setDragOver] = useState(false);
 
@@ -152,6 +154,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
       }
       setUploadProgress("");
       clearDraft();
+      setFirstRequest(Boolean(data.firstRequest));
       setSuccess(true);
       router.refresh();
     } catch {
@@ -164,14 +167,22 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
     return (
       <div className="space-y-8">
         <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600 mb-4">
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-600 mb-4">
+            {firstRequest ? (
+              <span className="text-3xl">🎉</span>
+            ) : (
+              <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            )}
           </div>
-          <h2 className="text-xl font-semibold text-slate-800">Votre demande a bien été envoyée</h2>
+          <h2 className="text-xl font-semibold text-slate-800">
+            {firstRequest ? "Bravo !" : "Votre demande a bien été envoyée"}
+          </h2>
           <p className="mt-2 text-slate-600">
-            Votre assistant l&apos;analyse et vous répond rapidement.
+            {firstRequest
+              ? "Votre première demande a été envoyée. Votre assistant l'analyse actuellement."
+              : "Votre assistant l'analyse et vous répond rapidement."}
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
@@ -215,6 +226,30 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
           <span className="text-lg font-bold text-[#1d4ed8]">{actionsRemaining}</span>
         </div>
       </header>
+
+      {/* Modèles / exemples de demandes */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-base font-semibold text-slate-800 mb-2">Exemples de demandes</h2>
+        <p className="text-sm text-slate-500 mb-4">
+          Cliquez sur un modèle pour pré-remplir le formulaire.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {DEMANDE_TEMPLATES.map((tpl) => (
+            <button
+              key={tpl.id}
+              type="button"
+              onClick={() => {
+                setTitle(tpl.title);
+                setCategory(tpl.category);
+                setDescription(tpl.description);
+              }}
+              className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 hover:border-[#1d4ed8] hover:bg-blue-50/50 hover:text-[#1d4ed8] transition"
+            >
+              {tpl.title}
+            </button>
+          ))}
+        </div>
+      </section>
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Bloc 1 : Informations principales */}

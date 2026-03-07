@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { ProfilSidebar } from "@/components/parametres/ProfilSidebar";
 import { ProfilBreadcrumb } from "@/components/parametres/ProfilBreadcrumb";
+import { BackLink } from "@/components/ui/BackLink";
 
 export default async function ParametresLayout({
   children,
@@ -21,8 +22,9 @@ export default async function ParametresLayout({
 
   return (
     <div className="mx-auto max-w-4xl">
+      <BackLink href="/dashboard" className="mb-4 block">Dashboard</BackLink>
       <ProfilBreadcrumb />
-      <h1 className="text-2xl font-bold tracking-tight text-[#0f172a]">
+      <h1 className="mt-4 text-2xl font-bold tracking-tight text-[#0f172a]">
         Votre profil
       </h1>
       <div className="mt-8 flex gap-8">

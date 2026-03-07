@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { MessagesSection } from "@/components/dashboard/MessagesSection";
+import { BackLink } from "@/components/ui/BackLink";
 
 export default async function MessageriePage() {
   const session = await getServerSession(authOptions);
@@ -14,6 +15,7 @@ export default async function MessageriePage() {
 
   return (
     <div className="space-y-8">
+      <BackLink href="/dashboard">Dashboard</BackLink>
       <div>
         <h1 className="text-2xl font-bold text-[#0f172a]">Messagerie</h1>
         <p className="mt-1 text-[#334155]">

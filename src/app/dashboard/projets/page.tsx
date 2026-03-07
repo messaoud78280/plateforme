@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { CreateProjectForm } from "@/components/CreateProjectForm";
+import { BackLink } from "@/components/ui/BackLink";
 
 const PROJECT_STATUSES: ProjectStatus[] = ["NOUVEAU", "EN_COURS", "EN_ATTENTE", "TERMINE"];
 
@@ -83,6 +84,7 @@ export default async function ProjetsPage({
 
   return (
     <div className="space-y-8">
+      <BackLink href="/dashboard">Dashboard</BackLink>
       <div>
         <h1 className="text-2xl font-bold text-slate-800">Projets</h1>
         <p className="mt-1 text-slate-600">

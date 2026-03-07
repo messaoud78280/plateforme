@@ -27,3 +27,37 @@ export const EXEMPLES_DEMANDES = [
   "Rédiger un email professionnel de relance client",
   "Trouver 3 prestataires de nettoyage de bureaux à Paris",
 ];
+
+/** Modèles de demandes pour le guidage et la première demande */
+export const DEMANDE_TEMPLATES = [
+  {
+    id: "devis",
+    title: "Préparer un devis",
+    category: "Facturation / devis",
+    description: "Client : [nom] — Prestation : [détails] — Délai souhaité : [date]",
+  },
+  {
+    id: "relance-facture",
+    title: "Relancer une facture",
+    category: "Facturation / devis",
+    description: "Facture n° [numéro] — Client : [nom] — Échéance : [date] — Relance par email puis téléphone si besoin",
+  },
+  {
+    id: "rdv",
+    title: "Organiser un rendez-vous",
+    category: "Organisation",
+    description: "Type : [réunion / visite / téléphonique] — Participants : [noms] — Créneaux préférés : [dates/heures]",
+  },
+  {
+    id: "fournisseur",
+    title: "Rechercher un fournisseur",
+    category: "Recherche",
+    description: "Secteur : [activité] — Zone géographique : [ville/région] — Critères : [budget, délais, références]",
+  },
+  {
+    id: "deplacement",
+    title: "Organisation d'un déplacement",
+    category: "Organisation",
+    description: "Destination : [ville] — Dates : [aller-retour] — Hébergement et transport à réserver",
+  },
+] as const;

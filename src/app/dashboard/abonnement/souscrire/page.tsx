@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { getPlan, PLAN_KEYS, SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
 import { SouscrireClient } from "./SouscrireClient";
-import Link from "next/link";
+import { BackLink } from "@/components/ui/BackLink";
 
 export const dynamic = "force-dynamic";
 
@@ -27,12 +27,7 @@ export default async function SouscrirePage({ searchParams }: Props) {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <Link
-        href="/tarifs"
-        className="inline-flex text-sm font-medium text-slate-600 hover:text-slate-900"
-      >
-        ← Retour aux tarifs
-      </Link>
+      <BackLink href="/dashboard/abonnement">Retour à l&apos;abonnement</BackLink>
       <h1 className="text-2xl font-bold text-slate-800">Souscription</h1>
       {plan ? (
         <SouscrireClient

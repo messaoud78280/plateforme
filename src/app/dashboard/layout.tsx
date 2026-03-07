@@ -80,6 +80,12 @@ export default async function DashboardLayout({
                 Abonnement
               </Link>
               <Link
+                href="/dashboard/equipe"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-[#334155] hover:bg-[#eef0f4] hover:text-[#0f172a]"
+              >
+                Équipe
+              </Link>
+              <Link
                 href="/dashboard/parametres"
                 className="rounded-lg px-3 py-2 text-sm font-medium text-[#334155] hover:bg-[#eef0f4] hover:text-[#0f172a]"
               >

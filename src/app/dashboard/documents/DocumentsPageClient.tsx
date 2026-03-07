@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { DocumentUploadZone } from "@/components/documents/DocumentUploadZone";
+import { BackLink } from "@/components/ui/BackLink";
 import { DocumentCard } from "@/components/documents/DocumentCard";
 import type { Document } from "@prisma/client";
 
@@ -73,6 +74,7 @@ export function DocumentsPageClient({
 
   return (
     <div className="space-y-6">
+      <BackLink href="/dashboard">Dashboard</BackLink>
       <h1 className="text-2xl font-bold text-slate-800">Mes documents</h1>
 
       <DocumentUploadZone

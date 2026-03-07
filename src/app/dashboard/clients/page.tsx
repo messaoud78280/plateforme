@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { BackLink } from "@/components/ui/BackLink";
 
 export default async function ClientsPage() {
   const session = await getServerSession(authOptions);
@@ -35,6 +36,7 @@ export default async function ClientsPage() {
 
   return (
     <div className="space-y-8">
+      <BackLink href="/dashboard">Dashboard</BackLink>
       <div>
         <h1 className="text-2xl font-bold text-[#0f172a]">Clients</h1>
         <p className="mt-1 text-[#334155]">

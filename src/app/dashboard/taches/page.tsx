@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { TaskListView } from "@/components/tasks/TaskListView";
 import { DepotTacheForm } from "@/components/tasks/DepotTacheForm";
 import { MesDemandesList } from "@/components/tasks/MesDemandesList";
+import { BackLink } from "@/components/ui/BackLink";
 
 export default async function TachesPage({
   searchParams,
@@ -82,6 +83,7 @@ export default async function TachesPage({
   if (isClient) {
     return (
       <div className="space-y-8">
+        <BackLink href="/dashboard">Dashboard</BackLink>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-800">Mes demandes</h1>
@@ -104,6 +106,7 @@ export default async function TachesPage({
 
   return (
     <div className="space-y-8">
+      <BackLink href="/dashboard">Dashboard</BackLink>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Mes tâches</h1>

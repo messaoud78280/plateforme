@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { BackLink } from "@/components/ui/BackLink";
 import { AssignAgentProject } from "@/components/clients/AssignAgentProject";
 import { AssignAgentTask } from "@/components/clients/AssignAgentTask";
 
@@ -67,12 +68,7 @@ export default async function ClientDetailPage({
 
   return (
     <div className="space-y-8">
-      <Link
-        href="/dashboard/clients"
-        className="text-sm text-[#1d4ed8] hover:underline"
-      >
-        ← Retour aux clients
-      </Link>
+      <BackLink href="/dashboard/clients">Retour aux clients</BackLink>
 
       <div className="rounded-xl border border-[#c8cdd6] bg-white p-6 shadow-sm">
         <h1 className="text-2xl font-bold text-[#0f172a]">{client.name}</h1>

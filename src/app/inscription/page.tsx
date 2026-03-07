@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { BackLink } from "@/components/ui/BackLink";
 
 const FORMES_JURIDIQUES = [
   "Profession libérale",
@@ -70,13 +71,14 @@ export default function InscriptionPage() {
       return;
     }
 
-    router.push("/connexion?registered=1");
+    router.push("/connexion?registered=1&callbackUrl=/dashboard/onboarding");
     router.refresh();
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-8">
       <div className="w-full max-w-lg rounded-2xl bg-white p-8 shadow-lg">
+        <BackLink href="/connexion" className="mb-4 inline-block">Retour à la connexion</BackLink>
         <h1 className="mb-2 text-2xl font-bold text-slate-800">
           Créer un compte professionnel
         </h1>

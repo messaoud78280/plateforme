@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { ComparatifReveal } from "@/components/tarifs/ComparatifReveal";
 import { StickyCtaMobile } from "@/components/tarifs/StickyCtaMobile";
+import { TARIFS_PLANS } from "@/lib/tarifs-plans";
 
 export const metadata: Metadata = {
   title: "Tarifs BeWork – Assistants administratifs virtuels dès 215€/mois",
@@ -12,48 +13,7 @@ export const metadata: Metadata = {
     "Offres Découverte, Standard, Business et Premium. Tarification au quota d’actions, tous services inclus. Assistants francophones augmentés par l'IA, pilotage en France.",
 };
 
-const plans = [
-  {
-    planKey: "DECOUVERTE" as const,
-    name: "Offre Découverte",
-    price: "109",
-    billing: "one_shot" as const,
-    detail: "Tous services administratifs inclus",
-    highlights: ["Jusqu\u2019à 60 actions", "Tous services administratifs inclus", "Sans abonnement", "Sans engagement"],
-    idealFor: "Tester BeWork sur un besoin ciblé",
-    badge: null as string | null,
-  },
-  {
-    planKey: "STANDARD" as const,
-    name: "Standard",
-    price: "215",
-    billing: "monthly" as const,
-    detail: "Tous services inclus",
-    highlights: ["120 actions / mois", "Tous services inclus"],
-    idealFor: "TPE, charge administrative régulière",
-    badge: null as string | null,
-  },
-  {
-    planKey: "STANDARD_PLUS" as const,
-    name: "Business",
-    price: "415",
-    billing: "monthly" as const,
-    detail: "Tous services inclus",
-    highlights: ["240 actions / mois", "Tous services inclus", "Priorité de traitement", "Assistant administratif dédié"],
-    idealFor: "PME, flux soutenu et réactivité",
-    badge: "Le plus choisi" as string | null,
-  },
-  {
-    planKey: "PREMIUM" as const,
-    name: "Premium",
-    price: "630",
-    billing: "monthly" as const,
-    detail: "Tous services inclus",
-    highlights: ["360 actions / mois", "Tous services inclus", "Priorité élevée", "Assistant administratif dédié"],
-    idealFor: "Dirigeants, dossiers multiples, suivi exigeant",
-    badge: null as string | null,
-  },
-];
+const plans = TARIFS_PLANS;
 
 const reassurance = [
   { label: "Pilotage", desc: "Direction en France, suivi de qualité" },

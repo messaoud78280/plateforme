@@ -38,10 +38,15 @@ model User {
   monthlyActionsTotal Int      @default(120)  // selon abonnement
   monthlyActionsUsed  Int      @default(0)    // consommées ce mois
   actionsResetAt      DateTime? // dernier reset (début du mois)
+  invitedById         String?   // utilisateur qui a invité (équipe)
+  teamRole            String?   // ADMIN | USER | SUPERVISEUR (si membre d'une équipe)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
+  invitedBy           User?     @relation("TeamMembers", fields: [invitedById], references: [id], onDelete: SetNull)
+  invitedUsers        User[]    @relation("TeamMembers")
+  invitationsSent     Invitation[]
   messagesSent       Message[]  @relation("SentMessages")
   messagesReceived   Message[]  @relation("ReceivedMessages")
   projects           Project[]  @relation("ClientProjects")
@@ -59,6 +64,29 @@ model User {
   subscriptions         Subscription[]
   payments              Payment[]
   actionsTransactions   ActionsTransaction[]
+}
+
+// Invitation à rejoindre l'équipe d'un client
+model Invitation {
+  id          String   @id @default(cuid())
+  email       String
+  role        String   // ADMIN | USER | SUPERVISEUR
+  invitedById String
+  token       String   @unique
+  status      InvitationStatus @default(PENDING)
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  invitedBy   User     @relation(fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@index([invitedById])
+  @@index([email, status])
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
 }
 
 // Formule / abonnement client (historique et état)

@@ -5,6 +5,7 @@ import { isAgenceOrManager } from "@/types";
 import { SimulationController } from "@/components/simulation/SimulationController";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { BackLink } from "@/components/ui/BackLink";
 
 export default async function SimulationPage() {
   const session = await getServerSession(authOptions);
@@ -32,6 +33,7 @@ export default async function SimulationPage() {
 
   return (
     <div className="space-y-8">
+      <BackLink href="/dashboard">Dashboard</BackLink>
       <div>
         <h1 className="text-2xl font-bold text-slate-800">Simulation BelleVie</h1>
         <p className="mt-1 text-slate-600">

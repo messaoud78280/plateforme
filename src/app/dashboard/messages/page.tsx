@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { AppointmentCalendar } from "@/components/appointments/AppointmentCalendar";
+import { BackLink } from "@/components/ui/BackLink";
 
 const STATUS_LABELS: Record<string, string> = {
   NOUVEAU: "Nouvelle",
@@ -42,6 +43,7 @@ export default async function MessagesPage() {
 
   return (
     <div className="space-y-8">
+      <BackLink href="/dashboard">Dashboard</BackLink>
       <div>
         <h1 className="text-2xl font-bold text-[#0f172a]">RDV</h1>
         <p className="mt-1 text-[#334155]">

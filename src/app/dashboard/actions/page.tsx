@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { authOptions } from "@/lib/auth";
+import { BackLink } from "@/components/ui/BackLink";
 
 const ROWS: { category: string; example: string; actions: string }[] = [
   { category: "Gestion d’emails", example: "Répondre à un email simple", actions: "1" },
@@ -24,14 +24,7 @@ export default async function ActionsInfoPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <div className="flex items-center gap-4">
-        <Link
-          href="/dashboard"
-          className="text-sm font-medium text-slate-600 hover:text-slate-900"
-        >
-          ← Tableau de bord
-        </Link>
-      </div>
+      <BackLink href="/dashboard">Tableau de bord</BackLink>
 
       <div className="space-y-3">
         <h1 className="text-2xl font-bold text-slate-800">Comment fonctionnent les actions</h1>

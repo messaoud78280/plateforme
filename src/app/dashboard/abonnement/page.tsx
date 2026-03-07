@@ -4,6 +4,8 @@ import Link from "next/link";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getPlan } from "@/lib/subscription-plans";
+import { BackLink } from "@/components/ui/BackLink";
+import { TARIFS_PLANS } from "@/lib/tarifs-plans";
 
 const PLAN_LABELS: Record<string, string> = {
   DECOUVERTE: "Offre Découverte",
@@ -82,14 +84,61 @@ export default async function AbonnementPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <Link
-          href="/dashboard"
-          className="text-sm font-medium text-slate-600 hover:text-slate-900"
-        >
-          ← Dashboard
-        </Link>
-      </div>
+      <BackLink href="/dashboard">Dashboard</BackLink>
+
+      {/* Formules disponibles (tarifs) + Devis */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-slate-800">Formules disponibles</h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Choisissez une formule ou demandez un devis personnalisé pour un volume sur mesure.
+        </p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          {TARIFS_PLANS.map((plan) => (
+            <div
+              key={plan.planKey}
+              className={`relative rounded-xl border-2 p-4 ${plan.badge ? "border-[#1d4ed8] bg-[#1d4ed8]/5" : "border-slate-200 bg-slate-50"}`}
+            >
+              {plan.badge && (
+                <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-[#1d4ed8] px-2 py-0.5 text-xs font-semibold text-white">
+                  {plan.badge}
+                </span>
+              )}
+              <h3 className="font-semibold text-slate-800">{plan.name}</h3>
+              <p className="mt-1 text-xl font-bold text-[#1d4ed8]">
+                {plan.price}€
+                {plan.billing === "monthly" && <span className="text-sm font-normal text-slate-500"> / mois</span>}
+              </p>
+              <ul className="mt-2 space-y-1 text-xs text-slate-600">
+                {plan.highlights.slice(0, 3).map((h) => (
+                  <li key={h}>• {h}</li>
+                ))}
+              </ul>
+              <Link
+                href={`/dashboard/abonnement/souscrire?plan=${plan.planKey}`}
+                className="mt-3 block w-full rounded-lg bg-[#1d4ed8] py-2 text-center text-sm font-semibold text-white hover:bg-[#1e40af]"
+              >
+                Choisir
+              </Link>
+            </div>
+          ))}
+          {/* Formule Devis */}
+          <div className="relative rounded-xl border-2 border-slate-300 bg-white p-4">
+            <h3 className="font-semibold text-slate-800">Devis personnalisé</h3>
+            <p className="mt-1 text-sm text-slate-600">Volume sur mesure, solution dédiée.</p>
+            <ul className="mt-2 space-y-1 text-xs text-slate-600">
+              <li>• Sur mesure</li>
+              <li>• 3 périmètres ou plus</li>
+              <li>• Full-time possible</li>
+            </ul>
+            <Link
+              href="/contact"
+              className="mt-3 block w-full rounded-lg border-2 border-slate-300 py-2 text-center text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              Demander un devis
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* Bloc Abonnement et actions — formule, KPIs, 3 CTA */}
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

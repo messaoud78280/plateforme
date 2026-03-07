@@ -4,6 +4,7 @@ import Link from "next/link";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ContractSigningBlock } from "@/components/contract/ContractSigningBlock";
+import { BackLink } from "@/components/ui/BackLink";
 
 const CONTRACT_PDF_URL = process.env.CONTRACT_PDF_URL;
 const SHOW_PDF_EMBED = Boolean(CONTRACT_PDF_URL);
@@ -32,12 +33,9 @@ export default async function ContractPage() {
   if (user.contractStatus === "SIGNED") {
     return (
       <div className="mx-auto max-w-2xl px-4 py-12 text-center">
-        <Link
-          href="/dashboard"
-          className="mb-6 inline-flex items-center gap-1 text-sm font-medium text-[#64748b] hover:text-[#0f172a]"
-        >
-          ← Retour à l&apos;accueil
-        </Link>
+        <div className="mb-6 flex justify-center">
+          <BackLink href="/dashboard">Retour au tableau de bord</BackLink>
+        </div>
         <h1 className="text-2xl font-bold text-[#0f172a]">Contrat signé</h1>
         <p className="mt-2 text-[#64748b]">
           Votre contrat a bien été accepté. Vous avez accès à l&apos;ensemble du
@@ -55,12 +53,7 @@ export default async function ContractPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
-      <Link
-        href="/dashboard"
-        className="mb-6 inline-flex items-center gap-1 text-sm font-medium text-[#64748b] hover:text-[#0f172a]"
-      >
-        ← Retour à l&apos;accueil
-      </Link>
+      <BackLink href="/dashboard">Retour au tableau de bord</BackLink>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-[#0f172a]">Contrat d&apos;abonnement</h1>
         <p className="mt-1 text-[#64748b]">

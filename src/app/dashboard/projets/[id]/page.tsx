@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { BackLink } from "@/components/ui/BackLink";
 import { MessageForm } from "@/components/MessageForm";
 import { ProjectAssignAgent } from "@/components/projects/ProjectAssignAgent";
 import { ProjectReportsSection } from "@/components/projects/ProjectReportsSection";
@@ -75,12 +76,7 @@ export default async function ProjetDetailPage({
 
   return (
     <div className="space-y-6">
-      <Link
-        href="/dashboard/projets"
-        className="text-sm text-blue-600 hover:underline"
-      >
-        ← Retour aux projets
-      </Link>
+      <BackLink href="/dashboard/projets">Retour aux projets</BackLink>
 
       <div className="rounded-xl border border-slate-200 bg-white p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">

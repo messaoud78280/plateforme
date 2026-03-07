@@ -109,6 +109,7 @@ export default async function DashboardPage({
     category: string | null;
     status: string;
     createdAt: Date;
+    updatedAt: Date;
     actionsUsed: number | null;
     estimatedActions: string | null;
     assignedTo: { id: string; name: string } | null;
@@ -180,6 +181,7 @@ export default async function DashboardPage({
             category: true,
             status: true,
             createdAt: true,
+            updatedAt: true,
             actionsUsed: true,
             estimatedActions: true,
             assignedTo: { select: { id: true, name: true } },

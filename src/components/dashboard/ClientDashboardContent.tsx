@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ActionsWidget } from "@/components/dashboard/ActionsWidget";
+import { QuickDelegationForm } from "@/components/dashboard/QuickDelegationForm";
 import { CLIENT_TASK_STATUS_LABELS, type TaskStatus } from "@/types";
 
 const DOCUMENT_CATEGORY_LABELS: Record<string, string> = {
@@ -37,6 +38,7 @@ type ClientDashboardContentProps = {
     category: string | null;
     status: string;
     createdAt: Date;
+    updatedAt: Date;
     actionsUsed: number | null;
     estimatedActions: string | null;
     assignedTo: { id: string; name: string } | null;
@@ -87,10 +89,11 @@ export function ClientDashboardContent({
 
   return (
     <div className="space-y-8 pb-12">
-      {/* Bloc d'accueil + 3 CTA */}
+      {/* Délégation rapide + actions rapides */}
       <section className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
         <h1 className="text-2xl font-bold text-slate-800">Bonjour, {userName ?? "vous"}</h1>
         <p className="mt-1 text-slate-600">Que souhaitez-vous déléguer aujourd&apos;hui ?</p>
+        <QuickDelegationForm />
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <Link
             href="/dashboard/nouvelle-demande"
@@ -110,6 +113,12 @@ export function ClientDashboardContent({
           >
             Contacter mon assistant
           </Link>
+          <Link
+            href="/dashboard/documents"
+            className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+          >
+            Envoyer un document
+          </Link>
         </div>
       </section>
 
@@ -126,8 +135,8 @@ export function ClientDashboardContent({
         </section>
       )}
 
-      {/* 3 cartes KPI + barre de progression */}
-      <section className="grid gap-4 sm:grid-cols-3">
+      {/* 4 KPI */}
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <p className="text-sm font-medium text-slate-500">Actions restantes</p>
           <p className="mt-1 text-2xl font-bold text-slate-800">
@@ -139,32 +148,12 @@ export function ClientDashboardContent({
           <p className="mt-1 text-2xl font-bold text-slate-800">{tasksEnCours}</p>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Temps moyen de traitement</p>
+          <p className="text-sm font-medium text-slate-500">Temps moyen de réponse</p>
           <p className="mt-1 text-2xl font-bold text-slate-800">{tempsMoyenLabel}</p>
         </div>
-      </section>
-
-      {/* Votre activité ce mois-ci */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-800">Votre activité ce mois-ci</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Nombre de demandes, actions réalisées et temps estimé économisé.
-        </p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
-          <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-4">
-            <p className="text-2xl font-bold text-slate-800">{tasksCompleteesCeMois}</p>
-            <p className="text-sm text-slate-500">Demandes réalisées ce mois</p>
-          </div>
-          <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-4">
-            <p className="text-2xl font-bold text-[#1d4ed8]">{actionsData.monthlyActionsUsed}</p>
-            <p className="text-sm text-slate-500">Actions réalisées</p>
-          </div>
-          <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-4">
-            <p className="text-2xl font-bold text-green-700">
-              {actionsData.monthlyActionsUsed * 10} min
-            </p>
-            <p className="text-sm text-slate-500">Temps estimé économisé</p>
-          </div>
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <p className="text-sm font-medium text-slate-500">Actions utilisées ce mois</p>
+          <p className="mt-1 text-2xl font-bold text-slate-800">{actionsData.monthlyActionsUsed}</p>
         </div>
       </section>
 
@@ -176,10 +165,10 @@ export function ClientDashboardContent({
         renewsAt={actionsData.renewsAt}
       />
 
-      {/* Activité de votre assistant */}
+      {/* Activité récente */}
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-800">Activité de votre assistant</h2>
-        <p className="mt-0.5 text-sm text-slate-500">Dernières actions réalisées pour vous</p>
+        <h2 className="text-lg font-semibold text-slate-800">Activité récente</h2>
+        <p className="mt-0.5 text-sm text-slate-500">Dernières tâches réalisées (devis envoyé, relance effectuée, etc.)</p>
         <ul className="mt-4 space-y-3">
           {(
             recentActivities.length > 0
@@ -267,13 +256,13 @@ export function ClientDashboardContent({
         </ul>
       </section>
 
-      {/* Bloc principal : Mes demandes en cours */}
+      {/* Demandes récentes */}
       <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-200 px-6 py-4">
-          <h2 className="text-lg font-semibold text-slate-800">Mes demandes en cours</h2>
-          <p className="mt-0.5 text-sm text-slate-500">Suivez l&apos;avancement de vos demandes</p>
+          <h2 className="text-lg font-semibold text-slate-800">Demandes récentes</h2>
+          <p className="mt-0.5 text-sm text-slate-500">Dernières demandes avec accès rapide</p>
         </div>
-        <div className="overflow-x-auto">
+        <div className="divide-y divide-slate-100">
           {clientTasks.length === 0 ? (
             <div className="px-6 py-12 text-center">
               <p className="text-slate-500">Aucune demande pour le moment.</p>
@@ -287,55 +276,59 @@ export function ClientDashboardContent({
               </div>
             </div>
           ) : (
-            <table className="w-full min-w-[640px] text-left text-sm">
-              <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/80">
-                  <th className="px-4 py-3 font-semibold text-slate-700">Demande</th>
-                  <th className="px-4 py-3 font-semibold text-slate-700">Catégorie</th>
-                  <th className="px-4 py-3 font-semibold text-slate-700">Statut</th>
-                  <th className="px-4 py-3 font-semibold text-slate-700">Date</th>
-                  <th className="px-4 py-3 font-semibold text-slate-700">Actions</th>
-                  <th className="px-4 py-3 font-semibold text-slate-700">Assistant</th>
-                  <th className="px-4 py-3 font-semibold text-slate-700 text-right">Lien</th>
-                </tr>
-              </thead>
-              <tbody>
-                {clientTasks.map((task) => (
-                  <tr key={task.id} className="border-b border-slate-100 transition hover:bg-slate-50/50">
-                    <td className="px-4 py-3 font-medium text-slate-800">{task.title}</td>
-                    <td className="px-4 py-3 text-slate-600">{task.category ?? "—"}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          task.status === "COMPLETE"
-                            ? "bg-green-100 text-green-800"
-                            : task.status === "EN_COURS"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-slate-100 text-slate-700"
-                        }`}
-                      >
-                        {CLIENT_TASK_STATUS_LABELS[task.status as TaskStatus] ?? task.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-slate-600">
-                      {new Date(task.createdAt).toLocaleDateString("fr-FR")}
-                    </td>
-                    <td className="px-4 py-3 text-slate-600">
-                      {task.actionsUsed != null ? task.actionsUsed : task.estimatedActions ?? "—"}
-                    </td>
-                    <td className="px-4 py-3 text-slate-600">{task.assignedTo?.name ?? "—"}</td>
-                    <td className="px-4 py-3 text-right">
-                      <Link
-                        href={`/dashboard/taches/${task.id}`}
-                        className="font-medium text-[#1d4ed8] hover:underline"
-                      >
-                        Voir le détail
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            clientTasks.slice(0, 8).map((task) => (
+              <div
+                key={task.id}
+                className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 sm:flex-nowrap"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-slate-800">{task.title}</p>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
+                    <span
+                      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                        task.status === "COMPLETE"
+                          ? "bg-green-100 text-green-800"
+                          : task.status === "EN_COURS"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-slate-100 text-slate-700"
+                      }`}
+                    >
+                      {CLIENT_TASK_STATUS_LABELS[task.status as TaskStatus] ?? task.status}
+                    </span>
+                    <span>Assistant : {task.assignedTo?.name ?? "—"}</span>
+                    <span>
+                      Dernière activité :{" "}
+                      {new Date(task.updatedAt).toLocaleDateString("fr-FR", {
+                        day: "numeric",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <Link
+                    href={`/dashboard/taches/${task.id}`}
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  >
+                    Voir
+                  </Link>
+                  <Link
+                    href="/dashboard/messagerie"
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  >
+                    Message
+                  </Link>
+                  <Link
+                    href="/dashboard/documents"
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  >
+                    Ajouter document
+                  </Link>
+                </div>
+              </div>
+            ))
           )}
         </div>
         {clientTasks.length > 0 && (

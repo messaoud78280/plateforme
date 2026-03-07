@@ -19,6 +19,7 @@ export async function GET(request: Request) {
   const search = searchParams.get("search") ?? "";
   const category = searchParams.get("category") ?? "";
   const status = searchParams.get("status") ?? "";
+  const projectId = searchParams.get("projectId") ?? "";
   const sort = searchParams.get("sort") ?? "createdAt";
   const order = searchParams.get("order") ?? "desc";
 
@@ -31,6 +32,9 @@ export async function GET(request: Request) {
   }
   if (status) {
     where.status = status;
+  }
+  if (projectId) {
+    where.projectId = projectId;
   }
 
   const [documents, total] = await Promise.all([

@@ -21,7 +21,11 @@ export async function GET() {
       select: {
         id: true,
         title: true,
+        description: true,
+        status: true,
+        urgency: true,
         clientId: true,
+        createdAt: true,
         client: { select: { id: true, name: true } },
         assignedToId: true,
         assignedTo: { select: { id: true, name: true } },

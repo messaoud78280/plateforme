@@ -38,8 +38,11 @@ export async function POST(request: Request) {
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
-  if (session.user.role !== "CLIENT") {
-    return NextResponse.json({ error: "Réservé aux clients" }, { status: 403 });
+  const role = session.user.role ?? "CLIENT";
+  const isClient = role === "CLIENT";
+  const isAgent = role === "AGENT";
+  if (!isClient && !isAgent) {
+    return NextResponse.json({ error: "Réservé aux clients et aux agents" }, { status: 403 });
   }
 
   const supabase = createServerClient();
@@ -63,6 +66,10 @@ export async function POST(request: Request) {
   const taskIdRaw = formData.get("taskId") as string | null;
   const taskIdTrimmed = taskIdRaw?.trim() || null;
 
+  let clientIdForDoc: string = session.user.id;
+  let projectIdForDoc: string | null = projectIdTrimmed;
+  let taskForAlert: { clientId: string; projectId: string | null } | null = null;
+
   if (projectIdTrimmed) {
     const project = await prisma.project.findFirst({
       where: { id: projectIdTrimmed, clientId: session.user.id },
@@ -74,11 +81,26 @@ export async function POST(request: Request) {
 
   if (taskIdTrimmed) {
     const task = await prisma.task.findFirst({
-      where: { id: taskIdTrimmed, clientId: session.user.id },
+      where: isClient
+        ? { id: taskIdTrimmed, clientId: session.user.id }
+        : { id: taskIdTrimmed, assignedToId: session.user.id },
+      select: { clientId: true, projectId: true },
     });
     if (!task) {
       return NextResponse.json({ error: "Tâche introuvable ou non autorisée" }, { status: 400 });
     }
+    if (isAgent) {
+      clientIdForDoc = task.clientId;
+      projectIdForDoc = task.projectId;
+    }
+    taskForAlert = task;
+  }
+
+  if (isAgent && !taskIdTrimmed) {
+    return NextResponse.json(
+      { error: "En tant qu'agent, vous devez associer le document à une mission." },
+      { status: 400 }
+    );
   }
 
   const files = formData.getAll("files") as File[];
@@ -88,7 +110,7 @@ export async function POST(request: Request) {
   }
 
   const bucket = "documents";
-  const clientId = session.user.id;
+  const clientId = clientIdForDoc;
   const created: { id: string; name: string }[] = [];
   const errors: string[] = [];
 
@@ -131,19 +153,19 @@ export async function POST(request: Request) {
         mimeType: mime,
         status: "EN_ATTENTE",
         clientId,
-        projectId: projectIdTrimmed || undefined,
+        projectId: projectIdForDoc || undefined,
         taskId: taskIdTrimmed || undefined,
       },
     });
     created.push({ id: doc.id, name: doc.name });
 
-    if (taskIdTrimmed && clientId) {
+    if (taskIdTrimmed && taskForAlert?.clientId) {
       try {
         await prisma.alert.create({
           data: {
             title: "Document ajouté à votre demande",
             message: `Un document "${file.name}" a été ajouté à l'une de vos demandes.`,
-            clientId,
+            clientId: taskForAlert.clientId,
             actionUrl: `/dashboard/taches/${taskIdTrimmed}#documents`,
           },
         });

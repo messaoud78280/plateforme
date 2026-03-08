@@ -14,17 +14,22 @@ interface DocumentUploadZoneProps {
   onUploadStart?: () => void;
   onUploadEnd?: () => void;
   category?: string;
+  isAgent?: boolean;
+  assignedTasks?: { id: string; title: string }[];
 }
 
 export function DocumentUploadZone({
   onUploadStart,
   onUploadEnd,
   category = "AUTRE",
+  isAgent = false,
+  assignedTasks = [],
 }: DocumentUploadZoneProps) {
   const [dragging, setDragging] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState<{ type: "ok" | "error"; text: string } | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleDrop = (e: React.DragEvent) => {
@@ -50,12 +55,17 @@ export function DocumentUploadZone({
 
   const upload = async () => {
     if (files.length === 0) return;
+    if (isAgent && assignedTasks.length > 0 && !selectedTaskId) {
+      setMessage({ type: "error", text: "Veuillez sélectionner une mission." });
+      return;
+    }
     setMessage(null);
     onUploadStart?.();
     setUploading(true);
     try {
       const formData = new FormData();
       formData.set("category", category);
+      if (isAgent && selectedTaskId) formData.set("taskId", selectedTaskId);
       files.forEach((f) => formData.append("files", f));
       const res = await fetch("/api/documents/upload", {
         method: "POST",
@@ -82,6 +92,28 @@ export function DocumentUploadZone({
 
   return (
     <div className="rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-6">
+      {isAgent && assignedTasks.length === 0 && (
+        <p className="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          Aucune mission assignée. Vous pourrez déposer des documents une fois qu’une mission vous sera attribuée.
+        </p>
+      )}
+      {isAgent && assignedTasks.length > 0 && (
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-slate-700">Mission concernée</label>
+          <select
+            value={selectedTaskId}
+            onChange={(e) => setSelectedTaskId(e.target.value)}
+            className="mt-1 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          >
+            <option value="">Sélectionner une mission</option>
+            {assignedTasks.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.title}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       <p className="mb-2 text-sm font-medium text-slate-700">
         Déposer des fichiers (PDF, JPG, PNG, DOCX, XLSX — max 10 Mo)
       </p>
@@ -128,7 +160,10 @@ export function DocumentUploadZone({
           <button
             type="button"
             onClick={upload}
-            disabled={uploading}
+            disabled={
+              uploading ||
+              (isAgent && assignedTasks.length > 0 && !selectedTaskId)
+            }
             className="mt-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
             {uploading ? "Envoi…" : "Déposer les documents"}

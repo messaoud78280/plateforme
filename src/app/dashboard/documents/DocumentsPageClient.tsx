@@ -35,6 +35,8 @@ interface DocumentsPageClientProps {
   currentStatut: string;
   currentSort: string;
   currentOrder: string;
+  userRole?: string;
+  assignedTasks?: { id: string; title: string }[];
 }
 
 export function DocumentsPageClient({
@@ -49,10 +51,13 @@ export function DocumentsPageClient({
   currentStatut,
   currentSort,
   currentOrder,
+  userRole = "CLIENT",
+  assignedTasks = [],
 }: DocumentsPageClientProps) {
   const router = useRouter();
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [uploading, setUploading] = useState(false);
+  const isAgent = userRole === "AGENT";
 
   const buildUrl = (updates: Record<string, string | number>) => {
     const p = new URLSearchParams();
@@ -81,6 +86,8 @@ export function DocumentsPageClient({
         onUploadStart={() => setUploading(true)}
         onUploadEnd={onUploadDone}
         category={currentCategory || "AUTRE"}
+        isAgent={isAgent}
+        assignedTasks={assignedTasks}
       />
 
       {/* Filtres */}

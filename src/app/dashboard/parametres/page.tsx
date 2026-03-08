@@ -24,8 +24,9 @@ export default async function ProfilVueEnsemblePage() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect("/connexion?callbackUrl=/dashboard/parametres");
 
-  if (session.user?.role !== "CLIENT") {
-    redirect("/dashboard");
+  const role = session.user?.role ?? "CLIENT";
+  if (role !== "CLIENT") {
+    redirect("/dashboard/parametres/informations");
   }
 
   const [user, activeSubscription, tasksWithActions, payments] = await Promise.all([

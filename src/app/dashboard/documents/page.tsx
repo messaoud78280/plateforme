@@ -15,7 +15,11 @@ export default async function DocumentsPage({
 }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect("/connexion?callbackUrl=/dashboard/documents");
-  if (session.user.role !== "CLIENT") redirect("/dashboard");
+
+  const role = session.user.role ?? "CLIENT";
+  const isClient = role === "CLIENT";
+  const isAgent = role === "AGENT";
+  const isAgence = role === "AGENCE" || role === "MANAGER";
 
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page ?? "1", 10));
@@ -25,14 +29,34 @@ export default async function DocumentsPage({
   const sort = params.sort ?? "createdAt";
   const order = params.order ?? "desc";
 
-  const where: Record<string, unknown> = { clientId: session.user.id };
+  let where: Record<string, unknown>;
+  if (isClient) {
+    where = { clientId: session.user.id };
+  } else if (isAgent) {
+    where = { task: { assignedToId: session.user.id } };
+  } else if (isAgence) {
+    where = {};
+  } else {
+    redirect("/dashboard");
+  }
+
   if (search) where.name = { contains: search, mode: "insensitive" };
   if (category) where.category = category;
   if (statut) where.status = statut;
 
   let documents: Awaited<ReturnType<typeof prisma.document.findMany>> = [];
   let total = 0;
+  let assignedTasks: { id: string; title: string }[] = [];
+
   try {
+    if (isAgent) {
+      assignedTasks = await prisma.task.findMany({
+        where: { assignedToId: session.user.id },
+        select: { id: true, title: true },
+        orderBy: { title: "asc" },
+        take: 100,
+      });
+    }
     if (prisma.document) {
       const [docs, count] = await Promise.all([
         prisma.document.findMany({
@@ -65,6 +89,8 @@ export default async function DocumentsPage({
       currentStatut={statut}
       currentSort={sort}
       currentOrder={order}
+      userRole={role}
+      assignedTasks={assignedTasks}
     />
   );
 }

@@ -11,7 +11,10 @@ export default async function PreferencesSecuritePage() {
     redirect("/connexion?callbackUrl=/dashboard/parametres/securite");
   }
 
-  const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
+  const role = session.user.role ?? "CLIENT";
+  const isAgence = role === "AGENCE" || role === "MANAGER";
+  const isAgent = role === "AGENT";
+  const roleLabel = isAgence ? "Agence" : isAgent ? "Agent" : "Client";
 
   return (
     <section className="rounded-2xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
@@ -29,7 +32,7 @@ export default async function PreferencesSecuritePage() {
                 isAgence ? "bg-blue-100 text-blue-800" : "bg-slate-200 text-slate-800"
               }`}
             >
-              {isAgence ? "Agence" : "Client"}
+              {roleLabel}
             </span>
             <LogoutButton />
           </div>

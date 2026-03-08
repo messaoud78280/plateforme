@@ -95,7 +95,7 @@ export default async function ClientsPage() {
                   <td className="px-6 py-4 text-right">
                     <Link
                       href={`/dashboard/clients/${client.id}`}
-                      className="rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#1e40af]"
+                      className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
                     >
                       Voir détail
                     </Link>

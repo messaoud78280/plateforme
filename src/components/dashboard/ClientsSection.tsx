@@ -76,7 +76,7 @@ export function ClientsSection({ clients }: ClientsSectionProps) {
                   <td className="py-3 text-right">
                     <Link
                       href={`/dashboard/clients/${client.id}`}
-                      className="text-blue-600 hover:underline"
+                      className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
                     >
                       Voir détail
                     </Link>

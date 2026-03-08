@@ -62,9 +62,13 @@ export default async function ClientDetailPage({
       }),
       prisma.task.findMany({
         where: { clientId },
-        include: {
-          assignedTo: { select: { id: true, name: true, email: true } },
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          assignedToId: true,
           project: { select: { id: true, title: true } },
+          assignedTo: { select: { id: true, name: true, email: true } },
         },
         orderBy: { updatedAt: "desc" },
       }),

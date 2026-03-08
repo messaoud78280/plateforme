@@ -266,48 +266,71 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Une plateforme de suivi simple et transparente */}
-        <section id="plateforme" className="px-6 py-16 md:py-20">
+        {/* Une plateforme simple pour déléguer votre administratif */}
+        <section id="plateforme" className="px-6 py-20 md:py-28">
           <div className="mx-auto max-w-6xl">
-            <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 lg:items-center">
-              <div>
-                <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
-                  Une plateforme de suivi simple et transparente
-                </h2>
-                <p className="mt-4 text-[#334155] leading-relaxed">
-                  Suivez vos tâches, échangez avec votre assistant et consultez l&apos;historique en un coup d&apos;œil.
-                </p>
-                <ul className="mt-6 space-y-3">
-                  {[
-                    "Suivi des tâches en temps réel",
-                    "Messagerie avec l'assistant dédié",
-                    "Gestion documentaire centralisée",
-                    "Historique des actions et reporting",
-                  ].map((feature, i) => (
-                    <li key={i} className="flex items-center gap-3">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8]">
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                      </span>
-                      <span className="text-[#334155]">{feature}</span>
-                    </li>
+            <div className="text-center mb-16">
+              <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl lg:text-4xl">
+                Une plateforme simple pour déléguer votre administratif
+              </h2>
+              <p className="mt-4 max-w-2xl mx-auto text-lg text-[#475569]">
+                Envoyez vos demandes, échangez avec votre assistant et suivez l&apos;avancement en temps réel.
+              </p>
+            </div>
+
+            {/* Capture / mockup dashboard */}
+            <div className="mb-20 flex justify-center">
+              <div className="w-full max-w-4xl overflow-hidden rounded-xl border border-[#e2e8f0] bg-white shadow-xl shadow-[#0f172a]/5">
+                <div className="flex items-center gap-2 border-b border-[#e2e8f0] bg-[#f8fafc] px-4 py-3">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#94a3b8]" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#94a3b8]" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#94a3b8]" />
+                  <span className="ml-2 text-xs font-medium text-[#64748b]">Dashboard BeWork</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[#e2e8f0]">
+                  {["Nouvelle demande", "Messagerie", "Mes demandes"].map((label, i) => (
+                    <div key={i} className="bg-white p-4 md:p-6">
+                      <div className="h-3 w-20 rounded bg-[#f1f5f9] mb-3" />
+                      <div className="space-y-2">
+                        {[1, 2, 3].map((j) => (
+                          <div key={j} className="h-10 rounded-lg bg-[#f8fafc] border border-[#e2e8f0]" />
+                        ))}
+                      </div>
+                    </div>
                   ))}
-                </ul>
-                <Link href="/tarifs" className="mt-8 inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white hover:bg-[#1e40af]">
-                  Découvrir les tarifs
-                </Link>
-              </div>
-              <div className="relative flex justify-center lg:justify-end">
-                <div className="w-full max-w-sm rounded-xl border-2 border-[#c8cdd6] bg-white p-4 shadow-lg">
-                  <div className="flex gap-2 mb-3">
-                    <span className="h-2 w-2 rounded-full bg-[#94a3b8]" /><span className="h-2 w-2 rounded-full bg-[#94a3b8]" /><span className="h-2 w-2 rounded-full bg-[#94a3b8]" />
-                  </div>
-                  <div className="space-y-2 rounded-lg bg-[#f8fafc] p-3 text-sm">
-                    {["Tâches · En cours", "Messages · 2 non lus", "Documents · À jour", "Rapport · Ce mois"].map((l, i) => (
-                      <div key={i} className="rounded bg-white px-3 py-2 border border-[#e2e8f0]">{l}</div>
-                    ))}
-                  </div>
                 </div>
               </div>
+            </div>
+
+            {/* 3 fonctionnalités clés */}
+            <div className="grid gap-10 md:grid-cols-3 md:gap-8">
+              {[
+                {
+                  title: "Créer une demande",
+                  description: "Déposez une tâche en quelques clics. Titre, description, pièces jointes : tout est centralisé.",
+                  icon: "M12 6v6m0 0v6m0-6h6m-6 0H6",
+                },
+                {
+                  title: "Messagerie avec l'assistant",
+                  description: "Échangez directement avec votre assistant dédié. Réponses rapides et historique des échanges.",
+                  icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z",
+                },
+                {
+                  title: "Suivi des missions",
+                  description: "Consultez l'état de vos demandes, les actions réalisées et le temps économisé en un coup d'œil.",
+                  icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
+                },
+              ].map((item, i) => (
+                <div key={i} className="rounded-xl border border-[#e2e8f0] bg-white p-6 text-left shadow-sm">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8]">
+                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
+                    </svg>
+                  </span>
+                  <h3 className="mt-4 text-lg font-semibold text-[#0f172a]">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-[#475569]">{item.description}</p>
+                </div>
+              ))}
             </div>
           </div>
         </section>

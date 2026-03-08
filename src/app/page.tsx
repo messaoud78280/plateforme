@@ -576,14 +576,14 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Qui sommes-nous / Équipe */}
+        {/* L'équipe derrière BeWork */}
         <section id="equipe" className="px-6 py-24 md:py-28">
           <div className="mx-auto max-w-6xl">
             <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-              Une équipe triée sur le volet.
+              L&apos;équipe derrière BeWork
             </h2>
 
-            {/* La fondatrice */}
+            {/* Laure Olivie — Fondatrice */}
             <div className="mt-16 flex flex-col items-center text-center md:flex-row md:items-start md:gap-12 md:text-left">
               <div className="shrink-0">
                 <div className="relative mx-auto h-56 w-56 overflow-hidden rounded-2xl bg-[#e2e8f0] shadow-lg shadow-[#0f172a]/8 md:h-64 md:w-64">
@@ -598,12 +598,14 @@ export default function HomePage() {
                 <p className="mt-0.5 text-sm font-medium text-[#64748b]">Fondatrice de BeWork</p>
               </div>
               <div className="mt-8 max-w-2xl md:mt-0 md:flex-1">
-                <h3 className="text-xl font-semibold text-[#0f172a]">La fondatrice</h3>
-                <p className="mt-4 text-lg leading-relaxed text-[#334155]">
-                  BeWork est né d&apos;une volonté simple&nbsp;: permettre aux entreprises de déléguer leur
+                <p className="text-lg leading-relaxed text-[#334155]">
+                  BeWork est né d&apos;une idée simple&nbsp;: permettre aux entreprises de déléguer leur
                   administratif facilement grâce à une plateforme moderne et efficace.
                 </p>
-                <p className="mt-5 text-[#334155] leading-relaxed">
+                <p className="mt-6 font-medium text-[#0f172a]">
+                  Notre mission&nbsp;: aider les entreprises à se concentrer sur l&apos;essentiel.
+                </p>
+                <p className="mt-6 text-[#334155] leading-relaxed">
                   BeWork est une société française fondée par Laure Olivie, formatrice IA reconnue et diplômée.
                   Votre interlocuteur principal est notre agence en région parisienne, qu&apos;elle dirige au quotidien.
                   Une plateforme opérationnelle internationale est supervisée depuis la France en temps réel,

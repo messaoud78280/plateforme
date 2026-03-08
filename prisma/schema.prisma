@@ -297,6 +297,9 @@ model Task {
   completedAt    DateTime?
   timeSpentMinutes Int?    // temps réel passé (minutes) — renseigné par l'agent
   actionsUsed      Int?    // actions déduites (ceil(min/10), min 1)
+  // Mémoire des missions (contacts et fournisseurs pour relance)
+  contactsJson    Json?    // [{ name, email, role }]
+  suppliersJson   Json?    // [{ name, contact }]
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 

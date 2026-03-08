@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ActionsWidget } from "@/components/dashboard/ActionsWidget";
 import { QuickDelegationForm } from "@/components/dashboard/QuickDelegationForm";
+import { MissionHistorySection } from "@/components/missions/MissionHistorySection";
 import { CopiloteAdmin } from "@/components/dashboard/CopiloteAdmin";
 import { CLIENT_TASK_STATUS_LABELS, type TaskStatus } from "@/types";
 
@@ -320,6 +321,9 @@ export function ClientDashboardContent({
           </div>
         )}
       </section>
+
+      {/* Historique des missions — mémoire administrative */}
+      <MissionHistorySection />
 
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Messages récents */}

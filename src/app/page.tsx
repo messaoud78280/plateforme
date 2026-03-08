@@ -535,25 +535,43 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Qui sommes-nous */}
+        {/* Qui sommes-nous / Équipe */}
         <section id="equipe" className="px-6 py-24 md:py-28">
           <div className="mx-auto max-w-6xl">
-            <div className="mb-16 max-w-2xl">
-              <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-                Une équipe triée sur le volet.
-              </h2>
-              <p className="mt-5 text-lg leading-relaxed text-[#334155]">
-                BeWork est une société française fondée par{" "}
-                <strong className="text-slate-900">Laure Olivie</strong>, formatrice
-                IA reconnue et diplômée. Votre interlocuteur principal est notre{" "}
-                <strong className="text-slate-900">agence en région parisienne</strong>,
-                qu&apos;elle dirige au quotidien. Une plateforme opérationnelle internationale
-                est supervisée depuis la France en temps réel, pour une qualité et une réactivité identiques.
-                Notre équipe est composée de diplômés Bac+5 minimum, expérimentés et
-                formés aux outils d&apos;intelligence artificielle.
-              </p>
+            <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
+              Une équipe triée sur le volet.
+            </h2>
+
+            {/* La fondatrice */}
+            <div className="mt-16 flex flex-col items-center text-center md:flex-row md:items-start md:gap-12 md:text-left">
+              <div className="shrink-0">
+                <div className="relative mx-auto h-56 w-56 overflow-hidden rounded-2xl bg-[#e2e8f0] shadow-lg shadow-[#0f172a]/8 md:h-64 md:w-64">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/laure-olivie.jpg"
+                    alt="Laure Olivie, fondatrice de BeWork"
+                    className="absolute inset-0 h-full w-full object-cover object-center"
+                  />
+                </div>
+                <p className="mt-4 text-lg font-semibold text-[#0f172a]">Laure Olivie</p>
+                <p className="mt-0.5 text-sm font-medium text-[#64748b]">Fondatrice de BeWork</p>
+              </div>
+              <div className="mt-8 max-w-2xl md:mt-0 md:flex-1">
+                <h3 className="text-xl font-semibold text-[#0f172a]">La fondatrice</h3>
+                <p className="mt-4 text-lg leading-relaxed text-[#334155]">
+                  BeWork est né d&apos;une volonté simple&nbsp;: permettre aux entreprises de déléguer leur
+                  administratif facilement grâce à une plateforme moderne et efficace.
+                </p>
+                <p className="mt-5 text-[#334155] leading-relaxed">
+                  BeWork est une société française fondée par Laure Olivie, formatrice IA reconnue et diplômée.
+                  Votre interlocuteur principal est notre agence en région parisienne, qu&apos;elle dirige au quotidien.
+                  Une plateforme opérationnelle internationale est supervisée depuis la France en temps réel,
+                  pour une qualité et une réactivité identiques. Notre équipe est composée de diplômés Bac+5
+                  minimum, expérimentés et formés aux outils d&apos;intelligence artificielle.
+                </p>
+              </div>
             </div>
-            <div className="card-frame rounded-xl p-10 md:p-14">
+            <div className="card-frame mt-16 rounded-xl p-10 md:p-14">
               <div className="grid gap-10 md:grid-cols-2 md:gap-14">
                 <div>
                   <p className="text-lg font-semibold text-[#0f172a]">

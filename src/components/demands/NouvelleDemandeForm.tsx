@@ -9,6 +9,7 @@ import {
   DEMANDE_ESTIMATION_OPTIONS,
   DEMANDE_TEMPLATES,
 } from "./constants";
+import { MissionSuggestions } from "@/components/missions/MissionSuggestions";
 
 const DRAFT_KEY = "bework-nouvelle-demande-draft";
 const ACCEPTED_EXT = ".pdf,.doc,.docx,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.gif,.webp,.bmp,.svg,.zip";
@@ -226,6 +227,16 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
           <span className="text-lg font-bold text-[#1d4ed8]">{actionsRemaining}</span>
         </div>
       </header>
+
+      {/* Suggestions basées sur les missions passées */}
+      <MissionSuggestions
+        onSelect={(t, d, c) => {
+          setTitle(t);
+          setDescription(d);
+          setCategory(c);
+        }}
+        searchQuery={title}
+      />
 
       {/* Modèles / exemples de demandes */}
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

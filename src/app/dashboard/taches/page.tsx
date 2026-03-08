@@ -40,7 +40,7 @@ export default async function TachesPage({
       tasks = await prisma.task.findMany({
         where: {
           ...taskWhere,
-          ...(validStatus && !isClient ? { status: validStatus } : {}),
+          ...(validStatus ? { status: validStatus } : {}),
         },
         include: {
           project: { select: { id: true, title: true } },
@@ -99,6 +99,40 @@ export default async function TachesPage({
           </Link>
         </div>
 
+        <div className="flex flex-wrap gap-2 mb-6">
+          <Link
+            href="/dashboard/taches"
+            className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
+              !validStatus ? "bg-slate-800 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+            }`}
+          >
+            Toutes
+          </Link>
+          <Link
+            href="/dashboard/taches?statut=EN_ATTENTE"
+            className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
+              validStatus === "EN_ATTENTE" ? "bg-amber-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+            }`}
+          >
+            En attente
+          </Link>
+          <Link
+            href="/dashboard/taches?statut=EN_COURS"
+            className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
+              validStatus === "EN_COURS" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+            }`}
+          >
+            En cours
+          </Link>
+          <Link
+            href="/dashboard/taches?statut=COMPLETE"
+            className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
+              validStatus === "COMPLETE" ? "bg-green-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+            }`}
+          >
+            Terminées
+          </Link>
+        </div>
         <MesDemandesList tasks={clientTasksForList} />
       </div>
     );

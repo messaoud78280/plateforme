@@ -5,14 +5,6 @@ import { MissionHistorySection } from "@/components/missions/MissionHistorySecti
 import { CopiloteAdmin } from "@/components/dashboard/CopiloteAdmin";
 import { CLIENT_TASK_STATUS_LABELS, type TaskStatus } from "@/types";
 
-const DOCUMENT_CATEGORY_LABELS: Record<string, string> = {
-  FACTURE: "Facture",
-  CONTRAT: "Contrat",
-  RH: "RH",
-  FISCAL: "Fiscal",
-  AUTRE: "Autre",
-};
-
 function formatMessageDate(d: Date) {
   const date = new Date(d);
   const now = new Date();
@@ -91,36 +83,26 @@ export function ClientDashboardContent({
 
   return (
     <div className="space-y-8 pb-12">
-      {/* Délégation rapide + actions rapides */}
+      {/* Zone centrale : actions principales */}
       <section className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
         <h1 className="text-2xl font-bold text-slate-800">Bonjour, {userName ?? "vous"}</h1>
         <p className="mt-1 text-slate-600">Que souhaitez-vous déléguer aujourd&apos;hui ?</p>
-        <QuickDelegationForm />
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <Link
             href="/dashboard/nouvelle-demande"
-            className="inline-flex items-center rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#1e40af]"
+            className="inline-flex items-center rounded-lg bg-[#1d4ed8] px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#1e40af]"
           >
-            Nouvelle demande
+            + Nouvelle mission
           </Link>
           <Link
             href="/dashboard/taches"
-            className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+            className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
           >
-            Voir mes demandes
+            Voir mes missions
           </Link>
-          <Link
-            href="/dashboard/messagerie"
-            className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
-          >
-            Contacter mon assistant
-          </Link>
-          <Link
-            href="/dashboard/documents"
-            className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
-          >
-            Envoyer un document
-          </Link>
+        </div>
+        <div className="mt-6 pt-6 border-t border-slate-100">
+          <QuickDelegationForm />
         </div>
       </section>
 
@@ -137,8 +119,8 @@ export function ClientDashboardContent({
         </section>
       )}
 
-      {/* 4 KPI */}
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* 3 indicateurs principaux */}
+      <section className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <p className="text-sm font-medium text-slate-500">Actions restantes</p>
           <p className="mt-1 text-2xl font-bold text-slate-800">
@@ -146,16 +128,15 @@ export function ClientDashboardContent({
           </p>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Demandes en cours</p>
+          <p className="text-sm font-medium text-slate-500">Missions en cours</p>
           <p className="mt-1 text-2xl font-bold text-slate-800">{tasksEnCours}</p>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Temps moyen de réponse</p>
-          <p className="mt-1 text-2xl font-bold text-slate-800">{tempsMoyenLabel}</p>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Actions utilisées ce mois</p>
-          <p className="mt-1 text-2xl font-bold text-slate-800">{actionsData.monthlyActionsUsed}</p>
+          <p className="text-sm font-medium text-slate-500">Derniers messages</p>
+          <p className="mt-1 text-2xl font-bold text-slate-800">{recentMessages.length}</p>
+          <Link href="/dashboard/messagerie" className="mt-1 block text-sm font-medium text-[#1d4ed8] hover:underline">
+            Voir la messagerie →
+          </Link>
         </div>
       </section>
 
@@ -217,43 +198,25 @@ export function ClientDashboardContent({
         </ul>
       </section>
 
-      {/* Temps économisé grâce à BeWork */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-800">Temps économisé grâce à BeWork</h2>
-        <p className="mt-0.5 text-sm text-slate-500">Ce mois-ci</p>
-        <div className="mt-4 flex flex-wrap items-baseline gap-6">
-          <div>
-            <p className="text-2xl font-bold text-[#1d4ed8]">{actionsData.monthlyActionsUsed}</p>
-            <p className="text-sm text-slate-600">actions réalisées</p>
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-green-700">
-              ≈ {Math.round((actionsData.monthlyActionsUsed * 10) / 60)} h
-            </p>
-            <p className="text-sm text-slate-600">économisées</p>
-          </div>
-        </div>
-      </section>
-
       {/* Copilote administratif */}
       <CopiloteAdmin />
 
-      {/* Demandes récentes */}
+      {/* Missions récentes */}
       <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-200 px-6 py-4">
-          <h2 className="text-lg font-semibold text-slate-800">Demandes récentes</h2>
-          <p className="mt-0.5 text-sm text-slate-500">Dernières demandes avec accès rapide</p>
+          <h2 className="text-lg font-semibold text-slate-800">Missions récentes</h2>
+          <p className="mt-0.5 text-sm text-slate-500">Vos missions avec conversation, documents et historique</p>
         </div>
         <div className="divide-y divide-slate-100">
           {clientTasks.length === 0 ? (
             <div className="px-6 py-12 text-center">
-              <p className="text-slate-500">Aucune demande pour le moment.</p>
+              <p className="text-slate-500">Aucune mission pour le moment.</p>
               <div className="mt-4">
                 <Link
                   href="/dashboard/nouvelle-demande"
                   className="inline-flex rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e40af]"
                 >
-                  Nouvelle demande
+                  + Nouvelle mission
                 </Link>
               </div>
             </div>
@@ -270,7 +233,7 @@ export function ClientDashboardContent({
                       className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
                         task.status === "COMPLETE"
                           ? "bg-green-100 text-green-800"
-                          : task.status === "EN_COURS"
+                          : task.status === "EN_COURS" || task.status === "EN_ANALYSE" || task.status === "ASSIGNEE"
                             ? "bg-blue-100 text-blue-800"
                             : "bg-slate-100 text-slate-700"
                       }`}
@@ -279,7 +242,6 @@ export function ClientDashboardContent({
                     </span>
                     <span>Assistant : {task.assignedTo?.name ?? "—"}</span>
                     <span>
-                      Dernière activité :{" "}
                       {new Date(task.updatedAt).toLocaleDateString("fr-FR", {
                         day: "numeric",
                         month: "short",
@@ -289,26 +251,12 @@ export function ClientDashboardContent({
                     </span>
                   </div>
                 </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  <Link
-                    href={`/dashboard/taches/${task.id}`}
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
-                  >
-                    Voir
-                  </Link>
-                  <Link
-                    href="/dashboard/messagerie"
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
-                  >
-                    Message
-                  </Link>
-                  <Link
-                    href="/dashboard/documents"
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
-                  >
-                    Ajouter document
-                  </Link>
-                </div>
+                <Link
+                  href={`/dashboard/taches/${task.id}`}
+                  className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  Voir la mission →
+                </Link>
               </div>
             ))
           )}
@@ -316,7 +264,7 @@ export function ClientDashboardContent({
         {clientTasks.length > 0 && (
           <div className="border-t border-slate-100 px-6 py-3">
             <Link href="/dashboard/taches" className="text-sm font-medium text-[#1d4ed8] hover:underline">
-              Voir toutes mes demandes →
+              Voir toutes mes missions →
             </Link>
           </div>
         )}
@@ -371,46 +319,16 @@ export function ClientDashboardContent({
           )}
         </section>
 
-        {/* Documents récents */}
+        {/* Activité récente ou temps économisé */}
         <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="border-b border-slate-200 px-6 py-4">
-            <h2 className="text-lg font-semibold text-slate-800">Documents récents</h2>
-            <p className="mt-0.5 text-sm text-slate-500">Derniers documents partagés</p>
+            <h2 className="text-lg font-semibold text-slate-800">Temps économisé</h2>
+            <p className="mt-0.5 text-sm text-slate-500">Ce mois-ci</p>
           </div>
-          <div className="divide-y divide-slate-100">
-            {recentDocuments.length === 0 ? (
-              <div className="px-6 py-8 text-center text-sm text-slate-500">
-                Aucun document pour le moment.
-              </div>
-            ) : (
-              recentDocuments.map((d) => (
-                <div key={d.id} className="flex items-center justify-between gap-3 px-6 py-4">
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-slate-800">{d.name}</p>
-                    <p className="mt-0.5 text-xs text-slate-500">
-                      {new Date(d.createdAt).toLocaleDateString("fr-FR")} · {DOCUMENT_CATEGORY_LABELS[d.category] ?? d.category}
-                      {d.task && ` · ${d.task.title}`}
-                    </p>
-                  </div>
-                  <a
-                    href={d.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
-                  >
-                    Télécharger
-                  </a>
-                </div>
-              ))
-            )}
+          <div className="px-6 py-4">
+            <p className="text-2xl font-bold text-[#1d4ed8]">{actionsData.monthlyActionsUsed} actions</p>
+            <p className="text-sm text-slate-600">≈ {Math.round((actionsData.monthlyActionsUsed * 10) / 60)} h économisées</p>
           </div>
-          {recentDocuments.length > 0 && (
-            <div className="border-t border-slate-100 px-6 py-3">
-              <Link href="/dashboard/documents" className="text-sm font-medium text-[#1d4ed8] hover:underline">
-                Voir tous les documents →
-              </Link>
-            </div>
-          )}
         </section>
       </div>
 

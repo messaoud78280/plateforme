@@ -30,6 +30,14 @@ export default async function DashboardLayout({
             BeWork
           </Link>
           <div className="flex items-center gap-2">
+            {session.user?.role === "CLIENT" && (
+              <Link
+                href="/dashboard/nouvelle-demande"
+                className="inline-flex items-center rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#1e40af]"
+              >
+                + Nouvelle mission
+              </Link>
+            )}
             <NotificationsDropdown />
             <OutilsCommunication />
             <UserAccountDropdown

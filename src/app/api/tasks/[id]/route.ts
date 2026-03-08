@@ -75,13 +75,15 @@ export async function PUT(
 
     const body = await request.json();
     const validStatuses = ["NOUVEAU", "EN_ATTENTE", "ASSIGNEE", "EN_ANALYSE", "EN_COURS", "EN_ATTENTE_INFO", "A_VALIDER", "COMPLETE"] as const;
-    const { title, description, status, assignedToId, agencyNotes, timeSpentMinutes } = body as {
+    const validPriorities = ["STANDARD", "PRIORITAIRE", "URGENT"] as const;
+    const { title, description, status, assignedToId, agencyNotes, timeSpentMinutes, priority } = body as {
       title?: string;
       description?: string | null;
       status?: (typeof validStatuses)[number];
       assignedToId?: string | null;
       agencyNotes?: string | null;
       timeSpentMinutes?: number | null;
+      priority?: (typeof validPriorities)[number] | null;
     };
 
     const data: {
@@ -93,10 +95,14 @@ export async function PUT(
       agencyNotes?: string | null;
       timeSpentMinutes?: number | null;
       actionsUsed?: number | null;
+      priority?: string | null;
     } = {};
     if (typeof title === "string" && title.trim()) data.title = title.trim();
     if (body.hasOwnProperty("description")) data.description = description?.trim() ?? null;
     if (status && validStatuses.includes(status)) data.status = status;
+    if (isAgence && body.hasOwnProperty("priority")) {
+      data.priority = priority && validPriorities.includes(priority) ? priority : null;
+    }
     if (status === "COMPLETE") data.completedAt = new Date();
     if (status && status !== "COMPLETE") data.completedAt = null;
     const assigningAgent = isAgence && body.hasOwnProperty("assignedToId") && assignedToId;

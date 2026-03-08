@@ -5,10 +5,10 @@ import Link from "next/link";
 import { TASK_STATUS_LABELS, type TaskStatus } from "@/types";
 import { minutesToActions } from "@/lib/actions";
 import { TaskTimeline } from "./TaskTimeline";
-import { ClientDemandTimeline } from "./ClientDemandTimeline";
 import { TaskConversation } from "./TaskConversation";
 import { TaskMessageConversation } from "./TaskMessageConversation";
 import { TaskInternalNotes } from "./TaskInternalNotes";
+import { DocumentUploadZone } from "@/components/documents/DocumentUploadZone";
 
 interface TaskDetailViewProps {
   sessionUserId?: string;
@@ -32,7 +32,8 @@ interface TaskDetailViewProps {
     estimatedActions?: string | null;
     assignedTo?: { id: string; name: string; email: string } | null;
     project?: { id: string; title: string } | null;
-    documents?: { id: string; name: string; fileUrl: string; fileSize: number; mimeType: string | null }[];
+    client?: { id: string; name: string };
+    documents?: { id: string; name: string; fileUrl: string; fileSize: number; mimeType: string | null; createdAt?: Date }[];
   };
   onStatusChange?: (newStatus: TaskStatus, timeSpentMinutes?: number) => void;
   isAgence?: boolean;
@@ -42,6 +43,7 @@ interface TaskDetailViewProps {
   onAgencyNotesChange?: (notes: string) => void;
   onValidate?: () => void;
   onRequestCorrection?: () => void;
+  onPriorityChange?: (priority: string | null) => void;
   correctionNoteInput?: string;
   onCorrectionNoteChange?: (value: string) => void;
 }
@@ -68,6 +70,7 @@ export function TaskDetailView({
   onAgencyNotesChange,
   onValidate,
   onRequestCorrection,
+  onPriorityChange,
   correctionNoteInput = "",
   onCorrectionNoteChange,
 }: TaskDetailViewProps) {
@@ -109,16 +112,22 @@ export function TaskDetailView({
             Assigner un agent
           </a>
           <a
+            href="#priority-section"
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          >
+            Changer priorité
+          </a>
+          <a
             href="#status-section"
             className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
           >
-            Changer le statut
+            Changer statut
           </a>
           <a
             href="#messages-section"
             className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
           >
-            Messages
+            Conversation
           </a>
           <a
             href="#documents-section"
@@ -126,6 +135,16 @@ export function TaskDetailView({
           >
             Documents
           </a>
+          {task.status === "A_VALIDER" && (
+            <>
+              <a href="#valider-section" className="rounded-lg border border-green-600 bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700">
+                Valider mission
+              </a>
+              <a href="#correction-section" className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800 hover:bg-amber-100">
+                Demander modification
+              </a>
+            </>
+          )}
         </div>
       )}
 
@@ -161,16 +180,30 @@ export function TaskDetailView({
         </div>
       )}
 
-      {/* En-tête */}
+      {/* En-tête : Titre, Client, Statut, Priorité, Actions estimées (agent) */}
       <div className="rounded-xl border border-slate-200 bg-white p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-800">{task.title}</h1>
-            <span
-              className={`mt-2 inline-flex rounded-full px-3 py-1 text-sm font-medium ${statusColors[task.status]}`}
-            >
-              {TASK_STATUS_LABELS[task.status]}
-            </span>
+            <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-slate-600">
+              {task.client && (isAgence || isAgent) && (
+                <span><strong>Client :</strong> {task.client.name}</span>
+              )}
+              {task.assignedTo && !isAgent && (
+                <span><strong>Agent assigné :</strong> {task.assignedTo.name}</span>
+              )}
+              <span
+                className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${statusColors[task.status]}`}
+              >
+                {TASK_STATUS_LABELS[task.status]}
+              </span>
+              {task.priority && (
+                <span>Priorité : {task.priority === "URGENT" ? "Urgent" : task.priority === "PRIORITAIRE" ? "Prioritaire" : "Standard"}</span>
+              )}
+              {(isAgent || isAgence) && task.estimatedActions && (
+                <span><strong>Actions estimées :</strong> {task.estimatedActions}</span>
+              )}
+            </div>
             {task.validatedAt && (
               <span className="ml-2 inline-flex rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
                 Validé
@@ -211,16 +244,50 @@ export function TaskDetailView({
         )}
       </div>
 
-      {/* Timeline client : 5 étapes (Demande reçue → Terminée) */}
+      {/* Historique de la mission (client uniquement — agent le voit après Documents) */}
       {!isAgence && (
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
-          <h2 className="mb-6 text-lg font-semibold text-slate-800">Avancement de votre demande</h2>
-          <ClientDemandTimeline
-            status={task.status}
-            createdAt={task.createdAt}
-            completedAt={task.completedAt}
-            validatedAt={task.validatedAt ?? null}
-          />
+        <div id="historique-section" className="scroll-mt-6 rounded-xl border border-slate-200 bg-white p-6">
+          <h2 className="mb-4 text-lg font-semibold text-slate-800">Historique</h2>
+          <ul className="space-y-4">
+            <li className="flex gap-3 border-l-2 border-slate-200 pl-4">
+              <div>
+                <p className="font-medium text-slate-800">Demande créée</p>
+                <p className="text-xs text-slate-500">
+                  {new Date(task.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                </p>
+              </div>
+            </li>
+            {task.assignedTo && (
+              <li className="flex gap-3 border-l-2 border-slate-200 pl-4">
+                <div>
+                  <p className="font-medium text-slate-800">Agent assigné : {task.assignedTo.name}</p>
+                  <p className="text-xs text-slate-500">Votre assistant prend en charge cette mission</p>
+                </div>
+              </li>
+            )}
+            {task.documents?.map((doc) => (
+              <li key={doc.id} className="flex gap-3 border-l-2 border-slate-200 pl-4">
+                <div>
+                  <p className="font-medium text-slate-800">Document ajouté : {doc.name}</p>
+                  {doc.createdAt && (
+                    <p className="text-xs text-slate-500">
+                      {new Date(doc.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                  )}
+                </div>
+              </li>
+            ))}
+            {task.completedAt && (
+              <li className="flex gap-3 border-l-2 border-green-200 pl-4">
+                <div>
+                  <p className="font-medium text-green-800">Mission terminée</p>
+                  <p className="text-xs text-slate-500">
+                    {new Date(task.completedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  </p>
+                </div>
+              </li>
+            )}
+          </ul>
         </div>
       )}
 
@@ -259,18 +326,25 @@ export function TaskDetailView({
         />
       )}
 
-      {/* Documents liés à la demande */}
+      {/* Documents liés à la mission */}
       {!isAgence && (
-        <div id="documents" className="scroll-mt-6 rounded-xl border border-slate-200 bg-white p-6">
+        <div id="documents-section" className="scroll-mt-6 rounded-xl border border-slate-200 bg-white p-6">
           <h2 className="mb-4 text-lg font-semibold text-slate-800">Documents</h2>
           {task.documents && task.documents.length > 0 ? (
-            <ul className="space-y-2">
+            <ul className="mb-6 space-y-2">
               {task.documents.map((doc) => (
                 <li
                   key={doc.id}
-                  className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 bg-slate-50 px-4 py-3"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-100 bg-slate-50 px-4 py-3"
                 >
-                  <span className="min-w-0 truncate text-sm font-medium text-slate-800">{doc.name}</span>
+                  <div className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-medium text-slate-800">{doc.name}</span>
+                    {doc.createdAt && (
+                      <span className="mt-0.5 block text-xs text-slate-500">
+                        {new Date(doc.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    )}
+                  </div>
                   <a
                     href={doc.fileUrl}
                     target="_blank"
@@ -283,14 +357,14 @@ export function TaskDetailView({
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-slate-500">Aucun document pour le moment.</p>
+            <p className="mb-6 text-sm text-slate-500">Aucun document pour le moment.</p>
           )}
-          <Link
-            href="/dashboard/documents"
-            className="mt-4 inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Ajouter un document
-          </Link>
+          <h3 className="mb-3 text-sm font-medium text-slate-700">Ajouter un document</h3>
+          <DocumentUploadZone
+            taskId={task.id}
+            category="AUTRE"
+            onUploadEnd={() => typeof window !== "undefined" && window.location.reload()}
+          />
         </div>
       )}
 
@@ -326,6 +400,99 @@ export function TaskDetailView({
           <p className="text-sm text-slate-500">Aucune pièce jointe.</p>
         </div>
       )}
+      {isAgent && (
+        <div className="rounded-xl border border-slate-200 bg-white p-6">
+          <h3 className="mb-3 text-sm font-medium text-slate-700">Ajouter un document</h3>
+          <DocumentUploadZone
+            taskId={task.id}
+            category="AUTRE"
+            onUploadEnd={() => typeof window !== "undefined" && window.location.reload()}
+          />
+        </div>
+      )}
+        </div>
+      )}
+
+      {/* Pour l'agent : Informations mission + Historique (ordre Conversation → Documents → Infos → Historique) */}
+      {isAgent && (
+        <>
+          <div id="infos-mission-section" className="scroll-mt-6 rounded-xl border border-slate-200 bg-white p-6">
+            <h2 className="mb-4 text-lg font-semibold text-slate-800">Informations mission</h2>
+            {task.description && (
+              <p className="mb-4 text-slate-600">{task.description}</p>
+            )}
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
+              {task.category && <span><strong>Catégorie :</strong> {task.category}</span>}
+              {task.priority && <span><strong>Priorité :</strong> {task.priority === "URGENT" ? "Urgent" : task.priority === "PRIORITAIRE" ? "Prioritaire" : "Standard"}</span>}
+              {task.desiredDate && <span><strong>Date souhaitée :</strong> {new Date(task.desiredDate).toLocaleDateString("fr-FR")}</span>}
+              {task.estimatedActions && <span><strong>Actions estimées :</strong> {task.estimatedActions}</span>}
+            </div>
+            {!task.description && !task.category && !task.priority && !task.desiredDate && !task.estimatedActions && (
+              <p className="text-sm text-slate-500">Aucune information complémentaire.</p>
+            )}
+          </div>
+          <div id="historique-section" className="scroll-mt-6 rounded-xl border border-slate-200 bg-white p-6">
+            <h2 className="mb-4 text-lg font-semibold text-slate-800">Historique</h2>
+            <ul className="space-y-4">
+              <li className="flex gap-3 border-l-2 border-slate-200 pl-4">
+                <div>
+                  <p className="font-medium text-slate-800">Mission créée</p>
+                  <p className="text-xs text-slate-500">
+                    {new Date(task.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  </p>
+                </div>
+              </li>
+              {task.assignedTo && (
+                <li className="flex gap-3 border-l-2 border-slate-200 pl-4">
+                  <div>
+                    <p className="font-medium text-slate-800">Agent assigné : {task.assignedTo.name}</p>
+                    <p className="text-xs text-slate-500">Mission assignée à vous</p>
+                  </div>
+                </li>
+              )}
+              {task.documents?.map((doc) => (
+                <li key={doc.id} className="flex gap-3 border-l-2 border-slate-200 pl-4">
+                  <div>
+                    <p className="font-medium text-slate-800">Document ajouté : {doc.name}</p>
+                    {doc.createdAt && (
+                      <p className="text-xs text-slate-500">
+                        {new Date(doc.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    )}
+                  </div>
+                </li>
+              ))}
+              {task.completedAt && (
+                <li className="flex gap-3 border-l-2 border-green-200 pl-4">
+                  <div>
+                    <p className="font-medium text-green-800">Mission terminée</p>
+                    <p className="text-xs text-slate-500">
+                      {new Date(task.completedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                  </div>
+                </li>
+              )}
+            </ul>
+          </div>
+        </>
+      )}
+
+      {/* Changer priorité (gérante) */}
+      {isAgence && onPriorityChange && (
+        <div id="priority-section" className="scroll-mt-6 rounded-xl border border-slate-200 bg-white p-6">
+          <h2 className="mb-4 text-lg font-semibold text-slate-800">Priorité</h2>
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="text-sm font-medium text-slate-700">Priorité de la mission :</label>
+            <select
+              value={task.priority ?? ""}
+              onChange={(e) => onPriorityChange(e.target.value || null)}
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="">Standard</option>
+              <option value="PRIORITAIRE">Prioritaire</option>
+              <option value="URGENT">Urgent</option>
+            </select>
+          </div>
         </div>
       )}
 
@@ -374,6 +541,53 @@ export function TaskDetailView({
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Historique de la mission (gérante) */}
+      {isAgence && (
+        <div id="historique-section" className="scroll-mt-6 rounded-xl border border-slate-200 bg-white p-6">
+          <h2 className="mb-4 text-lg font-semibold text-slate-800">Historique</h2>
+          <ul className="space-y-4">
+            <li className="flex gap-3 border-l-2 border-slate-200 pl-4">
+              <div>
+                <p className="font-medium text-slate-800">Mission créée</p>
+                <p className="text-xs text-slate-500">
+                  {new Date(task.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                </p>
+              </div>
+            </li>
+            {task.assignedTo && (
+              <li className="flex gap-3 border-l-2 border-slate-200 pl-4">
+                <div>
+                  <p className="font-medium text-slate-800">Agent assigné : {task.assignedTo.name}</p>
+                  <p className="text-xs text-slate-500">Mission assignée à l&apos;agent</p>
+                </div>
+              </li>
+            )}
+            {task.documents?.map((doc) => (
+              <li key={doc.id} className="flex gap-3 border-l-2 border-slate-200 pl-4">
+                <div>
+                  <p className="font-medium text-slate-800">Document ajouté : {doc.name}</p>
+                  {doc.createdAt && (
+                    <p className="text-xs text-slate-500">
+                      {new Date(doc.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                  )}
+                </div>
+              </li>
+            ))}
+            {task.completedAt && (
+              <li className="flex gap-3 border-l-2 border-green-200 pl-4">
+                <div>
+                  <p className="font-medium text-green-800">Mission terminée</p>
+                  <p className="text-xs text-slate-500">
+                    {new Date(task.completedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  </p>
+                </div>
+              </li>
+            )}
+          </ul>
         </div>
       )}
 
@@ -478,10 +692,10 @@ export function TaskDetailView({
 
       {/* Validation / Correction (gérante uniquement, statut A_VALIDER = en attente de validation) */}
       {isManager && task.status === "A_VALIDER" && (
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <div id="valider-section" className="scroll-mt-6 rounded-xl border border-slate-200 bg-white p-6">
           <h2 className="mb-4 text-lg font-semibold text-slate-800">Vérifier et valider le travail</h2>
           <p className="mb-4 text-sm text-slate-600">
-            Après vérification, validez le travail de l'agent ou demandez une correction.
+            Après vérification, validez le travail de l&apos;agent ou demandez une correction.
           </p>
           <div className="flex flex-wrap gap-4">
             <button
@@ -491,7 +705,8 @@ export function TaskDetailView({
             >
               Valider le travail
             </button>
-            <div className="flex flex-1 flex-col gap-2 min-w-[200px]">
+            <div id="correction-section" className="scroll-mt-6 flex flex-1 flex-col gap-2 min-w-[200px]">
+              <label className="text-sm font-medium text-slate-700">Demander une modification</label>
               <textarea
                 value={correctionNoteInput}
                 onChange={(e) => onCorrectionNoteChange?.(e.target.value)}

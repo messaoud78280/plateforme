@@ -303,6 +303,63 @@ export default async function DashboardPage({
     }
   }
 
+  let managerKpis: {
+    nouvellesCount: number;
+    aAssignerCount: number;
+    enCoursCount: number;
+    aValiderCount: number;
+    agentsActifsCount: number;
+    actionsConsumees: number;
+    activiteRecente: { id: string; title: string; detail: string | null; createdAt: Date; client?: { name: string } }[];
+  } = {
+    nouvellesCount: 0,
+    aAssignerCount: 0,
+    enCoursCount: 0,
+    aValiderCount: 0,
+    agentsActifsCount: 0,
+    actionsConsumees: 0,
+    activiteRecente: [],
+  };
+
+  if (isAgence) {
+    try {
+      const [nouvCount, aAssignCount, enCoursCount, aValiderCount, agentsCount, clientsActions, recentActivities] = await Promise.all([
+        prisma.task.count({ where: { status: "NOUVEAU" } }),
+        prisma.task.count({ where: { status: "EN_ATTENTE", assignedToId: null } }),
+        prisma.task.count({ where: { status: { in: ["ASSIGNEE", "EN_ANALYSE", "EN_COURS", "EN_ATTENTE_INFO"] } } }),
+        prisma.task.count({ where: { status: "A_VALIDER" } }),
+        prisma.user.count({ where: { role: "AGENT" } }),
+        prisma.user.findMany({ where: { role: "CLIENT" }, select: { monthlyActionsUsed: true } }),
+        prisma.activity.findMany({
+          orderBy: { createdAt: "desc" },
+          take: 10,
+          include: { client: { select: { name: true } } },
+        }),
+      ]);
+      const actionsConsumees = (clientsActions as { monthlyActionsUsed: number | null }[]).reduce(
+        (s, u) => s + (u.monthlyActionsUsed ?? 0),
+        0
+      );
+      managerKpis = {
+        nouvellesCount: nouvCount,
+        aAssignerCount: aAssignCount,
+        enCoursCount,
+        aValiderCount,
+        agentsActifsCount: agentsCount,
+        actionsConsumees,
+        activiteRecente: recentActivities.map((a) => ({
+          id: a.id,
+          title: a.title,
+          detail: a.detail,
+          createdAt: a.createdAt,
+          client: a.client ? { name: a.client.name } : undefined,
+        })),
+      };
+    } catch {
+      // ignore
+    }
+  }
+
   if (isAgence) {
     try {
       const clientUsers = await prisma.user.findMany({
@@ -364,21 +421,19 @@ export default async function DashboardPage({
   let agentData: {
     missionsToday: number;
     missionsUrgentes: number;
-    messagesClients: number;
-    documentsATraiter: number;
+    missionsEnCours: number;
+    messagesNonLus: number;
     missions: { id: string; title: string; status: string; priority: string | null; desiredDate: Date | null; createdAt: Date; updatedAt: Date; client: { id: string; name: string } }[];
     missionsUrgentesList: { id: string; title: string; status: string; priority: string | null; desiredDate: Date | null; createdAt: Date; updatedAt: Date; client: { id: string; name: string } }[];
     messagesRecents: { id: string; content: string; createdAt: Date; read: boolean; sender: { id: string; name: string }; task: { id: string; title: string } }[];
-    documentsATraiterList: { id: string; name: string; fileUrl: string; category: string; status: string; task: { id: string; title: string } | null }[];
   } = {
     missionsToday: 0,
     missionsUrgentes: 0,
-    messagesClients: 0,
-    documentsATraiter: 0,
+    missionsEnCours: 0,
+    messagesNonLus: 0,
     missions: [],
     missionsUrgentesList: [],
     messagesRecents: [],
-    documentsATraiterList: [],
   };
 
   if (isAgent) {
@@ -389,12 +444,12 @@ export default async function DashboardPage({
       tomorrow.setDate(tomorrow.getDate() + 1);
       const agentId = session.user.id;
 
-      const [missionsAll, urgentTasks, messagesCount, docsCount, messagesList, docsList] = await Promise.all([
+      const [missionsAll, urgentTasks, messagesCount, messagesList] = await Promise.all([
         prisma.task.findMany({
           where: { assignedToId: agentId, status: { notIn: ["COMPLETE"] } },
           include: { client: { select: { id: true, name: true } } },
           orderBy: { updatedAt: "desc" },
-          take: 15,
+          take: 20,
         }),
         prisma.task.findMany({
           where: { assignedToId: agentId, priority: { in: ["URGENT", "PRIORITAIRE"] }, status: { notIn: ["COMPLETE"] } },
@@ -404,17 +459,9 @@ export default async function DashboardPage({
         }),
         prisma.taskMessage.count({
           where: {
-            OR: [{ senderId: agentId }, { receiverId: agentId }],
             task: { assignedToId: agentId },
             read: false,
             receiverId: agentId,
-          },
-        }),
-        prisma.document.count({
-          where: {
-            taskId: { not: null },
-            task: { assignedToId: agentId },
-            status: { in: ["EN_ATTENTE", "EN_TRAITEMENT"] },
           },
         }),
         prisma.taskMessage.findMany({
@@ -426,16 +473,6 @@ export default async function DashboardPage({
             sender: { select: { id: true, name: true } },
             task: { select: { id: true, title: true } },
           },
-          orderBy: { createdAt: "desc" },
-          take: 10,
-        }),
-        prisma.document.findMany({
-          where: {
-            taskId: { not: null },
-            task: { assignedToId: agentId },
-            status: { in: ["EN_ATTENTE", "EN_TRAITEMENT"] },
-          },
-          include: { task: { select: { id: true, title: true } } },
           orderBy: { createdAt: "desc" },
           take: 10,
         }),
@@ -455,8 +492,8 @@ export default async function DashboardPage({
       agentData = {
         missionsToday,
         missionsUrgentes: urgentTasks.length,
-        messagesClients: messagesCount,
-        documentsATraiter: docsCount,
+        missionsEnCours: missionsAll.length,
+        messagesNonLus: messagesCount,
         missions: missionsAll.map((t) => ({
           id: t.id,
           title: t.title,
@@ -484,14 +521,6 @@ export default async function DashboardPage({
           read: m.read,
           sender: m.sender,
           task: m.task,
-        })),
-        documentsATraiterList: docsList.map((d) => ({
-          id: d.id,
-          name: d.name,
-          fileUrl: d.fileUrl,
-          category: d.category,
-          status: d.status,
-          task: d.task,
         })),
       };
     } catch {
@@ -536,12 +565,11 @@ export default async function DashboardPage({
           userName={session.user?.name ?? null}
           missionsToday={agentData.missionsToday}
           missionsUrgentes={agentData.missionsUrgentes}
-          messagesClients={agentData.messagesClients}
-          documentsATraiter={agentData.documentsATraiter}
+          missionsEnCours={agentData.missionsEnCours}
+          messagesNonLus={agentData.messagesNonLus}
           missions={agentData.missions}
           missionsUrgentesList={agentData.missionsUrgentesList}
           messagesRecents={agentData.messagesRecents}
-          documentsATraiterList={agentData.documentsATraiterList}
         />
       </div>
     );
@@ -554,15 +582,27 @@ export default async function DashboardPage({
 
       {/* Dashboard gérante — centre de pilotage */}
       {isAgence && (
-        <ManagerDashboardContent
-          nouvellesDemandes={managerTasks.nouvelles as unknown as ManagerTaskItem[]}
-          aAssigner={managerTasks.aAssigner as unknown as ManagerTaskItem[]}
-          missionsEnCours={managerTasks.enCours as unknown as ManagerTaskItem[]}
-          missionsAValider={managerTasks.aValider as unknown as ManagerTaskItem[]}
-          missionsTerminees={managerTasks.terminees as unknown as ManagerTaskItem[]}
-        />
+        <>
+          <ManagerDashboardContent
+            nouvellesDemandes={managerTasks.nouvelles as unknown as ManagerTaskItem[]}
+            aAssigner={managerTasks.aAssigner as unknown as ManagerTaskItem[]}
+            missionsEnCours={managerTasks.enCours as unknown as ManagerTaskItem[]}
+            missionsAValider={managerTasks.aValider as unknown as ManagerTaskItem[]}
+            missionsTerminees={managerTasks.terminees as unknown as ManagerTaskItem[]}
+            nouvellesCount={managerKpis.nouvellesCount}
+            aAssignerCount={managerKpis.aAssignerCount}
+            enCoursCount={managerKpis.enCoursCount}
+            aValiderCount={managerKpis.aValiderCount}
+            agentsActifsCount={managerKpis.agentsActifsCount}
+            actionsConsumees={managerKpis.actionsConsumees}
+            activiteRecente={managerKpis.activiteRecente}
+          />
+          {clients.length > 0 && <ClientsSection clients={clients} />}
+        </>
       )}
 
+      {!isAgence && (
+      <>
       {/* Carte de bienvenue + CTA Nouvelle demande (client) */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -770,6 +810,8 @@ export default async function DashboardPage({
           </Link>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }

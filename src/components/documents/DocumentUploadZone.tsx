@@ -16,6 +16,8 @@ interface DocumentUploadZoneProps {
   category?: string;
   isAgent?: boolean;
   assignedTasks?: { id: string; title: string }[];
+  /** Mission (tâche) pour associer les documents — utilisé côté client ou agent */
+  taskId?: string;
 }
 
 export function DocumentUploadZone({
@@ -24,6 +26,7 @@ export function DocumentUploadZone({
   category = "AUTRE",
   isAgent = false,
   assignedTasks = [],
+  taskId,
 }: DocumentUploadZoneProps) {
   const [dragging, setDragging] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
@@ -65,7 +68,8 @@ export function DocumentUploadZone({
     try {
       const formData = new FormData();
       formData.set("category", category);
-      if (isAgent && selectedTaskId) formData.set("taskId", selectedTaskId);
+      const tid = taskId || (isAgent && selectedTaskId ? selectedTaskId : null);
+      if (tid) formData.set("taskId", tid);
       files.forEach((f) => formData.append("files", f));
       const res = await fetch("/api/documents/upload", {
         method: "POST",

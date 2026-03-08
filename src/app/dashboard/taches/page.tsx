@@ -7,6 +7,7 @@ import { TaskListView } from "@/components/tasks/TaskListView";
 import { DepotTacheForm } from "@/components/tasks/DepotTacheForm";
 import { MesDemandesList } from "@/components/tasks/MesDemandesList";
 import { AgentMissionsList } from "@/components/tasks/AgentMissionsList";
+import { ManagerMissionsBoard, type ManagerBoardTask } from "@/components/tasks/ManagerMissionsBoard";
 import { BackLink } from "@/components/ui/BackLink";
 
 export default async function TachesPage({
@@ -39,25 +40,73 @@ export default async function TachesPage({
   let tasks: Awaited<ReturnType<typeof prisma.task.findMany>> = [];
   let projects: { id: string; title: string }[] = [];
   let agentSummary = { missionsAujourdhui: 0, missionsUrgentes: 0, missionsEnCours: 0 };
+  let managerBoard: {
+    nouvelles: ManagerBoardTask[];
+    aAssigner: ManagerBoardTask[];
+    enCours: ManagerBoardTask[];
+    aValider: ManagerBoardTask[];
+    terminees: ManagerBoardTask[];
+  } = { nouvelles: [], aAssigner: [], enCours: [], aValider: [], terminees: [] };
   try {
     if (prisma.task) {
-      const taskWhere = isAgence
-        ? {}
-        : isAgent
-          ? { assignedToId: session.user.id }
-          : { clientId: session.user.id };
-      tasks = await prisma.task.findMany({
-        where: {
-          ...taskWhere,
-          ...statusWhere,
-        },
-        include: {
-          project: { select: { id: true, title: true } },
-          assignedTo: { select: { id: true, name: true, email: true } },
-          client: { select: { id: true, name: true } },
-        },
-        orderBy: { updatedAt: "desc" },
-      });
+      if (isAgence) {
+        const [nouvelles, aAssigner, enCours, aValider, terminees] = await Promise.all([
+          prisma.task.findMany({
+            where: { status: "NOUVEAU" },
+            include: { client: { select: { id: true, name: true } }, assignedTo: { select: { id: true, name: true } } },
+            orderBy: { createdAt: "desc" },
+          }),
+          prisma.task.findMany({
+            where: { status: "EN_ATTENTE", assignedToId: null },
+            include: { client: { select: { id: true, name: true } }, assignedTo: { select: { id: true, name: true } } },
+            orderBy: { createdAt: "desc" },
+          }),
+          prisma.task.findMany({
+            where: { status: { in: ["ASSIGNEE", "EN_ANALYSE", "EN_COURS", "EN_ATTENTE_INFO"] } },
+            include: { client: { select: { id: true, name: true } }, assignedTo: { select: { id: true, name: true } } },
+            orderBy: { updatedAt: "desc" },
+          }),
+          prisma.task.findMany({
+            where: { status: "A_VALIDER" },
+            include: { client: { select: { id: true, name: true } }, assignedTo: { select: { id: true, name: true } } },
+            orderBy: { updatedAt: "desc" },
+          }),
+          prisma.task.findMany({
+            where: { status: "COMPLETE" },
+            include: { client: { select: { id: true, name: true } }, assignedTo: { select: { id: true, name: true } } },
+            orderBy: { completedAt: "desc" },
+          }),
+        ]);
+        const toBoard = (t: { id: string; title: string; status: string; priority: string | null; createdAt: Date; updatedAt: Date; client: { id: string; name: string }; assignedTo: { id: string; name: string } | null }) => ({
+          id: t.id,
+          title: t.title,
+          status: t.status,
+          priority: t.priority,
+          createdAt: t.createdAt,
+          updatedAt: t.updatedAt,
+          client: t.client,
+          assignedTo: t.assignedTo,
+        });
+        managerBoard = {
+          nouvelles: nouvelles.map(toBoard),
+          aAssigner: aAssigner.map(toBoard),
+          enCours: enCours.map(toBoard),
+          aValider: aValider.map(toBoard),
+          terminees: terminees.map(toBoard),
+        };
+        tasks = [...nouvelles, ...aAssigner, ...enCours, ...aValider, ...terminees];
+      } else {
+        const taskWhere = isAgent ? { assignedToId: session.user.id } : { clientId: session.user.id };
+        tasks = await prisma.task.findMany({
+          where: { ...taskWhere, ...statusWhere },
+          include: {
+            project: { select: { id: true, title: true } },
+            assignedTo: { select: { id: true, name: true, email: true } },
+            client: { select: { id: true, name: true } },
+          },
+          orderBy: { updatedAt: "desc" },
+        });
+      }
       if (isAgent) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -128,16 +177,16 @@ export default async function TachesPage({
         <BackLink href="/dashboard">Dashboard</BackLink>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">Mes demandes</h1>
+            <h1 className="text-2xl font-bold text-slate-800">Mes missions</h1>
             <p className="mt-1 text-slate-600">
-              Suivez l&apos;avancement de vos demandes et échangez avec votre assistant.
+              Suivez l&apos;avancement de vos missions et échangez avec votre assistant.
             </p>
           </div>
           <Link
             href="/dashboard/nouvelle-demande"
             className="rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af]"
           >
-            Nouvelle demande
+            + Nouvelle mission
           </Link>
         </div>
 
@@ -180,6 +229,27 @@ export default async function TachesPage({
     );
   }
 
+  if (isAgence) {
+    return (
+      <div className="space-y-8">
+        <BackLink href="/dashboard">Dashboard</BackLink>
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Missions</h1>
+          <p className="mt-1 text-slate-600">
+            Tableau de gestion des missions. Assignez les agents, suivez l&apos;avancement et validez les livrables.
+          </p>
+        </div>
+        <ManagerMissionsBoard
+          nouvelles={managerBoard.nouvelles}
+          aAssigner={managerBoard.aAssigner}
+          enCours={managerBoard.enCours}
+          aValider={managerBoard.aValider}
+          terminees={managerBoard.terminees}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <BackLink href="/dashboard">Dashboard</BackLink>
@@ -187,9 +257,7 @@ export default async function TachesPage({
         <div>
           <h1 className="text-2xl font-bold text-slate-800">{isAgent ? "Mes missions assignées" : "Mes tâches"}</h1>
           <p className="mt-1 text-slate-600">
-            {isAgence
-              ? "Tâches déposées par les clients. Cliquez sur une tâche pour la prendre en charge ou la marquer comme terminée."
-              : "Tâches qui vous sont assignées. Indiquez le temps passé lors de la clôture pour déduire les actions du client."}
+            Tâches qui vous sont assignées. Indiquez le temps passé lors de la clôture pour déduire les actions du client.
           </p>
         </div>
       </div>

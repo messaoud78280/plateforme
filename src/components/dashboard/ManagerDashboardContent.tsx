@@ -27,12 +27,28 @@ export type ManagerTaskItem = {
   assignedTo: { id: string; name: string } | null;
 };
 
+export type ManagerActivityItem = {
+  id: string;
+  title: string;
+  detail: string | null;
+  createdAt: Date;
+  client?: { name: string };
+};
+
 type ManagerDashboardContentProps = {
   nouvellesDemandes: ManagerTaskItem[];
   aAssigner: ManagerTaskItem[];
   missionsEnCours: ManagerTaskItem[];
   missionsAValider: ManagerTaskItem[];
   missionsTerminees: ManagerTaskItem[];
+  /** Indicateurs optionnels pour le bandeau KPI */
+  nouvellesCount?: number;
+  aAssignerCount?: number;
+  enCoursCount?: number;
+  aValiderCount?: number;
+  agentsActifsCount?: number;
+  actionsConsumees?: number;
+  activiteRecente?: ManagerActivityItem[];
 };
 
 function TaskCard({
@@ -94,13 +110,34 @@ function TaskCard({
   );
 }
 
+function KpiCard({ label, count, href }: { label: string; count: number; href?: string }) {
+  const content = (
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p className="text-2xl font-bold text-slate-800">{count}</p>
+      <p className="mt-1 text-sm text-slate-600">{label}</p>
+    </div>
+  );
+  if (href) {
+    return <Link href={href} className="block transition hover:opacity-90">{content}</Link>;
+  }
+  return content;
+}
+
 export function ManagerDashboardContent({
   nouvellesDemandes,
   aAssigner,
   missionsEnCours,
   missionsAValider,
   missionsTerminees,
+  nouvellesCount,
+  aAssignerCount,
+  enCoursCount,
+  aValiderCount,
+  agentsActifsCount = 0,
+  actionsConsumees,
+  activiteRecente = [],
 }: ManagerDashboardContentProps) {
+  const showKpis = typeof nouvellesCount === "number" || agentsActifsCount > 0;
   return (
     <div className="space-y-10">
       <div>
@@ -109,6 +146,75 @@ export function ManagerDashboardContent({
           Gérez les demandes clients, assignez les agents et validez les missions.
         </p>
       </div>
+
+      {/* Indicateurs */}
+      {showKpis && (
+        <section aria-label="Indicateurs">
+          <h3 className="mb-4 text-lg font-semibold text-slate-800">Vue d'ensemble</h3>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
+            <KpiCard
+              label="Nouvelles demandes"
+              count={typeof nouvellesCount === "number" ? nouvellesCount : nouvellesDemandes.length}
+              href="/dashboard/taches?statut=NOUVEAU"
+            />
+            <KpiCard
+              label="Missions à assigner"
+              count={typeof aAssignerCount === "number" ? aAssignerCount : aAssigner.length}
+              href="/dashboard/taches"
+            />
+            <KpiCard
+              label="Missions en cours"
+              count={typeof enCoursCount === "number" ? enCoursCount : missionsEnCours.length}
+              href="/dashboard/taches?statut=EN_COURS"
+            />
+            <KpiCard
+              label="Missions à valider"
+              count={typeof aValiderCount === "number" ? aValiderCount : missionsAValider.length}
+              href="/dashboard/taches?statut=A_VALIDER"
+            />
+            <KpiCard
+              label="Agents actifs"
+              count={agentsActifsCount}
+              href="/dashboard/agents"
+            />
+          </div>
+        </section>
+      )}
+
+      {/* Actions consommées + Activité récente */}
+      {(typeof actionsConsumees === "number" || activiteRecente.length > 0) && (
+        <div className="grid gap-6 lg:grid-cols-2">
+          {typeof actionsConsumees === "number" && (
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h3 className="text-lg font-semibold text-slate-800">Actions consommées</h3>
+              <p className="mt-2 text-3xl font-bold text-[#1d4ed8]">{actionsConsumees}</p>
+              <p className="mt-1 text-sm text-slate-500">Total consommé par les clients ce mois</p>
+            </div>
+          )}
+          {activiteRecente.length > 0 && (
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h3 className="text-lg font-semibold text-slate-800">Activité récente</h3>
+              <ul className="mt-4 space-y-3">
+                {activiteRecente.slice(0, 5).map((a) => (
+                  <li key={a.id} className="flex gap-3 border-l-2 border-slate-200 pl-3 text-sm">
+                    <div>
+                      <p className="font-medium text-slate-800">{a.title}</p>
+                      {a.detail && <p className="text-slate-500">{a.detail}</p>}
+                      {a.client && <p className="text-xs text-slate-400">Client : {a.client.name}</p>}
+                      <p className="mt-0.5 text-xs text-slate-400">
+                        {new Date(a.createdAt).toLocaleString("fr-FR")}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <Link href="/dashboard/taches" className="mt-3 inline-block text-sm font-medium text-[#1d4ed8] hover:underline">
+                Voir les missions →
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 1. Nouvelles demandes */}
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

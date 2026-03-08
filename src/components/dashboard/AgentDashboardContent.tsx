@@ -37,25 +37,15 @@ export type AgentMessageItem = {
   task: { id: string; title: string };
 };
 
-export type AgentDocumentItem = {
-  id: string;
-  name: string;
-  fileUrl: string;
-  category: string;
-  status: string;
-  task: { id: string; title: string } | null;
-};
-
 export type AgentDashboardContentProps = {
   userName: string | null;
   missionsToday: number;
   missionsUrgentes: number;
-  messagesClients: number;
-  documentsATraiter: number;
+  missionsEnCours: number;
+  messagesNonLus: number;
   missions: AgentTaskItem[];
   missionsUrgentesList: AgentTaskItem[];
   messagesRecents: AgentMessageItem[];
-  documentsATraiterList: AgentDocumentItem[];
 };
 
 function formatDate(d: Date) {
@@ -79,12 +69,11 @@ export function AgentDashboardContent({
   userName,
   missionsToday,
   missionsUrgentes,
-  messagesClients,
-  documentsATraiter,
+  missionsEnCours,
+  messagesNonLus,
   missions,
   missionsUrgentesList,
   messagesRecents,
-  documentsATraiterList,
 }: AgentDashboardContentProps) {
   return (
     <div className="space-y-8">
@@ -98,20 +87,20 @@ export function AgentDashboardContent({
         </p>
       </div>
 
-      {/* Résumé du jour */}
-      <section aria-label="Résumé du jour">
-        <h2 className="mb-4 text-lg font-semibold text-slate-800">Résumé du jour</h2>
+      {/* Indicateurs */}
+      <section aria-label="Indicateurs">
+        <h2 className="mb-4 text-lg font-semibold text-slate-800">Vue d'ensemble</h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <SummaryCard label="Missions aujourd'hui" count={missionsToday} href="/dashboard/taches" />
           <SummaryCard label="Missions urgentes" count={missionsUrgentes} href="/dashboard/taches" />
-          <SummaryCard label="Messages clients" count={messagesClients} href="/dashboard/messagerie" />
-          <SummaryCard label="Documents à traiter" count={documentsATraiter} href="/dashboard/documents" />
+          <SummaryCard label="Missions en cours" count={missionsEnCours} href="/dashboard/taches" />
+          <SummaryCard label="Messages non lus" count={messagesNonLus} href="/dashboard/messagerie" />
         </div>
       </section>
 
-      {/* Mes missions - section principale */}
-      <section aria-label="Mes missions">
-        <h2 className="mb-4 text-lg font-semibold text-slate-800">Mes missions</h2>
+      {/* Mes missions assignées - section principale */}
+      <section aria-label="Mes missions assignées">
+        <h2 className="mb-4 text-lg font-semibold text-slate-800">Mes missions assignées</h2>
         {missions.length === 0 ? (
           <div className="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
             <p className="text-slate-500">Aucune mission assignée pour le moment.</p>
@@ -139,28 +128,26 @@ export function AgentDashboardContent({
                     >
                       {task.priority === "URGENT" ? "Urgent" : task.priority === "PRIORITAIRE" ? "Prioritaire" : "Standard"}
                     </span>
-                    <span className="text-xs">
-                      {formatDate(task.updatedAt)}
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                        task.status === "COMPLETE" ? "bg-green-100 text-green-800" :
+                        task.status === "A_VALIDER" ? "bg-violet-100 text-violet-800" :
+                        task.status === "EN_COURS" || task.status === "EN_ANALYSE" || task.status === "ASSIGNEE"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-slate-100 text-slate-700"
+                      }`}
+                    >
+                      {STATUS_LABELS[task.status] ?? task.status}
                     </span>
+                    <span className="text-xs">Créée le {formatDate(task.createdAt)}</span>
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                      task.status === "COMPLETE" ? "bg-green-100 text-green-800" :
-                      task.status === "A_VALIDER" ? "bg-violet-100 text-violet-800" :
-                      task.status === "EN_COURS" || task.status === "EN_ANALYSE" || task.status === "ASSIGNEE"
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-slate-100 text-slate-700"
-                    }`}
-                  >
-                    {STATUS_LABELS[task.status] ?? task.status}
-                  </span>
                   <Link
                     href={`/dashboard/taches/${task.id}`}
                     className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
                   >
-                    Ouvrir
+                    Ouvrir la mission
                   </Link>
                 </div>
               </div>
@@ -240,56 +227,6 @@ export function AgentDashboardContent({
           className="mt-4 inline-block text-sm font-medium text-blue-600 hover:underline"
         >
           Voir la messagerie →
-        </Link>
-      </section>
-
-      {/* Documents à traiter */}
-      <section aria-label="Documents à traiter">
-        <h2 className="mb-4 text-lg font-semibold text-slate-800">Documents à traiter</h2>
-        {documentsATraiterList.length === 0 ? (
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-sm text-slate-500">Aucun document en attente.</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {documentsATraiterList.map((doc) => (
-              <div
-                key={doc.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white p-3"
-              >
-                <div className="min-w-0">
-                  <span className="font-medium text-slate-800">{doc.name}</span>
-                  {doc.task && (
-                    <p className="text-xs text-slate-500">Mission : {doc.task.title}</p>
-                  )}
-                </div>
-                <div className="flex shrink-0 gap-2">
-                  <a
-                    href={doc.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                  >
-                    Télécharger
-                  </a>
-                  {doc.task && (
-                    <Link
-                      href={`/dashboard/taches/${doc.task.id}`}
-                      className="rounded-lg bg-blue-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-blue-700"
-                    >
-                      Ouvrir mission
-                    </Link>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-        <Link
-          href="/dashboard/documents"
-          className="mt-4 inline-block text-sm font-medium text-blue-600 hover:underline"
-        >
-          Voir tous les documents →
         </Link>
       </section>
     </div>

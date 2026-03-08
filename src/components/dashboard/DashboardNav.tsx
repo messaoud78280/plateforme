@@ -29,6 +29,7 @@ export function DashboardNav({ role }: { role?: string | null }) {
   const pathname = usePathname();
   const isClient = role === "CLIENT";
   const isAgent = role === "AGENT";
+  const isAgence = role === "AGENCE" || role === "MANAGER";
 
   return (
     <nav className="border-b border-[#c8cdd6] bg-[#f8f9fb] px-4">
@@ -36,20 +37,25 @@ export function DashboardNav({ role }: { role?: string | null }) {
         <NavLink href="/dashboard" pathname={pathname} matchExact>Dashboard</NavLink>
         {isClient ? (
           <>
-            <NavLink href="/dashboard/nouvelle-demande" pathname={pathname}>Nouvelle demande</NavLink>
-            <NavLink href="/dashboard/taches" pathname={pathname}>Mes demandes</NavLink>
+            <NavLink href="/dashboard/taches" pathname={pathname}>Mes missions</NavLink>
             <NavLink href="/dashboard/messagerie" pathname={pathname}>Messagerie</NavLink>
-            <NavLink href="/dashboard/documents" pathname={pathname}>Documents</NavLink>
             <NavLink href="/dashboard/abonnement" pathname={pathname}>Abonnement</NavLink>
-            <NavLink href="/dashboard/equipe" pathname={pathname}>Équipe</NavLink>
             <NavLink href="/dashboard/parametres" pathname={pathname}>Paramètres</NavLink>
           </>
         ) : isAgent ? (
           <>
             <NavLink href="/dashboard/taches" pathname={pathname}>Mes missions</NavLink>
             <NavLink href="/dashboard/messagerie" pathname={pathname}>Messagerie</NavLink>
-            <NavLink href="/dashboard/documents" pathname={pathname}>Documents</NavLink>
             <NavLink href="/dashboard/taches?statut=COMPLETE" pathname={pathname}>Historique</NavLink>
+            <NavLink href="/dashboard/parametres" pathname={pathname}>Paramètres</NavLink>
+          </>
+        ) : isAgence ? (
+          <>
+            <NavLink href="/dashboard/taches" pathname={pathname}>Missions</NavLink>
+            <NavLink href="/dashboard/clients" pathname={pathname}>Clients</NavLink>
+            <NavLink href="/dashboard/agents" pathname={pathname}>Agents</NavLink>
+            <NavLink href="/dashboard/messagerie" pathname={pathname}>Messagerie</NavLink>
+            <NavLink href="/dashboard/rapports" pathname={pathname}>Rapports</NavLink>
             <NavLink href="/dashboard/parametres" pathname={pathname}>Paramètres</NavLink>
           </>
         ) : (
@@ -59,12 +65,6 @@ export function DashboardNav({ role }: { role?: string | null }) {
             <NavLink href="/dashboard/documents" pathname={pathname}>Mes documents</NavLink>
             <NavLink href="/dashboard/messagerie" pathname={pathname}>Messagerie</NavLink>
             <NavLink href="/dashboard/messages" pathname={pathname}>RDV</NavLink>
-            {(role === "AGENCE" || role === "MANAGER") && (
-              <>
-                <NavLink href="/dashboard/clients" pathname={pathname}>Clients</NavLink>
-                <NavLink href="/dashboard/simulation" pathname={pathname}>Simulation</NavLink>
-              </>
-            )}
             <NavLink href="/dashboard/rapports" pathname={pathname}>Rapports</NavLink>
           </>
         )}

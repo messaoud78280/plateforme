@@ -34,8 +34,9 @@ export default async function TacheDetailPage({
     timeSpentMinutes: number | null;
     actionsUsed: number | null;
     assignedTo: { id: string; name: string; email: string } | null;
+    client: { id: string; name: string };
     project: { id: string; title: string } | null;
-    documents: { id: string; name: string; fileUrl: string; fileSize: number; mimeType: string | null }[];
+    documents: { id: string; name: string; fileUrl: string; fileSize: number; mimeType: string | null; createdAt: Date }[];
   } | null = null;
 
   let agents: { id: string; name: string; email: string }[] = [];
@@ -45,8 +46,9 @@ export default async function TacheDetailPage({
       where: { id },
       include: {
         assignedTo: { select: { id: true, name: true, email: true } },
+        client: { select: { id: true, name: true } },
         project: { select: { id: true, title: true } },
-        documents: { orderBy: { createdAt: "asc" }, select: { id: true, name: true, fileUrl: true, fileSize: true, mimeType: true } },
+        documents: { orderBy: { createdAt: "asc" }, select: { id: true, name: true, fileUrl: true, fileSize: true, mimeType: true, createdAt: true } },
       },
     });
     if (session.user.role === "AGENCE" || session.user.role === "MANAGER") {
@@ -71,7 +73,7 @@ export default async function TacheDetailPage({
 
   return (
     <div className="space-y-6">
-      <BackLink href="/dashboard/taches">Retour aux tâches</BackLink>
+      <BackLink href="/dashboard/taches">Retour aux missions</BackLink>
 
       <TaskDetailClient
         sessionUserId={session.user.id}
@@ -94,6 +96,7 @@ export default async function TacheDetailPage({
           desiredDate: (task as { desiredDate?: Date | null }).desiredDate ?? null,
           estimatedActions: (task as { estimatedActions?: string | null }).estimatedActions ?? null,
           assignedTo: task.assignedTo ?? null,
+          client: task.client,
           project: task.project ?? null,
           documents: task.documents ?? [],
         }}

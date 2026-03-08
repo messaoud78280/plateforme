@@ -27,7 +27,8 @@ interface TaskDetailClientProps {
     estimatedActions?: string | null;
     assignedTo?: { id: string; name: string; email: string } | null;
     project?: { id: string; title: string } | null;
-    documents?: { id: string; name: string; fileUrl: string; fileSize: number; mimeType: string | null }[];
+    client?: { id: string; name: string };
+    documents?: { id: string; name: string; fileUrl: string; fileSize: number; mimeType: string | null; createdAt?: Date }[];
   };
   canEdit: boolean;
   isAgence: boolean;
@@ -116,6 +117,20 @@ export function TaskDetailClient({ sessionUserId, task, canEdit, isAgence, isAge
     }
   };
 
+  const handlePriorityChange = async (priority: string | null) => {
+    if (!isAgence) return;
+    try {
+      const res = await fetch(`/api/tasks/${task.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ priority }),
+      });
+      if (res.ok) router.refresh();
+    } catch {
+      // ignore
+    }
+  };
+
   return (
     <TaskDetailView
       sessionUserId={sessionUserId}
@@ -128,6 +143,7 @@ export function TaskDetailClient({ sessionUserId, task, canEdit, isAgence, isAge
       onAgencyNotesChange={isAgence ? handleAgencyNotes : undefined}
       onValidate={isAgence ? handleValidate : undefined}
       onRequestCorrection={isAgence ? handleRequestCorrection : undefined}
+      onPriorityChange={isAgence ? handlePriorityChange : undefined}
       correctionNoteInput={correctionNote}
       onCorrectionNoteChange={setCorrectionNote}
     />

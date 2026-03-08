@@ -1,5 +1,33 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
+
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://bework.fr";
+
+const RESSOURCES_BLOG = [
+  { title: "10 tâches administratives à déléguer", desc: "Les tâches chronophages que les dirigeants peuvent externaliser.", href: "/blog/10-taches-administratives-deleguer-dirigeant" },
+  { title: "Combien coûte un assistant administratif ?", desc: "Comparatif assistant externalisé vs salarié. Tarifs pour les PME.", href: "/blog/combien-coute-assistant-administratif" },
+  { title: "Assistant virtuel vs assistant salarié", desc: "Avantages et inconvénients pour choisir entre externaliser ou recruter.", href: "/blog/assistant-virtuel-vs-assistant-salarie" },
+];
+
+export const metadata: Metadata = {
+  title: "Assistant administratif externalisé pour PME | BeWork — France, Belgique, Suisse, Luxembourg",
+  description:
+    "Assistant administratif externalisé et assistant virtuel entreprise pour PME francophones. Externaliser votre administratif à distance : devis, factures, relances. Dès 215€/mois, sans recrutement. France, Belgique, Suisse, Luxembourg.",
+  keywords: [
+    "assistant administratif externalisé",
+    "assistant administratif à distance",
+    "assistant virtuel entreprise",
+    "externaliser administratif PME",
+    "assistant administratif PME",
+  ],
+  alternates: { canonical: BASE_URL },
+  openGraph: {
+    title: "Assistant administratif externalisé pour PME | BeWork",
+    description:
+      "Externalisez votre administratif avec un assistant virtuel dédié. Dès 215€/mois. France, Belgique, Suisse, Luxembourg.",
+  },
+};
 
 export default function HomePage() {
   return (
@@ -13,16 +41,22 @@ export default function HomePage() {
             </Link>
             <div className="flex items-center gap-3">
               <Link
+                href="/connexion"
+                className="rounded-lg border border-[#c8cdd6] bg-white px-5 py-2.5 text-sm font-medium text-[#1e293b] shadow-sm transition-all hover:bg-[#f8f9fb]"
+              >
+                Connexion
+              </Link>
+              <Link
                 href="/contact"
                 className="hidden rounded-lg border border-[#c8cdd6] bg-white px-5 py-2.5 text-sm font-medium text-[#1e293b] shadow-sm transition-all hover:border-[#9ca3af] hover:bg-[#f8f9fb] sm:inline-flex"
               >
                 Contact
               </Link>
               <Link
-                href="/connexion"
+                href="/inscription"
                 className="rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-[#1e40af] hover:shadow-lg"
               >
-                Accéder
+                Tester BeWork
               </Link>
             </div>
           </div>
@@ -34,8 +68,10 @@ export default function HomePage() {
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#secteurs">Secteurs</a>
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#plateforme">Plateforme</a>
             <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/tarifs">Tarifs</Link>
+            <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/blog">Blog</Link>
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#equipe">Équipe</a>
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#conciergerie">Conciergerie</a>
+            <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/faq">FAQ</Link>
             <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/contact">Contact</Link>
           </nav>
         </div>
@@ -48,28 +84,34 @@ export default function HomePage() {
             <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 lg:items-center">
               <div>
                 <h1 className="text-balance text-3xl font-bold leading-tight tracking-tight text-[#0f172a] md:text-4xl lg:text-5xl">
-                  Gagnez jusqu&apos;à 20 heures par semaine grâce à un assistant administratif dédié.
+                  Assistant administratif externalisé : gagnez jusqu&apos;à 20 heures par semaine
                 </h1>
                 <p className="mt-6 max-w-xl text-pretty text-base leading-relaxed text-[#334155] md:text-lg">
-                  Emails, devis, factures, relances, suivi de dossiers : nos assistants francophones gèrent votre administratif pendant que vous vous concentrez sur votre activité.
+                  Notre assistant administratif à distance gère votre administratif pour les PME : emails, devis, factures, relances. Externaliser administratif sans recrutement — France, Belgique, Suisse, Luxembourg.
                 </p>
                 <div className="mt-8 flex flex-wrap gap-4">
                   <Link
-                    href="/tarifs"
+                    href="/inscription"
                     className="inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3.5 text-center font-semibold text-white shadow-lg transition-all hover:bg-[#1e40af] hover:shadow-xl"
-                    aria-label="Découvrir les tarifs BeWork"
+                    aria-label="Tester BeWork gratuitement"
                   >
-                    Découvrir les tarifs
+                    Tester BeWork
+                  </Link>
+                  <Link
+                    href="/inscription"
+                    className="inline-flex rounded-lg border-2 border-[#1d4ed8] bg-transparent px-6 py-3.5 text-center font-semibold text-[#1d4ed8] transition-all hover:bg-[#eff6ff]"
+                  >
+                    Créer un compte
                   </Link>
                   <Link
                     href="/contact"
-                    className="inline-flex rounded-lg border-2 border-[#1d4ed8] bg-transparent px-6 py-3.5 text-center font-semibold text-[#1d4ed8] transition-all hover:bg-[#eff6ff]"
+                    className="inline-flex rounded-lg border-2 border-[#c8cdd6] bg-white px-6 py-3.5 text-center font-semibold text-[#334155] transition-all hover:border-[#1d4ed8] hover:text-[#1d4ed8]"
                   >
-                    Demander une démo
+                    Déléguer une première tâche
                   </Link>
                 </div>
                 <p className="mt-6 text-sm text-[#64748b]">
-                  Plateforme internationale supervisée depuis la France. Dès 215€/mois, sans recrutement.
+                  Plateforme internationale supervisée depuis la France. Dès 215€/mois, sans recrutement. Assistant virtuel entreprise pour PME francophones.
                 </p>
               </div>
               {/* Mockup plateforme */}
@@ -93,11 +135,14 @@ export default function HomePage() {
               </div>
             </div>
             <div className="mt-12 flex flex-wrap justify-center gap-4">
-              <Link href="/connexion" className="text-sm font-medium text-[#1d4ed8] hover:underline">
-                Se connecter
+              <Link href="/inscription" className="rounded-lg bg-white/80 px-4 py-2 text-sm font-semibold text-[#1d4ed8] shadow-sm hover:bg-white">
+                Tester BeWork
               </Link>
-              <Link href="/inscription" className="text-sm font-medium text-[#64748b] hover:text-[#0f172a]">
+              <Link href="/inscription" className="text-sm font-medium text-[#1d4ed8] hover:underline">
                 Créer un compte
+              </Link>
+              <Link href="/connexion" className="text-sm font-medium text-[#64748b] hover:text-[#0f172a]">
+                Se connecter
               </Link>
             </div>
           </div>
@@ -130,6 +175,35 @@ export default function HomePage() {
                 <h3 className="mt-1 text-lg font-semibold text-[#0f172a]">{item.title}</h3>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* Pourquoi externaliser son administratif */}
+        <section id="pourquoi-externaliser" className="px-6 py-16 md:py-20 bg-white/60 rounded-2xl mx-4 md:mx-6 max-w-6xl md:mx-auto scroll-mt-24" style={{ scrollMarginTop: "6rem" }}>
+          <div className="mx-auto max-w-6xl">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
+                Pourquoi externaliser son administratif ?
+              </h2>
+              <p className="mt-3 max-w-2xl mx-auto text-[#334155]">
+                Externaliser votre administratif avec un assistant virtuel entreprise permet de recentrer vos équipes sur votre cœur de métier tout en sécurisant les tâches de secrétariat, facturation et suivi.
+              </p>
+            </div>
+            <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {[
+                "Gain de temps : déchargez-vous des tâches chronophages et concentrez-vous sur votre activité.",
+                "Coût maîtrisé : pas de recrutement ni de charges sociales — un forfait tout compris dès 215€/mois.",
+                "Réactivité : assistant administratif à distance opérationnel après un court onboarding.",
+                "Scalabilité : augmentez ou réduisez le volume d'actions selon vos besoins.",
+                "Qualité : équipe francophone Bac+5, formée à l'IA, supervisée en France.",
+                "Souplesse : externaliser administratif PME sans engagement long terme.",
+              ].map((item, i) => (
+                <li key={i} className="card-frame flex gap-3 rounded-lg p-5">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8] text-sm font-bold">✓</span>
+                  <span className="text-[#334155] leading-relaxed">{item}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 
@@ -389,6 +463,64 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Exemples de missions par secteur */}
+        <section id="exemples-missions" className="px-6 py-24 md:py-28 scroll-mt-24" style={{ scrollMarginTop: "6rem" }}>
+          <div className="mx-auto max-w-6xl">
+            <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
+              Exemples de missions par secteur
+            </h2>
+            <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#334155]">
+              Un assistant administratif externalisé s&apos;adapte à votre secteur : BTP, immobilier, PME, indépendants.
+            </p>
+            <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+              <div className="card-frame rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-[#1d4ed8]">BTP</h3>
+                <ul className="mt-4 space-y-2 text-sm text-[#334155]">
+                  {["Devis chantiers", "Suivi des sous-traitants", "Relances factures fournisseurs", "Mise à jour planning"].map((m, i) => (
+                    <li key={i}>• {m}</li>
+                  ))}
+                </ul>
+                <Link href="/assistant-administratif-btp" className="mt-4 inline-block text-sm font-semibold text-[#1d4ed8] hover:underline">
+                  En savoir plus →
+                </Link>
+              </div>
+              <div className="card-frame rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-[#1d4ed8]">Immobilier</h3>
+                <ul className="mt-4 space-y-2 text-sm text-[#334155]">
+                  {["Dossiers locataires", "Relances loyers", "État des lieux", "Gestion des demandes"].map((m, i) => (
+                    <li key={i}>• {m}</li>
+                  ))}
+                </ul>
+                <Link href="/assistant-administratif-immobilier" className="mt-4 inline-block text-sm font-semibold text-[#1d4ed8] hover:underline">
+                  En savoir plus →
+                </Link>
+              </div>
+              <div className="card-frame rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-[#1d4ed8]">PME</h3>
+                <ul className="mt-4 space-y-2 text-sm text-[#334155]">
+                  {["Devis et factures clients", "Suivi des commandes", "Relances impayées", "Administratif RH"].map((m, i) => (
+                    <li key={i}>• {m}</li>
+                  ))}
+                </ul>
+                <Link href="/assistant-administratif-pme" className="mt-4 inline-block text-sm font-semibold text-[#1d4ed8] hover:underline">
+                  En savoir plus →
+                </Link>
+              </div>
+              <div className="card-frame rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-[#1d4ed8]">Indépendants</h3>
+                <ul className="mt-4 space-y-2 text-sm text-[#334155]">
+                  {["Facturation", "Agenda et RDV", "Recherches fournisseurs", "Suivi administratif"].map((m, i) => (
+                    <li key={i}>• {m}</li>
+                  ))}
+                </ul>
+                <Link href="/assistant-administratif-distance" className="mt-4 inline-block text-sm font-semibold text-[#1d4ed8] hover:underline">
+                  En savoir plus →
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Qui sommes-nous */}
         <section id="equipe" className="px-6 py-24 md:py-28">
           <div className="mx-auto max-w-6xl">
@@ -640,30 +772,15 @@ export default function HomePage() {
             </div>
 
             <div className="grid gap-8 md:grid-cols-3 md:gap-10">
-              {[
-                {
-                  title: "Mise en place d’un assistant virtuel",
-                  desc: "Comment démarrer rapidement et intégrer l’IA dans vos process administratifs.",
-                },
-                {
-                  title: "Délégation et suivi des dossiers",
-                  desc: "Bonnes pratiques pour déléguer en confiance et garder la main sur l’avancement.",
-                },
-                {
-                  title: "IA et qualité administrative",
-                  desc: "Rigueur, traçabilité et gain de temps avec des assistants formés à l’IA.",
-                },
-              ].map((r) => (
+              {RESSOURCES_BLOG.map((r) => (
                 <div
                   key={r.title}
                   className="card-frame rounded-lg p-8"
                 >
-                  <p className="text-lg font-semibold text-[#0f172a]">
-                    {r.title}
-                  </p>
+                  <p className="text-lg font-semibold text-[#0f172a]">{r.title}</p>
                   <p className="mt-4 text-[#334155] leading-relaxed">{r.desc}</p>
                   <Link
-                    href="/assistants-administratifs-taches"
+                    href={r.href}
                     className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-[#1d4ed8] transition-colors hover:text-[#1e40af]"
                   >
                     En savoir plus
@@ -672,6 +789,58 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* FAQ optimisée SEO */}
+        <section id="faq" className="px-6 py-24 md:py-28 scroll-mt-24" style={{ scrollMarginTop: "6rem" }}>
+          <div className="mx-auto max-w-3xl">
+            <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
+              Questions fréquentes
+            </h2>
+            <p className="mt-5 text-lg leading-relaxed text-[#334155]">
+              Réponses aux questions les plus posées sur l&apos;assistant administratif externalisé.
+            </p>
+            <dl className="mt-12 space-y-8">
+              {[
+                {
+                  q: "Combien coûte un assistant administratif ?",
+                  a: "Chez BeWork, les offres démarrent à 215€/mois pour une formule Standard (120 actions/mois, soit ~20h), 415€/mois pour Business (240 actions) et 630€/mois pour Premium (360 actions). L'offre Découverte à 109€ permet de tester le service. Tout est inclus : pas de coût caché, pas de recrutement.",
+                },
+                {
+                  q: "Comment fonctionne un assistant administratif externalisé ?",
+                  a: "Vous envoyez vos tâches via la plateforme BeWork, un assistant dédié les traite à distance (devis, factures, relances, suivi dossiers), vous suivez l'avancement en temps réel et recevez les livrables. Le tout sans recrutement ni infrastructure : externaliser administratif PME en toute simplicité.",
+                },
+                {
+                  q: "Qui réalise les missions ?",
+                  a: "Des assistants francophones diplômés Bac+5, formés à l'IA, encadrés par notre agence en région parisienne. La direction et la supervision sont en France ; la plateforme opérationnelle permet une exécution réactive et de qualité.",
+                },
+                {
+                  q: "Quel est le délai de traitement ?",
+                  a: "Réponse moyenne en moins de 2 heures. Les tâches urgentes sont priorisées. Le délai dépend du type de mission et de la complexité ; notre équipe en France assure une coordination fluide pour respecter vos échéances.",
+                },
+              ].map((item, i) => (
+                <div key={i} className="card-frame rounded-xl p-6">
+                  <dt className="text-lg font-semibold text-[#0f172a]">{item.q}</dt>
+                  <dd className="mt-3 text-[#334155] leading-relaxed">{item.a}</dd>
+                </div>
+              ))}
+            </dl>
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{
+                __html: JSON.stringify({
+                  "@context": "https://schema.org",
+                  "@type": "FAQPage",
+                  mainEntity: [
+                    { "@type": "Question", name: "Combien coûte un assistant administratif ?", acceptedAnswer: { "@type": "Answer", text: "Chez BeWork, les offres démarrent à 215€/mois pour une formule Standard (120 actions/mois), 415€/mois pour Business et 630€/mois pour Premium. L'offre Découverte à 109€ permet de tester le service. Tout est inclus." } },
+                    { "@type": "Question", name: "Comment fonctionne un assistant administratif externalisé ?", acceptedAnswer: { "@type": "Answer", text: "Vous envoyez vos tâches via la plateforme BeWork, un assistant dédié les traite à distance, vous suivez l'avancement en temps réel et recevez les livrables. Sans recrutement ni infrastructure." } },
+                    { "@type": "Question", name: "Qui réalise les missions ?", acceptedAnswer: { "@type": "Answer", text: "Des assistants francophones diplômés Bac+5, formés à l'IA, encadrés par notre agence en région parisienne. Direction et supervision en France." } },
+                    { "@type": "Question", name: "Quel est le délai de traitement ?", acceptedAnswer: { "@type": "Answer", text: "Réponse moyenne en moins de 2 heures. Les tâches urgentes sont priorisées. Notre équipe en France assure une coordination fluide." } },
+                  ],
+                }),
+              }}
+            />
           </div>
         </section>
 
@@ -718,14 +887,23 @@ export default function HomePage() {
             </span>
           </div>
           <div className="flex flex-wrap gap-x-6 gap-y-2">
+            <Link className="font-medium transition-colors hover:text-[#0f172a]" href="/inscription">
+              Tester BeWork
+            </Link>
+            <Link className="font-medium transition-colors hover:text-[#0f172a]" href="/inscription">
+              Créer un compte
+            </Link>
             <Link className="font-medium transition-colors hover:text-[#0f172a]" href="/connexion">
               Connexion
             </Link>
-            <Link className="font-medium transition-colors hover:text-[#0f172a]" href="/inscription">
-              Inscription
+            <Link className="font-medium transition-colors hover:text-[#0f172a]" href="/faq">
+              FAQ
             </Link>
             <Link className="font-medium transition-colors hover:text-[#0f172a]" href="/tarifs">
               Tarifs
+            </Link>
+            <Link className="font-medium transition-colors hover:text-[#0f172a]" href="/blog">
+              Blog
             </Link>
           </div>
         </div>

@@ -1,16 +1,13 @@
 interface BeWorkLogoProps {
   className?: string;
   size?: "sm" | "md" | "lg";
+  showTagline?: boolean;
 }
-
-/** Dégradé bleu métallique : professionnel, épuré, futuriste */
-const logoGradient =
-  "bg-gradient-to-r from-[#1e3a5f] via-[#2563eb] to-[#0ea5e9] bg-clip-text text-transparent";
-const logoShadow = "drop-shadow-[0_1px_2px_rgba(30,58,95,0.25)]";
 
 export function BeWorkLogo({
   className = "",
   size = "md",
+  showTagline = false,
 }: BeWorkLogoProps) {
   const textSize =
     size === "sm"
@@ -20,11 +17,19 @@ export function BeWorkLogo({
         : "text-4xl md:text-5xl";
 
   return (
-    <span
-      className={`font-extrabold tracking-tight ${textSize} ${logoGradient} ${logoShadow} ${className}`}
-      style={{ fontFamily: "var(--font-orbitron), system-ui, sans-serif" }}
-    >
-      BeWork
+    <span className={`inline-block ${className}`}>
+      <span
+        className={`font-extrabold tracking-tight ${textSize}`}
+        style={{ fontFamily: "var(--font-orbitron), system-ui, sans-serif" }}
+      >
+        <span className="text-[#64748b]">Be</span>
+        <span className="text-[#1d4ed8]">Work</span>
+      </span>
+      {showTagline && (
+        <span className="mt-0.5 hidden text-[10px] font-medium tracking-wide text-[#94a3b8] sm:block md:text-xs">
+          L&apos;assistant administratif à la demande
+        </span>
+      )}
     </span>
   );
 }

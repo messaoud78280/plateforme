@@ -37,7 +37,7 @@ export default function HomePage() {
           {/* Ligne 1 : Logo + boutons */}
           <div className="flex items-center justify-between">
             <Link href="/" className="shrink-0">
-              <BeWorkLogo size="sm" />
+              <BeWorkLogo size="sm" showTagline />
             </Link>
             <div className="flex items-center gap-3">
               <Link
@@ -79,39 +79,33 @@ export default function HomePage() {
 
       <main className="pt-0">
         {/* Hero — message orienté bénéfice + CTAs + mockup */}
-        <section id="hero" className="px-6 pt-20 pb-20 md:pt-24 md:pb-24" style={{ scrollMarginTop: "6rem" }}>
+        <section id="hero" className="px-6 pt-24 pb-24 md:pt-32 md:pb-32" style={{ scrollMarginTop: "6rem" }}>
           <div className="mx-auto max-w-6xl">
-            <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 lg:items-center">
-              <div>
-                <h1 className="text-balance text-3xl font-bold leading-tight tracking-tight text-[#0f172a] md:text-4xl lg:text-5xl">
-                  Assistant administratif externalisé : gagnez jusqu&apos;à 20 heures par semaine
+            <div className="grid gap-16 lg:grid-cols-2 lg:gap-20 lg:items-center">
+              <div className="space-y-8">
+                <h1 className="text-balance text-3xl font-bold leading-[1.15] tracking-tight text-[#0f172a] md:text-4xl lg:text-5xl lg:leading-[1.1]">
+                  Gagnez du temps. Déléguez votre administratif.
                 </h1>
-                <p className="mt-6 max-w-xl text-pretty text-base leading-relaxed text-[#334155] md:text-lg">
-                  Notre assistant administratif à distance gère votre administratif pour les PME : emails, devis, factures, relances. Externaliser administratif sans recrutement — France, Belgique, Suisse, Luxembourg.
+                <p className="max-w-xl text-lg leading-relaxed text-[#475569] md:text-xl">
+                  Confiez vos tâches administratives à un assistant à la demande, sans embauche et sans contraintes.
                 </p>
-                <div className="mt-8 flex flex-wrap gap-4">
+                <div className="flex flex-wrap items-center gap-4">
                   <Link
                     href="/inscription"
-                    className="inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3.5 text-center font-semibold text-white shadow-lg transition-all hover:bg-[#1e40af] hover:shadow-xl"
+                    className="inline-flex rounded-lg bg-[#1d4ed8] px-8 py-4 text-base font-semibold text-white shadow-lg shadow-[#1d4ed8]/25 transition-all hover:bg-[#1e40af] hover:shadow-xl hover:shadow-[#1d4ed8]/30"
                     aria-label="Tester BeWork gratuitement"
                   >
                     Tester BeWork
                   </Link>
                   <Link
-                    href="/inscription"
-                    className="inline-flex rounded-lg border-2 border-[#1d4ed8] bg-transparent px-6 py-3.5 text-center font-semibold text-[#1d4ed8] transition-all hover:bg-[#eff6ff]"
+                    href="#comment-ca-marche"
+                    className="inline-flex rounded-lg border border-[#e2e8f0] bg-white px-6 py-3.5 text-base font-medium text-[#334155] transition-all hover:border-[#c8cdd6] hover:bg-[#f8fafc]"
                   >
-                    Créer un compte
-                  </Link>
-                  <Link
-                    href="/contact"
-                    className="inline-flex rounded-lg border-2 border-[#c8cdd6] bg-white px-6 py-3.5 text-center font-semibold text-[#334155] transition-all hover:border-[#1d4ed8] hover:text-[#1d4ed8]"
-                  >
-                    Déléguer une première tâche
+                    Comment ça marche
                   </Link>
                 </div>
-                <p className="mt-6 text-sm text-[#64748b]">
-                  Plateforme internationale supervisée depuis la France. Dès 215€/mois, sans recrutement. Assistant virtuel entreprise pour PME francophones.
+                <p className="text-sm text-[#64748b]">
+                  France, Belgique, Suisse, Luxembourg. Dès 215€/mois, sans recrutement.
                 </p>
               </div>
               {/* Mockup plateforme */}
@@ -134,14 +128,11 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-            <div className="mt-12 flex flex-wrap justify-center gap-4">
-              <Link href="/inscription" className="rounded-lg bg-white/80 px-4 py-2 text-sm font-semibold text-[#1d4ed8] shadow-sm hover:bg-white">
-                Tester BeWork
-              </Link>
-              <Link href="/inscription" className="text-sm font-medium text-[#1d4ed8] hover:underline">
+            <div className="mt-16 flex flex-wrap justify-center gap-6 text-sm">
+              <Link href="/inscription" className="font-medium text-[#1d4ed8] hover:underline">
                 Créer un compte
               </Link>
-              <Link href="/connexion" className="text-sm font-medium text-[#64748b] hover:text-[#0f172a]">
+              <Link href="/connexion" className="font-medium text-[#64748b] hover:text-[#0f172a]">
                 Se connecter
               </Link>
             </div>

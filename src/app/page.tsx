@@ -278,26 +278,67 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Capture / mockup dashboard */}
+            {/* Démo dashboard — contenu réel */}
             <div className="mb-20 flex justify-center">
-              <div className="w-full max-w-4xl overflow-hidden rounded-xl border border-[#e2e8f0] bg-white shadow-xl shadow-[#0f172a]/5">
-                <div className="flex items-center gap-2 border-b border-[#e2e8f0] bg-[#f8fafc] px-4 py-3">
+              <div className="w-full max-w-5xl overflow-hidden rounded-xl border border-[#e2e8f0] bg-white shadow-xl shadow-[#0f172a]/8">
+                <div className="flex items-center gap-2 border-b border-[#e2e8f0] bg-[#f8fafc] px-5 py-3.5">
                   <span className="h-2.5 w-2.5 rounded-full bg-[#94a3b8]" />
                   <span className="h-2.5 w-2.5 rounded-full bg-[#94a3b8]" />
                   <span className="h-2.5 w-2.5 rounded-full bg-[#94a3b8]" />
-                  <span className="ml-2 text-xs font-medium text-[#64748b]">Dashboard BeWork</span>
+                  <span className="ml-2 text-sm font-medium text-[#64748b]">Dashboard BeWork</span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[#e2e8f0]">
-                  {["Nouvelle demande", "Messagerie", "Mes demandes"].map((label, i) => (
-                    <div key={i} className="bg-white p-4 md:p-6">
-                      <div className="h-3 w-20 rounded bg-[#f1f5f9] mb-3" />
-                      <div className="space-y-2">
-                        {[1, 2, 3].map((j) => (
-                          <div key={j} className="h-10 rounded-lg bg-[#f8fafc] border border-[#e2e8f0]" />
-                        ))}
-                      </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[#e2e8f0] p-px">
+                  {/* Colonne 1 : Nouvelle demande */}
+                  <div className="bg-white p-5">
+                    <h3 className="text-sm font-semibold text-[#0f172a] mb-3">Nouvelle demande</h3>
+                    <div className="space-y-2.5">
+                      {[
+                        { title: "Préparer devis Dupont BTP", cat: "Facturation" },
+                        { title: "Relancer facture n°2024-089", cat: "Comptabilité" },
+                        { title: "Organiser RDV client Martin", cat: "Organisation" },
+                      ].map((d, i) => (
+                        <div key={i} className="rounded-lg border border-[#e2e8f0] bg-white px-3 py-2.5 text-left shadow-sm hover:border-[#1d4ed8]/30 transition-colors">
+                          <p className="text-sm font-medium text-[#0f172a] line-clamp-1">{d.title}</p>
+                          <p className="mt-0.5 text-xs text-[#64748b]">{d.cat}</p>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
+                  {/* Colonne 2 : Messagerie */}
+                  <div className="bg-white p-5">
+                    <h3 className="text-sm font-semibold text-[#0f172a] mb-3">Messagerie</h3>
+                    <div className="space-y-2.5">
+                      {[
+                        { from: "Catherine (assistant)", msg: "Le devis est prêt, je vous l'envoie.", time: "10:24" },
+                        { from: "Vous", msg: "Merci, pouvez-vous le relire avant ?", time: "09:52" },
+                        { from: "Catherine (assistant)", msg: "Bien reçu, j'attaque ce matin.", time: "Hier 16:30" },
+                      ].map((m, i) => (
+                        <div key={i} className="rounded-lg border border-[#e2e8f0] bg-white px-3 py-2.5 text-left shadow-sm">
+                          <p className="text-xs font-medium text-[#1d4ed8]">{m.from}</p>
+                          <p className="mt-0.5 text-xs text-[#475569] line-clamp-2">{m.msg}</p>
+                          <p className="mt-1 text-[10px] text-[#94a3b8]">{m.time}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Colonne 3 : Mes demandes */}
+                  <div className="bg-white p-5">
+                    <h3 className="text-sm font-semibold text-[#0f172a] mb-3">Mes demandes</h3>
+                    <div className="space-y-2.5">
+                      {[
+                        { title: "Devis Dupont", status: "En cours", color: "bg-blue-100 text-blue-800" },
+                        { title: "Relance facture", status: "Terminée", color: "bg-green-100 text-green-800" },
+                        { title: "RDV Martin", status: "En attente", color: "bg-amber-100 text-amber-800" },
+                      ].map((t, i) => (
+                        <div key={i} className="rounded-lg border border-[#e2e8f0] bg-white px-3 py-2.5 text-left shadow-sm">
+                          <p className="text-sm font-medium text-[#0f172a]">{t.title}</p>
+                          <span className={`mt-1.5 inline-block rounded-full px-2 py-0.5 text-[10px] font-medium ${t.color}`}>
+                            {t.status}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

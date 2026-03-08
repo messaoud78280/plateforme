@@ -150,7 +150,7 @@ export default async function TachesPage({
       <BackLink href="/dashboard">Dashboard</BackLink>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Mes tâches</h1>
+          <h1 className="text-2xl font-bold text-slate-800">{isAgent ? "Mes missions" : "Mes tâches"}</h1>
           <p className="mt-1 text-slate-600">
             {isAgence
               ? "Tâches déposées par les clients. Cliquez sur une tâche pour la prendre en charge ou la marquer comme terminée."

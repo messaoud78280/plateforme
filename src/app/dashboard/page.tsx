@@ -15,6 +15,7 @@ import { ActionsWidget } from "@/components/dashboard/ActionsWidget";
 import { NouvelleDemandeTrigger } from "@/components/demands/NouvelleDemandeTrigger";
 import { ClientDashboardContent } from "@/components/dashboard/ClientDashboardContent";
 import { ManagerDashboardContent, type ManagerTaskItem } from "@/components/dashboard/ManagerDashboardContent";
+import { AgentDashboardContent } from "@/components/dashboard/AgentDashboardContent";
 import { BackLink } from "@/components/ui/BackLink";
 
 export default async function DashboardPage({
@@ -359,6 +360,145 @@ export default async function DashboardPage({
     }
   }
 
+  const isAgent = session.user.role === "AGENT";
+  let agentData: {
+    missionsToday: number;
+    missionsUrgentes: number;
+    messagesClients: number;
+    documentsATraiter: number;
+    missions: { id: string; title: string; status: string; priority: string | null; desiredDate: Date | null; createdAt: Date; updatedAt: Date; client: { id: string; name: string } }[];
+    missionsUrgentesList: { id: string; title: string; status: string; priority: string | null; desiredDate: Date | null; createdAt: Date; updatedAt: Date; client: { id: string; name: string } }[];
+    messagesRecents: { id: string; content: string; createdAt: Date; read: boolean; sender: { id: string; name: string }; task: { id: string; title: string } }[];
+    documentsATraiterList: { id: string; name: string; fileUrl: string; category: string; status: string; task: { id: string; title: string } | null }[];
+  } = {
+    missionsToday: 0,
+    missionsUrgentes: 0,
+    messagesClients: 0,
+    documentsATraiter: 0,
+    missions: [],
+    missionsUrgentesList: [],
+    messagesRecents: [],
+    documentsATraiterList: [],
+  };
+
+  if (isAgent) {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const agentId = session.user.id;
+
+      const [missionsAll, urgentTasks, messagesCount, docsCount, messagesList, docsList] = await Promise.all([
+        prisma.task.findMany({
+          where: { assignedToId: agentId, status: { notIn: ["COMPLETE"] } },
+          include: { client: { select: { id: true, name: true } } },
+          orderBy: { updatedAt: "desc" },
+          take: 15,
+        }),
+        prisma.task.findMany({
+          where: { assignedToId: agentId, priority: { in: ["URGENT", "PRIORITAIRE"] }, status: { notIn: ["COMPLETE"] } },
+          include: { client: { select: { id: true, name: true } } },
+          orderBy: { updatedAt: "desc" },
+          take: 10,
+        }),
+        prisma.taskMessage.count({
+          where: {
+            OR: [{ senderId: agentId }, { receiverId: agentId }],
+            task: { assignedToId: agentId },
+            read: false,
+            receiverId: agentId,
+          },
+        }),
+        prisma.document.count({
+          where: {
+            taskId: { not: null },
+            task: { assignedToId: agentId },
+            status: { in: ["EN_ATTENTE", "EN_TRAITEMENT"] },
+          },
+        }),
+        prisma.taskMessage.findMany({
+          where: {
+            OR: [{ senderId: agentId }, { receiverId: agentId }],
+            task: { assignedToId: agentId },
+          },
+          include: {
+            sender: { select: { id: true, name: true } },
+            task: { select: { id: true, title: true } },
+          },
+          orderBy: { createdAt: "desc" },
+          take: 10,
+        }),
+        prisma.document.findMany({
+          where: {
+            taskId: { not: null },
+            task: { assignedToId: agentId },
+            status: { in: ["EN_ATTENTE", "EN_TRAITEMENT"] },
+          },
+          include: { task: { select: { id: true, title: true } } },
+          orderBy: { createdAt: "desc" },
+          take: 10,
+        }),
+      ]);
+
+      const missionsToday = await prisma.task.count({
+        where: {
+          assignedToId: agentId,
+          status: { notIn: ["COMPLETE"] },
+          OR: [
+            { desiredDate: { gte: today, lt: tomorrow } },
+            { createdAt: { gte: today } },
+          ],
+        },
+      });
+
+      agentData = {
+        missionsToday,
+        missionsUrgentes: urgentTasks.length,
+        messagesClients: messagesCount,
+        documentsATraiter: docsCount,
+        missions: missionsAll.map((t) => ({
+          id: t.id,
+          title: t.title,
+          status: t.status,
+          priority: t.priority,
+          desiredDate: t.desiredDate,
+          createdAt: t.createdAt,
+          updatedAt: t.updatedAt,
+          client: t.client,
+        })),
+        missionsUrgentesList: urgentTasks.map((t) => ({
+          id: t.id,
+          title: t.title,
+          status: t.status,
+          priority: t.priority,
+          desiredDate: t.desiredDate,
+          createdAt: t.createdAt,
+          updatedAt: t.updatedAt,
+          client: t.client,
+        })),
+        messagesRecents: messagesList.map((m) => ({
+          id: m.id,
+          content: m.content,
+          createdAt: m.createdAt,
+          read: m.read,
+          sender: m.sender,
+          task: m.task,
+        })),
+        documentsATraiterList: docsList.map((d) => ({
+          id: d.id,
+          name: d.name,
+          fileUrl: d.fileUrl,
+          category: d.category,
+          status: d.status,
+          task: d.task,
+        })),
+      };
+    } catch {
+      // ignore
+    }
+  }
+
   if (isClient) {
     return (
       <div className="space-y-8">
@@ -383,6 +523,25 @@ export default async function DashboardPage({
           clientId={clientId}
           recentDocuments={recentDocuments}
           recentActivities={activities}
+        />
+      </div>
+    );
+  }
+
+  if (isAgent) {
+    return (
+      <div className="space-y-8">
+        <BackLink href="/">Retour à l&apos;accueil</BackLink>
+        <AgentDashboardContent
+          userName={session.user?.name ?? null}
+          missionsToday={agentData.missionsToday}
+          missionsUrgentes={agentData.missionsUrgentes}
+          messagesClients={agentData.messagesClients}
+          documentsATraiter={agentData.documentsATraiter}
+          missions={agentData.missions}
+          missionsUrgentesList={agentData.missionsUrgentesList}
+          messagesRecents={agentData.messagesRecents}
+          documentsATraiterList={agentData.documentsATraiterList}
         />
       </div>
     );

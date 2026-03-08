@@ -48,6 +48,7 @@ export function MessagesSection({ isAgence, sessionUserId, variant = "rdv" }: Me
   const [messages, setMessages] = useState<MessageItem[]>([]);
   const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [recipients, setRecipients] = useState<{ id: string; name: string; role: string }[]>([]);
+  const [gerante, setGerante] = useState<{ id: string; name: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("nouveaux");
   const [filterProject, setFilterProject] = useState<string>("");
@@ -72,13 +73,15 @@ export function MessagesSection({ isAgence, sessionUserId, variant = "rdv" }: Me
         if (projRes.ok) {
           const projs = await projRes.json();
           setProjects(projs);
+          const managerRes = await fetch("/api/users/gerante");
+          let g: { id: string; name: string } | null = null;
+          if (managerRes.ok) {
+            g = await managerRes.json();
+            if (g) setGerante(g);
+          }
           if (!isAgence && projs.length > 0) {
-            const managerRes = await fetch("/api/users/gerante");
             const recs: { id: string; name: string; role: string }[] = [];
-            if (managerRes.ok) {
-              const g = await managerRes.json();
-              if (g) recs.push({ ...g, role: "Gérante" });
-            }
+            if (g) recs.push({ ...g, role: "Gérante" });
             const agents = new Map<string, string>();
             projs.forEach((p: ProjectItem) => {
               if (p.assignedTo) agents.set(p.assignedTo.id, p.assignedTo.name);
@@ -128,14 +131,21 @@ export function MessagesSection({ isAgence, sessionUserId, variant = "rdv" }: Me
     }
   }
 
-  const recipientsForProject = !isAgence && sendProject
+  const recipientsForProject = sendProject
     ? (() => {
         const p = projects.find((x) => x.id === sendProject);
         const list: { id: string; name: string; role: string }[] = [];
-        const gerante = recipients.find((r) => r.role === "Gérante");
-        if (gerante) list.push(gerante);
-        if (p?.assignedTo)
-          list.push({ ...p.assignedTo, role: "Agent en charge" });
+        if (isAgence) {
+          // Agent : Client du projet ou Gérante (pas soi-même si on est la gérante)
+          if (p?.client) list.push({ ...p.client, role: "Client" });
+          if (gerante && gerante.id !== sessionUserId)
+            list.push({ ...gerante, role: "Gérante" });
+        } else {
+          const ger = recipients.find((r) => r.role === "Gérante");
+          if (ger) list.push(ger);
+          if (p?.assignedTo)
+            list.push({ ...p.assignedTo, role: "Agent en charge" });
+        }
         return list;
       })()
     : recipients;
@@ -143,7 +153,7 @@ export function MessagesSection({ isAgence, sessionUserId, variant = "rdv" }: Me
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
     if (!sendProject?.trim() || !sendContent?.trim()) return;
-    if (!isAgence && recipientsForProject.length > 0 && !sendReceiver?.trim()) {
+    if (recipientsForProject.length > 0 && !sendReceiver?.trim()) {
       setError("Choisissez un destinataire.");
       return;
     }
@@ -154,7 +164,7 @@ export function MessagesSection({ isAgence, sessionUserId, variant = "rdv" }: Me
         projectId: sendProject,
         content: sendContent.trim(),
       };
-      if (!isAgence && sendReceiver) body.receiverId = sendReceiver;
+      if (sendReceiver) body.receiverId = sendReceiver;
 
       const res = await fetch("/api/messages", {
         method: "POST",
@@ -562,7 +572,7 @@ export function MessagesSection({ isAgence, sessionUserId, variant = "rdv" }: Me
               </select>
             </div>
 
-            {!isAgence && recipientsForProject.length > 0 && (
+            {recipientsForProject.length > 0 && (
               <div>
                 <label className="block text-sm font-medium text-slate-700">
                   Destinataire
@@ -574,7 +584,7 @@ export function MessagesSection({ isAgence, sessionUserId, variant = "rdv" }: Me
                   required
                 >
                   <option value="">
-                    Choisir : gérante ou agent du dossier
+                    {isAgence ? "Choisir : client ou gérante" : "Choisir : gérante ou agent du dossier"}
                   </option>
                   {recipientsForProject.map((r) => (
                     <option key={r.id} value={r.id}>
@@ -605,7 +615,12 @@ export function MessagesSection({ isAgence, sessionUserId, variant = "rdv" }: Me
 
             <button
               type="submit"
-              disabled={sending || !sendProject || !sendContent.trim()}
+              disabled={
+                sending ||
+                !sendProject ||
+                !sendContent.trim() ||
+                (recipientsForProject.length > 0 && !sendReceiver)
+              }
               className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
             >
               {sending ? "Envoi en cours..." : "Envoyer le message"}

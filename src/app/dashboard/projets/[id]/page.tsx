@@ -205,6 +205,7 @@ export default async function ProjetDetailPage({
         <MessageForm
           projectId={project.id}
           clientId={project.clientId}
+          client={project.client ? { id: project.client.id, name: project.client.name } : undefined}
           isAgence={isAgence}
           sessionUserId={session.user.id}
         />

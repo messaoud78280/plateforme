@@ -75,7 +75,26 @@ export async function POST(request: Request) {
           { status: 403 }
         );
       }
-      finalReceiverId = project.clientId;
+      // L'agent peut choisir : client du projet ou gérante (MANAGER)
+      if (bodyReceiverId) {
+        if (bodyReceiverId === project.clientId) {
+          finalReceiverId = project.clientId;
+        } else {
+          const manager = await prisma.user.findFirst({
+            where: { id: bodyReceiverId, role: "MANAGER" },
+          });
+          if (manager) {
+            finalReceiverId = manager.id;
+          } else {
+            return NextResponse.json(
+              { error: "Destinataire invalide." },
+              { status: 400 }
+            );
+          }
+        }
+      } else {
+        finalReceiverId = project.clientId;
+      }
     } else {
       if (project.clientId !== session.user.id) {
         return NextResponse.json(
@@ -170,7 +189,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // Alerte pour le client quand l'assistant (agence) envoie un message
+    // Alerte quand l'assistant (agence) envoie un message (client ou gérante)
     if (isAgence && finalReceiverId) {
       try {
         const sender = await prisma.user.findUnique({
@@ -178,10 +197,13 @@ export async function POST(request: Request) {
           select: { name: true },
         });
         const excerpt = content.trim().slice(0, 80) + (content.trim().length > 80 ? "…" : "");
+        const isToGerante = finalReceiverId !== project.clientId;
         await prisma.alert.create({
           data: {
-            title: "Message de votre assistant",
-            message: `${sender?.name ?? "Votre assistant"} vous a répondu sur le projet « ${project.title} » : ${excerpt}`,
+            title: isToGerante ? "Message d'un agent" : "Message de votre assistant",
+            message: isToGerante
+              ? `${sender?.name ?? "Un agent"} vous a envoyé un message sur le projet « ${project.title} » : ${excerpt}`
+              : `${sender?.name ?? "Votre assistant"} vous a répondu sur le projet « ${project.title} » : ${excerpt}`,
             clientId: finalReceiverId,
             actionUrl: `/dashboard/messagerie?project=${projectId}`,
           },

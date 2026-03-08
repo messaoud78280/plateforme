@@ -47,7 +47,7 @@ export default async function ClientDetailPage({
       where: { id: clientId },
       select: { id: true, name: true, email: true, company: true, phone: true, role: true },
     });
-    if (!clientUser || clientUser.role !== "CLIENT") {
+    if (!clientUser) {
       notFound();
     }
     client = { id: clientUser.id, name: clientUser.name, email: clientUser.email, company: clientUser.company, phone: clientUser.phone };
@@ -79,7 +79,7 @@ export default async function ClientDetailPage({
     agents = agentsRes;
   } catch (e) {
     console.error("[ClientDetailPage] Erreur chargement client:", e);
-    notFound();
+    throw e;
   }
 
   if (!client) notFound();

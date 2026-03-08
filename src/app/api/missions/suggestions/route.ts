@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   try {
     const where = {
       clientId: session.user.id,
-      status: "COMPLETE",
+      status: "COMPLETE" as const,
       completedAt: { not: null },
     };
 

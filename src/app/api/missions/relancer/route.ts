@@ -55,8 +55,8 @@ export async function POST(request: NextRequest) {
         status: "EN_ATTENTE",
         clientId: session.user.id,
         projectId: source.projectId,
-        contactsJson: source.contactsJson,
-        suppliersJson: source.suppliersJson,
+        contactsJson: source.contactsJson ?? undefined,
+        suppliersJson: source.suppliersJson ?? undefined,
         estimatedActions: source.estimatedActions,
       },
     });

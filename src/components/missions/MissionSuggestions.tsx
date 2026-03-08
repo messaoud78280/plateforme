@@ -17,7 +17,7 @@ type MissionSuggestionsProps = {
 export function MissionSuggestions({ onSelect, searchQuery = "" }: MissionSuggestionsProps) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -31,7 +31,7 @@ export function MissionSuggestions({ onSelect, searchQuery = "" }: MissionSugges
         .catch(() => setSuggestions([]))
         .finally(() => setLoading(false));
     }, 400);
-    return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
+    return () => { if (timeoutRef.current != null) clearTimeout(timeoutRef.current); };
   }, [searchQuery]);
 
   if (suggestions.length === 0) return null;

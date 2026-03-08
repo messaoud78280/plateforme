@@ -1,8 +1,8 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
-import { MessagesSection } from "@/components/dashboard/MessagesSection";
-import { MessagerieView } from "@/components/messagerie/MessagerieView";
+import { prisma } from "@/lib/prisma";
+import { MessagerieMissionsView } from "@/components/messagerie/MessagerieMissionsView";
 import { BackLink } from "@/components/ui/BackLink";
 
 export default async function MessageriePage() {
@@ -13,7 +13,32 @@ export default async function MessageriePage() {
   }
 
   const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
+  const isAgent = session.user.role === "AGENT";
   const isClient = session.user.role === "CLIENT";
+
+  let agents: { id: string; name: string }[] = [];
+  let managerId: string | null = null;
+  if (isAgence || isAgent) {
+    try {
+      const [agentsRes, managerRes] = await Promise.all([
+        prisma.user.findMany({
+          where: { role: { in: ["AGENCE", "AGENT"] } },
+          select: { id: true, name: true },
+          orderBy: { name: "asc" },
+        }),
+        prisma.user.findFirst({
+          where: { role: "MANAGER" },
+          select: { id: true },
+        }),
+      ]);
+      agents = agentsRes;
+      managerId = managerRes?.id ?? null;
+    } catch {
+      // ignore
+    }
+  }
+
+  const canChangeStatus = isAgence || isAgent;
 
   return (
     <div className="space-y-6">
@@ -23,19 +48,18 @@ export default async function MessageriePage() {
         <p className="mt-1 text-[#334155]">
           {isClient
             ? "Échangez avec votre assistant, suivez vos demandes et envoyez des documents."
-            : "Échangez avec l'agence via les projets. Consultez les messages et l'historique."}
+            : "Messagerie centrée sur les missions. Gérez les échanges et le suivi des missions administratives."}
         </p>
       </div>
 
-      {isClient ? (
-        <MessagerieView sessionUserId={session.user.id} />
-      ) : (
-        <MessagesSection
-          isAgence={isAgence}
-          sessionUserId={session.user.id}
-          variant="messagerie"
-        />
-      )}
+      <MessagerieMissionsView
+        sessionUserId={session.user.id}
+        isAgence={isAgence}
+        isAgent={isAgent}
+        canChangeStatus={canChangeStatus}
+        agents={agents}
+        managerId={managerId}
+      />
     </div>
   );
 }

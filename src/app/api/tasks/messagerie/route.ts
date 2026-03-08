@@ -1,0 +1,100 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+
+/** GET /api/tasks/messagerie?filter=inbox|mes-missions|en-attente-client|en-cours|terminees
+ * Retourne les tâches avec lastMessage et unreadCount pour la messagerie missions */
+export async function GET(request: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  }
+
+  const { searchParams } = new URL(request.url);
+  const filter = searchParams.get("filter") ?? "inbox";
+
+  const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
+  const isAgent = session.user.role === "AGENT";
+  const isClient = session.user.role === "CLIENT";
+
+  try {
+    let taskWhere: Record<string, unknown> = {};
+
+    if (isClient) {
+      taskWhere = { clientId: session.user.id };
+    } else if (isAgent) {
+      taskWhere = { assignedToId: session.user.id };
+    }
+    // isAgence: pas de filtre client/agent
+
+    const statusFilters: Record<string, string[]> = {
+      inbox: [], // toutes (avec priorité aux non lus)
+      "mes-missions": [],
+      "en-attente-client": ["EN_ATTENTE_INFO"],
+      "en-cours": ["ASSIGNEE", "EN_ANALYSE", "EN_COURS", "A_VALIDER", "EN_ATTENTE"],
+      terminees: ["COMPLETE"],
+    };
+
+    const statusList = statusFilters[filter] ?? [];
+    if (statusList.length > 0) {
+      taskWhere.status = statusList.length === 1 ? statusList[0] : { in: statusList };
+    }
+
+    const tasks = await prisma.task.findMany({
+      where: taskWhere,
+      include: {
+        client: { select: { id: true, name: true } },
+        assignedTo: { select: { id: true, name: true } },
+        taskMessages: {
+          orderBy: { createdAt: "desc" },
+          take: 1,
+          include: { sender: { select: { id: true, name: true } } },
+        },
+        documents: { select: { id: true, name: true, fileUrl: true } },
+      },
+      orderBy: { updatedAt: "desc" },
+      take: 50,
+    });
+
+    // Unread count per task (messages où receiver = session et read = false)
+    const taskIds = tasks.map((t) => t.id);
+    const unreadByTask = await prisma.taskMessage.groupBy({
+      by: ["taskId"],
+      where: {
+        taskId: { in: taskIds },
+        receiverId: session.user.id,
+        read: false,
+      },
+      _count: { id: true },
+    });
+    const unreadMap = new Map(unreadByTask.map((u) => [u.taskId, u._count.id]));
+
+    const result = tasks.map((t) => ({
+      id: t.id,
+      title: t.title,
+      status: t.status,
+      priority: t.priority,
+      client: t.client,
+      assignedTo: t.assignedTo,
+      lastMessage: t.taskMessages[0]
+        ? {
+            id: t.taskMessages[0].id,
+            content: t.taskMessages[0].content,
+            createdAt: t.taskMessages[0].createdAt,
+            sender: t.taskMessages[0].sender,
+          }
+        : null,
+      unreadCount: unreadMap.get(t.id) ?? 0,
+      documents: t.documents,
+    }));
+
+    return NextResponse.json(result);
+  } catch (e) {
+    console.error(e);
+    return NextResponse.json(
+      { error: "Erreur lors de la récupération des missions" },
+      { status: 500 }
+    );
+  }
+}

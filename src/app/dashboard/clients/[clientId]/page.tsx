@@ -43,11 +43,16 @@ export default async function ClientDetailPage({
   let agents: { id: string; name: string; email: string }[] = [];
 
   try {
-    [client, projects, tasks, agents] = await Promise.all([
-      prisma.user.findFirst({
-        where: { id: clientId, role: "CLIENT" },
-        select: { id: true, name: true, email: true, company: true, phone: true },
-      }),
+    const clientUser = await prisma.user.findUnique({
+      where: { id: clientId },
+      select: { id: true, name: true, email: true, company: true, phone: true, role: true },
+    });
+    if (!clientUser || clientUser.role !== "CLIENT") {
+      notFound();
+    }
+    client = { id: clientUser.id, name: clientUser.name, email: clientUser.email, company: clientUser.company, phone: clientUser.phone };
+
+    const [projectsRes, tasksRes, agentsRes] = await Promise.all([
       prisma.project.findMany({
         where: { clientId },
         include: {
@@ -69,6 +74,9 @@ export default async function ClientDetailPage({
         orderBy: { name: "asc" },
       }),
     ]);
+    projects = projectsRes;
+    tasks = tasksRes;
+    agents = agentsRes;
   } catch (e) {
     console.error("[ClientDetailPage] Erreur chargement client:", e);
     notFound();

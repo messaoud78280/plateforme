@@ -23,7 +23,10 @@ export default function ClientDetailError({
           ? "Problème de connexion à la base de données. Vérifiez sur Railway : Variables → DATABASE_URL (ou DIRECT_URL)."
           : "Une erreur inattendue s'est produite."}
       </p>
-      {error.message && (
+      <p className="mt-3 max-w-lg text-center text-xs text-slate-500">
+        En production, le détail est masqué. Consultez <strong>Railway → Deployments → View logs</strong> et cherchez &quot;[ClientDetailPage]&quot; pour voir l&apos;erreur réelle.
+      </p>
+      {error.message && !error.message.includes("omitted in production") && (
         <p className="mt-2 max-w-lg break-words rounded bg-slate-100 px-3 py-2 text-xs text-slate-600">
           {error.message}
         </p>

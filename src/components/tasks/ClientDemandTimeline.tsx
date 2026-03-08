@@ -11,8 +11,9 @@ const STEPS = [
 ] as const;
 
 function stepIndex(status: TaskStatus, completedAt: Date | null, validatedAt: Date | null): number {
-  if (status === "EN_ATTENTE") return 0;
-  if (status === "EN_COURS") return 2;
+  if (status === "NOUVEAU" || status === "EN_ATTENTE") return 0;
+  if (["ASSIGNEE", "EN_ANALYSE", "EN_COURS", "EN_ATTENTE_INFO"].includes(status)) return 2;
+  if (status === "A_VALIDER") return 2;
   if (status === "COMPLETE") {
     if (validatedAt) return 4;
     if (completedAt) return 3;

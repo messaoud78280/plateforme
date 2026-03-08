@@ -23,10 +23,17 @@ export default async function TachesPage({
   const isAgent = session.user.role === "AGENT";
   const isClient = session.user.role === "CLIENT";
   const params = await searchParams;
-  const statusFilter = params.statut as "EN_ATTENTE" | "EN_COURS" | "COMPLETE" | undefined;
-  const validStatus = statusFilter && ["EN_ATTENTE", "EN_COURS", "COMPLETE"].includes(statusFilter)
-    ? statusFilter
+  const allTaskStatuses = ["NOUVEAU", "EN_ATTENTE", "ASSIGNEE", "EN_ANALYSE", "EN_COURS", "EN_ATTENTE_INFO", "A_VALIDER", "COMPLETE"] as const;
+  const statusFilter = params.statut as string | undefined;
+  const statusInProgress: (typeof allTaskStatuses)[number][] = ["ASSIGNEE", "EN_ANALYSE", "EN_COURS", "EN_ATTENTE_INFO", "A_VALIDER"];
+  const validStatus = statusFilter && allTaskStatuses.includes(statusFilter as (typeof allTaskStatuses)[number])
+    ? (statusFilter as (typeof allTaskStatuses)[number])
     : undefined;
+  const statusWhere = validStatus
+    ? validStatus === "EN_COURS"
+      ? { status: { in: statusInProgress } }
+      : { status: validStatus }
+    : {};
 
   let tasks: Awaited<ReturnType<typeof prisma.task.findMany>> = [];
   let projects: { id: string; title: string }[] = [];
@@ -40,7 +47,7 @@ export default async function TachesPage({
       tasks = await prisma.task.findMany({
         where: {
           ...taskWhere,
-          ...(validStatus ? { status: validStatus } : {}),
+          ...statusWhere,
         },
         include: {
           project: { select: { id: true, title: true } },

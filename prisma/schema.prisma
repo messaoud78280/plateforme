@@ -55,6 +55,9 @@ model User {
   tasks              Task[]
   tasksAssigned      Task[]     @relation("AssignedTasks")
   taskComments       TaskComment[]
+  taskMessagesSent   TaskMessage[]  @relation("TaskMessagesSent")
+  taskMessagesReceived TaskMessage[] @relation("TaskMessagesReceived")
+  notifications      Notification[]
   activities         Activity[]
   alerts             Alert[]
   appointmentsOrganized Appointment[] @relation("AppointmentOrganizer")
@@ -282,7 +285,7 @@ model Task {
   id             String    @id @default(cuid())
   title          String
   description    String?
-  status         TaskStatus @default(EN_COURS)
+  status         TaskStatus @default(NOUVEAU)
   clientId       String
   projectId      String?   // projet auquel la tâche se rapporte (optionnel)
   // Nouvelle demande intelligente
@@ -308,24 +311,67 @@ model Task {
   assignedTo User?        @relation("AssignedTasks", fields: [assignedToId], references: [id], onDelete: SetNull)
   comments   TaskComment[]
   documents  Document[]
+  taskMessages TaskMessage[]
 }
 
 enum TaskStatus {
-  EN_COURS
-  COMPLETE
-  EN_ATTENTE
+  NOUVEAU         // Nouvelle demande (client vient de créer)
+  EN_ATTENTE      // En attente (avant assignation ou en attente d'info)
+  ASSIGNEE        // Agent assigné par la gérante
+  EN_ANALYSE      // Agent analyse la demande
+  EN_COURS        // En cours de traitement
+  EN_ATTENTE_INFO // En attente d'information (client ou autre)
+  A_VALIDER       // Travail terminé, en attente de validation gérante
+  COMPLETE        // Terminée (validée par la gérante)
 }
 
-// Commentaires sur tâches
+// Messages sur une tâche (client ↔ agent quand assigné, ou interne gérante ↔ agent)
+model TaskMessage {
+  id         String   @id @default(cuid())
+  taskId     String
+  senderId   String
+  receiverId String
+  content    String
+  read       Boolean  @default(false)
+  isInternal Boolean  @default(false)  // true = visible uniquement gérante/agent
+  createdAt  DateTime @default(now())
+
+  task    Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  sender  User @relation("TaskMessagesSent", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("TaskMessagesReceived", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([receiverId])
+}
+
+// Commentaires sur tâches (optionnellement internes = invisibles client)
 model TaskComment {
-  id        String   @id @default(cuid())
-  taskId    String
-  userId    String
-  content   String
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  taskId     String
+  userId     String
+  content    String
+  isInternal Boolean  @default(false)
+  createdAt  DateTime @default(now())
 
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Notifications pour tous les rôles (client, agent, gérante)
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // NEW_TASK, TASK_ASSIGNED, MESSAGE_RECEIVED, TASK_COMPLETED, TASK_TO_VALIDATE, etc.
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  actionUrl String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([read])
 }
 
 // Factures

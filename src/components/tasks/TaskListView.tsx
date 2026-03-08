@@ -32,9 +32,14 @@ interface TaskListViewProps {
 }
 
 const statusColors: Record<TaskStatus, string> = {
-  EN_COURS: "bg-blue-100 text-blue-800",
-  COMPLETE: "bg-green-100 text-green-800",
+  NOUVEAU: "bg-slate-100 text-slate-800",
   EN_ATTENTE: "bg-amber-100 text-amber-800",
+  ASSIGNEE: "bg-indigo-100 text-indigo-800",
+  EN_ANALYSE: "bg-blue-100 text-blue-800",
+  EN_COURS: "bg-blue-100 text-blue-800",
+  EN_ATTENTE_INFO: "bg-amber-100 text-amber-800",
+  A_VALIDER: "bg-violet-100 text-violet-800",
+  COMPLETE: "bg-green-100 text-green-800",
 };
 
 export function TaskListView({ tasks }: TaskListViewProps) {

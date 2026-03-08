@@ -7,7 +7,15 @@ export type UserRole = "CLIENT" | "AGENCE" | "MANAGER";
 /** Vrai si l'utilisateur est agence ou gérant (accès côté agence) */
 export const isAgenceOrManager = (role: string) => role === "AGENCE" || role === "MANAGER";
 
-export type TaskStatus = "EN_COURS" | "COMPLETE" | "EN_ATTENTE";
+export type TaskStatus =
+  | "NOUVEAU"
+  | "EN_ATTENTE"
+  | "ASSIGNEE"
+  | "EN_ANALYSE"
+  | "EN_COURS"
+  | "EN_ATTENTE_INFO"
+  | "A_VALIDER"
+  | "COMPLETE";
 export type DocumentCategory = "FACTURE" | "CONTRAT" | "RH" | "FISCAL" | "AUTRE";
 export type DocumentStatus = "EN_ATTENTE" | "EN_TRAITEMENT" | "TRAITE" | "ARCHIVE";
 export type AlertLevel = "INFO" | "WARNING" | "URGENT";
@@ -67,15 +75,25 @@ export interface Project {
 
 /** Labels pour affichage */
 export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
-  EN_COURS: "En cours",
-  COMPLETE: "Terminée",
+  NOUVEAU: "Nouvelle demande",
   EN_ATTENTE: "En attente",
+  ASSIGNEE: "Assignée",
+  EN_ANALYSE: "En analyse",
+  EN_COURS: "En cours",
+  EN_ATTENTE_INFO: "En attente d'information",
+  A_VALIDER: "À valider",
+  COMPLETE: "Terminée",
 };
 
 /** Libellés orientés client pour le dashboard */
 export const CLIENT_TASK_STATUS_LABELS: Record<TaskStatus, string> = {
-  EN_ATTENTE: "Reçue",
+  NOUVEAU: "Reçue",
+  EN_ATTENTE: "En attente",
+  ASSIGNEE: "Assignée",
+  EN_ANALYSE: "En analyse",
   EN_COURS: "En cours",
+  EN_ATTENTE_INFO: "En attente d'info",
+  A_VALIDER: "À valider",
   COMPLETE: "Terminée",
 };
 

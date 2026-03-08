@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { minutesToActions, shouldResetActions, getMonthStart } from "@/lib/actions";
+import { createNotification } from "@/lib/notifications";
 
 /** GET /api/tasks/[id] – Détail d'une tâche */
 export async function GET(
@@ -73,10 +74,11 @@ export async function PUT(
     }
 
     const body = await request.json();
+    const validStatuses = ["NOUVEAU", "EN_ATTENTE", "ASSIGNEE", "EN_ANALYSE", "EN_COURS", "EN_ATTENTE_INFO", "A_VALIDER", "COMPLETE"] as const;
     const { title, description, status, assignedToId, agencyNotes, timeSpentMinutes } = body as {
       title?: string;
       description?: string | null;
-      status?: "EN_COURS" | "COMPLETE" | "EN_ATTENTE";
+      status?: (typeof validStatuses)[number];
       assignedToId?: string | null;
       agencyNotes?: string | null;
       timeSpentMinutes?: number | null;
@@ -85,7 +87,7 @@ export async function PUT(
     const data: {
       title?: string;
       description?: string | null;
-      status?: "EN_COURS" | "COMPLETE" | "EN_ATTENTE";
+      status?: (typeof validStatuses)[number];
       completedAt?: Date | null;
       assignedToId?: string | null;
       agencyNotes?: string | null;
@@ -94,10 +96,14 @@ export async function PUT(
     } = {};
     if (typeof title === "string" && title.trim()) data.title = title.trim();
     if (body.hasOwnProperty("description")) data.description = description?.trim() ?? null;
-    if (status) data.status = status;
+    if (status && validStatuses.includes(status)) data.status = status;
     if (status === "COMPLETE") data.completedAt = new Date();
     if (status && status !== "COMPLETE") data.completedAt = null;
-    if (isAgence && body.hasOwnProperty("assignedToId")) data.assignedToId = assignedToId || null;
+    const assigningAgent = isAgence && body.hasOwnProperty("assignedToId") && assignedToId;
+    if (isAgence && body.hasOwnProperty("assignedToId")) {
+      data.assignedToId = assignedToId || null;
+      if (assigningAgent) data.status = "ASSIGNEE";
+    }
     if (isAgence && body.hasOwnProperty("agencyNotes")) data.agencyNotes = agencyNotes?.trim() ?? null;
 
     let actionsToDeduct = 0;
@@ -129,6 +135,37 @@ export async function PUT(
         await prisma.user.update({
           where: { id: task.clientId },
           data: { monthlyActionsUsed: { increment: actionsToDeduct } },
+        });
+      }
+    }
+
+    if (assigningAgent && task.assignedToId) {
+      await createNotification({
+        userId: task.assignedToId,
+        type: "TASK_ASSIGNED",
+        title: "Mission assignée",
+        message: `Une mission vous a été assignée : « ${task.title} ».`,
+        actionUrl: `/dashboard/taches/${id}`,
+      });
+    }
+    if (status === "COMPLETE" && task.clientId) {
+      await createNotification({
+        userId: task.clientId,
+        type: "TASK_COMPLETED",
+        title: "Mission terminée",
+        message: `Votre demande « ${task.title} » a été traitée et validée.`,
+        actionUrl: `/dashboard/taches/${id}`,
+      });
+    }
+    if (status === "A_VALIDER") {
+      const managers = await prisma.user.findMany({ where: { role: "MANAGER" }, select: { id: true } });
+      for (const m of managers) {
+        await createNotification({
+          userId: m.id,
+          type: "TASK_TO_VALIDATE",
+          title: "Mission à valider",
+          message: `La mission « ${task.title} » est terminée et attend votre validation.`,
+          actionUrl: `/dashboard/taches/${id}`,
         });
       }
     }

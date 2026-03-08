@@ -7,6 +7,7 @@ import { minutesToActions } from "@/lib/actions";
 import { TaskTimeline } from "./TaskTimeline";
 import { ClientDemandTimeline } from "./ClientDemandTimeline";
 import { TaskConversation } from "./TaskConversation";
+import { TaskMessageConversation } from "./TaskMessageConversation";
 
 interface TaskDetailViewProps {
   sessionUserId?: string;
@@ -45,9 +46,14 @@ interface TaskDetailViewProps {
 }
 
 const statusColors: Record<TaskStatus, string> = {
-  EN_COURS: "bg-blue-100 text-blue-800",
-  COMPLETE: "bg-green-100 text-green-800",
+  NOUVEAU: "bg-slate-100 text-slate-800",
   EN_ATTENTE: "bg-amber-100 text-amber-800",
+  ASSIGNEE: "bg-indigo-100 text-indigo-800",
+  EN_ANALYSE: "bg-blue-100 text-blue-800",
+  EN_COURS: "bg-blue-100 text-blue-800",
+  EN_ATTENTE_INFO: "bg-amber-100 text-amber-800",
+  A_VALIDER: "bg-violet-100 text-violet-800",
+  COMPLETE: "bg-green-100 text-green-800",
 };
 
 export function TaskDetailView({
@@ -153,22 +159,32 @@ export function TaskDetailView({
         </div>
       )}
 
-      {/* Conversation liée (client) : messagerie intégrée ou lien */}
-      {!isAgence && task.project && sessionUserId && (
+      {/* Messages mission (client ↔ agent) — affichés uniquement si un agent est assigné */}
+      {sessionUserId && task.assignedToId && (
+        <TaskMessageConversation
+          taskId={task.id}
+          sessionUserId={sessionUserId}
+          isClient={!isAgence && !isAgent}
+          isAgence={Boolean(isAgence)}
+          isAgent={Boolean(isAgent)}
+          assignedToName={task.assignedTo?.name ?? null}
+        />
+      )}
+      {!task.assignedToId && !isAgence && !isAgent && (
+        <div className="rounded-xl border border-slate-200 bg-white p-6">
+          <h2 className="mb-4 text-lg font-semibold text-slate-800">Messages mission</h2>
+          <p className="text-sm text-slate-500">
+            La messagerie avec votre assistant sera disponible une fois qu&apos;un agent aura été assigné à cette mission.
+          </p>
+        </div>
+      )}
+      {/* Conversation projet (legacy, si projet lié) */}
+      {!isAgence && task.project && sessionUserId && !task.assignedToId && (
         <TaskConversation
           projectId={task.project.id}
           projectTitle={task.project.title}
           sessionUserId={sessionUserId}
         />
-      )}
-      {!isAgence && !task.project && (
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
-          <h2 className="mb-4 text-lg font-semibold text-slate-800">Conversation</h2>
-          <p className="text-sm text-slate-500">Aucun projet lié. Utilisez la messagerie pour échanger avec votre assistant.</p>
-          <Link href="/dashboard/messagerie" className="mt-3 inline-block rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e40af]">
-            Ouvrir la messagerie
-          </Link>
-        </div>
       )}
 
       {/* Documents liés à la demande */}

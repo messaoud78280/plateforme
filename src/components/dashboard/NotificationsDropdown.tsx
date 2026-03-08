@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 
-type AlertItem = {
+type NotifItem = {
   id: string;
   title: string;
   message: string;
@@ -12,18 +12,31 @@ type AlertItem = {
 };
 
 export function NotificationsDropdown() {
-  const [alerts, setAlerts] = useState<AlertItem[]>([]);
+  const [items, setItems] = useState<NotifItem[]>([]);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch("/api/alerts");
-        if (res.ok) {
-          const data = await res.json();
-          setAlerts(Array.isArray(data) ? data : data.alerts || []);
+        const [alertsRes, notifsRes] = await Promise.all([
+          fetch("/api/alerts"),
+          fetch("/api/notifications?unread=true"),
+        ]);
+        const list: NotifItem[] = [];
+        if (alertsRes.ok) {
+          const data = await alertsRes.json();
+          const alerts = Array.isArray(data) ? data : data.alerts || [];
+          list.push(...alerts.map((a: NotifItem) => ({ id: a.id, title: a.title, message: a.message, actionUrl: a.actionUrl ?? null, createdAt: a.createdAt })));
         }
+        if (notifsRes.ok) {
+          const notifs = await notifsRes.json();
+          if (Array.isArray(notifs)) {
+            list.push(...notifs.map((n: NotifItem) => ({ id: n.id, title: n.title, message: n.message, actionUrl: n.actionUrl ?? null, createdAt: n.createdAt })));
+          }
+        }
+        list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        setItems(list.slice(0, 20));
       } catch {
         // ignore
       }
@@ -39,7 +52,7 @@ export function NotificationsDropdown() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const count = alerts.length;
+  const count = items.length;
 
   return (
     <div className="relative" ref={ref}>
@@ -68,11 +81,11 @@ export function NotificationsDropdown() {
           <div className="border-b border-slate-100 px-4 py-2">
             <h3 className="text-sm font-semibold text-slate-800">Notifications</h3>
           </div>
-          {alerts.length === 0 ? (
+          {items.length === 0 ? (
             <p className="px-4 py-6 text-center text-sm text-slate-500">Aucune notification.</p>
           ) : (
             <ul className="max-h-72 overflow-y-auto">
-              {alerts.map((a) => (
+              {items.map((a) => (
                 <li key={a.id}>
                   <Link
                     href={a.actionUrl || "#"}

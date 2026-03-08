@@ -134,7 +134,10 @@ export default async function DashboardPage({
   try {
     const [tEnCours, tCompletees, docAttente, act, al, tasksChart] = await Promise.all([
       prisma.task.count({
-        where: { clientId, status: "EN_COURS" },
+        where: {
+          clientId,
+          status: { in: ["EN_COURS", "EN_ANALYSE", "ASSIGNEE", "EN_ATTENTE_INFO", "A_VALIDER"] },
+        },
       }),
       prisma.task.count({
         where: {

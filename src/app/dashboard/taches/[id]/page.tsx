@@ -79,7 +79,7 @@ export default async function TacheDetailPage({
           id: task.id,
           title: task.title,
           description: task.description,
-          status: task.status as "EN_COURS" | "COMPLETE" | "EN_ATTENTE",
+          status: task.status as "NOUVEAU" | "EN_ATTENTE" | "ASSIGNEE" | "EN_ANALYSE" | "EN_COURS" | "EN_ATTENTE_INFO" | "A_VALIDER" | "COMPLETE",
           completedAt: task.completedAt,
           createdAt: task.createdAt,
           updatedAt: task.updatedAt,

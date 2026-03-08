@@ -30,7 +30,7 @@ export default async function DashboardLayout({
             BeWork
           </Link>
           <div className="flex items-center gap-2">
-            {session.user?.role === "CLIENT" && <NotificationsDropdown />}
+            <NotificationsDropdown />
             <OutilsCommunication />
             <UserAccountDropdown
               userName={session.user?.name ?? null}

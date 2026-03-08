@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
         description: source.description,
         category: source.category,
         priority: source.priority,
-        status: "EN_ATTENTE",
+        status: "NOUVEAU",
         clientId: session.user.id,
         projectId: source.projectId,
         contactsJson: source.contactsJson ?? undefined,

@@ -33,11 +33,12 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const status = body?.status as "EN_COURS" | "COMPLETE" | "EN_ATTENTE" | undefined;
+    const validStatuses = ["NOUVEAU", "EN_ATTENTE", "ASSIGNEE", "EN_ANALYSE", "EN_COURS", "EN_ATTENTE_INFO", "A_VALIDER", "COMPLETE"] as const;
+    const status = body?.status as (typeof validStatuses)[number] | undefined;
     const timeSpentMinutes = typeof body?.timeSpentMinutes === "number" ? body.timeSpentMinutes : undefined;
-    if (!status || !["EN_COURS", "COMPLETE", "EN_ATTENTE"].includes(status)) {
+    if (!status || !validStatuses.includes(status)) {
       return NextResponse.json(
-        { error: "Statut invalide (EN_COURS, COMPLETE, EN_ATTENTE)" },
+        { error: "Statut invalide" },
         { status: 400 }
       );
     }

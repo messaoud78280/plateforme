@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { notifyManagers } from "@/lib/notifications";
 
 /** GET /api/tasks – Liste des tâches du client (ou toutes si agence) */
 export async function GET(request: NextRequest) {
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest) {
     const tasks = await prisma.task.findMany({
       where: {
         ...(isAgence ? {} : { clientId: session.user.id }),
-        ...(status ? { status: status as "EN_COURS" | "COMPLETE" | "EN_ATTENTE" } : {}),
+        ...(status ? { status: status as "NOUVEAU" | "EN_ATTENTE" | "ASSIGNEE" | "EN_ANALYSE" | "EN_COURS" | "EN_ATTENTE_INFO" | "A_VALIDER" | "COMPLETE" } : {}),
       },
       include: {
         project: { select: { id: true, title: true } },
@@ -99,7 +100,7 @@ export async function POST(request: NextRequest) {
       data: {
         title: title.trim(),
         description: description?.trim() ?? null,
-        status: "EN_ATTENTE",
+        status: "NOUVEAU",
         clientId: session.user.id,
         projectId: projectIdValid,
         category: category && typeof category === "string" && category.trim() ? category.trim() : null,
@@ -111,6 +112,17 @@ export async function POST(request: NextRequest) {
             : null,
       },
     });
+    try {
+      const clientName = session.user?.name ?? "Un client";
+      await notifyManagers({
+        type: "NEW_TASK",
+        title: "Nouvelle demande",
+        message: `${clientName} a créé une demande : « ${task.title} ».`,
+        actionUrl: `/dashboard/taches/${task.id}`,
+      });
+    } catch (notifErr) {
+      console.error("Notification nouvelle demande:", notifErr);
+    }
     return NextResponse.json({ ...task, firstRequest: countBefore === 0 });
   } catch (e) {
     const err = e as { message?: string; code?: string };

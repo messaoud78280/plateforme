@@ -19,24 +19,30 @@ type TaskItem = {
 };
 
 const STATUS_BADGES: Record<string, { label: string; className: string }> = {
-  EN_ATTENTE: { label: "Reçue", className: "bg-slate-100 text-slate-700" },
+  NOUVEAU: { label: "Reçue", className: "bg-slate-100 text-slate-700" },
+  EN_ATTENTE: { label: "En attente", className: "bg-slate-100 text-slate-700" },
+  ASSIGNEE: { label: "Assignée", className: "bg-indigo-100 text-indigo-800" },
+  EN_ANALYSE: { label: "En analyse", className: "bg-blue-100 text-blue-800" },
   EN_COURS: { label: "En cours", className: "bg-blue-100 text-blue-800" },
-  EN_ATTENTE_CLIENT: { label: "En attente client", className: "bg-amber-100 text-amber-800" },
+  EN_ATTENTE_INFO: { label: "En attente d'info", className: "bg-amber-100 text-amber-800" },
+  A_VALIDER: { label: "À valider", className: "bg-violet-100 text-violet-800" },
   COMPLETE: { label: "Terminée", className: "bg-green-100 text-green-700" },
+  EN_ATTENTE_CLIENT: { label: "En attente client", className: "bg-amber-100 text-amber-800" },
 };
 
-const PROGRESS_STEPS = ["Analyse", "Traitement", "Validation", "Terminé"];
+const PROGRESS_STEPS = ["Reçue", "En cours", "À valider", "Terminé"];
 
 function getStatusBadge(task: TaskItem) {
   if (task.status === "COMPLETE") return STATUS_BADGES.COMPLETE;
+  if (task.status === "A_VALIDER") return STATUS_BADGES.A_VALIDER;
   if (task.status === "EN_COURS" && task.correctionNote) return STATUS_BADGES.EN_ATTENTE_CLIENT;
-  if (task.status === "EN_COURS") return STATUS_BADGES.EN_COURS;
-  return STATUS_BADGES.EN_ATTENTE;
+  return STATUS_BADGES[task.status] ?? STATUS_BADGES.NOUVEAU;
 }
 
 function getProgressIndex(task: TaskItem): number {
   if (task.status === "COMPLETE") return 3;
-  if (task.status === "EN_COURS") return task.correctionNote ? 1 : 2;
+  if (["EN_COURS", "EN_ANALYSE", "ASSIGNEE", "EN_ATTENTE_INFO"].includes(task.status)) return 2;
+  if (task.status === "A_VALIDER") return 2;
   return 0;
 }
 
@@ -51,7 +57,9 @@ export function MesDemandesList({ tasks }: MesDemandesListProps) {
   const filtered = useMemo(() => {
     let list = tasks;
     if (filter === "en_cours") {
-      list = list.filter((t) => t.status === "EN_COURS" && !t.correctionNote);
+      list = list.filter((t) =>
+        ["EN_COURS", "EN_ANALYSE", "ASSIGNEE", "EN_ATTENTE_INFO", "A_VALIDER"].includes(t.status)
+      );
     } else if (filter === "en_attente_info") {
       list = list.filter((t) => t.status === "EN_COURS" && t.correctionNote);
     } else if (filter === "terminees") {

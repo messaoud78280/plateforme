@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { TaskListView } from "@/components/tasks/TaskListView";
 import { DepotTacheForm } from "@/components/tasks/DepotTacheForm";
 import { MesDemandesList } from "@/components/tasks/MesDemandesList";
+import { AgentMissionsList } from "@/components/tasks/AgentMissionsList";
 import { BackLink } from "@/components/ui/BackLink";
 
 export default async function TachesPage({
@@ -37,6 +38,7 @@ export default async function TachesPage({
 
   let tasks: Awaited<ReturnType<typeof prisma.task.findMany>> = [];
   let projects: { id: string; title: string }[] = [];
+  let agentSummary = { missionsAujourdhui: 0, missionsUrgentes: 0, missionsEnCours: 0 };
   try {
     if (prisma.task) {
       const taskWhere = isAgence
@@ -52,9 +54,42 @@ export default async function TachesPage({
         include: {
           project: { select: { id: true, title: true } },
           assignedTo: { select: { id: true, name: true, email: true } },
+          client: { select: { id: true, name: true } },
         },
         orderBy: { updatedAt: "desc" },
       });
+      if (isAgent) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const [aAuj, aUrg, aCours] = await Promise.all([
+          prisma.task.count({
+            where: {
+              assignedToId: session.user.id,
+              status: { notIn: ["COMPLETE"] },
+              OR: [
+                { desiredDate: { gte: today, lt: tomorrow } },
+                { createdAt: { gte: today } },
+              ],
+            },
+          }),
+          prisma.task.count({
+            where: {
+              assignedToId: session.user.id,
+              priority: { in: ["URGENT", "PRIORITAIRE"] },
+              status: { notIn: ["COMPLETE"] },
+            },
+          }),
+          prisma.task.count({
+            where: {
+              assignedToId: session.user.id,
+              status: { in: ["ASSIGNEE", "EN_ANALYSE", "EN_COURS", "EN_ATTENTE_INFO", "A_VALIDER"] },
+            },
+          }),
+        ]);
+        agentSummary = { missionsAujourdhui: aAuj, missionsUrgentes: aUrg, missionsEnCours: aCours };
+      }
     }
     if (!isAgence && prisma.project) {
       projects = await prisma.project.findMany({
@@ -150,7 +185,7 @@ export default async function TachesPage({
       <BackLink href="/dashboard">Dashboard</BackLink>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">{isAgent ? "Mes missions" : "Mes tâches"}</h1>
+          <h1 className="text-2xl font-bold text-slate-800">{isAgent ? "Mes missions assignées" : "Mes tâches"}</h1>
           <p className="mt-1 text-slate-600">
             {isAgence
               ? "Tâches déposées par les clients. Cliquez sur une tâche pour la prendre en charge ou la marquer comme terminée."
@@ -159,7 +194,24 @@ export default async function TachesPage({
         </div>
       </div>
 
-      <DepotTacheForm projects={projects} />
+      {isAgent && (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p className="text-2xl font-bold text-slate-800">{agentSummary.missionsAujourdhui}</p>
+            <p className="mt-1 text-sm text-slate-600">Missions aujourd&apos;hui</p>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p className="text-2xl font-bold text-red-600">{agentSummary.missionsUrgentes}</p>
+            <p className="mt-1 text-sm text-slate-600">Missions urgentes</p>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p className="text-2xl font-bold text-blue-600">{agentSummary.missionsEnCours}</p>
+            <p className="mt-1 text-sm text-slate-600">Missions en cours</p>
+          </div>
+        </div>
+      )}
+
+      {isAgence && <DepotTacheForm projects={projects} />}
 
       {(isAgence || isAgent) && (
         <div className="flex flex-wrap gap-2">
@@ -200,9 +252,26 @@ export default async function TachesPage({
 
       <section>
         <h2 className="mb-3 text-lg font-semibold text-slate-800">
-          {isAgence ? (validStatus ? `Tâches ${validStatus === "EN_ATTENTE" ? "en attente" : validStatus === "EN_COURS" ? "en cours" : "terminées"}` : "Toutes les tâches") : "Vos tâches"}
+          {isAgent
+            ? "Mes missions assignées"
+            : isAgence
+              ? (validStatus ? `Tâches ${validStatus === "EN_ATTENTE" ? "en attente" : validStatus === "EN_COURS" ? "en cours" : "terminées"}` : "Toutes les tâches")
+              : "Vos tâches"}
         </h2>
-        <TaskListView tasks={tasks} />
+        {isAgent ? (
+          <AgentMissionsList
+            missions={(tasks as unknown as { id: string; title: string; status: string; priority: string | null; createdAt: Date; client: { id: string; name: string } }[]).map((t) => ({
+              id: t.id,
+              title: t.title,
+              status: t.status,
+              priority: t.priority,
+              createdAt: t.createdAt,
+              client: t.client,
+            }))}
+          />
+        ) : (
+          <TaskListView tasks={tasks} />
+        )}
       </section>
     </div>
   );

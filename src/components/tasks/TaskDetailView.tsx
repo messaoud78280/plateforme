@@ -99,7 +99,7 @@ export function TaskDetailView({
 
   return (
     <div className="space-y-6">
-      {/* Barre d'actions rapides (gérante uniquement) */}
+      {/* Barre d'actions rapides (gérante) */}
       {isManager && (
         <div className="flex flex-wrap gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
           <a
@@ -126,6 +126,38 @@ export function TaskDetailView({
           >
             Documents
           </a>
+        </div>
+      )}
+
+      {/* Barre d'actions rapides (agent) */}
+      {isAgent && (
+        <div className="flex flex-wrap gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <a
+            href="#messages-section"
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          >
+            Répondre client
+          </a>
+          <a
+            href="#documents-section"
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          >
+            Ajouter document
+          </a>
+          <a
+            href="#status-section"
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          >
+            Changer statut
+          </a>
+          {(task.status === "EN_COURS" || task.status === "EN_ANALYSE" || task.status === "ASSIGNEE") && (
+            <a
+              href="#status-section"
+              className="rounded-lg border border-green-600 bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700"
+            >
+              Terminer mission
+            </a>
+          )}
         </div>
       )}
 

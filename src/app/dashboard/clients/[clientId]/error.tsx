@@ -23,8 +23,10 @@ export default function ClientDetailError({
           ? "Problème de connexion à la base de données. Vérifiez sur Railway : Variables → DATABASE_URL (ou DIRECT_URL)."
           : "Une erreur inattendue s'est produite."}
       </p>
-      {process.env.NODE_ENV === "development" && (
-        <p className="mt-2 text-xs text-slate-500">{error.message}</p>
+      {error.message && (
+        <p className="mt-2 max-w-lg break-words rounded bg-slate-100 px-3 py-2 text-xs text-slate-600">
+          {error.message}
+        </p>
       )}
       <div className="mt-6 flex gap-3">
         <button

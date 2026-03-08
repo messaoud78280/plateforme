@@ -37,32 +37,42 @@ export default async function ClientDetailPage({
     redirect("/dashboard");
   }
 
-  const [client, projects, tasks, agents] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: clientId, role: "CLIENT" },
-      select: { id: true, name: true, email: true, company: true, phone: true },
-    }),
-    prisma.project.findMany({
-      where: { clientId },
-      include: {
-        assignedTo: { select: { id: true, name: true, email: true } },
-      },
-      orderBy: { updatedAt: "desc" },
-    }),
-    prisma.task.findMany({
-      where: { clientId },
-      include: {
-        assignedTo: { select: { id: true, name: true, email: true } },
-        project: { select: { id: true, title: true } },
-      },
-      orderBy: { updatedAt: "desc" },
-    }),
-    prisma.user.findMany({
-      where: { role: "AGENCE" },
-      select: { id: true, name: true, email: true },
-      orderBy: { name: "asc" },
-    }),
-  ]);
+  let client: { id: string; name: string; email: string; company: string | null; phone: string | null } | null = null;
+  let projects: { id: string; title: string; status: string; assignedToId: string | null; assignedTo: { id: string; name: string; email: string } | null }[] = [];
+  let tasks: { id: string; title: string; status: string; assignedToId: string | null; project: { id: string; title: string } | null; assignedTo: { id: string; name: string; email: string } | null }[] = [];
+  let agents: { id: string; name: string; email: string }[] = [];
+
+  try {
+    [client, projects, tasks, agents] = await Promise.all([
+      prisma.user.findFirst({
+        where: { id: clientId, role: "CLIENT" },
+        select: { id: true, name: true, email: true, company: true, phone: true },
+      }),
+      prisma.project.findMany({
+        where: { clientId },
+        include: {
+          assignedTo: { select: { id: true, name: true, email: true } },
+        },
+        orderBy: { updatedAt: "desc" },
+      }),
+      prisma.task.findMany({
+        where: { clientId },
+        include: {
+          assignedTo: { select: { id: true, name: true, email: true } },
+          project: { select: { id: true, title: true } },
+        },
+        orderBy: { updatedAt: "desc" },
+      }),
+      prisma.user.findMany({
+        where: { role: { in: ["AGENCE", "AGENT"] } },
+        select: { id: true, name: true, email: true },
+        orderBy: { name: "asc" },
+      }),
+    ]);
+  } catch (e) {
+    console.error("[ClientDetailPage] Erreur chargement client:", e);
+    notFound();
+  }
 
   if (!client) notFound();
 

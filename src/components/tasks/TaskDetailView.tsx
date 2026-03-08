@@ -8,6 +8,7 @@ import { TaskTimeline } from "./TaskTimeline";
 import { ClientDemandTimeline } from "./ClientDemandTimeline";
 import { TaskConversation } from "./TaskConversation";
 import { TaskMessageConversation } from "./TaskMessageConversation";
+import { TaskInternalNotes } from "./TaskInternalNotes";
 
 interface TaskDetailViewProps {
   sessionUserId?: string;
@@ -94,8 +95,40 @@ export function TaskDetailView({
     }
   };
 
+  const isManager = isAgence && !isAgent;
+
   return (
     <div className="space-y-6">
+      {/* Barre d'actions rapides (gérante uniquement) */}
+      {isManager && (
+        <div className="flex flex-wrap gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <a
+            href="#agent-section"
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          >
+            Assigner un agent
+          </a>
+          <a
+            href="#status-section"
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          >
+            Changer le statut
+          </a>
+          <a
+            href="#messages-section"
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          >
+            Messages
+          </a>
+          <a
+            href="#documents-section"
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          >
+            Documents
+          </a>
+        </div>
+      )}
+
       {/* En-tête */}
       <div className="rounded-xl border border-slate-200 bg-white p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -159,8 +192,14 @@ export function TaskDetailView({
         </div>
       )}
 
+      {/* Notes internes (gérante + agent uniquement) */}
+      {(isManager || (isAgent && task.assignedToId === sessionUserId)) && (
+        <TaskInternalNotes taskId={task.id} />
+      )}
+
       {/* Messages mission (client ↔ agent) — affichés uniquement si un agent est assigné */}
       {sessionUserId && task.assignedToId && (
+        <div id="messages-section" className="scroll-mt-6">
         <TaskMessageConversation
           taskId={task.id}
           sessionUserId={sessionUserId}
@@ -169,6 +208,7 @@ export function TaskDetailView({
           isAgent={Boolean(isAgent)}
           assignedToName={task.assignedTo?.name ?? null}
         />
+        </div>
       )}
       {!task.assignedToId && !isAgence && !isAgent && (
         <div className="rounded-xl border border-slate-200 bg-white p-6">
@@ -223,7 +263,9 @@ export function TaskDetailView({
       )}
 
       {/* Pièces jointes (agence/agent) */}
-      {(isAgence || isAgent) && task.documents && task.documents.length > 0 && (
+      {(isAgence || isAgent) && (
+        <div id="documents-section" className="scroll-mt-6">
+      {task.documents && task.documents.length > 0 && (
         <div className="rounded-xl border border-slate-200 bg-white p-6">
           <h2 className="mb-4 text-lg font-semibold text-slate-800">Pièces jointes ({task.documents.length})</h2>
           <ul className="space-y-2">
@@ -246,10 +288,18 @@ export function TaskDetailView({
           </ul>
         </div>
       )}
+      {task.documents && task.documents.length === 0 && (
+        <div className="rounded-xl border border-slate-200 bg-white p-6">
+          <h2 className="mb-2 text-lg font-semibold text-slate-800">Pièces jointes</h2>
+          <p className="text-sm text-slate-500">Aucune pièce jointe.</p>
+        </div>
+      )}
+        </div>
+      )}
 
       {/* Agent en charge de la tâche — bloc visible pour l'agence (édition) */}
       {isAgence && (
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <div id="agent-section" className="scroll-mt-6 rounded-xl border border-slate-200 bg-white p-6">
           <h2 className="mb-4 text-lg font-semibold text-slate-800">Agent en charge de la tâche</h2>
           <div className="space-y-4">
             <div>
@@ -330,8 +380,8 @@ export function TaskDetailView({
       )}
 
       {/* Actions statut : agence/agent = prendre en charge / clôturer (avec temps) ; client = mettre en attente */}
-      {onStatusChange && task.status !== "COMPLETE" && (
-        <div className="flex flex-wrap items-end gap-4">
+      {onStatusChange && task.status !== "COMPLETE" && task.status !== "A_VALIDER" && !task.validatedAt && (
+        <div id="status-section" className="scroll-mt-6 flex flex-wrap items-end gap-4">
           {(isAgence || isAgent) && task.status === "EN_ATTENTE" && (
             <button
               type="button"
@@ -341,7 +391,7 @@ export function TaskDetailView({
               Prendre en charge
             </button>
           )}
-          {(isAgence || isAgent) && task.status === "EN_COURS" && !showCompleteForm && (
+          {(isAgence || isAgent) && (task.status === "EN_COURS" || task.status === "EN_ANALYSE" || task.status === "ASSIGNEE") && !showCompleteForm && (
             <button
               type="button"
               onClick={() => setShowCompleteForm(true)}
@@ -350,7 +400,7 @@ export function TaskDetailView({
               Marquer comme terminée
             </button>
           )}
-          {(isAgence || isAgent) && task.status === "EN_COURS" && showCompleteForm && (
+          {(isAgence || isAgent) && (task.status === "EN_COURS" || task.status === "EN_ANALYSE" || task.status === "ASSIGNEE") && showCompleteForm && (
             <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
               <label className="text-sm font-medium text-slate-700">
                 Temps passé (minutes) :
@@ -368,7 +418,7 @@ export function TaskDetailView({
               </span>
               <button
                 type="button"
-                onClick={() => { onStatusChange("COMPLETE", timeSpentMinutes); setShowCompleteForm(false); }}
+                onClick={() => { onStatusChange("A_VALIDER", timeSpentMinutes); setShowCompleteForm(false); }}
                 className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
               >
                 Valider
@@ -394,8 +444,8 @@ export function TaskDetailView({
         </div>
       )}
 
-      {/* Validation / Correction (agence uniquement, tâche terminée mais pas encore validée) */}
-      {isAgence && !isAgent && task.status === "COMPLETE" && !task.validatedAt && (
+      {/* Validation / Correction (gérante uniquement, statut A_VALIDER = en attente de validation) */}
+      {isManager && task.status === "A_VALIDER" && (
         <div className="rounded-xl border border-slate-200 bg-white p-6">
           <h2 className="mb-4 text-lg font-semibold text-slate-800">Vérifier et valider le travail</h2>
           <p className="mb-4 text-sm text-slate-600">

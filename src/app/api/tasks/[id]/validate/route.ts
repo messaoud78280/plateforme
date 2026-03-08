@@ -37,9 +37,23 @@ export async function PATCH(
     if (action === "validate") {
       const task = await prisma.task.update({
         where: { id },
-        data: { validatedAt: new Date() },
+        data: { validatedAt: new Date(), status: "COMPLETE" },
         include: { assignedTo: { select: { id: true, name: true, email: true } } },
       });
+      if (task.clientId) {
+        try {
+          await prisma.alert.create({
+            data: {
+              title: "Demande terminée",
+              message: `Votre demande "${task.title}" a été traitée et validée.`,
+              clientId: task.clientId,
+              actionUrl: `/dashboard/taches/${id}`,
+            },
+          });
+        } catch {
+          // ignore si table Alert absente
+        }
+      }
       return NextResponse.json(task);
     }
 
@@ -49,6 +63,7 @@ export async function PATCH(
         data: {
           status: "EN_COURS",
           validatedAt: null,
+          completedAt: null,
           correctionNote: correctionNote || null,
         },
         include: { assignedTo: { select: { id: true, name: true, email: true } } },

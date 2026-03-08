@@ -14,6 +14,7 @@ import { AppointmentCalendar } from "@/components/appointments/AppointmentCalend
 import { ActionsWidget } from "@/components/dashboard/ActionsWidget";
 import { NouvelleDemandeTrigger } from "@/components/demands/NouvelleDemandeTrigger";
 import { ClientDashboardContent } from "@/components/dashboard/ClientDashboardContent";
+import { ManagerDashboardContent, type ManagerTaskItem } from "@/components/dashboard/ManagerDashboardContent";
 import { BackLink } from "@/components/ui/BackLink";
 
 export default async function DashboardPage({
@@ -247,6 +248,60 @@ export default async function DashboardPage({
     // Tables Task/Document/Activity/Alert absentes : exécuter prisma/supabase-add-documents-tasks.sql puis npx prisma generate
   }
 
+  let managerTasks: {
+    nouvelles: Awaited<ReturnType<typeof prisma.task.findMany>>;
+    aAssigner: Awaited<ReturnType<typeof prisma.task.findMany>>;
+    enCours: Awaited<ReturnType<typeof prisma.task.findMany>>;
+    aValider: Awaited<ReturnType<typeof prisma.task.findMany>>;
+    terminees: Awaited<ReturnType<typeof prisma.task.findMany>>;
+  } = {
+    nouvelles: [],
+    aAssigner: [],
+    enCours: [],
+    aValider: [],
+    terminees: [],
+  };
+
+  if (isAgence) {
+    try {
+      const [nouvelles, aAssigner, enCours, aValider, terminees] = await Promise.all([
+        prisma.task.findMany({
+          where: { status: "NOUVEAU" },
+          include: { client: { select: { id: true, name: true } }, assignedTo: { select: { id: true, name: true } } },
+          orderBy: { createdAt: "desc" },
+          take: 20,
+        }),
+        prisma.task.findMany({
+          where: { status: "EN_ATTENTE", assignedToId: null },
+          include: { client: { select: { id: true, name: true } }, assignedTo: { select: { id: true, name: true } } },
+          orderBy: { createdAt: "desc" },
+          take: 20,
+        }),
+        prisma.task.findMany({
+          where: { status: { in: ["ASSIGNEE", "EN_ANALYSE", "EN_COURS", "EN_ATTENTE_INFO"] } },
+          include: { client: { select: { id: true, name: true } }, assignedTo: { select: { id: true, name: true } } },
+          orderBy: { updatedAt: "desc" },
+          take: 20,
+        }),
+        prisma.task.findMany({
+          where: { status: "A_VALIDER" },
+          include: { client: { select: { id: true, name: true } }, assignedTo: { select: { id: true, name: true } } },
+          orderBy: { updatedAt: "desc" },
+          take: 20,
+        }),
+        prisma.task.findMany({
+          where: { status: "COMPLETE" },
+          include: { client: { select: { id: true, name: true } }, assignedTo: { select: { id: true, name: true } } },
+          orderBy: { completedAt: "desc" },
+          take: 15,
+        }),
+      ]);
+      managerTasks = { nouvelles, aAssigner, enCours, aValider, terminees };
+    } catch {
+      // ignore
+    }
+  }
+
   if (isAgence) {
     try {
       const clientUsers = await prisma.user.findMany({
@@ -337,6 +392,18 @@ export default async function DashboardPage({
     <div className="space-y-8">
       <BackLink href="/">Retour à l&apos;accueil</BackLink>
       <ScrollToMessages />
+
+      {/* Dashboard gérante — centre de pilotage */}
+      {isAgence && (
+        <ManagerDashboardContent
+          nouvellesDemandes={managerTasks.nouvelles as unknown as ManagerTaskItem[]}
+          aAssigner={managerTasks.aAssigner as unknown as ManagerTaskItem[]}
+          missionsEnCours={managerTasks.enCours as unknown as ManagerTaskItem[]}
+          missionsAValider={managerTasks.aValider as unknown as ManagerTaskItem[]}
+          missionsTerminees={managerTasks.terminees as unknown as ManagerTaskItem[]}
+        />
+      )}
+
       {/* Carte de bienvenue + CTA Nouvelle demande (client) */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">

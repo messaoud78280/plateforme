@@ -44,7 +44,7 @@ export async function PATCH(
     }
 
     let actionsToDeduct = 0;
-    const canSetTime = (isAgence || isAgent) && status === "COMPLETE" && timeSpentMinutes != null && timeSpentMinutes >= 0;
+    const canSetTime = (isAgence || isAgent) && (status === "COMPLETE" || status === "A_VALIDER") && timeSpentMinutes != null && timeSpentMinutes >= 0;
     if (canSetTime) {
       actionsToDeduct = minutesToActions(timeSpentMinutes);
     }
@@ -53,7 +53,7 @@ export async function PATCH(
       where: { id },
       data: {
         status,
-        completedAt: status === "COMPLETE" ? new Date() : null,
+        completedAt: (status === "COMPLETE" || status === "A_VALIDER") ? new Date() : null,
         ...(canSetTime
           ? { timeSpentMinutes, actionsUsed: actionsToDeduct }
           : {}),

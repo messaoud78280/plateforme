@@ -43,7 +43,7 @@ export function TaskDetailClient({ sessionUserId, task, canEdit, isAgence, isAge
     if (!canEdit) return;
     try {
       const body: { status: TaskStatus; timeSpentMinutes?: number } = { status: newStatus };
-      if (newStatus === "COMPLETE" && typeof timeSpentMinutes === "number" && timeSpentMinutes >= 0) {
+      if ((newStatus === "COMPLETE" || newStatus === "A_VALIDER") && typeof timeSpentMinutes === "number" && timeSpentMinutes >= 0) {
         body.timeSpentMinutes = timeSpentMinutes;
       }
       const res = await fetch(`/api/tasks/${task.id}/status`, {

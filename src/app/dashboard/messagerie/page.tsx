@@ -50,12 +50,16 @@ export default async function MessageriePage() {
             ? "Échangez avec votre assistant, suivez vos demandes et envoyez des documents."
             : "Messagerie centrée sur les missions. Gérez les échanges et le suivi des missions administratives."}
         </p>
+        <div className="mt-3 rounded-lg border border-blue-100 bg-blue-50/50 px-4 py-3 text-sm text-slate-700">
+          <strong>Comment envoyer un message ?</strong> Sélectionnez une mission dans la liste du centre, puis utilisez le champ « Écrire un message » en bas à droite et le bouton <strong>Envoyer</strong>. Pour joindre un document : cliquez sur l&apos;icône trombone ou ouvrez la mission pour ajouter des pièces jointes.
+        </div>
       </div>
 
       <MessagerieMissionsView
         sessionUserId={session.user.id}
         isAgence={isAgence}
         isAgent={isAgent}
+        isClient={isClient}
         canChangeStatus={canChangeStatus}
         agents={agents}
         managerId={managerId}

@@ -160,7 +160,7 @@ export function DepotTacheForm({ projects = [] }: DepotTacheFormProps) {
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-semibold text-slate-800">Déposer une tâche</h2>
+      <h2 className="text-lg font-semibold text-slate-800">Nouvelle mission</h2>
       <p className="mt-1 text-sm text-slate-500">
         Décrivez votre demande. Vous pouvez la rattacher à un projet. L’agence assignera un agent après prise en charge.
       </p>
@@ -296,7 +296,7 @@ export function DepotTacheForm({ projects = [] }: DepotTacheFormProps) {
           disabled={loading}
           className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 disabled:opacity-50"
         >
-          {loading ? "Dépôt en cours…" : "Déposer la tâche"}
+          {loading ? "Envoi en cours…" : "Envoyer la mission"}
         </button>
       </form>
     </div>

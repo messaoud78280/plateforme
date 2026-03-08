@@ -10,9 +10,9 @@ export const DEMANDE_CATEGORIES = [
 ] as const;
 
 export const DEMANDE_PRIORITIES = [
-  { value: "STANDARD", label: "Normale" },
+  { value: "STANDARD", label: "Normal" },
   { value: "PRIORITAIRE", label: "Prioritaire" },
-  { value: "URGENT", label: "Urgente" },
+  { value: "URGENT", label: "Urgent" },
 ] as const;
 
 /** Options pour l'estimateur d'actions (sélecteur utilisateur) */
@@ -27,6 +27,14 @@ export const EXEMPLES_DEMANDES = [
   "Rédiger un email professionnel de relance client",
   "Trouver 3 prestataires de nettoyage de bureaux à Paris",
 ];
+
+/** Suggestions de missions (accès rapide) */
+export const MISSION_SUGGESTIONS = [
+  { id: "devis", title: "Préparer devis", description: "Client : [nom] — Prestation : [détails] — Délai souhaité : [date]", category: "Facturation / devis" },
+  { id: "relance", title: "Relancer factures", description: "Facture n° [numéro] — Client : [nom] — Échéance : [date] — Relance par email puis téléphone si besoin", category: "Facturation / devis" },
+  { id: "fournisseur", title: "Recherche fournisseur", description: "Secteur : [activité] — Zone : [ville/région] — Critères : [budget, délais, références]", category: "Recherche" },
+  { id: "classement", title: "Classement documents", description: "Type de documents : [factures / contrats / RH] — Organisation souhaitée : [chronologique / par client / par thème]", category: "Documents" },
+] as const;
 
 /** Modèles de demandes pour le guidage et la première demande */
 export const DEMANDE_TEMPLATES = [

@@ -8,6 +8,7 @@ import {
   DEMANDE_PRIORITIES,
   DEMANDE_ESTIMATION_OPTIONS,
   DEMANDE_TEMPLATES,
+  MISSION_SUGGESTIONS,
 } from "./constants";
 import { MissionSuggestions } from "@/components/missions/MissionSuggestions";
 
@@ -197,7 +198,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
               onClick={resetForm}
               className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
-              Créer une nouvelle demande
+              Créer une nouvelle mission
             </button>
           </div>
         </div>
@@ -217,9 +218,9 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
       {/* Header */}
       <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Nouvelle demande</h1>
+          <h1 className="text-2xl font-bold text-slate-800">Nouvelle mission</h1>
           <p className="mt-1 text-slate-600">
-            Décrivez la tâche que vous souhaitez déléguer à votre assistant.
+            Décrivez la mission que vous souhaitez confier à votre assistant.
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5">
@@ -227,6 +228,30 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
           <span className="text-lg font-bold text-[#1d4ed8]">{actionsRemaining}</span>
         </div>
       </header>
+
+      {/* Suggestions de missions */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-base font-semibold text-slate-800 mb-2">Suggestions de missions</h2>
+        <p className="text-sm text-slate-500 mb-4">
+          Cliquez sur une suggestion pour pré-remplir le formulaire.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {MISSION_SUGGESTIONS.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => {
+                setTitle(s.title);
+                setCategory(s.category);
+                setDescription(s.description);
+              }}
+              className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 hover:border-[#1d4ed8] hover:bg-blue-50/50 hover:text-[#1d4ed8] transition"
+            >
+              {s.title}
+            </button>
+          ))}
+        </div>
+      </section>
 
       {/* Suggestions basées sur les missions passées */}
       <MissionSuggestions
@@ -238,38 +263,14 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
         searchQuery={title}
       />
 
-      {/* Modèles / exemples de demandes */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-base font-semibold text-slate-800 mb-2">Exemples de demandes</h2>
-        <p className="text-sm text-slate-500 mb-4">
-          Cliquez sur un modèle pour pré-remplir le formulaire.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {DEMANDE_TEMPLATES.map((tpl) => (
-            <button
-              key={tpl.id}
-              type="button"
-              onClick={() => {
-                setTitle(tpl.title);
-                setCategory(tpl.category);
-                setDescription(tpl.description);
-              }}
-              className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 hover:border-[#1d4ed8] hover:bg-blue-50/50 hover:text-[#1d4ed8] transition"
-            >
-              {tpl.title}
-            </button>
-          ))}
-        </div>
-      </section>
-
       <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Bloc 1 : Informations principales */}
+        {/* Section 1 : Votre demande */}
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-slate-800 mb-4">Informations principales</h2>
+          <h2 className="text-base font-semibold text-slate-800 mb-4">1. Votre demande</h2>
           <div className="space-y-4">
             <div>
               <label htmlFor="nd-title" className="mb-1.5 block text-sm font-medium text-slate-700">
-                Titre de la demande
+                Titre
               </label>
               <input
                 id="nd-title"
@@ -282,8 +283,25 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
               />
             </div>
             <div>
+              <label htmlFor="nd-description" className="mb-1.5 block text-sm font-medium text-slate-700">
+                Description
+              </label>
+              <textarea
+                id="nd-description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={5}
+                placeholder="Décrivez précisément votre besoin, le résultat attendu et les éventuelles échéances."
+                className="w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-800 placeholder:text-slate-400 focus:border-[#1d4ed8] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8]/20 resize-y min-h-[120px]"
+                disabled={loading}
+              />
+              <p className="mt-2 text-xs text-slate-500">
+                Exemple : Client : Dupont BTP — Objectif : préparer un devis — Délai : avant vendredi
+              </p>
+            </div>
+            <div>
               <label htmlFor="nd-category" className="mb-1.5 block text-sm font-medium text-slate-700">
-                Catégorie
+                Catégorie (optionnel)
               </label>
               <select
                 id="nd-category"
@@ -301,31 +319,9 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
           </div>
         </section>
 
-        {/* Bloc 2 : Description */}
+        {/* Section 2 : Documents */}
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-slate-800 mb-4">Description</h2>
-          <div>
-            <label htmlFor="nd-description" className="mb-1.5 block text-sm font-medium text-slate-700">
-              Description détaillée
-            </label>
-            <textarea
-              id="nd-description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={5}
-              placeholder="Décrivez précisément votre besoin, le résultat attendu et les éventuelles échéances."
-              className="w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-800 placeholder:text-slate-400 focus:border-[#1d4ed8] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8]/20 resize-y min-h-[120px]"
-              disabled={loading}
-            />
-            <p className="mt-2 text-xs text-slate-500">
-              Exemple : Client : Dupont BTP — Objectif : préparer un devis — Délai : avant vendredi — Documents joints : grille tarifaire
-            </p>
-          </div>
-        </section>
-
-        {/* Bloc 3 : Pièces jointes */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-slate-800 mb-4">Pièces jointes</h2>
+          <h2 className="text-base font-semibold text-slate-800 mb-4">2. Documents</h2>
           <p className="mb-3 text-sm text-slate-500">
             PDF, Word, Excel, images, zip. Glissez-déposez ou cliquez pour ajouter.
           </p>
@@ -372,9 +368,9 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
           )}
         </section>
 
-        {/* Bloc 4 : Priorité */}
+        {/* Niveau de priorité */}
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-slate-800 mb-4">Priorité</h2>
+          <h2 className="text-base font-semibold text-slate-800 mb-4">Niveau de priorité</h2>
           <div className="space-y-3">
             {DEMANDE_PRIORITIES.map((p) => (
               <label
@@ -403,10 +399,10 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
           </div>
         </section>
 
-        {/* Bloc 5 : Estimation d'actions */}
+        {/* Section 3 : Estimation */}
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-slate-800 mb-4">Estimation d&apos;actions</h2>
-          <div className="flex flex-wrap gap-3">
+          <h2 className="text-base font-semibold text-slate-800 mb-4">3. Estimation</h2>
+          <div className="flex flex-wrap gap-3 mb-4">
             {DEMANDE_ESTIMATION_OPTIONS.map((opt) => (
               <label
                 key={opt.value}
@@ -425,9 +421,22 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
               </label>
             ))}
           </div>
-          <p className="mt-3 text-xs text-slate-500">
-            L&apos;estimation est indicative et peut varier selon la complexité réelle de la demande.
-          </p>
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-sm font-medium text-slate-800">
+              Nombre d&apos;actions : <span className="text-[#1d4ed8]">{estimatedActions}</span>
+            </p>
+            <p className="mt-1 text-sm text-slate-600">
+              Temps estimé :{" "}
+              {estimatedActions === "1 action"
+                ? "environ 10 minutes"
+                : estimatedActions === "2 à 3 actions"
+                  ? "environ 20 à 30 minutes"
+                  : "à évaluer avec votre assistant"}
+            </p>
+            <p className="mt-3 text-xs text-slate-500">
+              Une action = 10 minutes de travail. L&apos;estimation est indicative ; le temps réel sera comptabilisé à la clôture de la mission.
+            </p>
+          </div>
         </section>
 
         {/* Bloc 6 : Date souhaitée */}
@@ -467,7 +476,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
             disabled={loading}
             className="rounded-lg bg-[#1d4ed8] px-6 py-3 text-sm font-semibold text-white hover:bg-[#1e40af] disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2"
           >
-            {loading ? "Envoi en cours…" : "Envoyer la demande"}
+            {loading ? "Envoi en cours…" : "Envoyer la mission"}
           </button>
           <button
             type="button"

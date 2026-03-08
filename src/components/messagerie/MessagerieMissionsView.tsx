@@ -92,6 +92,7 @@ interface MessagerieMissionsViewProps {
   sessionUserId: string;
   isAgence: boolean;
   isAgent: boolean;
+  isClient?: boolean;
   canChangeStatus: boolean;
   agents?: { id: string; name: string }[];
   managerId?: string | null;
@@ -101,6 +102,7 @@ export function MessagerieMissionsView({
   sessionUserId,
   isAgence,
   isAgent,
+  isClient = false,
   canChangeStatus,
   agents = [],
   managerId,
@@ -260,7 +262,24 @@ export function MessagerieMissionsView({
         </div>
         <ul className="flex-1 overflow-y-auto">
           {missions.length === 0 ? (
-            <li className="p-4 text-center text-sm text-slate-500">Aucune mission.</li>
+            <li className="p-4">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-center">
+                <p className="text-sm font-medium text-slate-700">Aucune mission</p>
+                <p className="mt-1 text-xs text-slate-500">
+                  {isClient
+                    ? "Créez une mission pour démarrer une conversation et échanger avec votre assistant."
+                    : isAgent
+                      ? "Aucune mission ne vous est assignée. La gérante vous attribuera des missions."
+                      : "Les missions apparaissent lorsque les clients déposent des demandes."}
+                </p>
+                <Link
+                  href={isClient ? "/dashboard/nouvelle-demande" : "/dashboard/taches"}
+                  className="mt-3 inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                >
+                  {isClient ? "Créer une mission" : "Voir les missions"}
+                </Link>
+              </div>
+            </li>
           ) : (
             missions.map((m) => (
               <li key={m.id}>
@@ -416,12 +435,13 @@ export function MessagerieMissionsView({
                 <div className="flex shrink-0 flex-col gap-2">
                   <Link
                     href={`/dashboard/taches/${selectedTaskId}#documents-section`}
-                    className="rounded-lg border border-slate-300 bg-white p-2.5 text-slate-600 hover:bg-slate-50"
+                    className="flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
                     title="Joindre un document"
                   >
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                     </svg>
+                    <span>Joindre</span>
                   </Link>
                   <button
                     type="submit"
@@ -458,14 +478,28 @@ export function MessagerieMissionsView({
           </>
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
-            <p className="text-slate-500">Sélectionnez une mission dans la liste.</p>
-            {missions.length === 0 && (
-              <Link
-                href="/dashboard/taches"
-                className="mt-4 text-sm font-medium text-blue-600 hover:underline"
-              >
-                Voir les missions →
-              </Link>
+            {missions.length === 0 ? (
+              <>
+                <p className="text-sm font-medium text-slate-700">Aucune conversation pour l&apos;instant</p>
+                <p className="mt-2 max-w-sm text-sm text-slate-500">
+                  {isClient
+                    ? "Créez une mission depuis « Nouvelle mission » pour pouvoir envoyer des messages, joindre des pièces jointes et suivre les échanges avec votre assistant."
+                    : "Une fois des missions assignées ou disponibles, sélectionnez-en une ici pour voir la conversation, envoyer des messages et joindre des documents."}
+                </p>
+                <Link
+                  href={isClient ? "/dashboard/nouvelle-demande" : "/dashboard/taches"}
+                  className="mt-4 inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                >
+                  {isClient ? "Créer une mission" : "Voir les missions"}
+                </Link>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-medium text-slate-700">Sélectionnez une mission</p>
+                <p className="mt-2 max-w-sm text-sm text-slate-500">
+                  Cliquez sur une mission dans la liste à gauche pour afficher la conversation. Vous pourrez alors envoyer des messages, joindre des pièces jointes (bouton trombone) et gérer le statut.
+                </p>
+              </>
             )}
           </div>
         )}

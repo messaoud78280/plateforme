@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { createServerClient } from "@/lib/supabase";
+import { createServiceRoleClient } from "@/lib/supabase";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 const ALLOWED_TYPES = [
@@ -34,10 +34,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Réservé aux gérants et agents" }, { status: 403 });
   }
 
-  const supabase = createServerClient();
+  const supabase = createServiceRoleClient();
   if (!supabase) {
     return NextResponse.json(
-      { error: "Stockage non configuré" },
+      { error: "Stockage non configuré. Ajoutez SUPABASE_SERVICE_ROLE_KEY dans .env.local (Supabase → Settings → API → service_role)" },
       { status: 503 }
     );
   }

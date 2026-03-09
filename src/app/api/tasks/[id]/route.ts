@@ -22,11 +22,30 @@ export async function GET(
   try {
     const task = await prisma.task.findUnique({
       where: { id },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        status: true,
+        clientId: true,
+        projectId: true,
+        desiredDate: true,
+        assignedToId: true,
+        agencyNotes: true,
+        correctionNote: true,
+        validatedAt: true,
+        completedAt: true,
+        timeSpentMinutes: true,
+        actionsUsed: true,
+        createdAt: true,
+        updatedAt: true,
         assignedTo: { select: { id: true, name: true, email: true } },
         client: { select: { id: true, name: true } },
         project: { select: { id: true, title: true } },
-        documents: { orderBy: { createdAt: "asc" } },
+        documents: {
+          orderBy: { createdAt: "asc" as const },
+          select: { id: true, name: true, fileUrl: true, fileSize: true, mimeType: true, createdAt: true },
+        },
       },
     });
     if (!task) {
@@ -39,8 +58,9 @@ export async function GET(
     return NextResponse.json(task);
   } catch (e) {
     console.error(e);
+    const message = e instanceof Error ? e.message : "Erreur lors de la récupération de la tâche";
     return NextResponse.json(
-      { error: "Erreur lors de la récupération de la tâche" },
+      { error: message },
       { status: 500 }
     );
   }

@@ -88,7 +88,7 @@ export function TaskListView({ tasks }: TaskListViewProps) {
                     </p>
                   )}
                 </td>
-                <td className="px-4 py-3 text-slate-600 text-xs">{task.category ?? "—"}</td>
+                <td className="px-4 py-3 text-slate-600 text-xs">{(task as { category?: string | null }).category ?? "—"}</td>
                 <td className="px-4 py-3">
                   {task.priority ? (
                     <span className="text-xs text-slate-600">{PRIORITY_LABELS[task.priority] ?? task.priority}</span>

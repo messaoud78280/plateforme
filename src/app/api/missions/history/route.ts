@@ -28,7 +28,6 @@ export async function GET() {
         id: true,
         title: true,
         description: true,
-        category: true,
         completedAt: true,
         contactsJson: true,
         suppliersJson: true,

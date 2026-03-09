@@ -35,7 +35,7 @@ export function MissionDetailDrawer({ open, taskId, onClose, sessionUserId }: Mi
     assignedTo?: { id: string; name: string; email: string } | null;
     project?: { id: string; title: string } | null;
     client?: { id: string; name: string };
-    documents?: { id: string; name: string; fileUrl: string; fileSize: number; mimeType: string | null; createdAt?: string }[];
+    documents?: { id: string; name: string; fileUrl: string; fileSize: number; mimeType: string | null; createdAt?: Date }[];
   } | null>(null);
   const [agents, setAgents] = useState<{ id: string; name: string; email: string }[]>([]);
   const [loading, setLoading] = useState(false);
@@ -61,12 +61,17 @@ export function MissionDetailDrawer({ open, taskId, onClose, sessionUserId }: Mi
           setError("Mission introuvable");
           setTask(null);
         } else {
+          const docs = taskData.documents?.map((d: { id: string; name: string; fileUrl: string; fileSize: number; mimeType: string | null; createdAt?: string }) => ({
+            ...d,
+            createdAt: d.createdAt ? new Date(d.createdAt) : undefined,
+          }));
           setTask({
             ...taskData,
             createdAt: taskData.createdAt ? new Date(taskData.createdAt) : new Date(),
             updatedAt: taskData.updatedAt ? new Date(taskData.updatedAt) : new Date(),
             completedAt: taskData.completedAt ? new Date(taskData.completedAt) : null,
             validatedAt: taskData.validatedAt ? new Date(taskData.validatedAt) : null,
+            documents: docs ?? [],
           });
           setAgents(Array.isArray(agentsData) ? agentsData : []);
         }

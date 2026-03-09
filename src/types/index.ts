@@ -1,11 +1,34 @@
 /**
  * Types partagés – alignés sur le schéma Prisma et le brief
+ *
+ * Séparation en trois parties :
+ * 1. Agence (gérante) = MANAGER — gestion des missions, clients, agents
+ * 2. Agents = AGENCE + AGENT — exécution des missions (opérationnel / assistante)
+ * 3. Clients = CLIENT
  */
 
-export type UserRole = "CLIENT" | "AGENCE" | "MANAGER";
+export type UserRole = "CLIENT" | "AGENCE" | "MANAGER" | "AGENT";
 
-/** Vrai si l'utilisateur est agence ou gérant (accès côté agence) */
+/** Gérante / agence (responsable) */
+export const isManager = (role: string) => role === "MANAGER";
+
+/** Agent (opérationnel AGENCE ou assistante AGENT) */
+export const isAgentRole = (role: string) => role === "AGENCE" || role === "AGENT";
+
+/** Client */
+export const isClient = (role: string) => role === "CLIENT";
+
+/** Côté agence au sens large : gérante + agents (accès commun à certaines ressources) */
 export const isAgenceOrManager = (role: string) => role === "AGENCE" || role === "MANAGER";
+
+/** Libellé du rôle pour l’UI (trois parties) */
+export const ROLE_PART_LABELS: Record<string, string> = {
+  MANAGER: "Gérante (agence)",
+  AGENCE: "Agent",
+  AGENT: "Agent",
+  CLIENT: "Client",
+};
+export const getRolePartLabel = (role: string) => ROLE_PART_LABELS[role] ?? role;
 
 export type TaskStatus =
   | "NOUVEAU"

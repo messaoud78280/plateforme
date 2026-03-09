@@ -21,8 +21,8 @@ export default async function TachesPage({
     redirect("/connexion?callbackUrl=/dashboard");
   }
 
-  const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
-  const isAgent = session.user.role === "AGENT";
+  const isManager = session.user.role === "MANAGER";
+  const isAgent = session.user.role === "AGENT" || session.user.role === "AGENCE";
   const isClient = session.user.role === "CLIENT";
   const params = await searchParams;
   const allTaskStatuses = ["NOUVEAU", "EN_ATTENTE", "ASSIGNEE", "EN_ANALYSE", "EN_COURS", "EN_ATTENTE_INFO", "A_VALIDER", "COMPLETE"] as const;
@@ -49,7 +49,7 @@ export default async function TachesPage({
   } = { nouvelles: [], aAssigner: [], enCours: [], aValider: [], terminees: [] };
   try {
     if (prisma.task) {
-      if (isAgence) {
+      if (isManager) {
         const [nouvelles, aAssigner, enCours, aValider, terminees] = await Promise.all([
           prisma.task.findMany({
             where: { status: "NOUVEAU" },
@@ -141,7 +141,7 @@ export default async function TachesPage({
         agentSummary = { missionsAujourdhui: aAuj, missionsUrgentes: aUrg, missionsEnCours: aCours };
       }
     }
-    if (!isAgence && prisma.project) {
+    if (isClient && prisma.project) {
       projects = await prisma.project.findMany({
         where: { clientId: session.user.id },
         select: { id: true, title: true },
@@ -228,7 +228,8 @@ export default async function TachesPage({
         <MesDemandesList tasks={clientTasksForList} />
       </div>
     );
-  if (isAgence) {
+  }
+  if (isManager) {
     const boardForFilter = (() => {
       switch (statusFilter) {
         case "NOUVEAU":
@@ -265,9 +266,6 @@ export default async function TachesPage({
       </div>
     );
   }
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-8">
@@ -298,9 +296,9 @@ export default async function TachesPage({
         </div>
       )}
 
-      {isAgence && <DepotTacheForm projects={projects} />}
+      {isManager && <DepotTacheForm projects={projects} />}
 
-      {(isAgence || isAgent) && (
+      {(isManager || isAgent) && (
         <div className="flex flex-wrap gap-2">
           <a
             href="/dashboard/taches"
@@ -341,9 +339,7 @@ export default async function TachesPage({
         <h2 className="mb-3 text-lg font-semibold text-slate-800">
           {isAgent
             ? "Mes missions assignées"
-            : isAgence
-              ? (validStatus ? `Tâches ${validStatus === "EN_ATTENTE" ? "en attente" : validStatus === "EN_COURS" ? "en cours" : "terminées"}` : "Toutes les tâches")
-              : "Vos tâches"}
+            : "Vos tâches"}
         </h2>
         {isAgent ? (
           <AgentMissionsList

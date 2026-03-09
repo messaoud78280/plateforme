@@ -50,7 +50,6 @@ export async function POST(request: NextRequest) {
       data: {
         title: source.title,
         description: source.description,
-        category: source.category,
         priority: source.priority,
         status: "NOUVEAU",
         clientId: session.user.id,

@@ -29,7 +29,7 @@ type ClientDashboardContentProps = {
   clientTasks: {
     id: string;
     title: string;
-    category: string | null;
+    category?: string | null;
     status: string;
     createdAt: Date;
     updatedAt: Date;
@@ -50,7 +50,7 @@ type ClientDashboardContentProps = {
     id: string;
     name: string;
     createdAt: Date;
-    category: string;
+    category?: string;
     task: { id: string; title: string } | null;
     fileUrl: string;
   }[];

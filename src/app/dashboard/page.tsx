@@ -31,7 +31,8 @@ export default async function DashboardPage({
     redirect("/connexion?callbackUrl=/dashboard");
   }
 
-  const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
+  const isManager = session.user.role === "MANAGER";
+  const isAgent = session.user.role === "AGENT" || session.user.role === "AGENCE";
   const isClient = session.user.role === "CLIENT";
   const clientId = session.user.id;
 
@@ -42,7 +43,7 @@ export default async function DashboardPage({
     monthlyActionsUsed: number;
     renewsAt: Date | null;
   } | null = null;
-  if (!isAgence && isClient) {
+  if (isClient) {
     const u = await prisma.user.findUnique({
       where: { id: clientId },
       select: {
@@ -108,7 +109,7 @@ export default async function DashboardPage({
   let clientTasks: {
     id: string;
     title: string;
-    category: string | null;
+    category?: string | null;
     status: string;
     createdAt: Date;
     updatedAt: Date;
@@ -128,7 +129,7 @@ export default async function DashboardPage({
     id: string;
     name: string;
     createdAt: Date;
-    category: string;
+    category?: string;
     task: { id: string; title: string } | null;
     fileUrl: string;
   }[] = [];
@@ -183,7 +184,6 @@ export default async function DashboardPage({
           select: {
             id: true,
             title: true,
-            category: true,
             status: true,
             createdAt: true,
             updatedAt: true,
@@ -227,7 +227,7 @@ export default async function DashboardPage({
         id: d.id,
         name: d.name,
         createdAt: d.createdAt,
-        category: d.category,
+        category: (d as { category?: string | null }).category ?? undefined,
         task: d.task,
         fileUrl: d.fileUrl,
       }));
@@ -263,7 +263,7 @@ export default async function DashboardPage({
     terminees: [],
   };
 
-  if (isAgence) {
+  if (isManager) {
     try {
       const [nouvelles, aAssigner, enCours, aValider, terminees] = await Promise.all([
         prisma.task.findMany({
@@ -321,7 +321,7 @@ export default async function DashboardPage({
     activiteRecente: [],
   };
 
-  if (isAgence) {
+  if (isManager) {
     try {
       const [nouvCount, aAssignCount, enCoursCount, aValiderCount, agentsCount, clientsActions, recentActivities] = await Promise.all([
         prisma.task.count({ where: { status: "NOUVEAU" } }),
@@ -360,7 +360,7 @@ export default async function DashboardPage({
     }
   }
 
-  if (isAgence) {
+  if (isManager) {
     try {
       const clientUsers = await prisma.user.findMany({
         where: { role: "CLIENT" },
@@ -398,7 +398,7 @@ export default async function DashboardPage({
     }
   }
 
-  if (!isAgence && session.user?.email) {
+  if (isClient && session.user?.email) {
     try {
       contactRequestsClient = await prisma.contactRequest.findMany({
         where: { email: session.user.email },
@@ -417,7 +417,7 @@ export default async function DashboardPage({
     }
   }
 
-  const isAgent = session.user.role === "AGENT";
+  const isAgentRole = session.user.role === "AGENT" || session.user.role === "AGENCE";
   let agentData: {
     missionsToday: number;
     missionsUrgentes: number;
@@ -436,7 +436,7 @@ export default async function DashboardPage({
     messagesRecents: [],
   };
 
-  if (isAgent) {
+  if (isAgentRole) {
     try {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -581,7 +581,7 @@ export default async function DashboardPage({
       <ScrollToMessages />
 
       {/* Dashboard gérante — centre de pilotage */}
-      {isAgence && (
+      {isManager && (
         <>
           <ManagerDashboardContent
             nouvellesDemandes={managerTasks.nouvelles as unknown as ManagerTaskItem[]}
@@ -601,7 +601,7 @@ export default async function DashboardPage({
         </>
       )}
 
-      {!isAgence && (
+      {!isManager && (
       <>
       {/* Carte de bienvenue + CTA Nouvelle demande (client) */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -611,13 +611,9 @@ export default async function DashboardPage({
           Bienvenue, {session.user?.name}
         </h1>
         <p className="mt-1 text-slate-600">
-          {isAgence
-            ? session.user?.role === "MANAGER"
-              ? "Vous recevez les projets des clients. Consultez la section Clients pour attribuer un agent à un projet, une tâche ou un client."
-              : "Tableau de bord agence — vue d'ensemble des clients et tâches"
-            : session.user?.role === "AGENT"
-              ? "Tâches qui vous sont assignées. Indiquez le temps passé à la clôture pour déduire les actions du client."
-              : "Suivez vos documents, tâches et échanges avec l’agence."}
+          {isAgentRole
+            ? "Tâches qui vous sont assignées. Indiquez le temps passé à la clôture pour déduire les actions du client."
+            : "Suivez vos documents, tâches et échanges avec l’agence."}
         </p>
           </div>
           {isClient && (
@@ -627,7 +623,7 @@ export default async function DashboardPage({
       </div>
 
       {/* Section Contrat — visible pour les clients, accès à la page contrat */}
-      {!isAgence && (
+      {isClient && (
         <section aria-label="Contrat" className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-slate-800">Contrat d&apos;abonnement</h2>
           {contractStatus === "SIGNED" ? (
@@ -653,7 +649,7 @@ export default async function DashboardPage({
       )}
 
       {/* Actions du mois — clients */}
-      {!isAgence && actionsData && (
+      {isClient && actionsData && (
         <ActionsWidget
           subscriptionPlan={actionsData.subscriptionPlan}
           monthlyActionsTotal={actionsData.monthlyActionsTotal}
@@ -668,8 +664,8 @@ export default async function DashboardPage({
         className="scroll-mt-24 space-y-8"
         aria-label="RDV"
       >
-        {/* Demandes de RDV — clients : leurs demandes ; agence : lien vers page complète */}
-        {isAgence ? (
+        {/* Demandes de RDV — clients/agents : leurs demandes ; gérante : lien vers page complète */}
+        {isManager ? (
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <Link
               href="/dashboard/messages"
@@ -756,8 +752,8 @@ export default async function DashboardPage({
       {/* Graphique évolution 7 jours */}
       <TasksChart tasks={tasksPourChart} />
 
-      {/* Liste des clients (agence uniquement) */}
-      {isAgence && <ClientsSection clients={clients} />}
+      {/* Liste des clients (gérante uniquement) */}
+      {isManager && <ClientsSection clients={clients} />}
 
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Activité récente */}
@@ -767,9 +763,9 @@ export default async function DashboardPage({
         <AlertsSection alerts={alerts} />
       </div>
 
-      {/* Liens rapides (agence ou client) */}
+      {/* Liens rapides (gérante ou client) */}
       <div className="flex flex-wrap gap-4">
-        {isAgence && (
+        {isManager && (
           <Link
             href="/dashboard/clients"
             className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
@@ -801,7 +797,7 @@ export default async function DashboardPage({
         >
           RDV
         </Link>
-        {!isAgence && (
+        {isClient && (
           <Link
             href="/contract"
             className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"

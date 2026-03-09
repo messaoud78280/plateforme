@@ -242,7 +242,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
               type="button"
               onClick={() => {
                 setTitle(s.title);
-                setCategory(s.category);
+                setCategory((s as { category?: string | null }).category ?? "");
                 setDescription(s.description);
               }}
               className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 hover:border-[#1d4ed8] hover:bg-blue-50/50 hover:text-[#1d4ed8] transition"

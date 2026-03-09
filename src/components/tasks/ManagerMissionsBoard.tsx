@@ -68,7 +68,7 @@ function MissionCard({
         e.dataTransfer.setData("application/column-id", columnId);
         e.dataTransfer.effectAllowed = "move";
       }}
-      className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:border-slate-300"
+      className="cursor-grab rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:border-slate-300 active:cursor-grabbing"
     >
       <button
         type="button"
@@ -219,6 +219,9 @@ export function ManagerMissionsBoard({
 
   return (
     <>
+      <p className="mb-4 text-sm text-slate-500">
+        Glissez-déposez les cartes entre les colonnes pour mettre à jour le statut des missions.
+      </p>
       <div className="overflow-x-auto pb-4">
         <div className="flex min-w-[1000px] gap-4">
           {columns.map((col) => (

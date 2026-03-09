@@ -103,7 +103,6 @@ export async function POST(request: NextRequest) {
         status: "NOUVEAU",
         clientId: session.user.id,
         projectId: projectIdValid,
-        category: category && typeof category === "string" && category.trim() ? category.trim() : null,
         priority: validPriority,
         desiredDate: desiredDateValid,
         estimatedActions:

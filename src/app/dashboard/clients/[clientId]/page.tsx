@@ -32,8 +32,8 @@ export default async function ClientDetailPage({
     redirect("/connexion?callbackUrl=/dashboard");
   }
 
-  const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
-  if (!isAgence) {
+  const isManager = session.user.role === "MANAGER";
+  if (!isManager) {
     redirect("/dashboard");
   }
 

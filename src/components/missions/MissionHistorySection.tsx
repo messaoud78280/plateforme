@@ -86,7 +86,7 @@ export function MissionHistorySection() {
             <div className="min-w-0 flex-1">
               <p className="font-medium text-slate-800">{m.title}</p>
               <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
-                {m.category && <span>{m.category}</span>}
+                {(m as { category?: string | null }).category && <span>{(m as { category?: string | null }).category}</span>}
                 {m.documents.length > 0 && (
                   <span>{m.documents.length} document{m.documents.length > 1 ? "s" : ""}</span>
                 )}

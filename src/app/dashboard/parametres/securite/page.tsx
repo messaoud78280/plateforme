@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
+import { getRolePartLabel } from "@/types";
 import { ChangePasswordForm } from "@/components/settings/ChangePasswordForm";
 import { LogoutButton } from "@/components/LogoutButton";
 
@@ -12,9 +13,11 @@ export default async function PreferencesSecuritePage() {
   }
 
   const role = session.user.role ?? "CLIENT";
-  const isAgence = role === "AGENCE" || role === "MANAGER";
-  const isAgent = role === "AGENT";
-  const roleLabel = isAgence ? "Agence" : isAgent ? "Agent" : "Client";
+  const roleLabel = getRolePartLabel(role);
+  const isManager = role === "MANAGER";
+  const isAgent = role === "AGENT" || role === "AGENCE";
+  const isClient = role === "CLIENT";
+  const isCoteAgence = isManager || isAgent;
 
   return (
     <section className="rounded-2xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
@@ -29,7 +32,7 @@ export default async function PreferencesSecuritePage() {
             <span className="text-sm text-[#64748b]">Connecté en tant que</span>
             <span
               className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
-                isAgence ? "bg-blue-100 text-blue-800" : "bg-slate-200 text-slate-800"
+                isCoteAgence ? "bg-blue-100 text-blue-800" : "bg-slate-200 text-slate-800"
               }`}
             >
               {roleLabel}

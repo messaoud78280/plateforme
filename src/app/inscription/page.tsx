@@ -71,19 +71,19 @@ export default function InscriptionPage() {
       return;
     }
 
-    router.push("/connexion?registered=1&callbackUrl=/dashboard/onboarding");
+    router.push("/connexion/clients?registered=1&callbackUrl=/dashboard/onboarding");
     router.refresh();
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-8">
       <div className="w-full max-w-lg rounded-2xl bg-white p-8 shadow-lg">
-        <BackLink href="/connexion" className="mb-4 inline-block">Retour à la connexion</BackLink>
+        <BackLink href="/connexion/clients" className="mb-4 inline-block">Retour à la connexion clients</BackLink>
         <h1 className="mb-2 text-2xl font-bold text-slate-800">
-          Créer un compte professionnel
+          Créer un compte client
         </h1>
         <p className="mb-8 text-slate-600">
-          Inscrivez-vous pour accéder à nos services d&apos;agent administratif
+          Inscription réservée aux clients. Créez votre compte pour accéder à l&apos;espace client et à nos services.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -252,9 +252,9 @@ export default function InscriptionPage() {
         </form>
 
         <p className="mt-6 text-center text-sm text-slate-500">
-          Déjà un compte ?{" "}
-          <Link href="/connexion" className="text-blue-600 hover:underline">
-            Se connecter
+          Déjà un compte client ?{" "}
+          <Link href="/connexion/clients" className="text-blue-600 hover:underline">
+            Se connecter (espace clients)
           </Link>
         </p>
       </div>

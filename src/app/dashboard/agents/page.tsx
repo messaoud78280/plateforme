@@ -8,8 +8,8 @@ import { BackLink } from "@/components/ui/BackLink";
 export default async function AgentsPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect("/connexion?callbackUrl=/dashboard/agents");
-  const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
-  if (!isAgence) redirect("/dashboard");
+  const isManager = session.user.role === "MANAGER";
+  if (!isManager) redirect("/dashboard");
 
   let agents: {
     id: string;

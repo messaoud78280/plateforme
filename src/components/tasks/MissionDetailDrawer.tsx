@@ -52,32 +52,43 @@ export function MissionDetailDrawer({ open, taskId, onClose, sessionUserId }: Mi
     setLoading(true);
     setError(null);
     Promise.all([
-      fetch(`/api/tasks/${taskId}`).then((r) => (r.ok ? r.json() : null)),
+      fetch(`/api/tasks/${taskId}`).then(async (r) => {
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          const msg = (data && typeof data.error === "string") ? data.error : (r.status === 404 ? "Mission introuvable" : r.status === 401 ? "Session expirée" : "Erreur au chargement");
+          throw new Error(msg);
+        }
+        return data;
+      }),
       fetch("/api/agents").then((r) => (r.ok ? r.json() : [])),
     ])
       .then(([taskData, agentsData]) => {
         if (cancelled) return;
-        if (!taskData) {
-          setError("Mission introuvable");
+        if (!taskData || taskData.error) {
+          setError(taskData?.error ?? "Mission introuvable");
           setTask(null);
-        } else {
-          const docs = taskData.documents?.map((d: { id: string; name: string; fileUrl: string; fileSize: number; mimeType: string | null; createdAt?: string }) => ({
-            ...d,
-            createdAt: d.createdAt ? new Date(d.createdAt) : undefined,
-          }));
-          setTask({
-            ...taskData,
-            createdAt: taskData.createdAt ? new Date(taskData.createdAt) : new Date(),
-            updatedAt: taskData.updatedAt ? new Date(taskData.updatedAt) : new Date(),
-            completedAt: taskData.completedAt ? new Date(taskData.completedAt) : null,
-            validatedAt: taskData.validatedAt ? new Date(taskData.validatedAt) : null,
-            documents: docs ?? [],
-          });
-          setAgents(Array.isArray(agentsData) ? agentsData : []);
+          return;
         }
+        const docs = taskData.documents?.map((d: { id: string; name: string; fileUrl: string; fileSize: number; mimeType: string | null; createdAt?: string }) => ({
+          ...d,
+          createdAt: d.createdAt ? new Date(d.createdAt) : undefined,
+        }));
+        setTask({
+          ...taskData,
+          createdAt: taskData.createdAt ? new Date(taskData.createdAt) : new Date(),
+          updatedAt: taskData.updatedAt ? new Date(taskData.updatedAt) : new Date(),
+          completedAt: taskData.completedAt ? new Date(taskData.completedAt) : null,
+          validatedAt: taskData.validatedAt ? new Date(taskData.validatedAt) : null,
+          documents: docs ?? [],
+        });
+        setAgents(Array.isArray(agentsData) ? agentsData : []);
+        setError(null);
       })
-      .catch(() => {
-        if (!cancelled) setError("Erreur au chargement");
+      .catch((err: Error) => {
+        if (!cancelled) {
+          setError(err?.message ?? "Erreur au chargement");
+          setTask(null);
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);

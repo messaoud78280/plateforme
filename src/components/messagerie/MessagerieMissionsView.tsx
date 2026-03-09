@@ -42,9 +42,10 @@ type MissionItem = {
   documents: { id: string; name: string; fileUrl: string }[];
 };
 
-type FilterId = "inbox" | "mes-missions" | "en-attente-client" | "en-cours" | "terminees";
+type FilterId = "envoyer" | "inbox" | "mes-missions" | "en-attente-client" | "en-cours" | "terminees";
 
 const NAV_ITEMS: { id: FilterId; label: string }[] = [
+  { id: "envoyer", label: "Envoyer un message" },
   { id: "inbox", label: "Boîte de réception" },
   { id: "mes-missions", label: "Mes missions" },
   { id: "en-attente-client", label: "En attente client" },
@@ -96,6 +97,7 @@ interface MessagerieMissionsViewProps {
   canChangeStatus: boolean;
   agents?: { id: string; name: string }[];
   managerId?: string | null;
+  recipients?: { id: string; name: string; role: string }[];
 }
 
 export function MessagerieMissionsView({
@@ -106,6 +108,7 @@ export function MessagerieMissionsView({
   canChangeStatus,
   agents = [],
   managerId,
+  recipients = [],
 }: MessagerieMissionsViewProps) {
   const router = useRouter();
   const [missions, setMissions] = useState<MissionItem[]>([]);
@@ -117,11 +120,20 @@ export function MessagerieMissionsView({
   const [sendContent, setSendContent] = useState("");
   const [sending, setSending] = useState(false);
   const [internalNote, setInternalNote] = useState(false);
+  const [directRecipientId, setDirectRecipientId] = useState("");
+  const [directContent, setDirectContent] = useState("");
+  const [sendingDirect, setSendingDirect] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const selectedMission = missions.find((m) => m.id === selectedTaskId);
+  const showEnvoyerTab = isAgence || isAgent;
+  const navItems = showEnvoyerTab ? NAV_ITEMS : NAV_ITEMS.filter((i) => i.id !== "envoyer");
 
   useEffect(() => {
+    if (filter === "envoyer") {
+      setLoading(false);
+      return;
+    }
     async function load() {
       try {
         const res = await fetch(`/api/tasks/messagerie?filter=${filter}`);
@@ -195,6 +207,32 @@ export function MessagerieMissionsView({
     }
   }
 
+  async function handleSendDirect(e: React.FormEvent) {
+    e.preventDefault();
+    const content = directContent.trim();
+    if (!content || !directRecipientId || sendingDirect) return;
+
+    setSendingDirect(true);
+    try {
+      const res = await fetch("/api/messages/direct", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, receiverId: directRecipientId }),
+      });
+
+      if (res.ok) {
+        setDirectContent("");
+        setDirectRecipientId("");
+        router.refresh();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err?.error ?? "Erreur lors de l'envoi");
+      }
+    } finally {
+      setSendingDirect(false);
+    }
+  }
+
   async function handleStatusChange(newStatus: string) {
     if (!selectedTaskId || !canChangeStatus) return;
     try {
@@ -236,7 +274,7 @@ export function MessagerieMissionsView({
         </div>
         <nav className="flex-1 overflow-y-auto p-2">
           <ul className="space-y-0.5">
-            {NAV_ITEMS.map((item) => (
+            {navItems.map((item) => (
               <li key={item.id}>
                 <button
                   type="button"
@@ -255,7 +293,64 @@ export function MessagerieMissionsView({
         </nav>
       </aside>
 
-      {/* Colonne centre : liste des missions */}
+      {/* Colonne centre : liste des missions OU formulaire Envoyer un message */}
+      {filter === "envoyer" ? (
+        <div className="flex min-w-0 flex-1 flex-col overflow-y-auto p-6">
+          <h2 className="mb-4 text-lg font-semibold text-slate-800">Envoyer un message</h2>
+          <p className="mb-4 text-sm text-slate-600">
+            Choisissez un destinataire (agent ou gérant) et écrivez votre message. Il recevra une notification.
+          </p>
+          <form onSubmit={handleSendDirect} className="space-y-4">
+            <div>
+              <label htmlFor="recipient" className="mb-1.5 block text-sm font-medium text-slate-700">
+                Destinataire
+              </label>
+              <select
+                id="recipient"
+                value={directRecipientId}
+                onChange={(e) => setDirectRecipientId(e.target.value)}
+                required
+                className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              >
+                <option value="">Sélectionner un agent ou gérant…</option>
+                {recipients
+                  .filter((r) => r.id !== sessionUserId)
+                  .map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.name} ({r.role})
+                    </option>
+                  ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="direct-content" className="mb-1.5 block text-sm font-medium text-slate-700">
+                Message
+              </label>
+              <textarea
+                id="direct-content"
+                value={directContent}
+                onChange={(e) => setDirectContent(e.target.value)}
+                placeholder="Écrivez votre message…"
+                rows={5}
+                required
+                disabled={sendingDirect}
+                className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-60"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={sendingDirect || !directContent.trim() || !directRecipientId}
+              className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              {sendingDirect ? "Envoi…" : "Envoyer"}
+            </button>
+          </form>
+          {recipients.length === 0 && (
+            <p className="mt-4 text-sm text-slate-500">Aucun agent ou gérant disponible.</p>
+          )}
+        </div>
+      ) : (
+      <>
       <aside className="flex w-80 shrink-0 flex-col border-r border-slate-200 bg-white">
         <div className="border-b border-slate-200 p-3">
           <h2 className="text-sm font-semibold text-slate-800">Missions</h2>
@@ -504,6 +599,8 @@ export function MessagerieMissionsView({
           </div>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }

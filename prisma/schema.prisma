@@ -57,6 +57,8 @@ model User {
   taskComments       TaskComment[]
   taskMessagesSent   TaskMessage[]  @relation("TaskMessagesSent")
   taskMessagesReceived TaskMessage[] @relation("TaskMessagesReceived")
+  directMessagesSent   DirectMessage[] @relation("DirectMessagesSent")
+  directMessagesReceived DirectMessage[] @relation("DirectMessagesReceived")
   notifications      Notification[]
   activities         Activity[]
   alerts             Alert[]
@@ -323,6 +325,22 @@ enum TaskStatus {
   EN_ATTENTE_INFO // En attente d'information (client ou autre)
   A_VALIDER       // Travail terminé, en attente de validation gérante
   COMPLETE        // Terminée (validée par la gérante)
+}
+
+// Messages directs entre gérants et agents (sans mission)
+model DirectMessage {
+  id         String   @id @default(cuid())
+  senderId   String
+  receiverId String
+  content    String
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  sender   User @relation("DirectMessagesSent", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("DirectMessagesReceived", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([senderId])
+  @@index([receiverId])
 }
 
 // Messages sur une tâche (client ↔ agent quand assigné, ou interne gérante ↔ agent)

@@ -16,13 +16,19 @@ export default async function MessageriePage() {
   const isAgent = session.user.role === "AGENT";
   const isClient = session.user.role === "CLIENT";
 
-  let agents: { id: string; name: string }[] = [];
+  let agents: { id: string; name: string; role?: string }[] = [];
+  let recipients: { id: string; name: string; role: string }[] = []; // agents + managers pour "Envoyer un message"
   let managerId: string | null = null;
   if (isAgence || isAgent) {
     try {
-      const [agentsRes, managerRes] = await Promise.all([
+      const [agentsRes, managersRes, managerFirst] = await Promise.all([
         prisma.user.findMany({
           where: { role: { in: ["AGENCE", "AGENT"] } },
+          select: { id: true, name: true },
+          orderBy: { name: "asc" },
+        }),
+        prisma.user.findMany({
+          where: { role: "MANAGER" },
           select: { id: true, name: true },
           orderBy: { name: "asc" },
         }),
@@ -32,7 +38,11 @@ export default async function MessageriePage() {
         }),
       ]);
       agents = agentsRes;
-      managerId = managerRes?.id ?? null;
+      managerId = managerFirst?.id ?? null;
+      recipients = [
+        ...agentsRes.map((a) => ({ ...a, role: "agent" as const })),
+        ...managersRes.map((m) => ({ ...m, role: "gérant" as const })),
+      ].sort((a, b) => a.name.localeCompare(b.name));
     } catch {
       // ignore
     }
@@ -51,7 +61,11 @@ export default async function MessageriePage() {
             : "Messagerie centrée sur les missions. Gérez les échanges et le suivi des missions administratives."}
         </p>
         <div className="mt-3 rounded-lg border border-blue-100 bg-blue-50/50 px-4 py-3 text-sm text-slate-700">
-          <strong>Comment envoyer un message ?</strong> Sélectionnez une mission dans la liste du centre, puis utilisez le champ « Écrire un message » en bas à droite et le bouton <strong>Envoyer</strong>. Pour joindre un document : cliquez sur l&apos;icône trombone ou ouvrez la mission pour ajouter des pièces jointes.
+          <strong>Comment envoyer un message ?</strong>{" "}
+          {(isAgence || isAgent) && (
+            <>Utilisez l&apos;onglet <strong>Envoyer un message</strong> pour écrire à n&apos;importe quel agent ou gérant. Sinon, </>
+          )}
+          sélectionnez une mission dans la liste du centre, puis utilisez le champ « Écrire un message » en bas à droite et le bouton <strong>Envoyer</strong>. Pour joindre un document : cliquez sur l&apos;icône trombone ou ouvrez la mission pour ajouter des pièces jointes.
         </div>
       </div>
 
@@ -63,6 +77,7 @@ export default async function MessageriePage() {
         canChangeStatus={canChangeStatus}
         agents={agents}
         managerId={managerId}
+        recipients={recipients}
       />
     </div>
   );

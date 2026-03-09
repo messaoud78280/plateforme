@@ -24,6 +24,7 @@ export async function GET(
       where: { id },
       include: {
         assignedTo: { select: { id: true, name: true, email: true } },
+        client: { select: { id: true, name: true } },
         project: { select: { id: true, title: true } },
         documents: { orderBy: { createdAt: "asc" } },
       },

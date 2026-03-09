@@ -77,13 +77,14 @@ export default async function TachesPage({
             orderBy: { completedAt: "desc" },
           }),
         ]);
-        const toBoard = (t: { id: string; title: string; status: string; priority: string | null; createdAt: Date; updatedAt: Date; client: { id: string; name: string }; assignedTo: { id: string; name: string } | null }) => ({
+        const toBoard = (t: { id: string; title: string; status: string; priority: string | null; createdAt: Date; updatedAt: Date; estimatedActions: string | null; client: { id: string; name: string }; assignedTo: { id: string; name: string } | null }) => ({
           id: t.id,
           title: t.title,
           status: t.status,
           priority: t.priority,
           createdAt: t.createdAt,
           updatedAt: t.updatedAt,
+          estimatedActions: t.estimatedActions ?? null,
           client: t.client,
           assignedTo: t.assignedTo,
         });
@@ -259,6 +260,7 @@ export default async function TachesPage({
           enCours={boardForFilter.enCours}
           aValider={boardForFilter.aValider}
           terminees={boardForFilter.terminees}
+          sessionUserId={session.user.id}
         />
       </div>
     );

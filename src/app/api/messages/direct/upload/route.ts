@@ -13,8 +13,11 @@ const ALLOWED_TYPES = [
   "image/webp",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-excel",
+  "application/msword",
   "text/csv",
   "text/plain",
+  "application/octet-stream",
 ];
 
 /** POST /api/messages/direct/upload — Upload d'une pièce jointe pour message direct */
@@ -56,7 +59,11 @@ export async function POST(request: Request) {
   }
 
   const mime = file.type || "application/octet-stream";
-  if (!ALLOWED_TYPES.includes(mime)) {
+  const ext = file.name.split(".").pop()?.toLowerCase();
+  const allowedExts = ["pdf", "jpg", "jpeg", "png", "gif", "webp", "docx", "xlsx", "xls", "csv", "txt", "doc"];
+  const mimeOk = ALLOWED_TYPES.includes(mime);
+  const extOk = ext && allowedExts.includes(ext);
+  if (!mimeOk && !extOk) {
     return NextResponse.json({ error: "Type de fichier non accepté (PDF, images, DOCX, XLSX, CSV, TXT)" }, { status: 400 });
   }
 

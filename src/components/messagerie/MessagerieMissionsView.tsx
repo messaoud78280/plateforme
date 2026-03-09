@@ -302,22 +302,32 @@ export function MessagerieMissionsView({
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>, setAttachments: React.Dispatch<React.SetStateAction<AttachmentItem[]>>) {
     const files = e.target.files;
     if (!files?.length) return;
+    e.target.value = "";
     setUploadingAttach(true);
+    const uploaded: AttachmentItem[] = [];
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         if (!(file instanceof File) || !file.size) continue;
         const fd = new FormData();
         fd.append("file", file);
-        const res = await fetch("/api/messages/direct/upload", { method: "POST", body: fd });
-        if (res.ok) {
-          const data = await res.json();
-          setAttachments((prev) => [...prev, { name: data.name, fileUrl: data.fileUrl, fileSize: data.fileSize, mimeType: data.mimeType }]);
+        try {
+          const res = await fetch("/api/messages/direct/upload", { method: "POST", body: fd });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok && data.fileUrl) {
+            uploaded.push({ name: data.name ?? file.name, fileUrl: data.fileUrl, fileSize: data.fileSize ?? file.size, mimeType: data.mimeType });
+          } else {
+            alert(data?.error ?? `Erreur lors du téléchargement de "${file.name}"`);
+          }
+        } catch {
+          alert(`Erreur réseau pour "${file.name}". Vérifiez votre connexion.`);
         }
+      }
+      if (uploaded.length > 0) {
+        setAttachments((prev) => [...prev, ...uploaded]);
       }
     } finally {
       setUploadingAttach(false);
-      e.target.value = "";
     }
   }
 

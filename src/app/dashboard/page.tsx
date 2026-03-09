@@ -188,7 +188,6 @@ export default async function DashboardPage({
             createdAt: true,
             updatedAt: true,
             actionsUsed: true,
-            estimatedActions: true,
             assignedTo: { select: { id: true, name: true } },
           },
           orderBy: { updatedAt: "desc" },
@@ -214,7 +213,10 @@ export default async function DashboardPage({
           take: 5,
         }),
       ]);
-      clientTasks = tasksList;
+      clientTasks = tasksList.map((t) => ({
+        ...t,
+        estimatedActions: (t as { estimatedActions?: string | null }).estimatedActions ?? null,
+      }));
       recentMessages = messagesList.map((m) => ({
         id: m.id,
         content: m.content,
@@ -452,7 +454,7 @@ export default async function DashboardPage({
           take: 20,
         }),
         prisma.task.findMany({
-          where: { assignedToId: agentId, priority: { in: ["URGENT", "PRIORITAIRE"] }, status: { notIn: ["COMPLETE"] } },
+          where: { assignedToId: agentId, status: { notIn: ["COMPLETE"] } },
           include: { client: { select: { id: true, name: true } } },
           orderBy: { updatedAt: "desc" },
           take: 10,
@@ -498,7 +500,7 @@ export default async function DashboardPage({
           id: t.id,
           title: t.title,
           status: t.status,
-          priority: t.priority,
+          priority: (t as { priority?: string | null }).priority ?? null,
           desiredDate: t.desiredDate,
           createdAt: t.createdAt,
           updatedAt: t.updatedAt,
@@ -508,7 +510,7 @@ export default async function DashboardPage({
           id: t.id,
           title: t.title,
           status: t.status,
-          priority: t.priority,
+          priority: (t as { priority?: string | null }).priority ?? null,
           desiredDate: t.desiredDate,
           createdAt: t.createdAt,
           updatedAt: t.updatedAt,

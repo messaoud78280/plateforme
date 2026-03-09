@@ -146,7 +146,6 @@ export default async function TachesPage({
           prisma.task.count({
             where: {
               assignedToId: session.user.id,
-              priority: { in: ["URGENT", "PRIORITAIRE"] },
               status: { notIn: ["COMPLETE"] },
             },
           }),
@@ -184,7 +183,7 @@ export default async function TachesPage({
         status: t.status,
         createdAt: t.createdAt,
         actionsUsed: t.actionsUsed,
-        estimatedActions: t.estimatedActions,
+        estimatedActions: (t as { estimatedActions?: string | null }).estimatedActions ?? null,
         correctionNote: t.correctionNote ?? null,
         project: t.project ?? null,
         assignedTo: t.assignedTo ? { id: t.assignedTo.id, name: t.assignedTo.name } : null,

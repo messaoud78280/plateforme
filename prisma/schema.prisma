@@ -290,9 +290,9 @@ model Task {
   projectId      String?   // projet auquel la tâche se rapporte (optionnel)
   // Nouvelle demande intelligente (category désactivé si colonne absente en prod ; réactiver après ALTER TABLE "Task" ADD COLUMN "category" TEXT;)
   // category         String?   // Gestion d'emails, Recherche, Organisation, Réservation, Rédaction, etc.
-  priority         String?   // STANDARD | PRIORITAIRE | URGENT
+  // priority         String?   // STANDARD | PRIORITAIRE | URGENT — désactivé si colonne absente en prod ; réactiver après migration
   desiredDate      DateTime? @db.Date  // date souhaitée par le client
-  estimatedActions String?   // estimation initiale affichée au client (ex. "1 à 2 actions")
+  // estimatedActions String?   // estimation initiale — désactivé si colonne absente en prod ; réactiver après migration
   assignedToId   String?   // agent (User rôle AGENCE) assigné par l'agence après prise en charge
   agencyNotes    String?   // notes de l'agence pour l'agent (consignes, rappels)
   correctionNote String?   // note quand le responsable demande une correction

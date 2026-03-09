@@ -50,13 +50,12 @@ export async function POST(request: NextRequest) {
       data: {
         title: source.title,
         description: source.description,
-        priority: source.priority,
         status: "NOUVEAU",
         clientId: session.user.id,
         projectId: source.projectId,
         contactsJson: source.contactsJson ?? undefined,
         suppliersJson: source.suppliersJson ?? undefined,
-        estimatedActions: source.estimatedActions,
+        // priority / estimatedActions : colonnes désactivées en prod
       },
     });
 

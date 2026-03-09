@@ -86,7 +86,6 @@ export async function POST(request: NextRequest) {
       if (project) projectIdValid = project.id;
     }
 
-    const validPriority = priority && ["STANDARD", "PRIORITAIRE", "URGENT"].includes(priority) ? priority : null;
     let desiredDateValid: Date | null = null;
     if (desiredDate && typeof desiredDate === "string") {
       const d = new Date(desiredDate);
@@ -103,12 +102,8 @@ export async function POST(request: NextRequest) {
         status: "NOUVEAU",
         clientId: session.user.id,
         projectId: projectIdValid,
-        priority: validPriority,
         desiredDate: desiredDateValid,
-        estimatedActions:
-          estimatedActions && typeof estimatedActions === "string" && estimatedActions.trim()
-            ? estimatedActions.trim()
-            : null,
+        // priority / estimatedActions : colonnes désactivées en prod (réactiver après ALTER TABLE)
       },
     });
     try {

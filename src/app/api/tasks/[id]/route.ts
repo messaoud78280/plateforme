@@ -96,14 +96,11 @@ export async function PUT(
       agencyNotes?: string | null;
       timeSpentMinutes?: number | null;
       actionsUsed?: number | null;
-      priority?: string | null;
     } = {};
     if (typeof title === "string" && title.trim()) data.title = title.trim();
     if (body.hasOwnProperty("description")) data.description = description?.trim() ?? null;
     if (status && validStatuses.includes(status)) data.status = status;
-    if (isAgence && body.hasOwnProperty("priority")) {
-      data.priority = priority && validPriorities.includes(priority) ? priority : null;
-    }
+    // priority : colonne désactivée en prod (réactiver après ALTER TABLE)
     if (status === "COMPLETE") data.completedAt = new Date();
     if (status && status !== "COMPLETE") data.completedAt = null;
     const assigningAgent = isAgence && body.hasOwnProperty("assignedToId") && assignedToId;

@@ -93,6 +93,7 @@ export async function GET(request: NextRequest) {
       ["Documents déposés", String(stats.documents.total)],
       ["Projets créés", String(stats.projects.total)],
     ];
+    const pageW = (doc.internal.pageSize as { width?: number }).width ?? 210;
     tableData.forEach(([label, value]) => {
       doc.text(label, 14, y);
       doc.text(value, pageW - 14 - doc.getTextWidth(value), y);

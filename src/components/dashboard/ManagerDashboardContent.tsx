@@ -152,6 +152,7 @@ export function ManagerDashboardContent({
         <section aria-label="Indicateurs">
           <h3 className="mb-4 text-lg font-semibold text-slate-800">Vue d'ensemble</h3>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
             <KpiCard
               label="Nouvelles demandes"
               count={typeof nouvellesCount === "number" ? nouvellesCount : nouvellesDemandes.length}
@@ -160,7 +161,24 @@ export function ManagerDashboardContent({
             <KpiCard
               label="Missions à assigner"
               count={typeof aAssignerCount === "number" ? aAssignerCount : aAssigner.length}
-              href="/dashboard/taches"
+              href="/dashboard/taches?statut=EN_ATTENTE"
+            />
+            <KpiCard
+              label="Missions en cours"
+              count={typeof enCoursCount === "number" ? enCoursCount : missionsEnCours.length}
+              href="/dashboard/taches?statut=EN_COURS"
+            />
+            <KpiCard
+              label="Missions à valider"
+              count={typeof aValiderCount === "number" ? aValiderCount : missionsAValider.length}
+              href="/dashboard/taches?statut=A_VALIDER"
+            />
+            <KpiCard
+              label="Agents actifs"
+              count={agentsActifsCount}
+              href="/dashboard/agents"
+            />
+          </div>
             />
             <KpiCard
               label="Missions en cours"

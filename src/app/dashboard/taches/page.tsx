@@ -227,9 +227,23 @@ export default async function TachesPage({
         <MesDemandesList tasks={clientTasksForList} />
       </div>
     );
-  }
-
   if (isAgence) {
+    const boardForFilter = (() => {
+      switch (statusFilter) {
+        case "NOUVEAU":
+          return { ...managerBoard, aAssigner: [], enCours: [], aValider: [], terminees: [] };
+        case "EN_ATTENTE":
+          return { ...managerBoard, nouvelles: [], enCours: [], aValider: [], terminees: [] };
+        case "EN_COURS":
+          return { ...managerBoard, nouvelles: [], aAssigner: [], aValider: [], terminees: [] };
+        case "A_VALIDER":
+          return { ...managerBoard, nouvelles: [], aAssigner: [], enCours: [], terminees: [] };
+        case "COMPLETE":
+          return { ...managerBoard, nouvelles: [], aAssigner: [], enCours: [], aValider: [] };
+        default:
+          return managerBoard;
+      }
+    })();
     return (
       <div className="space-y-8">
         <BackLink href="/dashboard">Dashboard</BackLink>
@@ -240,12 +254,15 @@ export default async function TachesPage({
           </p>
         </div>
         <ManagerMissionsBoard
-          nouvelles={managerBoard.nouvelles}
-          aAssigner={managerBoard.aAssigner}
-          enCours={managerBoard.enCours}
-          aValider={managerBoard.aValider}
-          terminees={managerBoard.terminees}
+          nouvelles={boardForFilter.nouvelles}
+          aAssigner={boardForFilter.aAssigner}
+          enCours={boardForFilter.enCours}
+          aValider={boardForFilter.aValider}
+          terminees={boardForFilter.terminees}
         />
+      </div>
+    );
+  }
       </div>
     );
   }

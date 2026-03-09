@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-/** GET /api/agents – Liste des utilisateurs AGENCE (pour assignation des tâches) */
+/** GET /api/agents – Liste des utilisateurs AGENCE et AGENT (pour assignation des tâches) */
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -15,7 +15,7 @@ export async function GET() {
 
   try {
     const agents = await prisma.user.findMany({
-      where: { role: "AGENCE" },
+      where: { role: { in: ["AGENCE", "AGENT"] } },
       select: { id: true, name: true, email: true },
       orderBy: { name: "asc" },
     });

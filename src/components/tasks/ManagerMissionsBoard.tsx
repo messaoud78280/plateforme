@@ -8,20 +8,32 @@ import { MissionDetailDrawer } from "./MissionDetailDrawer";
 const FILTER_ALL = "";
 const FILTER_UNASSIGNED = "__none__";
 
-/** Priorité : couleur de la barre gauche + libellé */
+/** Priorité : 3 niveaux visibles (Urgent, Normal, Faible) */
 const PRIORITY_STYLES: Record<string, { label: string; borderClass: string; badgeClass: string }> = {
-  URGENT: { label: "Urgent", borderClass: "border-l-red-500", badgeClass: "bg-red-100 text-red-800" },
-  PRIORITAIRE: { label: "Prioritaire", borderClass: "border-l-amber-500", badgeClass: "bg-amber-100 text-amber-800" },
-  STANDARD: { label: "Normal", borderClass: "border-l-slate-400", badgeClass: "bg-slate-100 text-slate-700" },
-  "": { label: "Faible", borderClass: "border-l-slate-300", badgeClass: "bg-slate-100/80 text-slate-500" },
+  URGENT: { label: "Urgent", borderClass: "border-l-red-500", badgeClass: "bg-red-500/15 text-red-700 font-semibold px-2.5 py-1 rounded-md text-xs" },
+  PRIORITAIRE: { label: "Normal", borderClass: "border-l-blue-400", badgeClass: "bg-blue-500/15 text-blue-700 font-medium px-2.5 py-1 rounded-md text-xs" },
+  STANDARD: { label: "Normal", borderClass: "border-l-blue-400", badgeClass: "bg-blue-500/15 text-blue-700 font-medium px-2.5 py-1 rounded-md text-xs" },
+  "": { label: "Faible", borderClass: "border-l-slate-300", badgeClass: "bg-slate-200/80 text-slate-600 font-medium px-2.5 py-1 rounded-md text-xs" },
 };
 
 const PRIORITY_OPTIONS: { value: string; label: string }[] = [
   { value: "URGENT", label: "Urgent" },
-  { value: "PRIORITAIRE", label: "Prioritaire" },
   { value: "STANDARD", label: "Normal" },
   { value: "", label: "Faible" },
 ];
+
+type AgentOption = { id: string; name: string; email?: string };
+
+function AgentAvatar({ name }: { name: string }) {
+  const initials = name.trim().split(/\s+/).length >= 2
+    ? (name.trim().split(/\s+/)[0][0] + name.trim().split(/\s+/)[1][0]).toUpperCase()
+    : name.slice(0, 2).toUpperCase();
+  return (
+    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-600 text-xs font-semibold text-white" title={name}>
+      {initials}
+    </div>
+  );
+}
 
 export type ManagerBoardTask = {
   id: string;
@@ -51,16 +63,22 @@ const COLUMN_TO_STATUS: Record<string, string> = {
 function MissionCard({
   task,
   columnId,
+  agents,
   onOpenMission,
   onPriorityChange,
+  onAssignAgent,
 }: {
   task: ManagerBoardTask;
   columnId: string;
+  agents: AgentOption[];
   onOpenMission: (taskId: string) => void;
   onPriorityChange: (taskId: string, priority: string | null) => void;
+  onAssignAgent: (taskId: string, agentId: string) => void;
 }) {
+  const [assignerOpen, setAssignerOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const assignerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -71,9 +89,17 @@ function MissionCard({
     return () => document.removeEventListener("click", close);
   }, [menuOpen]);
 
+  useEffect(() => {
+    if (!assignerOpen) return;
+    const close = (e: MouseEvent) => {
+      if (assignerRef.current && !assignerRef.current.contains(e.target as Node)) setAssignerOpen(false);
+    };
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, [assignerOpen]);
+
   const priorityKey = task.priority ?? "";
   const priorityStyle = PRIORITY_STYLES[priorityKey] ?? PRIORITY_STYLES[""];
-  const hasAgent = !!task.assignedTo?.name;
 
   return (
     <div
@@ -83,7 +109,7 @@ function MissionCard({
         e.dataTransfer.setData("application/column-id", columnId);
         e.dataTransfer.effectAllowed = "move";
       }}
-      className={`cursor-grab rounded-lg border border-l-4 border-slate-200 bg-white p-3 shadow-sm transition hover:shadow-md active:cursor-grabbing ${priorityStyle.borderClass}`}
+      className={`cursor-grab rounded-xl border border-l-4 border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md active:cursor-grabbing min-h-[200px] flex flex-col ${priorityStyle.borderClass}`}
     >
       <button
         type="button"
@@ -92,48 +118,75 @@ function MissionCard({
       >
         {task.title || "Sans titre"}
       </button>
-      <p className="mt-1.5 text-xs text-slate-500 line-clamp-1">
-        {task.client.name}
-        {" · "}
-        {task.assignedTo?.name ?? "Non assigné"}
-        {" · "}
-        {formatDate(task.createdAt)}
+      <p className="mt-2 text-xs text-slate-600">
+        <span className="font-medium text-slate-700">Client :</span> {task.client.name}
       </p>
       <div className="mt-2 flex items-center gap-2">
-        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${priorityStyle.badgeClass}`}>
+        {task.assignedTo ? (
+          <>
+            <AgentAvatar name={task.assignedTo.name} />
+            <span className="text-xs font-medium text-slate-700 truncate">{task.assignedTo.name}</span>
+          </>
+        ) : (
+          <span className="text-xs text-slate-500 italic">Non assigné</span>
+        )}
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <span className={`inline-flex ${priorityStyle.badgeClass}`}>
           {priorityStyle.label}
         </span>
         {task.estimatedActions && (
-          <span className="text-xs text-slate-400">{task.estimatedActions}</span>
+          <span className="text-xs text-slate-500">{task.estimatedActions} actions</span>
         )}
+        <span className="text-xs text-slate-400">Créée le {formatDate(task.createdAt)}</span>
       </div>
-      <div className="mt-3 flex items-center gap-2">
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div className="relative" ref={assignerRef}>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setAssignerOpen((v) => !v); setMenuOpen(false); }}
+            className="rounded-lg bg-slate-800 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700"
+          >
+            Assigner
+          </button>
+          {assignerOpen && agents.length > 0 && (
+            <div className="absolute left-0 top-full z-20 mt-1 w-40 rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+              {agents.map((agent) => (
+                <button
+                  key={agent.id}
+                  type="button"
+                  onClick={() => {
+                    onAssignAgent(task.id, agent.id);
+                    setAssignerOpen(false);
+                  }}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
+                >
+                  <AgentAvatar name={agent.name} />
+                  {agent.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <button
           type="button"
           onClick={() => onOpenMission(task.id)}
-          className="flex-1 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+          className="text-xs font-medium text-blue-600 hover:underline"
         >
           Ouvrir
         </button>
-        <div className="relative" ref={menuRef}>
+        <div className="relative ml-auto" ref={menuRef}>
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); setMenuOpen((v) => !v); }}
-            className="rounded-lg border border-slate-200 bg-white p-1.5 text-slate-500 hover:bg-slate-50"
-            title="Actions"
-            aria-label="Menu actions"
+            onClick={(e) => { e.stopPropagation(); setMenuOpen((v) => !v); setAssignerOpen(false); }}
+            className="rounded border border-slate-200 bg-white p-1.5 text-slate-500 hover:bg-slate-50"
+            title="Priorité et plus"
+            aria-label="Menu"
           >
-            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
           </button>
           {menuOpen && (
-            <div className="absolute right-0 top-full z-20 mt-1 w-44 rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
-              <Link
-                href={`/dashboard/taches/${task.id}#agent-section`}
-                className="block px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
-                onClick={() => setMenuOpen(false)}
-              >
-                {hasAgent ? "Réassigner l'agent" : "Assigner un agent"}
-              </Link>
+            <div className="absolute right-0 top-full z-20 mt-1 w-40 rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
               {PRIORITY_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
@@ -147,6 +200,13 @@ function MissionCard({
                   Priorité : {opt.label}
                 </button>
               ))}
+              <Link
+                href={`/dashboard/taches/${task.id}#agent-section`}
+                className="block px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
+                onClick={() => setMenuOpen(false)}
+              >
+                Voir la fiche mission
+              </Link>
             </div>
           )}
         </div>
@@ -201,6 +261,14 @@ export function ManagerMissionsBoard({
   const [filterClient, setFilterClient] = useState(FILTER_ALL);
   const [filterAgent, setFilterAgent] = useState(FILTER_ALL);
   const [searchQuery, setSearchQuery] = useState("");
+  const [agents, setAgents] = useState<AgentOption[]>([]);
+
+  useEffect(() => {
+    fetch("/api/agents")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((list: AgentOption[]) => setAgents(Array.isArray(list) ? list : []))
+      .catch(() => setAgents([]));
+  }, []);
 
   const { clientNames, agentNames } = useMemo(() => {
     const all = [...nouvelles, ...aAssigner, ...enCours, ...aValider, ...terminees];
@@ -263,6 +331,22 @@ export function ManagerMissionsBoard({
     [router]
   );
 
+  const handleAssignAgent = useCallback(
+    async (taskId: string, agentId: string) => {
+      try {
+        const res = await fetch(`/api/tasks/${taskId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ assignedToId: agentId }),
+        });
+        if (res.ok) router.refresh();
+      } catch {
+        // ignore
+      }
+    },
+    [router]
+  );
+
   const hasActiveFilter = filterClient !== FILTER_ALL || filterAgent !== FILTER_ALL || searchQuery.trim() !== "";
 
   return (
@@ -316,7 +400,7 @@ export function ManagerMissionsBoard({
         )}
       </div>
       <p className="mb-3 text-sm text-slate-500">
-        Glissez-déposez une carte dans une autre colonne pour changer son statut. Cliquez sur <strong>Ouvrir</strong> pour les détails.
+        Glissez-déposez une carte pour changer son statut. Utilisez <strong>Assigner</strong> pour attribuer un agent, ou le titre / <strong>Ouvrir</strong> pour les détails.
       </p>
       <div className="overflow-x-auto pb-4">
         <div className="flex min-w-[1200px] gap-5">
@@ -357,8 +441,10 @@ export function ManagerMissionsBoard({
                       key={task.id}
                       task={task}
                       columnId={col.id}
+                      agents={agents}
                       onOpenMission={setDrawerTaskId}
                       onPriorityChange={handlePriorityChange}
+                      onAssignAgent={handleAssignAgent}
                     />
                   ))
                 )}

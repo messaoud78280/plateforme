@@ -145,8 +145,8 @@ export function MessagerieMissionsView({
   const [directAttachments, setDirectAttachments] = useState<AttachmentItem[]>([]);
   const [replyAttachments, setReplyAttachments] = useState<AttachmentItem[]>([]);
   const [uploadingAttach, setUploadingAttach] = useState(false);
-  const directFileRef = useRef<HTMLInputElement>(null);
-  const replyFileRef = useRef<HTMLInputElement>(null);
+  const directFileId = "direct-file-input";
+  const replyFileId = "reply-file-input";
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const selectedMission = missions.find((m) => m.id === selectedTaskId);
@@ -300,9 +300,9 @@ export function MessagerieMissionsView({
   }
 
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>, setAttachments: React.Dispatch<React.SetStateAction<AttachmentItem[]>>) {
-    const files = e.target.files;
+    const input = e.target;
+    const files = input.files;
     if (!files?.length) return;
-    e.target.value = "";
     setUploadingAttach(true);
     const uploaded: AttachmentItem[] = [];
     try {
@@ -328,6 +328,7 @@ export function MessagerieMissionsView({
       }
     } finally {
       setUploadingAttach(false);
+      input.value = "";
     }
   }
 
@@ -501,23 +502,21 @@ export function MessagerieMissionsView({
             </div>
             <div>
               <input
-                ref={directFileRef}
+                id={directFileId}
                 type="file"
-                accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.docx,.xlsx,.csv,.txt"
-                className="hidden"
+                accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.docx,.xlsx,.xls,.csv,.txt,.doc"
+                className="sr-only"
                 multiple
                 onChange={(e) => handleFileUpload(e, setDirectAttachments)}
               />
               <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => directFileRef.current?.click()}
-                  disabled={uploadingAttach || sendingDirect}
-                  className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                <label
+                  htmlFor={directFileId}
+                  className={`flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 ${(uploadingAttach || sendingDirect) ? "pointer-events-none opacity-50" : ""}`}
                 >
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
                   {uploadingAttach ? "Téléchargement…" : "Joindre un fichier"}
-                </button>
+                </label>
                 {directAttachments.map((a, i) => (
                   <span key={i} className="flex items-center gap-1 rounded bg-slate-100 px-2 py-1 text-xs text-slate-700">
                     {a.name}
@@ -641,10 +640,10 @@ export function MessagerieMissionsView({
                 <div className="shrink-0 border-t border-slate-200 bg-slate-50/60 p-4">
                   <form onSubmit={handleReplyDirect} className="space-y-2">
                     <input
-                      ref={replyFileRef}
+                      id={replyFileId}
                       type="file"
-                      accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.docx,.xlsx,.csv,.txt"
-                      className="hidden"
+                      accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.docx,.xlsx,.xls,.csv,.txt,.doc"
+                      className="sr-only"
                       multiple
                       onChange={(e) => handleFileUpload(e, setReplyAttachments)}
                     />
@@ -668,15 +667,13 @@ export function MessagerieMissionsView({
                         className="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-60"
                       />
                       <div className="flex shrink-0 flex-col gap-2">
-                        <button
-                          type="button"
-                          onClick={() => replyFileRef.current?.click()}
-                          disabled={uploadingAttach || sendingReply}
-                          className="rounded-lg border border-slate-300 bg-white p-2.5 text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                        <label
+                          htmlFor={replyFileId}
+                          className={`cursor-pointer rounded-lg border border-slate-300 bg-white p-2.5 text-slate-600 hover:bg-slate-50 ${(uploadingAttach || sendingReply) ? "pointer-events-none opacity-50" : ""}`}
                           title="Joindre un fichier"
                         >
                           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
-                        </button>
+                        </label>
                         <button
                           type="submit"
                           disabled={sendingReply || (!replyDirectContent.trim() && replyAttachments.length === 0)}

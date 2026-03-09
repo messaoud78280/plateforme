@@ -47,55 +47,74 @@ export default async function TachesPage({
     aValider: ManagerBoardTask[];
     terminees: ManagerBoardTask[];
   } = { nouvelles: [], aAssigner: [], enCours: [], aValider: [], terminees: [] };
+  const boardSelect = {
+    id: true,
+    title: true,
+    status: true,
+    createdAt: true,
+    updatedAt: true,
+    client: { select: { id: true, name: true } },
+    assignedTo: { select: { id: true, name: true } },
+  } as const;
+  type BoardRow = {
+    id: string;
+    title: string;
+    status: string;
+    createdAt: Date;
+    updatedAt: Date;
+    client: { id: string; name: string };
+    assignedTo: { id: string; name: string } | null;
+  };
+  const toBoard = (t: BoardRow): ManagerBoardTask => ({
+    id: t.id,
+    title: t.title,
+    status: t.status,
+    priority: null,
+    createdAt: t.createdAt,
+    updatedAt: t.updatedAt,
+    estimatedActions: null,
+    client: t.client,
+    assignedTo: t.assignedTo,
+  });
+
   try {
     if (prisma.task) {
       if (isManager) {
         const [nouvelles, aAssigner, enCours, aValider, terminees] = await Promise.all([
           prisma.task.findMany({
             where: { status: "NOUVEAU" },
-            include: { client: { select: { id: true, name: true } }, assignedTo: { select: { id: true, name: true } } },
+            select: boardSelect,
             orderBy: { createdAt: "desc" },
           }),
           prisma.task.findMany({
             where: { status: "EN_ATTENTE", assignedToId: null },
-            include: { client: { select: { id: true, name: true } }, assignedTo: { select: { id: true, name: true } } },
+            select: boardSelect,
             orderBy: { createdAt: "desc" },
           }),
           prisma.task.findMany({
             where: { status: { in: ["ASSIGNEE", "EN_ANALYSE", "EN_COURS", "EN_ATTENTE_INFO"] } },
-            include: { client: { select: { id: true, name: true } }, assignedTo: { select: { id: true, name: true } } },
+            select: boardSelect,
             orderBy: { updatedAt: "desc" },
           }),
           prisma.task.findMany({
             where: { status: "A_VALIDER" },
-            include: { client: { select: { id: true, name: true } }, assignedTo: { select: { id: true, name: true } } },
+            select: boardSelect,
             orderBy: { updatedAt: "desc" },
           }),
           prisma.task.findMany({
             where: { status: "COMPLETE" },
-            include: { client: { select: { id: true, name: true } }, assignedTo: { select: { id: true, name: true } } },
+            select: boardSelect,
             orderBy: { completedAt: "desc" },
           }),
         ]);
-        const toBoard = (t: { id: string; title: string; status: string; priority: string | null; createdAt: Date; updatedAt: Date; estimatedActions: string | null; client: { id: string; name: string }; assignedTo: { id: string; name: string } | null }) => ({
-          id: t.id,
-          title: t.title,
-          status: t.status,
-          priority: t.priority,
-          createdAt: t.createdAt,
-          updatedAt: t.updatedAt,
-          estimatedActions: t.estimatedActions ?? null,
-          client: t.client,
-          assignedTo: t.assignedTo,
-        });
         managerBoard = {
-          nouvelles: nouvelles.map(toBoard),
-          aAssigner: aAssigner.map(toBoard),
-          enCours: enCours.map(toBoard),
-          aValider: aValider.map(toBoard),
-          terminees: terminees.map(toBoard),
+          nouvelles: (nouvelles as BoardRow[]).map(toBoard),
+          aAssigner: (aAssigner as BoardRow[]).map(toBoard),
+          enCours: (enCours as BoardRow[]).map(toBoard),
+          aValider: (aValider as BoardRow[]).map(toBoard),
+          terminees: (terminees as BoardRow[]).map(toBoard),
         };
-        tasks = [...nouvelles, ...aAssigner, ...enCours, ...aValider, ...terminees];
+        tasks = [...nouvelles, ...aAssigner, ...enCours, ...aValider, ...terminees] as unknown as Awaited<ReturnType<typeof prisma.task.findMany>>;
       } else {
         const taskWhere = isAgent ? { assignedToId: session.user.id } : { clientId: session.user.id };
         tasks = await prisma.task.findMany({

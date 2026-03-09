@@ -29,7 +29,7 @@ export async function GET(
         status: true,
         clientId: true,
         projectId: true,
-        desiredDate: true,
+        // desiredDate absent si colonne non migrée en prod
         assignedToId: true,
         agencyNotes: true,
         correctionNote: true,

@@ -57,11 +57,18 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { content, receiverId } = body as { content?: string; receiverId?: string };
+    const { content, receiverId, attachments } = body as {
+      content?: string;
+      receiverId?: string;
+      attachments?: { name: string; fileUrl: string; fileSize: number; mimeType?: string }[];
+    };
 
-    if (!content?.trim() || !receiverId) {
+    const hasContent = typeof content === "string" && content.trim().length > 0;
+    const hasAttachments = Array.isArray(attachments) && attachments.length > 0;
+
+    if (!receiverId || (!hasContent && !hasAttachments)) {
       return NextResponse.json(
-        { error: "Destinataire et contenu requis." },
+        { error: "Destinataire requis. Indiquez un message ou des pièces jointes." },
         { status: 400 }
       );
     }
@@ -84,7 +91,8 @@ export async function POST(request: Request) {
       data: {
         senderId: session.user.id,
         receiverId: receiver.id,
-        content: content.trim(),
+        content: hasContent ? content.trim() : "",
+        attachmentsJson: hasAttachments ? attachments : undefined,
       },
       include: {
         sender: { select: { id: true, name: true } },

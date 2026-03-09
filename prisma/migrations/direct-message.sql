@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS "DirectMessage" (
   "senderId" TEXT NOT NULL,
   "receiverId" TEXT NOT NULL,
   "content" TEXT NOT NULL,
+  "attachmentsJson" JSONB,
   "read" BOOLEAN NOT NULL DEFAULT false,
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

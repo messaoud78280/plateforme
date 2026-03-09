@@ -47,10 +47,13 @@ type DirectMessageItem = {
   content: string;
   read: boolean;
   receiverId?: string;
+  attachmentsJson?: { name: string; fileUrl: string; fileSize: number; mimeType?: string }[] | null;
   createdAt: string;
   sender: { id: string; name: string };
   receiver: { id: string; name: string };
 };
+
+type AttachmentItem = { name: string; fileUrl: string; fileSize: number; mimeType?: string };
 
 type FilterId = "envoyer" | "messages-directs" | "inbox" | "mes-missions" | "en-attente-client" | "en-cours" | "terminees";
 
@@ -139,6 +142,11 @@ export function MessagerieMissionsView({
   const [selectedDirectContactId, setSelectedDirectContactId] = useState<string>("");
   const [replyDirectContent, setReplyDirectContent] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
+  const [directAttachments, setDirectAttachments] = useState<AttachmentItem[]>([]);
+  const [replyAttachments, setReplyAttachments] = useState<AttachmentItem[]>([]);
+  const [uploadingAttach, setUploadingAttach] = useState(false);
+  const directFileRef = useRef<HTMLInputElement>(null);
+  const replyFileRef = useRef<HTMLInputElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const selectedMission = missions.find((m) => m.id === selectedTaskId);
@@ -225,6 +233,30 @@ export function MessagerieMissionsView({
       .finally(() => setLoadingMessages(false));
   }, [selectedTaskId]);
 
+  // Rafraîchissement automatique des messages directs (toutes les 7 s)
+  useEffect(() => {
+    if (filter !== "messages-directs") return;
+    const interval = setInterval(() => {
+      fetch("/api/messages/direct")
+        .then((r) => (r.ok ? r.json() : []))
+        .then((data) => setDirectMessages(Array.isArray(data) ? data : []))
+        .catch(() => {});
+    }, 7000);
+    return () => clearInterval(interval);
+  }, [filter]);
+
+  // Rafraîchissement automatique des messages mission (toutes les 7 s)
+  useEffect(() => {
+    if (!selectedTaskId || filter === "envoyer" || filter === "messages-directs") return;
+    const interval = setInterval(() => {
+      fetch(`/api/tasks/${selectedTaskId}/messages`)
+        .then((r) => (r.ok ? r.json() : []))
+        .then((data) => setMessages(Array.isArray(data) ? data : []))
+        .catch(() => {});
+    }, 7000);
+    return () => clearInterval(interval);
+  }, [selectedTaskId, filter]);
+
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
@@ -267,19 +299,48 @@ export function MessagerieMissionsView({
     }
   }
 
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>, setAttachments: React.Dispatch<React.SetStateAction<AttachmentItem[]>>) {
+    const files = e.target.files;
+    if (!files?.length) return;
+    setUploadingAttach(true);
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!(file instanceof File) || !file.size) continue;
+        const fd = new FormData();
+        fd.append("file", file);
+        const res = await fetch("/api/messages/direct/upload", { method: "POST", body: fd });
+        if (res.ok) {
+          const data = await res.json();
+          setAttachments((prev) => [...prev, { name: data.name, fileUrl: data.fileUrl, fileSize: data.fileSize, mimeType: data.mimeType }]);
+        }
+      }
+    } finally {
+      setUploadingAttach(false);
+      e.target.value = "";
+    }
+  }
+
   async function handleReplyDirect(e: React.FormEvent) {
     e.preventDefault();
     const content = replyDirectContent.trim();
-    if (!content || !selectedDirectContactId || sendingReply) return;
+    const hasContent = content.length > 0;
+    const hasAttachments = replyAttachments.length > 0;
+    if ((!hasContent && !hasAttachments) || !selectedDirectContactId || sendingReply) return;
     setSendingReply(true);
     try {
       const res = await fetch("/api/messages/direct", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content, receiverId: selectedDirectContactId }),
+        body: JSON.stringify({
+          content: content || "",
+          receiverId: selectedDirectContactId,
+          attachments: hasAttachments ? replyAttachments : undefined,
+        }),
       });
       if (res.ok) {
         setReplyDirectContent("");
+        setReplyAttachments([]);
         const list = await fetch("/api/messages/direct").then((r) => (r.ok ? r.json() : []));
         setDirectMessages(Array.isArray(list) ? list : []);
         router.refresh();
@@ -295,19 +356,26 @@ export function MessagerieMissionsView({
   async function handleSendDirect(e: React.FormEvent) {
     e.preventDefault();
     const content = directContent.trim();
-    if (!content || !directRecipientId || sendingDirect) return;
+    const hasContent = content.length > 0;
+    const hasAttachments = directAttachments.length > 0;
+    if ((!hasContent && !hasAttachments) || !directRecipientId || sendingDirect) return;
 
     setSendingDirect(true);
     try {
       const res = await fetch("/api/messages/direct", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content, receiverId: directRecipientId }),
+        body: JSON.stringify({
+          content: content || "",
+          receiverId: directRecipientId,
+          attachments: hasAttachments ? directAttachments : undefined,
+        }),
       });
 
       if (res.ok) {
         setDirectContent("");
         setDirectRecipientId("");
+        setDirectAttachments([]);
         router.refresh();
       } else {
         const err = await res.json().catch(() => ({}));
@@ -417,14 +485,40 @@ export function MessagerieMissionsView({
                 onChange={(e) => setDirectContent(e.target.value)}
                 placeholder="Écrivez votre message…"
                 rows={5}
-                required
                 disabled={sendingDirect}
                 className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-60"
               />
             </div>
+            <div>
+              <input
+                ref={directFileRef}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.docx,.xlsx,.csv,.txt"
+                className="hidden"
+                multiple
+                onChange={(e) => handleFileUpload(e, setDirectAttachments)}
+              />
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => directFileRef.current?.click()}
+                  disabled={uploadingAttach || sendingDirect}
+                  className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
+                  {uploadingAttach ? "Téléchargement…" : "Joindre un fichier"}
+                </button>
+                {directAttachments.map((a, i) => (
+                  <span key={i} className="flex items-center gap-1 rounded bg-slate-100 px-2 py-1 text-xs text-slate-700">
+                    {a.name}
+                    <button type="button" onClick={() => setDirectAttachments((p) => p.filter((_, j) => j !== i))} className="text-slate-500 hover:text-red-600">×</button>
+                  </span>
+                ))}
+              </div>
+            </div>
             <button
               type="submit"
-              disabled={sendingDirect || !directContent.trim() || !directRecipientId}
+              disabled={sendingDirect || (!directContent.trim() && directAttachments.length === 0) || !directRecipientId}
               className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
             >
               {sendingDirect ? "Envoi…" : "Envoyer"}
@@ -507,7 +601,25 @@ export function MessagerieMissionsView({
                               }`}
                             >
                               <p className="text-xs font-medium opacity-90">{m.sender.name}</p>
-                              <p className="mt-0.5 whitespace-pre-wrap break-words text-sm">{m.content}</p>
+                              {m.content && <p className="mt-0.5 whitespace-pre-wrap break-words text-sm">{m.content}</p>}
+                              {Array.isArray(m.attachmentsJson) && m.attachmentsJson.length > 0 && (
+                                <div className="mt-2 space-y-1">
+                                  {m.attachmentsJson.map((a, i) => (
+                                    <a
+                                      key={i}
+                                      href={a.fileUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className={`flex items-center gap-2 rounded px-2 py-1 text-xs ${
+                                        isMe ? "bg-blue-500/50 text-white" : "bg-slate-200/80 text-slate-800"
+                                      }`}
+                                    >
+                                      <svg className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                      {a.name}
+                                    </a>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                             <p className="mt-1 text-xs text-slate-400">{formatMessageTime(m.createdAt)}</p>
                           </div>
@@ -517,22 +629,53 @@ export function MessagerieMissionsView({
                   </div>
                 </div>
                 <div className="shrink-0 border-t border-slate-200 bg-slate-50/60 p-4">
-                  <form onSubmit={handleReplyDirect} className="flex gap-2">
-                    <textarea
-                      value={replyDirectContent}
-                      onChange={(e) => setReplyDirectContent(e.target.value)}
-                      placeholder="Répondre…"
-                      rows={2}
-                      disabled={sendingReply}
-                      className="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-60"
+                  <form onSubmit={handleReplyDirect} className="space-y-2">
+                    <input
+                      ref={replyFileRef}
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.docx,.xlsx,.csv,.txt"
+                      className="hidden"
+                      multiple
+                      onChange={(e) => handleFileUpload(e, setReplyAttachments)}
                     />
-                    <button
-                      type="submit"
-                      disabled={sendingReply || !replyDirectContent.trim()}
+                    {replyAttachments.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {replyAttachments.map((a, i) => (
+                          <span key={i} className="flex items-center gap-1 rounded bg-slate-100 px-2 py-1 text-xs text-slate-700">
+                            {a.name}
+                            <button type="button" onClick={() => setReplyAttachments((p) => p.filter((_, j) => j !== i))} className="text-slate-500 hover:text-red-600">×</button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <div className="flex gap-2">
+                      <textarea
+                        value={replyDirectContent}
+                        onChange={(e) => setReplyDirectContent(e.target.value)}
+                        placeholder="Répondre…"
+                        rows={2}
+                        disabled={sendingReply}
+                        className="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-60"
+                      />
+                      <div className="flex shrink-0 flex-col gap-2">
+                        <button
+                          type="button"
+                          onClick={() => replyFileRef.current?.click()}
+                          disabled={uploadingAttach || sendingReply}
+                          className="rounded-lg border border-slate-300 bg-white p-2.5 text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                          title="Joindre un fichier"
+                        >
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={sendingReply || (!replyDirectContent.trim() && replyAttachments.length === 0)}
                       className="shrink-0 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                     >
-                      {sendingReply ? "Envoi…" : "Envoyer"}
-                    </button>
+                            {sendingReply ? "Envoi…" : "Envoyer"}
+                        </button>
+                      </div>
+                    </div>
                   </form>
                 </div>
               </>

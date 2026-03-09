@@ -42,10 +42,21 @@ type MissionItem = {
   documents: { id: string; name: string; fileUrl: string }[];
 };
 
-type FilterId = "envoyer" | "inbox" | "mes-missions" | "en-attente-client" | "en-cours" | "terminees";
+type DirectMessageItem = {
+  id: string;
+  content: string;
+  read: boolean;
+  receiverId?: string;
+  createdAt: string;
+  sender: { id: string; name: string };
+  receiver: { id: string; name: string };
+};
+
+type FilterId = "envoyer" | "messages-directs" | "inbox" | "mes-missions" | "en-attente-client" | "en-cours" | "terminees";
 
 const NAV_ITEMS: { id: FilterId; label: string }[] = [
   { id: "envoyer", label: "Envoyer un message" },
+  { id: "messages-directs", label: "Messages directs" },
   { id: "inbox", label: "Boîte de réception" },
   { id: "mes-missions", label: "Mes missions" },
   { id: "en-attente-client", label: "En attente client" },
@@ -123,14 +134,63 @@ export function MessagerieMissionsView({
   const [directRecipientId, setDirectRecipientId] = useState("");
   const [directContent, setDirectContent] = useState("");
   const [sendingDirect, setSendingDirect] = useState(false);
+  const [directMessages, setDirectMessages] = useState<DirectMessageItem[]>([]);
+  const [loadingDirectMessages, setLoadingDirectMessages] = useState(false);
+  const [selectedDirectContactId, setSelectedDirectContactId] = useState<string>("");
+  const [replyDirectContent, setReplyDirectContent] = useState("");
+  const [sendingReply, setSendingReply] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const selectedMission = missions.find((m) => m.id === selectedTaskId);
   const showEnvoyerTab = isAgence || isAgent;
-  const navItems = showEnvoyerTab ? NAV_ITEMS : NAV_ITEMS.filter((i) => i.id !== "envoyer");
+  const navItems = showEnvoyerTab ? NAV_ITEMS : NAV_ITEMS.filter((i) => i.id !== "envoyer" && i.id !== "messages-directs");
+
+  // Conversations directes : regroupées par contact, avec dernier message et non-lus
+  const directConversations = (() => {
+    const byOther = new Map<string, { user: { id: string; name: string }; lastMessage: DirectMessageItem; unread: number }>();
+    for (const m of directMessages) {
+      const other = m.sender.id === sessionUserId ? m.receiver : m.sender;
+      const existing = byOther.get(other.id);
+      const isNewer = !existing || new Date(m.createdAt) > new Date(existing.lastMessage.createdAt);
+      const isToMe = (m.receiverId ?? m.receiver.id) === sessionUserId;
+      const unreadIncr = isToMe && !m.read ? 1 : 0;
+      if (!existing) {
+        byOther.set(other.id, { user: other, lastMessage: m, unread: unreadIncr });
+      } else if (isNewer) {
+        byOther.set(other.id, { user: other, lastMessage: m, unread: existing.unread + unreadIncr });
+      } else if (unreadIncr > 0) {
+        byOther.set(other.id, { ...existing, unread: existing.unread + 1 });
+      }
+    }
+    return Array.from(byOther.values()).sort(
+      (a, b) => new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime()
+    );
+  })();
+
+  const selectedDirectThread = directMessages
+    .filter((m) => m.sender.id === selectedDirectContactId || m.receiver.id === selectedDirectContactId)
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+
+  const selectedDirectContact = recipients.find((r) => r.id === selectedDirectContactId) ?? directConversations.find((c) => c.user.id === selectedDirectContactId)?.user;
 
   useEffect(() => {
     if (filter === "envoyer") {
+      setLoading(false);
+      return;
+    }
+    if (filter === "messages-directs") {
+      setLoadingDirectMessages(true);
+      fetch("/api/messages/direct")
+        .then((r) => (r.ok ? r.json() : []))
+        .then((data) => {
+          setDirectMessages(Array.isArray(data) ? data : []);
+          if (!selectedDirectContactId && Array.isArray(data) && data.length > 0) {
+            const first = data[0] as DirectMessageItem;
+            const other = first.sender.id === sessionUserId ? first.receiver : first.sender;
+            if (other) setSelectedDirectContactId(other.id);
+          }
+        })
+        .finally(() => setLoadingDirectMessages(false));
       setLoading(false);
       return;
     }
@@ -204,6 +264,31 @@ export function MessagerieMissionsView({
       }
     } finally {
       setSending(false);
+    }
+  }
+
+  async function handleReplyDirect(e: React.FormEvent) {
+    e.preventDefault();
+    const content = replyDirectContent.trim();
+    if (!content || !selectedDirectContactId || sendingReply) return;
+    setSendingReply(true);
+    try {
+      const res = await fetch("/api/messages/direct", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, receiverId: selectedDirectContactId }),
+      });
+      if (res.ok) {
+        setReplyDirectContent("");
+        const list = await fetch("/api/messages/direct").then((r) => (r.ok ? r.json() : []));
+        setDirectMessages(Array.isArray(list) ? list : []);
+        router.refresh();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err?.error ?? "Erreur lors de l'envoi");
+      }
+    } finally {
+      setSendingReply(false);
     }
   }
 
@@ -349,6 +434,118 @@ export function MessagerieMissionsView({
             <p className="mt-4 text-sm text-slate-500">Aucun agent ou gérant disponible.</p>
           )}
         </div>
+      ) : filter === "messages-directs" ? (
+        <>
+          <aside className="flex w-80 shrink-0 flex-col border-r border-slate-200 bg-white">
+            <div className="border-b border-slate-200 p-3">
+              <h2 className="text-sm font-semibold text-slate-800">Conversations</h2>
+            </div>
+            <ul className="flex-1 overflow-y-auto">
+              {loadingDirectMessages ? (
+                <li className="p-4 text-sm text-slate-500">Chargement…</li>
+              ) : directConversations.length === 0 ? (
+                <li className="p-4 text-center">
+                  <p className="text-sm text-slate-600">Aucun message direct</p>
+                  <p className="mt-1 text-xs text-slate-500">Utilisez « Envoyer un message » pour démarrer une conversation.</p>
+                </li>
+              ) : (
+                directConversations.map((conv) => (
+                  <li key={conv.user.id}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDirectContactId(conv.user.id)}
+                      className={`w-full border-l-2 px-4 py-3 text-left transition ${
+                        selectedDirectContactId === conv.user.id
+                          ? "border-blue-600 bg-blue-50/60"
+                          : "border-transparent hover:bg-slate-50"
+                      }`}
+                    >
+                      <p className="truncate text-sm font-semibold text-slate-800">{conv.user.name}</p>
+                      <p className="mt-0.5 truncate text-xs text-slate-500">
+                        {conv.lastMessage.sender.id === sessionUserId ? "Vous : " : ""}
+                        {conv.lastMessage.content.slice(0, 50)}
+                        {conv.lastMessage.content.length > 50 ? "…" : ""}
+                      </p>
+                      <div className="mt-1.5 flex items-center gap-2">
+                        {conv.unread > 0 && (
+                          <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-blue-600 px-1.5 text-[10px] font-medium text-white">
+                            {conv.unread}
+                          </span>
+                        )}
+                        <span className="text-[10px] text-slate-400">
+                          {formatRelativeTime(conv.lastMessage.createdAt)}
+                        </span>
+                      </div>
+                    </button>
+                  </li>
+                ))
+              )}
+            </ul>
+          </aside>
+          <div className="flex min-w-0 flex-1 flex-col">
+            {selectedDirectContactId && selectedDirectContact ? (
+              <>
+                <div className="shrink-0 border-b border-slate-200 bg-white px-4 py-3">
+                  <h3 className="font-semibold text-slate-800">
+                    {(selectedDirectContact as { name?: string } | undefined)?.name ?? "Contact"}
+                  </h3>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4">
+                  <div className="space-y-4">
+                    {selectedDirectThread.map((m) => {
+                      const isMe = m.sender.id === sessionUserId;
+                      return (
+                        <div
+                          key={m.id}
+                          className={`flex gap-3 ${isMe ? "flex-row-reverse" : ""}`}
+                        >
+                          <Avatar name={m.sender.name} />
+                          <div className={`flex max-w-[80%] flex-col ${isMe ? "items-end" : "items-start"}`}>
+                            <div
+                              className={`rounded-2xl px-4 py-2.5 ${
+                                isMe ? "rounded-tr-md bg-blue-600 text-white" : "rounded-tl-md bg-slate-100 text-slate-800"
+                              }`}
+                            >
+                              <p className="text-xs font-medium opacity-90">{m.sender.name}</p>
+                              <p className="mt-0.5 whitespace-pre-wrap break-words text-sm">{m.content}</p>
+                            </div>
+                            <p className="mt-1 text-xs text-slate-400">{formatMessageTime(m.createdAt)}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="shrink-0 border-t border-slate-200 bg-slate-50/60 p-4">
+                  <form onSubmit={handleReplyDirect} className="flex gap-2">
+                    <textarea
+                      value={replyDirectContent}
+                      onChange={(e) => setReplyDirectContent(e.target.value)}
+                      placeholder="Répondre…"
+                      rows={2}
+                      disabled={sendingReply}
+                      className="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-60"
+                    />
+                    <button
+                      type="submit"
+                      disabled={sendingReply || !replyDirectContent.trim()}
+                      className="shrink-0 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      {sendingReply ? "Envoi…" : "Envoyer"}
+                    </button>
+                  </form>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
+                <p className="text-sm font-medium text-slate-700">Sélectionnez une conversation</p>
+                <p className="mt-2 max-w-sm text-sm text-slate-500">
+                  Cliquez sur une conversation dans la liste à gauche pour afficher les messages et répondre.
+                </p>
+              </div>
+            )}
+          </div>
+        </>
       ) : (
       <>
       <aside className="flex w-80 shrink-0 flex-col border-r border-slate-200 bg-white">

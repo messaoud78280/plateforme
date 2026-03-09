@@ -162,9 +162,6 @@ export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
             </>
           )}
         </p>
-        <p className="mt-4 text-center text-xs text-slate-400">
-          Démo : client@exemple.com / agence@exemple.com / agent@bework.fr — mot de passe : motdepasse123
-        </p>
       </div>
     </div>
   );

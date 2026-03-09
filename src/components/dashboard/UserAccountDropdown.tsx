@@ -44,7 +44,8 @@ export function UserAccountDropdown({ userName, userRole, userCompany }: UserAcc
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const roleLabel = userRole === "MANAGER" ? "Gérante" : userRole === "AGENCE" ? "Agence" : "Client";
+  const roleLabel =
+    userRole === "MANAGER" ? "Gérant" : userRole === "AGENCE" || userRole === "AGENT" ? "Agent" : "Client";
 
   return (
     <div className="relative" ref={ref}>
@@ -59,7 +60,7 @@ export function UserAccountDropdown({ userName, userRole, userCompany }: UserAcc
           <span className="text-sm font-semibold leading-tight text-[#0f172a]">
             {userName || "Utilisateur"}
           </span>
-          <span className="text-xs font-medium text-[#64748b]">Mon compte</span>
+          <span className="text-xs font-medium text-[#64748b]">{roleLabel}</span>
         </div>
         <div
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#475569] text-sm font-semibold text-white"

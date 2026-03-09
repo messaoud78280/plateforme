@@ -79,11 +79,14 @@ export default function InscriptionPage() {
     <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-8">
       <div className="w-full max-w-lg rounded-2xl bg-white p-8 shadow-lg">
         <BackLink href="/connexion/clients" className="mb-4 inline-block">Retour à la connexion clients</BackLink>
+        <p className="mb-3 inline-block rounded-full bg-slate-800 px-3 py-1.5 text-sm font-semibold uppercase tracking-wide text-white">
+          Inscription Client
+        </p>
         <h1 className="mb-2 text-2xl font-bold text-slate-800">
           Créer un compte client
         </h1>
         <p className="mb-8 text-slate-600">
-          Inscription réservée aux clients. Créez votre compte pour accéder à l&apos;espace client et à nos services.
+          Uniquement pour les clients. Gérants et agents : compte créé par l&apos;agence.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">

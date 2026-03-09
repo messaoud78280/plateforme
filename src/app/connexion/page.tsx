@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 const ACCES = [
   {
     slug: "gerante",
+    badge: "Connexion Gérant",
     title: "Espace Gérante / Managers",
     description: "Accès réservé à la gérante et aux managers de l'agence.",
     path: "/connexion/gerante",
@@ -14,6 +15,7 @@ const ACCES = [
   },
   {
     slug: "agents",
+    badge: "Connexion Agent",
     title: "Espace Agents",
     description: "Accès pour les agents opérationnels.",
     path: "/connexion/agents",
@@ -21,6 +23,7 @@ const ACCES = [
   },
   {
     slug: "clients",
+    badge: "Connexion Client",
     title: "Espace Clients",
     description: "Accès pour les clients de l'agence.",
     path: "/connexion/clients",
@@ -50,6 +53,9 @@ function ConnexionChoice() {
               href={`${acc.path}${query}`}
               className="flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-blue-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
+              <span className="mb-2 inline-block w-fit rounded-full bg-slate-800 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+                {acc.badge}
+              </span>
               <span className="mb-3 text-3xl" aria-hidden>{acc.icon}</span>
               <h2 className="mb-2 font-semibold text-slate-800">{acc.title}</h2>
               <p className="text-sm text-slate-600">{acc.description}</p>

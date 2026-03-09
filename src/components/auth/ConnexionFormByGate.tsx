@@ -10,21 +10,24 @@ export type ConnexionGate = "gerante" | "agents" | "clients";
 
 const GATE_CONFIG: Record<
   ConnexionGate,
-  { title: string; description: string; allowed: (role: string) => boolean; errorMessage: string }
+  { badge: string; title: string; description: string; allowed: (role: string) => boolean; errorMessage: string }
 > = {
   gerante: {
+    badge: "Connexion Gérant",
     title: "Espace Gérante / Managers",
     description: "Connectez-vous pour accéder à l'espace de gestion.",
     allowed: isManager,
     errorMessage: "Cet espace est réservé à la gérante et aux managers. Utilisez l'accès Gérante ou connectez-vous avec un compte autorisé.",
   },
   agents: {
+    badge: "Connexion Agent",
     title: "Espace Agents",
     description: "Connectez-vous pour accéder à votre espace agent.",
     allowed: isAgentRole,
     errorMessage: "Cet espace est réservé aux agents. Utilisez l'accès Agents ou connectez-vous avec un compte agent.",
   },
   clients: {
+    badge: "Connexion Client",
     title: "Espace Clients",
     description: "Connectez-vous pour accéder à votre espace client.",
     allowed: isClient,
@@ -86,6 +89,9 @@ export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
+        <p className="mb-3 inline-block rounded-full bg-slate-800 px-3 py-1.5 text-sm font-semibold uppercase tracking-wide text-white">
+          {config.badge}
+        </p>
         <h1 className="mb-2 text-2xl font-bold text-slate-800">{config.title}</h1>
         <p className="mb-8 text-slate-600">{config.description}</p>
 
@@ -156,11 +162,6 @@ export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
             </>
           )}
         </p>
-        {gate !== "clients" && (
-          <p className="mt-4 text-center text-xs text-slate-500">
-            Compte gérante ou agent : créé par l&apos;agence ou sur invitation.
-          </p>
-        )}
         <p className="mt-4 text-center text-xs text-slate-400">
           Démo : client@exemple.com / agence@exemple.com / agent@bework.fr — mot de passe : motdepasse123
         </p>

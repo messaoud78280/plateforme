@@ -11,7 +11,7 @@ export default async function EquipePage() {
 
   return (
     <div className="space-y-8">
-      <BackLink href="/dashboard">Dashboard</BackLink>
+      <BackLink href="/dashboard">Tableau de bord</BackLink>
       <div>
         <h1 className="text-2xl font-bold text-slate-800">Inviter un membre de l&apos;équipe</h1>
         <p className="mt-1 text-slate-600">

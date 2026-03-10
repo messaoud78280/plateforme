@@ -30,10 +30,12 @@ export const EXEMPLES_DEMANDES = [
 
 /** Suggestions de missions (accès rapide) */
 export const MISSION_SUGGESTIONS = [
-  { id: "devis", title: "Préparer devis", description: "Client : [nom] — Prestation : [détails] — Délai souhaité : [date]", category: "Facturation / devis" },
-  { id: "relance", title: "Relancer factures", description: "Facture n° [numéro] — Client : [nom] — Échéance : [date] — Relance par email puis téléphone si besoin", category: "Facturation / devis" },
-  { id: "fournisseur", title: "Recherche fournisseur", description: "Secteur : [activité] — Zone : [ville/région] — Critères : [budget, délais, références]", category: "Recherche" },
-  { id: "classement", title: "Classement documents", description: "Type de documents : [factures / contrats / RH] — Organisation souhaitée : [chronologique / par client / par thème]", category: "Documents" },
+  { id: "devis", title: "Préparer un devis", description: "Client : [nom] — Prestation : [détails] — Délai souhaité : [date]", category: "Facturation / devis" },
+  { id: "relance", title: "Relancer des factures", description: "Facture n° [numéro] — Client : [nom] — Échéance : [date] — Relance par email puis téléphone si besoin", category: "Facturation / devis" },
+  { id: "fournisseur", title: "Rechercher un fournisseur", description: "Secteur : [activité] — Zone : [ville/région] — Critères : [budget, délais, références]", category: "Recherche" },
+  { id: "classement", title: "Classer des documents", description: "Type de documents : [factures / contrats / RH] — Organisation souhaitée : [chronologique / par client / par thème]", category: "Documents" },
+  { id: "deplacement", title: "Organiser un déplacement", description: "Destination : [ville] — Dates : [aller / retour] — Transport et hébergement à organiser", category: "Organisation" },
+  { id: "tableau-suivi", title: "Créer un tableau de suivi", description: "Objet du suivi : [factures / projets / clients] — Période : [dates] — Informations à suivre : [montant, statut, responsable…]", category: "Administratif" },
 ] as const;
 
 /** Modèles de demandes pour le guidage et la première demande */

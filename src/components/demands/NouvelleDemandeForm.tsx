@@ -52,6 +52,9 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
   const [firstRequest, setFirstRequest] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [aiInput, setAiInput] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -228,6 +231,66 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
           <span className="text-lg font-bold text-[#1d4ed8]">{actionsRemaining}</span>
         </div>
       </header>
+
+      {/* Champ de description simple + IA */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+        <div>
+          <h2 className="text-base font-semibold text-slate-800">
+            Expliquez simplement ce que vous souhaitez déléguer
+          </h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Écrivez avec vos mots. L&apos;assistant IA proposera un titre, une description et une estimation que vous pourrez modifier avant d&apos;envoyer.
+          </p>
+        </div>
+        <textarea
+          value={aiInput}
+          onChange={(e) => setAiInput(e.target.value)}
+          rows={3}
+          placeholder='Exemple : "Préparer un devis pour un chantier de rénovation à Paris"'
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={async () => {
+              if (!aiInput.trim() || aiLoading) return;
+              setAiError(null);
+              setAiLoading(true);
+              try {
+                const res = await fetch("/api/ai/mission", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ text: aiInput.trim() }),
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                  setAiError(
+                    data?.error ??
+                      "Impossible d'analyser votre demande pour le moment. Vous pouvez remplir le formulaire manuellement."
+                  );
+                } else {
+                  if (data.title) setTitle(data.title);
+                  if (data.description) setDescription(data.description);
+                  if (data.category) setCategory(data.category);
+                  if (data.priority) setPriority(data.priority);
+                  if (data.estimatedActions) setEstimatedActions(data.estimatedActions);
+                  setAiError(null);
+                }
+              } catch {
+                setAiError(
+                  "Erreur de connexion avec l'assistant IA. Vous pouvez remplir le formulaire manuellement."
+                );
+              }
+              setAiLoading(false);
+            }}
+            className="inline-flex items-center rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e40af] disabled:opacity-50"
+            disabled={aiLoading || !aiInput.trim()}
+          >
+            {aiLoading ? "Analyse en cours…" : "Analyser avec l'IA"}
+          </button>
+          {aiError && <p className="text-sm text-red-600">{aiError}</p>}
+        </div>
+      </section>
 
       {/* Suggestions de missions */}
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

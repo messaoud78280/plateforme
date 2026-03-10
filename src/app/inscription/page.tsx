@@ -71,7 +71,7 @@ export default function InscriptionPage() {
       return;
     }
 
-    router.push("/connexion/clients?registered=1&callbackUrl=/dashboard/onboarding");
+    router.push("/connexion/clients?registered=1&callbackUrl=/dashboard/abonnement?onboarding=1");
     router.refresh();
   }
 

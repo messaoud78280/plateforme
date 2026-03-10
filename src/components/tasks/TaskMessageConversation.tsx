@@ -59,6 +59,16 @@ export function TaskMessageConversation({
     load();
   }, [taskId]);
 
+  // Si l'agent arrive via #messages-section-internal, cocher "Message interne" et scroller vers la zone messages
+  useEffect(() => {
+    if (typeof window === "undefined" || !isAgent) return;
+    if (window.location.hash === "#messages-section-internal") {
+      setInternal(true);
+      document.getElementById("messages-section")?.scrollIntoView({ behavior: "smooth" });
+      window.history.replaceState(null, "", window.location.pathname + window.location.search + "#messages-section");
+    }
+  }, [taskId, isAgent]);
+
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
     if (!content.trim() || sending) return;
@@ -102,6 +112,11 @@ export function TaskMessageConversation({
       {isClient && (
         <p className="mb-3 text-sm text-slate-500">
           Échangez avec votre assistant assigné. Vos messages sont visibles par l&apos;agent et la gérante.
+        </p>
+      )}
+      {isAgent && (
+        <p className="mb-3 text-sm text-slate-500">
+          Envoyez un message au client (décoché) ou à la gérante uniquement (cochez « Message interne »).
         </p>
       )}
       <div className="max-h-80 space-y-3 overflow-y-auto rounded-lg border border-slate-100 bg-slate-50/50 p-4">

@@ -39,7 +39,7 @@ export function AgentMissionsList({ missions }: AgentMissionsListProps) {
       <div className="rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
         <p className="text-slate-600">Aucune mission assignée pour le moment.</p>
         <p className="mt-2 text-sm text-slate-500">
-          La gérante vous attribuera des missions. Consultez le dashboard pour une vue d&apos;ensemble.
+          La gérante vous attribuera des missions. Consultez le tableau de bord pour une vue d&apos;ensemble.
         </p>
       </div>
     );

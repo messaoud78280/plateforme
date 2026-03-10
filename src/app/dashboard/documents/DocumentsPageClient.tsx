@@ -79,7 +79,7 @@ export function DocumentsPageClient({
 
   return (
     <div className="space-y-6">
-      <BackLink href="/dashboard">Dashboard</BackLink>
+      <BackLink href="/dashboard">Tableau de bord</BackLink>
       <h1 className="text-2xl font-bold text-slate-800">Mes documents</h1>
 
       <DocumentUploadZone

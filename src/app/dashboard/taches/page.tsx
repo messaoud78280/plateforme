@@ -193,7 +193,7 @@ export default async function TachesPage({
   if (isClient) {
     return (
       <div className="space-y-8">
-        <BackLink href="/dashboard">Dashboard</BackLink>
+        <BackLink href="/dashboard">Tableau de bord</BackLink>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-800">Mes missions</h1>
@@ -266,7 +266,7 @@ export default async function TachesPage({
     })();
     return (
       <div className="space-y-8">
-        <BackLink href="/dashboard">Dashboard</BackLink>
+        <BackLink href="/dashboard">Tableau de bord</BackLink>
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Missions</h1>
           <p className="mt-1 text-slate-600">
@@ -287,7 +287,7 @@ export default async function TachesPage({
 
   return (
     <div className="space-y-8">
-      <BackLink href="/dashboard">Dashboard</BackLink>
+      <BackLink href="/dashboard">Tableau de bord</BackLink>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">{isAgent ? "Mes missions assignées" : "Mes tâches"}</h1>

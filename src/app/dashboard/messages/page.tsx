@@ -43,7 +43,7 @@ export default async function MessagesPage() {
 
   return (
     <div className="space-y-8">
-      <BackLink href="/dashboard">Dashboard</BackLink>
+      <BackLink href="/dashboard">Tableau de bord</BackLink>
       <div>
         <h1 className="text-2xl font-bold text-[#0f172a]">RDV</h1>
         <p className="mt-1 text-[#334155]">

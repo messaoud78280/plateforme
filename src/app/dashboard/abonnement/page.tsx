@@ -143,7 +143,7 @@ export default async function AbonnementPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
-      <BackLink href="/dashboard">Dashboard</BackLink>
+      <BackLink href="/dashboard">Tableau de bord</BackLink>
 
       {/* Formules disponibles (tarifs) + Devis */}
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

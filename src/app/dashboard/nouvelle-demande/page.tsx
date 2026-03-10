@@ -28,7 +28,7 @@ export default async function NouvelleDemandePage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
-      <BackLink href="/dashboard">Dashboard</BackLink>
+      <BackLink href="/dashboard">Tableau de bord</BackLink>
       <NouvelleDemandeForm actionsRemaining={actionsRemaining} />
     </div>
   );

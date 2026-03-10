@@ -18,7 +18,7 @@ export default async function ParametresLayout({
 
   return (
     <div className="mx-auto max-w-4xl">
-      <BackLink href="/dashboard" className="mb-4 block">Dashboard</BackLink>
+      <BackLink href="/dashboard" className="mb-4 block">Tableau de bord</BackLink>
       <ProfilBreadcrumb />
       <h1 className="mt-4 text-2xl font-bold tracking-tight text-[#0f172a]">
         Votre profil

@@ -31,7 +31,7 @@ export default async function RapportsPage({
 
   return (
     <div className="space-y-6">
-      <BackLink href="/dashboard">Dashboard</BackLink>
+      <BackLink href="/dashboard">Tableau de bord</BackLink>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Rapports</h1>

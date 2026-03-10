@@ -11,7 +11,6 @@ import {
   MISSION_SUGGESTIONS,
 } from "./constants";
 import { MissionSuggestions } from "@/components/missions/MissionSuggestions";
-import { analyzeMissionFromText } from "@/lib/ai";
 
 const DRAFT_KEY = "bework-nouvelle-demande-draft";
 const ACCEPTED_EXT = ".pdf,.doc,.docx,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.gif,.webp,.bmp,.svg,.zip";
@@ -258,16 +257,28 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
               setAiError(null);
               setAiLoading(true);
               try {
-                const suggestion = await analyzeMissionFromText(aiInput.trim());
-                if (suggestion.title) setTitle(suggestion.title);
-                if (suggestion.description) setDescription(suggestion.description);
-                if (suggestion.category) setCategory(suggestion.category);
-                if (suggestion.priority) setPriority(suggestion.priority);
-                if (suggestion.estimatedActions) setEstimatedActions(suggestion.estimatedActions);
-                setAiError(null);
+                const res = await fetch("/api/ai/mission", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ text: aiInput.trim() }),
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                  setAiError(
+                    data?.error ??
+                      "Impossible d'analyser votre demande pour le moment. Vous pouvez remplir le formulaire manuellement."
+                  );
+                } else {
+                  if (data.title) setTitle(data.title);
+                  if (data.description) setDescription(data.description);
+                  if (data.category) setCategory(data.category);
+                  if (data.priority) setPriority(data.priority);
+                  if (data.estimatedActions) setEstimatedActions(data.estimatedActions);
+                  setAiError(null);
+                }
               } catch {
                 setAiError(
-                  "Impossible d'analyser votre demande pour le moment. Vous pouvez remplir le formulaire manuellement."
+                  "Erreur de connexion avec l'assistant IA. Vous pouvez remplir le formulaire manuellement."
                 );
               }
               setAiLoading(false);

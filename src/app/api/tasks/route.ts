@@ -122,16 +122,8 @@ export async function POST(request: NextRequest) {
     const err = e as { message?: string; code?: string };
     const msg = String(err?.message ?? "Erreur inconnue");
     console.error("Création tâche:", e);
-    // En dev, toujours renvoyer l'erreur réelle pour débogage
-    const isDev = process.env.NODE_ENV === "development";
-    const isColumnMissing =
-      !isDev &&
-      (/column.*does not exist|Unknown column|projectId.*exist/i.test(msg) || err?.code === "P2010");
-    const message = isColumnMissing
-      ? "La base de données doit être mise à jour. Exécutez le script prisma/supabase-tasks-project-id.sql dans Supabase (voir SUPABASE-SETUP.md)."
-      : isDev
-        ? `Erreur : ${msg}`
-        : "Erreur lors de la création de la tâche.";
+    // Toujours renvoyer l'erreur détaillée pour pouvoir diagnostiquer facilement (plateforme interne)
+    const message = `Erreur : ${msg}`;
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

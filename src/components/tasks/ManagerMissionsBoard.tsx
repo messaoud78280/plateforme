@@ -399,59 +399,61 @@ export function ManagerMissionsBoard({
           </button>
         )}
       </div>
-      <p className="mb-3 text-sm text-slate-500">
+      <p className="mb-4 text-sm text-slate-500">
         Glissez-déposez une carte pour changer son statut. Utilisez <strong>Assigner</strong> pour attribuer un agent, ou le titre / <strong>Ouvrir</strong> pour les détails.
       </p>
-      <div className="overflow-x-auto pb-4">
-        <div className="flex min-w-[1200px] gap-5">
-          {columns.map((col) => (
-            <div
-              key={col.id}
-              className={`w-72 shrink-0 rounded-xl border-2 p-4 transition ${
-                dragOverColumn === col.id
-                  ? "border-blue-400 bg-blue-50/80 ring-2 ring-blue-200"
-                  : "border-slate-200 bg-slate-50/50"
-              }`}
-              onDragOver={(e) => {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = "move";
-                setDragOverColumn(col.id);
-              }}
-              onDragLeave={() => setDragOverColumn(null)}
-              onDrop={(e) => {
-                e.preventDefault();
-                setDragOverColumn(null);
-                const taskId = e.dataTransfer.getData("application/task-id");
-                const sourceColumnId = e.dataTransfer.getData("application/column-id");
-                if (taskId && sourceColumnId) handleDrop(col.id, taskId, sourceColumnId);
-              }}
-            >
-              <h3 className="mb-3 font-semibold text-slate-800">
+      <div className="space-y-5 pb-4">
+        {columns.map((col) => (
+          <div
+            key={col.id}
+            className={`rounded-2xl border-2 bg-white/90 p-4 shadow-sm transition md:p-5 ${
+              dragOverColumn === col.id
+                ? "border-blue-400 bg-blue-50/80 ring-2 ring-blue-200"
+                : "border-slate-200 hover:border-blue-200 hover:shadow-md"
+            }`}
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.dataTransfer.dropEffect = "move";
+              setDragOverColumn(col.id);
+            }}
+            onDragLeave={() => setDragOverColumn(null)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragOverColumn(null);
+              const taskId = e.dataTransfer.getData("application/task-id");
+              const sourceColumnId = e.dataTransfer.getData("application/column-id");
+              if (taskId && sourceColumnId) handleDrop(col.id, taskId, sourceColumnId);
+            }}
+          >
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h3 className="text-base font-semibold text-slate-900">
                 {col.title}
-                <span className="ml-2 rounded-full bg-slate-200 px-2 py-0.5 text-sm font-medium text-slate-700">
-                  {col.tasks.length}
-                </span>
               </h3>
-              <div className="space-y-3">
-                {col.tasks.length === 0 ? (
-                  <p className="py-4 text-center text-sm text-slate-500">Aucune mission</p>
-                ) : (
-                  col.tasks.map((task) => (
-                    <MissionCard
-                      key={task.id}
-                      task={task}
-                      columnId={col.id}
-                      agents={agents}
-                      onOpenMission={setDrawerTaskId}
-                      onPriorityChange={handlePriorityChange}
-                      onAssignAgent={handleAssignAgent}
-                    />
-                  ))
-                )}
-              </div>
+              <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium uppercase tracking-wide text-slate-700">
+                {col.tasks.length} mission{col.tasks.length > 1 ? "s" : ""}
+              </span>
             </div>
-          ))}
-        </div>
+            {col.tasks.length === 0 ? (
+              <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50 py-6 text-center text-sm text-slate-500">
+                Aucune mission
+              </p>
+            ) : (
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {col.tasks.map((task) => (
+                  <MissionCard
+                    key={task.id}
+                    task={task}
+                    columnId={col.id}
+                    agents={agents}
+                    onOpenMission={setDrawerTaskId}
+                    onPriorityChange={handlePriorityChange}
+                    onAssignAgent={handleAssignAgent}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
       </div>
 
       <MissionDetailDrawer

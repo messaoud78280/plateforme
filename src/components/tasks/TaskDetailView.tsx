@@ -512,7 +512,7 @@ export function TaskDetailView({
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">Assigner un agent à cette tâche</label>
               <select
-                value={task.assignedToId ?? ""}
+                defaultValue={task.assignedToId ?? ""}
                 onChange={(e) => onAssign?.(e.target.value || null)}
                 className="w-full max-w-xs rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >

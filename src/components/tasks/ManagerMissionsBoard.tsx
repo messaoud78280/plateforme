@@ -292,6 +292,12 @@ export function ManagerMissionsBoard({
   const handleDrop = useCallback(
     async (targetColumnId: string, taskId: string, sourceColumnId: string) => {
       if (targetColumnId === sourceColumnId) return;
+      // La colonne "Terminées" est uniquement un affichage : on ne change
+      // pas le statut par simple glisser-déposer pour éviter de clôturer
+      // une mission sans validation explicite.
+      if (targetColumnId === "terminees") {
+        return;
+      }
       const newStatus = COLUMN_TO_STATUS[targetColumnId];
       if (!newStatus) return;
       try {

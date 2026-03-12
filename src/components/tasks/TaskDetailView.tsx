@@ -713,15 +713,26 @@ export function TaskDetailView({
             >
               Valider le travail
             </button>
-            <div id="correction-section" className="scroll-mt-6 flex flex-1 flex-col gap-2 min-w-[200px]">
+            <div id="correction-section" className="scroll-mt-6 flex flex-1 flex-col gap-3 min-w-[260px]">
               <label className="text-sm font-medium text-slate-700">Demander une modification</label>
               <textarea
                 value={correctionNoteInput}
                 onChange={(e) => onCorrectionNoteChange?.(e.target.value)}
-                placeholder="Précisez ce qui doit être corrigé..."
+                placeholder="Précisez ce qui doit être corrigé… (vous pouvez aussi coller ici des liens vers des exemples, documents, captures d’écran, etc.)"
                 rows={2}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
               />
+              <div className="rounded-lg border border-dashed border-amber-200 bg-amber-50/60 p-3">
+                <p className="mb-2 text-xs font-medium text-amber-900">Pièces jointes pour la correction</p>
+                <p className="mb-2 text-xs text-amber-900">
+                  Ajoutez ici les documents, captures d’écran ou photos qui expliquent la correction à faire.
+                </p>
+                <DocumentUploadZone
+                  taskId={task.id}
+                  category="AUTRE"
+                  onUploadEnd={() => typeof window !== "undefined" && window.location.reload()}
+                />
+              </div>
               <button
                 type="button"
                 onClick={onRequestCorrection}

@@ -16,31 +16,32 @@ export function NotificationsDropdown() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const [alertsRes, notifsRes] = await Promise.all([
-          fetch("/api/alerts"),
-          fetch("/api/notifications?unread=true"),
-        ]);
-        const list: NotifItem[] = [];
-        if (alertsRes.ok) {
-          const data = await alertsRes.json();
-          const alerts = Array.isArray(data) ? data : data.alerts || [];
-          list.push(...alerts.map((a: NotifItem) => ({ id: a.id, title: a.title, message: a.message, actionUrl: a.actionUrl ?? null, createdAt: a.createdAt })));
-        }
-        if (notifsRes.ok) {
-          const notifs = await notifsRes.json();
-          if (Array.isArray(notifs)) {
-            list.push(...notifs.map((n: NotifItem) => ({ id: n.id, title: n.title, message: n.message, actionUrl: n.actionUrl ?? null, createdAt: n.createdAt })));
-          }
-        }
-        list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        setItems(list.slice(0, 20));
-      } catch {
-        // ignore
+  async function load() {
+    try {
+      const [alertsRes, notifsRes] = await Promise.all([
+        fetch("/api/alerts"),
+        fetch("/api/notifications?unread=true"),
+      ]);
+      const list: NotifItem[] = [];
+      if (alertsRes.ok) {
+        const data = await alertsRes.json();
+        const alerts = Array.isArray(data) ? data : data.alerts || [];
+        list.push(...alerts.map((a: NotifItem) => ({ id: a.id, title: a.title, message: a.message, actionUrl: a.actionUrl ?? null, createdAt: a.createdAt })));
       }
+      if (notifsRes.ok) {
+        const notifs = await notifsRes.json();
+        if (Array.isArray(notifs)) {
+          list.push(...notifs.map((n: NotifItem) => ({ id: n.id, title: n.title, message: n.message, actionUrl: n.actionUrl ?? null, createdAt: n.createdAt })));
+        }
+      }
+      list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setItems(list.slice(0, 20));
+    } catch {
+      // ignore
     }
+  }
+
+  useEffect(() => {
     load();
   }, []);
 
@@ -52,13 +53,24 @@ export function NotificationsDropdown() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  async function handleToggle() {
+    if (!open) {
+      await Promise.all([
+        fetch("/api/notifications/read-all", { method: "POST" }),
+        fetch("/api/alerts/read-all", { method: "POST" }),
+      ]);
+      await load();
+    }
+    setOpen((v) => !v);
+  }
+
   const count = items.length;
 
   return (
     <div className="relative" ref={ref}>
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={handleToggle}
         className="relative rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-800"
         aria-label="Notifications"
       >

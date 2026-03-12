@@ -233,6 +233,26 @@ export function MessagerieMissionsView({
       .finally(() => setLoadingMessages(false));
   }, [selectedTaskId]);
 
+  // Marquer comme lus les messages directs du contact sélectionné
+  useEffect(() => {
+    if (filter !== "messages-directs" || !selectedDirectContactId) return;
+    fetch("/api/messages/direct/read", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ otherUserId: selectedDirectContactId }),
+    })
+      .then((r) => {
+        if (r.ok) {
+          return fetch("/api/messages/direct").then((res) => (res.ok ? res.json() : []));
+        }
+        return [];
+      })
+      .then((data) => {
+        if (Array.isArray(data)) setDirectMessages(data);
+      })
+      .catch(() => {});
+  }, [filter, selectedDirectContactId]);
+
   // Rafraîchissement automatique des messages directs (toutes les 7 s)
   useEffect(() => {
     if (filter !== "messages-directs") return;

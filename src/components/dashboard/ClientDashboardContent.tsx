@@ -140,6 +140,20 @@ export function ClientDashboardContent({
         </div>
       </section>
 
+      {/* Communication digitale */}
+      <section className="rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100/80 p-5">
+        <h2 className="text-base font-semibold text-slate-800">Visibilité en ligne</h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Avez-vous besoin d&apos;aide pour votre visibilité digitale ? Packs Google Business, réseaux sociaux, site vitrine.
+        </p>
+        <Link
+          href="/communication-digitale"
+          className="mt-3 inline-flex items-center rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1e40af]"
+        >
+          Découvrir les packs communication
+        </Link>
+      </section>
+
       {/* Barre de progression des actions */}
       <ActionsWidget
         subscriptionPlan={actionsData.subscriptionPlan}

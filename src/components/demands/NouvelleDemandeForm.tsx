@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   DEMANDE_CATEGORIES,
@@ -9,6 +9,7 @@ import {
   DEMANDE_ESTIMATION_OPTIONS,
   DEMANDE_TEMPLATES,
   MISSION_SUGGESTIONS,
+  MISSION_SUGGESTIONS_COMMUNICATION,
 } from "./constants";
 import { MissionSuggestions } from "@/components/missions/MissionSuggestions";
 
@@ -55,6 +56,8 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
   const [aiInput, setAiInput] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const packCommunication = searchParams.get("pack") === "communication";
 
   useEffect(() => {
     try {
@@ -72,6 +75,10 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
       // ignore
     }
   }, []);
+
+  useEffect(() => {
+    if (packCommunication) setCategory("Communication digitale");
+  }, [packCommunication]);
 
   const saveDraft = () => {
     const data: DraftData = {
@@ -313,6 +320,25 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
               {s.title}
             </button>
           ))}
+        </div>
+        <div className="mt-4 pt-4 border-t border-slate-100">
+          <p className="text-xs font-medium text-slate-600 mb-2">Communication digitale</p>
+          <div className="flex flex-wrap gap-2">
+            {MISSION_SUGGESTIONS_COMMUNICATION.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => {
+                  setTitle(s.title);
+                  setCategory((s as { category?: string | null }).category ?? "Communication digitale");
+                  setDescription(s.description);
+                }}
+                className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 hover:border-[#1d4ed8] hover:bg-blue-50/50 hover:text-[#1d4ed8] transition"
+              >
+                {s.title}
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 

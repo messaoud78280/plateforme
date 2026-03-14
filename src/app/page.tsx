@@ -67,12 +67,12 @@ export default function HomePage() {
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#solutions">Solutions</a>
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#secteurs">Secteurs</a>
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#plateforme">Plateforme</a>
-            <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/tarifs">Tarifs</Link>
+            <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/tarifs" title="Tarifs assistance administrative">Tarifs administratif</Link>
+            <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/communication-digitale" title="Tarifs communication digitale">Tarifs communication</Link>
             <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/blog">Blog</Link>
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#equipe">Équipe</a>
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#conciergerie">Conciergerie</a>
             <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/faq">FAQ</Link>
-            <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/contact">Contact</Link>
           </nav>
         </div>
       </header>
@@ -166,6 +166,42 @@ export default function HomePage() {
                 <h3 className="mt-1 text-lg font-semibold text-[#0f172a]">{item.title}</h3>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* Deux propositions tarifaires distinctes */}
+        <section id="tarifs" className="px-6 py-16 md:py-20 bg-white/60 rounded-2xl mx-4 md:mx-6 max-w-6xl md:mx-auto scroll-mt-24" style={{ scrollMarginTop: "6rem" }}>
+          <div className="mx-auto max-w-6xl text-center">
+            <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
+              Choisissez vos tarifs
+            </h2>
+            <p className="mt-3 max-w-2xl mx-auto text-[#334155]">
+              BeWork propose deux offres complémentaires. Sélectionnez celle qui correspond à vos besoins.
+            </p>
+            <div className="mt-10 grid gap-6 sm:grid-cols-2 max-w-3xl mx-auto">
+              <Link
+                href="/tarifs"
+                className="group flex flex-col rounded-2xl border-2 border-[#e2e8f0] bg-white p-6 text-left transition hover:border-[#1d4ed8] hover:shadow-lg"
+              >
+                <span className="text-sm font-medium text-[#64748b]">Assistance administrative</span>
+                <h3 className="mt-1 text-lg font-semibold text-[#0f172a]">Tarifs administratif</h3>
+                <p className="mt-2 text-sm text-[#334155]">
+                  Assistant virtuel, devis, factures, relances, suivi dossiers… Dès 109€ pour tester.
+                </p>
+                <p className="mt-3 text-base font-bold text-[#1d4ed8]">Dès 215€/mois →</p>
+              </Link>
+              <Link
+                href="/communication-digitale"
+                className="group flex flex-col rounded-2xl border-2 border-[#e2e8f0] bg-white p-6 text-left transition hover:border-[#1d4ed8] hover:shadow-lg"
+              >
+                <span className="text-sm font-medium text-[#64748b]">Visibilité en ligne</span>
+                <h3 className="mt-1 text-lg font-semibold text-[#0f172a]">Tarifs communication</h3>
+                <p className="mt-2 text-sm text-[#334155]">
+                  Google Business, réseaux sociaux, site vitrine, SEO… Packs clés en main.
+                </p>
+                <p className="mt-3 text-base font-bold text-[#1d4ed8]">Dès 149€/mois →</p>
+              </Link>
+            </div>
           </div>
         </section>
 
@@ -975,7 +1011,10 @@ export default function HomePage() {
               FAQ
             </Link>
             <Link className="font-medium transition-colors hover:text-[#0f172a]" href="/tarifs">
-              Tarifs
+              Tarifs administratif
+            </Link>
+            <Link className="font-medium transition-colors hover:text-[#0f172a]" href="/communication-digitale">
+              Tarifs communication
             </Link>
             <Link className="font-medium transition-colors hover:text-[#0f172a]" href="/blog">
               Blog

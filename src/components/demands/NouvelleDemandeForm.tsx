@@ -320,7 +320,6 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
             </button>
           ))}
         </div>
-        </div>
       </section>
 
       {/* Suggestions basées sur les missions passées */}

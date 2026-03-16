@@ -32,6 +32,21 @@ const ARTICLES = [
     title: "Comment gagner 5 heures par semaine en déléguant l'administratif",
     excerpt: "Conseils pratiques pour identifier les tâches à déléguer et libérer du temps grâce à un assistant administratif externalisé.",
   },
+  {
+    slug: "externaliser-assistant-administratif-avantages",
+    title: "Externaliser son assistant administratif : 7 avantages concrets pour une PME",
+    excerpt: "Coût, flexibilité, continuité de service… Découvrez les bénéfices concrets de l'externalisation pour les dirigeants de PME.",
+  },
+  {
+    slug: "organiser-journee-dirigeant-avec-assistant",
+    title: "Comment organiser votre journée de dirigeant avec l’aide d’un assistant administratif",
+    excerpt: "Exemple de journée type pour mieux prioriser, déléguer et garder du temps pour le développement de votre entreprise.",
+  },
+  {
+    slug: "erreurs-a-eviter-deleguer-administratif",
+    title: "5 erreurs à éviter quand vous commencez à déléguer votre administratif",
+    excerpt: "Périmètre flou, consignes incomplètes, manque de feedback… Les pièges à éviter pour une collaboration efficace.",
+  },
 ];
 
 export default function BlogPage() {

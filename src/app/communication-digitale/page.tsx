@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
@@ -69,6 +70,8 @@ const PACKS = [
 ] as const;
 
 export default async function CommunicationDigitalePage() {
+  // Fonctionnalité mise en cache : redirige toujours vers l'accueil pour l'instant.
+  redirect("/");
   const session = await getServerSession(authOptions);
   const isClient = session?.user?.role === "CLIENT";
 

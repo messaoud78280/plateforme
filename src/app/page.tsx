@@ -67,8 +67,7 @@ export default function HomePage() {
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#solutions">Solutions</a>
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#secteurs">Secteurs</a>
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#plateforme">Plateforme</a>
-            <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/tarifs" title="Tarifs assistance administrative">Tarifs administratif</Link>
-            <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/communication-digitale" title="Tarifs communication digitale">Tarifs communication</Link>
+            <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/tarifs" title="Tarifs assistance administrative">Tarifs</Link>
             <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/blog">Blog</Link>
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#equipe">Équipe</a>
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#conciergerie">Conciergerie</a>
@@ -78,18 +77,18 @@ export default function HomePage() {
       </header>
 
       <main className="pt-0">
-        {/* Hero — message orienté bénéfice + CTAs + mockup */}
+        {/* Hero + Comment ça marche */}
         <section id="hero" className="px-6 pt-24 pb-24 md:pt-32 md:pb-32" style={{ scrollMarginTop: "6rem" }}>
           <div className="mx-auto max-w-6xl">
-            <div className="grid gap-16 lg:grid-cols-2 lg:gap-20 lg:items-center">
-              <div className="space-y-8">
+            <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
+              <div className="space-y-8 text-center md:text-left">
                 <h1 className="text-balance text-3xl font-bold leading-[1.15] tracking-tight text-[#0f172a] md:text-4xl lg:text-5xl lg:leading-[1.1]">
                   Gagnez du temps. Déléguez votre administratif.
                 </h1>
-                <p className="max-w-xl text-lg leading-relaxed text-[#475569] md:text-xl">
+                <p className="max-w-xl text-lg leading-relaxed text-[#475569] md:text-xl mx-auto md:mx-0">
                   Confiez vos tâches administratives à un assistant à la demande, sans embauche et sans contraintes.
                 </p>
-                <div className="flex flex-wrap items-center gap-4">
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
                   <Link
                     href="/inscription"
                     className="inline-flex rounded-lg bg-[#1d4ed8] px-8 py-4 text-base font-semibold text-white shadow-lg shadow-[#1d4ed8]/25 transition-all hover:bg-[#1e40af] hover:shadow-xl hover:shadow-[#1d4ed8]/30"
@@ -107,65 +106,47 @@ export default function HomePage() {
                 <p className="text-sm text-[#64748b]">
                   France, Belgique, Suisse, Luxembourg. Dès 215€/mois, sans recrutement.
                 </p>
+                <div className="flex flex-wrap justify-center md:justify-start gap-6 text-sm text-[#64748b]">
+                  <Link href="/inscription" className="font-medium hover:text-[#0f172a] hover:underline">
+                    Créer un compte
+                  </Link>
+                  <Link href="/connexion" className="font-medium hover:text-[#0f172a]">
+                    Se connecter
+                  </Link>
+                </div>
               </div>
-              {/* Mockup plateforme */}
-              <div className="relative flex justify-center lg:justify-end">
-                <div className="w-full max-w-md rounded-xl border-2 border-[#c8cdd6] bg-white p-4 shadow-xl ring-1 ring-black/5 md:max-w-lg">
-                  <div className="flex gap-2 mb-4">
-                    <span className="h-2 w-2 rounded-full bg-[#94a3b8]" />
-                    <span className="h-2 w-2 rounded-full bg-[#94a3b8]" />
-                    <span className="h-2 w-2 rounded-full bg-[#94a3b8]" />
-                  </div>
-                  <div className="space-y-3 rounded-lg bg-[#f8fafc] p-4">
-                    {["Suivi des tâches", "Messagerie avec l'assistant", "Historique des actions"].map((label, i) => (
-                      <div key={i} className="flex items-center gap-3 rounded-lg bg-white px-3 py-2 border border-[#e2e8f0]">
-                        <span className="h-2 w-2 rounded-full bg-[#1d4ed8]" />
-                        <span className="text-sm text-[#334155]">{label}</span>
+              <div
+                id="comment-ca-marche"
+                className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm"
+              >
+                <div className="text-center mb-6">
+                  <h2 className="text-lg font-semibold text-[#0f172a] md:text-xl">
+                    Comment ça marche
+                  </h2>
+                  <p className="mt-2 text-sm text-[#334155]">
+                    Un parcours simple pour déléguer votre administratif en toute sérénité.
+                  </p>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {[
+                    { step: 1, title: "Vous envoyez vos tâches", icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" },
+                    { step: 2, title: "Votre assistant les traite", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" },
+                    { step: 3, title: "Vous suivez l'avancement sur la plateforme", icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
+                    { step: 4, title: "Vous gagnez du temps sur votre activité", icon: "M12 8v4l3 3m6-3a9 10.5 0 11-21 0 10.5 0 21 0z" },
+                  ].map((item) => (
+                    <div key={item.step} className="card-frame rounded-xl p-4 text-center transition-transform hover:scale-[1.02]">
+                      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[#eff6ff] text-[#1d4ed8]">
+                        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
+                        </svg>
                       </div>
-                    ))}
-                  </div>
-                  <p className="mt-3 text-center text-xs text-[#64748b]">Interface BeWork</p>
+                      <span className="mt-2 block text-xs font-medium text-[#64748b]">Étape {item.step}</span>
+                      <h3 className="mt-1 text-sm font-semibold text-[#0f172a]">{item.title}</h3>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
-            <div className="mt-16 flex flex-wrap justify-center gap-6 text-sm">
-              <Link href="/inscription" className="font-medium text-[#1d4ed8] hover:underline">
-                Créer un compte
-              </Link>
-              <Link href="/connexion" className="font-medium text-[#64748b] hover:text-[#0f172a]">
-                Se connecter
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Comment ça marche — 4 étapes */}
-        <section id="comment-ca-marche" className="px-6 py-16 md:py-20 bg-white/60 rounded-2xl mx-4 md:mx-6 max-w-6xl md:mx-auto scroll-mt-24" style={{ scrollMarginTop: "6rem" }}>
-          <div className="mx-auto max-w-4xl text-center mb-12">
-            <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
-              Comment ça marche
-            </h2>
-            <p className="mt-3 text-[#334155]">
-              Un parcours simple pour déléguer votre administratif en toute sérénité.
-            </p>
-          </div>
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { step: 1, title: "Vous envoyez vos tâches", icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" },
-              { step: 2, title: "Votre assistant les traite", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" },
-              { step: 3, title: "Vous suivez l'avancement sur la plateforme", icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
-              { step: 4, title: "Vous gagnez du temps sur votre activité", icon: "M12 8v4l3 3m6-3a9 10.5 0 11-21 0 10.5 0 21 0z" },
-            ].map((item) => (
-              <div key={item.step} className="card-frame rounded-xl p-6 text-center transition-transform hover:scale-[1.02]">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-[#eff6ff] text-[#1d4ed8]">
-                  <svg className="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
-                  </svg>
-                </div>
-                <span className="mt-3 block text-sm font-medium text-[#64748b]">Étape {item.step}</span>
-                <h3 className="mt-1 text-lg font-semibold text-[#0f172a]">{item.title}</h3>
-              </div>
-            ))}
           </div>
         </section>
 
@@ -178,28 +159,17 @@ export default function HomePage() {
             <p className="mt-3 max-w-2xl mx-auto text-[#334155]">
               BeWork propose deux offres complémentaires. Sélectionnez celle qui correspond à vos besoins.
             </p>
-            <div className="mt-10 grid gap-6 sm:grid-cols-2 max-w-3xl mx-auto">
+            <div className="mt-10 flex justify-center">
               <Link
                 href="/tarifs"
-                className="group flex flex-col rounded-2xl border-2 border-[#e2e8f0] bg-white p-6 text-left transition hover:border-[#1d4ed8] hover:shadow-lg"
+                className="group flex w-full max-w-md flex-col rounded-2xl border-2 border-[#e2e8f0] bg-white p-6 text-left transition hover:border-[#1d4ed8] hover:shadow-lg"
               >
                 <span className="text-sm font-medium text-[#64748b]">Assistance administrative</span>
-                <h3 className="mt-1 text-lg font-semibold text-[#0f172a]">Tarifs administratif</h3>
+                <h3 className="mt-1 text-lg font-semibold text-[#0f172a]">Tarifs BeWork</h3>
                 <p className="mt-2 text-sm text-[#334155]">
                   Assistant virtuel, devis, factures, relances, suivi dossiers… Dès 109€ pour tester.
                 </p>
                 <p className="mt-3 text-base font-bold text-[#1d4ed8]">Dès 215€/mois →</p>
-              </Link>
-              <Link
-                href="/communication-digitale"
-                className="group flex flex-col rounded-2xl border-2 border-[#e2e8f0] bg-white p-6 text-left transition hover:border-[#1d4ed8] hover:shadow-lg"
-              >
-                <span className="text-sm font-medium text-[#64748b]">Visibilité en ligne</span>
-                <h3 className="mt-1 text-lg font-semibold text-[#0f172a]">Tarifs communication</h3>
-                <p className="mt-2 text-sm text-[#334155]">
-                  Google Business, réseaux sociaux, site vitrine, SEO… Packs clés en main.
-                </p>
-                <p className="mt-3 text-base font-bold text-[#1d4ed8]">Dès 149€/mois →</p>
               </Link>
             </div>
           </div>

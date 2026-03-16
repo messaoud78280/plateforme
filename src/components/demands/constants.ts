@@ -6,7 +6,6 @@ export const DEMANDE_CATEGORIES = [
   { value: "Réservation", label: "Réservation" },
   { value: "Organisation", label: "Organisation" },
   { value: "Marketing / contenu", label: "Marketing / contenu" },
-  { value: "Communication digitale", label: "Communication digitale" },
   { value: "Autre", label: "Autre" },
 ] as const;
 
@@ -30,13 +29,6 @@ export const EXEMPLES_DEMANDES = [
 ];
 
 /** Suggestions de missions communication (packs communication digitale) */
-export const MISSION_SUGGESTIONS_COMMUNICATION = [
-  { id: "post-facebook", title: "Créer un post Facebook", description: "Thème : [sujet] — Texte souhaité : [indications] — Date de publication : [date]", category: "Communication digitale" },
-  { id: "optimiser-google", title: "Optimiser fiche Google", description: "Fiche Google Business à optimiser. Indications : [descriptif, photos à ajouter, horaires, etc.]", category: "Communication digitale" },
-  { id: "modifier-site", title: "Modifier une page du site", description: "Page : [URL ou nom] — Modifications demandées : [détails]", category: "Communication digitale" },
-  { id: "article-seo", title: "Publier un article SEO", description: "Sujet : [titre] — Mots-clés : [liste] — Structure souhaitée : [sommaire]", category: "Communication digitale" },
-  { id: "contenu-site", title: "Ajouter un contenu sur le site", description: "Page/section : [emplacement] — Contenu à ajouter : [texte, images, liens]", category: "Communication digitale" },
-] as const;
 
 /** Suggestions de missions (accès rapide) */
 export const MISSION_SUGGESTIONS = [

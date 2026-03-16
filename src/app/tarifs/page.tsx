@@ -70,12 +70,6 @@ export default async function TarifsPage() {
           </Link>
           <div className="flex items-center gap-3">
             <Link
-              href="/communication-digitale"
-              className="hidden rounded-lg border border-[#c8cdd6] bg-white px-4 py-2 text-sm font-medium text-[#1e293b] transition hover:bg-[#f8f9fb] sm:inline-flex"
-            >
-              Communication digitale
-            </Link>
-            <Link
               href="/contact"
               className="hidden rounded-lg border border-[#c8cdd6] bg-white px-4 py-2 text-sm font-medium text-[#1e293b] transition hover:bg-[#f8f9fb] sm:inline-flex"
               aria-label="Contact"

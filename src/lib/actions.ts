@@ -1,16 +1,16 @@
 /**
- * Facturation par actions : 1 action = 10 minutes.
- * Minimum 1 action par tâche. Formule : ceil(minutes / 10).
+ * Facturation par actions : 1 action = 12 minutes (5 actions ≈ 1 h).
+ * Minimum 1 action par tâche. Formule : ceil(minutes / MINUTES_PER_ACTION).
  */
 
-export const MINUTES_PER_ACTION = 10;
+export const MINUTES_PER_ACTION = 12;
 export const MIN_ACTIONS_PER_TASK = 1;
 
 export const SUBSCRIPTION_ACTIONS: Record<string, number> = {
-  STANDARD: 120,       // 20h
-  STANDARD_PLUS: 240,  // 40h
-  PREMIUM: 360,        // 60h
-  FULLTIME: 960,       // 160h
+  STANDARD: 120,       // ~24 h (120 × 12 min)
+  STANDARD_PLUS: 240,  // ~48 h
+  PREMIUM: 360,        // ~72 h
+  FULLTIME: 960,       // ~192 h
 };
 
 export function minutesToActions(minutes: number): number {

@@ -150,7 +150,7 @@ export function SouscrireClient({
               >
                 <span className="font-medium">{p.name}</span>
                 <span className="mt-1 block text-xs text-slate-500">
-                  {p.priceLabel}€ · {p.actionsLabel}
+                  {p.priceLabel} € TTC{p.billing === "monthly" ? " / mois" : ""} · {p.actionsLabel}
                 </span>
               </button>
             );
@@ -169,7 +169,7 @@ export function SouscrireClient({
           <div className="flex justify-between">
             <dt className="text-slate-500">Prix</dt>
             <dd className="font-medium text-slate-800">
-              {effectivePlan.priceLabel}€
+              {effectivePlan.priceLabel} € TTC
               {effectivePlan.billing === "monthly" && " / mois"}
             </dd>
           </div>
@@ -192,6 +192,10 @@ export function SouscrireClient({
             </dd>
           </div>
         </dl>
+        <div className="mt-4 border-t border-slate-100 pt-3 text-xs text-slate-500">
+          <p>TTC, sans frais cachés · Sans engagement long terme · Démarrage rapide</p>
+          <p className="mt-1">Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.</p>
+        </div>
 
         {/* Contrat */}
         <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
@@ -238,7 +242,10 @@ export function SouscrireClient({
         {step === "payment" && paymentId && (
           <div className="mt-6">
             <p className="text-sm text-slate-600">
-              Montant à régler : <strong>{effectivePlan.priceLabel}€</strong>
+              Montant à régler :{" "}
+              <strong>
+                {effectivePlan.priceLabel} € TTC{effectivePlan.billing === "monthly" ? " / mois" : ""}
+              </strong>
             </p>
             <p className="mt-2 text-xs text-slate-500">
               En environnement de démonstration, utilisez le bouton ci-dessous pour simuler un

@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import ContactForm from "./ContactForm";
+import { absoluteUrl } from "@/lib/site";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://bework.fr";
+const pageUrl = absoluteUrl("/contact");
 
 export const metadata: Metadata = {
   title: "Contact et rendez-vous",
   description:
     "Demande de contact et prise de rendez-vous en visioconférence avec BeWork. Renseignez votre structure, vos coordonnées et choisissez un créneau pour une démo.",
-  alternates: { canonical: `${BASE_URL}/contact` },
+  alternates: { canonical: pageUrl },
 };
 
 export default function ContactPage() {

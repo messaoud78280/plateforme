@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
+import { absoluteUrl } from "@/lib/site";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://bework.fr";
+const pageUrl = absoluteUrl("/assistant-administratif-distance");
 
 export const metadata: Metadata = {
   title: "Assistant administratif à distance | BeWork",
   description:
-    "Assistant administratif à distance pour PME et indépendants. Devis, factures, relances, suivi dossiers. Plateforme supervisée depuis la France. Dès 215€/mois.",
-  alternates: { canonical: `${BASE_URL}/assistant-administratif-distance` },
+    "Assistant administratif à distance pour PME et indépendants. Devis, factures, relances, suivi dossiers. Plateforme supervisée depuis la France. Dès 215 € TTC/mois.",
+  alternates: { canonical: pageUrl },
 };
 
 export default function Page() {
@@ -20,7 +21,7 @@ export default function Page() {
         <>
           L&apos;assistant administratif à distance BeWork travaille depuis notre plateforme, supervisée depuis la France.
           Devis, factures, relances, agenda : vous déléguez l&apos;administratif sans recruter. Pour PME et indépendants
-          en France, Belgique, Suisse et Luxembourg. Dès 215€/mois.
+          en France, Belgique, Suisse et Luxembourg. Dès 215 € TTC/mois.
         </>
       }
     >

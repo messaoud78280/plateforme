@@ -42,7 +42,7 @@ export function SeoLandingPage({ title, description, h1, intro, children }: SeoL
           <div className="mt-12 rounded-xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-8">
             <h2 className="text-xl font-bold text-[#0f172a]">Prêt à externaliser votre administratif ?</h2>
             <p className="mt-3 text-[#334155]">
-              BeWork accompagne les PME francophones en France, Belgique, Suisse et Luxembourg. Dès 215€/mois.
+              BeWork accompagne les PME francophones en France, Belgique, Suisse et Luxembourg. Dès 215 € TTC/mois.
             </p>
             <div className="mt-6 flex flex-wrap gap-4">
               <Link href="/inscription" className="inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white hover:bg-[#1e40af]">

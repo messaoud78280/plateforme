@@ -88,15 +88,15 @@ export default async function ContractPage() {
             <p className="mb-4">Les prestations sont réalisées à distance via la plateforme BeWork.</p>
 
             <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">5. Quota d’actions inclus dans les offres</h3>
-            <p className="mb-4">Les offres BeWork sont exprimées en quota d&apos;actions administratives. Une action correspond à une tâche administrative simple réalisée par notre équipe. La plupart des actions représentent environ 10 minutes de traitement administratif. Ce quota ne constitue pas une mise à disposition d&apos;un salarié. Le prestataire organise librement ses ressources. Les assistants restent sous l&apos;autorité exclusive de BeWork. Le client ne dispose d&apos;aucun lien de subordination avec les assistants.</p>
+            <p className="mb-4">Les offres BeWork sont exprimées en quota d&apos;actions administratives. Une action correspond à une tâche administrative simple réalisée par notre équipe. La plupart des actions représentent environ 12 minutes de traitement administratif (équivalent indicatif : cinq actions par heure). Ce quota ne constitue pas une mise à disposition d&apos;un salarié. Le prestataire organise librement ses ressources. Les assistants restent sous l&apos;autorité exclusive de BeWork. Le client ne dispose d&apos;aucun lien de subordination avec les assistants.</p>
 
             <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">6. Tarifs et paiement</h3>
             <p className="mb-2">Les tarifs sont ceux affichés sur la page Tarifs du site :</p>
             <ul className="mb-4 list-disc pl-5">
-              <li>Offre Découverte : 109 € (jusqu&apos;à 60 actions, sans abonnement)</li>
-              <li>Standard : 215 € / mois (120 actions / mois)</li>
-              <li>Business : 415 € / mois (240 actions / mois)</li>
-              <li>Premium : 630 € / mois (360 actions / mois)</li>
+              <li>Offre Découverte : 109 € TTC (jusqu&apos;à 60 actions, sans abonnement)</li>
+              <li>Standard : 215 € TTC / mois (120 actions / mois)</li>
+              <li>Business : 415 € TTC / mois (240 actions / mois)</li>
+              <li>Premium : 630 € TTC / mois (360 actions / mois)</li>
             </ul>
             <p className="mb-4">Paiement mensuel d&apos;avance.</p>
 

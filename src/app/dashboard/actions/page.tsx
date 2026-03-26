@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { BackLink } from "@/components/ui/BackLink";
+import { MINUTES_PER_ACTION } from "@/lib/actions";
 
 const ROWS: { category: string; example: string; actions: string }[] = [
   { category: "Gestion d’emails", example: "Répondre à un email simple", actions: "1" },
@@ -33,6 +34,9 @@ export default async function ActionsInfoPage() {
         </p>
         <p className="text-sm text-slate-600">
           L’objectif est de vous donner une vision claire de ce que représente une action selon le type de mission confiée.
+        </p>
+        <p className="text-sm text-slate-600">
+          Règle de comptage : environ {MINUTES_PER_ACTION} minutes par action (indicatif : 5 actions ≈ 1 h) ; le temps réel est pris en compte à la clôture des missions.
         </p>
       </div>
 

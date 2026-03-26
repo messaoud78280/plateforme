@@ -151,6 +151,9 @@ export default async function AbonnementPage() {
         <p className="mt-1 text-sm text-slate-600">
           Choisissez une formule ou demandez un devis personnalisé pour un volume sur mesure.
         </p>
+        <p className="mt-2 text-xs font-medium text-slate-700">
+          Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.
+        </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {TARIFS_PLANS.map((plan) => (
             <div
@@ -163,10 +166,13 @@ export default async function AbonnementPage() {
                 </span>
               )}
               <h3 className="font-semibold text-slate-800">{plan.name}</h3>
-              <p className="mt-1 text-xl font-bold text-[#1d4ed8]">
-                {plan.price}€
-                {plan.billing === "monthly" && <span className="text-sm font-normal text-slate-500"> / mois</span>}
+              <p className="mt-1 flex flex-wrap items-baseline gap-x-1 text-xl font-bold text-[#1d4ed8]">
+                <span className="tabular-nums">{plan.price}</span>
+                <span>€</span>
+                <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-slate-500">TTC</span>
+                {plan.billing === "monthly" && <span className="text-sm font-semibold text-slate-500">/ mois</span>}
               </p>
+              <p className="mt-1 text-xs font-medium leading-snug text-slate-700">{plan.tagline}</p>
               <ul className="mt-2 space-y-1 text-xs text-slate-600">
                 {plan.highlights.slice(0, 3).map((h) => (
                   <li key={h}>• {h}</li>

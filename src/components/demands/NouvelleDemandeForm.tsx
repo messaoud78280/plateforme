@@ -11,6 +11,7 @@ import {
   MISSION_SUGGESTIONS,
 } from "./constants";
 import { MissionSuggestions } from "@/components/missions/MissionSuggestions";
+import { MINUTES_PER_ACTION } from "@/lib/actions";
 
 const DRAFT_KEY = "bework-nouvelle-demande-draft";
 const ACCEPTED_EXT = ".pdf,.doc,.docx,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.gif,.webp,.bmp,.svg,.zip";
@@ -497,13 +498,13 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
             <p className="mt-1 text-sm text-slate-600">
               Temps estimé :{" "}
               {estimatedActions === "1 action"
-                ? "environ 10 minutes"
+                ? `environ ${MINUTES_PER_ACTION} minutes`
                 : estimatedActions === "2 à 3 actions"
-                  ? "environ 20 à 30 minutes"
+                  ? `environ ${2 * MINUTES_PER_ACTION} à ${3 * MINUTES_PER_ACTION} minutes`
                   : "à évaluer avec votre assistant"}
             </p>
             <p className="mt-3 text-xs text-slate-500">
-              Une action = 10 minutes de travail. L&apos;estimation est indicative ; le temps réel sera comptabilisé à la clôture de la mission.
+              Une action = {MINUTES_PER_ACTION} minutes de travail (indicatif : 5 actions ≈ 1 h). L&apos;estimation est indicative ; le temps réel sera comptabilisé à la clôture de la mission.
             </p>
           </div>
         </section>
@@ -525,6 +526,10 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
             />
           </div>
         </section>
+
+        <p className="text-xs text-slate-500">
+          Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.
+        </p>
 
         {/* Messages + Boutons */}
         {uploadProgress && <p className="text-sm text-slate-600">{uploadProgress}</p>}

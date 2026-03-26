@@ -1,20 +1,36 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
+import { absoluteUrl } from "@/lib/site";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://bework.fr";
+const faqUrl = absoluteUrl("/faq");
 
 export const metadata: Metadata = {
   title: "FAQ Assistant administratif externalisé | BeWork",
   description:
     "Questions fréquentes sur l'assistant administratif externalisé, le coût, le fonctionnement et les délais. BeWork — PME France, Belgique, Suisse, Luxembourg.",
-  alternates: { canonical: `${BASE_URL}/faq` },
+  alternates: { canonical: faqUrl, languages: { fr: faqUrl } },
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    url: faqUrl,
+    siteName: "BeWork",
+    title: "FAQ — Assistant administratif externalisé | BeWork",
+    description:
+      "Réponses sur les tarifs TTC, le fonctionnement, les délais et l'externalisation administrative pour les PME.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FAQ BeWork",
+    description: "Assistant administratif externalisé : tarifs, fonctionnement, délais.",
+  },
+  robots: { index: true, follow: true },
 };
 
 const FAQ_ITEMS = [
   {
     q: "Combien coûte un assistant administratif ?",
-    a: "Chez BeWork, les offres démarrent à 215€/mois pour une formule Standard (120 actions/mois, soit ~20h), 415€/mois pour Business (240 actions) et 630€/mois pour Premium (360 actions). L'offre Découverte à 109€ permet de tester le service. Tout est inclus : pas de coût caché, pas de recrutement.",
+    a: "Chez BeWork, tous les tarifs affichés sont TTC, sans frais supplémentaires. Les offres démarrent à 215 € TTC/mois pour la formule Standard (120 actions/mois, soit environ 20 h d'assistance), 415 € TTC/mois pour Business (240 actions) et 630 € TTC/mois pour Premium (360 actions). L'offre Découverte à 109 € TTC permet de tester le service. Tout est inclus : pas de coût caché, pas de recrutement.",
   },
   {
     q: "Comment fonctionne un assistant administratif externalisé ?",
@@ -66,6 +82,9 @@ export default function FaqPage() {
             Réponses aux questions les plus posées sur l&apos;assistant administratif externalisé, l&apos;assistant
             administratif à distance et l&apos;externalisation administrative pour les PME.
           </p>
+          <p className="mt-4 text-sm font-semibold text-[#0f172a]">
+            Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.
+          </p>
 
           <dl className="mt-12 space-y-8">
             {FAQ_ITEMS.map((item, i) => (
@@ -82,6 +101,9 @@ export default function FaqPage() {
               __html: JSON.stringify({
                 "@context": "https://schema.org",
                 "@type": "FAQPage",
+                "@id": `${faqUrl}#faq`,
+                url: faqUrl,
+                inLanguage: "fr-FR",
                 mainEntity: FAQ_ITEMS.map((item) => ({
                   "@type": "Question",
                   name: item.q,
@@ -94,7 +116,7 @@ export default function FaqPage() {
           <div className="mt-16 rounded-xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-8">
             <h2 className="text-xl font-bold text-[#0f172a]">Prêt à externaliser votre administratif ?</h2>
             <p className="mt-3 text-[#334155]">
-              BeWork accompagne les PME francophones. Assistant administratif externalisé dès 215€/mois.
+              BeWork accompagne les PME francophones. Assistant administratif externalisé dès 215 € TTC/mois.
             </p>
             <div className="mt-6 flex flex-wrap gap-4">
               <Link

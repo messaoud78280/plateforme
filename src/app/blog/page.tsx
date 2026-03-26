@@ -1,14 +1,30 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
+import { absoluteUrl } from "@/lib/site";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://bework.fr";
+const blogUrl = absoluteUrl("/blog");
 
 export const metadata: Metadata = {
   title: "Blog BeWork — Assistant administratif externalisé, délégation PME",
   description:
     "Articles et conseils sur l'assistant administratif externalisé, la délégation et l'externalisation de l'administratif pour PME et dirigeants.",
-  alternates: { canonical: `${BASE_URL}/blog` },
+  alternates: { canonical: blogUrl, languages: { fr: blogUrl } },
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    url: blogUrl,
+    siteName: "BeWork",
+    title: "Blog BeWork — Assistant administratif externalisé",
+    description:
+      "Conseils pour déléguer l'administratif, comparatifs de coûts et bonnes pratiques pour les dirigeants de PME.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Blog BeWork",
+    description: "Articles sur l'assistant administratif externalisé et la délégation pour PME.",
+  },
+  robots: { index: true, follow: true },
 };
 
 const ARTICLES = [

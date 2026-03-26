@@ -6,11 +6,30 @@ import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { ComparatifReveal } from "@/components/tarifs/ComparatifReveal";
 import { StickyCtaMobile } from "@/components/tarifs/StickyCtaMobile";
 import { TARIFS_PLANS } from "@/lib/tarifs-plans";
+import { absoluteUrl } from "@/lib/site";
+
+const tarifsUrl = absoluteUrl("/tarifs");
 
 export const metadata: Metadata = {
-  title: "Tarifs BeWork – Assistants administratifs virtuels dès 215€/mois",
+  title: "Tarifs BeWork – Assistants administratifs virtuels dès 215 € TTC/mois",
   description:
-    "Offres Découverte, Standard, Business et Premium. Tarification au quota d’actions, tous services inclus. Assistants francophones augmentés par l'IA, pilotage en France.",
+    "Offres Découverte, Standard, Business et Premium. Tarifs TTC, sans frais cachés. Tarification au quota d’actions, tous services inclus. Assistants francophones augmentés par l'IA, pilotage en France.",
+  alternates: { canonical: tarifsUrl, languages: { fr: tarifsUrl } },
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    url: tarifsUrl,
+    siteName: "BeWork",
+    title: "Tarifs BeWork – Assistant administratif externalisé",
+    description:
+      "Forfaits Découverte, Standard, Business et Premium. Tarifs TTC tout compris, pilotage en France.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Tarifs BeWork",
+    description: "Assistants administratifs virtuels dès 215 € TTC/mois. Sans frais cachés.",
+  },
+  robots: { index: true, follow: true },
 };
 
 const plans = TARIFS_PLANS;
@@ -47,6 +66,7 @@ const etapes = [
 ];
 
 const faq = [
+  { q: "Les prix sont-ils TTC ?", a: "Oui. Tous nos tarifs sont exprimés TTC, sans frais supplémentaires. Ce que vous voyez est ce que vous payez — pas de mauvaise surprise." },
   { q: "Qu'est-ce qu'un périmètre ?", a: "Un périmètre correspond à un domaine de mission (ex. commercial, comptabilité, RH). Les tarifs indiqués couvrent jusqu'à 2 périmètres. Au-delà, un devis personnalisé est établi." },
   { q: "Comment sont protégées mes données ?", a: "Nous appliquons des mesures de confidentialité et de sécurité adaptées. Les données sont traitées dans un cadre strict ; nous restons à votre disposition pour toute précision sur nos engagements." },
   { q: "Quels sont les horaires et délais ?", a: "Les assistants travaillent du lundi au vendredi, alignés sur le fuseau français. Les délais de traitement dépendent du volume et de la complexité ; nous les cadrons ensemble lors du démarrage." },
@@ -96,6 +116,9 @@ export default async function TarifsPage() {
           <p className="mt-4 max-w-2xl mx-auto text-lg leading-relaxed text-[#334155]">
             Assistants administratifs francophones, pilotés, augmentés par l&apos;IA — gagnez du temps et maîtrisez vos coûts.
           </p>
+          <p className="mt-3 text-sm font-semibold text-[#0f172a]">
+            Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.
+          </p>
           {/* Réassurance */}
           <ul className="mt-8 flex flex-wrap justify-center gap-4 md:gap-6" role="list">
             {reassurance.map(({ label, desc }) => (
@@ -131,13 +154,23 @@ export default async function TarifsPage() {
                 <h3 className="border-b-2 border-[#1e293b] pb-2 font-semibold text-[#0f172a]">
                   {plan.name}
                 </h3>
-                <p className="mt-4 text-2xl font-bold text-[#1d4ed8] md:text-3xl">
-                  {plan.price}€
+                <div className="mt-4 flex flex-wrap items-baseline gap-x-1.5 gap-y-0">
+                  <span className="text-3xl font-bold tracking-tight text-[#1d4ed8] tabular-nums md:text-[2.125rem]">
+                    {plan.price}
+                  </span>
+                  <span className="text-xl font-semibold text-[#0f172a]">€</span>
+                  <span className="text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-[#64748b]">TTC</span>
                   {plan.billing === "monthly" && (
-                    <span className="text-base font-semibold text-[#64748b]"> / mois</span>
+                    <span className="text-base font-semibold text-[#64748b]">/ mois</span>
                   )}
-                </p>
+                </div>
+                <p className="mt-2 text-sm font-medium leading-snug text-[#0f172a]">{plan.tagline}</p>
                 <p className="mt-2 text-sm text-[#334155]">{plan.detail}</p>
+                <ul className="mt-2 space-y-0.5 text-[11px] leading-relaxed text-[#64748b]" aria-label="Garanties tarifaires">
+                  <li>TTC, sans frais cachés</li>
+                  <li>Sans engagement long terme</li>
+                  <li>Démarrage rapide</li>
+                </ul>
                 <ul className="mt-4 space-y-2 text-sm text-[#334155]" role="list">
                   {plan.highlights.map((h) => (
                     <li key={h} className="flex items-start gap-2">
@@ -159,6 +192,13 @@ export default async function TarifsPage() {
                 </Link>
               </article>
             ))}
+          </div>
+          <div className="mx-auto mt-8 max-w-2xl space-y-2 rounded-xl border border-[#e0e4ea] bg-[#f8fafc] px-6 py-5 text-center">
+            <p className="text-sm font-medium text-[#0f172a]">
+              Moins cher qu&apos;un recrutement, sans charges ni engagement.
+            </p>
+            <p className="text-sm text-[#334155]">Vous payez uniquement ce dont vous avez besoin.</p>
+            <p className="text-xs text-[#64748b]">Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.</p>
           </div>
           <p className="mt-6 max-w-2xl mx-auto text-center text-sm text-[#334155]">
             *Tarifs valables pour 2 périmètres maximum. Pour 3 périmètres ou plus, contactez-nous en France pour un tarif personnalisé.
@@ -221,7 +261,7 @@ export default async function TarifsPage() {
               Une action correspond à une tâche administrative simple réalisée par notre équipe (gestion d’email, recherche d’information, création de document, organisation de rendez-vous, etc.).
             </p>
             <p className="mt-3 text-[#334155] leading-relaxed">
-              La plupart des actions représentent environ 10 minutes de traitement administratif.
+              La plupart des actions représentent environ 12 minutes de traitement administratif (indicatif : cinq actions par heure).
             </p>
           </div>
 
@@ -315,7 +355,7 @@ export default async function TarifsPage() {
                 </tr>
               </thead>
               <tbody className="text-[#334155]">
-                <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Prix</td><td className="px-4 py-3">109 €</td><td className="px-4 py-3">215 € / mois</td><td className="px-4 py-3">415 € / mois</td><td className="px-4 py-3">630 € / mois</td></tr>
+                <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Prix TTC</td><td className="px-4 py-3">109 € TTC</td><td className="px-4 py-3">215 € TTC / mois</td><td className="px-4 py-3">415 € TTC / mois</td><td className="px-4 py-3">630 € TTC / mois</td></tr>
                 <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Actions incluses</td><td className="px-4 py-3">Jusqu’à 60</td><td className="px-4 py-3">120 / mois</td><td className="px-4 py-3">240 / mois</td><td className="px-4 py-3">360 / mois</td></tr>
                 <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Abonnement</td><td className="px-4 py-3">Non</td><td className="px-4 py-3">Oui</td><td className="px-4 py-3">Oui</td><td className="px-4 py-3">Oui</td></tr>
                 <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Priorité de traitement</td><td className="px-4 py-3">Standard</td><td className="px-4 py-3">Standard</td><td className="px-4 py-3">Priorité</td><td className="px-4 py-3">Priorité élevée</td></tr>
@@ -369,8 +409,11 @@ export default async function TarifsPage() {
               </div>
               <div className="rounded-xl border-2 border-[#1d4ed8] bg-[#eff6ff] p-6">
                 <h4 className="text-sm font-semibold uppercase tracking-wide text-[#1d4ed8]">BeWork</h4>
-                <p className="mt-4 text-3xl font-bold text-[#1d4ed8]">215 € à 1 230 € <span className="text-lg font-normal text-[#64748b]">/mois</span></p>
-                <p className="mt-1 text-[#334155]">tout compris</p>
+                <p className="mt-4 text-3xl font-bold text-[#1d4ed8]">
+                  215 € à 1 230 € <span className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">TTC</span>{" "}
+                  <span className="text-lg font-normal text-[#64748b]">/ mois</span>
+                </p>
+                <p className="mt-1 text-[#334155]">Tout compris — sans frais cachés</p>
               </div>
             </div>
             <div className="mt-8 rounded-xl bg-[#0f172a] px-6 py-5 text-center text-white">

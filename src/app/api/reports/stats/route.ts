@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getReportStats, type PeriodKey } from "@/lib/reportStats";
+import { getReportStats } from "@/lib/reportStats";
+import { parseReportPeriodParam } from "@/lib/validation/reportParams";
 
 /** GET /api/reports/stats?period=7d|30d|3m|6m|1y */
 export async function GET(request: NextRequest) {
@@ -10,8 +11,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
 
-  const period = (request.nextUrl.searchParams.get("period") || "30d") as PeriodKey;
-  if (!["7d", "30d", "3m", "6m", "1y"].includes(period)) {
+  const period = parseReportPeriodParam(request.nextUrl.searchParams.get("period"));
+  if (period === null) {
     return NextResponse.json({ error: "Période invalide" }, { status: 400 });
   }
 
@@ -26,8 +27,8 @@ export async function GET(request: NextRequest) {
       start: stats.start.toISOString(),
       end: stats.end.toISOString(),
     });
-  } catch (e) {
-    console.error(e);
+  } catch (e: unknown) {
+    console.error("[reports/stats]", e);
     return NextResponse.json({ error: "Erreur lors du chargement des statistiques" }, { status: 500 });
   }
 }

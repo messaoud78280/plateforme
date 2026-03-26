@@ -49,7 +49,7 @@ export async function POST(request: Request) {
         secteurActivite: secteurActivite || undefined,
         service: service || undefined,
         subscriptionPlan: "STANDARD",
-        monthlyActionsTotal: 120, // Standard : 20h = 120 actions
+        monthlyActionsTotal: 120, // Standard : ~24 h = 120 actions × 12 min
       },
     });
 

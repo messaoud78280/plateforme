@@ -22,8 +22,6 @@ export function getPeriodBounds(period: PeriodKey): { start: Date; end: Date } {
     case "1y":
       start.setFullYear(start.getFullYear() - 1);
       break;
-    default:
-      start.setDate(start.getDate() - 29);
   }
   start.setHours(0, 0, 0, 0);
   return { start, end };

@@ -1,4 +1,4 @@
--- Facturation par actions (1 action = 10 min)
+-- Facturation par actions (1 action = 12 min, 5 actions ≈ 1 h)
 -- À exécuter dans Supabase SQL Editor. Après : npx prisma generate
 
 -- User : abonnement + quotas actions

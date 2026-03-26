@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MINUTES_PER_ACTION } from "@/lib/actions";
 import { ActionsWidget } from "@/components/dashboard/ActionsWidget";
 import { QuickDelegationForm } from "@/components/dashboard/QuickDelegationForm";
 import { MissionHistorySection } from "@/components/missions/MissionHistorySection";
@@ -329,7 +330,7 @@ export function ClientDashboardContent({
           </div>
           <div className="px-6 py-4">
             <p className="text-2xl font-bold text-[#1d4ed8]">{actionsData.monthlyActionsUsed} actions</p>
-            <p className="text-sm text-slate-600">≈ {Math.round((actionsData.monthlyActionsUsed * 10) / 60)} h économisées</p>
+            <p className="text-sm text-slate-600">≈ {Math.round((actionsData.monthlyActionsUsed * MINUTES_PER_ACTION) / 60)} h économisées</p>
           </div>
         </section>
       </div>

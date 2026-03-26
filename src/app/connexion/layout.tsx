@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
+import { absoluteUrl } from "@/lib/site";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://bework.fr";
+const pageUrl = absoluteUrl("/connexion");
 
 export const metadata: Metadata = {
   title: "Connexion | BeWork",
   description:
     "Connectez-vous à votre espace BeWork : client, agent ou gérante. Accédez à votre tableau de bord et gérez vos missions administratives.",
-  alternates: { canonical: `${BASE_URL}/connexion` },
+  alternates: { canonical: pageUrl },
   robots: { index: false, follow: true },
 };
 

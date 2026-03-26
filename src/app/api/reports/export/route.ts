@@ -2,15 +2,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getReportStats, type PeriodKey } from "@/lib/reportStats";
+import {
+  parseReportExportFormatParam,
+  parseReportPeriodParam,
+} from "@/lib/validation/reportParams";
 import { jsPDF } from "jspdf";
 
-const PERIOD_LABELS: Record<string, string> = {
+const PERIOD_LABELS: Record<PeriodKey, string> = {
   "7d": "7 jours",
   "30d": "30 jours",
   "3m": "3 mois",
   "6m": "6 mois",
   "1y": "1 an",
 };
+
+function safeExportFilenameBase(period: PeriodKey, start: Date): string {
+  const d = start.toISOString().slice(0, 10).replace(/[^0-9-]/g, "");
+  return `rapport-${period}-${d || "export"}`;
+}
 
 /** GET /api/reports/export?period=30d&format=csv|pdf */
 export async function GET(request: NextRequest) {
@@ -19,13 +28,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
 
-  const period = (request.nextUrl.searchParams.get("period") || "30d") as PeriodKey;
-  const format = request.nextUrl.searchParams.get("format") || "pdf";
-
-  if (!["7d", "30d", "3m", "6m", "1y"].includes(period)) {
+  const period = parseReportPeriodParam(request.nextUrl.searchParams.get("period"));
+  if (period === null) {
     return NextResponse.json({ error: "Période invalide" }, { status: 400 });
   }
-  if (format !== "csv" && format !== "pdf") {
+
+  const format = parseReportExportFormatParam(request.nextUrl.searchParams.get("format"));
+  if (format === null) {
     return NextResponse.json({ error: "Format invalide (csv ou pdf)" }, { status: 400 });
   }
 
@@ -58,18 +67,17 @@ export async function GET(request: NextRequest) {
       ];
       const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(";")).join("\n");
       const bom = "\uFEFF";
+      const fname = `${safeExportFilenameBase(period, stats.start)}.csv`;
       return new NextResponse(bom + csv, {
         headers: {
           "Content-Type": "text/csv; charset=utf-8",
-          "Content-Disposition": `attachment; filename="rapport-${period}-${stats.start.toISOString().slice(0, 10)}.csv"`,
+          "Content-Disposition": `attachment; filename="${fname}"`,
         },
       });
     }
 
     // PDF
     const doc = new jsPDF();
-    
-    
     let y = 20;
 
     doc.setFontSize(18);
@@ -93,7 +101,7 @@ export async function GET(request: NextRequest) {
       ["Documents déposés", String(stats.documents.total)],
       ["Projets créés", String(stats.projects.total)],
     ];
-    const pageW = (doc.internal.pageSize as { width?: number }).width ?? 210;
+    const pageW = doc.internal.pageSize.getWidth();
     tableData.forEach(([label, value]) => {
       doc.text(label, 14, y);
       doc.text(value, pageW - 14 - doc.getTextWidth(value), y);
@@ -105,14 +113,15 @@ export async function GET(request: NextRequest) {
     doc.text(`Généré le ${new Date().toLocaleString("fr-FR")} - Plateforme Client Agence`, 14, y);
 
     const buf = Buffer.from(doc.output("arraybuffer"));
+    const fname = `${safeExportFilenameBase(period, stats.start)}.pdf`;
     return new NextResponse(buf, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="rapport-${period}-${stats.start.toISOString().slice(0, 10)}.pdf"`,
+        "Content-Disposition": `attachment; filename="${fname}"`,
       },
     });
-  } catch (e) {
-    console.error(e);
+  } catch (e: unknown) {
+    console.error("[reports/export]", e);
     return NextResponse.json({ error: "Erreur lors de l'export" }, { status: 500 });
   }
 }

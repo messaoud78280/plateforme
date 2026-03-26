@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
-
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://bework.fr";
+import { SITE_URL } from "@/lib/site";
 
 const RESSOURCES_BLOG = [
   { title: "10 tâches administratives à déléguer", desc: "Les tâches chronophages que les dirigeants peuvent externaliser.", href: "/blog/10-taches-administratives-deleguer-dirigeant" },
@@ -13,7 +12,7 @@ const RESSOURCES_BLOG = [
 export const metadata: Metadata = {
   title: "Assistant administratif externalisé pour PME | BeWork — France, Belgique, Suisse, Luxembourg",
   description:
-    "Assistant administratif externalisé et assistant virtuel entreprise pour PME francophones. Externaliser votre administratif à distance : devis, factures, relances. Dès 215€/mois, sans recrutement. France, Belgique, Suisse, Luxembourg.",
+    "Assistant administratif externalisé et assistant virtuel entreprise pour PME francophones. Externaliser votre administratif à distance : devis, factures, relances. Dès 215 € TTC/mois, sans recrutement. France, Belgique, Suisse, Luxembourg.",
   keywords: [
     "assistant administratif externalisé",
     "assistant administratif à distance",
@@ -21,11 +20,21 @@ export const metadata: Metadata = {
     "externaliser administratif PME",
     "assistant administratif PME",
   ],
-  alternates: { canonical: BASE_URL },
+  alternates: { canonical: SITE_URL, languages: { fr: SITE_URL } },
   openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    url: SITE_URL,
+    siteName: "BeWork",
     title: "Assistant administratif externalisé pour PME | BeWork",
     description:
-      "Externalisez votre administratif avec un assistant virtuel dédié. Dès 215€/mois. France, Belgique, Suisse, Luxembourg.",
+      "Externalisez votre administratif avec un assistant virtuel dédié. Dès 215 € TTC/mois. France, Belgique, Suisse, Luxembourg.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Assistant administratif externalisé pour PME | BeWork",
+    description:
+      "Externalisez votre administratif à distance. Dès 215 € TTC/mois. France, Belgique, Suisse, Luxembourg.",
   },
 };
 
@@ -85,8 +94,36 @@ export default function HomePage() {
                 <h1 className="text-balance text-3xl font-bold leading-[1.15] tracking-tight text-[#0f172a] md:text-4xl lg:text-5xl lg:leading-[1.1]">
                   Gagnez du temps. Déléguez votre administratif.
                 </h1>
-                <p className="max-w-xl text-lg leading-relaxed text-[#475569] md:text-xl mx-auto md:mx-0">
-                  Confiez vos tâches administratives à un assistant à la demande, sans embauche et sans contraintes.
+                <Link
+                  href="/tarifs"
+                  className="group mx-auto flex max-w-xl flex-col gap-3 rounded-2xl border-2 border-[#1d4ed8]/30 bg-gradient-to-br from-[#f8fafc] via-white to-[#eff6ff] px-6 py-5 text-left shadow-lg shadow-[#1d4ed8]/10 transition hover:border-[#1d4ed8]/55 hover:shadow-xl md:mx-0"
+                >
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#1d4ed8]">
+                    Offre phare
+                  </span>
+                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
+                    <span className="text-4xl font-bold tracking-tight text-[#0f172a] tabular-nums md:text-[2.75rem]">
+                      215
+                    </span>
+                    <span className="text-xl font-semibold text-[#0f172a]">€</span>
+                    <span className="text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-[#64748b]">TTC</span>
+                    <span className="text-lg font-semibold text-[#64748b]">/ mois</span>
+                  </div>
+                  <div className="space-y-1.5 text-sm leading-snug text-[#334155]">
+                    <p className="font-medium text-[#0f172a]">≈ 20 h incluses</p>
+                    <p className="font-medium text-[#0f172a]">À partir de 10 €/h</p>
+                    <p className="pt-1 text-[#475569]">
+                      Moins cher qu&apos;un recrutement, sans charges ni engagement.
+                    </p>
+                    <p className="text-[#475569]">Vous payez uniquement ce dont vous avez besoin.</p>
+                  </div>
+                  <p className="text-[11px] leading-relaxed text-[#64748b]">
+                    TTC, sans frais cachés · Sans engagement long terme · Démarrage rapide
+                  </p>
+                  <span className="text-xs font-semibold text-[#1d4ed8] group-hover:underline">Voir les tarifs →</span>
+                </Link>
+                <p className="max-w-xl text-lg font-medium leading-relaxed text-[#0f172a] md:text-xl mx-auto md:mx-0">
+                  Une solution simple, sans recrutement, pour déléguer votre administratif dès aujourd&apos;hui.
                 </p>
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
                   <Link
@@ -104,7 +141,7 @@ export default function HomePage() {
                   </Link>
                 </div>
                 <p className="text-sm text-[#64748b]">
-                  France, Belgique, Suisse, Luxembourg. Dès 215€/mois, sans recrutement.
+                  France, Belgique, Suisse • sans recrutement
                 </p>
                 <div className="flex flex-wrap justify-center md:justify-start gap-6 text-sm text-[#64748b]">
                   <Link href="/inscription" className="font-medium hover:text-[#0f172a] hover:underline">
@@ -167,9 +204,12 @@ export default function HomePage() {
                 <span className="text-sm font-medium text-[#64748b]">Assistance administrative</span>
                 <h3 className="mt-1 text-lg font-semibold text-[#0f172a]">Tarifs BeWork</h3>
                 <p className="mt-2 text-sm text-[#334155]">
-                  Assistant virtuel, devis, factures, relances, suivi dossiers… Dès 109€ pour tester.
+                  Assistant virtuel, devis, factures, relances, suivi dossiers… Dès 109 € TTC pour tester.
                 </p>
-                <p className="mt-3 text-base font-bold text-[#1d4ed8]">Dès 215€/mois →</p>
+                <p className="mt-3 text-base font-bold text-[#1d4ed8]">
+                  <span className="tabular-nums">215</span> € <span className="text-sm font-semibold text-[#64748b]">TTC</span> / mois →
+                </p>
+                <p className="mt-2 text-xs text-[#64748b]">TTC, sans frais cachés · Démarrage rapide</p>
               </Link>
             </div>
           </div>
@@ -189,7 +229,7 @@ export default function HomePage() {
             <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {[
                 "Gain de temps : déchargez-vous des tâches chronophages et concentrez-vous sur votre activité.",
-                "Coût maîtrisé : pas de recrutement ni de charges sociales — un forfait tout compris dès 215€/mois.",
+                "Coût maîtrisé : pas de recrutement ni de charges sociales — un forfait tout compris dès 215 € TTC/mois.",
                 "Réactivité : assistant administratif à distance opérationnel après un court onboarding.",
                 "Scalabilité : augmentez ou réduisez le volume d'actions selon vos besoins.",
                 "Qualité : équipe francophone Bac+5, formée à l'IA, supervisée en France.",
@@ -237,7 +277,9 @@ export default function HomePage() {
                       </li>
                     ))}
                   </ul>
-                  <p className="mt-6 text-2xl font-bold text-[#1d4ed8]">Dès 215 € / mois</p>
+                  <p className="mt-6 text-2xl font-bold text-[#1d4ed8]">
+                    <span className="tabular-nums">215</span> € <span className="text-base font-semibold text-[#64748b]">TTC</span> / mois
+                  </p>
                   <Link href="/tarifs" className="mt-4 inline-block text-sm font-semibold text-[#1d4ed8] hover:underline">
                     Voir les offres →
                   </Link>
@@ -770,7 +812,7 @@ export default function HomePage() {
               <div className="mt-6 rounded-lg border border-[#1d4ed8]/30 bg-[#eff6ff] px-5 py-4">
                 <p className="font-semibold text-[#0f172a]">
                   Le coût réel d&apos;un assistant en CDI en France ? ~5 050 €/mois (salaire + charges + bureau + RH). 
-                  Nos assistants virtuels : à partir de 215 €/mois, tout compris — jusqu&apos;à ~75 % d&apos;économie.
+                  Nos assistants virtuels : à partir de 215 € TTC/mois, tout compris — jusqu&apos;à ~75 % d&apos;économie.
                 </p>
                 <Link href="/tarifs" className="mt-3 inline-block text-sm font-medium text-[#1d4ed8] hover:underline">
                   Voir le comparatif détaillé →
@@ -882,11 +924,14 @@ export default function HomePage() {
             <p className="mt-5 text-lg leading-relaxed text-[#334155]">
               Réponses aux questions les plus posées sur l&apos;assistant administratif externalisé.
             </p>
+            <p className="mt-4 text-sm font-medium text-[#0f172a]">
+              Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.
+            </p>
             <dl className="mt-12 space-y-8">
               {[
                 {
                   q: "Combien coûte un assistant administratif ?",
-                  a: "Chez BeWork, les offres démarrent à 215€/mois pour une formule Standard (120 actions/mois, soit ~20h), 415€/mois pour Business (240 actions) et 630€/mois pour Premium (360 actions). L'offre Découverte à 109€ permet de tester le service. Tout est inclus : pas de coût caché, pas de recrutement.",
+                  a: "Chez BeWork, tous les tarifs affichés sont TTC, sans frais supplémentaires. Les offres démarrent à 215 € TTC/mois pour la formule Standard (120 actions/mois, soit environ 20 h d'assistance), 415 € TTC/mois pour Business (240 actions) et 630 € TTC/mois pour Premium (360 actions). L'offre Découverte à 109 € TTC permet de tester le service. Tout est inclus : pas de coût caché, pas de recrutement.",
                 },
                 {
                   q: "Comment fonctionne un assistant administratif externalisé ?",
@@ -914,7 +959,7 @@ export default function HomePage() {
                   "@context": "https://schema.org",
                   "@type": "FAQPage",
                   mainEntity: [
-                    { "@type": "Question", name: "Combien coûte un assistant administratif ?", acceptedAnswer: { "@type": "Answer", text: "Chez BeWork, les offres démarrent à 215€/mois pour une formule Standard (120 actions/mois), 415€/mois pour Business et 630€/mois pour Premium. L'offre Découverte à 109€ permet de tester le service. Tout est inclus." } },
+                    { "@type": "Question", name: "Combien coûte un assistant administratif ?", acceptedAnswer: { "@type": "Answer", text: "Tous nos tarifs sont TTC, sans frais supplémentaires. Offres dès 215 € TTC/mois (Standard, 120 actions), 415 € TTC/mois (Business), 630 € TTC/mois (Premium), 109 € TTC (Découverte). Tout inclus, sans recrutement." } },
                     { "@type": "Question", name: "Comment fonctionne un assistant administratif externalisé ?", acceptedAnswer: { "@type": "Answer", text: "Vous envoyez vos tâches via la plateforme BeWork, un assistant dédié les traite à distance, vous suivez l'avancement en temps réel et recevez les livrables. Sans recrutement ni infrastructure." } },
                     { "@type": "Question", name: "Qui réalise les missions ?", acceptedAnswer: { "@type": "Answer", text: "Des assistants francophones diplômés Bac+5, formés à l'IA, encadrés par notre agence en région parisienne. Direction et supervision en France." } },
                     { "@type": "Question", name: "Quel est le délai de traitement ?", acceptedAnswer: { "@type": "Answer", text: "Réponse moyenne en moins de 2 heures. Les tâches urgentes sont priorisées. Notre équipe en France assure une coordination fluide." } },

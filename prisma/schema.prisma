@@ -33,7 +33,7 @@ model User {
   contractStatus  ContractStatus @default(PENDING)
   signedAt        DateTime?
   yousignSignatureRequestId String?  // ID de la demande Yousign
-  // Facturation par actions (1 action = 10 min)
+  // Facturation par actions (1 action = 12 min, 5 actions ≈ 1 h)
   subscriptionPlan   String?   // STANDARD | STANDARD_PLUS | PREMIUM | FULLTIME
   monthlyActionsTotal Int      @default(120)  // selon abonnement
   monthlyActionsUsed  Int      @default(0)    // consommées ce mois

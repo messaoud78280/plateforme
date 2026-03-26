@@ -7,10 +7,10 @@ import { BeWorkLogo } from "@/components/BeWorkLogo";
 type TakenSlot = { date: string; time: string };
 
 const FORMULES = [
-  { id: "decouverte", label: "Offre Découverte (109€ — jusqu’à 60 actions)", value: "Offre Découverte" },
-  { id: "standard", label: "Standard (215€/mois — 120 actions)", value: "Standard" },
-  { id: "business", label: "Business (415€/mois — 240 actions)", value: "Business" },
-  { id: "premium", label: "Premium (630€/mois — 360 actions)", value: "Premium" },
+  { id: "decouverte", label: "Offre Découverte (109 € TTC — jusqu’à 60 actions)", value: "Offre Découverte" },
+  { id: "standard", label: "Standard (215 € TTC/mois — 120 actions)", value: "Standard" },
+  { id: "business", label: "Business (415 € TTC/mois — 240 actions)", value: "Business" },
+  { id: "premium", label: "Premium (630 € TTC/mois — 360 actions)", value: "Premium" },
   { id: "sur-mesure", label: "Sur-mesure / À définir", value: "Sur-mesure" },
 ];
 
@@ -162,6 +162,9 @@ export default function ContactForm() {
         </h1>
         <p className="mt-2 text-[#334155]">
           Renseignez vos informations et choisissez un créneau pour un premier rendez-vous en visioconférence. Nous vous recontacterons par email et vous expliquerons lors du RDV notre mode opératoire pour travailler ensemble et les conditions.
+        </p>
+        <p className="mt-3 text-sm font-semibold text-[#0f172a]">
+          Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.
         </p>
 
         <div className="mt-8 rounded-2xl border border-[#c8cdd6] bg-[#f8f9fb] p-4 text-sm text-[#334155]">

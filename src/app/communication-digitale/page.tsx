@@ -4,14 +4,15 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
+import { absoluteUrl } from "@/lib/site";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://bework.fr";
+const pageUrl = absoluteUrl("/communication-digitale");
 
 export const metadata: Metadata = {
   title: "Tarifs communication digitale | Packs visibilité en ligne",
   description:
     "Tarifs des packs communication digitale BeWork : visibilité locale (Google Business), réseaux sociaux, site vitrine. De 149€ à 449€/mois. Développez votre présence en ligne.",
-  alternates: { canonical: `${BASE_URL}/communication-digitale` },
+  alternates: { canonical: pageUrl },
 };
 
 const PACKS = [

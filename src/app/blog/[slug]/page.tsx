@@ -2,13 +2,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
+import type { BlogSlug } from "@/content/blog-slugs";
+import { absoluteUrl, SITE_URL } from "@/lib/site";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://bework.fr";
+type BlogArticle = {
+  title: string;
+  description: string;
+  body: { type: "h2" | "p"; content: string }[];
+};
 
-const ARTICLES: Record<
-  string,
-  { title: string; description: string; body: { type: "h2" | "p"; content: string }[] }
-> = {
+const ARTICLES: Record<BlogSlug, BlogArticle> = {
   "10-taches-administratives-deleguer-dirigeant": {
     title: "10 tâches administratives à déléguer quand on est dirigeant",
     description:
@@ -39,10 +42,10 @@ const ARTICLES: Record<
   "combien-coute-assistant-administratif": {
     title: "Combien coûte un assistant administratif ?",
     description:
-      "Comparatif des coûts : assistant administratif externalisé vs salarié. Dès 215€/mois chez BeWork pour les PME.",
+      "Comparatif des coûts : assistant administratif externalisé vs salarié. Dès 215 € TTC/mois chez BeWork pour les PME.",
     body: [
       { type: "h2", content: "Assistant administratif externalisé : les tarifs BeWork" },
-      { type: "p", content: "BeWork propose des forfaits dès 215€/mois (formule Standard, 120 actions/mois soit ~20h), 415€/mois (Business, 240 actions) et 630€/mois (Premium, 360 actions). L'offre Découverte à 109€ permet de tester le service. Tout est inclus : pas de charges sociales, pas de recrutement." },
+      { type: "p", content: "BeWork propose des forfaits dès 215 € TTC/mois (formule Standard, 120 actions/mois, soit environ 20 h d'assistance), 415 € TTC/mois (Business, 240 actions) et 630 € TTC/mois (Premium, 360 actions). L'offre Découverte à 109 € TTC permet de tester le service. Tout est inclus : pas de charges sociales, pas de recrutement." },
       { type: "h2", content: "Assistant en interne : le coût réel" },
       { type: "p", content: "Un assistant administratif en CDI en Europe coûte environ 5 050€/mois (salaire brut + charges + bureau + matériel + recrutement). Soit jusqu'à 75 % plus cher qu'une solution externalisée." },
       { type: "h2", content: "Pourquoi externaliser coûte moins cher ?" },
@@ -55,7 +58,7 @@ const ARTICLES: Record<
       "Comparatif assistant administratif externalisé vs recrutement interne. Avantages et inconvénients pour les PME.",
     body: [
       { type: "h2", content: "Assistant virtuel (externalisé) : avantages" },
-      { type: "p", content: "Coût maîtrisé (dès 215€/mois), pas de recrutement, pas de charges sociales, scalabilité selon les besoins, opérationnel rapidement, supervision en France avec BeWork." },
+      { type: "p", content: "Coût maîtrisé (dès 215 € TTC/mois), pas de recrutement, pas de charges sociales, scalabilité selon les besoins, opérationnel rapidement, supervision en France avec BeWork." },
       { type: "h2", content: "Assistant salarié : avantages" },
       { type: "p", content: "Présence physique possible, lien direct si besoin d'un bureau sur site. En revanche, coût élevé (~5 050€/mois), charges, recrutement, formation." },
       { type: "h2", content: "Pour qui choisir quoi ?" },
@@ -144,19 +147,50 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const article = ARTICLES[slug];
+  const article = ARTICLES[slug as BlogSlug];
   if (!article) return { title: "Article non trouvé | BeWork" };
+  const url = absoluteUrl(`/blog/${slug}`);
   return {
     title: `${article.title} | BeWork Blog`,
     description: article.description,
-    alternates: { canonical: `${BASE_URL}/blog/${slug}` },
+    alternates: { canonical: url, languages: { fr: url } },
+    openGraph: {
+      type: "article",
+      locale: "fr_FR",
+      url,
+      siteName: "BeWork",
+      title: article.title,
+      description: article.description,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description: article.description,
+    },
+    robots: { index: true, follow: true },
   };
 }
 
 export default async function BlogArticlePage({ params }: Props) {
   const { slug } = await params;
-  const article = ARTICLES[slug];
+  const article = ARTICLES[slug as BlogSlug];
   if (!article) notFound();
+
+  const pageUrl = absoluteUrl(`/blog/${slug}`);
+  const blogPostingLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: article.title,
+    description: article.description,
+    inLanguage: "fr-FR",
+    url: pageUrl,
+    mainEntityOfPage: { "@type": "WebPage", "@id": pageUrl },
+    publisher: {
+      "@type": "Organization",
+      name: "BeWork",
+      url: SITE_URL,
+    },
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
@@ -175,11 +209,15 @@ export default async function BlogArticlePage({ params }: Props) {
       </header>
 
       <main className="px-6 py-16 md:py-24">
-        <article className="mx-auto max-w-2xl">
+        <article className="mx-auto max-w-2xl" itemScope itemType="https://schema.org/BlogPosting">
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingLd) }}
+          />
           <Link href="/blog" className="text-sm font-medium text-[#1d4ed8] hover:underline">
             ← Retour au blog
           </Link>
-          <h1 className="mt-6 text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
+          <h1 className="mt-6 text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl" itemProp="headline">
             {article.title}
           </h1>
           <div className="mt-12 space-y-6 text-[#334155]">
@@ -197,7 +235,7 @@ export default async function BlogArticlePage({ params }: Props) {
           </div>
           <div className="mt-12 rounded-xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-8">
             <p className="font-semibold text-[#0f172a]">Prêt à déléguer votre administratif ?</p>
-            <p className="mt-2 text-[#334155]">BeWork propose un assistant administratif externalisé dès 215€/mois.</p>
+            <p className="mt-2 text-[#334155]">BeWork propose un assistant administratif externalisé dès 215 € TTC/mois.</p>
             <Link
               href="/inscription"
               className="mt-4 inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white hover:bg-[#1e40af]"

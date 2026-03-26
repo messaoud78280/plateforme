@@ -89,14 +89,14 @@ export default function HomePage() {
         {/* Hero + Comment ça marche */}
         <section id="hero" className="px-6 pt-24 pb-24 md:pt-32 md:pb-32" style={{ scrollMarginTop: "6rem" }}>
           <div className="mx-auto max-w-6xl">
-            <div className="grid gap-12 lg:grid-cols-2 lg:items-start">
-              <div className="space-y-8 text-center md:text-left">
+            <div className="grid gap-8 lg:grid-cols-2 lg:items-stretch lg:gap-10">
+              <div className="flex flex-col gap-8 text-center md:text-left">
                 <h1 className="text-balance text-3xl font-bold leading-[1.15] tracking-tight text-[#0f172a] md:text-4xl lg:text-5xl lg:leading-[1.1]">
                   Gagnez du temps. Déléguez votre administratif.
                 </h1>
                 <Link
                   href="/tarifs"
-                  className="group mx-auto flex max-w-xl flex-col gap-3 rounded-2xl border-2 border-[#1d4ed8]/30 bg-gradient-to-br from-[#f8fafc] via-white to-[#eff6ff] px-6 py-5 text-left shadow-lg shadow-[#1d4ed8]/10 transition hover:border-[#1d4ed8]/55 hover:shadow-xl md:mx-0"
+                  className="group mx-auto flex w-full max-w-xl flex-col gap-3 rounded-2xl border-2 border-[#e2e8f0] border-l-[4px] border-l-[#1d4ed8] bg-gradient-to-br from-[#f8fafc] via-white to-[#eff6ff] px-6 py-6 text-left shadow-sm transition hover:border-[#cbd5e1] hover:shadow-md md:mx-0 md:max-w-none"
                 >
                   <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#1d4ed8]">
                     Offre phare
@@ -154,9 +154,9 @@ export default function HomePage() {
               </div>
               <div
                 id="comment-ca-marche"
-                className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm"
+                className="flex h-full flex-col rounded-2xl border-2 border-[#e2e8f0] bg-white/95 p-6 shadow-sm md:p-7"
               >
-                <div className="text-center mb-6">
+                <div className="mb-5 text-center md:mb-6">
                   <h2 className="text-lg font-semibold text-[#0f172a] md:text-xl">
                     Comment ça marche
                   </h2>
@@ -164,21 +164,24 @@ export default function HomePage() {
                     Un parcours simple pour déléguer votre administratif en toute sérénité.
                   </p>
                 </div>
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid flex-1 auto-rows-fr gap-3 sm:grid-cols-2 sm:gap-4">
                   {[
                     { step: 1, title: "Vous envoyez vos tâches", icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" },
                     { step: 2, title: "Votre assistant les traite", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" },
                     { step: 3, title: "Vous suivez l'avancement sur la plateforme", icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
                     { step: 4, title: "Vous gagnez du temps sur votre activité", icon: "M12 8v4l3 3m6-3a9 10.5 0 11-21 0 10.5 0 21 0z" },
                   ].map((item) => (
-                    <div key={item.step} className="card-frame rounded-xl p-4 text-center transition-transform hover:scale-[1.02]">
-                      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[#eff6ff] text-[#1d4ed8]">
-                        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <div
+                      key={item.step}
+                      className="card-frame flex min-h-[7.5rem] flex-col items-center justify-center rounded-xl p-4 text-center transition-transform hover:scale-[1.01]"
+                    >
+                      <div className="mx-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#eff6ff] text-[#1d4ed8] md:h-12 md:w-12">
+                        <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
                         </svg>
                       </div>
                       <span className="mt-2 block text-xs font-medium text-[#64748b]">Étape {item.step}</span>
-                      <h3 className="mt-1 text-sm font-semibold text-[#0f172a]">{item.title}</h3>
+                      <h3 className="mt-1 px-1 text-sm font-semibold leading-snug text-[#0f172a]">{item.title}</h3>
                     </div>
                   ))}
                 </div>
@@ -188,37 +191,39 @@ export default function HomePage() {
         </section>
 
         {/* Deux propositions tarifaires distinctes */}
-        <section id="tarifs" className="px-6 py-16 md:py-20 bg-white/60 rounded-2xl mx-4 md:mx-6 max-w-6xl md:mx-auto scroll-mt-24" style={{ scrollMarginTop: "6rem" }}>
-          <div className="mx-auto max-w-6xl text-center">
-            <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
-              Choisissez vos tarifs
-            </h2>
-            <p className="mt-3 max-w-2xl mx-auto text-[#334155]">
-              BeWork propose deux offres complémentaires. Sélectionnez celle qui correspond à vos besoins.
-            </p>
-            <div className="mt-10 flex justify-center">
-              <Link
-                href="/tarifs"
-                className="group flex w-full max-w-md flex-col rounded-2xl border-2 border-[#e2e8f0] bg-white p-6 text-left transition hover:border-[#1d4ed8] hover:shadow-lg"
-              >
-                <span className="text-sm font-medium text-[#64748b]">Assistance administrative</span>
-                <h3 className="mt-1 text-lg font-semibold text-[#0f172a]">Tarifs BeWork</h3>
-                <p className="mt-2 text-sm text-[#334155]">
-                  Assistant virtuel, devis, factures, relances, suivi dossiers… Dès 109 € TTC pour tester.
-                </p>
-                <p className="mt-3 text-base font-bold text-[#1d4ed8]">
-                  <span className="tabular-nums">215</span> € <span className="text-sm font-semibold text-[#64748b]">TTC</span> / mois →
-                </p>
-                <p className="mt-2 text-xs text-[#64748b]">TTC, sans frais cachés · Démarrage rapide</p>
-              </Link>
+        <section id="tarifs" className="scroll-mt-24 px-6 py-16 md:py-20" style={{ scrollMarginTop: "6rem" }}>
+          <div className="mx-auto max-w-6xl rounded-2xl border border-[#d8dee9] bg-white/75 px-6 py-12 shadow-sm md:px-10 md:py-16">
+            <div className="mx-auto max-w-3xl text-center">
+              <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
+                Choisissez vos tarifs
+              </h2>
+              <p className="mt-3 text-[#334155]">
+                BeWork propose deux offres complémentaires. Sélectionnez celle qui correspond à vos besoins.
+              </p>
+              <div className="mt-10 flex justify-center">
+                <Link
+                  href="/tarifs"
+                  className="group flex w-full max-w-md flex-col rounded-2xl border-2 border-[#e2e8f0] bg-white p-6 text-left shadow-sm transition hover:border-[#1d4ed8]/40 hover:shadow-md"
+                >
+                  <span className="text-sm font-medium text-[#64748b]">Assistance administrative</span>
+                  <h3 className="mt-1 text-lg font-semibold text-[#0f172a]">Tarifs BeWork</h3>
+                  <p className="mt-2 text-sm text-[#334155]">
+                    Assistant virtuel, devis, factures, relances, suivi dossiers… Dès 109 € TTC pour tester.
+                  </p>
+                  <p className="mt-3 text-base font-bold text-[#1d4ed8]">
+                    <span className="tabular-nums">215</span> € <span className="text-sm font-semibold text-[#64748b]">TTC</span> / mois →
+                  </p>
+                  <p className="mt-2 text-xs text-[#64748b]">TTC, sans frais cachés · Démarrage rapide</p>
+                </Link>
+              </div>
             </div>
           </div>
         </section>
 
         {/* Pourquoi externaliser son administratif */}
-        <section id="pourquoi-externaliser" className="px-6 py-16 md:py-20 bg-white/60 rounded-2xl mx-4 md:mx-6 max-w-6xl md:mx-auto scroll-mt-24" style={{ scrollMarginTop: "6rem" }}>
-          <div className="mx-auto max-w-6xl">
-            <div className="text-center mb-12">
+        <section id="pourquoi-externaliser" className="scroll-mt-24 px-6 py-16 md:py-20" style={{ scrollMarginTop: "6rem" }}>
+          <div className="mx-auto max-w-6xl rounded-2xl border border-[#d8dee9] bg-white/75 px-6 py-12 shadow-sm md:px-10 md:py-16">
+            <div className="text-center mb-10 md:mb-12">
               <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
                 Pourquoi externaliser son administratif ?
               </h2>
@@ -226,7 +231,7 @@ export default function HomePage() {
                 Externaliser votre administratif avec un assistant virtuel entreprise permet de recentrer vos équipes sur votre cœur de métier tout en sécurisant les tâches de secrétariat, facturation et suivi.
               </p>
             </div>
-            <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 md:items-stretch">
               {[
                 "Gain de temps : déchargez-vous des tâches chronophages et concentrez-vous sur votre activité.",
                 "Coût maîtrisé : pas de recrutement ni de charges sociales — un forfait tout compris dès 215 € TTC/mois.",
@@ -235,7 +240,7 @@ export default function HomePage() {
                 "Qualité : équipe francophone Bac+5, formée à l'IA, supervisée en France.",
                 "Souplesse : externaliser administratif PME sans engagement long terme.",
               ].map((item, i) => (
-                <li key={i} className="card-frame flex gap-3 rounded-lg p-5">
+                <li key={i} className="card-frame flex h-full gap-3 rounded-xl p-5">
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8] text-sm font-bold">✓</span>
                   <span className="text-[#334155] leading-relaxed">{item}</span>
                 </li>
@@ -256,8 +261,8 @@ export default function HomePage() {
               </p>
             </div>
             <div className="card-frame rounded-2xl border-2 border-[#1d4ed8]/20 overflow-hidden bg-white">
-              <div className="grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[#e2e8f0]">
-                <div className="p-8 md:p-10">
+              <div className="grid divide-y divide-[#e2e8f0] md:grid-cols-2 md:items-stretch md:divide-x md:divide-y-0">
+                <div className="flex flex-col p-8 md:p-10">
                   <h3 className="text-lg font-bold text-[#0f172a]">Assistant en interne (Europe)</h3>
                   <ul className="mt-4 space-y-2 text-[#334155]">
                     {["Salaire brut", "Charges sociales", "Bureau & matériel", "Recrutement & formation"].map((line) => (
@@ -266,9 +271,9 @@ export default function HomePage() {
                       </li>
                     ))}
                   </ul>
-                  <p className="mt-6 text-2xl font-bold text-[#64748b]">~5 050 € / mois</p>
+                  <p className="mt-auto pt-6 text-2xl font-bold text-[#64748b]">~5 050 € / mois</p>
                 </div>
-                <div className="p-8 md:p-10 bg-[#eff6ff]/50">
+                <div className="flex flex-col bg-[#eff6ff]/50 p-8 md:p-10">
                   <h3 className="text-lg font-bold text-[#1d4ed8]">Assistant via BeWork</h3>
                   <ul className="mt-4 space-y-2 text-[#334155]">
                     {["Un seul forfait tout compris", "Aucun coût de recrutement", "Aucune charge sociale", "Plateforme incluse"].map((line) => (
@@ -277,7 +282,7 @@ export default function HomePage() {
                       </li>
                     ))}
                   </ul>
-                  <p className="mt-6 text-2xl font-bold text-[#1d4ed8]">
+                  <p className="mt-auto pt-6 text-2xl font-bold text-[#1d4ed8]">
                     <span className="tabular-nums">215</span> € <span className="text-base font-semibold text-[#64748b]">TTC</span> / mois
                   </p>
                   <Link href="/tarifs" className="mt-4 inline-block text-sm font-semibold text-[#1d4ed8] hover:underline">
@@ -295,15 +300,15 @@ export default function HomePage() {
             <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl text-center mb-10">
               Ils nous font confiance
             </h2>
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 mb-12">
+            <div className="mb-12 grid gap-8 md:grid-cols-2 md:items-stretch lg:grid-cols-4">
               {[
                 { sector: "PME BTP", quote: "Une équipe réactive pour nos devis et notre suivi chantiers." },
                 { sector: "Agence immobilière", quote: "Gestion des dossiers et relances clients simplifiée." },
                 { sector: "Cabinet de conseil", quote: "Support admin qui nous permet de nous concentrer sur le conseil." },
                 { sector: "Agence de recrutement", quote: "Coordination et suivi candidats en toute sérénité." },
               ].map((item) => (
-                <div key={item.sector} className="card-frame rounded-xl p-6">
-                  <p className="text-[#334155] leading-relaxed italic">&ldquo;{item.quote}&rdquo;</p>
+                <div key={item.sector} className="card-frame flex h-full flex-col rounded-xl p-6">
+                  <p className="flex-1 text-[#334155] leading-relaxed italic">&ldquo;{item.quote}&rdquo;</p>
                   <p className="mt-4 text-sm font-semibold text-[#1d4ed8]">{item.sector}</p>
                 </div>
               ))}
@@ -392,7 +397,7 @@ export default function HomePage() {
             </div>
 
             {/* 3 fonctionnalités clés */}
-            <div className="grid gap-10 md:grid-cols-3 md:gap-8">
+            <div className="grid gap-10 md:grid-cols-3 md:items-stretch md:gap-8">
               {[
                 {
                   title: "Créer une demande",
@@ -410,7 +415,7 @@ export default function HomePage() {
                   icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
                 },
               ].map((item, i) => (
-                <div key={i} className="rounded-xl border border-[#e2e8f0] bg-white p-6 text-left shadow-sm">
+                <div key={i} className="flex h-full flex-col rounded-xl border-2 border-[#e2e8f0] bg-white p-6 text-left shadow-sm">
                   <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8]">
                     <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
@@ -436,7 +441,7 @@ export default function HomePage() {
                 Équipe francophone, dédiée et opérationnelle.
               </p>
             </div>
-            <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <ul className="grid gap-6 md:grid-cols-2 md:items-stretch lg:grid-cols-3">
               {[
                 "Aucun coût de recrutement ni d'infrastructure : votre assistant est opérationnel après l'onboarding.",
                 "Main-d'œuvre qualifiée, 100% francophone, motivée et encadrée.",
@@ -445,7 +450,7 @@ export default function HomePage() {
                 "Garantie : satisfait ou remplacé rapidement.",
                 "Direction et supervision opérationnelle en France pour rester au plus proche de vos attentes.",
               ].map((item, i) => (
-                <li key={i} className="card-frame flex gap-3 rounded-lg p-5">
+                <li key={i} className="card-frame flex h-full gap-3 rounded-xl p-5">
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#1d4ed8] text-white text-sm font-bold">
                     {i + 1}
                   </span>
@@ -459,7 +464,7 @@ export default function HomePage() {
         {/* Lien pilier tâches */}
         <section className="px-6 py-8 md:py-10">
           <div className="mx-auto max-w-6xl">
-            <div className="card-frame rounded-xl border-2 border-[#1d4ed8]/20 bg-white p-6 text-center md:p-8">
+            <div className="card-frame rounded-2xl border-2 border-[#e2e8f0] border-l-[4px] border-l-[#1d4ed8] bg-white p-6 text-center shadow-sm md:p-8">
               <p className="text-lg font-semibold text-[#0f172a]">
                 Découvrez les tâches prises en charge par nos assistants administratifs externalisés
               </p>
@@ -491,8 +496,8 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid gap-8 md:grid-cols-3 md:gap-10">
-              <div className="card-frame rounded-lg p-8">
+            <div className="grid gap-8 md:grid-cols-3 md:items-stretch md:gap-10">
+              <div className="card-frame flex h-full flex-col rounded-xl p-8">
                 <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8]">
                   <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -501,12 +506,12 @@ export default function HomePage() {
                 <p className="text-lg font-semibold text-[#0f172a]">
                   Suivi de dossiers et projets
                 </p>
-                <p className="mt-3 text-[#334155] leading-relaxed">
+                <p className="mt-3 flex-1 text-[#334155] leading-relaxed">
                   Avancement, échéances, priorités : nos assistants assurent un
                   suivi clair et réactif de vos dossiers.
                 </p>
               </div>
-              <div className="card-frame rounded-lg p-8">
+              <div className="card-frame flex h-full flex-col rounded-xl p-8">
                 <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8]">
                   <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -515,12 +520,12 @@ export default function HomePage() {
                 <p className="text-lg font-semibold text-[#0f172a]">
                   Gestion documentaire
                 </p>
-                <p className="mt-3 text-[#334155] leading-relaxed">
+                <p className="mt-3 flex-1 text-[#334155] leading-relaxed">
                   Saisie, classement, mise à jour et partage de documents :
                   une organisation irréprochable.
                 </p>
               </div>
-              <div className="card-frame rounded-lg p-8">
+              <div className="card-frame flex h-full flex-col rounded-xl p-8">
                 <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8]">
                   <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -529,7 +534,7 @@ export default function HomePage() {
                 <p className="text-lg font-semibold text-[#0f172a]">
                   Coordination & communication
                 </p>
-                <p className="mt-3 text-[#334155] leading-relaxed">
+                <p className="mt-3 flex-1 text-[#334155] leading-relaxed">
                   Relances, synthèses, compte-rendu : des échanges professionnels
                   et tracés avec vos interlocuteurs.
                 </p>
@@ -547,7 +552,7 @@ export default function HomePage() {
             <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#334155]">
               Une palette de missions pour PME, TPE, indépendants et agences : agilité, stabilité et sécurité.
             </p>
-            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-12 grid gap-6 sm:grid-cols-2 sm:items-stretch lg:grid-cols-3">
               {[
                 { title: "Secrétariat & administration", keys: "Emails, téléphone, courriers, agenda, déplacements, classement, archivage" },
                 { title: "Comptabilité & finance", keys: "Factures, relances, suivi paiements, pré-comptabilité, rapprochements bancaires" },
@@ -557,9 +562,9 @@ export default function HomePage() {
                 { title: "Gestion de projets", keys: "Événements, coordination, planning, reporting" },
                 { title: "Achats & services généraux", keys: "Sourcing, commandes, relations fournisseurs, gestion des stocks" },
               ].map((item) => (
-                <div key={item.title} className="card-frame rounded-lg p-6">
+                <div key={item.title} className="card-frame flex h-full flex-col rounded-xl p-6">
                   <h3 className="text-lg font-semibold text-[#0f172a]">{item.title}</h3>
-                  <p className="mt-2 text-sm text-[#334155]">{item.keys}</p>
+                  <p className="mt-2 flex-1 text-sm text-[#334155]">{item.keys}</p>
                 </div>
               ))}
             </div>
@@ -575,10 +580,10 @@ export default function HomePage() {
             <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#334155]">
               Un assistant administratif externalisé s&apos;adapte à votre secteur : BTP, immobilier, PME, indépendants.
             </p>
-            <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-              <div className="card-frame rounded-xl p-6">
+            <div className="mt-12 grid gap-8 md:grid-cols-2 md:items-stretch lg:grid-cols-4">
+              <div className="card-frame flex h-full flex-col rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-[#1d4ed8]">BTP</h3>
-                <ul className="mt-4 space-y-2 text-sm text-[#334155]">
+                <ul className="mt-4 flex-1 space-y-2 text-sm text-[#334155]">
                   {["Devis chantiers", "Suivi des sous-traitants", "Relances factures fournisseurs", "Mise à jour planning"].map((m, i) => (
                     <li key={i}>• {m}</li>
                   ))}
@@ -587,9 +592,9 @@ export default function HomePage() {
                   En savoir plus →
                 </Link>
               </div>
-              <div className="card-frame rounded-xl p-6">
+              <div className="card-frame flex h-full flex-col rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-[#1d4ed8]">Immobilier</h3>
-                <ul className="mt-4 space-y-2 text-sm text-[#334155]">
+                <ul className="mt-4 flex-1 space-y-2 text-sm text-[#334155]">
                   {["Dossiers locataires", "Relances loyers", "État des lieux", "Gestion des demandes"].map((m, i) => (
                     <li key={i}>• {m}</li>
                   ))}
@@ -598,9 +603,9 @@ export default function HomePage() {
                   En savoir plus →
                 </Link>
               </div>
-              <div className="card-frame rounded-xl p-6">
+              <div className="card-frame flex h-full flex-col rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-[#1d4ed8]">PME</h3>
-                <ul className="mt-4 space-y-2 text-sm text-[#334155]">
+                <ul className="mt-4 flex-1 space-y-2 text-sm text-[#334155]">
                   {["Devis et factures clients", "Suivi des commandes", "Relances impayées", "Administratif RH"].map((m, i) => (
                     <li key={i}>• {m}</li>
                   ))}
@@ -609,9 +614,9 @@ export default function HomePage() {
                   En savoir plus →
                 </Link>
               </div>
-              <div className="card-frame rounded-xl p-6">
+              <div className="card-frame flex h-full flex-col rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-[#1d4ed8]">Indépendants</h3>
-                <ul className="mt-4 space-y-2 text-sm text-[#334155]">
+                <ul className="mt-4 flex-1 space-y-2 text-sm text-[#334155]">
                   {["Facturation", "Agenda et RDV", "Recherches fournisseurs", "Suivi administratif"].map((m, i) => (
                     <li key={i}>• {m}</li>
                   ))}
@@ -663,8 +668,8 @@ export default function HomePage() {
               </div>
             </div>
             <div className="card-frame mt-16 rounded-xl p-10 md:p-14">
-              <div className="grid gap-10 md:grid-cols-2 md:gap-14">
-                <div>
+              <div className="grid gap-10 md:grid-cols-2 md:items-stretch md:gap-14">
+                <div className="flex flex-col">
                   <p className="text-lg font-semibold text-[#0f172a]">
                     Agence principale — Région parisienne
                   </p>
@@ -679,7 +684,7 @@ export default function HomePage() {
                     accompagnement de haut niveau.
                   </p>
                 </div>
-                <div>
+                <div className="flex flex-col">
                   <p className="text-lg font-semibold text-[#0f172a]">
                     Plateforme opérationnelle internationale
                   </p>
@@ -703,14 +708,14 @@ export default function HomePage() {
             <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
               Pourquoi collaborer avec nous ?
             </h2>
-            <ul className="mt-8 grid gap-4 md:grid-cols-2">
+            <ul className="mt-8 grid gap-4 md:grid-cols-2 md:items-stretch">
               {[
                 "Interlocuteur principal en Île-de-France (Laure Olivie) : proximité et réactivité.",
                 "Plateforme internationale pilotée en temps réel depuis la France.",
                 "Même fuseau horaire qu'en France : collaboration sans décalage.",
                 "Assistants francophones, Bac+5, formés à l'IA et encadrés en continu.",
               ].map((item, i) => (
-                <li key={i} className="card-frame flex gap-3 rounded-lg p-4">
+                <li key={i} className="card-frame flex h-full gap-3 rounded-xl p-4">
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[#1d4ed8]/10 text-[#1d4ed8] text-xs font-bold">✓</span>
                   <span className="text-[#334155]">{item}</span>
                 </li>
@@ -728,7 +733,7 @@ export default function HomePage() {
             <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#334155]">
               Dirigeants, cadres, PME ou cabinets : nous nous adaptons à votre secteur et à vos process.
             </p>
-            <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="mt-12 grid gap-4 sm:grid-cols-2 sm:items-stretch lg:grid-cols-3 xl:grid-cols-4">
               {[
                 { name: "BTP", desc: "Devis, suivi chantiers, coordination" },
                 { name: "Immobilier", desc: "Dossiers, relances, gestion locative" },
@@ -741,11 +746,11 @@ export default function HomePage() {
                 <Link
                   key={sector.name}
                   href="/contact"
-                  className="card-frame group rounded-xl border-2 border-[#e2e8f0] bg-white p-6 text-left transition-all hover:border-[#1d4ed8] hover:shadow-md"
+                  className="card-frame group flex h-full flex-col rounded-xl border-2 border-[#e2e8f0] bg-white p-6 text-left transition-all hover:border-[#1d4ed8] hover:shadow-md"
                 >
                   <h3 className="text-lg font-semibold text-[#0f172a] group-hover:text-[#1d4ed8]">{sector.name}</h3>
-                  <p className="mt-2 text-sm text-[#64748b]">{sector.desc}</p>
-                  <span className="mt-3 inline-flex items-center text-sm font-medium text-[#1d4ed8] opacity-0 group-hover:opacity-100 transition-opacity">
+                  <p className="mt-2 flex-1 text-sm text-[#64748b]">{sector.desc}</p>
+                  <span className="mt-3 inline-flex items-center text-sm font-medium text-[#1d4ed8] opacity-0 transition-opacity group-hover:opacity-100">
                     Nous contacter →
                   </span>
                 </Link>
@@ -862,19 +867,19 @@ export default function HomePage() {
             <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#334155]">
               Un parcours structuré : découverte de vos besoins, proposition de profil par notre équipe, puis phase de démarrage avec un cadre clair.
             </p>
-            <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-12 grid gap-8 md:grid-cols-2 md:items-stretch lg:grid-cols-4">
               {[
                 { step: "1", title: "Call de découverte", desc: "Échange pour comprendre vos activités, vos préférences et les outils que vous utilisez. Pas de questionnaire automatisé : un vrai échange avec notre équipe." },
                 { step: "2", title: "Proposition de profil", desc: "L'équipe BeWork sélectionne et vous présente un ou plusieurs profils adaptés. Sélection humaine, pas par algorithme." },
                 { step: "3", title: "Validation et contrat", desc: "Vous validez le ou les profils, nous signons le cadre de collaboration et définissons les objectifs communs." },
                 { step: "4", title: "Onboarding et démarrage", desc: "Phase de démarrage avec un cadre défini : rôles, objectifs, rituels de communication. Mise en place des outils et démarrage opérationnel." },
               ].map((item) => (
-                <div key={item.step} className="card-frame rounded-lg p-6">
+                <div key={item.step} className="card-frame flex h-full flex-col rounded-xl p-6">
                   <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#1d4ed8] text-lg font-bold text-white">
                     {item.step}
                   </span>
                   <h3 className="mt-4 text-lg font-semibold text-[#0f172a]">{item.title}</h3>
-                  <p className="mt-2 text-[#334155] leading-relaxed">{item.desc}</p>
+                  <p className="mt-2 flex-1 text-[#334155] leading-relaxed">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -894,14 +899,14 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid gap-8 md:grid-cols-3 md:gap-10">
+            <div className="grid gap-8 md:grid-cols-3 md:items-stretch md:gap-10">
               {RESSOURCES_BLOG.map((r) => (
                 <div
                   key={r.title}
-                  className="card-frame rounded-lg p-8"
+                  className="card-frame flex h-full flex-col rounded-xl p-8"
                 >
                   <p className="text-lg font-semibold text-[#0f172a]">{r.title}</p>
-                  <p className="mt-4 text-[#334155] leading-relaxed">{r.desc}</p>
+                  <p className="mt-4 flex-1 text-[#334155] leading-relaxed">{r.desc}</p>
                   <Link
                     href={r.href}
                     className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-[#1d4ed8] transition-colors hover:text-[#1e40af]"

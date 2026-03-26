@@ -78,7 +78,7 @@ export function TaskConversation({ projectId, projectTitle, sessionUserId }: Tas
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
+      <div className="rounded-xl surface-metallic-light p-6">
         <h2 className="mb-4 text-lg font-semibold text-slate-800">Conversation</h2>
         <p className="text-sm text-slate-500">Chargement des messages...</p>
       </div>
@@ -86,7 +86,7 @@ export function TaskConversation({ projectId, projectTitle, sessionUserId }: Tas
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-6">
+    <div className="rounded-xl surface-metallic-light p-6">
       <h2 className="mb-4 text-lg font-semibold text-slate-800">Conversation liée à la demande</h2>
       <p className="mb-4 text-sm text-slate-500">Projet : {projectTitle}</p>
 

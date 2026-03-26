@@ -68,7 +68,7 @@ export function CopiloteAdmin() {
   };
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-2xl surface-metallic-light p-6">
       <h2 className="text-lg font-semibold text-slate-800">Copilote administratif</h2>
       <p className="mt-0.5 text-sm text-slate-500">
         Identifiez rapidement des tâches à déléguer et gagnez du temps.

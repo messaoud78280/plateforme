@@ -154,7 +154,7 @@ export function NouvelleDemandeModal({ open, onClose }: Props) {
         onClick={onClose}
         aria-hidden="true"
       />
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl">
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl surface-metallic-light shadow-xl">
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4">
           <h2 id="nouvelle-demande-title" className="text-xl font-bold text-slate-800">
             Nouvelle demande
@@ -339,7 +339,7 @@ export function NouvelleDemandeModal({ open, onClose }: Props) {
                 {files.length > 0 && (
                   <ul className="mt-2 space-y-1">
                     {files.map((f, i) => (
-                      <li key={i} className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
+                      <li key={i} className="flex items-center justify-between rounded-lg surface-metallic-light px-3 py-2 text-sm">
                         <span className="min-w-0 truncate text-slate-800">{f.name}</span>
                         <span className="shrink-0 text-slate-400">{formatSize(f.size)}</span>
                         <button type="button" onClick={() => removeFile(i)} className="shrink-0 text-red-600 hover:underline">Retirer</button>

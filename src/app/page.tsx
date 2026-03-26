@@ -51,13 +51,13 @@ export default function HomePage() {
             <div className="flex items-center gap-3">
               <Link
                 href="/connexion"
-                className="rounded-lg border border-[#c8cdd6] bg-white px-5 py-2.5 text-sm font-medium text-[#1e293b] shadow-sm transition-all hover:bg-[#f8f9fb]"
+                className="rounded-lg surface-metallic-light px-5 py-2.5 text-sm font-medium text-[#1e293b] shadow-sm transition-all hover:bg-[#f8f9fb]"
               >
                 Connexion
               </Link>
               <Link
                 href="/contact"
-                className="hidden rounded-lg border border-[#c8cdd6] bg-white px-5 py-2.5 text-sm font-medium text-[#1e293b] shadow-sm transition-all hover:border-[#9ca3af] hover:bg-[#f8f9fb] sm:inline-flex"
+                className="hidden rounded-lg surface-metallic-light px-5 py-2.5 text-sm font-medium text-[#1e293b] shadow-sm transition-all hover:border-[#9ca3af] hover:bg-[#f8f9fb] sm:inline-flex"
               >
                 Contact
               </Link>
@@ -71,7 +71,7 @@ export default function HomePage() {
           </div>
           {/* Ligne 2 : Navigation — chaque lien sur une seule ligne */}
           <nav className="mt-3 hidden flex-wrap items-center justify-center gap-x-5 gap-y-1 border-t border-[#e0e4ea] pt-3 text-sm font-medium text-[#334155] md:flex">
-            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#comment-ca-marche">Comment ça marche</a>
+            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#comment-ca-marche">Parcours client</a>
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#roi">Économies</a>
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#solutions">Solutions</a>
             <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#secteurs">Secteurs</a>
@@ -86,41 +86,43 @@ export default function HomePage() {
       </header>
 
       <main className="pt-0">
-        {/* Hero + Comment ça marche */}
+        {/* Hero + parcours client (4 étapes) */}
         <section id="hero" className="px-6 pt-24 pb-24 md:pt-32 md:pb-32" style={{ scrollMarginTop: "6rem" }}>
           <div className="mx-auto max-w-6xl">
             <div className="grid gap-8 lg:grid-cols-2 lg:items-stretch lg:gap-10">
               <div className="flex flex-col gap-8 text-center md:text-left">
-                <h1 className="text-balance text-3xl font-bold leading-[1.15] tracking-tight text-[#0f172a] md:text-4xl lg:text-5xl lg:leading-[1.1]">
+                <h1 className="text-metallic-black text-balance text-3xl font-bold leading-[1.15] tracking-tight md:text-4xl lg:text-5xl lg:leading-[1.1]">
                   Gagnez du temps. Déléguez votre administratif.
                 </h1>
                 <Link
                   href="/tarifs"
-                  className="group mx-auto flex w-full max-w-xl flex-col gap-3 rounded-2xl border-2 border-[#e2e8f0] border-l-[4px] border-l-[#1d4ed8] bg-gradient-to-br from-[#f8fafc] via-white to-[#eff6ff] px-6 py-6 text-left shadow-sm transition hover:border-[#cbd5e1] hover:shadow-md md:mx-0 md:max-w-none"
+                  className="group surface-metallic-blue mx-auto flex w-full max-w-xl flex-col gap-3 rounded-2xl px-6 py-6 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#93c5fd]/80 md:mx-0 md:max-w-none"
                 >
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#1d4ed8]">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#93c5fd]">
                     Offre phare
                   </span>
                   <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
-                    <span className="text-4xl font-bold tracking-tight text-[#0f172a] tabular-nums md:text-[2.75rem]">
+                    <span className="text-4xl font-bold tracking-tight text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] tabular-nums md:text-[2.75rem]">
                       215
                     </span>
-                    <span className="text-xl font-semibold text-[#0f172a]">€</span>
-                    <span className="text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-[#64748b]">TTC</span>
-                    <span className="text-lg font-semibold text-[#64748b]">/ mois</span>
+                    <span className="text-xl font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]">€</span>
+                    <span className="text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-[#cbd5e1]">TTC</span>
+                    <span className="text-lg font-semibold text-[#cbd5e1]">/ mois</span>
                   </div>
-                  <div className="space-y-1.5 text-sm leading-snug text-[#334155]">
-                    <p className="font-medium text-[#0f172a]">≈ 20 h incluses</p>
-                    <p className="font-medium text-[#0f172a]">À partir de 10 €/h</p>
-                    <p className="pt-1 text-[#475569]">
+                  <div className="space-y-1.5 text-sm leading-snug text-[#e2e8f0]">
+                    <p className="font-medium text-white">≈ 20 h incluses</p>
+                    <p className="font-medium text-white">À partir de 10 €/h</p>
+                    <p className="pt-1 text-[#cbd5e1]">
                       Moins cher qu&apos;un recrutement, sans charges ni engagement.
                     </p>
-                    <p className="text-[#475569]">Vous payez uniquement ce dont vous avez besoin.</p>
+                    <p className="text-[#cbd5e1]">Vous payez uniquement ce dont vous avez besoin.</p>
                   </div>
-                  <p className="text-[11px] leading-relaxed text-[#64748b]">
+                  <p className="text-[11px] leading-relaxed text-[#94a3b8]">
                     TTC, sans frais cachés · Sans engagement long terme · Démarrage rapide
                   </p>
-                  <span className="text-xs font-semibold text-[#1d4ed8] group-hover:underline">Voir les tarifs →</span>
+                  <span className="text-xs font-semibold text-[#93c5fd] group-hover:text-white group-hover:underline">
+                    Voir les tarifs →
+                  </span>
                 </Link>
                 <p className="max-w-xl text-lg font-medium leading-relaxed text-[#0f172a] md:text-xl mx-auto md:mx-0">
                   Une solution simple, sans recrutement, pour déléguer votre administratif dès aujourd&apos;hui.
@@ -135,9 +137,10 @@ export default function HomePage() {
                   </Link>
                   <Link
                     href="#comment-ca-marche"
-                    className="inline-flex rounded-lg border border-[#e2e8f0] bg-white px-6 py-3.5 text-base font-medium text-[#334155] transition-all hover:border-[#c8cdd6] hover:bg-[#f8fafc]"
+                    className="inline-flex rounded-lg surface-metallic-light px-6 py-3.5 text-base font-medium text-[#334155] transition-all hover:border-[#c8cdd6] hover:bg-[#f8fafc]"
+                    aria-label="Voir le parcours client en quatre étapes"
                   >
-                    Comment ça marche
+                    Voir le parcours
                   </Link>
                 </div>
                 <p className="text-sm text-[#64748b]">
@@ -154,34 +157,36 @@ export default function HomePage() {
               </div>
               <div
                 id="comment-ca-marche"
-                className="flex h-full flex-col rounded-2xl border-2 border-[#e2e8f0] bg-white/95 p-6 shadow-sm md:p-7"
+                className="surface-metallic-blue flex h-full flex-col rounded-2xl p-6 md:p-7"
               >
-                <div className="mb-5 text-center md:mb-6">
-                  <h2 className="text-lg font-semibold text-[#0f172a] md:text-xl">
-                    Comment ça marche
+                <div className="mb-5 md:mb-6">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#93c5fd]">
+                    Parcours client
+                  </span>
+                  <h2 className="mt-2 text-lg font-semibold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] md:text-xl">
+                    Votre parcours en 4 étapes
                   </h2>
-                  <p className="mt-2 text-sm text-[#334155]">
-                    Un parcours simple pour déléguer votre administratif en toute sérénité.
+                  <p className="mt-2 text-sm leading-snug text-[#cbd5e1]">
+                    De la demande à la livraison : un flux simple pour déléguer votre administratif.
                   </p>
                 </div>
                 <div className="grid flex-1 auto-rows-fr gap-3 sm:grid-cols-2 sm:gap-4">
                   {[
-                    { step: 1, title: "Vous envoyez vos tâches", icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" },
-                    { step: 2, title: "Votre assistant les traite", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" },
-                    { step: 3, title: "Vous suivez l'avancement sur la plateforme", icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
-                    { step: 4, title: "Vous gagnez du temps sur votre activité", icon: "M12 8v4l3 3m6-3a9 10.5 0 11-21 0 10.5 0 21 0z" },
+                    { step: 1, title: "Vous envoyez vos tâches" },
+                    { step: 2, title: "Votre assistant les traite" },
+                    { step: 3, title: "Vous suivez l'avancement sur la plateforme" },
+                    { step: 4, title: "Vous gagnez du temps sur votre activité" },
                   ].map((item) => (
                     <div
                       key={item.step}
-                      className="card-frame flex min-h-[7.5rem] flex-col items-center justify-center rounded-xl p-4 text-center transition-transform hover:scale-[1.01]"
+                      className="surface-metallic-blue surface-metallic-blue--inset flex min-h-[9rem] flex-col items-center rounded-2xl px-4 pb-5 pt-5 text-center sm:min-h-[9.5rem]"
                     >
-                      <div className="mx-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#eff6ff] text-[#1d4ed8] md:h-12 md:w-12">
-                        <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
-                        </svg>
-                      </div>
-                      <span className="mt-2 block text-xs font-medium text-[#64748b]">Étape {item.step}</span>
-                      <h3 className="mt-1 px-1 text-sm font-semibold leading-snug text-[#0f172a]">{item.title}</h3>
+                      <span className="relative inline-flex shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-white via-[#dbe6f2] to-[#8fa9c2] px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[#0c1f33] shadow-[0_3px_12px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.95)] ring-2 ring-white/35 sm:text-xs sm:tracking-[0.1em]">
+                        Étape {item.step}
+                      </span>
+                      <h3 className="mt-4 flex w-full max-w-[17rem] flex-1 flex-col justify-center text-balance text-sm font-semibold leading-snug text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)] sm:max-w-none">
+                        {item.title}
+                      </h3>
                     </div>
                   ))}
                 </div>
@@ -192,7 +197,7 @@ export default function HomePage() {
 
         {/* Deux propositions tarifaires distinctes */}
         <section id="tarifs" className="scroll-mt-24 px-6 py-16 md:py-20" style={{ scrollMarginTop: "6rem" }}>
-          <div className="mx-auto max-w-6xl rounded-2xl border border-[#d8dee9] bg-white/75 px-6 py-12 shadow-sm md:px-10 md:py-16">
+          <div className="mx-auto max-w-6xl rounded-2xl surface-metallic-light surface-metallic-light--soft px-6 py-12 md:px-10 md:py-16">
             <div className="mx-auto max-w-3xl text-center">
               <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
                 Choisissez vos tarifs
@@ -203,17 +208,23 @@ export default function HomePage() {
               <div className="mt-10 flex justify-center">
                 <Link
                   href="/tarifs"
-                  className="group flex w-full max-w-md flex-col rounded-2xl border-2 border-[#e2e8f0] bg-white p-6 text-left shadow-sm transition hover:border-[#1d4ed8]/40 hover:shadow-md"
+                  className="group surface-metallic-blue flex w-full max-w-md flex-col rounded-2xl p-6 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#93c5fd]/80"
                 >
-                  <span className="text-sm font-medium text-[#64748b]">Assistance administrative</span>
-                  <h3 className="mt-1 text-lg font-semibold text-[#0f172a]">Tarifs BeWork</h3>
-                  <p className="mt-2 text-sm text-[#334155]">
+                  <span className="text-sm font-medium text-[#94a3b8]">Assistance administrative</span>
+                  <h3 className="mt-1 text-lg font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]">
+                    Tarifs BeWork
+                  </h3>
+                  <p className="mt-2 text-sm leading-snug text-[#cbd5e1]">
                     Assistant virtuel, devis, factures, relances, suivi dossiers… Dès 109 € TTC pour tester.
                   </p>
-                  <p className="mt-3 text-base font-bold text-[#1d4ed8]">
-                    <span className="tabular-nums">215</span> € <span className="text-sm font-semibold text-[#64748b]">TTC</span> / mois →
+                  <p className="mt-3 text-base font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]">
+                    <span className="tabular-nums">215</span> €{" "}
+                    <span className="text-sm font-semibold text-[#cbd5e1]">TTC</span> / mois{" "}
+                    <span className="text-[#93c5fd] transition-colors group-hover:text-white" aria-hidden>
+                      →
+                    </span>
                   </p>
-                  <p className="mt-2 text-xs text-[#64748b]">TTC, sans frais cachés · Démarrage rapide</p>
+                  <p className="mt-2 text-xs text-[#94a3b8]">TTC, sans frais cachés · Démarrage rapide</p>
                 </Link>
               </div>
             </div>
@@ -222,7 +233,7 @@ export default function HomePage() {
 
         {/* Pourquoi externaliser son administratif */}
         <section id="pourquoi-externaliser" className="scroll-mt-24 px-6 py-16 md:py-20" style={{ scrollMarginTop: "6rem" }}>
-          <div className="mx-auto max-w-6xl rounded-2xl border border-[#d8dee9] bg-white/75 px-6 py-12 shadow-sm md:px-10 md:py-16">
+          <div className="mx-auto max-w-6xl rounded-2xl surface-metallic-light surface-metallic-light--soft px-6 py-12 md:px-10 md:py-16">
             <div className="text-center mb-10 md:mb-12">
               <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
                 Pourquoi externaliser son administratif ?
@@ -260,7 +271,7 @@ export default function HomePage() {
                 Comparez le coût d&apos;un assistant en interne en Europe avec une solution externalisée BeWork.
               </p>
             </div>
-            <div className="card-frame rounded-2xl border-2 border-[#1d4ed8]/20 overflow-hidden bg-white">
+            <div className="card-frame rounded-2xl border-2 border-[#1d4ed8]/20 overflow-hidden">
               <div className="grid divide-y divide-[#e2e8f0] md:grid-cols-2 md:items-stretch md:divide-x md:divide-y-0">
                 <div className="flex flex-col p-8 md:p-10">
                   <h3 className="text-lg font-bold text-[#0f172a]">Assistant en interne (Europe)</h3>
@@ -333,7 +344,7 @@ export default function HomePage() {
 
             {/* Démo dashboard — contenu réel */}
             <div className="mb-20 flex justify-center">
-              <div className="w-full max-w-5xl overflow-hidden rounded-xl border border-[#e2e8f0] bg-white shadow-xl shadow-[#0f172a]/8">
+              <div className="w-full max-w-5xl overflow-hidden rounded-xl surface-metallic-light shadow-xl shadow-[#0f172a]/8">
                 <div className="flex items-center gap-2 border-b border-[#e2e8f0] bg-[#f8fafc] px-5 py-3.5">
                   <span className="h-2.5 w-2.5 rounded-full bg-[#94a3b8]" />
                   <span className="h-2.5 w-2.5 rounded-full bg-[#94a3b8]" />
@@ -342,7 +353,7 @@ export default function HomePage() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[#e2e8f0] p-px">
                   {/* Colonne 1 : Nouvelle demande */}
-                  <div className="bg-white p-5">
+                  <div className="surface-metallic-light p-5">
                     <h3 className="text-sm font-semibold text-[#0f172a] mb-3">Nouvelle demande</h3>
                     <div className="space-y-2.5">
                       {[
@@ -350,7 +361,7 @@ export default function HomePage() {
                         { title: "Relancer facture n°2024-089", cat: "Comptabilité" },
                         { title: "Organiser RDV client Martin", cat: "Organisation" },
                       ].map((d, i) => (
-                        <div key={i} className="rounded-lg border border-[#e2e8f0] bg-white px-3 py-2.5 text-left shadow-sm hover:border-[#1d4ed8]/30 transition-colors">
+                        <div key={i} className="rounded-lg surface-metallic-light px-3 py-2.5 text-left shadow-sm hover:border-[#1d4ed8]/30 transition-colors">
                           <p className="text-sm font-medium text-[#0f172a] line-clamp-1">{d.title}</p>
                           <p className="mt-0.5 text-xs text-[#64748b]">{d.cat}</p>
                         </div>
@@ -358,7 +369,7 @@ export default function HomePage() {
                     </div>
                   </div>
                   {/* Colonne 2 : Messagerie */}
-                  <div className="bg-white p-5">
+                  <div className="surface-metallic-light p-5">
                     <h3 className="text-sm font-semibold text-[#0f172a] mb-3">Messagerie</h3>
                     <div className="space-y-2.5">
                       {[
@@ -366,7 +377,7 @@ export default function HomePage() {
                         { from: "Vous", msg: "Merci, pouvez-vous le relire avant ?", time: "09:52" },
                         { from: "Catherine (assistant)", msg: "Bien reçu, j'attaque ce matin.", time: "Hier 16:30" },
                       ].map((m, i) => (
-                        <div key={i} className="rounded-lg border border-[#e2e8f0] bg-white px-3 py-2.5 text-left shadow-sm">
+                        <div key={i} className="rounded-lg surface-metallic-light px-3 py-2.5 text-left shadow-sm">
                           <p className="text-xs font-medium text-[#1d4ed8]">{m.from}</p>
                           <p className="mt-0.5 text-xs text-[#475569] line-clamp-2">{m.msg}</p>
                           <p className="mt-1 text-[10px] text-[#94a3b8]">{m.time}</p>
@@ -375,7 +386,7 @@ export default function HomePage() {
                     </div>
                   </div>
                   {/* Colonne 3 : Mes demandes */}
-                  <div className="bg-white p-5">
+                  <div className="surface-metallic-light p-5">
                     <h3 className="text-sm font-semibold text-[#0f172a] mb-3">Mes demandes</h3>
                     <div className="space-y-2.5">
                       {[
@@ -383,7 +394,7 @@ export default function HomePage() {
                         { title: "Relance facture", status: "Terminée", color: "bg-green-100 text-green-800" },
                         { title: "RDV Martin", status: "En attente", color: "bg-amber-100 text-amber-800" },
                       ].map((t, i) => (
-                        <div key={i} className="rounded-lg border border-[#e2e8f0] bg-white px-3 py-2.5 text-left shadow-sm">
+                        <div key={i} className="rounded-lg surface-metallic-light px-3 py-2.5 text-left shadow-sm">
                           <p className="text-sm font-medium text-[#0f172a]">{t.title}</p>
                           <span className={`mt-1.5 inline-block rounded-full px-2 py-0.5 text-[10px] font-medium ${t.color}`}>
                             {t.status}
@@ -415,7 +426,7 @@ export default function HomePage() {
                   icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
                 },
               ].map((item, i) => (
-                <div key={i} className="flex h-full flex-col rounded-xl border-2 border-[#e2e8f0] bg-white p-6 text-left shadow-sm">
+                <div key={i} className="surface-metallic-light flex h-full flex-col rounded-xl p-6 text-left">
                   <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8]">
                     <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
@@ -464,7 +475,7 @@ export default function HomePage() {
         {/* Lien pilier tâches */}
         <section className="px-6 py-8 md:py-10">
           <div className="mx-auto max-w-6xl">
-            <div className="card-frame rounded-2xl border-2 border-[#e2e8f0] border-l-[4px] border-l-[#1d4ed8] bg-white p-6 text-center shadow-sm md:p-8">
+            <div className="card-frame rounded-2xl border-2 border-[#e2e8f0] border-l-[4px] border-l-[#1d4ed8] p-6 text-center md:p-8">
               <p className="text-lg font-semibold text-[#0f172a]">
                 Découvrez les tâches prises en charge par nos assistants administratifs externalisés
               </p>
@@ -746,7 +757,7 @@ export default function HomePage() {
                 <Link
                   key={sector.name}
                   href="/contact"
-                  className="card-frame group flex h-full flex-col rounded-xl border-2 border-[#e2e8f0] bg-white p-6 text-left transition-all hover:border-[#1d4ed8] hover:shadow-md"
+                  className="card-frame group flex h-full flex-col rounded-xl border-2 border-[#e2e8f0] p-6 text-left transition-all hover:border-[#1d4ed8] hover:shadow-md"
                 >
                   <h3 className="text-lg font-semibold text-[#0f172a] group-hover:text-[#1d4ed8]">{sector.name}</h3>
                   <p className="mt-2 flex-1 text-sm text-[#64748b]">{sector.desc}</p>
@@ -761,7 +772,7 @@ export default function HomePage() {
 
         {/* Service de conciergerie — sur devis, 24/24 */}
         <section id="conciergerie" className="px-6 py-24 md:py-28">
-          <div className="card-frame mx-auto max-w-6xl rounded-xl border-2 border-[#1d4ed8]/20 bg-gradient-to-b from-white to-[#f8fafc] p-10 md:p-14">
+          <div className="card-frame mx-auto max-w-6xl rounded-xl border-2 border-[#1d4ed8]/20 p-10 md:p-14">
             <div className="flex flex-wrap items-start justify-between gap-6">
               <div className="max-w-2xl">
                 <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">

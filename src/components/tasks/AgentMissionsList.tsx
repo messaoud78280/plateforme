@@ -50,7 +50,7 @@ export function AgentMissionsList({ missions }: AgentMissionsListProps) {
       {missions.map((m) => (
         <div
           key={m.id}
-          className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-slate-300"
+          className="flex flex-wrap items-center justify-between gap-4 rounded-xl surface-metallic-light p-4 transition hover:border-slate-300"
         >
           <div className="min-w-0 flex-1">
             <Link

@@ -33,7 +33,7 @@ export function TasksChart({ tasks }: TasksChartProps) {
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-xl surface-metallic-light p-6">
       <h2 className="text-lg font-semibold text-slate-800">
         Évolution des tâches (7 derniers jours)
       </h2>

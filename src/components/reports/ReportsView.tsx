@@ -64,32 +64,32 @@ export function ReportsView({ period }: { period: string }) {
     <div className="space-y-6">
       {/* Cartes récap */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-xl surface-metallic-light p-4">
           <p className="text-2xl font-bold text-slate-800">{stats.tasks.total}</p>
           <p className="text-sm text-slate-500">Tâches (période)</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-xl surface-metallic-light p-4">
           <p className="text-2xl font-bold text-green-600">{stats.tasks.completed}</p>
           <p className="text-sm text-slate-500">Terminées</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-xl surface-metallic-light p-4">
           <p className="text-2xl font-bold text-blue-600">{tauxCompletion} %</p>
           <p className="text-sm text-slate-500">Complétion</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-xl surface-metallic-light p-4">
           <p className="text-2xl font-bold text-slate-800">
             {stats.tempsMoyenJours < 1 ? "< 1" : stats.tempsMoyenJours} j
           </p>
           <p className="text-sm text-slate-500">Temps moyen</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-xl surface-metallic-light p-4">
           <p className="text-2xl font-bold text-slate-800">{stats.documents.total}</p>
           <p className="text-sm text-slate-500">Documents</p>
         </div>
       </div>
 
       {/* Graphique évolution */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-xl surface-metallic-light p-6">
         <h2 className="text-lg font-semibold text-slate-800">Évolution des tâches</h2>
         <p className="mt-1 text-sm text-slate-500">Créées vs complétées sur la période</p>
         <div className="mt-6 h-64">
@@ -110,7 +110,7 @@ export function ReportsView({ period }: { period: string }) {
 
       {/* Répartition par statut */}
       {pieData.length > 0 && (
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-xl surface-metallic-light p-6">
           <h2 className="text-lg font-semibold text-slate-800">Répartition par statut</h2>
           <div className="mt-6 h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -138,7 +138,7 @@ export function ReportsView({ period }: { period: string }) {
       )}
 
       {/* Tableau récap */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-xl surface-metallic-light p-6">
         <h2 className="text-lg font-semibold text-slate-800">Récapitulatif</h2>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-left text-sm">

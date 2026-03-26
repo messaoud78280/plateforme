@@ -60,7 +60,7 @@ export default async function SimulationPage() {
           <SimulationController projectId={project.id} />
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-xl border border-slate-200 bg-white p-6">
+            <div className="rounded-xl surface-metallic-light p-6">
               <h2 className="mb-4 font-semibold text-slate-800">Projet BelleVie</h2>
               <dl className="space-y-2 text-sm">
                 <div>
@@ -89,7 +89,7 @@ export default async function SimulationPage() {
               </Link>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-6">
+            <div className="rounded-xl surface-metallic-light p-6">
               <h2 className="mb-4 font-semibold text-slate-800">Activités récentes</h2>
               {recentActivities.length === 0 ? (
                 <p className="text-sm text-slate-500">

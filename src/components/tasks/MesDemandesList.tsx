@@ -135,7 +135,7 @@ export function MesDemandesList({ tasks }: MesDemandesListProps) {
             return (
               <li
                 key={task.id}
-                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow"
+                className="rounded-2xl surface-metallic-light p-5 transition hover:shadow"
               >
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div className="min-w-0 flex-1">

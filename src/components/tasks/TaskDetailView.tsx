@@ -187,7 +187,7 @@ export function TaskDetailView({
       )}
 
       {/* En-tête : Titre, Client, Statut, Priorité, Actions estimées (agent) */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
+      <div className="rounded-xl surface-metallic-light p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-800">{task.title}</h1>
@@ -254,7 +254,7 @@ export function TaskDetailView({
 
       {/* Historique de la mission (client uniquement — agent le voit après Documents) */}
       {!isAgence && (
-        <div id="historique-section" className="scroll-mt-6 rounded-xl border border-slate-200 bg-white p-6">
+        <div id="historique-section" className="scroll-mt-6 rounded-xl surface-metallic-light p-6">
           <h2 className="mb-4 text-lg font-semibold text-slate-800">Historique</h2>
           <ul className="space-y-4">
             <li className="flex gap-3 border-l-2 border-slate-200 pl-4">
@@ -318,7 +318,7 @@ export function TaskDetailView({
         </div>
       )}
       {!task.assignedToId && !isAgence && !isAgent && (
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <div className="rounded-xl surface-metallic-light p-6">
           <h2 className="mb-4 text-lg font-semibold text-slate-800">Messages mission</h2>
           <p className="text-sm text-slate-500">
             La messagerie avec votre assistant sera disponible une fois qu&apos;un agent aura été assigné à cette mission.
@@ -336,7 +336,7 @@ export function TaskDetailView({
 
       {/* Documents liés à la mission */}
       {!isAgence && (
-        <div id="documents-section" className="scroll-mt-6 rounded-xl border border-slate-200 bg-white p-6">
+        <div id="documents-section" className="scroll-mt-6 rounded-xl surface-metallic-light p-6">
           <h2 className="mb-4 text-lg font-semibold text-slate-800">Documents</h2>
           {task.documents && task.documents.length > 0 ? (
             <ul className="mb-6 space-y-2">
@@ -357,7 +357,7 @@ export function TaskDetailView({
                     href={doc.fileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                    className="shrink-0 rounded-lg surface-metallic-light px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
                   >
                     Télécharger
                   </a>
@@ -380,7 +380,7 @@ export function TaskDetailView({
       {(isAgence || isAgent) && (
         <div id="documents-section" className="scroll-mt-6">
       {task.documents && task.documents.length > 0 && (
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <div className="rounded-xl surface-metallic-light p-6">
           <h2 className="mb-4 text-lg font-semibold text-slate-800">Pièces jointes ({task.documents.length})</h2>
           <ul className="space-y-2">
             {task.documents.map((doc) => (
@@ -403,13 +403,13 @@ export function TaskDetailView({
         </div>
       )}
       {task.documents && task.documents.length === 0 && (
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <div className="rounded-xl surface-metallic-light p-6">
           <h2 className="mb-2 text-lg font-semibold text-slate-800">Pièces jointes</h2>
           <p className="text-sm text-slate-500">Aucune pièce jointe.</p>
         </div>
       )}
       {isAgent && (
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <div className="rounded-xl surface-metallic-light p-6">
           <h3 className="mb-3 text-sm font-medium text-slate-700">Ajouter un document</h3>
           <DocumentUploadZone
             taskId={task.id}
@@ -424,7 +424,7 @@ export function TaskDetailView({
       {/* Pour l'agent : Informations mission + Historique (ordre Conversation → Documents → Infos → Historique) */}
       {isAgent && (
         <>
-          <div id="infos-mission-section" className="scroll-mt-6 rounded-xl border border-slate-200 bg-white p-6">
+          <div id="infos-mission-section" className="scroll-mt-6 rounded-xl surface-metallic-light p-6">
             <h2 className="mb-4 text-lg font-semibold text-slate-800">Informations mission</h2>
             {task.description && (
               <p className="mb-4 text-slate-600">{task.description}</p>
@@ -439,7 +439,7 @@ export function TaskDetailView({
               <p className="text-sm text-slate-500">Aucune information complémentaire.</p>
             )}
           </div>
-          <div id="historique-section" className="scroll-mt-6 rounded-xl border border-slate-200 bg-white p-6">
+          <div id="historique-section" className="scroll-mt-6 rounded-xl surface-metallic-light p-6">
             <h2 className="mb-4 text-lg font-semibold text-slate-800">Historique</h2>
             <ul className="space-y-4">
               <li className="flex gap-3 border-l-2 border-slate-200 pl-4">
@@ -487,7 +487,7 @@ export function TaskDetailView({
 
       {/* Changer priorité (gérante) */}
       {isAgence && onPriorityChange && (
-        <div id="priority-section" className="scroll-mt-6 rounded-xl border border-slate-200 bg-white p-6">
+        <div id="priority-section" className="scroll-mt-6 rounded-xl surface-metallic-light p-6">
           <h2 className="mb-4 text-lg font-semibold text-slate-800">Priorité</h2>
           <div className="flex flex-wrap items-center gap-3">
             <label className="text-sm font-medium text-slate-700">Priorité de la mission :</label>
@@ -506,7 +506,7 @@ export function TaskDetailView({
 
       {/* Agent en charge de la tâche — bloc visible pour l'agence (édition) */}
       {isAgence && (
-        <div id="agent-section" className="scroll-mt-6 rounded-xl border border-slate-200 bg-white p-6">
+        <div id="agent-section" className="scroll-mt-6 rounded-xl surface-metallic-light p-6">
           <h2 className="mb-4 text-lg font-semibold text-slate-800">Agent en charge de la tâche</h2>
           <div className="space-y-4">
             <div>
@@ -554,7 +554,7 @@ export function TaskDetailView({
 
       {/* Historique de la mission (gérante) */}
       {isAgence && (
-        <div id="historique-section" className="scroll-mt-6 rounded-xl border border-slate-200 bg-white p-6">
+        <div id="historique-section" className="scroll-mt-6 rounded-xl surface-metallic-light p-6">
           <h2 className="mb-4 text-lg font-semibold text-slate-800">Historique</h2>
           <ul className="space-y-4">
             <li className="flex gap-3 border-l-2 border-slate-200 pl-4">
@@ -700,7 +700,7 @@ export function TaskDetailView({
 
       {/* Validation / Correction (gérante uniquement, statut A_VALIDER = en attente de validation) */}
       {isManager && task.status === "A_VALIDER" && (
-        <div id="valider-section" className="scroll-mt-6 rounded-xl border border-slate-200 bg-white p-6">
+        <div id="valider-section" className="scroll-mt-6 rounded-xl surface-metallic-light p-6">
           <h2 className="mb-4 text-lg font-semibold text-slate-800">Vérifier et valider le travail</h2>
           <p className="mb-4 text-sm text-slate-600">
             Après vérification, validez le travail de l&apos;agent ou demandez une correction.
@@ -747,7 +747,7 @@ export function TaskDetailView({
       )}
 
       {/* Timeline */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
+      <div className="rounded-xl surface-metallic-light p-6">
         <h2 className="mb-4 text-lg font-semibold text-slate-800">Historique</h2>
         <TaskTimeline events={timelineEvents} />
       </div>

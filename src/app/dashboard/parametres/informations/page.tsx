@@ -39,7 +39,7 @@ export default async function InformationsPersonnellesPage() {
   const hasAddress = addressLines.length > 0;
 
   return (
-    <section className="rounded-2xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
+    <section className="rounded-2xl surface-metallic-light p-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h2 className="text-lg font-semibold text-[#475569]">
           Informations personnelles

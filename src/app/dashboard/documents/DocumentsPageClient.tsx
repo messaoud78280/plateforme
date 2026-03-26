@@ -91,7 +91,7 @@ export function DocumentsPageClient({
       />
 
       {/* Filtres */}
-      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="rounded-xl surface-metallic-light p-4">
         <form
           method="get"
           action="/dashboard/documents"

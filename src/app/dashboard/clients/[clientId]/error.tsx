@@ -16,7 +16,7 @@ export default function ClientDetailError({
     error.message?.includes("connect");
 
   return (
-    <div className="flex min-h-[40vh] flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-8">
+    <div className="flex min-h-[40vh] flex-col items-center justify-center rounded-xl surface-metallic-light p-8">
       <h2 className="text-lg font-semibold text-slate-800">Erreur de chargement du client</h2>
       <p className="mt-2 max-w-md text-center text-sm text-slate-600">
         {isDbError

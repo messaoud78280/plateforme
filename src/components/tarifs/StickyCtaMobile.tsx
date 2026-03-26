@@ -5,7 +5,7 @@ import Link from "next/link";
 export function StickyCtaMobile() {
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-30 border-t border-[#e0e4ea] bg-white/95 px-4 py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.08)] backdrop-blur-sm md:hidden"
+      className="surface-metallic-sticky-bar fixed bottom-0 left-0 right-0 z-30 px-4 py-3 md:hidden"
       role="banner"
       aria-label="Appel à l'action"
     >

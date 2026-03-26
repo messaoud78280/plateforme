@@ -53,7 +53,7 @@ export default async function MessagesPage() {
         </p>
       </div>
 
-      <section className="rounded-xl border border-[#c8cdd6] bg-white shadow-sm">
+      <section className="rounded-xl surface-metallic-light shadow-sm">
           <h2 className="border-b border-[#e0e4ea] px-6 py-4 text-lg font-semibold text-[#0f172a]">
             {isAgence ? "Demandes de contact et RDV" : "Mes demandes de RDV"}
           </h2>
@@ -135,7 +135,7 @@ export default async function MessagesPage() {
         </section>
 
       {/* Calendrier de prise de RDV (type Calendly) */}
-      <section className="rounded-xl border border-[#c8cdd6] bg-white p-6 shadow-sm">
+      <section className="rounded-xl surface-metallic-light p-6 shadow-sm">
         <h2 className="mb-4 text-lg font-semibold text-[#0f172a]">
           Prise de rendez-vous en ligne
         </h2>

@@ -54,7 +54,7 @@ export default async function DemandeContactPage({
     <div className="space-y-6">
       <BackLink href="/dashboard/messages">Retour aux RDV</BackLink>
 
-      <div className="rounded-xl border border-[#c8cdd6] bg-white shadow-sm">
+      <div className="rounded-xl surface-metallic-light shadow-sm">
         <div className="border-b border-[#e0e4ea] px-6 py-4 flex items-center justify-between">
           <h1 className="text-xl font-bold text-[#0f172a]">
             Demande de {demande.structure}
@@ -151,7 +151,7 @@ export default async function DemandeContactPage({
         )}
         <Link
           href="/dashboard/messages"
-          className="rounded-lg border border-[#c8cdd6] bg-white px-6 py-2.5 text-sm font-medium text-[#334155] hover:bg-[#f8f9fb]"
+          className="rounded-lg surface-metallic-light px-6 py-2.5 text-sm font-medium text-[#334155] hover:bg-[#f8f9fb]"
         >
           Retour aux RDV
         </Link>

@@ -85,7 +85,7 @@ export function ClientDashboardContent({
   return (
     <div className="space-y-8 pb-12">
       {/* Zone centrale : actions principales */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+      <section className="rounded-2xl surface-metallic-light p-8">
         <h1 className="text-2xl font-bold text-slate-800">Bonjour, {userName ?? "vous"}</h1>
         <p className="mt-1 text-slate-600">Que souhaitez-vous déléguer aujourd&apos;hui ?</p>
         <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -122,17 +122,17 @@ export function ClientDashboardContent({
 
       {/* 3 indicateurs principaux */}
       <section className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-xl surface-metallic-light p-5">
           <p className="text-sm font-medium text-slate-500">Actions restantes</p>
           <p className="mt-1 text-2xl font-bold text-slate-800">
             {remaining} <span className="text-lg font-normal text-slate-500">/ {actionsData.monthlyActionsTotal}</span>
           </p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-xl surface-metallic-light p-5">
           <p className="text-sm font-medium text-slate-500">Missions en cours</p>
           <p className="mt-1 text-2xl font-bold text-slate-800">{tasksEnCours}</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-xl surface-metallic-light p-5">
           <p className="text-sm font-medium text-slate-500">Derniers messages</p>
           <p className="mt-1 text-2xl font-bold text-slate-800">{recentMessages.length}</p>
           <Link href="/dashboard/messagerie" className="mt-1 block text-sm font-medium text-[#1d4ed8] hover:underline">
@@ -152,7 +152,7 @@ export function ClientDashboardContent({
       />
 
       {/* Activité récente */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl surface-metallic-light p-6">
         <h2 className="text-lg font-semibold text-slate-800">Activité récente</h2>
         <p className="mt-0.5 text-sm text-slate-500">Dernières tâches réalisées (devis envoyé, relance effectuée, etc.)</p>
         <ul className="mt-4 space-y-3">
@@ -205,7 +205,7 @@ export function ClientDashboardContent({
       <CopiloteAdmin />
 
       {/* Missions récentes */}
-      <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <section className="rounded-2xl surface-metallic-light">
         <div className="border-b border-slate-200 px-6 py-4">
           <h2 className="text-lg font-semibold text-slate-800">Missions récentes</h2>
           <p className="mt-0.5 text-sm text-slate-500">Vos missions avec conversation, documents et historique</p>
@@ -256,7 +256,7 @@ export function ClientDashboardContent({
                 </div>
                 <Link
                   href={`/dashboard/taches/${task.id}`}
-                  className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  className="rounded-lg surface-metallic-light px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
                 >
                   Voir la mission →
                 </Link>
@@ -278,7 +278,7 @@ export function ClientDashboardContent({
 
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Messages récents */}
-        <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <section className="rounded-2xl surface-metallic-light">
           <div className="border-b border-slate-200 px-6 py-4">
             <h2 className="text-lg font-semibold text-slate-800">Messages récents</h2>
             <p className="mt-0.5 text-sm text-slate-500">Derniers échanges avec votre assistant</p>
@@ -303,7 +303,7 @@ export function ClientDashboardContent({
                       </div>
                       <Link
                         href="/dashboard/messagerie"
-                        className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                        className="shrink-0 rounded-lg surface-metallic-light px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
                       >
                         Ouvrir la conversation
                       </Link>
@@ -323,7 +323,7 @@ export function ClientDashboardContent({
         </section>
 
         {/* Activité récente ou temps économisé */}
-        <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <section className="rounded-2xl surface-metallic-light">
           <div className="border-b border-slate-200 px-6 py-4">
             <h2 className="text-lg font-semibold text-slate-800">Temps économisé</h2>
             <p className="mt-0.5 text-sm text-slate-500">Ce mois-ci</p>

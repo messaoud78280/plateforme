@@ -159,7 +159,7 @@ export function DepotTacheForm({ projects = [] }: DepotTacheFormProps) {
   };
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl surface-metallic-light p-6">
       <h2 className="text-lg font-semibold text-slate-800">Nouvelle mission</h2>
       <p className="mt-1 text-sm text-slate-500">
         Décrivez votre demande. Vous pouvez la rattacher à un projet. L’agence assignera un agent après prise en charge.
@@ -268,7 +268,7 @@ export function DepotTacheForm({ projects = [] }: DepotTacheFormProps) {
               {files.map((f, i) => (
                 <li
                   key={i}
-                  className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+                  className="flex items-center justify-between gap-2 rounded-lg surface-metallic-light px-3 py-2 text-sm"
                 >
                   <span className="min-w-0 truncate text-slate-800" title={f.name}>
                     {f.name}

@@ -236,7 +236,7 @@ export function AppointmentCalendar() {
           {loading && <p className="text-sm text-slate-500">Chargement...</p>}
         </>
       ) : (
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <div className="rounded-xl surface-metallic-light p-6">
           <div className="mb-4 flex items-center gap-2">
             <button
               type="button"
@@ -362,7 +362,7 @@ export function AppointmentCalendar() {
       )}
 
       {/* Liste des RDV à venir */}
-      <div className="rounded-xl border border-slate-200 bg-white p-4">
+      <div className="rounded-xl surface-metallic-light p-4">
         <h4 className="mb-3 text-sm font-semibold text-slate-800">Rendez-vous à venir</h4>
         {appointments.filter((a) => new Date(a.startAt) >= new Date()).length === 0 ? (
           <p className="text-sm text-slate-500">Aucun rendez-vous prévu.</p>

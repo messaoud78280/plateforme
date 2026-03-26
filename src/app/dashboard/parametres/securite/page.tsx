@@ -20,7 +20,7 @@ export default async function PreferencesSecuritePage() {
   const isCoteAgence = isManager || isAgent;
 
   return (
-    <section className="rounded-2xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
+    <section className="rounded-2xl surface-metallic-light p-6">
       <h2 className="mb-6 text-lg font-semibold text-[#475569]">
         Préférences de sécurité
       </h2>

@@ -74,7 +74,7 @@ export default function BlogPage() {
             <BeWorkLogo size="sm" />
           </Link>
           <div className="flex items-center gap-3">
-            <Link href="/tarifs" className="rounded-lg border border-[#c8cdd6] bg-white px-5 py-2.5 text-sm font-medium text-[#1e293b] hover:bg-[#f8f9fb]">
+            <Link href="/tarifs" className="rounded-lg surface-metallic-light px-5 py-2.5 text-sm font-medium text-[#1e293b] hover:bg-[#f8f9fb]">
               Tarifs
             </Link>
             <Link href="/inscription" className="rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af]">
@@ -97,7 +97,7 @@ export default function BlogPage() {
               <li key={a.slug}>
                 <Link
                   href={`/blog/${a.slug}`}
-                  className="block rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-[#1d4ed8]/30 hover:shadow-md"
+                  className="block rounded-xl surface-metallic-light p-6 transition hover:border-[#1d4ed8]/30 hover:shadow-md"
                 >
                   <h2 className="text-xl font-semibold text-[#0f172a]">{a.title}</h2>
                   <p className="mt-2 text-[#334155]">{a.excerpt}</p>

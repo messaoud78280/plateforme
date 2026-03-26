@@ -74,7 +74,7 @@ export default async function ProfilVueEnsemblePage() {
   return (
     <div className="space-y-8">
       {/* 1. Bloc abonnement */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" aria-labelledby="abonnement-heading">
+      <section className="rounded-2xl surface-metallic-light p-6" aria-labelledby="abonnement-heading">
         <h2 id="abonnement-heading" className="text-lg font-semibold text-slate-800">
           Abonnement
         </h2>
@@ -125,7 +125,7 @@ export default async function ProfilVueEnsemblePage() {
       </section>
 
       {/* 2. Compteur d'actions + barre de progression */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" aria-labelledby="actions-heading">
+      <section className="rounded-2xl surface-metallic-light p-6" aria-labelledby="actions-heading">
         <h2 id="actions-heading" className="text-lg font-semibold text-slate-800">
           Compteur d&apos;actions
         </h2>
@@ -172,7 +172,7 @@ export default async function ProfilVueEnsemblePage() {
       )}
 
       {/* 3. Packs d'actions supplémentaires */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" aria-labelledby="packs-heading">
+      <section className="rounded-2xl surface-metallic-light p-6" aria-labelledby="packs-heading">
         <h2 id="packs-heading" className="text-lg font-semibold text-slate-800">
           Besoin de plus d&apos;actions ?
         </h2>
@@ -199,7 +199,7 @@ export default async function ProfilVueEnsemblePage() {
       </section>
 
       {/* 4. Historique des actions (Demande | Date | Actions utilisées) */}
-      <section className="rounded-2xl border border-slate-200 bg-white shadow-sm" aria-labelledby="historique-actions-heading">
+      <section className="rounded-2xl surface-metallic-light" aria-labelledby="historique-actions-heading">
         <h2 id="historique-actions-heading" className="border-b border-slate-200 px-6 py-4 text-lg font-semibold text-slate-800">
           Historique des actions
         </h2>
@@ -241,7 +241,7 @@ export default async function ProfilVueEnsemblePage() {
       </section>
 
       {/* 5. Historique des paiements (Date | Montant | Type | Statut) */}
-      <section className="rounded-2xl border border-slate-200 bg-white shadow-sm" aria-labelledby="historique-paiements-heading">
+      <section className="rounded-2xl surface-metallic-light" aria-labelledby="historique-paiements-heading">
         <h2 id="historique-paiements-heading" className="border-b border-slate-200 px-6 py-4 text-lg font-semibold text-slate-800">
           Historique des paiements
         </h2>
@@ -288,7 +288,7 @@ export default async function ProfilVueEnsemblePage() {
       </section>
 
       {/* 7. Gestion abonnement */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" aria-labelledby="gestion-abonnement-heading">
+      <section className="rounded-2xl surface-metallic-light p-6" aria-labelledby="gestion-abonnement-heading">
         <h2 id="gestion-abonnement-heading" className="text-lg font-semibold text-slate-800">
           Gestion de l&apos;abonnement
         </h2>

@@ -116,7 +116,7 @@ export default function ContactForm() {
               <BeWorkLogo size="lg" />
             </Link>
           </header>
-          <div className="rounded-2xl border border-[#c8cdd6] bg-white p-8 shadow-sm">
+          <div className="rounded-2xl surface-metallic-light p-8 shadow-sm">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-600">
               <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -181,7 +181,7 @@ export default function ContactForm() {
             </div>
           )}
 
-          <div className="rounded-2xl border border-[#c8cdd6] bg-white p-6 shadow-sm">
+          <div className="rounded-2xl surface-metallic-light p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-[#0f172a]">Votre structure</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div>
@@ -193,7 +193,7 @@ export default function ContactForm() {
                   name="structure"
                   type="text"
                   required
-                  className="mt-1 w-full rounded-lg border border-[#c8cdd6] bg-white px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
+                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
                   placeholder="Ex. Mon Entreprise SAS"
                 />
               </div>
@@ -205,14 +205,14 @@ export default function ContactForm() {
                   id="denominationSociale"
                   name="denominationSociale"
                   type="text"
-                  className="mt-1 w-full rounded-lg border border-[#c8cdd6] bg-white px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
+                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
                   placeholder="Raison sociale officielle"
                 />
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[#c8cdd6] bg-white p-6 shadow-sm">
+          <div className="rounded-2xl surface-metallic-light p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-[#0f172a]">Contact et coordonnées</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div>
@@ -224,7 +224,7 @@ export default function ContactForm() {
                   name="contactName"
                   type="text"
                   required
-                  className="mt-1 w-full rounded-lg border border-[#c8cdd6] bg-white px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
+                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
                   placeholder="Prénom et nom"
                 />
               </div>
@@ -237,7 +237,7 @@ export default function ContactForm() {
                   name="email"
                   type="email"
                   required
-                  className="mt-1 w-full rounded-lg border border-[#c8cdd6] bg-white px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
+                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
                   placeholder="contact@exemple.fr"
                 />
               </div>
@@ -249,14 +249,14 @@ export default function ContactForm() {
                   id="phone"
                   name="phone"
                   type="tel"
-                  className="mt-1 w-full rounded-lg border border-[#c8cdd6] bg-white px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
+                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
                   placeholder="+33 6 12 34 56 78"
                 />
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[#c8cdd6] bg-white p-6 shadow-sm">
+          <div className="rounded-2xl surface-metallic-light p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-[#0f172a]">Formule souhaitée</h2>
             <div className="mt-4">
               <label htmlFor="formule" className="block text-sm font-medium text-[#334155]">
@@ -265,7 +265,7 @@ export default function ContactForm() {
               <select
                 id="formule"
                 name="formule"
-                className="mt-1 w-full rounded-lg border border-[#c8cdd6] bg-white px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
+                className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
               >
                 <option value="">— Sélectionnez —</option>
                 {FORMULES.map((f) => (
@@ -277,7 +277,7 @@ export default function ContactForm() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[#c8cdd6] bg-white p-6 shadow-sm">
+          <div className="rounded-2xl surface-metallic-light p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-[#0f172a]">Demande de rendez-vous</h2>
             <p className="mt-1 text-sm text-[#64748b]">
               Sélectionnez une date et un créneau. Nous vous enverrons un lien de visioconférence par email après confirmation.
@@ -292,7 +292,7 @@ export default function ContactForm() {
                   name="rdvDate"
                   value={selectedRdvDate}
                   onChange={(e) => setSelectedRdvDate(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-[#c8cdd6] bg-white px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
+                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
                 >
                   <option value="">— Choisir une date —</option>
                   {dates.map((d) => (
@@ -309,7 +309,7 @@ export default function ContactForm() {
                 <select
                   id="rdvTime"
                   name="rdvTime"
-                  className="mt-1 w-full rounded-lg border border-[#c8cdd6] bg-white px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
+                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
                 >
                   <option value="">— Choisir un créneau —</option>
                   {TIME_SLOTS.map((t) => {
@@ -330,7 +330,7 @@ export default function ContactForm() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[#c8cdd6] bg-white p-6 shadow-sm">
+          <div className="rounded-2xl surface-metallic-light p-6 shadow-sm">
             <label htmlFor="message" className="block text-lg font-semibold text-[#0f172a]">
               Votre message ou demande
             </label>
@@ -338,12 +338,12 @@ export default function ContactForm() {
               id="message"
               name="message"
               rows={4}
-              className="mt-2 w-full rounded-lg border border-[#c8cdd6] bg-white px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
+              className="mt-2 w-full rounded-lg surface-metallic-light px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
               placeholder="Décrivez brièvement votre besoin ou posez vos questions..."
             />
           </div>
 
-          <div className="rounded-2xl border border-[#c8cdd6] bg-white p-6 shadow-sm">
+          <div className="rounded-2xl surface-metallic-light p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-[#0f172a]">Informations complémentaires (optionnel)</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div>
@@ -354,7 +354,7 @@ export default function ContactForm() {
                   id="sector"
                   name="sector"
                   type="text"
-                  className="mt-1 w-full rounded-lg border border-[#c8cdd6] bg-white px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
+                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
                   placeholder="Ex. Conseil, Santé, BTP..."
                 />
               </div>
@@ -365,7 +365,7 @@ export default function ContactForm() {
                 <select
                   id="howKnown"
                   name="howKnown"
-                  className="mt-1 w-full rounded-lg border border-[#c8cdd6] bg-white px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
+                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
                 >
                   <option value="">— Sélectionnez —</option>
                   <option value="recherche">Recherche internet</option>

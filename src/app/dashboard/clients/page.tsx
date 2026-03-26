@@ -45,14 +45,14 @@ export default async function ClientsPage() {
       </div>
 
       {clients.length === 0 ? (
-        <div className="rounded-xl border border-[#c8cdd6] bg-white p-12 text-center">
+        <div className="rounded-xl surface-metallic-light p-12 text-center">
           <p className="text-[#334155]">Aucun client pour le moment.</p>
           <p className="mt-2 text-sm text-[#64748b]">
             Les projets créés par les clients apparaîtront ici une fois qu&apos;ils auront un compte.
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-[#c8cdd6] bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl surface-metallic-light shadow-sm">
           <table className="w-full min-w-[600px] text-left text-sm">
             <thead>
               <tr className="border-b border-[#c8cdd6] bg-[#f8f9fb] text-[#334155]">
@@ -95,7 +95,7 @@ export default async function ClientsPage() {
                   <td className="px-6 py-4 text-right">
                     <Link
                       href={`/dashboard/clients/${client.id}`}
-                      className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+                      className="inline-flex items-center rounded-lg surface-metallic-light px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
                     >
                       Voir détail
                     </Link>

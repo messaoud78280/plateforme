@@ -78,7 +78,7 @@ export default async function ProjetDetailPage({
     <div className="space-y-6">
       <BackLink href="/dashboard/projets">Retour aux projets</BackLink>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
+      <div className="rounded-xl surface-metallic-light p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-800">{project.title}</h1>
@@ -153,7 +153,7 @@ export default async function ProjetDetailPage({
       <ProjectReportsSection projectId={project.id} isAgence={isAgence} />
 
       {project.documents.length > 0 && (
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <div className="rounded-xl surface-metallic-light p-6">
           <h2 className="mb-4 text-lg font-semibold text-slate-800">Pièces jointes ({project.documents.length})</h2>
           <ul className="space-y-2">
             {project.documents.map((doc) => (
@@ -173,7 +173,7 @@ export default async function ProjetDetailPage({
         </div>
       )}
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
+      <div className="rounded-xl surface-metallic-light p-6">
         <h2 className="mb-4 text-lg font-semibold text-slate-800">Messages</h2>
 
         <div className="space-y-4">

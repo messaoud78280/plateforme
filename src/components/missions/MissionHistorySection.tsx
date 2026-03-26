@@ -44,7 +44,7 @@ export function MissionHistorySection() {
 
   if (loading) {
     return (
-      <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <section className="rounded-2xl surface-metallic-light">
         <div className="border-b border-slate-200 px-6 py-4">
           <h2 className="text-lg font-semibold text-slate-800">Historique des missions</h2>
           <p className="mt-0.5 text-sm text-slate-500">Chargement…</p>
@@ -56,7 +56,7 @@ export function MissionHistorySection() {
 
   if (missions.length === 0) {
     return (
-      <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <section className="rounded-2xl surface-metallic-light">
         <div className="border-b border-slate-200 px-6 py-4">
           <h2 className="text-lg font-semibold text-slate-800">Historique des missions</h2>
           <p className="mt-0.5 text-sm text-slate-500">Votre mémoire administrative BeWork</p>
@@ -72,7 +72,7 @@ export function MissionHistorySection() {
   }
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <section className="rounded-2xl surface-metallic-light">
       <div className="border-b border-slate-200 px-6 py-4">
         <h2 className="text-lg font-semibold text-slate-800">Historique des missions</h2>
         <p className="mt-0.5 text-sm text-slate-500">Votre mémoire administrative — relancez une mission en un clic</p>
@@ -100,7 +100,7 @@ export function MissionHistorySection() {
             <div className="flex shrink-0 items-center gap-2">
               <Link
                 href={`/dashboard/taches/${m.id}`}
-                className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                className="rounded-lg surface-metallic-light px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
                 Voir
               </Link>

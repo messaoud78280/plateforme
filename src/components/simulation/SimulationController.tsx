@@ -57,7 +57,7 @@ export function SimulationController({ projectId }: SimulationControllerProps) {
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
+      <div className="rounded-xl surface-metallic-light p-6">
         <p className="text-slate-500">Chargement...</p>
       </div>
     );
@@ -97,7 +97,7 @@ export function SimulationController({ projectId }: SimulationControllerProps) {
       )}
 
       {lastResult && (
-        <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
+        <div className="mt-4 rounded-lg surface-metallic-light p-4">
           <p className="font-medium text-slate-800">
             Jour {lastResult.day} : {lastResult.executed} événement(s) exécuté(s)
           </p>

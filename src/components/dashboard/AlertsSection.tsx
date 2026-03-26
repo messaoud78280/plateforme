@@ -18,7 +18,7 @@ export function AlertsSection({ alerts }: AlertsSectionProps) {
   const urgentCount = alerts.filter((a) => a.level === "URGENT").length;
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-xl surface-metallic-light p-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-slate-800">Alertes importantes</h2>
         {urgentCount > 0 && (

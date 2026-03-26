@@ -197,14 +197,14 @@ export function ProjectReportsSection({ projectId, isAgence }: ProjectReportsSec
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
+      <div className="rounded-xl surface-metallic-light p-6">
         <p className="text-slate-500">Chargement des rapports…</p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-6">
+    <div className="rounded-xl surface-metallic-light p-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
         <h2 className="text-lg font-semibold text-slate-800">Reporting</h2>
         <button

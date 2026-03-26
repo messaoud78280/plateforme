@@ -299,15 +299,15 @@ export default async function TachesPage({
 
       {isAgent && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="rounded-xl surface-metallic-light p-4">
             <p className="text-2xl font-bold text-slate-800">{agentSummary.missionsAujourdhui}</p>
             <p className="mt-1 text-sm text-slate-600">Missions aujourd&apos;hui</p>
           </div>
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="rounded-xl surface-metallic-light p-4">
             <p className="text-2xl font-bold text-red-600">{agentSummary.missionsUrgentes}</p>
             <p className="mt-1 text-sm text-slate-600">Missions urgentes</p>
           </div>
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="rounded-xl surface-metallic-light p-4">
             <p className="text-2xl font-bold text-blue-600">{agentSummary.missionsEnCours}</p>
             <p className="mt-1 text-sm text-slate-600">Missions en cours</p>
           </div>

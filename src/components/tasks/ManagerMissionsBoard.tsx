@@ -150,7 +150,7 @@ function MissionCard({
             Assigner
           </button>
           {assignerOpen && agents.length > 0 && (
-            <div className="absolute left-0 top-full z-20 mt-1 w-40 rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+            <div className="absolute left-0 top-full z-20 mt-1 w-40 rounded-lg surface-metallic-light py-1 shadow-lg">
               {agents.map((agent) => (
                 <button
                   key={agent.id}
@@ -179,14 +179,14 @@ function MissionCard({
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); setMenuOpen((v) => !v); setAssignerOpen(false); }}
-            className="rounded border border-slate-200 bg-white p-1.5 text-slate-500 hover:bg-slate-50"
+            className="rounded surface-metallic-light p-1.5 text-slate-500 hover:bg-slate-50"
             title="Priorité et plus"
             aria-label="Menu"
           >
             <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
           </button>
           {menuOpen && (
-            <div className="absolute right-0 top-full z-20 mt-1 w-40 rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+            <div className="absolute right-0 top-full z-20 mt-1 w-40 rounded-lg surface-metallic-light py-1 shadow-lg">
               {PRIORITY_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
@@ -412,10 +412,10 @@ export function ManagerMissionsBoard({
         {columns.map((col) => (
           <div
             key={col.id}
-            className={`rounded-2xl border-2 bg-white/90 p-4 shadow-sm transition md:p-5 ${
+            className={`rounded-2xl border-2 p-4 transition md:p-5 ${
               dragOverColumn === col.id
                 ? "border-blue-400 bg-blue-50/80 ring-2 ring-blue-200"
-                : "border-slate-200 hover:border-blue-200 hover:shadow-md"
+                : "surface-metallic-light surface-metallic-light--soft border-slate-200 hover:border-blue-200 hover:shadow-md"
             }`}
             onDragOver={(e) => {
               e.preventDefault();

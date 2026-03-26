@@ -92,7 +92,7 @@ export default async function ClientDetailPage({
     <div className="space-y-8">
       <BackLink href="/dashboard/clients">Retour aux clients</BackLink>
 
-      <div className="rounded-xl border border-[#c8cdd6] bg-white p-6 shadow-sm">
+      <div className="rounded-xl surface-metallic-light p-6 shadow-sm">
         <h1 className="text-2xl font-bold text-[#0f172a]">{client.name}</h1>
         <p className="mt-1 text-[#334155]">{client.email}</p>
         {client.company && (
@@ -104,7 +104,7 @@ export default async function ClientDetailPage({
       </div>
 
       {/* Projets du client */}
-      <div className="rounded-xl border border-[#c8cdd6] bg-white shadow-sm">
+      <div className="rounded-xl surface-metallic-light shadow-sm">
         <h2 className="border-b border-[#e0e4ea] px-6 py-4 text-lg font-semibold text-[#0f172a]">
           Projets ({projects.length})
         </h2>
@@ -171,7 +171,7 @@ export default async function ClientDetailPage({
       </div>
 
       {/* Tâches du client */}
-      <div className="rounded-xl border border-[#c8cdd6] bg-white shadow-sm">
+      <div className="rounded-xl surface-metallic-light shadow-sm">
         <h2 className="border-b border-[#e0e4ea] px-6 py-4 text-lg font-semibold text-[#0f172a]">
           Tâches ({tasks.length})
         </h2>

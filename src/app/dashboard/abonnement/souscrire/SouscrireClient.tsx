@@ -101,7 +101,7 @@ export function SouscrireClient({
 
   if (step === "success") {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-2xl surface-metallic-light p-6">
         <h2 className="text-xl font-bold text-slate-800">Paiement effectué</h2>
         <p className="mt-2 text-slate-600">
           Vos actions ont été créditées sur votre compte. Vous pouvez les utiliser dès maintenant.
@@ -132,7 +132,7 @@ export function SouscrireClient({
   return (
     <div className="space-y-6">
       {/* Sélecteur de formule */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-2xl surface-metallic-light p-6">
         <h2 className="mb-3 text-sm font-semibold text-slate-700">Changer de formule</h2>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {(["DECOUVERTE", "STANDARD", "STANDARD_PLUS", "PREMIUM"] as PlanKey[]).map((key) => {
@@ -159,7 +159,7 @@ export function SouscrireClient({
       </div>
 
       {/* Récapitulatif */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-2xl surface-metallic-light p-6">
         <h2 className="text-lg font-semibold text-slate-800">Récapitulatif</h2>
         <dl className="mt-4 space-y-2 text-sm">
           <div className="flex justify-between">

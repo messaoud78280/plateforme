@@ -31,11 +31,10 @@
   --warning-500: #f59e0b;
   --error-500: #ef4444;
 
-  /* Cadres / cartes – contraste */
-  --card-bg: #ffffff;
-  --card-border: #c8cdd6;
-  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --card-shadow-hover: 0 8px 24px rgba(15, 23, 42, 0.08);
+  /* Cadres / cartes — ombres (fond géré par dégradé métal, plus marqué) */
+  --card-border: #8b9aad;
+  --card-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
+  --card-shadow-hover: 0 14px 36px rgba(15, 23, 42, 0.16);
 
   /* Typography */
   --font-family: var(--font-geist-sans), "Inter", system-ui, sans-serif;
@@ -71,16 +70,252 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* Cadre carte – contraste métallique */
+/* Cadre carte — métal acier (plus présent que l’ancien « quasi blanc ») */
 .card-frame {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  box-shadow: var(--card-shadow);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid rgba(91, 108, 130, 0.55);
+  background:
+    linear-gradient(
+      115deg,
+      rgba(255, 255, 255, 0.42) 0%,
+      rgba(255, 255, 255, 0.1) 26%,
+      transparent 44%,
+      transparent 60%,
+      rgba(255, 255, 255, 0.2) 82%,
+      rgba(255, 255, 255, 0.32) 100%
+    ),
+    linear-gradient(
+      158deg,
+      #dce3ee 0%,
+      #c9d4e4 22%,
+      #b8c6d8 48%,
+      #ccd6e4 72%,
+      #dfe7f0 100%
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    inset 0 -2px 0 rgba(15, 23, 42, 0.1),
+    var(--card-shadow);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
 }
 .card-frame:hover {
-  box-shadow: var(--card-shadow-hover);
-  border-color: var(--metal-400);
+  border-color: rgba(71, 85, 105, 0.65);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    inset 0 -2px 0 rgba(15, 23, 42, 0.08),
+    var(--card-shadow-hover);
+}
+
+/* Panneaux / cartes Tailwind — métal acier visible sur fond #f2f4f7 */
+.surface-metallic-light {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid rgba(91, 108, 130, 0.52);
+  background:
+    linear-gradient(
+      115deg,
+      rgba(255, 255, 255, 0.45) 0%,
+      rgba(255, 255, 255, 0.1) 24%,
+      transparent 42%,
+      transparent 62%,
+      rgba(255, 255, 255, 0.22) 84%,
+      rgba(255, 255, 255, 0.36) 100%
+    ),
+    linear-gradient(
+      158deg,
+      #d8e0ec 0%,
+      #c5d0e2 28%,
+      #b4c2d6 52%,
+      #cbd6e6 100%
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -2px 0 rgba(15, 23, 42, 0.09),
+    0 2px 8px rgba(15, 23, 42, 0.1);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.surface-metallic-light:hover {
+  border-color: rgba(71, 85, 105, 0.62);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    inset 0 -2px 0 rgba(15, 23, 42, 0.07),
+    0 10px 30px rgba(15, 23, 42, 0.14);
+}
+
+/* Bandeaux larges : un ton plus clair que .surface-metallic-light, mais bien visibles */
+.surface-metallic-light.surface-metallic-light--soft {
+  border-color: rgba(100, 116, 139, 0.45);
+  background:
+    linear-gradient(
+      115deg,
+      rgba(255, 255, 255, 0.38) 0%,
+      rgba(255, 255, 255, 0.08) 28%,
+      transparent 46%,
+      transparent 60%,
+      rgba(255, 255, 255, 0.18) 88%,
+      rgba(255, 255, 255, 0.3) 100%
+    ),
+    linear-gradient(
+      158deg,
+      #e4eaf3 0%,
+      #d6dfea 40%,
+      #cad6e6 70%,
+      #dde5f0 100%
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -1px 0 rgba(15, 23, 42, 0.07),
+    0 2px 10px rgba(15, 23, 42, 0.09);
+}
+.surface-metallic-light.surface-metallic-light--soft:hover {
+  border-color: rgba(71, 85, 105, 0.5);
+}
+
+/* Boutons / liens secondaires — contour 2px, métal plus marqué */
+.surface-metallic-outline {
+  position: relative;
+  isolation: isolate;
+  border: 2px solid rgba(100, 116, 139, 0.75);
+  background:
+    linear-gradient(
+      115deg,
+      rgba(255, 255, 255, 0.48) 0%,
+      rgba(255, 255, 255, 0.1) 26%,
+      transparent 44%,
+      transparent 58%,
+      rgba(255, 255, 255, 0.22) 84%,
+      rgba(255, 255, 255, 0.38) 100%
+    ),
+    linear-gradient(
+      158deg,
+      #d2dbe8 0%,
+      #c0cce0 35%,
+      #b3c0d6 55%,
+      #d0d9e8 100%
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -2px 0 rgba(15, 23, 42, 0.08),
+    0 2px 6px rgba(15, 23, 42, 0.1);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+}
+.surface-metallic-outline:hover {
+  border-color: rgba(29, 78, 216, 0.85);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 3px 14px rgba(29, 78, 216, 0.18);
+}
+.surface-metallic-outline.surface-metallic-outline--neutral:hover {
+  border-color: rgba(71, 85, 105, 0.85);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    0 3px 12px rgba(15, 23, 42, 0.12);
+}
+
+/* Barre fixe bas d’écran (CTA mobile tarifs) */
+.surface-metallic-sticky-bar {
+  border-top: 1px solid rgba(100, 116, 139, 0.55);
+  background:
+    linear-gradient(
+      105deg,
+      rgba(255, 255, 255, 0.35) 0%,
+      rgba(255, 255, 255, 0.06) 40%,
+      rgba(210, 220, 234, 0.92) 100%
+    ),
+    linear-gradient(180deg, #d8e2ee 0%, #c5d2e4 55%, #b9c8dc 100%);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 -8px 28px rgba(15, 23, 42, 0.14);
+}
+
+/* Surface bleu métallisé — cadres & blocs (parcours, etc.) */
+.surface-metallic-blue {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  color: #f1f5f9;
+  background:
+    linear-gradient(
+      118deg,
+      rgba(255, 255, 255, 0.14) 0%,
+      rgba(255, 255, 255, 0.02) 28%,
+      transparent 45%,
+      transparent 62%,
+      rgba(255, 255, 255, 0.08) 82%,
+      rgba(255, 255, 255, 0.03) 100%
+    ),
+    linear-gradient(
+      158deg,
+      #071422 0%,
+      #0f2840 14%,
+      #1a3f5f 28%,
+      #2d5a82 40%,
+      #1e4a6e 48%,
+      #3d6f9e 54%,
+      #1a3d5c 66%,
+      #0f2d4a 82%,
+      #050f18 100%
+    );
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.18),
+    0 8px 28px rgba(4, 20, 40, 0.5);
+  transition: box-shadow 0.35s ease, border-color 0.35s ease, transform 0.35s ease;
+}
+.surface-metallic-blue:hover {
+  border-color: rgba(255, 255, 255, 0.28);
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.14),
+    0 12px 36px rgba(4, 24, 48, 0.58);
+}
+
+/* Carte interne : léger relief par rapport au panneau parent */
+.surface-metallic-blue.surface-metallic-blue--inset {
+  transform: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.22),
+    0 4px 16px rgba(2, 12, 28, 0.45);
+}
+.surface-metallic-blue.surface-metallic-blue--inset:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.24);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.18),
+    0 8px 22px rgba(2, 12, 28, 0.55);
+}
+
+/* Titre hero — métal noir : texte toujours lisible si clip non supporté */
+.text-metallic-black {
+  color: #0f172a;
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .text-metallic-black {
+    background-image: linear-gradient(
+      118deg,
+      #475569 0%,
+      #1e293b 20%,
+      #64748b 34%,
+      #0f172a 48%,
+      #334155 58%,
+      #020617 72%,
+      #1e293b 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
 }
 
 @media (prefers-color-scheme: dark) {

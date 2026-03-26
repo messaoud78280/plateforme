@@ -96,19 +96,19 @@ export default async function ProjetsPage({
 
       {/* Stats */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-xl surface-metallic-light p-4">
           <p className="text-2xl font-bold text-slate-800">{total}</p>
           <p className="text-sm text-slate-500">Total</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-xl surface-metallic-light p-4">
           <p className="text-2xl font-bold text-blue-600">{byStatus.EN_COURS ?? 0}</p>
           <p className="text-sm text-slate-500">En cours</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-xl surface-metallic-light p-4">
           <p className="text-2xl font-bold text-amber-600">{byStatus.EN_ATTENTE ?? 0}</p>
           <p className="text-sm text-slate-500">En attente</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-xl surface-metallic-light p-4">
           <p className="text-2xl font-bold text-green-600">{byStatus.TERMINE ?? 0}</p>
           <p className="text-sm text-slate-500">Terminés</p>
         </div>
@@ -178,7 +178,7 @@ export default async function ProjetsPage({
             <Link
               key={project.id}
               href={`/dashboard/projets/${project.id}`}
-              className="block rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+              className="block rounded-xl surface-metallic-light p-6 transition-shadow hover:shadow-md"
             >
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">

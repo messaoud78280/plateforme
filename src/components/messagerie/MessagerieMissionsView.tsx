@@ -443,14 +443,14 @@ export function MessagerieMissionsView({
 
   if (loading) {
     return (
-      <div className="flex h-[calc(100vh-14rem)] items-center justify-center rounded-2xl border border-slate-200 bg-white">
+      <div className="flex h-[calc(100vh-14rem)] items-center justify-center rounded-2xl surface-metallic-light">
         <p className="text-slate-500">Chargement de la messagerie...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex h-[calc(100vh-14rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div className="flex h-[calc(100vh-14rem)] overflow-hidden rounded-2xl surface-metallic-light">
       {/* Colonne gauche : navigation */}
       <aside className="flex w-56 shrink-0 flex-col border-r border-slate-200 bg-slate-50/80">
         <div className="border-b border-slate-200 p-4">

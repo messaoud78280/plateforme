@@ -51,7 +51,7 @@ function ConnexionChoice() {
             <Link
               key={acc.slug}
               href={`${acc.path}${query}`}
-              className="flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-blue-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex flex-col rounded-2xl surface-metallic-light p-6 transition-all hover:border-blue-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <span className="mb-2 inline-block w-fit rounded-full bg-slate-800 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
                 {acc.badge}

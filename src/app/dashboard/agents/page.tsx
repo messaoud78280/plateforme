@@ -54,7 +54,7 @@ export default async function AgentsPage() {
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl surface-metallic-light">
         <table className="w-full min-w-[500px] text-left text-sm">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50">
@@ -106,13 +106,13 @@ export default async function AgentsPage() {
       <div className="flex flex-wrap gap-4">
         <Link
           href="/dashboard/taches"
-          className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
+          className="rounded-xl surface-metallic-light px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
         >
           Voir les missions
         </Link>
         <Link
           href="/dashboard/clients"
-          className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
+          className="rounded-xl surface-metallic-light px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
         >
           Voir les clients
         </Link>

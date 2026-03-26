@@ -54,7 +54,7 @@ export function DocumentCard({ doc, onDelete, list }: DocumentCardProps) {
 
   if (list) {
     return (
-      <div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex items-center justify-between gap-4 rounded-xl surface-metallic-light p-4">
         <div className="flex min-w-0 items-center gap-4">
           <span className="text-2xl">{iconForDoc(doc)}</span>
           <div className="min-w-0">
@@ -96,7 +96,7 @@ export function DocumentCard({ doc, onDelete, list }: DocumentCardProps) {
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="rounded-xl surface-metallic-light p-4">
       <div className="flex items-start justify-between">
         <span className="text-3xl">{iconForDoc(doc)}</span>
         <span

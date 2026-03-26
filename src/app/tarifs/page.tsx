@@ -91,7 +91,7 @@ export default async function TarifsPage() {
           <div className="flex items-center gap-3">
             <Link
               href="/contact"
-              className="hidden rounded-lg border border-[#c8cdd6] bg-white px-4 py-2 text-sm font-medium text-[#1e293b] transition hover:bg-[#f8f9fb] sm:inline-flex"
+              className="hidden rounded-lg surface-metallic-light px-4 py-2 text-sm font-medium text-[#1e293b] transition hover:bg-[#f8f9fb] sm:inline-flex"
               aria-label="Contact"
             >
               Contact
@@ -124,7 +124,7 @@ export default async function TarifsPage() {
             {reassurance.map(({ label, desc }) => (
               <li
                 key={label}
-                className="rounded-lg border border-[#e0e4ea] bg-white px-4 py-3 text-center shadow-sm"
+                className="rounded-lg surface-metallic-light px-4 py-3 text-center"
               >
                 <span className="block font-semibold text-[#0f172a]">{label}</span>
                 <span className="block text-sm text-[#64748b]">{desc}</span>
@@ -142,7 +142,7 @@ export default async function TarifsPage() {
             {plans.map((plan) => (
               <article
                 key={plan.name}
-                className={`relative rounded-xl border-2 bg-white p-6 shadow-sm transition-all hover:shadow-md ${
+                className={`relative rounded-xl border-2 surface-metallic-light p-6 transition-all hover:shadow-md ${
                   plan.badge ? "border-[#1d4ed8] shadow-[#1d4ed8]/10" : "border-[#c8cdd6] hover:border-[#9ca3af]"
                 }`}
               >
@@ -253,7 +253,7 @@ export default async function TarifsPage() {
           </section>
 
           {/* Qu’est-ce qu’une action ? */}
-          <div className="mt-10 rounded-2xl border border-[#e0e4ea] bg-white p-8 shadow-sm">
+          <div className="mt-10 rounded-2xl surface-metallic-light p-8">
             <h3 className="text-xl font-bold text-[#0f172a] md:text-2xl">
               Qu’est-ce qu’une action ?
             </h3>
@@ -281,7 +281,7 @@ export default async function TarifsPage() {
         </section>
 
         {/* Ce qui est inclus */}
-        <section className="mt-14 rounded-2xl border border-[#e0e4ea] bg-white p-8 shadow-sm" aria-labelledby="inclus-heading">
+        <section className="mt-14 rounded-2xl surface-metallic-light p-8" aria-labelledby="inclus-heading">
           <h2 id="inclus-heading" className="text-xl font-bold text-[#0f172a] md:text-2xl">
             Ce qui est inclus
           </h2>
@@ -310,7 +310,7 @@ export default async function TarifsPage() {
           </h2>
           <div className="mt-6 grid gap-6 md:grid-cols-3">
             {etapes.map((e, i) => (
-              <div key={i} className="rounded-xl border border-[#e0e4ea] bg-white p-6 shadow-sm">
+              <div key={i} className="rounded-xl surface-metallic-light p-6">
                 <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#1d4ed8] text-lg font-bold text-white">
                   {i + 1}
                 </span>
@@ -332,7 +332,7 @@ export default async function TarifsPage() {
           </Link>
           <Link
             href="/connexion"
-            className="w-full rounded-lg border border-[#c8cdd6] bg-white px-8 py-4 text-center font-semibold text-[#1e293b] transition hover:bg-[#f8f9fb] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2 sm:w-auto"
+            className="w-full rounded-lg surface-metallic-light px-8 py-4 text-center font-semibold text-[#1e293b] transition hover:bg-[#f8f9fb] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2 sm:w-auto"
             aria-label="Déjà client ? Accéder à mon espace"
           >
             Déjà client ? Accéder
@@ -342,7 +342,7 @@ export default async function TarifsPage() {
         {/* Tableau comparatif (révélé au clic) */}
         <ComparatifReveal>
           {/* Tableau des offres Découverte / Standard / Business / Premium */}
-          <div className="overflow-x-auto rounded-xl border border-[#c8cdd6] bg-white">
+          <div className="overflow-x-auto rounded-xl surface-metallic-light">
             <table className="w-full min-w-[500px] text-left text-sm" role="grid">
               <caption className="sr-only">Comparatif des offres BeWork</caption>
               <thead>
@@ -367,14 +367,14 @@ export default async function TarifsPage() {
           </div>
 
           {/* Bloc comparatif coût réel (existant) */}
-          <section className="mt-10 rounded-2xl border-2 border-[#1d4ed8]/20 bg-white p-6 shadow-lg md:p-10">
+          <section className="mt-10 rounded-2xl border-2 border-[#1d4ed8]/20 surface-metallic-light p-6 md:p-10">
             <h3 className="text-center text-xl font-bold text-[#0f172a] md:text-2xl">
               Comparatif : coût réel d&apos;un assistant vs nos assistants virtuels
             </h3>
             <p className="mt-3 text-center text-sm text-[#64748b]">
               Référence : salaire brut 2 200 €/mois (région parisienne). Coût réel = salaire + charges + avantages + bureau + RH.
             </p>
-            <div className="mt-10 overflow-x-auto rounded-xl border border-[#c8cdd6] bg-white">
+            <div className="mt-10 overflow-x-auto rounded-xl surface-metallic-light">
               <table className="w-full min-w-[640px] text-left text-sm">
                 <thead>
                   <tr className="border-b border-[#e0e4ea] bg-[#f8f9fb]">
@@ -431,7 +431,7 @@ export default async function TarifsPage() {
           </h2>
           <ul className="mt-6 space-y-4">
             {faq.map(({ q, a }, i) => (
-              <li key={i} className="rounded-xl border border-[#e0e4ea] bg-white shadow-sm">
+              <li key={i} className="rounded-xl surface-metallic-light">
                 <details className="group">
                   <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-4 font-medium text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-inset [&::-webkit-details-marker]:hidden">
                     <span>{q}</span>
@@ -464,7 +464,7 @@ export default async function TarifsPage() {
             </Link>
             <Link
               href="/connexion"
-              className="w-full rounded-lg border border-[#c8cdd6] bg-white px-8 py-4 text-center font-semibold text-[#1e293b] transition hover:bg-[#f8f9fb] sm:w-auto"
+              className="w-full rounded-lg surface-metallic-light px-8 py-4 text-center font-semibold text-[#1e293b] transition hover:bg-[#f8f9fb] sm:w-auto"
               aria-label="Déjà client ? Accéder"
             >
               Déjà client ? Accéder

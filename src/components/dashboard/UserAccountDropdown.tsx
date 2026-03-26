@@ -72,7 +72,7 @@ export function UserAccountDropdown({ userName, userRole, userCompany }: UserAcc
 
       {open && (
         <div
-          className="absolute right-0 top-full z-50 mt-2 w-72 rounded-xl border border-[#e0e4ea] bg-white py-2 shadow-lg"
+          className="absolute right-0 top-full z-50 mt-2 w-72 rounded-xl surface-metallic-light py-2 shadow-lg"
           role="menu"
         >
           <div className="border-b border-[#e0e4ea] px-4 py-3">

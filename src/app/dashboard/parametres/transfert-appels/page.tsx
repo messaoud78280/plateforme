@@ -10,7 +10,7 @@ export default async function TransfertAppelsPage() {
   }
 
   return (
-    <section className="rounded-2xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
+    <section className="rounded-2xl surface-metallic-light p-6">
       <h2 className="mb-4 text-lg font-semibold text-[#475569]">
         Transfert d&apos;appels
       </h2>

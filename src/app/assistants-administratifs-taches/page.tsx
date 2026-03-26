@@ -247,7 +247,7 @@ export default function AssistantsAdministratifsTachesPage() {
           <div className="flex items-center gap-3">
             <Link
               href="/contact"
-              className="hidden rounded-lg border border-[#c8cdd6] bg-white px-4 py-2 text-sm font-medium text-[#1e293b] transition hover:bg-[#f8f9fb] sm:inline-flex"
+              className="hidden rounded-lg surface-metallic-light px-4 py-2 text-sm font-medium text-[#1e293b] transition hover:bg-[#f8f9fb] sm:inline-flex"
               aria-label="Contact"
             >
               Contact
@@ -294,7 +294,7 @@ export default function AssistantsAdministratifsTachesPage() {
               </Link>
               <Link
                 href="/tarifs"
-                className="w-full rounded-lg border-2 border-[#c8cdd6] bg-white px-8 py-4 text-center font-semibold text-[#1e293b] transition hover:border-[#9ca3af] hover:bg-[#f8f9fb] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2 sm:w-auto"
+                className="surface-metallic-outline surface-metallic-outline--neutral w-full rounded-lg px-8 py-4 text-center font-semibold text-[#1e293b] transition focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2 sm:w-auto"
                 aria-label="Voir les tarifs BeWork"
               >
                 Voir les tarifs
@@ -371,7 +371,7 @@ export default function AssistantsAdministratifsTachesPage() {
             </p>
             <ul className="mt-6 space-y-3">
               {nonFait.map((item) => (
-                <li key={item} className="flex gap-3 rounded-lg border border-[#e0e4ea] bg-white px-4 py-3">
+                <li key={item} className="flex gap-3 rounded-lg surface-metallic-light px-4 py-3">
                   <span className="text-[#64748b]" aria-hidden>✕</span>
                   <span className="text-[#334155]">{item}</span>
                 </li>
@@ -401,7 +401,7 @@ export default function AssistantsAdministratifsTachesPage() {
               {reassurance.map(({ label, desc }) => (
                 <li
                   key={label}
-                  className="rounded-lg border border-[#e0e4ea] bg-white px-4 py-3 text-center shadow-sm"
+                  className="rounded-lg surface-metallic-light px-4 py-3 text-center"
                 >
                   <span className="block font-semibold text-[#0f172a]">{label}</span>
                   <span className="block text-sm text-[#64748b]">{desc}</span>
@@ -419,7 +419,7 @@ export default function AssistantsAdministratifsTachesPage() {
             </h2>
             <ul className="mt-8 space-y-4">
               {faqItems.map((item, i) => (
-                <li key={i} className="rounded-xl border border-[#e0e4ea] bg-white shadow-sm">
+                <li key={i} className="rounded-xl surface-metallic-light">
                   <details className="group">
                     <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-4 font-medium text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-inset [&::-webkit-details-marker]:hidden">
                       <span>{item.q}</span>
@@ -456,7 +456,7 @@ export default function AssistantsAdministratifsTachesPage() {
               </Link>
               <Link
                 href="/tarifs"
-                className="w-full rounded-lg border border-[#c8cdd6] bg-white px-8 py-4 text-center font-semibold text-[#1e293b] transition hover:bg-[#f8f9fb] sm:w-auto"
+                className="w-full rounded-lg surface-metallic-light px-8 py-4 text-center font-semibold text-[#1e293b] transition hover:bg-[#f8f9fb] sm:w-auto"
                 aria-label="Voir les tarifs BeWork"
               >
                 Voir les tarifs

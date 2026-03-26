@@ -40,7 +40,7 @@ export default async function ActionsInfoPage() {
         </p>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-2xl surface-metallic-light">
         <table className="w-full min-w-[480px] text-left text-sm">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50 text-slate-700">

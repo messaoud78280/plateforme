@@ -82,7 +82,7 @@ export function EquipeSection() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl surface-metallic-light p-6">
         <h2 className="text-lg font-semibold text-slate-800">Nouvelle invitation</h2>
         <form onSubmit={handleInvite} className="mt-4 flex flex-wrap items-end gap-4">
           <div className="min-w-[200px] flex-1">
@@ -137,7 +137,7 @@ export function EquipeSection() {
         )}
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl surface-metallic-light p-6">
         <h2 className="text-lg font-semibold text-slate-800">Invitations en attente</h2>
         {loadingList ? (
           <p className="mt-4 text-slate-500">Chargement…</p>

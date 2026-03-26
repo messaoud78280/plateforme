@@ -97,7 +97,7 @@ export function TaskMessageConversation({
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
+      <div className="rounded-xl surface-metallic-light p-6">
         <h2 className="mb-4 text-lg font-semibold text-slate-800">Messages mission</h2>
         <p className="text-sm text-slate-500">Chargement…</p>
       </div>
@@ -105,7 +105,7 @@ export function TaskMessageConversation({
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-6">
+    <div className="rounded-xl surface-metallic-light p-6">
       <h2 className="mb-4 text-lg font-semibold text-slate-800">
         Messages mission {assignedToName ? `— ${assignedToName}` : ""}
       </h2>

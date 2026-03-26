@@ -146,7 +146,7 @@ export default async function AbonnementPage() {
       <BackLink href="/dashboard">Tableau de bord</BackLink>
 
       {/* Formules disponibles (tarifs) + Devis */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl surface-metallic-light p-6">
         <h2 className="text-lg font-semibold text-slate-800">Formules disponibles</h2>
         <p className="mt-1 text-sm text-slate-600">
           Choisissez une formule ou demandez un devis personnalisé pour un volume sur mesure.
@@ -206,7 +206,7 @@ export default async function AbonnementPage() {
       </section>
 
       {/* Bloc Abonnement et actions — formule, KPIs, 3 CTA */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl surface-metallic-light p-6">
         <h2 className="text-lg font-semibold text-slate-800">Abonnement et actions</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div>
@@ -281,7 +281,7 @@ export default async function AbonnementPage() {
       </section>
 
       {/* Historique des paiements */}
-      <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <section className="rounded-2xl surface-metallic-light">
         <h2 className="border-b border-slate-200 px-6 py-4 text-lg font-semibold text-slate-800">
           Historique des paiements
         </h2>
@@ -330,7 +330,7 @@ export default async function AbonnementPage() {
       </section>
 
       {/* Historique des crédits d'actions */}
-      <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <section className="rounded-2xl surface-metallic-light">
         <h2 className="border-b border-slate-200 px-6 py-4 text-lg font-semibold text-slate-800">
           Historique des crédits d&apos;actions
         </h2>
@@ -378,7 +378,7 @@ export default async function AbonnementPage() {
         <p className="mt-1 text-sm text-slate-600">
           Historique des tâches terminées avec déduction d&apos;actions. Minimum 1 action par demande.
         </p>
-        <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="mt-4 overflow-x-auto rounded-xl surface-metallic-light">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50">

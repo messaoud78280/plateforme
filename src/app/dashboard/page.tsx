@@ -606,7 +606,7 @@ export default async function DashboardPage({
       {!isManager && (
       <>
       {/* Carte de bienvenue + CTA Nouvelle demande (client) */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-2xl surface-metallic-light p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
         <h1 className="text-2xl font-bold text-slate-800">
@@ -626,7 +626,7 @@ export default async function DashboardPage({
 
       {/* Section Contrat — visible pour les clients, accès à la page contrat */}
       {isClient && (
-        <section aria-label="Contrat" className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section aria-label="Contrat" className="rounded-2xl surface-metallic-light p-6">
           <h2 className="text-lg font-semibold text-slate-800">Contrat d&apos;abonnement</h2>
           {contractStatus === "SIGNED" ? (
             <p className="mt-2 text-sm text-slate-600">
@@ -668,7 +668,7 @@ export default async function DashboardPage({
       >
         {/* Demandes de RDV — clients/agents : leurs demandes ; gérante : lien vers page complète */}
         {isManager ? (
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="rounded-2xl surface-metallic-light p-4">
             <Link
               href="/dashboard/messages"
               className="flex items-center justify-between text-slate-700 hover:text-blue-600"
@@ -678,7 +678,7 @@ export default async function DashboardPage({
             </Link>
           </div>
         ) : (
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-2xl surface-metallic-light p-6">
             <h3 className="text-lg font-semibold text-slate-800">Mes demandes de RDV</h3>
             <p className="mt-1 text-sm text-slate-600">Demandes envoyées depuis la page Contact.</p>
             {contactRequestsClient.length === 0 ? (
@@ -732,7 +732,7 @@ export default async function DashboardPage({
         )}
 
         {/* Calendrier de prise de RDV — visible par tous */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-2xl surface-metallic-light p-6">
           <h3 className="text-lg font-semibold text-slate-800">Prise de rendez-vous en ligne</h3>
           <p className="mt-1 text-sm text-slate-600">
             Réservez un créneau, ajoutez des pièces jointes et des notes. Les RDV apparaissent dans les alertes.
@@ -770,39 +770,39 @@ export default async function DashboardPage({
         {isManager && (
           <Link
             href="/dashboard/clients"
-            className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
+            className="rounded-xl surface-metallic-light px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
           >
             Clients
           </Link>
         )}
         <Link
           href="/dashboard/documents"
-          className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
+          className="rounded-xl surface-metallic-light px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
         >
           Mes documents
         </Link>
         <Link
           href="/dashboard/projets"
-          className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
+          className="rounded-xl surface-metallic-light px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
         >
           Projets
         </Link>
         <Link
           href="/dashboard/messagerie"
-          className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
+          className="rounded-xl surface-metallic-light px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
         >
           Messagerie
         </Link>
         <Link
           href="/dashboard/messages"
-          className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
+          className="rounded-xl surface-metallic-light px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
         >
           RDV
         </Link>
         {isClient && (
           <Link
             href="/contract"
-            className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
+            className="rounded-xl surface-metallic-light px-6 py-3 text-slate-700 shadow-sm transition hover:border-slate-300 hover:shadow"
           >
             Contrat
           </Link>

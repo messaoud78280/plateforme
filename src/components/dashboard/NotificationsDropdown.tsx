@@ -89,7 +89,7 @@ export function NotificationsDropdown() {
         )}
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-1 w-80 rounded-xl border border-slate-200 bg-white py-2 shadow-lg">
+        <div className="absolute right-0 top-full z-50 mt-1 w-80 rounded-xl surface-metallic-light py-2 shadow-lg">
           <div className="border-b border-slate-100 px-4 py-2">
             <h3 className="text-sm font-semibold text-slate-800">Notifications</h3>
           </div>

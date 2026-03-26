@@ -47,7 +47,7 @@ export function ProjectAssignAgent({
 
   if (!isAgence && !assignedTo) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
+      <div className="rounded-xl surface-metallic-light p-6">
         <h2 className="mb-2 text-lg font-semibold text-slate-800">Votre référent</h2>
         <p className="text-sm text-slate-500">Aucun référent assigné à ce projet pour le moment. L’agence vous en désignera un.</p>
       </div>

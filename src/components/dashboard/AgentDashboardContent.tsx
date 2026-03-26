@@ -54,7 +54,7 @@ function formatDate(d: Date) {
 
 function SummaryCard({ label, count, href }: { label: string; count: number; href?: string }) {
   const content = (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="rounded-xl surface-metallic-light p-4">
       <p className="text-2xl font-bold text-slate-800">{count}</p>
       <p className="mt-1 text-sm text-slate-600">{label}</p>
     </div>
@@ -78,7 +78,7 @@ export function AgentDashboardContent({
   return (
     <div className="space-y-8">
       {/* En-tête */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-2xl surface-metallic-light p-6">
         <h1 className="text-2xl font-bold text-slate-800">
           Bienvenue, {userName ?? "Agent"}
         </h1>
@@ -102,7 +102,7 @@ export function AgentDashboardContent({
       <section aria-label="Mes missions assignées">
         <h2 className="mb-4 text-lg font-semibold text-slate-800">Mes missions assignées</h2>
         {missions.length === 0 ? (
-          <div className="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+          <div className="rounded-xl surface-metallic-light p-8 text-center shadow-sm">
             <p className="text-slate-500">Aucune mission assignée pour le moment.</p>
           </div>
         ) : (
@@ -110,7 +110,7 @@ export function AgentDashboardContent({
             {missions.map((task) => (
               <div
                 key={task.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-slate-300"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl surface-metallic-light p-4 transition hover:border-slate-300"
               >
                 <div className="min-w-0 flex-1">
                   <Link
@@ -166,7 +166,7 @@ export function AgentDashboardContent({
       <section aria-label="Missions urgentes">
         <h2 className="mb-4 text-lg font-semibold text-slate-800">Missions urgentes</h2>
         {missionsUrgentesList.length === 0 ? (
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-xl surface-metallic-light p-6">
             <p className="text-sm text-slate-500">Aucune mission urgente.</p>
           </div>
         ) : (
@@ -201,7 +201,7 @@ export function AgentDashboardContent({
       <section aria-label="Messages récents">
         <h2 className="mb-4 text-lg font-semibold text-slate-800">Messages récents</h2>
         {messagesRecents.length === 0 ? (
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-xl surface-metallic-light p-6">
             <p className="text-sm text-slate-500">Aucun message récent.</p>
           </div>
         ) : (

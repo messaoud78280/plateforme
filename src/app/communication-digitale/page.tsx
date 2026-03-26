@@ -86,13 +86,13 @@ export default async function CommunicationDigitalePage() {
           <div className="flex items-center gap-3">
             <Link
               href="/tarifs"
-              className="hidden rounded-lg border border-[#c8cdd6] bg-white px-4 py-2 text-sm font-medium text-[#1e293b] transition hover:bg-[#f8f9fb] sm:inline-flex"
+              className="hidden rounded-lg surface-metallic-light px-4 py-2 text-sm font-medium text-[#1e293b] transition hover:bg-[#f8f9fb] sm:inline-flex"
             >
               Tarifs administratif
             </Link>
             <Link
               href="/contact"
-              className="hidden rounded-lg border border-[#c8cdd6] bg-white px-4 py-2 text-sm font-medium text-[#1e293b] transition hover:bg-[#f8f9fb] sm:inline-flex"
+              className="hidden rounded-lg surface-metallic-light px-4 py-2 text-sm font-medium text-[#1e293b] transition hover:bg-[#f8f9fb] sm:inline-flex"
             >
               Contact
             </Link>
@@ -121,7 +121,7 @@ export default async function CommunicationDigitalePage() {
         </section>
 
         {/* Tarifs expliqués */}
-        <section className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="mt-10 rounded-2xl surface-metallic-light p-6">
           <h2 className="text-lg font-semibold text-[#0f172a]">Les tarifs communication BeWork</h2>
           <p className="mt-2 text-sm text-slate-600 leading-relaxed">
             Les prix affichés ci-dessous sont les tarifs officiels de BeWork. Chaque pack est facturé mensuellement et comprend
@@ -141,7 +141,7 @@ export default async function CommunicationDigitalePage() {
           {PACKS.map((pack) => (
             <article
               key={pack.id}
-              className="relative flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-md"
+              className="relative flex flex-col rounded-2xl surface-metallic-light p-6 transition hover:shadow-md"
             >
               {pack.badge && (
                 <span className="absolute right-4 top-4 rounded-full bg-[#1d4ed8] px-2.5 py-0.5 text-xs font-medium text-white">
@@ -177,7 +177,7 @@ export default async function CommunicationDigitalePage() {
         </section>
 
         {/* Missions possibles */}
-        <section className="mt-16 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+        <section className="mt-16 rounded-2xl surface-metallic-light p-8">
           <h2 className="text-xl font-semibold text-[#0f172a]">Missions possibles</h2>
           <p className="mt-1 text-sm text-slate-500">
             Avec un pack communication, vous pouvez créer ces missions dans votre tableau de bord.

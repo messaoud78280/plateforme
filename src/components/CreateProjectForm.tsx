@@ -109,7 +109,7 @@ export function CreateProjectForm() {
       ) : (
         <form
           onSubmit={handleSubmit}
-          className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+          className="rounded-2xl surface-metallic-light p-6"
         >
           <h3 className="text-lg font-semibold text-slate-800">Créer un projet</h3>
           <p className="mt-1 text-sm text-slate-500">

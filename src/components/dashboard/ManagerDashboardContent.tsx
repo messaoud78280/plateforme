@@ -59,7 +59,7 @@ function TaskCard({
   actions?: { label: string; href: string; primary?: boolean }[];
 }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-4 transition hover:border-slate-300 hover:shadow-sm">
+    <div className="rounded-lg surface-metallic-light p-4 transition hover:border-slate-300 hover:shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <Link
@@ -87,7 +87,7 @@ function TaskCard({
         <div className="flex shrink-0 flex-wrap gap-1.5">
           <Link
             href={`/dashboard/taches/${task.id}`}
-            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            className="rounded-lg surface-metallic-light px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
           >
             Voir
           </Link>
@@ -98,7 +98,7 @@ function TaskCard({
               className={`rounded-lg px-2.5 py-1.5 text-xs font-medium ${
                 a.primary
                   ? "bg-[#1d4ed8] text-white hover:bg-[#1e40af]"
-                  : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                  : "surface-metallic-light text-slate-700 hover:bg-slate-50"
               }`}
             >
               {a.label}
@@ -112,7 +112,7 @@ function TaskCard({
 
 function KpiCard({ label, count, href }: { label: string; count: number; href?: string }) {
   const content = (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="rounded-xl surface-metallic-light p-4">
       <p className="text-2xl font-bold text-slate-800">{count}</p>
       <p className="mt-1 text-sm text-slate-600">{label}</p>
     </div>
@@ -185,14 +185,14 @@ export function ManagerDashboardContent({
       {(typeof actionsConsumees === "number" || activiteRecente.length > 0) && (
         <div className="grid gap-6 lg:grid-cols-2">
           {typeof actionsConsumees === "number" && (
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="rounded-xl surface-metallic-light p-6">
               <h3 className="text-lg font-semibold text-slate-800">Actions consommées</h3>
               <p className="mt-2 text-3xl font-bold text-[#1d4ed8]">{actionsConsumees}</p>
               <p className="mt-1 text-sm text-slate-500">Total consommé par les clients ce mois</p>
             </div>
           )}
           {activiteRecente.length > 0 && (
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="rounded-xl surface-metallic-light p-6">
               <h3 className="text-lg font-semibold text-slate-800">Activité récente</h3>
               <ul className="mt-4 space-y-3">
                 {activiteRecente.slice(0, 5).map((a) => (
@@ -217,7 +217,7 @@ export function ManagerDashboardContent({
       )}
 
       {/* 1. Nouvelles demandes */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl surface-metallic-light p-6">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-slate-800">Nouvelles demandes</h3>
           <span className="rounded-full bg-slate-200 px-2.5 py-0.5 text-sm font-medium text-slate-700">
@@ -251,7 +251,7 @@ export function ManagerDashboardContent({
       </section>
 
       {/* 2. À assigner */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl surface-metallic-light p-6">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-slate-800">À assigner</h3>
           <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-sm font-medium text-amber-800">
@@ -285,7 +285,7 @@ export function ManagerDashboardContent({
       </section>
 
       {/* 3. Missions en cours */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl surface-metallic-light p-6">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-slate-800">Missions en cours</h3>
           <Link
@@ -353,7 +353,7 @@ export function ManagerDashboardContent({
       </section>
 
       {/* 5. Missions terminées */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl surface-metallic-light p-6">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-slate-800">Missions terminées</h3>
           <Link

@@ -12,7 +12,7 @@ export default async function OnboardingPage() {
   return (
     <div className="mx-auto max-w-2xl py-12 space-y-4">
       <BackLink href="/dashboard">Tableau de bord</BackLink>
-      <div className="rounded-2xl border border-slate-200 bg-white p-10 shadow-sm text-center">
+      <div className="rounded-2xl surface-metallic-light p-10 text-center">
         <h1 className="text-3xl font-bold text-slate-800">Bienvenue sur BeWork</h1>
         <p className="mt-4 text-lg text-slate-600">
           Votre assistant administratif est prêt.

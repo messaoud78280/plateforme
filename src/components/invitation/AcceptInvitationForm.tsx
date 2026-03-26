@@ -48,7 +48,7 @@ export function AcceptInvitationForm({ token, email, role }: Props) {
   }
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+    <div className="w-full max-w-md rounded-2xl surface-metallic-light p-8">
       <h1 className="text-xl font-bold text-slate-800">Rejoindre l&apos;équipe</h1>
       <p className="mt-2 text-sm text-slate-600">
         Vous avez été invité en tant que <strong>{ROLE_LABELS[role] ?? role}</strong>.

@@ -37,7 +37,7 @@ export function MissionSuggestions({ onSelect, searchQuery = "" }: MissionSugges
   if (suggestions.length === 0) return null;
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-2xl surface-metallic-light p-6">
       <h2 className="text-base font-semibold text-slate-800 mb-2">
         Suggestions basées sur vos missions passées
       </h2>

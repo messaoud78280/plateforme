@@ -17,7 +17,7 @@ interface ClientsSectionProps {
 
 export function ClientsSection({ clients }: ClientsSectionProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl surface-metallic-light p-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-slate-800">Vos clients</h2>
@@ -76,7 +76,7 @@ export function ClientsSection({ clients }: ClientsSectionProps) {
                   <td className="py-3 text-right">
                     <Link
                       href={`/dashboard/clients/${client.id}`}
-                      className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+                      className="inline-flex items-center rounded-lg surface-metallic-light px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
                     >
                       Voir détail
                     </Link>

@@ -6,7 +6,7 @@ interface ActivityTimelineProps {
 
 export function ActivityTimeline({ activities }: ActivityTimelineProps) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-xl surface-metallic-light p-6">
       <h2 className="text-lg font-semibold text-slate-800">Activité récente</h2>
       <p className="mt-1 text-sm text-slate-500">Les 5 dernières actions</p>
 

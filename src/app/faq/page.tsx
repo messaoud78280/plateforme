@@ -63,7 +63,7 @@ export default function FaqPage() {
             <BeWorkLogo size="sm" />
           </Link>
           <div className="flex items-center gap-3">
-            <Link href="/tarifs" className="rounded-lg border border-[#c8cdd6] bg-white px-5 py-2.5 text-sm font-medium text-[#1e293b] hover:bg-[#f8f9fb]">
+            <Link href="/tarifs" className="rounded-lg surface-metallic-light px-5 py-2.5 text-sm font-medium text-[#1e293b] hover:bg-[#f8f9fb]">
               Tarifs
             </Link>
             <Link href="/inscription" className="rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af]">
@@ -88,7 +88,7 @@ export default function FaqPage() {
 
           <dl className="mt-12 space-y-8">
             {FAQ_ITEMS.map((item, i) => (
-              <div key={i} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div key={i} className="rounded-xl surface-metallic-light p-6">
                 <dt className="text-lg font-semibold text-[#0f172a]">{item.q}</dt>
                 <dd className="mt-3 text-[#334155] leading-relaxed">{item.a}</dd>
               </div>
@@ -133,7 +133,7 @@ export default function FaqPage() {
               </Link>
               <Link
                 href="/contact"
-                className="inline-flex rounded-lg border-2 border-[#c8cdd6] bg-white px-6 py-3 font-semibold text-[#334155] hover:border-[#1d4ed8] hover:text-[#1d4ed8]"
+                className="surface-metallic-outline inline-flex rounded-lg px-6 py-3 font-semibold text-[#334155] hover:text-[#1d4ed8]"
               >
                 Déléguer une première tâche
               </Link>

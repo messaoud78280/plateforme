@@ -178,7 +178,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
   if (success) {
     return (
       <div className="space-y-8">
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm text-center">
+        <div className="rounded-2xl surface-metallic-light p-8 text-center">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-600 mb-4">
             {firstRequest ? (
               <span className="text-3xl">🎉</span>
@@ -240,7 +240,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
       </header>
 
       {/* Champ de description simple + IA */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+      <section className="rounded-2xl surface-metallic-light p-6 space-y-4">
         <div>
           <h2 className="text-base font-semibold text-slate-800">
             Expliquez simplement ce que vous souhaitez déléguer
@@ -300,7 +300,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
       </section>
 
       {/* Suggestions de missions */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl surface-metallic-light p-6">
         <h2 className="text-base font-semibold text-slate-800 mb-2">Suggestions de missions</h2>
         <p className="text-sm text-slate-500 mb-4">
           Cliquez sur une suggestion pour pré-remplir le formulaire.
@@ -335,7 +335,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Section 1 : Votre demande */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="rounded-2xl surface-metallic-light p-6">
           <h2 className="text-base font-semibold text-slate-800 mb-4">1. Votre demande</h2>
           <div className="space-y-4">
             <div>
@@ -390,7 +390,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
         </section>
 
         {/* Section 2 : Documents */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="rounded-2xl surface-metallic-light p-6">
           <h2 className="text-base font-semibold text-slate-800 mb-4">2. Documents</h2>
           <p className="mb-3 text-sm text-slate-500">
             PDF, Word, Excel, images, zip. Glissez-déposez ou cliquez pour ajouter.
@@ -439,7 +439,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
         </section>
 
         {/* Niveau de priorité */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="rounded-2xl surface-metallic-light p-6">
           <h2 className="text-base font-semibold text-slate-800 mb-4">Niveau de priorité</h2>
           <div className="space-y-3">
             {DEMANDE_PRIORITIES.map((p) => (
@@ -470,7 +470,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
         </section>
 
         {/* Section 3 : Estimation */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="rounded-2xl surface-metallic-light p-6">
           <h2 className="text-base font-semibold text-slate-800 mb-4">3. Estimation</h2>
           <div className="flex flex-wrap gap-3 mb-4">
             {DEMANDE_ESTIMATION_OPTIONS.map((opt) => (
@@ -510,7 +510,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
         </section>
 
         {/* Bloc 6 : Date souhaitée */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="rounded-2xl surface-metallic-light p-6">
           <h2 className="text-base font-semibold text-slate-800 mb-4">Date limite souhaitée</h2>
           <div>
             <label htmlFor="nd-desired-date" className="mb-1.5 block text-sm font-medium text-slate-700">

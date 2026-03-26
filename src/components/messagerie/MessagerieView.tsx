@@ -228,14 +228,14 @@ export function MessagerieView({ sessionUserId }: { sessionUserId: string }) {
 
   if (loading) {
     return (
-      <div className="flex h-[calc(100vh-12rem)] items-center justify-center rounded-2xl border border-slate-200 bg-white">
+      <div className="flex h-[calc(100vh-12rem)] items-center justify-center rounded-2xl surface-metallic-light">
         <p className="text-slate-500">Chargement de la messagerie...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex h-[calc(100vh-12rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div className="flex h-[calc(100vh-12rem)] overflow-hidden rounded-2xl surface-metallic-light">
       {/* Colonne gauche : conversations */}
       <aside className="flex w-80 shrink-0 flex-col border-r border-slate-200 bg-slate-50/60">
         <div className="border-b border-slate-200 p-4">
@@ -355,7 +355,7 @@ export function MessagerieView({ sessionUserId }: { sessionUserId: string }) {
                     key={text}
                     type="button"
                     onClick={() => setQuickReply(text)}
-                    className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-600 hover:bg-slate-50"
+                    className="rounded-full surface-metallic-light px-3 py-1 text-xs text-slate-600 hover:bg-slate-50"
                   >
                     {text}
                   </button>
@@ -459,7 +459,7 @@ export function MessagerieView({ sessionUserId }: { sessionUserId: string }) {
                           href={doc.fileUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="block truncate rounded border border-slate-200 bg-white px-2 py-1.5 text-xs text-[#1d4ed8] hover:underline"
+                          className="block truncate rounded surface-metallic-light px-2 py-1.5 text-xs text-[#1d4ed8] hover:underline"
                         >
                           {doc.name}
                         </a>

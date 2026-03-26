@@ -19,10 +19,10 @@ export function SeoLandingPage({ title, description, h1, intro, children }: SeoL
             <BeWorkLogo size="sm" />
           </Link>
           <div className="flex items-center gap-3">
-            <Link href="/tarifs" className="hidden rounded-lg border border-[#c8cdd6] bg-white px-5 py-2.5 text-sm font-medium text-[#1e293b] sm:inline-flex hover:bg-[#f8f9fb]">
+            <Link href="/tarifs" className="hidden rounded-lg surface-metallic-light px-5 py-2.5 text-sm font-medium text-[#1e293b] sm:inline-flex hover:bg-[#f8f9fb]">
               Tarifs
             </Link>
-            <Link href="/contact" className="rounded-lg border border-[#c8cdd6] bg-white px-5 py-2.5 text-sm font-medium text-[#1e293b] hover:bg-[#f8f9fb]">
+            <Link href="/contact" className="rounded-lg surface-metallic-light px-5 py-2.5 text-sm font-medium text-[#1e293b] hover:bg-[#f8f9fb]">
               Contact
             </Link>
             <Link href="/inscription" className="rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af]">
@@ -51,7 +51,7 @@ export function SeoLandingPage({ title, description, h1, intro, children }: SeoL
               <Link href="/inscription" className="inline-flex rounded-lg border-2 border-[#1d4ed8] px-6 py-3 font-semibold text-[#1d4ed8] hover:bg-[#eff6ff]">
                 Créer un compte
               </Link>
-              <Link href="/contact" className="inline-flex rounded-lg border-2 border-[#c8cdd6] bg-white px-6 py-3 font-semibold text-[#334155] hover:border-[#1d4ed8] hover:text-[#1d4ed8]">
+              <Link href="/contact" className="surface-metallic-outline inline-flex rounded-lg px-6 py-3 font-semibold text-[#334155] hover:text-[#1d4ed8]">
                 Déléguer une première tâche
               </Link>
             </div>

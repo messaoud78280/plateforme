@@ -41,46 +41,56 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
-      <header className="sticky top-0 z-20 border-b border-[#c8cdd6] bg-[#f8f9fb]">
-        <div className="mx-auto max-w-6xl px-6 py-4">
-          {/* Ligne 1 : Logo + boutons */}
-          <div className="flex items-center justify-between">
+      <header className="sticky top-0 z-20 bg-[#f8f9fb] shadow-[0_1px_0_0_rgba(203,213,225,0.9)]">
+        {/* Zone marque / actions — claire, délimitée */}
+        <div className="mx-auto max-w-6xl border-b border-[#dce3ec] px-4 py-2.5 sm:px-6 sm:py-3">
+          <div className="flex items-center justify-between gap-3">
             <Link href="/" className="shrink-0">
               <BeWorkLogo size="sm" showTagline />
             </Link>
-            <div className="flex items-center gap-3">
+            <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
               <Link
                 href="/connexion"
-                className="rounded-lg surface-metallic-light px-5 py-2.5 text-sm font-medium text-[#1e293b] shadow-sm transition-all hover:bg-[#f8f9fb]"
+                className="rounded-lg surface-metallic-light px-3.5 py-2 text-xs font-medium text-[#1e293b] shadow-sm transition-all hover:bg-[#f8f9fb] sm:px-4 sm:text-sm"
               >
                 Connexion
               </Link>
               <Link
                 href="/contact"
-                className="hidden rounded-lg surface-metallic-light px-5 py-2.5 text-sm font-medium text-[#1e293b] shadow-sm transition-all hover:border-[#9ca3af] hover:bg-[#f8f9fb] sm:inline-flex"
+                className="hidden rounded-lg surface-metallic-light px-3.5 py-2 text-xs font-medium text-[#1e293b] shadow-sm transition-all hover:border-[#9ca3af] hover:bg-[#f8f9fb] sm:inline-flex sm:px-4 sm:text-sm"
               >
                 Contact
               </Link>
               <Link
                 href="/inscription"
-                className="rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-[#1e40af] hover:shadow-lg"
+                className="rounded-lg bg-[#1d4ed8] px-3.5 py-2 text-xs font-semibold text-white shadow-md transition-all hover:bg-[#1e40af] hover:shadow-lg sm:px-4 sm:text-sm"
               >
                 Tester BeWork
               </Link>
             </div>
           </div>
-          {/* Ligne 2 : Navigation — chaque lien sur une seule ligne */}
-          <nav className="mt-3 hidden flex-wrap items-center justify-center gap-x-5 gap-y-1 border-t border-[#e0e4ea] pt-3 text-sm font-medium text-[#334155] md:flex">
-            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#comment-ca-marche">Parcours client</a>
-            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#roi">Économies</a>
-            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#solutions">Solutions</a>
-            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#secteurs">Secteurs</a>
-            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#plateforme">Plateforme</a>
-            <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/tarifs" title="Tarifs assistance administrative">Tarifs</Link>
-            <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/blog">Blog</Link>
-            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#equipe">Équipe</a>
-            <a className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="#conciergerie">Conciergerie</a>
-            <Link className="whitespace-nowrap transition-colors hover:text-[#0f172a]" href="/faq">FAQ</Link>
+        </div>
+        {/* Navigation — bandeau bleu métallisé pleine largeur (distinct du bloc du haut) */}
+        <div className="nav-strip-metallic-blue nav-strip-metallic-blue--compact hidden md:block">
+          <nav
+            className="nav-strip-metallic-blue__nav mx-auto flex max-w-6xl flex-nowrap items-center justify-center gap-x-0 px-3 py-1.5 sm:px-5 sm:py-2"
+            aria-label="Navigation principale"
+          >
+            <a className="whitespace-nowrap" href="#plateforme" title="Plateforme, solutions et secteurs">
+              Solutions & secteurs
+            </a>
+            <Link className="whitespace-nowrap" href="/tarifs" title="Tarifs assistance administrative">
+              Tarifs
+            </Link>
+            <Link className="whitespace-nowrap" href="/blog">
+              Blog
+            </Link>
+            <a className="whitespace-nowrap" href="#equipe">
+              Équipe
+            </a>
+            <Link className="whitespace-nowrap" href="/faq">
+              FAQ
+            </Link>
           </nav>
         </div>
       </header>

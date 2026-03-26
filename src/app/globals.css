@@ -449,6 +449,37 @@
   }
 }
 
+/* Dashboard — nav horizontale compacte, séparateurs entre liens (comme bandeau accueil) */
+.dashboard-nav__links {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.dashboard-nav__links::-webkit-scrollbar {
+  display: none;
+}
+.dashboard-nav__links > a {
+  flex-shrink: 0;
+}
+.dashboard-nav__links > a:not(:first-child)::before {
+  content: "";
+  width: 1px;
+  height: 0.68rem;
+  margin-right: 0.45rem;
+  margin-left: 0.28rem;
+  flex-shrink: 0;
+  border-radius: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(148, 163, 184, 0.25) 18%,
+    rgba(100, 116, 139, 0.42) 50%,
+    rgba(148, 163, 184, 0.25) 82%,
+    transparent 100%
+  );
+  box-shadow: 1px 0 0 rgba(255, 255, 255, 0.65);
+}
+
 /* Titre hero — métal noir : texte toujours lisible si clip non supporté */
 .text-metallic-black {
   color: #0f172a;

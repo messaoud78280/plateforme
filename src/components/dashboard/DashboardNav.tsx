@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const activeClass = "rounded-lg bg-[#1d4ed8] px-3 py-2 text-sm font-semibold text-white hover:bg-[#1e40af]";
-const inactiveClass = "rounded-lg px-3 py-2 text-sm font-medium text-[#334155] hover:bg-[#eef0f4] hover:text-[#0f172a]";
+const linkBase =
+  "inline-flex items-center rounded-md text-xs font-medium sm:text-sm transition-colors";
+const activeClass = `${linkBase} bg-[#1d4ed8] px-2.5 py-1.5 font-semibold text-white hover:bg-[#1e40af]`;
+const inactiveClass = `${linkBase} px-2.5 py-1.5 text-[#334155] hover:bg-[#e8ecf2] hover:text-[#0f172a]`;
 
 function NavLink({
   href,
@@ -32,8 +34,8 @@ export function DashboardNav({ role }: { role?: string | null }) {
   const isAgent = role === "AGENT" || role === "AGENCE";
 
   return (
-    <nav className="border-b border-[#c8cdd6] bg-[#f8f9fb] px-4">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-1 py-2">
+    <nav className="border-b border-[#c8cdd6] bg-[#f8f9fb] px-3 sm:px-4" aria-label="Navigation tableau de bord">
+      <div className="dashboard-nav__links mx-auto flex max-w-6xl flex-nowrap items-center justify-start gap-x-0 py-1.5 sm:py-2">
         <NavLink href="/dashboard" pathname={pathname} matchExact>Dashboard</NavLink>
         {isClient ? (
           <>

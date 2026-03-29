@@ -252,13 +252,6 @@ export default function HomePage() {
                   >
                     Tester BeWork
                   </Link>
-                  <Link
-                    href="#comment-ca-marche"
-                    className="inline-flex rounded-lg surface-metallic-light px-6 py-3.5 text-base font-medium text-[#334155] transition-all hover:border-[#c8cdd6] hover:bg-[#f8fafc]"
-                    aria-label="Voir le parcours client en quatre étapes"
-                  >
-                    Voir le parcours
-                  </Link>
                 </div>
                 <p className="text-sm text-[#64748b]">
                   France, Belgique, Suisse • sans embauche, sans charges cachées
@@ -290,8 +283,9 @@ export default function HomePage() {
                     <span className="text-lg font-semibold text-[#cbd5e1]">/ mois</span>
                   </div>
                   <div className="space-y-1.5 text-sm leading-snug text-[#e2e8f0]">
-                    <p className="font-medium text-white">≈ 20 h incluses</p>
-                    <p className="font-medium text-white">À partir de 10 €/h</p>
+                    <p className="font-medium text-white">≈ 20 h d&apos;assistance / mois incluses</p>
+                    <p className="font-medium text-white">≈ 10,75 € TTC / h sur cette base</p>
+                    <p className="text-xs text-[#94a3b8]">120 actions / mois — heures indicatives</p>
                     <p className="pt-1 text-[#cbd5e1]">
                       Sans recrutement, sans charges sociales, sans gestion RH : une équipe prête à l&apos;emploi.
                     </p>
@@ -500,49 +494,15 @@ export default function HomePage() {
                   <p className="mt-auto pt-6 text-2xl font-bold text-[#1d4ed8]">
                     <span className="tabular-nums">215</span> € <span className="text-base font-semibold text-[#64748b]">TTC</span> / mois
                   </p>
+                  <p className="mt-2 text-sm text-[#334155]">
+                    Standard : ≈ 20 h / mois · ≈ 10,75 € TTC / h (indicatif, 120 actions)
+                  </p>
                   <Link href="/tarifs" className="mt-4 inline-block text-sm font-semibold text-[#1d4ed8] hover:underline">
                     Voir les offres →
                   </Link>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* Ils nous font confiance — preuve sociale */}
-        <section id="confiance" className="px-6 py-16 md:py-20 bg-white/50">
-          <div className="mx-auto max-w-6xl">
-            <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl text-center mb-10">
-              Ils nous confient leur administratif
-            </h2>
-            <div className="mb-12 grid gap-8 md:grid-cols-2 md:items-stretch lg:grid-cols-4">
-              {[
-                {
-                  sector: "Entreprise de second œuvre",
-                  quote: "Nos devis sortent plus vite, les relances sont faites : on respire sur les chantiers.",
-                },
-                {
-                  sector: "Artisan gros œuvre",
-                  quote: "Moins de retard sur la facturation chantier — la trésorerie suit enfin le rythme des acomptes.",
-                },
-                {
-                  sector: "Coffrage / génie civil",
-                  quote: "DICT, déclarations, commandes béton : on a enfin quelqu'un qui suit les dossiers pendant qu'on pose.",
-                },
-                {
-                  sector: "PME du bâtiment",
-                  quote: "On a retrouvé des soirées sans Excel. L'image auprès des clients maîtres d'ouvrage est plus nette.",
-                },
-              ].map((item) => (
-                <div key={item.sector} className="card-frame flex h-full flex-col rounded-xl p-6">
-                  <p className="flex-1 text-[#334155] leading-relaxed italic">&ldquo;{item.quote}&rdquo;</p>
-                  <p className="mt-4 text-sm font-semibold text-[#1d4ed8]">{item.sector}</p>
-                </div>
-              ))}
-            </div>
-            <p className="text-center text-sm text-[#64748b]">
-              Artisans, chefs d'entreprise du bâtiment et PME du BTP — France, Belgique, Suisse, Luxembourg.
-            </p>
           </div>
         </section>
 

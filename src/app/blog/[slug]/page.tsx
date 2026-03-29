@@ -140,7 +140,13 @@ export default async function BlogArticlePage({ params }: Props) {
           </div>
           <div className="mt-12 rounded-xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-8">
             <p className="font-semibold text-[#0f172a]">Prêt à déléguer votre administratif ?</p>
-            <p className="mt-2 text-[#334155]">BeWork propose un assistant administratif externalisé dès 215 € TTC/mois.</p>
+            <p className="mt-2 text-[#334155] leading-relaxed">
+              BeWork propose un assistant administratif externalisé dès{" "}
+              <span className="font-semibold text-[#0f172a]">215 € TTC / mois</span> (formule Standard) : environ{" "}
+              <span className="font-semibold text-[#0f172a]">20 h</span> d&apos;assistance incluses par mois, soit environ{" "}
+              <span className="font-semibold text-[#0f172a]">10,75 € TTC / h</span> sur cette base — équivalent indicatif
+              (120 actions / mois).
+            </p>
             <Link
               href="/inscription"
               className="mt-4 inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white hover:bg-[#1e40af]"

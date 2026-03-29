@@ -2,12 +2,15 @@ interface BeWorkLogoProps {
   className?: string;
   size?: "sm" | "md" | "lg";
   showTagline?: boolean;
+  /** Surcharge du sous-titre (ex. page d’accueil orientée secteur) */
+  tagline?: string;
 }
 
 export function BeWorkLogo({
   className = "",
   size = "md",
   showTagline = false,
+  tagline,
 }: BeWorkLogoProps) {
   const textSize =
     size === "sm"
@@ -38,7 +41,7 @@ export function BeWorkLogo({
       </span>
       {showTagline && (
         <span className="mt-0.5 hidden text-[10px] font-medium tracking-wide text-[#94a3b8] sm:block md:text-xs">
-          L&apos;assistant administratif à la demande
+          {tagline ?? "L'assistant administratif à la demande"}
         </span>
       )}
     </span>

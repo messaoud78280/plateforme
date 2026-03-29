@@ -4,21 +4,33 @@ import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { SITE_URL } from "@/lib/site";
 
 const RESSOURCES_BLOG = [
-  { title: "10 tâches administratives à déléguer", desc: "Les tâches chronophages que les dirigeants peuvent externaliser.", href: "/blog/10-taches-administratives-deleguer-dirigeant" },
-  { title: "Combien coûte un assistant administratif ?", desc: "Comparatif assistant externalisé vs salarié. Tarifs pour les PME.", href: "/blog/combien-coute-assistant-administratif" },
-  { title: "Assistant virtuel vs assistant salarié", desc: "Avantages et inconvénients pour choisir entre externaliser ou recruter.", href: "/blog/assistant-virtuel-vs-assistant-salarie" },
+  {
+    title: "10 tâches administratives à déléguer en BTP",
+    desc: "Ce qui grève le quotidien des chefs d’entreprise du bâtiment — et comment le structurer autrement.",
+    href: "/blog/10-taches-administratives-deleguer-dirigeant",
+  },
+  {
+    title: "Combien coûte un administratif externalisé ?",
+    desc: "Comparatif forfait externalisé vs embauche : coûts cachés, charges sociales et charge RH pour les PME.",
+    href: "/blog/combien-coute-assistant-administratif",
+  },
+  {
+    title: "Externaliser ou recruter : le bon choix pour votre entreprise",
+    desc: "Recrutement, RH, matériel… ou une équipe opérationnelle sans friction. Les critères pour décider sereinement.",
+    href: "/blog/assistant-virtuel-vs-assistant-salarie",
+  },
 ];
 
 export const metadata: Metadata = {
-  title: "Assistant administratif externalisé pour PME | BeWork — France, Belgique, Suisse, Luxembourg",
+  title: "Organisation & administratif premium pour artisans et BTP | BeWork",
   description:
-    "Assistant administratif externalisé et assistant virtuel entreprise pour PME francophones. Externaliser votre administratif à distance : devis, factures, relances. Dès 215 € TTC/mois, sans recrutement. France, Belgique, Suisse, Luxembourg.",
+    "Pilotage administratif pour artisans et entreprises du bâtiment : devis, facturation chantier, relances, organisation. Pensé par une fondatrice avec 20 ans d’expérience artisanale. Dès 215 € TTC/mois, sans recrutement ni charges. France, Belgique, Suisse, Luxembourg.",
   keywords: [
-    "assistant administratif externalisé",
-    "assistant administratif à distance",
-    "assistant virtuel entreprise",
-    "externaliser administratif PME",
-    "assistant administratif PME",
+    "administratif BTP",
+    "organisation entreprise bâtiment",
+    "devis facturation artisan",
+    "externaliser administratif BTP",
+    "pilotage administratif artisans",
   ],
   alternates: { canonical: SITE_URL, languages: { fr: SITE_URL } },
   openGraph: {
@@ -26,15 +38,15 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: SITE_URL,
     siteName: "BeWork",
-    title: "Assistant administratif externalisé pour PME | BeWork",
+    title: "BeWork — Administratif premium pour artisans et BTP",
     description:
-      "Externalisez votre administratif avec un assistant virtuel dédié. Dès 215 € TTC/mois. France, Belgique, Suisse, Luxembourg.",
+      "Structurez votre administratif de chantier sans embauche. Dès 215 € TTC/mois. France, Belgique, Suisse, Luxembourg.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Assistant administratif externalisé pour PME | BeWork",
+    title: "BeWork — Administratif premium pour artisans et BTP",
     description:
-      "Externalisez votre administratif à distance. Dès 215 € TTC/mois. France, Belgique, Suisse, Luxembourg.",
+      "Gain de temps, trésorerie et image pro : un service structuré pour le BTP. Dès 215 € TTC/mois.",
   },
 };
 
@@ -46,7 +58,11 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl border-b border-[#dce3ec] px-4 py-2.5 sm:px-6 sm:py-3">
           <div className="flex items-center justify-between gap-3">
             <Link href="/" className="shrink-0">
-              <BeWorkLogo size="sm" showTagline />
+              <BeWorkLogo
+                size="sm"
+                showTagline
+                tagline="Organisation & administratif premium — le BTP, au quotidien"
+              />
             </Link>
             <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
               <Link
@@ -76,10 +92,10 @@ export default function HomePage() {
             className="nav-strip-metallic-blue__nav mx-auto flex max-w-6xl flex-nowrap items-center justify-center gap-x-0 px-3 py-1.5 sm:px-5 sm:py-2"
             aria-label="Navigation principale"
           >
-            <a className="whitespace-nowrap" href="#plateforme" title="Plateforme, solutions et secteurs">
-              Solutions & secteurs
+            <a className="whitespace-nowrap" href="#plateforme" title="Offre, plateforme et secteurs — dont le BTP">
+              Offre & secteurs
             </a>
-            <Link className="whitespace-nowrap" href="/tarifs" title="Tarifs assistance administrative">
+            <Link className="whitespace-nowrap" href="/tarifs" title="Tarifs — sans recrutement ni charges">
               Tarifs
             </Link>
             <Link className="whitespace-nowrap" href="/blog">
@@ -102,14 +118,14 @@ export default function HomePage() {
             <div className="grid gap-8 lg:grid-cols-2 lg:items-stretch lg:gap-10">
               <div className="flex flex-col gap-8 text-center md:text-left">
                 <h1 className="text-metallic-black text-balance text-3xl font-bold leading-[1.15] tracking-tight md:text-4xl lg:text-5xl lg:leading-[1.1]">
-                  Gagnez du temps. Déléguez votre administratif.
+                  Artisans et entreprises du BTP : moins d&apos;administratif, plus de chantiers.
                 </h1>
                 <Link
                   href="/tarifs"
                   className="group surface-metallic-blue mx-auto flex w-full max-w-xl flex-col gap-3 rounded-2xl px-6 py-6 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#93c5fd]/80 md:mx-0 md:max-w-none"
                 >
                   <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#93c5fd]">
-                    Offre phare
+                    Formule de référence
                   </span>
                   <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
                     <span className="text-4xl font-bold tracking-tight text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] tabular-nums md:text-[2.75rem]">
@@ -123,19 +139,24 @@ export default function HomePage() {
                     <p className="font-medium text-white">≈ 20 h incluses</p>
                     <p className="font-medium text-white">À partir de 10 €/h</p>
                     <p className="pt-1 text-[#cbd5e1]">
-                      Moins cher qu&apos;un recrutement, sans charges ni engagement.
+                      Sans recrutement, sans charges sociales, sans gestion RH : une équipe prête à l&apos;emploi.
                     </p>
-                    <p className="text-[#cbd5e1]">Vous payez uniquement ce dont vous avez besoin.</p>
+                    <p className="text-[#cbd5e1]">
+                      Solution immédiatement opérationnelle — vous ne payez que le pilotage dont vous avez besoin.
+                    </p>
                   </div>
                   <p className="text-[11px] leading-relaxed text-[#94a3b8]">
-                    TTC, sans frais cachés · Sans engagement long terme · Démarrage rapide
+                    TTC, sans frais cachés · Sans engagement long terme · Mise en route rapide
                   </p>
                   <span className="text-xs font-semibold text-[#93c5fd] group-hover:text-white group-hover:underline">
                     Voir les tarifs →
                   </span>
                 </Link>
                 <p className="max-w-xl text-lg font-medium leading-relaxed text-[#0f172a] md:text-xl mx-auto md:mx-0">
-                  Une solution simple, sans recrutement, pour déléguer votre administratif dès aujourd&apos;hui.
+                  BeWork structure et optimise votre administratif de terrain : devis clients, facturation chantier,
+                  relances, mails, organisation. Une offre premium pensée pour le bâtiment — portée par une fondatrice
+                  avec <strong className="font-semibold text-[#0f172a]">20 ans d&apos;expérience en artisanat</strong>.
+                  Vous gagnez du temps, de la sérénité et une image plus professionnelle, sans passer par l&apos;embauche.
                 </p>
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
                   <Link
@@ -154,7 +175,7 @@ export default function HomePage() {
                   </Link>
                 </div>
                 <p className="text-sm text-[#64748b]">
-                  France, Belgique, Suisse • sans recrutement
+                  France, Belgique, Suisse • sans embauche, sans charges cachées
                 </p>
                 <div className="flex flex-wrap justify-center md:justify-start gap-6 text-sm text-[#64748b]">
                   <Link href="/inscription" className="font-medium hover:text-[#0f172a] hover:underline">
@@ -171,21 +192,21 @@ export default function HomePage() {
               >
                 <div className="mb-5 md:mb-6">
                   <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#93c5fd]">
-                    Parcours client
+                    Votre cadence
                   </span>
                   <h2 className="mt-2 text-lg font-semibold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] md:text-xl">
-                    Votre parcours en 4 étapes
+                    Quatre étapes, un pilotage clair
                   </h2>
                   <p className="mt-2 text-sm leading-snug text-[#cbd5e1]">
-                    De la demande à la livraison : un flux simple pour déléguer votre administratif.
+                    De la consigne au livrable : un flux structuré pour sécuriser votre administratif de chantier.
                   </p>
                 </div>
                 <div className="grid flex-1 auto-rows-fr gap-3 sm:grid-cols-2 sm:gap-4">
                   {[
-                    { step: 1, title: "Vous envoyez vos tâches" },
-                    { step: 2, title: "Votre assistant les traite" },
-                    { step: 3, title: "Vous suivez l'avancement sur la plateforme" },
-                    { step: 4, title: "Vous gagnez du temps sur votre activité" },
+                    { step: 1, title: "Vous déposez vos demandes (devis, factures, relances…)" },
+                    { step: 2, title: "Votre équipe dédiée les traite dans les délais" },
+                    { step: 3, title: "Vous pilotez l’avancement sur la plateforme" },
+                    { step: 4, title: "Vous libérez du temps pour le terrain et la rentabilité" },
                   ].map((item) => (
                     <div
                       key={item.step}
@@ -210,22 +231,22 @@ export default function HomePage() {
           <div className="mx-auto max-w-6xl rounded-2xl surface-metallic-light surface-metallic-light--soft px-6 py-12 md:px-10 md:py-16">
             <div className="mx-auto max-w-3xl text-center">
               <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
-                Choisissez vos tarifs
+                Des tarifs nets pour artisans et entreprises du bâtiment
               </h2>
               <p className="mt-3 text-[#334155]">
-                BeWork propose deux offres complémentaires. Sélectionnez celle qui correspond à vos besoins.
+                Une entrée de gamme pour tester, puis des forfaits qui montent en puissance — sans surprise, sans embauche.
               </p>
               <div className="mt-10 flex justify-center">
                 <Link
                   href="/tarifs"
                   className="group surface-metallic-blue flex w-full max-w-md flex-col rounded-2xl p-6 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#93c5fd]/80"
                 >
-                  <span className="text-sm font-medium text-[#94a3b8]">Assistance administrative</span>
+                  <span className="text-sm font-medium text-[#94a3b8]">Pilotage administratif</span>
                   <h3 className="mt-1 text-lg font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]">
-                    Tarifs BeWork
+                    Forfaits BeWork
                   </h3>
                   <p className="mt-2 text-sm leading-snug text-[#cbd5e1]">
-                    Assistant virtuel, devis, factures, relances, suivi dossiers… Dès 109 € TTC pour tester.
+                    Devis clients, facturation chantier, relances, suivi de dossiers… Dès 109 € TTC pour tester, sans engagement lourd.
                   </p>
                   <p className="mt-3 text-base font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]">
                     <span className="tabular-nums">215</span> €{" "}
@@ -246,20 +267,26 @@ export default function HomePage() {
           <div className="mx-auto max-w-6xl rounded-2xl surface-metallic-light surface-metallic-light--soft px-6 py-12 md:px-10 md:py-16">
             <div className="text-center mb-10 md:mb-12">
               <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
-                Pourquoi externaliser son administratif ?
+                Quand l&apos;administratif vous vole vos soirées — et votre marge
               </h2>
-              <p className="mt-3 max-w-2xl mx-auto text-[#334155]">
-                Externaliser votre administratif avec un assistant virtuel entreprise permet de recentrer vos équipes sur votre cœur de métier tout en sécurisant les tâches de secrétariat, facturation et suivi.
+              <p className="mt-3 max-w-2xl mx-auto text-[#334155] leading-relaxed">
+                Les devis qui s&apos;étalent après 19 h. Les factures chantier qui prennent du retard. Les mails qui
+                s&apos;accumulent. L&apos;organisation qui vous freine avant même d&apos;ouvrir le camion.
+                <strong className="font-semibold text-[#0f172a]">
+                  {" "}
+                  BeWork transforme ce chaos en pilotage structuré
+                </strong>{" "}
+                : une équipe dédiée, des process clairs, pour que vous recentriez énergie et trésorerie sur vos ouvrages.
               </p>
             </div>
             <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 md:items-stretch">
               {[
-                "Gain de temps : déchargez-vous des tâches chronophages et concentrez-vous sur votre activité.",
-                "Coût maîtrisé : pas de recrutement ni de charges sociales — un forfait tout compris dès 215 € TTC/mois.",
-                "Réactivité : assistant administratif à distance opérationnel après un court onboarding.",
-                "Scalabilité : augmentez ou réduisez le volume d'actions selon vos besoins.",
-                "Qualité : équipe francophone Bac+5, formée à l'IA, supervisée en France.",
-                "Souplesse : externaliser administratif PME sans engagement long terme.",
+                "Gain de temps massif : vous sortez du secrétariat, vous rentrez dans le chantier et le chiffrage.",
+                "Coût maîtrisé : zéro recrutement, zéro charges sociales — forfait tout compris dès 215 € TTC/mois.",
+                "Réactivité : équipe opérationnelle après un onboarding court, adaptée au rythme du BTP.",
+                "Évolutif : montez ou baissez le volume d’actions selon vos pics de devis ou de facturation.",
+                "Exigence : profils francophones Bac+5, outils et IA maîtrisés, encadrement en France.",
+                "Souplesse : structurez votre administratif sans vous enfermer dans un CDI ni une structure lourde.",
               ].map((item, i) => (
                 <li key={i} className="card-frame flex h-full gap-3 rounded-xl p-5">
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8] text-sm font-bold">✓</span>
@@ -275,16 +302,16 @@ export default function HomePage() {
           <div className="mx-auto max-w-6xl">
             <div className="text-center mb-12">
               <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
-                Jusqu&apos;à 75&nbsp;% d&apos;économie par rapport à un recrutement interne
+                Jusqu&apos;à 75&nbsp;% d&apos;économie vs une embauche en interne
               </h2>
               <p className="mt-3 max-w-2xl mx-auto text-[#334155]">
-                Comparez le coût d&apos;un assistant en interne en Europe avec une solution externalisée BeWork.
+                Même exigence professionnelle : autrement plus de cash disponible pour matériel, sous-traitance et chantiers.
               </p>
             </div>
             <div className="card-frame rounded-2xl border-2 border-[#1d4ed8]/20 overflow-hidden">
               <div className="grid divide-y divide-[#e2e8f0] md:grid-cols-2 md:items-stretch md:divide-x md:divide-y-0">
                 <div className="flex flex-col p-8 md:p-10">
-                  <h3 className="text-lg font-bold text-[#0f172a]">Assistant en interne (Europe)</h3>
+                  <h3 className="text-lg font-bold text-[#0f172a]">Poste administratif en interne (Europe)</h3>
                   <ul className="mt-4 space-y-2 text-[#334155]">
                     {["Salaire brut", "Charges sociales", "Bureau & matériel", "Recrutement & formation"].map((line) => (
                       <li key={line} className="flex items-center gap-2">
@@ -295,7 +322,7 @@ export default function HomePage() {
                   <p className="mt-auto pt-6 text-2xl font-bold text-[#64748b]">~5 050 € / mois</p>
                 </div>
                 <div className="flex flex-col bg-[#eff6ff]/50 p-8 md:p-10">
-                  <h3 className="text-lg font-bold text-[#1d4ed8]">Assistant via BeWork</h3>
+                  <h3 className="text-lg font-bold text-[#1d4ed8]">Forfait BeWork</h3>
                   <ul className="mt-4 space-y-2 text-[#334155]">
                     {["Un seul forfait tout compris", "Aucun coût de recrutement", "Aucune charge sociale", "Plateforme incluse"].map((line) => (
                       <li key={line} className="flex items-center gap-2">
@@ -319,14 +346,26 @@ export default function HomePage() {
         <section id="confiance" className="px-6 py-16 md:py-20 bg-white/50">
           <div className="mx-auto max-w-6xl">
             <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl text-center mb-10">
-              Ils nous font confiance
+              Ils nous confient leur administratif
             </h2>
             <div className="mb-12 grid gap-8 md:grid-cols-2 md:items-stretch lg:grid-cols-4">
               {[
-                { sector: "PME BTP", quote: "Une équipe réactive pour nos devis et notre suivi chantiers." },
-                { sector: "Agence immobilière", quote: "Gestion des dossiers et relances clients simplifiée." },
-                { sector: "Cabinet de conseil", quote: "Support admin qui nous permet de nous concentrer sur le conseil." },
-                { sector: "Agence de recrutement", quote: "Coordination et suivi candidats en toute sérénité." },
+                {
+                  sector: "Entreprise de second œuvre",
+                  quote: "Nos devis sortent plus vite, les relances sont faites : on respire sur les chantiers.",
+                },
+                {
+                  sector: "Artisan gros œuvre",
+                  quote: "Moins de retard sur la facturation chantier — la trésorerie suit enfin le rythme des acomptes.",
+                },
+                {
+                  sector: "Coffrage / génie civil",
+                  quote: "Une structure pro derrière nous : mails, organisation, suivi fournisseurs, sans recruter.",
+                },
+                {
+                  sector: "PME du bâtiment",
+                  quote: "On a retrouvé des soirées sans Excel. L'image auprès des clients maîtres d'ouvrage est plus nette.",
+                },
               ].map((item) => (
                 <div key={item.sector} className="card-frame flex h-full flex-col rounded-xl p-6">
                   <p className="flex-1 text-[#334155] leading-relaxed italic">&ldquo;{item.quote}&rdquo;</p>
@@ -335,7 +374,7 @@ export default function HomePage() {
               ))}
             </div>
             <p className="text-center text-sm text-[#64748b]">
-              PME, dirigeants, cabinets et agences en France, Belgique, Suisse et Luxembourg.
+              Artisans, chefs d’entreprise du bâtiment et PME du BTP — France, Belgique, Suisse, Luxembourg.
             </p>
           </div>
         </section>
@@ -345,10 +384,10 @@ export default function HomePage() {
           <div className="mx-auto max-w-6xl">
             <div className="text-center mb-16">
               <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl lg:text-4xl">
-                Une plateforme simple pour déléguer votre administratif
+                Une plateforme pour piloter votre administratif de chantier
               </h2>
               <p className="mt-4 max-w-2xl mx-auto text-lg text-[#475569]">
-                Envoyez vos demandes, échangez avec votre assistant et suivez l&apos;avancement en temps réel.
+                Consignes, échanges, livrables et statuts : tout est centralisé, traçable et aligné sur vos priorités terrain.
               </p>
             </div>
 
@@ -367,9 +406,9 @@ export default function HomePage() {
                     <h3 className="text-sm font-semibold text-[#0f172a] mb-3">Nouvelle demande</h3>
                     <div className="space-y-2.5">
                       {[
-                        { title: "Préparer devis Dupont BTP", cat: "Facturation" },
-                        { title: "Relancer facture n°2024-089", cat: "Comptabilité" },
-                        { title: "Organiser RDV client Martin", cat: "Organisation" },
+                        { title: "Chiffrer devis rénovation immeuble", cat: "Devis clients" },
+                        { title: "Relancer situation de travaux n° ST-118", cat: "Suivi chantier" },
+                        { title: "Mettre à jour planning sous-traitants", cat: "Organisation" },
                       ].map((d, i) => (
                         <div key={i} className="rounded-lg surface-metallic-light px-3 py-2.5 text-left shadow-sm hover:border-[#1d4ed8]/30 transition-colors">
                           <p className="text-sm font-medium text-[#0f172a] line-clamp-1">{d.title}</p>
@@ -380,12 +419,12 @@ export default function HomePage() {
                   </div>
                   {/* Colonne 2 : Messagerie */}
                   <div className="surface-metallic-light p-5">
-                    <h3 className="text-sm font-semibold text-[#0f172a] mb-3">Messagerie</h3>
+                    <h3 className="text-sm font-semibold text-[#0f172a] mb-3">Échanges</h3>
                     <div className="space-y-2.5">
                       {[
-                        { from: "Catherine (assistant)", msg: "Le devis est prêt, je vous l'envoie.", time: "10:24" },
-                        { from: "Vous", msg: "Merci, pouvez-vous le relire avant ?", time: "09:52" },
-                        { from: "Catherine (assistant)", msg: "Bien reçu, j'attaque ce matin.", time: "Hier 16:30" },
+                        { from: "Équipe BeWork", msg: "Le devis est validé côté chiffrage, je vous l’envoie pour relecture.", time: "10:24" },
+                        { from: "Vous", msg: "Parfait — ajoutez la mention garantie décennale sur la dernière page.", time: "09:52" },
+                        { from: "Équipe BeWork", msg: "Reçu. Je mets à jour et je relance le client pour signature.", time: "Hier 16:30" },
                       ].map((m, i) => (
                         <div key={i} className="rounded-lg surface-metallic-light px-3 py-2.5 text-left shadow-sm">
                           <p className="text-xs font-medium text-[#1d4ed8]">{m.from}</p>
@@ -400,9 +439,9 @@ export default function HomePage() {
                     <h3 className="text-sm font-semibold text-[#0f172a] mb-3">Mes demandes</h3>
                     <div className="space-y-2.5">
                       {[
-                        { title: "Devis Dupont", status: "En cours", color: "bg-blue-100 text-blue-800" },
-                        { title: "Relance facture", status: "Terminée", color: "bg-green-100 text-green-800" },
-                        { title: "RDV Martin", status: "En attente", color: "bg-amber-100 text-amber-800" },
+                        { title: "Devis extension bureaux", status: "En cours", color: "bg-blue-100 text-blue-800" },
+                        { title: "Relance facture chantier", status: "Terminée", color: "bg-green-100 text-green-800" },
+                        { title: "Mise en forme situation travaux", status: "En attente", color: "bg-amber-100 text-amber-800" },
                       ].map((t, i) => (
                         <div key={i} className="rounded-lg surface-metallic-light px-3 py-2.5 text-left shadow-sm">
                           <p className="text-sm font-medium text-[#0f172a]">{t.title}</p>
@@ -422,17 +461,20 @@ export default function HomePage() {
               {[
                 {
                   title: "Créer une demande",
-                  description: "Déposez une tâche en quelques clics. Titre, description, pièces jointes : tout est centralisé.",
+                  description:
+                    "Devis, relance client, situation de travaux : une consigne claire, des pièces jointes, un dossier unique.",
                   icon: "M12 6v6m0 0v6m0-6h6m-6 0H6",
                 },
                 {
-                  title: "Messagerie avec l'assistant",
-                  description: "Échangez directement avec votre assistant dédié. Réponses rapides et historique des échanges.",
+                  title: "Échanges avec votre équipe dédiée",
+                  description:
+                    "Questions, ajustements, validations : le fil de discussion reste pro, traçable et au même endroit.",
                   icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z",
                 },
                 {
                   title: "Suivi des missions",
-                  description: "Consultez l'état de vos demandes, les actions réalisées et le temps économisé en un coup d'œil.",
+                  description:
+                    "Statuts, livrables, échéances : vous voyez ce qui avance, ce qui bloque, sans relancer par téléphone.",
                   icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
                 },
               ].map((item, i) => (
@@ -455,21 +497,21 @@ export default function HomePage() {
           <div className="mx-auto max-w-6xl">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-                Aucun compromis sur la qualité
+                Exigence terrain, exigence administrative
               </h2>
               <p className="mt-5 max-w-2xl mx-auto text-lg leading-relaxed text-[#334155]">
-                Réduisez la charge administrative tout en sécurisant la qualité de vos opérations. 
-                Équipe francophone, dédiée et opérationnelle.
+                Allégez votre charge de pilotage sans baisser le niveau : une équipe structurée, francophone, outillée — pour
+                des dossiers propres et une image irréprochable auprès de vos clients.
               </p>
             </div>
             <ul className="grid gap-6 md:grid-cols-2 md:items-stretch lg:grid-cols-3">
               {[
-                "Aucun coût de recrutement ni d'infrastructure : votre assistant est opérationnel après l'onboarding.",
-                "Main-d'œuvre qualifiée, 100% francophone, motivée et encadrée.",
-                "Même fuseau horaire qu'en France : plateforme internationale supervisée depuis la France pour une collaboration en temps réel.",
-                "Diplômés Bac+5 minimum, formés à l'IA et aux process administratifs.",
-                "Garantie : satisfait ou remplacé rapidement.",
-                "Direction et supervision opérationnelle en France pour rester au plus proche de vos attentes.",
+                "Zéro recrutement, zéro investissement matériel : l’équipe est opérationnelle après onboarding cadré.",
+                "Profils qualifiés, 100 % francophones, encadrés et alignés sur vos délais de chantier.",
+                "Même fuseau qu’en France : supervision depuis la France, réactivité quand ça presse sur le terrain.",
+                "Bac+5 minimum, formation IA et process administratifs — rigueur sur les chiffres et les relances.",
+                "Garantie satisfait ou remplacé : réaffectation rapide d'un profil si l'adéquation n'est pas au rendez-vous.",
+                "Pilotage et direction opérationnelle en France : un interlocuteur à la hauteur de votre entreprise.",
               ].map((item, i) => (
                 <li key={i} className="card-frame flex h-full gap-3 rounded-xl p-5">
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#1d4ed8] text-white text-sm font-bold">
@@ -487,10 +529,11 @@ export default function HomePage() {
           <div className="mx-auto max-w-6xl">
             <div className="card-frame rounded-2xl border-2 border-[#e2e8f0] border-l-[4px] border-l-[#1d4ed8] p-6 text-center md:p-8">
               <p className="text-lg font-semibold text-[#0f172a]">
-                Découvrez les tâches prises en charge par nos assistants administratifs externalisés
+                Découvrez le catalogue des missions que nous prenons en charge pour le BTP
               </p>
               <p className="mt-2 text-[#334155]">
-                Emails, devis, factures, relances, agenda, suivi dossiers — un catalogue complet pour les PME.
+                Devis, facturation chantier, situations de travaux, relances clients, mails, planning — autant de leviers
+                pour sécuriser votre trésorerie et votre image.
               </p>
               <Link
                 href="/assistants-administratifs-taches"
@@ -508,12 +551,11 @@ export default function HomePage() {
           <div className="mx-auto max-w-6xl">
             <div className="mb-16 max-w-2xl">
               <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-                Des solutions d&apos;assistance administrative qui font la différence.
+                Une offre structurée pour piloter l&apos;administratif du bâtiment
               </h2>
               <p className="mt-5 text-lg leading-relaxed text-[#334155]">
-                Nos assistants augmentés par l&apos;IA gèrent vos dossiers, documents et
-                suivis avec rigueur. Une équipe expérimentée, à l&apos;écoute de vos
-                besoins.
+                Organisation, optimisation et suivi : votre équipe BeWork traite dossiers, documents et relances avec une
+                méthode éprouvée — et des outils d&apos;IA au service de la précision, pas du gadget.
               </p>
             </div>
 
@@ -525,11 +567,10 @@ export default function HomePage() {
                   </svg>
                 </div>
                 <p className="text-lg font-semibold text-[#0f172a]">
-                  Suivi de dossiers et projets
+                  Suivi de dossiers & chantiers
                 </p>
                 <p className="mt-3 flex-1 text-[#334155] leading-relaxed">
-                  Avancement, échéances, priorités : nos assistants assurent un
-                  suivi clair et réactif de vos dossiers.
+                  Situations de travaux, acomptes, échéances MOA : un pilotage lisible pour ne rien laisser en suspens.
                 </p>
               </div>
               <div className="card-frame flex h-full flex-col rounded-xl p-8">
@@ -542,8 +583,7 @@ export default function HomePage() {
                   Gestion documentaire
                 </p>
                 <p className="mt-3 flex-1 text-[#334155] leading-relaxed">
-                  Saisie, classement, mise à jour et partage de documents :
-                  une organisation irréprochable.
+                  Devis, annexes techniques, plans de recollement : versionning, classement et partage maîtrisés.
                 </p>
               </div>
               <div className="card-frame flex h-full flex-col rounded-xl p-8">
@@ -553,11 +593,10 @@ export default function HomePage() {
                   </svg>
                 </div>
                 <p className="text-lg font-semibold text-[#0f172a]">
-                  Coordination & communication
+                  Coordination & relances
                 </p>
                 <p className="mt-3 flex-1 text-[#334155] leading-relaxed">
-                  Relances, synthèses, compte-rendu : des échanges professionnels
-                  et tracés avec vos interlocuteurs.
+                  Relances clients et fournisseurs, synthèses mail, comptes rendus : des échanges nets, datés, exploitables.
                 </p>
               </div>
             </div>
@@ -568,20 +607,42 @@ export default function HomePage() {
         <section id="missions" className="px-6 py-24 md:py-28">
           <div className="mx-auto max-w-6xl">
             <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-              Ce que fait votre assistant à distance
+              Ce que nous prenons en charge pour vous
             </h2>
             <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#334155]">
-              Une palette de missions pour PME, TPE, indépendants et agences : agilité, stabilité et sécurité.
+              Pensé pour les artisans et entreprises du bâtiment — avec la souplesse d&apos;étendre à vos autres besoins
+              administratifs.
             </p>
             <div className="mt-12 grid gap-6 sm:grid-cols-2 sm:items-stretch lg:grid-cols-3">
               {[
-                { title: "Secrétariat & administration", keys: "Emails, téléphone, courriers, agenda, déplacements, classement, archivage" },
-                { title: "Comptabilité & finance", keys: "Factures, relances, suivi paiements, pré-comptabilité, rapprochements bancaires" },
-                { title: "Commercial & client", keys: "Devis, CRM, support client, ADV, traitement commandes" },
-                { title: "Ressources humaines", keys: "Contrats, paie, recrutement, onboarding, gestion administrative du personnel" },
-                { title: "Marketing & digital", keys: "Réseaux sociaux, rédaction web, newsletters, création de contenu" },
-                { title: "Gestion de projets", keys: "Événements, coordination, planning, reporting" },
-                { title: "Achats & services généraux", keys: "Sourcing, commandes, relations fournisseurs, gestion des stocks" },
+                {
+                  title: "Secrétariat & administration",
+                  keys: "Gestion des emails, courriers, agenda, déplacements, classement, archivage des dossiers chantier",
+                },
+                {
+                  title: "Comptabilité & trésorerie",
+                  keys: "Facturation chantier, relances impayés, suivi des paiements, pré-compta, rapprochements",
+                },
+                {
+                  title: "Commercial & relation client",
+                  keys: "Devis clients, relances devis, suivi CRM, traitement des demandes et avenants",
+                },
+                {
+                  title: "Ressources humaines",
+                  keys: "Contrats, suivi administratif du personnel, onboarding, coordination avec la paie",
+                },
+                {
+                  title: "Visibilité & communication",
+                  keys: "Réseaux sociaux chantiers, newsletters, contenus pour valoriser vos réalisations",
+                },
+                {
+                  title: "Pilotage de projets",
+                  keys: "Planning chantier, coordination sous-traitants, reporting d'avancement",
+                },
+                {
+                  title: "Achats & fournisseurs",
+                  keys: "Sourcing matériaux, commandes, suivi livraisons, relations fournisseurs",
+                },
               ].map((item) => (
                 <div key={item.title} className="card-frame flex h-full flex-col rounded-xl p-6">
                   <h3 className="text-lg font-semibold text-[#0f172a]">{item.title}</h3>
@@ -599,13 +660,19 @@ export default function HomePage() {
               Exemples de missions par secteur
             </h2>
             <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#334155]">
-              Un assistant administratif externalisé s&apos;adapte à votre secteur : BTP, immobilier, PME, indépendants.
+              Le BTP est notre socle — nous accompagnons aussi l&apos;immobilier, les PME et les indépendants avec la même
+              exigence de structuration.
             </p>
             <div className="mt-12 grid gap-8 md:grid-cols-2 md:items-stretch lg:grid-cols-4">
               <div className="card-frame flex h-full flex-col rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-[#1d4ed8]">BTP</h3>
                 <ul className="mt-4 flex-1 space-y-2 text-sm text-[#334155]">
-                  {["Devis chantiers", "Suivi des sous-traitants", "Relances factures fournisseurs", "Mise à jour planning"].map((m, i) => (
+                  {[
+                    "Devis clients & chiffrage",
+                    "Facturation chantier & situations de travaux",
+                    "Relances clients et fournisseurs",
+                    "Organisation du planning chantier",
+                  ].map((m, i) => (
                     <li key={i}>• {m}</li>
                   ))}
                 </ul>
@@ -650,12 +717,18 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* L'équipe derrière BeWork */}
+        {/* Équipe & ADN fondateur */}
         <section id="equipe" className="px-6 py-24 md:py-28">
           <div className="mx-auto max-w-6xl">
             <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-              L&apos;équipe derrière BeWork
+              Une solution pensée par une ancienne artisane
             </h2>
+            <p className="mt-5 max-w-3xl text-lg leading-relaxed text-[#334155]">
+              BeWork n&apos;est pas une plateforme générique importée d&apos;ailleurs. Elle porte{" "}
+              <strong className="font-semibold text-[#0f172a]">vingt ans de terrain en artisanat</strong> : contraintes de
+              délais, tension de trésorerie, image client, paperasse du soir. Cette lecture du métier guide chaque
+              process, chaque brief, chaque livrable.
+            </p>
 
             {/* Laure Olivie — Fondatrice */}
             <div className="mt-16 flex flex-col items-center text-center md:flex-row md:items-start md:gap-12 md:text-left">
@@ -673,18 +746,21 @@ export default function HomePage() {
               </div>
               <div className="mt-8 max-w-2xl md:mt-0 md:flex-1">
                 <p className="text-lg leading-relaxed text-[#334155]">
-                  BeWork est né d&apos;une idée simple&nbsp;: permettre aux entreprises de déléguer leur
-                  administratif facilement grâce à une plateforme moderne et efficace.
+                  BeWork est né d&apos;un constat de terrain&nbsp;: trop d&apos;artisans et d&apos;entreprises du bâtiment
+                  brillent sur l&apos;ouvrage mais s&apos;étouffent sur l&apos;administratif. La réponse n&apos;est pas
+                  toujours l&apos;embauche — c&apos;est une organisation structurée, fiable, immédiatement opérationnelle.
                 </p>
                 <p className="mt-6 font-medium text-[#0f172a]">
-                  Notre mission&nbsp;: aider les entreprises à se concentrer sur l&apos;essentiel.
+                  Notre mission&nbsp;: vous rendre du temps, de la marge et de la sérénité — sans alourdir votre structure.
                 </p>
                 <p className="mt-6 text-[#334155] leading-relaxed">
-                  BeWork est une société française fondée par Laure Olivie, formatrice IA reconnue et diplômée.
-                  Votre interlocuteur principal est notre agence en région parisienne, qu&apos;elle dirige au quotidien.
-                  Une plateforme opérationnelle internationale est supervisée depuis la France en temps réel,
-                  pour une qualité et une réactivité identiques. Notre équipe est composée de diplômés Bac+5
-                  minimum, expérimentés et formés aux outils d&apos;intelligence artificielle.
+                  Société française fondée par{" "}
+                  <strong className="font-semibold text-[#0f172a]">Laure Olivie</strong>,{" "}
+                  <strong className="font-semibold text-[#0f172a]">vingt ans d&apos;expérience en artisanat</strong>,
+                  formatrice IA reconnue et diplômée. Votre interlocution principale passe par notre agence en région
+                  parisienne, qu&apos;elle pilote au quotidien. La plateforme opérationnelle est supervisée depuis la France
+                  en temps réel : même exigence, même réactivité. L&apos;équipe exécutive est composée de diplômés Bac+5
+                  minimum, rodés aux outils d&apos;intelligence artificielle — au service de la précision, pas du gadget.
                 </p>
               </div>
             </div>
@@ -698,11 +774,9 @@ export default function HomePage() {
                     Gérée par Laure Olivie, votre interlocutrice principale
                   </p>
                   <p className="mt-3 text-[#334155] leading-relaxed">
-                    Laure Olivie, formatrice IA reconnue et diplômée, pilote
-                    l&apos;agence en Île-de-France. C&apos;est elle qui assure la
-                    relation client, le cadrage des missions et la qualité du
-                    service. Son expertise et son exigence garantissent un
-                    accompagnement de haut niveau.
+                    Laure Olivie — ancienne artisane, vingt ans sur le terrain — pilote l&apos;agence en Île-de-France.
+                    Elle structure les missions, arbitre la qualité et garde le lien direct avec les dirigeants. Une exigence
+                    forgée sur le chantier, transposée à votre administratif.
                   </p>
                 </div>
                 <div className="flex flex-col">
@@ -713,9 +787,9 @@ export default function HomePage() {
                     Supervision opérationnelle en France
                   </p>
                   <p className="mt-3 text-[#334155] leading-relaxed">
-                    La plateforme est pilotée au quotidien depuis la France. Même fuseau horaire,
-                    même niveau d&apos;exigence : sélection Bac+5, formation IA et encadrement continu
-                    pour une assistance réactive et professionnelle.
+                    La plateforme est pilotée au quotidien depuis la France. Même fuseau, même niveau d&apos;exigence :
+                    sélection Bac+5, formation IA et encadrement continu — pour un service réactif quand votre planning
+                    serré ne pardonne pas.
                   </p>
                 </div>
               </div>
@@ -727,14 +801,14 @@ export default function HomePage() {
         <section id="pourquoi-nous" className="px-6 py-24 md:py-28">
           <div className="mx-auto max-w-6xl">
             <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-              Pourquoi collaborer avec nous ?
+              Pourquoi les entreprises du BTP nous choisissent
             </h2>
             <ul className="mt-8 grid gap-4 md:grid-cols-2 md:items-stretch">
               {[
-                "Interlocuteur principal en Île-de-France (Laure Olivie) : proximité et réactivité.",
-                "Plateforme internationale pilotée en temps réel depuis la France.",
-                "Même fuseau horaire qu'en France : collaboration sans décalage.",
-                "Assistants francophones, Bac+5, formés à l'IA et encadrés en continu.",
+                "ADN terrain : une fondatrice qui a porté l'artisanat pendant vingt ans — briefs qui parlent votre langue.",
+                "Interlocuteur principal en Île-de-France (Laure Olivie) : cadrage, exigence, disponibilité.",
+                "Plateforme pilotée en temps réel depuis la France : réactivité quand le chantier n'attend pas.",
+                "Équipe francophone Bac+5, formée à l'IA et encadrée en continu — rigueur sur les dossiers et les délais.",
               ].map((item, i) => (
                 <li key={i} className="card-frame flex h-full gap-3 rounded-xl p-4">
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[#1d4ed8]/10 text-[#1d4ed8] text-xs font-bold">✓</span>
@@ -749,19 +823,20 @@ export default function HomePage() {
         <section id="secteurs" className="px-6 py-24 md:py-28">
           <div className="mx-auto max-w-6xl">
             <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-              Des secteurs que nous connaissons bien
+              Des secteurs où nous excellons
             </h2>
             <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#334155]">
-              Dirigeants, cadres, PME ou cabinets : nous nous adaptons à votre secteur et à vos process.
+              Le bâtiment est notre cœur de cible — nous accompagnons aussi les structures qui partagent les mêmes exigences
+              de rigueur et de délais.
             </p>
             <div className="mt-12 grid gap-4 sm:grid-cols-2 sm:items-stretch lg:grid-cols-3 xl:grid-cols-4">
               {[
-                { name: "BTP", desc: "Devis, suivi chantiers, coordination" },
-                { name: "Immobilier", desc: "Dossiers, relances, gestion locative" },
-                { name: "Cabinets juridiques", desc: "Administratif et suivi dossiers" },
-                { name: "PME", desc: "Assistance administrative au quotidien" },
-                { name: "Consulting", desc: "Support et livrables" },
-                { name: "E-commerce", desc: "Commandes, SAV, suivi" },
+                { name: "BTP & artisans", desc: "Devis, facturation chantier, situations de travaux, planning" },
+                { name: "Immobilier", desc: "Dossiers locataires, relances, gestion administrative" },
+                { name: "Cabinets juridiques", desc: "Structuration et suivi de dossiers" },
+                { name: "PME du bâtiment", desc: "Pilotage administratif quotidien, sans embauche" },
+                { name: "Consulting", desc: "Support, synthèses et livrables premium" },
+                { name: "E-commerce", desc: "Commandes, SAV, suivi opérationnel" },
                 { name: "Agences de recrutement", desc: "Coordination et suivi candidats" },
               ].map((sector) => (
                 <Link
@@ -786,13 +861,13 @@ export default function HomePage() {
             <div className="flex flex-wrap items-start justify-between gap-6">
               <div className="max-w-2xl">
                 <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-                  Service de conciergerie
+                  Conciergerie d&apos;entreprise
                 </h2>
                 <p className="mt-5 text-lg leading-relaxed text-[#334155]">
-                  Au-delà de l&apos;assistance administrative, BeWork propose un{" "}
-                  <strong className="text-[#0f172a]">service de conciergerie professionnelle</strong>{" "}
-                  pour répondre à vos demandes sur mesure : assistance à la réservation, organisation de déplacements,
-                  recherches spécifiques ou gestion d&apos;imprévus. Tout se fait à distance — sans nous déplacer : recherches, appels, mails et réservations en votre nom. Service personnalisé, disponible 24h/24, sur devis.
+                  Au-delà du pilotage administratif, BeWork propose une{" "}
+                  <strong className="text-[#0f172a]">conciergerie professionnelle</strong> pour vos imprévus de dirigeant :
+                  déplacements, réservations, recherches pointues — exécutées à distance (appels, mails, confirmations) en
+                  votre nom. Disponibilité 24h/24, tarif sur mesure.
                 </p>
                 <ul className="mt-6 grid gap-2 sm:grid-cols-2 text-[#334155]">
                   {[
@@ -832,13 +907,14 @@ export default function HomePage() {
                 Un tarif transparent et tout compris
               </h2>
               <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#334155]">
-                Des offres claires, de l&apos;assistance dédiée à la qualité professionnelle. 
-                Pas de coût caché : vous savez ce que vous payez et ce que vous obtenez.
+                Des offres lisibles, une équipe dédiée, une qualité de prestation alignée sur les standards du BTP.
+                Aucun frais caché : vous savez ce que vous payez — et ce que cela vous rapporte en temps et en trésorerie.
               </p>
               <div className="mt-6 rounded-lg border border-[#1d4ed8]/30 bg-[#eff6ff] px-5 py-4">
                 <p className="font-semibold text-[#0f172a]">
-                  Le coût réel d&apos;un assistant en CDI en France ? ~5 050 €/mois (salaire + charges + bureau + RH). 
-                  Nos assistants virtuels : à partir de 215 € TTC/mois, tout compris — jusqu&apos;à ~75 % d&apos;économie.
+                  Un poste administratif en CDI en France ? Environ 5 050 €/mois (salaire, charges, bureau, RH). Avec
+                  BeWork : à partir de 215 € TTC/mois, tout compris — sans recrutement, sans charges sociales, sans gestion
+                  RH — jusqu&apos;à ~75 % d&apos;économie.
                 </p>
                 <Link href="/tarifs" className="mt-3 inline-block text-sm font-medium text-[#1d4ed8] hover:underline">
                   Voir le comparatif détaillé →
@@ -867,13 +943,11 @@ export default function HomePage() {
             </div>
             <div>
               <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-                Nous travaillons avec vos outils
+                Nous travaillons dans vos outils
               </h2>
               <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#334155]">
-                Intégration transparente à vos outils : CRM, logiciels de gestion, espaces 
-                collaboratifs et messageries. Nos assistants travaillent dans votre environnement ; 
-                notre plateforme BeWork complète le dispositif pour le suivi des dossiers et la 
-                livraison des tâches, avec une traçabilité et une réactivité à la hauteur de vos exigences.
+                CRM, logiciels de devis, GED, messageries : votre équipe BeWork s&apos;insère dans votre stack. La plateforme
+                centralise consignes, statuts et livrables — pour une traçabilité digne des exigences chantier.
               </p>
             </div>
           </div>
@@ -883,17 +957,34 @@ export default function HomePage() {
         <section id="processus" className="px-6 py-24 md:py-28">
           <div className="mx-auto max-w-6xl">
             <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-              Processus de matching et d&apos;onboarding
+              Matching et onboarding : un cadrage premium
             </h2>
             <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#334155]">
-              Un parcours structuré : découverte de vos besoins, proposition de profil par notre équipe, puis phase de démarrage avec un cadre clair.
+              Aucune surprise : nous cartographions vos flux administratifs, vos urgences chantier et vos outils — avant de
+              verrouiller l&apos;équipe et le rythme.
             </p>
             <div className="mt-12 grid gap-8 md:grid-cols-2 md:items-stretch lg:grid-cols-4">
               {[
-                { step: "1", title: "Call de découverte", desc: "Échange pour comprendre vos activités, vos préférences et les outils que vous utilisez. Pas de questionnaire automatisé : un vrai échange avec notre équipe." },
-                { step: "2", title: "Proposition de profil", desc: "L'équipe BeWork sélectionne et vous présente un ou plusieurs profils adaptés. Sélection humaine, pas par algorithme." },
-                { step: "3", title: "Validation et contrat", desc: "Vous validez le ou les profils, nous signons le cadre de collaboration et définissons les objectifs communs." },
-                { step: "4", title: "Onboarding et démarrage", desc: "Phase de démarrage avec un cadre défini : rôles, objectifs, rituels de communication. Mise en place des outils et démarrage opérationnel." },
+                {
+                  step: "1",
+                  title: "Échange de découverte",
+                  desc: "Comprendre vos métiers, vos délais, vos irritants (devis, factures, relances). Pas de formulaire froid : un vrai diagnostic avec notre équipe.",
+                },
+                {
+                  step: "2",
+                  title: "Proposition de profil",
+                  desc: "Nous sélectionnons et présentons un ou plusieurs profils alignés sur votre culture et vos outils. Choix humain, pas automatisé.",
+                },
+                {
+                  step: "3",
+                  title: "Validation & cadre",
+                  desc: "Vous validez l'équipe, nous formalisons le cadre de collaboration et les indicateurs de réussite.",
+                },
+                {
+                  step: "4",
+                  title: "Onboarding & go-live",
+                  desc: "Rituels de communication, accès outils, priorités : nous démarrons opérationnellement — pour des premiers livrables rapides.",
+                },
               ].map((item) => (
                 <div key={item.step} className="card-frame flex h-full flex-col rounded-xl p-6">
                   <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#1d4ed8] text-lg font-bold text-white">
@@ -912,11 +1003,11 @@ export default function HomePage() {
           <div className="mx-auto max-w-6xl">
             <div className="mb-16 max-w-2xl">
               <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-                Ressources & bonnes pratiques.
+                Ressources & bonnes pratiques
               </h2>
               <p className="mt-5 text-lg leading-relaxed text-[#334155]">
-                Guides et cas d&apos;usage pour mieux comprendre l&apos;assistance
-                virtuelle et son impact sur votre activité.
+                Guides et retours d&apos;expérience pour structurer votre administratif, sécuriser votre trésorerie et
+                professionnaliser votre relation client.
               </p>
             </div>
 
@@ -948,7 +1039,8 @@ export default function HomePage() {
               Questions fréquentes
             </h2>
             <p className="mt-5 text-lg leading-relaxed text-[#334155]">
-              Réponses aux questions les plus posées sur l&apos;assistant administratif externalisé.
+              Tout ce que les artisans et entreprises du bâtiment nous demandent avant de déléguer leur pilotage
+              administratif.
             </p>
             <p className="mt-4 text-sm font-medium text-[#0f172a]">
               Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.
@@ -956,20 +1048,20 @@ export default function HomePage() {
             <dl className="mt-12 space-y-8">
               {[
                 {
-                  q: "Combien coûte un assistant administratif ?",
-                  a: "Chez BeWork, tous les tarifs affichés sont TTC, sans frais supplémentaires. Les offres démarrent à 215 € TTC/mois pour la formule Standard (120 actions/mois, soit environ 20 h d'assistance), 415 € TTC/mois pour Business (240 actions) et 630 € TTC/mois pour Premium (360 actions). L'offre Découverte à 109 € TTC permet de tester le service. Tout est inclus : pas de coût caché, pas de recrutement.",
+                  q: "Combien coûte le pilotage administratif avec BeWork ?",
+                  a: "Tous les tarifs affichés sont TTC, sans frais supplémentaires. Les offres démarrent à 215 € TTC/mois pour la formule Standard (120 actions/mois, soit environ 20 h d'assistance), 415 € TTC/mois pour Business (240 actions) et 630 € TTC/mois pour Premium (360 actions). L'offre Découverte à 109 € TTC permet de tester le service. Tout est inclus : pas de coût caché, pas de recrutement, pas de charges sociales ni de gestion RH.",
                 },
                 {
-                  q: "Comment fonctionne un assistant administratif externalisé ?",
-                  a: "Vous envoyez vos tâches via la plateforme BeWork, un assistant dédié les traite à distance (devis, factures, relances, suivi dossiers), vous suivez l'avancement en temps réel et recevez les livrables. Le tout sans recrutement ni infrastructure : externaliser administratif PME en toute simplicité.",
+                  q: "Comment ça se passe concrètement au quotidien ?",
+                  a: "Vous déposez vos demandes sur la plateforme BeWork (devis, facturation chantier, relances, mails, organisation). Une équipe dédiée traite les dossiers, vous suivez l'avancement en temps réel et récupérez les livrables. Sans embauche ni infrastructure lourde : une solution immédiatement opérationnelle.",
                 },
                 {
-                  q: "Qui réalise les missions ?",
-                  a: "Des assistants francophones diplômés Bac+5, formés à l'IA, encadrés par notre agence en région parisienne. La direction et la supervision sont en France ; la plateforme opérationnelle permet une exécution réactive et de qualité.",
+                  q: "Qui exécute les missions ?",
+                  a: "Des profils francophones diplômés Bac+5, formés à l'IA, encadrés par notre agence en région parisienne. Direction et supervision en France ; la plateforme garantit réactivité et niveau de finition attendu par les entreprises du BTP.",
                 },
                 {
                   q: "Quel est le délai de traitement ?",
-                  a: "Réponse moyenne en moins de 2 heures. Les tâches urgentes sont priorisées. Le délai dépend du type de mission et de la complexité ; notre équipe en France assure une coordination fluide pour respecter vos échéances.",
+                  a: "Réponse moyenne en moins de 2 heures. Les urgences chantier sont priorisées. Le délai dépend du type de mission ; notre équipe en France coordonne pour respecter vos échéances et vos envois client.",
                 },
               ].map((item, i) => (
                 <div key={i} className="card-frame rounded-xl p-6">
@@ -985,10 +1077,38 @@ export default function HomePage() {
                   "@context": "https://schema.org",
                   "@type": "FAQPage",
                   mainEntity: [
-                    { "@type": "Question", name: "Combien coûte un assistant administratif ?", acceptedAnswer: { "@type": "Answer", text: "Tous nos tarifs sont TTC, sans frais supplémentaires. Offres dès 215 € TTC/mois (Standard, 120 actions), 415 € TTC/mois (Business), 630 € TTC/mois (Premium), 109 € TTC (Découverte). Tout inclus, sans recrutement." } },
-                    { "@type": "Question", name: "Comment fonctionne un assistant administratif externalisé ?", acceptedAnswer: { "@type": "Answer", text: "Vous envoyez vos tâches via la plateforme BeWork, un assistant dédié les traite à distance, vous suivez l'avancement en temps réel et recevez les livrables. Sans recrutement ni infrastructure." } },
-                    { "@type": "Question", name: "Qui réalise les missions ?", acceptedAnswer: { "@type": "Answer", text: "Des assistants francophones diplômés Bac+5, formés à l'IA, encadrés par notre agence en région parisienne. Direction et supervision en France." } },
-                    { "@type": "Question", name: "Quel est le délai de traitement ?", acceptedAnswer: { "@type": "Answer", text: "Réponse moyenne en moins de 2 heures. Les tâches urgentes sont priorisées. Notre équipe en France assure une coordination fluide." } },
+                    {
+                      "@type": "Question",
+                      name: "Combien coûte le pilotage administratif avec BeWork ?",
+                      acceptedAnswer: {
+                        "@type": "Answer",
+                        text: "Tarifs TTC sans frais supplémentaires. Offres dès 215 € TTC/mois (Standard, 120 actions), 415 € TTC/mois (Business), 630 € TTC/mois (Premium), 109 € TTC (Découverte). Tout inclus, sans recrutement ni charges sociales.",
+                      },
+                    },
+                    {
+                      "@type": "Question",
+                      name: "Comment ça se passe concrètement au quotidien ?",
+                      acceptedAnswer: {
+                        "@type": "Answer",
+                        text: "Demandes via la plateforme BeWork, équipe dédiée, suivi en temps réel et livrables. Sans embauche ni infrastructure lourde.",
+                      },
+                    },
+                    {
+                      "@type": "Question",
+                      name: "Qui exécute les missions ?",
+                      acceptedAnswer: {
+                        "@type": "Answer",
+                        text: "Profils francophones Bac+5, formés à l'IA, encadrés par l'agence en région parisienne. Direction et supervision en France.",
+                      },
+                    },
+                    {
+                      "@type": "Question",
+                      name: "Quel est le délai de traitement ?",
+                      acceptedAnswer: {
+                        "@type": "Answer",
+                        text: "Réponse moyenne en moins de 2 heures. Urgences priorisées. Coordination par l'équipe en France.",
+                      },
+                    },
                   ],
                 }),
               }}
@@ -1002,10 +1122,11 @@ export default function HomePage() {
             <div className="grid gap-12 md:grid-cols-3 md:items-center md:gap-16">
               <div className="md:col-span-2">
                 <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-                  Prêt à déléguer votre administratif ?
+                  Prêt à structurer votre administratif de chantier ?
                 </h2>
                 <p className="mt-6 max-w-2xl text-lg leading-relaxed text-[#94a3b8]">
-                  Découvrez nos offres ou demandez un rendez-vous : notre équipe en France vous répond et vous propose l&apos;offre adaptée à votre activité.
+                  Demandez un échange : nous dimensionnons l&apos;offre à votre rythme, à vos outils et à vos enjeux de
+                  trésorerie — sans engagement long terme, avec une exigence de résultat.
                 </p>
               </div>
               <div className="flex flex-col gap-4 md:items-end">
@@ -1035,7 +1156,7 @@ export default function HomePage() {
               <span className="text-[#0f172a]">© {new Date().getFullYear()} BeWork</span>
             </div>
             <span className="text-[#64748b]">
-              Société française — Agence principale : Île-de-France (Laure Olivie) — Plateforme internationale supervisée depuis la France
+              Société française — Agence Île-de-France (Laure Olivie) — Pilotage opérationnel supervisé depuis la France
             </span>
           </div>
           <div className="flex flex-wrap gap-x-6 gap-y-2">
@@ -1052,7 +1173,7 @@ export default function HomePage() {
               FAQ
             </Link>
             <Link className="font-medium transition-colors hover:text-[#0f172a]" href="/tarifs">
-              Tarifs administratif
+              Tarifs pilotage administratif
             </Link>
             <Link className="font-medium transition-colors hover:text-[#0f172a]" href="/communication-digitale">
               Tarifs communication

@@ -29,7 +29,7 @@ const RESSOURCES_BLOG = [
 export const metadata: Metadata = {
   title: "Administratif BTP & artisans : devis, facturation chantier, organisation | BeWork",
   description:
-    "Partenaire d'organisation pour artisans et BTP : devis, facturation, situations de travaux, démarches chantier, logistique fournisseurs, locations matériel/engins/véhicules, planning et suivi des dossiers sensibles. 20 ans d'expérience artisanale chez la fondatrice. Dès 215 € TTC/mois, sans recrutement. France, Belgique, Suisse, Luxembourg.",
+    "Partenaire d'organisation pour artisans et BTP : devis, facturation, situations de travaux, démarches chantier, logistique fournisseurs, locations matériel/engins/véhicules, planning et suivi des dossiers sensibles. Équipes formées aux outils d'intelligence artificielle pour plus de performance et de précision, sous encadrement humain. 20 ans d'expérience artisanale chez la fondatrice. Dès 215 € TTC/mois, sans recrutement. France, Belgique, Suisse, Luxembourg.",
   robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
   keywords: [
     "administratif BTP",
@@ -47,6 +47,8 @@ export const metadata: Metadata = {
     "DICT déclaration travaux",
     "logistique chantier BTP",
     "location engin chantier",
+    "administratif intelligence artificielle",
+    "IA productivité PME BTP",
   ],
   alternates: { canonical: SITE_URL, languages: { fr: SITE_URL } },
   openGraph: {
@@ -56,13 +58,13 @@ export const metadata: Metadata = {
     siteName: "BeWork",
     title: "BeWork — Administratif & organisation pour le BTP et les artisans",
     description:
-      "Administratif, démarches, logistique, moyens, planning : une offre complète pour le bâtiment. Sans embauche. Dès 215 € TTC/mois — France, Belgique, Suisse, Luxembourg.",
+      "Administratif, démarches, logistique, moyens, planning : une offre complète pour le bâtiment — avec outils IA maîtrisés pour la performance. Sans embauche. Dès 215 € TTC/mois — France, Belgique, Suisse, Luxembourg.",
   },
   twitter: {
     card: "summary_large_image",
     title: "BeWork — Administratif premium pour artisans et BTP",
     description:
-      "Gain de temps, trésorerie et image pro sur vos chantiers. Forfait dès 215 € TTC/mois, sans recrutement.",
+      "Gain de temps, trésorerie et image pro sur vos chantiers — équipes outillées IA sous supervision. Forfait dès 215 € TTC/mois, sans recrutement.",
   },
 };
 
@@ -76,7 +78,7 @@ const homeJsonLd = {
       name: "Administratif BTP & artisans : devis, facturation chantier | BeWork",
       inLanguage: "fr-FR",
       description:
-        "Partenaire d'organisation pour le BTP : administratif (devis, facturation, situations de travaux), démarches chantier, logistique fournisseurs, moyens, planning et suivi administratif des dossiers sensibles. Dès 215 € TTC/mois.",
+        "Partenaire d'organisation pour le BTP : administratif (devis, facturation, situations de travaux), démarches chantier, logistique fournisseurs, moyens, planning et suivi administratif des dossiers sensibles. Utilisation maîtrisée d'outils d'intelligence artificielle pour la performance. Dès 215 € TTC/mois.",
       isPartOf: { "@id": `${SITE_URL}/#website` },
       about: [
         { "@type": "Thing", name: "Bâtiment et travaux publics" },
@@ -92,7 +94,7 @@ const homeJsonLd = {
       "@id": `${SITE_URL}/#service-btp`,
       name: "Organisation et pilotage administratif pour entreprises du BTP",
       description:
-        "Support complet : devis, facturation, situations de travaux, suivi client, emails et structuration ; démarches (DICT, autorisations, déclarations) ; commandes, livraisons et coordination chantier ; locations matériel, engins et véhicules ; relances et suivi administratif des litiges sous validation client. France, Belgique, Suisse, Luxembourg.",
+        "Support complet : devis, facturation, situations de travaux, suivi client, emails et structuration ; démarches (DICT, autorisations, déclarations) ; commandes, livraisons et coordination chantier ; locations matériel, engins et véhicules ; relances et suivi administratif des litiges sous validation client. Outils d'intelligence artificielle utilisés de façon encadrée pour gagner en efficacité. France, Belgique, Suisse, Luxembourg.",
       serviceType: "Externalisation administrative",
       category: "Services administratifs pour le bâtiment",
       provider: { "@id": `${SITE_URL}/#organization` },
@@ -130,7 +132,7 @@ export default function HomePage() {
               <BeWorkLogo
                 size="sm"
                 showTagline
-                tagline="Partenaire d'organisation & support administratif complet — le BTP, sans compromis"
+                tagline="Administratif & organisation BTP — humain + outils IA pour la performance"
               />
             </Link>
             <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
@@ -190,6 +192,49 @@ export default function HomePage() {
                 <h1 className="text-metallic-black text-balance text-3xl font-bold leading-[1.15] tracking-tight md:text-4xl lg:text-5xl lg:leading-[1.1]">
                   Artisans et entreprises du BTP : un partenaire pour tout l&apos;organisationnel — du devis au chantier.
                 </h1>
+                <div
+                  className="mx-auto max-w-2xl rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-4 shadow-sm md:mx-0 md:p-5"
+                  role="region"
+                  aria-label="Mode opératoire : outils IA, équipe et validation"
+                >
+                  <p className="text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-[#64748b] lg:text-left">
+                    Mode opératoire
+                  </p>
+                  <div className="mt-4 flex flex-col gap-2 lg:flex-row lg:items-stretch lg:gap-1">
+                    <div className="flex flex-1 flex-col rounded-lg border border-[#e2e8f0] bg-white px-3.5 py-3">
+                      <span className="text-xs font-bold tabular-nums text-[#1d4ed8]">1 · IA</span>
+                      <p className="mt-1.5 text-sm leading-snug text-[#334155]">
+                        Soutien à la rédaction et au suivi des dossiers — moins de temps perdu sur le papier.
+                      </p>
+                    </div>
+                    <div
+                      className="flex shrink-0 items-center justify-center py-0.5 text-lg font-medium text-[#94a3b8] lg:px-1 lg:py-0"
+                      aria-hidden
+                    >
+                      <span className="lg:hidden">↓</span>
+                      <span className="hidden lg:inline">→</span>
+                    </div>
+                    <div className="flex flex-1 flex-col rounded-lg border border-[#e2e8f0] bg-white px-3.5 py-3">
+                      <span className="text-xs font-bold tabular-nums text-[#1d4ed8]">2 · Équipe</span>
+                      <p className="mt-1.5 text-sm leading-snug text-[#334155]">
+                        Contrôle, conformité et envoi. Supervision depuis la France.
+                      </p>
+                    </div>
+                    <div
+                      className="flex shrink-0 items-center justify-center py-0.5 text-lg font-medium text-[#94a3b8] lg:px-1 lg:py-0"
+                      aria-hidden
+                    >
+                      <span className="lg:hidden">↓</span>
+                      <span className="hidden lg:inline">→</span>
+                    </div>
+                    <div className="flex flex-1 flex-col rounded-lg border border-[#e2e8f0] bg-white px-3.5 py-3">
+                      <span className="text-xs font-bold tabular-nums text-[#1d4ed8]">3 · Vous</span>
+                      <p className="mt-1.5 text-sm leading-snug text-[#334155]">
+                        Validation avant envoi sur les actes sensibles (relances fermes, mises en demeure, litiges).
+                      </p>
+                    </div>
+                  </div>
+                </div>
                 <div className="mx-auto max-w-2xl space-y-6 text-left md:mx-0">
                   <p className="text-lg font-medium leading-relaxed text-[#0f172a] md:text-xl">
                     BeWork est votre{" "}
@@ -436,7 +481,9 @@ export default function HomePage() {
                   {" "}
                   BeWork tient l'organisation à votre place
                 </strong>
-                : administratif, logistique, coordination chantier et suivi des aspects sensibles, avec des process clairs.
+                : administratif, logistique, coordination chantier et suivi des aspects sensibles, avec des process clairs —
+                et des <strong className="font-semibold text-[#0f172a]">outils IA</strong> utilisés avec rigueur pour gagner en
+                vitesse sans lâcher la qualité.
                 Vous recentrez cash et calme sur l&apos;ouvrage.
               </p>
             </div>
@@ -446,7 +493,7 @@ export default function HomePage() {
                 "Coût maîtrisé : zéro recrutement, zéro charges sociales — forfait tout compris dès 215 € TTC/mois.",
                 "Réactivité terrain : équipe calée sur les pics devis, livraisons, démarches et urgences chantier.",
                 "Évolutif : vous ajustez le volume d'actions selon vos chantiers, sans alourdir votre structure.",
-                "Exigence : Bac+5, outils et IA maîtrisés, encadrement en France — y compris sur dossiers sensibles.",
+                "Exigence : Bac+5, outils professionnels et IA maîtrisés au quotidien, encadrement en France — y compris sur dossiers sensibles.",
                 "Premium accessible : structuration, relances et pilotage sans vous enfermer dans un CDI.",
               ].map((item, i) => (
                 <li key={i} className="card-frame flex h-full gap-3 rounded-xl p-5">
@@ -485,7 +532,13 @@ export default function HomePage() {
                 <div className="flex flex-col bg-[#eff6ff]/50 p-8 md:p-10">
                   <h3 className="text-lg font-bold text-[#1d4ed8]">Forfait BeWork</h3>
                   <ul className="mt-4 space-y-2 text-[#334155]">
-                    {["Un seul forfait tout compris", "Aucun coût de recrutement", "Aucune charge sociale", "Plateforme incluse"].map((line) => (
+                    {[
+                      "Un seul forfait tout compris",
+                      "Aucun coût de recrutement",
+                      "Aucune charge sociale",
+                      "Plateforme incluse",
+                      "Outils IA maîtrisés pour la productivité (sous supervision humaine)",
+                    ].map((line) => (
                       <li key={line} className="flex items-center gap-2">
                         <span className="text-[#1d4ed8]">✓</span> {line}
                       </li>
@@ -515,7 +568,10 @@ export default function HomePage() {
               </h2>
               <p className="mt-4 max-w-2xl mx-auto text-lg text-[#475569]">
                 De la relance client au suivi fournisseur, du planning à la démarche en mairie : consignes, échanges et
-                statuts au même endroit — alignés sur vos priorités terrain.
+                statuts au même endroit — alignés sur vos priorités terrain. Derrière, nos équipes combinent{" "}
+                <strong className="font-semibold text-[#334155]">expertise métier</strong> et{" "}
+                <strong className="font-semibold text-[#334155]">outils d&apos;IA</strong> pour traiter plus vite et plus
+                proprement, sans rogner sur la conformité ni sur votre contrôle.
               </p>
             </div>
 
@@ -584,8 +640,8 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* 3 fonctionnalités clés */}
-            <div className="grid gap-10 md:grid-cols-3 md:items-stretch md:gap-8">
+            {/* Fonctionnalités clés + IA */}
+            <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4 md:items-stretch md:gap-8">
               {[
                 {
                   title: "Créer une demande",
@@ -604,6 +660,12 @@ export default function HomePage() {
                   description:
                     "Planning, fournisseurs, démarches, locations : vous voyez ce qui avance — sans multiplier les interlocuteurs.",
                   icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
+                },
+                {
+                  title: "IA au service de l'efficacité",
+                  description:
+                    "Outils d'intelligence artificielle maîtrisés pour accélérer brouillons, contrôles et structuration — toujours validés par des profils humains et encadrés contractuellement.",
+                  icon: "M13 10V3L4 14h7v7l9-11h-7z",
                 },
               ].map((item, i) => (
                 <div key={i} className="surface-metallic-light flex h-full flex-col rounded-xl p-6 text-left">

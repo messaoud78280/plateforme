@@ -1,15 +1,5 @@
 /**
- * Slugs des articles blog — source unique pour le sitemap et le typage des pages.
- * Les clés de `ARTICLES` dans `app/blog/[slug]/page.tsx` doivent correspondre exactement.
+ * Slugs des articles blog — alignés sur `BLOG_ARTICLES` (sitemap, typage).
  */
-export const BLOG_SLUGS = [
-  "10-taches-administratives-deleguer-dirigeant",
-  "combien-coute-assistant-administratif",
-  "assistant-virtuel-vs-assistant-salarie",
-  "gagner-5-heures-semaine-deleguer-administratif",
-  "externaliser-assistant-administratif-avantages",
-  "organiser-journee-dirigeant-avec-assistant",
-  "erreurs-a-eviter-deleguer-administratif",
-] as const;
-
-export type BlogSlug = (typeof BLOG_SLUGS)[number];
+export type { BlogSlug, BlogArticle } from "./blog-articles";
+export { BLOG_ARTICLES, BLOG_SLUGS } from "./blog-articles";

@@ -1,73 +1,87 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
-import { absoluteUrl } from "@/lib/site";
+import { BLOG_ARTICLES, BLOG_SLUGS, type BlogSlug } from "@/content/blog-articles";
+import { absoluteUrl, SITE_URL } from "@/lib/site";
 
 const blogUrl = absoluteUrl("/blog");
 
+const ARTICLE_INDEX: { slug: BlogSlug; title: string; excerpt: string; publishedTime: string }[] = [...BLOG_SLUGS]
+  .map((slug) => {
+    const a = BLOG_ARTICLES[slug];
+    return {
+      slug,
+      title: a.title,
+      excerpt: a.excerpt ?? a.description,
+      publishedTime: a.publishedTime,
+    };
+  })
+  .sort((x, y) => new Date(y.publishedTime).getTime() - new Date(x.publishedTime).getTime());
+
 export const metadata: Metadata = {
-  title: "Blog BeWork — Assistant administratif externalisé, délégation PME",
+  title: "Blog BeWork — Administratif BTP, artisans, délégation & externalisation",
   description:
-    "Articles et conseils sur l'assistant administratif externalisé, la délégation et l'externalisation de l'administratif pour PME et dirigeants.",
+    "Articles sur l'administratif des entreprises du bâtiment, la facturation chantier, les situations de travaux, la délégation et l'assistant administratif externalisé pour PME et artisans.",
+  keywords: [
+    "blog administratif BTP",
+    "conseils artisan bâtiment",
+    "externalisation administrative",
+    "situation de travaux",
+    "facturation chantier",
+    "assistant administratif distance",
+  ],
   alternates: { canonical: blogUrl, languages: { fr: blogUrl } },
   openGraph: {
     type: "website",
     locale: "fr_FR",
     url: blogUrl,
     siteName: "BeWork",
-    title: "Blog BeWork — Assistant administratif externalisé",
+    title: "Blog BeWork — Administratif externalisé & BTP",
     description:
-      "Conseils pour déléguer l'administratif, comparatifs de coûts et bonnes pratiques pour les dirigeants de PME.",
+      "Guides pratiques : administratif chantier, trésorerie, DICT, délégation et externalisation pour dirigeants et artisans.",
   },
   twitter: {
     card: "summary_large_image",
     title: "Blog BeWork",
-    description: "Articles sur l'assistant administratif externalisé et la délégation pour PME.",
+    description: "Articles administratif BTP, artisans et externalisation pour PME.",
   },
   robots: { index: true, follow: true },
 };
 
-const ARTICLES = [
-  {
-    slug: "10-taches-administratives-deleguer-dirigeant",
-    title: "10 tâches administratives à déléguer quand on est dirigeant",
-    excerpt: "Découvrez les tâches chronophages que les dirigeants peuvent déléguer pour gagner du temps et se recentrer sur leur cœur de métier.",
-  },
-  {
-    slug: "combien-coute-assistant-administratif",
-    title: "Combien coûte un assistant administratif ?",
-    excerpt: "Comparatif des tarifs : assistant administratif externalisé vs salarié. Ce que coûte vraiment l'externalisation pour les PME.",
-  },
-  {
-    slug: "assistant-virtuel-vs-assistant-salarie",
-    title: "Assistant virtuel vs assistant salarié",
-    excerpt: "Avantages et inconvénients de l'assistant administratif externalisé face à un recrutement interne. Pour qui, pour quoi ?",
-  },
-  {
-    slug: "gagner-5-heures-semaine-deleguer-administratif",
-    title: "Comment gagner 5 heures par semaine en déléguant l'administratif",
-    excerpt: "Conseils pratiques pour identifier les tâches à déléguer et libérer du temps grâce à un assistant administratif externalisé.",
-  },
-  {
-    slug: "externaliser-assistant-administratif-avantages",
-    title: "Externaliser son assistant administratif : 7 avantages concrets pour une PME",
-    excerpt: "Coût, flexibilité, continuité de service… Découvrez les bénéfices concrets de l'externalisation pour les dirigeants de PME.",
-  },
-  {
-    slug: "organiser-journee-dirigeant-avec-assistant",
-    title: "Comment organiser votre journée de dirigeant avec l’aide d’un assistant administratif",
-    excerpt: "Exemple de journée type pour mieux prioriser, déléguer et garder du temps pour le développement de votre entreprise.",
-  },
-  {
-    slug: "erreurs-a-eviter-deleguer-administratif",
-    title: "5 erreurs à éviter quand vous commencez à déléguer votre administratif",
-    excerpt: "Périmètre flou, consignes incomplètes, manque de feedback… Les pièges à éviter pour une collaboration efficace.",
-  },
-];
-
 export default function BlogPage() {
+  const blogListLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Blog BeWork",
+    description: "Articles sur l'administratif externalisé, le BTP et la délégation.",
+    numberOfItems: ARTICLE_INDEX.length,
+    itemListElement: ARTICLE_INDEX.map((a, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: absoluteUrl(`/blog/${a.slug}`),
+      name: a.title,
+    })),
+  };
+
+  const blogJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: "Blog BeWork",
+    url: blogUrl,
+    inLanguage: "fr-FR",
+    publisher: { "@type": "Organization", name: "BeWork", url: SITE_URL },
+    blogPost: ARTICLE_INDEX.map((a) => ({
+      "@type": "BlogPosting",
+      headline: a.title,
+      url: absoluteUrl(`/blog/${a.slug}`),
+      datePublished: a.publishedTime,
+    })),
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogListLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }} />
       <header className="sticky top-0 z-20 border-b border-[#c8cdd6] bg-[#f8f9fb]">
         <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
           <Link href="/" className="shrink-0">
@@ -90,16 +104,23 @@ export default function BlogPage() {
             Blog BeWork
           </h1>
           <p className="mt-4 text-lg text-[#334155]">
-            Conseils et bonnes pratiques sur l&apos;assistant administratif externalisé et la délégation pour PME et dirigeants.
+            Conseils pour artisans et PME du bâtiment : administratif chantier, trésorerie, délégation et assistant administratif externalisé.
           </p>
           <ul className="mt-12 space-y-8">
-            {ARTICLES.map((a) => (
+            {ARTICLE_INDEX.map((a) => (
               <li key={a.slug}>
                 <Link
                   href={`/blog/${a.slug}`}
                   className="block rounded-xl surface-metallic-light p-6 transition hover:border-[#1d4ed8]/30 hover:shadow-md"
                 >
                   <h2 className="text-xl font-semibold text-[#0f172a]">{a.title}</h2>
+                  <p className="mt-1 text-xs text-[#64748b]">
+                    {new Date(a.publishedTime).toLocaleDateString("fr-FR", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </p>
                   <p className="mt-2 text-[#334155]">{a.excerpt}</p>
                   <span className="mt-4 inline-flex items-center text-sm font-medium text-[#1d4ed8]">
                     Lire l&apos;article →

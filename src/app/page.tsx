@@ -5,6 +5,16 @@ import { SITE_URL } from "@/lib/site";
 
 const RESSOURCES_BLOG = [
   {
+    title: "Facturation chantier et relances : trésorerie BTP",
+    desc: "Acomptes, situations de travaux et relances pour limiter les impayés sur vos chantiers.",
+    href: "/blog/facturation-chantier-btp-relances-tresorerie",
+  },
+  {
+    title: "Situation de travaux : obligations et calendrier",
+    desc: "Clarifier le cadre, la fréquence et le lien avec votre facturation.",
+    href: "/blog/situation-travaux-btp-obligations-conseils",
+  },
+  {
     title: "10 tâches administratives à déléguer en BTP",
     desc: "Ce qui grève le quotidien des chefs d’entreprise du bâtiment — et comment le structurer autrement.",
     href: "/blog/10-taches-administratives-deleguer-dirigeant",
@@ -14,17 +24,13 @@ const RESSOURCES_BLOG = [
     desc: "Comparatif forfait externalisé vs embauche : coûts cachés, charges sociales et charge RH pour les PME.",
     href: "/blog/combien-coute-assistant-administratif",
   },
-  {
-    title: "Externaliser ou recruter : le bon choix pour votre entreprise",
-    desc: "Recrutement, RH, matériel… ou une équipe opérationnelle sans friction. Les critères pour décider sereinement.",
-    href: "/blog/assistant-virtuel-vs-assistant-salarie",
-  },
 ];
 
 export const metadata: Metadata = {
   title: "Administratif BTP & artisans : devis, facturation chantier, organisation | BeWork",
   description:
     "Partenaire d'organisation pour artisans et BTP : devis, facturation, situations de travaux, démarches chantier, logistique fournisseurs, locations matériel/engins/véhicules, planning et suivi des dossiers sensibles. 20 ans d'expérience artisanale chez la fondatrice. Dès 215 € TTC/mois, sans recrutement. France, Belgique, Suisse, Luxembourg.",
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
   keywords: [
     "administratif BTP",
     "secrétariat entreprise bâtiment",
@@ -184,19 +190,60 @@ export default function HomePage() {
                 <h1 className="text-metallic-black text-balance text-3xl font-bold leading-[1.15] tracking-tight md:text-4xl lg:text-5xl lg:leading-[1.1]">
                   Artisans et entreprises du BTP : un partenaire pour tout l&apos;organisationnel — du devis au chantier.
                 </h1>
-                <p className="max-w-2xl text-lg font-medium leading-relaxed text-[#0f172a] md:text-xl mx-auto md:mx-0">
-                  BeWork est votre{" "}
-                  <strong className="font-semibold text-[#0f172a]">support administratif complet</strong> et votre{" "}
-                  <strong className="font-semibold text-[#0f172a]">bras droit d&apos;organisation</strong> : devis,
-                  facturation, situations de travaux, suivi client, mails et structuration. Nous sécurisons aussi la partie
-                  opérationnelle — démarches chantier (DICT, déclarations, autorisations, suivi administratif des dossiers),
-                  logistique fournisseurs, coordination livraisons, locations matériel / engins / véhicules, planning et
-                  coordination. Sur les sujets sensibles (relances fermes, mises en demeure, litiges), nous assurons le{" "}
-                  <strong className="font-semibold text-[#0f172a]">suivi administratif</strong> sous votre validation.
-                  Une offre premium née du terrain :{" "}
-                  <strong className="font-semibold text-[#0f172a]">20 ans d&apos;expérience artisanale</strong> chez la
-                  fondatrice — pour parler votre métier et protéger votre trésorerie, sans embauche.
-                </p>
+                <div className="mx-auto max-w-2xl space-y-6 text-left md:mx-0">
+                  <p className="text-lg font-medium leading-relaxed text-[#0f172a] md:text-xl">
+                    BeWork est votre{" "}
+                    <strong className="font-semibold text-[#0f172a]">support administratif complet</strong> et votre{" "}
+                    <strong className="font-semibold text-[#0f172a]">bras droit d&apos;organisation</strong>.
+                  </p>
+                  <div className="grid gap-6 sm:grid-cols-2 sm:gap-8">
+                    <div className="rounded-xl border border-[#dce3ec]/80 bg-white/60 p-4 shadow-sm backdrop-blur-sm">
+                      <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#1d4ed8]">
+                        Au bureau
+                      </p>
+                      <ul className="space-y-2.5 text-base leading-snug text-[#0f172a] md:text-[1.05rem]">
+                        <li className="flex gap-2.5">
+                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#1d4ed8]" aria-hidden />
+                          <span>Devis, facturation, situations de travaux</span>
+                        </li>
+                        <li className="flex gap-2.5">
+                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#1d4ed8]" aria-hidden />
+                          <span>Suivi client, mails et structuration de l&apos;activité</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <div className="rounded-xl border border-[#dce3ec]/80 bg-white/60 p-4 shadow-sm backdrop-blur-sm">
+                      <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#1d4ed8]">
+                        Chantier &amp; logistique
+                      </p>
+                      <ul className="space-y-2.5 text-base leading-snug text-[#0f172a] md:text-[1.05rem]">
+                        <li className="flex gap-2.5">
+                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#1d4ed8]" aria-hidden />
+                          <span>
+                            Démarches : DICT, déclarations, autorisations, suivi des dossiers
+                          </span>
+                        </li>
+                        <li className="flex gap-2.5">
+                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#1d4ed8]" aria-hidden />
+                          <span>Fournisseurs, livraisons, locations matériel / engins / véhicules</span>
+                        </li>
+                        <li className="flex gap-2.5">
+                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#1d4ed8]" aria-hidden />
+                          <span>Planning et coordination</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <p className="text-base leading-relaxed text-[#334155] md:text-lg">
+                    Sur les sujets sensibles (relances fermes, mises en demeure, litiges), nous assurons le{" "}
+                    <strong className="font-semibold text-[#0f172a]">suivi administratif</strong> sous votre validation.
+                  </p>
+                  <p className="text-base leading-relaxed text-[#0f172a] md:text-lg">
+                    Une offre premium née du terrain :{" "}
+                    <strong className="font-semibold text-[#0f172a]">20 ans d&apos;expérience artisanale</strong> chez la
+                    fondatrice — pour parler votre métier et protéger votre trésorerie, sans embauche.
+                  </p>
+                </div>
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
                   <Link
                     href="/inscription"

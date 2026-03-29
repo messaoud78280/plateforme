@@ -22,15 +22,25 @@ const RESSOURCES_BLOG = [
 ];
 
 export const metadata: Metadata = {
-  title: "Organisation & administratif premium pour artisans et BTP | BeWork",
+  title: "Administratif BTP & artisans : devis, facturation chantier, organisation | BeWork",
   description:
-    "Pilotage administratif pour artisans et entreprises du bâtiment : devis, facturation chantier, relances, organisation. Pensé par une fondatrice avec 20 ans d’expérience artisanale. Dès 215 € TTC/mois, sans recrutement ni charges. France, Belgique, Suisse, Luxembourg.",
+    "Partenaire d'organisation pour artisans et BTP : devis, facturation, situations de travaux, démarches chantier, logistique fournisseurs, locations matériel/engins/véhicules, planning et suivi des dossiers sensibles. 20 ans d'expérience artisanale chez la fondatrice. Dès 215 € TTC/mois, sans recrutement. France, Belgique, Suisse, Luxembourg.",
   keywords: [
     "administratif BTP",
-    "organisation entreprise bâtiment",
-    "devis facturation artisan",
-    "externaliser administratif BTP",
+    "secrétariat entreprise bâtiment",
+    "externalisation administrative BTP",
+    "devis et facturation chantier",
+    "situation de travaux administrative",
+    "organisation artisan bâtiment",
     "pilotage administratif artisans",
+    "entreprises du bâtiment administratif",
+    "PME BTP gestion administrative",
+    "relances clients BTP",
+    "sous-traitance administrative construction",
+    "BeWork BTP",
+    "DICT déclaration travaux",
+    "logistique chantier BTP",
+    "location engin chantier",
   ],
   alternates: { canonical: SITE_URL, languages: { fr: SITE_URL } },
   openGraph: {
@@ -38,21 +48,74 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: SITE_URL,
     siteName: "BeWork",
-    title: "BeWork — Administratif premium pour artisans et BTP",
+    title: "BeWork — Administratif & organisation pour le BTP et les artisans",
     description:
-      "Structurez votre administratif de chantier sans embauche. Dès 215 € TTC/mois. France, Belgique, Suisse, Luxembourg.",
+      "Administratif, démarches, logistique, moyens, planning : une offre complète pour le bâtiment. Sans embauche. Dès 215 € TTC/mois — France, Belgique, Suisse, Luxembourg.",
   },
   twitter: {
     card: "summary_large_image",
     title: "BeWork — Administratif premium pour artisans et BTP",
     description:
-      "Gain de temps, trésorerie et image pro : un service structuré pour le BTP. Dès 215 € TTC/mois.",
+      "Gain de temps, trésorerie et image pro sur vos chantiers. Forfait dès 215 € TTC/mois, sans recrutement.",
   },
+};
+
+const homeJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": `${SITE_URL}/#accueil`,
+      url: SITE_URL,
+      name: "Administratif BTP & artisans : devis, facturation chantier | BeWork",
+      inLanguage: "fr-FR",
+      description:
+        "Partenaire d'organisation pour le BTP : administratif (devis, facturation, situations de travaux), démarches chantier, logistique fournisseurs, moyens, planning et suivi administratif des dossiers sensibles. Dès 215 € TTC/mois.",
+      isPartOf: { "@id": `${SITE_URL}/#website` },
+      about: [
+        { "@type": "Thing", name: "Bâtiment et travaux publics" },
+        { "@type": "Thing", name: "Artisanat du bâtiment" },
+      ],
+      speakable: {
+        "@type": "SpeakableSpecification",
+        cssSelector: ["h1"],
+      },
+    },
+    {
+      "@type": "Service",
+      "@id": `${SITE_URL}/#service-btp`,
+      name: "Organisation et pilotage administratif pour entreprises du BTP",
+      description:
+        "Support complet : devis, facturation, situations de travaux, suivi client, emails et structuration ; démarches (DICT, autorisations, déclarations) ; commandes, livraisons et coordination chantier ; locations matériel, engins et véhicules ; relances et suivi administratif des litiges sous validation client. France, Belgique, Suisse, Luxembourg.",
+      serviceType: "Externalisation administrative",
+      category: "Services administratifs pour le bâtiment",
+      provider: { "@id": `${SITE_URL}/#organization` },
+      areaServed: [
+        { "@type": "Country", name: "France" },
+        { "@type": "Country", name: "Belgique" },
+        { "@type": "Country", name: "Suisse" },
+        { "@type": "Country", name: "Luxembourg" },
+      ],
+      audience: {
+        "@type": "BusinessAudience",
+        audienceType: "Artisans, TPE, PME et entrepreneurs du bâtiment",
+      },
+      offers: {
+        "@type": "AggregateOffer",
+        priceCurrency: "EUR",
+        lowPrice: "109",
+        highPrice: "630",
+        offerCount: "4",
+        description: "Forfaits TTC incluant heures d'assistance ; formule de référence à 215 € TTC/mois.",
+      },
+    },
+  ],
 };
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }} />
       <header className="sticky top-0 z-20 bg-[#f8f9fb] shadow-[0_1px_0_0_rgba(203,213,225,0.9)]">
         {/* Zone marque / actions — claire, délimitée */}
         <div className="mx-auto max-w-6xl border-b border-[#dce3ec] px-4 py-2.5 sm:px-6 sm:py-3">
@@ -61,7 +124,7 @@ export default function HomePage() {
               <BeWorkLogo
                 size="sm"
                 showTagline
-                tagline="Organisation & administratif premium — le BTP, au quotidien"
+                tagline="Partenaire d'organisation & support administratif complet — le BTP, sans compromis"
               />
             </Link>
             <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
@@ -113,50 +176,26 @@ export default function HomePage() {
 
       <main className="pt-0">
         {/* Hero + parcours client (4 étapes) */}
-        <section id="hero" className="px-6 pt-24 pb-24 md:pt-32 md:pb-32" style={{ scrollMarginTop: "6rem" }}>
+        <section id="hero" className="px-6 py-20 md:py-24 lg:py-28" style={{ scrollMarginTop: "6rem" }}>
           <div className="mx-auto max-w-6xl">
-            <div className="grid gap-8 lg:grid-cols-2 lg:items-stretch lg:gap-10">
-              <div className="flex flex-col gap-8 text-center md:text-left">
+            <div className="grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-10 xl:gap-14">
+              {/* Colonne principale : message + CTA (~60 %) */}
+              <div className="flex flex-col gap-6 text-center md:gap-7 md:text-left lg:col-span-7">
                 <h1 className="text-metallic-black text-balance text-3xl font-bold leading-[1.15] tracking-tight md:text-4xl lg:text-5xl lg:leading-[1.1]">
-                  Artisans et entreprises du BTP : moins d&apos;administratif, plus de chantiers.
+                  Artisans et entreprises du BTP : un partenaire pour tout l&apos;organisationnel — du devis au chantier.
                 </h1>
-                <Link
-                  href="/tarifs"
-                  className="group surface-metallic-blue mx-auto flex w-full max-w-xl flex-col gap-3 rounded-2xl px-6 py-6 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#93c5fd]/80 md:mx-0 md:max-w-none"
-                >
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#93c5fd]">
-                    Formule de référence
-                  </span>
-                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
-                    <span className="text-4xl font-bold tracking-tight text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] tabular-nums md:text-[2.75rem]">
-                      215
-                    </span>
-                    <span className="text-xl font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]">€</span>
-                    <span className="text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-[#cbd5e1]">TTC</span>
-                    <span className="text-lg font-semibold text-[#cbd5e1]">/ mois</span>
-                  </div>
-                  <div className="space-y-1.5 text-sm leading-snug text-[#e2e8f0]">
-                    <p className="font-medium text-white">≈ 20 h incluses</p>
-                    <p className="font-medium text-white">À partir de 10 €/h</p>
-                    <p className="pt-1 text-[#cbd5e1]">
-                      Sans recrutement, sans charges sociales, sans gestion RH : une équipe prête à l&apos;emploi.
-                    </p>
-                    <p className="text-[#cbd5e1]">
-                      Solution immédiatement opérationnelle — vous ne payez que le pilotage dont vous avez besoin.
-                    </p>
-                  </div>
-                  <p className="text-[11px] leading-relaxed text-[#94a3b8]">
-                    TTC, sans frais cachés · Sans engagement long terme · Mise en route rapide
-                  </p>
-                  <span className="text-xs font-semibold text-[#93c5fd] group-hover:text-white group-hover:underline">
-                    Voir les tarifs →
-                  </span>
-                </Link>
-                <p className="max-w-xl text-lg font-medium leading-relaxed text-[#0f172a] md:text-xl mx-auto md:mx-0">
-                  BeWork structure et optimise votre administratif de terrain : devis clients, facturation chantier,
-                  relances, mails, organisation. Une offre premium pensée pour le bâtiment — portée par une fondatrice
-                  avec <strong className="font-semibold text-[#0f172a]">20 ans d&apos;expérience en artisanat</strong>.
-                  Vous gagnez du temps, de la sérénité et une image plus professionnelle, sans passer par l&apos;embauche.
+                <p className="max-w-2xl text-lg font-medium leading-relaxed text-[#0f172a] md:text-xl mx-auto md:mx-0">
+                  BeWork est votre{" "}
+                  <strong className="font-semibold text-[#0f172a]">support administratif complet</strong> et votre{" "}
+                  <strong className="font-semibold text-[#0f172a]">bras droit d&apos;organisation</strong> : devis,
+                  facturation, situations de travaux, suivi client, mails et structuration. Nous sécurisons aussi la partie
+                  opérationnelle — démarches chantier (DICT, déclarations, autorisations, suivi administratif des dossiers),
+                  logistique fournisseurs, coordination livraisons, locations matériel / engins / véhicules, planning et
+                  coordination. Sur les sujets sensibles (relances fermes, mises en demeure, litiges), nous assurons le{" "}
+                  <strong className="font-semibold text-[#0f172a]">suivi administratif</strong> sous votre validation.
+                  Une offre premium née du terrain :{" "}
+                  <strong className="font-semibold text-[#0f172a]">20 ans d&apos;expérience artisanale</strong> chez la
+                  fondatrice — pour parler votre métier et protéger votre trésorerie, sans embauche.
                 </p>
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
                   <Link
@@ -186,40 +225,80 @@ export default function HomePage() {
                   </Link>
                 </div>
               </div>
-              <div
-                id="comment-ca-marche"
-                className="surface-metallic-blue flex h-full flex-col rounded-2xl p-6 md:p-7"
-              >
-                <div className="mb-5 md:mb-6">
+              {/* Colonne latérale : tarif + parcours, deux cartes empilées (~40 %) */}
+              <div className="mx-auto flex w-full max-w-md flex-col gap-4 lg:col-span-5 lg:mx-0 lg:max-w-none lg:self-start lg:sticky lg:top-24">
+                <Link
+                  href="/tarifs"
+                  className="group surface-metallic-blue flex w-full flex-col gap-3 rounded-2xl px-6 py-6 text-left shadow-lg shadow-slate-900/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#93c5fd]/80"
+                >
                   <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#93c5fd]">
-                    Votre cadence
+                    Formule de référence
                   </span>
-                  <h2 className="mt-2 text-lg font-semibold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] md:text-xl">
-                    Quatre étapes, un pilotage clair
-                  </h2>
-                  <p className="mt-2 text-sm leading-snug text-[#cbd5e1]">
-                    De la consigne au livrable : un flux structuré pour sécuriser votre administratif de chantier.
+                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
+                    <span className="text-4xl font-bold tracking-tight text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.35)] tabular-nums md:text-[2.75rem]">
+                      215
+                    </span>
+                    <span className="text-xl font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]">€</span>
+                    <span className="text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-[#cbd5e1]">TTC</span>
+                    <span className="text-lg font-semibold text-[#cbd5e1]">/ mois</span>
+                  </div>
+                  <div className="space-y-1.5 text-sm leading-snug text-[#e2e8f0]">
+                    <p className="font-medium text-white">≈ 20 h incluses</p>
+                    <p className="font-medium text-white">À partir de 10 €/h</p>
+                    <p className="pt-1 text-[#cbd5e1]">
+                      Sans recrutement, sans charges sociales, sans gestion RH : une équipe prête à l&apos;emploi.
+                    </p>
+                    <p className="text-[#cbd5e1]">
+                      Solution immédiatement opérationnelle — vous ne payez que le pilotage dont vous avez besoin.
+                    </p>
+                  </div>
+                  <p className="text-[11px] leading-relaxed text-[#94a3b8]">
+                    TTC, sans frais cachés · Sans engagement long terme · Mise en route rapide
                   </p>
-                </div>
-                <div className="grid flex-1 auto-rows-fr gap-3 sm:grid-cols-2 sm:gap-4">
-                  {[
-                    { step: 1, title: "Vous déposez vos demandes (devis, factures, relances…)" },
-                    { step: 2, title: "Votre équipe dédiée les traite dans les délais" },
-                    { step: 3, title: "Vous pilotez l’avancement sur la plateforme" },
-                    { step: 4, title: "Vous libérez du temps pour le terrain et la rentabilité" },
-                  ].map((item) => (
-                    <div
-                      key={item.step}
-                      className="surface-metallic-blue surface-metallic-blue--inset flex min-h-[9rem] flex-col items-center rounded-2xl px-4 pb-5 pt-5 text-center sm:min-h-[9.5rem]"
-                    >
-                      <span className="relative inline-flex shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-white via-[#dbe6f2] to-[#8fa9c2] px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[#0c1f33] shadow-[0_3px_12px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.95)] ring-2 ring-white/35 sm:text-xs sm:tracking-[0.1em]">
-                        Étape {item.step}
-                      </span>
-                      <h3 className="mt-4 flex w-full max-w-[17rem] flex-1 flex-col justify-center text-balance text-sm font-semibold leading-snug text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)] sm:max-w-none">
-                        {item.title}
-                      </h3>
-                    </div>
-                  ))}
+                  <span className="text-xs font-semibold text-[#93c5fd] group-hover:text-white group-hover:underline">
+                    Voir les tarifs →
+                  </span>
+                </Link>
+                <div
+                  id="comment-ca-marche"
+                  className="surface-metallic-blue rounded-2xl p-6 shadow-lg shadow-slate-900/20 md:p-7"
+                >
+                  <div className="mb-5">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#93c5fd]">
+                      Parcours client
+                    </span>
+                    <h2 className="mt-2 text-xl font-semibold tracking-tight text-white md:text-2xl">
+                      Quatre étapes, un pilotage clair
+                    </h2>
+                  </div>
+                  <ol className="space-y-0 text-left">
+                    {[
+                      {
+                        step: 1,
+                        title: "Vous priorisez : devis, réglementaire, fournisseurs, litiges…",
+                      },
+                      { step: 2, title: "Notre équipe exécute, coordonne et rend compte" },
+                      { step: 3, title: "Vous pilotez l'avancement sur la plateforme" },
+                      { step: 4, title: "Vous restez sur le chantier — nous tenons l'organisation" },
+                    ].map((item, index) => (
+                      <li key={item.step} className="relative flex gap-3.5 pb-4 last:pb-0 md:gap-4 md:pb-5 last:md:pb-0">
+                        {index < 3 ? (
+                          <span
+                            className="absolute left-[15px] top-9 bottom-0 w-px bg-gradient-to-b from-white/25 to-transparent md:left-[17px]"
+                            aria-hidden
+                          />
+                        ) : null}
+                        <span className="relative z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-xs font-semibold tabular-nums text-white md:h-9 md:w-9 md:text-sm">
+                          {item.step}
+                        </span>
+                        <div className="min-w-0 pt-0.5">
+                          <p className="text-sm font-medium leading-snug text-white md:text-[0.9375rem] md:leading-snug">
+                            {item.title}
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
                 </div>
               </div>
             </div>
@@ -234,28 +313,68 @@ export default function HomePage() {
                 Des tarifs nets pour artisans et entreprises du bâtiment
               </h2>
               <p className="mt-3 text-[#334155]">
-                Une entrée de gamme pour tester, puis des forfaits qui montent en puissance — sans surprise, sans embauche.
+                De l&apos;administratif pur à la coordination chantier : testez à partir de 109 € TTC, montez en puissance
+                sans embauche ni frais cachés.
               </p>
               <div className="mt-10 flex justify-center">
                 <Link
                   href="/tarifs"
-                  className="group surface-metallic-blue flex w-full max-w-md flex-col rounded-2xl p-6 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#93c5fd]/80"
+                  className="group surface-metallic-blue flex w-full max-w-3xl flex-col gap-5 rounded-2xl p-6 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#93c5fd]/80 md:grid md:grid-cols-2 md:items-start md:gap-6 md:p-8"
                 >
-                  <span className="text-sm font-medium text-[#94a3b8]">Pilotage administratif</span>
-                  <h3 className="mt-1 text-lg font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]">
-                    Forfaits BeWork
-                  </h3>
-                  <p className="mt-2 text-sm leading-snug text-[#cbd5e1]">
-                    Devis clients, facturation chantier, relances, suivi de dossiers… Dès 109 € TTC pour tester, sans engagement lourd.
-                  </p>
-                  <p className="mt-3 text-base font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]">
-                    <span className="tabular-nums">215</span> €{" "}
-                    <span className="text-sm font-semibold text-[#cbd5e1]">TTC</span> / mois{" "}
-                    <span className="text-[#93c5fd] transition-colors group-hover:text-white" aria-hidden>
-                      →
+                  <div>
+                    <span className="text-sm font-medium text-[#94a3b8]">Pilotage administratif</span>
+                    <h3 className="mt-1 text-lg font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] md:text-xl">
+                      Forfaits BeWork
+                    </h3>
+                    <p className="mt-2 text-sm leading-snug text-[#cbd5e1]">
+                      Administratif, organisation chantier, logistique fournisseurs, démarches, locations — tout compris en
+                      forfait actions (équivalent heures indicatif).
+                    </p>
+                    <p className="mt-4 text-2xl font-bold tabular-nums text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)] md:text-3xl">
+                      <span className="tabular-nums">215</span> €{" "}
+                      <span className="text-base font-semibold text-[#cbd5e1]">TTC</span>
+                      <span className="text-base font-semibold text-[#cbd5e1]"> / mois</span>
+                    </p>
+                    <p className="mt-2 text-sm font-medium text-white">
+                      Formule Standard : <span className="text-[#93c5fd]">≈ 20 h</span> d&apos;assistance / mois incluses
+                    </p>
+                    <p className="mt-1 text-sm text-[#cbd5e1]">
+                      Soit environ <span className="font-semibold text-white">10,75 € TTC / h</span> sur cette base
+                      (120 actions / mois, équivalent temps indicatif).
+                    </p>
+                    <p className="mt-3 text-xs leading-relaxed text-[#94a3b8]">
+                      TTC, sans frais cachés · Sans engagement long terme · Démarrage rapide
+                    </p>
+                    <span className="mt-3 inline-flex text-sm font-semibold text-[#93c5fd] group-hover:text-white group-hover:underline">
+                      Voir tous les tarifs →
                     </span>
-                  </p>
-                  <p className="mt-2 text-xs text-[#94a3b8]">TTC, sans frais cachés · Démarrage rapide</p>
+                  </div>
+                  <div className="rounded-xl border border-white/10 bg-black/10 p-4 md:p-5">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#93c5fd]">
+                      Équivalence par forfait
+                    </p>
+                    <ul className="mt-3 space-y-2.5 text-sm text-[#e2e8f0]">
+                      <li className="flex flex-col gap-0.5 border-b border-white/5 pb-2.5">
+                        <span className="font-semibold text-white">Découverte — 109 € TTC</span>
+                        <span className="text-[#cbd5e1]">Jusqu&apos;à ~12 h · ~9 € TTC / h</span>
+                      </li>
+                      <li className="flex flex-col gap-0.5 border-b border-white/5 pb-2.5">
+                        <span className="font-semibold text-white">Standard — 215 € / mois</span>
+                        <span className="text-[#cbd5e1]">~20 h · ~10,75 € TTC / h</span>
+                      </li>
+                      <li className="flex flex-col gap-0.5 border-b border-white/5 pb-2.5">
+                        <span className="font-semibold text-white">Business — 415 € / mois</span>
+                        <span className="text-[#cbd5e1]">~48 h · ~8,65 € TTC / h</span>
+                      </li>
+                      <li className="flex flex-col gap-0.5">
+                        <span className="font-semibold text-white">Premium — 630 € / mois</span>
+                        <span className="text-[#cbd5e1]">~72 h · ~8,75 € TTC / h</span>
+                      </li>
+                    </ul>
+                    <p className="mt-3 text-[11px] leading-snug text-[#94a3b8]">
+                      Heures = équivalent indicatif (actions / mois). Détail des actions sur la page tarifs.
+                    </p>
+                  </div>
                 </Link>
               </div>
             </div>
@@ -270,23 +389,24 @@ export default function HomePage() {
                 Quand l&apos;administratif vous vole vos soirées — et votre marge
               </h2>
               <p className="mt-3 max-w-2xl mx-auto text-[#334155] leading-relaxed">
-                Les devis qui s&apos;étalent après 19 h. Les factures chantier qui prennent du retard. Les mails qui
-                s&apos;accumulent. L&apos;organisation qui vous freine avant même d&apos;ouvrir le camion.
+                Les devis qui traînent. Les situations de travaux à boucler. Les commandes fournisseurs qui se télescopent
+                avec le planning. Les relances clients — et parfois les dossiers qui durcissent.
                 <strong className="font-semibold text-[#0f172a]">
                   {" "}
-                  BeWork transforme ce chaos en pilotage structuré
-                </strong>{" "}
-                : une équipe dédiée, des process clairs, pour que vous recentriez énergie et trésorerie sur vos ouvrages.
+                  BeWork tient l'organisation à votre place
+                </strong>
+                : administratif, logistique, coordination chantier et suivi des aspects sensibles, avec des process clairs.
+                Vous recentrez cash et calme sur l&apos;ouvrage.
               </p>
             </div>
             <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 md:items-stretch">
               {[
-                "Gain de temps massif : vous sortez du secrétariat, vous rentrez dans le chantier et le chiffrage.",
+                "Un interlocuteur unique pour l'administratif, la logistique et la coordination : moins de silos, plus de clarté.",
                 "Coût maîtrisé : zéro recrutement, zéro charges sociales — forfait tout compris dès 215 € TTC/mois.",
-                "Réactivité : équipe opérationnelle après un onboarding court, adaptée au rythme du BTP.",
-                "Évolutif : montez ou baissez le volume d’actions selon vos pics de devis ou de facturation.",
-                "Exigence : profils francophones Bac+5, outils et IA maîtrisés, encadrement en France.",
-                "Souplesse : structurez votre administratif sans vous enfermer dans un CDI ni une structure lourde.",
+                "Réactivité terrain : équipe calée sur les pics devis, livraisons, démarches et urgences chantier.",
+                "Évolutif : vous ajustez le volume d'actions selon vos chantiers, sans alourdir votre structure.",
+                "Exigence : Bac+5, outils et IA maîtrisés, encadrement en France — y compris sur dossiers sensibles.",
+                "Premium accessible : structuration, relances et pilotage sans vous enfermer dans un CDI.",
               ].map((item, i) => (
                 <li key={i} className="card-frame flex h-full gap-3 rounded-xl p-5">
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8] text-sm font-bold">✓</span>
@@ -360,7 +480,7 @@ export default function HomePage() {
                 },
                 {
                   sector: "Coffrage / génie civil",
-                  quote: "Une structure pro derrière nous : mails, organisation, suivi fournisseurs, sans recruter.",
+                  quote: "DICT, déclarations, commandes béton : on a enfin quelqu'un qui suit les dossiers pendant qu'on pose.",
                 },
                 {
                   sector: "PME du bâtiment",
@@ -374,7 +494,7 @@ export default function HomePage() {
               ))}
             </div>
             <p className="text-center text-sm text-[#64748b]">
-              Artisans, chefs d’entreprise du bâtiment et PME du BTP — France, Belgique, Suisse, Luxembourg.
+              Artisans, chefs d'entreprise du bâtiment et PME du BTP — France, Belgique, Suisse, Luxembourg.
             </p>
           </div>
         </section>
@@ -384,10 +504,11 @@ export default function HomePage() {
           <div className="mx-auto max-w-6xl">
             <div className="text-center mb-16">
               <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl lg:text-4xl">
-                Une plateforme pour piloter votre administratif de chantier
+                Une plateforme pour piloter administratif, chantier et logistique
               </h2>
               <p className="mt-4 max-w-2xl mx-auto text-lg text-[#475569]">
-                Consignes, échanges, livrables et statuts : tout est centralisé, traçable et aligné sur vos priorités terrain.
+                De la relance client au suivi fournisseur, du planning à la démarche en mairie : consignes, échanges et
+                statuts au même endroit — alignés sur vos priorités terrain.
               </p>
             </div>
 
@@ -406,9 +527,9 @@ export default function HomePage() {
                     <h3 className="text-sm font-semibold text-[#0f172a] mb-3">Nouvelle demande</h3>
                     <div className="space-y-2.5">
                       {[
-                        { title: "Chiffrer devis rénovation immeuble", cat: "Devis clients" },
-                        { title: "Relancer situation de travaux n° ST-118", cat: "Suivi chantier" },
-                        { title: "Mettre à jour planning sous-traitants", cat: "Organisation" },
+                        { title: "Finaliser devis gros œuvre + avenant MOA", cat: "Administratif & suivi client" },
+                        { title: "Dossier DICT / DT — relance exploitants", cat: "Démarches chantier" },
+                        { title: "Coordonner livraison grue + planning équipes", cat: "Logistique & coordination" },
                       ].map((d, i) => (
                         <div key={i} className="rounded-lg surface-metallic-light px-3 py-2.5 text-left shadow-sm hover:border-[#1d4ed8]/30 transition-colors">
                           <p className="text-sm font-medium text-[#0f172a] line-clamp-1">{d.title}</p>
@@ -422,7 +543,7 @@ export default function HomePage() {
                     <h3 className="text-sm font-semibold text-[#0f172a] mb-3">Échanges</h3>
                     <div className="space-y-2.5">
                       {[
-                        { from: "Équipe BeWork", msg: "Le devis est validé côté chiffrage, je vous l’envoie pour relecture.", time: "10:24" },
+                        { from: "Équipe BeWork", msg: "Le devis est validé côté chiffrage, je vous l'envoie pour relecture.", time: "10:24" },
                         { from: "Vous", msg: "Parfait — ajoutez la mention garantie décennale sur la dernière page.", time: "09:52" },
                         { from: "Équipe BeWork", msg: "Reçu. Je mets à jour et je relance le client pour signature.", time: "Hier 16:30" },
                       ].map((m, i) => (
@@ -439,9 +560,9 @@ export default function HomePage() {
                     <h3 className="text-sm font-semibold text-[#0f172a] mb-3">Mes demandes</h3>
                     <div className="space-y-2.5">
                       {[
-                        { title: "Devis extension bureaux", status: "En cours", color: "bg-blue-100 text-blue-800" },
-                        { title: "Relance facture chantier", status: "Terminée", color: "bg-green-100 text-green-800" },
-                        { title: "Mise en forme situation travaux", status: "En attente", color: "bg-amber-100 text-amber-800" },
+                        { title: "Commande fournisseur — créneau livraison", status: "En cours", color: "bg-blue-100 text-blue-800" },
+                        { title: "Préparation courrier mise en demeure (brouillon)", status: "À valider", color: "bg-amber-100 text-amber-800" },
+                        { title: "Location nacelle — confirmation prestataire", status: "Terminée", color: "bg-green-100 text-green-800" },
                       ].map((t, i) => (
                         <div key={i} className="rounded-lg surface-metallic-light px-3 py-2.5 text-left shadow-sm">
                           <p className="text-sm font-medium text-[#0f172a]">{t.title}</p>
@@ -462,19 +583,19 @@ export default function HomePage() {
                 {
                   title: "Créer une demande",
                   description:
-                    "Devis, relance client, situation de travaux : une consigne claire, des pièces jointes, un dossier unique.",
+                    "Administratif, réglementaire, logistique ou litige : une consigne, des pièces, une priorité — un dossier unique.",
                   icon: "M12 6v6m0 0v6m0-6h6m-6 0H6",
                 },
                 {
                   title: "Échanges avec votre équipe dédiée",
                   description:
-                    "Questions, ajustements, validations : le fil de discussion reste pro, traçable et au même endroit.",
+                    "Validations devis, consignes chantier, arbitrages sur relances ou courriers sensibles : tout est daté et traçable.",
                   icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z",
                 },
                 {
                   title: "Suivi des missions",
                   description:
-                    "Statuts, livrables, échéances : vous voyez ce qui avance, ce qui bloque, sans relancer par téléphone.",
+                    "Planning, fournisseurs, démarches, locations : vous voyez ce qui avance — sans multiplier les interlocuteurs.",
                   icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
                 },
               ].map((item, i) => (
@@ -497,18 +618,18 @@ export default function HomePage() {
           <div className="mx-auto max-w-6xl">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-                Exigence terrain, exigence administrative
+                Même exigence sur le chantier et dans les dossiers
               </h2>
               <p className="mt-5 max-w-2xl mx-auto text-lg leading-relaxed text-[#334155]">
-                Allégez votre charge de pilotage sans baisser le niveau : une équipe structurée, francophone, outillée — pour
-                des dossiers propres et une image irréprochable auprès de vos clients.
+                Administratif, logistique, conformité et suivi des tensions client / fournisseur : une équipe structurée,
+                francophone, outillée — pour des dossiers nets et une image à la hauteur de vos ouvrages.
               </p>
             </div>
             <ul className="grid gap-6 md:grid-cols-2 md:items-stretch lg:grid-cols-3">
               {[
-                "Zéro recrutement, zéro investissement matériel : l’équipe est opérationnelle après onboarding cadré.",
+                "Zéro recrutement, zéro investissement matériel : l'équipe est opérationnelle après onboarding cadré.",
                 "Profils qualifiés, 100 % francophones, encadrés et alignés sur vos délais de chantier.",
-                "Même fuseau qu’en France : supervision depuis la France, réactivité quand ça presse sur le terrain.",
+                "Même fuseau qu'en France : supervision depuis la France, réactivité quand ça presse sur le terrain.",
                 "Bac+5 minimum, formation IA et process administratifs — rigueur sur les chiffres et les relances.",
                 "Garantie satisfait ou remplacé : réaffectation rapide d'un profil si l'adéquation n'est pas au rendez-vous.",
                 "Pilotage et direction opérationnelle en France : un interlocuteur à la hauteur de votre entreprise.",
@@ -529,11 +650,12 @@ export default function HomePage() {
           <div className="mx-auto max-w-6xl">
             <div className="card-frame rounded-2xl border-2 border-[#e2e8f0] border-l-[4px] border-l-[#1d4ed8] p-6 text-center md:p-8">
               <p className="text-lg font-semibold text-[#0f172a]">
-                Découvrez le catalogue des missions que nous prenons en charge pour le BTP
+                Catalogue des missions : de l&apos;administratif à la coordination chantier
               </p>
               <p className="mt-2 text-[#334155]">
-                Devis, facturation chantier, situations de travaux, relances clients, mails, planning — autant de leviers
-                pour sécuriser votre trésorerie et votre image.
+                Devis, factures, situations de travaux, DICT et dossiers administratifs, commandes & livraisons, locations
+                matériel / engins / véhicules, planning, relances et suivi des litiges — le détail de ce que nous pouvons
+                prendre en main pour vous.
               </p>
               <Link
                 href="/assistants-administratifs-taches"
@@ -551,11 +673,11 @@ export default function HomePage() {
           <div className="mx-auto max-w-6xl">
             <div className="mb-16 max-w-2xl">
               <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-                Une offre structurée pour piloter l&apos;administratif du bâtiment
+                Trois leviers pour sécuriser tout votre organisationnel BTP
               </h2>
               <p className="mt-5 text-lg leading-relaxed text-[#334155]">
-                Organisation, optimisation et suivi : votre équipe BeWork traite dossiers, documents et relances avec une
-                méthode éprouvée — et des outils d&apos;IA au service de la précision, pas du gadget.
+                Administratif commercial, conformité chantier, logistique et coordination : une méthode unique, des outils et
+                l&apos;IA au service de la précision — pour que rien ne dérape entre le bureau et le terrain.
               </p>
             </div>
 
@@ -567,10 +689,11 @@ export default function HomePage() {
                   </svg>
                 </div>
                 <p className="text-lg font-semibold text-[#0f172a]">
-                  Suivi de dossiers & chantiers
+                  Administratif & relation client
                 </p>
                 <p className="mt-3 flex-1 text-[#334155] leading-relaxed">
-                  Situations de travaux, acomptes, échéances MOA : un pilotage lisible pour ne rien laisser en suspens.
+                  Devis, facturation, situations de travaux, suivi MOA, relances et mails : vos dossiers avancent, vos
+                  encaissements aussi.
                 </p>
               </div>
               <div className="card-frame flex h-full flex-col rounded-xl p-8">
@@ -580,10 +703,11 @@ export default function HomePage() {
                   </svg>
                 </div>
                 <p className="text-lg font-semibold text-[#0f172a]">
-                  Gestion documentaire
+                  Chantier, démarches & conformité
                 </p>
                 <p className="mt-3 flex-1 text-[#334155] leading-relaxed">
-                  Devis, annexes techniques, plans de recollement : versionning, classement et partage maîtrisés.
+                  Accompagnement sur DICT et DT, autorisations, déclarations, arrêtés et suivi administratif des dossiers —
+                  pour garder la maîtrise du calendrier réglementaire.
                 </p>
               </div>
               <div className="card-frame flex h-full flex-col rounded-xl p-8">
@@ -593,10 +717,11 @@ export default function HomePage() {
                   </svg>
                 </div>
                 <p className="text-lg font-semibold text-[#0f172a]">
-                  Coordination & relances
+                  Logistique, moyens & coordination
                 </p>
                 <p className="mt-3 flex-1 text-[#334155] leading-relaxed">
-                  Relances clients et fournisseurs, synthèses mail, comptes rendus : des échanges nets, datés, exploitables.
+                  Commandes fournisseurs, créneaux de livraison, planning équipes, locations matériel / engins / véhicules —
+                  et relances fournisseurs pour que le chantier ne s&apos;arrête pas.
                 </p>
               </div>
             </div>
@@ -607,41 +732,41 @@ export default function HomePage() {
         <section id="missions" className="px-6 py-24 md:py-28">
           <div className="mx-auto max-w-6xl">
             <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-              Ce que nous prenons en charge pour vous
+              Ce que nous prenons en charge — pensé pour le BTP
             </h2>
             <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#334155]">
-              Pensé pour les artisans et entreprises du bâtiment — avec la souplesse d&apos;étendre à vos autres besoins
-              administratifs.
+              Sept blocs qui couvrent l&apos;administratif, l&apos;organisation chantier, la logistique, les moyens et les
+              dossiers sensibles — avec la même exigence premium sur chaque livrable.
             </p>
             <div className="mt-12 grid gap-6 sm:grid-cols-2 sm:items-stretch lg:grid-cols-3">
               {[
                 {
-                  title: "Secrétariat & administration",
-                  keys: "Gestion des emails, courriers, agenda, déplacements, classement, archivage des dossiers chantier",
+                  title: "Administratif",
+                  keys: "Devis clients, facturation, situations de travaux, suivi client et avenants — le cœur commercial de vos chantiers.",
                 },
                 {
-                  title: "Comptabilité & trésorerie",
-                  keys: "Facturation chantier, relances impayés, suivi des paiements, pré-compta, rapprochements",
+                  title: "Gestion",
+                  keys: "Boîte mail, classement, relances courantes, structuration des dossiers et des priorités du jour.",
                 },
                 {
-                  title: "Commercial & relation client",
-                  keys: "Devis clients, relances devis, suivi CRM, traitement des demandes et avenants",
+                  title: "Chantier & démarches",
+                  keys: "Accompagnement sur DICT et DT, autorisations, déclarations, arrêtés et suivi administratif du dossier réglementaire.",
                 },
                 {
-                  title: "Ressources humaines",
-                  keys: "Contrats, suivi administratif du personnel, onboarding, coordination avec la paie",
+                  title: "Logistique",
+                  keys: "Commandes fournisseurs, suivi des livraisons, coordination avec le planning chantier et les accès site.",
                 },
                 {
-                  title: "Visibilité & communication",
-                  keys: "Réseaux sociaux chantiers, newsletters, contenus pour valoriser vos réalisations",
+                  title: "Moyens",
+                  keys: "Recherche et réservation de matériel, engins et véhicules — devis comparés, confirmations, créneaux sécurisés.",
                 },
                 {
-                  title: "Pilotage de projets",
-                  keys: "Planning chantier, coordination sous-traitants, reporting d'avancement",
+                  title: "Organisation",
+                  keys: "Planning équipes et interventions, coordination sous-traitants, structuration des flux info / doc.",
                 },
                 {
-                  title: "Achats & fournisseurs",
-                  keys: "Sourcing matériaux, commandes, suivi livraisons, relations fournisseurs",
+                  title: "Litiges & dossiers sensibles",
+                  keys: "Relances fermes, préparation et suivi administratif des mises en demeure, montage de dossiers — toujours sous votre validation.",
                 },
               ].map((item) => (
                 <div key={item.title} className="card-frame flex h-full flex-col rounded-xl p-6">
@@ -668,10 +793,10 @@ export default function HomePage() {
                 <h3 className="text-lg font-semibold text-[#1d4ed8]">BTP</h3>
                 <ul className="mt-4 flex-1 space-y-2 text-sm text-[#334155]">
                   {[
-                    "Devis clients & chiffrage",
-                    "Facturation chantier & situations de travaux",
-                    "Relances clients et fournisseurs",
-                    "Organisation du planning chantier",
+                    "Devis, facturation, situations de travaux, suivi client",
+                    "DICT / DT, autorisations, déclarations, suivi administratif des dossiers",
+                    "Commandes fournisseurs, livraisons, coordination planning chantier",
+                    "Locations matériel / engins / véhicules, relances, dossiers sensibles (sous validation)",
                   ].map((m, i) => (
                     <li key={i}>• {m}</li>
                   ))}
@@ -724,10 +849,10 @@ export default function HomePage() {
               Une solution pensée par une ancienne artisane
             </h2>
             <p className="mt-5 max-w-3xl text-lg leading-relaxed text-[#334155]">
-              BeWork n&apos;est pas une plateforme générique importée d&apos;ailleurs. Elle porte{" "}
-              <strong className="font-semibold text-[#0f172a]">vingt ans de terrain en artisanat</strong> : contraintes de
-              délais, tension de trésorerie, image client, paperasse du soir. Cette lecture du métier guide chaque
-              process, chaque brief, chaque livrable.
+              BeWork n&apos;est pas une plateforme générique. Elle porte{" "}
+              <strong className="font-semibold text-[#0f172a]">vingt ans de terrain en artisanat</strong> : délais de
+              chantier, tension de trésorerie, fournisseurs exigeants, paperasse du soir et dossiers qui piquent. Cette
+              lecture du BTP guide chaque process — de la relance client au suivi d&apos;une DICT.
             </p>
 
             {/* Laure Olivie — Fondatrice */}
@@ -805,10 +930,10 @@ export default function HomePage() {
             </h2>
             <ul className="mt-8 grid gap-4 md:grid-cols-2 md:items-stretch">
               {[
-                "ADN terrain : une fondatrice qui a porté l'artisanat pendant vingt ans — briefs qui parlent votre langue.",
-                "Interlocuteur principal en Île-de-France (Laure Olivie) : cadrage, exigence, disponibilité.",
-                "Plateforme pilotée en temps réel depuis la France : réactivité quand le chantier n'attend pas.",
-                "Équipe francophone Bac+5, formée à l'IA et encadrée en continu — rigueur sur les dossiers et les délais.",
+                "ADN terrain : vingt ans d'artisanat chez la fondatrice — briefs qui parlent chantier, fournisseurs et cash-flow.",
+                "Interlocuteur principal en Île-de-France (Laure Olivie) : cadrage, exigence, disponibilité sur l'organisationnel.",
+                "Une équipe pour l'administratif, la logistique et la coordination — pilotée depuis la France, au même fuseau.",
+                "Profils Bac+5, IA et process : rigueur sur délais, démarches et dossiers sensibles (sous votre validation).",
               ].map((item, i) => (
                 <li key={i} className="card-frame flex h-full gap-3 rounded-xl p-4">
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[#1d4ed8]/10 text-[#1d4ed8] text-xs font-bold">✓</span>
@@ -831,7 +956,10 @@ export default function HomePage() {
             </p>
             <div className="mt-12 grid gap-4 sm:grid-cols-2 sm:items-stretch lg:grid-cols-3 xl:grid-cols-4">
               {[
-                { name: "BTP & artisans", desc: "Devis, facturation chantier, situations de travaux, planning" },
+                {
+                  name: "BTP & artisans",
+                  desc: "Administratif, démarches, logistique fournisseurs, moyens, planning et suivi des litiges",
+                },
                 { name: "Immobilier", desc: "Dossiers locataires, relances, gestion administrative" },
                 { name: "Cabinets juridiques", desc: "Structuration et suivi de dossiers" },
                 { name: "PME du bâtiment", desc: "Pilotage administratif quotidien, sans embauche" },
@@ -872,11 +1000,11 @@ export default function HomePage() {
                 <ul className="mt-6 grid gap-2 sm:grid-cols-2 text-[#334155]">
                   {[
                     "Réservation hôtel & hébergement",
-                    "Location de voiture",
-                    "Réservation restaurant",
-                    "Organisation de déplacements",
+                    "Recherche location véhicule, engin ou matériel (sous votre validation)",
+                    "Réservation restaurant & organisation de déplacements",
+                    "Coordination prestataires et créneaux (hors site)",
                     "Recherche & comparaison sur mesure",
-                    "Envoi de cadeaux & attentions",
+                    "Envoi de cadeaux & attentions clients / équipes",
                   ].map((item, i) => (
                     <li key={i} className="flex gap-2">
                       <span className="text-[#1d4ed8] shrink-0">✓</span>
@@ -922,10 +1050,10 @@ export default function HomePage() {
               </div>
               <ul className="mt-8 grid gap-2 sm:grid-cols-2 text-[#334155]">
                 {[
-                  "Équipe dédiée et encadrée",
-                  "Formation continue et outils IA",
-                  "Plateforme de suivi et de livrables",
-                  "Direction et pilotage en France",
+                  "Équipe dédiée : administratif, organisation, logistique",
+                  "Formation continue, IA et process chantier",
+                  "Plateforme unique : statuts, livrables, traçabilité",
+                  "Pilotage et direction en France — même fuseau que vos chantiers",
                 ].map((item, i) => (
                   <li key={i} className="flex gap-2">
                     <span className="text-[#1d4ed8]">✓</span> {item}
@@ -946,8 +1074,9 @@ export default function HomePage() {
                 Nous travaillons dans vos outils
               </h2>
               <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#334155]">
-                CRM, logiciels de devis, GED, messageries : votre équipe BeWork s&apos;insère dans votre stack. La plateforme
-                centralise consignes, statuts et livrables — pour une traçabilité digne des exigences chantier.
+                CRM, logiciels de devis, outils de planning, GED, messageries : votre équipe BeWork travaille dans votre
+                environnement. La plateforme BeWork agrège consignes, statuts et livrables — du devis à la livraison
+                fournisseur.
               </p>
             </div>
           </div>
@@ -968,7 +1097,7 @@ export default function HomePage() {
                 {
                   step: "1",
                   title: "Échange de découverte",
-                  desc: "Comprendre vos métiers, vos délais, vos irritants (devis, factures, relances). Pas de formulaire froid : un vrai diagnostic avec notre équipe.",
+                  desc: "Cartographier vos flux : administratif, démarches, logistique, moyens, litiges. Pas de formulaire froid : un diagnostic terrain avec notre équipe.",
                 },
                 {
                   step: "2",
@@ -1053,7 +1182,7 @@ export default function HomePage() {
                 },
                 {
                   q: "Comment ça se passe concrètement au quotidien ?",
-                  a: "Vous déposez vos demandes sur la plateforme BeWork (devis, facturation chantier, relances, mails, organisation). Une équipe dédiée traite les dossiers, vous suivez l'avancement en temps réel et récupérez les livrables. Sans embauche ni infrastructure lourde : une solution immédiatement opérationnelle.",
+                  a: "Vous déposez vos demandes sur la plateforme : devis, factures, situations de travaux, DICT et dossiers administratifs, commandes et livraisons, locations matériel / engins / véhicules, planning, relances ou suivi de dossiers sensibles (sous votre validation). Une équipe dédiée exécute, vous suivez tout en temps réel. Sans embauche : opérationnel rapidement.",
                 },
                 {
                   q: "Qui exécute les missions ?",
@@ -1090,7 +1219,7 @@ export default function HomePage() {
                       name: "Comment ça se passe concrètement au quotidien ?",
                       acceptedAnswer: {
                         "@type": "Answer",
-                        text: "Demandes via la plateforme BeWork, équipe dédiée, suivi en temps réel et livrables. Sans embauche ni infrastructure lourde.",
+                        text: "Demandes via la plateforme : administratif, démarches, logistique, moyens, litiges (sous validation). Équipe dédiée, suivi en temps réel. Sans embauche.",
                       },
                     },
                     {
@@ -1122,11 +1251,11 @@ export default function HomePage() {
             <div className="grid gap-12 md:grid-cols-3 md:items-center md:gap-16">
               <div className="md:col-span-2">
                 <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-                  Prêt à structurer votre administratif de chantier ?
+                  Prêt à confier tout l&apos;organisationnel de votre entreprise ?
                 </h2>
                 <p className="mt-6 max-w-2xl text-lg leading-relaxed text-[#94a3b8]">
-                  Demandez un échange : nous dimensionnons l&apos;offre à votre rythme, à vos outils et à vos enjeux de
-                  trésorerie — sans engagement long terme, avec une exigence de résultat.
+                  Administratif, logistique, planning, démarches, moyens : nous dimensionnons l&apos;offre à votre parc
+                  machines, vos chantiers et votre trésorerie — sans engagement long terme, avec une exigence terrain.
                 </p>
               </div>
               <div className="flex flex-col gap-4 md:items-end">

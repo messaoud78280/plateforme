@@ -328,9 +328,21 @@ export default function HomePage() {
                     <span className="text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-[#cbd5e1]">TTC</span>
                     <span className="text-lg font-semibold text-[#cbd5e1]">/ mois</span>
                   </div>
-                  <div className="space-y-1.5 text-sm leading-snug text-[#e2e8f0]">
-                    <p className="font-medium text-white">≈ 20 h d&apos;assistance / mois incluses</p>
-                    <p className="font-medium text-white">≈ 10,75 € TTC / h sur cette base</p>
+                  <div className="space-y-2 text-sm leading-snug text-[#e2e8f0]">
+                    <p className="flex flex-wrap items-baseline gap-x-1.5 font-medium text-white">
+                      <span className="text-[#cbd5e1]">≈</span>
+                      <span className="tarif-emphase text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)]">
+                        20
+                      </span>
+                      <span>h d&apos;assistance / mois incluses</span>
+                    </p>
+                    <p className="flex flex-wrap items-baseline gap-x-1.5 font-medium text-white">
+                      <span className="text-[#cbd5e1]">≈</span>
+                      <span className="tarif-emphase text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)]">
+                        10,75
+                      </span>
+                      <span>€ TTC / h sur cette base</span>
+                    </p>
                     <p className="text-xs text-[#94a3b8]">120 actions / mois — heures indicatives</p>
                     <p className="pt-1 text-[#cbd5e1]">
                       Sans recrutement, sans charges sociales, sans gestion RH : une équipe prête à l&apos;emploi.
@@ -400,8 +412,9 @@ export default function HomePage() {
                 Des tarifs nets pour artisans et entreprises du bâtiment
               </h2>
               <p className="mt-3 text-[#334155]">
-                De l&apos;administratif pur à la coordination chantier : testez à partir de 109 € TTC, montez en puissance
-                sans embauche ni frais cachés.
+                De l&apos;administratif pur à la coordination chantier : testez à partir de{" "}
+                <span className="tarif-emphase text-[#1d4ed8]">109</span> € TTC, montez en puissance sans embauche ni frais
+                cachés.
               </p>
               <div className="mt-10 flex justify-center">
                 <Link
@@ -422,12 +435,16 @@ export default function HomePage() {
                       <span className="text-base font-semibold text-[#cbd5e1]">TTC</span>
                       <span className="text-base font-semibold text-[#cbd5e1]"> / mois</span>
                     </p>
-                    <p className="mt-2 text-sm font-medium text-white">
-                      Formule Standard : <span className="text-[#93c5fd]">≈ 20 h</span> d&apos;assistance / mois incluses
+                    <p className="mt-2 flex flex-wrap items-baseline gap-x-1 text-sm font-medium text-white">
+                      <span>Formule Standard :</span>
+                      <span className="text-[#93c5fd]">≈</span>
+                      <span className="tarif-emphase text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)]">20</span>
+                      <span> h d&apos;assistance / mois incluses</span>
                     </p>
-                    <p className="mt-1 text-sm text-[#cbd5e1]">
-                      Soit environ <span className="font-semibold text-white">10,75 € TTC / h</span> sur cette base
-                      (120 actions / mois, équivalent temps indicatif).
+                    <p className="mt-1 flex flex-wrap items-baseline gap-x-1 text-sm text-[#cbd5e1]">
+                      <span>Soit environ</span>
+                      <span className="tarif-emphase text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)]">10,75</span>
+                      <span> € TTC / h sur cette base (120 actions / mois, équivalent temps indicatif).</span>
                     </p>
                     <p className="mt-3 text-xs leading-relaxed text-[#94a3b8]">
                       TTC, sans frais cachés · Sans engagement long terme · Démarrage rapide
@@ -443,11 +460,15 @@ export default function HomePage() {
                     <ul className="mt-3 space-y-2.5 text-sm text-[#e2e8f0]">
                       <li className="flex flex-col gap-0.5 border-b border-white/5 pb-2.5">
                         <span className="font-semibold text-white">Découverte — 109 € TTC</span>
-                        <span className="text-[#cbd5e1]">Jusqu&apos;à ~12 h · ~9 € TTC / h</span>
+                        <span className="inline-flex flex-wrap items-baseline gap-x-0.5 text-[#cbd5e1]">
+                          Jusqu&apos;à ~<span className="tarif-emphase text-white">12</span> h · ~<span className="tarif-emphase text-white">9</span> € TTC / h
+                        </span>
                       </li>
                       <li className="flex flex-col gap-0.5 border-b border-white/5 pb-2.5">
                         <span className="font-semibold text-white">Standard — 215 € / mois</span>
-                        <span className="text-[#cbd5e1]">~20 h · ~10,75 € TTC / h</span>
+                        <span className="inline-flex flex-wrap items-baseline gap-x-0.5 text-[#cbd5e1]">
+                          ~<span className="tarif-emphase text-white">20</span> h · ~<span className="tarif-emphase text-white">10,75</span> € TTC / h
+                        </span>
                       </li>
                       <li className="flex flex-col gap-0.5 border-b border-white/5 pb-2.5">
                         <span className="font-semibold text-white">Business — 415 € / mois</span>
@@ -455,7 +476,9 @@ export default function HomePage() {
                       </li>
                       <li className="flex flex-col gap-0.5">
                         <span className="font-semibold text-white">Premium — 630 € / mois</span>
-                        <span className="text-[#cbd5e1]">~72 h · ~8,75 € TTC / h</span>
+                        <span className="inline-flex flex-wrap items-baseline gap-x-0.5 text-[#cbd5e1]">
+                          ~<span className="tarif-emphase text-white">72</span> h · ~<span className="tarif-emphase text-white">8,75</span> € TTC / h
+                        </span>
                       </li>
                     </ul>
                     <p className="mt-3 text-[11px] leading-snug text-[#94a3b8]">
@@ -548,8 +571,14 @@ export default function HomePage() {
                   <p className="mt-auto pt-6 text-2xl font-bold text-[#1d4ed8]">
                     <span className="tabular-nums">215</span> € <span className="text-base font-semibold text-[#64748b]">TTC</span> / mois
                   </p>
-                  <p className="mt-2 text-sm text-[#334155]">
-                    Standard : ≈ 20 h / mois · ≈ 10,75 € TTC / h (indicatif, 120 actions)
+                  <p className="mt-2 flex flex-wrap items-baseline gap-x-1 text-sm text-[#334155]">
+                    <span>Standard :</span>
+                    <span className="text-[#64748b]">≈</span>
+                    <span className="tarif-emphase text-[#1d4ed8]">20</span>
+                    <span> h / mois ·</span>
+                    <span className="text-[#64748b]">≈</span>
+                    <span className="tarif-emphase text-[#1d4ed8]">10,75</span>
+                    <span> € TTC / h (indicatif, 120 actions)</span>
                   </p>
                   <Link href="/tarifs" className="mt-4 inline-block text-sm font-semibold text-[#1d4ed8] hover:underline">
                     Voir les offres →

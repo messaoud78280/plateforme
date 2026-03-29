@@ -355,7 +355,21 @@ export default async function TarifsPage() {
                 </tr>
               </thead>
               <tbody className="text-[#334155]">
-                <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Prix TTC</td><td className="px-4 py-3">109 € TTC</td><td className="px-4 py-3">215 € TTC / mois</td><td className="px-4 py-3">415 € TTC / mois</td><td className="px-4 py-3">630 € TTC / mois</td></tr>
+                <tr className="border-b border-[#e0e4ea]">
+                  <td className="px-4 py-3">Prix TTC</td>
+                  <td className="px-4 py-3">
+                    <span className="tarif-emphase text-[#0f172a]">109</span> € TTC
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="tarif-emphase text-[#0f172a]">215</span> € TTC / mois
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="tarif-emphase text-[#0f172a]">415</span> € TTC / mois
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="tarif-emphase text-[#0f172a]">630</span> € TTC / mois
+                  </td>
+                </tr>
                 <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Actions incluses</td><td className="px-4 py-3">Jusqu’à 60</td><td className="px-4 py-3">120 / mois</td><td className="px-4 py-3">240 / mois</td><td className="px-4 py-3">360 / mois</td></tr>
                 <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Abonnement</td><td className="px-4 py-3">Non</td><td className="px-4 py-3">Oui</td><td className="px-4 py-3">Oui</td><td className="px-4 py-3">Oui</td></tr>
                 <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Priorité de traitement</td><td className="px-4 py-3">Standard</td><td className="px-4 py-3">Standard</td><td className="px-4 py-3">Priorité</td><td className="px-4 py-3">Priorité élevée</td></tr>

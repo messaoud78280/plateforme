@@ -142,10 +142,13 @@ export default async function BlogArticlePage({ params }: Props) {
             <p className="font-semibold text-[#0f172a]">Prêt à déléguer votre administratif ?</p>
             <p className="mt-2 text-[#334155] leading-relaxed">
               BeWork propose un assistant administratif externalisé dès{" "}
-              <span className="font-semibold text-[#0f172a]">215 € TTC / mois</span> (formule Standard) : environ{" "}
-              <span className="font-semibold text-[#0f172a]">20 h</span> d&apos;assistance incluses par mois, soit environ{" "}
-              <span className="font-semibold text-[#0f172a]">10,75 € TTC / h</span> sur cette base — équivalent indicatif
-              (120 actions / mois).
+              <span className="tarif-emphase text-[#0f172a]">215</span>{" "}
+              <span className="font-semibold text-[#0f172a]">€ TTC / mois</span> (formule Standard) : environ{" "}
+              <span className="tarif-emphase text-[#0f172a]">20</span>{" "}
+              <span className="font-semibold text-[#0f172a]">h</span> d&apos;assistance incluses par mois, soit environ{" "}
+              <span className="tarif-emphase text-[#0f172a]">10,75</span>{" "}
+              <span className="font-semibold text-[#0f172a]">€ TTC / h</span> sur cette base — équivalent indicatif (120
+              actions / mois).
             </p>
             <Link
               href="/inscription"

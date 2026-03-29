@@ -70,6 +70,21 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Montants / équivalences h & €·h — tailles en CSS pur (Tailwind v4 : @apply dans @layer peut ne pas s’appliquer) */
+.tarif-emphase {
+  font-size: 1.125rem;
+  line-height: 1.25;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.025em;
+}
+@media (min-width: 640px) {
+  .tarif-emphase {
+    font-size: 1.25rem;
+    line-height: 1.1;
+  }
+}
+
 /* Cadre carte — métal acier (plus présent que l’ancien « quasi blanc ») */
 .card-frame {
   position: relative;

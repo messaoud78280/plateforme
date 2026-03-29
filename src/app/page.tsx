@@ -127,15 +127,16 @@ export default function HomePage() {
       <header className="sticky top-0 z-20 bg-[#f8f9fb] shadow-[0_1px_0_0_rgba(203,213,225,0.9)]">
         {/* Zone marque / actions — claire, délimitée */}
         <div className="mx-auto max-w-6xl border-b border-[#dce3ec] px-4 py-2.5 sm:px-6 sm:py-3">
-          <div className="flex items-center justify-between gap-3">
-            <Link href="/" className="shrink-0">
+          <div className="flex items-start justify-between gap-3">
+            <Link href="/" className="min-w-0 shrink pr-2">
               <BeWorkLogo
                 size="sm"
                 showTagline
-                tagline="Administratif & organisation BTP — humain + outils IA pour la performance"
+                tagline="Administratif & organisation BTP"
+                taglineSub="Équipe augmentée et assistée par l'IA"
               />
             </Link>
-            <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
+            <div className="flex shrink-0 items-center gap-2 pt-0.5 sm:gap-2.5">
               <Link
                 href="/connexion"
                 className="rounded-lg surface-metallic-light px-3.5 py-2 text-xs font-medium text-[#1e293b] shadow-sm transition-all hover:bg-[#f8f9fb] sm:px-4 sm:text-sm"

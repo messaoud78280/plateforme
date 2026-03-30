@@ -100,7 +100,7 @@ export const BLOG_ARTICLES = {
   "combien-coute-assistant-administratif": {
     title: "Combien coûte un assistant administratif ?",
     description:
-      "Comparatif des coûts : assistant administratif externalisé vs salarié. Dès 215 € TTC/mois chez BeWork pour les PME.",
+      "Comparatif des coûts : assistant administratif externalisé vs salarié. Dès 290 € TTC/mois chez BeWork pour les PME.",
     excerpt:
       "Comparatif des tarifs : assistant administratif externalisé vs salarié. Ce que coûte vraiment l'externalisation pour les PME.",
     keywords: [
@@ -113,23 +113,23 @@ export const BLOG_ARTICLES = {
     publishedTime: "2025-07-22T09:00:00+01:00",
     articleSection: "Tarifs & comparatifs",
     body: [
-      { type: "h2", content: "Assistant administratif externalisé : les tarifs BeWork" },
+      { type: "h2", content: "Forfaits administratifs BeWork (BTP et PME)" },
       {
         type: "p",
         content:
-          "BeWork propose des forfaits dès 215 € TTC/mois (formule Standard, 120 actions/mois, soit environ 20 h d'assistance), 415 € TTC/mois (Business, 240 actions) et 630 € TTC/mois (Premium, 360 actions). L'offre Découverte à 109 € TTC permet de tester le service. Tout est inclus : pas de charges sociales, pas de recrutement.",
+          "Les offres sont en TTC, par mois : Structure 290 €, Suivi 490 €, Renfort 790 €, Pilotage 1 190 €. Chaque palier correspond à un niveau de structuration et de suivi, pas à une simple liste de tâches. Pas de charges sociales ni de recrutement à porter pour ce périmètre.",
       },
-      { type: "h2", content: "Assistant en interne : le coût réel" },
+      { type: "h2", content: "Poste en interne : ordre de grandeur du coût" },
       {
         type: "p",
         content:
-          "Un assistant administratif en CDI en Europe coûte environ 5 050€/mois (salaire brut + charges + bureau + matériel + recrutement). Soit jusqu'à 75 % plus cher qu'une solution externalisée.",
+          "Un administratif en CDI en Europe représente souvent plus de 5 000 €/mois charges comprises (salaire, cotisations, équipement, temps RH). Un forfait externalisé ne remplace pas toujours un plein temps, mais il évite de créer un poste pour une charge irrégulière.",
       },
-      { type: "h2", content: "Pourquoi externaliser coûte moins cher ?" },
+      { type: "h2", content: "Externaliser : autre logique de coût, autre cadre" },
       {
         type: "p",
         content:
-          "Pas de charges sociales, pas de bureau, pas de matériel, pas de recrutement. Vous payez un forfait tout compris et vous ne réglez que les actions consommées. Scalabilité et flexibilité à la clé.",
+          "Vous achetez un volume de prestations défini dans un contrat, pas une disponibilité illimitée. Utile lorsque l’embauche n’est pas le bon levier ou lorsque vous voulez structurer l’administratif sans alourdir la structure.",
       },
     ],
   },
@@ -152,7 +152,7 @@ export const BLOG_ARTICLES = {
       {
         type: "p",
         content:
-          "Coût maîtrisé (dès 215 € TTC/mois), pas de recrutement, pas de charges sociales, scalabilité selon les besoins, opérationnel rapidement, supervision en France avec BeWork.",
+          "Coût maîtrisé (dès 290 € TTC/mois), pas de recrutement, pas de charges sociales, scalabilité selon les besoins, opérationnel rapidement, supervision en France avec BeWork.",
       },
       { type: "h2", content: "Assistant salarié : avantages" },
       {

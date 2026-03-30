@@ -4,53 +4,71 @@ import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { absoluteUrl } from "@/lib/site";
 
 const faqUrl = absoluteUrl("/faq");
+const faqOgImage = absoluteUrl("/opengraph-image");
 
 export const metadata: Metadata = {
-  title: "FAQ Assistant administratif externalisé | BeWork",
+  title: "FAQ — Partenaire administratif BTP | BeWork",
   description:
-    "Questions fréquentes sur l'assistant administratif externalisé, le coût, le fonctionnement et les délais. BeWork — PME France, Belgique, Suisse, Luxembourg.",
-  alternates: { canonical: faqUrl, languages: { fr: faqUrl } },
+    "Externalisation administrative pour artisans et entreprises du bâtiment : cadre, tarifs TTC, suivi, délais et collaboration. BeWork — France, Belgique, Suisse, Luxembourg.",
+  alternates: { canonical: faqUrl, languages: { fr: faqUrl, "x-default": faqUrl } },
   openGraph: {
     type: "website",
     locale: "fr_FR",
     url: faqUrl,
     siteName: "BeWork",
-    title: "FAQ — Assistant administratif externalisé | BeWork",
+    title: "FAQ — BeWork, administratif structuré pour le BTP",
     description:
-      "Réponses sur les tarifs TTC, le fonctionnement, les délais et l'externalisation administrative pour les PME.",
+      "Réponses sur le cadrage, les forfaits, l’externalisation vs le recrutement et le fonctionnement au quotidien.",
+    images: [{ url: faqOgImage, width: 1200, height: 630, alt: "FAQ BeWork — administratif BTP" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "FAQ BeWork",
-    description: "Assistant administratif externalisé : tarifs, fonctionnement, délais.",
+    description: "Administratif externalisé pour le BTP : cadre, tarifs et collaboration.",
   },
   robots: { index: true, follow: true },
 };
 
 const FAQ_ITEMS = [
   {
-    q: "Combien coûte un assistant administratif ?",
-    a: "Chez BeWork, tous les tarifs affichés sont TTC, sans frais supplémentaires. Les offres démarrent à 215 € TTC/mois pour la formule Standard (120 actions/mois, soit environ 20 h d'assistance), 415 € TTC/mois pour Business (240 actions) et 630 € TTC/mois pour Premium (360 actions). L'offre Découverte à 109 € TTC permet de tester le service. Tout est inclus : pas de coût caché, pas de recrutement.",
+    q: "Pourquoi externaliser plutôt que recruter ?",
+    a: "Un poste en interne engage salaire, charges, formation et management — pour une charge qui n’est pas toujours constante. Avec BeWork, vous achetez un cadre de prestation et un niveau d’accompagnement défini : pas de structure RH à alourdir, pas d’absence à pallier seul. L’enjeu n’est pas de « remplacer une personne », mais de tenir un relais administratif fiable pendant que vous restez sur le chantier.",
   },
   {
-    q: "Comment fonctionne un assistant administratif externalisé ?",
-    a: "Vous envoyez vos tâches via la plateforme BeWork, un assistant dédié les traite à distance (devis, factures, relances, suivi dossiers), vous suivez l'avancement en temps réel et recevez les livrables. Le tout sans recrutement ni infrastructure : externaliser administratif PME en toute simplicité.",
+    q: "En quoi BeWork est-il différent d’un secrétariat généraliste ?",
+    a: "Notre socle est le bâtiment : devis, facturation, situations de travaux, relances, démarches chantier, coordination fournisseurs et dossiers sensibles sous votre validation. Les briefs sont lus avec une grille terrain — urgences, créneaux, trésorerie — pas seulement comme une liste de tâches. La prestation est cadrée par forfait, avec des rituels de suivi, pas comme une prestation floue à la demande.",
   },
   {
-    q: "Qui réalise les missions ?",
-    a: "Des assistants francophones diplômés Bac+5, formés à l'IA, encadrés par notre agence en région parisienne. La direction et la supervision sont en France ; la plateforme opérationnelle permet une exécution réactive et de qualité.",
+    q: "Pourquoi ce niveau de prix ?",
+    a: "Vous payez un pilotage encadré, des profils qualifiés, une plateforme de suivi et une exécution revue — pas un tarif « au rabais » qui se traduirait par de l’improvisation. Les montants TTC mensuels reflètent ce cadre : Structure 290 €, Suivi 490 €, Renfort 790 €, Pilotage 1 190 € — avec une montée en structuration et en priorité à chaque palier.",
   },
   {
-    q: "Quel est le délai de traitement ?",
-    a: "Réponse moyenne en moins de 2 heures. Les tâches urgentes sont priorisées. Le délai dépend du type de mission et de la complexité ; notre équipe en France assure une coordination fluide pour respecter vos échéances.",
+    q: "Est-ce adapté à une entreprise du BTP ?",
+    a: "Oui, c’est notre cœur de cible : artisans, TPE et PME du bâtiment dont l’administratif se télescope avec le terrain. Nous traitons les flux habituels du secteur (commercial, réglementaire, logistique) dans le même dispositif, avec une attention particulière aux délais et aux relances qui impactent directement la trésorerie.",
   },
   {
-    q: "L'assistant administratif à distance travaille-t-il avec mes outils ?",
-    a: "Oui. Nous travaillons avec Google Workspace, Microsoft 365, CRM (Salesforce, HubSpot, etc.) selon vos usages. L'assistant s'adapte à votre environnement.",
+    q: "Comment se passe le suivi au quotidien ?",
+    a: "Les demandes passent par la plateforme : consignes, pièces, priorités. Vous voyez l’avancement et les échanges ; les actes sensibles restent sous votre validation. Des points de pilotage permettent d’ajuster le rythme et le périmètre dans les limites du forfait choisi.",
   },
   {
-    q: "Pour quels secteurs ?",
-    a: "PME, TPE, indépendants, BTP, immobilier, cabinets : nous nous adaptons à votre secteur. Consultez nos pages assistant administratif BTP et assistant administratif immobilier pour des exemples par secteur.",
+    q: "Comment évitez-vous les débordements et les malentendus ?",
+    a: "Le cadre contractuel fixe ce qui est inclus à chaque niveau d’offre. Au-delà, nous en rediscutons plutôt que d’empiler des demandes non prévues. Les priorités sont posées ensemble ; les sujets à risque (relances fermes, mises en demeure, litiges) suivent un circuit de validation explicite.",
+  },
+  {
+    q: "Pour qui ce service est-il fait ?",
+    a: "Pour les dirigeants et structures du bâtiment qui veulent un administratif tenu sans recruter, qui acceptent un cadre contractuel et qui cherchent de la rigueur plutôt que le prix minimum. Idéal lorsque les devis, les relances et les dossiers ne peuvent plus attendre le soir ou le week-end.",
+  },
+  {
+    q: "Pour qui ce n’est-il pas adapté ?",
+    a: "Si vous cherchez avant tout le coût le plus bas, si vous refusez tout cadrage ou si vous attendez une disponibilité illimitée hors du cadre convenu, notre modèle ne sera probablement pas satisfaisant. Nous préférons une collaboration claire avec peu de clients bien accompagnés qu’une file de demandes non tenables.",
+  },
+  {
+    q: "Comment démarre la collaboration ?",
+    a: "Après un échange pour comprendre votre organisation, vos outils et votre charge, nous proposons un cadrage et une formule. L’onboarding fixe les rôles, les canaux et les priorités ; les premières missions démarrent une fois les accès et le périmètre validés.",
+  },
+  {
+    q: "Les besoins peuvent-ils évoluer ?",
+    a: "Oui. Vous pouvez ajuster de formule en formule selon l’activité, dans la limite des offres proposées. Les évolutions se discutent avec votre interlocuteur pour rester cohérents avec la charge réelle et la qualité de suivi.",
   },
 ];
 
@@ -63,11 +81,17 @@ export default function FaqPage() {
             <BeWorkLogo size="sm" />
           </Link>
           <div className="flex items-center gap-3">
-            <Link href="/tarifs" className="rounded-lg surface-metallic-light px-5 py-2.5 text-sm font-medium text-[#1e293b] hover:bg-[#f8f9fb]">
-              Tarifs
+            <Link
+              href="/tarifs"
+              className="rounded-lg surface-metallic-light px-5 py-2.5 text-sm font-medium text-[#1e293b] hover:bg-[#f8f9fb]"
+            >
+              Forfaits
             </Link>
-            <Link href="/inscription" className="rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af]">
-              Tester BeWork
+            <Link
+              href="/contact"
+              className="rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af]"
+            >
+              Demander un cadrage
             </Link>
           </div>
         </div>
@@ -76,11 +100,11 @@ export default function FaqPage() {
       <main className="px-6 py-16 md:py-24">
         <article className="mx-auto max-w-3xl">
           <h1 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-            FAQ — Assistant administratif externalisé
+            Questions fréquentes
           </h1>
           <p className="mt-6 text-lg leading-relaxed text-[#334155]">
-            Réponses aux questions les plus posées sur l&apos;assistant administratif externalisé, l&apos;assistant
-            administratif à distance et l&apos;externalisation administrative pour les PME.
+            Cadre, tarifs, collaboration et adéquation avec les entreprises du bâtiment : les réponses ci-dessous visent des
+            dirigeants qui veulent déléguer proprement, sans promesses creuses.
           </p>
           <p className="mt-4 text-sm font-semibold text-[#0f172a]">
             Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.
@@ -114,28 +138,29 @@ export default function FaqPage() {
           />
 
           <div className="mt-16 rounded-xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-8">
-            <h2 className="text-xl font-bold text-[#0f172a]">Prêt à externaliser votre administratif ?</h2>
+            <h2 className="text-xl font-bold text-[#0f172a]">Vérifier l’adéquation avec votre organisation</h2>
             <p className="mt-3 text-[#334155]">
-              BeWork accompagne les PME francophones. Assistant administratif externalisé dès 215 € TTC/mois.
+              Un échange permet de poser votre charge administrative, vos outils et le niveau de formule adapté — avant tout
+              engagement.
             </p>
             <div className="mt-6 flex flex-wrap gap-4">
               <Link
-                href="/inscription"
+                href="/contact"
                 className="inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white hover:bg-[#1e40af]"
               >
-                Tester BeWork
+                Échanger sur vos besoins
+              </Link>
+              <Link
+                href="/tarifs"
+                className="inline-flex rounded-lg border-2 border-[#1d4ed8] px-6 py-3 font-semibold text-[#1d4ed8] hover:bg-[#eff6ff]"
+              >
+                Consulter les forfaits
               </Link>
               <Link
                 href="/inscription"
-                className="inline-flex rounded-lg border-2 border-[#1d4ed8] px-6 py-3 font-semibold text-[#1d4ed8] hover:bg-[#eff6ff]"
-              >
-                Créer un compte
-              </Link>
-              <Link
-                href="/contact"
                 className="surface-metallic-outline inline-flex rounded-lg px-6 py-3 font-semibold text-[#334155] hover:text-[#1d4ed8]"
               >
-                Déléguer une première tâche
+                Accès client — créer un compte
               </Link>
             </div>
           </div>
@@ -149,10 +174,18 @@ export default function FaqPage() {
             <span className="text-[#0f172a]">© {new Date().getFullYear()} BeWork</span>
           </div>
           <div className="flex gap-6">
-            <Link href="/" className="font-medium hover:text-[#0f172a]">Accueil</Link>
-            <Link href="/faq" className="font-medium hover:text-[#0f172a]">FAQ</Link>
-            <Link href="/blog" className="font-medium hover:text-[#0f172a]">Blog</Link>
-            <Link href="/contact" className="font-medium hover:text-[#0f172a]">Contact</Link>
+            <Link href="/" className="font-medium hover:text-[#0f172a]">
+              Accueil
+            </Link>
+            <Link href="/faq" className="font-medium hover:text-[#0f172a]">
+              FAQ
+            </Link>
+            <Link href="/blog" className="font-medium hover:text-[#0f172a]">
+              Blog
+            </Link>
+            <Link href="/contact" className="font-medium hover:text-[#0f172a]">
+              Contact
+            </Link>
           </div>
         </div>
       </footer>

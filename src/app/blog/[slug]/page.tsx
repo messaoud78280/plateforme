@@ -18,11 +18,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const article = raw as BlogArticle;
   const url = absoluteUrl(`/blog/${slug}`);
   const modified = article.modifiedTime ?? article.publishedTime;
+  const ogImage = absoluteUrl("/opengraph-image");
   return {
     title: `${article.title} | BeWork Blog`,
     description: article.description,
     keywords: article.keywords,
-    alternates: { canonical: url, languages: { fr: url } },
+    alternates: { canonical: url, languages: { fr: url, "x-default": url } },
     openGraph: {
       type: "article",
       locale: "fr_FR",
@@ -32,6 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: article.description,
       publishedTime: article.publishedTime,
       modifiedTime: modified,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: article.title }],
     },
     twitter: {
       card: "summary_large_image",
@@ -49,6 +51,7 @@ export default async function BlogArticlePage({ params }: Props) {
   const article = raw as BlogArticle;
 
   const pageUrl = absoluteUrl(`/blog/${slug}`);
+  const ogImageDefault = absoluteUrl("/opengraph-image");
   const dateModified = article.modifiedTime ?? article.publishedTime;
   const blogPostingLd = {
     "@context": "https://schema.org",
@@ -70,6 +73,7 @@ export default async function BlogArticlePage({ params }: Props) {
       name: "BeWork",
       url: SITE_URL,
     },
+    image: [ogImageDefault],
     ...(article.articleSection ? { articleSection: article.articleSection } : {}),
     keywords: article.keywords.join(", "),
   };
@@ -83,8 +87,8 @@ export default async function BlogArticlePage({ params }: Props) {
           </Link>
           <div className="flex items-center gap-3">
             <Link href="/blog" className="text-sm font-medium text-[#64748b] hover:text-[#0f172a]">Blog</Link>
-            <Link href="/inscription" className="rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af]">
-              Tester BeWork
+            <Link href="/contact" className="rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af]">
+              Cadrage
             </Link>
           </div>
         </div>
@@ -139,23 +143,28 @@ export default async function BlogArticlePage({ params }: Props) {
             )}
           </div>
           <div className="mt-12 rounded-xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-8">
-            <p className="font-semibold text-[#0f172a]">Prêt à déléguer votre administratif ?</p>
+            <p className="font-semibold text-[#0f172a]">Structurer votre administratif BTP</p>
             <p className="mt-2 text-[#334155] leading-relaxed">
-              BeWork propose un assistant administratif externalisé dès{" "}
-              <span className="tarif-emphase text-[#0f172a]">215</span>{" "}
-              <span className="font-semibold text-[#0f172a]">€ TTC / mois</span> (formule Standard) : environ{" "}
-              <span className="tarif-emphase text-[#0f172a]">20</span>{" "}
-              <span className="font-semibold text-[#0f172a]">h</span> d&apos;assistance incluses par mois, soit environ{" "}
-              <span className="tarif-emphase text-[#0f172a]">10,75</span>{" "}
-              <span className="font-semibold text-[#0f172a]">€ TTC / h</span> sur cette base — équivalent indicatif (120
-              actions / mois).
+              Offre Suivi à{" "}
+              <span className="tarif-emphase text-[#0f172a]">490</span>{" "}
+              <span className="font-semibold text-[#0f172a]">€ TTC / mois</span> — niveau le plus adapté pour une activité
+              régulière. Palier d’entrée Structure à 290 € TTC / mois ; Renfort et Pilotage au-delà. Un échange permet de
+              vérifier l’adéquation avant tout engagement.
             </p>
-            <Link
-              href="/inscription"
-              className="mt-4 inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white hover:bg-[#1e40af]"
-            >
-              Tester BeWork
-            </Link>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link
+                href="/contact"
+                className="inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white hover:bg-[#1e40af]"
+              >
+                Demander un cadrage
+              </Link>
+              <Link
+                href="/tarifs"
+                className="inline-flex rounded-lg border-2 border-[#1d4ed8] px-6 py-3 font-semibold text-[#1d4ed8] hover:bg-white"
+              >
+                Voir les forfaits
+              </Link>
+            </div>
           </div>
         </article>
       </main>

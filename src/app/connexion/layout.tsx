@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: "Connexion | BeWork",
   description:
     "Connectez-vous à votre espace BeWork : client, agent ou gérante. Accédez à votre tableau de bord et gérez vos missions administratives.",
-  alternates: { canonical: pageUrl },
+  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   robots: { index: false, follow: true },
 };
 

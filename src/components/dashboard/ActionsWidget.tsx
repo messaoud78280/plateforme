@@ -1,10 +1,10 @@
 import Link from "next/link";
 
 const PLAN_LABELS: Record<string, string> = {
-  DECOUVERTE: "Offre Découverte",
-  STANDARD: "Standard",
-  STANDARD_PLUS: "Business",
-  PREMIUM: "Premium",
+  DECOUVERTE: "Structure",
+  STANDARD: "Suivi",
+  STANDARD_PLUS: "Renfort",
+  PREMIUM: "Pilotage",
   FULLTIME: "Full-time",
 };
 
@@ -31,7 +31,7 @@ export function ActionsWidget({ subscriptionPlan, monthlyActionsTotal, monthlyAc
     <section aria-label="Actions du mois" className="rounded-2xl surface-metallic-light p-6">
       <h2 className="text-lg font-semibold text-slate-800">Actions du mois</h2>
       <p className="mt-1 text-sm text-slate-600">
-        Abonnement : {subscriptionPlan ? PLAN_LABELS[subscriptionPlan] ?? subscriptionPlan : "Standard"}
+        Abonnement : {subscriptionPlan ? PLAN_LABELS[subscriptionPlan] ?? subscriptionPlan : "Suivi"}
       </p>
       <div className="mt-4 grid grid-cols-3 gap-4 text-center">
         <div>

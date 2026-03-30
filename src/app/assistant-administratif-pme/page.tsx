@@ -7,8 +7,8 @@ const pageUrl = absoluteUrl("/assistant-administratif-pme");
 export const metadata: Metadata = {
   title: "Assistant administratif PME | Externaliser l'administratif | BeWork",
   description:
-    "Assistant administratif pour PME : externaliser devis, factures, relances. Assistant virtuel entreprise dès 215 € TTC/mois. France, Belgique, Suisse, Luxembourg.",
-  alternates: { canonical: pageUrl },
+    "Assistant administratif pour PME : externaliser devis, factures, relances. Assistant virtuel entreprise dès 290 € TTC/mois. France, Belgique, Suisse, Luxembourg.",
+  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
 };
 
 export default function Page() {
@@ -21,7 +21,7 @@ export default function Page() {
         <>
           Les PME peuvent externaliser leur administratif avec un assistant virtuel entreprise dédié. Devis, factures,
           relances, suivi de dossiers : BeWork accompagne les dirigeants de PME en France, Belgique, Suisse et Luxembourg.
-          Assistant administratif externalisé dès 215 € TTC/mois.
+          Assistant administratif externalisé dès 290 € TTC/mois.
         </>
       }
     >
@@ -40,7 +40,7 @@ export default function Page() {
 
       <h2>Combien coûte un assistant administratif pour PME ?</h2>
       <p>
-        BeWork propose des forfaits dès 215 € TTC/mois (formule Standard). Externaliser administratif PME coûte jusqu&apos;à
+        BeWork propose des forfaits dès 290 € TTC/mois (offre Structure). Externaliser administratif PME coûte jusqu&apos;à
         75 % moins cher qu&apos;un recrutement interne. Tout est inclus : équipe francophone, supervision en France.
       </p>
     </SeoLandingPage>

@@ -8,10 +8,10 @@ import { getPlan } from "@/lib/subscription-plans";
 export const dynamic = "force-dynamic";
 
 const PLAN_LABELS: Record<string, string> = {
-  DECOUVERTE: "Offre Découverte",
-  STANDARD: "Standard",
-  STANDARD_PLUS: "Business",
-  PREMIUM: "Premium",
+  DECOUVERTE: "Structure",
+  STANDARD: "Suivi",
+  STANDARD_PLUS: "Renfort",
+  PREMIUM: "Pilotage",
 };
 
 const ACTION_PACKS = [
@@ -306,7 +306,7 @@ export default async function ProfilVueEnsemblePage() {
             href="/dashboard/abonnement/souscrire?plan=PREMIUM"
             className="rounded-lg border border-[#1d4ed8] bg-white px-4 py-2 text-sm font-medium text-[#1d4ed8] hover:bg-[#eff6ff]"
           >
-            Passer à Premium
+            Passer à Pilotage
           </Link>
           <Link
             href="/contact?sujet=Résiliation+abonnement"

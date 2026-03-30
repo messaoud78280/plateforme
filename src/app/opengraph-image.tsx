@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "BeWork — Assistant administratif externalisé pour PME";
+export const alt = "BeWork — Partenaire administratif pour le BTP et les artisans";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -33,10 +33,10 @@ export default function OpenGraphImage() {
             opacity: 0.95,
           }}
         >
-          Assistant administratif externalisé et secrétariat à distance
+          Administratif structuré pour artisans et entreprises du bâtiment
         </div>
         <div style={{ marginTop: 36, fontSize: 22, opacity: 0.85 }}>
-          PME francophones · France, Belgique, Suisse, Luxembourg · Dès 215 € TTC/mois
+          Cadre forfaitaire TTC · France, Belgique, Suisse, Luxembourg · Dès 290 € / mois
         </div>
       </div>
     ),

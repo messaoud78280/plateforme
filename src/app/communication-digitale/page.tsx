@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   title: "Tarifs communication digitale | Packs visibilité en ligne",
   description:
     "Tarifs des packs communication digitale BeWork : visibilité locale (Google Business), réseaux sociaux, site vitrine. De 149€ à 449€/mois. Développez votre présence en ligne.",
-  alternates: { canonical: pageUrl },
+  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
 };
 
 const PACKS = [

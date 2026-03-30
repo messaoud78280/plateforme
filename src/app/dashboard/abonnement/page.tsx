@@ -8,15 +8,15 @@ import { BackLink } from "@/components/ui/BackLink";
 import { TARIFS_PLANS } from "@/lib/tarifs-plans";
 
 const PLAN_LABELS: Record<string, string> = {
-  DECOUVERTE: "Offre Découverte",
-  STANDARD: "Standard",
-  STANDARD_PLUS: "Business",
-  PREMIUM: "Premium",
+  DECOUVERTE: "Structure",
+  STANDARD: "Suivi",
+  STANDARD_PLUS: "Renfort",
+  PREMIUM: "Pilotage",
 };
 
 const SOURCE_LABELS: Record<string, string> = {
   SUBSCRIPTION: "Souscription",
-  ONE_TIME: "Offre Découverte",
+  ONE_TIME: "Achat unique (historique)",
   RENEWAL: "Renouvellement",
   ADMIN: "Ajustement",
   TASK_DEDUCTION: "Tâche terminée",

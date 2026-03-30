@@ -71,7 +71,7 @@ export function CopiloteAdmin() {
     <section className="rounded-2xl surface-metallic-light p-6">
       <h2 className="text-lg font-semibold text-slate-800">Copilote administratif</h2>
       <p className="mt-0.5 text-sm text-slate-500">
-        Identifiez rapidement des tâches à déléguer et gagnez du temps.
+        Identifiez les dossiers à prioriser et à déléguer dans le cadre du forfait.
       </p>
 
       <ul className="mt-4 space-y-3">

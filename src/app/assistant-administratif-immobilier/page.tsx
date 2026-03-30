@@ -7,8 +7,8 @@ const pageUrl = absoluteUrl("/assistant-administratif-immobilier");
 export const metadata: Metadata = {
   title: "Assistant administratif immobilier | Dossiers, relances loyers | BeWork",
   description:
-    "Assistant administratif pour l'immobilier : dossiers locataires, relances loyers, gestion locative. Agences immobilières France, Belgique, Suisse. Dès 215 € TTC/mois.",
-  alternates: { canonical: pageUrl },
+    "Assistant administratif pour l'immobilier : dossiers locataires, relances loyers, gestion locative. Agences immobilières France, Belgique, Suisse. Dès 290 € TTC/mois.",
+  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
 };
 
 export default function Page() {
@@ -21,7 +21,7 @@ export default function Page() {
         <>
           Les agences immobilières et gestionnaires de biens peuvent externaliser leur administratif : dossiers
           locataires, relances loyers, état des lieux, gestion des demandes. BeWork accompagne les professionnels
-          de l&apos;immobilier en France, Belgique, Suisse et Luxembourg. Dès 215 € TTC/mois.
+          de l&apos;immobilier en France, Belgique, Suisse et Luxembourg. Dès 290 € TTC/mois.
         </>
       }
     >

@@ -21,7 +21,7 @@ export async function GET() {
 
   const sourceLabels: Record<string, string> = {
     SUBSCRIPTION: "Souscription",
-    ONE_TIME: "Offre Découverte",
+    ONE_TIME: "Achat unique (historique)",
     RENEWAL: "Renouvellement",
     ADMIN: "Ajustement",
     TASK_DEDUCTION: "Tâche terminée",

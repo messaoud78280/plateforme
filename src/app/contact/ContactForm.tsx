@@ -7,10 +7,10 @@ import { BeWorkLogo } from "@/components/BeWorkLogo";
 type TakenSlot = { date: string; time: string };
 
 const FORMULES = [
-  { id: "decouverte", label: "Offre Découverte (109 € TTC — jusqu’à 60 actions)", value: "Offre Découverte" },
-  { id: "standard", label: "Standard (215 € TTC/mois — 120 actions)", value: "Standard" },
-  { id: "business", label: "Business (415 € TTC/mois — 240 actions)", value: "Business" },
-  { id: "premium", label: "Premium (630 € TTC/mois — 360 actions)", value: "Premium" },
+  { id: "structure", label: "Structure — 290 € TTC / mois", value: "Structure" },
+  { id: "suivi", label: "Suivi — 490 € TTC / mois", value: "Suivi" },
+  { id: "renfort", label: "Renfort — 790 € TTC / mois", value: "Renfort" },
+  { id: "pilotage", label: "Pilotage — 1 190 € TTC / mois", value: "Pilotage" },
   { id: "sur-mesure", label: "Sur-mesure / À définir", value: "Sur-mesure" },
 ];
 
@@ -95,7 +95,7 @@ export default function ContactForm() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error || "Une erreur est survenue. Réessayez ou contactez-nous par email.");
+        setError(data.error || "Une erreur est survenue. Réessayez ou écrivez-nous directement par email.");
         return;
       }
       setSent(true);
@@ -126,7 +126,8 @@ export default function ContactForm() {
               Demande envoyée
             </h1>
             <p className="mt-3 text-center text-[#334155]">
-              Nous avons bien reçu votre demande et vos coordonnées. Nous vous recontacterons très prochainement à l’adresse indiquée pour confirmer votre rendez-vous en visioconférence et vous expliquer notre mode opératoire et les conditions de collaboration.
+              Nous avons bien reçu votre message. Nous vous recontacterons à l’adresse indiquée pour confirmer le créneau visio
+              et préciser le cadre d’un éventuel accompagnement — périmètre, forfait et modalités.
             </p>
             <div className="mt-8 flex justify-center">
               <Link
@@ -158,10 +159,11 @@ export default function ContactForm() {
         </header>
 
         <h1 className="text-3xl font-bold text-[#0f172a] md:text-4xl">
-          Demande de contact et rendez-vous
+          Échanger sur votre organisation
         </h1>
         <p className="mt-2 text-[#334155]">
-          Renseignez vos informations et choisissez un créneau pour un premier rendez-vous en visioconférence. Nous vous recontacterons par email et vous expliquerons lors du RDV notre mode opératoire pour travailler ensemble et les conditions.
+          Ce formulaire sert à un premier cadrage : structure, secteur (idéalement BTP ou proches), charge administrative et
+          attentes. Choisissez un créneau visio ; nous confirmons par email et préparons l’entretien en conséquence.
         </p>
         <p className="mt-3 text-sm font-semibold text-[#0f172a]">
           Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.
@@ -170,7 +172,8 @@ export default function ContactForm() {
         <div className="mt-8 rounded-2xl border border-[#c8cdd6] bg-[#f8f9fb] p-4 text-sm text-[#334155]">
           <p className="font-medium text-[#0f172a]">Premier rendez-vous (visio)</p>
           <p className="mt-1">
-            Lors de ce premier échange en visioconférence, nous vous présenterons notre façon de travailler, les conditions de collaboration et répondrons à toutes vos questions.
+            Nous clarifions votre besoin, nos forfaits et le cadre contractuel. L’objectif est de vérifier si la collaboration
+            est pertinente des deux côtés — pas de démo « one size fits all ».
           </p>
         </div>
 
@@ -384,7 +387,7 @@ export default function ContactForm() {
               disabled={sending}
               className="rounded-lg bg-[#1d4ed8] px-8 py-3 font-semibold text-white shadow-md hover:bg-[#1e40af] disabled:opacity-60"
             >
-              {sending ? "Envoi en cours…" : "Envoyer ma demande"}
+              {sending ? "Envoi en cours…" : "Valider la demande d’échange"}
             </button>
             <Link
               href="/"

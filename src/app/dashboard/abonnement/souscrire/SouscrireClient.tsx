@@ -8,7 +8,7 @@ type Props = {
   initialPlanKey: string;
   planName: string;
   priceLabel: string;
-  billing: "one_shot" | "monthly";
+  billing: "monthly";
   actionsLabel: string;
   actionsIncluded: number;
 };
@@ -104,7 +104,8 @@ export function SouscrireClient({
       <div className="rounded-2xl surface-metallic-light p-6">
         <h2 className="text-xl font-bold text-slate-800">Paiement effectué</h2>
         <p className="mt-2 text-slate-600">
-          Vos actions ont été créditées sur votre compte. Vous pouvez les utiliser dès maintenant.
+          Votre forfait est activé et votre compte a été crédité selon le niveau choisi. Vous pouvez déposer vos demandes dès
+          maintenant.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link
@@ -123,11 +124,6 @@ export function SouscrireClient({
       </div>
     );
   }
-
-  const modalite =
-    effectivePlan.billing === "one_shot"
-      ? "Achat unique (pas de renouvellement)"
-      : "Abonnement mensuel";
 
   return (
     <div className="space-y-6">
@@ -150,7 +146,7 @@ export function SouscrireClient({
               >
                 <span className="font-medium">{p.name}</span>
                 <span className="mt-1 block text-xs text-slate-500">
-                  {p.priceLabel} € TTC{p.billing === "monthly" ? " / mois" : ""} · {p.actionsLabel}
+                  {p.priceLabel} € TTC / mois · {p.actionsLabel}
                 </span>
               </button>
             );
@@ -169,17 +165,16 @@ export function SouscrireClient({
           <div className="flex justify-between">
             <dt className="text-slate-500">Prix</dt>
             <dd className="font-medium text-slate-800">
-              {effectivePlan.priceLabel} € TTC
-              {effectivePlan.billing === "monthly" && " / mois"}
+              {effectivePlan.priceLabel} € TTC / mois
             </dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-slate-500">Actions créditées</dt>
+            <dt className="text-slate-500">Crédit mensuel</dt>
             <dd className="font-medium text-slate-800">{effectivePlan.actionsLabel}</dd>
           </div>
           <div className="flex justify-between">
             <dt className="text-slate-500">Modalité</dt>
-            <dd className="font-medium text-slate-800">{modalite}</dd>
+            <dd className="font-medium text-slate-800">Abonnement mensuel</dd>
           </div>
           <div className="flex justify-between">
             <dt className="text-slate-500">Date de début</dt>

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { BLOG_SLUGS } from "@/content/blog-slugs";
+import { BLOG_ARTICLES, BLOG_SLUGS, type BlogArticle, type BlogSlug } from "@/content/blog-slugs";
 import { SITE_URL } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -20,12 +20,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/blog`, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 0.8 },
   ];
 
-  const blogPages: MetadataRoute.Sitemap = BLOG_SLUGS.map((slug) => ({
-    url: `${SITE_URL}/blog/${slug}`,
-    lastModified: new Date(),
-    changeFrequency: "monthly" as const,
-    priority: 0.7,
-  }));
+  const blogPages: MetadataRoute.Sitemap = BLOG_SLUGS.map((slug) => {
+    const article = BLOG_ARTICLES[slug as BlogSlug] as BlogArticle;
+    const modified = article.modifiedTime ?? article.publishedTime;
+    return {
+      url: `${SITE_URL}/blog/${slug}`,
+      lastModified: new Date(modified),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    };
+  });
 
   return [...staticPages, ...blogPages];
 }

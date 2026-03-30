@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title: "Tâches d'assistant administratif externalisé | BeWork",
   description:
     "Emails, devis, factures, relances, agenda, suivi clients : découvrez les tâches prises en charge par nos assistants administratifs externalisés pour PME. Délégation fiable et francophone.",
-  alternates: { canonical: pageUrl },
+  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
 };
 
 const top5Chronophages = [
@@ -441,7 +441,7 @@ export default function AssistantsAdministratifsTachesPage() {
         <section className="px-6 py-16 md:py-20">
           <div className="mx-auto max-w-4xl rounded-2xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-8 text-center md:p-12">
             <h2 className="text-2xl font-bold text-[#0f172a] md:text-3xl">
-              Dès 215 € TTC/mois — sans recrutement
+              Dès 290 € TTC/mois — sans recrutement
             </h2>
             <p className="mt-4 text-[#334155]">
               Déléguez vos tâches administratives à des assistants francophones augmentés par l&apos;IA. Pilotez en France, travaillez sereinement.

@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Orbitron } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
-import { SITE_URL } from "@/lib/site";
+import { absoluteUrl, SITE_URL } from "@/lib/site";
+
+const defaultOgImage = absoluteUrl("/opengraph-image");
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,11 +27,11 @@ const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "BeWork — Administratif & organisation pour artisans, BTP et PME | Francophone",
+    default: "BeWork — Partenaire administratif pour le BTP et les artisans",
     template: "%s | BeWork",
   },
   description:
-    "Pilotage administratif externalisé pour artisans, entreprises du bâtiment et PME francophones : devis, facturation chantier, relances, organisation. Équipes formées aux outils d'intelligence artificielle pour la performance, sous supervision humaine. Secrétariat supervisé depuis la France. Dès 215 € TTC/mois.",
+    "Administratif structuré pour le bâtiment : devis, relances, dossiers chantier, coordination — sans recruter. Cadre forfaitaire TTC, pilotage encadré en France. Forfaits dès 290 € TTC/mois (Structure).",
   applicationName: "BeWork",
   authors: [{ name: "BeWork", url: SITE_URL }],
   creator: "BeWork",
@@ -37,8 +39,8 @@ export const metadata: Metadata = {
   category: "business",
   keywords: [
     "administratif BTP",
-    "assistant administratif externalisé",
-    "secrétariat externalisé",
+    "externalisation administrative BTP",
+    "organisation administrative bâtiment",
     "externalisation administrative",
     "pilotage administratif PME",
     "organisation entreprise bâtiment",
@@ -62,17 +64,25 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: SITE_URL,
     siteName: "BeWork",
-    title: "BeWork — Administratif externalisé pour BTP, artisans et PME",
+    title: "BeWork — Partenaire administratif BTP",
     description:
-      "Organisation et pilotage administratif pour le bâtiment et les entreprises francophones — outils IA maîtrisés, supervision depuis la France. Dès 215 € TTC/mois.",
+      "Cadre, rigueur et lecture terrain pour artisans et entreprises du bâtiment. Forfaits TTC, pilotage en France.",
+    images: [
+      {
+        url: defaultOgImage,
+        width: 1200,
+        height: 630,
+        alt: "BeWork — Partenaire administratif pour le BTP et les artisans",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "BeWork — Administratif & organisation (BTP, artisans, PME)",
+    title: "BeWork — Administratif structuré pour le BTP",
     description:
-      "Externalisation administrative et secrétariat à distance, avec outils IA sous encadrement. Dès 215 € TTC/mois.",
+      "Relais administratif cadré : devis, relances, dossiers chantier. Forfaits TTC.",
   },
-  alternates: { canonical: SITE_URL, languages: { fr: SITE_URL } },
+  alternates: { canonical: SITE_URL, languages: { fr: SITE_URL, "x-default": SITE_URL } },
   ...(googleSiteVerification ? { verification: { google: googleSiteVerification } } : {}),
 };
 
@@ -88,6 +98,7 @@ const jsonLd = {
         "Pilotage administratif externalisé pour artisans, entreprises du BTP et PME francophones. Secrétariat et organisation à distance. France, Belgique, Suisse, Luxembourg.",
       inLanguage: "fr-FR",
       publisher: { "@id": `${SITE_URL}/#organization` },
+      image: { "@type": "ImageObject", url: defaultOgImage, width: 1200, height: 630 },
     },
     {
       "@type": "Organization",
@@ -111,7 +122,7 @@ const jsonLd = {
       "@id": `${SITE_URL}/#service`,
       name: "BeWork — Pilotage administratif externalisé",
       description:
-        "Externalisation administrative pour PME, artisans et BTP : devis, facturation chantier, relances, secrétariat et suivi de dossiers. Utilisation encadrée d'outils d'intelligence artificielle pour la productivité. Dès 215 € TTC/mois.",
+        "Externalisation administrative pour PME, artisans et BTP : devis, facturation chantier, relances et suivi de dossiers. Utilisation encadrée d'outils d'aide à l'exécution. Forfaits dès 290 € TTC/mois.",
       url: SITE_URL,
       provider: { "@id": `${SITE_URL}/#organization` },
       areaServed: { "@type": "GeoCircle", geoMidpoint: { "@type": "GeoCoordinates", latitude: 48.8566, longitude: 2.3522 }, geoRadius: "1000000" },

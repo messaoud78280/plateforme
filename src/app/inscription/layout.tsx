@@ -4,10 +4,10 @@ import { absoluteUrl } from "@/lib/site";
 const pageUrl = absoluteUrl("/inscription");
 
 export const metadata: Metadata = {
-  title: "Créer un compte client | Tester BeWork",
+  title: "Créer un compte client | BeWork",
   description:
-    "Inscrivez-vous sur BeWork pour tester l'assistant administratif externalisé. Créez votre compte client et commencez à déléguer vos tâches administratives dès 215 € TTC/mois.",
-  alternates: { canonical: pageUrl },
+    "Ouvrez votre espace client BeWork pour souscrire à un forfait administratif cadré (BTP et PME) et déposer vos demandes sur la plateforme.",
+  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   robots: { index: true, follow: true },
 };
 

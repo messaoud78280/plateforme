@@ -5,6 +5,7 @@ import { BLOG_ARTICLES, BLOG_SLUGS, type BlogSlug } from "@/content/blog-article
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 
 const blogUrl = absoluteUrl("/blog");
+const blogOgImage = absoluteUrl("/opengraph-image");
 
 const ARTICLE_INDEX: { slug: BlogSlug; title: string; excerpt: string; publishedTime: string }[] = [...BLOG_SLUGS]
   .map((slug) => {
@@ -30,7 +31,7 @@ export const metadata: Metadata = {
     "facturation chantier",
     "assistant administratif distance",
   ],
-  alternates: { canonical: blogUrl, languages: { fr: blogUrl } },
+  alternates: { canonical: blogUrl, languages: { fr: blogUrl, "x-default": blogUrl } },
   openGraph: {
     type: "website",
     locale: "fr_FR",
@@ -39,6 +40,7 @@ export const metadata: Metadata = {
     title: "Blog BeWork — Administratif externalisé & BTP",
     description:
       "Guides pratiques : administratif chantier, trésorerie, DICT, délégation et externalisation pour dirigeants et artisans.",
+    images: [{ url: blogOgImage, width: 1200, height: 630, alt: "Blog BeWork — administratif BTP" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -92,7 +94,7 @@ export default function BlogPage() {
               Tarifs
             </Link>
             <Link href="/inscription" className="rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af]">
-              Tester BeWork
+              Espace client
             </Link>
           </div>
         </div>

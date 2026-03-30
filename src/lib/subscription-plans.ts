@@ -6,39 +6,39 @@
 export const SUBSCRIPTION_PLANS = {
   DECOUVERTE: {
     planKey: "DECOUVERTE",
-    name: "Offre Découverte",
-    priceCents: 10900, // 109 €
-    priceLabel: "109",
-    billing: "one_shot" as const,
-    actionsIncluded: 60,
-    actionsLabel: "60 actions",
+    name: "Structure",
+    priceCents: 29000, // 290 €
+    priceLabel: "290",
+    billing: "monthly" as const,
+    actionsIncluded: 100,
+    actionsLabel: "Charge adaptée — niveau Structure",
   },
   STANDARD: {
     planKey: "STANDARD",
-    name: "Standard",
-    priceCents: 21500,
-    priceLabel: "215",
+    name: "Suivi",
+    priceCents: 49000,
+    priceLabel: "490",
     billing: "monthly" as const,
-    actionsIncluded: 120,
-    actionsLabel: "120 actions / mois",
+    actionsIncluded: 200,
+    actionsLabel: "Charge adaptée — niveau Suivi",
   },
   STANDARD_PLUS: {
     planKey: "STANDARD_PLUS",
-    name: "Business",
-    priceCents: 41500,
-    priceLabel: "415",
+    name: "Renfort",
+    priceCents: 79000,
+    priceLabel: "790",
     billing: "monthly" as const,
-    actionsIncluded: 240,
-    actionsLabel: "240 actions / mois",
+    actionsIncluded: 340,
+    actionsLabel: "Volume maîtrisé — niveau Renfort",
   },
   PREMIUM: {
     planKey: "PREMIUM",
-    name: "Premium",
-    priceCents: 63000,
-    priceLabel: "630",
+    name: "Pilotage",
+    priceCents: 119000,
+    priceLabel: "1190",
     billing: "monthly" as const,
-    actionsIncluded: 360,
-    actionsLabel: "360 actions / mois",
+    actionsIncluded: 520,
+    actionsLabel: "Capacité renforcée — niveau Pilotage",
   },
 } as const;
 
@@ -50,4 +50,3 @@ export function getPlan(planKey: string) {
   const key = planKey as PlanKey;
   return SUBSCRIPTION_PLANS[key] ?? null;
 }
-

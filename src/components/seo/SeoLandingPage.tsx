@@ -23,10 +23,10 @@ export function SeoLandingPage({ title, description, h1, intro, children }: SeoL
               Tarifs
             </Link>
             <Link href="/contact" className="rounded-lg surface-metallic-light px-5 py-2.5 text-sm font-medium text-[#1e293b] hover:bg-[#f8f9fb]">
-              Contact
+              Cadrage
             </Link>
             <Link href="/inscription" className="rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af]">
-              Tester BeWork
+              Espace client
             </Link>
           </div>
         </div>
@@ -40,19 +40,20 @@ export function SeoLandingPage({ title, description, h1, intro, children }: SeoL
             {children}
           </div>
           <div className="mt-12 rounded-xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-8">
-            <h2 className="text-xl font-bold text-[#0f172a]">Prêt à externaliser votre administratif ?</h2>
+            <h2 className="text-xl font-bold text-[#0f172a]">Vérifier l’adéquation avec votre charge</h2>
             <p className="mt-3 text-[#334155]">
-              BeWork accompagne les PME francophones en France, Belgique, Suisse et Luxembourg. Dès 215 € TTC/mois.
+              BeWork intervient pour le BTP et les PME exigeantes en France, Belgique, Suisse et Luxembourg — forfaits TTC
+              cadrés par volume.
             </p>
             <div className="mt-6 flex flex-wrap gap-4">
-              <Link href="/inscription" className="inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white hover:bg-[#1e40af]">
-                Tester BeWork
+              <Link href="/contact" className="inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white hover:bg-[#1e40af]">
+                Échanger sur votre besoin
               </Link>
-              <Link href="/inscription" className="inline-flex rounded-lg border-2 border-[#1d4ed8] px-6 py-3 font-semibold text-[#1d4ed8] hover:bg-[#eff6ff]">
-                Créer un compte
+              <Link href="/tarifs" className="inline-flex rounded-lg border-2 border-[#1d4ed8] px-6 py-3 font-semibold text-[#1d4ed8] hover:bg-[#eff6ff]">
+                Consulter les forfaits
               </Link>
-              <Link href="/contact" className="surface-metallic-outline inline-flex rounded-lg px-6 py-3 font-semibold text-[#334155] hover:text-[#1d4ed8]">
-                Déléguer une première tâche
+              <Link href="/inscription" className="surface-metallic-outline inline-flex rounded-lg px-6 py-3 font-semibold text-[#334155] hover:text-[#1d4ed8]">
+                Accès client
               </Link>
             </div>
           </div>

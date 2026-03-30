@@ -93,10 +93,10 @@ export default async function ContractPage() {
             <h3 className="mb-2 mt-6 font-semibold text-[#0f172a]">6. Tarifs et paiement</h3>
             <p className="mb-2">Les tarifs sont ceux affichés sur la page Tarifs du site :</p>
             <ul className="mb-4 list-disc pl-5">
-              <li>Offre Découverte : 109 € TTC (jusqu&apos;à 60 actions, sans abonnement)</li>
-              <li>Standard : 215 € TTC / mois (120 actions / mois)</li>
-              <li>Business : 415 € TTC / mois (240 actions / mois)</li>
-              <li>Premium : 630 € TTC / mois (360 actions / mois)</li>
+              <li>Structure : 290 € TTC / mois</li>
+              <li>Suivi : 490 € TTC / mois</li>
+              <li>Renfort : 790 € TTC / mois</li>
+              <li>Pilotage : 1 190 € TTC / mois</li>
             </ul>
             <p className="mb-4">Paiement mensuel d&apos;avance.</p>
 

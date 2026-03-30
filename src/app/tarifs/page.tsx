@@ -1,33 +1,46 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { ComparatifReveal } from "@/components/tarifs/ComparatifReveal";
 import { StickyCtaMobile } from "@/components/tarifs/StickyCtaMobile";
 import { TARIFS_PLANS } from "@/lib/tarifs-plans";
-import { absoluteUrl } from "@/lib/site";
+import { absoluteUrl, SITE_URL } from "@/lib/site";
 
 const tarifsUrl = absoluteUrl("/tarifs");
+const tarifsOgImage = absoluteUrl("/opengraph-image");
+
+function formatPriceTtc(value: string) {
+  const n = parseInt(value.replace(/\s/g, ""), 10);
+  if (Number.isNaN(n)) return value;
+  return n.toLocaleString("fr-FR");
+}
 
 export const metadata: Metadata = {
-  title: "Tarifs BeWork – Assistants administratifs virtuels dès 215 € TTC/mois",
+  title: "Forfaits administratifs BTP — cadre et valeur | BeWork",
   description:
-    "Offres Découverte, Standard, Business et Premium. Tarifs TTC, sans frais cachés. Tarification au quota d’actions, tous services inclus. Assistants francophones augmentés par l'IA, pilotage en France.",
-  alternates: { canonical: tarifsUrl, languages: { fr: tarifsUrl } },
+    "Structure, Suivi, Renfort et Pilotage : forfaits mensuels TTC pour entreprises du bâtiment. Cadre, suivi structuré, pilotage encadré en France.",
+  alternates: { canonical: tarifsUrl, languages: { fr: tarifsUrl, "x-default": tarifsUrl } },
   openGraph: {
     type: "website",
     locale: "fr_FR",
     url: tarifsUrl,
     siteName: "BeWork",
-    title: "Tarifs BeWork – Assistant administratif externalisé",
+    title: "Tarifs BeWork — partenaire administratif structuré",
     description:
-      "Forfaits Découverte, Standard, Business et Premium. Tarifs TTC tout compris, pilotage en France.",
+      "Quatre niveaux de structuration administrative pour le BTP. Tarifs TTC mensuels, sans frais cachés.",
+    images: [
+      {
+        url: tarifsOgImage,
+        width: 1200,
+        height: 630,
+        alt: "Forfaits administratifs BeWork pour le BTP",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Tarifs BeWork",
-    description: "Assistants administratifs virtuels dès 215 € TTC/mois. Sans frais cachés.",
+    description: "Forfaits administratifs pour le BTP — cadre TTC, sans frais cachés.",
   },
   robots: { index: true, follow: true },
 };
@@ -35,52 +48,86 @@ export const metadata: Metadata = {
 const plans = TARIFS_PLANS;
 
 const reassurance = [
-  { label: "Pilotage", desc: "Direction en France, suivi de qualité" },
-  { label: "Confidentialité", desc: "Données sécurisées, process rigoureux" },
-  { label: "Outils", desc: "Google, Microsoft, CRM selon vos usages" },
-  { label: "Support", desc: "Équipe réactive, points de suivi réguliers" },
+  { label: "Cadre", desc: "Périmètre défini, relation professionnelle claire" },
+  { label: "Pilotage", desc: "Encadrement en France, exigence sur la qualité des livrables" },
+  { label: "BTP", desc: "Devis, relances, chantier et logistique lus avec les contraintes terrain" },
+  { label: "Suivi", desc: "Plateforme, échanges datés, points d’ajustement réguliers" },
 ];
 
 const inclus = [
-  "Emails & organisation",
-  "Devis, factures & relances",
-  "Suivi dossiers / reporting",
-  "Saisie / CRM",
-  "Planning / RDV",
-  "Compte-rendus / mise en forme",
+  "Structuration des demandes et priorités",
+  "Devis, facturation, situations de travaux, relances",
+  "Suivi dossiers et restitution sur la plateforme",
+  "Saisie et outils métiers (selon vos accès)",
+  "Planning, coordination et échanges cadrés",
+  "Compte-rendus et documents préparés sous contrôle humain",
 ];
 
 const etapes = [
   {
-    title: "RDV & découverte",
-    desc: "Call pour comprendre vos activités, préférences, outils et volume. Proposition d’un profil sélectionné par notre équipe.",
+    title: "Échange & cartographie",
+    desc: "Nous passons en revue vos flux : commercial, réglementaire, logistique, urgences. Objectif : une proposition de formule alignée sur la charge réelle, pas sur un catalogue abstrait.",
   },
   {
-    title: "Onboarding",
-    desc: "Cadre de démarrage : rôles, objectifs, rituels de communication. Accès aux outils et prise en main.",
+    title: "Cadrage & démarrage",
+    desc: "Rôles, canaux, outils, rituels de pilotage : tout est posé par écrit avant l’exécution. Les accès et le périmètre sont validés ensemble.",
   },
   {
-    title: "Exécution + suivi",
-    desc: "Livraison des missions et points de suivi réguliers.",
+    title: "Exécution & pilotage",
+    desc: "Missions traitées dans le cadre convenu, avec reporting et ajustements lorsque l’activité évolue.",
   },
 ];
 
 const faq = [
-  { q: "Les prix sont-ils TTC ?", a: "Oui. Tous nos tarifs sont exprimés TTC, sans frais supplémentaires. Ce que vous voyez est ce que vous payez — pas de mauvaise surprise." },
-  { q: "Qu'est-ce qu'un périmètre ?", a: "Un périmètre correspond à un domaine de mission (ex. commercial, comptabilité, RH). Les tarifs indiqués couvrent jusqu'à 2 périmètres. Au-delà, un devis personnalisé est établi." },
-  { q: "Comment sont protégées mes données ?", a: "Nous appliquons des mesures de confidentialité et de sécurité adaptées. Les données sont traitées dans un cadre strict ; nous restons à votre disposition pour toute précision sur nos engagements." },
-  { q: "Quels sont les horaires et délais ?", a: "Les assistants travaillent du lundi au vendredi, alignés sur le fuseau français. Les délais de traitement dépendent du volume et de la complexité ; nous les cadrons ensemble lors du démarrage." },
-  { q: "Avec quels outils travaillez-vous ?", a: "Nous nous adaptons à vos outils : Google Workspace, Microsoft 365, CRM, messageries… Nous travaillons avec des agents IA adaptés selon la tâche à effectuer. Nos assistants utilisent votre environnement et la plateforme BeWork pour le suivi des dossiers." },
-  { q: "Y a-t-il un engagement ou une durée minimale ?", a: "Les conditions d'engagement et de résiliation sont précisées dans notre contrat. Contactez-nous pour en prendre connaissance." },
-  { q: "Peut-on monter en charge progressivement ?", a: "Oui. Nous pouvons démarrer sur un volume limité et ajuster selon vos besoins, en cohérence avec nos offres." },
-  { q: "Que se passe-t-il en cas d'absence de l'assistant ?", a: "Nous prévoyons une continuité de service et un remplacement si nécessaire. Les modalités sont détaillées dans le contrat." },
-  { q: "Comment communiquer avec mon assistant ?", a: "Vous échangez avec votre assistant directement via notre plateforme dédiée. Messagerie interne, email ou téléphone : les canaux de communication sont définis lors de votre onboarding pour garantir une collaboration fluide et efficace." },
+  { q: "Les prix sont-ils TTC ?", a: "Oui. Tous nos tarifs sont exprimés TTC, sans frais supplémentaires. La lisibilité du montant fait partie du cadre que nous proposons aux entreprises du bâtiment." },
+  { q: "Qu'est-ce qu'un périmètre ?", a: "Un périmètre correspond à un domaine de mission (ex. commercial, organisation, suivi réglementaire). Les tarifs indiqués couvrent jusqu'à deux périmètres. Au-delà, nous établissons un devis personnalisé." },
+  { q: "Comment sont protégées mes données ?", a: "Confidentialité et accès sont traités dans un cadre strict, avec des canaux dédiés. Nous pouvons préciser nos engagements lors du cadrage initial." },
+  { q: "Quels sont les horaires et délais ?", a: "L’équipe travaille du lundi au vendredi sur le fuseau français. Les délais dépendent du type de demande et du forfait ; les urgences chantier sont priorisées dans le cadre de votre offre." },
+  { q: "Avec quels outils travaillez-vous ?", a: "Nous intervenons dans votre environnement (Google, Microsoft, CRM, messageries, logiciels métiers) lorsque vous nous donnez les accès nécessaires. La plateforme BeWork centralise consignes, statuts et livrables." },
+  { q: "Y a-t-il un engagement ou une durée minimale ?", a: "Les modalités figurent au contrat. L’idée est un cadre clair des deux côtés, sans surprise sur la résiliation ou le renouvellement." },
+  { q: "Peut-on monter en charge progressivement ?", a: "Oui. Beaucoup de structures démarrent par Structure ou Suivi, puis passent à Renfort ou Pilotage lorsque l’activité augmente." },
+  { q: "Que se passe-t-il en cas d’indisponibilité ?", a: "La continuité de service est organisée : remplacement ou réaffectation selon les cas. Le détail est contractuel." },
+  { q: "Comment s’organisent les échanges ?", a: "Canal principal : la plateforme (messagerie, statuts, pièces). Email ou appel en complément si c’est cadré ensemble à l’onboarding." },
 ];
 
-export default async function TarifsPage() {
-  const session = await getServerSession(authOptions);
-  const isClient = session?.user?.role === "CLIENT";
+const tarifsStructuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "ItemList",
+      "@id": `${tarifsUrl}#plans`,
+      name: "Forfaits administratifs BeWork — BTP",
+      numberOfItems: plans.length,
+      itemListElement: plans.map((plan, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        item: {
+          "@type": "Offer",
+          name: `${plan.name} — BeWork`,
+          description: plan.tagline,
+          price: plan.price,
+          priceCurrency: "EUR",
+          url: tarifsUrl,
+          availability: "https://schema.org/InStock",
+          seller: { "@type": "Organization", name: "BeWork", url: SITE_URL },
+        },
+      })),
+    },
+    {
+      "@type": "FAQPage",
+      "@id": `${tarifsUrl}#faq`,
+      url: tarifsUrl,
+      inLanguage: "fr-FR",
+      mainEntity: faq.map((item) => ({
+        "@type": "Question",
+        name: item.q,
+        acceptedAnswer: { "@type": "Answer", text: item.a },
+      })),
+    },
+  ],
+};
 
+export default function TarifsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea] pb-24 md:pb-16">
       <header className="sticky top-0 z-20 border-b border-[#c8cdd6] bg-[#f8f9fb]/95 backdrop-blur-sm">
@@ -92,9 +139,9 @@ export default async function TarifsPage() {
             <Link
               href="/contact"
               className="hidden rounded-lg surface-metallic-light px-4 py-2 text-sm font-medium text-[#1e293b] transition hover:bg-[#f8f9fb] sm:inline-flex"
-              aria-label="Contact"
+              aria-label="Demander un cadrage"
             >
-              Contact
+              Cadrage
             </Link>
             <Link
               href="/connexion"
@@ -107,17 +154,24 @@ export default async function TarifsPage() {
         </div>
       </header>
 
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(tarifsStructuredData) }}
+      />
+
       <main className="mx-auto max-w-6xl px-4 py-12 md:py-16">
         {/* Hero */}
         <section className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-            Les tarifs BeWork
+          <h1 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl md:leading-tight">
+            Un cadre administratif adapté à votre niveau d&apos;activité
           </h1>
-          <p className="mt-4 max-w-2xl mx-auto text-lg leading-relaxed text-[#334155]">
-            Assistants administratifs francophones, pilotés, augmentés par l&apos;IA — gagnez du temps et maîtrisez vos coûts.
+          <p className="mt-5 max-w-2xl mx-auto text-lg leading-relaxed text-[#334155]">
+            Chaque offre correspond à un niveau de structuration et de suivi. L&apos;objectif n&apos;est pas de faire plus,
+            mais de faire mieux, avec méthode — pour les entreprises du bâtiment qui veulent tenir leurs dossiers sans
+            alourdir leur structure.
           </p>
-          <p className="mt-3 text-sm font-semibold text-[#0f172a]">
-            Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.
+          <p className="mt-4 text-sm font-semibold text-[#0f172a]">
+            Tous nos tarifs sont exprimés TTC / mois, sans frais supplémentaires.
           </p>
           {/* Réassurance */}
           <ul className="mt-8 flex flex-wrap justify-center gap-4 md:gap-6" role="list">
@@ -138,25 +192,31 @@ export default async function TarifsPage() {
           <h2 id="offres-heading" className="sr-only">
             Nos offres
           </h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {plans.map((plan) => (
+          <div className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:items-stretch lg:gap-5">
+            {plans.map((plan) => {
+              const isFeatured = plan.planKey === "STANDARD";
+              return (
               <article
                 key={plan.name}
-                className={`relative rounded-xl border-2 surface-metallic-light p-6 transition-all hover:shadow-md ${
-                  plan.badge ? "border-[#1d4ed8] shadow-[#1d4ed8]/10" : "border-[#c8cdd6] hover:border-[#9ca3af]"
-                }`}
+                className={`relative flex flex-col rounded-xl border-2 surface-metallic-light transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${
+                  isFeatured
+                    ? "z-10 border-[#1d4ed8] py-7 shadow-md shadow-[#1d4ed8]/15 ring-2 ring-[#1d4ed8]/30 md:px-7 md:py-8 lg:scale-[1.03]"
+                    : plan.badge
+                      ? "border-[#1d4ed8]/80 py-6 shadow-sm shadow-[#1d4ed8]/10"
+                      : "border-[#c8cdd6] py-6 hover:border-[#94a3b8]"
+                } px-5`}
               >
                 {plan.badge && (
-                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-[#1d4ed8] px-3 py-0.5 text-xs font-semibold text-white">
+                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#1d4ed8] px-3 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-white">
                     {plan.badge}
                   </span>
                 )}
-                <h3 className="border-b-2 border-[#1e293b] pb-2 font-semibold text-[#0f172a]">
+                <h3 className="border-b border-[#e2e8f0] pb-3 text-lg font-semibold tracking-tight text-[#0f172a]">
                   {plan.name}
                 </h3>
-                <div className="mt-4 flex flex-wrap items-baseline gap-x-1.5 gap-y-0">
+                <div className="mt-5 flex flex-wrap items-baseline gap-x-1.5 gap-y-0">
                   <span className="text-3xl font-bold tracking-tight text-[#1d4ed8] tabular-nums md:text-[2.125rem]">
-                    {plan.price}
+                    {formatPriceTtc(plan.price)}
                   </span>
                   <span className="text-xl font-semibold text-[#0f172a]">€</span>
                   <span className="text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-[#64748b]">TTC</span>
@@ -164,50 +224,126 @@ export default async function TarifsPage() {
                     <span className="text-base font-semibold text-[#64748b]">/ mois</span>
                   )}
                 </div>
-                <p className="mt-2 text-sm font-medium leading-snug text-[#0f172a]">{plan.tagline}</p>
-                <p className="mt-2 text-sm text-[#334155]">{plan.detail}</p>
-                <ul className="mt-2 space-y-0.5 text-[11px] leading-relaxed text-[#64748b]" aria-label="Garanties tarifaires">
+                <p className="mt-5 text-sm font-medium leading-relaxed text-[#0f172a]">{plan.tagline}</p>
+                {plan.detail ? (
+                  <p className="mt-3 text-sm leading-relaxed text-[#334155]">{plan.detail}</p>
+                ) : null}
+                <ul className="mt-5 space-y-1.5 text-[11px] leading-relaxed text-[#64748b]" aria-label="Garanties tarifaires">
                   <li>TTC, sans frais cachés</li>
-                  <li>Sans engagement long terme</li>
-                  <li>Démarrage rapide</li>
+                  <li>Cadre contractuel clair</li>
+                  <li>Démarrage après cadrage</li>
                 </ul>
-                <ul className="mt-4 space-y-2 text-sm text-[#334155]" role="list">
+                <ul className="mt-5 flex-1 space-y-3 text-sm leading-snug text-[#334155]" role="list">
                   {plan.highlights.map((h) => (
-                    <li key={h} className="flex items-start gap-2">
-                      <span className="mt-0.5 text-[#1d4ed8]" aria-hidden>✓</span>
+                    <li key={h} className="flex items-start gap-2.5">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#eff6ff] text-[10px] font-bold text-[#1d4ed8]" aria-hidden>
+                        ✓
+                      </span>
                       <span>{h}</span>
                     </li>
                   ))}
                 </ul>
-                <p className="mt-3 text-xs text-[#64748b] italic">
-                  Idéal pour : {plan.idealFor}
+                <div className="mt-5 border-t border-[#f1f5f9] pt-4" aria-label="Repère indicatif de charge">
+                  <p className="text-[11px] leading-snug text-[#94a3b8] md:text-xs md:leading-relaxed">
+                    <span className="block font-normal text-[#64748b]">{plan.equivalentNote.line1}</span>
+                    <span className="mt-1 block font-normal text-[#94a3b8]">{plan.equivalentNote.line2}</span>
+                  </p>
+                </div>
+                <p className="mt-4 border-t border-[#f1f5f9] pt-4 text-xs leading-relaxed text-[#64748b]">
+                  <span className="font-medium text-[#475569]">Idéal pour :</span> {plan.idealFor}
                 </p>
                 <Link
-                  href={isClient
-                    ? `/dashboard/abonnement/souscrire?plan=${plan.planKey}`
-                    : `/connexion?callbackUrl=${encodeURIComponent(`/dashboard/abonnement/souscrire?plan=${plan.planKey}`)}`}
-                  className="mt-4 block w-full rounded-lg bg-[#1d4ed8] py-2.5 text-center text-sm font-semibold text-white transition hover:bg-[#1e40af]"
+                  href="/contact"
+                  className="mt-5 block w-full rounded-lg bg-[#1d4ed8] py-3 text-center text-sm font-semibold text-white transition hover:bg-[#1e40af]"
                 >
-                  Choisir cette formule
+                  Demander un cadrage
                 </Link>
               </article>
-            ))}
+              );
+            })}
           </div>
-          <div className="mx-auto mt-8 max-w-2xl space-y-2 rounded-xl border border-[#e0e4ea] bg-[#f8fafc] px-6 py-5 text-center">
-            <p className="text-sm font-medium text-[#0f172a]">
-              Moins cher qu&apos;un recrutement, sans charges ni engagement.
+          <div className="mx-auto mt-10 max-w-2xl px-2 text-center">
+            <p className="text-[11px] font-normal leading-relaxed text-[#64748b] md:text-xs">
+              Les volumes indiqués sont des repères estimatifs.
             </p>
-            <p className="text-sm text-[#334155]">Vous payez uniquement ce dont vous avez besoin.</p>
-            <p className="text-xs text-[#64748b]">Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.</p>
+            <p className="mt-2 text-[11px] font-normal leading-relaxed text-[#64748b] md:text-xs">
+              Notre approche repose sur un cadre de travail structuré et un niveau de suivi adapté à votre activité, et non sur
+              une logique horaire stricte.
+            </p>
+          </div>
+          <div className="mx-auto mt-10 max-w-3xl rounded-xl border border-[#e0e4ea] bg-[#f8fafc] px-6 py-6 text-center md:px-8 md:py-7">
+            <p className="text-sm font-medium leading-relaxed text-[#0f172a] md:text-base">
+              Nos offres s&apos;adressent à des entreprises du bâtiment en activité réelle, souhaitant structurer leur
+              organisation administrative.
+            </p>
+            <p className="mt-3 text-sm leading-relaxed text-[#334155] md:text-[0.9375rem]">
+              Elles ne sont pas adaptées à des besoins ponctuels ou à une logique de prestation à la demande.
+            </p>
+          </div>
+
+          <section className="mx-auto mt-14 max-w-3xl" aria-labelledby="quelle-offre-heading">
+            <h2 id="quelle-offre-heading" className="text-center text-xl font-bold tracking-tight text-[#0f172a] md:text-2xl">
+              Quelle offre choisir ?
+            </h2>
+            <ul className="mt-8 space-y-5 text-left text-[#334155]">
+              <li className="rounded-xl border border-[#e2e8f0] bg-white/80 px-5 py-4 shadow-sm">
+                <span className="font-semibold text-[#0f172a]">Structure</span>
+                <span className="mt-1 block text-sm leading-relaxed">
+                  Si votre administratif est encore irrégulier et peu structuré.
+                </span>
+              </li>
+              <li className="rounded-xl border border-[#e2e8f0] bg-white/80 px-5 py-4 shadow-sm">
+                <span className="font-semibold text-[#0f172a]">Suivi</span>
+                <span className="mt-1 block text-sm leading-relaxed">
+                  Si vous avez une activité continue avec besoin de suivi fiable.
+                </span>
+              </li>
+              <li className="rounded-xl border border-[#e2e8f0] bg-white/80 px-5 py-4 shadow-sm">
+                <span className="font-semibold text-[#0f172a]">Renfort</span>
+                <span className="mt-1 block text-sm leading-relaxed">
+                  Si vous gérez plusieurs dossiers ou chantiers en parallèle.
+                </span>
+              </li>
+              <li className="rounded-xl border border-[#e2e8f0] bg-white/80 px-5 py-4 shadow-sm">
+                <span className="font-semibold text-[#0f172a]">Pilotage</span>
+                <span className="mt-1 block text-sm leading-relaxed">
+                  Si vous souhaitez déléguer avec un niveau de suivi élevé et structuré.
+                </span>
+              </li>
+            </ul>
+          </section>
+
+          <div className="mx-auto mt-14 max-w-3xl rounded-xl border border-[#cbd5e1] bg-[#f1f5f9]/60 px-6 py-7 text-center md:px-10">
+            <p className="text-sm leading-relaxed text-[#334155] md:text-base">
+              BeWork ne propose pas une prestation administrative classique.
+            </p>
+            <p className="mt-4 text-sm leading-relaxed text-[#334155] md:text-[0.9375rem]">
+              Nous mettons en place un cadre de travail structuré, adapté aux réalités du terrain, afin de garantir un suivi
+              fiable et durable.
+            </p>
+            <p className="mt-4 text-sm leading-relaxed text-[#334155] md:text-[0.9375rem]">
+              Notre approche s&apos;adresse à des professionnels du bâtiment qui souhaitent organiser leur activité, pas
+              simplement déléguer des tâches.
+            </p>
+          </div>
+
+          <div className="mx-auto mt-10 max-w-2xl space-y-2 rounded-xl border border-[#e0e4ea] bg-[#f8fafc] px-6 py-5 text-center">
+            <p className="text-sm font-medium text-[#0f172a]">
+              Externaliser avec un cadre défini évite de porter seul salaire, charges et management d&apos;un poste interne à
+              temps plein.
+            </p>
+            <p className="text-sm text-[#334155]">
+              Vous choisissez un niveau d&apos;accompagnement cohérent avec votre charge — pas une relation informelle ni une
+              disponibilité illimitée.
+            </p>
+            <p className="text-xs text-[#64748b]">Tous nos tarifs sont exprimés TTC / mois, sans frais supplémentaires.</p>
           </div>
           <p className="mt-6 max-w-2xl mx-auto text-center text-sm text-[#334155]">
-            *Tarifs valables pour 2 périmètres maximum. Pour 3 périmètres ou plus, contactez-nous en France pour un tarif personnalisé.
-          </p>
-          <p className="mt-2 max-w-2xl mx-auto text-center text-sm text-[#334155]">
-            Minimum facturé : 1 action par demande.
+            *Tarifs valables pour 2 périmètres maximum. Pour 3 périmètres ou plus, contactez-nous pour un tarif personnalisé.
           </p>
           <p className="mt-6 max-w-3xl mx-auto text-center text-sm text-[#64748b] leading-relaxed">
-            BeWork fournit un service d&apos;assistance administrative externalisée. Les prestations sont réalisées par notre équipe interne. Les clients achètent un volume de services administratifs et non la mise à disposition de personnel.
+            BeWork fournit une prestation d&apos;organisation et d&apos;assistance administrative externalisée, encadrée par
+            contrat. La relation est celle d&apos;un partenaire de pilotage, pas d&apos;un simple portage de personnel.
           </p>
 
           {/* Solution dédiée — Full-time */}
@@ -221,7 +357,7 @@ export default async function TarifsPage() {
             <div className="mt-8 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <ul className="space-y-3 text-[#e2e8f0]" role="list">
-                  {["Volume d'actions personnalisé", "Assistant administratif dédié", "Organisation adaptée à votre entreprise", "Priorité maximale"].map((item) => (
+                  {["Capacité sur mesure", "Interlocuteur dédié", "Organisation adaptée à votre entreprise", "Priorité maximale"].map((item) => (
                     <li key={item} className="flex items-center gap-2">
                       <span className="text-[#60a5fa]" aria-hidden>✓</span>
                       {item}
@@ -241,7 +377,7 @@ export default async function TarifsPage() {
                   href="/contact"
                   className="mt-6 inline-flex rounded-lg bg-white px-6 py-3 font-semibold text-[#0f172a] shadow-md transition hover:bg-[#f1f5f9] focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#1e293b]"
                 >
-                  Nous contacter
+                  Étudier un volume sur mesure
                 </Link>
               </div>
               <div className="shrink-0 rounded-xl border border-[#334155] bg-[#1e293b]/80 px-6 py-4 lg:ml-8">
@@ -251,19 +387,6 @@ export default async function TarifsPage() {
               </div>
             </div>
           </section>
-
-          {/* Qu’est-ce qu’une action ? */}
-          <div className="mt-10 rounded-2xl surface-metallic-light p-8">
-            <h3 className="text-xl font-bold text-[#0f172a] md:text-2xl">
-              Qu’est-ce qu’une action ?
-            </h3>
-            <p className="mt-3 text-[#334155] leading-relaxed">
-              Une action correspond à une tâche administrative simple réalisée par notre équipe (gestion d’email, recherche d’information, création de document, organisation de rendez-vous, etc.).
-            </p>
-            <p className="mt-3 text-[#334155] leading-relaxed">
-              La plupart des actions représentent environ 12 minutes de traitement administratif (indicatif : cinq actions par heure).
-            </p>
-          </div>
 
           {/* Conciergerie — sur devis */}
           <div className="mt-10 rounded-xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-6 text-center">
@@ -328,7 +451,7 @@ export default async function TarifsPage() {
             className="w-full rounded-lg bg-[#1d4ed8] px-8 py-4 text-center font-semibold text-white shadow-md transition hover:bg-[#1e40af] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2 sm:w-auto"
             aria-label="Demande de contact et rendez-vous"
           >
-            Demande de contact et RDV
+            Échanger sur votre fonctionnement
           </Link>
           <Link
             href="/connexion"
@@ -341,37 +464,37 @@ export default async function TarifsPage() {
 
         {/* Tableau comparatif (révélé au clic) */}
         <ComparatifReveal>
-          {/* Tableau des offres Découverte / Standard / Business / Premium */}
+          {/* Tableau des offres Essentiel / Standard / Renfort / Pilotage */}
           <div className="overflow-x-auto rounded-xl surface-metallic-light">
             <table className="w-full min-w-[500px] text-left text-sm" role="grid">
               <caption className="sr-only">Comparatif des offres BeWork</caption>
               <thead>
                 <tr className="border-b border-[#e0e4ea] bg-[#f8f9fb]">
                   <th className="px-4 py-3 font-semibold text-[#0f172a]">Critère</th>
-                  <th className="px-4 py-3 font-semibold text-[#0f172a]">Découverte</th>
-                  <th className="px-4 py-3 font-semibold text-[#0f172a]">Standard</th>
-                  <th className="px-4 py-3 font-semibold text-[#0f172a]">Business</th>
-                  <th className="px-4 py-3 font-semibold text-[#0f172a]">Premium</th>
+                  <th className="px-4 py-3 font-semibold text-[#0f172a]">Structure</th>
+                  <th className="px-4 py-3 font-semibold text-[#0f172a]">Suivi</th>
+                  <th className="px-4 py-3 font-semibold text-[#0f172a]">Renfort</th>
+                  <th className="px-4 py-3 font-semibold text-[#0f172a]">Pilotage</th>
                 </tr>
               </thead>
               <tbody className="text-[#334155]">
                 <tr className="border-b border-[#e0e4ea]">
-                  <td className="px-4 py-3">Prix TTC</td>
+                  <td className="px-4 py-3">Prix TTC / mois</td>
                   <td className="px-4 py-3">
-                    <span className="tarif-emphase text-[#0f172a]">109</span> € TTC
+                    <span className="tarif-emphase text-[#0f172a]">290</span> € TTC
                   </td>
                   <td className="px-4 py-3">
-                    <span className="tarif-emphase text-[#0f172a]">215</span> € TTC / mois
+                    <span className="tarif-emphase text-[#0f172a]">490</span> € TTC
                   </td>
                   <td className="px-4 py-3">
-                    <span className="tarif-emphase text-[#0f172a]">415</span> € TTC / mois
+                    <span className="tarif-emphase text-[#0f172a]">790</span> € TTC
                   </td>
                   <td className="px-4 py-3">
-                    <span className="tarif-emphase text-[#0f172a]">630</span> € TTC / mois
+                    <span className="tarif-emphase text-[#0f172a]">1 190</span> € TTC
                   </td>
                 </tr>
-                <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Actions incluses</td><td className="px-4 py-3">Jusqu’à 60</td><td className="px-4 py-3">120 / mois</td><td className="px-4 py-3">240 / mois</td><td className="px-4 py-3">360 / mois</td></tr>
-                <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Abonnement</td><td className="px-4 py-3">Non</td><td className="px-4 py-3">Oui</td><td className="px-4 py-3">Oui</td><td className="px-4 py-3">Oui</td></tr>
+                <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Niveau d&apos;accompagnement</td><td className="px-4 py-3">Charge adaptée</td><td className="px-4 py-3">Suivi structuré</td><td className="px-4 py-3">Volume maîtrisé renforcé</td><td className="px-4 py-3">Capacité maximale</td></tr>
+                <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Abonnement</td><td className="px-4 py-3">Oui</td><td className="px-4 py-3">Oui</td><td className="px-4 py-3">Oui</td><td className="px-4 py-3">Oui</td></tr>
                 <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Priorité de traitement</td><td className="px-4 py-3">Standard</td><td className="px-4 py-3">Standard</td><td className="px-4 py-3">Priorité</td><td className="px-4 py-3">Priorité élevée</td></tr>
                 <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Périmètres inclus</td><td colSpan={4} className="px-4 py-3">Max 2 (au-delà : devis sur mesure)</td></tr>
                 <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Support / pilotage</td><td colSpan={4} className="px-4 py-3">Pilotage en France, points de suivi réguliers</td></tr>
@@ -383,7 +506,7 @@ export default async function TarifsPage() {
           {/* Bloc comparatif coût réel (existant) */}
           <section className="mt-10 rounded-2xl border-2 border-[#1d4ed8]/20 surface-metallic-light p-6 md:p-10">
             <h3 className="text-center text-xl font-bold text-[#0f172a] md:text-2xl">
-              Comparatif : coût réel d&apos;un assistant vs nos assistants virtuels
+              Comparatif : coût d&apos;un poste administratif interne vs forfait externalisé
             </h3>
             <p className="mt-3 text-center text-sm text-[#64748b]">
               Référence : salaire brut 2 200 €/mois (région parisienne). Coût réel = salaire + charges + avantages + bureau + RH.
@@ -424,7 +547,7 @@ export default async function TarifsPage() {
               <div className="rounded-xl border-2 border-[#1d4ed8] bg-[#eff6ff] p-6">
                 <h4 className="text-sm font-semibold uppercase tracking-wide text-[#1d4ed8]">BeWork</h4>
                 <p className="mt-4 text-3xl font-bold text-[#1d4ed8]">
-                  215 € à 1 230 € <span className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">TTC</span>{" "}
+                  290 € à 1 190 € <span className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">TTC</span>{" "}
                   <span className="text-lg font-normal text-[#64748b]">/ mois</span>
                 </p>
                 <p className="mt-1 text-[#334155]">Tout compris — sans frais cachés</p>
@@ -463,18 +586,18 @@ export default async function TarifsPage() {
         {/* CTA bas de page */}
         <section className="mt-14 rounded-2xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-8 text-center md:p-10">
           <h2 className="text-xl font-bold text-[#0f172a] md:text-2xl">
-            Prêt à démarrer ?
+            Faisons le point sur votre organisation
           </h2>
-          <p className="mt-2 text-[#334155]">
-            Demandez un rendez-vous pour un cadrage personnalisé.
+          <p className="mt-3 max-w-xl mx-auto text-sm leading-relaxed text-[#334155] md:text-base">
+            Nous vérifions ensemble si notre accompagnement est adapté à votre activité.
           </p>
           <div className="mt-6 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
               href="/contact"
               className="w-full rounded-lg bg-[#1d4ed8] px-8 py-4 text-center font-semibold text-white shadow-md transition hover:bg-[#1e40af] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2 sm:w-auto"
-              aria-label="Demande de contact et rendez-vous"
+              aria-label="Échanger sur votre fonctionnement"
             >
-              Demande de contact et RDV
+              Échanger sur votre fonctionnement
             </Link>
             <Link
               href="/connexion"

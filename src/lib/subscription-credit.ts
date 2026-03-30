@@ -8,8 +8,8 @@ import { getMonthStart } from "@/lib/actions";
 
 /**
  * Après un paiement réussi : créditer les actions, mettre à jour User et Subscription.
- * - Offre Découverte : 60 actions une fois, pas de renouvellement
- * - Standard / Business / Premium : crédit mensuel, renouvellement à J+1 mois
+ * - Structure (DECOUVERTE) : abonnement mensuel, crédit au niveau Structure
+ * - Suivi / Renfort / Pilotage : crédit mensuel, renouvellement à J+1 mois
  */
 export async function creditActionsAfterPayment(
   userId: string,
@@ -21,9 +21,7 @@ export async function creditActionsAfterPayment(
   if (!plan) return { success: false, error: "Formule inconnue" };
 
   const now = new Date();
-  const renewsAt = plan.billing === "monthly"
-    ? new Date(now.getFullYear(), now.getMonth() + 1, now.getDate(), 0, 0, 0, 0)
-    : null;
+  const renewsAt = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate(), 0, 0, 0, 0);
 
   await prisma.$transaction(async (tx) => {
     // 1. Crédit sur le compte User (remplace le quota du mois)
@@ -49,7 +47,7 @@ export async function creditActionsAfterPayment(
       data: {
         userId,
         type: "CREDIT",
-        source: plan.billing === "one_shot" ? "ONE_TIME" : "SUBSCRIPTION",
+        source: "SUBSCRIPTION",
         amount: plan.actionsIncluded,
         description: `Crédit ${plan.name} - ${plan.actionsLabel}`,
         referenceId: paymentId,

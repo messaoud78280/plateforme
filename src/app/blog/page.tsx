@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
+import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { BLOG_ARTICLES, BLOG_SLUGS, type BlogSlug } from "@/content/blog-articles";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 
@@ -84,21 +85,7 @@ export default function BlogPage() {
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogListLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }} />
-      <header className="sticky top-0 z-20 border-b border-[#c8cdd6] bg-[#f8f9fb]">
-        <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="shrink-0">
-            <BeWorkLogo size="sm" />
-          </Link>
-          <div className="flex items-center gap-3">
-            <Link href="/tarifs" className="rounded-lg surface-metallic-light px-5 py-2.5 text-sm font-medium text-[#1e293b] hover:bg-[#f8f9fb]">
-              Tarifs
-            </Link>
-            <Link href="/inscription" className="rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af]">
-              Espace client
-            </Link>
-          </div>
-        </div>
-      </header>
+      <MarketingSiteHeader plainBg />
 
       <main className="px-6 py-16 md:py-24">
         <div className="mx-auto max-w-3xl">

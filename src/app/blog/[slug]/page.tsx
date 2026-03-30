@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
+import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { BLOG_ARTICLES, BLOG_SLUGS, type BlogArticle, type BlogSlug } from "@/content/blog-articles";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 
@@ -80,19 +81,7 @@ export default async function BlogArticlePage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
-      <header className="sticky top-0 z-20 border-b border-[#c8cdd6] bg-[#f8f9fb]">
-        <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="shrink-0">
-            <BeWorkLogo size="sm" />
-          </Link>
-          <div className="flex items-center gap-3">
-            <Link href="/blog" className="text-sm font-medium text-[#64748b] hover:text-[#0f172a]">Blog</Link>
-            <Link href="/contact" className="rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af]">
-              Cadrage
-            </Link>
-          </div>
-        </div>
-      </header>
+      <MarketingSiteHeader plainBg showBlogLink />
 
       <main className="px-6 py-16 md:py-24">
         <article className="mx-auto max-w-2xl" itemScope itemType="https://schema.org/BlogPosting">

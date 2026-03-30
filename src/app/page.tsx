@@ -29,7 +29,7 @@ const RESSOURCES_BLOG = [
 export const metadata: Metadata = {
   title: "BeWork | Partenaire administratif pour artisans et entreprises du bâtiment",
   description:
-    "Cadre, rigueur et lecture terrain : devis et relances suivis, dossiers chantier structurés, coordination fournisseurs — sans recruter. Vingt ans d’expérience artisanale au cœur de la méthode. Forfaits TTC à partir de 290 €/mois (Structure). France, Belgique, Suisse, Luxembourg.",
+    "Cadre, rigueur et lecture terrain : devis et relances suivis, dossiers chantier structurés, coordination fournisseurs — sans recruter. Méthode portée par une dirigeante du BTP en Île-de-France, vingt ans sur le terrain. Forfaits TTC à partir de 290 €/mois (Structure). France, Belgique, Suisse, Luxembourg.",
   robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
   keywords: [
     "administratif BTP",
@@ -144,7 +144,14 @@ export default function HomePage() {
                 taglineSub="Cadre, rigueur, lecture terrain"
               />
             </Link>
-            <div className="flex shrink-0 items-center gap-2 pt-0.5 sm:gap-2.5">
+            <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 pt-0.5 sm:gap-2.5">
+              <Link
+                href="/notre-facon-de-travailler"
+                className="rounded-lg border border-[#e2e8f0] bg-white/90 px-2.5 py-2 text-xs font-semibold text-[#1d4ed8] shadow-sm transition-all hover:bg-[#eff6ff] sm:px-3 sm:text-sm"
+                title="Notre méthode — flux, organisation et forfaits"
+              >
+                Méthode
+              </Link>
               <Link
                 href="/connexion"
                 className="rounded-lg surface-metallic-light px-3.5 py-2 text-xs font-medium text-[#1e293b] shadow-sm transition-all hover:bg-[#f8f9fb] sm:px-4 sm:text-sm"
@@ -177,6 +184,9 @@ export default function HomePage() {
             </a>
             <Link className="whitespace-nowrap" href="/tarifs" title="Tarifs — sans recrutement ni charges">
               Tarifs
+            </Link>
+            <Link className="whitespace-nowrap" href="/notre-facon-de-travailler" title="Flux, organisation et forfaits">
+              Notre méthode
             </Link>
             <Link className="whitespace-nowrap" href="/blog">
               Blog
@@ -294,9 +304,10 @@ export default function HomePage() {
                     <strong className="font-semibold text-[#0f172a]">suivi administratif</strong> sous votre validation.
                   </p>
                   <p className="text-base leading-relaxed text-[#0f172a] md:text-lg">
-                    <strong className="font-semibold text-[#0f172a]">Vingt ans sur le terrain</strong>, côté artisanat, chez
-                    la fondatrice : on ne découvre pas vos contraintes au fil des mails — on les lit dès le brief. Sans
-                    embauche, avec un cadre contractuel clair.
+                    <strong className="font-semibold text-[#0f172a]">Vingt ans sur le terrain du BTP</strong>,{" "}
+                    <strong className="font-semibold text-[#0f172a]">en tant que dirigeante d&apos;entreprise en Île-de-France</strong>{" "}
+                    : on ne découvre pas vos contraintes au fil des mails — on les lit dès le brief. Sans embauche, avec un
+                    cadre contractuel clair.
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
@@ -932,13 +943,13 @@ export default function HomePage() {
         <section id="equipe" className="px-6 py-24 md:py-28">
           <div className="mx-auto max-w-6xl">
             <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-              Une solution pensée par une ancienne artisane
+              Une solution pensée par une dirigeante du BTP en Île-de-France
             </h2>
             <p className="mt-5 max-w-3xl text-lg leading-relaxed text-[#334155]">
               BeWork n&apos;est pas une plateforme générique. Elle porte{" "}
-              <strong className="font-semibold text-[#0f172a]">vingt ans de terrain en artisanat</strong> : délais de
-              chantier, tension de trésorerie, fournisseurs exigeants, paperasse du soir et dossiers qui piquent. Cette
-              lecture du BTP guide chaque process — de la relance client au suivi d&apos;une DICT.
+              <strong className="font-semibold text-[#0f172a]">vingt ans de terrain à la tête d&apos;entreprises du bâtiment</strong>{" "}
+              : délais de chantier, tension de trésorerie, fournisseurs exigeants, paperasse du soir et dossiers qui piquent.
+              Cette lecture du BTP guide chaque process — de la relance client au suivi d&apos;une DICT.
             </p>
 
             {/* Laure Olivie — Fondatrice */}
@@ -968,8 +979,10 @@ export default function HomePage() {
                 <p className="mt-6 text-[#334155] leading-relaxed">
                   Société française fondée par{" "}
                   <strong className="font-semibold text-[#0f172a]">Laure Olivie</strong>,{" "}
-                  <strong className="font-semibold text-[#0f172a]">vingt ans d&apos;expérience en artisanat</strong>,
-                  formatrice IA reconnue et diplômée. Votre interlocution principale passe par notre agence en région
+                  <strong className="font-semibold text-[#0f172a]">
+                    dirigeante d&apos;entreprise du BTP en Île-de-France, vingt ans sur le terrain
+                  </strong>
+                  , formatrice IA reconnue et diplômée. Votre interlocution principale passe par notre agence en région
                   parisienne, qu&apos;elle pilote au quotidien. La plateforme opérationnelle est supervisée depuis la France
                   en temps réel : même exigence, même réactivité. L&apos;équipe exécutive est composée de diplômés Bac+5
                   minimum, rodés aux outils d&apos;intelligence artificielle — au service de la précision, pas du gadget.
@@ -986,9 +999,9 @@ export default function HomePage() {
                     Gérée par Laure Olivie, votre interlocutrice principale
                   </p>
                   <p className="mt-3 text-[#334155] leading-relaxed">
-                    Laure Olivie — ancienne artisane, vingt ans sur le terrain — pilote l&apos;agence en Île-de-France.
-                    Elle structure les missions, arbitre la qualité et garde le lien direct avec les dirigeants. Une exigence
-                    forgée sur le chantier, transposée à votre administratif.
+                    Laure Olivie — dirigeante d&apos;entreprise du BTP, vingt ans sur le terrain — pilote l&apos;agence en
+                    Île-de-France. Elle structure les missions, arbitre la qualité et garde le lien direct avec les
+                    dirigeants. Une exigence forgée sur le chantier et en entreprise, transposée à votre administratif.
                   </p>
                 </div>
                 <div className="flex flex-col">
@@ -1017,7 +1030,7 @@ export default function HomePage() {
             </h2>
             <ul className="mt-8 grid gap-4 md:grid-cols-2 md:items-stretch">
               {[
-                "ADN terrain : vingt ans d'artisanat chez la fondatrice — briefs qui parlent chantier, fournisseurs et cash-flow.",
+                "ADN terrain : vingt ans de BTP et de direction d'entreprise chez la fondatrice — briefs qui parlent chantier, fournisseurs et cash-flow.",
                 "Interlocuteur principal en Île-de-France (Laure Olivie) : cadrage, exigence, disponibilité sur l'organisationnel.",
                 "Une équipe pour l'administratif, la logistique et la coordination — pilotée depuis la France, au même fuseau.",
                 "Profils Bac+5, IA et process : rigueur sur délais, démarches et dossiers sensibles (sous votre validation).",
@@ -1387,6 +1400,9 @@ export default function HomePage() {
             </Link>
             <Link className="font-medium transition-colors hover:text-[#0f172a]" href="/faq">
               FAQ
+            </Link>
+            <Link className="font-medium transition-colors hover:text-[#0f172a]" href="/notre-facon-de-travailler">
+              Notre façon de travailler
             </Link>
             <Link className="font-medium transition-colors hover:text-[#0f172a]" href="/tarifs">
               Tarifs pilotage administratif

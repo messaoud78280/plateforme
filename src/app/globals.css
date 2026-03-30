@@ -160,6 +160,11 @@
     0 10px 30px rgba(15, 23, 42, 0.14);
 }
 
+/* Badge « pill » centré en -top : sans ça, overflow:hidden + inset highlight coupent le badge (ligne sombre). */
+.surface-metallic-light.surface-metallic-light--badge-pill {
+  overflow: visible;
+}
+
 /* Bandeaux larges : un ton plus clair que .surface-metallic-light, mais bien visibles */
 .surface-metallic-light.surface-metallic-light--soft {
   border-color: rgba(100, 116, 139, 0.45);

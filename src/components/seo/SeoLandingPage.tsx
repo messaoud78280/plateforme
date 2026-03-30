@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
+import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 
 type SeoLandingPageProps = {
   title: string;
@@ -13,24 +14,7 @@ type SeoLandingPageProps = {
 export function SeoLandingPage({ title, description, h1, intro, children }: SeoLandingPageProps) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
-      <header className="sticky top-0 z-20 border-b border-[#c8cdd6] bg-[#f8f9fb]">
-        <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="shrink-0">
-            <BeWorkLogo size="sm" />
-          </Link>
-          <div className="flex items-center gap-3">
-            <Link href="/tarifs" className="hidden rounded-lg surface-metallic-light px-5 py-2.5 text-sm font-medium text-[#1e293b] sm:inline-flex hover:bg-[#f8f9fb]">
-              Tarifs
-            </Link>
-            <Link href="/contact" className="rounded-lg surface-metallic-light px-5 py-2.5 text-sm font-medium text-[#1e293b] hover:bg-[#f8f9fb]">
-              Cadrage
-            </Link>
-            <Link href="/inscription" className="rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af]">
-              Espace client
-            </Link>
-          </div>
-        </div>
-      </header>
+      <MarketingSiteHeader plainBg />
 
       <main className="px-6 py-16 md:py-24">
         <article className="mx-auto max-w-3xl">

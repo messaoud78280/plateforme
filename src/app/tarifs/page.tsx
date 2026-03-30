@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BeWorkLogo } from "@/components/BeWorkLogo";
+import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { ComparatifReveal } from "@/components/tarifs/ComparatifReveal";
 import { StickyCtaMobile } from "@/components/tarifs/StickyCtaMobile";
 import { TARIFS_PLANS } from "@/lib/tarifs-plans";
@@ -130,29 +130,7 @@ const tarifsStructuredData = {
 export default function TarifsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea] pb-24 md:pb-16">
-      <header className="sticky top-0 z-20 border-b border-[#c8cdd6] bg-[#f8f9fb]/95 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <Link href="/" className="shrink-0" aria-label="BeWork - Retour à l'accueil">
-            <BeWorkLogo size="sm" />
-          </Link>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/contact"
-              className="hidden rounded-lg surface-metallic-light px-4 py-2 text-sm font-medium text-[#1e293b] transition hover:bg-[#f8f9fb] sm:inline-flex"
-              aria-label="Demander un cadrage"
-            >
-              Cadrage
-            </Link>
-            <Link
-              href="/connexion"
-              className="rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1e40af] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2"
-              aria-label="Accéder à mon espace"
-            >
-              Accéder
-            </Link>
-          </div>
-        </div>
-      </header>
+      <MarketingSiteHeader />
 
       <script
         type="application/ld+json"
@@ -198,7 +176,7 @@ export default function TarifsPage() {
               return (
               <article
                 key={plan.name}
-                className={`relative flex flex-col rounded-xl border-2 surface-metallic-light transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${
+                className={`relative flex flex-col rounded-xl border-2 surface-metallic-light surface-metallic-light--badge-pill transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${
                   isFeatured
                     ? "z-10 border-[#1d4ed8] py-7 shadow-md shadow-[#1d4ed8]/15 ring-2 ring-[#1d4ed8]/30 md:px-7 md:py-8 lg:scale-[1.03]"
                     : plan.badge
@@ -207,7 +185,7 @@ export default function TarifsPage() {
                 } px-5`}
               >
                 {plan.badge && (
-                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#1d4ed8] px-3 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-white">
+                  <span className="absolute -top-3 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#1d4ed8] px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white shadow-[0_2px_8px_rgba(29,78,216,0.4)]">
                     {plan.badge}
                   </span>
                 )}
@@ -224,7 +202,15 @@ export default function TarifsPage() {
                     <span className="text-base font-semibold text-[#64748b]">/ mois</span>
                   )}
                 </div>
-                <p className="mt-5 text-sm font-medium leading-relaxed text-[#0f172a]">{plan.tagline}</p>
+                <div className="mt-2.5" aria-label="Repère indicatif de charge">
+                  <p className="text-[11px] leading-snug text-[#64748b] md:text-xs md:leading-relaxed">
+                    <span className="block font-normal">{plan.equivalentNote.line1}</span>
+                    <span className="mt-0.5 block font-normal text-[#94a3b8]">{plan.equivalentNote.line2}</span>
+                  </p>
+                </div>
+                <p className="mt-4 border-t border-[#e2e8f0] pt-4 text-sm font-medium leading-relaxed text-[#0f172a]">
+                  {plan.tagline}
+                </p>
                 {plan.detail ? (
                   <p className="mt-3 text-sm leading-relaxed text-[#334155]">{plan.detail}</p>
                 ) : null}
@@ -243,12 +229,6 @@ export default function TarifsPage() {
                     </li>
                   ))}
                 </ul>
-                <div className="mt-5 border-t border-[#f1f5f9] pt-4" aria-label="Repère indicatif de charge">
-                  <p className="text-[11px] leading-snug text-[#94a3b8] md:text-xs md:leading-relaxed">
-                    <span className="block font-normal text-[#64748b]">{plan.equivalentNote.line1}</span>
-                    <span className="mt-1 block font-normal text-[#94a3b8]">{plan.equivalentNote.line2}</span>
-                  </p>
-                </div>
                 <p className="mt-4 border-t border-[#f1f5f9] pt-4 text-xs leading-relaxed text-[#64748b]">
                   <span className="font-medium text-[#475569]">Idéal pour :</span> {plan.idealFor}
                 </p>

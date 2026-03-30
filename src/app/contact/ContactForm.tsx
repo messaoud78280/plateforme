@@ -144,20 +144,8 @@ export default function ContactForm() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea] py-12 px-4">
+    <div className="px-4 py-8 md:py-10">
       <div className="mx-auto max-w-3xl">
-        <header className="mb-10 flex items-center justify-between">
-          <Link href="/">
-            <BeWorkLogo size="md" />
-          </Link>
-          <Link
-            href="/"
-            className="text-sm text-[#64748b] underline hover:text-[#0f172a]"
-          >
-            Retour à l’accueil
-          </Link>
-        </header>
-
         <h1 className="text-3xl font-bold text-[#0f172a] md:text-4xl">
           Échanger sur votre organisation
         </h1>

@@ -234,6 +234,16 @@ export default function HomePage() {
                   L&apos;administratif BTP, enfin géré comme un chantier.
                 </h1>
                 <div
+                  className="mx-auto max-w-2xl rounded-xl border border-[#93c5fd]/45 bg-gradient-to-br from-white via-[#f8fafc] to-[#eff6ff]/90 px-5 py-4 text-center shadow-[0_4px_20px_rgba(29,78,216,0.07),inset_0_1px_0_rgba(255,255,255,0.9)] md:mx-0 md:text-left lg:max-w-none"
+                >
+                  <p className="font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-lg font-semibold leading-snug tracking-tight text-[#0f172a] md:text-xl lg:text-2xl">
+                    Concentrez-vous sur vos chantiers.
+                  </p>
+                  <p className="mt-2 text-sm font-medium leading-relaxed text-[#334155] md:text-base lg:text-[1.0625rem]">
+                    Nous structurons le reste pour développer votre activité et augmenter votre chiffre d&apos;affaires.
+                  </p>
+                </div>
+                <div
                   className="mx-auto max-w-2xl rounded-xl surface-metallic-light surface-metallic-light--soft p-4 shadow-sm md:mx-0 md:p-5 lg:max-w-none"
                   role="region"
                   aria-label="Mode opératoire : outils IA, équipe et validation"

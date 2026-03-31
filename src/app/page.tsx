@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
+import { TARIFS_PLANS } from "@/lib/tarifs-plans";
 import { SITE_URL } from "@/lib/site";
+
+const SUIVI_PLAN = TARIFS_PLANS.find((p) => p.planKey === "STANDARD")!;
 
 const RESSOURCES_BLOG = [
   {
@@ -208,8 +211,16 @@ export default function HomePage() {
             <div className="grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-10 xl:gap-14">
               {/* Colonne principale : message + CTA (~60 %) */}
               <div className="flex flex-col gap-6 text-center md:gap-7 md:text-left lg:col-span-7">
-                <h1 className="text-metallic-black text-balance text-3xl font-bold leading-[1.15] tracking-tight md:text-4xl lg:text-5xl lg:leading-[1.1]">
-                  BTP : un relais administratif tenu comme un chantier — par quelqu&apos;un qui connaît le terrain.
+                <h1 className="text-metallic-black text-balance text-4xl font-extrabold leading-[1.1] tracking-[-0.03em] md:text-5xl md:leading-[1.08] lg:text-6xl lg:leading-[1.05]">
+                  L&apos;administratif BTP, enfin{" "}
+                  <span className="relative inline-block">
+                    <span className="relative z-10">géré comme un chantier</span>
+                    <span
+                      className="pointer-events-none absolute inset-x-0 -bottom-0.5 -z-0 h-[0.4em] rounded-sm bg-gradient-to-r from-blue-600/25 via-indigo-500/30 to-blue-600/25 md:-bottom-1 md:h-[0.36em]"
+                      aria-hidden
+                    />
+                  </span>
+                  .
                 </h1>
                 <div
                   className="mx-auto max-w-2xl rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-4 shadow-sm md:mx-0 md:p-5"
@@ -355,6 +366,15 @@ export default function HomePage() {
                     <span className="text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-[#cbd5e1]">TTC</span>
                     <span className="text-lg font-semibold text-[#cbd5e1]">/ mois</span>
                   </div>
+                  <div className="mt-1 border-b border-white/10 pb-3" aria-label="Repère indicatif de charge">
+                    <p className="text-[11px] leading-snug text-[#94a3b8] md:text-xs md:leading-relaxed">
+                      <span className="block font-normal text-[#e2e8f0]">{SUIVI_PLAN.equivalentNote.line1}</span>
+                      <span className="mt-0.5 block font-normal text-[#94a3b8]">{SUIVI_PLAN.equivalentNote.line2}</span>
+                    </p>
+                    <p className="mt-1.5 text-[10px] leading-snug text-[#64748b]">
+                      Repère estimatif — pas une facturation à l&apos;heure.
+                    </p>
+                  </div>
                   <div className="space-y-2 text-sm leading-snug text-[#e2e8f0]">
                     <p className="font-medium text-white">
                       Pour une activité régulière : dossiers suivis, relances structurées, coordination administrative — dans
@@ -451,6 +471,15 @@ export default function HomePage() {
                       <span className="text-base font-semibold text-[#cbd5e1]">TTC</span>
                       <span className="text-base font-semibold text-[#cbd5e1]"> / mois</span>
                     </p>
+                    <div className="mt-2 border-b border-white/10 pb-3" aria-label="Repère indicatif de charge">
+                      <p className="text-[11px] leading-snug text-[#94a3b8] md:text-xs">
+                        <span className="block font-normal text-[#e2e8f0]">{SUIVI_PLAN.equivalentNote.line1}</span>
+                        <span className="mt-0.5 block font-normal text-[#94a3b8]">{SUIVI_PLAN.equivalentNote.line2}</span>
+                      </p>
+                      <p className="mt-1.5 text-[10px] leading-snug text-[#64748b]">
+                        Repère estimatif — pas une facturation à l&apos;heure.
+                      </p>
+                    </div>
                     <p className="mt-2 text-sm font-medium text-white">
                       Formule Suivi — référence pour une activité continue dans le BTP.
                     </p>

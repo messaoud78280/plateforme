@@ -46,26 +46,6 @@ export const TARIFS_PLANS = [
     badge: "Le plus adapté" as string | null,
   },
   {
-    planKey: "STANDARD_PLUS" as const,
-    name: "Renfort",
-    price: "790",
-    billing: "monthly" as const,
-    detail: "",
-    tagline: "Pour les entreprises actives avec plusieurs chantiers ou un volume soutenu.",
-    highlights: [
-      "Priorité de traitement",
-      "Suivi renforcé des dossiers",
-      "Interlocuteur dédié",
-      "Capacité adaptée à un flux élevé",
-    ],
-    idealFor: "PME du bâtiment avec une activité dynamique nécessitant réactivité et suivi constant.",
-    equivalentNote: {
-      line1: "Capacité renforcée pour un flux soutenu",
-      line2: "(équivalent d’environ 40 à 60h / mois)",
-    },
-    badge: null as string | null,
-  },
-  {
     planKey: "PREMIUM" as const,
     name: "Pilotage",
     price: "1190",

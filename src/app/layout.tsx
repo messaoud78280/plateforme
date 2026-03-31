@@ -66,7 +66,7 @@ export const metadata: Metadata = {
     siteName: "BeWork",
     title: "BeWork — Partenaire administratif BTP",
     description:
-      "Cadre, rigueur et lecture terrain pour artisans et entreprises du bâtiment. Forfaits TTC, pilotage en France.",
+      "Cadre, rigueur, pilotage et lecture terrain pour artisans et entreprises du bâtiment. Forfaits TTC. France, Belgique, Suisse, Luxembourg.",
     images: [
       {
         url: defaultOgImage,

@@ -18,7 +18,7 @@ function formatPriceTtc(value: string) {
 export const metadata: Metadata = {
   title: "Forfaits administratifs BTP — cadre et valeur | BeWork",
   description:
-    "Structure, Suivi, Renfort et Pilotage : forfaits mensuels TTC pour entreprises du bâtiment. Cadre, suivi structuré, pilotage encadré en France.",
+    "Structure, Suivi et Pilotage : trois forfaits mensuels TTC pour entreprises du bâtiment. Cadre, suivi structuré, pilotage encadré en France.",
   alternates: { canonical: tarifsUrl, languages: { fr: tarifsUrl, "x-default": tarifsUrl } },
   openGraph: {
     type: "website",
@@ -85,7 +85,7 @@ const faq = [
   { q: "Quels sont les horaires et délais ?", a: "L’équipe travaille du lundi au vendredi sur le fuseau français. Les délais dépendent du type de demande et du forfait ; les urgences chantier sont priorisées dans le cadre de votre offre." },
   { q: "Avec quels outils travaillez-vous ?", a: "Nous intervenons dans votre environnement (Google, Microsoft, CRM, messageries, logiciels métiers) lorsque vous nous donnez les accès nécessaires. La plateforme BeWork centralise consignes, statuts et livrables." },
   { q: "Y a-t-il un engagement ou une durée minimale ?", a: "Les modalités figurent au contrat. L’idée est un cadre clair des deux côtés, sans surprise sur la résiliation ou le renouvellement." },
-  { q: "Peut-on monter en charge progressivement ?", a: "Oui. Beaucoup de structures démarrent par Structure ou Suivi, puis passent à Renfort ou Pilotage lorsque l’activité augmente." },
+  { q: "Peut-on monter en charge progressivement ?", a: "Oui. Beaucoup de structures démarrent par Structure ou Suivi, puis passent au Pilotage lorsque l’activité augmente." },
   { q: "Que se passe-t-il en cas d’indisponibilité ?", a: "La continuité de service est organisée : remplacement ou réaffectation selon les cas. Le détail est contractuel." },
   { q: "Comment s’organisent les échanges ?", a: "Canal principal : la plateforme (messagerie, statuts, pièces). Email ou appel en complément si c’est cadré ensemble à l’onboarding." },
 ];
@@ -170,7 +170,7 @@ export default function TarifsPage() {
           <h2 id="offres-heading" className="sr-only">
             Nos offres
           </h2>
-          <div className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:items-stretch lg:gap-5">
+          <div className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:items-stretch lg:gap-5">
             {plans.map((plan) => {
               const isFeatured = plan.planKey === "STANDARD";
               return (
@@ -276,12 +276,6 @@ export default function TarifsPage() {
                 <span className="font-semibold text-[#0f172a]">Suivi</span>
                 <span className="mt-1 block text-sm leading-relaxed">
                   Si vous avez une activité continue avec besoin de suivi fiable.
-                </span>
-              </li>
-              <li className="rounded-xl border border-[#e2e8f0] bg-white/80 px-5 py-4 shadow-sm">
-                <span className="font-semibold text-[#0f172a]">Renfort</span>
-                <span className="mt-1 block text-sm leading-relaxed">
-                  Si vous gérez plusieurs dossiers ou chantiers en parallèle.
                 </span>
               </li>
               <li className="rounded-xl border border-[#e2e8f0] bg-white/80 px-5 py-4 shadow-sm">
@@ -444,16 +438,15 @@ export default function TarifsPage() {
 
         {/* Tableau comparatif (révélé au clic) */}
         <ComparatifReveal>
-          {/* Tableau des offres Essentiel / Standard / Renfort / Pilotage */}
+          {/* Tableau des offres Structure / Suivi / Pilotage */}
           <div className="overflow-x-auto rounded-xl surface-metallic-light">
-            <table className="w-full min-w-[500px] text-left text-sm" role="grid">
+            <table className="w-full min-w-[420px] text-left text-sm" role="grid">
               <caption className="sr-only">Comparatif des offres BeWork</caption>
               <thead>
                 <tr className="border-b border-[#e0e4ea] bg-[#f8f9fb]">
                   <th className="px-4 py-3 font-semibold text-[#0f172a]">Critère</th>
                   <th className="px-4 py-3 font-semibold text-[#0f172a]">Structure</th>
                   <th className="px-4 py-3 font-semibold text-[#0f172a]">Suivi</th>
-                  <th className="px-4 py-3 font-semibold text-[#0f172a]">Renfort</th>
                   <th className="px-4 py-3 font-semibold text-[#0f172a]">Pilotage</th>
                 </tr>
               </thead>
@@ -467,18 +460,45 @@ export default function TarifsPage() {
                     <span className="tarif-emphase text-[#0f172a]">490</span> € TTC
                   </td>
                   <td className="px-4 py-3">
-                    <span className="tarif-emphase text-[#0f172a]">790</span> € TTC
-                  </td>
-                  <td className="px-4 py-3">
                     <span className="tarif-emphase text-[#0f172a]">1 190</span> € TTC
                   </td>
                 </tr>
-                <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Niveau d&apos;accompagnement</td><td className="px-4 py-3">Charge adaptée</td><td className="px-4 py-3">Suivi structuré</td><td className="px-4 py-3">Volume maîtrisé renforcé</td><td className="px-4 py-3">Capacité maximale</td></tr>
-                <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Abonnement</td><td className="px-4 py-3">Oui</td><td className="px-4 py-3">Oui</td><td className="px-4 py-3">Oui</td><td className="px-4 py-3">Oui</td></tr>
-                <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Priorité de traitement</td><td className="px-4 py-3">Standard</td><td className="px-4 py-3">Standard</td><td className="px-4 py-3">Priorité</td><td className="px-4 py-3">Priorité élevée</td></tr>
-                <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Périmètres inclus</td><td colSpan={4} className="px-4 py-3">Max 2 (au-delà : devis sur mesure)</td></tr>
-                <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Support / pilotage</td><td colSpan={4} className="px-4 py-3">Pilotage en France, points de suivi réguliers</td></tr>
-                <tr className="border-b border-[#e0e4ea]"><td className="px-4 py-3">Canaux</td><td colSpan={4} className="px-4 py-3">Plateforme dédiée, email, messagerie, téléphone selon vos besoins</td></tr>
+                <tr className="border-b border-[#e0e4ea]">
+                  <td className="px-4 py-3">Niveau d&apos;accompagnement</td>
+                  <td className="px-4 py-3">Charge adaptée</td>
+                  <td className="px-4 py-3">Suivi structuré</td>
+                  <td className="px-4 py-3">Capacité maximale</td>
+                </tr>
+                <tr className="border-b border-[#e0e4ea]">
+                  <td className="px-4 py-3">Abonnement</td>
+                  <td className="px-4 py-3">Oui</td>
+                  <td className="px-4 py-3">Oui</td>
+                  <td className="px-4 py-3">Oui</td>
+                </tr>
+                <tr className="border-b border-[#e0e4ea]">
+                  <td className="px-4 py-3">Priorité de traitement</td>
+                  <td className="px-4 py-3">Standard</td>
+                  <td className="px-4 py-3">Standard</td>
+                  <td className="px-4 py-3">Priorité élevée</td>
+                </tr>
+                <tr className="border-b border-[#e0e4ea]">
+                  <td className="px-4 py-3">Périmètres inclus</td>
+                  <td colSpan={3} className="px-4 py-3">
+                    Max 2 (au-delà : devis sur mesure)
+                  </td>
+                </tr>
+                <tr className="border-b border-[#e0e4ea]">
+                  <td className="px-4 py-3">Support / pilotage</td>
+                  <td colSpan={3} className="px-4 py-3">
+                    Pilotage en France, points de suivi réguliers
+                  </td>
+                </tr>
+                <tr className="border-b border-[#e0e4ea]">
+                  <td className="px-4 py-3">Canaux</td>
+                  <td colSpan={3} className="px-4 py-3">
+                    Plateforme dédiée, email, messagerie, téléphone selon vos besoins
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>

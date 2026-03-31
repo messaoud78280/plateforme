@@ -154,7 +154,7 @@ export default async function AbonnementPage() {
         <p className="mt-2 text-xs font-medium text-slate-700">
           Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.
         </p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {TARIFS_PLANS.map((plan) => (
             <div
               key={plan.planKey}

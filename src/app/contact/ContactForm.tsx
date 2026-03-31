@@ -9,7 +9,6 @@ type TakenSlot = { date: string; time: string };
 const FORMULES = [
   { id: "structure", label: "Structure — 290 € TTC / mois", value: "Structure" },
   { id: "suivi", label: "Suivi — 490 € TTC / mois", value: "Suivi" },
-  { id: "renfort", label: "Renfort — 790 € TTC / mois", value: "Renfort" },
   { id: "pilotage", label: "Pilotage — 1 190 € TTC / mois", value: "Pilotage" },
   { id: "sur-mesure", label: "Sur-mesure / À définir", value: "Sur-mesure" },
 ];

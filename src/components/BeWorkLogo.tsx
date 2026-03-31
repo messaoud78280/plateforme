@@ -23,11 +23,10 @@ export function BeWorkLogo({
         : "text-4xl md:text-5xl";
 
   const iconSize =
-    size === "sm" ? "h-8 w-8 text-sm" : size === "md" ? "h-9 w-9 text-base" : "h-10 w-10 text-lg";
+    size === "sm" ? "h-11 w-11 text-base" : size === "md" ? "h-12 w-12 text-lg" : "h-14 w-14 text-xl";
 
-  /** Aligne le sous-titre avec le début du mot « BeWork », pas sous le pictogramme */
-  const taglineIndent =
-    size === "sm" ? "pl-10" : size === "md" ? "pl-11" : "pl-12";
+  /** Aligne le sous-titre avec le début du mot « BeWork », pas sous le pictogramme (pastille + gap-2) */
+  const taglineIndent = size === "sm" ? "pl-[3.25rem]" : size === "md" ? "pl-14" : "pl-16";
 
   const defaultTagline = "L'assistant administratif à la demande";
 
@@ -35,17 +34,31 @@ export function BeWorkLogo({
     <span className={`inline-flex flex-col ${className}`}>
       <span className="inline-flex items-center gap-2">
         <span
-          className={`flex shrink-0 items-center justify-center rounded-full bg-[#0f172a] font-extrabold text-white ${iconSize}`}
+          className={`bework-logo-badge-metallic relative flex shrink-0 items-center justify-center rounded-full font-extrabold text-white ${iconSize}`}
           style={{ fontFamily: "var(--font-orbitron), system-ui, sans-serif" }}
         >
-          BW
+          <span
+            className="pointer-events-none absolute -left-1/4 -top-1/2 h-full w-[90%] rounded-full bg-gradient-to-b from-white/25 to-transparent opacity-80 blur-[3px]"
+            aria-hidden
+          />
+          <span
+            className="pointer-events-none absolute inset-0 rounded-full opacity-40"
+            style={{
+              background:
+                "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.12) 50%, transparent 60%)",
+            }}
+            aria-hidden
+          />
+          <span className="relative z-10 tracking-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">BW</span>
         </span>
         <span
           className={`font-extrabold tracking-tight ${textSize}`}
           style={{ fontFamily: "var(--font-orbitron), system-ui, sans-serif" }}
         >
-          <span className="text-[#64748b]">Be</span>
-          <span className="text-[#1d4ed8]">Work</span>
+          <span className="text-metallic-black">Be</span>
+          <span className="bg-gradient-to-r from-[#60a5fa] via-[#3b82f6] to-[#1d4ed8] bg-clip-text text-transparent [text-shadow:none]">
+            Work
+          </span>
         </span>
       </span>
       {showTagline && (

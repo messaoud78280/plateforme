@@ -117,7 +117,7 @@ export const BLOG_ARTICLES = {
       {
         type: "p",
         content:
-          "Les offres sont en TTC, par mois : Structure 290 €, Suivi 490 €, Renfort 790 €, Pilotage 1 190 €. Chaque palier correspond à un niveau de structuration et de suivi, pas à une simple liste de tâches. Pas de charges sociales ni de recrutement à porter pour ce périmètre.",
+          "Les offres sont en TTC, par mois : Structure 290 €, Suivi 490 €, Pilotage 1 190 €. Chaque palier correspond à un niveau de structuration et de suivi, pas à une simple liste de tâches. Pas de charges sociales ni de recrutement à porter pour ce périmètre.",
       },
       { type: "h2", content: "Poste en interne : ordre de grandeur du coût" },
       {

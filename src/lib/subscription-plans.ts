@@ -1,6 +1,7 @@
 /**
  * Configuration des formules BeWork (alignée sur la grille tarifaire).
- * planKey utilisé en base : DECOUVERTE | STANDARD | STANDARD_PLUS | PREMIUM
+ * planKey en base : DECOUVERTE | STANDARD | STANDARD_PLUS | PREMIUM
+ * STANDARD_PLUS (Renfort) n’est plus proposé à la souscription ; conservé pour l’historique et les comptes existants.
  */
 
 export const SUBSCRIPTION_PLANS = {
@@ -44,7 +45,8 @@ export const SUBSCRIPTION_PLANS = {
 
 export type PlanKey = keyof typeof SUBSCRIPTION_PLANS;
 
-export const PLAN_KEYS: PlanKey[] = ["DECOUVERTE", "STANDARD", "STANDARD_PLUS", "PREMIUM"];
+/** Formules proposées à la souscription et au checkout (3 offres publiques). */
+export const PLAN_KEYS: PlanKey[] = ["DECOUVERTE", "STANDARD", "PREMIUM"];
 
 export function getPlan(planKey: string) {
   const key = planKey as PlanKey;

@@ -137,7 +137,7 @@ export default async function BlogArticlePage({ params }: Props) {
               Offre Suivi à{" "}
               <span className="tarif-emphase text-[#0f172a]">490</span>{" "}
               <span className="font-semibold text-[#0f172a]">€ TTC / mois</span> — niveau le plus adapté pour une activité
-              régulière. Palier d’entrée Structure à 290 € TTC / mois ; Renfort et Pilotage au-delà. Un échange permet de
+              régulière. Palier d’entrée Structure à 290 € TTC / mois ; Pilotage pour le niveau le plus élevé. Un échange permet de
               vérifier l’adéquation avant tout engagement.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">

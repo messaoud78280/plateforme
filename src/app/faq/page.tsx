@@ -41,7 +41,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Pourquoi ce niveau de prix ?",
-    a: "Vous payez un pilotage encadré, des profils qualifiés, une plateforme de suivi et une exécution revue — pas un tarif « au rabais » qui se traduirait par de l’improvisation. Les montants TTC mensuels reflètent ce cadre : Structure 290 €, Suivi 490 €, Renfort 790 €, Pilotage 1 190 € — avec une montée en structuration et en priorité à chaque palier.",
+    a: "Vous payez un pilotage encadré, des profils qualifiés, une plateforme de suivi et une exécution revue — pas un tarif « au rabais » qui se traduirait par de l’improvisation. Les montants TTC mensuels reflètent ce cadre : Structure 290 €, Suivi 490 €, Pilotage 1 190 € — avec une montée en structuration et en priorité à chaque palier.",
   },
   {
     q: "Est-ce adapté à une entreprise du BTP ?",

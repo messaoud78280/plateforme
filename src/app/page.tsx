@@ -6,6 +6,30 @@ import { SITE_URL } from "@/lib/site";
 
 const SUIVI_PLAN = TARIFS_PLANS.find((p) => p.planKey === "STANDARD")!;
 
+function formatPriceTtc(value: string) {
+  const n = parseInt(value.replace(/\s/g, ""), 10);
+  if (Number.isNaN(n)) return value;
+  return n.toLocaleString("fr-FR");
+}
+
+const TARIFS_PROGRESSION_ROWS = [
+  {
+    planKey: "DECOUVERTE" as const,
+    sub: "Charge adaptée, administratif de base structuré",
+    subClass: "text-[#cbd5e1]",
+  },
+  {
+    planKey: "STANDARD" as const,
+    sub: "Suivi structuré — le plus adapté",
+    subClass: "text-[#93c5fd]",
+  },
+  {
+    planKey: "PREMIUM" as const,
+    sub: "Capacité maximale, organisation globale",
+    subClass: "text-[#cbd5e1]",
+  },
+];
+
 const RESSOURCES_BLOG = [
   {
     title: "Facturation chantier et relances : trésorerie BTP",
@@ -32,7 +56,7 @@ const RESSOURCES_BLOG = [
 export const metadata: Metadata = {
   title: "BeWork | Partenaire administratif pour artisans et entreprises du bâtiment",
   description:
-    "Cadre, rigueur et lecture terrain : devis et relances suivis, dossiers chantier structurés, coordination fournisseurs — sans recruter. Méthode portée par une dirigeante du BTP en Île-de-France, vingt ans sur le terrain. Forfaits TTC à partir de 290 €/mois (Structure). France, Belgique, Suisse, Luxembourg.",
+    "Cadre, rigueur, pilotage et lecture terrain : devis et relances suivis, dossiers chantier structurés, coordination fournisseurs — sans recruter. Méthode portée par une dirigeante du BTP en Île-de-France, vingt ans sur le terrain. Forfaits TTC à partir de 290 €/mois (Structure). France, Belgique, Suisse, Luxembourg.",
   robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
   keywords: [
     "administratif BTP",
@@ -89,7 +113,7 @@ const homeJsonLd = {
       name: "BeWork — Partenaire administratif pour le BTP",
       inLanguage: "fr-FR",
       description:
-        "Structuration de l’administratif pour artisans et entreprises du bâtiment : devis, facturation, relances, démarches chantier, logistique et dossiers sensibles sous validation. Méthode encadrée, lecture terrain. Forfaits TTC.",
+        "Structuration de l’administratif pour artisans et entreprises du bâtiment : devis, facturation, relances, démarches chantier, logistique et dossiers sensibles sous validation. Méthode encadrée, pilotage et lecture terrain. Forfaits TTC.",
       isPartOf: { "@id": `${SITE_URL}/#website` },
       about: [
         { "@type": "Thing", name: "Bâtiment et travaux publics" },
@@ -144,7 +168,7 @@ export default function HomePage() {
                 size="sm"
                 showTagline
                 tagline="Partenaire administratif — BTP"
-                taglineSub="Cadre, rigueur, lecture terrain"
+                taglineSub="Cadre, rigueur, pilotage, lecture terrain"
               />
             </Link>
             <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 pt-0.5 sm:gap-2.5">
@@ -212,54 +236,52 @@ export default function HomePage() {
               {/* Colonne principale : message + CTA (~60 %) */}
               <div className="flex flex-col gap-6 text-center md:gap-7 md:text-left lg:col-span-7">
                 <h1 className="text-metallic-black text-balance text-4xl font-extrabold leading-[1.1] tracking-[-0.03em] md:text-5xl md:leading-[1.08] lg:text-6xl lg:leading-[1.05]">
-                  L&apos;administratif BTP, enfin{" "}
-                  <span className="relative inline-block">
-                    <span className="relative z-10">géré comme un chantier</span>
-                    <span
-                      className="pointer-events-none absolute inset-x-0 -bottom-0.5 -z-0 h-[0.4em] rounded-sm bg-gradient-to-r from-blue-600/25 via-indigo-500/30 to-blue-600/25 md:-bottom-1 md:h-[0.36em]"
-                      aria-hidden
-                    />
-                  </span>
-                  .
+                  L&apos;administratif BTP, enfin géré comme un chantier.
                 </h1>
                 <div
-                  className="mx-auto max-w-2xl rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-4 shadow-sm md:mx-0 md:p-5"
+                  className="mx-auto max-w-2xl rounded-xl surface-metallic-light surface-metallic-light--soft p-4 shadow-sm md:mx-0 md:p-5 lg:max-w-none"
                   role="region"
                   aria-label="Mode opératoire : outils IA, équipe et validation"
                 >
-                  <p className="text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-[#64748b] lg:text-left">
+                  <p className="text-center text-xs font-bold uppercase tracking-[0.14em] text-metallic-black lg:text-left md:text-[0.8125rem]">
                     Mode opératoire
                   </p>
-                  <div className="mt-4 flex flex-col gap-2 lg:flex-row lg:items-stretch lg:gap-1">
-                    <div className="flex flex-1 flex-col rounded-lg border border-[#e2e8f0] bg-white px-3.5 py-3">
-                      <span className="text-xs font-bold tabular-nums text-[#1d4ed8]">1 · IA</span>
-                      <p className="mt-1.5 text-sm leading-snug text-[#334155]">
+                  <div className="mt-4 flex flex-col gap-2 lg:flex-row lg:items-stretch lg:gap-1.5">
+                    <div className="flex flex-1 flex-col rounded-lg surface-metallic-light px-4 py-3.5 md:px-4 md:py-4">
+                      <span className="text-metallic-black text-sm font-extrabold tabular-nums tracking-tight md:text-base">
+                        1 · IA
+                      </span>
+                      <p className="mt-2 text-sm font-semibold leading-snug text-[#0f172a] md:text-[0.9375rem] md:leading-relaxed">
                         Outils utilisés avec rigueur pour structurer brouillons et contrôles — toujours validés par l&apos;équipe.
                       </p>
                     </div>
                     <div
-                      className="flex shrink-0 items-center justify-center py-0.5 text-lg font-medium text-[#94a3b8] lg:px-1 lg:py-0"
+                      className="flex shrink-0 items-center justify-center py-0.5 text-xl font-semibold text-[#64748b] lg:px-0.5 lg:py-0"
                       aria-hidden
                     >
                       <span className="lg:hidden">↓</span>
                       <span className="hidden lg:inline">→</span>
                     </div>
-                    <div className="flex flex-1 flex-col rounded-lg border border-[#e2e8f0] bg-white px-3.5 py-3">
-                      <span className="text-xs font-bold tabular-nums text-[#1d4ed8]">2 · Équipe</span>
-                      <p className="mt-1.5 text-sm leading-snug text-[#334155]">
+                    <div className="flex flex-1 flex-col rounded-lg surface-metallic-light px-4 py-3.5 md:px-4 md:py-4">
+                      <span className="text-metallic-black text-sm font-extrabold tabular-nums tracking-tight md:text-base">
+                        2 · Équipe
+                      </span>
+                      <p className="mt-2 text-sm font-semibold leading-snug text-[#0f172a] md:text-[0.9375rem] md:leading-relaxed">
                         Exécution par des profils diplômés, encadrée et pilotée depuis la France.
                       </p>
                     </div>
                     <div
-                      className="flex shrink-0 items-center justify-center py-0.5 text-lg font-medium text-[#94a3b8] lg:px-1 lg:py-0"
+                      className="flex shrink-0 items-center justify-center py-0.5 text-xl font-semibold text-[#64748b] lg:px-0.5 lg:py-0"
                       aria-hidden
                     >
                       <span className="lg:hidden">↓</span>
                       <span className="hidden lg:inline">→</span>
                     </div>
-                    <div className="flex flex-1 flex-col rounded-lg border border-[#e2e8f0] bg-white px-3.5 py-3">
-                      <span className="text-xs font-bold tabular-nums text-[#1d4ed8]">3 · Vous</span>
-                      <p className="mt-1.5 text-sm leading-snug text-[#334155]">
+                    <div className="flex flex-1 flex-col rounded-lg surface-metallic-light px-4 py-3.5 md:px-4 md:py-4">
+                      <span className="text-metallic-black text-sm font-extrabold tabular-nums tracking-tight md:text-base">
+                        3 · Vous
+                      </span>
+                      <p className="mt-2 text-sm font-semibold leading-snug text-[#0f172a] md:text-[0.9375rem] md:leading-relaxed">
                         Validation avant envoi sur les actes sensibles (relances fermes, mises en demeure, litiges).
                       </p>
                     </div>
@@ -380,7 +402,7 @@ export default function HomePage() {
                       Pour une activité régulière : dossiers suivis, relances structurées, coordination administrative — dans
                       un cadre mensuel TTC clair.
                     </p>
-                    <p className="text-xs text-[#94a3b8]">Quatre niveaux : Structure à Pilotage (290 € à 1 190 € TTC / mois).</p>
+                    <p className="text-xs text-[#94a3b8]">Trois niveaux : Structure à Pilotage (290 € à 1 190 € TTC / mois).</p>
                     <p className="pt-1 text-[#cbd5e1]">
                       Pas de poste à pourvoir : un cadre de prestation et un niveau d&apos;accompagnement défini chaque mois.
                     </p>
@@ -494,25 +516,35 @@ export default function HomePage() {
                     <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#93c5fd]">
                       Progression des offres
                     </p>
-                    <ul className="mt-3 space-y-2.5 text-sm text-[#e2e8f0]">
-                      <li className="flex flex-col gap-0.5 border-b border-white/5 pb-2.5">
-                        <span className="font-semibold text-white">Structure — 290 € TTC / mois</span>
-                        <span className="text-[#cbd5e1]">Charge adaptée, administratif de base structuré</span>
-                      </li>
-                      <li className="flex flex-col gap-0.5 border-b border-white/5 pb-2.5">
-                        <span className="font-semibold text-white">Suivi — 490 € TTC / mois</span>
-                        <span className="text-[#93c5fd]">Suivi structuré — le plus adapté</span>
-                      </li>
-                      <li className="flex flex-col gap-0.5 border-b border-white/5 pb-2.5">
-                        <span className="font-semibold text-white">Renfort — 790 € TTC / mois</span>
-                        <span className="text-[#cbd5e1]">Volume maîtrisé renforcé, priorité de traitement</span>
-                      </li>
-                      <li className="flex flex-col gap-0.5">
-                        <span className="font-semibold text-white">Pilotage — 1 190 € TTC / mois</span>
-                        <span className="text-[#cbd5e1]">Capacité maximale, organisation globale</span>
-                      </li>
+                    <ul className="mt-3 space-y-0 text-sm text-[#e2e8f0]">
+                      {TARIFS_PROGRESSION_ROWS.map((row, idx) => {
+                        const plan = TARIFS_PLANS.find((p) => p.planKey === row.planKey)!;
+                        const isLast = idx === TARIFS_PROGRESSION_ROWS.length - 1;
+                        return (
+                          <li
+                            key={row.planKey}
+                            className={`flex flex-col gap-0.5 border-b border-white/5 py-2.5 first:pt-0 ${isLast ? "border-b-0 pb-0" : ""}`}
+                          >
+                            <span className="font-semibold text-white">
+                              {plan.name} — {formatPriceTtc(plan.price)} € TTC / mois
+                            </span>
+                            <span className={row.subClass}>{row.sub}</span>
+                            <div className="mt-1.5" aria-label="Repère indicatif de charge">
+                              <p className="text-[10px] leading-snug text-[#94a3b8] md:text-[11px]">
+                                <span className="block font-normal text-[#e2e8f0]">{plan.equivalentNote.line1}</span>
+                                <span className="mt-0.5 block font-normal text-[#94a3b8]">
+                                  {plan.equivalentNote.line2}
+                                </span>
+                              </p>
+                            </div>
+                          </li>
+                        );
+                      })}
                     </ul>
-                    <p className="mt-3 text-[11px] leading-snug text-[#94a3b8]">
+                    <p className="mt-2 text-[10px] leading-snug text-[#64748b]">
+                      Repère estimatif — pas une facturation à l&apos;heure.
+                    </p>
+                    <p className="mt-2 text-[11px] leading-snug text-[#94a3b8]">
                       Détail et cadrage sur la page tarifs.
                     </p>
                   </div>
@@ -525,93 +557,217 @@ export default function HomePage() {
         {/* Pourquoi externaliser son administratif */}
         <section id="pourquoi-externaliser" className="scroll-mt-24 px-6 py-16 md:py-20" style={{ scrollMarginTop: "6rem" }}>
           <div className="mx-auto max-w-6xl rounded-2xl surface-metallic-light surface-metallic-light--soft px-6 py-12 md:px-10 md:py-16">
-            <div className="text-center mb-10 md:mb-12">
+            <div className="mb-10 text-center md:mb-12">
               <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
-                Quand l&apos;administratif vous vole vos soirées — et votre marge
+                Sur le terrain, pas derrière l&apos;écran.
               </h2>
-              <p className="mt-3 max-w-2xl mx-auto text-[#334155] leading-relaxed">
-                Les devis qui traînent. Les situations de travaux à boucler. Les commandes fournisseurs qui se télescopent
-                avec le planning. Les relances clients — et parfois les dossiers qui durcissent.
-                <strong className="font-semibold text-[#0f172a]">
-                  {" "}
-                  BeWork tient le fil administratif à votre place
-                </strong>
-                : devis, relances, dossiers chantier, logistique et suivi des sujets sensibles — avec des process explicites et
-                des <strong className="font-semibold text-[#0f172a]">outils d&apos;aide</strong> utilisés sous contrôle humain,
-                pour une exécution plus rapide sans rogner sur la relecture.
-                Vous gardez le chantier ; le dossier avance.
+              <p className="mx-auto mt-2 max-w-lg text-base font-semibold text-[#0f172a] md:text-lg">
+                BeWork tient le bureau. Vous, le chantier.
               </p>
+              {/* Schéma lecture 10 secondes */}
+              <div
+                className="mx-auto mt-8 max-w-3xl rounded-2xl border border-[#dce3ec] bg-white/90 p-4 shadow-sm md:p-6"
+                role="img"
+                aria-label="Schéma : votre chantier, notre suivi administratif"
+              >
+                <div className="grid items-stretch gap-4 md:grid-cols-[1fr_auto_1fr] md:gap-3">
+                  <div className="rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-4 text-left">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#64748b]">Chez vous (souvent)</p>
+                    <ul className="mt-3 space-y-2 text-sm font-bold leading-snug text-[#0f172a]">
+                      <li className="flex gap-2">
+                        <span className="text-[#94a3b8]" aria-hidden>
+                          ▸
+                        </span>
+                        Devis &amp; relances qui traînent
+                      </li>
+                      <li className="flex gap-2">
+                        <span className="text-[#94a3b8]" aria-hidden>
+                          ▸
+                        </span>
+                        Fournisseurs / planning qui se télescopent
+                      </li>
+                      <li className="flex gap-2">
+                        <span className="text-[#94a3b8]" aria-hidden>
+                          ▸
+                        </span>
+                        Salarié absent ou en arrêt : ça retombe sur vous
+                      </li>
+                    </ul>
+                  </div>
+                  <div className="flex items-center justify-center py-1 md:flex-col md:py-0">
+                    <span className="rounded-full bg-[#1d4ed8] px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-white shadow-md">
+                      →
+                    </span>
+                  </div>
+                  <div className="rounded-xl border border-[#bfdbfe] bg-[#eff6ff] p-4 text-left">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">Avec BeWork</p>
+                    <ul className="mt-3 space-y-2 text-sm font-bold leading-snug text-[#0f172a]">
+                      <li className="flex gap-2">
+                        <span className="text-[#1d4ed8]" aria-hidden>
+                          ✓
+                        </span>
+                        Dossiers suivis, coordination, logistique
+                      </li>
+                      <li className="flex gap-2">
+                        <span className="text-[#1d4ed8]" aria-hidden>
+                          ✓
+                        </span>
+                        Forfait TTC — pas d&apos;embauche
+                      </li>
+                      <li className="flex gap-2">
+                        <span className="text-[#1d4ed8]" aria-hidden>
+                          ✓
+                        </span>
+                        Sensible : vous validez avant envoi
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
-            <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 md:items-stretch">
+            <ul className="grid gap-3 sm:grid-cols-2">
               {[
-                "Un même cadre pour l'administratif, la logistique et la coordination : une lecture globale de votre charge, pas des silos.",
-                "Forfait TTC : pas de recrutement ni de charges sociales à porter — vous choisissez un volume d'actions mensuel cohérent.",
-                "Priorisation terrain : pics devis, livraisons, démarches et urgences chantier sont lus comme tels, pas comme des mails en retard.",
-                "Évolutif : vous changez de formule selon l'activité, sans créer un poste interne à temps plein.",
-                "Exigence : profils Bac+5, méthode et outils encadrés, pilotage depuis la France — y compris sur dossiers sensibles sous validation.",
-                "Sérénité : relances, structuration et suivi tenus dans un dispositif contractuel clair — pas une relation informelle.",
+                "Une équipe + une plateforme — pilotage depuis la France.",
+                "On parle BTP : urgences chantier = priorités, pas « mails en retard ».",
+                "Vous montez ou baissez de forfait selon l&apos;activité.",
+                "Cadre contractuel clair — pas du bricolage entre particuliers.",
               ].map((item, i) => (
-                <li key={i} className="card-frame flex h-full gap-3 rounded-xl p-5">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8] text-sm font-bold">✓</span>
-                  <span className="text-[#334155] leading-relaxed">{item}</span>
+                <li key={i} className="card-frame flex gap-3 rounded-xl p-4">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#eff6ff] text-xs font-bold text-[#1d4ed8]">
+                    {i + 1}
+                  </span>
+                  <span className="text-left text-sm font-semibold leading-snug text-[#334155]">{item}</span>
                 </li>
               ))}
             </ul>
           </div>
         </section>
 
-        {/* ROI / Économies — comparatif */}
-        <section id="roi" className="px-6 py-16 md:py-20 scroll-mt-24" style={{ scrollMarginTop: "6rem" }}>
+        {/* ROI / Économies — comparatif (lecture rapide : chiffres puis « pourquoi ») */}
+        <section id="roi" className="scroll-mt-24 px-6 py-16 md:py-20" style={{ scrollMarginTop: "6rem" }}>
           <div className="mx-auto max-w-6xl">
-            <div className="text-center mb-12">
+            <div className="mb-10 text-center md:mb-12">
               <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
-                Coût maîtrisé face à un poste administratif interne
+                Même besoin : tenir l&apos;administratif. Autre façon de payer.
               </h2>
-              <p className="mt-3 max-w-2xl mx-auto text-[#334155]">
-                Même niveau d&apos;exigence sur les livrables : une autre répartition du budget entre structure interne et pilotage externalisé.
+              <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-[#334155] md:text-lg">
+                À gauche, ce qu&apos;un poste en interne coûte souvent au total chaque mois. À droite, un forfait TTC unique pour
+                le cadre défini au contrat — sans salaire ni charges à votre charge sur ce périmètre.
               </p>
             </div>
-            <div className="card-frame rounded-2xl border-2 border-[#1d4ed8]/20 overflow-hidden">
-              <div className="grid divide-y divide-[#e2e8f0] md:grid-cols-2 md:items-stretch md:divide-x md:divide-y-0">
-                <div className="flex flex-col p-8 md:p-10">
-                  <h3 className="text-lg font-bold text-[#0f172a]">Poste administratif en interne (Europe)</h3>
-                  <ul className="mt-4 space-y-2 text-[#334155]">
-                    {["Salaire brut", "Charges sociales", "Bureau & matériel", "Recrutement & formation"].map((line) => (
-                      <li key={line} className="flex items-center gap-2">
-                        <span className="text-[#94a3b8]">•</span> {line}
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="mt-auto pt-6 text-2xl font-bold text-[#64748b]">~5 050 € / mois</p>
+            <div className="card-frame overflow-hidden rounded-2xl border-2 border-[#1d4ed8]/20">
+              {/* Synthèse chiffres — compréhension immédiate */}
+              <div className="grid divide-y divide-[#e2e8f0] bg-[#f8fafc] md:grid-cols-[1fr_auto_1fr] md:divide-x md:divide-y-0">
+                <div className="px-6 py-6 text-center md:px-8 md:py-8 md:text-left">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#64748b]">Assistant en interne</p>
+                  <p className="mt-2 text-3xl font-extrabold tabular-nums tracking-tight text-[#0f172a] md:text-4xl">~5 050 €</p>
+                  <p className="mt-1 text-sm font-medium text-[#64748b]">par mois, coût employeur réel (ordre de grandeur Europe)</p>
                 </div>
-                <div className="flex flex-col bg-[#eff6ff]/50 p-8 md:p-10">
-                  <h3 className="text-lg font-bold text-[#1d4ed8]">Forfait BeWork</h3>
-                  <ul className="mt-4 space-y-2 text-[#334155]">
-                    {[
-                      "Un seul forfait tout compris",
-                      "Aucun coût de recrutement",
-                      "Aucune charge sociale",
-                      "Plateforme incluse",
-                      "Outils d&apos;aide à l&apos;exécution, toujours validés humainement",
-                    ].map((line) => (
-                      <li key={line} className="flex items-center gap-2">
-                        <span className="text-[#1d4ed8]">✓</span> {line}
-                      </li>
-                    ))}
+                <div className="flex items-center justify-center bg-[#f1f5f9] px-4 py-3 md:bg-[#f8fafc] md:px-5 md:py-8">
+                  <span
+                    className="rounded-full border border-[#cbd5e1] bg-white px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider text-[#475569] shadow-sm"
+                    aria-hidden
+                  >
+                    vs
+                  </span>
+                </div>
+                <div className="bg-[#eff6ff]/60 px-6 py-6 text-center md:px-8 md:py-8 md:text-right">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#1d4ed8]">Forfait BeWork</p>
+                  <p className="mt-2 text-3xl font-extrabold tabular-nums tracking-tight text-[#1d4ed8] md:text-4xl">
+                    <span className="tabular-nums">290</span> – <span className="tabular-nums">1 190</span> €
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-[#64748b]">
+                    TTC / mois · une ligne sur votre budget · tout compris dans le cadre souscrit
+                  </p>
+                </div>
+              </div>
+              {/* Pourquoi ces montants — listes courtes */}
+              <div className="grid divide-y divide-[#e2e8f0] md:grid-cols-2 md:divide-x md:divide-y-0">
+                <div className="flex flex-col p-8 md:p-10">
+                  <h3 className="text-base font-bold text-[#0f172a] md:text-lg">Pourquoi c&apos;est si élevé en interne ?</h3>
+                  <p className="mt-2 text-sm text-[#64748b]">Le salaire affiché n&apos;est qu&apos;une partie de la facture.</p>
+                  <ul className="mt-4 space-y-2.5 text-[15px] font-medium leading-snug text-[#334155]">
+                    <li className="flex gap-2.5">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#94a3b8]" aria-hidden />
+                      <span>Salaire, charges patronales et avantages (mutuelle, tickets, etc.)</span>
+                    </li>
+                    <li className="flex gap-2.5">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#94a3b8]" aria-hidden />
+                      <span>Bureau, matériel, outils — et temps RH (recrutement, remplacement)</span>
+                    </li>
+                    <li className="flex gap-2.5">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#94a3b8]" aria-hidden />
+                      <span>
+                        Aléas du poste : absences, arrêts maladie, congés, RTT, congés parentaux — l&apos;administratif
+                        ralentit ou retombe sur vous jusqu&apos;à ce qu&apos;un remplaçant soit trouvé et formé
+                      </span>
+                    </li>
+                    <li className="flex gap-2.5">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#94a3b8]" aria-hidden />
+                      <span>
+                        Démission, licenciement ou temps partiel : trou de compétence, transfert de savoir, charge mentale et
+                        coût caché pour la société
+                      </span>
+                    </li>
                   </ul>
-                  <p className="mt-auto pt-6 text-2xl font-bold text-[#1d4ed8]">
-                    <span className="tabular-nums">290</span> € à{" "}
-                    <span className="tabular-nums">1 190</span> €{" "}
-                    <span className="text-base font-semibold text-[#64748b]">TTC</span> / mois
-                  </p>
-                  <p className="mt-2 text-sm text-[#334155]">
-                    Exemple central : offre Suivi à 490 € TTC / mois — suivi structuré pour une activité régulière.
-                  </p>
-                  <Link href="/tarifs" className="mt-4 inline-block text-sm font-semibold text-[#1d4ed8] hover:underline">
-                    Voir les offres →
+                </div>
+                <div className="flex flex-col bg-[#eff6ff]/35 p-8 md:p-10">
+                  <h3 className="text-base font-bold text-[#1d4ed8] md:text-lg">Ce que vous payez avec BeWork</h3>
+                  <p className="mt-2 text-sm text-[#64748b]">Un niveau de forfait = un cadre mensuel clair.</p>
+                  <ul className="mt-4 space-y-2.5 text-[15px] font-medium leading-snug text-[#334155]">
+                    <li className="flex gap-2.5">
+                      <span className="text-[#1d4ed8]" aria-hidden>
+                        ✓
+                      </span>
+                      <span>Un montant TTC / mois, sans embauche ni charges sociales sur ce forfait</span>
+                    </li>
+                    <li className="flex gap-2.5">
+                      <span className="text-[#1d4ed8]" aria-hidden>
+                        ✓
+                      </span>
+                      <span>
+                        Pas de salarié administratif interne à votre charge : vous ne palliez pas les absences, arrêts maladie,
+                        congés payés, RTT ou autres congés comme le ferait un employeur sur un poste dédié
+                      </span>
+                    </li>
+                    <li className="flex gap-2.5">
+                      <span className="text-[#1d4ed8]" aria-hidden>
+                        ✓
+                      </span>
+                      <span>
+                        Pas de recrutement de remplaçant ni d&apos;urgence « double casquette » quand quelqu&apos;un est absent
+                        longtemps ou quitte l&apos;entreprise
+                      </span>
+                    </li>
+                    <li className="flex gap-2.5">
+                      <span className="text-[#1d4ed8]" aria-hidden>
+                        ✓
+                      </span>
+                      <span>Plateforme, suivi et exécution encadrée — actes sensibles sous votre validation</span>
+                    </li>
+                    <li className="flex gap-2.5">
+                      <span className="text-[#1d4ed8]" aria-hidden>
+                        ✓
+                      </span>
+                      <span>
+                        Repère fréquent : offre <strong className="font-semibold text-[#0f172a]">Suivi</strong> à{" "}
+                        <span className="tabular-nums font-semibold text-[#0f172a]">490</span> € TTC / mois pour une activité
+                        régulière
+                      </span>
+                    </li>
+                  </ul>
+                  <Link
+                    href="/tarifs"
+                    className="mt-6 inline-flex text-sm font-bold text-[#1d4ed8] hover:underline md:mt-auto md:pt-6"
+                  >
+                    Voir les offres et le détail des forfaits →
                   </Link>
                 </div>
               </div>
+              <p className="border-t border-[#e2e8f0] bg-[#f8fafc] px-6 py-3 text-center text-xs leading-relaxed text-[#64748b] md:px-8">
+                Comparaison à vocation pédagogique : le poste interne regroupe le coût réel d&apos;un salarié ; le forfait
+                correspond au périmètre administratif défini avec BeWork (pas un clone poste pour poste du même volume horaire).
+              </p>
             </div>
           </div>
         </section>

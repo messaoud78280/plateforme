@@ -95,7 +95,6 @@ export default async function ContractPage() {
             <ul className="mb-4 list-disc pl-5">
               <li>Structure : 290 € TTC / mois</li>
               <li>Suivi : 490 € TTC / mois</li>
-              <li>Renfort : 790 € TTC / mois</li>
               <li>Pilotage : 1 190 € TTC / mois</li>
             </ul>
             <p className="mb-4">Paiement mensuel d&apos;avance.</p>

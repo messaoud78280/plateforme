@@ -9,7 +9,7 @@ import { getMonthStart } from "@/lib/actions";
 /**
  * Après un paiement réussi : créditer les actions, mettre à jour User et Subscription.
  * - Structure (DECOUVERTE) : abonnement mensuel, crédit au niveau Structure
- * - Suivi / Renfort / Pilotage : crédit mensuel, renouvellement à J+1 mois
+ * - Suivi / Pilotage : crédit mensuel, renouvellement à J+1 mois (Renfort historique : STANDARD_PLUS)
  */
 export async function creditActionsAfterPayment(
   userId: string,

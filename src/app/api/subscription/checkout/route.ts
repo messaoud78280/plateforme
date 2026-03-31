@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getPlan, type PlanKey } from "@/lib/subscription-plans";
+import { getPlan, PLAN_KEYS, type PlanKey } from "@/lib/subscription-plans";
 
-const VALID_PLANS: PlanKey[] = ["DECOUVERTE", "STANDARD", "STANDARD_PLUS", "PREMIUM"];
+const VALID_PLANS: PlanKey[] = PLAN_KEYS;
 
 /**
  * POST /api/subscription/checkout
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
   const planKey = body.planKey as string;
   if (!planKey || !VALID_PLANS.includes(planKey as PlanKey)) {
     return NextResponse.json(
-      { error: "Formule invalide. Choisissez DECOUVERTE, STANDARD, STANDARD_PLUS ou PREMIUM." },
+      { error: "Formule invalide. Choisissez Structure, Suivi ou Pilotage." },
       { status: 400 }
     );
   }

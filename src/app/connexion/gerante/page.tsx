@@ -11,8 +11,8 @@ export default function ConnexionGerantePage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-slate-100">
-          <p className="text-slate-600">Chargement...</p>
+        <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#dce2ea] px-4">
+          <p className="text-sm font-medium text-[#64748b]">Chargement…</p>
         </div>
       }
     >

@@ -145,23 +145,62 @@ export default function ContactForm() {
   return (
     <div className="px-4 py-8 md:py-10">
       <div className="mx-auto max-w-3xl">
-        <h1 className="text-3xl font-bold text-[#0f172a] md:text-4xl">
+        <h1 className="text-metallic-black font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-3xl font-semibold tracking-tight md:text-4xl">
           Échanger sur votre organisation
         </h1>
-        <p className="mt-2 text-[#334155]">
-          Ce formulaire sert à un premier cadrage : structure, secteur (idéalement BTP ou proches), charge administrative et
-          attentes. Choisissez un créneau visio ; nous confirmons par email et préparons l’entretien en conséquence.
+        <p className="mt-4 text-base font-medium leading-relaxed text-[#0f172a] md:text-lg">
+          En validant ce formulaire, vous déclenchez un <span className="text-[#1d4ed8]">premier cadrage</span> avec BeWork :{" "}
+          <strong className="font-semibold text-[#0f172a]">nous vous proposons rapidement un rendez-vous en visioconférence</strong>{" "}
+          — pas une file d’attente sans suite. C’est le moment où nous nous parlons{" "}
+          <strong className="font-semibold text-[#0f172a]">de vive voix</strong>.
         </p>
-        <p className="mt-3 text-sm font-semibold text-[#0f172a]">
+        <ol className="mt-5 list-none space-y-3 pl-0 text-sm leading-relaxed text-[#334155] md:text-[0.9375rem]">
+          <li className="flex gap-3">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#eff6ff] text-xs font-bold text-[#1d4ed8]" aria-hidden>
+              1
+            </span>
+            <span>
+              Décrivez votre structure, votre secteur (de préférence <strong className="font-semibold text-[#0f172a]">BTP</strong>{" "}
+              ou activités proches), votre charge administrative et ce que vous attendez.
+            </span>
+          </li>
+          <li className="flex gap-3">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#eff6ff] text-xs font-bold text-[#1d4ed8]" aria-hidden>
+              2
+            </span>
+            <span>
+              Choisissez un créneau visio dans le formulaire : nous <strong className="font-semibold text-[#0f172a]">confirmons par e-mail dans les meilleurs délais</strong>{" "}
+              et préparons l’échange en fonction de vos réponses.
+            </span>
+          </li>
+        </ol>
+        <p className="mt-5 text-xs font-semibold uppercase tracking-[0.1em] text-[#64748b]">
           Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.
         </p>
 
-        <div className="mt-8 rounded-2xl border border-[#c8cdd6] bg-[#f8f9fb] p-4 text-sm text-[#334155]">
-          <p className="font-medium text-[#0f172a]">Premier rendez-vous (visio)</p>
-          <p className="mt-1">
-            Nous clarifions votre besoin, nos forfaits et le cadre contractuel. L’objectif est de vérifier si la collaboration
-            est pertinente des deux côtés — pas de démo « one size fits all ».
-          </p>
+        <div className="mt-8 rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_8px_28px_rgba(15,23,42,0.08)]">
+          <div className="surface-metallic-light surface-metallic-light--soft rounded-2xl p-5 text-left md:p-6">
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#1d4ed8]">Après votre envoi</p>
+            <p className="mt-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-lg font-semibold text-[#0f172a] md:text-xl">
+              Visio de cadrage — échange direct avec l’équipe
+            </p>
+            <p className="mt-3 text-sm leading-relaxed text-[#334155] md:text-[0.9375rem]">
+              Lors de ce rendez-vous, nous vous expliquons{" "}
+              <strong className="font-semibold text-[#0f172a]">oralement notre façon de travailler</strong> : méthode, cadre,
+              forfaits et ce que nous pouvons prendre en charge concrètement pour votre entreprise.
+            </p>
+            <p className="mt-3 text-sm leading-relaxed text-[#334155] md:text-[0.9375rem]">
+              Nous regardons ensemble comment <strong className="font-semibold text-[#0f172a]">mieux structurer votre organisation</strong>{" "}
+              administrative (devis, facturation, relances, dossiers chantier, coordination…) afin de{" "}
+              <strong className="font-semibold text-[#0f172a]">sécuriser votre activité et soutenir votre chiffre d’affaires</strong>
+              : moins de temps perdu sur des tâches qui traînent, une trésorerie et un suivi commercial plus fluides — sans
+              promesse creuse, avec des leviers réalistes pour le BTP.
+            </p>
+            <p className="mt-3 text-sm leading-relaxed text-[#64748b] md:text-[0.9375rem]">
+              L’objectif reste de vérifier si un accompagnement BeWork a du sens pour vous comme pour nous — ce n’est pas une
+              démo générique imposée à toutes les structures.
+            </p>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">

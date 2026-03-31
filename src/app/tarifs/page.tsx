@@ -175,7 +175,9 @@ export default function TarifsPage() {
               const isFeatured = plan.planKey === "STANDARD";
               return (
               <article
+                id={`tarif-${plan.planKey}`}
                 key={plan.name}
+                style={{ scrollMarginTop: "5.5rem" }}
                 className={`relative flex flex-col rounded-xl border-2 surface-metallic-light surface-metallic-light--badge-pill transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${
                   isFeatured
                     ? "z-10 border-[#1d4ed8] py-7 shadow-md shadow-[#1d4ed8]/15 ring-2 ring-[#1d4ed8]/30 md:px-7 md:py-8 lg:scale-[1.03]"
@@ -251,74 +253,189 @@ export default function TarifsPage() {
               une logique horaire stricte.
             </p>
           </div>
-          <div className="mx-auto mt-10 max-w-3xl rounded-xl border border-[#e0e4ea] bg-[#f8fafc] px-6 py-6 text-center md:px-8 md:py-7">
-            <p className="text-sm font-medium leading-relaxed text-[#0f172a] md:text-base">
-              Nos offres s&apos;adressent à des entreprises du bâtiment en activité réelle, souhaitant structurer leur
-              organisation administrative.
-            </p>
-            <p className="mt-3 text-sm leading-relaxed text-[#334155] md:text-[0.9375rem]">
-              Elles ne sont pas adaptées à des besoins ponctuels ou à une logique de prestation à la demande.
-            </p>
+          <div className="mx-auto mt-10 max-w-3xl rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_8px_28px_rgba(15,23,42,0.08)]">
+            <div className="surface-metallic-light surface-metallic-light--soft rounded-2xl px-6 py-7 text-center md:px-8 md:py-8">
+              <p className="text-sm font-medium leading-relaxed text-[#0f172a] md:text-base">
+                Nos offres s&apos;adressent à des entreprises du bâtiment en activité réelle, souhaitant structurer leur
+                organisation administrative.
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-[#475569] md:text-[0.9375rem]">
+                Elles ne sont pas adaptées à des besoins ponctuels ou à une logique de prestation à la demande.
+              </p>
+            </div>
           </div>
 
           <section className="mx-auto mt-14 max-w-3xl" aria-labelledby="quelle-offre-heading">
-            <h2 id="quelle-offre-heading" className="text-center text-xl font-bold tracking-tight text-[#0f172a] md:text-2xl">
-              Quelle offre choisir ?
-            </h2>
-            <ul className="mt-8 space-y-5 text-left text-[#334155]">
-              <li className="rounded-xl border border-[#e2e8f0] bg-white/80 px-5 py-4 shadow-sm">
-                <span className="font-semibold text-[#0f172a]">Structure</span>
-                <span className="mt-1 block text-sm leading-relaxed">
-                  Si votre administratif est encore irrégulier et peu structuré.
-                </span>
-              </li>
-              <li className="rounded-xl border border-[#e2e8f0] bg-white/80 px-5 py-4 shadow-sm">
-                <span className="font-semibold text-[#0f172a]">Suivi</span>
-                <span className="mt-1 block text-sm leading-relaxed">
-                  Si vous avez une activité continue avec besoin de suivi fiable.
-                </span>
-              </li>
-              <li className="rounded-xl border border-[#e2e8f0] bg-white/80 px-5 py-4 shadow-sm">
-                <span className="font-semibold text-[#0f172a]">Pilotage</span>
-                <span className="mt-1 block text-sm leading-relaxed">
-                  Si vous souhaitez déléguer avec un niveau de suivi élevé et structuré.
-                </span>
-              </li>
-            </ul>
+            <div className="rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_12px_40px_rgba(15,23,42,0.1)]">
+              <div className="card-frame rounded-2xl px-6 py-8 md:px-10 md:py-10">
+                <h2
+                  id="quelle-offre-heading"
+                  className="text-metallic-black text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-2xl font-semibold tracking-tight md:text-[1.85rem]"
+                >
+                  Quelle offre choisir ?
+                </h2>
+                <p className="mx-auto mt-3 max-w-lg text-center text-sm leading-relaxed text-[#64748b]">
+                  Repères selon votre situation — cliquez sur une ligne pour remonter à la carte tarifaire correspondante.
+                </p>
+                <ul className="mt-8 space-y-4 text-left" role="list">
+                  <li>
+                    <a
+                      href="#tarif-DECOUVERTE"
+                      className="surface-metallic-light group block rounded-xl p-5 transition-all duration-200 hover:border-[#93c5fd]/80 hover:shadow-[0_8px_24px_rgba(29,78,216,0.12)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#eef0f4] md:p-6"
+                    >
+                      <span className="block font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-xl font-semibold tracking-tight text-[#0f172a] md:text-2xl">
+                        Structure
+                      </span>
+                      <span className="mt-1 block text-sm leading-relaxed text-[#475569]">
+                        Si votre administratif est encore irrégulier et peu structuré.
+                      </span>
+                      <span className="mt-3 inline-flex text-xs font-semibold text-[#1d4ed8] transition group-hover:text-[#1e40af]">
+                        Voir le forfait Structure →
+                      </span>
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#tarif-STANDARD"
+                      className="surface-metallic-light group block rounded-xl p-5 transition-all duration-200 hover:border-[#93c5fd]/80 hover:shadow-[0_8px_24px_rgba(29,78,216,0.12)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#eef0f4] md:p-6"
+                    >
+                      <span className="block font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-xl font-semibold tracking-tight text-[#0f172a] md:text-2xl">
+                        Suivi
+                      </span>
+                      <span className="mt-1 block text-sm leading-relaxed text-[#475569]">
+                        Si vous avez une activité continue avec besoin de suivi fiable.
+                      </span>
+                      <span className="mt-3 inline-flex text-xs font-semibold text-[#1d4ed8] transition group-hover:text-[#1e40af]">
+                        Voir le forfait Suivi →
+                      </span>
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#tarif-PREMIUM"
+                      className="surface-metallic-light group block rounded-xl p-5 transition-all duration-200 hover:border-[#93c5fd]/80 hover:shadow-[0_8px_24px_rgba(29,78,216,0.12)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#eef0f4] md:p-6"
+                    >
+                      <span className="block font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-xl font-semibold tracking-tight text-[#0f172a] md:text-2xl">
+                        Pilotage
+                      </span>
+                      <span className="mt-1 block text-sm leading-relaxed text-[#475569]">
+                        Si vous souhaitez déléguer avec un niveau de suivi élevé et structuré.
+                      </span>
+                      <span className="mt-3 inline-flex text-xs font-semibold text-[#1d4ed8] transition group-hover:text-[#1e40af]">
+                        Voir le forfait Pilotage →
+                      </span>
+                    </a>
+                  </li>
+                </ul>
+                <Link
+                  href="/"
+                  className="surface-metallic-outline mt-8 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-[#1e293b] transition hover:text-[#0f172a]"
+                >
+                  <span aria-hidden>←</span>
+                  Retour à l&apos;accueil
+                </Link>
+              </div>
+            </div>
           </section>
 
-          <div className="mx-auto mt-14 max-w-3xl rounded-xl border border-[#cbd5e1] bg-[#f1f5f9]/60 px-6 py-7 text-center md:px-10">
-            <p className="text-sm leading-relaxed text-[#334155] md:text-base">
-              BeWork ne propose pas une prestation administrative classique.
-            </p>
-            <p className="mt-4 text-sm leading-relaxed text-[#334155] md:text-[0.9375rem]">
-              Nous mettons en place un cadre de travail structuré, adapté aux réalités du terrain, afin de garantir un suivi
-              fiable et durable.
-            </p>
-            <p className="mt-4 text-sm leading-relaxed text-[#334155] md:text-[0.9375rem]">
-              Notre approche s&apos;adresse à des professionnels du bâtiment qui souhaitent organiser leur activité, pas
-              simplement déléguer des tâches.
-            </p>
-          </div>
+          <section
+            className="mx-auto mt-14 max-w-3xl space-y-8"
+            aria-labelledby="cadre-prestation-heading"
+          >
+            <div className="rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_12px_40px_rgba(15,23,42,0.1)]">
+              <div className="card-frame rounded-2xl px-6 py-8 text-center md:px-10 md:py-9">
+                <h2
+                  id="cadre-prestation-heading"
+                  className="text-metallic-black font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-xl font-semibold tracking-tight md:text-2xl"
+                >
+                  Cadre de prestation
+                </h2>
+                <div className="mx-auto mt-6 max-w-2xl space-y-4 text-sm leading-relaxed text-[#334155] md:text-[0.9375rem]">
+                  <p>BeWork ne propose pas une prestation administrative classique.</p>
+                  <p>
+                    Nous mettons en place un cadre de travail structuré, adapté aux réalités du terrain, afin de garantir un
+                    suivi fiable et durable.
+                  </p>
+                  <p>
+                    Notre approche s&apos;adresse à des professionnels du bâtiment qui souhaitent organiser leur activité, pas
+                    simplement déléguer des tâches.
+                  </p>
+                </div>
+              </div>
+            </div>
 
-          <div className="mx-auto mt-10 max-w-2xl space-y-2 rounded-xl border border-[#e0e4ea] bg-[#f8fafc] px-6 py-5 text-center">
-            <p className="text-sm font-medium text-[#0f172a]">
-              Externaliser avec un cadre défini évite de porter seul salaire, charges et management d&apos;un poste interne à
-              temps plein.
-            </p>
-            <p className="text-sm text-[#334155]">
-              Vous choisissez un niveau d&apos;accompagnement cohérent avec votre charge — pas une relation informelle ni une
-              disponibilité illimitée.
-            </p>
-            <p className="text-xs text-[#64748b]">Tous nos tarifs sont exprimés TTC / mois, sans frais supplémentaires.</p>
-          </div>
-          <p className="mt-6 max-w-2xl mx-auto text-center text-sm text-[#334155]">
-            *Tarifs valables pour 2 périmètres maximum. Pour 3 périmètres ou plus, contactez-nous pour un tarif personnalisé.
-          </p>
-          <p className="mt-6 max-w-3xl mx-auto text-center text-sm text-[#64748b] leading-relaxed">
-            BeWork fournit une prestation d&apos;organisation et d&apos;assistance administrative externalisée, encadrée par
-            contrat. La relation est celle d&apos;un partenaire de pilotage, pas d&apos;un simple portage de personnel.
-          </p>
+            <div className="rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_8px_28px_rgba(15,23,42,0.08)]">
+              <div className="surface-metallic-light surface-metallic-light--soft rounded-2xl px-6 py-7 text-center md:px-8 md:py-8">
+                <p className="text-sm font-semibold leading-relaxed text-[#0f172a] md:text-[0.9375rem]">
+                  Externaliser avec un cadre défini évite de porter seul salaire, charges et management d&apos;un poste interne
+                  à temps plein.
+                </p>
+                <p className="mt-4 text-sm leading-relaxed text-[#475569]">
+                  Vous choisissez un niveau d&apos;accompagnement cohérent avec votre charge — pas une relation informelle ni
+                  une disponibilité illimitée.
+                </p>
+                <p className="mt-4 text-xs font-medium uppercase tracking-[0.08em] text-[#64748b]">
+                  Tous nos tarifs sont exprimés TTC / mois, sans frais supplémentaires.
+                </p>
+              </div>
+            </div>
+
+            <div
+              id="perimetres-missions"
+              className="scroll-mt-24 rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_12px_40px_rgba(15,23,42,0.1)]"
+            >
+              <div className="card-frame rounded-2xl px-6 py-8 md:px-10 md:py-9">
+                <h3 className="text-metallic-black text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-xl font-semibold tracking-tight md:text-left md:text-2xl">
+                  Que signifie « périmètre » ?
+                </h3>
+                <p className="mt-5 text-sm leading-relaxed text-[#334155] md:text-[0.9375rem]">
+                  Un <strong className="font-semibold text-[#0f172a]">périmètre</strong>, ce n&apos;est pas une tâche isolée :
+                  c&apos;est un <strong className="font-semibold text-[#0f172a]">ensemble de missions</strong> du même ordre,
+                  regroupé et défini avec vous au contrat — par exemple tout le volet devis, factures et relances, ou le suivi
+                  des dossiers chantier et fournisseurs, ou encore les démarches réglementaires, selon ce qui est retenu.
+                </p>
+                <p className="mt-4 text-sm leading-relaxed text-[#475569]">
+                  En BTP, on peut ainsi avoir un périmètre « commercial / facturation » et un autre « chantier / coordination »,
+                  toujours selon le cadrage convenu ensemble.
+                </p>
+                <div className="mt-6 rounded-xl border border-[#93c5fd]/45 bg-gradient-to-b from-[#eff6ff]/90 to-[#dbeafe]/40 p-5 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
+                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#1d4ed8]">Tarifs affichés</p>
+                  <p className="mt-3 text-sm leading-relaxed text-[#334155]">
+                    <strong className="text-[#0f172a]">Ces montants valent pour deux périmètres au maximum</strong> — soit deux
+                    domaines distincts, fixés au contrat.{" "}
+                    <strong className="text-[#0f172a]">Au-delà</strong>, nous préparons une{" "}
+                    <Link href="/contact" className="font-semibold text-[#1d4ed8] underline-offset-2 hover:underline">
+                      offre sur mesure
+                    </Link>{" "}
+                    (autres volumes, autre organisation).
+                  </p>
+                </div>
+                <p className="mt-5 text-center text-xs text-[#64748b] md:text-left">
+                  <Link
+                    href="/assistants-administratifs-taches#faq-heading"
+                    className="font-medium text-[#1d4ed8] hover:underline"
+                  >
+                    Tâches prises en charge &amp; FAQ (périmètres)
+                  </Link>
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_8px_28px_rgba(15,23,42,0.08)]">
+              <div className="surface-metallic-light surface-metallic-light--soft rounded-2xl px-6 py-7 text-center md:px-9 md:py-8">
+                <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#64748b]">Nature de la prestation</p>
+                <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[#334155] md:text-[0.9375rem]">
+                  BeWork intervient en <strong className="font-semibold text-[#0f172a]">organisation</strong> et{" "}
+                  <strong className="font-semibold text-[#0f172a]">assistance administrative externalisée</strong>. Tout est
+                  cadré par <strong className="font-semibold text-[#0f172a]">contrat</strong> : périmètre, modalités, engagements
+                  des deux côtés.
+                </p>
+                <p className="mx-auto mt-4 max-w-2xl font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-base font-semibold leading-snug text-[#0f172a] md:text-lg">
+                  Un partenaire de pilotage — pas un portage de personnel.
+                </p>
+              </div>
+            </div>
+          </section>
 
           {/* Solution dédiée — Full-time */}
           <section className="mt-12 rounded-2xl border-2 border-[#1e293b] bg-gradient-to-br from-[#0f172a] to-[#1e293b] p-8 md:p-10 text-white shadow-xl" aria-labelledby="solution-dediee-heading">
@@ -363,18 +480,58 @@ export default function TarifsPage() {
           </section>
 
           {/* Conciergerie — sur devis */}
-          <div className="mt-10 rounded-xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-6 text-center">
-            <h3 className="text-xl font-bold text-[#0f172a]">Service de conciergerie</h3>
-            <p className="mt-2 text-[#334155]">
-              Réservation hôtel, voiture, restaurant, organisation de déplacements… À distance : recherches, appels et mails en votre nom, sans déplacement. Sur devis personnalisé, disponible 24h/24.
-            </p>
-            <Link
-              href="/contact"
-              className="mt-4 inline-block rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af]"
-            >
-              Demander un devis
-            </Link>
-          </div>
+          <section
+            className="mt-12"
+            aria-labelledby="conciergerie-heading"
+          >
+            <div className="rounded-2xl bg-gradient-to-br from-[#93c5fd]/55 via-white/95 to-[#bfdbfe]/50 p-[1px] shadow-[0_12px_40px_rgba(29,78,216,0.14),0_2px_0_rgba(255,255,255,0.5)_inset]">
+              <div className="rounded-2xl border border-[#bfdbfe]/70 bg-gradient-to-b from-white via-[#f8fafc] to-[#eff6ff]/95 px-6 py-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)] md:px-10 md:py-9">
+                <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:justify-center sm:gap-4">
+                  <h3
+                    id="conciergerie-heading"
+                    className="text-metallic-black font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-xl font-semibold tracking-tight md:text-2xl"
+                  >
+                    Service de conciergerie
+                  </h3>
+                  <span className="surface-metallic-light surface-metallic-light--badge-pill rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#0f172a] shadow-sm">
+                    Sur devis
+                  </span>
+                </div>
+                <p className="mx-auto mt-5 max-w-2xl text-center text-sm leading-relaxed text-[#475569] md:text-[0.9375rem]">
+                  Un complément à part : réservations et organisation du quotidien professionnel, traitées comme des missions
+                  ponctuelles — en dehors du cadre des forfaits administratifs BTP.
+                </p>
+                <ul
+                  className="mx-auto mt-6 grid max-w-xl gap-3 text-left text-sm text-[#334155] sm:grid-cols-2"
+                  role="list"
+                >
+                  <li className="flex gap-2.5 rounded-lg border border-[#e2e8f0]/80 bg-white/70 px-3 py-2.5 shadow-sm">
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#dbeafe] text-[10px] font-bold text-[#1d4ed8]" aria-hidden>
+                      ✓
+                    </span>
+                    <span>Hôtel, véhicule, restaurant, déplacements</span>
+                  </li>
+                  <li className="flex gap-2.5 rounded-lg border border-[#e2e8f0]/80 bg-white/70 px-3 py-2.5 shadow-sm">
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#dbeafe] text-[10px] font-bold text-[#1d4ed8]" aria-hidden>
+                      ✓
+                    </span>
+                    <span>À distance : recherches, appels et e-mails en votre nom</span>
+                  </li>
+                </ul>
+                <p className="mt-6 text-center text-xs font-semibold uppercase tracking-[0.1em] text-[#1d4ed8]">
+                  Disponible 24h/24 — montant et périmètre fixés au devis
+                </p>
+                <div className="mt-6 flex justify-center">
+                  <Link
+                    href="/contact"
+                    className="inline-flex rounded-xl border border-[#2563eb]/70 bg-gradient-to-b from-[#3b82f6] via-[#2563eb] to-[#1d4ed8] px-6 py-3 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_4px_18px_rgba(29,78,216,0.35)] transition hover:border-[#3b82f6] hover:from-[#2563eb] hover:via-[#1d4ed8] hover:to-[#1e40af] active:translate-y-px"
+                  >
+                    Demander un devis
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </section>
         </section>
 
         {/* Ce qui est inclus */}

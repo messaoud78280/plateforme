@@ -19,6 +19,12 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
-    host: SITE_URL.replace(/^https?:\/\//, ""),
+    host: (() => {
+      try {
+        return new URL(SITE_URL).host;
+      } catch {
+        return SITE_URL.replace(/^https?:\/\//, "").split("/")[0] ?? SITE_URL;
+      }
+    })(),
   };
 }

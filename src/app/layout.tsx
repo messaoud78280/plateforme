@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Orbitron, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
-import { absoluteUrl, SITE_URL } from "@/lib/site";
+import { absoluteUrl, getOrgSameAs, SITE_URL } from "@/lib/site";
 
 const defaultOgImage = absoluteUrl("/opengraph-image");
 
@@ -47,7 +47,10 @@ export const metadata: Metadata = {
   keywords: [
     "administratif BTP",
     "externalisation administrative BTP",
+    "secrétaire externalisé BTP",
     "organisation administrative bâtiment",
+    "assistant administratif entreprise bâtiment",
+    "Île-de-France administratif BTP",
     "externalisation administrative",
     "pilotage administratif PME",
     "organisation entreprise bâtiment",
@@ -56,7 +59,9 @@ export const metadata: Metadata = {
     "DICT déclaration travaux",
     "facturation chantier BTP",
     "trésorerie artisan bâtiment",
+    "relances impayés BTP",
     "délégation administrative",
+    "cadrage administratif dirigeant",
     "BeWork",
     "administratif intelligence artificielle",
     "assistant IA entreprise",
@@ -88,10 +93,18 @@ export const metadata: Metadata = {
     title: "BeWork — Administratif structuré pour le BTP",
     description:
       "Relais administratif cadré : devis, relances, dossiers chantier. Forfaits TTC.",
+    ...(process.env.NEXT_PUBLIC_TWITTER_SITE?.trim()
+      ? { site: process.env.NEXT_PUBLIC_TWITTER_SITE.trim() }
+      : {}),
+    ...(process.env.NEXT_PUBLIC_TWITTER_CREATOR?.trim()
+      ? { creator: process.env.NEXT_PUBLIC_TWITTER_CREATOR.trim() }
+      : {}),
   },
   alternates: { canonical: SITE_URL, languages: { fr: SITE_URL, "x-default": SITE_URL } },
   ...(googleSiteVerification ? { verification: { google: googleSiteVerification } } : {}),
 };
+
+const orgSameAs = getOrgSameAs();
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -101,20 +114,49 @@ const jsonLd = {
       "@id": `${SITE_URL}/#website`,
       url: SITE_URL,
       name: "BeWork",
+      alternateName: ["BeWork — administratif BTP", "BeWork partenaire administratif"],
       description:
-        "Pilotage administratif externalisé pour artisans, entreprises du BTP et PME francophones. Secrétariat et organisation à distance. France, Belgique, Suisse, Luxembourg.",
+        "Pilotage administratif externalisé pour artisans, entreprises du BTP et PME francophones. Organisation, devis, facturation, relances et dossiers chantier. France, Belgique, Suisse, Luxembourg.",
       inLanguage: "fr-FR",
       publisher: { "@id": `${SITE_URL}/#organization` },
       image: { "@type": "ImageObject", url: defaultOgImage, width: 1200, height: 630 },
+      potentialAction: {
+        "@type": "ContactAction",
+        name: "Demander un cadrage ou un échange",
+        target: absoluteUrl("/contact"),
+      },
     },
     {
       "@type": "Organization",
       "@id": `${SITE_URL}/#organization`,
       name: "BeWork",
       url: SITE_URL,
+      logo: { "@type": "ImageObject", url: defaultOgImage, width: 1200, height: 630 },
+      image: defaultOgImage,
       description:
-        "Services d'organisation et de pilotage administratif externalisé pour artisans, entreprises du bâtiment et PME francophones.",
+        "Organisation et pilotage administratif externalisé pour artisans, entreprises du bâtiment et PME : devis, facturation, relances, démarches chantier, coordination. Agence en Île-de-France, exécution supervisée depuis la France.",
+      slogan: "Cadre, rigueur, pilotage et lecture terrain pour le BTP",
       areaServed: ["FR", "BE", "CH", "LU"],
+      founder: {
+        "@type": "Person",
+        name: "Laure Olivie",
+        jobTitle: "Fondatrice",
+        knowsAbout: [
+          "Bâtiment et travaux publics",
+          "Direction d'entreprise",
+          "Externalisation administrative",
+        ],
+      },
+      contactPoint: [
+        {
+          "@type": "ContactPoint",
+          contactType: "sales",
+          url: absoluteUrl("/contact"),
+          availableLanguage: ["French"],
+          areaServed: ["FR", "BE", "CH", "LU"],
+        },
+      ],
+      ...(orgSameAs.length ? { sameAs: orgSameAs } : {}),
       knowsAbout: [
         "BTP",
         "Artisanat du bâtiment",
@@ -129,10 +171,14 @@ const jsonLd = {
       "@id": `${SITE_URL}/#service`,
       name: "BeWork — Pilotage administratif externalisé",
       description:
-        "Externalisation administrative pour PME, artisans et BTP : devis, facturation chantier, relances et suivi de dossiers. Utilisation encadrée d'outils d'aide à l'exécution. Forfaits dès 290 € TTC/mois.",
+        "Externalisation administrative pour PME, artisans et BTP : devis, facturation chantier, relances et suivi de dossiers. Utilisation encadrée d'outils d'aide à l'exécution. Trois forfaits TTC mensuels dès 290 €.",
       url: SITE_URL,
       provider: { "@id": `${SITE_URL}/#organization` },
-      areaServed: { "@type": "GeoCircle", geoMidpoint: { "@type": "GeoCoordinates", latitude: 48.8566, longitude: 2.3522 }, geoRadius: "1000000" },
+      areaServed: {
+        "@type": "GeoCircle",
+        geoMidpoint: { "@type": "GeoCoordinates", latitude: 48.8566, longitude: 2.3522 },
+        geoRadius: "1000000",
+      },
     },
   ],
 };

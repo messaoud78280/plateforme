@@ -31,6 +31,25 @@ const TARIFS_PROGRESSION_ROWS = [
   },
 ];
 
+const HOME_FAQ_ITEMS = [
+  {
+    q: "Pourquoi externaliser plutôt que recruter ?",
+    a: "Un salarié engage salaire, charges, formation et management pour une charge qui n’est pas toujours constante. Un forfait BeWork fixe un niveau d’accompagnement et un cadre : pas de structure RH à alourdir pour tenir le même niveau d’organisation.",
+  },
+  {
+    q: "Comment se passe le quotidien ?",
+    a: "Vous déposez vos demandes sur la plateforme (devis, factures, situations de travaux, démarches, logistique, relances, dossiers sensibles sous validation). L’équipe exécute dans le forfait ; vous suivez statuts et échanges. Démarrage après cadrage et accès outils.",
+  },
+  {
+    q: "Qui exécute les missions ?",
+    a: "Des profils francophones diplômés Bac+5, encadrés par l’agence en région parisienne. Pilotage depuis la France ; exigence alignée sur ce qu’attendent les entreprises du bâtiment en termes de délais et de relecture.",
+  },
+  {
+    q: "Quel est le délai de traitement ?",
+    a: "Réponse moyenne en moins de deux heures ouvrées. Les urgences liées au chantier sont priorisées dans le cadre de votre offre. Le délai détaillé dépend de la mission ; la coordination reste assurée par l’équipe en France.",
+  },
+] as const;
+
 const RESSOURCES_BLOG = [
   {
     title: "Facturation chantier et relances : trésorerie BTP",
@@ -149,9 +168,22 @@ const homeJsonLd = {
         priceCurrency: "EUR",
         lowPrice: "290",
         highPrice: "1190",
-        offerCount: "4",
-        description: "Forfaits TTC mensuels BTP ; offre Suivi 490 € TTC/mois, niveau le plus adapté pour une activité régulière.",
+        offerCount: "3",
+        description:
+          "Trois forfaits TTC mensuels BTP : Structure, Suivi (490 € TTC/mois — le plus adapté pour une activité régulière), Pilotage.",
       },
+    },
+    {
+      "@type": "FAQPage",
+      "@id": `${SITE_URL}/#faq`,
+      url: `${SITE_URL}/`,
+      isPartOf: { "@id": `${SITE_URL}/#website` },
+      inLanguage: "fr-FR",
+      mainEntity: HOME_FAQ_ITEMS.map((item) => ({
+        "@type": "Question",
+        name: item.q,
+        acceptedAnswer: { "@type": "Answer", text: item.a },
+      })),
     },
   ],
 };
@@ -1090,80 +1122,145 @@ export default function HomePage() {
         {/* Équipe & ADN fondateur */}
         <section id="equipe" className="px-6 py-24 md:py-28">
           <div className="mx-auto max-w-6xl">
-            <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-              Une solution pensée par une dirigeante du BTP en Île-de-France
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">Fondatrice &amp; méthode</p>
+            <h2 className="text-metallic-black mt-3 max-w-4xl font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-3xl font-semibold leading-[1.15] tracking-tight md:text-4xl md:leading-[1.1]">
+              Une solution née du terrain — par une dirigeante du BTP en Île-de-France
             </h2>
-            <p className="mt-5 max-w-3xl text-lg leading-relaxed text-[#334155]">
-              BeWork n&apos;est pas une plateforme générique. Elle porte{" "}
-              <strong className="font-semibold text-[#0f172a]">vingt ans de terrain à la tête d&apos;entreprises du bâtiment</strong>{" "}
-              : délais de chantier, tension de trésorerie, fournisseurs exigeants, paperasse du soir et dossiers qui piquent.
-              Cette lecture du BTP guide chaque process — de la relance client au suivi d&apos;une DICT.
-            </p>
 
-            {/* Laure Olivie — Fondatrice */}
-            <div className="mt-16 flex flex-col items-center text-center md:flex-row md:items-start md:gap-12 md:text-left">
-              <div className="shrink-0">
-                <div className="relative mx-auto h-56 w-56 overflow-hidden rounded-2xl bg-[#e2e8f0] shadow-lg shadow-[#0f172a]/8 md:h-64 md:w-64">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/laure-olivie.jpg"
-                    alt="Laure Olivie, fondatrice de BeWork"
-                    className="absolute inset-0 h-full w-full object-cover object-center"
-                  />
-                </div>
-                <p className="mt-4 text-lg font-semibold text-[#0f172a]">Laure Olivie</p>
-                <p className="mt-0.5 text-sm font-medium text-[#64748b]">Fondatrice de BeWork</p>
-              </div>
-              <div className="mt-8 max-w-2xl md:mt-0 md:flex-1">
-                <p className="text-lg leading-relaxed text-[#334155]">
-                  BeWork est né d&apos;un constat de terrain&nbsp;: trop d&apos;artisans et d&apos;entreprises du bâtiment
-                  brillent sur l&apos;ouvrage mais s&apos;étouffent sur l&apos;administratif. La réponse n&apos;est pas
-                  toujours l&apos;embauche — c&apos;est une organisation structurée, fiable, immédiatement opérationnelle.
-                </p>
-                <p className="mt-6 font-medium text-[#0f172a]">
-                  Notre rôle&nbsp;: tenir un relais administratif fiable pour les entreprises qui en ont besoin — pas multiplier
-                  les dossiers à la chaîne sans cadre.
-                </p>
-                <p className="mt-6 text-[#334155] leading-relaxed">
-                  Société française fondée par{" "}
-                  <strong className="font-semibold text-[#0f172a]">Laure Olivie</strong>,{" "}
+            <div className="mt-8 max-w-4xl rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_12px_40px_rgba(15,23,42,0.1)]">
+              <div className="surface-metallic-light surface-metallic-light--soft rounded-2xl px-6 py-7 md:px-8 md:py-8">
+                <p className="text-base leading-relaxed text-[#334155] md:text-lg">
+                  BeWork n&apos;est pas une plateforme générique. Elle s&apos;appuie sur{" "}
                   <strong className="font-semibold text-[#0f172a]">
-                    dirigeante d&apos;entreprise du BTP en Île-de-France, vingt ans sur le terrain
-                  </strong>
-                  , formatrice IA reconnue et diplômée. Votre interlocution principale passe par notre agence en région
-                  parisienne, qu&apos;elle pilote au quotidien. La plateforme opérationnelle est supervisée depuis la France
-                  en temps réel : même exigence, même réactivité. L&apos;équipe exécutive est composée de diplômés Bac+5
-                  minimum, rodés aux outils d&apos;intelligence artificielle — au service de la précision, pas du gadget.
+                    vingt ans de terrain à la tête d&apos;entreprises du bâtiment
+                  </strong>{" "}
+                  : délais de chantier, tension de trésorerie, fournisseurs exigeants, paperasse du soir, dossiers qui
+                  bloquent. Cette lecture du BTP guide{" "}
+                  <strong className="font-semibold text-[#0f172a]">chaque process</strong> — de la relance client au suivi
+                  d&apos;une DICT.
                 </p>
               </div>
             </div>
-            <div className="card-frame mt-16 rounded-xl p-10 md:p-14">
-              <div className="grid gap-10 md:grid-cols-2 md:items-stretch md:gap-14">
-                <div className="flex flex-col">
-                  <p className="text-lg font-semibold text-[#0f172a]">
-                    Agence principale — Région parisienne
+
+            <div className="mt-14 grid gap-12 md:grid-cols-12 md:items-start md:gap-14">
+              <div className="mx-auto shrink-0 text-center md:col-span-4 md:mx-0 md:text-left">
+                <div className="rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_12px_36px_rgba(15,23,42,0.12)]">
+                  <div className="relative mx-auto aspect-square w-full max-w-[16rem] overflow-hidden rounded-2xl bg-[#e2e8f0] md:max-w-none">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/laure-olivie.jpg"
+                      alt="Laure Olivie, fondatrice de BeWork"
+                      className="absolute inset-0 h-full w-full object-cover object-center"
+                    />
+                  </div>
+                </div>
+                <p className="mt-5 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-xl font-semibold text-[#0f172a] md:text-2xl">
+                  Laure Olivie
+                </p>
+                <p className="mt-1 text-sm font-semibold uppercase tracking-[0.08em] text-[#64748b]">
+                  Fondatrice de BeWork
+                </p>
+                <p className="mx-auto mt-3 max-w-xs text-xs leading-relaxed text-[#64748b] md:mx-0">
+                  Dirigeante BTP · Île-de-France · Formatrice IA · Diplômée
+                </p>
+              </div>
+
+              <div className="space-y-6 md:col-span-8">
+                <p className="text-lg leading-relaxed text-[#334155]">
+                  BeWork est né d&apos;un constat simple&nbsp;: beaucoup d&apos;artisans et d&apos;entreprises du bâtiment
+                  excellent sur l&apos;ouvrage mais s&apos;étouffent sur l&apos;administratif. La réponse n&apos;est pas
+                  toujours l&apos;embauche — c&apos;est une{" "}
+                  <strong className="font-semibold text-[#0f172a]">organisation structurée, fiable et immédiatement
+                  opérationnelle</strong>
+                  .
+                </p>
+                <div className="rounded-xl border border-[#bfdbfe]/70 bg-gradient-to-br from-[#eff6ff]/95 to-white/90 px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] md:px-6 md:py-6">
+                  <p className="font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-lg font-semibold leading-snug text-[#0f172a] md:text-xl">
+                    Notre rôle
                   </p>
-                  <p className="mt-2 text-sm font-medium text-[#64748b]">
-                    Gérée par Laure Olivie, votre interlocutrice principale
-                  </p>
-                  <p className="mt-3 text-[#334155] leading-relaxed">
-                    Laure Olivie — dirigeante d&apos;entreprise du BTP, vingt ans sur le terrain — pilote l&apos;agence en
-                    Île-de-France. Elle structure les missions, arbitre la qualité et garde le lien direct avec les
-                    dirigeants. Une exigence forgée sur le chantier et en entreprise, transposée à votre administratif.
+                  <p className="mt-2 text-sm leading-relaxed text-[#334155] md:text-base">
+                    Tenir un <strong className="font-semibold text-[#0f172a]">relais administratif fiable</strong>, dans un{" "}
+                    <strong className="font-semibold text-[#0f172a]">cadre contractuel clair</strong> — pas empiler des
+                    dossiers à la chaîne sans méthode ni pilotage.
                   </p>
                 </div>
-                <div className="flex flex-col">
-                  <p className="text-lg font-semibold text-[#0f172a]">
-                    Plateforme opérationnelle internationale
+                <div className="space-y-4 text-[#334155] leading-relaxed">
+                  <p>
+                    <strong className="font-semibold text-[#0f172a]">Société française</strong> fondée par{" "}
+                    <strong className="font-semibold text-[#0f172a]">Laure Olivie</strong> —{" "}
+                    <strong className="font-semibold text-[#0f172a]">
+                      dirigeante d&apos;entreprise du BTP, vingt ans sur le terrain en Île-de-France
+                    </strong>
+                    . Votre <strong className="font-semibold text-[#0f172a]">interlocution principale</strong> passe par
+                    l&apos;agence qu&apos;elle pilote au quotidien en région parisienne : cadrage, exigence sur la qualité,
+                    lien direct avec les dirigeants.
                   </p>
-                  <p className="mt-2 text-sm font-medium text-[#64748b]">
-                    Supervision opérationnelle en France
+                  <p>
+                    La <strong className="font-semibold text-[#0f172a]">plateforme opérationnelle</strong> est supervisée{" "}
+                    <strong className="font-semibold text-[#0f172a]">en temps réel depuis la France</strong> : même fuseau,
+                    même réactivité quand le planning serré ne pardonne pas. L&apos;équipe exécutive est composée de profils{" "}
+                    <strong className="font-semibold text-[#0f172a]">diplômés Bac+5 minimum</strong>, formés aux outils
+                    d&apos;intelligence artificielle — au service de la <strong className="font-semibold text-[#0f172a]">précision et du gain de temps</strong>, pas du gadget.
                   </p>
-                  <p className="mt-3 text-[#334155] leading-relaxed">
-                    La plateforme est pilotée au quotidien depuis la France. Même fuseau, même niveau d&apos;exigence :
-                    sélection Bac+5, formation IA et encadrement continu — pour un service réactif quand votre planning
-                    serré ne pardonne pas.
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-14 rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_12px_40px_rgba(15,23,42,0.1)]">
+              <div className="card-frame rounded-2xl p-8 md:p-12">
+                <div className="grid gap-10 md:grid-cols-2 md:items-stretch md:gap-12">
+                  <div className="flex flex-col border-b border-[#c8d0dc]/70 pb-10 md:border-b-0 md:border-r md:border-[#c8d0dc]/70 md:pb-0 md:pr-10">
+                    <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#1d4ed8]">Agence</p>
+                    <p className="mt-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-xl font-semibold text-[#0f172a] md:text-2xl">
+                      Région parisienne
+                    </p>
+                    <p className="mt-2 text-sm font-medium text-[#64748b]">
+                      Laure Olivie — votre interlocutrice principale
+                    </p>
+                    <p className="mt-4 flex-1 text-sm leading-relaxed text-[#334155] md:text-[0.9375rem]">
+                      Elle structure les missions, arbitre la qualité et garde le fil avec les dirigeants. Une exigence forgée
+                      sur le chantier et en entreprise, appliquée à votre administratif.
+                    </p>
+                  </div>
+                  <div className="flex flex-col">
+                    <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#1d4ed8]">Plateforme</p>
+                    <p className="mt-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-xl font-semibold text-[#0f172a] md:text-2xl">
+                      Pilotage depuis la France
+                    </p>
+                    <p className="mt-2 text-sm font-medium text-[#64748b]">Exécution encadrée, même fuseau horaire</p>
+                    <p className="mt-4 flex-1 text-sm leading-relaxed text-[#334155] md:text-[0.9375rem]">
+                      Sélection rigoureuse, formation IA et encadrement continu — pour un service réactif, aligné sur vos
+                      urgences terrain et vos échéances administratives.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-12 rounded-2xl bg-gradient-to-br from-[#93c5fd]/45 via-white/95 to-[#bfdbfe]/40 p-[1px] shadow-[0_12px_40px_rgba(29,78,216,0.14)]">
+              <div className="flex flex-col gap-6 rounded-2xl border border-[#bfdbfe]/60 bg-gradient-to-b from-white via-[#f8fafc] to-[#eff6ff]/90 px-6 py-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)] md:flex-row md:items-center md:justify-between md:gap-10 md:px-10 md:py-9">
+                <div className="min-w-0 flex-1 text-center md:text-left">
+                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#1d4ed8]">Premier échange</p>
+                  <p className="mt-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-xl font-semibold text-[#0f172a] md:text-2xl">
+                    Parlons de votre organisation
                   </p>
+                  <p className="mt-3 text-sm leading-relaxed text-[#475569] md:text-[0.9375rem]">
+                    Après le formulaire de cadrage, nous vous proposons{" "}
+                    <strong className="font-semibold text-[#0f172a]">rapidement un rendez-vous en visio</strong>. Nous vous
+                    présentons <strong className="font-semibold text-[#0f172a]">de vive voix</strong> notre façon de travailler
+                    et les leviers pour <strong className="font-semibold text-[#0f172a]">mieux structurer votre
+                    administratif</strong> — au service de votre activité et de votre{" "}
+                    <strong className="font-semibold text-[#0f172a]">chiffre d&apos;affaires</strong> (relances, devis,
+                    dossiers tenus, temps libéré sur le terrain).
+                  </p>
+                </div>
+                <div className="flex shrink-0 justify-center md:justify-end">
+                  <Link
+                    href="/contact"
+                    className="inline-flex rounded-xl border border-[#2563eb]/70 bg-gradient-to-b from-[#3b82f6] via-[#2563eb] to-[#1d4ed8] px-6 py-3.5 text-center text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_4px_18px_rgba(29,78,216,0.35)] transition hover:border-[#3b82f6] hover:from-[#2563eb] hover:via-[#1d4ed8] hover:to-[#1e40af] active:translate-y-px"
+                  >
+                    Demander un cadrage
+                  </Link>
                 </div>
               </div>
             </div>
@@ -1423,73 +1520,13 @@ export default function HomePage() {
               Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.
             </p>
             <dl className="mt-12 space-y-8">
-              {[
-                {
-                  q: "Pourquoi externaliser plutôt que recruter ?",
-                  a: "Un salarié engage salaire, charges, formation et management pour une charge qui n’est pas toujours constante. Un forfait BeWork fixe un niveau d’accompagnement et un cadre : pas de structure RH à alourdir pour tenir le même niveau d’organisation.",
-                },
-                {
-                  q: "Comment se passe le quotidien ?",
-                  a: "Vous déposez vos demandes sur la plateforme (devis, factures, situations de travaux, démarches, logistique, relances, dossiers sensibles sous validation). L’équipe exécute dans le forfait ; vous suivez statuts et échanges. Démarrage après cadrage et accès outils.",
-                },
-                {
-                  q: "Qui exécute les missions ?",
-                  a: "Des profils francophones diplômés Bac+5, encadrés par l’agence en région parisienne. Pilotage depuis la France ; exigence alignée sur ce qu’attendent les entreprises du bâtiment en termes de délais et de relecture.",
-                },
-                {
-                  q: "Quel est le délai de traitement ?",
-                  a: "Réponse moyenne en moins de deux heures ouvrées. Les urgences liées au chantier sont priorisées dans le cadre de votre offre. Le délai détaillé dépend de la mission ; la coordination reste assurée par l’équipe en France.",
-                },
-              ].map((item, i) => (
+              {HOME_FAQ_ITEMS.map((item, i) => (
                 <div key={i} className="card-frame rounded-xl p-6">
                   <dt className="text-lg font-semibold text-[#0f172a]">{item.q}</dt>
                   <dd className="mt-3 text-[#334155] leading-relaxed">{item.a}</dd>
                 </div>
               ))}
             </dl>
-            <script
-              type="application/ld+json"
-              dangerouslySetInnerHTML={{
-                __html: JSON.stringify({
-                  "@context": "https://schema.org",
-                  "@type": "FAQPage",
-                  mainEntity: [
-                    {
-                      "@type": "Question",
-                      name: "Pourquoi externaliser plutôt que recruter ?",
-                      acceptedAnswer: {
-                        "@type": "Answer",
-                        text: "Forfait avec niveau d'accompagnement défini et cadre contractuel, sans charges d'embauche ni gestion RH d'un poste interne à temps plein.",
-                      },
-                    },
-                    {
-                      "@type": "Question",
-                      name: "Comment se passe le quotidien ?",
-                      acceptedAnswer: {
-                        "@type": "Answer",
-                        text: "Demandes sur la plateforme, exécution encadrée, suivi des statuts et des échanges ; dossiers sensibles sous validation client.",
-                      },
-                    },
-                    {
-                      "@type": "Question",
-                      name: "Qui exécute les missions ?",
-                      acceptedAnswer: {
-                        "@type": "Answer",
-                        text: "Profils francophones Bac+5, pilotage depuis la France, encadrement par l'agence en région parisienne.",
-                      },
-                    },
-                    {
-                      "@type": "Question",
-                      name: "Quel est le délai de traitement ?",
-                      acceptedAnswer: {
-                        "@type": "Answer",
-                        text: "Réponse moyenne sous deux heures ouvrées ; urgences chantier priorisées dans le cadre du forfait choisi.",
-                      },
-                    },
-                  ],
-                }),
-              }}
-            />
           </div>
         </section>
 

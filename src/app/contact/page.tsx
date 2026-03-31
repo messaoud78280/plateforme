@@ -9,7 +9,14 @@ const contactOgImage = absoluteUrl("/opengraph-image");
 export const metadata: Metadata = {
   title: "Cadrage et prise de contact | BeWork",
   description:
-    "Échange avec BeWork pour présenter votre organisation, votre charge administrative et vérifier l’adéquation avec nos forfaits BTP. Créneau visio et rappel par email.",
+    "Formulaire de cadrage : décrivez votre structure et votre charge administrative. Nous vous proposons rapidement un rendez-vous visio pour présenter notre méthode et les forfaits BTP (Structure, Suivi, Pilotage). Confirmation par e-mail.",
+  keywords: [
+    "contact BeWork",
+    "cadrage administratif BTP",
+    "rendez-vous visio administratif",
+    "échange externalisation administrative",
+    "devis accompagnement administratif bâtiment",
+  ],
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   openGraph: {
     type: "website",

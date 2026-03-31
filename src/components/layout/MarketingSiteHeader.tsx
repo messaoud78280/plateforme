@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 
@@ -8,24 +9,48 @@ type Props = {
   plainBg?: boolean;
   /** Affiche un lien « Blog » (ex. article) */
   showBlogLink?: boolean;
+  /** Contenu sous la barre principale (ex. bandeau ancres page d’accueil), dans le même header sticky */
+  bottom?: ReactNode;
 };
 
 /**
  * En-tête commun pages vitrine : accès compte, navigation (méthode, forfaits) + cadrage.
  */
-export function MarketingSiteHeader({ plainBg = false, showBlogLink = false }: Props) {
+export function MarketingSiteHeader({ plainBg = false, showBlogLink = false, bottom }: Props) {
   return (
     <header
-      className={`sticky top-0 z-20 border-b border-[#c8cdd6] ${
+      className={`sticky top-0 z-20 border-b border-[#c8cdd6] shadow-[0_1px_0_0_rgba(203,213,225,0.9)] ${
         plainBg ? "bg-[#f8f9fb]" : "bg-[#f8f9fb]/95 backdrop-blur-sm"
       }`}
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3.5 sm:gap-3 sm:px-6 sm:py-4">
-        <Link href="/" className="min-w-0 shrink-0" aria-label="BeWork — Accueil">
-          <BeWorkLogo size="sm" />
+      <div
+        className={`mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3.5 sm:gap-4 sm:px-6 sm:py-4 ${bottom ? "border-b border-[#dce3ec]" : ""}`}
+      >
+        <Link
+          href="/"
+          className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:gap-4 md:gap-5 lg:gap-6"
+          aria-label="BeWork — Accueil"
+        >
+          <span className="shrink-0">
+            <BeWorkLogo size="sm" />
+          </span>
+          <span
+            className="hidden h-9 w-px shrink-0 bg-gradient-to-b from-transparent via-[#94a3b8]/55 to-transparent sm:inline-block"
+            aria-hidden
+          />
+          <span className="min-w-0 text-left">
+            <span className="block text-[0.8125rem] font-extrabold leading-snug tracking-tight text-[#0f172a] sm:text-sm lg:text-[0.9375rem]">
+              Partenaire administratif{" "}
+              <span className="font-bold text-[#94a3b8]">—</span>{" "}
+              <span className="bg-gradient-to-b from-[#3b82f6] to-[#1d4ed8] bg-clip-text text-transparent">BTP</span>
+            </span>
+            <span className="mt-0.5 block text-[11px] font-medium leading-snug text-[#64748b] sm:text-xs">
+              Cadre, rigueur, pilotage, lecture terrain
+            </span>
+          </span>
         </Link>
         <nav
-          className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2"
+          className="flex shrink-0 flex-wrap items-center justify-end gap-1.5 sm:gap-2"
           aria-label="Navigation et accès plateforme"
         >
           <div
@@ -77,6 +102,7 @@ export function MarketingSiteHeader({ plainBg = false, showBlogLink = false }: P
           </Link>
         </nav>
       </div>
+      {bottom}
     </header>
   );
 }

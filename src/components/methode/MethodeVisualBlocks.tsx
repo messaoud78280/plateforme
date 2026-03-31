@@ -1,10 +1,24 @@
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 
 /** Icônes minimalistes 24×24, stroke cohérent */
 function IconWrapper({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
     <span
       className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8] ${className}`}
+      aria-hidden
+    >
+      {children}
+    </span>
+  );
+}
+
+/** Icône étape chaîne A→Z — pastille bleu métal */
+function ChainIconWrapper({ children, compact }: { children: ReactNode; compact?: boolean }) {
+  return (
+    <span
+      className={`inline-flex shrink-0 items-center justify-center bg-gradient-to-br from-white via-[#eff6ff] to-[#dbeafe] text-[#1d4ed8] shadow-[inset_0_2px_5px_rgba(255,255,255,0.95),inset_0_-3px_6px_rgba(29,78,216,0.07),0_4px_16px_rgba(37,99,235,0.18)] ring-1 ring-[#bfdbfe]/90 ${
+        compact ? "h-9 w-9 rounded-lg" : "h-11 w-11 rounded-xl"
+      }`}
       aria-hidden
     >
       {children}
@@ -83,6 +97,35 @@ const AVEC = [
   "Plus de chantiers signés",
 ] as const;
 
+function IconXCircle({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+      <path d="M15 9l-6 6M9 9l6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconCheckCircle({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+      <path d="M8 12l2.5 2.5L16 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IconChevronRole({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+const VOUS_ROLES = ["Le terrain", "Les chantiers", "Les équipes"] as const;
+const NOUS_ROLES = ["Organisation", "Administratif", "Suivi", "Structuration"] as const;
+
 const TIMELINE = [
   { n: 1, title: "Analyse", phrase: "On comprend votre rythme et vos blocages." },
   { n: 2, title: "Mise en place", phrase: "Cadre, outils, forfait : tout est posé par écrit." },
@@ -106,61 +149,119 @@ const PRESENCE_ITEMS = [
   "Image professionnelle",
 ] as const;
 
+const metallicBlueFlowCard =
+  "relative flex flex-col overflow-hidden rounded-xl border border-[#93c5fd]/55 bg-gradient-to-br from-[#eff6ff]/90 via-white to-[#f8fafc] text-center shadow-[0_10px_32px_-10px_rgba(37,99,235,0.2),inset_0_1px_0_rgba(255,255,255,0.9)] transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-0.5 hover:border-[#60a5fa]/80 hover:shadow-[0_16px_40px_-12px_rgba(37,99,235,0.28)]";
+
+const chainStepCardClass = `${metallicBlueFlowCard} p-4`;
+
+/** Rangée desktop : padding réduit pour tenir dans le cadre sans scroll */
+const chainStepCardDesktopClass = `${metallicBlueFlowCard} p-2 md:p-2.5`;
+
+const impactCardClass = `${metallicBlueFlowCard} items-center gap-3 p-5 md:gap-4 md:p-6`;
+
+/** Titres d’étapes (CLIENT, DEVIS…) : Geist + capitales + tracking, comme « Parcours », « Impact », etc. */
+const chainPhaseTitleClass =
+  "break-words font-sans text-[0.68rem] font-bold uppercase leading-[1.15] tracking-[0.16em] text-[#0f172a] antialiased sm:text-[0.72rem] sm:tracking-[0.18em] md:text-[0.75rem] md:tracking-[0.2em] lg:text-xs lg:tracking-[0.22em] xl:text-[0.8125rem]";
+
+/** Titres sur la rangée desktop (colonnes étroites) */
+const chainPhaseTitleDesktopClass =
+  "break-words font-sans text-[0.625rem] font-bold uppercase leading-[1.1] tracking-[0.1em] text-[#0f172a] antialiased md:text-[0.65rem] md:tracking-[0.12em] lg:text-[0.7rem] lg:tracking-[0.14em] xl:text-[0.72rem]";
+
+/** Numéros de la timeline : Geist tabulaire, même famille que le corps du site */
+const timelineIndexClass =
+  "font-sans text-[0.95rem] font-bold tabular-nums tracking-tight text-white";
+
 export function ChainFlowSection() {
   return (
     <section id="flux" className="scroll-mt-24" aria-labelledby="flux-heading">
-      <h2 id="flux-heading" className="text-center text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
-        Un fonctionnement clair de A à Z
-      </h2>
-      <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-[#64748b] md:text-base">
-        De la première prise de contact jusqu’à l’encaissement — une chaîne maîtrisée.
-      </p>
+      <div className="mx-auto max-w-5xl">
+        <div className="relative overflow-hidden rounded-3xl border border-[var(--metal-200)] bg-gradient-to-br from-[var(--metal-50)] via-white to-[var(--metal-100)] p-7 shadow-[var(--shadow-lg)] md:p-10">
+          <div
+            className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/45 via-transparent to-[#2563eb]/[0.04]"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute -right-16 top-0 h-40 w-40 rounded-full bg-gradient-to-br from-sky-200/30 to-transparent blur-2xl"
+            aria-hidden
+          />
 
-      {/* Mobile : vertical */}
-      <div className="mx-auto mt-10 max-w-sm md:hidden">
-        <ol className="space-y-0" role="list">
-          {CHAIN_STEPS.map((step, i) => (
-            <li key={step.label}>
-              <div className="rounded-xl border border-[#e2e8f0] bg-white p-4 text-center shadow-sm transition-shadow duration-200 hover:shadow-md">
-                <div className="mx-auto w-fit">
-                  <IconWrapper>
-                    <step.Icon />
-                  </IconWrapper>
-                </div>
-                <p className="mt-3 text-xs font-bold tracking-wide text-[#0f172a]">{step.label}</p>
-                <p className="mt-1 text-[11px] leading-snug text-[#64748b]">{step.desc}</p>
-              </div>
-              {i < CHAIN_STEPS.length - 1 && (
-                <div className="flex justify-center py-2 text-lg text-[#94a3b8]" aria-hidden>
-                  ↓
-                </div>
-              )}
-            </li>
-          ))}
-        </ol>
-      </div>
+          <div className="relative">
+            <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-[#94a3b8]">Parcours</p>
+            <h2
+              id="flux-heading"
+              className="mt-2 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.55rem] font-semibold leading-tight tracking-tight text-[#0f172a] md:text-3xl"
+            >
+              Un fonctionnement clair de A à Z
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-center text-sm leading-relaxed text-[#64748b] md:text-base">
+              De la première prise de contact jusqu’à l’encaissement — une chaîne maîtrisée.
+            </p>
 
-      {/* Desktop : horizontal scroll si besoin, sinon flex */}
-      <div className="mt-10 hidden md:block">
-        <div className="flex flex-wrap items-stretch justify-center gap-2 lg:gap-3 xl:flex-nowrap">
-          {CHAIN_STEPS.map((step, i) => (
-            <div key={step.label} className="flex items-stretch">
-              <div className="flex w-[140px] flex-col rounded-xl border border-[#e2e8f0] bg-white/95 p-4 text-center shadow-sm transition-all duration-200 hover:border-[#bfdbfe] hover:shadow-md lg:w-[150px]">
-                <div className="mx-auto">
-                  <IconWrapper>
-                    <step.Icon />
-                  </IconWrapper>
-                </div>
-                <p className="mt-3 text-xs font-bold tracking-wide text-[#0f172a]">{step.label}</p>
-                <p className="mt-2 text-[11px] leading-snug text-[#64748b]">{step.desc}</p>
-              </div>
-              {i < CHAIN_STEPS.length - 1 && (
-                <div className="flex w-8 shrink-0 items-center justify-center lg:w-10" aria-hidden>
-                  <span className="text-xl font-light text-[#94a3b8]">→</span>
-                </div>
-              )}
+            {/* Mobile : vertical */}
+            <div className="mx-auto mt-10 max-w-sm md:hidden">
+              <ol className="space-y-0" role="list">
+                {CHAIN_STEPS.map((step, i) => (
+                  <li key={step.label}>
+                    <div className={chainStepCardClass}>
+                      <div
+                        className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-sky-300 via-[#2563eb] to-[#1d4ed8] shadow-[0_3px_16px_rgba(37,99,235,0.45)]"
+                        aria-hidden
+                      />
+                      <div className="mx-auto w-fit pt-0.5">
+                        <ChainIconWrapper>
+                          <step.Icon />
+                        </ChainIconWrapper>
+                      </div>
+                      <p className={`mt-3 ${chainPhaseTitleClass}`}>{step.label}</p>
+                      <p className="mt-1 text-[11px] leading-snug text-[#64748b]">{step.desc}</p>
+                    </div>
+                    {i < CHAIN_STEPS.length - 1 && (
+                      <div className="flex justify-center py-2.5" aria-hidden>
+                        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#f8fafc] via-[#e2e8f0] to-[#cbd5e1] text-sm font-light text-[#475569] shadow-[inset_0_2px_4px_rgba(255,255,255,0.88),0_3px_10px_rgba(15,23,42,0.08)] ring-1 ring-white/80">
+                          ↓
+                        </span>
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ol>
             </div>
-          ))}
+
+            {/* Desktop : grille 5×1fr + flèches — tient dans le cadre sans débordement ni scroll */}
+            <div className="mt-10 hidden w-full min-w-0 md:block">
+              <div
+                className="grid w-full grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(0,1fr)_minmax(0,auto)_minmax(0,1fr)_minmax(0,auto)_minmax(0,1fr)_minmax(0,auto)_minmax(0,1fr)] items-stretch gap-x-0.5 md:gap-x-1"
+                role="list"
+              >
+                {CHAIN_STEPS.map((step, i) => (
+                  <Fragment key={step.label}>
+                    <div className={`${chainStepCardDesktopClass} min-w-0`} role="listitem">
+                      <div
+                        className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-sky-300 via-[#2563eb] to-[#1d4ed8] shadow-[0_3px_16px_rgba(37,99,235,0.45)]"
+                        aria-hidden
+                      />
+                      <div className="mx-auto w-fit pt-0.5">
+                        <ChainIconWrapper compact>
+                          <step.Icon />
+                        </ChainIconWrapper>
+                      </div>
+                      <p className={`mt-2 ${chainPhaseTitleDesktopClass}`}>{step.label}</p>
+                      <p className="mt-1.5 text-[9px] leading-snug text-[#64748b] lg:text-[10px]">
+                        {step.desc}
+                      </p>
+                    </div>
+                    {i < CHAIN_STEPS.length - 1 && (
+                      <div className="flex items-center justify-center self-center px-0.5" aria-hidden>
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-[#f8fafc] via-[#e2e8f0] to-[#cbd5e1] text-[10px] font-medium text-[#64748b] shadow-[inset_0_1px_3px_rgba(255,255,255,0.9),0_2px_6px_rgba(15,23,42,0.06)] ring-1 ring-white/90 md:h-7 md:w-7 md:text-[11px]">
+                          →
+                        </span>
+                      </div>
+                    )}
+                  </Fragment>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -170,38 +271,122 @@ export function ChainFlowSection() {
 export function BeforeAfterSection() {
   return (
     <section id="comparaison" className="scroll-mt-24" aria-labelledby="comparaison-heading">
-      <h2 id="comparaison-heading" className="text-center text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
-        Avant / après
-      </h2>
-      <p className="mx-auto mt-3 max-w-xl text-center text-sm text-[#64748b]">
-        Le même métier. Une autre façon d’organiser l’administratif.
-      </p>
-      <div className="mt-10 grid gap-6 md:grid-cols-2 md:gap-8">
-        <div className="rounded-2xl border-2 border-[#fecaca] bg-gradient-to-b from-[#fef2f2] to-white p-6 shadow-sm transition-shadow duration-200 hover:shadow-md md:p-8">
-          <p className="text-sm font-bold uppercase tracking-wide text-[#b91c1c]">Sans organisation</p>
-          <ul className="mt-5 space-y-3" role="list">
-            {SANS.map((t) => (
-              <li key={t} className="flex items-start gap-3 text-sm text-[#334155]">
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#fee2e2] text-xs font-bold text-[#b91c1c]" aria-hidden>
-                  ×
+      <div className="mx-auto max-w-5xl">
+        <div className="relative overflow-hidden rounded-3xl border border-[var(--metal-200)] bg-gradient-to-br from-[var(--metal-50)] via-white to-[var(--metal-100)] p-7 shadow-[var(--shadow-lg)] md:p-10">
+          <div
+            className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/45 via-transparent to-[#2563eb]/[0.035]"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute -right-16 top-1/3 h-44 w-44 rounded-full bg-gradient-to-br from-rose-200/25 to-transparent blur-2xl"
+            aria-hidden
+          />
+
+          <div className="relative">
+            <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-[#94a3b8]">Comparaison</p>
+            <h2
+              id="comparaison-heading"
+              className="mt-2 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.55rem] font-semibold leading-tight tracking-tight text-[#0f172a] md:text-3xl"
+            >
+              Avant / après
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-center text-sm leading-relaxed text-[#64748b] md:text-base">
+              Le même métier. Une autre façon d’organiser l’administratif.
+            </p>
+
+            <div className="relative mt-12 grid gap-8 md:grid-cols-2 md:gap-6 lg:gap-10">
+              <div
+                className="pointer-events-none absolute left-1/2 top-[42%] z-10 hidden -translate-x-1/2 -translate-y-1/2 md:flex"
+                aria-hidden
+              >
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#f8fafc] via-[#e2e8f0] to-[#cbd5e1] font-sans text-[11px] font-extrabold tracking-[0.2em] text-[#475569] shadow-[inset_0_2px_5px_rgba(255,255,255,0.9),inset_0_-3px_8px_rgba(15,23,42,0.12),0_6px_22px_rgba(15,23,42,0.12)] ring-2 ring-white ring-offset-2 ring-offset-[var(--metal-50)]">
+                  VS
                 </span>
-                {t}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="rounded-2xl border-2 border-[#93c5fd] bg-gradient-to-b from-[#eff6ff] to-white p-6 shadow-sm transition-shadow duration-200 hover:shadow-md md:p-8">
-          <p className="text-sm font-bold uppercase tracking-wide text-[#1d4ed8]">Avec BeWork</p>
-          <ul className="mt-5 space-y-3" role="list">
-            {AVEC.map((t) => (
-              <li key={t} className="flex items-start gap-3 text-sm text-[#334155]">
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#dbeafe] text-[10px] font-bold text-[#1d4ed8]" aria-hidden>
-                  ✓
+              </div>
+
+              {/* Sans organisation — tons rouge + liseré métal rosé */}
+              <article className="group relative overflow-hidden rounded-2xl border border-[#fecaca]/90 bg-gradient-to-br from-[#fff1f2] via-white to-[#fef2f2] p-6 shadow-[0_12px_44px_-10px_rgba(185,28,28,0.18),inset_0_1px_0_rgba(255,255,255,0.85)] transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-0.5 hover:border-[#f87171] hover:shadow-[0_20px_50px_-12px_rgba(185,28,28,0.28)] md:p-8">
+                <div
+                  className="absolute inset-x-0 top-0 z-[2] h-[3px] bg-[linear-gradient(90deg,#fff1f2_0%,#fecaca_24%,#dc2626_48%,#f87171_52%,#fecdd3_76%,#fef2f2_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_3px_18px_rgba(220,38,38,0.35)]"
+                  aria-hidden
+                />
+                <div
+                  className="pointer-events-none absolute inset-0 bg-gradient-to-br from-rose-500/[0.04] via-transparent to-transparent"
+                  aria-hidden
+                />
+                <header className="relative flex flex-wrap items-center gap-3 pt-0.5">
+                  <span className="inline-flex items-center rounded-full bg-gradient-to-b from-[#fee2e2] to-[#fecaca] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#7f1d1d] shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] ring-1 ring-inset ring-[#fca5a5]/90">
+                    Sans organisation
+                  </span>
+                  <span className="text-xs text-[#64748b]">Aujourd’hui, sans cadre</span>
+                </header>
+                <ul className="relative mt-6 space-y-1" role="list">
+                  {SANS.map((t) => (
+                    <li
+                      key={t}
+                      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[#334155] transition-colors duration-200 md:text-[15px] ${
+                        t === "Devis en retard"
+                          ? "bg-[#fff1f2]/95 shadow-[inset_0_0_0_1px_rgba(254,202,202,0.75)] hover:bg-[#ffe4e6]/90"
+                          : "hover:bg-[#fef2f2]/85"
+                      }`}
+                    >
+                      <span
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-white via-[#fff1f2] to-[#fecdd3] text-[#b91c1c] shadow-[inset_0_2px_4px_rgba(255,255,255,0.95),inset_0_-2px_5px_rgba(185,28,28,0.1),0_4px_12px_rgba(220,38,38,0.14)] ring-1 ring-[#fca5a5]/80 transition-transform duration-200 group-hover:scale-105"
+                        aria-hidden
+                      >
+                        <IconXCircle className="opacity-95" />
+                      </span>
+                      <span className="font-medium leading-snug">{t}</span>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+
+              <div className="flex justify-center py-1 md:hidden" aria-hidden>
+                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#f8fafc] via-[#e2e8f0] to-[#cbd5e1] font-sans text-[10px] font-extrabold tracking-[0.2em] text-[#475569] shadow-[inset_0_2px_4px_rgba(255,255,255,0.85),0_4px_14px_rgba(15,23,42,0.1)] ring-2 ring-white">
+                  VS
                 </span>
-                {t}
-              </li>
-            ))}
-          </ul>
+              </div>
+
+              {/* Avec BeWork — même logique que carte « Nous » */}
+              <article className="group relative overflow-hidden rounded-2xl border border-[#93c5fd]/90 bg-gradient-to-br from-[#eff6ff] via-white to-[#f0f9ff] p-6 shadow-[0_12px_44px_-10px_rgba(37,99,235,0.22),inset_0_1px_0_rgba(255,255,255,0.85)] transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-0.5 hover:border-[#60a5fa] hover:shadow-[0_20px_50px_-12px_rgba(37,99,235,0.32)] md:p-8">
+                <div
+                  className="absolute inset-x-0 top-0 z-[2] h-[3px] bg-gradient-to-r from-[#38bdf8] via-[#2563eb] to-[#1d4ed8] shadow-[0_4px_28px_rgba(37,99,235,0.55),inset_0_1px_0_rgba(255,255,255,0.45)]"
+                  aria-hidden
+                />
+                <div
+                  className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#3b82f6]/[0.06] via-transparent to-transparent"
+                  aria-hidden
+                />
+                <header className="relative flex flex-wrap items-center gap-3 pt-0.5">
+                  <span className="inline-flex items-center rounded-full bg-gradient-to-b from-[#dbeafe] to-[#bfdbfe] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#1e3a8a] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] ring-1 ring-inset ring-[#93c5fd]/90">
+                    Avec BeWork
+                  </span>
+                  <span className="text-xs text-[#64748b]">Même activité, autre rythme</span>
+                </header>
+                <ul className="relative mt-6 space-y-1" role="list">
+                  {AVEC.map((t) => (
+                    <li
+                      key={t}
+                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[#334155] transition-colors duration-200 hover:bg-[#eff6ff]/75 md:text-[15px]"
+                    >
+                      <span
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-white via-[#eff6ff] to-[#dbeafe] text-[#1d4ed8] shadow-[inset_0_2px_4px_rgba(255,255,255,0.95),inset_0_-2px_5px_rgba(29,78,216,0.08),0_4px_12px_rgba(37,99,235,0.15)] ring-1 ring-[#bfdbfe]/90 transition-transform duration-200 group-hover:scale-105"
+                        aria-hidden
+                      >
+                        <IconCheckCircle className="opacity-95" />
+                      </span>
+                      <span className="font-medium leading-snug">{t}</span>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+
+              <p className="text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-sm font-semibold text-[#64748b] md:col-span-2 md:-mt-2 md:text-base">
+                Passez du désordre au pilotage — sans changer de métier.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -211,50 +396,121 @@ export function BeforeAfterSection() {
 export function VousNousSection() {
   return (
     <section id="roles" className="scroll-mt-24" aria-labelledby="roles-heading">
-      <h2 id="roles-heading" className="text-center text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
-        Ce que vous faites / ce que nous faisons
-      </h2>
-      <div className="mt-10 grid gap-6 md:grid-cols-2 md:gap-8">
-        <div className="rounded-2xl border border-[#e2e8f0] bg-white/90 p-6 shadow-sm transition-all duration-200 hover:border-[#cbd5e1] hover:shadow-md md:p-8">
-          <p className="text-lg font-bold text-[#0f172a]">Vous</p>
-          <ul className="mt-4 space-y-2 text-sm font-medium text-[#334155]" role="list">
-            <li className="flex gap-2">
-              <span className="text-[#1d4ed8]" aria-hidden>
-                ▸
-              </span>
-              Le terrain
-            </li>
-            <li className="flex gap-2">
-              <span className="text-[#1d4ed8]" aria-hidden>
-                ▸
-              </span>
-              Les chantiers
-            </li>
-            <li className="flex gap-2">
-              <span className="text-[#1d4ed8]" aria-hidden>
-                ▸
-              </span>
-              Les équipes
-            </li>
-          </ul>
-        </div>
-        <div className="rounded-2xl border border-[#bfdbfe] bg-[#f8fafc] p-6 shadow-sm transition-all duration-200 hover:border-[#93c5fd] hover:shadow-md md:p-8">
-          <p className="text-lg font-bold text-[#1d4ed8]">Nous</p>
-          <ul className="mt-4 space-y-2 text-sm font-medium text-[#334155]" role="list">
-            {["Organisation", "Administratif", "Suivi", "Structuration"].map((t) => (
-              <li key={t} className="flex gap-2">
-                <span className="text-[#1d4ed8]" aria-hidden>
-                  ▸
+      <div className="mx-auto max-w-5xl">
+        <div className="relative overflow-hidden rounded-3xl border border-[var(--metal-200)] bg-gradient-to-br from-[var(--metal-50)] via-white to-[var(--metal-100)] p-7 shadow-[var(--shadow-lg)] md:p-10">
+          <div
+            className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/45 via-transparent to-[#2563eb]/[0.035]"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute -left-20 top-1/2 h-48 w-48 -translate-y-1/2 rounded-full bg-gradient-to-br from-slate-200/35 to-transparent blur-2xl"
+            aria-hidden
+          />
+
+          <div className="relative">
+            <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-[#94a3b8]">Rôles</p>
+            <h2
+              id="roles-heading"
+              className="mt-2 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.55rem] font-semibold leading-tight tracking-tight text-[#0f172a] md:text-3xl"
+            >
+              Ce que vous faites / ce que nous faisons
+            </h2>
+
+            <div className="relative mt-12 grid gap-8 md:grid-cols-2 md:gap-6 lg:gap-10">
+              <div
+                className="pointer-events-none absolute left-1/2 top-[42%] z-10 hidden -translate-x-1/2 -translate-y-1/2 md:flex"
+                aria-hidden
+              >
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#f8fafc] via-[#e2e8f0] to-[#cbd5e1] font-sans text-2xl font-semibold leading-none text-[#475569] shadow-[inset_0_2px_5px_rgba(255,255,255,0.9),inset_0_-3px_8px_rgba(15,23,42,0.12),0_6px_22px_rgba(15,23,42,0.12)] ring-2 ring-white ring-offset-2 ring-offset-[var(--metal-50)]">
+                  +
                 </span>
-                {t}
-              </li>
-            ))}
-          </ul>
+              </div>
+
+              {/* Carte Vous — acier / chrome (surface métallique claire) */}
+              <article className="group relative overflow-hidden rounded-2xl surface-metallic-light surface-metallic-light--soft p-6 transition-[box-shadow,transform] duration-300 hover:-translate-y-0.5 md:p-8">
+                <div
+                  className="absolute inset-x-0 top-0 z-[2] h-[3px] bg-[linear-gradient(90deg,#f8fafc_0%,#cbd5e1_22%,#64748b_48%,#94a3b8_52%,#e2e8f0_78%,#f1f5f9_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_2px_12px_rgba(100,116,139,0.25)]"
+                  aria-hidden
+                />
+                <div
+                  className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/25 via-transparent to-transparent"
+                  aria-hidden
+                />
+                <header className="relative flex flex-wrap items-center gap-3 pt-0.5">
+                  <span className="inline-flex items-center rounded-full bg-[#f1f5f9]/90 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#334155] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] ring-1 ring-inset ring-[#cbd5e1]/80">
+                    Vous
+                  </span>
+                  <span className="text-xs text-[#64748b]">Cœur de métier &amp; exécution</span>
+                </header>
+                <ul className="relative mt-6 space-y-1" role="list">
+                  {VOUS_ROLES.map((t) => (
+                    <li
+                      key={t}
+                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[#334155] transition-colors duration-200 hover:bg-white/45 md:text-[15px]"
+                    >
+                      <span
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-white via-[#f8fafc] to-[#d1d9e6] text-[#475569] shadow-[inset_0_2px_4px_rgba(255,255,255,0.95),inset_0_-2px_4px_rgba(15,23,42,0.06),0_2px_6px_rgba(15,23,42,0.06)] ring-1 ring-[#94a3b8]/35 transition-transform duration-200 group-hover:scale-105"
+                        aria-hidden
+                      >
+                        <IconChevronRole />
+                      </span>
+                      <span className="font-medium leading-snug">{t}</span>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+
+              <div className="flex justify-center py-1 md:hidden" aria-hidden>
+                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#f8fafc] via-[#e2e8f0] to-[#cbd5e1] font-sans text-xl font-semibold leading-none text-[#475569] shadow-[inset_0_2px_4px_rgba(255,255,255,0.85),0_4px_14px_rgba(15,23,42,0.1)] ring-2 ring-white">
+                  +
+                </span>
+              </div>
+
+              {/* Carte Nous — bleu lumineux + relief */}
+              <article className="group relative overflow-hidden rounded-2xl border border-[#93c5fd]/90 bg-gradient-to-br from-[#eff6ff] via-white to-[#f0f9ff] p-6 shadow-[0_12px_44px_-10px_rgba(37,99,235,0.22),inset_0_1px_0_rgba(255,255,255,0.85)] transition-[box-shadow,transform,border-color] duration-300 hover:-translate-y-0.5 hover:border-[#60a5fa] hover:shadow-[0_20px_50px_-12px_rgba(37,99,235,0.32)] md:p-8">
+                <div
+                  className="absolute inset-x-0 top-0 z-[2] h-[3px] bg-gradient-to-r from-[#38bdf8] via-[#2563eb] to-[#1d4ed8] shadow-[0_4px_28px_rgba(37,99,235,0.55),inset_0_1px_0_rgba(255,255,255,0.45)]"
+                  aria-hidden
+                />
+                <div
+                  className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#3b82f6]/[0.06] via-transparent to-transparent"
+                  aria-hidden
+                />
+                <header className="relative flex flex-wrap items-center gap-3 pt-0.5">
+                  <span className="inline-flex items-center rounded-full bg-gradient-to-b from-[#dbeafe] to-[#bfdbfe] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#1e3a8a] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] ring-1 ring-inset ring-[#93c5fd]/90">
+                    Nous
+                  </span>
+                  <span className="text-xs text-[#64748b]">Structure, suivi &amp; administratif</span>
+                </header>
+                <ul className="relative mt-6 space-y-1" role="list">
+                  {NOUS_ROLES.map((t) => (
+                    <li
+                      key={t}
+                      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[#334155] transition-colors duration-200 md:text-[15px] ${
+                        t === "Suivi"
+                          ? "bg-[#eff6ff]/95 shadow-[inset_0_0_0_1px_rgba(191,219,254,0.7)] hover:bg-[#dbeafe]/90"
+                          : "hover:bg-[#eff6ff]/75"
+                      }`}
+                    >
+                      <span
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-white via-[#eff6ff] to-[#dbeafe] text-[#1d4ed8] shadow-[inset_0_2px_4px_rgba(255,255,255,0.95),inset_0_-2px_5px_rgba(29,78,216,0.08),0_4px_12px_rgba(37,99,235,0.15)] ring-1 ring-[#bfdbfe]/90 transition-transform duration-200 group-hover:scale-105"
+                        aria-hidden
+                      >
+                        <IconChevronRole />
+                      </span>
+                      <span className="font-medium leading-snug">{t}</span>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+
+              <p className="text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-sm font-semibold text-[#0f172a] md:col-span-2 md:-mt-2 md:text-base">
+                Chacun son rôle, tout devient plus fluide.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-      <p className="mt-8 text-center text-base font-semibold text-[#0f172a]">
-        Chacun son rôle, tout devient plus fluide.
-      </p>
     </section>
   );
 }
@@ -262,31 +518,53 @@ export function VousNousSection() {
 export function ShortTimelineSection() {
   return (
     <section id="methode" className="scroll-mt-24" aria-labelledby="methode-heading">
-      <h2 id="methode-heading" className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
-        Notre déroulé — en 5 temps
-      </h2>
-      <p className="mt-3 max-w-2xl text-sm text-[#64748b] md:text-base">
-        Le forfait (Structure à Pilotage) se choisit à la mise en place — voir la grille plus bas.
-      </p>
-      <ol className="relative mx-auto mt-10 max-w-xl space-y-0 md:max-w-2xl">
-        {TIMELINE.map((step, i) => (
-          <li key={step.n} className="relative flex gap-4 pb-8 last:pb-0">
-            {i < TIMELINE.length - 1 && (
-              <div
-                className="absolute left-[17px] top-10 hidden h-[calc(100%-2rem)] w-px bg-[#e2e8f0] md:block"
-                aria-hidden
-              />
-            )}
-            <span className="relative z-[1] flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#1d4ed8] text-sm font-bold text-white shadow-sm">
-              {step.n}
-            </span>
-            <div className="min-w-0 border-b border-[#f1f5f9] pb-8 last:border-b-0 last:pb-0">
-              <p className="font-semibold text-[#0f172a]">{step.title}</p>
-              <p className="mt-1 text-sm leading-relaxed text-[#334155]">{step.phrase}</p>
-            </div>
-          </li>
-        ))}
-      </ol>
+      <div className="relative overflow-hidden rounded-3xl border border-[var(--metal-200)] bg-gradient-to-br from-[var(--metal-50)] via-white to-[var(--metal-100)] p-7 shadow-[var(--shadow-lg)] md:p-10 md:pl-12">
+        <div
+          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-[#2563eb]/[0.04]"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-gradient-to-br from-slate-200/40 to-transparent blur-2xl"
+          aria-hidden
+        />
+
+        <div className="relative">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#94a3b8]">Méthode</p>
+          <h2
+            id="methode-heading"
+            className="mt-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.65rem] font-semibold leading-tight tracking-tight text-[#0f172a] md:text-3xl"
+          >
+            Notre déroulé — en 5 temps
+          </h2>
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#64748b] md:text-base">
+            Le forfait (Structure à Pilotage) se choisit à la mise en place — voir la grille plus bas.
+          </p>
+
+          <ol className="relative mx-auto mt-12 max-w-xl space-y-0 md:max-w-2xl">
+            {TIMELINE.map((step, i) => (
+              <li key={step.n} className="relative flex gap-5 pb-10 last:pb-0">
+                {i < TIMELINE.length - 1 && (
+                  <div
+                    className="absolute left-[21px] top-[52px] hidden h-[calc(100%-2.75rem)] w-0.5 bg-gradient-to-b from-slate-300 via-slate-400/90 to-slate-300 shadow-[0_0_12px_rgba(148,163,184,0.35),inset_0_0_1px_rgba(255,255,255,0.6)] md:block"
+                    aria-hidden
+                  />
+                )}
+                <span
+                  className={`relative z-[1] flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sky-200 via-[#2563eb] to-[#0c1e3d] shadow-[inset_0_2px_6px_rgba(255,255,255,0.55),inset_0_-4px_10px_rgba(0,0,0,0.35),0_8px_24px_rgba(29,78,216,0.38)] ring-2 ring-white/90 ${timelineIndexClass}`}
+                >
+                  {step.n}
+                </span>
+                <div className="min-w-0 flex-1 border-b border-[#e2e8f0]/70 pb-10 last:border-b-0 last:pb-0">
+                  <p className="font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-lg font-semibold tracking-tight text-[#0f172a] md:text-xl">
+                    {step.title}
+                  </p>
+                  <p className="mt-2 text-sm leading-relaxed text-[#475569] md:text-[15px]">{step.phrase}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
     </section>
   );
 }
@@ -294,31 +572,50 @@ export function ShortTimelineSection() {
 export function ImpactCardsSection() {
   return (
     <section id="impact" className="scroll-mt-24" aria-labelledby="impact-heading">
-      <h2 id="impact-heading" className="text-center text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
-        Un impact direct sur votre activité
-      </h2>
-      <p className="mx-auto mt-3 max-w-xl text-center text-sm text-[#64748b]">
-        Ce que vous ressentez au quotidien sur le terrain.
-      </p>
-      <ul
-        className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5"
-        role="list"
-      >
-        {IMPACT_CARDS.map(({ title, Icon }) => (
-          <li
-            key={title}
-            className="flex flex-col items-center rounded-xl border border-[#e2e8f0] bg-white/95 p-5 text-center shadow-sm transition-all duration-200 hover:border-[#bfdbfe] hover:shadow-md"
-          >
-            <IconWrapper className="mb-3">
-              <Icon />
-            </IconWrapper>
-            <p className="text-sm font-semibold leading-snug text-[#0f172a]">{title}</p>
-          </li>
-        ))}
-      </ul>
-      <p className="mt-10 text-center text-base font-bold text-[#0f172a] md:text-lg">
-        Un administratif bien géré, c’est plus de chiffre d’affaires.
-      </p>
+      <div className="mx-auto max-w-5xl">
+        <div className="relative overflow-hidden rounded-3xl border border-[var(--metal-200)] bg-gradient-to-br from-[var(--metal-50)] via-white to-[var(--metal-100)] p-7 shadow-[var(--shadow-lg)] md:p-10">
+          <div
+            className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/45 via-transparent to-[#2563eb]/[0.04]"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute bottom-0 left-1/4 h-36 w-36 rounded-full bg-gradient-to-tr from-sky-200/25 to-transparent blur-2xl"
+            aria-hidden
+          />
+
+          <div className="relative">
+            <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-[#94a3b8]">Impact</p>
+            <h2
+              id="impact-heading"
+              className="mt-2 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.55rem] font-semibold leading-tight tracking-tight text-[#0f172a] md:text-3xl"
+            >
+              Un impact direct sur votre activité
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-center text-sm leading-relaxed text-[#64748b] md:text-base">
+              Ce que vous ressentez au quotidien sur le terrain.
+            </p>
+            <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5" role="list">
+              {IMPACT_CARDS.map(({ title, Icon }) => (
+                <li key={title} className={impactCardClass}>
+                  <div
+                    className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-sky-300 via-[#2563eb] to-[#1d4ed8] shadow-[0_3px_16px_rgba(37,99,235,0.45)]"
+                    aria-hidden
+                  />
+                  <div className="relative flex flex-col items-center gap-3 pt-1 md:gap-4">
+                    <ChainIconWrapper>
+                      <Icon />
+                    </ChainIconWrapper>
+                    <p className="text-sm font-semibold leading-snug text-[#0f172a] md:text-[15px]">{title}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-10 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-base font-semibold text-[#0f172a] md:text-lg">
+              Un administratif bien géré, c’est plus de chiffre d’affaires.
+            </p>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }

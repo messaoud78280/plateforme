@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Orbitron } from "next/font/google";
+import { Geist, Geist_Mono, Orbitron, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
@@ -20,6 +20,13 @@ const orbitron = Orbitron({
   variable: "--font-orbitron",
   subsets: ["latin"],
   weight: ["600", "700", "800", "900"],
+});
+
+const playfairDisplay = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  display: "swap",
 });
 
 const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
@@ -138,7 +145,7 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${orbitron.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${orbitron.variable} ${playfairDisplay.variable} antialiased`}
       >
         <script
           type="application/ld+json"

@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     siteName: "BeWork",
     title: "Tarifs BeWork — partenaire administratif structuré",
     description:
-      "Quatre niveaux de structuration administrative pour le BTP. Tarifs TTC mensuels, sans frais cachés.",
+      "Trois niveaux de structuration administrative pour le BTP. Tarifs TTC mensuels, sans frais cachés.",
     images: [
       {
         url: tarifsOgImage,

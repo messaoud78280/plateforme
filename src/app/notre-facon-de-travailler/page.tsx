@@ -20,7 +20,7 @@ const ogImage = absoluteUrl("/opengraph-image");
 export const metadata: Metadata = {
   title: "Notre méthode — façon de travailler BeWork BTP",
   description:
-    "Chaîne complète client → encaissement, avant/après, rôles et forfaits Structure à Pilotage. Méthode claire pour artisans et PME du bâtiment.",
+    "De la demande à l’encaissement : étapes claires et maîtrisées. Vous sur le terrain, nous sur l’administratif — forfait mensuel adapté. Méthode BeWork pour le BTP.",
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   openGraph: {
     type: "website",
@@ -75,14 +75,23 @@ export default function NotreFaconDeTravaillerPage() {
       <main className="mx-auto max-w-6xl px-4 py-14 md:px-6 md:py-20">
         {/* Hero */}
         <header className="mx-auto max-w-3xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#1d4ed8]">Notre méthode</p>
+          <p className="mx-auto max-w-full text-center">
+            <span className="inline-block bg-gradient-to-b from-[#60a5fa] via-[#2563eb] to-[#1e3a8a] bg-clip-text font-sans text-sm font-extrabold uppercase leading-snug tracking-[0.18em] text-transparent antialiased sm:text-[0.95rem] md:text-base md:tracking-[0.2em]">
+              Notre méthode
+            </span>
+          </p>
           <h1 className="mt-3 text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl md:leading-tight">
             Une organisation simple, efficace et adaptée au terrain
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-[#334155] md:text-lg">
-            De la demande client à l’encaissement : un système clair. Vous gardez le chantier, nous structurons
-            l’administratif — avec un forfait mensuel adapté (Structure à Pilotage).
-          </p>
+          <div className="mx-auto mt-5 max-w-3xl space-y-4 text-base leading-relaxed text-[#334155] md:text-lg">
+            <p>
+              De la demande client à l’encaissement, chaque étape est claire, structurée et maîtrisée.
+            </p>
+            <p>
+              Vous restez concentré sur vos chantiers, nous prenons en charge l’organisation et le pilotage de votre
+              administratif — avec un forfait mensuel adapté.
+            </p>
+          </div>
           <a
             href="#flux"
             className="mt-8 inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1e40af] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2"
@@ -98,12 +107,12 @@ export default function NotreFaconDeTravaillerPage() {
           <ShortTimelineSection />
 
           {/* Grille tarifaire */}
-          <SectionShell id="forfaits" title="Quatre forfaits, une même méthode" className="mx-auto max-w-5xl">
+          <SectionShell id="forfaits" title="Trois forfaits, une même méthode" className="mx-auto max-w-5xl">
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#334155] md:text-base">
               Le déroulé ne change pas : analyse, cadrage, suivi, ajustements. Ce qui varie, c’est la profondeur du pilotage
               — posée à la mise en place avec vous.
             </p>
-            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {TARIFS_PLANS.map((plan) => (
                 <div
                   key={plan.planKey}
@@ -159,28 +168,63 @@ export default function NotreFaconDeTravaillerPage() {
           <ImpactCardsSection />
           <PresenceBlockSection />
 
-          <SectionShell id="conseil" title="Un accompagnement au-delà de l’administratif">
-            <div className="mt-6 rounded-2xl border border-[#e2e8f0] bg-white/90 p-6 shadow-sm transition-shadow duration-200 hover:shadow-md md:p-8">
-              <ul className="grid gap-3 sm:grid-cols-2" role="list">
-                {[
-                  "Conseils sur l’organisation",
-                  "Aide au recrutement",
-                  "Structuration des équipes",
-                  "Amélioration du fonctionnement",
-                ].map((t) => (
-                  <li key={t} className="flex items-center gap-2 text-sm font-medium text-[#334155]">
-                    <span className="text-[#1d4ed8]" aria-hidden>
-                      ✓
-                    </span>
-                    {t}
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-6 border-t border-[#f1f5f9] pt-6 text-center text-sm font-semibold text-[#0f172a] md:text-base">
-                On ne fait pas que gérer. On vous aide à évoluer.
-              </p>
+          <section id="conseil" className="mx-auto max-w-5xl scroll-mt-24" aria-labelledby="conseil-heading">
+            <div className="relative overflow-hidden rounded-3xl border border-[var(--metal-200)] bg-gradient-to-br from-[var(--metal-50)] via-white to-[var(--metal-100)] p-7 shadow-[var(--shadow-lg)] md:p-10">
+              <div
+                className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/45 via-transparent to-[#2563eb]/[0.04]"
+                aria-hidden
+              />
+              <div
+                className="pointer-events-none absolute -left-10 bottom-0 h-36 w-36 rounded-full bg-gradient-to-tr from-indigo-200/25 to-transparent blur-2xl"
+                aria-hidden
+              />
+
+              <div className="relative">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#94a3b8]">Conseil</p>
+                <h2
+                  id="conseil-heading"
+                  className="mt-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.55rem] font-semibold leading-tight tracking-tight text-[#0f172a] md:text-3xl"
+                >
+                  Un accompagnement au-delà de l’administratif
+                </h2>
+
+                <div className="relative mt-8 overflow-hidden rounded-2xl border border-[#93c5fd]/75 bg-gradient-to-br from-[#eff6ff]/95 via-white to-[#f8fafc] p-6 shadow-[0_12px_44px_-12px_rgba(37,99,235,0.2),inset_0_1px_0_rgba(255,255,255,0.9)] transition-[box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_48px_-14px_rgba(37,99,235,0.28)] md:p-8">
+                  <div
+                    className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-sky-300 via-[#2563eb] to-[#1d4ed8] shadow-[0_3px_16px_rgba(37,99,235,0.45)]"
+                    aria-hidden
+                  />
+                  <div
+                    className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#3b82f6]/[0.05] via-transparent to-transparent"
+                    aria-hidden
+                  />
+                  <ul className="relative grid gap-2 sm:grid-cols-2 sm:gap-3" role="list">
+                    {[
+                      "Conseils sur l’organisation",
+                      "Aide au recrutement",
+                      "Structuration des équipes",
+                      "Amélioration du fonctionnement",
+                    ].map((t) => (
+                      <li
+                        key={t}
+                        className="flex items-center gap-3 rounded-xl px-2 py-2.5 text-sm font-medium text-[#334155] transition-colors duration-200 hover:bg-[#eff6ff]/70 md:text-[15px]"
+                      >
+                        <span
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-white via-[#eff6ff] to-[#dbeafe] text-sm font-bold text-[#1d4ed8] shadow-[inset_0_2px_4px_rgba(255,255,255,0.95),inset_0_-2px_4px_rgba(29,78,216,0.06),0_3px_10px_rgba(37,99,235,0.14)] ring-1 ring-[#bfdbfe]/90"
+                          aria-hidden
+                        >
+                          ✓
+                        </span>
+                        {t}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="relative mt-8 border-t border-[#bfdbfe]/50 pt-6 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-base font-semibold text-[#0f172a] md:text-lg">
+                    On ne fait pas que gérer. On vous aide à évoluer.
+                  </p>
+                </div>
+              </div>
             </div>
-          </SectionShell>
+          </section>
         </div>
 
         {/* CTA */}

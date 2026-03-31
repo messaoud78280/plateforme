@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
+import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { TARIFS_PLANS } from "@/lib/tarifs-plans";
 import { SITE_URL } from "@/lib/site";
 
@@ -159,74 +160,36 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }} />
-      <header className="sticky top-0 z-20 bg-[#f8f9fb] shadow-[0_1px_0_0_rgba(203,213,225,0.9)]">
-        {/* Zone marque / actions — claire, délimitée */}
-        <div className="mx-auto max-w-6xl border-b border-[#dce3ec] px-4 py-2.5 sm:px-6 sm:py-3">
-          <div className="flex items-start justify-between gap-3">
-            <Link href="/" className="min-w-0 shrink pr-2">
-              <BeWorkLogo
-                size="sm"
-                showTagline
-                tagline="Partenaire administratif — BTP"
-                taglineSub="Cadre, rigueur, pilotage, lecture terrain"
-              />
-            </Link>
-            <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 pt-0.5 sm:gap-2.5">
-              <Link
-                href="/notre-facon-de-travailler"
-                className="rounded-lg border border-[#e2e8f0] bg-white/90 px-2.5 py-2 text-xs font-semibold text-[#1d4ed8] shadow-sm transition-all hover:bg-[#eff6ff] sm:px-3 sm:text-sm"
-                title="Notre méthode — flux, organisation et forfaits"
-              >
-                Méthode
+      <MarketingSiteHeader
+        plainBg
+        bottom={
+          <div className="nav-strip-metallic-blue nav-strip-metallic-blue--compact hidden md:block">
+            <nav
+              className="nav-strip-metallic-blue__nav mx-auto flex max-w-6xl flex-nowrap items-center justify-center gap-x-0 px-3 py-1.5 sm:px-5 sm:py-2"
+              aria-label="Navigation principale"
+            >
+              <a className="whitespace-nowrap" href="#plateforme" title="Offre, plateforme et secteurs — dont le BTP">
+                Offre & secteurs
+              </a>
+              <Link className="whitespace-nowrap" href="/tarifs" title="Tarifs — sans recrutement ni charges">
+                Tarifs
               </Link>
-              <Link
-                href="/connexion"
-                className="rounded-lg surface-metallic-light px-3.5 py-2 text-xs font-medium text-[#1e293b] shadow-sm transition-all hover:bg-[#f8f9fb] sm:px-4 sm:text-sm"
-              >
-                Connexion
+              <Link className="whitespace-nowrap" href="/notre-facon-de-travailler" title="Flux, organisation et forfaits">
+                Notre méthode
               </Link>
-              <Link
-                href="/contact"
-                className="hidden rounded-lg surface-metallic-light px-3.5 py-2 text-xs font-medium text-[#1e293b] shadow-sm transition-all hover:border-[#9ca3af] hover:bg-[#f8f9fb] sm:inline-flex sm:px-4 sm:text-sm"
-              >
-                Cadrage
+              <Link className="whitespace-nowrap" href="/blog">
+                Blog
               </Link>
-              <Link
-                href="/inscription"
-                className="rounded-lg bg-[#1d4ed8] px-3.5 py-2 text-xs font-semibold text-white shadow-md transition-all hover:bg-[#1e40af] hover:shadow-lg sm:px-4 sm:text-sm"
-              >
-                Espace client
+              <a className="whitespace-nowrap" href="#equipe">
+                Équipe
+              </a>
+              <Link className="whitespace-nowrap" href="/faq">
+                FAQ
               </Link>
-            </div>
+            </nav>
           </div>
-        </div>
-        {/* Navigation — bandeau bleu métallisé pleine largeur (distinct du bloc du haut) */}
-        <div className="nav-strip-metallic-blue nav-strip-metallic-blue--compact hidden md:block">
-          <nav
-            className="nav-strip-metallic-blue__nav mx-auto flex max-w-6xl flex-nowrap items-center justify-center gap-x-0 px-3 py-1.5 sm:px-5 sm:py-2"
-            aria-label="Navigation principale"
-          >
-            <a className="whitespace-nowrap" href="#plateforme" title="Offre, plateforme et secteurs — dont le BTP">
-              Offre & secteurs
-            </a>
-            <Link className="whitespace-nowrap" href="/tarifs" title="Tarifs — sans recrutement ni charges">
-              Tarifs
-            </Link>
-            <Link className="whitespace-nowrap" href="/notre-facon-de-travailler" title="Flux, organisation et forfaits">
-              Notre méthode
-            </Link>
-            <Link className="whitespace-nowrap" href="/blog">
-              Blog
-            </Link>
-            <a className="whitespace-nowrap" href="#equipe">
-              Équipe
-            </a>
-            <Link className="whitespace-nowrap" href="/faq">
-              FAQ
-            </Link>
-          </nav>
-        </div>
-      </header>
+        }
+      />
 
       <main className="pt-0">
         {/* Hero + parcours client (4 étapes) */}

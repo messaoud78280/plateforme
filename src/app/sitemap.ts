@@ -8,7 +8,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/assistant-administratif-externalise`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.9 },
     { url: `${SITE_URL}/assistant-administratif-pme`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.9 },
     { url: `${SITE_URL}/assistant-administratif-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.9 },
-    { url: `${SITE_URL}/assistant-administratif-immobilier`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.9 },
     { url: `${SITE_URL}/assistant-administratif-distance`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.9 },
     { url: `${SITE_URL}/externaliser-administratif`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.9 },
     { url: `${SITE_URL}/assistants-administratifs-taches`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },

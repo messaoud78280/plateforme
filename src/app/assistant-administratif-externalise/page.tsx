@@ -35,8 +35,8 @@ export default function Page() {
       <h2>Que fait un assistant administratif externalisé BeWork ?</h2>
       <p>
         Nos assistants gèrent les tâches courantes : emails, devis, factures, relances clients et fournisseurs, agenda,
-        suivi de dossiers, saisie et classement de documents. Ils s&apos;adaptent à votre secteur (BTP, immobilier, PME,
-        indépendants) et travaillent avec vos outils.
+        suivi de dossiers, saisie et classement de documents. Ils s&apos;adaptent à votre secteur (BTP en priorité, PME,
+        indépendants, services) et travaillent avec vos outils.
       </p>
 
       <h2>Pour qui ?</h2>

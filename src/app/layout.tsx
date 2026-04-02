@@ -34,11 +34,11 @@ const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "BeWork — Partenaire administratif pour le BTP et les artisans",
+    default: "BeWork — Agence de pilotage administratif pour entreprises du BTP",
     template: "%s | BeWork",
   },
   description:
-    "Administratif structuré pour le bâtiment : devis, relances, dossiers chantier, coordination — sans recruter. Cadre forfaitaire TTC, pilotage encadré en France. Forfaits dès 290 € TTC/mois (Structure).",
+    "Agence de pilotage administratif BTP : nous structurons, gérons et optimisons votre administratif — temps, clients, chiffre d’affaires. Sans recruter. Forfaits TTC dès 290 €/mois, pilotage encadré.",
   applicationName: "BeWork",
   authors: [{ name: "BeWork", url: SITE_URL }],
   creator: "BeWork",

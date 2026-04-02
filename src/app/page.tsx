@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
+import { HomePageNavStrip } from "@/components/layout/HomePageNavStrip";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { TARIFS_PLANS } from "@/lib/tarifs-plans";
 import { SITE_URL } from "@/lib/site";
@@ -74,12 +75,13 @@ const RESSOURCES_BLOG = [
 ];
 
 export const metadata: Metadata = {
-  title: "BeWork | Partenaire administratif pour artisans et entreprises du bâtiment",
+  title: "BeWork | Agence de pilotage administratif pour entreprises du BTP",
   description:
-    "Cadre, rigueur, pilotage et lecture terrain : devis et relances suivis, dossiers chantier structurés, coordination fournisseurs — sans recruter. Méthode portée par une dirigeante du BTP en Île-de-France, vingt ans sur le terrain. Forfaits TTC à partir de 290 €/mois (Structure). France, Belgique, Suisse, Luxembourg.",
+    "Agence de pilotage administratif dédiée au BTP : nous structurons, gérons et optimisons votre administratif pour vous faire gagner du temps, des clients et du chiffre d’affaires. Sans recruter. Méthode terrain, forfaits TTC dès 290 €/mois. France, Belgique, Suisse, Luxembourg.",
   robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
   keywords: [
     "administratif BTP",
+    "agence pilotage administratif BTP",
     "secrétariat entreprise bâtiment",
     "externalisation administrative BTP",
     "devis et facturation chantier",
@@ -103,9 +105,9 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: SITE_URL,
     siteName: "BeWork",
-    title: "BeWork — Administratif structuré pour le BTP",
+    title: "BeWork — Agence de pilotage administratif pour le BTP",
     description:
-      "Partenaire administratif pour le bâtiment : suivi des dossiers, réactivité encadrée, exécution sous contrôle humain. Sans embauche. France, Belgique, Suisse, Luxembourg.",
+      "Nous structurons, gérons et optimisons votre administratif pour vous faire gagner du temps, des clients et du chiffre d’affaires. Entreprises du bâtiment — sans embauche. France, Belgique, Suisse, Luxembourg.",
     images: [
       {
         url: `${SITE_URL}/opengraph-image`,
@@ -117,9 +119,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "BeWork — Partenaire administratif BTP",
+    title: "BeWork — Agence de pilotage administratif BTP",
     description:
-      "Organisation, relances et dossiers tenus pour artisans et entreprises du bâtiment. Forfaits TTC, cadre défini.",
+      "Structuration et pilotage de votre administratif BTP : temps, clients, chiffre d’affaires. Forfaits TTC, cadre défini.",
   },
 };
 
@@ -130,10 +132,10 @@ const homeJsonLd = {
       "@type": "WebPage",
       "@id": `${SITE_URL}/#accueil`,
       url: SITE_URL,
-      name: "BeWork — Partenaire administratif pour le BTP",
+      name: "BeWork — Agence de pilotage administratif pour entreprises du BTP",
       inLanguage: "fr-FR",
       description:
-        "Structuration de l’administratif pour artisans et entreprises du bâtiment : devis, facturation, relances, démarches chantier, logistique et dossiers sensibles sous validation. Méthode encadrée, pilotage et lecture terrain. Forfaits TTC.",
+        "Agence de pilotage administratif BTP : structuration, gestion et optimisation de l’administratif pour gagner du temps, des clients et du chiffre d’affaires. Devis, chantier, relances — méthode encadrée. Forfaits TTC.",
       isPartOf: { "@id": `${SITE_URL}/#website` },
       about: [
         { "@type": "Thing", name: "Bâtiment et travaux publics" },
@@ -192,36 +194,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }} />
-      <MarketingSiteHeader
-        plainBg
-        bottom={
-          <div className="nav-strip-metallic-blue nav-strip-metallic-blue--compact hidden md:block">
-            <nav
-              className="nav-strip-metallic-blue__nav mx-auto flex max-w-6xl flex-nowrap items-center justify-center gap-x-0 px-3 py-1.5 sm:px-5 sm:py-2"
-              aria-label="Navigation principale"
-            >
-              <a className="whitespace-nowrap" href="#plateforme" title="Offre, plateforme et secteurs — dont le BTP">
-                Offre & secteurs
-              </a>
-              <Link className="whitespace-nowrap" href="/tarifs" title="Tarifs — sans recrutement ni charges">
-                Tarifs
-              </Link>
-              <Link className="whitespace-nowrap" href="/notre-facon-de-travailler" title="Flux, organisation et forfaits">
-                Notre méthode
-              </Link>
-              <Link className="whitespace-nowrap" href="/blog">
-                Blog
-              </Link>
-              <a className="whitespace-nowrap" href="#equipe">
-                Équipe
-              </a>
-              <Link className="whitespace-nowrap" href="/faq">
-                FAQ
-              </Link>
-            </nav>
-          </div>
-        }
-      />
+      <MarketingSiteHeader plainBg bottom={<HomePageNavStrip />} />
 
       <main className="pt-0">
         {/* Hero + parcours client (4 étapes) */}
@@ -230,17 +203,15 @@ export default function HomePage() {
             <div className="grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-10 xl:gap-14">
               {/* Colonne principale : message + CTA (~60 %) */}
               <div className="flex flex-col gap-6 text-center md:gap-7 md:text-left lg:col-span-7">
-                <h1 className="text-metallic-black text-balance text-4xl font-extrabold leading-[1.1] tracking-[-0.03em] md:text-5xl md:leading-[1.08] lg:text-6xl lg:leading-[1.05]">
-                  L&apos;administratif BTP, enfin géré comme un chantier.
+                <h1 className="text-metallic-black text-balance text-[1.65rem] font-extrabold leading-[1.12] tracking-[-0.03em] min-[400px]:text-3xl md:text-4xl md:leading-[1.1] lg:text-[2.65rem] lg:leading-[1.08] xl:text-5xl xl:leading-[1.06]">
+                  Agence de pilotage administratif dédiée aux entreprises du BTP
                 </h1>
                 <div
-                  className="mx-auto max-w-2xl rounded-xl border border-[#93c5fd]/45 bg-gradient-to-br from-white via-[#f8fafc] to-[#eff6ff]/90 px-5 py-4 text-center shadow-[0_4px_20px_rgba(29,78,216,0.07),inset_0_1px_0_rgba(255,255,255,0.9)] md:mx-0 md:text-left lg:max-w-none"
+                  className="mx-auto max-w-2xl rounded-xl border border-[#93c5fd]/45 bg-gradient-to-br from-white via-[#f8fafc] to-[#eff6ff]/90 px-5 py-5 text-center shadow-[0_4px_20px_rgba(29,78,216,0.07),inset_0_1px_0_rgba(255,255,255,0.9)] md:mx-0 md:px-6 md:py-5 md:text-left lg:max-w-none"
                 >
-                  <p className="font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-lg font-semibold leading-snug tracking-tight text-[#0f172a] md:text-xl lg:text-2xl">
-                    Concentrez-vous sur vos chantiers.
-                  </p>
-                  <p className="mt-2 text-sm font-medium leading-relaxed text-[#334155] md:text-base lg:text-[1.0625rem]">
-                    Nous structurons le reste pour développer votre activité et augmenter votre chiffre d&apos;affaires.
+                  <p className="font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-lg font-semibold leading-snug tracking-tight text-[#0f172a] md:text-xl md:leading-snug lg:text-2xl lg:leading-snug">
+                    Nous structurons, gérons et optimisons votre administratif pour vous faire gagner du temps, des clients et
+                    du chiffre d&apos;affaires.
                   </p>
                 </div>
                 <div
@@ -376,8 +347,8 @@ export default function HomePage() {
                   </Link>
                 </div>
               </div>
-              {/* Colonne latérale : tarif + parcours, deux cartes empilées (~40 %) */}
-              <div className="mx-auto flex w-full max-w-md flex-col gap-4 lg:col-span-5 lg:mx-0 lg:max-w-none lg:self-start lg:sticky lg:top-24">
+              {/* Colonne latérale : visuellement parcours au-dessus, tarif Suivi en dessous (flex-col-reverse + ordre DOM tarif puis parcours) */}
+              <div className="mx-auto flex w-full max-w-md flex-col-reverse gap-4 lg:col-span-5 lg:mx-0 lg:max-w-none lg:self-start lg:sticky lg:top-24">
                 <Link
                   href="/tarifs"
                   className="group surface-metallic-blue flex w-full flex-col gap-3 rounded-2xl px-6 py-6 text-left shadow-lg shadow-slate-900/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#93c5fd]/80"
@@ -426,37 +397,56 @@ export default function HomePage() {
                   id="comment-ca-marche"
                   className="surface-metallic-blue rounded-2xl p-6 shadow-lg shadow-slate-900/20 md:p-7"
                 >
-                  <div className="mb-5">
+                  <div className="mb-6 md:mb-7">
                     <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#93c5fd]">
                       Parcours client
                     </span>
-                    <h2 className="mt-2 text-xl font-semibold tracking-tight text-white md:text-2xl">
-                      Quatre étapes, un pilotage clair
+                    <h2 className="mt-2 max-w-[22rem] text-lg font-semibold leading-snug tracking-tight text-white md:max-w-none md:text-xl md:leading-tight">
+                      4 étapes simples pour vous libérer de l&apos;administratif
                     </h2>
                   </div>
-                  <ol className="space-y-0 text-left">
+                  <ol className="text-left">
                     {[
                       {
                         step: 1,
-                        title: "Vous fixez les priorités : devis, réglementaire, fournisseurs, litiges…",
+                        title: "Vous nous dites ce qu’il faut gérer",
+                        detail: "devis, clients, fournisseurs…",
                       },
-                      { step: 2, title: "Nous exécutons, coordonnons et rendons compte dans le forfait" },
-                      { step: 3, title: "Vous suivez l’avancement et les échanges sur la plateforme" },
-                      { step: 4, title: "Vous restez sur le chantier — nous tenons l’administratif" },
+                      {
+                        step: 2,
+                        title: "On s’occupe de tout pour vous",
+                        detail: "devis, relances, organisation…",
+                      },
+                      {
+                        step: 3,
+                        title: "Vous suivez tout facilement",
+                        detail: "depuis une plateforme simple",
+                      },
+                      {
+                        step: 4,
+                        title: "Vous restez sur vos chantiers",
+                        detail: "On gère l’administratif",
+                      },
                     ].map((item, index) => (
-                      <li key={item.step} className="relative flex gap-3.5 pb-4 last:pb-0 md:gap-4 md:pb-5 last:md:pb-0">
+                      <li
+                        key={item.step}
+                        className="relative flex gap-3.5 pb-6 last:pb-0 md:gap-4 md:pb-7 last:md:pb-0"
+                      >
                         {index < 3 ? (
                           <span
-                            className="absolute left-[15px] top-9 bottom-0 w-px bg-gradient-to-b from-white/25 to-transparent md:left-[17px]"
+                            className="absolute left-[15px] top-[2.125rem] bottom-0 w-px bg-gradient-to-b from-white/28 to-transparent md:left-[17px] md:top-[2.25rem]"
                             aria-hidden
                           />
                         ) : null}
-                        <span className="relative z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-xs font-semibold tabular-nums text-white md:h-9 md:w-9 md:text-sm">
+                        <span className="relative z-[1] mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-xs font-semibold tabular-nums text-white md:h-9 md:w-9 md:text-sm">
                           {item.step}
                         </span>
-                        <div className="min-w-0 pt-0.5">
-                          <p className="text-sm font-medium leading-snug text-white md:text-[0.9375rem] md:leading-snug">
+                        <div className="min-w-0 flex-1 pb-0.5">
+                          <p className="text-[0.9375rem] font-semibold leading-snug text-white md:text-base md:leading-snug">
                             {item.title}
+                          </p>
+                          <p className="mt-1.5 text-[12px] leading-relaxed text-[#94a3b8] md:text-[13px]">
+                            {item.detail}
                           </p>
                         </div>
                       </li>
@@ -778,7 +768,11 @@ export default function HomePage() {
         </section>
 
         {/* Une plateforme simple pour déléguer votre administratif */}
-        <section id="plateforme" className="px-6 py-20 md:py-28">
+        <section
+          id="plateforme"
+          className="scroll-mt-24 px-6 py-20 md:py-28"
+          style={{ scrollMarginTop: "6rem" }}
+        >
           <div className="mx-auto max-w-6xl">
             <div className="text-center mb-16">
               <h2 className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl lg:text-4xl">
@@ -1072,10 +1066,10 @@ export default function HomePage() {
               Exemples de missions par secteur
             </h2>
             <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#334155]">
-              Le BTP est notre socle — nous travaillons aussi avec l&apos;immobilier, les PME et les indépendants qui partagent
-              les mêmes exigences de délais et de rigueur.
+              Le BTP est notre socle — nous accompagnons aussi les PME et les indépendants qui partagent les mêmes exigences
+              de délais, de chantier et de rigueur documentaire.
             </p>
-            <div className="mt-12 grid gap-8 md:grid-cols-2 md:items-stretch lg:grid-cols-4">
+            <div className="mt-12 grid gap-8 md:grid-cols-2 md:items-stretch lg:grid-cols-3">
               <div className="card-frame flex h-full flex-col rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-[#1d4ed8]">BTP</h3>
                 <ul className="mt-4 flex-1 space-y-2 text-sm text-[#334155]">
@@ -1093,14 +1087,19 @@ export default function HomePage() {
                 </Link>
               </div>
               <div className="card-frame flex h-full flex-col rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-[#1d4ed8]">Immobilier</h3>
+                <h3 className="text-lg font-semibold text-[#1d4ed8]">Artisanat &amp; sous-traitance</h3>
                 <ul className="mt-4 flex-1 space-y-2 text-sm text-[#334155]">
-                  {["Dossiers locataires", "Relances loyers", "État des lieux", "Gestion des demandes"].map((m, i) => (
+                  {[
+                    "Réponses aux marchés et montage de dossiers techniques (sous votre validation)",
+                    "Suivi des réceptions, réserves et échanges avec maîtrise d’ouvrage / MOE",
+                    "Coordination sous-traitants, planning et relances chantier",
+                    "Dossiers assurance, décennale et contentieux — cadre administratif cadré",
+                  ].map((m, i) => (
                     <li key={i}>• {m}</li>
                   ))}
                 </ul>
-                <Link href="/assistant-administratif-immobilier" className="mt-4 inline-block text-sm font-semibold text-[#1d4ed8] hover:underline">
-                  Voir le périmètre →
+                <Link href="/assistant-administratif-btp" className="mt-4 inline-block text-sm font-semibold text-[#1d4ed8] hover:underline">
+                  Voir le périmètre BTP →
                 </Link>
               </div>
               <div className="card-frame flex h-full flex-col rounded-xl p-6">
@@ -1130,7 +1129,11 @@ export default function HomePage() {
         </section>
 
         {/* Équipe & ADN fondateur */}
-        <section id="equipe" className="px-6 py-24 md:py-28">
+        <section
+          id="equipe"
+          className="scroll-mt-24 px-6 py-24 md:py-28"
+          style={{ scrollMarginTop: "6rem" }}
+        >
           <div className="mx-auto max-w-6xl">
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">Fondatrice &amp; méthode</p>
             <h2 className="text-metallic-black mt-3 max-w-4xl font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-3xl font-semibold leading-[1.15] tracking-tight md:text-4xl md:leading-[1.1]">
@@ -1315,7 +1318,10 @@ export default function HomePage() {
                   name: "BTP & artisans",
                   desc: "Administratif, démarches, logistique fournisseurs, moyens, planning et suivi des litiges",
                 },
-                { name: "Immobilier", desc: "Dossiers locataires, relances, gestion administrative" },
+                {
+                  name: "Rénovation & second œuvre",
+                  desc: "Dossiers chantier, coordination, réponses appels d’offres et suivi administratif du terrain",
+                },
                 { name: "Cabinets juridiques", desc: "Structuration et suivi de dossiers" },
                 { name: "PME du bâtiment", desc: "Pilotage administratif quotidien dans un forfait défini" },
                 { name: "Consulting", desc: "Support, synthèses et livrables premium" },

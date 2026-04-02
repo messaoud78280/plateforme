@@ -27,7 +27,6 @@ const SECTEURS_ACTIVITE = [
   "Santé",
   "BTP / Construction",
   "Conseils / Consulting",
-  "Immobilier",
   "Finance / Assurances",
   "Industrie",
   "Autre",

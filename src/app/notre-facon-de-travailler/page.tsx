@@ -109,7 +109,7 @@ export default function NotreFaconDeTravaillerPage() {
           {/* Grille tarifaire */}
           <SectionShell id="forfaits" title="Trois forfaits, une même méthode" className="mx-auto max-w-5xl">
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#334155] md:text-base">
-              Le déroulé ne change pas : analyse, cadrage, suivi, ajustements. Ce qui varie, c’est la profondeur du pilotage
+              Le déroulé ne change pas : analyse, rendez-vous découverte, suivi, ajustements. Ce qui varie, c’est la profondeur du pilotage
               — posée à la mise en place avec vous.
             </p>
             <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -238,7 +238,7 @@ export default function NotreFaconDeTravaillerPage() {
               href="/contact"
               className="inline-flex justify-center rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white transition hover:bg-[#1e40af]"
             >
-              Demander un cadrage
+              Demander un rendez-vous découverte
             </Link>
             <Link
               href="/tarifs"

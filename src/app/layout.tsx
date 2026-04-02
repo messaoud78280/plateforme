@@ -61,7 +61,7 @@ export const metadata: Metadata = {
     "trésorerie artisan bâtiment",
     "relances impayés BTP",
     "délégation administrative",
-    "cadrage administratif dirigeant",
+    "rendez-vous découverte administratif dirigeant",
     "BeWork",
     "administratif intelligence artificielle",
     "assistant IA entreprise",
@@ -122,7 +122,7 @@ const jsonLd = {
       image: { "@type": "ImageObject", url: defaultOgImage, width: 1200, height: 630 },
       potentialAction: {
         "@type": "ContactAction",
-        name: "Demander un cadrage ou un échange",
+        name: "Demander un rendez-vous découverte ou un échange",
         target: absoluteUrl("/contact"),
       },
     },

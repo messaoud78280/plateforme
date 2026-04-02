@@ -149,7 +149,7 @@ export default function ContactForm() {
           Échanger sur votre organisation
         </h1>
         <p className="mt-4 text-base font-medium leading-relaxed text-[#0f172a] md:text-lg">
-          En validant ce formulaire, vous déclenchez un <span className="text-[#1d4ed8]">premier cadrage</span> avec BeWork :{" "}
+          En validant ce formulaire, vous déclenchez un <span className="text-[#1d4ed8]">premier rendez-vous découverte</span> avec BeWork :{" "}
           <strong className="font-semibold text-[#0f172a]">nous vous proposons rapidement un rendez-vous en visioconférence</strong>{" "}
           — pas une file d’attente sans suite. C’est le moment où nous nous parlons{" "}
           <strong className="font-semibold text-[#0f172a]">de vive voix</strong>.
@@ -182,7 +182,7 @@ export default function ContactForm() {
           <div className="surface-metallic-light surface-metallic-light--soft rounded-2xl p-5 text-left md:p-6">
             <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#1d4ed8]">Après votre envoi</p>
             <p className="mt-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-lg font-semibold text-[#0f172a] md:text-xl">
-              Visio de cadrage — échange direct avec l’équipe
+              Visio découverte — échange direct avec l’équipe
             </p>
             <p className="mt-3 text-sm leading-relaxed text-[#334155] md:text-[0.9375rem]">
               Lors de ce rendez-vous, nous vous expliquons{" "}

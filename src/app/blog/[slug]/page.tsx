@@ -145,7 +145,7 @@ export default async function BlogArticlePage({ params }: Props) {
                 href="/contact"
                 className="inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white hover:bg-[#1e40af]"
               >
-                Demander un cadrage
+                Demander un rendez-vous découverte
               </Link>
               <Link
                 href="/tarifs"

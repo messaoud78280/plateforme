@@ -69,7 +69,7 @@ const etapes = [
     desc: "Nous passons en revue vos flux : commercial, réglementaire, logistique, urgences. Objectif : une proposition de formule alignée sur la charge réelle, pas sur un catalogue abstrait.",
   },
   {
-    title: "Cadrage & démarrage",
+    title: "Rendez-vous découverte & démarrage",
     desc: "Rôles, canaux, outils, rituels de pilotage : tout est posé par écrit avant l’exécution. Les accès et le périmètre sont validés ensemble.",
   },
   {
@@ -81,7 +81,7 @@ const etapes = [
 const faq = [
   { q: "Les prix sont-ils TTC ?", a: "Oui. Tous nos tarifs sont exprimés TTC, sans frais supplémentaires. La lisibilité du montant fait partie du cadre que nous proposons aux entreprises du bâtiment." },
   { q: "Qu'est-ce qu'un périmètre ?", a: "Un périmètre correspond à un domaine de mission (ex. commercial, organisation, suivi réglementaire). Les tarifs indiqués couvrent jusqu'à deux périmètres. Au-delà, nous établissons un devis personnalisé." },
-  { q: "Comment sont protégées mes données ?", a: "Confidentialité et accès sont traités dans un cadre strict, avec des canaux dédiés. Nous pouvons préciser nos engagements lors du cadrage initial." },
+  { q: "Comment sont protégées mes données ?", a: "Confidentialité et accès sont traités dans un cadre strict, avec des canaux dédiés. Nous pouvons préciser nos engagements lors du premier échange." },
   { q: "Quels sont les horaires et délais ?", a: "L’équipe travaille du lundi au vendredi sur le fuseau français. Les délais dépendent du type de demande et du forfait ; les urgences chantier sont priorisées dans le cadre de votre offre." },
   { q: "Avec quels outils travaillez-vous ?", a: "Nous intervenons dans votre environnement (Google, Microsoft, CRM, messageries, logiciels métiers) lorsque vous nous donnez les accès nécessaires. La plateforme BeWork centralise consignes, statuts et livrables." },
   { q: "Y a-t-il un engagement ou une durée minimale ?", a: "Les modalités figurent au contrat. L’idée est un cadre clair des deux côtés, sans surprise sur la résiliation ou le renouvellement." },
@@ -219,7 +219,7 @@ export default function TarifsPage() {
                 <ul className="mt-5 space-y-1.5 text-[11px] leading-relaxed text-[#64748b]" aria-label="Garanties tarifaires">
                   <li>TTC, sans frais cachés</li>
                   <li>Cadre contractuel clair</li>
-                  <li>Démarrage après cadrage</li>
+                  <li>Démarrage après votre rendez-vous découverte</li>
                 </ul>
                 <ul className="mt-5 flex-1 space-y-3 text-sm leading-snug text-[#334155]" role="list">
                   {plan.highlights.map((h) => (
@@ -238,7 +238,7 @@ export default function TarifsPage() {
                   href="/contact"
                   className="mt-5 block w-full rounded-lg bg-[#1d4ed8] py-3 text-center text-sm font-semibold text-white transition hover:bg-[#1e40af]"
                 >
-                  Demander un cadrage
+                  Demander un rendez-vous découverte
                 </Link>
               </article>
               );
@@ -396,7 +396,7 @@ export default function TarifsPage() {
                 </p>
                 <p className="mt-4 text-sm leading-relaxed text-[#475569]">
                   En BTP, on peut ainsi avoir un périmètre « commercial / facturation » et un autre « chantier / coordination »,
-                  toujours selon le cadrage convenu ensemble.
+                  toujours selon ce qui a été convenu ensemble.
                 </p>
                 <div className="mt-6 rounded-xl border border-[#93c5fd]/45 bg-gradient-to-b from-[#eff6ff]/90 to-[#dbeafe]/40 p-5 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
                   <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#1d4ed8]">Tarifs affichés</p>

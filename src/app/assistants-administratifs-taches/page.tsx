@@ -367,7 +367,7 @@ export default function AssistantsAdministratifsTachesPage() {
               Ce que nous ne faisons pas
             </h2>
             <p className="mt-4 text-[#334155] leading-relaxed">
-              Cadrage clair pour éviter tout malentendu. L&apos;assistant exécute des missions définies avec vous ; les actes engageant votre responsabilité restent sous votre contrôle.
+              Cadre clair dès le rendez-vous découverte pour éviter tout malentendu. L&apos;assistant exécute des missions définies avec vous ; les actes engageant votre responsabilité restent sous votre contrôle.
             </p>
             <ul className="mt-6 space-y-3">
               {nonFait.map((item) => (

@@ -14,7 +14,7 @@ type Props = {
 };
 
 /**
- * En-tête commun pages vitrine : accès compte, navigation (méthode, forfaits) + cadrage.
+ * En-tête commun pages vitrine : accès compte, navigation (méthode, forfaits) + rendez-vous découverte.
  */
 export function MarketingSiteHeader({ plainBg = false, showBlogLink = false, bottom }: Props) {
   return (
@@ -98,7 +98,7 @@ export function MarketingSiteHeader({ plainBg = false, showBlogLink = false, bot
             href="/contact"
             className="rounded-lg bg-[#1d4ed8] px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#1e40af] sm:px-4 sm:py-2 sm:text-sm"
           >
-            Cadrage
+            Rendez-vous découverte
           </Link>
         </nav>
       </div>

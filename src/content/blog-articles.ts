@@ -252,7 +252,7 @@ export const BLOG_ARTICLES = {
       {
         type: "p",
         content:
-          "Inutile d’attendre des semaines entre l’offre, le recrutement, l’onboarding. Avec BeWork, un assistant peut être opérationnel en quelques jours après cadrage de votre périmètre.",
+          "Inutile d’attendre des semaines entre l’offre, le recrutement, l’onboarding. Avec BeWork, un assistant peut être opérationnel en quelques jours après votre rendez-vous découverte et la définition de votre périmètre.",
       },
       { type: "h2", content: "6. Une direction et un suivi structurés" },
       {

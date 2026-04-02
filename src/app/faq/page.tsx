@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     siteName: "BeWork",
     title: "FAQ — BeWork, administratif structuré pour le BTP",
     description:
-      "Réponses sur le cadrage, les forfaits, l’externalisation vs le recrutement et le fonctionnement au quotidien.",
+      "Réponses sur le rendez-vous découverte, les forfaits, l’externalisation vs le recrutement et le fonctionnement au quotidien.",
     images: [{ url: faqOgImage, width: 1200, height: 630, alt: "FAQ BeWork — administratif BTP" }],
   },
   twitter: {
@@ -61,11 +61,11 @@ const FAQ_ITEMS = [
   },
   {
     q: "Pour qui ce n’est-il pas adapté ?",
-    a: "Si vous cherchez avant tout le coût le plus bas, si vous refusez tout cadrage ou si vous attendez une disponibilité illimitée hors du cadre convenu, notre modèle ne sera probablement pas satisfaisant. Nous préférons une collaboration claire avec peu de clients bien accompagnés qu’une file de demandes non tenables.",
+    a: "Si vous cherchez avant tout le coût le plus bas, si vous refusez tout échange préalable de mise au point ou si vous attendez une disponibilité illimitée hors du cadre convenu, notre modèle ne sera probablement pas satisfaisant. Nous préférons une collaboration claire avec peu de clients bien accompagnés qu’une file de demandes non tenables.",
   },
   {
     q: "Comment démarre la collaboration ?",
-    a: "Après un échange pour comprendre votre organisation, vos outils et votre charge, nous proposons un cadrage et une formule. L’onboarding fixe les rôles, les canaux et les priorités ; les premières missions démarrent une fois les accès et le périmètre validés.",
+    a: "Après un échange pour comprendre votre organisation, vos outils et votre charge, nous proposons un rendez-vous découverte et une formule. L’onboarding fixe les rôles, les canaux et les priorités ; les premières missions démarrent une fois les accès et le périmètre validés.",
   },
   {
     q: "Les besoins peuvent-ils évoluer ?",

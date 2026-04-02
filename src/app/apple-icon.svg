@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="BeWork">
+  <defs>
+    <linearGradient id="apple-bw-disk" x1="88" y1="72" x2="424" y2="440" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2d5a82" />
+      <stop offset="0.45" stop-color="#153a5c" />
+      <stop offset="1" stop-color="#050a12" />
+    </linearGradient>
+    <radialGradient id="apple-bw-shine" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(256 148) rotate(90) scale(200 120)">
+      <stop stop-color="#ffffff" stop-opacity="0.28" />
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <circle cx="256" cy="256" r="250" fill="none" stroke="#93c5fd" stroke-width="10" stroke-opacity="0.9" />
+  <circle cx="256" cy="256" r="238" fill="url(#apple-bw-disk)" />
+  <ellipse cx="256" cy="168" rx="168" ry="96" fill="url(#apple-bw-shine)" />
+  <text
+    x="256"
+    y="256"
+    text-anchor="middle"
+    dominant-baseline="central"
+    fill="#f8fafc"
+    font-family="system-ui, -apple-system, 'Segoe UI', sans-serif"
+    font-size="184"
+    font-weight="800"
+    letter-spacing="-0.06em"
+  >
+    BW
+  </text>
+</svg>

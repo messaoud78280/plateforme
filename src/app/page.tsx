@@ -39,7 +39,7 @@ const HOME_FAQ_ITEMS = [
   },
   {
     q: "Comment se passe le quotidien ?",
-    a: "Vous déposez vos demandes sur la plateforme (devis, factures, situations de travaux, démarches, logistique, relances, dossiers sensibles sous validation). L’équipe exécute dans le forfait ; vous suivez statuts et échanges. Démarrage après cadrage et accès outils.",
+    a: "Vous déposez vos demandes sur la plateforme (devis, factures, situations de travaux, démarches, logistique, relances, dossiers sensibles sous validation). L’équipe exécute dans le forfait ; vous suivez statuts et échanges. Démarrage après votre rendez-vous découverte et accès outils.",
   },
   {
     q: "Qui exécute les missions ?",
@@ -323,9 +323,9 @@ export default function HomePage() {
                   <Link
                     href="/contact"
                     className="inline-flex rounded-lg bg-[#1d4ed8] px-8 py-4 text-base font-semibold text-white shadow-lg shadow-[#1d4ed8]/25 transition-all hover:bg-[#1e40af] hover:shadow-xl hover:shadow-[#1d4ed8]/30"
-                    aria-label="Demander un cadrage de votre besoin"
+                    aria-label="Demander un rendez-vous découverte adapté à votre besoin"
                   >
-                    Demander un cadrage
+                    Demander un rendez-vous découverte
                   </Link>
                   <Link
                     href="/tarifs"
@@ -540,7 +540,7 @@ export default function HomePage() {
                       Repère estimatif — pas une facturation à l&apos;heure.
                     </p>
                     <p className="mt-2 text-[11px] leading-snug text-[#94a3b8]">
-                      Détail et cadrage sur la page tarifs.
+                      Précisions et forfaits sur la page tarifs.
                     </p>
                   </div>
                 </Link>
@@ -1205,7 +1205,7 @@ export default function HomePage() {
                       dirigeante d&apos;entreprise du BTP, vingt ans sur le terrain en Île-de-France
                     </strong>
                     . Votre <strong className="font-semibold text-[#0f172a]">interlocution principale</strong> passe par
-                    l&apos;agence qu&apos;elle pilote au quotidien en région parisienne : cadrage, exigence sur la qualité,
+                    l&apos;agence qu&apos;elle pilote au quotidien en région parisienne : écoute, exigence sur la qualité,
                     lien direct avec les dirigeants.
                   </p>
                   <p>
@@ -1258,7 +1258,7 @@ export default function HomePage() {
                     Parlons de votre organisation
                   </p>
                   <p className="mt-3 text-sm leading-relaxed text-[#475569] md:text-[0.9375rem]">
-                    Après le formulaire de cadrage, nous vous proposons{" "}
+                    Après le formulaire de rendez-vous découverte, nous vous proposons{" "}
                     <strong className="font-semibold text-[#0f172a]">rapidement un rendez-vous en visio</strong>. Nous vous
                     présentons <strong className="font-semibold text-[#0f172a]">de vive voix</strong> notre façon de travailler
                     et les leviers pour <strong className="font-semibold text-[#0f172a]">mieux structurer votre
@@ -1272,7 +1272,7 @@ export default function HomePage() {
                     href="/contact"
                     className="inline-flex rounded-xl border border-[#2563eb]/70 bg-gradient-to-b from-[#3b82f6] via-[#2563eb] to-[#1d4ed8] px-6 py-3.5 text-center text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_4px_18px_rgba(29,78,216,0.35)] transition hover:border-[#3b82f6] hover:from-[#2563eb] hover:via-[#1d4ed8] hover:to-[#1e40af] active:translate-y-px"
                   >
-                    Demander un cadrage
+                    Demander un rendez-vous découverte
                   </Link>
                 </div>
               </div>
@@ -1289,7 +1289,7 @@ export default function HomePage() {
             <ul className="mt-8 grid gap-4 md:grid-cols-2 md:items-stretch">
               {[
                 "ADN terrain : vingt ans de BTP et de direction d'entreprise chez la fondatrice — briefs qui parlent chantier, fournisseurs et cash-flow.",
-                "Interlocuteur principal en Île-de-France (Laure Olivie) : cadrage, exigence, disponibilité sur l'organisationnel.",
+                "Interlocuteur principal en Île-de-France (Laure Olivie) : échange, exigence, disponibilité sur l'organisationnel.",
                 "Une équipe pour l'administratif, la logistique et la coordination — pilotée depuis la France, au même fuseau.",
                 "Profils Bac+5, IA et process : rigueur sur délais, démarches et dossiers sensibles (sous votre validation).",
               ].map((item, i) => (
@@ -1447,7 +1447,7 @@ export default function HomePage() {
         <section id="processus" className="px-6 py-24 md:py-28">
           <div className="mx-auto max-w-6xl">
             <h2 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-              Matching et onboarding : un cadrage premium
+              Matching et onboarding : un rendez-vous découverte premium
             </h2>
             <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[#334155]">
               Aucune surprise : nous cartographions vos flux administratifs, vos urgences chantier et vos outils — avant de

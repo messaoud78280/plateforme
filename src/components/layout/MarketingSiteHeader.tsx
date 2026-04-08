@@ -24,11 +24,11 @@ export function MarketingSiteHeader({ plainBg = false, showBlogLink = false, bot
       }`}
     >
       <div
-        className={`mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3.5 sm:gap-4 sm:px-6 sm:py-4 ${bottom ? "border-b border-[#dce3ec]" : ""}`}
+        className={`mx-auto flex max-w-6xl flex-col items-stretch gap-3 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-4 ${bottom ? "border-b border-[#dce3ec]" : ""}`}
       >
         <Link
           href="/"
-          className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:gap-4 md:gap-5 lg:gap-6"
+          className="flex min-w-0 items-center gap-3 sm:flex-1 sm:gap-4 md:gap-5 lg:gap-6"
           aria-label="BeWork — Accueil"
         >
           <span className="shrink-0">
@@ -38,7 +38,7 @@ export function MarketingSiteHeader({ plainBg = false, showBlogLink = false, bot
             className="hidden h-9 w-px shrink-0 bg-gradient-to-b from-transparent via-[#94a3b8]/55 to-transparent sm:inline-block"
             aria-hidden
           />
-          <span className="min-w-0 text-left">
+          <span className="hidden min-w-0 text-left sm:block">
             <span className="block text-[0.8125rem] font-extrabold leading-snug tracking-tight text-[#0f172a] sm:text-sm lg:text-[0.9375rem]">
               Partenaire administratif{" "}
               <span className="font-bold text-[#94a3b8]">—</span>{" "}
@@ -50,7 +50,7 @@ export function MarketingSiteHeader({ plainBg = false, showBlogLink = false, bot
           </span>
         </Link>
         <nav
-          className="flex shrink-0 flex-wrap items-center justify-end gap-1.5 sm:gap-2"
+          className="flex w-full flex-wrap items-center justify-start gap-1.5 sm:w-auto sm:justify-end sm:gap-2"
           aria-label="Navigation et accès plateforme"
         >
           <div

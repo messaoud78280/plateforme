@@ -38,6 +38,7 @@
     "resend": "^6.9.2"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",
     "@types/better-sqlite3": "^7.6.13",
@@ -47,6 +48,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
+    "to-ico": "^1.1.5",
     "tsx": "^4.21.0",
     "typescript": "^5"
   }

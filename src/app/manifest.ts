@@ -16,9 +16,15 @@ export default function manifest(): MetadataRoute.Manifest {
     id: SITE_URL,
     icons: [
       {
-        src: "/icon.svg",
-        sizes: "any",
-        type: "image/svg+xml",
+        src: "/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/apple-touch-icon.png",
+        sizes: "180x180",
+        type: "image/png",
         purpose: "any",
       },
     ],

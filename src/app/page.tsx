@@ -204,14 +204,16 @@ export default function HomePage() {
               {/* Colonne principale : message + CTA (~60 %) */}
               <div className="flex flex-col gap-6 text-center md:gap-7 md:text-left lg:col-span-7">
                 <h1 className="text-metallic-black text-balance text-[1.65rem] font-extrabold leading-[1.12] tracking-[-0.03em] min-[400px]:text-3xl md:text-4xl md:leading-[1.1] lg:text-[2.65rem] lg:leading-[1.08] xl:text-5xl xl:leading-[1.06]">
-                  Agence de pilotage administratif dédiée aux entreprises du BTP
+                  On tient le bureau, vous tenez le chantier.
                 </h1>
                 <div
                   className="mx-auto max-w-2xl rounded-xl border border-[#93c5fd]/45 bg-gradient-to-br from-white via-[#f8fafc] to-[#eff6ff]/90 px-5 py-5 text-center shadow-[0_4px_20px_rgba(29,78,216,0.07),inset_0_1px_0_rgba(255,255,255,0.9)] md:mx-0 md:px-6 md:py-5 md:text-left lg:max-w-none"
                 >
                   <p className="font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-lg font-semibold leading-snug tracking-tight text-[#0f172a] md:text-xl md:leading-snug lg:text-2xl lg:leading-snug">
-                    Nous structurons, gérons et optimisons votre administratif pour vous faire gagner du temps, des clients et
-                    du chiffre d&apos;affaires.
+                    Devis, relances, dossiers chantier, DICT, fournisseurs : on gère votre administratif BTP au quotidien.
+                  </p>
+                  <p className="mt-2 text-sm font-medium leading-relaxed text-[#334155] md:text-base">
+                    Vous envoyez vos demandes, on exécute, vous validez le sensible, vous suivez tout sur une plateforme simple.
                   </p>
                 </div>
                 <div
@@ -325,7 +327,8 @@ export default function HomePage() {
                     className="inline-flex rounded-lg bg-[#1d4ed8] px-8 py-4 text-base font-semibold text-white shadow-lg shadow-[#1d4ed8]/25 transition-all hover:bg-[#1e40af] hover:shadow-xl hover:shadow-[#1d4ed8]/30"
                     aria-label="Demander un rendez-vous découverte adapté à votre besoin"
                   >
-                    Demander un rendez-vous découverte
+                    <span className="sm:hidden">Rendez-vous découverte</span>
+                    <span className="hidden sm:inline">Demander un rendez-vous découverte</span>
                   </Link>
                   <Link
                     href="/tarifs"
@@ -336,7 +339,7 @@ export default function HomePage() {
                   </Link>
                 </div>
                 <p className="text-sm text-[#64748b]">
-                  France, Belgique, Suisse • forfaits TTC • pas de charges cachées
+                  TTC mensuel • Sans recrutement • Encadrement en France
                 </p>
                 <div className="flex flex-wrap justify-center md:justify-start gap-6 text-sm text-[#64748b]">
                   <Link href="/inscription" className="font-medium hover:text-[#0f172a] hover:underline">
@@ -1272,7 +1275,8 @@ export default function HomePage() {
                     href="/contact"
                     className="inline-flex rounded-xl border border-[#2563eb]/70 bg-gradient-to-b from-[#3b82f6] via-[#2563eb] to-[#1d4ed8] px-6 py-3.5 text-center text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_4px_18px_rgba(29,78,216,0.35)] transition hover:border-[#3b82f6] hover:from-[#2563eb] hover:via-[#1d4ed8] hover:to-[#1e40af] active:translate-y-px"
                   >
-                    Demander un rendez-vous découverte
+                    <span className="sm:hidden">Rendez-vous découverte</span>
+                    <span className="hidden sm:inline">Demander un rendez-vous découverte</span>
                   </Link>
                 </div>
               </div>

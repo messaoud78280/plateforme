@@ -238,7 +238,8 @@ export default function NotreFaconDeTravaillerPage() {
               href="/contact"
               className="inline-flex justify-center rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white transition hover:bg-[#1e40af]"
             >
-              Demander un rendez-vous découverte
+              <span className="sm:hidden">Rendez-vous découverte</span>
+              <span className="hidden sm:inline">Demander un rendez-vous découverte</span>
             </Link>
             <Link
               href="/tarifs"

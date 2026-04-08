@@ -97,8 +97,10 @@ export function MarketingSiteHeader({ plainBg = false, showBlogLink = false, bot
           <Link
             href="/contact"
             className="rounded-lg bg-[#1d4ed8] px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#1e40af] sm:px-4 sm:py-2 sm:text-sm"
+            aria-label="Rendez-vous découverte"
           >
-            Rendez-vous découverte
+            <span className="sm:hidden">Découverte</span>
+            <span className="hidden sm:inline">Rendez-vous découverte</span>
           </Link>
         </nav>
       </div>

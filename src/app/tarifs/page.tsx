@@ -238,12 +238,17 @@ export default function TarifsPage() {
                   href="/contact"
                   className="mt-5 block w-full rounded-lg bg-[#1d4ed8] py-3 text-center text-sm font-semibold text-white transition hover:bg-[#1e40af]"
                 >
-                  Demander un rendez-vous découverte
+                  <span className="sm:hidden">Rendez-vous découverte</span>
+                  <span className="hidden sm:inline">Demander un rendez-vous découverte</span>
                 </Link>
               </article>
               );
             })}
           </div>
+          <p className="mx-auto mt-6 max-w-3xl text-center text-[12px] leading-relaxed text-[#475569] md:text-sm">
+            Inclus : <strong className="font-semibold text-[#0f172a]">jusqu’à 2 périmètres</strong> (ex. devis/facturation/relances + chantier/logistique/démarches).
+            Au-delà : <Link href="/contact" className="font-semibold text-[#1d4ed8] hover:underline">sur-mesure</Link>.
+          </p>
           <div className="mx-auto mt-10 max-w-2xl px-2 text-center">
             <p className="text-[11px] font-normal leading-relaxed text-[#64748b] md:text-xs">
               Les volumes indiqués sont des repères estimatifs.

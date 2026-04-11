@@ -1139,9 +1139,9 @@ export default function HomePage() {
                   <div className="relative mx-auto aspect-square w-full max-w-[16rem] overflow-hidden rounded-2xl bg-[#e2e8f0] md:max-w-none">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="/laure-olivie.jpg"
-                      alt="Laure Olivie, fondatrice de BeWork"
-                      className="absolute inset-0 h-full w-full object-cover object-center"
+                      src="/laure-olivie-chantier.png"
+                      alt="Laure Olivie, fondatrice de BeWork, sur chantier en gilet haute visibilité avec porte-documents"
+                      className="absolute inset-0 h-full w-full object-cover object-[center_20%]"
                     />
                   </div>
                 </div>

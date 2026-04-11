@@ -205,7 +205,7 @@ export default function HomePage() {
           <div className="mx-auto max-w-6xl">
             <div className="grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-10 xl:gap-14">
               {/* Colonne principale : message + CTA (~60 %) */}
-              <div className="flex flex-col gap-6 text-center md:gap-7 md:text-left lg:col-span-7">
+              <div className="flex min-w-0 flex-col gap-6 text-center md:gap-7 md:text-left lg:col-span-7">
                 <div
                   className="mx-auto max-w-2xl rounded-xl border border-[#93c5fd]/45 bg-gradient-to-br from-white via-[#f8fafc] to-[#eff6ff]/90 px-5 py-5 text-center shadow-[0_4px_20px_rgba(29,78,216,0.07),inset_0_1px_0_rgba(255,255,255,0.9)] md:mx-0 md:px-6 md:py-5 md:text-left lg:max-w-none"
                 >

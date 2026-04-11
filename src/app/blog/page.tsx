@@ -21,11 +21,12 @@ const ARTICLE_INDEX: { slug: BlogSlug; title: string; excerpt: string; published
   .sort((x, y) => new Date(y.publishedTime).getTime() - new Date(x.publishedTime).getTime());
 
 export const metadata: Metadata = {
-  title: "Blog BeWork — Administratif BTP, artisans, délégation & externalisation",
+  title: "Blog BeWork — Pilotage administratif BTP, artisans & externalisation",
   description:
-    "Articles sur l'administratif des entreprises du bâtiment, la facturation chantier, les situations de travaux, la délégation et l'assistant administratif externalisé pour PME et artisans.",
+    "Articles sur le pilotage administratif des entreprises du bâtiment : facturation chantier, relances, situations de travaux, DICT, délégation et externalisation pour PME et artisans.",
   keywords: [
     "blog administratif BTP",
+    "pilotage administratif BTP",
     "conseils artisan bâtiment",
     "externalisation administrative",
     "situation de travaux",
@@ -38,9 +39,9 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: blogUrl,
     siteName: "BeWork",
-    title: "Blog BeWork — Administratif externalisé & BTP",
+    title: "Blog BeWork — Pilotage administratif & BTP",
     description:
-      "Guides pratiques : administratif chantier, trésorerie, DICT, délégation et externalisation pour dirigeants et artisans.",
+      "Guides pratiques : pilotage administratif chantier, trésorerie, relances, DICT, délégation et externalisation pour dirigeants et artisans.",
     images: [{ url: blogOgImage, width: 1200, height: 630, alt: "Blog BeWork — administratif BTP" }],
   },
   twitter: {

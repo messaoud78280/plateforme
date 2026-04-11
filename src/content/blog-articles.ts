@@ -721,6 +721,99 @@ export const BLOG_ARTICLES = {
       },
     ],
   },
+  "bureau-chantier-administratif-btp-sans-recruter": {
+    title:
+      "Bureau et chantier : structurer l’administratif BTP sans recruter (devis, relances, dossiers)",
+    description:
+      "Comment séparer clairement bureau et chantier, prioriser les tâches administratives du BTP et gagner en régularité sans embauche — avec une agence de pilotage administratif encadrée.",
+    excerpt:
+      "Le chantier paie les factures ; le bureau les sécurise. Voici une grille simple pour structurer l’administratif BTP sans recruter.",
+    keywords: [
+      "agence pilotage administratif BTP",
+      "administratif artisan bâtiment",
+      "structuration administrative sans embauche",
+      "devis et facturation chantier",
+      "relances clients BTP",
+      "organisation TPE BTP",
+      "externalisation administrative BTP",
+      "BeWork BTP",
+    ],
+    publishedTime: "2026-04-11T09:00:00+02:00",
+    modifiedTime: "2026-04-11T09:00:00+02:00",
+    articleSection: "BTP & artisans",
+    body: [
+      {
+        type: "h2",
+        content: "Deux vitesses, un seul objectif : la marge et la trésorerie",
+      },
+      {
+        type: "p",
+        content:
+          "Sur le chantier, tout va vite : planning, matériaux, sous-traitants, imprévus. Au bureau, il faut de la constance : devis clairs, factures à jour, relances régulières, dossiers DICT et situations de travaux bien tenus. Quand les deux se mélangent sans cadre, c’est souvent le bureau qui perd — et avec lui les encaissements.",
+      },
+      {
+        type: "p",
+        content:
+          "Structurer l’administratif, ce n’est pas « faire plus de paperasse » : c’est verrouiller un minimum de flux (commercial, facturation, suivi client, réglementaire) pour que le terrain puisse enchaîner les chantiers sans revenir en arrière chaque semaine.",
+      },
+      {
+        type: "h2",
+        content: "Ce qui doit sortir de votre tête (sans perdre le contrôle)",
+      },
+      {
+        type: "p",
+        content:
+          "Les dirigeants BTP gardent naturellement les décisions à fort enjeu : prix, avenants, contentieux sensibles, choix fournisseurs critiques. En revanche, la préparation, le classement, les relances de niveau 1, la mise en forme des pièces et le suivi des échéances peuvent être délégués — à condition d’avoir un périmètre écrit, des validations claires et des priorités terrain.",
+      },
+      {
+        type: "p",
+        content:
+          "Une agence de pilotage administratif sert de relais : elle exécute dans un cadre défini, remonte ce qui bloque, et évite que les tâches répétitives saturent votre semaine.",
+      },
+      {
+        type: "h2",
+        content: "Une grille simple : urgent / important / récurrent",
+      },
+      {
+        type: "p",
+        content:
+          "Urgent terrain : ce qui fait tourner le chantier demain (accès, livraison, coordination). Important bureau : devis à envoyer, factures à émettre, impayés qui traînent, dossiers réglementaires avec date butoir. Récurrent : modèles de documents, relances planifiées, points de suivi hebdomadaires.",
+      },
+      {
+        type: "p",
+        content:
+          "Beaucoup d’artisans excellent sur l’urgent terrain mais repoussent l’important bureau — jusqu’à ce que la trésorerie ou un client le rappelle à l’ordre. Un pilotage administratif vise à traiter l’important avant qu’il devienne urgent.",
+      },
+      {
+        type: "h2",
+        content: "Sans recruter : pourquoi le forfait peut mieux coller au BTP",
+      },
+      {
+        type: "p",
+        content:
+          "L’embauche administrative impose un volume régulier, du management et des coûts fixes. Or l’activité du bâtiment est souvent cyclique : gros mois de chiffrage, puis période chargée sur le terrain. Un accompagnement externalisé permet d’ajuster le niveau de service au rythme réel, avec un coût maîtrisé et des engagements adaptés.",
+      },
+      {
+        type: "p",
+        content:
+          "L’enjeu n’est pas de remplacer votre jugement métier, mais de tenir le bureau aussi sérieusement que le chantier — sans y passer vos soirées.",
+      },
+      {
+        type: "h2",
+        content: "Conclusion",
+      },
+      {
+        type: "p",
+        content:
+          "Si vous sentez que le bureau ralentit le chantier (retards de devis, relances irrégulières, dossiers qui s’empilent), commencez par clarifier le périmètre déléguable et les validations. C’est souvent le premier pas le plus rentable — avant même d’optimiser un outil ou de recruter.",
+      },
+      {
+        type: "p",
+        content:
+          "Chez BeWork, nous positionnons ce relais comme un pilotage administratif encadré pour le BTP : méthode terrain, forfaits TTC, et priorisation avec vous. Pour en parler concrètement sur votre activité, le rendez-vous découverte permet de cadrer besoins et périmètre sans engagement.",
+      },
+    ],
+  },
 } satisfies Record<string, BlogArticle>;
 
 export type BlogSlug = keyof typeof BLOG_ARTICLES;

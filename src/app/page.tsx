@@ -98,6 +98,8 @@ export const metadata: Metadata = {
     "location engin chantier",
     "administratif intelligence artificielle",
     "IA productivité PME BTP",
+    "bureau et chantier BTP",
+    "pilotage administratif encadré",
   ],
   alternates: { canonical: SITE_URL, languages: { fr: SITE_URL, "x-default": SITE_URL } },
   openGraph: {
@@ -107,13 +109,13 @@ export const metadata: Metadata = {
     siteName: "BeWork",
     title: "BeWork — Agence de pilotage administratif pour le BTP",
     description:
-      "Nous structurons, gérons et optimisons votre administratif pour vous faire gagner du temps, des clients et du chiffre d’affaires. Entreprises du bâtiment — sans embauche. France, Belgique, Suisse, Luxembourg.",
+      "On tient le bureau, vous tenez le chantier : pilotage administratif encadré pour gagner du temps, des clients et du chiffre d’affaires. Bâtiment — sans embauche. France, Belgique, Suisse, Luxembourg.",
     images: [
       {
         url: `${SITE_URL}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: "BeWork — Partenaire administratif pour artisans et entreprises du bâtiment",
+        alt: "BeWork — Agence de pilotage administratif pour artisans et entreprises du bâtiment",
       },
     ],
   },
@@ -135,7 +137,7 @@ const homeJsonLd = {
       name: "BeWork — Agence de pilotage administratif pour entreprises du BTP",
       inLanguage: "fr-FR",
       description:
-        "Agence de pilotage administratif BTP : structuration, gestion et optimisation de l’administratif pour gagner du temps, des clients et du chiffre d’affaires. Devis, chantier, relances — méthode encadrée. Forfaits TTC.",
+        "On tient le bureau, vous tenez le chantier : agence de pilotage administratif BTP — devis, facturation, relances, dossiers chantier et démarches, dans un cadre défini. Forfaits TTC, sans recruter.",
       isPartOf: { "@id": `${SITE_URL}/#website` },
       about: [
         { "@type": "Thing", name: "Bâtiment et travaux publics" },
@@ -197,7 +199,7 @@ export default function HomePage() {
       <MarketingSiteHeader plainBg bottom={<HomePageNavStrip />} />
 
       <main className="pt-0">
-        {/* Hero + parcours client (4 étapes) */}
+        {/* Hero + comment ça fonctionne (4 étapes) */}
         <section id="hero" className="px-6 py-20 md:py-24 lg:py-28" style={{ scrollMarginTop: "6rem" }}>
           <div className="mx-auto max-w-6xl">
             <div className="grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-10 xl:gap-14">
@@ -401,34 +403,31 @@ export default function HomePage() {
                   className="surface-metallic-blue rounded-2xl p-6 shadow-lg shadow-slate-900/20 md:p-7"
                 >
                   <div className="mb-6 md:mb-7">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#93c5fd]">
-                      Parcours client
-                    </span>
-                    <h2 className="mt-2 max-w-[22rem] text-lg font-semibold leading-snug tracking-tight text-white md:max-w-none md:text-xl md:leading-tight">
-                      4 étapes simples pour vous libérer de l&apos;administratif
+                    <h2 className="max-w-[22rem] text-lg font-semibold leading-snug tracking-tight text-white md:max-w-none md:text-xl md:leading-tight">
+                      Comment ça fonctionne concrètement
                     </h2>
                   </div>
                   <ol className="text-left">
                     {[
                       {
                         step: 1,
-                        title: "Vous nous dites ce qu’il faut gérer",
+                        title: "Vous nous transmettez vos demandes",
                         detail: "devis, clients, fournisseurs…",
                       },
                       {
                         step: 2,
-                        title: "On s’occupe de tout pour vous",
-                        detail: "devis, relances, organisation…",
+                        title: "On exécute rapidement avec méthode",
+                        detail: "rédaction, relances, organisation",
                       },
                       {
                         step: 3,
-                        title: "Vous suivez tout facilement",
-                        detail: "depuis une plateforme simple",
+                        title: "Vous validez uniquement l’essentiel",
+                        detail: "zéro perte de temps",
                       },
                       {
                         step: 4,
-                        title: "Vous restez sur vos chantiers",
-                        detail: "On gère l’administratif",
+                        title: "Votre activité devient plus fluide",
+                        detail: "et vos opportunités mieux exploitées",
                       },
                     ].map((item, index) => (
                       <li

@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     template: "%s | BeWork",
   },
   description:
-    "Agence de pilotage administratif BTP : nous structurons, gérons et optimisons votre administratif — temps, clients, chiffre d’affaires. Sans recruter. Forfaits TTC dès 290 €/mois, pilotage encadré.",
+    "On tient le bureau, vous tenez le chantier : agence de pilotage administratif BTP — structuration, exécution et suivi administratif. Sans recruter. Forfaits TTC dès 290 €/mois.",
   applicationName: "BeWork",
   authors: [{ name: "BeWork", url: SITE_URL }],
   creator: "BeWork",
@@ -76,23 +76,23 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: SITE_URL,
     siteName: "BeWork",
-    title: "BeWork — Partenaire administratif BTP",
+    title: "BeWork — Agence de pilotage administratif pour entreprises du BTP",
     description:
-      "Cadre, rigueur, pilotage et lecture terrain pour artisans et entreprises du bâtiment. Forfaits TTC. France, Belgique, Suisse, Luxembourg.",
+      "On tient le bureau, vous tenez le chantier : structuration, exécution et pilotage administratif pour artisans et PME du bâtiment. Forfaits TTC. France, Belgique, Suisse, Luxembourg.",
     images: [
       {
         url: defaultOgImage,
         width: 1200,
         height: 630,
-        alt: "BeWork — Partenaire administratif pour le BTP et les artisans",
+        alt: "BeWork — Agence de pilotage administratif pour le BTP",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "BeWork — Administratif structuré pour le BTP",
+    title: "BeWork — Agence de pilotage administratif BTP",
     description:
-      "Relais administratif cadré : devis, relances, dossiers chantier. Forfaits TTC.",
+      "Pilotage administratif encadré : devis, facturation, relances, dossiers chantier. Forfaits TTC.",
     ...(process.env.NEXT_PUBLIC_TWITTER_SITE?.trim()
       ? { site: process.env.NEXT_PUBLIC_TWITTER_SITE.trim() }
       : {}),

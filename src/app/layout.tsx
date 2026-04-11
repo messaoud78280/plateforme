@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     template: "%s | BeWork",
   },
   description:
-    "On tient le bureau, vous tenez le chantier : agence de pilotage administratif BTP — structuration, exécution et suivi administratif. Sans recruter. Forfaits TTC dès 290 €/mois.",
+    "On tient le bureau, vous tenez le chantier : agence de pilotage administratif BTP — structuration, exécution et suivi administratif. Vidéo de présentation sur le site. Sans recruter. Forfaits TTC dès 290 €/mois.",
   applicationName: "BeWork",
   authors: [{ name: "BeWork", url: SITE_URL }],
   creator: "BeWork",
@@ -65,6 +65,7 @@ export const metadata: Metadata = {
     "BeWork",
     "administratif intelligence artificielle",
     "assistant IA entreprise",
+    "vidéo présentation administratif BTP",
   ],
   robots: {
     index: true,
@@ -78,7 +79,7 @@ export const metadata: Metadata = {
     siteName: "BeWork",
     title: "BeWork — Agence de pilotage administratif pour entreprises du BTP",
     description:
-      "On tient le bureau, vous tenez le chantier : structuration, exécution et pilotage administratif pour artisans et PME du bâtiment. Forfaits TTC. France, Belgique, Suisse, Luxembourg.",
+      "On tient le bureau, vous tenez le chantier : présentation en vidéo et pilotage administratif pour artisans et PME du bâtiment. Forfaits TTC. France, Belgique, Suisse, Luxembourg.",
     images: [
       {
         url: defaultOgImage,
@@ -92,7 +93,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "BeWork — Agence de pilotage administratif BTP",
     description:
-      "Pilotage administratif encadré : devis, facturation, relances, dossiers chantier. Forfaits TTC.",
+      "Vidéo + pilotage administratif encadré : devis, facturation, relances, dossiers chantier. Forfaits TTC.",
     ...(process.env.NEXT_PUBLIC_TWITTER_SITE?.trim()
       ? { site: process.env.NEXT_PUBLIC_TWITTER_SITE.trim() }
       : {}),

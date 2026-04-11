@@ -46,6 +46,7 @@ export function HeroPresentationVideo() {
           playsInline
           controls
           preload="metadata"
+          poster="/opengraph-image"
           title="Présentation BeWork"
           src="/video/presentation.mp4"
         >

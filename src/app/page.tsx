@@ -5,7 +5,11 @@ import { HomePageNavStrip } from "@/components/layout/HomePageNavStrip";
 import { HeroPresentationVideo } from "@/components/HeroPresentationVideo";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { TARIFS_PLANS } from "@/lib/tarifs-plans";
-import { SITE_URL } from "@/lib/site";
+import { SITE_URL, absoluteUrl } from "@/lib/site";
+
+/** Vidéo hero — même fichier que `HeroPresentationVideo` ; durée ~13 s (fichier court présentation). */
+const PRESENTATION_VIDEO_MP4 = "/video/presentation.mp4";
+const PRESENTATION_VIDEO_DURATION_ISO = "PT13S";
 
 const SUIVI_PLAN = TARIFS_PLANS.find((p) => p.planKey === "STANDARD")!;
 
@@ -78,7 +82,7 @@ const RESSOURCES_BLOG = [
 export const metadata: Metadata = {
   title: "BeWork | Agence de pilotage administratif pour entreprises du BTP",
   description:
-    "Agence de pilotage administratif dédiée au BTP : nous structurons, gérons et optimisons votre administratif pour vous faire gagner du temps, des clients et du chiffre d’affaires. Sans recruter. Méthode terrain, forfaits TTC dès 290 €/mois. France, Belgique, Suisse, Luxembourg.",
+    "Agence de pilotage administratif BTP : vidéo de présentation sur l’accueil, structuration de l’administratif (devis, relances, chantier) sans recruter. Forfaits TTC dès 290 €/mois. France, Belgique, Suisse, Luxembourg.",
   robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
   keywords: [
     "administratif BTP",
@@ -101,6 +105,8 @@ export const metadata: Metadata = {
     "IA productivité PME BTP",
     "bureau et chantier BTP",
     "pilotage administratif encadré",
+    "vidéo présentation BeWork",
+    "présentation agence administrative BTP",
   ],
   alternates: { canonical: SITE_URL, languages: { fr: SITE_URL, "x-default": SITE_URL } },
   openGraph: {
@@ -110,7 +116,7 @@ export const metadata: Metadata = {
     siteName: "BeWork",
     title: "BeWork — Agence de pilotage administratif pour le BTP",
     description:
-      "On tient le bureau, vous tenez le chantier : pilotage administratif encadré pour gagner du temps, des clients et du chiffre d’affaires. Bâtiment — sans embauche. France, Belgique, Suisse, Luxembourg.",
+      "On tient le bureau, vous tenez le chantier : découvrez BeWork en vidéo sur la page d’accueil — pilotage administratif encadré BTP, sans embauche. France, Belgique, Suisse, Luxembourg.",
     images: [
       {
         url: `${SITE_URL}/opengraph-image`,
@@ -124,7 +130,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "BeWork — Agence de pilotage administratif BTP",
     description:
-      "Structuration et pilotage de votre administratif BTP : temps, clients, chiffre d’affaires. Forfaits TTC, cadre défini.",
+      "Vidéo de présentation + pilotage administratif BTP : temps, clients, chiffre d’affaires. Forfaits TTC, cadre défini.",
   },
 };
 
@@ -138,8 +144,9 @@ const homeJsonLd = {
       name: "BeWork — Agence de pilotage administratif pour entreprises du BTP",
       inLanguage: "fr-FR",
       description:
-        "On tient le bureau, vous tenez le chantier : agence de pilotage administratif BTP — devis, facturation, relances, dossiers chantier et démarches, dans un cadre défini. Forfaits TTC, sans recruter.",
+        "On tient le bureau, vous tenez le chantier : agence de pilotage administratif BTP — devis, facturation, relances, dossiers chantier et démarches, dans un cadre défini. Vidéo de présentation sur la page. Forfaits TTC, sans recruter.",
       isPartOf: { "@id": `${SITE_URL}/#website` },
+      video: { "@id": `${SITE_URL}/#video-presentation-bework` },
       about: [
         { "@type": "Thing", name: "Bâtiment et travaux publics" },
         { "@type": "Thing", name: "Artisanat du bâtiment" },
@@ -177,6 +184,22 @@ const homeJsonLd = {
         description:
           "Trois forfaits TTC mensuels BTP : Structure, Suivi (490 € TTC/mois — le plus adapté pour une activité régulière), Pilotage.",
       },
+    },
+    {
+      "@type": "VideoObject",
+      "@id": `${SITE_URL}/#video-presentation-bework`,
+      name: "Présentation BeWork — pilotage administratif pour le BTP",
+      description:
+        "Présentation courte de BeWork : structuration de l’administratif des entreprises du bâtiment — devis, relances, dossiers chantier, sans recruter.",
+      thumbnailUrl: [absoluteUrl("/opengraph-image")],
+      uploadDate: "2026-04-11T12:00:00+02:00",
+      duration: PRESENTATION_VIDEO_DURATION_ISO,
+      contentUrl: absoluteUrl(PRESENTATION_VIDEO_MP4),
+      embedUrl: `${SITE_URL}/#presentation`,
+      encodingFormat: "video/mp4",
+      inLanguage: "fr-FR",
+      isFamilyFriendly: true,
+      publisher: { "@id": `${SITE_URL}/#organization` },
     },
     {
       "@type": "FAQPage",

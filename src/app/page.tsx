@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { HomePageNavStrip } from "@/components/layout/HomePageNavStrip";
+import { HeroPresentationVideo } from "@/components/HeroPresentationVideo";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { TARIFS_PLANS } from "@/lib/tarifs-plans";
 import { SITE_URL } from "@/lib/site";
@@ -205,9 +206,6 @@ export default function HomePage() {
             <div className="grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-10 xl:gap-14">
               {/* Colonne principale : message + CTA (~60 %) */}
               <div className="flex flex-col gap-6 text-center md:gap-7 md:text-left lg:col-span-7">
-                <h1 className="text-metallic-black text-balance text-[1.65rem] font-extrabold leading-[1.12] tracking-[-0.03em] min-[400px]:text-3xl md:text-4xl md:leading-[1.1] lg:text-[2.65rem] lg:leading-[1.08] xl:text-5xl xl:leading-[1.06]">
-                  On tient le bureau, vous tenez le chantier.
-                </h1>
                 <div
                   className="mx-auto max-w-2xl rounded-xl border border-[#93c5fd]/45 bg-gradient-to-br from-white via-[#f8fafc] to-[#eff6ff]/90 px-5 py-5 text-center shadow-[0_4px_20px_rgba(29,78,216,0.07),inset_0_1px_0_rgba(255,255,255,0.9)] md:mx-0 md:px-6 md:py-5 md:text-left lg:max-w-none"
                 >
@@ -218,62 +216,17 @@ export default function HomePage() {
                     Vous envoyez vos demandes, on exécute, vous validez le sensible, vous suivez tout sur une plateforme simple.
                   </p>
                 </div>
-                <div
-                  className="mx-auto max-w-2xl rounded-xl surface-metallic-light surface-metallic-light--soft p-4 shadow-sm md:mx-0 md:p-5 lg:max-w-none"
-                  role="region"
-                  aria-label="Mode opératoire : outils IA, équipe et validation"
-                >
-                  <p className="text-center text-xs font-bold uppercase tracking-[0.14em] text-metallic-black lg:text-left md:text-[0.8125rem]">
-                    Mode opératoire
-                  </p>
-                  <div className="mt-4 flex flex-col gap-2 lg:flex-row lg:items-stretch lg:gap-1.5">
-                    <div className="flex flex-1 flex-col rounded-lg surface-metallic-light px-4 py-3.5 md:px-4 md:py-4">
-                      <span className="text-metallic-black text-sm font-extrabold tabular-nums tracking-tight md:text-base">
-                        1 · IA
-                      </span>
-                      <p className="mt-2 text-sm font-semibold leading-snug text-[#0f172a] md:text-[0.9375rem] md:leading-relaxed">
-                        Outils utilisés avec rigueur pour structurer brouillons et contrôles — toujours validés par l&apos;équipe.
-                      </p>
-                    </div>
-                    <div
-                      className="flex shrink-0 items-center justify-center py-0.5 text-xl font-semibold text-[#64748b] lg:px-0.5 lg:py-0"
-                      aria-hidden
-                    >
-                      <span className="lg:hidden">↓</span>
-                      <span className="hidden lg:inline">→</span>
-                    </div>
-                    <div className="flex flex-1 flex-col rounded-lg surface-metallic-light px-4 py-3.5 md:px-4 md:py-4">
-                      <span className="text-metallic-black text-sm font-extrabold tabular-nums tracking-tight md:text-base">
-                        2 · Équipe
-                      </span>
-                      <p className="mt-2 text-sm font-semibold leading-snug text-[#0f172a] md:text-[0.9375rem] md:leading-relaxed">
-                        Exécution par des profils diplômés, encadrée et pilotée depuis la France.
-                      </p>
-                    </div>
-                    <div
-                      className="flex shrink-0 items-center justify-center py-0.5 text-xl font-semibold text-[#64748b] lg:px-0.5 lg:py-0"
-                      aria-hidden
-                    >
-                      <span className="lg:hidden">↓</span>
-                      <span className="hidden lg:inline">→</span>
-                    </div>
-                    <div className="flex flex-1 flex-col rounded-lg surface-metallic-light px-4 py-3.5 md:px-4 md:py-4">
-                      <span className="text-metallic-black text-sm font-extrabold tabular-nums tracking-tight md:text-base">
-                        3 · Vous
-                      </span>
-                      <p className="mt-2 text-sm font-semibold leading-snug text-[#0f172a] md:text-[0.9375rem] md:leading-relaxed">
-                        Validation avant envoi sur les actes sensibles (relances fermes, mises en demeure, litiges).
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <p className="mx-auto max-w-2xl text-lg font-medium leading-relaxed text-[#0f172a] text-center md:mx-0 md:text-left md:text-xl">
+                  BeWork structure votre{" "}
+                  <strong className="font-semibold text-[#0f172a]">administratif et votre coordination</strong> : devis et
+                  relances qui avancent, dossiers suivis, échanges cadrés. Vous restez sur l&apos;ouvrage ; nous tenons le
+                  dossier.
+                </p>
+                <HeroPresentationVideo />
+                <h1 className="text-metallic-black text-balance text-[1.65rem] font-extrabold leading-[1.12] tracking-[-0.03em] min-[400px]:text-3xl md:text-4xl md:leading-[1.1] lg:text-[2.65rem] lg:leading-[1.08] xl:text-5xl xl:leading-[1.06]">
+                  On tient le bureau, vous tenez le chantier.
+                </h1>
                 <div className="mx-auto max-w-2xl space-y-6 text-left md:mx-0">
-                  <p className="text-lg font-medium leading-relaxed text-[#0f172a] md:text-xl">
-                    BeWork structure votre{" "}
-                    <strong className="font-semibold text-[#0f172a]">administratif et votre coordination</strong> : devis et
-                    relances qui avancent, dossiers suivis, échanges cadrés. Vous restez sur l&apos;ouvrage ; nous tenons le
-                    dossier.
-                  </p>
                   <div className="grid gap-6 sm:grid-cols-2 sm:gap-8">
                     <div className="rounded-xl border border-[#dce3ec]/80 bg-white/60 p-4 shadow-sm backdrop-blur-sm">
                       <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#1d4ed8]">

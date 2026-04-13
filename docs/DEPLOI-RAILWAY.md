@@ -60,6 +60,7 @@ Variables **recommandées** (selon vos besoins) :
 | `RESEND_API_KEY` | Clé API Resend (envoi d’emails) |
 | `RESEND_FROM_EMAIL` | Expéditeur des emails (domaine vérifié sur Resend) |
 | `RESEND_FROM_NAME` | Nom d’affichage (ex. BeWork) |
+| `NEW_TASK_EMAIL_TO` | (Optionnel) Destinataires email pour “Nouvelle mission” (emails séparés par virgules). Si absent, envoie aux comptes `MANAGER` ayant un email |
 
 **Important** : Après le premier déploiement, mettez à jour `NEXTAUTH_URL` avec l’URL réelle fournie par Railway (ex. `https://plateforme-production-xxxx.up.railway.app`).
 

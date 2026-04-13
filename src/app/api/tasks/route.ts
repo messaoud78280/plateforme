@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notifyManagers } from "@/lib/notifications";
+import { sendNewTaskEmail } from "@/lib/email";
 
 /** GET /api/tasks – Liste des tâches du client (ou toutes si agence) */
 export async function GET(request: NextRequest) {
@@ -113,6 +114,12 @@ export async function POST(request: NextRequest) {
         title: "Nouvelle demande",
         message: `${clientName} a créé une demande : « ${task.title} ».`,
         actionUrl: `/dashboard/taches/${task.id}`,
+      });
+      await sendNewTaskEmail({
+        taskId: task.id,
+        taskTitle: task.title,
+        clientName,
+        clientEmail: session.user?.email ?? null,
       });
     } catch (notifErr) {
       console.error("Notification nouvelle demande:", notifErr);

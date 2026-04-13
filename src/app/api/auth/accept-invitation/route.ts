@@ -41,7 +41,7 @@ export async function POST(request: Request) {
         invitedById: inv.invitedById,
         teamRole: inv.role,
         subscriptionPlan: "STANDARD",
-        monthlyActionsTotal: 120,
+        monthlyActionsTotal: 185,
       },
     });
     await prisma.invitation.update({

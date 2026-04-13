@@ -7,9 +7,9 @@ export const MINUTES_PER_ACTION = 12;
 export const MIN_ACTIONS_PER_TASK = 1;
 
 export const SUBSCRIPTION_ACTIONS: Record<string, number> = {
-  STANDARD: 120,       // ~24 h (120 × 12 min)
+  STANDARD: 185,       // ~37 h (185 × 12 min)
   STANDARD_PLUS: 240,  // ~48 h
-  PREMIUM: 360,        // ~72 h
+  PREMIUM: 500,        // ~100 h
   FULLTIME: 960,       // ~192 h
 };
 

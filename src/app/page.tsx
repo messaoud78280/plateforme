@@ -12,11 +12,25 @@ const PRESENTATION_VIDEO_MP4 = "/video/presentation.mp4";
 const PRESENTATION_VIDEO_DURATION_ISO = "PT13S";
 
 const SUIVI_PLAN = TARIFS_PLANS.find((p) => p.planKey === "STANDARD")!;
+const ACTION_MINUTES = 12;
+const ACTIONS_PER_HOUR = 60 / ACTION_MINUTES; // 5
 
 function formatPriceTtc(value: string) {
   const n = parseInt(value.replace(/\s/g, ""), 10);
   if (Number.isNaN(n)) return value;
   return n.toLocaleString("fr-FR");
+}
+
+function getPlanVolume(planKey: (typeof TARIFS_PLANS)[number]["planKey"]) {
+  // Volumes affichés (1 action = 12 min) : Structure=20h/100, Suivi=37h/185, Pilotage=100h/500
+  const hoursMap: Record<(typeof TARIFS_PLANS)[number]["planKey"], number> = {
+    DECOUVERTE: 20,
+    STANDARD: 37,
+    PREMIUM: 100,
+  };
+  const hoursApprox = hoursMap[planKey];
+  const actionsApprox = Math.round(hoursApprox * ACTIONS_PER_HOUR);
+  return { hoursApprox, actionsApprox };
 }
 
 const TARIFS_PROGRESSION_ROWS = [
@@ -228,7 +242,11 @@ export default function HomePage() {
           <div className="mx-auto max-w-6xl">
             <div className="grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-10 xl:gap-14">
               {/* Colonne principale : message + CTA (~60 %) */}
-              <div className="flex min-w-0 flex-col gap-6 text-center md:gap-7 md:text-left lg:col-span-7">
+              <div className="flex min-w-0 flex-col gap-6 text-center md:gap-7 md:text-left lg:order-2 lg:col-span-7">
+                <HeroPresentationVideo />
+                <h1 className="text-metallic-black text-balance font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.7rem] font-semibold leading-[1.1] tracking-[-0.02em] min-[400px]:text-3xl md:text-4xl md:leading-[1.08] lg:text-[2.75rem] lg:leading-[1.06] xl:text-5xl xl:leading-[1.04]">
+                  On tient le bureau, vous tenez le chantier.
+                </h1>
                 <div
                   className="mx-auto max-w-2xl rounded-xl border border-[#93c5fd]/45 bg-gradient-to-br from-white via-[#f8fafc] to-[#eff6ff]/90 px-5 py-5 text-center shadow-[0_4px_20px_rgba(29,78,216,0.07),inset_0_1px_0_rgba(255,255,255,0.9)] md:mx-0 md:px-6 md:py-5 md:text-left lg:max-w-none"
                 >
@@ -239,16 +257,24 @@ export default function HomePage() {
                     Vous envoyez vos demandes, on exécute, vous validez le sensible, vous suivez tout sur une plateforme simple.
                   </p>
                 </div>
-                <p className="mx-auto max-w-2xl text-lg font-medium leading-relaxed text-[#0f172a] text-center md:mx-0 md:text-left md:text-xl">
-                  BeWork structure votre{" "}
-                  <strong className="font-semibold text-[#0f172a]">administratif et votre coordination</strong> : devis et
-                  relances qui avancent, dossiers suivis, échanges cadrés. Vous restez sur l&apos;ouvrage ; nous tenons le
-                  dossier.
-                </p>
-                <HeroPresentationVideo />
-                <h1 className="text-metallic-black text-balance text-[1.65rem] font-extrabold leading-[1.12] tracking-[-0.03em] min-[400px]:text-3xl md:text-4xl md:leading-[1.1] lg:text-[2.65rem] lg:leading-[1.08] xl:text-5xl xl:leading-[1.06]">
-                  On tient le bureau, vous tenez le chantier.
-                </h1>
+                <div className="mx-auto max-w-2xl rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_10px_30px_rgba(15,23,42,0.08)] md:mx-0">
+                  <div className="surface-metallic-light surface-metallic-light--soft rounded-2xl px-5 py-5 text-center md:px-6 md:py-5 md:text-left">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#64748b]">Pilotage administratif</p>
+                    <p className="mt-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-lg font-semibold leading-snug tracking-tight text-[#0f172a] md:text-xl md:leading-snug">
+                      BeWork structure votre{" "}
+                      <strong className="font-semibold text-[#0f172a]">administratif et votre coordination</strong> : devis et
+                      relances qui avancent, dossiers suivis, échanges cadrés. Vous restez sur l&apos;ouvrage ; nous tenons le
+                      dossier.
+                    </p>
+                  </div>
+                </div>
+                <div className="mx-auto max-w-2xl rounded-xl border border-[#bfdbfe]/80 bg-gradient-to-br from-[#eff6ff]/95 to-white/90 px-5 py-4 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_10px_24px_rgba(15,23,42,0.06)] md:mx-0 md:px-6 md:py-4 md:text-left">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">IA assistée</p>
+                  <p className="mt-2 text-sm font-semibold leading-relaxed text-[#0f172a] md:text-base">
+                    Nos agents sont <span className="font-extrabold">assistés par l’IA</span> pour accélérer préparation et
+                    contrôles — <span className="font-extrabold">toujours relus et validés</span> par l’équipe.
+                  </p>
+                </div>
                 <div className="mx-auto max-w-2xl space-y-6 text-left md:mx-0">
                   <div className="grid gap-6 sm:grid-cols-2 sm:gap-8">
                     <div className="rounded-xl border border-[#dce3ec]/80 bg-white/60 p-4 shadow-sm backdrop-blur-sm">
@@ -329,7 +355,7 @@ export default function HomePage() {
                 </div>
               </div>
               {/* Colonne latérale : visuellement parcours au-dessus, tarif Suivi en dessous (flex-col-reverse + ordre DOM tarif puis parcours) */}
-              <div className="mx-auto flex w-full max-w-md flex-col-reverse gap-4 lg:col-span-5 lg:mx-0 lg:max-w-none lg:self-start lg:sticky lg:top-24">
+              <div className="mx-auto flex w-full max-w-md flex-col-reverse gap-4 lg:order-1 lg:col-span-5 lg:mx-0 lg:max-w-none lg:self-start lg:sticky lg:top-24">
                 <Link
                   href="/tarifs"
                   className="group surface-metallic-blue flex w-full flex-col gap-3 rounded-2xl px-6 py-6 text-left shadow-lg shadow-slate-900/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#93c5fd]/80"
@@ -345,6 +371,10 @@ export default function HomePage() {
                     <span className="text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-[#cbd5e1]">TTC</span>
                     <span className="text-lg font-semibold text-[#cbd5e1]">/ mois</span>
                   </div>
+                  <div className="mt-1 flex flex-wrap gap-2 text-[11px] font-semibold text-[#e2e8f0]" aria-label="Temps inclus estimé et actions">
+                    <span className="rounded-full border border-white/15 bg-black/10 px-3 py-1">~37h incluses</span>
+                    <span className="rounded-full border border-white/15 bg-black/10 px-3 py-1">≈ 185 actions</span>
+                  </div>
                   <div className="mt-1 border-b border-white/10 pb-3" aria-label="Repère indicatif de charge">
                     <p className="text-[11px] leading-snug text-[#94a3b8] md:text-xs md:leading-relaxed">
                       <span className="block font-normal text-[#e2e8f0]">{SUIVI_PLAN.equivalentNote.line1}</span>
@@ -356,8 +386,8 @@ export default function HomePage() {
                   </div>
                   <div className="space-y-2 text-sm leading-snug text-[#e2e8f0]">
                     <p className="font-medium text-white">
-                      Pour une activité régulière : dossiers suivis, relances structurées, coordination administrative — dans
-                      un cadre mensuel TTC clair.
+                      Pour ne plus perdre d’opportunités : relances, suivi de devis, coordination au quotidien — dans un cadre
+                      mensuel TTC clair.
                     </p>
                     <p className="text-xs text-[#94a3b8]">Trois niveaux : Structure à Pilotage (290 € à 1 190 € TTC / mois).</p>
                     <p className="pt-1 text-[#cbd5e1]">
@@ -368,7 +398,7 @@ export default function HomePage() {
                     </p>
                   </div>
                   <p className="text-[11px] leading-relaxed text-[#94a3b8]">
-                    TTC, sans frais cachés · Sans engagement long terme · Mise en route rapide
+                    1 action = {ACTION_MINUTES} min · TTC, sans frais cachés · Sans engagement long terme · Mise en route rapide
                   </p>
                   <span className="text-xs font-semibold text-[#93c5fd] group-hover:text-white group-hover:underline">
                     Voir les tarifs →
@@ -447,6 +477,10 @@ export default function HomePage() {
                 De la Structure (<span className="tarif-emphase text-[#1d4ed8]">290</span> € TTC / mois) au Pilotage : chaque
                 palier fixe un niveau de structuration et de suivi — pas de surprise sur ce qui est tenu.
               </p>
+              <p className="mx-auto mt-4 max-w-2xl text-sm font-semibold text-[#0f172a]">
+                1 action = {ACTION_MINUTES} minutes{" "}
+                <span className="font-normal text-[#64748b]">(devis, relance, appel, mail, commande, coordination…)</span>
+              </p>
               <div className="mt-10 flex justify-center">
                 <Link
                   href="/tarifs"
@@ -466,6 +500,10 @@ export default function HomePage() {
                       <span className="text-base font-semibold text-[#cbd5e1]">TTC</span>
                       <span className="text-base font-semibold text-[#cbd5e1]"> / mois</span>
                     </p>
+                    <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold text-[#e2e8f0]" aria-label="Volume inclus estimé">
+                      <span className="rounded-full border border-white/15 bg-black/10 px-3 py-1">~37h incluses</span>
+                      <span className="rounded-full border border-white/15 bg-black/10 px-3 py-1">≈ 185 actions</span>
+                    </div>
                     <div className="mt-2 border-b border-white/10 pb-3" aria-label="Repère indicatif de charge">
                       <p className="text-[11px] leading-snug text-[#94a3b8] md:text-xs">
                         <span className="block font-normal text-[#e2e8f0]">{SUIVI_PLAN.equivalentNote.line1}</span>
@@ -476,7 +514,7 @@ export default function HomePage() {
                       </p>
                     </div>
                     <p className="mt-2 text-sm font-medium text-white">
-                      Formule Suivi — référence pour une activité continue dans le BTP.
+                      Pour ne plus perdre d’opportunités : relances, suivi de devis, coordination au quotidien — dans un cadre mensuel TTC clair.
                     </p>
                     <p className="mt-3 text-xs leading-relaxed text-[#94a3b8]">
                       TTC, sans frais cachés · Sans engagement long terme · Démarrage rapide
@@ -492,6 +530,7 @@ export default function HomePage() {
                     <ul className="mt-3 space-y-0 text-sm text-[#e2e8f0]">
                       {TARIFS_PROGRESSION_ROWS.map((row, idx) => {
                         const plan = TARIFS_PLANS.find((p) => p.planKey === row.planKey)!;
+                        const volume = getPlanVolume(plan.planKey);
                         const isLast = idx === TARIFS_PROGRESSION_ROWS.length - 1;
                         return (
                           <li
@@ -500,6 +539,9 @@ export default function HomePage() {
                           >
                             <span className="font-semibold text-white">
                               {plan.name} — {formatPriceTtc(plan.price)} € TTC / mois
+                            </span>
+                            <span className="text-[11px] font-semibold text-[#cbd5e1]">
+                              ~{volume.hoursApprox}h · ≈ {volume.actionsApprox} actions
                             </span>
                             <span className={row.subClass}>{row.sub}</span>
                             <div className="mt-1.5" aria-label="Repère indicatif de charge">

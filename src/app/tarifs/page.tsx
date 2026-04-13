@@ -47,6 +47,40 @@ export const metadata: Metadata = {
 
 const plans = TARIFS_PLANS;
 
+const ACTION_MINUTES = 12;
+const ACTIONS_PER_HOUR = 60 / ACTION_MINUTES; // 5
+
+const PLAN_VOLUME = {
+  DECOUVERTE: { hoursApprox: 20, actionsApprox: 100 },
+  STANDARD: { hoursApprox: 37, actionsApprox: 185 },
+  PREMIUM: { hoursApprox: 100, actionsApprox: 500 },
+} as const;
+
+function formatHourlyCost(priceTtc: string, hoursApprox: number) {
+  const p = parseFloat(priceTtc.replace(/\s/g, ""));
+  if (!Number.isFinite(p) || hoursApprox <= 0) return null;
+  const v = p / hoursApprox;
+  return v.toLocaleString("fr-FR", { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+}
+
+const PLAN_COPY = {
+  DECOUVERTE: {
+    label: "Pour structurer votre administratif et éviter les oublis.",
+    includes: ["Devis et factures", "Organisation de base", "Suivi simple des demandes"],
+    results: ["Moins de retards", "Moins d’oublis", "Base administrative propre"],
+  },
+  STANDARD: {
+    label: "Pour ne plus perdre d’opportunités et signer plus de chantiers.",
+    includes: ["Relances clients régulières", "Suivi complet des devis", "Coordination quotidienne"],
+    results: ["Plus de devis signés", "Plus de chantiers", "Suivi pro constant"],
+  },
+  PREMIUM: {
+    label: "Pour déléguer entièrement votre administratif.",
+    includes: ["Gestion quotidienne prioritaire", "Suivi complet des dossiers", "Organisation globale"],
+    results: ["Activité structurée", "Gain de temps massif", "Développement du chiffre d’affaires"],
+  },
+} as const;
+
 const reassurance = [
   { label: "Cadre", desc: "Périmètre défini, relation professionnelle claire" },
   { label: "Pilotage", desc: "Encadrement en France, exigence sur la qualité des livrables" },
@@ -138,26 +172,36 @@ export default function TarifsPage() {
       />
 
       <main className="mx-auto max-w-6xl px-4 py-12 md:py-16">
-        {/* Hero */}
+        {/* Intro */}
         <section className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl md:leading-tight">
-            Un cadre administratif adapté à votre niveau d&apos;activité
+          <h1 className="text-metallic-black font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-3xl font-semibold tracking-tight md:text-4xl md:leading-tight">
+            Ne perdez plus de chantiers par manque de suivi.
           </h1>
-          <p className="mt-5 max-w-2xl mx-auto text-lg leading-relaxed text-[#334155]">
-            Chaque offre correspond à un niveau de structuration et de suivi. L&apos;objectif n&apos;est pas de faire plus,
-            mais de faire mieux, avec méthode — pour les entreprises du bâtiment qui veulent tenir leurs dossiers sans
-            alourdir leur structure.
+          <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-[#334155]">
+            Nous gérons tout ce qui ne nécessite pas votre présence sur le terrain.
           </p>
-          <p className="mt-4 text-sm font-semibold text-[#0f172a]">
-            Tous nos tarifs sont exprimés TTC / mois, sans frais supplémentaires.
+          <p className="mx-auto mt-4 max-w-3xl text-sm leading-relaxed text-[#475569] md:text-base">
+            Dans le BTP, des opportunités se perdent à cause du manque de suivi : devis, relances, organisation, coordination.
+            Ici, vous achetez du <strong className="font-semibold text-[#0f172a]">suivi</strong>, de la{" "}
+            <strong className="font-semibold text-[#0f172a]">structuration</strong> et des{" "}
+            <strong className="font-semibold text-[#0f172a]">chantiers sécurisés</strong>.
           </p>
-          {/* Réassurance */}
+          <p className="mx-auto mt-4 max-w-2xl text-sm font-semibold text-[#0f172a]">
+            Plus vous déléguez, plus le coût horaire diminue.
+          </p>
+          <div className="mx-auto mt-7 max-w-3xl rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+            <div className="surface-metallic-light surface-metallic-light--soft rounded-2xl px-6 py-5 text-center md:px-8 md:py-6">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#64748b]">Repère simple</p>
+              <p className="mt-2 text-base font-semibold text-[#0f172a] md:text-lg">
+                1 action = {ACTION_MINUTES} minutes{" "}
+                <span className="font-normal text-[#475569]">(devis, relance, appel, mail…)</span>
+              </p>
+            </div>
+          </div>
+          {/* Réassurance (premium, en 1 ligne) */}
           <ul className="mt-8 flex flex-wrap justify-center gap-4 md:gap-6" role="list">
             {reassurance.map(({ label, desc }) => (
-              <li
-                key={label}
-                className="rounded-lg surface-metallic-light px-4 py-3 text-center"
-              >
+              <li key={label} className="rounded-lg surface-metallic-light px-4 py-3 text-center">
                 <span className="block font-semibold text-[#0f172a]">{label}</span>
                 <span className="block text-sm text-[#64748b]">{desc}</span>
               </li>
@@ -170,9 +214,16 @@ export default function TarifsPage() {
           <h2 id="offres-heading" className="sr-only">
             Nos offres
           </h2>
+          <p className="mx-auto mb-6 max-w-3xl text-center text-[12px] leading-relaxed text-[#475569] md:text-sm">
+            À partir d’environ <strong className="font-semibold text-[#0f172a]">12 €/h</strong> tout compris, sans recrutement, sans
+            charges, sans contraintes.
+          </p>
           <div className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:items-stretch lg:gap-5">
             {plans.map((plan) => {
               const isFeatured = plan.planKey === "STANDARD";
+              const volume = PLAN_VOLUME[plan.planKey];
+              const copy = PLAN_COPY[plan.planKey];
+              const hourlyCost = formatHourlyCost(plan.price, volume.hoursApprox);
               return (
               <article
                 id={`tarif-${plan.planKey}`}
@@ -181,14 +232,12 @@ export default function TarifsPage() {
                 className={`relative flex flex-col rounded-xl border-2 surface-metallic-light surface-metallic-light--badge-pill transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${
                   isFeatured
                     ? "z-10 border-[#1d4ed8] py-7 shadow-md shadow-[#1d4ed8]/15 ring-2 ring-[#1d4ed8]/30 md:px-7 md:py-8 lg:scale-[1.03]"
-                    : plan.badge
-                      ? "border-[#1d4ed8]/80 py-6 shadow-sm shadow-[#1d4ed8]/10"
-                      : "border-[#c8cdd6] py-6 hover:border-[#94a3b8]"
+                    : "border-[#c8cdd6] py-6 hover:border-[#94a3b8]"
                 } px-5`}
               >
-                {plan.badge && (
+                {isFeatured && (
                   <span className="absolute -top-3 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#1d4ed8] px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white shadow-[0_2px_8px_rgba(29,78,216,0.4)]">
-                    {plan.badge}
+                    LE PLUS CHOISI
                   </span>
                 )}
                 <h3 className="border-b border-[#e2e8f0] pb-3 text-lg font-semibold tracking-tight text-[#0f172a]">
@@ -204,36 +253,60 @@ export default function TarifsPage() {
                     <span className="text-base font-semibold text-[#64748b]">/ mois</span>
                   )}
                 </div>
-                <div className="mt-2.5" aria-label="Repère indicatif de charge">
-                  <p className="text-[11px] leading-snug text-[#64748b] md:text-xs md:leading-relaxed">
-                    <span className="block font-normal">{plan.equivalentNote.line1}</span>
-                    <span className="mt-0.5 block font-normal text-[#94a3b8]">{plan.equivalentNote.line2}</span>
-                  </p>
+                <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-[#0f172a]" aria-label="Volume inclus estimé">
+                  <span className="rounded-full border border-[#cbd5e1] bg-white/70 px-3 py-1">
+                    ~{volume.hoursApprox}h incluses
+                  </span>
+                  <span className="rounded-full border border-[#cbd5e1] bg-white/70 px-3 py-1">
+                    ≈ {volume.actionsApprox} actions
+                  </span>
+                  {hourlyCost ? (
+                    <span className="rounded-full border border-[#cbd5e1] bg-white/70 px-3 py-1">
+                      ~{hourlyCost} €/h
+                    </span>
+                  ) : null}
                 </div>
-                <p className="mt-4 border-t border-[#e2e8f0] pt-4 text-sm font-medium leading-relaxed text-[#0f172a]">
-                  {plan.tagline}
+                <p className="mt-4 border-t border-[#e2e8f0] pt-4 text-sm font-semibold leading-relaxed text-[#0f172a]">
+                  {copy.label}
                 </p>
                 {plan.detail ? (
                   <p className="mt-3 text-sm leading-relaxed text-[#334155]">{plan.detail}</p>
                 ) : null}
-                <ul className="mt-5 space-y-1.5 text-[11px] leading-relaxed text-[#64748b]" aria-label="Garanties tarifaires">
-                  <li>TTC, sans frais cachés</li>
-                  <li>Cadre contractuel clair</li>
-                  <li>Démarrage après votre rendez-vous découverte</li>
-                </ul>
-                <ul className="mt-5 flex-1 space-y-3 text-sm leading-snug text-[#334155]" role="list">
-                  {plan.highlights.map((h) => (
-                    <li key={h} className="flex items-start gap-2.5">
-                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#eff6ff] text-[10px] font-bold text-[#1d4ed8]" aria-hidden>
-                        ✓
-                      </span>
-                      <span>{h}</span>
-                    </li>
-                  ))}
-                </ul>
-                <p className="mt-4 border-t border-[#f1f5f9] pt-4 text-xs leading-relaxed text-[#64748b]">
-                  <span className="font-medium text-[#475569]">Idéal pour :</span> {plan.idealFor}
-                </p>
+                <div className="mt-5 grid gap-4">
+                  <div className="rounded-xl border border-[#dce3ec]/80 bg-white/60 p-4 shadow-sm backdrop-blur-sm">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#1d4ed8]">Inclus</p>
+                    <ul className="mt-3 space-y-2 text-sm text-[#334155]" role="list">
+                      {copy.includes.map((h) => (
+                        <li key={h} className="flex items-start gap-2.5">
+                          <span
+                            className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#eff6ff] text-[10px] font-bold text-[#1d4ed8]"
+                            aria-hidden
+                          >
+                            ✓
+                          </span>
+                          <span>{h}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div
+                    className={`rounded-xl border p-4 shadow-sm ${
+                      isFeatured ? "border-[#1d4ed8]/35 bg-[#eff6ff]/70" : "border-[#dce3ec]/80 bg-white/60"
+                    }`}
+                  >
+                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#0f172a]">Résultat</p>
+                    <ul className="mt-3 space-y-2 text-sm text-[#0f172a]" role="list">
+                      {copy.results.map((r) => (
+                        <li key={r} className="flex items-start gap-2.5">
+                          <span className="mt-0.5 text-[#16a34a]" aria-hidden>
+                            ●
+                          </span>
+                          <span className="font-semibold">{r}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
                 <Link
                   href="/contact"
                   className="mt-5 block w-full rounded-lg bg-[#1d4ed8] py-3 text-center text-sm font-semibold text-white transition hover:bg-[#1e40af]"
@@ -241,6 +314,15 @@ export default function TarifsPage() {
                   <span className="sm:hidden">Rendez-vous découverte</span>
                   <span className="hidden sm:inline">Demander un rendez-vous découverte</span>
                 </Link>
+                <p className="mt-3 text-center text-[11px] leading-relaxed text-[#64748b]">
+                  Volume estimatif basé sur 1 action = {ACTION_MINUTES} min.
+                </p>
+                {plan.planKey === "PREMIUM" ? (
+                  <p className="mt-2 text-center text-[11px] leading-relaxed text-[#475569]">
+                    Équivalent d’un <span className="font-semibold text-[#0f172a]">relais administratif structuré à forte capacité</span>, sans
+                    charges ni contraintes internes.
+                  </p>
+                ) : null}
               </article>
               );
             })}
@@ -249,99 +331,76 @@ export default function TarifsPage() {
             Inclus : <strong className="font-semibold text-[#0f172a]">jusqu’à 2 périmètres</strong> (ex. devis/facturation/relances + chantier/logistique/démarches).
             Au-delà : <Link href="/contact" className="font-semibold text-[#1d4ed8] hover:underline">sur-mesure</Link>.
           </p>
-          <div className="mx-auto mt-10 max-w-2xl px-2 text-center">
-            <p className="text-[11px] font-normal leading-relaxed text-[#64748b] md:text-xs">
-              Les volumes indiqués sont des repères estimatifs.
-            </p>
-            <p className="mt-2 text-[11px] font-normal leading-relaxed text-[#64748b] md:text-xs">
-              Notre approche repose sur un cadre de travail structuré et un niveau de suivi adapté à votre activité, et non sur
-              une logique horaire stricte.
-            </p>
-          </div>
-          <div className="mx-auto mt-10 max-w-3xl rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_8px_28px_rgba(15,23,42,0.08)]">
-            <div className="surface-metallic-light surface-metallic-light--soft rounded-2xl px-6 py-7 text-center md:px-8 md:py-8">
-              <p className="text-sm font-medium leading-relaxed text-[#0f172a] md:text-base">
-                Nos offres s&apos;adressent à des entreprises du bâtiment en activité réelle, souhaitant structurer leur
-                organisation administrative.
+          <p className="mx-auto mt-6 max-w-3xl text-center text-[11px] leading-relaxed text-[#64748b] md:text-xs">
+            Volumes estimatifs (repères) basés sur 1 action = {ACTION_MINUTES} minutes.
+          </p>
+        {/* Compréhension */}
+        <section className="mx-auto mt-14 max-w-5xl" aria-labelledby="comprehension-heading">
+          <div className="rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_12px_40px_rgba(15,23,42,0.1)]">
+            <div className="card-frame rounded-2xl px-6 py-8 md:px-10 md:py-10">
+              <h2
+                id="comprehension-heading"
+                className="text-metallic-black text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-2xl font-semibold tracking-tight md:text-3xl"
+              >
+                Concrètement, ça représente quoi ?
+              </h2>
+              <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-relaxed text-[#64748b] md:text-base">
+                Des repères simples pour visualiser le volume. Une action correspond à ~{ACTION_MINUTES} minutes.
               </p>
-              <p className="mt-3 text-sm leading-relaxed text-[#475569] md:text-[0.9375rem]">
-                Elles ne sont pas adaptées à des besoins ponctuels ou à une logique de prestation à la demande.
-              </p>
-            </div>
-          </div>
-
-          <section className="mx-auto mt-14 max-w-3xl" aria-labelledby="quelle-offre-heading">
-            <div className="rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_12px_40px_rgba(15,23,42,0.1)]">
-              <div className="card-frame rounded-2xl px-6 py-8 md:px-10 md:py-10">
-                <h2
-                  id="quelle-offre-heading"
-                  className="text-metallic-black text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-2xl font-semibold tracking-tight md:text-[1.85rem]"
-                >
-                  Quelle offre choisir ?
-                </h2>
-                <p className="mx-auto mt-3 max-w-lg text-center text-sm leading-relaxed text-[#64748b]">
-                  Repères selon votre situation — cliquez sur une ligne pour remonter à la carte tarifaire correspondante.
-                </p>
-                <ul className="mt-8 space-y-4 text-left" role="list">
-                  <li>
-                    <a
-                      href="#tarif-DECOUVERTE"
-                      className="surface-metallic-light group block rounded-xl p-5 transition-all duration-200 hover:border-[#93c5fd]/80 hover:shadow-[0_8px_24px_rgba(29,78,216,0.12)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#eef0f4] md:p-6"
-                    >
-                      <span className="block font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-xl font-semibold tracking-tight text-[#0f172a] md:text-2xl">
-                        Structure
-                      </span>
-                      <span className="mt-1 block text-sm leading-relaxed text-[#475569]">
-                        Si votre administratif est encore irrégulier et peu structuré.
-                      </span>
-                      <span className="mt-3 inline-flex text-xs font-semibold text-[#1d4ed8] transition group-hover:text-[#1e40af]">
-                        Voir le forfait Structure →
-                      </span>
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#tarif-STANDARD"
-                      className="surface-metallic-light group block rounded-xl p-5 transition-all duration-200 hover:border-[#93c5fd]/80 hover:shadow-[0_8px_24px_rgba(29,78,216,0.12)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#eef0f4] md:p-6"
-                    >
-                      <span className="block font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-xl font-semibold tracking-tight text-[#0f172a] md:text-2xl">
-                        Suivi
-                      </span>
-                      <span className="mt-1 block text-sm leading-relaxed text-[#475569]">
-                        Si vous avez une activité continue avec besoin de suivi fiable.
-                      </span>
-                      <span className="mt-3 inline-flex text-xs font-semibold text-[#1d4ed8] transition group-hover:text-[#1e40af]">
-                        Voir le forfait Suivi →
-                      </span>
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#tarif-PREMIUM"
-                      className="surface-metallic-light group block rounded-xl p-5 transition-all duration-200 hover:border-[#93c5fd]/80 hover:shadow-[0_8px_24px_rgba(29,78,216,0.12)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#eef0f4] md:p-6"
-                    >
-                      <span className="block font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-xl font-semibold tracking-tight text-[#0f172a] md:text-2xl">
-                        Pilotage
-                      </span>
-                      <span className="mt-1 block text-sm leading-relaxed text-[#475569]">
-                        Si vous souhaitez déléguer avec un niveau de suivi élevé et structuré.
-                      </span>
-                      <span className="mt-3 inline-flex text-xs font-semibold text-[#1d4ed8] transition group-hover:text-[#1e40af]">
-                        Voir le forfait Pilotage →
-                      </span>
-                    </a>
-                  </li>
-                </ul>
-                <Link
-                  href="/"
-                  className="surface-metallic-outline mt-8 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-[#1e293b] transition hover:text-[#0f172a]"
-                >
-                  <span aria-hidden>←</span>
-                  Retour à l&apos;accueil
-                </Link>
+              <div className="mt-8 grid gap-4 md:grid-cols-2">
+                {[
+                  { k: "1 devis", v: "1 à 2 actions" },
+                  { k: "1 relance", v: "1 action" },
+                  { k: "1 appel client", v: "1 action" },
+                  { k: "1 coordination fournisseur", v: "1 à 3 actions" },
+                ].map((row) => (
+                  <div
+                    key={row.k}
+                    className="rounded-xl border border-[#dce3ec]/80 bg-white/60 p-5 shadow-sm backdrop-blur-sm"
+                  >
+                    <p className="text-sm font-semibold text-[#0f172a]">{row.k}</p>
+                    <p className="mt-1 text-sm text-[#334155]">{row.v}</p>
+                  </div>
+                ))}
               </div>
             </div>
-          </section>
+          </div>
+        </section>
+
+        {/* Impact */}
+        <section className="mx-auto mt-14 max-w-5xl" aria-labelledby="impact-heading">
+          <div className="rounded-2xl border-2 border-[#1e293b] bg-gradient-to-br from-[#0f172a] to-[#1e293b] p-8 text-white shadow-xl md:p-10">
+            <h2
+              id="impact-heading"
+              className="text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-2xl font-semibold tracking-tight md:text-3xl"
+            >
+              Ce que vous gagnez réellement
+            </h2>
+            <ul className="mx-auto mt-7 grid max-w-3xl gap-3 text-[#e2e8f0] md:grid-cols-2" role="list">
+              {["Plus de clients", "Plus de chantiers signés", "Moins de stress", "Plus de temps pour le terrain"].map((item) => (
+                <li key={item} className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 p-4">
+                  <span className="mt-0.5 text-[#60a5fa]" aria-hidden>
+                    ✓
+                  </span>
+                  <span className="font-semibold">{item}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mx-auto mt-7 max-w-3xl text-center text-sm leading-relaxed text-[#e2e8f0] md:text-base">
+              <strong className="text-white">
+                Ce que vous investissez ici est largement rentabilisé par les opportunités que vous ne perdez plus.
+              </strong>
+            </p>
+            <div className="mt-8 flex justify-center">
+              <Link
+                href="/contact"
+                className="inline-flex items-center justify-center rounded-xl bg-[#1d4ed8] px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#1d4ed8]/25 transition hover:bg-[#1e40af]"
+              >
+                Demander un rendez-vous découverte
+              </Link>
+            </div>
+          </div>
+        </section>
 
           <section
             className="mx-auto mt-14 max-w-3xl space-y-8"

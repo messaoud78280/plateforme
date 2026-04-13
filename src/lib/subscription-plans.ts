@@ -20,7 +20,7 @@ export const SUBSCRIPTION_PLANS = {
     priceCents: 49000,
     priceLabel: "490",
     billing: "monthly" as const,
-    actionsIncluded: 200,
+    actionsIncluded: 185,
     actionsLabel: "Charge adaptée — niveau Suivi",
   },
   STANDARD_PLUS: {
@@ -38,7 +38,7 @@ export const SUBSCRIPTION_PLANS = {
     priceCents: 119000,
     priceLabel: "1190",
     billing: "monthly" as const,
-    actionsIncluded: 520,
+    actionsIncluded: 500,
     actionsLabel: "Capacité renforcée — niveau Pilotage",
   },
 } as const;

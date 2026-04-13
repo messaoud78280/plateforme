@@ -80,7 +80,7 @@ export default async function DashboardPage({
       if (after) {
         actionsData = {
           subscriptionPlan: after.subscriptionPlan ?? null,
-          monthlyActionsTotal: after.monthlyActionsTotal ?? 120,
+          monthlyActionsTotal: after.monthlyActionsTotal ?? 185,
           monthlyActionsUsed: after.monthlyActionsUsed ?? 0,
           renewsAt,
         };
@@ -541,7 +541,7 @@ export default async function DashboardPage({
           actionsData={
             actionsData ?? {
               subscriptionPlan: null,
-              monthlyActionsTotal: 120,
+              monthlyActionsTotal: 185,
               monthlyActionsUsed: 0,
               renewsAt: null,
             }

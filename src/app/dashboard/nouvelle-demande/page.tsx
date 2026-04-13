@@ -19,7 +19,7 @@ export default async function NouvelleDemandePage() {
       where: { id: session.user.id },
       select: { monthlyActionsTotal: true, monthlyActionsUsed: true },
     });
-    const total = u?.monthlyActionsTotal ?? 120;
+    const total = u?.monthlyActionsTotal ?? 185;
     const used = u?.monthlyActionsUsed ?? 0;
     actionsRemaining = Math.max(0, total - used);
   } catch {

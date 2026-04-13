@@ -270,14 +270,81 @@ export function ManagerMissionsBoard({
     aValider: ManagerBoardTask[];
     terminees: ManagerBoardTask[];
   }>({ nouvelles, aAssigner, enCours, aValider, terminees });
+  const pendingMovesRef = useRef<Set<string>>(new Set());
   const [filterClient, setFilterClient] = useState(FILTER_ALL);
   const [filterAgent, setFilterAgent] = useState(FILTER_ALL);
   const [searchQuery, setSearchQuery] = useState("");
   const [agents, setAgents] = useState<AgentOption[]>([]);
 
   useEffect(() => {
-    // Synchronise l'état local avec les props (après refresh serveur)
-    setBoardState({ nouvelles, aAssigner, enCours, aValider, terminees });
+    // Synchronise l'état local avec les props (après refresh serveur),
+    // mais sans écraser les déplacements optimistes en attente de confirmation.
+    const server = { nouvelles, aAssigner, enCours, aValider, terminees };
+    const pending = pendingMovesRef.current;
+    if (pending.size === 0) {
+      setBoardState(server);
+      return;
+    }
+    setBoardState((cur) => {
+      const serverAll = [
+        ...server.nouvelles,
+        ...server.aAssigner,
+        ...server.enCours,
+        ...server.aValider,
+        ...server.terminees,
+      ];
+      const serverById = new Map(serverAll.map((t) => [t.id, t]));
+
+      // Si le serveur "voit" déjà la mission déplacée (statut mis à jour),
+      // on la retire des pending et on laisse le serveur reprendre la main.
+      for (const id of Array.from(pending)) {
+        const s = serverById.get(id);
+        const c =
+          cur.nouvelles.find((t) => t.id === id) ??
+          cur.aAssigner.find((t) => t.id === id) ??
+          cur.enCours.find((t) => t.id === id) ??
+          cur.aValider.find((t) => t.id === id) ??
+          cur.terminees.find((t) => t.id === id);
+        if (s && c && s.status === c.status) {
+          pending.delete(id);
+        }
+      }
+
+      if (pending.size === 0) return server;
+
+      // Merge: on prend la base serveur, puis on réinjecte les cartes pending
+      // depuis l'état courant (optimiste) pour éviter un "clignotement".
+      const next = {
+        nouvelles: [...server.nouvelles],
+        aAssigner: [...server.aAssigner],
+        enCours: [...server.enCours],
+        aValider: [...server.aValider],
+        terminees: [...server.terminees],
+      };
+      const removeFromAll = (id: string) => {
+        next.nouvelles = next.nouvelles.filter((t) => t.id !== id);
+        next.aAssigner = next.aAssigner.filter((t) => t.id !== id);
+        next.enCours = next.enCours.filter((t) => t.id !== id);
+        next.aValider = next.aValider.filter((t) => t.id !== id);
+        next.terminees = next.terminees.filter((t) => t.id !== id);
+      };
+      for (const id of pending) {
+        const c =
+          cur.nouvelles.find((t) => t.id === id) ??
+          cur.aAssigner.find((t) => t.id === id) ??
+          cur.enCours.find((t) => t.id === id) ??
+          cur.aValider.find((t) => t.id === id) ??
+          cur.terminees.find((t) => t.id === id);
+        if (!c) continue;
+        removeFromAll(id);
+        if (c.status === "NOUVEAU") next.nouvelles = [c, ...next.nouvelles];
+        else if (c.status === "EN_ATTENTE") next.aAssigner = [c, ...next.aAssigner];
+        else if (["ASSIGNEE", "EN_ANALYSE", "EN_COURS", "EN_ATTENTE_INFO"].includes(c.status)) next.enCours = [c, ...next.enCours];
+        else if (c.status === "A_VALIDER") next.aValider = [c, ...next.aValider];
+        else if (c.status === "COMPLETE") next.terminees = [c, ...next.terminees];
+      }
+      return next;
+    });
   }, [nouvelles, aAssigner, enCours, aValider, terminees]);
 
   useEffect(() => {
@@ -326,6 +393,7 @@ export function ManagerMissionsBoard({
       if (!newStatus) return;
       // UI optimiste: on déplace immédiatement la carte pour éviter le "blanc" pendant router.refresh()
       const prev = boardState;
+      pendingMovesRef.current.add(taskId);
       const keyOf = (colId: string) => {
         if (colId === "nouvelles") return "nouvelles" as const;
         if (colId === "a-assigner") return "aAssigner" as const;
@@ -370,6 +438,7 @@ export function ManagerMissionsBoard({
             setDropHint("Impossible de déplacer la mission (droits ou erreur serveur).");
             window.setTimeout(() => setDropHint(null), 7000);
             setBoardState(prev);
+            pendingMovesRef.current.delete(taskId);
             router.refresh();
             return;
           }
@@ -383,6 +452,7 @@ export function ManagerMissionsBoard({
           setDropHint("Le déplacement n'a pas été enregistré (droits ou erreur serveur).");
           window.setTimeout(() => setDropHint(null), 7000);
           setBoardState(prev);
+          pendingMovesRef.current.delete(taskId);
         }
         // Toujours resynchroniser le board après un drop
         router.refresh();
@@ -390,6 +460,7 @@ export function ManagerMissionsBoard({
         setDropHint("Erreur réseau : le déplacement n'a pas été enregistré.");
         window.setTimeout(() => setDropHint(null), 7000);
         setBoardState(prev);
+        pendingMovesRef.current.delete(taskId);
         router.refresh();
       }
     },

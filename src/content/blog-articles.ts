@@ -814,6 +814,202 @@ export const BLOG_ARTICLES = {
       },
     ],
   },
+  "relance-devis-btp-augmenter-signatures": {
+    title: "Relancer un devis dans le BTP : méthode pour signer plus de chantiers",
+    description:
+      "Devis envoyés trop tard, relances irrégulières, clients qui disparaissent : une méthode simple pour relancer sans harceler, suivre vos devis et augmenter le taux de signature.",
+    excerpt:
+      "Une méthode concrète pour relancer les devis BTP (J+2, J+7, J+14), garder la main sur le suivi et signer plus de chantiers sans y passer vos soirées.",
+    keywords: [
+      "relance devis BTP",
+      "suivi devis artisan",
+      "signer plus de chantiers",
+      "process relance client",
+      "devis chantier relance",
+      "pilotage administratif BTP",
+    ],
+    publishedTime: "2026-04-13T09:00:00+02:00",
+    articleSection: "Commercial & suivi",
+    body: [
+      { type: "h2", content: "Pourquoi les devis se perdent (souvent) côté suivi" },
+      {
+        type: "p",
+        content:
+          "Dans le BTP, vous êtes sur le terrain. Le client, lui, compare, hésite, change de priorité. Sans relance régulière, un devis “en attente” devient vite un devis “oublié”. Ce n’est pas un problème de compétence : c’est un problème de rythme et de méthode.",
+      },
+      { type: "h2", content: "La règle d’or : relancer tôt, puis cadrer" },
+      {
+        type: "p",
+        content:
+          "Une relance efficace n’est pas agressive : elle est rapide, factuelle et utile. L’objectif est d’obtenir une réponse (oui / non / à quelle date) et de sécuriser les prochaines étapes (visite, ajustement, délai).",
+      },
+      { type: "h2", content: "Le scénario simple (qui marche) : J+2, J+7, J+14" },
+      {
+        type: "p",
+        content:
+          "J+2 : confirmation de bonne réception + question courte (un point bloquant ?). J+7 : relance avec une proposition (créneau d’appel / visite). J+14 : relance plus ferme mais professionnelle (délai de validité, planning, capacité). Entre chaque étape, vous notez le statut et la prochaine action.",
+      },
+      { type: "h2", content: "Ce qu’il faut tracer (sinon vous relancez “dans le vide”)" },
+      {
+        type: "p",
+        content:
+          "Au minimum : date d’envoi, montant, décision attendue, date de prochaine relance, canal (appel/mail), réponse client. Sans ce mini-tableau, vous perdez du temps à reconstituer l’historique — et vous relancez trop tard.",
+      },
+      { type: "h2", content: "Externaliser le suivi : ce qui se délègue, ce qui reste chez vous" },
+      {
+        type: "p",
+        content:
+          "Se délègue : préparation des messages, relances cadrées, mise à jour du suivi, reporting. Reste chez vous : validation du prix, arbitrages techniques, décision commerciale sur les concessions. C’est exactement la logique d’un pilotage administratif : tenir le suivi, sans vous retirer la décision.",
+      },
+      { type: "h2", content: "Conclusion" },
+      {
+        type: "p",
+        content:
+          "Si vous avez “des devis en attente” chaque semaine, ce n’est pas normal : c’est un manque de système. Une méthode simple + un suivi tenu dans le temps font souvent la différence entre un carnet plein et des semaines creuses.",
+      },
+    ],
+  },
+  "avenant-chantier-btp-process": {
+    title: "Avenants chantier BTP : le process administratif pour éviter les litiges",
+    description:
+      "Avenants, travaux supplémentaires, ajustements : comment cadrer la demande, faire valider et archiver les pièces pour sécuriser votre chiffre d’affaires et éviter les “oui mais…” en fin de chantier.",
+    excerpt:
+      "Un process simple pour gérer les avenants : demande, chiffrage, validation, traçabilité. Objectif : sécuriser vos marges et votre encaissement.",
+    keywords: [
+      "avenant chantier",
+      "travaux supplémentaires BTP",
+      "process avenant",
+      "litige chantier prévention",
+      "facturation travaux supplémentaires",
+      "suivi administratif chantier",
+    ],
+    publishedTime: "2026-04-13T09:00:00+02:00",
+    articleSection: "Chantier & conformité",
+    body: [
+      { type: "h2", content: "Le risque : faire, puis “régulariser plus tard”" },
+      {
+        type: "p",
+        content:
+          "Sur le terrain, on avance. Mais sur le papier, un avenant mal cadré finit en discussion (ou en impayé). Le problème n’est pas l’avenant : c’est l’absence de validation claire et de traçabilité.",
+      },
+      { type: "h2", content: "Le process en 5 étapes" },
+      {
+        type: "p",
+        content:
+          "1) Demande formulée (qui, quoi, pourquoi). 2) Chiffrage (prix + délai + impact planning). 3) Validation écrite (mail signé, bon pour accord, outil). 4) Exécution. 5) Archivage + facturation (pièce jointe au dossier chantier).",
+      },
+      { type: "h2", content: "Les pièces à standardiser (pour gagner du temps)" },
+      {
+        type: "p",
+        content:
+          "Un modèle d’avenant, une checklist de pièces (photos, métrés, plans), et un espace de classement par chantier. Sans standard, vous réinventez à chaque fois — et l’urgence du terrain gagne.",
+      },
+      { type: "h2", content: "Ce qui se délègue en administratif" },
+      {
+        type: "p",
+        content:
+          "Préparer le document, récupérer les infos, relancer pour signature, classer et mettre à jour le suivi. Vous validez le fond (prix, technique, engagement). Résultat : plus de rigueur, moins de tension client, et un CA mieux sécurisé.",
+      },
+      { type: "h2", content: "Conclusion" },
+      {
+        type: "p",
+        content:
+          "Un avenant bien géré n’est pas “de la paperasse”. C’est une protection : de votre marge, de votre planning, et de votre trésorerie.",
+      },
+    ],
+  },
+  "tableau-suivi-chantier-administratif": {
+    title: "Tableau de suivi administratif chantier : modèle simple pour tenir devis, factures et relances",
+    description:
+      "Un tableau unique pour suivre vos chantiers côté administratif : devis, situations, factures, relances, pièces et statuts. Objectif : ne plus rien oublier et gagner du temps chaque semaine.",
+    excerpt:
+      "Le modèle de tableau le plus simple (colonnes indispensables) pour suivre l’administratif chantier sans usine à gaz.",
+    keywords: [
+      "tableau suivi chantier",
+      "suivi administratif chantier",
+      "suivi factures relances",
+      "organisation BTP",
+      "process administratif BTP",
+      "pilotage administratif",
+    ],
+    publishedTime: "2026-04-13T09:00:00+02:00",
+    articleSection: "Organisation & méthodes",
+    body: [
+      { type: "h2", content: "Pourquoi un seul tableau change tout" },
+      {
+        type: "p",
+        content:
+          "Beaucoup d’oublis viennent d’un problème de dispersion : un peu dans la boîte mail, un peu dans le téléphone, un peu dans la tête. Un tableau unique, même basique, crée un “centre de gravité” : on sait ce qui est fait, ce qui manque, et la prochaine action.",
+      },
+      { type: "h2", content: "Les colonnes indispensables (version ultra simple)" },
+      {
+        type: "p",
+        content:
+          "Client / Chantier, Montant, Statut devis, Date d’envoi, Prochaine relance, Statut facture, Date d’échéance, Paiement reçu, Pièces manquantes, Commentaire. Rien de plus au départ : l’objectif est la régularité, pas la perfection.",
+      },
+      { type: "h2", content: "Le rituel qui rend le tableau rentable" },
+      {
+        type: "p",
+        content:
+          "15 minutes deux fois par semaine : vous mettez à jour le tableau et vous déclenchez les relances. C’est ce rituel qui sécurise la trésorerie et évite les grosses sessions de rattrapage.",
+      },
+      { type: "h2", content: "Comment déléguer sans perdre le contrôle" },
+      {
+        type: "p",
+        content:
+          "Un assistant peut tenir le tableau, préparer les relances, classer les pièces et vous remonter une liste courte de validations. Vous gardez les décisions (prix, arbitrages, litiges).",
+      },
+      { type: "h2", content: "Conclusion" },
+      {
+        type: "p",
+        content:
+          "Un tableau simple + un rituel fixe = moins d’oublis, plus de visibilité, et des encaissements plus réguliers.",
+      },
+    ],
+  },
+  "suivi-commandes-fournisseurs-chantier": {
+    title: "Suivi fournisseurs et commandes chantier : éviter les retards (sans y passer la journée)",
+    description:
+      "Commandes, confirmations, livraisons, retours : un process administratif simple pour suivre les fournisseurs, limiter les ruptures et sécuriser votre planning chantier.",
+    excerpt:
+      "Un process concret pour suivre commandes et livraisons fournisseurs : confirmations, relances, pièces, et tableau de suivi.",
+    keywords: [
+      "suivi fournisseurs chantier",
+      "commande fournisseur relance",
+      "livraison chantier organisation",
+      "retard fournisseur BTP",
+      "logistique chantier",
+      "coordination fournisseurs",
+    ],
+    publishedTime: "2026-04-13T09:00:00+02:00",
+    articleSection: "Logistique & coordination",
+    body: [
+      { type: "h2", content: "Le vrai coût d’un retard fournisseur" },
+      {
+        type: "p",
+        content:
+          "Un retard de livraison peut immobiliser une équipe, décaler un lot et créer des jours “perdus”. Le suivi fournisseur n’est pas un détail : c’est une partie du pilotage chantier.",
+      },
+      { type: "h2", content: "Le process simple : commande → confirmation → livraison → preuve" },
+      {
+        type: "p",
+        content:
+          "À chaque commande : confirmer la référence, la quantité, le lieu, la date. Puis obtenir une confirmation écrite. Ensuite, relancer en amont de la date, et archiver la preuve de livraison (bon, email).",
+      },
+      { type: "h2", content: "Ce qu’un assistant peut faire à votre place" },
+      {
+        type: "p",
+        content:
+          "Suivre les confirmations, relancer, mettre à jour un tableau, centraliser bons de livraison et échanges. Vous intervenez uniquement en cas de blocage ou d’arbitrage (changement produit, urgence, surcoût).",
+      },
+      { type: "h2", content: "Conclusion" },
+      {
+        type: "p",
+        content:
+          "Avec un suivi tenue et traçable, vous limitez les “surprises” et vous gagnez en fiabilité auprès des clients.",
+      },
+    ],
+  },
 } satisfies Record<string, BlogArticle>;
 
 export type BlogSlug = keyof typeof BLOG_ARTICLES;

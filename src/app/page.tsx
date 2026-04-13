@@ -82,6 +82,11 @@ const RESSOURCES_BLOG = [
     href: "/blog/situation-travaux-btp-obligations-conseils",
   },
   {
+    title: "DICT & déclarations : préparer le dossier sans perdre de temps",
+    desc: "Pièces, délais, relances et classement : ce qui se délègue pendant que vous restez sur le chantier.",
+    href: "/blog/dict-et-declarations-de-travaux",
+  },
+  {
     title: "10 tâches administratives à déléguer en BTP",
     desc: "Ce qui grève le quotidien des chefs d’entreprise du bâtiment — et comment le structurer autrement.",
     href: "/blog/10-taches-administratives-deleguer-dirigeant",
@@ -90,6 +95,16 @@ const RESSOURCES_BLOG = [
     title: "Combien coûte un administratif externalisé ?",
     desc: "Comparatif forfait externalisé vs embauche : coûts cachés, charges sociales et charge RH pour les PME.",
     href: "/blog/combien-coute-assistant-administratif",
+  },
+  {
+    title: "Relancer un devis : méthode pour signer plus de chantiers",
+    desc: "J+2, J+7, J+14 : un suivi simple, traçable, sans harceler.",
+    href: "/blog/relance-devis-btp-augmenter-signatures",
+  },
+  {
+    title: "Bureau & chantier : structurer sans recruter",
+    desc: "Prioriser l’important bureau (devis, relances, dossiers) sans sacrifier le terrain.",
+    href: "/blog/bureau-chantier-administratif-btp-sans-recruter",
   },
 ];
 
@@ -1522,7 +1537,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid gap-8 md:grid-cols-3 md:items-stretch md:gap-10">
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 md:items-stretch md:gap-10">
               {RESSOURCES_BLOG.map((r) => (
                 <div
                   key={r.title}

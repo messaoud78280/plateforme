@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DeleteTaskButton } from "@/components/tasks/DeleteTaskButton";
 
 const STATUS_LABELS: Record<string, string> = {
   NOUVEAU: "Nouvelle",
@@ -149,6 +150,7 @@ export function AgentDashboardContent({
                   >
                     Ouvrir la mission
                   </Link>
+                  <DeleteTaskButton taskId={task.id} />
                 </div>
               </div>
             ))}

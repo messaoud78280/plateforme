@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { DeleteTaskButton } from "./DeleteTaskButton";
 
 export type DemandeStatusFilter = "toutes" | "en_cours" | "en_attente_info" | "terminees";
 
@@ -195,6 +196,10 @@ export function MesDemandesList({ tasks }: MesDemandesListProps) {
                     >
                       Message
                     </Link>
+                    <DeleteTaskButton
+                      taskId={task.id}
+                      confirmText="Supprimer cette demande ? Cette action est irréversible."
+                    />
                   </div>
                 </div>
               </li>

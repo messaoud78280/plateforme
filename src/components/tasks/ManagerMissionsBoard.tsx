@@ -4,6 +4,7 @@ import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { MissionDetailDrawer } from "./MissionDetailDrawer";
+import { DeleteTaskButton } from "./DeleteTaskButton";
 
 const FILTER_ALL = "";
 const FILTER_UNASSIGNED = "__none__";
@@ -111,13 +112,16 @@ function MissionCard({
       }}
       className={`cursor-grab rounded-xl border border-l-4 border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md active:cursor-grabbing min-h-[200px] flex flex-col ${priorityStyle.borderClass}`}
     >
-      <button
-        type="button"
-        onClick={() => onOpenMission(task.id)}
-        className="w-full text-left text-sm font-semibold text-slate-800 hover:text-blue-600 line-clamp-2"
-      >
-        {task.title || "Sans titre"}
-      </button>
+      <div className="flex items-start gap-3">
+        <button
+          type="button"
+          onClick={() => onOpenMission(task.id)}
+          className="min-w-0 flex-1 text-left text-sm font-semibold text-slate-800 hover:text-blue-600 line-clamp-2"
+        >
+          {task.title || "Sans titre"}
+        </button>
+        <DeleteTaskButton taskId={task.id} />
+      </div>
       <p className="mt-2 text-xs text-slate-600">
         <span className="font-medium text-slate-700">Client :</span> {task.client.name}
       </p>
@@ -258,6 +262,7 @@ export function ManagerMissionsBoard({
   const router = useRouter();
   const [drawerTaskId, setDrawerTaskId] = useState<string | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
+  const [dropHint, setDropHint] = useState<string | null>(null);
   const [filterClient, setFilterClient] = useState(FILTER_ALL);
   const [filterAgent, setFilterAgent] = useState(FILTER_ALL);
   const [searchQuery, setSearchQuery] = useState("");
@@ -298,24 +303,44 @@ export function ManagerMissionsBoard({
       if (targetColumnId === "terminees") {
         return;
       }
+      // Même logique pour "À valider" : il faut saisir le temps passé pour décompter les actions.
+      if (targetColumnId === "a-valider") {
+        setDropHint("Pour passer « À valider », ouvrez la mission et cliquez « Marquer comme terminée » (avec le temps passé).");
+        window.setTimeout(() => setDropHint(null), 7000);
+        setDrawerTaskId(taskId);
+        return;
+      }
       const newStatus = COLUMN_TO_STATUS[targetColumnId];
       if (!newStatus) return;
       try {
         if (targetColumnId === "a-assigner") {
-          await fetch(`/api/tasks/${taskId}`, {
+          const unassignRes = await fetch(`/api/tasks/${taskId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ assignedToId: null }),
           });
+          if (!unassignRes.ok) {
+            setDropHint("Impossible de déplacer la mission (droits ou erreur serveur).");
+            window.setTimeout(() => setDropHint(null), 7000);
+            router.refresh();
+            return;
+          }
         }
         const res = await fetch(`/api/tasks/${taskId}/status`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ status: newStatus }),
         });
-        if (res.ok) router.refresh();
+        if (!res.ok) {
+          setDropHint("Le déplacement n'a pas été enregistré (droits ou erreur serveur).");
+          window.setTimeout(() => setDropHint(null), 7000);
+        }
+        // Toujours resynchroniser le board après un drop
+        router.refresh();
       } catch {
-        // ignore
+        setDropHint("Erreur réseau : le déplacement n'a pas été enregistré.");
+        window.setTimeout(() => setDropHint(null), 7000);
+        router.refresh();
       }
     },
     [router]
@@ -357,6 +382,11 @@ export function ManagerMissionsBoard({
 
   return (
     <>
+      {dropHint && (
+        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          {dropHint}
+        </div>
+      )}
       <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/80 p-3">
         <span className="text-sm font-medium text-slate-600">Filtrer :</span>
         <input

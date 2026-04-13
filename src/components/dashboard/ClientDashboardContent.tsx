@@ -5,6 +5,7 @@ import { QuickDelegationForm } from "@/components/dashboard/QuickDelegationForm"
 import { MissionHistorySection } from "@/components/missions/MissionHistorySection";
 import { CopiloteAdmin } from "@/components/dashboard/CopiloteAdmin";
 import { CLIENT_TASK_STATUS_LABELS, type TaskStatus } from "@/types";
+import { DeleteTaskButton } from "@/components/tasks/DeleteTaskButton";
 
 function formatMessageDate(d: Date) {
   const date = new Date(d);
@@ -254,12 +255,15 @@ export function ClientDashboardContent({
                     </span>
                   </div>
                 </div>
-                <Link
-                  href={`/dashboard/taches/${task.id}`}
-                  className="rounded-lg surface-metallic-light px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-                >
-                  Voir la mission →
-                </Link>
+                <div className="flex shrink-0 items-center gap-2">
+                  <Link
+                    href={`/dashboard/taches/${task.id}`}
+                    className="rounded-lg surface-metallic-light px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  >
+                    Voir la mission →
+                  </Link>
+                  <DeleteTaskButton taskId={task.id} />
+                </div>
               </div>
             ))
           )}

@@ -210,6 +210,24 @@ export function TaskDetailView({
                 <span><strong>Actions estimées :</strong> {task.estimatedActions}</span>
               )}
             </div>
+            {task.actionsUsed != null && task.actionsUsed > 0 && (
+              <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-slate-800">
+                <span className="font-semibold text-[#1d4ed8]">Consommation :</span>{" "}
+                <span className="font-semibold">
+                  {task.actionsUsed} action{task.actionsUsed > 1 ? "s" : ""}
+                </span>
+                {task.timeSpentMinutes != null ? (
+                  <span className="text-slate-600"> (≈ {task.timeSpentMinutes} min)</span>
+                ) : null}
+                <span className="text-slate-500"> — 1 action = 12 min</span>
+              </div>
+            )}
+            {(isAgence || isAgent) && (task.status === "A_VALIDER" || task.status === "COMPLETE") && task.actionsUsed == null && (
+              <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                Pour décompter les actions, renseignez le <span className="font-semibold">temps passé (minutes)</span> lors de la
+                clôture.
+              </div>
+            )}
             {task.validatedAt && (
               <span className="ml-2 inline-flex rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
                 Validé

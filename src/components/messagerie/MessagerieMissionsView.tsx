@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { DeleteTaskButton } from "@/components/tasks/DeleteTaskButton";
 
 const STATUS_LABELS: Record<string, string> = {
   NOUVEAU: "Nouvelle",
@@ -790,7 +791,10 @@ export function MessagerieMissionsView({
           <>
             {/* En-tête mission */}
             <div className="shrink-0 border-b border-slate-200 bg-white px-4 py-3">
-              <h3 className="font-semibold text-slate-800">{selectedMission.title}</h3>
+              <div className="flex items-start justify-between gap-3">
+                <h3 className="min-w-0 flex-1 truncate font-semibold text-slate-800">{selectedMission.title}</h3>
+                <DeleteTaskButton taskId={selectedTaskId} />
+              </div>
               <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-slate-600">
                 <span>Client : {selectedMission.client.name}</span>
                 {selectedMission.assignedTo && (

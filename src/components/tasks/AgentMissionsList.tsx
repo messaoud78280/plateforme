@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { TASK_STATUS_LABELS, type TaskStatus } from "@/types";
+import { DeleteTaskButton } from "./DeleteTaskButton";
 
 const STATUS_COLORS: Record<string, string> = {
   NOUVEAU: "bg-slate-100 text-slate-800",
@@ -77,12 +78,15 @@ export function AgentMissionsList({ missions }: AgentMissionsListProps) {
               </span>
             </div>
           </div>
-          <Link
-            href={`/dashboard/taches/${m.id}`}
-            className="shrink-0 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-          >
-            Ouvrir mission
-          </Link>
+          <div className="flex shrink-0 items-center gap-2">
+            <Link
+              href={`/dashboard/taches/${m.id}`}
+              className="shrink-0 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              Ouvrir mission
+            </Link>
+            <DeleteTaskButton taskId={m.id} />
+          </div>
         </div>
       ))}
     </div>

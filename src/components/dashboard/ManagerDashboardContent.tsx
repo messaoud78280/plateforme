@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DeleteTaskButton } from "@/components/tasks/DeleteTaskButton";
 
 const STATUS_LABELS: Record<string, string> = {
   NOUVEAU: "Nouvelle",
@@ -91,6 +92,7 @@ function TaskCard({
           >
             Voir
           </Link>
+          <DeleteTaskButton taskId={task.id} />
           {actions?.map((a) => (
             <Link
               key={a.label}

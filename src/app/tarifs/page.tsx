@@ -48,7 +48,6 @@ export const metadata: Metadata = {
 const plans = TARIFS_PLANS;
 
 const ACTION_MINUTES = 12;
-const ACTIONS_PER_HOUR = 60 / ACTION_MINUTES; // 5
 
 const PLAN_VOLUME = {
   DECOUVERTE: { hoursApprox: 20, actionsApprox: 100 },
@@ -398,6 +397,34 @@ export default function TarifsPage() {
               >
                 Demander un rendez-vous découverte
               </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Ressources utiles */}
+        <section className="mx-auto mt-14 max-w-5xl" aria-labelledby="ressources-seo-heading">
+          <div className="rounded-2xl surface-metallic-light p-8 md:p-10">
+            <h2 id="ressources-seo-heading" className="text-xl font-semibold tracking-tight text-[#0f172a] md:text-2xl">
+              Ressources utiles (BTP)
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-[#475569] md:text-base">
+              Des guides concrets sur les sujets qui font gagner du temps et sécurisent le chiffre d’affaires.
+            </p>
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                { title: "Relance devis BTP : signer plus de chantiers", href: "/relance-devis-btp" },
+                { title: "Impayés : relances cadrées et trésorerie", href: "/impayes-btp-relances" },
+                { title: "Situation de travaux : structurer et envoyer", href: "/situation-travaux-btp" },
+                { title: "DICT / DT : dossier, délais, suivi", href: "/dict-dt-travaux" },
+              ].map((r) => (
+                <Link
+                  key={r.href}
+                  href={r.href}
+                  className="rounded-xl border border-[#dce3ec] bg-white/60 px-5 py-4 font-medium text-[#0f172a] transition hover:border-[#93c5fd] hover:bg-white"
+                >
+                  {r.title} <span className="text-[#1d4ed8]">→</span>
+                </Link>
+              ))}
             </div>
           </div>
         </section>

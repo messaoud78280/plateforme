@@ -14,10 +14,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/tarifs`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.9 },
     { url: `${SITE_URL}/faq`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.7 },
     { url: `${SITE_URL}/notre-facon-de-travailler`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.85 },
+    { url: `${SITE_URL}/cas-clients`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.75 },
     { url: `${SITE_URL}/contact`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
     { url: `${SITE_URL}/inscription`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
     { url: `${SITE_URL}/connexion`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.6 },
     { url: `${SITE_URL}/blog`, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 0.8 },
+    // Pages intentionnelles (SEO)
+    { url: `${SITE_URL}/relance-devis-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.85 },
+    { url: `${SITE_URL}/impayes-btp-relances`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
+    { url: `${SITE_URL}/situation-travaux-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
+    { url: `${SITE_URL}/dict-dt-travaux`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
+    { url: `${SITE_URL}/avenant-chantier`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.75 },
+    { url: `${SITE_URL}/suivi-fournisseurs-chantier`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.75 },
+    { url: `${SITE_URL}/admin-btp-sans-recruter`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.85 },
   ];
 
   const blogPages: MetadataRoute.Sitemap = BLOG_SLUGS.map((slug) => {

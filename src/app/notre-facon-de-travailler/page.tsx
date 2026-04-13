@@ -163,6 +163,14 @@ export default function NotreFaconDeTravaillerPage() {
                 Voir le détail des forfaits et le comparatif
               </Link>
             </p>
+            <p className="mt-3 text-center">
+              <Link
+                href="/cas-clients"
+                className="text-sm font-semibold text-[#0f172a] underline decoration-[#0f172a]/20 underline-offset-2 hover:decoration-[#0f172a]/40"
+              >
+                Voir des cas clients (preuves)
+              </Link>
+            </p>
           </SectionShell>
 
           <ImpactCardsSection />

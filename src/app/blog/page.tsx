@@ -119,6 +119,29 @@ export default function BlogPage() {
               </li>
             ))}
           </ul>
+
+          <section className="mt-14 rounded-2xl border border-[#dce3ec] bg-white/60 p-7">
+            <h2 className="text-lg font-semibold text-[#0f172a]">Pages pratiques (BTP)</h2>
+            <p className="mt-2 text-sm leading-relaxed text-[#475569]">
+              Accès direct aux ressources les plus demandées : relances, situations, DICT/DT et suivi.
+            </p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              {[
+                { title: "Relance devis BTP", href: "/relance-devis-btp" },
+                { title: "Impayés & relances", href: "/impayes-btp-relances" },
+                { title: "Situation de travaux", href: "/situation-travaux-btp" },
+                { title: "DICT / DT", href: "/dict-dt-travaux" },
+              ].map((r) => (
+                <Link
+                  key={r.href}
+                  href={r.href}
+                  className="rounded-xl surface-metallic-light p-4 font-medium text-[#0f172a] transition hover:shadow-sm"
+                >
+                  {r.title} <span className="text-[#1d4ed8]">→</span>
+                </Link>
+              ))}
+            </div>
+          </section>
         </div>
       </main>
 

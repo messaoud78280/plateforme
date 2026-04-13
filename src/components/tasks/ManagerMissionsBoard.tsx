@@ -263,10 +263,22 @@ export function ManagerMissionsBoard({
   const [drawerTaskId, setDrawerTaskId] = useState<string | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
   const [dropHint, setDropHint] = useState<string | null>(null);
+  const [boardState, setBoardState] = useState<{
+    nouvelles: ManagerBoardTask[];
+    aAssigner: ManagerBoardTask[];
+    enCours: ManagerBoardTask[];
+    aValider: ManagerBoardTask[];
+    terminees: ManagerBoardTask[];
+  }>({ nouvelles, aAssigner, enCours, aValider, terminees });
   const [filterClient, setFilterClient] = useState(FILTER_ALL);
   const [filterAgent, setFilterAgent] = useState(FILTER_ALL);
   const [searchQuery, setSearchQuery] = useState("");
   const [agents, setAgents] = useState<AgentOption[]>([]);
+
+  useEffect(() => {
+    // Synchronise l'état local avec les props (après refresh serveur)
+    setBoardState({ nouvelles, aAssigner, enCours, aValider, terminees });
+  }, [nouvelles, aAssigner, enCours, aValider, terminees]);
 
   useEffect(() => {
     fetch("/api/agents")
@@ -276,23 +288,23 @@ export function ManagerMissionsBoard({
   }, []);
 
   const { clientNames, agentNames } = useMemo(() => {
-    const all = [...nouvelles, ...aAssigner, ...enCours, ...aValider, ...terminees];
+    const all = [...boardState.nouvelles, ...boardState.aAssigner, ...boardState.enCours, ...boardState.aValider, ...boardState.terminees];
     const clients = [...new Set(all.map((t) => t.client.name))].filter(Boolean).sort();
     const agents = [...new Set(all.map((t) => t.assignedTo?.name).filter((n): n is string => !!n))].sort();
     return { clientNames: clients, agentNames: agents };
-  }, [nouvelles, aAssigner, enCours, aValider, terminees]);
+  }, [boardState]);
 
   const columns: Column[] = useMemo(() => {
     const fn = (tasks: ManagerBoardTask[]) =>
       tasks.filter((t) => filterTask(t, filterClient, filterAgent, searchQuery));
     return [
-      { id: "nouvelles", title: "Nouvelles", tasks: fn(nouvelles) },
-      { id: "a-assigner", title: "À assigner", tasks: fn(aAssigner) },
-      { id: "en-cours", title: "En cours", tasks: fn(enCours) },
-      { id: "a-valider", title: "À valider", tasks: fn(aValider) },
-      { id: "terminees", title: "Terminées", tasks: fn(terminees) },
+      { id: "nouvelles", title: "Nouvelles", tasks: fn(boardState.nouvelles) },
+      { id: "a-assigner", title: "À assigner", tasks: fn(boardState.aAssigner) },
+      { id: "en-cours", title: "En cours", tasks: fn(boardState.enCours) },
+      { id: "a-valider", title: "À valider", tasks: fn(boardState.aValider) },
+      { id: "terminees", title: "Terminées", tasks: fn(boardState.terminees) },
     ];
-  }, [nouvelles, aAssigner, enCours, aValider, terminees, filterClient, filterAgent, searchQuery]);
+  }, [boardState, filterClient, filterAgent, searchQuery]);
 
   const handleDrop = useCallback(
     async (targetColumnId: string, taskId: string, sourceColumnId: string) => {
@@ -312,6 +324,41 @@ export function ManagerMissionsBoard({
       }
       const newStatus = COLUMN_TO_STATUS[targetColumnId];
       if (!newStatus) return;
+      // UI optimiste: on déplace immédiatement la carte pour éviter le "blanc" pendant router.refresh()
+      const prev = boardState;
+      const keyOf = (colId: string) => {
+        if (colId === "nouvelles") return "nouvelles" as const;
+        if (colId === "a-assigner") return "aAssigner" as const;
+        if (colId === "en-cours") return "enCours" as const;
+        if (colId === "a-valider") return "aValider" as const;
+        return "terminees" as const;
+      };
+      const sourceKey = keyOf(sourceColumnId);
+      const targetKey = keyOf(targetColumnId);
+      const moving =
+        prev[sourceKey].find((t) => t.id === taskId) ??
+        prev.nouvelles.find((t) => t.id === taskId) ??
+        prev.aAssigner.find((t) => t.id === taskId) ??
+        prev.enCours.find((t) => t.id === taskId) ??
+        prev.aValider.find((t) => t.id === taskId) ??
+        prev.terminees.find((t) => t.id === taskId);
+      if (moving) {
+        setBoardState((cur) => {
+          const next = {
+            nouvelles: cur.nouvelles.filter((t) => t.id !== taskId),
+            aAssigner: cur.aAssigner.filter((t) => t.id !== taskId),
+            enCours: cur.enCours.filter((t) => t.id !== taskId),
+            aValider: cur.aValider.filter((t) => t.id !== taskId),
+            terminees: cur.terminees.filter((t) => t.id !== taskId),
+          };
+          const updated: ManagerBoardTask = { ...moving, status: newStatus };
+          // Si on déplace vers "À assigner", on force l'affichage "non assigné" immédiatement
+          const finalTask =
+            targetColumnId === "a-assigner" ? { ...updated, assignedTo: null } : updated;
+          next[targetKey] = [finalTask, ...next[targetKey]];
+          return next;
+        });
+      }
       try {
         if (targetColumnId === "a-assigner") {
           const unassignRes = await fetch(`/api/tasks/${taskId}`, {
@@ -322,6 +369,7 @@ export function ManagerMissionsBoard({
           if (!unassignRes.ok) {
             setDropHint("Impossible de déplacer la mission (droits ou erreur serveur).");
             window.setTimeout(() => setDropHint(null), 7000);
+            setBoardState(prev);
             router.refresh();
             return;
           }
@@ -334,16 +382,18 @@ export function ManagerMissionsBoard({
         if (!res.ok) {
           setDropHint("Le déplacement n'a pas été enregistré (droits ou erreur serveur).");
           window.setTimeout(() => setDropHint(null), 7000);
+          setBoardState(prev);
         }
         // Toujours resynchroniser le board après un drop
         router.refresh();
       } catch {
         setDropHint("Erreur réseau : le déplacement n'a pas été enregistré.");
         window.setTimeout(() => setDropHint(null), 7000);
+        setBoardState(prev);
         router.refresh();
       }
     },
-    [router]
+    [router, boardState]
   );
 
   const handlePriorityChange = useCallback(

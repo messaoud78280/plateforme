@@ -191,7 +191,7 @@ export default function NotreFaconDeTravaillerPage() {
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#94a3b8]">Conseil</p>
                 <h2
                   id="conseil-heading"
-                  className="mt-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.55rem] font-semibold leading-tight tracking-tight text-black md:text-3xl"
+                  className="mt-2 font-sans text-[1.55rem] font-semibold leading-tight tracking-tight text-black md:text-3xl"
                 >
                   Un accompagnement au-delà de l’administratif
                 </h2>
@@ -226,7 +226,7 @@ export default function NotreFaconDeTravaillerPage() {
                       </li>
                     ))}
                   </ul>
-                  <p className="relative mt-8 border-t border-[#bfdbfe]/50 pt-6 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-base font-semibold text-black md:text-lg">
+                  <p className="relative mt-8 border-t border-[#bfdbfe]/50 pt-6 text-center font-sans text-base font-semibold text-black md:text-lg">
                     On ne fait pas que gérer. On vous aide à évoluer.
                   </p>
                 </div>

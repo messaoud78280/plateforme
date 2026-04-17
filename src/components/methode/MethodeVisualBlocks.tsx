@@ -189,7 +189,7 @@ export function ChainFlowSection() {
             <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-[#94a3b8]">Parcours</p>
             <h2
               id="flux-heading"
-              className="mt-2 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.55rem] font-semibold leading-tight tracking-tight text-black md:text-3xl"
+              className="mt-2 text-center font-sans text-[1.55rem] font-semibold leading-tight tracking-tight text-black md:text-3xl"
             >
               Un fonctionnement clair de A à Z
             </h2>
@@ -286,7 +286,7 @@ export function BeforeAfterSection() {
             <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-[#94a3b8]">Comparaison</p>
             <h2
               id="comparaison-heading"
-              className="mt-2 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.55rem] font-semibold leading-tight tracking-tight text-black md:text-3xl"
+              className="mt-2 text-center font-sans text-[1.55rem] font-semibold leading-tight tracking-tight text-black md:text-3xl"
             >
               Avant / après
             </h2>
@@ -382,7 +382,7 @@ export function BeforeAfterSection() {
                 </ul>
               </article>
 
-              <p className="text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-sm font-semibold text-black md:col-span-2 md:-mt-2 md:text-base">
+              <p className="text-center font-sans text-sm font-semibold text-black md:col-span-2 md:-mt-2 md:text-base">
                 Passez du désordre au pilotage — sans changer de métier.
               </p>
             </div>
@@ -411,7 +411,7 @@ export function VousNousSection() {
             <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-[#94a3b8]">Rôles</p>
             <h2
               id="roles-heading"
-              className="mt-2 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.55rem] font-semibold leading-tight tracking-tight text-black md:text-3xl"
+              className="mt-2 text-center font-sans text-[1.55rem] font-semibold leading-tight tracking-tight text-black md:text-3xl"
             >
               Ce que vous faites / ce que nous faisons
             </h2>
@@ -504,7 +504,7 @@ export function VousNousSection() {
                 </ul>
               </article>
 
-              <p className="text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-sm font-semibold text-black md:col-span-2 md:-mt-2 md:text-base">
+              <p className="text-center font-sans text-sm font-semibold text-black md:col-span-2 md:-mt-2 md:text-base">
                 Chacun son rôle, tout devient plus fluide.
               </p>
             </div>
@@ -532,7 +532,7 @@ export function ShortTimelineSection() {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#94a3b8]">Méthode</p>
           <h2
             id="methode-heading"
-            className="mt-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.65rem] font-semibold leading-tight tracking-tight text-black md:text-3xl"
+            className="mt-2 font-sans text-[1.65rem] font-semibold leading-tight tracking-tight text-black md:text-3xl"
           >
             Notre déroulé — en 5 temps
           </h2>
@@ -555,7 +555,7 @@ export function ShortTimelineSection() {
                   {step.n}
                 </span>
                 <div className="min-w-0 flex-1 border-b border-[#e2e8f0]/70 pb-10 last:border-b-0 last:pb-0">
-                  <p className="font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-lg font-semibold tracking-tight text-black md:text-xl">
+                  <p className="font-sans text-lg font-semibold tracking-tight text-black md:text-xl">
                     {step.title}
                   </p>
                   <p className="mt-2 text-sm leading-relaxed text-black md:text-[15px]">{step.phrase}</p>
@@ -587,7 +587,7 @@ export function ImpactCardsSection() {
             <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-[#94a3b8]">Impact</p>
             <h2
               id="impact-heading"
-              className="mt-2 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.55rem] font-semibold leading-tight tracking-tight text-black md:text-3xl"
+              className="mt-2 text-center font-sans text-[1.55rem] font-semibold leading-tight tracking-tight text-black md:text-3xl"
             >
               Un impact direct sur votre activité
             </h2>
@@ -610,7 +610,7 @@ export function ImpactCardsSection() {
                 </li>
               ))}
             </ul>
-            <p className="mt-10 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-base font-semibold text-black md:text-lg">
+            <p className="mt-10 text-center font-sans text-base font-semibold text-black md:text-lg">
               Un administratif bien géré, c’est plus de chiffre d’affaires.
             </p>
           </div>

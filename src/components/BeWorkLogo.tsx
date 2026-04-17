@@ -34,8 +34,7 @@ export function BeWorkLogo({
     <span className={`inline-flex flex-col ${className}`}>
       <span className="inline-flex items-center gap-2">
         <span
-          className={`bework-logo-badge-metallic relative flex shrink-0 items-center justify-center rounded-full font-extrabold text-white ${iconSize}`}
-          style={{ fontFamily: "var(--font-orbitron), system-ui, sans-serif" }}
+          className={`bework-logo-badge-metallic relative flex shrink-0 items-center justify-center rounded-full font-sans font-extrabold text-white ${iconSize}`}
         >
           <span
             className="pointer-events-none absolute -left-1/4 -top-1/2 h-full w-[90%] rounded-full bg-gradient-to-b from-white/25 to-transparent opacity-80 blur-[3px]"
@@ -51,10 +50,7 @@ export function BeWorkLogo({
           />
           <span className="relative z-10 tracking-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">BW</span>
         </span>
-        <span
-          className={`font-extrabold tracking-tight ${textSize}`}
-          style={{ fontFamily: "var(--font-orbitron), system-ui, sans-serif" }}
-        >
+        <span className={`font-sans font-extrabold tracking-tight ${textSize}`}>
           <span className="text-metallic-black">Be</span>
           <span className="bg-gradient-to-r from-[#60a5fa] via-[#3b82f6] to-[#1d4ed8] bg-clip-text text-transparent [text-shadow:none]">
             Work

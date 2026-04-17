@@ -37,7 +37,7 @@
   --card-shadow-hover: 0 14px 36px rgba(15, 23, 42, 0.16);
 
   /* Typography */
-  --font-family: var(--font-geist-sans), "Inter", system-ui, sans-serif;
+  --font-family: var(--font-geist-sans), system-ui, sans-serif;
   --heading-1: 2rem;
   --heading-2: 1.5rem;
   --heading-3: 1.25rem;

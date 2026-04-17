@@ -145,7 +145,7 @@ export default function ContactForm() {
   return (
     <div className="px-4 py-8 md:py-10">
       <div className="mx-auto max-w-3xl">
-        <h1 className="text-metallic-black font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-3xl font-semibold tracking-tight md:text-4xl">
+        <h1 className="text-metallic-black font-sans text-3xl font-semibold tracking-tight md:text-4xl">
           Échanger sur votre organisation
         </h1>
         <p className="mt-4 text-base font-medium leading-relaxed text-black md:text-lg">
@@ -181,7 +181,7 @@ export default function ContactForm() {
         <div className="mt-8 rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_8px_28px_rgba(15,23,42,0.08)]">
           <div className="surface-metallic-light surface-metallic-light--soft rounded-2xl p-5 text-left md:p-6">
             <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#1d4ed8]">Après votre envoi</p>
-            <p className="mt-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-lg font-semibold text-black md:text-xl">
+            <p className="mt-2 font-sans text-lg font-semibold text-black md:text-xl">
               Visio découverte — échange direct avec l’équipe
             </p>
             <p className="mt-3 text-sm leading-relaxed text-black md:text-[0.9375rem]">

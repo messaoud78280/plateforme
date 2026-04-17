@@ -107,7 +107,7 @@ export default function InscriptionPage() {
             </div>
 
             <h1
-              className="text-metallic-black mb-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.75rem] font-semibold leading-tight tracking-tight md:text-[2rem]"
+              className="text-metallic-black mb-2 font-sans text-[1.75rem] font-semibold leading-tight tracking-tight md:text-[2rem]"
             >
               Créer un compte client
             </h1>

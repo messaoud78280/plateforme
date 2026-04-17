@@ -86,7 +86,7 @@ function ConnexionChoice() {
         <div className="rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_12px_40px_rgba(15,23,42,0.12),0_2px_0_rgba(255,255,255,0.6)_inset]">
           <div className="card-frame rounded-2xl p-8 md:p-10">
             <header className="mb-10 border-b border-[#c8d0dc]/60 pb-8 text-center">
-              <h1 className="text-metallic-black font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.85rem] font-semibold leading-tight tracking-tight md:text-[2.25rem]">
+              <h1 className="text-metallic-black font-sans text-[1.85rem] font-semibold leading-tight tracking-tight md:text-[2.25rem]">
                 Plateforme BeWork
               </h1>
               <p className="mt-3 text-sm leading-relaxed text-black md:text-base">
@@ -110,7 +110,7 @@ function ConnexionChoice() {
                     <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg border border-[#bfdbfe]/60 bg-gradient-to-br from-[#eff6ff] to-[#dbeafe]/90 text-[#1d4ed8] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] transition group-hover:border-[#93c5fd] group-hover:text-[#1e40af]">
                       <Icon className="h-7 w-7" />
                     </span>
-                    <h2 className="mb-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-lg font-semibold leading-snug tracking-tight text-black md:text-xl">
+                    <h2 className="mb-2 font-sans text-lg font-semibold leading-snug tracking-tight text-black md:text-xl">
                       {acc.title}
                     </h2>
                     <p className="text-sm leading-relaxed text-black">{acc.description}</p>

@@ -173,7 +173,7 @@ export default function TarifsPage() {
       <main className="mx-auto max-w-6xl px-4 py-12 md:py-16">
         {/* Intro */}
         <section className="text-center">
-          <h1 className="text-metallic-black font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-3xl font-semibold tracking-tight md:text-4xl md:leading-tight">
+          <h1 className="text-metallic-black font-sans text-3xl font-semibold tracking-tight md:text-4xl md:leading-tight">
             Ne perdez plus de chantiers par manque de suivi.
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-black">
@@ -339,7 +339,7 @@ export default function TarifsPage() {
             <div className="card-frame rounded-2xl px-6 py-8 md:px-10 md:py-10">
               <h2
                 id="comprehension-heading"
-                className="text-metallic-black text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-2xl font-semibold tracking-tight md:text-3xl"
+                className="text-metallic-black text-center font-sans text-2xl font-semibold tracking-tight md:text-3xl"
               >
                 Concrètement, ça représente quoi ?
               </h2>
@@ -371,7 +371,7 @@ export default function TarifsPage() {
           <div className="surface-metallic-light surface-metallic-light--soft rounded-2xl border-2 border-[#1d4ed8]/20 p-8 text-black shadow-lg md:p-10">
             <h2
               id="impact-heading"
-              className="text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-2xl font-semibold tracking-tight md:text-3xl"
+              className="text-center font-sans text-2xl font-semibold tracking-tight md:text-3xl"
             >
               Ce que vous gagnez réellement
             </h2>
@@ -437,7 +437,7 @@ export default function TarifsPage() {
               <div className="card-frame rounded-2xl px-6 py-8 text-center md:px-10 md:py-9">
                 <h2
                   id="cadre-prestation-heading"
-                  className="text-metallic-black font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-xl font-semibold tracking-tight md:text-2xl"
+                  className="text-metallic-black font-sans text-xl font-semibold tracking-tight md:text-2xl"
                 >
                   Cadre de prestation
                 </h2>
@@ -476,7 +476,7 @@ export default function TarifsPage() {
               className="scroll-mt-24 rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_12px_40px_rgba(15,23,42,0.1)]"
             >
               <div className="card-frame rounded-2xl px-6 py-8 md:px-10 md:py-9">
-                <h3 className="text-metallic-black text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-xl font-semibold tracking-tight md:text-left md:text-2xl">
+                <h3 className="text-metallic-black text-center font-sans text-xl font-semibold tracking-tight md:text-left md:text-2xl">
                   Que signifie « périmètre » ?
                 </h3>
                 <p className="mt-5 text-sm leading-relaxed text-black md:text-[0.9375rem]">
@@ -521,7 +521,7 @@ export default function TarifsPage() {
                   cadré par <strong className="font-semibold text-black">contrat</strong> : périmètre, modalités, engagements
                   des deux côtés.
                 </p>
-                <p className="mx-auto mt-4 max-w-2xl font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-base font-semibold leading-snug text-black md:text-lg">
+                <p className="mx-auto mt-4 max-w-2xl font-sans text-base font-semibold leading-snug text-black md:text-lg">
                   Un partenaire de pilotage — pas un portage de personnel.
                 </p>
               </div>
@@ -580,7 +580,7 @@ export default function TarifsPage() {
                 <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:justify-center sm:gap-4">
                   <h3
                     id="conciergerie-heading"
-                    className="text-metallic-black font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-xl font-semibold tracking-tight md:text-2xl"
+                    className="text-metallic-black font-sans text-xl font-semibold tracking-tight md:text-2xl"
                   >
                     Service de conciergerie
                   </h3>

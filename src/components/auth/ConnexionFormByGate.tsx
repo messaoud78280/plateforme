@@ -118,7 +118,7 @@ export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
               </span>
             </div>
 
-            <h1 className="text-metallic-black font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.75rem] font-semibold leading-tight tracking-tight md:text-[2rem]">
+            <h1 className="text-metallic-black font-sans text-[1.75rem] font-semibold leading-tight tracking-tight md:text-[2rem]">
               {config.title}
             </h1>
             <p className="mt-3 text-sm leading-relaxed text-black md:text-[0.9375rem]">{config.description}</p>

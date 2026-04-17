@@ -259,13 +259,13 @@ export default function HomePage() {
               {/* Colonne principale : message + CTA (~60 %) */}
               <div className="flex min-w-0 flex-col gap-6 text-center md:gap-7 md:text-left lg:order-2 lg:col-span-7">
                 <HeroPresentationVideo />
-                <h1 className="text-metallic-black text-balance font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.7rem] font-semibold leading-[1.1] tracking-[-0.02em] min-[400px]:text-3xl md:text-4xl md:leading-[1.08] lg:text-[2.75rem] lg:leading-[1.06] xl:text-5xl xl:leading-[1.04]">
+                <h1 className="text-metallic-black text-balance font-sans text-[1.7rem] font-semibold leading-[1.1] tracking-[-0.02em] min-[400px]:text-3xl md:text-4xl md:leading-[1.08] lg:text-[2.75rem] lg:leading-[1.06] xl:text-5xl xl:leading-[1.04]">
                   On tient le bureau, vous tenez le chantier.
                 </h1>
                 <div
                   className="mx-auto max-w-2xl rounded-xl border border-[#93c5fd]/45 bg-gradient-to-br from-white via-[#f8fafc] to-[#eff6ff]/90 px-5 py-5 text-center shadow-[0_4px_20px_rgba(29,78,216,0.07),inset_0_1px_0_rgba(255,255,255,0.9)] md:mx-0 md:px-6 md:py-5 md:text-left lg:max-w-none"
                 >
-                  <p className="font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-lg font-semibold leading-snug tracking-tight text-black md:text-xl md:leading-snug lg:text-2xl lg:leading-snug">
+                  <p className="font-sans text-lg font-semibold leading-snug tracking-tight text-black md:text-xl md:leading-snug lg:text-2xl lg:leading-snug">
                     Devis, relances, dossiers chantier, DICT, fournisseurs : on gère votre administratif BTP au quotidien.
                   </p>
                   <p className="mt-2 text-sm font-medium leading-relaxed text-black md:text-base">
@@ -275,7 +275,7 @@ export default function HomePage() {
                 <div className="mx-auto max-w-2xl rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_10px_30px_rgba(15,23,42,0.08)] md:mx-0">
                   <div className="surface-metallic-light surface-metallic-light--soft rounded-2xl px-5 py-5 text-center md:px-6 md:py-5 md:text-left">
                     <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-black">Pilotage administratif</p>
-                    <p className="mt-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-lg font-semibold leading-snug tracking-tight text-black md:text-xl md:leading-snug">
+                    <p className="mt-2 font-sans text-lg font-semibold leading-snug tracking-tight text-black md:text-xl md:leading-snug">
                       BeWork structure votre{" "}
                       <strong className="font-semibold text-black">administratif et votre coordination</strong> : devis et
                       relances qui avancent, dossiers suivis, échanges cadrés. Vous restez sur l&apos;ouvrage ; nous tenons le
@@ -1171,7 +1171,7 @@ export default function HomePage() {
         >
           <div className="mx-auto max-w-6xl">
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">Fondatrice &amp; méthode</p>
-            <h2 className="text-metallic-black mt-3 max-w-4xl font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-3xl font-semibold leading-[1.15] tracking-tight md:text-4xl md:leading-[1.1]">
+            <h2 className="text-metallic-black mt-3 max-w-4xl font-sans text-3xl font-semibold leading-[1.15] tracking-tight md:text-4xl md:leading-[1.1]">
               Une solution née du terrain — par une dirigeante du BTP en Île-de-France
             </h2>
 
@@ -1202,7 +1202,7 @@ export default function HomePage() {
                     />
                   </div>
                 </div>
-                <p className="mt-5 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-xl font-semibold text-black md:text-2xl">
+                <p className="mt-5 font-sans text-xl font-semibold text-black md:text-2xl">
                   Laure Olivie
                 </p>
                 <p className="mt-1 text-sm font-semibold uppercase tracking-[0.08em] text-black">
@@ -1223,7 +1223,7 @@ export default function HomePage() {
                   .
                 </p>
                 <div className="rounded-xl border border-[#bfdbfe]/70 bg-gradient-to-br from-[#eff6ff]/95 to-white/90 px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] md:px-6 md:py-6">
-                  <p className="font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-lg font-semibold leading-snug text-black md:text-xl">
+                  <p className="font-sans text-lg font-semibold leading-snug text-black md:text-xl">
                     Notre rôle
                   </p>
                   <p className="mt-2 text-sm leading-relaxed text-black md:text-base">
@@ -1259,7 +1259,7 @@ export default function HomePage() {
                 <div className="grid gap-10 md:grid-cols-2 md:items-stretch md:gap-12">
                   <div className="flex flex-col border-b border-[#c8d0dc]/70 pb-10 md:border-b-0 md:border-r md:border-[#c8d0dc]/70 md:pb-0 md:pr-10">
                     <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#1d4ed8]">Agence</p>
-                    <p className="mt-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-xl font-semibold text-black md:text-2xl">
+                    <p className="mt-2 font-sans text-xl font-semibold text-black md:text-2xl">
                       Région parisienne
                     </p>
                     <p className="mt-2 text-sm font-medium text-black">
@@ -1272,7 +1272,7 @@ export default function HomePage() {
                   </div>
                   <div className="flex flex-col">
                     <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#1d4ed8]">Plateforme</p>
-                    <p className="mt-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-xl font-semibold text-black md:text-2xl">
+                    <p className="mt-2 font-sans text-xl font-semibold text-black md:text-2xl">
                       Pilotage depuis la France
                     </p>
                     <p className="mt-2 text-sm font-medium text-black">Exécution encadrée, même fuseau horaire</p>
@@ -1289,7 +1289,7 @@ export default function HomePage() {
               <div className="flex flex-col gap-6 rounded-2xl border border-[#bfdbfe]/60 bg-gradient-to-b from-white via-[#f8fafc] to-[#eff6ff]/90 px-6 py-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)] md:flex-row md:items-center md:justify-between md:gap-10 md:px-10 md:py-9">
                 <div className="min-w-0 flex-1 text-center md:text-left">
                   <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#1d4ed8]">Premier échange</p>
-                  <p className="mt-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-xl font-semibold text-black md:text-2xl">
+                  <p className="mt-2 font-sans text-xl font-semibold text-black md:text-2xl">
                     Parlons de votre organisation
                   </p>
                   <p className="mt-3 text-sm leading-relaxed text-black md:text-[0.9375rem]">

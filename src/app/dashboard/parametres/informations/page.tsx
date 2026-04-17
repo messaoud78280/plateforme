@@ -41,7 +41,7 @@ export default async function InformationsPersonnellesPage() {
   return (
     <section className="rounded-2xl surface-metallic-light p-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h2 className="text-lg font-semibold text-[#475569]">
+        <h2 className="text-lg font-semibold text-black">
           Informations personnelles
         </h2>
         <Link
@@ -54,23 +54,23 @@ export default async function InformationsPersonnellesPage() {
 
       <dl className="mt-6 space-y-5">
         <div>
-          <dt className="text-sm font-medium text-[#64748b]">Civilité</dt>
-          <dd className="mt-1 text-[#0f172a]">{user.civilite || "—"}</dd>
+          <dt className="text-sm font-medium text-black">Civilité</dt>
+          <dd className="mt-1 text-black">{user.civilite || "—"}</dd>
         </div>
 
         <div>
-          <dt className="text-sm font-medium text-[#64748b]">Nom complet</dt>
-          <dd className="mt-1 text-[#0f172a]">{user.name || "—"}</dd>
+          <dt className="text-sm font-medium text-black">Nom complet</dt>
+          <dd className="mt-1 text-black">{user.name || "—"}</dd>
         </div>
 
         <div>
-          <dt className="text-sm font-medium text-[#64748b]">Pays/Région</dt>
-          <dd className="mt-1 text-[#0f172a]">{user.billingCountry || "—"}</dd>
+          <dt className="text-sm font-medium text-black">Pays/Région</dt>
+          <dd className="mt-1 text-black">{user.billingCountry || "—"}</dd>
         </div>
 
         <div>
-          <dt className="text-sm font-medium text-[#64748b]">Votre adresse</dt>
-          <dd className="mt-1 text-[#0f172a]">
+          <dt className="text-sm font-medium text-black">Votre adresse</dt>
+          <dd className="mt-1 text-black">
             {hasAddress ? (
               addressLines.map((line, i) => (
                 <span key={i}>
@@ -85,12 +85,12 @@ export default async function InformationsPersonnellesPage() {
         </div>
 
         <div>
-          <dt className="text-sm font-medium text-[#64748b]">Numéro de téléphone</dt>
-          <dd className="mt-1 text-[#0f172a]">
+          <dt className="text-sm font-medium text-black">Numéro de téléphone</dt>
+          <dd className="mt-1 text-black">
             {user.phone ? (
               <>
                 {user.phone}
-                <span className="ml-2 text-sm text-[#64748b]">(principal)</span>
+                <span className="ml-2 text-sm text-black">(principal)</span>
               </>
             ) : (
               "—"
@@ -99,8 +99,8 @@ export default async function InformationsPersonnellesPage() {
         </div>
 
         <div>
-          <dt className="text-sm font-medium text-[#64748b]">Adresse e-mail de contact</dt>
-          <dd className="mt-1 text-[#0f172a]">{user.email || "—"}</dd>
+          <dt className="text-sm font-medium text-black">Adresse e-mail de contact</dt>
+          <dd className="mt-1 text-black">{user.email || "—"}</dd>
         </div>
       </dl>
     </section>

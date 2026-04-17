@@ -39,12 +39,12 @@ export function MarketingSiteHeader({ plainBg = false, showBlogLink = true, bott
             aria-hidden
           />
           <span className="hidden min-w-0 text-left sm:block">
-            <span className="block text-[0.8125rem] font-extrabold leading-snug tracking-tight text-[#0f172a] sm:text-sm lg:text-[0.9375rem]">
+            <span className="block text-[0.8125rem] font-extrabold leading-snug tracking-tight text-black sm:text-sm lg:text-[0.9375rem]">
               Partenaire administratif{" "}
               <span className="font-bold text-[#94a3b8]">—</span>{" "}
               <span className="bg-gradient-to-b from-[#3b82f6] to-[#1d4ed8] bg-clip-text text-transparent">BTP</span>
             </span>
-            <span className="mt-0.5 block text-[11px] font-medium leading-snug text-[#64748b] sm:text-xs">
+            <span className="mt-0.5 block text-[11px] font-medium leading-snug text-black sm:text-xs">
               Cadre, rigueur, pilotage, lecture terrain
             </span>
           </span>
@@ -60,14 +60,14 @@ export function MarketingSiteHeader({ plainBg = false, showBlogLink = true, bott
           >
             <Link
               href="/connexion"
-              className="rounded-md px-2 py-1.5 text-xs font-medium text-[#334155] transition hover:bg-[#f1f5f9] hover:text-[#0f172a] sm:px-3 sm:text-sm"
+              className="rounded-md px-2 py-1.5 text-xs font-medium text-black transition hover:bg-[#f1f5f9] hover:text-black sm:px-3 sm:text-sm"
             >
               Connexion
             </Link>
             <span className="mx-0.5 h-5 w-px shrink-0 bg-[#e2e8f0]" aria-hidden />
             <Link
               href="/inscription"
-              className="rounded-md px-2 py-1.5 text-xs font-medium text-[#334155] transition hover:bg-[#f1f5f9] hover:text-[#0f172a] sm:px-3 sm:text-sm"
+              className="rounded-md px-2 py-1.5 text-xs font-medium text-black transition hover:bg-[#f1f5f9] hover:text-black sm:px-3 sm:text-sm"
             >
               Espace client
             </Link>
@@ -75,14 +75,14 @@ export function MarketingSiteHeader({ plainBg = false, showBlogLink = true, bott
           {showBlogLink ? (
             <Link
               href="/blog"
-              className="rounded-lg px-2 py-1.5 text-xs font-medium text-[#64748b] transition hover:text-[#0f172a] sm:px-3 sm:text-sm"
+              className="rounded-lg px-2 py-1.5 text-xs font-medium text-black transition hover:text-black sm:px-3 sm:text-sm"
             >
               Blog
             </Link>
           ) : null}
           <Link
             href="/notre-facon-de-travailler"
-            className="rounded-lg px-2 py-1.5 text-xs font-medium text-[#64748b] transition hover:text-[#0f172a] sm:px-3 sm:text-sm"
+            className="rounded-lg px-2 py-1.5 text-xs font-medium text-black transition hover:text-black sm:px-3 sm:text-sm"
             title="Notre méthode — flux, organisation et forfaits"
           >
             <span className="sm:hidden">Méthode</span>
@@ -90,7 +90,7 @@ export function MarketingSiteHeader({ plainBg = false, showBlogLink = true, bott
           </Link>
           <Link
             href="/tarifs"
-            className="rounded-lg surface-metallic-light px-2.5 py-1.5 text-xs font-medium text-[#1e293b] transition hover:bg-[#f8f9fb] sm:px-4 sm:py-2 sm:text-sm"
+            className="rounded-lg surface-metallic-light px-2.5 py-1.5 text-xs font-medium text-black transition hover:bg-[#f8f9fb] sm:px-4 sm:py-2 sm:text-sm"
           >
             Forfaits
           </Link>

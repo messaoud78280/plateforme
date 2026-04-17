@@ -54,7 +54,7 @@ export function AssignAgentTask({
         ))}
       </select>
       {assignedToName && (
-        <span className="text-xs text-[#64748b]">Actuel : {assignedToName}</span>
+        <span className="text-xs text-black">Actuel : {assignedToName}</span>
       )}
     </div>
   );

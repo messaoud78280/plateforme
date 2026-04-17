@@ -92,10 +92,10 @@ export default async function BlogArticlePage({ params }: Props) {
           <Link href="/blog" className="text-sm font-medium text-[#1d4ed8] hover:underline">
             ← Retour au blog
           </Link>
-          <h1 className="mt-6 text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl" itemProp="headline">
+          <h1 className="mt-6 text-3xl font-bold tracking-tight text-black md:text-4xl" itemProp="headline">
             {article.title}
           </h1>
-          <p className="mt-3 text-sm text-[#64748b]">
+          <p className="mt-3 text-sm text-black">
             <time dateTime={article.publishedTime} itemProp="datePublished">
               {new Date(article.publishedTime).toLocaleDateString("fr-FR", {
                 day: "numeric",
@@ -118,10 +118,10 @@ export default async function BlogArticlePage({ params }: Props) {
               </>
             ) : null}
           </p>
-          <div className="mt-12 space-y-6 text-[#334155]">
+          <div className="mt-12 space-y-6 text-black">
             {article.body.map((block, i) =>
               block.type === "h2" ? (
-                <h2 key={i} className="text-xl font-semibold text-[#0f172a]">
+                <h2 key={i} className="text-xl font-semibold text-black">
                   {block.content}
                 </h2>
               ) : (
@@ -132,11 +132,11 @@ export default async function BlogArticlePage({ params }: Props) {
             )}
           </div>
           <div className="mt-12 rounded-xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-8">
-            <p className="font-semibold text-[#0f172a]">Structurer votre administratif BTP</p>
-            <p className="mt-2 text-[#334155] leading-relaxed">
+            <p className="font-semibold text-black">Structurer votre administratif BTP</p>
+            <p className="mt-2 text-black leading-relaxed">
               Offre Suivi à{" "}
-              <span className="tarif-emphase text-[#0f172a]">490</span>{" "}
-              <span className="font-semibold text-[#0f172a]">€ TTC / mois</span> — niveau le plus adapté pour une activité
+              <span className="tarif-emphase text-black">490</span>{" "}
+              <span className="font-semibold text-black">€ TTC / mois</span> — niveau le plus adapté pour une activité
               régulière. Palier d’entrée Structure à 290 € TTC / mois ; Pilotage pour le niveau le plus élevé. Un échange permet de
               vérifier l’adéquation avant tout engagement.
             </p>
@@ -160,15 +160,15 @@ export default async function BlogArticlePage({ params }: Props) {
       </main>
 
       <footer className="border-t border-[#c8cdd6] bg-[#f8f9fb] px-6 py-12 mt-16">
-        <div className="mx-auto max-w-6xl flex flex-col gap-6 md:flex-row md:items-center md:justify-between text-sm text-[#334155]">
+        <div className="mx-auto max-w-6xl flex flex-col gap-6 md:flex-row md:items-center md:justify-between text-sm text-black">
           <div className="flex items-center gap-3">
             <BeWorkLogo size="sm" />
-            <span className="text-[#0f172a]">© {new Date().getFullYear()} BeWork</span>
+            <span className="text-black">© {new Date().getFullYear()} BeWork</span>
           </div>
           <div className="flex gap-6">
-            <Link href="/" className="font-medium hover:text-[#0f172a]">Accueil</Link>
-            <Link href="/blog" className="font-medium hover:text-[#0f172a]">Blog</Link>
-            <Link href="/contact" className="font-medium hover:text-[#0f172a]">Contact</Link>
+            <Link href="/" className="font-medium hover:text-black">Accueil</Link>
+            <Link href="/blog" className="font-medium hover:text-black">Blog</Link>
+            <Link href="/contact" className="font-medium hover:text-black">Contact</Link>
           </div>
         </div>
       </footer>

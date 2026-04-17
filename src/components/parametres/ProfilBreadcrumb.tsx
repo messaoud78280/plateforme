@@ -17,17 +17,17 @@ export function ProfilBreadcrumb() {
   const showSegment = segment && segmentLabels[segment];
 
   return (
-    <nav aria-label="Fil d'Ariane" className="mb-4 text-sm text-[#64748b]">
+    <nav aria-label="Fil d'Ariane" className="mb-4 text-sm text-black">
       <ol className="flex flex-wrap items-center gap-1">
         <li>
-          <Link href="/dashboard/parametres" className="hover:text-[#0f172a]">
+          <Link href="/dashboard/parametres" className="hover:text-black">
             Votre profil
           </Link>
         </li>
         {showSegment && (
           <>
             <li aria-hidden>/</li>
-            <li className="font-medium text-[#0f172a]">{currentLabel}</li>
+            <li className="font-medium text-black">{currentLabel}</li>
           </>
         )}
       </ol>

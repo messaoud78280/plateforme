@@ -33,10 +33,10 @@ const SECTEURS_ACTIVITE = [
 ] as const;
 
 const labelClass =
-  "mb-2 block text-xs font-semibold uppercase tracking-[0.1em] text-[#64748b]";
+  "mb-2 block text-xs font-semibold uppercase tracking-[0.1em] text-black";
 
 const fieldClass =
-  "w-full rounded-lg border border-[#b8c4d4]/90 bg-gradient-to-b from-white to-[#f4f7fb] px-4 py-2.5 text-[0.9375rem] font-medium text-[#0f172a] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_1px_2px_rgba(15,23,42,0.04)] outline-none transition placeholder:font-normal placeholder:text-[#94a3b8] focus:border-[#3b82f6]/65 focus:shadow-[inset_0_1px_0_rgba(255,255,255,1),0_0_0_3px_rgba(59,130,246,0.18)]";
+  "w-full rounded-lg border border-[#b8c4d4]/90 bg-gradient-to-b from-white to-[#f4f7fb] px-4 py-2.5 text-[0.9375rem] font-medium text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_1px_2px_rgba(15,23,42,0.04)] outline-none transition placeholder:font-normal placeholder:text-[#94a3b8] focus:border-[#3b82f6]/65 focus:shadow-[inset_0_1px_0_rgba(255,255,255,1),0_0_0_3px_rgba(59,130,246,0.18)]";
 
 export default function InscriptionPage() {
   const router = useRouter();
@@ -97,11 +97,11 @@ export default function InscriptionPage() {
             <div className="mb-6 flex flex-col gap-3 border-b border-[#c8d0dc]/60 pb-6 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <BackLink
                 href="/connexion/clients"
-                className="text-[#475569] transition-colors hover:text-[#0f172a]"
+                className="text-black transition-colors hover:text-black"
               >
                 Retour à la connexion clients
               </BackLink>
-              <span className="surface-metallic-light surface-metallic-light--badge-pill w-fit shrink-0 rounded-full px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#0f172a] shadow-sm">
+              <span className="surface-metallic-light surface-metallic-light--badge-pill w-fit shrink-0 rounded-full px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-black shadow-sm">
                 Inscription client
               </span>
             </div>
@@ -111,7 +111,7 @@ export default function InscriptionPage() {
             >
               Créer un compte client
             </h1>
-            <p className="mb-8 text-sm leading-relaxed text-[#64748b] md:text-[0.9375rem]">
+            <p className="mb-8 text-sm leading-relaxed text-black md:text-[0.9375rem]">
               Uniquement pour les clients. Gérants et agents : compte créé par l&apos;agence.
             </p>
 
@@ -259,7 +259,7 @@ export default function InscriptionPage() {
               </button>
             </form>
 
-            <p className="mt-8 border-t border-[#c8d0dc]/50 pt-6 text-center text-sm text-[#64748b]">
+            <p className="mt-8 border-t border-[#c8d0dc]/50 pt-6 text-center text-sm text-black">
               Déjà un compte client ?{" "}
               <Link
                 href="/connexion/clients"
@@ -270,7 +270,7 @@ export default function InscriptionPage() {
             </p>
             <Link
               href="/"
-              className="surface-metallic-outline mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-[#1e293b] transition hover:text-[#0f172a]"
+              className="surface-metallic-outline mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-[#1e293b] transition hover:text-black"
             >
               <span aria-hidden>←</span>
               Retour à l&apos;accueil

@@ -93,28 +93,28 @@ export default async function ClientDetailPage({
       <BackLink href="/dashboard/clients">Retour aux clients</BackLink>
 
       <div className="rounded-xl surface-metallic-light p-6 shadow-sm">
-        <h1 className="text-2xl font-bold text-[#0f172a]">{client.name}</h1>
-        <p className="mt-1 text-[#334155]">{client.email}</p>
+        <h1 className="text-2xl font-bold text-black">{client.name}</h1>
+        <p className="mt-1 text-black">{client.email}</p>
         {client.company && (
-          <p className="mt-1 text-sm text-[#64748b]">Société : {client.company}</p>
+          <p className="mt-1 text-sm text-black">Société : {client.company}</p>
         )}
         {client.phone && (
-          <p className="mt-1 text-sm text-[#64748b]">Tél. : {client.phone}</p>
+          <p className="mt-1 text-sm text-black">Tél. : {client.phone}</p>
         )}
       </div>
 
       {/* Projets du client */}
       <div className="rounded-xl surface-metallic-light shadow-sm">
-        <h2 className="border-b border-[#e0e4ea] px-6 py-4 text-lg font-semibold text-[#0f172a]">
+        <h2 className="border-b border-[#e0e4ea] px-6 py-4 text-lg font-semibold text-black">
           Projets ({projects.length})
         </h2>
         {projects.length === 0 ? (
-          <p className="px-6 py-8 text-sm text-[#64748b]">Aucun projet pour ce client.</p>
+          <p className="px-6 py-8 text-sm text-black">Aucun projet pour ce client.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[500px] text-sm">
               <thead>
-                <tr className="border-b border-[#e0e4ea] bg-[#f8f9fb] text-[#334155]">
+                <tr className="border-b border-[#e0e4ea] bg-[#f8f9fb] text-black">
                   <th className="px-6 py-3 text-left font-medium">Projet</th>
                   <th className="px-6 py-3 text-left font-medium">Statut</th>
                   <th className="px-6 py-3 text-left font-medium">Agent assigné</th>
@@ -172,16 +172,16 @@ export default async function ClientDetailPage({
 
       {/* Tâches du client */}
       <div className="rounded-xl surface-metallic-light shadow-sm">
-        <h2 className="border-b border-[#e0e4ea] px-6 py-4 text-lg font-semibold text-[#0f172a]">
+        <h2 className="border-b border-[#e0e4ea] px-6 py-4 text-lg font-semibold text-black">
           Tâches ({tasks.length})
         </h2>
         {tasks.length === 0 ? (
-          <p className="px-6 py-8 text-sm text-[#64748b]">Aucune tâche pour ce client.</p>
+          <p className="px-6 py-8 text-sm text-black">Aucune tâche pour ce client.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[500px] text-sm">
               <thead>
-                <tr className="border-b border-[#e0e4ea] bg-[#f8f9fb] text-[#334155]">
+                <tr className="border-b border-[#e0e4ea] bg-[#f8f9fb] text-black">
                   <th className="px-6 py-3 text-left font-medium">Tâche</th>
                   <th className="px-6 py-3 text-left font-medium">Projet</th>
                   <th className="px-6 py-3 text-left font-medium">Statut</th>
@@ -200,7 +200,7 @@ export default async function ClientDetailPage({
                         {task.title}
                       </Link>
                     </td>
-                    <td className="px-6 py-3 text-[#334155]">
+                    <td className="px-6 py-3 text-black">
                       {task.project ? (
                         <Link
                           href={`/dashboard/projets/${task.project.id}`}

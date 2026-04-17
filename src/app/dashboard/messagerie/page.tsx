@@ -54,8 +54,8 @@ export default async function MessageriePage() {
     <div className="space-y-6">
       <BackLink href="/dashboard">Tableau de bord</BackLink>
       <div>
-        <h1 className="text-2xl font-bold text-[#0f172a]">Messagerie</h1>
-        <p className="mt-1 text-[#334155]">
+        <h1 className="text-2xl font-bold text-black">Messagerie</h1>
+        <p className="mt-1 text-black">
           {isClient
             ? "Échangez avec votre assistant, suivez vos demandes et envoyez des documents."
             : "Messagerie centrée sur les missions. Gérez les échanges et le suivi des missions administratives."}

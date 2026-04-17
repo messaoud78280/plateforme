@@ -21,15 +21,15 @@ export default async function PreferencesSecuritePage() {
 
   return (
     <section className="rounded-2xl surface-metallic-light p-6">
-      <h2 className="mb-6 text-lg font-semibold text-[#475569]">
+      <h2 className="mb-6 text-lg font-semibold text-black">
         Préférences de sécurité
       </h2>
       <div className="space-y-8">
         <ChangePasswordForm />
         <div className="border-t border-[#e2e8f0] pt-6">
-          <p className="mb-2 text-sm font-medium text-[#64748b]">Session</p>
+          <p className="mb-2 text-sm font-medium text-black">Session</p>
           <div className="flex flex-wrap items-center gap-4">
-            <span className="text-sm text-[#64748b]">Connecté en tant que</span>
+            <span className="text-sm text-black">Connecté en tant que</span>
             <span
               className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
                 isCoteAgence ? "bg-blue-100 text-blue-800" : "bg-slate-200 text-slate-800"

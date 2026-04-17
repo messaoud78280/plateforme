@@ -12,7 +12,7 @@ export default async function ParametresPreferencesPage() {
 
   return (
     <section className="rounded-2xl surface-metallic-light p-6">
-      <h2 className="mb-6 text-lg font-semibold text-[#475569]">
+      <h2 className="mb-6 text-lg font-semibold text-black">
         Paramètres et préférences
       </h2>
       <ProfileForm

@@ -121,10 +121,10 @@ export default function ContactForm() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h1 className="mt-6 text-center text-2xl font-bold text-[#0f172a]">
+            <h1 className="mt-6 text-center text-2xl font-bold text-black">
               Demande envoyée
             </h1>
-            <p className="mt-3 text-center text-[#334155]">
+            <p className="mt-3 text-center text-black">
               Nous avons bien reçu votre message. Nous vous recontacterons à l’adresse indiquée pour confirmer le créneau visio
               et préciser le cadre d’un éventuel accompagnement — périmètre, forfait et modalités.
             </p>
@@ -148,19 +148,19 @@ export default function ContactForm() {
         <h1 className="text-metallic-black font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-3xl font-semibold tracking-tight md:text-4xl">
           Échanger sur votre organisation
         </h1>
-        <p className="mt-4 text-base font-medium leading-relaxed text-[#0f172a] md:text-lg">
+        <p className="mt-4 text-base font-medium leading-relaxed text-black md:text-lg">
           En validant ce formulaire, vous déclenchez un <span className="text-[#1d4ed8]">premier rendez-vous découverte</span> avec BeWork :{" "}
-          <strong className="font-semibold text-[#0f172a]">nous vous proposons rapidement un rendez-vous en visioconférence</strong>{" "}
+          <strong className="font-semibold text-black">nous vous proposons rapidement un rendez-vous en visioconférence</strong>{" "}
           — pas une file d’attente sans suite. C’est le moment où nous nous parlons{" "}
-          <strong className="font-semibold text-[#0f172a]">de vive voix</strong>.
+          <strong className="font-semibold text-black">de vive voix</strong>.
         </p>
-        <ol className="mt-5 list-none space-y-3 pl-0 text-sm leading-relaxed text-[#334155] md:text-[0.9375rem]">
+        <ol className="mt-5 list-none space-y-3 pl-0 text-sm leading-relaxed text-black md:text-[0.9375rem]">
           <li className="flex gap-3">
             <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#eff6ff] text-xs font-bold text-[#1d4ed8]" aria-hidden>
               1
             </span>
             <span>
-              Décrivez votre structure, votre secteur (de préférence <strong className="font-semibold text-[#0f172a]">BTP</strong>{" "}
+              Décrivez votre structure, votre secteur (de préférence <strong className="font-semibold text-black">BTP</strong>{" "}
               ou activités proches), votre charge administrative et ce que vous attendez.
             </span>
           </li>
@@ -169,34 +169,34 @@ export default function ContactForm() {
               2
             </span>
             <span>
-              Choisissez un créneau visio dans le formulaire : nous <strong className="font-semibold text-[#0f172a]">confirmons par e-mail dans les meilleurs délais</strong>{" "}
+              Choisissez un créneau visio dans le formulaire : nous <strong className="font-semibold text-black">confirmons par e-mail dans les meilleurs délais</strong>{" "}
               et préparons l’échange en fonction de vos réponses.
             </span>
           </li>
         </ol>
-        <p className="mt-5 text-xs font-semibold uppercase tracking-[0.1em] text-[#64748b]">
+        <p className="mt-5 text-xs font-semibold uppercase tracking-[0.1em] text-black">
           Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.
         </p>
 
         <div className="mt-8 rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_8px_28px_rgba(15,23,42,0.08)]">
           <div className="surface-metallic-light surface-metallic-light--soft rounded-2xl p-5 text-left md:p-6">
             <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#1d4ed8]">Après votre envoi</p>
-            <p className="mt-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-lg font-semibold text-[#0f172a] md:text-xl">
+            <p className="mt-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-lg font-semibold text-black md:text-xl">
               Visio découverte — échange direct avec l’équipe
             </p>
-            <p className="mt-3 text-sm leading-relaxed text-[#334155] md:text-[0.9375rem]">
+            <p className="mt-3 text-sm leading-relaxed text-black md:text-[0.9375rem]">
               Lors de ce rendez-vous, nous vous expliquons{" "}
-              <strong className="font-semibold text-[#0f172a]">oralement notre façon de travailler</strong> : méthode, cadre,
+              <strong className="font-semibold text-black">oralement notre façon de travailler</strong> : méthode, cadre,
               forfaits et ce que nous pouvons prendre en charge concrètement pour votre entreprise.
             </p>
-            <p className="mt-3 text-sm leading-relaxed text-[#334155] md:text-[0.9375rem]">
-              Nous regardons ensemble comment <strong className="font-semibold text-[#0f172a]">mieux structurer votre organisation</strong>{" "}
+            <p className="mt-3 text-sm leading-relaxed text-black md:text-[0.9375rem]">
+              Nous regardons ensemble comment <strong className="font-semibold text-black">mieux structurer votre organisation</strong>{" "}
               administrative (devis, facturation, relances, dossiers chantier, coordination…) afin de{" "}
-              <strong className="font-semibold text-[#0f172a]">sécuriser votre activité et soutenir votre chiffre d’affaires</strong>
+              <strong className="font-semibold text-black">sécuriser votre activité et soutenir votre chiffre d’affaires</strong>
               : moins de temps perdu sur des tâches qui traînent, une trésorerie et un suivi commercial plus fluides — sans
               promesse creuse, avec des leviers réalistes pour le BTP.
             </p>
-            <p className="mt-3 text-sm leading-relaxed text-[#64748b] md:text-[0.9375rem]">
+            <p className="mt-3 text-sm leading-relaxed text-black md:text-[0.9375rem]">
               L’objectif reste de vérifier si un accompagnement BeWork a du sens pour vous comme pour nous — ce n’est pas une
               démo générique imposée à toutes les structures.
             </p>
@@ -211,10 +211,10 @@ export default function ContactForm() {
           )}
 
           <div className="rounded-2xl surface-metallic-light p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-[#0f172a]">Votre structure</h2>
+            <h2 className="text-lg font-semibold text-black">Votre structure</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="structure" className="block text-sm font-medium text-[#334155]">
+                <label htmlFor="structure" className="block text-sm font-medium text-black">
                   Nom de la structure <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -222,19 +222,19 @@ export default function ContactForm() {
                   name="structure"
                   type="text"
                   required
-                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
+                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-black focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
                   placeholder="Ex. Mon Entreprise SAS"
                 />
               </div>
               <div>
-                <label htmlFor="denominationSociale" className="block text-sm font-medium text-[#334155]">
+                <label htmlFor="denominationSociale" className="block text-sm font-medium text-black">
                   Dénomination sociale
                 </label>
                 <input
                   id="denominationSociale"
                   name="denominationSociale"
                   type="text"
-                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
+                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-black focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
                   placeholder="Raison sociale officielle"
                 />
               </div>
@@ -242,10 +242,10 @@ export default function ContactForm() {
           </div>
 
           <div className="rounded-2xl surface-metallic-light p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-[#0f172a]">Contact et coordonnées</h2>
+            <h2 className="text-lg font-semibold text-black">Contact et coordonnées</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="contactName" className="block text-sm font-medium text-[#334155]">
+                <label htmlFor="contactName" className="block text-sm font-medium text-black">
                   Nom du contact <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -253,12 +253,12 @@ export default function ContactForm() {
                   name="contactName"
                   type="text"
                   required
-                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
+                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-black focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
                   placeholder="Prénom et nom"
                 />
               </div>
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-[#334155]">
+                <label htmlFor="email" className="block text-sm font-medium text-black">
                   Email <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -266,19 +266,19 @@ export default function ContactForm() {
                   name="email"
                   type="email"
                   required
-                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
+                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-black focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
                   placeholder="contact@exemple.fr"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label htmlFor="phone" className="block text-sm font-medium text-[#334155]">
+                <label htmlFor="phone" className="block text-sm font-medium text-black">
                   Téléphone
                 </label>
                 <input
                   id="phone"
                   name="phone"
                   type="tel"
-                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
+                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-black focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
                   placeholder="+33 6 12 34 56 78"
                 />
               </div>
@@ -286,15 +286,15 @@ export default function ContactForm() {
           </div>
 
           <div className="rounded-2xl surface-metallic-light p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-[#0f172a]">Formule souhaitée</h2>
+            <h2 className="text-lg font-semibold text-black">Formule souhaitée</h2>
             <div className="mt-4">
-              <label htmlFor="formule" className="block text-sm font-medium text-[#334155]">
+              <label htmlFor="formule" className="block text-sm font-medium text-black">
                 Choisissez une formule
               </label>
               <select
                 id="formule"
                 name="formule"
-                className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
+                className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-black focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
               >
                 <option value="">— Sélectionnez —</option>
                 {FORMULES.map((f) => (
@@ -307,13 +307,13 @@ export default function ContactForm() {
           </div>
 
           <div className="rounded-2xl surface-metallic-light p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-[#0f172a]">Demande de rendez-vous</h2>
-            <p className="mt-1 text-sm text-[#64748b]">
+            <h2 className="text-lg font-semibold text-black">Demande de rendez-vous</h2>
+            <p className="mt-1 text-sm text-black">
               Sélectionnez une date et un créneau. Nous vous enverrons un lien de visioconférence par email après confirmation.
             </p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="rdvDate" className="block text-sm font-medium text-[#334155]">
+                <label htmlFor="rdvDate" className="block text-sm font-medium text-black">
                   Date souhaitée
                 </label>
                 <select
@@ -321,7 +321,7 @@ export default function ContactForm() {
                   name="rdvDate"
                   value={selectedRdvDate}
                   onChange={(e) => setSelectedRdvDate(e.target.value)}
-                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
+                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-black focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
                 >
                   <option value="">— Choisir une date —</option>
                   {dates.map((d) => (
@@ -332,13 +332,13 @@ export default function ContactForm() {
                 </select>
               </div>
               <div>
-                <label htmlFor="rdvTime" className="block text-sm font-medium text-[#334155]">
+                <label htmlFor="rdvTime" className="block text-sm font-medium text-black">
                   Créneau horaire
                 </label>
                 <select
                   id="rdvTime"
                   name="rdvTime"
-                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
+                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-black focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
                 >
                   <option value="">— Choisir un créneau —</option>
                   {TIME_SLOTS.map((t) => {
@@ -351,7 +351,7 @@ export default function ContactForm() {
                   })}
                 </select>
                 {selectedRdvDate && (
-                  <p className="mt-1 text-xs text-[#64748b]">
+                  <p className="mt-1 text-xs text-black">
                     Les créneaux déjà pris sont marqués « indisponible ».
                   </p>
                 )}
@@ -360,41 +360,41 @@ export default function ContactForm() {
           </div>
 
           <div className="rounded-2xl surface-metallic-light p-6 shadow-sm">
-            <label htmlFor="message" className="block text-lg font-semibold text-[#0f172a]">
+            <label htmlFor="message" className="block text-lg font-semibold text-black">
               Votre message ou demande
             </label>
             <textarea
               id="message"
               name="message"
               rows={4}
-              className="mt-2 w-full rounded-lg surface-metallic-light px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
+              className="mt-2 w-full rounded-lg surface-metallic-light px-3 py-2 text-black focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
               placeholder="Décrivez brièvement votre besoin ou posez vos questions..."
             />
           </div>
 
           <div className="rounded-2xl surface-metallic-light p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-[#0f172a]">Informations complémentaires (optionnel)</h2>
+            <h2 className="text-lg font-semibold text-black">Informations complémentaires (optionnel)</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="sector" className="block text-sm font-medium text-[#334155]">
+                <label htmlFor="sector" className="block text-sm font-medium text-black">
                   Secteur d’activité
                 </label>
                 <input
                   id="sector"
                   name="sector"
                   type="text"
-                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
+                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-black focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
                   placeholder="Ex. Conseil, Santé, BTP..."
                 />
               </div>
               <div>
-                <label htmlFor="howKnown" className="block text-sm font-medium text-[#334155]">
+                <label htmlFor="howKnown" className="block text-sm font-medium text-black">
                   Comment nous avez-vous connu ?
                 </label>
                 <select
                   id="howKnown"
                   name="howKnown"
-                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
+                  className="mt-1 w-full rounded-lg surface-metallic-light px-3 py-2 text-black focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8]"
                 >
                   <option value="">— Sélectionnez —</option>
                   <option value="recherche">Recherche internet</option>
@@ -417,14 +417,14 @@ export default function ContactForm() {
             </button>
             <Link
               href="/"
-              className="text-sm text-[#64748b] underline hover:text-[#0f172a]"
+              className="text-sm text-black underline hover:text-black"
             >
               Annuler
             </Link>
           </div>
         </form>
 
-        <p className="mt-8 text-center text-sm text-[#64748b]">
+        <p className="mt-8 text-center text-sm text-black">
           En envoyant ce formulaire, vous acceptez d’être recontacté par BeWork dans le cadre de votre demande.
         </p>
       </div>

@@ -3,7 +3,7 @@
 /* Design system BeWork – métallique clair, épuré, futuriste */
 :root {
   --background: #f2f4f7;
-  --foreground: #0f172a;
+  --foreground: #000000;
 
   /* Métallique clair (pro) */
   --metal-50: #f8f9fb;
@@ -14,7 +14,7 @@
   --metal-500: #64748b;
   --metal-700: #334155;
   --metal-800: #1e293b;
-  --metal-900: #0f172a;
+  --metal-900: #000000;
 
   /* Accent futuriste (bleu acier) */
   --accent-500: #2563eb;
@@ -284,98 +284,91 @@
     0 -8px 28px rgba(15, 23, 42, 0.14);
 }
 
-/* Surface bleu métallisé — cadres & blocs (parcours, etc.) */
+/* Surface bleu métallisé — alignée sur le métal clair + texte noir (cartes tarifs, CTA) */
 .surface-metallic-blue {
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  color: #f1f5f9;
+  color: #000000;
   background:
     linear-gradient(
-      118deg,
-      rgba(255, 255, 255, 0.14) 0%,
-      rgba(255, 255, 255, 0.02) 28%,
-      transparent 45%,
-      transparent 62%,
-      rgba(255, 255, 255, 0.08) 82%,
-      rgba(255, 255, 255, 0.03) 100%
+      115deg,
+      rgba(255, 255, 255, 0.42) 0%,
+      rgba(255, 255, 255, 0.1) 26%,
+      transparent 44%,
+      transparent 58%,
+      rgba(239, 246, 255, 0.55) 82%,
+      rgba(255, 255, 255, 0.38) 100%
     ),
     linear-gradient(
       158deg,
-      #071422 0%,
-      #0f2840 14%,
-      #1a3f5f 28%,
-      #2d5a82 40%,
-      #1e4a6e 48%,
-      #3d6f9e 54%,
-      #1a3d5c 66%,
-      #0f2d4a 82%,
-      #050f18 100%
+      #e8eef6 0%,
+      #d8e2ee 22%,
+      #c9d6e8 48%,
+      #dce6f2 72%,
+      #eef2f8 100%
     );
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(29, 78, 216, 0.2);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    inset 0 -2px 0 rgba(0, 0, 0, 0.18),
-    0 8px 28px rgba(4, 20, 40, 0.5);
-  transition: box-shadow 0.35s ease, border-color 0.35s ease, transform 0.35s ease;
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -1px 0 rgba(15, 23, 42, 0.06),
+    0 6px 22px rgba(15, 23, 42, 0.1);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
 }
 .surface-metallic-blue:hover {
-  border-color: rgba(255, 255, 255, 0.28);
+  border-color: rgba(29, 78, 216, 0.32);
   transform: translateY(-2px);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.26),
-    inset 0 -2px 0 rgba(0, 0, 0, 0.14),
-    0 12px 36px rgba(4, 24, 48, 0.58);
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -1px 0 rgba(15, 23, 42, 0.05),
+    0 10px 28px rgba(15, 23, 42, 0.12);
 }
 
 /* Carte interne : léger relief par rapport au panneau parent */
 .surface-metallic-blue.surface-metallic-blue--inset {
   transform: none;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
-    inset 0 -3px 0 rgba(0, 0, 0, 0.22),
-    0 4px 16px rgba(2, 12, 28, 0.45);
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -2px 0 rgba(15, 23, 42, 0.08),
+    0 4px 14px rgba(15, 23, 42, 0.09);
 }
 .surface-metallic-blue.surface-metallic-blue--inset:hover {
   transform: translateY(-1px);
-  border-color: rgba(255, 255, 255, 0.24);
+  border-color: rgba(29, 78, 216, 0.28);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    inset 0 -3px 0 rgba(0, 0, 0, 0.18),
-    0 8px 22px rgba(2, 12, 28, 0.55);
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    inset 0 -2px 0 rgba(15, 23, 42, 0.06),
+    0 8px 20px rgba(15, 23, 42, 0.11);
 }
 
-/* Bandeau navigation accueil — pleine largeur, séparé de la zone claire (pas de « bloc » flottant) */
+/* Bandeau navigation accueil — même famille métal clair + liens noirs */
 .nav-strip-metallic-blue {
   position: relative;
   width: 100%;
   overflow: hidden;
   isolation: isolate;
   border: none;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.2);
+  border-bottom: 1px solid rgba(100, 116, 139, 0.35);
   background:
     linear-gradient(
-      118deg,
-      rgba(255, 255, 255, 0.1) 0%,
-      rgba(255, 255, 255, 0.02) 30%,
-      transparent 48%,
-      transparent 58%,
-      rgba(255, 255, 255, 0.06) 82%,
-      rgba(255, 255, 255, 0.03) 100%
+      115deg,
+      rgba(255, 255, 255, 0.38) 0%,
+      rgba(255, 255, 255, 0.08) 28%,
+      transparent 46%,
+      transparent 60%,
+      rgba(255, 255, 255, 0.18) 88%,
+      rgba(255, 255, 255, 0.3) 100%
     ),
     linear-gradient(
       158deg,
-      #060f18 0%,
-      #0c2238 18%,
-      #153a5c 36%,
-      #2d5a82 48%,
-      #1a3d5c 62%,
-      #0f2840 82%,
-      #050a12 100%
+      #e4eaf3 0%,
+      #d6dfea 40%,
+      #cad6e6 70%,
+      #dde5f0 100%
     );
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
-    inset 0 -2px 0 rgba(0, 0, 0, 0.18);
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -1px 0 rgba(15, 23, 42, 0.06);
 }
 /* Liseré lumineux entre header clair et bandeau (distinction nette) */
 .nav-strip-metallic-blue::before {
@@ -424,34 +417,28 @@
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.12) 18%,
-    rgba(186, 220, 255, 0.38) 50%,
-    rgba(255, 255, 255, 0.1) 82%,
+    rgba(148, 163, 184, 0.35) 18%,
+    rgba(100, 116, 139, 0.45) 50%,
+    rgba(148, 163, 184, 0.35) 82%,
     transparent 100%
   );
-  box-shadow: 1px 0 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 1px 0 0 rgba(255, 255, 255, 0.6);
 }
 .nav-strip-metallic-blue a {
-  color: #f1f5f9;
+  color: #000000;
   font-weight: 700;
   font-size: 0.8125rem;
   letter-spacing: 0.05em;
   padding: 0.4rem 0.75rem;
   border-radius: 0.375rem;
-  text-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.5),
-    0 0 1px rgba(0, 0, 0, 0.85);
+  text-shadow: none;
   transition:
     color 0.2s ease,
-    text-shadow 0.2s ease,
     background-color 0.2s ease;
 }
 .nav-strip-metallic-blue a:hover {
-  color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.1);
-  text-shadow:
-    0 0 14px rgba(147, 197, 253, 0.4),
-    0 1px 2px rgba(0, 0, 0, 0.45);
+  color: #000000;
+  background-color: rgba(29, 78, 216, 0.08);
 }
 .nav-strip-metallic-blue a:focus-visible {
   outline: 2px solid #93c5fd;
@@ -537,23 +524,14 @@
   box-shadow: 1px 0 0 rgba(255, 255, 255, 0.65);
 }
 
-/* Titre hero — métal noir : texte toujours lisible si clip non supporté */
+/* Titre hero — noir maximal (lisible partout) */
 .text-metallic-black {
-  color: #0f172a;
+  color: #000000;
 }
 
 @supports ((-webkit-background-clip: text) or (background-clip: text)) {
   .text-metallic-black {
-    background-image: linear-gradient(
-      118deg,
-      #475569 0%,
-      #1e293b 20%,
-      #64748b 34%,
-      #0f172a 48%,
-      #334155 58%,
-      #020617 72%,
-      #1e293b 100%
-    );
+    background-image: linear-gradient(118deg, #171717 0%, #000000 45%, #262626 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -563,8 +541,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #f2f4f7;
+    --foreground: #000000;
   }
 }
 
@@ -582,9 +560,9 @@ html {
 input,
 textarea,
 select {
-  color: #0f172a;
+  color: #000000;
   background-color: #ffffff;
-  caret-color: #0f172a;
+  caret-color: #000000;
 }
 
 input::placeholder,

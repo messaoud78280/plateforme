@@ -77,8 +77,8 @@ export function InformationsPersonnellesForm({ initialData }: InformationsPerson
   };
 
   const inputClass =
-    "w-full rounded-lg border border-[#e2e8f0] px-3 py-2 text-[#0f172a] focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8] disabled:bg-[#f8fafc]";
-  const labelClass = "mb-1 block text-sm font-medium text-[#64748b]";
+    "w-full rounded-lg border border-[#e2e8f0] px-3 py-2 text-black focus:border-[#1d4ed8] focus:outline-none focus:ring-1 focus:ring-[#1d4ed8] disabled:bg-[#f8fafc]";
+  const labelClass = "mb-1 block text-sm font-medium text-black";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
@@ -118,7 +118,7 @@ export function InformationsPersonnellesForm({ initialData }: InformationsPerson
 
       <div>
         <label className={labelClass}>Adresse e-mail de contact</label>
-        <p className="text-[#64748b]">{initialData.email}</p>
+        <p className="text-black">{initialData.email}</p>
         <p className="mt-1 text-xs text-[#94a3b8]">L&apos;email ne peut pas être modifié ici.</p>
       </div>
 
@@ -230,7 +230,7 @@ export function InformationsPersonnellesForm({ initialData }: InformationsPerson
         </button>
         <Link
           href="/dashboard/parametres/informations"
-          className="text-sm font-medium text-[#64748b] hover:text-[#0f172a]"
+          className="text-sm font-medium text-black hover:text-black"
         >
           Annuler
         </Link>

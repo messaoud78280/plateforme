@@ -89,7 +89,7 @@ function ConnexionChoice() {
               <h1 className="text-metallic-black font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.85rem] font-semibold leading-tight tracking-tight md:text-[2.25rem]">
                 Plateforme BeWork
               </h1>
-              <p className="mt-3 text-sm leading-relaxed text-[#64748b] md:text-base">
+              <p className="mt-3 text-sm leading-relaxed text-black md:text-base">
                 Choisissez votre espace de connexion
               </p>
             </header>
@@ -104,16 +104,16 @@ function ConnexionChoice() {
                     className="surface-metallic-light group flex flex-col rounded-xl p-5 transition-all duration-200 hover:border-[#93c5fd]/80 hover:shadow-[0_8px_28px_rgba(29,78,216,0.12)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#eef0f4] md:p-6"
                     aria-label={`${acc.title} — ${acc.description}`}
                   >
-                    <span className="surface-metallic-light surface-metallic-light--badge-pill mb-4 w-fit rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#0f172a] shadow-sm">
+                    <span className="surface-metallic-light surface-metallic-light--badge-pill mb-4 w-fit rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-black shadow-sm">
                       {acc.badge}
                     </span>
                     <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg border border-[#bfdbfe]/60 bg-gradient-to-br from-[#eff6ff] to-[#dbeafe]/90 text-[#1d4ed8] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] transition group-hover:border-[#93c5fd] group-hover:text-[#1e40af]">
                       <Icon className="h-7 w-7" />
                     </span>
-                    <h2 className="mb-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-lg font-semibold leading-snug tracking-tight text-[#0f172a] md:text-xl">
+                    <h2 className="mb-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-lg font-semibold leading-snug tracking-tight text-black md:text-xl">
                       {acc.title}
                     </h2>
-                    <p className="text-sm leading-relaxed text-[#64748b]">{acc.description}</p>
+                    <p className="text-sm leading-relaxed text-black">{acc.description}</p>
                     <span className="mt-4 text-xs font-semibold text-[#1d4ed8] transition group-hover:text-[#1e40af]">
                       Se connecter →
                     </span>
@@ -125,7 +125,7 @@ function ConnexionChoice() {
             <div className="mt-10 flex flex-col gap-3 border-t border-[#c8d0dc]/50 pt-8 sm:flex-row sm:justify-center sm:gap-4">
               <Link
                 href="/"
-                className="surface-metallic-outline flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-[#1e293b] transition hover:text-[#0f172a]"
+                className="surface-metallic-outline flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-[#1e293b] transition hover:text-black"
               >
                 <span aria-hidden>←</span>
                 Retour à l&apos;accueil
@@ -149,7 +149,7 @@ export default function ConnexionPage() {
     <Suspense
       fallback={
         <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#dce2ea] px-4">
-          <p className="text-sm font-medium text-[#64748b]">Chargement…</p>
+          <p className="text-sm font-medium text-black">Chargement…</p>
         </div>
       }
     >

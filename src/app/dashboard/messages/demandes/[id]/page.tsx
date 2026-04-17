@@ -56,7 +56,7 @@ export default async function DemandeContactPage({
 
       <div className="rounded-xl surface-metallic-light shadow-sm">
         <div className="border-b border-[#e0e4ea] px-6 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-[#0f172a]">
+          <h1 className="text-xl font-bold text-black">
             Demande de {demande.structure}
           </h1>
           <span
@@ -74,67 +74,67 @@ export default async function DemandeContactPage({
 
         <div className="p-6 space-y-6">
           <section>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-[#64748b]">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-black">
               Structure
             </h2>
-            <p className="mt-1 font-medium text-[#0f172a]">{demande.structure}</p>
+            <p className="mt-1 font-medium text-black">{demande.structure}</p>
             {demande.denominationSociale && (
-              <p className="mt-1 text-[#334155]">Dénomination sociale : {demande.denominationSociale}</p>
+              <p className="mt-1 text-black">Dénomination sociale : {demande.denominationSociale}</p>
             )}
           </section>
 
           <section>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-[#64748b]">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-black">
               Contact
             </h2>
-            <p className="mt-1 font-medium text-[#0f172a]">{demande.contactName}</p>
+            <p className="mt-1 font-medium text-black">{demande.contactName}</p>
             <p className="mt-1">
               <a href={`mailto:${demande.email}`} className="text-[#1d4ed8] hover:underline">
                 {demande.email}
               </a>
             </p>
             {demande.phone && (
-              <p className="mt-1 text-[#334155]">Tél. : {demande.phone}</p>
+              <p className="mt-1 text-black">Tél. : {demande.phone}</p>
             )}
           </section>
 
           <section>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-[#64748b]">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-black">
               Formule et rendez-vous
             </h2>
             {demande.formule && (
-              <p className="mt-1 text-[#0f172a]">Formule : {demande.formule}</p>
+              <p className="mt-1 text-black">Formule : {demande.formule}</p>
             )}
-            <p className="mt-1 text-[#334155]">Créneau demandé : <strong>{rdvLabel}</strong></p>
-            <p className="mt-2 text-sm text-[#64748b]">
+            <p className="mt-1 text-black">Créneau demandé : <strong>{rdvLabel}</strong></p>
+            <p className="mt-2 text-sm text-black">
               Recontacter le prospect par email pour confirmer le RDV en visioconférence et expliquer le mode opératoire et les conditions.
             </p>
           </section>
 
           {demande.message && (
             <section>
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-[#64748b]">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-black">
                 Message
               </h2>
-              <p className="mt-1 whitespace-pre-wrap text-[#334155]">{demande.message}</p>
+              <p className="mt-1 whitespace-pre-wrap text-black">{demande.message}</p>
             </section>
           )}
 
           {(demande.sector || demande.howKnown) && (
             <section>
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-[#64748b]">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-black">
                 Compléments
               </h2>
-              {demande.sector && <p className="mt-1 text-[#334155]">Secteur : {demande.sector}</p>}
+              {demande.sector && <p className="mt-1 text-black">Secteur : {demande.sector}</p>}
               {demande.howKnown && (
-                <p className="mt-1 text-[#334155]">
+                <p className="mt-1 text-black">
                   Comment nous a connu : {HOW_KNOWN_LABELS[demande.howKnown] ?? demande.howKnown}
                 </p>
               )}
             </section>
           )}
 
-          <p className="pt-4 border-t border-[#e0e4ea] text-sm text-[#64748b]">
+          <p className="pt-4 border-t border-[#e0e4ea] text-sm text-black">
             Reçu le {new Date(demande.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
           </p>
         </div>
@@ -151,7 +151,7 @@ export default async function DemandeContactPage({
         )}
         <Link
           href="/dashboard/messages"
-          className="rounded-lg surface-metallic-light px-6 py-2.5 text-sm font-medium text-[#334155] hover:bg-[#f8f9fb]"
+          className="rounded-lg surface-metallic-light px-6 py-2.5 text-sm font-medium text-black hover:bg-[#f8f9fb]"
         >
           Retour aux RDV
         </Link>

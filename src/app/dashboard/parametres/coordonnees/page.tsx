@@ -43,31 +43,31 @@ export default async function CoordonneesEntreprisePage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <nav aria-label="Fil d'Ariane" className="mb-4 text-sm text-[#64748b]">
+      <nav aria-label="Fil d'Ariane" className="mb-4 text-sm text-black">
         <ol className="flex flex-wrap items-center gap-1">
           <li>
-            <Link href="/dashboard" className="hover:text-[#0f172a]">
+            <Link href="/dashboard" className="hover:text-black">
               Compte
             </Link>
           </li>
           <li aria-hidden>/</li>
           <li>
-            <Link href="/dashboard/parametres/coordonnees" className="hover:text-[#0f172a]">
+            <Link href="/dashboard/parametres/coordonnees" className="hover:text-black">
               Coordonnées de l&apos;entreprise
             </Link>
           </li>
           <li aria-hidden>/</li>
-          <li className="font-medium text-[#0f172a]">{companyName}</li>
+          <li className="font-medium text-black">{companyName}</li>
         </ol>
       </nav>
 
-      <h1 className="text-2xl font-bold tracking-tight text-[#0f172a]">
+      <h1 className="text-2xl font-bold tracking-tight text-black">
         Coordonnées de l&apos;entreprise
       </h1>
 
       <section className="mt-8 rounded-2xl surface-metallic-light p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold text-[#0f172a]">
+          <h2 className="text-lg font-semibold text-black">
             Détails de {companyName}
           </h2>
           <Link
@@ -80,18 +80,18 @@ export default async function CoordonneesEntreprisePage() {
 
         <dl className="mt-6 space-y-5">
           <div>
-            <dt className="text-sm font-medium text-[#64748b]">Nom de l&apos;entreprise</dt>
-            <dd className="mt-1 text-[#0f172a]">{user.company || "—"}</dd>
+            <dt className="text-sm font-medium text-black">Nom de l&apos;entreprise</dt>
+            <dd className="mt-1 text-black">{user.company || "—"}</dd>
           </div>
 
           <div>
-            <dt className="text-sm font-medium text-[#64748b]">Pays/Région</dt>
-            <dd className="mt-1 text-[#0f172a]">{user.billingCountry || "—"}</dd>
+            <dt className="text-sm font-medium text-black">Pays/Région</dt>
+            <dd className="mt-1 text-black">{user.billingCountry || "—"}</dd>
           </div>
 
           <div>
-            <dt className="text-sm font-medium text-[#64748b]">Adresse de facturation</dt>
-            <dd className="mt-1 text-[#0f172a]">
+            <dt className="text-sm font-medium text-black">Adresse de facturation</dt>
+            <dd className="mt-1 text-black">
               {hasAddress ? (
                 addressLines.map((line, i) => (
                   <span key={i}>
@@ -106,12 +106,12 @@ export default async function CoordonneesEntreprisePage() {
           </div>
 
           <div>
-            <dt className="text-sm font-medium text-[#64748b]">Numéro de téléphone</dt>
-            <dd className="mt-1 text-[#0f172a]">
+            <dt className="text-sm font-medium text-black">Numéro de téléphone</dt>
+            <dd className="mt-1 text-black">
               {user.phone ? (
                 <>
                   {user.phone}
-                  <span className="ml-2 text-sm text-[#64748b]">(Principal)</span>
+                  <span className="ml-2 text-sm text-black">(Principal)</span>
                 </>
               ) : (
                 "—"

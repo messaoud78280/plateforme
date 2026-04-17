@@ -38,16 +38,16 @@ export default async function ClientsPage() {
     <div className="space-y-8">
       <BackLink href="/dashboard">Tableau de bord</BackLink>
       <div>
-        <h1 className="text-2xl font-bold text-[#0f172a]">Clients</h1>
-        <p className="mt-1 text-[#334155]">
+        <h1 className="text-2xl font-bold text-black">Clients</h1>
+        <p className="mt-1 text-black">
           Répertoire de tous vos clients. Accédez à leurs projets et tâches, et attribuez un agent à chaque projet ou tâche.
         </p>
       </div>
 
       {clients.length === 0 ? (
         <div className="rounded-xl surface-metallic-light p-12 text-center">
-          <p className="text-[#334155]">Aucun client pour le moment.</p>
-          <p className="mt-2 text-sm text-[#64748b]">
+          <p className="text-black">Aucun client pour le moment.</p>
+          <p className="mt-2 text-sm text-black">
             Les projets créés par les clients apparaîtront ici une fois qu&apos;ils auront un compte.
           </p>
         </div>
@@ -55,7 +55,7 @@ export default async function ClientsPage() {
         <div className="overflow-hidden rounded-xl surface-metallic-light shadow-sm">
           <table className="w-full min-w-[600px] text-left text-sm">
             <thead>
-              <tr className="border-b border-[#c8cdd6] bg-[#f8f9fb] text-[#334155]">
+              <tr className="border-b border-[#c8cdd6] bg-[#f8f9fb] text-black">
                 <th className="px-6 py-4 font-semibold">Client</th>
                 <th className="px-6 py-4 font-semibold">Email</th>
                 <th className="px-6 py-4 font-semibold text-center">Projets</th>
@@ -75,21 +75,21 @@ export default async function ClientsPage() {
                   className="border-b border-[#e0e4ea] transition hover:bg-[#f8f9fb]"
                 >
                   <td className="px-6 py-4">
-                    <span className="font-medium text-[#0f172a]">{client.name}</span>
+                    <span className="font-medium text-black">{client.name}</span>
                     {client.company && (
-                      <span className="ml-2 text-[#64748b]">— {client.company}</span>
+                      <span className="ml-2 text-black">— {client.company}</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-[#334155]">{client.email}</td>
-                  <td className="px-6 py-4 text-center text-[#334155]">
+                  <td className="px-6 py-4 text-black">{client.email}</td>
+                  <td className="px-6 py-4 text-center text-black">
                     {client._count.projects}
                   </td>
-                  <td className="px-6 py-4 text-center text-[#334155]">
+                  <td className="px-6 py-4 text-center text-black">
                     {client._count.tasks}
                   </td>
-                  <td className="px-6 py-4 text-center text-[#334155]">
+                  <td className="px-6 py-4 text-center text-black">
                     {total > 0 ? (
-                      <span>{used} / {total} <span className="text-[#64748b]">(reste {remaining})</span></span>
+                      <span>{used} / {total} <span className="text-black">(reste {remaining})</span></span>
                     ) : "—"}
                   </td>
                   <td className="px-6 py-4 text-right">

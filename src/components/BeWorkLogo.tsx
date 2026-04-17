@@ -65,11 +65,11 @@ export function BeWorkLogo({
         <span
           className={`${taglineIndent} mt-1.5 max-w-[calc(100vw-3rem)] py-0.5 sm:max-w-xl`}
         >
-          <span className="block text-xs font-semibold leading-snug text-[#0f172a] sm:text-sm">
+          <span className="block text-xs font-semibold leading-snug text-black sm:text-sm">
             {tagline ?? defaultTagline}
           </span>
           {taglineSub ? (
-            <span className="mt-1 block text-[11px] font-medium leading-snug text-[#64748b] sm:text-[0.8125rem]">
+            <span className="mt-1 block text-[11px] font-medium leading-snug text-black sm:text-[0.8125rem]">
               {taglineSub}
             </span>
           ) : null}

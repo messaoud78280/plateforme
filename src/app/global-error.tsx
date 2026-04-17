@@ -15,10 +15,10 @@ export default function GlobalError({
     <html lang="fr">
       <body style={{ margin: 0, fontFamily: "system-ui, sans-serif", background: "#f8fafc", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
         <div style={{ maxWidth: 480, textAlign: "center" }}>
-          <h1 style={{ fontSize: "1.25rem", color: "#0f172a", marginBottom: 8 }}>
+          <h1 style={{ fontSize: "1.25rem", color: "#000000", marginBottom: 8 }}>
             Une erreur est survenue
           </h1>
-          <p style={{ color: "#64748b", fontSize: "0.875rem", marginBottom: 24 }}>
+          <p style={{ color: "#000000", fontSize: "0.875rem", marginBottom: 24 }}>
             Rechargez la page ou vérifiez les logs du serveur (Railway → Deployments → View logs).
             {error.digest && (
               <span style={{ display: "block", marginTop: 8, color: "#94a3b8" }}>

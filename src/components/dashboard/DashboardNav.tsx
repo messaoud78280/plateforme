@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 const linkBase =
   "inline-flex items-center rounded-md text-xs font-medium sm:text-sm transition-colors";
 const activeClass = `${linkBase} bg-[#1d4ed8] px-2.5 py-1.5 font-semibold text-white hover:bg-[#1e40af]`;
-const inactiveClass = `${linkBase} px-2.5 py-1.5 text-[#334155] hover:bg-[#e8ecf2] hover:text-[#0f172a]`;
+const inactiveClass = `${linkBase} px-2.5 py-1.5 text-black hover:bg-[#e8ecf2] hover:text-black`;
 
 function NavLink({
   href,

@@ -59,7 +59,7 @@ function SectionShell({
 }) {
   return (
     <section id={id} className={`scroll-mt-24 ${className}`} aria-labelledby={id ? `${id}-heading` : undefined}>
-      <h2 id={id ? `${id}-heading` : undefined} className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
+      <h2 id={id ? `${id}-heading` : undefined} className="text-2xl font-bold tracking-tight text-black md:text-3xl">
         {title}
       </h2>
       {children}
@@ -80,10 +80,10 @@ export default function NotreFaconDeTravaillerPage() {
               Notre méthode
             </span>
           </p>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl md:leading-tight">
+          <h1 className="mt-3 text-3xl font-bold tracking-tight text-black md:text-4xl md:leading-tight">
             Une organisation simple, efficace et adaptée au terrain
           </h1>
-          <div className="mx-auto mt-5 max-w-3xl space-y-4 text-base leading-relaxed text-[#334155] md:text-lg">
+          <div className="mx-auto mt-5 max-w-3xl space-y-4 text-base leading-relaxed text-black md:text-lg">
             <p>
               De la demande client à l’encaissement, chaque étape est claire, structurée et maîtrisée.
             </p>
@@ -108,7 +108,7 @@ export default function NotreFaconDeTravaillerPage() {
 
           {/* Grille tarifaire */}
           <SectionShell id="forfaits" title="Trois forfaits, une même méthode" className="mx-auto max-w-5xl">
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#334155] md:text-base">
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-black md:text-base">
               Le déroulé ne change pas : analyse, rendez-vous découverte, suivi, ajustements. Ce qui varie, c’est la profondeur du pilotage
               — posée à la mise en place avec vous.
             </p>
@@ -125,18 +125,18 @@ export default function NotreFaconDeTravaillerPage() {
                       {plan.badge}
                     </span>
                   )}
-                  <p className="text-lg font-bold text-[#0f172a]">{plan.name}</p>
+                  <p className="text-lg font-bold text-black">{plan.name}</p>
                   <p className="mt-1 text-sm font-semibold text-[#1d4ed8]">
-                    {formatPriceTtc(plan.price)} € TTC<span className="font-normal text-[#64748b]"> / mois</span>
+                    {formatPriceTtc(plan.price)} € TTC<span className="font-normal text-black"> / mois</span>
                   </p>
                   <div className="mt-2" aria-label="Repère indicatif de charge">
-                    <p className="text-[11px] leading-snug text-[#64748b] md:text-xs md:leading-relaxed">
+                    <p className="text-[11px] leading-snug text-black md:text-xs md:leading-relaxed">
                       <span className="block font-normal">{plan.equivalentNote.line1}</span>
                       <span className="mt-0.5 block font-normal text-[#94a3b8]">{plan.equivalentNote.line2}</span>
                     </p>
                   </div>
-                  <p className="mt-3 border-t border-[#e2e8f0] pt-3 text-sm leading-snug text-[#334155]">{plan.tagline}</p>
-                  <ul className="mt-4 space-y-1.5 text-xs leading-snug text-[#64748b]">
+                  <p className="mt-3 border-t border-[#e2e8f0] pt-3 text-sm leading-snug text-black">{plan.tagline}</p>
+                  <ul className="mt-4 space-y-1.5 text-xs leading-snug text-black">
                     {plan.highlights.slice(0, 3).map((h) => (
                       <li key={h} className="flex gap-2">
                         <span className="shrink-0 text-[#1d4ed8]" aria-hidden>
@@ -150,7 +150,7 @@ export default function NotreFaconDeTravaillerPage() {
               ))}
             </div>
             <div className="mx-auto mt-6 max-w-xl text-center">
-              <p className="text-[11px] font-normal leading-relaxed text-[#64748b] md:text-xs">
+              <p className="text-[11px] font-normal leading-relaxed text-black md:text-xs">
                 Les volumes indiqués sont des repères estimatifs. Notre approche repose sur un cadre de travail structuré et un
                 niveau de suivi adapté à votre activité, et non sur une logique horaire stricte.
               </p>
@@ -166,7 +166,7 @@ export default function NotreFaconDeTravaillerPage() {
             <p className="mt-3 text-center">
               <Link
                 href="/cas-clients"
-                className="text-sm font-semibold text-[#0f172a] underline decoration-[#0f172a]/20 underline-offset-2 hover:decoration-[#0f172a]/40"
+                className="text-sm font-semibold text-black underline decoration-black/20 underline-offset-2 hover:decoration-black/40"
               >
                 Voir des cas clients (preuves)
               </Link>
@@ -191,7 +191,7 @@ export default function NotreFaconDeTravaillerPage() {
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#94a3b8]">Conseil</p>
                 <h2
                   id="conseil-heading"
-                  className="mt-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.55rem] font-semibold leading-tight tracking-tight text-[#0f172a] md:text-3xl"
+                  className="mt-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.55rem] font-semibold leading-tight tracking-tight text-black md:text-3xl"
                 >
                   Un accompagnement au-delà de l’administratif
                 </h2>
@@ -214,7 +214,7 @@ export default function NotreFaconDeTravaillerPage() {
                     ].map((t) => (
                       <li
                         key={t}
-                        className="flex items-center gap-3 rounded-xl px-2 py-2.5 text-sm font-medium text-[#334155] transition-colors duration-200 hover:bg-[#eff6ff]/70 md:text-[15px]"
+                        className="flex items-center gap-3 rounded-xl px-2 py-2.5 text-sm font-medium text-black transition-colors duration-200 hover:bg-[#eff6ff]/70 md:text-[15px]"
                       >
                         <span
                           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-white via-[#eff6ff] to-[#dbeafe] text-sm font-bold text-[#1d4ed8] shadow-[inset_0_2px_4px_rgba(255,255,255,0.95),inset_0_-2px_4px_rgba(29,78,216,0.06),0_3px_10px_rgba(37,99,235,0.14)] ring-1 ring-[#bfdbfe]/90"
@@ -226,7 +226,7 @@ export default function NotreFaconDeTravaillerPage() {
                       </li>
                     ))}
                   </ul>
-                  <p className="relative mt-8 border-t border-[#bfdbfe]/50 pt-6 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-base font-semibold text-[#0f172a] md:text-lg">
+                  <p className="relative mt-8 border-t border-[#bfdbfe]/50 pt-6 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-base font-semibold text-black md:text-lg">
                     On ne fait pas que gérer. On vous aide à évoluer.
                   </p>
                 </div>
@@ -237,8 +237,8 @@ export default function NotreFaconDeTravaillerPage() {
 
         {/* CTA */}
         <div className="mx-auto mt-20 max-w-3xl rounded-xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-8 text-center md:mt-24 md:p-10">
-          <h2 className="text-xl font-bold text-[#0f172a] md:text-2xl">On fait le point sur votre organisation ?</h2>
-          <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-[#334155] md:text-base">
+          <h2 className="text-xl font-bold text-black md:text-2xl">On fait le point sur votre organisation ?</h2>
+          <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-black md:text-base">
             Un échange suffit pour voir si notre méthode colle à votre façon de travailler sur le terrain.
           </p>
           <div className="mt-6 flex flex-col items-stretch gap-3 sm:flex-row sm:justify-center sm:gap-4">
@@ -259,32 +259,32 @@ export default function NotreFaconDeTravaillerPage() {
         </div>
 
         <p className="mt-10 text-center">
-          <Link href="/" className="text-sm font-medium text-[#64748b] underline hover:text-[#0f172a]">
+          <Link href="/" className="text-sm font-medium text-black underline hover:text-black">
             Retour à l’accueil
           </Link>
         </p>
       </main>
 
       <footer className="mt-12 border-t border-[#c8cdd6] bg-[#f8f9fb] px-6 py-10">
-        <div className="mx-auto flex max-w-6xl flex-col gap-6 text-sm text-[#334155] md:flex-row md:items-center md:justify-between">
+        <div className="mx-auto flex max-w-6xl flex-col gap-6 text-sm text-black md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
             <BeWorkLogo size="sm" />
-            <span className="text-[#0f172a]">© {new Date().getFullYear()} BeWork</span>
+            <span className="text-black">© {new Date().getFullYear()} BeWork</span>
           </div>
           <div className="flex flex-wrap gap-x-6 gap-y-2">
-            <Link href="/" className="font-medium hover:text-[#0f172a]">
+            <Link href="/" className="font-medium hover:text-black">
               Accueil
             </Link>
-            <Link href="/faq" className="font-medium hover:text-[#0f172a]">
+            <Link href="/faq" className="font-medium hover:text-black">
               FAQ
             </Link>
-            <Link href="/tarifs" className="font-medium hover:text-[#0f172a]">
+            <Link href="/tarifs" className="font-medium hover:text-black">
               Forfaits
             </Link>
-            <Link href="/blog" className="font-medium hover:text-[#0f172a]">
+            <Link href="/blog" className="font-medium hover:text-black">
               Blog
             </Link>
-            <Link href="/contact" className="font-medium hover:text-[#0f172a]">
+            <Link href="/contact" className="font-medium hover:text-black">
               Contact
             </Link>
           </div>

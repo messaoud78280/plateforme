@@ -80,22 +80,22 @@ export default function FaqPage() {
 
       <main className="px-6 py-16 md:py-24">
         <article className="mx-auto max-w-3xl">
-          <h1 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
+          <h1 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
             Questions fréquentes
           </h1>
-          <p className="mt-6 text-lg leading-relaxed text-[#334155]">
+          <p className="mt-6 text-lg leading-relaxed text-black">
             Cadre, tarifs, collaboration et adéquation avec les entreprises du bâtiment : les réponses ci-dessous visent des
             dirigeants qui veulent déléguer proprement, sans promesses creuses.
           </p>
-          <p className="mt-4 text-sm font-semibold text-[#0f172a]">
+          <p className="mt-4 text-sm font-semibold text-black">
             Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.
           </p>
 
           <dl className="mt-12 space-y-8">
             {FAQ_ITEMS.map((item, i) => (
               <div key={i} className="rounded-xl surface-metallic-light p-6">
-                <dt className="text-lg font-semibold text-[#0f172a]">{item.q}</dt>
-                <dd className="mt-3 text-[#334155] leading-relaxed">{item.a}</dd>
+                <dt className="text-lg font-semibold text-black">{item.q}</dt>
+                <dd className="mt-3 text-black leading-relaxed">{item.a}</dd>
               </div>
             ))}
           </dl>
@@ -119,8 +119,8 @@ export default function FaqPage() {
           />
 
           <div className="mt-16 rounded-xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-8">
-            <h2 className="text-xl font-bold text-[#0f172a]">Vérifier l’adéquation avec votre organisation</h2>
-            <p className="mt-3 text-[#334155]">
+            <h2 className="text-xl font-bold text-black">Vérifier l’adéquation avec votre organisation</h2>
+            <p className="mt-3 text-black">
               Un échange permet de poser votre charge administrative, vos outils et le niveau de formule adapté — avant tout
               engagement.
             </p>
@@ -139,7 +139,7 @@ export default function FaqPage() {
               </Link>
               <Link
                 href="/inscription"
-                className="surface-metallic-outline inline-flex rounded-lg px-6 py-3 font-semibold text-[#334155] hover:text-[#1d4ed8]"
+                className="surface-metallic-outline inline-flex rounded-lg px-6 py-3 font-semibold text-black hover:text-[#1d4ed8]"
               >
                 Accès client — créer un compte
               </Link>
@@ -149,22 +149,22 @@ export default function FaqPage() {
       </main>
 
       <footer className="border-t border-[#c8cdd6] bg-[#f8f9fb] px-6 py-12 mt-16">
-        <div className="mx-auto max-w-6xl flex flex-col gap-6 md:flex-row md:items-center md:justify-between text-sm text-[#334155]">
+        <div className="mx-auto max-w-6xl flex flex-col gap-6 md:flex-row md:items-center md:justify-between text-sm text-black">
           <div className="flex items-center gap-3">
             <BeWorkLogo size="sm" />
-            <span className="text-[#0f172a]">© {new Date().getFullYear()} BeWork</span>
+            <span className="text-black">© {new Date().getFullYear()} BeWork</span>
           </div>
           <div className="flex gap-6">
-            <Link href="/" className="font-medium hover:text-[#0f172a]">
+            <Link href="/" className="font-medium hover:text-black">
               Accueil
             </Link>
-            <Link href="/faq" className="font-medium hover:text-[#0f172a]">
+            <Link href="/faq" className="font-medium hover:text-black">
               FAQ
             </Link>
-            <Link href="/blog" className="font-medium hover:text-[#0f172a]">
+            <Link href="/blog" className="font-medium hover:text-black">
               Blog
             </Link>
-            <Link href="/contact" className="font-medium hover:text-[#0f172a]">
+            <Link href="/contact" className="font-medium hover:text-black">
               Contact
             </Link>
           </div>

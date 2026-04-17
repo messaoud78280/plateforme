@@ -11,10 +11,10 @@ export default async function TransfertAppelsPage() {
 
   return (
     <section className="rounded-2xl surface-metallic-light p-6">
-      <h2 className="mb-4 text-lg font-semibold text-[#475569]">
+      <h2 className="mb-4 text-lg font-semibold text-black">
         Transfert d&apos;appels
       </h2>
-      <p className="text-[#64748b]">
+      <p className="text-black">
         Cette fonctionnalité sera bientôt disponible.
       </p>
     </section>

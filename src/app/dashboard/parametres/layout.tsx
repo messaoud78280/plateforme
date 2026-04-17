@@ -20,7 +20,7 @@ export default async function ParametresLayout({
     <div className="mx-auto max-w-4xl">
       <BackLink href="/dashboard" className="mb-4 block">Tableau de bord</BackLink>
       <ProfilBreadcrumb />
-      <h1 className="mt-4 text-2xl font-bold tracking-tight text-[#0f172a]">
+      <h1 className="mt-4 text-2xl font-bold tracking-tight text-black">
         Votre profil
       </h1>
       <div className="mt-8 flex gap-8">

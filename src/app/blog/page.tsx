@@ -90,10 +90,10 @@ export default function BlogPage() {
 
       <main className="px-6 py-16 md:py-24">
         <div className="mx-auto max-w-3xl">
-          <h1 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
+          <h1 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
             Blog BeWork
           </h1>
-          <p className="mt-4 text-lg text-[#334155]">
+          <p className="mt-4 text-lg text-black">
             Conseils pour artisans et PME du bâtiment : administratif chantier, trésorerie, délégation et assistant administratif externalisé.
           </p>
           <ul className="mt-12 space-y-8">
@@ -103,15 +103,15 @@ export default function BlogPage() {
                   href={`/blog/${a.slug}`}
                   className="block rounded-xl surface-metallic-light p-6 transition hover:border-[#1d4ed8]/30 hover:shadow-md"
                 >
-                  <h2 className="text-xl font-semibold text-[#0f172a]">{a.title}</h2>
-                  <p className="mt-1 text-xs text-[#64748b]">
+                  <h2 className="text-xl font-semibold text-black">{a.title}</h2>
+                  <p className="mt-1 text-xs text-black">
                     {new Date(a.publishedTime).toLocaleDateString("fr-FR", {
                       day: "numeric",
                       month: "long",
                       year: "numeric",
                     })}
                   </p>
-                  <p className="mt-2 text-[#334155]">{a.excerpt}</p>
+                  <p className="mt-2 text-black">{a.excerpt}</p>
                   <span className="mt-4 inline-flex items-center text-sm font-medium text-[#1d4ed8]">
                     Lire l&apos;article →
                   </span>
@@ -121,8 +121,8 @@ export default function BlogPage() {
           </ul>
 
           <section className="mt-14 rounded-2xl border border-[#dce3ec] bg-white/60 p-7">
-            <h2 className="text-lg font-semibold text-[#0f172a]">Pages pratiques (BTP)</h2>
-            <p className="mt-2 text-sm leading-relaxed text-[#475569]">
+            <h2 className="text-lg font-semibold text-black">Pages pratiques (BTP)</h2>
+            <p className="mt-2 text-sm leading-relaxed text-black">
               Accès direct aux ressources les plus demandées : relances, situations, DICT/DT et suivi.
             </p>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -135,7 +135,7 @@ export default function BlogPage() {
                 <Link
                   key={r.href}
                   href={r.href}
-                  className="rounded-xl surface-metallic-light p-4 font-medium text-[#0f172a] transition hover:shadow-sm"
+                  className="rounded-xl surface-metallic-light p-4 font-medium text-black transition hover:shadow-sm"
                 >
                   {r.title} <span className="text-[#1d4ed8]">→</span>
                 </Link>
@@ -146,15 +146,15 @@ export default function BlogPage() {
       </main>
 
       <footer className="border-t border-[#c8cdd6] bg-[#f8f9fb] px-6 py-12 mt-16">
-        <div className="mx-auto max-w-6xl flex flex-col gap-6 md:flex-row md:items-center md:justify-between text-sm text-[#334155]">
+        <div className="mx-auto max-w-6xl flex flex-col gap-6 md:flex-row md:items-center md:justify-between text-sm text-black">
           <div className="flex items-center gap-3">
             <BeWorkLogo size="sm" />
-            <span className="text-[#0f172a]">© {new Date().getFullYear()} BeWork</span>
+            <span className="text-black">© {new Date().getFullYear()} BeWork</span>
           </div>
           <div className="flex gap-6">
-            <Link href="/" className="font-medium hover:text-[#0f172a]">Accueil</Link>
-            <Link href="/tarifs" className="font-medium hover:text-[#0f172a]">Tarifs</Link>
-            <Link href="/contact" className="font-medium hover:text-[#0f172a]">Contact</Link>
+            <Link href="/" className="font-medium hover:text-black">Accueil</Link>
+            <Link href="/tarifs" className="font-medium hover:text-black">Tarifs</Link>
+            <Link href="/contact" className="font-medium hover:text-black">Contact</Link>
           </div>
         </div>
       </footer>

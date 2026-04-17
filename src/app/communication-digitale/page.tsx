@@ -109,20 +109,20 @@ export default async function CommunicationDigitalePage() {
       <main className="mx-auto max-w-6xl px-4 py-12 md:py-16">
         {/* Hero */}
         <section className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
+          <h1 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
             Communication digitale
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-[#334155]">
+          <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-black">
             Complétez votre assistance administrative avec des packs de visibilité en ligne simples et faciles à comprendre.
           </p>
-          <p className="mt-2 text-sm text-[#64748b]">
+          <p className="mt-2 text-sm text-black">
             Créez votre fiche Google, animez vos réseaux sociaux ou lancez votre site professionnel.
           </p>
         </section>
 
         {/* Tarifs expliqués */}
         <section className="mt-10 rounded-2xl surface-metallic-light p-6">
-          <h2 className="text-lg font-semibold text-[#0f172a]">Les tarifs communication BeWork</h2>
+          <h2 className="text-lg font-semibold text-black">Les tarifs communication BeWork</h2>
           <p className="mt-2 text-sm text-slate-600 leading-relaxed">
             Les prix affichés ci-dessous sont les tarifs officiels de BeWork. Chaque pack est facturé mensuellement et comprend
             l&apos;ensemble des services listés. Pas de frais cachés, pas de supplément pour l&apos;accompagnement : tout est inclus.
@@ -135,7 +135,7 @@ export default async function CommunicationDigitalePage() {
 
         {/* Packs */}
         <section className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4" aria-labelledby="packs-heading">
-          <h2 id="packs-heading" className="col-span-full text-xl font-semibold text-[#0f172a]">
+          <h2 id="packs-heading" className="col-span-full text-xl font-semibold text-black">
             Tarifs des packs
           </h2>
           {PACKS.map((pack) => (
@@ -148,9 +148,9 @@ export default async function CommunicationDigitalePage() {
                   {pack.badge}
                 </span>
               )}
-              <h3 className="text-lg font-semibold text-[#0f172a]">{pack.name}</h3>
-              <p className="mt-2 text-sm text-[#64748b]">{pack.description}</p>
-              <ul className="mt-4 flex-1 space-y-2 text-sm text-[#334155]">
+              <h3 className="text-lg font-semibold text-black">{pack.name}</h3>
+              <p className="mt-2 text-sm text-black">{pack.description}</p>
+              <ul className="mt-4 flex-1 space-y-2 text-sm text-black">
                 {pack.services.map((s) => (
                   <li key={s} className="flex items-start gap-2">
                     <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#1d4ed8]" />
@@ -159,7 +159,7 @@ export default async function CommunicationDigitalePage() {
                 ))}
               </ul>
               <p className="mt-4">
-                <span className="text-2xl font-bold text-[#0f172a]">{pack.price}€</span>
+                <span className="text-2xl font-bold text-black">{pack.price}€</span>
                 <span className="ml-1 text-sm font-normal text-slate-500">/mois TTC</span>
               </p>
               <Link
@@ -178,7 +178,7 @@ export default async function CommunicationDigitalePage() {
 
         {/* Missions possibles */}
         <section className="mt-16 rounded-2xl surface-metallic-light p-8">
-          <h2 className="text-xl font-semibold text-[#0f172a]">Missions possibles</h2>
+          <h2 className="text-xl font-semibold text-black">Missions possibles</h2>
           <p className="mt-1 text-sm text-slate-500">
             Avec un pack communication, vous pouvez créer ces missions dans votre tableau de bord.
           </p>

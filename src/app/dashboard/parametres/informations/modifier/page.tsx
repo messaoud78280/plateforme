@@ -34,7 +34,7 @@ export default async function ModifierInformationsPage() {
   return (
     <section className="rounded-2xl surface-metallic-light p-6">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <h2 className="text-lg font-semibold text-[#475569]">
+        <h2 className="text-lg font-semibold text-black">
           Modifier les coordonnées personnelles
         </h2>
         <BackLink href="/dashboard/parametres/informations">Retour aux informations</BackLink>

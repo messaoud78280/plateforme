@@ -161,11 +161,11 @@ const impactCardClass = `${metallicBlueFlowCard} items-center gap-3 p-5 md:gap-4
 
 /** Titres d’étapes (CLIENT, DEVIS…) : Geist + capitales + tracking, comme « Parcours », « Impact », etc. */
 const chainPhaseTitleClass =
-  "break-words font-sans text-[0.68rem] font-bold uppercase leading-[1.15] tracking-[0.16em] text-[#0f172a] antialiased sm:text-[0.72rem] sm:tracking-[0.18em] md:text-[0.75rem] md:tracking-[0.2em] lg:text-xs lg:tracking-[0.22em] xl:text-[0.8125rem]";
+  "break-words font-sans text-[0.68rem] font-bold uppercase leading-[1.15] tracking-[0.16em] text-black antialiased sm:text-[0.72rem] sm:tracking-[0.18em] md:text-[0.75rem] md:tracking-[0.2em] lg:text-xs lg:tracking-[0.22em] xl:text-[0.8125rem]";
 
 /** Titres sur la rangée desktop (colonnes étroites) */
 const chainPhaseTitleDesktopClass =
-  "break-words font-sans text-[0.625rem] font-bold uppercase leading-[1.1] tracking-[0.1em] text-[#0f172a] antialiased md:text-[0.65rem] md:tracking-[0.12em] lg:text-[0.7rem] lg:tracking-[0.14em] xl:text-[0.72rem]";
+  "break-words font-sans text-[0.625rem] font-bold uppercase leading-[1.1] tracking-[0.1em] text-black antialiased md:text-[0.65rem] md:tracking-[0.12em] lg:text-[0.7rem] lg:tracking-[0.14em] xl:text-[0.72rem]";
 
 /** Numéros de la timeline : Geist tabulaire, même famille que le corps du site */
 const timelineIndexClass =
@@ -189,11 +189,11 @@ export function ChainFlowSection() {
             <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-[#94a3b8]">Parcours</p>
             <h2
               id="flux-heading"
-              className="mt-2 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.55rem] font-semibold leading-tight tracking-tight text-[#0f172a] md:text-3xl"
+              className="mt-2 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.55rem] font-semibold leading-tight tracking-tight text-black md:text-3xl"
             >
               Un fonctionnement clair de A à Z
             </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-center text-sm leading-relaxed text-[#64748b] md:text-base">
+            <p className="mx-auto mt-4 max-w-2xl text-center text-sm leading-relaxed text-black md:text-base">
               De la première prise de contact jusqu’à l’encaissement — une chaîne maîtrisée.
             </p>
 
@@ -213,11 +213,11 @@ export function ChainFlowSection() {
                         </ChainIconWrapper>
                       </div>
                       <p className={`mt-3 ${chainPhaseTitleClass}`}>{step.label}</p>
-                      <p className="mt-1 text-[11px] leading-snug text-[#64748b]">{step.desc}</p>
+                      <p className="mt-1 text-[11px] leading-snug text-black">{step.desc}</p>
                     </div>
                     {i < CHAIN_STEPS.length - 1 && (
                       <div className="flex justify-center py-2.5" aria-hidden>
-                        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#f8fafc] via-[#e2e8f0] to-[#cbd5e1] text-sm font-light text-[#475569] shadow-[inset_0_2px_4px_rgba(255,255,255,0.88),0_3px_10px_rgba(15,23,42,0.08)] ring-1 ring-white/80">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#f8fafc] via-[#e2e8f0] to-[#cbd5e1] text-sm font-light text-black shadow-[inset_0_2px_4px_rgba(255,255,255,0.88),0_3px_10px_rgba(15,23,42,0.08)] ring-1 ring-white/80">
                           ↓
                         </span>
                       </div>
@@ -246,13 +246,13 @@ export function ChainFlowSection() {
                         </ChainIconWrapper>
                       </div>
                       <p className={`mt-2 ${chainPhaseTitleDesktopClass}`}>{step.label}</p>
-                      <p className="mt-1.5 text-[9px] leading-snug text-[#64748b] lg:text-[10px]">
+                      <p className="mt-1.5 text-[9px] leading-snug text-black lg:text-[10px]">
                         {step.desc}
                       </p>
                     </div>
                     {i < CHAIN_STEPS.length - 1 && (
                       <div className="flex items-center justify-center self-center px-0.5" aria-hidden>
-                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-[#f8fafc] via-[#e2e8f0] to-[#cbd5e1] text-[10px] font-medium text-[#64748b] shadow-[inset_0_1px_3px_rgba(255,255,255,0.9),0_2px_6px_rgba(15,23,42,0.06)] ring-1 ring-white/90 md:h-7 md:w-7 md:text-[11px]">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-[#f8fafc] via-[#e2e8f0] to-[#cbd5e1] text-[10px] font-medium text-black shadow-[inset_0_1px_3px_rgba(255,255,255,0.9),0_2px_6px_rgba(15,23,42,0.06)] ring-1 ring-white/90 md:h-7 md:w-7 md:text-[11px]">
                           →
                         </span>
                       </div>
@@ -286,11 +286,11 @@ export function BeforeAfterSection() {
             <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-[#94a3b8]">Comparaison</p>
             <h2
               id="comparaison-heading"
-              className="mt-2 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.55rem] font-semibold leading-tight tracking-tight text-[#0f172a] md:text-3xl"
+              className="mt-2 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.55rem] font-semibold leading-tight tracking-tight text-black md:text-3xl"
             >
               Avant / après
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-center text-sm leading-relaxed text-[#64748b] md:text-base">
+            <p className="mx-auto mt-4 max-w-xl text-center text-sm leading-relaxed text-black md:text-base">
               Le même métier. Une autre façon d’organiser l’administratif.
             </p>
 
@@ -299,7 +299,7 @@ export function BeforeAfterSection() {
                 className="pointer-events-none absolute left-1/2 top-[42%] z-10 hidden -translate-x-1/2 -translate-y-1/2 md:flex"
                 aria-hidden
               >
-                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#f8fafc] via-[#e2e8f0] to-[#cbd5e1] font-sans text-[11px] font-extrabold tracking-[0.2em] text-[#475569] shadow-[inset_0_2px_5px_rgba(255,255,255,0.9),inset_0_-3px_8px_rgba(15,23,42,0.12),0_6px_22px_rgba(15,23,42,0.12)] ring-2 ring-white ring-offset-2 ring-offset-[var(--metal-50)]">
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#f8fafc] via-[#e2e8f0] to-[#cbd5e1] font-sans text-[11px] font-extrabold tracking-[0.2em] text-black shadow-[inset_0_2px_5px_rgba(255,255,255,0.9),inset_0_-3px_8px_rgba(15,23,42,0.12),0_6px_22px_rgba(15,23,42,0.12)] ring-2 ring-white ring-offset-2 ring-offset-[var(--metal-50)]">
                   VS
                 </span>
               </div>
@@ -318,13 +318,13 @@ export function BeforeAfterSection() {
                   <span className="inline-flex items-center rounded-full bg-gradient-to-b from-[#fee2e2] to-[#fecaca] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#7f1d1d] shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] ring-1 ring-inset ring-[#fca5a5]/90">
                     Sans organisation
                   </span>
-                  <span className="text-xs text-[#64748b]">Aujourd’hui, sans cadre</span>
+                  <span className="text-xs text-black">Aujourd’hui, sans cadre</span>
                 </header>
                 <ul className="relative mt-6 space-y-1" role="list">
                   {SANS.map((t) => (
                     <li
                       key={t}
-                      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[#334155] transition-colors duration-200 md:text-[15px] ${
+                      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-black transition-colors duration-200 md:text-[15px] ${
                         t === "Devis en retard"
                           ? "bg-[#fff1f2]/95 shadow-[inset_0_0_0_1px_rgba(254,202,202,0.75)] hover:bg-[#ffe4e6]/90"
                           : "hover:bg-[#fef2f2]/85"
@@ -343,7 +343,7 @@ export function BeforeAfterSection() {
               </article>
 
               <div className="flex justify-center py-1 md:hidden" aria-hidden>
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#f8fafc] via-[#e2e8f0] to-[#cbd5e1] font-sans text-[10px] font-extrabold tracking-[0.2em] text-[#475569] shadow-[inset_0_2px_4px_rgba(255,255,255,0.85),0_4px_14px_rgba(15,23,42,0.1)] ring-2 ring-white">
+                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#f8fafc] via-[#e2e8f0] to-[#cbd5e1] font-sans text-[10px] font-extrabold tracking-[0.2em] text-black shadow-[inset_0_2px_4px_rgba(255,255,255,0.85),0_4px_14px_rgba(15,23,42,0.1)] ring-2 ring-white">
                   VS
                 </span>
               </div>
@@ -362,13 +362,13 @@ export function BeforeAfterSection() {
                   <span className="inline-flex items-center rounded-full bg-gradient-to-b from-[#dbeafe] to-[#bfdbfe] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#1e3a8a] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] ring-1 ring-inset ring-[#93c5fd]/90">
                     Avec BeWork
                   </span>
-                  <span className="text-xs text-[#64748b]">Même activité, autre rythme</span>
+                  <span className="text-xs text-black">Même activité, autre rythme</span>
                 </header>
                 <ul className="relative mt-6 space-y-1" role="list">
                   {AVEC.map((t) => (
                     <li
                       key={t}
-                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[#334155] transition-colors duration-200 hover:bg-[#eff6ff]/75 md:text-[15px]"
+                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-black transition-colors duration-200 hover:bg-[#eff6ff]/75 md:text-[15px]"
                     >
                       <span
                         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-white via-[#eff6ff] to-[#dbeafe] text-[#1d4ed8] shadow-[inset_0_2px_4px_rgba(255,255,255,0.95),inset_0_-2px_5px_rgba(29,78,216,0.08),0_4px_12px_rgba(37,99,235,0.15)] ring-1 ring-[#bfdbfe]/90 transition-transform duration-200 group-hover:scale-105"
@@ -382,7 +382,7 @@ export function BeforeAfterSection() {
                 </ul>
               </article>
 
-              <p className="text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-sm font-semibold text-[#64748b] md:col-span-2 md:-mt-2 md:text-base">
+              <p className="text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-sm font-semibold text-black md:col-span-2 md:-mt-2 md:text-base">
                 Passez du désordre au pilotage — sans changer de métier.
               </p>
             </div>
@@ -411,7 +411,7 @@ export function VousNousSection() {
             <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-[#94a3b8]">Rôles</p>
             <h2
               id="roles-heading"
-              className="mt-2 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.55rem] font-semibold leading-tight tracking-tight text-[#0f172a] md:text-3xl"
+              className="mt-2 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.55rem] font-semibold leading-tight tracking-tight text-black md:text-3xl"
             >
               Ce que vous faites / ce que nous faisons
             </h2>
@@ -421,7 +421,7 @@ export function VousNousSection() {
                 className="pointer-events-none absolute left-1/2 top-[42%] z-10 hidden -translate-x-1/2 -translate-y-1/2 md:flex"
                 aria-hidden
               >
-                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#f8fafc] via-[#e2e8f0] to-[#cbd5e1] font-sans text-2xl font-semibold leading-none text-[#475569] shadow-[inset_0_2px_5px_rgba(255,255,255,0.9),inset_0_-3px_8px_rgba(15,23,42,0.12),0_6px_22px_rgba(15,23,42,0.12)] ring-2 ring-white ring-offset-2 ring-offset-[var(--metal-50)]">
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#f8fafc] via-[#e2e8f0] to-[#cbd5e1] font-sans text-2xl font-semibold leading-none text-black shadow-[inset_0_2px_5px_rgba(255,255,255,0.9),inset_0_-3px_8px_rgba(15,23,42,0.12),0_6px_22px_rgba(15,23,42,0.12)] ring-2 ring-white ring-offset-2 ring-offset-[var(--metal-50)]">
                   +
                 </span>
               </div>
@@ -437,19 +437,19 @@ export function VousNousSection() {
                   aria-hidden
                 />
                 <header className="relative flex flex-wrap items-center gap-3 pt-0.5">
-                  <span className="inline-flex items-center rounded-full bg-[#f1f5f9]/90 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#334155] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] ring-1 ring-inset ring-[#cbd5e1]/80">
+                  <span className="inline-flex items-center rounded-full bg-[#f1f5f9]/90 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] ring-1 ring-inset ring-[#cbd5e1]/80">
                     Vous
                   </span>
-                  <span className="text-xs text-[#64748b]">Cœur de métier &amp; exécution</span>
+                  <span className="text-xs text-black">Cœur de métier &amp; exécution</span>
                 </header>
                 <ul className="relative mt-6 space-y-1" role="list">
                   {VOUS_ROLES.map((t) => (
                     <li
                       key={t}
-                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[#334155] transition-colors duration-200 hover:bg-white/45 md:text-[15px]"
+                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-black transition-colors duration-200 hover:bg-white/45 md:text-[15px]"
                     >
                       <span
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-white via-[#f8fafc] to-[#d1d9e6] text-[#475569] shadow-[inset_0_2px_4px_rgba(255,255,255,0.95),inset_0_-2px_4px_rgba(15,23,42,0.06),0_2px_6px_rgba(15,23,42,0.06)] ring-1 ring-[#94a3b8]/35 transition-transform duration-200 group-hover:scale-105"
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-white via-[#f8fafc] to-[#d1d9e6] text-black shadow-[inset_0_2px_4px_rgba(255,255,255,0.95),inset_0_-2px_4px_rgba(15,23,42,0.06),0_2px_6px_rgba(15,23,42,0.06)] ring-1 ring-[#94a3b8]/35 transition-transform duration-200 group-hover:scale-105"
                         aria-hidden
                       >
                         <IconChevronRole />
@@ -461,7 +461,7 @@ export function VousNousSection() {
               </article>
 
               <div className="flex justify-center py-1 md:hidden" aria-hidden>
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#f8fafc] via-[#e2e8f0] to-[#cbd5e1] font-sans text-xl font-semibold leading-none text-[#475569] shadow-[inset_0_2px_4px_rgba(255,255,255,0.85),0_4px_14px_rgba(15,23,42,0.1)] ring-2 ring-white">
+                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-[#f8fafc] via-[#e2e8f0] to-[#cbd5e1] font-sans text-xl font-semibold leading-none text-black shadow-[inset_0_2px_4px_rgba(255,255,255,0.85),0_4px_14px_rgba(15,23,42,0.1)] ring-2 ring-white">
                   +
                 </span>
               </div>
@@ -480,13 +480,13 @@ export function VousNousSection() {
                   <span className="inline-flex items-center rounded-full bg-gradient-to-b from-[#dbeafe] to-[#bfdbfe] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#1e3a8a] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] ring-1 ring-inset ring-[#93c5fd]/90">
                     Nous
                   </span>
-                  <span className="text-xs text-[#64748b]">Structure, suivi &amp; administratif</span>
+                  <span className="text-xs text-black">Structure, suivi &amp; administratif</span>
                 </header>
                 <ul className="relative mt-6 space-y-1" role="list">
                   {NOUS_ROLES.map((t) => (
                     <li
                       key={t}
-                      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[#334155] transition-colors duration-200 md:text-[15px] ${
+                      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-black transition-colors duration-200 md:text-[15px] ${
                         t === "Suivi"
                           ? "bg-[#eff6ff]/95 shadow-[inset_0_0_0_1px_rgba(191,219,254,0.7)] hover:bg-[#dbeafe]/90"
                           : "hover:bg-[#eff6ff]/75"
@@ -504,7 +504,7 @@ export function VousNousSection() {
                 </ul>
               </article>
 
-              <p className="text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-sm font-semibold text-[#0f172a] md:col-span-2 md:-mt-2 md:text-base">
+              <p className="text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-sm font-semibold text-black md:col-span-2 md:-mt-2 md:text-base">
                 Chacun son rôle, tout devient plus fluide.
               </p>
             </div>
@@ -532,11 +532,11 @@ export function ShortTimelineSection() {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#94a3b8]">Méthode</p>
           <h2
             id="methode-heading"
-            className="mt-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.65rem] font-semibold leading-tight tracking-tight text-[#0f172a] md:text-3xl"
+            className="mt-2 font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.65rem] font-semibold leading-tight tracking-tight text-black md:text-3xl"
           >
             Notre déroulé — en 5 temps
           </h2>
-          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#64748b] md:text-base">
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-black md:text-base">
             Le forfait (Structure à Pilotage) se choisit à la mise en place — voir la grille plus bas.
           </p>
 
@@ -555,10 +555,10 @@ export function ShortTimelineSection() {
                   {step.n}
                 </span>
                 <div className="min-w-0 flex-1 border-b border-[#e2e8f0]/70 pb-10 last:border-b-0 last:pb-0">
-                  <p className="font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-lg font-semibold tracking-tight text-[#0f172a] md:text-xl">
+                  <p className="font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-lg font-semibold tracking-tight text-black md:text-xl">
                     {step.title}
                   </p>
-                  <p className="mt-2 text-sm leading-relaxed text-[#475569] md:text-[15px]">{step.phrase}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-black md:text-[15px]">{step.phrase}</p>
                 </div>
               </li>
             ))}
@@ -587,11 +587,11 @@ export function ImpactCardsSection() {
             <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-[#94a3b8]">Impact</p>
             <h2
               id="impact-heading"
-              className="mt-2 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.55rem] font-semibold leading-tight tracking-tight text-[#0f172a] md:text-3xl"
+              className="mt-2 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-[1.55rem] font-semibold leading-tight tracking-tight text-black md:text-3xl"
             >
               Un impact direct sur votre activité
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-center text-sm leading-relaxed text-[#64748b] md:text-base">
+            <p className="mx-auto mt-4 max-w-xl text-center text-sm leading-relaxed text-black md:text-base">
               Ce que vous ressentez au quotidien sur le terrain.
             </p>
             <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5" role="list">
@@ -605,12 +605,12 @@ export function ImpactCardsSection() {
                     <ChainIconWrapper>
                       <Icon />
                     </ChainIconWrapper>
-                    <p className="text-sm font-semibold leading-snug text-[#0f172a] md:text-[15px]">{title}</p>
+                    <p className="text-sm font-semibold leading-snug text-black md:text-[15px]">{title}</p>
                   </div>
                 </li>
               ))}
             </ul>
-            <p className="mt-10 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-base font-semibold text-[#0f172a] md:text-lg">
+            <p className="mt-10 text-center font-[family-name:var(--font-playfair),ui-serif,Georgia,serif] text-base font-semibold text-black md:text-lg">
               Un administratif bien géré, c’est plus de chiffre d’affaires.
             </p>
           </div>
@@ -624,14 +624,14 @@ export function PresenceBlockSection() {
   return (
     <section id="visibilite" className="scroll-mt-24" aria-labelledby="visibilite-heading">
       <div className="overflow-hidden rounded-2xl border border-[#c7d2fe] bg-gradient-to-br from-[#eef2ff] via-white to-[#eff6ff] p-6 shadow-sm transition-shadow duration-200 hover:shadow-md md:p-10">
-        <h2 id="visibilite-heading" className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl">
+        <h2 id="visibilite-heading" className="text-2xl font-bold tracking-tight text-black md:text-3xl">
           Plus visible, plus crédible
         </h2>
         <ul className="mt-6 grid gap-3 sm:grid-cols-2" role="list">
           {PRESENCE_ITEMS.map((t) => (
             <li
               key={t}
-              className="flex items-center gap-3 rounded-lg border border-white/60 bg-white/70 px-4 py-3 text-sm font-medium text-[#334155] shadow-sm"
+              className="flex items-center gap-3 rounded-lg border border-white/60 bg-white/70 px-4 py-3 text-sm font-medium text-black shadow-sm"
             >
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#1d4ed8]/10 text-xs font-bold text-[#1d4ed8]" aria-hidden>
                 ✓
@@ -640,7 +640,7 @@ export function PresenceBlockSection() {
             </li>
           ))}
         </ul>
-        <p className="mt-8 border-t border-[#c7d2fe]/60 pt-6 text-center text-base font-semibold text-[#0f172a]">
+        <p className="mt-8 border-t border-[#c7d2fe]/60 pt-6 text-center text-base font-semibold text-black">
           Vous devenez une référence locale.
         </p>
       </div>

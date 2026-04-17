@@ -45,8 +45,8 @@ export default async function MessagesPage() {
     <div className="space-y-8">
       <BackLink href="/dashboard">Tableau de bord</BackLink>
       <div>
-        <h1 className="text-2xl font-bold text-[#0f172a]">RDV</h1>
-        <p className="mt-1 text-[#334155]">
+        <h1 className="text-2xl font-bold text-black">RDV</h1>
+        <p className="mt-1 text-black">
           {isAgence
             ? "Consultez les demandes de contact et rendez-vous, et gérez le calendrier."
             : "Consultez vos demandes de RDV et prenez rendez-vous en ligne."}
@@ -54,11 +54,11 @@ export default async function MessagesPage() {
       </div>
 
       <section className="rounded-xl surface-metallic-light shadow-sm">
-          <h2 className="border-b border-[#e0e4ea] px-6 py-4 text-lg font-semibold text-[#0f172a]">
+          <h2 className="border-b border-[#e0e4ea] px-6 py-4 text-lg font-semibold text-black">
             {isAgence ? "Demandes de contact et RDV" : "Mes demandes de RDV"}
           </h2>
           {contactRequests.length === 0 ? (
-            <p className="px-6 py-8 text-sm text-[#64748b]">
+            <p className="px-6 py-8 text-sm text-black">
               {isAgence
                 ? "Aucune demande pour le moment. Les demandes envoyées depuis la page Contact apparaîtront ici."
                 : "Aucune demande pour le moment. Vos demandes envoyées depuis la page Contact apparaîtront ici."}
@@ -67,7 +67,7 @@ export default async function MessagesPage() {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[500px] text-sm">
                 <thead>
-                  <tr className="border-b border-[#e0e4ea] bg-[#f8f9fb] text-[#334155]">
+                  <tr className="border-b border-[#e0e4ea] bg-[#f8f9fb] text-black">
                     <th className="px-6 py-3 text-left font-medium">Structure / Contact</th>
                     <th className="px-6 py-3 text-left font-medium">Email</th>
                     <th className="px-6 py-3 text-left font-medium">Créneau demandé</th>
@@ -87,16 +87,16 @@ export default async function MessagesPage() {
                     return (
                       <tr key={r.id} className="border-b border-[#e0e4ea] hover:bg-[#f8f9fb]">
                         <td className="px-6 py-3">
-                          <span className="font-medium text-[#0f172a]">{r.structure}</span>
+                          <span className="font-medium text-black">{r.structure}</span>
                           <br />
-                          <span className="text-[#64748b]">{r.contactName}</span>
+                          <span className="text-black">{r.contactName}</span>
                         </td>
                         <td className="px-6 py-3">
                           <a href={`mailto:${r.email}`} className="text-[#1d4ed8] hover:underline">
                             {r.email}
                           </a>
                         </td>
-                        <td className="px-6 py-3 text-[#334155]">{rdvLabel}</td>
+                        <td className="px-6 py-3 text-black">{rdvLabel}</td>
                         <td className="px-6 py-3">
                           <span
                             className={`rounded-full px-2 py-0.5 text-xs font-medium ${
@@ -110,7 +110,7 @@ export default async function MessagesPage() {
                             {STATUS_LABELS[r.status] ?? r.status}
                           </span>
                         </td>
-                        <td className="px-6 py-3 text-[#64748b]">
+                        <td className="px-6 py-3 text-black">
                           {new Date(r.createdAt).toLocaleDateString("fr-FR", {
                             day: "numeric",
                             month: "short",
@@ -136,17 +136,17 @@ export default async function MessagesPage() {
 
       {/* Calendrier de prise de RDV (type Calendly) */}
       <section className="rounded-xl surface-metallic-light p-6 shadow-sm">
-        <h2 className="mb-4 text-lg font-semibold text-[#0f172a]">
+        <h2 className="mb-4 text-lg font-semibold text-black">
           Prise de rendez-vous en ligne
         </h2>
-        <p className="mb-6 text-sm text-[#334155]">
+        <p className="mb-6 text-sm text-black">
           Réservez un créneau, ajoutez des pièces jointes, des notes et une récurrence. Les RDV apparaissent dans les alertes avec rappel.
         </p>
         <AppointmentCalendar />
       </section>
 
       <div className="rounded-xl border border-dashed border-[#c8cdd6] bg-white p-12 text-center">
-        <p className="text-[#334155]">
+        <p className="text-black">
           {isAgence
             ? "Sélectionnez un projet pour voir les messages d'échange avec les clients."
             : "Consultez vos projets pour voir les messages avec l'agence."}

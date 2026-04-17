@@ -57,10 +57,10 @@ export function UserAccountDropdown({ userName, userRole, userCompany }: UserAcc
         aria-haspopup="true"
       >
         <div className="flex flex-col">
-          <span className="text-sm font-semibold leading-tight text-[#0f172a]">
+          <span className="text-sm font-semibold leading-tight text-black">
             {userName || "Utilisateur"}
           </span>
-          <span className="text-xs font-medium text-[#64748b]">{roleLabel}</span>
+          <span className="text-xs font-medium text-black">{roleLabel}</span>
         </div>
         <div
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#475569] text-sm font-semibold text-white"
@@ -81,8 +81,8 @@ export function UserAccountDropdown({ userName, userRole, userCompany }: UserAcc
                 {getInitials(userName)}
               </div>
               <div className="min-w-0">
-                <p className="truncate font-semibold text-[#0f172a]">{userName || "Utilisateur"}</p>
-                <p className="text-sm text-[#64748b]">{userCompany || "BeWork"}</p>
+                <p className="truncate font-semibold text-black">{userName || "Utilisateur"}</p>
+                <p className="text-sm text-black">{userCompany || "BeWork"}</p>
                 <p className="text-xs text-[#94a3b8]">{roleLabel}</p>
               </div>
             </div>
@@ -127,7 +127,7 @@ export function UserAccountDropdown({ userName, userRole, userCompany }: UserAcc
                 setOpen(false);
                 signOut({ callbackUrl: "/" });
               }}
-              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-[#64748b] transition-colors hover:bg-[#f8f9fb] hover:text-[#0f172a]"
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-black transition-colors hover:bg-[#f8f9fb] hover:text-black"
               role="menuitem"
             >
               <svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

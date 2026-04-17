@@ -201,7 +201,7 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${orbitron.variable} ${playfairDisplay.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${orbitron.variable} ${playfairDisplay.variable} antialiased text-black`}
       >
         <script
           type="application/ld+json"

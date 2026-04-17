@@ -103,12 +103,12 @@ export default async function ProjetDetailPage({
 
         <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
           <span className="rounded-full bg-[#1d4ed8]/10 px-3 py-1 font-medium text-[#1d4ed8]">
-            Actions consommées par ce projet : {projectActionsUsed}
+            Crédits consommés par ce projet : {projectActionsUsed}
           </span>
           {isAgence && (
             <>
               <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">
-                Actions client (mois) : {clientUsed} utilisées / {clientTotal} total
+                Crédits client (mois) : {clientUsed} utilisés / {clientTotal} total
               </span>
               <span className="rounded-full bg-green-100 px-3 py-1 font-medium text-green-800">
                 Restantes : {clientRemaining}

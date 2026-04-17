@@ -192,7 +192,7 @@ export default function TarifsPage() {
             <div className="surface-metallic-light surface-metallic-light--soft rounded-2xl px-6 py-5 text-center md:px-8 md:py-6">
               <p className="text-xs font-bold uppercase tracking-[0.14em] text-black">Repère simple</p>
               <p className="mt-2 text-base font-semibold text-black md:text-lg">
-                1 action = {ACTION_MINUTES} minutes{" "}
+                1 crédit = {ACTION_MINUTES} minutes{" "}
                 <span className="font-normal text-black">(devis, relance, appel, mail…)</span>
               </p>
             </div>
@@ -257,7 +257,7 @@ export default function TarifsPage() {
                     ~{volume.hoursApprox}h incluses
                   </span>
                   <span className="rounded-full border border-[#cbd5e1] bg-white/70 px-3 py-1">
-                    ≈ {volume.actionsApprox} actions
+                    ≈ {volume.actionsApprox} crédits
                   </span>
                   {hourlyCost ? (
                     <span className="rounded-full border border-[#cbd5e1] bg-white/70 px-3 py-1">
@@ -314,7 +314,7 @@ export default function TarifsPage() {
                   <span className="hidden sm:inline">Demander un rendez-vous découverte</span>
                 </Link>
                 <p className="mt-3 text-center text-[11px] leading-relaxed text-black">
-                  Volume estimatif basé sur 1 action = {ACTION_MINUTES} min.
+                  Volume estimatif basé sur 1 crédit = {ACTION_MINUTES} min.
                 </p>
                 {plan.planKey === "PREMIUM" ? (
                   <p className="mt-2 text-center text-[11px] leading-relaxed text-black">
@@ -331,7 +331,7 @@ export default function TarifsPage() {
             Au-delà : <Link href="/contact" className="font-semibold text-[#1d4ed8] hover:underline">sur-mesure</Link>.
           </p>
           <p className="mx-auto mt-6 max-w-3xl text-center text-[11px] leading-relaxed text-black md:text-xs">
-            Volumes estimatifs (repères) basés sur 1 action = {ACTION_MINUTES} minutes.
+            Volumes estimatifs (repères) basés sur 1 crédit = {ACTION_MINUTES} minutes.
           </p>
         {/* Compréhension */}
         <section className="mx-auto mt-14 max-w-5xl" aria-labelledby="comprehension-heading">
@@ -344,14 +344,14 @@ export default function TarifsPage() {
                 Concrètement, ça représente quoi ?
               </h2>
               <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-relaxed text-black md:text-base">
-                Des repères simples pour visualiser le volume. Une action correspond à ~{ACTION_MINUTES} minutes.
+                Des repères simples pour visualiser le volume. Un crédit correspond à ~{ACTION_MINUTES} minutes.
               </p>
               <div className="mt-8 grid gap-4 md:grid-cols-2">
                 {[
-                  { k: "1 devis", v: "1 à 2 actions" },
-                  { k: "1 relance", v: "1 action" },
-                  { k: "1 appel client", v: "1 action" },
-                  { k: "1 coordination fournisseur", v: "1 à 3 actions" },
+                  { k: "1 devis", v: "1 à 2 crédits" },
+                  { k: "1 relance", v: "1 crédit" },
+                  { k: "1 appel client", v: "1 crédit" },
+                  { k: "1 coordination fournisseur", v: "1 à 3 crédits" },
                 ].map((row) => (
                   <div
                     key={row.k}

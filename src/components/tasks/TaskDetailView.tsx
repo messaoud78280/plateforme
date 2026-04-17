@@ -102,7 +102,7 @@ export function TaskDetailView({
 
   return (
     <div className="space-y-6">
-      {/* Barre d'actions rapides (gérante) */}
+      {/* Raccourcis (gérante) */}
       {isManager && (
         <div className="flex flex-wrap gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
           <a
@@ -148,7 +148,7 @@ export function TaskDetailView({
         </div>
       )}
 
-      {/* Barre d'actions rapides (agent) */}
+      {/* Raccourcis (agent) */}
       {isAgent && (
         <div className="flex flex-wrap gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
           <a
@@ -186,7 +186,7 @@ export function TaskDetailView({
         </div>
       )}
 
-      {/* En-tête : Titre, Client, Statut, Priorité, Actions estimées (agent) */}
+      {/* En-tête : Titre, Client, Statut, Priorité, estimation crédits (agent) */}
       <div className="rounded-xl surface-metallic-light p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -207,24 +207,24 @@ export function TaskDetailView({
                 <span>Priorité : {task.priority === "URGENT" ? "Urgent" : task.priority === "PRIORITAIRE" ? "Prioritaire" : "Standard"}</span>
               )}
               {(isAgent || isAgence) && task.estimatedActions && (
-                <span><strong>Actions estimées :</strong> {task.estimatedActions}</span>
+                <span><strong>Crédits estimés :</strong> {task.estimatedActions}</span>
               )}
             </div>
             {task.actionsUsed != null && task.actionsUsed > 0 && (
               <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-slate-800">
                 <span className="font-semibold text-[#1d4ed8]">Consommation :</span>{" "}
                 <span className="font-semibold">
-                  {task.actionsUsed} action{task.actionsUsed > 1 ? "s" : ""}
+                  {task.actionsUsed} crédit{task.actionsUsed > 1 ? "s" : ""}
                 </span>
                 {task.timeSpentMinutes != null ? (
                   <span className="text-slate-600"> (≈ {task.timeSpentMinutes} min)</span>
                 ) : null}
-                <span className="text-slate-500"> — 1 action = 12 min</span>
+                <span className="text-slate-500"> — 1 crédit = 12 min</span>
               </div>
             )}
             {(isAgence || isAgent) && (task.status === "A_VALIDER" || task.status === "COMPLETE") && task.actionsUsed == null && (
               <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                Pour décompter les actions, renseignez le <span className="font-semibold">temps passé (minutes)</span> lors de la
+                Pour décompter les crédits, renseignez le <span className="font-semibold">temps passé (minutes)</span> lors de la
                 clôture.
               </div>
             )}
@@ -245,7 +245,7 @@ export function TaskDetailView({
               <p>Terminée le {new Date(task.completedAt).toLocaleDateString("fr-FR")}</p>
             )}
             {task.timeSpentMinutes != null && task.actionsUsed != null && (
-              <p className="text-[#1d4ed8] font-medium">{task.timeSpentMinutes} min → {task.actionsUsed} action{task.actionsUsed > 1 ? "s" : ""}</p>
+              <p className="text-[#1d4ed8] font-medium">{task.timeSpentMinutes} min → {task.actionsUsed} crédit{task.actionsUsed > 1 ? "s" : ""}</p>
             )}
           </div>
         </div>
@@ -451,7 +451,7 @@ export function TaskDetailView({
               {task.category && <span><strong>Catégorie :</strong> {task.category}</span>}
               {task.priority && <span><strong>Priorité :</strong> {task.priority === "URGENT" ? "Urgent" : task.priority === "PRIORITAIRE" ? "Prioritaire" : "Standard"}</span>}
               {task.desiredDate && <span><strong>Date souhaitée :</strong> {new Date(task.desiredDate).toLocaleDateString("fr-FR")}</span>}
-              {task.estimatedActions && <span><strong>Actions estimées :</strong> {task.estimatedActions}</span>}
+              {task.estimatedActions && <span><strong>Crédits estimés :</strong> {task.estimatedActions}</span>}
             </div>
             {!task.description && !task.category && !task.priority && !task.desiredDate && !task.estimatedActions && (
               <p className="text-sm text-slate-500">Aucune information complémentaire.</p>
@@ -651,7 +651,7 @@ export function TaskDetailView({
         </div>
       )}
 
-      {/* Actions statut : agence/agent = prendre en charge / clôturer (avec temps) ; client = mettre en attente */}
+      {/* Contrôles de statut : agence/agent = prendre en charge / clôturer (avec temps) ; client = mettre en attente */}
       {onStatusChange && task.status !== "COMPLETE" && task.status !== "A_VALIDER" && !task.validatedAt && (
         <div id="status-section" className="scroll-mt-6 flex flex-wrap items-end gap-4">
           {(isAgence || isAgent) && task.status === "EN_ATTENTE" && (
@@ -686,7 +686,7 @@ export function TaskDetailView({
                 className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm"
               />
               <span className="text-sm text-slate-600">
-                = {minutesToActions(timeSpentMinutes)} action{minutesToActions(timeSpentMinutes) > 1 ? "s" : ""}
+                = {minutesToActions(timeSpentMinutes)} crédit{minutesToActions(timeSpentMinutes) > 1 ? "s" : ""}
               </span>
               <button
                 type="button"

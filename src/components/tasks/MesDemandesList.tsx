@@ -160,7 +160,7 @@ export function MesDemandesList({ tasks }: MesDemandesListProps) {
                       <span>{new Date(task.createdAt).toLocaleDateString("fr-FR")}</span>
                       <span>
                         {task.actionsUsed != null
-                          ? `${task.actionsUsed} action(s) consommées`
+                          ? `${task.actionsUsed} crédit${task.actionsUsed > 1 ? "s" : ""} consommé${task.actionsUsed > 1 ? "s" : ""}`
                           : task.estimatedActions ?? "—"}
                       </span>
                     </div>
@@ -198,7 +198,7 @@ export function MesDemandesList({ tasks }: MesDemandesListProps) {
                     </Link>
                     <DeleteTaskButton
                       taskId={task.id}
-                      confirmText="Supprimer cette demande ? Cette action est irréversible."
+                      confirmText="Supprimer cette demande ? Cette opération est irréversible."
                     />
                   </div>
                 </div>

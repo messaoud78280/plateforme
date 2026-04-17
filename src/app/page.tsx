@@ -22,7 +22,7 @@ function formatPriceTtc(value: string) {
 }
 
 function getPlanVolume(planKey: (typeof TARIFS_PLANS)[number]["planKey"]) {
-  // Volumes affichés (1 action = 12 min) : Structure=20h/100, Suivi=37h/185, Pilotage=100h/500
+  // Volumes affichés (1 crédit = 12 min) : Structure=20h/100, Suivi=37h/185, Pilotage=100h/500
   const hoursMap: Record<(typeof TARIFS_PLANS)[number]["planKey"], number> = {
     DECOUVERTE: 20,
     STANDARD: 37,
@@ -386,9 +386,9 @@ export default function HomePage() {
                     <span className="text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-black">TTC</span>
                     <span className="text-lg font-semibold text-black">/ mois</span>
                   </div>
-                  <div className="mt-1 flex flex-wrap gap-2 text-[11px] font-semibold text-black" aria-label="Temps inclus estimé et actions">
+                  <div className="mt-1 flex flex-wrap gap-2 text-[11px] font-semibold text-black" aria-label="Temps inclus estimé et crédits">
                     <span className="rounded-full border border-black/15 bg-white/80 px-3 py-1">~37h incluses</span>
-                    <span className="rounded-full border border-black/15 bg-white/80 px-3 py-1">≈ 185 actions</span>
+                    <span className="rounded-full border border-black/15 bg-white/80 px-3 py-1">≈ 185 crédits</span>
                   </div>
                   <div className="mt-1 border-b border-black/10 pb-3" aria-label="Repère indicatif de charge">
                     <p className="text-[11px] leading-snug text-black md:text-xs md:leading-relaxed">
@@ -413,7 +413,7 @@ export default function HomePage() {
                     </p>
                   </div>
                   <p className="text-[11px] leading-relaxed text-black">
-                    1 action = {ACTION_MINUTES} min · TTC, sans frais cachés · Sans engagement long terme · Mise en route rapide
+                    1 crédit = {ACTION_MINUTES} min · TTC, sans frais cachés · Sans engagement long terme · Mise en route rapide
                   </p>
                   <span className="text-xs font-semibold text-[#1d4ed8] group-hover:underline">
                     Voir les tarifs →
@@ -493,7 +493,7 @@ export default function HomePage() {
                 palier fixe un niveau de structuration et de suivi — pas de surprise sur ce qui est tenu.
               </p>
               <p className="mx-auto mt-4 max-w-2xl text-sm font-semibold text-black">
-                1 action = {ACTION_MINUTES} minutes{" "}
+                1 crédit = {ACTION_MINUTES} minutes{" "}
                 <span className="font-normal text-black">(devis, relance, appel, mail, commande, coordination…)</span>
               </p>
               <div className="mt-10 flex justify-center">
@@ -517,7 +517,7 @@ export default function HomePage() {
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold text-black" aria-label="Volume inclus estimé">
                       <span className="rounded-full border border-black/15 bg-white/80 px-3 py-1">~37h incluses</span>
-                      <span className="rounded-full border border-black/15 bg-white/80 px-3 py-1">≈ 185 actions</span>
+                      <span className="rounded-full border border-black/15 bg-white/80 px-3 py-1">≈ 185 crédits</span>
                     </div>
                     <div className="mt-2 border-b border-black/10 pb-3" aria-label="Repère indicatif de charge">
                       <p className="text-[11px] leading-snug text-black md:text-xs">
@@ -556,7 +556,7 @@ export default function HomePage() {
                               {plan.name} — {formatPriceTtc(plan.price)} € TTC / mois
                             </span>
                             <span className="text-[11px] font-semibold text-black">
-                              ~{volume.hoursApprox}h · ≈ {volume.actionsApprox} actions
+                              ~{volume.hoursApprox}h · ≈ {volume.actionsApprox} crédits
                             </span>
                             <span className={row.subClass}>{row.sub}</span>
                             <div className="mt-1.5" aria-label="Repère indicatif de charge">

@@ -140,7 +140,7 @@ function MissionCard({
           {priorityStyle.label}
         </span>
         {task.estimatedActions && (
-          <span className="text-xs text-slate-500">{task.estimatedActions} actions</span>
+          <span className="text-xs text-slate-500">{task.estimatedActions}</span>
         )}
         <span className="text-xs text-slate-400">Créée le {formatDate(task.createdAt)}</span>
       </div>
@@ -382,7 +382,7 @@ export function ManagerMissionsBoard({
       if (targetColumnId === "terminees") {
         return;
       }
-      // Même logique pour "À valider" : il faut saisir le temps passé pour décompter les actions.
+      // Même logique pour "À valider" : il faut saisir le temps passé pour décompter les crédits.
       if (targetColumnId === "a-valider") {
         setDropHint("Pour passer « À valider », ouvrez la mission et cliquez « Marquer comme terminée » (avec le temps passé).");
         window.setTimeout(() => setDropHint(null), 7000);

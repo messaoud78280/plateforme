@@ -183,12 +183,12 @@ export function ManagerDashboardContent({
         </section>
       )}
 
-      {/* Actions consommées + Activité récente */}
+      {/* Crédits consommés + Activité récente */}
       {(typeof actionsConsumees === "number" || activiteRecente.length > 0) && (
         <div className="grid gap-6 lg:grid-cols-2">
           {typeof actionsConsumees === "number" && (
             <div className="rounded-xl surface-metallic-light p-6">
-              <h3 className="text-lg font-semibold text-slate-800">Actions consommées</h3>
+              <h3 className="text-lg font-semibold text-slate-800">Crédits consommés</h3>
               <p className="mt-2 text-3xl font-bold text-[#1d4ed8]">{actionsConsumees}</p>
               <p className="mt-1 text-sm text-slate-500">Total consommé par les clients ce mois</p>
             </div>

@@ -38,7 +38,7 @@ export default function Page() {
       <h2>Avantages pour les indépendants et PME</h2>
       <p>
         Gain de temps, flexibilité, coût maîtrisé. Un assistant virtuel entreprise à distance évite le recrutement et
-        les charges associées. Vous payez un forfait tout compris et réglez uniquement les actions consommées.
+        les charges associées. Vous payez un forfait tout compris et réglez uniquement les crédits consommés.
       </p>
 
       <h2>Qualité et supervision</h2>

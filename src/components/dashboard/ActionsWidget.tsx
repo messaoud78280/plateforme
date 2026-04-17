@@ -28,23 +28,23 @@ export function ActionsWidget({ subscriptionPlan, monthlyActionsTotal, monthlyAc
   }
 
   return (
-    <section aria-label="Actions du mois" className="rounded-2xl surface-metallic-light p-6">
-      <h2 className="text-lg font-semibold text-slate-800">Actions du mois</h2>
+    <section aria-label="Crédits du mois" className="rounded-2xl surface-metallic-light p-6">
+      <h2 className="text-lg font-semibold text-slate-800">Crédits du mois</h2>
       <p className="mt-1 text-sm text-slate-600">
         Abonnement : {subscriptionPlan ? PLAN_LABELS[subscriptionPlan] ?? subscriptionPlan : "Suivi"}
       </p>
       <div className="mt-4 grid grid-cols-3 gap-4 text-center">
         <div>
           <p className="text-2xl font-bold text-[#1d4ed8]">{monthlyActionsTotal}</p>
-          <p className="text-xs text-slate-500">Actions totales</p>
+          <p className="text-xs text-slate-500">Crédits totaux</p>
         </div>
         <div>
           <p className="text-2xl font-bold text-slate-800">{monthlyActionsUsed}</p>
-          <p className="text-xs text-slate-500">Actions utilisées</p>
+          <p className="text-xs text-slate-500">Crédits utilisés</p>
         </div>
         <div>
           <p className="text-2xl font-bold text-green-700">{remaining}</p>
-          <p className="text-xs text-slate-500">Actions restantes</p>
+          <p className="text-xs text-slate-500">Crédits restants</p>
         </div>
       </div>
       <div className="mt-4">
@@ -62,13 +62,13 @@ export function ActionsWidget({ subscriptionPlan, monthlyActionsTotal, monthlyAc
             aria-valuenow={monthlyActionsUsed}
             aria-valuemin={0}
             aria-valuemax={monthlyActionsTotal}
-            aria-label="Actions utilisées"
+            aria-label="Crédits utilisés"
           />
         </div>
         <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
-          <span>Actions utilisées</span>
+          <span>Crédits utilisés</span>
           <span>
-            {monthlyActionsUsed} / {monthlyActionsTotal} actions
+            {monthlyActionsUsed} / {monthlyActionsTotal} crédits
           </span>
         </div>
       </div>
@@ -83,7 +83,7 @@ export function ActionsWidget({ subscriptionPlan, monthlyActionsTotal, monthlyAc
           <p>
             {alertLevel === "high"
               ? "Votre forfait arrive bientôt à sa limite."
-              : "Vous avez utilisé la majorité de vos actions ce mois-ci."}
+              : "Vous avez utilisé la majorité de vos crédits ce mois-ci."}
           </p>
           <Link
             href="/tarifs"
@@ -108,7 +108,7 @@ export function ActionsWidget({ subscriptionPlan, monthlyActionsTotal, monthlyAc
           href="/dashboard/abonnement"
           className="text-sm font-medium text-[#1d4ed8] hover:underline"
         >
-          Voir le suivi des actions →
+          Voir le suivi des crédits →
         </Link>
         <Link
           href="/dashboard/abonnement/souscrire"

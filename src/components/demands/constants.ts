@@ -15,10 +15,10 @@ export const DEMANDE_PRIORITIES = [
   { value: "URGENT", label: "Urgent" },
 ] as const;
 
-/** Options pour l'estimateur d'actions (sélecteur utilisateur) */
+/** Options pour l'estimateur de crédits (sélecteur utilisateur) */
 export const DEMANDE_ESTIMATION_OPTIONS = [
-  { value: "1 action", label: "1 action" },
-  { value: "2 à 3 actions", label: "2 à 3 actions" },
+  { value: "1 crédit", label: "1 crédit" },
+  { value: "2 à 3 crédits", label: "2 à 3 crédits" },
   { value: "À évaluer", label: "À évaluer" },
 ] as const;
 

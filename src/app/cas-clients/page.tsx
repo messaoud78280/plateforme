@@ -19,7 +19,7 @@ const cases = [
   {
     title: "Relances devis : plus de réponses, moins d’oubli",
     before: "Devis envoyés mais peu relancés, décisions client floues.",
-    after: "Rythme de relance + statuts + prochaines actions, réponses plus rapides.",
+    after: "Rythme de relance + statuts + prochaines étapes, réponses plus rapides.",
     kpis: ["Suivi J+2/J+7/J+14", "Traçabilité des réponses", "Décisions client clarifiées"],
   },
   {

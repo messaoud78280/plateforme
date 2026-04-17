@@ -85,7 +85,7 @@ export function ClientDashboardContent({
 
   return (
     <div className="space-y-8 pb-12">
-      {/* Zone centrale : actions principales */}
+      {/* Zone centrale : raccourcis principaux */}
       <section className="rounded-2xl surface-metallic-light p-8">
         <h1 className="text-2xl font-bold text-slate-800">Bonjour, {userName ?? "vous"}</h1>
         <p className="mt-1 text-slate-600">Que souhaitez-vous déléguer aujourd&apos;hui ?</p>
@@ -124,7 +124,7 @@ export function ClientDashboardContent({
       {/* 3 indicateurs principaux */}
       <section className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-xl surface-metallic-light p-5">
-          <p className="text-sm font-medium text-slate-500">Actions restantes</p>
+          <p className="text-sm font-medium text-slate-500">Crédits restants</p>
           <p className="mt-1 text-2xl font-bold text-slate-800">
             {remaining} <span className="text-lg font-normal text-slate-500">/ {actionsData.monthlyActionsTotal}</span>
           </p>
@@ -144,7 +144,7 @@ export function ClientDashboardContent({
 
       {/* Communication digitale */}
 
-      {/* Barre de progression des actions */}
+      {/* Barre de progression des crédits */}
       <ActionsWidget
         subscriptionPlan={actionsData.subscriptionPlan}
         monthlyActionsTotal={actionsData.monthlyActionsTotal}
@@ -170,7 +170,7 @@ export function ClientDashboardContent({
                     createdAt: t.createdAt,
                   }))
           ).length === 0 ? (
-            <li className="text-sm text-slate-500">Aucune action récente. Vos demandes en cours apparaîtront ici une fois traitées.</li>
+            <li className="text-sm text-slate-500">Aucune activité récente. Vos demandes en cours apparaîtront ici une fois traitées.</li>
           ) : (
             (recentActivities.length > 0
               ? recentActivities.map((a) => (
@@ -333,7 +333,7 @@ export function ClientDashboardContent({
             <p className="mt-0.5 text-sm text-slate-500">Ce mois-ci</p>
           </div>
           <div className="px-6 py-4">
-            <p className="text-2xl font-bold text-[#1d4ed8]">{actionsData.monthlyActionsUsed} actions</p>
+            <p className="text-2xl font-bold text-[#1d4ed8]">{actionsData.monthlyActionsUsed} crédits</p>
             <p className="text-sm text-slate-600">≈ {Math.round((actionsData.monthlyActionsUsed * MINUTES_PER_ACTION) / 60)} h économisées</p>
           </div>
         </section>

@@ -8,7 +8,7 @@ import { creditActionsAfterPayment } from "@/lib/subscription-credit";
 /**
  * POST /api/payment/confirm
  * Confirme un paiement (après succès Stripe ou simulation).
- * Marque le paiement PAID, crédite les actions, met à jour User et Subscription.
+ * Marque le paiement PAID, crédite le compte (crédits), met à jour User et Subscription.
  */
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -80,6 +80,6 @@ export async function POST(request: NextRequest) {
     success: true,
     paymentId: payment.id,
     actionsCredited,
-    message: "Paiement enregistré. Vos actions ont été créditées.",
+    message: "Paiement enregistré. Votre compte a été crédité.",
   });
 }

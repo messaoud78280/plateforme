@@ -445,7 +445,7 @@ export function MessagerieView({ sessionUserId }: { sessionUserId: string }) {
                 </p>
               </div>
               <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Actions estimées</p>
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Crédits estimés</p>
                 <p className="mt-0.5 text-sm text-slate-700">—</p>
               </div>
 

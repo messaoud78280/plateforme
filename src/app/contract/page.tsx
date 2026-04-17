@@ -87,8 +87,8 @@ export default async function ContractPage() {
             <h3 className="mb-2 mt-6 font-semibold text-black">4. Modalités de prestation</h3>
             <p className="mb-4">Les prestations sont réalisées à distance via la plateforme BeWork.</p>
 
-            <h3 className="mb-2 mt-6 font-semibold text-black">5. Quota d’actions inclus dans les offres</h3>
-            <p className="mb-4">Les offres BeWork sont exprimées en quota d&apos;actions administratives. Une action correspond à une tâche administrative simple réalisée par notre équipe. La plupart des actions représentent environ 12 minutes de traitement administratif (équivalent indicatif : cinq actions par heure). Ce quota ne constitue pas une mise à disposition d&apos;un salarié. Le prestataire organise librement ses ressources. Les assistants restent sous l&apos;autorité exclusive de BeWork. Le client ne dispose d&apos;aucun lien de subordination avec les assistants.</p>
+            <h3 className="mb-2 mt-6 font-semibold text-black">5. Quota de crédits inclus dans les offres</h3>
+            <p className="mb-4">Les offres BeWork sont exprimées en quota de crédits administratifs. Un crédit correspond à une tâche administrative simple réalisée par notre équipe. La plupart des crédits représentent environ 12 minutes de traitement administratif (équivalent indicatif : cinq crédits par heure). Ce quota ne constitue pas une mise à disposition d&apos;un salarié. Le prestataire organise librement ses ressources. Les assistants restent sous l&apos;autorité exclusive de BeWork. Le client ne dispose d&apos;aucun lien de subordination avec les assistants.</p>
 
             <h3 className="mb-2 mt-6 font-semibold text-black">6. Tarifs et paiement</h3>
             <p className="mb-2">Les tarifs sont ceux affichés sur la page Tarifs du site :</p>

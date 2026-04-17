@@ -292,7 +292,7 @@ export default async function TachesPage({
         <div>
           <h1 className="text-2xl font-bold text-slate-800">{isAgent ? "Mes missions assignées" : "Mes tâches"}</h1>
           <p className="mt-1 text-slate-600">
-            Tâches qui vous sont assignées. Indiquez le temps passé lors de la clôture pour déduire les actions du client.
+            Tâches qui vous sont assignées. Indiquez le temps passé lors de la clôture pour déduire les crédits du client.
           </p>
         </div>
       </div>

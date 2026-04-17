@@ -15,7 +15,7 @@ export function DeleteTaskButton({
   taskId,
   className = "",
   size = "sm",
-  confirmText = "Supprimer cette mission ? Cette action est irréversible.",
+  confirmText = "Supprimer cette mission ? Cette opération est irréversible.",
   onDeleted,
 }: Props) {
   const router = useRouter();

@@ -44,7 +44,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("STANDARD");
   const [desiredDate, setDesiredDate] = useState("");
-  const [estimatedActions, setEstimatedActions] = useState("1 action");
+  const [estimatedActions, setEstimatedActions] = useState("1 crédit");
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -69,7 +69,12 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
         if (data.description) setDescription(data.description);
         if (data.priority) setPriority(data.priority);
         if (data.desiredDate) setDesiredDate(data.desiredDate);
-        if (data.estimatedActions) setEstimatedActions(data.estimatedActions);
+        if (data.estimatedActions) {
+          let e = data.estimatedActions;
+          if (e === "1 action") e = "1 crédit";
+          if (e === "2 à 3 actions") e = "2 à 3 crédits";
+          setEstimatedActions(e);
+        }
       }
     } catch {
       // ignore
@@ -119,7 +124,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
     setDescription("");
     setPriority("STANDARD");
     setDesiredDate("");
-    setEstimatedActions("1 action");
+    setEstimatedActions("1 crédit");
     setFiles([]);
     setError("");
     setSuccess(false);
@@ -234,7 +239,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5">
-          <span className="text-sm font-medium text-slate-600">Actions restantes ce mois-ci</span>
+          <span className="text-sm font-medium text-slate-600">Crédits restants ce mois-ci</span>
           <span className="text-lg font-bold text-[#1d4ed8]">{actionsRemaining}</span>
         </div>
       </header>
@@ -493,18 +498,18 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
           </div>
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
             <p className="text-sm font-medium text-slate-800">
-              Nombre d&apos;actions : <span className="text-[#1d4ed8]">{estimatedActions}</span>
+              Nombre de crédits : <span className="text-[#1d4ed8]">{estimatedActions}</span>
             </p>
             <p className="mt-1 text-sm text-slate-600">
               Temps estimé :{" "}
-              {estimatedActions === "1 action"
+              {estimatedActions === "1 crédit"
                 ? `environ ${MINUTES_PER_ACTION} minutes`
-                : estimatedActions === "2 à 3 actions"
+                : estimatedActions === "2 à 3 crédits"
                   ? `environ ${2 * MINUTES_PER_ACTION} à ${3 * MINUTES_PER_ACTION} minutes`
                   : "à évaluer avec votre assistant"}
             </p>
             <p className="mt-3 text-xs text-slate-500">
-              Une action = {MINUTES_PER_ACTION} minutes de travail (indicatif : 5 actions ≈ 1 h). L&apos;estimation est indicative ; le temps réel sera comptabilisé à la clôture de la mission.
+              Un crédit = {MINUTES_PER_ACTION} minutes de travail (indicatif : 5 crédits ≈ 1 h). L&apos;estimation est indicative ; le temps réel sera comptabilisé à la clôture de la mission.
             </p>
           </div>
         </section>

@@ -34,10 +34,10 @@ export function DepotTacheForm({ projects = [] }: DepotTacheFormProps) {
       return "sur évaluation";
     }
     if (text.includes("recherche approfondie") || text.includes("analyse détaillée") || text.includes("analyse detaillee")) {
-      return "3 à 4 actions";
+      return "3 à 4 crédits";
     }
     if (text.includes("création") || text.includes("creation") || text.includes("document administratif") || text.includes("dossier")) {
-      return "3 actions";
+      return "3 crédits";
     }
     if (
       text.includes("comparatif") ||
@@ -45,7 +45,7 @@ export function DepotTacheForm({ projects = [] }: DepotTacheFormProps) {
       text.includes("plusieurs prestataires") ||
       text.includes("devis multiples")
     ) {
-      return "2 à 3 actions";
+      return "2 à 3 crédits";
     }
     if (
       text.includes("coordination") ||
@@ -53,7 +53,7 @@ export function DepotTacheForm({ projects = [] }: DepotTacheFormProps) {
       text.includes("plusieurs rendez vous") ||
       text.includes("organisation de plusieurs")
     ) {
-      return "2 actions";
+      return "2 crédits";
     }
     if (
       text.includes("réservation") ||
@@ -62,19 +62,19 @@ export function DepotTacheForm({ projects = [] }: DepotTacheFormProps) {
       text.includes("hotel") ||
       text.includes("transport")
     ) {
-      return "1 à 2 actions";
+      return "1 à 2 crédits";
     }
     if (text.includes("rédaction") || text.includes("redaction") || text.includes("email professionnel")) {
-      return "2 actions";
+      return "2 crédits";
     }
     if (text.includes("recherche simple") || text.includes("trouver une information") || text.includes("rechercher")) {
-      return "1 action";
+      return "1 crédit";
     }
     if (text.includes("email") || text.includes("mail")) {
-      return "1 action";
+      return "1 crédit";
     }
 
-    return "1 à 2 actions";
+    return "1 à 2 crédits";
   }, [combinedText]);
 
   const handleDrop = (e: React.DragEvent) => {
@@ -216,7 +216,7 @@ export function DepotTacheForm({ projects = [] }: DepotTacheFormProps) {
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-          <h3 className="text-sm font-semibold text-slate-800">Estimation des actions</h3>
+          <h3 className="text-sm font-semibold text-slate-800">Estimation des crédits</h3>
           <p className="mt-1 text-xs text-slate-500">
             L’estimation est indicative et peut varier selon la complexité de la demande.
           </p>

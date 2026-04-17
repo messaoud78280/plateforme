@@ -23,7 +23,7 @@ export async function PATCH(
 
   if (action !== "validate" && action !== "correction") {
     return NextResponse.json(
-      { error: "Action invalide (validate ou correction)" },
+      { error: "Opération invalide (validate ou correction)" },
       { status: 400 }
     );
   }
@@ -73,10 +73,10 @@ export async function PATCH(
   } catch (e) {
     console.error(e);
     return NextResponse.json(
-      { error: "Erreur lors de l'action" },
+      { error: "Erreur lors de l'opération" },
       { status: 500 }
     );
   }
 
-  return NextResponse.json({ error: "Action inconnue" }, { status: 400 });
+  return NextResponse.json({ error: "Opération inconnue" }, { status: 400 });
 }

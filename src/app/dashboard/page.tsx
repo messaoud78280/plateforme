@@ -614,7 +614,7 @@ export default async function DashboardPage({
         </h1>
         <p className="mt-1 text-slate-600">
           {isAgentRole
-            ? "Tâches qui vous sont assignées. Indiquez le temps passé à la clôture pour déduire les actions du client."
+            ? "Tâches qui vous sont assignées. Indiquez le temps passé à la clôture pour déduire les crédits du client."
             : "Suivez vos documents, tâches et échanges avec l’agence."}
         </p>
           </div>
@@ -650,7 +650,7 @@ export default async function DashboardPage({
         </section>
       )}
 
-      {/* Actions du mois — clients */}
+      {/* Crédits du mois — clients */}
       {isClient && actionsData && (
         <ActionsWidget
           subscriptionPlan={actionsData.subscriptionPlan}

@@ -69,7 +69,7 @@ export default function Page() {
 
       <h2>Pilotage BeWork : suivi, pas disponibilité illimitée</h2>
       <p>
-        Vous achetez un cadre : un niveau de suivi, des actions réalisées et des indicateurs. L’objectif est simple :
+        Vous achetez un cadre : un niveau de suivi, des prestations réalisées et des indicateurs. L’objectif est simple :
         des encaissements plus réguliers, une trésorerie moins tendue et moins de stress côté dirigeant.
       </p>
     </SeoLandingPage>

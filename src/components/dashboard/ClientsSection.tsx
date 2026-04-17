@@ -44,7 +44,7 @@ export function ClientsSection({ clients }: ClientsSectionProps) {
                 <th className="pb-3 font-medium">Email</th>
                 <th className="pb-3 font-medium text-center">Projets</th>
                 <th className="pb-3 font-medium text-center">Tâches</th>
-                <th className="pb-3 font-medium text-center">Actions</th>
+                <th className="pb-3 font-medium text-center">Crédits</th>
                 <th className="pb-3 font-medium" aria-hidden />
               </tr>
             </thead>

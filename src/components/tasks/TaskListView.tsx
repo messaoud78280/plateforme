@@ -65,7 +65,7 @@ export function TaskListView({ tasks }: TaskListViewProps) {
               <th className="px-4 py-3 font-semibold text-slate-800">Statut</th>
               <th className="px-4 py-3 font-semibold text-slate-800">Date</th>
               <th className="px-4 py-3 font-semibold text-slate-800">Estimation</th>
-              <th className="px-4 py-3 font-semibold text-slate-800 text-center">Actions</th>
+              <th className="px-4 py-3 font-semibold text-slate-800 text-center">Crédits</th>
               <th className="px-4 py-3 font-semibold text-slate-800">Lien</th>
             </tr>
           </thead>
@@ -122,7 +122,7 @@ export function TaskListView({ tasks }: TaskListViewProps) {
                 <td className="px-4 py-3 text-center">
                   {task.actionsUsed != null && task.actionsUsed > 0 ? (
                     <span className="font-medium text-[#1d4ed8] text-xs">
-                      {task.actionsUsed} action{task.actionsUsed > 1 ? "s" : ""}
+                      {task.actionsUsed} crédit{task.actionsUsed > 1 ? "s" : ""}
                       {task.timeSpentMinutes != null && (
                         <span className="ml-1 text-slate-500">({task.timeSpentMinutes} min)</span>
                       )}

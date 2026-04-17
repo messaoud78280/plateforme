@@ -15,9 +15,9 @@ const PLAN_LABELS: Record<string, string> = {
 };
 
 const ACTION_PACKS = [
-  { actions: 20, price: 39, label: "20 actions" },
-  { actions: 50, price: 89, label: "50 actions" },
-  { actions: 100, price: 159, label: "100 actions" },
+  { actions: 20, price: 39, label: "20 crédits" },
+  { actions: 50, price: 89, label: "50 crédits" },
+  { actions: 100, price: 159, label: "100 crédits" },
 ];
 
 export default async function ProfilVueEnsemblePage() {
@@ -84,7 +84,7 @@ export default async function ProfilVueEnsemblePage() {
             <dd className="mt-0.5 font-medium text-slate-800">{planName}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Actions mensuelles</dt>
+            <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Crédits mensuels</dt>
             <dd className="mt-0.5 font-medium text-slate-800">{total}</dd>
           </div>
           <div>
@@ -124,30 +124,30 @@ export default async function ProfilVueEnsemblePage() {
         </div>
       </section>
 
-      {/* 2. Compteur d'actions + barre de progression */}
-      <section className="rounded-2xl surface-metallic-light p-6" aria-labelledby="actions-heading">
-        <h2 id="actions-heading" className="text-lg font-semibold text-slate-800">
-          Compteur d&apos;actions
+      {/* 2. Compteur de crédits + barre de progression */}
+      <section className="rounded-2xl surface-metallic-light p-6" aria-labelledby="credits-heading">
+        <h2 id="credits-heading" className="text-lg font-semibold text-slate-800">
+          Compteur de crédits
         </h2>
         <div className="mt-4 grid grid-cols-3 gap-4 text-center">
           <div>
             <p className="text-2xl font-bold text-slate-800">{total}</p>
-            <p className="text-xs text-slate-500">Actions disponibles</p>
+            <p className="text-xs text-slate-500">Crédits disponibles</p>
           </div>
           <div>
             <p className="text-2xl font-bold text-slate-700">{used}</p>
-            <p className="text-xs text-slate-500">Actions utilisées</p>
+            <p className="text-xs text-slate-500">Crédits utilisés</p>
           </div>
           <div>
             <p className="text-2xl font-bold text-[#1d4ed8]">{remaining}</p>
-            <p className="text-xs text-slate-500">Actions restantes</p>
+            <p className="text-xs text-slate-500">Crédits restants</p>
           </div>
         </div>
         <p className="mt-2 text-center text-sm font-medium text-slate-700">
-          {used} / {total} actions
+          {used} / {total} crédits
         </p>
         <div className="mt-4">
-          <div className="h-3 w-full overflow-hidden rounded-full bg-slate-200" role="progressbar" aria-valuenow={used} aria-valuemin={0} aria-valuemax={total} aria-label="Actions utilisées">
+          <div className="h-3 w-full overflow-hidden rounded-full bg-slate-200" role="progressbar" aria-valuenow={used} aria-valuemin={0} aria-valuemax={total} aria-label="Crédits utilisés">
             <div
               className={`h-full rounded-full transition-all ${usagePercent >= 90 ? "bg-red-500" : usagePercent >= 70 ? "bg-amber-400" : "bg-[#1d4ed8]"}`}
               style={{ width: `${usagePercent}%` }}
@@ -171,13 +171,13 @@ export default async function ProfilVueEnsemblePage() {
         </section>
       )}
 
-      {/* 3. Packs d'actions supplémentaires */}
+      {/* 3. Packs de crédits supplémentaires */}
       <section className="rounded-2xl surface-metallic-light p-6" aria-labelledby="packs-heading">
         <h2 id="packs-heading" className="text-lg font-semibold text-slate-800">
-          Besoin de plus d&apos;actions ?
+          Besoin de plus de crédits ?
         </h2>
         <p className="mt-1 text-sm text-slate-600">
-          Achetez des actions supplémentaires en complément de votre forfait.
+          Achetez des crédits supplémentaires en complément de votre forfait.
         </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           {ACTION_PACKS.map((pack) => (
@@ -188,7 +188,7 @@ export default async function ProfilVueEnsemblePage() {
               <p className="font-semibold text-slate-800">{pack.label}</p>
               <p className="mt-1 text-xl font-bold text-[#1d4ed8]">{pack.price} €</p>
               <Link
-                href={`/contact?sujet=Pack+${pack.actions}+actions`}
+                href={`/contact?sujet=Pack+${pack.actions}+crédits`}
                 className="mt-4 rounded-lg bg-[#1d4ed8] px-4 py-2 text-center text-sm font-semibold text-white hover:bg-[#1e40af]"
               >
                 Acheter
@@ -198,10 +198,10 @@ export default async function ProfilVueEnsemblePage() {
         </div>
       </section>
 
-      {/* 4. Historique des actions (Demande | Date | Actions utilisées) */}
-      <section className="rounded-2xl surface-metallic-light" aria-labelledby="historique-actions-heading">
-        <h2 id="historique-actions-heading" className="border-b border-slate-200 px-6 py-4 text-lg font-semibold text-slate-800">
-          Historique des actions
+      {/* 4. Historique des crédits (Demande | Date | Crédits utilisés) */}
+      <section className="rounded-2xl surface-metallic-light" aria-labelledby="historique-credits-heading">
+        <h2 id="historique-credits-heading" className="border-b border-slate-200 px-6 py-4 text-lg font-semibold text-slate-800">
+          Historique des crédits
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[320px] text-left text-sm">
@@ -209,14 +209,14 @@ export default async function ProfilVueEnsemblePage() {
               <tr className="border-b border-slate-200 bg-slate-50">
                 <th className="px-4 py-3 font-semibold text-slate-800">Demande</th>
                 <th className="px-4 py-3 font-semibold text-slate-800">Date</th>
-                <th className="px-4 py-3 font-semibold text-slate-800">Actions utilisées</th>
+                <th className="px-4 py-3 font-semibold text-slate-800">Crédits utilisés</th>
               </tr>
             </thead>
             <tbody>
               {tasksWithActions.length === 0 ? (
                 <tr>
                   <td colSpan={3} className="px-4 py-8 text-center text-slate-500">
-                    Aucune demande avec actions pour le moment.
+                    Aucune demande avec consommation de crédits pour le moment.
                   </td>
                 </tr>
               ) : (
@@ -226,7 +226,7 @@ export default async function ProfilVueEnsemblePage() {
                     <td className="px-4 py-3 text-slate-700">
                       {t.completedAt ? new Date(t.completedAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }) : "—"}
                     </td>
-                    <td className="px-4 py-3 font-medium text-[#1d4ed8]">{t.actionsUsed ?? 0} action{(t.actionsUsed ?? 0) > 1 ? "s" : ""}</td>
+                    <td className="px-4 py-3 font-medium text-[#1d4ed8]">{t.actionsUsed ?? 0} crédit{(t.actionsUsed ?? 0) > 1 ? "s" : ""}</td>
                   </tr>
                 ))
               )}
@@ -235,7 +235,7 @@ export default async function ProfilVueEnsemblePage() {
         </div>
         <div className="border-t border-slate-200 px-6 py-3">
           <Link href="/dashboard/abonnement" className="text-sm font-medium text-[#1d4ed8] hover:underline">
-            Voir tout le suivi des actions →
+            Voir tout le suivi des crédits →
           </Link>
         </div>
       </section>

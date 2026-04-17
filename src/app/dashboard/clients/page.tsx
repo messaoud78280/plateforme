@@ -60,7 +60,7 @@ export default async function ClientsPage() {
                 <th className="px-6 py-4 font-semibold">Email</th>
                 <th className="px-6 py-4 font-semibold text-center">Projets</th>
                 <th className="px-6 py-4 font-semibold text-center">Tâches</th>
-                <th className="px-6 py-4 font-semibold text-center">Quota actions (utilisées / total)</th>
+                <th className="px-6 py-4 font-semibold text-center">Quota crédits (utilisés / total)</th>
                 <th className="px-6 py-4 font-semibold text-right">Détail</th>
               </tr>
             </thead>

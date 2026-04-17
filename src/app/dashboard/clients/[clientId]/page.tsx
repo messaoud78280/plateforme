@@ -118,7 +118,7 @@ export default async function ClientDetailPage({
                   <th className="px-6 py-3 text-left font-medium">Projet</th>
                   <th className="px-6 py-3 text-left font-medium">Statut</th>
                   <th className="px-6 py-3 text-left font-medium">Agent assigné</th>
-                  <th className="px-6 py-3 text-right font-medium">Actions</th>
+                  <th className="px-6 py-3 text-right font-medium">Accès</th>
                 </tr>
               </thead>
               <tbody>
@@ -186,7 +186,7 @@ export default async function ClientDetailPage({
                   <th className="px-6 py-3 text-left font-medium">Projet</th>
                   <th className="px-6 py-3 text-left font-medium">Statut</th>
                   <th className="px-6 py-3 text-left font-medium">Agent assigné</th>
-                  <th className="px-6 py-3 text-right font-medium">Actions</th>
+                  <th className="px-6 py-3 text-right font-medium">Accès</th>
                 </tr>
               </thead>
               <tbody>

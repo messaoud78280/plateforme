@@ -1,6 +1,6 @@
 /**
- * Facturation par actions : 1 action = 12 minutes (5 actions ≈ 1 h).
- * Minimum 1 action par tâche. Formule : ceil(minutes / MINUTES_PER_ACTION).
+ * Facturation par crédits : 1 crédit = 12 minutes (5 crédits ≈ 1 h).
+ * Minimum 1 crédit par tâche. Formule : ceil(minutes / MINUTES_PER_ACTION).
  */
 
 export const MINUTES_PER_ACTION = 12;

@@ -205,24 +205,24 @@ export default async function AbonnementPage() {
         </div>
       </section>
 
-      {/* Bloc Abonnement et actions — formule, KPIs, 3 CTA */}
+      {/* Bloc Abonnement et crédits — formule, KPIs, 3 CTA */}
       <section className="rounded-2xl surface-metallic-light p-6">
-        <h2 className="text-lg font-semibold text-slate-800">Abonnement et actions</h2>
+        <h2 className="text-lg font-semibold text-slate-800">Abonnement et crédits</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Formule active</p>
             <p className="mt-0.5 font-semibold text-slate-800">{planName}</p>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Actions totales</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Crédits totaux</p>
             <p className="mt-0.5 font-semibold text-slate-800">{total}</p>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Actions utilisées</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Crédits utilisés</p>
             <p className="mt-0.5 font-semibold text-slate-800">{used}</p>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Actions restantes</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Crédits restants</p>
             <p className="mt-0.5 font-semibold text-[#1d4ed8]">{remaining}</p>
           </div>
         </div>
@@ -250,15 +250,15 @@ export default async function AbonnementPage() {
             />
           </div>
           <p className="mt-1.5 text-xs text-slate-500">
-            {used} / {total} actions utilisées ce mois
+            {used} / {total} crédits utilisés ce mois
           </p>
         </div>
         <div className="mt-6 flex flex-wrap gap-3">
           <a
-            href="#suivi-actions"
+            href="#suivi-credits"
             className="inline-flex rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e40af]"
           >
-            Voir le suivi des actions
+            Voir le suivi des crédits
           </a>
           <Link
             href="/dashboard/abonnement/souscrire"
@@ -292,7 +292,7 @@ export default async function AbonnementPage() {
                 <th className="px-4 py-3 font-semibold text-slate-800">Formule</th>
                 <th className="px-4 py-3 font-semibold text-slate-800">Date</th>
                 <th className="px-4 py-3 font-semibold text-slate-800">Montant</th>
-                <th className="px-4 py-3 font-semibold text-slate-800">Actions créditées</th>
+                <th className="px-4 py-3 font-semibold text-slate-800">Crédits ajoutés</th>
                 <th className="px-4 py-3 font-semibold text-slate-800">Statut</th>
               </tr>
             </thead>
@@ -329,10 +329,10 @@ export default async function AbonnementPage() {
         </div>
       </section>
 
-      {/* Historique des crédits d'actions */}
+      {/* Historique des mouvements de crédits */}
       <section className="rounded-2xl surface-metallic-light">
         <h2 className="border-b border-slate-200 px-6 py-4 text-lg font-semibold text-slate-800">
-          Historique des crédits d&apos;actions
+          Historique des mouvements de crédits
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
@@ -372,11 +372,11 @@ export default async function AbonnementPage() {
         </div>
       </section>
 
-      {/* Suivi des actions (tâches) */}
-      <section id="suivi-actions" className="scroll-mt-6">
-        <h2 className="text-xl font-bold text-slate-800">Suivi des actions</h2>
+      {/* Suivi des crédits (tâches) */}
+      <section id="suivi-credits" className="scroll-mt-6">
+        <h2 className="text-xl font-bold text-slate-800">Suivi des crédits</h2>
         <p className="mt-1 text-sm text-slate-600">
-          Historique des tâches terminées avec déduction d&apos;actions. Minimum 1 action par demande.
+          Historique des tâches terminées avec déduction de crédits. Minimum 1 crédit par demande.
         </p>
         <div className="mt-4 overflow-x-auto rounded-xl surface-metallic-light">
           <table className="w-full text-left text-sm">
@@ -385,7 +385,7 @@ export default async function AbonnementPage() {
                 <th className="px-4 py-3 font-semibold text-slate-800">Demande</th>
                 <th className="px-4 py-3 font-semibold text-slate-800">Date</th>
                 <th className="px-4 py-3 font-semibold text-slate-800">Statut</th>
-                <th className="px-4 py-3 font-semibold text-slate-800">Actions utilisées</th>
+                <th className="px-4 py-3 font-semibold text-slate-800">Crédits utilisés</th>
                 <th className="px-4 py-3 font-semibold text-slate-800">Projet</th>
                 <th className="px-4 py-3 font-semibold text-slate-800">Assistante</th>
               </tr>
@@ -394,7 +394,7 @@ export default async function AbonnementPage() {
               {tasksWithActions.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
-                    Aucune tâche avec actions déduites pour le moment.
+                    Aucune tâche avec crédits déduits pour le moment.
                   </td>
                 </tr>
               ) : (
@@ -405,7 +405,7 @@ export default async function AbonnementPage() {
                       {t.completedAt ? new Date(t.completedAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" }) : "—"}
                     </td>
                     <td className="px-4 py-3 text-slate-600">Terminé</td>
-                    <td className="px-4 py-3 font-medium text-[#1d4ed8]">{t.actionsUsed ?? 0} action{(t.actionsUsed ?? 0) > 1 ? "s" : ""}</td>
+                    <td className="px-4 py-3 font-medium text-[#1d4ed8]">{t.actionsUsed ?? 0} crédit{(t.actionsUsed ?? 0) > 1 ? "s" : ""}</td>
                     <td className="px-4 py-3 text-slate-600">{t.project?.title ?? "—"}</td>
                     <td className="px-4 py-3 text-slate-600">{t.assignedTo?.name ?? "—"}</td>
                   </tr>

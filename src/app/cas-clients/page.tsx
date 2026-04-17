@@ -1,17 +1,19 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
-import { absoluteUrl } from "@/lib/site";
+import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/seo-landing-json-ld";
 
-const pageUrl = absoluteUrl("/cas-clients");
+const PAGE_PATH = "/cas-clients";
 
-export const metadata: Metadata = {
+const h1 = "Cas clients (BTP) : ce que vous gagnez vraiment";
+
+export const metadata = landingPageMetadata({
   title: "Cas clients BTP : suivi, trésorerie, organisation | BeWork",
   description:
     "Exemples concrets : devis relancés, facturation sécurisée, situations de travaux cadrées, dossiers tenus. Pilotage administratif encadré pour entreprises du BTP.",
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
-  robots: { index: true, follow: true },
-};
+  path: PAGE_PATH,
+  keywords: ["cas clients BTP", "preuve résultats administratif", "témoignage artisan bâtiment", "BeWork"],
+});
 
 const cases = [
   {
@@ -34,16 +36,44 @@ const cases = [
   },
 ] as const;
 
+const breadcrumbItems = [
+  { name: "Accueil", href: "/" },
+  { name: "Cas clients BTP", href: PAGE_PATH },
+] as const;
+
+const casClientsJsonLd = buildWebPageAndBreadcrumbJsonLd({
+  pagePath: PAGE_PATH,
+  h1,
+  description:
+    "Exemples concrets : devis relancés, facturation sécurisée, situations de travaux cadrées, dossiers tenus. Pilotage administratif encadré pour entreprises du BTP.",
+  breadcrumbItems: [...breadcrumbItems],
+});
+
 export default function CasClientsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(casClientsJsonLd) }} />
       <MarketingSiteHeader plainBg />
 
       <main className="mx-auto max-w-6xl px-6 py-16 md:py-24">
         <header className="mx-auto max-w-3xl text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
-            Cas clients (BTP) : ce que vous gagnez vraiment
-          </h1>
+          <nav className="mb-6 text-left text-sm text-[#64748b] sm:text-center" aria-label="Fil d’Ariane">
+            <ol className="inline-flex flex-wrap items-center justify-start gap-x-2 gap-y-1 sm:justify-center">
+              {breadcrumbItems.map((item, i) => (
+                <li key={item.href} className="flex items-center gap-2">
+                  {i > 0 ? <span aria-hidden className="text-[#94a3b8]">/</span> : null}
+                  {i < breadcrumbItems.length - 1 ? (
+                    <Link href={item.href} className="font-medium text-[#475569] hover:text-[#1d4ed8]">
+                      {item.name}
+                    </Link>
+                  ) : (
+                    <span className="font-medium text-[#334155]">{item.name}</span>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </nav>
+          <h1 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">{h1}</h1>
           <p className="mt-5 text-lg leading-relaxed text-[#334155]">
             BeWork ne “fait pas de secrétariat”. On met en place un cadre de suivi : relances, dossiers, pièces, et
             validations — pour sécuriser vos opportunités et votre chiffre d’affaires.

@@ -86,7 +86,7 @@ export default function BlogPage() {
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogListLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }} />
-      <MarketingSiteHeader plainBg />
+      <MarketingSiteHeader plainBg showBlogLink={false} />
 
       <main className="px-6 py-16 md:py-24">
         <div className="mx-auto max-w-3xl">

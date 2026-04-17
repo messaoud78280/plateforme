@@ -1,15 +1,15 @@
-import type { Metadata } from "next";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
-import { absoluteUrl } from "@/lib/site";
+import { landingPageMetadata } from "@/lib/seo-landing-metadata";
 
-const pageUrl = absoluteUrl("/suivi-fournisseurs-chantier");
+const PAGE_PATH = "/suivi-fournisseurs-chantier";
 
-export const metadata: Metadata = {
+export const metadata = landingPageMetadata({
   title: "Suivi fournisseurs chantier : commandes, relances, preuves | BeWork",
   description:
     "Suivi fournisseurs chantier : commande → confirmation → livraison → preuve. Process simple, relances et tableau de suivi pour éviter les retards. Forfaits TTC.",
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
-};
+  path: PAGE_PATH,
+  keywords: ["suivi fournisseurs chantier", "commande matériaux BTP", "livraison chantier", "relance fournisseur"],
+});
 
 export default function Page() {
   const faq = [
@@ -39,8 +39,11 @@ export default function Page() {
 
   return (
     <SeoLandingPage
-      title="Suivi fournisseurs chantier"
-      description="Commandes, confirmations, livraisons"
+      description="Suivi fournisseurs chantier : commande → confirmation → livraison → preuve. Process simple, relances et tableau de suivi pour éviter les retards. Forfaits TTC."
+      breadcrumbItems={[
+        { name: "Accueil", href: "/" },
+        { name: "Suivi fournisseurs chantier", href: PAGE_PATH },
+      ]}
       h1="Suivi fournisseurs chantier : commandes, relances et preuves (sans y passer la journée)"
       intro={
         <>

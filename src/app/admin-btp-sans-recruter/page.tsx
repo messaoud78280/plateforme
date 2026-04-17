@@ -1,15 +1,15 @@
-import type { Metadata } from "next";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
-import { absoluteUrl } from "@/lib/site";
+import { landingPageMetadata } from "@/lib/seo-landing-metadata";
 
-const pageUrl = absoluteUrl("/admin-btp-sans-recruter");
+const PAGE_PATH = "/admin-btp-sans-recruter";
 
-export const metadata: Metadata = {
+export const metadata = landingPageMetadata({
   title: "Administratif BTP sans recruter : structurer et suivre | BeWork",
   description:
     "Structurer l’administratif BTP sans recruter : devis, relances, dossiers, DT/DICT, situations. Pilotage encadré avec validations. Forfaits TTC.",
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
-};
+  path: PAGE_PATH,
+  keywords: ["administratif BTP sans recruter", "externalisation administrative BTP", "pilotage administratif", "forfait administratif"],
+});
 
 export default function Page() {
   const faq = [
@@ -39,8 +39,11 @@ export default function Page() {
 
   return (
     <SeoLandingPage
-      title="Administratif BTP sans recruter"
-      description="Structurer sans embauche"
+      description="Structurer l’administratif BTP sans recruter : devis, relances, dossiers, DT/DICT, situations. Pilotage encadré avec validations. Forfaits TTC."
+      breadcrumbItems={[
+        { name: "Accueil", href: "/" },
+        { name: "Administratif BTP sans recruter", href: PAGE_PATH },
+      ]}
       h1="Administratif BTP sans recruter : structurer le bureau, sécuriser les chantiers"
       intro={
         <>

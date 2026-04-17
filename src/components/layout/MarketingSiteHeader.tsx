@@ -7,7 +7,7 @@ import { BeWorkLogo } from "@/components/BeWorkLogo";
 type Props = {
   /** Fond opaque sans blur (certaines pages marketing) */
   plainBg?: boolean;
-  /** Affiche un lien « Blog » (ex. article) */
+  /** Affiche un lien « Blog » (désactiver sur /blog pour éviter un lien vers la page courante) */
   showBlogLink?: boolean;
   /** Contenu sous la barre principale (ex. bandeau ancres page d’accueil), dans le même header sticky */
   bottom?: ReactNode;
@@ -16,7 +16,7 @@ type Props = {
 /**
  * En-tête commun pages vitrine : accès compte, navigation (méthode, forfaits) + rendez-vous découverte.
  */
-export function MarketingSiteHeader({ plainBg = false, showBlogLink = false, bottom }: Props) {
+export function MarketingSiteHeader({ plainBg = false, showBlogLink = true, bottom }: Props) {
   return (
     <header
       className={`sticky top-0 z-20 border-b border-[#c8cdd6] shadow-[0_1px_0_0_rgba(203,213,225,0.9)] ${

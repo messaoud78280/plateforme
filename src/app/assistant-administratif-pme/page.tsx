@@ -1,21 +1,24 @@
-import type { Metadata } from "next";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
-import { absoluteUrl } from "@/lib/site";
+import { landingPageMetadata } from "@/lib/seo-landing-metadata";
 
-const pageUrl = absoluteUrl("/assistant-administratif-pme");
+const PAGE_PATH = "/assistant-administratif-pme";
 
-export const metadata: Metadata = {
+export const metadata = landingPageMetadata({
   title: "Assistant administratif PME | Externaliser l'administratif | BeWork",
   description:
     "Assistant administratif pour PME : externaliser devis, factures, relances. Assistant virtuel entreprise dès 290 € TTC/mois. France, Belgique, Suisse, Luxembourg.",
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
-};
+  path: PAGE_PATH,
+  keywords: ["assistant administratif PME", "assistant virtuel entreprise", "externaliser administratif", "secrétariat externalisé"],
+});
 
 export default function Page() {
   return (
     <SeoLandingPage
-      title="Assistant administratif PME"
-      description="Externaliser administratif PME"
+      description="Assistant administratif pour PME : externaliser devis, factures, relances. Assistant virtuel entreprise dès 290 € TTC/mois. France, Belgique, Suisse, Luxembourg."
+      breadcrumbItems={[
+        { name: "Accueil", href: "/" },
+        { name: "Assistant administratif PME", href: PAGE_PATH },
+      ]}
       h1="Assistant administratif pour PME : externaliser sans recruter"
       intro={
         <>

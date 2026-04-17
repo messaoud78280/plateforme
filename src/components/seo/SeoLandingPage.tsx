@@ -2,22 +2,57 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
+import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/seo-landing-json-ld";
 
 type SeoLandingPageProps = {
-  title: string;
+  /** Résumé pour le JSON-LD WebPage (aligné sur la meta description) */
   description: string;
   h1: string;
   intro: ReactNode;
   children: ReactNode;
+  /** Fil d’Ariane + JSON-LD WebPage / BreadcrumbList (dernier segment = page courante) */
+  breadcrumbItems?: { name: string; href: string }[];
 };
 
-export function SeoLandingPage({ title, description, h1, intro, children }: SeoLandingPageProps) {
+export function SeoLandingPage({ description, h1, intro, children, breadcrumbItems }: SeoLandingPageProps) {
+  const lastPath = breadcrumbItems?.length ? breadcrumbItems[breadcrumbItems.length - 1]?.href : undefined;
+  const structuredData =
+    breadcrumbItems?.length && lastPath
+      ? buildWebPageAndBreadcrumbJsonLd({
+          pagePath: lastPath,
+          h1,
+          description,
+          breadcrumbItems,
+        })
+      : null;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
+      {structuredData ? (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+      ) : null}
       <MarketingSiteHeader plainBg />
 
       <main className="px-6 py-16 md:py-24">
         <article className="mx-auto max-w-3xl">
+          {breadcrumbItems?.length ? (
+            <nav className="mb-6 text-sm text-[#64748b]" aria-label="Fil d’Ariane">
+              <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                {breadcrumbItems.map((item, i) => (
+                  <li key={`${item.href}-${item.name}`} className="flex items-center gap-2">
+                    {i > 0 ? <span aria-hidden className="text-[#94a3b8]">/</span> : null}
+                    {i < breadcrumbItems.length - 1 ? (
+                      <Link href={item.href} className="font-medium text-[#475569] hover:text-[#1d4ed8]">
+                        {item.name}
+                      </Link>
+                    ) : (
+                      <span className="font-medium text-[#334155]">{item.name}</span>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          ) : null}
           <h1 className="text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">{h1}</h1>
           <p className="mt-6 text-lg leading-relaxed text-[#334155]">{intro}</p>
           <div className="mt-12 prose prose-slate max-w-none prose-headings:text-[#0f172a] prose-p:text-[#334155]">
@@ -54,6 +89,9 @@ export function SeoLandingPage({ title, description, h1, intro, children }: SeoL
           </div>
           <div className="flex flex-wrap gap-x-6 gap-y-2">
             <Link href="/" className="font-medium hover:text-[#0f172a]">Accueil</Link>
+            <Link href="/notre-facon-de-travailler" className="font-medium hover:text-[#0f172a]">Méthode</Link>
+            <Link href="/blog" className="font-medium hover:text-[#0f172a]">Blog</Link>
+            <Link href="/cas-clients" className="font-medium hover:text-[#0f172a]">Cas clients</Link>
             <Link href="/tarifs" className="font-medium hover:text-[#0f172a]">Tarifs</Link>
             <Link href="/contact" className="font-medium hover:text-[#0f172a]">Contact</Link>
           </div>

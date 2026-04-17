@@ -1,15 +1,15 @@
-import type { Metadata } from "next";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
-import { absoluteUrl } from "@/lib/site";
+import { landingPageMetadata } from "@/lib/seo-landing-metadata";
 
-const pageUrl = absoluteUrl("/impayes-btp-relances");
+const PAGE_PATH = "/impayes-btp-relances";
 
-export const metadata: Metadata = {
+export const metadata = landingPageMetadata({
   title: "Impayés BTP : relances cadrées et trésorerie | BeWork",
   description:
     "Impayés BTP : organisation des relances (J+5/J+15/J+30), suivi des encaissements, preuves et reporting. Pilotage administratif encadré, forfaits TTC.",
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
-};
+  path: PAGE_PATH,
+  keywords: ["impayés BTP", "relance facture artisan", "trésorerie chantier", "encaissement BTP"],
+});
 
 export default function Page() {
   const faq = [
@@ -39,8 +39,11 @@ export default function Page() {
 
   return (
     <SeoLandingPage
-      title="Impayés BTP"
-      description="Impayés BTP : relances et suivi encaissements"
+      description="Impayés BTP : organisation des relances (J+5/J+15/J+30), suivi des encaissements, preuves et reporting. Pilotage administratif encadré, forfaits TTC."
+      breadcrumbItems={[
+        { name: "Accueil", href: "/" },
+        { name: "Impayés BTP", href: PAGE_PATH },
+      ]}
       h1="Impayés BTP : relances cadrées pour sécuriser la trésorerie"
       intro={
         <>

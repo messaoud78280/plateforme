@@ -1,15 +1,15 @@
-import type { Metadata } from "next";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
-import { absoluteUrl } from "@/lib/site";
+import { landingPageMetadata } from "@/lib/seo-landing-metadata";
 
-const pageUrl = absoluteUrl("/situation-travaux-btp");
+const PAGE_PATH = "/situation-travaux-btp";
 
-export const metadata: Metadata = {
+export const metadata = landingPageMetadata({
   title: "Situation de travaux BTP : structurer et envoyer sans retard | BeWork",
   description:
     "Situation de travaux BTP : organisation, pièces, fréquence, modèle et suivi pour facturer au fil de l’eau. Pilotage administratif encadré, forfaits TTC.",
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
-};
+  path: PAGE_PATH,
+  keywords: ["situation de travaux BTP", "facturation chantier", "avancement travaux", "administratif BTP"],
+});
 
 export default function Page() {
   const faq = [
@@ -39,8 +39,11 @@ export default function Page() {
 
   return (
     <SeoLandingPage
-      title="Situation de travaux BTP"
-      description="Situation de travaux : structuration et suivi"
+      description="Situation de travaux BTP : organisation, pièces, fréquence, modèle et suivi pour facturer au fil de l’eau. Pilotage administratif encadré, forfaits TTC."
+      breadcrumbItems={[
+        { name: "Accueil", href: "/" },
+        { name: "Situation de travaux BTP", href: PAGE_PATH },
+      ]}
       h1="Situation de travaux BTP : structurer, envoyer, relancer — sans perdre de temps"
       intro={
         <>

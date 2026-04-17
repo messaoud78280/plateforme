@@ -1,15 +1,15 @@
-import type { Metadata } from "next";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
-import { absoluteUrl } from "@/lib/site";
+import { landingPageMetadata } from "@/lib/seo-landing-metadata";
 
-const pageUrl = absoluteUrl("/relance-devis-btp");
+const PAGE_PATH = "/relance-devis-btp";
 
-export const metadata: Metadata = {
+export const metadata = landingPageMetadata({
   title: "Relance devis BTP : signer plus de chantiers | BeWork",
   description:
     "Relance devis BTP : méthode J+2 / J+7 / J+14, scripts et suivi pour augmenter les signatures sans harceler. Pilotage administratif encadré. Forfaits TTC.",
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
-};
+  path: PAGE_PATH,
+  keywords: ["relance devis BTP", "suivi devis chantier", "signature devis artisan", "pilotage administratif BTP"],
+});
 
 export default function Page() {
   const faq = [
@@ -39,8 +39,11 @@ export default function Page() {
 
   return (
     <SeoLandingPage
-      title="Relance devis BTP"
-      description="Relance devis BTP : signer plus de chantiers"
+      description="Relance devis BTP : méthode J+2 / J+7 / J+14, scripts et suivi pour augmenter les signatures sans harceler. Pilotage administratif encadré. Forfaits TTC."
+      breadcrumbItems={[
+        { name: "Accueil", href: "/" },
+        { name: "Relance devis BTP", href: PAGE_PATH },
+      ]}
       h1="Relance devis BTP : une méthode simple pour signer plus de chantiers"
       intro={
         <>

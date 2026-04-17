@@ -1,15 +1,15 @@
-import type { Metadata } from "next";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
-import { absoluteUrl } from "@/lib/site";
+import { landingPageMetadata } from "@/lib/seo-landing-metadata";
 
-const pageUrl = absoluteUrl("/avenant-chantier");
+const PAGE_PATH = "/avenant-chantier";
 
-export const metadata: Metadata = {
+export const metadata = landingPageMetadata({
   title: "Avenant chantier : cadrer et sécuriser le CA | BeWork",
   description:
     "Avenant chantier : process administratif (demande, chiffrage, validation, preuve, archivage) pour sécuriser vos marges et éviter les litiges. Forfaits TTC.",
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
-};
+  path: PAGE_PATH,
+  keywords: ["avenant chantier BTP", "travaux supplémentaires", "marge chantier", "litige travaux"],
+});
 
 export default function Page() {
   const faq = [
@@ -39,8 +39,11 @@ export default function Page() {
 
   return (
     <SeoLandingPage
-      title="Avenant chantier"
-      description="Avenants : process et traçabilité"
+      description="Avenant chantier : process administratif (demande, chiffrage, validation, preuve, archivage) pour sécuriser vos marges et éviter les litiges. Forfaits TTC."
+      breadcrumbItems={[
+        { name: "Accueil", href: "/" },
+        { name: "Avenant chantier", href: PAGE_PATH },
+      ]}
       h1="Avenant chantier : le process administratif pour sécuriser votre chiffre d’affaires"
       intro={
         <>

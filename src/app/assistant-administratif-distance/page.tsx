@@ -1,21 +1,24 @@
-import type { Metadata } from "next";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
-import { absoluteUrl } from "@/lib/site";
+import { landingPageMetadata } from "@/lib/seo-landing-metadata";
 
-const pageUrl = absoluteUrl("/assistant-administratif-distance");
+const PAGE_PATH = "/assistant-administratif-distance";
 
-export const metadata: Metadata = {
+export const metadata = landingPageMetadata({
   title: "Assistant administratif à distance | BeWork",
   description:
     "Assistant administratif à distance pour PME et indépendants. Devis, factures, relances, suivi dossiers. Plateforme supervisée depuis la France. Dès 290 € TTC/mois.",
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
-};
+  path: PAGE_PATH,
+  keywords: ["assistant administratif à distance", "assistant virtuel", "télésecrétariat PME", "externalisation administrative"],
+});
 
 export default function Page() {
   return (
     <SeoLandingPage
-      title="Assistant administratif à distance"
-      description="Assistant administratif à distance"
+      description="Assistant administratif à distance pour PME et indépendants. Devis, factures, relances, suivi dossiers. Plateforme supervisée depuis la France. Dès 290 € TTC/mois."
+      breadcrumbItems={[
+        { name: "Accueil", href: "/" },
+        { name: "Assistant administratif à distance", href: PAGE_PATH },
+      ]}
       h1="Assistant administratif à distance : même qualité qu&apos;en interne"
       intro={
         <>

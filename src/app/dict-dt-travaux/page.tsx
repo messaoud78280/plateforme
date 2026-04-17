@@ -1,15 +1,15 @@
-import type { Metadata } from "next";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
-import { absoluteUrl } from "@/lib/site";
+import { landingPageMetadata } from "@/lib/seo-landing-metadata";
 
-const pageUrl = absoluteUrl("/dict-dt-travaux");
+const PAGE_PATH = "/dict-dt-travaux";
 
-export const metadata: Metadata = {
+export const metadata = landingPageMetadata({
   title: "DICT / DT : dossier, délais, suivi (BTP) | BeWork",
   description:
     "DICT / DT : préparation du dossier, suivi des accusés, relances et classement. Démarches chantier cadrées pendant que vous restez sur le terrain. Forfaits TTC.",
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
-};
+  path: PAGE_PATH,
+  keywords: ["DICT BTP", "déclaration travaux", "dossier DT chantier", "démarches administratives BTP"],
+});
 
 export default function Page() {
   const faq = [
@@ -39,8 +39,11 @@ export default function Page() {
 
   return (
     <SeoLandingPage
-      title="DICT / DT"
-      description="DICT / DT : préparation et suivi"
+      description="DICT / DT : préparation du dossier, suivi des accusés, relances et classement. Démarches chantier cadrées pendant que vous restez sur le terrain. Forfaits TTC."
+      breadcrumbItems={[
+        { name: "Accueil", href: "/" },
+        { name: "DICT / DT", href: PAGE_PATH },
+      ]}
       h1="DICT / DT : préparer le dossier et tenir le suivi, sans perdre du temps terrain"
       intro={
         <>

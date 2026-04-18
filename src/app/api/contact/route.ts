@@ -144,22 +144,35 @@ export async function POST(request: NextRequest) {
 </html>
   `.trim();
 
-  if (resend && CONTACT_EMAIL?.trim()) {
+  let emailSent = false;
+  if (!process.env.RESEND_API_KEY?.trim()) {
+    console.warn(
+      "[contact] Aucun RESEND_API_KEY : la demande est enregistrée en base mais aucun mail d’alerte n’est envoyé. Configurez Resend sur Railway (voir .env.example)."
+    );
+  } else if (!CONTACT_EMAIL?.trim()) {
+    console.warn(
+      "[contact] CONTACT_EMAIL (ou RESEND_FROM_EMAIL) manquant : précisez l’adresse qui doit recevoir les demandes."
+    );
+  } else if (resend) {
     const fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
     const fromName = process.env.RESEND_FROM_NAME || "BeWork Contact";
     try {
       const { error } = await resend.emails.send({
         from: `${fromName} <${fromEmail}>`,
-        to: [CONTACT_EMAIL],
+        to: [CONTACT_EMAIL.trim()],
         replyTo: email,
         subject: `[BeWork] Demande de contact – ${structure} – ${contactName}`,
         html,
       });
-      if (error) console.error("Resend error:", error);
+      if (error) {
+        console.error("Resend error:", error);
+      } else {
+        emailSent = true;
+      }
     } catch (e) {
       console.error("Contact email error:", e);
     }
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, emailNotificationSent: emailSent });
 }

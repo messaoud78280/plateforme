@@ -2,8 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { prisma } from "@/lib/prisma";
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-const CONTACT_EMAIL = process.env.CONTACT_EMAIL || process.env.RESEND_FROM_EMAIL;
+function envTrim(s: string | undefined | null): string {
+  return typeof s === "string" ? s.trim() : "";
+}
+
+/** Une ou plusieurs adresses séparées par virgule ou point-virgule */
+function parseEmailRecipients(raw: string): string[] {
+  return raw
+    .split(/[,;]+/)
+    .map((s) => s.trim())
+    .filter((s) => s.includes("@") && s.length > 4);
+}
+
+const resendApiKey = envTrim(process.env.RESEND_API_KEY);
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
+
+const contactEmailRaw = envTrim(process.env.CONTACT_EMAIL) || envTrim(process.env.RESEND_FROM_EMAIL);
+const contactRecipients = contactEmailRaw ? parseEmailRecipients(contactEmailRaw) : [];
 
 function escapeHtml(s: string): string {
   return s
@@ -145,34 +160,48 @@ export async function POST(request: NextRequest) {
   `.trim();
 
   let emailSent = false;
-  if (!process.env.RESEND_API_KEY?.trim()) {
+  let resendErrorMessage: string | null = null;
+
+  if (!resendApiKey) {
     console.warn(
-      "[contact] Aucun RESEND_API_KEY : la demande est enregistrée en base mais aucun mail d’alerte n’est envoyé. Configurez Resend sur Railway (voir .env.example)."
+      "[contact] Aucun RESEND_API_KEY : la demande est enregistrée en base mais aucun mail d’alerte n’est envoyé."
     );
-  } else if (!CONTACT_EMAIL?.trim()) {
+  } else if (contactRecipients.length === 0) {
     console.warn(
-      "[contact] CONTACT_EMAIL (ou RESEND_FROM_EMAIL) manquant : précisez l’adresse qui doit recevoir les demandes."
+      "[contact] CONTACT_EMAIL / RESEND_FROM_EMAIL vide ou invalide : ajoutez une adresse email valide (ex. contact@bework.fr)."
     );
   } else if (resend) {
-    const fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
-    const fromName = process.env.RESEND_FROM_NAME || "BeWork Contact";
+    const fromEmail = envTrim(process.env.RESEND_FROM_EMAIL) || "onboarding@resend.dev";
+    const fromName = envTrim(process.env.RESEND_FROM_NAME) || "BeWork Contact";
     try {
-      const { error } = await resend.emails.send({
+      const { data, error } = await resend.emails.send({
         from: `${fromName} <${fromEmail}>`,
-        to: [CONTACT_EMAIL.trim()],
+        to: contactRecipients,
         replyTo: email,
         subject: `[BeWork] Demande de contact – ${structure} – ${contactName}`,
         html,
       });
       if (error) {
-        console.error("Resend error:", error);
+        const msg =
+          typeof error === "object" && error !== null && "message" in error
+            ? String((error as { message: string }).message)
+            : JSON.stringify(error);
+        resendErrorMessage = msg;
+        console.error("[contact] Resend refus ou erreur:", msg, error);
       } else {
         emailSent = true;
+        console.info("[contact] Mail d’alerte envoyé, id:", data?.id ?? "—", "→", contactRecipients.join(", "));
       }
     } catch (e) {
-      console.error("Contact email error:", e);
+      const msg = e instanceof Error ? e.message : String(e);
+      resendErrorMessage = msg;
+      console.error("[contact] Erreur envoi email:", e);
     }
   }
 
-  return NextResponse.json({ ok: true, emailNotificationSent: emailSent });
+  return NextResponse.json({
+    ok: true,
+    emailNotificationSent: emailSent,
+    ...(resendErrorMessage ? { resendError: resendErrorMessage } : {}),
+  });
 }

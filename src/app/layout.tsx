@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Orbitron } from "next/font/google";
+import { Geist, Geist_Mono, Manrope, Orbitron } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { SEO_KEYWORDS_GLOBAL } from "@/lib/seo-keywords";
@@ -15,6 +15,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+/** Slogan / accroches — lisible, moins « tech » qu’Orbitron */
+const manrope = Manrope({
+  variable: "--font-manrope",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
 });
 
 /** Logo BeWork (pastille BW + mot) — identité d’origine */
@@ -196,7 +203,7 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${orbitron.variable} font-sans antialiased text-black`}
+        className={`${geistSans.variable} ${geistMono.variable} ${manrope.variable} ${orbitron.variable} font-sans antialiased text-black`}
       >
         <script
           type="application/ld+json"

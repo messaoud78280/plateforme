@@ -248,7 +248,25 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }} />
-      <MarketingSiteHeader plainBg bottom={<HomePageNavStrip />} />
+      <MarketingSiteHeader
+        plainBg
+        centerSlot={
+          <h1 className="inline-block max-w-[min(100vw-2rem,52rem)] text-balance">
+            <span className="inline-block rounded-xl border border-slate-200/90 bg-white/90 px-4 py-2.5 shadow-[0_1px_3px_rgba(15,23,42,0.06),0_4px_14px_rgba(15,23,42,0.04)] backdrop-blur-sm sm:px-5 sm:py-2.5">
+              <span
+                className="block font-semibold leading-snug tracking-[-0.02em] text-[clamp(0.9375rem,2vw,1.375rem)] antialiased md:inline md:whitespace-nowrap md:leading-tight"
+                style={{ fontFamily: "var(--font-manrope), var(--font-geist-sans), system-ui, sans-serif" }}
+              >
+                <span className="text-slate-900">On tient le bureau,</span>{" "}
+                <span className="bg-gradient-to-r from-[#2563eb] to-[#1d4ed8] bg-clip-text text-transparent">
+                  vous tenez le chantier.
+                </span>
+              </span>
+            </span>
+          </h1>
+        }
+        bottom={<HomePageNavStrip />}
+      />
 
       <main className="pt-0">
         {/* Hero + comment ça fonctionne (4 étapes) */}
@@ -258,9 +276,6 @@ export default function HomePage() {
               {/* Colonne principale : message + CTA (~60 %) */}
               <div className="flex min-w-0 flex-col gap-6 text-center md:gap-7 md:text-left lg:order-2 lg:col-span-7">
                 <HeroPresentationVideo />
-                <h1 className="text-metallic-black text-balance font-sans text-[1.7rem] font-semibold leading-[1.1] tracking-[-0.02em] min-[400px]:text-3xl md:text-4xl md:leading-[1.08] lg:text-[2.75rem] lg:leading-[1.06] xl:text-5xl xl:leading-[1.04]">
-                  On tient le bureau, vous tenez le chantier.
-                </h1>
                 <p className="mx-auto max-w-2xl text-sm font-medium leading-relaxed text-slate-700 md:mx-0 md:text-base">
                   Partenaire administratif externalisé pour artisans et PME du bâtiment — France, Belgique, Suisse,
                   Luxembourg.

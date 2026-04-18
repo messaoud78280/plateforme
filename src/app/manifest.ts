@@ -3,10 +3,10 @@ import { SITE_URL } from "@/lib/site";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "BeWork — Partenaire administratif BTP",
+    name: "BeWork — Partenaire administratif externalisé BTP & PME",
     short_name: "BeWork",
     description:
-      "Administratif structuré pour le bâtiment : devis, relances, dossiers chantier, forfaits TTC.",
+      "Partenaire administratif externalisé : pilotage administratif pour le bâtiment — devis, relances, dossiers chantier, forfaits TTC.",
     start_url: "/",
     display: "standalone",
     background_color: "#f8f9fb",

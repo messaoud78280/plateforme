@@ -4,6 +4,7 @@ import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { ComparatifReveal } from "@/components/tarifs/ComparatifReveal";
 import { StickyCtaMobile } from "@/components/tarifs/StickyCtaMobile";
 import { TARIFS_PLANS } from "@/lib/tarifs-plans";
+import { SEO_KEYWORDS_PARTENAIRE_CORE } from "@/lib/seo-keywords";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 
 const tarifsUrl = absoluteUrl("/tarifs");
@@ -16,9 +17,15 @@ function formatPriceTtc(value: string) {
 }
 
 export const metadata: Metadata = {
-  title: "Forfaits administratifs BTP — cadre et valeur | BeWork",
+  title: "Forfaits partenaire administratif externalisé BTP — Structure, Suivi, Pilotage | BeWork",
   description:
-    "Structure, Suivi et Pilotage : trois forfaits mensuels TTC pour entreprises du bâtiment. Cadre, suivi structuré, pilotage encadré en France.",
+    "Tarifs du partenaire administratif externalisé BeWork : Structure, Suivi et Pilotage — trois forfaits mensuels TTC pour entreprises du bâtiment. Pilotage encadré en France.",
+  keywords: [
+    ...SEO_KEYWORDS_PARTENAIRE_CORE,
+    "forfait administratif externalisé",
+    "tarif assistant administratif externalisé",
+    "Structure Suivi Pilotage BeWork",
+  ],
   alternates: { canonical: tarifsUrl, languages: { fr: tarifsUrl, "x-default": tarifsUrl } },
   openGraph: {
     type: "website",

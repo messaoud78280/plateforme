@@ -6,6 +6,7 @@ const defaultOgImage = absoluteUrl("/opengraph-image");
 /**
  * Métadonnées homogènes pour les pages vitrine / SEO : canonical, OG, Twitter.
  * Utilise `title.absolute` pour éviter le double suffixe « | BeWork » du layout racine.
+ * Pour les expressions cibles (partenaire administratif externalisé, etc.), réutiliser `@/lib/seo-keywords`.
  */
 export function landingPageMetadata(opts: {
   title: string;

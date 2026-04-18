@@ -1,14 +1,20 @@
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { SEO_KEYWORDS_PARTENAIRE_CORE } from "@/lib/seo-keywords";
 
 const PAGE_PATH = "/externaliser-administratif";
 
 export const metadata = landingPageMetadata({
-  title: "Externaliser son administratif | BeWork — PME France, Belgique, Suisse",
+  title: "Externaliser son administratif | Partenaire externalisé PME & BTP | BeWork",
   description:
-    "Externaliser administratif PME : assistant virtuel pour devis, factures, relances. Sans recrutement. Dès 290 € TTC/mois. France, Belgique, Suisse, Luxembourg.",
+    "Externaliser l’administratif avec un partenaire administratif externalisé : devis, factures, relances, dossiers — sans recrutement. Dès 290 € TTC/mois. France, Belgique, Suisse, Luxembourg.",
   path: PAGE_PATH,
-  keywords: ["externaliser administratif", "délégation administrative PME", "assistant virtuel", "sans recrutement"],
+  keywords: [
+    ...SEO_KEYWORDS_PARTENAIRE_CORE,
+    "externaliser son administratif",
+    "comment externaliser administratif",
+    "sans recrutement",
+  ],
 });
 
 export default function Page() {

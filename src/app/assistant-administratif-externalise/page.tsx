@@ -1,14 +1,20 @@
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { SEO_KEYWORDS_PARTENAIRE_CORE } from "@/lib/seo-keywords";
 
 const PAGE_PATH = "/assistant-administratif-externalise";
 
 export const metadata = landingPageMetadata({
-  title: "Assistant administratif externalisé pour PME | BeWork",
+  title: "Partenaire administratif externalisé & assistant dédié PME | BeWork",
   description:
-    "L'assistant administratif externalisé BeWork prend en charge devis, factures, relances et suivi de dossiers pour les PME. Dès 290 € TTC/mois. France, Belgique, Suisse, Luxembourg.",
+    "Partenaire administratif externalisé pour PME et BTP : assistant administratif dédié pour devis, factures, relances et dossiers — cadre forfaitaire, sans recrutement. Dès 290 € TTC/mois. France, Belgique, Suisse, Luxembourg.",
   path: PAGE_PATH,
-  keywords: ["assistant administratif externalisé", "externalisation administrative PME", "BeWork", "assistant virtuel entreprise"],
+  keywords: [
+    ...SEO_KEYWORDS_PARTENAIRE_CORE,
+    "assistant administratif externalisé PME",
+    "assistant virtuel entreprise",
+    "BeWork",
+  ],
 });
 
 export default function Page() {

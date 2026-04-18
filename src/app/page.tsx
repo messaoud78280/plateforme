@@ -5,6 +5,7 @@ import { HomePageNavStrip } from "@/components/layout/HomePageNavStrip";
 import { HeroPresentationVideo } from "@/components/HeroPresentationVideo";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { TARIFS_PLANS } from "@/lib/tarifs-plans";
+import { SEO_KEYWORDS_BTP_PME, SEO_KEYWORDS_PARTENAIRE_CORE, SEO_VALUE_PROPOSITION } from "@/lib/seo-keywords";
 import { SITE_URL, absoluteUrl } from "@/lib/site";
 
 /** Vidéo hero — même fichier que `HeroPresentationVideo` ; durée ~13 s (fichier court présentation). */
@@ -52,6 +53,10 @@ const TARIFS_PROGRESSION_ROWS = [
 ];
 
 const HOME_FAQ_ITEMS = [
+  {
+    q: "En quoi BeWork est-il un partenaire administratif externalisé ?",
+    a: "BeWork est un prestataire administratif externalisé : vous confiez devis, relances, dossiers et coordination dans un cadre forfaitaire, sans embauche. Une équipe encadrée en France exécute et vous gardez la main sur les décisions sensibles.",
+  },
   {
     q: "Pourquoi externaliser plutôt que recruter ?",
     a: "Un salarié engage salaire, charges, formation et management pour une charge qui n’est pas toujours constante. Un forfait BeWork fixe un niveau d’accompagnement et un cadre : pas de structure RH à alourdir pour tenir le même niveau d’organisation.",
@@ -109,21 +114,15 @@ const RESSOURCES_BLOG = [
 ];
 
 export const metadata: Metadata = {
-  title: "BeWork | Agence de pilotage administratif pour entreprises du BTP",
-  description:
-    "Agence de pilotage administratif BTP : vidéo de présentation sur l’accueil, structuration de l’administratif (devis, relances, chantier) sans recruter. Forfaits TTC dès 290 €/mois. France, Belgique, Suisse, Luxembourg.",
+  title: "BeWork | Partenaire administratif externalisé BTP & PME",
+  description: `${SEO_VALUE_PROPOSITION} Vidéo sur l’accueil. Forfaits TTC dès 290 €/mois. France, Belgique, Suisse, Luxembourg.`,
   robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
   keywords: [
-    "administratif BTP",
+    ...SEO_KEYWORDS_PARTENAIRE_CORE,
+    ...SEO_KEYWORDS_BTP_PME,
     "agence pilotage administratif BTP",
     "secrétariat entreprise bâtiment",
-    "externalisation administrative BTP",
-    "devis et facturation chantier",
     "situation de travaux administrative",
-    "organisation artisan bâtiment",
-    "pilotage administratif artisans",
-    "entreprises du bâtiment administratif",
-    "PME BTP gestion administrative",
     "relances clients BTP",
     "sous-traitance administrative construction",
     "BeWork BTP",
@@ -143,23 +142,23 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: SITE_URL,
     siteName: "BeWork",
-    title: "BeWork — Agence de pilotage administratif pour le BTP",
+    title: "BeWork — Partenaire administratif externalisé BTP & PME",
     description:
-      "On tient le bureau, vous tenez le chantier : découvrez BeWork en vidéo sur la page d’accueil — pilotage administratif encadré BTP, sans embauche. France, Belgique, Suisse, Luxembourg.",
+      "Partenaire administratif externalisé : découvrez BeWork en vidéo — pilotage administratif encadré pour artisans et PME du bâtiment, sans embauche. France, Belgique, Suisse, Luxembourg.",
     images: [
       {
         url: `${SITE_URL}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: "BeWork — Agence de pilotage administratif pour artisans et entreprises du bâtiment",
+        alt: "BeWork — Partenaire administratif externalisé pour artisans et entreprises du bâtiment",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "BeWork — Agence de pilotage administratif BTP",
+    title: "BeWork — Partenaire administratif externalisé BTP",
     description:
-      "Vidéo de présentation + pilotage administratif BTP : temps, clients, chiffre d’affaires. Forfaits TTC, cadre défini.",
+      "Vidéo + partenaire administratif externalisé : pilotage administratif BTP — devis, relances, dossiers. Forfaits TTC, cadre défini.",
   },
 };
 
@@ -170,10 +169,10 @@ const homeJsonLd = {
       "@type": "WebPage",
       "@id": `${SITE_URL}/#accueil`,
       url: SITE_URL,
-      name: "BeWork — Agence de pilotage administratif pour entreprises du BTP",
+      name: "BeWork — Partenaire administratif externalisé pour entreprises du BTP et PME",
       inLanguage: "fr-FR",
       description:
-        "On tient le bureau, vous tenez le chantier : agence de pilotage administratif BTP — devis, facturation, relances, dossiers chantier et démarches, dans un cadre défini. Vidéo de présentation sur la page. Forfaits TTC, sans recruter.",
+        "Partenaire administratif externalisé : pilotage administratif BTP — devis, facturation, relances, dossiers chantier et démarches, dans un cadre défini. Vidéo sur la page. Forfaits TTC, sans recruter.",
       isPartOf: { "@id": `${SITE_URL}/#website` },
       video: { "@id": `${SITE_URL}/#video-presentation-bework` },
       about: [
@@ -188,10 +187,10 @@ const homeJsonLd = {
     {
       "@type": "Service",
       "@id": `${SITE_URL}/#service-btp`,
-      name: "Organisation et pilotage administratif pour entreprises du BTP",
+      name: "Partenaire administratif externalisé — organisation et pilotage pour le BTP",
       description:
-        "Relais administratif cadré : devis, facturation, situations de travaux, suivi client ; démarches chantier ; logistique fournisseurs et moyens ; relances et dossiers sensibles sous validation. Exécution encadrée, priorisation terrain. France, Belgique, Suisse, Luxembourg.",
-      serviceType: "Externalisation administrative",
+        "Prestataire administratif externalisé : relais cadré — devis, facturation, situations de travaux, suivi client ; démarches chantier ; logistique fournisseurs et moyens ; relances et dossiers sensibles sous validation. France, Belgique, Suisse, Luxembourg.",
+      serviceType: "Partenaire administratif externalisé",
       category: "Services administratifs pour le bâtiment",
       provider: { "@id": `${SITE_URL}/#organization` },
       areaServed: [
@@ -217,9 +216,9 @@ const homeJsonLd = {
     {
       "@type": "VideoObject",
       "@id": `${SITE_URL}/#video-presentation-bework`,
-      name: "Présentation BeWork — pilotage administratif pour le BTP",
+      name: "Présentation BeWork — partenaire administratif externalisé pour le BTP",
       description:
-        "Présentation courte de BeWork : structuration de l’administratif des entreprises du bâtiment — devis, relances, dossiers chantier, sans recruter.",
+        "Présentation courte de BeWork en tant que partenaire administratif externalisé : structuration de l’administratif des entreprises du bâtiment — devis, relances, dossiers chantier, sans recruter.",
       thumbnailUrl: [absoluteUrl("/opengraph-image")],
       uploadDate: "2026-04-11T12:00:00+02:00",
       duration: PRESENTATION_VIDEO_DURATION_ISO,
@@ -262,6 +261,10 @@ export default function HomePage() {
                 <h1 className="text-metallic-black text-balance font-sans text-[1.7rem] font-semibold leading-[1.1] tracking-[-0.02em] min-[400px]:text-3xl md:text-4xl md:leading-[1.08] lg:text-[2.75rem] lg:leading-[1.06] xl:text-5xl xl:leading-[1.04]">
                   On tient le bureau, vous tenez le chantier.
                 </h1>
+                <p className="mx-auto max-w-2xl text-sm font-medium leading-relaxed text-slate-700 md:mx-0 md:text-base">
+                  Partenaire administratif externalisé pour artisans et PME du bâtiment — France, Belgique, Suisse,
+                  Luxembourg.
+                </p>
                 <div
                   className="mx-auto max-w-2xl rounded-xl border border-[#93c5fd]/45 bg-gradient-to-br from-white via-[#f8fafc] to-[#eff6ff]/90 px-5 py-5 text-center shadow-[0_4px_20px_rgba(29,78,216,0.07),inset_0_1px_0_rgba(255,255,255,0.9)] md:mx-0 md:px-6 md:py-5 md:text-left lg:max-w-none"
                 >

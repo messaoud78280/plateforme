@@ -8,9 +8,16 @@ const faqUrl = absoluteUrl("/faq");
 const faqOgImage = absoluteUrl("/opengraph-image");
 
 export const metadata: Metadata = {
-  title: "FAQ — Partenaire administratif BTP | BeWork",
+  title: "FAQ — Partenaire administratif externalisé BTP | BeWork",
   description:
-    "Externalisation administrative pour artisans et entreprises du bâtiment : cadre, tarifs TTC, suivi, délais et collaboration. BeWork — France, Belgique, Suisse, Luxembourg.",
+    "Questions sur le partenaire administratif externalisé pour artisans et PME du bâtiment : cadre, tarifs TTC, suivi, délais et collaboration. BeWork — France, Belgique, Suisse, Luxembourg.",
+  keywords: [
+    "partenaire administratif externalisé",
+    "externalisation administrative BTP",
+    "FAQ administratif externalisé",
+    "BeWork",
+    "assistant administratif externalisé",
+  ],
   alternates: { canonical: faqUrl, languages: { fr: faqUrl, "x-default": faqUrl } },
   openGraph: {
     type: "website",

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Orbitron } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
+import { SEO_KEYWORDS_GLOBAL } from "@/lib/seo-keywords";
 import { absoluteUrl, getOrgSameAs, SITE_URL } from "@/lib/site";
 
 const defaultOgImage = absoluteUrl("/opengraph-image");
@@ -28,37 +29,29 @@ const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "BeWork — Agence de pilotage administratif pour entreprises du BTP",
+    default:
+      "BeWork — Partenaire administratif externalisé BTP & PME | Pilotage administratif",
     template: "%s | BeWork",
   },
   description:
-    "On tient le bureau, vous tenez le chantier : agence de pilotage administratif BTP — structuration, exécution et suivi administratif. Vidéo de présentation sur le site. Sans recruter. Forfaits TTC dès 290 €/mois.",
+    "Partenaire administratif externalisé pour artisans et PME du bâtiment : pilotage administratif, devis, facturation, relances et dossiers chantier. On tient le bureau, vous tenez le chantier. Vidéo sur le site. Sans recruter — forfaits TTC dès 290 €/mois. France, Belgique, Suisse, Luxembourg.",
   applicationName: "BeWork",
   authors: [{ name: "BeWork", url: SITE_URL }],
   creator: "BeWork",
   publisher: "BeWork",
   category: "business",
   keywords: [
-    "administratif BTP",
-    "externalisation administrative BTP",
+    ...SEO_KEYWORDS_GLOBAL,
+    "agence pilotage administratif BTP",
     "secrétaire externalisé BTP",
     "organisation administrative bâtiment",
     "assistant administratif entreprise bâtiment",
-    "Île-de-France administratif BTP",
-    "externalisation administrative",
-    "pilotage administratif PME",
-    "organisation entreprise bâtiment",
-    "devis facturation chantier",
     "situation de travaux artisan",
     "DICT déclaration travaux",
     "facturation chantier BTP",
     "trésorerie artisan bâtiment",
     "relances impayés BTP",
-    "délégation administrative",
-    "rendez-vous découverte administratif dirigeant",
-    "BeWork",
     "administratif intelligence artificielle",
-    "assistant IA entreprise",
     "vidéo présentation administratif BTP",
   ],
   robots: {
@@ -71,23 +64,23 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: SITE_URL,
     siteName: "BeWork",
-    title: "BeWork — Agence de pilotage administratif pour entreprises du BTP",
+    title: "BeWork — Partenaire administratif externalisé BTP & PME",
     description:
-      "On tient le bureau, vous tenez le chantier : présentation en vidéo et pilotage administratif pour artisans et PME du bâtiment. Forfaits TTC. France, Belgique, Suisse, Luxembourg.",
+      "Partenaire administratif externalisé : pilotage administratif pour artisans et PME du bâtiment — devis, relances, dossiers chantier. Présentation en vidéo. Forfaits TTC. France, Belgique, Suisse, Luxembourg.",
     images: [
       {
         url: defaultOgImage,
         width: 1200,
         height: 630,
-        alt: "BeWork — Agence de pilotage administratif pour le BTP",
+        alt: "BeWork — Partenaire administratif externalisé pour le BTP et les PME",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "BeWork — Agence de pilotage administratif BTP",
+    title: "BeWork — Partenaire administratif externalisé BTP",
     description:
-      "Vidéo + pilotage administratif encadré : devis, facturation, relances, dossiers chantier. Forfaits TTC.",
+      "Partenaire administratif externalisé : vidéo + pilotage encadré — devis, facturation, relances, dossiers chantier. Forfaits TTC.",
     ...(process.env.NEXT_PUBLIC_TWITTER_SITE?.trim()
       ? { site: process.env.NEXT_PUBLIC_TWITTER_SITE.trim() }
       : {}),
@@ -118,9 +111,14 @@ const jsonLd = {
       "@id": `${SITE_URL}/#website`,
       url: SITE_URL,
       name: "BeWork",
-      alternateName: ["BeWork — administratif BTP", "BeWork partenaire administratif"],
+      alternateName: [
+        "BeWork — partenaire administratif externalisé",
+        "BeWork — administratif BTP",
+        "BeWork prestataire administratif externalisé",
+        "BeWork pilotage administratif",
+      ],
       description:
-        "Pilotage administratif externalisé pour artisans, entreprises du BTP et PME francophones. Organisation, devis, facturation, relances et dossiers chantier. France, Belgique, Suisse, Luxembourg.",
+        "Partenaire administratif externalisé pour artisans, entreprises du BTP et PME : pilotage administratif, organisation, devis, facturation, relances et dossiers chantier. France, Belgique, Suisse, Luxembourg.",
       inLanguage: "fr-FR",
       publisher: { "@id": `${SITE_URL}/#organization` },
       image: { "@type": "ImageObject", url: defaultOgImage, width: 1200, height: 630 },
@@ -138,7 +136,7 @@ const jsonLd = {
       logo: { "@type": "ImageObject", url: defaultOgImage, width: 1200, height: 630 },
       image: defaultOgImage,
       description:
-        "Organisation et pilotage administratif externalisé pour artisans, entreprises du bâtiment et PME : devis, facturation, relances, démarches chantier, coordination. Agence en Île-de-France, exécution supervisée depuis la France.",
+        "Partenaire administratif externalisé : organisation et pilotage pour artisans, entreprises du bâtiment et PME — devis, facturation, relances, démarches chantier, coordination. Agence en Île-de-France, exécution supervisée depuis la France.",
       slogan: "Cadre, rigueur, pilotage et lecture terrain pour le BTP",
       areaServed: ["FR", "BE", "CH", "LU"],
       founder: {
@@ -149,6 +147,8 @@ const jsonLd = {
           "Bâtiment et travaux publics",
           "Direction d'entreprise",
           "Externalisation administrative",
+          "Partenaire administratif externalisé",
+          "Prestataire administratif PME",
         ],
       },
       contactPoint: [
@@ -167,15 +167,16 @@ const jsonLd = {
         "Facturation chantier",
         "Devis entreprise du bâtiment",
         "Externalisation administrative",
+        "Partenaire administratif externalisé",
         "Intelligence artificielle appliquée à l'administratif",
       ],
     },
     {
       "@type": "ProfessionalService",
       "@id": `${SITE_URL}/#service`,
-      name: "BeWork — Pilotage administratif externalisé",
+      name: "BeWork — Partenaire administratif externalisé (BTP & PME)",
       description:
-        "Externalisation administrative pour PME, artisans et BTP : devis, facturation chantier, relances et suivi de dossiers. Utilisation encadrée d'outils d'aide à l'exécution. Trois forfaits TTC mensuels dès 290 €.",
+        "Partenaire administratif externalisé pour PME, artisans et BTP : devis, facturation chantier, relances et suivi de dossiers. Outils d’aide à l’exécution encadrés. Trois forfaits TTC mensuels dès 290 €.",
       url: SITE_URL,
       provider: { "@id": `${SITE_URL}/#organization` },
       areaServed: {

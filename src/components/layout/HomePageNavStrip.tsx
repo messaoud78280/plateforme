@@ -45,6 +45,13 @@ export function HomePageNavStrip() {
         >
           Offre & secteurs
         </a>
+        <Link
+          className="whitespace-nowrap"
+          href="/assistant-administratif-externalise"
+          title="Partenaire administratif externalisé — présentation"
+        >
+          Partenaire externalisé
+        </Link>
         <Link className="whitespace-nowrap" href="/tarifs" title="Tarifs — sans recrutement ni charges">
           Tarifs
         </Link>

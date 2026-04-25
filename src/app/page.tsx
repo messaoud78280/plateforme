@@ -252,7 +252,7 @@ export default function HomePage() {
         plainBg
         centerSlot={
           <h1 className="inline-block max-w-[min(100vw-2rem,52rem)] text-balance">
-            <span className="inline-block rounded-xl border border-slate-200/90 bg-white/90 px-4 py-2.5 shadow-[0_1px_3px_rgba(15,23,42,0.06),0_4px_14px_rgba(15,23,42,0.04)] backdrop-blur-sm sm:px-5 sm:py-2.5">
+            <span className="inline-block rounded-xl border border-slate-200/90 bg-[#e6edf6] px-4 py-2.5 shadow-[0_1px_3px_rgba(15,23,42,0.06),0_4px_14px_rgba(15,23,42,0.04)] sm:px-5 sm:py-2.5">
               <span
                 className="block font-semibold leading-snug tracking-[-0.02em] text-[clamp(0.9375rem,2vw,1.375rem)] antialiased md:inline md:whitespace-nowrap md:leading-tight"
                 style={{ fontFamily: "var(--font-manrope), var(--font-geist-sans), system-ui, sans-serif" }}

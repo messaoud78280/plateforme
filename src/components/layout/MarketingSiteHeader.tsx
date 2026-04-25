@@ -26,7 +26,7 @@ function BrandTaglines({ className = "" }: { className?: string }) {
         <span className="bg-gradient-to-b from-[#3b82f6] to-[#1d4ed8] bg-clip-text text-transparent">BTP</span>
       </span>
       <span className="mt-1.5 block text-[11px] font-medium leading-relaxed text-black sm:mt-2 sm:text-xs md:text-[0.8125rem] md:leading-relaxed">
-        Cadre, rigueur, pilotage, lecture terrain
+        Devis, facturation, relances, dossiers chantier BTP
       </span>
     </div>
   );

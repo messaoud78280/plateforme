@@ -24,6 +24,11 @@ export const SEO_KEYWORDS_BTP_PME = [
   "secrétariat externalisé BTP",
   "devis facturation chantier",
   "organisation administrative bâtiment",
+  "retenue de garantie BTP",
+  "devis BTP",
+  "DPGF budget chantier",
+  "plis techniques DCE BTP",
+  "traçabilité chantier",
 ] as const;
 
 /** Liste fusionnée pour le layout racine (meta keywords). */

@@ -77,6 +77,21 @@ const HOME_FAQ_ITEMS = [
 
 const RESSOURCES_BLOG = [
   {
+    title: "Retenue de garantie BTP : suivi, échéances, pièces",
+    desc: "Retenue de garantie, tableau de suivi, relances cadrées et liens facturation pour sous-traitants et donneurs d’ordre.",
+    href: "/blog/retenue-garantie-btp-sous-traitance",
+  },
+  {
+    title: "Devis BTP : 7 leviers pour structurer l’offre",
+    desc: "Découpage, acomptes, validité, preuves : réduire les allers-retour et améliorer le taux de signature.",
+    href: "/blog/devis-btp-structuration-conversion",
+  },
+  {
+    title: "DPGF et budget de chantier : lire, suivre l’écart",
+    desc: "Avenants, marge, trésorerie : garder le même chiffre entre technique et exécution comptable.",
+    href: "/blog/dpgf-budget-chantier-ecart",
+  },
+  {
     title: "Facturation chantier et relances : trésorerie BTP",
     desc: "Acomptes, situations de travaux et relances pour limiter les impayés sur vos chantiers.",
     href: "/blog/facturation-chantier-btp-relances-tresorerie",

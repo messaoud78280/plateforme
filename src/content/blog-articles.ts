@@ -1006,7 +1006,234 @@ export const BLOG_ARTICLES = {
       {
         type: "p",
         content:
-          "Avec un suivi tenue et traçable, vous limitez les “surprises” et vous gagnez en fiabilité auprès des clients.",
+          "Avec un suivi bien tenu et traçable, vous limitez les “surprises” et vous gagnez en fiabilité auprès des clients.",
+      },
+    ],
+  },
+  "retenue-garantie-btp-sous-traitance": {
+    title: "Retenue de garantie BTP (sous-traitance) : suivi, échéances et pièces utiles",
+    description:
+      "Comprendre le cycle administratif d’une retenue de garantie : suivi des dates, liens facturation/acomptes, pièces à conserver, et relances. Pour artisans et PME du bâtiment.",
+    excerpt:
+      "Un guide pratique pour suivre les retenues, sécuriser la traçabilité et relancer au bon moment — sans mélanger tout dans la messagerie.",
+    keywords: [
+      "retenue de garantie BTP",
+      "retenue de garantie sous-traitant",
+      "défaut de paiement retenue",
+      "facturation BTP acomptes",
+      "suivi administratif chantier",
+      "pilotage administratif bâtiment",
+    ],
+    publishedTime: "2026-04-25T10:00:00+02:00",
+    articleSection: "Facturation & trésorerie",
+    body: [
+      { type: "h2", content: "Ce que vous voulez éviter" },
+      {
+        type: "p",
+        content:
+          "Les retenues s’oublient souvent : la date, le taux, le plafond, la date de fin de garantie, la restitution, les factures d’entretien, les pièces “preuve d’entretien” éventuelles. Le résultat, c’est l’oubli, la surprise en fin d’ouvrage, ou une mauvaise surprise en comptabilité. Un cadre documentaire basique y remédie, même sans devenir juge du droit de ces clauses.",
+      },
+      { type: "h2", content: "Un suivi “tableau” suffit" },
+      {
+        type: "p",
+        content:
+          "Pour chaque retenue : client, affaire, montant, taux, plafond, facture(s) de référence, factures de retenue, date de constat, échéance, statut, pièces (PDF) et e-mails clés. Vous avez un point unique pour le dirigeant : ce qui se paie, ce qui se bloque, ce qui arrive à date.",
+      },
+      { type: "h2", content: "Relances : simples et calibrées" },
+      {
+        type: "p",
+        content:
+          "La relance n’est pas du harcèlement : c’est un rappel daté, avec montant et référence, qui arrive avant l’oubli. Côté exécution, un partenaire administratif encadré peut standardiser le message, conserver l’historique, et ne vous remonter que le sensible (litige, négociation, accord particulier). Voir nos pages dédiées trésorerie BTP (facturation, situations, relances) sur le site.",
+      },
+      { type: "h2", content: "Conclusion" },
+      {
+        type: "p",
+        content:
+          "La retenue, ce n’est pas seulement un montant comptable : c’est un engagement dans le temps. Avec un suivi propre, vous protégez la trésorerie et la relation fournisseurs / clients, tout en gagnant du temps sur l’exécution.",
+      },
+    ],
+  },
+  "devis-btp-structuration-conversion": {
+    title: "Devis BTP : 7 leviers pour structurer l’offre et convertir plus vite",
+    description:
+      "Méthode de structuration d’un devis bâtiment : découpage, options, acomptes, délais, pièces, suivi. Comment réduire les allers-retours et augmenter le taux de signature.",
+    excerpt:
+      "Un cadre d’offre clair, des acomptes explicites et un suivi de relance — le trio qui fait payer le “temps caché” de la négociation par email.",
+    keywords: [
+      "devis BTP",
+      "structurer un devis bâtiment",
+      "relance devis artisan",
+      "acompte chantier",
+      "négociation devis PME",
+      "assistant administratif devis",
+    ],
+    publishedTime: "2026-04-25T10:15:00+02:00",
+    articleSection: "Ventes & devis",
+    body: [
+      { type: "h2", content: "1) Une page de synthèse lisible" },
+      {
+        type: "p",
+        content:
+          "Même si le technico est riche, le client a besoin d’un résumé exécutif : périmètre, durée, délais, modalités, exclusions, indexation éventuelle, révision. Si la première page est claire, la décision va plus vite.",
+      },
+      { type: "h2", content: "2) Découper le chantier (lots / phases)" },
+      {
+        type: "p",
+        content:
+          "Un découpage simple évite l’opacité. Il permet aussi d’envisager un plan d’avancement logique et, côté admin, d’ancrer les acomptes sur des déclencheurs réalistes (et traçables).",
+      },
+      { type: "h2", content: "3) Options et avenants" },
+      {
+        type: "p",
+        content:
+          "Dès qu’il y a de l’incertain, l’“option chiffrée” fait gagner un temps énorme : le client coche, vous facturez, la relation reste saine. Les avenants restent l’exception quand l’exécution a démarré — mais mieux vaut le prévoir que le subir. Pour un vrai cadrage, voir aussi l’approche avenant sur le site (page dédiée) et l’offre forfait BeWork (tarifs).",
+      },
+      { type: "h2", content: "4) Acomptes, situations, rythme" },
+      {
+        type: "p",
+        content:
+          "Déclarez tôt l’exigence de rythme d’encaissement. Les entreprises saines s’appuient sur des acomptes clairs, des situations, et un suivi. BeWork le traite en flux administratif, pas en mode “brouillons dans l’e-mail du chef”.",
+      },
+      { type: "h2", content: "5) Délai de validité" },
+      {
+        type: "p",
+        content:
+          "Un devis n’est “bon” qu’une fenêtre. La date de validité, associée à des conditions d’achat, évite d’hériter d’un prix obsolète quand l’inflation ou les coûts matériaux varient rapidement (spécialement en BTP).",
+      },
+      { type: "h2", content: "6) Preuves et conformité" },
+      {
+        type: "p",
+        content:
+          "Mention des versions de normes, des notices, de la période d’exécution, des contraintes d’accès, des retraits — pas pour “faire l’avocat”, mais pour réduire les interprétations. Le gain est administratif : moins d’e-mails, moins de reprises, moins d’incompréhensions de facturation.",
+      },
+      { type: "h2", content: "7) Relance" },
+      {
+        type: "p",
+        content:
+          "Le devis n’est jamais “fini” : plan J+2 / J+7 / J+14, ton professionnel, traçable. C’est l’un des gisements les plus efficaces pour le CA — un article entier y est consacré sur le blog (relance devis) et s’enchaîne naturellement avec l’inscription d’un devis cadré côté admin.",
+      },
+    ],
+  },
+  "dpgf-budget-chantier-ecart": {
+    title: "DPGF et budget de chantier : lire, suivre l’écart, anticiper la fin de travaux",
+    description:
+      "Comment s’y retrouver entre budget initial, avenants, coût réel et marge, sans mélange entre planning technique et trésorerie. Pour chefs d’entreprise BTP, artisans et PME du bâtiment.",
+    excerpt:
+      "L’enjeu n’est pas de remplacer votre BE : c’est d’avoir le même chiffre “quelque part” pour piloter, facturer, et ne pas se réveiller avec un écart marge/vision.",
+    keywords: [
+      "DPGF chantier",
+      "écart budget chantier",
+      "marge BTP suivi",
+      "avenant budget travaux",
+      "pilotage budgétaire PME bâtiment",
+      "trésorerie chantier",
+    ],
+    publishedTime: "2026-04-25T10:30:00+02:00",
+    articleSection: "Pilotage chantier",
+    body: [
+      { type: "h2", content: "DPGF, budget, marge : trois niveaux" },
+      {
+        type: "p",
+        content:
+          "Le DPGF structure le détail, le “budget d’exécution” suit ce que vous avez négocié, et le coût réel s’inscrit dans le temps. Quand la finance et le chantier ne partagent pas la même “échelle”, l’écart marge/vision explose. Le travail d’abord, c’est un référentiel unique : devis, avenant, dernière version validée, et mises à jour datées.",
+      },
+      { type: "h2", content: "Avenants : la principale source d’écart" },
+      {
+        type: "p",
+        content:
+          "La majorité des écarts “surprises” vient d’avenants gérés en conversation plutôt qu’en document. La discipline est simple : numéroter, dater, relier chaque avenant au budget de référence, et cadrer l’incidence comptable. BeWork a une offre cadrant ce flux en administratif, sans remplacer votre expertise technique. La page avenant du site sert d’amorce côté SEO, le blog ici sert d’explication de méthode.",
+      },
+      { type: "h2", content: "Trésorerie de chantier" },
+      {
+        type: "p",
+        content:
+          "L’écart budget, ce n’est pas seulement de la marge : c’est du cash. Anticiper les acomptes, les situations, les retards, et le décalage de TVA, relève d’un rythme administratif. C’est l’enchaînement naturel de nos contenus “facturation, situations, relances” et des landings pédagogiques du site (tarifs, offre, FAQ).",
+      },
+      { type: "h2", content: "Conclusion" },
+      {
+        type: "p",
+        content:
+          "Le pilotage, ce n’est pas “plus de chiffres” : c’est moins d’improvisation. Avec un référentiel unique, vous sécurisez le chantier et la marge, sans diluer la relecture terrain.",
+      },
+    ],
+  },
+  "preuve-photo-chantier-tracabilite": {
+    title: "Photos de chantier et preuve : ce qui compte côté administratif (et relation client)",
+    description:
+      "Compte-rendus, photos, échanges, datage : constituer une preuve utile en cas d’incompréhension, d’itération client, ou de suivi d’entretien. Guide orienté PME BTP, artisans et TPE du bâtiment.",
+    excerpt:
+      "Moins d’e-mails, plus de faits : nommer les plans, dater, archiver, relier le dossier. Le gain, c’est la paix d’esprit (et moins d’heures perdues en “je te renvoie la photo”).",
+    keywords: [
+      "photos chantier",
+      "compte rendu de chantier",
+      "traçabilité BTP",
+      "litige client artisan",
+      "preuve travaux bâtiment",
+      "dossier technique chantier",
+    ],
+    publishedTime: "2026-04-25T10:45:00+02:00",
+    articleSection: "Preuve & suivi de chantier",
+    body: [
+      { type: "h2", content: "Ce que la preuve sert (vraiment)" },
+      {
+        type: "p",
+        content:
+          "Dans 90% des conflits “techniques” non juridiques, le problème est la mémoire : qui a dit quoi, quand, avec quelle version des plans, avec quel accord. La preuve n’est pas un procès, c’est un alignement. Quand c’est propre, le client s’y retrouve, l’exécution avance, la facture justifie, et l’entretien post-chantier ne devient pas un héritage d’ambiguïté.",
+      },
+      { type: "h2", content: "Le minimum : nommage, date, lieu, lot" },
+      {
+        type: "p",
+        content:
+          "Évitez l’“IMG_4521.jpg” sans contexte. Un nom type “CH24_Lot-03_2026-04-20_Raccord-xxx.jpg” s’y retrouve. Idem pour e-mails de synthèse : en-tête, pièces jointes, suite logique, réponse attendue, délai. C’est bête, c’est 80% de la bataille.",
+      },
+      { type: "h2", content: "Comment une équipe distante aide (sans usurper le rôle d’ouvrier sur site)" },
+      {
+        type: "p",
+        content:
+          "L’agencement admin consiste à classer, relier, relancer, vérifier la complétude, préparer l’e-mail, préparer l’inclusion dans le dossier “chantier” et la fiche de synthèse. C’est l’orchestration : pas la pose. BeWork a une plateforme et des forfaits TTC, sans embauche (voir l’offre, les tarifs, et la prise de contact).",
+      },
+      { type: "h2", content: "Conclusion" },
+      {
+        type: "p",
+        content:
+          "Un dossier propre, c’est un chantier moins lourd, une facture plus lisse, un client moins angoissé, et moins d’heures “gratuites” en arbitrage. Le ROI, c’est direct.",
+      },
+    ],
+  },
+  "plis-techniques-dce-versions": {
+    title: "DCE / plis techniques : suivi de versions, transmittaux et zéro pièce perdue",
+    description:
+      "Méthode d’ordre : versions de plans, devis, transmittaux, additifs, et pièces reçues. Comment éviter de facturer l’ancienne version ou de construire “à côté” du cahier des charges.",
+    excerpt:
+      "Le chaos coûte cher : ici, un cadre d’intitulé, d’obsolescence, et d’inclusion. Idéal en travaux, rénovation, lotissement technique et marchés en plusieurs envois.",
+    keywords: [
+      "DCE BTP",
+      "transmittal pièces",
+      "version de plan",
+      "classement administratif chantier",
+      "additif marché BTP",
+      "coordination de chantier PME",
+    ],
+    publishedTime: "2026-04-25T11:00:00+02:00",
+    articleSection: "Dossier & coordination",
+    body: [
+      { type: "h2", content: "Le vrai sujet, ce sont les versions" },
+      {
+        type: "p",
+        content:
+          "Tant que l’on ne gèle pas l’“état courant de référence”, toute l’exécution se bat avec des documents divergents. Règles de base : une version, une source, un statut, une date, une feuille de transmission (transmittal) quand c’est gros, ou un e-mail cadré quand c’est moyen. Le client voit l’adulte dans la pièce — et vous, vous n’inventez plus ce qui a été reçu le mardi 14h.",
+      },
+      { type: "h2", content: "L’inventaire simple (pas un ERP, juste l’utile)" },
+      {
+        type: "p",
+        content:
+          "Inventorier : plan, devis, additif, fiche d’incompatibilité, compte-rendu de visite, photos, fiches produits, réceptions. Quand c’est moins de 30 pièces, un tableau suffit. Quand c’est 300, il faut des étiquettes de nommage et un référent. Le point commun : n’alimentez jamais la facture sans revenir sur la dernière version reconnue par les correspondants. BeWork ajuste ce rythme en administratif, pas en expertise technique, mais c’est le chaînon le plus manquant en PME.",
+      },
+      { type: "h2", content: "Relation avec les autres articles du blog" },
+      {
+        type: "p",
+        content:
+          "Les preuves photos, le suivi fournisseurs, la retenue, la DPGF, le devis, et les situations de travaux s’enchaînent. Prenez ce blog comme un “parcours” : commencez par ce qui vous manque, puis reliez. Si vous avez un besoin “clé en main” du flux admin, l’inscription, la prise de rendez-vous découverte, et l’onboarding, sont sur le site.",
       },
     ],
   },

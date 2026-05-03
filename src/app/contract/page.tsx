@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ContractSigningBlock } from "@/components/contract/ContractSigningBlock";
 import { BackLink } from "@/components/ui/BackLink";
+import { PLAN_KEYS, SUBSCRIPTION_PLANS, formatPriceLabelFr } from "@/lib/subscription-plans";
 
 const CONTRACT_PDF_URL = process.env.CONTRACT_PDF_URL;
 const SHOW_PDF_EMBED = Boolean(CONTRACT_PDF_URL);
@@ -93,9 +94,14 @@ export default async function ContractPage() {
             <h3 className="mb-2 mt-6 font-semibold text-black">6. Tarifs et paiement</h3>
             <p className="mb-2">Les tarifs sont ceux affichés sur la page Tarifs du site :</p>
             <ul className="mb-4 list-disc pl-5">
-              <li>Structure : 290 € TTC / mois</li>
-              <li>Suivi : 490 € TTC / mois</li>
-              <li>Pilotage : 1 190 € TTC / mois</li>
+              {PLAN_KEYS.map((key) => {
+                const p = SUBSCRIPTION_PLANS[key];
+                return (
+                  <li key={key}>
+                    {p.name} : {formatPriceLabelFr(p.priceLabel)} € TTC / mois
+                  </li>
+                );
+              })}
             </ul>
             <p className="mb-4">Paiement mensuel d&apos;avance.</p>
 

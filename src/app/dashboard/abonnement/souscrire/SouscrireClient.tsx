@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { SUBSCRIPTION_PLANS, getPlan, PLAN_KEYS, type PlanKey } from "@/lib/subscription-plans";
+import { SUBSCRIPTION_PLANS, getPlan, PLAN_KEYS } from "@/lib/subscription-plans";
 
 type Props = {
   initialPlanKey: string;
@@ -131,7 +131,7 @@ export function SouscrireClient({
       <div className="rounded-2xl surface-metallic-light p-6">
         <h2 className="mb-3 text-sm font-semibold text-slate-700">Changer de formule</h2>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {(PLAN_KEYS as PlanKey[]).map((key) => {
+          {PLAN_KEYS.map((key) => {
             const p = SUBSCRIPTION_PLANS[key];
             return (
               <button

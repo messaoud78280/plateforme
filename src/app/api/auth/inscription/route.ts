@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
 import { UserRole } from "@prisma/client";
 
 export async function POST(request: Request) {
@@ -49,7 +50,7 @@ export async function POST(request: Request) {
         secteurActivite: secteurActivite || undefined,
         service: service || undefined,
         subscriptionPlan: "STANDARD",
-        monthlyActionsTotal: 185, // Standard : ~37 h = 185 actions × 12 min
+        monthlyActionsTotal: SUBSCRIPTION_PLANS.STANDARD.actionsIncluded,
       },
     });
 

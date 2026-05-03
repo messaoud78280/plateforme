@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
 
 export async function POST(request: Request) {
   try {
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
         invitedById: inv.invitedById,
         teamRole: inv.role,
         subscriptionPlan: "STANDARD",
-        monthlyActionsTotal: 185,
+        monthlyActionsTotal: SUBSCRIPTION_PLANS.STANDARD.actionsIncluded,
       },
     });
     await prisma.invitation.update({

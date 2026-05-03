@@ -26,7 +26,7 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-[#eef0f4]">
       <header className="border-b border-[#c8cdd6] bg-[#f8f9fb]">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-3 py-2.5 sm:px-4 sm:py-3">
+        <div className="mx-auto flex max-w-site items-center justify-between gap-3 px-3 py-2.5 sm:px-4 sm:py-3">
           <Link
             href="/dashboard"
             className="shrink-0 text-xl font-extrabold tracking-tight bg-gradient-to-r from-[#1e3a5f] via-[#2563eb] to-[#0ea5e9] bg-clip-text text-transparent drop-shadow-[0_1px_2px_rgba(30,58,95,0.25)] md:text-2xl"
@@ -54,7 +54,7 @@ export default async function DashboardLayout({
         </div>
       </header>
       <DashboardNav role={session.user?.role ?? null} />
-      <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+      <main className="mx-auto max-w-site px-4 py-8">{children}</main>
     </div>
   );
 }

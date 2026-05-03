@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getPlan, PLAN_KEYS, type PlanKey } from "@/lib/subscription-plans";
+import { getPlan, PLAN_KEYS, type PublicPlanKey } from "@/lib/subscription-plans";
 
-const VALID_PLANS: PlanKey[] = PLAN_KEYS;
+const VALID_PLANS = PLAN_KEYS satisfies readonly PublicPlanKey[];
 
 /**
  * POST /api/subscription/checkout
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
   }
 
   const planKey = body.planKey as string;
-  if (!planKey || !VALID_PLANS.includes(planKey as PlanKey)) {
+  if (!planKey || !(VALID_PLANS as readonly string[]).includes(planKey)) {
     return NextResponse.json(
       { error: "Formule invalide. Choisissez Structure, Suivi ou Pilotage." },
       { status: 400 }

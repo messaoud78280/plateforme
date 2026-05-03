@@ -3,13 +3,25 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
+import { PLAN_KEYS, SUBSCRIPTION_PLANS, formatPriceLabelFr } from "@/lib/subscription-plans";
 
 type TakenSlot = { date: string; time: string };
 
+const CONTACT_PLAN_ROWS: { id: string; planKey: (typeof PLAN_KEYS)[number]; value: string }[] = [
+  { id: "structure", planKey: "DECOUVERTE", value: "Structure" },
+  { id: "suivi", planKey: "STANDARD", value: "Suivi" },
+  { id: "pilotage", planKey: "PREMIUM", value: "Pilotage" },
+];
+
 const FORMULES = [
-  { id: "structure", label: "Structure — 290 € TTC / mois", value: "Structure" },
-  { id: "suivi", label: "Suivi — 490 € TTC / mois", value: "Suivi" },
-  { id: "pilotage", label: "Pilotage — 1 190 € TTC / mois", value: "Pilotage" },
+  ...CONTACT_PLAN_ROWS.map((row) => {
+    const p = SUBSCRIPTION_PLANS[row.planKey];
+    return {
+      id: row.id,
+      label: `${row.value} — ${formatPriceLabelFr(p.priceLabel)} € TTC / mois`,
+      value: row.value,
+    };
+  }),
   { id: "sur-mesure", label: "Sur-mesure / À définir", value: "Sur-mesure" },
 ];
 

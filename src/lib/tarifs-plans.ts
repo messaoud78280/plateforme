@@ -1,14 +1,26 @@
 /**
- * Formules tarifaires BeWork (partagées entre page Tarifs et Abonnement).
- * Les planKey restent stables pour l’API / abonnement.
+ * Tarifs marketing (consomme `subscription-plans` = même grille que Postgres / paiements).
  */
 
-export const TARIFS_PLANS = [
-  {
-    planKey: "DECOUVERTE" as const,
-    name: "Structure",
-    price: "290",
-    billing: "monthly" as const,
+import {
+  CREDIT_MINUTES,
+  PLAN_KEYS,
+  SUBSCRIPTION_PLANS,
+  type PlanKey,
+  type PublicPlanKey,
+} from "@/lib/subscription-plans";
+
+type TarifsCopyEntry = {
+  detail: string;
+  tagline: string;
+  highlights: readonly string[];
+  idealFor: string;
+  equivalentNote: { line1: string; line2: string };
+  badge: string | null;
+};
+
+const TARIFS_COPY = {
+  DECOUVERTE: {
     detail: "",
     tagline: "Pour démarrer proprement : devis + factures + organisation de base.",
     highlights: [
@@ -18,18 +30,13 @@ export const TARIFS_PLANS = [
       "Moins d’oublis, moins de retards",
     ],
     idealFor: "si votre administratif est irrégulier et que vous voulez démarrer sans complexifier.",
-    /** Repère temps indicatif — affichage discret, hors logique horaire contractuelle */
     equivalentNote: {
       line1: "Idéal si l’administratif est irrégulier",
       line2: "",
     },
     badge: null as string | null,
   },
-  {
-    planKey: "STANDARD" as const,
-    name: "Suivi",
-    price: "490",
-    billing: "monthly" as const,
+  STANDARD: {
     detail: "",
     tagline: "Pour une activité régulière : dossiers suivis + relances + coordination.",
     highlights: [
@@ -45,11 +52,7 @@ export const TARIFS_PLANS = [
     },
     badge: "Le plus adapté" as string | null,
   },
-  {
-    planKey: "PREMIUM" as const,
-    name: "Pilotage",
-    price: "1190",
-    billing: "monthly" as const,
+  PREMIUM: {
     detail: "",
     tagline: "Pour déléguer vraiment : priorisation + organisation globale + suivi complet.",
     highlights: [
@@ -65,4 +68,29 @@ export const TARIFS_PLANS = [
     },
     badge: null as string | null,
   },
-] as const;
+} satisfies Record<PublicPlanKey, TarifsCopyEntry>;
+
+export const TARIFS_PLANS = PLAN_KEYS.map((key) => {
+  const p = SUBSCRIPTION_PLANS[key];
+  const c = TARIFS_COPY[key];
+  return {
+    planKey: key,
+    name: p.name,
+    price: p.priceLabel,
+    billing: p.billing,
+    detail: c.detail,
+    tagline: c.tagline,
+    highlights: [...c.highlights],
+    idealFor: c.idealFor,
+    equivalentNote: c.equivalentNote,
+    badge: c.badge,
+    /** Aligné quotas base : crédits / mois après souscription ou paiement. */
+    actionsIncluded: p.actionsIncluded,
+    creditsMinutes: CREDIT_MINUTES,
+  };
+});
+
+export type TarifMarketingPlan = (typeof TARIFS_PLANS)[number];
+
+/** Compatibilité typage ancien flux (uniquement clés publiques). */
+export type TarifPlanKey = Extract<PlanKey, PublicPlanKey>;

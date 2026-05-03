@@ -4,6 +4,14 @@ import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { ComparatifReveal } from "@/components/tarifs/ComparatifReveal";
 import { StickyCtaMobile } from "@/components/tarifs/StickyCtaMobile";
 import { TARIFS_PLANS } from "@/lib/tarifs-plans";
+import {
+  CREDIT_MINUTES,
+  PLAN_KEYS,
+  SUBSCRIPTION_PLANS,
+  creditsToDisplayHours,
+  formatPriceLabelFr,
+  getPublicPriceBoundsLabels,
+} from "@/lib/subscription-plans";
 import { SEO_KEYWORDS_PARTENAIRE_CORE } from "@/lib/seo-keywords";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 
@@ -54,13 +62,16 @@ export const metadata: Metadata = {
 
 const plans = TARIFS_PLANS;
 
-const ACTION_MINUTES = 12;
+const ACTION_MINUTES = CREDIT_MINUTES;
 
-const PLAN_VOLUME = {
-  DECOUVERTE: { hoursApprox: 20, actionsApprox: 100 },
-  STANDARD: { hoursApprox: 37, actionsApprox: 185 },
-  PREMIUM: { hoursApprox: 100, actionsApprox: 500 },
-} as const;
+const PRICE_BOUNDS = getPublicPriceBoundsLabels();
+
+const PLAN_VOLUME = Object.fromEntries(
+  PLAN_KEYS.map((key) => {
+    const a = SUBSCRIPTION_PLANS[key].actionsIncluded;
+    return [key, { hoursApprox: creditsToDisplayHours(a), actionsApprox: a }] as const;
+  })
+) as Record<(typeof PLAN_KEYS)[number], { hoursApprox: number; actionsApprox: number }>;
 
 function formatHourlyCost(priceTtc: string, hoursApprox: number) {
   const p = parseFloat(priceTtc.replace(/\s/g, ""));
@@ -177,7 +188,7 @@ export default function TarifsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(tarifsStructuredData) }}
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-12 md:py-16">
+      <main className="mx-auto max-w-site px-4 py-12 md:py-16">
         {/* Intro */}
         <section className="text-center">
           <h1 className="text-metallic-black font-sans text-3xl font-semibold tracking-tight md:text-4xl md:leading-tight">
@@ -224,7 +235,7 @@ export default function TarifsPage() {
             À partir d’environ <strong className="font-semibold text-black">12 €/h</strong> tout compris, sans recrutement, sans
             charges, sans contraintes.
           </p>
-          <div className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:items-stretch lg:gap-5">
+          <div className="mx-auto grid max-w-site gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:items-stretch lg:gap-5">
             {plans.map((plan) => {
               const isFeatured = plan.planKey === "STANDARD";
               const volume = PLAN_VOLUME[plan.planKey];
@@ -708,15 +719,14 @@ export default function TarifsPage() {
               <tbody className="text-black">
                 <tr className="border-b border-[#e0e4ea]">
                   <td className="px-4 py-3">Prix TTC / mois</td>
-                  <td className="px-4 py-3">
-                    <span className="tarif-emphase text-black">290</span> € TTC
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="tarif-emphase text-black">490</span> € TTC
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="tarif-emphase text-black">1 190</span> € TTC
-                  </td>
+                  {PLAN_KEYS.map((key) => (
+                    <td key={key} className="px-4 py-3">
+                      <span className="tarif-emphase text-black">
+                        {formatPriceLabelFr(SUBSCRIPTION_PLANS[key].priceLabel)}
+                      </span>{" "}
+                      € TTC
+                    </td>
+                  ))}
                 </tr>
                 <tr className="border-b border-[#e0e4ea]">
                   <td className="px-4 py-3">Niveau d&apos;accompagnement</td>
@@ -802,7 +812,8 @@ export default function TarifsPage() {
               <div className="rounded-xl border-2 border-[#1d4ed8] bg-[#eff6ff] p-6">
                 <h4 className="text-sm font-semibold uppercase tracking-wide text-[#1d4ed8]">BeWork</h4>
                 <p className="mt-4 text-3xl font-bold text-[#1d4ed8]">
-                  290 € à 1 190 € <span className="text-xs font-semibold uppercase tracking-wide text-black">TTC</span>{" "}
+                  {formatPriceLabelFr(PRICE_BOUNDS.low)} € à {formatPriceLabelFr(PRICE_BOUNDS.high)} €{" "}
+                  <span className="text-xs font-semibold uppercase tracking-wide text-black">TTC</span>{" "}
                   <span className="text-lg font-normal text-black">/ mois</span>
                 </p>
                 <p className="mt-1 text-black">Tout compris — sans frais cachés</p>

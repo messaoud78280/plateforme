@@ -17,6 +17,7 @@ import { ClientDashboardContent } from "@/components/dashboard/ClientDashboardCo
 import { ManagerDashboardContent, type ManagerTaskItem } from "@/components/dashboard/ManagerDashboardContent";
 import { AgentDashboardContent } from "@/components/dashboard/AgentDashboardContent";
 import { BackLink } from "@/components/ui/BackLink";
+import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
 
 export default async function DashboardPage({
   searchParams,
@@ -80,7 +81,7 @@ export default async function DashboardPage({
       if (after) {
         actionsData = {
           subscriptionPlan: after.subscriptionPlan ?? null,
-          monthlyActionsTotal: after.monthlyActionsTotal ?? 185,
+          monthlyActionsTotal: after.monthlyActionsTotal ?? SUBSCRIPTION_PLANS.STANDARD.actionsIncluded,
           monthlyActionsUsed: after.monthlyActionsUsed ?? 0,
           renewsAt,
         };
@@ -541,7 +542,7 @@ export default async function DashboardPage({
           actionsData={
             actionsData ?? {
               subscriptionPlan: null,
-              monthlyActionsTotal: 185,
+              monthlyActionsTotal: SUBSCRIPTION_PLANS.STANDARD.actionsIncluded,
               monthlyActionsUsed: 0,
               renewsAt: null,
             }

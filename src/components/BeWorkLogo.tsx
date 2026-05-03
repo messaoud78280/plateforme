@@ -1,3 +1,10 @@
+import Image from "next/image";
+
+const LOGO_PATH = "/BeWork.logo.png";
+/** Dimensions intrinsèques du fichier ( évite déformation + layout shift ) */
+const LOGO_WIDTH = 2040;
+const LOGO_HEIGHT = 562;
+
 interface BeWorkLogoProps {
   className?: string;
   size?: "sm" | "md" | "lg";
@@ -6,7 +13,15 @@ interface BeWorkLogoProps {
   tagline?: string;
   /** Ligne secondaire, plus discrète (ex. promesse IA / zone) */
   taglineSub?: string;
+  /** Image prioritaire (ex. premier écran homepage) */
+  priority?: boolean;
 }
+
+const imageClassBySize: Record<NonNullable<BeWorkLogoProps["size"]>, string> = {
+  sm: "h-11 w-auto max-w-[min(100%,14rem)] sm:h-12 sm:max-w-[min(100%,16rem)] md:h-[3.25rem] md:max-w-[min(100%,18rem)]",
+  md: "h-12 w-auto max-w-[min(100%,18rem)] md:h-14 md:max-w-[min(100%,22rem)] lg:h-16 lg:max-w-[min(100%,26rem)]",
+  lg: "h-14 w-auto max-w-[min(100%,22rem)] md:h-16 md:max-w-[min(100%,28rem)] lg:h-[4.5rem] lg:max-w-[min(100%,32rem)]",
+};
 
 export function BeWorkLogo({
   className = "",
@@ -14,58 +29,31 @@ export function BeWorkLogo({
   showTagline = false,
   tagline,
   taglineSub,
+  priority = false,
 }: BeWorkLogoProps) {
-  const textSize =
-    size === "sm"
-      ? "text-2xl md:text-3xl"
-      : size === "md"
-        ? "text-3xl md:text-4xl"
-        : "text-4xl md:text-5xl";
-
-  const iconSize =
-    size === "sm" ? "h-11 w-11 text-base" : size === "md" ? "h-12 w-12 text-lg" : "h-14 w-14 text-xl";
-
-  /** Aligne le sous-titre avec le début du mot « BeWork », pas sous le pictogramme (pastille + gap-2) */
-  const taglineIndent = size === "sm" ? "pl-[3.25rem]" : size === "md" ? "pl-14" : "pl-16";
-
   const defaultTagline = "L'assistant administratif à la demande";
+
+  const sizesAttr =
+    size === "sm"
+      ? "(max-width:768px) 220px, 280px"
+      : size === "md"
+        ? "(max-width:768px) 260px, 360px"
+        : "(max-width:768px) 320px, 420px";
 
   return (
     <span className={`inline-flex flex-col ${className}`}>
-      <span className="inline-flex items-center gap-2">
-        <span
-          className={`bework-logo-badge-metallic relative flex shrink-0 items-center justify-center rounded-full font-extrabold text-white ${iconSize}`}
-          style={{ fontFamily: "var(--font-orbitron), system-ui, sans-serif" }}
-        >
-          <span
-            className="pointer-events-none absolute -left-1/4 -top-1/2 h-full w-[90%] rounded-full bg-gradient-to-b from-white/25 to-transparent opacity-80 blur-[3px]"
-            aria-hidden
-          />
-          <span
-            className="pointer-events-none absolute inset-0 rounded-full opacity-40"
-            style={{
-              background:
-                "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.12) 50%, transparent 60%)",
-            }}
-            aria-hidden
-          />
-          <span className="relative z-10 tracking-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">BW</span>
-        </span>
-        <span
-          className={`font-extrabold tracking-tight ${textSize}`}
-          style={{ fontFamily: "var(--font-orbitron), system-ui, sans-serif" }}
-        >
-          <span className="text-metallic-black">Be</span>
-          <span className="bg-gradient-to-r from-[#60a5fa] via-[#3b82f6] to-[#1d4ed8] bg-clip-text text-transparent [text-shadow:none]">
-            Work
-          </span>
-        </span>
-      </span>
-      {showTagline && (
-        <span
-          className={`${taglineIndent} mt-1.5 max-w-[calc(100vw-3rem)] py-0.5 sm:max-w-xl`}
-        >
-          <span className="block text-xs font-semibold leading-snug text-black sm:text-sm">
+      <Image
+        src={LOGO_PATH}
+        alt="BeWork"
+        width={LOGO_WIDTH}
+        height={LOGO_HEIGHT}
+        className={`shrink-0 object-contain object-left ${imageClassBySize[size]}`}
+        sizes={sizesAttr}
+        priority={priority}
+      />
+      {showTagline ? (
+        <span className="mt-1 max-w-[calc(100vw-3rem)] self-start py-0.5 sm:mt-1.5 sm:max-w-xl">
+          <span className="block text-[11px] font-medium leading-tight tracking-tight text-slate-600 sm:text-xs md:text-[0.8125rem]">
             {tagline ?? defaultTagline}
           </span>
           {taglineSub ? (
@@ -74,7 +62,7 @@ export function BeWorkLogo({
             </span>
           ) : null}
         </span>
-      )}
+      ) : null}
     </span>
   );
 }

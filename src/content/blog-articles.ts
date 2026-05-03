@@ -2,6 +2,22 @@
  * Contenu des articles blog — source unique (liste, pages, sitemap, SEO).
  */
 
+import {
+  PLAN_KEYS,
+  SUBSCRIPTION_PLANS,
+  formatPriceLabelFr,
+  getPublicPriceBoundsLabels,
+} from "@/lib/subscription-plans";
+
+function blogMonthlyTtcPlansList(): string {
+  return PLAN_KEYS.map(
+    (k) => `${SUBSCRIPTION_PLANS[k].name} ${formatPriceLabelFr(SUBSCRIPTION_PLANS[k].priceLabel)} €`
+  ).join(", ");
+}
+
+const BW_PRICE_LOW_FR = formatPriceLabelFr(getPublicPriceBoundsLabels().low);
+const BW_PLANS_TTC_COMMA = blogMonthlyTtcPlansList();
+
 export type BlogBodyBlock = { type: "h2" | "p"; content: string };
 
 export type BlogArticle = {
@@ -99,8 +115,7 @@ export const BLOG_ARTICLES = {
   },
   "combien-coute-assistant-administratif": {
     title: "Combien coûte un assistant administratif ?",
-    description:
-      "Comparatif des coûts : assistant administratif externalisé vs salarié. Dès 290 € TTC/mois chez BeWork pour les PME.",
+    description: `Comparatif des coûts : assistant administratif externalisé vs salarié. Dès ${BW_PRICE_LOW_FR} € TTC/mois chez BeWork pour les PME.`,
     excerpt:
       "Comparatif des tarifs : assistant administratif externalisé vs salarié. Ce que coûte vraiment l'externalisation pour les PME.",
     keywords: [
@@ -116,8 +131,7 @@ export const BLOG_ARTICLES = {
       { type: "h2", content: "Forfaits administratifs BeWork (BTP et PME)" },
       {
         type: "p",
-        content:
-          "Les offres sont en TTC, par mois : Structure 290 €, Suivi 490 €, Pilotage 1 190 €. Chaque palier correspond à un niveau de structuration et de suivi, pas à une simple liste de tâches. Pas de charges sociales ni de recrutement à porter pour ce périmètre.",
+        content: `Les offres sont en TTC, par mois : ${BW_PLANS_TTC_COMMA}. Chaque palier correspond à un niveau de structuration et de suivi, pas à une simple liste de tâches. Pas de charges sociales ni de recrutement à porter pour ce périmètre.`,
       },
       { type: "h2", content: "Poste en interne : ordre de grandeur du coût" },
       {
@@ -151,8 +165,7 @@ export const BLOG_ARTICLES = {
       { type: "h2", content: "Assistant virtuel (externalisé) : avantages" },
       {
         type: "p",
-        content:
-          "Coût maîtrisé (dès 290 € TTC/mois), pas de recrutement, pas de charges sociales, scalabilité selon les besoins, opérationnel rapidement, supervision en France avec BeWork.",
+        content: `Coût maîtrisé (dès ${BW_PRICE_LOW_FR} € TTC/mois), pas de recrutement, pas de charges sociales, scalabilité selon les besoins, opérationnel rapidement, supervision en France avec BeWork.`,
       },
       { type: "h2", content: "Assistant salarié : avantages" },
       {

@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
-import { getPlan, PLAN_KEYS, SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
+import { getPlan, PLAN_KEYS, type PublicPlanKey } from "@/lib/subscription-plans";
 import { SouscrireClient } from "./SouscrireClient";
 import { BackLink } from "@/components/ui/BackLink";
 
@@ -20,8 +20,8 @@ export default async function SouscrirePage({ searchParams }: Props) {
 
   const params = await searchParams;
   const planKeyParam = params.plan ?? "";
-  const planKey = PLAN_KEYS.includes(planKeyParam as keyof typeof SUBSCRIPTION_PLANS)
-    ? planKeyParam
+  const planKey: PublicPlanKey = (PLAN_KEYS as readonly string[]).includes(planKeyParam)
+    ? (planKeyParam as PublicPlanKey)
     : "STANDARD";
   const plan = getPlan(planKey);
 

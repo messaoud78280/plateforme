@@ -79,7 +79,7 @@ export default async function CommunicationDigitalePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea] pb-24 md:pb-16">
       <header className="sticky top-0 z-20 border-b border-[#c8cdd6] bg-[#f8f9fb]/95 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+        <div className="mx-auto flex max-w-site items-center justify-between px-4 py-4">
           <Link href="/" className="shrink-0" aria-label="BeWork - Retour à l'accueil">
             <BeWorkLogo size="sm" />
           </Link>
@@ -106,7 +106,7 @@ export default async function CommunicationDigitalePage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-12 md:py-16">
+      <main className="mx-auto max-w-site px-4 py-12 md:py-16">
         {/* Hero */}
         <section className="text-center">
           <h1 className="text-3xl font-bold tracking-tight text-black md:text-4xl">

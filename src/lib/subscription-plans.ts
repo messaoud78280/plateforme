@@ -1,8 +1,27 @@
 /**
- * Configuration des formules BeWork (alignée sur la grille tarifaire).
+ * Source de vérité des formules BeWork — alignée sur PostgreSQL / Supabase
+ * (`User.subscriptionPlan`, `Subscription.planKey`, `Payment.amount`, `User.monthlyActionsTotal`).
+ *
+ * Toujours mettre à jour ici puis laisser l’UI marketing dériver depuis ce module ou `tarifs-plans`.
+ * Les montants affichés sur `/tarifs` doivent correspondre aux `priceLabel` ci-dessous (les lignes
+ * historiques `Payment` peuvent différer : promo, prorata, ancien grille, paiement personnalisé).
+ *
  * planKey en base : DECOUVERTE | STANDARD | STANDARD_PLUS | PREMIUM
  * STANDARD_PLUS (Renfort) n’est plus proposé à la souscription ; conservé pour l’historique et les comptes existants.
  */
+
+/** 1 crédit = CREDIT_MINUTES min — même règle que quotas et débit par tâche. */
+export const CREDIT_MINUTES = 12;
+
+/** Heures affichées (repère) dérivées des crédits inclus. */
+export function creditsToDisplayHours(actionsIncluded: number): number {
+  return Math.round((actionsIncluded * CREDIT_MINUTES) / 60);
+}
+
+export function formatPriceLabelFr(priceLabel: string): string {
+  const n = Number(priceLabel.replace(/\s/g, ""));
+  return Number.isFinite(n) ? n.toLocaleString("fr-FR") : priceLabel;
+}
 
 export const SUBSCRIPTION_PLANS = {
   DECOUVERTE: {
@@ -46,7 +65,33 @@ export const SUBSCRIPTION_PLANS = {
 export type PlanKey = keyof typeof SUBSCRIPTION_PLANS;
 
 /** Formules proposées à la souscription et au checkout (3 offres publiques). */
-export const PLAN_KEYS: PlanKey[] = ["DECOUVERTE", "STANDARD", "PREMIUM"];
+export const PLAN_KEYS = ["DECOUVERTE", "STANDARD", "PREMIUM"] as const;
+
+/** Sous-ensemble des planKey exposés au site et au checkout (hors Renfort historique). */
+export type PublicPlanKey = (typeof PLAN_KEYS)[number];
+
+/** Borne basse / haute des trois offres publiques (JSON-LD, meta, phrases). */
+export function getPublicPriceBoundsLabels(): { low: string; high: string } {
+  let low: number = SUBSCRIPTION_PLANS[PLAN_KEYS[0]].priceCents;
+  let high: number = low;
+  for (const k of PLAN_KEYS) {
+    const c = SUBSCRIPTION_PLANS[k].priceCents;
+    low = Math.min(low, c);
+    high = Math.max(high, c);
+  }
+  const lowPlan = PLAN_KEYS.find((k) => SUBSCRIPTION_PLANS[k].priceCents === low)!;
+  const highPlan = PLAN_KEYS.find((k) => SUBSCRIPTION_PLANS[k].priceCents === high)!;
+  return {
+    low: SUBSCRIPTION_PLANS[lowPlan].priceLabel,
+    high: SUBSCRIPTION_PLANS[highPlan].priceLabel,
+  };
+}
+
+/** Phrase AggregateOffer (offre Suivi = STANDARD). */
+export function getAggregateOfferDescription(): string {
+  const suivi = SUBSCRIPTION_PLANS.STANDARD;
+  return `Trois forfaits TTC mensuels BTP : Structure, Suivi (${suivi.priceLabel} € TTC/mois — le plus adapté pour une activité régulière), Pilotage.`;
+}
 
 export function getPlan(planKey: string) {
   const key = planKey as PlanKey;

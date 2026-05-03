@@ -1,17 +1,22 @@
 /**
- * Facturation par crédits : 1 crédit = 12 minutes (5 crédits ≈ 1 h).
+ * Facturation par crédits — alignée `CREDIT_MINUTES` dans `subscription-plans`
+ * (`User.monthlyActionsTotal`, débit après paiement).
  * Minimum 1 crédit par tâche. Formule : ceil(minutes / MINUTES_PER_ACTION).
  */
 
-export const MINUTES_PER_ACTION = 12;
+import type { PlanKey } from "@/lib/subscription-plans";
+import { CREDIT_MINUTES, SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
+
+export const MINUTES_PER_ACTION = CREDIT_MINUTES;
 export const MIN_ACTIONS_PER_TASK = 1;
 
-export const SUBSCRIPTION_ACTIONS: Record<string, number> = {
-  STANDARD: 185,       // ~37 h (185 × 12 min)
-  STANDARD_PLUS: 240,  // ~48 h
-  PREMIUM: 500,        // ~100 h
-  FULLTIME: 960,       // ~192 h
-};
+export const SUBSCRIPTION_ACTIONS = {
+  ...Object.fromEntries(
+    (Object.keys(SUBSCRIPTION_PLANS) as PlanKey[]).map((key) => [key, SUBSCRIPTION_PLANS[key].actionsIncluded])
+  ),
+  /** Hors catalogue public — valeur métier hors table des trois offres principales */
+  FULLTIME: 960,
+} as Record<string, number>;
 
 export function minutesToActions(minutes: number): number {
   if (minutes <= 0) return MIN_ACTIONS_PER_TASK;

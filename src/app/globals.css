@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Ancres : évite que le sticky header recouvre la cible au scroll */
+html {
+  scroll-padding-top: 5rem;
+}
+
 /* Design system BeWork – métallique clair, épuré, futuriste */
 :root {
   --background: #f2f4f7;
@@ -61,6 +66,9 @@
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
+
+  /* Largeur canonique du contenu (marketing + dashboard) */
+  --site-max-width: 1200px;
 }
 
 @theme inline {
@@ -68,6 +76,26 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+@layer utilities {
+  .max-w-site {
+    max-width: var(--site-max-width);
+  }
+
+  /**
+   * Conteneur marketing unique : même axe horizontal que le header (logo, nav)
+   * et que les sections type hero (max-width site + gouttières 24px).
+   */
+  .container-site {
+    box-sizing: border-box;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    max-width: var(--site-max-width);
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
 }
 
 /* Montants / équivalences h & €·h — tailles en CSS pur (Tailwind v4 : @apply dans @layer peut ne pas s’appliquer) */
@@ -163,37 +191,6 @@
 /* Badge « pill » centré en -top : sans ça, overflow:hidden + inset highlight coupent le badge (ligne sombre). */
 .surface-metallic-light.surface-metallic-light--badge-pill {
   overflow: visible;
-}
-
-/* Logo BeWork — pastille BW métallisée */
-.bework-logo-badge-metallic {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  background:
-    linear-gradient(
-      125deg,
-      rgba(255, 255, 255, 0.32) 0%,
-      rgba(255, 255, 255, 0.1) 28%,
-      transparent 46%,
-      transparent 54%,
-      rgba(255, 255, 255, 0.12) 76%,
-      rgba(147, 197, 253, 0.18) 100%
-    ),
-    linear-gradient(
-      158deg,
-      #6b8cbe 0%,
-      #355a8a 18%,
-      #1e3a5f 42%,
-      #0f172a 68%,
-      #020617 100%
-    );
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.32),
-    inset 0 -3px 0 rgba(0, 0, 0, 0.45),
-    0 4px 16px rgba(15, 23, 42, 0.32),
-    0 0 0 1px rgba(96, 165, 250, 0.55),
-    0 0 24px rgba(29, 78, 216, 0.12);
 }
 
 /* Bandeaux larges : un ton plus clair que .surface-metallic-light, mais bien visibles */
@@ -568,4 +565,26 @@ select {
 input::placeholder,
 textarea::placeholder {
   color: #9ca3af;
+}
+
+/* Menus déroulants header (Solutions, Ressources) : entrée discrète */
+@keyframes bework-header-dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bework-header-dropdown-enter {
+    animation: none !important;
+  }
+}
+
+.bework-header-dropdown-enter {
+  animation: bework-header-dropdown-in 0.15s ease-out both;
 }

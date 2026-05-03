@@ -1,10 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
-import { HomePageNavStrip } from "@/components/layout/HomePageNavStrip";
+import { HomeProblemSection } from "@/components/HomeProblemSection";
+import { HomeHowItWorksDetailSection } from "@/components/HomeHowItWorksDetailSection";
+import { HomeSolutionSection } from "@/components/HomeSolutionSection";
 import { HeroPresentationVideo } from "@/components/HeroPresentationVideo";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { TARIFS_PLANS } from "@/lib/tarifs-plans";
+import {
+  CREDIT_MINUTES,
+  SUBSCRIPTION_PLANS,
+  creditsToDisplayHours,
+  formatPriceLabelFr,
+  getAggregateOfferDescription,
+  getPublicPriceBoundsLabels,
+} from "@/lib/subscription-plans";
 import { SEO_KEYWORDS_BTP_PME, SEO_KEYWORDS_PARTENAIRE_CORE, SEO_VALUE_PROPOSITION } from "@/lib/seo-keywords";
 import { SITE_URL, absoluteUrl } from "@/lib/site";
 
@@ -13,8 +23,9 @@ const PRESENTATION_VIDEO_MP4 = "/video/presentation.mp4";
 const PRESENTATION_VIDEO_DURATION_ISO = "PT13S";
 
 const SUIVI_PLAN = TARIFS_PLANS.find((p) => p.planKey === "STANDARD")!;
-const ACTION_MINUTES = 12;
-const ACTIONS_PER_HOUR = 60 / ACTION_MINUTES; // 5
+const PRICE_BOUNDS = getPublicPriceBoundsLabels();
+const SUIVI_PRODUCT = SUBSCRIPTION_PLANS.STANDARD;
+const SUIVI_HOURS = creditsToDisplayHours(SUIVI_PRODUCT.actionsIncluded);
 
 function formatPriceTtc(value: string) {
   const n = parseInt(value.replace(/\s/g, ""), 10);
@@ -23,15 +34,11 @@ function formatPriceTtc(value: string) {
 }
 
 function getPlanVolume(planKey: (typeof TARIFS_PLANS)[number]["planKey"]) {
-  // Volumes affichés (1 crédit = 12 min) : Structure=20h/100, Suivi=37h/185, Pilotage=100h/500
-  const hoursMap: Record<(typeof TARIFS_PLANS)[number]["planKey"], number> = {
-    DECOUVERTE: 20,
-    STANDARD: 37,
-    PREMIUM: 100,
+  const p = SUBSCRIPTION_PLANS[planKey];
+  return {
+    hoursApprox: creditsToDisplayHours(p.actionsIncluded),
+    actionsApprox: p.actionsIncluded,
   };
-  const hoursApprox = hoursMap[planKey];
-  const actionsApprox = Math.round(hoursApprox * ACTIONS_PER_HOUR);
-  return { hoursApprox, actionsApprox };
 }
 
 const TARIFS_PROGRESSION_ROWS = [
@@ -130,7 +137,7 @@ const RESSOURCES_BLOG = [
 
 export const metadata: Metadata = {
   title: "BeWork | Partenaire administratif externalisé BTP & PME",
-  description: `${SEO_VALUE_PROPOSITION} Vidéo sur l’accueil. Forfaits TTC dès 290 €/mois. France, Belgique, Suisse, Luxembourg.`,
+  description: `${SEO_VALUE_PROPOSITION} Vidéo sur l’accueil. Forfaits TTC dès ${formatPriceLabelFr(PRICE_BOUNDS.low)} €/mois. France, Belgique, Suisse, Luxembourg.`,
   robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
   keywords: [
     ...SEO_KEYWORDS_PARTENAIRE_CORE,
@@ -221,11 +228,10 @@ const homeJsonLd = {
       offers: {
         "@type": "AggregateOffer",
         priceCurrency: "EUR",
-        lowPrice: "290",
-        highPrice: "1190",
+        lowPrice: PRICE_BOUNDS.low,
+        highPrice: PRICE_BOUNDS.high,
         offerCount: "3",
-        description:
-          "Trois forfaits TTC mensuels BTP : Structure, Suivi (490 € TTC/mois — le plus adapté pour une activité régulière), Pilotage.",
+        description: getAggregateOfferDescription(),
       },
     },
     {
@@ -261,272 +267,210 @@ const homeJsonLd = {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
+    <div className="min-h-screen bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }} />
-      <MarketingSiteHeader
-        plainBg
-        centerSlot={
-          <h1 className="inline-block max-w-[min(100vw-2rem,52rem)] text-balance">
-            <span className="inline-block rounded-xl border border-slate-200/90 bg-[#e6edf6] px-4 py-2.5 shadow-[0_1px_3px_rgba(15,23,42,0.06),0_4px_14px_rgba(15,23,42,0.04)] sm:px-5 sm:py-2.5">
-              <span
-                className="block font-semibold leading-snug tracking-[-0.02em] text-[clamp(0.9375rem,2vw,1.375rem)] antialiased md:inline md:whitespace-nowrap md:leading-tight"
-                style={{ fontFamily: "var(--font-manrope), var(--font-geist-sans), system-ui, sans-serif" }}
-              >
-                <span className="text-slate-900">On tient le bureau,</span>{" "}
-                <span className="bg-gradient-to-r from-[#2563eb] to-[#1d4ed8] bg-clip-text text-transparent">
-                  vous tenez le chantier.
-                </span>
-              </span>
-            </span>
-          </h1>
-        }
-        bottom={<HomePageNavStrip />}
-      />
+      <MarketingSiteHeader plainBg />
 
       <main className="pt-0">
-        {/* Hero + comment ça fonctionne (4 étapes) */}
-        <section id="hero" className="px-6 py-20 md:py-24 lg:py-28" style={{ scrollMarginTop: "6rem" }}>
-          <div className="mx-auto max-w-6xl">
-            <div className="grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-10 xl:gap-14">
-              {/* Colonne principale : message + CTA (~60 %) */}
-              <div className="flex min-w-0 flex-col gap-6 text-center md:gap-7 md:text-left lg:order-2 lg:col-span-7">
-                <HeroPresentationVideo />
-                <p className="mx-auto max-w-2xl text-sm font-medium leading-relaxed text-slate-700 md:mx-0 md:text-base">
-                  Partenaire administratif externalisé pour artisans et PME du bâtiment — France, Belgique, Suisse,
-                  Luxembourg.
+        {/* Hero → Problème → Solution → Comment ça marche : un seul fond (dégradé + métallique continu) */}
+        <div className="relative overflow-hidden bg-gradient-to-b from-white via-[#fdfefe] to-[#F8FAFC]">
+          <div className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-b from-white/55 via-transparent to-white/[0.45]" aria-hidden />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute right-[-6%] top-[-12rem] -bottom-[18rem] z-0 w-[46%] skew-x-[-12deg] opacity-70 md:top-[-14rem] md:-bottom-[22rem]"
+            style={{
+              background: "linear-gradient(135deg, #F8FAFC 0%, #D7E0EA 45%, #EEF3F8 100%)",
+            }}
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute right-[-6%] top-[-12rem] -bottom-[18rem] z-0 w-[46%] skew-x-[-12deg] opacity-25 md:top-[-14rem] md:-bottom-[22rem]"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(120deg, rgba(15,23,42,0.14) 0px, rgba(15,23,42,0.14) 1px, transparent 1px, transparent 7px)",
+            }}
+          />
+          <div className="relative z-10">
+            {/* Hero compact premium — 1200px, grille 55/45 */}
+            <section
+              id="hero"
+              className="relative overflow-visible bg-transparent pb-20 pt-0 lg:pt-1"
+              style={{ scrollMarginTop: "6rem" }}
+            >
+              <div className="container-site relative z-[1]">
+            <div className="grid items-center gap-8 text-center lg:grid-cols-[1.15fr_0.85fr] lg:items-start lg:gap-x-[4.75rem] lg:gap-y-0 lg:text-left">
+              <div className="mx-auto flex w-full min-w-0 max-w-[580px] flex-col gap-6 lg:mx-0 lg:max-w-none lg:gap-5 lg:pt-24">
+                <p className="mx-auto inline-flex max-w-full items-center gap-2 self-center rounded-full border border-[#bfdbfe] bg-[#eff6ff] px-3.5 py-1.5 text-[12.5px] font-medium leading-snug text-[#2563eb] sm:gap-2.5 sm:px-4 sm:text-sm lg:mx-0 lg:self-start">
+                  <svg
+                    className="size-[15px] shrink-0 sm:size-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={1.85}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden
+                  >
+                    <rect width="8" height="4" x="8" y="2" rx="1" />
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                    <path d="M9 10h6M9 14h6M9 18h4" />
+                  </svg>
+                  <span>Assistant administratif BTP augmenté par l’IA</span>
                 </p>
-                <div
-                  className="mx-auto max-w-2xl rounded-xl border border-[#93c5fd]/45 bg-gradient-to-br from-white via-[#f8fafc] to-[#eff6ff]/90 px-5 py-5 text-center shadow-[0_4px_20px_rgba(29,78,216,0.07),inset_0_1px_0_rgba(255,255,255,0.9)] md:mx-0 md:px-6 md:py-5 md:text-left lg:max-w-none"
+
+                <h1
+                  className="text-balance text-[clamp(2.125rem,calc(0.45rem+4.35vw),4.25rem)] font-sans leading-[1.05] tracking-[-0.02em]"
+                  style={{ fontFamily: "var(--font-inter), var(--font-geist-sans), system-ui, sans-serif" }}
                 >
-                  <p className="font-sans text-lg font-semibold leading-snug tracking-tight text-black md:text-xl md:leading-snug lg:text-2xl lg:leading-snug">
-                    Devis, relances, dossiers chantier, DICT, fournisseurs : on gère votre administratif BTP au quotidien.
-                  </p>
-                  <p className="mt-2 text-sm font-medium leading-relaxed text-black md:text-base">
-                    Vous envoyez vos demandes, on exécute, vous validez le sensible, vous suivez tout sur une plateforme simple.
-                  </p>
-                </div>
-                <div className="mx-auto max-w-2xl rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_10px_30px_rgba(15,23,42,0.08)] md:mx-0">
-                  <div className="surface-metallic-light surface-metallic-light--soft rounded-2xl px-5 py-5 text-center md:px-6 md:py-5 md:text-left">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-black">Pilotage administratif</p>
-                    <p className="mt-2 font-sans text-lg font-semibold leading-snug tracking-tight text-black md:text-xl md:leading-snug">
-                      BeWork structure votre{" "}
-                      <strong className="font-semibold text-black">administratif et votre coordination</strong> : devis et
-                      relances qui avancent, dossiers suivis, échanges cadrés. Vous restez sur l&apos;ouvrage ; nous tenons le
-                      dossier.
-                    </p>
-                  </div>
-                </div>
-                <div className="mx-auto max-w-2xl rounded-xl border border-[#bfdbfe]/80 bg-gradient-to-br from-[#eff6ff]/95 to-white/90 px-5 py-4 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_10px_24px_rgba(15,23,42,0.06)] md:mx-0 md:px-6 md:py-4 md:text-left">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">IA assistée</p>
-                  <p className="mt-2 text-sm font-semibold leading-relaxed text-black md:text-base">
-                    Nos agents sont <span className="font-extrabold">assistés par l’IA</span> pour accélérer préparation et
-                    contrôles — <span className="font-extrabold">toujours relus et validés</span> par l’équipe.
-                  </p>
-                </div>
-                <div className="mx-auto max-w-2xl space-y-6 text-left md:mx-0">
-                  <div className="grid gap-6 sm:grid-cols-2 sm:gap-8">
-                    <div className="rounded-xl border border-[#dce3ec]/80 bg-white/60 p-4 shadow-sm backdrop-blur-sm">
-                      <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#1d4ed8]">
-                        Au bureau
-                      </p>
-                      <ul className="space-y-2.5 text-base leading-snug text-black md:text-[1.05rem]">
-                        <li className="flex gap-2.5">
-                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#1d4ed8]" aria-hidden />
-                          <span>Devis, facturation, situations de travaux</span>
-                        </li>
-                        <li className="flex gap-2.5">
-                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#1d4ed8]" aria-hidden />
-                          <span>Suivi client, mails et structuration de l&apos;activité</span>
-                        </li>
-                      </ul>
-                    </div>
-                    <div className="rounded-xl border border-[#dce3ec]/80 bg-white/60 p-4 shadow-sm backdrop-blur-sm">
-                      <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[#1d4ed8]">
-                        Chantier &amp; logistique
-                      </p>
-                      <ul className="space-y-2.5 text-base leading-snug text-black md:text-[1.05rem]">
-                        <li className="flex gap-2.5">
-                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#1d4ed8]" aria-hidden />
-                          <span>
-                            Démarches : DICT, déclarations, autorisations, suivi des dossiers
-                          </span>
-                        </li>
-                        <li className="flex gap-2.5">
-                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#1d4ed8]" aria-hidden />
-                          <span>Fournisseurs, livraisons, locations matériel / engins / véhicules</span>
-                        </li>
-                        <li className="flex gap-2.5">
-                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#1d4ed8]" aria-hidden />
-                          <span>Planning et coordination</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                  <p className="text-base leading-relaxed text-black md:text-lg">
-                    Sur les sujets sensibles (relances fermes, mises en demeure, litiges), nous assurons le{" "}
-                    <strong className="font-semibold text-black">suivi administratif</strong> sous votre validation.
-                  </p>
-                  <p className="text-base leading-relaxed text-black md:text-lg">
-                    <strong className="font-semibold text-black">Vingt ans sur le terrain du BTP</strong>,{" "}
-                    <strong className="font-semibold text-black">en tant que dirigeante d&apos;entreprise en Île-de-France</strong>{" "}
-                    : on ne découvre pas vos contraintes au fil des mails — on les lit dès le brief. Sans embauche, avec un
-                    cadre contractuel clair.
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                  <span className="block font-bold text-[#0F172A]">On tient le bureau,</span>
+                  <span className="mt-[0.125em] flex w-full min-w-0 flex-nowrap items-baseline justify-between gap-2 font-extrabold text-[#3072F0]">
+                    <span className="shrink-0 whitespace-nowrap">vous tenez</span>
+                    <span className="shrink-0 whitespace-nowrap">le chantier.</span>
+                  </span>
+                </h1>
+
+                <p className="mx-auto max-w-[580px] text-lg leading-[1.62] text-balance text-slate-700 lg:mx-0 lg:max-w-none lg:text-[20px] lg:leading-snug">
+                  Vous gérez le terrain. BeWork prend le relais&nbsp;: devis, relances, facturation et dossiers chantier pendant que vous avancez sur{" "}
+                  <span className="font-semibold text-[#3072F0]">vos&nbsp;chantiers.</span>
+                </p>
+
+                <div className="mx-auto mt-1 flex w-full max-w-[580px] flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:mx-0 lg:max-w-full lg:justify-start">
                   <Link
                     href="/contact"
-                    className="inline-flex rounded-lg bg-[#1d4ed8] px-8 py-4 text-base font-semibold text-white shadow-lg shadow-[#1d4ed8]/25 transition-all hover:bg-[#1e40af] hover:shadow-xl hover:shadow-[#1d4ed8]/30"
-                    aria-label="Demander un rendez-vous découverte adapté à votre besoin"
+                    className="inline-flex min-h-[3rem] shrink-0 items-center justify-center gap-2 rounded-xl bg-[#1d4ed8] px-8 py-3.5 text-base font-semibold text-white shadow-md shadow-[#1d4ed8]/22 transition-colors hover:bg-[#1e40af]"
                   >
-                    <span className="sm:hidden">Rendez-vous découverte</span>
-                    <span className="hidden sm:inline">Demander un rendez-vous découverte</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 opacity-95" aria-hidden>
+                      <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                      <path d="M15 3v4M9 3v4M4 13h17" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    Réserver un appel
                   </Link>
                   <Link
-                    href="/tarifs"
-                    className="inline-flex rounded-lg border-2 border-[#1d4ed8] bg-white px-8 py-4 text-base font-semibold text-[#1d4ed8] shadow-sm transition-all hover:bg-[#f8fafc]"
-                    aria-label="Consulter les forfaits"
+                    href="#comment-ca-marche"
+                    className="inline-flex min-h-[3rem] shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-8 py-3.5 text-base font-semibold tracking-tight text-slate-900 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
                   >
-                    Consulter les forfaits
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 text-slate-700" aria-hidden>
+                      <circle cx="12" cy="12" r="9.5" stroke="currentColor" strokeWidth="1.5" />
+                      <path d="M10 9.5 L15.5 12 10 14.8V9.5Z" fill="currentColor" stroke="currentColor" strokeWidth="1" strokeLinejoin="round" />
+                    </svg>
+                    Voir comment ça marche
                   </Link>
                 </div>
-                <p className="text-sm text-black">
-                  TTC mensuel • Sans recrutement • Encadrement en France
-                </p>
-                <div className="flex flex-wrap justify-center md:justify-start gap-6 text-sm text-black">
-                  <Link href="/inscription" className="font-medium hover:text-black hover:underline">
-                    Ouvrir un compte client
-                  </Link>
-                  <Link href="/connexion" className="font-medium hover:text-black">
-                    Connexion
-                  </Link>
-                </div>
-              </div>
-              {/* Colonne latérale : visuellement parcours au-dessus, tarif Suivi en dessous (flex-col-reverse + ordre DOM tarif puis parcours) */}
-              <div className="mx-auto flex w-full max-w-md flex-col-reverse gap-4 lg:order-1 lg:col-span-5 lg:mx-0 lg:max-w-none lg:self-start lg:sticky lg:top-24">
-                <Link
-                  href="/tarifs"
-                  className="group surface-metallic-blue flex w-full flex-col gap-3 rounded-2xl px-6 py-6 text-left shadow-md shadow-slate-900/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8]/50"
+
+                <ul
+                  className="mx-auto mt-5 flex max-w-[580px] flex-col divide-y divide-slate-200/90 sm:mx-auto sm:mt-4 sm:w-full sm:max-w-none sm:flex-row sm:items-center sm:divide-x sm:divide-y-0 sm:divide-slate-200 lg:mx-0 lg:justify-start"
+                  aria-label="Engagements"
                 >
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#1d4ed8]">
-                    Le plus adapté — Suivi
-                  </span>
-                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
-                    <span className="text-4xl font-bold tracking-tight text-black tabular-nums md:text-[2.75rem]">
-                      490
+                  <li className="flex flex-1 items-center gap-3 py-4 sm:py-3 sm:first:pr-6 sm:last:pl-6 sm:last:pr-0 sm:[&:nth-child(2)]:px-6">
+                    <span
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#dbeafe] text-[#2563eb] shadow-sm shadow-blue-900/5 ring-[0.5px] ring-[#bfdbfe]/90"
+                      aria-hidden
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        {/* Délais courts (type horloge) */}
+                        <path
+                          d="M12 6v7l6 6"
+                          stroke="currentColor"
+                          strokeWidth="1.65"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" />
+                      </svg>
                     </span>
-                    <span className="text-xl font-semibold text-black">€</span>
-                    <span className="text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-black">TTC</span>
-                    <span className="text-lg font-semibold text-black">/ mois</span>
-                  </div>
-                  <div className="mt-1 flex flex-wrap gap-2 text-[11px] font-semibold text-black" aria-label="Temps inclus estimé et crédits">
-                    <span className="rounded-full border border-black/15 bg-white/80 px-3 py-1">~37h incluses</span>
-                    <span className="rounded-full border border-black/15 bg-white/80 px-3 py-1">≈ 185 crédits</span>
-                  </div>
-                  <div className="mt-1 border-b border-black/10 pb-3" aria-label="Repère indicatif de charge">
-                    <p className="text-[11px] leading-snug text-black md:text-xs md:leading-relaxed">
-                      <span className="block font-normal">{SUIVI_PLAN.equivalentNote.line1}</span>
-                      <span className="mt-0.5 block font-normal opacity-90">{SUIVI_PLAN.equivalentNote.line2}</span>
-                    </p>
-                    <p className="mt-1.5 text-[10px] leading-snug text-black">
-                      Repère estimatif — pas une facturation à l&apos;heure.
-                    </p>
-                  </div>
-                  <div className="space-y-2 text-sm leading-snug text-black">
-                    <p className="font-medium">
-                      Pour ne plus perdre d’opportunités : relances, suivi de devis, coordination au quotidien — dans un cadre
-                      mensuel TTC clair.
-                    </p>
-                    <p className="text-xs">Trois niveaux : Structure à Pilotage (290 € à 1 190 € TTC / mois).</p>
-                    <p className="pt-1">
-                      Pas de poste à pourvoir : un cadre de prestation et un niveau d&apos;accompagnement défini chaque mois.
-                    </p>
-                    <p>
-                      Vous achetez du suivi structuré et de l&apos;exécution encadrée — pas une promesse floue à la demande.
-                    </p>
-                  </div>
-                  <p className="text-[11px] leading-relaxed text-black">
-                    1 crédit = {ACTION_MINUTES} min · TTC, sans frais cachés · Sans engagement long terme · Mise en route rapide
-                  </p>
-                  <span className="text-xs font-semibold text-[#1d4ed8] group-hover:underline">
-                    Voir les tarifs →
-                  </span>
-                </Link>
-                <div
-                  id="comment-ca-marche"
-                  className="surface-metallic-light surface-metallic-light--soft rounded-2xl p-6 shadow-md shadow-slate-900/10 md:p-7"
-                >
-                  <div className="mb-6 md:mb-7">
-                    <h2 className="max-w-[22rem] text-lg font-semibold leading-snug tracking-tight text-black md:max-w-none md:text-xl md:leading-tight">
-                      Comment ça fonctionne concrètement
-                    </h2>
-                  </div>
-                  <ol className="text-left">
-                    {[
-                      {
-                        step: 1,
-                        title: "Vous nous transmettez vos demandes",
-                        detail: "devis, clients, fournisseurs…",
-                      },
-                      {
-                        step: 2,
-                        title: "On exécute rapidement avec méthode",
-                        detail: "rédaction, relances, organisation",
-                      },
-                      {
-                        step: 3,
-                        title: "Vous validez uniquement l’essentiel",
-                        detail: "zéro perte de temps",
-                      },
-                      {
-                        step: 4,
-                        title: "Votre activité devient plus fluide",
-                        detail: "et vos opportunités mieux exploitées",
-                      },
-                    ].map((item, index) => (
-                      <li
-                        key={item.step}
-                        className="relative flex gap-3.5 pb-6 last:pb-0 md:gap-4 md:pb-7 last:md:pb-0"
-                      >
-                        {index < 3 ? (
-                          <span
-                            className="absolute left-[15px] top-[2.125rem] bottom-0 w-px bg-gradient-to-b from-[#94a3b8]/55 to-transparent md:left-[17px] md:top-[2.25rem]"
-                            aria-hidden
-                          />
-                        ) : null}
-                        <span className="relative z-[1] mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-black/15 bg-white text-xs font-semibold tabular-nums text-black shadow-sm md:h-9 md:w-9 md:text-sm">
-                          {item.step}
-                        </span>
-                        <div className="min-w-0 flex-1 pb-0.5">
-                          <p className="text-[0.9375rem] font-semibold leading-snug text-black md:text-base md:leading-snug">
-                            {item.title}
-                          </p>
-                          <p className="mt-1.5 text-[12px] leading-relaxed text-black md:text-[13px]">
-                            {item.detail}
-                          </p>
-                        </div>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
+                    <span className="min-w-0 text-left text-[15px] font-semibold leading-[1.2] tracking-tight text-[#171717]">
+                      <span className="block">Opérationnel</span>
+                      <span className="block text-slate-600">en 3 à 5 jours</span>
+                    </span>
+                  </li>
+                  <li className="flex flex-1 items-center gap-3 py-4 sm:py-3 sm:first:pr-6 sm:last:pl-6 sm:last:pr-0 sm:[&:nth-child(2)]:px-6">
+                    <span
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#dbeafe] text-[#2563eb] shadow-sm shadow-blue-900/5 ring-[0.5px] ring-[#bfdbfe]/90"
+                      aria-hidden
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        {/* Pas d’embauche : équipe externe */}
+                        <path
+                          d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"
+                          stroke="currentColor"
+                          strokeWidth="1.65"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <circle cx="9" cy="7" r="3.5" stroke="currentColor" strokeWidth="1.65" />
+                        <path
+                          d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
+                          stroke="currentColor"
+                          strokeWidth="1.65"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M18.5 14.5l2 2 4-4"
+                          stroke="currentColor"
+                          strokeWidth="1.65"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </span>
+                    <span className="min-w-0 text-left text-[15px] font-semibold leading-[1.2] tracking-tight text-[#171717]">
+                      <span className="block">Sans</span>
+                      <span className="block text-slate-600">recrutement</span>
+                    </span>
+                  </li>
+                  <li className="flex flex-1 items-center gap-3 py-4 sm:py-3 sm:first:pr-6 sm:last:pl-6 sm:last:pr-0 sm:[&:nth-child(2)]:px-6">
+                    <span
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#dbeafe] text-[#2563eb] shadow-sm shadow-blue-900/5 ring-[0.5px] ring-[#bfdbfe]/90"
+                      aria-hidden
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        {/* Ancrage France / siège */}
+                        <path
+                          d="M20 10c0 5.25-7.53 13.94-8.35 14.71a.5.5 0 0 1-.65 0C10.53 23.94 4 15.27 4 10a8 8 0 1 1 16 0Z"
+                          stroke="currentColor"
+                          strokeWidth="1.65"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <circle cx="12" cy="10" r="2.75" stroke="currentColor" strokeWidth="1.65" />
+                      </svg>
+                    </span>
+                    <span className="min-w-0 text-left text-[15px] font-semibold leading-[1.2] tracking-tight text-[#171717]">
+                      <span className="block">Piloté depuis</span>
+                      <span className="block text-slate-600">la France</span>
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="relative flex w-full min-w-0 shrink-0 justify-center lg:justify-center lg:self-start">
+                <HeroPresentationVideo />
               </div>
             </div>
+              </div>
+            </section>
+
+            <HomeProblemSection />
+            <HomeSolutionSection />
+            <HomeHowItWorksDetailSection />
           </div>
-        </section>
+        </div>
 
         {/* Deux propositions tarifaires distinctes */}
         <section id="tarifs" className="scroll-mt-24 px-6 py-16 md:py-20" style={{ scrollMarginTop: "6rem" }}>
-          <div className="mx-auto max-w-6xl rounded-2xl surface-metallic-light surface-metallic-light--soft px-6 py-12 md:px-10 md:py-16">
+          <div className="mx-auto max-w-site rounded-2xl surface-metallic-light surface-metallic-light--soft px-6 py-12 md:px-10 md:py-16">
             <div className="mx-auto max-w-3xl text-center">
               <h2 className="text-2xl font-bold tracking-tight text-black md:text-3xl">
                 Forfaits clairs pour le BTP
               </h2>
               <p className="mt-3 text-black">
-                De la Structure (<span className="tarif-emphase text-[#1d4ed8]">290</span> € TTC / mois) au Pilotage : chaque
-                palier fixe un niveau de structuration et de suivi — pas de surprise sur ce qui est tenu.
+                De la Structure (
+                <span className="tarif-emphase text-[#1d4ed8]">{formatPriceLabelFr(PRICE_BOUNDS.low)}</span> € TTC / mois) au
+                Pilotage : chaque palier fixe un niveau de structuration et de suivi — pas de surprise sur ce qui est tenu.
               </p>
               <p className="mx-auto mt-4 max-w-2xl text-sm font-semibold text-black">
-                1 crédit = {ACTION_MINUTES} minutes{" "}
+                1 crédit = {CREDIT_MINUTES} minutes{" "}
                 <span className="font-normal text-black">(devis, relance, appel, mail, commande, coordination…)</span>
               </p>
               <div className="mt-10 flex justify-center">
@@ -544,13 +488,15 @@ export default function HomePage() {
                       niveau de suivi qui augmente à chaque palier.
                     </p>
                     <p className="mt-4 text-2xl font-bold tabular-nums text-black md:text-3xl">
-                      <span className="tabular-nums">490</span> €{" "}
+                      <span className="tabular-nums">{formatPriceTtc(SUIVI_PRODUCT.priceLabel)}</span> €{" "}
                       <span className="text-base font-semibold text-black">TTC</span>
                       <span className="text-base font-semibold text-black"> / mois</span>
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold text-black" aria-label="Volume inclus estimé">
-                      <span className="rounded-full border border-black/15 bg-white/80 px-3 py-1">~37h incluses</span>
-                      <span className="rounded-full border border-black/15 bg-white/80 px-3 py-1">≈ 185 crédits</span>
+                      <span className="rounded-full border border-black/15 bg-white/80 px-3 py-1">~{SUIVI_HOURS}h incluses</span>
+                      <span className="rounded-full border border-black/15 bg-white/80 px-3 py-1">
+                        ≈ {SUIVI_PRODUCT.actionsIncluded} crédits
+                      </span>
                     </div>
                     <div className="mt-2 border-b border-black/10 pb-3" aria-label="Repère indicatif de charge">
                       <p className="text-[11px] leading-snug text-black md:text-xs">
@@ -619,7 +565,7 @@ export default function HomePage() {
 
         {/* Pourquoi externaliser son administratif */}
         <section id="pourquoi-externaliser" className="scroll-mt-24 px-6 py-16 md:py-20" style={{ scrollMarginTop: "6rem" }}>
-          <div className="mx-auto max-w-6xl rounded-2xl surface-metallic-light surface-metallic-light--soft px-6 py-12 md:px-10 md:py-16">
+          <div className="mx-auto max-w-site rounded-2xl surface-metallic-light surface-metallic-light--soft px-6 py-12 md:px-10 md:py-16">
             <div className="mb-10 text-center md:mb-12">
               <h2 className="text-2xl font-bold tracking-tight text-black md:text-3xl">
                 Sur le terrain, pas derrière l&apos;écran.
@@ -708,7 +654,7 @@ export default function HomePage() {
 
         {/* ROI / Économies — comparatif (lecture rapide : chiffres puis « pourquoi ») */}
         <section id="roi" className="scroll-mt-24 px-6 py-16 md:py-20" style={{ scrollMarginTop: "6rem" }}>
-          <div className="mx-auto max-w-6xl">
+          <div className="mx-auto max-w-site">
             <div className="mb-10 text-center md:mb-12">
               <h2 className="text-2xl font-bold tracking-tight text-black md:text-3xl">
                 Même besoin : tenir l&apos;administratif. Autre façon de payer.
@@ -737,7 +683,8 @@ export default function HomePage() {
                 <div className="bg-[#eff6ff]/60 px-6 py-6 text-center md:px-8 md:py-8 md:text-right">
                   <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#1d4ed8]">Forfait BeWork</p>
                   <p className="mt-2 text-3xl font-extrabold tabular-nums tracking-tight text-[#1d4ed8] md:text-4xl">
-                    <span className="tabular-nums">290</span> – <span className="tabular-nums">1 190</span> €
+                    <span className="tabular-nums">{formatPriceLabelFr(PRICE_BOUNDS.low)}</span> –{" "}
+                    <span className="tabular-nums">{formatPriceLabelFr(PRICE_BOUNDS.high)}</span> €
                   </p>
                   <p className="mt-1 text-sm font-medium text-black">
                     TTC / mois · une ligne sur votre budget · tout compris dans le cadre souscrit
@@ -814,8 +761,10 @@ export default function HomePage() {
                       </span>
                       <span>
                         Repère fréquent : offre <strong className="font-semibold text-black">Suivi</strong> à{" "}
-                        <span className="tabular-nums font-semibold text-black">490</span> € TTC / mois pour une activité
-                        régulière
+                        <span className="tabular-nums font-semibold text-black">
+                          {formatPriceLabelFr(SUIVI_PRODUCT.priceLabel)}
+                        </span>{" "}
+                        € TTC / mois pour une activité régulière
                       </span>
                     </li>
                   </ul>
@@ -841,7 +790,7 @@ export default function HomePage() {
           className="scroll-mt-24 px-6 py-20 md:py-28"
           style={{ scrollMarginTop: "6rem" }}
         >
-          <div className="mx-auto max-w-6xl">
+          <div className="mx-auto max-w-site">
             <div className="text-center mb-16">
               <h2 className="text-2xl font-bold tracking-tight text-black md:text-3xl lg:text-4xl">
                 Pilotage administratif, chantier et logistique au même endroit
@@ -964,7 +913,7 @@ export default function HomePage() {
 
         {/* Avantages / Aucun compromis sur la qualité */}
         <section id="avantages" className="px-6 pt-16 pb-24 md:pt-20 md:pb-28">
-          <div className="mx-auto max-w-6xl">
+          <div className="mx-auto max-w-site">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
                 Même exigence sur le chantier et dans les dossiers
@@ -996,7 +945,7 @@ export default function HomePage() {
 
         {/* Lien pilier tâches */}
         <section className="px-6 py-8 md:py-10">
-          <div className="mx-auto max-w-6xl">
+          <div className="mx-auto max-w-site">
             <div className="card-frame rounded-2xl border-2 border-[#e2e8f0] border-l-[4px] border-l-[#1d4ed8] p-6 text-center md:p-8">
               <p className="text-lg font-semibold text-black">
                 Catalogue des missions : de l&apos;administratif à la coordination chantier
@@ -1019,7 +968,7 @@ export default function HomePage() {
 
         {/* Solutions */}
         <section id="solutions" className="px-6 py-24 md:py-28">
-          <div className="mx-auto max-w-6xl">
+          <div className="mx-auto max-w-site">
             <div className="mb-16 max-w-2xl">
               <h2 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
                 Trois leviers pour sécuriser tout votre organisationnel BTP
@@ -1079,7 +1028,7 @@ export default function HomePage() {
 
         {/* Ce que fait votre assistant */}
         <section id="missions" className="px-6 py-24 md:py-28">
-          <div className="mx-auto max-w-6xl">
+          <div className="mx-auto max-w-site">
             <h2 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
               Ce que nous prenons en charge — pensé pour le BTP
             </h2>
@@ -1129,7 +1078,7 @@ export default function HomePage() {
 
         {/* Exemples de missions par secteur */}
         <section id="exemples-missions" className="px-6 py-24 md:py-28 scroll-mt-24" style={{ scrollMarginTop: "6rem" }}>
-          <div className="mx-auto max-w-6xl">
+          <div className="mx-auto max-w-site">
             <h2 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
               Exemples de missions par secteur
             </h2>
@@ -1202,7 +1151,7 @@ export default function HomePage() {
           className="scroll-mt-24 px-6 py-24 md:py-28"
           style={{ scrollMarginTop: "6rem" }}
         >
-          <div className="mx-auto max-w-6xl">
+          <div className="mx-auto max-w-site">
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">Fondatrice &amp; méthode</p>
             <h2 className="text-metallic-black mt-3 max-w-4xl font-sans text-3xl font-semibold leading-[1.15] tracking-tight md:text-4xl md:leading-[1.1]">
               Une solution née du terrain — par une dirigeante du BTP en Île-de-France
@@ -1351,7 +1300,7 @@ export default function HomePage() {
 
         {/* Notre organisation */}
         <section id="pourquoi-nous" className="px-6 py-24 md:py-28">
-          <div className="mx-auto max-w-6xl">
+          <div className="mx-auto max-w-site">
             <h2 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
               Pourquoi les entreprises du BTP nous choisissent
             </h2>
@@ -1373,7 +1322,7 @@ export default function HomePage() {
 
         {/* Secteurs — cartes cliquables */}
         <section id="secteurs" className="px-6 py-24 md:py-28">
-          <div className="mx-auto max-w-6xl">
+          <div className="mx-auto max-w-site">
             <h2 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
               Des secteurs où nous excellons
             </h2>
@@ -1415,7 +1364,7 @@ export default function HomePage() {
 
         {/* Service de conciergerie — sur devis, 24/24 */}
         <section id="conciergerie" className="px-6 py-24 md:py-28">
-          <div className="card-frame mx-auto max-w-6xl rounded-xl border-2 border-[#1d4ed8]/20 p-10 md:p-14">
+          <div className="card-frame mx-auto max-w-site rounded-xl border-2 border-[#1d4ed8]/20 p-10 md:p-14">
             <div className="flex flex-wrap items-start justify-between gap-6">
               <div className="max-w-2xl">
                 <h2 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
@@ -1459,7 +1408,7 @@ export default function HomePage() {
 
         {/* Tarif transparent + Nous travaillons avec vos outils */}
         <section className="px-6 py-24 md:py-28">
-          <div className="mx-auto max-w-6xl space-y-20">
+          <div className="mx-auto max-w-site space-y-20">
             <div className="card-frame rounded-xl p-10 md:p-14">
               <h2 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
                 Tarifs lisibles, prestation cadrée
@@ -1471,8 +1420,9 @@ export default function HomePage() {
               <div className="mt-6 rounded-lg border border-[#1d4ed8]/30 bg-[#eff6ff] px-5 py-4">
                 <p className="font-semibold text-black">
                   Un poste administratif en CDI en France représente souvent plus de 5 000 €/mois charges comprises (salaire,
-                  cotisations, équipement, RH). Les forfaits BeWork (à partir de 290 € TTC / mois, offre Suivi à 490 €) proposent
-                  un autre modèle : cadre défini, pas d&apos;embauche à gérer — utile à comparer selon votre charge réelle.
+                  cotisations, équipement, RH). Les forfaits BeWork (à partir de {formatPriceLabelFr(PRICE_BOUNDS.low)} € TTC /
+                  mois, offre Suivi à {formatPriceLabelFr(SUIVI_PRODUCT.priceLabel)} €) proposent un autre modèle : cadre défini,
+                  pas d&apos;embauche à gérer — utile à comparer selon votre charge réelle.
                 </p>
                 <Link href="/tarifs" className="mt-3 inline-block text-sm font-medium text-[#1d4ed8] hover:underline">
                   Voir le comparatif détaillé →
@@ -1514,7 +1464,7 @@ export default function HomePage() {
 
         {/* Processus : matching et onboarding */}
         <section id="processus" className="px-6 py-24 md:py-28">
-          <div className="mx-auto max-w-6xl">
+          <div className="mx-auto max-w-site">
             <h2 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
               Matching et onboarding : un rendez-vous découverte premium
             </h2>
@@ -1559,7 +1509,7 @@ export default function HomePage() {
 
         {/* Ressources */}
         <section id="ressources" className="px-6 py-24 md:py-28">
-          <div className="mx-auto max-w-6xl">
+          <div className="mx-auto max-w-site">
             <div className="mb-16 max-w-2xl">
               <h2 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
                 Ressources & bonnes pratiques
@@ -1617,7 +1567,7 @@ export default function HomePage() {
 
         {/* CTA final */}
         <section id="contact" className="px-6 py-24 md:py-28">
-          <div className="mx-auto max-w-6xl rounded-2xl surface-metallic-light surface-metallic-light--soft border-2 border-[#1d4ed8]/25 p-12 text-black shadow-lg md:p-16">
+          <div className="mx-auto max-w-site rounded-2xl surface-metallic-light surface-metallic-light--soft border-2 border-[#1d4ed8]/25 p-12 text-black shadow-lg md:p-16">
             <div className="grid gap-12 md:grid-cols-3 md:items-center md:gap-16">
               <div className="md:col-span-2">
                 <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
@@ -1648,7 +1598,7 @@ export default function HomePage() {
       </main>
 
       <footer className="border-t border-[#c8cdd6] bg-[#f8f9fb] px-6 py-12">
-        <div className="mx-auto flex max-w-6xl flex-col gap-6 text-sm text-black md:flex-row md:items-center md:justify-between">
+        <div className="mx-auto flex max-w-site flex-col gap-6 text-sm text-black md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-3">
               <BeWorkLogo size="sm" />

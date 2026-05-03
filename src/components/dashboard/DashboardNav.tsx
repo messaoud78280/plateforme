@@ -35,7 +35,7 @@ export function DashboardNav({ role }: { role?: string | null }) {
 
   return (
     <nav className="border-b border-[#c8cdd6] bg-[#f8f9fb] px-3 sm:px-4" aria-label="Navigation tableau de bord">
-      <div className="dashboard-nav__links mx-auto flex max-w-6xl flex-nowrap items-center justify-start gap-x-0 py-1.5 sm:py-2">
+      <div className="dashboard-nav__links mx-auto flex max-w-site flex-nowrap items-center justify-start gap-x-0 py-1.5 sm:py-2">
         <NavLink href="/dashboard" pathname={pathname} matchExact>Dashboard</NavLink>
         {isClient ? (
           <>

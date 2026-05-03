@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BeWorkLogo } from "@/components/BeWorkLogo";
+import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { absoluteUrl } from "@/lib/site";
 
 const pageUrl = absoluteUrl("/assistants-administratifs-taches");
@@ -239,40 +239,7 @@ export default function AssistantsAdministratifsTachesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
       <FaqJsonLd />
-      <header className="sticky top-0 z-20 border-b border-[#c8cdd6] bg-[#f8f9fb]/95 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <Link href="/" className="shrink-0" aria-label="BeWork - Retour à l'accueil">
-            <BeWorkLogo size="sm" />
-          </Link>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/contact"
-              className="hidden rounded-lg surface-metallic-light px-4 py-2 text-sm font-medium text-[#1e293b] transition hover:bg-[#f8f9fb] sm:inline-flex"
-              aria-label="Contact"
-            >
-              Contact
-            </Link>
-            <Link
-              href="/connexion"
-              className="rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1e40af] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2"
-              aria-label="Accéder à mon espace"
-            >
-              Accéder
-            </Link>
-          </div>
-        </div>
-        <nav className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-5 gap-y-1 border-t border-[#e0e4ea] px-4 pt-3 pb-2 text-sm font-medium text-black">
-          <Link href="/" className="whitespace-nowrap transition-colors hover:text-black">
-            Accueil
-          </Link>
-          <Link href="/tarifs" className="whitespace-nowrap transition-colors hover:text-black">
-            Tarifs
-          </Link>
-          <Link href="/contact" className="whitespace-nowrap transition-colors hover:text-black">
-            Contact
-          </Link>
-        </nav>
-      </header>
+      <MarketingSiteHeader />
 
       <main>
         {/* A) Hero */}
@@ -314,7 +281,7 @@ export default function AssistantsAdministratifsTachesPage() {
 
         {/* C) Les 5 tâches les plus chronophages */}
         <section className="px-6 py-12 md:py-16" aria-labelledby="top5-heading">
-          <div className="mx-auto max-w-6xl">
+          <div className="mx-auto max-w-site">
             <h2 id="top5-heading" className="text-2xl font-bold tracking-tight text-black md:text-3xl">
               Les 5 tâches les plus chronophages (et les plus déléguées)
             </h2>
@@ -334,7 +301,7 @@ export default function AssistantsAdministratifsTachesPage() {
 
         {/* D) Catalogue des tâches */}
         <section className="px-6 py-12 md:py-16" aria-labelledby="catalogue-heading">
-          <div className="mx-auto max-w-6xl">
+          <div className="mx-auto max-w-site">
             <h2 id="catalogue-heading" className="text-2xl font-bold tracking-tight text-black md:text-3xl">
               Catalogue des tâches
             </h2>
@@ -382,7 +349,7 @@ export default function AssistantsAdministratifsTachesPage() {
 
         {/* F) Comment ça marche */}
         <section className="px-6 py-12 md:py-16" aria-labelledby="process-heading">
-          <div className="mx-auto max-w-6xl">
+          <div className="mx-auto max-w-site">
             <h2 id="process-heading" className="text-2xl font-bold tracking-tight text-black md:text-3xl">
               Comment ça marche
             </h2>
@@ -467,7 +434,7 @@ export default function AssistantsAdministratifsTachesPage() {
       </main>
 
       <footer className="border-t border-[#c8cdd6] bg-[#f8f9fb] px-6 py-8">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 text-sm text-black">
+        <div className="mx-auto flex max-w-site flex-wrap items-center justify-between gap-4 text-sm text-black">
           <Link href="/" className="font-medium transition-colors hover:text-black">
             Accueil
           </Link>

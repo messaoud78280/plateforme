@@ -72,7 +72,7 @@ export default function NotreFaconDeTravaillerPage() {
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
       <MarketingSiteHeader />
 
-      <main className="mx-auto max-w-6xl px-4 py-14 md:px-6 md:py-20">
+      <main className="mx-auto max-w-site px-4 py-14 md:px-6 md:py-20">
         {/* Hero */}
         <header className="mx-auto max-w-3xl text-center">
           <p className="mx-auto max-w-full text-center">
@@ -266,7 +266,7 @@ export default function NotreFaconDeTravaillerPage() {
       </main>
 
       <footer className="mt-12 border-t border-[#c8cdd6] bg-[#f8f9fb] px-6 py-10">
-        <div className="mx-auto flex max-w-6xl flex-col gap-6 text-sm text-black md:flex-row md:items-center md:justify-between">
+        <div className="mx-auto flex max-w-site flex-col gap-6 text-sm text-black md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
             <BeWorkLogo size="sm" />
             <span className="text-black">© {new Date().getFullYear()} BeWork</span>

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NouvelleDemandeForm } from "@/components/demands/NouvelleDemandeForm";
 import { BackLink } from "@/components/ui/BackLink";
+import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
 
 export default async function NouvelleDemandePage() {
   const session = await getServerSession(authOptions);
@@ -19,7 +20,7 @@ export default async function NouvelleDemandePage() {
       where: { id: session.user.id },
       select: { monthlyActionsTotal: true, monthlyActionsUsed: true },
     });
-    const total = u?.monthlyActionsTotal ?? 185;
+    const total = u?.monthlyActionsTotal ?? SUBSCRIPTION_PLANS.STANDARD.actionsIncluded;
     const used = u?.monthlyActionsUsed ?? 0;
     actionsRemaining = Math.max(0, total - used);
   } catch {

@@ -81,7 +81,7 @@ export default async function BlogArticlePage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
-      <MarketingSiteHeader plainBg showBlogLink />
+      <MarketingSiteHeader plainBg />
 
       <main className="px-6 py-16 md:py-24">
         <article className="mx-auto max-w-2xl" itemScope itemType="https://schema.org/BlogPosting">
@@ -160,7 +160,7 @@ export default async function BlogArticlePage({ params }: Props) {
       </main>
 
       <footer className="border-t border-[#c8cdd6] bg-[#f8f9fb] px-6 py-12 mt-16">
-        <div className="mx-auto max-w-6xl flex flex-col gap-6 md:flex-row md:items-center md:justify-between text-sm text-black">
+        <div className="mx-auto max-w-site flex flex-col gap-6 md:flex-row md:items-center md:justify-between text-sm text-black">
           <div className="flex items-center gap-3">
             <BeWorkLogo size="sm" />
             <span className="text-black">© {new Date().getFullYear()} BeWork</span>

@@ -55,7 +55,7 @@ export default function CasClientsPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(casClientsJsonLd) }} />
       <MarketingSiteHeader plainBg />
 
-      <main className="mx-auto max-w-6xl px-6 py-16 md:py-24">
+      <main className="mx-auto max-w-site px-6 py-16 md:py-24">
         <header className="mx-auto max-w-3xl text-center">
           <nav className="mb-6 text-left text-sm text-black sm:text-center" aria-label="Fil d’Ariane">
             <ol className="inline-flex flex-wrap items-center justify-start gap-x-2 gap-y-1 sm:justify-center">

@@ -3,6 +3,11 @@ import Link from "next/link";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { absoluteUrl } from "@/lib/site";
+import { PLAN_KEYS, SUBSCRIPTION_PLANS, formatPriceLabelFr } from "@/lib/subscription-plans";
+
+const PLANS_PRICE_FAQ_SEGMENT = PLAN_KEYS.map(
+  (k) => `${SUBSCRIPTION_PLANS[k].name} ${formatPriceLabelFr(SUBSCRIPTION_PLANS[k].priceLabel)} €`
+).join(", ");
 
 const faqUrl = absoluteUrl("/faq");
 const faqOgImage = absoluteUrl("/opengraph-image");
@@ -48,7 +53,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Pourquoi ce niveau de prix ?",
-    a: "Vous payez un pilotage encadré, des profils qualifiés, une plateforme de suivi et une exécution revue — pas un tarif « au rabais » qui se traduirait par de l’improvisation. Les montants TTC mensuels reflètent ce cadre : Structure 290 €, Suivi 490 €, Pilotage 1 190 € — avec une montée en structuration et en priorité à chaque palier.",
+    a: `Vous payez un pilotage encadré, des profils qualifiés, une plateforme de suivi et une exécution revue — pas un tarif « au rabais » qui se traduirait par de l’improvisation. Les montants TTC mensuels reflètent ce cadre : ${PLANS_PRICE_FAQ_SEGMENT} — avec une montée en structuration et en priorité à chaque palier.`,
   },
   {
     q: "Est-ce adapté à une entreprise du BTP ?",
@@ -156,7 +161,7 @@ export default function FaqPage() {
       </main>
 
       <footer className="border-t border-[#c8cdd6] bg-[#f8f9fb] px-6 py-12 mt-16">
-        <div className="mx-auto max-w-6xl flex flex-col gap-6 md:flex-row md:items-center md:justify-between text-sm text-black">
+        <div className="mx-auto max-w-site flex flex-col gap-6 md:flex-row md:items-center md:justify-between text-sm text-black">
           <div className="flex items-center gap-3">
             <BeWorkLogo size="sm" />
             <span className="text-black">© {new Date().getFullYear()} BeWork</span>

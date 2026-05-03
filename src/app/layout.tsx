@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Manrope, Orbitron } from "next/font/google";
+import { Geist, Geist_Mono, Inter, Manrope, Orbitron } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { SEO_KEYWORDS_GLOBAL } from "@/lib/seo-keywords";
 import { absoluteUrl, getOrgSameAs, SITE_URL } from "@/lib/site";
+import { formatPriceLabelFr, getPublicPriceBoundsLabels } from "@/lib/subscription-plans";
 
 const defaultOgImage = absoluteUrl("/opengraph-image");
+const SITE_PRICE_LOW_FR = formatPriceLabelFr(getPublicPriceBoundsLabels().low);
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,11 +19,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+/** Titres marketing (hero & co.) — aligné rendu desktop type ~64–68 px */
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  weight: ["700", "800"],
+});
+
 /** Slogan / accroches — lisible, moins « tech » qu’Orbitron */
 const manrope = Manrope({
   variable: "--font-manrope",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  weight: ["500", "600", "700", "800"],
 });
 
 /** Logo BeWork (pastille BW + mot) — identité d’origine */
@@ -40,8 +49,7 @@ export const metadata: Metadata = {
       "BeWork — Partenaire administratif externalisé BTP & PME | Pilotage administratif",
     template: "%s | BeWork",
   },
-  description:
-    "Partenaire administratif externalisé pour artisans et PME du bâtiment : pilotage administratif, devis, facturation, relances et dossiers chantier. On tient le bureau, vous tenez le chantier. Vidéo sur le site. Sans recruter — forfaits TTC dès 290 €/mois. France, Belgique, Suisse, Luxembourg.",
+  description: `Partenaire administratif externalisé pour artisans et PME du bâtiment : pilotage administratif, devis, facturation, relances et dossiers chantier. On tient le bureau, vous tenez le chantier. Vidéo sur le site. Sans recruter — forfaits TTC dès ${SITE_PRICE_LOW_FR} €/mois. France, Belgique, Suisse, Luxembourg.`,
   applicationName: "BeWork",
   authors: [{ name: "BeWork", url: SITE_URL }],
   creator: "BeWork",
@@ -182,8 +190,7 @@ const jsonLd = {
       "@type": "ProfessionalService",
       "@id": `${SITE_URL}/#service`,
       name: "BeWork — Partenaire administratif externalisé (BTP & PME)",
-      description:
-        "Partenaire administratif externalisé pour PME, artisans et BTP : devis, facturation chantier, relances et suivi de dossiers. Outils d’aide à l’exécution encadrés. Trois forfaits TTC mensuels dès 290 €.",
+      description: `Partenaire administratif externalisé pour PME, artisans et BTP : devis, facturation chantier, relances et suivi de dossiers. Outils d’aide à l’exécution encadrés. Trois forfaits TTC mensuels dès ${SITE_PRICE_LOW_FR} €.`,
       url: SITE_URL,
       provider: { "@id": `${SITE_URL}/#organization` },
       areaServed: {
@@ -203,7 +210,7 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${manrope.variable} ${orbitron.variable} font-sans antialiased text-black`}
+        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${manrope.variable} ${orbitron.variable} font-sans antialiased text-black`}
       >
         <script
           type="application/ld+json"

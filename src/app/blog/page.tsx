@@ -90,7 +90,7 @@ export default function BlogPage() {
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogListLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }} />
-      <MarketingSiteHeader plainBg showBlogLink={false} />
+      <MarketingSiteHeader plainBg />
 
       <main className="px-6 py-16 md:py-24">
         <div className="mx-auto max-w-3xl">
@@ -150,7 +150,7 @@ export default function BlogPage() {
       </main>
 
       <footer className="border-t border-[#c8cdd6] bg-[#f8f9fb] px-6 py-12 mt-16">
-        <div className="mx-auto max-w-6xl flex flex-col gap-6 md:flex-row md:items-center md:justify-between text-sm text-black">
+        <div className="mx-auto max-w-site flex flex-col gap-6 md:flex-row md:items-center md:justify-between text-sm text-black">
           <div className="flex items-center gap-3">
             <BeWorkLogo size="sm" />
             <span className="text-black">© {new Date().getFullYear()} BeWork</span>

@@ -61,8 +61,8 @@ export function SeoLandingPage({ description, h1, intro, children, breadcrumbIte
           <div className="mt-12 rounded-xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-8">
             <h2 className="text-xl font-bold text-black">Vérifier l’adéquation avec votre charge</h2>
             <p className="mt-3 text-black">
-              BeWork intervient pour le BTP et les PME exigeantes en France, Belgique, Suisse et Luxembourg — forfaits TTC
-              cadrés par volume.
+              BeWork intervient pour artisans, conducteurs de travaux et dirigeants BTP en France, Belgique, Suisse et
+              Luxembourg — forfaits TTC cadrés par volume.
             </p>
             <div className="mt-6 flex flex-wrap gap-4">
               <Link href="/contact" className="inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white hover:bg-[#1e40af]">

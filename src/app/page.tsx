@@ -15,7 +15,11 @@ import {
   getAggregateOfferDescription,
   getPublicPriceBoundsLabels,
 } from "@/lib/subscription-plans";
-import { SEO_KEYWORDS_BTP_PME, SEO_KEYWORDS_PARTENAIRE_CORE, SEO_VALUE_PROPOSITION } from "@/lib/seo-keywords";
+import {
+  SEO_VALUE_PROPOSITION,
+  SEO_VALUE_PROPOSITION_SHORT,
+  SEO_KEYWORDS_HOME,
+} from "@/lib/seo-keywords";
 import { SITE_URL, absoluteUrl } from "@/lib/site";
 
 /** Vidéo hero — même fichier que `HeroPresentationVideo` ; durée ~13 s (fichier court présentation). */
@@ -80,6 +84,14 @@ const HOME_FAQ_ITEMS = [
     q: "Quel est le délai de traitement ?",
     a: "Réponse moyenne en moins de deux heures ouvrées. Les urgences liées au chantier sont priorisées dans le cadre de votre offre. Le délai détaillé dépend de la mission ; la coordination reste assurée par l’équipe en France.",
   },
+  {
+    q: "BeWork peut-il accompagner conducteurs de travaux et artisans hors de France métropolitaine ?",
+    a: "Oui lorsque votre activité correspond à une clientèle francophone : Belgique, Suisse ou Luxembourg peuvent être couverts selon le cadre précis au rendez-vous découverte (outils, horaires et format des demandes). L’interface et le soutien sont en français.",
+  },
+  {
+    q: "Un conducteur de travaux sans assistant interne peut-il « brancher » BeWork sur ses chantiers ?",
+    a: "Oui : vous centralisez devis, relances, dossiers administratifs (situations de travaux, DICT ou avancement fournisseur) sous forme de demandes suivies jusqu’à clôture. Les envois juridiquement sensibles restent soumis à votre validation.",
+  },
 ] as const;
 
 const RESSOURCES_BLOG = [
@@ -136,37 +148,22 @@ const RESSOURCES_BLOG = [
 ];
 
 export const metadata: Metadata = {
-  title: "BeWork | Partenaire administratif externalisé BTP & PME",
-  description: `${SEO_VALUE_PROPOSITION} Vidéo sur l’accueil. Forfaits TTC dès ${formatPriceLabelFr(PRICE_BOUNDS.low)} €/mois. France, Belgique, Suisse, Luxembourg.`,
-  robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
-  keywords: [
-    ...SEO_KEYWORDS_PARTENAIRE_CORE,
-    ...SEO_KEYWORDS_BTP_PME,
-    "agence pilotage administratif BTP",
-    "secrétariat entreprise bâtiment",
-    "situation de travaux administrative",
-    "relances clients BTP",
-    "sous-traitance administrative construction",
-    "BeWork BTP",
-    "DICT déclaration travaux",
-    "logistique chantier BTP",
-    "location engin chantier",
-    "administratif intelligence artificielle",
-    "IA productivité PME BTP",
-    "bureau et chantier BTP",
-    "pilotage administratif encadré",
-    "vidéo présentation BeWork",
-    "présentation agence administrative BTP",
-  ],
+  title: "BeWork | Administratif externalisé BTP · artisans & conducteurs de travaux",
+  description: `${SEO_VALUE_PROPOSITION} Vidéo d’introduction. Forfaits TTC dès ${formatPriceLabelFr(PRICE_BOUNDS.low)} €/mois.`,
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
+  },
+  keywords: SEO_KEYWORDS_HOME,
   alternates: { canonical: SITE_URL, languages: { fr: SITE_URL, "x-default": SITE_URL } },
   openGraph: {
     type: "website",
     locale: "fr_FR",
     url: SITE_URL,
     siteName: "BeWork",
-    title: "BeWork — Partenaire administratif externalisé BTP & PME",
-    description:
-      "Partenaire administratif externalisé : découvrez BeWork en vidéo — pilotage administratif encadré pour artisans et PME du bâtiment, sans embauche. France, Belgique, Suisse, Luxembourg.",
+    title: "BeWork — Administratif externalisé BTP pour artisans et conducteurs de travaux",
+    description: `${SEO_VALUE_PROPOSITION_SHORT} Vidéo présentée sur cette page.`,
     images: [
       {
         url: `${SITE_URL}/opengraph-image`,
@@ -178,9 +175,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "BeWork — Partenaire administratif externalisé BTP",
-    description:
-      "Vidéo + partenaire administratif externalisé : pilotage administratif BTP — devis, relances, dossiers. Forfaits TTC, cadre défini.",
+    title: "BeWork — Administratif externalisé BTP (conducteurs travaux & artisans)",
+    description: `${SEO_VALUE_PROPOSITION_SHORT} Vidéo. Forfaits TTC.`,
   },
 };
 
@@ -191,15 +187,16 @@ const homeJsonLd = {
       "@type": "WebPage",
       "@id": `${SITE_URL}/#accueil`,
       url: SITE_URL,
-      name: "BeWork — Partenaire administratif externalisé pour entreprises du BTP et PME",
+      name: "BeWork — Administratif externalisé pour artisans et conducteurs de travaux (BTP)",
       inLanguage: "fr-FR",
-      description:
-        "Partenaire administratif externalisé : pilotage administratif BTP — devis, facturation, relances, dossiers chantier et démarches, dans un cadre défini. Vidéo sur la page. Forfaits TTC, sans recruter.",
+      description: `${SEO_VALUE_PROPOSITION} Démo vidéo, forfaits TTC, sans embauche.`,
       isPartOf: { "@id": `${SITE_URL}/#website` },
       video: { "@id": `${SITE_URL}/#video-presentation-bework` },
       about: [
         { "@type": "Thing", name: "Bâtiment et travaux publics" },
+        { "@type": "Thing", name: "Conducteurs de travaux" },
         { "@type": "Thing", name: "Artisanat du bâtiment" },
+        { "@type": "Thing", name: "Entreprises du bâtiment en France, Belgique, Suisse, Luxembourg" },
       ],
       speakable: {
         "@type": "SpeakableSpecification",
@@ -223,7 +220,8 @@ const homeJsonLd = {
       ],
       audience: {
         "@type": "BusinessAudience",
-        audienceType: "Artisans, TPE, PME et entrepreneurs du bâtiment",
+        audienceType:
+          "Conducteurs de travaux, artisans, sous-traitants, dirigeants de TPE/PME et entreprises générales du bâtiment (France, Belgique, Suisse, Luxembourg)",
       },
       offers: {
         "@type": "AggregateOffer",
@@ -239,7 +237,7 @@ const homeJsonLd = {
       "@id": `${SITE_URL}/#video-presentation-bework`,
       name: "Présentation BeWork — partenaire administratif externalisé pour le BTP",
       description:
-        "Présentation courte de BeWork en tant que partenaire administratif externalisé : structuration de l’administratif des entreprises du bâtiment — devis, relances, dossiers chantier, sans recruter.",
+        "Vidéo de présentation BeWork — administratif externalisé pour conducteurs de travaux, artisans et dirigeants BTP : dossiers chantier, devis et relances, sans recruter (France · Belgique · Suisse · Luxembourg).",
       thumbnailUrl: [absoluteUrl("/opengraph-image")],
       uploadDate: "2026-04-11T12:00:00+02:00",
       duration: PRESENTATION_VIDEO_DURATION_ISO,

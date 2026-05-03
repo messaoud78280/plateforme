@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter, Manrope, Orbitron } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
-import { SEO_KEYWORDS_GLOBAL } from "@/lib/seo-keywords";
+import { SEO_KEYWORDS_GLOBAL, SEO_VALUE_PROPOSITION, SEO_VALUE_PROPOSITION_SHORT } from "@/lib/seo-keywords";
 import { absoluteUrl, getOrgSameAs, SITE_URL } from "@/lib/site";
 import { formatPriceLabelFr, getPublicPriceBoundsLabels } from "@/lib/subscription-plans";
 
@@ -45,11 +45,10 @@ const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default:
-      "BeWork — Partenaire administratif externalisé BTP & PME | Pilotage administratif",
+    default: "BeWork — Administratif externalisé BTP : artisans & conducteurs de travaux",
     template: "%s | BeWork",
   },
-  description: `Partenaire administratif externalisé pour artisans et PME du bâtiment : pilotage administratif, devis, facturation, relances et dossiers chantier. On tient le bureau, vous tenez le chantier. Vidéo sur le site. Sans recruter — forfaits TTC dès ${SITE_PRICE_LOW_FR} €/mois. France, Belgique, Suisse, Luxembourg.`,
+  description: `${SEO_VALUE_PROPOSITION} Vidéo. Forfaits TTC dès ${SITE_PRICE_LOW_FR} €/mois. Conducteurs de travaux, artisans, dirigeants BTP.`,
   applicationName: "BeWork",
   authors: [{ name: "BeWork", url: SITE_URL }],
   creator: "BeWork",
@@ -79,23 +78,21 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: SITE_URL,
     siteName: "BeWork",
-    title: "BeWork — Partenaire administratif externalisé BTP & PME",
-    description:
-      "Partenaire administratif externalisé : pilotage administratif pour artisans et PME du bâtiment — devis, relances, dossiers chantier. Présentation en vidéo. Forfaits TTC. France, Belgique, Suisse, Luxembourg.",
+    title: "BeWork — Administratif externalisé BTP (artisans & conducteurs de travaux)",
+    description: `${SEO_VALUE_PROPOSITION_SHORT} Vidéo. Dès ${SITE_PRICE_LOW_FR} € TTC.`,
     images: [
       {
         url: defaultOgImage,
         width: 1200,
         height: 630,
-        alt: "BeWork — Partenaire administratif externalisé pour le BTP et les PME",
+        alt: "BeWork — Administratif externalisé pour artisans et conducteurs de travaux (France, Belgique, Suisse, Luxembourg)",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     title: "BeWork — Partenaire administratif externalisé BTP",
-    description:
-      "Partenaire administratif externalisé : vidéo + pilotage encadré — devis, facturation, relances, dossiers chantier. Forfaits TTC.",
+    description: `${SEO_VALUE_PROPOSITION_SHORT} Vidéo. Dès ${SITE_PRICE_LOW_FR} € TTC.`,
     ...(process.env.NEXT_PUBLIC_TWITTER_SITE?.trim()
       ? { site: process.env.NEXT_PUBLIC_TWITTER_SITE.trim() }
       : {}),
@@ -131,9 +128,9 @@ const jsonLd = {
         "BeWork — administratif BTP",
         "BeWork prestataire administratif externalisé",
         "BeWork pilotage administratif",
+        "Administratif chantier artisans conducteurs travaux",
       ],
-      description:
-        "Partenaire administratif externalisé pour artisans, entreprises du BTP et PME : pilotage administratif, organisation, devis, facturation, relances et dossiers chantier. France, Belgique, Suisse, Luxembourg.",
+      description: SEO_VALUE_PROPOSITION,
       inLanguage: "fr-FR",
       publisher: { "@id": `${SITE_URL}/#organization` },
       image: { "@type": "ImageObject", url: defaultOgImage, width: 1200, height: 630 },
@@ -151,15 +148,21 @@ const jsonLd = {
       logo: { "@type": "ImageObject", url: defaultOgImage, width: 1200, height: 630 },
       image: defaultOgImage,
       description:
-        "Partenaire administratif externalisé : organisation et pilotage pour artisans, entreprises du bâtiment et PME — devis, facturation, relances, démarches chantier, coordination. Agence en Île-de-France, exécution supervisée depuis la France.",
+        "Administratif externalisé pour artisans, conducteurs de travaux et dirigeants d’entreprises du bâtiment : devis, facturation, relances, dossiers chantier — France, Belgique, Suisse, Luxembourg. Coordination depuis la France.",
       slogan: "Cadre, rigueur, pilotage et lecture terrain pour le BTP",
-      areaServed: ["FR", "BE", "CH", "LU"],
+      areaServed: [
+        { "@type": "Country", name: "France" },
+        { "@type": "Country", name: "Belgique" },
+        { "@type": "Country", name: "Suisse" },
+        { "@type": "Country", name: "Luxembourg" },
+      ],
       founder: {
         "@type": "Person",
         name: "Laure Olivie",
         jobTitle: "Fondatrice",
         knowsAbout: [
           "Bâtiment et travaux publics",
+          "Conducteurs de travaux",
           "Direction d'entreprise",
           "Externalisation administrative",
           "Partenaire administratif externalisé",
@@ -172,13 +175,20 @@ const jsonLd = {
           contactType: "sales",
           url: absoluteUrl("/contact"),
           availableLanguage: ["French"],
-          areaServed: ["FR", "BE", "CH", "LU"],
+          areaServed: [
+            { "@type": "Country", name: "France" },
+            { "@type": "Country", name: "Belgique" },
+            { "@type": "Country", name: "Suisse" },
+            { "@type": "Country", name: "Luxembourg" },
+          ],
         },
       ],
       ...(orgSameAs.length ? { sameAs: orgSameAs } : {}),
       knowsAbout: [
         "BTP",
         "Artisanat du bâtiment",
+        "Conducteurs de travaux",
+        "Entreprises générales et sous-traitants",
         "Facturation chantier",
         "Devis entreprise du bâtiment",
         "Externalisation administrative",
@@ -190,13 +200,18 @@ const jsonLd = {
       "@type": "ProfessionalService",
       "@id": `${SITE_URL}/#service`,
       name: "BeWork — Partenaire administratif externalisé (BTP & PME)",
-      description: `Partenaire administratif externalisé pour PME, artisans et BTP : devis, facturation chantier, relances et suivi de dossiers. Outils d’aide à l’exécution encadrés. Trois forfaits TTC mensuels dès ${SITE_PRICE_LOW_FR} €.`,
+      description: `Administratif externalisé pour artisans, conducteurs de travaux et chefs d’entreprise du BTP : devis, facturation chantier, relances, dossiers (DICT, situations, AO). France, Belgique, Suisse, Luxembourg. Forfaits TTC dès ${SITE_PRICE_LOW_FR} €.`,
       url: SITE_URL,
       provider: { "@id": `${SITE_URL}/#organization` },
-      areaServed: {
-        "@type": "GeoCircle",
-        geoMidpoint: { "@type": "GeoCoordinates", latitude: 48.8566, longitude: 2.3522 },
-        geoRadius: "1000000",
+      areaServed: [
+        { "@type": "Country", name: "France" },
+        { "@type": "Country", name: "Belgique" },
+        { "@type": "Country", name: "Suisse" },
+        { "@type": "Country", name: "Luxembourg" },
+      ],
+      audience: {
+        "@type": "BusinessAudience",
+        audienceType: "Conducteurs de travaux, artisans, sous-traitants et dirigeants d’entreprises du bâtiment",
       },
     },
   ],

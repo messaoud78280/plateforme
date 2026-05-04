@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { landingPageMetadata } from "@/lib/seo-landing-metadata";
 
@@ -71,6 +72,15 @@ export default function Page() {
       <p>
         En tenant le bureau au même niveau d’exigence que le chantier, vous gagnez en fiabilité et vous exploitez mieux
         vos opportunités.
+      </p>
+
+      <h2>Artisan débordé : l’angle terrain</h2>
+      <p>
+        Si la charge se résume surtout à « tout faire soi-même » entre atelier et bureau, voir{" "}
+        <Link href="/artisan-deborde-administratif" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
+          artisan débordé administratif
+        </Link>
+        .
       </p>
     </SeoLandingPage>
   );

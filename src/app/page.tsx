@@ -20,6 +20,7 @@ import {
   SEO_VALUE_PROPOSITION_SHORT,
   SEO_KEYWORDS_HOME,
 } from "@/lib/seo-keywords";
+import { EXTERNALISATION_ADMIN_BT_NAV } from "@/lib/externalisation-administrative-btp-geo";
 import { SITE_URL, absoluteUrl } from "@/lib/site";
 
 /** Vidéo hero — même fichier que `HeroPresentationVideo` ; durée ~13 s (fichier court présentation). */
@@ -1518,6 +1519,28 @@ export default function HomePage() {
               </p>
             </div>
 
+            <div className="mb-12 rounded-2xl border border-[#1d4ed8]/25 bg-[#eff6ff]/40 p-8 md:p-10">
+              <h3 className="text-xl font-bold tracking-tight text-black md:text-2xl">
+                Externalisation administrative BTP — Europe francophone
+              </h3>
+              <p className="mt-4 max-w-3xl text-black leading-relaxed">
+                Parcours SEO par pays (contenus distincts)&nbsp;: France, Belgique, Suisse romande et Luxembourg. Commencez par la vue
+                d&apos;ensemble, puis ouvrez la page qui correspond à votre marché.
+              </p>
+              <ul className="mt-6 flex flex-wrap gap-3">
+                {EXTERNALISATION_ADMIN_BT_NAV.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="inline-flex rounded-lg border border-[#1d4ed8]/35 bg-white px-4 py-2 text-sm font-semibold text-[#1d4ed8] transition hover:bg-[#eff6ff]"
+                    >
+                      {link.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 md:items-stretch md:gap-10">
               {RESSOURCES_BLOG.map((r) => (
                 <div
@@ -1630,6 +1653,9 @@ export default function HomePage() {
             </Link>
             <Link className="font-medium transition-colors hover:text-black" href="/blog">
               Blog
+            </Link>
+            <Link className="font-medium transition-colors hover:text-black" href="/externalisation-administrative-btp-europe">
+              Europe francophone — admin BTP
             </Link>
           </div>
         </div>

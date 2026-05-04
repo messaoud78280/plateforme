@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { landingPageMetadata } from "@/lib/seo-landing-metadata";
 
@@ -71,6 +72,15 @@ export default function Page() {
       <p>
         Vous achetez un cadre : un niveau de suivi, des prestations réalisées et des indicateurs. L’objectif est simple :
         des encaissements plus réguliers, une trésorerie moins tendue et moins de stress côté dirigeant.
+      </p>
+
+      <h2>Angle terrain : factures impayées &amp; trésorerie</h2>
+      <p>
+        Pour un focus sur le coût business des retards de paiement et la protection de trésorerie, voir{" "}
+        <Link href="/facture-impayee-btp" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
+          facture impayée BTP
+        </Link>
+        .
       </p>
     </SeoLandingPage>
   );

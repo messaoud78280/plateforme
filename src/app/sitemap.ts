@@ -1,6 +1,26 @@
 import type { MetadataRoute } from "next";
 import { BLOG_ARTICLES, BLOG_SLUGS, type BlogArticle, type BlogSlug } from "@/content/blog-slugs";
+import { BTP_PAIN_PAGE_PATHS } from "@/lib/btp-pain-pages";
+import { EXTERNALISATION_ADMIN_BT_PATHS } from "@/lib/externalisation-administrative-btp-geo";
 import { SITE_URL } from "@/lib/site";
+
+const BTP_PAIN_SEO_PAGES: MetadataRoute.Sitemap = (
+  Object.values(BTP_PAIN_PAGE_PATHS) as string[]
+).map((path) => ({
+  url: `${SITE_URL}${path}`,
+  lastModified: new Date(),
+  changeFrequency: "monthly" as const,
+  priority: 0.84,
+}));
+
+const GEO_EXTERNALISATION_ADMIN_BT_PAGES: MetadataRoute.Sitemap = (
+  Object.values(EXTERNALISATION_ADMIN_BT_PATHS) as string[]
+).map((path) => ({
+  url: `${SITE_URL}${path}`,
+  lastModified: new Date(),
+  changeFrequency: "monthly" as const,
+  priority: path.endsWith("-europe") ? 0.88 : 0.86,
+}));
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const staticPages: MetadataRoute.Sitemap = [
@@ -32,6 +52,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/avenant-chantier`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.75 },
     { url: `${SITE_URL}/suivi-fournisseurs-chantier`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.75 },
     { url: `${SITE_URL}/admin-btp-sans-recruter`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.85 },
+    ...BTP_PAIN_SEO_PAGES,
+    ...GEO_EXTERNALISATION_ADMIN_BT_PAGES,
   ];
 
   const blogPages: MetadataRoute.Sitemap = BLOG_SLUGS.map((slug) => {

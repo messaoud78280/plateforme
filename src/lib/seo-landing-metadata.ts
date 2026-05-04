@@ -13,14 +13,17 @@ export function landingPageMetadata(opts: {
   description: string;
   path: string;
   keywords?: string[];
+  /** Hreflang cluster (ex. fr-FR / fr-BE …) ; sinon `fr` + x-default = canonical. */
+  hreflangLanguages?: Record<string, string>;
 }): Metadata {
   const url = absoluteUrl(opts.path);
+  const langMap = opts.hreflangLanguages ?? { fr: url, "x-default": url };
 
   return {
     title: { absolute: opts.title },
     description: opts.description,
     ...(opts.keywords?.length ? { keywords: opts.keywords } : {}),
-    alternates: { canonical: url, languages: { fr: url, "x-default": url } },
+    alternates: { canonical: url, languages: langMap },
     robots: { index: true, follow: true },
     openGraph: {
       type: "website",

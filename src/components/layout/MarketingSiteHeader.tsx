@@ -11,7 +11,14 @@ type Props = {
 
 type SolutionMenuIconId = "devis" | "folder" | "invoice" | "cart" | "calendar";
 
-type ResourceMenuIconId = "book" | "users" | "document" | "clipboard" | "question" | "calculator";
+type ResourceMenuIconId =
+  | "book"
+  | "globe"
+  | "users"
+  | "document"
+  | "clipboard"
+  | "question"
+  | "calculator";
 
 const SOLUTION_MENU_ENTRIES: {
   href: string;
@@ -57,6 +64,20 @@ const RESOURCE_MENU_ENTRIES: {
   description: string;
   icon: ResourceMenuIconId;
 }[] = [
+  {
+    href: "/externalisation-administrative-btp-europe",
+    title: "Europe francophone (FR · BE · CH · LU)",
+    description:
+      "Externalisation administrative BTP : vue d’ensemble et pages locales France, Belgique, Suisse, Luxembourg.",
+    icon: "globe",
+  },
+  {
+    href: "/artisan-deborde-administratif",
+    title: "Administratif sous pression (angles terrain)",
+    description:
+      "Débordement, devis en retard, suivi chantier, impayés : entrées SEO utiles avant d’externaliser cadre.",
+    icon: "clipboard",
+  },
   {
     href: "/blog",
     title: "Blog & conseils terrain",
@@ -556,6 +577,19 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
 
 function ResourceNavIcon({ id, className }: { id: ResourceMenuIconId; className?: string }) {
   switch (id) {
+    case "globe":
+      return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+          <circle cx="12" cy="12" r="9.25" stroke="currentColor" strokeWidth="1.55" />
+          <path
+            d="M12 2.75c2.62 8.25 2.62 13.08 0 18.5M12 12h9.05M12 12H2.95M21 12h-18"
+            stroke="currentColor"
+            strokeWidth="1.35"
+            strokeLinecap="round"
+          />
+          <ellipse cx="12" cy="12" rx="3.85" ry="9.05" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
+        </svg>
+      );
     case "book":
       return (
         <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>

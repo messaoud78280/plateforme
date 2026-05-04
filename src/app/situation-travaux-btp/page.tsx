@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { landingPageMetadata } from "@/lib/seo-landing-metadata";
 
@@ -71,6 +72,15 @@ export default function Page() {
       <p>
         Une situation à jour facilite la facturation au fil de l’eau et les relances. Vous sécurisez vos encaissements
         sans sacrifier le terrain.
+      </p>
+
+      <h2>Quand le chantier « dérape » côté dossier</h2>
+      <p>
+        Si le sujet est plus large que la situation seule (client, fournisseur, pièces éparpillées), voir{" "}
+        <Link href="/chantier-mal-suivi" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
+          chantier mal suivi — administratif
+        </Link>
+        .
       </p>
     </SeoLandingPage>
   );

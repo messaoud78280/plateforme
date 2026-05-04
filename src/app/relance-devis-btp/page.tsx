@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { landingPageMetadata } from "@/lib/seo-landing-metadata";
 
@@ -73,6 +74,15 @@ export default function Page() {
         Nous tenons le suivi, préparons les relances, mettons à jour les statuts et vous remontons les validations. Vous
         gardez la décision commerciale et technique. Résultat : plus de chantiers sécurisés, moins d’oublis, une relation
         client plus professionnelle.
+      </p>
+
+      <h2>Si le problème est avant la relance…</h2>
+      <p>
+        Quand le devis sort trop tard, les relances sur un fond vide ne suffisent pas. Voir aussi notre page{" "}
+        <Link href="/devis-retard-btp" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
+          devis en retard BTP
+        </Link>
+        .
       </p>
     </SeoLandingPage>
   );

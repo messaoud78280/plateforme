@@ -1,19 +1,27 @@
 import type { JSX } from "react";
 
 const BLUE = "#2563eb";
-const BLUE_SOFT = "#eff6ff";
 const TEXT_DARK = "#111827";
 const TEXT_MUTED = "#6b7280";
-const BORDER = "#e5e7eb";
 
-const CARDS: {
+type CardConfig = {
   title: string;
   bullets: string[];
   footerTitle: string;
   footerSub: string;
   Icon: () => JSX.Element;
   FooterIcon: () => JSX.Element;
-}[] = [
+  stripe: string;
+  blob: string;
+  wash: string;
+  iconWrap: string;
+  checkClass: string;
+  footerBg: string;
+  footerIconWrap: string;
+  footerTitleClass: string;
+};
+
+const CARDS: CardConfig[] = [
   {
     title: "Gestion des devis & relances",
     bullets: ["Relance automatique des devis", "Suivi des réponses clients", "Facturation claire et rapide"],
@@ -21,6 +29,14 @@ const CARDS: {
     footerSub: "Plus d’opportunités, plus de CA.",
     Icon: IconEuroDocument,
     FooterIcon: IconBarsUp,
+    stripe: "from-[#1e40af] via-[#2563eb] to-[#3b82f6]",
+    blob: "bg-blue-600",
+    wash: "from-blue-50/[0.78]",
+    iconWrap: "bg-gradient-to-br from-blue-50 to-blue-100/85 text-blue-700 ring-2 ring-blue-200/75",
+    checkClass: "text-blue-600",
+    footerBg: "bg-gradient-to-br from-blue-50 via-blue-50/95 to-blue-100/45 ring-1 ring-blue-200/50",
+    footerIconWrap: "bg-white/95 text-blue-600 shadow-sm shadow-blue-900/6 ring-2 ring-blue-100/80",
+    footerTitleClass: "text-[#1d4ed8]",
   },
   {
     title: "Suivi administratif chantier",
@@ -29,6 +45,14 @@ const CARDS: {
     footerSub: "Conformité et sérénité garanties.",
     Icon: IconClipboardChecks,
     FooterIcon: IconShieldMini,
+    stripe: "from-[#2563eb] via-[#3b82f6] to-[#60a5fa]",
+    blob: "bg-blue-500",
+    wash: "from-blue-50/[0.7]",
+    iconWrap: "bg-gradient-to-br from-blue-50 to-blue-100/70 text-blue-600 ring-2 ring-blue-100/90",
+    checkClass: "text-blue-600",
+    footerBg: "bg-gradient-to-br from-blue-50/98 via-blue-50/90 to-blue-100/35 ring-1 ring-blue-200/48",
+    footerIconWrap: "bg-white/95 text-blue-600 shadow-sm shadow-blue-900/6 ring-2 ring-blue-100/85",
+    footerTitleClass: "text-[#1d4ed8]",
   },
   {
     title: "Coordination & organisation",
@@ -37,17 +61,25 @@ const CARDS: {
     footerSub: "Tout est au bon endroit, au bon moment.",
     Icon: IconPeopleCoord,
     FooterIcon: IconTruckMini,
+    stripe: "from-[#3b82f6] via-[#60a5fa] to-[#93c5fd]",
+    blob: "bg-blue-400",
+    wash: "from-blue-50/[0.62]",
+    iconWrap: "bg-gradient-to-br from-blue-50 to-blue-100/75 text-blue-600 ring-2 ring-blue-100/80",
+    checkClass: "text-blue-600",
+    footerBg: "bg-gradient-to-br from-blue-50/95 via-blue-100/25 to-blue-50/50 ring-1 ring-blue-200/42",
+    footerIconWrap: "bg-white/95 text-blue-600 shadow-sm shadow-blue-900/6 ring-2 ring-blue-100/75",
+    footerTitleClass: "text-[#1d4ed8]",
   },
 ];
 
 /** Section « La solution BeWork » — sous Problème, continu hero/métallique parent */
 export function HomeSolutionSection() {
-  const sans = 'var(--font-inter),var(--font-geist-sans),system-ui,sans-serif';
+  const sans = "var(--font-inter),var(--font-geist-sans),system-ui,sans-serif";
 
   return (
     <section
       id="solution-bework"
-      className="relative bg-transparent pt-10 pb-8 md:pt-14 md:pb-10 lg:pt-16 lg:pb-12"
+      className="relative bg-transparent pt-6 pb-8 md:pt-8 md:pb-10 lg:pt-10 lg:pb-12"
       style={{ fontFamily: sans }}
       aria-labelledby="solution-bework-heading"
     >
@@ -56,50 +88,90 @@ export function HomeSolutionSection() {
           <p className="text-[13px] font-semibold uppercase tracking-[0.2em]" style={{ color: BLUE }}>
             LA&nbsp;SOLUTION&nbsp;BEWORK
           </p>
-          <div className="mx-auto mt-3 h-[3px] w-12 rounded-full" style={{ backgroundColor: BLUE }} />
+          <div className="mx-auto mt-2 h-[3px] w-12 rounded-full" style={{ backgroundColor: BLUE }} />
 
-          <h2 id="solution-bework-heading" className="mt-8 text-[clamp(1.875rem,calc(1rem+3.8vw),3rem)] font-bold leading-[1.08] tracking-[-0.025em]" style={{ color: TEXT_DARK }}>
+          <h2
+            id="solution-bework-heading"
+            className="mt-5 text-[clamp(1.875rem,calc(1rem+3.8vw),3rem)] font-bold leading-[1.08] tracking-[-0.025em]"
+            style={{ color: TEXT_DARK }}
+          >
             <span style={{ color: BLUE }}>BeWork</span> prend le relais.
           </h2>
 
-          <p className="mx-auto mt-5 max-w-xl text-[17px] leading-relaxed md:text-lg" style={{ color: TEXT_MUTED }}>
+          <p className="mx-auto mt-3 max-w-xl text-[17px] leading-relaxed md:text-lg" style={{ color: TEXT_MUTED }}>
             Vous avancez sur vos chantiers. On sécurise tout le reste.
           </p>
         </header>
 
-        <div className="mx-auto grid max-w-[1200px] gap-8 md:grid-cols-3 md:gap-8 lg:gap-10">
+        <div className="mx-auto grid max-w-[1200px] gap-7 md:grid-cols-3 md:gap-8 lg:gap-10">
           {CARDS.map((card) => (
             <article
               key={card.title}
-              className="flex flex-col items-center rounded-[18px] border bg-white p-7 text-center shadow-[0_14px_40px_rgba(15,23,42,0.045)] md:p-8"
-              style={{ borderColor: BORDER }}
+              className="bework-solution-card group/sol relative flex flex-col items-center overflow-hidden rounded-[18px] border border-slate-200/90 bg-white p-7 text-center shadow-[0_14px_40px_rgba(15,23,42,0.06)] ring-1 ring-black/[0.02] transition-[transform,box-shadow,border-color] duration-300 ease-out will-change-transform motion-safe:hover:-translate-y-1 motion-safe:hover:border-slate-300/90 motion-safe:hover:shadow-[0_22px_52px_rgba(15,23,42,0.1)] motion-reduce:transition-none md:p-8"
             >
-              <div className="mb-6 flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-700">
-                <card.Icon />
+              <span
+                className={`pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b ${card.wash} to-transparent`}
+                aria-hidden
+              />
+              <div
+                className={`pointer-events-none absolute -right-12 -top-12 h-[8rem] w-[8rem] rounded-full ${card.blob} opacity-[0.1] blur-3xl transition-opacity duration-300 group-hover/sol:opacity-[0.17]`}
+                aria-hidden
+              />
+              <div
+                className={`pointer-events-none absolute -bottom-14 -left-10 h-[5.5rem] w-[5.5rem] rounded-full ${card.blob} opacity-[0.065] blur-3xl transition-opacity duration-300 group-hover/sol:opacity-[0.11]`}
+                aria-hidden
+              />
+              <div
+                className={`pointer-events-none absolute inset-x-6 top-0 h-[3px] rounded-b-full bg-gradient-to-r opacity-95 ${card.stripe}`}
+                aria-hidden
+              />
+              <div
+                className={`pointer-events-none absolute inset-x-6 bottom-0 h-[2px] rounded-t-full bg-gradient-to-r opacity-0 transition-opacity duration-300 motion-safe:group-hover/sol:opacity-[0.88] ${card.stripe}`}
+                aria-hidden
+              />
+
+              <div className="bework-solution-card-icon relative mb-6 flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl">
+                <span
+                  className={`flex h-full w-full items-center justify-center rounded-2xl shadow-sm shadow-slate-900/[0.04] motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover/sol:scale-105 ${card.iconWrap}`}
+                >
+                  <card.Icon />
+                </span>
               </div>
 
-              <h3 className="mb-5 text-xl font-semibold tracking-tight text-slate-900">{card.title}</h3>
+              <h3 className="relative mb-5 text-xl font-semibold tracking-tight text-slate-900">{card.title}</h3>
 
-              <ul className="mx-auto mb-6 flex w-full max-w-[17.5rem] flex-1 flex-col gap-3 text-left text-[15px] leading-snug md:max-w-[19rem]" style={{ color: TEXT_MUTED }}>
-                {card.bullets.map((item) => (
-                  <li key={item} className="flex gap-3">
-                    <span className="mt-0.5 shrink-0 text-[#2563eb]" aria-hidden>
-                      <IconCheck />
-                    </span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
+              <div className="relative mb-6 flex w-full flex-1 justify-center">
+                <ul
+                  className="inline-flex min-h-0 flex-col gap-2.5 text-left text-[15px] leading-snug"
+                  style={{ color: TEXT_MUTED }}
+                >
+                  {card.bullets.map((item) => (
+                    <li
+                      key={item}
+                      className="flex max-w-[19rem] items-start gap-3 rounded-lg px-1.5 py-1 transition-[background-color,box-shadow] duration-200 motion-safe:hover:bg-slate-50/95 motion-safe:hover:ring-1 motion-safe:hover:ring-slate-100/80"
+                    >
+                      <span
+                        className={`mt-0.5 shrink-0 motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover/sol:scale-105 ${card.checkClass}`}
+                        aria-hidden
+                      >
+                        <IconCheck />
+                      </span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
               <div
-                className="mt-auto flex w-full gap-4 rounded-xl p-4 text-left md:p-[18px]"
-                style={{ backgroundColor: BLUE_SOFT }}
+                className={`relative mt-auto flex w-full flex-col items-center gap-3 rounded-xl p-4 transition-[transform,box-shadow] duration-300 motion-safe:group-hover/sol:shadow-md motion-safe:group-hover/sol:shadow-slate-900/[0.06] sm:flex-row sm:justify-center sm:gap-4 sm:p-[18px] ${card.footerBg}`}
               >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-white/90 text-[#2563eb] shadow-sm shadow-blue-900/5 ring-1 ring-blue-100">
+                <span
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 motion-safe:group-hover/sol:scale-105 motion-safe:group-hover/sol:rotate-[-3deg] ${card.footerIconWrap}`}
+                >
                   <card.FooterIcon />
                 </span>
-                <div className="min-w-0">
-                  <p className="text-[15px] font-semibold text-[#1d4ed8]">{card.footerTitle}</p>
+                <div className="min-w-0 text-center sm:text-left">
+                  <p className={`text-[15px] font-semibold ${card.footerTitleClass}`}>{card.footerTitle}</p>
                   <p className="mt-1 text-[13px] leading-snug text-slate-600">{card.footerSub}</p>
                 </div>
               </div>
@@ -173,4 +245,3 @@ function IconTruckMini() {
     </svg>
   );
 }
-

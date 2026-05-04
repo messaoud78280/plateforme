@@ -302,7 +302,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                   </ul>
                   <div className="mt-3 border-t border-slate-200/80 px-5 pt-3">
                     <Link
-                      href="/#solutions"
+                      href="/#notre-expertise"
                       className="inline-flex items-center gap-1 text-[13px] font-semibold text-[#1d4ed8] transition-colors hover:text-[#1e40af]"
                       onClick={() => setSolutionsOpen(false)}
                     >
@@ -353,40 +353,40 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               </button>
               {resourcesOpen ? (
                 <nav
-                  className="bework-header-dropdown-enter absolute left-0 top-full z-[70] mt-3 hidden max-h-[min(70vh,calc(100dvh-5rem))] w-[min(420px,calc(100vw-2rem))] overflow-y-auto overflow-x-hidden rounded-2xl border border-slate-200 bg-white py-4 whitespace-normal shadow-[0_20px_40px_rgba(0,0,0,0.08)] lg:block"
+                  className="bework-header-dropdown-enter absolute left-0 top-full z-[70] mt-2.5 hidden max-h-[min(70vh,calc(100dvh-5rem))] w-[min(420px,calc(100vw-2rem))] overflow-y-auto overflow-x-hidden rounded-xl border border-slate-200 bg-[#f8fafc] py-4 whitespace-normal shadow-md shadow-slate-900/[0.08] lg:block"
                   aria-label="Nos ressources BTP"
                   role="menu"
                 >
                   <p className="px-5 pb-3 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-[#1d4ed8]/95">
                     Nos ressources BTP
                   </p>
-                  <ul className="flex flex-col divide-y divide-slate-100 px-3" role="none">
+                  <ul className="flex flex-col gap-3 px-3" role="none">
                     {RESOURCE_MENU_ENTRIES.map((item, index) => (
                       <li key={`${item.href}-${index}`} role="none">
                         <Link
                           href={item.href}
                           role="menuitem"
-                          className="flex items-start gap-3 rounded-lg px-2 py-3 transition-colors duration-150 hover:bg-[#f8fafc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8]/35"
+                          className="flex items-start gap-3 rounded-lg px-2 py-2.5 transition-colors duration-150 hover:bg-[#eff6ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8]/35"
                           onClick={() => setResourcesOpen(false)}
                         >
                           <span
-                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8]"
+                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#eff6ff] text-[#1d4ed8]"
                             aria-hidden
                           >
-                            <ResourceNavIcon id={item.icon} className="h-[18px] w-[18px]" />
+                            <ResourceNavIcon id={item.icon} className="h-[17px] w-[17px]" />
                           </span>
-                          <div className="min-w-0 flex-1 pt-0.5">
+                          <div className="min-w-0 flex-1 pt-px">
                             <span className="block text-[0.875rem] font-semibold leading-tight tracking-tight text-slate-900">
                               {item.title}
                             </span>
-                            <span className="mt-1 block text-[12px] leading-snug text-slate-600">{item.description}</span>
+                            <span className="mt-1 block truncate text-[12px] leading-snug text-slate-600">{item.description}</span>
                           </div>
-                          <ChevronRightThin className="mt-1.5 h-4 w-4 shrink-0 self-start text-slate-400" />
+                          <ChevronRightThin className="mt-1 h-4 w-4 shrink-0 self-start text-slate-400" />
                         </Link>
                       </li>
                     ))}
                   </ul>
-                  <div className="mt-3 border-t border-slate-200 px-5 pt-3">
+                  <div className="mt-3 border-t border-slate-200/80 px-5 pt-3">
                     <Link
                       href="/blog"
                       className="inline-flex items-center gap-1 text-[13px] font-semibold text-[#1d4ed8] transition-colors hover:text-[#1e40af]"
@@ -480,7 +480,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 ))}
               </ul>
               <Link
-                href="/#solutions"
+                href="/#notre-expertise"
                 className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-[#1d4ed8]"
                 onClick={() => setMobileOpen(false)}
               >

@@ -46,7 +46,7 @@ export function HomeProblemSection() {
   return (
     <section
       id="probleme"
-      className="relative z-[1] overflow-visible bg-transparent pt-[70px] pb-16 md:pb-20"
+      className="relative z-[1] overflow-visible bg-transparent pt-[70px] pb-10 md:pb-12"
       style={{ fontFamily: fontSans }}
     >
       <div className="container-site relative grid grid-cols-1 items-center gap-10 lg:grid-cols-[0.38fr_0.62fr] lg:gap-16">

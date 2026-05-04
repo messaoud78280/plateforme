@@ -78,6 +78,39 @@ html {
   --font-mono: var(--font-geist-mono);
 }
 
+/* Homepage — cartes sections marketing : entrée en fondu / léger lift (voir motion-reduce en bas) */
+@keyframes bework-what-handle-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bework-solution-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bework-sol-icon-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
 @layer utilities {
   .max-w-site {
     max-width: var(--site-max-width);
@@ -95,6 +128,59 @@ html {
     max-width: var(--site-max-width);
     padding-left: 1.5rem;
     padding-right: 1.5rem;
+  }
+
+  /** Cartes service — apparition léger stagger + préparation hover (hover géré par Tailwind sur la carte) */
+  .bework-what-handle-card {
+    animation: bework-what-handle-card-in 0.58s cubic-bezier(0.25, 0.46, 0.45, 0.94) backwards;
+  }
+  .bework-what-handle-card:nth-child(2) {
+    animation-delay: 90ms;
+  }
+  .bework-what-handle-card:nth-child(3) {
+    animation-delay: 180ms;
+  }
+
+  /** Cartes « La solution BeWork » — même tempo d’apparition */
+  .bework-solution-card {
+    animation: bework-solution-card-in 0.58s cubic-bezier(0.25, 0.46, 0.45, 0.94) backwards;
+  }
+  .bework-solution-card:nth-child(2) {
+    animation-delay: 90ms;
+  }
+  .bework-solution-card:nth-child(3) {
+    animation-delay: 180ms;
+  }
+
+  /** Missions par secteur (4 cartes) — même entrée en fondu + décalage 4e carte */
+  .bework-sector-example-card {
+    animation: bework-what-handle-card-in 0.58s cubic-bezier(0.25, 0.46, 0.45, 0.94) backwards;
+  }
+  .bework-sector-example-card:nth-child(2) {
+    animation-delay: 90ms;
+  }
+  .bework-sector-example-card:nth-child(3) {
+    animation-delay: 180ms;
+  }
+  .bework-sector-example-card:nth-child(4) {
+    animation-delay: 270ms;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bework-solution-card:hover .bework-solution-card-icon {
+    animation: bework-sol-icon-float 2.8s ease-in-out infinite;
+  }
+  .bework-sector-example-card:hover .bework-sector-example-icon {
+    animation: bework-sol-icon-float 2.8s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bework-what-handle-card,
+  .bework-solution-card,
+  .bework-sector-example-card {
+    animation: none !important;
   }
 }
 

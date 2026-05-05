@@ -76,12 +76,13 @@ export default function InscriptionPage() {
       return;
     }
 
-    router.push("/connexion/clients?registered=1&callbackUrl=/dashboard/abonnement?onboarding=1");
+    const target = `/inscription/confirmation?email=${encodeURIComponent(email.trim())}`;
+    router.push(target);
     router.refresh();
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#dce2ea] px-4 py-10 md:py-14">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9] px-4 py-8 md:py-10">
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.35]"
         aria-hidden
@@ -91,32 +92,37 @@ export default function InscriptionPage() {
         }}
       />
       <div className="relative mx-auto w-full max-w-lg">
-        {/* Cadre extérieur : bordure dégradée type chrome */}
-        <div className="rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_12px_40px_rgba(15,23,42,0.12),0_2px_0_rgba(255,255,255,0.6)_inset]">
-          <div className="card-frame rounded-2xl p-8 md:p-10">
-            <div className="mb-6 flex flex-col gap-3 border-b border-[#c8d0dc]/60 pb-6 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-[0_26px_70px_-38px_rgba(15,23,42,0.35)] md:p-9">
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <BackLink
                 href="/connexion/clients"
                 className="text-black transition-colors hover:text-black"
               >
                 Retour à la connexion clients
               </BackLink>
-              <span className="surface-metallic-light surface-metallic-light--badge-pill w-fit shrink-0 rounded-full px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-black shadow-sm">
+              <span className="w-fit shrink-0 rounded-full border border-[#bbf7d0] bg-[color:var(--client-50)] px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[color:var(--client-700)] shadow-sm">
                 Inscription client
               </span>
-            </div>
+          </div>
 
-            <h1
-              className="text-metallic-black mb-2 font-sans text-[1.75rem] font-semibold leading-tight tracking-tight md:text-[2rem]"
-            >
-              Créer un compte client
-            </h1>
-            <p className="mb-8 text-sm leading-relaxed text-black md:text-[0.9375rem]">
-              Uniquement pour les clients. Gérants et agents : compte créé par l&apos;agence.
-            </p>
+          <h1 className="mb-2 font-sans text-[1.55rem] font-semibold leading-tight tracking-tight text-slate-900 md:text-[1.8rem]">
+            Créer votre compte client
+          </h1>
+          <p className="text-sm leading-relaxed text-slate-700 md:text-[0.9375rem]">
+            Accès réservé aux clients. Gérants et agents : compte créé par l&apos;agence.
+          </p>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-xs text-slate-700">
+            <span className="font-semibold text-slate-900">Espace sécurisé.</span> Vos informations restent confidentielles.
+            <span className="mx-2 text-slate-300" aria-hidden>
+              ·
+            </span>
+            <span className="font-semibold text-slate-900">Support rapide.</span> Notre équipe peut vous aider dès la création du compte.
+          </div>
+
+          <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-1">
                 <label htmlFor="name" className={labelClass}>
                   Nom du contact
                 </label>
@@ -130,8 +136,7 @@ export default function InscriptionPage() {
                   placeholder="Jean Dupont"
                 />
               </div>
-
-              <div>
+              <div className="sm:col-span-1">
                 <label htmlFor="email" className={labelClass}>
                   Email
                 </label>
@@ -145,7 +150,9 @@ export default function InscriptionPage() {
                   placeholder="vous@entreprise.com"
                 />
               </div>
+            </div>
 
+            <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="phone" className={labelClass}>
                   Téléphone
@@ -159,10 +166,9 @@ export default function InscriptionPage() {
                   placeholder="06 12 34 56 78"
                 />
               </div>
-
               <div>
                 <label htmlFor="company" className={labelClass}>
-                  Raison sociale / Nom de l&apos;entreprise
+                  Entreprise
                 </label>
                 <input
                   id="company"
@@ -173,7 +179,9 @@ export default function InscriptionPage() {
                   placeholder="Exemple SAS"
                 />
               </div>
+            </div>
 
+            <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="formeJuridique" className={labelClass}>
                   Forme juridique
@@ -192,7 +200,6 @@ export default function InscriptionPage() {
                   ))}
                 </select>
               </div>
-
               <div>
                 <label htmlFor="secteurActivite" className={labelClass}>
                   Secteur d&apos;activité
@@ -211,71 +218,72 @@ export default function InscriptionPage() {
                   ))}
                 </select>
               </div>
+            </div>
 
-              <div>
-                <label htmlFor="service" className={labelClass}>
-                  Service / Département
-                </label>
-                <input
-                  id="service"
-                  type="text"
-                  value={service}
-                  onChange={(e) => setService(e.target.value)}
-                  className={fieldClass}
-                  placeholder="Ex. Direction, Comptabilité, RH…"
-                />
-              </div>
+            <div>
+              <label htmlFor="service" className={labelClass}>
+                Service / Département
+              </label>
+              <input
+                id="service"
+                type="text"
+                value={service}
+                onChange={(e) => setService(e.target.value)}
+                className={fieldClass}
+                placeholder="Ex. Direction, Comptabilité, RH…"
+              />
+            </div>
 
-              <div>
-                <label htmlFor="password" className={labelClass}>
-                  Mot de passe
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  className={fieldClass}
-                  placeholder="Minimum 6 caractères"
-                />
-              </div>
+            <div>
+              <label htmlFor="password" className={labelClass}>
+                Mot de passe
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className={fieldClass}
+                placeholder="Minimum 6 caractères"
+              />
+              <p className="mt-2 text-xs text-slate-600">Astuce : utilisez un mot de passe unique, d’au moins 8 caractères.</p>
+            </div>
 
-              {error ? (
-                <p
-                  className="rounded-lg border border-red-300/60 bg-gradient-to-b from-red-50/95 to-red-50/70 px-4 py-3 text-sm font-medium text-red-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]"
-                  role="alert"
-                >
-                  {error}
-                </p>
-              ) : null}
-
-              <button
-                type="submit"
-                className="w-full rounded-xl border border-[#2563eb]/70 bg-gradient-to-b from-[#3b82f6] via-[#2563eb] to-[#1d4ed8] px-4 py-3.5 text-center text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_4px_18px_rgba(29,78,216,0.38)] transition hover:border-[#3b82f6] hover:from-[#2563eb] hover:via-[#1d4ed8] hover:to-[#1e40af] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_6px_24px_rgba(29,78,216,0.45)] active:translate-y-px"
+            {error ? (
+              <p
+                className="rounded-lg border border-red-300/60 bg-gradient-to-b from-red-50/95 to-red-50/70 px-4 py-3 text-sm font-medium text-red-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]"
+                role="alert"
               >
-                S&apos;inscrire
-              </button>
-            </form>
+                {error}
+              </p>
+            ) : null}
 
-            <p className="mt-8 border-t border-[#c8d0dc]/50 pt-6 text-center text-sm text-black">
+            <button
+              type="submit"
+              className="w-full rounded-xl border border-[color:var(--accent-600)]/70 bg-gradient-to-b from-[color:var(--accent-500)] via-[color:var(--accent-600)] to-[color:var(--accent-600)] px-4 py-3.5 text-center text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_4px_18px_rgba(29,78,216,0.38)] transition hover:border-[color:var(--accent-500)] hover:from-[color:var(--accent-600)] hover:via-[color:var(--accent-700)] hover:to-[color:var(--accent-700)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_6px_24px_rgba(29,78,216,0.45)] active:translate-y-px"
+            >
+              S&apos;inscrire
+            </button>
+          </form>
+
+          <p className="mt-7 border-t border-slate-200/70 pt-6 text-center text-sm text-slate-800">
               Déjà un compte client ?{" "}
               <Link
                 href="/connexion/clients"
-                className="font-semibold text-[#1d4ed8] underline-offset-2 transition hover:text-[#1e40af] hover:underline"
+                className="font-semibold text-[color:var(--accent-600)] underline-offset-2 transition hover:text-[color:var(--accent-700)] hover:underline"
               >
                 Se connecter (espace clients)
               </Link>
             </p>
             <Link
               href="/"
-              className="surface-metallic-outline mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-[#1e293b] transition hover:text-black"
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
             >
               <span aria-hidden>←</span>
               Retour à l&apos;accueil
             </Link>
-          </div>
         </div>
       </div>
     </div>

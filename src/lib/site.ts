@@ -13,6 +13,30 @@ export function absoluteUrl(path: string): string {
 }
 
 /**
+ * Origine unique pour emails + magic link (évite mélange localhost / 127.0.0.1).
+ * Ordre : NEXTAUTH_URL → NEXT_PUBLIC_SITE_URL → origine de la requête d’inscription.
+ */
+export function canonicalRequestOrigin(preferredFromRequest?: string): string {
+  const tryOrigin = (raw: string | undefined) => {
+    if (!raw?.trim()) return null;
+    const u = raw.trim().replace(/\/$/, "");
+    if (!/^https?:\/\//i.test(u)) return null;
+    try {
+      return new URL(u).origin;
+    } catch {
+      return null;
+    }
+  };
+  return (
+    tryOrigin(process.env.NEXTAUTH_URL) ??
+    tryOrigin(process.env.NEXT_PUBLIC_SITE_URL) ??
+    tryOrigin(preferredFromRequest) ??
+    tryOrigin(SITE_URL) ??
+    "http://127.0.0.1:3000"
+  );
+}
+
+/**
  * URLs pour JSON-LD Organization.sameAs (LinkedIn, profil Google Business, annuaires…).
  * Définir NEXT_PUBLIC_ORG_SAME_AS en prod, URLs séparées par des virgules ou des retours à la ligne.
  * Ex. NEXT_PUBLIC_ORG_SAME_AS=https://www.linkedin.com/company/votre-page,https://...

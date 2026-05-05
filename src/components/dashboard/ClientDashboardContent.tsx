@@ -92,7 +92,7 @@ export function ClientDashboardContent({
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <Link
             href="/dashboard/nouvelle-demande"
-            className="inline-flex items-center rounded-lg bg-[#1d4ed8] px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#1e40af]"
+            className="inline-flex items-center rounded-lg bg-[color:var(--client-600)] px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[color:var(--client-700)]"
           >
             + Nouvelle mission
           </Link>
@@ -136,7 +136,10 @@ export function ClientDashboardContent({
         <div className="rounded-xl surface-metallic-light p-5">
           <p className="text-sm font-medium text-slate-500">Derniers messages</p>
           <p className="mt-1 text-2xl font-bold text-slate-800">{recentMessages.length}</p>
-          <Link href="/dashboard/messagerie" className="mt-1 block text-sm font-medium text-[#1d4ed8] hover:underline">
+          <Link
+            href="/dashboard/messagerie"
+            className="mt-1 block text-sm font-medium text-[color:var(--client-700)] hover:underline"
+          >
             Voir la messagerie →
           </Link>
         </div>
@@ -218,7 +221,7 @@ export function ClientDashboardContent({
               <div className="mt-4">
                 <Link
                   href="/dashboard/nouvelle-demande"
-                  className="inline-flex rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e40af]"
+                  className="inline-flex rounded-lg bg-[color:var(--client-600)] px-4 py-2 text-sm font-medium text-white hover:bg-[color:var(--client-700)]"
                 >
                   + Nouvelle mission
                 </Link>
@@ -238,7 +241,7 @@ export function ClientDashboardContent({
                         task.status === "COMPLETE"
                           ? "bg-green-100 text-green-800"
                           : task.status === "EN_COURS" || task.status === "EN_ANALYSE" || task.status === "ASSIGNEE"
-                            ? "bg-blue-100 text-blue-800"
+                            ? "bg-[color:var(--client-50)] text-[color:var(--client-700)]"
                             : "bg-slate-100 text-slate-700"
                       }`}
                     >
@@ -270,7 +273,10 @@ export function ClientDashboardContent({
         </div>
         {clientTasks.length > 0 && (
           <div className="border-t border-slate-100 px-6 py-3">
-            <Link href="/dashboard/taches" className="text-sm font-medium text-[#1d4ed8] hover:underline">
+            <Link
+              href="/dashboard/taches"
+              className="text-sm font-medium text-[color:var(--client-700)] hover:underline"
+            >
               Voir toutes mes missions →
             </Link>
           </div>
@@ -319,7 +325,10 @@ export function ClientDashboardContent({
           </div>
           {recentMessages.length > 0 && (
             <div className="border-t border-slate-100 px-6 py-3">
-              <Link href="/dashboard/messagerie" className="text-sm font-medium text-[#1d4ed8] hover:underline">
+              <Link
+                href="/dashboard/messagerie"
+                className="text-sm font-medium text-[color:var(--client-700)] hover:underline"
+              >
                 Voir la messagerie →
               </Link>
             </div>
@@ -333,7 +342,7 @@ export function ClientDashboardContent({
             <p className="mt-0.5 text-sm text-slate-500">Ce mois-ci</p>
           </div>
           <div className="px-6 py-4">
-            <p className="text-2xl font-bold text-[#1d4ed8]">{actionsData.monthlyActionsUsed} crédits</p>
+            <p className="text-2xl font-bold text-[color:var(--client-700)]">{actionsData.monthlyActionsUsed} crédits</p>
             <p className="text-sm text-slate-600">≈ {Math.round((actionsData.monthlyActionsUsed * MINUTES_PER_ACTION) / 60)} h économisées</p>
           </div>
         </section>

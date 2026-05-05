@@ -46,6 +46,24 @@ interface ConnexionFormByGateProps {
   gate: ConnexionGate;
 }
 
+const badgeClassByGate: Record<ConnexionGate, string> = {
+  gerante:
+    "bg-[color:var(--primary-50)] text-[color:var(--accent-700)] border-slate-200",
+  agents:
+    "bg-[color:var(--agent-50)] text-[color:var(--agent-700)] border-[#e9d5ff]",
+  clients:
+    "bg-[color:var(--client-50)] text-[color:var(--client-700)] border-[#bbf7d0]",
+};
+
+const primaryButtonClassByGate: Record<ConnexionGate, string> = {
+  gerante:
+    "w-full rounded-xl border border-[color:var(--accent-600)]/70 bg-gradient-to-b from-[color:var(--accent-500)] via-[color:var(--accent-600)] to-[color:var(--accent-600)] px-4 py-3.5 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_4px_18px_rgba(29,78,216,0.38)] transition hover:border-[color:var(--accent-500)] hover:from-[color:var(--accent-600)] hover:via-[color:var(--accent-700)] hover:to-[color:var(--accent-700)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_6px_24px_rgba(29,78,216,0.45)] active:translate-y-px",
+  agents:
+    "w-full rounded-xl border border-[color:var(--agent-600)]/70 bg-gradient-to-b from-[color:var(--agent-500)] via-[color:var(--agent-600)] to-[color:var(--agent-600)] px-4 py-3.5 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_4px_18px_rgba(124,58,237,0.34)] transition hover:border-[color:var(--agent-500)] hover:from-[color:var(--agent-600)] hover:via-[color:var(--agent-700)] hover:to-[color:var(--agent-700)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_6px_24px_rgba(124,58,237,0.4)] active:translate-y-px",
+  clients:
+    "w-full rounded-xl border border-[color:var(--client-600)]/70 bg-gradient-to-b from-[color:var(--client-600)] via-[color:var(--client-600)] to-[color:var(--client-700)] px-4 py-3.5 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_4px_18px_rgba(22,163,74,0.28)] transition hover:border-[color:var(--client-600)] hover:from-[color:var(--client-600)] hover:via-[color:var(--client-700)] hover:to-[color:var(--client-700)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_6px_24px_rgba(22,163,74,0.32)] active:translate-y-px",
+};
+
 export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -104,8 +122,7 @@ export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
         }}
       />
       <div className="relative mx-auto w-full max-w-md">
-        <div className="rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_12px_40px_rgba(15,23,42,0.12),0_2px_0_rgba(255,255,255,0.6)_inset]">
-          <div className="card-frame rounded-2xl p-8 md:p-9">
+        <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-[0_26px_70px_-38px_rgba(15,23,42,0.35)] md:p-9">
             <div className="mb-6 flex flex-col gap-3 border-b border-[#c8d0dc]/60 pb-6 sm:flex-row sm:items-center sm:justify-between">
               <Link
                 href="/connexion"
@@ -113,12 +130,14 @@ export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
               >
                 ← Changer d&apos;espace
               </Link>
-              <span className="surface-metallic-light surface-metallic-light--badge-pill w-fit shrink-0 rounded-full px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-black shadow-sm">
+              <span
+                className={`w-fit shrink-0 rounded-full border px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] shadow-sm ${badgeClassByGate[gate]}`}
+              >
                 {config.badge}
               </span>
             </div>
 
-            <h1 className="text-metallic-black font-sans text-[1.75rem] font-semibold leading-tight tracking-tight md:text-[2rem]">
+            <h1 className="font-sans text-[1.75rem] font-semibold leading-tight tracking-tight text-slate-900 md:text-[2rem]">
               {config.title}
             </h1>
             <p className="mt-3 text-sm leading-relaxed text-black md:text-[0.9375rem]">{config.description}</p>
@@ -166,7 +185,7 @@ export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
 
               <button
                 type="submit"
-                className="w-full rounded-xl border border-[#2563eb]/70 bg-gradient-to-b from-[#3b82f6] via-[#2563eb] to-[#1d4ed8] px-4 py-3.5 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_4px_18px_rgba(29,78,216,0.38)] transition hover:border-[#3b82f6] hover:from-[#2563eb] hover:via-[#1d4ed8] hover:to-[#1e40af] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_6px_24px_rgba(29,78,216,0.45)] active:translate-y-px"
+                className={primaryButtonClassByGate[gate]}
               >
                 Se connecter
               </button>
@@ -193,13 +212,12 @@ export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
               </div>
               <Link
                 href="/"
-                className="surface-metallic-outline flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-[#1e293b] transition hover:text-black"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-slate-300 hover:shadow-md"
               >
                 <span aria-hidden>←</span>
                 Accueil BeWork
               </Link>
             </div>
-          </div>
         </div>
       </div>
     </div>

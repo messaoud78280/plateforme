@@ -116,7 +116,7 @@ export function AgentDashboardContent({
                 <div className="min-w-0 flex-1">
                   <Link
                     href={`/dashboard/taches/${task.id}`}
-                    className="font-medium text-slate-800 hover:text-blue-600 hover:underline"
+                    className="font-medium text-slate-800 hover:text-[color:var(--agent-600)] hover:underline"
                   >
                     {task.title}
                   </Link>
@@ -134,7 +134,7 @@ export function AgentDashboardContent({
                         task.status === "COMPLETE" ? "bg-green-100 text-green-800" :
                         task.status === "A_VALIDER" ? "bg-violet-100 text-violet-800" :
                         task.status === "EN_COURS" || task.status === "EN_ANALYSE" || task.status === "ASSIGNEE"
-                          ? "bg-blue-100 text-blue-800"
+                          ? "bg-[color:var(--agent-50)] text-[color:var(--agent-700)]"
                           : "bg-slate-100 text-slate-700"
                       }`}
                     >
@@ -146,7 +146,7 @@ export function AgentDashboardContent({
                 <div className="flex shrink-0 items-center gap-2">
                   <Link
                     href={`/dashboard/taches/${task.id}`}
-                    className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+                    className="rounded-lg bg-[color:var(--agent-600)] px-3 py-1.5 text-sm font-medium text-white hover:bg-[color:var(--agent-700)]"
                   >
                     Ouvrir la mission
                   </Link>
@@ -158,7 +158,7 @@ export function AgentDashboardContent({
         )}
         <Link
           href="/dashboard/taches"
-          className="mt-4 inline-block text-sm font-medium text-blue-600 hover:underline"
+          className="mt-4 inline-block text-sm font-medium text-[color:var(--agent-600)] hover:underline"
         >
           Voir toutes mes missions →
         </Link>
@@ -180,7 +180,7 @@ export function AgentDashboardContent({
               >
                 <Link
                   href={`/dashboard/taches/${task.id}`}
-                  className="font-medium text-slate-800 hover:text-blue-600 hover:underline"
+                  className="font-medium text-slate-800 hover:text-[color:var(--agent-600)] hover:underline"
                 >
                   {task.title}
                 </Link>
@@ -212,8 +212,10 @@ export function AgentDashboardContent({
               <Link
                 key={msg.id}
                 href={`/dashboard/taches/${msg.task.id}`}
-                className={`block rounded-lg border p-3 transition hover:border-blue-300 ${
-                  !msg.read ? "border-blue-200 bg-blue-50/50" : "border-slate-200 bg-white"
+                className={`block rounded-lg border p-3 transition hover:border-[color:var(--agent-500)]/40 ${
+                  !msg.read
+                    ? "border-[color:var(--agent-500)]/30 bg-[color:var(--agent-50)]"
+                    : "border-slate-200 bg-white"
                 }`}
               >
                 <p className="truncate text-sm text-slate-800">{msg.content}</p>
@@ -226,7 +228,7 @@ export function AgentDashboardContent({
         )}
         <Link
           href="/dashboard/messagerie"
-          className="mt-4 inline-block text-sm font-medium text-blue-600 hover:underline"
+          className="mt-4 inline-block text-sm font-medium text-[color:var(--agent-600)] hover:underline"
         >
           Voir la messagerie →
         </Link>

@@ -6,6 +6,9 @@ import { prisma } from "@/lib/prisma";
  * Affiche l'erreur exacte et le host utilisé, sans exposer le mot de passe.
  */
 export async function GET() {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
   const url = process.env.DATABASE_URL || process.env.DIRECT_URL || "";
   let host = "non défini";
   try {

@@ -2,14 +2,16 @@ import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
 
-// DIRECT_URL = connexion directe (5432). DATABASE_URL = pooler (6543) avec ?pgbouncer=true.
-// Sur Railway, utiliser DATABASE_URL (pooler) si DIRECT_URL est vide ou invalide.
+// Prisma Client (requêtes runtime) : DATABASE_URL (pooler Supabase 6543 recommandé avec ?pgbouncer=true).
+// DIRECT_URL sert surtout aux migrations / db push via `schema.prisma` `directUrl`.
 function getConnectionUrl(): string {
-  const rawDirect = (process.env.DIRECT_URL ?? "").trim();
-  const validDirect =
-    rawDirect && (rawDirect.startsWith("postgresql://") || rawDirect.startsWith("postgres://"));
-  const url = validDirect ? rawDirect : (process.env.DATABASE_URL ?? "").trim();
-  if (url && (url.startsWith("postgresql://") || url.startsWith("postgres://"))) return url;
+  const pool = (process.env.DATABASE_URL ?? "").trim();
+  const direct = (process.env.DIRECT_URL ?? "").trim();
+  const isPg = (u: string) =>
+    u.startsWith("postgresql://") || u.startsWith("postgres://");
+
+  if (pool && isPg(pool)) return pool;
+  if (direct && isPg(direct)) return direct;
   return "";
 }
 

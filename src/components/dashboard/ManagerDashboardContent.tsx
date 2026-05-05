@@ -65,14 +65,14 @@ function TaskCard({
         <div className="min-w-0 flex-1">
           <Link
             href={`/dashboard/taches/${task.id}`}
-            className="font-medium text-slate-800 hover:text-blue-600 hover:underline line-clamp-2"
+            className="line-clamp-2 font-medium text-slate-800 hover:text-[color:var(--accent-600)] hover:underline"
           >
             {task.title}
           </Link>
           <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm text-slate-500">
             <span>Client : {task.client.name}</span>
             {task.assignedTo && (
-              <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-800">
+              <span className="rounded-full bg-[color:var(--primary-50)] px-2 py-0.5 text-xs font-medium text-[color:var(--accent-700)]">
                 {task.assignedTo.name}
               </span>
             )}
@@ -99,7 +99,7 @@ function TaskCard({
               href={a.href}
               className={`rounded-lg px-2.5 py-1.5 text-xs font-medium ${
                 a.primary
-                  ? "bg-[#1d4ed8] text-white hover:bg-[#1e40af]"
+                  ? "bg-[color:var(--accent-600)] text-white hover:bg-[color:var(--accent-700)]"
                   : "surface-metallic-light text-slate-700 hover:bg-slate-50"
               }`}
             >
@@ -189,7 +189,7 @@ export function ManagerDashboardContent({
           {typeof actionsConsumees === "number" && (
             <div className="rounded-xl surface-metallic-light p-6">
               <h3 className="text-lg font-semibold text-slate-800">Crédits consommés</h3>
-              <p className="mt-2 text-3xl font-bold text-[#1d4ed8]">{actionsConsumees}</p>
+              <p className="mt-2 text-3xl font-bold text-[color:var(--accent-600)]">{actionsConsumees}</p>
               <p className="mt-1 text-sm text-slate-500">Total consommé par les clients ce mois</p>
             </div>
           )}
@@ -210,7 +210,10 @@ export function ManagerDashboardContent({
                   </li>
                 ))}
               </ul>
-              <Link href="/dashboard/taches" className="mt-3 inline-block text-sm font-medium text-[#1d4ed8] hover:underline">
+              <Link
+                href="/dashboard/taches"
+                className="mt-3 inline-block text-sm font-medium text-[color:var(--accent-600)] hover:underline"
+              >
                 Voir les missions →
               </Link>
             </div>
@@ -243,7 +246,7 @@ export function ManagerDashboardContent({
             {nouvellesDemandes.length > 5 && (
               <Link
                 href="/dashboard/taches?statut=NOUVEAU"
-                className="block pt-2 text-center text-sm font-medium text-[#1d4ed8] hover:underline"
+                className="block pt-2 text-center text-sm font-medium text-[color:var(--accent-600)] hover:underline"
               >
                 Voir toutes ({nouvellesDemandes.length}) →
               </Link>
@@ -277,7 +280,7 @@ export function ManagerDashboardContent({
             {aAssigner.length > 5 && (
               <Link
                 href="/dashboard/taches"
-                className="block pt-2 text-center text-sm font-medium text-[#1d4ed8] hover:underline"
+                className="block pt-2 text-center text-sm font-medium text-[color:var(--accent-600)] hover:underline"
               >
                 Voir tout →
               </Link>
@@ -292,7 +295,7 @@ export function ManagerDashboardContent({
           <h3 className="text-lg font-semibold text-slate-800">Missions en cours</h3>
           <Link
             href="/dashboard/taches?statut=EN_COURS"
-            className="text-sm font-medium text-[#1d4ed8] hover:underline"
+            className="text-sm font-medium text-[color:var(--accent-600)] hover:underline"
           >
             Voir tout
           </Link>
@@ -345,7 +348,7 @@ export function ManagerDashboardContent({
             {missionsAValider.length > 5 && (
               <Link
                 href="/dashboard/taches?statut=A_VALIDER"
-                className="block pt-2 text-center text-sm font-medium text-[#1d4ed8] hover:underline"
+                className="block pt-2 text-center text-sm font-medium text-[color:var(--accent-600)] hover:underline"
               >
                 Voir toutes ({missionsAValider.length}) →
               </Link>
@@ -360,7 +363,7 @@ export function ManagerDashboardContent({
           <h3 className="text-lg font-semibold text-slate-800">Missions terminées</h3>
           <Link
             href="/dashboard/taches?statut=COMPLETE"
-            className="text-sm font-medium text-[#1d4ed8] hover:underline"
+            className="text-sm font-medium text-[color:var(--accent-600)] hover:underline"
           >
             Voir l&apos;historique
           </Link>

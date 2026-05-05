@@ -26,6 +26,17 @@ html {
   --accent-600: #1d4ed8;
   --accent-700: #1e40af;
 
+  /* Accent Agents (violet/rose) */
+  --agent-50: #f5f3ff;
+  --agent-500: #a855f7;
+  --agent-600: #7c3aed;
+  --agent-700: #6d28d9;
+
+  /* Accent Clients (vert) */
+  --client-50: #dcfce7;
+  --client-600: #16a34a;
+  --client-700: #166534;
+
   /* Primary (aligné accent) */
   --primary-50: #eff6ff;
   --primary-500: #3b82f6;

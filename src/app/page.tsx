@@ -11,6 +11,7 @@ import { HomePricingSection } from "@/components/HomePricingSection";
 import { HomeSolutionSection } from "@/components/HomeSolutionSection";
 import { HomeSectorExamplesSection } from "@/components/HomeSectorExamplesSection";
 import { HeroPresentationVideo } from "@/components/HeroPresentationVideo";
+import { ConciergerieDirigeantSection } from "@/components/ConciergerieDirigeantSection";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import {
   formatPriceLabelFr,
@@ -246,14 +247,14 @@ export default function HomePage() {
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute right-[-6%] top-[-12rem] -bottom-[56rem] z-0 w-[46%] skew-x-[-12deg] opacity-[0.78] md:top-[-14rem] md:-bottom-[68rem]"
+            className="pointer-events-none absolute right-[-6%] top-[-12rem] -bottom-[92rem] z-0 w-[46%] skew-x-[-12deg] opacity-[0.78] md:top-[-14rem] md:-bottom-[112rem]"
             style={{
               background: "linear-gradient(135deg, #F8FAFC 0%, #D7E0EA 45%, #EEF3F8 100%)",
             }}
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute right-[-6%] top-[-12rem] -bottom-[56rem] z-0 w-[46%] skew-x-[-12deg] opacity-30 md:top-[-14rem] md:-bottom-[68rem]"
+            className="pointer-events-none absolute right-[-6%] top-[-12rem] -bottom-[92rem] z-0 w-[46%] skew-x-[-12deg] opacity-30 md:top-[-14rem] md:-bottom-[112rem]"
             style={{
               backgroundImage:
                 "repeating-linear-gradient(120deg, rgba(15,23,42,0.14) 0px, rgba(15,23,42,0.14) 1px, transparent 1px, transparent 7px)",
@@ -462,52 +463,9 @@ export default function HomePage() {
 
             {/* Même fond courbe grise que le hero / sections précédentes */}
             <HomeSectorExamplesSection />
+            <ConciergerieDirigeantSection />
           </div>
         </div>
-
-        {/* Service de conciergerie — sur devis, 24/24 */}
-        <section id="conciergerie" className="px-6 py-24 md:py-28">
-          <div className="card-frame mx-auto max-w-site rounded-xl border-2 border-[#1d4ed8]/20 p-10 md:p-14">
-            <div className="flex flex-wrap items-start justify-between gap-6">
-              <div className="max-w-2xl">
-                <h2 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
-                  Conciergerie d&apos;entreprise
-                </h2>
-                <p className="mt-5 text-lg leading-relaxed text-black">
-                  Au-delà du pilotage administratif, BeWork propose une{" "}
-                  <strong className="text-black">conciergerie professionnelle</strong> pour vos imprévus de dirigeant :
-                  déplacements, réservations, recherches pointues — exécutées à distance (appels, mails, confirmations) en
-                  votre nom. Disponibilité 24h/24, tarif sur mesure.
-                </p>
-                <ul className="mt-6 grid gap-2 sm:grid-cols-2 text-black">
-                  {[
-                    "Réservation hôtel & hébergement",
-                    "Recherche location véhicule, engin ou matériel (sous votre validation)",
-                    "Réservation restaurant & organisation de déplacements",
-                    "Coordination prestataires et créneaux (hors site)",
-                    "Recherche & comparaison sur mesure",
-                    "Envoi de cadeaux & attentions clients / équipes",
-                  ].map((item, i) => (
-                    <li key={i} className="flex gap-2">
-                      <span className="text-[#1d4ed8] shrink-0">✓</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/contact"
-                  className="mt-8 inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white shadow-md transition-all hover:bg-[#1e40af] hover:shadow-lg"
-                >
-                  Demander un devis conciergerie
-                </Link>
-              </div>
-              <div className="rounded-lg border border-[#1d4ed8]/30 bg-[#eff6ff] px-5 py-4">
-                <p className="text-sm font-semibold text-black">Sur devis personnalisé</p>
-                <p className="mt-1 text-sm text-black">Tarif adapté à vos besoins et au volume de demandes. 24h/24.</p>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* Ressources */}
         <section id="ressources" className="px-6 py-24 md:py-28">

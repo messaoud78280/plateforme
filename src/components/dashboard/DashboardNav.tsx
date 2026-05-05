@@ -5,18 +5,19 @@ import { usePathname } from "next/navigation";
 
 const linkBase =
   "inline-flex items-center rounded-md text-xs font-medium sm:text-sm transition-colors";
-const activeClass = `${linkBase} bg-[#1d4ed8] px-2.5 py-1.5 font-semibold text-white hover:bg-[#1e40af]`;
 const inactiveClass = `${linkBase} px-2.5 py-1.5 text-black hover:bg-[#e8ecf2] hover:text-black`;
 
 function NavLink({
   href,
   children,
   pathname,
+  activeClass,
   matchExact = false,
 }: {
   href: string;
   children: React.ReactNode;
   pathname: string;
+  activeClass: string;
   matchExact?: boolean;
 }) {
   const isActive = matchExact ? pathname === href : pathname === href || pathname.startsWith(href + "/");
@@ -32,42 +33,88 @@ export function DashboardNav({ role }: { role?: string | null }) {
   const isClient = role === "CLIENT";
   const isManager = role === "MANAGER";
   const isAgent = role === "AGENT" || role === "AGENCE";
+  const activeClass = `${linkBase} bg-[color:var(--accent-600)] px-2.5 py-1.5 font-semibold text-white hover:bg-[color:var(--accent-700)]`;
+  const activeClassAgent = `${linkBase} bg-[color:var(--agent-600)] px-2.5 py-1.5 font-semibold text-white hover:bg-[color:var(--agent-700)]`;
+  const activeClassClient = `${linkBase} bg-[color:var(--client-600)] px-2.5 py-1.5 font-semibold text-white hover:bg-[color:var(--client-700)]`;
+  const active = isAgent ? activeClassAgent : isClient ? activeClassClient : activeClass;
 
   return (
     <nav className="border-b border-[#c8cdd6] bg-[#f8f9fb] px-3 sm:px-4" aria-label="Navigation tableau de bord">
       <div className="dashboard-nav__links mx-auto flex max-w-site flex-nowrap items-center justify-start gap-x-0 py-1.5 sm:py-2">
-        <NavLink href="/dashboard" pathname={pathname} matchExact>Dashboard</NavLink>
+        <NavLink href="/dashboard" pathname={pathname} matchExact activeClass={active}>
+          Dashboard
+        </NavLink>
         {isClient ? (
           <>
-            <NavLink href="/dashboard/taches" pathname={pathname}>Mes missions</NavLink>
-            <NavLink href="/dashboard/messagerie" pathname={pathname}>Messagerie</NavLink>
-            <NavLink href="/dashboard/abonnement" pathname={pathname}>Abonnement</NavLink>
-            <NavLink href="/dashboard/parametres" pathname={pathname}>Paramètres</NavLink>
+            <NavLink href="/dashboard/taches" pathname={pathname} activeClass={active}>
+              Mes missions
+            </NavLink>
+            <NavLink href="/dashboard/messagerie" pathname={pathname} activeClass={active}>
+              Messagerie
+            </NavLink>
+            <NavLink href="/dashboard/abonnement" pathname={pathname} activeClass={active}>
+              Abonnement
+            </NavLink>
+            <NavLink href="/dashboard/parametres" pathname={pathname} activeClass={active}>
+              Paramètres
+            </NavLink>
           </>
         ) : isManager ? (
           <>
-            <NavLink href="/dashboard/taches" pathname={pathname}>Missions</NavLink>
-            <NavLink href="/dashboard/clients" pathname={pathname}>Clients</NavLink>
-            <NavLink href="/dashboard/agents" pathname={pathname}>Agents</NavLink>
-            <NavLink href="/dashboard/messagerie" pathname={pathname}>Messagerie</NavLink>
-            <NavLink href="/dashboard/rapports" pathname={pathname}>Rapports</NavLink>
-            <NavLink href="/dashboard/parametres" pathname={pathname}>Paramètres</NavLink>
+            <NavLink href="/dashboard/taches" pathname={pathname} activeClass={active}>
+              Missions
+            </NavLink>
+            <NavLink href="/dashboard/clients" pathname={pathname} activeClass={active}>
+              Clients
+            </NavLink>
+            <NavLink href="/dashboard/agents" pathname={pathname} activeClass={active}>
+              Agents
+            </NavLink>
+            <NavLink href="/dashboard/messagerie" pathname={pathname} activeClass={active}>
+              Messagerie
+            </NavLink>
+            <NavLink href="/dashboard/rapports" pathname={pathname} activeClass={active}>
+              Rapports
+            </NavLink>
+            <NavLink href="/dashboard/parametres" pathname={pathname} activeClass={active}>
+              Paramètres
+            </NavLink>
           </>
         ) : isAgent ? (
           <>
-            <NavLink href="/dashboard/taches" pathname={pathname}>Mes missions</NavLink>
-            <NavLink href="/dashboard/messagerie" pathname={pathname}>Messagerie</NavLink>
-            <NavLink href="/dashboard/taches?statut=COMPLETE" pathname={pathname}>Historique</NavLink>
-            <NavLink href="/dashboard/parametres" pathname={pathname}>Paramètres</NavLink>
+            <NavLink href="/dashboard/taches" pathname={pathname} activeClass={active}>
+              Mes missions
+            </NavLink>
+            <NavLink href="/dashboard/messagerie" pathname={pathname} activeClass={active}>
+              Messagerie
+            </NavLink>
+            <NavLink href="/dashboard/taches?statut=COMPLETE" pathname={pathname} activeClass={active}>
+              Historique
+            </NavLink>
+            <NavLink href="/dashboard/parametres" pathname={pathname} activeClass={active}>
+              Paramètres
+            </NavLink>
           </>
         ) : (
           <>
-            <NavLink href="/dashboard/projets" pathname={pathname}>Projets</NavLink>
-            <NavLink href="/dashboard/taches" pathname={pathname}>Mes tâches</NavLink>
-            <NavLink href="/dashboard/documents" pathname={pathname}>Mes documents</NavLink>
-            <NavLink href="/dashboard/messagerie" pathname={pathname}>Messagerie</NavLink>
-            <NavLink href="/dashboard/messages" pathname={pathname}>RDV</NavLink>
-            <NavLink href="/dashboard/rapports" pathname={pathname}>Rapports</NavLink>
+            <NavLink href="/dashboard/projets" pathname={pathname} activeClass={active}>
+              Projets
+            </NavLink>
+            <NavLink href="/dashboard/taches" pathname={pathname} activeClass={active}>
+              Mes tâches
+            </NavLink>
+            <NavLink href="/dashboard/documents" pathname={pathname} activeClass={active}>
+              Mes documents
+            </NavLink>
+            <NavLink href="/dashboard/messagerie" pathname={pathname} activeClass={active}>
+              Messagerie
+            </NavLink>
+            <NavLink href="/dashboard/messages" pathname={pathname} activeClass={active}>
+              RDV
+            </NavLink>
+            <NavLink href="/dashboard/rapports" pathname={pathname} activeClass={active}>
+              Rapports
+            </NavLink>
           </>
         )}
       </div>

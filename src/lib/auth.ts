@@ -1,10 +1,30 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import EmailProvider from "next-auth/providers/email";
 import bcrypt from "bcryptjs";
+import { prismaAdapterCaseInsensitiveEmail } from "./auth-adapter";
 import { prisma } from "./prisma";
 
 export const authOptions: NextAuthOptions = {
+  adapter: prismaAdapterCaseInsensitiveEmail(prisma),
   providers: [
+    EmailProvider({
+      // 24h pour utiliser le lien (option B)
+      maxAge: 24 * 60 * 60,
+      server: {
+        host: process.env.SMTP_HOST,
+        port: Number(process.env.SMTP_PORT || "587"),
+        secure:
+          (process.env.SMTP_SECURE ?? "").trim().toLowerCase() === "true" ||
+          (process.env.SMTP_SECURE ?? "").trim() === "1" ||
+          (!(process.env.SMTP_SECURE ?? "").trim() && Number(process.env.SMTP_PORT || "587") === 465),
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      },
+      from: process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER,
+    }),
     CredentialsProvider({
       name: "Identifiants",
       credentials: {

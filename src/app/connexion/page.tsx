@@ -4,6 +4,19 @@ import Link from "next/link";
 import { Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 
+function IconShield({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 2.25l7.5 4.125V12c0 5.25-3.75 9.75-7.5 9.75S4.5 17.25 4.5 12V6.375L12 2.25Z"
+      />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 12l1.5 1.5L15.75 9" />
+    </svg>
+  );
+}
+
 function IconBriefcase({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden>
@@ -46,6 +59,8 @@ const ACCES = [
     badge: "Connexion gérant",
     title: "Espace Gérante / Managers",
     description: "Accès réservé à la gérante et aux managers de l'agence.",
+    emphasis: "Pilotage global, suivi des chantiers et performance.",
+    accent: "blue",
     path: "/connexion/gerante",
     Icon: IconBriefcase,
   },
@@ -54,6 +69,8 @@ const ACCES = [
     badge: "Connexion agent",
     title: "Espace Agents",
     description: "Accès pour les agents opérationnels.",
+    emphasis: "Traitement des missions, coordination et suivi opérationnel.",
+    accent: "violet",
     path: "/connexion/agents",
     Icon: IconUser,
   },
@@ -62,10 +79,39 @@ const ACCES = [
     badge: "Connexion client",
     title: "Espace Clients",
     description: "Accès pour les clients de l'agence.",
+    emphasis: "Suivi de vos demandes, échanges et avancement en temps réel.",
+    accent: "green",
     path: "/connexion/clients",
     Icon: IconBuilding,
   },
 ] as const;
+
+type Accent = (typeof ACCES)[number]["accent"];
+
+function getAccent(acc: Accent) {
+  if (acc === "violet") {
+    return {
+      badge: "bg-[color:var(--agent-50)] text-[color:var(--agent-700)] border-[#e9d5ff]",
+      iconWrap: "bg-[color:var(--agent-50)] text-[color:var(--agent-700)] border-[#e9d5ff]",
+      emphasis: "text-[color:var(--agent-700)]",
+      link: "text-[color:var(--agent-700)]",
+    } as const;
+  }
+  if (acc === "green") {
+    return {
+      badge: "bg-[color:var(--client-50)] text-[color:var(--client-700)] border-[#bbf7d0]",
+      iconWrap: "bg-[color:var(--client-50)] text-[color:var(--client-700)] border-[#bbf7d0]",
+      emphasis: "text-[color:var(--client-700)]",
+      link: "text-[color:var(--client-700)]",
+    } as const;
+  }
+  return {
+    badge: "bg-[color:var(--primary-50)] text-[color:var(--accent-600)] border-[#bfdbfe]",
+    iconWrap: "bg-[color:var(--primary-50)] text-[color:var(--accent-600)] border-[#bfdbfe]",
+    emphasis: "text-[color:var(--accent-600)]",
+    link: "text-[color:var(--accent-600)]",
+  } as const;
+}
 
 function ConnexionChoice() {
   const searchParams = useSearchParams();
@@ -73,48 +119,67 @@ function ConnexionChoice() {
   const query = useMemo(() => (callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""), [callbackUrl]);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#dce2ea] px-4 py-10 md:py-14">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9] px-4 py-10 md:py-14">
+      {/* Fond métallisé incliné à droite (style accueil) */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.35]"
         aria-hidden
+        className="pointer-events-none absolute right-[-6%] top-[-12rem] -bottom-[56rem] z-0 w-[46%] skew-x-[-12deg] opacity-[0.78] md:top-[-14rem] md:-bottom-[68rem]"
         style={{
-          background:
-            "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 130, 246, 0.12), transparent 55%)",
+          background: "linear-gradient(135deg, #F8FAFC 0%, #D7E0EA 45%, #EEF3F8 100%)",
         }}
       />
-      <div className="relative mx-auto w-full max-w-4xl">
-        <div className="rounded-2xl bg-gradient-to-br from-[#c8d0dc] via-white/90 to-[#a8b4c8] p-[1px] shadow-[0_12px_40px_rgba(15,23,42,0.12),0_2px_0_rgba(255,255,255,0.6)_inset]">
-          <div className="card-frame rounded-2xl p-8 md:p-10">
-            <header className="mb-10 border-b border-[#c8d0dc]/60 pb-8 text-center">
-              <h1 className="text-metallic-black font-sans text-[1.85rem] font-semibold leading-tight tracking-tight md:text-[2.25rem]">
-                Plateforme BeWork
+      <div
+        aria-hidden
+        className="pointer-events-none absolute right-[-6%] top-[-12rem] -bottom-[56rem] z-0 w-[46%] skew-x-[-12deg] opacity-30 md:top-[-14rem] md:-bottom-[68rem]"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(120deg, rgba(15,23,42,0.14) 0px, rgba(15,23,42,0.14) 1px, transparent 1px, transparent 7px)",
+        }}
+      />
+      <div
+        className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-white/60 via-transparent to-transparent"
+        aria-hidden
+      />
+
+      <div className="container-site relative z-10">
+        <div className="mx-auto w-full max-w-4xl">
+          <div className="rounded-3xl border border-slate-200/80 bg-white/85 p-8 shadow-[0_18px_55px_-28px_rgba(15,23,42,0.18)] ring-1 ring-slate-100/80 backdrop-blur-[2px] md:p-10">
+            <header className="mb-8 border-b border-[#c8d0dc]/60 pb-6 text-center">
+              <h1 className="font-sans text-[1.9rem] font-extrabold leading-tight tracking-tight text-slate-950 md:text-[2.4rem]">
+                Accédez à votre espace <span className="text-[#2F5BFF]">BeWork</span>
               </h1>
-              <p className="mt-3 text-sm leading-relaxed text-black md:text-base">
-                Choisissez votre espace de connexion
+              <p className="mt-2 text-sm leading-relaxed text-slate-700 md:text-base">
+                Un accès sécurisé à votre espace de travail, adapté à votre rôle.
               </p>
             </header>
 
             <div className="grid gap-4 sm:grid-cols-3">
               {ACCES.map((acc) => {
                 const { Icon } = acc;
+                const a = getAccent(acc.accent);
                 return (
                   <Link
                     key={acc.slug}
                     href={`${acc.path}${query}`}
-                    className="surface-metallic-light group flex flex-col rounded-xl p-5 transition-all duration-200 hover:border-[#93c5fd]/80 hover:shadow-[0_8px_28px_rgba(29,78,216,0.12)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#eef0f4] md:p-6"
+                    className="group flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_26px_70px_-38px_rgba(15,23,42,0.35)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#93c5fd]/80 hover:shadow-[0_34px_90px_-44px_rgba(15,23,42,0.42)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white md:p-6"
                     aria-label={`${acc.title} — ${acc.description}`}
                   >
-                    <span className="surface-metallic-light surface-metallic-light--badge-pill mb-4 w-fit rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-black shadow-sm">
+                    <span
+                      className={`mb-4 w-fit rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] shadow-sm ${a.badge}`}
+                    >
                       {acc.badge}
                     </span>
-                    <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg border border-[#bfdbfe]/60 bg-gradient-to-br from-[#eff6ff] to-[#dbeafe]/90 text-[#1d4ed8] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] transition group-hover:border-[#93c5fd] group-hover:text-[#1e40af]">
+                    <span
+                      className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl border shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] transition group-hover:brightness-[0.98] ${a.iconWrap}`}
+                    >
                       <Icon className="h-7 w-7" />
                     </span>
                     <h2 className="mb-2 font-sans text-lg font-semibold leading-snug tracking-tight text-black md:text-xl">
                       {acc.title}
                     </h2>
-                    <p className="text-sm leading-relaxed text-black">{acc.description}</p>
-                    <span className="mt-4 text-xs font-semibold text-[#1d4ed8] transition group-hover:text-[#1e40af]">
+                    <p className="text-sm leading-relaxed text-slate-700">{acc.description}</p>
+                    <p className={`mt-3 text-sm font-semibold leading-relaxed ${a.emphasis}`}>{acc.emphasis}</p>
+                    <span className={`mt-4 text-xs font-semibold transition group-hover:opacity-90 ${a.link}`}>
                       Se connecter →
                     </span>
                   </Link>
@@ -125,7 +190,7 @@ function ConnexionChoice() {
             <div className="mt-10 flex flex-col gap-3 border-t border-[#c8d0dc]/50 pt-8 sm:flex-row sm:justify-center sm:gap-4">
               <Link
                 href="/"
-                className="surface-metallic-outline flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-[#1e293b] transition hover:text-black"
+                className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
               >
                 <span aria-hidden>←</span>
                 Retour à l&apos;accueil
@@ -137,6 +202,14 @@ function ConnexionChoice() {
                 Créer un compte (clients)
               </Link>
             </div>
+
+            <p className="mt-4 text-center text-xs text-slate-700 md:text-sm">
+              Besoin d&apos;aide ?{" "}
+              <Link href="/contact" className="font-semibold text-[#1d4ed8] hover:text-[#1e40af]">
+                Contactez-nous
+              </Link>
+              .
+            </p>
           </div>
         </div>
       </div>
@@ -148,7 +221,7 @@ export default function ConnexionPage() {
   return (
     <Suspense
       fallback={
-        <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#dce2ea] px-4">
+        <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-b from-white via-[#fdfefe] to-[#F8FAFC] px-4">
           <p className="text-sm font-medium text-black">Chargement…</p>
         </div>
       }

@@ -29,7 +29,16 @@ function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(e);
 }
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+/** Lecture au runtime : évite Resend désactivé si le module était chargé avant les env (certains environnements). */
+function hasResendApiKey(): boolean {
+  return Boolean((process.env.RESEND_API_KEY ?? "").trim());
+}
+
+function getResendClient(): Resend | null {
+  const key = (process.env.RESEND_API_KEY ?? "").trim();
+  if (!key) return null;
+  return new Resend(key);
+}
 
 function formatSmtpFromHeader(): string {
   const name = (process.env.SMTP_FROM_NAME || process.env.RESEND_FROM_NAME || "BeWork").trim();
@@ -51,13 +60,37 @@ function smtpConfigured(): boolean {
   return Boolean(host && user && pass);
 }
 
-/** Retourne `true` si au moins un transport a accepté le message. */
+/** Retourne `true` si au moins un transport a accepté le message. Resend est essayé en premier (adapté Railway sans SMTP). */
 async function sendTransactionalEmail(params: {
   to: string | string[];
   subject: string;
   html: string;
   replyTo?: string;
 }): Promise<boolean> {
+  const resendClient = getResendClient();
+  if (resendClient) {
+    try {
+      const { error, data } = await resendClient.emails.send({
+        from: formatResendFromHeader(),
+        to: params.to,
+        subject: params.subject,
+        html: params.html,
+        ...(params.replyTo ? { replyTo: params.replyTo } : {}),
+      });
+      if (error) {
+        console.error(
+          "[Email] Resend a refusé l’envoi (domaine/expéditeur ou quota). Détail:",
+          typeof error === "object" ? JSON.stringify(error) : error
+        );
+      } else {
+        console.info("[Email] Resend envoyé:", { to: params.to, id: data?.id });
+        return true;
+      }
+    } catch (e) {
+      console.error("[Email] Resend exception:", e);
+    }
+  }
+
   if (smtpConfigured()) {
     const host = process.env.SMTP_HOST!.trim();
     const port = Number(process.env.SMTP_PORT || "587");
@@ -90,37 +123,17 @@ async function sendTransactionalEmail(params: {
       return true;
     } catch (e) {
       console.error("SMTP send error:", e);
-      if (!resend) {
-        console.error("No RESEND_API_KEY configured; cannot fallback after SMTP failure.");
+      if (!hasResendApiKey()) {
+        console.error("Pas de RETRY Resend : RESEND_API_KEY non défini.");
       }
-    }
-  }
-
-  if (!resend) {
-    if (!smtpConfigured()) {
-      console.error("Email not sent: configure SMTP_* or RESEND_API_KEY.");
-    }
-    return false;
-  }
-
-  try {
-    const { error, data } = await resend.emails.send({
-      from: formatResendFromHeader(),
-      to: params.to,
-      subject: params.subject,
-      html: params.html,
-      ...(params.replyTo ? { replyTo: params.replyTo } : {}),
-    });
-    if (error) {
-      console.error("Resend error:", error);
       return false;
     }
-    console.info("[Email] Resend envoyé:", { to: params.to, id: data?.id });
-    return true;
-  } catch (e) {
-    console.error("Resend send error:", e);
-    return false;
   }
+
+  if (!hasResendApiKey() && !smtpConfigured()) {
+    console.error("Email not sent: configure RESEND_API_KEY ou SMTP_* sur l’hébergeur.");
+  }
+  return false;
 }
 
 function absoluteUrlFromBase(baseUrl: string | undefined, path: string): string {
@@ -143,7 +156,7 @@ export async function sendWelcomeEmail(
     console.warn("[sendWelcomeEmail] email invalide:", user.email);
     return { ok: false, reason: "invalid_email" };
   }
-  if (!smtpConfigured() && !resend) {
+  if (!smtpConfigured() && !hasResendApiKey()) {
     console.warn("[sendWelcomeEmail] ignoré : aucune config SMTP ni RESEND_API_KEY.");
     return { ok: false, reason: "no_mail_provider" };
   }
@@ -258,7 +271,7 @@ export async function sendNewTaskEmail(params: {
   clientName: string;
   clientEmail?: string | null;
 }) {
-  if (!smtpConfigured() && !resend) return;
+  if (!smtpConfigured() && !hasResendApiKey()) return;
   const to =
     parseList(process.env.NEW_TASK_EMAIL_TO).length > 0
       ? parseList(process.env.NEW_TASK_EMAIL_TO)
@@ -344,7 +357,7 @@ export async function sendAdminNewUserNotification(user: {
 
   const to = parseList(rawTo).filter((e) => isValidEmail(e));
   if (to.length === 0) return;
-  if (!smtpConfigured() && !resend) return;
+  if (!smtpConfigured() && !hasResendApiKey()) return;
 
   const created =
     user.createdAt instanceof Date

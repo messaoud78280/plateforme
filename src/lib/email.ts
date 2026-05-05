@@ -82,6 +82,15 @@ async function sendTransactionalEmail(params: {
           "[Email] Resend a refusé l’envoi (domaine/expéditeur ou quota). Détail:",
           typeof error === "object" ? JSON.stringify(error) : error
         );
+        const errObj = error as { statusCode?: number; message?: string };
+        if (
+          errObj?.statusCode === 401 ||
+          String(errObj?.message ?? "").toLowerCase().includes("api key")
+        ) {
+          console.error(
+            "[Email] → Corrigez RESEND_API_KEY sur Railway : Resend → API Keys → nouvelle clé « Sending access ». Coller la valeur seule (sans guillemets). Révoquez les anciennes clés invalides."
+          );
+        }
       } else {
         console.info("[Email] Resend envoyé:", { to: params.to, id: data?.id });
         return true;

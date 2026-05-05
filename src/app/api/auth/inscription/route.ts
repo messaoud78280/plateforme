@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { isWellFormedEmail } from "@/lib/email-validation";
 import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
 import { UserRole } from "@prisma/client";
 import { sendAdminNewUserNotification, sendWelcomeEmail } from "@/lib/email";
@@ -26,7 +27,18 @@ export async function POST(request: Request) {
       );
     }
 
-    const emailNorm = String(email).trim().toLowerCase();
+    const emailRaw = String(email).trim();
+    if (!isWellFormedEmail(emailRaw)) {
+      return NextResponse.json(
+        {
+          error:
+            "Adresse email invalide ou incomplète (ex. il manque « .com », « .fr » après votre fournisseur @gmail, @yahoo, etc.).",
+        },
+        { status: 400 }
+      );
+    }
+
+    const emailNorm = emailRaw.toLowerCase();
 
     const existing = await prisma.user.findUnique({
       where: { email: emailNorm },
@@ -81,15 +93,22 @@ export async function POST(request: Request) {
       role: user.role,
     });
   } catch (error: unknown) {
-    const err = error as { code?: string; message?: string };
-    console.error("Erreur inscription:", err?.message ?? error);
+    const err = error as { code?: string; message?: string; meta?: { target?: unknown } };
+    console.error("Erreur inscription:", err?.code ?? "", err?.message ?? error);
 
-    // Base de données indisponible (ex: Supabase down / mauvais host / mauvais port)
-    if ((err?.message ?? "").includes("Can't reach database server")) {
+    const msg = (err?.message ?? "").toLowerCase();
+
+    // Base / connexion Postgres (Supabase, Railway…)
+    if (
+      msg.includes("can't reach database server") ||
+      msg.includes("server has closed the connection") ||
+      err?.code === "P1001" ||
+      err?.code === "P1017"
+    ) {
       return NextResponse.json(
         {
           error:
-            "Service momentanément indisponible : la base de données ne répond pas. Réessayez dans quelques minutes ou contactez le support.",
+            "La base de données est injoignable depuis le serveur. Vérifiez DATABASE_URL (pooler SSL) et le pare-feu sur le tableau d’hébergement.",
         },
         { status: 503 }
       );
@@ -102,11 +121,20 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-    // Table ou colonne absente en base
-    if (err?.code === "P2021" || err?.code === "P2010") {
+    // Table ou colonne absente — souvent après déploiement sans prisma db push
+    if (
+      err?.code === "P2021" ||
+      err?.code === "P2010" ||
+      err?.code === "P2022" ||
+      msg.includes("does not exist") ||
+      (msg.includes("column") && msg.includes("not found"))
+    ) {
       return NextResponse.json(
-        { error: "Configuration base de données incomplète. Contactez l'administrateur." },
-        { status: 500 }
+        {
+          error:
+            "Schéma base de données non à jour sur ce serveur. Exécutez « npx prisma db push » sur la base de production puis redémarrez.",
+        },
+        { status: 503 }
       );
     }
 

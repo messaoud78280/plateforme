@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { BackLink } from "@/components/ui/BackLink";
+import { isWellFormedEmail } from "@/lib/email-validation";
 
 const FORMES_JURIDIQUES = [
   "Profession libérale",
@@ -54,6 +55,13 @@ export default function InscriptionPage() {
     e.preventDefault();
     setError("");
 
+    if (!isWellFormedEmail(email)) {
+      setError(
+        "Indiquez une adresse email complète (ex. nom@gmail.com, contact@entreprise.fr)."
+      );
+      return;
+    }
+
     const res = await fetch("/api/auth/inscription", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -69,7 +77,15 @@ export default function InscriptionPage() {
       }),
     });
 
-    const data = await res.json();
+    let data: { error?: string };
+    try {
+      data = (await res.json()) as { error?: string };
+    } catch {
+      setError(
+        `Réponse serveur invalide (${res.status}). En production, vérifiez DATABASE_URL et un schéma à jour (prisma db push).`
+      );
+      return;
+    }
 
     if (!res.ok) {
       setError(data.error ?? "Erreur lors de l'inscription.");

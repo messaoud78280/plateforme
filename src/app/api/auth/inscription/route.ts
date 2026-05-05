@@ -71,7 +71,11 @@ export async function POST(request: Request) {
 
     // Email de bienvenue (non bloquant : ne doit pas empêcher l'inscription)
     const baseUrl = new URL(request.url).origin;
-    sendWelcomeEmail({ email: user.email, name: user.name }, { baseUrl }).catch((e) => {
+    sendWelcomeEmail({ email: user.email, name: user.name }, { baseUrl }).then((r) => {
+      if (!r.ok) {
+        console.error("[inscription] Mail de bienvenue non envoyé — raison:", r.reason);
+      }
+    }).catch((e) => {
       console.error("sendWelcomeEmail route error:", e);
     });
 

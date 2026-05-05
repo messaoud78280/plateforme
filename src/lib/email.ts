@@ -51,12 +51,13 @@ function smtpConfigured(): boolean {
   return Boolean(host && user && pass);
 }
 
+/** Retourne `true` si au moins un transport a accepté le message. */
 async function sendTransactionalEmail(params: {
   to: string | string[];
   subject: string;
   html: string;
   replyTo?: string;
-}) {
+}): Promise<boolean> {
   if (smtpConfigured()) {
     const host = process.env.SMTP_HOST!.trim();
     const port = Number(process.env.SMTP_PORT || "587");
@@ -86,14 +87,12 @@ async function sendTransactionalEmail(params: {
         ...(params.replyTo ? { replyTo: params.replyTo } : {}),
       });
       console.info("[Email] SMTP envoyé:", { to: params.to, messageId: info.messageId });
-      return;
+      return true;
     } catch (e) {
       console.error("SMTP send error:", e);
       if (!resend) {
         console.error("No RESEND_API_KEY configured; cannot fallback after SMTP failure.");
-        return;
       }
-      // fallback Resend below
     }
   }
 
@@ -101,7 +100,7 @@ async function sendTransactionalEmail(params: {
     if (!smtpConfigured()) {
       console.error("Email not sent: configure SMTP_* or RESEND_API_KEY.");
     }
-    return;
+    return false;
   }
 
   try {
@@ -112,10 +111,15 @@ async function sendTransactionalEmail(params: {
       html: params.html,
       ...(params.replyTo ? { replyTo: params.replyTo } : {}),
     });
-    if (error) console.error("Resend error:", error);
-    else console.info("[Email] Resend envoyé:", { to: params.to, id: data?.id });
+    if (error) {
+      console.error("Resend error:", error);
+      return false;
+    }
+    console.info("[Email] Resend envoyé:", { to: params.to, id: data?.id });
+    return true;
   } catch (e) {
     console.error("Resend send error:", e);
+    return false;
   }
 }
 
@@ -127,14 +131,21 @@ function absoluteUrlFromBase(baseUrl: string | undefined, path: string): string 
   return absoluteUrl(p);
 }
 
+export type SendWelcomeEmailResult =
+  | { ok: true }
+  | { ok: false; reason: string };
+
 export async function sendWelcomeEmail(
   user: { email: string; name?: string | null },
   opts?: { baseUrl?: string }
-) {
-  if (!isValidEmail(user.email)) return;
+): Promise<SendWelcomeEmailResult> {
+  if (!isValidEmail(user.email)) {
+    console.warn("[sendWelcomeEmail] email invalide:", user.email);
+    return { ok: false, reason: "invalid_email" };
+  }
   if (!smtpConfigured() && !resend) {
     console.warn("[sendWelcomeEmail] ignoré : aucune config SMTP ni RESEND_API_KEY.");
-    return;
+    return { ok: false, reason: "no_mail_provider" };
   }
 
   const firstName = (user.name ?? "").trim();
@@ -229,9 +240,15 @@ export async function sendWelcomeEmail(
   `.trim();
 
   try {
-    await sendTransactionalEmail({ to, subject, html });
+    const sent = await sendTransactionalEmail({ to, subject, html });
+    if (!sent) {
+      console.error("[sendWelcomeEmail] échec transport (SMTP/Resend). Voir logs ci-dessus.");
+      return { ok: false, reason: "transport_failed" };
+    }
+    return { ok: true };
   } catch (e) {
     console.error("sendWelcomeEmail error:", e);
+    return { ok: false, reason: "exception" };
   }
 }
 

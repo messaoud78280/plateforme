@@ -26,7 +26,11 @@ async function main() {
       );
       process.exit(1);
     }
-    await sendWelcomeEmail({ email, name }, { baseUrl: origin });
+    const r = await sendWelcomeEmail({ email, name }, { baseUrl: origin });
+    if (!r.ok) {
+      console.error("Échec envoi mail de bienvenue:", r.reason);
+      process.exit(1);
+    }
     console.log("Mail envoyé.", { to: email, origin });
   } finally {
     await prisma.$disconnect();

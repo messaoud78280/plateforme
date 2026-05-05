@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { isWellFormedEmail } from "@/lib/email-validation";
 import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
-import { UserRole } from "@prisma/client";
+import { Prisma, UserRole } from "@prisma/client";
 import { sendAdminNewUserNotification, sendWelcomeEmail } from "@/lib/email";
 
 export async function POST(request: Request) {
@@ -93,46 +93,74 @@ export async function POST(request: Request) {
       role: user.role,
     });
   } catch (error: unknown) {
-    const err = error as { code?: string; message?: string; meta?: { target?: unknown } };
-    console.error("Erreur inscription:", err?.code ?? "", err?.message ?? error);
+    console.error("Erreur inscription:", error);
 
-    const msg = (err?.message ?? "").toLowerCase();
+    const msg = (error instanceof Error ? error.message : String(error)).toLowerCase();
 
-    // Base / connexion Postgres (Supabase, Railway…)
-    if (
-      msg.includes("can't reach database server") ||
-      msg.includes("server has closed the connection") ||
-      err?.code === "P1001" ||
-      err?.code === "P1017"
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "La base de données est injoignable depuis le serveur. Vérifiez DATABASE_URL (pooler SSL) et le pare-feu sur le tableau d’hébergement.",
-        },
-        { status: 503 }
-      );
+    // Connexion DB : Prisma met le code dans `errorCode`, pas dans `code`
+    if (error instanceof Prisma.PrismaClientInitializationError) {
+      const c = error.errorCode ?? "";
+      if (["P1001", "P1000", "P1011", "P1017"].includes(c) || msg.includes("can't reach database server")) {
+        return NextResponse.json(
+          {
+            error:
+              "La base de données est injoignable depuis le serveur (credentials, SSL ou réseau). Vérifiez DATABASE_URL sur Railway (pooler Supabase + sslmode=require).",
+          },
+          { status: 503 }
+        );
+      }
     }
 
-    // Contrainte unique (email déjà pris malgré le findUnique)
-    if (err?.code === "P2002") {
+    // Erreurs Prisma métier connues (colonne manquante, contrainte, etc.)
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (["P1001", "P1017"].includes(error.code)) {
+        return NextResponse.json(
+          {
+            error:
+              "Impossible de joindre la base de données. Vérifiez DATABASE_URL et que Supabase autorise Railway (sans IP bloquée).",
+          },
+          { status: 503 }
+        );
+      }
+      if (error.code === "P2002") {
+        return NextResponse.json(
+          { error: "Un compte existe déjà avec cet email." },
+          { status: 400 }
+        );
+      }
+      if (
+        error.code === "P2021" ||
+        error.code === "P2010" ||
+        error.code === "P2022" ||
+        msg.includes("does not exist") ||
+        (msg.includes("column") && msg.includes("not found"))
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "Schéma PostgreSQL incomplet pour ce déploiement. Connectez DATABASE_URL prod et exécutez : npx prisma db push",
+          },
+          { status: 503 }
+        );
+      }
+    }
+
+    if (error instanceof Prisma.PrismaClientValidationError) {
       return NextResponse.json(
-        { error: "Un compte existe déjà avec cet email." },
+        { error: "Données invalides pour la création du compte. Vérifiez le formulaire." },
         { status: 400 }
       );
     }
-    // Table ou colonne absente — souvent après déploiement sans prisma db push
+
     if (
-      err?.code === "P2021" ||
-      err?.code === "P2010" ||
-      err?.code === "P2022" ||
-      msg.includes("does not exist") ||
-      (msg.includes("column") && msg.includes("not found"))
+      msg.includes("can't reach database server") ||
+      msg.includes("server has closed the connection") ||
+      msg.includes("authentication failed")
     ) {
       return NextResponse.json(
         {
           error:
-            "Schéma base de données non à jour sur ce serveur. Exécutez « npx prisma db push » sur la base de production puis redémarrez.",
+            "Erreur de connexion à PostgreSQL (URL ou mot de passe). Vérifiez DATABASE_URL sur l’hébergeur.",
         },
         { status: 503 }
       );

@@ -40,6 +40,17 @@ function getResendClient(): Resend | null {
   return new Resend(key);
 }
 
+function hasBrevoApiKey(): boolean {
+  return Boolean((process.env.BREVO_API_KEY ?? "").trim());
+}
+
+function formatBrevoFromHeader(): { email: string; name?: string } {
+  const name = (process.env.BREVO_FROM_NAME || process.env.SMTP_FROM_NAME || "BeWork").trim();
+  const email = (process.env.BREVO_FROM_EMAIL || process.env.SMTP_FROM_EMAIL || "").trim();
+  if (!email) throw new Error("Missing BREVO_FROM_EMAIL (or SMTP_FROM_EMAIL) for Brevo API from address");
+  return { email, name: name || undefined };
+}
+
 function formatSmtpFromHeader(): string {
   const name = (process.env.SMTP_FROM_NAME || process.env.RESEND_FROM_NAME || "BeWork").trim();
   const addr = (process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER || "").trim();
@@ -60,6 +71,62 @@ function smtpConfigured(): boolean {
   return Boolean(host && user && pass);
 }
 
+async function sendViaBrevoApi(params: {
+  to: string | string[];
+  subject: string;
+  html: string;
+  replyTo?: string;
+}): Promise<boolean> {
+  const apiKey = (process.env.BREVO_API_KEY ?? "").trim();
+  if (!apiKey) return false;
+
+  const toList = (Array.isArray(params.to) ? params.to : [params.to])
+    .map((e) => e.trim())
+    .filter(Boolean)
+    .map((email) => ({ email }));
+
+  if (toList.length === 0) return false;
+
+  const from = formatBrevoFromHeader();
+  const controller = new AbortController();
+  const timeoutMs = Number(process.env.BREVO_API_TIMEOUT_MS || "20000");
+  const t = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        "api-key": apiKey,
+      },
+      body: JSON.stringify({
+        sender: from,
+        to: toList,
+        subject: params.subject,
+        htmlContent: params.html,
+        ...(params.replyTo ? { replyTo: { email: params.replyTo } } : {}),
+      }),
+      signal: controller.signal,
+    });
+
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      console.error("[Email] Brevo API refused:", { status: res.status, body: body.slice(0, 1000) });
+      return false;
+    }
+
+    const data = (await res.json().catch(() => null)) as { messageId?: string } | null;
+    console.info("[Email] Brevo API envoyé:", { to: params.to, messageId: data?.messageId });
+    return true;
+  } catch (e) {
+    console.error("[Email] Brevo API exception:", e);
+    return false;
+  } finally {
+    clearTimeout(t);
+  }
+}
+
 /** Retourne `true` si au moins un transport a accepté le message. Resend est essayé en premier (adapté Railway sans SMTP). */
 async function sendTransactionalEmail(params: {
   to: string | string[];
@@ -67,6 +134,12 @@ async function sendTransactionalEmail(params: {
   html: string;
   replyTo?: string;
 }): Promise<boolean> {
+  // 1) Brevo API (HTTPS) — utile si l'hébergeur bloque les ports SMTP sortants.
+  if (hasBrevoApiKey()) {
+    const ok = await sendViaBrevoApi(params);
+    if (ok) return true;
+  }
+
   const resendClient = getResendClient();
   if (resendClient) {
     try {
@@ -115,6 +188,18 @@ async function sendTransactionalEmail(params: {
     const greetingTimeout = Number(process.env.SMTP_GREETING_TIMEOUT_MS || "20000");
     const socketTimeout = Number(process.env.SMTP_SOCKET_TIMEOUT_MS || "20000");
 
+    console.info("[Email] SMTP config:", {
+      host,
+      port,
+      secure,
+      family: family ?? "default",
+      connectionTimeout,
+      greetingTimeout,
+      socketTimeout,
+      hasBrevoApiKey: hasBrevoApiKey(),
+      hasResendApiKey: hasResendApiKey(),
+    });
+
     const transporter = nodemailer.createTransport({
       host,
       port,
@@ -145,12 +230,15 @@ async function sendTransactionalEmail(params: {
       if (!hasResendApiKey()) {
         console.error("Pas de RETRY Resend : RESEND_API_KEY non défini.");
       }
+      if (!hasBrevoApiKey()) {
+        console.error("Pas de fallback Brevo API : BREVO_API_KEY non défini.");
+      }
       return false;
     }
   }
 
-  if (!hasResendApiKey() && !smtpConfigured()) {
-    console.error("Email not sent: configure RESEND_API_KEY ou SMTP_* sur l’hébergeur.");
+  if (!hasResendApiKey() && !smtpConfigured() && !hasBrevoApiKey()) {
+    console.error("Email not sent: configure BREVO_API_KEY, RESEND_API_KEY ou SMTP_* sur l’hébergeur.");
   }
   return false;
 }

@@ -109,14 +109,24 @@ async function sendTransactionalEmail(params: {
       secureRaw === "1" ||
       (!secureRaw && port === 465);
 
+    const familyRaw = (process.env.SMTP_FAMILY ?? "").trim();
+    const family = familyRaw ? Number(familyRaw) : undefined; // 4 ou 6 (optionnel). Utile sur certains hébergeurs si l'IPv6 timeoute.
+    const connectionTimeout = Number(process.env.SMTP_CONNECTION_TIMEOUT_MS || "20000");
+    const greetingTimeout = Number(process.env.SMTP_GREETING_TIMEOUT_MS || "20000");
+    const socketTimeout = Number(process.env.SMTP_SOCKET_TIMEOUT_MS || "20000");
+
     const transporter = nodemailer.createTransport({
       host,
       port,
       secure,
+      ...(family ? { family } : {}),
       auth: {
         user: process.env.SMTP_USER!.trim(),
         pass: process.env.SMTP_PASS!.trim(),
       },
+      connectionTimeout,
+      greetingTimeout,
+      socketTimeout,
     });
 
     try {
@@ -143,14 +153,6 @@ async function sendTransactionalEmail(params: {
     console.error("Email not sent: configure RESEND_API_KEY ou SMTP_* sur l’hébergeur.");
   }
   return false;
-}
-
-function absoluteUrlFromBase(baseUrl: string | undefined, path: string): string {
-  const p = path.startsWith("/") ? path : `/${path}`;
-  if (baseUrl && /^https?:\/\//i.test(baseUrl)) {
-    return `${baseUrl.replace(/\/$/, "")}${p}`;
-  }
-  return absoluteUrl(p);
 }
 
 export type SendWelcomeEmailResult =

@@ -141,6 +141,19 @@ export type SendWelcomeEmailResult =
   | { ok: true }
   | { ok: false; reason: string };
 
+function getAdminRecipients(): string[] {
+  const raw = (process.env.ADMIN_EMAIL ?? process.env.ADMIN_NOTIFICATION_EMAIL ?? "").trim();
+  return parseList(raw).filter((e) => isValidEmail(e));
+}
+
+function splitName(fullName: string | undefined | null): { firstName: string; lastName: string } {
+  const s = String(fullName ?? "").trim().replace(/\s+/g, " ");
+  if (!s) return { firstName: "", lastName: "" };
+  const parts = s.split(" ");
+  if (parts.length === 1) return { firstName: parts[0], lastName: "" };
+  return { firstName: parts[0], lastName: parts.slice(1).join(" ") };
+}
+
 export async function sendWelcomeEmail(
   user: { email: string; name?: string | null },
   opts?: { baseUrl?: string }
@@ -340,15 +353,13 @@ function formatDateTimeFr(d: Date): string {
 
 export async function sendAdminNewUserNotification(user: {
   name?: string | null;
+  company?: string | null;
   email?: string | null;
   phone?: string | null;
   role?: string | null;
   createdAt?: Date | string | null;
 }) {
-  const rawTo = (process.env.ADMIN_NOTIFICATION_EMAIL ?? "").trim();
-  if (!rawTo) return;
-
-  const to = parseList(rawTo).filter((e) => isValidEmail(e));
+  const to = getAdminRecipients();
   if (to.length === 0) return;
   if (!hasBrevoApiKey()) return;
 
@@ -360,6 +371,7 @@ export async function sendAdminNewUserNotification(user: {
         : new Date();
 
   const subject = "Nouvelle inscription client BeWork";
+  const { firstName, lastName } = splitName(user.name);
   const html = `
 <!DOCTYPE html>
 <html>
@@ -373,9 +385,11 @@ export async function sendAdminNewUserNotification(user: {
       </p>
 
       <div style="border:1px solid #e2e8f0; border-radius:12px; padding:14px 16px; background:#f8fafc;">
-        <p style="margin:0 0 8px 0; font-size:14px;"><strong>Nom :</strong> ${formatValue(user.name)}</p>
+        <p style="margin:0 0 8px 0; font-size:14px;"><strong>Prénom :</strong> ${formatValue(firstName)}</p>
+        <p style="margin:0 0 8px 0; font-size:14px;"><strong>Nom :</strong> ${formatValue(lastName || user.name)}</p>
         <p style="margin:0 0 8px 0; font-size:14px;"><strong>Email :</strong> ${formatValue(user.email)}</p>
         <p style="margin:0 0 8px 0; font-size:14px;"><strong>Téléphone :</strong> ${formatValue(user.phone)}</p>
+        <p style="margin:0 0 8px 0; font-size:14px;"><strong>Société :</strong> ${formatValue(user.company)}</p>
         <p style="margin:0 0 8px 0; font-size:14px;"><strong>Type de compte :</strong> ${formatValue(user.role ?? "CLIENT")}</p>
         <p style="margin:0; font-size:14px;"><strong>Date d’inscription :</strong> ${escapeHtml(formatDateTimeFr(created))}</p>
       </div>

@@ -7,6 +7,7 @@ La plateforme envoie les emails **uniquement** via l’API officielle **Brevo** 
 - `BREVO_API_KEY` : clé API Brevo v3 (format `xkeysib-...`)
 - `EMAIL_FROM` : expéditeur visible (ex. `noreply@bework.fr`)
 - `EMAIL_FROM_NAME` : nom d’expéditeur (ex. `BeWork`)
+- `ADMIN_EMAIL` : destinataire(s) notification nouvelle inscription (emails séparés par virgules)
 
 Optionnel :
 

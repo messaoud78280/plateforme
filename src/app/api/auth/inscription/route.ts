@@ -84,6 +84,7 @@ export async function POST(request: Request) {
       name: user.name,
       email: user.email,
       phone: user.phone ?? null,
+      company: user.company ?? null,
       role: user.role,
       createdAt: user.createdAt,
     }).catch((e) => {

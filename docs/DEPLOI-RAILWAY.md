@@ -57,9 +57,9 @@ Variables **recommandées** (selon vos besoins) :
 | `NEXT_PUBLIC_SUPABASE_URL` | URL du projet Supabase (Storage/Realtime) |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clé anon Supabase |
 | `CONTACT_EMAIL` | Email qui reçoit les demandes de contact |
-| `RESEND_API_KEY` | Clé API Resend (envoi d’emails) |
-| `RESEND_FROM_EMAIL` | Expéditeur des emails (domaine vérifié sur Resend) |
-| `RESEND_FROM_NAME` | Nom d’affichage (ex. BeWork) |
+| `BREVO_API_KEY` | Clé API Brevo (envoi d’emails transactionnels via API HTTPS) |
+| `EMAIL_FROM` | Expéditeur des emails (ex. `noreply@bework.fr`) |
+| `EMAIL_FROM_NAME` | Nom d’affichage (ex. BeWork) |
 | `NEW_TASK_EMAIL_TO` | (Optionnel) Destinataires email pour “Nouvelle mission” (emails séparés par virgules). Si absent, envoie aux comptes `MANAGER` ayant un email |
 
 **Important** : Après le premier déploiement, mettez à jour `NEXTAUTH_URL` avec l’URL réelle fournie par Railway (ex. `https://plateforme-production-xxxx.up.railway.app`).

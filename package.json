@@ -33,13 +33,11 @@
     "lucide-react": "^1.14.0",
     "next": "16.1.6",
     "next-auth": "^4.24.13",
-    "nodemailer": "^7.0.13",
     "pg": "^8.18.0",
     "prisma": "^5.22.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "recharts": "^3.7.0",
-    "resend": "^6.9.2"
+    "recharts": "^3.7.0"
   },
   "devDependencies": {
     "@resvg/resvg-js": "^2.6.2",
@@ -47,7 +45,6 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",
-    "@types/nodemailer": "^8.0.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

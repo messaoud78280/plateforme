@@ -4,6 +4,7 @@ import EmailProvider from "next-auth/providers/email";
 import bcrypt from "bcryptjs";
 import { prismaAdapterCaseInsensitiveEmail } from "./auth-adapter";
 import { prisma } from "./prisma";
+import { sendEmail } from "@/lib/email";
 
 export const authOptions: NextAuthOptions = {
   adapter: prismaAdapterCaseInsensitiveEmail(prisma),
@@ -11,19 +12,40 @@ export const authOptions: NextAuthOptions = {
     EmailProvider({
       // 24h pour utiliser le lien (option B)
       maxAge: 24 * 60 * 60,
-      server: {
-        host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT || "587"),
-        secure:
-          (process.env.SMTP_SECURE ?? "").trim().toLowerCase() === "true" ||
-          (process.env.SMTP_SECURE ?? "").trim() === "1" ||
-          (!(process.env.SMTP_SECURE ?? "").trim() && Number(process.env.SMTP_PORT || "587") === 465),
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
+      // Envoi via l'API Brevo (pas de SMTP / nodemailer).
+      // NextAuth utilise seulement ce callback pour envoyer le lien.
+      from: process.env.EMAIL_FROM,
+      async sendVerificationRequest({ identifier, url }) {
+        const subject = "Connexion BeWork — lien de connexion";
+        const safeUrl = String(url);
+        const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Connexion BeWork</title></head>
+<body style="font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; line-height: 1.55; color: #0f172a; padding: 24px;">
+  <h1 style="margin:0 0 12px 0; font-size:20px;">Connexion à BeWork</h1>
+  <p style="margin:0 0 16px 0; color:#334155; font-size:14px;">
+    Cliquez sur le bouton ci-dessous pour vous connecter. Ce lien expire dans 24 heures.
+  </p>
+  <p style="margin:18px 0;">
+    <a href="${safeUrl}" style="display:inline-block; background:#1d4ed8; color:#fff; text-decoration:none; padding:10px 14px; border-radius:10px; font-weight:700;">
+      Se connecter
+    </a>
+  </p>
+  <p style="margin:18px 0 0 0; font-size:12px; color:#64748b;">
+    Si le bouton ne fonctionne pas, copiez-collez ce lien :
+    <br>
+    <a href="${safeUrl}" style="color:#1d4ed8;">${safeUrl}</a>
+  </p>
+</body>
+</html>
+        `.trim();
+
+        const r = await sendEmail({ to: identifier, subject, html });
+        if (!r.ok) {
+          console.error("[Auth] sendVerificationRequest failed:", r);
+        }
       },
-      from: process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER,
     }),
     CredentialsProvider({
       name: "Identifiants",

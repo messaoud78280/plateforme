@@ -1,6 +1,4 @@
 import crypto from "crypto";
-import nodemailer from "nodemailer";
-import { Resend } from "resend";
 import { prisma } from "@/lib/prisma";
 import { nextAuthEmailVerificationTokenHash } from "@/lib/nextauth-verification-hash";
 import { absoluteUrl, canonicalRequestOrigin } from "@/lib/site";
@@ -29,70 +27,76 @@ function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(e);
 }
 
-/** Lecture au runtime : évite Resend désactivé si le module était chargé avant les env (certains environnements). */
-function hasResendApiKey(): boolean {
-  return Boolean((process.env.RESEND_API_KEY ?? "").trim());
-}
-
-function getResendClient(): Resend | null {
-  const key = (process.env.RESEND_API_KEY ?? "").trim();
-  if (!key) return null;
-  return new Resend(key);
-}
-
 function hasBrevoApiKey(): boolean {
   return Boolean((process.env.BREVO_API_KEY ?? "").trim());
 }
 
-function formatBrevoFromHeader(): { email: string; name?: string } {
-  const name = (process.env.BREVO_FROM_NAME || process.env.SMTP_FROM_NAME || "BeWork").trim();
-  const email = (process.env.BREVO_FROM_EMAIL || process.env.SMTP_FROM_EMAIL || "").trim();
-  if (!email) throw new Error("Missing BREVO_FROM_EMAIL (or SMTP_FROM_EMAIL) for Brevo API from address");
+function getEmailFrom(): { email: string; name?: string } {
+  const email = (process.env.EMAIL_FROM ?? "").trim();
+  if (!email) throw new Error("Missing EMAIL_FROM");
+  const name = (process.env.EMAIL_FROM_NAME ?? "BeWork").trim();
   return { email, name: name || undefined };
 }
 
-function formatSmtpFromHeader(): string {
-  const name = (process.env.SMTP_FROM_NAME || process.env.RESEND_FROM_NAME || "BeWork").trim();
-  const addr = (process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER || "").trim();
-  if (!addr) throw new Error("Missing SMTP_FROM_EMAIL (or SMTP_USER) for SMTP from address");
-  return `${name} <${addr}>`;
+function truncate(s: string, max = 1200): string {
+  if (!s) return "";
+  return s.length > max ? `${s.slice(0, max)}…` : s;
 }
 
-function formatResendFromHeader(): string {
-  const name = (process.env.RESEND_FROM_NAME || process.env.SMTP_FROM_NAME || "BeWork").trim();
-  const addr = (process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev").trim();
-  return `${name} <${addr}>`;
-}
+export type SendEmailResult =
+  | { ok: true; provider: "brevo"; messageId?: string }
+  | { ok: false; provider: "brevo"; reason: string; status?: number };
 
-function smtpConfigured(): boolean {
-  const host = (process.env.SMTP_HOST ?? "").trim();
-  const user = (process.env.SMTP_USER ?? "").trim();
-  const pass = (process.env.SMTP_PASS ?? "").trim();
-  return Boolean(host && user && pass);
-}
-
-async function sendViaBrevoApi(params: {
+export async function sendEmail(params: {
   to: string | string[];
   subject: string;
   html: string;
   replyTo?: string;
-}): Promise<boolean> {
+}): Promise<SendEmailResult> {
   const apiKey = (process.env.BREVO_API_KEY ?? "").trim();
-  if (!apiKey) return false;
+  if (!apiKey) {
+    console.error("[Email] Brevo: BREVO_API_KEY manquant.");
+    return { ok: false, provider: "brevo", reason: "missing_brevo_api_key" };
+  }
+
+  let from: { email: string; name?: string };
+  try {
+    from = getEmailFrom();
+  } catch (e) {
+    console.error("[Email] Brevo: expéditeur invalide. Configurez EMAIL_FROM (+ EMAIL_FROM_NAME).", e);
+    return { ok: false, provider: "brevo", reason: "missing_email_from" };
+  }
 
   const toList = (Array.isArray(params.to) ? params.to : [params.to])
     .map((e) => e.trim())
     .filter(Boolean)
     .map((email) => ({ email }));
 
-  if (toList.length === 0) return false;
+  if (toList.length === 0) {
+    console.error("[Email] Brevo: destinataire vide.");
+    return { ok: false, provider: "brevo", reason: "missing_recipient" };
+  }
 
-  const from = formatBrevoFromHeader();
   const controller = new AbortController();
   const timeoutMs = Number(process.env.BREVO_API_TIMEOUT_MS || "20000");
   const t = setTimeout(() => controller.abort(), timeoutMs);
 
+  const payload = {
+    sender: from,
+    to: toList,
+    subject: params.subject,
+    htmlContent: params.html,
+    ...(params.replyTo ? { replyTo: { email: params.replyTo } } : {}),
+  };
+
   try {
+    console.info("[Email] Brevo API → envoi", {
+      to: toList.map((x) => x.email),
+      subject: params.subject,
+      timeoutMs,
+      from: from.email,
+    });
+
     const res = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
@@ -100,147 +104,37 @@ async function sendViaBrevoApi(params: {
         "content-type": "application/json",
         "api-key": apiKey,
       },
-      body: JSON.stringify({
-        sender: from,
-        to: toList,
-        subject: params.subject,
-        htmlContent: params.html,
-        ...(params.replyTo ? { replyTo: { email: params.replyTo } } : {}),
-      }),
+      body: JSON.stringify(payload),
       signal: controller.signal,
     });
 
+    const contentType = res.headers.get("content-type") ?? "";
+    const isJson = contentType.toLowerCase().includes("application/json");
+    const bodyText = await res.text().catch(() => "");
+    const bodyJson = isJson ? (JSON.parse(bodyText || "null") as unknown) : null;
+
     if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      console.error("[Email] Brevo API refused:", { status: res.status, body: body.slice(0, 1000) });
-      return false;
+      console.error("[Email] Brevo API refus", {
+        status: res.status,
+        body: truncate(typeof bodyJson === "object" && bodyJson ? JSON.stringify(bodyJson) : bodyText),
+      });
+      return { ok: false, provider: "brevo", reason: "brevo_refused", status: res.status };
     }
 
-    const data = (await res.json().catch(() => null)) as { messageId?: string } | null;
-    console.info("[Email] Brevo API envoyé:", { to: params.to, messageId: data?.messageId });
-    return true;
+    const messageId =
+      typeof bodyJson === "object" && bodyJson !== null && "messageId" in bodyJson
+        ? String((bodyJson as { messageId?: unknown }).messageId ?? "")
+        : undefined;
+
+    console.info("[Email] Brevo API ← envoyé", { to: toList.map((x) => x.email), messageId });
+    return { ok: true, provider: "brevo", messageId };
   } catch (e) {
-    console.error("[Email] Brevo API exception:", e);
-    return false;
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("[Email] Brevo API exception", { message: msg, to: toList.map((x) => x.email) }, e);
+    return { ok: false, provider: "brevo", reason: "brevo_exception" };
   } finally {
     clearTimeout(t);
   }
-}
-
-/** Retourne `true` si au moins un transport a accepté le message. Resend est essayé en premier (adapté Railway sans SMTP). */
-async function sendTransactionalEmail(params: {
-  to: string | string[];
-  subject: string;
-  html: string;
-  replyTo?: string;
-}): Promise<boolean> {
-  // 1) Brevo API (HTTPS) — utile si l'hébergeur bloque les ports SMTP sortants.
-  if (hasBrevoApiKey()) {
-    const ok = await sendViaBrevoApi(params);
-    if (ok) return true;
-  }
-
-  const resendClient = getResendClient();
-  if (resendClient) {
-    try {
-      const { error, data } = await resendClient.emails.send({
-        from: formatResendFromHeader(),
-        to: params.to,
-        subject: params.subject,
-        html: params.html,
-        ...(params.replyTo ? { replyTo: params.replyTo } : {}),
-      });
-      if (error) {
-        console.error(
-          "[Email] Resend a refusé l’envoi (domaine/expéditeur ou quota). Détail:",
-          typeof error === "object" ? JSON.stringify(error) : error
-        );
-        const errObj = error as { statusCode?: number; message?: string };
-        if (
-          errObj?.statusCode === 401 ||
-          String(errObj?.message ?? "").toLowerCase().includes("api key")
-        ) {
-          console.error(
-            "[Email] → Corrigez RESEND_API_KEY sur Railway : Resend → API Keys → nouvelle clé « Sending access ». Coller la valeur seule (sans guillemets). Révoquez les anciennes clés invalides."
-          );
-        }
-      } else {
-        console.info("[Email] Resend envoyé:", { to: params.to, id: data?.id });
-        return true;
-      }
-    } catch (e) {
-      console.error("[Email] Resend exception:", e);
-    }
-  }
-
-  if (smtpConfigured()) {
-    const host = process.env.SMTP_HOST!.trim();
-    const port = Number(process.env.SMTP_PORT || "587");
-    const secureRaw = (process.env.SMTP_SECURE ?? "").trim().toLowerCase();
-    const secure =
-      secureRaw === "true" ||
-      secureRaw === "1" ||
-      (!secureRaw && port === 465);
-
-    const familyRaw = (process.env.SMTP_FAMILY ?? "").trim();
-    const family = familyRaw ? Number(familyRaw) : undefined; // 4 ou 6 (optionnel). Utile sur certains hébergeurs si l'IPv6 timeoute.
-    const connectionTimeout = Number(process.env.SMTP_CONNECTION_TIMEOUT_MS || "20000");
-    const greetingTimeout = Number(process.env.SMTP_GREETING_TIMEOUT_MS || "20000");
-    const socketTimeout = Number(process.env.SMTP_SOCKET_TIMEOUT_MS || "20000");
-
-    console.info("[Email] SMTP config:", {
-      host,
-      port,
-      secure,
-      family: family ?? "default",
-      connectionTimeout,
-      greetingTimeout,
-      socketTimeout,
-      hasBrevoApiKey: hasBrevoApiKey(),
-      hasResendApiKey: hasResendApiKey(),
-    });
-
-    const transporter = nodemailer.createTransport({
-      host,
-      port,
-      secure,
-      ...(family ? { family } : {}),
-      auth: {
-        user: process.env.SMTP_USER!.trim(),
-        pass: process.env.SMTP_PASS!.trim(),
-      },
-      connectionTimeout,
-      greetingTimeout,
-      socketTimeout,
-    });
-
-    try {
-      const from = formatSmtpFromHeader();
-      const info = await transporter.sendMail({
-        from,
-        to: params.to,
-        subject: params.subject,
-        html: params.html,
-        ...(params.replyTo ? { replyTo: params.replyTo } : {}),
-      });
-      console.info("[Email] SMTP envoyé:", { to: params.to, messageId: info.messageId });
-      return true;
-    } catch (e) {
-      console.error("SMTP send error:", e);
-      if (!hasResendApiKey()) {
-        console.error("Pas de RETRY Resend : RESEND_API_KEY non défini.");
-      }
-      if (!hasBrevoApiKey()) {
-        console.error("Pas de fallback Brevo API : BREVO_API_KEY non défini.");
-      }
-      return false;
-    }
-  }
-
-  if (!hasResendApiKey() && !smtpConfigured() && !hasBrevoApiKey()) {
-    console.error("Email not sent: configure BREVO_API_KEY, RESEND_API_KEY ou SMTP_* sur l’hébergeur.");
-  }
-  return false;
 }
 
 export type SendWelcomeEmailResult =
@@ -255,8 +149,8 @@ export async function sendWelcomeEmail(
     console.warn("[sendWelcomeEmail] email invalide:", user.email);
     return { ok: false, reason: "invalid_email" };
   }
-  if (!smtpConfigured() && !hasResendApiKey()) {
-    console.warn("[sendWelcomeEmail] ignoré : aucune config SMTP ni RESEND_API_KEY.");
+  if (!hasBrevoApiKey()) {
+    console.warn("[sendWelcomeEmail] ignoré : BREVO_API_KEY manquant.");
     return { ok: false, reason: "no_mail_provider" };
   }
 
@@ -352,9 +246,9 @@ export async function sendWelcomeEmail(
   `.trim();
 
   try {
-    const sent = await sendTransactionalEmail({ to, subject, html });
-    if (!sent) {
-      console.error("[sendWelcomeEmail] échec transport (SMTP/Resend). Voir logs ci-dessus.");
+    const sent = await sendEmail({ to, subject, html });
+    if (!sent.ok) {
+      console.error("[sendWelcomeEmail] échec transport (Brevo).", sent);
       return { ok: false, reason: "transport_failed" };
     }
     return { ok: true };
@@ -370,7 +264,7 @@ export async function sendNewTaskEmail(params: {
   clientName: string;
   clientEmail?: string | null;
 }) {
-  if (!smtpConfigured() && !hasResendApiKey()) return;
+  if (!hasBrevoApiKey()) return;
   const to =
     parseList(process.env.NEW_TASK_EMAIL_TO).length > 0
       ? parseList(process.env.NEW_TASK_EMAIL_TO)
@@ -425,7 +319,7 @@ export async function sendNewTaskEmail(params: {
   const replyTo = params.clientEmail?.trim() ? params.clientEmail.trim() : undefined;
 
   try {
-    await sendTransactionalEmail({ to, subject, html, replyTo });
+    await sendEmail({ to, subject, html, replyTo });
   } catch (e) {
     console.error("sendNewTaskEmail error:", e);
   }
@@ -456,7 +350,7 @@ export async function sendAdminNewUserNotification(user: {
 
   const to = parseList(rawTo).filter((e) => isValidEmail(e));
   if (to.length === 0) return;
-  if (!smtpConfigured() && !hasResendApiKey()) return;
+  if (!hasBrevoApiKey()) return;
 
   const created =
     user.createdAt instanceof Date
@@ -496,7 +390,7 @@ export async function sendAdminNewUserNotification(user: {
   `.trim();
 
   try {
-    await sendTransactionalEmail({ to, subject, html });
+    await sendEmail({ to, subject, html });
   } catch (e) {
     console.error("sendAdminNewUserNotification error:", e);
   }

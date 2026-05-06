@@ -47,9 +47,9 @@ Optionnel (formulaire contact / emails) :
 | Variable | Valeur |
 |----------|--------|
 | `CONTACT_EMAIL` | Email qui reçoit les demandes |
-| `RESEND_API_KEY` | Clé API Resend |
-| `RESEND_FROM_EMAIL` | Ex. noreply@votredomaine.com |
-| `RESEND_FROM_NAME` | BeWork |
+| `BREVO_API_KEY` | Clé API Brevo (transactionnel) |
+| `EMAIL_FROM` | Ex. noreply@bework.fr |
+| `EMAIL_FROM_NAME` | BeWork |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | Numéro WhatsApp (sans +) |
 
 ## 5. Obtenir l’URL publique et corriger NEXTAUTH_URL

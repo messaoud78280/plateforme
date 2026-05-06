@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
 import { prisma } from "@/lib/prisma";
+import { sendEmail } from "@/lib/email";
 
 function envTrim(s: string | undefined | null): string {
   return typeof s === "string" ? s.trim() : "";
@@ -14,10 +14,7 @@ function parseEmailRecipients(raw: string): string[] {
     .filter((s) => s.includes("@") && s.length > 4);
 }
 
-const resendApiKey = envTrim(process.env.RESEND_API_KEY);
-const resend = resendApiKey ? new Resend(resendApiKey) : null;
-
-const contactEmailRaw = envTrim(process.env.CONTACT_EMAIL) || envTrim(process.env.RESEND_FROM_EMAIL);
+const contactEmailRaw = envTrim(process.env.CONTACT_EMAIL);
 const contactRecipients = contactEmailRaw ? parseEmailRecipients(contactEmailRaw) : [];
 
 function escapeHtml(s: string): string {
@@ -160,41 +157,34 @@ export async function POST(request: NextRequest) {
   `.trim();
 
   let emailSent = false;
-  let resendErrorMessage: string | null = null;
+  let providerErrorMessage: string | null = null;
 
-  if (!resendApiKey) {
+  if (contactRecipients.length === 0) {
     console.warn(
-      "[contact] Aucun RESEND_API_KEY : la demande est enregistrée en base mais aucun mail d’alerte n’est envoyé."
+      "[contact] CONTACT_EMAIL vide ou invalide : ajoutez une ou plusieurs adresses valides (ex. contact@bework.fr)."
     );
-  } else if (contactRecipients.length === 0) {
-    console.warn(
-      "[contact] CONTACT_EMAIL / RESEND_FROM_EMAIL vide ou invalide : ajoutez une adresse email valide (ex. contact@bework.fr)."
-    );
-  } else if (resend) {
-    const fromEmail = envTrim(process.env.RESEND_FROM_EMAIL) || "onboarding@resend.dev";
-    const fromName = envTrim(process.env.RESEND_FROM_NAME) || "BeWork Contact";
+  } else {
     try {
-      const { data, error } = await resend.emails.send({
-        from: `${fromName} <${fromEmail}>`,
+      const r = await sendEmail({
         to: contactRecipients,
         replyTo: email,
         subject: `[BeWork] Demande de contact – ${structure} – ${contactName}`,
         html,
       });
-      if (error) {
-        const msg =
-          typeof error === "object" && error !== null && "message" in error
-            ? String((error as { message: string }).message)
-            : JSON.stringify(error);
-        resendErrorMessage = msg;
-        console.error("[contact] Resend refus ou erreur:", msg, error);
+      if (!r.ok) {
+        providerErrorMessage = `${r.reason}${r.status ? ` (status ${r.status})` : ""}`;
+        console.error("[contact] Email refusé:", r);
       } else {
         emailSent = true;
-        console.info("[contact] Mail d’alerte envoyé, id:", data?.id ?? "—", "→", contactRecipients.join(", "));
+        console.info(
+          "[contact] Mail d’alerte envoyé via Brevo:",
+          r.messageId ?? "—",
+          "→",
+          contactRecipients.join(", ")
+        );
       }
     } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      resendErrorMessage = msg;
+      providerErrorMessage = e instanceof Error ? e.message : String(e);
       console.error("[contact] Erreur envoi email:", e);
     }
   }
@@ -202,6 +192,6 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({
     ok: true,
     emailNotificationSent: emailSent,
-    ...(resendErrorMessage ? { resendError: resendErrorMessage } : {}),
+    ...(providerErrorMessage ? { emailError: providerErrorMessage } : {}),
   });
 }

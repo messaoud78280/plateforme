@@ -61,6 +61,10 @@ const HOME_FAQ_ITEMS = [
     q: "Un conducteur de travaux sans assistant interne peut-il « brancher » BeWork sur ses chantiers ?",
     a: "Oui : vous centralisez devis, relances, dossiers administratifs (situations de travaux, DICT ou avancement fournisseur) sous forme de demandes suivies jusqu’à clôture. Les envois juridiquement sensibles restent soumis à votre validation.",
   },
+  {
+    q: "Sécurité, confidentialité et validation : comment ça marche ?",
+    a: "Chaque mission sensible reste sous votre contrôle : relance ferme, mise en demeure, envoi à un client, dépôt d’appel d’offres ou transmission MOE/MOA passent par votre validation avant envoi. Les échanges sont tracés, les documents restent confidentiels, et les données sont hébergées dans un cadre conforme RGPD.",
+  },
 ] as const;
 
 const RESSOURCES_BLOG = [
@@ -285,7 +289,7 @@ export default function HomePage() {
                     <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
                     <path d="M9 10h6M9 14h6M9 18h4" />
                   </svg>
-                  <span>Assistant administratif BTP augmenté par l’IA</span>
+                  <span>Assistant BTP externalisé · Renfort administratif chantier · Augmenté par l’IA</span>
                 </p>
 
                 <h1
@@ -300,9 +304,21 @@ export default function HomePage() {
                 </h1>
 
                 <p className="mx-auto max-w-[580px] text-lg leading-[1.62] text-balance text-slate-700 lg:mx-0 lg:max-w-none lg:text-[20px] lg:leading-snug">
-                  Vous gérez le terrain. BeWork prend le relais&nbsp;: devis, relances, facturation et dossiers chantier pendant que vous avancez sur{" "}
-                  <span className="font-semibold text-[#3072F0]">vos&nbsp;chantiers.</span>
+                  Devis, relances, facturation, DICT, commandes matériel, dossiers chantier et urgences du quotidien&nbsp;: BeWork prend le relais
+                  pendant que vous restez concentré sur{" "}
+                  <span className="font-semibold text-[#3072F0]">le&nbsp;terrain.</span>
                 </p>
+
+                <div className="mx-auto -mt-1 flex w-full max-w-[580px] flex-wrap justify-center gap-2 lg:mx-0 lg:max-w-none lg:justify-start">
+                  {["DICT", "Commandes matériel", "Engins & locations", "RDV client", "Relances urgentes"].map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-[12px] font-semibold text-slate-700 shadow-sm"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
 
                 <div className="mx-auto mt-1 flex w-full max-w-[580px] flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:mx-0 lg:max-w-full lg:justify-start">
                   <Link
@@ -418,6 +434,22 @@ export default function HomePage() {
                 <HeroPresentationVideo />
               </div>
             </div>
+              </div>
+            </section>
+
+            {/* Mini-bloc : définition d’un Beworker (sans dupliquer « Comment ça marche ») */}
+            <section className="relative bg-transparent px-6 pb-10 md:pb-12">
+              <div className="container-site">
+                <div className="mx-auto max-w-4xl rounded-2xl border border-slate-200/90 bg-white p-6 shadow-[0_10px_40px_-16px_rgba(15,23,42,0.1)] ring-1 ring-slate-100/85 md:p-8">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
+                    C’est quoi un Beworker ?
+                  </p>
+                  <p className="mt-3 text-[15px] leading-relaxed text-slate-700 md:text-base">
+                    Un Beworker, c’est un assistant BTP dédié, formé aux outils du secteur et augmenté par l’IA. Il traite vos demandes, prépare vos
+                    livrables, suit vos dossiers et reste encadré par BeWork. Ce n’est pas un chatbot&nbsp;: c’est un relais humain, structuré,
+                    joignable et supervisé.
+                  </p>
+                </div>
               </div>
             </section>
 

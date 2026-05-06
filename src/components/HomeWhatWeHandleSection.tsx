@@ -189,6 +189,102 @@ export function HomeWhatWeHandleSection() {
             );
           })}
         </div>
+
+        {/* 3 — Urgences chantier (bloc court, sans doubler le catalogue de missions) */}
+        <div className="mt-10 md:mt-12">
+          <div className="mx-auto max-w-5xl rounded-2xl border border-slate-200/90 bg-white p-6 shadow-[0_10px_40px_-16px_rgba(15,23,42,0.1)] ring-1 ring-slate-100/85 md:p-8">
+            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
+              Urgences chantier
+            </p>
+            <h3 className="mt-2.5 text-balance font-sans text-xl font-bold tracking-tight text-[#0f172a] md:text-2xl">
+              Quand le chantier bloque, BeWork prend le relais.
+            </h3>
+            <p className="mt-3 text-[15px] leading-relaxed text-slate-600 md:text-base">
+              Engin en panne, matériel manquant, livraison à confirmer, fournisseur à relancer, rendez-vous client à caler : votre Beworker traite les
+              urgences opérationnelles à distance, contacte les bons interlocuteurs, compare les solutions et vous fait valider avant engagement.
+            </p>
+            <ul className="mt-5 grid gap-2 text-[14px] font-semibold text-slate-700 sm:grid-cols-2 lg:grid-cols-3">
+              {[
+                "Engins & locations",
+                "Commandes fournisseurs",
+                "Livraisons chantier",
+                "RDV clients",
+                "Relances urgentes",
+                "Coordination planning",
+              ].map((i) => (
+                <li key={i} className="flex items-start gap-2 rounded-lg border border-slate-100 bg-slate-50/70 px-3 py-2">
+                  <span className="mt-[2px] text-[#1d4ed8]" aria-hidden>
+                    ✓
+                  </span>
+                  <span>{i}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* 4 — Conducteur de travaux / Chargé d’affaires */}
+        <div className="mt-10 md:mt-12">
+          <div className="mx-auto max-w-5xl">
+            <h3 className="text-balance text-xl font-bold tracking-tight text-[#0f172a] md:text-2xl">
+              Un relais pour vos conducteurs de travaux et vos chargés d’affaires.
+            </h3>
+            <div className="mt-6 grid gap-5 md:grid-cols-2">
+              <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm ring-1 ring-slate-100/85 md:p-7">
+                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
+                  Pour vos conducteurs de travaux
+                </p>
+                <p className="mt-3 text-[15px] leading-relaxed text-slate-600 md:text-base">
+                  Situations de travaux, bons de commande, suivi sous-traitants, PV de réception, levées de réserves, factures clients, relances et
+                  coordination quotidienne.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm ring-1 ring-slate-100/85 md:p-7">
+                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
+                  Pour vos chargés d’affaires
+                </p>
+                <p className="mt-3 text-[15px] leading-relaxed text-slate-600 md:text-base">
+                  Dossiers de candidature, DC1/DC2/DC4, mémoire technique, références chantier, relances devis, suivi commercial et réponses
+                  administratives clients.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 5 — Missions avancées (4 cartes) */}
+        <div className="mt-10 md:mt-12">
+          <div className="mx-auto max-w-5xl">
+            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
+              Missions avancées BTP
+            </p>
+            <h3 className="mt-2.5 text-balance text-xl font-bold tracking-tight text-[#0f172a] md:text-2xl">
+              Au‑delà du “bureau” : des livrables chantier concrets.
+            </h3>
+            <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {[
+                {
+                  t: "Sécurité & réglementaire",
+                  b: "DUERP, PPSPS, plans de prévention, documents obligatoires.",
+                },
+                {
+                  t: "Appels d’offres & dossiers techniques",
+                  b: "DCE, mémoire technique, DC1/DC2/DC4, références chantier.",
+                },
+                { t: "Chiffrage & contractuel", b: "DPGF, devis, avenants, BPU, suivi financier." },
+                { t: "Réception & clôture chantier", b: "PV, OPR, levée de réserves, DOE, synthèse finale." },
+              ].map((c) => (
+                <div
+                  key={c.t}
+                  className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm ring-1 ring-slate-100/85"
+                >
+                  <p className="text-[14px] font-bold leading-snug text-slate-900">{c.t}</p>
+                  <p className="mt-2 text-[13px] leading-relaxed text-slate-600">{c.b}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

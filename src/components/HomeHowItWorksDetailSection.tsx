@@ -65,6 +65,10 @@ export function HomeHowItWorksDetailSection() {
           <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-relaxed text-slate-600 md:mt-6 md:text-lg">
             De la demande à la livraison, BeWork structure, suit et sécurise chaque étape pour vous faire gagner du temps.
           </p>
+          <p className="mx-auto mt-3 max-w-3xl text-sm leading-relaxed text-slate-500">
+            Vos Beworkers peuvent travailler avec vos outils existants : Excel, Google Sheets, Outlook, Gmail, Batigest, Onaya, EBP, Sage, MS Project,
+            Drive, SharePoint, Chorus Pro, PLACE/AWS, ChatGPT et Claude.
+          </p>
         </header>
 
         <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">

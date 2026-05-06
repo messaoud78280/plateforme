@@ -24,20 +24,20 @@ export function HomeProblemSection() {
       ConsequenceIcon: IconConstructionLost,
     },
     {
-      problem: "Retards administratifs",
-      consequence: "Clients insatisfaits",
+      problem: "DICT / dossier chantier en retard",
+      consequence: "Démarrage qui se décale",
       ProblemIcon: IconFolderClock,
       ConsequenceIcon: IconSad,
     },
     {
-      problem: "Tâches qui s’accumulent",
-      consequence: "Stress et surcharge quotidienne",
+      problem: "Fournisseurs / locations mal suivis",
+      consequence: "Équipe immobilisée",
       ProblemIcon: IconTasksPileUp,
       ConsequenceIcon: IconFlameOverload,
     },
     {
-      problem: "Manque de suivi",
-      consequence: "Perte de chiffre d’affaires",
+      problem: "Réserves / DOE repoussés",
+      consequence: "Fin de chantier qui traîne",
       ProblemIcon: IconTrackingOff,
       ConsequenceIcon: IconEuroTrendDown,
     },
@@ -67,7 +67,7 @@ export function HomeProblemSection() {
           <div className="mt-6 h-[2px] w-16 rounded-full bg-slate-300/90" />
 
           <p className="mt-6 text-[18px] font-medium leading-[1.55] text-slate-600">
-            Trop de tâches, pas assez de temps.
+            Le chantier avance. Le dossier doit suivre.
           </p>
 
           <ul className="mt-8 divide-y divide-slate-200">
@@ -92,7 +92,7 @@ export function HomeProblemSection() {
                 <IconFolderMini className="h-[22px] w-[22px]" />
               </span>
               <p className="text-[18px] font-bold" style={{ color: TEXT_PRIMARY }}>
-                Dossiers <span style={{ color: BEWORK_BLUE }}>en attente</span>
+                Dossier chantier <span style={{ color: BEWORK_BLUE }}>en retard</span>
               </p>
             </li>
             <li className="flex items-center gap-5 py-4 pb-0 last:border-b-0">
@@ -104,7 +104,7 @@ export function HomeProblemSection() {
                 <IconUserWave className="h-[22px] w-[22px]" />
               </span>
               <p className="text-[18px] font-bold" style={{ color: TEXT_PRIMARY }}>
-                Suivi client <span style={{ color: BEWORK_BLUE }}>irrégulier</span>
+                Client qui <span style={{ color: BEWORK_BLUE }}>attend une réponse</span>
               </p>
             </li>
           </ul>
@@ -123,12 +123,9 @@ export function HomeProblemSection() {
               !
             </div>
             <p className="text-xl font-extrabold leading-snug" style={{ color: TEXT_PRIMARY }}>
-              Résultat :{" "}
-              <span style={{ color: RED_SOFT }}>du temps perdu</span>
-              …
-              <br />
-              et{" "}
-              <span style={{ color: RED_SOFT }}>du chiffre d’affaires</span> aussi.
+            Résultat : un planning qui dérape, des décisions prises sous pression…
+            <br />
+            et du cash qui se tend.
             </p>
           </div>
         </div>

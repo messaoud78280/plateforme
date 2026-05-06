@@ -74,47 +74,47 @@ export function ConciergeDashboardMockup() {
         </div>
       </div>
 
-      {/* Floating cards */}
-      {/* Restaurant + Véhicule : en haut à droite du header (hors du bloc) */}
-      <FloatingCard className="absolute left-full ml-4 top-2 z-20">
-        <div className="flex items-start gap-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white">
-            <Check className="h-5 w-5" />
+      {/* Floating cards (colonne) */}
+      <div className="absolute left-[360px] top-[-160px] z-20 flex flex-col gap-3">
+        <FloatingCard>
+          <div className="flex items-start gap-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white">
+              <Check className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="font-bold text-slate-950">Restaurant réservé</p>
+              <p className="mt-1 text-slate-500">Le 14/05 à 20h00</p>
+              <p className="mt-1 text-slate-500">8 personnes</p>
+            </div>
           </div>
-          <div>
-            <p className="font-bold text-slate-950">Restaurant réservé</p>
-            <p className="mt-1 text-slate-500">Le 14/05 à 20h00</p>
-            <p className="mt-1 text-slate-500">8 personnes</p>
-          </div>
-        </div>
-      </FloatingCard>
+        </FloatingCard>
 
-      <FloatingCard className="absolute left-full ml-4 top-[108px] z-20">
-        <div className="flex items-start gap-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600">
-            <Car className="h-5 w-5" />
+        <FloatingCard>
+          <div className="flex items-start gap-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+              <Car className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="font-bold text-slate-950">Véhicule livré</p>
+              <p className="mt-1 text-slate-500">Le 13/05 à 09h00</p>
+              <p className="mt-1 text-slate-500">Sur votre chantier</p>
+            </div>
           </div>
-          <div>
-            <p className="font-bold text-slate-950">Véhicule livré</p>
-            <p className="mt-1 text-slate-500">Le 13/05 à 09h00</p>
-            <p className="mt-1 text-slate-500">Sur votre chantier</p>
-          </div>
-        </div>
-      </FloatingCard>
+        </FloatingCard>
 
-      {/* Cadeaux : aligné à droite de “Réservation hôtel” (hors du bloc) */}
-      <FloatingCard className="absolute left-full ml-4 top-[214px] z-20">
-        <div className="flex items-start gap-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600">
-            <Gift className="h-5 w-5" />
+        <FloatingCard>
+          <div className="flex items-start gap-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+              <Gift className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="font-bold text-slate-950">Cadeaux envoyés</p>
+              <p className="mt-1 text-slate-500">Le 12/05</p>
+              <p className="mt-1 text-slate-500">Clients &amp; équipes</p>
+            </div>
           </div>
-          <div>
-            <p className="font-bold text-slate-950">Cadeaux envoyés</p>
-            <p className="mt-1 text-slate-500">Le 12/05</p>
-            <p className="mt-1 text-slate-500">Clients &amp; équipes</p>
-          </div>
-        </div>
-      </FloatingCard>
+        </FloatingCard>
+      </div>
 
       {/* Dark callout */}
       <div className="absolute -bottom-12 right-[-2.5rem] z-30 w-[330px] rounded-2xl bg-slate-950 p-4 text-white shadow-[0_24px_70px_rgba(15,23,42,0.35)]">

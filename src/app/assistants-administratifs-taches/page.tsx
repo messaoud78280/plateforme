@@ -6,171 +6,162 @@ import { absoluteUrl } from "@/lib/site";
 const pageUrl = absoluteUrl("/assistants-administratifs-taches");
 
 export const metadata: Metadata = {
-  title: "Tâches d'assistant administratif externalisé | BeWork",
+  title: "Missions BeWork pour vos chantiers (assistante travaux BTP) | BeWork",
   description:
-    "Emails, devis, factures, relances, agenda, suivi clients : découvrez les tâches prises en charge par nos assistants administratifs externalisés pour PME. Délégation fiable et francophone.",
+    "Devis, relances, dossiers chantier, DICT, fournisseurs, comptes rendus, réserves, DOE, DCE/CCTP : BeWork, assistante travaux BTP augmentée par l’IA, tient ce qui doit avancer côté bureau et structure vos livrables chantier.",
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
 };
 
 const top5Chronophages = [
   {
-    title: "Gestion des emails",
-    benefit: "Tri, priorisation, réponses simples et relances sans perdre de temps.",
+    title: "Devis à relancer",
+    benefit: "Relances tenues, suivi des réponses, statuts clairs jusqu’à la signature.",
   },
   {
-    title: "Facturation & relances",
-    benefit: "Devis, factures, suivi paiements et relances gérés par un tiers de confiance.",
+    title: "Situations & factures chantier",
+    benefit: "Préparation, mise en forme, suivi des envois et pièces associées.",
   },
   {
-    title: "Agenda & RDV",
-    benefit: "Planification, coordination et rappels pour garder le contrôle de votre calendrier.",
+    title: "DICT / DT & pièces chantier",
+    benefit: "Dossiers suivis, documents classés, rappels et échéances sous contrôle.",
   },
   {
-    title: "Suivi dossiers clients",
-    benefit: "Collecte de pièces, CRM, relances : plus aucune perte de trace.",
+    title: "Fournisseurs, livraisons, locations",
+    benefit: "Commandes et suivis, relances, coordination logistique au bon moment.",
   },
   {
-    title: "Saisie & mise en forme",
-    benefit: "Documents, tableaux, comptes rendus : une présentation impeccable, sans effort.",
+    title: "Comptes rendus, réserves, DOE",
+    benefit: "CR chantier propres, OPR/réserves suivies, DOE organisé en fin de chantier.",
   },
 ];
 
-const catalogue = [
+const missionFamilies = [
   {
-    h2: "Emails",
-    benefice: "Reprenez la main sur votre boîte mail sans sacrifier la réactivité.",
+    h2: "Devis, relances & situations",
+    benefice: "Plus de chances de signer et un suivi financier chantier plus net.",
     items: [
-      "Tri et classement des emails entrants",
-      "Réponses simples sur modèle validé",
-      "Relances clients et fournisseurs",
-      "Priorisation et transmission des urgences",
-      "Archivage et organisation des dossiers",
-      "Synthèse hebdomadaire des échanges importants",
+      "Préparation / mise en forme de devis (sur modèle validé)",
+      "Relances devis (jusqu’à réponse)",
+      "Suivi des validations client et prochaines actions",
+      "Situations de travaux (préparation, pièces)",
+      "Suivi factures liées aux chantiers",
+      "Avenants (préparation, suivi, relances)",
     ],
   },
   {
-    h2: "Devis / Factures / Relances",
-    benefice: "Un cycle de facturation fluide et des encaissements optimisés.",
+    h2: "Dossiers chantier & documents travaux",
+    benefice: "Des livrables chantier propres, retrouvables, et à jour.",
     items: [
-      "Création et envoi des devis",
-      "Émission des factures",
-      "Suivi des paiements et rapprochements",
-      "Relances amiables et formalisées",
-      "Mise à jour des tableaux de bord",
-      "Archivage des pièces comptables",
+      "Comptes rendus de chantier (structure, mise au propre, diffusion)",
+      "Suivi OPR / réserves",
+      "PV de levée de réserve (préparation, organisation des pièces)",
+      "DOE (organisation, relances pièces, compilation)",
+      "PPSPS / documents sécurité (structuration, checklists, pièces)",
+      "Classement des pièces chantier (plans, échanges, PV, photos)",
     ],
   },
   {
-    h2: "Agenda / RDV",
-    benefice: "Un calendrier maîtrisé et des rendez-vous bien préparés.",
+    h2: "Analyse de dossiers techniques (IA augmentée)",
+    benefice: "Trier, synthétiser, extraire l’essentiel pour décider plus vite.",
     items: [
-      "Planification des RDV",
-      "Coordination avec les participants",
-      "Reprogrammation et rappels",
-      "Préparation des visioconférences",
-      "Synthèse post-RDV",
-      "Gestion des conflits de créneaux",
+      "Tri et analyse DCE (pièces, exigences, manquants)",
+      "Synthèse CCTP (points clés, obligations)",
+      "Repérage des pièces importantes et des risques",
+      "Extraction des obligations (délais, livrables, pénalités)",
+      "Checklists de documents à préparer",
+      "Structuration d’un dossier de réponse (sans engagement technique à votre place)",
     ],
   },
   {
-    h2: "Suivi dossiers",
-    benefice: "Aucun dossier ne tombe entre les mailles du filet.",
+    h2: "Fournisseurs, planning & logistique",
+    benefice: "Moins de blocages terrain grâce à un suivi bureau-terrain serré.",
     items: [
-      "Collecte des documents requis",
-      "Check-list d’avancement par dossier",
-      "Saisie et mise à jour CRM",
-      "Relances pièces manquantes",
-      "Synthèse pour validation",
-      "Alertes échéances",
+      "Commandes matériaux (préparation, suivi, confirmations)",
+      "Suivi livraisons chantier (créneaux, contacts, relances)",
+      "Locations matériel (recherche, réservation, prolongations)",
+      "Relances fournisseurs (disponibilités, délais, AR)",
+      "Organisation des rendez-vous (clients, fournisseurs, sous-traitants)",
+      "Planning simple chantier (rappels, jalons, coordination)",
     ],
   },
   {
-    h2: "Documents & mise en forme",
-    benefice: "Une présentation professionnelle sans vous en occuper.",
+    h2: "Suivi client & organisation bureau-terrain",
+    benefice: "Une relation client plus régulière, sans vous couper du chantier.",
     items: [
-      "Saisie de documents et tableaux",
-      "Comptes rendus de réunions",
-      "Mise en page et formatage",
-      "Préparation de présentations",
-      "Relecture et corrections",
-      "Conversion de formats (PDF, Word, Excel)",
-    ],
-  },
-  {
-    h2: "RH administratif",
-    benefice: "L’administratif RH allégé, dans le respect du cadre légal.",
-    items: [
-      "Suivi des congés et absences",
-      "Préparation des dossiers paie",
-      "Notes de frais et justificatifs",
-      "Mise à jour des contrats (informations)",
-      "Archivage des dossiers personnels",
-      "Coordination avec le service paie externe",
-    ],
-  },
-  {
-    h2: "Pré-comptabilité",
-    benefice: "Un flux propre vers votre expert-comptable.",
-    items: [
-      "Classement des pièces comptables",
-      "Saisie des écritures courantes",
-      "Préparation des relevés pour le comptable",
-      "Transmission des pièces",
-      "Suivi des demandes d’informations",
-      "Point d’étape mensuel",
-    ],
-  },
-  {
-    h2: "Fournisseurs",
-    benefice: "Des achats suivis et des relations fournisseurs apaisées.",
-    items: [
-      "Demande de devis",
-      "Comparatifs et synthèses",
-      "Relances commandes et livraisons",
-      "Suivi des contrats et échéances",
-      "Mise à jour des référentiels",
-      "Archivage des pièces",
-    ],
-  },
-  {
-    h2: "Reporting",
-    benefice: "Des tableaux de bord à jour et une visibilité claire.",
-    items: [
-      "KPI simples (CA, factures en attente, etc.)",
-      "Reporting hebdomadaire ou mensuel",
-      "Mises à jour des tableaux Excel",
-      "Graphiques et synthèses",
-      "Alertes sur seuils",
-      "Préparation des supports de réunion",
-    ],
-  },
-  {
-    h2: "Relances administratives",
-    benefice: "Signatures, validations et paiements suivis jusqu’au bout.",
-    items: [
-      "Relance des signatures en attente",
-      "Suivi des documents à valider",
-      "Relances paiements",
-      "Coordination avec les services concernés",
-      "Mise à jour du suivi",
-      "Escalade si nécessaire",
+      "Préparation de mails professionnels (sur votre ton, sur modèle)",
+      "Relances client (devis, validations, pièces, RDV)",
+      "Organisation des demandes et des priorités",
+      "Suivi des réponses en attente",
+      "Tableau de bord chantier hebdomadaire (statuts, prochaines actions)",
+      "Synthèses courtes pour arbitrage (vous décidez)",
     ],
   },
 ];
+
+const repetitiveVsAdvanced = {
+  repetitive: [
+    "Relances devis",
+    "Mails clients (préparation, réponses simples sur modèle)",
+    "Suivi factures / situations",
+    "Commandes fournisseurs",
+    "Locations matériel",
+    "Planning simple",
+    "Classement documents",
+  ],
+  advanced: [
+    "DOE",
+    "PPSPS",
+    "DUERP (organisation des pièces / structure)",
+    "DCE (tri, checklists, pièces)",
+    "CCTP (synthèse des points clés)",
+    "PV de levée de réserve",
+    "Avenants",
+    "Comptes rendus chantier",
+    "Tableau de bord chantier",
+  ],
+} as const;
+
+const prepareVsValidate = {
+  prepare: [
+    "Brouillons de mails et réponses (sur modèle)",
+    "Tableaux de suivi et statuts",
+    "Checklists de pièces et échéances",
+    "Synthèses (DCE/CCTP, échanges, points bloquants)",
+    "Comptes rendus mis au propre",
+    "Dossiers organisés (DOE, réserves, pièces chantier)",
+    "Relances et suivis jusqu’à réponse",
+  ],
+  validate: [
+    "Prix et marges",
+    "Choix techniques",
+    "Engagements contractuels",
+    "Signatures",
+    "Réponses sensibles",
+    "Arbitrages chantier",
+  ],
+} as const;
+
+const complementaryRequests = [
+  "Agenda général (si cadré : rdv chantier, rdv client, jalons)",
+  "Emails non liés au chantier (au cas par cas)",
+  "Saisie administrative interne (ponctuelle, cadrée)",
+  "Pré-comptabilité (uniquement flux simple et transmission de pièces)",
+  "RH (uniquement si cadré, jamais au cœur de l’accompagnement)",
+] as const;
 
 const nonFait = [
+  "Prendre des décisions techniques à votre place",
+  "Signer ou engager contractuellement sans votre validation explicite",
+  "Remplacer un conducteur de travaux, un maître d’œuvre ou un bureau d’études",
+  "Produire une étude technique, un plan d’exécution ou un avis d’expert",
   "Prendre des décisions juridiques ou fiscales à votre place",
-  "Représenter légalement votre entreprise sans mandat écrit",
-  "Signer des documents sans votre validation explicite",
-  "Rédiger des attestations ou bilans comptables (réservé aux experts habilités)",
-  "Accéder à des systèmes ou données sans autorisation formelle",
-  "Effectuer des actes engageant votre responsabilité sans votre accord",
+  "Effectuer un acte engageant votre responsabilité sans votre accord",
 ];
 
 const commentCaMarche = [
-  { step: 1, title: "Call de découverte", desc: "Échange pour comprendre vos activités, préférences et outils. Notre équipe vous propose ensuite un profil adapté (sélection humaine, pas par algorithme)." },
-  { step: 2, title: "Onboarding", desc: "Cadre de démarrage : rôles, objectifs, rituels de communication. Accès aux outils et prise en main avec votre assistant dédié." },
-  { step: 3, title: "Exécution & pilotage", desc: "Livraison des missions, points de suivi réguliers et ajustements si besoin." },
+  { step: 1, title: "Cadrage chantier", desc: "On définit vos types de demandes (devis, dossiers chantier, fournisseurs…), vos outils et vos règles de validation." },
+  { step: 2, title: "Mise en route", desc: "On met en place les modèles (mails, tableaux), les accès et le circuit de validation. Vous gardez la main sur les points sensibles." },
+  { step: 3, title: "Suivi & cadence", desc: "Votre Beworker exécute, relance, structure et vous remonte les arbitrages. Points réguliers et ajustements selon la charge." },
 ];
 
 const reassurance = [
@@ -181,36 +172,28 @@ const reassurance = [
 
 const faqItems = [
   {
-    q: "Quels outils utilisez-vous ?",
-    a: "Nous travaillons avec Google Workspace, Microsoft 365, CRM (Salesforce, HubSpot, etc.) et messageries selon vos usages. L’assistant s’adapte à votre environnement.",
+    q: "Quelles missions peut gérer une assistante travaux BeWork ?",
+    a: "Les missions qui doivent avancer côté bureau : relances devis, suivi client, dossiers chantier, DICT/DT, fournisseurs, comptes rendus, réserves, DOE et tableaux de suivi.",
   },
   {
-    q: "Quels sont les délais et horaires ?",
-    a: "Les assistants travaillent du lundi au vendredi, alignés sur le fuseau français. Les délais dépendent du volume et de la complexité ; nous les cadrons ensemble au démarrage.",
+    q: "BeWork peut-elle préparer un DOE ou un PPSPS ?",
+    a: "Oui, sur un périmètre cadré : organisation des pièces, checklists, relances documents, mise au propre et compilation. Vous validez les éléments sensibles avant diffusion.",
   },
   {
-    q: "Comment sont protégées mes données (RGPD) ?",
-    a: "Nous appliquons des mesures de confidentialité adaptées. Les données sont traitées dans un cadre strict. Nous restons à votre disposition pour toute précision sur nos engagements.",
+    q: "BeWork peut-elle analyser un DCE ou un CCTP ?",
+    a: "BeWork peut trier, structurer et synthétiser les pièces (DCE/CCTP), repérer les obligations et produire des checklists. Cela ne remplace pas un bureau d’études ni une décision technique : vous gardez la validation.",
   },
   {
-    q: "Combien de périmètres puis-je déléguer ?",
-    a: "Nos offres couvrent jusqu’à 2 périmètres. Au-delà, nous construisons une offre sur-mesure adaptée à vos besoins.",
+    q: "Est-ce que BeWork peut relancer mes devis et mes clients ?",
+    a: "Oui : relances devis, relances de pièces, relances de validation, suivi des réponses. On tient la cadence et on vous remonte ce qui doit être arbitré.",
   },
   {
-    q: "Comment communiquer avec mon assistant ?",
-    a: "Vous échangez avec votre assistant directement via notre plateforme dédiée. Messagerie interne, email ou téléphone : les canaux de communication sont définis lors de votre onboarding pour garantir une collaboration fluide et efficace.",
+    q: "Qui valide les documents avant envoi ?",
+    a: "Vous. BeWork prépare, met en forme, organise et propose ; vous validez les prix, choix techniques, engagements contractuels, signatures et réponses sensibles.",
   },
   {
-    q: "Peut-on monter en charge progressivement ?",
-    a: "Oui. Nous pouvons démarrer sur un volume limité et ajuster selon vos besoins, en cohérence avec nos offres.",
-  },
-  {
-    q: "Que se passe-t-il en cas d’absence de l’assistant ?",
-    a: "Nous prévoyons une continuité de service et un remplacement si nécessaire. Les modalités sont détaillées dans le contrat.",
-  },
-  {
-    q: "Comment démarrer ?",
-    a: "Remplissez notre formulaire de contact, choisissez un créneau pour un premier RDV en visioconférence. Nous vous recontactons et cadrons ensemble votre besoin.",
+    q: "BeWork remplace-t-elle un conducteur de travaux ou un bureau d’études ?",
+    a: "Non. BeWork est un relais travaux bureau-terrain pour tenir vos dossiers, relances et documents. Les décisions techniques et responsabilités restent chez vous (ou vos partenaires habilités).",
   },
 ];
 
@@ -237,7 +220,7 @@ function FaqJsonLd() {
 
 export default function AssistantsAdministratifsTachesPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
+    <div className="min-h-screen bg-[#f8fafc]">
       <FaqJsonLd />
       <MarketingSiteHeader />
 
@@ -246,10 +229,11 @@ export default function AssistantsAdministratifsTachesPage() {
         <section className="px-6 pt-16 pb-12 md:pt-20 md:pb-16" style={{ scrollMarginTop: "6rem" }}>
           <div className="mx-auto max-w-4xl text-center">
             <h1 className="text-balance text-3xl font-bold tracking-tight text-black md:text-4xl lg:text-5xl">
-              Tâches d&apos;assistant administratif externalisé : ce que BeWork prend en charge
+              Missions BeWork pour vos chantiers
             </h1>
             <p className="mt-6 max-w-3xl mx-auto text-lg leading-relaxed text-black">
-              Emails, devis, factures, relances, agenda, suivi clients… déléguez l&apos;administratif à des assistants francophones augmentés par l&apos;IA.
+              Devis, relances, dossiers chantier, DICT, fournisseurs, comptes rendus, réserves, DOE, DCE, CCTP : BeWork vous aide à tenir ce qui doit
+              avancer côté bureau pendant que vous gérez le terrain.
             </p>
             <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
               <Link
@@ -274,7 +258,11 @@ export default function AssistantsAdministratifsTachesPage() {
         <section className="px-6 py-12 md:py-16">
           <div className="mx-auto max-w-3xl">
             <p className="text-black leading-relaxed">
-              L&apos;externalisation de l&apos;assistanat administratif permet aux PME, TPE et professionnels de gagner du temps et de se recentrer sur leur cœur de métier. Avec BeWork, vous déléguez des tâches concrètes — gestion des emails, devis, factures, relances, agenda, suivi de dossiers — à des assistants francophones formés à l&apos;IA. Notre organisation combine une agence en France (Laure Olivie, votre interlocutrice principale) et une équipe opérationnelle alignée sur le fuseau horaire français. Vous bénéficiez d&apos;une qualité professionnelle, d&apos;un pilotage réactif et d&apos;outils adaptés à vos process. Découvrez ci-dessous le catalogue des tâches prises en charge et ce que nous ne faisons pas, pour cadrer sereinement votre projet d&apos;externalisation administrative.
+              BeWork n’est pas un “secrétariat PME” généraliste. C’est une{" "}
+              <strong>assistante travaux / assistante BTP augmentée par l’IA</strong> : un relais bureau‑terrain pour tenir les{" "}
+              <strong>dossiers chantier</strong>, les <strong>relances</strong>, les <strong>documents travaux</strong> et la{" "}
+              <strong>coordination</strong> quand vous êtes pris sur le terrain. L’IA sert à trier, synthétiser et structurer — pas à “faire de la magie” :
+              vous gardez la validation finale sur les décisions qui engagent votre entreprise.
             </p>
           </div>
         </section>
@@ -283,10 +271,10 @@ export default function AssistantsAdministratifsTachesPage() {
         <section className="px-6 py-12 md:py-16" aria-labelledby="top5-heading">
           <div className="mx-auto max-w-site">
             <h2 id="top5-heading" className="text-2xl font-bold tracking-tight text-black md:text-3xl">
-              Les 5 tâches les plus chronophages (et les plus déléguées)
+              Les 5 sujets qui bloquent le plus souvent côté chantier
             </h2>
             <p className="mt-4 max-w-2xl text-black leading-relaxed">
-              Celles qui absorbent le plus de temps et que nos clients nous confient en priorité.
+              Ce que nos clients BTP nous confient en priorité pour garder le chantier fluide et le dossier carré.
             </p>
             <ul className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {top5Chronophages.map((item) => (
@@ -299,17 +287,17 @@ export default function AssistantsAdministratifsTachesPage() {
           </div>
         </section>
 
-        {/* D) Catalogue des tâches */}
+        {/* D) Missions BTP (par familles) */}
         <section className="px-6 py-12 md:py-16" aria-labelledby="catalogue-heading">
           <div className="mx-auto max-w-site">
             <h2 id="catalogue-heading" className="text-2xl font-bold tracking-tight text-black md:text-3xl">
-              Catalogue des tâches
+              Les missions BeWork (version chantier)
             </h2>
             <p className="mt-4 max-w-2xl text-black leading-relaxed">
-              Par catégorie : ce que nous faisons et le bénéfice pour vous.
+              Un aperçu structuré (sans liste interminable) des missions les plus fréquentes côté BTP.
             </p>
             <div className="mt-10 space-y-10">
-              {catalogue.map((cat) => (
+              {missionFamilies.map((cat) => (
                 <article key={cat.h2} className="card-frame rounded-xl p-6 md:p-8">
                   <h3 className="text-xl font-semibold text-black">{cat.h2}</h3>
                   <p className="mt-2 text-black">{cat.benefice}</p>
@@ -327,7 +315,89 @@ export default function AssistantsAdministratifsTachesPage() {
           </div>
         </section>
 
-        {/* E) Ce que nous ne faisons pas */}
+        {/* E) Tâches répétitives vs missions avancées */}
+        <section className="px-6 py-12 md:py-16" aria-labelledby="repeat-advanced-heading">
+          <div className="mx-auto max-w-site">
+            <h2 id="repeat-advanced-heading" className="text-2xl font-bold tracking-tight text-black md:text-3xl">
+              Tâches répétitives vs missions avancées BTP
+            </h2>
+            <p className="mt-4 max-w-3xl text-black leading-relaxed">
+              L’objectif : tenir la cadence sur le quotidien, et structurer les livrables chantier quand il faut.
+            </p>
+            <div className="mt-8 grid gap-6 lg:grid-cols-2">
+              <div className="card-frame rounded-xl p-6 md:p-8">
+                <h3 className="text-xl font-semibold text-black">Tâches répétitives à tenir</h3>
+                <p className="mt-2 text-black">Celles qui doivent avancer tous les jours, sans vous consommer.</p>
+                <ul className="mt-4 grid gap-2 sm:grid-cols-2" role="list">
+                  {repetitiveVsAdvanced.repetitive.map((item) => (
+                    <li key={item} className="flex gap-2 text-black">
+                      <span className="text-[#1d4ed8] shrink-0" aria-hidden>
+                        ✓
+                      </span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="card-frame rounded-xl p-6 md:p-8">
+                <h3 className="text-xl font-semibold text-black">Missions avancées BTP à structurer</h3>
+                <p className="mt-2 text-black">Celles qui demandent méthode, rigueur et livrables propres.</p>
+                <ul className="mt-4 grid gap-2 sm:grid-cols-2" role="list">
+                  {repetitiveVsAdvanced.advanced.map((item) => (
+                    <li key={item} className="flex gap-2 text-black">
+                      <span className="text-[#1d4ed8] shrink-0" aria-hidden>
+                        ✓
+                      </span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* F) Prépare vs vous validez */}
+        <section className="px-6 py-12 md:py-16" aria-labelledby="prepare-validate-heading">
+          <div className="mx-auto max-w-site">
+            <h2 id="prepare-validate-heading" className="text-2xl font-bold tracking-tight text-black md:text-3xl">
+              Ce que BeWork prépare, ce que vous validez
+            </h2>
+            <p className="mt-4 max-w-3xl text-black leading-relaxed">
+              BeWork prépare, structure, classe, relance et suit. Les décisions qui engagent votre entreprise restent sous votre contrôle.
+            </p>
+            <div className="mt-8 grid gap-6 lg:grid-cols-2">
+              <div className="card-frame rounded-xl p-6 md:p-8">
+                <h3 className="text-xl font-semibold text-black">BeWork peut préparer</h3>
+                <ul className="mt-4 grid gap-2 sm:grid-cols-2" role="list">
+                  {prepareVsValidate.prepare.map((item) => (
+                    <li key={item} className="flex gap-2 text-black">
+                      <span className="text-[#1d4ed8] shrink-0" aria-hidden>
+                        ✓
+                      </span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="card-frame rounded-xl p-6 md:p-8">
+                <h3 className="text-xl font-semibold text-black">Vous validez</h3>
+                <ul className="mt-4 grid gap-2 sm:grid-cols-2" role="list">
+                  {prepareVsValidate.validate.map((item) => (
+                    <li key={item} className="flex gap-2 text-black">
+                      <span className="text-black shrink-0" aria-hidden>
+                        ✓
+                      </span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* G) Ce que nous ne faisons pas */}
         <section className="px-6 py-12 md:py-16" aria-labelledby="non-fait-heading">
           <div className="mx-auto max-w-4xl">
             <h2 id="non-fait-heading" className="text-2xl font-bold tracking-tight text-black md:text-3xl">
@@ -347,7 +417,7 @@ export default function AssistantsAdministratifsTachesPage() {
           </div>
         </section>
 
-        {/* F) Comment ça marche */}
+        {/* H) Comment ça marche */}
         <section className="px-6 py-12 md:py-16" aria-labelledby="process-heading">
           <div className="mx-auto max-w-site">
             <h2 id="process-heading" className="text-2xl font-bold tracking-tight text-black md:text-3xl">
@@ -378,7 +448,7 @@ export default function AssistantsAdministratifsTachesPage() {
           </div>
         </section>
 
-        {/* G) FAQ */}
+        {/* I) FAQ */}
         <section className="px-6 py-12 md:py-16" aria-labelledby="faq-heading">
           <div className="mx-auto max-w-3xl">
             <h2 id="faq-heading" className="text-2xl font-bold tracking-tight text-black md:text-3xl">
@@ -404,14 +474,40 @@ export default function AssistantsAdministratifsTachesPage() {
           </div>
         </section>
 
-        {/* H) Bloc final conversion */}
+        {/* J) Demandes complémentaires (hors cœur BTP) */}
+        <section className="px-6 py-12 md:py-16" aria-labelledby="complementary-heading">
+          <div className="mx-auto max-w-site">
+            <h2 id="complementary-heading" className="text-2xl font-bold tracking-tight text-black md:text-3xl">
+              Demandes complémentaires (uniquement si elles sont cadrées)
+            </h2>
+            <p className="mt-4 max-w-4xl text-black leading-relaxed">
+              BeWork peut aussi traiter certaines demandes complémentaires liées à votre organisation interne, mais le cœur de l’accompagnement reste le
+              suivi travaux, les dossiers chantier, les devis, les documents et la coordination bureau‑terrain.
+            </p>
+            <div className="mt-8 card-frame rounded-xl p-6 md:p-8">
+              <ul className="grid gap-2 sm:grid-cols-2 md:grid-cols-3" role="list">
+                {complementaryRequests.map((item) => (
+                  <li key={item} className="flex gap-2 text-black">
+                    <span className="text-[#1d4ed8] shrink-0" aria-hidden>
+                      ✓
+                    </span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* K) Bloc final conversion */}
         <section className="px-6 py-16 md:py-20">
           <div className="mx-auto max-w-4xl rounded-2xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-8 text-center md:p-12">
             <h2 className="text-2xl font-bold text-black md:text-3xl">
               Dès 290 € TTC/mois — sans recrutement
             </h2>
             <p className="mt-4 text-black">
-              Déléguez vos tâches administratives à des assistants francophones augmentés par l&apos;IA. Pilotez en France, travaillez sereinement.
+              Un relais travaux bureau‑terrain, avec une assistante BTP augmentée par l’IA pour trier, synthétiser et structurer. Vous gardez la validation
+              finale.
             </p>
             <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
               <Link

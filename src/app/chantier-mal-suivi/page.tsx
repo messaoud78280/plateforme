@@ -7,33 +7,49 @@ import { landingPageMetadata } from "@/lib/seo-landing-metadata";
 const PAGE_PATH = BTP_PAIN_PAGE_PATHS.chantierMalSuivi;
 
 export const metadata = landingPageMetadata({
-  title: "Chantier mal suivi : dossier administratif, client, fournisseur | BeWork",
+  title: "Chantier mal suivi | Suivi dossiers travaux avec BeWork",
   description:
-    "Chantier mal suivi côté administratif : retards, litiges et cash qui fuit. Organisation chantier BTP et suivi dossier — demandes cadrées, pièces, relances. Pilotage encadré.",
+    "BeWork aide les entreprises du BTP à structurer le suivi de leurs dossiers chantier : relances, preuves, comptes rendus, réserves, DOE, fournisseurs et documents travaux.",
   path: PAGE_PATH,
   keywords: [
     "chantier mal suivi",
-    "suivi administratif chantier",
-    "organisation chantier BTP",
-    "suivi dossier chantier",
-    "pilotage administratif chantier",
-    "coordination administrative BTP",
+    "suivi chantier BTP",
+    "suivi dossiers chantier",
+    "documents chantier",
+    "réserves chantier",
+    "DOE",
+    "comptes rendus chantier",
+    "relais bureau-chantier",
+    "assistante travaux",
+    "assistante BTP",
   ],
 });
 
 export default function Page() {
   const faq = [
     {
-      q: "Qu’est-ce qui distingue « mauvais suivi » de « mauvaise exécution » ?",
-      a: "L’exécution, c’est le geste technique. Le suivi administratif, c’est la cohérence documents (mails, avenants, preuves, validations), la réactivité client et la chaîne fournisseur. Les deux se touchent : un retard de pièce peut bloquer une phase technique ou une facturation.",
+      q: "Comment savoir si un chantier est mal suivi ?",
+      a: "Quand les infos sont dispersées, que le client relance, que les comptes rendus manquent, que les réserves traînent, que les preuves sont introuvables et que personne ne sait “où on en est” sans fouiller mails/WhatsApp.",
     },
     {
-      q: "BeWork va-t-il sur le chantier ?",
-      a: "Non. Nous tenons le volet bureau : classement, relances, préparation de dossiers, suivi des demandes et remontée des points bloquants. Vous gardez la relation directe sur l’ouvrage et les arbitrages techniques.",
+      q: "Quels documents faut-il suivre pendant un chantier ?",
+      a: "Les comptes rendus, preuves (photos/échanges), pièces chantier et validations, suivi des réserves/OPR, et le fil des demandes (client, fournisseurs, locations). L’objectif est la traçabilité, pas la paperasse.",
     },
     {
-      q: "Comment éviter le chaos quand il y a plusieurs acteurs ?",
-      a: "Une demande = un fil, un statut, une échéance visible. Moins de pièces perdues entre trois boîtes mail et moins de « je croyais que X s’en occupait ».",
+      q: "Comment éviter que les réserves traînent ?",
+      a: "Avec un suivi simple : réserve → responsable → preuve → date → relance → levée. Sans statut et prochaine action, une réserve devient vite “un sujet de fin de chantier” qui s’éternise.",
+    },
+    {
+      q: "BeWork peut-elle préparer un tableau de suivi chantier ?",
+      a: "Oui : tableau de suivi (statuts, prochaines actions, pièces, points bloquants), comptes rendus, classement des preuves et relances planifiées. Vous validez les décisions sensibles.",
+    },
+    {
+      q: "BeWork peut-elle suivre les réserves et préparer le DOE ?",
+      a: "Oui sur un périmètre cadré : organisation des pièces, checklists, relances documents, compilation progressive. La conduite technique reste chez vous.",
+    },
+    {
+      q: "BeWork remplace-t-elle un conducteur de travaux ?",
+      a: "Non. BeWork est un relais bureau‑chantier pour tenir les dossiers, la traçabilité et le suivi. Le conducteur de travaux, le maître d’œuvre et/ou le bureau d’études gardent la conduite technique et les arbitrages.",
     },
   ] as const;
 
@@ -49,58 +65,78 @@ export default function Page() {
 
   return (
     <SeoLandingPage
-      description="Quand un chantier dérape côté paperasse : où part l’argent, pourquoi le dossier s’effondre et comment sécuriser l’organisation administrative."
+      description="Chantier mal suivi : informations dispersées, relances oubliées, preuves manquantes, réserves qui traînent. Une méthode simple pour reprendre le contrôle côté dossiers travaux."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
-        { name: "Chantier mal suivi — administratif", href: PAGE_PATH },
+        { name: "Chantier mal suivi", href: PAGE_PATH },
       ]}
-      h1="Chantier mal suivi administratif — le coût caché des dossiers en vrac"
+      h1="Chantier mal suivi : reprenez le contrôle de vos dossiers travaux"
       intro={
         <>
-          Vue terrain, tout semble sous contrôle jusqu’à la première divergence : pièce envoyée trois fois, bon de commande
-          introuvable, situation de travaux bloquée, client qui conteste alors que vos équipes ont déjà avancé. Un chantier mal
-          suivi côté administratif peut coûter cher en heures perdus, décotes acceptées sous pression et impayés en cascade.
-          BeWork structure le flux bureau à la même enseigne que votre exigeance chantier.
+          Un chantier peut déraper même si le terrain est bien tenu, simplement parce que les informations, documents et relances
+          ne suivent pas : demandes client oubliées, comptes rendus manquants, preuves dispersées, réserves non suivies, DOE
+          repoussé. BeWork vous aide à structurer le suivi côté bureau (dossiers, relances, traçabilité) sans remplacer la
+          conduite technique du chantier.
         </>
       }
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <h2>Ce que vous perdez aujourd’hui</h2>
+      <h2>Les signes d’un chantier mal suivi</h2>
       <ul>
-        <li>
-          <strong>Des avances trésorerie mal calées</strong> quand situations et validations ne suivent pas l’avancement réel.
-        </li>
-        <li>
-          <strong>Une exposition aux contestations</strong> (preuves incomplètes, échanges dispersés dans cinq conversations).
-        </li>
-        <li>
-          <strong>Du temps direction</strong> consacré à reconstituer l’histoire du dossier au lieu d’aller vers le prochain
-          chantier.
-        </li>
+        <li>Le client relance plusieurs fois, mails sans réponse, décisions qui traînent.</li>
+        <li>Comptes rendus non envoyés ou introuvables.</li>
+        <li>Réserves notées, mais pas de suivi (qui / quand / preuve / relance).</li>
+        <li>Photos, preuves, échanges dispersés (WhatsApp, mail, téléphone).</li>
+        <li>Documents chantier mal classés : “on ne retrouve plus”.</li>
+        <li>Fournisseurs / locations non confirmés, planning mis à jour trop tard.</li>
+        <li>DOE repoussé à la fin, puis impossible à reconstituer proprement.</li>
       </ul>
 
-      <h2>Pourquoi ça arrive</h2>
-      <p>
-        La production avance vite ; le bureau rattrape après coup. À mesure que grandissent fournisseur, sous-traitant et client —
-        sans référent unique pour le dossier, chacun optimise son coin. Le téléphone chantier fait office de lien documentaire —
-        jusqu’à la première divergence contractuelle où il manque justement la trace qui arrondit les angles.
-      </p>
-
-      <h2>Comment BeWork vous aide</h2>
-      <p>
-        Nous assurons suivi dossier chantier dans un environnement cloisonné : vos demandes (DICT complémentaires, relances GO,
-        confirmations fournisseur, mise en copie réglementée…) sont suivies jusqu’à clôture avec statuts. L’assistant administratif
-        BTP n’est pas un répondeur : c’est une exécution encadrée, pilotée depuis la France, avec des profils diplômés habitués
-        aux dossiers chantier.
-      </p>
-
-      <h2>Bénéfices concrets</h2>
+      <h2>Ce que ça coûte à l’entreprise</h2>
       <ul>
-        <li>Un chantier mieux défendu sur pièges courants (« on n’a jamais reçu » / « vous n’avez pas validé »).</li>
-        <li>Moins d’allers-retours stériles avec fournisseur et client.</li>
-        <li>Une transition plus propre chantier suivant sans traîner un sac de dossiers non clos.</li>
+        <li>Perte de crédibilité et tensions avec le client.</li>
+        <li>Réserves qui traînent et fin de chantier compliquée.</li>
+        <li>Situations / factures retardées (trésorerie qui se tend).</li>
+        <li>Risque de litiges faute de preuves et de traçabilité.</li>
+        <li>Charge mentale du dirigeant / conducteur de travaux.</li>
       </ul>
+
+      <h2>Méthode simple pour reprendre le contrôle</h2>
+      <ul>
+        <li>Centraliser les demandes (une file unique) et garder une trace.</li>
+        <li>Créer un tableau de suivi chantier (statut, prochaine action, échéance).</li>
+        <li>Classer les documents chantier (CR, photos, PV, validations).</li>
+        <li>Suivre les relances (client / fournisseurs) et les points bloquants.</li>
+        <li>Suivre les réserves avec une boucle claire jusqu’à levée.</li>
+        <li>Préparer le DOE progressivement, pas “à la fin”.</li>
+      </ul>
+
+      <h2>Ce que BeWork peut prendre en charge (côté bureau)</h2>
+      <ul>
+        <li>Tableau de suivi chantier (demandes, statuts, échéances, points bloquants)</li>
+        <li>Préparation des comptes rendus et diffusion (sur votre circuit)</li>
+        <li>Suivi des demandes client et relances</li>
+        <li>Classement des pièces, preuves et documents</li>
+        <li>Suivi des réserves (OPR → relance → preuve → levée)</li>
+        <li>Préparation/organisation du DOE (checklists, relances pièces, compilation progressive)</li>
+        <li>Relances fournisseurs ou locations (confirmations, créneaux, AR)</li>
+        <li>Alertes sur les points bloquants et priorisation</li>
+      </ul>
+
+      <h2>Ce que vous gardez (validation finale)</h2>
+      <ul>
+        <li>Conduite technique du chantier et arbitrages terrain</li>
+        <li>Choix techniques et décisions contractuelles</li>
+        <li>Relations sensibles client et réponses engageantes</li>
+        <li>Validation finale, signatures et engagements</li>
+      </ul>
+
+      <h2>Exemple concret</h2>
+      <p>
+        Sur un chantier avec plusieurs réserves, des photos dispersées et des mails clients en attente, BeWork peut structurer un tableau de suivi,
+        classer les preuves, préparer les relances et vous signaler les points à valider. Vous gardez la conduite technique et les décisions sensibles.
+      </p>
 
       <h2>Questions fréquentes</h2>
       <dl className="space-y-6">
@@ -117,10 +153,19 @@ export default function Page() {
           Réserver un appel
         </Link>
         <Link
-          href="/dict-dt-travaux"
-          className="inline-flex rounded-lg border-2 border-[#1d4ed8] px-6 py-3 font-bold text-[#1d4ed8] hover:bg-[#eff6ff]"
+          href="/assistants-administratifs-taches"
+          className="inline-flex rounded-lg border border-slate-200 bg-white px-6 py-3 font-bold text-slate-900 hover:bg-slate-50"
         >
-          Dossiers & autorisations (DICT)
+          Voir les missions
+        </Link>
+        <Link href="/notre-facon-de-travailler" className="inline-flex rounded-lg border border-slate-200 bg-white px-6 py-3 font-bold text-slate-900 hover:bg-slate-50">
+          Voir la méthode
+        </Link>
+        <Link href="/tarifs" className="inline-flex rounded-lg border border-slate-200 bg-white px-6 py-3 font-bold text-slate-900 hover:bg-slate-50">
+          Voir les forfaits
+        </Link>
+        <Link href="/dict-dt-travaux" className="inline-flex rounded-lg border border-slate-200 bg-white px-6 py-3 font-bold text-slate-900 hover:bg-slate-50">
+          DICT / DT : dossier & suivi
         </Link>
       </div>
 

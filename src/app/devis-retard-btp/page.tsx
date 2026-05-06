@@ -7,33 +7,48 @@ import { landingPageMetadata } from "@/lib/seo-landing-metadata";
 const PAGE_PATH = BTP_PAIN_PAGE_PATHS.devisRetard;
 
 export const metadata = landingPageMetadata({
-  title: "Devis retard BTP : réactivité commerciale = CA sécurisé | BeWork",
+  title: "Devis BTP en retard | Préparation et suivi avec BeWork",
   description:
-    "Devis bâtiment en retard : coût direct en opportunités perdues. Gestion devis BTP cadrée, préparation et relances pour augmenter le taux de signature — pilotage administratif, forfaits TTC.",
+    "BeWork aide les entreprises du BTP à préparer, organiser et suivre leurs devis travaux pour répondre plus vite aux clients, sans perdre le contrôle du prix, de la marge ou de la validation technique.",
   path: PAGE_PATH,
   keywords: [
-    "devis retard BTP",
-    "devis bâtiment en retard",
-    "gestion devis BTP",
-    "augmenter taux de signature devis bâtiment",
-    "réactivité devis artisan",
-    "relance devis chantier",
+    "devis BTP en retard",
+    "devis travaux en retard",
+    "préparation devis BTP",
+    "suivi devis travaux",
+    "devis non envoyé",
+    "devis bâtiment",
+    "suivi commercial BTP",
+    "assistante travaux",
+    "assistante BTP",
   ],
 });
 
 export default function Page() {
   const faq = [
     {
-      q: "Le problème est-il toujours la rédaction technique ?",
-      a: "Souvent non : c’est le creux entre « je sais quoi chiffrer » et « le PDF est parti ». Manque de pièces, attente d’un fournisseur, devis laissé en brouillon après une urgence chantier : BeWork referme la boucle administrative pour que la date d’envoi recolle à votre ambition commerciale.",
+      q: "Pourquoi mes devis BTP prennent-ils du retard ?",
+      a: "Souvent, ce n’est pas le chiffrage en lui-même : ce sont les infos manquantes, les demandes dispersées, les prix à récupérer, et les urgences chantier qui interrompent le devis commencé. Sans suivi, le brouillon reste en suspens.",
     },
     {
-      q: "Comment améliorer le taux de signature sans brader ?",
-      a: "En sortant plus vite un devis propre, en suivant les relances avec un calendrier et des messages cohérents, en documentant les objections. Le prix compte, mais la régularité et la clarté décident souvent entre deux offres proches.",
+      q: "Comment sortir mes devis travaux plus rapidement ?",
+      a: "Centralisez les demandes, vérifiez les pièces manquantes, utilisez une checklist, fixez une date d’envoi, et tenez un tableau de suivi. La méthode compte autant que le temps de chiffrage.",
     },
     {
-      q: "BeWork envoie-t-il le devis sans vous ?",
-      a: "Les envois engageants restent sous vos validations si vous le souhaitez. Nous préparons, structurons, relançons les pièces manquantes et tenons le tableau de suivi pour que rien ne reste en attente invisible.",
+      q: "BeWork peut-elle préparer un devis à ma place ?",
+      a: "BeWork peut organiser la demande, rassembler les pièces, préparer la mise en forme et le mail d’envoi. Le chiffrage technique, le prix et la marge restent chez vous, avec validation finale.",
+    },
+    {
+      q: "Qui valide le prix et la marge ?",
+      a: "Vous. BeWork prépare et structure, mais ne fixe pas vos prix ni vos marges et ne prend pas d’engagement à votre place.",
+    },
+    {
+      q: "Que faire si des informations manquent pour établir le devis ?",
+      a: "Lister ce qui manque, le demander immédiatement (client/fournisseur), et bloquer le devis avec une prochaine action datée. BeWork peut préparer la liste, relancer et suivre jusqu’à obtention des éléments.",
+    },
+    {
+      q: "Quelle différence entre devis en retard et devis non relancé ?",
+      a: "Le devis en retard n’est pas (ou pas encore) envoyé. Le devis non relancé a été envoyé mais n’est pas suivi. Les deux se traitent avec une méthode et des statuts ; la relance vient ensuite.",
     },
   ] as const;
 
@@ -49,58 +64,79 @@ export default function Page() {
 
   return (
     <SeoLandingPage
-      description="Devis en retard en BTP : ce que ça coûte en CA, pourquoi ça bloque, et comment un pilotage administratif referme le délai entre chiffrage et envoi."
+      description="Devis travaux en retard : pourquoi ça bloque, ce que ça coûte, et une méthode simple pour sortir vos devis plus vite sans perdre le contrôle."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Devis en retard — BTP", href: PAGE_PATH },
       ]}
-      h1="Devis en retard en BTP — chaque jour compte pour signer le chantier"
+      h1="Devis BTP en retard : ne laissez pas vos opportunités refroidir"
       intro={
         <>
-          Un client compare plusieurs entreprises. Si votre devis arrive deux semaines après la concurrence, vous n’êtes même
-          plus dans la course — même avec un bon prix. La réactivité commerciale est un levier direct de chiffre d’affaires.
-          BeWork muscle la partie « sortir le dossier de l’atelier » : préparation, pièces, mise en forme et suivi des relances
-          selon vos règles, avec une équipe qui connaît le vocabulaire chantier.
+          Un devis qui tarde à sortir fait douter le client. Dans le BTP, la rapidité de réponse peut faire la différence
+          entre rester dans la short list et être oublié — même à prix équivalent. BeWork aide à structurer la{" "}
+          <strong>préparation</strong>, le <strong>suivi</strong> et l’<strong>envoi</strong> des devis travaux, sans remplacer le
+          chiffrage technique ni la validation finale.
         </>
       }
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <h2>Ce que vous perdez aujourd’hui</h2>
+      <h2>Pourquoi les devis BTP prennent du retard</h2>
       <ul>
+        <li>Le chef d’entreprise est sur chantier : le devis passe après l’urgence terrain.</li>
+        <li>Demandes dispersées entre téléphone, mails et WhatsApp.</li>
+        <li>Photos, métrés ou détails techniques manquants.</li>
+        <li>Prix fournisseurs à demander / délais à confirmer.</li>
+        <li>Devis commencé mais non finalisé (interruptions, priorités qui changent).</li>
+        <li>Absence de tableau de suivi et de dates d’envoi.</li>
+      </ul>
+
+      <h2>Ce que le retard provoque</h2>
+      <ul>
+        <li>Le client doute et compare ailleurs.</li>
+        <li>Un concurrent répond avant : chantier perdu.</li>
+        <li>Image moins professionnelle et commercial irrégulier.</li>
+        <li>Devis fait dans l’urgence : risque d’oublis et de marge qui baisse.</li>
+      </ul>
+
+      <h2>Une méthode simple pour sortir les devis plus vite</h2>
+      <ul>
+        <li>Centraliser les demandes (une “file unique”).</li>
+        <li>Vérifier les pièces manquantes et les demander tout de suite.</li>
+        <li>Utiliser une checklist devis (infos, pièces, options).</li>
+        <li>Classer les priorités (impact, urgence, valeur).</li>
+        <li>Fixer une date limite d’envoi et la tenir.</li>
+        <li>Une fois envoyé : passer au suivi et à la relance.</li>
+      </ul>
+
+      <h2>Ce que BeWork peut prendre en charge (devis en retard)</h2>
+      <ul>
+        <li>Organiser les demandes de devis et centraliser les pièces (photos, infos, échanges)</li>
+        <li>Préparer la liste des informations manquantes</li>
+        <li>Mettre en forme le devis (sur votre modèle) et préparer le mail d’envoi</li>
+        <li>Préparer les relances fournisseurs (prix, disponibilités, délais)</li>
+        <li>Tenir un tableau de suivi (statuts, dates, prochaines actions)</li>
+        <li>Alerter sur les devis en retard et prioriser</li>
         <li>
-          <strong>Des chantiers avant même le débat technique.</strong> Sans date d’envoi, il n’y a pas de négociation possible.
-        </li>
-        <li>
-          <strong>De la crédibilité.</strong> Un client entend « on vous envoie ça demain » trois fois — la confiance se fissure.
-        </li>
-        <li>
-          <strong>Des marges sur le mal classé.</strong> Quand le devis part en urgence, on oublie postes, options ou marges de
-          risque — vous signez plus bas que prévu.
+          Préparer la suite après envoi :{" "}
+          <Link href="/relance-devis-btp" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
+            relance devis BTP
+          </Link>
         </li>
       </ul>
 
-      <h2>Pourquoi ça arrive</h2>
-      <p>
-        Les devis se bloquent rarement sur un seul « gros calcul ». C’est le cumul : attente d’un tarif fournisseur, photo
-        manquante, devis modèle obsolète, interruption par un contrôle chantier, priorisation par émotion du jour. Sans file
-        unique et sans quelqu’un qui pousse le dossier comme une tâche production, le retard devient structurel.
-      </p>
-
-      <h2>Comment BeWork vous aide</h2>
-      <p>
-        Nous traitons la gestion devis BTP comme une chaîne : collecte des éléments, structuration, relecture forme, relances
-        internes/externes et statuts visibles. L’IA réduit le temps sur les tâches répétitives (reformulation, extractions,
-        check-lists) ; les humains gardent le sens client et le respect de votre méthode de chiffrage. Résultat : un rythme
-        d’envoi qui suit votre capacité commerciale, pas seulement votre emploi du temps chantier.
-      </p>
-
-      <h2>Bénéfices concrets</h2>
+      <h2>Ce que vous gardez</h2>
       <ul>
-        <li>Plus de devis comparables dans le même laps de temps — vous restez dans la short list.</li>
-        <li>Moins d’oublis de pièces jointes ou de validité floue sur l’offre.</li>
-        <li>Un historique de relance propre si le client temporise — sans improvisation harcelante.</li>
+        <li>Chiffrage technique</li>
+        <li>Prix, marge, choix des matériaux et méthode</li>
+        <li>Validation finale, signature et engagements contractuels</li>
       </ul>
+
+      <h2>Exemple concret</h2>
+      <p>
+        Un client demande un devis après une visite chantier. BeWork peut centraliser les photos, noter les informations manquantes, préparer le
+        brouillon, demander les prix fournisseurs et vous rappeler la date d’envoi prévue. Vous gardez la main sur le prix et la validation.
+      </p>
 
       <h2>Questions fréquentes</h2>
       <dl className="space-y-6">
@@ -117,10 +153,16 @@ export default function Page() {
           Réserver un appel
         </Link>
         <Link
-          href="/relance-devis-btp"
-          className="inline-flex rounded-lg border-2 border-black px-6 py-3 font-bold text-black hover:bg-slate-100"
+          href="/assistants-administratifs-taches"
+          className="inline-flex rounded-lg border border-slate-200 bg-white px-6 py-3 font-bold text-slate-900 hover:bg-slate-50"
         >
-          Voir la méthode relances devis
+          Voir les missions
+        </Link>
+        <Link href="/notre-facon-de-travailler" className="inline-flex rounded-lg border border-slate-200 bg-white px-6 py-3 font-bold text-slate-900 hover:bg-slate-50">
+          Voir la méthode
+        </Link>
+        <Link href="/tarifs" className="inline-flex rounded-lg border border-slate-200 bg-white px-6 py-3 font-bold text-slate-900 hover:bg-slate-50">
+          Voir les forfaits
         </Link>
       </div>
 

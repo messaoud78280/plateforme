@@ -23,8 +23,8 @@ type CardConfig = {
 
 const CARDS: CardConfig[] = [
   {
-    title: "Gestion des devis & relances",
-    bullets: ["Relance automatique des devis", "Suivi des réponses clients", "Facturation claire et rapide"],
+    title: "Devis, relances & situations",
+    bullets: ["Relances devis tenues", "Situations & factures préparées", "Suivi client clair (statuts, prochaines actions)"],
     footerTitle: "+ de devis signés",
     footerSub: "Plus d’opportunités, plus de CA.",
     Icon: IconEuroDocument,
@@ -39,10 +39,10 @@ const CARDS: CardConfig[] = [
     footerTitleClass: "text-[#1d4ed8]",
   },
   {
-    title: "Suivi administratif chantier",
-    bullets: ["DICT, autorisations, dossiers", "Documents toujours à jour", "Aucun oubli administratif"],
-    footerTitle: "0 retard administratif",
-    footerSub: "Conformité et sérénité garanties.",
+    title: "Dossiers chantier & documents travaux",
+    bullets: ["DICT/DT et pièces suivies", "Documents travaux centralisés", "PV, réserves, DOE organisés"],
+    footerTitle: "Dossiers chantier carrés",
+    footerSub: "Moins d’oublis, moins de litiges.",
     Icon: IconClipboardChecks,
     FooterIcon: IconShieldMini,
     stripe: "from-[#2563eb] via-[#3b82f6] to-[#60a5fa]",
@@ -55,8 +55,8 @@ const CARDS: CardConfig[] = [
     footerTitleClass: "text-[#1d4ed8]",
   },
   {
-    title: "Coordination & organisation",
-    bullets: ["Commandes fournisseurs", "Planning équipes", "Suivi des livraisons"],
+    title: "Fournisseurs, planning & urgences",
+    bullets: ["Commandes, livraisons, locations", "Planning et coordination", "Urgences traitées et arbitrages remontés"],
     footerTitle: "Chantiers fluides",
     footerSub: "Tout est au bon endroit, au bon moment.",
     Icon: IconPeopleCoord,

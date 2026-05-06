@@ -27,7 +27,7 @@ export function SeoLandingPage({ description, h1, intro, children, breadcrumbIte
       : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
+    <div className="min-h-screen bg-[#f8fafc]">
       {structuredData ? (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       ) : null}
@@ -58,9 +58,9 @@ export function SeoLandingPage({ description, h1, intro, children, breadcrumbIte
           <div className="mt-12 prose prose-slate max-w-none prose-headings:text-black prose-p:text-black prose-li:text-black prose-strong:text-black">
             {children}
           </div>
-          <div className="mt-12 rounded-xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-8">
+          <div className="mt-12 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
             <h2 className="text-xl font-bold text-black">Vérifier l’adéquation avec votre charge</h2>
-            <p className="mt-3 text-black">
+            <p className="mt-3 text-slate-700">
               BeWork intervient pour artisans, conducteurs de travaux et dirigeants BTP en France, Belgique, Suisse et
               Luxembourg — forfaits TTC cadrés par volume.
             </p>
@@ -68,10 +68,13 @@ export function SeoLandingPage({ description, h1, intro, children, breadcrumbIte
               <Link href="/contact" className="inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white hover:bg-[#1e40af]">
                 Échanger sur votre besoin
               </Link>
-              <Link href="/tarifs" className="inline-flex rounded-lg border-2 border-[#1d4ed8] px-6 py-3 font-semibold text-[#1d4ed8] hover:bg-[#eff6ff]">
+              <Link href="/tarifs" className="inline-flex rounded-lg border border-slate-200 bg-white px-6 py-3 font-semibold text-slate-900 hover:bg-slate-50">
                 Consulter les forfaits
               </Link>
-              <Link href="/inscription" className="surface-metallic-outline inline-flex rounded-lg px-6 py-3 font-semibold text-black hover:text-[#1d4ed8]">
+              <Link href="/ressources" className="inline-flex rounded-lg border border-slate-200 bg-white px-6 py-3 font-semibold text-slate-900 hover:bg-slate-50">
+                Ressources
+              </Link>
+              <Link href="/inscription" className="inline-flex rounded-lg border border-slate-200 bg-white px-6 py-3 font-semibold text-slate-900 hover:bg-slate-50">
                 Accès client
               </Link>
             </div>
@@ -79,7 +82,7 @@ export function SeoLandingPage({ description, h1, intro, children, breadcrumbIte
         </article>
       </main>
 
-      <footer className="border-t border-[#c8cdd6] bg-[#f8f9fb] px-6 py-12">
+      <footer className="border-t border-slate-200 bg-white px-6 py-12">
         <div className="mx-auto flex max-w-site flex-col gap-6 text-sm text-black md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-3">
@@ -90,6 +93,7 @@ export function SeoLandingPage({ description, h1, intro, children, breadcrumbIte
           <div className="flex flex-wrap gap-x-6 gap-y-2">
             <Link href="/" className="font-medium hover:text-black">Accueil</Link>
             <Link href="/notre-facon-de-travailler" className="font-medium hover:text-black">Méthode</Link>
+            <Link href="/ressources" className="font-medium hover:text-black">Ressources BTP</Link>
             <Link href="/blog" className="font-medium hover:text-black">Blog</Link>
             <Link href="/cas-clients" className="font-medium hover:text-black">Cas clients</Link>
             <Link href="/tarifs" className="font-medium hover:text-black">Tarifs</Link>

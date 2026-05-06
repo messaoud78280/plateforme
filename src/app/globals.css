@@ -5,16 +5,16 @@ html {
   scroll-padding-top: 5rem;
 }
 
-/* Design system BeWork – métallique clair, épuré, futuriste */
+/* Design system BeWork – clair, premium, sobre (sans effet métal/verre) */
 :root {
-  --background: #f2f4f7;
+  --background: #f8fafc;
   --foreground: #000000;
 
-  /* Métallique clair (pro) */
-  --metal-50: #f8f9fb;
-  --metal-100: #eef0f4;
-  --metal-200: #e0e4ea;
-  --metal-300: #c8cdd6;
+  /* Neutres (clair, lisible) */
+  --metal-50: #f8fafc;
+  --metal-100: #f9fafb;
+  --metal-200: #f1f5f9;
+  --metal-300: #e5e7eb;
   --metal-400: #9ca3af;
   --metal-500: #64748b;
   --metal-700: #334155;
@@ -47,10 +47,10 @@ html {
   --warning-500: #f59e0b;
   --error-500: #ef4444;
 
-  /* Cadres / cartes — ombres (fond géré par dégradé métal, plus marqué) */
-  --card-border: #8b9aad;
-  --card-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
-  --card-shadow-hover: 0 14px 36px rgba(15, 23, 42, 0.16);
+  /* Cadres / cartes — sobres, neutres */
+  --card-border: #e5e7eb;
+  --card-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --card-shadow-hover: 0 10px 28px rgba(15, 23, 42, 0.08);
 
   /* Typography */
   --font-family: var(--font-geist-sans), system-ui, sans-serif;
@@ -210,79 +210,34 @@ html {
   }
 }
 
-/* Cadre carte — métal acier (plus présent que l’ancien « quasi blanc ») */
+/* Cadre carte — blanc propre, bordure neutre, ombre douce */
 .card-frame {
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  border: 1px solid rgba(91, 108, 130, 0.55);
-  background:
-    linear-gradient(
-      115deg,
-      rgba(255, 255, 255, 0.42) 0%,
-      rgba(255, 255, 255, 0.1) 26%,
-      transparent 44%,
-      transparent 60%,
-      rgba(255, 255, 255, 0.2) 82%,
-      rgba(255, 255, 255, 0.32) 100%
-    ),
-    linear-gradient(
-      158deg,
-      #dce3ee 0%,
-      #c9d4e4 22%,
-      #b8c6d8 48%,
-      #ccd6e4 72%,
-      #dfe7f0 100%
-    );
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.72),
-    inset 0 -2px 0 rgba(15, 23, 42, 0.1),
-    var(--card-shadow);
+  border: 1px solid var(--card-border);
+  background: #ffffff;
+  box-shadow: var(--card-shadow);
   transition: box-shadow 0.25s ease, border-color 0.25s ease;
 }
 .card-frame:hover {
-  border-color: rgba(71, 85, 105, 0.65);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.82),
-    inset 0 -2px 0 rgba(15, 23, 42, 0.08),
-    var(--card-shadow-hover);
+  border-color: #d1d5db;
+  box-shadow: var(--card-shadow-hover);
 }
 
-/* Panneaux / cartes Tailwind — métal acier visible sur fond #f2f4f7 */
+/* Panneaux / cartes Tailwind — sobres */
 .surface-metallic-light {
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  border: 1px solid rgba(91, 108, 130, 0.52);
-  background:
-    linear-gradient(
-      115deg,
-      rgba(255, 255, 255, 0.45) 0%,
-      rgba(255, 255, 255, 0.1) 24%,
-      transparent 42%,
-      transparent 62%,
-      rgba(255, 255, 255, 0.22) 84%,
-      rgba(255, 255, 255, 0.36) 100%
-    ),
-    linear-gradient(
-      158deg,
-      #d8e0ec 0%,
-      #c5d0e2 28%,
-      #b4c2d6 52%,
-      #cbd6e6 100%
-    );
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    inset 0 -2px 0 rgba(15, 23, 42, 0.09),
-    0 2px 8px rgba(15, 23, 42, 0.1);
+  border: 1px solid var(--card-border);
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
   transition: box-shadow 0.25s ease, border-color 0.25s ease;
 }
 .surface-metallic-light:hover {
-  border-color: rgba(71, 85, 105, 0.62);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.78),
-    inset 0 -2px 0 rgba(15, 23, 42, 0.07),
-    0 10px 30px rgba(15, 23, 42, 0.14);
+  border-color: #d1d5db;
+  box-shadow: var(--shadow-md);
 }
 
 /* Badge « pill » centré en -top : sans ça, overflow:hidden + inset highlight coupent le badge (ligne sombre). */
@@ -290,132 +245,58 @@ html {
   overflow: visible;
 }
 
-/* Bandeaux larges : un ton plus clair que .surface-metallic-light, mais bien visibles */
+/* Bandeaux larges : idem, sans reflets */
 .surface-metallic-light.surface-metallic-light--soft {
-  border-color: rgba(100, 116, 139, 0.45);
-  background:
-    linear-gradient(
-      115deg,
-      rgba(255, 255, 255, 0.38) 0%,
-      rgba(255, 255, 255, 0.08) 28%,
-      transparent 46%,
-      transparent 60%,
-      rgba(255, 255, 255, 0.18) 88%,
-      rgba(255, 255, 255, 0.3) 100%
-    ),
-    linear-gradient(
-      158deg,
-      #e4eaf3 0%,
-      #d6dfea 40%,
-      #cad6e6 70%,
-      #dde5f0 100%
-    );
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.65),
-    inset 0 -1px 0 rgba(15, 23, 42, 0.07),
-    0 2px 10px rgba(15, 23, 42, 0.09);
+  border-color: var(--card-border);
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
 }
 .surface-metallic-light.surface-metallic-light--soft:hover {
-  border-color: rgba(71, 85, 105, 0.5);
+  border-color: #d1d5db;
 }
 
-/* Boutons / liens secondaires — contour 2px, métal plus marqué */
+/* Boutons / liens secondaires — blanc, bordure fine, hover discret */
 .surface-metallic-outline {
   position: relative;
   isolation: isolate;
-  border: 2px solid rgba(100, 116, 139, 0.75);
-  background:
-    linear-gradient(
-      115deg,
-      rgba(255, 255, 255, 0.48) 0%,
-      rgba(255, 255, 255, 0.1) 26%,
-      transparent 44%,
-      transparent 58%,
-      rgba(255, 255, 255, 0.22) 84%,
-      rgba(255, 255, 255, 0.38) 100%
-    ),
-    linear-gradient(
-      158deg,
-      #d2dbe8 0%,
-      #c0cce0 35%,
-      #b3c0d6 55%,
-      #d0d9e8 100%
-    );
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.75),
-    inset 0 -2px 0 rgba(15, 23, 42, 0.08),
-    0 2px 6px rgba(15, 23, 42, 0.1);
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
   transition: border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
 }
 .surface-metallic-outline:hover {
-  border-color: rgba(29, 78, 216, 0.85);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.85),
-    0 3px 14px rgba(29, 78, 216, 0.18);
+  border-color: rgba(29, 78, 216, 0.35);
+  box-shadow: var(--shadow-md);
 }
 .surface-metallic-outline.surface-metallic-outline--neutral:hover {
-  border-color: rgba(71, 85, 105, 0.85);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.78),
-    0 3px 12px rgba(15, 23, 42, 0.12);
+  border-color: #d1d5db;
+  box-shadow: var(--shadow-md);
 }
 
 /* Barre fixe bas d’écran (CTA mobile tarifs) */
 .surface-metallic-sticky-bar {
-  border-top: 1px solid rgba(100, 116, 139, 0.55);
-  background:
-    linear-gradient(
-      105deg,
-      rgba(255, 255, 255, 0.35) 0%,
-      rgba(255, 255, 255, 0.06) 40%,
-      rgba(210, 220, 234, 0.92) 100%
-    ),
-    linear-gradient(180deg, #d8e2ee 0%, #c5d2e4 55%, #b9c8dc 100%);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.55),
-    0 -8px 28px rgba(15, 23, 42, 0.14);
+  border-top: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.92);
+  -webkit-backdrop-filter: saturate(140%) blur(6px);
+  backdrop-filter: saturate(140%) blur(6px);
+  box-shadow: 0 -10px 28px rgba(15, 23, 42, 0.08);
 }
 
-/* Surface bleu métallisé — alignée sur le métal clair + texte noir (cartes tarifs, CTA) */
+/* Surface bleu très pâle — accent léger (sans reflets) */
 .surface-metallic-blue {
   position: relative;
   overflow: hidden;
   isolation: isolate;
   color: #000000;
-  background:
-    linear-gradient(
-      115deg,
-      rgba(255, 255, 255, 0.42) 0%,
-      rgba(255, 255, 255, 0.1) 26%,
-      transparent 44%,
-      transparent 58%,
-      rgba(239, 246, 255, 0.55) 82%,
-      rgba(255, 255, 255, 0.38) 100%
-    ),
-    linear-gradient(
-      158deg,
-      #e8eef6 0%,
-      #d8e2ee 22%,
-      #c9d6e8 48%,
-      #dce6f2 72%,
-      #eef2f8 100%
-    );
-  border: 1px solid rgba(29, 78, 216, 0.2);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.85),
-    inset 0 -1px 0 rgba(15, 23, 42, 0.06),
-    0 6px 22px rgba(15, 23, 42, 0.1);
+  background: #eff6ff;
+  border: 1px solid rgba(29, 78, 216, 0.18);
+  box-shadow: var(--shadow-sm);
   transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
 }
 .surface-metallic-blue:hover {
-  border-color: rgba(29, 78, 216, 0.32);
-  transform: translateY(-2px);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.92),
-    inset 0 -1px 0 rgba(15, 23, 42, 0.05),
-    0 10px 28px rgba(15, 23, 42, 0.12);
+  border-color: rgba(29, 78, 216, 0.28);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 /* Carte interne : léger relief par rapport au panneau parent */
@@ -442,27 +323,9 @@ html {
   overflow: hidden;
   isolation: isolate;
   border: none;
-  border-bottom: 1px solid rgba(100, 116, 139, 0.35);
-  background:
-    linear-gradient(
-      115deg,
-      rgba(255, 255, 255, 0.38) 0%,
-      rgba(255, 255, 255, 0.08) 28%,
-      transparent 46%,
-      transparent 60%,
-      rgba(255, 255, 255, 0.18) 88%,
-      rgba(255, 255, 255, 0.3) 100%
-    ),
-    linear-gradient(
-      158deg,
-      #e4eaf3 0%,
-      #d6dfea 40%,
-      #cad6e6 70%,
-      #dde5f0 100%
-    );
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.65),
-    inset 0 -1px 0 rgba(15, 23, 42, 0.06);
+  border-bottom: 1px solid #e5e7eb;
+  background: #ffffff;
+  box-shadow: none;
 }
 /* Liseré lumineux entre header clair et bandeau (distinction nette) */
 .nav-strip-metallic-blue::before {
@@ -472,14 +335,7 @@ html {
   right: 0;
   top: 0;
   height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(96, 165, 250, 0.15) 20%,
-    rgba(147, 197, 253, 0.55) 50%,
-    rgba(96, 165, 250, 0.15) 80%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg, transparent 0%, rgba(226, 232, 240, 0.95) 50%, transparent 100%);
   pointer-events: none;
 }
 .nav-strip-metallic-blue nav {
@@ -557,9 +413,7 @@ html {
   height: 1px;
 }
 .nav-strip-metallic-blue.nav-strip-metallic-blue--compact {
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.14);
+  box-shadow: none;
 }
 .nav-strip-metallic-blue.nav-strip-metallic-blue--compact a {
   padding: 0.3rem 0.6rem;
@@ -635,7 +489,7 @@ html {
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #f2f4f7;
+    --background: #f8fafc;
     --foreground: #000000;
   }
 }

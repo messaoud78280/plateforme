@@ -3,25 +3,25 @@ import Link from "next/link";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { absoluteUrl } from "@/lib/site";
-import { PLAN_KEYS, SUBSCRIPTION_PLANS, formatPriceLabelFr } from "@/lib/subscription-plans";
-
-const PLANS_PRICE_FAQ_SEGMENT = PLAN_KEYS.map(
-  (k) => `${SUBSCRIPTION_PLANS[k].name} ${formatPriceLabelFr(SUBSCRIPTION_PLANS[k].priceLabel)} €`
-).join(", ");
 
 const faqUrl = absoluteUrl("/faq");
 const faqOgImage = absoluteUrl("/opengraph-image");
 
 export const metadata: Metadata = {
-  title: "FAQ — Partenaire administratif externalisé BTP | BeWork",
+  title: "FAQ BeWork | Assistante travaux BTP & relais bureau-chantier",
   description:
-    "Questions sur le partenaire administratif externalisé pour artisans et PME du bâtiment : cadre, tarifs TTC, suivi, délais et collaboration. BeWork — France, Belgique, Suisse, Luxembourg.",
+    "Retrouvez les réponses aux questions fréquentes sur le fonctionnement de BeWork, les missions possibles, les forfaits, la validation finale, l’utilisation de l’IA et le cadre d’intervention.",
   keywords: [
-    "partenaire administratif externalisé",
-    "externalisation administrative BTP",
-    "FAQ administratif externalisé",
     "BeWork",
-    "assistant administratif externalisé",
+    "FAQ BeWork",
+    "assistante travaux",
+    "assistante BTP",
+    "relais bureau-chantier",
+    "dossiers chantier",
+    "documents travaux",
+    "validation finale",
+    "forfaits BeWork",
+    "IA BTP",
   ],
   alternates: { canonical: faqUrl, languages: { fr: faqUrl, "x-default": faqUrl } },
   openGraph: {
@@ -29,88 +29,166 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: faqUrl,
     siteName: "BeWork",
-    title: "FAQ — BeWork, administratif structuré pour le BTP",
+    title: "FAQ BeWork — assistante travaux BTP (relais bureau-chantier)",
     description:
-      "Réponses sur le rendez-vous découverte, les forfaits, l’externalisation vs le recrutement et le fonctionnement au quotidien.",
-    images: [{ url: faqOgImage, width: 1200, height: 630, alt: "FAQ BeWork — administratif BTP" }],
+      "Fonctionnement, périmètre, forfaits, validation finale, IA et confidentialité : les réponses essentielles.",
+    images: [{ url: faqOgImage, width: 1200, height: 630, alt: "FAQ BeWork — assistante travaux BTP" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "FAQ BeWork",
-    description: "Administratif externalisé pour le BTP : cadre, tarifs et collaboration.",
+    title: "FAQ BeWork — assistante travaux BTP",
+    description: "Fonctionnement, périmètre, forfaits, validation finale, IA et confidentialité.",
   },
   robots: { index: true, follow: true },
 };
 
-const FAQ_ITEMS = [
+const FAQ_CATEGORIES = [
   {
-    q: "Pourquoi externaliser plutôt que recruter ?",
-    a: "Un poste en interne engage salaire, charges, formation et management — pour une charge qui n’est pas toujours constante. Avec BeWork, vous achetez un cadre de prestation et un niveau d’accompagnement défini : pas de structure RH à alourdir, pas d’absence à pallier seul. L’enjeu n’est pas de « remplacer une personne », mais de tenir un relais administratif fiable pendant que vous restez sur le chantier.",
+    title: "Comprendre BeWork",
+    items: [
+      {
+        q: "Qu’est-ce que BeWork ?",
+        a: "BeWork est une assistante travaux / assistante BTP augmentée par l’IA : un relais bureau‑chantier pour tenir vos dossiers (devis, relances, documents travaux, suivi) quand vous êtes pris sur le terrain.",
+      },
+      {
+        q: "BeWork est-elle une assistante administrative ou une assistante travaux ?",
+        a: "Une assistante travaux BTP. BeWork prépare, structure, classe, relance et suit ce qui doit avancer côté bureau, avec une grille “chantier” (priorités, échéances, impacts).",
+      },
+      {
+        q: "À qui s’adresse BeWork ?",
+        a: "Aux artisans, chefs de chantier, conducteurs de travaux, chargés d’affaires et entreprises du bâtiment qui veulent un suivi bureau‑terrain fiable, sans recruter.",
+      },
+      {
+        q: "Qu’est-ce qui différencie BeWork d’un secrétariat classique ?",
+        a: "Un périmètre BTP cadré, des livrables chantier (dossiers, pièces, suivis), de la traçabilité, et un circuit de validation clair. Ce n’est pas une “disponibilité illimitée” à la demande.",
+      },
+    ],
   },
   {
-    q: "En quoi BeWork est-il différent d’un secrétariat généraliste ?",
-    a: "Notre socle est le bâtiment : devis, facturation, situations de travaux, relances, démarches chantier, coordination fournisseurs et dossiers sensibles sous votre validation. Les briefs sont lus avec une grille terrain — urgences, créneaux, trésorerie — pas seulement comme une liste de tâches. La prestation est cadrée par forfait, avec des rituels de suivi, pas comme une prestation floue à la demande.",
+    title: "Missions et périmètre",
+    items: [
+      {
+        q: "Quelles demandes peut-on confier à BeWork ?",
+        a: "Les demandes qui doivent avancer côté bureau : relances devis/clients, documents travaux, situations/factures, suivi fournisseurs, organisation de dossiers chantier. Les décisions sensibles restent sous votre validation.",
+      },
+      {
+        q: "BeWork peut-elle gérer des documents chantier ?",
+        a: "Oui : organisation, checklists, mise au propre, compilation et suivi des pièces (selon périmètre). Vous validez avant diffusion sur les éléments sensibles.",
+      },
+      {
+        q: "BeWork intervient-elle sur les devis, relances et situations ?",
+        a: "Oui : relances, suivi des réponses, préparation/mise en forme (sur modèle validé) et suivi d’avancement. Vous gardez la main sur les prix et engagements.",
+      },
+      {
+        q: "BeWork remplace-t-elle un conducteur de travaux ou un bureau d’études ?",
+        a: "Non. BeWork est un relais bureau‑chantier pour tenir les dossiers et le suivi. Les décisions techniques et responsabilités restent chez vous (ou vos partenaires habilités).",
+      },
+    ],
   },
   {
-    q: "Pourquoi ce niveau de prix ?",
-    a: `Vous payez un pilotage encadré, des profils qualifiés, une plateforme de suivi et une exécution revue — pas un tarif « au rabais » qui se traduirait par de l’improvisation. Les montants TTC mensuels reflètent ce cadre : ${PLANS_PRICE_FAQ_SEGMENT} — avec une montée en structuration et en priorité à chaque palier.`,
+    title: "Fonctionnement",
+    items: [
+      {
+        q: "Comment envoyer une demande ?",
+        a: "Via la plateforme BeWork (ou le canal cadré au démarrage) avec le contexte, les pièces jointes, l’échéance et ce que vous attendez comme livrable.",
+      },
+      {
+        q: "Comment sont priorisées les demandes ?",
+        a: "Selon l’urgence, l’impact terrain et les échéances. Les urgences doivent être signalées explicitement pour éviter les malentendus.",
+      },
+      {
+        q: "Comment suivre l’avancement ?",
+        a: "Avec des statuts et un historique (demandes en cours, en attente, livrées) + des points de suivi si nécessaire.",
+      },
+      {
+        q: "Qui valide les documents avant envoi ?",
+        a: "Vous. BeWork prépare et propose ; vous validez les prix, choix techniques, signatures, engagements contractuels et réponses sensibles.",
+      },
+    ],
   },
   {
-    q: "Est-ce adapté à une entreprise du BTP ?",
-    a: "Oui, c’est notre cœur de cible : artisans, TPE et PME du bâtiment dont l’administratif se télescope avec le terrain. Nous traitons les flux habituels du secteur (commercial, réglementaire, logistique) dans le même dispositif, avec une attention particulière aux délais et aux relances qui impactent directement la trésorerie.",
+    title: "Tarifs et forfaits",
+    items: [
+      {
+        q: "Comment fonctionnent les actions ?",
+        a: "Vous achetez un volume mensuel de traitement : chaque demande consomme des actions/crédits selon le temps réellement passé (relance, mail, appel, suivi, préparation de document, etc.).",
+      },
+      {
+        q: "À quoi correspondent les heures incluses ?",
+        a: "C’est un repère de conversion des actions/crédits. Le forfait achète surtout un niveau de suivi et de priorisation dans un périmètre cadré.",
+      },
+      {
+        q: "Puis-je changer de forfait ?",
+        a: "Oui. On ajuste selon votre charge et vos priorités, pour rester cohérent avec le volume réel et la qualité de suivi attendue.",
+      },
+      {
+        q: "Que se passe-t-il si une demande dépasse le temps prévu ?",
+        a: "On vous propose un découpage, une estimation et un point de validation avant d’aller trop loin, pour garder de la visibilité.",
+      },
+    ],
   },
   {
-    q: "Comment se passe le suivi au quotidien ?",
-    a: "Les demandes passent par la plateforme : consignes, pièces, priorités. Vous voyez l’avancement et les échanges ; les actes sensibles restent sous votre validation. Des points de pilotage permettent d’ajuster le rythme et le périmètre dans les limites du forfait choisi.",
+    title: "IA, confidentialité et cadre",
+    items: [
+      {
+        q: "Quel rôle joue l’IA chez BeWork ?",
+        a: "L’IA aide à trier, synthétiser, reformuler, repérer les points clés et préparer des brouillons. Il y a une supervision humaine, et vous gardez la validation finale sur ce qui engage.",
+      },
+      {
+        q: "Mes documents sont-ils confidentiels ?",
+        a: "Oui : accès encadrés, échanges professionnels et cadre de traitement clair. Les modalités sont définies au démarrage.",
+      },
+      {
+        q: "Qui garde la responsabilité des décisions ?",
+        a: "Vous. BeWork prépare, structure et suit, mais ne prend pas de décisions techniques/juridiques à votre place.",
+      },
+      {
+        q: "Quelles sont les limites de l’intervention BeWork ?",
+        a: "BeWork ne remplace pas un maître d’œuvre, un bureau d’études, un avocat, un expert technique ou un conducteur de travaux. Les actes engageants passent par votre validation.",
+      },
+    ],
   },
-  {
-    q: "Comment évitez-vous les débordements et les malentendus ?",
-    a: "Le cadre contractuel fixe ce qui est inclus à chaque niveau d’offre. Au-delà, nous en rediscutons plutôt que d’empiler des demandes non prévues. Les priorités sont posées ensemble ; les sujets à risque (relances fermes, mises en demeure, litiges) suivent un circuit de validation explicite.",
-  },
-  {
-    q: "Pour qui ce service est-il fait ?",
-    a: "Pour les dirigeants et structures du bâtiment qui veulent un administratif tenu sans recruter, qui acceptent un cadre contractuel et qui cherchent de la rigueur plutôt que le prix minimum. Idéal lorsque les devis, les relances et les dossiers ne peuvent plus attendre le soir ou le week-end.",
-  },
-  {
-    q: "Pour qui ce n’est-il pas adapté ?",
-    a: "Si vous cherchez avant tout le coût le plus bas, si vous refusez tout échange préalable de mise au point ou si vous attendez une disponibilité illimitée hors du cadre convenu, notre modèle ne sera probablement pas satisfaisant. Nous préférons une collaboration claire avec peu de clients bien accompagnés qu’une file de demandes non tenables.",
-  },
-  {
-    q: "Comment démarre la collaboration ?",
-    a: "Après un échange pour comprendre votre organisation, vos outils et votre charge, nous proposons un rendez-vous découverte et une formule. L’onboarding fixe les rôles, les canaux et les priorités ; les premières missions démarrent une fois les accès et le périmètre validés.",
-  },
-  {
-    q: "Les besoins peuvent-ils évoluer ?",
-    a: "Oui. Vous pouvez ajuster de formule en formule selon l’activité, dans la limite des offres proposées. Les évolutions se discutent avec votre interlocuteur pour rester cohérents avec la charge réelle et la qualité de suivi.",
-  },
-];
+] as const;
+
+const FAQ_ITEMS_FLAT: { q: string; a: string }[] = FAQ_CATEGORIES.reduce<{ q: string; a: string }[]>((acc, cat) => {
+  for (const item of cat.items) {
+    acc.push({ q: item.q, a: item.a });
+  }
+  return acc;
+}, []);
 
 export default function FaqPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
+    <div className="min-h-screen bg-[#f8fafc]">
       <MarketingSiteHeader plainBg />
 
       <main className="px-6 py-16 md:py-24">
-        <article className="mx-auto max-w-3xl">
-          <h1 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
-            Questions fréquentes
-          </h1>
-          <p className="mt-6 text-lg leading-relaxed text-black">
-            Cadre, tarifs, collaboration et adéquation avec les entreprises du bâtiment : les réponses ci-dessous visent des
-            dirigeants qui veulent déléguer proprement, sans promesses creuses.
-          </p>
-          <p className="mt-4 text-sm font-semibold text-black">
-            Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.
-          </p>
+        <article className="mx-auto max-w-4xl">
+          <header className="mx-auto max-w-3xl text-center">
+            <h1 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
+              FAQ BeWork : assistante travaux, dossiers chantier et relais bureau‑chantier
+            </h1>
+            <p className="mt-6 text-lg leading-relaxed text-slate-700">
+              Retrouvez les réponses aux questions fréquentes sur le fonctionnement de BeWork, les missions possibles, les forfaits, la validation finale,
+              l’utilisation de l’IA et le cadre d’intervention.
+            </p>
+          </header>
 
-          <dl className="mt-12 space-y-8">
-            {FAQ_ITEMS.map((item, i) => (
-              <div key={i} className="rounded-xl surface-metallic-light p-6">
-                <dt className="text-lg font-semibold text-black">{item.q}</dt>
-                <dd className="mt-3 text-black leading-relaxed">{item.a}</dd>
-              </div>
+          <div className="mt-12 space-y-10">
+            {FAQ_CATEGORIES.map((cat) => (
+              <section key={cat.title} aria-label={cat.title} className="space-y-4">
+                <h2 className="text-xl font-bold tracking-tight text-black md:text-2xl">{cat.title}</h2>
+                <dl className="space-y-4">
+                  {cat.items.map((item) => (
+                    <div key={item.q} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                      <dt className="text-base font-semibold text-black md:text-lg">{item.q}</dt>
+                      <dd className="mt-2 text-sm leading-relaxed text-slate-700 md:text-base">{item.a}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
             ))}
-          </dl>
+          </div>
 
           <script
             type="application/ld+json"
@@ -121,7 +199,7 @@ export default function FaqPage() {
                 "@id": `${faqUrl}#faq`,
                 url: faqUrl,
                 inLanguage: "fr-FR",
-                mainEntity: FAQ_ITEMS.map((item) => ({
+                mainEntity: FAQ_ITEMS_FLAT.map((item) => ({
                   "@type": "Question",
                   name: item.q,
                   acceptedAnswer: { "@type": "Answer", text: item.a },
@@ -130,11 +208,10 @@ export default function FaqPage() {
             }}
           />
 
-          <div className="mt-16 rounded-xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-8">
+          <div className="mt-16 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
             <h2 className="text-xl font-bold text-black">Vérifier l’adéquation avec votre organisation</h2>
-            <p className="mt-3 text-black">
-              Un échange permet de poser votre charge administrative, vos outils et le niveau de formule adapté — avant tout
-              engagement.
+            <p className="mt-3 text-slate-700">
+              Un échange permet de cadrer votre besoin, votre circuit de validation et le forfait adapté — avant tout engagement.
             </p>
             <div className="mt-6 flex flex-wrap gap-4">
               <Link
@@ -145,13 +222,13 @@ export default function FaqPage() {
               </Link>
               <Link
                 href="/tarifs"
-                className="inline-flex rounded-lg border-2 border-[#1d4ed8] px-6 py-3 font-semibold text-[#1d4ed8] hover:bg-[#eff6ff]"
+                className="inline-flex rounded-lg border border-slate-200 bg-white px-6 py-3 font-semibold text-slate-900 hover:bg-slate-50"
               >
                 Consulter les forfaits
               </Link>
               <Link
                 href="/inscription"
-                className="surface-metallic-outline inline-flex rounded-lg px-6 py-3 font-semibold text-black hover:text-[#1d4ed8]"
+                className="inline-flex rounded-lg border border-slate-200 bg-white px-6 py-3 font-semibold text-slate-900 hover:bg-slate-50"
               >
                 Accès client — créer un compte
               </Link>
@@ -160,8 +237,8 @@ export default function FaqPage() {
         </article>
       </main>
 
-      <footer className="border-t border-[#c8cdd6] bg-[#f8f9fb] px-6 py-12 mt-16">
-        <div className="mx-auto max-w-site flex flex-col gap-6 md:flex-row md:items-center md:justify-between text-sm text-black">
+      <footer className="mt-16 border-t border-slate-200 bg-white px-6 py-12">
+        <div className="mx-auto flex max-w-site flex-col gap-6 text-sm text-black md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
             <BeWorkLogo size="sm" />
             <span className="text-black">© {new Date().getFullYear()} BeWork</span>

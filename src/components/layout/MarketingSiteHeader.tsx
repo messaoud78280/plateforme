@@ -65,6 +65,18 @@ const RESOURCE_MENU_ENTRIES: {
   icon: ResourceMenuIconId;
 }[] = [
   {
+    href: "/ressources",
+    title: "Ressources",
+    description: "Guides pratiques, conseils chantier et prompts IA pour mieux gérer vos dossiers BTP.",
+    icon: "book",
+  },
+  {
+    href: "/ressources/compte-rendu-chantier",
+    title: "Compte rendu de chantier",
+    description: "Checklist + méthode pour rédiger un CR clair : décisions, actions, responsables et délais.",
+    icon: "document",
+  },
+  {
     href: "/externalisation-administrative-btp-europe",
     title: "Europe francophone (FR · BE · CH · LU)",
     description:
@@ -90,12 +102,6 @@ const RESOURCE_MENU_ENTRIES: {
     title: "Cas clients",
     description: "Découvrez comment des artisans et PME du BTP gagnent du temps et sécurisent leur activité.",
     icon: "users",
-  },
-  {
-    href: "/blog",
-    title: "Guides pratiques BTP",
-    description: "Nos guides pas à pas pour mieux piloter vos chantiers et votre administratif.",
-    icon: "document",
   },
   {
     href: "/assistants-administratifs-taches",
@@ -388,7 +394,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                   </ul>
                   <div className="mt-3 border-t border-slate-200/80 px-5 pt-3">
                     <Link
-                      href="/blog"
+                      href="/ressources"
                       className="inline-flex items-center gap-1 text-[13px] font-semibold text-[#1d4ed8] transition-colors hover:text-[#1e40af]"
                       onClick={() => setResourcesOpen(false)}
                     >
@@ -541,7 +547,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 ))}
               </ul>
               <Link
-                href="/blog"
+                href="/ressources"
                 className="mt-3 inline-flex items-center gap-1.5 px-3 text-sm font-semibold text-[#1d4ed8]"
                 onClick={() => setMobileOpen(false)}
               >

@@ -5,26 +5,47 @@ import { landingPageMetadata } from "@/lib/seo-landing-metadata";
 const PAGE_PATH = "/relance-devis-btp";
 
 export const metadata = landingPageMetadata({
-  title: "Relance devis BTP : signer plus de chantiers | BeWork",
+  title: "Relance devis BTP | Suivi devis travaux avec BeWork",
   description:
-    "Relance devis BTP : méthode J+2 / J+7 / J+14, scripts et suivi pour augmenter les signatures sans harceler. Pilotage administratif encadré. Forfaits TTC.",
+    "BeWork aide les entreprises du BTP à suivre leurs devis, préparer les relances clients et éviter les opportunités perdues grâce à une assistante travaux spécialisée.",
   path: PAGE_PATH,
-  keywords: ["relance devis BTP", "suivi devis chantier", "signature devis artisan", "pilotage administratif BTP"],
+  keywords: [
+    "relance devis BTP",
+    "relance devis travaux",
+    "suivi devis BTP",
+    "devis travaux",
+    "relance client BTP",
+    "suivi commercial BTP",
+    "assistante travaux",
+    "assistante BTP",
+  ],
 });
 
 export default function Page() {
   const faq = [
     {
-      q: "Quand relancer un devis ?",
-      a: "Un scénario simple : J+2 (réception), J+7 (proposition de créneau), J+14 (cadrage planning/validité). L’essentiel est la régularité et la traçabilité.",
+      q: "Quand relancer un devis BTP ?",
+      a: "Une méthode simple et réaliste : une relance courte après l’envoi (ex. J+2), une relance de clarification (ex. J+7) puis une relance finale propre (ex. J+14). L’essentiel est la régularité et le suivi des statuts.",
     },
     {
-      q: "Relancer par mail ou par téléphone ?",
-      a: "Les deux. Un appel débloque vite, un email laisse une trace. Le bon mix dépend du client, mais le suivi doit être noté (date, réponse, prochaine action).",
+      q: "Comment relancer un devis travaux sans paraître insistant ?",
+      a: "Restez court, professionnel et contextualisé : rappel de la date d’envoi, question simple, proposition de créneau. Et notez la prochaine action (date/canal) pour éviter les relances au hasard.",
     },
     {
-      q: "Qu’est-ce qui se délègue ?",
-      a: "Préparer les messages, relancer selon vos consignes, tenir le tableau de suivi et remonter les validations. Vous gardez la décision sur le prix, la technique et les concessions.",
+      q: "Pourquoi les devis non relancés font perdre des chantiers ?",
+      a: "Parce que le client avance avec l’entreprise la plus réactive. Souvent, ce n’est pas le prix : c’est l’absence de rythme, de relance et de suivi entre mails, appels et WhatsApp.",
+    },
+    {
+      q: "BeWork peut-elle préparer mes relances devis ?",
+      a: "Oui : tableau de suivi, mails de relance, relances planifiées, mise à jour des statuts et alertes sur les devis sans retour. Vous validez les points sensibles si besoin.",
+    },
+    {
+      q: "Est-ce que BeWork peut négocier le prix à ma place ?",
+      a: "Non. Le prix, la marge et les concessions restent sous votre contrôle. BeWork prépare et structure le suivi, mais vous gardez la validation finale sur ce qui engage.",
+    },
+    {
+      q: "Comment suivre plusieurs devis en même temps ?",
+      a: "Avec un tableau simple (statut, prochaine relance, canal, réponse) et des relances planifiées. L’objectif : savoir quoi relancer, quand, et avec quel message.",
     },
   ] as const;
 
@@ -40,47 +61,103 @@ export default function Page() {
 
   return (
     <SeoLandingPage
-      description="Relance devis BTP : méthode J+2 / J+7 / J+14, scripts et suivi pour augmenter les signatures sans harceler. Pilotage administratif encadré. Forfaits TTC."
+      description="Suivi devis travaux, relances clients et statuts clairs : une méthode simple pour éviter les opportunités perdues."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Relance devis BTP", href: PAGE_PATH },
       ]}
-      h1="Relance devis BTP : une méthode simple pour signer plus de chantiers"
+      h1="Relance devis BTP : ne laissez plus vos chantiers partir ailleurs"
       intro={
         <>
-          Un devis non relancé est souvent un chantier perdu. BeWork met en place un suivi structuré (relances, statuts,
-          traçabilité) pour augmenter les signatures sans y passer vos soirées — dans un cadre encadré, avec validation
-          sur les points sensibles.
+          Un devis envoyé mais non suivi peut faire perdre un chantier. Le problème n’est pas toujours le prix : souvent,
+          c’est l’absence de rythme, de relance et de suivi. BeWork aide les entreprises du BTP à structurer le{" "}
+          <strong>suivi des devis travaux</strong> : relances préparées, statuts clairs, réponses suivies — avec{" "}
+          <strong>validation finale</strong> côté client sur ce qui engage.
         </>
       }
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <h2>La méthode “J+2 / J+7 / J+14”</h2>
+      <h2>Pourquoi les devis BTP ne sont pas relancés</h2>
+      <ul>
+        <li>Le chef d’entreprise est sur chantier, et les relances passent après l’urgence du terrain.</li>
+        <li>Le devis est envoyé, puis plus de trace : pas de date de relance ni de statut.</li>
+        <li>Les infos sont dispersées entre email, téléphone, WhatsApp, photos et notes.</li>
+        <li>Le client “réfléchit” et personne ne propose un créneau ou une prochaine étape.</li>
+      </ul>
+
+      <h2>Une méthode simple de relance (sans promesse magique)</h2>
+      <p>Un scénario réaliste, à adapter à votre activité :</p>
+      <ul>
+        <li>
+          <strong>Relance courte après envoi</strong> (ex. J+2) : vérifier la réception + détecter un point bloquant.
+        </li>
+        <li>
+          <strong>Relance de clarification</strong> (ex. J+7) : question simple + proposition de créneau.
+        </li>
+        <li>
+          <strong>Relance avant décision</strong> (ex. J+14) : cadrer planning/validité/capacité et obtenir une réponse.
+        </li>
+      </ul>
+      <p>Le point clé : un statut clair pour chaque devis.</p>
+      <ul>
+        <li>
+          <strong>Envoyé</strong> → <strong>Relancé</strong> → <strong>En attente</strong> → <strong>Accepté</strong> ou{" "}
+          <strong>Perdu</strong>
+        </li>
+      </ul>
+
+      <h2>Ce que BeWork peut prendre en charge (sur la relance devis)</h2>
+      <ul>
+        <li>Tableau de suivi des devis (statuts, prochaines relances, échéances)</li>
+        <li>Préparation des mails/messages de relance (professionnels, contextualisés)</li>
+        <li>Relances planifiées selon vos consignes</li>
+        <li>Suivi des réponses clients et mise à jour des statuts</li>
+        <li>Alertes sur les devis sans retour + priorisation</li>
+      </ul>
+
+      <h2>Ce que vous gardez (validation finale)</h2>
+      <ul>
+        <li>Prix, marge, concessions et négociations importantes</li>
+        <li>Choix techniques et arbitrages</li>
+        <li>Signature, engagements contractuels, réponses sensibles</li>
+      </ul>
+
+      <h2>Exemple concret</h2>
       <p>
-        J+2 : vérifier la réception et détecter un point bloquant. J+7 : proposer un créneau d’appel/visite et cadrer la
-        prochaine étape. J+14 : relance plus ferme (planning, validité, capacité). Le but : obtenir une réponse claire
-        (oui/non/date).
+        Un devis envoyé depuis 10 jours sans réponse peut être relancé avec un message court, professionnel et contextualisé.
+        BeWork peut préparer la relance, noter le statut, programmer une relance suivante et vous signaler les devis prioritaires.
       </p>
 
-      <h2>Ce qu’il faut suivre (sinon vous relancez dans le vide)</h2>
-      <p>
-        Date d’envoi, montant, décision attendue, prochaine relance, canal, réponse et action suivante. Un suivi minimal
-        suffit : la régularité fait la performance.
-      </p>
+      <h2>Aller plus loin (liens utiles)</h2>
+      <ul>
+        <li>
+          <Link href="/assistants-administratifs-taches" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
+            Voir les missions BeWork
+          </Link>
+        </li>
+        <li>
+          <Link href="/notre-facon-de-travailler" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
+            Comprendre notre façon de travailler
+          </Link>
+        </li>
+        <li>
+          <Link href="/tarifs" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
+            Découvrir les forfaits
+          </Link>
+        </li>
+        <li>
+          <Link href="/devis-retard-btp" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
+            Devis en retard BTP : éviter les retards dès le départ
+          </Link>
+        </li>
+      </ul>
 
-      <h2>BeWork : pilotage administratif, pas “secrétariat”</h2>
+      <h2>Parler de votre suivi devis</h2>
       <p>
-        Nous tenons le suivi, préparons les relances, mettons à jour les statuts et vous remontons les validations. Vous
-        gardez la décision commerciale et technique. Résultat : plus de chantiers sécurisés, moins d’oublis, une relation
-        client plus professionnelle.
-      </p>
-
-      <h2>Si le problème est avant la relance…</h2>
-      <p>
-        Quand le devis sort trop tard, les relances sur un fond vide ne suffisent pas. Voir aussi notre page{" "}
-        <Link href="/devis-retard-btp" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
-          devis en retard BTP
+        Besoin d’un relais pour tenir vos relances et vos statuts de devis sans y passer vos soirées ?{" "}
+        <Link href="/contact" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
+          Réserver un échange
         </Link>
         .
       </p>

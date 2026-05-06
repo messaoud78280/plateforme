@@ -108,8 +108,25 @@ export function HomeWhatWeHandleSection() {
             </p>
           </div>
           <p className="mx-auto mt-6 max-w-2xl text-center text-lg leading-relaxed text-slate-600 max-xl:text-pretty md:mt-7 xl:max-w-none xl:whitespace-nowrap">
-            On ne fait pas « un peu d’administratif ». On prend en charge tout ce qui fait tourner votre activité au quotidien.
+            On tient ce qui doit avancer côté bureau pour ne pas faire dérailler le chantier.
           </p>
+        </div>
+
+        <div className="mx-auto mt-7 max-w-3xl">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm ring-1 ring-slate-100/85">
+              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8]">Tâches répétitives</p>
+              <p className="mt-2 text-[14px] font-semibold leading-snug text-slate-800">
+                Relances, suivi, demandes fournisseurs : tenir le rythme, sans y laisser vos soirées.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm ring-1 ring-slate-100/85">
+              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8]">Missions avancées BTP</p>
+              <p className="mt-2 text-[14px] font-semibold leading-snug text-slate-800">
+                DOE, PPSPS, DUERP, DCE/CCTP : structurer des livrables chantier propres, au bon moment.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* 2 — Trois cartes */}

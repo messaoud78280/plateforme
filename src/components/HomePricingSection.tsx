@@ -18,18 +18,18 @@ const PLAN_CARD_COPY: Record<
 > = {
   DECOUVERTE: {
     badge: null,
-    usage: "Pour structurer votre administratif et éviter les oublis.",
-    included: ["Devis et factures", "Organisation de base", "Suivi simple des demandes"],
+    usage: "Pour tenir vos dossiers chantier et éviter les oublis.",
+    included: ["Devis & relances", "Dossiers chantier", "Suivi simple des demandes"],
   },
   STANDARD: {
     badge: "LE PLUS CHOISI",
     usage: "Pour ne plus perdre d’opportunités et signer plus de chantiers.",
-    included: ["Relances clients régulières", "Suivi complet des devis", "Coordination quotidienne"],
+    included: ["Relances régulières", "Suivi complet des devis", "Coordination quotidienne"],
   },
   PREMIUM: {
     badge: null,
-    usage: "Pour déléguer entièrement votre administratif.",
-    included: ["Gestion quotidienne prioritaire", "Suivi complet des dossiers", "Organisation globale"],
+    usage: "Pour un relais travaux à forte capacité, sans recruter.",
+    included: ["Priorité & urgences", "Suivi complet des dossiers", "Coordination élargie"],
   },
 };
 
@@ -63,7 +63,7 @@ export function HomePricingSection() {
             Des tarifs clairs. <span className="text-[#1d4ed8]">Sans surprise.</span>
           </h2>
           <p className="mx-auto mt-2 max-w-md text-[14px] leading-relaxed text-slate-600 md:text-[15px]">
-            Vous payez du temps utile. Rien de plus.
+            Un relais travaux sans recrutement, avec un cadre clair et des forfaits adaptés au volume de demandes.
           </p>
         </header>
 
@@ -190,82 +190,18 @@ export function HomePricingSection() {
           })}
         </div>
 
-        {/* Réassurance */}
         <p className="mx-auto mt-7 max-w-3xl text-center text-[12px] font-medium leading-relaxed text-slate-600 md:mt-8 md:text-[13px]">
-          Sans recrutement <span className="text-slate-300">&nbsp;·&nbsp;</span> Sans charges{" "}
-          <span className="text-slate-300">&nbsp;·&nbsp;</span> Sans contraintes internes
+          Sans recrutement <span className="text-slate-300">&nbsp;·&nbsp;</span> Cadre clair{" "}
+          <span className="text-slate-300">&nbsp;·&nbsp;</span> Dossiers chantier suivis
         </p>
 
-        {/* Comparatif — carte blanche large (max-w-6xl = grille tarifs), trait vertical + pastille vs */}
-        <div
-          className="mx-auto mt-7 max-w-6xl rounded-xl border border-slate-200/90 bg-white px-5 py-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.08)] md:mt-8 md:px-6 md:py-8"
-          role="region"
-          aria-labelledby="comparison-heading"
-        >
-          <h3 id="comparison-heading" className="sr-only">
-            Comparatif coût salarié et BeWork
-          </h3>
-
-          <div className="mx-auto flex max-w-4xl flex-col md:flex-row md:items-center md:justify-center md:gap-4 lg:gap-6">
-            {/* Colonne gauche — salarié (alignée vers le vs) */}
-            <div className="min-w-0 shrink-0 text-center md:w-[min(100%,13.5rem)] md:text-right">
-              <p className="text-[13px] font-medium leading-tight text-slate-600 md:text-[14px]">Un salarié à temps plein</p>
-              <p className="mt-2 tabular-nums text-[1.625rem] font-bold leading-none tracking-tight text-slate-900 md:text-[1.875rem]">
-                ≈ 5&nbsp;000 € / mois
-              </p>
-              <p className="mt-2 text-[11px] text-slate-400 md:text-xs">Coût moyen chargé</p>
-            </div>
-
-            {/* Trait horizontal + vs — mobile */}
-            <div className="relative my-6 flex items-center md:hidden">
-              <div className="h-px flex-1 bg-slate-200" aria-hidden />
-              <span
-                className="mx-4 flex h-10 min-w-[2.5rem] items-center justify-center rounded-full border border-slate-200 bg-white px-3 text-[12px] font-semibold lowercase text-slate-600 shadow-[0_1px_4px_rgba(15,23,42,0.06)]"
-                aria-hidden
-              >
-                vs
-              </span>
-              <div className="h-px flex-1 bg-slate-200" aria-hidden />
-            </div>
-
-            {/* Trait vertical + pastille vs — desktop */}
-            <div className="relative hidden w-[2.5rem] shrink-0 md:flex md:flex-col md:items-center md:justify-center">
-              <span
-                className="absolute left-1/2 top-10 bottom-10 w-px -translate-x-1/2 bg-slate-200 lg:top-9 lg:bottom-9"
-                aria-hidden
-              />
-              <span className="relative z-[1] flex h-11 min-w-[2.75rem] items-center justify-center rounded-full border border-slate-200 bg-white px-3.5 text-[12px] font-semibold lowercase tracking-tight text-slate-700 shadow-[0_1px_6px_rgba(15,23,42,0.07)]">
-                vs
-              </span>
-            </div>
-
-            {/* Colonne droite — prix BeWork + puces, resserrée vers le vs */}
-            <div className="flex min-w-0 shrink-0 flex-col gap-4 pt-1 text-center md:w-auto md:flex-row md:items-start md:gap-5 md:pl-0 md:text-left lg:gap-6 md:pt-0">
-              <div className="shrink-0">
-                <p className="text-[13px] font-semibold leading-tight text-[#1d4ed8] md:text-[14px]">BeWork</p>
-                <p className="mt-2 tabular-nums text-[1.625rem] font-bold leading-snug tracking-tight text-[#1d4ed8] md:text-[1.875rem]">
-                  {lowFr}&nbsp;€ → {highFr}&nbsp;€ / mois
-                </p>
-                <span className="mt-1 inline-block text-[11px] font-semibold uppercase tracking-[0.08em] text-blue-700/80">
-                  TTC
-                </span>
-              </div>
-              <ul
-                className="min-w-0 space-y-2 text-[13px] leading-snug text-slate-700 md:max-w-[13.5rem]"
-                aria-label="Avantages BeWork"
-              >
-                {(["Pas de charges", "Pas de gestion RH", "Pas de contraintes internes"] as const).map((label) => (
-                  <li key={label} className="flex items-start gap-2.5">
-                    <span className="mt-0.5 shrink-0 text-[14px] font-semibold leading-none text-[#1d4ed8]" aria-hidden>
-                      ✓
-                    </span>
-                    <span>{label}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
+        <p className="mx-auto mt-4 max-w-2xl text-center text-[12px] leading-relaxed text-slate-600 md:text-[13px]">
+          Besoin d’un repère de coût complet ?{" "}
+          <Link href="/tarifs" className="font-semibold text-[#1d4ed8] hover:text-[#1e40af]">
+            Voir le détail des forfaits
+          </Link>
+          .
+        </p>
       </div>
     </section>
   );

@@ -18,11 +18,7 @@ import {
   getAggregateOfferDescription,
   getPublicPriceBoundsLabels,
 } from "@/lib/subscription-plans";
-import {
-  SEO_VALUE_PROPOSITION,
-  SEO_VALUE_PROPOSITION_SHORT,
-  SEO_KEYWORDS_HOME,
-} from "@/lib/seo-keywords";
+import { SEO_KEYWORDS_HOME } from "@/lib/seo-keywords";
 import { EXTERNALISATION_ADMIN_BT_NAV } from "@/lib/externalisation-administrative-btp-geo";
 import { SITE_URL, absoluteUrl } from "@/lib/site";
 
@@ -34,36 +30,16 @@ const PRICE_BOUNDS = getPublicPriceBoundsLabels();
 
 const HOME_FAQ_ITEMS = [
   {
-    q: "En quoi BeWork est-il un partenaire administratif externalisé ?",
-    a: "BeWork est un prestataire administratif externalisé : vous confiez devis, relances, dossiers et coordination dans un cadre forfaitaire, sans embauche. Une équipe encadrée en France exécute et vous gardez la main sur les décisions sensibles.",
+    q: "BeWork, c’est une assistante administrative ou une assistante travaux ?",
+    a: "BeWork est une assistante travaux BTP : un relais bureau-chantier qui tient vos dossiers de devis, relances, documents travaux, DICT, fournisseurs, comptes rendus et réserves pendant que vous êtes sur le terrain. Ce n’est pas un secrétariat généraliste.",
   },
   {
-    q: "Pourquoi externaliser plutôt que recruter ?",
-    a: "Un salarié engage salaire, charges, formation et management pour une charge qui n’est pas toujours constante. Un forfait BeWork fixe un niveau d’accompagnement et un cadre : pas de structure RH à alourdir pour tenir le même niveau d’organisation.",
+    q: "Quels types de demandes chantier peut-on déléguer ?",
+    a: "Vous pouvez déléguer les tâches qui doivent avancer côté bureau : relances devis, préparation de documents, suivi DICT/DT, commandes fournisseurs, livraisons, locations matériel, comptes rendus, préparation de PV, organisation et relances clients.",
   },
   {
-    q: "Comment se passe le quotidien ?",
-    a: "Vous déposez vos demandes sur la plateforme (devis, factures, situations de travaux, démarches, logistique, relances, dossiers sensibles sous validation). L’équipe exécute dans le forfait ; vous suivez statuts et échanges. Démarrage après votre rendez-vous découverte et accès outils.",
-  },
-  {
-    q: "Qui exécute les missions ?",
-    a: "Des profils francophones diplômés Bac+5, encadrés par l’agence en région parisienne. Pilotage depuis la France ; exigence alignée sur ce qu’attendent les entreprises du bâtiment en termes de délais et de relecture.",
-  },
-  {
-    q: "Quel est le délai de traitement ?",
-    a: "Réponse moyenne en moins de deux heures ouvrées. Les urgences liées au chantier sont priorisées dans le cadre de votre offre. Le délai détaillé dépend de la mission ; la coordination reste assurée par l’équipe en France.",
-  },
-  {
-    q: "BeWork peut-il accompagner conducteurs de travaux et artisans hors de France métropolitaine ?",
-    a: "Oui lorsque votre activité correspond à une clientèle francophone : Belgique, Suisse ou Luxembourg peuvent être couverts selon le cadre précis au rendez-vous découverte (outils, horaires et format des demandes). L’interface et le soutien sont en français.",
-  },
-  {
-    q: "Un conducteur de travaux sans assistant interne peut-il « brancher » BeWork sur ses chantiers ?",
-    a: "Oui : vous centralisez devis, relances, dossiers administratifs (situations de travaux, DICT ou avancement fournisseur) sous forme de demandes suivies jusqu’à clôture. Les envois juridiquement sensibles restent soumis à votre validation.",
-  },
-  {
-    q: "Sécurité, confidentialité et validation : comment ça marche ?",
-    a: "Chaque mission sensible reste sous votre contrôle : relance ferme, mise en demeure, envoi à un client, dépôt d’appel d’offres ou transmission MOE/MOA passent par votre validation avant envoi. Les échanges sont tracés, les documents restent confidentiels, et les données sont hébergées dans un cadre conforme RGPD.",
+    q: "Est-ce que je garde la validation finale ?",
+    a: "Oui. BeWork prépare, structure, relance et suit les dossiers, mais vous gardez la main sur toutes les décisions qui engagent votre entreprise : prix, validation technique, signature, engagement contractuel ou réponse client sensible.",
   },
 ] as const;
 
@@ -104,7 +80,7 @@ const RESSOURCES_BLOG = [
     href: "/blog/10-taches-administratives-deleguer-dirigeant",
   },
   {
-    title: "Combien coûte un administratif externalisé ?",
+    title: "Quel budget prévoir pour tenir vos dossiers chantier ?",
     desc: "Comparatif forfait externalisé vs embauche : coûts cachés, charges sociales et charge RH pour les PME.",
     href: "/blog/combien-coute-assistant-administratif",
   },
@@ -121,8 +97,8 @@ const RESSOURCES_BLOG = [
 ];
 
 export const metadata: Metadata = {
-  title: "BeWork | Administratif externalisé BTP · artisans & conducteurs de travaux",
-  description: `${SEO_VALUE_PROPOSITION} Vidéo d’introduction. Forfaits TTC dès ${formatPriceLabelFr(PRICE_BOUNDS.low)} €/mois.`,
+  title: "BeWork | Assistante travaux BTP — relais dossiers chantier (devis, DICT, relances)",
+  description: `Assistante BTP pour tenir vos dossiers chantier : devis & relances, DICT, fournisseurs, comptes rendus, plannings, réserves, DOE. Un relais bureau‑chantier, sans recruter. Forfaits TTC dès ${formatPriceLabelFr(PRICE_BOUNDS.low)} €/mois.`,
   robots: {
     index: true,
     follow: true,
@@ -135,21 +111,23 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: SITE_URL,
     siteName: "BeWork",
-    title: "BeWork — Administratif externalisé BTP pour artisans et conducteurs de travaux",
-    description: `${SEO_VALUE_PROPOSITION_SHORT} Vidéo présentée sur cette page.`,
+    title: "BeWork — Assistante travaux BTP (relais dossiers chantier)",
+    description:
+      "Devis & relances, DICT, fournisseurs, documents travaux, comptes rendus : BeWork tient vos dossiers chantier pendant que vous êtes sur le terrain.",
     images: [
       {
         url: `${SITE_URL}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: "BeWork — Partenaire administratif externalisé pour artisans et entreprises du bâtiment",
+        alt: "BeWork — Assistante travaux BTP (relais dossiers chantier) pour artisans et conducteurs de travaux",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "BeWork — Administratif externalisé BTP (conducteurs travaux & artisans)",
-    description: `${SEO_VALUE_PROPOSITION_SHORT} Vidéo. Forfaits TTC.`,
+    title: "BeWork — Assistante travaux BTP (relais dossiers chantier)",
+    description:
+      "Devis & relances, DICT, fournisseurs, documents travaux : un relais bureau‑chantier pour tenir l’activité quand vous êtes sur le terrain.",
   },
 };
 
@@ -160,9 +138,10 @@ const homeJsonLd = {
       "@type": "WebPage",
       "@id": `${SITE_URL}/#accueil`,
       url: SITE_URL,
-      name: "BeWork — Administratif externalisé pour artisans et conducteurs de travaux (BTP)",
+      name: "BeWork — Assistante travaux BTP (relais dossiers chantier)",
       inLanguage: "fr-FR",
-      description: `${SEO_VALUE_PROPOSITION} Démo vidéo, forfaits TTC, sans embauche.`,
+      description:
+        "Assistante BTP : un relais bureau‑chantier pour tenir vos dossiers (devis, relances, DICT, fournisseurs, documents travaux) sans recruter. Démo vidéo et forfaits TTC.",
       isPartOf: { "@id": `${SITE_URL}/#website` },
       video: { "@id": `${SITE_URL}/#video-presentation-bework` },
       about: [
@@ -179,11 +158,11 @@ const homeJsonLd = {
     {
       "@type": "Service",
       "@id": `${SITE_URL}/#service-btp`,
-      name: "Partenaire administratif externalisé — organisation et pilotage pour le BTP",
+      name: "Assistante travaux BTP — relais dossiers chantier",
       description:
-        "Prestataire administratif externalisé : relais cadré — devis, facturation, situations de travaux, suivi client ; démarches chantier ; logistique fournisseurs et moyens ; relances et dossiers sensibles sous validation. France, Belgique, Suisse, Luxembourg.",
-      serviceType: "Partenaire administratif externalisé",
-      category: "Services administratifs pour le bâtiment",
+        "Relais bureau‑chantier : devis & relances, situations de travaux, DICT/DT et dossiers chantier, coordination fournisseurs (commandes, livraisons, locations), comptes rendus et documents de réception/DOE — sous validation sur les points sensibles.",
+      serviceType: "Assistante travaux BTP",
+      category: "Assistance travaux et dossiers chantier (BTP)",
       provider: { "@id": `${SITE_URL}/#organization` },
       areaServed: [
         { "@type": "Country", name: "France" },
@@ -208,9 +187,9 @@ const homeJsonLd = {
     {
       "@type": "VideoObject",
       "@id": `${SITE_URL}/#video-presentation-bework`,
-      name: "Présentation BeWork — partenaire administratif externalisé pour le BTP",
+      name: "Présentation BeWork — assistante travaux BTP (relais dossiers chantier)",
       description:
-        "Vidéo de présentation BeWork — administratif externalisé pour conducteurs de travaux, artisans et dirigeants BTP : dossiers chantier, devis et relances, sans recruter (France · Belgique · Suisse · Luxembourg).",
+        "Vidéo de présentation BeWork — assistante travaux BTP : dossiers chantier, devis & relances, DICT et coordination fournisseurs, sans recruter (France · Belgique · Suisse · Luxembourg).",
       thumbnailUrl: [absoluteUrl("/opengraph-image")],
       uploadDate: "2026-04-11T12:00:00+02:00",
       duration: PRESENTATION_VIDEO_DURATION_ISO,
@@ -273,7 +252,7 @@ export default function HomePage() {
             >
               <div className="container-site relative z-[1]">
             <div className="grid items-center gap-8 text-center lg:grid-cols-[1.15fr_0.85fr] lg:items-start lg:gap-x-[4.75rem] lg:gap-y-0 lg:text-left">
-              <div className="mx-auto flex w-full min-w-0 max-w-[580px] flex-col gap-6 lg:mx-0 lg:max-w-none lg:gap-5 lg:pt-24">
+              <div className="mx-auto flex w-full min-w-0 max-w-[580px] flex-col gap-6 lg:mx-0 lg:max-w-none lg:gap-5 lg:pt-12">
                 <p className="mx-auto inline-flex max-w-full items-center gap-2 self-center rounded-full border border-[#bfdbfe] bg-[#eff6ff] px-3.5 py-1.5 text-[12.5px] font-medium leading-snug text-[#2563eb] sm:gap-2.5 sm:px-4 sm:text-sm lg:mx-0 lg:self-start">
                   <svg
                     className="size-[15px] shrink-0 sm:size-4"
@@ -289,7 +268,7 @@ export default function HomePage() {
                     <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
                     <path d="M9 10h6M9 14h6M9 18h4" />
                   </svg>
-                  <span>Assistant BTP externalisé · Renfort administratif chantier · Augmenté par l’IA</span>
+                  <span>Assistante travaux BTP · Relais dossiers chantier · Augmentée par l’IA</span>
                 </p>
 
                 <h1
@@ -304,9 +283,9 @@ export default function HomePage() {
                 </h1>
 
                 <p className="mx-auto max-w-[580px] text-lg leading-[1.62] text-balance text-slate-700 lg:mx-0 lg:max-w-none lg:text-[20px] lg:leading-snug">
-                  Devis, relances, facturation, DICT, commandes matériel, dossiers chantier et urgences du quotidien&nbsp;: BeWork prend le relais
-                  pendant que vous restez concentré sur{" "}
-                  <span className="font-semibold text-[#3072F0]">le&nbsp;terrain.</span>
+                  Devis à relancer, situations à envoyer, DICT à suivre, commandes à verrouiller, comptes rendus à sortir,
+                  réserves à suivre, DOE à organiser&nbsp;: BeWork tient vos{" "}
+                  <span className="font-semibold text-[#3072F0]">dossiers chantier</span> pendant que vous êtes sur le terrain.
                 </p>
 
                 <div className="mx-auto -mt-1 flex w-full max-w-[580px] flex-wrap justify-center gap-2 lg:mx-0 lg:max-w-none lg:justify-start">
@@ -510,6 +489,13 @@ export default function HomePage() {
                 Guides et retours d&apos;expérience pour structurer votre administratif, sécuriser votre trésorerie et
                 professionnaliser votre relation client.
               </p>
+              <Link
+                href="/ressources"
+                className="mt-6 inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50"
+              >
+                Voir toutes les ressources
+                <span aria-hidden>→</span>
+              </Link>
             </div>
 
             <div className="mb-12 rounded-2xl border border-[#1d4ed8]/25 bg-[#eff6ff]/40 p-8 md:p-10">
@@ -637,6 +623,9 @@ export default function HomePage() {
             </Link>
             <Link className="font-medium transition-colors hover:text-black" href="/notre-facon-de-travailler">
               Notre façon de travailler
+            </Link>
+            <Link className="font-medium transition-colors hover:text-black" href="/ressources">
+              Ressources BTP
             </Link>
             <Link className="font-medium transition-colors hover:text-black" href="/tarifs">
               Tarifs pilotage administratif

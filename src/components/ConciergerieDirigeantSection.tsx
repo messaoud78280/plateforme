@@ -10,7 +10,7 @@ const BLUE = "#2F5BFF";
 
 export function ConciergerieDirigeantSection() {
   return (
-    <section id="conciergerie" className="relative overflow-hidden bg-transparent py-10 md:py-12">
+    <section id="conciergerie" className="relative overflow-visible bg-transparent py-10 md:py-12">
       <div className="container-site relative z-10 grid grid-cols-1 items-center gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
         {/* LEFT */}
         <div className="max-w-xl">
@@ -99,7 +99,7 @@ export function ConciergerieDirigeantSection() {
 
         {/* RIGHT — mockup UI */}
         <div className="flex w-full items-center justify-center overflow-visible">
-          <div className="w-full max-w-[480px] origin-center scale-[0.9] lg:scale-[0.95] -translate-x-6 lg:-translate-x-10">
+          <div className="w-full max-w-[480px] origin-center scale-[0.9] lg:scale-[0.95] -translate-x-6 lg:-translate-x-10 translate-y-12">
             <ConciergeDashboardMockup />
           </div>
         </div>

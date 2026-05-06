@@ -10,18 +10,19 @@ import { landingPageMetadata } from "@/lib/seo-landing-metadata";
 const PAGE_PATH = EXTERNALISATION_ADMIN_BT_PATHS.france;
 
 export const metadata = landingPageMetadata({
-  title: "Externalisation administrative BTP France — artisans & conducteurs de travaux | BeWork",
+  title: "Externalisation administrative BTP en France | Assistante travaux & dossiers chantier — BeWork",
   description:
-    "France : devis, facturation chantier, situations de travaux, relances et dossiers administratifs pour artisans, TPE et conducteurs de travaux. Forfait TTC, sans embauche. Équipe francophone encadrée.",
+    "BeWork aide les entreprises du BTP en France à tenir devis, relances, situations, documents travaux, fournisseurs, réserves et DOE avec une assistante travaux BTP, sans recruter.",
   path: PAGE_PATH,
   keywords: [
     "externalisation administrative BTP France",
-    "gestion administrative artisan France",
-    "conducteur de travaux administratif",
-    "secrétariat externalisé bâtiment",
-    "devis relances chantier France",
-    "situation travaux administrative",
-    "pilotage administratif PME bâtiment",
+    "assistante travaux BTP France",
+    "assistante BTP France",
+    "relais travaux France",
+    "dossiers chantier",
+    "suivi bureau-terrain",
+    "suivi devis et relances",
+    "documents travaux",
   ],
   hreflangLanguages: hreflangExternalisationAdministrativeBtpCluster(),
 });
@@ -29,16 +30,16 @@ export const metadata = landingPageMetadata({
 export default function Page() {
   const faq = [
     {
-      q: "Quelle est la différence entre un secrétariat classique et BeWork pour un artisan ?",
-      a: "Un secrétaire prend des messages. BeWork est cadré sur l’exécution jusqu’à statut fiché — devis, relances, factures ou dossiers chantier suivis jusqu’à clôture avec traçabilité. Vous validez les points sensibles.",
+      q: "BeWork peut-elle accompagner une entreprise BTP en France ?",
+      a: "Oui. BeWork fonctionne à distance partout en France : vous transmettez vos demandes, nous préparons et suivons les dossiers, et vous validez ce qui engage votre entreprise.",
     },
     {
-      q: "Un conducteur de travaux peut-il déléguer sans perdre la main ?",
-      a: "Oui : nous travaillons sur des demandes ouvertes avec critères visibles ; pour ce qui engage la responsabilité contractuelle ou juridique, le déclencheur d’envoi reste votre validation avant expédition.",
+      q: "Quelles tâches peuvent être suivies à distance ?",
+      a: "Devis et relances, situations/factures, documents travaux, comptes rendus, suivi fournisseurs/locations, réserves et préparation DOE (sur périmètre cadré).",
     },
     {
-      q: "Êtes-vous limité à une région en France ?",
-      a: "Non : le fonctionnement est national pour les équipes francophones côté traitement après validation préalable de votre périmètre au rendez-vous découverte — notre siège pilote reste structuré en France.",
+      q: "Qui garde la validation et la responsabilité ?",
+      a: "Vous. BeWork prépare, structure, relance et suit, mais vous gardez la validation finale sur le prix, les choix techniques, les signatures et les engagements contractuels.",
     },
   ] as const;
 
@@ -54,59 +55,67 @@ export default function Page() {
 
   return (
     <SeoLandingPage
-      description="Externalisation administrative pour le BTP en France — devis, relances et dossiers chantier structurés."
+      description="Externalisation administrative BTP en France : un relais travaux pour tenir vos dossiers chantier, sans recruter."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Externalisation administrative BTP — France", href: PAGE_PATH },
       ]}
-      h1="Externalisation administrative BTP en France — du devis au dossier chantier"
+      h1="Externalisation administrative BTP en France : un relais travaux pour vos dossiers chantier"
       intro={
         <>
-          En France vous connaissez le rythme&nbsp;: AO publics qui pèsent sur la rédaction, devis envoyés puis oubliés faute de
-          relances calibrées, situations de travaux à relancer pour alimenter la trésorerie, piles de mails fournisseur qui
-          restent sans réponse un dimanche sur deux. Ce n&apos;est pas une question de discipline personnelle — c&apos;est un
-          volume administratif montant en volume quand votre carnet de chantiers se remplit. BeWork prend ce flux comme un flux
-          production, pas comme une boîte mail supplémentaire.
+          En France, beaucoup d’entreprises du bâtiment tiennent le terrain… mais le bureau décroche dès que le carnet se remplit.
+          Le sujet n’est pas “faire du secrétariat” : c’est tenir un <strong>relais bureau‑chantier</strong> pour que les dossiers
+          avancent (devis, relances, situations, documents travaux, réserves), avec une <strong>validation finale</strong> côté client.
         </>
       }
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <h2>Le vocabulaire terrain que vous retrouvez chez vos clients français</h2>
-      <p>
-        Devis initial, avenants, attestations URSSAF demandées tardivement, mémoires techniques qui piquent vos nuits avant
-        soumission&nbsp;: vos interlocuteurs mélangent jargon commercial et jargon administratif. Nous parlons ces objets sous
-        forme de demandes actionnables sur la plateforme — «&nbsp;relance devis X&nbsp;», «&nbsp;situation travaux à
-        facturer&nbsp;», «&nbsp;pièces pour DICT&nbsp;» — pour que la charge devienne traçable et priorisée par urgence chantier.
-      </p>
+      <h2>Pourquoi externaliser une partie du suivi BTP (sans recruter)</h2>
+      <ul>
+        <li>Charge variable selon les chantiers et les périodes.</li>
+        <li>Devis, relances, situations et documents qui doivent avancer même quand vous êtes sur site.</li>
+        <li>Besoin de traçabilité (preuves, comptes rendus, réserves) pour éviter les litiges.</li>
+        <li>Un cadre souple avant une éventuelle embauche interne.</li>
+      </ul>
 
-      <h2>Artisans multisites et conducteurs de travaux multitâches</h2>
-      <p>
-        Le chef d&apos;entreprise artisan doit parfois enchaîner pose le matin et devis révision l&apos;après-midi. Le CT est
-        pris dans les validations techniques et répond aux demandes administratives des sous-traitants. Dans ces deux figures,
-        l&apos;enjeu français est mécanique&nbsp;: gagner deux heures de bureau trois fois dans la semaine change la courbe du
-        cash et évite erreurs dossier lorsque la pile est élevée hors saison creuse.
-      </p>
+      <h2>Ce que BeWork peut gérer (version terrain)</h2>
+      <ul>
+        <li>Devis & relances (préparation, suivi des réponses, statuts)</li>
+        <li>Situations / factures (préparation, pièces, relances courtoises)</li>
+        <li>Documents travaux (classement, checklists, diffusion cadrée)</li>
+        <li>Comptes rendus, réserves, préparation DOE (sur périmètre cadré)</li>
+        <li>Fournisseurs & locations (confirmations, relances, livraisons)</li>
+      </ul>
 
-      <h2>Structurer sans recruter en pleine saison</h2>
-      <p>
-        Recruter un binôme bureau en plein pic chantier prend du retard et fige vos charges alors que vos carnets suivent cycles
-        bâtiments. Externaliser sous forfait TTC évite cet effet «&nbsp;dents creuses puis surcharge&nbsp;» puisque vos paliers{" "}
-        <Link href="/tarifs" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
-          correspondent à un niveau défini au contrat
-        </Link>{" "}
-        plutôt qu&apos;à une fiche paie évolutive.
-      </p>
+      <h2>Comment ça fonctionne à distance</h2>
+      <ul>
+        <li>Vous envoyez vos demandes et pièces (plateforme / canal cadré).</li>
+        <li>BeWork analyse, prépare et suit les échéances.</li>
+        <li>Vous validez ce qui engage (prix, technique, signatures, réponses sensibles).</li>
+        <li>Tout reste traçable : statuts, historique, documents classés.</li>
+      </ul>
+
+      <h2>Ce que vous gardez</h2>
+      <ul>
+        <li>Prix, marges et décisions commerciales</li>
+        <li>Choix techniques et arbitrages terrain</li>
+        <li>Signatures, engagements contractuels, relation client sensible</li>
+        <li>Responsabilités réglementaires locales</li>
+      </ul>
 
       <div className="not-prose my-10 flex flex-wrap gap-4">
         <Link href="/contact" className="inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-bold text-white hover:bg-[#1e40af]">
           Réserver un appel
         </Link>
-        <Link
-          href="/contact"
-          className="inline-flex rounded-lg border-2 border-[#1d4ed8] px-6 py-3 font-bold text-[#1d4ed8] hover:bg-[#eff6ff]"
-        >
-          Demander un diagnostic offert
+        <Link href="/assistants-administratifs-taches" className="inline-flex rounded-lg border border-slate-200 bg-white px-6 py-3 font-bold text-slate-900 hover:bg-slate-50">
+          Voir les missions
+        </Link>
+        <Link href="/notre-facon-de-travailler" className="inline-flex rounded-lg border border-slate-200 bg-white px-6 py-3 font-bold text-slate-900 hover:bg-slate-50">
+          Voir la méthode
+        </Link>
+        <Link href="/tarifs" className="inline-flex rounded-lg border border-slate-200 bg-white px-6 py-3 font-bold text-slate-900 hover:bg-slate-50">
+          Voir les forfaits
         </Link>
       </div>
 

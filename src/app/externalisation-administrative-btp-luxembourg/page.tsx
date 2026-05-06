@@ -11,17 +11,18 @@ const PAGE_PATH = EXTERNALISATION_ADMIN_BT_PATHS.luxembourg;
 
 export const metadata = landingPageMetadata({
   title:
-    "Externalisation administrative entreprise Luxembourg — support PME construction & chantier | BeWork",
+    "Externalisation administrative BTP au Luxembourg | Relais bureau-chantier — BeWork",
   description:
-    "Luxembourg : soutien administratif pour PME bâtiment en croissance — relances clients, dossiers chantier multi-pays francophones sans alourdir l’effectif interne.",
+    "BeWork aide les entreprises du BTP au Luxembourg à tenir devis, relances, documents travaux, situations et dossiers chantier avec un relais bureau‑chantier, sans recruter.",
   path: PAGE_PATH,
   keywords: [
     "externalisation administrative entreprise Luxembourg",
-    "support administratif PME Luxembourg",
-    "gestion administrative croissance chantier",
-    "prestataire administratif bâtiment",
-    "secrétariat externalisé PME LU",
-    "coordination dossiers chantier transfrontalier",
+    "externalisation administrative BTP luxembourg",
+    "relais bureau-chantier",
+    "dossiers chantier",
+    "assistante travaux",
+    "assistante BTP",
+    "suivi bureau-terrain",
   ],
   hreflangLanguages: hreflangExternalisationAdministrativeBtpCluster(),
 });
@@ -29,16 +30,16 @@ export const metadata = landingPageMetadata({
 export default function Page() {
   const faq = [
     {
-      q: "Nous avons chantiers frontalier allemand/français mélangés : votre modèle passe ?",
-      a: "L’essentiel est que vos consignes relances mails et dossiers restent français pour notre équipe francophone après validation périmètre ; les validations sensibles chantier suivent vos règles internes. Le détail des langues mails sortants se paramètre lorsque vous activez validations.",
+      q: "BeWork peut-elle accompagner une entreprise BTP au Luxembourg ?",
+      a: "Oui, notamment quand vos échanges métier sont en français (clients, équipes, dossiers). On cadre le périmètre au démarrage et vous gardez la validation finale sur ce qui engage.",
     },
     {
-      q: "Une PME luxembourgeoise vise forte croissance : pourquoi éviter première embauche admin interne trop tôt ?",
-      a: "Parce que le palier RH fige vite budget là où un forfait encadré aligne niveau dossier chantier suivis au contrat évolutible plus tard — utile lorsque vos marges projet pas encore amortissent siège léger Luxembourg.",
+      q: "Quelles tâches peuvent être suivies à distance ?",
+      a: "Suivi devis/relances, documents travaux, situations/factures, dossiers chantier, relances et coordination multi‑interlocuteurs. Vous validez les points sensibles.",
     },
     {
-      q: "Combien vite sommes nous opérationnels ?",
-      a: "Objectif trois à cinq jours ouvrés post validation contrat onboarding — vos premières demandes apparaissent sur plateforme avec statuts dès vos accès attribués.",
+      q: "Qui garde la responsabilité des documents et validations ?",
+      a: "Votre entreprise. BeWork prépare, structure et suit, mais vous gardez la validation finale (prix, technique, signatures, engagements) et les responsabilités réglementaires locales.",
     },
   ] as const;
 
@@ -54,53 +55,57 @@ export default function Page() {
 
   return (
     <SeoLandingPage
-      description="PME luxembourgeoises du bâtiment : dossiers chantier et relances structurées, sans surcharge RH."
+      description="Externalisation administrative BTP au Luxembourg : relais bureau‑chantier pour dossiers et relances, sans recruter."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Externalisation administrative BTP — Luxembourg", href: PAGE_PATH },
       ]}
-      h1="Externalisation administrative BTP au Luxembourg — croître sans noyer votre agenda back-office"
+      h1="Externalisation administrative BTP au Luxembourg : un relais bureau‑chantier traçable"
       intro={
         <>
-          Dans économie luxembourgeoise dynamique, petites équipes chantier absorbent souvent à la fois clientèle locale et dossiers
-          transfrontaliers. À mesure vos volumes montent vite, mails fournisseur et validations devis retardent vos signatures
-          commerciales car vous passez quatre heures hebdomadaires sur tableurs relances incomplets. Notre service relève plutôt
-          rôle tiers administratif chantier suivis dossiers fermés jusqu&apos;à statut final — dans forfait TTC sans salaire RH
-          supplémentaire immédiat.
+          Au Luxembourg, la coordination peut vite se complexifier : multi‑interlocuteurs, rythmes soutenus, dossiers qui passent
+          du bureau au terrain (et inversement). BeWork vous aide à tenir le suivi côté bureau : documents, relances, statuts,
+          points bloquants — avec un cadre clair et une validation finale côté client.
         </>
       }
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <h2>Support administratif lorsque quatre personnes portent sept casquettes au bureau</h2>
-      <p>
-        La croissance produit vite une équipe très plate&nbsp;: le même profil enchaîne chantier, téléphone puis mails fournisseur,
-        sans dossier commun — d&apos;où les relances doublonnées trois jours d&apos;affilée. Une demande assignée, suivie jusqu&apos;à
-        clôture évite cette dispersion&nbsp;: tableau de statuts aligné avec vos priorités commerciales.
-      </p>
+      <h2>Pourquoi externaliser une partie du suivi bureau‑chantier</h2>
+      <ul>
+        <li>Charge variable : vous avez besoin d’un relais, pas forcément d’une embauche immédiate.</li>
+        <li>Documents et relances doivent avancer même quand le terrain accélère.</li>
+        <li>Traçabilité utile quand plusieurs interlocuteurs interviennent sur le même dossier.</li>
+      </ul>
 
-      <h2>Trésorerie et image pro&nbsp;: des relances humaines, pas des mails robots</h2>
-      <p>
-        Vos clients PME attendent souvent une réactivité «&nbsp;côté patron&nbsp;». Quand tout retarde administrativement, ils voient une
-        structure encore amateur. BeWork prend en charge mails et relances dans une tonalité sérieuse prévalidée avec vous — sans
-        modèles froids qui nuisent aux petites structures très relationnelles du Luxembourg.
-      </p>
+      <h2>Ce que BeWork peut gérer (liste courte)</h2>
+      <ul>
+        <li>Devis & relances (préparation, statuts, prochaines actions)</li>
+        <li>Situations / factures : préparation, pièces, relances courtoises</li>
+        <li>Documents travaux et dossiers : classement, checklists, diffusion cadrée</li>
+        <li>Suivi réserves et préparation DOE (sur périmètre cadré)</li>
+        <li>Fournisseurs / locations : confirmations, relances, livraisons</li>
+      </ul>
 
-      <h2>Un flux français pour dossiers LU et voisins européens</h2>
-      <p>
-        Pas de double saisie systématique&nbsp;: nous préparons pièces et brouillons de mails&nbsp;; vous validez ce qui engage. Cela évite le
-        chaos où plusieurs boîtes mail suivent le même dossier frontalier avec des filtres différents.
-      </p>
+      <h2>Comment ça fonctionne à distance</h2>
+      <ul>
+        <li>Demandes et pièces transmises via la plateforme (ou canal cadré).</li>
+        <li>Suivi des statuts, échéances et points bloquants.</li>
+        <li>Validation finale côté client sur ce qui engage.</li>
+      </ul>
 
       <div className="not-prose my-10 flex flex-wrap gap-4">
         <Link href="/contact" className="inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-bold text-white hover:bg-[#1e40af]">
           Réserver un appel avec BeWork
         </Link>
-        <Link
-          href="/tarifs"
-          className="inline-flex rounded-lg border-2 border-[#1d4ed8] px-6 py-3 font-bold text-[#1d4ed8] hover:bg-[#eff6ff]"
-        >
-          Tester le cadre tarifaire
+        <Link href="/assistants-administratifs-taches" className="inline-flex rounded-lg border border-slate-200 bg-white px-6 py-3 font-bold text-slate-900 hover:bg-slate-50">
+          Voir les missions
+        </Link>
+        <Link href="/notre-facon-de-travailler" className="inline-flex rounded-lg border border-slate-200 bg-white px-6 py-3 font-bold text-slate-900 hover:bg-slate-50">
+          Voir la méthode
+        </Link>
+        <Link href="/tarifs" className="inline-flex rounded-lg border border-slate-200 bg-white px-6 py-3 font-bold text-slate-900 hover:bg-slate-50">
+          Voir les forfaits
         </Link>
       </div>
 

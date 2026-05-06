@@ -25,14 +25,18 @@ function formatPriceTtc(value: string) {
 }
 
 export const metadata: Metadata = {
-  title: "Forfaits partenaire administratif externalisé BTP — Structure, Suivi, Pilotage | BeWork",
+  title: "Tarifs BeWork | Assistante travaux BTP & relais dossiers chantier",
   description:
-    "Tarifs du partenaire administratif externalisé BeWork : Structure, Suivi et Pilotage — trois forfaits mensuels TTC pour entreprises du bâtiment. Pilotage encadré en France.",
+    "Découvrez les forfaits BeWork pour déléguer vos devis, relances, documents travaux, fournisseurs, réserves et DOE avec une assistante travaux BTP, sans recruter.",
   keywords: [
     ...SEO_KEYWORDS_PARTENAIRE_CORE,
-    "forfait administratif externalisé",
+    "tarifs assistante travaux",
+    "assistante BTP",
+    "relais travaux",
+    "dossiers chantier",
+    "suivi devis et relances",
+    "documents travaux",
     "tarif assistant administratif externalisé",
-    "Structure Suivi Pilotage BeWork",
   ],
   alternates: { canonical: tarifsUrl, languages: { fr: tarifsUrl, "x-default": tarifsUrl } },
   openGraph: {
@@ -40,22 +44,22 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: tarifsUrl,
     siteName: "BeWork",
-    title: "Tarifs BeWork — partenaire administratif structuré",
+    title: "Tarifs BeWork — assistante travaux BTP (relais dossiers chantier)",
     description:
-      "Trois niveaux de structuration administrative pour le BTP. Tarifs TTC mensuels, sans frais cachés.",
+      "Forfaits TTC pour tenir vos dossiers chantier : devis & relances, situations, documents travaux, fournisseurs, réserves, DOE — sans recruter.",
     images: [
       {
         url: tarifsOgImage,
         width: 1200,
         height: 630,
-        alt: "Forfaits administratifs BeWork pour le BTP",
+        alt: "Tarifs BeWork — assistante travaux BTP (relais dossiers chantier)",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tarifs BeWork",
-    description: "Forfaits administratifs pour le BTP — cadre TTC, sans frais cachés.",
+    title: "Tarifs BeWork — assistante travaux BTP",
+    description: "Forfaits TTC pour tenir vos dossiers chantier (devis, relances, situations, documents travaux) sans recruter.",
   },
   robots: { index: true, follow: true },
 };
@@ -82,19 +86,22 @@ function formatHourlyCost(priceTtc: string, hoursApprox: number) {
 
 const PLAN_COPY = {
   DECOUVERTE: {
-    label: "Pour structurer votre administratif et éviter les oublis.",
-    includes: ["Devis et factures", "Organisation de base", "Suivi simple des demandes"],
-    results: ["Moins de retards", "Moins d’oublis", "Base administrative propre"],
+    label: "Pour tenir vos dossiers chantier et éviter les oublis.",
+    includes: ["Relances devis", "Mails clients", "Classement documents travaux"],
+    results: ["Plus de réponses", "Moins d’oublis", "Suivi plus régulier"],
+    examples: ["Relances devis & pièces", "Suivi d’un petit volume de dossiers", "Demandes ponctuelles (fournisseur, doc, RDV)"],
   },
   STANDARD: {
     label: "Pour ne plus perdre d’opportunités et signer plus de chantiers.",
-    includes: ["Relances clients régulières", "Suivi complet des devis", "Coordination quotidienne"],
+    includes: ["Suivi devis & relances", "Situations / factures chantier", "Fournisseurs & commandes"],
     results: ["Plus de devis signés", "Plus de chantiers", "Suivi pro constant"],
+    examples: ["Suivi devis + relances jusqu’à réponse", "Situations, pièces et envois", "Commandes, livraisons, locations"],
   },
   PREMIUM: {
-    label: "Pour déléguer entièrement votre administratif.",
-    includes: ["Gestion quotidienne prioritaire", "Suivi complet des dossiers", "Organisation globale"],
+    label: "Pour un relais travaux à forte capacité, sur plusieurs chantiers.",
+    includes: ["Suivi multi-dossiers", "Réserves / DOE", "Coordination renforcée"],
     results: ["Activité structurée", "Gain de temps massif", "Développement du chiffre d’affaires"],
+    examples: ["DOE, réserves, PV (organisation & suivi)", "DCE/CCTP (tri, synthèses, checklists)", "Cadence quasi quotidienne si besoin"],
   },
 } as const;
 
@@ -130,15 +137,34 @@ const etapes = [
 ];
 
 const faq = [
-  { q: "Les prix sont-ils TTC ?", a: "Oui. Tous nos tarifs sont exprimés TTC, sans frais supplémentaires. La lisibilité du montant fait partie du cadre que nous proposons aux entreprises du bâtiment." },
-  { q: "Qu'est-ce qu'un périmètre ?", a: "Un périmètre correspond à un domaine de mission (ex. commercial, organisation, suivi réglementaire). Les tarifs indiqués couvrent jusqu'à deux périmètres. Au-delà, nous établissons un devis personnalisé." },
-  { q: "Comment sont protégées mes données ?", a: "Confidentialité et accès sont traités dans un cadre strict, avec des canaux dédiés. Nous pouvons préciser nos engagements lors du premier échange." },
-  { q: "Quels sont les horaires et délais ?", a: "L’équipe travaille du lundi au vendredi sur le fuseau français. Les délais dépendent du type de demande et du forfait ; les urgences chantier sont priorisées dans le cadre de votre offre." },
-  { q: "Avec quels outils travaillez-vous ?", a: "Nous intervenons dans votre environnement (Google, Microsoft, CRM, messageries, logiciels métiers) lorsque vous nous donnez les accès nécessaires. La plateforme BeWork centralise consignes, statuts et livrables." },
-  { q: "Y a-t-il un engagement ou une durée minimale ?", a: "Les modalités figurent au contrat. L’idée est un cadre clair des deux côtés, sans surprise sur la résiliation ou le renouvellement." },
-  { q: "Peut-on monter en charge progressivement ?", a: "Oui. Beaucoup de structures démarrent par Structure ou Suivi, puis passent au Pilotage lorsque l’activité augmente." },
-  { q: "Que se passe-t-il en cas d’indisponibilité ?", a: "La continuité de service est organisée : remplacement ou réaffectation selon les cas. Le détail est contractuel." },
-  { q: "Comment s’organisent les échanges ?", a: "Canal principal : la plateforme (messagerie, statuts, pièces). Email ou appel en complément si c’est cadré ensemble à l’onboarding." },
+  {
+    q: "Comment fonctionnent les actions BeWork ?",
+    a: `1 crédit = ${ACTION_MINUTES} minutes. Chaque demande consomme des crédits selon le temps réellement passé : relance, mail, appel, suivi fournisseur, préparation d’une situation, mise au propre d’un compte rendu, etc.`,
+  },
+  {
+    q: "À quoi correspondent les heures incluses ?",
+    a: "Les heures affichées sont un repère (conversion des crédits). Vous achetez un volume mensuel de traitement et de suivi, dans un cadre cadré (périmètres, priorités, circuit de validation).",
+  },
+  {
+    q: "Quel forfait choisir pour une entreprise du BTP ?",
+    a: "Découverte pour démarrer (relances, suivi simple, docs). Standard pour un suivi régulier (devis/relances, situations, fournisseurs). Premium si vous avez plusieurs chantiers et des livrables plus lourds (réserves, DOE, coordination renforcée).",
+  },
+  {
+    q: "Puis-je utiliser mon forfait pour des DOE, PPSPS, DCE ou CCTP ?",
+    a: "Oui sur un périmètre cadré : organisation des pièces, checklists, relances documents, tri et synthèse. Vous validez les points sensibles (technique, prix, engagement) avant diffusion.",
+  },
+  {
+    q: "Que se passe-t-il si une demande dépasse le temps prévu ?",
+    a: "On vous propose un découpage (étapes), une estimation en crédits et un point de validation avant d’aller plus loin. L’objectif : garder de la visibilité et éviter les dérives.",
+  },
+  {
+    q: "Est-ce que BeWork remplace une assistante salariée ?",
+    a: "Non. BeWork est un relais travaux bureau‑terrain : utile quand la charge varie, quand vous ne voulez pas recruter, ou quand vous avez besoin d’un cadre clair. Un poste interne reste pertinent si vous avez un besoin constant à temps plein.",
+  },
+  {
+    q: "Les tarifs sont-ils adaptés aux artisans et petites entreprises du bâtiment ?",
+    a: "Oui : forfaits TTC, sans recrutement, avec une montée en charge progressive. Vous gardez la validation finale et les décisions qui engagent votre entreprise.",
+  },
 ];
 
 const tarifsStructuredData = {
@@ -147,7 +173,7 @@ const tarifsStructuredData = {
     {
       "@type": "ItemList",
       "@id": `${tarifsUrl}#plans`,
-      name: "Forfaits administratifs BeWork — BTP",
+      name: "Tarifs BeWork — assistante travaux BTP",
       numberOfItems: plans.length,
       itemListElement: plans.map((plan, i) => ({
         "@type": "ListItem",
@@ -180,7 +206,7 @@ const tarifsStructuredData = {
 
 export default function TarifsPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea] pb-24 md:pb-16">
+    <div className="min-h-screen bg-[#f8fafc] pb-24 md:pb-16">
       <MarketingSiteHeader />
 
       <script
@@ -192,10 +218,10 @@ export default function TarifsPage() {
         {/* Intro */}
         <section className="text-center">
           <h1 className="text-metallic-black font-sans text-3xl font-semibold tracking-tight md:text-4xl md:leading-tight">
-            Ne perdez plus de chantiers par manque de suivi.
+            Tarifs BeWork : un relais travaux pour tenir vos dossiers chantier
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-black">
-            Nous gérons tout ce qui ne nécessite pas votre présence sur le terrain.
+            Des forfaits clairs pour déléguer le suivi bureau‑terrain : devis, relances, situations, documents travaux, fournisseurs, réserves, DOE.
           </p>
           <p className="mx-auto mt-4 max-w-3xl text-sm leading-relaxed text-black md:text-base">
             Dans le BTP, des opportunités se perdent à cause du manque de suivi : devis, relances, organisation, coordination.
@@ -211,7 +237,7 @@ export default function TarifsPage() {
               <p className="text-xs font-bold uppercase tracking-[0.14em] text-black">Repère simple</p>
               <p className="mt-2 text-base font-semibold text-black md:text-lg">
                 1 crédit = {ACTION_MINUTES} minutes{" "}
-                <span className="font-normal text-black">(devis, relance, appel, mail…)</span>
+                <span className="font-normal text-black">(relance, appel, mail, suivi fournisseur, doc chantier…)</span>
               </p>
             </div>
           </div>
@@ -336,7 +362,7 @@ export default function TarifsPage() {
                 </p>
                 {plan.planKey === "PREMIUM" ? (
                   <p className="mt-2 text-center text-[11px] leading-relaxed text-black">
-                    Équivalent d’un <span className="font-semibold text-black">relais administratif structuré à forte capacité</span>, sans
+                    Équivalent d’un <span className="font-semibold text-black">relais travaux structuré à forte capacité</span>, sans
                     charges ni contraintes internes.
                   </p>
                 ) : null}
@@ -535,12 +561,11 @@ export default function TarifsPage() {
                 <p className="text-xs font-bold uppercase tracking-[0.12em] text-black">Nature de la prestation</p>
                 <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-black md:text-[0.9375rem]">
                   BeWork intervient en <strong className="font-semibold text-black">organisation</strong> et{" "}
-                  <strong className="font-semibold text-black">assistance administrative externalisée</strong>. Tout est
-                  cadré par <strong className="font-semibold text-black">contrat</strong> : périmètre, modalités, engagements
-                  des deux côtés.
+                  <strong className="font-semibold text-black">assistance travaux externalisée</strong> (relais bureau‑terrain). Tout est
+                  cadré par <strong className="font-semibold text-black">contrat</strong> : périmètre, modalités et circuit de validation.
                 </p>
                 <p className="mx-auto mt-4 max-w-2xl font-sans text-base font-semibold leading-snug text-black md:text-lg">
-                  Un partenaire de pilotage — pas un portage de personnel.
+                  Un relais opérationnel — pas un portage de personnel.
                 </p>
               </div>
             </div>
@@ -552,7 +577,7 @@ export default function TarifsPage() {
               Besoin d&apos;un volume plus important ?
             </h2>
             <p className="mt-4 max-w-2xl text-black leading-relaxed">
-              Nous proposons également des solutions dédiées pour les entreprises ayant des besoins administratifs plus importants.
+              Nous proposons aussi des solutions dédiées quand le volume de demandes (multi‑chantiers, coordination, livrables) devient plus important.
             </p>
             <div className="mt-8 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
               <div>
@@ -567,10 +592,10 @@ export default function TarifsPage() {
                 <div className="mt-6">
                   <p className="font-semibold text-black">Full-time</p>
                   <p className="mt-1 text-sm text-black leading-relaxed">
-                    Une solution sur mesure pour les entreprises souhaitant externaliser une grande partie de leur gestion administrative.
+                    Une solution sur mesure pour les entreprises qui veulent un relais travaux quasi quotidien, avec un périmètre cadré.
                   </p>
                   <p className="mt-2 text-sm font-medium text-[#1d4ed8]">
-                    Solution idéale pour les entreprises qui souhaitent externaliser durablement leur gestion administrative.
+                    Solution idéale quand la charge est régulière et que vous voulez éviter un recrutement trop tôt.
                   </p>
                 </div>
                 <Link
@@ -608,7 +633,7 @@ export default function TarifsPage() {
                 </div>
                 <p className="mx-auto mt-5 max-w-2xl text-center text-sm leading-relaxed text-black md:text-[0.9375rem]">
                   Un complément à part : réservations et organisation du quotidien professionnel, traitées comme des missions
-                  ponctuelles — en dehors du cadre des forfaits administratifs BTP.
+                  ponctuelles — en dehors du cadre des forfaits relais travaux.
                 </p>
                 <ul
                   className="mx-auto mt-6 grid max-w-xl gap-3 text-left text-sm text-black sm:grid-cols-2"
@@ -771,7 +796,7 @@ export default function TarifsPage() {
           {/* Bloc comparatif coût réel (existant) */}
           <section className="mt-10 rounded-2xl border-2 border-[#1d4ed8]/20 surface-metallic-light p-6 md:p-10">
             <h3 className="text-center text-xl font-bold text-black md:text-2xl">
-              Comparatif : coût d&apos;un poste administratif interne vs forfait externalisé
+              Recruter ou déléguer vos dossiers chantier ?
             </h3>
             <p className="mt-3 text-center text-sm text-black">
               Référence : salaire brut 2 200 €/mois (région parisienne). Coût réel = salaire + charges + avantages + bureau + RH.

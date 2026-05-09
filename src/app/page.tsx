@@ -172,7 +172,7 @@ export default function HomePage() {
 
       <main className="pt-0">
         {/* Hero → Problème → Solution → Comment ça marche : un seul fond (dégradé + métallique continu) */}
-        <div className="relative overflow-hidden bg-gradient-to-b from-white via-[#fdfefe] to-[#F8FAFC]">
+        <div className="relative bg-gradient-to-b from-white via-[#fdfefe] to-[#F8FAFC]">
           <div
             className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-b from-white/50 via-transparent to-transparent"
             aria-hidden
@@ -406,7 +406,7 @@ export default function HomePage() {
             <HomeCallCtaBanner />
 
             {/* Lien pilier tâches — dans le bloc hero pour que la courbe métallique suive jusqu’ici */}
-            <section className="relative overflow-hidden px-6 pb-12 pt-8 md:pb-14 md:pt-10">
+            <section className="relative px-6 pb-12 pt-8 md:pb-14 md:pt-10">
               <div
                 aria-hidden
                 className="pointer-events-none absolute inset-y-0 right-0 z-0 w-[min(38%,18rem)] rounded-l-[88px] bg-gradient-to-l from-slate-200/30 via-slate-100/15 to-transparent opacity-[0.42] md:w-[min(36%,22rem)] md:rounded-l-[110px] md:opacity-35"

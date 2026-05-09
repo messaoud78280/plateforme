@@ -3,6 +3,10 @@
 /* Ancres : évite que le sticky header recouvre la cible au scroll */
 html {
   scroll-padding-top: 5rem;
+  /* Coupe le léger débordement horizontal des décors skew sans créer une portée de défilement (voir ancien overflow-hidden sur un bloc parent). */
+  overflow-x: clip;
+  /* smooth sur tout le html + ancre # peut provoquer un scroll bloquant vers le haut (Chrome) ; les ancres utilisent scroll-padding-top. */
+  scroll-behavior: auto;
 }
 
 /* Design system BeWork – clair, premium, sobre (sans effet métal/verre) */
@@ -498,10 +502,6 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-family);
-}
-
-html {
-  scroll-behavior: smooth;
 }
 
 /* Forcer une bonne lisibilité des champs de formulaire (Chrome, dark mode, etc.) */

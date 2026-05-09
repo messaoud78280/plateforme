@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
-import { BeWorkLogo } from "@/components/BeWorkLogo";
+import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { HomeProblemSection } from "@/components/HomeProblemSection";
 import { HomeHowItWorksDetailSection } from "@/components/HomeHowItWorksDetailSection";
 import { HomeWhatWeHandleSection } from "@/components/HomeWhatWeHandleSection";
@@ -442,6 +442,8 @@ export default function HomePage() {
           </div>
         </div>
 
+        {/* Au-dessus du décor skew qui déborde du bloc hero — évite que le panneau gris recouvre le texte */}
+        <div className="relative z-10 bg-gradient-to-b from-[#f8fafc] via-[#f1f5f9] to-[#f1f5f9]">
         {/* Ressources */}
         <section id="ressources" className="px-6 py-24 md:py-28">
           <div className="mx-auto max-w-site">
@@ -551,53 +553,10 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+        </div>
       </main>
 
-      <footer className="border-t border-[#c8cdd6] bg-[#f8f9fb] px-6 py-12">
-        <div className="mx-auto flex max-w-site flex-col gap-6 text-sm text-black md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-3">
-              <BeWorkLogo size="sm" />
-              <span className="text-black">© {new Date().getFullYear()} BeWork</span>
-            </div>
-            <span className="text-black">
-              Société française — Agence Île-de-France (Laure Olivie) — Pilotage opérationnel supervisé depuis la France
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-x-6 gap-y-2">
-            <Link className="font-medium transition-colors hover:text-black" href="/inscription">
-              Espace client
-            </Link>
-            <Link className="font-medium transition-colors hover:text-black" href="/inscription">
-              Créer un compte
-            </Link>
-            <Link className="font-medium transition-colors hover:text-black" href="/connexion">
-              Connexion
-            </Link>
-            <Link className="font-medium transition-colors hover:text-black" href="/faq">
-              FAQ
-            </Link>
-            <Link className="font-medium transition-colors hover:text-black" href="/notre-facon-de-travailler">
-              Notre façon de travailler
-            </Link>
-            <Link className="font-medium transition-colors hover:text-black" href="/ressources">
-              Ressources BTP
-            </Link>
-            <Link className="font-medium transition-colors hover:text-black" href="/tarifs">
-              Tarifs pilotage administratif
-            </Link>
-            <Link className="font-medium transition-colors hover:text-black" href="/communication-digitale">
-              Tarifs communication
-            </Link>
-            <Link className="font-medium transition-colors hover:text-black" href="/blog">
-              Blog
-            </Link>
-            <Link className="font-medium transition-colors hover:text-black" href="/externalisation-administrative-btp-france">
-              Externalisation administrative BTP
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <MarketingSiteFooter />
     </div>
   );
 }

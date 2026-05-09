@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BeWorkLogo } from "@/components/BeWorkLogo";
+import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { BLOG_ARTICLES, BLOG_SLUGS, type BlogSlug } from "@/content/blog-articles";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
@@ -164,19 +164,7 @@ export default function BlogPage() {
         </div>
       </main>
 
-      <footer className="border-t border-[#c8cdd6] bg-[#f8f9fb] px-6 py-12 mt-16">
-        <div className="mx-auto max-w-site flex flex-col gap-6 md:flex-row md:items-center md:justify-between text-sm text-black">
-          <div className="flex items-center gap-3">
-            <BeWorkLogo size="sm" />
-            <span className="text-black">© {new Date().getFullYear()} BeWork</span>
-          </div>
-          <div className="flex gap-6">
-            <Link href="/" className="font-medium hover:text-black">Accueil</Link>
-            <Link href="/tarifs" className="font-medium hover:text-black">Tarifs</Link>
-            <Link href="/contact" className="font-medium hover:text-black">Contact</Link>
-          </div>
-        </div>
-      </footer>
+      <MarketingSiteFooter />
     </div>
   );
 }

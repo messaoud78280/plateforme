@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
-import { BeWorkLogo } from "@/components/BeWorkLogo";
+import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { TUTO_TITRE } from "@/components/seo/tuto-section-titles";
 import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/seo-landing-json-ld";
@@ -535,31 +535,7 @@ export default function CompteRenduChantierTutoPage() {
         </div>
       </main>
 
-      <footer className="border-t border-[#c8cdd6] bg-[#f8f9fb] px-6 py-12">
-        <div className="mx-auto flex max-w-site flex-col gap-6 text-sm text-black md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
-            <BeWorkLogo size="sm" />
-            <span>© {new Date().getFullYear()} BeWork</span>
-          </div>
-          <div className="flex flex-wrap gap-x-6 gap-y-2">
-            <Link href="/" className="font-medium transition-colors hover:text-black">
-              Accueil
-            </Link>
-            <Link href="/ressources" className="font-medium transition-colors hover:text-black">
-              Ressources BTP
-            </Link>
-            <Link href="/notre-facon-de-travailler" className="font-medium transition-colors hover:text-black">
-              Méthode
-            </Link>
-            <Link href="/tarifs" className="font-medium transition-colors hover:text-black">
-              Tarifs
-            </Link>
-            <Link href="/contact" className="font-medium transition-colors hover:text-black">
-              Contact
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <MarketingSiteFooter />
     </div>
   );
 }

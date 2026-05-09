@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
-import { BeWorkLogo } from "@/components/BeWorkLogo";
+import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { absoluteUrl } from "@/lib/site";
 
@@ -310,31 +310,7 @@ export default function FaqPage() {
         </article>
       </main>
 
-      <footer className="mt-16 border-t border-slate-200 bg-white px-6 py-12">
-        <div className="mx-auto flex max-w-site flex-col gap-6 text-sm text-black md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
-            <BeWorkLogo size="sm" />
-            <span className="text-black">© {new Date().getFullYear()} BeWork</span>
-          </div>
-          <div className="flex gap-6">
-            <Link href="/" className="font-medium hover:text-black">
-              Accueil
-            </Link>
-            <Link href="/faq" className="font-medium hover:text-black">
-              FAQ
-            </Link>
-            <Link href="/blog" className="font-medium hover:text-black">
-              Blog
-            </Link>
-            <Link href="/ressources/tutos" className="font-medium hover:text-black">
-              Tutoriels
-            </Link>
-            <Link href="/contact" className="font-medium hover:text-black">
-              Contact
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <MarketingSiteFooter />
     </div>
   );
 }

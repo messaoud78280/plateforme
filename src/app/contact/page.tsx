@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
+import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { absoluteUrl } from "@/lib/site";
 
@@ -90,28 +90,7 @@ export default function ContactPage() {
         </div>
       </main>
 
-      <footer className="border-t border-[#c8cdd6] bg-[#f8f9fb] px-6 py-12">
-        <div className="mx-auto flex max-w-site flex-col gap-6 text-sm text-black md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
-            <BeWorkLogo size="sm" />
-            <span>© {new Date().getFullYear()} BeWork</span>
-          </div>
-          <div className="flex flex-wrap gap-x-6 gap-y-2">
-            <Link href="/ressources" className="font-medium hover:text-black">
-              Ressources
-            </Link>
-            <Link href="/blog" className="font-medium hover:text-black">
-              Blog
-            </Link>
-            <Link href="/ressources/tutos" className="font-medium hover:text-black">
-              Tutoriels
-            </Link>
-            <Link href="/notre-facon-de-travailler" className="font-medium hover:text-black">
-              Méthode
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <MarketingSiteFooter />
     </div>
   );
 }

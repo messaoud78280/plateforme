@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
-import { BeWorkLogo } from "@/components/BeWorkLogo";
+import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/seo-landing-json-ld";
 
@@ -101,26 +101,7 @@ export function SeoLandingPage({ description, h1, intro, children, breadcrumbIte
         </article>
       </main>
 
-      <footer className="border-t border-slate-200 bg-white px-6 py-12">
-        <div className="mx-auto flex max-w-site flex-col gap-6 text-base text-black md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-3">
-              <BeWorkLogo size="sm" />
-              <span className="text-black">© {new Date().getFullYear()} BeWork</span>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-x-6 gap-y-2">
-            <Link href="/" className="font-medium hover:text-black">Accueil</Link>
-            <Link href="/notre-facon-de-travailler" className="font-medium hover:text-black">Méthode</Link>
-            <Link href="/ressources" className="font-medium hover:text-black">Ressources BTP</Link>
-            <Link href="/blog" className="font-medium hover:text-black">Blog</Link>
-            <Link href="/ressources/tutos" className="font-medium hover:text-black">Tutoriels</Link>
-            <Link href="/cas-clients" className="font-medium hover:text-black">Cas clients</Link>
-            <Link href="/tarifs" className="font-medium hover:text-black">Tarifs</Link>
-            <Link href="/contact" className="font-medium hover:text-black">Contact</Link>
-          </div>
-        </div>
-      </footer>
+      <MarketingSiteFooter />
     </div>
   );
 }

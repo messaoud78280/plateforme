@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
+import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { absoluteUrl } from "@/lib/site";
 
@@ -541,19 +542,7 @@ export default function AssistantsAdministratifsTachesPage() {
         </section>
       </main>
 
-      <footer className="border-t border-[#c8cdd6] bg-[#f8f9fb] px-6 py-8">
-        <div className="mx-auto flex max-w-site flex-wrap items-center justify-between gap-4 text-sm text-black">
-          <Link href="/" className="font-medium transition-colors hover:text-black">
-            Accueil
-          </Link>
-          <Link href="/tarifs" className="font-medium transition-colors hover:text-black">
-            Tarifs
-          </Link>
-          <Link href="/contact" className="font-medium transition-colors hover:text-black">
-            Contact
-          </Link>
-        </div>
-      </footer>
+      <MarketingSiteFooter />
     </div>
   );
 }

@@ -19,6 +19,13 @@ export const RESOURCE_TUTO_ITEMS: readonly ResourceTutoItem[] = [
     icon: "document",
   },
   {
+    title: "Tutoriel PDF — chiffrage de devis BTP avec l’IA (Claude & skills)",
+    desc: "BPU, coefficients, fichiers Word + Excel — prompts de calibrage et d’usage quotidien, PDF intégré.",
+    href: "/ressources/tuto-skill-chiffrage-devis-bework",
+    status: "Guide PDF",
+    icon: "document",
+  },
+  {
     title: "Tutoriel PDF — constat de retard avec l’IA (Claude & skills)",
     desc: "7 éléments LRAR, CCAG art.19, CIBTP — PDF intégré et prompts prêts à coller.",
     href: "/ressources/tuto-skill-constat-retard-bework",
@@ -64,13 +71,6 @@ export const RESOURCE_TUTO_ITEMS: readonly ResourceTutoItem[] = [
     title: "Tutoriel PDF — skill PPSPS avec l’IA (Claude & skills)",
     desc: "Guide BeWork gratuit : 9 rubriques R4532-64, prompts de calibrage et d’usage quotidien, PDF intégré.",
     href: "/ressources/tuto-skill-ppsps-bework",
-    status: "Guide PDF",
-    icon: "document",
-  },
-  {
-    title: "Tutoriel PDF — compte rendu de chantier avec l’IA (Claude & skills)",
-    desc: "Guide BeWork gratuit : mise en page PDF à consulter, transcription intégrale, prompts prêts à coller.",
-    href: "/ressources/compte-rendu-chantier-guide-btp",
     status: "Guide PDF",
     icon: "document",
   },

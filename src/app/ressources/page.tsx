@@ -6,20 +6,32 @@ import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { ResourceSpotlightCarousel } from "@/components/ressources/ResourceSpotlightCarousel";
 import { BLOG_ARTICLES, BLOG_SLUGS } from "@/content/blog-articles";
 import { CAS_CLIENT_CASES } from "@/content/cas-clients-cases";
+import { RESOURCE_GUIDE_PAGE_ITEMS } from "@/content/resource-guides-pages";
 import { RESOURCE_TUTO_ITEMS, type ResourceTutoItem, type ResourceStatus } from "@/content/resource-tutos";
 import { absoluteUrl } from "@/lib/site";
 
 const pageUrl = absoluteUrl("/ressources");
 const ogImage = absoluteUrl("/opengraph-image");
 
-const GUIDE_CAROUSEL_ITEMS = [...BLOG_SLUGS]
-  .map((slug) => {
+const GUIDE_CAROUSEL_ITEMS = [
+  ...[...BLOG_SLUGS].map((slug) => {
     const a = BLOG_ARTICLES[slug];
-    return { slug, title: a.title, excerpt: a.excerpt ?? a.description, href: `/blog/${slug}` as const };
-  })
-  .sort(
-    (x, y) => new Date(BLOG_ARTICLES[y.slug].publishedTime).getTime() - new Date(BLOG_ARTICLES[x.slug].publishedTime).getTime()
-  );
+    return {
+      key: `blog:${slug}`,
+      title: a.title,
+      excerpt: a.excerpt ?? a.description,
+      href: `/blog/${slug}`,
+      publishedTime: a.publishedTime,
+    };
+  }),
+  ...RESOURCE_GUIDE_PAGE_ITEMS.map((g) => ({
+    key: `resource:${g.href}`,
+    title: g.title,
+    excerpt: g.excerpt,
+    href: g.href,
+    publishedTime: g.publishedTime,
+  })),
+].sort((x, y) => new Date(y.publishedTime).getTime() - new Date(x.publishedTime).getTime());
 
 export const metadata: Metadata = {
   title: "Ressources BeWork — Tutoriels, guides & cas clients",
@@ -49,8 +61,8 @@ const FAQ_ITEMS = [
     a: "Les tutoriels PDF sont des fiches téléchargeables, étape par étape, sur une tâche précise (PPSPS, DCE…). Les guides longs (articles) seront de nouveau proposés via le blog lorsque le catalogue sera enrichi ; pour l’instant, l’essentiel passe par les tutoriels et le hub ressources.",
   },
   {
-    q: "Le tutoriel PDF « compte rendu de chantier » est-il gratuit ?",
-    a: "Oui. Il est consultable sur sa page dédiée, avec le PDF BeWork et la transcription intégrale du guide.",
+    q: "Le guide PDF « compte rendu de chantier » est-il gratuit ?",
+    a: "Oui. Il est listé parmi les guides et consultable sur sa page dédiée, avec le PDF BeWork et la transcription du guide.",
   },
   {
     q: "Puis-je réserver un appel après lecture des ressources ?",
@@ -307,7 +319,7 @@ export default function RessourcesPage() {
                 nextAriaLabel="Page suivante"
               >
                 {GUIDE_CAROUSEL_ITEMS.map((item) => (
-                  <GuideCarouselCard key={item.slug} item={item} />
+                  <GuideCarouselCard key={item.key} item={item} />
                 ))}
               </ResourceSpotlightCarousel>
             ) : (

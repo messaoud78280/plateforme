@@ -76,6 +76,13 @@ export default function ChiffrageDevisBtpPage() {
         <section className="not-prose">
           <div className="rounded-2xl border border-slate-200 bg-white p-6 text-[13px] leading-relaxed text-slate-600 shadow-sm">
             Compléments utiles :{" "}
+            <Link
+              href="/ressources/tuto-skill-chiffrage-devis-bework"
+              className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline"
+            >
+              tutoriel PDF + skill Claude (chiffrage devis avec l&apos;IA)
+            </Link>
+            ,{" "}
             <Link href="/devis-retard-btp" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
               devis en retard
             </Link>

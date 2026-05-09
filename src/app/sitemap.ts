@@ -103,6 +103,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly" as const,
       priority: 0.81,
     },
+    {
+      url: `${SITE_URL}/ressources/tuto-skill-chiffrage-devis-bework`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.81,
+    },
     { url: `${SITE_URL}/ressources/ppsps-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
     { url: `${SITE_URL}/ressources/analyse-dce-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.82 },
     { url: `${SITE_URL}/ressources/memoire-technique-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },

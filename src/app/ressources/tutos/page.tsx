@@ -12,7 +12,7 @@ const ogImage = absoluteUrl("/opengraph-image");
 export const metadata: Metadata = {
   title: "Tutoriels PDF & pratiques BTP | BeWork",
   description:
-    "Tutoriels BeWork : guides PDF téléchargeables et méthodes courtes pour le chantier — à commencer par le compte rendu de chantier avec l’IA.",
+    "Tutoriels BeWork : guides PDF téléchargeables et méthodes courtes pour vos dossiers chantier (Claude, prompts, fiches pratiques).",
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   openGraph: {
     type: "website",
@@ -97,8 +97,12 @@ export default function RessourcesTutosPage() {
           </nav>
           <h1 className="text-balance text-2xl font-bold tracking-tight text-black md:text-3xl">Tutoriels</h1>
           <p className="mt-3 max-w-xl text-xs leading-snug text-slate-700 sm:text-sm sm:leading-relaxed md:text-[0.9375rem]">
-            Tutoriels courts et guides PDF préparés par BeWork. Commencez par le compte rendu de chantier avec l&apos;IA — mise en page,
-            transcription complète et prompts prêts à l&apos;emploi.
+            Tutoriels courts et fiches PDF préparés par BeWork : méthodes pas à pas avec prompts à copier. Pour un guide plus large sur les
+            comptes rendus chantier&nbsp;avec l&apos;IA, voir aussi la liste des&nbsp;
+            <Link href="/ressources/guides" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
+              guides
+            </Link>
+            .
           </p>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <CalendlyBookingLink className="inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50">
@@ -108,24 +112,17 @@ export default function RessourcesTutosPage() {
         </header>
 
         <div className="mx-auto mt-8 w-full max-w-4xl">
-          {RESOURCE_TUTO_ITEMS.length === 0 ? null : RESOURCE_TUTO_ITEMS.length === 1 ? (
-            <div className="mx-auto max-w-lg">
-              <ResourceCard key={RESOURCE_TUTO_ITEMS[0].href} item={RESOURCE_TUTO_ITEMS[0]} />
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2 md:gap-2.5">
-              <div className="grid grid-cols-1 items-stretch gap-2 sm:grid-cols-2 md:gap-2.5">
-                {RESOURCE_TUTO_ITEMS.slice(0, 2).map((item) => (
-                  <ResourceCard key={item.href} item={item} />
-                ))}
-              </div>
-              {RESOURCE_TUTO_ITEMS.length > 2 ? (
-                <div className="flex max-w-full flex-col gap-2 md:max-w-xl md:gap-2.5">
-                  {RESOURCE_TUTO_ITEMS.slice(2).map((item) => (
-                    <ResourceCard key={item.href} item={item} />
-                  ))}
-                </div>
-              ) : null}
+          {RESOURCE_TUTO_ITEMS.length === 0 ? null : (
+            <div
+              className={
+                RESOURCE_TUTO_ITEMS.length === 1
+                  ? "mx-auto max-w-lg"
+                  : "grid grid-cols-1 items-stretch gap-2 sm:grid-cols-2 sm:gap-2.5 md:gap-3"
+              }
+            >
+              {RESOURCE_TUTO_ITEMS.map((item) => (
+                <ResourceCard key={item.href} item={item} />
+              ))}
             </div>
           )}
         </div>

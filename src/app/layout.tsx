@@ -3,7 +3,7 @@ import { Geist, Geist_Mono, Inter, Manrope, Orbitron } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { SEO_KEYWORDS_GLOBAL, SEO_VALUE_PROPOSITION, SEO_VALUE_PROPOSITION_SHORT } from "@/lib/seo-keywords";
-import { absoluteUrl, getOrgSameAs, SITE_URL } from "@/lib/site";
+import { absoluteUrl, CALENDLY_APPEL_DECOUVERTE_URL, getOrgSameAs, SITE_URL } from "@/lib/site";
 import { formatPriceLabelFr, getPublicPriceBoundsLabels } from "@/lib/subscription-plans";
 
 const defaultOgImage = absoluteUrl("/opengraph-image");
@@ -137,7 +137,7 @@ const jsonLd = {
       potentialAction: {
         "@type": "ContactAction",
         name: "Demander un rendez-vous découverte ou un échange",
-        target: absoluteUrl("/contact"),
+        target: CALENDLY_APPEL_DECOUVERTE_URL,
       },
     },
     {

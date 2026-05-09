@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { absoluteUrl } from "@/lib/site";
@@ -337,13 +338,10 @@ export default function NotreFaconDeTravaillerPage() {
             Un échange suffit pour cadrer votre besoin, votre circuit de validation et les priorités.
           </p>
           <div className="mt-6 flex flex-col items-stretch gap-3 sm:flex-row sm:justify-center sm:gap-4">
-            <Link
-              href="/contact"
-              className="inline-flex justify-center rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white transition hover:bg-[#1e40af]"
-            >
+            <CalendlyBookingLink className="inline-flex justify-center rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white transition hover:bg-[#1e40af]">
               <span className="sm:hidden">Rendez-vous découverte</span>
               <span className="hidden sm:inline">Demander un rendez-vous découverte</span>
-            </Link>
+            </CalendlyBookingLink>
             <Link
               href="/assistants-administratifs-taches"
               className="inline-flex justify-center rounded-lg border border-slate-200 bg-white px-6 py-3 font-semibold text-slate-900 transition hover:bg-slate-50"
@@ -378,6 +376,9 @@ export default function NotreFaconDeTravaillerPage() {
             </Link>
             <Link href="/blog" className="font-medium hover:text-black">
               Blog
+            </Link>
+            <Link href="/ressources/tutos" className="font-medium hover:text-black">
+              Tutoriels
             </Link>
             <Link href="/contact" className="font-medium hover:text-black">
               Contact

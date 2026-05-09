@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
         destination: "/assistant-administratif-btp",
         permanent: true,
       },
+      {
+        source: "/externalisation-administrative-btp-europe",
+        destination: "/externalisation-administrative-btp-france",
+        permanent: true,
+      },
     ];
   },
 };

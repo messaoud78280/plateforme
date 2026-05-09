@@ -10,7 +10,6 @@ import { AlertsSection } from "@/components/dashboard/AlertsSection";
 import { TasksChart } from "@/components/dashboard/TasksChart";
 import { ClientsSection } from "@/components/dashboard/ClientsSection";
 import { ScrollToMessages } from "@/components/ScrollToMessages";
-import { AppointmentCalendar } from "@/components/appointments/AppointmentCalendar";
 import { ActionsWidget } from "@/components/dashboard/ActionsWidget";
 import { NouvelleDemandeTrigger } from "@/components/demands/NouvelleDemandeTrigger";
 import { ClientDashboardContent } from "@/components/dashboard/ClientDashboardContent";
@@ -732,16 +731,6 @@ export default async function DashboardPage({
           </div>
         )}
 
-        {/* Calendrier de prise de RDV — visible par tous */}
-        <div className="rounded-2xl surface-metallic-light p-6">
-          <h3 className="text-lg font-semibold text-slate-800">Prise de rendez-vous en ligne</h3>
-          <p className="mt-1 text-sm text-slate-600">
-            Réservez un créneau, ajoutez des pièces jointes et des notes. Les RDV apparaissent dans les alertes.
-          </p>
-          <div className="mt-4">
-            <AppointmentCalendar />
-          </div>
-        </div>
       </section>
 
       {/* KPIs */}

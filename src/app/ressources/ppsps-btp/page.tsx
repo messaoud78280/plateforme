@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
+import { TUTO_TITRE } from "@/components/seo/tuto-section-titles";
 import { absoluteUrl } from "@/lib/site";
 
 const pageUrl = absoluteUrl("/ressources/ppsps-btp");
@@ -8,7 +10,7 @@ const pageUrl = absoluteUrl("/ressources/ppsps-btp");
 export const metadata: Metadata = {
   title: "PPSPS BTP | Préparer un plan particulier de sécurité chantier",
   description:
-    "Guide pratique pour comprendre le PPSPS BTP, les informations à rassembler, les erreurs à éviter et la méthode pour structurer un plan particulier de sécurité chantier.",
+    "Tuto pratique pour comprendre le PPSPS BTP, les informations à rassembler, les erreurs à éviter et la méthode pour structurer un plan particulier de sécurité chantier.",
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   openGraph: {
     type: "article",
@@ -23,7 +25,7 @@ export const metadata: Metadata = {
         url: absoluteUrl("/opengraph-image"),
         width: 1200,
         height: 630,
-        alt: "PPSPS BTP — Guide pratique (BeWork)",
+        alt: "PPSPS BTP — Tuto pratique (BeWork)",
       },
     ],
   },
@@ -31,7 +33,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "PPSPS BTP | Préparer un plan particulier de sécurité chantier",
     description:
-      "Guide pratique : comprendre le PPSPS, rassembler les infos et structurer un document clair avant intervention.",
+      "Tuto pratique : comprendre le PPSPS, rassembler les infos et structurer un document clair avant intervention.",
   },
   robots: { index: true, follow: true },
 };
@@ -129,7 +131,7 @@ function StructureModelCard() {
   );
 }
 
-export default function PpspsBtpGuidePage() {
+export default function PpspsBtpTutoPage() {
   return (
     <>
       <FaqPpspsJsonLd />
@@ -153,7 +155,7 @@ export default function PpspsBtpGuidePage() {
         <section aria-labelledby="cadre" className="not-prose">
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <p className="text-[13px] font-semibold text-slate-700">
-              Ce guide est pédagogique : il aide à structurer la préparation du PPSPS (checklist + méthode), sans faire
+              Ce tuto est pédagogique : il aide à structurer la préparation du PPSPS (checklist + méthode), sans faire
               un cours réglementaire.
             </p>
             <p className="mt-3 text-[13px] leading-relaxed text-slate-600">
@@ -171,7 +173,7 @@ export default function PpspsBtpGuidePage() {
           l’organisation pratique avant intervention.
         </p>
 
-        <h2>À quoi sert un PPSPS ?</h2>
+        <h2>{TUTO_TITRE.aQuoi}</h2>
         <ul>
           <li>Identifier les risques liés à l’intervention.</li>
           <li>Décrire les moyens de prévention et les consignes de sécurité.</li>
@@ -182,7 +184,7 @@ export default function PpspsBtpGuidePage() {
           <li>Éviter les oublis avant démarrage (checklist + points manquants).</li>
         </ul>
 
-        <h2>Quand préparer un PPSPS ?</h2>
+        <h2>{TUTO_TITRE.quand}</h2>
         <ul>
           <li>Avant le démarrage des travaux concernés.</li>
           <li>Dès que les informations chantier sont disponibles (accès, zones, phasage, coactivité…).</li>
@@ -257,7 +259,7 @@ export default function PpspsBtpGuidePage() {
           </div>
         </section>
 
-        <h2>Méthode simple pour organiser un PPSPS (pas à pas)</h2>
+        <h2>{TUTO_TITRE.etapes}</h2>
         <ol>
           <li>Relire les exigences du marché ou du coordonnateur SPS (ce qui est attendu).</li>
           <li>Lister les informations chantier à récupérer (contacts, accès, zones, planning).</li>
@@ -270,7 +272,7 @@ export default function PpspsBtpGuidePage() {
           <li>Faire valider par la personne compétente avant transmission.</li>
         </ol>
 
-        <h2>Erreurs fréquentes</h2>
+        <h2>{TUTO_TITRE.erreurs}</h2>
         <ul>
           <li>Préparer le PPSPS trop tard (urgence = oublis).</li>
           <li>Copier un ancien document sans l’adapter au chantier.</li>
@@ -282,7 +284,7 @@ export default function PpspsBtpGuidePage() {
           <li>Absence de validation par la personne compétente avant transmission.</li>
         </ul>
 
-        <h2>Exemple de structure simple (modèle)</h2>
+        <h2>{TUTO_TITRE.exemple}</h2>
         <section className="not-prose">
           <div className="mt-6 grid gap-4 lg:grid-cols-2">
             <StructureModelCard />
@@ -297,7 +299,7 @@ export default function PpspsBtpGuidePage() {
         </section>
 
         <h2>Comment BeWork peut aider (sans valider la conformité sécurité)</h2>
-        <p>BeWork peut aider sur la partie organisation/administratif :</p>
+        <p>BeWork peut aider sur la partie organisation / administratif :</p>
         <ul>
           <li>créer une checklist PPSPS et une trame structurée ;</li>
           <li>rassembler les informations disponibles (chantier, contacts, accès, zones, planning) ;</li>
@@ -310,13 +312,26 @@ export default function PpspsBtpGuidePage() {
           sécurité et ne remplace pas un coordonnateur SPS, un responsable sécurité, un maître d’œuvre, un bureau d’études
           ou un expert réglementaire.
         </p>
-
-        <h2>Exemple concret (mini scénario)</h2>
+        <p className="font-semibold text-slate-800">Mini scénario</p>
         <p>
           Avant une intervention, les informations chantier sont dispersées entre mails, plans, consignes et documents
           internes. BeWork peut créer une checklist PPSPS, regrouper les informations disponibles, repérer les éléments
           manquants et préparer une trame claire à faire valider par la personne compétente.
         </p>
+
+        <section className="not-prose" id="faq" aria-label="FAQ PPSPS" style={{ scrollMarginTop: "6rem" }}>
+          <h2 className="mt-12 border-b border-slate-200 pb-3 text-xl font-bold tracking-tight text-black md:text-2xl">
+            {TUTO_TITRE.faq} — PPSPS
+          </h2>
+          <dl className="mt-5 space-y-4">
+            {FAQ_ITEMS.map((item) => (
+              <div key={item.q} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <dt className="text-base font-semibold text-black">{item.q}</dt>
+                <dd className="mt-2 text-sm leading-relaxed text-slate-700">{item.a}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
 
         <section className="not-prose" aria-label="CTA">
           <div className="mt-10 rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
@@ -326,9 +341,9 @@ export default function PpspsBtpGuidePage() {
               avec un circuit de validation clair.
             </p>
             <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <Link href="/contact" className="inline-flex justify-center rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white hover:bg-[#1e40af]">
+              <CalendlyBookingLink className="inline-flex justify-center rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white hover:bg-[#1e40af]">
                 Réserver un échange
-              </Link>
+              </CalendlyBookingLink>
               <Link href="/assistants-administratifs-taches" className="inline-flex justify-center rounded-lg border border-slate-200 bg-white px-6 py-3 font-semibold text-slate-900 hover:bg-slate-50">
                 Voir les missions
               </Link>
@@ -343,18 +358,6 @@ export default function PpspsBtpGuidePage() {
               </Link>
             </div>
           </div>
-        </section>
-
-        <section className="not-prose" id="faq" aria-label="FAQ PPSPS" style={{ scrollMarginTop: "6rem" }}>
-          <h2 className="mt-12 text-xl font-bold tracking-tight text-black md:text-2xl">FAQ PPSPS</h2>
-          <dl className="mt-5 space-y-4">
-            {FAQ_ITEMS.map((item) => (
-              <div key={item.q} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <dt className="text-base font-semibold text-black">{item.q}</dt>
-                <dd className="mt-2 text-sm leading-relaxed text-slate-700">{item.a}</dd>
-              </div>
-            ))}
-          </dl>
         </section>
       </SeoLandingPage>
     </>

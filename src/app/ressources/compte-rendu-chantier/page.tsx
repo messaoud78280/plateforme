@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
+import { TUTO_TITRE } from "@/components/seo/tuto-section-titles";
 import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/seo-landing-json-ld";
 import { absoluteUrl } from "@/lib/site";
 
@@ -12,10 +14,10 @@ const pagePath = "/ressources/compte-rendu-chantier";
 const H1 =
   "Compte rendu de chantier : comment le rédiger et le structurer";
 const META_DESCRIPTION =
-  "Guide pratique pour rédiger un compte rendu de chantier clair : participants, avancement, décisions, réserves, actions à suivre, responsables, délais et points bloquants.";
+  "Tuto pratique pour rédiger un compte rendu de chantier clair : participants, avancement, décisions, réserves, actions à suivre, responsables, délais et points bloquants.";
 
 export const metadata: Metadata = {
-  title: "Compte rendu de chantier | Guide pratique BTP",
+  title: "Compte rendu de chantier | Tuto pratique BTP",
   description: META_DESCRIPTION,
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   openGraph: {
@@ -23,7 +25,7 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: pageUrl,
     siteName: "BeWork",
-    title: "Compte rendu de chantier | Guide pratique BTP",
+    title: "Compte rendu de chantier | Tuto pratique BTP",
     description:
       "Méthode simple + checklist pour structurer un compte rendu de réunion chantier : décisions, points bloquants, actions, responsables et délais.",
     images: [
@@ -31,13 +33,13 @@ export const metadata: Metadata = {
         url: absoluteUrl("/opengraph-image"),
         width: 1200,
         height: 630,
-        alt: "Compte rendu de chantier — Guide pratique (BeWork)",
+        alt: "Compte rendu de chantier — Tuto pratique (BeWork)",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Compte rendu de chantier | Guide pratique BTP",
+    title: "Compte rendu de chantier | Tuto pratique BTP",
     description:
       "Rédiger un compte rendu de chantier clair : participants, avancement, décisions, points bloquants, actions, responsables, délais.",
   },
@@ -54,16 +56,16 @@ const FAQ_ITEMS = [
     a: "Cela dépend de l’organisation : maîtrise d’œuvre, conducteur de travaux, responsable chantier ou entreprise pilote. L’important est de savoir qui le rédige, qui le valide, et qui le diffuse.",
   },
   {
-    q: "Que doit contenir un compte rendu de réunion chantier ?",
-    a: "Au minimum : informations générales, participants, avancement, décisions, points bloquants et une liste d’actions avec responsable + date limite. Le contenu exact dépend du chantier et des intervenants.",
+    q: "Que doit contenir un compte rendu de réunion chantier, et quand l’envoyer ?",
+    a: "Au minimum : informations générales, participants, avancement, décisions, points bloquants et une liste d’actions avec responsable + date limite. À envoyer le plus vite possible — idéalement le jour même ou le lendemain — pendant que les décisions sont fraîches ; cela évite les erreurs d’exécution coûteuses.",
   },
   {
-    q: "Quand envoyer le compte rendu après la réunion ?",
-    a: "Le plus vite possible, idéalement le jour même ou le lendemain, pendant que les décisions sont fraîches. Cela permet de corriger rapidement une incompréhension avant que le chantier avance.",
+    q: "Est-ce que BeWork peut préparer un compte rendu à partir de notes, photos ou messages vocaux ?",
+    a: "Oui. BeWork peut structurer un compte rendu à partir de notes de chantier, photos, échanges, messages vocaux ou informations transmises par le conducteur de travaux. L’objectif est de transformer des éléments bruts en document clair, exploitable et facile à valider. Vous gardez la validation finale avant diffusion.",
   },
   {
-    q: "BeWork peut-elle préparer un compte rendu de chantier ?",
-    a: "BeWork peut aider à remettre en forme des notes, structurer le compte rendu, préparer un tableau d’actions, classer et archiver, puis suivre les relances des points en attente. Vous gardez la validation finale avant diffusion.",
+    q: "Est-ce adapté aux artisans, chefs de chantier et conducteurs de travaux ?",
+    a: "Oui. Le service est pensé pour les artisans, chefs de chantier, conducteurs de travaux et petites entreprises BTP qui manquent de temps pour formaliser leurs suivis de chantier, relances et décisions importantes.",
   },
   {
     q: "Le compte rendu de chantier remplace-t-il une validation technique ?",
@@ -164,7 +166,7 @@ function ArticleProseSection({ title, children }: { title: string; children: Rea
   );
 }
 
-export default function CompteRenduChantierGuidePage() {
+export default function CompteRenduChantierTutoPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9]">
       <FaqCrJsonLd />
@@ -228,7 +230,7 @@ export default function CompteRenduChantierGuidePage() {
                 <line x1="16" x2="8" y1="17" y2="17" />
                 <line x1="10" x2="8" y1="9" y2="9" />
               </svg>
-              <span>Guide pratique · Ressources BTP · Dossiers chantier</span>
+              <span>Tuto pratique · Ressources BTP · Dossiers chantier</span>
             </p>
 
             <h1
@@ -254,12 +256,9 @@ export default function CompteRenduChantierGuidePage() {
               >
                 ← Ressources
               </Link>
-              <Link
-                href="/contact"
-                className="inline-flex min-h-[2.875rem] items-center justify-center gap-2 rounded-xl bg-[#1d4ed8] px-6 text-sm font-semibold text-white shadow-md shadow-[#1d4ed8]/22 transition hover:bg-[#1e40af]"
-              >
+              <CalendlyBookingLink className="inline-flex min-h-[2.875rem] items-center justify-center gap-2 rounded-xl bg-[#1d4ed8] px-6 text-sm font-semibold text-white shadow-md shadow-[#1d4ed8]/22 transition hover:bg-[#1e40af]">
                 Réserver un appel
-              </Link>
+              </CalendlyBookingLink>
             </div>
           </div>
         </div>
@@ -280,7 +279,7 @@ export default function CompteRenduChantierGuidePage() {
             </p>
           </div>
 
-          {/* Corps guide */}
+          {/* Corps tuto */}
           <article className="mx-auto mt-10 max-w-3xl space-y-0 rounded-2xl border border-slate-200/90 bg-white px-7 py-10 shadow-[0_10px_40px_-16px_rgba(15,23,42,0.1)] ring-1 ring-slate-100/85 md:px-10 md:py-12">
             <section>
               <h2 className="text-xl font-bold tracking-tight text-[#0F172A] md:text-[1.35rem]">
@@ -295,7 +294,7 @@ export default function CompteRenduChantierGuidePage() {
               </div>
             </section>
 
-            <ArticleProseSection title="À quoi sert un compte rendu de chantier ?">
+            <ArticleProseSection title={TUTO_TITRE.aQuoi}>
               <ul className="!mt-0">
                 <li>Garder une trace des décisions et arbitrages.</li>
                 <li>Clarifier les responsabilités (qui fait quoi).</li>
@@ -307,7 +306,7 @@ export default function CompteRenduChantierGuidePage() {
               </ul>
             </ArticleProseSection>
 
-            <ArticleProseSection title="Quand rédiger un compte rendu ?">
+            <ArticleProseSection title={TUTO_TITRE.quand}>
               <ul className="!mt-0">
                 <li>Après une réunion chantier.</li>
                 <li>Après un point client important.</li>
@@ -382,7 +381,7 @@ export default function CompteRenduChantierGuidePage() {
               </div>
             </section>
 
-            <ArticleProseSection title="Méthode simple pour rédiger efficacement">
+            <ArticleProseSection title={TUTO_TITRE.etapes}>
               <ol className="!mt-0">
                 <li>Prendre des notes pendant la réunion (et repérer les décisions).</li>
                 <li>Distinguer faits, décisions et demandes (trois blocs différents).</li>
@@ -396,7 +395,7 @@ export default function CompteRenduChantierGuidePage() {
               </ol>
             </ArticleProseSection>
 
-            <ArticleProseSection title="Erreurs fréquentes">
+            <ArticleProseSection title={TUTO_TITRE.erreurs}>
               <ul className="!mt-0">
                 <li>Compte rendu envoyé trop tard : les souvenirs divergent.</li>
                 <li>Aucun responsable : personne ne se sent concerné.</li>
@@ -411,7 +410,7 @@ export default function CompteRenduChantierGuidePage() {
 
             <section aria-labelledby="titre-modele" className="pt-10">
               <h2 id="titre-modele" className="text-xl font-bold tracking-tight text-[#0F172A] md:text-[1.35rem]">
-                Modèle de structure simple
+                {TUTO_TITRE.exemple}
               </h2>
               <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_0.92fr]">
                 <StructureModelCard />
@@ -465,12 +464,9 @@ export default function CompteRenduChantierGuidePage() {
                   Besoin d’un appui pour mettre au propre, classer et suivre vos comptes rendus — avec un circuit de validation net.
                 </p>
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                  <Link
-                    href="/contact"
-                    className="inline-flex min-h-[3rem] items-center justify-center rounded-xl bg-[#1d4ed8] px-7 py-3.5 text-sm font-semibold text-white shadow-md shadow-[#1d4ed8]/22 transition hover:bg-[#1e40af]"
-                  >
+                  <CalendlyBookingLink className="inline-flex min-h-[3rem] items-center justify-center rounded-xl bg-[#1d4ed8] px-7 py-3.5 text-sm font-semibold text-white shadow-md shadow-[#1d4ed8]/22 transition hover:bg-[#1e40af]">
                     Réserver un échange
-                  </Link>
+                  </CalendlyBookingLink>
                   <Link
                     href="/assistants-administratifs-taches"
                     className="inline-flex min-h-[3rem] items-center justify-center rounded-xl border border-slate-200 bg-white px-7 py-3.5 text-sm font-semibold text-[#0F172A] shadow-sm hover:border-slate-300 hover:bg-slate-50"
@@ -500,7 +496,9 @@ export default function CompteRenduChantierGuidePage() {
             </aside>
 
             <section id="faq" aria-label="FAQ compte rendu" className="mt-14 scroll-mt-[6.5rem]">
-              <h2 className="text-xl font-bold tracking-tight text-[#0F172A] md:text-2xl">FAQ</h2>
+              <h2 className="border-b border-slate-200 pb-3 text-xl font-bold tracking-tight text-[#0F172A] md:text-2xl">
+                {TUTO_TITRE.faq}
+              </h2>
               <p className="mt-2 text-sm text-slate-600">Réponses rapides avant d’adapter à votre chantier.</p>
               <dl className="mt-6 space-y-3">
                 {FAQ_ITEMS.map((item) => (
@@ -523,12 +521,9 @@ export default function CompteRenduChantierGuidePage() {
               BeWork intervient pour artisans, conducteurs de travaux et dirigeants BTP — avec des forfaits TTC cadrés par volume.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                href="/contact"
-                className="inline-flex justify-center rounded-xl bg-[#1d4ed8] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#1e40af]"
-              >
+              <CalendlyBookingLink className="inline-flex justify-center rounded-xl bg-[#1d4ed8] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#1e40af]">
                 Échanger sur votre besoin
-              </Link>
+              </CalendlyBookingLink>
               <Link
                 href="/tarifs"
                 className="inline-flex justify-center rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-[#0F172A] shadow-sm hover:bg-slate-50"

@@ -31,7 +31,7 @@ export function BtpPainLandingMaillage({ currentHref }: Props) {
 
       <div className="rounded-2xl border border-[#1d4ed8]/20 bg-[#eff6ff]/35 p-6 md:p-8">
         <p className="text-sm font-bold uppercase tracking-[0.1em] text-[#1d4ed8]">
-          Externalisation administrative BTP (Europe francophone)
+          Externalisation administrative BTP (France, Belgique, Suisse, Luxembourg)
         </p>
         <ul className="mt-4 flex flex-wrap gap-2">
           {EXTERNALISATION_ADMIN_BT_NAV.map((n) => (

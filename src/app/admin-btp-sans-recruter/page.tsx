@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { landingPageMetadata } from "@/lib/seo-landing-metadata";
 
@@ -151,9 +152,9 @@ export default function Page() {
           </Link>
         </li>
         <li>
-          <Link href="/contact" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
+          <CalendlyBookingLink className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
             Réserver un échange
-          </Link>
+          </CalendlyBookingLink>
         </li>
       </ul>
 

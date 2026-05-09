@@ -29,5 +29,5 @@ export const BTP_PAIN_PAGE_CLUSTER = [
   },
 ] as const;
 
-/** Page « Notre façon de travailler » (demande projet : alias logique « comment ça marche »). */
-export const BEWORK_COMMENT_CA_MARCHE_PATH = "/notre-facon-de-travailler" as const;
+/** Ancre « Comment ça marche » sur la page d’accueil (parcours unifié). */
+export const BEWORK_COMMENT_CA_MARCHE_PATH = "/#comment-ca-marche" as const;

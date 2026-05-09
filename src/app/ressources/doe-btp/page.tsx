@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
+import { TUTO_TITRE } from "@/components/seo/tuto-section-titles";
 import { absoluteUrl } from "@/lib/site";
 
 const pageUrl = absoluteUrl("/ressources/doe-btp");
@@ -8,7 +10,7 @@ const pageUrl = absoluteUrl("/ressources/doe-btp");
 export const metadata: Metadata = {
   title: "DOE BTP | Préparer un dossier des ouvrages exécutés",
   description:
-    "Guide pratique pour comprendre le DOE BTP, les documents à rassembler, les erreurs à éviter et la méthode pour organiser un dossier des ouvrages exécutés clair en fin de chantier.",
+    "Tuto pratique pour comprendre le DOE BTP, les documents à rassembler, les erreurs à éviter et la méthode pour organiser un dossier des ouvrages exécutés clair en fin de chantier.",
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   openGraph: {
     type: "article",
@@ -23,7 +25,7 @@ export const metadata: Metadata = {
         url: absoluteUrl("/opengraph-image"),
         width: 1200,
         height: 630,
-        alt: "DOE BTP — Guide pratique (BeWork)",
+        alt: "DOE BTP — Tuto pratique (BeWork)",
       },
     ],
   },
@@ -31,7 +33,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "DOE BTP | Préparer un dossier des ouvrages exécutés",
     description:
-      "Guide pratique : documents DOE, checklist, méthode d’organisation et erreurs à éviter en fin de chantier.",
+      "Tuto pratique : documents DOE, checklist, méthode d’organisation et erreurs à éviter en fin de chantier.",
   },
   robots: { index: true, follow: true },
 };
@@ -101,7 +103,7 @@ function ChecklistCard({
   );
 }
 
-export default function DoeBtpGuidePage() {
+export default function DoeBtpTutoPage() {
   return (
     <>
       <FaqDoeJsonLd />
@@ -145,7 +147,7 @@ export default function DoeBtpGuidePage() {
           et permet au client (ou à l’exploitant) de retrouver rapidement l’information.
         </p>
 
-        <h2>À quoi sert un DOE ?</h2>
+        <h2>{TUTO_TITRE.aQuoi}</h2>
         <ul>
           <li>Clôturer proprement un chantier (dossier final clair et complet).</li>
           <li>Transmettre les informations au client ou au maître d’ouvrage.</li>
@@ -155,7 +157,7 @@ export default function DoeBtpGuidePage() {
           <li>Montrer une organisation professionnelle (remise lisible et vérifiée).</li>
         </ul>
 
-        <h2>Quand préparer le DOE ?</h2>
+        <h2>{TUTO_TITRE.quand}</h2>
         <p>
           Le DOE ne doit pas se faire “le dernier jour”. La bonne routine est de{" "}
           <strong>collecter les pièces au fil de l’eau</strong> :
@@ -222,7 +224,7 @@ export default function DoeBtpGuidePage() {
           </div>
         </section>
 
-        <h2>Méthode simple pour organiser un DOE (pas à pas)</h2>
+        <h2>{TUTO_TITRE.etapes}</h2>
         <ol>
           <li>Relire les exigences du marché et du CCTP (ce qui est attendu, par lot).</li>
           <li>Créer une arborescence claire (par lot / zone / phase / type de document).</li>
@@ -235,7 +237,7 @@ export default function DoeBtpGuidePage() {
           <li>Faire valider avant remise (circuit de validation interne).</li>
         </ol>
 
-        <h2>Erreurs fréquentes (et comment les éviter)</h2>
+        <h2>{TUTO_TITRE.erreurs}</h2>
         <ul>
           <li>Attendre la fin du chantier : vous perdez du temps et oubliez des pièces.</li>
           <li>Fichiers mal nommés : impossible de s’y retrouver, même avec “toutes les pièces”.</li>
@@ -264,12 +266,26 @@ export default function DoeBtpGuidePage() {
           contenu exact dépend du chantier et des exigences contractuelles.
         </p>
 
-        <h2>Exemple concret (mini scénario)</h2>
+        <h2>{TUTO_TITRE.exemple}</h2>
         <p>
-          <strong>À deux semaines de la réception</strong>, plusieurs fiches techniques, notices et plans sont dispersés
-          entre mails et dossiers internes. BeWork peut créer une checklist, classer les pièces déjà disponibles,
+          <strong>Mini scénario.</strong> À deux semaines de la réception, plusieurs fiches techniques, notices et plans sont
+          dispersés entre mails et dossiers internes. BeWork peut créer une checklist, classer les pièces déjà disponibles,
           identifier les manquants, préparer les relances et organiser une version DOE claire à faire valider.
         </p>
+
+        <section className="not-prose" id="faq" aria-label="FAQ DOE" style={{ scrollMarginTop: "6rem" }}>
+          <h2 className="mt-12 border-b border-slate-200 pb-3 text-xl font-bold tracking-tight text-black md:text-2xl">
+            {TUTO_TITRE.faq} — DOE
+          </h2>
+          <dl className="mt-5 space-y-4">
+            {FAQ_ITEMS.map((item) => (
+              <div key={item.q} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <dt className="text-base font-semibold text-black">{item.q}</dt>
+                <dd className="mt-2 text-sm leading-relaxed text-slate-700">{item.a}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
 
         <section className="not-prose" aria-label="CTA">
           <div className="mt-10 rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
@@ -278,9 +294,9 @@ export default function DoeBtpGuidePage() {
               On peut vous aider à préparer, classer et suivre les pièces (DOE, relances, DICT, documents travaux) avec un circuit de validation clair.
             </p>
             <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <Link href="/contact" className="inline-flex justify-center rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white hover:bg-[#1e40af]">
+              <CalendlyBookingLink className="inline-flex justify-center rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white hover:bg-[#1e40af]">
                 Réserver un échange
-              </Link>
+              </CalendlyBookingLink>
               <Link href="/assistants-administratifs-taches" className="inline-flex justify-center rounded-lg border border-slate-200 bg-white px-6 py-3 font-semibold text-slate-900 hover:bg-slate-50">
                 Voir les missions
               </Link>
@@ -295,18 +311,6 @@ export default function DoeBtpGuidePage() {
               </Link>
             </div>
           </div>
-        </section>
-
-        <section className="not-prose" id="faq" aria-label="FAQ DOE" style={{ scrollMarginTop: "6rem" }}>
-          <h2 className="mt-12 text-xl font-bold tracking-tight text-black md:text-2xl">FAQ DOE</h2>
-          <dl className="mt-5 space-y-4">
-            {FAQ_ITEMS.map((item) => (
-              <div key={item.q} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <dt className="text-base font-semibold text-black">{item.q}</dt>
-                <dd className="mt-2 text-sm leading-relaxed text-slate-700">{item.a}</dd>
-              </div>
-            ))}
-          </dl>
         </section>
       </SeoLandingPage>
     </>

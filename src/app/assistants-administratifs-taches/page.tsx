@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { absoluteUrl } from "@/lib/site";
 
@@ -236,13 +237,12 @@ export default function AssistantsAdministratifsTachesPage() {
               avancer côté bureau pendant que vous gérez le terrain.
             </p>
             <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-              <Link
-                href="/contact"
+              <CalendlyBookingLink
                 className="w-full rounded-lg bg-[#1d4ed8] px-8 py-4 text-center font-semibold text-white shadow-md transition hover:bg-[#1e40af] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2 sm:w-auto"
                 aria-label="Demander un rendez-vous"
               >
                 Demander un RDV
-              </Link>
+              </CalendlyBookingLink>
               <Link
                 href="/tarifs"
                 className="surface-metallic-outline surface-metallic-outline--neutral w-full rounded-lg px-8 py-4 text-center font-semibold text-[#1e293b] transition focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2 sm:w-auto"
@@ -417,11 +417,11 @@ export default function AssistantsAdministratifsTachesPage() {
           </div>
         </section>
 
-        {/* H) Comment ça marche */}
+        {/* H) Résumé process — le parcours détaillé est sur l’accueil (#comment-ca-marche) */}
         <section className="px-6 py-12 md:py-16" aria-labelledby="process-heading">
           <div className="mx-auto max-w-site">
             <h2 id="process-heading" className="text-2xl font-bold tracking-tight text-black md:text-3xl">
-              Comment ça marche
+              Le flux côté missions (résumé)
             </h2>
             <div className="mt-8 grid gap-6 md:grid-cols-3">
               {commentCaMarche.map((item) => (
@@ -434,6 +434,11 @@ export default function AssistantsAdministratifsTachesPage() {
                 </div>
               ))}
             </div>
+            <p className="mt-8 text-center text-sm text-black">
+              <Link href="/#comment-ca-marche" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
+                Voir le parcours détaillé « Comment ça marche » sur la page d’accueil
+              </Link>
+            </p>
             <ul className="mt-10 flex flex-wrap justify-center gap-4 md:gap-6" role="list">
               {reassurance.map(({ label, desc }) => (
                 <li
@@ -454,6 +459,14 @@ export default function AssistantsAdministratifsTachesPage() {
             <h2 id="faq-heading" className="text-2xl font-bold tracking-tight text-black md:text-3xl">
               Questions fréquentes
             </h2>
+            <p className="mt-4 max-w-3xl text-slate-700 leading-relaxed">
+              Les formulations « comme à l’oral » (assistante travaux, différence avec l’administratif, DCE, DOE, PPSPS, externalisation chantier…) sont traitées
+              en détail sur la{" "}
+              <Link href="/faq" className="font-semibold text-[#1d4ed8] underline underline-offset-2 hover:text-[#1e40af]">
+                FAQ BeWork
+              </Link>
+              , avec ancres directes sur chaque question.
+            </p>
             <ul className="mt-8 space-y-4">
               {faqItems.map((item, i) => (
                 <li key={i} className="rounded-xl surface-metallic-light">
@@ -510,13 +523,12 @@ export default function AssistantsAdministratifsTachesPage() {
               finale.
             </p>
             <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-              <Link
-                href="/contact"
+              <CalendlyBookingLink
                 className="w-full rounded-lg bg-[#1d4ed8] px-8 py-4 text-center font-semibold text-white shadow-md transition hover:bg-[#1e40af] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2 sm:w-auto"
                 aria-label="Demander un rendez-vous"
               >
                 Demander un RDV
-              </Link>
+              </CalendlyBookingLink>
               <Link
                 href="/tarifs"
                 className="w-full rounded-lg surface-metallic-light px-8 py-4 text-center font-semibold text-[#1e293b] transition hover:bg-[#f8f9fb] sm:w-auto"

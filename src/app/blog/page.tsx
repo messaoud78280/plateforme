@@ -100,29 +100,44 @@ export default function BlogPage() {
           <p className="mt-4 text-lg text-black">
             Conseils pour artisans et PME du bâtiment : administratif chantier, trésorerie, délégation et assistant administratif externalisé.
           </p>
-          <ul className="mt-12 space-y-8">
-            {ARTICLE_INDEX.map((a) => (
-              <li key={a.slug}>
-                <Link
-                  href={`/blog/${a.slug}`}
-                  className="block rounded-xl surface-metallic-light p-6 transition hover:border-[#1d4ed8]/30 hover:shadow-md"
-                >
-                  <h2 className="text-xl font-semibold text-black">{a.title}</h2>
-                  <p className="mt-1 text-xs text-black">
-                    {new Date(a.publishedTime).toLocaleDateString("fr-FR", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </p>
-                  <p className="mt-2 text-black">{a.excerpt}</p>
-                  <span className="mt-4 inline-flex items-center text-sm font-medium text-[#1d4ed8]">
-                    Lire l&apos;article →
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {ARTICLE_INDEX.length === 0 ? (
+            <div className="mt-12 rounded-xl border border-[#dce3ec] bg-white/70 p-6 text-black md:p-8">
+              <p className="font-medium">
+                Les articles sont en cours de refonte&nbsp;: en attendant, parcourez les tutoriels PDF et les fiches métier depuis le hub
+                ressources.
+              </p>
+              <Link
+                href="/ressources"
+                className="mt-4 inline-flex text-sm font-semibold text-[#1d4ed8] underline-offset-4 hover:underline"
+              >
+                Hub ressources BeWork →
+              </Link>
+            </div>
+          ) : (
+            <ul className="mt-12 space-y-8">
+              {ARTICLE_INDEX.map((a) => (
+                <li key={a.slug}>
+                  <Link
+                    href={`/blog/${a.slug}`}
+                    className="block rounded-xl surface-metallic-light p-6 transition hover:border-[#1d4ed8]/30 hover:shadow-md"
+                  >
+                    <h2 className="text-xl font-semibold text-black">{a.title}</h2>
+                    <p className="mt-1 text-xs text-black">
+                      {new Date(a.publishedTime).toLocaleDateString("fr-FR", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </p>
+                    <p className="mt-2 text-black">{a.excerpt}</p>
+                    <span className="mt-4 inline-flex items-center text-sm font-medium text-[#1d4ed8]">
+                      Lire l&apos;article →
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
 
           <section className="mt-14 rounded-2xl border border-[#dce3ec] bg-white/60 p-7">
             <h2 className="text-lg font-semibold text-black">Pages pratiques (BTP)</h2>

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 
 export function StickyCtaMobile() {
   return (
@@ -9,13 +9,12 @@ export function StickyCtaMobile() {
       role="banner"
       aria-label="Appel à l'action"
     >
-      <Link
-        href="/contact"
+      <CalendlyBookingLink
         className="flex w-full items-center justify-center rounded-lg bg-[#1d4ed8] px-6 py-3 text-center font-semibold text-white shadow-md transition hover:bg-[#1e40af] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2"
         aria-label="Échanger sur votre fonctionnement avec BeWork"
       >
         Échanger sur votre fonctionnement
-      </Link>
+      </CalendlyBookingLink>
     </div>
   );
 }

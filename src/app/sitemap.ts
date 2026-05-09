@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { BLOG_ARTICLES, BLOG_SLUGS, type BlogArticle, type BlogSlug } from "@/content/blog-slugs";
+import { BLOG_ARTICLES, BLOG_SLUGS, type BlogArticle, type BlogSlug } from "@/content/blog-articles";
 import { BTP_PAIN_PAGE_PATHS } from "@/lib/btp-pain-pages";
 import { EXTERNALISATION_ADMIN_BT_PATHS } from "@/lib/externalisation-administrative-btp-geo";
 import { SITE_URL } from "@/lib/site";
@@ -19,7 +19,7 @@ const GEO_EXTERNALISATION_ADMIN_BT_PAGES: MetadataRoute.Sitemap = (
   url: `${SITE_URL}${path}`,
   lastModified: new Date(),
   changeFrequency: "monthly" as const,
-  priority: path.endsWith("-europe") ? 0.88 : 0.86,
+  priority: 0.86,
 }));
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -44,6 +44,71 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/inscription`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
     { url: `${SITE_URL}/connexion`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.6 },
     { url: `${SITE_URL}/blog`, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 0.8 },
+    { url: `${SITE_URL}/ressources`, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 0.82 },
+    { url: `${SITE_URL}/ressources/guides`, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 0.81 },
+    { url: `${SITE_URL}/ressources/tutos`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.81 },
+    { url: `${SITE_URL}/ressources/doe-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
+    { url: `${SITE_URL}/ressources/compte-rendu-chantier`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
+    {
+      url: `${SITE_URL}/ressources/compte-rendu-chantier-guide-btp`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.81,
+    },
+    {
+      url: `${SITE_URL}/ressources/tuto-skill-ppsps-bework`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.81,
+    },
+    {
+      url: `${SITE_URL}/ressources/tuto-skill-analyse-dce-bework`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.81,
+    },
+    {
+      url: `${SITE_URL}/ressources/tuto-skill-memoire-technique-bework`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.81,
+    },
+    {
+      url: `${SITE_URL}/ressources/tuto-skill-pv-levee-reserves-bework`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.81,
+    },
+    {
+      url: `${SITE_URL}/ressources/tuto-skill-doe-bework`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.81,
+    },
+    {
+      url: `${SITE_URL}/ressources/tuto-skill-duerp-bework`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.81,
+    },
+    {
+      url: `${SITE_URL}/ressources/tuto-skill-constat-retard-bework`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.81,
+    },
+    {
+      url: `${SITE_URL}/ressources/tuto-tri-dce-claude-chrome-bework`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.81,
+    },
+    { url: `${SITE_URL}/ressources/ppsps-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
+    { url: `${SITE_URL}/ressources/analyse-dce-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.82 },
+    { url: `${SITE_URL}/ressources/memoire-technique-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
+    { url: `${SITE_URL}/ressources/chiffrage-devis-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.78 },
+    { url: `${SITE_URL}/ressources/pv-levee-reserves-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.78 },
+    { url: `${SITE_URL}/ressources/planning-chantier-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.78 },
     // Pages intentionnelles (SEO)
     { url: `${SITE_URL}/relance-devis-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.85 },
     { url: `${SITE_URL}/impayes-btp-relances`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },

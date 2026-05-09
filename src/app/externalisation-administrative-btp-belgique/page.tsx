@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { GeoExternalisationHubLinks } from "@/components/seo/GeoExternalisationHubLinks";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import {
@@ -93,9 +94,9 @@ export default function Page() {
       </ul>
 
       <div className="not-prose my-10 flex flex-wrap gap-4">
-        <Link href="/contact" className="inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-bold text-white hover:bg-[#1e40af]">
+        <CalendlyBookingLink className="inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-bold text-white hover:bg-[#1e40af]">
           Réserver un appel
-        </Link>
+        </CalendlyBookingLink>
         <Link href="/assistants-administratifs-taches" className="inline-flex rounded-lg border border-slate-200 bg-white px-6 py-3 font-bold text-slate-900 hover:bg-slate-50">
           Voir les missions
         </Link>

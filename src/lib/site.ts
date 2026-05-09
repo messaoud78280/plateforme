@@ -13,6 +13,14 @@ export function absoluteUrl(path: string): string {
 }
 
 /**
+ * Prise de rendez-vous — appel découverte (Calendly). Surchargable via NEXT_PUBLIC_CALENDLY_BOOKING_URL.
+ * @see https://calendly.com/bework-btp/appel-decouverte
+ */
+export const CALENDLY_APPEL_DECOUVERTE_URL =
+  (typeof process !== "undefined" && process.env.NEXT_PUBLIC_CALENDLY_BOOKING_URL?.trim()) ||
+  "https://calendly.com/bework-btp/appel-decouverte";
+
+/**
  * Origine unique pour emails + magic link (évite mélange localhost / 127.0.0.1).
  * Ordre : NEXTAUTH_URL → NEXT_PUBLIC_SITE_URL → origine de la requête d’inscription.
  */

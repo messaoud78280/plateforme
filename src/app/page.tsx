@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { HomeProblemSection } from "@/components/HomeProblemSection";
 import { HomeHowItWorksDetailSection } from "@/components/HomeHowItWorksDetailSection";
@@ -12,6 +13,7 @@ import { HomeSolutionSection } from "@/components/HomeSolutionSection";
 import { HomeSectorExamplesSection } from "@/components/HomeSectorExamplesSection";
 import { HeroPresentationVideo } from "@/components/HeroPresentationVideo";
 import { ConciergerieDirigeantSection } from "@/components/ConciergerieDirigeantSection";
+import { HomeGeoExternalisationCards } from "@/components/HomeGeoExternalisationCards";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import {
   formatPriceLabelFr,
@@ -42,59 +44,6 @@ const HOME_FAQ_ITEMS = [
     a: "Oui. BeWork prépare, structure, relance et suit les dossiers, mais vous gardez la main sur toutes les décisions qui engagent votre entreprise : prix, validation technique, signature, engagement contractuel ou réponse client sensible.",
   },
 ] as const;
-
-const RESSOURCES_BLOG = [
-  {
-    title: "Retenue de garantie BTP : suivi, échéances, pièces",
-    desc: "Retenue de garantie, tableau de suivi, relances cadrées et liens facturation pour sous-traitants et donneurs d’ordre.",
-    href: "/blog/retenue-garantie-btp-sous-traitance",
-  },
-  {
-    title: "Devis BTP : 7 leviers pour structurer l’offre",
-    desc: "Découpage, acomptes, validité, preuves : réduire les allers-retour et améliorer le taux de signature.",
-    href: "/blog/devis-btp-structuration-conversion",
-  },
-  {
-    title: "DPGF et budget de chantier : lire, suivre l’écart",
-    desc: "Avenants, marge, trésorerie : garder le même chiffre entre technique et exécution comptable.",
-    href: "/blog/dpgf-budget-chantier-ecart",
-  },
-  {
-    title: "Facturation chantier et relances : trésorerie BTP",
-    desc: "Acomptes, situations de travaux et relances pour limiter les impayés sur vos chantiers.",
-    href: "/blog/facturation-chantier-btp-relances-tresorerie",
-  },
-  {
-    title: "Situation de travaux : obligations et calendrier",
-    desc: "Clarifier le cadre, la fréquence et le lien avec votre facturation.",
-    href: "/blog/situation-travaux-btp-obligations-conseils",
-  },
-  {
-    title: "DICT & déclarations : préparer le dossier sans perdre de temps",
-    desc: "Pièces, délais, relances et classement : ce qui se délègue pendant que vous restez sur le chantier.",
-    href: "/blog/dict-et-declarations-de-travaux",
-  },
-  {
-    title: "10 tâches administratives à déléguer en BTP",
-    desc: "Ce qui grève le quotidien des chefs d’entreprise du bâtiment — et comment le structurer autrement.",
-    href: "/blog/10-taches-administratives-deleguer-dirigeant",
-  },
-  {
-    title: "Quel budget prévoir pour tenir vos dossiers chantier ?",
-    desc: "Comparatif forfait externalisé vs embauche : coûts cachés, charges sociales et charge RH pour les PME.",
-    href: "/blog/combien-coute-assistant-administratif",
-  },
-  {
-    title: "Relancer un devis : méthode pour signer plus de chantiers",
-    desc: "J+2, J+7, J+14 : un suivi simple, traçable, sans harceler.",
-    href: "/blog/relance-devis-btp-augmenter-signatures",
-  },
-  {
-    title: "Bureau & chantier : structurer sans recruter",
-    desc: "Prioriser l’important bureau (devis, relances, dossiers) sans sacrifier le terrain.",
-    href: "/blog/bureau-chantier-administratif-btp-sans-recruter",
-  },
-];
 
 export const metadata: Metadata = {
   title: "BeWork | Assistante travaux BTP — relais dossiers chantier (devis, DICT, relances)",
@@ -268,24 +217,27 @@ export default function HomePage() {
                     <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
                     <path d="M9 10h6M9 14h6M9 18h4" />
                   </svg>
-                  <span>Assistante travaux BTP · Relais dossiers chantier · Augmentée par l’IA</span>
+                  <span>Assistant de gestion travaux · Relais BTP · Augmenté par l’IA</span>
+                </p>
+
+                <p className="mx-auto max-w-[580px] text-[15px] leading-relaxed text-balance text-slate-700 lg:mx-0 lg:max-w-none lg:text-[16px] lg:leading-relaxed">
+                  Le relais BTP qui vous aide à produire vos documents, suivre vos chantiers et répondre plus vite.
                 </p>
 
                 <h1
-                  className="text-balance text-[clamp(2.125rem,calc(0.45rem+4.35vw),4.25rem)] font-sans leading-[1.05] tracking-[-0.02em]"
+                  className="text-balance text-[clamp(1.375rem,calc(0.3rem+2.83vw),2.75rem)] font-sans leading-[1.05] tracking-[-0.02em]"
                   style={{ fontFamily: "var(--font-inter), var(--font-geist-sans), system-ui, sans-serif" }}
                 >
                   <span className="block font-bold text-[#0F172A]">On tient le bureau,</span>
-                  <span className="mt-[0.125em] flex w-full min-w-0 flex-nowrap items-baseline justify-between gap-2 font-extrabold text-[#3072F0]">
+                  <span className="mt-[0.125em] flex flex-wrap items-baseline justify-start gap-x-2 font-extrabold text-[#3072F0]">
                     <span className="shrink-0 whitespace-nowrap">vous tenez</span>
                     <span className="shrink-0 whitespace-nowrap">le chantier.</span>
                   </span>
                 </h1>
 
                 <p className="mx-auto max-w-[580px] text-lg leading-[1.62] text-balance text-slate-700 lg:mx-0 lg:max-w-none lg:text-[20px] lg:leading-snug">
-                  Devis à relancer, situations à envoyer, DICT à suivre, commandes à verrouiller, comptes rendus à sortir,
-                  réserves à suivre, DOE à organiser&nbsp;: BeWork tient vos{" "}
-                  <span className="font-semibold text-[#3072F0]">dossiers chantier</span> pendant que vous êtes sur le terrain.
+                  BeWork accompagne les pros du BTP sur les tâches les plus chronophages&nbsp;: comptes rendus de chantier,
+                  analyse de DCE, PPSPS, mémoire technique, chiffrage de devis, dossiers travaux, relances et suivi administratif.
                 </p>
 
                 <div className="mx-auto -mt-1 flex w-full max-w-[580px] flex-wrap justify-center gap-2 lg:mx-0 lg:max-w-none lg:justify-start">
@@ -300,25 +252,36 @@ export default function HomePage() {
                 </div>
 
                 <div className="mx-auto mt-1 flex w-full max-w-[580px] flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:mx-0 lg:max-w-full lg:justify-start">
-                  <Link
-                    href="/contact"
-                    className="inline-flex min-h-[3rem] shrink-0 items-center justify-center gap-2 rounded-xl bg-[#1d4ed8] px-8 py-3.5 text-base font-semibold text-white shadow-md shadow-[#1d4ed8]/22 transition-colors hover:bg-[#1e40af]"
-                  >
+                  <CalendlyBookingLink className="inline-flex min-h-[3rem] shrink-0 items-center justify-center gap-2 rounded-xl bg-[#1d4ed8] px-8 py-3.5 text-base font-semibold text-white shadow-md shadow-[#1d4ed8]/22 transition-colors hover:bg-[#1e40af]">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 opacity-95" aria-hidden>
                       <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
                       <path d="M15 3v4M9 3v4M4 13h17" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     Réserver un appel
-                  </Link>
+                  </CalendlyBookingLink>
                   <Link
-                    href="#comment-ca-marche"
-                    className="inline-flex min-h-[3rem] shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-8 py-3.5 text-base font-semibold tracking-tight text-slate-900 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
+                    href="/#comment-ca-marche"
+                    className="inline-flex min-h-[3rem] shrink-0 items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-8 py-3.5 text-base font-semibold tracking-tight text-slate-900 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 text-slate-700" aria-hidden>
                       <circle cx="12" cy="12" r="9.5" stroke="currentColor" strokeWidth="1.5" />
                       <path d="M10 9.5 L15.5 12 10 14.8V9.5Z" fill="currentColor" stroke="currentColor" strokeWidth="1" strokeLinejoin="round" />
                     </svg>
                     Voir comment ça marche
+                  </Link>
+                </div>
+                <div className="mx-auto mt-2 flex w-full max-w-[580px] flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:justify-center lg:mx-0 lg:max-w-full lg:justify-start">
+                  <Link
+                    href="/ressources"
+                    className="inline-flex min-h-[2.875rem] shrink-0 items-center justify-center gap-2 rounded-xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] px-6 py-3 text-[15px] font-semibold text-[#1e3a8a] transition-colors hover:bg-[#dbeafe]"
+                  >
+                    Découvrir les ressources
+                  </Link>
+                  <Link
+                    href="/dashboard/nouvelle-demande"
+                    className="inline-flex min-h-[2.875rem] shrink-0 items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-6 py-3 text-[15px] font-semibold text-slate-900 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
+                  >
+                    Confier une tâche
                   </Link>
                 </div>
 
@@ -438,6 +401,7 @@ export default function HomePage() {
             <HomeWhatWeHandleSection />
             <HomePricingSection />
             <HomeCredibilitySection />
+            <HomeGeoExternalisationCards />
             <ExpertiseTableSection />
             <HomeCallCtaBanner />
 
@@ -486,7 +450,7 @@ export default function HomePage() {
                 Ressources & bonnes pratiques
               </h2>
               <p className="mt-5 text-lg leading-relaxed text-black">
-                Guides et retours d&apos;expérience pour structurer votre administratif, sécuriser votre trésorerie et
+                Tutoriels PDF et hub ressources pour structurer votre administratif, sécuriser votre trésorerie et
                 professionnaliser votre relation client.
               </p>
               <Link
@@ -500,11 +464,11 @@ export default function HomePage() {
 
             <div className="mb-12 rounded-2xl border border-[#1d4ed8]/25 bg-[#eff6ff]/40 p-8 md:p-10">
               <h3 className="text-xl font-bold tracking-tight text-black md:text-2xl">
-                Externalisation administrative BTP — Europe francophone
+                Externalisation administrative BTP par pays
               </h3>
               <p className="mt-4 max-w-3xl text-black leading-relaxed">
-                Parcours SEO par pays (contenus distincts)&nbsp;: France, Belgique, Suisse romande et Luxembourg. Commencez par la vue
-                d&apos;ensemble, puis ouvrez la page qui correspond à votre marché.
+                Contenus distincts selon votre marché&nbsp;: France, Belgique, Suisse romande et Luxembourg. Ouvrez la page qui correspond à votre
+                zone d&apos;activité.
               </p>
               <ul className="mt-6 flex flex-wrap gap-3">
                 {EXTERNALISATION_ADMIN_BT_NAV.map((link) => (
@@ -520,23 +484,18 @@ export default function HomePage() {
               </ul>
             </div>
 
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 md:items-stretch md:gap-10">
-              {RESSOURCES_BLOG.map((r) => (
-                <div
-                  key={r.title}
-                  className="card-frame flex h-full flex-col rounded-xl p-8"
-                >
-                  <p className="text-lg font-semibold text-black">{r.title}</p>
-                  <p className="mt-4 flex-1 text-black leading-relaxed">{r.desc}</p>
-                  <Link
-                    href={r.href}
-                    className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-[#1d4ed8] transition-colors hover:text-[#1e40af]"
-                  >
-                    Lire l’article
-                    <span aria-hidden>→</span>
-                  </Link>
-                </div>
-              ))}
+            <div className="mt-14 max-w-2xl">
+              <p className="text-lg leading-relaxed text-black">
+                Retrouvez nos tutoriels PDF (compte rendu de chantier, analyse DCE, PPSPS, mémoires techniques…) sur la liste des tutoriels —
+                mise en page, transcription et prompts à copier.
+              </p>
+              <Link
+                href="/ressources/tutos"
+                className="mt-6 inline-flex items-center gap-2 rounded-lg border border-[#1d4ed8]/35 bg-[#eff6ff] px-4 py-2 text-sm font-semibold text-[#1e3a8a] transition hover:bg-[#dbeafe]"
+              >
+                Ouvrir les tutoriels PDF
+                <span aria-hidden>→</span>
+              </Link>
             </div>
           </div>
         </section>
@@ -585,12 +544,9 @@ export default function HomePage() {
                 >
                   Consulter les forfaits
                 </Link>
-                <Link
-                  href="/contact"
-                  className="inline-flex w-full justify-center rounded-lg bg-[#1d4ed8] px-8 py-4 font-semibold text-white shadow-md transition-all hover:bg-[#1e40af] md:w-auto"
-                >
+                <CalendlyBookingLink className="inline-flex w-full justify-center rounded-lg bg-[#1d4ed8] px-8 py-4 font-semibold text-white shadow-md transition-all hover:bg-[#1e40af] md:w-auto">
                   Échanger sur votre besoin
-                </Link>
+                </CalendlyBookingLink>
               </div>
             </div>
           </div>
@@ -636,8 +592,8 @@ export default function HomePage() {
             <Link className="font-medium transition-colors hover:text-black" href="/blog">
               Blog
             </Link>
-            <Link className="font-medium transition-colors hover:text-black" href="/externalisation-administrative-btp-europe">
-              Europe francophone — admin BTP
+            <Link className="font-medium transition-colors hover:text-black" href="/externalisation-administrative-btp-france">
+              Externalisation administrative BTP
             </Link>
           </div>
         </div>

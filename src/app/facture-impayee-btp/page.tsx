@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { BtpPainLandingMaillage } from "@/components/seo/BtpPainLandingMaillage";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { BTP_PAIN_PAGE_PATHS } from "@/lib/btp-pain-pages";
@@ -111,9 +112,9 @@ export default function Page() {
       </dl>
 
       <div className="not-prose my-10 flex flex-wrap gap-4">
-        <Link href="/contact" className="inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-bold text-white hover:bg-[#1e40af]">
+        <CalendlyBookingLink className="inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-bold text-white hover:bg-[#1e40af]">
           Réserver un appel
-        </Link>
+        </CalendlyBookingLink>
         <Link
           href="/impayes-btp-relances"
           className="inline-flex rounded-lg border-2 border-[#1d4ed8] px-6 py-3 font-bold text-[#1d4ed8] hover:bg-[#eff6ff]"

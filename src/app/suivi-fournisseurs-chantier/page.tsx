@@ -1,5 +1,6 @@
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import Link from "next/link";
+import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { landingPageMetadata } from "@/lib/seo-landing-metadata";
 
 const PAGE_PATH = "/suivi-fournisseurs-chantier";
@@ -160,9 +161,9 @@ export default function Page() {
       <h2>Parler de votre suivi fournisseurs</h2>
       <p>
         Besoin d’un relais bureau‑terrain pour tenir confirmations, relances et statuts sans immobiliser vos équipes ?{" "}
-        <Link href="/contact" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
+        <CalendlyBookingLink className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
           Réserver un échange
-        </Link>
+        </CalendlyBookingLink>
         .
       </p>
     </SeoLandingPage>

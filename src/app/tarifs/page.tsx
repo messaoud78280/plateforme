@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { ComparatifReveal } from "@/components/tarifs/ComparatifReveal";
 import { StickyCtaMobile } from "@/components/tarifs/StickyCtaMobile";
@@ -350,13 +351,10 @@ export default function TarifsPage() {
                     </ul>
                   </div>
                 </div>
-                <Link
-                  href="/contact"
-                  className="mt-5 block w-full rounded-lg bg-[#1d4ed8] py-3 text-center text-sm font-semibold text-white transition hover:bg-[#1e40af]"
-                >
+                <CalendlyBookingLink className="mt-5 block w-full rounded-lg bg-[#1d4ed8] py-3 text-center text-sm font-semibold text-white transition hover:bg-[#1e40af]">
                   <span className="sm:hidden">Rendez-vous découverte</span>
                   <span className="hidden sm:inline">Demander un rendez-vous découverte</span>
-                </Link>
+                </CalendlyBookingLink>
                 <p className="mt-3 text-center text-[11px] leading-relaxed text-black">
                   Volume estimatif basé sur 1 crédit = {ACTION_MINUTES} min.
                 </p>
@@ -435,12 +433,9 @@ export default function TarifsPage() {
               </strong>
             </p>
             <div className="mt-8 flex justify-center">
-              <Link
-                href="/contact"
-                className="inline-flex items-center justify-center rounded-xl bg-[#1d4ed8] px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#1d4ed8]/25 transition hover:bg-[#1e40af]"
-              >
+              <CalendlyBookingLink className="inline-flex items-center justify-center rounded-xl bg-[#1d4ed8] px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#1d4ed8]/25 transition hover:bg-[#1e40af]">
                 Demander un rendez-vous découverte
-              </Link>
+              </CalendlyBookingLink>
             </div>
           </div>
         </section>
@@ -452,7 +447,7 @@ export default function TarifsPage() {
               Ressources utiles (BTP)
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-black md:text-base">
-              Des guides concrets sur les sujets qui font gagner du temps et sécurisent le chiffre d’affaires.
+              Des tutos concrets sur les sujets qui font gagner du temps et sécurisent le chiffre d’affaires.
             </p>
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               {[
@@ -711,13 +706,12 @@ export default function TarifsPage() {
 
         {/* CTA principal */}
         <div className="mt-14 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-          <Link
-            href="/contact"
+          <CalendlyBookingLink
             className="w-full rounded-lg bg-[#1d4ed8] px-8 py-4 text-center font-semibold text-white shadow-md transition hover:bg-[#1e40af] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2 sm:w-auto"
             aria-label="Demande de contact et rendez-vous"
           >
             Échanger sur votre fonctionnement
-          </Link>
+          </CalendlyBookingLink>
           <Link
             href="/connexion"
             className="w-full rounded-lg surface-metallic-light px-8 py-4 text-center font-semibold text-[#1e293b] transition hover:bg-[#f8f9fb] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2 sm:w-auto"
@@ -883,13 +877,12 @@ export default function TarifsPage() {
             Nous vérifions ensemble si notre accompagnement est adapté à votre activité.
           </p>
           <div className="mt-6 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Link
-              href="/contact"
+            <CalendlyBookingLink
               className="w-full rounded-lg bg-[#1d4ed8] px-8 py-4 text-center font-semibold text-white shadow-md transition hover:bg-[#1e40af] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2 sm:w-auto"
               aria-label="Échanger sur votre fonctionnement"
             >
               Échanger sur votre fonctionnement
-            </Link>
+            </CalendlyBookingLink>
             <Link
               href="/connexion"
               className="w-full rounded-lg surface-metallic-light px-8 py-4 text-center font-semibold text-[#1e293b] transition hover:bg-[#f8f9fb] sm:w-auto"

@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
+import { CAS_CLIENT_CASES } from "@/content/cas-clients-cases";
 import { landingPageMetadata } from "@/lib/seo-landing-metadata";
 import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/seo-landing-json-ld";
 
@@ -15,26 +17,7 @@ export const metadata = landingPageMetadata({
   keywords: ["cas clients BTP", "preuve résultats administratif", "témoignage artisan bâtiment", "BeWork"],
 });
 
-const cases = [
-  {
-    title: "Relances devis : plus de réponses, moins d’oubli",
-    before: "Devis envoyés mais peu relancés, décisions client floues.",
-    after: "Rythme de relance + statuts + prochaines étapes, réponses plus rapides.",
-    kpis: ["Suivi J+2/J+7/J+14", "Traçabilité des réponses", "Décisions client clarifiées"],
-  },
-  {
-    title: "Trésorerie : factures et impayés mieux pilotés",
-    before: "Facturation en retard, relances irrégulières, stress sur l’encaissement.",
-    after: "Calendrier de relance + preuves + reporting, trésorerie plus stable.",
-    kpis: ["Relances cadrées", "Pièces classées par chantier", "Reporting impayés"],
-  },
-  {
-    title: "Chantier : dossier propre (situations, avenants, DT/DICT)",
-    before: "Pièces dispersées, délais qui glissent, relances faites au dernier moment.",
-    after: "Process simple : préparation, suivi, classement, validations au bon moment.",
-    kpis: ["Tableau de suivi", "Checklists pièces", "Validation des points sensibles"],
-  },
-] as const;
+const cases = CAS_CLIENT_CASES;
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },
@@ -79,12 +62,9 @@ export default function CasClientsPage() {
             validations — pour sécuriser vos opportunités et votre chiffre d’affaires.
           </p>
           <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
-            <Link
-              href="/contact"
-              className="inline-flex justify-center rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white hover:bg-[#1e40af]"
-            >
+            <CalendlyBookingLink className="inline-flex justify-center rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white hover:bg-[#1e40af]">
               Demander un rendez-vous découverte
-            </Link>
+            </CalendlyBookingLink>
             <Link
               href="/tarifs"
               className="inline-flex justify-center rounded-lg border-2 border-[#1d4ed8] px-6 py-3 font-semibold text-[#1d4ed8] hover:bg-white"

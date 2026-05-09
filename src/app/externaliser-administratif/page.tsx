@@ -17,6 +17,35 @@ export const metadata = landingPageMetadata({
   ],
 });
 
+const faq = [
+  {
+    q: "Pourquoi externaliser l’administratif dans une entreprise BTP plutôt que tout internaliser ?",
+    a: "Parce que la charge varie fortement selon les chantiers : pics de devis, relances, documents. Externaliser permet de sécuriser le rythme côté bureau sans alourdir la masse salariale, avec des forfaits TTC et une équipe déjà opérationnelle.",
+  },
+  {
+    q: "Quelles tâches administratives peut-on déléguer en priorité ?",
+    a: "Les flux répétitifs et chronophages : relances de devis et factures, préparation de pièces, suivi de dossiers, structuration d’échanges, coordination écrite. Ce qui engage juridiquement ou techniquement reste arbitré chez vous.",
+  },
+  {
+    q: "L’externalisation convient-elle aux artisans du bâtiment et aux petites structures ?",
+    a: "Oui, c’est même un usage fréquent : peu ou pas de bureau à temps plein, dirigeant sur le terrain. BeWork cadre le périmètre (forfait, missions) pour que la délégation reste lisible et maîtrisée.",
+  },
+  {
+    q: "Comment garder le contrôle sur les documents et décisions importantes ?",
+    a: "Par un principe simple : BeWork prépare et propose ; vous validez avant envoi les points sensibles. La plateforme conserve l’historique des demandes et des versions, ce qui limite les erreurs et clarifie les responsabilités.",
+  },
+] as const;
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faq.map((item) => ({
+    "@type": "Question",
+    name: item.q,
+    acceptedAnswer: { "@type": "Answer", text: item.a },
+  })),
+};
+
 export default function Page() {
   return (
     <SeoLandingPage
@@ -25,7 +54,7 @@ export default function Page() {
         { name: "Accueil", href: "/" },
         { name: "Externaliser son administratif", href: PAGE_PATH },
       ]}
-      h1="Externaliser son administratif : guide et bonnes pratiques"
+      h1="Externaliser son administratif : tuto et bonnes pratiques"
       intro={
         <>
           Externaliser administratif PME permet de recentrer vos équipes sur le cœur de métier tout en sécurisant
@@ -34,6 +63,8 @@ export default function Page() {
         </>
       }
     >
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+
       <h2>Pourquoi externaliser l&apos;administratif ?</h2>
       <p>
         Les tâches administratives chronophages (emails, facturation, suivi dossiers) peuvent être externalisées avec
@@ -52,6 +83,18 @@ export default function Page() {
         BeWork propose des forfaits dès 290 € TTC/mois (offre Structure). Pas de charges sociales, pas de recrutement :
         un forfait tout compris. Jusqu&apos;à 75 % d&apos;économie par rapport à un assistant en interne.
       </p>
+
+      <section className="not-prose" id="faq" aria-label="FAQ externaliser son administratif" style={{ scrollMarginTop: "6rem" }}>
+        <h2 className="mt-12 text-xl font-bold tracking-tight text-black md:text-2xl">Questions fréquentes</h2>
+        <dl className="mt-5 space-y-4">
+          {faq.map((item) => (
+            <div key={item.q} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <dt className="text-base font-semibold text-black">{item.q}</dt>
+              <dd className="mt-2 text-sm leading-relaxed text-slate-700">{item.a}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
     </SeoLandingPage>
   );
 }

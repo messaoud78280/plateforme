@@ -1,13 +1,16 @@
 import Image from "next/image";
 
-const LOGO_PATH = "/BeWork.logo.png";
+// Logo fourni (inclut déjà la baseline) — filename versionné pour casser tout cache.
+const LOGO_PATH = "/BeWork.logo.v2.png";
 /** Dimensions intrinsèques du fichier ( évite déformation + layout shift ) */
-const LOGO_WIDTH = 2040;
-const LOGO_HEIGHT = 562;
+const LOGO_WIDTH = 1024;
+const LOGO_HEIGHT = 341;
 
 interface BeWorkLogoProps {
   className?: string;
   size?: "sm" | "md" | "lg";
+  /** Permet d’overrider uniquement la taille de l’image (ex. header plus grand) */
+  imageClassName?: string;
   showTagline?: boolean;
   /** Ligne principale du sous-titre (ex. positionnement métier) */
   tagline?: string;
@@ -26,6 +29,7 @@ const imageClassBySize: Record<NonNullable<BeWorkLogoProps["size"]>, string> = {
 export function BeWorkLogo({
   className = "",
   size = "md",
+  imageClassName = "",
   showTagline = false,
   tagline,
   taglineSub,
@@ -47,7 +51,7 @@ export function BeWorkLogo({
         alt="BeWork"
         width={LOGO_WIDTH}
         height={LOGO_HEIGHT}
-        className={`shrink-0 object-contain object-left ${imageClassBySize[size]}`}
+        className={`shrink-0 object-contain object-left ${imageClassBySize[size]} ${imageClassName}`}
         sizes={sizesAttr}
         priority={priority}
       />

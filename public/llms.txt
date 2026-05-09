@@ -1,0 +1,25 @@
+# bework.fr — extraits pour assistants
+
+## Ressources BeWork
+- https://bework.fr/ressources: Hub (carrousels tutoriels, guides, cas clients).
+- https://bework.fr/ressources/guides: Liste des guides (articles blog pilotage administratif BTP).
+- https://bework.fr/blog: Blog — index des guides (même entrées ; pages article `/blog/[slug]`).
+- https://bework.fr/ressources/tutos: Liste des tutoriels (PDF CR chantier IA, skill PPSPS, etc.).
+- https://bework.fr/ressources/compte-rendu-chantier-guide-btp: Tuto PDF CR chantier (texte intégral du guide + visionneuse PDF, prompts Claude/skills, FAQ).
+- https://bework.fr/ressources/tuto-skill-ppsps-bework: Tuto PDF skill PPSPS Claude (9 rubriques R4532-64 + PDF + prompts + FAQ).
+- https://bework.fr/ressources/pdf/tuto-skill-ppsps-bework.pdf: Fichier PDF du tuto skill PPSPS BeWork.
+- https://bework.fr/ressources/tuto-skill-analyse-dce-bework: Tuto PDF skill analyse DCE (fiche Go/No Go + PDF + prompts + FAQ).
+- https://bework.fr/ressources/pdf/tuto-skill-analyse-dce-bework.pdf: Fichier PDF du tuto analyse DCE BeWork.
+- https://bework.fr/ressources/tuto-skill-memoire-technique-bework: Tuto PDF skill mémoire technique BTP (structure, style, prompts + FAQ).
+- https://bework.fr/ressources/pdf/tuto-skill-memoire-technique-bework.pdf: Fichier PDF du tuto mémoire technique BeWork.
+- https://bework.fr/ressources/tuto-skill-pv-levee-reserves-bework: Tuto PDF skill PV levée réserves (.docx 7 blocs + prompts + FAQ).
+- https://bework.fr/ressources/pdf/tuto-skill-pv-levee-reserves-bework.pdf: Fichier PDF du tuto PV levée réserves BeWork.
+- https://bework.fr/ressources/tuto-skill-doe-bework: Tuto PDF skill DOE BTP (9 rubriques sommaire .docx + prompts + FAQ).
+- https://bework.fr/ressources/pdf/tuto-skill-doe-bework.pdf: Fichier PDF du tuto DOE BeWork.
+- https://bework.fr/ressources/tuto-skill-duerp-bework: Tuto PDF skill DUERP BTP (7 éléments, INRS, prompts + FAQ).
+- https://bework.fr/ressources/pdf/tuto-skill-duerp-bework.pdf: Fichier PDF du tuto DUERP BeWork.
+- https://bework.fr/ressources/tuto-skill-constat-retard-bework: Tuto PDF skill constat retard BTP (LRAR 7 éléments + prompts + FAQ).
+- https://bework.fr/ressources/pdf/tuto-skill-constat-retard-bework.pdf: Fichier PDF du tuto constat retard BeWork.
+- https://bework.fr/ressources/tuto-tri-dce-claude-chrome-bework: Tuto PDF tri DCE Claude in Chrome (BOAMP, raccourci, prompts + FAQ).
+- https://bework.fr/ressources/pdf/tuto-tri-dce-claude-chrome-bework.pdf: Fichier PDF du tuto tri DCE Claude in Chrome BeWork.
+- https://bework.fr/cas-clients: Page cas clients.

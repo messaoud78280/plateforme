@@ -14,43 +14,43 @@ const STEPS: {
 }[] = [
   {
     n: 1,
-    title: "Vous déposez votre demande",
-    body: "Décrivez votre besoin en quelques clics : devis, dossier, relance ou coordination.",
+    title: "Vous nous envoyez votre demande",
+    body: "Via la plateforme : devis, dossier chantier, relance, fournisseur, document — un brief court suffit pour lancer le travail.",
     Icon: IconInbox,
   },
   {
     n: 2,
-    title: "Votre référent analyse et attribue",
-    body: "Il qualifie la demande et la confie au profil le plus adapté à votre contexte BTP.",
+    title: "BeWork analyse et prépare le travail",
+    body: "Qualification, pièces attendues, priorisation et répartition vers l’assistant travaux le plus aligné avec votre contexte BTP.",
     Icon: IconUserLink,
   },
   {
     n: 3,
-    title: "Le Beworker traite la mission",
-    body: "Rédaction, relances, classement et suivi : l’équipe exécute dans le cadre de votre forfait.",
+    title: "L’assistant travaux augmenté par l’IA exécute ou pré-remplit",
+    body: "Rédaction, relances, classement, pré-remplissage et suivi : le relais humain reste piloté, l’IA accélère tout ce qui est reproductible.",
     Icon: IconBriefcase,
   },
   {
     n: 4,
-    title: "Vous validez avant envoi",
-    body: "Les éléments sensibles passent par votre relecture avant envoi au client ou au fournisseur.",
+    title: "Vous validez uniquement l’essentiel",
+    body: "Ce qui engage (prix, engagement, envoi sensible) passe par vous. Le reste est traité dans le cadre défini avec votre forfait.",
     Icon: IconCheckCircle,
   },
   {
     n: 5,
-    title: "Suivi et décompte des crédits",
-    body: "Statuts visibles à chaque étape et transparence sur la consommation de vos crédits.",
+    title: "Votre activité devient plus fluide",
+    body: "Moins de friction entre bureau et chantier : statuts visibles, pièces classées, relances qui avancent sans sacrifier le terrain.",
     Icon: IconChart,
   },
 ];
 
-/** Section « Comment ça marche en détail » — landing premium, sous Solution */
+/** Section unique « Comment ça marche » — parcours aligné sur la homepage */
 export function HomeHowItWorksDetailSection() {
   return (
     <section
       id="comment-ca-marche"
-      className="relative scroll-mt-24 bg-transparent pt-10 pb-12 md:pt-12 md:pb-14 lg:pt-14 lg:pb-16"
-      style={{ fontFamily: fontSans, scrollMarginTop: "6rem" }}
+      className="relative scroll-mt-28 bg-transparent pt-10 pb-12 md:pt-12 md:pb-14 lg:pt-14 lg:pb-16"
+      style={{ fontFamily: fontSans }}
       aria-labelledby="how-detail-heading"
     >
       <div className="container-site relative z-[1]">
@@ -60,10 +60,10 @@ export function HomeHowItWorksDetailSection() {
             className="text-[13px] font-semibold uppercase tracking-[0.22em]"
             style={{ color: BLUE }}
           >
-            Comment ça marche en détail
+            Comment ça marche
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-relaxed text-slate-600 md:mt-6 md:text-lg">
-            De la demande à la livraison, BeWork structure, suit et sécurise chaque étape pour vous faire gagner du temps.
+            Un seul parcours, du premier message à une organisation plus fluide — sans vous noyer dans l’administratif.
           </p>
           <p className="mx-auto mt-3 max-w-3xl text-sm leading-relaxed text-slate-500">
             Vos Beworkers peuvent travailler avec vos outils existants : Excel, Google Sheets, Outlook, Gmail, Batigest, Onaya, EBP, Sage, MS Project,

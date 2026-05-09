@@ -151,6 +151,11 @@ export default function Page() {
             Chantier mal suivi : reprendre le contrôle
           </Link>
         </li>
+        <li>
+          <Link href="/ressources/analyse-dce-btp" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
+            Analyser un DCE (appels d’offres)
+          </Link>
+        </li>
       </ul>
     </SeoLandingPage>
   );

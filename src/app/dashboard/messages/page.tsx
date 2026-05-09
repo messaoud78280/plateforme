@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { AppointmentCalendar } from "@/components/appointments/AppointmentCalendar";
 import { BackLink } from "@/components/ui/BackLink";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -48,8 +47,8 @@ export default async function MessagesPage() {
         <h1 className="text-2xl font-bold text-black">RDV</h1>
         <p className="mt-1 text-black">
           {isAgence
-            ? "Consultez les demandes de contact et rendez-vous, et gérez le calendrier."
-            : "Consultez vos demandes de RDV et prenez rendez-vous en ligne."}
+            ? "Consultez les demandes de contact reçues (historique des envois depuis l’ancien formulaire, le cas échéant)."
+            : "Historique des demandes de contact associées à votre compte."}
         </p>
       </div>
 
@@ -60,8 +59,8 @@ export default async function MessagesPage() {
           {contactRequests.length === 0 ? (
             <p className="px-6 py-8 text-sm text-black">
               {isAgence
-                ? "Aucune demande pour le moment. Les demandes envoyées depuis la page Contact apparaîtront ici."
-                : "Aucune demande pour le moment. Vos demandes envoyées depuis la page Contact apparaîtront ici."}
+                ? "Aucune demande enregistrée pour le moment."
+                : "Aucune demande enregistrée pour le moment."}
             </p>
           ) : (
             <div className="overflow-x-auto">
@@ -133,17 +132,6 @@ export default async function MessagesPage() {
             </div>
           )}
         </section>
-
-      {/* Calendrier de prise de RDV (type Calendly) */}
-      <section className="rounded-xl surface-metallic-light p-6 shadow-sm">
-        <h2 className="mb-4 text-lg font-semibold text-black">
-          Prise de rendez-vous en ligne
-        </h2>
-        <p className="mb-6 text-sm text-black">
-          Réservez un créneau, ajoutez des pièces jointes, des notes et une récurrence. Les RDV apparaissent dans les alertes avec rappel.
-        </p>
-        <AppointmentCalendar />
-      </section>
 
       <div className="rounded-xl border border-dashed border-[#c8cdd6] bg-white p-12 text-center">
         <p className="text-black">

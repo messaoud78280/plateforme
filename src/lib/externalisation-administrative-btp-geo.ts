@@ -1,8 +1,7 @@
 import { absoluteUrl } from "@/lib/site";
 
-/** Cluster SEO : une page pilier Europe + 4 pages pays (même famille sémantique, contenus uniques). */
+/** Cluster SEO : 4 pages pays (même famille sémantique, contenus uniques). */
 export const EXTERNALISATION_ADMIN_BT_PATHS = {
-  europe: "/externalisation-administrative-btp-europe",
   france: "/externalisation-administrative-btp-france",
   belgique: "/externalisation-administrative-btp-belgique",
   suisse: "/externalisation-administrative-btp-suisse",
@@ -11,27 +10,22 @@ export const EXTERNALISATION_ADMIN_BT_PATHS = {
 
 export type ExternalisationAdminBtGeoKey = keyof typeof EXTERNALISATION_ADMIN_BT_PATHS;
 
-/** Balises hreflang : `fr` et `x-default` pointent vers la page pilier Europe. */
+/** Balises hreflang : `fr` et `x-default` pointent vers la page France (hub linguistique principal). */
 export function hreflangExternalisationAdministrativeBtpCluster(): Record<string, string> {
   const p = EXTERNALISATION_ADMIN_BT_PATHS;
+  const fr = absoluteUrl(p.france);
   return {
     "fr-FR": absoluteUrl(p.france),
     "fr-BE": absoluteUrl(p.belgique),
     "fr-CH": absoluteUrl(p.suisse),
     "fr-LU": absoluteUrl(p.luxembourg),
-    fr: absoluteUrl(p.europe),
-    "x-default": absoluteUrl(p.europe),
+    fr,
+    "x-default": fr,
   };
 }
 
 /** Liens pour maillage (header, home, pied de page des landings). */
 export const EXTERNALISATION_ADMIN_BT_NAV = [
-  {
-    key: "europe" as const,
-    href: EXTERNALISATION_ADMIN_BT_PATHS.europe,
-    title: "Europe francophone",
-    line: "Vue d’ensemble FR · BE · CH · LU",
-  },
   {
     key: "france",
     href: EXTERNALISATION_ADMIN_BT_PATHS.france,

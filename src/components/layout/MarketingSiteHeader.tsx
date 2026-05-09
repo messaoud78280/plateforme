@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
+import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 
 type Props = {
   /** Fond opaque (pages sur fond déjà uni) */
@@ -16,7 +17,6 @@ type ResourceMenuIconId =
   | "globe"
   | "users"
   | "document"
-  | "clipboard"
   | "question"
   | "calculator";
 
@@ -58,6 +58,7 @@ const SOLUTION_MENU_ENTRIES: {
   },
 ];
 
+/** Sous-rubriques du menu « Ressources » (la page hub est /ressources). */
 const RESOURCE_MENU_ENTRIES: {
   href: string;
   title: string;
@@ -65,61 +66,22 @@ const RESOURCE_MENU_ENTRIES: {
   icon: ResourceMenuIconId;
 }[] = [
   {
-    href: "/ressources",
-    title: "Ressources",
-    description: "Guides pratiques, conseils chantier et prompts IA pour mieux gérer vos dossiers BTP.",
-    icon: "book",
-  },
-  {
-    href: "/ressources/compte-rendu-chantier",
-    title: "Compte rendu de chantier",
-    description: "Checklist + méthode pour rédiger un CR clair : décisions, actions, responsables et délais.",
+    href: "/ressources/tutos",
+    title: "Tutoriels",
+    description: "Tutoriels PDF et formats courts — CR chantier, DCE, PPSPS, mémoires techniques, etc.",
     icon: "document",
   },
   {
-    href: "/externalisation-administrative-btp-europe",
-    title: "Europe francophone (FR · BE · CH · LU)",
-    description:
-      "Externalisation administrative BTP : vue d’ensemble et pages locales France, Belgique, Suisse, Luxembourg.",
-    icon: "globe",
-  },
-  {
-    href: "/artisan-deborde-administratif",
-    title: "Administratif sous pression (angles terrain)",
-    description:
-      "Débordement, devis en retard, suivi chantier, impayés : entrées SEO utiles avant d’externaliser cadre.",
-    icon: "clipboard",
-  },
-  {
-    href: "/blog",
-    title: "Blog & conseils terrain",
-    description:
-      "Des articles concrets pour mieux gérer votre administratif et développer votre entreprise.",
+    href: "/ressources/guides",
+    title: "Guides",
+    description: "Articles sur le pilotage administratif BTP, la trésorerie, la relance et l’externalisation.",
     icon: "book",
   },
   {
     href: "/cas-clients",
     title: "Cas clients",
-    description: "Découvrez comment des artisans et PME du BTP gagnent du temps et sécurisent leur activité.",
+    description: "Exemples concrets : relances, trésorerie, dossiers chantier.",
     icon: "users",
-  },
-  {
-    href: "/assistants-administratifs-taches",
-    title: "Tâches prises en charge",
-    description: "La liste complète de tout ce que nous gérons pour vous au quotidien.",
-    icon: "clipboard",
-  },
-  {
-    href: "/faq",
-    title: "FAQ",
-    description: "Réponses à vos questions sur nos services, nos tarifs et notre fonctionnement.",
-    icon: "question",
-  },
-  {
-    href: "/tarifs",
-    title: "Simuler mon besoin",
-    description: "Estimez le temps gagné et le coût de notre accompagnement en quelques clics.",
-    icon: "calculator",
   },
 ];
 
@@ -236,7 +198,10 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
         {/* Col 1 — marque */}
         <div className="min-w-0 justify-self-start">
           <Link href="/" className="group inline-block max-w-full transition-opacity hover:opacity-90" aria-label="BeWork — Accueil">
-            <BeWorkLogo size="sm" />
+            <BeWorkLogo
+              size="sm"
+              imageClassName="h-[5.5rem] max-w-[min(100%,22rem)] sm:h-[6rem] sm:max-w-[min(100%,24rem)] md:h-[6.5rem] md:max-w-[min(100%,28rem)] contrast-[1.35] saturate-[1.2] brightness-[0.97] drop-shadow-[0_1px_0_rgba(15,23,42,0.18)]"
+            />
           </Link>
         </div>
 
@@ -321,7 +286,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             </div>
 
             <Link
-              href="/notre-facon-de-travailler"
+              href="/#comment-ca-marche"
               className="rounded-[10px] px-1.5 py-2 text-sm font-[530] tracking-tight text-black whitespace-nowrap transition-colors hover:text-[#1d4ed8] xl:px-2"
             >
               Comment ça marche
@@ -339,36 +304,51 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               onMouseEnter={openResources}
               onMouseLeave={scheduleCloseResources}
             >
-              <button
-                type="button"
-                className={`inline-flex items-center gap-1 rounded-[10px] px-1.5 py-2 text-sm font-[530] tracking-tight transition-colors xl:px-2 ${
-                  resourcesOpen ? "bg-[#eff6ff]/80 text-[#1d4ed8]" : "text-black hover:bg-slate-50"
+              <div
+                className={`inline-flex items-stretch rounded-[10px] transition-colors ${
+                  resourcesOpen ? "bg-[#eff6ff]/80" : ""
                 }`}
-                aria-expanded={resourcesOpen}
-                aria-haspopup="menu"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  clearResourcesCloseTimer();
-                  clearSolutionsCloseTimer();
-                  setResourcesOpen((v) => !v);
-                  setSolutionsOpen(false);
-                }}
               >
-                <span className="whitespace-nowrap">Ressources</span>
-                <ChevronDown accent className={resourcesOpen ? "rotate-180" : ""} />
-              </button>
+                <Link
+                  href="/ressources"
+                  className={`inline-flex items-center rounded-l-[10px] px-1.5 py-2 text-sm font-[530] tracking-tight transition-colors xl:pl-2 xl:pr-1.5 ${
+                    resourcesOpen ? "text-[#1d4ed8]" : "text-black hover:bg-slate-50"
+                  }`}
+                  onClick={() => setResourcesOpen(false)}
+                >
+                  <span className="whitespace-nowrap">Ressources</span>
+                </Link>
+                <button
+                  type="button"
+                  className={`inline-flex items-center rounded-r-[10px] border-l border-slate-200/80 px-1 py-2 transition-colors xl:pr-2 ${
+                    resourcesOpen ? "text-[#1d4ed8]" : "text-black hover:bg-slate-50"
+                  }`}
+                  aria-expanded={resourcesOpen}
+                  aria-haspopup="menu"
+                  aria-label="Sous-rubriques Ressources"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    clearResourcesCloseTimer();
+                    clearSolutionsCloseTimer();
+                    setResourcesOpen((v) => !v);
+                    setSolutionsOpen(false);
+                  }}
+                >
+                  <ChevronDown accent className={resourcesOpen ? "rotate-180" : ""} />
+                </button>
+              </div>
               {resourcesOpen ? (
                 <nav
                   className="bework-header-dropdown-enter absolute left-0 top-full z-[70] mt-2.5 hidden max-h-[min(70vh,calc(100dvh-5rem))] w-[min(420px,calc(100vw-2rem))] overflow-y-auto overflow-x-hidden rounded-xl border border-slate-200 bg-[#f8fafc] py-4 whitespace-normal shadow-md shadow-slate-900/[0.08] lg:block"
-                  aria-label="Nos ressources BTP"
+                  aria-label="Ressources"
                   role="menu"
                 >
                   <p className="px-5 pb-3 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-[#1d4ed8]/95">
-                    Nos ressources BTP
+                    À explorer
                   </p>
                   <ul className="flex flex-col gap-3 px-3" role="none">
                     {RESOURCE_MENU_ENTRIES.map((item, index) => (
-                      <li key={`${item.href}-${index}`} role="none">
+                      <li key={`${item.title}-${index}`} role="none">
                         <Link
                           href={item.href}
                           role="menuitem"
@@ -398,7 +378,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                       className="inline-flex items-center gap-1 text-[13px] font-semibold text-[#1d4ed8] transition-colors hover:text-[#1e40af]"
                       onClick={() => setResourcesOpen(false)}
                     >
-                      Voir toutes nos ressources
+                      Vue d&apos;ensemble Ressources (carrousels)
                       <span aria-hidden>→</span>
                     </Link>
                   </div>
@@ -410,18 +390,17 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
           <div className="flex shrink-0 items-center gap-2 whitespace-nowrap xl:gap-2.5">
             <Link
               href="/connexion"
-              className="inline-flex items-center gap-1.5 rounded-[10px] border border-slate-200 bg-white px-3 py-2 text-sm font-medium tracking-tight text-black transition hover:border-slate-300 hover:bg-slate-50 xl:px-3.5"
+              className="inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-[10px] border border-slate-200 bg-white px-3.5 py-2 text-base font-medium tracking-tight text-black transition hover:border-slate-300 hover:bg-slate-50 xl:px-4"
             >
               <IconUser className="h-[18px] w-[18px] shrink-0 text-slate-700" aria-hidden />
               <span className="whitespace-nowrap">Connexion</span>
             </Link>
-            <Link
-              href="/contact"
-              className="inline-flex items-center gap-1.5 rounded-[10px] bg-[#1d4ed8] px-3 py-2 text-sm font-semibold tracking-tight text-white shadow-sm transition hover:bg-[#1e40af] xl:px-3.5"
+            <CalendlyBookingLink
+              className="inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-[10px] bg-[#1d4ed8] px-3.5 py-2 text-base font-semibold tracking-tight text-white shadow-md shadow-[#1d4ed8]/22 transition hover:bg-[#1e40af] xl:px-4"
             >
               <IconCalendar className="h-[18px] w-[18px] shrink-0 text-white" aria-hidden />
               <span className="whitespace-nowrap">Réserver un appel</span>
-            </Link>
+            </CalendlyBookingLink>
           </div>
         </div>
 
@@ -502,18 +481,17 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                   <li key={line}>• {line}</li>
                 ))}
               </ul>
-              <Link
-                href="/contact"
-                className="mt-2 inline-flex justify-center rounded-lg bg-[#1d4ed8] px-4 py-3 text-sm font-semibold text-white hover:bg-[#1e40af]"
+              <CalendlyBookingLink
+                className="mt-2 inline-flex min-h-[3rem] justify-center rounded-xl bg-[#1d4ed8] px-4 py-3 text-base font-semibold text-white shadow-md shadow-[#1d4ed8]/20 hover:bg-[#1e40af]"
                 onClick={() => setMobileOpen(false)}
               >
                 Réserver un appel
-              </Link>
+              </CalendlyBookingLink>
             </div>
 
             <nav className="flex flex-col gap-1 border-t border-slate-100 pt-4" aria-label="Navigation mobile">
               <Link
-                href="/notre-facon-de-travailler"
+                href="/#comment-ca-marche"
                 className="rounded-lg px-3 py-3 text-sm font-[530] text-slate-800 hover:bg-slate-50"
                 onClick={() => setMobileOpen(false)}
               >
@@ -522,10 +500,19 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               <Link href="/tarifs" className="rounded-lg px-3 py-3 text-sm font-[530] text-slate-800 hover:bg-slate-50" onClick={() => setMobileOpen(false)}>
                 Tarifs
               </Link>
-              <p className="mt-3 px-3 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-[#1d4ed8]">Nos ressources BTP</p>
+              <p className="mt-3 px-3 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-[#1d4ed8]">
+                Ressources
+              </p>
+              <Link
+                href="/ressources"
+                className="mx-3 mt-2 inline-flex min-h-[2.75rem] items-center justify-center rounded-lg border border-slate-200 bg-[#eff6ff]/40 px-3 text-sm font-semibold text-[#1d4ed8] transition hover:bg-[#eff6ff]"
+                onClick={() => setMobileOpen(false)}
+              >
+                Vue d&apos;ensemble
+              </Link>
               <ul className="mt-2 divide-y divide-slate-100 rounded-xl border border-slate-100">
                 {RESOURCE_MENU_ENTRIES.map((item, index) => (
-                  <li key={`${item.title}-${index}`}>
+                  <li key={`mobile-${item.title}-${index}`}>
                     <Link
                       href={item.href}
                       className="flex items-start gap-3 px-3 py-3.5 transition hover:bg-[#f8fafc]"
@@ -546,33 +533,24 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                   </li>
                 ))}
               </ul>
-              <Link
-                href="/ressources"
-                className="mt-3 inline-flex items-center gap-1.5 px-3 text-sm font-semibold text-[#1d4ed8]"
-                onClick={() => setMobileOpen(false)}
-              >
-                Voir toutes nos ressources
-                <span aria-hidden>→</span>
-              </Link>
             </nav>
 
             <div className="flex flex-col gap-2.5 pt-4">
               <Link
                 href="/connexion"
-                className="inline-flex items-center justify-center gap-2 rounded-[10px] border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-black hover:bg-slate-50"
+                className="inline-flex min-h-[3rem] items-center justify-center gap-2 rounded-[10px] border border-slate-200 bg-white px-4 py-3 text-base font-medium text-black hover:bg-slate-50"
                 onClick={() => setMobileOpen(false)}
               >
                 <IconUser className="h-[18px] w-[18px] text-slate-700" aria-hidden />
                 Connexion
               </Link>
-              <Link
-                href="/contact"
-                className="inline-flex items-center justify-center gap-2 rounded-[10px] bg-[#1d4ed8] px-4 py-3 text-sm font-semibold text-white hover:bg-[#1e40af]"
+              <CalendlyBookingLink
+                className="inline-flex min-h-[3rem] items-center justify-center gap-2 rounded-[10px] bg-[#1d4ed8] px-4 py-3 text-base font-semibold text-white shadow-md shadow-[#1d4ed8]/20 hover:bg-[#1e40af]"
                 onClick={() => setMobileOpen(false)}
               >
                 <IconCalendar className="h-[18px] w-[18px]" aria-hidden />
                 Réserver un appel
-              </Link>
+              </CalendlyBookingLink>
             </div>
           </div>
         </div>
@@ -632,18 +610,6 @@ function ResourceNavIcon({ id, className }: { id: ResourceMenuIconId; className?
           <path d="M8 21V3h11l5 5v13H8Z" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" strokeLinejoin="round" />
           <path d="M14 3v7h7M11 17h10M11 13h10" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
           <circle cx="8.75" cy="13.75" r="1.25" fill="currentColor" />
-        </svg>
-      );
-    case "clipboard":
-      return (
-        <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-          <path
-            d="M9 6V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1h2a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2z"
-            stroke="currentColor"
-            strokeWidth="1.55"
-            strokeLinejoin="round"
-          />
-          <path d="M9 11h11M9 15h11M9 19h8" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
         </svg>
       );
     case "question":

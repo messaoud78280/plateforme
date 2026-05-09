@@ -184,10 +184,10 @@ export function HomeCredibilitySection() {
 
             <div className="flex shrink-0 md:justify-end">
               <Link
-                href="#comment-ca-marche"
-                className="inline-flex w-full min-h-[2.875rem] items-center justify-center gap-1.5 rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-[13px] font-semibold text-white shadow-sm shadow-[#1d4ed8]/22 transition hover:bg-[#1e40af] md:w-auto md:min-h-[3rem] md:px-6 md:text-sm"
+                href="/#comment-ca-marche"
+                className="inline-flex w-full min-h-[3rem] items-center justify-center gap-1.5 rounded-xl bg-[#1d4ed8] px-5 py-3 text-base font-semibold text-white shadow-md shadow-[#1d4ed8]/22 transition hover:bg-[#1e40af] md:w-auto md:px-7"
               >
-                Découvrir comment ça marche
+                Voir comment ça marche
                 <span aria-hidden>→</span>
               </Link>
             </div>

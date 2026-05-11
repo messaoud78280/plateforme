@@ -59,7 +59,7 @@ const PROMPT_EXEMPLE_AJUSTEMENT_TEXT = `Le brouillon est bien mais 3 points à c
 
 Régénère le skill avec ces ajustements et propose-moi un nouveau CR test.`;
 
-const H1 = "Tuto PDF : créer un compte rendu de chantier avec l’IA";
+const H1 = "Crée ton skill — Compte rendu de chantier";
 
 const META_DESCRIPTION =
   "Téléchargez et consultez le tuto BeWork pour créer un compte rendu de chantier avec l’IA à partir de notes, photos ou vocaux.";
@@ -67,7 +67,7 @@ const META_DESCRIPTION =
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },
   { name: "Ressources", href: "/ressources" },
-  { name: "Guide PDF — Compte rendu de chantier", href: pagePath },
+  { name: H1, href: pagePath },
 ] as const;
 
 const FAQ_FOR_JSON_LD = [
@@ -104,7 +104,7 @@ const FAQ_FOR_JSON_LD = [
 ] as const;
 
 export const metadata: Metadata = {
-  title: "Tuto PDF compte rendu de chantier IA | BeWork",
+  title: "Crée ton skill — Compte rendu de chantier | BeWork",
   description: META_DESCRIPTION,
   alternates: {
     canonical: CANONICAL_URL,
@@ -115,13 +115,13 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: CANONICAL_URL,
     siteName: "BeWork",
-    title: "Tuto PDF compte rendu de chantier IA | BeWork",
+    title: "Crée ton skill — Compte rendu de chantier | BeWork",
     description: META_DESCRIPTION,
-    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Tuto PDF compte rendu de chantier — BeWork" }],
+    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Crée ton skill — Compte rendu de chantier — BeWork" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tuto PDF compte rendu de chantier IA | BeWork",
+    title: "Crée ton skill — Compte rendu de chantier | BeWork",
     description: META_DESCRIPTION,
   },
   robots: { index: true, follow: true },
@@ -224,7 +224,7 @@ export default function CompteRenduChantierGuideBtpPdfPage() {
 
           <header className="mb-12 w-full">
             <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">
-              Guide PDF gratuit · Compte rendu de chantier · BeWork
+              Tuto PDF gratuit · Compte rendu de chantier · BeWork
             </p>
             <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl md:text-[2.35rem] md:leading-tight">
               {H1}
@@ -275,7 +275,7 @@ export default function CompteRenduChantierGuideBtpPdfPage() {
               <iframe
                 src={`${pdfPath}#toolbar=1&navpanes=0&scrollbar=1`}
                 className="h-[650px] w-full rounded-2xl border border-slate-200 bg-white shadow-sm md:h-[900px]"
-                title="Tuto PDF compte rendu de chantier BeWork"
+                title="Crée ton skill — Compte rendu de chantier — PDF BeWork"
               />
             </div>
           </section>

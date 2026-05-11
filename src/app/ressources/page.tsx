@@ -87,7 +87,7 @@ function BadgeStatus({ status }: { status: ResourceStatus | "Cas client" | "Guid
   const base =
     "inline-flex shrink-0 items-center rounded-full px-1.5 py-0.5 text-[0.625rem] font-semibold ring-1 sm:px-2 sm:py-0.5 sm:text-[0.6875rem]";
   const map: Record<string, string> = {
-    "Guide PDF": `${base} bg-teal-50 text-teal-950 ring-teal-200/90`,
+    "Tuto PDF": `${base} bg-teal-50 text-teal-950 ring-teal-200/90`,
     "Cas client": `${base} bg-amber-50 text-amber-950 ring-amber-200/90`,
     Guide: `${base} bg-violet-50 text-violet-950 ring-violet-200/90`,
   };

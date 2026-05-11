@@ -41,7 +41,7 @@ suivants :
 - [AJUSTEMENT 3]
 Ré-enregistre la nouvelle version sous le même nom.`;
 
-const H1 = "Tuto PDF : trier vos DCE avec Claude in Chrome (BOAMP, plateformes)";
+const H1 = "Trie tes DCE avec Claude in Chrome";
 
 const META_DESCRIPTION =
   "Tutoriel BeWork gratuit : Claude in Chrome pour filtrer BOAMP et plateformes — critères zone/métier/montant, prompts, raccourci et veille programmée.";
@@ -49,7 +49,7 @@ const META_DESCRIPTION =
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },
   { name: "Ressources", href: "/ressources" },
-  { name: "Guide PDF — Tri DCE Claude in Chrome", href: pagePath },
+  { name: H1, href: pagePath },
 ] as const;
 
 const FAQ_FOR_JSON_LD = [
@@ -86,7 +86,7 @@ const FAQ_FOR_JSON_LD = [
 ] as const;
 
 export const metadata: Metadata = {
-  title: "Tuto PDF tri DCE Claude in Chrome | BeWork",
+  title: "Trie tes DCE avec Claude in Chrome | BeWork",
   description: META_DESCRIPTION,
   alternates: {
     canonical: CANONICAL_URL,
@@ -97,13 +97,13 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: CANONICAL_URL,
     siteName: "BeWork",
-    title: "Tuto PDF tri DCE Claude in Chrome | BeWork",
+    title: "Trie tes DCE avec Claude in Chrome | BeWork",
     description: META_DESCRIPTION,
-    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Tuto PDF tri DCE Claude in Chrome — BeWork" }],
+    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Trie tes DCE avec Claude in Chrome — BeWork" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tuto PDF tri DCE Claude in Chrome | BeWork",
+    title: "Trie tes DCE avec Claude in Chrome | BeWork",
     description: META_DESCRIPTION,
   },
   robots: { index: true, follow: true },
@@ -206,7 +206,7 @@ export default function TutoTriDceClaudeChromeBeworkPage() {
 
           <header className="mb-12 w-full">
             <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">
-              Guide PDF gratuit · Claude in Chrome · DCE · BeWork
+              Tuto PDF gratuit · Claude in Chrome · DCE · BeWork
             </p>
             <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl md:text-[2.35rem] md:leading-tight">
               {H1}
@@ -256,7 +256,7 @@ export default function TutoTriDceClaudeChromeBeworkPage() {
               <iframe
                 src={`${pdfPath}#toolbar=1&navpanes=0&scrollbar=1`}
                 className="h-[650px] w-full rounded-2xl border border-slate-200 bg-white shadow-sm md:h-[900px]"
-                title="Tuto PDF tri DCE Claude in Chrome BeWork"
+                title="Trie tes DCE avec Claude in Chrome — PDF BeWork"
               />
             </div>
           </section>

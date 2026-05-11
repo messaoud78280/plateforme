@@ -65,7 +65,7 @@ est acquise tacitement »
 Régénère le skill avec ces ajustements et propose-moi un nouveau
 constat test sur le même cas fictif.`;
 
-const H1 = "Tuto PDF : créer un skill constat de retard (LRAR) avec l’IA (Claude)";
+const H1 = "Crée ton skill — Constat de retard";
 
 const META_DESCRIPTION =
   "Tutoriel BeWork gratuit : skill Claude pour constats de retard chantier — 7 éléments, CCAG art.19, LRAR .docx, prolongation délai, prompts.";
@@ -73,7 +73,7 @@ const META_DESCRIPTION =
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },
   { name: "Ressources", href: "/ressources" },
-  { name: "Guide PDF — Skill constat retard Claude", href: pagePath },
+  { name: H1, href: pagePath },
 ] as const;
 
 const FAQ_FOR_JSON_LD = [
@@ -110,7 +110,7 @@ const FAQ_FOR_JSON_LD = [
 ] as const;
 
 export const metadata: Metadata = {
-  title: "Tuto PDF skill constat retard Claude (IA) | BeWork",
+  title: "Crée ton skill — Constat de retard | BeWork",
   description: META_DESCRIPTION,
   alternates: {
     canonical: CANONICAL_URL,
@@ -121,13 +121,13 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: CANONICAL_URL,
     siteName: "BeWork",
-    title: "Tuto PDF skill constat retard Claude (IA) | BeWork",
+    title: "Crée ton skill — Constat de retard | BeWork",
     description: META_DESCRIPTION,
-    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Tuto PDF constat retard — BeWork" }],
+    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Crée ton skill — Constat de retard — BeWork" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tuto PDF skill constat retard Claude | BeWork",
+    title: "Crée ton skill — Constat de retard | BeWork",
     description: META_DESCRIPTION,
   },
   robots: { index: true, follow: true },
@@ -230,7 +230,7 @@ export default function TutoSkillConstatRetardBeworkPage() {
 
           <header className="mb-12 w-full">
             <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">
-              Guide PDF gratuit · Constat de retard · Claude · BeWork
+              Tuto PDF gratuit · Constat de retard · Claude · BeWork
             </p>
             <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl md:text-[2.35rem] md:leading-tight">
               {H1}
@@ -280,7 +280,7 @@ export default function TutoSkillConstatRetardBeworkPage() {
               <iframe
                 src={`${pdfPath}#toolbar=1&navpanes=0&scrollbar=1`}
                 className="h-[650px] w-full rounded-2xl border border-slate-200 bg-white shadow-sm md:h-[900px]"
-                title="Tuto PDF constat retard BeWork"
+                title="Crée ton skill — Constat de retard — PDF BeWork"
               />
             </div>
           </section>

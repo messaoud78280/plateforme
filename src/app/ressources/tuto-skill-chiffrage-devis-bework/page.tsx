@@ -77,7 +77,7 @@ le solde à la livraison, pas seulement le TTC global
 Régénère le skill avec ces ajustements et propose-moi un nouveau
 devis test sur le même cas fictif.`;
 
-const H1 = "Tutoriel PDF — chiffrage de devis BTP avec l’IA (Claude & skills)";
+const H1 = "Crée ton skill — Chiffrage de devis BTP";
 
 const META_DESCRIPTION =
   "Tuto BeWork gratuit : créer un skill Claude pour chiffrer vos devis BTP (BPU, coefficients, Word + Excel), prompts de calibrage et d’usage quotidien — PDF 9 pages.";
@@ -85,7 +85,7 @@ const META_DESCRIPTION =
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },
   { name: "Ressources", href: "/ressources" },
-  { name: "Guide PDF — Chiffrage de devis BTP", href: pagePath },
+  { name: H1, href: pagePath },
 ] as const;
 
 const FAQ_FOR_JSON_LD = [
@@ -122,7 +122,7 @@ const FAQ_FOR_JSON_LD = [
 ] as const;
 
 export const metadata: Metadata = {
-  title: "Tuto PDF chiffrage de devis BTP avec l’IA (Claude) | BeWork",
+  title: "Crée ton skill — Chiffrage de devis BTP | BeWork",
   description: META_DESCRIPTION,
   alternates: {
     canonical: pageUrl,
@@ -133,13 +133,13 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: pageUrl,
     siteName: "BeWork",
-    title: "Tuto PDF chiffrage de devis BTP avec l’IA | BeWork",
+    title: "Crée ton skill — Chiffrage de devis BTP | BeWork",
     description: META_DESCRIPTION,
-    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Tuto PDF chiffrage de devis BTP — BeWork" }],
+    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Crée ton skill — Chiffrage de devis BTP — BeWork" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tuto PDF chiffrage de devis BTP | BeWork",
+    title: "Crée ton skill — Chiffrage de devis BTP | BeWork",
     description: META_DESCRIPTION,
   },
   robots: { index: true, follow: true },
@@ -242,7 +242,7 @@ export default function TutoSkillChiffrageDevisBeworkPage() {
 
           <header className="mb-12 w-full">
             <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">
-              Guide PDF gratuit · Chiffrage de devis BTP · BeWork
+              Tuto PDF gratuit · Chiffrage de devis BTP · BeWork
             </p>
             <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl md:text-[2.35rem] md:leading-tight">
               {H1}
@@ -300,7 +300,7 @@ export default function TutoSkillChiffrageDevisBeworkPage() {
               <iframe
                 src={`${pdfPath}#toolbar=1&navpanes=0&scrollbar=1`}
                 className="h-[650px] w-full rounded-2xl border border-slate-200 bg-white shadow-sm md:h-[900px]"
-                title="Tuto PDF chiffrage de devis BTP BeWork"
+                title="Crée ton skill — Chiffrage de devis BTP — PDF BeWork"
               />
             </div>
           </section>

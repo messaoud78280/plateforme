@@ -10,7 +10,7 @@ export type ResourceGuidePageItem = {
 export const RESOURCE_GUIDE_PAGE_ITEMS: readonly ResourceGuidePageItem[] = [
   {
     href: "/ressources/compte-rendu-chantier-guide-btp",
-    title: "Tuto PDF : créer un compte rendu de chantier avec l’IA",
+    title: "Tuto Crée ton skill — Compte rendu de chantier",
     excerpt:
       "Guide BeWork : mise en page PDF, transcription depuis notes brut ou vocal, prompts prêts à coller (Claude & skills).",
     publishedTime: "2026-04-01T12:00:00+02:00",

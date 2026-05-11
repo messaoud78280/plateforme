@@ -60,7 +60,7 @@ l'objet d'un PV ultérieur. » — pour éviter toute ambiguïté
 Régénère le skill avec ces ajustements et propose-moi un nouveau
 PV test sur le même cas fictif.`;
 
-const H1 = "Tuto PDF : créer un skill PV de levée de réserves avec l’IA (Claude)";
+const H1 = "Crée ton skill — PV de levée de réserves";
 
 const META_DESCRIPTION =
   "Tutoriel BeWork gratuit : skill Claude pour PV de levée de réserves (.docx), 7 blocs obligatoires, prompts calibrage et usage quotidien.";
@@ -68,7 +68,7 @@ const META_DESCRIPTION =
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },
   { name: "Ressources", href: "/ressources" },
-  { name: "Guide PDF — Skill PV levée réserves Claude", href: pagePath },
+  { name: H1, href: pagePath },
 ] as const;
 
 const FAQ_FOR_JSON_LD = [
@@ -105,7 +105,7 @@ const FAQ_FOR_JSON_LD = [
 ] as const;
 
 export const metadata: Metadata = {
-  title: "Tuto PDF skill PV levée réserves Claude (IA) | BeWork",
+  title: "Crée ton skill — PV de levée de réserves | BeWork",
   description: META_DESCRIPTION,
   alternates: {
     canonical: CANONICAL_URL,
@@ -116,13 +116,13 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: CANONICAL_URL,
     siteName: "BeWork",
-    title: "Tuto PDF skill PV levée réserves Claude (IA) | BeWork",
+    title: "Crée ton skill — PV de levée de réserves | BeWork",
     description: META_DESCRIPTION,
-    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Tuto PDF PV levée réserves — BeWork" }],
+    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Crée ton skill — PV de levée de réserves — BeWork" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tuto PDF skill PV levée réserves Claude | BeWork",
+    title: "Crée ton skill — PV de levée de réserves | BeWork",
     description: META_DESCRIPTION,
   },
   robots: { index: true, follow: true },
@@ -225,7 +225,7 @@ export default function TutoSkillPvLeveeReservesBeworkPage() {
 
           <header className="mb-12 w-full">
             <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">
-              Guide PDF gratuit · PV levée réserves · Claude · BeWork
+              Tuto PDF gratuit · PV levée réserves · Claude · BeWork
             </p>
             <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl md:text-[2.35rem] md:leading-tight">
               {H1}
@@ -276,7 +276,7 @@ export default function TutoSkillPvLeveeReservesBeworkPage() {
               <iframe
                 src={`${pdfPath}#toolbar=1&navpanes=0&scrollbar=1`}
                 className="h-[650px] w-full rounded-2xl border border-slate-200 bg-white shadow-sm md:h-[900px]"
-                title="Tuto PDF PV levée réserves BeWork"
+                title="Crée ton skill — PV de levée de réserves — PDF BeWork"
               />
             </div>
           </section>

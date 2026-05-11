@@ -75,7 +75,7 @@ function BadgeGuide({ variant }: { variant: GuideCardVariant }) {
     variant === "pdf"
       ? `${base} bg-teal-50 text-teal-950 ring-teal-200/90`
       : `${base} bg-violet-50 text-violet-950 ring-violet-200/90`;
-  return <span className={cls}>{variant === "pdf" ? "Guide PDF" : "Article"}</span>;
+  return <span className={cls}>{variant === "pdf" ? "Tuto PDF" : "Article"}</span>;
 }
 
 function GuideGlyph({ className }: { className?: string }) {

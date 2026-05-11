@@ -48,7 +48,7 @@ sur les normes DTU applicables.
 Et change le ton de la section "valeur ajoutée" : je ne veux pas du
 tout sonner commercial, je veux rester factuel.`;
 
-const H1 = "Tuto PDF : créer un skill mémoire technique BTP avec l’IA (Claude)";
+const H1 = "Crée ton skill — Mémoire Technique BTP";
 
 const META_DESCRIPTION =
   "Tutoriel BeWork gratuit : skill Claude pour rédiger vos mémoires techniques (AO) — PDF, 5 étapes, prompts à copier, FAQ.";
@@ -56,7 +56,7 @@ const META_DESCRIPTION =
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },
   { name: "Ressources", href: "/ressources" },
-  { name: "Guide PDF — Skill mémoire technique Claude", href: pagePath },
+  { name: H1, href: pagePath },
 ] as const;
 
 const FAQ_FOR_JSON_LD = [
@@ -93,7 +93,7 @@ const FAQ_FOR_JSON_LD = [
 ] as const;
 
 export const metadata: Metadata = {
-  title: "Tuto PDF skill mémoire technique Claude (IA) | BeWork",
+  title: "Crée ton skill — Mémoire Technique BTP | BeWork",
   description: META_DESCRIPTION,
   alternates: {
     canonical: CANONICAL_URL,
@@ -104,13 +104,13 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: CANONICAL_URL,
     siteName: "BeWork",
-    title: "Tuto PDF skill mémoire technique Claude (IA) | BeWork",
+    title: "Crée ton skill — Mémoire Technique BTP | BeWork",
     description: META_DESCRIPTION,
-    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Tuto PDF mémoire technique — BeWork" }],
+    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Crée ton skill — Mémoire Technique BTP — BeWork" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tuto PDF skill mémoire technique Claude | BeWork",
+    title: "Crée ton skill — Mémoire Technique BTP | BeWork",
     description: META_DESCRIPTION,
   },
   robots: { index: true, follow: true },
@@ -213,7 +213,7 @@ export default function TutoSkillMemoireTechniqueBeworkPage() {
 
           <header className="mb-12 w-full">
             <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">
-              Guide PDF gratuit · Mémoire technique · Claude · BeWork
+              Tuto PDF gratuit · Mémoire technique · Claude · BeWork
             </p>
             <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl md:text-[2.35rem] md:leading-tight">
               {H1}
@@ -264,7 +264,7 @@ export default function TutoSkillMemoireTechniqueBeworkPage() {
               <iframe
                 src={`${pdfPath}#toolbar=1&navpanes=0&scrollbar=1`}
                 className="h-[650px] w-full rounded-2xl border border-slate-200 bg-white shadow-sm md:h-[900px]"
-                title="Tuto PDF mémoire technique BeWork"
+                title="Crée ton skill — Mémoire Technique BTP — PDF BeWork"
               />
             </div>
           </section>

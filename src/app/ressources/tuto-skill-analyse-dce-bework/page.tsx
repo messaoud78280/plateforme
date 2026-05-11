@@ -52,7 +52,7 @@ de vigilance.
 Et pour la retenue de garantie : signale systématiquement si elle
 est non remplaçable par caution bancaire.`;
 
-const H1 = "Tuto PDF : créer un skill d’analyse de DCE avec l’IA (Claude)";
+const H1 = "Crée ton skill — Analyse de DCE";
 
 const META_DESCRIPTION =
   "Tutoriel BeWork gratuit : skill Claude pour analyser un DCE (CCAP, CCTP, RC, BPU) — fiche standardisée, Go/No Go, PDF et prompts à copier.";
@@ -60,7 +60,7 @@ const META_DESCRIPTION =
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },
   { name: "Ressources", href: "/ressources" },
-  { name: "Guide PDF — Skill analyse DCE Claude", href: pagePath },
+  { name: H1, href: pagePath },
 ] as const;
 
 const FAQ_FOR_JSON_LD = [
@@ -97,7 +97,7 @@ const FAQ_FOR_JSON_LD = [
 ] as const;
 
 export const metadata: Metadata = {
-  title: "Tuto PDF skill analyse DCE Claude (IA) | BeWork",
+  title: "Crée ton skill — Analyse de DCE | BeWork",
   description: META_DESCRIPTION,
   alternates: {
     canonical: CANONICAL_URL,
@@ -108,13 +108,13 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: CANONICAL_URL,
     siteName: "BeWork",
-    title: "Tuto PDF skill analyse DCE Claude (IA) | BeWork",
+    title: "Crée ton skill — Analyse de DCE | BeWork",
     description: META_DESCRIPTION,
-    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Tuto PDF analyse DCE — BeWork" }],
+    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Crée ton skill — Analyse de DCE — BeWork" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tuto PDF skill analyse DCE Claude | BeWork",
+    title: "Crée ton skill — Analyse de DCE | BeWork",
     description: META_DESCRIPTION,
   },
   robots: { index: true, follow: true },
@@ -217,7 +217,7 @@ export default function TutoSkillAnalyseDceBeworkPage() {
 
           <header className="mb-12 w-full">
             <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">
-              Guide PDF gratuit · Analyse DCE · Claude · BeWork
+              Tuto PDF gratuit · Analyse DCE · Claude · BeWork
             </p>
             <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl md:text-[2.35rem] md:leading-tight">
               {H1}
@@ -268,7 +268,7 @@ export default function TutoSkillAnalyseDceBeworkPage() {
               <iframe
                 src={`${pdfPath}#toolbar=1&navpanes=0&scrollbar=1`}
                 className="h-[650px] w-full rounded-2xl border border-slate-200 bg-white shadow-sm md:h-[900px]"
-                title="Tuto PDF analyse DCE BeWork"
+                title="Crée ton skill — Analyse de DCE — PDF BeWork"
               />
             </div>
           </section>

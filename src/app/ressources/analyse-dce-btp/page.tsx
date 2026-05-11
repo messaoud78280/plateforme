@@ -148,6 +148,19 @@ export default function AnalyseDceBtpTutoPage() {
           </div>
         </section>
 
+        <section className="not-prose">
+          <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-6 text-[13px] leading-relaxed text-slate-600 shadow-sm">
+            Déchiffrer un <strong>CCTP</strong> long avant chiffrage :{" "}
+            <Link
+              href="/ressources/tuto-skill-analyse-express-cctp-bework"
+              className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline"
+            >
+              tutoriel PDF + skill Claude « analyse express CCTP »
+            </Link>
+            .
+          </div>
+        </section>
+
         <h2 id="utilite-analyse">{TUTO_TITRE.aQuoi}</h2>
         <ul>
           <li>Savoir si le marché est réaliste pour votre entreprise (délais, moyens, risques).</li>

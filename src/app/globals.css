@@ -3,6 +3,8 @@
 /* Ancres : évite que le sticky header recouvre la cible au scroll */
 html {
   scroll-padding-top: 5rem;
+  /* Réserve l’espace de la barre de défilement pour limiter les micro-décalages largeur / scroll (header sticky). */
+  scrollbar-gutter: stable;
   /* Coupe le léger débordement horizontal des décors skew sans créer une portée de défilement (voir ancien overflow-hidden sur un bloc parent). */
   overflow-x: clip;
   /* smooth sur tout le html + ancre # peut provoquer un scroll bloquant vers le haut (Chrome) ; les ancres utilisent scroll-padding-top. */
@@ -62,7 +64,7 @@ body {
   --card-shadow-hover: 0 10px 28px rgba(15, 23, 42, 0.08);
 
   /* Typography */
-  --font-family: var(--font-geist-sans), system-ui, sans-serif;
+  --font-family: var(--font-ibm-plex), var(--font-geist-sans), system-ui, sans-serif;
   --heading-1: 2rem;
   --heading-2: 1.5rem;
   --heading-3: 1.25rem;
@@ -94,7 +96,7 @@ body {
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-ibm-plex);
   --font-mono: var(--font-geist-mono);
 }
 

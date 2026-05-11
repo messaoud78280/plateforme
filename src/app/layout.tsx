@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Inter, Manrope, Orbitron } from "next/font/google";
+import { Geist, Geist_Mono, IBM_Plex_Sans, Inter, Manrope, Orbitron } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { SEO_KEYWORDS_GLOBAL, SEO_VALUE_PROPOSITION, SEO_VALUE_PROPOSITION_SHORT } from "@/lib/seo-keywords";
@@ -17,6 +17,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+/** Corps de texte — esprit « plan / ingénierie », complémentaire au logo blueprint */
+const ibmPlexSans = IBM_Plex_Sans({
+  variable: "--font-ibm-plex",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 /** Titres marketing (hero & co.) — aligné rendu desktop type ~64–68 px */
@@ -231,7 +238,7 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${manrope.variable} ${orbitron.variable} min-w-0 overflow-x-clip font-sans antialiased text-black`}
+        className={`${geistSans.variable} ${geistMono.variable} ${ibmPlexSans.variable} ${inter.variable} ${manrope.variable} ${orbitron.variable} min-w-0 overflow-x-clip font-sans antialiased text-black`}
       >
         <script
           type="application/ld+json"

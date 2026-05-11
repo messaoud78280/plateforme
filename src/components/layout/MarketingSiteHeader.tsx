@@ -142,7 +142,16 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
   }, [clearResourcesCloseTimer]);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
+    /** Seuil avec hystérésis : évite basculements rapides près du haut (scroll élastique, barre de défilement). */
+    const releaseScrollY = 4;
+    const engageScrollY = 32;
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled((prev) => {
+        if (prev) return y > releaseScrollY;
+        return y > engageScrollY;
+      });
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -190,7 +199,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
   return (
     <header
       ref={headerRef}
-      className={`relative sticky top-0 z-50 overflow-visible transition-[padding] duration-200 ease-out ${bgClass}`}
+      className={`relative sticky top-0 z-50 overflow-visible ${bgClass}`}
     >
       <div
         className={`container-site grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2.5 lg:grid-cols-[auto_1fr] lg:items-start lg:gap-x-6 ${barPy} font-sans`}

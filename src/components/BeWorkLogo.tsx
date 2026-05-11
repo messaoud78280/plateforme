@@ -1,10 +1,10 @@
 import Image from "next/image";
 
-// Logo fourni (inclut déjà la baseline) — filename versionné pour casser tout cache.
-const LOGO_PATH = "/BeWork.logo.v2.png";
+// Logo fourni (BeWork + baseline IA) — filename versionné pour casser tout cache.
+const LOGO_PATH = "/BeWork.logo.v4.png";
 /** Dimensions intrinsèques du fichier ( évite déformation + layout shift ) */
 const LOGO_WIDTH = 1024;
-const LOGO_HEIGHT = 341;
+const LOGO_HEIGHT = 361;
 
 interface BeWorkLogoProps {
   className?: string;

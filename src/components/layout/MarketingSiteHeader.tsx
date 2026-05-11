@@ -200,7 +200,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
           <Link href="/" className="group inline-block max-w-full transition-opacity hover:opacity-90" aria-label="BeWork — Accueil">
             <BeWorkLogo
               size="sm"
-              imageClassName="h-[5.5rem] max-w-[min(100%,22rem)] sm:h-[6rem] sm:max-w-[min(100%,24rem)] md:h-[6.5rem] md:max-w-[min(100%,28rem)] contrast-[1.35] saturate-[1.2] brightness-[0.97] drop-shadow-[0_1px_0_rgba(15,23,42,0.18)]"
+              imageClassName="h-[5.5rem] max-w-[min(100%,22rem)] sm:h-[6rem] sm:max-w-[min(100%,24rem)] md:h-[6.5rem] md:max-w-[min(100%,28rem)] drop-shadow-[0_1px_0_rgba(15,23,42,0.12)]"
             />
           </Link>
         </div>

@@ -200,7 +200,8 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
           <Link href="/" className="group inline-block max-w-full transition-opacity hover:opacity-90" aria-label="BeWork — Accueil">
             <BeWorkLogo
               size="sm"
-              imageClassName="h-[3.84rem] max-w-[min(100%,17.92rem)] sm:h-[4.48rem] sm:max-w-[min(100%,21.76rem)] md:h-[6.4rem] md:max-w-[min(100%,28.16rem)] lg:h-[7.04rem] lg:max-w-[min(100%,35.84rem)]"
+              priority
+              imageClassName="h-[5.4rem] max-w-[min(100%,24rem)] sm:h-[6.3rem] sm:max-w-[min(100%,28.8rem)] md:h-[9rem] md:max-w-[min(100%,38.4rem)] lg:h-[10.2rem] lg:max-w-[min(100%,50.4rem)]"
             />
           </Link>
         </div>
@@ -430,12 +431,12 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
       {/* Menu mobile */}
       <div
         id="marketing-mobile-nav"
-        className={`fixed inset-x-0 bottom-0 top-0 z-40 bg-white pt-[calc(5.35rem+env(safe-area-inset-top,0px))] transition-[opacity,visibility] duration-200 sm:pt-[calc(6.5rem+env(safe-area-inset-top,0px))] md:pt-[calc(8.75rem+env(safe-area-inset-top,0px))] lg:hidden ${
+        className={`fixed inset-x-0 bottom-0 top-0 z-40 bg-white pt-[calc(6.75rem+env(safe-area-inset-top,0px))] transition-[opacity,visibility] duration-200 sm:pt-[calc(8.25rem+env(safe-area-inset-top,0px))] md:pt-[calc(11rem+env(safe-area-inset-top,0px))] lg:hidden ${
           mobileOpen ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"
         }`}
         aria-hidden={!mobileOpen}
       >
-        <div className="h-[calc(100dvh-5.35rem-env(safe-area-inset-top,0px))] overflow-y-auto pb-10 pt-4 sm:h-[calc(100dvh-6.5rem-env(safe-area-inset-top,0px))] md:h-[calc(100dvh-8.75rem-env(safe-area-inset-top,0px))]">
+        <div className="h-[calc(100dvh-6.75rem-env(safe-area-inset-top,0px))] overflow-y-auto pb-10 pt-4 sm:h-[calc(100dvh-8.25rem-env(safe-area-inset-top,0px))] md:h-[calc(100dvh-11rem-env(safe-area-inset-top,0px))]">
           <div className="container-site flex flex-col gap-6">
             <div>
               <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[#1d4ed8]">

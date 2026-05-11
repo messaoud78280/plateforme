@@ -1,10 +1,10 @@
 import Image from "next/image";
 
-// Logo définitif (pastille BW + BeWork 3D + baseline) — nom de fichier versionné pour le cache.
-const LOGO_PATH = "/BeWork.logo.definitif.png";
+// Logo blueprint HD (fichier source 1024 px — optim Next conserve netteté Retina).
+const LOGO_PATH = "/BeWork.logo.blueprint.png";
 /** Dimensions intrinsèques du fichier (évite déformation + layout shift) */
 const LOGO_WIDTH = 1024;
-const LOGO_HEIGHT = 409;
+const LOGO_HEIGHT = 341;
 
 interface BeWorkLogoProps {
   className?: string;
@@ -37,12 +37,13 @@ export function BeWorkLogo({
 }: BeWorkLogoProps) {
   const defaultTagline = "L'assistant administratif à la demande";
 
+  /** Large enough for Retina / header élargi — aide next/image à choisir une variante ≥ besoin réel */
   const sizesAttr =
     size === "sm"
-      ? "(max-width:768px) 220px, 280px"
+      ? "(max-width:640px) min(90vw,360px), (max-width:1024px) min(50vw,440px), min(640px,42vw)"
       : size === "md"
-        ? "(max-width:768px) 260px, 360px"
-        : "(max-width:768px) 320px, 420px";
+        ? "(max-width:768px) min(92vw,420px), min(720px,48vw)"
+        : "(max-width:768px) min(92vw,480px), min(840px,52vw)";
 
   return (
     <span className={`inline-flex flex-col ${className}`}>
@@ -53,6 +54,7 @@ export function BeWorkLogo({
         height={LOGO_HEIGHT}
         className={`shrink-0 object-contain object-left ${imageClassBySize[size]} ${imageClassName}`}
         sizes={sizesAttr}
+        quality={100}
         priority={priority}
       />
       {showTagline ? (

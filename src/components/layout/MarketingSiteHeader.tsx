@@ -210,7 +210,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             <BeWorkLogo
               size="sm"
               priority
-              imageClassName="h-[8.25rem] max-w-[min(100%,34.5rem)] sm:h-[9rem] sm:max-w-[min(100%,40.5rem)] md:h-[10.05rem] md:max-w-[min(100%,48rem)] lg:h-[11.25rem] lg:max-w-[min(100%,60rem)]"
+              imageClassName="h-[6.1875rem] max-w-[min(100%,25.875rem)] sm:h-[6.75rem] sm:max-w-[min(100%,30.375rem)] md:h-[7.5375rem] md:max-w-[min(100%,36rem)] lg:h-[8.4375rem] lg:max-w-[min(100%,45rem)]"
             />
           </Link>
         </div>
@@ -439,12 +439,12 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
       {/* Menu mobile */}
       <div
         id="marketing-mobile-nav"
-        className={`fixed inset-x-0 bottom-0 top-0 z-40 bg-white pt-[calc(10.5rem+env(safe-area-inset-top,0px))] transition-[opacity,visibility] duration-200 sm:pt-[calc(11.25rem+env(safe-area-inset-top,0px))] md:pt-[calc(12rem+env(safe-area-inset-top,0px))] lg:hidden ${
+        className={`fixed inset-x-0 bottom-0 top-0 z-40 bg-white pt-[calc(7.875rem+env(safe-area-inset-top,0px))] transition-[opacity,visibility] duration-200 sm:pt-[calc(8.4375rem+env(safe-area-inset-top,0px))] md:pt-[calc(9rem+env(safe-area-inset-top,0px))] lg:hidden ${
           mobileOpen ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"
         }`}
         aria-hidden={!mobileOpen}
       >
-        <div className="h-[calc(100dvh-10.5rem-env(safe-area-inset-top,0px))] overflow-y-auto pb-10 pt-4 sm:h-[calc(100dvh-11.25rem-env(safe-area-inset-top,0px))] md:h-[calc(100dvh-12rem-env(safe-area-inset-top,0px))]">
+        <div className="h-[calc(100dvh-7.875rem-env(safe-area-inset-top,0px))] overflow-y-auto pb-10 pt-4 sm:h-[calc(100dvh-8.4375rem-env(safe-area-inset-top,0px))] md:h-[calc(100dvh-9rem-env(safe-area-inset-top,0px))]">
           <div className="container-site flex flex-col gap-6">
             <div>
               <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[#1d4ed8]">

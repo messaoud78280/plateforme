@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-// Logo blueprint HD (fichier source 1024 px — optim Next conserve netteté Retina).
+/** Logo blueprint (BeWork + baseline) — fichier source 1024 px */
 const LOGO_PATH = "/BeWork.logo.blueprint.png";
 /** Dimensions intrinsèques du fichier (évite déformation + layout shift) */
 const LOGO_WIDTH = 1024;
@@ -37,10 +37,9 @@ export function BeWorkLogo({
 }: BeWorkLogoProps) {
   const defaultTagline = "L'assistant administratif à la demande";
 
-  /** Large enough for Retina / header élargi — aide next/image à choisir une variante ≥ besoin réel */
   const sizesAttr =
     size === "sm"
-      ? "(max-width:640px) min(90vw,360px), (max-width:1024px) min(50vw,440px), min(640px,42vw)"
+      ? "(max-width:640px) min(100vw,1024px), (max-width:1024px) min(90vw,1024px), 1024px"
       : size === "md"
         ? "(max-width:768px) min(92vw,420px), min(720px,48vw)"
         : "(max-width:768px) min(92vw,480px), min(840px,52vw)";

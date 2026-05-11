@@ -193,23 +193,38 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
       className={`relative sticky top-0 z-50 overflow-visible transition-[padding] duration-200 ease-out ${bgClass}`}
     >
       <div
-        className={`container-site grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 lg:grid-cols-[auto_minmax(0,1fr)] lg:gap-x-4 ${barPy} font-sans`}
+        className={`container-site grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2.5 lg:grid-cols-[auto_1fr] lg:items-start lg:gap-x-6 ${barPy} font-sans`}
       >
-        {/* Col 1 — marque */}
-        <div className="min-w-0 justify-self-start">
+        {/* Ligne 1 — marque (desktop + mobile) */}
+        <div className="min-w-0 justify-self-start self-center lg:col-start-1 lg:row-start-1 lg:self-start">
           <Link href="/" className="group inline-block max-w-full transition-opacity hover:opacity-90" aria-label="BeWork — Accueil">
             <BeWorkLogo
               size="sm"
               priority
-              imageClassName="h-[5.4rem] max-w-[min(100%,24rem)] sm:h-[6.3rem] sm:max-w-[min(100%,28.8rem)] md:h-[9rem] md:max-w-[min(100%,38.4rem)] lg:h-[10.2rem] lg:max-w-[min(100%,50.4rem)]"
+              imageClassName="h-[8.25rem] max-w-[min(100%,34.5rem)] sm:h-[9rem] sm:max-w-[min(100%,40.5rem)] md:h-[10.05rem] md:max-w-[min(100%,48rem)] lg:h-[11.25rem] lg:max-w-[min(100%,60rem)]"
             />
           </Link>
         </div>
 
-        {/* Desktop : nav + CTA regroupés et alignés à droite, une seule ligne */}
-        <div className="hidden min-w-0 flex-nowrap items-center justify-end gap-4 lg:flex xl:gap-5">
+        {/* Desktop — colonne droite : Connexion + Réserver, puis navigation juste en dessous */}
+        <div className="hidden min-w-0 flex-col items-end gap-y-2 lg:col-start-2 lg:row-start-1 lg:flex">
+          <div className="flex shrink-0 items-center justify-end gap-2 whitespace-nowrap xl:gap-2.5">
+            <Link
+              href="/connexion"
+              className="inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-[10px] border border-slate-200 bg-white px-3.5 py-2 text-base font-medium tracking-tight text-black transition hover:border-slate-300 hover:bg-slate-50 xl:px-4"
+            >
+              <IconUser className="h-[18px] w-[18px] shrink-0 text-slate-700" aria-hidden />
+              <span className="whitespace-nowrap">Connexion</span>
+            </Link>
+            <CalendlyBookingLink
+              className="inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-[10px] bg-[#1d4ed8] px-3.5 py-2 text-base font-semibold tracking-tight text-white shadow-md shadow-[#1d4ed8]/22 transition hover:bg-[#1e40af] xl:px-4"
+            >
+              <IconCalendar className="h-[18px] w-[18px] shrink-0 text-white" aria-hidden />
+              <span className="whitespace-nowrap">Réserver un appel</span>
+            </CalendlyBookingLink>
+          </div>
           <nav
-            className="relative flex min-w-0 items-center justify-end gap-4 whitespace-nowrap xl:gap-5"
+            className="relative flex min-w-0 max-w-full flex-wrap items-center justify-end gap-x-4 gap-y-2 whitespace-nowrap xl:gap-x-5"
             aria-label="Navigation principale"
           >
             <div
@@ -340,7 +355,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               </div>
               {resourcesOpen ? (
                 <nav
-                  className="bework-header-dropdown-enter absolute left-0 top-full z-[70] mt-2.5 hidden max-h-[min(70vh,calc(100dvh-5rem))] w-[min(420px,calc(100vw-2rem))] overflow-y-auto overflow-x-hidden rounded-xl border border-slate-200 bg-[#f8fafc] py-4 whitespace-normal shadow-md shadow-slate-900/[0.08] lg:block"
+                  className="bework-header-dropdown-enter absolute right-0 left-auto top-full z-[70] mt-2.5 hidden max-h-[min(70vh,calc(100dvh-5rem))] w-[min(420px,calc(100vw-2rem))] overflow-y-auto overflow-x-hidden rounded-xl border border-slate-200 bg-[#f8fafc] py-4 whitespace-normal shadow-md shadow-slate-900/[0.08] lg:block"
                   aria-label="Ressources"
                   role="menu"
                 >
@@ -387,22 +402,6 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               ) : null}
             </div>
           </nav>
-
-          <div className="flex shrink-0 items-center gap-2 whitespace-nowrap xl:gap-2.5">
-            <Link
-              href="/connexion"
-              className="inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-[10px] border border-slate-200 bg-white px-3.5 py-2 text-base font-medium tracking-tight text-black transition hover:border-slate-300 hover:bg-slate-50 xl:px-4"
-            >
-              <IconUser className="h-[18px] w-[18px] shrink-0 text-slate-700" aria-hidden />
-              <span className="whitespace-nowrap">Connexion</span>
-            </Link>
-            <CalendlyBookingLink
-              className="inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-[10px] bg-[#1d4ed8] px-3.5 py-2 text-base font-semibold tracking-tight text-white shadow-md shadow-[#1d4ed8]/22 transition hover:bg-[#1e40af] xl:px-4"
-            >
-              <IconCalendar className="h-[18px] w-[18px] shrink-0 text-white" aria-hidden />
-              <span className="whitespace-nowrap">Réserver un appel</span>
-            </CalendlyBookingLink>
-          </div>
         </div>
 
         {/* Burger : même ligne, à droite &lt; lg */}
@@ -431,12 +430,12 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
       {/* Menu mobile */}
       <div
         id="marketing-mobile-nav"
-        className={`fixed inset-x-0 bottom-0 top-0 z-40 bg-white pt-[calc(6.75rem+env(safe-area-inset-top,0px))] transition-[opacity,visibility] duration-200 sm:pt-[calc(8.25rem+env(safe-area-inset-top,0px))] md:pt-[calc(11rem+env(safe-area-inset-top,0px))] lg:hidden ${
+        className={`fixed inset-x-0 bottom-0 top-0 z-40 bg-white pt-[calc(10.5rem+env(safe-area-inset-top,0px))] transition-[opacity,visibility] duration-200 sm:pt-[calc(11.25rem+env(safe-area-inset-top,0px))] md:pt-[calc(12rem+env(safe-area-inset-top,0px))] lg:hidden ${
           mobileOpen ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"
         }`}
         aria-hidden={!mobileOpen}
       >
-        <div className="h-[calc(100dvh-6.75rem-env(safe-area-inset-top,0px))] overflow-y-auto pb-10 pt-4 sm:h-[calc(100dvh-8.25rem-env(safe-area-inset-top,0px))] md:h-[calc(100dvh-11rem-env(safe-area-inset-top,0px))]">
+        <div className="h-[calc(100dvh-10.5rem-env(safe-area-inset-top,0px))] overflow-y-auto pb-10 pt-4 sm:h-[calc(100dvh-11.25rem-env(safe-area-inset-top,0px))] md:h-[calc(100dvh-12rem-env(safe-area-inset-top,0px))]">
           <div className="container-site flex flex-col gap-6">
             <div>
               <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[#1d4ed8]">

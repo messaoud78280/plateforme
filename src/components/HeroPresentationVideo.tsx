@@ -48,7 +48,7 @@ export function HeroPresentationVideo({ className = "" }: { className?: string }
       id="presentation"
       role="region"
       aria-label="Vidéo de présentation BeWork — lecture automatique, son désactivé par défaut"
-      className={`relative isolate mx-auto flex w-full shrink-0 justify-center translate-y-[50px] before:pointer-events-none before:absolute before:left-1/2 before:top-1/2 before:-z-10 before:size-[380px] before:-translate-x-1/2 before:-translate-y-1/2 before:bg-[radial-gradient(circle,rgba(37,99,235,0.10),transparent_70%)] before:content-[''] lg:mx-0 ${className}`}
+      className={`relative isolate mx-auto flex w-full max-w-full shrink-0 justify-center translate-y-[50px] before:pointer-events-none before:absolute before:left-1/2 before:top-1/2 before:-z-10 before:size-[min(380px,92vw)] before:-translate-x-1/2 before:-translate-y-1/2 before:bg-[radial-gradient(circle,rgba(37,99,235,0.10),transparent_70%)] before:content-[''] lg:mx-0 ${className}`}
     >
       <div className="group mx-auto w-full max-w-[290px] transition-transform duration-300 ease-out will-change-transform group-hover:scale-[1.02] motion-reduce:transition-none motion-reduce:group-hover:scale-100 lg:mx-0 lg:max-h-[524px] lg:max-w-[300px]">
         <div

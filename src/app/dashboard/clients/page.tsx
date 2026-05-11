@@ -52,7 +52,7 @@ export default async function ClientsPage() {
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl surface-metallic-light shadow-sm">
+        <div className="overflow-x-auto rounded-xl surface-metallic-light shadow-sm">
           <table className="w-full min-w-[600px] text-left text-sm">
             <thead>
               <tr className="border-b border-[#c8cdd6] bg-[#f8f9fb] text-black">

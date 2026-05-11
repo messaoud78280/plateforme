@@ -9,6 +9,11 @@ html {
   scroll-behavior: auto;
 }
 
+body {
+  min-width: 0;
+  width: 100%;
+}
+
 /* Design system BeWork – clair, premium, sobre (sans effet métal/verre) */
 :root {
   --background: #f8fafc;
@@ -141,8 +146,15 @@ html {
     margin-right: auto;
     width: 100%;
     max-width: var(--site-max-width);
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
+  }
+
+  @media (min-width: 640px) {
+    .container-site {
+      padding-left: max(1.5rem, env(safe-area-inset-left, 0px));
+      padding-right: max(1.5rem, env(safe-area-inset-right, 0px));
+    }
   }
 
   /** Cartes service — apparition léger stagger + préparation hover (hover géré par Tailwind sur la carte) */

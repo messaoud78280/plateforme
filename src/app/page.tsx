@@ -166,13 +166,13 @@ const homeJsonLd = {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9]">
+    <div className="min-h-screen min-w-0 overflow-x-clip bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }} />
       <MarketingSiteHeader plainBg />
 
       <main className="pt-0">
         {/* Hero → Problème → Solution → Comment ça marche : un seul fond (dégradé + métallique continu) */}
-        <div className="relative bg-gradient-to-b from-white via-[#fdfefe] to-[#F8FAFC]">
+        <div className="relative overflow-x-clip bg-gradient-to-b from-white via-[#fdfefe] to-[#F8FAFC]">
           <div
             className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-b from-white/50 via-transparent to-transparent"
             aria-hidden
@@ -196,7 +196,7 @@ export default function HomePage() {
             {/* Hero compact premium — 1200px, grille 55/45 */}
             <section
               id="hero"
-              className="relative overflow-visible bg-transparent pb-20 pt-0 lg:pt-1"
+              className="relative overflow-x-clip overflow-y-visible bg-transparent pb-20 pt-0 lg:pt-1"
               style={{ scrollMarginTop: "6rem" }}
             >
               <div className="container-site relative z-[1]">
@@ -225,14 +225,11 @@ export default function HomePage() {
                 </p>
 
                 <h1
-                  className="text-balance text-[clamp(1.375rem,calc(0.3rem+2.83vw),2.75rem)] font-sans leading-[1.05] tracking-[-0.02em]"
+                  className="text-balance text-[clamp(1.2rem,calc(0.45rem+2vw),1.95rem)] font-sans font-bold leading-snug tracking-[-0.015em] sm:leading-[1.35] lg:max-w-[38rem]"
                   style={{ fontFamily: "var(--font-inter), var(--font-geist-sans), system-ui, sans-serif" }}
                 >
-                  <span className="block font-bold text-[#0F172A]">On tient le bureau,</span>
-                  <span className="mt-[0.125em] flex flex-wrap items-baseline justify-start gap-x-2 font-extrabold text-[#3072F0]">
-                    <span className="shrink-0 whitespace-nowrap">vous tenez</span>
-                    <span className="shrink-0 whitespace-nowrap">le chantier.</span>
-                  </span>
+                  <span className="text-[#0F172A]">Un assistant travaux à vos côtés pour </span>
+                  <span className="text-[#3072F0]">tenir le rythme du chantier.</span>
                 </h1>
 
                 <p className="mx-auto max-w-[580px] text-lg leading-[1.62] text-balance text-slate-700 lg:mx-0 lg:max-w-none lg:text-[20px] lg:leading-snug">

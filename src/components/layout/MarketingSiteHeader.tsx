@@ -185,7 +185,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
   /** Fond blanc plein (maquette SaaS type Stripe / Notion) */
   const bgClass = plainBg ? "bg-white" : scrolled ? "bg-white shadow-[0_1px_0_0_rgb(226,232,240)]" : "bg-white";
 
-  const barPy = scrolled ? "py-2.5 md:py-3" : "py-3.5 md:py-4";
+  const barPy = scrolled ? "py-2 sm:py-2.5 md:py-3" : "py-2.5 sm:py-3.5 md:py-4";
 
   return (
     <header
@@ -200,7 +200,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
           <Link href="/" className="group inline-block max-w-full transition-opacity hover:opacity-90" aria-label="BeWork — Accueil">
             <BeWorkLogo
               size="sm"
-              imageClassName="h-[5.5rem] max-w-[min(100%,22rem)] sm:h-[6rem] sm:max-w-[min(100%,24rem)] md:h-[6.5rem] md:max-w-[min(100%,28rem)] drop-shadow-[0_1px_0_rgba(15,23,42,0.12)]"
+              imageClassName="h-12 max-w-[min(100%,14rem)] drop-shadow-[0_1px_0_rgba(15,23,42,0.12)] sm:h-14 sm:max-w-[min(100%,17rem)] md:h-20 md:max-w-[min(100%,22rem)] lg:h-[5.5rem] lg:max-w-[min(100%,28rem)]"
             />
           </Link>
         </div>
@@ -430,12 +430,12 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
       {/* Menu mobile */}
       <div
         id="marketing-mobile-nav"
-        className={`fixed inset-x-0 bottom-0 top-0 z-40 bg-white pt-[4.75rem] transition-[opacity,visibility] duration-200 lg:hidden ${
+        className={`fixed inset-x-0 bottom-0 top-0 z-40 bg-white pt-[calc(4rem+env(safe-area-inset-top,0px))] transition-[opacity,visibility] duration-200 sm:pt-[calc(4.5rem+env(safe-area-inset-top,0px))] lg:hidden ${
           mobileOpen ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"
         }`}
         aria-hidden={!mobileOpen}
       >
-        <div className="h-[calc(100dvh-4.75rem)] overflow-y-auto border-t border-slate-100 pb-10 pt-4">
+        <div className="h-[calc(100dvh-4rem-env(safe-area-inset-top,0px))] overflow-y-auto border-t border-slate-100 pb-10 pt-4 sm:h-[calc(100dvh-4.5rem-env(safe-area-inset-top,0px))]">
           <div className="container-site flex flex-col gap-6">
             <div>
               <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[#1d4ed8]">

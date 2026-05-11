@@ -56,7 +56,7 @@ export function ExpertiseTableSection() {
   return (
     <section
       id="notre-expertise"
-      className="relative scroll-mt-28 overflow-hidden bg-transparent px-6 pb-14 pt-14 md:scroll-mt-32 md:pb-16 md:pt-18 lg:pt-22"
+      className="relative scroll-mt-28 overflow-x-clip overflow-y-visible bg-transparent px-4 pb-14 pt-14 sm:px-6 md:scroll-mt-32 md:pb-16 md:pt-18 lg:pt-22"
       aria-labelledby="expertise-table-heading"
     >
       {/* Renfort droit (lusible sur la zone claire globale), cohérent avec Preuve & crédibilité */}

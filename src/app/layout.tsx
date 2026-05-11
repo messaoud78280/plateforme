@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Inter, Manrope, Orbitron } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
@@ -41,6 +41,12 @@ const orbitron = Orbitron({
 });
 
 const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -225,7 +231,7 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${manrope.variable} ${orbitron.variable} font-sans antialiased text-black`}
+        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${manrope.variable} ${orbitron.variable} min-w-0 overflow-x-clip font-sans antialiased text-black`}
       >
         <script
           type="application/ld+json"

@@ -54,7 +54,7 @@ export default async function DashboardLayout({
         </div>
       </header>
       <DashboardNav role={session.user?.role ?? null} />
-      <main className="mx-auto max-w-site px-4 py-8">{children}</main>
+      <main className="mx-auto max-w-site min-w-0 px-3 py-6 sm:px-4 sm:py-8">{children}</main>
     </div>
   );
 }

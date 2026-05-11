@@ -182,15 +182,15 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
     return () => document.removeEventListener("mousedown", down);
   }, [solutionsOpen, resourcesOpen]);
 
-  /** Fond blanc plein (maquette SaaS type Stripe / Notion) */
-  const bgClass = plainBg ? "bg-white" : scrolled ? "bg-white shadow-[0_1px_0_0_rgb(226,232,240)]" : "bg-white";
+  /** Fond blanc plein — sans trait ni ombre sous la barre */
+  const bgClass = "bg-white";
 
   const barPy = scrolled ? "py-2 sm:py-2.5 md:py-3" : "py-2.5 sm:py-3.5 md:py-4";
 
   return (
     <header
       ref={headerRef}
-      className={`relative sticky top-0 z-50 overflow-visible border-b border-slate-200 transition-[padding,box-shadow] duration-200 ease-out ${bgClass}`}
+      className={`relative sticky top-0 z-50 overflow-visible transition-[padding] duration-200 ease-out ${bgClass}`}
     >
       <div
         className={`container-site grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 lg:grid-cols-[auto_minmax(0,1fr)] lg:gap-x-4 ${barPy} font-sans`}
@@ -200,7 +200,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
           <Link href="/" className="group inline-block max-w-full transition-opacity hover:opacity-90" aria-label="BeWork — Accueil">
             <BeWorkLogo
               size="sm"
-              imageClassName="h-12 max-w-[min(100%,14rem)] drop-shadow-[0_1px_0_rgba(15,23,42,0.12)] sm:h-14 sm:max-w-[min(100%,17rem)] md:h-20 md:max-w-[min(100%,22rem)] lg:h-[5.5rem] lg:max-w-[min(100%,28rem)]"
+              imageClassName="h-[3.84rem] max-w-[min(100%,17.92rem)] sm:h-[4.48rem] sm:max-w-[min(100%,21.76rem)] md:h-[6.4rem] md:max-w-[min(100%,28.16rem)] lg:h-[7.04rem] lg:max-w-[min(100%,35.84rem)]"
             />
           </Link>
         </div>
@@ -430,12 +430,12 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
       {/* Menu mobile */}
       <div
         id="marketing-mobile-nav"
-        className={`fixed inset-x-0 bottom-0 top-0 z-40 bg-white pt-[calc(4rem+env(safe-area-inset-top,0px))] transition-[opacity,visibility] duration-200 sm:pt-[calc(4.5rem+env(safe-area-inset-top,0px))] lg:hidden ${
+        className={`fixed inset-x-0 bottom-0 top-0 z-40 bg-white pt-[calc(5.35rem+env(safe-area-inset-top,0px))] transition-[opacity,visibility] duration-200 sm:pt-[calc(6.5rem+env(safe-area-inset-top,0px))] md:pt-[calc(8.75rem+env(safe-area-inset-top,0px))] lg:hidden ${
           mobileOpen ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"
         }`}
         aria-hidden={!mobileOpen}
       >
-        <div className="h-[calc(100dvh-4rem-env(safe-area-inset-top,0px))] overflow-y-auto border-t border-slate-100 pb-10 pt-4 sm:h-[calc(100dvh-4.5rem-env(safe-area-inset-top,0px))]">
+        <div className="h-[calc(100dvh-5.35rem-env(safe-area-inset-top,0px))] overflow-y-auto pb-10 pt-4 sm:h-[calc(100dvh-6.5rem-env(safe-area-inset-top,0px))] md:h-[calc(100dvh-8.75rem-env(safe-area-inset-top,0px))]">
           <div className="container-site flex flex-col gap-6">
             <div>
               <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[#1d4ed8]">

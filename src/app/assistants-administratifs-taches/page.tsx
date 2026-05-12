@@ -418,7 +418,7 @@ export default function AssistantsAdministratifsTachesPage() {
           </div>
         </section>
 
-        {/* H) Résumé process — le parcours détaillé est sur l’accueil (#comment-ca-marche) */}
+        {/* H) Résumé process — le parcours détaillé est sur l’accueil (#process-bework) */}
         <section className="px-6 py-12 md:py-16" aria-labelledby="process-heading">
           <div className="mx-auto max-w-site">
             <h2 id="process-heading" className="text-2xl font-bold tracking-tight text-black md:text-3xl">
@@ -436,8 +436,8 @@ export default function AssistantsAdministratifsTachesPage() {
               ))}
             </div>
             <p className="mt-8 text-center text-sm text-black">
-              <Link href="/#comment-ca-marche" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
-                Voir le parcours détaillé « Comment ça marche » sur la page d’accueil
+              <Link href="/#process-bework" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
+                Voir le parcours détaillé « Process BeWork » sur la page d’accueil
               </Link>
             </p>
             <ul className="mt-10 flex flex-wrap justify-center gap-4 md:gap-6" role="list">

@@ -179,8 +179,8 @@ export function MarketingSiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/#comment-ca-marche" className={COL_LINK}>
-                  Comment ça marche
+                <Link href="/#process-bework" className={COL_LINK}>
+                  Process BeWork
                 </Link>
               </li>
             </ul>

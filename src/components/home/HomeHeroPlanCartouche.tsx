@@ -12,16 +12,11 @@ export function HomeHeroPlanCartouche() {
         <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-[9px] uppercase leading-tight tracking-[0.12em] text-slate-600 md:text-[10px] md:tracking-[0.14em]">
           <span className="text-slate-500">Projet</span>
           <span className="font-semibold text-[#1e40af]">BeWork</span>
-          <span className="text-slate-500">Échelle</span>
-          <span className="text-slate-700">1 : 50</span>
           <span className="text-slate-500">Date</span>
           <span className="text-slate-700">2026</span>
           <span className="text-slate-500">Dessiné par</span>
           <span className="text-slate-700">BW Team</span>
         </div>
-        <p className="mt-2 border-t border-slate-200/80 pt-2 text-center text-[8px] tracking-wide text-slate-400 md:text-[9px]">
-          Illustration indicative — non contractuelle
-        </p>
       </div>
     </div>
   );

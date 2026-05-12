@@ -29,5 +29,8 @@ export const BTP_PAIN_PAGE_CLUSTER = [
   },
 ] as const;
 
-/** Ancre « Comment ça marche » sur la page d’accueil (parcours unifié). */
-export const BEWORK_COMMENT_CA_MARCHE_PATH = "/#comment-ca-marche" as const;
+/** Ancre canonique section Process BeWork sur la page d’accueil. */
+export const BEWORK_PROCESS_BEW_PATH = "/#process-bework" as const;
+
+/** @deprecated Utiliser `BEWORK_PROCESS_BEW_PATH` */
+export const BEWORK_COMMENT_CA_MARCHE_PATH = BEWORK_PROCESS_BEW_PATH;

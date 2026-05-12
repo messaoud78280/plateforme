@@ -686,10 +686,10 @@ export default function TarifsPage() {
           </p>
         </section>
 
-        {/* Comment ça marche */}
+        {/* Process BeWork */}
         <section className="mt-14" aria-labelledby="process-heading">
           <h2 id="process-heading" className="text-xl font-bold text-black md:text-2xl">
-            Comment ça marche
+            Process BeWork
           </h2>
           <div className="mt-6 grid gap-6 md:grid-cols-3">
             {etapes.map((e, i) => (

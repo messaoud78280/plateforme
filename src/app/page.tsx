@@ -175,7 +175,7 @@ export default function HomePage() {
       <MarketingSiteHeader plainBg />
 
       <main className="pt-0">
-        {/* Hero → Problème → Solution → Comment ça marche : un seul fond (dégradé + métallique continu) */}
+        {/* Hero → Problème → Solution → Process BeWork : un seul fond (dégradé + métallique continu) */}
         <div className="relative overflow-x-clip bg-gradient-to-b from-white via-[#fdfefe] to-[#F8FAFC]">
           <div
             className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-b from-white/50 via-transparent to-transparent"
@@ -243,8 +243,8 @@ export default function HomePage() {
               <HomeHeroMetalCorners />
               <HomeHeroPlanSketchDecor />
               <div className="container-site relative z-[1]">
-            <div className="grid items-center gap-10 text-center lg:grid-cols-[minmax(0,1.08fr)_minmax(280px,1fr)] lg:items-start lg:gap-x-10 xl:gap-x-14 lg:gap-y-0 lg:text-left">
-              <div className="mx-auto flex w-full min-w-0 max-w-[540px] flex-col gap-6 lg:mx-0 lg:max-w-none lg:gap-5 lg:pt-10 xl:max-w-[560px]">
+            <div className="grid items-center gap-10 text-center lg:grid-cols-[minmax(0,1.08fr)_minmax(280px,1fr)] lg:items-start lg:gap-x-10 xl:grid-cols-[minmax(0,1fr)_minmax(520px,1.15fr)] xl:gap-x-14 lg:gap-y-0 lg:text-left">
+              <div className="relative z-[2] mx-auto flex w-full min-w-0 max-w-[540px] flex-col gap-6 lg:mx-0 lg:max-w-none lg:gap-5 lg:pt-10 xl:max-w-[560px]">
                 <p className="mx-auto inline-flex max-w-full items-center gap-2 self-center rounded-full border border-[#93c5fd]/70 bg-gradient-to-r from-[#eff6ff] via-white to-[#eff6ff] px-3.5 py-1.5 text-[12.5px] font-semibold leading-snug tracking-tight text-[#1d4ed8] shadow-[0_8px_28px_-18px_rgba(37,99,235,0.35)] ring-1 ring-white/80 sm:gap-2.5 sm:px-4 sm:text-sm lg:mx-0 lg:self-start">
                   <svg
                     className="size-[15px] shrink-0 sm:size-4"
@@ -292,52 +292,24 @@ export default function HomePage() {
                   ))}
                 </div>
 
-                <div className="mx-auto mt-1 flex w-full max-w-[540px] flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:mx-0 lg:max-w-full lg:justify-start">
-                  <CalendlyBookingLink className="bework-cta-primary-glow inline-flex min-h-[3rem] shrink-0 items-center justify-center gap-2 rounded-xl bg-[#1d4ed8] px-8 py-3.5 text-base font-semibold text-white transition-colors hover:bg-[#1e40af]">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 opacity-95" aria-hidden>
-                      <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                      <path d="M15 3v4M9 3v4M4 13h17" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    Réserver un appel
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="shrink-0 opacity-90" aria-hidden>
-                      <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </CalendlyBookingLink>
-                  <Link
-                    href="/#comment-ca-marche"
-                    className="inline-flex min-h-[3rem] shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-300/90 bg-white/95 px-8 py-3.5 text-base font-semibold tracking-tight text-slate-900 shadow-[0_8px_28px_-16px_rgba(15,23,42,0.12)] ring-1 ring-slate-200/70 backdrop-blur-[2px] transition-colors hover:border-slate-400/90 hover:bg-white"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 text-slate-700" aria-hidden>
-                      <circle cx="12" cy="12" r="9.5" stroke="currentColor" strokeWidth="1.5" />
-                      <path d="M10 9.5 L15.5 12 10 14.8V9.5Z" fill="currentColor" stroke="currentColor" strokeWidth="1" strokeLinejoin="round" />
-                    </svg>
-                    Voir comment ça marche
-                  </Link>
-                </div>
-                <div className="mx-auto mt-2 flex w-full max-w-[540px] flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-start lg:mx-0 lg:max-w-full">
+                {/* CTA hero : lien ressources uniquement — « Réserver un appel » est dans le header */}
+                <div className="mt-1 flex w-full lg:justify-start">
                   <Link
                     href="/ressources"
-                    className="inline-flex min-h-[2.75rem] shrink-0 items-center gap-2 text-[15px] font-semibold text-[#1d4ed8] underline-offset-[6px] transition-colors hover:text-[#1e40af] hover:underline"
+                    className="inline-flex min-h-[2.75rem] items-center gap-2 text-left text-[15px] font-semibold text-[#1d4ed8] underline-offset-[6px] transition-colors hover:text-[#1e40af] hover:underline"
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 opacity-90" aria-hidden>
                       <path d="M8 21V7l8-4v14M8 21l8-4M8 21H6a2 2 0 0 1-2-2v-9M16 17v4M16 3v14" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     Découvrir les ressources
                   </Link>
-                  <span className="hidden h-5 w-px shrink-0 bg-slate-200 sm:block" aria-hidden />
-                  <Link
-                    href="/dashboard/nouvelle-demande"
-                    className="inline-flex min-h-[2.875rem] shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-300/85 bg-white/90 px-6 py-3 text-[15px] font-semibold text-slate-900 shadow-sm ring-1 ring-slate-100/90 backdrop-blur-[2px] transition-colors hover:border-slate-400 hover:bg-white"
-                  >
-                    Confier une tâche
-                  </Link>
                 </div>
 
                 <ul
-                  className="mx-auto mt-5 flex max-w-[580px] flex-col divide-y divide-slate-200/90 sm:mx-auto sm:mt-4 sm:w-full sm:max-w-none sm:flex-row sm:items-center sm:divide-x sm:divide-y-0 sm:divide-slate-200 lg:mx-0 lg:justify-start"
+                  className="mt-6 flex w-full max-w-[580px] flex-col divide-y divide-slate-200 rounded-xl border border-slate-200/70 bg-white/[0.78] px-3 py-1 shadow-[0_8px_28px_-18px_rgba(15,23,42,0.1)] backdrop-blur-md sm:max-w-none sm:flex-row sm:divide-x sm:divide-y-0 sm:items-stretch sm:px-4 sm:py-2 lg:mx-0 lg:max-w-none"
                   aria-label="Engagements"
                 >
-                  <li className="flex flex-1 items-center gap-3 py-4 sm:py-3 sm:first:pr-6 sm:last:pl-6 sm:last:pr-0 sm:[&:nth-child(2)]:px-6">
+                  <li className="flex min-h-[3.25rem] flex-1 items-center gap-3 px-2 py-4 sm:min-h-[3.75rem] sm:px-4 sm:py-4 lg:min-h-[3.5rem]">
                     <span
                       className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#dbeafe] text-[#2563eb] shadow-sm shadow-blue-900/5 ring-[0.5px] ring-[#bfdbfe]/90"
                       aria-hidden
@@ -359,7 +331,7 @@ export default function HomePage() {
                       <span className="block text-slate-600">en 3 à 5 jours</span>
                     </span>
                   </li>
-                  <li className="flex flex-1 items-center gap-3 py-4 sm:py-3 sm:first:pr-6 sm:last:pl-6 sm:last:pr-0 sm:[&:nth-child(2)]:px-6">
+                  <li className="flex min-h-[3.25rem] flex-1 items-center gap-3 px-2 py-4 sm:min-h-[3.75rem] sm:px-4 sm:py-4 lg:min-h-[3.5rem]">
                     <span
                       className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#dbeafe] text-[#2563eb] shadow-sm shadow-blue-900/5 ring-[0.5px] ring-[#bfdbfe]/90"
                       aria-hidden
@@ -395,7 +367,7 @@ export default function HomePage() {
                       <span className="block text-slate-600">recrutement</span>
                     </span>
                   </li>
-                  <li className="flex flex-1 items-center gap-3 py-4 sm:py-3 sm:first:pr-6 sm:last:pl-6 sm:last:pr-0 sm:[&:nth-child(2)]:px-6">
+                  <li className="flex min-h-[3.25rem] flex-1 items-center gap-3 px-2 py-4 sm:min-h-[3.75rem] sm:px-4 sm:py-4 lg:min-h-[3.5rem]">
                     <span
                       className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#dbeafe] text-[#2563eb] shadow-sm shadow-blue-900/5 ring-[0.5px] ring-[#bfdbfe]/90"
                       aria-hidden
@@ -428,7 +400,7 @@ export default function HomePage() {
               </div>
             </section>
 
-            {/* Mini-bloc : définition d’un Beworker (sans dupliquer « Comment ça marche ») */}
+            {/* Mini-bloc : définition d’un Beworker (sans dupliquer « Process BeWork ») */}
             <section className="relative bg-transparent px-6 pb-10 md:pb-12">
               <div className="container-site">
                 <div className="mx-auto max-w-4xl rounded-2xl border border-slate-200/90 bg-white p-6 shadow-[0_10px_40px_-16px_rgba(15,23,42,0.1)] ring-1 ring-slate-100/85 md:p-8">

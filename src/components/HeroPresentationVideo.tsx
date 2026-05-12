@@ -6,14 +6,23 @@ import { useEffect, useRef, useState } from "react";
 const FRAME_SHADOW =
   "0 0 52px -14px rgba(37, 99, 235, 0.42), 0 28px 56px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255,255,255,0.35)";
 
+type HeroPresentationVideoProps = {
+  className?: string;
+  /** Par défaut léger décalage vertical ; désactiver quand la vidéo est empilée sous un autre bloc hero */
+  verticalShift?: boolean;
+};
+
 /** Hero vidéo — cadre type smartphone pro, contour métallique léger + ligne bleue */
-export function HeroPresentationVideo({ className = "" }: { className?: string }) {
+export function HeroPresentationVideo({ className = "", verticalShift = true }: HeroPresentationVideoProps) {
   const ref = useRef<HTMLVideoElement>(null);
   const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     const v = ref.current;
     if (!v) return;
+    v.defaultMuted = true;
+    v.muted = true;
+
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     const syncPaused = () => setPaused(v.paused);
@@ -21,23 +30,27 @@ export function HeroPresentationVideo({ className = "" }: { className?: string }
     v.addEventListener("pause", syncPaused);
     v.addEventListener("ended", syncPaused);
 
-    const apply = () => {
+    const tryPlay = () => {
       if (mq.matches) {
         v.pause();
       } else {
-        v.play().catch(() => {
+        void v.play().catch(() => {
           syncPaused();
         });
       }
       syncPaused();
     };
 
-    apply();
-    mq.addEventListener("change", apply);
+    tryPlay();
+    const onLoadedData = () => tryPlay();
+    v.addEventListener("loadeddata", onLoadedData);
+
+    mq.addEventListener("change", tryPlay);
     const t = window.setTimeout(syncPaused, 400);
     return () => {
       window.clearTimeout(t);
-      mq.removeEventListener("change", apply);
+      mq.removeEventListener("change", tryPlay);
+      v.removeEventListener("loadeddata", onLoadedData);
       v.removeEventListener("play", syncPaused);
       v.removeEventListener("pause", syncPaused);
       v.removeEventListener("ended", syncPaused);
@@ -49,7 +62,7 @@ export function HeroPresentationVideo({ className = "" }: { className?: string }
       id="presentation"
       role="region"
       aria-label="Vidéo de présentation BeWork — lecture automatique, son désactivé par défaut"
-      className={`relative isolate mx-auto flex w-full max-w-full shrink-0 justify-center translate-y-[36px] lg:translate-y-[44px] ${className}`}
+      className={`relative isolate mx-auto flex w-full max-w-full shrink-0 justify-center ${verticalShift ? "translate-y-[36px] lg:translate-y-[44px]" : ""} ${className}`}
     >
       {/* Halo radial */}
       <div
@@ -91,7 +104,7 @@ export function HeroPresentationVideo({ className = "" }: { className?: string }
                 playsInline
                 controls
                 controlsList="nodownload"
-                preload="metadata"
+                preload="auto"
                 poster="/opengraph-image"
                 title="Présentation BeWork"
                 src="/video/presentation.mp4"
@@ -106,7 +119,7 @@ export function HeroPresentationVideo({ className = "" }: { className?: string }
                 <button
                   type="button"
                   aria-label="Lancer la vidéo"
-                  className="absolute inset-0 z-[2] flex items-center justify-center bg-black/20 transition hover:bg-black/28"
+                  className="absolute inset-0 z-[25] flex items-center justify-center bg-black/20 transition hover:bg-black/28"
                   onClick={() => {
                     void ref.current?.play();
                   }}

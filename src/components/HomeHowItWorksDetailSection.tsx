@@ -44,15 +44,21 @@ const STEPS: {
   },
 ];
 
-/** Section unique « Comment ça marche » — parcours aligné sur la homepage */
+/** Section « Process BeWork » — parcours aligné sur la homepage */
 export function HomeHowItWorksDetailSection() {
   return (
     <section
-      id="comment-ca-marche"
+      id="process-bework"
       className="relative scroll-mt-28 bg-transparent pt-10 pb-12 md:pt-12 md:pb-14 lg:pt-14 lg:pb-16"
       style={{ fontFamily: fontSans }}
       aria-labelledby="how-detail-heading"
     >
+      {/* Ancre héritée : anciens liens / signets #comment-ca-marche */}
+      <span
+        id="comment-ca-marche"
+        className="pointer-events-none absolute left-0 top-0 block h-px w-px overflow-hidden opacity-0"
+        aria-hidden
+      />
       <div className="container-site relative z-[1]">
         <header className="mx-auto mb-16 max-w-3xl text-center md:mb-20">
           <h2
@@ -60,7 +66,7 @@ export function HomeHowItWorksDetailSection() {
             className="text-[13px] font-semibold uppercase tracking-[0.22em]"
             style={{ color: BLUE }}
           >
-            Comment ça marche
+            Process BeWork
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-relaxed text-slate-600 md:mt-6 md:text-lg">
             Un seul parcours, du premier message à une organisation plus fluide — sans vous noyer dans l’administratif.

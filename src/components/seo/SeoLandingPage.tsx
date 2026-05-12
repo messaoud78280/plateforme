@@ -85,7 +85,7 @@ export function SeoLandingPage({ description, h1, intro, children, breadcrumbIte
                 href="/notre-facon-de-travailler"
                 className="inline-flex min-h-[3rem] items-center justify-center rounded-xl border-2 border-slate-200 bg-white px-5 py-3 text-base font-semibold text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
               >
-                Voir comment ça marche
+                Voir le Process BeWork
               </Link>
             </div>
             <p className="mt-5 text-sm text-slate-600">

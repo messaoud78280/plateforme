@@ -311,10 +311,10 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             </div>
 
             <Link
-              href="/#comment-ca-marche"
+              href="/#process-bework"
               className="rounded-[10px] px-1.5 py-2 text-sm font-[530] tracking-tight text-black whitespace-nowrap transition-colors hover:text-[#1d4ed8] xl:px-2"
             >
-              Comment ça marche
+              Process BeWork
             </Link>
             <Link
               href="/tarifs"
@@ -500,11 +500,11 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
 
             <nav className="flex flex-col gap-1 border-t border-slate-100 pt-4" aria-label="Navigation mobile">
               <Link
-                href="/#comment-ca-marche"
+                href="/#process-bework"
                 className="rounded-lg px-3 py-3 text-sm font-[530] text-slate-800 hover:bg-slate-50"
                 onClick={() => setMobileOpen(false)}
               >
-                Comment ça marche
+                Process BeWork
               </Link>
               <Link href="/tarifs" className="rounded-lg px-3 py-3 text-sm font-[530] text-slate-800 hover:bg-slate-50" onClick={() => setMobileOpen(false)}>
                 Tarifs

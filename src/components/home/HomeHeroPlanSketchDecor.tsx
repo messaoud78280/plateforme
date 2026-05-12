@@ -40,13 +40,6 @@ export function HomeHeroPlanSketchDecor() {
           </text>
         </g>
 
-        <g opacity="0.9">
-          <circle cx="980" cy="120" r="22" stroke="currentColor" strokeWidth="0.9" fill="none" strokeDasharray="2 3" />
-          <text x="1006" y="125" fill="#1e40af" style={{ fontFamily: MONO, fontSize: "10px" }}>
-            R18
-          </text>
-        </g>
-
         <g stroke="currentColor" strokeWidth="0.75" fill="none" opacity="0.88">
           <path d="M 210 520 L 250 520 L 250 480" />
           <path d="M 218 520 A 22 22 0 0 1 250 488" />

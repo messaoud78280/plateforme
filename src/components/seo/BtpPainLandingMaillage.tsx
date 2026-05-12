@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { EXTERNALISATION_ADMIN_BT_NAV } from "@/lib/externalisation-administrative-btp-geo";
-import { BEWORK_COMMENT_CA_MARCHE_PATH, BTP_PAIN_PAGE_CLUSTER } from "@/lib/btp-pain-pages";
+import { BEWORK_PROCESS_BEW_PATH, BTP_PAIN_PAGE_CLUSTER } from "@/lib/btp-pain-pages";
 
 type Props = {
   /** URL courante (exclue du bloc « autres angles »). */
@@ -53,7 +53,7 @@ export function BtpPainLandingMaillage({ currentHref }: Props) {
             Forfaits & tarifs
           </Link>
           <Link
-            href={BEWORK_COMMENT_CA_MARCHE_PATH}
+            href={BEWORK_PROCESS_BEW_PATH}
             className="inline-flex rounded-lg border border-black/15 bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-slate-50"
           >
             Comment BeWork travaille

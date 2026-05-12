@@ -73,7 +73,7 @@ function CardIcon({ id }: { id: (typeof SECONDARY_CARDS)[number]["icon"] }) {
 }
 
 /**
- * Section « Ce qu’on gère pour vous » — sous « Comment ça marche », même esprit premium SaaS.
+ * Section « Ce qu’on gère pour vous » — sous « Process BeWork », même esprit premium SaaS.
  */
 export function HomeWhatWeHandleSection() {
   return (
@@ -83,7 +83,7 @@ export function HomeWhatWeHandleSection() {
       style={{ scrollMarginTop: "6rem" }}
       aria-labelledby="what-we-handle-heading"
     >
-      {/* Même fond que « Comment ça marche » : pas de dégradé vers le blanc (laisser la courbe grise du parent) */}
+      {/* Même fond que « Process BeWork » : pas de dégradé vers le blanc (laisser la courbe grise du parent) */}
       <div className="container-site relative z-10">
         {/* 1 — En-tête (centré) */}
         <div className="mx-auto max-w-3xl text-center">

@@ -184,10 +184,10 @@ export function HomeCredibilitySection() {
 
             <div className="flex shrink-0 md:justify-end">
               <Link
-                href="/#comment-ca-marche"
+                href="/#process-bework"
                 className="inline-flex w-full min-h-[3rem] items-center justify-center gap-1.5 rounded-xl bg-[#1d4ed8] px-5 py-3 text-base font-semibold text-white shadow-md shadow-[#1d4ed8]/22 transition hover:bg-[#1e40af] md:w-auto md:px-7"
               >
-                Voir comment ça marche
+                Voir le Process BeWork
                 <span aria-hidden>→</span>
               </Link>
             </div>

@@ -159,6 +159,40 @@ body {
     }
   }
 
+  /** Homepage — grille type plan technique (très discrète) */
+  .bework-blueprint-grid {
+    background-image:
+      linear-gradient(to right, rgba(100, 116, 139, 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(100, 116, 139, 0.06) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+
+  /** Hero — papier millimétré légèrement bleuté (maquette blueprint BTP) */
+  .bework-blueprint-grid--hero {
+    background-image:
+      linear-gradient(to right, rgba(37, 99, 235, 0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(37, 99, 235, 0.045) 1px, transparent 1px),
+      linear-gradient(to right, rgba(148, 163, 184, 0.055) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(148, 163, 184, 0.055) 1px, transparent 1px);
+    background-size:
+      36px 36px,
+      36px 36px,
+      9px 9px,
+      9px 9px;
+    background-position:
+      0 0,
+      0 0,
+      0 0,
+      0 0;
+  }
+
+  /** CTA principal — léger halo bleu (header / hero) */
+  .bework-cta-primary-glow {
+    box-shadow:
+      0 4px 16px rgba(29, 78, 216, 0.32),
+      0 0 36px rgba(37, 99, 235, 0.18);
+  }
+
   /** Cartes service — apparition léger stagger + préparation hover (hover géré par Tailwind sur la carte) */
   .bework-what-handle-card {
     animation: bework-what-handle-card-in 0.58s cubic-bezier(0.25, 0.46, 0.45, 0.94) backwards;

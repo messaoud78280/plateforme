@@ -226,7 +226,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               <span className="whitespace-nowrap">Connexion</span>
             </Link>
             <CalendlyBookingLink
-              className="inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-[10px] bg-[#1d4ed8] px-3.5 py-2 text-base font-semibold tracking-tight text-white shadow-md shadow-[#1d4ed8]/22 transition hover:bg-[#1e40af] xl:px-4"
+              className="inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-[10px] bg-[#1d4ed8] px-3.5 py-2 text-base font-semibold tracking-tight text-white bework-cta-primary-glow transition hover:bg-[#1e40af] xl:px-4"
             >
               <IconCalendar className="h-[18px] w-[18px] shrink-0 text-white" aria-hidden />
               <span className="whitespace-nowrap">Réserver un appel</span>
@@ -491,7 +491,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 ))}
               </ul>
               <CalendlyBookingLink
-                className="mt-2 inline-flex min-h-[3rem] justify-center rounded-xl bg-[#1d4ed8] px-4 py-3 text-base font-semibold text-white shadow-md shadow-[#1d4ed8]/20 hover:bg-[#1e40af]"
+                className="mt-2 inline-flex min-h-[3rem] justify-center rounded-xl bg-[#1d4ed8] px-4 py-3 text-base font-semibold text-white bework-cta-primary-glow hover:bg-[#1e40af]"
                 onClick={() => setMobileOpen(false)}
               >
                 Réserver un appel
@@ -554,7 +554,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 Connexion
               </Link>
               <CalendlyBookingLink
-                className="inline-flex min-h-[3rem] items-center justify-center gap-2 rounded-[10px] bg-[#1d4ed8] px-4 py-3 text-base font-semibold text-white shadow-md shadow-[#1d4ed8]/20 hover:bg-[#1e40af]"
+                className="inline-flex min-h-[3rem] items-center justify-center gap-2 rounded-[10px] bg-[#1d4ed8] px-4 py-3 text-base font-semibold text-white bework-cta-primary-glow hover:bg-[#1e40af]"
                 onClick={() => setMobileOpen(false)}
               >
                 <IconCalendar className="h-[18px] w-[18px]" aria-hidden />

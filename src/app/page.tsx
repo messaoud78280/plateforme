@@ -11,7 +11,11 @@ import { HomeCallCtaBanner } from "@/components/HomeCallCtaBanner";
 import { HomePricingSection } from "@/components/HomePricingSection";
 import { HomeSolutionSection } from "@/components/HomeSolutionSection";
 import { HomeSectorExamplesSection } from "@/components/HomeSectorExamplesSection";
-import { HeroPresentationVideo } from "@/components/HeroPresentationVideo";
+import { HomeHeroAside } from "@/components/home/HomeHeroAside";
+import { HomeBlueprintScrollDecor } from "@/components/home/HomeBlueprintScrollDecor";
+import { HomeHeroMetalCorners } from "@/components/home/HomeHeroMetalCorners";
+import { HomeHeroPlanCartouche } from "@/components/home/HomeHeroPlanCartouche";
+import { HomeHeroPlanSketchDecor } from "@/components/home/HomeHeroPlanSketchDecor";
 import { ConciergerieDirigeantSection } from "@/components/ConciergerieDirigeantSection";
 import { HomeGeoExternalisationCards } from "@/components/HomeGeoExternalisationCards";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
@@ -24,7 +28,7 @@ import { SEO_KEYWORDS_HOME } from "@/lib/seo-keywords";
 import { EXTERNALISATION_ADMIN_BT_NAV } from "@/lib/externalisation-administrative-btp-geo";
 import { SITE_URL, absoluteUrl } from "@/lib/site";
 
-/** Vidéo hero — même fichier que `HeroPresentationVideo` ; durée ~13 s (fichier court présentation). */
+/** Vidéo hero — même fichier que dans `HeroPresentationVideo` ; durée ~13 s (fichier court présentation). */
 const PRESENTATION_VIDEO_MP4 = "/video/presentation.mp4";
 const PRESENTATION_VIDEO_DURATION_ISO = "PT13S";
 
@@ -192,17 +196,56 @@ export default function HomePage() {
                 "repeating-linear-gradient(120deg, rgba(15,23,42,0.14) 0px, rgba(15,23,42,0.14) 1px, transparent 1px, transparent 7px)",
             }}
           />
+          {/* Quadrillage plan — papier millimétré bleuté */}
+          <div className="pointer-events-none absolute inset-0 z-[3] bework-blueprint-grid--hero opacity-[0.42] md:opacity-[0.38]" aria-hidden />
+          {/* Courbe métallique centrale — complète les arcs coins */}
+          <div
+            className="pointer-events-none absolute inset-x-[-8%] top-[-6%] z-[4] h-[min(48vh,480px)] opacity-[0.26] md:inset-x-[-4%] md:opacity-[0.22]"
+            aria-hidden
+          >
+            <svg viewBox="0 0 1400 520" className="h-full w-full min-w-[900px]" preserveAspectRatio="xMidYMid slice">
+              <defs>
+                <linearGradient id="bework-hero-metal" x1="0%" y1="0%" x2="100%" y2="35%">
+                  <stop offset="0%" stopColor="#cbd5e1" />
+                  <stop offset="45%" stopColor="#f1f5f9" />
+                  <stop offset="100%" stopColor="#94a3b8" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M-120 440 Q 380 60 760 280 T 1520 120"
+                stroke="url(#bework-hero-metal)"
+                strokeWidth="18"
+                fill="none"
+                strokeLinecap="round"
+                opacity="0.55"
+              />
+              <path
+                d="M-120 440 Q 380 60 760 280 T 1520 120"
+                stroke="#2563eb"
+                strokeWidth="2.25"
+                fill="none"
+                strokeLinecap="round"
+                opacity="0.42"
+              />
+            </svg>
+          </div>
           <div className="relative z-10">
+            <div className="pointer-events-none absolute inset-0 z-[1] overflow-hidden" aria-hidden>
+              <HomeBlueprintScrollDecor />
+            </div>
+            <div className="relative z-[2]">
             {/* Hero compact premium — 1200px, grille 55/45 */}
             <section
               id="hero"
               className="relative overflow-x-clip overflow-y-visible bg-transparent pb-20 pt-0 lg:pt-1"
               style={{ scrollMarginTop: "6rem" }}
             >
+              <HomeHeroMetalCorners />
+              <HomeHeroPlanSketchDecor />
               <div className="container-site relative z-[1]">
-            <div className="grid items-center gap-8 text-center lg:grid-cols-[1.15fr_0.85fr] lg:items-start lg:gap-x-[4.75rem] lg:gap-y-0 lg:text-left">
-              <div className="mx-auto flex w-full min-w-0 max-w-[580px] flex-col gap-6 lg:mx-0 lg:max-w-none lg:gap-5 lg:pt-12">
-                <p className="mx-auto inline-flex max-w-full items-center gap-2 self-center rounded-full border border-[#bfdbfe] bg-[#eff6ff] px-3.5 py-1.5 text-[12.5px] font-medium leading-snug text-[#2563eb] sm:gap-2.5 sm:px-4 sm:text-sm lg:mx-0 lg:self-start">
+            <div className="grid items-center gap-10 text-center lg:grid-cols-[minmax(0,1.08fr)_minmax(280px,1fr)] lg:items-start lg:gap-x-10 xl:gap-x-14 lg:gap-y-0 lg:text-left">
+              <div className="mx-auto flex w-full min-w-0 max-w-[540px] flex-col gap-6 lg:mx-0 lg:max-w-none lg:gap-5 lg:pt-10 xl:max-w-[560px]">
+                <p className="mx-auto inline-flex max-w-full items-center gap-2 self-center rounded-full border border-[#93c5fd]/70 bg-gradient-to-r from-[#eff6ff] via-white to-[#eff6ff] px-3.5 py-1.5 text-[12.5px] font-semibold leading-snug tracking-tight text-[#1d4ed8] shadow-[0_8px_28px_-18px_rgba(37,99,235,0.35)] ring-1 ring-white/80 sm:gap-2.5 sm:px-4 sm:text-sm lg:mx-0 lg:self-start">
                   <svg
                     className="size-[15px] shrink-0 sm:size-4"
                     viewBox="0 0 24 24"
@@ -220,45 +263,49 @@ export default function HomePage() {
                   <span>Assistant de gestion travaux · Relais BTP · Augmenté par l’IA</span>
                 </p>
 
-                <p className="mx-auto max-w-[580px] text-[15px] leading-relaxed text-balance text-slate-700 lg:mx-0 lg:max-w-none lg:text-[16px] lg:leading-relaxed">
+                <p className="mx-auto max-w-[540px] text-[15px] leading-relaxed text-balance text-slate-600 lg:mx-0 lg:max-w-none lg:text-[15px] lg:leading-relaxed">
                   Le relais BTP qui vous aide à produire vos documents, suivre vos chantiers et répondre plus vite.
                 </p>
 
                 <h1
-                  className="text-balance text-[clamp(1.2rem,calc(0.45rem+2vw),1.95rem)] font-sans font-bold leading-snug tracking-[-0.015em] sm:leading-[1.35] lg:max-w-[38rem]"
+                  className="text-balance text-[clamp(1.35rem,calc(0.55rem+2.35vw),2.35rem)] font-sans font-extrabold leading-[1.18] tracking-[-0.02em] sm:leading-[1.22] lg:max-w-[40rem]"
                   style={{ fontFamily: "var(--font-inter), var(--font-geist-sans), system-ui, sans-serif" }}
                 >
-                  <span className="text-[#0F172A]">Un assistant travaux à vos côtés pour </span>
-                  <span className="text-[#3072F0]">tenir le rythme du chantier.</span>
+                  <span className="text-[#0f172a]">Un assistant travaux à vos côtés pour </span>
+                  <span className="text-[#2563eb]">tenir le rythme du chantier</span>
+                  <span className="text-[#0f172a]">.</span>
                 </h1>
 
-                <p className="mx-auto max-w-[580px] text-lg leading-[1.62] text-balance text-slate-700 lg:mx-0 lg:max-w-none lg:text-[20px] lg:leading-snug">
+                <p className="mx-auto max-w-[540px] text-lg leading-[1.62] text-balance text-slate-600 lg:mx-0 lg:max-w-none lg:text-[19px] lg:leading-snug">
                   BeWork accompagne les pros du BTP sur les tâches les plus chronophages&nbsp;: comptes rendus de chantier,
                   analyse de DCE, PPSPS, mémoire technique, chiffrage de devis, dossiers travaux, relances et suivi administratif.
                 </p>
 
-                <div className="mx-auto -mt-1 flex w-full max-w-[580px] flex-wrap justify-center gap-2 lg:mx-0 lg:max-w-none lg:justify-start">
+                <div className="mx-auto -mt-1 flex w-full max-w-[540px] flex-wrap justify-center gap-2 lg:mx-0 lg:max-w-none lg:justify-start">
                   {["DICT", "Commandes matériel", "Engins & locations", "RDV client", "Relances urgentes"].map((tag) => (
                     <span
                       key={tag}
-                      className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-[12px] font-semibold text-slate-700 shadow-sm"
+                      className="inline-flex items-center rounded-full border border-slate-200/90 bg-white/90 px-3 py-1 text-[11.5px] font-semibold tracking-tight text-slate-700 shadow-[0_6px_20px_-14px_rgba(15,23,42,0.14)] ring-1 ring-[#2563eb]/[0.07] backdrop-blur-[2px]"
                     >
                       {tag}
                     </span>
                   ))}
                 </div>
 
-                <div className="mx-auto mt-1 flex w-full max-w-[580px] flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:mx-0 lg:max-w-full lg:justify-start">
-                  <CalendlyBookingLink className="inline-flex min-h-[3rem] shrink-0 items-center justify-center gap-2 rounded-xl bg-[#1d4ed8] px-8 py-3.5 text-base font-semibold text-white shadow-md shadow-[#1d4ed8]/22 transition-colors hover:bg-[#1e40af]">
+                <div className="mx-auto mt-1 flex w-full max-w-[540px] flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center lg:mx-0 lg:max-w-full lg:justify-start">
+                  <CalendlyBookingLink className="bework-cta-primary-glow inline-flex min-h-[3rem] shrink-0 items-center justify-center gap-2 rounded-xl bg-[#1d4ed8] px-8 py-3.5 text-base font-semibold text-white transition-colors hover:bg-[#1e40af]">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 opacity-95" aria-hidden>
                       <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
                       <path d="M15 3v4M9 3v4M4 13h17" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     Réserver un appel
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="shrink-0 opacity-90" aria-hidden>
+                      <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                   </CalendlyBookingLink>
                   <Link
                     href="/#comment-ca-marche"
-                    className="inline-flex min-h-[3rem] shrink-0 items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-8 py-3.5 text-base font-semibold tracking-tight text-slate-900 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
+                    className="inline-flex min-h-[3rem] shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-300/90 bg-white/95 px-8 py-3.5 text-base font-semibold tracking-tight text-slate-900 shadow-[0_8px_28px_-16px_rgba(15,23,42,0.12)] ring-1 ring-slate-200/70 backdrop-blur-[2px] transition-colors hover:border-slate-400/90 hover:bg-white"
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 text-slate-700" aria-hidden>
                       <circle cx="12" cy="12" r="9.5" stroke="currentColor" strokeWidth="1.5" />
@@ -267,16 +314,20 @@ export default function HomePage() {
                     Voir comment ça marche
                   </Link>
                 </div>
-                <div className="mx-auto mt-2 flex w-full max-w-[580px] flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:justify-center lg:mx-0 lg:max-w-full lg:justify-start">
+                <div className="mx-auto mt-2 flex w-full max-w-[540px] flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-start lg:mx-0 lg:max-w-full">
                   <Link
                     href="/ressources"
-                    className="inline-flex min-h-[2.875rem] shrink-0 items-center justify-center gap-2 rounded-xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] px-6 py-3 text-[15px] font-semibold text-[#1e3a8a] transition-colors hover:bg-[#dbeafe]"
+                    className="inline-flex min-h-[2.75rem] shrink-0 items-center gap-2 text-[15px] font-semibold text-[#1d4ed8] underline-offset-[6px] transition-colors hover:text-[#1e40af] hover:underline"
                   >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 opacity-90" aria-hidden>
+                      <path d="M8 21V7l8-4v14M8 21l8-4M8 21H6a2 2 0 0 1-2-2v-9M16 17v4M16 3v14" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                     Découvrir les ressources
                   </Link>
+                  <span className="hidden h-5 w-px shrink-0 bg-slate-200 sm:block" aria-hidden />
                   <Link
                     href="/dashboard/nouvelle-demande"
-                    className="inline-flex min-h-[2.875rem] shrink-0 items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-white px-6 py-3 text-[15px] font-semibold text-slate-900 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
+                    className="inline-flex min-h-[2.875rem] shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-300/85 bg-white/90 px-6 py-3 text-[15px] font-semibold text-slate-900 shadow-sm ring-1 ring-slate-100/90 backdrop-blur-[2px] transition-colors hover:border-slate-400 hover:bg-white"
                   >
                     Confier une tâche
                   </Link>
@@ -369,10 +420,11 @@ export default function HomePage() {
                 </ul>
               </div>
 
-              <div className="relative flex w-full min-w-0 shrink-0 justify-center lg:justify-center lg:self-start">
-                <HeroPresentationVideo />
+              <div className="relative flex w-full min-w-0 shrink-0 justify-center lg:justify-end lg:self-start">
+                <HomeHeroAside />
               </div>
             </div>
+              <HomeHeroPlanCartouche />
               </div>
             </section>
 
@@ -436,13 +488,30 @@ export default function HomePage() {
             {/* Même fond courbe grise que le hero / sections précédentes */}
             <HomeSectorExamplesSection />
             <ConciergerieDirigeantSection />
+            </div>
           </div>
         </div>
 
         {/* Au-dessus du décor skew qui déborde du bloc hero — évite que le panneau gris recouvre le texte */}
-        <div className="relative z-10 bg-gradient-to-b from-[#f8fafc] via-[#f1f5f9] to-[#f1f5f9]">
+        <div className="relative z-10 overflow-x-clip bg-gradient-to-b from-[#f8fafc] via-[#f1f5f9] to-[#f1f5f9]">
+          <div className="pointer-events-none absolute inset-0 bework-blueprint-grid opacity-[0.14] md:opacity-[0.16]" aria-hidden />
+          <div className="pointer-events-none absolute right-0 top-[8%] h-[min(45%,380px)] w-[min(48%,420px)] opacity-[0.035] md:opacity-[0.045]" aria-hidden>
+            <svg className="h-full w-full text-slate-400" viewBox="0 0 200 200" fill="none" preserveAspectRatio="xMidYMid meet">
+              <path
+                d="M20 160 L160 40 M30 170 L170 50"
+                stroke="currentColor"
+                strokeWidth="0.6"
+                strokeDasharray="4 4"
+                opacity="0.6"
+              />
+              <text x="24" y="36" fill="currentColor" style={{ fontFamily: "ui-monospace, monospace", fontSize: "9px" }}>
+                Axe 01
+              </text>
+            </svg>
+          </div>
+          <div className="relative z-[1]">
         {/* Ressources */}
-        <section id="ressources" className="px-6 py-24 md:py-28">
+        <section id="ressources" className="relative px-6 py-24 md:py-28">
           <div className="mx-auto max-w-site">
             <div className="mb-16 max-w-2xl">
               <h2 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
@@ -550,6 +619,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+          </div>
         </div>
       </main>
 

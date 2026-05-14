@@ -1,0 +1,117 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
+import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
+import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
+import { SERVICE_PAGES, SERVICE_PAGE_ORDER } from "@/content/service-pages";
+import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/seo-landing-json-ld";
+import { absoluteUrl } from "@/lib/site";
+
+const path = "/services";
+const url = absoluteUrl(path);
+const title = "Services BeWork — assistants travaux augmentés par l’IA (BTP)";
+const description =
+  "Pages par intention : assistant travaux, conducteur de travaux, chef de chantier, externalisation administrative BTP, comptes rendus, DCE, PPSPS, mémoires techniques, chiffrage, DOE — avec liens vers ressources et tarifs.";
+
+export const metadata: Metadata = {
+  title: { absolute: title },
+  description,
+  alternates: { canonical: url, languages: { fr: url, "x-default": url } },
+  robots: { index: true, follow: true },
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    url,
+    siteName: "BeWork",
+    title,
+    description,
+    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: title }],
+  },
+};
+
+const jsonLd = buildWebPageAndBreadcrumbJsonLd({
+  pagePath: path,
+  h1: "Services BeWork pour le BTP",
+  description,
+  breadcrumbItems: [
+    { name: "Accueil", href: "/" },
+    { name: "Services", href: path },
+  ],
+});
+
+export default function ServicesHubPage() {
+  return (
+    <div className="min-h-screen bg-[#f8fafc]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <MarketingSiteHeader plainBg />
+      <main className="mx-auto max-w-site px-6 py-14 md:py-20">
+        <article className="mx-auto max-w-3xl">
+          <nav className="mb-6 text-sm text-slate-600" aria-label="Fil d’Ariane">
+            <ol className="flex flex-wrap gap-2">
+              <li>
+                <Link href="/" className="font-medium text-[#1d4ed8] hover:underline">
+                  Accueil
+                </Link>
+              </li>
+              <li aria-hidden>/</li>
+              <li className="font-medium text-slate-900">Services</li>
+            </ol>
+          </nav>
+          <h1 className="text-3xl font-bold tracking-tight text-black md:text-[2.35rem]">Services BeWork pour le BTP</h1>
+          <p className="mt-6 text-lg leading-relaxed text-slate-700">
+            Chaque page répond à une intention précise (métier ou mission) et renvoie vers les ressources détaillées lorsqu’elles existent. BeWork est un{" "}
+            <strong>service francophone à distance</strong>, piloté depuis la France, pour entreprises du bâtiment en France, Belgique, Suisse et Luxembourg.
+          </p>
+          <p className="mt-4 text-base leading-relaxed text-slate-600">
+            <span className="font-semibold text-slate-800">En résumé :</span> assistants travaux augmentés par l’IA pour structurer le suivi ; vous gardez la
+            validation sur tout ce qui engage.
+          </p>
+
+          <ul className="mt-12 grid gap-4 sm:grid-cols-2">
+            {SERVICE_PAGE_ORDER.map((slug) => {
+              const p = SERVICE_PAGES[slug];
+              return (
+                <li key={slug}>
+                  <Link
+                    href={`/services/${slug}`}
+                    className="flex h-full flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow"
+                  >
+                    <span className="text-sm font-bold text-[#1d4ed8]">Service</span>
+                    <span className="mt-2 text-base font-semibold leading-snug text-slate-900">{p.h1}</span>
+                    <span className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-600">{p.intro}</span>
+                    <span className="mt-4 text-sm font-semibold text-[#1d4ed8]">Lire la page →</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div className="mt-14 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <p className="text-base font-semibold text-slate-900">Passer à l’action</p>
+            <p className="mt-2 text-sm leading-relaxed text-slate-600">
+              Forfaits TTC, espace client et appel découverte pour cadrer le volume avec votre réalité chantier.
+            </p>
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <CalendlyBookingLink className="inline-flex min-h-[2.75rem] items-center justify-center rounded-lg bg-[#1d4ed8] px-5 text-sm font-semibold text-white hover:bg-[#1e40af]">
+                Réserver un appel
+              </CalendlyBookingLink>
+              <Link
+                href="/tarifs"
+                className="inline-flex min-h-[2.75rem] items-center justify-center rounded-lg border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-900 hover:bg-slate-50"
+              >
+                Voir les tarifs
+              </Link>
+              <Link
+                href="/assistants-administratifs-taches"
+                className="inline-flex min-h-[2.75rem] items-center justify-center rounded-lg border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-900 hover:bg-slate-50"
+              >
+                Catalogue des missions
+              </Link>
+            </div>
+          </div>
+        </article>
+      </main>
+      <MarketingSiteFooter />
+    </div>
+  );
+}

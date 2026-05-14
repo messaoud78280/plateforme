@@ -1,50 +1,39 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, IBM_Plex_Sans, Inter, Manrope, Orbitron } from "next/font/google";
+import { Architects_Daughter, Geist_Mono, Inter, Rajdhani } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { SEO_KEYWORDS_GLOBAL, SEO_VALUE_PROPOSITION, SEO_VALUE_PROPOSITION_SHORT } from "@/lib/seo-keywords";
+import { jsonLdCountriesServed, jsonLdExpandedAreaServed } from "@/lib/jsonld-area-served";
 import { absoluteUrl, CALENDLY_APPEL_DECOUVERTE_URL, getOrgSameAs, SITE_URL } from "@/lib/site";
 import { formatPriceLabelFr, getPublicPriceBoundsLabels } from "@/lib/subscription-plans";
 
 const defaultOgImage = absoluteUrl("/opengraph-image");
 const SITE_PRICE_LOW_FR = formatPriceLabelFr(getPublicPriceBoundsLabels().low);
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
-/** Corps de texte — esprit « plan / ingénierie », complémentaire au logo blueprint */
-const ibmPlexSans = IBM_Plex_Sans({
-  variable: "--font-ibm-plex",
+/** Interface & textes courants — lisibilité maximale */
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
 
-/** Titres marketing (hero & co.) — aligné rendu desktop type ~64–68 px */
-const inter = Inter({
-  variable: "--font-inter",
+/** Titres, cartes fortes, chiffres — esprit bureau d’études / plan technique */
+const rajdhani = Rajdhani({
+  variable: "--font-rajdhani",
   subsets: ["latin"],
-  weight: ["700", "800"],
+  weight: ["500", "600", "700"],
 });
 
-/** Slogan / accroches — lisible, moins « tech » qu’Orbitron */
-const manrope = Manrope({
-  variable: "--font-manrope",
+/** Micro-annotations façon « note sur plan » — usage très limité */
+const architectsDaughter = Architects_Daughter({
+  variable: "--font-blueprint-note",
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
-});
-
-/** Logo BeWork (pastille BW + mot) — identité d’origine */
-const orbitron = Orbitron({
-  variable: "--font-orbitron",
-  subsets: ["latin"],
-  weight: ["600", "700", "800", "900"],
+  weight: ["400"],
 });
 
 const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
@@ -89,6 +78,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "fr_FR",
+    alternateLocale: ["fr_BE", "fr_CH", "fr_LU"],
     url: SITE_URL,
     siteName: "BeWork",
     title: "BeWork — Administratif externalisé BTP (artisans & conducteurs de travaux)",
@@ -113,7 +103,10 @@ export const metadata: Metadata = {
       ? { creator: process.env.NEXT_PUBLIC_TWITTER_CREATOR.trim() }
       : {}),
   },
-  alternates: { canonical: SITE_URL, languages: { fr: SITE_URL, "x-default": SITE_URL } },
+  alternates: {
+    canonical: SITE_URL,
+    languages: { fr: SITE_URL, "x-default": SITE_URL },
+  },
   icons: {
     icon: [
       { url: "/favicon.ico" },
@@ -163,12 +156,7 @@ const jsonLd = {
       description:
         "Administratif externalisé pour artisans, conducteurs de travaux et dirigeants d’entreprises du bâtiment : devis, facturation, relances, dossiers chantier — France, Belgique, Suisse, Luxembourg. Coordination depuis la France.",
       slogan: "Cadre, rigueur, pilotage et lecture terrain pour le BTP",
-      areaServed: [
-        { "@type": "Country", name: "France" },
-        { "@type": "Country", name: "Belgique" },
-        { "@type": "Country", name: "Suisse" },
-        { "@type": "Country", name: "Luxembourg" },
-      ],
+      areaServed: jsonLdExpandedAreaServed(),
       founder: {
         "@type": "Person",
         name: "Laure Olivie",
@@ -188,12 +176,7 @@ const jsonLd = {
           contactType: "sales",
           url: absoluteUrl("/contact"),
           availableLanguage: ["French"],
-          areaServed: [
-            { "@type": "Country", name: "France" },
-            { "@type": "Country", name: "Belgique" },
-            { "@type": "Country", name: "Suisse" },
-            { "@type": "Country", name: "Luxembourg" },
-          ],
+          areaServed: jsonLdCountriesServed(),
         },
       ],
       ...(orgSameAs.length ? { sameAs: orgSameAs } : {}),
@@ -216,11 +199,12 @@ const jsonLd = {
       description: `Administratif externalisé pour artisans, conducteurs de travaux et chefs d’entreprise du BTP : devis, facturation chantier, relances, dossiers (DICT, situations, AO). France, Belgique, Suisse, Luxembourg. Forfaits TTC dès ${SITE_PRICE_LOW_FR} €.`,
       url: SITE_URL,
       provider: { "@id": `${SITE_URL}/#organization` },
-      areaServed: [
-        { "@type": "Country", name: "France" },
-        { "@type": "Country", name: "Belgique" },
-        { "@type": "Country", name: "Suisse" },
-        { "@type": "Country", name: "Luxembourg" },
+      areaServed: jsonLdExpandedAreaServed(),
+      serviceType: [
+        "Externalisation administrative BTP",
+        "Assistante travaux et dossiers chantier",
+        "Suivi devis et relances clients",
+        "Préparation documents travaux et réserves",
       ],
       audience: {
         "@type": "BusinessAudience",
@@ -238,7 +222,7 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${ibmPlexSans.variable} ${inter.variable} ${manrope.variable} ${orbitron.variable} min-w-0 overflow-x-clip font-sans antialiased text-black`}
+        className={`${inter.variable} ${rajdhani.variable} ${architectsDaughter.variable} ${geistMono.variable} min-w-0 overflow-x-clip antialiased text-black`}
       >
         <script
           type="application/ld+json"

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { BlueprintCotationFooterHairline } from "@/components/home/BlueprintCotationDecor";
 import { MarketingSitePreFooter } from "@/components/layout/MarketingSitePreFooter";
 import { SITE_URL, getOrgSameAs } from "@/lib/site";
 
@@ -71,7 +72,8 @@ export function MarketingSiteFooter() {
     <>
       <MarketingSitePreFooter />
       <footer className="relative z-10 border-t border-slate-800/80 bg-[#0b1220] text-slate-300">
-        <div className="mx-auto max-w-site px-5 py-14 sm:px-6 lg:py-16">
+        <BlueprintCotationFooterHairline />
+        <div className="relative z-10 mx-auto max-w-site px-5 py-14 sm:px-6 lg:py-16">
           <div className="grid grid-cols-2 gap-10 sm:gap-12 md:grid-cols-3 lg:grid-cols-5 lg:gap-8">
           {/* Marque */}
           <div className="col-span-2 md:col-span-3 lg:col-span-1 lg:max-w-xs">
@@ -119,6 +121,16 @@ export function MarketingSiteFooter() {
               <li>
                 <Link href="/externaliser-administratif" className={COL_LINK}>
                   Externaliser l&apos;administratif
+                </Link>
+              </li>
+              <li>
+                <Link href="/services" className={COL_LINK}>
+                  Services BTP (hub)
+                </Link>
+              </li>
+              <li>
+                <Link href="/services/assistant-travaux" className={COL_LINK}>
+                  Assistant travaux
                 </Link>
               </li>
             </ul>
@@ -202,6 +214,16 @@ export function MarketingSiteFooter() {
               <li>
                 <Link href="/contact" className={COL_LINK}>
                   Contact
+                </Link>
+              </li>
+              <li>
+                <Link href="/mentions-legales" className={COL_LINK}>
+                  Mentions légales
+                </Link>
+              </li>
+              <li>
+                <Link href="/politique-confidentialite" className={COL_LINK}>
+                  Politique de confidentialité
                 </Link>
               </li>
             </ul>

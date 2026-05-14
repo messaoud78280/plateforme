@@ -1,25 +1,84 @@
-# bework.fr — extraits pour assistants
+# BeWork — informations pour assistants IA et crawlers
 
-## Ressources BeWork
-- https://bework.fr/ressources: Hub (carrousels tutoriels, guides, cas clients).
-- https://bework.fr/ressources/guides: Liste des guides (articles blog pilotage administratif BTP).
-- https://bework.fr/blog: Blog — index des guides (même entrées ; pages article `/blog/[slug]`).
-- https://bework.fr/ressources/tutos: Liste des tutoriels (PDF CR chantier IA, skill PPSPS, etc.).
-- https://bework.fr/ressources/compte-rendu-chantier-guide-btp: Tuto PDF CR chantier (texte intégral du guide + visionneuse PDF, prompts Claude/skills, FAQ).
-- https://bework.fr/ressources/tuto-skill-ppsps-bework: Tuto PDF skill PPSPS Claude (9 rubriques R4532-64 + PDF + prompts + FAQ).
-- https://bework.fr/ressources/pdf/tuto-skill-ppsps-bework.pdf: Fichier PDF du tuto skill PPSPS BeWork.
-- https://bework.fr/ressources/tuto-skill-analyse-dce-bework: Tuto PDF skill analyse DCE (fiche Go/No Go + PDF + prompts + FAQ).
-- https://bework.fr/ressources/pdf/tuto-skill-analyse-dce-bework.pdf: Fichier PDF du tuto analyse DCE BeWork.
-- https://bework.fr/ressources/tuto-skill-memoire-technique-bework: Tuto PDF skill mémoire technique BTP (structure, style, prompts + FAQ).
-- https://bework.fr/ressources/pdf/tuto-skill-memoire-technique-bework.pdf: Fichier PDF du tuto mémoire technique BeWork.
-- https://bework.fr/ressources/tuto-skill-pv-levee-reserves-bework: Tuto PDF skill PV levée réserves (.docx 7 blocs + prompts + FAQ).
-- https://bework.fr/ressources/pdf/tuto-skill-pv-levee-reserves-bework.pdf: Fichier PDF du tuto PV levée réserves BeWork.
-- https://bework.fr/ressources/tuto-skill-doe-bework: Tuto PDF skill DOE BTP (9 rubriques sommaire .docx + prompts + FAQ).
-- https://bework.fr/ressources/pdf/tuto-skill-doe-bework.pdf: Fichier PDF du tuto DOE BeWork.
-- https://bework.fr/ressources/tuto-skill-duerp-bework: Tuto PDF skill DUERP BTP (7 éléments, INRS, prompts + FAQ).
-- https://bework.fr/ressources/pdf/tuto-skill-duerp-bework.pdf: Fichier PDF du tuto DUERP BeWork.
-- https://bework.fr/ressources/tuto-skill-constat-retard-bework: Tuto PDF skill constat retard BTP (LRAR 7 éléments + prompts + FAQ).
-- https://bework.fr/ressources/pdf/tuto-skill-constat-retard-bework.pdf: Fichier PDF du tuto constat retard BeWork.
-- https://bework.fr/ressources/tuto-tri-dce-claude-chrome-bework: Tuto PDF tri DCE Claude in Chrome (BOAMP, raccourci, prompts + FAQ).
-- https://bework.fr/ressources/pdf/tuto-tri-dce-claude-chrome-bework.pdf: Fichier PDF du tuto tri DCE Claude in Chrome BeWork.
-- https://bework.fr/cas-clients: Page cas clients.
+L’URL canonique du site est définie par la configuration de production (ex. https://bework.fr). Les chemins ci‑dessous sont relatifs à la racine du site public.
+
+## Qu’est-ce que BeWork ?
+
+BeWork est une plateforme d’assistants travaux pour le BTP, avec des outils d’IA pour structurer et accélérer la préparation des livrables. Le service s’adresse aux artisans, conducteurs de travaux, chefs de chantier, chargés d’affaires et dirigeants d’entreprises du bâtiment qui veulent déléguer des tâches chronophages (dossiers chantier, relances, documents, suivi administratif) tout en gardant la validation sur ce qui engage. L’accompagnement est assuré à distance, en français, avec pilotage supervisé depuis la France ; zone d’usage habituelle : France, Belgique, Suisse, Luxembourg.
+
+## Proposition courte (AEO)
+
+- Relais bureau‑chantier : « on tient le bureau, vous tenez le chantier ».
+- L’IA augmente le travail de préparation et de mise en forme ; ce n’est pas un substitut aux arbitrages techniques, commerciaux ou réglementaires de l’entreprise cliente.
+
+## Pages principales
+
+- / — Accueil (vidéo de présentation, process, tarifs, FAQ).
+- /services — Hub des pages « services » (intentions métier et missions).
+- /services/assistant-travaux — Assistant travaux augmenté par l’IA (définition et périmètre).
+- /services/assistant-conducteur-de-travaux — Angle conducteur de travaux.
+- /services/assistant-chef-de-chantier — Angle chef de chantier.
+- /services/externalisation-administrative-btp — Externalisation administrative BTP.
+- /services/compte-rendu-chantier — Comptes rendus de chantier.
+- /services/analyse-dce-btp — Analyse DCE.
+- /services/ppsps — PPSPS.
+- /services/memoire-technique-btp — Mémoire technique.
+- /services/chiffrage-devis-btp — Chiffrage et devis.
+- /services/doe-btp — DOE.
+- /tarifs — Forfaits TTC (abonnements).
+- /contact — Contact.
+- /mentions-legales — Mentions légales (éditeur du site).
+- /politique-confidentialite — Politique de confidentialité (RGPD).
+- /assistants-administratifs-taches — Catalogue des missions et périmètre.
+- /notre-facon-de-travailler — Méthode (Process BeWork).
+- /inscription — Création de compte client.
+- /connexion — Connexion.
+
+## Externalisation par pays (francophonie)
+
+- /externalisation-administrative-btp-france
+- /externalisation-administrative-btp-belgique
+- /externalisation-administrative-btp-suisse
+- /externalisation-administrative-btp-luxembourg
+
+## Ressources (guides, tutoriels PDF, blog)
+
+- /ressources — Hub ressources (parcours par thème, tutoriels, guides, cas clients).
+- /ressources/guides — Liste des guides.
+- /ressources/tutos — Liste des tutoriels PDF.
+- /blog — Index blog (articles longs).
+
+### Exemples de fiches ressources
+
+- /ressources/analyse-dce-btp
+- /ressources/memoire-technique-btp
+- /ressources/ppsps-btp
+- /ressources/doe-btp
+- /ressources/chiffrage-devis-btp
+- /ressources/compte-rendu-chantier
+- /ressources/planning-chantier-btp
+- /ressources/pv-levee-reserves-btp
+
+Les tutoriels « skill » (PDF, prompts) sont listés sous /ressources/tutos et en hub /ressources.
+
+## Landings intentionnelles (SEO)
+
+- /relance-devis-btp
+- /dict-dt-travaux
+- /situation-travaux-btp
+- /impayes-btp-relances
+- /suivi-fournisseurs-chantier
+- /externaliser-administratif
+
+## Fichiers machine
+
+- /sitemap.xml — Plan du site.
+- /robots.txt — Règles d’indexation.
+
+## Mots-clés métiers (non exhaustif)
+
+assistant travaux, assistant travaux augmenté par l’IA, conducteur de travaux, chef de chantier, chargé d’affaires BTP, externalisation administrative BTP, gestion administrative chantier, compte rendu de chantier, DOE, PPSPS, DUERP, mémoire technique, analyse DCE, analyse CCTP, chiffrage devis, avenant travaux, planning chantier, DICT, PV levée de réserves, relances clients et fournisseurs.
+
+## Note
+
+Ne pas inférer d’effectifs, de chiffre d’affaires, d’avis clients ou de certifications non présents explicitement sur le site.

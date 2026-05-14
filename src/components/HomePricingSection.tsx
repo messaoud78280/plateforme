@@ -55,7 +55,7 @@ export function HomePricingSection() {
       <div className="container-site relative z-[1]">
         {/* En-tête — compact */}
         <header className="mx-auto mb-7 max-w-2xl text-center md:mb-8">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-[#1d4ed8] md:text-[13px]">Tarifs</p>
+          <p className="font-heading text-[12px] font-semibold uppercase tracking-[0.2em] text-[#1d4ed8] md:text-[13px]">Tarifs</p>
           <h2
             id="home-pricing-heading"
             className="mt-2 text-balance text-[1.625rem] font-bold leading-tight tracking-tight text-[#0f172a] md:text-[2rem]"

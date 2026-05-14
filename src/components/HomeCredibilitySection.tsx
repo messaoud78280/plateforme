@@ -20,7 +20,7 @@ export function HomeCredibilitySection() {
       <div className="relative z-[1] mx-auto w-full max-w-6xl">
         {/* Header — max 720px, aligné gauche */}
         <header className="mb-6 text-left md:mb-7">
-          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
+          <p className="font-heading text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
             Preuve &amp; crédibilité
           </p>
           <h2

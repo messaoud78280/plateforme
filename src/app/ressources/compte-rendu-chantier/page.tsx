@@ -234,8 +234,7 @@ export default function CompteRenduChantierTutoPage() {
             </p>
 
             <h1
-              className="mt-5 max-w-3xl text-balance font-sans text-[clamp(1.625rem,calc(0.95rem+2.35vw),2.375rem)] font-bold leading-[1.12] tracking-[-0.03em] text-[#0F172A]"
-              style={{ fontFamily: "var(--font-inter), var(--font-geist-sans), system-ui, sans-serif" }}
+              className="font-heading mt-5 max-w-3xl text-balance text-[clamp(1.625rem,calc(0.95rem+2.35vw),2.375rem)] font-bold leading-[1.12] tracking-[-0.03em] text-[#0F172A]"
             >
               Compte rendu de chantier :{" "}
               <span className="text-[#3072F0]">comment le rédiger et le structurer</span>

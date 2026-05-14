@@ -1,3 +1,5 @@
+import { BlueprintCotationMissionsFrame } from "@/components/home/BlueprintCotationDecor";
+
 /** Variantes uniquement dans la même teinte bleu BeWork (contraste léger carte 1 → 3). */
 const SECONDARY_CARDS = [
   {
@@ -87,7 +89,7 @@ export function HomeWhatWeHandleSection() {
       <div className="container-site relative z-10">
         {/* 1 — En-tête (centré) */}
         <div className="mx-auto max-w-3xl text-center">
-          <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-[#1d4ed8]">
+          <p className="font-heading text-[13px] font-semibold uppercase tracking-[0.18em] text-[#1d4ed8]">
             Ce qu’on gère pour vous
           </p>
           <h2
@@ -115,13 +117,13 @@ export function HomeWhatWeHandleSection() {
         <div className="mx-auto mt-7 max-w-3xl">
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm ring-1 ring-slate-100/85">
-              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8]">Tâches répétitives</p>
+              <p className="font-heading text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8]">Tâches répétitives</p>
               <p className="mt-2 text-[14px] font-semibold leading-snug text-slate-800">
                 Relances, suivi, demandes fournisseurs : tenir le rythme, sans y laisser vos soirées.
               </p>
             </div>
             <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm ring-1 ring-slate-100/85">
-              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8]">Missions avancées BTP</p>
+              <p className="font-heading text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8]">Missions avancées BTP</p>
               <p className="mt-2 text-[14px] font-semibold leading-snug text-slate-800">
                 DOE, PPSPS, DUERP, DCE/CCTP : structurer des livrables chantier propres, au bon moment.
               </p>
@@ -130,7 +132,9 @@ export function HomeWhatWeHandleSection() {
         </div>
 
         {/* 2 — Trois cartes */}
-        <div className="mt-14 grid gap-7 md:grid-cols-3 md:mt-16">
+        <div className="relative mt-14 md:mt-16">
+          <BlueprintCotationMissionsFrame />
+          <div className="relative z-10 grid gap-7 md:grid-cols-3">
           {SECONDARY_CARDS.map((card, index) => {
             const num = String(index + 1).padStart(2, "0");
             return (
@@ -205,12 +209,13 @@ export function HomeWhatWeHandleSection() {
               </div>
             );
           })}
+          </div>
         </div>
 
         {/* 3 — Urgences chantier (bloc court, sans doubler le catalogue de missions) */}
         <div className="mt-10 md:mt-12">
           <div className="mx-auto max-w-5xl rounded-2xl border border-slate-200/90 bg-white p-6 shadow-[0_10px_40px_-16px_rgba(15,23,42,0.1)] ring-1 ring-slate-100/85 md:p-8">
-            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
+            <p className="font-heading text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
               Urgences chantier
             </p>
             <h3 className="mt-2.5 text-balance font-sans text-xl font-bold tracking-tight text-[#0f172a] md:text-2xl">
@@ -248,7 +253,7 @@ export function HomeWhatWeHandleSection() {
             </h3>
             <div className="mt-6 grid gap-5 md:grid-cols-2">
               <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm ring-1 ring-slate-100/85 md:p-7">
-                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
+                <p className="font-heading text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
                   Pour vos conducteurs de travaux
                 </p>
                 <p className="mt-3 text-[15px] leading-relaxed text-slate-600 md:text-base">
@@ -257,7 +262,7 @@ export function HomeWhatWeHandleSection() {
                 </p>
               </div>
               <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm ring-1 ring-slate-100/85 md:p-7">
-                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
+                <p className="font-heading text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
                   Pour vos chargés d’affaires
                 </p>
                 <p className="mt-3 text-[15px] leading-relaxed text-slate-600 md:text-base">
@@ -272,7 +277,7 @@ export function HomeWhatWeHandleSection() {
         {/* 5 — Missions avancées (4 cartes) */}
         <div className="mt-10 md:mt-12">
           <div className="mx-auto max-w-5xl">
-            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
+            <p className="font-heading text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
               Missions avancées BTP
             </p>
             <h3 className="mt-2.5 text-balance text-xl font-bold tracking-tight text-[#0f172a] md:text-2xl">

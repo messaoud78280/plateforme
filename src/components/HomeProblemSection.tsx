@@ -1,4 +1,5 @@
 import type { JSX } from "react";
+import { BlueprintCotationProblemMarks } from "@/components/home/BlueprintCotationDecor";
 
 const BEWORK_BLUE = "#2563eb";
 const BEWORK_BLUE_SOFT = "#eff6ff";
@@ -9,7 +10,7 @@ const CARD_BORDER = "#E5EAF2";
 
 /** Section « Le problème » — homepage, sous le hero (maquette métallique + tableau). */
 export function HomeProblemSection() {
-  const fontSans = 'var(--font-inter),var(--font-geist-sans),system-ui,sans-serif';
+  const fontSans = "var(--font-inter),ui-sans-serif,system-ui,sans-serif";
 
   const tableRows: {
     problem: string;
@@ -49,7 +50,8 @@ export function HomeProblemSection() {
       className="relative z-[1] overflow-visible bg-transparent pt-[70px] pb-10 md:pb-12"
       style={{ fontFamily: fontSans }}
     >
-      <div className="container-site relative grid grid-cols-1 items-center gap-10 lg:grid-cols-[0.38fr_0.62fr] lg:gap-16">
+      <BlueprintCotationProblemMarks />
+      <div className="container-site relative z-10 grid grid-cols-1 items-center gap-10 lg:grid-cols-[0.38fr_0.62fr] lg:gap-16">
         {/* Colonne gauche */}
         <div className="min-w-0">
           <p className="text-[14px] font-bold tracking-[0.18em]" style={{ color: BEWORK_BLUE }}>

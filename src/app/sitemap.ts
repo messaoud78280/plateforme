@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { BLOG_ARTICLES, BLOG_SLUGS, type BlogArticle, type BlogSlug } from "@/content/blog-articles";
+import { SERVICE_PAGE_ORDER, servicePagePath } from "@/content/service-pages";
 import { BTP_PAIN_PAGE_PATHS } from "@/lib/btp-pain-pages";
 import { EXTERNALISATION_ADMIN_BT_PATHS } from "@/lib/externalisation-administrative-btp-geo";
 import { SITE_URL } from "@/lib/site";
@@ -22,6 +23,16 @@ const GEO_EXTERNALISATION_ADMIN_BT_PAGES: MetadataRoute.Sitemap = (
   priority: 0.86,
 }));
 
+const SERVICE_PAGES_SITEMAP: MetadataRoute.Sitemap = [
+  { url: `${SITE_URL}/services`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.92 },
+  ...SERVICE_PAGE_ORDER.map((slug) => ({
+    url: `${SITE_URL}${servicePagePath(slug)}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly" as const,
+    priority: 0.88,
+  })),
+];
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const staticPages: MetadataRoute.Sitemap = [
     { url: SITE_URL, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 1 },
@@ -41,6 +52,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/notre-facon-de-travailler`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.85 },
     { url: `${SITE_URL}/cas-clients`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.75 },
     { url: `${SITE_URL}/contact`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
+    { url: `${SITE_URL}/mentions-legales`, lastModified: new Date(), changeFrequency: "yearly" as const, priority: 0.35 },
+    { url: `${SITE_URL}/politique-confidentialite`, lastModified: new Date(), changeFrequency: "yearly" as const, priority: 0.35 },
     { url: `${SITE_URL}/inscription`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
     { url: `${SITE_URL}/connexion`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.6 },
     { url: `${SITE_URL}/blog`, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 0.8 },
@@ -125,6 +138,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/admin-btp-sans-recruter`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.85 },
     ...BTP_PAIN_SEO_PAGES,
     ...GEO_EXTERNALISATION_ADMIN_BT_PAGES,
+    ...SERVICE_PAGES_SITEMAP,
   ];
 
   const blogPages: MetadataRoute.Sitemap = BLOG_SLUGS.map((slug) => {

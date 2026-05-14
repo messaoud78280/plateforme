@@ -74,7 +74,7 @@ const CARDS: CardConfig[] = [
 
 /** Section « La solution BeWork » — sous Problème, continu hero/métallique parent */
 export function HomeSolutionSection() {
-  const sans = "var(--font-inter),var(--font-geist-sans),system-ui,sans-serif";
+  const sans = "var(--font-inter),ui-sans-serif,system-ui,sans-serif";
 
   return (
     <section
@@ -85,7 +85,7 @@ export function HomeSolutionSection() {
     >
       <div className="container-site relative z-[1]">
         <header className="mx-auto mb-14 max-w-3xl text-center md:mb-16">
-          <p className="text-[13px] font-semibold uppercase tracking-[0.2em]" style={{ color: BLUE }}>
+          <p className="font-heading text-[13px] font-semibold uppercase tracking-[0.2em]" style={{ color: BLUE }}>
             LA&nbsp;SOLUTION&nbsp;BEWORK
           </p>
           <div className="mx-auto mt-2 h-[3px] w-12 rounded-full" style={{ backgroundColor: BLUE }} />

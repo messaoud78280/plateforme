@@ -66,6 +66,12 @@ const RESOURCE_MENU_ENTRIES: {
   icon: ResourceMenuIconId;
 }[] = [
   {
+    href: "/services",
+    title: "Services BTP",
+    description: "Intentions métier : assistant travaux, conducteur de travaux, DCE, PPSPS, DOE…",
+    icon: "globe",
+  },
+  {
     href: "/ressources/tutos",
     title: "Tutoriels",
     description: "Tutoriels PDF et formats courts — CR chantier, DCE, PPSPS, mémoires techniques, etc.",

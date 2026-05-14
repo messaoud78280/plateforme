@@ -16,6 +16,7 @@ import { HomeBlueprintScrollDecor } from "@/components/home/HomeBlueprintScrollD
 import { HomeHeroMetalCorners } from "@/components/home/HomeHeroMetalCorners";
 import { HomeHeroPlanCartouche } from "@/components/home/HomeHeroPlanCartouche";
 import { HomeHeroPlanSketchDecor } from "@/components/home/HomeHeroPlanSketchDecor";
+import { BlueprintCotationHero } from "@/components/home/BlueprintCotationDecor";
 import { ConciergerieDirigeantSection } from "@/components/ConciergerieDirigeantSection";
 import { HomeGeoExternalisationCards } from "@/components/HomeGeoExternalisationCards";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
@@ -24,6 +25,7 @@ import {
   getAggregateOfferDescription,
   getPublicPriceBoundsLabels,
 } from "@/lib/subscription-plans";
+import { jsonLdExpandedAreaServed } from "@/lib/jsonld-area-served";
 import { SEO_KEYWORDS_HOME } from "@/lib/seo-keywords";
 import { EXTERNALISATION_ADMIN_BT_NAV } from "@/lib/externalisation-administrative-btp-geo";
 import { SITE_URL, absoluteUrl } from "@/lib/site";
@@ -35,6 +37,10 @@ const PRESENTATION_VIDEO_DURATION_ISO = "PT13S";
 const PRICE_BOUNDS = getPublicPriceBoundsLabels();
 
 const HOME_FAQ_ITEMS = [
+  {
+    q: "Qu’est-ce qu’un « assistant travaux augmenté par l’IA » chez BeWork ?",
+    a: "C’est un relais opérationnel pour vos dossiers chantier et votre administratif lié au BTP : préparation de documents, relances, suivi et coordination cadrés. L’IA aide à structurer et accélérer la mise en forme ; un interlocuteur humain garde le fil, le cadre et la relation avec vous. Ce n’est pas un substitut à votre expertise terrain ni à vos validations sur les engagements.",
+  },
   {
     q: "BeWork, c’est une assistante administrative ou une assistante travaux ?",
     a: "BeWork est une assistante travaux BTP : un relais bureau-chantier qui tient vos dossiers de devis, relances, documents travaux, DICT, fournisseurs, comptes rendus et réserves pendant que vous êtes sur le terrain. Ce n’est pas un secrétariat généraliste.",
@@ -50,8 +56,9 @@ const HOME_FAQ_ITEMS = [
 ] as const;
 
 export const metadata: Metadata = {
-  title: "BeWork | Assistante travaux BTP — relais dossiers chantier (devis, DICT, relances)",
-  description: `Assistante BTP pour tenir vos dossiers chantier : devis & relances, DICT, fournisseurs, comptes rendus, plannings, réserves, DOE. Un relais bureau‑chantier, sans recruter. Forfaits TTC dès ${formatPriceLabelFr(PRICE_BOUNDS.low)} €/mois.`,
+  title:
+    "BeWork | Assistants travaux augmentés par l’IA — relais bureau-chantier BTP (devis, DICT, dossiers)",
+  description: `Assistants travaux augmentés par l’IA pour artisans, conducteurs de travaux, chefs de chantier et entreprises du BTP : devis & relances, DICT, fournisseurs, comptes rendus, plannings, réserves, DOE. Un relais bureau‑chantier, sans recruter. Forfaits TTC dès ${formatPriceLabelFr(PRICE_BOUNDS.low)} €/mois.`,
   robots: {
     index: true,
     follow: true,
@@ -62,25 +69,26 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "fr_FR",
+    alternateLocale: ["fr_BE", "fr_CH", "fr_LU"],
     url: SITE_URL,
     siteName: "BeWork",
-    title: "BeWork — Assistante travaux BTP (relais dossiers chantier)",
+    title: "BeWork — Assistants travaux augmentés par l’IA (relais dossiers chantier)",
     description:
-      "Devis & relances, DICT, fournisseurs, documents travaux, comptes rendus : BeWork tient vos dossiers chantier pendant que vous êtes sur le terrain.",
+      "Assistants travaux augmentés par l’IA pour le BTP : devis & relances, DICT, fournisseurs, documents travaux, comptes rendus — vous validez ce qui engage.",
     images: [
       {
         url: `${SITE_URL}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: "BeWork — Assistante travaux BTP (relais dossiers chantier) pour artisans et conducteurs de travaux",
+        alt: "BeWork — Assistants travaux augmentés par l’IA pour artisans et conducteurs de travaux",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "BeWork — Assistante travaux BTP (relais dossiers chantier)",
+    title: "BeWork — Assistants travaux augmentés par l’IA",
     description:
-      "Devis & relances, DICT, fournisseurs, documents travaux : un relais bureau‑chantier pour tenir l’activité quand vous êtes sur le terrain.",
+      "Relais bureau‑chantier BTP : dossiers chantier, relances et suivi — vous tenez le terrain, nous tenons le cadre administratif.",
   },
 };
 
@@ -91,10 +99,10 @@ const homeJsonLd = {
       "@type": "WebPage",
       "@id": `${SITE_URL}/#accueil`,
       url: SITE_URL,
-      name: "BeWork — Assistante travaux BTP (relais dossiers chantier)",
+      name: "BeWork — Assistants travaux augmentés par l’IA (relais dossiers chantier)",
       inLanguage: "fr-FR",
       description:
-        "Assistante BTP : un relais bureau‑chantier pour tenir vos dossiers (devis, relances, DICT, fournisseurs, documents travaux) sans recruter. Démo vidéo et forfaits TTC.",
+        "Assistants travaux augmentés par l’IA : relais bureau‑chantier pour dossiers (devis, relances, DICT, fournisseurs, documents travaux) sans recruter. Démo vidéo et forfaits TTC.",
       isPartOf: { "@id": `${SITE_URL}/#website` },
       video: { "@id": `${SITE_URL}/#video-presentation-bework` },
       about: [
@@ -111,22 +119,17 @@ const homeJsonLd = {
     {
       "@type": "Service",
       "@id": `${SITE_URL}/#service-btp`,
-      name: "Assistante travaux BTP — relais dossiers chantier",
+      name: "Assistants travaux BTP — relais dossiers chantier (augmentés par l’IA)",
       description:
-        "Relais bureau‑chantier : devis & relances, situations de travaux, DICT/DT et dossiers chantier, coordination fournisseurs (commandes, livraisons, locations), comptes rendus et documents de réception/DOE — sous validation sur les points sensibles.",
-      serviceType: "Assistante travaux BTP",
+        "Relais bureau‑chantier : devis & relances, situations de travaux, DICT/DT et dossiers chantier, coordination fournisseurs (commandes, livraisons, locations), comptes rendus et documents de réception/DOE — outils d’IA pour structurer et accélérer, sous validation sur les points sensibles.",
+      serviceType: "Assistants travaux BTP augmentés par l’IA",
       category: "Assistance travaux et dossiers chantier (BTP)",
       provider: { "@id": `${SITE_URL}/#organization` },
-      areaServed: [
-        { "@type": "Country", name: "France" },
-        { "@type": "Country", name: "Belgique" },
-        { "@type": "Country", name: "Suisse" },
-        { "@type": "Country", name: "Luxembourg" },
-      ],
+      areaServed: jsonLdExpandedAreaServed(),
       audience: {
         "@type": "BusinessAudience",
         audienceType:
-          "Conducteurs de travaux, artisans, sous-traitants, dirigeants de TPE/PME et entreprises générales du bâtiment (France, Belgique, Suisse, Luxembourg)",
+          "Artisans, conducteurs de travaux, chefs de chantier, chargés d’affaires, sous-traitants, dirigeants de TPE/PME et entreprises générales du bâtiment (France, Belgique, Suisse, Luxembourg)",
       },
       offers: {
         "@type": "AggregateOffer",
@@ -140,9 +143,9 @@ const homeJsonLd = {
     {
       "@type": "VideoObject",
       "@id": `${SITE_URL}/#video-presentation-bework`,
-      name: "Présentation BeWork — assistante travaux BTP (relais dossiers chantier)",
+      name: "Présentation BeWork — assistants travaux BTP augmentés par l’IA",
       description:
-        "Vidéo de présentation BeWork — assistante travaux BTP : dossiers chantier, devis & relances, DICT et coordination fournisseurs, sans recruter (France · Belgique · Suisse · Luxembourg).",
+        "Vidéo de présentation : dossiers chantier, devis & relances, DICT et coordination fournisseurs — service à distance, forfaits TTC (France · Belgique · Suisse · Luxembourg).",
       thumbnailUrl: [absoluteUrl("/opengraph-image")],
       uploadDate: "2026-04-11T12:00:00+02:00",
       duration: PRESENTATION_VIDEO_DURATION_ISO,
@@ -242,7 +245,8 @@ export default function HomePage() {
             >
               <HomeHeroMetalCorners />
               <HomeHeroPlanSketchDecor />
-              <div className="container-site relative z-[1]">
+              <BlueprintCotationHero />
+              <div className="container-site relative z-[2]">
             <div className="grid items-center gap-10 text-center lg:grid-cols-[minmax(0,1.08fr)_minmax(280px,1fr)] lg:items-start lg:gap-x-10 xl:grid-cols-[minmax(0,1fr)_minmax(520px,1.15fr)] xl:gap-x-14 lg:gap-y-0 lg:text-left">
               <div className="relative z-[2] mx-auto flex w-full min-w-0 max-w-[540px] flex-col gap-6 lg:mx-0 lg:max-w-none lg:gap-5 lg:pt-10 xl:max-w-[560px]">
                 <p className="mx-auto inline-flex max-w-full items-center gap-2 self-center rounded-full border border-[#93c5fd]/70 bg-gradient-to-r from-[#eff6ff] via-white to-[#eff6ff] px-3.5 py-1.5 text-[12.5px] font-semibold leading-snug tracking-tight text-[#1d4ed8] shadow-[0_8px_28px_-18px_rgba(37,99,235,0.35)] ring-1 ring-white/80 sm:gap-2.5 sm:px-4 sm:text-sm lg:mx-0 lg:self-start">
@@ -260,7 +264,12 @@ export default function HomePage() {
                     <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
                     <path d="M9 10h6M9 14h6M9 18h4" />
                   </svg>
-                  <span>Assistant de gestion travaux · Relais BTP · Augmenté par l’IA</span>
+                  <span className="flex flex-col items-start gap-0.5 text-left sm:flex-row sm:items-center sm:gap-2">
+                    <span>Assistant de gestion travaux · Relais BTP</span>
+                    <span className="font-blueprint-note text-[11px] font-normal normal-case tracking-wide text-slate-600 sm:text-xs">
+                      Augmenté par l’IA · note chantier
+                    </span>
+                  </span>
                 </p>
 
                 <p className="mx-auto max-w-[540px] text-[15px] leading-relaxed text-balance text-slate-600 lg:mx-0 lg:max-w-none lg:text-[15px] lg:leading-relaxed">
@@ -268,8 +277,7 @@ export default function HomePage() {
                 </p>
 
                 <h1
-                  className="text-balance text-[clamp(1.35rem,calc(0.55rem+2.35vw),2.35rem)] font-sans font-extrabold leading-[1.18] tracking-[-0.02em] sm:leading-[1.22] lg:max-w-[40rem]"
-                  style={{ fontFamily: "var(--font-inter), var(--font-geist-sans), system-ui, sans-serif" }}
+                  className="font-heading text-balance text-[clamp(1.35rem,calc(0.55rem+2.35vw),2.35rem)] font-bold leading-[1.18] tracking-[-0.02em] sm:leading-[1.22] lg:max-w-[40rem]"
                 >
                   <span className="text-[#0f172a]">Un assistant travaux à vos côtés pour </span>
                   <span className="text-[#2563eb]">tenir le rythme du chantier</span>
@@ -400,17 +408,39 @@ export default function HomePage() {
               </div>
             </section>
 
-            {/* Mini-bloc : définition d’un Beworker (sans dupliquer « Process BeWork ») */}
+            {/* Définition BeWork + rôle Beworker (AEO / GEO — une seule carte) */}
             <section className="relative bg-transparent px-6 pb-10 md:pb-12">
               <div className="container-site">
                 <div className="mx-auto max-w-4xl rounded-2xl border border-slate-200/90 bg-white p-6 shadow-[0_10px_40px_-16px_rgba(15,23,42,0.1)] ring-1 ring-slate-100/85 md:p-8">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
+                  <p className="font-heading text-[11px] font-bold uppercase tracking-[0.2em] text-[#1d4ed8] md:text-[12px]">
+                    BeWork, c’est quoi ?
+                  </p>
+                  <p className="mt-3 text-[15px] leading-relaxed text-slate-700 md:text-base">
+                    BeWork est un service d’<strong>assistants travaux augmentés par l’IA</strong> pour les entreprises du BTP. La plateforme aide
+                    artisans, conducteurs de travaux, chefs de chantier et chargés d’affaires à déléguer les tâches chronophages&nbsp;: comptes rendus de
+                    chantier, DOE, PPSPS, analyse de DCE, chiffrage et devis, relances, planning, demandes administratives et suivi opérationnel. L’objectif
+                    est de libérer du temps terrain tout en structurant le suivi administratif et commercial —{" "}
+                    <span className="font-semibold text-slate-800">on tient le bureau, vous tenez le chantier.</span>
+                  </p>
+                  <hr className="my-6 border-slate-200/90" />
+                  <p className="font-heading text-[11px] font-bold uppercase tracking-[0.2em] text-[#1d4ed8] md:text-[12px]">
                     C’est quoi un Beworker ?
                   </p>
                   <p className="mt-3 text-[15px] leading-relaxed text-slate-700 md:text-base">
                     Un Beworker, c’est un assistant BTP dédié, formé aux outils du secteur et augmenté par l’IA. Il traite vos demandes, prépare vos
-                    livrables, suit vos dossiers et reste encadré par BeWork. Ce n’est pas un chatbot&nbsp;: c’est un relais humain, structuré,
-                    joignable et supervisé.
+                    livrables, suit vos dossiers et reste encadré par BeWork. Ce n’est pas un chatbot&nbsp;: c’est un relais humain, structuré, joignable
+                    et supervisé.
+                  </p>
+                  <p className="font-blueprint-note mt-3 text-center text-[13px] text-slate-600 md:text-sm">
+                    Relais bureau ↔ chantier · suivi terrain
+                  </p>
+                  <p className="mt-4 text-center">
+                    <Link
+                      href="/services"
+                      className="text-sm font-semibold text-[#1d4ed8] underline-offset-4 hover:underline"
+                    >
+                      Voir les pages services
+                    </Link>
                   </p>
                 </div>
               </div>
@@ -443,7 +473,11 @@ export default function HomePage() {
                   <p className="mt-3 text-[15px] leading-relaxed text-slate-600 md:mx-auto md:max-w-[48rem] md:text-base md:leading-relaxed">
                     Devis, factures, situations de travaux, DICT et dossiers administratifs, commandes & livraisons, locations
                     matériel / engins / véhicules, planning, relances et suivi des litiges — le détail de ce que nous pouvons
-                    prendre en main pour vous.
+                    prendre en main pour vous. Voir aussi les{" "}
+                    <Link href="/services" className="font-semibold text-[#1d4ed8] underline-offset-2 hover:underline">
+                      pages services
+                    </Link>{" "}
+                    pour les intentions métier (conducteur de travaux, DCE, PPSPS, DOE…).
                   </p>
                   <div className="mt-2.5 h-1 w-14 rounded-sm bg-[#1d4ed8] md:mx-auto" aria-hidden />
                   <Link

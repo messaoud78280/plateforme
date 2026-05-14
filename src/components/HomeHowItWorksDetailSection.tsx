@@ -2,9 +2,10 @@
 
 import { type JSX } from "react";
 import { HomeClientSpacePreview } from "@/components/HomeClientSpacePreview";
+import { BlueprintCotationProcessRail } from "@/components/home/BlueprintCotationDecor";
 
 const BLUE = "#2563eb";
-const fontSans = "var(--font-inter), var(--font-geist-sans), system-ui, sans-serif";
+const fontSans = "var(--font-inter), ui-sans-serif, system-ui, sans-serif";
 
 const STEPS: {
   n: number;
@@ -59,11 +60,11 @@ export function HomeHowItWorksDetailSection() {
         className="pointer-events-none absolute left-0 top-0 block h-px w-px overflow-hidden opacity-0"
         aria-hidden
       />
-      <div className="container-site relative z-[1]">
-        <header className="mx-auto mb-16 max-w-3xl text-center md:mb-20">
+      <div className="container-site relative z-[2]">
+        <header className="relative z-10 mx-auto mb-16 max-w-3xl text-center md:mb-20">
           <h2
             id="how-detail-heading"
-            className="text-[13px] font-semibold uppercase tracking-[0.22em]"
+            className="font-heading text-[13px] font-semibold uppercase tracking-[0.22em]"
             style={{ color: BLUE }}
           >
             Process BeWork
@@ -77,7 +78,9 @@ export function HomeHowItWorksDetailSection() {
           </p>
         </header>
 
-        <div className="grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
+        <div className="relative">
+          <BlueprintCotationProcessRail className="inset-x-3 -top-5 h-12 md:inset-x-6 md:-top-6 md:h-14" />
+          <div className="relative z-10 grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
           {/* Timeline */}
           <div className="relative pl-0">
             <div className="absolute left-5 top-3 bottom-3 w-px bg-gradient-to-b from-slate-200 via-slate-200 to-slate-200/30" aria-hidden />
@@ -106,6 +109,7 @@ export function HomeHowItWorksDetailSection() {
           </div>
 
           <HomeClientSpacePreview />
+          </div>
         </div>
       </div>
     </section>

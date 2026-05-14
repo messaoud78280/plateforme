@@ -7,6 +7,7 @@ import { ResourceSpotlightCarousel } from "@/components/ressources/ResourceSpotl
 import { BLOG_ARTICLES, BLOG_SLUGS } from "@/content/blog-articles";
 import { CAS_CLIENT_CASES } from "@/content/cas-clients-cases";
 import { RESOURCE_GUIDE_PAGE_ITEMS } from "@/content/resource-guides-pages";
+import { RESOURCE_GUIDE_CATEGORIES } from "@/content/resource-categories";
 import { RESOURCE_TUTO_ITEMS, type ResourceTutoItem, type ResourceStatus } from "@/content/resource-tutos";
 import { absoluteUrl } from "@/lib/site";
 
@@ -255,6 +256,39 @@ export default function RessourcesPage() {
             </div>
           </div>
         </header>
+
+        <section
+          id="parcours-themes"
+          className="mt-10 scroll-mt-24 border-t border-slate-200/90 pt-10 md:scroll-mt-28 md:pt-12"
+          aria-labelledby="titre-themes"
+        >
+          <h2 id="titre-themes" className="text-lg font-bold tracking-tight text-black sm:text-xl">
+            Parcourir par thème
+          </h2>
+          <p className="mt-1 max-w-2xl text-xs leading-snug text-slate-600 sm:text-sm sm:leading-relaxed">
+            Raccourcis éditoriaux vers les hubs utiles (gestion de chantier, appels d’offres, sécurité, devis…). Les guides longs restent listés ci‑dessous et sur la page Guides.
+          </p>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {RESOURCE_GUIDE_CATEGORIES.map((cat) => (
+              <div
+                key={cat.id}
+                className="rounded-xl border border-slate-200/95 bg-white p-4 shadow-sm ring-1 ring-slate-100/80"
+              >
+                <h3 className="text-sm font-bold text-slate-900">{cat.title}</h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-slate-600">{cat.description}</p>
+                <ul className="mt-3 space-y-1.5 text-xs font-medium sm:text-[0.8125rem]">
+                  {cat.links.map((l) => (
+                    <li key={l.href}>
+                      <Link href={l.href} className="text-[#1d4ed8] underline-offset-2 hover:underline">
+                        {l.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
 
         {RESOURCE_TUTO_ITEMS.length > 0 ? (
           <section

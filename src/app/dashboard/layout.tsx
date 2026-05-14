@@ -30,7 +30,7 @@ export default async function DashboardLayout({
           <Link
             href="/dashboard"
             className="shrink-0 text-xl font-extrabold tracking-tight bg-gradient-to-r from-[#1e3a5f] via-[#2563eb] to-[#0ea5e9] bg-clip-text text-transparent drop-shadow-[0_1px_2px_rgba(30,58,95,0.25)] md:text-2xl"
-            style={{ fontFamily: "var(--font-orbitron), system-ui, sans-serif" }}
+            style={{ fontFamily: "var(--font-rajdhani), ui-sans-serif, system-ui, sans-serif" }}
           >
             BeWork
           </Link>

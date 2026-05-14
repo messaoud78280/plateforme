@@ -54,13 +54,13 @@ export function SeoLandingPage({ description, h1, intro, children, breadcrumbIte
               </ol>
             </nav>
           ) : null}
-          <h1 className="text-3xl font-bold tracking-tight text-black md:text-[2.35rem] md:leading-tight">{h1}</h1>
+          <h1 className="font-heading text-3xl font-bold tracking-tight text-black md:text-[2.35rem] md:leading-tight">{h1}</h1>
           <p className="mt-6 text-xl leading-relaxed text-black">{intro}</p>
           <div className="mt-12 prose prose-slate prose-lg max-w-none prose-headings:text-black prose-p:text-black prose-li:text-black prose-strong:text-black prose-p:text-[1.0625rem] prose-p:leading-[1.75] prose-p:mb-5 prose-li:my-2 prose-li:leading-relaxed prose-ul:my-4 prose-ol:my-4 prose-h2:mt-14 prose-h2:scroll-mt-28 prose-h2:border-b prose-h2:border-slate-200 prose-h2:pb-3 prose-h2:text-[1.5rem] prose-h2:font-bold prose-h2:leading-snug prose-h2:first:mt-0 md:prose-h2:text-[1.625rem] prose-h3:mt-8 prose-h3:text-[1.1875rem] prose-h3:font-bold md:prose-h3:text-xl">
             {children}
           </div>
           <div className="mt-14 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-            <h2 className="text-[1.35rem] font-bold leading-snug text-black md:text-2xl">Passer à l’action</h2>
+            <h2 className="font-heading text-[1.35rem] font-bold leading-snug text-black md:text-2xl">Passer à l’action</h2>
             <p className="mt-3 text-base leading-relaxed text-slate-700">
               BeWork intervient pour artisans, conducteurs de travaux et dirigeants BTP en France, Belgique, Suisse et Luxembourg — forfaits TTC cadrés
               par volume. Connexion requise pour confier une tâche depuis l’espace client.

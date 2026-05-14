@@ -55,6 +55,13 @@ export const SEO_KEYWORDS_GEO_SCOPE = [
   "Île-de-France BTP gestion bureau",
   "entreprise artisanale wallonie",
   "Suisse romande administratif chantier",
+  "assistante travaux BTP distance France",
+  "externalisation administrative PACA",
+  "BTP relais administratif Auvergne-Rhône-Alpes",
+  "artisan bâtiment Nouvelle-Aquitaine gestion",
+  "conducteur de travaux Grand Est administratif",
+  "externalisation administrative Occitanie",
+  "gestion bureau chantier Hauts-de-France",
 ] as const;
 
 /** Techniques & intention (conversion + entités reliées aux pages piliers). */

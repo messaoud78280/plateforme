@@ -39,6 +39,7 @@ Dans **Variables** (onglet du service ou **Variables** du projet), ajoutez :
 | `DATABASE_URL` | URL Supabase (port **6543**, pooler) | Oui |
 | `NEXTAUTH_SECRET` | Chaîne secrète (ex. `openssl rand -base64 32`) | Oui |
 | `NEXTAUTH_URL` | **https://votre-app.railway.app** (voir ci‑dessous) | Oui |
+| `NEXT_PUBLIC_SITE_URL` | Même origine publique que le site (ex. **https://www.bework.fr**) — sitemap, OG, JSON-LD | Recommandé |
 
 **Important :** Ne pas mettre `DIRECT_URL` sur Railway (réservé au `prisma db push` en local).
 
@@ -67,9 +68,9 @@ Optionnel (formulaire contact / emails) :
 
 ## 7. (Optionnel) Domaine personnalisé
 
-Dans **Settings** → **Networking** → **Custom Domain**, ajoutez votre domaine (ex. `app.iatask.fr`) et configurez le CNAME indiqué par Railway chez votre hébergeur DNS.
+Dans **Settings** → **Networking** → **Custom Domain**, ajoutez votre domaine (ex. `www.bework.fr`) et configurez le CNAME indiqué par Railway chez votre hébergeur DNS.
 
-Pensez à mettre à jour **`NEXTAUTH_URL`** avec ce domaine (ex. `https://app.iatask.fr`).
+Pensez à mettre à jour **`NEXTAUTH_URL`** et **`NEXT_PUBLIC_SITE_URL`** avec cette URL publique (ex. **https://www.bework.fr**), sans slash final.
 
 ---
 
@@ -77,7 +78,7 @@ Pensez à mettre à jour **`NEXTAUTH_URL`** avec ce domaine (ex. `https://app.ia
 
 - **Build** : `npm run build` (déjà : `prisma generate && next build`).
 - **Start** : `npm run start` (écoute sur le `PORT` fourni par Railway).
-- **Variables minimales** : `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL` (URL réelle du site après génération du domaine).
+- **Variables minimales** : `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL` (URL réelle du site après génération du domaine). En production sur le domaine canonique BeWork : **`NEXT_PUBLIC_SITE_URL=https://www.bework.fr`** (identique à l’origine de `NEXTAUTH_URL`).
 
 Pour générer un secret :
 

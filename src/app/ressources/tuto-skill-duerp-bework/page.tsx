@@ -9,7 +9,7 @@ import { absoluteUrl, SITE_URL } from "@/lib/site";
 
 const pagePath = "/ressources/tuto-skill-duerp-bework";
 
-const CANONICAL_URL = "https://www.bework.fr/ressources/tuto-skill-duerp-bework";
+const pageUrl = absoluteUrl(pagePath);
 
 const pdfPath = "/ressources/pdf/tuto-skill-duerp-bework.pdf";
 
@@ -107,13 +107,13 @@ export const metadata: Metadata = {
   title: "Crée ton skill — DUERP | BeWork",
   description: META_DESCRIPTION,
   alternates: {
-    canonical: CANONICAL_URL,
-    languages: { fr: CANONICAL_URL, "x-default": CANONICAL_URL },
+    canonical: pageUrl,
+    languages: { fr: pageUrl, "x-default": pageUrl },
   },
   openGraph: {
     type: "article",
     locale: "fr_FR",
-    url: CANONICAL_URL,
+    url: pageUrl,
     siteName: "BeWork",
     title: "Crée ton skill — DUERP | BeWork",
     description: META_DESCRIPTION,
@@ -154,7 +154,7 @@ export default function TutoSkillDuerpBeworkPage() {
     "@type": "Article",
     headline: H1,
     description: META_DESCRIPTION,
-    url: CANONICAL_URL,
+    url: pageUrl,
     author: { "@type": "Organization" as const, name: "BeWork", url: SITE_URL },
     publisher: {
       "@type": "Organization" as const,
@@ -502,7 +502,7 @@ export default function TutoSkillDuerpBeworkPage() {
               </ul>
               <p className="mt-10 text-[1.0625rem] font-semibold text-slate-900">
                 Réservez un appel de cadrage de 20 minutes sur{" "}
-                <Link href="https://bework.fr" className="text-[#1d4ed8] underline underline-offset-4 hover:no-underline">
+                <Link href={SITE_URL} className="text-[#1d4ed8] underline underline-offset-4 hover:no-underline">
                   bework.fr
                 </Link>
               </p>

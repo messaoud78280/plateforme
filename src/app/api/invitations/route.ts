@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { SITE_URL } from "@/lib/site";
 import crypto from "crypto";
 
 const ROLE_MAP: Record<string, string> = {
@@ -77,7 +78,7 @@ export async function POST(request: Request) {
         expiresAt,
       },
     });
-    const baseUrl = process.env.NEXTAUTH_URL || "https://www.bework.fr";
+    const baseUrl = (process.env.NEXTAUTH_URL?.trim() || SITE_URL).replace(/\/$/, "");
     const acceptUrl = `${baseUrl}/invitation/accept?token=${token}`;
     return NextResponse.json({
       id: inv.id,

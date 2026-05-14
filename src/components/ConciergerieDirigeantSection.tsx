@@ -97,9 +97,9 @@ export function ConciergerieDirigeantSection() {
           </div>
         </div>
 
-        {/* RIGHT — mockup UI */}
-        <div className="flex w-full items-center justify-center overflow-visible">
-          <div className="w-full max-w-[480px] origin-center scale-[0.9] lg:scale-[0.95] -translate-x-6 lg:-translate-x-10 translate-y-12">
+        {/* RIGHT — mockup UI (flux sans chevauchement) */}
+        <div className="flex w-full items-start justify-center overflow-x-clip lg:justify-end">
+          <div className="w-full max-w-[min(100%,720px)] origin-center scale-[0.92] sm:scale-[0.96] lg:max-w-none lg:scale-100">
             <ConciergeDashboardMockup />
           </div>
         </div>

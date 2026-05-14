@@ -26,6 +26,7 @@ Dans **Settings** du projet (ou lors de l’import), ajoutez :
 | `DATABASE_URL` | Votre URL Supabase (port **6543**, pooler) | Copier depuis Supabase → Database → Connection string |
 | `NEXTAUTH_SECRET` | Une chaîne aléatoire (ex. `openssl rand -base64 32`) | Gardez la même qu’en local ou générez une nouvelle pour la prod |
 | `NEXTAUTH_URL` | **https://votre-projet.vercel.app** | À adapter après le 1er déploiement (voir ci‑dessous) |
+| `NEXT_PUBLIC_SITE_URL` | **https://www.bework.fr** (domaine canonique prod) | Même origine que `NEXTAUTH_URL` une fois le domaine défini — sitemap, OG, JSON-LD |
 
 Variables optionnelles (selon vos besoins) :
 
@@ -50,9 +51,9 @@ Variables optionnelles (selon vos besoins) :
 ## 5. Corriger NEXTAUTH_URL après le 1er déploiement
 
 1. Dans Vercel : **Project** → **Settings** → **Environment Variables**.
-2. Modifiez `NEXTAUTH_URL` et mettez exactement l’URL de votre site, par ex. :  
+2. Modifiez `NEXTAUTH_URL` et **`NEXT_PUBLIC_SITE_URL`** et mettez exactement l’URL de votre site, par ex. :  
    `https://plateforme-xxx.vercel.app`  
-   (ou votre nom de domaine personnalisé si vous l’ajoutez).
+   (ou **`https://www.bework.fr`** si vous utilisez le domaine canonique BeWork).
 3. Redéployez : **Deployments** → ⋮ sur le dernier déploiement → **Redeploy**.
 
 Sans cette URL correcte, la connexion (NextAuth) peut échouer en production.

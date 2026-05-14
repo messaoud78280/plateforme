@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
+import { MarketingHeaderBlueprintDecor } from "@/components/layout/MarketingHeaderBlueprintDecor";
 
 type Props = {
   /** Fond opaque (pages sur fond déjà uni) */
@@ -197,18 +198,16 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
     return () => document.removeEventListener("mousedown", down);
   }, [solutionsOpen, resourcesOpen]);
 
-  /** Fond blanc plein — sans trait ni ombre sous la barre */
-  const bgClass = "bg-white";
-
   const barPy = scrolled ? "py-2 sm:py-2.5 md:py-3" : "py-2.5 sm:py-3.5 md:py-4";
 
   return (
     <header
       ref={headerRef}
-      className={`relative sticky top-0 z-50 overflow-visible ${bgClass}`}
+      className="relative sticky top-0 z-50 overflow-visible border-b border-slate-200/50"
     >
+      <MarketingHeaderBlueprintDecor plainBg={plainBg} />
       <div
-        className={`container-site grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2.5 lg:grid-cols-[auto_1fr] lg:items-start lg:gap-x-6 ${barPy} font-sans`}
+        className={`container-site relative z-10 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2.5 lg:grid-cols-[auto_1fr] lg:items-start lg:gap-x-6 ${barPy} font-sans`}
       >
         {/* Ligne 1 — marque (desktop + mobile) */}
         <div className="min-w-0 justify-self-start self-center lg:col-start-1 lg:row-start-1 lg:self-start">

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ServicePageBody } from "@/components/marketing/ServicePageBody";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { SERVICE_PAGES, SERVICE_PAGE_ORDER, isServicePageSlug, servicePagePath } from "@/content/service-pages";
+import { buildServiceOfferingJsonLd } from "@/lib/jsonld-content-marketing";
 import { absoluteUrl } from "@/lib/site";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -58,12 +59,15 @@ export default async function ServiceDetailPage({ params }: Props) {
   const path = servicePagePath(slug);
   const pageUrl = absoluteUrl(path);
 
+  const serviceLd = buildServiceOfferingJsonLd(d, pageUrl);
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd(d.faq, pageUrl)) }}
       />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceLd) }} />
       <SeoLandingPage
         description={d.metaDescription}
         h1={d.h1}

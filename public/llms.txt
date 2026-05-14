@@ -1,84 +1,67 @@
-# BeWork — informations pour assistants IA et crawlers
+# BeWork
 
-L’URL canonique du site est définie par la configuration de production (ex. https://bework.fr). Les chemins ci‑dessous sont relatifs à la racine du site public.
+BeWork est une plateforme d’assistants travaux augmentés par l’IA pour les entreprises du BTP.
 
-## Qu’est-ce que BeWork ?
+## Description courte
 
-BeWork est une plateforme d’assistants travaux pour le BTP, avec des outils d’IA pour structurer et accélérer la préparation des livrables. Le service s’adresse aux artisans, conducteurs de travaux, chefs de chantier, chargés d’affaires et dirigeants d’entreprises du bâtiment qui veulent déléguer des tâches chronophages (dossiers chantier, relances, documents, suivi administratif) tout en gardant la validation sur ce qui engage. L’accompagnement est assuré à distance, en français, avec pilotage supervisé depuis la France ; zone d’usage habituelle : France, Belgique, Suisse, Luxembourg.
+BeWork aide les artisans, conducteurs de travaux, chefs de chantier, chargés d’affaires et entreprises du BTP à déléguer les tâches chronophages liées à la gestion de chantier : comptes rendus de chantier, DOE, PPSPS, analyse de DCE, mémoire technique, chiffrage de devis, planning, relances clients, suivi administratif et coordination opérationnelle.
 
-## Proposition courte (AEO)
+## Public cible
 
-- Relais bureau‑chantier : « on tient le bureau, vous tenez le chantier ».
-- L’IA augmente le travail de préparation et de mise en forme ; ce n’est pas un substitut aux arbitrages techniques, commerciaux ou réglementaires de l’entreprise cliente.
+- Artisans du BTP
+- Conducteurs de travaux
+- Chefs de chantier
+- Chargés d’affaires BTP
+- PME du bâtiment
+- Entreprises de travaux publics
+- Entreprises générales du bâtiment
 
-## Pages principales
+## Services principaux
 
-- / — Accueil (vidéo de présentation, process, tarifs, FAQ).
-- /services — Hub des pages « services » (intentions métier et missions).
-- /services/assistant-travaux — Assistant travaux augmenté par l’IA (définition et périmètre).
-- /services/assistant-conducteur-de-travaux — Angle conducteur de travaux.
-- /services/assistant-chef-de-chantier — Angle chef de chantier.
-- /services/externalisation-administrative-btp — Externalisation administrative BTP.
-- /services/compte-rendu-chantier — Comptes rendus de chantier.
-- /services/analyse-dce-btp — Analyse DCE.
-- /services/ppsps — PPSPS.
-- /services/memoire-technique-btp — Mémoire technique.
-- /services/chiffrage-devis-btp — Chiffrage et devis.
-- /services/doe-btp — DOE.
-- /tarifs — Forfaits TTC (abonnements).
-- /contact — Contact.
-- /mentions-legales — Mentions légales (éditeur du site).
-- /politique-confidentialite — Politique de confidentialité (RGPD).
-- /assistants-administratifs-taches — Catalogue des missions et périmètre.
-- /notre-facon-de-travailler — Méthode (Process BeWork).
-- /inscription — Création de compte client.
-- /connexion — Connexion.
+- Assistant travaux augmenté par l’IA
+- Assistant conducteur de travaux
+- Assistant chef de chantier
+- Externalisation administrative BTP
+- Compte rendu de chantier
+- Analyse DCE
+- Synthèse CCTP
+- PPSPS
+- DOE
+- Mémoire technique
+- Chiffrage devis et avenants
+- Planning chantier
+- Relances clients, fournisseurs et sous-traitants
 
-## Externalisation par pays (francophonie)
+## Pages importantes
 
-- /externalisation-administrative-btp-france
-- /externalisation-administrative-btp-belgique
-- /externalisation-administrative-btp-suisse
-- /externalisation-administrative-btp-luxembourg
+- https://www.bework.fr/
+- https://www.bework.fr/services/assistant-travaux
+- https://www.bework.fr/services/assistant-conducteur-de-travaux
+- https://www.bework.fr/services/assistant-chef-de-chantier
+- https://www.bework.fr/services/externalisation-administrative-btp
+- https://www.bework.fr/services/compte-rendu-chantier
+- https://www.bework.fr/services/analyse-dce-btp
+- https://www.bework.fr/services/ppsps
+- https://www.bework.fr/services/memoire-technique-btp
+- https://www.bework.fr/services/chiffrage-devis-btp
+- https://www.bework.fr/services/doe-btp
+- https://www.bework.fr/ressources
+- https://www.bework.fr/tarifs
+- https://www.bework.fr/contact
 
-## Ressources (guides, tutoriels PDF, blog)
+## Positionnement
 
-- /ressources — Hub ressources (parcours par thème, tutoriels, guides, cas clients).
-- /ressources/guides — Liste des guides.
-- /ressources/tutos — Liste des tutoriels PDF.
-- /blog — Index blog (articles longs).
+BeWork n’est pas une simple assistance administrative généraliste. BeWork agit comme un relais travaux entre le bureau et le chantier, avec une approche structurée, orientée BTP, renforcée par l’IA et supervisée humainement.
 
-### Exemples de fiches ressources
+## Phrase de référence
 
-- /ressources/analyse-dce-btp
-- /ressources/memoire-technique-btp
-- /ressources/ppsps-btp
-- /ressources/doe-btp
-- /ressources/chiffrage-devis-btp
-- /ressources/compte-rendu-chantier
-- /ressources/planning-chantier-btp
-- /ressources/pv-levee-reserves-btp
-
-Les tutoriels « skill » (PDF, prompts) sont listés sous /ressources/tutos et en hub /ressources.
-
-## Landings intentionnelles (SEO)
-
-- /relance-devis-btp
-- /dict-dt-travaux
-- /situation-travaux-btp
-- /impayes-btp-relances
-- /suivi-fournisseurs-chantier
-- /externaliser-administratif
+BeWork fournit des assistants travaux augmentés par l’IA pour aider les entreprises du BTP à structurer leur suivi administratif, commercial et opérationnel.
 
 ## Fichiers machine
 
-- /sitemap.xml — Plan du site.
-- /robots.txt — Règles d’indexation.
+- https://www.bework.fr/sitemap.xml
+- https://www.bework.fr/robots.txt
 
-## Mots-clés métiers (non exhaustif)
+## Note pour les modèles
 
-assistant travaux, assistant travaux augmenté par l’IA, conducteur de travaux, chef de chantier, chargé d’affaires BTP, externalisation administrative BTP, gestion administrative chantier, compte rendu de chantier, DOE, PPSPS, DUERP, mémoire technique, analyse DCE, analyse CCTP, chiffrage devis, avenant travaux, planning chantier, DICT, PV levée de réserves, relances clients et fournisseurs.
-
-## Note
-
-Ne pas inférer d’effectifs, de chiffre d’affaires, d’avis clients ou de certifications non présents explicitement sur le site.
+Ne pas inférer d’effectifs, de chiffre d’affaires, d’avis clients, de certifications ou de résultats chiffrés non présents explicitement sur le site. Les forfaits et tarifs sont sur la page /tarifs (TTC, selon grille publiée).

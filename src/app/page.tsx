@@ -200,7 +200,7 @@ export default function HomePage() {
             }}
           />
           {/* Quadrillage plan — papier millimétré bleuté */}
-          <div className="pointer-events-none absolute inset-0 z-[3] bework-blueprint-grid--hero opacity-[0.42] md:opacity-[0.38]" aria-hidden />
+          <div className="pointer-events-none absolute inset-0 z-[3] bework-blueprint-grid--hero opacity-[0.58] md:opacity-[0.52]" aria-hidden />
           {/* Courbe métallique centrale — complète les arcs coins */}
           <div
             className="pointer-events-none absolute inset-x-[-8%] top-[-6%] z-[4] h-[min(48vh,480px)] opacity-[0.26] md:inset-x-[-4%] md:opacity-[0.22]"
@@ -416,11 +416,14 @@ export default function HomePage() {
                     BeWork, c’est quoi ?
                   </p>
                   <p className="mt-3 text-[15px] leading-relaxed text-slate-700 md:text-base">
-                    BeWork est un service d’<strong>assistants travaux augmentés par l’IA</strong> pour les entreprises du BTP. La plateforme aide
-                    artisans, conducteurs de travaux, chefs de chantier et chargés d’affaires à déléguer les tâches chronophages&nbsp;: comptes rendus de
-                    chantier, DOE, PPSPS, analyse de DCE, chiffrage et devis, relances, planning, demandes administratives et suivi opérationnel. L’objectif
-                    est de libérer du temps terrain tout en structurant le suivi administratif et commercial —{" "}
-                    <span className="font-semibold text-slate-800">on tient le bureau, vous tenez le chantier.</span>
+                    BeWork est un service d&apos;assistants travaux augmentés par l&apos;IA pour les entreprises du BTP. La
+                    plateforme aide les artisans, conducteurs de travaux, chefs de chantier et chargés d&apos;affaires à
+                    déléguer les tâches chronophages&nbsp;: comptes rendus de chantier, DOE, PPSPS, analyse de DCE, chiffrage
+                    de devis, relances, planning, demandes administratives et suivi opérationnel. L&apos;objectif est de
+                    libérer du temps terrain tout en structurant le suivi administratif et commercial des chantiers.
+                  </p>
+                  <p className="mt-3 text-center text-[13px] font-semibold text-slate-800 md:text-sm">
+                    On tient le bureau, vous tenez le chantier.
                   </p>
                   <hr className="my-6 border-slate-200/90" />
                   <p className="font-heading text-[11px] font-bold uppercase tracking-[0.2em] text-[#1d4ed8] md:text-[12px]">
@@ -433,6 +436,35 @@ export default function HomePage() {
                   </p>
                   <p className="font-blueprint-note mt-3 text-center text-[13px] text-slate-600 md:text-sm">
                     Relais bureau ↔ chantier · suivi terrain
+                  </p>
+                  <p className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-center text-[12px] text-slate-600 md:text-sm">
+                    <Link href="/services/assistant-travaux" className="text-[#1d4ed8] underline-offset-2 hover:underline">
+                      Assistant travaux
+                    </Link>
+                    <span className="text-slate-300" aria-hidden>
+                      ·
+                    </span>
+                    <Link href="/services/compte-rendu-chantier" className="text-[#1d4ed8] underline-offset-2 hover:underline">
+                      Compte rendu chantier
+                    </Link>
+                    <span className="text-slate-300" aria-hidden>
+                      ·
+                    </span>
+                    <Link href="/services/analyse-dce-btp" className="text-[#1d4ed8] underline-offset-2 hover:underline">
+                      Analyse DCE
+                    </Link>
+                    <span className="text-slate-300" aria-hidden>
+                      ·
+                    </span>
+                    <Link href="/tarifs" className="text-[#1d4ed8] underline-offset-2 hover:underline">
+                      Tarifs
+                    </Link>
+                    <span className="text-slate-300" aria-hidden>
+                      ·
+                    </span>
+                    <Link href="/contact" className="text-[#1d4ed8] underline-offset-2 hover:underline">
+                      Contact
+                    </Link>
                   </p>
                   <p className="mt-4 text-center">
                     <Link
@@ -479,6 +511,29 @@ export default function HomePage() {
                     </Link>{" "}
                     pour les intentions métier (conducteur de travaux, DCE, PPSPS, DOE…).
                   </p>
+                  <p className="mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5 text-[12px] text-slate-600 md:mt-4 md:max-w-[48rem] md:gap-x-3 md:text-sm md:leading-relaxed">
+                    <Link href="/services/assistant-conducteur-de-travaux" className="text-[#1d4ed8] underline-offset-2 hover:underline">
+                      Assistant conducteur de travaux
+                    </Link>
+                    <span className="text-slate-300" aria-hidden>
+                      ·
+                    </span>
+                    <Link href="/services/ppsps" className="text-[#1d4ed8] underline-offset-2 hover:underline">
+                      PPSPS
+                    </Link>
+                    <span className="text-slate-300" aria-hidden>
+                      ·
+                    </span>
+                    <Link href="/services/doe-btp" className="text-[#1d4ed8] underline-offset-2 hover:underline">
+                      DOE
+                    </Link>
+                    <span className="text-slate-300" aria-hidden>
+                      ·
+                    </span>
+                    <Link href="/ressources" className="text-[#1d4ed8] underline-offset-2 hover:underline">
+                      Ressources
+                    </Link>
+                  </p>
                   <div className="mt-2.5 h-1 w-14 rounded-sm bg-[#1d4ed8] md:mx-auto" aria-hidden />
                   <Link
                     href="/assistants-administratifs-taches"
@@ -500,7 +555,7 @@ export default function HomePage() {
 
         {/* Au-dessus du décor skew qui déborde du bloc hero — évite que le panneau gris recouvre le texte */}
         <div className="relative z-10 overflow-x-clip bg-gradient-to-b from-[#f8fafc] via-[#f1f5f9] to-[#f1f5f9]">
-          <div className="pointer-events-none absolute inset-0 bework-blueprint-grid opacity-[0.14] md:opacity-[0.16]" aria-hidden />
+          <div className="pointer-events-none absolute inset-0 bework-blueprint-grid opacity-[0.22] md:opacity-[0.26]" aria-hidden />
           <div className="pointer-events-none absolute right-0 top-[8%] h-[min(45%,380px)] w-[min(48%,420px)] opacity-[0.035] md:opacity-[0.045]" aria-hidden>
             <svg className="h-full w-full text-slate-400" viewBox="0 0 200 200" fill="none" preserveAspectRatio="xMidYMid meet">
               <path

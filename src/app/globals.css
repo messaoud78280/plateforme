@@ -204,21 +204,24 @@ body {
     }
   }
 
-  /** Homepage — grille type plan technique (très discrète) */
+  /** Homepage — grille type plan technique (lisible, premium blueprint) */
   .bework-blueprint-grid {
     background-image:
-      linear-gradient(to right, rgba(100, 116, 139, 0.06) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(100, 116, 139, 0.06) 1px, transparent 1px);
-    background-size: 44px 44px;
+      linear-gradient(to right, rgba(15, 23, 42, 0.07) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(15, 23, 42, 0.07) 1px, transparent 1px),
+      linear-gradient(to right, rgba(37, 99, 235, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(37, 99, 235, 0.05) 1px, transparent 1px);
+    background-size: 44px 44px, 44px 44px, 11px 11px, 11px 11px;
+    background-position: 0 0, 0 0, 0 0, 0 0;
   }
 
   /** Hero — papier millimétré légèrement bleuté (maquette blueprint BTP) */
   .bework-blueprint-grid--hero {
     background-image:
-      linear-gradient(to right, rgba(37, 99, 235, 0.045) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(37, 99, 235, 0.045) 1px, transparent 1px),
-      linear-gradient(to right, rgba(148, 163, 184, 0.055) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(148, 163, 184, 0.055) 1px, transparent 1px);
+      linear-gradient(to right, rgba(37, 99, 235, 0.09) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(37, 99, 235, 0.09) 1px, transparent 1px),
+      linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
     background-size:
       36px 36px,
       36px 36px,

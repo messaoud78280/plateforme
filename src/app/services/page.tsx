@@ -4,6 +4,7 @@ import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { SERVICE_PAGES, SERVICE_PAGE_ORDER } from "@/content/service-pages";
+import { buildServicesHubItemListJsonLd } from "@/lib/jsonld-content-marketing";
 import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/seo-landing-json-ld";
 import { absoluteUrl } from "@/lib/site";
 
@@ -39,10 +40,13 @@ const jsonLd = buildWebPageAndBreadcrumbJsonLd({
   ],
 });
 
+const itemListLd = buildServicesHubItemListJsonLd(SERVICE_PAGE_ORDER);
+
 export default function ServicesHubPage() {
   return (
     <div className="min-h-screen bg-[#f8fafc]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
       <MarketingSiteHeader plainBg />
       <main className="mx-auto max-w-site px-6 py-14 md:py-20">
         <article className="mx-auto max-w-3xl">

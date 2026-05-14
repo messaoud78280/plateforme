@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
+import { BlueprintRessourcesBackdrop } from "@/components/home/BlueprintCotationDecor";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { ResourceSpotlightCarousel } from "@/components/ressources/ResourceSpotlightCarousel";
@@ -9,6 +10,7 @@ import { CAS_CLIENT_CASES } from "@/content/cas-clients-cases";
 import { RESOURCE_GUIDE_PAGE_ITEMS } from "@/content/resource-guides-pages";
 import { RESOURCE_GUIDE_CATEGORIES } from "@/content/resource-categories";
 import { RESOURCE_TUTO_ITEMS, type ResourceTutoItem, type ResourceStatus } from "@/content/resource-tutos";
+import { buildResourcesHubCollectionJsonLd } from "@/lib/jsonld-content-marketing";
 import { absoluteUrl } from "@/lib/site";
 
 const pageUrl = absoluteUrl("/ressources");
@@ -34,10 +36,12 @@ const GUIDE_CAROUSEL_ITEMS = [
   })),
 ].sort((x, y) => new Date(y.publishedTime).getTime() - new Date(x.publishedTime).getTime());
 
+const RESSOURCES_META_DESC =
+  "Vue d’ensemble : tutoriels PDF, guides blog (administratif BTP) et exemples de cas clients.";
+
 export const metadata: Metadata = {
   title: "Ressources BeWork — Tutoriels, guides & cas clients",
-  description:
-    "Vue d’ensemble : tutoriels PDF, guides blog (administratif BTP) et exemples de cas clients.",
+  description: RESSOURCES_META_DESC,
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   openGraph: {
     type: "website",
@@ -81,6 +85,11 @@ function FaqJsonLd() {
       acceptedAnswer: { "@type": "Answer", text: item.a },
     })),
   };
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+}
+
+function ResourcesCollectionJsonLd() {
+  const schema = buildResourcesHubCollectionJsonLd(RESSOURCES_META_DESC);
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
 }
 
@@ -223,11 +232,13 @@ function CaseCarouselCard({ cas }: { cas: (typeof CAS_CLIENT_CASES)[number] }) {
 
 export default function RessourcesPage() {
   return (
-    <div className="min-h-screen bg-[#f8fafc]">
+    <div className="relative min-h-screen bg-[#f8fafc]">
+      <BlueprintRessourcesBackdrop />
       <FaqJsonLd />
+      <ResourcesCollectionJsonLd />
       <MarketingSiteHeader plainBg />
 
-      <main className="mx-auto max-w-site px-4 pb-16 pt-10 sm:px-6 md:pb-20 md:pt-14">
+      <main className="relative z-10 mx-auto max-w-site px-4 pb-16 pt-10 sm:px-6 md:pb-20 md:pt-14">
         <header className="border-b border-slate-200/90 pb-8 md:pb-10">
           <div className="max-w-xl text-left">
             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1d4ed8]">Ressources BeWork</p>

@@ -549,7 +549,7 @@ export default function TutoSkillChiffrageDevisBeworkPage() {
               </ul>
               <p className="mt-10 text-[1.0625rem] font-semibold text-slate-900">
                 Réservez un appel de cadrage de 20 minutes sur{" "}
-                <Link href="https://bework.fr" className="text-[#1d4ed8] underline underline-offset-4 hover:no-underline">
+                <Link href={SITE_URL} className="text-[#1d4ed8] underline underline-offset-4 hover:no-underline">
                   bework.fr
                 </Link>
               </p>

@@ -1,4 +1,7 @@
-import { BlueprintCotationMissionsFrame } from "@/components/home/BlueprintCotationDecor";
+import {
+  BlueprintCotationMissionsFrame,
+  BlueprintCotationWhatWeHandleAmbient,
+} from "@/components/home/BlueprintCotationDecor";
 
 /** Variantes uniquement dans la même teinte bleu BeWork (contraste léger carte 1 → 3). */
 const SECONDARY_CARDS = [
@@ -85,6 +88,7 @@ export function HomeWhatWeHandleSection() {
       style={{ scrollMarginTop: "6rem" }}
       aria-labelledby="what-we-handle-heading"
     >
+      <BlueprintCotationWhatWeHandleAmbient />
       {/* Même fond que « Process BeWork » : pas de dégradé vers le blanc (laisser la courbe grise du parent) */}
       <div className="container-site relative z-10">
         {/* 1 — En-tête (centré) */}

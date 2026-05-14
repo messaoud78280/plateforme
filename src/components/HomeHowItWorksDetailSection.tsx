@@ -2,7 +2,10 @@
 
 import { type JSX } from "react";
 import { HomeClientSpacePreview } from "@/components/HomeClientSpacePreview";
-import { BlueprintCotationProcessRail } from "@/components/home/BlueprintCotationDecor";
+import {
+  BlueprintCotationProcessAmbient,
+  BlueprintCotationProcessRail,
+} from "@/components/home/BlueprintCotationDecor";
 
 const BLUE = "#2563eb";
 const fontSans = "var(--font-inter), ui-sans-serif, system-ui, sans-serif";
@@ -60,6 +63,7 @@ export function HomeHowItWorksDetailSection() {
         className="pointer-events-none absolute left-0 top-0 block h-px w-px overflow-hidden opacity-0"
         aria-hidden
       />
+      <BlueprintCotationProcessAmbient />
       <div className="container-site relative z-[2]">
         <header className="relative z-10 mx-auto mb-16 max-w-3xl text-center md:mb-20">
           <h2

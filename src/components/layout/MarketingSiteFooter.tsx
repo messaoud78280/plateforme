@@ -133,6 +133,26 @@ export function MarketingSiteFooter() {
                   Assistant travaux
                 </Link>
               </li>
+              <li>
+                <Link href="/services/compte-rendu-chantier" className={COL_LINK}>
+                  Compte rendu de chantier
+                </Link>
+              </li>
+              <li>
+                <Link href="/services/analyse-dce-btp" className={COL_LINK}>
+                  Analyse DCE
+                </Link>
+              </li>
+              <li>
+                <Link href="/services/ppsps" className={COL_LINK}>
+                  PPSPS
+                </Link>
+              </li>
+              <li>
+                <Link href="/services/doe-btp" className={COL_LINK}>
+                  DOE
+                </Link>
+              </li>
             </ul>
           </div>
 

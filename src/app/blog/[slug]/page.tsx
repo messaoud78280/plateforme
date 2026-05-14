@@ -56,7 +56,7 @@ export default async function BlogArticlePage({ params }: Props) {
   const dateModified = article.modifiedTime ?? article.publishedTime;
   const blogPostingLd = {
     "@context": "https://schema.org",
-    "@type": "BlogPosting",
+    "@type": ["BlogPosting", "Article"],
     headline: article.title,
     description: article.description,
     inLanguage: "fr-FR",

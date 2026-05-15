@@ -1,0 +1,251 @@
+import type { ReactNode } from "react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { deletePriceEntry } from "@/app/dashboard/devis/actions";
+import { PriceEntryCreateForm } from "@/components/devis/PriceEntryCreateForm";
+import {
+  QUALITY_LEVEL_LABELS,
+  SOURCE_TYPE_LABELS,
+  WORK_ITEM_STATUS_LABELS,
+} from "@/lib/be-work-devis-labels";
+import { formatDateFr, formatEurFr } from "@/lib/be-work-devis-format";
+import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
+import { prisma } from "@/lib/prisma";
+
+type Props = { params: Promise<{ id: string }> };
+
+function Label({ children }: { children: ReactNode }) {
+  return <dt className="text-[11px] font-bold uppercase tracking-wide text-slate-500">{children}</dt>;
+}
+
+function Value({ children }: { children: ReactNode }) {
+  return <dd className="mt-1 whitespace-pre-wrap text-sm text-slate-900">{children}</dd>;
+}
+
+export default async function FicheOuvragePage({ params }: Props) {
+  await requireBeWorkDevisSession();
+  const { id } = await params;
+
+  const item = await prisma.workItem.findUnique({ where: { id } });
+  if (!item) notFound();
+
+  const [agg, countPrices, entries, sources] = await Promise.all([
+    prisma.priceEntry.aggregate({
+      where: { workItemId: id },
+      _min: { unitPriceHT: true },
+      _max: { unitPriceHT: true },
+      _avg: { unitPriceHT: true },
+    }),
+    prisma.priceEntry.count({ where: { workItemId: id } }),
+    prisma.priceEntry.findMany({
+      where: { workItemId: id },
+      orderBy: [{ updatedAt: "desc" }],
+      include: { priceSource: true },
+    }),
+    prisma.priceSource.findMany({ orderBy: { name: "asc" } }),
+  ]);
+
+  const minHt = agg._min.unitPriceHT != null ? Number(agg._min.unitPriceHT) : null;
+  const maxHt = agg._max.unitPriceHT != null ? Number(agg._max.unitPriceHT) : null;
+  const avgHt = agg._avg.unitPriceHT != null ? Number(agg._avg.unitPriceHT) : null;
+
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col gap-4 px-1 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-3">
+          <Link href="/dashboard/devis/bibliotheque" className="text-sm font-semibold text-[#1d4ed8] hover:underline">
+            ← Bibliothèque
+          </Link>
+        </div>
+        <Link
+          href={`/dashboard/devis/bibliotheque/${id}/modifier`}
+          className="inline-flex w-fit rounded-xl bg-[#1e3a5f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#152a45]"
+        >
+          Modifier
+        </Link>
+      </div>
+
+      <header className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-wrap gap-2">
+          <span className="rounded-full bg-[#1e3a5f]/10 px-2.5 py-0.5 font-mono text-xs font-bold text-[#1e3a5f]">
+            {item.code}
+          </span>
+          <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-900">
+            {QUALITY_LEVEL_LABELS[item.qualityLevel]}
+          </span>
+          <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-800">
+            {WORK_ITEM_STATUS_LABELS[item.status]}
+          </span>
+        </div>
+        <h1 className="mt-4 font-heading text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{item.title}</h1>
+        <p className="mt-2 text-sm text-slate-600">
+          Lot : <span className="font-semibold text-slate-800">{item.lot}</span>
+          {item.subLot ? (
+            <>
+              {" "}
+              · Sous-lot : <span className="font-semibold">{item.subLot}</span>
+            </>
+          ) : null}
+          {item.family ? (
+            <>
+              {" "}
+              · Famille : <span className="font-semibold">{item.family}</span>
+            </>
+          ) : null}
+          {" "}
+          · Unité : <span className="font-semibold">{item.unit}</span>
+        </p>
+      </header>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="border-b border-slate-100 pb-2 font-heading text-lg font-bold text-slate-900">Descriptif</h2>
+          <dl className="mt-4 space-y-4">
+            {item.shortDescription ? (
+              <div>
+                <Label>Désignation courte</Label>
+                <Value>{item.shortDescription}</Value>
+              </div>
+            ) : null}
+            <div>
+              <Label>Désignation complète</Label>
+              <Value>{item.fullDescription}</Value>
+            </div>
+            {item.technicalReference ? (
+              <div>
+                <Label>Référence technique indicative</Label>
+                <Value>{item.technicalReference}</Value>
+              </div>
+            ) : null}
+          </dl>
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="border-b border-slate-100 pb-2 font-heading text-lg font-bold text-slate-900">
+            Méthode & vigilance
+          </h2>
+          <dl className="mt-4 space-y-4">
+            {item.includedItems ? (
+              <div>
+                <Label>Inclus</Label>
+                <Value>{item.includedItems}</Value>
+              </div>
+            ) : null}
+            {item.excludedItems ? (
+              <div>
+                <Label>Exclus</Label>
+                <Value>{item.excludedItems}</Value>
+              </div>
+            ) : null}
+            {item.vigilancePoints ? (
+              <div>
+                <Label>Points de vigilance</Label>
+                <Value>{item.vigilancePoints}</Value>
+              </div>
+            ) : null}
+            {item.clientQuestions ? (
+              <div>
+                <Label>Questions client</Label>
+                <Value>{item.clientQuestions}</Value>
+              </div>
+            ) : null}
+            {item.companyQuestions ? (
+              <div>
+                <Label>Questions entreprise</Label>
+                <Value>{item.companyQuestions}</Value>
+              </div>
+            ) : null}
+            {item.internalNotes ? (
+              <div>
+                <Label>Notes internes</Label>
+                <Value>{item.internalNotes}</Value>
+              </div>
+            ) : null}
+          </dl>
+        </section>
+      </div>
+
+      <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-2 border-b border-slate-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="font-heading text-lg font-bold text-slate-900">Prix observés</h2>
+          <div className="flex flex-wrap gap-3 text-sm">
+            <span className="rounded-lg bg-emerald-50 px-3 py-1 font-semibold text-emerald-900">
+              Min HT : {formatEurFr(minHt)}
+            </span>
+            <span className="rounded-lg bg-sky-50 px-3 py-1 font-semibold text-sky-900">
+              Moy. HT : {formatEurFr(avgHt)}
+            </span>
+            <span className="rounded-lg bg-orange-50 px-3 py-1 font-semibold text-orange-900">
+              Max HT : {formatEurFr(maxHt)}
+            </span>
+            <span className="rounded-lg bg-slate-100 px-3 py-1 font-semibold text-slate-800">
+              {countPrices} prix
+            </span>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="min-w-[920px] w-full text-left text-sm">
+            <thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase text-slate-600">
+              <tr>
+                <th className="px-3 py-2">Source</th>
+                <th className="px-3 py-2">Type</th>
+                <th className="px-3 py-2">HT</th>
+                <th className="px-3 py-2">TVA %</th>
+                <th className="px-3 py-2">TTC</th>
+                <th className="px-3 py-2">Dept.</th>
+                <th className="px-3 py-2">Fiab.</th>
+                <th className="px-3 py-2">Date</th>
+                <th className="px-3 py-2 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {entries.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="px-3 py-8 text-center text-slate-500">
+                    Aucun prix enregistré pour cet ouvrage.
+                  </td>
+                </tr>
+              ) : (
+                entries.map((pe) => (
+                  <tr key={pe.id} className="hover:bg-slate-50/80">
+                    <td className="max-w-[200px] truncate px-3 py-2 font-medium" title={pe.sourceName}>
+                      {pe.sourceName}
+                      {pe.priceSource ? (
+                        <span className="mt-0.5 block text-xs font-normal text-slate-500">
+                          Lié : {pe.priceSource.name}
+                        </span>
+                      ) : null}
+                    </td>
+                    <td className="px-3 py-2">{SOURCE_TYPE_LABELS[pe.sourceType]}</td>
+                    <td className="px-3 py-2 font-mono text-xs">{formatEurFr(Number(pe.unitPriceHT))}</td>
+                    <td className="px-3 py-2">{Number(pe.vatRate)} %</td>
+                    <td className="px-3 py-2 font-mono text-xs">{formatEurFr(Number(pe.unitPriceTTC))}</td>
+                    <td className="px-3 py-2">{pe.department ?? "—"}</td>
+                    <td className="px-3 py-2">{pe.reliabilityScore}</td>
+                    <td className="px-3 py-2 whitespace-nowrap">{formatDateFr(pe.dateObserved ?? pe.createdAt)}</td>
+                    <td className="px-3 py-2 text-right">
+                      <form action={deletePriceEntry} className="inline">
+                        <input type="hidden" name="id" value={pe.id} />
+                        <input type="hidden" name="workItemId" value={id} />
+                        <button
+                          type="submit"
+                          className="text-xs font-semibold text-red-700 hover:underline"
+                          title="Supprimer ce prix"
+                        >
+                          Supprimer
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <PriceEntryCreateForm workItemId={id} sources={sources} />
+      </section>
+    </div>
+  );
+}

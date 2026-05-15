@@ -13,7 +13,7 @@
     "lint": "eslint",
     "db:seed": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx prisma/seed.ts",
     "db:seed:equipe": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx prisma/seed-equipe-bework.ts",
-    "db:seed:simulation": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx prisma/seed-simulation.ts",
+    "db:seed:devis": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx prisma/seed-bework-devis.ts",
     "db:check": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/verifier-supabase.ts",
     "db:update-demo-passwords": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/update-demo-passwords.ts",
     "db:studio": "prisma studio",

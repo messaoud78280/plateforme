@@ -629,3 +629,106 @@ model ReportComment {
   report Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+// ─── BeWork Devis — bibliothèque interne (référentiel ouvrages / prix / sources) ───
+
+enum WorkItemQualityLevel {
+  standard
+  confort
+  premium
+}
+
+enum WorkItemStatus {
+  brouillon
+  a_completer
+  a_verifier
+  valide
+  archive
+}
+
+enum BeWorkPriceDocSourceType {
+  devis
+  bpu
+  dpgf
+  marche_public
+  estimation_interne
+  autre
+}
+
+/// Ouvrage BTP de la bibliothèque interne
+model WorkItem {
+  id                   String               @id @default(cuid())
+  code                 String               @unique
+  lot                  String
+  subLot               String?
+  family               String?
+  title                String
+  shortDescription     String?              @db.Text
+  fullDescription      String               @db.Text
+  unit                 String
+  qualityLevel         WorkItemQualityLevel @default(standard)
+  technicalReference   String?
+  includedItems        String?              @db.Text
+  excludedItems        String?              @db.Text
+  vigilancePoints      String?              @db.Text
+  clientQuestions      String?              @db.Text
+  companyQuestions     String?              @db.Text
+  internalNotes        String?              @db.Text
+  status               WorkItemStatus       @default(brouillon)
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+
+  priceEntries PriceEntry[]
+
+  @@index([lot])
+  @@index([status])
+  @@index([unit])
+}
+
+/// Document ou source métier (devis, BPU, DPGF…)
+model PriceSource {
+  id               String                   @id @default(cuid())
+  name             String
+  sourceType       BeWorkPriceDocSourceType
+  clientName       String?
+  projectName      String?
+  projectLocation  String?
+  department       String?
+  dateDocument     DateTime?                @db.Date
+  notes            String?                  @db.Text
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+
+  priceEntries PriceEntry[]
+
+  @@index([sourceType])
+}
+
+/// Prix observé pour un ouvrage
+model PriceEntry {
+  id               String                   @id @default(cuid())
+  workItemId       String
+  priceSourceId    String?
+  sourceName       String
+  sourceType       BeWorkPriceDocSourceType
+  unitPriceHT      Decimal                  @db.Decimal(14, 4)
+  vatRate          Decimal                  @db.Decimal(6, 4)
+  unitPriceTTC     Decimal                  @db.Decimal(14, 4)
+  quantity         Decimal?                 @db.Decimal(14, 4)
+  region           String?
+  department       String?
+  projectType      String?
+  qualityLevel     String?
+  dateObserved     DateTime?                @db.Date
+  reliabilityScore Int                      @default(3)
+  notes            String?                  @db.Text
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+
+  workItem    WorkItem     @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  priceSource PriceSource? @relation(fields: [priceSourceId], references: [id], onDelete: SetNull)
+
+  @@index([workItemId])
+  @@index([sourceType])
+  @@index([department])
+}

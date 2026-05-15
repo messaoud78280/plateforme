@@ -715,6 +715,8 @@ model PriceEntry {
   vatRate          Decimal                  @db.Decimal(6, 4)
   unitPriceTTC     Decimal                  @db.Decimal(14, 4)
   quantity         Decimal?                 @db.Decimal(14, 4)
+  totalHT          Decimal?                 @db.Decimal(14, 4)
+  totalTTC         Decimal?                 @db.Decimal(14, 4)
   region           String?
   department       String?
   projectType      String?

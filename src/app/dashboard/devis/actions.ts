@@ -9,7 +9,9 @@ import {
   isWorkItemStatus,
 } from "@/lib/be-work-devis-labels";
 import { isWorkItemUnit, normalizeUnit } from "@/lib/be-work-devis-units";
+import { buildPriceEntryCreateFromPaste, extractPriceEntriesFromPastedWorkItem } from "@/lib/be-work-devis-price-entry-paste";
 import {
+  emptyStructuredPasteFormValues,
   mapObjectToStructuredPasteFormValues,
   type StructuredPasteFormValues,
 } from "@/lib/be-work-devis-structured-paste";
@@ -86,6 +88,32 @@ export async function createWorkItem(formData: FormData) {
 
 const BULK_IMPORT_MAX = 500;
 
+export type BulkImportWorkItemPayload = {
+  values: StructuredPasteFormValues;
+  priceEntries: Record<string, unknown>[];
+};
+
+function normalizeBulkImportRows(rowsInput: unknown): BulkImportWorkItemPayload[] | null {
+  if (!Array.isArray(rowsInput)) return null;
+  return rowsInput.map((row) => {
+    if (!row || typeof row !== "object" || Array.isArray(row)) {
+      return { values: emptyStructuredPasteFormValues(), priceEntries: [] };
+    }
+    const o = row as Record<string, unknown>;
+    if ("values" in o && o.values && typeof o.values === "object" && !Array.isArray(o.values)) {
+      const values = o.values as StructuredPasteFormValues;
+      const pe = Array.isArray(o.priceEntries)
+        ? (o.priceEntries as unknown[]).filter(
+            (x): x is Record<string, unknown> => typeof x === "object" && x !== null && !Array.isArray(x),
+          )
+        : [];
+      return { values, priceEntries: pe };
+    }
+    const { values } = mapObjectToStructuredPasteFormValues(o);
+    return { values, priceEntries: extractPriceEntriesFromPastedWorkItem(o) };
+  });
+}
+
 /** Codes déjà présents en base (comparaison exacte sur le champ `code`). */
 export async function checkWorkItemCodesExist(codesInput: string[]): Promise<string[]> {
   await guard();
@@ -139,11 +167,13 @@ function buildWorkItemCreateDataFromPasteValues(v: StructuredPasteFormValues) {
 /**
  * Import en masse depuis le collage JSON (sans redirection).
  * Ignore les codes déjà en base et les lignes sans code valide.
+ * Crée les `PriceEntry` fournis dans chaque ligne (`priceEntries`).
  */
 export async function importWorkItemsBulk(rowsInput: unknown): Promise<
   | {
       ok: true;
       created: number;
+      pricesCreated: number;
       skippedDuplicate: number;
       skippedInvalid: number;
       skippedBatchDuplicate: number;
@@ -152,31 +182,28 @@ export async function importWorkItemsBulk(rowsInput: unknown): Promise<
   | { ok: false; error: string }
 > {
   await guard();
-  if (!Array.isArray(rowsInput)) {
+  const bundles = normalizeBulkImportRows(rowsInput);
+  if (!bundles) {
     return { ok: false, error: "Format invalide : attendu un tableau d’objets." };
   }
-  if (rowsInput.length === 0) {
+  if (bundles.length === 0) {
     return { ok: false, error: "Aucune ligne à importer." };
   }
-  if (rowsInput.length > BULK_IMPORT_MAX) {
+  if (bundles.length > BULK_IMPORT_MAX) {
     return { ok: false, error: `Maximum ${BULK_IMPORT_MAX} ouvrages par import.` };
   }
 
   const errors: string[] = [];
   let created = 0;
+  let pricesCreated = 0;
   let skippedDuplicate = 0;
   let skippedInvalid = 0;
   let skippedBatchDuplicate = 0;
   const seenInBatch = new Set<string>();
 
-  for (let i = 0; i < rowsInput.length; i++) {
-    const raw = rowsInput[i];
-    if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
-      skippedInvalid += 1;
-      errors.push(`Ligne ${i + 1} : objet attendu.`);
-      continue;
-    }
-    const { values } = mapObjectToStructuredPasteFormValues(raw as Record<string, unknown>);
+  for (let i = 0; i < bundles.length; i++) {
+    const bundle = bundles[i];
+    const { values, priceEntries } = bundle;
     const code = values.code.trim();
     if (!code) {
       skippedInvalid += 1;
@@ -198,8 +225,19 @@ export async function importWorkItemsBulk(rowsInput: unknown): Promise<
 
     const data = buildWorkItemCreateDataFromPasteValues(values);
     try {
-      await prisma.workItem.create({ data });
+      const workItem = await prisma.workItem.create({ data });
       created += 1;
+
+      for (let j = 0; j < priceEntries.length; j++) {
+        const rawPe = priceEntries[j];
+        const built = buildPriceEntryCreateFromPaste(workItem.id, rawPe);
+        if (!built.ok) {
+          errors.push(`Ligne ${i + 1} (${code}), prix #${j + 1} : ${built.error}`);
+          continue;
+        }
+        await prisma.priceEntry.create({ data: built.data });
+        pricesCreated += 1;
+      }
     } catch (e) {
       skippedInvalid += 1;
       const msg = e instanceof Error ? e.message : "Erreur inconnue.";
@@ -209,9 +247,11 @@ export async function importWorkItemsBulk(rowsInput: unknown): Promise<
 
   revalidatePath("/dashboard/devis/bibliotheque");
   revalidatePath("/dashboard/devis/recherche");
+  revalidatePath("/dashboard/devis/prix");
   return {
     ok: true,
     created,
+    pricesCreated,
     skippedDuplicate,
     skippedInvalid,
     skippedBatchDuplicate,

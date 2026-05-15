@@ -181,15 +181,18 @@ export default async function PrixObservesPage({ searchParams }: { searchParams:
       </form>
 
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <table className="min-w-[1080px] w-full text-left text-sm">
+        <table className="min-w-[1200px] w-full text-left text-sm">
           <thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-600">
             <tr>
               <th className="px-4 py-3">Ouvrage</th>
               <th className="px-4 py-3">Source</th>
               <th className="px-4 py-3">Type source</th>
+              <th className="px-4 py-3">Qté</th>
               <th className="px-4 py-3">Prix HT</th>
+              <th className="px-4 py-3">Total HT</th>
               <th className="px-4 py-3">TVA</th>
               <th className="px-4 py-3">Prix TTC</th>
+              <th className="px-4 py-3">Total TTC</th>
               <th className="px-4 py-3">Unité</th>
               <th className="px-4 py-3">Département</th>
               <th className="px-4 py-3">Fiabilité</th>
@@ -200,7 +203,7 @@ export default async function PrixObservesPage({ searchParams }: { searchParams:
           <tbody className="divide-y divide-slate-100">
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={11} className="px-4 py-12 text-center text-slate-500">
+                <td colSpan={14} className="px-4 py-12 text-center text-slate-500">
                   Aucun prix pour ces filtres.
                 </td>
               </tr>
@@ -222,9 +225,18 @@ export default async function PrixObservesPage({ searchParams }: { searchParams:
                     {pe.sourceName}
                   </td>
                   <td className="px-4 py-3">{SOURCE_TYPE_LABELS[pe.sourceType]}</td>
+                  <td className="whitespace-nowrap px-4 py-3 font-mono text-xs">
+                    {pe.quantity != null ? String(pe.quantity) : "—"}
+                  </td>
                   <td className="whitespace-nowrap px-4 py-3 font-mono text-xs">{formatEurFr(Number(pe.unitPriceHT))}</td>
+                  <td className="whitespace-nowrap px-4 py-3 font-mono text-xs">
+                    {pe.totalHT != null ? formatEurFr(Number(pe.totalHT)) : "—"}
+                  </td>
                   <td className="px-4 py-3">{Number(pe.vatRate)} %</td>
                   <td className="whitespace-nowrap px-4 py-3 font-mono text-xs">{formatEurFr(Number(pe.unitPriceTTC))}</td>
+                  <td className="whitespace-nowrap px-4 py-3 font-mono text-xs">
+                    {pe.totalTTC != null ? formatEurFr(Number(pe.totalTTC)) : "—"}
+                  </td>
                   <td className="px-4 py-3">{pe.workItem.unit}</td>
                   <td className="px-4 py-3">{pe.department ?? "—"}</td>
                   <td className="px-4 py-3">{pe.reliabilityScore}</td>

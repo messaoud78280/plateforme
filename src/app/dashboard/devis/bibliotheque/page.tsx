@@ -29,6 +29,8 @@ type SearchParams = Promise<{
   sort?: string;
   /** Nombre d'ouvrages créés après import groupé (affichage flash). */
   imported?: string;
+  /** Nombre de lignes PriceEntry créées lors du dernier import groupé. */
+  pricesImported?: string;
 }>;
 
 function toFilterParams(sp: Awaited<SearchParams>): WorkItemFilterParams {
@@ -96,14 +98,15 @@ export default async function BibliothequePage({ searchParams }: { searchParams:
   const qsStr = filterQueryString(sp);
   const sourceTypeKeys = Object.keys(SOURCE_TYPE_LABELS) as BeWorkPriceDocSourceType[];
   const importedCount = sp.imported != null ? Number.parseInt(sp.imported, 10) : NaN;
+  const pricesImportedCount = sp.pricesImported != null ? Number.parseInt(sp.pricesImported, 10) : NaN;
   const showImportBanner = Number.isFinite(importedCount) && importedCount > 0;
 
   return (
     <div className="space-y-6">
       {showImportBanner ? (
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950">
-          <strong>{importedCount}</strong> ouvrage(s) importé(s) dans la bibliothèque. Les lignes en doublon ou invalides ont été
-          ignorées selon votre confirmation.
+          <strong>{importedCount}</strong> ouvrage(s) importé(s),{" "}
+          <strong>{Number.isFinite(pricesImportedCount) ? pricesImportedCount : 0}</strong> prix observé(s) ajouté(s).
         </div>
       ) : null}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">

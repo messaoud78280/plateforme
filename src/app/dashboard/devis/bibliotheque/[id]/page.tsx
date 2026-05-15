@@ -190,9 +190,12 @@ export default async function FicheOuvragePage({ params }: Props) {
               <tr>
                 <th className="px-3 py-2">Source</th>
                 <th className="px-3 py-2">Type</th>
-                <th className="px-3 py-2">HT</th>
+                <th className="px-3 py-2">Qté</th>
+                <th className="px-3 py-2">PU HT</th>
+                <th className="px-3 py-2">Total HT</th>
                 <th className="px-3 py-2">TVA %</th>
                 <th className="px-3 py-2">TTC</th>
+                <th className="px-3 py-2">Total TTC</th>
                 <th className="px-3 py-2">Dept.</th>
                 <th className="px-3 py-2">Fiab.</th>
                 <th className="px-3 py-2">Date</th>
@@ -202,7 +205,7 @@ export default async function FicheOuvragePage({ params }: Props) {
             <tbody className="divide-y divide-slate-100">
               {entries.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-3 py-8 text-center text-slate-500">
+                  <td colSpan={12} className="px-3 py-8 text-center text-slate-500">
                     Aucun prix enregistré pour cet ouvrage.
                   </td>
                 </tr>
@@ -218,9 +221,18 @@ export default async function FicheOuvragePage({ params }: Props) {
                       ) : null}
                     </td>
                     <td className="px-3 py-2">{SOURCE_TYPE_LABELS[pe.sourceType]}</td>
+                    <td className="whitespace-nowrap px-3 py-2 font-mono text-xs">
+                      {pe.quantity != null ? String(pe.quantity) : "—"}
+                    </td>
                     <td className="px-3 py-2 font-mono text-xs">{formatEurFr(Number(pe.unitPriceHT))}</td>
+                    <td className="px-3 py-2 font-mono text-xs">
+                      {pe.totalHT != null ? formatEurFr(Number(pe.totalHT)) : "—"}
+                    </td>
                     <td className="px-3 py-2">{Number(pe.vatRate)} %</td>
                     <td className="px-3 py-2 font-mono text-xs">{formatEurFr(Number(pe.unitPriceTTC))}</td>
+                    <td className="px-3 py-2 font-mono text-xs">
+                      {pe.totalTTC != null ? formatEurFr(Number(pe.totalTTC)) : "—"}
+                    </td>
                     <td className="px-3 py-2">{pe.department ?? "—"}</td>
                     <td className="px-3 py-2">{pe.reliabilityScore}</td>
                     <td className="px-3 py-2 whitespace-nowrap">{formatDateFr(pe.dateObserved ?? pe.createdAt)}</td>

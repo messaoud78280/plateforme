@@ -10,6 +10,7 @@ import {
   type ParsedPasteBulkRow,
   type StructuredPasteFormValues,
 } from "@/lib/be-work-devis-structured-paste";
+import { buildFirstPriceEntryPreviewCells } from "@/lib/be-work-devis-price-entry-paste";
 
 type Props = {
   onApplyValues: (values: StructuredPasteFormValues) => void;
@@ -111,7 +112,10 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
     clearMessages();
     const payload = bulkRows
       .filter((r) => r.values.code.trim() && !r.duplicateDb && !r.duplicateBatch)
-      .map((r) => r.values);
+      .map((r) => ({
+        values: r.values,
+        priceEntries: r.priceEntries,
+      }));
 
     startTransition(async () => {
       const res = await importWorkItemsBulk(payload);
@@ -125,7 +129,10 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
       if (res.errors.length > 0) {
         setWarnings(res.errors);
       }
-      router.push(`/dashboard/devis/bibliotheque?imported=${res.created}`);
+      const q = new URLSearchParams();
+      q.set("imported", String(res.created));
+      q.set("pricesImported", String(res.pricesCreated));
+      router.push(`/dashboard/devis/bibliotheque?${q.toString()}`);
       router.refresh();
     });
   }, [bulkRows, clearMessages, router]);
@@ -158,11 +165,28 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
   "fullDescription": "…"
 }`}
           </pre>
-          <p className="font-medium text-slate-700">Plusieurs ouvrages (tableau)</p>
-          <pre className="max-h-40 overflow-auto rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-800">
+          <p className="font-medium text-slate-700">Plusieurs ouvrages (avec prix optionnels)</p>
+          <pre className="max-h-48 overflow-auto rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-800">
 {`[
-  { "code": "BW-A", "lot": "Lot 1", "title": "…", "unit": "m²", "fullDescription": "…" },
-  { "code": "BW-B", "lot": "Lot 2", "title": "…", "unit": "m²", "fullDescription": "…" }
+  {
+    "code": "BW-A",
+    "lot": "Lot 1",
+    "title": "…",
+    "unit": "m²",
+    "fullDescription": "…",
+    "priceEntries": [
+      {
+        "sourceName": "Devis Martin",
+        "sourceType": "devis",
+        "unitPriceHT": 120,
+        "vatRate": 0.2,
+        "unitPriceTTC": 144,
+        "quantity": 10,
+        "totalHT": 1200,
+        "totalTTC": 1440
+      }
+    ]
+  }
 ]`}
           </pre>
         </div>
@@ -245,36 +269,51 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
           </div>
 
           <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-            <table className="min-w-[720px] w-full text-left text-sm">
+            <table className="min-w-[1400px] w-full text-left text-sm">
               <thead className="border-b border-slate-100 bg-slate-50 text-xs font-bold uppercase text-slate-600">
                 <tr>
-                  <th className="px-3 py-2">#</th>
-                  <th className="px-3 py-2">Code</th>
-                  <th className="px-3 py-2">Lot</th>
-                  <th className="px-3 py-2">Titre</th>
-                  <th className="px-3 py-2">Unité</th>
-                  <th className="px-3 py-2">Statut</th>
-                  <th className="px-3 py-2">Doublon</th>
+                  <th className="px-2 py-2">#</th>
+                  <th className="px-2 py-2">Code</th>
+                  <th className="px-2 py-2">Lot</th>
+                  <th className="px-2 py-2">Titre</th>
+                  <th className="px-2 py-2">Unité</th>
+                  <th className="px-2 py-2">Statut</th>
+                  <th className="px-2 py-2">Qté</th>
+                  <th className="px-2 py-2">PU HT</th>
+                  <th className="px-2 py-2">Total HT</th>
+                  <th className="px-2 py-2">TVA</th>
+                  <th className="px-2 py-2">Total TTC</th>
+                  <th className="px-2 py-2">Source prix</th>
+                  <th className="px-2 py-2">Doublon</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {bulkRows.map((row) => {
                   const dup = row.duplicateDb || row.duplicateBatch;
+                  const px = buildFirstPriceEntryPreviewCells(row);
                   return (
                     <tr key={row.index} className={dup ? "bg-amber-50/60" : undefined}>
-                      <td className="whitespace-nowrap px-3 py-2 text-slate-500">{row.index + 1}</td>
-                      <td className="px-3 py-2 font-mono text-xs font-semibold text-[#1e3a5f]">
+                      <td className="whitespace-nowrap px-2 py-2 text-slate-500">{row.index + 1}</td>
+                      <td className="px-2 py-2 font-mono text-xs font-semibold text-[#1e3a5f]">
                         {row.values.code.trim() || "—"}
                       </td>
-                      <td className="max-w-[140px] truncate px-3 py-2" title={row.values.lot}>
+                      <td className="max-w-[120px] truncate px-2 py-2" title={row.values.lot}>
                         {row.values.lot.trim() || "—"}
                       </td>
-                      <td className="max-w-[220px] truncate px-3 py-2 font-medium text-slate-900" title={row.values.title}>
+                      <td className="max-w-[180px] truncate px-2 py-2 font-medium text-slate-900" title={row.values.title}>
                         {row.values.title.trim() || "—"}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2">{row.values.unit.trim() || "—"}</td>
-                      <td className="whitespace-nowrap px-3 py-2 text-slate-700">{displayStatusLabel(row.values.status)}</td>
-                      <td className="px-3 py-2">
+                      <td className="whitespace-nowrap px-2 py-2">{row.values.unit.trim() || "—"}</td>
+                      <td className="whitespace-nowrap px-2 py-2 text-slate-700">{displayStatusLabel(row.values.status)}</td>
+                      <td className="whitespace-nowrap px-2 py-2 font-mono text-xs">{px.qty}</td>
+                      <td className="whitespace-nowrap px-2 py-2 font-mono text-xs">{px.puHt}</td>
+                      <td className="whitespace-nowrap px-2 py-2 font-mono text-xs">{px.totalHt}</td>
+                      <td className="whitespace-nowrap px-2 py-2 text-xs">{px.tva}</td>
+                      <td className="whitespace-nowrap px-2 py-2 font-mono text-xs">{px.totalTtc}</td>
+                      <td className="max-w-[200px] truncate px-2 py-2 text-xs" title={px.source}>
+                        {px.source}
+                      </td>
+                      <td className="px-2 py-2">
                         {dup ? (
                           <span className="rounded-full bg-amber-200 px-2 py-0.5 text-xs font-bold text-amber-950">
                             Doublon détecté

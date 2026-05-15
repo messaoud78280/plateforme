@@ -1,4 +1,5 @@
 import { isWorkItemQualityLevel, isWorkItemStatus } from "@/lib/be-work-devis-labels";
+import { extractPriceEntriesFromPastedWorkItem } from "@/lib/be-work-devis-price-entry-paste";
 import { normalizeUnit } from "@/lib/be-work-devis-units";
 
 /** Clés reconnues depuis un collage JSON / pseudo-JSON (alignées sur le formulaire ouvrage). */
@@ -174,6 +175,8 @@ export type ParsedPasteBulkRow = {
   index: number;
   values: StructuredPasteFormValues;
   warnings: string[];
+  priceEntries: Record<string, unknown>[];
+  rootQuantity?: unknown;
 };
 
 export type ParsedPasteBulk = {
@@ -213,11 +216,20 @@ export function parseStructuredPasteBlock(raw: string):
           index,
           values: emptyStructuredPasteFormValues(),
           warnings: ["Entrée ignorée : ce n’est pas un objet JSON."],
+          priceEntries: [],
         });
         return;
       }
-      const { values, warnings } = mapObjectToStructuredPasteFormValues(entry as Record<string, unknown>);
-      rows.push({ index, values, warnings });
+      const rowObj = entry as Record<string, unknown>;
+      const { values, warnings } = mapObjectToStructuredPasteFormValues(rowObj);
+      const priceEntries = extractPriceEntriesFromPastedWorkItem(rowObj);
+      rows.push({
+        index,
+        values,
+        warnings,
+        priceEntries,
+        rootQuantity: rowObj.quantity,
+      });
     });
     return { ok: true, result: { mode: "bulk", rows } };
   }

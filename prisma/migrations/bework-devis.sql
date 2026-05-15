@@ -68,6 +68,8 @@ CREATE TABLE "PriceEntry" (
     "vatRate" DECIMAL(6,4) NOT NULL,
     "unitPriceTTC" DECIMAL(14,4) NOT NULL,
     "quantity" DECIMAL(14,4),
+    "totalHT" DECIMAL(14,4),
+    "totalTTC" DECIMAL(14,4),
     "region" TEXT,
     "department" TEXT,
     "projectType" TEXT,

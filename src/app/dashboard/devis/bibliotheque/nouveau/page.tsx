@@ -19,7 +19,7 @@ export default async function NouveauOuvragePage() {
         <h1 className="font-heading text-xl font-bold text-slate-900 sm:text-2xl">Nouvel ouvrage</h1>
         <p className="mt-1 text-sm text-slate-600">Créer une fiche ouvrage dans la bibliothèque interne.</p>
       </header>
-      <WorkItemEditorForm mode="create" />
+      <WorkItemEditorForm mode="create" enableStructuredPaste />
     </div>
   );
 }

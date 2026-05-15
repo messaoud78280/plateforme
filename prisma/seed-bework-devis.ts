@@ -75,7 +75,7 @@ const DEMO_ITEMS = [
     title: "Fenêtre PVC double vitrage",
     fullDescription:
       "Fourniture et pose de fenêtre PVC avec vitrage isolant, huisseries et quincailleries conformes au carnet de prescriptions.",
-    unit: "u",
+    unit: "unité",
   },
   {
     code: "BW-ELEC-001",

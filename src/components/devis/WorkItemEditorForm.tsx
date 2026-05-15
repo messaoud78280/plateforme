@@ -12,6 +12,7 @@ import {
   WORK_ITEM_STATUS_LABELS,
   WORK_ITEM_UNITS,
 } from "@/lib/be-work-devis-labels";
+import { normalizeUnit } from "@/lib/be-work-devis-units";
 import { WorkItemStructuredPastePanel } from "@/components/devis/WorkItemStructuredPastePanel";
 
 type Props = {
@@ -40,6 +41,10 @@ export function WorkItemEditorForm({ mode, item, enableStructuredPaste = false }
   const fieldVal = useCallback(
     (field: StructuredPasteFieldKey): string => {
       if (mode === "edit" && item) {
+        if (field === "unit") {
+          const raw = String(item.unit ?? "");
+          return normalizeUnit(raw) ?? raw;
+        }
         const v = item[field as keyof WorkItem];
         if (v === null || v === undefined) return "";
         return String(v);

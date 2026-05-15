@@ -4,17 +4,7 @@ import type {
   WorkItemStatus,
 } from "@prisma/client";
 
-export const WORK_ITEM_UNITS = [
-  "m²",
-  "ml",
-  "m³",
-  "u",
-  "forfait",
-  "kg",
-  "t",
-  "h",
-  "jour",
-] as const;
+export { WORK_ITEM_UNITS, normalizeUnit, unitComparisonKey, isWorkItemUnit } from "./be-work-devis-units";
 
 export const SOURCE_TYPE_LABELS: Record<BeWorkPriceDocSourceType, string> = {
   devis: "Devis",

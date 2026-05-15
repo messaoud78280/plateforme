@@ -7,8 +7,8 @@ import {
   isBeWorkPriceDocSourceType,
   isWorkItemQualityLevel,
   isWorkItemStatus,
-  WORK_ITEM_UNITS,
 } from "@/lib/be-work-devis-labels";
+import { isWorkItemUnit, normalizeUnit } from "@/lib/be-work-devis-units";
 import {
   mapObjectToStructuredPasteFormValues,
   type StructuredPasteFormValues,
@@ -46,15 +46,16 @@ export async function createWorkItem(formData: FormData) {
   const lot = String(formData.get("lot") ?? "").trim();
   const title = String(formData.get("title") ?? "").trim();
   const fullDescription = String(formData.get("fullDescription") ?? "").trim();
-  const unit = String(formData.get("unit") ?? "").trim();
+  const unitRaw = String(formData.get("unit") ?? "").trim();
+  const unit = normalizeUnit(unitRaw) ?? unitRaw;
   const statusRaw = String(formData.get("status") ?? "brouillon");
   const qualityRaw = String(formData.get("qualityLevel") ?? "standard");
 
-  if (!code || !lot || !title || !fullDescription || !unit) {
+  if (!code || !lot || !title || !fullDescription || !unitRaw) {
     throw new Error("Champs obligatoires manquants.");
   }
-  if (!isWorkItemStatus(statusRaw) || !isWorkItemQualityLevel(qualityRaw)) {
-    throw new Error("Statut ou gamme invalide.");
+  if (!isWorkItemUnit(unit) || !isWorkItemStatus(statusRaw) || !isWorkItemQualityLevel(qualityRaw)) {
+    throw new Error("Statut, gamme ou unité invalide.");
   }
 
   await prisma.workItem.create({
@@ -107,10 +108,8 @@ function buildWorkItemCreateDataFromPasteValues(v: StructuredPasteFormValues) {
   const lot = v.lot.trim() || "Non classé";
   const title = v.title.trim() || "Sans titre";
   const fullDescription = v.fullDescription.trim() || "À compléter.";
-  let unit = v.unit.trim();
-  if (!(WORK_ITEM_UNITS as readonly string[]).includes(unit)) {
-    unit = "m²";
-  }
+  const rawUnit = v.unit.trim();
+  const unit = normalizeUnit(rawUnit) ?? "m²";
   let statusRaw = v.status.trim();
   if (!isWorkItemStatus(statusRaw)) statusRaw = "brouillon";
   let qualityRaw = v.qualityLevel.trim();
@@ -229,15 +228,16 @@ export async function updateWorkItem(formData: FormData) {
   const lot = String(formData.get("lot") ?? "").trim();
   const title = String(formData.get("title") ?? "").trim();
   const fullDescription = String(formData.get("fullDescription") ?? "").trim();
-  const unit = String(formData.get("unit") ?? "").trim();
+  const unitRaw = String(formData.get("unit") ?? "").trim();
+  const unit = normalizeUnit(unitRaw) ?? unitRaw;
   const statusRaw = String(formData.get("status") ?? "brouillon");
   const qualityRaw = String(formData.get("qualityLevel") ?? "standard");
 
-  if (!code || !lot || !title || !fullDescription || !unit) {
+  if (!code || !lot || !title || !fullDescription || !unitRaw) {
     throw new Error("Champs obligatoires manquants.");
   }
-  if (!isWorkItemStatus(statusRaw) || !isWorkItemQualityLevel(qualityRaw)) {
-    throw new Error("Statut ou gamme invalide.");
+  if (!isWorkItemUnit(unit) || !isWorkItemStatus(statusRaw) || !isWorkItemQualityLevel(qualityRaw)) {
+    throw new Error("Statut, gamme ou unité invalide.");
   }
 
   const existing = await prisma.workItem.findUnique({ where: { id } });

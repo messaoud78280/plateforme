@@ -1,4 +1,5 @@
-import { WORK_ITEM_UNITS, isWorkItemQualityLevel, isWorkItemStatus } from "@/lib/be-work-devis-labels";
+import { isWorkItemQualityLevel, isWorkItemStatus } from "@/lib/be-work-devis-labels";
+import { normalizeUnit } from "@/lib/be-work-devis-units";
 
 /** Clés reconnues depuis un collage JSON / pseudo-JSON (alignées sur le formulaire ouvrage). */
 export const STRUCTURED_PASTE_FIELD_KEYS = [
@@ -27,10 +28,6 @@ export type StructuredPasteFormValues = Record<StructuredPasteFieldKey, string>;
 
 export function emptyStructuredPasteFormValues(): StructuredPasteFormValues {
   return Object.fromEntries(STRUCTURED_PASTE_FIELD_KEYS.map((k) => [k, ""])) as StructuredPasteFormValues;
-}
-
-function isWorkItemUnit(v: string): boolean {
-  return (WORK_ITEM_UNITS as readonly string[]).includes(v);
 }
 
 function stripCodeFence(raw: string): string {
@@ -99,13 +96,19 @@ export function mapObjectToStructuredPasteFormValues(obj: Record<string, unknown
     }
 
     if (key === "unit") {
-      if (!leaf.trim()) {
+      const trimmed = leaf.trim();
+      if (!trimmed) {
         values.unit = "";
-      } else if (isWorkItemUnit(leaf.trim())) {
-        values.unit = leaf.trim();
       } else {
-        warnings.push(`Unité « ${leaf} » non reconnue — une valeur par défaut sera appliquée à l’import.`);
-        values.unit = "";
+        const nu = normalizeUnit(trimmed);
+        if (nu) {
+          values.unit = nu;
+        } else {
+          warnings.push(
+            `Unité « ${leaf} » non reconnue après normalisation — à l’import, m² sera utilisé si vous ne corrigez pas le champ.`,
+          );
+          values.unit = "";
+        }
       }
       continue;
     }

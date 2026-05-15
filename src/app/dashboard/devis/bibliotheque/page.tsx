@@ -31,6 +31,10 @@ type SearchParams = Promise<{
   imported?: string;
   /** Nombre de lignes PriceEntry créées lors du dernier import groupé. */
   pricesImported?: string;
+  /** Import collage « prix seuls » (workItemCode) : 1 si bannière dédiée. */
+  pricePaste?: string;
+  pricePasteAdded?: string;
+  pricePasteIgnored?: string;
 }>;
 
 function toFilterParams(sp: Awaited<SearchParams>): WorkItemFilterParams {
@@ -100,9 +104,17 @@ export default async function BibliothequePage({ searchParams }: { searchParams:
   const importedCount = sp.imported != null ? Number.parseInt(sp.imported, 10) : NaN;
   const pricesImportedCount = sp.pricesImported != null ? Number.parseInt(sp.pricesImported, 10) : NaN;
   const showImportBanner = Number.isFinite(importedCount) && importedCount > 0;
+  const pricePasteAdded = sp.pricePasteAdded != null ? Number.parseInt(sp.pricePasteAdded, 10) : NaN;
+  const pricePasteIgnored = sp.pricePasteIgnored != null ? Number.parseInt(sp.pricePasteIgnored, 10) : NaN;
+  const showPricePasteBanner = sp.pricePaste === "1" && Number.isFinite(pricePasteAdded) && Number.isFinite(pricePasteIgnored);
 
   return (
     <div className="space-y-6">
+      {showPricePasteBanner ? (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950">
+          <strong>{pricePasteAdded}</strong> prix observé(s) ajouté(s), <strong>{pricePasteIgnored}</strong> ignoré(s).
+        </div>
+      ) : null}
       {showImportBanner ? (
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950">
           <strong>{importedCount}</strong> ouvrage(s) importé(s),{" "}

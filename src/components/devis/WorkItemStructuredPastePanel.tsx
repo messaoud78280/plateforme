@@ -2,7 +2,13 @@
 
 import { useCallback, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { checkWorkItemCodesExist, importWorkItemsBulk } from "@/app/dashboard/devis/actions";
+import {
+  checkWorkItemCodesExist,
+  importObservedPricesForWorkItems,
+  importWorkItemsBulk,
+  previewObservedPricesPaste,
+  type PreviewObservedPricePasteResultRow,
+} from "@/app/dashboard/devis/actions";
 import { WORK_ITEM_STATUS_LABELS } from "@/lib/be-work-devis-labels";
 import {
   parseStructuredPasteBlock,
@@ -17,10 +23,14 @@ type Props = {
   onClearForm: () => void;
 };
 
-type PreviewRow = ParsedPasteBulkRow & {
+type WorkItemPreviewRow = ParsedPasteBulkRow & {
   duplicateDb: boolean;
   duplicateBatch: boolean;
 };
+
+type PricePastePreviewRow = ParsedPasteBulkRow & PreviewObservedPricePasteResultRow;
+
+type BulkPasteKind = "workItems" | "pricesOnly" | null;
 
 function displayStatusLabel(statusRaw: string): string {
   const s = statusRaw.trim();
@@ -35,7 +45,9 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
-  const [bulkRows, setBulkRows] = useState<PreviewRow[] | null>(null);
+  const [bulkPasteKind, setBulkPasteKind] = useState<BulkPasteKind>(null);
+  const [workItemBulkRows, setWorkItemBulkRows] = useState<WorkItemPreviewRow[] | null>(null);
+  const [priceBulkRows, setPriceBulkRows] = useState<PricePastePreviewRow[] | null>(null);
   const [confirmSkipDuplicates, setConfirmSkipDuplicates] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -45,26 +57,28 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
     setWarnings([]);
   }, []);
 
-  const buildPreviewRows = useCallback(async (rows: ParsedPasteBulkRow[]) => {
+  const buildWorkItemPreviewRows = useCallback(async (rows: ParsedPasteBulkRow[]) => {
     const codes = rows.map((r) => r.values.code.trim()).filter(Boolean);
     const existing = await checkWorkItemCodesExist(codes);
     const existingSet = new Set(existing);
     const seenInFile = new Set<string>();
-    const enriched: PreviewRow[] = rows.map((row) => {
+    const enriched: WorkItemPreviewRow[] = rows.map((row) => {
       const code = row.values.code.trim();
       const duplicateDb = Boolean(code && existingSet.has(code));
       const duplicateBatch = Boolean(code && seenInFile.has(code));
       if (code) seenInFile.add(code);
       return { ...row, duplicateDb, duplicateBatch };
     });
-    setBulkRows(enriched);
+    setWorkItemBulkRows(enriched);
     setConfirmSkipDuplicates(false);
   }, []);
 
   /** Objet unique → formulaire ; tableau → prévisualisation. */
   const handleAnalyzeOrPrefill = useCallback(async () => {
     clearMessages();
-    setBulkRows(null);
+    setBulkPasteKind(null);
+    setWorkItemBulkRows(null);
+    setPriceBulkRows(null);
     const parsed = parseStructuredPasteBlock(text);
     if (!parsed.ok) {
       setError(parsed.error);
@@ -76,17 +90,62 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
       setSuccess("Formulaire prérempli. Relisez les champs puis enregistrez avec « Créer l’ouvrage ».");
       return;
     }
-    setWarnings(parsed.result.rows.flatMap((r) => r.warnings.map((w) => `Ligne ${r.index + 1} : ${w}`)));
-    await buildPreviewRows(parsed.result.rows);
+    const bulk = parsed.result;
+    setBulkPasteKind(bulk.bulkKind);
+    setWarnings(bulk.rows.flatMap((r) => r.warnings.map((w) => `Ligne ${r.index + 1} : ${w}`)));
+
+    if (bulk.bulkKind === "pricesOnly") {
+      setWorkItemBulkRows(null);
+      const input = bulk.rows.map((r) => ({
+        index: r.index,
+        workItemCode: r.workItemCode ?? "",
+        priceEntries: r.priceEntries,
+      }));
+      const prev = await previewObservedPricesPaste(input);
+      if (!prev.ok) {
+        setError(prev.error);
+        setBulkPasteKind(null);
+        setPriceBulkRows(null);
+        return;
+      }
+      const byIndex = new Map(prev.rows.map((p) => [p.index, p]));
+      const merged: PricePastePreviewRow[] = bulk.rows.map((r) => {
+        const s = byIndex.get(r.index);
+        if (!s) {
+          return {
+            ...r,
+            workItemCode: r.workItemCode ?? "—",
+            title: null,
+            found: false,
+            statutLabel: "Ouvrage introuvable",
+            pricesTotal: r.priceEntries.length,
+            importablePriceCount: 0,
+            duplicatePriceCount: 0,
+            invalidPriceCount: r.priceEntries.length,
+          };
+        }
+        return { ...r, ...s };
+      });
+      setPriceBulkRows(merged);
+      setSuccess(
+        `${merged.length} bloc(s) de prix détecté(s) pour des codes ouvrage. Vérifiez la liste puis cliquez sur « Importer les prix observés » (aucun enregistrement avant validation).`,
+      );
+      return;
+    }
+
+    setPriceBulkRows(null);
+    await buildWorkItemPreviewRows(bulk.rows);
     setSuccess(
-      `${parsed.result.rows.length} ouvrage(s) détecté(s). Vérifiez la liste puis cliquez sur « Importer les ouvrages » (aucun enregistrement avant validation).`,
+      `${bulk.rows.length} ouvrage(s) détecté(s). Vérifiez la liste puis cliquez sur « Importer les ouvrages » (aucun enregistrement avant validation).`,
     );
-  }, [text, onApplyValues, clearMessages, buildPreviewRows]);
+  }, [text, onApplyValues, clearMessages, buildWorkItemPreviewRows]);
 
   /** Uniquement un objet JSON (erreur explicite si tableau). */
   const handlePrefillFormOnly = useCallback(() => {
     clearMessages();
-    setBulkRows(null);
+    setBulkPasteKind(null);
+    setWorkItemBulkRows(null);
+    setPriceBulkRows(null);
     const result = parseStructuredWorkItemPaste(text);
     if (!result.ok) {
       setError(result.error);
@@ -97,20 +156,24 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
     setSuccess("Formulaire prérempli. Relisez les champs puis enregistrez avec « Créer l’ouvrage ».");
   }, [text, onApplyValues, clearMessages]);
 
-  const duplicateCount = bulkRows?.filter((r) => r.duplicateDb || r.duplicateBatch).length ?? 0;
+  const duplicateCount = workItemBulkRows?.filter((r) => r.duplicateDb || r.duplicateBatch).length ?? 0;
   const importableCount =
-    bulkRows?.filter((r) => r.values.code.trim() && !r.duplicateDb && !r.duplicateBatch).length ?? 0;
+    workItemBulkRows?.filter((r) => r.values.code.trim() && !r.duplicateDb && !r.duplicateBatch).length ?? 0;
 
   const canImportBulk =
-    bulkRows &&
-    bulkRows.length > 0 &&
+    workItemBulkRows &&
+    workItemBulkRows.length > 0 &&
     importableCount > 0 &&
     (duplicateCount === 0 || confirmSkipDuplicates);
 
+  const totalImportablePrices =
+    priceBulkRows?.reduce((sum, r) => sum + r.importablePriceCount, 0) ?? 0;
+  const canImportPrices = Boolean(priceBulkRows?.length && totalImportablePrices > 0);
+
   const handleImportBulk = useCallback(() => {
-    if (!bulkRows) return;
+    if (!workItemBulkRows) return;
     clearMessages();
-    const payload = bulkRows
+    const payload = workItemBulkRows
       .filter((r) => r.values.code.trim() && !r.duplicateDb && !r.duplicateBatch)
       .map((r) => ({
         values: r.values,
@@ -123,7 +186,8 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
         setError(res.error);
         return;
       }
-      setBulkRows(null);
+      setWorkItemBulkRows(null);
+      setBulkPasteKind(null);
       setText("");
       setConfirmSkipDuplicates(false);
       if (res.errors.length > 0) {
@@ -135,11 +199,42 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
       router.push(`/dashboard/devis/bibliotheque?${q.toString()}`);
       router.refresh();
     });
-  }, [bulkRows, clearMessages, router]);
+  }, [workItemBulkRows, clearMessages, router]);
+
+  const handleImportPricesOnly = useCallback(() => {
+    if (!priceBulkRows) return;
+    clearMessages();
+    const payload = priceBulkRows.map((r) => ({
+      workItemCode: r.workItemCode ?? "",
+      priceEntries: r.priceEntries,
+    }));
+
+    startTransition(async () => {
+      const res = await importObservedPricesForWorkItems(payload);
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      setPriceBulkRows(null);
+      setBulkPasteKind(null);
+      setText("");
+      if (res.errors.length > 0) {
+        setWarnings(res.errors);
+      }
+      const q = new URLSearchParams();
+      q.set("pricePaste", "1");
+      q.set("pricePasteAdded", String(res.added));
+      q.set("pricePasteIgnored", String(res.ignored));
+      router.push(`/dashboard/devis/bibliotheque?${q.toString()}`);
+      router.refresh();
+    });
+  }, [priceBulkRows, clearMessages, router]);
 
   const handleClear = useCallback(() => {
     setText("");
-    setBulkRows(null);
+    setBulkPasteKind(null);
+    setWorkItemBulkRows(null);
+    setPriceBulkRows(null);
     setConfirmSkipDuplicates(false);
     clearMessages();
     onClearForm();
@@ -149,8 +244,10 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
     <section className="rounded-2xl border border-dashed border-[#1e3a5f]/35 bg-[#f8fafc] p-5 shadow-sm">
       <h2 className="font-heading text-base font-bold text-slate-900">Ajout rapide depuis données structurées</h2>
       <p className="mt-2 text-sm text-slate-600">
-        Collez un <strong>objet JSON</strong> pour préremplir le formulaire manuel ci-dessous, ou un <strong>tableau JSON</strong> pour
-        prévisualiser et importer plusieurs ouvrages d’un coup (devis, BPU…). Aucun enregistrement automatique : vous validez à la fin.
+        Collez un <strong>objet JSON</strong> pour préremplir le formulaire manuel ci-dessous, un <strong>tableau d’ouvrages</strong>{" "}
+        (champ <code className="rounded bg-slate-200 px-1">code</code>) pour importer des fiches, ou un <strong>tableau de prix</strong>{" "}
+        (champ <code className="rounded bg-slate-200 px-1">workItemCode</code> + <code className="rounded bg-slate-200 px-1">priceEntries</code>
+        ) pour ajouter des prix observés à des ouvrages déjà en bibliothèque. Aucun enregistrement automatique : vous validez à la fin.
       </p>
       <details className="mt-3 text-sm text-slate-600">
         <summary className="cursor-pointer font-semibold text-[#1e3a5f] hover:underline">Voir des exemples</summary>
@@ -189,6 +286,26 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
   }
 ]`}
           </pre>
+          <p className="font-medium text-slate-700">Prix seuls sur ouvrage existant (code déjà en base)</p>
+          <pre className="max-h-48 overflow-auto rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-800">
+{`[
+  {
+    "workItemCode": "BW-MARTIN-02-1",
+    "priceEntries": [
+      {
+        "sourceName": "Devis CCMI Martin corrigé BeWork",
+        "sourceType": "devis",
+        "unitPriceHT": 8.5,
+        "vatRate": 0.2,
+        "unitPriceTTC": 10.2,
+        "quantity": 180,
+        "totalHT": 1530,
+        "totalTTC": 1836
+      }
+    ]
+  }
+]`}
+          </pre>
         </div>
       </details>
 
@@ -201,7 +318,7 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
         onChange={(e) => setText(e.target.value)}
         rows={12}
         spellCheck={false}
-        placeholder={'{ "code": "…" }  ou  [ { "code": "…" }, … ]'}
+        placeholder={'{ "code": "…" }  ou  [ { "code": "…" }, … ]  ou  [ { "workItemCode": "…", "priceEntries": [ … ] } ]'}
         className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-3 font-mono text-sm leading-relaxed text-slate-900 shadow-inner focus:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/20"
       />
 
@@ -247,15 +364,16 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
         </button>
       </div>
       <p className="mt-2 text-xs text-slate-500">
-        « Analyser le collage » : objet → préremplissage du formulaire ; tableau → prévisualisation + import groupé. « Préremplir le
-        formulaire » : réservé à un <strong>seul</strong> objet JSON.
+        « Analyser le collage » : objet → préremplissage ; tableau → prévisualisation + import (ouvrages ou prix selon le format). «
+        Préremplir le formulaire » : réservé à un <strong>seul</strong> objet JSON d’ouvrage (sans <code className="rounded bg-slate-100 px-1">workItemCode</code>
+        ).
       </p>
 
-      {bulkRows && bulkRows.length > 0 ? (
+      {workItemBulkRows && bulkPasteKind === "workItems" && workItemBulkRows.length > 0 ? (
         <div className="mt-6 space-y-4 border-t border-slate-200 pt-6">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="font-heading text-sm font-bold text-slate-900">
-              Prévisualisation — {bulkRows.length} ouvrage(s) détecté(s)
+              Prévisualisation — {workItemBulkRows.length} ouvrage(s) détecté(s)
             </h3>
             <span className="text-xs text-slate-600">
               Importables : <strong>{importableCount}</strong>
@@ -288,7 +406,7 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {bulkRows.map((row) => {
+                {workItemBulkRows.map((row) => {
                   const dup = row.duplicateDb || row.duplicateBatch;
                   const px = buildFirstPriceEntryPreviewCells(row);
                   return (
@@ -353,8 +471,80 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
           >
             {isPending ? "Import en cours…" : "Importer les ouvrages"}
           </button>
-          {bulkRows.length > 0 && importableCount === 0 ? (
+          {workItemBulkRows.length > 0 && importableCount === 0 ? (
             <p className="text-sm text-amber-900">Aucune ligne importable : corrigez les codes en doublon ou videz le collage.</p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {priceBulkRows && bulkPasteKind === "pricesOnly" && priceBulkRows.length > 0 ? (
+        <div className="mt-6 space-y-4 border-t border-slate-200 pt-6">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h3 className="font-heading text-sm font-bold text-slate-900">
+              Prévisualisation — prix pour ouvrages existants ({priceBulkRows.length} bloc(s))
+            </h3>
+            <span className="text-xs text-slate-600">
+              Prix importables : <strong>{totalImportablePrices}</strong>
+            </span>
+          </div>
+
+          <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+            <table className="min-w-[1100px] w-full text-left text-sm">
+              <thead className="border-b border-slate-100 bg-slate-50 text-xs font-bold uppercase text-slate-600">
+                <tr>
+                  <th className="px-2 py-2">#</th>
+                  <th className="px-2 py-2">Code ouvrage</th>
+                  <th className="px-2 py-2">Titre ouvrage</th>
+                  <th className="px-2 py-2">Qté</th>
+                  <th className="px-2 py-2">PU HT</th>
+                  <th className="px-2 py-2">Total HT</th>
+                  <th className="px-2 py-2">TVA</th>
+                  <th className="px-2 py-2">Total TTC</th>
+                  <th className="px-2 py-2">Source</th>
+                  <th className="px-2 py-2">Statut</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {priceBulkRows.map((row) => {
+                  const px = buildFirstPriceEntryPreviewCells(row);
+                  const title = row.found ? row.title ?? "—" : "—";
+                  const warnRow =
+                    !row.found ||
+                    row.statutLabel.toLowerCase().includes("doublon") ||
+                    row.statutLabel.toLowerCase().includes("invalide");
+                  return (
+                    <tr key={row.index} className={warnRow ? "bg-amber-50/40" : undefined}>
+                      <td className="whitespace-nowrap px-2 py-2 text-slate-500">{row.index + 1}</td>
+                      <td className="px-2 py-2 font-mono text-xs font-semibold text-[#1e3a5f]">{row.workItemCode || "—"}</td>
+                      <td className="max-w-[220px] truncate px-2 py-2 font-medium text-slate-900" title={title}>
+                        {title}
+                      </td>
+                      <td className="whitespace-nowrap px-2 py-2 font-mono text-xs">{px.qty}</td>
+                      <td className="whitespace-nowrap px-2 py-2 font-mono text-xs">{px.puHt}</td>
+                      <td className="whitespace-nowrap px-2 py-2 font-mono text-xs">{px.totalHt}</td>
+                      <td className="whitespace-nowrap px-2 py-2 text-xs">{px.tva}</td>
+                      <td className="whitespace-nowrap px-2 py-2 font-mono text-xs">{px.totalTtc}</td>
+                      <td className="max-w-[200px] truncate px-2 py-2 text-xs" title={px.source}>
+                        {px.source}
+                      </td>
+                      <td className="max-w-[220px] px-2 py-2 text-xs font-medium text-slate-800">{row.statutLabel}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <button
+            type="button"
+            disabled={!canImportPrices || isPending}
+            onClick={handleImportPricesOnly}
+            className="rounded-lg bg-[#0f766e] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#0d5c56] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isPending ? "Import en cours…" : "Importer les prix observés"}
+          </button>
+          {priceBulkRows.length > 0 && !canImportPrices ? (
+            <p className="text-sm text-amber-900">Aucun prix importable : vérifiez les codes ouvrage et les doublons.</p>
           ) : null}
         </div>
       ) : null}

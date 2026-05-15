@@ -162,6 +162,57 @@ export function formatPasteQtyPreview(v: unknown): string {
   return "—";
 }
 
+/** Clé de dédoublonnage import : même ouvrage + sourceName + PU HT + quantité + total HT. */
+export type PriceEntryDuplicateKey = {
+  sourceName: string;
+  unitPriceHT: Prisma.Decimal;
+  quantity: Prisma.Decimal | null;
+  totalHT: Prisma.Decimal | null;
+};
+
+/** Extrait une clé depuis le JSON collé (sans validation complète du prix). */
+export function duplicateKeyFromPricePasteRaw(raw: Record<string, unknown>): PriceEntryDuplicateKey | null {
+  const sourceName = strOrUndef(raw.sourceName);
+  if (!sourceName) return null;
+  const unitPriceHT = toPrismaDecimalUnknown(raw.unitPriceHT);
+  if (!unitPriceHT) return null;
+  const q = toPrismaDecimalUnknown(raw.quantity);
+  const th = toPrismaDecimalUnknown(raw.totalHT);
+  return {
+    sourceName,
+    unitPriceHT,
+    quantity: q ?? null,
+    totalHT: th ?? null,
+  };
+}
+
+export function priceDuplicateKeyMatchesRow(
+  key: PriceEntryDuplicateKey,
+  row: {
+    sourceName: string;
+    unitPriceHT: Prisma.Decimal;
+    quantity: Prisma.Decimal | null;
+    totalHT: Prisma.Decimal | null;
+  },
+): boolean {
+  if (row.sourceName !== key.sourceName) return false;
+  if (!row.unitPriceHT.equals(key.unitPriceHT)) return false;
+  const rq = row.quantity ?? null;
+  const kq = key.quantity ?? null;
+  if (rq === null && kq === null) {
+    // continue
+  } else if (rq === null || kq === null) {
+    return false;
+  } else if (!rq.equals(kq)) {
+    return false;
+  }
+  const rth = row.totalHT ?? null;
+  const kth = key.totalHT ?? null;
+  if (rth === null && kth === null) return true;
+  if (rth === null || kth === null) return false;
+  return rth.equals(kth);
+}
+
 export function buildFirstPriceEntryPreviewCells(row: {
   priceEntries: Record<string, unknown>[];
   rootQuantity?: unknown;

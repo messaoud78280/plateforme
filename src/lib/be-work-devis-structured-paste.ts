@@ -2,6 +2,17 @@ import { isWorkItemQualityLevel, isWorkItemStatus } from "@/lib/be-work-devis-la
 import { extractPriceEntriesFromPastedWorkItem } from "@/lib/be-work-devis-price-entry-paste";
 import { normalizeUnit } from "@/lib/be-work-devis-units";
 
+/** Code ouvrage existant pour un collage « prix seuls » (JSON `workItemCode`). */
+export function extractWorkItemCodeFromPasteObject(obj: Record<string, unknown>): string | null {
+  const v = obj.workItemCode;
+  if (typeof v === "string" && v.trim()) return v.trim();
+  if (typeof v === "number" && Number.isFinite(v)) {
+    const s = String(v);
+    if (s.trim()) return s.trim();
+  }
+  return null;
+}
+
 /** Clés reconnues depuis un collage JSON / pseudo-JSON (alignées sur le formulaire ouvrage). */
 export const STRUCTURED_PASTE_FIELD_KEYS = [
   "code",
@@ -171,9 +182,14 @@ export type ParsedPasteSingle = {
   warnings: string[];
 };
 
+export type PasteBulkRowKind = "workItem" | "pricesOnly";
+
 export type ParsedPasteBulkRow = {
   index: number;
+  rowKind: PasteBulkRowKind;
   values: StructuredPasteFormValues;
+  /** Si `rowKind === "pricesOnly"` : code BeWork de l’ouvrage cible (champ JSON `workItemCode`). */
+  workItemCode?: string;
   warnings: string[];
   priceEntries: Record<string, unknown>[];
   rootQuantity?: unknown;
@@ -181,6 +197,8 @@ export type ParsedPasteBulkRow = {
 
 export type ParsedPasteBulk = {
   mode: "bulk";
+  /** `pricesOnly` : tableau de `{ workItemCode, priceEntries }` pour enrichir des ouvrages déjà en base. */
+  bulkKind: "workItems" | "pricesOnly";
   rows: ParsedPasteBulkRow[];
 };
 
@@ -209,11 +227,31 @@ export function parseStructuredPasteBlock(raw: string):
     if (parsed.length === 0) {
       return { ok: false, error: "Le tableau JSON ne contient aucun ouvrage." };
     }
+    let sawPricesOnly = false;
+    let sawWorkItem = false;
+    for (const entry of parsed) {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+        sawWorkItem = true;
+        continue;
+      }
+      const rowObj = entry as Record<string, unknown>;
+      if (extractWorkItemCodeFromPasteObject(rowObj)) sawPricesOnly = true;
+      else sawWorkItem = true;
+    }
+    if (sawPricesOnly && sawWorkItem) {
+      return {
+        ok: false,
+        error:
+          "Ne mélangez pas dans un même tableau des ouvrages complets (champ « code ») et des blocs « prix seuls » (champ « workItemCode »). Collez deux imports séparés.",
+      };
+    }
+    const bulkKind: ParsedPasteBulk["bulkKind"] = sawPricesOnly ? "pricesOnly" : "workItems";
     const rows: ParsedPasteBulkRow[] = [];
     parsed.forEach((entry, index) => {
       if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
         rows.push({
           index,
+          rowKind: "workItem",
           values: emptyStructuredPasteFormValues(),
           warnings: ["Entrée ignorée : ce n’est pas un objet JSON."],
           priceEntries: [],
@@ -221,24 +259,69 @@ export function parseStructuredPasteBlock(raw: string):
         return;
       }
       const rowObj = entry as Record<string, unknown>;
+      const wic = extractWorkItemCodeFromPasteObject(rowObj);
+      if (wic) {
+        const priceEntries = extractPriceEntriesFromPastedWorkItem(rowObj);
+        const warnings: string[] = [];
+        if (priceEntries.length === 0) {
+          warnings.push("Aucune entrée dans priceEntries.");
+        }
+        rows.push({
+          index,
+          rowKind: "pricesOnly",
+          workItemCode: wic,
+          values: emptyStructuredPasteFormValues(),
+          warnings,
+          priceEntries,
+        });
+        return;
+      }
       const { values, warnings } = mapObjectToStructuredPasteFormValues(rowObj);
       const priceEntries = extractPriceEntriesFromPastedWorkItem(rowObj);
       rows.push({
         index,
+        rowKind: "workItem",
         values,
         warnings,
         priceEntries,
         rootQuantity: rowObj.quantity,
       });
     });
-    return { ok: true, result: { mode: "bulk", rows } };
+    return { ok: true, result: { mode: "bulk", bulkKind, rows } };
   }
 
   if (!parsed || typeof parsed !== "object") {
     return { ok: false, error: "Le contenu doit être un objet { … } ou un tableau [ … ] d’objets." };
   }
 
-  const { values, warnings } = mapObjectToStructuredPasteFormValues(parsed as Record<string, unknown>);
+  const singleObj = parsed as Record<string, unknown>;
+  const wicSingle = extractWorkItemCodeFromPasteObject(singleObj);
+  if (wicSingle) {
+    const priceEntries = extractPriceEntriesFromPastedWorkItem(singleObj);
+    const warnings: string[] = [];
+    if (priceEntries.length === 0) {
+      warnings.push("Aucune entrée dans priceEntries.");
+    }
+    return {
+      ok: true,
+      result: {
+        mode: "bulk",
+        bulkKind: "pricesOnly",
+        rows: [
+          {
+            index: 0,
+            rowKind: "pricesOnly",
+            workItemCode: wicSingle,
+            values: emptyStructuredPasteFormValues(),
+            warnings,
+            priceEntries,
+          },
+        ],
+      },
+    };
+  }
+
+  const { values, warnings } = mapObjectToStructuredPasteFormValues(singleObj);
   return { ok: true, result: { mode: "single", values, warnings } };
 }
 
@@ -252,6 +335,13 @@ export function parseStructuredWorkItemPaste(raw: string):
   const r = parseStructuredPasteBlock(raw);
   if (!r.ok) return r;
   if (r.result.mode === "bulk") {
+    if (r.result.bulkKind === "pricesOnly") {
+      return {
+        ok: false,
+        error:
+          "Ce collage ajoute des prix sur des ouvrages existants (champ « workItemCode »). Utilisez « Analyser le collage » pour la prévisualiser et importer les prix observés.",
+      };
+    }
     return {
       ok: false,
       error: "Ce collage est une liste d’ouvrages. Utilisez « Analyser le collage » pour la prévisualiser et l’importer.",

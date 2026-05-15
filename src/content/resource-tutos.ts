@@ -13,6 +13,20 @@ export type ResourceTutoItem = {
 /** Titres d’entrée : alignés sur les couvertures des PDF (« Crée ton skill », « Trie tes DCE… », etc.). */
 export const RESOURCE_TUTO_ITEMS: readonly ResourceTutoItem[] = [
   {
+    title: "Tuto Crée ton skill — Plan d'Installation de Chantier",
+    desc: "PIC complet et conforme en 1 h — base vie, co-activité, grue, déchets, checklist SPS — PDF et prompts.",
+    href: "/ressources/tuto-skill-pic-bework",
+    status: "Tuto PDF",
+    icon: "document",
+  },
+  {
+    title: "Tuto Crée ton skill — Ordre de Service",
+    desc: "Décortiquer, contester et chiffrer un OS en 5 min — CCAG art. 3.8, courrier de réserves, fourchette plus-value, délai 15 jours — PDF et prompts.",
+    href: "/ressources/tuto-skill-ordre-de-service-bework",
+    status: "Tuto PDF",
+    icon: "document",
+  },
+  {
     title: "Tuto Crée ton bureau depuis ton chantier",
     desc: "Pairer PC et mobile, 8 commandes vocales BTP, sécurité et routine — PDF intégré, prompts à copier.",
     href: "/ressources/tuto-dispatch-bework",
@@ -93,6 +107,13 @@ export const RESOURCE_TUTO_ITEMS: readonly ResourceTutoItem[] = [
     title: "Tuto Crée ton skill — PPSPS (Plan Particulier Sécurité et Santé)",
     desc: "Guide BeWork gratuit : 9 rubriques R4532-64, prompts de calibrage et d’usage quotidien, PDF intégré.",
     href: "/ressources/tuto-skill-ppsps-bework",
+    status: "Tuto PDF",
+    icon: "document",
+  },
+  {
+    title: "Tuto Crée ton skill — Compte rendu de chantier",
+    desc: "CR hebdo en 10 min — 8 rubriques, notes brutes ou vocales, prompts prêts à coller (Claude & skills).",
+    href: "/ressources/compte-rendu-chantier-guide-btp",
     status: "Tuto PDF",
     icon: "document",
   },

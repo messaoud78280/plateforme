@@ -104,7 +104,19 @@ export function ResourceSpotlightCarousel({
           aria-atomic="false"
         >
           {!measured ? (
-            <div className="flex min-h-[7rem] w-full flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm animate-pulse sm:min-h-[8rem]" />
+            <div
+              className={
+                perPage >= 2
+                  ? "grid w-full grid-cols-1 items-stretch gap-2 sm:grid-cols-2 md:gap-3"
+                  : "flex w-full flex-col gap-2"
+              }
+            >
+              {slides.map((slide, i) => (
+                <div key={i} className="min-w-0">
+                  {slide}
+                </div>
+              ))}
+            </div>
           ) : (
             <div
               className="flex will-change-transform transition-[transform] duration-300 ease-out motion-reduce:transition-none motion-reduce:transform-none"

@@ -63,7 +63,31 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/ressources/doe-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
     { url: `${SITE_URL}/ressources/compte-rendu-chantier`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
     {
+      url: `${SITE_URL}/ressources/guide-cdt-bework`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.83,
+    },
+    {
+      url: `${SITE_URL}/ressources/guide-conducteur-de-travaux-ia-bework`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.82,
+    },
+    {
       url: `${SITE_URL}/ressources/compte-rendu-chantier-guide-btp`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.81,
+    },
+    {
+      url: `${SITE_URL}/ressources/tuto-skill-pic-bework`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.81,
+    },
+    {
+      url: `${SITE_URL}/ressources/tuto-skill-ordre-de-service-bework`,
       lastModified: new Date(),
       changeFrequency: "monthly" as const,
       priority: 0.81,
@@ -118,6 +142,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${SITE_URL}/ressources/tuto-skill-chiffrage-devis-bework`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.81,
+    },
+    {
+      url: `${SITE_URL}/ressources/tuto-skill-analyse-express-cctp-bework`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.81,
+    },
+    {
+      url: `${SITE_URL}/ressources/tuto-skill-metre-bework`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.81,
+    },
+    {
+      url: `${SITE_URL}/ressources/tuto-dispatch-bework`,
       lastModified: new Date(),
       changeFrequency: "monthly" as const,
       priority: 0.81,

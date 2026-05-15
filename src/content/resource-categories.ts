@@ -63,6 +63,8 @@ export const RESOURCE_GUIDE_CATEGORIES: readonly ResourceCategory[] = [
     title: "Organisation conducteur de travaux",
     description: "Pilotage administratif, fournisseurs et charge de bureau.",
     links: [
+      { href: "/ressources/guide-cdt-bework", label: "Guide conducteur de travaux (PDF 52 pages)" },
+      { href: "/ressources/guide-conducteur-de-travaux-ia-bework", label: "Article guide conducteur & IA" },
       { href: "/suivi-fournisseurs-chantier", label: "Fournisseurs & achats" },
       { href: "/assistants-administratifs-taches", label: "Missions BeWork" },
       { href: "/services/assistant-conducteur-de-travaux", label: "Assistant conducteur de travaux" },

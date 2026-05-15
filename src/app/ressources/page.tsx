@@ -7,7 +7,7 @@ import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { ResourceSpotlightCarousel } from "@/components/ressources/ResourceSpotlightCarousel";
 import { BLOG_ARTICLES, BLOG_SLUGS } from "@/content/blog-articles";
 import { CAS_CLIENT_CASES } from "@/content/cas-clients-cases";
-import { RESOURCE_GUIDE_PAGE_ITEMS } from "@/content/resource-guides-pages";
+import { RESOURCE_GUIDE_PAGE_ITEMS, type ResourceGuideBadge } from "@/content/resource-guides-pages";
 import { RESOURCE_GUIDE_CATEGORIES } from "@/content/resource-categories";
 import { RESOURCE_TUTO_ITEMS, type ResourceTutoItem, type ResourceStatus } from "@/content/resource-tutos";
 import { buildResourcesHubCollectionJsonLd } from "@/lib/jsonld-content-marketing";
@@ -16,7 +16,16 @@ import { absoluteUrl } from "@/lib/site";
 const pageUrl = absoluteUrl("/ressources");
 const ogImage = absoluteUrl("/opengraph-image");
 
-const GUIDE_CAROUSEL_ITEMS = [
+type GuideCarouselItem = {
+  key: string;
+  title: string;
+  excerpt: string;
+  href: string;
+  publishedTime: string;
+  badge?: ResourceGuideBadge;
+};
+
+const GUIDE_CAROUSEL_ITEMS: GuideCarouselItem[] = [
   ...[...BLOG_SLUGS].map((slug) => {
     const a = BLOG_ARTICLES[slug];
     return {
@@ -33,6 +42,7 @@ const GUIDE_CAROUSEL_ITEMS = [
     excerpt: g.excerpt,
     href: g.href,
     publishedTime: g.publishedTime,
+    badge: g.badge ?? ("Guide PDF" as const),
   })),
 ].sort((x, y) => new Date(y.publishedTime).getTime() - new Date(x.publishedTime).getTime());
 
@@ -93,15 +103,16 @@ function ResourcesCollectionJsonLd() {
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
 }
 
-function BadgeStatus({ status }: { status: ResourceStatus | "Cas client" | "Guide" }) {
+function BadgeStatus({ status }: { status: ResourceStatus | "Cas client" | "Guide" | "Guide PDF" }) {
   const base =
     "inline-flex shrink-0 items-center rounded-full px-1.5 py-0.5 text-[0.625rem] font-semibold ring-1 sm:px-2 sm:py-0.5 sm:text-[0.6875rem]";
   const map: Record<string, string> = {
     "Tuto PDF": `${base} bg-teal-50 text-teal-950 ring-teal-200/90`,
+    "Guide PDF": `${base} bg-amber-50 text-amber-950 ring-amber-200/90`,
     "Cas client": `${base} bg-amber-50 text-amber-950 ring-amber-200/90`,
     Guide: `${base} bg-violet-50 text-violet-950 ring-violet-200/90`,
   };
-  return <span className={map[status]}>{status}</span>;
+  return <span className={map[status] ?? map.Guide}>{status}</span>;
 }
 
 function ResourceGlyph({ className }: { className?: string }) {
@@ -190,7 +201,7 @@ function GuideCarouselCard({ item }: { item: (typeof GUIDE_CAROUSEL_ITEMS)[numbe
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
             <h3 className="text-[0.8125rem] font-bold leading-snug tracking-tight text-slate-900 sm:text-sm">{item.title}</h3>
-            <BadgeStatus status="Guide" />
+            <BadgeStatus status={item.badge ?? "Guide PDF"} />
           </div>
           <p className="mt-1 text-[0.75rem] leading-snug text-slate-600 sm:mt-1.5 sm:text-[0.8125rem] sm:leading-relaxed">{item.excerpt}</p>
         </div>
@@ -342,7 +353,7 @@ export default function RessourcesPage() {
               Guides
             </h2>
             <p className="mt-1 text-xs leading-snug text-slate-600 sm:text-sm sm:leading-relaxed">
-              Articles longs pour structurer votre administratif chantier et votre relation client.
+              Guides PDF (compilation conducteur de travaux, IA &amp; skills Claude) pour structurer votre administratif chantier.
             </p>
             {GUIDE_CAROUSEL_ITEMS.length > 0 ? (
               <Link
@@ -357,23 +368,18 @@ export default function RessourcesPage() {
           </div>
           <div className="mt-4 w-full max-w-[min(100%,72rem)]">
             {GUIDE_CAROUSEL_ITEMS.length > 0 ? (
-              <ResourceSpotlightCarousel
-                slidesPerView={2}
-                dotListAriaLabel="Choisir une page de guides"
-                prevAriaLabel="Page précédente"
-                nextAriaLabel="Page suivante"
-              >
+              <div className="grid grid-cols-1 items-stretch gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {GUIDE_CAROUSEL_ITEMS.map((item) => (
                   <GuideCarouselCard key={item.key} item={item} />
                 ))}
-              </ResourceSpotlightCarousel>
+              </div>
             ) : (
               <div
                 className="rounded-xl border border-dashed border-slate-300/95 bg-slate-50/80 px-4 py-10 text-center text-sm leading-relaxed text-slate-600 sm:px-6"
                 aria-live="polite"
               >
-                Aucun guide publié pour l’instant. Les tutoriels ci-dessus restent disponibles ; les guides (articles){' '}
-                seront ajoutés ici au fil des mises en ligne.
+                Aucun guide publié pour l’instant. Les tutoriels ci-dessus restent disponibles ; les guides PDF seront
+                ajoutés ici au fil des mises en ligne.
               </div>
             )}
           </div>

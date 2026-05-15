@@ -10,7 +10,14 @@ import { absoluteUrl, SITE_URL } from "@/lib/site";
 const guidesUrl = absoluteUrl("/ressources/guides");
 const guidesOgImage = absoluteUrl("/opengraph-image");
 
-const GUIDE_INDEX: { key: string; href: string; title: string; excerpt: string; publishedTime: string }[] = [
+const GUIDE_INDEX: {
+  key: string;
+  href: string;
+  title: string;
+  excerpt: string;
+  publishedTime: string;
+  badge?: import("@/content/resource-guides-pages").ResourceGuideBadge;
+}[] = [
   ...[...BLOG_SLUGS].map((slug) => {
     const a = BLOG_ARTICLES[slug];
     return {
@@ -27,6 +34,7 @@ const GUIDE_INDEX: { key: string; href: string; title: string; excerpt: string; 
     title: g.title,
     excerpt: g.excerpt,
     publishedTime: g.publishedTime,
+    badge: g.badge,
   })),
 ].sort((x, y) => new Date(y.publishedTime).getTime() - new Date(x.publishedTime).getTime());
 
@@ -68,14 +76,17 @@ export const metadata: Metadata = {
 
 type GuideCardVariant = "article" | "pdf";
 
-function BadgeGuide({ variant }: { variant: GuideCardVariant }) {
+function BadgeGuide({ variant, label }: { variant: GuideCardVariant; label?: string }) {
   const base =
     "inline-flex shrink-0 items-center rounded-full px-1.5 py-0.5 text-[0.625rem] font-semibold ring-1 sm:px-2 sm:py-0.5 sm:text-[0.6875rem]";
+  const pdfLabel = label ?? "Tuto PDF";
   const cls =
-    variant === "pdf"
-      ? `${base} bg-teal-50 text-teal-950 ring-teal-200/90`
-      : `${base} bg-violet-50 text-violet-950 ring-violet-200/90`;
-  return <span className={cls}>{variant === "pdf" ? "Tuto PDF" : "Article"}</span>;
+    pdfLabel === "Guide PDF"
+      ? `${base} bg-amber-50 text-amber-950 ring-amber-200/90`
+      : variant === "pdf"
+        ? `${base} bg-teal-50 text-teal-950 ring-teal-200/90`
+        : `${base} bg-violet-50 text-violet-950 ring-violet-200/90`;
+  return <span className={cls}>{variant === "pdf" ? pdfLabel : "Article"}</span>;
 }
 
 function GuideGlyph({ className }: { className?: string }) {
@@ -114,7 +125,7 @@ function GuideCard({ item }: { item: (typeof GUIDE_INDEX)[number] }) {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
             <h2 className="text-[0.8125rem] font-bold leading-snug tracking-tight text-slate-900 sm:text-sm">{item.title}</h2>
-            <BadgeGuide variant={variant} />
+            <BadgeGuide variant={variant} label={item.badge} />
           </div>
           <p className="mt-0.5 text-[0.6875rem] font-medium text-slate-500 sm:text-[0.75rem]">{dateLabel}</p>
           <p className="mt-1 text-[0.75rem] leading-snug text-slate-600 sm:mt-1.5 sm:text-[0.8125rem] sm:leading-relaxed">{item.excerpt}</p>
@@ -189,7 +200,7 @@ export default function RessourcesGuidesPage() {
           </nav>
           <h1 className="text-balance text-2xl font-bold tracking-tight text-black md:text-3xl">Guides</h1>
           <p className="mt-3 max-w-xl text-xs leading-snug text-slate-700 sm:text-sm sm:leading-relaxed md:text-[0.9375rem]">
-            Articles et guides PDF pour structurer l&apos;administratif chantier, la trésorerie et le relais bureau. Pour les fiches courtes
+            Guides PDF conducteur de travaux (compilation 52 pages, article IA &amp; skills). Pour les fiches pas à pas avec prompts, voir les
             pas à pas (prompts, skills), voir aussi les{" "}
             <Link href="/ressources/tutos" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
               tutoriels

@@ -37,6 +37,8 @@ const architectsDaughter = Architects_Daughter({
 });
 
 const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
+const bingSiteVerification = process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION?.trim();
+const llmsTxtUrl = absoluteUrl("/llms.txt");
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -116,7 +118,14 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/apple-touch-icon.png", type: "image/png", sizes: "180x180" }],
   },
-  ...(googleSiteVerification ? { verification: { google: googleSiteVerification } } : {}),
+  ...(googleSiteVerification || bingSiteVerification
+    ? {
+        verification: {
+          ...(googleSiteVerification ? { google: googleSiteVerification } : {}),
+          ...(bingSiteVerification ? { other: { "msvalidate.01": bingSiteVerification } } : {}),
+        },
+      }
+    : {}),
 };
 
 const orgSameAs = getOrgSameAs();
@@ -221,6 +230,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
+      <head>
+        <link rel="alternate" type="text/plain" href={llmsTxtUrl} title="Index pour assistants IA (llms.txt)" />
+      </head>
       <body
         className={`${inter.variable} ${rajdhani.variable} ${architectsDaughter.variable} ${geistMono.variable} min-w-0 overflow-x-clip antialiased text-black`}
       >

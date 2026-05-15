@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { GeoAeoBrief } from "@/components/seo/GeoAeoBrief";
 import { EXTERNALISATION_ADMIN_BT_NAV } from "@/lib/externalisation-administrative-btp-geo";
 
 /** Maillage interne du cluster « externalisation administrative BTP » multi-pays. */
@@ -52,6 +53,8 @@ export function GeoExternalisationHubLinks({ currentHref }: { currentHref: strin
           </li>
         </ul>
       </div>
+
+      <GeoAeoBrief className="mt-10" />
     </div>
   );
 }

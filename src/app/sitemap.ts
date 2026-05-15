@@ -1,183 +1,83 @@
 import type { MetadataRoute } from "next";
 import { BLOG_ARTICLES, BLOG_SLUGS, type BlogArticle, type BlogSlug } from "@/content/blog-articles";
+import { RESOURCE_PDF_CATALOG } from "@/content/resource-pdf-catalog";
 import { SERVICE_PAGE_ORDER, servicePagePath } from "@/content/service-pages";
 import { BTP_PAIN_PAGE_PATHS } from "@/lib/btp-pain-pages";
 import { EXTERNALISATION_ADMIN_BT_PATHS } from "@/lib/externalisation-administrative-btp-geo";
 import { SITE_URL } from "@/lib/site";
 
-const BTP_PAIN_SEO_PAGES: MetadataRoute.Sitemap = (
-  Object.values(BTP_PAIN_PAGE_PATHS) as string[]
-).map((path) => ({
-  url: `${SITE_URL}${path}`,
-  lastModified: new Date(),
-  changeFrequency: "monthly" as const,
-  priority: 0.84,
-}));
+type ChangeFreq = NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>;
 
-const GEO_EXTERNALISATION_ADMIN_BT_PAGES: MetadataRoute.Sitemap = (
-  Object.values(EXTERNALISATION_ADMIN_BT_PATHS) as string[]
-).map((path) => ({
-  url: `${SITE_URL}${path}`,
-  lastModified: new Date(),
-  changeFrequency: "monthly" as const,
-  priority: 0.86,
-}));
+function entry(
+  path: string,
+  priority: number,
+  changeFrequency: ChangeFreq = "monthly"
+): MetadataRoute.Sitemap[number] {
+  return {
+    url: `${SITE_URL}${path}`,
+    lastModified: new Date(),
+    changeFrequency,
+    priority,
+  };
+}
+
+const BTP_PAIN_SEO_PAGES = (Object.values(BTP_PAIN_PAGE_PATHS) as string[]).map((path) => entry(path, 0.84));
+
+const GEO_EXTERNALISATION_ADMIN_BT_PAGES = (Object.values(EXTERNALISATION_ADMIN_BT_PATHS) as string[]).map((path) =>
+  entry(path, 0.86)
+);
 
 const SERVICE_PAGES_SITEMAP: MetadataRoute.Sitemap = [
-  { url: `${SITE_URL}/services`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.92 },
-  ...SERVICE_PAGE_ORDER.map((slug) => ({
-    url: `${SITE_URL}${servicePagePath(slug)}`,
-    lastModified: new Date(),
-    changeFrequency: "monthly" as const,
-    priority: 0.88,
-  })),
+  entry("/services", 0.92),
+  ...SERVICE_PAGE_ORDER.map((slug) => entry(servicePagePath(slug), 0.88)),
 ];
+
+/** Pages ressources éditoriales (hors catalogue PDF tutos/guides). */
+const RESOURCE_EDITORIAL_PAGES = [
+  "/ressources/compte-rendu-chantier",
+  "/ressources/planning-chantier-btp",
+  "/ressources/analyse-dce-btp",
+  "/ressources/memoire-technique-btp",
+  "/ressources/chiffrage-devis-btp",
+  "/ressources/ppsps-btp",
+  "/ressources/pv-levee-reserves-btp",
+  "/ressources/doe-btp",
+] as const;
+
+const PDF_RESOURCE_PAGES = RESOURCE_PDF_CATALOG.map((r) => entry(r.href, r.kind === "guide" ? 0.83 : 0.81));
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const staticPages: MetadataRoute.Sitemap = [
-    { url: SITE_URL, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 1 },
-    {
-      url: `${SITE_URL}/assistant-administratif-externalise`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.95,
-    },
-    { url: `${SITE_URL}/assistant-administratif-pme`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.9 },
-    { url: `${SITE_URL}/assistant-administratif-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.9 },
-    { url: `${SITE_URL}/assistant-administratif-distance`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.9 },
-    { url: `${SITE_URL}/externaliser-administratif`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.92 },
-    { url: `${SITE_URL}/assistants-administratifs-taches`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
-    { url: `${SITE_URL}/tarifs`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.9 },
-    { url: `${SITE_URL}/faq`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.7 },
-    { url: `${SITE_URL}/notre-facon-de-travailler`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.85 },
-    { url: `${SITE_URL}/cas-clients`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.75 },
-    { url: `${SITE_URL}/contact`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
-    { url: `${SITE_URL}/mentions-legales`, lastModified: new Date(), changeFrequency: "yearly" as const, priority: 0.35 },
-    { url: `${SITE_URL}/politique-confidentialite`, lastModified: new Date(), changeFrequency: "yearly" as const, priority: 0.35 },
-    { url: `${SITE_URL}/inscription`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
-    { url: `${SITE_URL}/connexion`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.6 },
-    { url: `${SITE_URL}/blog`, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 0.8 },
-    { url: `${SITE_URL}/ressources`, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 0.82 },
-    { url: `${SITE_URL}/ressources/guides`, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 0.81 },
-    { url: `${SITE_URL}/ressources/tutos`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.81 },
-    { url: `${SITE_URL}/ressources/doe-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
-    { url: `${SITE_URL}/ressources/compte-rendu-chantier`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
-    {
-      url: `${SITE_URL}/ressources/guide-cdt-bework`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.83,
-    },
-    {
-      url: `${SITE_URL}/ressources/guide-conducteur-de-travaux-ia-bework`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.82,
-    },
-    {
-      url: `${SITE_URL}/ressources/compte-rendu-chantier-guide-btp`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.81,
-    },
-    {
-      url: `${SITE_URL}/ressources/tuto-skill-pic-bework`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.81,
-    },
-    {
-      url: `${SITE_URL}/ressources/tuto-skill-ordre-de-service-bework`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.81,
-    },
-    {
-      url: `${SITE_URL}/ressources/tuto-skill-ppsps-bework`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.81,
-    },
-    {
-      url: `${SITE_URL}/ressources/tuto-skill-analyse-dce-bework`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.81,
-    },
-    {
-      url: `${SITE_URL}/ressources/tuto-skill-memoire-technique-bework`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.81,
-    },
-    {
-      url: `${SITE_URL}/ressources/tuto-skill-pv-levee-reserves-bework`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.81,
-    },
-    {
-      url: `${SITE_URL}/ressources/tuto-skill-doe-bework`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.81,
-    },
-    {
-      url: `${SITE_URL}/ressources/tuto-skill-duerp-bework`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.81,
-    },
-    {
-      url: `${SITE_URL}/ressources/tuto-skill-constat-retard-bework`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.81,
-    },
-    {
-      url: `${SITE_URL}/ressources/tuto-tri-dce-claude-chrome-bework`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.81,
-    },
-    {
-      url: `${SITE_URL}/ressources/tuto-skill-chiffrage-devis-bework`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.81,
-    },
-    {
-      url: `${SITE_URL}/ressources/tuto-skill-analyse-express-cctp-bework`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.81,
-    },
-    {
-      url: `${SITE_URL}/ressources/tuto-skill-metre-bework`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.81,
-    },
-    {
-      url: `${SITE_URL}/ressources/tuto-dispatch-bework`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.81,
-    },
-    { url: `${SITE_URL}/ressources/ppsps-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
-    { url: `${SITE_URL}/ressources/analyse-dce-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.82 },
-    { url: `${SITE_URL}/ressources/memoire-technique-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
-    { url: `${SITE_URL}/ressources/chiffrage-devis-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.78 },
-    { url: `${SITE_URL}/ressources/pv-levee-reserves-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.78 },
-    { url: `${SITE_URL}/ressources/planning-chantier-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.78 },
-    // Pages intentionnelles (SEO)
-    { url: `${SITE_URL}/relance-devis-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.85 },
-    { url: `${SITE_URL}/impayes-btp-relances`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
-    { url: `${SITE_URL}/situation-travaux-btp`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
-    { url: `${SITE_URL}/dict-dt-travaux`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.8 },
-    { url: `${SITE_URL}/avenant-chantier`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.75 },
-    { url: `${SITE_URL}/suivi-fournisseurs-chantier`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.75 },
-    { url: `${SITE_URL}/admin-btp-sans-recruter`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.85 },
+    entry("/", 1, "weekly"),
+    entry("/assistant-administratif-externalise", 0.95),
+    entry("/assistant-administratif-pme", 0.9),
+    entry("/assistant-administratif-btp", 0.9),
+    entry("/assistant-administratif-distance", 0.9),
+    entry("/externaliser-administratif", 0.92),
+    entry("/assistants-administratifs-taches", 0.8),
+    entry("/tarifs", 0.9),
+    entry("/faq", 0.7),
+    entry("/notre-facon-de-travailler", 0.85),
+    entry("/cas-clients", 0.75),
+    entry("/contact", 0.8),
+    entry("/mentions-legales", 0.35, "yearly"),
+    entry("/politique-confidentialite", 0.35, "yearly"),
+    entry("/inscription", 0.8),
+    entry("/connexion", 0.6),
+    entry("/blog", 0.8, "weekly"),
+    entry("/ressources", 0.82, "weekly"),
+    entry("/ressources/guides", 0.81, "weekly"),
+    entry("/ressources/tutos", 0.81, "weekly"),
+    entry("/llms.txt", 0.55, "weekly"),
+    ...RESOURCE_EDITORIAL_PAGES.map((path) => entry(path, 0.8)),
+    ...PDF_RESOURCE_PAGES,
+    entry("/relance-devis-btp", 0.85),
+    entry("/impayes-btp-relances", 0.8),
+    entry("/situation-travaux-btp", 0.8),
+    entry("/dict-dt-travaux", 0.8),
+    entry("/avenant-chantier", 0.75),
+    entry("/suivi-fournisseurs-chantier", 0.75),
+    entry("/admin-btp-sans-recruter", 0.85),
     ...BTP_PAIN_SEO_PAGES,
     ...GEO_EXTERNALISATION_ADMIN_BT_PAGES,
     ...SERVICE_PAGES_SITEMAP,

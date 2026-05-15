@@ -3,7 +3,8 @@ import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
-import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/seo-landing-json-ld";
+import { GeoAeoBrief } from "@/components/seo/GeoAeoBrief";
+import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/schema";
 
 type SeoLandingPageProps = {
   /** Résumé pour le JSON-LD WebPage (aligné sur la meta description) */
@@ -13,9 +14,18 @@ type SeoLandingPageProps = {
   children: ReactNode;
   /** Fil d’Ariane + JSON-LD WebPage / BreadcrumbList (dernier segment = page courante) */
   breadcrumbItems?: { name: string; href: string }[];
+  /** Bloc « BeWork en bref » (GEO/AEO) — désactivé si déjà fourni en bas de page (ex. maillage douleur). */
+  showGeoAeoBrief?: boolean;
 };
 
-export function SeoLandingPage({ description, h1, intro, children, breadcrumbItems }: SeoLandingPageProps) {
+export function SeoLandingPage({
+  description,
+  h1,
+  intro,
+  children,
+  breadcrumbItems,
+  showGeoAeoBrief = false,
+}: SeoLandingPageProps) {
   const lastPath = breadcrumbItems?.length ? breadcrumbItems[breadcrumbItems.length - 1]?.href : undefined;
   const structuredData =
     breadcrumbItems?.length && lastPath
@@ -59,6 +69,7 @@ export function SeoLandingPage({ description, h1, intro, children, breadcrumbIte
           <div className="mt-12 prose prose-slate prose-lg max-w-none prose-headings:text-black prose-p:text-black prose-li:text-black prose-strong:text-black prose-p:text-[1.0625rem] prose-p:leading-[1.75] prose-p:mb-5 prose-li:my-2 prose-li:leading-relaxed prose-ul:my-4 prose-ol:my-4 prose-h2:mt-14 prose-h2:scroll-mt-28 prose-h2:border-b prose-h2:border-slate-200 prose-h2:pb-3 prose-h2:text-[1.5rem] prose-h2:font-bold prose-h2:leading-snug prose-h2:first:mt-0 md:prose-h2:text-[1.625rem] prose-h3:mt-8 prose-h3:text-[1.1875rem] prose-h3:font-bold md:prose-h3:text-xl">
             {children}
           </div>
+          {showGeoAeoBrief ? <GeoAeoBrief className="mt-14" /> : null}
           <div className="mt-14 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
             <h2 className="font-heading text-[1.35rem] font-bold leading-snug text-black md:text-2xl">Passer à l’action</h2>
             <p className="mt-3 text-base leading-relaxed text-slate-700">

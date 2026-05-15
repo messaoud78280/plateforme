@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { BlueprintCotationFooterHairline } from "@/components/home/BlueprintCotationDecor";
 import { MarketingSitePreFooter } from "@/components/layout/MarketingSitePreFooter";
+import { BTP_PAIN_PAGE_CLUSTER } from "@/lib/btp-pain-pages";
+import { EXTERNALISATION_ADMIN_BT_NAV } from "@/lib/externalisation-administrative-btp-geo";
 import { SITE_URL, getOrgSameAs } from "@/lib/site";
 
 const COL_LINK =
@@ -74,7 +76,7 @@ export function MarketingSiteFooter() {
       <footer className="relative z-10 border-t border-slate-800/80 bg-[#0b1220] text-slate-300">
         <BlueprintCotationFooterHairline />
         <div className="relative z-10 mx-auto max-w-site px-5 py-14 sm:px-6 lg:py-16">
-          <div className="grid grid-cols-2 gap-10 sm:gap-12 md:grid-cols-3 lg:grid-cols-5 lg:gap-8">
+          <div className="grid grid-cols-2 gap-10 sm:gap-12 md:grid-cols-3 lg:grid-cols-6 lg:gap-8">
           {/* Marque */}
           <div className="col-span-2 md:col-span-3 lg:col-span-1 lg:max-w-xs">
             <Link href="/" className="inline-block rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500">
@@ -98,6 +100,13 @@ export function MarketingSiteFooter() {
                   Signer plus de devis
                 </Link>
               </li>
+              {BTP_PAIN_PAGE_CLUSTER.map((p) => (
+                <li key={p.href}>
+                  <Link href={p.href} className={COL_LINK}>
+                    {p.title}
+                  </Link>
+                </li>
+              ))}
               <li>
                 <Link href="/dict-dt-travaux" className={COL_LINK}>
                   Chantiers &amp; dossiers travaux
@@ -153,6 +162,19 @@ export function MarketingSiteFooter() {
                   DOE
                 </Link>
               </li>
+            </ul>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <ColumnTitle>Externalisation par pays</ColumnTitle>
+            <ul className="flex flex-col gap-3">
+              {EXTERNALISATION_ADMIN_BT_NAV.map((z) => (
+                <li key={z.href}>
+                  <Link href={z.href} className={COL_LINK}>
+                    {z.title === "Suisse" ? "Suisse romande" : z.title}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -292,6 +314,12 @@ export function MarketingSiteFooter() {
                 className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70"
               >
                 Plan du site
+              </a>
+              <a
+                href={`${SITE_URL}/llms.txt`}
+                className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70"
+              >
+                Index IA (llms.txt)
               </a>
             </div>
           </div>

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ServicePageBody } from "@/components/marketing/ServicePageBody";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { SERVICE_PAGES, SERVICE_PAGE_ORDER, isServicePageSlug, servicePagePath } from "@/content/service-pages";
-import { buildServiceOfferingJsonLd } from "@/lib/jsonld-content-marketing";
+import { buildFaqPageJsonLd, buildServiceOfferingJsonLd } from "@/lib/schema";
 import { absoluteUrl } from "@/lib/site";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -39,19 +39,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-function faqJsonLd(faq: { q: string; a: string }[], pageUrl: string) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faq.map((item) => ({
-      "@type": "Question",
-      name: item.q,
-      acceptedAnswer: { "@type": "Answer", text: item.a },
-    })),
-    url: pageUrl,
-  };
-}
-
 export default async function ServiceDetailPage({ params }: Props) {
   const { slug } = await params;
   if (!isServicePageSlug(slug)) notFound();
@@ -65,7 +52,7 @@ export default async function ServiceDetailPage({ params }: Props) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd(d.faq, pageUrl)) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildFaqPageJsonLd(d.faq, pageUrl)) }}
       />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceLd) }} />
       <SeoLandingPage

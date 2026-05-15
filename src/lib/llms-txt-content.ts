@@ -1,6 +1,8 @@
 import { RESOURCE_PDF_CATALOG, RESOURCE_PDF_GUIDES, RESOURCE_PDF_TUTOS } from "@/content/resource-pdf-catalog";
 import { RESOURCE_TUTO_ITEMS } from "@/content/resource-tutos";
 import { SERVICE_PAGE_ORDER, SERVICE_PAGES, servicePagePath } from "@/content/service-pages";
+import { BEWORK_AEO_DEFINITION, getGeoAeoBriefItems } from "@/lib/seo";
+import { formatPriceLabelFr, getPublicPriceBoundsLabels } from "@/lib/subscription-plans";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 
 const TUTO_TITLES = new Map(RESOURCE_TUTO_ITEMS.map((t) => [t.href, t.title]));
@@ -30,9 +32,17 @@ export function buildLlmsTxt(): string {
     return line(title, t.href, "Tutoriel PDF skill Claude — prompts copiables.");
   }).join("\n");
 
+  const geoBrief = getGeoAeoBriefItems(formatPriceLabelFr(getPublicPriceBoundsLabels().low))
+    .map((item) => `### ${item.question}\n${item.answer}`)
+    .join("\n\n");
+
   return `# BeWork
 
-> BeWork est une plateforme d'assistants travaux augmentés par l'IA pour les entreprises du BTP (France, Belgique, Suisse, Luxembourg). Relais bureau-chantier : comptes rendus, DCE, PPSPS, DOE, mémoires techniques, relances — supervisé en France. Slogan : « On tient le bureau, vous tenez le chantier ».
+> ${BEWORK_AEO_DEFINITION} Relais bureau-chantier pour entreprises du BTP en France, Belgique, Suisse et Luxembourg : comptes rendus, DCE, PPSPS, DOE, mémoires techniques, relances — supervision depuis la France. Slogan : « On tient le bureau, vous tenez le chantier ».
+
+## Fiche GEO / AEO (réponses courtes)
+
+${geoBrief}
 
 ## Services
 

@@ -30,6 +30,7 @@ const USER_AGENTS = [
   "cohere-ai",
   "Meta-ExternalAgent",
   "FacebookBot",
+  "DuckDuckBot",
 ] as const;
 
 export default function robots(): MetadataRoute.Robots {

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { GeoAeoBrief } from "@/components/seo/GeoAeoBrief";
 import { EXTERNALISATION_ADMIN_BT_NAV } from "@/lib/externalisation-administrative-btp-geo";
 import { BEWORK_PROCESS_BEW_PATH, BTP_PAIN_PAGE_CLUSTER } from "@/lib/btp-pain-pages";
 
@@ -12,6 +13,7 @@ export function BtpPainLandingMaillage({ currentHref }: Props) {
 
   return (
     <div className="not-prose mt-14 space-y-10">
+      <GeoAeoBrief />
       <div className="rounded-2xl border border-black/10 bg-[#f8fafc] p-6 md:p-8">
         <p className="text-sm font-bold uppercase tracking-[0.1em] text-[#1d4ed8]">Autres freins terrain</p>
         <p className="mt-2 text-sm text-black leading-relaxed">

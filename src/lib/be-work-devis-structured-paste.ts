@@ -49,6 +49,15 @@ function extractBalancedObject(text: string): string {
   return text.slice(start, end + 1);
 }
 
+function extractBalancedArray(text: string): string {
+  const start = text.indexOf("[");
+  const end = text.lastIndexOf("]");
+  if (start === -1 || end <= start) {
+    throw new Error("Aucun tableau JSON détecté (crochets [ … ] introuvables).");
+  }
+  return text.slice(start, end + 1);
+}
+
 /** Supprime les virgules finales avant } ou ] (tolère un peu de pseudo-JSON). */
 function stripTrailingCommas(json: string): string {
   let prev = "";
@@ -73,42 +82,11 @@ function coerceLeaf(v: unknown): string | null {
   return null;
 }
 
-/**
- * Interprète un bloc collé (JSON strict ou légèrement assoupli).
- * Ne persiste rien : uniquement des valeurs pour préremplissage.
- */
-export function parseStructuredWorkItemPaste(raw: string):
-  | { ok: true; values: StructuredPasteFormValues; warnings: string[] }
-  | { ok: false; error: string } {
-  const trimmed = raw.trim();
-  if (!trimmed) {
-    return { ok: false, error: "Collez d’abord un bloc de données (JSON ou pseudo-JSON)." };
-  }
-
-  let slice: string;
-  try {
-    slice = extractBalancedObject(normalizeSmartQuotes(stripCodeFence(trimmed)));
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : "Format invalide.";
-    return { ok: false, error: msg };
-  }
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(stripTrailingCommas(slice));
-  } catch (e) {
-    const hint = e instanceof Error ? e.message : "Erreur de syntaxe.";
-    return {
-      ok: false,
-      error: `Impossible de lire le JSON. ${hint} Vérifiez les guillemets, les virgules et les accolades.`,
-    };
-  }
-
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-    return { ok: false, error: "Le contenu doit être un objet JSON { … }, pas un tableau ou une valeur simple." };
-  }
-
-  const obj = parsed as Record<string, unknown>;
+/** Mappe un objet JSON vers les champs du formulaire ouvrage. */
+export function mapObjectToStructuredPasteFormValues(obj: Record<string, unknown>): {
+  values: StructuredPasteFormValues;
+  warnings: string[];
+} {
   const warnings: string[] = [];
   const values = emptyStructuredPasteFormValues();
 
@@ -126,7 +104,7 @@ export function parseStructuredWorkItemPaste(raw: string):
       } else if (isWorkItemUnit(leaf.trim())) {
         values.unit = leaf.trim();
       } else {
-        warnings.push(`Unité « ${leaf} » non reconnue — choisissez une unité dans la liste.`);
+        warnings.push(`Unité « ${leaf} » non reconnue — une valeur par défaut sera appliquée à l’import.`);
         values.unit = "";
       }
       continue;
@@ -161,5 +139,108 @@ export function parseStructuredWorkItemPaste(raw: string):
     values[key] = leaf;
   }
 
-  return { ok: true, values, warnings };
+  return { values, warnings };
+}
+
+function parseJsonFlexible(trimmed: string): unknown {
+  const n = normalizeSmartQuotes(stripCodeFence(trimmed));
+  try {
+    return JSON.parse(stripTrailingCommas(n));
+  } catch {
+    const arrStart = n.indexOf("[");
+    const objStart = n.indexOf("{");
+    if (arrStart !== -1 && (objStart === -1 || arrStart < objStart)) {
+      const slice = extractBalancedArray(n);
+      return JSON.parse(stripTrailingCommas(slice));
+    }
+    if (objStart !== -1) {
+      const slice = extractBalancedObject(n);
+      return JSON.parse(stripTrailingCommas(slice));
+    }
+    throw new Error("Impossible d’extraire un objet ou un tableau JSON valide.");
+  }
+}
+
+export type ParsedPasteSingle = {
+  mode: "single";
+  values: StructuredPasteFormValues;
+  warnings: string[];
+};
+
+export type ParsedPasteBulkRow = {
+  index: number;
+  values: StructuredPasteFormValues;
+  warnings: string[];
+};
+
+export type ParsedPasteBulk = {
+  mode: "bulk";
+  rows: ParsedPasteBulkRow[];
+};
+
+export type ParsedStructuredPaste = ParsedPasteSingle | ParsedPasteBulk;
+
+export function parseStructuredPasteBlock(raw: string):
+  | { ok: true; result: ParsedStructuredPaste }
+  | { ok: false; error: string } {
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    return { ok: false, error: "Collez d’abord un bloc de données (JSON ou pseudo-JSON)." };
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = parseJsonFlexible(trimmed);
+  } catch (e) {
+    const hint = e instanceof Error ? e.message : "Erreur de syntaxe.";
+    return {
+      ok: false,
+      error: `Impossible de lire le JSON. ${hint} Vérifiez les guillemets, les virgules, les crochets et les accolades.`,
+    };
+  }
+
+  if (Array.isArray(parsed)) {
+    if (parsed.length === 0) {
+      return { ok: false, error: "Le tableau JSON ne contient aucun ouvrage." };
+    }
+    const rows: ParsedPasteBulkRow[] = [];
+    parsed.forEach((entry, index) => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+        rows.push({
+          index,
+          values: emptyStructuredPasteFormValues(),
+          warnings: ["Entrée ignorée : ce n’est pas un objet JSON."],
+        });
+        return;
+      }
+      const { values, warnings } = mapObjectToStructuredPasteFormValues(entry as Record<string, unknown>);
+      rows.push({ index, values, warnings });
+    });
+    return { ok: true, result: { mode: "bulk", rows } };
+  }
+
+  if (!parsed || typeof parsed !== "object") {
+    return { ok: false, error: "Le contenu doit être un objet { … } ou un tableau [ … ] d’objets." };
+  }
+
+  const { values, warnings } = mapObjectToStructuredPasteFormValues(parsed as Record<string, unknown>);
+  return { ok: true, result: { mode: "single", values, warnings } };
+}
+
+/**
+ * @deprecated Préférer parseStructuredPasteBlock (objet ou tableau).
+ * Interprète un bloc collé comme un seul objet.
+ */
+export function parseStructuredWorkItemPaste(raw: string):
+  | { ok: true; values: StructuredPasteFormValues; warnings: string[] }
+  | { ok: false; error: string } {
+  const r = parseStructuredPasteBlock(raw);
+  if (!r.ok) return r;
+  if (r.result.mode === "bulk") {
+    return {
+      ok: false,
+      error: "Ce collage est une liste d’ouvrages. Utilisez « Analyser le collage » pour la prévisualiser et l’importer.",
+    };
+  }
+  return { ok: true, values: r.result.values, warnings: r.result.warnings };
 }

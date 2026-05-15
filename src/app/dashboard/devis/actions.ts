@@ -1,13 +1,18 @@
 "use server";
 
-import { Prisma } from "@prisma/client";
+import { Prisma, type WorkItemQualityLevel, type WorkItemStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   isBeWorkPriceDocSourceType,
   isWorkItemQualityLevel,
   isWorkItemStatus,
+  WORK_ITEM_UNITS,
 } from "@/lib/be-work-devis-labels";
+import {
+  mapObjectToStructuredPasteFormValues,
+  type StructuredPasteFormValues,
+} from "@/lib/be-work-devis-structured-paste";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import { prisma } from "@/lib/prisma";
 
@@ -76,6 +81,143 @@ export async function createWorkItem(formData: FormData) {
 
   revalidatePath("/dashboard/devis/bibliotheque");
   redirect("/dashboard/devis/bibliotheque");
+}
+
+const BULK_IMPORT_MAX = 500;
+
+/** Codes déjà présents en base (comparaison exacte sur le champ `code`). */
+export async function checkWorkItemCodesExist(codesInput: string[]): Promise<string[]> {
+  await guard();
+  const codes = [...new Set(codesInput.map((c) => c.trim()).filter(Boolean))].slice(0, 2000);
+  if (codes.length === 0) return [];
+  const found = await prisma.workItem.findMany({
+    where: { code: { in: codes } },
+    select: { code: true },
+  });
+  return found.map((r) => r.code);
+}
+
+function pasteStr(v: string): string | undefined {
+  const t = v.trim();
+  return t || undefined;
+}
+
+function buildWorkItemCreateDataFromPasteValues(v: StructuredPasteFormValues) {
+  const code = v.code.trim();
+  const lot = v.lot.trim() || "Non classé";
+  const title = v.title.trim() || "Sans titre";
+  const fullDescription = v.fullDescription.trim() || "À compléter.";
+  let unit = v.unit.trim();
+  if (!(WORK_ITEM_UNITS as readonly string[]).includes(unit)) {
+    unit = "m²";
+  }
+  let statusRaw = v.status.trim();
+  if (!isWorkItemStatus(statusRaw)) statusRaw = "brouillon";
+  let qualityRaw = v.qualityLevel.trim();
+  if (!isWorkItemQualityLevel(qualityRaw)) qualityRaw = "standard";
+
+  return {
+    code,
+    lot,
+    subLot: pasteStr(v.subLot),
+    family: pasteStr(v.family),
+    title,
+    shortDescription: pasteStr(v.shortDescription),
+    fullDescription,
+    unit,
+    qualityLevel: qualityRaw as WorkItemQualityLevel,
+    technicalReference: pasteStr(v.technicalReference),
+    includedItems: pasteStr(v.includedItems),
+    excludedItems: pasteStr(v.excludedItems),
+    vigilancePoints: pasteStr(v.vigilancePoints),
+    clientQuestions: pasteStr(v.clientQuestions),
+    companyQuestions: pasteStr(v.companyQuestions),
+    internalNotes: pasteStr(v.internalNotes),
+    status: statusRaw as WorkItemStatus,
+  };
+}
+
+/**
+ * Import en masse depuis le collage JSON (sans redirection).
+ * Ignore les codes déjà en base et les lignes sans code valide.
+ */
+export async function importWorkItemsBulk(rowsInput: unknown): Promise<
+  | {
+      ok: true;
+      created: number;
+      skippedDuplicate: number;
+      skippedInvalid: number;
+      skippedBatchDuplicate: number;
+      errors: string[];
+    }
+  | { ok: false; error: string }
+> {
+  await guard();
+  if (!Array.isArray(rowsInput)) {
+    return { ok: false, error: "Format invalide : attendu un tableau d’objets." };
+  }
+  if (rowsInput.length === 0) {
+    return { ok: false, error: "Aucune ligne à importer." };
+  }
+  if (rowsInput.length > BULK_IMPORT_MAX) {
+    return { ok: false, error: `Maximum ${BULK_IMPORT_MAX} ouvrages par import.` };
+  }
+
+  const errors: string[] = [];
+  let created = 0;
+  let skippedDuplicate = 0;
+  let skippedInvalid = 0;
+  let skippedBatchDuplicate = 0;
+  const seenInBatch = new Set<string>();
+
+  for (let i = 0; i < rowsInput.length; i++) {
+    const raw = rowsInput[i];
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+      skippedInvalid += 1;
+      errors.push(`Ligne ${i + 1} : objet attendu.`);
+      continue;
+    }
+    const { values } = mapObjectToStructuredPasteFormValues(raw as Record<string, unknown>);
+    const code = values.code.trim();
+    if (!code) {
+      skippedInvalid += 1;
+      errors.push(`Ligne ${i + 1} : code BeWork manquant.`);
+      continue;
+    }
+    if (seenInBatch.has(code)) {
+      skippedBatchDuplicate += 1;
+      errors.push(`Ligne ${i + 1} (${code}) : doublon dans le collage (code déjà présent plus haut).`);
+      continue;
+    }
+    seenInBatch.add(code);
+
+    const existing = await prisma.workItem.findUnique({ where: { code } });
+    if (existing) {
+      skippedDuplicate += 1;
+      continue;
+    }
+
+    const data = buildWorkItemCreateDataFromPasteValues(values);
+    try {
+      await prisma.workItem.create({ data });
+      created += 1;
+    } catch (e) {
+      skippedInvalid += 1;
+      const msg = e instanceof Error ? e.message : "Erreur inconnue.";
+      errors.push(`Ligne ${i + 1} (${code}) : ${msg}`);
+    }
+  }
+
+  revalidatePath("/dashboard/devis/bibliotheque");
+  revalidatePath("/dashboard/devis/recherche");
+  return {
+    ok: true,
+    created,
+    skippedDuplicate,
+    skippedInvalid,
+    skippedBatchDuplicate,
+    errors: errors.slice(0, 40),
+  };
 }
 
 export async function updateWorkItem(formData: FormData) {

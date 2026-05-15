@@ -27,6 +27,8 @@ type SearchParams = Promise<{
   priceDept?: string;
   priceSourceType?: string;
   sort?: string;
+  /** Nombre d'ouvrages créés après import groupé (affichage flash). */
+  imported?: string;
 }>;
 
 function toFilterParams(sp: Awaited<SearchParams>): WorkItemFilterParams {
@@ -93,9 +95,17 @@ export default async function BibliothequePage({ searchParams }: { searchParams:
 
   const qsStr = filterQueryString(sp);
   const sourceTypeKeys = Object.keys(SOURCE_TYPE_LABELS) as BeWorkPriceDocSourceType[];
+  const importedCount = sp.imported != null ? Number.parseInt(sp.imported, 10) : NaN;
+  const showImportBanner = Number.isFinite(importedCount) && importedCount > 0;
 
   return (
     <div className="space-y-6">
+      {showImportBanner ? (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950">
+          <strong>{importedCount}</strong> ouvrage(s) importé(s) dans la bibliothèque. Les lignes en doublon ou invalides ont été
+          ignorées selon votre confirmation.
+        </div>
+      ) : null}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="font-heading text-xl font-bold text-slate-900 sm:text-2xl">Bibliothèque ouvrages</h1>

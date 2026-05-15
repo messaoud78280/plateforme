@@ -12,15 +12,24 @@ const DISALLOW: string[] = [
   "/communication-digitale",
 ];
 
+/** Crawlers recherche IA + moteurs classiques — allow pour visibilité AEO/GEO (ne pas bloquer OAI-SearchBot / PerplexityBot). */
 const USER_AGENTS = [
   "*",
   "Googlebot",
+  "Google-Extended",
   "Bingbot",
+  "Applebot",
   "OAI-SearchBot",
   "GPTBot",
   "ChatGPT-User",
   "PerplexityBot",
   "Perplexity-User",
+  "ClaudeBot",
+  "anthropic-ai",
+  "Claude-Web",
+  "cohere-ai",
+  "Meta-ExternalAgent",
+  "FacebookBot",
 ] as const;
 
 export default function robots(): MetadataRoute.Robots {

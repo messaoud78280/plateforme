@@ -17,6 +17,49 @@ BEGIN
   END IF;
 END $$;
 
+-- Anciennes tables renommées en *_legacy_pre_bework : PostgreSQL garde souvent les MÊMES noms
+-- d’index / PK (ex. "QuoteProject_pkey"). Sans ce bloc, CREATE TABLE "QuoteProject" échoue avec
+-- « relation …_pkey already exists ». Idempotent (ignore si tables ou noms absents / déjà renommés).
+DO $$ BEGIN
+  ALTER TABLE "QuoteProject_legacy_pre_bework" RENAME CONSTRAINT "QuoteProject_pkey" TO "QuoteProject_legacy_pre_bework_pkey";
+EXCEPTION WHEN undefined_table OR undefined_object OR duplicate_object THEN NULL;
+END $$;
+DO $$ BEGIN
+  ALTER TABLE "QuoteDocument_legacy_pre_bework" RENAME CONSTRAINT "QuoteDocument_pkey" TO "QuoteDocument_legacy_pre_bework_pkey";
+EXCEPTION WHEN undefined_table OR undefined_object OR duplicate_object THEN NULL;
+END $$;
+DO $$ BEGIN
+  ALTER TABLE "QuoteLine_legacy_pre_bework" RENAME CONSTRAINT "QuoteLine_pkey" TO "QuoteLine_legacy_pre_bework_pkey";
+EXCEPTION WHEN undefined_table OR undefined_object OR duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN ALTER INDEX "QuoteProject_code_key" RENAME TO "QuoteProject_legacy_pre_bework_code_key";
+EXCEPTION WHEN undefined_table OR undefined_object OR duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER INDEX "QuoteProject_department_idx" RENAME TO "QuoteProject_legacy_pre_bework_department_idx";
+EXCEPTION WHEN undefined_table OR undefined_object OR duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER INDEX "QuoteProject_status_idx" RENAME TO "QuoteProject_legacy_pre_bework_status_idx";
+EXCEPTION WHEN undefined_table OR undefined_object OR duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN ALTER INDEX "QuoteDocument_documentNumber_quoteProjectId_key" RENAME TO "QuoteDocument_legacy_pre_bework_documentNumber_quoteProjectId_key";
+EXCEPTION WHEN undefined_table OR undefined_object OR duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER INDEX "QuoteDocument_quoteProjectId_idx" RENAME TO "QuoteDocument_legacy_pre_bework_quoteProjectId_idx";
+EXCEPTION WHEN undefined_table OR undefined_object OR duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER INDEX "QuoteDocument_status_idx" RENAME TO "QuoteDocument_legacy_pre_bework_status_idx";
+EXCEPTION WHEN undefined_table OR undefined_object OR duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN ALTER INDEX "QuoteLine_code_idx" RENAME TO "QuoteLine_legacy_pre_bework_code_idx";
+EXCEPTION WHEN undefined_table OR undefined_object OR duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER INDEX "QuoteLine_lot_idx" RENAME TO "QuoteLine_legacy_pre_bework_lot_idx";
+EXCEPTION WHEN undefined_table OR undefined_object OR duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER INDEX "QuoteLine_qualityLevel_idx" RENAME TO "QuoteLine_legacy_pre_bework_qualityLevel_idx";
+EXCEPTION WHEN undefined_table OR undefined_object OR duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER INDEX "QuoteLine_quoteDocumentId_idx" RENAME TO "QuoteLine_legacy_pre_bework_quoteDocumentId_idx";
+EXCEPTION WHEN undefined_table OR undefined_object OR duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER INDEX "QuoteLine_totalTTC_idx" RENAME TO "QuoteLine_legacy_pre_bework_totalTTC_idx";
+EXCEPTION WHEN undefined_table OR undefined_object OR duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER INDEX "QuoteLine_workItemId_idx" RENAME TO "QuoteLine_legacy_pre_bework_workItemId_idx";
+EXCEPTION WHEN undefined_table OR undefined_object OR duplicate_object THEN NULL; END $$;
+
 -- WorkItem sans colonne « code » (vieille base / migration incomplète) : obligatoire pour Prisma + lignes de devis
 DO $$
 BEGIN

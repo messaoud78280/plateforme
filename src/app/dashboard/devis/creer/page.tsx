@@ -1,11 +1,24 @@
 import Link from "next/link";
-import { createQuoteDocumentWizard, listQuoteProjectsForSelect } from "@/app/dashboard/devis/quote-actions";
+import { createQuoteDocumentWizard } from "@/app/dashboard/devis/quote-actions";
+import { QuoteSchemaMissingCallout } from "@/components/devis/QuoteSchemaMissingCallout";
 import { QUOTE_DOCUMENT_TYPE_LABELS } from "@/lib/be-work-devis-quote-labels";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
+import { prisma } from "@/lib/prisma";
 
 export default async function CreerDevisPage() {
   await requireBeWorkDevisSession();
-  const projects = await listQuoteProjectsForSelect();
+
+  let quoteSchemaOk = true;
+  let projects: { id: string; clientName: string; projectName: string }[] = [];
+  try {
+    projects = await prisma.quoteProject.findMany({
+      orderBy: { updatedAt: "desc" },
+      take: 200,
+      select: { id: true, clientName: true, projectName: true },
+    });
+  } catch {
+    quoteSchemaOk = false;
+  }
 
   return (
     <div className="mx-auto max-w-2xl space-y-8 px-1">
@@ -17,6 +30,8 @@ export default async function CreerDevisPage() {
           l&apos;éditeur pour ajouter les lignes et générer le PDF.
         </p>
       </header>
+
+      {!quoteSchemaOk ? <QuoteSchemaMissingCallout /> : null}
 
       <ol className="space-y-6 text-sm">
         <li className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -42,88 +57,90 @@ export default async function CreerDevisPage() {
         </li>
       </ol>
 
-      <form action={createQuoteDocumentWizard} className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div>
-          <label htmlFor="projectId" className="block text-xs font-bold uppercase tracking-wide text-slate-500">
-            Projet
-          </label>
-          <select
-            id="projectId"
-            name="projectId"
-            required
-            className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
-            defaultValue=""
-          >
-            <option value="" disabled>
-              — Choisir un projet —
-            </option>
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.clientName} — {p.projectName}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="documentType" className="block text-xs font-bold uppercase tracking-wide text-slate-500">
-            Type de document
-          </label>
-          <select
-            id="documentType"
-            name="documentType"
-            className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
-            defaultValue="devis_estimatif"
-          >
-            {(Object.keys(QUOTE_DOCUMENT_TYPE_LABELS) as (keyof typeof QUOTE_DOCUMENT_TYPE_LABELS)[]).map((k) => (
-              <option key={k} value={k}>
-                {QUOTE_DOCUMENT_TYPE_LABELS[k]}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="title" className="block text-xs font-bold uppercase tracking-wide text-slate-500">
-            Titre du document
-          </label>
-          <input
-            id="title"
-            name="title"
-            required
-            placeholder="Ex. Estimation gros œuvre — Lot 01"
-            className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
-          />
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+      {quoteSchemaOk ? (
+        <form action={createQuoteDocumentWizard} className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div>
-            <label htmlFor="issueDate" className="block text-xs font-bold uppercase tracking-wide text-slate-500">
-              Date d&apos;émission
+            <label htmlFor="projectId" className="block text-xs font-bold uppercase tracking-wide text-slate-500">
+              Projet
+            </label>
+            <select
+              id="projectId"
+              name="projectId"
+              required
+              className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+              defaultValue=""
+            >
+              <option value="" disabled>
+                — Choisir un projet —
+              </option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.clientName} — {p.projectName}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="documentType" className="block text-xs font-bold uppercase tracking-wide text-slate-500">
+              Type de document
+            </label>
+            <select
+              id="documentType"
+              name="documentType"
+              className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+              defaultValue="devis_estimatif"
+            >
+              {(Object.keys(QUOTE_DOCUMENT_TYPE_LABELS) as (keyof typeof QUOTE_DOCUMENT_TYPE_LABELS)[]).map((k) => (
+                <option key={k} value={k}>
+                  {QUOTE_DOCUMENT_TYPE_LABELS[k]}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="title" className="block text-xs font-bold uppercase tracking-wide text-slate-500">
+              Titre du document
             </label>
             <input
-              id="issueDate"
-              name="issueDate"
-              type="date"
+              id="title"
+              name="title"
+              required
+              placeholder="Ex. Estimation gros œuvre — Lot 01"
               className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
             />
           </div>
-          <div>
-            <label htmlFor="validityDate" className="block text-xs font-bold uppercase tracking-wide text-slate-500">
-              Date de validité (optionnel)
-            </label>
-            <input id="validityDate" name="validityDate" type="date" className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="issueDate" className="block text-xs font-bold uppercase tracking-wide text-slate-500">
+                Date d&apos;émission
+              </label>
+              <input
+                id="issueDate"
+                name="issueDate"
+                type="date"
+                className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+              />
+            </div>
+            <div>
+              <label htmlFor="validityDate" className="block text-xs font-bold uppercase tracking-wide text-slate-500">
+                Date de validité (optionnel)
+              </label>
+              <input id="validityDate" name="validityDate" type="date" className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+            </div>
           </div>
-        </div>
-        <div className="flex flex-wrap gap-3 pt-2">
-          <button type="submit" className="rounded-xl bg-[#1e3a5f] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#152a45]">
-            Créer le document
-          </button>
-          <Link
-            href="/dashboard/devis/projets"
-            className="inline-flex items-center rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            Gérer les projets
-          </Link>
-        </div>
-      </form>
+          <div className="flex flex-wrap gap-3 pt-2">
+            <button type="submit" className="rounded-xl bg-[#1e3a5f] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#152a45]">
+              Créer le document
+            </button>
+            <Link
+              href="/dashboard/devis/projets"
+              className="inline-flex items-center rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              Gérer les projets
+            </Link>
+          </div>
+        </form>
+      ) : null}
     </div>
   );
 }

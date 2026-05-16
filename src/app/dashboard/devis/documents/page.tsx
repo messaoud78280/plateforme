@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { listQuoteDocuments } from "@/app/dashboard/devis/quote-actions";
+import { QuoteSchemaMissingCallout } from "@/components/devis/QuoteSchemaMissingCallout";
 import { QUOTE_DOCUMENT_STATUS_LABELS, QUOTE_DOCUMENT_TYPE_LABELS } from "@/lib/be-work-devis-quote-labels";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 
@@ -9,7 +10,14 @@ export default async function DevisDocumentsPage({ searchParams }: { searchParam
   await requireBeWorkDevisSession();
   const sp = await searchParams;
   const projectId = sp.project?.trim() || undefined;
-  const docs = await listQuoteDocuments(projectId);
+
+  let quoteSchemaOk = true;
+  let docs: Awaited<ReturnType<typeof listQuoteDocuments>> = [];
+  try {
+    docs = await listQuoteDocuments(projectId);
+  } catch {
+    quoteSchemaOk = false;
+  }
 
   return (
     <div className="space-y-6 px-1">
@@ -29,16 +37,21 @@ export default async function DevisDocumentsPage({ searchParams }: { searchParam
             </p>
           ) : null}
         </div>
-        <Link
-          href="/dashboard/devis/creer"
-          className="inline-flex w-fit items-center rounded-xl bg-[#1e3a5f] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#152a45]"
-        >
-          Créer un devis
-        </Link>
+        {quoteSchemaOk ? (
+          <Link
+            href="/dashboard/devis/creer"
+            className="inline-flex w-fit items-center rounded-xl bg-[#1e3a5f] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#152a45]"
+          >
+            Créer un devis
+          </Link>
+        ) : null}
       </header>
 
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <table className="min-w-[900px] w-full border-collapse text-left text-sm">
+      {!quoteSchemaOk ? <QuoteSchemaMissingCallout /> : null}
+
+      {quoteSchemaOk ? (
+        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <table className="min-w-[900px] w-full border-collapse text-left text-sm">
           <thead className="bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-600">
             <tr>
               <th className="border-b border-slate-200 px-4 py-3">N°</th>
@@ -97,7 +110,8 @@ export default async function DevisDocumentsPage({ searchParams }: { searchParam
             )}
           </tbody>
         </table>
-      </div>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -2,17 +2,34 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { QUOTE_DOCUMENT_STATUS_LABELS, QUOTE_DOCUMENT_TYPE_LABELS } from "@/lib/be-work-devis-quote-labels";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
+import { isMissingQuoteSchemaError } from "@/lib/be-work-devis-prisma-guard";
 import { prisma } from "@/lib/prisma";
+import { QuoteSchemaMissingCallout } from "@/components/devis/QuoteSchemaMissingCallout";
 
 type PageProps = { params: Promise<{ id: string }> };
 
 export default async function QuoteDocumentFichePage({ params }: PageProps) {
   await requireBeWorkDevisSession();
   const { id } = await params;
-  const doc = await prisma.quoteDocument.findUnique({
-    where: { id },
-    include: { project: true },
-  });
+  let doc;
+  try {
+    doc = await prisma.quoteDocument.findUnique({
+      where: { id },
+      include: { project: true },
+    });
+  } catch (e) {
+    if (isMissingQuoteSchemaError(e)) {
+      return (
+        <div className="mx-auto max-w-3xl space-y-6 px-1">
+          <QuoteSchemaMissingCallout />
+          <Link href="/dashboard/devis/documents" className="inline-flex text-sm font-semibold text-[#1e3a5f] hover:underline">
+            Retour à la liste des documents
+          </Link>
+        </div>
+      );
+    }
+    throw e;
+  }
   if (!doc) notFound();
 
   return (

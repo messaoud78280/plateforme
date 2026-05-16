@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import { updateQuoteDocumentMeta } from "@/app/dashboard/devis/quote-actions";
 import type { QuoteLineDraft } from "@/app/dashboard/devis/quote-actions";
 import { QuoteDocumentEditor } from "@/components/devis/QuoteDocumentEditor";
+import { QuoteSchemaMissingCallout } from "@/components/devis/QuoteSchemaMissingCallout";
 import { QUOTE_DOCUMENT_STATUS_LABELS, QUOTE_DOCUMENT_TYPE_LABELS } from "@/lib/be-work-devis-quote-labels";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
+import { isMissingQuoteSchemaError } from "@/lib/be-work-devis-prisma-guard";
 import { prisma } from "@/lib/prisma";
 import type { QuoteLine } from "@prisma/client";
 
@@ -37,13 +39,28 @@ function lineToDraft(l: QuoteLine): QuoteLineDraft {
 export default async function ModifierQuoteDocumentPage({ params }: PageProps) {
   await requireBeWorkDevisSession();
   const { id } = await params;
-  const doc = await prisma.quoteDocument.findUnique({
-    where: { id },
-    include: {
-      project: true,
-      lines: { orderBy: [{ sortOrder: "asc" }, { lot: "asc" }] },
-    },
-  });
+  let doc;
+  try {
+    doc = await prisma.quoteDocument.findUnique({
+      where: { id },
+      include: {
+        project: true,
+        lines: { orderBy: [{ sortOrder: "asc" }, { lot: "asc" }] },
+      },
+    });
+  } catch (e) {
+    if (isMissingQuoteSchemaError(e)) {
+      return (
+        <div className="space-y-6 px-1">
+          <QuoteSchemaMissingCallout />
+          <Link href="/dashboard/devis/documents" className="inline-flex text-sm font-semibold text-[#1e3a5f] hover:underline">
+            Retour à la liste des documents
+          </Link>
+        </div>
+      );
+    }
+    throw e;
+  }
   if (!doc) notFound();
 
   const lineDrafts = doc.lines.map(lineToDraft);

@@ -1,10 +1,18 @@
 import Link from "next/link";
 import { listQuoteProjectsTable } from "@/app/dashboard/devis/quote-actions";
+import { QuoteSchemaMissingCallout } from "@/components/devis/QuoteSchemaMissingCallout";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 
 export default async function DevisProjetsPage() {
   await requireBeWorkDevisSession();
-  const projects = await listQuoteProjectsTable();
+
+  let quoteSchemaOk = true;
+  let projects: Awaited<ReturnType<typeof listQuoteProjectsTable>> = [];
+  try {
+    projects = await listQuoteProjectsTable();
+  } catch {
+    quoteSchemaOk = false;
+  }
 
   return (
     <div className="space-y-6 px-1">
@@ -16,16 +24,21 @@ export default async function DevisProjetsPage() {
             Regroupez vos documents de chiffrage par chantier ou dossier client.
           </p>
         </div>
-        <Link
-          href="/dashboard/devis/projets/nouveau"
-          className="inline-flex w-fit items-center rounded-xl bg-[#1e3a5f] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#152a45]"
-        >
-          Nouveau projet
-        </Link>
+        {quoteSchemaOk ? (
+          <Link
+            href="/dashboard/devis/projets/nouveau"
+            className="inline-flex w-fit items-center rounded-xl bg-[#1e3a5f] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#152a45]"
+          >
+            Nouveau projet
+          </Link>
+        ) : null}
       </header>
 
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <table className="min-w-[640px] w-full border-collapse text-left text-sm">
+      {!quoteSchemaOk ? <QuoteSchemaMissingCallout /> : null}
+
+      {quoteSchemaOk ? (
+        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <table className="min-w-[640px] w-full border-collapse text-left text-sm">
           <thead className="bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-600">
             <tr>
               <th className="border-b border-slate-200 px-4 py-3">Client</th>
@@ -63,7 +76,8 @@ export default async function DevisProjetsPage() {
             )}
           </tbody>
         </table>
-      </div>
+        </div>
+      ) : null}
     </div>
   );
 }

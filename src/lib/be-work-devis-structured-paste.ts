@@ -1,5 +1,5 @@
 import { isWorkItemQualityLevel, isWorkItemStatus } from "@/lib/be-work-devis-labels";
-import { extractPriceEntriesFromPastedWorkItem } from "@/lib/be-work-devis-price-entry-paste";
+import { extractOrCoalescePriceEntriesFromPasteObject } from "@/lib/be-work-devis-price-entry-paste";
 import { normalizeUnit } from "@/lib/be-work-devis-units";
 
 /** Code ouvrage existant pour un collage « prix seuls » (JSON `workItemCode`). */
@@ -261,7 +261,7 @@ export function parseStructuredPasteBlock(raw: string):
       const rowObj = entry as Record<string, unknown>;
       const wic = extractWorkItemCodeFromPasteObject(rowObj);
       if (wic) {
-        const priceEntries = extractPriceEntriesFromPastedWorkItem(rowObj);
+        const priceEntries = extractOrCoalescePriceEntriesFromPasteObject(rowObj);
         const warnings: string[] = [];
         if (priceEntries.length === 0) {
           warnings.push("Aucune entrée dans priceEntries.");
@@ -277,7 +277,7 @@ export function parseStructuredPasteBlock(raw: string):
         return;
       }
       const { values, warnings } = mapObjectToStructuredPasteFormValues(rowObj);
-      const priceEntries = extractPriceEntriesFromPastedWorkItem(rowObj);
+      const priceEntries = extractOrCoalescePriceEntriesFromPasteObject(rowObj);
       rows.push({
         index,
         rowKind: "workItem",
@@ -297,7 +297,7 @@ export function parseStructuredPasteBlock(raw: string):
   const singleObj = parsed as Record<string, unknown>;
   const wicSingle = extractWorkItemCodeFromPasteObject(singleObj);
   if (wicSingle) {
-    const priceEntries = extractPriceEntriesFromPastedWorkItem(singleObj);
+    const priceEntries = extractOrCoalescePriceEntriesFromPasteObject(singleObj);
     const warnings: string[] = [];
     if (priceEntries.length === 0) {
       warnings.push("Aucune entrée dans priceEntries.");

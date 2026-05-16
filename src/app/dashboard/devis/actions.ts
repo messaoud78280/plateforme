@@ -11,10 +11,14 @@ import {
 } from "@/lib/be-work-devis-labels";
 import { isWorkItemUnit, normalizeUnit } from "@/lib/be-work-devis-units";
 import {
+  buildFirstPriceEntryPreviewCells,
   buildPriceEntryCreateFromPaste,
   duplicateKeyFromPricePasteRaw,
+  extractOrCoalescePriceEntriesFromPasteObject,
   extractPriceEntriesFromPastedWorkItem,
+  mapPriceEntryPasteBuildError,
   priceDuplicateKeyMatchesRow,
+  summarizePricePasteInvalidReasons,
 } from "@/lib/be-work-devis-price-entry-paste";
 import {
   emptyStructuredPasteFormValues,
@@ -127,7 +131,7 @@ function normalizeBulkImportRows(rowsInput: unknown): BulkImportWorkItemPayload[
       return { values, priceEntries: pe };
     }
     const { values } = mapObjectToStructuredPasteFormValues(o);
-    return { values, priceEntries: extractPriceEntriesFromPastedWorkItem(o) };
+    return { values, priceEntries: extractOrCoalescePriceEntriesFromPasteObject(o) };
   });
 }
 
@@ -149,6 +153,15 @@ export type PreviewObservedPricePasteInputRow = {
   priceEntries: Record<string, unknown>[];
 };
 
+export type PricePastePreviewCells = {
+  qty: string;
+  puHt: string;
+  totalHt: string;
+  tva: string;
+  totalTtc: string;
+  source: string;
+};
+
 export type PreviewObservedPricePasteResultRow = {
   index: number;
   workItemCode: string;
@@ -159,6 +172,7 @@ export type PreviewObservedPricePasteResultRow = {
   importablePriceCount: number;
   duplicatePriceCount: number;
   invalidPriceCount: number;
+  preview: PricePastePreviewCells;
 };
 
 /**
@@ -187,11 +201,7 @@ export async function previewObservedPricesPaste(
     const o = raw as Record<string, unknown>;
     const idx = typeof o.index === "number" && Number.isInteger(o.index) ? o.index : i;
     const code = String(o.workItemCode ?? "").trim();
-    const pe = Array.isArray(o.priceEntries)
-      ? (o.priceEntries as unknown[]).filter(
-          (x): x is Record<string, unknown> => typeof x === "object" && x !== null && !Array.isArray(x),
-        )
-      : [];
+    const pe = extractOrCoalescePriceEntriesFromPasteObject(o);
     rows.push({ index: idx, workItemCode: code, priceEntries: pe });
   }
 
@@ -234,6 +244,8 @@ export async function previewObservedPricesPaste(
     let duplicatePriceCount = 0;
     let invalidPriceCount = 0;
 
+    const preview = buildFirstPriceEntryPreviewCells({ priceEntries: r.priceEntries });
+
     if (!code || !wi) {
       invalidPriceCount = pricesTotal;
       return {
@@ -241,25 +253,29 @@ export async function previewObservedPricesPaste(
         workItemCode: code || "—",
         title: null,
         found: false,
-        statutLabel: "Ouvrage introuvable",
+        statutLabel: "code ouvrage introuvable",
         pricesTotal,
         importablePriceCount: 0,
         duplicatePriceCount: 0,
         invalidPriceCount,
+        preview,
       };
     }
 
     const existingList = pricesByWorkItem.get(wi.id) ?? [];
+    const invalidReasons: string[] = [];
 
     for (const rawPe of r.priceEntries) {
       const built = buildPriceEntryCreateFromPaste(wi.id, rawPe);
       if (!built.ok) {
         invalidPriceCount += 1;
+        invalidReasons.push(mapPriceEntryPasteBuildError(built.error, built.code));
         continue;
       }
       const key = duplicateKeyFromPricePasteRaw(rawPe);
       if (!key) {
         invalidPriceCount += 1;
+        invalidReasons.push("prix manquant");
         continue;
       }
       const dup = existingList.some((row) => priceDuplicateKeyMatchesRow(key, row));
@@ -271,17 +287,20 @@ export async function previewObservedPricesPaste(
     if (pricesTotal === 0) {
       statutLabel = "—";
     } else if (importablePriceCount === 0 && duplicatePriceCount > 0 && invalidPriceCount === 0) {
-      statutLabel = "Prix déjà existant";
+      statutLabel =
+        duplicatePriceCount > 1
+          ? `${duplicatePriceCount}× doublon déjà existant`
+          : "doublon déjà existant";
     } else if (importablePriceCount === 0 && duplicatePriceCount > 0 && invalidPriceCount > 0) {
-      statutLabel = "Prix déjà existant / lignes invalides";
+      statutLabel = `${summarizePricePasteInvalidReasons(invalidReasons)} ; ${duplicatePriceCount}× doublon déjà existant`;
     } else if (importablePriceCount === 0 && duplicatePriceCount === 0 && invalidPriceCount > 0) {
-      statutLabel = "Données invalides";
+      statutLabel = summarizePricePasteInvalidReasons(invalidReasons);
     } else if (duplicatePriceCount > 0 && importablePriceCount > 0) {
-      statutLabel = `OK — ${importablePriceCount} nouveau(x), ${duplicatePriceCount} doublon(s)`;
+      statutLabel = `OK — ${importablePriceCount} importable(s), ${duplicatePriceCount}× doublon déjà existant`;
     } else if (invalidPriceCount > 0 && importablePriceCount > 0 && duplicatePriceCount === 0) {
-      statutLabel = `OK — ${invalidPriceCount} ligne(s) ignorée(s) (invalides)`;
+      statutLabel = `OK — ${importablePriceCount} importable(s) ; ${summarizePricePasteInvalidReasons(invalidReasons)}`;
     } else if (invalidPriceCount > 0 && importablePriceCount > 0 && duplicatePriceCount > 0) {
-      statutLabel = `OK — ${importablePriceCount} nouveau(x), ${duplicatePriceCount} doublon(s), ${invalidPriceCount} invalide(s)`;
+      statutLabel = `OK — ${importablePriceCount} importable(s), ${duplicatePriceCount}× doublon ; ${summarizePricePasteInvalidReasons(invalidReasons)}`;
     }
 
     return {
@@ -294,6 +313,7 @@ export async function previewObservedPricesPaste(
       importablePriceCount,
       duplicatePriceCount,
       invalidPriceCount,
+      preview,
     };
   });
 
@@ -332,11 +352,7 @@ export async function importObservedPricesForWorkItems(rowsInput: unknown): Prom
     }
     const o = raw as Record<string, unknown>;
     const code = String(o.workItemCode ?? "").trim();
-    const pe = Array.isArray(o.priceEntries)
-      ? (o.priceEntries as unknown[]).filter(
-          (x): x is Record<string, unknown> => typeof x === "object" && x !== null && !Array.isArray(x),
-        )
-      : [];
+    const pe = extractOrCoalescePriceEntriesFromPasteObject(o);
     rows.push({ workItemCode: code, priceEntries: pe });
   }
 
@@ -393,13 +409,15 @@ export async function importObservedPricesForWorkItems(rowsInput: unknown): Prom
       const built = buildPriceEntryCreateFromPaste(wi.id, rawPe);
       if (!built.ok) {
         ignored += 1;
-        errors.push(`Ligne ${i + 1} (${code}), prix #${j + 1} : ${built.error}`);
+        errors.push(
+          `Ligne ${i + 1} (${code}), prix #${j + 1} : ${mapPriceEntryPasteBuildError(built.error, built.code)}.`,
+        );
         continue;
       }
       const key = duplicateKeyFromPricePasteRaw(rawPe);
       if (!key) {
         ignored += 1;
-        errors.push(`Ligne ${i + 1} (${code}), prix #${j + 1} : clé de dédoublonnage invalide.`);
+        errors.push(`Ligne ${i + 1} (${code}), prix #${j + 1} : prix manquant.`);
         continue;
       }
       const dupDb = existingList.some((er) => priceDuplicateKeyMatchesRow(key, er));

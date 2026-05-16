@@ -17,6 +17,7 @@ import {
   type StructuredPasteFormValues,
 } from "@/lib/be-work-devis-structured-paste";
 import { buildFirstPriceEntryPreviewCells } from "@/lib/be-work-devis-price-entry-paste";
+import type { PricePastePreviewCells } from "@/app/dashboard/devis/actions";
 
 type Props = {
   onApplyValues: (values: StructuredPasteFormValues) => void;
@@ -112,16 +113,18 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
       const merged: PricePastePreviewRow[] = bulk.rows.map((r) => {
         const s = byIndex.get(r.index);
         if (!s) {
+          const preview = buildFirstPriceEntryPreviewCells(r);
           return {
             ...r,
             workItemCode: r.workItemCode ?? "—",
             title: null,
             found: false,
-            statutLabel: "Ouvrage introuvable",
+            statutLabel: "code ouvrage introuvable",
             pricesTotal: r.priceEntries.length,
             importablePriceCount: 0,
             duplicatePriceCount: 0,
             invalidPriceCount: r.priceEntries.length,
+            preview,
           };
         }
         return { ...r, ...s };
@@ -506,12 +509,10 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {priceBulkRows.map((row) => {
-                  const px = buildFirstPriceEntryPreviewCells(row);
+                  const px: PricePastePreviewCells =
+                    row.preview ?? buildFirstPriceEntryPreviewCells(row);
                   const title = row.found ? row.title ?? "—" : "—";
-                  const warnRow =
-                    !row.found ||
-                    row.statutLabel.toLowerCase().includes("doublon") ||
-                    row.statutLabel.toLowerCase().includes("invalide");
+                  const warnRow = !row.found || row.importablePriceCount === 0;
                   return (
                     <tr key={row.index} className={warnRow ? "bg-amber-50/40" : undefined}>
                       <td className="whitespace-nowrap px-2 py-2 text-slate-500">{row.index + 1}</td>

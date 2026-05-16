@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import { buildQuoteDocumentPdf } from "@/lib/be-work-devis-quote-pdf";
+import { assertCanGenerateQuotePdf } from "@/lib/be-work-devis-quote-pdf-guard";
+import { parsePresentationSettings } from "@/lib/be-work-devis-pdf-presentation";
 import { isMissingQuoteSchemaError } from "@/lib/be-work-devis-prisma-guard";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
-export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   await requireBeWorkDevisSession();
   const { id } = await params;
 
@@ -37,7 +39,21 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     throw e;
   }
 
-  const buf = buildQuoteDocumentPdf(document, lines);
+  const url = new URL(req.url);
+  const modeParam = url.searchParams.get("mode");
+  const modeOverride = modeParam === "estimation" || modeParam === "official" ? modeParam : null;
+  const guard = assertCanGenerateQuotePdf(document.project, document.presentationSettings, modeOverride);
+  if (!guard.ok) {
+    return NextResponse.json({ error: guard.error }, { status: 400 });
+  }
+
+  const settings = parsePresentationSettings(document.presentationSettings);
+  const docForPdf = {
+    ...document,
+    presentationSettings: { ...settings, pdfMode: guard.mode },
+  };
+
+  const buf = buildQuoteDocumentPdf(docForPdf, lines);
   const safeName = `${document.documentNumber.replace(/[^\w.-]+/g, "_")}.pdf`;
   const body = new Uint8Array(buf);
 

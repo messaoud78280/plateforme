@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { updateQuoteDocumentMeta } from "@/app/dashboard/devis/quote-actions";
+import { QuotePdfGenerateLinks } from "@/components/devis/QuotePdfGenerateLinks";
+import { QuotePdfIssuerAlert } from "@/components/devis/QuotePdfIssuerAlert";
+import { QuotePdfIssuerSection, QuotePdfPresentationFields } from "@/components/devis/QuotePdfSettingsSections";
+import { parsePresentationSettings } from "@/lib/be-work-devis-pdf-presentation";
 import type { QuoteLineDraft } from "@/app/dashboard/devis/quote-actions";
 import { QuoteDocumentEditor } from "@/components/devis/QuoteDocumentEditor";
 import { QuoteSchemaMissingCallout } from "@/components/devis/QuoteSchemaMissingCallout";
@@ -65,6 +69,7 @@ export default async function ModifierQuoteDocumentPage({ params }: PageProps) {
 
   const lineDrafts = doc.lines.map(lineToDraft);
   const defaultVat = doc.globalVatRate.toString();
+  const pdfSettings = parsePresentationSettings(doc.presentationSettings);
 
   return (
     <div className="space-y-10 px-1">
@@ -81,16 +86,11 @@ export default async function ModifierQuoteDocumentPage({ params }: PageProps) {
           >
             Fiche
           </Link>
-          <a
-            href={`/dashboard/devis/documents/${doc.id}/pdf`}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            PDF
-          </a>
+          <QuotePdfGenerateLinks documentId={doc.id} project={doc.project} />
         </div>
       </header>
+
+      <QuotePdfIssuerAlert project={doc.project} />
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="font-heading text-lg font-bold text-slate-900">Projet & client</h2>
@@ -239,23 +239,14 @@ export default async function ModifierQuoteDocumentPage({ params }: PageProps) {
               className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
             />
           </div>
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wide text-slate-500" htmlFor="legalDisclaimer">
-              Mentions / réserve
-            </label>
-            <textarea
-              id="legalDisclaimer"
-              name="legalDisclaimer"
-              rows={4}
-              defaultValue={doc.legalDisclaimer ?? ""}
-              className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
-            />
-          </div>
+          <QuotePdfPresentationFields pdfSettings={pdfSettings} document={doc} />
           <button type="submit" className="rounded-xl bg-[#1e3a5f] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#152a45]">
-            Enregistrer l&apos;en-tête
+            Enregistrer l&apos;en-tête &amp; PDF
           </button>
         </form>
       </section>
+
+      <QuotePdfIssuerSection project={doc.project} documentId={doc.id} />
 
       <section className="space-y-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">

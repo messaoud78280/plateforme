@@ -12,6 +12,10 @@ import {
   isQuoteDocumentType,
 } from "@/lib/be-work-devis-quote-labels";
 import { computeLineTotalsDecimal, parseDecimalInput } from "@/lib/be-work-devis-quote-maths";
+import {
+  DEFAULT_QUOTE_PDF_PRESENTATION,
+  presentationSettingsFromFormData,
+} from "@/lib/be-work-devis-pdf-presentation";
 import { searchWorkItemsForQuotePicker } from "@/lib/be-work-devis-quote-picker";
 
 async function guard() {
@@ -111,6 +115,7 @@ export async function createQuoteDocumentWizard(formData: FormData) {
       validityDate: validityDate && !Number.isNaN(validityDate.getTime()) ? validityDate : undefined,
       globalVatRate: new Prisma.Decimal("20"),
       legalDisclaimer: defaultLegalDisclaimerForType(documentTypeRaw),
+      presentationSettings: DEFAULT_QUOTE_PDF_PRESENTATION as Prisma.InputJsonValue,
     },
   });
   revalidatePath("/dashboard/devis/documents");
@@ -359,9 +364,44 @@ export async function updateQuoteDocumentMeta(formData: FormData) {
       notesClient: empty(formData, "notesClient"),
       internalNotes: empty(formData, "internalNotes"),
       legalDisclaimer: empty(formData, "legalDisclaimer"),
+      quoteObject: empty(formData, "quoteObject"),
+      commercialConditions: empty(formData, "commercialConditions"),
+      technicalReservations: empty(formData, "technicalReservations"),
+      presentationSettings: presentationSettingsFromFormData(formData) as Prisma.InputJsonValue,
     },
   });
   revalidatePath(`/dashboard/devis/documents/${id}/modifier`);
   revalidatePath(`/dashboard/devis/documents/${id}`);
   revalidatePath("/dashboard/devis/documents");
+}
+
+export async function updateQuoteProjectIssuer(formData: FormData) {
+  await guard();
+  const projectId = String(formData.get("projectId") ?? "").trim();
+  const documentId = String(formData.get("documentId") ?? "").trim();
+  if (!projectId) throw new Error("Projet manquant.");
+
+  await prisma.quoteProject.update({
+    where: { id: projectId },
+    data: {
+      issuerCompanyName: empty(formData, "issuerCompanyName"),
+      issuerAddressLine1: empty(formData, "issuerAddressLine1"),
+      issuerAddressLine2: empty(formData, "issuerAddressLine2"),
+      issuerPhone: empty(formData, "issuerPhone"),
+      issuerEmail: empty(formData, "issuerEmail"),
+      issuerSiret: empty(formData, "issuerSiret"),
+      issuerTvaNumber: empty(formData, "issuerTvaNumber"),
+      issuerApeCode: empty(formData, "issuerApeCode"),
+      issuerInsuranceName: empty(formData, "issuerInsuranceName"),
+      issuerInsurancePolicy: empty(formData, "issuerInsurancePolicy"),
+      issuerLegalMentions: empty(formData, "issuerLegalMentions"),
+      issuerLogoPath: empty(formData, "issuerLogoPath"),
+      clientReference: empty(formData, "clientReference"),
+    },
+  });
+  revalidatePath("/dashboard/devis/projets");
+  if (documentId) {
+    revalidatePath(`/dashboard/devis/documents/${documentId}/modifier`);
+    revalidatePath(`/dashboard/devis/documents/${documentId}`);
+  }
 }

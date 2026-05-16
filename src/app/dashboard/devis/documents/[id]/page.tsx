@@ -4,6 +4,8 @@ import { QUOTE_DOCUMENT_STATUS_LABELS, QUOTE_DOCUMENT_TYPE_LABELS } from "@/lib/
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import { isMissingQuoteSchemaError } from "@/lib/be-work-devis-prisma-guard";
 import { prisma } from "@/lib/prisma";
+import { QuotePdfGenerateLinks } from "@/components/devis/QuotePdfGenerateLinks";
+import { QuotePdfIssuerAlert } from "@/components/devis/QuotePdfIssuerAlert";
 import { QuoteSchemaMissingCallout } from "@/components/devis/QuoteSchemaMissingCallout";
 
 type PageProps = { params: Promise<{ id: string }> };
@@ -77,6 +79,8 @@ export default async function QuoteDocumentFichePage({ params }: PageProps) {
         </div>
       </dl>
 
+      <QuotePdfIssuerAlert project={doc.project} />
+
       <div className="flex flex-wrap gap-3">
         <Link
           href={`/dashboard/devis/documents/${doc.id}/modifier`}
@@ -84,14 +88,7 @@ export default async function QuoteDocumentFichePage({ params }: PageProps) {
         >
           Modifier
         </Link>
-        <a
-          href={`/dashboard/devis/documents/${doc.id}/pdf`}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-50"
-        >
-          Télécharger le PDF
-        </a>
+        <QuotePdfGenerateLinks documentId={doc.id} project={doc.project} />
         <Link href="/dashboard/devis/documents" className="inline-flex rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 hover:underline">
           Retour à la liste
         </Link>

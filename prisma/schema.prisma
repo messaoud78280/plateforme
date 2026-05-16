@@ -783,6 +783,20 @@ model QuoteProject {
   projectDepartment  String?
   projectType        String?
   notes              String?  @db.Text
+  /// Émetteur du devis (entreprise qui chiffre) — affiché en en-tête PDF
+  issuerCompanyName  String?
+  issuerAddressLine1 String?
+  issuerAddressLine2 String?
+  issuerPhone        String?
+  issuerEmail        String?
+  issuerSiret        String?
+  issuerTvaNumber    String?
+  issuerApeCode      String?
+  issuerInsuranceName   String?
+  issuerInsurancePolicy String?
+  issuerLegalMentions   String?  @db.Text
+  issuerLogoPath     String?
+  clientReference    String?
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
@@ -811,6 +825,14 @@ model QuoteDocument {
   notesClient      String?             @db.Text
   internalNotes    String?             @db.Text
   legalDisclaimer  String?             @db.Text
+  /// Objet du devis (affiché sous les cartes client/projet)
+  quoteObject      String?             @db.Text
+  /// Conditions commerciales (paiement, délais, acompte…)
+  commercialConditions String?           @db.Text
+  /// Réserves techniques (complément mentions légales)
+  technicalReservations String?          @db.Text
+  /// Options de mise en page PDF (pdfMode, designationMode, etc.)
+  presentationSettings Json?
   createdAt        DateTime            @default(now())
   updatedAt        DateTime            @updatedAt
 

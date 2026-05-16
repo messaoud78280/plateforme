@@ -11,6 +11,7 @@ import {
 } from "@/lib/be-work-devis-labels";
 import { formatDateFr, formatEurFr } from "@/lib/be-work-devis-format";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
+import { getBeWorkFamilyLabel } from "@/lib/bework-devis-family-codes";
 import { prisma } from "@/lib/prisma";
 
 type Props = { params: Promise<{ id: string }> };
@@ -68,9 +69,14 @@ export default async function FicheOuvragePage({ params }: Props) {
 
       <header className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex flex-wrap gap-2">
-          <span className="rounded-full bg-[#1e3a5f]/10 px-2.5 py-0.5 font-mono text-xs font-bold text-[#1e3a5f]">
+          <span className="rounded-full bg-[#1e3a5f]/10 px-2.5 py-0.5 font-mono text-xs font-bold text-[#1e3a5f]" title="Code BeWork">
             {item.code}
           </span>
+          {item.familyCode ? (
+            <span className="rounded-full bg-sky-50 px-2.5 py-0.5 font-mono text-xs font-bold text-sky-900" title={getBeWorkFamilyLabel(item.familyCode) ?? ""}>
+              {item.familyCode}
+            </span>
+          ) : null}
           <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-900">
             {QUALITY_LEVEL_LABELS[item.qualityLevel]}
           </span>
@@ -99,12 +105,39 @@ export default async function FicheOuvragePage({ params }: Props) {
           {" "}
           · Unité : <span className="font-semibold">{item.unit}</span>
         </p>
+        {(item.sourceCode || item.sourceLine) && (
+          <dl className="mt-4 grid gap-2 rounded-xl border border-slate-100 bg-slate-50/80 p-4 text-sm sm:grid-cols-2">
+            {item.sourceCode ? (
+              <div>
+                <dt className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Ancien code source</dt>
+                <dd className="mt-0.5 font-mono text-slate-900">{item.sourceCode}</dd>
+              </div>
+            ) : null}
+            {item.sourceLine ? (
+              <div>
+                <dt className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Ligne source</dt>
+                <dd className="mt-0.5 font-mono text-slate-900">{item.sourceLine}</dd>
+              </div>
+            ) : null}
+          </dl>
+        )}
       </header>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="border-b border-slate-100 pb-2 font-heading text-lg font-bold text-slate-900">Descriptif</h2>
           <dl className="mt-4 space-y-4">
+            {item.familyCode ? (
+              <div>
+                <Label>Code famille</Label>
+                <Value>
+                  <span className="font-mono font-semibold">{item.familyCode}</span>
+                  {getBeWorkFamilyLabel(item.familyCode) ? (
+                    <span className="ml-2 text-slate-600">({getBeWorkFamilyLabel(item.familyCode)})</span>
+                  ) : null}
+                </Value>
+              </div>
+            ) : null}
             {item.shortDescription ? (
               <div>
                 <Label>Désignation courte</Label>
@@ -171,7 +204,7 @@ export default async function FicheOuvragePage({ params }: Props) {
 
       <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex flex-col gap-2 border-b border-slate-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="font-heading text-lg font-bold text-slate-900">Prix observés</h2>
+          <h2 className="font-heading text-lg font-bold text-slate-900">Prix observés (sources)</h2>
           <div className="flex flex-wrap gap-3 text-sm">
             <span className="rounded-lg bg-emerald-50 px-3 py-1 font-semibold text-emerald-900">
               Min HT : {formatEurFr(minHt)}

@@ -684,6 +684,12 @@ model WorkItem {
   internalNotes        String?              @db.Text
   status               WorkItemStatus       @default(brouillon)
   itemType             WorkItemItemType     @default(ouvrage_technique)
+  /// Code ou libellé court de famille BeWork (ex. TER, CAR) — lexique interne
+  familyCode           String?
+  /// Ancien code métier / import (ex. BW-MARTIN-15-1)
+  sourceCode           String?
+  /// Référence de ligne dans la source (ex. 15.1)
+  sourceLine           String?
   createdAt            DateTime             @default(now())
   updatedAt            DateTime             @updatedAt
 
@@ -694,6 +700,7 @@ model WorkItem {
   @@index([status])
   @@index([unit])
   @@index([itemType])
+  @@index([familyCode])
 }
 
 /// Document ou source métier (devis, BPU, DPGF…)

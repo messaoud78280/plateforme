@@ -37,6 +37,9 @@ CREATE TABLE "WorkItem" (
     "internalNotes" TEXT,
     "status" "WorkItemStatus" NOT NULL DEFAULT 'brouillon',
     "itemType" "WorkItemItemType" NOT NULL DEFAULT 'ouvrage_technique',
+    "familyCode" TEXT,
+    "sourceCode" TEXT,
+    "sourceLine" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -48,6 +51,7 @@ CREATE INDEX "WorkItem_lot_idx" ON "WorkItem"("lot");
 CREATE INDEX "WorkItem_status_idx" ON "WorkItem"("status");
 CREATE INDEX "WorkItem_unit_idx" ON "WorkItem"("unit");
 CREATE INDEX "WorkItem_itemType_idx" ON "WorkItem"("itemType");
+CREATE INDEX "WorkItem_familyCode_idx" ON "WorkItem"("familyCode");
 
 CREATE TABLE "PriceSource" (
     "id" TEXT NOT NULL,

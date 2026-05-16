@@ -78,6 +78,9 @@ export async function createWorkItem(formData: FormData) {
       lot,
       subLot: emptyToNull(formData, "subLot"),
       family: emptyToNull(formData, "family"),
+      familyCode: emptyToNull(formData, "familyCode"),
+      sourceCode: emptyToNull(formData, "sourceCode"),
+      sourceLine: emptyToNull(formData, "sourceLine"),
       title,
       shortDescription: emptyToNull(formData, "shortDescription"),
       fullDescription,
@@ -96,6 +99,7 @@ export async function createWorkItem(formData: FormData) {
   });
 
   revalidatePath("/dashboard/devis/bibliotheque");
+  revalidatePath("/dashboard/devis/bibliotheque/recodification");
   redirect("/dashboard/devis/bibliotheque");
 }
 
@@ -602,6 +606,9 @@ export async function updateWorkItem(formData: FormData) {
       lot,
       subLot: emptyToNull(formData, "subLot"),
       family: emptyToNull(formData, "family"),
+      familyCode: emptyToNull(formData, "familyCode"),
+      sourceCode: emptyToNull(formData, "sourceCode"),
+      sourceLine: emptyToNull(formData, "sourceLine"),
       title,
       shortDescription: emptyToNull(formData, "shortDescription"),
       fullDescription,
@@ -620,6 +627,7 @@ export async function updateWorkItem(formData: FormData) {
   });
 
   revalidatePath("/dashboard/devis/bibliotheque");
+  revalidatePath("/dashboard/devis/bibliotheque/recodification");
   revalidatePath(`/dashboard/devis/bibliotheque/${id}`);
   redirect(`/dashboard/devis/bibliotheque/${id}`);
 }

@@ -14,7 +14,10 @@ import {
   WORK_ITEM_UNITS,
 } from "@/lib/be-work-devis-labels";
 import { normalizeUnit } from "@/lib/be-work-devis-units";
+import { getBeWorkFamilyLexiconSorted } from "@/lib/bework-devis-family-codes";
 import { WorkItemStructuredPastePanel } from "@/components/devis/WorkItemStructuredPastePanel";
+
+const FAMILY_LEX = getBeWorkFamilyLexiconSorted();
 
 type Props = {
   mode: "create" | "edit";
@@ -25,6 +28,10 @@ type Props = {
 
 export function WorkItemEditorForm({ mode, item, enableStructuredPaste = false }: Props) {
   const action = mode === "create" ? createWorkItem : updateWorkItem;
+
+  const editFamilyCode = mode === "edit" && item ? item.familyCode ?? "" : "";
+  const editSourceCode = mode === "edit" && item ? item.sourceCode ?? "" : "";
+  const editSourceLine = mode === "edit" && item ? item.sourceLine ?? "" : "";
 
   const [pasteTick, setPasteTick] = useState(0);
   const [createDraft, setCreateDraft] = useState<StructuredPasteFormValues | null>(null);
@@ -174,6 +181,45 @@ export function WorkItemEditorForm({ mode, item, enableStructuredPaste = false }
                 </option>
               ))}
             </select>
+          </div>
+
+          <div className="sm:col-span-2 border-t border-slate-100 pt-6">
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Codification et traçabilité</p>
+            <div className="mt-4 grid gap-6 sm:grid-cols-3">
+              <div>
+                <label className="block text-sm font-semibold text-slate-800">Code famille (lexique)</label>
+                <select
+                  name="familyCode"
+                  defaultValue={editFamilyCode}
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/20"
+                >
+                  <option value="">— Non défini —</option>
+                  {FAMILY_LEX.map((f) => (
+                    <option key={f.code} value={f.code}>
+                      {f.code} · {f.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-800">Ancien code source</label>
+                <input
+                  name="sourceCode"
+                  defaultValue={editSourceCode}
+                  placeholder="Ex. BW-MARTIN-15-1"
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm focus:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/20"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-800">Ligne source</label>
+                <input
+                  name="sourceLine"
+                  defaultValue={editSourceLine}
+                  placeholder="Ex. 15.1"
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm focus:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/20"
+                />
+              </div>
+            </div>
           </div>
         </section>
 

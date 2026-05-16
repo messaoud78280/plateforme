@@ -104,6 +104,7 @@ export default async function BibliothequePage({ searchParams }: { searchParams:
   const rows: BibliothequeWorkItemRow[] = items.map((w) => ({
     id: w.id,
     code: w.code,
+    familyCode: w.familyCode,
     lot: w.lot,
     family: w.family,
     title: w.title,
@@ -154,12 +155,20 @@ export default async function BibliothequePage({ searchParams }: { searchParams:
             Référentiel type BPU : filtres, tri, vue tableau ou cartes, regroupement par lot et actions de masse.
           </p>
         </div>
-        <Link
-          href="/dashboard/devis/bibliotheque/nouveau"
-          className="inline-flex items-center justify-center rounded-xl bg-[#1e3a5f] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#152a45]"
-        >
-          Ajouter un ouvrage
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/dashboard/devis/bibliotheque/recodification"
+            className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50"
+          >
+            Recodification
+          </Link>
+          <Link
+            href="/dashboard/devis/bibliotheque/nouveau"
+            className="inline-flex items-center justify-center rounded-xl bg-[#1e3a5f] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#152a45]"
+          >
+            Ajouter un ouvrage
+          </Link>
+        </div>
       </div>
 
       <BibliothequeStatsStrip stats={stats} />

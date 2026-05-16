@@ -12,6 +12,7 @@ import type { BibliothequeStats } from "@/lib/be-work-devis-search";
 export type BibliothequeWorkItemRow = {
   id: string;
   code: string;
+  familyCode: string | null;
   lot: string;
   family: string | null;
   title: string;
@@ -163,6 +164,7 @@ export function BibliothequeWorkItemsShell({ rows, stats, view, groupLots }: Pro
         />
       </td>
       <td className="whitespace-nowrap px-2 py-2 font-mono text-xs font-semibold text-[#1e3a5f]">{row.code}</td>
+      <td className="whitespace-nowrap px-2 py-2 font-mono text-[11px] text-slate-700">{row.familyCode?.trim() || "—"}</td>
       <td className="max-w-[200px] px-2 py-2 text-xs text-slate-800 break-words" title={row.lot}>
         {row.lot}
       </td>
@@ -213,7 +215,7 @@ export function BibliothequeWorkItemsShell({ rows, stats, view, groupLots }: Pro
 
   const tableBlock = (subset: BibliothequeWorkItemRow[]) => (
     <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-      <table className="min-w-[1180px] w-full text-left text-sm">
+      <table className="min-w-[1280px] w-full text-left text-sm">
         <thead className="border-b border-slate-200 bg-slate-50/90 text-[11px] font-bold uppercase tracking-wide text-slate-500">
           <tr>
             <th className="w-10 px-2 py-2">
@@ -225,7 +227,8 @@ export function BibliothequeWorkItemsShell({ rows, stats, view, groupLots }: Pro
                 aria-label="Tout sélectionner"
               />
             </th>
-            <th className="px-2 py-2">Code</th>
+            <th className="px-2 py-2">Code BeWork</th>
+            <th className="px-2 py-2">Famille code</th>
             <th className="px-2 py-2">Lot</th>
             <th className="px-2 py-2">Type</th>
             <th className="px-2 py-2">Famille</th>
@@ -265,7 +268,14 @@ export function BibliothequeWorkItemsShell({ rows, stats, view, groupLots }: Pro
             />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="font-mono text-[11px] font-bold text-[#1e3a5f]">{row.code}</span>
+                <span className="font-mono text-[11px] font-bold text-[#1e3a5f]" title="Code BeWork">
+                  {row.code}
+                </span>
+                {row.familyCode ? (
+                  <span className="font-mono text-[10px] font-semibold text-sky-900" title="Code famille">
+                    {row.familyCode}
+                  </span>
+                ) : null}
                 <span className={`inline-flex rounded px-1.5 py-0.5 text-[10px] font-semibold ${typeBadgeClass(row.itemType)}`}>
                   {WORK_ITEM_ITEM_TYPE_LABELS[row.itemType]}
                 </span>
@@ -279,6 +289,10 @@ export function BibliothequeWorkItemsShell({ rows, stats, view, groupLots }: Pro
                 {row.lot}
               </p>
               <dl className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1 text-[11px] text-slate-600">
+                <div>
+                  <dt className="font-semibold text-slate-500">Famille code</dt>
+                  <dd className="font-mono">{row.familyCode?.trim() || "—"}</dd>
+                </div>
                 <div>
                   <dt className="font-semibold text-slate-500">Unité</dt>
                   <dd>{row.unit}</dd>

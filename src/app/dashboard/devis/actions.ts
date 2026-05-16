@@ -1,10 +1,11 @@
 "use server";
 
-import { Prisma, type WorkItemQualityLevel, type WorkItemStatus } from "@prisma/client";
+import { Prisma, type WorkItemItemType, type WorkItemQualityLevel, type WorkItemStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   isBeWorkPriceDocSourceType,
+  isWorkItemItemType,
   isWorkItemQualityLevel,
   isWorkItemStatus,
 } from "@/lib/be-work-devis-labels";
@@ -57,12 +58,18 @@ export async function createWorkItem(formData: FormData) {
   const unit = normalizeUnit(unitRaw) ?? unitRaw;
   const statusRaw = String(formData.get("status") ?? "brouillon");
   const qualityRaw = String(formData.get("qualityLevel") ?? "standard");
+  const itemTypeRaw = String(formData.get("itemType") ?? "ouvrage_technique");
 
   if (!code || !lot || !title || !fullDescription || !unitRaw) {
     throw new Error("Champs obligatoires manquants.");
   }
-  if (!isWorkItemUnit(unit) || !isWorkItemStatus(statusRaw) || !isWorkItemQualityLevel(qualityRaw)) {
-    throw new Error("Statut, gamme ou unité invalide.");
+  if (
+    !isWorkItemUnit(unit) ||
+    !isWorkItemStatus(statusRaw) ||
+    !isWorkItemQualityLevel(qualityRaw) ||
+    !isWorkItemItemType(itemTypeRaw)
+  ) {
+    throw new Error("Statut, gamme, unité ou type d’ouvrage invalide.");
   }
 
   await prisma.workItem.create({
@@ -76,6 +83,7 @@ export async function createWorkItem(formData: FormData) {
       fullDescription,
       unit,
       qualityLevel: qualityRaw,
+      itemType: itemTypeRaw as WorkItemItemType,
       technicalReference: emptyToNull(formData, "technicalReference"),
       includedItems: emptyToNull(formData, "includedItems"),
       excludedItems: emptyToNull(formData, "excludedItems"),
@@ -458,6 +466,7 @@ function buildWorkItemCreateDataFromPasteValues(v: StructuredPasteFormValues) {
     companyQuestions: pasteStr(v.companyQuestions),
     internalNotes: pasteStr(v.internalNotes),
     status: statusRaw as WorkItemStatus,
+    itemType: "ouvrage_technique" as WorkItemItemType,
   };
 }
 
@@ -569,12 +578,18 @@ export async function updateWorkItem(formData: FormData) {
   const unit = normalizeUnit(unitRaw) ?? unitRaw;
   const statusRaw = String(formData.get("status") ?? "brouillon");
   const qualityRaw = String(formData.get("qualityLevel") ?? "standard");
+  const itemTypeRaw = String(formData.get("itemType") ?? "ouvrage_technique");
 
   if (!code || !lot || !title || !fullDescription || !unitRaw) {
     throw new Error("Champs obligatoires manquants.");
   }
-  if (!isWorkItemUnit(unit) || !isWorkItemStatus(statusRaw) || !isWorkItemQualityLevel(qualityRaw)) {
-    throw new Error("Statut, gamme ou unité invalide.");
+  if (
+    !isWorkItemUnit(unit) ||
+    !isWorkItemStatus(statusRaw) ||
+    !isWorkItemQualityLevel(qualityRaw) ||
+    !isWorkItemItemType(itemTypeRaw)
+  ) {
+    throw new Error("Statut, gamme, unité ou type d’ouvrage invalide.");
   }
 
   const existing = await prisma.workItem.findUnique({ where: { id } });
@@ -592,6 +607,7 @@ export async function updateWorkItem(formData: FormData) {
       fullDescription,
       unit,
       qualityLevel: qualityRaw,
+      itemType: itemTypeRaw as WorkItemItemType,
       technicalReference: emptyToNull(formData, "technicalReference"),
       includedItems: emptyToNull(formData, "includedItems"),
       excludedItems: emptyToNull(formData, "excludedItems"),
@@ -615,6 +631,37 @@ export async function deleteWorkItem(formData: FormData) {
   await prisma.workItem.delete({ where: { id } });
   revalidatePath("/dashboard/devis/bibliotheque");
   redirect("/dashboard/devis/bibliotheque");
+}
+
+const BULK_BIB_MAX = 500;
+
+export async function bulkSetWorkItemsStatus(
+  ids: string[],
+  status: WorkItemStatus,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  await guard();
+  if (!ids.length) return { ok: false, error: "Aucun ouvrage sélectionné." };
+  if (ids.length > BULK_BIB_MAX) return { ok: false, error: `Maximum ${BULK_BIB_MAX} ouvrages par action.` };
+  if (!isWorkItemStatus(status)) return { ok: false, error: "Statut invalide." };
+  await prisma.workItem.updateMany({
+    where: { id: { in: ids } },
+    data: { status },
+  });
+  revalidatePath("/dashboard/devis/bibliotheque");
+  revalidatePath("/dashboard/devis/recherche");
+  revalidatePath("/dashboard/devis/prix");
+  return { ok: true };
+}
+
+export async function bulkDeleteWorkItems(ids: string[]): Promise<{ ok: true } | { ok: false; error: string }> {
+  await guard();
+  if (!ids.length) return { ok: false, error: "Aucun ouvrage sélectionné." };
+  if (ids.length > BULK_BIB_MAX) return { ok: false, error: `Maximum ${BULK_BIB_MAX} ouvrages par action.` };
+  await prisma.workItem.deleteMany({ where: { id: { in: ids } } });
+  revalidatePath("/dashboard/devis/bibliotheque");
+  revalidatePath("/dashboard/devis/recherche");
+  revalidatePath("/dashboard/devis/prix");
+  return { ok: true };
 }
 
 export async function createPriceEntry(formData: FormData) {

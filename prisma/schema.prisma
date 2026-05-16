@@ -646,6 +646,14 @@ enum WorkItemStatus {
   archive
 }
 
+enum WorkItemItemType {
+  ouvrage_technique
+  etude_controle
+  prestation_administrative
+  garantie_assurance
+  frais_annexe
+}
+
 enum BeWorkPriceDocSourceType {
   devis
   bpu
@@ -675,6 +683,7 @@ model WorkItem {
   companyQuestions     String?              @db.Text
   internalNotes        String?              @db.Text
   status               WorkItemStatus       @default(brouillon)
+  itemType             WorkItemItemType     @default(ouvrage_technique)
   createdAt            DateTime             @default(now())
   updatedAt            DateTime             @updatedAt
 
@@ -683,6 +692,7 @@ model WorkItem {
   @@index([lot])
   @@index([status])
   @@index([unit])
+  @@index([itemType])
 }
 
 /// Document ou source métier (devis, BPU, DPGF…)

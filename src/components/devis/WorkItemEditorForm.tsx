@@ -9,6 +9,7 @@ import type {
 } from "@/lib/be-work-devis-structured-paste";
 import {
   QUALITY_LEVEL_LABELS,
+  WORK_ITEM_ITEM_TYPE_LABELS,
   WORK_ITEM_STATUS_LABELS,
   WORK_ITEM_UNITS,
 } from "@/lib/be-work-devis-labels";
@@ -153,6 +154,21 @@ export function WorkItemEditorForm({ mode, item, enableStructuredPaste = false }
             >
               {showEnumPlaceholder ? <option value="">— Choisir un statut —</option> : null}
               {Object.entries(WORK_ITEM_STATUS_LABELS).map(([k, lab]) => (
+                <option key={k} value={k}>
+                  {lab}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-800">Type d’ouvrage *</label>
+            <select
+              name="itemType"
+              required
+              defaultValue={mode === "edit" && item ? item.itemType : "ouvrage_technique"}
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/20"
+            >
+              {Object.entries(WORK_ITEM_ITEM_TYPE_LABELS).map(([k, lab]) => (
                 <option key={k} value={k}>
                   {lab}
                 </option>

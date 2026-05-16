@@ -1,8 +1,10 @@
 import type { Prisma, WorkItem } from "@prisma/client";
 import {
   isBeWorkPriceDocSourceType,
+  isWorkItemItemType,
   isWorkItemQualityLevel,
   isWorkItemStatus,
+  WORK_ITEM_ITEM_TYPES_ANNEX,
 } from "@/lib/be-work-devis-labels";
 import { prisma } from "@/lib/prisma";
 
@@ -13,6 +15,7 @@ export const WORK_ITEM_SORT_KEYS = [
   "lot_asc",
   "title_asc",
   "status_asc",
+  "itemType_asc",
   "priceCount_desc",
   "avgHt_desc",
   "avgHt_asc",
@@ -59,7 +62,110 @@ export type WorkItemFilterParams = {
   priceDept?: string;
   /** Type de source documentaire sur une ligne de prix associée */
   priceSourceType?: string;
+  /** Type d’ouvrage (enum Prisma) */
+  itemType?: string;
+  /** « 1 » : uniquement ouvrage_technique (prioritaire sur onlyAnnexes si les deux sont envoyés) */
+  onlyTechnical?: string;
+  /** « 1 » : uniquement types annexes (hors ouvrage_technique) */
+  onlyAnnexes?: string;
 };
+
+export type BibliothequeStats = {
+  totalRows: number;
+  technicalCount: number;
+  etudeControleCount: number;
+  administratifCount: number;
+  garantieCount: number;
+  fraisAnnexeCount: number;
+  totalPriceEntries: number;
+  globalAvgUnitHt: number | null;
+};
+
+export function computeBibliothequeStats(items: WorkItemWithPriceStats[]): BibliothequeStats {
+  let technicalCount = 0;
+  let etudeControleCount = 0;
+  let administratifCount = 0;
+  let garantieCount = 0;
+  let fraisAnnexeCount = 0;
+  let totalPriceEntries = 0;
+  let weightedSum = 0;
+  let weight = 0;
+
+  for (const r of items) {
+    totalPriceEntries += r.priceCount;
+    switch (r.itemType) {
+      case "ouvrage_technique":
+        technicalCount += 1;
+        break;
+      case "etude_controle":
+        etudeControleCount += 1;
+        break;
+      case "prestation_administrative":
+        administratifCount += 1;
+        break;
+      case "garantie_assurance":
+        garantieCount += 1;
+        break;
+      case "frais_annexe":
+        fraisAnnexeCount += 1;
+        break;
+      default:
+        technicalCount += 1;
+    }
+    if (r.avgHt != null && r.priceCount > 0) {
+      weightedSum += r.avgHt * r.priceCount;
+      weight += r.priceCount;
+    }
+  }
+
+  return {
+    totalRows: items.length,
+    technicalCount,
+    etudeControleCount,
+    administratifCount,
+    garantieCount,
+    fraisAnnexeCount,
+    totalPriceEntries,
+    globalAvgUnitHt: weight > 0 ? weightedSum / weight : null,
+  };
+}
+
+function parsePriceFilterInput(raw: string | undefined): number | null {
+  if (raw == null) return null;
+  const t = raw.trim().replace(/\s/g, "").replace(",", ".");
+  if (!t) return null;
+  const n = Number(t);
+  if (!Number.isFinite(n) || n < 0) return null;
+  return n;
+}
+
+/**
+ * Filtre sur le prix moyen HT affiché (post-agrégation).
+ * Avec un minimum : exclut les ouvrages sans prix moyen.
+ * Avec un maximum seul : inclut aussi les ouvrages sans prix.
+ */
+export function filterWorkItemsByAvgPriceRange(
+  rows: WorkItemWithPriceStats[],
+  priceMinStr?: string,
+  priceMaxStr?: string,
+): WorkItemWithPriceStats[] {
+  const min = parsePriceFilterInput(priceMinStr);
+  const max = parsePriceFilterInput(priceMaxStr);
+  if (min == null && max == null) return rows;
+
+  return rows.filter((r) => {
+    const avg = r.avgHt;
+    if (min != null) {
+      if (avg == null) return false;
+      if (avg < min) return false;
+    }
+    if (max != null) {
+      if (avg == null) return true;
+      if (avg > max) return false;
+    }
+    return true;
+  });
+}
 
 export function buildWorkItemWhere(params: WorkItemFilterParams): Prisma.WorkItemWhereInput {
   const AND: Prisma.WorkItemWhereInput[] = [];
@@ -84,6 +190,15 @@ export function buildWorkItemWhere(params: WorkItemFilterParams): Prisma.WorkIte
 
   const techRef = params.techRef?.trim();
   if (techRef) AND.push({ technicalReference: { contains: techRef, mode: "insensitive" } });
+
+  if (params.onlyTechnical?.trim() === "1") {
+    AND.push({ itemType: "ouvrage_technique" });
+  } else if (params.onlyAnnexes?.trim() === "1") {
+    AND.push({ itemType: { in: [...WORK_ITEM_ITEM_TYPES_ANNEX] } });
+  } else {
+    const it = params.itemType?.trim();
+    if (it && isWorkItemItemType(it)) AND.push({ itemType: it });
+  }
 
   const priceDept = params.priceDept?.trim();
   const pst = params.priceSourceType?.trim();
@@ -125,6 +240,8 @@ export function sortMergedWorkItems(rows: WorkItemWithPriceStats[], sort: WorkIt
         return cmp(r1.title, r2.title) || cmp(r1.code, r2.code);
       case "status_asc":
         return cmp(r1.status, r2.status) || cmp(r1.code, r2.code);
+      case "itemType_asc":
+        return cmp(r1.itemType, r2.itemType) || cmp(r1.code, r2.code);
       case "priceCount_desc":
         return r2.priceCount - r1.priceCount || r2.updatedAt.getTime() - r1.updatedAt.getTime();
       case "avgHt_desc": {

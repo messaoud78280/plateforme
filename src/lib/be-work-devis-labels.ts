@@ -1,10 +1,31 @@
 import type {
   BeWorkPriceDocSourceType,
+  WorkItemItemType,
   WorkItemQualityLevel,
   WorkItemStatus,
 } from "@prisma/client";
 
 export { WORK_ITEM_UNITS, normalizeUnit, unitComparisonKey, isWorkItemUnit } from "./be-work-devis-units";
+
+export const WORK_ITEM_ITEM_TYPE_LABELS: Record<WorkItemItemType, string> = {
+  ouvrage_technique: "Ouvrage technique",
+  etude_controle: "Étude / contrôle",
+  prestation_administrative: "Administratif",
+  garantie_assurance: "Garantie / assurance",
+  frais_annexe: "Frais annexe",
+};
+
+/** Types hors « ouvrage technique » (prestations annexes au sens filtre). */
+export const WORK_ITEM_ITEM_TYPES_ANNEX: readonly WorkItemItemType[] = [
+  "etude_controle",
+  "prestation_administrative",
+  "garantie_assurance",
+  "frais_annexe",
+] as const;
+
+export function isWorkItemItemType(v: string): v is WorkItemItemType {
+  return (Object.keys(WORK_ITEM_ITEM_TYPE_LABELS) as WorkItemItemType[]).includes(v as WorkItemItemType);
+}
 
 export const SOURCE_TYPE_LABELS: Record<BeWorkPriceDocSourceType, string> = {
   devis: "Devis",

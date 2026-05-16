@@ -8,6 +8,13 @@
 
 CREATE TYPE "WorkItemQualityLevel" AS ENUM ('standard', 'confort', 'premium');
 CREATE TYPE "WorkItemStatus" AS ENUM ('brouillon', 'a_completer', 'a_verifier', 'valide', 'archive');
+CREATE TYPE "WorkItemItemType" AS ENUM (
+  'ouvrage_technique',
+  'etude_controle',
+  'prestation_administrative',
+  'garantie_assurance',
+  'frais_annexe'
+);
 CREATE TYPE "BeWorkPriceDocSourceType" AS ENUM ('devis', 'bpu', 'dpgf', 'marche_public', 'estimation_interne', 'autre');
 
 CREATE TABLE "WorkItem" (
@@ -29,6 +36,7 @@ CREATE TABLE "WorkItem" (
     "companyQuestions" TEXT,
     "internalNotes" TEXT,
     "status" "WorkItemStatus" NOT NULL DEFAULT 'brouillon',
+    "itemType" "WorkItemItemType" NOT NULL DEFAULT 'ouvrage_technique',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -39,6 +47,7 @@ CREATE UNIQUE INDEX "WorkItem_code_key" ON "WorkItem"("code");
 CREATE INDEX "WorkItem_lot_idx" ON "WorkItem"("lot");
 CREATE INDEX "WorkItem_status_idx" ON "WorkItem"("status");
 CREATE INDEX "WorkItem_unit_idx" ON "WorkItem"("unit");
+CREATE INDEX "WorkItem_itemType_idx" ON "WorkItem"("itemType");
 
 CREATE TABLE "PriceSource" (
     "id" TEXT NOT NULL,

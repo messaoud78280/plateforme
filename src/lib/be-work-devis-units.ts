@@ -37,9 +37,11 @@ const ALIAS_TO_CANONICAL: Record<string, WorkItemUnit> = {
   u: "unité",
   unite: "unité",
   unites: "unité",
-  // forfait (ex. Ft, F) — la valeur canonique « forfait » est déjà couverte par la boucle sur WORK_ITEM_UNITS
+  // forfait (ex. Ft, F, ensemble / ens sur devis) — la valeur canonique « forfait » est déjà couverte par la boucle sur WORK_ITEM_UNITS
   f: "forfait",
   ft: "forfait",
+  ensemble: "forfait",
+  ens: "forfait",
   // surfaces / linéaires
   m2: "m²",
   m3: "m³",

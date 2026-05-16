@@ -6,6 +6,7 @@ import { PriceEntryCreateForm } from "@/components/devis/PriceEntryCreateForm";
 import {
   QUALITY_LEVEL_LABELS,
   SOURCE_TYPE_LABELS,
+  WORK_ITEM_ITEM_TYPE_LABELS,
   WORK_ITEM_STATUS_LABELS,
 } from "@/lib/be-work-devis-labels";
 import { formatDateFr, formatEurFr } from "@/lib/be-work-devis-format";
@@ -75,6 +76,9 @@ export default async function FicheOuvragePage({ params }: Props) {
           </span>
           <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-800">
             {WORK_ITEM_STATUS_LABELS[item.status]}
+          </span>
+          <span className="rounded-full bg-[#0f172a]/8 px-2.5 py-0.5 text-xs font-semibold text-slate-800">
+            {WORK_ITEM_ITEM_TYPE_LABELS[item.itemType]}
           </span>
         </div>
         <h1 className="mt-4 font-heading text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{item.title}</h1>

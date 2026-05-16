@@ -42,3 +42,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Args MCP Supabase (copies locales à la racine ; version versionnée dans scripts/supabase/)
+.migration_apply_mcp_args.json
+.migration_apply_mcp_args.pretty.json
+
+# PDF doublons legacy (canoniques en kebab-case — voir src/content/resource-pdf-catalog.ts)
+/public/ressources/pdf/Guide_CDT*
+/public/ressources/pdf/Tuto_Skill*
+/public/ressources/pdf/article-guide-conducteur-de-travaux-ia (1).pdf

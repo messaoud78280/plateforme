@@ -688,6 +688,7 @@ model WorkItem {
   updatedAt            DateTime             @updatedAt
 
   priceEntries PriceEntry[]
+  quoteLines   QuoteLine[]
 
   @@index([lot])
   @@index([status])
@@ -743,4 +744,103 @@ model PriceEntry {
   @@index([workItemId])
   @@index([sourceType])
   @@index([department])
+}
+
+// ─── BeWork Devis — projets clients & documents de chiffrage (devis / DPGF / etc.) ───
+
+enum QuoteDocumentType {
+  devis_estimatif
+  dpgf_consultation
+  devis_corrige
+  comparatif_devis
+  devis_contractuel
+}
+
+enum QuoteDocumentStatus {
+  brouillon
+  a_verifier
+  pret_a_envoyer
+  envoye
+  archive
+}
+
+/// Projet client pour regrouper les documents de chiffrage
+model QuoteProject {
+  id                 String   @id @default(cuid())
+  clientName         String
+  clientEmail        String?
+  clientPhone        String?
+  projectName        String
+  projectAddress     String?
+  projectCity        String?
+  projectDepartment  String?
+  projectType        String?
+  notes              String?  @db.Text
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  documents QuoteDocument[]
+
+  @@index([clientName])
+  @@index([projectName])
+}
+
+/// Document (devis estimatif, DPGF consultation, etc.)
+model QuoteDocument {
+  id               String              @id @default(cuid())
+  projectId        String
+  project          QuoteProject        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  documentNumber   String              @unique
+  documentType     QuoteDocumentType   @default(devis_estimatif)
+  title            String
+  status           QuoteDocumentStatus @default(brouillon)
+  issueDate        DateTime            @db.Date
+  validityDate     DateTime?           @db.Date
+  currency         String              @default("EUR")
+  globalVatRate    Decimal             @default(20) @db.Decimal(6, 4)
+  subtotalHT       Decimal             @default(0) @db.Decimal(14, 4)
+  totalVat         Decimal             @default(0) @db.Decimal(14, 4)
+  totalTTC         Decimal             @default(0) @db.Decimal(14, 4)
+  notesClient      String?             @db.Text
+  internalNotes    String?             @db.Text
+  legalDisclaimer  String?             @db.Text
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  lines QuoteLine[]
+
+  @@index([projectId])
+  @@index([status])
+  @@index([documentType])
+}
+
+/// Ligne de document (ouvrage bibliothèque ou ligne libre)
+model QuoteLine {
+  id               String   @id @default(cuid())
+  documentId       String
+  document         QuoteDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  workItemId       String?
+  workItem         WorkItem? @relation(fields: [workItemId], references: [id], onDelete: SetNull)
+  lot              String
+  family           String?
+  code             String?
+  title            String
+  description      String   @db.Text
+  unit             String
+  quantity         Decimal  @db.Decimal(14, 4)
+  unitPriceHT      Decimal  @db.Decimal(14, 4)
+  vatRate          Decimal  @db.Decimal(6, 4)
+  totalHT          Decimal  @db.Decimal(14, 4)
+  totalVat         Decimal  @db.Decimal(14, 4)
+  totalTTC         Decimal  @db.Decimal(14, 4)
+  includedItems    String?  @db.Text
+  excludedItems    String?  @db.Text
+  vigilancePoints  String?  @db.Text
+  sortOrder        Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([documentId])
+  @@index([workItemId])
+  @@index([lot])
 }

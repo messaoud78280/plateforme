@@ -6,7 +6,29 @@ export default async function BeWorkDevisHomePage() {
 
   const cards = [
     {
-      title: "Bibliothèque ouvrages",
+      title: "Créer un devis",
+      description:
+        "Constituer un document estimatif ou de consultation à partir des ouvrages BeWork et exporter un PDF client.",
+      href: "/dashboard/devis/creer",
+      cta: "Démarrer",
+      badge: "Chiffrage",
+    },
+    {
+      title: "Projets clients",
+      description: "Regrouper vos dossiers par client et chantier avant de générer des documents.",
+      href: "/dashboard/devis/projets",
+      cta: "Voir les projets",
+      badge: "Organisation",
+    },
+    {
+      title: "Documents",
+      description: "Liste des devis et documents estimatifs : modification, statut et export PDF.",
+      href: "/dashboard/devis/documents",
+      cta: "Ouvrir la liste",
+      badge: "Production",
+    },
+    {
+      title: "Ouvrages & prix",
       description:
         "Classer les ouvrages BTP avec désignations, unités, lots et points de vigilance.",
       href: "/dashboard/devis/bibliotheque",

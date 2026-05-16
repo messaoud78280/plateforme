@@ -16,6 +16,7 @@
     "db:seed:devis": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx prisma/seed-bework-devis.ts",
     "db:check": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/verifier-supabase.ts",
     "db:update-demo-passwords": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/update-demo-passwords.ts",
+    "db:backfill-work-item-descriptions": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/backfill-work-item-descriptions.ts",
     "db:studio": "prisma studio",
     "deploy": "npx --yes @railway/cli up",
     "render:conciergerie-ui": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx scripts/render-conciergerie-ui.ts"

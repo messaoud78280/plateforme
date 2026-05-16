@@ -1,5 +1,6 @@
 import { isWorkItemQualityLevel, isWorkItemStatus } from "@/lib/be-work-devis-labels";
 import { extractOrCoalescePriceEntriesFromPasteObject } from "@/lib/be-work-devis-price-entry-paste";
+import { applyResolvedDescriptionsToPasteValues } from "@/lib/be-work-devis-work-item-description";
 import { normalizeUnit } from "@/lib/be-work-devis-units";
 
 /** Code ouvrage existant pour un collage « prix seuls » (JSON `workItemCode`). */
@@ -153,6 +154,8 @@ export function mapObjectToStructuredPasteFormValues(obj: Record<string, unknown
 
     values[key] = leaf;
   }
+
+  applyResolvedDescriptionsToPasteValues(obj, values);
 
   return { values, warnings };
 }

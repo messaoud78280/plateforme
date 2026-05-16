@@ -25,6 +25,11 @@ import {
   mapObjectToStructuredPasteFormValues,
   type StructuredPasteFormValues,
 } from "@/lib/be-work-devis-structured-paste";
+import {
+  generateFullDescriptionFromTitle,
+  isIncompleteDescriptionText,
+  resolveImportedFullDescription,
+} from "@/lib/be-work-devis-work-item-description";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import { prisma } from "@/lib/prisma";
 
@@ -112,6 +117,8 @@ const BULK_IMPORT_MAX = 500;
 export type BulkImportWorkItemPayload = {
   values: StructuredPasteFormValues;
   priceEntries: Record<string, unknown>[];
+  /** Objet JSON source (pour résolution désignation / type matériaux). */
+  pasteSource?: Record<string, unknown>;
 };
 
 function normalizeBulkImportRows(rowsInput: unknown): BulkImportWorkItemPayload[] | null {
@@ -128,10 +135,14 @@ function normalizeBulkImportRows(rowsInput: unknown): BulkImportWorkItemPayload[
             (x): x is Record<string, unknown> => typeof x === "object" && x !== null && !Array.isArray(x),
           )
         : [];
-      return { values, priceEntries: pe };
+      return { values, priceEntries: pe, pasteSource: o };
     }
     const { values } = mapObjectToStructuredPasteFormValues(o);
-    return { values, priceEntries: extractOrCoalescePriceEntriesFromPasteObject(o) };
+    return {
+      values,
+      priceEntries: extractOrCoalescePriceEntriesFromPasteObject(o),
+      pasteSource: o,
+    };
   });
 }
 
@@ -458,11 +469,23 @@ function pasteStr(v: string): string | undefined {
   return t || undefined;
 }
 
-function buildWorkItemCreateDataFromPasteValues(v: StructuredPasteFormValues) {
+function buildWorkItemCreateDataFromPasteValues(
+  v: StructuredPasteFormValues,
+  pasteObj?: Record<string, unknown>,
+) {
   const code = v.code.trim();
   const lot = v.lot.trim() || "Non classé";
   const title = v.title.trim() || "Sans titre";
-  const fullDescription = v.fullDescription.trim() || "À compléter.";
+  let fullDescription = v.fullDescription.trim();
+  if (isIncompleteDescriptionText(fullDescription)) {
+    if (pasteObj) {
+      fullDescription = resolveImportedFullDescription(pasteObj, { titleHint: title });
+    } else if (title !== "Sans titre") {
+      fullDescription = generateFullDescriptionFromTitle(title, false);
+    } else {
+      fullDescription = "À compléter.";
+    }
+  }
   const rawUnit = v.unit.trim();
   const unit = normalizeUnit(rawUnit) ?? "m²";
   let statusRaw = v.status.trim();
@@ -551,7 +574,7 @@ export async function importWorkItemsBulk(rowsInput: unknown): Promise<
       continue;
     }
 
-    const data = buildWorkItemCreateDataFromPasteValues(values);
+    const data = buildWorkItemCreateDataFromPasteValues(values, bundle.pasteSource);
     try {
       const workItem = await prisma.workItem.create({ data });
       created += 1;

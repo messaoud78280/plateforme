@@ -44,7 +44,7 @@ Ré-enregistre la nouvelle version sous le même nom.`;
 const H1 = "Trie tes DCE avec Claude in Chrome";
 
 const META_DESCRIPTION =
-  "Tutoriel BeWork gratuit : Claude in Chrome pour filtrer BOAMP et plateformes — critères zone/métier/montant, prompts, raccourci et veille programmée.";
+  "Tuto Claude in Chrome : filtrer BOAMP et plateformes AO par zone, métier et montant. Prompts et veille.";
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },

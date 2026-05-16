@@ -85,7 +85,7 @@ Corrige ces 3 points et regénère le skill.`;
 const H1 = "Crée ton skill — Métré quantitatif et qualitatif";
 
 const META_DESCRIPTION =
-  "Tuto BeWork gratuit : skill Claude « metre-quantitatif-qualitatif » — plans + CCTP, unités U/ml/m²/m³, DPGF Excel, croisements et ratios — prompts et PDF 9 pages.";
+  "Tuto skill métré quantitatif : plans, CCTP, unités et export DPGF Excel. PDF 9 pages et prompts.";
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },

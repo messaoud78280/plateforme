@@ -12,7 +12,7 @@ const path = "/services";
 const url = absoluteUrl(path);
 const title = "Services BeWork — assistants travaux augmentés par l’IA (BTP)";
 const description =
-  "Pages par intention : assistant travaux, conducteur de travaux, chef de chantier, externalisation administrative BTP, comptes rendus, DCE, PPSPS, mémoires techniques, chiffrage, DOE — avec liens vers ressources et tarifs.";
+  "Hub services BeWork : assistant travaux, CR, analyse DCE, PPSPS, devis, DOE. Pages par intention + liens ressources.";
 
 export const metadata: Metadata = {
   title: { absolute: title },

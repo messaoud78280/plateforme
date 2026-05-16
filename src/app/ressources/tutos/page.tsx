@@ -12,7 +12,7 @@ const ogImage = absoluteUrl("/opengraph-image");
 export const metadata: Metadata = {
   title: "Tutoriels PDF & pratiques BTP | BeWork",
   description:
-    "Tutoriels BeWork : guides PDF téléchargeables et méthodes courtes pour vos dossiers chantier (Claude, prompts, fiches pratiques).",
+    "Index des tutoriels BeWork : PDF gratuits, skills Claude et fiches pratiques pour vos dossiers chantier (DCE, PPSPS, DOE).",
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   openGraph: {
     type: "website",
@@ -20,7 +20,8 @@ export const metadata: Metadata = {
     url: pageUrl,
     siteName: "BeWork",
     title: "Tutoriels PDF & pratiques BTP | BeWork",
-    description: "Liste des tutoriels gratuits BeWork.",
+    description:
+      "Index des tutoriels BeWork : PDF gratuits, skills Claude et fiches pratiques pour vos dossiers chantier (DCE, PPSPS, DOE).",
     images: [{ url: ogImage, width: 1200, height: 630, alt: "BeWork — tutoriels" }],
   },
   robots: { index: true, follow: true },

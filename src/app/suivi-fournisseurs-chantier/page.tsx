@@ -8,7 +8,7 @@ const PAGE_PATH = "/suivi-fournisseurs-chantier";
 export const metadata = landingPageMetadata({
   title: "Suivi fournisseurs chantier BTP | Commandes & livraisons avec BeWork",
   description:
-    "BeWork aide les entreprises du BTP à suivre fournisseurs, commandes, livraisons, locations matériel, confirmations et relances pour éviter les équipes bloquées sur chantier.",
+    "Suivi fournisseurs chantier : commandes, livraisons, locations et relances pour éviter les blocages sur le terrain.",
   path: PAGE_PATH,
   keywords: [
     "suivi fournisseurs chantier",

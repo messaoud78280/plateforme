@@ -14,7 +14,7 @@ export const metadata = landingPageMetadata({
   title:
     "Externalisation administrative BTP au Luxembourg | Relais bureau-chantier — BeWork",
   description:
-    "BeWork aide les entreprises du BTP au Luxembourg à tenir devis, relances, documents travaux, situations et dossiers chantier avec un relais bureau‑chantier, sans recruter.",
+    "Externalisation administrative BTP au Luxembourg : devis, situations et dossiers chantier. Relais bureau-chantier sans recruter.",
   path: PAGE_PATH,
   keywords: [
     "externalisation administrative entreprise Luxembourg",

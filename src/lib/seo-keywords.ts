@@ -112,8 +112,8 @@ export const SEO_KEYWORDS_HOME: string[] = [
 
 /** Phrases pour enrichir les descriptions (réutilisables en intro de meta). ≤ ~155 car. utiles en SERP. */
 export const SEO_VALUE_PROPOSITION =
-  "Administratif externalisé pour artisan, conducteur de travaux et entreprise du BTP : devis, relances, dossiers chantier — sans embauche. Français · France · Belgique · Suisse · Luxembourg.";
+  "Assistants travaux pour le BTP : relais bureau-chantier, dossiers chantier et forfaits TTC clairs. France, Belgique, Suisse, Luxembourg.";
 
 /** Proposition courte (OG, snippets secondaires). */
 export const SEO_VALUE_PROPOSITION_SHORT =
-  "Administratif externalisé BTP : artisans, conducteurs de travaux et dirigeants. Forfaits TTC. Zone FR · BE · CH · LU.";
+  "Assistants travaux BTP : relais bureau-chantier et dossiers chantier. Forfaits TTC. FR · BE · CH · LU.";

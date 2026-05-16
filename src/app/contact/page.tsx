@@ -11,7 +11,7 @@ const contactOgImage = absoluteUrl("/opengraph-image");
 export const metadata: Metadata = {
   title: "Contact | BeWork",
   description:
-    "Prenez rendez-vous pour un appel découverte (Calendly) ou consultez la FAQ et les tarifs. BeWork accompagne artisans et entreprises du BTP — France, Belgique, Suisse, Luxembourg.",
+    "Contactez BeWork : appel découverte, FAQ et tarifs. Accompagnement administratif BTP en France, Belgique, Suisse, Luxembourg.",
   keywords: [
     "contact BeWork",
     "appel découverte BTP",
@@ -26,13 +26,14 @@ export const metadata: Metadata = {
     siteName: "BeWork",
     title: "Contact — BeWork",
     description:
-      "Réservez un créneau d’échange ou parcourez nos ressources pour structurer votre administratif chantier.",
+      "Contactez BeWork : appel découverte, FAQ et tarifs. Accompagnement administratif BTP en France, Belgique, Suisse, Luxembourg.",
     images: [{ url: contactOgImage, width: 1200, height: 630, alt: "Contacter BeWork — partenaire administratif BTP" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Contact BeWork",
-    description: "Appel découverte et ressources pour entreprises du bâtiment.",
+    description:
+      "Contactez BeWork : appel découverte, FAQ et tarifs. Accompagnement administratif BTP en France, Belgique, Suisse, Luxembourg.",
   },
   robots: { index: true, follow: true },
 };

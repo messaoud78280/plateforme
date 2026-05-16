@@ -9,7 +9,7 @@ const pagePath = "/ressources/planning-chantier-btp";
 const pageUrl = absoluteUrl(pagePath);
 
 const DESCRIPTION =
-  "Tuto pratique : planning chantier BTP — jalons, dépendances, coactivité et tableaux simples pour synchroniser terrain et bureau.";
+  "Tuto planning chantier BTP : jalons, dépendances et tableaux simples pour aligner terrain et bureau.";
 
 export const metadata: Metadata = {
   title: "Planning chantier BTP | Jalons & pilotage",

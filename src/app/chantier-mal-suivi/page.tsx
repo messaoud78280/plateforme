@@ -10,7 +10,7 @@ const PAGE_PATH = BTP_PAIN_PAGE_PATHS.chantierMalSuivi;
 export const metadata = landingPageMetadata({
   title: "Chantier mal suivi | Suivi dossiers travaux avec BeWork",
   description:
-    "BeWork aide les entreprises du BTP à structurer le suivi de leurs dossiers chantier : relances, preuves, comptes rendus, réserves, DOE, fournisseurs et documents travaux.",
+    "Chantier mal suivi côté admin ? Relances, CR, réserves, DOE et fournisseurs structurés avec un relais travaux BTP.",
   path: PAGE_PATH,
   keywords: [
     "chantier mal suivi",

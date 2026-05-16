@@ -6,11 +6,12 @@ import { TUTO_TITRE } from "@/components/seo/tuto-section-titles";
 import { absoluteUrl } from "@/lib/site";
 
 const pageUrl = absoluteUrl("/ressources/analyse-dce-btp");
+const META_DESCRIPTION =
+  "Tuto analyse DCE BTP : RC, CCTP, CCAP, BPU et synthèse avant réponse à un appel d’offres. Méthode et pièces clés.";
 
 export const metadata: Metadata = {
   title: "Analyse DCE BTP | Dossier de consultation des entreprises & appels d’offres",
-  description:
-    "Tuto pratique : analyser un DCE BTP (dossier de consultation des entreprises), repérer les pièces clés (RC, CCTP, CCAP, AE, BPU, DPGF, DQE, plans) et préparer une synthèse avant réponse à un appel d’offres. Assistant travaux & assistant BTP.",
+  description: META_DESCRIPTION,
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   keywords: [
     "analyse DCE BTP",
@@ -32,8 +33,7 @@ export const metadata: Metadata = {
     url: pageUrl,
     siteName: "BeWork",
     title: "Analyse DCE BTP | Comprendre les pièces d’un appel d’offres",
-    description:
-      "Décrypter un DCE : pièces importantes, synthèse, points de vigilance et aide opérationnelle pour répondre sans tout refaire en interne.",
+    description: META_DESCRIPTION,
     images: [
       {
         url: absoluteUrl("/opengraph-image"),
@@ -46,8 +46,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Analyse DCE BTP | Dossier de consultation des entreprises",
-    description:
-      "Lire un DCE plus vite : RC, CCTP, CCAP, prix, plans, mémoire technique — et préparer une réponse structurée.",
+    description: META_DESCRIPTION,
   },
   robots: { index: true, follow: true },
 };

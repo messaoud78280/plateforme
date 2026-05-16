@@ -63,7 +63,7 @@ PV test sur le même cas fictif.`;
 const H1 = "Crée ton skill — PV de levée de réserves";
 
 const META_DESCRIPTION =
-  "Tutoriel BeWork gratuit : skill Claude pour PV de levée de réserves (.docx), 7 blocs obligatoires, prompts calibrage et usage quotidien.";
+  "Tuto skill PV levée de réserves : 7 blocs obligatoires, modèle .docx et prompts d’usage quotidien.";
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },

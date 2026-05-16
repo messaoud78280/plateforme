@@ -6,11 +6,12 @@ import { TUTO_TITRE } from "@/components/seo/tuto-section-titles";
 import { absoluteUrl } from "@/lib/site";
 
 const pageUrl = absoluteUrl("/ressources/doe-btp");
+const META_DESCRIPTION =
+  "Tuto DOE BTP : documents à rassembler, erreurs à éviter et méthode pour un dossier des ouvrages exécutés clair.";
 
 export const metadata: Metadata = {
   title: "DOE BTP | Préparer un dossier des ouvrages exécutés",
-  description:
-    "Tuto pratique pour comprendre le DOE BTP, les documents à rassembler, les erreurs à éviter et la méthode pour organiser un dossier des ouvrages exécutés clair en fin de chantier.",
+  description: META_DESCRIPTION,
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   openGraph: {
     type: "article",
@@ -18,8 +19,7 @@ export const metadata: Metadata = {
     url: pageUrl,
     siteName: "BeWork",
     title: "DOE BTP | Préparer un dossier des ouvrages exécutés",
-    description:
-      "Comprendre le DOE, rassembler les documents, éviter les oublis et organiser un dossier clair pour la fin de chantier.",
+    description: META_DESCRIPTION,
     images: [
       {
         url: absoluteUrl("/opengraph-image"),
@@ -32,8 +32,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "DOE BTP | Préparer un dossier des ouvrages exécutés",
-    description:
-      "Tuto pratique : documents DOE, checklist, méthode d’organisation et erreurs à éviter en fin de chantier.",
+    description: META_DESCRIPTION,
   },
   robots: { index: true, follow: true },
 };

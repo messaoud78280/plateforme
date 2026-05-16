@@ -6,7 +6,7 @@ const PAGE_PATH = "/assistant-administratif-distance";
 export const metadata = landingPageMetadata({
   title: "Assistant administratif à distance | BeWork",
   description:
-    "Assistant administratif à distance pour PME et indépendants. Devis, factures, relances, suivi dossiers. Plateforme supervisée depuis la France. Dès 290 € TTC/mois.",
+    "Assistant administratif à distance pour PME : devis, relances, suivi dossiers. Plateforme supervisée, forfaits TTC.",
   path: PAGE_PATH,
   keywords: ["assistant administratif à distance", "assistant virtuel", "télésecrétariat PME", "externalisation administrative"],
 });

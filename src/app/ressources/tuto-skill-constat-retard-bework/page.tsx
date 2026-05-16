@@ -68,7 +68,7 @@ constat test sur le même cas fictif.`;
 const H1 = "Crée ton skill — Constat de retard";
 
 const META_DESCRIPTION =
-  "Tutoriel BeWork gratuit : skill Claude pour constats de retard chantier — 7 éléments, CCAG art.19, LRAR .docx, prolongation délai, prompts.";
+  "Tuto skill constat de retard : 7 éléments, CCAG art. 19, modèle .docx et prolongation de délai.";
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },

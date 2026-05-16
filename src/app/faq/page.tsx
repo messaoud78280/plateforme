@@ -11,7 +11,7 @@ const faqOgImage = absoluteUrl("/opengraph-image");
 export const metadata: Metadata = {
   title: "FAQ BeWork | Assistante travaux BTP & relais bureau-chantier",
   description:
-    "FAQ BeWork : assistante travaux BTP, différence avec l’administratif, externalisation administrative de chantier, PPSPS, comptes rendus, DCE, DOE — plus fonctionnement, forfaits, IA et validation.",
+    "FAQ BeWork : assistante travaux, externalisation, PPSPS, DCE, DOE, forfaits et validation. Réponses claires pour le BTP.",
   keywords: [
     "BeWork",
     "FAQ BeWork",
@@ -39,13 +39,14 @@ export const metadata: Metadata = {
     siteName: "BeWork",
     title: "FAQ BeWork — assistante travaux BTP (relais bureau-chantier)",
     description:
-      "Assistante travaux, missions chantier, DCE, DOE, PPSPS, externalisation — et fonctionnement BeWork (forfaits, IA, validation).",
+      "FAQ BeWork : assistante travaux, externalisation, PPSPS, DCE, DOE, forfaits et validation. Réponses claires pour le BTP.",
     images: [{ url: faqOgImage, width: 1200, height: 630, alt: "FAQ BeWork — assistante travaux BTP" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "FAQ BeWork — assistante travaux BTP",
-    description: "Questions BTP type recherche vocale ; forfaits, IA et validation.",
+    description:
+      "FAQ BeWork : assistante travaux, externalisation, PPSPS, DCE, DOE, forfaits et validation. Réponses claires pour le BTP.",
   },
   robots: { index: true, follow: true },
 };

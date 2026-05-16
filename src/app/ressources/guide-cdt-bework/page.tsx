@@ -15,7 +15,7 @@ const pdfPath = "/ressources/pdf/guide-cdt-bework.pdf";
 const H1 = "Le guide du conducteur de travaux — 6 outils Claude pour piloter ton chantier de A à Z";
 
 const META_DESCRIPTION =
-  "Guide PDF gratuit BeWork (52 pages) pour conducteurs de travaux : 6 skills Claude AI — DCE, PPSPS, CR, constat de retard, PV de levée, DOE — 30 à 50 h de bureau récupérées par chantier.";
+  "Guide PDF conducteur de travaux : 6 skills Claude (DCE, PPSPS, CR, retard, PV, DOE). Gratuit, 52 pages.";
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },

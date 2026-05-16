@@ -41,7 +41,7 @@ const GUIDE_INDEX: {
 export const metadata: Metadata = {
   title: "Guides BeWork — pilotage administratif BTP, artisans & externalisation",
   description:
-    "Guides pratiques sur le pilotage administratif des entreprises du bâtiment : facturation chantier, relances, situations de travaux, DICT, délégation et externalisation pour PME et artisans.",
+    "Guides BeWork : méthodes et articles pour piloter l’administratif chantier, la trésorerie et l’externalisation en BTP.",
   keywords: [
     "guides administratif BTP",
     "pilotage administratif BTP",
@@ -63,13 +63,14 @@ export const metadata: Metadata = {
     siteName: "BeWork",
     title: "Guides BeWork — pilotage administratif & BTP",
     description:
-      "Guides pratiques : pilotage administratif chantier, trésorerie, relances, DICT, délégation et externalisation pour dirigeants et artisans.",
+      "Guides BeWork : méthodes et articles pour piloter l’administratif chantier, la trésorerie et l’externalisation en BTP.",
     images: [{ url: guidesOgImage, width: 1200, height: 630, alt: "Guides BeWork — administratif BTP" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Guides BeWork",
-    description: "Guides administratif BTP, artisans et externalisation pour PME.",
+    description:
+      "Guides BeWork : méthodes et articles pour piloter l’administratif chantier, la trésorerie et l’externalisation en BTP.",
   },
   robots: { index: true, follow: true },
 };

@@ -10,7 +10,7 @@ const PAGE_PATH = BTP_PAIN_PAGE_PATHS.factureImpayee;
 export const metadata = landingPageMetadata({
   title: "Facture impayée BTP : relances structurées & trésorerie chantier | BeWork",
   description:
-    "Retard de paiement chantier : factures impayées qui fragilisent la trésorerie. Relance facture bâtiment cadrée, suivi encaissements et remontée des cas sensibles — forfaits TTC.",
+    "Facture impayée sur chantier ? Relances cadrées, suivi encaissements et remontée des cas sensibles. Sécurisez votre trésorerie.",
   path: PAGE_PATH,
   keywords: [
     "facture impayée BTP",

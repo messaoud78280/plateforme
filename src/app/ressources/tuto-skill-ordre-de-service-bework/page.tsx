@@ -63,7 +63,7 @@ Corrige ces 3 points et regénère le skill.`;
 const H1 = "Crée ton skill — Ordre de Service";
 
 const META_DESCRIPTION =
-  "Tutoriel PDF — ordre de service avec l’IA (Claude & skills) : décortiquer, contester et chiffrer un OS en 5 minutes — PDF BeWork et prompts à copier.";
+  "Tuto ordre de service avec l’IA : décortiquer, contester et chiffrer un OS en quelques minutes. PDF gratuit.";
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },

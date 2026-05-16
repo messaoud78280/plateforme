@@ -6,7 +6,7 @@ const PAGE_PATH = "/avenant-chantier";
 export const metadata = landingPageMetadata({
   title: "Avenant chantier : cadrer et sécuriser le CA | BeWork",
   description:
-    "Avenant chantier : process administratif (demande, chiffrage, validation, preuve, archivage) pour sécuriser vos marges et éviter les litiges. Forfaits TTC.",
+    "Avenant chantier : cadrer demande, chiffrage, validation et preuves pour protéger vos marges. Relais administratif BTP.",
   path: PAGE_PATH,
   keywords: ["avenant chantier BTP", "travaux supplémentaires", "marge chantier", "litige travaux"],
 });

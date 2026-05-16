@@ -9,7 +9,7 @@ const pagePath = "/ressources/pv-levee-reserves-btp";
 const pageUrl = absoluteUrl(pagePath);
 
 const DESCRIPTION =
-  "Tuto pratique : PV de levée de réserves BTP — quand le lever, quoi tracer, preuves, responsables et clôture sans zone d’ombre.";
+  "Tuto PV levée de réserves : quand lever, quoi tracer, preuves et clôture sans zone d’ombre.";
 
 export const metadata: Metadata = {
   title: "PV de levée de réserves BTP | Méthode & traçabilité",

@@ -6,7 +6,7 @@ const pageUrl = absoluteUrl("/inscription");
 export const metadata: Metadata = {
   title: "Créer un compte client | BeWork",
   description:
-    "Ouvrez votre espace client BeWork pour souscrire à un forfait administratif cadré (BTP et PME) et déposer vos demandes sur la plateforme.",
+    "Créez votre compte BeWork : forfait administratif BTP et dépôt de missions sur la plateforme. Démarrage encadré.",
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   robots: { index: true, follow: true },
 };

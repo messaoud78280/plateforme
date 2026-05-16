@@ -55,10 +55,13 @@ const HOME_FAQ_ITEMS = [
   },
 ] as const;
 
+const HOME_META_DESCRIPTION =
+  "Externalisez l’administratif BTP : devis, relances, DICT, comptes rendus et DOE avec des assistants travaux IA. Vous validez, on structure.";
+
 export const metadata: Metadata = {
   title:
     "BeWork | Assistants travaux augmentés par l’IA — relais bureau-chantier BTP (devis, DICT, dossiers)",
-  description: `Assistants travaux augmentés par l’IA pour artisans, conducteurs de travaux, chefs de chantier et entreprises du BTP : devis & relances, DICT, fournisseurs, comptes rendus, plannings, réserves, DOE. Un relais bureau‑chantier, sans recruter. Forfaits TTC dès ${formatPriceLabelFr(PRICE_BOUNDS.low)} €/mois.`,
+  description: HOME_META_DESCRIPTION,
   robots: {
     index: true,
     follow: true,
@@ -73,8 +76,7 @@ export const metadata: Metadata = {
     url: SITE_URL,
     siteName: "BeWork",
     title: "BeWork — Assistants travaux augmentés par l’IA (relais dossiers chantier)",
-    description:
-      "Assistants travaux augmentés par l’IA pour le BTP : devis & relances, DICT, fournisseurs, documents travaux, comptes rendus — vous validez ce qui engage.",
+    description: HOME_META_DESCRIPTION,
     images: [
       {
         url: `${SITE_URL}/opengraph-image`,
@@ -87,8 +89,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "BeWork — Assistants travaux augmentés par l’IA",
-    description:
-      "Relais bureau‑chantier BTP : dossiers chantier, relances et suivi — vous tenez le terrain, nous tenons le cadre administratif.",
+    description: HOME_META_DESCRIPTION,
   },
 };
 

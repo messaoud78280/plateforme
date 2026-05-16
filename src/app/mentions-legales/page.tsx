@@ -8,7 +8,8 @@ const pageUrl = absoluteUrl(path);
 
 export const metadata: Metadata = {
   title: { absolute: "Mentions légales | BeWork" },
-  description: "Informations légales relatives à l’éditeur du site BeWork, société OFC CREATION D’ENTREPRISE.",
+  description:
+    "Mentions légales BeWork : éditeur du site, OFC CREATION D’ENTREPRISE, coordonnées et informations réglementaires.",
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   robots: { index: true, follow: true },
   openGraph: {
@@ -17,7 +18,8 @@ export const metadata: Metadata = {
     url: pageUrl,
     siteName: "BeWork",
     title: "Mentions légales | BeWork",
-    description: "Informations légales relatives à l’éditeur du site BeWork, société OFC CREATION D’ENTREPRISE.",
+    description:
+    "Mentions légales BeWork : éditeur du site, OFC CREATION D’ENTREPRISE, coordonnées et informations réglementaires.",
     images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Mentions légales — BeWork" }],
   },
 };

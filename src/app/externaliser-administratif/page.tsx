@@ -7,7 +7,7 @@ const PAGE_PATH = "/externaliser-administratif";
 export const metadata = landingPageMetadata({
   title: "Externaliser son administratif | Partenaire externalisé PME & BTP | BeWork",
   description:
-    "Externaliser l’administratif avec un partenaire administratif externalisé : devis, factures, relances, dossiers — sans recrutement. Dès 290 € TTC/mois. France, Belgique, Suisse, Luxembourg.",
+    "Externaliser l’administratif : devis, factures, relances et dossiers sans recruter. Partenaire cadré, forfaits TTC.",
   path: PAGE_PATH,
   keywords: [
     ...SEO_KEYWORDS_PARTENAIRE_CORE,

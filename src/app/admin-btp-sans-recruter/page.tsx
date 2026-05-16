@@ -8,7 +8,7 @@ const PAGE_PATH = "/admin-btp-sans-recruter";
 export const metadata = landingPageMetadata({
   title: "Admin BTP sans recruter | Relais travaux avec BeWork",
   description:
-    "BeWork aide les entreprises du BTP à tenir leurs devis, relances, dossiers chantier, documents travaux et suivis bureau-terrain sans recruter immédiatement.",
+    "Tenez devis, relances et dossiers chantier sans recruter : relais administratif BTP à forfait, validation chez vous.",
   path: PAGE_PATH,
   keywords: [
     "admin BTP sans recruter",

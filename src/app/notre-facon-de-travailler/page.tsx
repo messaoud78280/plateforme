@@ -12,7 +12,7 @@ const ogImage = absoluteUrl("/opengraph-image");
 export const metadata: Metadata = {
   title: "Notre façon de travailler | Relais bureau-chantier (assistante travaux BTP) — BeWork",
   description:
-    "Vous envoyez vos demandes, BeWork les analyse, prépare les livrables, suit les échéances et vous laisse valider ce qui engage votre entreprise. Méthode BeWork : relais bureau‑chantier clair, traçable et sécurisé.",
+    "Notre méthode : brief, préparation, suivi et validation avant tout engagement. Relais bureau-chantier BTP traçable.",
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   openGraph: {
     type: "website",
@@ -21,13 +21,14 @@ export const metadata: Metadata = {
     siteName: "BeWork",
     title: "Notre méthode — BeWork",
     description:
-      "Relais bureau‑chantier : réception, analyse, préparation, suivi, validation et traçabilité — méthode BeWork (assistante travaux BTP).",
+      "Notre méthode : brief, préparation, suivi et validation avant tout engagement. Relais bureau-chantier BTP traçable.",
     images: [{ url: ogImage, width: 1200, height: 630, alt: "BeWork — méthode de travail BTP" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Notre méthode | BeWork",
-    description: "Relais bureau‑chantier clair et suivi : de la demande à la validation.",
+    description:
+      "Notre méthode : brief, préparation, suivi et validation avant tout engagement. Relais bureau-chantier BTP traçable.",
   },
   robots: { index: true, follow: true },
 };

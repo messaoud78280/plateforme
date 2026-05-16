@@ -80,7 +80,7 @@ devis test sur le même cas fictif.`;
 const H1 = "Crée ton skill — Chiffrage de devis BTP";
 
 const META_DESCRIPTION =
-  "Tuto BeWork gratuit : créer un skill Claude pour chiffrer vos devis BTP (BPU, coefficients, Word + Excel), prompts de calibrage et d’usage quotidien — PDF 9 pages.";
+  "Tuto skill chiffrage devis BTP : BPU, coefficients, Word et Excel. Prompts de calibrage et PDF 9 pages.";
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },

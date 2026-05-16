@@ -61,7 +61,7 @@ Régénère le skill avec ces ajustements et propose-moi un nouveau CR test.`;
 const H1 = "Crée ton skill — Compte rendu de chantier";
 
 const META_DESCRIPTION =
-  "Téléchargez et consultez le tuto BeWork pour créer un compte rendu de chantier avec l’IA à partir de notes, photos ou vocaux.";
+  "Guide PDF : créer un compte rendu de chantier avec l’IA à partir de notes, photos ou vocaux. Téléchargement gratuit.";
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },

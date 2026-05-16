@@ -84,7 +84,7 @@ PPSPS test sur le même cas fictif.`;
 const H1 = "Crée ton skill — PPSPS (Plan Particulier Sécurité et Santé)";
 
 const META_DESCRIPTION =
-  "Tutoriel BeWork gratuit : créer un skill Claude pour rédiger un PPSPS conforme aux 9 rubriques R4532-64 — PDF consultable et prompts à copier.";
+  "Tuto skill PPSPS : 9 rubriques R4532-64, prompts et PDF pour rédiger un plan sécurité structuré.";
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },

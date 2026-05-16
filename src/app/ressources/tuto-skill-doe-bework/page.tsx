@@ -66,7 +66,7 @@ DOE test sur le même cas fictif.`;
 const H1 = "Crée ton skill — DOE";
 
 const META_DESCRIPTION =
-  "Tutoriel BeWork gratuit : skill Claude pour compiler un DOE BTP — 9 rubriques, page de garde + sommaire .docx, checklist manquants, prompts.";
+  "Tuto skill DOE : 9 rubriques, page de garde, sommaire .docx et checklist des manquants. Prompts inclus.";
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },

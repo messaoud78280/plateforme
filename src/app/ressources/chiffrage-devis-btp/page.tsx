@@ -9,7 +9,7 @@ const pagePath = "/ressources/chiffrage-devis-btp";
 const pageUrl = absoluteUrl(pagePath);
 
 const DESCRIPTION =
-  "Tuto pratique : chiffrage devis BTP — BPU, DQE, hypothèses, quantités, interfaces et erreurs fréquentes avant envoi d’offre.";
+  "Tuto chiffrage devis BTP : BPU, DQE, hypothèses et erreurs fréquentes avant envoi d’offre. Checklist pratique.";
 
 export const metadata: Metadata = {
   title: "Chiffrage devis BTP | BPU, DQE & méthode",

@@ -7,7 +7,7 @@ const PAGE_PATH = "/dict-dt-travaux";
 export const metadata = landingPageMetadata({
   title: "DICT / DT travaux BTP | Suivi démarches chantier avec BeWork",
   description:
-    "BeWork aide les entreprises du BTP à préparer et suivre leurs dossiers DICT/DT : informations chantier, accusés, réponses, relances, échéances et classement des pièces.",
+    "DICT et DT : préparez et suivez dossiers, accusés, relances et classement. Relais administratif BTP, vous validez.",
   path: PAGE_PATH,
   keywords: [
     "DICT travaux",

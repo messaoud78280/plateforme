@@ -6,7 +6,7 @@ const PAGE_PATH = "/assistant-administratif-btp";
 export const metadata = landingPageMetadata({
   title: "Assistant administratif BTP | Devis, suivi chantiers | BeWork",
   description:
-    "Assistant administratif pour le BTP : devis chantiers, suivi sous-traitants, relances factures. PME BTP France, Belgique, Suisse. Dès 290 € TTC/mois.",
+    "Assistant administratif BTP : devis chantier, relances et suivi dossiers pour PME et artisans. Forfait TTC, sans recrutement.",
   path: PAGE_PATH,
   keywords: ["assistant administratif BTP", "externalisation administrative BTP", "devis chantier", "sous-traitance administrative"],
 });

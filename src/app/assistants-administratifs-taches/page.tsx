@@ -10,7 +10,7 @@ const pageUrl = absoluteUrl("/assistants-administratifs-taches");
 export const metadata: Metadata = {
   title: "Missions BeWork pour vos chantiers (assistante travaux BTP) | BeWork",
   description:
-    "Devis, relances, dossiers chantier, DICT, fournisseurs, comptes rendus, réserves, DOE, DCE/CCTP : BeWork, assistante travaux BTP augmentée par l’IA, tient ce qui doit avancer côté bureau et structure vos livrables chantier.",
+    "Catalogue missions : devis, DICT, CR, PPSPS, DCE, DOE, relances. Assistante travaux BTP augmentée par l’IA.",
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
 };
 

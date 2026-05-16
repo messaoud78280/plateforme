@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     default: "BeWork — Administratif externalisé BTP : artisans & conducteurs de travaux",
     template: "%s | BeWork",
   },
-  description: `${SEO_VALUE_PROPOSITION} Vidéo. Forfaits TTC dès ${SITE_PRICE_LOW_FR} €/mois. Conducteurs de travaux, artisans, dirigeants BTP.`,
+  description: SEO_VALUE_PROPOSITION,
   applicationName: "BeWork",
   authors: [{ name: "BeWork", url: SITE_URL }],
   creator: "BeWork",
@@ -84,7 +84,7 @@ export const metadata: Metadata = {
     url: SITE_URL,
     siteName: "BeWork",
     title: "BeWork — Administratif externalisé BTP (artisans & conducteurs de travaux)",
-    description: `${SEO_VALUE_PROPOSITION_SHORT} Vidéo. Dès ${SITE_PRICE_LOW_FR} € TTC.`,
+    description: `${SEO_VALUE_PROPOSITION_SHORT} Dès ${SITE_PRICE_LOW_FR} € TTC.`,
     images: [
       {
         url: defaultOgImage,
@@ -97,7 +97,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "BeWork — Partenaire administratif externalisé BTP",
-    description: `${SEO_VALUE_PROPOSITION_SHORT} Vidéo. Dès ${SITE_PRICE_LOW_FR} € TTC.`,
+    description: `${SEO_VALUE_PROPOSITION_SHORT} Dès ${SITE_PRICE_LOW_FR} € TTC.`,
     ...(process.env.NEXT_PUBLIC_TWITTER_SITE?.trim()
       ? { site: process.env.NEXT_PUBLIC_TWITTER_SITE.trim() }
       : {}),

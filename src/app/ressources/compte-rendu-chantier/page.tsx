@@ -14,7 +14,7 @@ const pagePath = "/ressources/compte-rendu-chantier";
 const H1 =
   "Compte rendu de chantier : comment le rédiger et le structurer";
 const META_DESCRIPTION =
-  "Tuto pratique pour rédiger un compte rendu de chantier clair : participants, avancement, décisions, réserves, actions à suivre, responsables, délais et points bloquants.";
+  "Tuto compte rendu de chantier : participants, décisions, actions, délais et points bloquants. Méthode simple à appliquer.";
 
 export const metadata: Metadata = {
   title: "Compte rendu de chantier | Tuto pratique BTP",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     siteName: "BeWork",
     title: "Compte rendu de chantier | Tuto pratique BTP",
     description:
-      "Méthode simple + checklist pour structurer un compte rendu de réunion chantier : décisions, points bloquants, actions, responsables et délais.",
+      "Tuto compte rendu de chantier : participants, décisions, actions, délais et points bloquants. Méthode simple à appliquer.",
     images: [
       {
         url: absoluteUrl("/opengraph-image"),
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Compte rendu de chantier | Tuto pratique BTP",
     description:
-      "Rédiger un compte rendu de chantier clair : participants, avancement, décisions, points bloquants, actions, responsables, délais.",
+      "Tuto compte rendu de chantier : participants, décisions, actions, délais et points bloquants. Méthode simple à appliquer.",
   },
   robots: { index: true, follow: true },
 };

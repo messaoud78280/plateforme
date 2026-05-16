@@ -62,7 +62,7 @@ DUERP test sur la même unité de travail.`;
 const H1 = "Crée ton skill — DUERP";
 
 const META_DESCRIPTION =
-  "Tutoriel BeWork gratuit : skill Claude pour Document Unique Évaluation Risques Professionnels — 7 éléments R4121, .docx, plan d’action, prompts.";
+  "Tuto skill DUERP : 7 éléments R4121, plan d’action et export .docx. Prompts Claude à copier.";
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },

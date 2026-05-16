@@ -47,7 +47,7 @@ const GUIDE_CAROUSEL_ITEMS: GuideCarouselItem[] = [
 ].sort((x, y) => new Date(y.publishedTime).getTime() - new Date(x.publishedTime).getTime());
 
 const RESSOURCES_META_DESC =
-  "Vue d’ensemble : tutoriels PDF, guides blog (administratif BTP) et exemples de cas clients.";
+  "Hub ressources BeWork : tutoriels PDF gratuits, guides administratif BTP et retours d’expérience pour entreprises du bâtiment.";
 
 export const metadata: Metadata = {
   title: "Ressources BeWork — Tutoriels, guides & cas clients",
@@ -59,13 +59,13 @@ export const metadata: Metadata = {
     url: pageUrl,
     siteName: "BeWork",
     title: "Ressources BeWork — Tutoriels, guides & cas clients",
-    description: "Parcourez tutoriels PDF, guides blog et des cas concrets pour votre entreprise du bâtiment.",
+    description: RESSOURCES_META_DESC,
     images: [{ url: ogImage, width: 1200, height: 630, alt: "BeWork — ressources" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Ressources BeWork",
-    description: "Tutoriels PDF, guides administratif BTP et cas clients.",
+    description: RESSOURCES_META_DESC,
   },
   robots: { index: true, follow: true },
 };

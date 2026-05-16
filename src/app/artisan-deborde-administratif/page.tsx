@@ -10,7 +10,7 @@ const PAGE_PATH = BTP_PAIN_PAGE_PATHS.artisanDeborde;
 export const metadata = landingPageMetadata({
   title: "Artisan débordé administratif : devis, factures, relances sans noyer le terrain | BeWork",
   description:
-    "Artisan du bâtiment sous l’eau : la paperasse mange du temps, du cash et des opportunités. Assistant administratif BTP appuyé par des outils — exécution cadrée, France, Belgique, Suisse, Luxembourg.",
+    "Artisan débordé par l’administratif ? Déléguez devis, relances et dossiers chantier à un relais BTP encadré, sans embaucher.",
   path: PAGE_PATH,
   keywords: [
     "artisan débordé administratif",

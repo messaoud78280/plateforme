@@ -7,7 +7,7 @@ const PAGE_PATH = "/assistant-administratif-externalise";
 export const metadata = landingPageMetadata({
   title: "Partenaire administratif externalisé & assistant dédié PME | BeWork",
   description:
-    "Partenaire administratif externalisé pour PME et BTP : assistant administratif dédié pour devis, factures, relances et dossiers — cadre forfaitaire, sans recrutement. Dès 290 € TTC/mois. France, Belgique, Suisse, Luxembourg.",
+    "Partenaire administratif externalisé : devis, factures, relances et dossiers pour PME et BTP. Forfait TTC, sans embauche.",
   path: PAGE_PATH,
   keywords: [
     ...SEO_KEYWORDS_PARTENAIRE_CORE,

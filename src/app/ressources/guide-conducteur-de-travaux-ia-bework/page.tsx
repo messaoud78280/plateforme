@@ -15,7 +15,7 @@ const pdfPath = "/ressources/pdf/guide-conducteur-de-travaux-ia-bework.pdf";
 const H1 = "Guide du conducteur de travaux : 6 outils IA pour automatiser CR chantier, PPSPS, DCE et DOE";
 
 const META_DESCRIPTION =
-  "Guide PDF gratuit BeWork pour conducteurs de travaux BTP : 6 skills Claude AI (DCE, PPSPS, CR, constat de retard, PV de levée, DOE) — 30 à 50 h de bureau récupérées par chantier.";
+  "Guide IA pour conducteur de travaux : 6 skills Claude pour gagner du temps bureau sur vos chantiers. PDF gratuit.";
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },

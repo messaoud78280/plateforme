@@ -10,7 +10,7 @@ const PAGE_PATH = BTP_PAIN_PAGE_PATHS.devisRetard;
 export const metadata = landingPageMetadata({
   title: "Devis BTP en retard | Préparation et suivi avec BeWork",
   description:
-    "BeWork aide les entreprises du BTP à préparer, organiser et suivre leurs devis travaux pour répondre plus vite aux clients, sans perdre le contrôle du prix, de la marge ou de la validation technique.",
+    "Devis en retard ? Organisez préparation, relances et envois plus vite, sans lâcher le contrôle prix et validation technique.",
   path: PAGE_PATH,
   keywords: [
     "devis BTP en retard",

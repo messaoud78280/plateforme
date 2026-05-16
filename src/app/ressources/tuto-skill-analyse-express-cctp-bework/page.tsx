@@ -78,7 +78,7 @@ Si une prestation n'a pas d'équivalent dans ma nomenclature, marque-la
 const H1 = "Crée ton skill — Analyse express · CCTP";
 
 const META_DESCRIPTION =
-  "Tuto BeWork gratuit : créer un skill Claude « analyse-express-cctp » — prestations à chiffrer, DTU/AQS, clauses pénalisantes, ambiguïtés, fiche Go/No Go — prompts et PDF 9 pages.";
+  "Tuto skill « analyse express CCTP » : prestations à chiffrer, DTU, clauses et fiche Go/No Go. PDF et prompts.";
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },

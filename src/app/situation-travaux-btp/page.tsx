@@ -7,7 +7,7 @@ const PAGE_PATH = "/situation-travaux-btp";
 export const metadata = landingPageMetadata({
   title: "Situation de travaux BTP : structurer et envoyer sans retard | BeWork",
   description:
-    "Situation de travaux BTP : organisation, pièces, fréquence, modèle et suivi pour facturer au fil de l’eau. Pilotage administratif encadré, forfaits TTC.",
+    "Situations de travaux BTP : pièces, fréquence, modèle et envoi pour facturer au fil de l’eau. Pilotage administratif encadré.",
   path: PAGE_PATH,
   keywords: ["situation de travaux BTP", "facturation chantier", "avancement travaux", "administratif BTP"],
 });

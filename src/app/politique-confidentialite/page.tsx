@@ -8,7 +8,8 @@ const pageUrl = absoluteUrl(path);
 
 export const metadata: Metadata = {
   title: { absolute: "Politique de confidentialité | BeWork" },
-  description: "Informations sur la collecte, l’utilisation et la protection des données personnelles sur le site BeWork.",
+  description:
+    "Politique de confidentialité BeWork : collecte, usage et protection de vos données personnelles sur le site et la plateforme.",
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   robots: { index: true, follow: true },
   openGraph: {
@@ -17,7 +18,8 @@ export const metadata: Metadata = {
     url: pageUrl,
     siteName: "BeWork",
     title: "Politique de confidentialité | BeWork",
-    description: "Informations sur la collecte, l’utilisation et la protection des données personnelles sur le site BeWork.",
+    description:
+    "Politique de confidentialité BeWork : collecte, usage et protection de vos données personnelles sur le site et la plateforme.",
     images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Politique de confidentialité — BeWork" }],
   },
 };

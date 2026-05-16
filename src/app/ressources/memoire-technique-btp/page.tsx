@@ -9,7 +9,7 @@ const pagePath = "/ressources/memoire-technique-btp";
 const pageUrl = absoluteUrl(pagePath);
 
 const DESCRIPTION =
-  "Tuto pratique : préparer un mémoire technique BTP aligné sur le DCE — critères du jury, structure, preuves, planning méthode et erreurs à éviter avant dépôt.";
+  "Tuto mémoire technique BTP : critères jury, structure, preuves et planning méthode avant dépôt.";
 
 export const metadata: Metadata = {
   title: "Mémoire technique BTP | Méthode, structure & appel d’offres",

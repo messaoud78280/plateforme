@@ -12,7 +12,7 @@ const h1 = "Cas clients (BTP) : ce que vous gagnez vraiment";
 export const metadata = landingPageMetadata({
   title: "Cas clients BTP : suivi, trésorerie, organisation | BeWork",
   description:
-    "Exemples concrets : devis relancés, facturation sécurisée, situations de travaux cadrées, dossiers tenus. Pilotage administratif encadré pour entreprises du BTP.",
+    "Cas clients BTP : devis relancés, situations cadrées, dossiers tenus. Exemples concrets d’un pilotage administratif encadré.",
   path: PAGE_PATH,
   keywords: ["cas clients BTP", "preuve résultats administratif", "témoignage artisan bâtiment", "BeWork"],
 });
@@ -28,7 +28,7 @@ const casClientsJsonLd = buildWebPageAndBreadcrumbJsonLd({
   pagePath: PAGE_PATH,
   h1,
   description:
-    "Exemples concrets : devis relancés, facturation sécurisée, situations de travaux cadrées, dossiers tenus. Pilotage administratif encadré pour entreprises du BTP.",
+    "Cas clients BTP : devis relancés, situations cadrées, dossiers tenus. Exemples concrets d’un pilotage administratif encadré.",
   breadcrumbItems: [...breadcrumbItems],
 });
 

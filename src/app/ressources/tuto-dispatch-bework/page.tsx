@@ -46,7 +46,7 @@ Préviens-moi quand c'est prêt, je les relirai et les enverrai moi-même ce soi
 const H1 = "Crée ton bureau depuis ton chantier";
 
 const META_DESCRIPTION =
-  "Tuto BeWork gratuit : installer Dispatch (Claude Desktop + mobile), pairer PC et téléphone, 8 commandes vocales BTP, sécurité et routine — PDF 9 pages.";
+  "Tuto Dispatch : installer Claude Desktop et mobile, commandes vocales BTP et routine terrain-bureau.";
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },

@@ -55,7 +55,7 @@ est non remplaçable par caution bancaire.`;
 const H1 = "Crée ton skill — Analyse de DCE";
 
 const META_DESCRIPTION =
-  "Tutoriel BeWork gratuit : skill Claude pour analyser un DCE (CCAP, CCTP, RC, BPU) — fiche standardisée, Go/No Go, PDF et prompts à copier.";
+  "Tuto skill Claude « analyse DCE » : fiche Go/No Go, prompts et PDF à copier pour vos consultations BTP.";
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },

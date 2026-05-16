@@ -13,7 +13,7 @@ const PAGE_PATH = EXTERNALISATION_ADMIN_BT_PATHS.france;
 export const metadata = landingPageMetadata({
   title: "Externalisation administrative BTP en France | Assistante travaux & dossiers chantier — BeWork",
   description:
-    "BeWork aide les entreprises du BTP en France à tenir devis, relances, situations, documents travaux, fournisseurs, réserves et DOE avec une assistante travaux BTP, sans recruter.",
+    "Externalisation administrative BTP en France : devis, relances, situations, DOE. Assistante travaux, sans recruter.",
   path: PAGE_PATH,
   keywords: [
     "externalisation administrative BTP France",

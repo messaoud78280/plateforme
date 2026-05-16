@@ -6,11 +6,12 @@ import { TUTO_TITRE } from "@/components/seo/tuto-section-titles";
 import { absoluteUrl } from "@/lib/site";
 
 const pageUrl = absoluteUrl("/ressources/ppsps-btp");
+const META_DESCRIPTION =
+  "Tuto PPSPS BTP : informations à rassembler, erreurs courantes et méthode pour structurer votre plan sécurité.";
 
 export const metadata: Metadata = {
   title: "PPSPS BTP | Préparer un plan particulier de sécurité chantier",
-  description:
-    "Tuto pratique pour comprendre le PPSPS BTP, les informations à rassembler, les erreurs à éviter et la méthode pour structurer un plan particulier de sécurité chantier.",
+  description: META_DESCRIPTION,
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   openGraph: {
     type: "article",
@@ -18,8 +19,7 @@ export const metadata: Metadata = {
     url: pageUrl,
     siteName: "BeWork",
     title: "PPSPS BTP | Préparer un plan particulier de sécurité chantier",
-    description:
-      "Checklist + méthode simple pour préparer un PPSPS : informations chantier, organisation, risques, prévention et urgence.",
+    description: META_DESCRIPTION,
     images: [
       {
         url: absoluteUrl("/opengraph-image"),
@@ -32,8 +32,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "PPSPS BTP | Préparer un plan particulier de sécurité chantier",
-    description:
-      "Tuto pratique : comprendre le PPSPS, rassembler les infos et structurer un document clair avant intervention.",
+    description: META_DESCRIPTION,
   },
   robots: { index: true, follow: true },
 };

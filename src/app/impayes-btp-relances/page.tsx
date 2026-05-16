@@ -8,7 +8,7 @@ const PAGE_PATH = "/impayes-btp-relances";
 export const metadata = landingPageMetadata({
   title: "Impayés BTP | Relances factures et situations avec BeWork",
   description:
-    "BeWork aide les entreprises du BTP à suivre leurs factures, situations de travaux et relances clients pour éviter les impayés qui s’accumulent et sécuriser la trésorerie.",
+    "Impayés BTP : suivez factures et situations, relancez clients à temps et limitez les retards de paiement sur chantier.",
   path: PAGE_PATH,
   keywords: [
     "impayés BTP",

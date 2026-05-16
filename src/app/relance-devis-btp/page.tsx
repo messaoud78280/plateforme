@@ -8,7 +8,7 @@ const PAGE_PATH = "/relance-devis-btp";
 export const metadata = landingPageMetadata({
   title: "Relance devis BTP | Suivi devis travaux avec BeWork",
   description:
-    "BeWork aide les entreprises du BTP à suivre leurs devis, préparer les relances clients et éviter les opportunités perdues grâce à une assistante travaux spécialisée.",
+    "Relance devis BTP : suivez vos offres, relancez clients et ne perdez plus d’opportunités faute de suivi administratif.",
   path: PAGE_PATH,
   keywords: [
     "relance devis BTP",

@@ -51,7 +51,7 @@ tout sonner commercial, je veux rester factuel.`;
 const H1 = "Crée ton skill — Mémoire Technique BTP";
 
 const META_DESCRIPTION =
-  "Tutoriel BeWork gratuit : skill Claude pour rédiger vos mémoires techniques (AO) — PDF, 5 étapes, prompts à copier, FAQ.";
+  "Tuto skill mémoire technique : structure AO en 5 étapes, prompts et PDF pour vos réponses aux consultations.";
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },

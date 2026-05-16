@@ -65,7 +65,7 @@ Corrige ces 3 points et regénère le skill.`;
 const H1 = "Crée ton skill — Plan d'Installation de Chantier";
 
 const META_DESCRIPTION =
-  "Tutoriel PDF — plan d'installation de chantier avec l’IA (Claude & skills) : produire un PIC complet et conforme en 1 h au lieu de 4 — PDF BeWork et prompts à copier.";
+  "Tuto skill PIC : produire un plan d’installation de chantier complet plus vite. PDF BeWork et prompts Claude.";
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },

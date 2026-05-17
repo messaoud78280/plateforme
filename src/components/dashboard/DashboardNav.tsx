@@ -79,8 +79,8 @@ export function DashboardNav({ role }: { role?: string | null }) {
             <NavLink href="/dashboard/devis" pathname={pathname} activeClass={active}>
               Devis
             </NavLink>
-            <NavLink href="/dashboard/skills/cctp" pathname={pathname} activeClass={active}>
-              CCTP
+            <NavLink href="/dashboard/skills" pathname={pathname} activeClass={active}>
+              Skills
             </NavLink>
             <NavLink href="/dashboard/parametres" pathname={pathname} activeClass={active}>
               Paramètres
@@ -100,8 +100,8 @@ export function DashboardNav({ role }: { role?: string | null }) {
             <NavLink href="/dashboard/devis" pathname={pathname} activeClass={active}>
               Devis
             </NavLink>
-            <NavLink href="/dashboard/skills/cctp" pathname={pathname} activeClass={active}>
-              CCTP
+            <NavLink href="/dashboard/skills" pathname={pathname} activeClass={active}>
+              Skills
             </NavLink>
             <NavLink href="/dashboard/parametres" pathname={pathname} activeClass={active}>
               Paramètres

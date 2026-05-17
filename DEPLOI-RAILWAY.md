@@ -1,42 +1,65 @@
-# Déployer sur Railway
+# Déployer sur Railway (`npm run deploy`)
 
-## 1. Connexion (une seule fois)
+## Déblocage en 2 minutes (token projet — le plus fiable)
 
-Utilisez le CLI officiel **@railway/cli**. Dans un terminal, à la racine du projet :
-
-```bash
-cd /Users/djebailialiabtp/Desktop/plateforme
-npx @railway/cli login
-```
-
-Ouvrez l’URL affichée dans le navigateur (Safari ou Chrome), connectez-vous à [railway.app](https://railway.app) et validez l’autorisation.
-
-## 2. Lier le projet (première fois)
-
-Si le déploiement indique qu’aucun projet n’est lié, exécutez :
+1. Ouvrez [railway.app](https://railway.app) → projet **plateforme** (www.bework.fr).
+2. **Settings** → **Tokens** → **Create project token** (copiez le token).
+3. Dans le terminal, à la racine du projet :
 
 ```bash
-npx @railway/cli link
+cp railway.deploy.env.example .env.railway
 ```
 
-Choisissez **Create new project** (créer un projet) ou **Link to existing project** (lier un projet existant).
+4. Éditez `.env.railway` et collez votre token :
 
-## 3. Déploiement
+```
+RAILWAY_TOKEN="votre_token_ici"
+```
+
+5. Déployez :
 
 ```bash
 npm run deploy
 ```
 
-## 4. Variables d’environnement
-
-Dans le [dashboard Railway](https://railway.app) → votre projet → **Variables**, ajoutez au minimum :
-
-- `DATABASE_URL` — si vous utilisez la base PostgreSQL Railway (service **Add PostgreSQL** dans le projet)
-- `NEXTAUTH_SECRET` — une chaîne aléatoire (ex. `openssl rand -base64 32`)
-- `NEXTAUTH_URL` — l’URL de l’app une fois déployée (ex. `https://votre-app.up.railway.app`)
-
-Puis redéployez : `npm run deploy`.
+Le script charge `.env.railway` automatiquement. **Ne commitez jamais ce fichier.**
 
 ---
 
-**Si ça ne marche pas** : copiez le **message d’erreur exact** affiché dans le terminal après `npm run deploy` et partagez-le pour diagnostiquer.
+## Connexion classique (session CLI)
+
+```bash
+npm run deploy:login
+```
+
+Puis :
+
+```bash
+npm run deploy
+```
+
+Sans navigateur (SSH / terminal distant) :
+
+```bash
+npm run deploy:login:browserless
+```
+
+---
+
+## Commandes utiles
+
+| Commande | Rôle |
+|----------|------|
+| `npm run deploy` | Déploie le code actuel |
+| `npm run deploy:login` | Connexion Railway (1×) |
+| `npm run deploy:logs` | Logs production |
+
+---
+
+## Dépannage
+
+| Erreur | Solution |
+|--------|----------|
+| `Unauthorized` | Token invalide ou expiré → recréer un project token |
+| `Project Token Not Found` | Utilisez un **project token**, pas un account token |
+| `No service` | Vérifiez `RAILWAY_SERVICE=plateforme` dans `.env.railway` |

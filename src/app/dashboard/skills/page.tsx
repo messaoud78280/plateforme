@@ -9,10 +9,9 @@ export default async function SkillsHubPage() {
     <div className="space-y-8 px-1">
       <header className="space-y-2">
         <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#1e3a5f]/80">Assistants métier BeWork</p>
-        <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">CCTP</h1>
+        <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Skills BeWork</h1>
         <p className="max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
-          Rédaction, structuration et amélioration de vos Cahiers des Clauses Techniques Particulières — et futurs skills
-          bureau-chantier.
+          Assistants métier pour le bureau-chantier : CCTP, PPSPS, et prochains outils de rédaction et de suivi.
         </p>
       </header>
 

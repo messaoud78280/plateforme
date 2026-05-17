@@ -13,7 +13,7 @@ export function SkillsSubNav() {
   return (
     <nav
       className="flex flex-wrap gap-2 rounded-xl border border-slate-200/80 bg-white p-2 shadow-sm"
-      aria-label="Navigation CCTP"
+      aria-label="Navigation skills BeWork"
     >
       <Link
         href="/dashboard/skills"

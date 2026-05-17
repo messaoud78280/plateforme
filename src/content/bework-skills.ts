@@ -23,6 +23,17 @@ export const BEWORK_SKILLS: readonly BeworkSkillDefinition[] = [
     badge: "CCTP",
     status: "available",
   },
+  {
+    slug: "ppsps",
+    title: "Génération PPSPS",
+    subtitle:
+      "Préparez l'analyse des risques et les modes opératoires de votre PPSPS avec l'assistant BeWork.",
+    description:
+      "Analyse ou PPSPS complet, base OPPBTP, lien dossier projet, import, modèles, affinage, export et historique.",
+    href: "/dashboard/skills/ppsps",
+    badge: "PPSPS",
+    status: "available",
+  },
 ] as const;
 
 export function getBeworkSkill(slug: string): BeworkSkillDefinition | undefined {

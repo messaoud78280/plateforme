@@ -72,6 +72,7 @@ model User {
   payments              Payment[]
   actionsTransactions   ActionsTransaction[]
   skillCctpSessions     SkillCctpSession[]
+  skillPpspsSessions    SkillPpspsSession[]
 
   // NextAuth (magic link)
   accounts              Account[]
@@ -264,6 +265,7 @@ model Project {
   activities Activity[]
   appointments Appointment[]
   reports Report[]
+  skillPpspsSessions SkillPpspsSession[]
 }
 
 enum ProjectStatus {
@@ -915,6 +917,49 @@ model SkillCctpFile {
   storagePath   String?
   storageUrl    String?
   createdAt     DateTime @default(now())
+
+  @@index([sessionId])
+}
+
+/// Session Skill PPSPS (analyse risques, historique, exports)
+model SkillPpspsSession {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId        String?
+  project          Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  siteName         String?
+  siteAddress      String?
+  detailLevel      String   @default("standard")
+  generationMode   String   @default("analyse_risques")
+  formSnapshot     Json
+  extractedContext String?  @db.Text
+  resultMarkdown   String?  @db.Text
+  usedLlm          Boolean  @default(false)
+  notice           String?  @db.Text
+  linkedDocumentId String?
+  meta             Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  files SkillPpspsFile[]
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([projectId])
+}
+
+model SkillPpspsFile {
+  id            String           @id @default(cuid())
+  sessionId     String
+  session       SkillPpspsSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  kind          String
+  fileName      String
+  mimeType      String?
+  fileSize      Int
+  extractedText String?          @db.Text
+  storagePath   String?
+  storageUrl    String?
+  createdAt     DateTime         @default(now())
 
   @@index([sessionId])
 }

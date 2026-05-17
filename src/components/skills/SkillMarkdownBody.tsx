@@ -20,6 +20,14 @@ export function SkillMarkdownBody({ markdown }: { markdown: string }) {
           );
         }
 
+        if (trimmed.startsWith("# ") && !trimmed.startsWith("## ")) {
+          return (
+            <h1 key={i} className="font-heading text-xl font-bold tracking-tight text-[#0f172a] sm:text-2xl">
+              {trimmed.replace(/^#\s+/, "")}
+            </h1>
+          );
+        }
+
         if (trimmed.startsWith("## ")) {
           return (
             <h2 key={i} className="font-heading text-lg font-bold tracking-tight text-[#0f172a]">

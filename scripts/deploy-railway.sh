@@ -1,24 +1,53 @@
 #!/usr/bin/env bash
-# Déploiement sur Railway — à lancer depuis la racine du projet.
-set -e
+# Déploiement Railway — authentification par session CLI ou token projet (.env.railway).
+set -euo pipefail
 cd "$(dirname "$0")/.."
 
-echo "→ Vérification de la connexion Railway..."
-if ! npx --yes @railway/cli whoami &>/dev/null; then
+CLI="npx --yes @railway/cli"
+ENV_FILE=".env.railway"
+
+if [[ -f "$ENV_FILE" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$ENV_FILE"
+  set +a
+fi
+
+SERVICE="${RAILWAY_SERVICE:-plateforme}"
+ENVIRONMENT="${RAILWAY_ENVIRONMENT:-production}"
+
+echo "→ Vérification Railway CLI…"
+
+if [[ -n "${RAILWAY_TOKEN:-}" ]]; then
+  echo "   Token projet (.env.railway) détecté."
+elif $CLI whoami &>/dev/null; then
+  echo "   Session CLI active ($($CLI whoami 2>/dev/null || echo 'ok'))."
+else
   echo ""
-  echo "Vous devez vous connecter à Railway (une seule fois)."
-  echo "Exécutez :  npx @railway/cli login"
-  echo "Une page web s’ouvrira pour l’authentification."
+  echo "╔══════════════════════════════════════════════════════════════╗"
+  echo "║  Railway CLI non connectée                                   ║"
+  echo "╠══════════════════════════════════════════════════════════════╣"
+  echo "║  Option A — Connexion navigateur (une fois) :                ║"
+  echo "║    npm run deploy:login                                      ║"
+  echo "║                                                              ║"
+  echo "║  Option B — Token projet (recommandé, stable) :               ║"
+  echo "║    1. railway.app → projet plateforme → Settings → Tokens    ║"
+  echo "║    2. Create project token                                   ║"
+  echo "║    3. cp railway.deploy.env.example .env.railway              ║"
+  echo "║    4. Collez le token dans .env.railway                      ║"
+  echo "║    5. npm run deploy                                         ║"
+  echo "╚══════════════════════════════════════════════════════════════╝"
   echo ""
   exit 1
 fi
 
-echo "→ Liaison du projet (si pas déjà fait : choisir 'Create new project')..."
-npx --yes @railway/cli link 2>/dev/null || true
+if [[ -z "${RAILWAY_TOKEN:-}" ]]; then
+  echo "→ Liaison du projet (si besoin)…"
+  $CLI link -p plateforme -e "$ENVIRONMENT" -s "$SERVICE" 2>/dev/null || $CLI link 2>/dev/null || true
+fi
 
-echo "→ Déploiement en cours..."
-npx --yes @railway/cli up
+echo "→ Déploiement : service=$SERVICE environment=$ENVIRONMENT"
+$CLI up --service "$SERVICE" --environment "$ENVIRONMENT"
 
 echo ""
-echo "→ Déploiement lancé. Consultez l’URL dans le dashboard Railway."
-echo "  N’oubliez pas de définir les variables d’environnement (voir docs/DEPLOI-RAILWAY.md)."
+echo "→ Déploiement envoyé. Suivez les logs sur railway.app ou : npm run deploy:logs"

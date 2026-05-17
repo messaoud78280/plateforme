@@ -18,7 +18,10 @@
     "db:update-demo-passwords": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/update-demo-passwords.ts",
     "db:backfill-work-item-descriptions": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/backfill-work-item-descriptions.ts",
     "db:studio": "prisma studio",
-    "deploy": "npx --yes @railway/cli up",
+    "deploy": "bash scripts/deploy-railway.sh",
+    "deploy:login": "npx --yes @railway/cli login",
+    "deploy:login:browserless": "npx --yes @railway/cli login --browserless",
+    "deploy:logs": "npx --yes @railway/cli logs --service plateforme --environment production",
     "render:conciergerie-ui": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx scripts/render-conciergerie-ui.ts"
   },
   "dependencies": {

@@ -2,20 +2,14 @@ import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { CAS_CLIENT_CASES } from "@/content/cas-clients-cases";
-import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/seo-landing-json-ld";
 
 const PAGE_PATH = "/cas-clients";
 
 const h1 = "Cas clients (BTP) : ce que vous gagnez vraiment";
 
-export const metadata = landingPageMetadata({
-  title: "Cas clients BTP : suivi, trésorerie, organisation | BeWork",
-  description:
-    "Cas clients BTP : devis relancés, situations cadrées, dossiers tenus. Exemples concrets d’un pilotage administratif encadré.",
-  path: PAGE_PATH,
-  keywords: ["cas clients BTP", "preuve résultats administratif", "témoignage artisan bâtiment", "BeWork"],
-});
+export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 
 const cases = CAS_CLIENT_CASES;
 

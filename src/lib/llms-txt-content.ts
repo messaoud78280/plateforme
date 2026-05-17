@@ -1,6 +1,7 @@
 import { RESOURCE_PDF_CATALOG, RESOURCE_PDF_GUIDES, RESOURCE_PDF_TUTOS } from "@/content/resource-pdf-catalog";
 import { RESOURCE_TUTO_ITEMS } from "@/content/resource-tutos";
 import { SERVICE_PAGE_ORDER, SERVICE_PAGES, servicePagePath } from "@/content/service-pages";
+import { RESOURCE_EDITORIAL_SEO } from "@/lib/seo-resource-metadata";
 import { BEWORK_AEO_DEFINITION, getGeoAeoBriefItems } from "@/lib/seo";
 import { formatPriceLabelFr, getPublicPriceBoundsLabels } from "@/lib/subscription-plans";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
@@ -32,6 +33,10 @@ export function buildLlmsTxt(): string {
     return line(title, t.href, "Tutoriel PDF skill Claude — prompts copiables.");
   }).join("\n");
 
+  const editorialGuides = Object.entries(RESOURCE_EDITORIAL_SEO)
+    .map(([path, seo]) => line(seo.title.replace(/ \| BeWork$/, ""), path, seo.description))
+    .join("\n");
+
   const geoBrief = getGeoAeoBriefItems(formatPriceLabelFr(getPublicPriceBoundsLabels().low))
     .map((item) => `### ${item.question}\n${item.answer}`)
     .join("\n\n");
@@ -47,6 +52,10 @@ ${geoBrief}
 ## Services
 
 ${services}
+
+## Guides pratiques BTP (pages web)
+
+${editorialGuides}
 
 ## Guides PDF (conducteur de travaux, IA & skills)
 

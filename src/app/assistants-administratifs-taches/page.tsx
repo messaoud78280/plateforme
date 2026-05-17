@@ -8,9 +8,9 @@ import { absoluteUrl } from "@/lib/site";
 const pageUrl = absoluteUrl("/assistants-administratifs-taches");
 
 export const metadata: Metadata = {
-  title: "Missions BeWork pour vos chantiers (assistante travaux BTP) | BeWork",
+  title: { absolute: "Missions assistant travaux BTP : documents chantier | BeWork" },
   description:
-    "Catalogue missions : devis, DICT, CR, PPSPS, DCE, DOE, relances. Assistante travaux BTP augmentée par l’IA.",
+    "Catalogue des missions déléguables : compte rendu, DOE, PPSPS, analyse DCE, devis, relances et suivi administratif chantier. Assistant travaux augmenté par l’IA.",
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
 };
 

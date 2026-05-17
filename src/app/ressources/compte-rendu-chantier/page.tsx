@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { getResourceEditorialDescription, resourceEditorialMetadata } from "@/lib/seo-resource-metadata";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
@@ -8,43 +8,14 @@ import { TUTO_TITRE } from "@/components/seo/tuto-section-titles";
 import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/seo-landing-json-ld";
 import { absoluteUrl } from "@/lib/site";
 
+const PAGE_PATH = "/ressources/compte-rendu-chantier";
+
 const pageUrl = absoluteUrl("/ressources/compte-rendu-chantier");
 const pagePath = "/ressources/compte-rendu-chantier";
 
 const H1 =
   "Compte rendu de chantier : comment le rédiger et le structurer";
-const META_DESCRIPTION =
-  "Tuto compte rendu de chantier : participants, décisions, actions, délais et points bloquants. Méthode simple à appliquer.";
-
-export const metadata: Metadata = {
-  title: "Compte rendu de chantier | Tuto pratique BTP",
-  description: META_DESCRIPTION,
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
-  openGraph: {
-    type: "article",
-    locale: "fr_FR",
-    url: pageUrl,
-    siteName: "BeWork",
-    title: "Compte rendu de chantier | Tuto pratique BTP",
-    description:
-      "Tuto compte rendu de chantier : participants, décisions, actions, délais et points bloquants. Méthode simple à appliquer.",
-    images: [
-      {
-        url: absoluteUrl("/opengraph-image"),
-        width: 1200,
-        height: 630,
-        alt: "Compte rendu de chantier — Tuto pratique (BeWork)",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Compte rendu de chantier | Tuto pratique BTP",
-    description:
-      "Tuto compte rendu de chantier : participants, décisions, actions, délais et points bloquants. Méthode simple à appliquer.",
-  },
-  robots: { index: true, follow: true },
-};
+export const metadata = resourceEditorialMetadata(PAGE_PATH);
 
 const FAQ_ITEMS = [
   {
@@ -98,7 +69,7 @@ function FaqCrJsonLd() {
 const webJsonLd = buildWebPageAndBreadcrumbJsonLd({
   pagePath,
   h1: H1,
-  description: META_DESCRIPTION,
+  description: getResourceEditorialDescription(PAGE_PATH),
   breadcrumbItems: [...breadcrumbItems],
 });
 

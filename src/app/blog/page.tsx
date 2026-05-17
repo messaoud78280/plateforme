@@ -21,9 +21,9 @@ const ARTICLE_INDEX: { slug: BlogSlug; title: string; excerpt: string; published
   .sort((x, y) => new Date(y.publishedTime).getTime() - new Date(x.publishedTime).getTime());
 
 export const metadata: Metadata = {
-  title: "Blog BeWork — Pilotage administratif BTP, artisans & externalisation",
+  title: { absolute: "Blog BTP : assistant travaux et gestion chantier | BeWork" },
   description:
-    "Blog BeWork : articles sur administratif chantier, relances, DICT et externalisation pour artisans et PME du bâtiment.",
+    "Articles BeWork sur l’assistant travaux BTP, la gestion administrative chantier, les relances, le DCE et l’externalisation bureau-chantier.",
   keywords: [
     "blog administratif BTP",
     "pilotage administratif BTP",

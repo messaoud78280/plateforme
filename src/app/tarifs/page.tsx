@@ -26,9 +26,9 @@ function formatPriceTtc(value: string) {
 }
 
 export const metadata: Metadata = {
-  title: "Tarifs BeWork | Assistante travaux BTP & relais dossiers chantier",
+  title: { absolute: "Tarifs assistant travaux BTP externalisé | BeWork" },
   description:
-    "Forfaits BeWork TTC : déléguez devis, relances, documents travaux, réserves et DOE. Assistante travaux BTP, sans recruter.",
+    "Forfaits TTC pour externaliser votre gestion bureau-chantier : devis, relances, DOE, PPSPS et dossiers chantier. Assistants travaux BTP, sans recruter.",
   keywords: [
     ...SEO_KEYWORDS_PARTENAIRE_CORE,
     "tarifs assistante travaux",

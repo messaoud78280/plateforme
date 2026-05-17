@@ -1,26 +1,11 @@
 import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
-import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 
 const PAGE_PATH = "/relance-devis-btp";
 
-export const metadata = landingPageMetadata({
-  title: "Relance devis BTP | Suivi devis travaux avec BeWork",
-  description:
-    "Relance devis BTP : suivez vos offres, relancez clients et ne perdez plus d’opportunités faute de suivi administratif.",
-  path: PAGE_PATH,
-  keywords: [
-    "relance devis BTP",
-    "relance devis travaux",
-    "suivi devis BTP",
-    "devis travaux",
-    "relance client BTP",
-    "suivi commercial BTP",
-    "assistante travaux",
-    "assistante BTP",
-  ],
-});
+export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 
 export default function Page() {
   const faq = [

@@ -4,6 +4,25 @@
  * Google utilise surtout le contenu et les titres ; ce champ `keywords` reste un signal secondaire.
  */
 
+/** Positionnement « assistant travaux » (prioritaire sur secrétariat générique). */
+export const SEO_KEYWORDS_ASSISTANT_TRAVAUX = [
+  "assistant travaux augmenté par l’IA",
+  "assistant travaux BTP",
+  "assistante travaux BTP",
+  "assistant conducteur de travaux",
+  "assistant chef de chantier",
+  "assistant chargé d’affaires BTP",
+  "gestion administrative BTP",
+  "externalisation administrative BTP",
+  "relais bureau-chantier",
+  "documents chantier BTP",
+  "plateforme assistant BTP",
+  "assistant IA BTP",
+  "assistant virtuel BTP",
+  "assistant MOA BTP",
+  "assistant maîtrise d’ouvrage",
+] as const;
+
 export const SEO_KEYWORDS_PARTENAIRE_CORE = [
   "partenaire administratif externalisé",
   "prestataire administratif externalisé",
@@ -112,7 +131,7 @@ export const SEO_KEYWORDS_HOME: string[] = [
 
 /** Phrases pour enrichir les descriptions (réutilisables en intro de meta). ≤ ~155 car. utiles en SERP. */
 export const SEO_VALUE_PROPOSITION =
-  "Assistants travaux pour le BTP : relais bureau-chantier, dossiers chantier et forfaits TTC clairs. France, Belgique, Suisse, Luxembourg.";
+  "BeWork : assistants travaux augmentés par l’IA pour le BTP. Relais bureau-chantier, documents chantier et forfaits TTC. France, Belgique, Suisse, Luxembourg.";
 
 /** Proposition courte (OG, snippets secondaires). */
 export const SEO_VALUE_PROPOSITION_SHORT =

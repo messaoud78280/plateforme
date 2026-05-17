@@ -4,6 +4,7 @@ import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { GeoAeoBrief } from "@/components/seo/GeoAeoBrief";
+import { SeoInternalLinks } from "@/components/seo/SeoInternalLinks";
 import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/schema";
 
 type SeoLandingPageProps = {
@@ -70,6 +71,7 @@ export function SeoLandingPage({
             {children}
           </div>
           {showGeoAeoBrief ? <GeoAeoBrief className="mt-14" /> : null}
+          {lastPath ? <SeoInternalLinks path={lastPath} /> : null}
           <div className="mt-14 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
             <h2 className="font-heading text-[1.35rem] font-bold leading-snug text-black md:text-2xl">Passer à l’action</h2>
             <p className="mt-3 text-base leading-relaxed text-slate-700">

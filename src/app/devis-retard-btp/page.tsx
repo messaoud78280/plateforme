@@ -3,27 +3,11 @@ import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { BtpPainLandingMaillage } from "@/components/seo/BtpPainLandingMaillage";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { BTP_PAIN_PAGE_PATHS } from "@/lib/btp-pain-pages";
-import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 
 const PAGE_PATH = BTP_PAIN_PAGE_PATHS.devisRetard;
 
-export const metadata = landingPageMetadata({
-  title: "Devis BTP en retard | Préparation et suivi avec BeWork",
-  description:
-    "Devis en retard ? Organisez préparation, relances et envois plus vite, sans lâcher le contrôle prix et validation technique.",
-  path: PAGE_PATH,
-  keywords: [
-    "devis BTP en retard",
-    "devis travaux en retard",
-    "préparation devis BTP",
-    "suivi devis travaux",
-    "devis non envoyé",
-    "devis bâtiment",
-    "suivi commercial BTP",
-    "assistante travaux",
-    "assistante BTP",
-  ],
-});
+export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 
 export default function Page() {
   const faq = [

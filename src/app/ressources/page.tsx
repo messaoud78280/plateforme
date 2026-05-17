@@ -58,11 +58,12 @@ const GUIDE_CAROUSEL_ITEMS: GuideCarouselItem[] = [
   })),
 ].sort((x, y) => new Date(y.publishedTime).getTime() - new Date(x.publishedTime).getTime());
 
+const RESSOURCES_META_TITLE = "Ressources BTP : guides, tutos et documents chantier";
 const RESSOURCES_META_DESC =
-  "Hub ressources BeWork : tutoriels PDF gratuits, guides administratif BTP et retours d’expérience pour entreprises du bâtiment.";
+  "Guides et tutoriels BTP : compte rendu, DOE, PPSPS, DCE, devis et gestion administrative chantier. Références BeWork pour conducteurs et artisans.";
 
 export const metadata: Metadata = {
-  title: "Ressources BeWork — Tutoriels, guides & cas clients",
+  title: { absolute: RESSOURCES_META_TITLE },
   description: RESSOURCES_META_DESC,
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   openGraph: {
@@ -70,7 +71,7 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: pageUrl,
     siteName: "BeWork",
-    title: "Ressources BeWork — Tutoriels, guides & cas clients",
+    title: RESSOURCES_META_TITLE,
     description: RESSOURCES_META_DESC,
     images: [{ url: ogImage, width: 1200, height: 630, alt: "BeWork — ressources" }],
   },

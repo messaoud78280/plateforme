@@ -13,9 +13,9 @@ const pageUrl = absoluteUrl("/ressources/tutos");
 const ogImage = absoluteUrl("/opengraph-image");
 
 export const metadata: Metadata = {
-  title: "Tutoriels PDF & pratiques BTP | BeWork",
+  title: { absolute: "Tutoriels BTP : skills Claude et PDF gratuits | BeWork" },
   description:
-    "Index des tutoriels BeWork : PDF gratuits, skills Claude et fiches pratiques pour vos dossiers chantier (DCE, PPSPS, DOE).",
+    "Tutoriels BeWork : skills Claude pour DCE, PPSPS, DOE, devis et comptes rendus. PDF gratuits et prompts pour conducteurs de travaux et PME du bâtiment.",
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   openGraph: {
     type: "website",

@@ -6,27 +6,11 @@ import {
   EXTERNALISATION_ADMIN_BT_PATHS,
   hreflangExternalisationAdministrativeBtpCluster,
 } from "@/lib/externalisation-administrative-btp-geo";
-import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 
 const PAGE_PATH = EXTERNALISATION_ADMIN_BT_PATHS.france;
 
-export const metadata = landingPageMetadata({
-  title: "Externalisation administrative BTP en France | Assistante travaux & dossiers chantier — BeWork",
-  description:
-    "Externalisation administrative BTP en France : devis, relances, situations, DOE. Assistante travaux, sans recruter.",
-  path: PAGE_PATH,
-  keywords: [
-    "externalisation administrative BTP France",
-    "assistante travaux BTP France",
-    "assistante BTP France",
-    "relais travaux France",
-    "dossiers chantier",
-    "suivi bureau-terrain",
-    "suivi devis et relances",
-    "documents travaux",
-  ],
-  hreflangLanguages: hreflangExternalisationAdministrativeBtpCluster(),
-});
+export const metadata = landingPageMetadataFromPath(PAGE_PATH, { hreflangLanguages: hreflangExternalisationAdministrativeBtpCluster() });
 
 export default function Page() {
   const faq = [

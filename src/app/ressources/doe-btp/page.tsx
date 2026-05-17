@@ -1,41 +1,14 @@
-import type { Metadata } from "next";
+import { resourceEditorialMetadata } from "@/lib/seo-resource-metadata";
 import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { TUTO_TITRE } from "@/components/seo/tuto-section-titles";
 import { absoluteUrl } from "@/lib/site";
 
-const pageUrl = absoluteUrl("/ressources/doe-btp");
-const META_DESCRIPTION =
-  "Tuto DOE BTP : documents à rassembler, erreurs à éviter et méthode pour un dossier des ouvrages exécutés clair.";
+const PAGE_PATH = "/ressources/doe-btp";
 
-export const metadata: Metadata = {
-  title: "DOE BTP | Préparer un dossier des ouvrages exécutés",
-  description: META_DESCRIPTION,
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
-  openGraph: {
-    type: "article",
-    locale: "fr_FR",
-    url: pageUrl,
-    siteName: "BeWork",
-    title: "DOE BTP | Préparer un dossier des ouvrages exécutés",
-    description: META_DESCRIPTION,
-    images: [
-      {
-        url: absoluteUrl("/opengraph-image"),
-        width: 1200,
-        height: 630,
-        alt: "DOE BTP — Tuto pratique (BeWork)",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "DOE BTP | Préparer un dossier des ouvrages exécutés",
-    description: META_DESCRIPTION,
-  },
-  robots: { index: true, follow: true },
-};
+const pageUrl = absoluteUrl("/ressources/doe-btp");
+export const metadata = resourceEditorialMetadata(PAGE_PATH);
 
 const FAQ_ITEMS = [
   {
@@ -111,7 +84,9 @@ export default function DoeBtpTutoPage() {
         h1="DOE BTP : comment préparer un dossier des ouvrages exécutés"
         intro={
           <>
-            Le DOE (dossier des ouvrages exécutés) est souvent repoussé à la fin du chantier… et finit en urgence, avec
+            <strong>Définition :</strong> le DOE (dossier des ouvrages exécutés) regroupe les documents permettant
+            d’exploiter et d’entretenir les ouvrages livrés. BeWork aide les entreprises du BTP à structurer ce dossier
+            en fin de chantier — vous validez le contenu et la conformité. Le DOE est souvent repoussé à la fin du chantier… et finit en urgence, avec
             des pièces dispersées entre mails, WhatsApp et dossiers internes. La bonne approche est simple :{" "}
             <strong>collecter et classer progressivement</strong>, puis finaliser avant la réception.
           </>

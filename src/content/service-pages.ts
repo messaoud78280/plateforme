@@ -38,9 +38,9 @@ const BASE_SEE: ServicePageSlug[] = ["assistant-travaux", "externalisation-admin
 export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
   "assistant-travaux": {
     slug: "assistant-travaux",
-    metaTitle: "Assistant travaux augmenté par l’IA | BeWork — relais bureau-chantier BTP",
+    metaTitle: "Assistant travaux BTP augmenté par l’IA | BeWork",
     metaDescription:
-      "Assistant travaux IA pour le BTP : dossiers, relances et coordination. Vous validez ce qui engage votre entreprise.",
+      "Assistant travaux pour le BTP : relais bureau-chantier, dossiers chantier et relances. L’IA structure, vous validez ce qui engage votre entreprise.",
     h1: "Assistant travaux augmenté par l’IA pour entreprises du BTP",
     intro:
       "BeWork met à votre disposition un relais opérationnel entre le bureau et le chantier : préparation de documents, suivi des échéances et coordination cadrée. L’IA accélère la structuration et la relecture ; un interlocuteur humain garde le fil et le cadre.",
@@ -84,9 +84,9 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
 
   "assistant-conducteur-de-travaux": {
     slug: "assistant-conducteur-de-travaux",
-    metaTitle: "Assistant conducteur de travaux | Dossiers, relances, suivi chantier — BeWork",
+    metaTitle: "Assistant conducteur de travaux BTP | BeWork",
     metaDescription:
-      "Assistant conducteur de travaux : situations, relances, CR et coordination fournisseurs. Service à distance, validation chez vous.",
+      "Assistant conducteur de travaux : déléguez CR, relances, situations et coordination fournisseurs. Relais bureau-chantier, validation chez vous.",
     h1: "Assistant conducteur de travaux : dossiers et suivi quand le carnet déborde",
     intro:
       "Le conducteur de travaux est souvent le point de contact unique entre maîtrise d’ouvrage, entreprises et corps d’état. BeWork sécurise la partie « dossier qui doit avancer » : relances, pièces, plannings administratifs et préparations de synthèses, sans empiéter sur vos arbitrages terrain.",
@@ -124,7 +124,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
 
   "assistant-chef-de-chantier": {
     slug: "assistant-chef-de-chantier",
-    metaTitle: "Assistant chef de chantier | Coordination administrative & logistique — BeWork",
+    metaTitle: "Assistant chef de chantier BTP | BeWork",
     metaDescription:
       "Assistant chef de chantier : documents, relances commandes et CR quand le poste est sur le terrain. Relais à distance.",
     h1: "Assistant chef de chantier : tenir le bureau quand le poste est sur le terrain",
@@ -162,7 +162,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
 
   "externalisation-administrative-btp": {
     slug: "externalisation-administrative-btp",
-    metaTitle: "Externalisation administrative BTP | BeWork — assistante travaux & suivi chantier",
+    metaTitle: "Externalisation administrative BTP | BeWork",
     metaDescription:
       "Externalisation administrative BTP : relais travaux, forfaits TTC, accompagnement francophone FR · BE · CH · LU.",
     h1: "Externalisation administrative BTP avec un relais travaux encadré",
@@ -202,7 +202,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
 
   "compte-rendu-chantier": {
     slug: "compte-rendu-chantier",
-    metaTitle: "Compte rendu de chantier | Préparation & suivi — BeWork",
+    metaTitle: "Compte rendu de chantier BTP | BeWork",
     metaDescription:
       "Compte rendu de chantier : structuration, relecture et relances. Préparez des CR clairs sans y passer la soirée.",
     h1: "Compte rendu de chantier : structurer l’information sans y passer la soirée",
@@ -240,7 +240,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
 
   "analyse-dce-btp": {
     slug: "analyse-dce-btp",
-    metaTitle: "Analyse DCE BTP | Tri, synthèse et risques — BeWork",
+    metaTitle: "Analyse DCE BTP : synthèse et appels d’offres | BeWork",
     metaDescription:
       "Analyse DCE BTP : tri des pièces et synthèses pour arbitrer avant appel d’offres. Sans remplacer votre chiffrage.",
     h1: "Analyse DCE BTP : y voir clair avant d’engager vos équipes",
@@ -278,7 +278,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
 
   ppsps: {
     slug: "ppsps",
-    metaTitle: "PPSPS BTP | Préparation, mise en forme et rubriques — BeWork",
+    metaTitle: "PPSPS BTP : aide à la rédaction | BeWork",
     metaDescription:
       "PPSPS BTP : structuration des rubriques et relecture. Vous validez les mesures de prévention et l’organisation.",
     h1: "PPSPS : avancer sur la mise en forme sans bricoler les rubriques essentielles",
@@ -316,7 +316,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
 
   "memoire-technique-btp": {
     slug: "memoire-technique-btp",
-    metaTitle: "Mémoire technique BTP | Structure, rédactionnel et relecture — BeWork",
+    metaTitle: "Mémoire technique BTP | BeWork",
     metaDescription:
       "Mémoire technique BTP : plan, fil rouge et relecture pour une réponse AO lisible par la maîtrise d’ouvrage.",
     h1: "Mémoire technique BTP : un fil clair pour une réponse lisible",
@@ -354,7 +354,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
 
   "chiffrage-devis-btp": {
     slug: "chiffrage-devis-btp",
-    metaTitle: "Chiffrage & devis BTP | Préparation, relances et suivi — BeWork",
+    metaTitle: "Chiffrage devis BTP | BeWork",
     metaDescription:
       "Chiffrage et devis BTP : montage, relances fournisseurs et suivi envois. Vous gardez prix, marges et stratégie.",
     h1: "Chiffrage et devis BTP : accélérer la préparation sans perdre le contrôle des prix",
@@ -392,7 +392,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
 
   "doe-btp": {
     slug: "doe-btp",
-    metaTitle: "DOE BTP | Constitution, classement et livrables — BeWork",
+    metaTitle: "DOE BTP : constitution et livrables | BeWork",
     metaDescription:
       "DOE BTP : structure des lots, suivi des pièces manquantes et mise en forme. Clôture documentaire plus prévisible.",
     h1: "DOE BTP : avancer sur la constitution sans noyer le chantier dans l’administratif",

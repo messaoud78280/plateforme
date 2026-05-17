@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getPublicPageSeo } from "@/lib/seo-public-pages";
 import { absoluteUrl } from "@/lib/site";
 
 const defaultOgImage = absoluteUrl("/opengraph-image");
@@ -46,4 +47,22 @@ export function landingPageMetadata(opts: {
         : {}),
     },
   };
+}
+
+/** Métadonnées vitrine depuis le registre central (`seo-public-pages.ts`). */
+export function landingPageMetadataFromPath(
+  path: string,
+  extra?: Pick<Parameters<typeof landingPageMetadata>[0], "hreflangLanguages" | "keywords">
+): Metadata {
+  const seo = getPublicPageSeo(path);
+  if (!seo) {
+    throw new Error(`Missing public page SEO config for path: ${path}`);
+  }
+  return landingPageMetadata({
+    title: seo.title,
+    description: seo.description,
+    path,
+    keywords: extra?.keywords ?? seo.keywords,
+    hreflangLanguages: extra?.hreflangLanguages ?? seo.hreflangLanguages,
+  });
 }

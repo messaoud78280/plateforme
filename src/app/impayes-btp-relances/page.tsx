@@ -1,27 +1,11 @@
 import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
-import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 
 const PAGE_PATH = "/impayes-btp-relances";
 
-export const metadata = landingPageMetadata({
-  title: "Impayés BTP | Relances factures et situations avec BeWork",
-  description:
-    "Impayés BTP : suivez factures et situations, relancez clients à temps et limitez les retards de paiement sur chantier.",
-  path: PAGE_PATH,
-  keywords: [
-    "impayés BTP",
-    "relance facture BTP",
-    "relance situation de travaux",
-    "factures impayées bâtiment",
-    "retard paiement chantier",
-    "trésorerie BTP",
-    "suivi factures chantier",
-    "assistante travaux",
-    "assistante BTP",
-  ],
-});
+export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 
 export default function Page() {
   const faq = [

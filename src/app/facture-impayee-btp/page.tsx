@@ -3,24 +3,11 @@ import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { BtpPainLandingMaillage } from "@/components/seo/BtpPainLandingMaillage";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { BTP_PAIN_PAGE_PATHS } from "@/lib/btp-pain-pages";
-import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 
 const PAGE_PATH = BTP_PAIN_PAGE_PATHS.factureImpayee;
 
-export const metadata = landingPageMetadata({
-  title: "Facture impayée BTP : relances structurées & trésorerie chantier | BeWork",
-  description:
-    "Facture impayée sur chantier ? Relances cadrées, suivi encaissements et remontée des cas sensibles. Sécurisez votre trésorerie.",
-  path: PAGE_PATH,
-  keywords: [
-    "facture impayée BTP",
-    "relance facture bâtiment",
-    "retard paiement chantier",
-    "trésorerie entreprise BTP",
-    "encaissement artisan",
-    "impayés chantier",
-  ],
-});
+export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 
 export default function Page() {
   const faq = [

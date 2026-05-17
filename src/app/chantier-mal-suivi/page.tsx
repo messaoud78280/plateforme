@@ -3,28 +3,11 @@ import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { BtpPainLandingMaillage } from "@/components/seo/BtpPainLandingMaillage";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { BTP_PAIN_PAGE_PATHS } from "@/lib/btp-pain-pages";
-import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 
 const PAGE_PATH = BTP_PAIN_PAGE_PATHS.chantierMalSuivi;
 
-export const metadata = landingPageMetadata({
-  title: "Chantier mal suivi | Suivi dossiers travaux avec BeWork",
-  description:
-    "Chantier mal suivi côté admin ? Relances, CR, réserves, DOE et fournisseurs structurés avec un relais travaux BTP.",
-  path: PAGE_PATH,
-  keywords: [
-    "chantier mal suivi",
-    "suivi chantier BTP",
-    "suivi dossiers chantier",
-    "documents chantier",
-    "réserves chantier",
-    "DOE",
-    "comptes rendus chantier",
-    "relais bureau-chantier",
-    "assistante travaux",
-    "assistante BTP",
-  ],
-});
+export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 
 export default function Page() {
   const faq = [

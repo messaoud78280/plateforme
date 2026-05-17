@@ -1,15 +1,9 @@
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
-import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 
 const PAGE_PATH = "/assistant-administratif-btp";
 
-export const metadata = landingPageMetadata({
-  title: "Assistant administratif BTP | Devis, suivi chantiers | BeWork",
-  description:
-    "Assistant administratif BTP : devis chantier, relances et suivi dossiers pour PME et artisans. Forfait TTC, sans recrutement.",
-  path: PAGE_PATH,
-  keywords: ["assistant administratif BTP", "externalisation administrative BTP", "devis chantier", "sous-traitance administrative"],
-});
+export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 
 const faq = [
   {

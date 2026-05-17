@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { getTutoPageDescription, tutoPageMetadata } from "@/lib/seo-tuto-metadata";
 import Link from "next/link";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
@@ -84,8 +84,6 @@ Corrige ces 3 points et regénère le skill.`;
 
 const H1 = "Crée ton skill — Métré quantitatif et qualitatif";
 
-const META_DESCRIPTION =
-  "Tuto skill métré quantitatif : plans, CCTP, unités et export DPGF Excel. PDF 9 pages et prompts.";
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },
@@ -131,29 +129,7 @@ const FAQ_FOR_JSON_LD = [
   },
 ] as const;
 
-export const metadata: Metadata = {
-  title: "Crée ton skill — Métré quantitatif et qualitatif | BeWork",
-  description: META_DESCRIPTION,
-  alternates: {
-    canonical: pageUrl,
-    languages: { fr: pageUrl, "x-default": pageUrl },
-  },
-  openGraph: {
-    type: "article",
-    locale: "fr_FR",
-    url: pageUrl,
-    siteName: "BeWork",
-    title: "Crée ton skill — Métré quantitatif et qualitatif | BeWork",
-    description: META_DESCRIPTION,
-    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Crée ton skill — Métré quantitatif et qualitatif — BeWork" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Crée ton skill — Métré quantitatif et qualitatif | BeWork",
-    description: META_DESCRIPTION,
-  },
-  robots: { index: true, follow: true },
-};
+export const metadata = tutoPageMetadata(pagePath);
 
 function PromptBlock({ label, promptText }: { label: string; promptText: string }) {
   return (
@@ -173,7 +149,7 @@ export default function TutoSkillMetreBeworkPage() {
   const webPageBread = buildWebPageAndBreadcrumbJsonLd({
     pagePath,
     h1: H1,
-    description: META_DESCRIPTION,
+    description: getTutoPageDescription(pagePath),
     breadcrumbItems: [...breadcrumbItems],
   });
 
@@ -181,7 +157,7 @@ export default function TutoSkillMetreBeworkPage() {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: H1,
-    description: META_DESCRIPTION,
+    description: getTutoPageDescription(pagePath),
     url: pageUrl,
     author: { "@type": "Organization" as const, name: "BeWork", url: SITE_URL },
     publisher: {
@@ -210,7 +186,7 @@ export default function TutoSkillMetreBeworkPage() {
     "@context": "https://schema.org",
     "@type": "HowTo",
     name: H1,
-    description: META_DESCRIPTION,
+    description: getTutoPageDescription(pagePath),
     step: [
       { "@type": "HowToStep", name: "Activer la fonction Skills dans Claude" },
       { "@type": "HowToStep", name: "Rassembler la matière (métrés, nomenclature, ratios, trame DPGF)" },

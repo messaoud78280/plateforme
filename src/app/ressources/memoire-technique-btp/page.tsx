@@ -1,36 +1,16 @@
-import type { Metadata } from "next";
+import { getResourceEditorialDescription, resourceEditorialMetadata } from "@/lib/seo-resource-metadata";
 import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { TUTO_TITRE } from "@/components/seo/tuto-section-titles";
 import { absoluteUrl } from "@/lib/site";
 
+const PAGE_PATH = "/ressources/memoire-technique-btp";
+
 const pagePath = "/ressources/memoire-technique-btp";
 const pageUrl = absoluteUrl(pagePath);
 
-const DESCRIPTION =
-  "Tuto mémoire technique BTP : critères jury, structure, preuves et planning méthode avant dépôt.";
-
-export const metadata: Metadata = {
-  title: "Mémoire technique BTP | Méthode, structure & appel d’offres",
-  description: DESCRIPTION,
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
-  openGraph: {
-    type: "article",
-    locale: "fr_FR",
-    url: pageUrl,
-    siteName: "BeWork",
-    title: "Mémoire technique BTP | Méthode et structure",
-    description: DESCRIPTION,
-    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Mémoire technique BTP — BeWork" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Mémoire technique BTP | BeWork",
-    description: DESCRIPTION,
-  },
-  robots: { index: true, follow: true },
-};
+export const metadata = resourceEditorialMetadata(PAGE_PATH);
 
 const FAQ_ITEMS = [
   {
@@ -68,11 +48,14 @@ export default function MemoireTechniqueBtpPage() {
     <>
       <FaqJsonLd />
       <SeoLandingPage
-        description={DESCRIPTION}
+        description={getResourceEditorialDescription(PAGE_PATH)}
         h1="Mémoire technique BTP : structure utile avant dépôt"
         intro={
           <>
-            Après la <Link href="/ressources/analyse-dce-btp">lecture du DCE</Link>, le mémoire technique traduit votre compréhension du marché.
+            <strong>Définition :</strong> le mémoire technique BTP expose votre méthode, vos moyens et votre compréhension
+            du marché pour convaincre le maître d’ouvrage. BeWork est un assistant travaux augmenté par l’IA pour préparer
+            et structurer vos réponses — vous validez chaque engagement. Après la{" "}
+            <Link href="/ressources/analyse-dce-btp">lecture du DCE</Link>, le mémoire technique traduit votre compréhension du marché.
             L’objectif : répondre aux <strong>critères du jury</strong>, sans disperser l’information ni sur-promettre.
           </>
         }

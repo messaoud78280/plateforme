@@ -1,15 +1,9 @@
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
-import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 
 const PAGE_PATH = "/assistant-administratif-distance";
 
-export const metadata = landingPageMetadata({
-  title: "Assistant administratif à distance | BeWork",
-  description:
-    "Assistant administratif à distance pour PME : devis, relances, suivi dossiers. Plateforme supervisée, forfaits TTC.",
-  path: PAGE_PATH,
-  keywords: ["assistant administratif à distance", "assistant virtuel", "télésecrétariat PME", "externalisation administrative"],
-});
+export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 
 const faq = [
   {

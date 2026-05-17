@@ -1,15 +1,9 @@
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
-import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 
 const PAGE_PATH = "/assistant-administratif-pme";
 
-export const metadata = landingPageMetadata({
-  title: "Assistant administratif PME | Externaliser l'administratif | BeWork",
-  description:
-    "Externalisez l’administratif de votre PME : devis, relances et suivi dossiers. Assistant dédié, forfaits TTC, zone FR · BE · CH · LU.",
-  path: PAGE_PATH,
-  keywords: ["assistant administratif PME", "assistant virtuel entreprise", "externaliser administratif", "secrétariat externalisé"],
-});
+export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 
 const faq = [
   {

@@ -1,55 +1,14 @@
-import type { Metadata } from "next";
+import { resourceEditorialMetadata } from "@/lib/seo-resource-metadata";
 import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { TUTO_TITRE } from "@/components/seo/tuto-section-titles";
 import { absoluteUrl } from "@/lib/site";
 
-const pageUrl = absoluteUrl("/ressources/analyse-dce-btp");
-const META_DESCRIPTION =
-  "Tuto analyse DCE BTP : RC, CCTP, CCAP, BPU et synthèse avant réponse à un appel d’offres. Méthode et pièces clés.";
+const PAGE_PATH = "/ressources/analyse-dce-btp";
 
-export const metadata: Metadata = {
-  title: "Analyse DCE BTP | Dossier de consultation des entreprises & appels d’offres",
-  description: META_DESCRIPTION,
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
-  keywords: [
-    "analyse DCE BTP",
-    "dossier de consultation des entreprises",
-    "appel d’offres BTP",
-    "CCTP",
-    "CCAP",
-    "BPU",
-    "DPGF",
-    "mémoire technique",
-    "assistant travaux",
-    "assistant BTP",
-    "DQE",
-    "DCE",
-  ],
-  openGraph: {
-    type: "article",
-    locale: "fr_FR",
-    url: pageUrl,
-    siteName: "BeWork",
-    title: "Analyse DCE BTP | Comprendre les pièces d’un appel d’offres",
-    description: META_DESCRIPTION,
-    images: [
-      {
-        url: absoluteUrl("/opengraph-image"),
-        width: 1200,
-        height: 630,
-        alt: "Analyse DCE BTP — Tuto pratique (BeWork)",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Analyse DCE BTP | Dossier de consultation des entreprises",
-    description: META_DESCRIPTION,
-  },
-  robots: { index: true, follow: true },
-};
+const pageUrl = absoluteUrl("/ressources/analyse-dce-btp");
+export const metadata = resourceEditorialMetadata(PAGE_PATH);
 
 const FAQ_ITEMS = [
   {
@@ -121,7 +80,9 @@ export default function AnalyseDceBtpTutoPage() {
         h1="Analyse DCE BTP : comprendre rapidement les pièces importantes d’un appel d’offres"
         intro={
           <>
-            Un <strong>DCE</strong> (dossier de consultation des entreprises) peut être volumineux et technique. Pour un artisan,
+            <strong>Définition :</strong> le DCE (dossier de consultation des entreprises) regroupe les pièces d’un appel
+            d’offres (CCTP, CCAP, plans, bordereaux…). BeWork accompagne les chargés d’affaires et conducteurs de travaux
+            dans l’analyse et la synthèse — sans remplacer votre décision Go/No Go. Un <strong>DCE</strong> peut être volumineux et technique. Pour un artisan,
             un conducteur de travaux ou une <strong>PME BTP</strong>, le risque est de perdre des heures… et de manquer une pièce
             critique avant la réponse. L’objectif n’est pas de remplacer votre expertise : c’est de{" "}
             <strong>trier</strong>, <strong>structurer</strong> et <strong>rendre lisible</strong> ce qui compte vraiment avant

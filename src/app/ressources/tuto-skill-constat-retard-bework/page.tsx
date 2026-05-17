@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { getTutoPageDescription, tutoPageMetadata } from "@/lib/seo-tuto-metadata";
 import Link from "next/link";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
@@ -67,8 +67,6 @@ constat test sur le même cas fictif.`;
 
 const H1 = "Crée ton skill — Constat de retard";
 
-const META_DESCRIPTION =
-  "Tuto skill constat de retard : 7 éléments, CCAG art. 19, modèle .docx et prolongation de délai.";
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },
@@ -109,29 +107,7 @@ const FAQ_FOR_JSON_LD = [
   },
 ] as const;
 
-export const metadata: Metadata = {
-  title: "Crée ton skill — Constat de retard | BeWork",
-  description: META_DESCRIPTION,
-  alternates: {
-    canonical: pageUrl,
-    languages: { fr: pageUrl, "x-default": pageUrl },
-  },
-  openGraph: {
-    type: "article",
-    locale: "fr_FR",
-    url: pageUrl,
-    siteName: "BeWork",
-    title: "Crée ton skill — Constat de retard | BeWork",
-    description: META_DESCRIPTION,
-    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Crée ton skill — Constat de retard — BeWork" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Crée ton skill — Constat de retard | BeWork",
-    description: META_DESCRIPTION,
-  },
-  robots: { index: true, follow: true },
-};
+export const metadata = tutoPageMetadata(pagePath);
 
 function PromptBlock({ label, promptText }: { label: string; promptText: string }) {
   return (
@@ -151,7 +127,7 @@ export default function TutoSkillConstatRetardBeworkPage() {
   const webPageBread = buildWebPageAndBreadcrumbJsonLd({
     pagePath,
     h1: H1,
-    description: META_DESCRIPTION,
+    description: getTutoPageDescription(pagePath),
     breadcrumbItems: [...breadcrumbItems],
   });
 
@@ -159,7 +135,7 @@ export default function TutoSkillConstatRetardBeworkPage() {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: H1,
-    description: META_DESCRIPTION,
+    description: getTutoPageDescription(pagePath),
     url: pageUrl,
     author: { "@type": "Organization" as const, name: "BeWork", url: SITE_URL },
     publisher: {
@@ -188,7 +164,7 @@ export default function TutoSkillConstatRetardBeworkPage() {
     "@context": "https://schema.org",
     "@type": "HowTo",
     name: H1,
-    description: META_DESCRIPTION,
+    description: getTutoPageDescription(pagePath),
     step: [
       { "@type": "HowToStep", name: "Activer la fonction skills dans Claude" },
       { "@type": "HowToStep", name: "Rassembler ta matière première" },

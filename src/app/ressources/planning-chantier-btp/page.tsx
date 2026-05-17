@@ -1,31 +1,16 @@
-import type { Metadata } from "next";
+import { getResourceEditorialDescription, resourceEditorialMetadata } from "@/lib/seo-resource-metadata";
 import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { TUTO_TITRE } from "@/components/seo/tuto-section-titles";
 import { absoluteUrl } from "@/lib/site";
 
+const PAGE_PATH = "/ressources/planning-chantier-btp";
+
 const pagePath = "/ressources/planning-chantier-btp";
 const pageUrl = absoluteUrl(pagePath);
 
-const DESCRIPTION =
-  "Tuto planning chantier BTP : jalons, dépendances et tableaux simples pour aligner terrain et bureau.";
-
-export const metadata: Metadata = {
-  title: "Planning chantier BTP | Jalons & pilotage",
-  description: DESCRIPTION,
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
-  openGraph: {
-    type: "article",
-    locale: "fr_FR",
-    url: pageUrl,
-    siteName: "BeWork",
-    title: "Planning chantier BTP",
-    description: DESCRIPTION,
-    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Planning chantier BTP — BeWork" }],
-  },
-  robots: { index: true, follow: true },
-};
+export const metadata = resourceEditorialMetadata(PAGE_PATH);
 
 const FAQ_ITEMS = [
   {
@@ -55,7 +40,7 @@ export default function PlanningChantierBtpPage() {
     <>
       <FaqJsonLd />
       <SeoLandingPage
-        description={DESCRIPTION}
+        description={getResourceEditorialDescription(PAGE_PATH)}
         h1="Planning chantier BTP : jalons lisibles pour tout le monde"
         intro={
           <>

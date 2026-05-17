@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
-import { absoluteUrl } from "@/lib/site";
-
-const pageUrl = absoluteUrl("/connexion");
 
 export const metadata: Metadata = {
   title: "Connexion | BeWork",
-  description:
-    "Connectez-vous à votre espace BeWork : client, agent ou gérante. Accédez à votre tableau de bord et gérez vos missions administratives.",
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
-  robots: { index: false, follow: true },
+  description: "Connexion à votre espace BeWork (client, agent ou direction).",
+  robots: { index: false, follow: false, googleBot: { index: false, follow: false } },
 };
 
 export default function ConnexionLayout({ children }: { children: React.ReactNode }) {

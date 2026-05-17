@@ -1,16 +1,10 @@
 import Link from "next/link";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
-import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 
 const PAGE_PATH = "/situation-travaux-btp";
 
-export const metadata = landingPageMetadata({
-  title: "Situation de travaux BTP : structurer et envoyer sans retard | BeWork",
-  description:
-    "Situations de travaux BTP : pièces, fréquence, modèle et envoi pour facturer au fil de l’eau. Pilotage administratif encadré.",
-  path: PAGE_PATH,
-  keywords: ["situation de travaux BTP", "facturation chantier", "avancement travaux", "administratif BTP"],
-});
+export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 
 export default function Page() {
   const faq = [

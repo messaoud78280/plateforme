@@ -1,41 +1,14 @@
-import type { Metadata } from "next";
+import { resourceEditorialMetadata } from "@/lib/seo-resource-metadata";
 import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { TUTO_TITRE } from "@/components/seo/tuto-section-titles";
 import { absoluteUrl } from "@/lib/site";
 
-const pageUrl = absoluteUrl("/ressources/ppsps-btp");
-const META_DESCRIPTION =
-  "Tuto PPSPS BTP : informations à rassembler, erreurs courantes et méthode pour structurer votre plan sécurité.";
+const PAGE_PATH = "/ressources/ppsps-btp";
 
-export const metadata: Metadata = {
-  title: "PPSPS BTP | Préparer un plan particulier de sécurité chantier",
-  description: META_DESCRIPTION,
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
-  openGraph: {
-    type: "article",
-    locale: "fr_FR",
-    url: pageUrl,
-    siteName: "BeWork",
-    title: "PPSPS BTP | Préparer un plan particulier de sécurité chantier",
-    description: META_DESCRIPTION,
-    images: [
-      {
-        url: absoluteUrl("/opengraph-image"),
-        width: 1200,
-        height: 630,
-        alt: "PPSPS BTP — Tuto pratique (BeWork)",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "PPSPS BTP | Préparer un plan particulier de sécurité chantier",
-    description: META_DESCRIPTION,
-  },
-  robots: { index: true, follow: true },
-};
+const pageUrl = absoluteUrl("/ressources/ppsps-btp");
+export const metadata = resourceEditorialMetadata(PAGE_PATH);
 
 const FAQ_ITEMS = [
   {
@@ -139,7 +112,10 @@ export default function PpspsBtpTutoPage() {
         h1="PPSPS BTP : comment préparer un plan particulier de sécurité chantier"
         intro={
           <>
-            Le PPSPS est souvent préparé dans l’urgence, alors qu’il demande des informations précises (chantier, accès,
+            <strong>Définition :</strong> le PPSPS (Plan Particulier de Sécurité et de Protection de la Santé) décrit
+            comment votre entreprise organise la prévention des risques sur un chantier donné. BeWork est un assistant
+            travaux augmenté par l’IA pour structurer vos dossiers BTP — la validation sécurité reste chez vous. Le PPSPS
+            est souvent préparé dans l’urgence, alors qu’il demande des informations précises (chantier, accès,
             coactivité, risques, prévention, urgence). Un PPSPS mal organisé crée des allers-retours, des oublis et peut
             retarder le démarrage. L’objectif est simple : <strong>rassembler</strong>, <strong>structurer</strong>, puis{" "}
             <strong>faire valider</strong> par la personne compétente avant transmission.

@@ -6,27 +6,11 @@ import {
   EXTERNALISATION_ADMIN_BT_PATHS,
   hreflangExternalisationAdministrativeBtpCluster,
 } from "@/lib/externalisation-administrative-btp-geo";
-import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 
 const PAGE_PATH = EXTERNALISATION_ADMIN_BT_PATHS.luxembourg;
 
-export const metadata = landingPageMetadata({
-  title:
-    "Externalisation administrative BTP au Luxembourg | Relais bureau-chantier — BeWork",
-  description:
-    "Externalisation administrative BTP au Luxembourg : devis, situations et dossiers chantier. Relais bureau-chantier sans recruter.",
-  path: PAGE_PATH,
-  keywords: [
-    "externalisation administrative entreprise Luxembourg",
-    "externalisation administrative BTP luxembourg",
-    "relais bureau-chantier",
-    "dossiers chantier",
-    "assistante travaux",
-    "assistante BTP",
-    "suivi bureau-terrain",
-  ],
-  hreflangLanguages: hreflangExternalisationAdministrativeBtpCluster(),
-});
+export const metadata = landingPageMetadataFromPath(PAGE_PATH, { hreflangLanguages: hreflangExternalisationAdministrativeBtpCluster() });
 
 export default function Page() {
   const faq = [

@@ -1,21 +1,10 @@
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
-import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 import { SEO_KEYWORDS_PARTENAIRE_CORE } from "@/lib/seo-keywords";
 
 const PAGE_PATH = "/externaliser-administratif";
 
-export const metadata = landingPageMetadata({
-  title: "Externaliser son administratif | Partenaire externalisé PME & BTP | BeWork",
-  description:
-    "Externaliser l’administratif : devis, factures, relances et dossiers sans recruter. Partenaire cadré, forfaits TTC.",
-  path: PAGE_PATH,
-  keywords: [
-    ...SEO_KEYWORDS_PARTENAIRE_CORE,
-    "externaliser son administratif",
-    "comment externaliser administratif",
-    "sans recrutement",
-  ],
-});
+export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 
 const faq = [
   {

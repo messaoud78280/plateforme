@@ -1,28 +1,11 @@
 import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
-import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 
 const PAGE_PATH = "/admin-btp-sans-recruter";
 
-export const metadata = landingPageMetadata({
-  title: "Admin BTP sans recruter | Relais travaux avec BeWork",
-  description:
-    "Tenez devis, relances et dossiers chantier sans recruter : relais administratif BTP à forfait, validation chez vous.",
-  path: PAGE_PATH,
-  keywords: [
-    "admin BTP sans recruter",
-    "BTP sans recruter",
-    "assistante BTP sans embauche",
-    "assistante travaux externalisée",
-    "relais travaux",
-    "dossiers chantier",
-    "bureau chantier",
-    "suivi administratif BTP",
-    "assistante travaux",
-    "assistante BTP",
-  ],
-});
+export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 
 export default function Page() {
   const faq = [

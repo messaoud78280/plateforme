@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { getTutoPageDescription, tutoPageMetadata } from "@/lib/seo-tuto-metadata";
 import Link from "next/link";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
@@ -14,8 +14,6 @@ const pdfPath = "/ressources/pdf/guide-cdt-bework.pdf";
 
 const H1 = "Le guide du conducteur de travaux — 6 outils Claude pour piloter ton chantier de A à Z";
 
-const META_DESCRIPTION =
-  "Guide PDF conducteur de travaux : 6 skills Claude (DCE, PPSPS, CR, retard, PV, DOE). Gratuit, 52 pages.";
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },
@@ -153,35 +151,13 @@ const FAQ_FOR_JSON_LD = [
   },
 ] as const;
 
-export const metadata: Metadata = {
-  title: "Guide conducteur de travaux BTP — 6 outils Claude (PDF 52 pages) | BeWork",
-  description: META_DESCRIPTION,
-  alternates: {
-    canonical: pageUrl,
-    languages: { fr: pageUrl, "x-default": pageUrl },
-  },
-  openGraph: {
-    type: "article",
-    locale: "fr_FR",
-    url: pageUrl,
-    siteName: "BeWork",
-    title: "Guide conducteur de travaux BTP — 6 outils Claude | BeWork",
-    description: META_DESCRIPTION,
-    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: H1 }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Guide conducteur de travaux BTP — 6 outils Claude | BeWork",
-    description: META_DESCRIPTION,
-  },
-  robots: { index: true, follow: true },
-};
+export const metadata = tutoPageMetadata(pagePath);
 
 export default function GuideCdtBeworkPage() {
   const webPageBread = buildWebPageAndBreadcrumbJsonLd({
     pagePath,
     h1: H1,
-    description: META_DESCRIPTION,
+    description: getTutoPageDescription(pagePath),
     breadcrumbItems: [...breadcrumbItems],
   });
 
@@ -189,7 +165,7 @@ export default function GuideCdtBeworkPage() {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: H1,
-    description: META_DESCRIPTION,
+    description: getTutoPageDescription(pagePath),
     url: pageUrl,
     datePublished: "2026-05-12",
     author: { "@type": "Organization" as const, name: "BeWork", url: SITE_URL },

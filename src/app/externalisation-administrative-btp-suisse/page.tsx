@@ -6,26 +6,11 @@ import {
   EXTERNALISATION_ADMIN_BT_PATHS,
   hreflangExternalisationAdministrativeBtpCluster,
 } from "@/lib/externalisation-administrative-btp-geo";
-import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 
 const PAGE_PATH = EXTERNALISATION_ADMIN_BT_PATHS.suisse;
 
-export const metadata = landingPageMetadata({
-  title: "Externalisation administrative BTP en Suisse romande | Relais dossiers chantier — BeWork",
-  description:
-    "Externalisation administrative BTP en Suisse romande : dossiers, relances et suivi bureau-terrain. Relais travaux encadré.",
-  path: PAGE_PATH,
-  keywords: [
-    "externalisation administrative BTP romandie",
-    "assistante travaux Suisse romande",
-    "assistante BTP Suisse",
-    "relais bureau-chantier",
-    "dossiers chantier",
-    "documents travaux",
-    "validation finale",
-  ],
-  hreflangLanguages: hreflangExternalisationAdministrativeBtpCluster(),
-});
+export const metadata = landingPageMetadataFromPath(PAGE_PATH, { hreflangLanguages: hreflangExternalisationAdministrativeBtpCluster() });
 
 export default function Page() {
   const faq = [

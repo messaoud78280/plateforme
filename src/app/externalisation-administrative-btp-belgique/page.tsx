@@ -6,25 +6,11 @@ import {
   EXTERNALISATION_ADMIN_BT_PATHS,
   hreflangExternalisationAdministrativeBtpCluster,
 } from "@/lib/externalisation-administrative-btp-geo";
-import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 
 const PAGE_PATH = EXTERNALISATION_ADMIN_BT_PATHS.belgique;
 
-export const metadata = landingPageMetadata({
-  title: "Externalisation administrative BTP en Belgique | Assistante travaux & dossiers chantier — BeWork",
-  description:
-    "Externalisation administrative BTP en Belgique : dossiers chantier, devis et relances. Accompagnement francophone à distance.",
-  path: PAGE_PATH,
-  keywords: [
-    "gestion administrative construction belgique",
-    "externalisation administrative BTP belgique",
-    "assistante BTP belgique",
-    "relais travaux belgique",
-    "dossiers chantier",
-    "suivi devis et relances",
-  ],
-  hreflangLanguages: hreflangExternalisationAdministrativeBtpCluster(),
-});
+export const metadata = landingPageMetadataFromPath(PAGE_PATH, { hreflangLanguages: hreflangExternalisationAdministrativeBtpCluster() });
 
 export default function Page() {
   const faq = [

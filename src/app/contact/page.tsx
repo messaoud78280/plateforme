@@ -10,9 +10,9 @@ const pageUrl = absoluteUrl("/contact");
 const contactOgImage = absoluteUrl("/opengraph-image");
 
 export const metadata: Metadata = {
-  title: "Contact | BeWork",
+  title: { absolute: "Contact BeWork : assistant travaux BTP | Rendez-vous" },
   description:
-    "Contactez BeWork : appel découverte, FAQ et tarifs. Accompagnement administratif BTP en France, Belgique, Suisse, Luxembourg.",
+    "Contactez BeWork pour un appel découverte : assistants travaux BTP en France, Belgique, Suisse et Luxembourg. Externalisez votre gestion bureau-chantier.",
   keywords: [
     "contact BeWork",
     "appel découverte BTP",

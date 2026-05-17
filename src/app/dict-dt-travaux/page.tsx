@@ -1,27 +1,10 @@
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import Link from "next/link";
-import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 
 const PAGE_PATH = "/dict-dt-travaux";
 
-export const metadata = landingPageMetadata({
-  title: "DICT / DT travaux BTP | Suivi démarches chantier avec BeWork",
-  description:
-    "DICT et DT : préparez et suivez dossiers, accusés, relances et classement. Relais administratif BTP, vous validez.",
-  path: PAGE_PATH,
-  keywords: [
-    "DICT travaux",
-    "DT travaux",
-    "DICT BTP",
-    "déclaration intention commencement travaux",
-    "déclaration projet de travaux",
-    "démarches chantier",
-    "suivi DICT",
-    "dossier DICT",
-    "assistante travaux",
-    "assistante BTP",
-  ],
-});
+export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 
 export default function Page() {
   const faq = [

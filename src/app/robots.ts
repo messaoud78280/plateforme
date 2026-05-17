@@ -5,7 +5,9 @@ import { SITE_URL } from "@/lib/site";
 const DISALLOW: string[] = [
   "/dashboard/",
   "/api/",
-  "/connexion/gerante",
+  "/connexion",
+  "/inscription",
+  "/connexion/gerente",
   "/connexion/agents",
   "/connexion/clients",
   "/invitation/",

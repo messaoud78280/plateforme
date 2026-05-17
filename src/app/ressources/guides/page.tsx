@@ -39,9 +39,9 @@ const GUIDE_INDEX: {
 ].sort((x, y) => new Date(y.publishedTime).getTime() - new Date(x.publishedTime).getTime());
 
 export const metadata: Metadata = {
-  title: "Guides BeWork — pilotage administratif BTP, artisans & externalisation",
+  title: { absolute: "Guides BTP : conducteur de travaux et IA | BeWork" },
   description:
-    "Guides BeWork : méthodes et articles pour piloter l’administratif chantier, la trésorerie et l’externalisation en BTP.",
+    "Guides PDF BeWork pour conducteurs de travaux : IA, skills Claude, gestion administrative chantier et externalisation bureau-chantier.",
   keywords: [
     "guides administratif BTP",
     "pilotage administratif BTP",

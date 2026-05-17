@@ -9,9 +9,9 @@ const faqUrl = absoluteUrl("/faq");
 const faqOgImage = absoluteUrl("/opengraph-image");
 
 export const metadata: Metadata = {
-  title: "FAQ BeWork | Assistante travaux BTP & relais bureau-chantier",
+  title: { absolute: "FAQ assistant travaux BTP : BeWork et documents chantier" },
   description:
-    "FAQ BeWork : assistante travaux, externalisation, PPSPS, DCE, DOE, forfaits et validation. Réponses claires pour le BTP.",
+    "Questions fréquentes sur BeWork : assistant travaux BTP, externalisation bureau-chantier, PPSPS, DCE, DOE, forfaits et validation avant envoi.",
   keywords: [
     "BeWork",
     "FAQ BeWork",

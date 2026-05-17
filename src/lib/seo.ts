@@ -9,11 +9,13 @@ export {
   SEO_VALUE_PROPOSITION_SHORT,
 } from "@/lib/seo-keywords";
 
-export { landingPageMetadata } from "@/lib/seo-landing-metadata";
+export { landingPageMetadata, landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
+export { resourceEditorialMetadata } from "@/lib/seo-resource-metadata";
+export { tutoPageMetadata, getTutoPageDescription } from "@/lib/seo-tuto-metadata";
 
 /** Phrase de positionnement réutilisable dans le contenu (citations IA / extraits). */
 export const BEWORK_AEO_DEFINITION =
-  "BeWork est une solution d’assistants travaux augmentés par l’IA pour les artisans, conducteurs de travaux, chefs de chantier et entreprises du BTP.";
+  "BeWork est une plateforme d’assistants travaux augmentés par l’IA pour les entreprises du BTP : relais bureau-chantier pour devis, documents chantier, appels d’offres et suivi administratif.";
 
 export type GeoAeoBriefItem = { question: string; answer: string };
 

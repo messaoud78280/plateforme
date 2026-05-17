@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { getTutoPageDescription, tutoPageMetadata } from "@/lib/seo-tuto-metadata";
 import Link from "next/link";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
@@ -14,8 +14,6 @@ const pdfPath = "/ressources/pdf/guide-conducteur-de-travaux-ia-bework.pdf";
 
 const H1 = "Guide du conducteur de travaux : 6 outils IA pour automatiser CR chantier, PPSPS, DCE et DOE";
 
-const META_DESCRIPTION =
-  "Guide IA pour conducteur de travaux : 6 skills Claude pour gagner du temps bureau sur vos chantiers. PDF gratuit.";
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },
@@ -71,35 +69,13 @@ const FAQ_FOR_JSON_LD = [
   },
 ] as const;
 
-export const metadata: Metadata = {
-  title: "Guide conducteur de travaux BTP — 6 outils IA (CR, PPSPS, DCE, DOE) | BeWork",
-  description: META_DESCRIPTION,
-  alternates: {
-    canonical: pageUrl,
-    languages: { fr: pageUrl, "x-default": pageUrl },
-  },
-  openGraph: {
-    type: "article",
-    locale: "fr_FR",
-    url: pageUrl,
-    siteName: "BeWork",
-    title: "Guide conducteur de travaux BTP — 6 outils IA | BeWork",
-    description: META_DESCRIPTION,
-    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: H1 }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Guide conducteur de travaux BTP — 6 outils IA | BeWork",
-    description: META_DESCRIPTION,
-  },
-  robots: { index: true, follow: true },
-};
+export const metadata = tutoPageMetadata(pagePath);
 
 export default function GuideConducteurTravauxIaBeworkPage() {
   const webPageBread = buildWebPageAndBreadcrumbJsonLd({
     pagePath,
     h1: H1,
-    description: META_DESCRIPTION,
+    description: getTutoPageDescription(pagePath),
     breadcrumbItems: [...breadcrumbItems],
   });
 
@@ -107,7 +83,7 @@ export default function GuideConducteurTravauxIaBeworkPage() {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: H1,
-    description: META_DESCRIPTION,
+    description: getTutoPageDescription(pagePath),
     url: pageUrl,
     datePublished: "2026-05-11",
     author: { "@type": "Organization" as const, name: "BeWork", url: SITE_URL },

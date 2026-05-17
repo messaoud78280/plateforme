@@ -1,31 +1,16 @@
-import type { Metadata } from "next";
+import { getResourceEditorialDescription, resourceEditorialMetadata } from "@/lib/seo-resource-metadata";
 import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { TUTO_TITRE } from "@/components/seo/tuto-section-titles";
 import { absoluteUrl } from "@/lib/site";
 
+const PAGE_PATH = "/ressources/pv-levee-reserves-btp";
+
 const pagePath = "/ressources/pv-levee-reserves-btp";
 const pageUrl = absoluteUrl(pagePath);
 
-const DESCRIPTION =
-  "Tuto PV levée de réserves : quand lever, quoi tracer, preuves et clôture sans zone d’ombre.";
-
-export const metadata: Metadata = {
-  title: "PV de levée de réserves BTP | Méthode & traçabilité",
-  description: DESCRIPTION,
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
-  openGraph: {
-    type: "article",
-    locale: "fr_FR",
-    url: pageUrl,
-    siteName: "BeWork",
-    title: "PV de levée de réserves BTP",
-    description: DESCRIPTION,
-    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "PV levée réserves BTP — BeWork" }],
-  },
-  robots: { index: true, follow: true },
-};
+export const metadata = resourceEditorialMetadata(PAGE_PATH);
 
 const FAQ_ITEMS = [
   {
@@ -59,7 +44,7 @@ export default function PvLeveeReservesBtpPage() {
     <>
       <FaqJsonLd />
       <SeoLandingPage
-        description={DESCRIPTION}
+        description={getResourceEditorialDescription(PAGE_PATH)}
         h1="PV de levée de réserves : clôturer sans ambiguïté"
         intro={
           <>

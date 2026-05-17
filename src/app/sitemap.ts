@@ -62,8 +62,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     entry("/contact", 0.8),
     entry("/mentions-legales", 0.35, "yearly"),
     entry("/politique-confidentialite", 0.35, "yearly"),
-    entry("/inscription", 0.8),
-    entry("/connexion", 0.6),
     entry("/blog", 0.8, "weekly"),
     entry("/ressources", 0.82, "weekly"),
     entry("/ressources/guides", 0.81, "weekly"),

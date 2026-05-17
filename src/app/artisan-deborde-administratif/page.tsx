@@ -3,24 +3,11 @@ import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { BtpPainLandingMaillage } from "@/components/seo/BtpPainLandingMaillage";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { BTP_PAIN_PAGE_PATHS } from "@/lib/btp-pain-pages";
-import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 
 const PAGE_PATH = BTP_PAIN_PAGE_PATHS.artisanDeborde;
 
-export const metadata = landingPageMetadata({
-  title: "Artisan débordé administratif : devis, factures, relances sans noyer le terrain | BeWork",
-  description:
-    "Artisan débordé par l’administratif ? Déléguez devis, relances et dossiers chantier à un relais BTP encadré, sans embaucher.",
-  path: PAGE_PATH,
-  keywords: [
-    "artisan débordé administratif",
-    "assistant administratif BTP",
-    "externalisation administratif artisan",
-    "gagner du temps artisan bâtiment",
-    "pilotage administratif chantier",
-    "prestataire administratif bâtiment",
-  ],
-});
+export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 
 export default function Page() {
   const faq = [

@@ -56,12 +56,12 @@ const HOME_FAQ_ITEMS = [
   },
 ] as const;
 
+const HOME_META_TITLE = "Assistant travaux BTP augmenté par l’IA | BeWork";
 const HOME_META_DESCRIPTION =
-  "Externalisez l’administratif BTP : devis, relances, DICT, comptes rendus et DOE avec des assistants travaux IA. Vous validez, on structure.";
+  "Assistants travaux pour le BTP : devis, relances, DOE, PPSPS, DCE et suivi bureau-chantier. On tient le bureau, vous tenez le chantier.";
 
 export const metadata: Metadata = {
-  title:
-    "BeWork | Assistants travaux augmentés par l’IA — relais bureau-chantier BTP (devis, DICT, dossiers)",
+  title: { absolute: HOME_META_TITLE },
   description: HOME_META_DESCRIPTION,
   robots: {
     index: true,
@@ -76,7 +76,7 @@ export const metadata: Metadata = {
     alternateLocale: ["fr_BE", "fr_CH", "fr_LU"],
     url: SITE_URL,
     siteName: "BeWork",
-    title: "BeWork — Assistants travaux augmentés par l’IA (relais dossiers chantier)",
+    title: HOME_META_TITLE,
     description: HOME_META_DESCRIPTION,
     images: [
       {

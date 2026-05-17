@@ -1,28 +1,11 @@
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
-import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 
 const PAGE_PATH = "/suivi-fournisseurs-chantier";
 
-export const metadata = landingPageMetadata({
-  title: "Suivi fournisseurs chantier BTP | Commandes & livraisons avec BeWork",
-  description:
-    "Suivi fournisseurs chantier : commandes, livraisons, locations et relances pour éviter les blocages sur le terrain.",
-  path: PAGE_PATH,
-  keywords: [
-    "suivi fournisseurs chantier",
-    "fournisseurs BTP",
-    "commandes matériaux",
-    "livraison chantier",
-    "location matériel chantier",
-    "relance fournisseur BTP",
-    "logistique chantier",
-    "planning chantier",
-    "assistante travaux",
-    "assistante BTP",
-  ],
-});
+export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 
 export default function Page() {
   const faq = [

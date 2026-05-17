@@ -1,31 +1,16 @@
-import type { Metadata } from "next";
+import { getResourceEditorialDescription, resourceEditorialMetadata } from "@/lib/seo-resource-metadata";
 import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { TUTO_TITRE } from "@/components/seo/tuto-section-titles";
 import { absoluteUrl } from "@/lib/site";
 
+const PAGE_PATH = "/ressources/chiffrage-devis-btp";
+
 const pagePath = "/ressources/chiffrage-devis-btp";
 const pageUrl = absoluteUrl(pagePath);
 
-const DESCRIPTION =
-  "Tuto chiffrage devis BTP : BPU, DQE, hypothèses et erreurs fréquentes avant envoi d’offre. Checklist pratique.";
-
-export const metadata: Metadata = {
-  title: "Chiffrage devis BTP | BPU, DQE & méthode",
-  description: DESCRIPTION,
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
-  openGraph: {
-    type: "article",
-    locale: "fr_FR",
-    url: pageUrl,
-    siteName: "BeWork",
-    title: "Chiffrage devis BTP | Méthode",
-    description: DESCRIPTION,
-    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Chiffrage devis BTP — BeWork" }],
-  },
-  robots: { index: true, follow: true },
-};
+export const metadata = resourceEditorialMetadata(PAGE_PATH);
 
 const FAQ_ITEMS = [
   {
@@ -59,7 +44,7 @@ export default function ChiffrageDevisBtpPage() {
     <>
       <FaqJsonLd />
       <SeoLandingPage
-        description={DESCRIPTION}
+        description={getResourceEditorialDescription(PAGE_PATH)}
         h1="Chiffrage devis BTP : sécuriser postes, quantités et hypothèses"
         intro={
           <>

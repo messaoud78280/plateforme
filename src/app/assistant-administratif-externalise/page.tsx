@@ -1,21 +1,10 @@
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
-import { landingPageMetadata } from "@/lib/seo-landing-metadata";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 import { SEO_KEYWORDS_PARTENAIRE_CORE } from "@/lib/seo-keywords";
 
 const PAGE_PATH = "/assistant-administratif-externalise";
 
-export const metadata = landingPageMetadata({
-  title: "Partenaire administratif externalisé & assistant dédié PME | BeWork",
-  description:
-    "Partenaire administratif externalisé : devis, factures, relances et dossiers pour PME et BTP. Forfait TTC, sans embauche.",
-  path: PAGE_PATH,
-  keywords: [
-    ...SEO_KEYWORDS_PARTENAIRE_CORE,
-    "assistant administratif externalisé PME",
-    "assistant virtuel entreprise",
-    "BeWork",
-  ],
-});
+export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 
 const faq = [
   {

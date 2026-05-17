@@ -73,7 +73,7 @@ function parseSite(raw: unknown): PpspsSiteInfo {
   };
 }
 
-export function parsePpspsFormBody(raw: unknown): PpspsFormInput {
+function parsePpspsFormBody(raw: unknown): PpspsFormInput {
   const o = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
   const siteRaw = o.site ?? o;
   const trades = Array.isArray(o.trades)

@@ -15,6 +15,7 @@ import {
   buildWorkItemWhere,
   computeBibliothequeStats,
   excerptDesignation,
+  fetchBibliothequeStatsFromDb,
   fetchWorkItemsWithPriceStats,
   filterWorkItemsByAvgPriceRange,
   parseWorkItemSortKey,
@@ -88,8 +89,12 @@ export default async function BibliothequePage({ searchParams }: { searchParams:
   const tradeWhere =
     tradeFilter && isKnownFamilyCode(tradeFilter) ? buildWorkItemTradeWhere(tradeFilter) : undefined;
 
-  const [rawItems, lotsRow, subLotsRow, deptRows] = await Promise.all([
+  const hasAvgPriceFilter = Boolean(sp.priceMin?.trim() || sp.priceMax?.trim());
+
+  const [rawItems, totalMatching, dbStats, lotsRow, subLotsRow, deptRows] = await Promise.all([
     fetchWorkItemsWithPriceStats(where, sort),
+    prisma.workItem.count({ where }),
+    hasAvgPriceFilter ? Promise.resolve(null) : fetchBibliothequeStatsFromDb(where),
     prisma.workItem.findMany({
       select: { lot: true },
       distinct: ["lot"],
@@ -113,7 +118,12 @@ export default async function BibliothequePage({ searchParams }: { searchParams:
   ]);
 
   const items = filterWorkItemsByAvgPriceRange(rawItems, sp.priceMin, sp.priceMax);
-  const stats = computeBibliothequeStats(items);
+  const listTruncated = totalMatching > rawItems.length;
+  const stats = {
+    ...(hasAvgPriceFilter ? computeBibliothequeStats(items) : (dbStats ?? computeBibliothequeStats(items))),
+    displayedRows: items.length,
+    listTruncated,
+  };
 
   const rows: BibliothequeWorkItemRow[] = items.map((w) => ({
     id: w.id,

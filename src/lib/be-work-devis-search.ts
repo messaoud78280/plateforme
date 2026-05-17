@@ -83,39 +83,100 @@ export type BibliothequeStats = {
   fraisAnnexeCount: number;
   totalPriceEntries: number;
   globalAvgUnitHt: number | null;
+  /** Lignes effectivement chargées pour la liste (≤ plafond de fetch). */
+  displayedRows?: number;
+  /** Vrai si des ouvrages correspondant aux filtres ne sont pas chargés dans la liste. */
+  listTruncated?: boolean;
 };
 
+function countItemTypeBucket(
+  itemType: WorkItem["itemType"] | null,
+  n: number,
+  acc: Pick<
+    BibliothequeStats,
+    "technicalCount" | "etudeControleCount" | "administratifCount" | "garantieCount" | "fraisAnnexeCount"
+  >,
+): void {
+  switch (itemType) {
+    case "ouvrage_technique":
+      acc.technicalCount += n;
+      break;
+    case "etude_controle":
+      acc.etudeControleCount += n;
+      break;
+    case "prestation_administrative":
+      acc.administratifCount += n;
+      break;
+    case "garantie_assurance":
+      acc.garantieCount += n;
+      break;
+    case "frais_annexe":
+      acc.fraisAnnexeCount += n;
+      break;
+    default:
+      acc.technicalCount += n;
+  }
+}
+
+/** Totaux réels en base (filtres SQL, hors filtre prix moyen post-agrégation). */
+export async function fetchBibliothequeStatsFromDb(
+  where: Prisma.WorkItemWhereInput,
+): Promise<BibliothequeStats> {
+  const [byType, priceAgg] = await Promise.all([
+    prisma.workItem.groupBy({
+      by: ["itemType"],
+      where,
+      _count: { _all: true },
+    }),
+    prisma.priceEntry.aggregate({
+      where: { workItem: where },
+      _count: { _all: true },
+      _sum: { unitPriceHT: true },
+    }),
+  ]);
+
+  const buckets = {
+    technicalCount: 0,
+    etudeControleCount: 0,
+    administratifCount: 0,
+    garantieCount: 0,
+    fraisAnnexeCount: 0,
+  };
+  let totalRows = 0;
+  for (const row of byType) {
+    const n = row._count._all;
+    totalRows += n;
+    countItemTypeBucket(row.itemType, n, buckets);
+  }
+
+  const totalPriceEntries = priceAgg._count._all;
+  const sumHt = priceAgg._sum.unitPriceHT;
+  const globalAvgUnitHt =
+    totalPriceEntries > 0 && sumHt != null ? Number(sumHt) / totalPriceEntries : null;
+
+  return {
+    totalRows,
+    ...buckets,
+    totalPriceEntries,
+    globalAvgUnitHt,
+  };
+}
+
 export function computeBibliothequeStats(items: WorkItemWithPriceStats[]): BibliothequeStats {
-  let technicalCount = 0;
-  let etudeControleCount = 0;
-  let administratifCount = 0;
-  let garantieCount = 0;
-  let fraisAnnexeCount = 0;
+  const buckets = {
+    technicalCount: 0,
+    etudeControleCount: 0,
+    administratifCount: 0,
+    garantieCount: 0,
+    fraisAnnexeCount: 0,
+  };
   let totalPriceEntries = 0;
   let weightedSum = 0;
   let weight = 0;
 
   for (const r of items) {
     totalPriceEntries += r.priceCount;
-    switch (r.itemType) {
-      case "ouvrage_technique":
-        technicalCount += 1;
-        break;
-      case "etude_controle":
-        etudeControleCount += 1;
-        break;
-      case "prestation_administrative":
-        administratifCount += 1;
-        break;
-      case "garantie_assurance":
-        garantieCount += 1;
-        break;
-      case "frais_annexe":
-        fraisAnnexeCount += 1;
-        break;
-      default:
-        technicalCount += 1;
-    }
+    countItemTypeBucket(r.itemType, 1, buckets);
     if (r.avgHt != null && r.priceCount > 0) {
       weightedSum += r.avgHt * r.priceCount;
       weight += r.priceCount;
@@ -124,11 +185,7 @@ export function computeBibliothequeStats(items: WorkItemWithPriceStats[]): Bibli
 
   return {
     totalRows: items.length,
-    technicalCount,
-    etudeControleCount,
-    administratifCount,
-    garantieCount,
-    fraisAnnexeCount,
+    ...buckets,
     totalPriceEntries,
     globalAvgUnitHt: weight > 0 ? weightedSum / weight : null,
   };
@@ -271,12 +328,20 @@ export function sortMergedWorkItems(rows: WorkItemWithPriceStats[], sort: WorkIt
   });
 }
 
-const DEFAULT_MAX_ROWS = 2000;
+/** Plafond de chargement pour la liste (perf mémoire). Surcharge via BEWORK_BIBLIOTHEQUE_MAX_ROWS. */
+export const BIBLIOTHEQUE_LIST_FETCH_LIMIT = (() => {
+  const raw = process.env.BEWORK_BIBLIOTHEQUE_MAX_ROWS?.trim();
+  if (raw) {
+    const n = Number(raw);
+    if (Number.isFinite(n) && n > 0) return Math.min(Math.floor(n), 50_000);
+  }
+  return 10_000;
+})();
 
 export async function fetchWorkItemsWithPriceStats(
   where: Prisma.WorkItemWhereInput,
   sort: WorkItemSortKey,
-  maxRows = DEFAULT_MAX_ROWS,
+  maxRows = BIBLIOTHEQUE_LIST_FETCH_LIMIT,
 ): Promise<WorkItemWithPriceStats[]> {
   const items = await prisma.workItem.findMany({
     where,

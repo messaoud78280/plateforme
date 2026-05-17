@@ -471,7 +471,10 @@ export function BibliothequeWorkItemsShell({ rows, stats, view, groupLots }: Pro
           </label>
         </div>
         <p className="text-xs text-slate-500">
-          {stats.totalRows} résultat(s) · tri et filtres via le formulaire ci-dessus
+          {stats.listTruncated && stats.displayedRows != null
+            ? `${stats.displayedRows.toLocaleString("fr-FR")} affiché(s) sur ${stats.totalRows.toLocaleString("fr-FR")}`
+            : `${stats.totalRows.toLocaleString("fr-FR")} résultat(s)`}{" "}
+          · tri et filtres via le formulaire ci-dessus
         </p>
       </div>
 

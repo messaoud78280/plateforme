@@ -45,6 +45,7 @@ export function SkillCctpWorkspace({ initialSessions = [] }: Props) {
   const [sessions, setSessions] = useState<CctpSessionSummary[]>(initialSessions);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [uploadNotice, setUploadNotice] = useState<string | null>(null);
 
   const refreshSessions = useCallback(async () => {
     try {
@@ -161,6 +162,26 @@ export function SkillCctpWorkspace({ initialSessions = [] }: Props) {
             ))}
           </div>
 
+          <SkillCctpFileUpload
+            existingCctp={existingCctp}
+            referenceDocs={referenceDocs}
+            onExistingChange={(f) => {
+              setExistingCctp(f);
+              setUploadNotice(null);
+            }}
+            onReferencesChange={(files) => {
+              setReferenceDocs(files);
+              setUploadNotice(null);
+            }}
+            onReject={(msg) => setUploadNotice(msg)}
+          />
+
+          {uploadNotice ? (
+            <p className="rounded-lg border border-amber-200/90 bg-amber-50 px-3 py-2 text-xs text-amber-950" role="status">
+              {uploadNotice}
+            </p>
+          ) : null}
+
           <div>
             <label className={labelClass} htmlFor="cctp-request">
               Demande *
@@ -270,13 +291,6 @@ export function SkillCctpWorkspace({ initialSessions = [] }: Props) {
           </fieldset>
 
           <SkillCctpNormPicker selected={normReferences} onChange={setNormReferences} />
-
-          <SkillCctpFileUpload
-            existingCctp={existingCctp}
-            referenceDocs={referenceDocs}
-            onExistingChange={setExistingCctp}
-            onReferencesChange={setReferenceDocs}
-          />
 
           {error ? (
             <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">

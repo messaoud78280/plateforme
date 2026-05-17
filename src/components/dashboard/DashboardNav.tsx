@@ -80,7 +80,7 @@ export function DashboardNav({ role }: { role?: string | null }) {
               BeWork Devis
             </NavLink>
             <NavLink href="/dashboard/skills" pathname={pathname} activeClass={active}>
-              Skills BTP
+              CCTP
             </NavLink>
             <NavLink href="/dashboard/parametres" pathname={pathname} activeClass={active}>
               Paramètres
@@ -101,7 +101,7 @@ export function DashboardNav({ role }: { role?: string | null }) {
               BeWork Devis
             </NavLink>
             <NavLink href="/dashboard/skills" pathname={pathname} activeClass={active}>
-              Skills BTP
+              CCTP
             </NavLink>
             <NavLink href="/dashboard/parametres" pathname={pathname} activeClass={active}>
               Paramètres

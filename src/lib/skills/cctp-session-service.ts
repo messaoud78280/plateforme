@@ -10,7 +10,15 @@ export type PersistCctpSessionInput = {
   resultMarkdown: string;
   usedLlm: boolean;
   notice?: string;
-  files: { kind: string; fileName: string; mimeType: string | null; fileSize: number; extractedText: string | null }[];
+  files: {
+    kind: string;
+    fileName: string;
+    mimeType: string | null;
+    fileSize: number;
+    extractedText: string | null;
+    storagePath?: string | null;
+    storageUrl?: string | null;
+  }[];
 };
 
 export async function persistCctpSession(data: PersistCctpSessionInput): Promise<string> {
@@ -36,6 +44,8 @@ export async function persistCctpSession(data: PersistCctpSessionInput): Promise
           mimeType: f.mimeType,
           fileSize: f.fileSize,
           extractedText: f.extractedText,
+          storagePath: f.storagePath ?? null,
+          storageUrl: f.storageUrl ?? null,
         })),
       },
     },
@@ -75,7 +85,7 @@ export async function getCctpSessionForUser(userId: string, sessionId: string): 
     where: { id: sessionId, userId },
     include: {
       files: {
-        select: { id: true, kind: true, fileName: true, fileSize: true },
+        select: { id: true, kind: true, fileName: true, fileSize: true, mimeType: true, storageUrl: true },
         orderBy: { createdAt: "asc" },
       },
     },

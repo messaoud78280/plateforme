@@ -55,7 +55,14 @@ export type CctpSessionDetail = CctpSessionSummary & {
   normReferences: string[];
   resultMarkdown: string | null;
   notice: string | null;
-  files: { id: string; kind: string; fileName: string; fileSize: number }[];
+  files: {
+    id: string;
+    kind: string;
+    fileName: string;
+    fileSize: number;
+    mimeType: string | null;
+    storageUrl: string | null;
+  }[];
 };
 
 export type CctpExportFormat = "pdf" | "doc";

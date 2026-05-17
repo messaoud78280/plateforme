@@ -1,0 +1,2 @@
+ALTER TABLE "SkillCctpFile" ADD COLUMN IF NOT EXISTS "storagePath" TEXT;
+ALTER TABLE "SkillCctpFile" ADD COLUMN IF NOT EXISTS "storageUrl" TEXT;

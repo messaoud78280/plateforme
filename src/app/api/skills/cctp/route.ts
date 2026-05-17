@@ -2,18 +2,28 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { canAccessBeWorkSkills } from "@/lib/be-work-skills-access";
+import { CCTP_MAX_REFERENCE_FILES } from "@/lib/skills/cctp-upload-config";
+import { uploadCctpSkillFile } from "@/lib/skills/cctp-skill-storage";
 import {
   combineExtractedBlocks,
   extractTextFromBuffer,
-  isCctpUploadAllowed,
+  isCctpFileAccepted,
 } from "@/lib/skills/extract-upload-text";
 import { generateCctpRedaction } from "@/lib/skills/cctp-redaction-generate";
 import type { CctpDetailLevel, CctpProjectContext, CctpRedactionRequestBody } from "@/lib/skills/cctp-redaction-types";
-import { persistCctpSession } from "@/lib/skills/cctp-session-service";
+import { persistCctpSession, type PersistCctpSessionInput } from "@/lib/skills/cctp-session-service";
+import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
-const MAX_REFERENCE_FILES = 5;
+type PendingFileRecord = {
+  kind: string;
+  fileName: string;
+  mimeType: string | null;
+  fileSize: number;
+  extractedText: string | null;
+  buffer: Buffer;
+};
 
 function parseDetailLevel(v: unknown): CctpDetailLevel {
   if (v === "synthese" || v === "detaille") return v;
@@ -47,59 +57,81 @@ function parseNormReferences(raw: unknown): string[] {
   return raw.filter((x): x is string => typeof x === "string").map((s) => s.trim()).filter(Boolean);
 }
 
+async function processFile(
+  file: File,
+  kind: string,
+  label: string,
+  blocks: { label: string; fileName: string; text: string; warning?: string }[],
+  pending: PendingFileRecord[],
+  extractWarnings: string[],
+) {
+  if (!isCctpFileAccepted(file)) {
+    extractWarnings.push(
+      `${file.name} : fichier refusé (taille max 20 Mo, exécutables interdits).`,
+    );
+    return;
+  }
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const { text, warning } = await extractTextFromBuffer(buffer, file.name, file.type);
+  if (warning) extractWarnings.push(`${file.name} : ${warning}`);
+  blocks.push({ label, fileName: file.name, text, warning });
+  pending.push({
+    kind,
+    fileName: file.name,
+    mimeType: file.type || null,
+    fileSize: file.size,
+    extractedText: text || null,
+    buffer,
+  });
+}
+
 async function processUploads(formData: FormData) {
   const extractWarnings: string[] = [];
-  const fileRecords: {
-    kind: string;
-    fileName: string;
-    mimeType: string | null;
-    fileSize: number;
-    extractedText: string | null;
-  }[] = [];
+  const pending: PendingFileRecord[] = [];
   const blocks: { label: string; fileName: string; text: string; warning?: string }[] = [];
 
   const existing = formData.get("existingCctp");
   if (existing instanceof File && existing.size > 0) {
-    if (!isCctpUploadAllowed(existing)) {
-      throw new Error("Fichier CCTP existant invalide (taille ou format).");
-    }
-    const buffer = Buffer.from(await existing.arrayBuffer());
-    const { text, warning } = await extractTextFromBuffer(buffer, existing.name, existing.type);
-    if (warning) extractWarnings.push(`${existing.name} : ${warning}`);
-    blocks.push({ label: "CCTP existant", fileName: existing.name, text, warning });
-    fileRecords.push({
-      kind: "existing_cctp",
-      fileName: existing.name,
-      mimeType: existing.type || null,
-      fileSize: existing.size,
-      extractedText: text || null,
-    });
+    await processFile(existing, "existing_cctp", "CCTP existant", blocks, pending, extractWarnings);
   }
 
   const refs = formData.getAll("referenceDocs").filter((f): f is File => f instanceof File && f.size > 0);
-  if (refs.length > MAX_REFERENCE_FILES) {
-    throw new Error(`Maximum ${MAX_REFERENCE_FILES} documents de référence.`);
+  if (refs.length > CCTP_MAX_REFERENCE_FILES) {
+    throw new Error(`Maximum ${CCTP_MAX_REFERENCE_FILES} documents de référence.`);
   }
   for (const file of refs) {
-    if (!isCctpUploadAllowed(file)) {
-      extractWarnings.push(`${file.name} : format ou taille non accepté.`);
-      continue;
-    }
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const { text, warning } = await extractTextFromBuffer(buffer, file.name, file.type);
-    if (warning) extractWarnings.push(`${file.name} : ${warning}`);
-    blocks.push({ label: "Document de référence", fileName: file.name, text, warning });
-    fileRecords.push({
-      kind: "reference",
-      fileName: file.name,
-      mimeType: file.type || null,
-      fileSize: file.size,
-      extractedText: text || null,
-    });
+    await processFile(file, "reference", "Document transmis", blocks, pending, extractWarnings);
   }
 
   const extractedFromFiles = combineExtractedBlocks(blocks);
-  return { extractedFromFiles: extractedFromFiles || undefined, extractWarnings, fileRecords };
+  return { extractedFromFiles: extractedFromFiles || undefined, extractWarnings, pending };
+}
+
+async function persistFilesWithStorage(
+  userId: string,
+  sessionId: string,
+  pending: PendingFileRecord[],
+) {
+  const fileRecords: PersistCctpSessionInput["files"] = [];
+  for (const p of pending) {
+    const stored = await uploadCctpSkillFile({
+      userId,
+      sessionId,
+      fileName: p.fileName,
+      buffer: p.buffer,
+      mimeType: p.mimeType ?? "application/octet-stream",
+    });
+    fileRecords.push({
+      kind: p.kind,
+      fileName: p.fileName,
+      mimeType: p.mimeType,
+      fileSize: p.fileSize,
+      extractedText: p.extractedText,
+      storagePath: stored?.storagePath ?? null,
+      storageUrl: stored?.storageUrl ?? null,
+    });
+  }
+  return fileRecords;
 }
 
 export async function POST(request: NextRequest) {
@@ -118,7 +150,7 @@ export async function POST(request: NextRequest) {
     let normReferences: string[] = [];
     let extractedFromFiles: string | undefined;
     let extractWarnings: string[] = [];
-    let fileRecords: Awaited<ReturnType<typeof processUploads>>["fileRecords"] = [];
+    let pending: PendingFileRecord[] = [];
 
     if (contentType.includes("multipart/form-data")) {
       const formData = await request.formData();
@@ -135,7 +167,7 @@ export async function POST(request: NextRequest) {
       const uploads = await processUploads(formData);
       extractedFromFiles = uploads.extractedFromFiles;
       extractWarnings = uploads.extractWarnings;
-      fileRecords = uploads.fileRecords;
+      pending = uploads.pending;
     } else {
       const body = (await request.json().catch(() => ({}))) as Partial<CctpRedactionRequestBody>;
       reqText = typeof body.request === "string" ? body.request : "";
@@ -161,8 +193,24 @@ export async function POST(request: NextRequest) {
         resultMarkdown: result.markdown,
         usedLlm: result.usedLlm,
         notice: result.notice,
-        files: fileRecords,
+        files: [],
       });
+      if (sessionId && pending.length > 0) {
+        const sid = sessionId;
+        const files = await persistFilesWithStorage(session.user.id, sid, pending);
+        await prisma.skillCctpFile.createMany({
+          data: files.map((f) => ({
+            sessionId: sid,
+            kind: f.kind,
+            fileName: f.fileName,
+            mimeType: f.mimeType,
+            fileSize: f.fileSize,
+            extractedText: f.extractedText,
+            storagePath: f.storagePath,
+            storageUrl: f.storageUrl,
+          })),
+        });
+      }
     } catch (dbErr) {
       console.error("[skills/cctp] persist session", dbErr);
     }

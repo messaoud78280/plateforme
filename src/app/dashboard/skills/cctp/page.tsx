@@ -23,8 +23,8 @@ export default async function SkillCctpPage() {
         <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{skill.title}</h1>
         <p className="text-base leading-relaxed text-slate-600">{skill.subtitle}</p>
         <p className="text-sm text-slate-500">
-          Importez un CCTP existant, sélectionnez des familles DTU, générez puis exportez en PDF ou Word. Historique
-          conservé sur votre compte.
+          Modes mission (rédaction, audit, sommaire…), modèles par lot, affinage itératif, import multi-formats, DTU et
+          export PDF / Word. Historique conservé sur votre compte.
         </p>
       </header>
 

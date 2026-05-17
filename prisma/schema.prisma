@@ -892,6 +892,9 @@ model SkillCctpSession {
   resultMarkdown     String?  @db.Text
   usedLlm            Boolean  @default(false)
   notice             String?  @db.Text
+  generationMode     String   @default("redaction")
+  marketProfile      String?
+  meta               Json?
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 

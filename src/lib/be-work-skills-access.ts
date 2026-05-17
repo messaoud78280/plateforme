@@ -10,7 +10,7 @@ export function canAccessBeWorkSkills(role: string | undefined | null): boolean 
 export async function requireBeWorkSkillsSession() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
-    redirect("/connexion?callbackUrl=/dashboard/skills");
+    redirect("/connexion?callbackUrl=/dashboard/skills/cctp");
   }
   if (!canAccessBeWorkSkills(session.user.role)) {
     redirect("/dashboard");

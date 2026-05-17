@@ -1,7 +1,30 @@
 import { cctpNormLabelsByIds } from "@/content/cctp-norm-references";
 import { CCTP_REDACTION_SYSTEM_PROMPT } from "@/lib/skills/cctp-redaction-system-prompt";
 import type { CctpGenerationInput, CctpProjectContext, CctpRedactionResponseBody } from "@/lib/skills/cctp-redaction-types";
-import { chatCompletion, isSkillsLlmConfigured } from "@/lib/skills/llm-chat";
+import {
+  type CctpGenerationMode,
+  getMarketPromptSuffix,
+  getModePromptSuffix,
+} from "@/lib/skills/cctp-generation-modes";
+import { chatCompletion, isSkillsLlmConfigured, type LlmChatMessage } from "@/lib/skills/llm-chat";
+
+function resolveMode(input: CctpGenerationInput): CctpGenerationMode {
+  if (input.generationMode) return input.generationMode;
+  const intent = detectIntent(input.request);
+  if (intent === "sommaire") return "sommaire";
+  if (intent === "analyse") return "audit";
+  if (intent === "amelioration") return "enrichissement";
+  return "redaction";
+}
+
+function buildSystemPrompt(input: CctpGenerationInput): string {
+  const mode = resolveMode(input);
+  return (
+    CCTP_REDACTION_SYSTEM_PROMPT +
+    getModePromptSuffix(mode) +
+    getMarketPromptSuffix(input.marketProfile)
+  );
+}
 
 const DETAIL_LABELS: Record<CctpProjectContext["detailLevel"], string> = {
   synthese: "Synthèse (sommaire et grandes parties)",
@@ -37,7 +60,18 @@ function buildUserMessage(input: CctpGenerationInput): string {
     );
   }
 
-  lines.push("", "## Demande utilisateur", request.trim());
+  if (input.refine) {
+    lines.push(
+      "",
+      "## Affinage demandé",
+      input.refine.instruction.trim(),
+      "",
+      "## Document précédent à faire évoluer",
+      input.refine.previousMarkdown.trim(),
+    );
+  } else {
+    lines.push("", "## Demande utilisateur", request.trim());
+  }
   return lines.join("\n");
 }
 
@@ -190,22 +224,35 @@ Les prestations du présent lot incluront la fourniture, la pose et les sujétio
 }
 
 export async function generateCctpRedaction(input: CctpGenerationInput): Promise<CctpRedactionResponseBody> {
-  const trimmed = input.request.trim();
-  if (!trimmed) {
-    throw new Error("La demande est obligatoire.");
+  const mode = resolveMode(input);
+  const reqText = input.refine ? input.refine.instruction.trim() : input.request.trim();
+  if (!reqText) {
+    throw new Error(input.refine ? "L'instruction d'affinage est obligatoire." : "La demande est obligatoire.");
   }
 
   if (isSkillsLlmConfigured()) {
-    const markdown = await chatCompletion([
-      { role: "system", content: CCTP_REDACTION_SYSTEM_PROMPT },
-      { role: "user", content: buildUserMessage(input) },
-    ]);
-    return { markdown, usedLlm: true };
+    const messages: LlmChatMessage[] = [{ role: "system", content: buildSystemPrompt(input) }];
+    if (input.refine) {
+      messages.push(
+        { role: "user", content: buildUserMessage({ ...input, request: input.request, refine: undefined }) },
+        { role: "assistant", content: input.refine.previousMarkdown },
+        {
+          role: "user",
+          content: `Affine le document selon cette consigne :\n\n${input.refine.instruction}\n\nConserve la structure utile. Réponds en Markdown complet.`,
+        },
+      );
+    } else {
+      messages.push({ role: "user", content: buildUserMessage(input) });
+    }
+    const markdown = await chatCompletion(messages);
+    return { markdown, usedLlm: true, generationMode: mode, refined: Boolean(input.refine) };
   }
 
   return {
     markdown: generateCctpFallback(input),
     usedLlm: false,
+    generationMode: mode,
+    refined: Boolean(input.refine),
     notice:
       "Mode assisté BeWork (sans clé OpenAI). Ajoutez OPENAI_API_KEY dans les variables d'environnement pour activer la génération IA complète.",
   };

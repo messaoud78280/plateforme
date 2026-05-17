@@ -1,6 +1,7 @@
 "use client";
 
 import { History } from "lucide-react";
+import { CCTP_GENERATION_MODES } from "@/lib/skills/cctp-generation-modes";
 import type { CctpSessionSummary } from "@/lib/skills/cctp-redaction-types";
 
 type Props = {
@@ -48,6 +49,9 @@ export function SkillCctpSessionHistory({ sessions, activeId, onSelect, loading 
                   <span className="mt-1 block text-xs text-slate-500">
                     {date}
                     {s.lot ? ` · ${s.lot}` : ""}
+                    {s.generationMode
+                      ? ` · ${CCTP_GENERATION_MODES.find((m) => m.id === s.generationMode)?.label ?? s.generationMode}`
+                      : ""}
                     {s.usedLlm ? " · IA" : ""}
                   </span>
                 </button>

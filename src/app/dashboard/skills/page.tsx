@@ -8,11 +8,11 @@ export default async function SkillsHubPage() {
   return (
     <div className="space-y-8 px-1">
       <header className="space-y-2">
-        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#1e3a5f]/80">Assistants métier</p>
-        <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Skills BeWork</h1>
+        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#1e3a5f]/80">Assistants métier BeWork</p>
+        <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">CCTP</h1>
         <p className="max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
-          Outils IA intégrés pour accélérer la rédaction et la structuration de vos dossiers BTP — CCTP, analyses et
-          livrables administratifs.
+          Rédaction, structuration et amélioration de vos Cahiers des Clauses Techniques Particulières — et futurs skills
+          bureau-chantier.
         </p>
       </header>
 

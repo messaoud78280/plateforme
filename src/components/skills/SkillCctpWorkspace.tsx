@@ -5,8 +5,13 @@ import { Loader2, Sparkles } from "lucide-react";
 import { SKILL_CCTP_QUICK_PROMPTS } from "@/content/skill-cctp-quick-prompts";
 import { SkillCctpExportButtons } from "@/components/skills/SkillCctpExportButtons";
 import { SkillCctpFileUpload } from "@/components/skills/SkillCctpFileUpload";
+import { SkillCctpLotTemplates } from "@/components/skills/SkillCctpLotTemplates";
+import { SkillCctpMarketProfile } from "@/components/skills/SkillCctpMarketProfile";
+import { SkillCctpModeSelector } from "@/components/skills/SkillCctpModeSelector";
 import { SkillCctpNormPicker } from "@/components/skills/SkillCctpNormPicker";
+import { SkillCctpRefinePanel } from "@/components/skills/SkillCctpRefinePanel";
 import { SkillCctpSessionHistory } from "@/components/skills/SkillCctpSessionHistory";
+import type { CctpGenerationMode, CctpMarketProfile } from "@/lib/skills/cctp-generation-modes";
 import { SkillMarkdownBody } from "@/components/skills/SkillMarkdownBody";
 import type {
   CctpDetailLevel,
@@ -46,6 +51,8 @@ export function SkillCctpWorkspace({ initialSessions = [] }: Props) {
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
+  const [generationMode, setGenerationMode] = useState<CctpGenerationMode>("redaction");
+  const [marketProfile, setMarketProfile] = useState<CctpMarketProfile | null>(null);
 
   const refreshSessions = useCallback(async () => {
     try {
@@ -76,6 +83,10 @@ export function SkillCctpWorkspace({ initialSessions = [] }: Props) {
         availableDocuments: data.availableDocuments ?? "",
       });
       setNormReferences(data.normReferences ?? []);
+      if (data.generationMode) {
+        setGenerationMode(data.generationMode as CctpGenerationMode);
+      }
+      setMarketProfile((data.marketProfile as CctpMarketProfile | null) ?? null);
       setExistingCctp(null);
       setReferenceDocs([]);
       if (data.resultMarkdown) {
@@ -99,37 +110,55 @@ export function SkillCctpWorkspace({ initialSessions = [] }: Props) {
     }
   }, [initialSessions.length, refreshSessions]);
 
-  const generate = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const formData = new FormData();
-      formData.append("request", request);
-      formData.append("context", JSON.stringify(context));
-      formData.append("normReferences", JSON.stringify(normReferences));
-      if (existingCctp) formData.append("existingCctp", existingCctp);
-      for (const f of referenceDocs) {
-        formData.append("referenceDocs", f);
-      }
+  const runGeneration = useCallback(
+    async (opts?: { refineInstruction?: string }) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const formData = new FormData();
+        formData.append("request", request);
+        formData.append("context", JSON.stringify(context));
+        formData.append("normReferences", JSON.stringify(normReferences));
+        formData.append("generationMode", generationMode);
+        if (marketProfile) formData.append("marketProfile", marketProfile);
 
-      const res = await fetch("/api/skills/cctp", {
-        method: "POST",
-        body: formData,
-      });
-      const data = (await res.json()) as CctpRedactionResponseBody & { error?: string };
-      if (!res.ok) {
-        throw new Error(data.error ?? "Erreur de génération.");
+        if (opts?.refineInstruction && activeSessionId) {
+          formData.append("refineSessionId", activeSessionId);
+          formData.append("refineInstruction", opts.refineInstruction);
+        } else {
+          if (existingCctp) formData.append("existingCctp", existingCctp);
+          for (const f of referenceDocs) {
+            formData.append("referenceDocs", f);
+          }
+        }
+
+        const res = await fetch("/api/skills/cctp", { method: "POST", body: formData });
+        const data = (await res.json()) as CctpRedactionResponseBody & { error?: string };
+        if (!res.ok) throw new Error(data.error ?? "Erreur de génération.");
+        setResult(data);
+        if (data.sessionId) setActiveSessionId(data.sessionId);
+        await refreshSessions();
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Erreur inconnue.");
+        if (!opts?.refineInstruction) setResult(null);
+      } finally {
+        setLoading(false);
       }
-      setResult(data);
-      if (data.sessionId) setActiveSessionId(data.sessionId);
-      await refreshSessions();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Erreur inconnue.");
-      setResult(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [request, context, normReferences, existingCctp, referenceDocs, refreshSessions]);
+    },
+    [
+      request,
+      context,
+      normReferences,
+      generationMode,
+      marketProfile,
+      existingCctp,
+      referenceDocs,
+      activeSessionId,
+      refreshSessions,
+    ],
+  );
+
+  const generate = useCallback(() => void runGeneration(), [runGeneration]);
 
   const applyQuickPrompt = (text: string) => {
     setRequest(text);
@@ -148,6 +177,18 @@ export function SkillCctpWorkspace({ initialSessions = [] }: Props) {
               Décrivez ce dont vous avez besoin : sommaire, article, relecture, analyse des manques…
             </p>
           </div>
+
+          <SkillCctpModeSelector value={generationMode} onChange={setGenerationMode} />
+          <SkillCctpMarketProfile value={marketProfile} onChange={setMarketProfile} />
+          <SkillCctpLotTemplates
+            onApply={({ context: ctx, normReferences: norms, request: req }) => {
+              setContext((c) => ({ ...c, ...ctx }));
+              setNormReferences(norms);
+              setRequest(req);
+              setResult(null);
+              setError(null);
+            }}
+          />
 
           <div className="flex flex-wrap gap-2">
             {SKILL_CCTP_QUICK_PROMPTS.map((prompt) => (
@@ -343,10 +384,23 @@ export function SkillCctpWorkspace({ initialSessions = [] }: Props) {
                   ))}
                 </ul>
               ) : null}
-              {result.usedLlm ? (
-                <p className="text-xs font-medium text-emerald-700">Génération IA activée</p>
-              ) : null}
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                {result.usedLlm ? (
+                  <span className="font-medium text-emerald-700">Génération IA</span>
+                ) : (
+                  <span className="text-slate-500">Mode assisté</span>
+                )}
+                {result.refined ? <span className="text-[#1d4ed8]">· Affiné</span> : null}
+                {result.generationMode ? (
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">{result.generationMode}</span>
+                ) : null}
+              </div>
               <SkillCctpExportButtons sessionId={result.sessionId ?? activeSessionId} />
+              <SkillCctpRefinePanel
+                sessionId={result.sessionId ?? activeSessionId}
+                loading={loading}
+                onRefine={(instruction) => void runGeneration({ refineInstruction: instruction })}
+              />
               <div className="max-h-[min(70vh,720px)] overflow-y-auto rounded-xl border border-slate-100 bg-slate-50/50 p-4 sm:p-5">
                 <SkillMarkdownBody markdown={result.markdown} />
               </div>

@@ -1,5 +1,10 @@
 import type { CctpDetailLevel, CctpProjectContext, CctpSessionDetail, CctpSessionSummary } from "@/lib/skills/cctp-redaction-types";
+import type { CctpGenerationMode, CctpMarketProfile } from "@/lib/skills/cctp-generation-modes";
 import { prisma } from "@/lib/prisma";
+
+type SessionMeta = {
+  refines?: { instruction: string; at: string }[];
+};
 
 export type PersistCctpSessionInput = {
   userId: string;
@@ -10,6 +15,8 @@ export type PersistCctpSessionInput = {
   resultMarkdown: string;
   usedLlm: boolean;
   notice?: string;
+  generationMode?: CctpGenerationMode;
+  marketProfile?: CctpMarketProfile | null;
   files: {
     kind: string;
     fileName: string;
@@ -20,6 +27,18 @@ export type PersistCctpSessionInput = {
     storageUrl?: string | null;
   }[];
 };
+
+function parseNormRefs(raw: unknown): string[] {
+  if (Array.isArray(raw)) return raw.filter((x): x is string => typeof x === "string");
+  return [];
+}
+
+function parseMeta(raw: unknown): SessionMeta {
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    return raw as SessionMeta;
+  }
+  return {};
+}
 
 export async function persistCctpSession(data: PersistCctpSessionInput): Promise<string> {
   const session = await prisma.skillCctpSession.create({
@@ -37,6 +56,9 @@ export async function persistCctpSession(data: PersistCctpSessionInput): Promise
       resultMarkdown: data.resultMarkdown,
       usedLlm: data.usedLlm,
       notice: data.notice ?? null,
+      generationMode: data.generationMode ?? "redaction",
+      marketProfile: data.marketProfile ?? null,
+      meta: { refines: [] },
       files: {
         create: data.files.map((f) => ({
           kind: f.kind,
@@ -54,6 +76,73 @@ export async function persistCctpSession(data: PersistCctpSessionInput): Promise
   return session.id;
 }
 
+export async function updateCctpSessionAfterRefine(
+  userId: string,
+  sessionId: string,
+  data: {
+    resultMarkdown: string;
+    refineInstruction: string;
+    usedLlm: boolean;
+    notice?: string;
+  },
+): Promise<boolean> {
+  const existing = await prisma.skillCctpSession.findFirst({
+    where: { id: sessionId, userId },
+    select: { meta: true },
+  });
+  if (!existing) return false;
+
+  const meta = parseMeta(existing.meta);
+  const refines = meta.refines ?? [];
+  refines.push({ instruction: data.refineInstruction, at: new Date().toISOString() });
+
+  await prisma.skillCctpSession.update({
+    where: { id: sessionId },
+    data: {
+      resultMarkdown: data.resultMarkdown,
+      usedLlm: data.usedLlm,
+      notice: data.notice ?? null,
+      meta: { refines },
+      updatedAt: new Date(),
+    },
+  });
+  return true;
+}
+
+export async function getCctpSessionGenerationContext(
+  userId: string,
+  sessionId: string,
+): Promise<{
+  context: CctpProjectContext;
+  normReferences: string[];
+  extractedContext: string | null;
+  resultMarkdown: string | null;
+  generationMode: string | null;
+  marketProfile: string | null;
+  requestText: string;
+} | null> {
+  const row = await prisma.skillCctpSession.findFirst({
+    where: { id: sessionId, userId },
+  });
+  if (!row) return null;
+  return {
+    requestText: row.requestText,
+    context: {
+      projectType: row.projectType ?? "",
+      lot: row.lot ?? "",
+      location: row.location ?? "",
+      constraints: row.constraints ?? "",
+      detailLevel: (row.detailLevel as CctpDetailLevel) || "standard",
+      availableDocuments: row.availableDocuments ?? "",
+    },
+    normReferences: parseNormRefs(row.normReferences),
+    extractedContext: row.extractedContext,
+    resultMarkdown: row.resultMarkdown,
+    generationMode: row.generationMode,
+    marketProfile: row.marketProfile,
+  };
+}
+
 export async function listCctpSessionsForUser(userId: string, limit = 20): Promise<CctpSessionSummary[]> {
   const rows = await prisma.skillCctpSession.findMany({
     where: { userId },
@@ -67,6 +156,7 @@ export async function listCctpSessionsForUser(userId: string, limit = 20): Promi
       createdAt: true,
       usedLlm: true,
       resultMarkdown: true,
+      generationMode: true,
     },
   });
   return rows.map((r) => ({
@@ -77,6 +167,7 @@ export async function listCctpSessionsForUser(userId: string, limit = 20): Promi
     createdAt: r.createdAt.toISOString(),
     usedLlm: r.usedLlm,
     hasResult: Boolean(r.resultMarkdown?.trim()),
+    generationMode: r.generationMode,
   }));
 }
 
@@ -92,12 +183,6 @@ export async function getCctpSessionForUser(userId: string, sessionId: string): 
   });
   if (!row) return null;
 
-  const normRefs = Array.isArray(row.normReferences)
-    ? (row.normReferences as string[])
-    : typeof row.normReferences === "object" && row.normReferences !== null
-      ? Object.values(row.normReferences as Record<string, string>)
-      : [];
-
   return {
     id: row.id,
     requestText: row.requestText,
@@ -106,13 +191,16 @@ export async function getCctpSessionForUser(userId: string, sessionId: string): 
     createdAt: row.createdAt.toISOString(),
     usedLlm: row.usedLlm,
     hasResult: Boolean(row.resultMarkdown?.trim()),
+    generationMode: row.generationMode,
     location: row.location,
     constraints: row.constraints,
     detailLevel: (row.detailLevel as CctpDetailLevel) || "standard",
     availableDocuments: row.availableDocuments,
-    normReferences: normRefs.filter((x): x is string => typeof x === "string"),
+    normReferences: parseNormRefs(row.normReferences),
+    marketProfile: row.marketProfile,
     resultMarkdown: row.resultMarkdown,
     notice: row.notice,
+    extractedContext: row.extractedContext,
     files: row.files,
   };
 }

@@ -1,3 +1,5 @@
+import type { CctpGenerationMode, CctpMarketProfile } from "@/lib/skills/cctp-generation-modes";
+
 /** Niveau de détail attendu pour la rédaction CCTP. */
 export type CctpDetailLevel = "synthese" | "standard" | "detaille";
 
@@ -11,19 +13,32 @@ export type CctpProjectContext = {
   availableDocuments: string;
 };
 
-/** Entrée génération (V2 : fichiers + normes). */
+/** Affinage itératif sur un résultat existant. */
+export type CctpRefineInput = {
+  previousMarkdown: string;
+  instruction: string;
+};
+
+/** Entrée génération complète. */
 export type CctpGenerationInput = {
   request: string;
   context: CctpProjectContext;
   extractedFromFiles?: string;
   normReferences?: string[];
+  generationMode?: CctpGenerationMode;
+  marketProfile?: CctpMarketProfile | null;
+  refine?: CctpRefineInput;
 };
 
-/** Corps JSON legacy POST /api/skills/cctp */
+/** Corps JSON POST /api/skills/cctp */
 export type CctpRedactionRequestBody = {
   request: string;
   context: CctpProjectContext;
   normReferences?: string[];
+  generationMode?: CctpGenerationMode;
+  marketProfile?: CctpMarketProfile | null;
+  refineSessionId?: string;
+  refineInstruction?: string;
 };
 
 /** Réponse API génération CCTP */
@@ -33,6 +48,8 @@ export type CctpRedactionResponseBody = {
   notice?: string;
   sessionId?: string;
   extractWarnings?: string[];
+  generationMode?: CctpGenerationMode;
+  refined?: boolean;
 };
 
 /** Résumé session pour historique UI */
@@ -44,6 +61,7 @@ export type CctpSessionSummary = {
   createdAt: string;
   usedLlm: boolean;
   hasResult: boolean;
+  generationMode?: string | null;
 };
 
 /** Détail session (rechargement) */
@@ -53,8 +71,10 @@ export type CctpSessionDetail = CctpSessionSummary & {
   detailLevel: CctpDetailLevel;
   availableDocuments: string | null;
   normReferences: string[];
+  marketProfile: string | null;
   resultMarkdown: string | null;
   notice: string | null;
+  extractedContext: string | null;
   files: {
     id: string;
     kind: string;

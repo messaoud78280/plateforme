@@ -27,8 +27,8 @@ export async function chatCompletion(messages: LlmChatMessage[]): Promise<string
     body: JSON.stringify({
       model,
       messages,
-      temperature: 0.35,
-      max_tokens: 4096,
+      temperature: 0.3,
+      max_tokens: 8192,
     }),
   });
 

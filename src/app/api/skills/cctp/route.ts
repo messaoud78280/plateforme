@@ -9,10 +9,43 @@ import {
   extractTextFromBuffer,
   isCctpFileAccepted,
 } from "@/lib/skills/extract-upload-text";
+import {
+  type CctpGenerationMode,
+  type CctpMarketProfile,
+} from "@/lib/skills/cctp-generation-modes";
 import { generateCctpRedaction } from "@/lib/skills/cctp-redaction-generate";
 import type { CctpDetailLevel, CctpProjectContext, CctpRedactionRequestBody } from "@/lib/skills/cctp-redaction-types";
-import { persistCctpSession, type PersistCctpSessionInput } from "@/lib/skills/cctp-session-service";
+import {
+  getCctpSessionGenerationContext,
+  persistCctpSession,
+  updateCctpSessionAfterRefine,
+  type PersistCctpSessionInput,
+} from "@/lib/skills/cctp-session-service";
 import { prisma } from "@/lib/prisma";
+
+const VALID_MODES = new Set<CctpGenerationMode>([
+  "redaction",
+  "sommaire",
+  "audit",
+  "enrichissement",
+  "coordination",
+]);
+
+const VALID_MARKETS = new Set<CctpMarketProfile>(["public", "prive", "sous_traitance", "maintenance"]);
+
+function parseGenerationMode(v: unknown): CctpGenerationMode | undefined {
+  if (typeof v === "string" && VALID_MODES.has(v as CctpGenerationMode)) {
+    return v as CctpGenerationMode;
+  }
+  return undefined;
+}
+
+function parseMarketProfile(v: unknown): CctpMarketProfile | null {
+  if (typeof v === "string" && VALID_MARKETS.has(v as CctpMarketProfile)) {
+    return v as CctpMarketProfile;
+  }
+  return null;
+}
 
 export const runtime = "nodejs";
 
@@ -151,6 +184,10 @@ export async function POST(request: NextRequest) {
     let extractedFromFiles: string | undefined;
     let extractWarnings: string[] = [];
     let pending: PendingFileRecord[] = [];
+    let generationMode: CctpGenerationMode | undefined;
+    let marketProfile: CctpMarketProfile | null = null;
+    let refineSessionId: string | undefined;
+    let refineInstruction: string | undefined;
 
     if (contentType.includes("multipart/form-data")) {
       const formData = await request.formData();
@@ -164,6 +201,14 @@ export async function POST(request: NextRequest) {
         }
       }
       normReferences = parseNormReferences(formData.get("normReferences"));
+      generationMode = parseGenerationMode(formData.get("generationMode"));
+      marketProfile = parseMarketProfile(formData.get("marketProfile"));
+      refineSessionId =
+        typeof formData.get("refineSessionId") === "string" ? String(formData.get("refineSessionId")).trim() : undefined;
+      refineInstruction =
+        typeof formData.get("refineInstruction") === "string"
+          ? String(formData.get("refineInstruction")).trim()
+          : undefined;
       const uploads = await processUploads(formData);
       extractedFromFiles = uploads.extractedFromFiles;
       extractWarnings = uploads.extractWarnings;
@@ -173,43 +218,88 @@ export async function POST(request: NextRequest) {
       reqText = typeof body.request === "string" ? body.request : "";
       context = parseContext(body.context);
       normReferences = parseNormReferences(body.normReferences);
+      generationMode = parseGenerationMode(body.generationMode);
+      marketProfile = parseMarketProfile(body.marketProfile);
+      refineSessionId = typeof body.refineSessionId === "string" ? body.refineSessionId.trim() : undefined;
+      refineInstruction = typeof body.refineInstruction === "string" ? body.refineInstruction.trim() : undefined;
+    }
+
+    const isRefine = Boolean(refineSessionId && refineInstruction);
+    if (isRefine && !refineSessionId) {
+      throw new Error("Session d'affinage invalide.");
+    }
+
+    let loadedCtx: Awaited<ReturnType<typeof getCctpSessionGenerationContext>> = null;
+    if (isRefine && refineSessionId) {
+      loadedCtx = await getCctpSessionGenerationContext(session.user.id, refineSessionId);
+      if (!loadedCtx?.resultMarkdown?.trim()) {
+        throw new Error("Aucun résultat à affiner pour cette session.");
+      }
+      context = loadedCtx.context;
+      normReferences = loadedCtx.normReferences;
+      extractedFromFiles = loadedCtx.extractedContext ?? undefined;
+      if (!generationMode && loadedCtx.generationMode) {
+        generationMode = parseGenerationMode(loadedCtx.generationMode);
+      }
+      if (!marketProfile && loadedCtx.marketProfile) {
+        marketProfile = parseMarketProfile(loadedCtx.marketProfile);
+      }
     }
 
     const result = await generateCctpRedaction({
-      request: reqText,
+      request: isRefine ? loadedCtx!.requestText : reqText,
       context,
       extractedFromFiles,
       normReferences,
+      generationMode,
+      marketProfile,
+      refine: isRefine
+        ? {
+            previousMarkdown: loadedCtx!.resultMarkdown!,
+            instruction: refineInstruction!,
+          }
+        : undefined,
     });
 
-    let sessionId: string | undefined;
+    let sessionId: string | undefined = isRefine ? refineSessionId : undefined;
     try {
-      sessionId = await persistCctpSession({
-        userId: session.user.id,
-        request: reqText.trim(),
-        context,
-        normReferences,
-        extractedContext: extractedFromFiles ?? null,
-        resultMarkdown: result.markdown,
-        usedLlm: result.usedLlm,
-        notice: result.notice,
-        files: [],
-      });
-      if (sessionId && pending.length > 0) {
-        const sid = sessionId;
-        const files = await persistFilesWithStorage(session.user.id, sid, pending);
-        await prisma.skillCctpFile.createMany({
-          data: files.map((f) => ({
-            sessionId: sid,
-            kind: f.kind,
-            fileName: f.fileName,
-            mimeType: f.mimeType,
-            fileSize: f.fileSize,
-            extractedText: f.extractedText,
-            storagePath: f.storagePath,
-            storageUrl: f.storageUrl,
-          })),
+      if (isRefine && refineSessionId) {
+        await updateCctpSessionAfterRefine(session.user.id, refineSessionId, {
+          resultMarkdown: result.markdown,
+          refineInstruction: refineInstruction!,
+          usedLlm: result.usedLlm,
+          notice: result.notice,
         });
+      } else {
+        sessionId = await persistCctpSession({
+          userId: session.user.id,
+          request: reqText.trim(),
+          context,
+          normReferences,
+          extractedContext: extractedFromFiles ?? null,
+          resultMarkdown: result.markdown,
+          usedLlm: result.usedLlm,
+          notice: result.notice,
+          generationMode: result.generationMode ?? generationMode ?? "redaction",
+          marketProfile,
+          files: [],
+        });
+        if (sessionId && pending.length > 0) {
+          const sid = sessionId;
+          const files = await persistFilesWithStorage(session.user.id, sid, pending);
+          await prisma.skillCctpFile.createMany({
+            data: files.map((f) => ({
+              sessionId: sid,
+              kind: f.kind,
+              fileName: f.fileName,
+              mimeType: f.mimeType,
+              fileSize: f.fileSize,
+              extractedText: f.extractedText,
+              storagePath: f.storagePath,
+              storageUrl: f.storageUrl,
+            })),
+          });
+        }
       }
     } catch (dbErr) {
       console.error("[skills/cctp] persist session", dbErr);

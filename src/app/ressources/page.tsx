@@ -5,11 +5,12 @@ import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { BlueprintRessourcesBackdrop } from "@/components/home/BlueprintCotationDecor";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
-import { ResourceSpotlightCarousel } from "@/components/ressources/ResourceSpotlightCarousel";
+import { ResourcesClickableList } from "@/components/ressources/ResourcesClickableList";
 import {
   ResourcesSectionHeader,
   ResourcesThemeCard,
   resourcesBtnPrimary,
+  resourcesBtnCompactPdf,
   resourcesBtnSecondary,
   resourcesCardLinkBtn,
   resourcesCardShell,
@@ -19,7 +20,8 @@ import { BLOG_ARTICLES, BLOG_SLUGS } from "@/content/blog-articles";
 import { CAS_CLIENT_CASES } from "@/content/cas-clients-cases";
 import { RESOURCE_GUIDE_PAGE_ITEMS, type ResourceGuideBadge } from "@/content/resource-guides-pages";
 import { RESOURCE_GUIDE_CATEGORIES } from "@/content/resource-categories";
-import { RESOURCE_TUTO_ITEMS, type ResourceTutoItem, type ResourceStatus } from "@/content/resource-tutos";
+import { getResourcePdfPublicPath, resourceSlugFromHref } from "@/content/resource-pdf-catalog";
+import { RESOURCE_TUTO_ITEMS, type ResourceStatus } from "@/content/resource-tutos";
 import { buildResourcesHubCollectionJsonLd } from "@/lib/jsonld-content-marketing";
 import { absoluteUrl } from "@/lib/site";
 
@@ -176,6 +178,8 @@ function ResourceCarouselCard({
   href,
   cta,
   glyph,
+  pdfHref,
+  pdfFileName,
 }: {
   title: string;
   badge: ResourceStatus | "Cas client" | "Guide" | "Guide PDF";
@@ -183,6 +187,8 @@ function ResourceCarouselCard({
   href: string;
   cta: string;
   glyph: ReactNode;
+  pdfHref?: string;
+  pdfFileName?: string;
 }) {
   return (
     <article className={resourcesCardShell}>
@@ -201,29 +207,23 @@ function ResourceCarouselCard({
           <p className="mt-2 text-sm leading-relaxed text-slate-600">{excerpt}</p>
         </div>
       </div>
-      <div className="mt-4 sm:mt-5">
+      <div className="mt-4 flex flex-wrap gap-2 sm:mt-5">
         <Link href={href} className={resourcesCardLinkBtn}>
           {cta}
         </Link>
+        {pdfHref ? (
+          <a href={pdfHref} download={pdfFileName} className={resourcesBtnCompactPdf}>
+            Télécharger le PDF
+          </a>
+        ) : null}
       </div>
     </article>
   );
 }
 
-function TutoResourceCard({ item }: { item: ResourceTutoItem }) {
-  return (
-    <ResourceCarouselCard
-      title={item.title}
-      badge={item.status}
-      excerpt={item.desc}
-      href={item.href}
-      cta="Ouvrir le tutoriel"
-      glyph={<ResourceGlyph className="h-5 w-5 sm:h-[1.125rem] sm:w-[1.125rem]" />}
-    />
-  );
-}
-
 function GuideCarouselCard({ item }: { item: (typeof GUIDE_CAROUSEL_ITEMS)[number] }) {
+  const pdfHref = getResourcePdfPublicPath(item.href);
+  const pdfFileName = pdfHref?.split("/").pop();
   return (
     <ResourceCarouselCard
       title={item.title}
@@ -232,23 +232,8 @@ function GuideCarouselCard({ item }: { item: (typeof GUIDE_CAROUSEL_ITEMS)[numbe
       href={item.href}
       cta="Lire le guide"
       glyph={<GuideGlyph className="h-5 w-5 sm:h-[1.125rem] sm:w-[1.125rem]" />}
-    />
-  );
-}
-
-function CaseCarouselCard({ cas }: { cas: (typeof CAS_CLIENT_CASES)[number] }) {
-  return (
-    <ResourceCarouselCard
-      title={cas.title}
-      badge="Cas client"
-      excerpt={
-        <>
-          <span className="font-semibold text-slate-700">Après :</span> {cas.after}
-        </>
-      }
-      href="/cas-clients"
-      cta="Voir les cas clients"
-      glyph={<UsersGlyph className="h-5 w-5 sm:h-[1.125rem] sm:w-[1.125rem]" />}
+      pdfHref={pdfHref}
+      pdfFileName={pdfFileName}
     />
   );
 }
@@ -317,18 +302,24 @@ export default function RessourcesPage() {
               linkHref="/ressources/tutos"
               linkLabel="Tous les tutoriels →"
             />
-            <div className="mx-auto mt-8 w-full max-w-6xl">
-              <ResourceSpotlightCarousel
-                slidesPerView={2}
-                dotListAriaLabel="Choisir une page de tutoriels"
-                prevAriaLabel="Page précédente"
-                nextAriaLabel="Page suivante"
-              >
-                {RESOURCE_TUTO_ITEMS.map((item) => (
-                  <TutoResourceCard key={item.href} item={item} />
-                ))}
-              </ResourceSpotlightCarousel>
-            </div>
+            <ResourcesClickableList
+              className="mx-auto mt-8 max-w-6xl"
+              columns={2}
+              items={RESOURCE_TUTO_ITEMS.map((item) => {
+                const pdfHref = getResourcePdfPublicPath(item.href);
+                return {
+                  href: item.href,
+                  title: item.title,
+                  description: item.desc,
+                  badge: <BadgeStatus status={item.status} />,
+                  icon: <ResourceGlyph className="h-5 w-5 sm:h-[1.125rem] sm:w-[1.125rem]" />,
+                  pdfHref,
+                  resourceSlug: resourceSlugFromHref(item.href),
+                  openLabel: "Ouvrir le tutoriel",
+                  pdfLabel: "Télécharger le PDF",
+                };
+              })}
+            />
           </section>
         ) : null}
 
@@ -366,18 +357,22 @@ export default function RessourcesPage() {
             linkHref="/cas-clients"
             linkLabel="Page cas clients →"
           />
-          <div className="mx-auto mt-8 w-full max-w-6xl">
-            <ResourceSpotlightCarousel
-              slidesPerView={2}
-              dotListAriaLabel="Choisir une page de cas clients"
-              prevAriaLabel="Page précédente"
-              nextAriaLabel="Page suivante"
-            >
-              {CAS_CLIENT_CASES.map((c) => (
-                <CaseCarouselCard key={c.title} cas={c} />
-              ))}
-            </ResourceSpotlightCarousel>
-          </div>
+          <ResourcesClickableList
+            className="mx-auto mt-8 max-w-6xl"
+            columns={1}
+            items={CAS_CLIENT_CASES.map((c) => ({
+              href: "/cas-clients",
+              title: c.title,
+              description: (
+                <>
+                  <span className="font-semibold text-slate-700">Après :</span> {c.after}
+                </>
+              ),
+              badge: <BadgeStatus status="Cas client" />,
+              icon: <UsersGlyph className="h-5 w-5 sm:h-[1.125rem] sm:w-[1.125rem]" />,
+              openLabel: "Voir les cas clients",
+            }))}
+          />
         </section>
 
         <section className="mx-auto mt-16 max-w-3xl md:mt-20" aria-label="Découvrir BeWork">

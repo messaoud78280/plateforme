@@ -16,6 +16,12 @@ export const resourcesIconWrap =
 export const resourcesCardLinkBtn =
   "inline-flex min-h-10 w-full items-center justify-center rounded-full bg-gradient-to-b from-[#3b82f6] via-[#2563eb] to-[#1d4ed8] px-4 text-sm font-semibold text-white shadow-[0_4px_16px_rgba(29,78,216,0.22)] transition hover:from-[#2563eb] hover:via-[#1d4ed8] hover:to-[#1e40af] sm:w-auto sm:min-h-11 sm:px-5";
 
+export const resourcesBtnCompactOutline =
+  "inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full border border-slate-200/90 bg-white px-4 text-xs font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 sm:text-sm";
+
+export const resourcesBtnCompactPdf =
+  "inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full border border-[#2563eb]/35 bg-[#eff6ff] px-4 text-xs font-semibold text-[#1d4ed8] transition hover:border-[#3b82f6]/50 hover:bg-[#dbeafe] sm:text-sm";
+
 export function ResourcesSectionHeader({
   id,
   title,

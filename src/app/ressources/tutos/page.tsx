@@ -3,7 +3,10 @@ import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
-import { RESOURCE_TUTO_ITEMS, type ResourceTutoItem, type ResourceStatus } from "@/content/resource-tutos";
+import { ResourcesClickableList } from "@/components/ressources/ResourcesClickableList";
+import { resourcesBtnSecondary } from "@/components/ressources/resources-hub-ui";
+import { getResourcePdfPublicPath, resourceSlugFromHref } from "@/content/resource-pdf-catalog";
+import { RESOURCE_TUTO_ITEMS, type ResourceStatus } from "@/content/resource-tutos";
 import { absoluteUrl } from "@/lib/site";
 
 const pageUrl = absoluteUrl("/ressources/tutos");
@@ -43,90 +46,56 @@ function ResourceGlyph({ className }: { className?: string }) {
   );
 }
 
-const CARD =
-  "flex h-full flex-col rounded-xl border border-slate-200/95 bg-white p-3 shadow-sm transition hover:border-slate-300 hover:shadow-sm sm:p-3.5";
-
-const ICON_WRAP =
-  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#eff6ff] ring-1 ring-blue-100 sm:h-9 sm:w-9";
-
-const LINK_BTN =
-  "inline-flex min-h-[2.25rem] w-full items-center justify-center rounded-lg bg-[#1d4ed8] px-3 text-xs font-semibold text-white shadow-sm shadow-[#1d4ed8]/18 transition hover:bg-[#1e40af] sm:w-auto sm:min-h-[2.375rem] sm:px-4 sm:text-sm";
-
-function ResourceCard({ item }: { item: ResourceTutoItem }) {
-  return (
-    <article className={CARD}>
-      <div className="flex items-start gap-2.5 sm:gap-3">
-        <span className={ICON_WRAP} aria-hidden>
-          <ResourceGlyph />
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
-            <h2 className="text-[0.8125rem] font-bold leading-snug tracking-tight text-slate-900 sm:text-sm">{item.title}</h2>
-            <BadgeStatus status={item.status} />
-          </div>
-          <p className="mt-1 text-[0.75rem] leading-snug text-slate-600 sm:mt-1.5 sm:text-[0.8125rem] sm:leading-relaxed">{item.desc}</p>
-        </div>
-      </div>
-      <div className="mt-2.5 sm:mt-3">
-        <Link href={item.href} className={LINK_BTN}>
-          Ouvrir le tutoriel
-        </Link>
-      </div>
-    </article>
-  );
-}
-
 export default function RessourcesTutosPage() {
   return (
-    <div className="min-h-screen bg-[#f8fafc]">
+    <div className="relative min-h-screen overflow-x-clip bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9]">
       <MarketingSiteHeader plainBg />
 
       <main className="mx-auto max-w-site px-4 pb-14 pt-10 sm:px-6 md:pb-16 md:pt-12">
-        <header className="w-full border-b border-slate-200/90 pb-6 md:pb-8">
-          <nav className="mb-4 text-[0.6875rem] text-slate-700 sm:text-sm" aria-label="Fil d’Ariane">
-            <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <header className="mx-auto max-w-3xl border-b border-slate-200/90 pb-8 text-center md:pb-10">
+          <nav className="mb-4 text-sm text-slate-600" aria-label="Fil d’Ariane">
+            <ol className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
               <li>
-                <Link href="/ressources" className="font-medium text-black hover:text-[#1d4ed8]">
+                <Link href="/ressources" className="font-medium text-[#2563eb] hover:underline">
                   Ressources
                 </Link>
               </li>
               <li className="text-slate-400" aria-hidden>
                 /
               </li>
-              <li className="font-medium text-black">Tutoriels</li>
+              <li className="font-medium text-slate-900">Tutoriels</li>
             </ol>
           </nav>
-          <h1 className="text-balance text-2xl font-bold tracking-tight text-black md:text-3xl">Tutoriels</h1>
-          <p className="mt-3 max-w-xl text-xs leading-snug text-slate-700 sm:text-sm sm:leading-relaxed md:text-[0.9375rem]">
-            Tutoriels courts et fiches PDF préparés par BeWork : méthodes pas à pas avec prompts à copier. Pour un guide plus large sur les
-            comptes rendus chantier&nbsp;avec l&apos;IA, voir aussi la liste des&nbsp;
-            <Link href="/ressources/guides" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
-              guides
-            </Link>
-            .
+          <h1 className="font-heading text-balance text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl">
+            Tutoriels
+          </h1>
+          <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
+            Tutoriels courts et fiches PDF préparés par BeWork : méthodes pas à pas avec prompts à copier. Téléchargez le PDF
+            directement ou ouvrez la fiche pour le lire en ligne.
           </p>
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-            <CalendlyBookingLink className="inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50">
-              Réserver un appel
-            </CalendlyBookingLink>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <CalendlyBookingLink className={resourcesBtnSecondary}>Réserver un appel</CalendlyBookingLink>
           </div>
         </header>
 
-        <div className="mx-auto mt-8 w-full max-w-4xl">
-          {RESOURCE_TUTO_ITEMS.length === 0 ? null : (
-            <div
-              className={
-                RESOURCE_TUTO_ITEMS.length === 1
-                  ? "mx-auto max-w-lg"
-                  : "grid grid-cols-1 items-stretch gap-2 sm:grid-cols-2 sm:gap-2.5 md:gap-3"
-              }
-            >
-              {RESOURCE_TUTO_ITEMS.map((item) => (
-                <ResourceCard key={item.href} item={item} />
-              ))}
-            </div>
-          )}
-        </div>
+        <ResourcesClickableList
+          className="mx-auto mt-10 max-w-6xl"
+          columns={2}
+          items={RESOURCE_TUTO_ITEMS.map((item) => {
+            const pdfHref = getResourcePdfPublicPath(item.href);
+            return {
+              href: item.href,
+              title: item.title,
+              description: item.desc,
+              badge: <BadgeStatus status={item.status} />,
+              icon: <ResourceGlyph className="h-5 w-5 sm:h-[1.125rem] sm:w-[1.125rem]" />,
+              pdfHref,
+              resourceSlug: resourceSlugFromHref(item.href),
+              openLabel: "Ouvrir le tutoriel",
+              pdfLabel: "Télécharger le PDF",
+            };
+          })}
+        />
       </main>
 
       <MarketingSiteFooter />

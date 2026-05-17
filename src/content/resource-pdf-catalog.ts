@@ -50,3 +50,18 @@ export const RESOURCE_PDF_CATALOG: readonly ResourcePdfCatalogEntry[] = [
   ...RESOURCE_PDF_GUIDES,
   ...RESOURCE_PDF_TUTOS,
 ];
+
+const PDF_PUBLIC_PATH_BY_HREF: Readonly<Record<string, string>> = Object.fromEntries(
+  RESOURCE_PDF_CATALOG.map((e) => [e.href, `/ressources/pdf/${e.pdfFile}`]),
+);
+
+/** Chemin public du PDF associé à une page ressource, ou `undefined` si aucun PDF catalogué. */
+export function getResourcePdfPublicPath(href: string): string | undefined {
+  return PDF_PUBLIC_PATH_BY_HREF[href];
+}
+
+/** Slug analytics / dataLayer à partir de la route ressource. */
+export function resourceSlugFromHref(href: string): string {
+  const normalized = href.startsWith("/") ? href.slice(1) : href;
+  return normalized.replace(/^ressources\//, "") || "resource";
+}

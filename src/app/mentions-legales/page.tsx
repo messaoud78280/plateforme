@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
+import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import { absoluteUrl } from "@/lib/site";
 
 const path = "/mentions-legales";
@@ -68,12 +69,20 @@ export default function MentionsLegalesPage() {
       <h2>2. Contact</h2>
       <p>
         E-mail&nbsp;:{" "}
-        <a href="mailto:contact@bework.fr" className="font-medium text-[#1d4ed8] underline-offset-2 hover:underline">
+        <a
+          href="mailto:contact@bework.fr"
+          className="font-medium text-[#1d4ed8] underline-offset-2 hover:underline"
+          {...plausibleTrackProps(PLAUSIBLE_EVENTS.CLICK_EMAIL, "mentions-legales")}
+        >
           contact@bework.fr
         </a>
         <br />
         Téléphone&nbsp;:{" "}
-        <a href="tel:+33695661818" className="font-medium text-[#1d4ed8] underline-offset-2 hover:underline">
+        <a
+          href="tel:+33695661818"
+          className="font-medium text-[#1d4ed8] underline-offset-2 hover:underline"
+          {...plausibleTrackProps(PLAUSIBLE_EVENTS.CLICK_TELEPHONE, "mentions-legales")}
+        >
           06&nbsp;95&nbsp;66&nbsp;18&nbsp;18
         </a>
       </p>

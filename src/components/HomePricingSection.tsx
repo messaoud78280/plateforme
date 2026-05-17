@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import type { PublicPlanKey } from "@/lib/subscription-plans";
 import {
   CREDIT_MINUTES,
@@ -197,7 +198,11 @@ export function HomePricingSection() {
 
         <p className="mx-auto mt-4 max-w-2xl text-center text-[12px] leading-relaxed text-slate-600 md:text-[13px]">
           Besoin d’un repère de coût complet ?{" "}
-          <Link href="/tarifs" className="font-semibold text-[#1d4ed8] hover:text-[#1e40af]">
+          <Link
+            href="/tarifs"
+            className="font-semibold text-[#1d4ed8] hover:text-[#1e40af]"
+            {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_TARIFS, "home-pricing")}
+          >
             Voir le détail des forfaits
           </Link>
           .

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
+import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import { absoluteUrl } from "@/lib/site";
 
 const path = "/politique-confidentialite";
@@ -56,7 +57,11 @@ export default function PolitiqueConfidentialitePage() {
         Responsable de publication&nbsp;: <strong>Laure Olivie</strong>
         <br />
         Contact RGPD&nbsp;:{" "}
-        <a href="mailto:contact@bework.fr" className="font-medium text-[#1d4ed8] underline-offset-2 hover:underline">
+        <a
+          href="mailto:contact@bework.fr"
+          className="font-medium text-[#1d4ed8] underline-offset-2 hover:underline"
+          {...plausibleTrackProps(PLAUSIBLE_EVENTS.CLICK_EMAIL, "politique-confidentialite-rgpd")}
+        >
           contact@bework.fr
         </a>
       </p>
@@ -152,7 +157,11 @@ export default function PolitiqueConfidentialitePage() {
       </p>
       <p>
         Pour exercer ses droits, l’utilisateur peut contacter BeWork à l’adresse suivante&nbsp;:{" "}
-        <a href="mailto:contact@bework.fr" className="font-medium text-[#1d4ed8] underline-offset-2 hover:underline">
+        <a
+          href="mailto:contact@bework.fr"
+          className="font-medium text-[#1d4ed8] underline-offset-2 hover:underline"
+          {...plausibleTrackProps(PLAUSIBLE_EVENTS.CLICK_EMAIL, "politique-confidentialite-droits")}
+        >
           contact@bework.fr
         </a>
       </p>

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Architects_Daughter, Geist_Mono, Inter, Rajdhani } from "next/font/google";
 import "./globals.css";
+import { PlausibleScript } from "@/components/analytics/PlausibleScript";
 import { Providers } from "@/components/Providers";
 import { SEO_KEYWORDS_GLOBAL, SEO_VALUE_PROPOSITION, SEO_VALUE_PROPOSITION_SHORT } from "@/lib/seo-keywords";
 import { jsonLdCountriesServed, jsonLdExpandedAreaServed } from "@/lib/jsonld-area-served";
@@ -232,6 +233,7 @@ export default function RootLayout({
     <html lang="fr">
       <head>
         <link rel="alternate" type="text/plain" href={llmsTxtUrl} title="Index pour assistants IA (llms.txt)" />
+        <PlausibleScript />
       </head>
       <body
         className={`${inter.variable} ${rajdhani.variable} ${architectsDaughter.variable} ${geistMono.variable} min-w-0 overflow-x-clip antialiased text-black`}

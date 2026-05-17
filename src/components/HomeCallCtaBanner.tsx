@@ -38,6 +38,7 @@ export function HomeCallCtaBanner() {
 
           <div className="flex shrink-0 sm:justify-end">
             <CalendlyBookingLink
+              trackLocation="home-cta-banner"
               className="inline-flex h-12 min-h-[3rem] w-full items-center justify-center gap-2 rounded-xl border border-[#2563eb]/70 bg-gradient-to-b from-[#3b82f6] via-[#2563eb] to-[#1d4ed8] px-6 text-base font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_4px_20px_rgba(29,78,216,0.32)] transition hover:border-[#3b82f6] hover:from-[#2563eb] hover:via-[#1d4ed8] hover:to-[#1e40af] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_6px_24px_rgba(29,78,216,0.38)] active:translate-y-px md:w-auto md:px-8"
             >
               <IconCalendar className="h-[18px] w-[18px] shrink-0 opacity-95" aria-hidden />

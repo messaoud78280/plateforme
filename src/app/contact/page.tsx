@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
+import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import { absoluteUrl } from "@/lib/site";
 
 const pageUrl = absoluteUrl("/contact");
@@ -55,7 +56,10 @@ export default function ContactPage() {
           </p>
 
           <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
-            <CalendlyBookingLink className="inline-flex min-h-[3rem] items-center justify-center rounded-xl bg-[#1d4ed8] px-8 py-3.5 text-center text-base font-semibold text-white shadow-md shadow-[#1d4ed8]/25 transition hover:bg-[#1e40af]">
+            <CalendlyBookingLink
+              trackLocation="contact-page"
+              className="inline-flex min-h-[3rem] items-center justify-center rounded-xl bg-[#1d4ed8] px-8 py-3.5 text-center text-base font-semibold text-white shadow-md shadow-[#1d4ed8]/25 transition hover:bg-[#1e40af]"
+            >
               Réserver un appel découverte
             </CalendlyBookingLink>
             <Link
@@ -67,6 +71,7 @@ export default function ContactPage() {
             <Link
               href="/tarifs"
               className="inline-flex min-h-[3rem] items-center justify-center rounded-xl border-2 border-slate-200 bg-white px-8 py-3.5 text-center text-base font-semibold text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+              {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_TARIFS, "contact-page")}
             >
               Voir les tarifs
             </Link>

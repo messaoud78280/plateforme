@@ -4,6 +4,7 @@ import { BlueprintCotationFooterHairline } from "@/components/home/BlueprintCota
 import { MarketingSitePreFooter } from "@/components/layout/MarketingSitePreFooter";
 import { BTP_PAIN_PAGE_CLUSTER } from "@/lib/btp-pain-pages";
 import { EXTERNALISATION_ADMIN_BT_NAV } from "@/lib/externalisation-administrative-btp-geo";
+import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import { SITE_URL, getOrgSameAs } from "@/lib/site";
 
 const COL_LINK =
@@ -254,7 +255,7 @@ export function MarketingSiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className={COL_LINK}>
+                <Link href="/contact" className={COL_LINK} {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "footer-column")}>
                   Contact
                 </Link>
               </li>
@@ -306,7 +307,11 @@ export function MarketingSiteFooter() {
               <Link href="/faq" className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70">
                 Centre d&apos;aide / FAQ
               </Link>
-              <Link href="/contact" className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70">
+              <Link
+                href="/contact"
+                className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70"
+                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "footer-bar")}
+              >
                 Demandes légales
               </Link>
               <a

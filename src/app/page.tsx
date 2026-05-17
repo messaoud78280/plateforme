@@ -28,6 +28,7 @@ import {
 import { jsonLdExpandedAreaServed } from "@/lib/jsonld-area-served";
 import { SEO_KEYWORDS_HOME } from "@/lib/seo-keywords";
 import { EXTERNALISATION_ADMIN_BT_NAV } from "@/lib/externalisation-administrative-btp-geo";
+import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import { SITE_URL, absoluteUrl } from "@/lib/site";
 
 /** Vidéo hero — même fichier que dans `HeroPresentationVideo` ; durée ~13 s (fichier court présentation). */
@@ -457,13 +458,21 @@ export default function HomePage() {
                     <span className="text-slate-300" aria-hidden>
                       ·
                     </span>
-                    <Link href="/tarifs" className="text-[#1d4ed8] underline-offset-2 hover:underline">
+                    <Link
+                      href="/tarifs"
+                      className="text-[#1d4ed8] underline-offset-2 hover:underline"
+                      {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_TARIFS, "home-services-strip")}
+                    >
                       Tarifs
                     </Link>
                     <span className="text-slate-300" aria-hidden>
                       ·
                     </span>
-                    <Link href="/contact" className="text-[#1d4ed8] underline-offset-2 hover:underline">
+                    <Link
+                      href="/contact"
+                      className="text-[#1d4ed8] underline-offset-2 hover:underline"
+                      {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-services-strip")}
+                    >
                       Contact
                     </Link>
                   </p>
@@ -671,10 +680,14 @@ export default function HomePage() {
                 <Link
                   href="/tarifs"
                   className="inline-flex w-full justify-center rounded-lg border-2 border-[#1d4ed8] bg-white px-8 py-4 font-semibold text-black shadow-md transition-all hover:bg-[#f8f9fb] md:w-auto"
+                  {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_TARIFS, "home-final-cta")}
                 >
                   Consulter les forfaits
                 </Link>
-                <CalendlyBookingLink className="inline-flex w-full justify-center rounded-lg bg-[#1d4ed8] px-8 py-4 font-semibold text-white shadow-md transition-all hover:bg-[#1e40af] md:w-auto">
+                <CalendlyBookingLink
+                  trackLocation="home-final-cta"
+                  className="inline-flex w-full justify-center rounded-lg bg-[#1d4ed8] px-8 py-4 font-semibold text-white shadow-md transition-all hover:bg-[#1e40af] md:w-auto"
+                >
                   Échanger sur votre besoin
                 </CalendlyBookingLink>
               </div>

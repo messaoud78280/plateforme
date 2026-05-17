@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
+import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import { MarketingHeaderBlueprintDecor } from "@/components/layout/MarketingHeaderBlueprintDecor";
 
 type Props = {
@@ -231,6 +232,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               <span className="whitespace-nowrap">Connexion</span>
             </Link>
             <CalendlyBookingLink
+              trackLocation="header-desktop"
               className="inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-[10px] bg-[#1d4ed8] px-3.5 py-2 text-base font-semibold tracking-tight text-white bework-cta-primary-glow transition hover:bg-[#1e40af] xl:px-4"
             >
               <IconCalendar className="h-[18px] w-[18px] shrink-0 text-white" aria-hidden />
@@ -324,6 +326,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             <Link
               href="/tarifs"
               className="rounded-[10px] px-1.5 py-2 text-sm font-[530] tracking-tight text-black whitespace-nowrap transition-colors hover:text-[#1d4ed8] xl:px-2"
+              {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_TARIFS, "header-nav")}
             >
               Tarifs
             </Link>
@@ -496,6 +499,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 ))}
               </ul>
               <CalendlyBookingLink
+                trackLocation="header-mobile-menu"
                 className="mt-2 inline-flex min-h-[3rem] justify-center rounded-xl bg-[#1d4ed8] px-4 py-3 text-base font-semibold text-white bework-cta-primary-glow hover:bg-[#1e40af]"
                 onClick={() => setMobileOpen(false)}
               >
@@ -511,7 +515,12 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               >
                 Process BeWork
               </Link>
-              <Link href="/tarifs" className="rounded-lg px-3 py-3 text-sm font-[530] text-slate-800 hover:bg-slate-50" onClick={() => setMobileOpen(false)}>
+              <Link
+                href="/tarifs"
+                className="rounded-lg px-3 py-3 text-sm font-[530] text-slate-800 hover:bg-slate-50"
+                onClick={() => setMobileOpen(false)}
+                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_TARIFS, "header-mobile-nav")}
+              >
                 Tarifs
               </Link>
               <p className="mt-3 px-3 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-[#1d4ed8]">
@@ -559,6 +568,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 Connexion
               </Link>
               <CalendlyBookingLink
+                trackLocation="header-mobile-footer"
                 className="inline-flex min-h-[3rem] items-center justify-center gap-2 rounded-[10px] bg-[#1d4ed8] px-4 py-3 text-base font-semibold text-white bework-cta-primary-glow hover:bg-[#1e40af]"
                 onClick={() => setMobileOpen(false)}
               >

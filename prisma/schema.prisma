@@ -71,6 +71,7 @@ model User {
   subscriptions         Subscription[]
   payments              Payment[]
   actionsTransactions   ActionsTransaction[]
+  skillCctpSessions     SkillCctpSession[]
 
   // NextAuth (magic link)
   accounts              Account[]
@@ -872,4 +873,43 @@ model QuoteLine {
   @@index([documentId])
   @@index([workItemId])
   @@index([lot])
+}
+
+/// Session Skill CCTP (génération, historique, exports)
+model SkillCctpSession {
+  id                 String   @id @default(cuid())
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requestText        String   @db.Text
+  projectType        String?
+  lot                String?
+  location           String?
+  constraints        String?  @db.Text
+  detailLevel        String   @default("standard")
+  availableDocuments String?  @db.Text
+  normReferences     Json?
+  extractedContext   String?  @db.Text
+  resultMarkdown     String?  @db.Text
+  usedLlm            Boolean  @default(false)
+  notice             String?  @db.Text
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  files SkillCctpFile[]
+
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+model SkillCctpFile {
+  id            String   @id @default(cuid())
+  sessionId     String
+  session       SkillCctpSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  kind          String
+  fileName      String
+  mimeType      String?
+  fileSize      Int
+  extractedText String?  @db.Text
+  createdAt     DateTime @default(now())
+
+  @@index([sessionId])
 }

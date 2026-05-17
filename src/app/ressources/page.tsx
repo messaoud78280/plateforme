@@ -1,10 +1,20 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { BlueprintRessourcesBackdrop } from "@/components/home/BlueprintCotationDecor";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { ResourceSpotlightCarousel } from "@/components/ressources/ResourceSpotlightCarousel";
+import {
+  ResourcesSectionHeader,
+  ResourcesThemeCard,
+  resourcesBtnPrimary,
+  resourcesBtnSecondary,
+  resourcesCardLinkBtn,
+  resourcesCardShell,
+  resourcesIconWrap,
+} from "@/components/ressources/resources-hub-ui";
 import { BLOG_ARTICLES, BLOG_SLUGS } from "@/content/blog-articles";
 import { CAS_CLIENT_CASES } from "@/content/cas-clients-cases";
 import { RESOURCE_GUIDE_PAGE_ITEMS, type ResourceGuideBadge } from "@/content/resource-guides-pages";
@@ -154,185 +164,160 @@ function UsersGlyph({ className }: { className?: string }) {
   );
 }
 
-const RESOURCE_CARD_SHELL =
-  "flex h-full flex-col rounded-xl border border-slate-200/95 bg-white shadow-sm transition hover:border-slate-300 hover:shadow-sm p-3 sm:p-3.5";
+const RESOURCE_CARD_ROW = "flex items-start gap-3 sm:gap-3.5";
 
-const RESOURCE_ICON_WRAP =
-  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#eff6ff] ring-1 ring-blue-100 sm:h-9 sm:w-9";
+const CARD_STRIPE =
+  "pointer-events-none absolute inset-x-4 bottom-0 h-[2px] rounded-t-full bg-gradient-to-r from-[#1d4ed8] via-[#2563eb] to-[#3b82f6] opacity-0 transition-opacity duration-300 motion-safe:group-hover/card:opacity-90 sm:inset-x-5";
 
-const RESOURCE_CARD_ROW = "flex items-start gap-2.5 sm:gap-3";
-
-const RESOURCE_LINK_BTN =
-  "inline-flex min-h-[2.25rem] w-full items-center justify-center rounded-lg bg-[#1d4ed8] px-3 text-xs font-semibold text-white shadow-sm shadow-[#1d4ed8]/18 transition hover:bg-[#1e40af] sm:w-auto sm:min-h-[2.375rem] sm:px-4 sm:text-sm";
-
-function TutoResourceCard({ item }: { item: ResourceTutoItem }) {
+function ResourceCarouselCard({
+  title,
+  badge,
+  excerpt,
+  href,
+  cta,
+  glyph,
+}: {
+  title: string;
+  badge: ResourceStatus | "Cas client" | "Guide" | "Guide PDF";
+  excerpt: ReactNode;
+  href: string;
+  cta: string;
+  glyph: ReactNode;
+}) {
   return (
-    <article className={RESOURCE_CARD_SHELL}>
+    <article className={resourcesCardShell}>
+      <span className={CARD_STRIPE} aria-hidden />
       <div className={RESOURCE_CARD_ROW}>
-        <span className={RESOURCE_ICON_WRAP} aria-hidden>
-          <ResourceGlyph />
+        <span className={resourcesIconWrap} aria-hidden>
+          {glyph}
         </span>
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
-            <h3 className="text-[0.8125rem] font-bold leading-snug tracking-tight text-slate-900 sm:text-sm">
-              {item.title}
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <h3 className="font-heading text-base font-bold leading-snug tracking-tight text-[#0f172a] sm:text-[1.05rem]">
+              {title}
             </h3>
-            <BadgeStatus status={item.status} />
+            <BadgeStatus status={badge} />
           </div>
-          <p className="mt-1 text-[0.75rem] leading-snug text-slate-600 sm:mt-1.5 sm:text-[0.8125rem] sm:leading-relaxed">{item.desc}</p>
+          <p className="mt-2 text-sm leading-relaxed text-slate-600">{excerpt}</p>
         </div>
       </div>
-      <div className="mt-2.5 sm:mt-3">
-        <Link href={item.href} className={RESOURCE_LINK_BTN}>
-          Ouvrir le tutoriel
+      <div className="mt-4 sm:mt-5">
+        <Link href={href} className={resourcesCardLinkBtn}>
+          {cta}
         </Link>
       </div>
     </article>
+  );
+}
+
+function TutoResourceCard({ item }: { item: ResourceTutoItem }) {
+  return (
+    <ResourceCarouselCard
+      title={item.title}
+      badge={item.status}
+      excerpt={item.desc}
+      href={item.href}
+      cta="Ouvrir le tutoriel"
+      glyph={<ResourceGlyph className="h-5 w-5 sm:h-[1.125rem] sm:w-[1.125rem]" />}
+    />
   );
 }
 
 function GuideCarouselCard({ item }: { item: (typeof GUIDE_CAROUSEL_ITEMS)[number] }) {
   return (
-    <article className={RESOURCE_CARD_SHELL}>
-      <div className={RESOURCE_CARD_ROW}>
-        <span className={RESOURCE_ICON_WRAP} aria-hidden>
-          <GuideGlyph />
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
-            <h3 className="text-[0.8125rem] font-bold leading-snug tracking-tight text-slate-900 sm:text-sm">{item.title}</h3>
-            <BadgeStatus status={item.badge ?? "Guide PDF"} />
-          </div>
-          <p className="mt-1 text-[0.75rem] leading-snug text-slate-600 sm:mt-1.5 sm:text-[0.8125rem] sm:leading-relaxed">{item.excerpt}</p>
-        </div>
-      </div>
-      <div className="mt-2.5 sm:mt-3">
-        <Link href={item.href} className={RESOURCE_LINK_BTN}>
-          Lire le guide
-        </Link>
-      </div>
-    </article>
+    <ResourceCarouselCard
+      title={item.title}
+      badge={item.badge ?? "Guide PDF"}
+      excerpt={item.excerpt}
+      href={item.href}
+      cta="Lire le guide"
+      glyph={<GuideGlyph className="h-5 w-5 sm:h-[1.125rem] sm:w-[1.125rem]" />}
+    />
   );
 }
 
 function CaseCarouselCard({ cas }: { cas: (typeof CAS_CLIENT_CASES)[number] }) {
   return (
-    <article className={RESOURCE_CARD_SHELL}>
-      <div className={RESOURCE_CARD_ROW}>
-        <span className={RESOURCE_ICON_WRAP} aria-hidden>
-          <UsersGlyph />
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
-            <h3 className="text-[0.8125rem] font-bold leading-snug text-slate-900 sm:text-sm">{cas.title}</h3>
-            <BadgeStatus status="Cas client" />
-          </div>
-          <p className="mt-1 text-[0.75rem] leading-snug text-slate-600 sm:mt-1.5 sm:text-[0.8125rem] sm:leading-relaxed">
-            <span className="font-semibold text-slate-700">Après :</span> {cas.after}
-          </p>
-        </div>
-      </div>
-      <div className="mt-2.5 sm:mt-3">
-        <Link href="/cas-clients" className={RESOURCE_LINK_BTN}>
-          Voir les cas clients
-        </Link>
-      </div>
-    </article>
+    <ResourceCarouselCard
+      title={cas.title}
+      badge="Cas client"
+      excerpt={
+        <>
+          <span className="font-semibold text-slate-700">Après :</span> {cas.after}
+        </>
+      }
+      href="/cas-clients"
+      cta="Voir les cas clients"
+      glyph={<UsersGlyph className="h-5 w-5 sm:h-[1.125rem] sm:w-[1.125rem]" />}
+    />
   );
 }
 
 export default function RessourcesPage() {
   return (
-    <div className="relative min-h-screen bg-[#f8fafc]">
-      <BlueprintRessourcesBackdrop />
+    <div className="relative min-h-screen overflow-x-clip bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9]">
+      <BlueprintRessourcesBackdrop className="opacity-[0.55] md:opacity-70" />
       <FaqJsonLd />
       <ResourcesCollectionJsonLd />
       <MarketingSiteHeader plainBg />
 
-      <main className="relative z-10 mx-auto max-w-site px-4 pb-16 pt-10 sm:px-6 md:pb-20 md:pt-14">
-        <header className="border-b border-slate-200/90 pb-8 md:pb-10">
-          <div className="max-w-xl text-left">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#1d4ed8]">Ressources BeWork</p>
-            <h1 className="mt-2 text-balance text-2xl font-bold tracking-tight text-black md:text-3xl lg:text-[2rem] lg:leading-tight">
-              Tutoriels, guides et cas clients
-            </h1>
-            <p className="mt-3 text-sm leading-relaxed text-slate-700 md:mt-3.5 md:text-[0.9375rem] md:leading-relaxed">
-              Une entrée unique pour parcourir nos tutoriels PDF, les guides blog (administratif BTP) et des exemples de missions côté terrain et bureau.
-            </p>
-            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              <Link
-                href="/ressources/tutos"
-                className="inline-flex min-h-9 w-full items-center justify-center rounded-lg bg-[#1d4ed8] px-4 text-sm font-semibold text-white shadow-sm shadow-[#1d4ed8]/18 transition hover:bg-[#1e40af] sm:w-auto sm:min-h-10 sm:px-5"
-              >
-                Voir les tutoriels
-              </Link>
-              <Link
-                href="/ressources/guides"
-                className="inline-flex min-h-9 w-full items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 sm:w-auto sm:min-h-10 sm:px-5"
-              >
-                Liste des guides
-              </Link>
-              <CalendlyBookingLink className="inline-flex min-h-9 w-full items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 sm:w-auto sm:min-h-10 sm:px-5">
-                Réserver un appel
-              </CalendlyBookingLink>
-            </div>
+      <main className="relative z-10 mx-auto max-w-site px-4 pb-20 pt-6 sm:px-6 md:pb-24 md:pt-10">
+        <header className="mx-auto max-w-3xl pb-12 text-center md:pb-16">
+          <p className="mx-auto inline-flex items-center gap-2 rounded-full border border-[#93c5fd]/70 bg-gradient-to-r from-[#eff6ff] via-white to-[#eff6ff] px-4 py-1.5 text-xs font-semibold tracking-tight text-[#2563eb] shadow-[0_8px_28px_-18px_rgba(37,99,235,0.35)] ring-1 ring-white/80 sm:text-sm">
+            <ResourceGlyph className="h-4 w-4 shrink-0" />
+            Ressources BeWork · BTP
+          </p>
+          <h1 className="font-heading mt-5 text-balance text-[clamp(1.75rem,4vw,2.65rem)] font-bold leading-[1.15] tracking-tight text-[#0f172a]">
+            Tutoriels, guides et{" "}
+            <span className="text-[#2563eb]">cas clients</span>
+          </h1>
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-600 md:text-lg">
+            Méthodes PDF, guides terrain et retours d&apos;expérience pour structurer votre administratif chantier — sans jargon inutile.
+          </p>
+          <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap">
+            <Link href="/ressources/tutos" className={resourcesBtnPrimary}>
+              Voir les tutoriels
+            </Link>
+            <Link href="/ressources/guides" className={resourcesBtnSecondary}>
+              Liste des guides
+            </Link>
+            <CalendlyBookingLink className={resourcesBtnSecondary}>Réserver un appel</CalendlyBookingLink>
           </div>
         </header>
 
         <section
           id="parcours-themes"
-          className="mt-10 scroll-mt-24 border-t border-slate-200/90 pt-10 md:scroll-mt-28 md:pt-12"
+          className="scroll-mt-28 border-y border-slate-200/80 bg-white/60 py-12 backdrop-blur-[2px] md:scroll-mt-32 md:py-16"
           aria-labelledby="titre-themes"
         >
-          <h2 id="titre-themes" className="text-lg font-bold tracking-tight text-black sm:text-xl">
-            Parcourir par thème
-          </h2>
-          <p className="mt-1 max-w-2xl text-xs leading-snug text-slate-600 sm:text-sm sm:leading-relaxed">
-            Raccourcis éditoriaux vers les hubs utiles (gestion de chantier, appels d’offres, sécurité, devis…). Les guides longs restent listés ci‑dessous et sur la page Guides.
-          </p>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ResourcesSectionHeader
+            id="titre-themes"
+            title="Parcourir par thème"
+            description="Raccourcis vers gestion de chantier, appels d’offres, sécurité, devis et organisation conducteur de travaux."
+          />
+          <div className="mx-auto mt-10 grid max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {RESOURCE_GUIDE_CATEGORIES.map((cat) => (
-              <div
+              <ResourcesThemeCard
                 key={cat.id}
-                className="rounded-xl border border-slate-200/95 bg-white p-4 shadow-sm ring-1 ring-slate-100/80"
-              >
-                <h3 className="text-sm font-bold text-slate-900">{cat.title}</h3>
-                <p className="mt-1.5 text-xs leading-relaxed text-slate-600">{cat.description}</p>
-                <ul className="mt-3 space-y-1.5 text-xs font-medium sm:text-[0.8125rem]">
-                  {cat.links.map((l) => (
-                    <li key={l.href}>
-                      <Link href={l.href} className="text-[#1d4ed8] underline-offset-2 hover:underline">
-                        {l.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                id={cat.id}
+                title={cat.title}
+                description={cat.description}
+                links={cat.links}
+              />
             ))}
           </div>
         </section>
 
         {RESOURCE_TUTO_ITEMS.length > 0 ? (
-          <section
-            id="tutoriels"
-            className="mt-10 scroll-mt-24 md:scroll-mt-28"
-            aria-labelledby="titre-tutoriels"
-          >
-            <div className="max-w-xl text-left">
-              <h2 id="titre-tutoriels" className="text-lg font-bold tracking-tight text-black sm:text-xl">
-                Tutoriels
-              </h2>
-              <p className="mt-1 text-xs leading-snug text-slate-600 sm:text-sm sm:leading-relaxed">
-                PDF et méthodes courtes pour avancer vite sur vos dossiers chantier.
-              </p>
-              <Link
-                href="/ressources/tutos"
-                className="mt-2 inline-flex text-xs font-semibold text-[#1d4ed8] underline-offset-4 hover:underline sm:mt-2.5 sm:text-sm"
-              >
-                Tous les tutoriels →
-              </Link>
-            </div>
-            <div className="mt-4 w-full max-w-[min(100%,72rem)]">
+          <section id="tutoriels" className="mt-14 scroll-mt-28 md:mt-16 md:scroll-mt-32" aria-labelledby="titre-tutoriels">
+            <ResourcesSectionHeader
+              id="titre-tutoriels"
+              title="Tutoriels"
+              description="PDF et méthodes courtes pour avancer vite sur vos dossiers chantier."
+              linkHref="/ressources/tutos"
+              linkLabel="Tous les tutoriels →"
+            />
+            <div className="mx-auto mt-8 w-full max-w-6xl">
               <ResourceSpotlightCarousel
                 slidesPerView={2}
                 dotListAriaLabel="Choisir une page de tutoriels"
@@ -347,60 +332,41 @@ export default function RessourcesPage() {
           </section>
         ) : null}
 
-        <section id="guides" className="mt-10 scroll-mt-24 md:scroll-mt-28" aria-labelledby="titre-guides">
-          <div className="max-w-xl text-left">
-            <h2 id="titre-guides" className="text-lg font-bold tracking-tight text-black sm:text-xl">
-              Guides
-            </h2>
-            <p className="mt-1 text-xs leading-snug text-slate-600 sm:text-sm sm:leading-relaxed">
-              Guides PDF (compilation conducteur de travaux, IA &amp; skills Claude) pour structurer votre administratif chantier.
-            </p>
+        <section id="guides" className="mt-14 scroll-mt-28 md:mt-16 md:scroll-mt-32" aria-labelledby="titre-guides">
+          <ResourcesSectionHeader
+            id="titre-guides"
+            title="Guides"
+            description="Guides PDF et articles pour structurer votre administratif chantier (conducteur de travaux, IA & skills)."
+            linkHref={GUIDE_CAROUSEL_ITEMS.length > 0 ? "/ressources/guides" : undefined}
+            linkLabel={GUIDE_CAROUSEL_ITEMS.length > 0 ? "Tous les guides →" : undefined}
+          />
+          <div className="mx-auto mt-8 w-full max-w-6xl">
             {GUIDE_CAROUSEL_ITEMS.length > 0 ? (
-              <Link
-                href="/ressources/guides"
-                className="mt-2 inline-flex text-xs font-semibold text-[#1d4ed8] underline-offset-4 hover:underline sm:mt-2.5 sm:text-sm"
-              >
-                Tous les guides →
-              </Link>
-            ) : (
-              <p className="mt-2 text-xs text-slate-500 sm:text-sm">Catalogue vide pour le moment.</p>
-            )}
-          </div>
-          <div className="mt-4 w-full max-w-[min(100%,72rem)]">
-            {GUIDE_CAROUSEL_ITEMS.length > 0 ? (
-              <div className="grid grid-cols-1 items-stretch gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {GUIDE_CAROUSEL_ITEMS.map((item) => (
                   <GuideCarouselCard key={item.key} item={item} />
                 ))}
               </div>
             ) : (
               <div
-                className="rounded-xl border border-dashed border-slate-300/95 bg-slate-50/80 px-4 py-10 text-center text-sm leading-relaxed text-slate-600 sm:px-6"
+                className="rounded-2xl border border-dashed border-slate-300/90 bg-white/80 px-6 py-12 text-center text-sm leading-relaxed text-slate-600"
                 aria-live="polite"
               >
-                Aucun guide publié pour l’instant. Les tutoriels ci-dessus restent disponibles ; les guides PDF seront
-                ajoutés ici au fil des mises en ligne.
+                Aucun guide publié pour l’instant. Les tutoriels ci-dessus restent disponibles ; les guides PDF seront ajoutés ici au fil des mises en ligne.
               </div>
             )}
           </div>
         </section>
 
-        <section id="cas-clients" className="mt-10 scroll-mt-24 md:mt-12 md:scroll-mt-28" aria-labelledby="titre-cas">
-          <div className="max-w-xl text-left">
-            <h2 id="titre-cas" className="text-lg font-bold tracking-tight text-black sm:text-xl">
-              Cas clients
-            </h2>
-            <p className="mt-1 text-xs leading-snug text-slate-600 sm:text-sm sm:leading-relaxed">
-              Exemples de problématiques traitées : relances, trésorerie, dossiers chantier.
-            </p>
-            <Link
-              href="/cas-clients"
-              className="mt-2 inline-flex text-xs font-semibold text-[#1d4ed8] underline-offset-4 hover:underline sm:mt-2.5 sm:text-sm"
-            >
-              Page cas clients →
-            </Link>
-          </div>
-          <div className="mt-4 w-full max-w-[min(100%,72rem)]">
+        <section id="cas-clients" className="mt-14 scroll-mt-28 md:mt-16 md:scroll-mt-32" aria-labelledby="titre-cas">
+          <ResourcesSectionHeader
+            id="titre-cas"
+            title="Cas clients"
+            description="Exemples concrets : relances, trésorerie, dossiers chantier."
+            linkHref="/cas-clients"
+            linkLabel="Page cas clients →"
+          />
+          <div className="mx-auto mt-8 w-full max-w-6xl">
             <ResourceSpotlightCarousel
               slidesPerView={2}
               dotListAriaLabel="Choisir une page de cas clients"
@@ -414,39 +380,34 @@ export default function RessourcesPage() {
           </div>
         </section>
 
-        <section className="mx-auto mt-12 max-w-none md:mt-16" aria-label="Découvrir BeWork">
-          <div className="rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm sm:p-5 md:p-6">
-            <h2 className="text-lg font-bold tracking-tight text-black sm:text-xl">Besoin d&apos;un relais sur vos dossiers ?</h2>
-            <p className="mt-2 max-w-xl text-xs leading-snug text-slate-600 sm:text-sm sm:leading-relaxed">
-              BeWork peut structurer, relancer et suivre avec vous — vous gardez la validation terrain.
+        <section className="mx-auto mt-16 max-w-3xl md:mt-20" aria-label="Découvrir BeWork">
+          <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-6 text-center shadow-[0_10px_40px_-14px_rgba(15,23,42,0.1)] ring-1 ring-slate-100/85 sm:p-8 md:p-10">
+            <h2 className="font-heading text-2xl font-bold tracking-tight text-[#0f172a]">Besoin d&apos;un relais sur vos dossiers ?</h2>
+            <p className="mx-auto mt-3 max-w-lg text-base leading-relaxed text-slate-600">
+              BeWork structure, relance et suit avec vous — vous gardez la validation terrain.
             </p>
-            <div className="mt-4 flex max-w-sm flex-col gap-2">
-              <CalendlyBookingLink className="inline-flex min-h-9 items-center justify-center rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-[#1d4ed8]/18 hover:bg-[#1e40af]">
-                Réserver un appel
-              </CalendlyBookingLink>
-              <Link
-                href="/dashboard/nouvelle-demande"
-                className="inline-flex min-h-9 items-center justify-center rounded-lg border border-[#1d4ed8]/35 bg-[#eff6ff] px-4 py-2 text-sm font-semibold text-[#1e3a8a] hover:bg-[#dbeafe]"
-              >
+            <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <CalendlyBookingLink className={resourcesBtnPrimary}>Réserver un appel</CalendlyBookingLink>
+              <Link href="/dashboard/nouvelle-demande" className={resourcesBtnSecondary}>
                 Confier une tâche
               </Link>
             </div>
           </div>
         </section>
 
-        <section aria-label="FAQ" className="mx-auto mt-10 max-w-none pb-8 md:mt-14">
-          <h2 className="text-left text-lg font-bold text-black sm:text-xl">Questions fréquentes</h2>
-          <ul className="mt-4 space-y-2">
+        <section aria-label="FAQ" className="mx-auto mt-14 max-w-3xl pb-4 md:mt-16">
+          <h2 className="font-heading text-center text-2xl font-bold tracking-tight text-[#0f172a]">Questions fréquentes</h2>
+          <ul className="mt-6 space-y-3">
             {FAQ_ITEMS.map((item) => (
-              <li key={item.q} className="rounded-lg border border-slate-200 bg-white shadow-sm">
+              <li key={item.q} className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm ring-1 ring-slate-100/80">
                 <details className="group">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-3 text-sm font-semibold text-black [&::-webkit-details-marker]:hidden sm:px-4">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-4 text-sm font-semibold text-[#0f172a] [&::-webkit-details-marker]:hidden sm:px-5 sm:text-base">
                     {item.q}
-                    <span className="shrink-0 text-slate-500 group-open:rotate-180" aria-hidden>
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition group-open:rotate-180" aria-hidden>
                       ▾
                     </span>
                   </summary>
-                  <div className="border-t border-slate-100 px-3 py-3 text-xs leading-relaxed text-slate-600 sm:px-4 sm:text-sm">
+                  <div className="border-t border-slate-100 px-4 py-4 text-sm leading-relaxed text-slate-600 sm:px-5">
                     {item.a}
                   </div>
                 </details>

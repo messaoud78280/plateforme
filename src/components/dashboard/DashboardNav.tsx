@@ -77,7 +77,7 @@ export function DashboardNav({ role }: { role?: string | null }) {
               Rapports
             </NavLink>
             <NavLink href="/dashboard/devis" pathname={pathname} activeClass={active}>
-              BeWork Devis
+              Devis
             </NavLink>
             <NavLink href="/dashboard/skills" pathname={pathname} activeClass={active}>
               CCTP
@@ -98,7 +98,7 @@ export function DashboardNav({ role }: { role?: string | null }) {
               Historique
             </NavLink>
             <NavLink href="/dashboard/devis" pathname={pathname} activeClass={active}>
-              BeWork Devis
+              Devis
             </NavLink>
             <NavLink href="/dashboard/skills" pathname={pathname} activeClass={active}>
               CCTP

@@ -1,15 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AlertTriangle, Copy, Loader2, RotateCcw, Shield, Sparkles } from "lucide-react";
+import { AlertTriangle, Copy, Files, Loader2, RotateCcw, Shield, Sparkles } from "lucide-react";
 import type { PpspsTradeTemplate } from "@/content/ppsps-trade-templates";
 import { SKILL_PPSPS_QUICK_PROMPTS } from "@/content/skill-ppsps-quick-prompts";
 import { SkillPpspsExportButtons } from "@/components/skills/SkillPpspsExportButtons";
 import { SkillPpspsFileUpload } from "@/components/skills/SkillPpspsFileUpload";
 import { SkillPpspsModeSelector } from "@/components/skills/SkillPpspsModeSelector";
+import { SkillPpspsNormPicker } from "@/components/skills/SkillPpspsNormPicker";
 import { SkillPpspsOppbtpSearch } from "@/components/skills/SkillPpspsOppbtpSearch";
 import { SkillPpspsProjectPicker } from "@/components/skills/SkillPpspsProjectPicker";
+import { SkillPpspsRefineHistory } from "@/components/skills/SkillPpspsRefineHistory";
 import { SkillPpspsRefinePanel } from "@/components/skills/SkillPpspsRefinePanel";
+import { SkillPpspsSiteProfile } from "@/components/skills/SkillPpspsSiteProfile";
 import { SkillPpspsRiskChecklist } from "@/components/skills/SkillPpspsRiskChecklist";
 import { SkillPpspsSessionHistory } from "@/components/skills/SkillPpspsSessionHistory";
 import { SkillPpspsTradeTemplates } from "@/components/skills/SkillPpspsTradeTemplates";
@@ -20,11 +23,13 @@ import {
   PPSPS_OPERATION_TYPES,
   PPSPS_TRADES,
 } from "@/lib/skills/ppsps-labels";
-import type { PpspsGenerationMode } from "@/lib/skills/ppsps-generation-modes";
+import { getPpspsModeLabel, type PpspsGenerationMode } from "@/lib/skills/ppsps-generation-modes";
 import type { PpspsProjectOption } from "@/lib/skills/ppsps-projects";
 import type {
+  PpspsExportFormat,
   PpspsFormInput,
   PpspsGenerationResponse,
+  PpspsRefineEntry,
   PpspsSessionDetail,
   PpspsSessionSummary,
   PpspsSiteInfo,
@@ -60,6 +65,9 @@ const defaultForm: PpspsFormInput = {
   constraints: "",
   projectId: null,
   generationMode: "analyse_risques",
+  siteProfile: null,
+  normReferences: [],
+  freeformInstruction: "",
   oppbtpSearchQuery: "",
 };
 
@@ -73,12 +81,38 @@ const QUICK_PROMPT_TASK_IDS: string[][] = [
   ["m-stockage", "m-dechargement", "t-fondations"],
 ];
 
+function mergePpspsPrefill(current: PpspsFormInput, prefill: Partial<PpspsFormInput>): PpspsFormInput {
+  return {
+    ...current,
+    ...prefill,
+    projectId: prefill.projectId ?? current.projectId,
+    site: { ...current.site, ...prefill.site },
+    trades: prefill.trades?.length ? prefill.trades : current.trades,
+    selectedRiskTaskIds: prefill.selectedRiskTaskIds?.length
+      ? prefill.selectedRiskTaskIds
+      : current.selectedRiskTaskIds,
+    constraints: prefill.constraints?.trim() ? prefill.constraints : current.constraints,
+  };
+}
+
 type Props = {
   initialSessions?: PpspsSessionSummary[];
+  initialSessionId?: string;
+  initialProjectPrefill?: Partial<PpspsFormInput>;
+  initialFilterProjectId?: string;
+  initialFilterProjectTitle?: string;
 };
 
-export function SkillPpspsWorkspace({ initialSessions = [] }: Props) {
-  const [form, setForm] = useState<PpspsFormInput>(defaultForm);
+export function SkillPpspsWorkspace({
+  initialSessions = [],
+  initialSessionId,
+  initialProjectPrefill,
+  initialFilterProjectId,
+  initialFilterProjectTitle,
+}: Props) {
+  const [form, setForm] = useState<PpspsFormInput>(() =>
+    initialProjectPrefill ? mergePpspsPrefill(defaultForm, initialProjectPrefill) : defaultForm,
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<PpspsGenerationResponse | null>(null);
@@ -93,6 +127,13 @@ export function SkillPpspsWorkspace({ initialSessions = [] }: Props) {
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [linkedDocumentId, setLinkedDocumentId] = useState<string | null>(null);
+  const [saveFormat, setSaveFormat] = useState<PpspsExportFormat>("pdf");
+  const [filterProjectId, setFilterProjectId] = useState<string | null>(initialFilterProjectId ?? null);
+  const [filterProjectTitle, setFilterProjectTitle] = useState<string | null>(
+    initialFilterProjectTitle ?? null,
+  );
+  const [sessionRefines, setSessionRefines] = useState<PpspsRefineEntry[]>([]);
+  const [duplicateLoading, setDuplicateLoading] = useState(false);
 
   const setSite = (patch: Partial<PpspsSiteInfo>) => {
     setForm((f) => ({ ...f, site: { ...f.site, ...patch } }));
@@ -110,14 +151,17 @@ export function SkillPpspsWorkspace({ initialSessions = [] }: Props) {
 
   const refreshSessions = useCallback(async () => {
     try {
-      const res = await fetch("/api/skills/ppsps/sessions");
+      const url = filterProjectId
+        ? `/api/skills/ppsps/sessions?projectId=${encodeURIComponent(filterProjectId)}`
+        : "/api/skills/ppsps/sessions";
+      const res = await fetch(url);
       if (!res.ok) return;
       const data = (await res.json()) as { sessions: PpspsSessionSummary[] };
       setSessions(data.sessions ?? []);
     } catch {
       /* ignore */
     }
-  }, []);
+  }, [filterProjectId]);
 
   const loadSession = useCallback(async (id: string) => {
     setHistoryLoading(true);
@@ -139,6 +183,7 @@ export function SkillPpspsWorkspace({ initialSessions = [] }: Props) {
         });
       }
       setLinkedDocumentId(data.linkedDocumentId ?? null);
+      setSessionRefines(data.refines ?? []);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur de chargement.");
     } finally {
@@ -147,8 +192,32 @@ export function SkillPpspsWorkspace({ initialSessions = [] }: Props) {
   }, []);
 
   useEffect(() => {
-    if (!initialSessions.length) void refreshSessions();
-  }, [initialSessions.length, refreshSessions]);
+    void refreshSessions();
+  }, [refreshSessions]);
+
+  useEffect(() => {
+    if (initialFilterProjectId) {
+      setFilterProjectId(initialFilterProjectId);
+      setFilterProjectTitle(initialFilterProjectTitle ?? null);
+    }
+  }, [initialFilterProjectId, initialFilterProjectTitle]);
+
+  useEffect(() => {
+    if (initialSessionId) void loadSession(initialSessionId);
+  }, [initialSessionId, loadSession]);
+
+  const applyProjectPrefill = useCallback(async (id: string) => {
+    try {
+      const res = await fetch(`/api/skills/ppsps/projects?id=${encodeURIComponent(id)}`);
+      if (!res.ok) return;
+      const data = (await res.json()) as { prefill?: Partial<PpspsFormInput> };
+      if (data.prefill) {
+        setForm((f) => mergePpspsPrefill({ ...f, projectId: id }, data.prefill!));
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   const reset = () => {
     setForm(defaultForm);
@@ -161,6 +230,41 @@ export function SkillPpspsWorkspace({ initialSessions = [] }: Props) {
     setUploadNotice(null);
     setSaveMessage(null);
     setLinkedDocumentId(null);
+    setSessionRefines([]);
+  };
+
+  const duplicateSession = async () => {
+    if (!sessionId) return;
+    setDuplicateLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/skills/ppsps/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "duplicate", sessionId }),
+      });
+      const data = (await res.json()) as { session?: PpspsSessionDetail; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Duplication impossible.");
+      if (data.session) {
+        setActiveSessionId(data.session.id);
+        setForm(data.session.form);
+        setSessionRefines(data.session.refines ?? []);
+        if (data.session.resultMarkdown) {
+          setResult({
+            markdown: data.session.resultMarkdown,
+            usedLlm: data.session.usedLlm,
+            notice: data.session.notice ?? undefined,
+            sessionId: data.session.id,
+          });
+        }
+        setLinkedDocumentId(data.session.linkedDocumentId ?? null);
+      }
+      void refreshSessions();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erreur de duplication.");
+    } finally {
+      setDuplicateLoading(false);
+    }
   };
 
   const applyTradeTemplate = (tpl: PpspsTradeTemplate) => {
@@ -189,8 +293,19 @@ export function SkillPpspsWorkspace({ initialSessions = [] }: Props) {
 
   const submitGeneration = useCallback(
     async (opts?: { refineInstruction?: string }) => {
-      if (!opts?.refineInstruction && !form.selectedRiskTaskIds.length) {
-        setError("Sélectionnez au moins une tâche à risque avant de générer l'analyse.");
+      const auditLike =
+        form.generationMode === "audit_ppsps" || form.generationMode === "enrichissement";
+      const hasFiles = Boolean(existingPpsps) || referenceDocs.length > 0;
+      if (
+        !opts?.refineInstruction &&
+        !form.selectedRiskTaskIds.length &&
+        !(auditLike && (hasFiles || form.freeformInstruction?.trim()))
+      ) {
+        setError(
+          auditLike
+            ? "Mode audit/enrichissement : importez un PPSPS existant, ajoutez une consigne libre ou sélectionnez des tâches."
+            : "Sélectionnez au moins une tâche à risque avant de générer l'analyse.",
+        );
         return;
       }
 
@@ -200,7 +315,6 @@ export function SkillPpspsWorkspace({ initialSessions = [] }: Props) {
       setUploadNotice(null);
 
       try {
-        const hasFiles = Boolean(existingPpsps) || referenceDocs.length > 0;
         let res: Response;
 
         if (hasFiles || opts?.refineInstruction) {
@@ -230,10 +344,12 @@ export function SkillPpspsWorkspace({ initialSessions = [] }: Props) {
         const data = (await res.json()) as PpspsGenerationResponse & { error?: string };
         if (!res.ok) throw new Error(data.error ?? "Erreur de génération.");
         setResult(data);
+        const sid = data.sessionId ?? activeSessionId;
         if (data.sessionId) setActiveSessionId(data.sessionId);
         if (data.extractWarnings?.length) {
           setUploadNotice(data.extractWarnings.join(" · "));
         }
+        if (opts?.refineInstruction && sid) void loadSession(sid);
         void refreshSessions();
       } catch (e) {
         setError(e instanceof Error ? e.message : "Erreur inattendue.");
@@ -241,7 +357,7 @@ export function SkillPpspsWorkspace({ initialSessions = [] }: Props) {
         setLoading(false);
       }
     },
-    [form, existingPpsps, referenceDocs, includeOppbtpHints, activeSessionId, refreshSessions],
+    [form, existingPpsps, referenceDocs, includeOppbtpHints, activeSessionId, refreshSessions, loadSession],
   );
 
   const saveToProject = async () => {
@@ -256,7 +372,7 @@ export function SkillPpspsWorkspace({ initialSessions = [] }: Props) {
       const res = await fetch("/api/skills/ppsps/save-to-project", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, projectId: form.projectId }),
+        body: JSON.stringify({ sessionId, projectId: form.projectId, format: saveFormat }),
       });
       const data = (await res.json()) as {
         ok?: boolean;
@@ -290,11 +406,26 @@ export function SkillPpspsWorkspace({ initialSessions = [] }: Props) {
 
   return (
     <div className="space-y-6">
+      {initialFilterProjectId && filterProjectTitle ? (
+        <p className="rounded-xl border border-[#93c5fd]/40 bg-[#eff6ff] px-4 py-3 text-sm text-[#1e40af]">
+          Analyse liée au projet <strong>{filterProjectTitle}</strong> — le formulaire est prérempli.
+        </p>
+      ) : null}
+
       <SkillPpspsSessionHistory
         sessions={sessions}
         activeId={activeSessionId}
         onSelect={(id) => void loadSession(id)}
         loading={historyLoading}
+        filterProjectTitle={filterProjectId ? filterProjectTitle : null}
+        onClearProjectFilter={
+          filterProjectId
+            ? () => {
+                setFilterProjectId(null);
+                setFilterProjectTitle(null);
+              }
+            : undefined
+        }
       />
 
     <div className="grid gap-8 lg:grid-cols-2 lg:items-start">
@@ -315,13 +446,19 @@ export function SkillPpspsWorkspace({ initialSessions = [] }: Props) {
           onChange={(generationMode: PpspsGenerationMode) => setForm((f) => ({ ...f, generationMode }))}
         />
 
+        <SkillPpspsSiteProfile
+          value={form.siteProfile ?? null}
+          onChange={(siteProfile) => setForm((f) => ({ ...f, siteProfile }))}
+        />
+
         <SkillPpspsProjectPicker
           projectId={form.projectId ?? null}
-          onChange={(projectId) => setForm((f) => ({ ...f, projectId }))}
+          onChange={(projectId) => {
+            setForm((f) => ({ ...f, projectId }));
+            if (projectId) void applyProjectPrefill(projectId);
+          }}
           onPrefill={(p: PpspsProjectOption) => {
-            if (!form.site.siteName.trim()) {
-              setSite({ siteName: p.title });
-            }
+            void applyProjectPrefill(p.id);
           }}
         />
 
@@ -541,6 +678,24 @@ export function SkillPpspsWorkspace({ initialSessions = [] }: Props) {
           </div>
         </section>
 
+        <SkillPpspsNormPicker
+          selected={form.normReferences ?? []}
+          onChange={(normReferences) => setForm((f) => ({ ...f, normReferences }))}
+        />
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <h2 className="font-heading text-base font-bold text-slate-900">Consigne libre (optionnel)</h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Précisez un angle particulier (audit, lot, zone, entreprise sous-traitante…).
+          </p>
+          <textarea
+            className={`${inputClass} min-h-[88px]`}
+            value={form.freeformInstruction ?? ""}
+            onChange={(e) => setForm((f) => ({ ...f, freeformInstruction: e.target.value }))}
+            placeholder="Ex. Prioriser les risques liés à la coactivité avec l'entreprise électricité en R+3."
+          />
+        </section>
+
         <SkillPpspsOppbtpSearch
           query={form.oppbtpSearchQuery ?? ""}
           taskIds={form.selectedRiskTaskIds}
@@ -594,8 +749,21 @@ export function SkillPpspsWorkspace({ initialSessions = [] }: Props) {
       <div className="lg:sticky lg:top-6">
         <section className="flex min-h-[320px] flex-col rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
-            <h2 className="font-heading text-base font-bold text-slate-900">Résultat — analyse PPSPS</h2>
+            <h2 className="font-heading text-base font-bold text-slate-900">
+              Résultat — {getPpspsModeLabel(form.generationMode)}
+            </h2>
             <div className="flex flex-wrap gap-2">
+              {sessionId ? (
+                <button
+                  type="button"
+                  onClick={() => void duplicateSession()}
+                  disabled={duplicateLoading || loading}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+                >
+                  {duplicateLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Files className="h-3.5 w-3.5" />}
+                  Dupliquer
+                </button>
+              ) : null}
               <button
                 type="button"
                 onClick={() => void copyResult()}
@@ -610,15 +778,29 @@ export function SkillPpspsWorkspace({ initialSessions = [] }: Props) {
           <div className="space-y-3 border-b border-slate-100 px-5 pb-4">
             <SkillPpspsExportButtons sessionId={sessionId} disabled={loading} />
             {form.projectId && sessionId ? (
-              <button
-                type="button"
-                onClick={() => void saveToProject()}
-                disabled={saveLoading || loading || !result?.markdown}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-900 hover:bg-emerald-100 disabled:opacity-50 sm:w-auto"
-              >
-                {saveLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                Enregistrer dans le dossier chantier
-              </button>
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-600">
+                  Format :
+                  <select
+                    value={saveFormat}
+                    onChange={(e) => setSaveFormat(e.target.value === "doc" ? "doc" : "pdf")}
+                    className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs"
+                    disabled={saveLoading}
+                  >
+                    <option value="pdf">PDF</option>
+                    <option value="doc">Word (.doc)</option>
+                  </select>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => void saveToProject()}
+                  disabled={saveLoading || loading || !result?.markdown}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-900 hover:bg-emerald-100 disabled:opacity-50 sm:w-auto"
+                >
+                  {saveLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  Enregistrer dans le dossier chantier
+                </button>
+              </div>
             ) : null}
             {saveMessage ? (
               <p className="text-xs text-emerald-800">
@@ -666,9 +848,11 @@ export function SkillPpspsWorkspace({ initialSessions = [] }: Props) {
           onRefine={(instruction) => void submitGeneration({ refineInstruction: instruction })}
         />
 
-        {form.generationMode === "ppsps_complet" ? (
+        <SkillPpspsRefineHistory refines={sessionRefines} />
+
+        {form.generationMode && form.generationMode !== "analyse_risques" ? (
           <p className="mt-3 text-xs text-amber-800">
-            Mode PPSPS complet : trame étendue (organisation, installations, secours, environnement).
+            Mode {getPpspsModeLabel(form.generationMode)} — adaptez les imports et la consigne libre si besoin.
           </p>
         ) : null}
       </div>

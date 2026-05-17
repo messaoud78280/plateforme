@@ -1,7 +1,7 @@
 /** Types Skill PPSPS — analyse des risques */
-import type { PpspsGenerationMode } from "@/lib/skills/ppsps-generation-modes";
+import type { PpspsGenerationMode, PpspsSiteProfile } from "@/lib/skills/ppsps-generation-modes";
 
-export type { PpspsGenerationMode };
+export type { PpspsGenerationMode, PpspsSiteProfile };
 
 export type PpspsOperationType =
   | "construction_neuve"
@@ -31,6 +31,11 @@ export type PpspsSiteInfo = {
   safetyManager: string;
 };
 
+export type PpspsRefineEntry = {
+  instruction: string;
+  at: string;
+};
+
 export type PpspsFormInput = {
   site: PpspsSiteInfo;
   trades: string[];
@@ -40,6 +45,9 @@ export type PpspsFormInput = {
   constraints: string;
   projectId?: string | null;
   generationMode?: PpspsGenerationMode;
+  siteProfile?: PpspsSiteProfile | null;
+  normReferences?: string[];
+  freeformInstruction?: string;
   oppbtpSearchQuery?: string;
 };
 
@@ -80,6 +88,7 @@ export type PpspsSessionSummary = {
   taskCount: number;
   project: PpspsProjectSummary | null;
   linkedDocumentId: string | null;
+  refineCount: number;
 };
 
 export type PpspsSessionFileSummary = {
@@ -98,4 +107,5 @@ export type PpspsSessionDetail = PpspsSessionSummary & {
   extractedContext: string | null;
   files: PpspsSessionFileSummary[];
   projectId: string | null;
+  refines: PpspsRefineEntry[];
 };

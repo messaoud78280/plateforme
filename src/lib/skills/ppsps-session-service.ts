@@ -58,9 +58,11 @@ function mapSessionSummary(
     resultMarkdown: string | null;
     linkedDocumentId: string | null;
     project: { id: string; title: string } | null;
+    meta?: unknown;
   },
 ): PpspsSessionSummary {
   const form = parseFormSnapshot(r.formSnapshot);
+  const meta = parseMeta(r.meta);
   return {
     id: r.id,
     siteName: r.siteName,
@@ -73,6 +75,7 @@ function mapSessionSummary(
     taskCount: form?.selectedRiskTaskIds?.length ?? 0,
     project: r.project ? { id: r.project.id, title: r.project.title } : null,
     linkedDocumentId: r.linkedDocumentId,
+    refineCount: meta.refines?.length ?? 0,
   };
 }
 
@@ -87,6 +90,7 @@ const sessionSelect = {
   usedLlm: true,
   resultMarkdown: true,
   linkedDocumentId: true,
+  meta: true,
   project: { select: { id: true, title: true } },
 } as const;
 
@@ -191,6 +195,65 @@ export async function listPpspsSessionsForUser(userId: string, limit = 20): Prom
   return rows.map(mapSessionSummary);
 }
 
+export async function listPpspsSessionsForProject(
+  projectId: string,
+  userId: string,
+  limit = 15,
+): Promise<PpspsSessionSummary[]> {
+  const rows = await prisma.skillPpspsSession.findMany({
+    where: { projectId, userId },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    select: sessionSelect,
+  });
+  return rows.map(mapSessionSummary);
+}
+
+export async function duplicatePpspsSession(
+  userId: string,
+  sessionId: string,
+): Promise<{ id: string } | null> {
+  const source = await prisma.skillPpspsSession.findFirst({
+    where: { id: sessionId, userId },
+    select: {
+      projectId: true,
+      siteName: true,
+      siteAddress: true,
+      detailLevel: true,
+      generationMode: true,
+      formSnapshot: true,
+      extractedContext: true,
+      resultMarkdown: true,
+      usedLlm: true,
+      notice: true,
+    },
+  });
+  if (!source) return null;
+
+  const form = parseFormSnapshot(source.formSnapshot);
+  if (!form) return null;
+
+  const copy = await prisma.skillPpspsSession.create({
+    data: {
+      userId,
+      projectId: source.projectId,
+      siteName: source.siteName,
+      siteAddress: source.siteAddress,
+      detailLevel: source.detailLevel,
+      generationMode: source.generationMode,
+      formSnapshot: source.formSnapshot as object,
+      extractedContext: source.extractedContext,
+      resultMarkdown: source.resultMarkdown,
+      usedLlm: source.usedLlm,
+      notice: source.notice ? `${source.notice} (copie)` : "Copie d'une session existante.",
+      meta: { refines: [], duplicatedFrom: sessionId },
+    },
+    select: { id: true },
+  });
+
+  return { id: copy.id };
+}
+
 export async function getPpspsSessionForUser(userId: string, sessionId: string): Promise<PpspsSessionDetail | null> {
   const row = await prisma.skillPpspsSession.findFirst({
     where: { id: sessionId, userId },
@@ -199,6 +262,7 @@ export async function getPpspsSessionForUser(userId: string, sessionId: string):
       projectId: true,
       notice: true,
       extractedContext: true,
+      meta: true,
       files: {
         select: { id: true, kind: true, fileName: true, fileSize: true, mimeType: true, storageUrl: true },
         orderBy: { createdAt: "asc" },
@@ -210,6 +274,7 @@ export async function getPpspsSessionForUser(userId: string, sessionId: string):
   if (!form) return null;
 
   const summary = mapSessionSummary(row);
+  const meta = parseMeta(row.meta);
 
   return {
     ...summary,
@@ -219,6 +284,7 @@ export async function getPpspsSessionForUser(userId: string, sessionId: string):
     notice: row.notice,
     extractedContext: row.extractedContext,
     files: row.files,
+    refines: meta.refines ?? [],
   };
 }
 

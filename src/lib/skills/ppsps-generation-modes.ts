@@ -1,5 +1,12 @@
-/** Modes de génération PPSPS — V3 */
-export type PpspsGenerationMode = "analyse_risques" | "ppsps_complet";
+/** Modes de génération PPSPS — V5 */
+export type PpspsGenerationMode =
+  | "analyse_risques"
+  | "ppsps_complet"
+  | "audit_ppsps"
+  | "enrichissement"
+  | "coordination_coactivite";
+
+export type PpspsSiteProfile = "public" | "prive" | "sous_traitance" | "maintenance";
 
 export const PPSPS_GENERATION_MODES: {
   id: PpspsGenerationMode;
@@ -14,19 +21,67 @@ export const PPSPS_GENERATION_MODES: {
   {
     id: "ppsps_complet",
     label: "PPSPS complet",
-    description:
-      "Document structuré : organisation chantier, analyse des risques, installations, secours, environnement et annexes.",
+    description: "Trame documentaire complète (organisation, risques, secours, environnement).",
+  },
+  {
+    id: "audit_ppsps",
+    label: "Audit & manques",
+    description: "Diagnostic d'un PPSPS existant : écarts, priorités, actions correctives.",
+  },
+  {
+    id: "enrichissement",
+    label: "Enrichissement",
+    description: "Renforcer un document existant sans le diluer — ajouts marqués [Ajout BeWork].",
+  },
+  {
+    id: "coordination_coactivite",
+    label: "Coordination & coactivité",
+    description: "Interfaces entre entreprises, réunions, zones, planning de coordination.",
   },
 ];
 
-export function getPpspsModePromptSuffix(mode: PpspsGenerationMode): string {
-  if (mode === "analyse_risques") {
-    return `
-## Mode actif : ANALYSE DES RISQUES
-Produire uniquement la section analyse des risques et modes opératoires au format défini (sans répéter tout le PPSPS).`;
-  }
+export const PPSPS_SITE_PROFILES: {
+  id: PpspsSiteProfile;
+  label: string;
+  hint: string;
+}[] = [
+  { id: "public", label: "Marché public / ERP", hint: "CSPS, PGC, registres, autorisations administratives." },
+  { id: "prive", label: "Chantier privé", hint: "MOA/MOE, consignes contractuelles, voisinage." },
+  { id: "sous_traitance", label: "Sous-traitance", hint: "Périmètre lot, interfaces donneur d'ordre, PPSPS entreprise utilisatrice." },
+  { id: "maintenance", label: "Maintenance / exploitation", hint: "Site occupé, continuité d'activité, consignes exploitant." },
+];
 
-  return `
+export function getPpspsModeLabel(mode: PpspsGenerationMode | string | null | undefined): string {
+  return PPSPS_GENERATION_MODES.find((m) => m.id === mode)?.label ?? "Analyse";
+}
+
+export function getPpspsModePromptSuffix(mode: PpspsGenerationMode): string {
+  switch (mode) {
+    case "audit_ppsps":
+      return `
+## Mode actif : AUDIT PPSPS & MANQUES
+Structure obligatoire :
+1. Synthèse exécutive (5 lignes max)
+2. Tableau | Thème | Constat | Risque | Recommandation |
+3. Écarts par rapport aux tâches à risque sélectionnées
+4. Top 5 actions prioritaires avant diffusion sur chantier
+Ne pas réécrire tout le PPSPS : diagnostiquer et prescrire. Si un PPSPS existant est joint, s'y référer explicitement.`;
+    case "enrichissement":
+      return `
+## Mode actif : ENRICHISSEMENT PPSPS
+Conserver la structure existante si un document est fourni. Pour chaque section concernée : compléter modes opératoires, EPI, mesures de prévention.
+Marquer clairement les ajouts avec « [Ajout BeWork] ». Ne pas supprimer le contenu source sans raison.`;
+    case "coordination_coactivite":
+      return `
+## Mode actif : COORDINATION & COACTIVITÉ
+Produire :
+- Matrice des interfaces (entreprise / zone / risque / mesure / responsable)
+- Réunions de coordination et points de contrôle communs
+- Règles de circulation, stockages, livraisons
+- Planning type de coordination sécurité
+Citer les entreprises / lots limitrophes à valider avec le SPS.`;
+    case "ppsps_complet":
+      return `
 ## Mode actif : PPSPS COMPLET (trame entreprise)
 Rédiger un PPSPS exploitable avec la structure suivante (Markdown, titres numérotés) :
 
@@ -65,4 +120,16 @@ Rédiger un PPSPS exploitable avec la structure suivante (Markdown, titres numé
 (Liste des pièces à joindre : plans, fiches DATA, attestations, registres…)
 
 Ne pas inventer de données entreprise (SIRET, assurances) : indiquer « À compléter par l'entreprise ».`;
+    default:
+      return `
+## Mode actif : ANALYSE DES RISQUES
+Produire uniquement la section analyse des risques et modes opératoires au format défini (sans répéter tout le PPSPS).`;
+  }
+}
+
+export function getPpspsSiteProfilePromptSuffix(profile: PpspsSiteProfile | null | undefined): string {
+  if (!profile) return "";
+  const p = PPSPS_SITE_PROFILES.find((x) => x.id === profile);
+  if (!p) return "";
+  return `\n## Profil chantier : ${p.label}\n${p.hint}`;
 }

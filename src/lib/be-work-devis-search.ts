@@ -6,6 +6,8 @@ import {
   isWorkItemStatus,
   WORK_ITEM_ITEM_TYPES_ANNEX,
 } from "@/lib/be-work-devis-labels";
+import { buildWorkItemTradeWhere } from "@/lib/bework-devis-lot-trades";
+import { isKnownFamilyCode } from "@/lib/bework-devis-family-codes";
 import { prisma } from "@/lib/prisma";
 
 /** Tri côté application après agrégation des prix (pas de ORDER BY SQL sur les agrégats). */
@@ -51,6 +53,8 @@ export function keywordSearchWhereClause(q: string): Prisma.WorkItemWhereInput {
 
 export type WorkItemFilterParams = {
   q?: string;
+  /** Filtre par corps de métier (code famille BeWork, ex. ELE, MAC). */
+  trade?: string;
   lot?: string;
   subLot?: string;
   unit?: string;
@@ -173,8 +177,13 @@ export function buildWorkItemWhere(params: WorkItemFilterParams): Prisma.WorkIte
   const q = params.q?.trim();
   if (q) AND.push(keywordSearchWhereClause(q));
 
-  const lot = params.lot?.trim();
-  if (lot) AND.push({ lot });
+  const trade = params.trade?.trim().toUpperCase();
+  if (trade && isKnownFamilyCode(trade)) {
+    AND.push(buildWorkItemTradeWhere(trade));
+  } else {
+    const lot = params.lot?.trim();
+    if (lot) AND.push({ lot });
+  }
 
   const subLot = params.subLot?.trim();
   if (subLot) AND.push({ subLot });

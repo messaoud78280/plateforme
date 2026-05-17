@@ -29,7 +29,7 @@ export const BEWORK_SKILLS: readonly BeworkSkillDefinition[] = [
     subtitle:
       "Préparez l'analyse des risques et les modes opératoires de votre PPSPS avec l'assistant BeWork.",
     description:
-      "Analyse ou PPSPS complet, base OPPBTP, lien dossier projet, import, modèles, affinage, export et historique.",
+      "5 modes (analyse, PPSPS complet, audit, enrichissement, coordination), profil chantier, références prévention, lien projet, duplication et export.",
     href: "/dashboard/skills/ppsps",
     badge: "PPSPS",
     status: "available",

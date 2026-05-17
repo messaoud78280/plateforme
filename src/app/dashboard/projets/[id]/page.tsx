@@ -6,7 +6,9 @@ import Link from "next/link";
 import { BackLink } from "@/components/ui/BackLink";
 import { MessageForm } from "@/components/MessageForm";
 import { ProjectAssignAgent } from "@/components/projects/ProjectAssignAgent";
+import { ProjectPpspsSection } from "@/components/projects/ProjectPpspsSection";
 import { ProjectReportsSection } from "@/components/projects/ProjectReportsSection";
+import { canAccessBeWorkSkills } from "@/lib/be-work-skills-access";
 
 export default async function ProjetDetailPage({
   params,
@@ -151,6 +153,10 @@ export default async function ProjetDetailPage({
 
       {/* Reporting hebdomadaire / journalier */}
       <ProjectReportsSection projectId={project.id} isAgence={isAgence} />
+
+      {canAccessBeWorkSkills(session.user.role) ? (
+        <ProjectPpspsSection projectId={project.id} projectTitle={project.title} />
+      ) : null}
 
       {project.documents.length > 0 && (
         <div className="rounded-xl surface-metallic-light p-6">

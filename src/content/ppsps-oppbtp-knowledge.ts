@@ -138,4 +138,31 @@ export const PPSPS_OPPBTP_KNOWLEDGE: readonly OppbtpKnowledgeEntry[] = [
     content:
       "Organiser zones de déchargement et stockage. Limiter manutentions manuelles (aides mécaniques). Protection des trémies et ouvertures. Garde-corps sur rives. Coordination livraisons (horaires, engins).",
   },
+  {
+    id: "amiante-plomb",
+    title: "Amiante, plomb et polluants",
+    themes: ["demolition", "organisation"],
+    keywords: ["amiante", "plomb", "repérage", "désamiantage", "ssiap"],
+    sourceLabel: "Repère amiante / plomb",
+    content:
+      "Repérage réglementaire avant travaux sur bâtiment ancien. Travaux sous-section 4 si amiante. Encadrement des opérateurs habilités. Confinement, décontamination, filière déchets traçable. Mesures d'empoussièrement si doute.",
+  },
+  {
+    id: "electricite-chantier",
+    title: "Électricité sur chantier",
+    themes: ["organisation"],
+    keywords: ["électricité", "tableau", "câble", "habilitation", "consignation"],
+    sourceLabel: "Repère électricité",
+    content:
+      "Installations provisoires conformes (tableau, différentiel, mise à la terre). Câbles protégés mécaniquement. Habilitations électriques selon interventions. Consignation avant travaux sur réseaux existants. Vérification périodique des matériels.",
+  },
+  {
+    id: "chaleur-canicule",
+    title: "Chaleur et conditions climatiques",
+    themes: ["organisation"],
+    keywords: ["chaleur", "canicule", "hydratation", "soleil", "froid"],
+    sourceLabel: "Repère conditions climatiques",
+    content:
+      "Adapter horaires en période de forte chaleur. Hydratation et pauses ombragées. Protection solaire. En cas de froid : vêtements adaptés, surfaces antidérapantes si gel. Surveiller signes d'hyperthermie ou d'hypothermie.",
+  },
 ] as const;

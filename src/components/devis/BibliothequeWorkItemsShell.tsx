@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { WorkItemItemType, WorkItemStatus } from "@prisma/client";
@@ -7,6 +8,7 @@ import { useCallback, useEffect, useMemo, useState, useTransition } from "react"
 import { bulkDeleteWorkItems, bulkSetWorkItemsStatus } from "@/app/dashboard/devis/actions";
 import { formatDateFr, formatEurFrBpu } from "@/lib/be-work-devis-format";
 import { WORK_ITEM_ITEM_TYPE_LABELS, WORK_ITEM_STATUS_LABELS } from "@/lib/be-work-devis-labels";
+import { groupDistinctLotsByTrade } from "@/lib/bework-devis-lot-trades";
 import type { BibliothequeStats } from "@/lib/be-work-devis-search";
 
 export type BibliothequeWorkItemRow = {
@@ -14,6 +16,7 @@ export type BibliothequeWorkItemRow = {
   code: string;
   familyCode: string | null;
   lot: string;
+  subLot: string | null;
   family: string | null;
   title: string;
   unit: string;
@@ -75,11 +78,22 @@ export function BibliothequeWorkItemsShell({ rows, stats, view, groupLots }: Pro
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkError, setBulkError] = useState<string | null>(null);
   const [lotOpen, setLotOpen] = useState<Record<string, boolean>>({});
+  const [tradeOpen, setTradeOpen] = useState<Record<string, boolean>>({});
 
   const lotsOrdered = useMemo(
     () => [...new Set(rows.map((r) => r.lot))].sort((a, b) => a.localeCompare(b, "fr", { sensitivity: "base" })),
     [rows],
   );
+
+  const tradesGrouped = useMemo(() => {
+    const groups = groupDistinctLotsByTrade(lotsOrdered);
+    return groups
+      .map((g) => ({
+        ...g,
+        lotsInResults: g.lots.filter((lot) => lotsOrdered.includes(lot)),
+      }))
+      .filter((g) => g.lotsInResults.length > 0);
+  }, [lotsOrdered]);
 
   useEffect(() => {
     setLotOpen((prev) => {
@@ -89,7 +103,14 @@ export function BibliothequeWorkItemsShell({ rows, stats, view, groupLots }: Pro
       }
       return next;
     });
-  }, [lotsOrdered]);
+    setTradeOpen((prev) => {
+      const next = { ...prev };
+      for (const g of tradesGrouped) {
+        if (!(g.tradeCode in next)) next[g.tradeCode] = true;
+      }
+      return next;
+    });
+  }, [lotsOrdered, tradesGrouped]);
 
   const pushQuery = useCallback(
     (updates: Record<string, string | undefined>) => {
@@ -152,6 +173,85 @@ export function BibliothequeWorkItemsShell({ rows, stats, view, groupLots }: Pro
   const allSelected = rows.length > 0 && selected.size === rows.length;
   const someSelected = selected.size > 0;
 
+  const renderLotSection = (
+    lot: string,
+    sub: BibliothequeWorkItemRow[],
+    content: (items: BibliothequeWorkItemRow[]) => ReactNode,
+  ) => {
+    const { n, avg } = lotSectionStats(sub);
+    const open = lotOpen[lot] !== false;
+    return (
+      <section key={lot} className="rounded-xl border border-slate-200/90 bg-slate-50/40">
+        <button
+          type="button"
+          onClick={() => setLotOpen((p) => ({ ...p, [lot]: !open }))}
+          className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left hover:bg-white/80"
+        >
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold text-slate-900 break-words">{lot}</h3>
+            <p className="mt-0.5 text-xs text-slate-600">
+              {n} ouvrage(s)
+              {avg != null ? (
+                <>
+                  {" "}
+                  · Prix moyen pondéré HT :{" "}
+                  <span className="font-mono font-semibold">{formatEurFrBpu(avg)}</span>
+                </>
+              ) : (
+                " · Pas de moyenne HT"
+              )}
+            </p>
+          </div>
+          <span className="shrink-0 text-xs font-semibold text-[#1e3a5f]">{open ? "Réduire" : "Développer"}</span>
+        </button>
+        {open ? <div className="border-t border-slate-100 bg-white p-2">{content(sub)}</div> : null}
+      </section>
+    );
+  };
+
+  const renderGroupedByTrade = (content: (items: BibliothequeWorkItemRow[]) => ReactNode) => (
+    <div className="space-y-6">
+      {tradesGrouped.map((trade) => {
+        const tradeRows = rows.filter((r) => trade.lotsInResults.includes(r.lot));
+        const isTradeExpanded = tradeOpen[trade.tradeCode] !== false;
+        const tradeStats = lotSectionStats(tradeRows);
+        return (
+          <section key={trade.tradeCode} className="rounded-2xl border border-[#93c5fd]/30 bg-[#f8fafc] shadow-sm">
+            <button
+              type="button"
+              onClick={() => setTradeOpen((p) => ({ ...p, [trade.tradeCode]: !isTradeExpanded }))}
+              className="flex w-full items-center justify-between gap-3 border-b border-slate-200/80 px-4 py-3 text-left hover:bg-white/60"
+            >
+              <div className="min-w-0">
+                <h2 className="font-heading text-base font-bold text-[#1e3a5f]">{trade.tradeLabel}</h2>
+                <p className="mt-0.5 text-xs text-slate-600">
+                  {trade.lotsInResults.length} lot(s) · {tradeStats.n} ouvrage(s)
+                  {tradeStats.avg != null ? (
+                    <>
+                      {" "}
+                      · Moy. HT : <span className="font-mono font-semibold">{formatEurFrBpu(tradeStats.avg)}</span>
+                    </>
+                  ) : null}
+                </p>
+              </div>
+              <span className="shrink-0 text-xs font-semibold text-[#2563eb]">
+                {isTradeExpanded ? "Réduire le corps de métier" : "Développer"}
+              </span>
+            </button>
+            {isTradeExpanded ? (
+              <div className="space-y-3 p-3">
+                {trade.lotsInResults.map((lot) => {
+                  const sub = rows.filter((r) => r.lot === lot);
+                  return renderLotSection(lot, sub, content);
+                })}
+              </div>
+            ) : null}
+          </section>
+        );
+      })}
+    </div>
+  );
+
   const renderRowCells = (row: BibliothequeWorkItemRow) => (
     <>
       <td className="px-2 py-2 align-middle">
@@ -166,7 +266,10 @@ export function BibliothequeWorkItemsShell({ rows, stats, view, groupLots }: Pro
       <td className="whitespace-nowrap px-2 py-2 font-mono text-xs font-semibold text-[#1e3a5f]">{row.code}</td>
       <td className="whitespace-nowrap px-2 py-2 font-mono text-[11px] text-slate-700">{row.familyCode?.trim() || "—"}</td>
       <td className="max-w-[200px] px-2 py-2 text-xs text-slate-800 break-words" title={row.lot}>
-        {row.lot}
+        <span className="font-medium">{row.lot}</span>
+        {row.subLot?.trim() ? (
+          <span className="mt-0.5 block text-[11px] text-slate-500">{row.subLot}</span>
+        ) : null}
       </td>
       <td className="whitespace-nowrap px-2 py-2">
         <span className={`inline-flex rounded-md px-2 py-0.5 text-[11px] font-semibold ${typeBadgeClass(row.itemType)}`}>
@@ -364,7 +467,7 @@ export function BibliothequeWorkItemsShell({ rows, stats, view, groupLots }: Pro
               checked={groupLots}
               onChange={(e) => pushQuery({ groupLots: e.target.checked ? "1" : undefined })}
             />
-            <span>Regrouper par lot</span>
+            <span>Regrouper par corps de métier</span>
           </label>
         </div>
         <p className="text-xs text-slate-500">
@@ -426,74 +529,12 @@ export function BibliothequeWorkItemsShell({ rows, stats, view, groupLots }: Pro
         </div>
       ) : view === "table" ? (
         groupLots ? (
-          <div className="space-y-4">
-            {lotsOrdered.map((lot) => {
-              const sub = rows.filter((r) => r.lot === lot);
-              const { n, avg } = lotSectionStats(sub);
-              const open = lotOpen[lot] !== false;
-              return (
-                <section key={lot} className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-                  <button
-                    type="button"
-                    onClick={() => setLotOpen((p) => ({ ...p, [lot]: !open }))}
-                    className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-slate-50/80"
-                  >
-                    <div className="min-w-0">
-                      <h3 className="text-sm font-bold text-slate-900 break-words">{lot}</h3>
-                      <p className="mt-0.5 text-xs text-slate-600">
-                        {n} ouvrage(s)
-                        {avg != null ? (
-                          <>
-                            {" "}
-                            · Prix moyen pondéré HT : <span className="font-mono font-semibold">{formatEurFrBpu(avg)}</span>
-                          </>
-                        ) : (
-                          " · Pas de moyenne HT (prix absents)"
-                        )}
-                      </p>
-                    </div>
-                    <span className="shrink-0 text-xs font-semibold text-[#1e3a5f]">{open ? "Réduire" : "Développer"}</span>
-                  </button>
-                  {open ? <div className="border-t border-slate-100 p-2">{tableBlock(sub)}</div> : null}
-                </section>
-              );
-            })}
-          </div>
+          renderGroupedByTrade(tableBlock)
         ) : (
           tableBlock(rows)
         )
       ) : groupLots ? (
-        <div className="space-y-4">
-          {lotsOrdered.map((lot) => {
-            const sub = rows.filter((r) => r.lot === lot);
-            const { n, avg } = lotSectionStats(sub);
-            const open = lotOpen[lot] !== false;
-            return (
-              <section key={lot} className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <button
-                  type="button"
-                  onClick={() => setLotOpen((p) => ({ ...p, [lot]: !open }))}
-                  className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-slate-50/80"
-                >
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-bold text-slate-900 break-words">{lot}</h3>
-                    <p className="mt-0.5 text-xs text-slate-600">
-                      {n} ouvrage(s)
-                      {avg != null ? (
-                        <>
-                          {" "}
-                          · Prix moyen pondéré HT : <span className="font-mono font-semibold">{formatEurFrBpu(avg)}</span>
-                        </>
-                      ) : null}
-                    </p>
-                  </div>
-                  <span className="shrink-0 text-xs font-semibold text-[#1e3a5f]">{open ? "Réduire" : "Développer"}</span>
-                </button>
-                {open ? <div className="border-t border-slate-100 p-3">{cardsBlock(sub)}</div> : null}
-              </section>
-            );
-          })}
-        </div>
+        renderGroupedByTrade(cardsBlock)
       ) : (
         cardsBlock(rows)
       )}

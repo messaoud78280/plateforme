@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { BeWorkPriceDocSourceType, WorkItemQualityLevel, WorkItemStatus } from "@prisma/client";
 import type { PriceEntry, PriceSource, WorkItem } from "@prisma/client";
+import { TradeSubLotFilterSelect } from "@/components/devis/TradeSubLotFilterSelect";
 import { WorkItemSearchResults } from "@/components/devis/WorkItemSearchResults";
 import {
   QUALITY_LEVEL_LABELS,
@@ -16,12 +17,15 @@ import {
   type WorkItemFilterParams,
 } from "@/lib/be-work-devis-search";
 import { formatDateFr, formatEurFr } from "@/lib/be-work-devis-format";
+import { buildWorkItemTradeWhere, groupDistinctLotsByTrade } from "@/lib/bework-devis-lot-trades";
+import { getBeWorkFamilyLexiconSorted, isKnownFamilyCode } from "@/lib/bework-devis-family-codes";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import { prisma } from "@/lib/prisma";
 
 type Sp = Promise<{
   q?: string;
   lot?: string;
+  trade?: string;
   subLot?: string;
   unit?: string;
   status?: string;
@@ -33,9 +37,11 @@ type Sp = Promise<{
 }>;
 
 function toFilterParams(sp: Awaited<Sp>): WorkItemFilterParams {
+  const trade = sp.trade?.trim().toUpperCase();
   return {
     q: sp.q,
-    lot: sp.lot,
+    trade: trade && isKnownFamilyCode(trade) ? trade : undefined,
+    lot: sp.lot?.trim() || undefined,
     subLot: sp.subLot,
     unit: sp.unit,
     status: sp.status,
@@ -50,6 +56,7 @@ function filterQueryString(sp: Awaited<Sp>): string {
   const qs = new URLSearchParams();
   const p = toFilterParams(sp);
   if (p.q) qs.set("q", p.q);
+  if (p.trade) qs.set("trade", p.trade);
   if (p.lot) qs.set("lot", p.lot);
   if (p.subLot) qs.set("subLot", p.subLot);
   if (p.unit) qs.set("unit", p.unit);
@@ -65,7 +72,8 @@ function filterQueryString(sp: Awaited<Sp>): string {
 
 function hasActiveWorkItemFilters(sp: WorkItemFilterParams): boolean {
   return Boolean(
-    sp.lot?.trim() ||
+    sp.trade?.trim() ||
+      sp.lot?.trim() ||
       sp.subLot?.trim() ||
       sp.unit?.trim() ||
       (sp.status?.trim() && sp.status.trim().length > 0) ||
@@ -84,6 +92,9 @@ export default async function RechercheDevisPage({ searchParams }: { searchParam
   const sort = parseWorkItemSortKey(sp.sort);
 
   const fetchExtendedGlobal = q.length >= 2;
+  const tradeFilter = sp.trade?.trim().toUpperCase();
+  const tradeWhere =
+    tradeFilter && isKnownFamilyCode(tradeFilter) ? buildWorkItemTradeWhere(tradeFilter) : undefined;
 
   let priceRows: (PriceEntry & { workItem: WorkItem })[] = [];
   let sources: PriceSource[] = [];
@@ -98,7 +109,10 @@ export default async function RechercheDevisPage({ searchParams }: { searchParam
       orderBy: { lot: "asc" },
     }),
     prisma.workItem.findMany({
-      where: { subLot: { not: null } },
+      where: {
+        subLot: { not: null },
+        ...(tradeWhere ? tradeWhere : {}),
+      },
       select: { subLot: true },
       distinct: ["subLot"],
       orderBy: { subLot: "asc" },
@@ -144,6 +158,13 @@ export default async function RechercheDevisPage({ searchParams }: { searchParam
   }
 
   const lots = lotsRow.map((r) => r.lot);
+  const lotsGroupedByTrade = groupDistinctLotsByTrade(lots);
+  const lexiconGrouped = getBeWorkFamilyLexiconSorted().map((f) => ({
+    tradeCode: f.code,
+    tradeLabel: f.label,
+    order: f.order,
+    lots: lotsGroupedByTrade.find((g) => g.tradeCode === f.code)?.lots ?? [f.label],
+  }));
   const subLots = subLotsRow.map((r) => r.subLot).filter((s): s is string => s != null && s !== "");
   const departments = deptRows.map((r) => r.department).filter((d): d is string => d != null && d !== "");
   const qsStr = filterQueryString(sp);
@@ -186,31 +207,17 @@ export default async function RechercheDevisPage({ searchParams }: { searchParam
         </div>
 
         <div className="grid gap-3 border-t border-slate-100 pt-4 sm:grid-cols-2 lg:grid-cols-6 xl:grid-cols-8">
-          <div>
-            <label htmlFor="rs-lot" className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Lot
-            </label>
-            <select id="rs-lot" name="lot" defaultValue={sp.lot ?? ""} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-              <option value="">Tous</option>
-              {lots.map((l) => (
-                <option key={l} value={l}>
-                  {l}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="rs-sublot" className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Sous-lot
-            </label>
-            <select id="rs-sublot" name="subLot" defaultValue={sp.subLot ?? ""} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-              <option value="">Tous</option>
-              {subLots.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
+          <div className="sm:col-span-2">
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Corps de métier / sous-lot</span>
+            <TradeSubLotFilterSelect
+              tradeId="rs-trade"
+              subLotId="rs-sublot"
+              grouped={lexiconGrouped}
+              tradeValue={tradeFilter && isKnownFamilyCode(tradeFilter) ? tradeFilter : ""}
+              subLotValue={sp.subLot ?? ""}
+              subLotsForTrade={subLots}
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            />
           </div>
           <div>
             <label htmlFor="rs-unit" className="text-xs font-semibold uppercase tracking-wide text-slate-500">

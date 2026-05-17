@@ -48,6 +48,27 @@ export async function listPpspsProjectsForUser(
   }));
 }
 
+export async function getPpspsProjectForPrefill(
+  userId: string,
+  role: string | null | undefined,
+  projectId: string,
+) {
+  const access = await canUserAccessPpspsProject(userId, role, projectId);
+  if (!access.ok) return null;
+
+  return prisma.project.findUnique({
+    where: { id: projectId },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      notes: true,
+      dateSouhaitee: true,
+      deadline: true,
+    },
+  });
+}
+
 export async function canUserAccessPpspsProject(
   userId: string,
   role: string | null | undefined,

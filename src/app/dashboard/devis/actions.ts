@@ -30,8 +30,22 @@ import {
   isIncompleteDescriptionText,
   resolveImportedFullDescription,
 } from "@/lib/be-work-devis-work-item-description";
+import {
+  normalizeWorkItemLotFields,
+  workItemLotNeedsNormalization,
+} from "@/lib/bework-devis-lot-normalize";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import { prisma } from "@/lib/prisma";
+
+function applyNormalizedLotFields(formData: FormData) {
+  const normalized = normalizeWorkItemLotFields({
+    lot: String(formData.get("lot") ?? "").trim(),
+    subLot: emptyToNull(formData, "subLot"),
+    family: emptyToNull(formData, "family"),
+    familyCode: emptyToNull(formData, "familyCode"),
+  });
+  return normalized;
+}
 
 function parseMoney(raw: string): Prisma.Decimal | null {
   const s = raw.trim().replace(/\s/g, "").replace(",", ".");
@@ -60,7 +74,7 @@ async function guard() {
 export async function createWorkItem(formData: FormData) {
   await guard();
   const code = String(formData.get("code") ?? "").trim();
-  const lot = String(formData.get("lot") ?? "").trim();
+  const { lot, subLot, familyCode } = applyNormalizedLotFields(formData);
   const title = String(formData.get("title") ?? "").trim();
   const fullDescription = String(formData.get("fullDescription") ?? "").trim();
   const unitRaw = String(formData.get("unit") ?? "").trim();
@@ -85,9 +99,9 @@ export async function createWorkItem(formData: FormData) {
     data: {
       code,
       lot,
-      subLot: emptyToNull(formData, "subLot"),
+      subLot,
       family: emptyToNull(formData, "family"),
-      familyCode: emptyToNull(formData, "familyCode"),
+      familyCode,
       sourceCode: emptyToNull(formData, "sourceCode"),
       sourceLine: emptyToNull(formData, "sourceLine"),
       title,
@@ -474,8 +488,12 @@ function buildWorkItemCreateDataFromPasteValues(
   pasteObj?: Record<string, unknown>,
 ) {
   const code = v.code.trim();
-  const lot = v.lot.trim() || "Non classé";
   const title = v.title.trim() || "Sans titre";
+  const { lot, subLot, familyCode } = normalizeWorkItemLotFields({
+    lot: v.lot.trim() || "Non classé",
+    subLot: pasteStr(v.subLot),
+    family: pasteStr(v.family),
+  });
   let fullDescription = v.fullDescription.trim();
   if (isIncompleteDescriptionText(fullDescription)) {
     if (pasteObj) {
@@ -496,8 +514,9 @@ function buildWorkItemCreateDataFromPasteValues(
   return {
     code,
     lot,
-    subLot: pasteStr(v.subLot),
+    subLot,
     family: pasteStr(v.family),
+    familyCode,
     title,
     shortDescription: pasteStr(v.shortDescription),
     fullDescription,
@@ -616,7 +635,7 @@ export async function updateWorkItem(formData: FormData) {
   if (!id) throw new Error("Identifiant manquant.");
 
   const code = String(formData.get("code") ?? "").trim();
-  const lot = String(formData.get("lot") ?? "").trim();
+  const { lot, subLot, familyCode } = applyNormalizedLotFields(formData);
   const title = String(formData.get("title") ?? "").trim();
   const fullDescription = String(formData.get("fullDescription") ?? "").trim();
   const unitRaw = String(formData.get("unit") ?? "").trim();
@@ -645,9 +664,9 @@ export async function updateWorkItem(formData: FormData) {
     data: {
       code,
       lot,
-      subLot: emptyToNull(formData, "subLot"),
+      subLot,
       family: emptyToNull(formData, "family"),
-      familyCode: emptyToNull(formData, "familyCode"),
+      familyCode,
       sourceCode: emptyToNull(formData, "sourceCode"),
       sourceLine: emptyToNull(formData, "sourceLine"),
       title,
@@ -812,6 +831,72 @@ export async function deletePriceSource(formData: FormData) {
   revalidatePath("/dashboard/devis/sources");
   revalidatePath("/dashboard/devis/prix");
   redirect("/dashboard/devis/sources");
+}
+
+/** Harmonise en masse les lots / sous-lots / familyCode de tous les ouvrages. */
+export async function normalizeAllWorkItemLots(): Promise<
+  { ok: true; workItemsUpdated: number; quoteLinesUpdated: number; distinctLots: number } | { ok: false; error: string }
+> {
+  await guard();
+
+  try {
+    const items = await prisma.workItem.findMany({
+      select: { id: true, lot: true, subLot: true, family: true, familyCode: true },
+    });
+
+    let workItemsUpdated = 0;
+    let quoteLinesUpdated = 0;
+
+    for (const item of items) {
+      if (!workItemLotNeedsNormalization(item)) continue;
+
+      const n = normalizeWorkItemLotFields(item);
+      await prisma.workItem.update({
+        where: { id: item.id },
+        data: { lot: n.lot, subLot: n.subLot, familyCode: n.familyCode },
+      });
+      workItemsUpdated += 1;
+
+      const ql = await prisma.quoteLine.updateMany({
+        where: { workItemId: item.id },
+        data: { lot: n.lot, family: n.subLot ?? undefined },
+      });
+      quoteLinesUpdated += ql.count;
+    }
+
+    const orphanLines = await prisma.quoteLine.findMany({
+      where: { workItemId: null },
+      select: { id: true, lot: true, family: true },
+    });
+    for (const line of orphanLines) {
+      const n = normalizeWorkItemLotFields({ lot: line.lot, subLot: line.family });
+      if (n.lot === line.lot && (n.subLot ?? null) === (line.family?.trim() || null)) continue;
+      await prisma.quoteLine.update({
+        where: { id: line.id },
+        data: { lot: n.lot, family: n.subLot ?? undefined },
+      });
+      quoteLinesUpdated += 1;
+    }
+
+    const distinctLots = await prisma.workItem.findMany({
+      select: { lot: true },
+      distinct: ["lot"],
+    });
+
+    revalidatePath("/dashboard/devis/bibliotheque");
+    revalidatePath("/dashboard/devis/recherche");
+    revalidatePath("/dashboard/devis/prix");
+
+    return {
+      ok: true,
+      workItemsUpdated,
+      quoteLinesUpdated,
+      distinctLots: distinctLots.length,
+    };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Harmonisation impossible.";
+    return { ok: false, error: message };
+  }
 }
 
 function emptyToNull(formData: FormData, key: string): string | undefined {

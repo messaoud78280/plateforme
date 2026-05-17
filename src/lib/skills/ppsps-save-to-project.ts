@@ -1,6 +1,8 @@
+import { buildCctpPdfBuffer } from "@/lib/skills/cctp-export-pdf";
 import { buildCctpWordBuffer } from "@/lib/skills/cctp-export-word";
 import { canUserAccessPpspsProject } from "@/lib/skills/ppsps-projects";
 import { getPpspsSessionMarkdownForExport } from "@/lib/skills/ppsps-session-service";
+import type { PpspsExportFormat } from "@/lib/skills/ppsps-types";
 import { createServiceRoleClient } from "@/lib/supabase";
 import { prisma } from "@/lib/prisma";
 
@@ -11,7 +13,9 @@ export async function savePpspsSessionToProject(opts: {
   role: string | null | undefined;
   sessionId: string;
   projectId: string;
-}): Promise<{ documentId: string; fileUrl: string }> {
+  format?: PpspsExportFormat;
+}): Promise<{ documentId: string; fileUrl: string; format: PpspsExportFormat }> {
+  const format = opts.format === "pdf" ? "pdf" : "doc";
   const access = await canUserAccessPpspsProject(opts.userId, opts.role, opts.projectId);
   if (!access.ok || !access.clientId) {
     throw new Error("Projet introuvable ou non autorisé.");
@@ -24,8 +28,19 @@ export async function savePpspsSessionToProject(opts: {
 
   const siteLabel = exportData.siteName?.trim() || "chantier";
   const title = `PPSPS — ${siteLabel}`;
-  const fileName = `ppsps-${siteLabel.replace(/\s+/g, "-").slice(0, 40)}-${opts.sessionId.slice(-6)}.doc`;
-  const buffer = buildCctpWordBuffer(exportData.markdown, title);
+  const ext = format === "pdf" ? "pdf" : "doc";
+  const fileName = `ppsps-${siteLabel.replace(/\s+/g, "-").slice(0, 40)}-${opts.sessionId.slice(-6)}.${ext}`;
+
+  const buffer =
+    format === "pdf"
+      ? buildCctpPdfBuffer({
+          title,
+          markdown: exportData.markdown,
+          lot: exportData.siteAddress ?? undefined,
+        })
+      : buildCctpWordBuffer(exportData.markdown, title);
+
+  const mimeType = format === "pdf" ? "application/pdf" : "application/msword";
 
   const supabase = createServiceRoleClient();
   if (!supabase) {
@@ -34,7 +49,7 @@ export async function savePpspsSessionToProject(opts: {
 
   const storagePath = `projects/${opts.projectId}/ppsps/${Date.now()}-${fileName}`;
   const { error: uploadError } = await supabase.storage.from(BUCKET).upload(storagePath, buffer, {
-    contentType: "application/msword",
+    contentType: mimeType,
     upsert: false,
   });
   if (uploadError) {
@@ -45,11 +60,11 @@ export async function savePpspsSessionToProject(opts: {
 
   const doc = await prisma.document.create({
     data: {
-      name: title,
+      name: `${title} (${format.toUpperCase()})`,
       category: "AUTRE",
       fileUrl: urlData.publicUrl,
       fileSize: buffer.length,
-      mimeType: "application/msword",
+      mimeType,
       status: "TRAITE",
       clientId: access.clientId,
       projectId: opts.projectId,
@@ -66,5 +81,5 @@ export async function savePpspsSessionToProject(opts: {
     },
   });
 
-  return { documentId: doc.id, fileUrl: urlData.publicUrl };
+  return { documentId: doc.id, fileUrl: urlData.publicUrl, format };
 }

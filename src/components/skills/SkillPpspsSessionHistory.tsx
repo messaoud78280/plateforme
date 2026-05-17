@@ -1,6 +1,7 @@
 "use client";
 
 import { History } from "lucide-react";
+import { getPpspsModeLabel } from "@/lib/skills/ppsps-generation-modes";
 import type { PpspsSessionSummary } from "@/lib/skills/ppsps-types";
 
 type Props = {
@@ -8,9 +9,18 @@ type Props = {
   activeId: string | null;
   onSelect: (id: string) => void;
   loading?: boolean;
+  filterProjectTitle?: string | null;
+  onClearProjectFilter?: () => void;
 };
 
-export function SkillPpspsSessionHistory({ sessions, activeId, onSelect, loading }: Props) {
+export function SkillPpspsSessionHistory({
+  sessions,
+  activeId,
+  onSelect,
+  loading,
+  filterProjectTitle,
+  onClearProjectFilter,
+}: Props) {
   if (!sessions.length && !loading) return null;
 
   return (
@@ -19,7 +29,20 @@ export function SkillPpspsSessionHistory({ sessions, activeId, onSelect, loading
         <History className="size-4 text-[#2563eb]" aria-hidden />
         Historique
       </h3>
-      <p className="mt-1 text-xs text-slate-500">Vos dernières analyses PPSPS (20 max).</p>
+      <p className="mt-1 text-xs text-slate-500">
+        {filterProjectTitle
+          ? `Analyses liées au projet « ${filterProjectTitle} ».`
+          : "Vos dernières analyses PPSPS (20 max)."}
+      </p>
+      {filterProjectTitle && onClearProjectFilter ? (
+        <button
+          type="button"
+          onClick={onClearProjectFilter}
+          className="mt-2 text-xs font-semibold text-[#2563eb] hover:underline"
+        >
+          Voir tout l&apos;historique
+        </button>
+      ) : null}
       {loading ? (
         <p className="mt-4 text-sm text-slate-500">Chargement…</p>
       ) : (
@@ -52,7 +75,10 @@ export function SkillPpspsSessionHistory({ sessions, activeId, onSelect, loading
                     {date}
                     {s.project ? ` · ${s.project.title}` : ""}
                     {s.taskCount ? ` · ${s.taskCount} tâche(s)` : ""}
-                    {s.generationMode === "ppsps_complet" ? " · PPSPS complet" : ""}
+                    {s.generationMode !== "analyse_risques"
+                      ? ` · ${getPpspsModeLabel(s.generationMode)}`
+                      : ""}
+                    {s.refineCount ? ` · ${s.refineCount} affinage(s)` : ""}
                     {s.usedLlm ? " · IA" : ""}
                     {s.linkedDocumentId ? " · Dossier" : ""}
                   </span>

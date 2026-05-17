@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
     const body = (await request.json().catch(() => ({}))) as {
       sessionId?: string;
       projectId?: string;
+      format?: string;
     };
     const sessionId = typeof body.sessionId === "string" ? body.sessionId.trim() : "";
     const projectId = typeof body.projectId === "string" ? body.projectId.trim() : "";
@@ -24,11 +25,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "sessionId et projectId requis." }, { status: 400 });
     }
 
+    const format = body.format === "pdf" ? "pdf" : "doc";
+
     const result = await savePpspsSessionToProject({
       userId: session.user.id,
       role: session.user.role,
       sessionId,
       projectId,
+      format,
     });
 
     return NextResponse.json({

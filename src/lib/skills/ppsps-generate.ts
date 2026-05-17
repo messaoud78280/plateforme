@@ -130,8 +130,15 @@ ${missing.map((m) => `- ${m} : **à compléter**`).join("\n")}
 }
 
 export async function generatePpspsAnalysis(input: PpspsGenerationInput): Promise<PpspsGenerationResponse> {
-  if (!input.selectedRiskTaskIds.length && !input.refine) {
-    throw new Error("Sélectionnez au moins une tâche à risque avant de générer l'analyse.");
+  const auditLike =
+    input.generationMode === "audit_ppsps" || input.generationMode === "enrichissement";
+  const hasAltInput = Boolean(input.extractedFromFiles?.trim() || input.freeformInstruction?.trim());
+  if (!input.selectedRiskTaskIds.length && !input.refine && !(auditLike && hasAltInput)) {
+    throw new Error(
+      auditLike
+        ? "Mode audit/enrichissement : fournissez un document, une consigne libre ou des tâches à risque."
+        : "Sélectionnez au moins une tâche à risque avant de générer l'analyse.",
+    );
   }
 
   const userMessage = buildPpspsUserMessage(input);

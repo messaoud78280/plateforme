@@ -16,7 +16,8 @@ import {
   type PersistPpspsSessionInput,
 } from "@/lib/skills/ppsps-session-service";
 import { uploadPpspsSkillFile } from "@/lib/skills/ppsps-skill-storage";
-import type { PpspsGenerationMode } from "@/lib/skills/ppsps-generation-modes";
+import type { PpspsGenerationMode, PpspsSiteProfile } from "@/lib/skills/ppsps-generation-modes";
+import { PPSPS_GENERATION_MODES, PPSPS_SITE_PROFILES } from "@/lib/skills/ppsps-generation-modes";
 import { canUserAccessPpspsProject } from "@/lib/skills/ppsps-projects";
 import type { PpspsCoactivity, PpspsDetailLevel, PpspsFormInput, PpspsOperationType, PpspsSiteInfo } from "@/lib/skills/ppsps-types";
 import { prisma } from "@/lib/prisma";
@@ -35,7 +36,8 @@ const VALID_OPERATIONS = new Set<PpspsOperationType>([
 
 const VALID_COACTIVITY = new Set<PpspsCoactivity>(["oui", "non", "a_confirmer"]);
 const VALID_DETAIL = new Set<PpspsDetailLevel>(["synthetique", "standard", "detaille", "tres_detaille"]);
-const VALID_GENERATION_MODES = new Set<PpspsGenerationMode>(["analyse_risques", "ppsps_complet"]);
+const VALID_GENERATION_MODES = new Set<PpspsGenerationMode>(PPSPS_GENERATION_MODES.map((m) => m.id));
+const VALID_SITE_PROFILES = new Set<PpspsSiteProfile>(PPSPS_SITE_PROFILES.map((p) => p.id));
 
 type PendingFileRecord = {
   kind: string;
@@ -92,6 +94,13 @@ function parsePpspsFormBody(raw: unknown): PpspsFormInput {
       : "analyse_risques";
   const projectId =
     typeof o.projectId === "string" && o.projectId.trim() ? o.projectId.trim() : null;
+  const siteProfile =
+    typeof o.siteProfile === "string" && VALID_SITE_PROFILES.has(o.siteProfile as PpspsSiteProfile)
+      ? (o.siteProfile as PpspsSiteProfile)
+      : null;
+  const normReferences = Array.isArray(o.normReferences)
+    ? o.normReferences.filter((id): id is string => typeof id === "string")
+    : [];
 
   return {
     site: parseSite(siteRaw),
@@ -102,6 +111,9 @@ function parsePpspsFormBody(raw: unknown): PpspsFormInput {
     constraints: typeof o.constraints === "string" ? o.constraints.trim() : "",
     projectId,
     generationMode,
+    siteProfile,
+    normReferences,
+    freeformInstruction: typeof o.freeformInstruction === "string" ? o.freeformInstruction.trim() : "",
     oppbtpSearchQuery: typeof o.oppbtpSearchQuery === "string" ? o.oppbtpSearchQuery.trim() : "",
   };
 }

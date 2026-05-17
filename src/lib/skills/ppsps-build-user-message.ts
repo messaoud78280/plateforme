@@ -8,8 +8,12 @@ import {
   formatOppbtpKnowledgeForPrompt,
   searchOppbtpKnowledge,
 } from "@/lib/skills/ppsps-oppbtp-search";
+import { formatPpspsNormReferencesForPrompt } from "@/content/ppsps-norm-references";
 import type { PpspsGenerationMode } from "@/lib/skills/ppsps-generation-modes";
-import { getPpspsModePromptSuffix } from "@/lib/skills/ppsps-generation-modes";
+import {
+  getPpspsModePromptSuffix,
+  getPpspsSiteProfilePromptSuffix,
+} from "@/lib/skills/ppsps-generation-modes";
 import type { PpspsFormInput, PpspsGenerationInput } from "@/lib/skills/ppsps-types";
 
 function siteCompleteness(site: PpspsFormInput["site"]): string[] {
@@ -57,9 +61,18 @@ export function buildPpspsUserMessage(input: PpspsGenerationInput): string {
     "",
     "## Contraintes particulières",
     constraints.trim() || "Aucune précisée",
-    "",
-    "## Tâches à risques sélectionnées (à traiter une par une)",
   ];
+
+  if (input.freeformInstruction?.trim()) {
+    lines.push("", "## Consigne complémentaire", input.freeformInstruction.trim());
+  }
+
+  const normBlock = formatPpspsNormReferencesForPrompt(input.normReferences ?? []);
+  if (normBlock) {
+    lines.push("", "## Références prévention à prendre en compte", normBlock);
+  }
+
+  lines.push("", "## Tâches à risques sélectionnées (à traiter une par une)");
 
   for (const t of tasks) {
     const alerts = t.alerts?.length ? ` [${t.alerts.join(", ")}]` : "";
@@ -90,6 +103,8 @@ export function buildPpspsUserMessage(input: PpspsGenerationInput): string {
 
   const mode: PpspsGenerationMode = input.generationMode ?? "analyse_risques";
   lines.push("", getPpspsModePromptSuffix(mode));
+  const profileSuffix = getPpspsSiteProfilePromptSuffix(input.siteProfile);
+  if (profileSuffix) lines.push(profileSuffix);
 
   if (input.extractedFromFiles?.trim()) {
     lines.push(

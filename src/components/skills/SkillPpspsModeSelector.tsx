@@ -11,7 +11,7 @@ export function SkillPpspsModeSelector({ value, onChange }: Props) {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
       <h2 className="font-heading text-base font-bold text-slate-900">Mode de génération</h2>
-      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+      <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
         {PPSPS_GENERATION_MODES.map((mode) => (
           <label
             key={mode.id}

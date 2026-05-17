@@ -100,6 +100,14 @@ const REASSURANCE = [
   "Plateforme simple et sécurisée",
 ];
 
+const NAV_LINK =
+  "inline-flex items-center gap-1 rounded-lg px-3 py-2 text-[13px] font-medium tracking-normal text-slate-600 transition-[color,background,box-shadow] hover:bg-white/80 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8]/35";
+const NAV_LINK_OPEN = "bg-white text-[#1d4ed8] shadow-sm ring-1 ring-slate-200/70";
+const HEADER_BTN_SECONDARY =
+  "inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200/90 bg-white/95 px-3.5 text-sm font-medium text-slate-800 shadow-sm backdrop-blur-sm transition hover:border-slate-300 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8]/35";
+const HEADER_BTN_PRIMARY =
+  "inline-flex h-10 items-center gap-2 rounded-lg bg-[#1d4ed8] px-4 text-sm font-semibold text-white shadow-sm bework-cta-primary-glow transition hover:bg-[#1e40af] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8]/50";
+
 export function MarketingSiteHeader({ plainBg = false }: Props) {
   const [scrolled, setScrolled] = useState(false);
   const [solutionsOpen, setSolutionsOpen] = useState(false);
@@ -199,18 +207,17 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
     return () => document.removeEventListener("mousedown", down);
   }, [solutionsOpen, resourcesOpen]);
 
-  const barPy = scrolled ? "py-2 sm:py-2.5 md:py-3" : "py-2.5 sm:py-3.5 md:py-4";
+  const barPy = scrolled ? "py-2 md:py-2.5" : "py-2.5 md:py-3";
 
   return (
     <header
       ref={headerRef}
-      className="relative sticky top-0 z-50 overflow-visible border-b border-slate-200/50"
+      className="relative sticky top-0 z-50 overflow-visible border-b border-slate-200/60"
     >
       <MarketingHeaderBlueprintDecor plainBg={plainBg} />
       <div
-        className={`container-site relative z-10 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2.5 lg:grid-cols-[auto_1fr] lg:items-start lg:gap-x-6 ${barPy} font-sans`}
+        className={`container-site relative z-10 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 lg:grid-cols-[auto_1fr] lg:items-start lg:gap-x-6 ${barPy} font-sans`}
       >
-        {/* Ligne 1 — marque (desktop + mobile) */}
         <div className="min-w-0 justify-self-start self-center lg:col-start-1 lg:row-start-1 lg:self-start">
           <Link href="/" className="group inline-block max-w-full transition-opacity hover:opacity-90" aria-label="BeWork — Accueil">
             <BeWorkLogo
@@ -221,26 +228,23 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
           </Link>
         </div>
 
-        {/* Desktop — colonne droite : Connexion + Réserver, puis navigation juste en dessous */}
-        <div className="hidden min-w-0 flex-col items-end gap-y-2 lg:col-start-2 lg:row-start-1 lg:flex">
-          <div className="flex shrink-0 items-center justify-end gap-2 whitespace-nowrap xl:gap-2.5">
-            <Link
-              href="/connexion"
-              className="inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-[10px] border border-slate-200 bg-white px-3.5 py-2 text-base font-medium tracking-tight text-black transition hover:border-slate-300 hover:bg-slate-50 xl:px-4"
-            >
-              <IconUser className="h-[18px] w-[18px] shrink-0 text-slate-700" aria-hidden />
+        <div className="hidden min-w-0 flex-col items-end gap-y-2.5 lg:col-start-2 lg:row-start-1 lg:flex">
+          <div
+            className="flex shrink-0 flex-wrap items-center justify-end gap-2 whitespace-nowrap"
+            role="group"
+            aria-label="Compte et prise de rendez-vous"
+          >
+            <Link href="/connexion" className={HEADER_BTN_SECONDARY}>
+              <IconUser className="h-4 w-4 shrink-0 text-slate-600" aria-hidden />
               <span className="whitespace-nowrap">Connexion</span>
             </Link>
-            <CalendlyBookingLink
-              trackLocation="header-desktop"
-              className="inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-[10px] bg-[#1d4ed8] px-3.5 py-2 text-base font-semibold tracking-tight text-white bework-cta-primary-glow transition hover:bg-[#1e40af] xl:px-4"
-            >
-              <IconCalendar className="h-[18px] w-[18px] shrink-0 text-white" aria-hidden />
+            <CalendlyBookingLink trackLocation="header-desktop" className={HEADER_BTN_PRIMARY}>
+              <IconCalendar className="h-4 w-4 shrink-0 text-white" aria-hidden />
               <span className="whitespace-nowrap">Réserver un appel</span>
             </CalendlyBookingLink>
           </div>
           <nav
-            className="relative flex min-w-0 max-w-full flex-wrap items-center justify-end gap-x-4 gap-y-2 whitespace-nowrap xl:gap-x-5"
+            className="relative flex max-w-full flex-wrap items-center justify-end gap-x-1 gap-y-1 rounded-xl border border-slate-200/55 bg-white/50 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_1px_2px_rgba(15,23,42,0.04)] backdrop-blur-md"
             aria-label="Navigation principale"
           >
             <div
@@ -251,9 +255,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             >
               <button
                 type="button"
-                className={`inline-flex items-center gap-1 rounded-[10px] px-1.5 py-2 text-sm font-[530] tracking-tight transition-colors xl:px-2 ${
-                  solutionsOpen ? "bg-[#eff6ff]/80 text-[#1d4ed8]" : "text-[#1d4ed8] hover:bg-slate-50"
-                }`}
+                className={`${NAV_LINK} ${solutionsOpen ? NAV_LINK_OPEN : ""}`}
                 aria-expanded={solutionsOpen}
                 aria-haspopup="menu"
                 onClick={(e) => {
@@ -265,7 +267,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 }}
               >
                 <span className="whitespace-nowrap">Solutions BTP</span>
-                <ChevronDown accent className={solutionsOpen ? "rotate-180" : ""} />
+                <ChevronDown accent={solutionsOpen} className={solutionsOpen ? "rotate-180" : ""} />
               </button>
 
               {solutionsOpen ? (
@@ -317,15 +319,12 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               ) : null}
             </div>
 
-            <Link
-              href="/#process-bework"
-              className="rounded-[10px] px-1.5 py-2 text-sm font-[530] tracking-tight text-black whitespace-nowrap transition-colors hover:text-[#1d4ed8] xl:px-2"
-            >
+            <Link href="/#process-bework" className={`${NAV_LINK} whitespace-nowrap`}>
               Process BeWork
             </Link>
             <Link
               href="/tarifs"
-              className="rounded-[10px] px-1.5 py-2 text-sm font-[530] tracking-tight text-black whitespace-nowrap transition-colors hover:text-[#1d4ed8] xl:px-2"
+              className={`${NAV_LINK} whitespace-nowrap`}
               {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_TARIFS, "header-nav")}
             >
               Tarifs
@@ -337,25 +336,17 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               onMouseEnter={openResources}
               onMouseLeave={scheduleCloseResources}
             >
-              <div
-                className={`inline-flex items-stretch rounded-[10px] transition-colors ${
-                  resourcesOpen ? "bg-[#eff6ff]/80" : ""
-                }`}
-              >
+              <div className={`inline-flex items-stretch rounded-lg ${resourcesOpen ? NAV_LINK_OPEN : ""}`}>
                 <Link
                   href="/ressources"
-                  className={`inline-flex items-center rounded-l-[10px] px-1.5 py-2 text-sm font-[530] tracking-tight transition-colors xl:pl-2 xl:pr-1.5 ${
-                    resourcesOpen ? "text-[#1d4ed8]" : "text-black hover:bg-slate-50"
-                  }`}
+                  className={`${NAV_LINK} rounded-r-none pr-2 whitespace-nowrap`}
                   onClick={() => setResourcesOpen(false)}
                 >
-                  <span className="whitespace-nowrap">Ressources</span>
+                  Ressources
                 </Link>
                 <button
                   type="button"
-                  className={`inline-flex items-center rounded-r-[10px] border-l border-slate-200/80 px-1 py-2 transition-colors xl:pr-2 ${
-                    resourcesOpen ? "text-[#1d4ed8]" : "text-black hover:bg-slate-50"
-                  }`}
+                  className={`${NAV_LINK} rounded-l-none border-l border-slate-200/70 px-2 ${resourcesOpen ? "text-[#1d4ed8]" : ""}`}
                   aria-expanded={resourcesOpen}
                   aria-haspopup="menu"
                   aria-label="Sous-rubriques Ressources"
@@ -367,7 +358,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                     setSolutionsOpen(false);
                   }}
                 >
-                  <ChevronDown accent className={resourcesOpen ? "rotate-180" : ""} />
+                  <ChevronDown accent={resourcesOpen} className={resourcesOpen ? "rotate-180" : ""} />
                 </button>
               </div>
               {resourcesOpen ? (
@@ -421,10 +412,9 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
           </nav>
         </div>
 
-        {/* Burger : même ligne, à droite &lt; lg */}
         <button
           type="button"
-          className="col-start-2 row-start-1 flex h-11 w-11 shrink-0 items-center justify-center justify-self-end rounded-lg border border-slate-200 text-slate-800 transition hover:border-slate-300 hover:bg-slate-50 lg:hidden"
+          className="col-start-2 row-start-1 flex h-11 w-11 shrink-0 items-center justify-center justify-self-end rounded-lg border border-slate-200/90 bg-white/90 text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-white lg:hidden"
           aria-expanded={mobileOpen}
           aria-controls="marketing-mobile-nav"
           aria-label={mobileOpen ? "Fermer le menu" : "Ouvrir le menu"}

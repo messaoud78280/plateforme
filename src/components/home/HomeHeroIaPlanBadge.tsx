@@ -1,89 +1,76 @@
 /**
- * Badge « IA » façon croquis / planche d’architecte : cotations, Ø, traits techniques — ~×2 vs ancienne pastille.
+ * Badge IA hero — boule 3D « sortie d’écran », typo IA cinéma, sous-titre BTP discret.
  */
 export function HomeHeroIaPlanBadge() {
-  const mono = "ui-monospace, monospace, monospace";
-
   return (
-    <div className="relative h-[min(280px,72vw)] w-[min(280px,72vw)] shrink-0 max-w-[280px]" aria-hidden>
-      <svg className="absolute inset-0 h-full w-full text-[#2563eb]" viewBox="0 0 280 280" fill="none">
-        <defs>
-          <filter id="bework-ia-badge-sketch" x="-15%" y="-15%" width="130%" height="130%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" result="noise" />
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.35" xChannelSelector="R" yChannelSelector="G" />
-          </filter>
-        </defs>
+    <div className="bework-ia-cinema-scene relative h-[min(320px,82vw)] w-[min(320px,82vw)] max-w-[320px] shrink-0" aria-hidden>
+      <div
+        className="bework-ia-cinema-halo pointer-events-none absolute left-1/2 top-[48%] h-[14rem] w-[14rem] -translate-x-1/2 -translate-y-1/2 rounded-full"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(56,189,248,0.4) 0%, rgba(99,102,241,0.15) 38%, transparent 68%)",
+        }}
+      />
 
-        {/* Grand cercle fantôme — repère chantier */}
-        <circle
-          cx="140"
-          cy="148"
-          r="118"
-          stroke="currentColor"
-          strokeWidth="0.65"
-          strokeDasharray="6 5"
-          opacity="0.22"
-          filter="url(#bework-ia-badge-sketch)"
-        />
+      <div
+        className="pointer-events-none absolute left-1/2 top-[72%] z-0 h-[1.75rem] w-[62%] -translate-x-1/2 rounded-[100%]"
+        style={{
+          background: "radial-gradient(ellipse, rgba(15,23,42,0.45) 0%, transparent 72%)",
+          filter: "blur(10px)",
+          transform: "translateX(-50%) scaleY(0.55)",
+        }}
+      />
 
-        {/* Cotation horizontale Ø */}
-        <g opacity="0.88">
-          <path d="M 52 52 L 228 52" stroke="currentColor" strokeWidth="0.85" strokeDasharray="3 2" />
-          <path d="M 52 48 L 52 56 M 228 48 L 228 56" stroke="currentColor" strokeWidth="0.75" />
-          <text x="140" y="42" textAnchor="middle" fill="#1e40af" style={{ fontFamily: mono, fontSize: "11px", fontWeight: 600 }}>
-            Ø 152.00
-          </text>
-        </g>
+      <div className="bework-ia-sphere-pop absolute left-1/2 top-[48%] z-20 -translate-x-1/2 -translate-y-1/2">
+        <div className="bework-ia-sphere relative flex h-[11.25rem] w-[11.25rem] flex-col items-center justify-center overflow-hidden rounded-full sm:h-[12rem] sm:w-[12rem]">
+          <div
+            className="pointer-events-none absolute inset-0 rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle at 28% 22%, #7dd3fc 0%, #2563eb 22%, #1e3a8a 48%, #0f172a 72%, #020617 100%)",
+            }}
+          />
+          <div
+            className="pointer-events-none absolute inset-0 rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle at 78% 82%, transparent 58%, rgba(34,211,238,0.22) 72%, rgba(167,139,250,0.12) 88%, transparent 100%)",
+            }}
+          />
+          <div
+            className="pointer-events-none absolute left-[12%] top-[8%] h-[38%] w-[44%] rounded-full"
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.15) 45%, transparent 70%)",
+              filter: "blur(1px)",
+            }}
+          />
+          <div
+            className="pointer-events-none absolute inset-0 rounded-full"
+            style={{
+              background: "radial-gradient(circle at 50% 95%, rgba(0,0,0,0.55) 0%, transparent 48%)",
+            }}
+          />
 
-        {/* Cotation verticale R */}
-        <g opacity="0.82">
-          <path d="M 44 82 L 44 214" stroke="currentColor" strokeWidth="0.75" strokeDasharray="4 3" />
-          <path d="M 40 82 L 48 82 M 40 214 L 48 214" stroke="currentColor" strokeWidth="0.7" />
-          <text
-            x="30"
-            y="152"
-            textAnchor="middle"
-            fill="#1e40af"
-            style={{ fontFamily: mono, fontSize: "10px", fontWeight: 600 }}
-            transform="rotate(-90 30 152)"
-          >
-            R = 76
-          </text>
-        </g>
+          <div className="relative z-[3] flex flex-col items-center justify-center px-3 text-center">
+            <p className="bework-ia-cinema-title font-heading leading-none tracking-tight">IA</p>
+            <p className="mt-2 max-w-[8.5rem] text-[8.5px] font-medium uppercase leading-[1.35] tracking-[0.14em] text-sky-100/85 sm:text-[9px]">
+              Au service des pros du BTP
+            </p>
+          </div>
+        </div>
+      </div>
 
-        {/* Angle 90° — coin bas-droite */}
-        <g stroke="currentColor" strokeWidth="0.7" opacity="0.55">
-          <path d="M 238 206 L 238 228 L 216 228" />
-          <path d="M 228 228 A 14 14 0 0 1 238 214" fill="none" />
-          <text x="244" y="222" fill="#64748b" style={{ fontFamily: mono, fontSize: "9px" }}>
-            90°
-          </text>
-        </g>
-
-        {/* Axes légers */}
-        <line x1="140" y1="54" x2="140" y2="242" stroke="currentColor" strokeWidth="0.45" strokeDasharray="5 9" opacity="0.18" />
-        <line x1="56" y1="148" x2="224" y2="148" stroke="currentColor" strokeWidth="0.45" strokeDasharray="5 9" opacity="0.15" />
-
-        {/* Cercles concentriques type DAO */}
-        <circle cx="140" cy="148" r="92" stroke="currentColor" strokeWidth="0.55" strokeDasharray="2 4" opacity="0.35" />
-        <circle cx="140" cy="148" r="84" stroke="#64748b" strokeWidth="0.5" strokeDasharray="8 6" opacity="0.25" />
-      </svg>
-
-      {/* Disque central — lisibilité renforcée */}
-      <div className="absolute left-1/2 top-[53%] flex h-[9.5rem] w-[9.5rem] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border-2 border-dashed border-[#93c5fd]/95 bg-gradient-to-b from-slate-900 via-[#0f172a] to-black px-4 text-center shadow-[0_0_0_1px_rgba(37,99,235,0.5),0_0_42px_-8px_rgba(37,99,235,0.55),0_22px_48px_-14px_rgba(15,23,42,0.55)] ring-[3px] ring-white/25 ring-offset-[3px] ring-offset-[rgba(248,250,252,0.85)]">
-        {/* Léger voile blueprint */}
+      <div className="pointer-events-none absolute left-1/2 top-[48%] z-10 h-[13rem] w-[13rem] -translate-x-1/2 -translate-y-1/2">
+        <div className="bework-ia-flare absolute left-[6%] top-[18%] h-1 w-1 rounded-full bg-white/80 blur-[1px]" />
         <div
-          className="pointer-events-none absolute inset-[10px] rounded-full opacity-[0.12]"
-          style={{
-            backgroundImage: `repeating-linear-gradient(-45deg, transparent, transparent 5px, rgba(147, 197, 253, 0.9) 5px, rgba(147, 197, 253, 0.9) 6px)`,
-          }}
+          className="bework-ia-flare absolute right-[10%] top-[28%] h-0.5 w-0.5 rounded-full bg-cyan-200/90 blur-[0.5px]"
+          style={{ animationDelay: "0.8s" }}
         />
-        <span
-          className="relative z-[1] text-[10px] font-bold uppercase leading-[1.22] tracking-[0.1em] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] sm:text-[11px] sm:tracking-[0.11em]"
-          style={{ fontFamily: mono }}
-        >
-          IA au service des pros du BTP
-        </span>
+        <div
+          className="bework-ia-flare absolute bottom-[22%] right-[14%] h-1.5 w-1.5 rounded-full bg-violet-200/70 blur-[1px]"
+          style={{ animationDelay: "1.4s" }}
+        />
       </div>
     </div>
   );

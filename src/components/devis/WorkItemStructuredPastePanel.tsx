@@ -4,6 +4,7 @@ import { useCallback, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   checkWorkItemCodesExist,
+  checkWorkItemsSimilarTitles,
   importObservedPricesForWorkItems,
   importWorkItemsBulk,
   previewObservedPricesPaste,
@@ -14,6 +15,7 @@ import type { MotherVariantImportBundle } from "@/lib/be-work-devis-chatgpt-past
 import {
   describeStructuredPasteKind,
   parseStructuredPasteBlock,
+  STRUCTURED_PASTE_DETECTED_FORMAT_LABELS,
   type ParsedPasteBulkRow,
   type StructuredPasteFormValues,
 } from "@/lib/be-work-devis-structured-paste";
@@ -33,6 +35,8 @@ type WorkItemPreviewRow = ParsedPasteBulkRow & {
 type MotherPreviewRow = MotherVariantImportBundle & {
   duplicateDb: boolean;
   duplicateBatch: boolean;
+  similarTitleDb: boolean;
+  similarTitleCode: string | null;
 };
 
 type PricePastePreviewRow = ParsedPasteBulkRow & PreviewObservedPricePasteResultRow;
@@ -72,13 +76,31 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
     const codes = mothers.map((m) => m.values.code.trim()).filter(Boolean);
     const existing = await checkWorkItemCodesExist(codes);
     const existingSet = new Set(existing);
+    const similarMatches = await checkWorkItemsSimilarTitles(
+      mothers.map((m) => ({ title: m.ficheMere, lot: m.values.lot })),
+    );
+    const similarByTitle = new Map(similarMatches.map((m) => [m.inputTitle, m]));
     const seenInFile = new Set<string>();
     const enriched: MotherPreviewRow[] = mothers.map((mother) => {
       const code = mother.values.code.trim();
       const duplicateDb = Boolean(code && existingSet.has(code));
       const duplicateBatch = Boolean(code && seenInFile.has(code));
+      const similar = similarByTitle.get(mother.ficheMere);
+      const similarTitleDb = Boolean(similar && !duplicateDb);
       if (code) seenInFile.add(code);
-      return { ...mother, duplicateDb, duplicateBatch };
+      const values =
+        similarTitleDb && similar?.existingCode
+          ? { ...mother.values, code: similar.existingCode }
+          : mother.values;
+
+      return {
+        ...mother,
+        values,
+        duplicateDb: duplicateDb || similarTitleDb,
+        duplicateBatch,
+        similarTitleDb,
+        similarTitleCode: similar?.existingCode ?? null,
+      };
     });
     setMotherBulkRows(enriched);
     setConfirmSkipDuplicates(false);
@@ -119,13 +141,17 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
     }
 
     const kind = describeStructuredPasteKind(parsed.result);
-    const kindLabels: Record<typeof kind, string> = {
-      single: "Objet ouvrage simple",
-      workItemsList: "Tableau d’ouvrages",
-      pricesOnly: "Prix sur ouvrages existants",
-      motherWithVariants: "Fiches mères avec variantes (ChatGPT)",
-    };
-    setPasteKindLabel(kindLabels[kind]);
+    if (parsed.result.mode === "motherVariants") {
+      setPasteKindLabel(parsed.result.pasteTypeLabel);
+    } else {
+      const kindLabels: Record<typeof kind, string> = {
+        single: STRUCTURED_PASTE_DETECTED_FORMAT_LABELS.objet_ouvrage_simple,
+        workItemsList: STRUCTURED_PASTE_DETECTED_FORMAT_LABELS.tableau_ouvrages,
+        pricesOnly: "Prix sur ouvrages existants",
+        motherWithVariants: STRUCTURED_PASTE_DETECTED_FORMAT_LABELS.export_fiches_meres_variantes,
+      };
+      setPasteKindLabel(kindLabels[kind]);
+    }
 
     if (parsed.result.mode === "single") {
       onApplyValues(parsed.result.values);
@@ -145,7 +171,9 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
       setMotherStats({ totalVariants: mv.totalVariantCount, famille: mv.famille });
       await buildMotherPreviewRows(mv.mothers);
       setSuccess(
-        `${mv.mothers.length} fiche(s) mère · ${mv.totalVariantCount} variante(s) · codes : ${mv.allCodes.slice(0, 12).join(", ")}${mv.allCodes.length > 12 ? "…" : ""}. Vérifiez puis importez.`,
+        mv.mothers.length === 1
+          ? `1 fiche mère détectée avec ${mv.totalVariantCount} variante(s). Vérifiez puis importez.`
+          : `${mv.mothers.length} fiches mères détectées avec ${mv.totalVariantCount} variantes au total. Vérifiez puis importez.`,
       );
       return;
     }
@@ -424,18 +452,26 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
   }
 ]`}
           </pre>
-          <p className="font-medium text-slate-700">Famille ChatGPT — fiche mère + variantes</p>
+          <p className="font-medium text-slate-700">Export fiche mère + variantes (objet fiche_mere)</p>
           <pre className="max-h-48 overflow-auto rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-800">
 {`{
-  "famille": "VRD",
-  "sous_famille": "Tranchées",
+  "famille": "Assainissement",
   "ouvrages": [
     {
-      "fiche_mere": "Fourniture de galets 40/100",
-      "designation_complete": "…",
-      "unite_principale": "m³",
+      "fiche_mere": {
+        "designation": "Fosses toutes eaux en polyéthylène sans préfiltre",
+        "description": "…",
+        "unite": "U",
+        "sous_famille": "Fosses toutes eaux",
+        "materiaux": "polyéthylène, PVC"
+      },
       "variantes": [
-        { "code": "V1", "profondeur_m": 0.6, "prix_reference": 25.31 }
+        {
+          "code": "4.2.59",
+          "designation": "Fosse 1000 L sans préfiltre",
+          "volume_litres": 1000,
+          "prix": { "fourniture_pose_41h": 1147.47 }
+        }
       ]
     }
   ]
@@ -515,10 +551,13 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
         <div className="mt-6 space-y-4 border-t border-slate-200 pt-6">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="font-heading text-sm font-bold text-slate-900">
-              Prévisualisation — fiches mères & variantes
+              Prévisualisation —{" "}
+              {motherBulkRows.length === 1
+                ? "1 fiche mère détectée"
+                : `${motherBulkRows.length} fiches mères détectées`}
             </h3>
             <span className="text-xs text-slate-600">
-              <strong>{motherBulkRows.length}</strong> fiche(s) mère · <strong>{motherStats?.totalVariants ?? 0}</strong> variante(s)
+              <strong>{motherStats?.totalVariants ?? 0}</strong> variante(s) au total
               {motherDuplicateCount > 0 ? (
                 <>
                   {" "}
@@ -533,6 +572,32 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
               Famille : <strong>{motherStats.famille}</strong>
             </p>
           ) : null}
+
+          <ul className="space-y-2 rounded-xl border border-[#1e3a5f]/15 bg-[#f8fafc] p-4 text-sm text-slate-800">
+            {motherBulkRows.map((row, i) => (
+              <li key={`summary-${row.motherIndex}`}>
+                <span className="font-semibold text-[#1e3a5f]">
+                  {motherBulkRows.length > 1 ? `${i + 1}. ` : "Fiche mère : "}
+                  {row.ficheMere}
+                </span>
+                {" — "}
+                <span className="tabular-nums">
+                  {row.variantCount} variante{row.variantCount > 1 ? "s" : ""}
+                </span>
+                {row.variantCodes.length > 0 ? (
+                  <span className="mt-1 block text-xs text-slate-600">
+                    Codes variantes : {row.variantCodes.slice(0, 10).join(", ")}
+                    {row.variantCodes.length > 10 ? "…" : ""}
+                  </span>
+                ) : null}
+                {row.similarTitleDb && row.similarTitleCode ? (
+                  <span className="mt-1 block text-xs font-medium text-amber-800">
+                    Fiche similaire en bibliothèque ({row.similarTitleCode})
+                  </span>
+                ) : null}
+              </li>
+            ))}
+          </ul>
 
           <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
             <table className="min-w-[900px] w-full text-left text-sm">
@@ -565,7 +630,11 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
                       <td className="px-2 py-2">
                         {dup ? (
                           <span className="rounded-full bg-amber-200 px-2 py-0.5 text-xs font-bold text-amber-950">
-                            {row.duplicateDb ? "Déjà en base" : "Répété dans le collage"}
+                            {row.duplicateBatch
+                              ? "Répété dans le collage"
+                              : row.similarTitleDb
+                                ? "Titre similaire"
+                                : "Déjà en base"}
                           </span>
                         ) : (
                           "—"
@@ -614,7 +683,9 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
             onClick={handleImportBulk}
             className="rounded-lg bg-[#0f766e] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#0d5c56] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isPending ? "Import en cours…" : `Importer ${motherPayloadCount} fiche(s) et variantes`}
+            {isPending
+              ? "Import en cours…"
+              : `Importer ${motherPayloadCount} fiche(s) et ${motherStats?.totalVariants ?? 0} variante(s)`}
           </button>
         </div>
       ) : null}

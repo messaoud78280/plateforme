@@ -14,6 +14,11 @@ export type PriceEntryImportMeta = {
   quantiteReference?: string;
   tags?: string[];
   commentaire?: string;
+  /** Grille de prix importée (pose / fourniture) — conservée intégralement. */
+  prixGrille?: Record<string, number>;
+  /** Caractéristiques techniques de la variante (volume, dimensions…). */
+  caracteristiques?: Record<string, string | number | boolean>;
+  temps_pose?: number;
 };
 
 export function isPriceEntryImportMeta(v: unknown): v is PriceEntryImportMeta {

@@ -20,6 +20,7 @@ import {
   priceDuplicateKeyMatchesRow,
   summarizePricePasteInvalidReasons,
 } from "@/lib/be-work-devis-price-entry-paste";
+import { normalizeText } from "@/lib/be-work-devis-chatgpt-paste";
 import {
   emptyStructuredPasteFormValues,
   mapObjectToStructuredPasteFormValues,
@@ -170,6 +171,49 @@ export async function checkWorkItemCodesExist(codesInput: string[]): Promise<str
     select: { code: true },
   });
   return found.map((r) => r.code);
+}
+
+export type SimilarWorkItemMatch = {
+  inputTitle: string;
+  existingCode: string;
+  existingTitle: string;
+};
+
+/** Fiches mères probablement déjà en bibliothèque (désignation normalisée + lot). */
+export async function checkWorkItemsSimilarTitles(
+  inputs: { title: string; lot?: string }[],
+): Promise<SimilarWorkItemMatch[]> {
+  await guard();
+  const rows = inputs
+    .map((i) => ({ title: i.title.trim(), lot: i.lot?.trim() ?? "" }))
+    .filter((i) => i.title.length > 0)
+    .slice(0, 200);
+  if (rows.length === 0) return [];
+
+  const candidates = await prisma.workItem.findMany({
+    where: { mergeStatus: { not: "merged" } },
+    select: { code: true, title: true, lot: true },
+    take: 5000,
+  });
+
+  const matches: SimilarWorkItemMatch[] = [];
+  for (const input of rows) {
+    const nTitle = normalizeText(input.title);
+    const nLot = input.lot ? normalizeText(input.lot) : "";
+    const hit = candidates.find((c) => {
+      if (normalizeText(c.title) !== nTitle) return false;
+      if (nLot && c.lot && normalizeText(c.lot) !== nLot) return false;
+      return true;
+    });
+    if (hit) {
+      matches.push({
+        inputTitle: input.title,
+        existingCode: hit.code,
+        existingTitle: hit.title,
+      });
+    }
+  }
+  return matches;
 }
 
 export type PreviewObservedPricePasteInputRow = {

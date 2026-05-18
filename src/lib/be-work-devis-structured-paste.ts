@@ -1,4 +1,7 @@
 import {
+  countFichesMeresInParsed,
+  countVariantesInParsed,
+  getOuvragesFromRoot,
   isMotherVariantOuvrageEntry,
   preservesMotherVariantStructure,
   tryParseChatGptMotherVariantsExport,
@@ -149,9 +152,15 @@ export function extractPasteWorkItemCode(obj: Record<string, unknown>): string |
 }
 
 function looksLikeSingleWorkItemRoot(obj: Record<string, unknown>): boolean {
+  if (isMotherVariantOuvrageEntry(obj)) return true;
+  for (const key of PASTE_BULK_ARRAY_KEYS) {
+    const val = obj[key];
+    if (isArrayOfObjects(val)) return false;
+  }
+  if (getOuvragesFromRoot(obj)) return false;
   if (extractPasteWorkItemCode(obj)) return true;
   if (pickPasteString(obj, PASTE_TITLE_KEYS)) return true;
-  if (pickPasteString(obj, PASTE_LOT_KEYS)) return true;
+  if (pickPasteString(obj, ["lot", "corpsEtat", "corps_etat", "trade"])) return true;
   return false;
 }
 
@@ -389,6 +398,52 @@ export type StructuredPasteKind =
   | "pricesOnly"
   | "motherWithVariants";
 
+/** Format détecté avant parsing détaillé (priorité stricte). */
+export type StructuredPasteDetectedFormat =
+  | "fiche_mere_variantes"
+  | "export_fiches_meres_variantes"
+  | "tableau_ouvrages"
+  | "objet_ouvrage_simple"
+  | "json_invalide";
+
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return v !== null && typeof v === "object" && !Array.isArray(v);
+}
+
+/**
+ * Détecte le format d’un JSON déjà parsé (priorité : fiche mère + variantes avant tableau / objet simple).
+ */
+export function detectStructuredPasteFormat(parsedJson: unknown): StructuredPasteDetectedFormat {
+  if (parsedJson === null || parsedJson === undefined) return "json_invalide";
+
+  if (Array.isArray(parsedJson)) {
+    if (parsedJson.length === 0) return "json_invalide";
+    const objects = parsedJson.filter(isRecord);
+    if (objects.some(isMotherVariantOuvrageEntry)) return "export_fiches_meres_variantes";
+    return "tableau_ouvrages";
+  }
+
+  if (!isRecord(parsedJson)) return "json_invalide";
+
+  if (isMotherVariantOuvrageEntry(parsedJson)) return "fiche_mere_variantes";
+
+  const ouvrages = getOuvragesFromRoot(parsedJson);
+  if (ouvrages) {
+    if (ouvrages.some(isMotherVariantOuvrageEntry)) return "export_fiches_meres_variantes";
+    return "tableau_ouvrages";
+  }
+
+  return "objet_ouvrage_simple";
+}
+
+export const STRUCTURED_PASTE_DETECTED_FORMAT_LABELS: Record<StructuredPasteDetectedFormat, string> = {
+  fiche_mere_variantes: "Fiche mère + variantes détectée",
+  export_fiches_meres_variantes: "Export fiches mères + variantes détecté",
+  tableau_ouvrages: "Tableau d’ouvrages",
+  objet_ouvrage_simple: "Objet ouvrage simple",
+  json_invalide: "JSON invalide",
+};
+
 export function describeStructuredPasteKind(result: ParsedStructuredPaste): StructuredPasteKind {
   if (result.mode === "single") return "single";
   if (result.mode === "motherVariants") return "motherWithVariants";
@@ -412,6 +467,32 @@ export function parseStructuredPasteBlock(raw: string):
     return {
       ok: false,
       error: `Impossible de lire le JSON. ${hint} Vérifiez les guillemets, les virgules, les crochets et les accolades.`,
+    };
+  }
+
+  const detectedType = detectStructuredPasteFormat(parsed);
+  const countFichesMeres = countFichesMeresInParsed(parsed);
+  const countVariantes = countVariantesInParsed(parsed);
+  console.log("[StructuredPaste] type détecté:", detectedType);
+  console.log("[StructuredPaste] fiches mères détectées:", countFichesMeres);
+  console.log("[StructuredPaste] variantes détectées:", countVariantes);
+  console.log(
+    "[StructuredPaste] premier objet:",
+    Array.isArray(parsed) ? parsed[0] : parsed,
+  );
+
+  if (
+    detectedType === "fiche_mere_variantes" ||
+    detectedType === "export_fiches_meres_variantes"
+  ) {
+    const motherExport = tryParseChatGptMotherVariantsExport(parsed);
+    if (motherExport) {
+      return { ok: true, result: motherExport };
+    }
+    return {
+      ok: false,
+      error:
+        "Format fiche mère + variantes détecté, mais lecture impossible. Vérifiez que fiche_mere contient une designation et que variantes est un tableau non vide.",
     };
   }
 

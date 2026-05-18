@@ -2,10 +2,12 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { deletePriceEntry } from "@/app/dashboard/devis/actions";
+import { ObservedPricesTable } from "@/components/devis/ObservedPricesTable";
 import { PriceEntryCreateForm } from "@/components/devis/PriceEntryCreateForm";
+import type { ObservedPriceRowSerialized } from "@/lib/be-work-devis-price-entry-detail";
+import { parsePriceEntryImportMeta } from "@/lib/be-work-devis-price-entry-import-meta";
 import {
   QUALITY_LEVEL_LABELS,
-  SOURCE_TYPE_LABELS,
   WORK_ITEM_ITEM_TYPE_LABELS,
   WORK_ITEM_STATUS_LABELS,
 } from "@/lib/be-work-devis-labels";
@@ -55,6 +57,36 @@ export default async function FicheOuvragePage({ params }: Props) {
   const minHt = agg._min.unitPriceHT != null ? Number(agg._min.unitPriceHT) : null;
   const maxHt = agg._max.unitPriceHT != null ? Number(agg._max.unitPriceHT) : null;
   const avgHt = agg._avg.unitPriceHT != null ? Number(agg._avg.unitPriceHT) : null;
+
+  const serializedEntries: ObservedPriceRowSerialized[] = entries.map((pe) => ({
+    id: pe.id,
+    sourceName: pe.sourceName,
+    variantDesignation: pe.variantDesignation,
+    importMeta: parsePriceEntryImportMeta(pe.importMeta),
+    sourceType: pe.sourceType,
+    unitPriceHT: Number(pe.unitPriceHT),
+    unitPriceTTC: Number(pe.unitPriceTTC),
+    vatRate: Number(pe.vatRate),
+    quantity: pe.quantity != null ? Number(pe.quantity) : null,
+    totalHT: pe.totalHT != null ? Number(pe.totalHT) : null,
+    totalTTC: pe.totalTTC != null ? Number(pe.totalTTC) : null,
+    department: pe.department,
+    reliabilityScore: pe.reliabilityScore,
+    notes: pe.notes,
+    dateObserved: pe.dateObserved?.toISOString() ?? null,
+    createdAt: pe.createdAt.toISOString(),
+    priceSourceName: pe.priceSource?.name ?? null,
+  }));
+
+  const workItemContext = {
+    id: item.id,
+    code: item.code,
+    title: item.title,
+    lot: item.lot,
+    subLot: item.subLot,
+    family: item.family,
+    unit: item.unit,
+  };
 
   return (
     <div className="space-y-8">
@@ -257,77 +289,12 @@ export default async function FicheOuvragePage({ params }: Props) {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-[920px] w-full text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase text-slate-600">
-              <tr>
-                <th className="px-3 py-2">Source</th>
-                <th className="px-3 py-2">Type</th>
-                <th className="px-3 py-2">Qté</th>
-                <th className="px-3 py-2">PU HT</th>
-                <th className="px-3 py-2">Total HT</th>
-                <th className="px-3 py-2">TVA %</th>
-                <th className="px-3 py-2">TTC</th>
-                <th className="px-3 py-2">Total TTC</th>
-                <th className="px-3 py-2">Dept.</th>
-                <th className="px-3 py-2">Fiab.</th>
-                <th className="px-3 py-2">Date</th>
-                <th className="px-3 py-2 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {entries.length === 0 ? (
-                <tr>
-                  <td colSpan={12} className="px-3 py-8 text-center text-slate-500">
-                    Aucun prix enregistré pour cet ouvrage.
-                  </td>
-                </tr>
-              ) : (
-                entries.map((pe) => (
-                  <tr key={pe.id} className="hover:bg-slate-50/80">
-                    <td className="max-w-[200px] truncate px-3 py-2 font-medium" title={pe.sourceName}>
-                      {pe.sourceName}
-                      {pe.priceSource ? (
-                        <span className="mt-0.5 block text-xs font-normal text-slate-500">
-                          Lié : {pe.priceSource.name}
-                        </span>
-                      ) : null}
-                    </td>
-                    <td className="px-3 py-2">{SOURCE_TYPE_LABELS[pe.sourceType]}</td>
-                    <td className="whitespace-nowrap px-3 py-2 font-mono text-xs">
-                      {pe.quantity != null ? String(pe.quantity) : "—"}
-                    </td>
-                    <td className="px-3 py-2 font-mono text-xs">{formatEurFr(Number(pe.unitPriceHT))}</td>
-                    <td className="px-3 py-2 font-mono text-xs">
-                      {pe.totalHT != null ? formatEurFr(Number(pe.totalHT)) : "—"}
-                    </td>
-                    <td className="px-3 py-2">{Number(pe.vatRate)} %</td>
-                    <td className="px-3 py-2 font-mono text-xs">{formatEurFr(Number(pe.unitPriceTTC))}</td>
-                    <td className="px-3 py-2 font-mono text-xs">
-                      {pe.totalTTC != null ? formatEurFr(Number(pe.totalTTC)) : "—"}
-                    </td>
-                    <td className="px-3 py-2">{pe.department ?? "—"}</td>
-                    <td className="px-3 py-2">{pe.reliabilityScore}</td>
-                    <td className="px-3 py-2 whitespace-nowrap">{formatDateFr(pe.dateObserved ?? pe.createdAt)}</td>
-                    <td className="px-3 py-2 text-right">
-                      <form action={deletePriceEntry} className="inline">
-                        <input type="hidden" name="id" value={pe.id} />
-                        <input type="hidden" name="workItemId" value={id} />
-                        <button
-                          type="submit"
-                          className="text-xs font-semibold text-red-700 hover:underline"
-                          title="Supprimer ce prix"
-                        >
-                          Supprimer
-                        </button>
-                      </form>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        <ObservedPricesTable
+          workItemId={id}
+          workItem={workItemContext}
+          entries={serializedEntries}
+          deletePriceEntry={deletePriceEntry}
+        />
 
         <PriceEntryCreateForm workItemId={id} sources={sources} />
       </section>

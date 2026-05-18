@@ -964,6 +964,10 @@ model PriceEntry {
   dateObserved     DateTime?                @db.Date
   reliabilityScore Int                      @default(3)
   notes            String?                  @db.Text
+  /// Désignation complète de la variante importée (ChatGPT / collage JSON).
+  variantDesignation String?                @db.Text
+  /// Métadonnées structurées d’import (famille, profondeur, classe de terre, tags…).
+  importMeta         Json?
   createdAt        DateTime                 @default(now())
   updatedAt        DateTime                 @updatedAt
 

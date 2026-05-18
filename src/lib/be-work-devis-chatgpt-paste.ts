@@ -3,6 +3,7 @@
  * Une fiche mère → un WorkItem ; chaque variante → PriceEntry(s) rattachée(s).
  */
 
+import type { PriceEntryImportMeta } from "@/lib/be-work-devis-price-entry-import-meta";
 import { extractOrCoalescePriceEntriesFromPasteObject } from "@/lib/be-work-devis-price-entry-paste";
 import {
   emptyStructuredPasteFormValues,
@@ -122,34 +123,110 @@ function collectVariantAttributeNotes(v: Record<string, unknown>): string {
   return lines.join("\n");
 }
 
+export type VariantPasteContext = {
+  famille?: string | null;
+  sousFamille?: string | null;
+  ficheMere: string;
+  unite?: string | null;
+  tags?: string[];
+};
+
+/** Désignation complète lisible pour la fiche détail / tooltip. */
+export function buildVariantDesignation(
+  variante: Record<string, unknown>,
+  ficheMere: string,
+): string {
+  const explicit = pickPasteString(variante, [
+    "designation",
+    "designation_complete",
+    "designationComplete",
+    "libelle",
+    "label",
+    "designation_variante",
+  ]);
+  if (explicit) return explicit;
+
+  const parts: string[] = [ficheMere];
+  const largeur = pickPasteString(variante, ["largeur_m", "largeur", "width"]);
+  const profondeur = pickPasteString(variante, ["profondeur_m", "profondeur", "depth"]);
+  const classe = pickPasteString(variante, ["classe_terre", "classeTerre", "classe"]);
+  if (largeur) parts.push(`largeur ${largeur} m`);
+  if (profondeur) parts.push(`profondeur ${profondeur} m`);
+  if (classe) parts.push(`terre de classe ${classe}`);
+  return parts.join(", ");
+}
+
+function buildVariantImportMeta(
+  variante: Record<string, unknown>,
+  ctx: VariantPasteContext,
+): PriceEntryImportMeta {
+  const tagsRaw = variante.tags ?? variante.etiquettes;
+  const variantTags = Array.isArray(tagsRaw)
+    ? tagsRaw.map((t) => coerceLeaf(t)).filter((t): t is string => Boolean(t?.trim()))
+    : [];
+
+  return {
+    codeSource:
+      pickPasteString(variante, ["code", "code_variante", "code_source", "ref", "reference"]) ?? undefined,
+    famille: ctx.famille?.trim() || pickPasteString(variante, ["famille", "lot"]) || undefined,
+    sousFamille: ctx.sousFamille?.trim() || pickPasteString(variante, ["sous_famille", "sousFamille"]) || undefined,
+    ficheMere: ctx.ficheMere,
+    unite:
+      ctx.unite?.trim() ||
+      pickPasteString(variante, ["unite", "unite_principale", "unit"]) ||
+      undefined,
+    largeur_m: pickPasteString(variante, ["largeur_m", "largeur"]) ?? undefined,
+    profondeur_m: pickPasteString(variante, ["profondeur_m", "profondeur"]) ?? undefined,
+    classe_terre: pickPasteString(variante, ["classe_terre", "classeTerre", "classe"]) ?? undefined,
+    quantiteReference:
+      pickPasteString(variante, ["quantite_reference", "quantite", "quantity"]) ?? undefined,
+    tags: [...(ctx.tags ?? []), ...variantTags].length > 0 ? [...(ctx.tags ?? []), ...variantTags] : undefined,
+    commentaire: pickPasteString(variante, ["commentaire", "comment", "notes"]) ?? undefined,
+  };
+}
+
+function enrichPriceEntryRaw(
+  raw: Record<string, unknown>,
+  variante: Record<string, unknown>,
+  ctx: VariantPasteContext,
+  varianteIndex: number,
+  subIndex = 0,
+): Record<string, unknown> {
+  const variantDesignation = buildVariantDesignation(variante, ctx.ficheMere);
+  const importMeta = buildVariantImportMeta(variante, ctx);
+  const codeSource = importMeta.codeSource ?? `V${varianteIndex + 1}${subIndex > 0 ? `.${subIndex + 1}` : ""}`;
+  const shortSource = codeSource;
+
+  return {
+    ...raw,
+    sourceName: shortSource,
+    variantDesignation,
+    importMeta,
+    sourceType: raw.sourceType ?? pickPasteString(variante, ["sourceType", "typeSource"]) ?? "estimation_interne",
+    notes: [coerceLeaf(raw.notes), collectVariantAttributeNotes(variante)].filter(Boolean).join("\n") || undefined,
+  };
+}
+
 /** Transforme une variante ChatGPT en objet compatible `buildPriceEntryCreateFromPaste`. */
 export function mapVarianteToPriceEntryRaw(
   variante: Record<string, unknown>,
   ficheMere: string,
   varianteIndex: number,
-  sourceLabel?: string | null,
+  _sourceLabel?: string | null,
+  ctx?: Partial<VariantPasteContext>,
 ): Record<string, unknown>[] {
+  const pasteCtx: VariantPasteContext = {
+    ficheMere,
+    famille: ctx?.famille ?? null,
+    sousFamille: ctx?.sousFamille ?? null,
+    unite: ctx?.unite ?? null,
+    tags: ctx?.tags,
+  };
+
   const nested = extractOrCoalescePriceEntriesFromPasteObject(variante);
   if (nested.length > 0) {
-    return nested.map((pe, j) => {
-      const label =
-        pickPasteString(pe, ["sourceName", "source", "code", "ref"]) ??
-        pickPasteString(variante, ["code", "code_variante", "ref", "designation"]) ??
-        `Variante ${varianteIndex + 1}${nested.length > 1 ? `.${j + 1}` : ""}`;
-      return {
-        ...pe,
-        sourceName: `${ficheMere} — ${label}`,
-        sourceType: pe.sourceType ?? "estimation_interne",
-        notes: [coerceLeaf(pe.notes), collectVariantAttributeNotes(variante)].filter(Boolean).join("\n"),
-      };
-    });
+    return nested.map((pe, j) => enrichPriceEntryRaw(pe, variante, pasteCtx, varianteIndex, j));
   }
-
-  const variantCode =
-    pickPasteString(variante, ["code", "code_variante", "ref", "reference"]) ?? `V${varianteIndex + 1}`;
-  const sourceName = sourceLabel?.trim()
-    ? `${ficheMere} — ${sourceLabel.trim()}`
-    : `${ficheMere} — ${variantCode}`;
 
   const prixRef =
     variante.prix_reference ??
@@ -160,12 +237,9 @@ export function mapVarianteToPriceEntryRaw(
     variante.unitPriceHT;
 
   const entry: Record<string, unknown> = {
-    sourceName,
-    sourceType: pickPasteString(variante, ["sourceType", "typeSource"]) ?? "estimation_interne",
     unitPriceHT: prixRef,
     quantity: variante.quantite_reference ?? variante.quantite ?? variante.quantity ?? 1,
     vatRate: variante.tva ?? variante.vatRate ?? 0.2,
-    notes: collectVariantAttributeNotes(variante),
   };
 
   const extraCols: string[] = [];
@@ -174,10 +248,10 @@ export function mapVarianteToPriceEntryRaw(
     if (variante[k] != null) extraCols.push(`${k}=${coerceLeaf(variante[k])}`);
   }
   if (extraCols.length > 0) {
-    entry.notes = [entry.notes, `Grille: ${extraCols.join(", ")}`].filter(Boolean).join("\n");
+    entry.notes = `Grille: ${extraCols.join(", ")}`;
   }
 
-  return [entry];
+  return [enrichPriceEntryRaw(entry, variante, pasteCtx, varianteIndex)];
 }
 
 function mapMotherFromOuvrageEntry(
@@ -246,7 +320,12 @@ function mapMotherFromOuvrageEntry(
       warnings.push(`Variante ${vi + 1} ignorée (pas un objet).`);
       return;
     }
-    const mapped = mapVarianteToPriceEntryRaw(item, ficheMere, vi, pickPasteString(item, ["designation", "libelle"]));
+    const mapped = mapVarianteToPriceEntryRaw(item, ficheMere, vi, pickPasteString(item, ["designation", "libelle"]), {
+      famille,
+      sousFamille,
+      unite: unit,
+      tags,
+    });
     priceEntries.push(...mapped);
   });
 

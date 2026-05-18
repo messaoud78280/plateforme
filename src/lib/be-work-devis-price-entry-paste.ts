@@ -1,6 +1,10 @@
 import type { BeWorkPriceDocSourceType } from "@prisma/client";
 import { Prisma } from "@prisma/client";
 import { isBeWorkPriceDocSourceType } from "@/lib/be-work-devis-labels";
+import {
+  isPriceEntryImportMeta,
+  type PriceEntryImportMeta,
+} from "@/lib/be-work-devis-price-entry-import-meta";
 
 /** Extrait le tableau `priceEntries` d’un objet ouvrage collé (JSON). */
 export function extractPriceEntriesFromPastedWorkItem(obj: Record<string, unknown>): Record<string, unknown>[] {
@@ -330,6 +334,8 @@ export function buildPriceEntryCreateFromPaste(
       dateObserved: parseDateObservedPaste(pickRawField(raw, DATE_OBSERVED_KEYS)),
       reliabilityScore: parseReliabilityPaste(pickRawField(raw, RELIABILITY_KEYS)),
       notes: strOrUndef(raw.notes),
+      variantDesignation: strOrUndef(raw.variantDesignation),
+      importMeta: isPriceEntryImportMeta(raw.importMeta) ? (raw.importMeta as PriceEntryImportMeta) : undefined,
     },
   };
 }

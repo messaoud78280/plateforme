@@ -657,6 +657,19 @@ enum WorkItemItemType {
   frais_annexe
 }
 
+/// Statut de regroupement doublons (aucune suppression — fusion réversible)
+enum WorkItemMergeStatus {
+  unique
+  canonical
+  merged
+}
+
+enum WorkItemMergeProposalStatus {
+  pending
+  approved
+  rejected
+}
+
 enum BeWorkPriceDocSourceType {
   devis
   bpu
@@ -693,6 +706,15 @@ model WorkItem {
   sourceCode           String?
   /// Référence de ligne dans la source (ex. 15.1)
   sourceLine           String?
+  /// Clé normalisée pour détection doublons (désignation)
+  normalizedDesignation String?
+  /// Fiche principale si cette ligne est une variante fusionnée
+  canonicalWorkItemId  String?
+  canonicalWorkItem    WorkItem?            @relation("WorkItemDuplicateGroup", fields: [canonicalWorkItemId], references: [id], onDelete: SetNull)
+  mergedVariants       WorkItem[]           @relation("WorkItemDuplicateGroup")
+  mergeStatus          WorkItemMergeStatus  @default(unique)
+  mergedAt             DateTime?
+  mergeNote            String?
   createdAt            DateTime             @default(now())
   updatedAt            DateTime             @updatedAt
 
@@ -701,12 +723,55 @@ model WorkItem {
   siteResourceLinks         WorkItemSiteResource[]
   siteResourceAliases       SiteResourceAlias[]
   siteResourceGroupingProposals SiteResourceGroupingProposal[]
+  mergeProposalsAsCanonical WorkItemMergeProposal[] @relation("MergeProposalCanonical")
+  mergeProposalMembers      WorkItemMergeProposalMember[]
 
   @@index([lot])
   @@index([status])
   @@index([unit])
   @@index([itemType])
   @@index([familyCode])
+  @@index([normalizedDesignation])
+  @@index([canonicalWorkItemId])
+  @@index([mergeStatus])
+}
+
+/// Proposition de fusion de doublons ouvrages (validation humaine)
+model WorkItemMergeProposal {
+  id                    String                      @id @default(cuid())
+  status                WorkItemMergeProposalStatus   @default(pending)
+  proposedCanonicalId   String?
+  proposedCanonical     WorkItem?                   @relation("MergeProposalCanonical", fields: [proposedCanonicalId], references: [id], onDelete: SetNull)
+  canonicalDesignation  String
+  normalizedKey         String
+  similarityScore       Int
+  matchReasons          Json?
+  mergeMode             String                      @default("manual_review")
+  reviewedAt            DateTime?
+  reviewNote            String?
+  createdAt             DateTime                    @default(now())
+  updatedAt             DateTime                    @updatedAt
+
+  members               WorkItemMergeProposalMember[]
+
+  @@index([status])
+  @@index([normalizedKey])
+  @@index([similarityScore])
+}
+
+/// Lien proposition ↔ ouvrage candidat (données conservées)
+model WorkItemMergeProposalMember {
+  id           String                @id @default(cuid())
+  proposalId   String
+  proposal     WorkItemMergeProposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  workItemId   String
+  workItem     WorkItem              @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  isCanonical  Boolean               @default(false)
+  designation  String
+  similarityScore Int?
+
+  @@unique([proposalId, workItemId])
+  @@index([workItemId])
 }
 
 // ─── BeWork Devis — ressources chantier (matériaux, consommables, locations…) ───

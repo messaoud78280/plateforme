@@ -9,6 +9,7 @@ import {
 import { buildWorkItemTradeWhere } from "@/lib/bework-devis-lot-trades";
 import { isKnownFamilyCode } from "@/lib/bework-devis-family-codes";
 import { prisma } from "@/lib/prisma";
+import { WORK_ITEM_VISIBLE_IN_LIST } from "@/lib/work-item-merge";
 
 /** Tri côté application après agrégation des prix (pas de ORDER BY SQL sur les agrégats). */
 export const WORK_ITEM_SORT_KEYS = [
@@ -229,7 +230,7 @@ export function filterWorkItemsByAvgPriceRange(
 }
 
 export function buildWorkItemWhere(params: WorkItemFilterParams): Prisma.WorkItemWhereInput {
-  const AND: Prisma.WorkItemWhereInput[] = [];
+  const AND: Prisma.WorkItemWhereInput[] = [WORK_ITEM_VISIBLE_IN_LIST];
 
   const q = params.q?.trim();
   if (q) AND.push(keywordSearchWhereClause(q));

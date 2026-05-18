@@ -3,6 +3,8 @@ import type { BeWorkPriceDocSourceType, WorkItemItemType, WorkItemQualityLevel, 
 import { BibliothequeStatsStrip } from "@/components/devis/BibliothequeStatsStrip";
 import { BibliothequeWorkItemsShell, type BibliothequeWorkItemRow } from "@/components/devis/BibliothequeWorkItemsShell";
 import { HarmonizeLotsButton } from "@/components/devis/HarmonizeLotsButton";
+import { WorkItemMergeAnalyzeButton } from "@/components/devis/WorkItemMergeAnalyzeButton";
+import { countMergedVariantsForCanonicalIds, fetchWorkItemMergeStats } from "@/app/dashboard/devis/work-item-merge-actions";
 import { TradeSubLotFilterSelect } from "@/components/devis/TradeSubLotFilterSelect";
 import {
   QUALITY_LEVEL_LABELS,
@@ -91,7 +93,7 @@ export default async function BibliothequePage({ searchParams }: { searchParams:
 
   const hasAvgPriceFilter = Boolean(sp.priceMin?.trim() || sp.priceMax?.trim());
 
-  const [rawItems, totalMatching, dbStats, lotsRow, subLotsRow, deptRows] = await Promise.all([
+  const [rawItems, totalMatching, dbStats, lotsRow, subLotsRow, deptRows, mergeStats] = await Promise.all([
     fetchWorkItemsWithPriceStats(where, sort),
     prisma.workItem.count({ where }),
     hasAvgPriceFilter ? Promise.resolve(null) : fetchBibliothequeStatsFromDb(where),
@@ -115,6 +117,7 @@ export default async function BibliothequePage({ searchParams }: { searchParams:
       distinct: ["department"],
       orderBy: { department: "asc" },
     }),
+    fetchWorkItemMergeStats(),
   ]);
 
   const items = filterWorkItemsByAvgPriceRange(rawItems, sp.priceMin, sp.priceMax);
@@ -124,6 +127,9 @@ export default async function BibliothequePage({ searchParams }: { searchParams:
     displayedRows: items.length,
     listTruncated,
   };
+
+  const canonicalIds = items.filter((w) => w.mergeStatus === "canonical").map((w) => w.id);
+  const variantCountMap = await countMergedVariantsForCanonicalIds(canonicalIds);
 
   const rows: BibliothequeWorkItemRow[] = items.map((w) => ({
     id: w.id,
@@ -140,6 +146,8 @@ export default async function BibliothequePage({ searchParams }: { searchParams:
     priceCount: w.priceCount,
     avgHt: w.avgHt,
     designation: excerptDesignation(w, 400),
+    mergeStatus: w.mergeStatus,
+    variantCount: variantCountMap.get(w.id) ?? 0,
   }));
 
   const lots = lotsRow.map((r) => r.lot);
@@ -188,6 +196,7 @@ export default async function BibliothequePage({ searchParams }: { searchParams:
           </p>
         </div>
         <div className="flex flex-wrap items-start gap-2">
+          <WorkItemMergeAnalyzeButton pendingProposals={mergeStats.pendingProposals} />
           <HarmonizeLotsButton />
           <Link
             href="/dashboard/devis/bibliotheque/recodification"

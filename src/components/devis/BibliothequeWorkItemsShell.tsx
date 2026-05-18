@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import type { WorkItemItemType, WorkItemStatus } from "@prisma/client";
+import type { WorkItemItemType, WorkItemMergeStatus, WorkItemStatus } from "@prisma/client";
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import { bulkDeleteWorkItems, bulkSetWorkItemsStatus } from "@/app/dashboard/devis/actions";
 import { formatDateFr, formatEurFrBpu } from "@/lib/be-work-devis-format";
@@ -26,6 +26,8 @@ export type BibliothequeWorkItemRow = {
   priceCount: number;
   avgHt: number | null;
   designation: string;
+  mergeStatus: WorkItemMergeStatus;
+  variantCount: number;
 };
 
 type ViewMode = "table" | "cards";
@@ -55,6 +57,21 @@ function statusBadgeClass(status: WorkItemStatus): string {
 function typeBadgeClass(t: WorkItemItemType): string {
   if (t === "ouvrage_technique") return "bg-[#1e3a5f]/10 text-[#0f2744] ring-1 ring-[#1e3a5f]/15";
   return "bg-slate-100 text-slate-700 ring-1 ring-slate-200/80";
+}
+
+function mergeBadge(row: BibliothequeWorkItemRow) {
+  if (row.mergeStatus === "canonical" && row.variantCount > 0) {
+    return (
+      <span className="inline-flex rounded-md border border-violet-200 bg-violet-50 px-2 py-0.5 text-[10px] font-bold uppercase text-violet-900">
+        Fusionné — {row.variantCount} variante{row.variantCount > 1 ? "s" : ""}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-600">
+      Unique
+    </span>
+  );
 }
 
 function lotSectionStats(sub: BibliothequeWorkItemRow[]) {
@@ -286,6 +303,7 @@ export function BibliothequeWorkItemsShell({ rows, stats, view, groupLots }: Pro
         <div className="mt-0.5 text-[11px] leading-snug text-slate-500 line-clamp-2" title={row.designation}>
           {row.designation || "—"}
         </div>
+        <div className="mt-1">{mergeBadge(row)}</div>
       </td>
       <td className="whitespace-nowrap px-2 py-2 text-xs">{row.unit}</td>
       <td className="whitespace-nowrap px-2 py-2 text-right font-mono text-xs tabular-nums">
@@ -303,7 +321,7 @@ export function BibliothequeWorkItemsShell({ rows, stats, view, groupLots }: Pro
             href={`/dashboard/devis/bibliotheque/${row.id}`}
             className="rounded-md border border-slate-200 bg-white px-2 py-1 font-semibold text-[#1e3a5f] hover:bg-slate-50"
           >
-            Voir
+            {row.variantCount > 0 ? "Voir les variantes" : "Voir"}
           </Link>
           <Link
             href={`/dashboard/devis/bibliotheque/${row.id}/modifier`}
@@ -387,6 +405,7 @@ export function BibliothequeWorkItemsShell({ rows, stats, view, groupLots }: Pro
                 </span>
               </div>
               <p className="mt-1 text-xs font-semibold leading-snug text-slate-900">{row.title}</p>
+              <div className="mt-1">{mergeBadge(row)}</div>
               <p className="mt-1 break-words text-[11px] leading-snug text-slate-600" title={row.lot}>
                 <span className="font-semibold text-slate-500">Lot · </span>
                 {row.lot}

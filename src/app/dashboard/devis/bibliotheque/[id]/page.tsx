@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { deletePriceEntry } from "@/app/dashboard/devis/actions";
 import { ObservedPricesTable } from "@/components/devis/ObservedPricesTable";
+import { WorkItemMergedVariantsSection } from "@/components/devis/WorkItemMergedVariantsSection";
+import { fetchWorkItemWithMergedVariants } from "@/app/dashboard/devis/work-item-merge-actions";
 import { PriceEntryCreateForm } from "@/components/devis/PriceEntryCreateForm";
 import type { ObservedPriceRowSerialized } from "@/lib/be-work-devis-price-entry-detail";
 import { parsePriceEntryImportMeta } from "@/lib/be-work-devis-price-entry-import-meta";
@@ -30,8 +32,10 @@ export default async function FicheOuvragePage({ params }: Props) {
   await requireBeWorkDevisSession();
   const { id } = await params;
 
-  const item = await prisma.workItem.findUnique({ where: { id } });
-  if (!item) notFound();
+  const itemWithVariants = await fetchWorkItemWithMergedVariants(id);
+  if (!itemWithVariants) notFound();
+  const item = itemWithVariants;
+  const mergedVariants = itemWithVariants.mergedVariants ?? [];
 
   const [agg, countPrices, entries, sources, siteResourceLinks] = await Promise.all([
     prisma.priceEntry.aggregate({
@@ -159,6 +163,25 @@ export default async function FicheOuvragePage({ params }: Props) {
           </dl>
         )}
       </header>
+
+      <WorkItemMergedVariantsSection
+        canonicalId={item.id}
+        mergeStatus={item.mergeStatus}
+        variants={mergedVariants.map((v) => ({
+          id: v.id,
+          code: v.code,
+          title: v.title,
+          lot: v.lot,
+          unit: v.unit,
+          mergedAt: v.mergedAt?.toISOString() ?? null,
+          priceEntries: v.priceEntries.map((pe) => ({
+            id: pe.id,
+            sourceName: pe.sourceName,
+            unitPriceHT: Number(pe.unitPriceHT),
+            variantDesignation: pe.variantDesignation,
+          })),
+        }))}
+      />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

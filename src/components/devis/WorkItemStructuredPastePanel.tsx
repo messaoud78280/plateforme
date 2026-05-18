@@ -10,9 +10,10 @@ import {
   type PreviewObservedPricePasteResultRow,
 } from "@/app/dashboard/devis/actions";
 import { WORK_ITEM_STATUS_LABELS } from "@/lib/be-work-devis-labels";
+import type { MotherVariantImportBundle } from "@/lib/be-work-devis-chatgpt-paste";
 import {
+  describeStructuredPasteKind,
   parseStructuredPasteBlock,
-  parseStructuredWorkItemPaste,
   type ParsedPasteBulkRow,
   type StructuredPasteFormValues,
 } from "@/lib/be-work-devis-structured-paste";
@@ -29,9 +30,14 @@ type WorkItemPreviewRow = ParsedPasteBulkRow & {
   duplicateBatch: boolean;
 };
 
+type MotherPreviewRow = MotherVariantImportBundle & {
+  duplicateDb: boolean;
+  duplicateBatch: boolean;
+};
+
 type PricePastePreviewRow = ParsedPasteBulkRow & PreviewObservedPricePasteResultRow;
 
-type BulkPasteKind = "workItems" | "pricesOnly" | null;
+type BulkPasteKind = "workItems" | "pricesOnly" | "motherWithVariants" | null;
 
 function displayStatusLabel(statusRaw: string): string {
   const s = statusRaw.trim();
@@ -48,14 +54,35 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
   const [warnings, setWarnings] = useState<string[]>([]);
   const [bulkPasteKind, setBulkPasteKind] = useState<BulkPasteKind>(null);
   const [workItemBulkRows, setWorkItemBulkRows] = useState<WorkItemPreviewRow[] | null>(null);
+  const [motherBulkRows, setMotherBulkRows] = useState<MotherPreviewRow[] | null>(null);
+  const [motherStats, setMotherStats] = useState<{ totalVariants: number; famille: string | null } | null>(null);
   const [priceBulkRows, setPriceBulkRows] = useState<PricePastePreviewRow[] | null>(null);
+  const [pasteKindLabel, setPasteKindLabel] = useState<string | null>(null);
   const [confirmSkipDuplicates, setConfirmSkipDuplicates] = useState(false);
+  const [confirmMergeDuplicates, setConfirmMergeDuplicates] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const clearMessages = useCallback(() => {
     setError(null);
     setSuccess(null);
     setWarnings([]);
+  }, []);
+
+  const buildMotherPreviewRows = useCallback(async (mothers: MotherVariantImportBundle[]) => {
+    const codes = mothers.map((m) => m.values.code.trim()).filter(Boolean);
+    const existing = await checkWorkItemCodesExist(codes);
+    const existingSet = new Set(existing);
+    const seenInFile = new Set<string>();
+    const enriched: MotherPreviewRow[] = mothers.map((mother) => {
+      const code = mother.values.code.trim();
+      const duplicateDb = Boolean(code && existingSet.has(code));
+      const duplicateBatch = Boolean(code && seenInFile.has(code));
+      if (code) seenInFile.add(code);
+      return { ...mother, duplicateDb, duplicateBatch };
+    });
+    setMotherBulkRows(enriched);
+    setConfirmSkipDuplicates(false);
+    setConfirmMergeDuplicates(false);
   }, []);
 
   const buildWorkItemPreviewRows = useCallback(async (rows: ParsedPasteBulkRow[]) => {
@@ -71,26 +98,58 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
       return { ...row, duplicateDb, duplicateBatch };
     });
     setWorkItemBulkRows(enriched);
+    setMotherBulkRows(null);
     setConfirmSkipDuplicates(false);
+    setConfirmMergeDuplicates(false);
   }, []);
 
-  /** Tableau (ou conteneur déplié) → prévisualisation + import ; objet seul → formulaire. */
+  /** Tableau / fiches mères+variantes / prix seuls / objet simple. */
   const handleAnalyzeOrPrefill = useCallback(async () => {
     clearMessages();
     setBulkPasteKind(null);
     setWorkItemBulkRows(null);
+    setMotherBulkRows(null);
+    setMotherStats(null);
     setPriceBulkRows(null);
+    setPasteKindLabel(null);
     const parsed = parseStructuredPasteBlock(text);
     if (!parsed.ok) {
       setError(parsed.error);
       return;
     }
+
+    const kind = describeStructuredPasteKind(parsed.result);
+    const kindLabels: Record<typeof kind, string> = {
+      single: "Objet ouvrage simple",
+      workItemsList: "Tableau d’ouvrages",
+      pricesOnly: "Prix sur ouvrages existants",
+      motherWithVariants: "Fiches mères avec variantes (ChatGPT)",
+    };
+    setPasteKindLabel(kindLabels[kind]);
+
     if (parsed.result.mode === "single") {
       onApplyValues(parsed.result.values);
       setWarnings(parsed.result.warnings);
       setSuccess("Formulaire prérempli. Relisez les champs puis enregistrez avec « Créer l’ouvrage ».");
       return;
     }
+
+    if (parsed.result.mode === "motherVariants") {
+      const mv = parsed.result;
+      setBulkPasteKind("motherWithVariants");
+      setWarnings(
+        mv.mothers.flatMap((m) =>
+          m.warnings.map((w) => `Fiche ${m.motherIndex + 1} (${m.ficheMere}) : ${w}`),
+        ),
+      );
+      setMotherStats({ totalVariants: mv.totalVariantCount, famille: mv.famille });
+      await buildMotherPreviewRows(mv.mothers);
+      setSuccess(
+        `${mv.mothers.length} fiche(s) mère · ${mv.totalVariantCount} variante(s) · codes : ${mv.allCodes.slice(0, 12).join(", ")}${mv.allCodes.length > 12 ? "…" : ""}. Vérifiez puis importez.`,
+      );
+      return;
+    }
+
     const bulk = parsed.result;
     setBulkPasteKind(bulk.bulkKind);
     setWarnings(bulk.rows.flatMap((r) => r.warnings.map((w) => `Ligne ${r.index + 1} : ${w}`)));
@@ -151,12 +210,13 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
       setError(block.error);
       return;
     }
-    if (block.result.mode === "bulk") {
+    if (block.result.mode === "bulk" || block.result.mode === "motherVariants") {
       void handleAnalyzeOrPrefill();
       return;
     }
     setBulkPasteKind(null);
     setWorkItemBulkRows(null);
+    setMotherBulkRows(null);
     setPriceBulkRows(null);
     onApplyValues(block.result.values);
     setWarnings(block.result.warnings);
@@ -167,46 +227,94 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
   const importableCount =
     workItemBulkRows?.filter((r) => r.values.code.trim() && !r.duplicateDb && !r.duplicateBatch).length ?? 0;
 
+  const motherDuplicateCount = motherBulkRows?.filter((r) => r.duplicateDb || r.duplicateBatch).length ?? 0;
+  const motherDbDuplicateCount = motherBulkRows?.filter((r) => r.duplicateDb).length ?? 0;
+  const motherImportableCount =
+    motherBulkRows?.filter((r) => r.values.code.trim() && !r.duplicateBatch).length ?? 0;
+  const motherNewCount =
+    motherBulkRows?.filter((r) => r.values.code.trim() && !r.duplicateDb && !r.duplicateBatch).length ?? 0;
+
   const canImportBulk =
     workItemBulkRows &&
     workItemBulkRows.length > 0 &&
     importableCount > 0 &&
     (duplicateCount === 0 || confirmSkipDuplicates);
 
+  const motherPayloadCount =
+    motherBulkRows?.filter((r) => {
+      if (!r.values.code.trim() || r.duplicateBatch) return false;
+      if (r.duplicateDb) return confirmMergeDuplicates;
+      return true;
+    }).length ?? 0;
+
+  const canImportMothers =
+    Boolean(motherBulkRows?.length) &&
+    motherPayloadCount > 0 &&
+    (motherDuplicateCount === 0 || confirmSkipDuplicates || confirmMergeDuplicates);
+
   const totalImportablePrices =
     priceBulkRows?.reduce((sum, r) => sum + r.importablePriceCount, 0) ?? 0;
   const canImportPrices = Boolean(priceBulkRows?.length && totalImportablePrices > 0);
 
   const handleImportBulk = useCallback(() => {
-    if (!workItemBulkRows) return;
+    const rows = motherBulkRows ?? workItemBulkRows;
+    if (!rows) return;
     clearMessages();
-    const payload = workItemBulkRows
-      .filter((r) => r.values.code.trim() && !r.duplicateDb && !r.duplicateBatch)
-      .map((r) => ({
-        values: r.values,
-        priceEntries: r.priceEntries,
-      }));
+
+    const payload =
+      motherBulkRows != null
+        ? motherBulkRows
+            .filter((r) => {
+              if (!r.values.code.trim() || r.duplicateBatch) return false;
+              if (r.duplicateDb) return confirmMergeDuplicates;
+              return true;
+            })
+            .map((r) => ({
+              values: r.values,
+              priceEntries: r.priceEntries,
+              pasteSource: r.pasteSource,
+            }))
+        : workItemBulkRows!
+            .filter((r) => r.values.code.trim() && !r.duplicateDb && !r.duplicateBatch)
+            .map((r) => ({
+              values: r.values,
+              priceEntries: r.priceEntries,
+            }));
 
     startTransition(async () => {
-      const res = await importWorkItemsBulk(payload);
+      const res = await importWorkItemsBulk(payload, {
+        mergeDuplicates: confirmMergeDuplicates,
+      });
       if (!res.ok) {
         setError(res.error);
         return;
       }
       setWorkItemBulkRows(null);
+      setMotherBulkRows(null);
+      setMotherStats(null);
       setBulkPasteKind(null);
       setText("");
       setConfirmSkipDuplicates(false);
+      setConfirmMergeDuplicates(false);
       if (res.errors.length > 0) {
         setWarnings(res.errors);
       }
       const q = new URLSearchParams();
       q.set("imported", String(res.created));
       q.set("pricesImported", String(res.pricesCreated));
+      if (res.mergedDuplicates > 0) q.set("merged", String(res.mergedDuplicates));
       router.push(`/dashboard/devis/bibliotheque?${q.toString()}`);
       router.refresh();
     });
-  }, [workItemBulkRows, clearMessages, router]);
+  }, [
+    workItemBulkRows,
+    motherBulkRows,
+    motherDuplicateCount,
+    confirmSkipDuplicates,
+    confirmMergeDuplicates,
+    clearMessages,
+    router,
+  ]);
 
   const handleImportPricesOnly = useCallback(() => {
     if (!priceBulkRows) return;
@@ -241,8 +349,12 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
     setText("");
     setBulkPasteKind(null);
     setWorkItemBulkRows(null);
+    setMotherBulkRows(null);
+    setMotherStats(null);
     setPriceBulkRows(null);
+    setPasteKindLabel(null);
     setConfirmSkipDuplicates(false);
+    setConfirmMergeDuplicates(false);
     clearMessages();
     onClearForm();
   }, [onClearForm, clearMessages]);
@@ -251,12 +363,9 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
     <section className="rounded-2xl border border-dashed border-[#1e3a5f]/35 bg-[#f8fafc] p-5 shadow-sm">
       <h2 className="font-heading text-base font-bold text-slate-900">Ajout rapide depuis données structurées</h2>
       <p className="mt-2 text-sm text-slate-600">
-        Pour <strong>remplir la bibliothèque</strong> : collez un tableau <code className="rounded bg-slate-200 px-1">[ … ]</code> ou un export
-        encapsulé <code className="rounded bg-slate-200 px-1">{`{ "ouvrages": [ … ] }`}</code>, puis{" "}
-        <strong>« Analyser le collage »</strong> → <strong>« Importer les ouvrages »</strong>. Un seul objet{" "}
-        <code className="rounded bg-slate-200 px-1">{`{ "code": "…" }`}</code> préremplit le formulaire ci-dessous. Les blocs{" "}
-        <code className="rounded bg-slate-200 px-1">workItemCode</code> + <code className="rounded bg-slate-200 px-1">priceEntries</code> ajoutent
-        des prix sur des ouvrages déjà en base.
+        Collez un JSON complet (ChatGPT ou autre) : export <code className="rounded bg-slate-200 px-1">{`{ "famille", "ouvrages": [{ "fiche_mere", "variantes" }] }`}</code>, tableau
+        d’ouvrages, ou objet simple. <strong>« Analyser le collage »</strong> détecte le format ; les fiches mères importent toutes leurs
+        variantes en prix observés sur une seule fiche bibliothèque.
       </p>
       <details className="mt-3 text-sm text-slate-600">
         <summary className="cursor-pointer font-semibold text-[#1e3a5f] hover:underline">Voir des exemples</summary>
@@ -315,6 +424,23 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
   }
 ]`}
           </pre>
+          <p className="font-medium text-slate-700">Famille ChatGPT — fiche mère + variantes</p>
+          <pre className="max-h-48 overflow-auto rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-800">
+{`{
+  "famille": "VRD",
+  "sous_famille": "Tranchées",
+  "ouvrages": [
+    {
+      "fiche_mere": "Fourniture de galets 40/100",
+      "designation_complete": "…",
+      "unite_principale": "m³",
+      "variantes": [
+        { "code": "V1", "profondeur_m": 0.6, "prix_reference": 25.31 }
+      ]
+    }
+  ]
+}`}
+          </pre>
         </div>
       </details>
 
@@ -325,11 +451,14 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
         id="structured-paste-json"
         value={text}
         onChange={(e) => setText(e.target.value)}
-        rows={12}
+        rows={18}
         spellCheck={false}
-        placeholder={'{ "code": "…" }  ou  [ { "code": "…" }, … ]  ou  [ { "workItemCode": "…", "priceEntries": [ … ] } ]'}
-        className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-3 font-mono text-sm leading-relaxed text-slate-900 shadow-inner focus:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/20"
+        placeholder={'{ "famille": "…", "ouvrages": [{ "fiche_mere": "…", "variantes": [ … ] }] }'}
+        className="mt-1 min-h-[280px] w-full rounded-xl border border-slate-300 bg-white px-3 py-3 font-mono text-sm leading-relaxed text-slate-900 shadow-inner focus:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/20"
       />
+      {text.length > 0 ? (
+        <p className="mt-1 text-xs text-slate-500">{text.length.toLocaleString("fr-FR")} caractères collés (aucune troncature).</p>
+      ) : null}
 
       {error ? (
         <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900" role="alert">
@@ -373,10 +502,122 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
         </button>
       </div>
       <p className="mt-2 text-xs text-slate-500">
-        « Analyser le collage » : objet → préremplissage ; tableau → prévisualisation + import (ouvrages ou prix selon le format). «
-        Préremplir le formulaire » : réservé à un <strong>seul</strong> objet JSON d’ouvrage (sans <code className="rounded bg-slate-100 px-1">workItemCode</code>
-        ).
+        Formats reconnus : objet simple · tableau d’ouvrages · fiche mère + variantes · prix sur code existant.
+        {pasteKindLabel ? (
+          <>
+            {" "}
+            Dernier collage : <strong>{pasteKindLabel}</strong>.
+          </>
+        ) : null}
       </p>
+
+      {motherBulkRows && bulkPasteKind === "motherWithVariants" && motherBulkRows.length > 0 ? (
+        <div className="mt-6 space-y-4 border-t border-slate-200 pt-6">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h3 className="font-heading text-sm font-bold text-slate-900">
+              Prévisualisation — fiches mères & variantes
+            </h3>
+            <span className="text-xs text-slate-600">
+              <strong>{motherBulkRows.length}</strong> fiche(s) mère · <strong>{motherStats?.totalVariants ?? 0}</strong> variante(s)
+              {motherDuplicateCount > 0 ? (
+                <>
+                  {" "}
+                  · <strong className="text-amber-800">{motherDuplicateCount}</strong> doublon(s)
+                </>
+              ) : null}
+            </span>
+          </div>
+
+          {motherStats?.famille ? (
+            <p className="text-sm text-slate-600">
+              Famille : <strong>{motherStats.famille}</strong>
+            </p>
+          ) : null}
+
+          <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+            <table className="min-w-[900px] w-full text-left text-sm">
+              <thead className="border-b border-slate-100 bg-slate-50 text-xs font-bold uppercase text-slate-600">
+                <tr>
+                  <th className="px-2 py-2">#</th>
+                  <th className="px-2 py-2">Code</th>
+                  <th className="px-2 py-2">Fiche mère</th>
+                  <th className="px-2 py-2">Lot</th>
+                  <th className="px-2 py-2">Unité</th>
+                  <th className="px-2 py-2">Variantes</th>
+                  <th className="px-2 py-2">Prix importés</th>
+                  <th className="px-2 py-2">Doublon</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {motherBulkRows.map((row) => {
+                  const dup = row.duplicateDb || row.duplicateBatch;
+                  return (
+                    <tr key={row.motherIndex} className={dup ? "bg-amber-50/60" : undefined}>
+                      <td className="px-2 py-2 text-slate-500">{row.motherIndex + 1}</td>
+                      <td className="px-2 py-2 font-mono text-xs font-semibold text-[#1e3a5f]">{row.values.code}</td>
+                      <td className="max-w-[240px] truncate px-2 py-2 font-medium" title={row.ficheMere}>
+                        {row.ficheMere}
+                      </td>
+                      <td className="px-2 py-2">{row.values.lot || "—"}</td>
+                      <td className="px-2 py-2">{row.values.unit || "—"}</td>
+                      <td className="px-2 py-2 tabular-nums">{row.variantCount}</td>
+                      <td className="px-2 py-2 tabular-nums">{row.priceEntries.length}</td>
+                      <td className="px-2 py-2">
+                        {dup ? (
+                          <span className="rounded-full bg-amber-200 px-2 py-0.5 text-xs font-bold text-amber-950">
+                            {row.duplicateDb ? "Déjà en base" : "Répété dans le collage"}
+                          </span>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {motherDbDuplicateCount > 0 ? (
+            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-blue-200 bg-blue-50/80 p-3 text-sm text-blue-950">
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={confirmMergeDuplicates}
+                onChange={(e) => setConfirmMergeDuplicates(e.target.checked)}
+              />
+              <span>
+                Fusionner les variantes dans les <strong>{motherDbDuplicateCount}</strong> fiche(s) déjà en bibliothèque (ajout des prix
+                observés, sans créer de doublon).
+              </span>
+            </label>
+          ) : null}
+
+          {motherDuplicateCount > 0 ? (
+            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-amber-200 bg-amber-50/80 p-3 text-sm text-amber-950">
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={confirmSkipDuplicates}
+                onChange={(e) => setConfirmSkipDuplicates(e.target.checked)}
+              />
+              <span>
+                Ignorer les doublons et n’importer que les <strong>{motherNewCount}</strong> nouvelle(s) fiche(s) (
+                <strong>{motherPayloadCount}</strong> au total avec fusion éventuelle).
+              </span>
+            </label>
+          ) : null}
+
+          <button
+            type="button"
+            disabled={!canImportMothers || isPending}
+            onClick={handleImportBulk}
+            className="rounded-lg bg-[#0f766e] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#0d5c56] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isPending ? "Import en cours…" : `Importer ${motherPayloadCount} fiche(s) et variantes`}
+          </button>
+        </div>
+      ) : null}
 
       {workItemBulkRows && bulkPasteKind === "workItems" && workItemBulkRows.length > 0 ? (
         <div className="mt-6 space-y-4 border-t border-slate-200 pt-6">

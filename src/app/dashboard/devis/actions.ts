@@ -539,11 +539,15 @@ function buildWorkItemCreateDataFromPasteValues(
  * Ignore les codes déjà en base et les lignes sans code valide.
  * Crée les `PriceEntry` fournis dans chaque ligne (`priceEntries`).
  */
-export async function importWorkItemsBulk(rowsInput: unknown): Promise<
+export async function importWorkItemsBulk(
+  rowsInput: unknown,
+  options?: { mergeDuplicates?: boolean },
+): Promise<
   | {
       ok: true;
       created: number;
       pricesCreated: number;
+      mergedDuplicates: number;
       skippedDuplicate: number;
       skippedInvalid: number;
       skippedBatchDuplicate: number;
@@ -552,6 +556,7 @@ export async function importWorkItemsBulk(rowsInput: unknown): Promise<
   | { ok: false; error: string }
 > {
   await guard();
+  const mergeDuplicates = options?.mergeDuplicates === true;
   const bundles = normalizeBulkImportRows(rowsInput);
   if (!bundles) {
     return { ok: false, error: "Format invalide : attendu un tableau d’objets." };
@@ -566,14 +571,37 @@ export async function importWorkItemsBulk(rowsInput: unknown): Promise<
   const errors: string[] = [];
   let created = 0;
   let pricesCreated = 0;
+  let mergedDuplicates = 0;
   let skippedDuplicate = 0;
   let skippedInvalid = 0;
   let skippedBatchDuplicate = 0;
   const seenInBatch = new Set<string>();
 
+  async function attachPriceEntries(
+    workItemId: string,
+    code: string,
+    lineLabel: string,
+    priceEntries: Record<string, unknown>[],
+  ) {
+    for (let j = 0; j < priceEntries.length; j++) {
+      const rawPe = priceEntries[j];
+      const built = buildPriceEntryCreateFromPaste(workItemId, rawPe);
+      if (!built.ok) {
+        errors.push(`${lineLabel} (${code}), prix #${j + 1} : ${built.error}`);
+        continue;
+      }
+      await prisma.priceEntry.create({ data: built.data });
+      pricesCreated += 1;
+    }
+  }
+
   for (let i = 0; i < bundles.length; i++) {
     const bundle = bundles[i];
     const { values, priceEntries } = bundle;
+    const pasteSource =
+      bundle.pasteSource && typeof bundle.pasteSource === "object" && !Array.isArray(bundle.pasteSource)
+        ? (bundle.pasteSource as Record<string, unknown>)
+        : undefined;
     const code = values.code.trim();
     if (!code) {
       skippedInvalid += 1;
@@ -589,25 +617,20 @@ export async function importWorkItemsBulk(rowsInput: unknown): Promise<
 
     const existing = await prisma.workItem.findUnique({ where: { code } });
     if (existing) {
-      skippedDuplicate += 1;
+      if (mergeDuplicates && priceEntries.length > 0) {
+        await attachPriceEntries(existing.id, code, `Ligne ${i + 1}`, priceEntries);
+        mergedDuplicates += 1;
+      } else {
+        skippedDuplicate += 1;
+      }
       continue;
     }
 
-    const data = buildWorkItemCreateDataFromPasteValues(values, bundle.pasteSource);
+    const data = buildWorkItemCreateDataFromPasteValues(values, pasteSource);
     try {
       const workItem = await prisma.workItem.create({ data });
       created += 1;
-
-      for (let j = 0; j < priceEntries.length; j++) {
-        const rawPe = priceEntries[j];
-        const built = buildPriceEntryCreateFromPaste(workItem.id, rawPe);
-        if (!built.ok) {
-          errors.push(`Ligne ${i + 1} (${code}), prix #${j + 1} : ${built.error}`);
-          continue;
-        }
-        await prisma.priceEntry.create({ data: built.data });
-        pricesCreated += 1;
-      }
+      await attachPriceEntries(workItem.id, code, `Ligne ${i + 1}`, priceEntries);
     } catch (e) {
       skippedInvalid += 1;
       const msg = e instanceof Error ? e.message : "Erreur inconnue.";
@@ -622,6 +645,7 @@ export async function importWorkItemsBulk(rowsInput: unknown): Promise<
     ok: true,
     created,
     pricesCreated,
+    mergedDuplicates,
     skippedDuplicate,
     skippedInvalid,
     skippedBatchDuplicate,

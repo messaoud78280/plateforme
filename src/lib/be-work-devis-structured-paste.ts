@@ -1,7 +1,15 @@
+import {
+  isMotherVariantOuvrageEntry,
+  preservesMotherVariantStructure,
+  tryParseChatGptMotherVariantsExport,
+  type ParsedPasteMotherVariants,
+} from "@/lib/be-work-devis-chatgpt-paste";
 import { isWorkItemQualityLevel, isWorkItemStatus } from "@/lib/be-work-devis-labels";
 import { extractOrCoalescePriceEntriesFromPasteObject } from "@/lib/be-work-devis-price-entry-paste";
 import { applyResolvedDescriptionsToPasteValues } from "@/lib/be-work-devis-work-item-description";
 import { normalizeUnit } from "@/lib/be-work-devis-units";
+
+export type { MotherVariantImportBundle, ParsedPasteMotherVariants } from "@/lib/be-work-devis-chatgpt-paste";
 
 const PASTE_WORK_ITEM_CODE_KEYS = ["code", "codeOuvrage", "codeBeWork", "reference", "ref"] as const;
 const PASTE_TITLE_KEYS = ["title", "name", "designation", "libelle", "label"] as const;
@@ -218,6 +226,10 @@ function flattenBulkPasteEntries(entries: unknown[]): unknown[] {
       continue;
     }
     const rowObj = entry as Record<string, unknown>;
+    if (isMotherVariantOuvrageEntry(rowObj)) {
+      flat.push(entry);
+      continue;
+    }
     if (looksLikeSingleWorkItemRoot(rowObj)) {
       flat.push(entry);
       continue;
@@ -322,21 +334,25 @@ export function mapObjectToStructuredPasteFormValues(obj: Record<string, unknown
 
 function parseJsonFlexible(trimmed: string): unknown {
   const n = normalizeSmartQuotes(stripCodeFence(trimmed));
-  try {
-    return JSON.parse(stripTrailingCommas(n));
-  } catch {
-    const arrStart = n.indexOf("[");
-    const objStart = n.indexOf("{");
-    if (arrStart !== -1 && (objStart === -1 || arrStart < objStart)) {
-      const slice = extractBalancedArray(n);
-      return JSON.parse(stripTrailingCommas(slice));
+  const attempts = [n, stripTrailingCommas(n)];
+  for (const candidate of attempts) {
+    try {
+      return JSON.parse(candidate);
+    } catch {
+      /* essai suivant */
     }
-    if (objStart !== -1) {
-      const slice = extractBalancedObject(n);
-      return JSON.parse(stripTrailingCommas(slice));
-    }
-    throw new Error("Impossible d’extraire un objet ou un tableau JSON valide.");
   }
+  const arrStart = n.indexOf("[");
+  const objStart = n.indexOf("{");
+  if (arrStart !== -1 && (objStart === -1 || arrStart < objStart)) {
+    const slice = extractBalancedArray(n);
+    return JSON.parse(stripTrailingCommas(slice));
+  }
+  if (objStart !== -1) {
+    const slice = extractBalancedObject(n);
+    return JSON.parse(stripTrailingCommas(slice));
+  }
+  throw new Error("Impossible d’extraire un objet ou un tableau JSON valide.");
 }
 
 export type ParsedPasteSingle = {
@@ -365,7 +381,20 @@ export type ParsedPasteBulk = {
   rows: ParsedPasteBulkRow[];
 };
 
-export type ParsedStructuredPaste = ParsedPasteSingle | ParsedPasteBulk;
+export type ParsedStructuredPaste = ParsedPasteSingle | ParsedPasteBulk | ParsedPasteMotherVariants;
+
+export type StructuredPasteKind =
+  | "single"
+  | "workItemsList"
+  | "pricesOnly"
+  | "motherWithVariants";
+
+export function describeStructuredPasteKind(result: ParsedStructuredPaste): StructuredPasteKind {
+  if (result.mode === "single") return "single";
+  if (result.mode === "motherVariants") return "motherWithVariants";
+  if (result.bulkKind === "pricesOnly") return "pricesOnly";
+  return "workItemsList";
+}
 
 export function parseStructuredPasteBlock(raw: string):
   | { ok: true; result: ParsedStructuredPaste }
@@ -386,7 +415,18 @@ export function parseStructuredPasteBlock(raw: string):
     };
   }
 
-  parsed = unwrapStructuredPasteRoot(parsed);
+  const motherExport = tryParseChatGptMotherVariantsExport(parsed);
+  if (motherExport) {
+    return { ok: true, result: motherExport };
+  }
+
+  if (!preservesMotherVariantStructure(parsed)) {
+    parsed = unwrapStructuredPasteRoot(parsed);
+    const motherAfterUnwrap = tryParseChatGptMotherVariantsExport(parsed);
+    if (motherAfterUnwrap) {
+      return { ok: true, result: motherAfterUnwrap };
+    }
+  }
 
   if (Array.isArray(parsed)) {
     const entries = flattenBulkPasteEntries(parsed);
@@ -501,6 +541,13 @@ export function parseStructuredWorkItemPaste(raw: string):
   | { ok: false; error: string } {
   const r = parseStructuredPasteBlock(raw);
   if (!r.ok) return r;
+  if (r.result.mode === "motherVariants") {
+    return {
+      ok: false,
+      error:
+        "Ce collage contient des fiches mères avec variantes. Utilisez « Analyser le collage » pour la prévisualiser et importer toute la famille.",
+    };
+  }
   if (r.result.mode === "bulk") {
     if (r.result.bulkKind === "pricesOnly") {
       return {

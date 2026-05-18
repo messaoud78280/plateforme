@@ -50,6 +50,10 @@ const PU_HT_KEYS = [
   "prixUnitaireHT",
   "prixHT",
   "prixHt",
+  "prix_reference",
+  "prix_reference_ht",
+  "prix_colonne_1",
+  "prixColonne1",
   "montantUnitaireHT",
   "montantHT",
 ] as const;

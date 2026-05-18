@@ -33,6 +33,7 @@ export function SkillCctpLotTemplates({ onApply }: Props) {
                 },
                 normReferences: t.suggestedNorms,
                 request: t.sampleRequest,
+                generationMode: t.generationMode,
               })
             }
             className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-[#93c5fd]/70 hover:bg-[#eff6ff] hover:text-[#1d4ed8]"

@@ -1,20 +1,26 @@
+import {
+  CCTP_DOCUMENT_CATEGORIES,
+  CCTP_OUVRAGE_EXAMPLE,
+  CCTP_OUVRAGE_TEMPLATE_FIELDS,
+  CCTP_SIX_STEPS,
+  CCTP_NORMS_STANDARD_PHRASE,
+} from "@/content/cctp-methodology";
 import { cctpNormLabelsByIds } from "@/content/cctp-norm-references";
 import { CCTP_REDACTION_SYSTEM_PROMPT } from "@/lib/skills/cctp-redaction-system-prompt";
 import type { CctpGenerationInput, CctpProjectContext, CctpRedactionResponseBody } from "@/lib/skills/cctp-redaction-types";
 import {
   type CctpGenerationMode,
+  getCctpModeLabel,
+  getCctpModeUiHint,
   getMarketPromptSuffix,
   getModePromptSuffix,
+  resolveCctpGenerationMode,
 } from "@/lib/skills/cctp-generation-modes";
 import { chatCompletion, isSkillsLlmConfigured, type LlmChatMessage } from "@/lib/skills/llm-chat";
 
 function resolveMode(input: CctpGenerationInput): CctpGenerationMode {
-  if (input.generationMode) return input.generationMode;
-  const intent = detectIntent(input.request);
-  if (intent === "sommaire") return "sommaire";
-  if (intent === "analyse") return "audit";
-  if (intent === "amelioration") return "enrichissement";
-  return "redaction";
+  const req = input.refine ? input.refine.instruction : input.request;
+  return resolveCctpGenerationMode(input.generationMode, req);
 }
 
 function buildSystemPrompt(input: CctpGenerationInput): string {
@@ -34,7 +40,11 @@ const DETAIL_LABELS: Record<CctpProjectContext["detailLevel"], string> = {
 
 function buildUserMessage(input: CctpGenerationInput): string {
   const { request, context, extractedFromFiles, normReferences } = input;
+  const mode = resolveMode(input);
   const lines = [
+    "## Mode de mission",
+    `- **${getCctpModeLabel(mode)}** — ${getCctpModeUiHint(mode)}`,
+    "",
     "## Contexte projet",
     `- Type d'ouvrage : ${context.projectType || "Non renseigné"}`,
     `- Lot concerné : ${context.lot || "Non renseigné"}`,
@@ -75,10 +85,28 @@ function buildUserMessage(input: CctpGenerationInput): string {
   return lines.join("\n");
 }
 
-function detectIntent(request: string): "sommaire" | "article" | "amelioration" | "analyse" | "general" {
+function detectIntent(
+  request: string,
+):
+  | "sommaire"
+  | "article"
+  | "amelioration"
+  | "analyse"
+  | "fiche_ouvrage"
+  | "checklist_documents"
+  | "coherence_dpgf"
+  | "methode"
+  | "coordination"
+  | "general" {
   const t = request.toLowerCase();
+  if (/(fiche ouvrage|fiche d'ouvrage|modèle ouvrage|modele ouvrage)/.test(t)) return "fiche_ouvrage";
+  if (/(checklist|pièces à rassembler|pieces a rassembler|documents à rassembler|dossier document)/.test(t))
+    return "checklist_documents";
+  if (/(cohérence dpgf|coherence dpgf|dpgf|bpu|dqe|devis.*cctp|cctp.*devis)/.test(t)) return "coherence_dpgf";
+  if (/(6 étapes|6 etapes|guide méthode|guide methode|plan de travail|méthode pour établir)/.test(t)) return "methode";
+  if (/(coordination|interfaces|réservations|reservations|rebouchage|matrice.*lot)/.test(t)) return "coordination";
   if (/(sommaire|trame|plan|structure)/.test(t)) return "sommaire";
-  if (/(amélior|amelior|corriger|reformul|relecture)/.test(t)) return "amelioration";
+  if (/(amélior|amelior|corriger|reformul|relecture|trop vague)/.test(t)) return "amelioration";
   if (/(manque|analys|audit|vérifier|verifier|incohéren)/.test(t)) return "analyse";
   if (/(rédig|redig|article|clause|prestation)/.test(t)) return "article";
   return "general";
@@ -86,6 +114,7 @@ function detectIntent(request: string): "sommaire" | "article" | "amelioration" 
 
 function generateCctpFallback(input: CctpGenerationInput): string {
   const { request, context, extractedFromFiles, normReferences } = input;
+  const mode = resolveMode(input);
   const intent = detectIntent(request);
   const lot = context.lot || "lot à préciser";
   const ouvrage = context.projectType || "ouvrage à préciser";
@@ -115,7 +144,78 @@ ${docsBlock}${normsBlock}
 
 `;
 
-  if (intent === "sommaire") {
+  if (mode === "fiche_ouvrage") {
+    const fields = CCTP_OUVRAGE_TEMPLATE_FIELDS.map((f) => `### ${f}\n… (à compléter selon plans et études)`).join("\n\n");
+    return `${header}## Fiche ouvrage — ${lot}
+
+${fields}
+
+---
+
+### Exemple de référence (mur blocs 20 cm)
+- **Titre :** ${CCTP_OUVRAGE_EXAMPLE.title}
+- **Localisation :** ${CCTP_OUVRAGE_EXAMPLE.localization}
+- **Description :** ${CCTP_OUVRAGE_EXAMPLE.description}
+
+### Points à vérifier
+${CCTP_OUVRAGE_EXAMPLE.aVerifier.map((p) => `- ${p}`).join("\n")}`;
+  }
+
+  if (mode === "checklist_documents") {
+    const sections = CCTP_DOCUMENT_CATEGORIES.map(
+      (cat) =>
+        `### ${cat.title}\n${cat.items.map((item) => `- [ ] ${item} — *à vérifier*`).join("\n")}`,
+    ).join("\n\n");
+    return `${header}## Checklist des pièces à rassembler
+
+${sections}
+
+### Statut global
+Cochez chaque pièce disponible avant de lancer la rédaction détaillée. En rénovation, prioriser les diagnostics (amiante, plomb, structure).`;
+  }
+
+  if (mode === "coherence_dpgf") {
+    return `${header}## Contrôle de cohérence CCTP ↔ DPGF / devis
+
+| Ouvrage ou prestation (CCTP) | Présent au DPGF ? | Risque chiffrage | Action |
+|------------------------------|-------------------|------------------|--------|
+| *À lister depuis votre CCTP* | À vérifier | — | Croiser avec une ligne de prix |
+
+### Rappel
+Tout ouvrage décrit au CCTP doit avoir une ligne au DPGF/BPU/devis, et inversement.
+
+### Questions
+1. Disposez-vous du DPGF ou du devis à joindre en import ?
+2. Quels lots sont concernés par la demande : **${lot}** ?`;
+  }
+
+  if (mode === "methode") {
+    const steps = CCTP_SIX_STEPS.map((s) => `**${s.step}. ${s.title}** — ${s.detail}`).join("\n\n");
+    return `${header}## Plan de travail — établir le CCTP (${lot})
+
+${steps}
+
+### Schéma de synthèse
+Plans + études + diagnostics → ouvrages par lot → normes (${CCTP_NORMS_STANDARD_PHRASE.slice(0, 80)}…) → limites de prestation → vérification DPGF → CCTP final.
+
+### Question clé
+L'entreprise peut-elle **comprendre, chiffrer et exécuter** les travaux avec le document prévu ?`;
+  }
+
+  if (mode === "coordination") {
+    return `${header}## Matrice de coordination — ${lot}
+
+| Interface | Lot concerné | Responsable | Délai / remarque |
+|-----------|--------------|-------------|------------------|
+| Réservations réseaux | À préciser | Lot GO / fluides | Plans techniques avant exécution |
+| Rebouchages après passage | À préciser | Lot fluides / GO | Selon CCTP |
+| Protections ouvrages existants | Tous | Chaque lot | En cours de chantier |
+
+### Exemple de limite de prestation
+Les réservations nécessaires aux passages des réseaux seront réalisées suivant les plans techniques transmis avant exécution. Les rebouchages après passage des réseaux seront à la charge du lot concerné, sauf indication contraire.`;
+  }
+
+  if (intent === "sommaire" || mode === "sommaire") {
     return `${header}## Sommaire type — CCTP ${lot}
 
 1. **Dispositions générales**

@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, Sparkles } from "lucide-react";
 import { SKILL_CCTP_QUICK_PROMPTS } from "@/content/skill-cctp-quick-prompts";
+import { SkillCctpDocumentsChecklist } from "@/components/skills/SkillCctpDocumentsChecklist";
 import { SkillCctpExportButtons } from "@/components/skills/SkillCctpExportButtons";
+import { SkillCctpMethodologyPanel } from "@/components/skills/SkillCctpMethodologyPanel";
 import { SkillCctpFileUpload } from "@/components/skills/SkillCctpFileUpload";
 import { SkillCctpLotTemplates } from "@/components/skills/SkillCctpLotTemplates";
 import { SkillCctpMarketProfile } from "@/components/skills/SkillCctpMarketProfile";
@@ -11,7 +13,14 @@ import { SkillCctpModeSelector } from "@/components/skills/SkillCctpModeSelector
 import { SkillCctpNormPicker } from "@/components/skills/SkillCctpNormPicker";
 import { SkillCctpRefinePanel } from "@/components/skills/SkillCctpRefinePanel";
 import { SkillCctpSessionHistory } from "@/components/skills/SkillCctpSessionHistory";
-import type { CctpGenerationMode, CctpMarketProfile } from "@/lib/skills/cctp-generation-modes";
+import {
+  getCctpModeLabel,
+  getCctpModeRequestPlaceholder,
+  type CctpGenerationMode,
+  type CctpMarketProfile,
+} from "@/lib/skills/cctp-generation-modes";
+import { formatOuvrageTemplateMarkdown } from "@/content/cctp-methodology";
+import { SkillCctpModeHint } from "@/components/skills/SkillCctpModeHint";
 import { SkillMarkdownBody } from "@/components/skills/SkillMarkdownBody";
 import type {
   CctpDetailLevel,
@@ -160,15 +169,37 @@ export function SkillCctpWorkspace({ initialSessions = [] }: Props) {
 
   const generate = useCallback(() => void runGeneration(), [runGeneration]);
 
-  const applyQuickPrompt = (text: string) => {
+  const applyQuickPrompt = (text: string, mode: CctpGenerationMode) => {
     setRequest(text);
+    setGenerationMode(mode);
     setResult(null);
     setError(null);
     setActiveSessionId(null);
   };
 
+  const syncDocumentsToForm = (text: string) => {
+    setContext((c) => ({
+      ...c,
+      availableDocuments: c.availableDocuments?.trim()
+        ? `${c.availableDocuments.trim()}, ${text}`
+        : text,
+    }));
+  };
+
+  const insertOuvrageTemplate = () => {
+    const tpl = formatOuvrageTemplateMarkdown();
+    setRequest((r) => (r.trim() ? `${r.trim()}\n\n${tpl}` : tpl));
+    setGenerationMode("fiche_ouvrage");
+  };
+
   return (
     <div className="space-y-6">
+      <SkillCctpMethodologyPanel />
+      <SkillCctpDocumentsChecklist
+        availableDocumentsHint={context.availableDocuments}
+        onSyncToForm={syncDocumentsToForm}
+      />
+
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-start">
         <section className="space-y-6 rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm ring-1 ring-slate-100/80 sm:p-6">
           <div>
@@ -179,12 +210,14 @@ export function SkillCctpWorkspace({ initialSessions = [] }: Props) {
           </div>
 
           <SkillCctpModeSelector value={generationMode} onChange={setGenerationMode} />
+          <SkillCctpModeHint mode={generationMode} />
           <SkillCctpMarketProfile value={marketProfile} onChange={setMarketProfile} />
           <SkillCctpLotTemplates
-            onApply={({ context: ctx, normReferences: norms, request: req }) => {
+            onApply={({ context: ctx, normReferences: norms, request: req, generationMode: mode }) => {
               setContext((c) => ({ ...c, ...ctx }));
               setNormReferences(norms);
               setRequest(req);
+              if (mode) setGenerationMode(mode);
               setResult(null);
               setError(null);
             }}
@@ -193,12 +226,16 @@ export function SkillCctpWorkspace({ initialSessions = [] }: Props) {
           <div className="flex flex-wrap gap-2">
             {SKILL_CCTP_QUICK_PROMPTS.map((prompt) => (
               <button
-                key={prompt}
+                key={prompt.text}
                 type="button"
-                onClick={() => applyQuickPrompt(prompt)}
-                className="rounded-full border border-slate-200/90 bg-slate-50 px-3 py-1.5 text-left text-xs font-medium text-slate-700 transition hover:border-[#93c5fd]/70 hover:bg-[#eff6ff] hover:text-[#1d4ed8] sm:text-[0.8125rem]"
+                onClick={() => applyQuickPrompt(prompt.text, prompt.mode)}
+                className={`rounded-full border px-3 py-1.5 text-left text-xs font-medium transition sm:text-[0.8125rem] ${
+                  generationMode === prompt.mode
+                    ? "border-[#2563eb]/50 bg-[#eff6ff] text-[#1d4ed8]"
+                    : "border-slate-200/90 bg-slate-50 text-slate-700 hover:border-[#93c5fd]/70 hover:bg-[#eff6ff] hover:text-[#1d4ed8]"
+                }`}
               >
-                {prompt}
+                {prompt.text}
               </button>
             ))}
           </div>
@@ -224,15 +261,26 @@ export function SkillCctpWorkspace({ initialSessions = [] }: Props) {
           ) : null}
 
           <div>
-            <label className={labelClass} htmlFor="cctp-request">
-              Demande *
-            </label>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <label className={labelClass} htmlFor="cctp-request">
+                Demande *
+              </label>
+              {generationMode === "fiche_ouvrage" ? (
+                <button
+                  type="button"
+                  onClick={insertOuvrageTemplate}
+                  className="text-xs font-semibold text-[#2563eb] hover:underline"
+                >
+                  Insérer le modèle 13 rubriques
+                </button>
+              ) : null}
+            </div>
             <textarea
               id="cctp-request"
               rows={6}
               value={request}
               onChange={(e) => setRequest(e.target.value)}
-              placeholder="Ex. : Fais-moi un sommaire de CCTP pour un lot gros œuvre en rénovation…"
+              placeholder={getCctpModeRequestPlaceholder(generationMode)}
               className={`${inputClass} min-h-[140px] resize-y`}
               required
             />
@@ -392,7 +440,9 @@ export function SkillCctpWorkspace({ initialSessions = [] }: Props) {
                 )}
                 {result.refined ? <span className="text-[#1d4ed8]">· Affiné</span> : null}
                 {result.generationMode ? (
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">{result.generationMode}</span>
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">
+                    {getCctpModeLabel(result.generationMode as CctpGenerationMode)}
+                  </span>
                 ) : null}
               </div>
               <SkillCctpExportButtons sessionId={result.sessionId ?? activeSessionId} />

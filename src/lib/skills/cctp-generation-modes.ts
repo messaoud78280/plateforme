@@ -4,7 +4,11 @@ export type CctpGenerationMode =
   | "sommaire"
   | "audit"
   | "enrichissement"
-  | "coordination";
+  | "coordination"
+  | "fiche_ouvrage"
+  | "checklist_documents"
+  | "coherence_dpgf"
+  | "methode";
 
 export type CctpMarketProfile = "public" | "prive" | "sous_traitance" | "maintenance";
 
@@ -37,6 +41,26 @@ export const CCTP_GENERATION_MODES: {
     id: "coordination",
     label: "Coordination lots",
     description: "Interfaces, réservations et coactivité entre corps d'état.",
+  },
+  {
+    id: "fiche_ouvrage",
+    label: "Fiche ouvrage",
+    description: "Modèle complet par ouvrage (13 rubriques chiffrables).",
+  },
+  {
+    id: "checklist_documents",
+    label: "Pièces à rassembler",
+    description: "Checklist plans, diagnostics, études, DPGF, marché.",
+  },
+  {
+    id: "coherence_dpgf",
+    label: "Cohérence DPGF",
+    description: "Croiser CCTP, devis et pièces de prix.",
+  },
+  {
+    id: "methode",
+    label: "Guide méthode",
+    description: "Plan de travail en 6 étapes pour établir le CCTP.",
   },
 ];
 
@@ -78,6 +102,44 @@ Marquer clairement les ajouts avec « [Ajout BeWork] ».`;
 ## Mode actif : COORDINATION LOTS
 Produire : matrice des interfaces (lot / prestation / responsable / délai), réservations à prévoir, points de contrôle communs, planning type de coordination.
 Citer les lots limitrophes à valider avec le MOE.`;
+    case "fiche_ouvrage":
+      return `
+## Mode actif : FICHE OUVRAGE
+Pour chaque ouvrage demandé (ou identifié), produire une fiche avec les rubriques :
+Titre · Localisation · Description technique · Matériaux · Dimensions/épaisseurs · Performance · Mise en œuvre · Compris dans le prix · Non compris · Interfaces autres lots · Contrôles · Documents à fournir · Points à vérifier.
+Ton professionnel, prescriptions impératives, aucune section vide sans mention « à préciser ».
+Format : titres ### par rubrique ; listes à puces pour compris / non compris / points à vérifier.`;
+    case "checklist_documents":
+      return `
+## Mode actif : PIÈCES À RASSEMBLER
+Produire une checklist structurée par catégories :
+A) Documents de base (plans, photos, programme)
+B) Pièces graphiques complémentaires
+C) Diagnostics (si rénovation)
+D) Études techniques
+E) Règles techniques (DTU, normes, fabricants — sans numéros inventés)
+F) Documents financiers (DPGF, BPU, DQE, devis)
+G) Documents administratifs (CCAP, RC, planning, DOE…)
+Pour chaque ligne : statut (disponible / manquant / à demander) si l'utilisateur l'a indiqué, sinon « à vérifier ».`;
+    case "coherence_dpgf":
+      return `
+## Mode actif : COHÉRENCE DPGF / DEVIS
+Structure :
+1. Synthèse des écarts CCTP ↔ DPGF/BPU/devis
+2. Tableau | Ouvrage ou prestation CCTP | Présent au DPGF ? | Risque chiffrage | Action |
+3. Ouvrages au DPGF absents du CCTP
+4. Recommandations avant diffusion du dossier`;
+    case "methode":
+      return `
+## Mode actif : GUIDE MÉTHODE (6 étapes)
+Produire un plan de travail personnalisé selon le contexte :
+1. Comprendre le besoin client
+2. Rassembler les documents (liste détaillée)
+3. Lister les lots
+4. Repérer les ouvrages par lot
+5. Décrire chaque ouvrage
+6. Vérifier la cohérence (checklist finale)
+Inclure le schéma : plans → études → ouvrages → normes → limites → CCTP final.`;
     default:
       return `
 ## Mode actif : RÉDACTION
@@ -91,4 +153,80 @@ export function getMarketPromptSuffix(profile: CctpMarketProfile | null | undefi
   const p = CCTP_MARKET_PROFILES.find((x) => x.id === profile);
   if (!p) return "";
   return `\n## Profil marché : ${p.label}\n${p.hint}`;
+}
+
+export function getCctpModeLabel(mode: CctpGenerationMode): string {
+  return CCTP_GENERATION_MODES.find((m) => m.id === mode)?.label ?? mode;
+}
+
+/** Conseil court affiché sous le sélecteur de mode. */
+export function getCctpModeUiHint(mode: CctpGenerationMode): string {
+  switch (mode) {
+    case "sommaire":
+      return "Importez un CCTP existant ou listez les lots : l’IA produit une trame numérotée prête à compléter.";
+    case "audit":
+      return "Joignez votre CCTP + plans : l’IA liste les manques, risques et actions prioritaires en tableau.";
+    case "enrichissement":
+      return "Collez ou importez l’article à enrichir : les ajouts seront marqués [Ajout BeWork].";
+    case "coordination":
+      return "Précisez les lots limitrophes : matrice interfaces, réservations, rebouchages, responsables.";
+    case "fiche_ouvrage":
+      return "Nommez l’ouvrage et la localisation (plans) : fiche complète en 13 rubriques, chiffrable.";
+    case "checklist_documents":
+      return "Cochez les pièces dans la checklist puis synchronisez vers le formulaire avant de générer.";
+    case "coherence_dpgf":
+      return "Importez CCTP + DPGF/devis : croisement ouvrages ↔ lignes de prix.";
+    case "methode":
+      return "Décrivez le type de projet : plan personnalisé en 6 étapes + lots à traiter.";
+    default:
+      return "Précisez lot, localisation et ouvrages : articles contractuels « l’entreprise devra… ».";
+  }
+}
+
+export function getCctpModeRequestPlaceholder(mode: CctpGenerationMode): string {
+  switch (mode) {
+    case "sommaire":
+      return "Ex. : Sommaire CCTP lot gros œuvre — maison individuelle neuve, avec réception et DOE…";
+    case "audit":
+      return "Ex. : Audite ce CCTP importé : manques, incohérences avec les plans, points bloquants pour le chiffrage…";
+    case "enrichissement":
+      return "Ex. : Enrichis l’article carrelage (trop vague) : format, support, sujétions, plinthes, contrôles…";
+    case "coordination":
+      return "Ex. : Matrice de coordination lot plomberie / GO : percements, réservations, rebouchages, coupe-feu…";
+    case "fiche_ouvrage":
+      return "Ex. : Fiche ouvrage — dallage béton 12 cm, RDC, dalle sur terre-plein, avec joints de dilatation…";
+    case "checklist_documents":
+      return "Ex. : Checklist complète des pièces pour un CCTP rénovation tertiaire (diagnostics + études)…";
+    case "coherence_dpgf":
+      return "Ex. : Vérifie la cohérence entre le CCTP joint et le DPGF : ouvrages sans ligne de prix…";
+    case "methode":
+      return "Ex. : Plan de travail en 6 étapes pour établir le CCTP d’une extension de bureaux (lot GO + second œuvre)…";
+    default:
+      return "Ex. : Rédige l’article CCTP murs en blocs 20 cm — fourniture, pose, chaînages, réservations, sujétions…";
+  }
+}
+
+/** Déduit le mode depuis la formulation de la demande (si mode « rédaction » générique). */
+export function inferCctpGenerationModeFromRequest(request: string): CctpGenerationMode | null {
+  const t = request.toLowerCase();
+  if (/(fiche ouvrage|fiche d'ouvrage|modèle ouvrage|modele ouvrage)/.test(t)) return "fiche_ouvrage";
+  if (/(checklist|pièces à rassembler|pieces a rassembler|documents à rassembler|dossier document)/.test(t))
+    return "checklist_documents";
+  if (/(cohérence dpgf|coherence dpgf|\bdpgf\b|\bbpu\b|\bdqe\b|devis.*cctp|cctp.*devis)/.test(t))
+    return "coherence_dpgf";
+  if (/(6 étapes|6 etapes|guide méthode|guide methode|plan de travail|méthode pour établir)/.test(t)) return "methode";
+  if (/(coordination|interfaces|réservations|reservations|rebouchage|matrice.*lot|limites de prestation)/.test(t))
+    return "coordination";
+  if (/(sommaire|trame|plan du cctp|structure du cctp)/.test(t)) return "sommaire";
+  if (/(amélior|amelior|corriger|reformul|relecture|trop vague|enrichir)/.test(t)) return "enrichissement";
+  if (/(manque|analys|audit|incohéren|incohéren)/.test(t)) return "audit";
+  return null;
+}
+
+export function resolveCctpGenerationMode(
+  explicit: CctpGenerationMode | undefined,
+  request: string,
+): CctpGenerationMode {
+  if (explicit && explicit !== "redaction") return explicit;
+  return inferCctpGenerationModeFromRequest(request) ?? explicit ?? "redaction";
 }

@@ -29,6 +29,10 @@ const VALID_MODES = new Set<CctpGenerationMode>([
   "audit",
   "enrichissement",
   "coordination",
+  "fiche_ouvrage",
+  "checklist_documents",
+  "coherence_dpgf",
+  "methode",
 ]);
 
 const VALID_MARKETS = new Set<CctpMarketProfile>(["public", "prive", "sous_traitance", "maintenance"]);

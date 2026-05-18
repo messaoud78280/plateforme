@@ -347,12 +347,31 @@ export async function approveAllMergeAliasProposals(runId: string) {
     where: { extractionRunId: runId, status: "pending", proposalType: "merge_as_alias", similarityScore: { gte: 90 } },
     select: { id: true },
   });
+  return approveGroupingProposals(pending.map((p) => p.id));
+}
+
+export async function approveGroupingProposals(proposalIds: string[]) {
+  await requireBeWorkDevisSession();
+  const uniqueIds = [...new Set(proposalIds.filter(Boolean))];
   let ok = 0;
-  for (const p of pending) {
-    const res = await approveGroupingProposal(p.id);
+  let failed = 0;
+  for (const id of uniqueIds) {
+    const res = await approveGroupingProposal(id);
+    if (res.ok) ok += 1;
+    else failed += 1;
+  }
+  return { ok, failed, total: uniqueIds.length };
+}
+
+export async function rejectGroupingProposals(proposalIds: string[], note?: string) {
+  await requireBeWorkDevisSession();
+  const uniqueIds = [...new Set(proposalIds.filter(Boolean))];
+  let ok = 0;
+  for (const id of uniqueIds) {
+    const res = await rejectGroupingProposal(id, note);
     if (res.ok) ok += 1;
   }
-  return { ok, total: pending.length };
+  return { ok, total: uniqueIds.length };
 }
 
 export async function createManualSiteResource(formData: FormData) {

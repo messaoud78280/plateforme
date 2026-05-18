@@ -696,14 +696,233 @@ model WorkItem {
   createdAt            DateTime             @default(now())
   updatedAt            DateTime             @updatedAt
 
-  priceEntries PriceEntry[]
-  quoteLines   QuoteLine[]
+  priceEntries              PriceEntry[]
+  quoteLines                QuoteLine[]
+  siteResourceLinks         WorkItemSiteResource[]
+  siteResourceAliases       SiteResourceAlias[]
+  siteResourceGroupingProposals SiteResourceGroupingProposal[]
 
   @@index([lot])
   @@index([status])
   @@index([unit])
   @@index([itemType])
   @@index([familyCode])
+}
+
+// ─── BeWork Devis — ressources chantier (matériaux, consommables, locations…) ───
+
+enum SiteResourceType {
+  materiaux
+  consommables
+  location_engin
+  location_outillage
+  equipements
+  services
+}
+
+enum SiteResourceStatus {
+  brouillon
+  a_verifier
+  valide
+  archive
+  fusionne
+}
+
+enum SiteResourceConfidence {
+  faible
+  moyen
+  eleve
+}
+
+enum SiteResourceAliasKind {
+  synonyme
+  extraction_ouvrage
+  fournisseur
+  orthographe
+  ancien_libelle
+  court
+  variante_libelle
+}
+
+enum SiteResourceLinkRole {
+  materiau_principal
+  fourniture
+  consommable
+  location
+  equipement
+  service
+  autre
+}
+
+enum SiteResourceExtractedFrom {
+  title
+  includedItems
+  fullDescription
+  manuel
+}
+
+enum SiteResourceGroupingProposalType {
+  merge_as_alias
+  create_variant
+  new_resource
+  keep_separate
+  ignore
+}
+
+enum SiteResourceGroupingProposalStatus {
+  pending
+  approved
+  rejected
+}
+
+enum SiteResourceExtractionRunStatus {
+  draft
+  preview
+  applied
+  cancelled
+}
+
+/// Fiche ressource chantier principale (regroupement intelligent, sans perte d’alias)
+model SiteResource {
+  id                      String                   @id @default(cuid())
+  shortName               String
+  fullDescription         String                   @db.Text
+  resourceType            SiteResourceType
+  family                  String
+  subFamily               String?
+  orderUnit               String
+  siteUsage               String?                  @db.Text
+  mainCharacteristics     String?                  @db.Text
+  characteristicsToVerify String?                  @db.Text
+  businessNotes           String?                  @db.Text
+  confidenceLevel         SiteResourceConfidence   @default(moyen)
+  status                  SiteResourceStatus       @default(brouillon)
+  mergedIntoId            String?
+  mergedInto              SiteResource?            @relation("SiteResourceMerge", fields: [mergedIntoId], references: [id], onDelete: SetNull)
+  mergedFrom              SiteResource[]           @relation("SiteResourceMerge")
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+
+  aliases           SiteResourceAlias[]
+  variants          SiteResourceVariant[]
+  workItemLinks     WorkItemSiteResource[]
+  groupingProposals SiteResourceGroupingProposal[] @relation("ProposalTargetResource")
+  groupingProposalsAsSource SiteResourceGroupingProposal[] @relation("ProposalCreatedResource")
+
+  @@index([resourceType, family, subFamily])
+  @@index([status])
+  @@index([shortName])
+  @@index([mergedIntoId])
+}
+
+/// Alias / désignations alternatives conservées (rien n’est supprimé)
+model SiteResourceAlias {
+  id               String                @id @default(cuid())
+  siteResourceId   String
+  siteResource     SiteResource          @relation(fields: [siteResourceId], references: [id], onDelete: Cascade)
+  label            String
+  normalizedLabel  String
+  aliasKind        SiteResourceAliasKind @default(extraction_ouvrage)
+  sourceWorkItemId String?
+  sourceWorkItem   WorkItem?             @relation(fields: [sourceWorkItemId], references: [id], onDelete: SetNull)
+  sourceField      SiteResourceExtractedFrom?
+  sourceSnippet    String?               @db.Text
+  confidenceScore  Int?
+  createdAt        DateTime              @default(now())
+
+  @@index([siteResourceId])
+  @@index([normalizedLabel])
+  @@index([sourceWorkItemId])
+}
+
+/// Variante technique distinguable (BA13 standard vs hydro, câbles différents…)
+model SiteResourceVariant {
+  id                      String                 @id @default(cuid())
+  siteResourceId          String
+  siteResource            SiteResource           @relation(fields: [siteResourceId], references: [id], onDelete: Cascade)
+  shortName               String
+  fullDescription         String                 @db.Text
+  distinguishingAttributes String?               @db.Text
+  orderUnit               String?
+  confidenceLevel         SiteResourceConfidence @default(moyen)
+  status                  SiteResourceStatus     @default(a_verifier)
+  createdAt               DateTime               @default(now())
+  updatedAt               DateTime               @updatedAt
+
+  @@index([siteResourceId])
+  @@index([status])
+}
+
+/// Lien N–N ouvrage bibliothèque ↔ ressource chantier
+model WorkItemSiteResource {
+  id               String                    @id @default(cuid())
+  workItemId       String
+  workItem         WorkItem                  @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  siteResourceId   String
+  siteResource     SiteResource              @relation(fields: [siteResourceId], references: [id], onDelete: Cascade)
+  linkRole         SiteResourceLinkRole      @default(fourniture)
+  extractedFrom    SiteResourceExtractedFrom @default(includedItems)
+  sourceSnippet    String?                   @db.Text
+  extractionRunId  String?
+  extractionRun    SiteResourceExtractionRun? @relation(fields: [extractionRunId], references: [id], onDelete: SetNull)
+  confidenceScore  Int?
+  createdAt        DateTime                  @default(now())
+
+  @@unique([workItemId, siteResourceId, extractedFrom, sourceSnippet])
+  @@index([workItemId])
+  @@index([siteResourceId])
+  @@index([extractionRunId])
+}
+
+/// Lot d’extraction depuis la bibliothèque d’ouvrages
+model SiteResourceExtractionRun {
+  id              String                        @id @default(cuid())
+  label           String?
+  status          SiteResourceExtractionRunStatus @default(draft)
+  workItemCount   Int                           @default(0)
+  candidateCount  Int                           @default(0)
+  proposalCount   Int                           @default(0)
+  meta            Json?
+  createdByUserId String?
+  createdAt       DateTime                      @default(now())
+  updatedAt       DateTime                      @updatedAt
+
+  proposals       SiteResourceGroupingProposal[]
+  workItemLinks   WorkItemSiteResource[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+/// Proposition de regroupement (validation humaine obligatoire)
+model SiteResourceGroupingProposal {
+  id                    String                             @id @default(cuid())
+  extractionRunId       String?
+  extractionRun         SiteResourceExtractionRun?         @relation(fields: [extractionRunId], references: [id], onDelete: SetNull)
+  proposalType          SiteResourceGroupingProposalType
+  status                SiteResourceGroupingProposalStatus @default(pending)
+  similarityScore       Int
+  sourceLabel           String
+  normalizedSourceLabel String
+  targetSiteResourceId  String?
+  targetSiteResource    SiteResource?                      @relation("ProposalTargetResource", fields: [targetSiteResourceId], references: [id], onDelete: SetNull)
+  sourceWorkItemId      String?
+  sourceWorkItem        WorkItem?                          @relation(fields: [sourceWorkItemId], references: [id], onDelete: SetNull)
+  sourceField           SiteResourceExtractedFrom?
+  sourceSnippet         String?                            @db.Text
+  matchReasons          Json?
+  createdSiteResourceId String?
+  createdSiteResource   SiteResource?                      @relation("ProposalCreatedResource", fields: [createdSiteResourceId], references: [id], onDelete: SetNull)
+  reviewedAt            DateTime?
+  reviewNote            String?                            @db.Text
+  createdAt             DateTime                           @default(now())
+  updatedAt             DateTime                           @updatedAt
+
+  @@index([extractionRunId])
+  @@index([status])
+  @@index([targetSiteResourceId])
+  @@index([normalizedSourceLabel])
+  @@index([sourceWorkItemId])
 }
 
 /// Document ou source métier (devis, BPU, DPGF…)

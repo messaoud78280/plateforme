@@ -31,7 +31,7 @@ export default async function FicheOuvragePage({ params }: Props) {
   const item = await prisma.workItem.findUnique({ where: { id } });
   if (!item) notFound();
 
-  const [agg, countPrices, entries, sources] = await Promise.all([
+  const [agg, countPrices, entries, sources, siteResourceLinks] = await Promise.all([
     prisma.priceEntry.aggregate({
       where: { workItemId: id },
       _min: { unitPriceHT: true },
@@ -45,6 +45,11 @@ export default async function FicheOuvragePage({ params }: Props) {
       include: { priceSource: true },
     }),
     prisma.priceSource.findMany({ orderBy: { name: "asc" } }),
+    prisma.workItemSiteResource.findMany({
+      where: { workItemId: id },
+      include: { siteResource: { select: { id: true, shortName: true, status: true } } },
+      orderBy: { createdAt: "desc" },
+    }),
   ]);
 
   const minHt = agg._min.unitPriceHT != null ? Number(agg._min.unitPriceHT) : null;
@@ -155,6 +160,37 @@ export default async function FicheOuvragePage({ params }: Props) {
               </div>
             ) : null}
           </dl>
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2">
+            <h2 className="font-heading text-lg font-bold text-slate-900">Ressources chantier liées</h2>
+            <Link
+              href="/dashboard/devis/ressources-chantier/extraction"
+              className="text-xs font-semibold text-[#1d4ed8] hover:underline"
+            >
+              Extraire / regrouper
+            </Link>
+          </div>
+          {siteResourceLinks.length === 0 ? (
+            <p className="mt-4 text-sm text-slate-500">Aucune ressource chantier associée.</p>
+          ) : (
+            <ul className="mt-4 space-y-2 text-sm">
+              {siteResourceLinks.map((l) => (
+                <li key={l.id}>
+                  <Link
+                    href={`/dashboard/devis/ressources-chantier/${l.siteResource.id}`}
+                    className="font-semibold text-[#1d4ed8] hover:underline"
+                  >
+                    {l.siteResource.shortName}
+                  </Link>
+                  {l.sourceSnippet ? (
+                    <span className="text-slate-500"> — {l.sourceSnippet.slice(0, 80)}</span>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

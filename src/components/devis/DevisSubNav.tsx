@@ -11,6 +11,7 @@ export function DevisSubNav() {
   const links = [
     { href: "/dashboard/devis", label: "Vue d’ensemble", exact: true },
     { href: "/dashboard/devis/bibliotheque", label: "Ouvrages & prix" },
+    { href: "/dashboard/devis/ressources-chantier", label: "Ressources chantier" },
     { href: "/dashboard/devis/creer", label: "Créer un devis" },
     { href: "/dashboard/devis/projets", label: "Projets" },
     { href: "/dashboard/devis/documents", label: "Documents" },

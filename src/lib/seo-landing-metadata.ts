@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getPublicPageSeo } from "@/lib/seo-public-pages";
+import { SEO_PUBLIC_ROBOTS } from "@/lib/seo-search-engines";
 import { absoluteUrl } from "@/lib/site";
 
 const defaultOgImage = absoluteUrl("/opengraph-image");
@@ -25,7 +26,7 @@ export function landingPageMetadata(opts: {
     description: opts.description,
     ...(opts.keywords?.length ? { keywords: opts.keywords } : {}),
     alternates: { canonical: url, languages: langMap },
-    robots: { index: true, follow: true },
+    robots: SEO_PUBLIC_ROBOTS,
     openGraph: {
       type: "website",
       locale: "fr_FR",

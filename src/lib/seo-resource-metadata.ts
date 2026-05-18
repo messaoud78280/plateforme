@@ -2,6 +2,7 @@
  * Métadonnées SEO pour guides éditoriaux /ressources/* (hors tutos skills).
  */
 import type { Metadata } from "next";
+import { SEO_PUBLIC_ROBOTS } from "@/lib/seo-search-engines";
 import { absoluteUrl } from "@/lib/site";
 
 const defaultOgImage = absoluteUrl("/opengraph-image");
@@ -91,7 +92,7 @@ export function resourceEditorialMetadata(path: string): Metadata {
     description: seo.description,
     ...(seo.keywords?.length ? { keywords: seo.keywords } : {}),
     alternates: { canonical: url, languages: { fr: url, "x-default": url } },
-    robots: { index: true, follow: true },
+    robots: SEO_PUBLIC_ROBOTS,
     openGraph: {
       type: ogType,
       locale: "fr_FR",

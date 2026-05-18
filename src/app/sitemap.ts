@@ -67,6 +67,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     entry("/ressources/guides", 0.81, "weekly"),
     entry("/ressources/tutos", 0.81, "weekly"),
     entry("/llms.txt", 0.55, "weekly"),
+    entry("/feed.xml", 0.6, "daily"),
     ...RESOURCE_EDITORIAL_PAGES.map((path) => entry(path, 0.8)),
     ...PDF_RESOURCE_PAGES,
     entry("/relance-devis-btp", 0.85),

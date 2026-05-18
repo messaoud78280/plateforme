@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SEO_NOINDEX_ROBOTS } from "@/lib/seo-search-engines";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
@@ -9,7 +10,7 @@ import { UserAccountDropdown } from "@/components/dashboard/UserAccountDropdown"
 import { NotificationsDropdown } from "@/components/dashboard/NotificationsDropdown";
 
 export const metadata: Metadata = {
-  robots: { index: false, follow: false, googleBot: { index: false, follow: false } },
+  robots: SEO_NOINDEX_ROBOTS,
 };
 
 export default async function DashboardLayout({

@@ -5,6 +5,10 @@ import { PlausibleScript } from "@/components/analytics/PlausibleScript";
 import { Providers } from "@/components/Providers";
 import { SEO_KEYWORDS_GLOBAL, SEO_VALUE_PROPOSITION, SEO_VALUE_PROPOSITION_SHORT } from "@/lib/seo-keywords";
 import { jsonLdCountriesServed, jsonLdExpandedAreaServed } from "@/lib/jsonld-area-served";
+import {
+  buildSearchEngineVerification,
+  SEO_PUBLIC_ROBOTS,
+} from "@/lib/seo-search-engines";
 import { absoluteUrl, CALENDLY_APPEL_DECOUVERTE_URL, getOrgSameAs, SITE_URL } from "@/lib/site";
 import { formatPriceLabelFr, getPublicPriceBoundsLabels } from "@/lib/subscription-plans";
 
@@ -37,9 +41,9 @@ const architectsDaughter = Architects_Daughter({
   weight: ["400"],
 });
 
-const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
-const bingSiteVerification = process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION?.trim();
+const searchEngineVerification = buildSearchEngineVerification();
 const llmsTxtUrl = absoluteUrl("/llms.txt");
+const rssFeedUrl = absoluteUrl("/feed.xml");
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -73,11 +77,7 @@ export const metadata: Metadata = {
     "administratif intelligence artificielle",
     "vidéo présentation administratif BTP",
   ],
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
-  },
+  robots: SEO_PUBLIC_ROBOTS,
   openGraph: {
     type: "website",
     locale: "fr_FR",
@@ -119,14 +119,17 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/apple-touch-icon.png", type: "image/png", sizes: "180x180" }],
   },
-  ...(googleSiteVerification || bingSiteVerification
-    ? {
-        verification: {
-          ...(googleSiteVerification ? { google: googleSiteVerification } : {}),
-          ...(bingSiteVerification ? { other: { "msvalidate.01": bingSiteVerification } } : {}),
-        },
-      }
-    : {}),
+  ...(searchEngineVerification ? { verification: searchEngineVerification } : {}),
+  appleWebApp: {
+    capable: true,
+    title: "BeWork",
+    statusBarStyle: "default",
+  },
+  formatDetection: {
+    telephone: false,
+    email: false,
+    address: false,
+  },
 };
 
 const orgSameAs = getOrgSameAs();
@@ -233,6 +236,7 @@ export default function RootLayout({
     <html lang="fr">
       <head>
         <link rel="alternate" type="text/plain" href={llmsTxtUrl} title="Index pour assistants IA (llms.txt)" />
+        <link rel="alternate" type="application/rss+xml" href={rssFeedUrl} title="Flux RSS BeWork" />
         <PlausibleScript />
       </head>
       <body

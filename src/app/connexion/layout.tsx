@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { SEO_NOINDEX_ROBOTS } from "@/lib/seo-search-engines";
 
 export const metadata: Metadata = {
   title: "Connexion | BeWork",
   description: "Connexion à votre espace BeWork (client, agent ou direction).",
-  robots: { index: false, follow: false, googleBot: { index: false, follow: false } },
+  robots: SEO_NOINDEX_ROBOTS,
 };
 
 export default function ConnexionLayout({ children }: { children: React.ReactNode }) {

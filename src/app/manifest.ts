@@ -14,12 +14,19 @@ export default function manifest(): MetadataRoute.Manifest {
     lang: "fr",
     scope: "/",
     id: SITE_URL,
+    categories: ["business", "productivity"],
     icons: [
       {
         src: "/icon-512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
+      },
+      {
+        src: "/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
       },
       {
         src: "/apple-touch-icon.png",

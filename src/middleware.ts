@@ -15,6 +15,20 @@ function getCanonicalHost(): string {
 const APEX_REDIRECT_HOSTS = new Set(["bework.fr"]);
 
 export function middleware(request: NextRequest) {
+  const indexNowKey = process.env.INDEXNOW_API_KEY?.trim();
+  if (indexNowKey) {
+    const keyMatch = request.nextUrl.pathname.match(/^\/([a-zA-Z0-9-]{8,128})\.txt$/);
+    if (keyMatch?.[1] === indexNowKey) {
+      return new NextResponse(indexNowKey, {
+        status: 200,
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          "Cache-Control": "public, max-age=86400",
+        },
+      });
+    }
+  }
+
   const canonicalHost = getCanonicalHost();
   const host = request.headers.get("host")?.split(":")[0]?.toLowerCase();
 

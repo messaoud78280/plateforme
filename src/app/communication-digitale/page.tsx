@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
+import { SEO_NOINDEX_ROBOTS } from "@/lib/seo-search-engines";
 import { absoluteUrl } from "@/lib/site";
 
 const pageUrl = absoluteUrl("/communication-digitale");
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
   description:
     "Packs communication digitale BeWork : visibilité locale, réseaux sociaux, site vitrine. Tarifs de 149 à 449 €/mois.",
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
+  robots: SEO_NOINDEX_ROBOTS,
 };
 
 const PACKS = [

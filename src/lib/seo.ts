@@ -9,6 +9,14 @@ export {
   SEO_VALUE_PROPOSITION_SHORT,
 } from "@/lib/seo-keywords";
 
+export {
+  SEO_CRAWLER_USER_AGENTS,
+  SEO_DISALLOW_PATHS,
+  SEO_NOINDEX_ROBOTS,
+  SEO_PUBLIC_ROBOTS,
+  buildSearchEngineVerification,
+} from "@/lib/seo-search-engines";
+export { getIndexNowKey, getIndexNowKeyLocation, pingIndexNow } from "@/lib/indexnow";
 export { landingPageMetadata, landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 export { resourceEditorialMetadata } from "@/lib/seo-resource-metadata";
 export { tutoPageMetadata, getTutoPageDescription } from "@/lib/seo-tuto-metadata";

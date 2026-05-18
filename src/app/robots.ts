@@ -1,46 +1,16 @@
 import type { MetadataRoute } from "next";
+import {
+  SEO_CRAWLER_USER_AGENTS,
+  SEO_DISALLOW_PATHS,
+} from "@/lib/seo-search-engines";
 import { SITE_URL } from "@/lib/site";
-
-/** Chemins privés, techniques ou non pertinents pour l’indexation (inchangés pour tous les user-agents). */
-const DISALLOW: string[] = [
-  "/dashboard/",
-  "/api/",
-  "/connexion",
-  "/inscription",
-  "/connexion/gerente",
-  "/connexion/agents",
-  "/connexion/clients",
-  "/invitation/",
-  "/communication-digitale",
-];
-
-/** Crawlers recherche IA + moteurs classiques — allow pour visibilité AEO/GEO (ne pas bloquer OAI-SearchBot / PerplexityBot). */
-const USER_AGENTS = [
-  "*",
-  "Googlebot",
-  "Google-Extended",
-  "Bingbot",
-  "Applebot",
-  "OAI-SearchBot",
-  "GPTBot",
-  "ChatGPT-User",
-  "PerplexityBot",
-  "Perplexity-User",
-  "ClaudeBot",
-  "anthropic-ai",
-  "Claude-Web",
-  "cohere-ai",
-  "Meta-ExternalAgent",
-  "FacebookBot",
-  "DuckDuckBot",
-] as const;
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: USER_AGENTS.map((userAgent) => ({
+    rules: SEO_CRAWLER_USER_AGENTS.map((userAgent) => ({
       userAgent,
       allow: "/",
-      disallow: DISALLOW,
+      disallow: [...SEO_DISALLOW_PATHS],
     })),
     sitemap: `${SITE_URL}/sitemap.xml`,
     host: (() => {

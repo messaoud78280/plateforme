@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import {
+  detectCountryCode,
+  isCountryBlocked,
+  parseBlockedCountries,
+  shouldSkipGeoBlock,
+} from "@/lib/geo-block";
 
 /** Hôte canonique (ex. www.bework.fr) — dérivé de NEXT_PUBLIC_SITE_URL en prod. */
 function getCanonicalHost(): string {
@@ -13,6 +19,32 @@ function getCanonicalHost(): string {
 
 /** Domaines apex à rediriger vers l’hôte canonique (sans www). */
 const APEX_REDIRECT_HOSTS = new Set(["bework.fr"]);
+
+const BLOCKED_COUNTRIES = parseBlockedCountries(process.env.BLOCKED_COUNTRIES);
+
+function geoBlockResponse(request: NextRequest): NextResponse | null {
+  if (!BLOCKED_COUNTRIES.length) return null;
+
+  const pathname = request.nextUrl.pathname;
+  if (shouldSkipGeoBlock(pathname)) return null;
+
+  const country = detectCountryCode(request);
+
+  if (process.env.NODE_ENV === "development") {
+    console.info("[geo-block]", {
+      pathname,
+      country: country ?? "(inconnu)",
+      blocked: BLOCKED_COUNTRIES,
+    });
+  }
+
+  if (!isCountryBlocked(country, BLOCKED_COUNTRIES)) return null;
+
+  return new NextResponse("Access denied.", {
+    status: 403,
+    headers: { "Content-Type": "text/plain; charset=utf-8" },
+  });
+}
 
 export function middleware(request: NextRequest) {
   const indexNowKey = process.env.INDEXNOW_API_KEY?.trim();
@@ -28,6 +60,9 @@ export function middleware(request: NextRequest) {
       });
     }
   }
+
+  const blocked = geoBlockResponse(request);
+  if (blocked) return blocked;
 
   const canonicalHost = getCanonicalHost();
   const host = request.headers.get("host")?.split(":")[0]?.toLowerCase();
@@ -47,5 +82,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg|woff2?)$).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:ico|png|jpg|jpeg|gif|webp|svg|woff2?|txt|xml)$).*)",
+  ],
 };

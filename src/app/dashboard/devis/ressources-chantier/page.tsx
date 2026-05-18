@@ -8,7 +8,10 @@ import {
   SITE_RESOURCE_STATUS_LABELS,
   SITE_RESOURCE_TYPE_LABELS,
 } from "@/lib/chantier-resources/labels";
+import { ChantierResourceCleanupPanel } from "@/components/devis/ChantierResourceCleanupPanel";
 import { fetchChantierResourceStats, fetchChantierResourcesList } from "@/app/dashboard/devis/ressources-chantier-actions";
+
+const eur = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 
 type SearchParams = Promise<{
@@ -92,6 +95,8 @@ export default async function RessourcesChantierPage({ searchParams }: { searchP
         </div>
       </div>
 
+      <ChantierResourceCleanupPanel />
+
       <form className="flex flex-wrap gap-2 px-1" method="get">
         {type ? <input type="hidden" name="type" value={type} /> : null}
         {sp.family ? <input type="hidden" name="family" value={sp.family} /> : null}
@@ -121,8 +126,10 @@ export default async function RessourcesChantierPage({ searchParams }: { searchP
                 <th className="px-4 py-3">Famille</th>
                 <th className="px-4 py-3">Sous-famille</th>
                 <th className="px-4 py-3">Ressource</th>
-                <th className="px-4 py-3">Alias</th>
-                <th className="px-4 py-3">Var.</th>
+                <th className="px-4 py-3">Prix obs.</th>
+                <th className="px-4 py-3">Min</th>
+                <th className="px-4 py-3">Max</th>
+                <th className="px-4 py-3">Moy.</th>
                 <th className="px-4 py-3">Ouvrages</th>
                 <th className="px-4 py-3">Unité</th>
                 <th className="px-4 py-3">Confiance</th>
@@ -132,7 +139,7 @@ export default async function RessourcesChantierPage({ searchParams }: { searchP
             <tbody className="divide-y divide-slate-100">
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="px-4 py-10 text-center text-slate-500">
+                  <td colSpan={12} className="px-4 py-10 text-center text-slate-500">
                     Aucune ressource. Lancez une extraction depuis la bibliothèque d&apos;ouvrages.
                   </td>
                 </tr>
@@ -147,8 +154,16 @@ export default async function RessourcesChantierPage({ searchParams }: { searchP
                         {r.shortName}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 tabular-nums">{r._count.aliases}</td>
-                    <td className="px-4 py-3 tabular-nums">{r._count.variants}</td>
+                    <td className="px-4 py-3 tabular-nums">{r.priceStats.count || "—"}</td>
+                    <td className="px-4 py-3 tabular-nums text-slate-600">
+                      {r.priceStats.min != null ? eur.format(r.priceStats.min) : "—"}
+                    </td>
+                    <td className="px-4 py-3 tabular-nums text-slate-600">
+                      {r.priceStats.max != null ? eur.format(r.priceStats.max) : "—"}
+                    </td>
+                    <td className="px-4 py-3 tabular-nums text-slate-600">
+                      {r.priceStats.avg != null ? eur.format(r.priceStats.avg) : "—"}
+                    </td>
                     <td className="px-4 py-3 tabular-nums">{r._count.workItemLinks}</td>
                     <td className="px-4 py-3">{r.orderUnit}</td>
                     <td className="px-4 py-3">{SITE_RESOURCE_CONFIDENCE_LABELS[r.confidenceLevel]}</td>

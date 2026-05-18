@@ -719,6 +719,7 @@ model WorkItem {
   updatedAt            DateTime             @updatedAt
 
   priceEntries              PriceEntry[]
+  siteResourcePriceObservations SiteResourcePriceObservation[]
   quoteLines                QuoteLine[]
   siteResourceLinks         WorkItemSiteResource[]
   siteResourceAliases       SiteResourceAlias[]
@@ -862,22 +863,44 @@ model SiteResource {
   businessNotes           String?                  @db.Text
   confidenceLevel         SiteResourceConfidence   @default(moyen)
   status                  SiteResourceStatus       @default(brouillon)
+  normalizedDesignation   String?
   mergedIntoId            String?
   mergedInto              SiteResource?            @relation("SiteResourceMerge", fields: [mergedIntoId], references: [id], onDelete: SetNull)
   mergedFrom              SiteResource[]           @relation("SiteResourceMerge")
   createdAt               DateTime                 @default(now())
   updatedAt               DateTime                 @updatedAt
 
-  aliases           SiteResourceAlias[]
-  variants          SiteResourceVariant[]
-  workItemLinks     WorkItemSiteResource[]
+  aliases            SiteResourceAlias[]
+  variants           SiteResourceVariant[]
+  priceObservations  SiteResourcePriceObservation[]
+  workItemLinks      WorkItemSiteResource[]
   groupingProposals SiteResourceGroupingProposal[] @relation("ProposalTargetResource")
   groupingProposalsAsSource SiteResourceGroupingProposal[] @relation("ProposalCreatedResource")
 
   @@index([resourceType, family, subFamily])
   @@index([status])
   @@index([shortName])
+  @@index([normalizedDesignation])
   @@index([mergedIntoId])
+}
+
+/// Prix observés rattachés à une fiche ressource (conservés lors des fusions)
+model SiteResourcePriceObservation {
+  id               String       @id @default(cuid())
+  siteResourceId   String
+  siteResource     SiteResource @relation(fields: [siteResourceId], references: [id], onDelete: Cascade)
+  amountHT         Decimal      @db.Decimal(12, 4)
+  orderUnit        String       @default("u")
+  sourceName       String?
+  sourceWorkItemId String?
+  sourceWorkItem   WorkItem?    @relation(fields: [sourceWorkItemId], references: [id], onDelete: SetNull)
+  notes            String?      @db.Text
+  observationKey   String
+  importedAt       DateTime     @default(now())
+  createdAt        DateTime     @default(now())
+
+  @@unique([siteResourceId, observationKey])
+  @@index([siteResourceId])
 }
 
 /// Alias / désignations alternatives conservées (rien n’est supprimé)

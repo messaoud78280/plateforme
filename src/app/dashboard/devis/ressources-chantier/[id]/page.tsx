@@ -21,6 +21,12 @@ export default async function ChantierResourceDetailPage({ params }: Props) {
   const resource = await fetchChantierResourceDetail(id);
   if (!resource) notFound();
 
+  const priceAmounts = resource.priceObservations.map((p) => Number(p.amountHT)).filter((n) => n > 0);
+  const priceMin = priceAmounts.length ? Math.min(...priceAmounts) : null;
+  const priceMax = priceAmounts.length ? Math.max(...priceAmounts) : null;
+  const priceAvg = priceAmounts.length ? priceAmounts.reduce((a, b) => a + b, 0) / priceAmounts.length : null;
+  const eur = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 2 });
+
   return (
     <div className="space-y-8">
       <Link href="/dashboard/devis/ressources-chantier" className="text-sm font-semibold text-[#1d4ed8] hover:underline">
@@ -92,6 +98,56 @@ export default async function ChantierResourceDetailPage({ params }: Props) {
         </ul>
         <AddAliasForm siteResourceId={resource.id} />
       </section>
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="font-heading text-lg font-bold text-slate-900">
+          Prix observés ({resource.priceObservations.length})
+        </h2>
+        {resource.priceObservations.length === 0 ? (
+          <p className="mt-3 text-sm text-slate-500">Aucun prix enregistré pour cette fiche.</p>
+        ) : (
+          <>
+            <p className="mt-2 text-sm text-slate-600">
+              {priceMin != null && priceMax != null ? (
+                <>
+                  Min {eur.format(priceMin)} · Max {eur.format(priceMax)}
+                  {priceAvg != null ? ` · Moyenne ${eur.format(priceAvg)}` : null}
+                </>
+              ) : null}
+            </p>
+            <ul className="mt-4 divide-y divide-slate-100">
+              {resource.priceObservations.map((p) => (
+                <li key={p.id} className="py-3 text-sm">
+                  <span className="font-semibold text-slate-900">{eur.format(Number(p.amountHT))}</span>
+                  <span className="text-slate-600"> / {p.orderUnit}</span>
+                  {p.sourceName ? <span className="ml-2 text-slate-500">— {p.sourceName}</span> : null}
+                  {p.notes ? <p className="mt-1 text-xs text-slate-500">{p.notes}</p> : null}
+                  <p className="mt-0.5 text-xs text-slate-400">
+                    Importé le {new Date(p.importedAt).toLocaleDateString("fr-FR")}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </section>
+
+      {resource.mergedFrom.length > 0 ? (
+        <section className="rounded-2xl border border-slate-100 bg-slate-50/80 p-6">
+          <h2 className="font-heading text-lg font-bold text-slate-900">Occurrences dédupliquées</h2>
+          <ul className="mt-3 space-y-1 text-sm text-slate-600">
+            {resource.mergedFrom.map((m) => (
+              <li key={m.id}>
+                {m.shortName}
+                <span className="text-xs text-slate-400">
+                  {" "}
+                  — fusionné le {new Date(m.updatedAt).toLocaleDateString("fr-FR")}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {resource.variants.length > 0 ? (
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

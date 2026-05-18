@@ -78,6 +78,7 @@ export const CHANTIER_RESOURCE_TAXONOMY: Record<SiteResourceType, ChantierResour
         { key: "tubes", label: "Tubes" },
         { key: "raccords", label: "Raccords" },
         { key: "evacuations", label: "Évacuations" },
+        { key: "appareils-sanitaires", label: "Appareils sanitaires" },
       ],
     },
     {
@@ -159,6 +160,14 @@ export const CHANTIER_RESOURCE_TAXONOMY: Record<SiteResourceType, ChantierResour
       label: "Prestations",
       subFamilies: [{ key: "services", label: "Services" }],
     },
+    {
+      family: "documents-administratifs-chantier",
+      label: "Documents administratifs chantier",
+      subFamilies: [
+        { key: "garanties-attestations", label: "Garanties et attestations" },
+        { key: "assurances", label: "Assurances" },
+      ],
+    },
   ],
 };
 
@@ -184,7 +193,30 @@ export function suggestTaxonomyFromText(text: string): {
     .replace(/\p{M}/gu, "")
     .replace(/\s+/g, " ");
 
-  if (/mini.pelle|pelle|grue|nacelle|engin/.test(n)) {
+  if (/attestation|garantie|assurance|decennale|livraison|pv\s|proces.verbal|document administratif/.test(n)) {
+    return {
+      resourceType: "services",
+      family: "documents-administratifs-chantier",
+      subFamily: /attestation|garantie|decennale|livraison/.test(n) ? "garanties-attestations" : "assurances",
+    };
+  }
+  if (/baignoire|lavabo|wc\b|receveur|robinetterie|sanitaire|douche/.test(n)) {
+    return { resourceType: "materiaux", family: "plomberie", subFamily: "appareils-sanitaires" };
+  }
+  if (/beton\s*c\d|beton\s*c\s*\d|c25\/30|c30\/37|mortier|sable|gravier|ciment/.test(n)) {
+    return {
+      resourceType: "materiaux",
+      family: /mortier|ciment/.test(n) ? "maconnerie" : "terrassement",
+      subFamily: /gravier/.test(n) ? "graviers" : /sable/.test(n) ? "sables" : "liants",
+    };
+  }
+  if (/parpaing|bloc.*beton|brique/.test(n)) {
+    return { resourceType: "materiaux", family: "maconnerie", subFamily: "blocs-beton" };
+  }
+  if (/laine.*verre|laine.*roche|isolant|polystyrene/.test(n)) {
+    return { resourceType: "materiaux", family: "isolation", subFamily: "isolants-mineraux" };
+  }
+  if (/mini.pelle|pelle|grue|nacelle|engin|compacteur/.test(n)) {
     return { resourceType: "location_engin", family: "engins", subFamily: "mini-pelles" };
   }
   if (/echafaud|perforateur|marteau.piqueur|outillage/.test(n)) {

@@ -8,6 +8,7 @@ import type {
   SiteResourceStatus,
   SiteResourceType,
 } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import { extractCandidatesFromWorkItem } from "@/lib/chantier-resources/extract-from-work-item";
 import {
@@ -174,6 +175,53 @@ export async function fetchExtractionRun(runId: string) {
   });
 }
 
+export type PendingProposalFilters = {
+  runId?: string;
+  proposalType?: SiteResourceGroupingProposalType;
+  minScore?: number;
+  maxScore?: number;
+};
+
+function buildPendingProposalWhere(filters?: PendingProposalFilters): Prisma.SiteResourceGroupingProposalWhereInput {
+  const minScore = filters?.minScore;
+  const maxScore = filters?.maxScore;
+  return {
+    status: "pending",
+    ...(filters?.runId ? { extractionRunId: filters.runId } : {}),
+    ...(filters?.proposalType ? { proposalType: filters.proposalType } : {}),
+    ...(minScore != null || maxScore != null
+      ? {
+          similarityScore: {
+            ...(minScore != null ? { gte: minScore } : {}),
+            ...(maxScore != null ? { lte: maxScore } : {}),
+          },
+        }
+      : {}),
+  };
+}
+
+/** Toutes les propositions en attente (tous lots confondus sauf filtre runId). */
+export async function fetchPendingGroupingProposals(filters?: PendingProposalFilters) {
+  await requireBeWorkDevisSession();
+  return prisma.siteResourceGroupingProposal.findMany({
+    where: buildPendingProposalWhere(filters),
+    orderBy: [{ similarityScore: "desc" }, { sourceLabel: "asc" }],
+    take: 500,
+    include: {
+      targetSiteResource: { select: { id: true, shortName: true } },
+      sourceWorkItem: { select: { id: true, code: true, title: true } },
+      extractionRun: { select: { id: true, label: true, createdAt: true } },
+    },
+  });
+}
+
+export async function countPendingGroupingProposals(filters?: PendingProposalFilters) {
+  await requireBeWorkDevisSession();
+  return prisma.siteResourceGroupingProposal.count({
+    where: buildPendingProposalWhere(filters),
+  });
+}
+
 function defaultFullDescription(shortName: string): string {
   return `${shortName}, caractéristiques exactes à vérifier selon fournisseur ou CCTP.`;
 }
@@ -327,51 +375,114 @@ export async function approveGroupingProposal(proposalId: string) {
   });
 
   for (const p of REVALIDATE) revalidatePath(p);
+  revalidatePath("/dashboard/devis/ressources-chantier");
   if (resourceId) revalidatePath(`/dashboard/devis/ressources-chantier/${resourceId}`);
   return { ok: true as const, resourceId };
 }
 
 export async function rejectGroupingProposal(proposalId: string, note?: string) {
   await requireBeWorkDevisSession();
+  const existing = await prisma.siteResourceGroupingProposal.findUnique({
+    where: { id: proposalId },
+    select: { status: true },
+  });
+  if (!existing || existing.status !== "pending") {
+    return { ok: false as const, error: "Proposition introuvable ou déjà traitée." };
+  }
   await prisma.siteResourceGroupingProposal.update({
     where: { id: proposalId },
     data: { status: "rejected", reviewedAt: new Date(), reviewNote: note?.trim() || null },
   });
   for (const p of REVALIDATE) revalidatePath(p);
+  revalidatePath("/dashboard/devis/ressources-chantier");
   return { ok: true as const };
 }
 
-export async function approveAllMergeAliasProposals(runId: string) {
+export type BulkProposalActionResult = {
+  ok: number;
+  failed: number;
+  total: number;
+  errors: string[];
+};
+
+export async function approveAllMergeAliasProposals(opts?: { runId?: string | null }) {
   await requireBeWorkDevisSession();
   const pending = await prisma.siteResourceGroupingProposal.findMany({
-    where: { extractionRunId: runId, status: "pending", proposalType: "merge_as_alias", similarityScore: { gte: 90 } },
+    where: {
+      status: "pending",
+      proposalType: "merge_as_alias",
+      similarityScore: { gte: 90 },
+      ...(opts?.runId ? { extractionRunId: opts.runId } : {}),
+    },
     select: { id: true },
   });
-  return approveGroupingProposals(pending.map((p) => p.id));
+  if (pending.length === 0) {
+    return { ok: 0, failed: 0, total: 0, errors: [], empty: true as const };
+  }
+  const res = await approveGroupingProposals(pending.map((p) => p.id));
+  return { ...res, empty: false as const };
 }
 
-export async function approveGroupingProposals(proposalIds: string[]) {
+/** Valide toutes les propositions en attente avec score ≥ minScore (tous types). */
+export async function approveAllHighScorePendingProposals(opts?: { runId?: string | null; minScore?: number }) {
+  await requireBeWorkDevisSession();
+  const minScore = opts?.minScore ?? 90;
+  const pending = await prisma.siteResourceGroupingProposal.findMany({
+    where: {
+      status: "pending",
+      similarityScore: { gte: minScore },
+      ...(opts?.runId ? { extractionRunId: opts.runId } : {}),
+    },
+    select: { id: true },
+  });
+  if (pending.length === 0) {
+    return { ok: 0, failed: 0, total: 0, errors: [], empty: true as const };
+  }
+  const res = await approveGroupingProposals(pending.map((p) => p.id));
+  return { ...res, empty: false as const };
+}
+
+export async function approveGroupingProposals(proposalIds: string[]): Promise<BulkProposalActionResult> {
   await requireBeWorkDevisSession();
   const uniqueIds = [...new Set(proposalIds.filter(Boolean))];
   let ok = 0;
   let failed = 0;
+  const errors: string[] = [];
   for (const id of uniqueIds) {
     const res = await approveGroupingProposal(id);
     if (res.ok) ok += 1;
-    else failed += 1;
+    else {
+      failed += 1;
+      if (res.error) errors.push(res.error);
+    }
   }
-  return { ok, failed, total: uniqueIds.length };
+  for (const p of REVALIDATE) revalidatePath(p);
+  revalidatePath("/dashboard/devis/ressources-chantier");
+  return { ok, failed, total: uniqueIds.length, errors: errors.slice(0, 8) };
 }
 
-export async function rejectGroupingProposals(proposalIds: string[], note?: string) {
+export async function rejectGroupingProposals(proposalIds: string[], note?: string): Promise<BulkProposalActionResult> {
   await requireBeWorkDevisSession();
   const uniqueIds = [...new Set(proposalIds.filter(Boolean))];
   let ok = 0;
+  let failed = 0;
+  const errors: string[] = [];
   for (const id of uniqueIds) {
-    const res = await rejectGroupingProposal(id, note);
-    if (res.ok) ok += 1;
+    try {
+      const res = await rejectGroupingProposal(id, note);
+      if (res.ok) ok += 1;
+      else {
+        failed += 1;
+        errors.push(`Proposition ${id} : déjà traitée.`);
+      }
+    } catch (e) {
+      failed += 1;
+      errors.push(e instanceof Error ? e.message : "Erreur lors du rejet.");
+    }
   }
-  return { ok, total: uniqueIds.length };
+  for (const p of REVALIDATE) revalidatePath(p);
+  revalidatePath("/dashboard/devis/ressources-chantier");
+  return { ok, failed, total: uniqueIds.length, errors: errors.slice(0, 8) };
 }
 
 export async function createManualSiteResource(formData: FormData) {

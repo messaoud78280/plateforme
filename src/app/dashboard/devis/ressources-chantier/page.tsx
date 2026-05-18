@@ -76,10 +76,14 @@ export default async function RessourcesChantierPage({ searchParams }: { searchP
           <p className="text-xs font-semibold uppercase text-slate-500">Fiches actives</p>
           <p className="mt-1 text-2xl font-bold text-slate-900">{stats.total}</p>
         </div>
-        <div className="rounded-xl border border-amber-200/80 bg-amber-50/50 p-4 shadow-sm">
+        <Link
+          href="/dashboard/devis/ressources-chantier/extraction"
+          className="block rounded-xl border border-amber-200/80 bg-amber-50/50 p-4 shadow-sm transition hover:border-amber-300 hover:bg-amber-50"
+        >
           <p className="text-xs font-semibold uppercase text-amber-800">Propositions en attente</p>
           <p className="mt-1 text-2xl font-bold text-amber-950">{stats.pendingProposals}</p>
-        </div>
+          <p className="mt-1 text-xs font-medium text-amber-900/80">Valider ou ignorer →</p>
+        </Link>
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <p className="text-xs font-semibold uppercase text-slate-500">Types</p>
           <p className="mt-1 text-sm text-slate-700">

@@ -3,6 +3,28 @@ import { extractOrCoalescePriceEntriesFromPasteObject } from "@/lib/be-work-devi
 import { applyResolvedDescriptionsToPasteValues } from "@/lib/be-work-devis-work-item-description";
 import { normalizeUnit } from "@/lib/be-work-devis-units";
 
+const PASTE_WORK_ITEM_CODE_KEYS = ["code", "codeOuvrage", "codeBeWork", "reference", "ref"] as const;
+const PASTE_TITLE_KEYS = ["title", "name", "designation", "libelle", "label"] as const;
+const PASTE_LOT_KEYS = ["lot", "corpsEtat", "corps_etat", "trade", "famille"] as const;
+const PASTE_UNIT_KEYS = ["unit", "unite", "u"] as const;
+
+/** Conteneurs fréquents autour d’un tableau d’ouvrages (export IA, scripts, etc.). */
+const PASTE_BULK_ARRAY_KEYS = [
+  "workItems",
+  "workitems",
+  "ouvrages",
+  "items",
+  "rows",
+  "data",
+  "results",
+  "entries",
+  "liste",
+  "bibliotheque",
+  "library",
+  "records",
+  "lignes",
+] as const;
+
 /** Code ouvrage existant pour un collage « prix seuls » (JSON `workItemCode`). */
 export function extractWorkItemCodeFromPasteObject(obj: Record<string, unknown>): string | null {
   const v = obj.workItemCode;
@@ -92,6 +114,132 @@ function coerceLeaf(v: unknown): string | null {
   return null;
 }
 
+function pickPasteString(obj: Record<string, unknown>, keys: readonly string[]): string | null {
+  for (const k of keys) {
+    if (Object.prototype.hasOwnProperty.call(obj, k)) {
+      const leaf = coerceLeaf(obj[k]);
+      if (leaf !== null && leaf.trim()) return leaf.trim();
+    }
+  }
+  const byLower = new Map<string, string>();
+  for (const k of Object.keys(obj)) {
+    byLower.set(k.toLowerCase(), k);
+  }
+  for (const k of keys) {
+    const actual = byLower.get(k.toLowerCase());
+    if (actual) {
+      const leaf = coerceLeaf(obj[actual]);
+      if (leaf !== null && leaf.trim()) return leaf.trim();
+    }
+  }
+  return null;
+}
+
+/** Code BeWork d’un ouvrage (création / import bibliothèque). */
+export function extractPasteWorkItemCode(obj: Record<string, unknown>): string | null {
+  return pickPasteString(obj, PASTE_WORK_ITEM_CODE_KEYS);
+}
+
+function looksLikeSingleWorkItemRoot(obj: Record<string, unknown>): boolean {
+  if (extractPasteWorkItemCode(obj)) return true;
+  if (pickPasteString(obj, PASTE_TITLE_KEYS)) return true;
+  if (pickPasteString(obj, PASTE_LOT_KEYS)) return true;
+  return false;
+}
+
+function isArrayOfObjects(v: unknown): v is Record<string, unknown>[] {
+  return (
+    Array.isArray(v) &&
+    v.length > 0 &&
+    v.every((e) => e !== null && typeof e === "object" && !Array.isArray(e))
+  );
+}
+
+/**
+ * Déplie les exports du type `{ "ouvrages": [ … ] }` ou `{ "data": { "workItems": [ … ] } }`.
+ */
+export function unwrapStructuredPasteRoot(parsed: unknown, depth = 0): unknown {
+  if (depth > 5) return parsed;
+  if (Array.isArray(parsed)) return parsed;
+  if (!parsed || typeof parsed !== "object") return parsed;
+
+  const obj = parsed as Record<string, unknown>;
+  if (looksLikeSingleWorkItemRoot(obj)) return parsed;
+
+  for (const key of PASTE_BULK_ARRAY_KEYS) {
+    const direct = obj[key];
+    if (isArrayOfObjects(direct)) {
+      return unwrapStructuredPasteRoot(direct, depth + 1);
+    }
+  }
+
+  const byLower = new Map<string, string>();
+  for (const k of Object.keys(obj)) {
+    byLower.set(k.toLowerCase(), k);
+  }
+  for (const key of PASTE_BULK_ARRAY_KEYS) {
+    const actual = byLower.get(key.toLowerCase());
+    if (!actual) continue;
+    const val = obj[actual];
+    if (isArrayOfObjects(val)) {
+      return unwrapStructuredPasteRoot(val, depth + 1);
+    }
+  }
+
+  for (const val of Object.values(obj)) {
+    if (val && typeof val === "object" && !Array.isArray(val)) {
+      const inner = unwrapStructuredPasteRoot(val, depth + 1);
+      if (Array.isArray(inner)) return inner;
+    }
+  }
+
+  const arrayProps = Object.values(obj).filter(isArrayOfObjects);
+  if (arrayProps.length === 1) {
+    return unwrapStructuredPasteRoot(arrayProps[0], depth + 1);
+  }
+
+  return parsed;
+}
+
+/** Bloc « prix seuls » : workItemCode sans fiche ouvrage complète dans la même ligne. */
+export function rowIsPricesOnlyPaste(obj: Record<string, unknown>): boolean {
+  const targetCode = extractWorkItemCodeFromPasteObject(obj);
+  if (!targetCode) return false;
+  if (extractPasteWorkItemCode(obj)) return false;
+  if (pickPasteString(obj, PASTE_TITLE_KEYS) || pickPasteString(obj, PASTE_LOT_KEYS)) return false;
+  return true;
+}
+
+function flattenBulkPasteEntries(entries: unknown[]): unknown[] {
+  const flat: unknown[] = [];
+  for (const entry of entries) {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      flat.push(entry);
+      continue;
+    }
+    const rowObj = entry as Record<string, unknown>;
+    if (looksLikeSingleWorkItemRoot(rowObj)) {
+      flat.push(entry);
+      continue;
+    }
+    let nested: unknown[] | null = null;
+    for (const key of PASTE_BULK_ARRAY_KEYS) {
+      const val = rowObj[key];
+      if (isArrayOfObjects(val)) {
+        nested = val;
+        break;
+      }
+    }
+    if (!nested) {
+      const arrays = Object.values(rowObj).filter(isArrayOfObjects);
+      if (arrays.length === 1) nested = arrays[0];
+    }
+    if (nested) flat.push(...nested);
+    else flat.push(entry);
+  }
+  return flat;
+}
+
 /** Mappe un objet JSON vers les champs du formulaire ouvrage. */
 export function mapObjectToStructuredPasteFormValues(obj: Record<string, unknown>): {
   values: StructuredPasteFormValues;
@@ -99,6 +247,18 @@ export function mapObjectToStructuredPasteFormValues(obj: Record<string, unknown
 } {
   const warnings: string[] = [];
   const values = emptyStructuredPasteFormValues();
+
+  const codeAlias = extractPasteWorkItemCode(obj);
+  if (codeAlias) values.code = codeAlias;
+
+  const lotAlias = pickPasteString(obj, PASTE_LOT_KEYS);
+  if (lotAlias && !String(obj.lot ?? "").trim()) values.lot = lotAlias;
+
+  const unitAlias = pickPasteString(obj, PASTE_UNIT_KEYS);
+  if (unitAlias && !String(obj.unit ?? "").trim()) values.unit = unitAlias;
+
+  const titleAlias = pickPasteString(obj, PASTE_TITLE_KEYS);
+  if (titleAlias && !String(obj.title ?? "").trim()) values.title = titleAlias;
 
   for (const key of STRUCTURED_PASTE_FIELD_KEYS) {
     if (!(key in obj)) continue;
@@ -226,19 +386,22 @@ export function parseStructuredPasteBlock(raw: string):
     };
   }
 
+  parsed = unwrapStructuredPasteRoot(parsed);
+
   if (Array.isArray(parsed)) {
-    if (parsed.length === 0) {
+    const entries = flattenBulkPasteEntries(parsed);
+    if (entries.length === 0) {
       return { ok: false, error: "Le tableau JSON ne contient aucun ouvrage." };
     }
     let sawPricesOnly = false;
     let sawWorkItem = false;
-    for (const entry of parsed) {
+    for (const entry of entries) {
       if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
         sawWorkItem = true;
         continue;
       }
       const rowObj = entry as Record<string, unknown>;
-      if (extractWorkItemCodeFromPasteObject(rowObj)) sawPricesOnly = true;
+      if (rowIsPricesOnlyPaste(rowObj)) sawPricesOnly = true;
       else sawWorkItem = true;
     }
     if (sawPricesOnly && sawWorkItem) {
@@ -250,7 +413,7 @@ export function parseStructuredPasteBlock(raw: string):
     }
     const bulkKind: ParsedPasteBulk["bulkKind"] = sawPricesOnly ? "pricesOnly" : "workItems";
     const rows: ParsedPasteBulkRow[] = [];
-    parsed.forEach((entry, index) => {
+    entries.forEach((entry, index) => {
       if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
         rows.push({
           index,
@@ -262,8 +425,8 @@ export function parseStructuredPasteBlock(raw: string):
         return;
       }
       const rowObj = entry as Record<string, unknown>;
-      const wic = extractWorkItemCodeFromPasteObject(rowObj);
-      if (wic) {
+      if (rowIsPricesOnlyPaste(rowObj)) {
+        const wic = extractWorkItemCodeFromPasteObject(rowObj)!;
         const priceEntries = extractOrCoalescePriceEntriesFromPasteObject(rowObj);
         const warnings: string[] = [];
         if (priceEntries.length === 0) {
@@ -298,8 +461,9 @@ export function parseStructuredPasteBlock(raw: string):
   }
 
   const singleObj = parsed as Record<string, unknown>;
-  const wicSingle = extractWorkItemCodeFromPasteObject(singleObj);
-  if (wicSingle) {
+
+  if (rowIsPricesOnlyPaste(singleObj)) {
+    const wicSingle = extractWorkItemCodeFromPasteObject(singleObj)!;
     const priceEntries = extractOrCoalescePriceEntriesFromPasteObject(singleObj);
     const warnings: string[] = [];
     if (priceEntries.length === 0) {

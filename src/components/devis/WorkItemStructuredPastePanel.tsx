@@ -74,7 +74,7 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
     setConfirmSkipDuplicates(false);
   }, []);
 
-  /** Objet unique → formulaire ; tableau → prévisualisation. */
+  /** Tableau (ou conteneur déplié) → prévisualisation + import ; objet seul → formulaire. */
   const handleAnalyzeOrPrefill = useCallback(async () => {
     clearMessages();
     setBulkPasteKind(null);
@@ -143,21 +143,25 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
     );
   }, [text, onApplyValues, clearMessages, buildWorkItemPreviewRows]);
 
-  /** Uniquement un objet JSON (erreur explicite si tableau). */
+  /** Objet unique → formulaire ; liste détectée → même flux que « Analyser » (import bibliothèque). */
   const handlePrefillFormOnly = useCallback(() => {
     clearMessages();
+    const block = parseStructuredPasteBlock(text);
+    if (!block.ok) {
+      setError(block.error);
+      return;
+    }
+    if (block.result.mode === "bulk") {
+      void handleAnalyzeOrPrefill();
+      return;
+    }
     setBulkPasteKind(null);
     setWorkItemBulkRows(null);
     setPriceBulkRows(null);
-    const result = parseStructuredWorkItemPaste(text);
-    if (!result.ok) {
-      setError(result.error);
-      return;
-    }
-    onApplyValues(result.values);
-    setWarnings(result.warnings);
+    onApplyValues(block.result.values);
+    setWarnings(block.result.warnings);
     setSuccess("Formulaire prérempli. Relisez les champs puis enregistrez avec « Créer l’ouvrage ».");
-  }, [text, onApplyValues, clearMessages]);
+  }, [text, onApplyValues, clearMessages, handleAnalyzeOrPrefill]);
 
   const duplicateCount = workItemBulkRows?.filter((r) => r.duplicateDb || r.duplicateBatch).length ?? 0;
   const importableCount =
@@ -247,10 +251,12 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
     <section className="rounded-2xl border border-dashed border-[#1e3a5f]/35 bg-[#f8fafc] p-5 shadow-sm">
       <h2 className="font-heading text-base font-bold text-slate-900">Ajout rapide depuis données structurées</h2>
       <p className="mt-2 text-sm text-slate-600">
-        Collez un <strong>objet JSON</strong> pour préremplir le formulaire manuel ci-dessous, un <strong>tableau d’ouvrages</strong>{" "}
-        (champ <code className="rounded bg-slate-200 px-1">code</code>) pour importer des fiches, ou un <strong>tableau de prix</strong>{" "}
-        (champ <code className="rounded bg-slate-200 px-1">workItemCode</code> + <code className="rounded bg-slate-200 px-1">priceEntries</code>
-        ) pour ajouter des prix observés à des ouvrages déjà en bibliothèque. Aucun enregistrement automatique : vous validez à la fin.
+        Pour <strong>remplir la bibliothèque</strong> : collez un tableau <code className="rounded bg-slate-200 px-1">[ … ]</code> ou un export
+        encapsulé <code className="rounded bg-slate-200 px-1">{`{ "ouvrages": [ … ] }`}</code>, puis{" "}
+        <strong>« Analyser le collage »</strong> → <strong>« Importer les ouvrages »</strong>. Un seul objet{" "}
+        <code className="rounded bg-slate-200 px-1">{`{ "code": "…" }`}</code> préremplit le formulaire ci-dessous. Les blocs{" "}
+        <code className="rounded bg-slate-200 px-1">workItemCode</code> + <code className="rounded bg-slate-200 px-1">priceEntries</code> ajoutent
+        des prix sur des ouvrages déjà en base.
       </p>
       <details className="mt-3 text-sm text-slate-600">
         <summary className="cursor-pointer font-semibold text-[#1e3a5f] hover:underline">Voir des exemples</summary>

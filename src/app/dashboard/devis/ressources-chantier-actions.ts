@@ -23,6 +23,10 @@ import {
   type DuplicateCleanupPreview,
   type PriceObservationDraft,
 } from "@/lib/chantier-resources/deduplication";
+import {
+  aliasIdsToRemoveKeepingOnePerNormalized,
+  createSiteResourceAliasIfAbsent,
+} from "@/lib/chantier-resources/alias-dedup";
 import { buildPriceObservationKey, normalizeResourceLabel } from "@/lib/chantier-resources/normalize-label";
 import { suggestTaxonomyFromText } from "@/lib/chantier-resources/taxonomy";
 import { prisma } from "@/lib/prisma";
@@ -413,17 +417,15 @@ export async function approveGroupingProposal(proposalId: string) {
   let resourceId = proposal.targetSiteResourceId;
 
   if (proposal.proposalType === "merge_as_alias" && resourceId) {
-    await prisma.siteResourceAlias.create({
-      data: {
-        siteResourceId: resourceId,
-        label: proposal.sourceLabel,
-        normalizedLabel: proposal.normalizedSourceLabel,
-        aliasKind: "extraction_ouvrage",
-        sourceWorkItemId: proposal.sourceWorkItemId ?? undefined,
-        sourceField: proposal.sourceField ?? undefined,
-        sourceSnippet: proposal.sourceSnippet ?? undefined,
-        confidenceScore: proposal.similarityScore,
-      },
+    await createSiteResourceAliasIfAbsent(prisma, {
+      siteResourceId: resourceId,
+      label: proposal.sourceLabel,
+      normalizedLabel: proposal.normalizedSourceLabel,
+      aliasKind: "extraction_ouvrage",
+      sourceWorkItemId: proposal.sourceWorkItemId,
+      sourceField: proposal.sourceField ?? undefined,
+      sourceSnippet: proposal.sourceSnippet ?? undefined,
+      confidenceScore: proposal.similarityScore,
     });
   } else if (proposal.proposalType === "create_variant" && resourceId) {
     await prisma.siteResourceVariant.create({
@@ -437,17 +439,15 @@ export async function approveGroupingProposal(proposalId: string) {
         status: "a_verifier",
       },
     });
-    await prisma.siteResourceAlias.create({
-      data: {
-        siteResourceId: resourceId,
-        label: proposal.sourceLabel,
-        normalizedLabel: proposal.normalizedSourceLabel,
-        aliasKind: "variante_libelle",
-        sourceWorkItemId: proposal.sourceWorkItemId ?? undefined,
-        sourceField: proposal.sourceField ?? undefined,
-        sourceSnippet: proposal.sourceSnippet ?? undefined,
-        confidenceScore: proposal.similarityScore,
-      },
+    await createSiteResourceAliasIfAbsent(prisma, {
+      siteResourceId: resourceId,
+      label: proposal.sourceLabel,
+      normalizedLabel: proposal.normalizedSourceLabel,
+      aliasKind: "variante_libelle",
+      sourceWorkItemId: proposal.sourceWorkItemId,
+      sourceField: proposal.sourceField ?? undefined,
+      sourceSnippet: proposal.sourceSnippet ?? undefined,
+      confidenceScore: proposal.similarityScore,
     });
   } else if (proposal.proposalType === "new_resource" || proposal.proposalType === "keep_separate") {
     const existingRows = await loadResourcesForDedupIndex();
@@ -460,23 +460,16 @@ export async function approveGroupingProposal(proposalId: string) {
     });
     if (match) {
       resourceId = match.id;
-      const dupAlias = await prisma.siteResourceAlias.findFirst({
-        where: { siteResourceId: resourceId, normalizedLabel: proposal.normalizedSourceLabel },
+      await createSiteResourceAliasIfAbsent(prisma, {
+        siteResourceId: resourceId,
+        label: proposal.sourceLabel,
+        normalizedLabel: proposal.normalizedSourceLabel,
+        aliasKind: "extraction_ouvrage",
+        sourceWorkItemId: proposal.sourceWorkItemId,
+        sourceField: proposal.sourceField ?? undefined,
+        sourceSnippet: proposal.sourceSnippet ?? undefined,
+        confidenceScore: proposal.similarityScore,
       });
-      if (!dupAlias) {
-        await prisma.siteResourceAlias.create({
-          data: {
-            siteResourceId: resourceId,
-            label: proposal.sourceLabel,
-            normalizedLabel: proposal.normalizedSourceLabel,
-            aliasKind: "extraction_ouvrage",
-            sourceWorkItemId: proposal.sourceWorkItemId ?? undefined,
-            sourceField: proposal.sourceField ?? undefined,
-            sourceSnippet: proposal.sourceSnippet ?? undefined,
-            confidenceScore: proposal.similarityScore,
-          },
-        });
-      }
     } else {
       const created = await createSiteResourceFromCandidate(draft, "a_verifier");
       resourceId = created.id;
@@ -666,16 +659,73 @@ export async function addAliasToSiteResource(siteResourceId: string, label: stri
   await requireBeWorkDevisSession();
   const t = label.trim();
   if (!t) return { ok: false as const, error: "Alias vide." };
-  await prisma.siteResourceAlias.create({
-    data: {
-      siteResourceId,
-      label: t,
-      normalizedLabel: normalizeResourceLabel(t),
-      aliasKind: "synonyme",
-    },
+  const { created } = await createSiteResourceAliasIfAbsent(prisma, {
+    siteResourceId,
+    label: t,
+    aliasKind: "synonyme",
   });
   revalidatePath(`/dashboard/devis/ressources-chantier/${siteResourceId}`);
-  return { ok: true as const };
+  if (!created) {
+    return { ok: true as const, duplicate: true as const, message: "Cet alias existe déjà sur cette fiche." };
+  }
+  return { ok: true as const, duplicate: false as const };
+}
+
+export async function dedupeAliasesForSiteResource(siteResourceId: string) {
+  await requireBeWorkDevisSession();
+  const aliases = await prisma.siteResourceAlias.findMany({
+    where: { siteResourceId },
+    select: {
+      id: true,
+      normalizedLabel: true,
+      label: true,
+      createdAt: true,
+      confidenceScore: true,
+      sourceWorkItemId: true,
+    },
+  });
+  const idsToRemove = aliasIdsToRemoveKeepingOnePerNormalized(aliases);
+  if (idsToRemove.length > 0) {
+    await prisma.siteResourceAlias.deleteMany({ where: { id: { in: idsToRemove } } });
+  }
+  revalidatePath(`/dashboard/devis/ressources-chantier/${siteResourceId}`);
+  revalidatePath("/dashboard/devis/ressources-chantier");
+  return {
+    ok: true as const,
+    removed: idsToRemove.length,
+    remaining: aliases.length - idsToRemove.length,
+  };
+}
+
+export async function dedupeAllSiteResourceAliases() {
+  await requireBeWorkDevisSession();
+  const resources = await prisma.siteResource.findMany({
+    where: { status: { not: "fusionne" } },
+    select: {
+      id: true,
+      aliases: {
+        select: {
+          id: true,
+          normalizedLabel: true,
+          label: true,
+          createdAt: true,
+          confidenceScore: true,
+          sourceWorkItemId: true,
+        },
+      },
+    },
+  });
+  let removed = 0;
+  let resourcesAffected = 0;
+  for (const r of resources) {
+    const ids = aliasIdsToRemoveKeepingOnePerNormalized(r.aliases);
+    if (ids.length === 0) continue;
+    await prisma.siteResourceAlias.deleteMany({ where: { id: { in: ids } } });
+    removed += ids.length;
+    resourcesAffected += 1;
+  }
+  revalidatePath("/dashboard/devis/ressources-chantier");
+  return { ok: true as const, removed, resourcesAffected };
 }
 
 async function mergeSiteResourceIntoCanonical(
@@ -686,23 +736,16 @@ async function mergeSiteResourceIntoCanonical(
 ) {
   const aliases = await tx.siteResourceAlias.findMany({ where: { siteResourceId: sourceId } });
   for (const a of aliases) {
-    const exists = await tx.siteResourceAlias.findFirst({
-      where: { siteResourceId: targetId, normalizedLabel: a.normalizedLabel },
+    await createSiteResourceAliasIfAbsent(tx, {
+      siteResourceId: targetId,
+      label: a.label,
+      normalizedLabel: a.normalizedLabel,
+      aliasKind: a.aliasKind,
+      sourceWorkItemId: a.sourceWorkItemId,
+      sourceField: a.sourceField,
+      sourceSnippet: a.sourceSnippet,
+      confidenceScore: a.confidenceScore,
     });
-    if (!exists) {
-      await tx.siteResourceAlias.create({
-        data: {
-          siteResourceId: targetId,
-          label: a.label,
-          normalizedLabel: a.normalizedLabel,
-          aliasKind: a.aliasKind,
-          sourceWorkItemId: a.sourceWorkItemId,
-          sourceField: a.sourceField,
-          sourceSnippet: a.sourceSnippet,
-          confidenceScore: a.confidenceScore,
-        },
-      });
-    }
   }
 
   const sourcePrices = await tx.siteResourcePriceObservation.findMany({ where: { siteResourceId: sourceId } });

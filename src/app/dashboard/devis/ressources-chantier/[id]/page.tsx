@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddAliasForm } from "@/components/devis/AddAliasForm";
+import { DedupeAliasesButton } from "@/components/devis/DedupeAliasesButton";
+import { countRedundantAliases } from "@/lib/chantier-resources/alias-dedup";
 import { getFamilyLabel, getSubFamilyLabel } from "@/lib/chantier-resources/taxonomy";
 import {
   SITE_RESOURCE_ALIAS_KIND_LABELS,
@@ -26,6 +28,8 @@ export default async function ChantierResourceDetailPage({ params }: Props) {
   const priceMax = priceAmounts.length ? Math.max(...priceAmounts) : null;
   const priceAvg = priceAmounts.length ? priceAmounts.reduce((a, b) => a + b, 0) / priceAmounts.length : null;
   const eur = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 2 });
+  const redundantAliasCount = countRedundantAliases(resource.aliases);
+  const uniqueAliasCount = resource.aliases.length - redundantAliasCount;
 
   return (
     <div className="space-y-8">
@@ -85,8 +89,17 @@ export default async function ChantierResourceDetailPage({ params }: Props) {
       </header>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="font-heading text-lg font-bold text-slate-900">Alias / synonymes ({resource.aliases.length})</h2>
-        <p className="mt-1 text-sm text-slate-600">Toutes les désignations conservées — rien n&apos;est supprimé.</p>
+        <h2 className="font-heading text-lg font-bold text-slate-900">
+          Alias / synonymes ({uniqueAliasCount}
+          {redundantAliasCount > 0 ? (
+            <span className="font-normal text-amber-800"> · {redundantAliasCount} doublon(s)</span>
+          ) : null}
+          )
+        </h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Un seul alias par libellé normalisé. Les doublons peuvent être retirés sans perdre la désignation.
+        </p>
+        <DedupeAliasesButton siteResourceId={resource.id} redundantCount={redundantAliasCount} />
         <ul className="mt-4 space-y-2">
           {resource.aliases.map((a) => (
             <li key={a.id} className="rounded-lg border border-slate-100 bg-slate-50/80 px-3 py-2 text-sm">

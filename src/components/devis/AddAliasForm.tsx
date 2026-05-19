@@ -7,6 +7,7 @@ import { addAliasToSiteResource } from "@/app/dashboard/devis/ressources-chantie
 export function AddAliasForm({ siteResourceId }: { siteResourceId: string }) {
   const router = useRouter();
   const [label, setLabel] = useState("");
+  const [hint, setHint] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   return (
@@ -15,7 +16,12 @@ export function AddAliasForm({ siteResourceId }: { siteResourceId: string }) {
       onSubmit={(e) => {
         e.preventDefault();
         startTransition(async () => {
-          await addAliasToSiteResource(siteResourceId, label);
+          setHint(null);
+          const res = await addAliasToSiteResource(siteResourceId, label);
+          if (res.ok && "duplicate" in res && res.duplicate) {
+            setHint(res.message ?? "Cet alias existe déjà sur cette fiche.");
+            return;
+          }
           setLabel("");
           router.refresh();
         });
@@ -35,6 +41,7 @@ export function AddAliasForm({ siteResourceId }: { siteResourceId: string }) {
       >
         Ajouter
       </button>
+      {hint ? <p className="w-full text-sm text-amber-800">{hint}</p> : null}
     </form>
   );
 }

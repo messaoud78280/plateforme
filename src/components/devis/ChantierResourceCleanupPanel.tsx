@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import {
   applyDuplicateResourceCleanup,
+  dedupeAllSiteResourceAliases,
   previewDuplicateResourceCleanup,
 } from "@/app/dashboard/devis/ressources-chantier-actions";
 import type { DuplicateCleanupPreview } from "@/lib/chantier-resources/deduplication";
@@ -24,6 +25,22 @@ export function ChantierResourceCleanupPanel() {
         setPreview(p);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Erreur lors de l’analyse.");
+      }
+    });
+  }
+
+  function runAliasDedupe() {
+    setError(null);
+    setDone(null);
+    startTransition(async () => {
+      try {
+        const res = await dedupeAllSiteResourceAliases();
+        setDone(
+          `${res.removed} alias en double supprimé(s) sur ${res.resourcesAffected} fiche(s) (un libellé normalisé = un alias).`,
+        );
+        router.refresh();
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Erreur lors du nettoyage des alias.");
       }
     });
   }
@@ -72,6 +89,14 @@ export function ChantierResourceCleanupPanel() {
             {pending ? "Fusion…" : "Valider le nettoyage"}
           </button>
         ) : null}
+        <button
+          type="button"
+          disabled={pending}
+          onClick={runAliasDedupe}
+          className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-950 hover:bg-amber-100 disabled:opacity-50"
+        >
+          Supprimer les alias en double (toutes fiches)
+        </button>
       </div>
 
       {error ? <p className="mt-3 text-sm font-medium text-red-700">{error}</p> : null}

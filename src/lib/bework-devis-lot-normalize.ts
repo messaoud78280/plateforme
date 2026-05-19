@@ -1,8 +1,9 @@
 import {
+  DEFAULT_BEWORK_FAMILY_CODE,
   getBeWorkFamilyLabel,
   isKnownFamilyCode,
   normalizeBeWorkMatchString,
-  suggestFamilyCodeFromLot,
+  suggestFamilyCodeFromWorkItem,
 } from "@/lib/bework-devis-family-codes";
 
 export type NormalizedWorkItemLot = {
@@ -38,21 +39,42 @@ export function normalizeWorkItemLotFields(input: {
   subLot?: string | null;
   family?: string | null;
   familyCode?: string | null;
+  title?: string | null;
+  shortDescription?: string | null;
+  fullDescription?: string | null;
+  itemType?: string | null;
 }): NormalizedWorkItemLot {
   const rawLot = input.lot.trim();
   if (!rawLot) {
-    return { lot: "Non classé", subLot: null, familyCode: "GAR" };
+    return { lot: "Non classé", subLot: null, familyCode: DEFAULT_BEWORK_FAMILY_CODE };
   }
 
   const existingSub = input.subLot?.trim() || null;
   const familyField = input.family?.trim() || null;
-  const haystack = [rawLot, existingSub, familyField].filter(Boolean).join(" ");
 
   const hinted = input.familyCode?.trim().toUpperCase();
-  const familyCode =
-    hinted && isKnownFamilyCode(hinted)
-      ? hinted
-      : (suggestFamilyCodeFromLot(haystack, familyField) ?? "GAR");
+  const suggested = suggestFamilyCodeFromWorkItem({
+    lot: rawLot,
+    subLot: existingSub,
+    family: familyField,
+    title: input.title,
+    shortDescription: input.shortDescription,
+    fullDescription: input.fullDescription,
+    itemType: input.itemType,
+  });
+
+  let familyCode: string;
+  if (hinted && isKnownFamilyCode(hinted)) {
+    if (hinted === "GAR" && suggested && suggested !== "GAR") {
+      familyCode = suggested;
+    } else if (hinted !== "GAR" || input.itemType === "garantie_assurance") {
+      familyCode = hinted;
+    } else {
+      familyCode = suggested ?? DEFAULT_BEWORK_FAMILY_CODE;
+    }
+  } else {
+    familyCode = suggested ?? DEFAULT_BEWORK_FAMILY_CODE;
+  }
 
   const canonicalLot = getBeWorkFamilyLabel(familyCode) ?? rawLot;
   const subLotParts: string[] = [];
@@ -84,12 +106,19 @@ export function workItemLotNeedsNormalization(input: {
   subLot?: string | null;
   family?: string | null;
   familyCode?: string | null;
+  title?: string | null;
+  shortDescription?: string | null;
+  fullDescription?: string | null;
+  itemType?: string | null;
 }): boolean {
   const n = normalizeWorkItemLotFields(input);
   const curCode = input.familyCode?.trim().toUpperCase() || null;
+
+  if (curCode === "GAR" && n.familyCode !== "GAR") return true;
+
   return (
     n.lot !== input.lot.trim() ||
     (n.subLot ?? null) !== (input.subLot?.trim() || null) ||
-    n.familyCode !== (curCode && isKnownFamilyCode(curCode) ? curCode : n.familyCode)
+    n.familyCode !== (curCode && isKnownFamilyCode(curCode) && curCode !== "GAR" ? curCode : n.familyCode)
   );
 }

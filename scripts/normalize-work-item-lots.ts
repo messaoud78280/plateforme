@@ -26,7 +26,18 @@ const prisma = new PrismaClient({
 
 async function main() {
   const items = await prisma.workItem.findMany({
-    select: { id: true, code: true, lot: true, subLot: true, family: true, familyCode: true },
+    select: {
+      id: true,
+      code: true,
+      lot: true,
+      subLot: true,
+      family: true,
+      familyCode: true,
+      title: true,
+      shortDescription: true,
+      fullDescription: true,
+      itemType: true,
+    },
     orderBy: { code: "asc" },
   });
 

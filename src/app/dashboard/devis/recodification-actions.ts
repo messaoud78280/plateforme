@@ -8,7 +8,7 @@ import {
   parseSourceLineFromMartinCode,
   type RecodeProposalRow,
 } from "@/lib/be-work-devis-recodification";
-import { generateBeWorkCode, suggestFamilyCodeFromLot } from "@/lib/bework-devis-family-codes";
+import { DEFAULT_BEWORK_FAMILY_CODE, generateBeWorkCode, suggestFamilyCodeFromWorkItem } from "@/lib/bework-devis-family-codes";
 import { prisma } from "@/lib/prisma";
 import type { PrismaClient } from "@prisma/client";
 
@@ -98,14 +98,21 @@ export async function applyWorkItemRecodification(workItemId: string): Promise<{
     await prisma.$transaction(async (tx) => {
       const item = await tx.workItem.findUnique({
         where: { id: workItemId },
-        select: { id: true, code: true, lot: true, family: true },
+        select: { id: true, code: true, lot: true, family: true, title: true, itemType: true },
       });
       if (!item) throw new Error("Ouvrage introuvable.");
       if (!isMartinImportCode(item.code)) {
         throw new Error("Cet ouvrage n’est plus éligible (code déjà recodifié ou non Martin).");
       }
 
-      const fam = (suggestFamilyCodeFromLot(item.lot, item.family) ?? "GAR").toUpperCase();
+      const fam = (
+        suggestFamilyCodeFromWorkItem({
+          lot: item.lot,
+          family: item.family,
+          title: item.title,
+          itemType: item.itemType,
+        }) ?? DEFAULT_BEWORK_FAMILY_CODE
+      ).toUpperCase();
       const newCode = await allocateNextGenericCode(tx, fam, item.id);
       const line = parseSourceLineFromMartinCode(item.code);
       const oldCode = item.code;

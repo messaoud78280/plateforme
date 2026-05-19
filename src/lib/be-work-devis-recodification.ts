@@ -1,7 +1,8 @@
 import {
   BEWORK_DEVIS_FAMILY_LEXICON,
   generateBeWorkCode,
-  suggestFamilyCodeFromLot,
+  DEFAULT_BEWORK_FAMILY_CODE,
+  suggestFamilyCodeFromWorkItem,
 } from "@/lib/bework-devis-family-codes";
 import type { WorkItemStatus } from "@prisma/client";
 
@@ -83,7 +84,14 @@ export function buildRecodificationProposals(
 
   const out: RecodeProposalRow[] = [];
   for (const c of sorted) {
-    const fam = (suggestFamilyCodeFromLot(c.lot, c.family) ?? "GAR").toUpperCase();
+    const fam = (
+      suggestFamilyCodeFromWorkItem({
+        lot: c.lot,
+        family: c.family,
+        title: c.title,
+        itemType: "ouvrage_technique",
+      }) ?? DEFAULT_BEWORK_FAMILY_CODE
+    ).toUpperCase();
     let n = (counters.get(fam) ?? 0) + 1;
     let nextCode = generateBeWorkCode(fam, n);
     while (used.has(nextCode)) {

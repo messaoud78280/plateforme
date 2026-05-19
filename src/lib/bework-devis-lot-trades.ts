@@ -1,9 +1,10 @@
 import type { Prisma } from "@prisma/client";
 import {
   BEWORK_DEVIS_FAMILY_LEXICON,
+  DEFAULT_BEWORK_FAMILY_CODE,
   getBeWorkFamilyLabel,
   isKnownFamilyCode,
-  suggestFamilyCodeFromLot,
+  suggestFamilyCodeFromWorkItem,
 } from "@/lib/bework-devis-family-codes";
 
 const FAMILY_ORDER = new Map(BEWORK_DEVIS_FAMILY_LEXICON.map((f) => [f.code.toUpperCase(), f.order ?? 0]));
@@ -16,8 +17,8 @@ export type LotsGroupedByTrade = {
 };
 
 /** Code corps de métier (famille BeWork) pour un libellé de lot. */
-export function resolveLotTradeCode(lot: string, familyField?: string | null): string {
-  return suggestFamilyCodeFromLot(lot, familyField) ?? "GAR";
+export function resolveLotTradeCode(lot: string, familyField?: string | null, title?: string | null): string {
+  return suggestFamilyCodeFromWorkItem({ lot, family: familyField, title }) ?? DEFAULT_BEWORK_FAMILY_CODE;
 }
 
 export function resolveLotTradeLabel(lot: string, familyField?: string | null): string {

@@ -44,6 +44,8 @@ function applyNormalizedLotFields(formData: FormData) {
     subLot: emptyToNull(formData, "subLot"),
     family: emptyToNull(formData, "family"),
     familyCode: emptyToNull(formData, "familyCode"),
+    title: String(formData.get("title") ?? "").trim() || null,
+    itemType: String(formData.get("itemType") ?? "").trim() || null,
   });
   return normalized;
 }
@@ -537,6 +539,8 @@ function buildWorkItemCreateDataFromPasteValues(
     lot: v.lot.trim() || "Non classé",
     subLot: pasteStr(v.subLot),
     family: pasteStr(v.family),
+    title,
+    itemType: "ouvrage_technique",
   });
   let fullDescription = v.fullDescription.trim();
   if (isIncompleteDescriptionText(fullDescription)) {
@@ -909,7 +913,17 @@ export async function normalizeAllWorkItemLots(): Promise<
 
   try {
     const items = await prisma.workItem.findMany({
-      select: { id: true, lot: true, subLot: true, family: true, familyCode: true },
+      select: {
+        id: true,
+        lot: true,
+        subLot: true,
+        family: true,
+        familyCode: true,
+        title: true,
+        shortDescription: true,
+        fullDescription: true,
+        itemType: true,
+      },
     });
 
     let workItemsUpdated = 0;

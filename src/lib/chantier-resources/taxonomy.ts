@@ -193,12 +193,19 @@ export function suggestTaxonomyFromText(text: string): {
     .replace(/\p{M}/gu, "")
     .replace(/\s+/g, " ");
 
-  if (/attestation|garantie|assurance|decennale|livraison|pv\s|proces.verbal|document administratif/.test(n)) {
+  if (
+    /attestation|document administratif|frais contractuel|dommage.ouvrage|retenue de garantie|caution bancaire/.test(n) ||
+    (/assurance chantier|garantie decennale|garantie de livraison/.test(n) &&
+      !/portail|portillon|beton|maconnerie|fourniture|pose de|carrelage|plomberie|electricite/.test(n))
+  ) {
     return {
       resourceType: "services",
       family: "documents-administratifs-chantier",
       subFamily: /attestation|garantie|decennale|livraison/.test(n) ? "garanties-attestations" : "assurances",
     };
+  }
+  if (/portail|portillon|porte coulissante|porte sectionnelle|grillage|cloture|clôture/.test(n)) {
+    return { resourceType: "materiaux", family: "menuiserie", subFamily: "bois-panneaux" };
   }
   if (/baignoire|lavabo|wc\b|receveur|robinetterie|sanitaire|douche/.test(n)) {
     return { resourceType: "materiaux", family: "plomberie", subFamily: "appareils-sanitaires" };

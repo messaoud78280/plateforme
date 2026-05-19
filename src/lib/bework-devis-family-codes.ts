@@ -2,6 +2,9 @@
  * Lexique des familles d’ouvrages BeWork Devis (codes courts BW-XXX-NNN).
  */
 
+/** Repli quand aucun corps de métier ne correspond (jamais GAR : réservé à l’administratif). */
+export const DEFAULT_BEWORK_FAMILY_CODE = "DIV";
+
 export type BeWorkDevisFamilyDefinition = {
   code: string;
   label: string;
@@ -73,7 +76,25 @@ export const BEWORK_DEVIS_FAMILY_LEXICON: BeWorkDevisFamilyDefinition[] = [
     label: "Menuiseries extérieures",
     order: 9,
     description: "Portes, fenêtres, volets et occultations extérieures.",
-    matchTerms: ["menuiseries extérieures", "fenêtre", "porte-fenêtre", "volet roulant", "baie vitrée"],
+    matchTerms: [
+      "menuiseries extérieures",
+      "fenêtre",
+      "porte-fenêtre",
+      "volet roulant",
+      "baie vitrée",
+      "portail",
+      "portillon",
+      "portes et portails",
+      "portes et portillons",
+      "porte de garage",
+      "porte sectionnelle",
+      "porte coulissante",
+      "portail coulissant",
+      "grillage",
+      "cloture",
+      "clôture",
+      "portes coulissantes",
+    ],
   },
   {
     code: "PLA",
@@ -152,14 +173,34 @@ export const BEWORK_DEVIS_FAMILY_LEXICON: BeWorkDevisFamilyDefinition[] = [
     description: "Garanties décennales, assurances chantier, frais et réserves contractuelles.",
     matchTerms: [
       "garanties / assurances / frais contractuels",
-      "garantie",
-      "assurance",
+      "garanties / assurances",
+      "frais contractuels",
       "frais contractuel",
-      "décennale",
       "dommage-ouvrage",
+      "dommage ouvrage",
+      "assurance chantier",
+      "assurance decennale",
+      "garantie decennale",
+      "retenue de garantie",
+      "caution bancaire",
+      "attestation d assurance",
+      "attestation de garantie",
     ],
   },
+  {
+    code: "DIV",
+    label: "Divers / À classer",
+    order: 98,
+    description: "Ouvrages sans corps de métier identifié automatiquement.",
+    matchTerms: [],
+  },
 ];
+
+const GAR_CANONICAL_LOT_LABEL = normalizeBeWorkMatchString("Garanties / Assurances / Frais contractuels");
+
+/** Signaux d’ouvrage technique : empêche un classement GAR sur un libellé ambigu. */
+const TECHNICAL_WORK_SIGNAL =
+  /\b(portail|portillon|beton|maconnerie|charpente|couverture|carrelage|plomberie|electricite|terrassement|fourniture et pose|dalle|semelle|parpaing|isolation|peinture|enduit|menuiserie|echafaud|nacelle|grue|tube|pvc|cable|gaine)\b/;
 
 const FAMILY_ORDER = new Map(BEWORK_DEVIS_FAMILY_LEXICON.map((f, i) => [f.code.toUpperCase(), f.order ?? i]));
 
@@ -204,17 +245,51 @@ export function generateBeWorkCode(familyCode: string, index: number): string {
   return `BW-${fam}-${num}`;
 }
 
-/**
- * Déduit le code famille à partir du lot (et optionnellement du libellé famille texte).
- * Retourne null si aucune règle ne correspond (l’appelant peut utiliser GAR par défaut).
- */
-export function suggestFamilyCodeFromLot(lot: string, familyField?: string | null): string | null {
-  const hay = normalizeBeWorkMatchString(`${lot}\n${familyField ?? ""}`);
+export type WorkItemFamilySuggestionInput = {
+  lot: string;
+  subLot?: string | null;
+  family?: string | null;
+  title?: string | null;
+  shortDescription?: string | null;
+  fullDescription?: string | null;
+  itemType?: string | null;
+};
 
-  const rules = [...BEWORK_DEVIS_FAMILY_LEXICON].sort((a, b) => {
-    const maxLen = (f: BeWorkDevisFamilyDefinition) => Math.max(...f.matchTerms.map((t) => t.length), 0);
-    return maxLen(b) - maxLen(a) || (FAMILY_ORDER.get(a.code) ?? 0) - (FAMILY_ORDER.get(b.code) ?? 0);
-  });
+function sanitizedLotForClassification(lot: string, title?: string | null): string {
+  const raw = lot.trim();
+  if (!raw) return raw;
+  if (title?.trim() && normalizeBeWorkMatchString(raw) === GAR_CANONICAL_LOT_LABEL) {
+    return title.trim();
+  }
+  return raw;
+}
+
+/** Chaîne normalisée pour la classification (titre prioritaire si le lot a été écrasé en GAR). */
+export function buildWorkItemClassificationHaystack(input: WorkItemFamilySuggestionInput): string {
+  const lotPart = sanitizedLotForClassification(input.lot, input.title);
+  const descSnippet = input.fullDescription?.trim().slice(0, 320) ?? "";
+  return normalizeBeWorkMatchString(
+    [input.title, input.subLot, input.family, lotPart, input.shortDescription, descSnippet].filter(Boolean).join(" "),
+  );
+}
+
+function isStrictAdministrativeHaystack(hay: string): boolean {
+  const gar = BEWORK_DEVIS_FAMILY_LEXICON.find((f) => f.code === "GAR");
+  if (!gar) return false;
+  for (const term of gar.matchTerms) {
+    const t = normalizeBeWorkMatchString(term);
+    if (t && hay.includes(t)) return true;
+  }
+  return false;
+}
+
+function matchFamilyFromHaystack(hay: string, opts: { allowGar: boolean }): string | null {
+  const rules = [...BEWORK_DEVIS_FAMILY_LEXICON]
+    .filter((f) => f.code !== "DIV" && (opts.allowGar || f.code !== "GAR"))
+    .sort((a, b) => {
+      const maxLen = (f: BeWorkDevisFamilyDefinition) => Math.max(...f.matchTerms.map((t) => t.length), 0);
+      return maxLen(b) - maxLen(a) || (FAMILY_ORDER.get(a.code) ?? 0) - (FAMILY_ORDER.get(b.code) ?? 0);
+    });
 
   for (const fam of rules) {
     for (const term of fam.matchTerms) {
@@ -222,5 +297,50 @@ export function suggestFamilyCodeFromLot(lot: string, familyField?: string | nul
       if (t && hay.includes(t)) return fam.code.toUpperCase();
     }
   }
+
+  if (opts.allowGar && isStrictAdministrativeHaystack(hay) && !TECHNICAL_WORK_SIGNAL.test(hay)) {
+    return "GAR";
+  }
+
   return null;
+}
+
+/**
+ * Déduit le code famille à partir du contexte ouvrage.
+ * Retourne null si aucune règle ne correspond (repli : {@link DEFAULT_BEWORK_FAMILY_CODE}).
+ */
+export function suggestFamilyCodeFromWorkItem(input: WorkItemFamilySuggestionInput): string | null {
+  const itemType = input.itemType?.trim();
+  if (itemType === "garantie_assurance") return "GAR";
+
+  const hay = buildWorkItemClassificationHaystack(input);
+  const allowGar = itemType !== "ouvrage_technique";
+  const matched = matchFamilyFromHaystack(hay, { allowGar });
+
+  if (matched) return matched;
+
+  if (itemType === "prestation_administrative" || itemType === "frais_annexe") {
+    if (isStrictAdministrativeHaystack(hay)) return "GAR";
+    return "ADM";
+  }
+
+  return null;
+}
+
+/**
+ * Déduit le code famille à partir du lot (et optionnellement du libellé famille texte).
+ * @deprecated Préférer {@link suggestFamilyCodeFromWorkItem} avec titre / type d’ouvrage.
+ */
+export function suggestFamilyCodeFromLot(
+  lot: string,
+  familyField?: string | null,
+  extra?: Pick<WorkItemFamilySuggestionInput, "title" | "itemType" | "subLot">,
+): string | null {
+  return suggestFamilyCodeFromWorkItem({
+    lot,
+    family: familyField,
+    subLot: extra?.subLot,
+    title: extra?.title,
+    itemType: extra?.itemType,
+  });
 }

@@ -75,10 +75,10 @@ async function loadExistingResourceIndex(prisma: PrismaClient): Promise<Existing
   });
 }
 
-function pushVirtual(virtualCreated: ExistingResourceIndex[], p: GroupingProposalDraft) {
-  if (p.proposalType !== "new_resource" && p.proposalType !== "keep_separate") return;
+function pushVirtual(virtualCreated: ExistingResourceIndex[], p: GroupingProposalDraft, persistedId?: string | null) {
+  const id = persistedId ?? `virtual-${p.normalizedSourceLabel}`;
   virtualCreated.push({
-    id: `virtual-${p.normalizedSourceLabel}`,
+    id,
     shortName: p.candidate.suggestedShortName,
     orderUnit: p.candidate.suggestedUnit,
     aliases: [{ label: p.sourceLabel, normalizedLabel: p.normalizedSourceLabel }],
@@ -216,23 +216,26 @@ export async function processLibrarySyncBatch(
 
     for (const p of proposals) {
       const applied = await applyGroupingDraft(prisma, p, runId);
-      switch (applied.action) {
-        case "alias":
-          stats.aliasesMerged += 1;
-          break;
-        case "variant":
-          stats.variantsCreated += 1;
-          break;
-        case "created":
-          stats.resourcesCreated += 1;
-          pushVirtual(virtualCreated, p);
-          break;
-        case "matched":
-          stats.resourcesMatched += 1;
-          break;
-        default:
-          stats.skipped += 1;
-      }
+        switch (applied.action) {
+          case "alias":
+            stats.aliasesMerged += 1;
+            if (applied.resourceId) pushVirtual(virtualCreated, p, applied.resourceId);
+            break;
+          case "variant":
+            stats.variantsCreated += 1;
+            if (applied.resourceId) pushVirtual(virtualCreated, p, applied.resourceId);
+            break;
+          case "created":
+            stats.resourcesCreated += 1;
+            pushVirtual(virtualCreated, p, applied.resourceId);
+            break;
+          case "matched":
+            stats.resourcesMatched += 1;
+            if (applied.resourceId) pushVirtual(virtualCreated, p, applied.resourceId);
+            break;
+          default:
+            stats.skipped += 1;
+        }
     }
   }
 

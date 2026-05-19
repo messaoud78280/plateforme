@@ -2,6 +2,7 @@ import type { SiteResourceGroupingProposalType } from "@prisma/client";
 import type { ExtractedResourceCandidate } from "@/lib/chantier-resources/extract-from-work-item";
 import { scoreSimilarity } from "@/lib/chantier-resources/similarity";
 import { normalizeResourceLabel } from "@/lib/chantier-resources/normalize-label";
+import { isPersistedResourceId } from "@/lib/chantier-resources/resource-id";
 
 export type ExistingResourceIndex = {
   id: string;
@@ -69,15 +70,20 @@ export function normalizeAndGroupResources(input: {
     if (match) {
       score = match.score;
       reasons = match.reasons;
-      if (match.hint === "merge_as_alias" && score >= 90) {
+      const persistedTarget = isPersistedResourceId(match.resource.id) ? match.resource.id : null;
+
+      if (match.hint === "merge_as_alias" && score >= 90 && persistedTarget) {
         proposalType = "merge_as_alias";
-        targetId = match.resource.id;
-      } else if (match.hint === "create_variant" || (score >= 70 && score < 90)) {
+        targetId = persistedTarget;
+      } else if ((match.hint === "create_variant" || (score >= 70 && score < 90)) && persistedTarget) {
         proposalType = "create_variant";
-        targetId = match.resource.id;
-      } else if (score >= 50 && score < 70) {
+        targetId = persistedTarget;
+      } else if (score >= 50 && score < 70 && persistedTarget) {
         proposalType = "keep_separate";
-        targetId = match.resource.id;
+        targetId = persistedTarget;
+      } else if (score >= 70 && !persistedTarget) {
+        proposalType = "new_resource";
+        reasons = [...reasons, "Cible en mémoire uniquement — création en base"];
       } else if (score < 50) {
         proposalType = "new_resource";
       }

@@ -6,9 +6,19 @@ import { createSiteResourceAliasIfAbsent } from "@/lib/chantier-resources/alias-
 import { findMatchingExistingResource, resourceToDedupRow, type PriceObservationDraft } from "@/lib/chantier-resources/deduplication";
 import type { GroupingProposalDraft } from "@/lib/chantier-resources/normalize-and-group";
 import { buildPriceObservationKey, normalizeResourceLabel } from "@/lib/chantier-resources/normalize-label";
+import { isPersistedResourceId } from "@/lib/chantier-resources/resource-id";
 import type { SiteResourceType } from "@prisma/client";
 
 type Db = PrismaClient | Prisma.TransactionClient;
+
+async function resolveActiveResourceId(db: Db, id: string | null | undefined): Promise<string | null> {
+  if (!isPersistedResourceId(id)) return null;
+  const row = await db.siteResource.findFirst({
+    where: { id: id!, mergedIntoId: null, status: { not: "fusionne" } },
+    select: { id: true },
+  });
+  return row?.id ?? null;
+}
 
 async function loadResourceDedupRows(db: PrismaClient) {
   const rows = await db.siteResource.findMany({
@@ -167,9 +177,18 @@ export async function applyGroupingDraft(
     return { resourceId: null, action: "skipped" };
   }
 
-  let resourceId = p.targetSiteResourceId;
+  let proposalType = p.proposalType;
+  let resourceId = await resolveActiveResourceId(db, p.targetSiteResourceId);
 
-  if (p.proposalType === "merge_as_alias" && resourceId) {
+  if (
+    (proposalType === "merge_as_alias" || proposalType === "create_variant") &&
+    p.targetSiteResourceId &&
+    !resourceId
+  ) {
+    proposalType = "new_resource";
+  }
+
+  if (proposalType === "merge_as_alias" && resourceId) {
     await createSiteResourceAliasIfAbsent(db, {
       siteResourceId: resourceId,
       label: p.sourceLabel,
@@ -180,7 +199,7 @@ export async function applyGroupingDraft(
       sourceSnippet: p.sourceSnippet,
       confidenceScore: p.similarityScore,
     });
-  } else if (p.proposalType === "create_variant" && resourceId) {
+  } else if (proposalType === "create_variant" && resourceId) {
     const existingVariant = await db.siteResourceVariant.findFirst({
       where: {
         siteResourceId: resourceId,
@@ -210,7 +229,7 @@ export async function applyGroupingDraft(
       sourceSnippet: p.sourceSnippet,
       confidenceScore: p.similarityScore,
     });
-  } else if (p.proposalType === "new_resource" || p.proposalType === "keep_separate") {
+  } else if (proposalType === "new_resource" || proposalType === "keep_separate") {
     const rows = await loadResourceDedupRows(db as PrismaClient);
     const match = findMatchingExistingResource(rows, {
       shortName: p.candidate.suggestedShortName,
@@ -254,6 +273,6 @@ export async function applyGroupingDraft(
   return {
     resourceId,
     action:
-      p.proposalType === "merge_as_alias" ? "alias" : p.proposalType === "create_variant" ? "variant" : "skipped",
+      proposalType === "merge_as_alias" ? "alias" : proposalType === "create_variant" ? "variant" : "skipped",
   };
 }

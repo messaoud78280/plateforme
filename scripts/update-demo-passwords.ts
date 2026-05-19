@@ -7,13 +7,14 @@
  *   # ou avec un mot de passe personnalisé :
  *   MOT_DE_PASSE_DEMO="monmotdepasse" npm run db:update-demo-passwords
  */
-import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { getScriptDatabaseUrl, loadScriptEnv } from "./load-script-env";
 
-const connectionUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
+loadScriptEnv();
+const connectionUrl = getScriptDatabaseUrl();
 if (!connectionUrl) {
-  console.error("❌ DIRECT_URL ou DATABASE_URL manquant dans .env");
+  console.error("❌ DATABASE_URL manquant (.env ou .env.local)");
   process.exit(1);
 }
 

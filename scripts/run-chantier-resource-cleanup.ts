@@ -5,19 +5,18 @@
  *   npx tsx scripts/run-chantier-resource-cleanup.ts           # dry-run (aperçu)
  *   npx tsx scripts/run-chantier-resource-cleanup.ts --apply   # exécution en base
  */
-import dotenv from "dotenv";
-dotenv.config({ path: ".env.local" });
-dotenv.config();
 import { PrismaClient } from "@prisma/client";
 import {
   buildResourceDuplicateCleanupPreview,
   dedupeAllResourceAliases,
   applyResourceDuplicateCleanup,
 } from "../src/lib/chantier-resources/execute-cleanup";
+import { getScriptDatabaseUrl, loadScriptEnv } from "./load-script-env";
 
-const connectionUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
+loadScriptEnv();
+const connectionUrl = getScriptDatabaseUrl();
 if (!connectionUrl) {
-  console.error("❌ DIRECT_URL ou DATABASE_URL manquant (.env ou .env.local)");
+  console.error("❌ DATABASE_URL manquant (.env ou .env.local)");
   process.exit(1);
 }
 

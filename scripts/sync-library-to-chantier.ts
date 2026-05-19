@@ -4,16 +4,14 @@
  * Usage:
  *   npx tsx scripts/sync-library-to-chantier.ts
  */
-import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import { syncLibraryToChantierResourcesCore } from "../src/lib/chantier-resources/automated-library-sync";
+import { getScriptDatabaseUrl, loadScriptEnv } from "./load-script-env";
 
-dotenv.config({ path: ".env.local" });
-dotenv.config();
-
-const connectionUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
+loadScriptEnv();
+const connectionUrl = getScriptDatabaseUrl();
 if (!connectionUrl) {
-  console.error("❌ DIRECT_URL ou DATABASE_URL manquant");
+  console.error("❌ DATABASE_URL manquant (.env ou .env.local)");
   process.exit(1);
 }
 

@@ -5,13 +5,14 @@
  *   npm run db:backfill-work-item-descriptions          # simulation (dry-run)
  *   npm run db:backfill-work-item-descriptions -- --apply   # écriture en base
  */
-import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { resolveFullDescriptionForExistingWorkItem } from "../src/lib/be-work-devis-work-item-description";
+import { getScriptDatabaseUrl, loadScriptEnv } from "./load-script-env";
 
-const connectionUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
+loadScriptEnv();
+const connectionUrl = getScriptDatabaseUrl();
 if (!connectionUrl) {
-  console.error("❌ DIRECT_URL ou DATABASE_URL manquant (.env ou .env.local)");
+  console.error("❌ DATABASE_URL manquant (.env ou .env.local)");
   process.exit(1);
 }
 

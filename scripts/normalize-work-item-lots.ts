@@ -5,16 +5,17 @@
  *   npm run db:normalize-work-item-lots              # simulation
  *   npm run db:normalize-work-item-lots -- --apply   # écriture en base
  */
-import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import {
   normalizeWorkItemLotFields,
   workItemLotNeedsNormalization,
 } from "../src/lib/bework-devis-lot-normalize";
+import { getScriptDatabaseUrl, loadScriptEnv } from "./load-script-env";
 
-const connectionUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
+loadScriptEnv();
+const connectionUrl = getScriptDatabaseUrl();
 if (!connectionUrl) {
-  console.error("❌ DIRECT_URL ou DATABASE_URL manquant (.env ou .env.local)");
+  console.error("❌ DATABASE_URL manquant (.env ou .env.local)");
   process.exit(1);
 }
 

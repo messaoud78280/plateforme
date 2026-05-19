@@ -7,6 +7,7 @@ import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import {
   CCMI_MARTIN_CASE,
   CCMI_MARTIN_CONTROLS,
+  CCMI_MARTIN_DTU_REPORT,
   CCMI_MARTIN_ISSUES,
   CCMI_MARTIN_KEY_FIGURES,
   CCMI_MARTIN_SLIDES,
@@ -19,7 +20,7 @@ const PAGE_PATH = CCMI_MARTIN_CASE.href;
 
 const title = "Cas client CCMI Martin : audit devis BTP avant signature | BeWork";
 const description =
-  "Découvrez comment BeWork a audité un devis CCMI de 287 180 € TTC avant signature : 92 lignes analysées, oublis détectés, DTU vérifiés, étude G2 prise en compte et devis rectifié.";
+  "Découvrez comment BeWork a audité un devis CCMI de 287 180 € TTC avant signature : 92 lignes, rapport DTU × devis (23 DTU, 28 alertes), étude G2 et devis rectifié.";
 
 const ogImage = absoluteUrl(CCMI_MARTIN_SLIDES[0]!.src);
 const pageUrl = absoluteUrl(PAGE_PATH);
@@ -150,6 +151,50 @@ export default function CcmiMartinAuditDevisPage() {
           </div>
         </Section>
 
+        <section id="rapport-dtu" className="mx-auto mt-14 max-w-4xl scroll-mt-24">
+          <h2 className="font-heading text-xl font-bold text-slate-900 md:text-2xl">
+            Rapport DTU × devis — repérage normatif
+          </h2>
+          <div className="mt-5 space-y-5 text-sm leading-relaxed text-slate-800 md:text-base">
+            <p>
+              En complément de l’audit contractuel et financier, BeWork a produit un{" "}
+              <strong className="font-semibold text-slate-900">{CCMI_MARTIN_DTU_REPORT.title}</strong> (
+              {CCMI_MARTIN_DTU_REPORT.pages} pages, {CCMI_MARTIN_DTU_REPORT.date}) : chaque ligne du{" "}
+              {CCMI_MARTIN_DTU_REPORT.devisRef} est rapprochée du DTU probablement concerné, avec les articles à
+              vérifier et un niveau de confiance — sans reproduire le texte officiel des normes.
+            </p>
+
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <DtuStat label="Lignes analysées" value={String(CCMI_MARTIN_DTU_REPORT.linesAnalyzed)} />
+              <DtuStat label="DTU distincts repérés" value={String(CCMI_MARTIN_DTU_REPORT.dtuCount)} />
+              <DtuStat
+                label="Confiance (élevé / moyen / faible)"
+                value={`${CCMI_MARTIN_DTU_REPORT.confidence.high} · ${CCMI_MARTIN_DTU_REPORT.confidence.medium} · ${CCMI_MARTIN_DTU_REPORT.confidence.low}`}
+              />
+              <DtuStat
+                label="Alertes complétude"
+                value={`${CCMI_MARTIN_DTU_REPORT.completenessAlerts} sur ${CCMI_MARTIN_DTU_REPORT.alertLines} lignes`}
+              />
+            </div>
+
+            <ul className="list-inside list-disc space-y-1.5 text-sm">
+              {CCMI_MARTIN_DTU_REPORT.deliverables.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+
+            <p className="rounded-lg border border-amber-200/80 bg-amber-50/90 px-4 py-3 text-xs leading-relaxed text-amber-950">
+              {CCMI_MARTIN_DTU_REPORT.disclaimer}
+            </p>
+
+            <DevisPdfViewer
+              pdfHref={c.pdfDtuReportHref}
+              title="Rapport DTU × devis (PDF intégral)"
+              downloadLabel="Ouvrir le rapport DTU en plein écran"
+            />
+          </div>
+        </section>
+
         <Section title="Avant / après — visuels du dossier">
           <p className="mb-6 text-sm text-slate-600">
             Le carrousel reprend les visuels transmis (devis initial vs corrections). Le PDF ci-dessous présente la
@@ -172,15 +217,21 @@ export default function CcmiMartinAuditDevisPage() {
             exploitable :
           </p>
           <ul className="mt-4 list-inside list-disc space-y-2 text-sm text-slate-800">
-            <li>désignations corrigées</li>
-            <li>points techniques complétés</li>
-            <li>postes à confirmer</li>
-            <li>oublis identifiés</li>
-            <li>avenants potentiels</li>
-            <li>références DTU indicatives</li>
-            <li>préconisations liées à la G2</li>
-            <li>synthèse claire pour le client</li>
+            <li>
+              rapport DTU × devis ({CCMI_MARTIN_DTU_REPORT.pages} p., {CCMI_MARTIN_DTU_REPORT.dtuCount} DTU repérés,{" "}
+              {CCMI_MARTIN_DTU_REPORT.completenessAlerts} alertes de complétude)
+            </li>
+            <li>désignations corrigées et devis présentable client</li>
+            <li>points techniques complétés et postes à confirmer</li>
+            <li>oublis identifiés et avenants potentiels chiffrés</li>
+            <li>préconisations liées à la G2 et synthèse claire</li>
+            <li>visuels avant / après (carrousel) pour la restitution</li>
           </ul>
+          <p className="mt-4">
+            <a href="#rapport-dtu" className="font-semibold text-[#1d4ed8] hover:underline">
+              Revoir le rapport DTU intégré ↑
+            </a>
+          </p>
         </Section>
 
         <Section title="Pourquoi c’est important">
@@ -210,11 +261,18 @@ export default function CcmiMartinAuditDevisPage() {
               Découvrir nos prestations
             </Link>
             <a
+              href={c.pdfDtuReportHref}
+              download
+              className="inline-flex justify-center rounded-lg border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+            >
+              Télécharger le rapport DTU
+            </a>
+            <a
               href={c.pdfCompleteHref}
               download
               className="inline-flex justify-center rounded-lg border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
             >
-              Télécharger le cas client PDF
+              Cas client (PDF)
             </a>
           </div>
           <p className="mt-8 text-sm font-medium italic text-[#1e3a5f]">On tient le bureau, vous tenez le chantier.</p>
@@ -238,3 +296,13 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     </section>
   );
 }
+
+function DtuStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-center shadow-sm">
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{label}</p>
+      <p className="mt-1 text-base font-bold tabular-nums text-[#1e3a5f]">{value}</p>
+    </div>
+  );
+}
+

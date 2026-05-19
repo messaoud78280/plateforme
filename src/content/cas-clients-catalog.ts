@@ -18,6 +18,7 @@ export type CasClientFeaturedCase = {
   href: string;
   pdfPresentableHref: string;
   pdfCompleteHref: string;
+  pdfDtuReportHref: string;
 };
 
 export const CAS_CLIENT_SIMPLE_CASES: CasClientSimpleCase[] = [
@@ -50,12 +51,34 @@ export const CCMI_MARTIN_CASE: CasClientFeaturedCase = {
   cardTitle: "CCMI Martin : devis audité avant signature",
   cardSubtitle: "287 180 € TTC — 92 lignes analysées, 75 points à préciser ou reformuler.",
   cardSummary:
-    "Un devis CCMI semblait complet. L’audit BeWork a révélé des postes flous, des oublis liés à la G2, des points DTU à préciser et des risques de plus-values ou litiges en chantier.",
+    "Un devis CCMI semblait complet. L’audit BeWork a produit un rapport DTU × devis (23 normes, 28 alertes), corrigé les postes flous et intégré les préconisations G2 avant signature.",
   badges: ["Devis CCMI", "Audit technique", "DTU", "Étude G2", "Avant / Après"],
   href: "/cas-clients/ccmi-martin-audit-devis",
   pdfPresentableHref: "/cas-clients/ccmi-martin/pdf/devis-corrige-presentable.pdf",
   pdfCompleteHref: "/cas-clients/ccmi-martin/pdf/cas-client-complet.pdf",
+  pdfDtuReportHref: "/cas-clients/ccmi-martin/pdf/rapport-dtu-martin.pdf",
 };
+
+/** Synthèse du rapport « Vérification DTU × Devis » (15/05/2026, 21 p.). */
+export const CCMI_MARTIN_DTU_REPORT = {
+  title: "Rapport d'analyse BeWork — Vérification DTU × Devis",
+  date: "15 mai 2026",
+  devisRef: "Devis CCMI n° MIF-2026-0473",
+  pages: 21,
+  linesAnalyzed: 92,
+  dtuCount: 23,
+  confidence: { high: 20, medium: 61, low: 11 },
+  completenessAlerts: 28,
+  alertLines: 25,
+  disclaimer:
+    "Outil de repérage interne : identifie les DTU probablement concernés par chaque ligne de devis pour orienter une vérification technique. Aucun extrait officiel de DTU n'est reproduit — le texte des articles doit être consulté dans le DTU officiel (AFNOR / CSTB) avant toute exploitation contractuelle. Le niveau de confiance n'engage pas la conformité du devis ni de l'exécution.",
+  deliverables: [
+    "Rapprochement ligne de devis → ouvrage détecté → DTU probable",
+    "Articles à vérifier (sans citation du texte normatif)",
+    "Niveau de confiance par ligne (élevé, moyen, faible)",
+    "Bloc alertes de complétude (hors DTU, accessoires manquants, etc.)",
+  ],
+} as const;
 
 export const CCMI_MARTIN_SLIDES = Array.from({ length: 8 }, (_, i) => ({
   src: `/cas-clients/ccmi-martin/carousel/slide-${String(i + 1).padStart(2, "0")}.jpg`,

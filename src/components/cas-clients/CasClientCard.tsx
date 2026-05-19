@@ -28,11 +28,17 @@ export function CasClientFeaturedCard({ case: c }: FeaturedProps) {
           Voir le cas client
         </Link>
         <a
-          href={c.pdfCompleteHref}
-          download
+          href={`${c.href}#rapport-dtu`}
           className="inline-flex justify-center rounded-lg border-2 border-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-[#1d4ed8] hover:bg-[#eff6ff]"
         >
-          Télécharger le PDF
+          Rapport DTU
+        </a>
+        <a
+          href={c.pdfCompleteHref}
+          download
+          className="inline-flex justify-center rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+        >
+          PDF cas client
         </a>
       </div>
     </article>

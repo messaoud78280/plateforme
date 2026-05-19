@@ -142,7 +142,7 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
   "/cas-clients/ccmi-martin-audit-devis": {
     title: "Cas client CCMI Martin : audit devis BTP avant signature",
     description:
-      "Audit d’un devis CCMI de 287 180 € TTC : 92 lignes analysées, DTU et étude G2, devis rectifié avant signature.",
+      "Audit d’un devis CCMI de 287 180 € TTC : 92 lignes, rapport DTU × devis (23 normes, 28 alertes), devis rectifié avant signature.",
     keywords: ["audit devis CCMI", "cas client BeWork", "devis BTP"],
   },
 };

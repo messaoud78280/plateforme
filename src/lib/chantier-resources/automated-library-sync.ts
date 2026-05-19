@@ -1,6 +1,5 @@
 /**
- * Synchronisation automatique bibliothèque d’ouvrages → ressources chantier.
- * Applique directement les regroupements (sans validation manuelle).
+ * Synchronisation automatique bibliothèque d’ouvrages → ressources chantier (par lots).
  */
 
 import type { PrismaClient } from "@prisma/client";
@@ -11,11 +10,7 @@ import {
   dedupeAllResourceAliases,
 } from "@/lib/chantier-resources/execute-cleanup";
 import { extractCandidatesFromWorkItem } from "@/lib/chantier-resources/extract-from-work-item";
-import {
-  normalizeAndGroupResources,
-  type ExistingResourceIndex,
-  type GroupingProposalDraft,
-} from "@/lib/chantier-resources/normalize-and-group";
+import { normalizeAndGroupResources, type ExistingResourceIndex, type GroupingProposalDraft } from "@/lib/chantier-resources/normalize-and-group";
 
 export type LibrarySyncStats = {
   workItemsProcessed: number;
@@ -29,9 +24,20 @@ export type LibrarySyncStats = {
   resourceFichesMerged: number;
 };
 
-export type LibrarySyncResult = {
-  runId: string;
+export type LibrarySyncRunMeta = {
+  mode: "automated_library_sync";
+  phase: "processing" | "done";
+  cursor: string | null;
   stats: LibrarySyncStats;
+  totalWorkItems?: number;
+};
+
+export type LibrarySyncBatchResult = {
+  runId: string;
+  done: boolean;
+  stats: LibrarySyncStats;
+  batchWorkItems: number;
+  totalWorkItems: number | null;
 };
 
 const WORK_ITEM_SELECT = {
@@ -45,26 +51,20 @@ const WORK_ITEM_SELECT = {
   shortDescription: true,
 } as const;
 
-export async function syncLibraryToChantierResourcesCore(
-  prisma: PrismaClient,
-  opts?: { batchSize?: number; maxWorkItems?: number },
-): Promise<LibrarySyncResult> {
-  const batchSize = Math.min(opts?.batchSize ?? 150, 300);
-  const maxWorkItems = opts?.maxWorkItems ?? 15_000;
+const EMPTY_STATS = (): LibrarySyncStats => ({
+  workItemsProcessed: 0,
+  candidatesExtracted: 0,
+  aliasesMerged: 0,
+  variantsCreated: 0,
+  resourcesCreated: 0,
+  resourcesMatched: 0,
+  skipped: 0,
+  aliasesRemoved: 0,
+  resourceFichesMerged: 0,
+});
 
-  const stats: LibrarySyncStats = {
-    workItemsProcessed: 0,
-    candidatesExtracted: 0,
-    aliasesMerged: 0,
-    variantsCreated: 0,
-    resourcesCreated: 0,
-    resourcesMatched: 0,
-    skipped: 0,
-    aliasesRemoved: 0,
-    resourceFichesMerged: 0,
-  };
-
-  const dbExisting = await prisma.siteResource.findMany({
+async function loadExistingResourceIndex(prisma: PrismaClient): Promise<ExistingResourceIndex[]> {
+  return prisma.siteResource.findMany({
     where: { status: { not: "fusionne" }, mergedIntoId: null },
     select: {
       id: true,
@@ -73,72 +73,23 @@ export async function syncLibraryToChantierResourcesCore(
       aliases: { select: { label: true, normalizedLabel: true } },
     },
   });
+}
 
-  const virtualCreated: ExistingResourceIndex[] = [];
-
-  const run = await prisma.siteResourceExtractionRun.create({
-    data: {
-      label: `Sync auto ${new Date().toLocaleString("fr-FR")}`,
-      status: "applied",
-      workItemCount: 0,
-      candidateCount: 0,
-      proposalCount: 0,
-      meta: { mode: "automated_library_sync" },
-    },
+function pushVirtual(virtualCreated: ExistingResourceIndex[], p: GroupingProposalDraft) {
+  if (p.proposalType !== "new_resource" && p.proposalType !== "keep_separate") return;
+  virtualCreated.push({
+    id: `virtual-${p.normalizedSourceLabel}`,
+    shortName: p.candidate.suggestedShortName,
+    orderUnit: p.candidate.suggestedUnit,
+    aliases: [{ label: p.sourceLabel, normalizedLabel: p.normalizedSourceLabel }],
   });
+}
 
-  let cursor: string | undefined;
-  let processed = 0;
+async function countActiveWorkItems(prisma: PrismaClient) {
+  return prisma.workItem.count({ where: { status: { not: "archive" } } });
+}
 
-  while (processed < maxWorkItems) {
-    const batch = await prisma.workItem.findMany({
-      where: { status: { not: "archive" } },
-      select: WORK_ITEM_SELECT,
-      orderBy: { id: "asc" },
-      take: batchSize,
-      ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
-    });
-    if (batch.length === 0) break;
-
-    for (const wi of batch) {
-      stats.workItemsProcessed += 1;
-      const candidates = extractCandidatesFromWorkItem(wi);
-      stats.candidatesExtracted += candidates.length;
-      if (!candidates.length) continue;
-
-      const proposals = normalizeAndGroupResources({
-        candidates,
-        existingResources: [...dbExisting, ...virtualCreated],
-        sourceWorkItemId: wi.id,
-      });
-
-      for (const p of proposals) {
-        const applied = await applyGroupingDraft(prisma, p, run.id);
-        switch (applied.action) {
-          case "alias":
-            stats.aliasesMerged += 1;
-            break;
-          case "variant":
-            stats.variantsCreated += 1;
-            break;
-          case "created":
-            stats.resourcesCreated += 1;
-            pushVirtual(virtualCreated, p);
-            break;
-          case "matched":
-            stats.resourcesMatched += 1;
-            break;
-          default:
-            stats.skipped += 1;
-        }
-      }
-    }
-
-    cursor = batch[batch.length - 1]!.id;
-    processed += batch.length;
-    if (batch.length < batchSize) break;
-  }
-
+async function finalizeSync(prisma: PrismaClient, runId: string, stats: LibrarySyncStats) {
   const aliasDedupe = await dedupeAllResourceAliases(prisma);
   stats.aliasesRemoved = aliasDedupe.removed;
 
@@ -156,29 +107,170 @@ export async function syncLibraryToChantierResourcesCore(
   });
 
   await prisma.siteResourceExtractionRun.update({
-    where: { id: run.id },
+    where: { id: runId },
     data: {
+      status: "applied",
       workItemCount: stats.workItemsProcessed,
       candidateCount: stats.candidatesExtracted,
       proposalCount: 0,
       meta: {
         mode: "automated_library_sync",
+        phase: "done",
+        cursor: null,
         stats,
         aliasDedupe,
         merge,
+      } satisfies LibrarySyncRunMeta & { aliasDedupe: unknown; merge: unknown },
+    },
+  });
+}
+
+/** Traite un lot d’ouvrages (appel répété côté client jusqu’à done=true). */
+export async function processLibrarySyncBatch(
+  prisma: PrismaClient,
+  opts: { runId?: string | null; batchSize?: number },
+): Promise<LibrarySyncBatchResult> {
+  const batchSize = Math.min(opts.batchSize ?? 35, 60);
+  let runId = opts.runId?.trim() || null;
+
+  let meta: LibrarySyncRunMeta | null = null;
+  let stats: LibrarySyncStats = EMPTY_STATS();
+
+  if (runId) {
+    const run = await prisma.siteResourceExtractionRun.findUnique({ where: { id: runId } });
+    if (!run) {
+      runId = null;
+    } else {
+      const m = run.meta as LibrarySyncRunMeta | null;
+      if (m?.mode === "automated_library_sync" && m.phase === "processing") {
+        meta = m;
+        stats = { ...EMPTY_STATS(), ...m.stats };
+      } else if (m?.mode === "automated_library_sync" && m.phase === "done") {
+        return {
+          runId: run.id,
+          done: true,
+          stats: m.stats,
+          batchWorkItems: 0,
+          totalWorkItems: m.totalWorkItems ?? null,
+        };
+      } else {
+        runId = null;
+      }
+    }
+  }
+
+  if (!runId) {
+    const totalWorkItems = await countActiveWorkItems(prisma);
+    stats = EMPTY_STATS();
+    meta = { mode: "automated_library_sync", phase: "processing", cursor: null, stats, totalWorkItems };
+    const run = await prisma.siteResourceExtractionRun.create({
+      data: {
+        label: `Sync auto ${new Date().toLocaleString("fr-FR")}`,
+        status: "preview",
+        workItemCount: 0,
+        candidateCount: 0,
+        proposalCount: 0,
+        meta,
       },
+    });
+    runId = run.id;
+  }
+
+  if (!meta || !runId) {
+    throw new Error("Impossible d'initialiser la synchronisation.");
+  }
+
+  const dbExisting = await loadExistingResourceIndex(prisma);
+  const virtualCreated: ExistingResourceIndex[] = [];
+
+  const batch = await prisma.workItem.findMany({
+    where: { status: { not: "archive" } },
+    select: WORK_ITEM_SELECT,
+    orderBy: { id: "asc" },
+    take: batchSize,
+    ...(meta.cursor ? { skip: 1, cursor: { id: meta.cursor } } : {}),
+  });
+
+  if (batch.length === 0) {
+    await finalizeSync(prisma, runId, stats);
+    return {
+      runId,
+      done: true,
+      stats,
+      batchWorkItems: 0,
+      totalWorkItems: meta.totalWorkItems ?? null,
+    };
+  }
+
+  for (const wi of batch) {
+    stats.workItemsProcessed += 1;
+    const candidates = extractCandidatesFromWorkItem(wi);
+    stats.candidatesExtracted += candidates.length;
+    if (!candidates.length) continue;
+
+    const proposals = normalizeAndGroupResources({
+      candidates,
+      existingResources: [...dbExisting, ...virtualCreated],
+      sourceWorkItemId: wi.id,
+    });
+
+    for (const p of proposals) {
+      const applied = await applyGroupingDraft(prisma, p, runId);
+      switch (applied.action) {
+        case "alias":
+          stats.aliasesMerged += 1;
+          break;
+        case "variant":
+          stats.variantsCreated += 1;
+          break;
+        case "created":
+          stats.resourcesCreated += 1;
+          pushVirtual(virtualCreated, p);
+          break;
+        case "matched":
+          stats.resourcesMatched += 1;
+          break;
+        default:
+          stats.skipped += 1;
+      }
+    }
+  }
+
+  const nextCursor = batch[batch.length - 1]!.id;
+  const totalWorkItems = meta.totalWorkItems ?? (await countActiveWorkItems(prisma));
+
+  await prisma.siteResourceExtractionRun.update({
+    where: { id: runId },
+    data: {
+      meta: {
+        mode: "automated_library_sync",
+        phase: "processing",
+        cursor: nextCursor,
+        stats,
+        totalWorkItems,
+      } satisfies LibrarySyncRunMeta,
     },
   });
 
-  return { runId: run.id, stats };
+  return {
+    runId,
+    done: false,
+    stats,
+    batchWorkItems: batch.length,
+    totalWorkItems,
+  };
 }
 
-function pushVirtual(virtualCreated: ExistingResourceIndex[], p: GroupingProposalDraft) {
-  if (p.proposalType !== "new_resource" && p.proposalType !== "keep_separate") return;
-  virtualCreated.push({
-    id: `virtual-${p.normalizedSourceLabel}`,
-    shortName: p.candidate.suggestedShortName,
-    orderUnit: p.candidate.suggestedUnit,
-    aliases: [{ label: p.sourceLabel, normalizedLabel: p.normalizedSourceLabel }],
-  });
+/** Sync complète en une fois (scripts CLI uniquement — pas pour une requête HTTP). */
+export async function syncLibraryToChantierResourcesCore(
+  prisma: PrismaClient,
+  opts?: { batchSize?: number },
+): Promise<{ runId: string; stats: LibrarySyncStats }> {
+  let runId: string | null = null;
+  let result: LibrarySyncBatchResult;
+  do {
+    result = await processLibrarySyncBatch(prisma, { runId, batchSize: opts?.batchSize ?? 80 });
+    runId = result.runId;
+  } while (!result.done);
+  return { runId: result.runId, stats: result.stats };
 }

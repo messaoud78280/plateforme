@@ -968,7 +968,23 @@ export async function applyDuplicateResourceCleanup(
   return { merged, removed, pricesAdded };
 }
 
-export async function syncLibraryToChantierResources(opts?: { batchSize?: number; maxWorkItems?: number }) {
+export async function processLibrarySyncBatchAction(runId?: string | null) {
+  await requireBeWorkDevisSession();
+  try {
+    const { processLibrarySyncBatch } = await import("@/lib/chantier-resources/automated-library-sync");
+    const result = await processLibrarySyncBatch(prisma, { runId });
+    if (result.done) {
+      for (const p of REVALIDATE) revalidatePath(p);
+      revalidatePath("/dashboard/devis/ressources-chantier/extraction");
+    }
+    return { ok: true as const, ...result };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Erreur lors du traitement du lot.";
+    return { ok: false as const, error: message };
+  }
+}
+
+export async function syncLibraryToChantierResources(opts?: { batchSize?: number }) {
   await requireBeWorkDevisSession();
   const { syncLibraryToChantierResourcesCore } = await import("@/lib/chantier-resources/automated-library-sync");
   const result = await syncLibraryToChantierResourcesCore(prisma, opts);

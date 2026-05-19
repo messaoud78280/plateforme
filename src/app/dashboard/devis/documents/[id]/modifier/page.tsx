@@ -266,10 +266,10 @@ export default async function ModifierQuoteDocumentPage({ params }: PageProps) {
       <section className="space-y-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="font-heading text-lg font-bold text-slate-900">Lignes du document</h2>
+            <h2 className="font-heading text-lg font-bold text-slate-900">Aperçu des lignes</h2>
             <p className="text-sm text-slate-600">
-              Totaux enregistrés (base) : HT {doc.subtotalHT.toString()} € · TVA {doc.totalVat.toString()} € · TTC{" "}
-              {doc.totalTTC.toString()} € — mis à jour après enregistrement des lignes.
+              Saisie type ERP : recherche d&apos;articles, types de lignes (produit, service, texte…). Totaux en base
+              après enregistrement : HT {doc.subtotalHT.toString()} € · TTC {doc.totalTTC.toString()} €.
             </p>
           </div>
         </div>

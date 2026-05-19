@@ -60,10 +60,10 @@ export default async function RessourcesChantierPage({ searchParams }: { searchP
         </div>
         <div className="flex flex-wrap gap-2">
           <Link
-            href="/dashboard/devis/ressources-chantier/extraction"
+            href="/dashboard/devis/ressources-chantier/extraction?force=1"
             className="inline-flex rounded-xl bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e40af]"
           >
-            Extraire depuis la bibliothèque
+            Synchroniser la bibliothèque
           </Link>
           <Link
             href="/dashboard/devis/ressources-chantier/nouveau"
@@ -80,12 +80,12 @@ export default async function RessourcesChantierPage({ searchParams }: { searchP
           <p className="mt-1 text-2xl font-bold text-slate-900">{stats.total}</p>
         </div>
         <Link
-          href="/dashboard/devis/ressources-chantier/extraction"
-          className="block rounded-xl border border-amber-200/80 bg-amber-50/50 p-4 shadow-sm transition hover:border-amber-300 hover:bg-amber-50"
+          href="/dashboard/devis/ressources-chantier/extraction?force=1"
+          className="block rounded-xl border border-sky-200/80 bg-sky-50/50 p-4 shadow-sm transition hover:border-sky-300 hover:bg-sky-50"
         >
-          <p className="text-xs font-semibold uppercase text-amber-800">Propositions en attente</p>
-          <p className="mt-1 text-2xl font-bold text-amber-950">{stats.pendingProposals}</p>
-          <p className="mt-1 text-xs font-medium text-amber-900/80">Valider ou ignorer →</p>
+          <p className="text-xs font-semibold uppercase text-sky-800">Sync bibliothèque</p>
+          <p className="mt-1 text-sm font-medium text-sky-950">Automatique · sans validation manuelle</p>
+          <p className="mt-1 text-xs text-sky-900/80">Relancer la synchro →</p>
         </Link>
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <p className="text-xs font-semibold uppercase text-slate-500">Types</p>
@@ -140,7 +140,7 @@ export default async function RessourcesChantierPage({ searchParams }: { searchP
               {rows.length === 0 ? (
                 <tr>
                   <td colSpan={12} className="px-4 py-10 text-center text-slate-500">
-                    Aucune ressource. Lancez une extraction depuis la bibliothèque d&apos;ouvrages.
+                    Aucune ressource. Ouvrez la synchronisation depuis la bibliothèque d&apos;ouvrages.
                   </td>
                 </tr>
               ) : (

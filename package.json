@@ -19,6 +19,7 @@
     "db:backfill-work-item-descriptions": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/backfill-work-item-descriptions.ts",
     "db:normalize-work-item-lots": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/normalize-work-item-lots.ts",
     "db:cleanup-chantier-resources": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/run-chantier-resource-cleanup.ts",
+    "db:sync-chantier-from-library": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/sync-library-to-chantier.ts",
     "db:studio": "prisma studio",
     "deploy": "bash scripts/deploy-railway.sh",
     "deploy:login": "npx --yes @railway/cli login",

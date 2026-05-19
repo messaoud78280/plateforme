@@ -87,6 +87,23 @@ export function extractCandidatesFromWorkItem(item: {
     }
   }
 
+  if (out.length === 0 && item.fullDescription?.trim()) {
+    const lines = splitIncludedItems(item.fullDescription);
+    for (const line of lines.slice(0, 12)) {
+      push(line, "fullDescription", line);
+    }
+  }
+
+  const titleNorm = normalizeResourceLabel(item.title);
+  if (
+    out.length === 0 &&
+    titleNorm.length >= 3 &&
+    (/\blocation\b|\blocative\b|\blouer\b/.test(titleNorm) ||
+      /mini.pelle|nacelle|grue|echafaud|benne|engin/.test(titleNorm))
+  ) {
+    push(item.title, "title", item.title);
+  }
+
   return out;
 }
 

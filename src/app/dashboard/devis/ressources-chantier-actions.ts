@@ -180,7 +180,17 @@ export async function createExtractionPreview(opts?: { workItemLimit?: number; l
       workItemCount: workItems.length,
       candidateCount: allCandidates.length,
       proposalCount: allCandidates.length,
-      meta: { buckets: bucketProposals(allCandidates) },
+      meta: {
+        buckets: (() => {
+          const b = bucketProposals(allCandidates);
+          return {
+            newResource: b.newResource.length,
+            mergeAsAlias: b.mergeAsAlias.length,
+            createVariant: b.createVariant.length,
+            toReview: b.toReview.length,
+          };
+        })(),
+      },
     },
   });
 
@@ -956,6 +966,30 @@ export async function applyDuplicateResourceCleanup(
 
   for (const p of REVALIDATE) revalidatePath(p);
   return { merged, removed, pricesAdded };
+}
+
+export async function syncLibraryToChantierResources(opts?: { batchSize?: number; maxWorkItems?: number }) {
+  await requireBeWorkDevisSession();
+  const { syncLibraryToChantierResourcesCore } = await import("@/lib/chantier-resources/automated-library-sync");
+  const result = await syncLibraryToChantierResourcesCore(prisma, opts);
+  for (const p of REVALIDATE) revalidatePath(p);
+  revalidatePath("/dashboard/devis/ressources-chantier/extraction");
+  return { ok: true as const, ...result };
+}
+
+export async function fetchLastLibrarySyncRun() {
+  await requireBeWorkDevisSession();
+  const runs = await prisma.siteResourceExtractionRun.findMany({
+    where: { status: "applied" },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+  });
+  return (
+    runs.find((r) => {
+      const meta = r.meta as { mode?: string } | null;
+      return meta?.mode === "automated_library_sync";
+    }) ?? null
+  );
 }
 
 export async function fetchChantierResourceStats() {

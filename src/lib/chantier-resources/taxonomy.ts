@@ -210,6 +210,16 @@ export function suggestTaxonomyFromText(text: string): {
       subFamily: /gravier/.test(n) ? "graviers" : /sable/.test(n) ? "sables" : "liants",
     };
   }
+  if (/\blocation\b|\blocative\b|\blouer\b|\bla\s+journee\b|\bforfait\s+location/.test(n)) {
+    if (/echafaud|echafaudage|banche|pontage|perforateur|marteau|outillage|electroportatif/.test(n)) {
+      return { resourceType: "location_outillage", family: "outillage", subFamily: "electroportatif" };
+    }
+    return {
+      resourceType: "location_engin",
+      family: "engins",
+      subFamily: /nacelle/.test(n) ? "nacelles" : /grue/.test(n) ? "grues" : "mini-pelles",
+    };
+  }
   if (/parpaing|bloc.*beton|brique/.test(n)) {
     return { resourceType: "materiaux", family: "maconnerie", subFamily: "blocs-beton" };
   }

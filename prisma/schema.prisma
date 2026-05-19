@@ -1091,6 +1091,18 @@ model QuoteProject {
   clientName         String
   clientEmail        String?
   clientPhone        String?
+  clientType         String?  @default("professionnel")
+  clientCivility     String?
+  clientFirstName    String?
+  clientLastName     String?
+  clientCompanyName  String?
+  clientAddressLine1 String?
+  clientAddressLine2 String?
+  clientPostalCode   String?
+  clientCityName     String?
+  clientLandline     String?
+  clientMobile       String?
+  clientFax          String?
   projectName        String
   projectAddress     String?
   projectCity        String?

@@ -5,10 +5,13 @@ type Props = {
   clientLabel: string;
   documentNumberPreview: string;
   issueDateLabel: string;
+  onAddClient?: () => void;
 };
 
 /** Aperçu statique du modèle commercial (sans coordonnées société). */
-export function QuoteCreationPreview({ title, clientLabel, documentNumberPreview, issueDateLabel }: Props) {
+export function QuoteCreationPreview({ title, clientLabel, documentNumberPreview, issueDateLabel, onAddClient }: Props) {
+  const hasClient = Boolean(clientLabel.trim());
+
   return (
     <div className="flex h-full min-h-[520px] flex-col rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-100 bg-slate-50 px-4 py-2">
@@ -16,8 +19,23 @@ export function QuoteCreationPreview({ title, clientLabel, documentNumberPreview
       </div>
       <div className="flex flex-1 flex-col p-5 text-slate-800">
         <div className="text-right">
-          <p className="text-sm font-bold text-slate-900">{title || "Titre du devis"}</p>
-          <p className="mt-1 text-xs text-slate-600">{clientLabel || "Client — projet"}</p>
+          <p className="text-sm font-bold text-slate-900">{title || "Cliquez ici pour ajouter un titre"}</p>
+          {hasClient ? (
+            <p className="mt-1 text-xs text-slate-600">{clientLabel}</p>
+          ) : (
+            <button
+              type="button"
+              onClick={onAddClient}
+              className="mt-2 w-full rounded border border-slate-200 bg-slate-50 px-3 py-2.5 text-center text-[10px] font-semibold uppercase tracking-wide text-slate-400 transition hover:border-[#1e3a5f]/40 hover:bg-amber-50/50 hover:text-[#1e3a5f]"
+            >
+              Cliquez ici pour ajouter un client
+            </button>
+          )}
+          {hasClient && onAddClient ? (
+            <button type="button" onClick={onAddClient} className="mt-1 text-[10px] font-semibold text-[#1e3a5f] hover:underline">
+              Modifier le client
+            </button>
+          ) : null}
         </div>
         <div className="mt-8 text-center">
           <p className="text-lg font-bold tracking-tight text-slate-900">

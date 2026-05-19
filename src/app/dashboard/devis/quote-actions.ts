@@ -17,6 +17,7 @@ import {
   presentationSettingsFromFormData,
 } from "@/lib/be-work-devis-pdf-presentation";
 import { searchWorkItemsForQuotePicker } from "@/lib/be-work-devis-quote-picker";
+import { clientFormToPrismaData, parseClientFormFromFormData } from "@/lib/quote-client-form";
 
 async function guard() {
   await requireBeWorkDevisSession();
@@ -63,6 +64,62 @@ export async function listQuoteDocuments(projectId?: string) {
 function empty(formData: FormData, key: string): string | undefined {
   const v = String(formData.get(key) ?? "").trim();
   return v || undefined;
+}
+
+export type QuoteProjectSelectOption = {
+  id: string;
+  clientName: string;
+  projectName: string;
+};
+
+export async function getQuoteProjectForClientForm(projectId: string) {
+  await guard();
+  if (!projectId.trim()) return null;
+  return prisma.quoteProject.findUnique({ where: { id: projectId } });
+}
+
+export async function saveQuoteProjectClientCoordinates(
+  formData: FormData,
+): Promise<{ ok: true; project: QuoteProjectSelectOption } | { ok: false; error: string }> {
+  await guard();
+  const projectId = String(formData.get("projectId") ?? "").trim();
+  const values = parseClientFormFromFormData(formData);
+  if (!values.projectName.trim()) {
+    return { ok: false, error: "L'intitulé du projet / chantier est obligatoire." };
+  }
+  if (values.clientType === "professionnel" && !values.companyName.trim() && !values.lastName.trim()) {
+    return { ok: false, error: "Indiquez la raison sociale ou un contact pour le client professionnel." };
+  }
+  if (values.clientType === "particulier" && !values.lastName.trim()) {
+    return { ok: false, error: "Le nom du client particulier est obligatoire." };
+  }
+
+  const data = clientFormToPrismaData(values);
+
+  try {
+    if (projectId) {
+      const updated = await prisma.quoteProject.update({
+        where: { id: projectId },
+        data,
+        select: { id: true, clientName: true, projectName: true },
+      });
+      revalidatePath("/dashboard/devis/creer");
+      revalidatePath("/dashboard/devis/projets");
+      revalidatePath(`/dashboard/devis/documents`);
+      return { ok: true, project: updated };
+    }
+
+    const created = await prisma.quoteProject.create({
+      data,
+      select: { id: true, clientName: true, projectName: true },
+    });
+    revalidatePath("/dashboard/devis/creer");
+    revalidatePath("/dashboard/devis/projets");
+    return { ok: true, project: created };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Erreur lors de l'enregistrement du client.";
+    return { ok: false, error: msg };
+  }
 }
 
 export async function createQuoteProject(formData: FormData) {

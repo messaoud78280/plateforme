@@ -6,6 +6,7 @@ import { QuotePdfIssuerAlert } from "@/components/devis/QuotePdfIssuerAlert";
 import { QuotePdfIssuerSection, QuotePdfPresentationFields } from "@/components/devis/QuotePdfSettingsSections";
 import { isCommercialPdfLayout, parsePresentationSettings } from "@/lib/be-work-devis-pdf-presentation";
 import type { QuoteLineDraft } from "@/app/dashboard/devis/quote-actions";
+import { QuoteDocumentClientPanel } from "@/components/devis/QuoteDocumentClientPanel";
 import { QuoteDocumentEditor } from "@/components/devis/QuoteDocumentEditor";
 import { QuoteSchemaMissingCallout } from "@/components/devis/QuoteSchemaMissingCallout";
 import { QUOTE_DOCUMENT_STATUS_LABELS, QUOTE_DOCUMENT_TYPE_LABELS } from "@/lib/be-work-devis-quote-labels";
@@ -95,6 +96,9 @@ export default async function ModifierQuoteDocumentPage({ params }: PageProps) {
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="font-heading text-lg font-bold text-slate-900">Projet & client</h2>
+        <div className="mt-4">
+          <QuoteDocumentClientPanel project={doc.project} />
+        </div>
         <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
           <div>
             <dt className="text-xs font-bold uppercase tracking-wide text-slate-500">Client</dt>

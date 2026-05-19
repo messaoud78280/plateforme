@@ -18,6 +18,7 @@ import {
   type QuotePdfIssuer,
   type QuotePdfPresentationSettings,
 } from "@/lib/be-work-devis-pdf-presentation";
+import { formatClientLinesForPdf } from "@/lib/quote-client-form";
 
 const C = BEWORK_PDF;
 const MARGIN = 14;
@@ -222,13 +223,7 @@ function drawCommercialHeader(ctx: PdfCtx) {
   doc.setTextColor(...C.slate);
   doc.text(p.clientName, rightX, ry, { align: "right" });
   ry += 4;
-  const clientLines = [
-    [p.projectAddress, p.projectCity, p.projectDepartment].filter(Boolean).join(", ") || null,
-    p.clientEmail,
-    p.clientPhone,
-    p.clientReference && `Réf. ${p.clientReference}`,
-  ].filter(Boolean) as string[];
-  for (const line of clientLines) {
+  for (const line of formatClientLinesForPdf(p)) {
     for (const w of doc.splitTextToSize(line, 88)) {
       doc.text(w, rightX, ry, { align: "right" });
       ry += 3.6;

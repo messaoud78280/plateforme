@@ -24,14 +24,21 @@ const C = BEWORK_PDF;
 const MARGIN = 14;
 const FOOTER_H = 14;
 
-/** Montants au format français : 8 018,90 € */
+/** jsPDF gère mal les espaces insécables fr-FR (U+202F) : chiffres éclatés « 1 8 5 4 ». */
+function pdfFmtFr(raw: string): string {
+  return raw.replace(/\u202f/g, " ").replace(/\u00a0/g, " ");
+}
+
+/** Montants au format français : 8 018,90 € (compatible PDF) */
 export function fmtEur(n: number): string {
-  return new Intl.NumberFormat("fr-FR", {
-    style: "currency",
-    currency: "EUR",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(n);
+  return pdfFmtFr(
+    new Intl.NumberFormat("fr-FR", {
+      style: "currency",
+      currency: "EUR",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(n),
+  );
 }
 
 function fmtDate(d: Date): string {
@@ -45,8 +52,12 @@ function fmtDateLong(d: Date): string {
 
 function fmtQty(n: number): string {
   const v = Number(n);
-  if (Number.isInteger(v)) return new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(v);
-  return new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
+  if (Number.isInteger(v)) {
+    return pdfFmtFr(new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(v));
+  }
+  return pdfFmtFr(
+    new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v),
+  );
 }
 
 function fmtPct(n: number): string {
@@ -54,15 +65,19 @@ function fmtPct(n: number): string {
 }
 
 type TableCols = {
-  ref: number;
-  desc: number;
-  unit: number;
-  qty: number;
-  pu: number;
-  tva: number;
-  ht: number;
+  tableLeft: number;
+  tableRight: number;
+  refX: number;
+  refW: number;
+  descX: number;
   descW: number;
-  right: number;
+  unitRight: number;
+  qtyRight: number;
+  puRight: number;
+  tvaRight: number;
+  htRight: number;
+  showVat: boolean;
+  commercial: boolean;
 };
 
 type PdfCtx = {
@@ -80,22 +95,36 @@ type PdfCtx = {
 };
 
 function buildCols(pageW: number, showVat: boolean, commercial: boolean): TableCols {
-  const right = pageW - MARGIN;
-  const ht = right - 1;
-  const tva = ht - (showVat ? 14 : 0);
-  const pu = tva - 22;
-  const qty = pu - 18;
-  if (commercial) {
-    const desc = MARGIN + 16;
-    const ref = MARGIN;
-    const descW = qty - desc - 4;
-    return { ref, desc, unit: qty, qty, pu, tva: showVat ? tva : pu, ht, descW, right };
-  }
-  const unit = qty - 14;
-  const desc = MARGIN + 14;
-  const ref = MARGIN;
-  const descW = unit - desc - 4;
-  return { ref, desc, unit, qty, pu, tva: showVat ? tva : pu, ht, descW, right };
+  const tableRight = pageW - MARGIN;
+  const htW = 28;
+  const tvaW = showVat ? 14 : 0;
+  const puW = 26;
+  const qtyW = 20;
+  const unitW = commercial ? 0 : 14;
+  const htRight = tableRight;
+  const tvaRight = htRight - htW;
+  const puRight = (showVat ? tvaRight : htRight) - puW;
+  const qtyRight = puRight - qtyW;
+  const unitRight = qtyRight - unitW;
+  const refW = commercial ? 24 : 14;
+  const refX = MARGIN;
+  const descX = refX + refW + 2;
+  const descW = Math.max(40, unitRight - descX - 3);
+  return {
+    tableLeft: MARGIN,
+    tableRight,
+    refX,
+    refW,
+    descX,
+    descW,
+    unitRight,
+    qtyRight,
+    puRight,
+    tvaRight: showVat ? tvaRight : puRight,
+    htRight,
+    showVat,
+    commercial,
+  };
 }
 
 function footerReserve(ctx: PdfCtx): number {
@@ -202,41 +231,49 @@ function drawIssuerLines(doc: jsPDF, issuer: QuotePdfIssuer, x: number, y: numbe
   return cy;
 }
 
-/** En-tête type ERP : titre + client à droite, sans coordonnées société. */
+/** En-tête type ERP : client à droite, titre devis centré, sans coordonnées société. */
 function drawCommercialHeader(ctx: PdfCtx) {
   const { doc, document, pageW } = ctx;
   const p = document.project;
   const rightX = pageW - MARGIN;
-  let ry = MARGIN + 4;
+  const clientW = 78;
+  let yClient = MARGIN + 2;
+  let yLeft = MARGIN + 2;
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.setTextColor(...C.navy);
-  const titleLines = doc.splitTextToSize(document.title.trim() || "Titre du devis", 88);
-  for (const line of titleLines) {
-    doc.text(line, rightX, ry, { align: "right" });
-    ry += 4.5;
+  const docTitle = document.title.trim();
+  if (docTitle && docTitle.toLowerCase() !== p.clientName.trim().toLowerCase()) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(...C.navy);
+    for (const line of doc.splitTextToSize(docTitle, pageW - 2 * MARGIN - clientW - 8)) {
+      doc.text(line, MARGIN, yLeft);
+      yLeft += 4;
+    }
+    yLeft += 2;
   }
 
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(...C.navy);
+  doc.text(p.clientName, rightX, yClient, { align: "right" });
+  yClient += 4.5;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
+  doc.setFontSize(7.5);
   doc.setTextColor(...C.slate);
-  doc.text(p.clientName, rightX, ry, { align: "right" });
-  ry += 4;
   for (const line of formatClientLinesForPdf(p)) {
-    for (const w of doc.splitTextToSize(line, 88)) {
-      doc.text(w, rightX, ry, { align: "right" });
-      ry += 3.6;
+    for (const w of doc.splitTextToSize(line, clientW)) {
+      doc.text(w, rightX, yClient, { align: "right" });
+      yClient += 3.5;
     }
   }
 
-  ctx.y = Math.max(ry, MARGIN + 28) + 6;
+  ctx.y = Math.max(yLeft, yClient) + 10;
   const prov = ctx.isDraft ? " (PROVISOIRE)" : "";
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
+  doc.setFontSize(15);
   doc.setTextColor(...C.ink);
   doc.text(`DEVIS N° ${document.documentNumber}${prov}`, pageW / 2, ctx.y, { align: "center" });
-  ctx.y += 7;
+  ctx.y += 8;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(...C.slate);
@@ -247,7 +284,7 @@ function drawCommercialHeader(ctx: PdfCtx) {
     doc.text(`Valable jusqu'au ${fmtDate(new Date(document.validityDate))}`, pageW / 2, ctx.y, { align: "center" });
     ctx.y += 5;
   }
-  ctx.y += 4;
+  ctx.y += 6;
 }
 
 function drawDocumentMetaBox(ctx: PdfCtx) {
@@ -370,32 +407,31 @@ function drawObjectBlock(ctx: PdfCtx, objectText: string) {
 }
 
 function drawTableHeader(ctx: PdfCtx) {
-  const { doc, cols, settings } = ctx;
-  const commercial = isCommercialPdfLayout(settings);
+  const { doc, cols } = ctx;
   const headerH = 8;
   doc.setFillColor(240, 240, 242);
   doc.setDrawColor(...C.border);
   doc.setLineWidth(0.25);
-  doc.rect(MARGIN, ctx.y, cols.right - MARGIN, headerH, "FD");
+  doc.rect(cols.tableLeft, ctx.y, cols.tableRight - cols.tableLeft, headerH, "FD");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(6.5);
   doc.setTextColor(...C.navy);
   const hy = ctx.y + 5.2;
-  if (commercial) {
-    doc.text("Référence", cols.ref + 1, hy);
-    doc.text("Désignation", cols.desc, hy);
-    doc.text("Quantité", cols.qty + 14, hy, { align: "right" });
-    doc.text("PU Vente", cols.pu + 20, hy, { align: "right" });
-    if (settings.showLineVat) doc.text("TVA", cols.tva + 10, hy, { align: "right" });
-    doc.text("Montant HT", cols.ht, hy, { align: "right" });
+  if (cols.commercial) {
+    doc.text("Référence", cols.refX + 1, hy);
+    doc.text("Désignation", cols.descX, hy);
+    doc.text("Quantité", cols.qtyRight, hy, { align: "right" });
+    doc.text("PU Vente", cols.puRight, hy, { align: "right" });
+    if (cols.showVat) doc.text("TVA", cols.tvaRight, hy, { align: "right" });
+    doc.text("Montant HT", cols.htRight, hy, { align: "right" });
   } else {
-    doc.text("Réf.", cols.ref + 1, hy);
-    doc.text("Désignation", cols.desc, hy);
-    doc.text("Unité", cols.unit + 12, hy, { align: "right" });
-    doc.text("Qté", cols.qty + 14, hy, { align: "right" });
-    doc.text("PU HT", cols.pu + 20, hy, { align: "right" });
-    if (settings.showLineVat) doc.text("TVA", cols.tva + 10, hy, { align: "right" });
-    doc.text("Total HT", cols.ht, hy, { align: "right" });
+    doc.text("Réf.", cols.refX + 1, hy);
+    doc.text("Désignation", cols.descX, hy);
+    doc.text("Unité", cols.unitRight, hy, { align: "right" });
+    doc.text("Qté", cols.qtyRight, hy, { align: "right" });
+    doc.text("PU HT", cols.puRight, hy, { align: "right" });
+    if (cols.showVat) doc.text("TVA", cols.tvaRight, hy, { align: "right" });
+    doc.text("Total HT", cols.htRight, hy, { align: "right" });
   }
   ctx.y += headerH + 1;
   ctx.tableHeaderDrawn = true;
@@ -431,7 +467,7 @@ function drawLotBanner(ctx: PdfCtx, lot: string) {
   ensureSpace(ctx, 10);
   const { doc, cols } = ctx;
   doc.setFillColor(...C.navy);
-  doc.rect(MARGIN, ctx.y, cols.right - MARGIN, 6.5, "F");
+  doc.rect(cols.tableLeft, ctx.y, cols.tableRight - cols.tableLeft, 6.5, "F");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7);
   doc.setTextColor(255, 255, 255);
@@ -444,21 +480,26 @@ function drawLineRow(ctx: PdfCtx, row: QuoteLine, ht: number) {
   const { headline, body } = formatDesignationForPdf(row.title, row.description, settings.designationMode);
   const bodyLines = body ? doc.splitTextToSize(body, cols.descW) : [];
   const headlineLines = doc.splitTextToSize(headline, cols.descW);
-  const rowH = Math.max(9, 4 + headlineLines.length * 3.3 + bodyLines.length * 3);
+  const refLines = doc.splitTextToSize((row.code ?? "—").trim() || "—", cols.refW);
+  const rowH = Math.max(10, 4 + Math.max(refLines.length, 1) * 3.2 + headlineLines.length * 3.3 + bodyLines.length * 3);
   ensureSpace(ctx, rowH + 2);
 
   const numY = ctx.y + 4;
+  let refY = ctx.y + 3.5;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7);
+  doc.setFontSize(6.2);
   doc.setTextColor(...C.muted);
-  doc.text(row.code ?? "—", cols.ref + 1, numY);
+  for (const rl of refLines.slice(0, 4)) {
+    doc.text(rl, cols.refX, refY);
+    refY += 3.1;
+  }
 
   let dy = ctx.y + 3.5;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.setTextColor(...C.ink);
   for (const hl of headlineLines) {
-    doc.text(hl, cols.desc, dy);
+    doc.text(hl, cols.descX, dy);
     dy += 3.3;
   }
   if (bodyLines.length) {
@@ -466,7 +507,7 @@ function drawLineRow(ctx: PdfCtx, row: QuoteLine, ht: number) {
     doc.setFontSize(6.8);
     doc.setTextColor(...C.muted);
     for (const bl of bodyLines) {
-      doc.text(bl, cols.desc, dy);
+      doc.text(bl, cols.descX, dy);
       dy += 3;
     }
   }
@@ -474,37 +515,42 @@ function drawLineRow(ctx: PdfCtx, row: QuoteLine, ht: number) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(...C.slate);
-  if (!isCommercialPdfLayout(settings)) {
-    doc.text(row.unit, cols.unit + 12, numY, { align: "right" });
+  if (!cols.commercial) {
+    doc.text(row.unit, cols.unitRight, numY, { align: "right" });
   }
-  doc.text(fmtQty(Number(row.quantity)), cols.qty + 14, numY, { align: "right" });
-  doc.text(fmtEur(Number(row.unitPriceHT)), cols.pu + 20, numY, { align: "right" });
-  if (settings.showLineVat) doc.text(fmtPct(Number(row.vatRate)), cols.tva + 10, numY, { align: "right" });
+  doc.text(fmtQty(Number(row.quantity)), cols.qtyRight, numY, { align: "right" });
+  doc.text(fmtEur(Number(row.unitPriceHT)), cols.puRight, numY, { align: "right" });
+  if (cols.showVat) doc.text(fmtPct(Number(row.vatRate)), cols.tvaRight, numY, { align: "right" });
   doc.setFont("helvetica", "bold");
-  doc.text(fmtEur(ht), cols.ht, numY, { align: "right" });
+  doc.setTextColor(...C.ink);
+  doc.text(fmtEur(ht), cols.htRight, numY, { align: "right" });
 
-  ctx.y = Math.max(dy, numY) + 4;
+  ctx.y = Math.max(dy, refY, numY + 3) + 3;
   doc.setDrawColor(...C.border);
   doc.setLineWidth(0.1);
-  doc.line(MARGIN, ctx.y, cols.right, ctx.y);
+  doc.line(cols.tableLeft, ctx.y, cols.tableRight, ctx.y);
   ctx.y += 1.5;
 }
 
 function drawLotSubtotal(ctx: PdfCtx, lot: string, subHt: number, subTtc: number) {
   if (!ctx.settings.showLotSubtotals) return;
-  ensureSpace(ctx, 7);
-  ctx.doc.setFont("helvetica", "italic");
-  ctx.doc.setFontSize(7);
-  ctx.doc.setTextColor(...C.muted);
-  ctx.doc.text(`Sous-total ${lot} — ${fmtEur(subHt)} HT · ${fmtEur(subTtc)} TTC`, ctx.cols.desc, ctx.y + 3);
-  ctx.y += 7;
+  ensureSpace(ctx, 8);
+  const { doc, cols } = ctx;
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(7);
+  doc.setTextColor(...C.muted);
+  doc.text(`Sous-total ${lot}`, cols.descX, ctx.y + 4);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...C.slate);
+  doc.text(`${fmtEur(subHt)} HT · ${fmtEur(subTtc)} TTC`, cols.htRight, ctx.y + 4, { align: "right" });
+  ctx.y += 8;
 }
 
 function drawTotals(ctx: PdfCtx, grandHt: number, grandVat: number, grandTtc: number) {
   ensureSpace(ctx, 38);
   const { doc, cols } = ctx;
-  const boxW = 70;
-  const boxX = cols.ht - boxW + 6;
+  const boxW = 72;
+  const boxX = cols.htRight - boxW;
   const boxY = ctx.y + 2;
 
   doc.setFillColor(...C.panelBlue);
@@ -517,20 +563,20 @@ function drawTotals(ctx: PdfCtx, grandHt: number, grandVat: number, grandTtc: nu
   doc.setFontSize(8);
   doc.setTextColor(...C.slate);
   doc.text("Total HT", boxX + 4, ty);
-  doc.text(fmtEur(grandHt), cols.ht, ty, { align: "right" });
+  doc.text(fmtEur(grandHt), cols.htRight - 2, ty, { align: "right" });
   ty += 6;
   doc.text("Total TVA", boxX + 4, ty);
-  doc.text(fmtEur(grandVat), cols.ht, ty, { align: "right" });
+  doc.text(fmtEur(grandVat), cols.htRight - 2, ty, { align: "right" });
   ty += 7;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
   doc.setTextColor(...C.navy);
   doc.text("Total TTC", boxX + 4, ty);
-  doc.text(fmtEur(grandTtc), cols.ht, ty, { align: "right" });
+  doc.text(fmtEur(grandTtc), cols.htRight - 2, ty, { align: "right" });
   ty += 7;
   doc.setFontSize(9);
   doc.text("Net à payer TTC", boxX + 4, ty);
-  doc.text(fmtEur(grandTtc), cols.ht, ty, { align: "right" });
+  doc.text(fmtEur(grandTtc), cols.htRight - 2, ty, { align: "right" });
   ctx.y = boxY + 36;
 }
 
@@ -557,61 +603,66 @@ function drawParagraphBlock(ctx: PdfCtx, text: string) {
 }
 
 function drawCommercialClosing(ctx: PdfCtx, grandHt: number, grandVat: number, grandTtc: number, commercialText: string) {
-  ensureSpace(ctx, 52);
-  const { doc, pageW, settings } = ctx;
-  const leftW = (pageW - 2 * MARGIN) * 0.55;
-  const rightX = MARGIN + leftW + 6;
+  ensureSpace(ctx, 58);
+  const { doc, pageW, settings, cols } = ctx;
   const startY = ctx.y;
+  const totalsW = 74;
+  const totalsX = cols.htRight - totalsW;
+  const leftW = totalsX - MARGIN - 8;
+  let leftY = startY;
 
   if (settings.showSignatureBlock && !ctx.isEstimation) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8);
     doc.setTextColor(...C.navy);
-    doc.text("Bon pour Accord", MARGIN, ctx.y + 3);
-    ctx.y += 6;
+    doc.text("Bon pour accord", MARGIN, leftY + 3);
+    leftY += 6;
     doc.setDrawColor(...C.border);
     doc.setLineWidth(0.2);
-    doc.rect(MARGIN, ctx.y, leftW - 4, 22);
-    ctx.y += 26;
+    doc.rect(MARGIN, leftY, leftW, 20);
+    leftY += 24;
   }
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.setTextColor(...C.navy);
-  doc.text("Conditions de paiement", MARGIN, ctx.y + 3);
-  ctx.y += 5;
+  doc.text("Conditions de paiement", MARGIN, leftY + 3);
+  leftY += 5;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(...C.slate);
   const payLines = commercialText.split("\n").filter((l) => /%|acompte|solde|paiement/i.test(l));
   const linesToShow = payLines.length >= 2 ? payLines.slice(0, 5) : [...DEFAULT_PAYMENT_CONDITIONS_LINES];
   for (const line of linesToShow) {
-    doc.text(line, MARGIN, ctx.y);
-    ctx.y += 3.8;
+    for (const w of doc.splitTextToSize(line, leftW)) {
+      doc.text(w, MARGIN, leftY);
+      leftY += 3.6;
+    }
   }
 
-  const boxW = pageW - MARGIN - rightX;
   const boxY = startY;
+  const boxH = 34;
   doc.setFillColor(245, 245, 247);
   doc.setDrawColor(...C.border);
-  doc.rect(rightX, boxY, boxW, 32, "FD");
+  doc.setLineWidth(0.25);
+  doc.roundedRect(totalsX, boxY, totalsW, boxH, 2, 2, "FD");
   let ty = boxY + 8;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(...C.slate);
-  doc.text("Total HT", rightX + 4, ty);
-  doc.text(fmtEur(grandHt), pageW - MARGIN - 2, ty, { align: "right" });
+  doc.text("Total HT", totalsX + 4, ty);
+  doc.text(fmtEur(grandHt), cols.htRight - 2, ty, { align: "right" });
   ty += 7;
-  doc.text("TVA", rightX + 4, ty);
-  doc.text(fmtEur(grandVat), pageW - MARGIN - 2, ty, { align: "right" });
+  doc.text("TVA", totalsX + 4, ty);
+  doc.text(fmtEur(grandVat), cols.htRight - 2, ty, { align: "right" });
   ty += 8;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
   doc.setTextColor(...C.navy);
-  doc.text("Total TTC", rightX + 4, ty);
-  doc.text(fmtEur(grandTtc), pageW - MARGIN - 2, ty, { align: "right" });
+  doc.text("Total TTC", totalsX + 4, ty);
+  doc.text(fmtEur(grandTtc), cols.htRight - 2, ty, { align: "right" });
 
-  ctx.y = Math.max(ctx.y, boxY + 36) + 4;
+  ctx.y = Math.max(leftY, boxY + boxH) + 6;
 }
 
 function drawSignature(ctx: PdfCtx) {

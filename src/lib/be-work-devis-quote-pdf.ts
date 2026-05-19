@@ -7,7 +7,9 @@ import {
   beworkPdfFooterLine,
   buildLegalMentionsBlock,
   DEFAULT_COMMERCIAL_CONDITIONS,
+  DEFAULT_PAYMENT_CONDITIONS_LINES,
   formatDesignationForPdf,
+  isCommercialPdfLayout,
   isDraftStatus,
   parsePresentationSettings,
   quoteStatusLabelForPdf,
@@ -33,6 +35,11 @@ export function fmtEur(n: number): string {
 
 function fmtDate(d: Date): string {
   return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
+function fmtDateLong(d: Date): string {
+  const raw = d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  return raw.charAt(0).toUpperCase() + raw.slice(1);
 }
 
 function fmtQty(n: number): string {
@@ -71,12 +78,18 @@ type PdfCtx = {
   tableHeaderDrawn: boolean;
 };
 
-function buildCols(pageW: number, showVat: boolean): TableCols {
+function buildCols(pageW: number, showVat: boolean, commercial: boolean): TableCols {
   const right = pageW - MARGIN;
   const ht = right - 1;
   const tva = ht - (showVat ? 14 : 0);
   const pu = tva - 22;
-  const qty = pu - 16;
+  const qty = pu - 18;
+  if (commercial) {
+    const desc = MARGIN + 16;
+    const ref = MARGIN;
+    const descW = qty - desc - 4;
+    return { ref, desc, unit: qty, qty, pu, tva: showVat ? tva : pu, ht, descW, right };
+  }
   const unit = qty - 14;
   const desc = MARGIN + 14;
   const ref = MARGIN;
@@ -188,8 +201,68 @@ function drawIssuerLines(doc: jsPDF, issuer: QuotePdfIssuer, x: number, y: numbe
   return cy;
 }
 
+/** En-tête type ERP : titre + client à droite, sans coordonnées société. */
+function drawCommercialHeader(ctx: PdfCtx) {
+  const { doc, document, pageW } = ctx;
+  const p = document.project;
+  const rightX = pageW - MARGIN;
+  let ry = MARGIN + 4;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(...C.navy);
+  const titleLines = doc.splitTextToSize(document.title.trim() || "Titre du devis", 88);
+  for (const line of titleLines) {
+    doc.text(line, rightX, ry, { align: "right" });
+    ry += 4.5;
+  }
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...C.slate);
+  doc.text(p.clientName, rightX, ry, { align: "right" });
+  ry += 4;
+  const clientLines = [
+    [p.projectAddress, p.projectCity, p.projectDepartment].filter(Boolean).join(", ") || null,
+    p.clientEmail,
+    p.clientPhone,
+    p.clientReference && `Réf. ${p.clientReference}`,
+  ].filter(Boolean) as string[];
+  for (const line of clientLines) {
+    for (const w of doc.splitTextToSize(line, 88)) {
+      doc.text(w, rightX, ry, { align: "right" });
+      ry += 3.6;
+    }
+  }
+
+  ctx.y = Math.max(ry, MARGIN + 28) + 6;
+  const prov = ctx.isDraft ? " (PROVISOIRE)" : "";
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.setTextColor(...C.ink);
+  doc.text(`DEVIS N° ${document.documentNumber}${prov}`, pageW / 2, ctx.y, { align: "center" });
+  ctx.y += 7;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(...C.slate);
+  doc.text(fmtDateLong(new Date(document.issueDate)), pageW / 2, ctx.y, { align: "center" });
+  ctx.y += 5;
+  if (document.validityDate) {
+    doc.setFontSize(8);
+    doc.text(`Valable jusqu'au ${fmtDate(new Date(document.validityDate))}`, pageW / 2, ctx.y, { align: "center" });
+    ctx.y += 5;
+  }
+  ctx.y += 4;
+}
+
 function drawDocumentMetaBox(ctx: PdfCtx) {
-  const { doc, document, pageW, issuer } = ctx;
+  const { doc, document, pageW, issuer, settings } = ctx;
+
+  if (isCommercialPdfLayout(settings)) {
+    drawCommercialHeader(ctx);
+    return;
+  }
+
   const boxW = 58;
   const boxX = pageW - MARGIN - boxW;
   const boxY = MARGIN;
@@ -303,32 +376,45 @@ function drawObjectBlock(ctx: PdfCtx, objectText: string) {
 
 function drawTableHeader(ctx: PdfCtx) {
   const { doc, cols, settings } = ctx;
+  const commercial = isCommercialPdfLayout(settings);
   const headerH = 8;
-  doc.setFillColor(...C.panelBlue);
-  doc.setDrawColor(...C.borderAccent);
+  doc.setFillColor(240, 240, 242);
+  doc.setDrawColor(...C.border);
   doc.setLineWidth(0.25);
   doc.rect(MARGIN, ctx.y, cols.right - MARGIN, headerH, "FD");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(6.5);
   doc.setTextColor(...C.navy);
   const hy = ctx.y + 5.2;
-  doc.text("Réf.", cols.ref + 1, hy);
-  doc.text("Désignation", cols.desc, hy);
-  doc.text("Unité", cols.unit + 12, hy, { align: "right" });
-  doc.text("Qté", cols.qty + 14, hy, { align: "right" });
-  doc.text("PU HT", cols.pu + 20, hy, { align: "right" });
-  if (settings.showLineVat) doc.text("TVA", cols.tva + 10, hy, { align: "right" });
-  doc.text("Total HT", cols.ht, hy, { align: "right" });
+  if (commercial) {
+    doc.text("Référence", cols.ref + 1, hy);
+    doc.text("Désignation", cols.desc, hy);
+    doc.text("Quantité", cols.qty + 14, hy, { align: "right" });
+    doc.text("PU Vente", cols.pu + 20, hy, { align: "right" });
+    if (settings.showLineVat) doc.text("TVA", cols.tva + 10, hy, { align: "right" });
+    doc.text("Montant HT", cols.ht, hy, { align: "right" });
+  } else {
+    doc.text("Réf.", cols.ref + 1, hy);
+    doc.text("Désignation", cols.desc, hy);
+    doc.text("Unité", cols.unit + 12, hy, { align: "right" });
+    doc.text("Qté", cols.qty + 14, hy, { align: "right" });
+    doc.text("PU HT", cols.pu + 20, hy, { align: "right" });
+    if (settings.showLineVat) doc.text("TVA", cols.tva + 10, hy, { align: "right" });
+    doc.text("Total HT", cols.ht, hy, { align: "right" });
+  }
   ctx.y += headerH + 1;
   ctx.tableHeaderDrawn = true;
 }
 
 function drawContinuationHeader(ctx: PdfCtx) {
-  const { doc, document, issuer, pageW } = ctx;
+  const { doc, document, issuer, pageW, settings } = ctx;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(...C.navy);
-  doc.text(issuer.companyName, MARGIN, ctx.y + 4);
+  const leftLabel = isCommercialPdfLayout(settings)
+    ? document.title.slice(0, 48)
+    : issuer.companyName || "Entreprise";
+  doc.text(leftLabel, MARGIN, ctx.y + 4);
   doc.text(`DEVIS N° ${document.documentNumber}`, pageW - MARGIN, ctx.y + 4, { align: "right" });
   ctx.y += 8;
   drawBeworkAccentLine(doc, ctx.y, MARGIN, pageW);
@@ -393,7 +479,9 @@ function drawLineRow(ctx: PdfCtx, row: QuoteLine, ht: number) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(...C.slate);
-  doc.text(row.unit, cols.unit + 12, numY, { align: "right" });
+  if (!isCommercialPdfLayout(settings)) {
+    doc.text(row.unit, cols.unit + 12, numY, { align: "right" });
+  }
   doc.text(fmtQty(Number(row.quantity)), cols.qty + 14, numY, { align: "right" });
   doc.text(fmtEur(Number(row.unitPriceHT)), cols.pu + 20, numY, { align: "right" });
   if (settings.showLineVat) doc.text(fmtPct(Number(row.vatRate)), cols.tva + 10, numY, { align: "right" });
@@ -473,8 +561,67 @@ function drawParagraphBlock(ctx: PdfCtx, text: string) {
   ctx.y += 3;
 }
 
+function drawCommercialClosing(ctx: PdfCtx, grandHt: number, grandVat: number, grandTtc: number, commercialText: string) {
+  ensureSpace(ctx, 52);
+  const { doc, pageW, settings } = ctx;
+  const leftW = (pageW - 2 * MARGIN) * 0.55;
+  const rightX = MARGIN + leftW + 6;
+  const startY = ctx.y;
+
+  if (settings.showSignatureBlock && !ctx.isEstimation) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(...C.navy);
+    doc.text("Bon pour Accord", MARGIN, ctx.y + 3);
+    ctx.y += 6;
+    doc.setDrawColor(...C.border);
+    doc.setLineWidth(0.2);
+    doc.rect(MARGIN, ctx.y, leftW - 4, 22);
+    ctx.y += 26;
+  }
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7.5);
+  doc.setTextColor(...C.navy);
+  doc.text("Conditions de paiement", MARGIN, ctx.y + 3);
+  ctx.y += 5;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7);
+  doc.setTextColor(...C.slate);
+  const payLines = commercialText.split("\n").filter((l) => /%|acompte|solde|paiement/i.test(l));
+  const linesToShow = payLines.length >= 2 ? payLines.slice(0, 5) : [...DEFAULT_PAYMENT_CONDITIONS_LINES];
+  for (const line of linesToShow) {
+    doc.text(line, MARGIN, ctx.y);
+    ctx.y += 3.8;
+  }
+
+  const boxW = pageW - MARGIN - rightX;
+  const boxY = startY;
+  doc.setFillColor(245, 245, 247);
+  doc.setDrawColor(...C.border);
+  doc.rect(rightX, boxY, boxW, 32, "FD");
+  let ty = boxY + 8;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...C.slate);
+  doc.text("Total HT", rightX + 4, ty);
+  doc.text(fmtEur(grandHt), pageW - MARGIN - 2, ty, { align: "right" });
+  ty += 7;
+  doc.text("TVA", rightX + 4, ty);
+  doc.text(fmtEur(grandVat), pageW - MARGIN - 2, ty, { align: "right" });
+  ty += 8;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(...C.navy);
+  doc.text("Total TTC", rightX + 4, ty);
+  doc.text(fmtEur(grandTtc), pageW - MARGIN - 2, ty, { align: "right" });
+
+  ctx.y = Math.max(ctx.y, boxY + 36) + 4;
+}
+
 function drawSignature(ctx: PdfCtx) {
   if (!ctx.settings.showSignatureBlock || ctx.isEstimation) return;
+  if (isCommercialPdfLayout(ctx.settings)) return;
   ensureSpace(ctx, 32);
   const { doc, issuer, pageW } = ctx;
   drawSectionTitle(ctx, "Bon pour accord");
@@ -497,6 +644,7 @@ function drawFooters(ctx: PdfCtx) {
   const { doc, document, issuer, pageW, pageH, settings } = ctx;
   const total = doc.getNumberOfPages();
   const footerLine = beworkPdfFooterLine(settings.pdfMode);
+  const commercial = isCommercialPdfLayout(settings);
   for (let p = 1; p <= total; p++) {
     doc.setPage(p);
     drawDraftWatermark(ctx);
@@ -506,7 +654,11 @@ function drawFooters(ctx: PdfCtx) {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(6.5);
     doc.setTextColor(...C.muted);
-    doc.text(`${issuer.companyName} — ${document.documentNumber}`, MARGIN, pageH - 5);
+    doc.text(
+      commercial ? document.documentNumber : `${issuer.companyName} — ${document.documentNumber}`,
+      MARGIN,
+      pageH - 5,
+    );
     doc.text(`Page ${p} / ${total}`, pageW - MARGIN, pageH - 5, { align: "right" });
     const footerLines = doc.splitTextToSize(footerLine, pageW - 2 * MARGIN);
     let fy = pageH - 9;
@@ -529,7 +681,8 @@ export function buildQuoteDocumentPdf(
   const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
-  const cols = buildCols(pageW, settings.showLineVat);
+  const commercial = isCommercialPdfLayout(settings);
+  const cols = buildCols(pageW, settings.showLineVat, commercial);
 
   const ctx: PdfCtx = {
     doc,
@@ -549,16 +702,32 @@ export function buildQuoteDocumentPdf(
   drawDraftWatermark(ctx);
   drawEstimationBanner(ctx);
   drawDocumentMetaBox(ctx);
-  drawBeworkAccentLine(doc, ctx.y, MARGIN, pageW);
-  ctx.y += 3;
-  drawClientProjectCards(ctx);
+  if (!commercial) {
+    drawBeworkAccentLine(doc, ctx.y, MARGIN, pageW);
+    ctx.y += 3;
+    drawClientProjectCards(ctx);
+  } else {
+    drawBeworkAccentLine(doc, ctx.y, MARGIN, pageW);
+    ctx.y += 3;
+  }
 
   const sorted = [...lines].sort((a, b) => a.sortOrder - b.sortOrder || a.lot.localeCompare(b.lot, "fr"));
   const lots = [...new Set(sorted.map((l) => l.lot))];
-  const objectText = resolveQuoteObject(document, document.project, lots);
-  drawObjectBlock(ctx, objectText);
+  if (!commercial) {
+    const objectText = resolveQuoteObject(document, document.project, lots);
+    drawObjectBlock(ctx, objectText);
+  }
 
   drawTableHeader(ctx);
+
+  if (commercial && sorted.length === 0) {
+    ensureSpace(ctx, 12);
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(9);
+    doc.setTextColor(...C.muted);
+    doc.text("Cliquez ici pour saisir vos lignes", pageW / 2, ctx.y + 6, { align: "center" });
+    ctx.y += 14;
+  }
 
   let grandHt = 0;
   let grandVat = 0;
@@ -583,16 +752,23 @@ export function buildQuoteDocumentPdf(
     drawLotSubtotal(ctx, lot, subHt, subTtc);
   }
 
-  drawTotals(ctx, grandHt, grandVat, grandTtc);
-
-  const commercial =
+  const commercialText =
     document.commercialConditions?.trim() ||
     (document.notesClient?.trim() ? `${DEFAULT_COMMERCIAL_CONDITIONS}\n\n${document.notesClient.trim()}` : DEFAULT_COMMERCIAL_CONDITIONS);
-  drawSectionTitle(ctx, "Conditions");
-  drawParagraphBlock(ctx, commercial);
 
-  drawSectionTitle(ctx, "Mentions légales et réserves");
-  drawParagraphBlock(ctx, buildLegalMentionsBlock(issuer, document));
+  if (commercial) {
+    drawCommercialClosing(ctx, grandHt, grandVat, grandTtc, commercialText);
+  } else {
+    drawTotals(ctx, grandHt, grandVat, grandTtc);
+    drawSectionTitle(ctx, "Conditions");
+    drawParagraphBlock(ctx, commercialText);
+  }
+
+  drawSectionTitle(ctx, commercial ? "Mentions légales" : "Mentions légales et réserves");
+  drawParagraphBlock(
+    ctx,
+    buildLegalMentionsBlock(issuer, document, { includeIssuerIds: !commercial && settings.showIssuerOnPdf }),
+  );
 
   drawSignature(ctx);
   drawFooters(ctx);

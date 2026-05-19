@@ -12,7 +12,7 @@ export function assertCanGenerateQuotePdf(
 ): { ok: true; mode: QuotePdfMode } | { ok: false; error: string } {
   const settings = parsePresentationSettings(presentationSettings);
   const mode = modeOverride ?? settings.pdfMode;
-  if (mode === "official") {
+  if (mode === "official" && settings.showIssuerOnPdf && settings.layoutStyle === "classic") {
     const check = validateOfficialPdfIssuer(project);
     if (!check.ok) return { ok: false, error: check.message };
   }

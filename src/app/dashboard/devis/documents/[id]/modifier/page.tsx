@@ -4,7 +4,7 @@ import { updateQuoteDocumentMeta } from "@/app/dashboard/devis/quote-actions";
 import { QuotePdfGenerateLinks } from "@/components/devis/QuotePdfGenerateLinks";
 import { QuotePdfIssuerAlert } from "@/components/devis/QuotePdfIssuerAlert";
 import { QuotePdfIssuerSection, QuotePdfPresentationFields } from "@/components/devis/QuotePdfSettingsSections";
-import { parsePresentationSettings } from "@/lib/be-work-devis-pdf-presentation";
+import { isCommercialPdfLayout, parsePresentationSettings } from "@/lib/be-work-devis-pdf-presentation";
 import type { QuoteLineDraft } from "@/app/dashboard/devis/quote-actions";
 import { QuoteDocumentEditor } from "@/components/devis/QuoteDocumentEditor";
 import { QuoteSchemaMissingCallout } from "@/components/devis/QuoteSchemaMissingCallout";
@@ -70,6 +70,7 @@ export default async function ModifierQuoteDocumentPage({ params }: PageProps) {
   const lineDrafts = doc.lines.map(lineToDraft);
   const defaultVat = doc.globalVatRate.toString();
   const pdfSettings = parsePresentationSettings(doc.presentationSettings);
+  const commercialLayout = isCommercialPdfLayout(pdfSettings);
 
   return (
     <div className="space-y-10 px-1">
@@ -90,7 +91,7 @@ export default async function ModifierQuoteDocumentPage({ params }: PageProps) {
         </div>
       </header>
 
-      <QuotePdfIssuerAlert project={doc.project} />
+      {!commercialLayout ? <QuotePdfIssuerAlert project={doc.project} /> : null}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="font-heading text-lg font-bold text-slate-900">Projet & client</h2>
@@ -246,7 +247,17 @@ export default async function ModifierQuoteDocumentPage({ params }: PageProps) {
         </form>
       </section>
 
-      <QuotePdfIssuerSection project={doc.project} documentId={doc.id} />
+      {commercialLayout ? (
+        <section className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600">
+          <p className="font-semibold text-slate-800">Modèle commercial actif</p>
+          <p className="mt-1">
+            Le PDF n&apos;affiche pas les coordonnées de votre société en en-tête. Pour le modèle classique avec logo et
+            adresse, choisissez « Classique » dans la section Mise en page ci-dessus.
+          </p>
+        </section>
+      ) : (
+        <QuotePdfIssuerSection project={doc.project} documentId={doc.id} />
+      )}
 
       <section className="space-y-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">

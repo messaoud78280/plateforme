@@ -4,16 +4,24 @@ import { QUOTE_DOCUMENT_STATUS_LABELS } from "@/lib/be-work-devis-quote-labels";
 export type QuotePdfMode = "official" | "estimation";
 export type QuotePdfDesignationMode = "summary" | "full";
 
+export type QuotePdfLayoutStyle = "commercial" | "classic";
+
 export type QuotePdfPresentationSettings = {
   pdfMode: QuotePdfMode;
+  layoutStyle: QuotePdfLayoutStyle;
+  /** Affiche logo + coordonnées entreprise en en-tête PDF (modèle classique). */
+  showIssuerOnPdf: boolean;
   designationMode: QuotePdfDesignationMode;
   showLineVat: boolean;
   showLotSubtotals: boolean;
   showSignatureBlock: boolean;
 };
 
+/** Modèle type ERP : titre + client, sans bloc société à gauche. */
 export const DEFAULT_QUOTE_PDF_PRESENTATION: QuotePdfPresentationSettings = {
   pdfMode: "official",
+  layoutStyle: "commercial",
+  showIssuerOnPdf: false,
   designationMode: "full",
   showLineVat: true,
   showLotSubtotals: true,
@@ -117,11 +125,25 @@ function isDesignationMode(v: unknown): v is QuotePdfDesignationMode {
   return v === "summary" || v === "full";
 }
 
+function isLayoutStyle(v: unknown): v is QuotePdfLayoutStyle {
+  return v === "commercial" || v === "classic";
+}
+
 export function parsePresentationSettings(raw: unknown): QuotePdfPresentationSettings {
   if (!raw || typeof raw !== "object") return { ...DEFAULT_QUOTE_PDF_PRESENTATION };
   const o = raw as Record<string, unknown>;
+  const layoutStyle = isLayoutStyle(o.layoutStyle) ? o.layoutStyle : DEFAULT_QUOTE_PDF_PRESENTATION.layoutStyle;
+  const showIssuerOnPdf =
+    typeof o.showIssuerOnPdf === "boolean"
+      ? o.showIssuerOnPdf
+      : layoutStyle === "classic"
+        ? true
+        : DEFAULT_QUOTE_PDF_PRESENTATION.showIssuerOnPdf;
+
   return {
     pdfMode: isPdfMode(o.pdfMode) ? o.pdfMode : DEFAULT_QUOTE_PDF_PRESENTATION.pdfMode,
+    layoutStyle,
+    showIssuerOnPdf,
     designationMode: isDesignationMode(o.designationMode)
       ? o.designationMode
       : DEFAULT_QUOTE_PDF_PRESENTATION.designationMode,
@@ -138,13 +160,20 @@ export function parsePresentationSettings(raw: unknown): QuotePdfPresentationSet
 }
 
 export function presentationSettingsFromFormData(formData: FormData): QuotePdfPresentationSettings {
+  const layoutStyle = formData.get("pdfLayoutStyle") === "classic" ? "classic" : "commercial";
   return {
     pdfMode: formData.get("pdfMode") === "estimation" ? "estimation" : "official",
+    layoutStyle,
+    showIssuerOnPdf: formData.get("pdfShowIssuerOnPdf") === "on",
     designationMode: formData.get("pdfDesignationMode") === "summary" ? "summary" : "full",
     showLineVat: formData.get("pdfShowLineVat") === "on",
     showLotSubtotals: formData.get("pdfShowLotSubtotals") === "on",
     showSignatureBlock: formData.get("pdfShowSignatureBlock") === "on",
   };
+}
+
+export function isCommercialPdfLayout(settings: QuotePdfPresentationSettings): boolean {
+  return settings.layoutStyle === "commercial" || !settings.showIssuerOnPdf;
 }
 
 export function quoteStatusLabelForPdf(status: QuoteDocumentStatus): string {
@@ -175,10 +204,18 @@ Délais prévisionnels : à préciser après validation du devis et planificatio
 
 export const DEFAULT_TECHNICAL_RESERVATION = `Le présent devis est établi sous réserve de validation des supports, accès chantier, réseaux existants, contraintes techniques, autorisations administratives, prescriptions du CCTP le cas échéant, et de toute étude technique nécessaire avant exécution.`;
 
+export const DEFAULT_PAYMENT_CONDITIONS_LINES = [
+  "30,00 % soit 0,00 € — Acompte à la commande",
+  "40,00 % soit 0,00 € — Acompte en cours de chantier",
+  "30,00 % soit 0,00 € — Paiement du solde",
+] as const;
+
 export function buildLegalMentionsBlock(
   issuer: QuotePdfIssuer,
   document: Pick<QuoteDocument, "legalDisclaimer" | "technicalReservations">,
+  opts?: { includeIssuerIds?: boolean },
 ): string {
+  const includeIssuerIds = opts?.includeIssuerIds !== false;
   const parts: string[] = [];
   if (document.legalDisclaimer?.trim()) parts.push(document.legalDisclaimer.trim());
   else {
@@ -187,15 +224,17 @@ export function buildLegalMentionsBlock(
       "Indemnité forfaitaire de recouvrement de 40 € due au titre des articles L.441-10 et D.441-5 du code de commerce (client professionnel). Pénalités de retard au taux légal en vigueur.",
     );
   }
-  if (issuer.siret) parts.push(`SIRET : ${issuer.siret}`);
-  if (issuer.tvaNumber) parts.push(`TVA intracommunautaire : ${issuer.tvaNumber}`);
-  if (issuer.apeCode) parts.push(`Code APE / NAF : ${issuer.apeCode}`);
-  if (issuer.insuranceName || issuer.insurancePolicy) {
-    parts.push(
-      `Assurance décennale / responsabilité civile : ${[issuer.insuranceName, issuer.insurancePolicy].filter(Boolean).join(" — ")}`,
-    );
+  if (includeIssuerIds) {
+    if (issuer.siret) parts.push(`SIRET : ${issuer.siret}`);
+    if (issuer.tvaNumber) parts.push(`TVA intracommunautaire : ${issuer.tvaNumber}`);
+    if (issuer.apeCode) parts.push(`Code APE / NAF : ${issuer.apeCode}`);
+    if (issuer.insuranceName || issuer.insurancePolicy) {
+      parts.push(
+        `Assurance décennale / responsabilité civile : ${[issuer.insuranceName, issuer.insurancePolicy].filter(Boolean).join(" — ")}`,
+      );
+    }
+    if (issuer.legalMentions) parts.push(issuer.legalMentions);
   }
-  if (issuer.legalMentions) parts.push(issuer.legalMentions);
   if (document.technicalReservations?.trim()) parts.push(document.technicalReservations.trim());
   return parts.join("\n\n");
 }

@@ -35,6 +35,30 @@ export function QuotePdfPresentationFields({ pdfSettings, document }: Presentati
         </div>
       </div>
       <div className="rounded-xl border border-[#1e3a5f]/15 bg-slate-50/80 p-4">
+        <h3 className="text-sm font-bold text-slate-900">Mise en page</h3>
+        <p className="mt-1 text-xs text-slate-600">Modèle commercial : sans coordonnées société en en-tête (recommandé).</p>
+        <div className="mt-3 space-y-2">
+          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-white p-3">
+            <input type="radio" name="pdfLayoutStyle" value="commercial" defaultChecked={pdfSettings.layoutStyle !== "classic"} className="mt-1" />
+            <span>
+              <span className="block text-sm font-semibold text-slate-900">Commercial (type ERP)</span>
+              <span className="block text-xs text-slate-600">Titre + client, tableau simplifié.</span>
+            </span>
+          </label>
+          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-white p-3">
+            <input type="radio" name="pdfLayoutStyle" value="classic" defaultChecked={pdfSettings.layoutStyle === "classic"} className="mt-1" />
+            <span>
+              <span className="block text-sm font-semibold text-slate-900">Classique</span>
+              <span className="block text-xs text-slate-600">Logo et coordonnées entreprise à gauche.</span>
+            </span>
+          </label>
+        </div>
+        <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+          <input type="checkbox" name="pdfShowIssuerOnPdf" defaultChecked={pdfSettings.showIssuerOnPdf} className="rounded border-slate-300" />
+          Afficher les coordonnées société sur le PDF
+        </label>
+      </div>
+      <div className="rounded-xl border border-[#1e3a5f]/15 bg-slate-50/80 p-4">
         <h3 className="text-sm font-bold text-slate-900">Contenu du PDF</h3>
         <div className="mt-4 space-y-4">
           <div>

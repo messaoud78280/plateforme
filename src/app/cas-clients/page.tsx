@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
+import { CasClientFeaturedCard, CasClientSimpleCard } from "@/components/cas-clients/CasClientCard";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
-import { CAS_CLIENT_CASES } from "@/content/cas-clients-cases";
+import { CAS_CLIENT_SIMPLE_CASES, CCMI_MARTIN_CASE } from "@/content/cas-clients-catalog";
 import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/seo-landing-json-ld";
 
@@ -10,8 +11,6 @@ const PAGE_PATH = "/cas-clients";
 const h1 = "Cas clients (BTP) : ce que vous gagnez vraiment";
 
 export const metadata = landingPageMetadataFromPath(PAGE_PATH);
-
-const cases = CAS_CLIENT_CASES;
 
 const breadcrumbItems = [
   { name: "Accueil", href: "/" },
@@ -68,41 +67,13 @@ export default function CasClientsPage() {
           </div>
         </header>
 
-        <section className="mx-auto mt-14 grid max-w-5xl gap-6 md:grid-cols-3" aria-label="Cas clients">
-          {cases.map((c) => (
-            <article key={c.title} className="rounded-2xl surface-metallic-light p-7">
-              <h2 className="text-lg font-semibold text-black">{c.title}</h2>
-              <div className="mt-4 space-y-3 text-sm text-black">
-                <p>
-                  <span className="font-semibold text-black">Avant :</span> {c.before}
-                </p>
-                <p>
-                  <span className="font-semibold text-black">Après :</span> {c.after}
-                </p>
-              </div>
-              <ul className="mt-5 space-y-2 text-sm text-black" role="list">
-                {c.kpis.map((k) => (
-                  <li key={k} className="flex items-start gap-2">
-                    <span className="mt-0.5 text-[#1d4ed8]" aria-hidden>
-                      ✓
-                    </span>
-                    <span>{k}</span>
-                  </li>
-                ))}
-              </ul>
-            </article>
+        <section className="mx-auto mt-14 grid max-w-5xl gap-6 md:grid-cols-2 lg:grid-cols-3" aria-label="Cas clients">
+          <CasClientFeaturedCard case={CCMI_MARTIN_CASE} />
+          {CAS_CLIENT_SIMPLE_CASES.map((c) => (
+            <CasClientSimpleCard key={c.title} case={c} />
           ))}
-        </section>
-
-        <section className="mx-auto mt-10 max-w-5xl rounded-2xl border border-[#dce3ec] bg-white/60 p-7">
-          <h2 className="text-lg font-semibold text-black">Tu veux que je mette tes vrais chiffres ?</h2>
-          <p className="mt-2 text-sm leading-relaxed text-black">
-            Donne-moi 2–3 cas réels (type de mission, volume, avant/après, résultat) et je remplace ces exemples par des
-            cas clients précis + un format “preuve” plus convaincant.
-          </p>
         </section>
       </main>
     </div>
   );
 }
-

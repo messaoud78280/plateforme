@@ -17,7 +17,7 @@ import {
   resourcesIconWrap,
 } from "@/components/ressources/resources-hub-ui";
 import { BLOG_ARTICLES, BLOG_SLUGS } from "@/content/blog-articles";
-import { CAS_CLIENT_CASES } from "@/content/cas-clients-cases";
+import { CAS_CLIENT_SIMPLE_CASES, CCMI_MARTIN_CASE } from "@/content/cas-clients-catalog";
 import { RESOURCE_GUIDE_PAGE_ITEMS, type ResourceGuideBadge } from "@/content/resource-guides-pages";
 import { RESOURCE_GUIDE_CATEGORIES } from "@/content/resource-categories";
 import { getResourcePdfPublicPath, resourceSlugFromHref } from "@/content/resource-pdf-catalog";
@@ -361,18 +361,28 @@ export default function RessourcesPage() {
           <ResourcesClickableList
             className="mx-auto mt-8 max-w-6xl"
             columns={1}
-            items={CAS_CLIENT_CASES.map((c) => ({
-              href: "/cas-clients",
-              title: c.title,
-              description: (
-                <>
-                  <span className="font-semibold text-slate-700">Après :</span> {c.after}
-                </>
-              ),
-              badge: <BadgeStatus status="Cas client" />,
-              icon: <UsersGlyph className="h-5 w-5 sm:h-[1.125rem] sm:w-[1.125rem]" />,
-              openLabel: "Voir les cas clients",
-            }))}
+            items={[
+              {
+                href: CCMI_MARTIN_CASE.href,
+                title: CCMI_MARTIN_CASE.cardTitle,
+                description: CCMI_MARTIN_CASE.cardSummary,
+                badge: <BadgeStatus status="Cas client" />,
+                icon: <UsersGlyph className="h-5 w-5 sm:h-[1.125rem] sm:w-[1.125rem]" />,
+                openLabel: "Voir le cas client",
+              },
+              ...CAS_CLIENT_SIMPLE_CASES.map((c) => ({
+                href: "/cas-clients",
+                title: c.title,
+                description: (
+                  <>
+                    <span className="font-semibold text-slate-700">Après :</span> {c.after}
+                  </>
+                ),
+                badge: <BadgeStatus status="Cas client" />,
+                icon: <UsersGlyph className="h-5 w-5 sm:h-[1.125rem] sm:w-[1.125rem]" />,
+                openLabel: "Voir les cas clients",
+              })),
+            ]}
           />
         </section>
 

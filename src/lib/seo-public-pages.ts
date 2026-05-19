@@ -139,6 +139,12 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
       "Exemples concrets : devis relancés, dossiers tenus, trésorerie sécurisée. Retours d’expérience d’entreprises du bâtiment avec BeWork.",
     keywords: ["cas clients BTP", "retour expérience BTP", "organisation chantier"],
   },
+  "/cas-clients/ccmi-martin-audit-devis": {
+    title: "Cas client CCMI Martin : audit devis BTP avant signature",
+    description:
+      "Audit d’un devis CCMI de 287 180 € TTC : 92 lignes analysées, DTU et étude G2, devis rectifié avant signature.",
+    keywords: ["audit devis CCMI", "cas client BeWork", "devis BTP"],
+  },
 };
 
 export function getPublicPageSeo(path: string): PublicPageSeo | undefined {

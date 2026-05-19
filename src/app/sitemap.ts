@@ -59,6 +59,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     entry("/faq", 0.7),
     entry("/notre-facon-de-travailler", 0.85),
     entry("/cas-clients", 0.75),
+    entry("/cas-clients/ccmi-martin-audit-devis", 0.72),
     entry("/contact", 0.8),
     entry("/mentions-legales", 0.35, "yearly"),
     entry("/politique-confidentialite", 0.35, "yearly"),

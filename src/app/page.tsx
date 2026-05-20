@@ -26,6 +26,11 @@ import {
   getPublicPriceBoundsLabels,
 } from "@/lib/subscription-plans";
 import { jsonLdExpandedAreaServed } from "@/lib/jsonld-area-served";
+import {
+  SEO_OG_ALTERNATE_LOCALES,
+  hreflangFrancophonieLanguages,
+  metaDescriptionFrancophonie,
+} from "@/lib/seo-francophonie";
 import { SEO_KEYWORDS_HOME } from "@/lib/seo-keywords";
 import { EXTERNALISATION_ADMIN_BT_NAV } from "@/lib/externalisation-administrative-btp-geo";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
@@ -57,8 +62,9 @@ const HOME_FAQ_ITEMS = [
 ] as const;
 
 const HOME_META_TITLE = "Assistant travaux BTP augmenté par l’IA | BeWork";
-const HOME_META_DESCRIPTION =
-  "Assistants travaux pour le BTP : devis, relances, DOE, PPSPS, DCE et suivi bureau-chantier. On tient le bureau, vous tenez le chantier.";
+const HOME_META_DESCRIPTION = metaDescriptionFrancophonie(
+  "Assistants travaux BTP : devis, relances, DOE, PPSPS, DCE et suivi bureau-chantier. On tient le bureau, vous le chantier",
+);
 
 export const metadata: Metadata = {
   title: { absolute: HOME_META_TITLE },
@@ -69,11 +75,11 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
   },
   keywords: SEO_KEYWORDS_HOME,
-  alternates: { canonical: SITE_URL, languages: { fr: SITE_URL, "x-default": SITE_URL } },
+  alternates: { canonical: SITE_URL, languages: hreflangFrancophonieLanguages("/") },
   openGraph: {
     type: "website",
     locale: "fr_FR",
-    alternateLocale: ["fr_BE", "fr_CH", "fr_LU"],
+    alternateLocale: [...SEO_OG_ALTERNATE_LOCALES],
     url: SITE_URL,
     siteName: "BeWork",
     title: HOME_META_TITLE,

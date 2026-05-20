@@ -9,6 +9,11 @@ import {
   buildSearchEngineVerification,
   SEO_PUBLIC_ROBOTS,
 } from "@/lib/seo-search-engines";
+import {
+  SEO_OG_ALTERNATE_LOCALES,
+  SEO_OG_LOCALE_PRIMARY,
+  hreflangFrancophonieLanguages,
+} from "@/lib/seo-francophonie";
 import { absoluteUrl, CALENDLY_APPEL_DECOUVERTE_URL, getOrgSameAs, SITE_URL } from "@/lib/site";
 import { formatPriceLabelFr, getPublicPriceBoundsLabels } from "@/lib/subscription-plans";
 
@@ -80,11 +85,11 @@ export const metadata: Metadata = {
   robots: SEO_PUBLIC_ROBOTS,
   openGraph: {
     type: "website",
-    locale: "fr_FR",
-    alternateLocale: ["fr_BE", "fr_CH", "fr_LU"],
+    locale: SEO_OG_LOCALE_PRIMARY,
+    alternateLocale: [...SEO_OG_ALTERNATE_LOCALES],
     url: SITE_URL,
     siteName: "BeWork",
-    title: "BeWork — Administratif externalisé BTP (artisans & conducteurs de travaux)",
+    title: "BeWork — Assistants travaux BTP (France, Belgique, Suisse, Luxembourg)",
     description: `${SEO_VALUE_PROPOSITION_SHORT} Dès ${SITE_PRICE_LOW_FR} € TTC.`,
     images: [
       {
@@ -108,7 +113,7 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: SITE_URL,
-    languages: { fr: SITE_URL, "x-default": SITE_URL },
+    languages: hreflangFrancophonieLanguages("/"),
   },
   icons: {
     icon: [

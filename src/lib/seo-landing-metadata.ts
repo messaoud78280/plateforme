@@ -1,4 +1,9 @@
 import type { Metadata } from "next";
+import {
+  SEO_OG_ALTERNATE_LOCALES,
+  SEO_OG_LOCALE_PRIMARY,
+  hreflangFrancophonieLanguages,
+} from "@/lib/seo-francophonie";
 import { getPublicPageSeo } from "@/lib/seo-public-pages";
 import { SEO_PUBLIC_ROBOTS } from "@/lib/seo-search-engines";
 import { absoluteUrl } from "@/lib/site";
@@ -19,7 +24,7 @@ export function landingPageMetadata(opts: {
   hreflangLanguages?: Record<string, string>;
 }): Metadata {
   const url = absoluteUrl(opts.path);
-  const langMap = opts.hreflangLanguages ?? { fr: url, "x-default": url };
+  const langMap = opts.hreflangLanguages ?? hreflangFrancophonieLanguages(opts.path);
 
   return {
     title: { absolute: opts.title },
@@ -29,7 +34,8 @@ export function landingPageMetadata(opts: {
     robots: SEO_PUBLIC_ROBOTS,
     openGraph: {
       type: "website",
-      locale: "fr_FR",
+      locale: SEO_OG_LOCALE_PRIMARY,
+      alternateLocale: [...SEO_OG_ALTERNATE_LOCALES],
       url,
       siteName: "BeWork",
       title: opts.title,

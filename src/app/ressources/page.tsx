@@ -23,6 +23,12 @@ import { RESOURCE_GUIDE_CATEGORIES } from "@/content/resource-categories";
 import { getResourcePdfPublicPath, resourceSlugFromHref } from "@/content/resource-pdf-catalog";
 import { RESOURCE_TUTO_ITEMS, type ResourceStatus } from "@/content/resource-tutos";
 import { buildResourcesHubCollectionJsonLd } from "@/lib/jsonld-content-marketing";
+import {
+  SEO_OG_ALTERNATE_LOCALES,
+  SEO_OG_LOCALE_PRIMARY,
+  hreflangFrancophonieLanguages,
+  metaDescriptionFrancophonie,
+} from "@/lib/seo-francophonie";
 import { absoluteUrl } from "@/lib/site";
 
 const pageUrl = absoluteUrl("/ressources");
@@ -58,17 +64,19 @@ const GUIDE_CAROUSEL_ITEMS: GuideCarouselItem[] = [
   })),
 ].sort((x, y) => new Date(y.publishedTime).getTime() - new Date(x.publishedTime).getTime());
 
-const RESSOURCES_META_TITLE = "Ressources BTP : guides, tutos et documents chantier";
-const RESSOURCES_META_DESC =
-  "Guides et tutoriels BTP : compte rendu, DOE, PPSPS, DCE, devis et gestion administrative chantier. Références BeWork pour conducteurs et artisans.";
+const RESSOURCES_META_TITLE = "Ressources BTP : guides, tutos PDF et documents chantier";
+const RESSOURCES_META_DESC = metaDescriptionFrancophonie(
+  "Guides et tutoriels BTP : CR, DOE, PPSPS, DCE, devis et gestion administrative. PDF gratuits pour conducteurs et artisans",
+);
 
 export const metadata: Metadata = {
   title: { absolute: RESSOURCES_META_TITLE },
   description: RESSOURCES_META_DESC,
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
+  alternates: { canonical: pageUrl, languages: hreflangFrancophonieLanguages("/ressources") },
   openGraph: {
     type: "website",
-    locale: "fr_FR",
+    locale: SEO_OG_LOCALE_PRIMARY,
+    alternateLocale: [...SEO_OG_ALTERNATE_LOCALES],
     url: pageUrl,
     siteName: "BeWork",
     title: RESSOURCES_META_TITLE,

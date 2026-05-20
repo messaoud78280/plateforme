@@ -129,10 +129,10 @@ export const SEO_KEYWORDS_HOME: string[] = [
   "conducteur de travaux France Belgique",
 ];
 
-/** Phrases pour enrichir les descriptions (réutilisables en intro de meta). ≤ ~155 car. utiles en SERP. */
+/** Meta description site (layout racine) — ~155 car., périmètre francophonie. */
 export const SEO_VALUE_PROPOSITION =
-  "BeWork : assistants travaux augmentés par l’IA pour le BTP. Relais bureau-chantier, documents chantier et forfaits TTC. France, Belgique, Suisse, Luxembourg.";
+  "Assistants travaux BTP par l’IA : devis, relances, DOE, PPSPS et dossiers chantier. Relais bureau-chantier, forfaits TTC. FR · BE · CH · LU.";
 
-/** Proposition courte (OG, snippets secondaires). */
+/** Proposition courte (OG, Twitter). */
 export const SEO_VALUE_PROPOSITION_SHORT =
-  "Assistants travaux BTP : relais bureau-chantier et dossiers chantier. Forfaits TTC. FR · BE · CH · LU.";
+  "Assistants travaux BTP : bureau-chantier et documents chantier. Forfaits TTC. France, Belgique, Suisse, Luxembourg.";

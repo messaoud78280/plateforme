@@ -7,25 +7,40 @@ import { ResourcesClickableList } from "@/components/ressources/ResourcesClickab
 import { resourcesBtnSecondary } from "@/components/ressources/resources-hub-ui";
 import { getResourcePdfPublicPath, resourceSlugFromHref } from "@/content/resource-pdf-catalog";
 import { RESOURCE_TUTO_ITEMS, type ResourceStatus } from "@/content/resource-tutos";
+import {
+  SEO_OG_ALTERNATE_LOCALES,
+  SEO_OG_LOCALE_PRIMARY,
+  hreflangFrancophonieLanguages,
+  metaDescriptionFrancophonie,
+} from "@/lib/seo-francophonie";
 import { absoluteUrl } from "@/lib/site";
 
 const pageUrl = absoluteUrl("/ressources/tutos");
 const ogImage = absoluteUrl("/opengraph-image");
 
+const TUTOS_META_TITLE = "Tutoriels BTP : skills Claude et PDF gratuits | BeWork";
+const TUTOS_META_DESC = metaDescriptionFrancophonie(
+  "Tutoriels BeWork : skills Claude pour DCE, PPSPS, DOE, devis, RDV client et CR. PDF gratuits et prompts pour le BTP",
+);
+
 export const metadata: Metadata = {
-  title: { absolute: "Tutoriels BTP : skills Claude et PDF gratuits | BeWork" },
-  description:
-    "Tutoriels BeWork : skills Claude pour DCE, PPSPS, DOE, devis et comptes rendus. PDF gratuits et prompts pour conducteurs de travaux et PME du bâtiment.",
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
+  title: { absolute: TUTOS_META_TITLE },
+  description: TUTOS_META_DESC,
+  alternates: { canonical: pageUrl, languages: hreflangFrancophonieLanguages("/ressources/tutos") },
   openGraph: {
     type: "website",
-    locale: "fr_FR",
+    locale: SEO_OG_LOCALE_PRIMARY,
+    alternateLocale: [...SEO_OG_ALTERNATE_LOCALES],
     url: pageUrl,
     siteName: "BeWork",
-    title: "Tutoriels PDF & pratiques BTP | BeWork",
-    description:
-      "Index des tutoriels BeWork : PDF gratuits, skills Claude et fiches pratiques pour vos dossiers chantier (DCE, PPSPS, DOE).",
+    title: TUTOS_META_TITLE,
+    description: TUTOS_META_DESC,
     images: [{ url: ogImage, width: 1200, height: 630, alt: "BeWork — tutoriels" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TUTOS_META_TITLE,
+    description: TUTOS_META_DESC,
   },
   robots: { index: true, follow: true },
 };

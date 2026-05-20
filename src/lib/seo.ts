@@ -17,6 +17,16 @@ export {
   buildSearchEngineVerification,
 } from "@/lib/seo-search-engines";
 export { getIndexNowKey, getIndexNowKeyLocation, pingIndexNow } from "@/lib/indexnow";
+export {
+  SEO_GEO_SCOPE_SHORT,
+  SEO_GEO_SCOPE_TAG,
+  SEO_OG_ALTERNATE_LOCALES,
+  SEO_OG_LOCALE_PRIMARY,
+  clampMetaDescription,
+  hreflangFrancophonieLanguages,
+  hreflangExternalisationAdministrativeBtpCluster,
+  metaDescriptionFrancophonie,
+} from "@/lib/seo-francophonie";
 export { landingPageMetadata, landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 export { resourceEditorialMetadata } from "@/lib/seo-resource-metadata";
 export { tutoPageMetadata, getTutoPageDescription } from "@/lib/seo-tuto-metadata";

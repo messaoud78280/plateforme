@@ -5,6 +5,12 @@ import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { BLOG_ARTICLES, BLOG_SLUGS } from "@/content/blog-articles";
 import { RESOURCE_GUIDE_PAGE_ITEMS } from "@/content/resource-guides-pages";
+import {
+  SEO_OG_ALTERNATE_LOCALES,
+  SEO_OG_LOCALE_PRIMARY,
+  hreflangFrancophonieLanguages,
+  metaDescriptionFrancophonie,
+} from "@/lib/seo-francophonie";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 
 const guidesUrl = absoluteUrl("/ressources/guides");
@@ -38,10 +44,13 @@ const GUIDE_INDEX: {
   })),
 ].sort((x, y) => new Date(y.publishedTime).getTime() - new Date(x.publishedTime).getTime());
 
+const GUIDES_META_DESC = metaDescriptionFrancophonie(
+  "Guides PDF BeWork : IA, skills Claude, gestion administrative chantier et externalisation bureau-chantier pour conducteurs",
+);
+
 export const metadata: Metadata = {
   title: { absolute: "Guides BTP : conducteur de travaux et IA | BeWork" },
-  description:
-    "Guides PDF BeWork pour conducteurs de travaux : IA, skills Claude, gestion administrative chantier et externalisation bureau-chantier.",
+  description: GUIDES_META_DESC,
   keywords: [
     "guides administratif BTP",
     "pilotage administratif BTP",
@@ -55,15 +64,15 @@ export const metadata: Metadata = {
     "DPGF",
     "assistant administratif distance",
   ],
-  alternates: { canonical: guidesUrl, languages: { fr: guidesUrl, "x-default": guidesUrl } },
+  alternates: { canonical: guidesUrl, languages: hreflangFrancophonieLanguages("/ressources/guides") },
   openGraph: {
     type: "website",
-    locale: "fr_FR",
+    locale: SEO_OG_LOCALE_PRIMARY,
+    alternateLocale: [...SEO_OG_ALTERNATE_LOCALES],
     url: guidesUrl,
     siteName: "BeWork",
     title: "Guides BeWork — pilotage administratif & BTP",
-    description:
-      "Guides BeWork : méthodes et articles pour piloter l’administratif chantier, la trésorerie et l’externalisation en BTP.",
+    description: GUIDES_META_DESC,
     images: [{ url: guidesOgImage, width: 1200, height: 630, alt: "Guides BeWork — administratif BTP" }],
   },
   twitter: {

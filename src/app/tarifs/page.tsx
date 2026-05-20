@@ -13,6 +13,12 @@ import {
   formatPriceLabelFr,
   getPublicPriceBoundsLabels,
 } from "@/lib/subscription-plans";
+import {
+  SEO_OG_ALTERNATE_LOCALES,
+  SEO_OG_LOCALE_PRIMARY,
+  hreflangFrancophonieLanguages,
+  metaDescriptionFrancophonie,
+} from "@/lib/seo-francophonie";
 import { SEO_KEYWORDS_PARTENAIRE_CORE } from "@/lib/seo-keywords";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 
@@ -25,10 +31,13 @@ function formatPriceTtc(value: string) {
   return n.toLocaleString("fr-FR");
 }
 
+const TARIFS_META_DESC = metaDescriptionFrancophonie(
+  "Forfaits TTC pour externaliser bureau-chantier : devis, relances, DOE, PPSPS et dossiers. Assistants travaux BTP, sans recruter",
+);
+
 export const metadata: Metadata = {
   title: { absolute: "Tarifs assistant travaux BTP externalisé | BeWork" },
-  description:
-    "Forfaits TTC pour externaliser votre gestion bureau-chantier : devis, relances, DOE, PPSPS et dossiers chantier. Assistants travaux BTP, sans recruter.",
+  description: TARIFS_META_DESC,
   keywords: [
     ...SEO_KEYWORDS_PARTENAIRE_CORE,
     "tarifs assistante travaux",
@@ -39,15 +48,15 @@ export const metadata: Metadata = {
     "documents travaux",
     "tarif assistant administratif externalisé",
   ],
-  alternates: { canonical: tarifsUrl, languages: { fr: tarifsUrl, "x-default": tarifsUrl } },
+  alternates: { canonical: tarifsUrl, languages: hreflangFrancophonieLanguages("/tarifs") },
   openGraph: {
     type: "website",
-    locale: "fr_FR",
+    locale: SEO_OG_LOCALE_PRIMARY,
+    alternateLocale: [...SEO_OG_ALTERNATE_LOCALES],
     url: tarifsUrl,
     siteName: "BeWork",
     title: "Tarifs BeWork — assistante travaux BTP (relais dossiers chantier)",
-    description:
-      "Forfaits BeWork TTC : déléguez devis, relances, documents travaux, réserves et DOE. Assistante travaux BTP, sans recruter.",
+    description: TARIFS_META_DESC,
     images: [
       {
         url: tarifsOgImage,

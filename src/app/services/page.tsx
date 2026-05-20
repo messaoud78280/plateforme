@@ -6,22 +6,30 @@ import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { SERVICE_PAGES, SERVICE_PAGE_ORDER } from "@/content/service-pages";
 import { buildServicesHubItemListJsonLd } from "@/lib/jsonld-content-marketing";
 import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/seo-landing-json-ld";
+import {
+  SEO_OG_ALTERNATE_LOCALES,
+  SEO_OG_LOCALE_PRIMARY,
+  hreflangFrancophonieLanguages,
+  metaDescriptionFrancophonie,
+} from "@/lib/seo-francophonie";
 import { absoluteUrl } from "@/lib/site";
 
 const path = "/services";
 const url = absoluteUrl(path);
 const title = "Services BeWork — assistants travaux augmentés par l’IA (BTP)";
-const description =
-  "Hub services BeWork : assistant travaux, CR, analyse DCE, PPSPS, devis, DOE. Pages par intention + liens ressources.";
+const description = metaDescriptionFrancophonie(
+  "Hub services BeWork : assistant travaux, CR, analyse DCE, PPSPS, devis, DOE. Pages par intention et ressources métier",
+);
 
 export const metadata: Metadata = {
   title: { absolute: title },
   description,
-  alternates: { canonical: url, languages: { fr: url, "x-default": url } },
+  alternates: { canonical: url, languages: hreflangFrancophonieLanguages(path) },
   robots: { index: true, follow: true },
   openGraph: {
     type: "website",
-    locale: "fr_FR",
+    locale: SEO_OG_LOCALE_PRIMARY,
+    alternateLocale: [...SEO_OG_ALTERNATE_LOCALES],
     url,
     siteName: "BeWork",
     title,

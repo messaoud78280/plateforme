@@ -1,5 +1,3 @@
-import { absoluteUrl } from "@/lib/site";
-
 /** Cluster SEO : 4 pages pays (même famille sémantique, contenus uniques). */
 export const EXTERNALISATION_ADMIN_BT_PATHS = {
   france: "/externalisation-administrative-btp-france",
@@ -10,19 +8,7 @@ export const EXTERNALISATION_ADMIN_BT_PATHS = {
 
 export type ExternalisationAdminBtGeoKey = keyof typeof EXTERNALISATION_ADMIN_BT_PATHS;
 
-/** Balises hreflang : `fr` et `x-default` pointent vers la page France (hub linguistique principal). */
-export function hreflangExternalisationAdministrativeBtpCluster(): Record<string, string> {
-  const p = EXTERNALISATION_ADMIN_BT_PATHS;
-  const fr = absoluteUrl(p.france);
-  return {
-    "fr-FR": absoluteUrl(p.france),
-    "fr-BE": absoluteUrl(p.belgique),
-    "fr-CH": absoluteUrl(p.suisse),
-    "fr-LU": absoluteUrl(p.luxembourg),
-    fr,
-    "x-default": fr,
-  };
-}
+export { hreflangExternalisationAdministrativeBtpCluster } from "@/lib/seo-francophonie";
 
 /** Liens pour maillage (header, home, pied de page des landings). */
 export const EXTERNALISATION_ADMIN_BT_NAV = [

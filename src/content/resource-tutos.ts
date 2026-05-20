@@ -13,6 +13,13 @@ export type ResourceTutoItem = {
 /** Titres d’entrée : alignés sur les couvertures des PDF (« Crée ton skill », « Trie tes DCE… », etc.). */
 export const RESOURCE_TUTO_ITEMS: readonly ResourceTutoItem[] = [
   {
+    title: "Tuto Crée ton skill — Préparation de RDV client",
+    desc: "Brief contact, ordre du jour chronométré et trame de CR post-RDV en 15 min — PDF et prompts pour Claude.",
+    href: "/ressources/tuto-skill-rdv-client-bework",
+    status: "Tuto PDF",
+    icon: "document",
+  },
+  {
     title: "Tuto Crée ton skill — Plan d'Installation de Chantier",
     desc: "PIC complet et conforme en 1 h — base vie, co-activité, grue, déchets, checklist SPS — PDF et prompts.",
     href: "/ressources/tuto-skill-pic-bework",

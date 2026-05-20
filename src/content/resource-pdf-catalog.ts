@@ -27,8 +27,9 @@ export const RESOURCE_PDF_GUIDES: readonly ResourcePdfCatalogEntry[] = [
   },
 ] as const;
 
-/** 15 tutoriels PDF (skills Claude, 1 page = 1 tuto) */
+/** 16 tutoriels PDF (skills Claude, 1 page = 1 tuto) */
 export const RESOURCE_PDF_TUTOS: readonly ResourcePdfCatalogEntry[] = [
+  { pdfFile: "tuto-skill-rdv-client-bework.pdf", kind: "tuto", href: "/ressources/tuto-skill-rdv-client-bework" },
   { pdfFile: "tuto-skill-analyse-dce-bework.pdf", kind: "tuto", href: "/ressources/tuto-skill-analyse-dce-bework" },
   { pdfFile: "tuto-skill-ppsps-bework.pdf", kind: "tuto", href: "/ressources/tuto-skill-ppsps-bework" },
   { pdfFile: "tuto-skill-cr-chantier-bework.pdf", kind: "tuto", href: "/ressources/compte-rendu-chantier-guide-btp" },

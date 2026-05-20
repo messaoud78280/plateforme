@@ -80,6 +80,12 @@ export const TUTO_PAGE_SEO: Record<string, TutoPageSeo> = {
       "Tutoriel skill OS : décortiquer, contester et chiffrer un ordre de service. CCAG, réserves et délai 15 jours — prompts inclus.",
     keywords: ["ordre de service BTP", "skill OS chantier", "CCAG travaux"],
   },
+  "/ressources/tuto-skill-rdv-client-bework": {
+    title: "Skill préparation RDV client BTP : tutoriel Claude | BeWork",
+    description:
+      "Tutoriel skill RDV client : brief contact, ordre du jour, questions de découverte et CR post-RDV. PDF gratuit et prompts prêts à coller.",
+    keywords: ["skill RDV client", "préparation RDV BTP", "compte rendu RDV", "Claude commercial BTP"],
+  },
   "/ressources/tuto-skill-pic-bework": {
     title: "Skill plan installation chantier (PIC) | BeWork",
     description:

@@ -16,6 +16,7 @@ import {
   buildResourceGroupingKey,
   normalizeResourceLabel,
 } from "../src/lib/chantier-resources/normalize-label";
+import { collectClassificationFixes } from "../src/lib/chantier-resources/classification";
 import { suggestTaxonomyFromText } from "../src/lib/chantier-resources/taxonomy";
 import type { SiteResource } from "@prisma/client";
 
@@ -135,6 +136,45 @@ function siteResourceStub(partial: Partial<SiteResource> & { id: string; shortNa
   assert.equal(tax.family, "documents-administratifs-chantier");
   assert.equal(tax.subFamily, "garanties-attestations");
   console.log("✓ Classification documents administratifs");
+}
+
+// Clôture « jointifs » — ne doit pas partir en carrelage / joints
+{
+  const tax = suggestTaxonomyFromText(
+    "Clôture bois plus occultante en panneaux de châtaignier jointifs, posée sur lisses et pieux",
+  );
+  assert.equal(tax.family, "amenagements-exterieurs");
+  assert.equal(tax.subFamily, "clotures-portails");
+  assert.notEqual(tax.family, "carrelage");
+  console.log("✓ Clôture bois — aménagements extérieurs (pas carrelage)");
+}
+
+// Alias seul avec « jointifs » + titre clôture
+{
+  const fixes = collectClassificationFixes([
+    {
+      id: "fence-1",
+      shortName: "Clôture bois plus occultante en panneaux de c...",
+      fullDescription: null,
+      resourceType: "materiaux",
+      family: "carrelage",
+      subFamily: "joints",
+      aliasLabels: [
+        "Clôture bois plus occultante en panneaux de châtaignier jointifs, posée sur lisses et pieux",
+      ],
+    },
+  ]);
+  assert.equal(fixes.length, 1);
+  assert.equal(fixes[0]?.suggestedFamily, "amenagements-exterieurs");
+  console.log("✓ Recatégorisation fiche clôture mal classée en carrelage");
+}
+
+// Joint carrelage réel
+{
+  const tax = suggestTaxonomyFromText("Mortier de joint carrelage intérieur 5 kg");
+  assert.equal(tax.family, "carrelage");
+  assert.equal(tax.subFamily, "joints");
+  console.log("✓ Joint carrelage — famille carrelage");
 }
 
 // Normalisation dimensions

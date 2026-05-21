@@ -903,21 +903,17 @@ export async function previewDuplicateResourceCleanup(): Promise<DuplicateCleanu
   const priceMap = await buildPriceMapForResources(rows.map((r) => r.id));
   const preview = buildDuplicateCleanupPreview(rows, priceMap);
 
-  for (const r of rows) {
-    const tax = suggestTaxonomyFromText(r.shortName);
-    const misclassified =
-      r.resourceType !== tax.resourceType ||
-      r.family !== tax.family ||
-      (tax.subFamily != null && r.subFamily !== tax.subFamily);
-    if (misclassified && /attestation|garantie|baignoire|lavabo|beton|laine|parpaing|echafaud|nacelle/.test(normalizeResourceLabel(r.shortName))) {
-      preview.classificationFixes.push({
-        id: r.id,
-        shortName: r.shortName,
-        suggestedType: tax.resourceType,
-        suggestedFamily: tax.family,
-      });
-    }
-  }
+  const { collectClassificationFixes, loadResourcesForClassification } = await import(
+    "@/lib/chantier-resources/classification"
+  );
+  const classifiable = await loadResourcesForClassification(prisma);
+  const fixes = collectClassificationFixes(classifiable);
+  preview.classificationFixes = fixes.map((fix) => ({
+    id: fix.id,
+    shortName: fix.shortName,
+    suggestedType: fix.suggestedType,
+    suggestedFamily: fix.suggestedFamily,
+  }));
 
   return preview;
 }
@@ -951,14 +947,18 @@ export async function applyDuplicateResourceCleanup(
     }
   }
 
-  for (const fix of preview.classificationFixes) {
-    const tax = suggestTaxonomyFromText(fix.shortName);
+  const { collectClassificationFixes, loadResourcesForClassification } = await import(
+    "@/lib/chantier-resources/classification"
+  );
+  const classifiable = await loadResourcesForClassification(prisma);
+  const fixes = collectClassificationFixes(classifiable);
+  for (const fix of fixes) {
     await prisma.siteResource.update({
       where: { id: fix.id },
       data: {
-        resourceType: tax.resourceType as SiteResourceType,
-        family: tax.family,
-        subFamily: tax.subFamily,
+        resourceType: fix.suggestedType,
+        family: fix.suggestedFamily,
+        subFamily: fix.suggestedSubFamily,
         normalizedDesignation: normalizeResourceLabel(fix.shortName),
       },
     });

@@ -105,9 +105,30 @@ export const CHANTIER_RESOURCE_TAXONOMY: Record<SiteResourceType, ChantierResour
       subFamilies: [{ key: "elements-couverture", label: "Éléments de couverture" }],
     },
     {
+      family: "amenagements-exterieurs",
+      label: "Aménagements extérieurs",
+      subFamilies: [
+        { key: "clotures-portails", label: "Clôtures et portails" },
+        { key: "vrd", label: "VRD et extérieurs" },
+      ],
+    },
+    {
       family: "menuiserie",
       label: "Menuiserie",
-      subFamilies: [{ key: "bois-panneaux", label: "Bois et panneaux" }],
+      subFamilies: [
+        { key: "fenetres-portes", label: "Fenêtres et portes" },
+        { key: "bois-panneaux", label: "Bois et panneaux" },
+      ],
+    },
+    {
+      family: "charpente",
+      label: "Charpente",
+      subFamilies: [{ key: "ossature-bois", label: "Ossature bois" }],
+    },
+    {
+      family: "metallerie",
+      label: "Métallerie",
+      subFamilies: [{ key: "acier", label: "Acier et ouvrages métalliques" }],
     },
     {
       family: "divers-materiaux",
@@ -133,6 +154,7 @@ export const CHANTIER_RESOURCE_TAXONOMY: Record<SiteResourceType, ChantierResour
       subFamilies: [
         { key: "mini-pelles", label: "Mini-pelles" },
         { key: "nacelles", label: "Nacelles" },
+        { key: "grues", label: "Grues" },
         { key: "compacteurs", label: "Compacteurs" },
       ],
     },
@@ -182,21 +204,46 @@ export function getSubFamilyLabel(type: SiteResourceType, familyKey: string, sub
   return node?.subFamilies.find((s) => s.key === subKey)?.label ?? subKey;
 }
 
-export function suggestTaxonomyFromText(text: string): {
+export type ChantierResourceTaxonomySuggestion = {
   resourceType: SiteResourceType;
   family: string;
   subFamily: string | null;
-} {
-  const n = text
+};
+
+/** Normalise le libellé pour les règles métier (sans accents, espaces unifiés). */
+export function normalizeTaxonomyText(text: string): string {
+  return text
     .toLowerCase()
     .normalize("NFD")
     .replace(/\p{M}/gu, "")
     .replace(/\s+/g, " ");
+}
+
+/** Joint de carrelage — exclut « jointifs », lisses jointives, panneaux bois, etc. */
+function isCarrelageJointContext(n: string): boolean {
+  if (/jointifs|jointif\b|jointives|panneau.x\s+jointifs|lisse.x\s+jointive|joint de dilatation structure/.test(n)) {
+    return false;
+  }
+  if (/joints?\s+(de\s+)?(carrelage|faience|mosaique)|mortier\s+de\s+joint|joint\s+(epoxy|souple|carrelage)/.test(n)) {
+    return true;
+  }
+  if (/\bjoint\b/.test(n) && /carrelage|faience|mosaique|colle/.test(n)) return true;
+  return false;
+}
+
+function isExteriorEnvelope(n: string): boolean {
+  return /portail|portillon|porte\s+coulissante|porte\s+sectionnelle|grillage|cloture|palissade|occultant|claustra|panneau.x\s+de\s+chataignier|haie\s+artificielle/.test(
+    n,
+  );
+}
+
+export function suggestTaxonomyFromText(text: string): ChantierResourceTaxonomySuggestion {
+  const n = normalizeTaxonomyText(text);
 
   if (
     /attestation|document administratif|frais contractuel|dommage.ouvrage|retenue de garantie|caution bancaire/.test(n) ||
     (/assurance chantier|garantie decennale|garantie de livraison/.test(n) &&
-      !/portail|portillon|beton|maconnerie|fourniture|pose de|carrelage|plomberie|electricite/.test(n))
+      !/portail|portillon|beton|maconnerie|fourniture|pose de|carrelage|plomberie|electricite|cloture/.test(n))
   ) {
     return {
       resourceType: "services",
@@ -204,76 +251,150 @@ export function suggestTaxonomyFromText(text: string): {
       subFamily: /attestation|garantie|decennale|livraison/.test(n) ? "garanties-attestations" : "assurances",
     };
   }
-  if (/portail|portillon|porte coulissante|porte sectionnelle|grillage|cloture|clôture/.test(n)) {
-    return { resourceType: "materiaux", family: "menuiserie", subFamily: "bois-panneaux" };
+
+  if (isExteriorEnvelope(n)) {
+    return { resourceType: "materiaux", family: "amenagements-exterieurs", subFamily: "clotures-portails" };
   }
-  if (/baignoire|lavabo|wc\b|receveur|robinetterie|sanitaire|douche/.test(n)) {
-    return { resourceType: "materiaux", family: "plomberie", subFamily: "appareils-sanitaires" };
-  }
-  if (/beton\s*c\d|beton\s*c\s*\d|c25\/30|c30\/37|mortier|sable|gravier|ciment/.test(n)) {
-    return {
-      resourceType: "materiaux",
-      family: /mortier|ciment/.test(n) ? "maconnerie" : "terrassement",
-      subFamily: /gravier/.test(n) ? "graviers" : /sable/.test(n) ? "sables" : "liants",
-    };
-  }
+
   if (/\blocation\b|\blocative\b|\blouer\b|\bla\s+journee\b|\bforfait\s+location/.test(n)) {
     if (/echafaud|echafaudage|banche|pontage|perforateur|marteau|outillage|electroportatif/.test(n)) {
       return { resourceType: "location_outillage", family: "outillage", subFamily: "electroportatif" };
     }
+    if (/nacelle|grue|mini.pelle|pelle|engin|compacteur|chargeuse/.test(n)) {
+      return {
+        resourceType: "location_engin",
+        family: "engins",
+        subFamily: /nacelle/.test(n) ? "nacelles" : /grue/.test(n) ? "grues" : "mini-pelles",
+      };
+    }
+  }
+
+  if (/baignoire|lavabo|wc\b|receveur|robinetterie|sanitaire|douche|ballon\s+ecs|chauffe.eau/.test(n)) {
+    return { resourceType: "materiaux", family: "plomberie", subFamily: "appareils-sanitaires" };
+  }
+
+  if (/beton\s*c\d|beton\s*c\s*\d|c25\/30|c30\/37|beton\s+pret/.test(n)) {
+    return { resourceType: "materiaux", family: "beton", subFamily: "beton-pret" };
+  }
+
+  if (/tuile|ardoise|zinc|couverture|liteau|volige|egout|cheneau/.test(n) && !/carrelage|faience/.test(n)) {
+    return { resourceType: "materiaux", family: "couverture", subFamily: "elements-couverture" };
+  }
+
+  if (/membrane\s+etanche|etancheite\s+toiture|bache\s+etanche/.test(n)) {
+    return { resourceType: "materiaux", family: "etancheite", subFamily: "membranes" };
+  }
+
+  if (/charpente|fermette|solive|poutre\s+bois|ossature\s+bois/.test(n)) {
+    return { resourceType: "materiaux", family: "charpente", subFamily: "ossature-bois" };
+  }
+
+  if (/garde.corps|acier|metallique|heb|ipn|tube\s+metallique|bardage\s+metallique/.test(n)) {
+    return { resourceType: "materiaux", family: "metallerie", subFamily: "acier" };
+  }
+
+  if (/parpaing|agglo|bloc\s+creux|bloc\s+beton|brique\s+(creuse|pleine)/.test(n)) {
+    return { resourceType: "materiaux", family: "maconnerie", subFamily: "blocs-beton" };
+  }
+
+  if (/ciment|mortier\s+(sec|de\s+joint|colle)|liant/.test(n) && !/carrelage|faience/.test(n)) {
+    return {
+      resourceType: "materiaux",
+      family: "maconnerie",
+      subFamily: /mortier/.test(n) ? "mortiers" : "liants",
+    };
+  }
+
+  if (/sable|gravier|granulat|0\/\d|grave|tout.venant/.test(n)) {
+    return { resourceType: "materiaux", family: "terrassement", subFamily: /gravier|grave/.test(n) ? "graviers" : "sables" };
+  }
+
+  if (/laine\s+de\s+verre|laine\s+de\s+roche|isolant|polystyrene|polyurethane|pir\b|xps\b/.test(n)) {
+    return {
+      resourceType: "materiaux",
+      family: "isolation",
+      subFamily: /polystyrene|polyurethane|pir|xps/.test(n) ? "isolants-synthetiques" : "isolants-mineraux",
+    };
+  }
+
+  if (/placo|plaque\s+de\s+platre|ba13|ba25|cloison\s+placo/.test(n)) {
+    return { resourceType: "materiaux", family: "platrerie", subFamily: "plaques-platre" };
+  }
+
+  if (/gaine\s+icta|gaine\s+elec|icta|goulotte/.test(n)) {
+    return { resourceType: "materiaux", family: "electricite", subFamily: "gaines" };
+  }
+
+  if (/cable|3g\d|5g\d|ho7|gaine\s+ird/.test(n)) {
+    return { resourceType: "materiaux", family: "electricite", subFamily: "cables" };
+  }
+
+  if (/interrupteur|prise\s+elec|tableau\s+elec|disjoncteur/.test(n)) {
+    return { resourceType: "materiaux", family: "electricite", subFamily: "appareillages" };
+  }
+
+  if (/tube\s+per|per\b|multicouche|evacuation|wc\s+suspendu|groupe\s+securite/.test(n)) {
+    return {
+      resourceType: "materiaux",
+      family: "plomberie",
+      subFamily: /evacuation|wc\s+suspendu/.test(n) ? "evacuations" : "tubes",
+    };
+  }
+
+  if (/fenetre|porte\s+d[' ]?entree|menuiserie\s+(pvc|alu|bois)|volet|baie\s+coulissante/.test(n)) {
+    return { resourceType: "materiaux", family: "menuiserie", subFamily: "fenetres-portes" };
+  }
+
+  if (/bois\s+massif|panneau\s+(contreplaque|osb|ctbx)|lambourde|liteau/.test(n)) {
+    return { resourceType: "materiaux", family: "menuiserie", subFamily: "bois-panneaux" };
+  }
+
+  if (isCarrelageJointContext(n)) {
+    return { resourceType: "materiaux", family: "carrelage", subFamily: "joints" };
+  }
+
+  if (/colle\s+carrelage|carrelage|faience|mosaique|gres\s+cerame|margelle|dallage/.test(n)) {
+    return {
+      resourceType: "materiaux",
+      family: "carrelage",
+      subFamily: /colle/.test(n) ? "colles" : null,
+    };
+  }
+
+  if (/peinture|enduit\s+facade|ravalement|lasure/.test(n)) {
+    return { resourceType: "materiaux", family: "peinture", subFamily: "peintures-interieures" };
+  }
+
+  if (/vis\b|cheville|boulon|agrafe|fixation|bande\s+joint/.test(n)) {
+    return { resourceType: "consommables", family: "consommables-chantier", subFamily: "fixations" };
+  }
+
+  if (/mastic|colle\s+(ms|polyurethane)|silicone/.test(n)) {
+    return { resourceType: "consommables", family: "consommables-chantier", subFamily: "colles-mastics" };
+  }
+
+  if (/bache|film\s+polyane|protection\s+chantier/.test(n)) {
+    return { resourceType: "consommables", family: "consommables-chantier", subFamily: "protection" };
+  }
+
+  if (/mini.pelle|pelle|grue|nacelle|engin|compacteur/.test(n)) {
     return {
       resourceType: "location_engin",
       family: "engins",
       subFamily: /nacelle/.test(n) ? "nacelles" : /grue/.test(n) ? "grues" : "mini-pelles",
     };
   }
-  if (/parpaing|bloc.*beton|brique/.test(n)) {
-    return { resourceType: "materiaux", family: "maconnerie", subFamily: "blocs-beton" };
+
+  if (/echafaud|perforateur|marteau.piqueur|outillage|banche/.test(n)) {
+    return { resourceType: "location_outillage", family: "outillage", subFamily: /echafaud/.test(n) ? "echafaudages" : "electroportatif" };
   }
-  if (/laine.*verre|laine.*roche|isolant|polystyrene/.test(n)) {
-    return { resourceType: "materiaux", family: "isolation", subFamily: "isolants-mineraux" };
-  }
-  if (/mini.pelle|pelle|grue|nacelle|engin|compacteur/.test(n)) {
-    return { resourceType: "location_engin", family: "engins", subFamily: "mini-pelles" };
-  }
-  if (/echafaud|perforateur|marteau.piqueur|outillage/.test(n)) {
-    return { resourceType: "location_outillage", family: "outillage", subFamily: "electroportatif" };
-  }
-  if (/epi|casque|gant|harnais/.test(n)) {
+
+  if (/epi|casque|gant|harnais|lunette|botte\s+securite/.test(n)) {
     return { resourceType: "equipements", family: "epi", subFamily: "epi" };
   }
-  if (/placo|plaque.*platre|ba13|ba25/.test(n)) {
-    return { resourceType: "materiaux", family: "platrerie", subFamily: "plaques-platre" };
-  }
-  if (/parpaing|agglo|bloc.*beton|bloc.*creux/.test(n)) {
-    return { resourceType: "materiaux", family: "maconnerie", subFamily: "blocs-beton" };
-  }
-  if (/ciment|mortier|liant/.test(n)) {
-    return { resourceType: "materiaux", family: "maconnerie", subFamily: "liants" };
-  }
-  if (/sable|gravier|granulat|0\/\d/.test(n)) {
-    return { resourceType: "materiaux", family: "terrassement", subFamily: /gravier/.test(n) ? "graviers" : "sables" };
-  }
-  if (/gaine.*icta|gaine.*elec|icta/.test(n)) {
-    return { resourceType: "materiaux", family: "electricite", subFamily: "gaines" };
-  }
-  if (/cable|3g\d|5g\d|ho7/.test(n)) {
-    return { resourceType: "materiaux", family: "electricite", subFamily: "cables" };
-  }
-  if (/tube.*pvc|pvc|evacuation|pression/.test(n)) {
-    return { resourceType: "materiaux", family: "plomberie", subFamily: /evacuation/.test(n) ? "evacuations" : "tubes" };
-  }
-  if (/laine.*verre/.test(n)) {
-    return { resourceType: "materiaux", family: "isolation", subFamily: "isolants-mineraux" };
-  }
-  if (/laine.*roche/.test(n)) {
-    return { resourceType: "materiaux", family: "isolation", subFamily: "isolants-mineraux" };
-  }
-  if (/peinture/.test(n)) {
-    return { resourceType: "materiaux", family: "peinture", subFamily: "peintures-interieures" };
-  }
-  if (/colle.*carrelage|joint/.test(n)) {
-    return { resourceType: "materiaux", family: "carrelage", subFamily: /joint/.test(n) ? "joints" : "colles" };
+
+  if (/prestation|main.d.oeuvre|etude\s+technique|coordination\s+sps/.test(n)) {
+    return { resourceType: "services", family: "prestations", subFamily: "services" };
   }
 
   return { resourceType: "materiaux", family: "divers-materiaux", subFamily: "non-classe" };

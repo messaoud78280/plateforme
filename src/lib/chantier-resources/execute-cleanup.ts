@@ -2,7 +2,7 @@
  * Nettoyage batch ressources chantier (sans session UI) — alias + fiches doublons.
  */
 
-import type { Prisma, PrismaClient, SiteResourceType } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 import { Prisma as PrismaNS } from "@prisma/client";
 import {
   aliasIdsToRemoveKeepingOnePerNormalized,
@@ -15,9 +15,21 @@ import {
   type PriceObservationDraft,
 } from "@/lib/chantier-resources/deduplication";
 import { buildPriceObservationKey, normalizeResourceLabel } from "@/lib/chantier-resources/normalize-label";
-import { suggestTaxonomyFromText } from "@/lib/chantier-resources/taxonomy";
-
+import {
+  collectClassificationFixes,
+  loadResourcesForClassification,
+  type ClassificationFix,
+} from "@/lib/chantier-resources/classification";
 type Db = PrismaClient | Prisma.TransactionClient;
+
+function toLegacyClassificationFix(fix: ClassificationFix) {
+  return {
+    id: fix.id,
+    shortName: fix.shortName,
+    suggestedType: fix.suggestedType,
+    suggestedFamily: fix.suggestedFamily,
+  };
+}
 
 export type AliasDedupeResult = {
   removed: number;
@@ -247,21 +259,9 @@ export async function buildResourceDuplicateCleanupPreview(prisma: PrismaClient)
   );
   const preview = buildDuplicateCleanupPreview(rows, priceMap);
 
-  for (const r of rows) {
-    const tax = suggestTaxonomyFromText(r.shortName);
-    const misclassified =
-      r.resourceType !== tax.resourceType ||
-      r.family !== tax.family ||
-      (tax.subFamily != null && r.subFamily !== tax.subFamily);
-    if (misclassified && /attestation|garantie|baignoire|lavabo|beton|laine|parpaing|echafaud|nacelle/.test(normalizeResourceLabel(r.shortName))) {
-      preview.classificationFixes.push({
-        id: r.id,
-        shortName: r.shortName,
-        suggestedType: tax.resourceType,
-        suggestedFamily: tax.family,
-      });
-    }
-  }
+  const classifiable = await loadResourcesForClassification(prisma);
+  const fixes = collectClassificationFixes(classifiable);
+  preview.classificationFixes = fixes.map(toLegacyClassificationFix);
 
   return preview;
 }
@@ -289,15 +289,16 @@ export async function applyResourceDuplicateCleanup(
     }
   }
 
+  const fullFixes = await loadResourcesForClassification(prisma);
+  const classificationFixList = collectClassificationFixes(fullFixes);
   let classificationFixes = 0;
-  for (const fix of preview.classificationFixes) {
-    const tax = suggestTaxonomyFromText(fix.shortName);
+  for (const fix of classificationFixList) {
     await prisma.siteResource.update({
       where: { id: fix.id },
       data: {
-        resourceType: tax.resourceType as SiteResourceType,
-        family: tax.family,
-        subFamily: tax.subFamily,
+        resourceType: fix.suggestedType,
+        family: fix.suggestedFamily,
+        subFamily: fix.suggestedSubFamily,
         normalizedDesignation: normalizeResourceLabel(fix.shortName),
       },
     });

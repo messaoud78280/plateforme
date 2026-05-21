@@ -23,8 +23,8 @@ export default async function SkillCctpPage() {
         <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{skill.title}</h1>
         <p className="text-base leading-relaxed text-slate-600">{skill.subtitle}</p>
         <p className="text-sm text-slate-500">
-          Guide express intégré, checklist des pièces à rassembler (plans, diagnostics, études, DPGF), modes fiche
-          ouvrage et cohérence devis, modèles par lot, affinage, export PDF / Word. Historique sur votre compte.
+          Assistant travaux intelligent : vigilance technique, audit documentaire, interfaces inter-lots, fiches
+          ouvrage standardisées, modèles par lot, export PDF / Word. Ton conducteur de travaux, pas générateur IA.
         </p>
       </header>
 

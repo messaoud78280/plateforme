@@ -45,7 +45,7 @@ export const CCTP_GENERATION_MODES: {
   {
     id: "fiche_ouvrage",
     label: "Fiche ouvrage",
-    description: "Modèle complet par ouvrage (13 rubriques chiffrables).",
+    description: "Fiche ouvrage standardisée (14 rubriques + vigilance).",
   },
   {
     id: "checklist_documents",
@@ -104,11 +104,13 @@ Produire : matrice des interfaces (lot / prestation / responsable / délai), ré
 Citer les lots limitrophes à valider avec le MOE.`;
     case "fiche_ouvrage":
       return `
-## Mode actif : FICHE OUVRAGE
-Pour chaque ouvrage demandé (ou identifié), produire une fiche avec les rubriques :
-Titre · Localisation · Description technique · Matériaux · Dimensions/épaisseurs · Performance · Mise en œuvre · Compris dans le prix · Non compris · Interfaces autres lots · Contrôles · Documents à fournir · Points à vérifier.
-Ton professionnel, prescriptions impératives, aucune section vide sans mention « à préciser ».
-Format : titres ### par rubrique ; listes à puces pour compris / non compris / points à vérifier.`;
+## Mode actif : FICHE OUVRAGE INTELLIGENTE
+Pour chaque ouvrage, produire une fiche avec les rubriques standard :
+Objet des travaux · Prestations comprises · Prestations exclues · Matériaux · Mise en œuvre · Références DTU et normes · Prescriptions techniques · Tolérances · Réservations · Interfaces inter-lots · Points de contrôle · Nettoyage chantier · Essais et validations · DOE et documents finaux.
+Ajouter si pertinent : localisation sur plans, variantes, limites de prestation, contrôles avant réception.
+Pour 2 rubriques sensibles, inclure une ligne « Pourquoi » et « Risque si oubli ».
+Ton conducteur de travaux, prescriptions impératives, sections vides = « à valider avec le MOE ».
+Format : ### par rubrique ; listes pour compris / exclu / contrôles.`;
     case "checklist_documents":
       return `
 ## Mode actif : PIÈCES À RASSEMBLER
@@ -171,7 +173,7 @@ export function getCctpModeUiHint(mode: CctpGenerationMode): string {
     case "coordination":
       return "Précisez les lots limitrophes : matrice interfaces, réservations, rebouchages, responsables.";
     case "fiche_ouvrage":
-      return "Nommez l’ouvrage et la localisation (plans) : fiche complète en 13 rubriques, chiffrable.";
+      return "Nommez l’ouvrage et la localisation (plans) : fiche complète 14 rubriques, chiffrable et relivable chantier.";
     case "checklist_documents":
       return "Cochez les pièces dans la checklist puis synchronisez vers le formulaire avant de générer.";
     case "coherence_dpgf":
@@ -194,7 +196,7 @@ export function getCctpModeRequestPlaceholder(mode: CctpGenerationMode): string 
     case "coordination":
       return "Ex. : Matrice de coordination lot plomberie / GO : percements, réservations, rebouchages, coupe-feu…";
     case "fiche_ouvrage":
-      return "Ex. : Fiche ouvrage — dallage béton 12 cm, RDC, dalle sur terre-plein, avec joints de dilatation…";
+      return "Ex. : Fiche ouvrage — dallage béton 12 cm, réservations, interfaces GO/fluides, contrôles avant coulage…";
     case "checklist_documents":
       return "Ex. : Checklist complète des pièces pour un CCTP rénovation tertiaire (diagnostics + études)…";
     case "coherence_dpgf":

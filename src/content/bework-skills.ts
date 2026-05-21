@@ -17,9 +17,9 @@ export const BEWORK_SKILLS: readonly BeworkSkillDefinition[] = [
     slug: "cctp",
     title: "Rédaction de CCTP",
     subtitle:
-      "Guide méthode, fiches ouvrage, checklist documentaire et cohérence DPGF — CCTP clair, chiffrable et exécutable.",
+      "Assistant travaux : vigilance technique, audit documentaire, interfaces inter-lots — CCTP chiffrable et relivable chantier.",
     description:
-      "Méthode en 6 étapes, modèles par lot, fiches ouvrage (13 rubriques), audit, cohérence DPGF, import multi-formats et export PDF / Word.",
+      "Vigilance par lot, audit des pièces, fiches ouvrage 14 rubriques, coordination, cohérence DPGF, import multi-formats et export PDF / Word.",
     href: "/dashboard/skills/cctp",
     badge: "CCTP",
     status: "available",

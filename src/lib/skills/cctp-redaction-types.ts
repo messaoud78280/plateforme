@@ -1,3 +1,5 @@
+import type { CctpAssistantInsights } from "@/lib/skills/cctp-assistant-intelligence";
+import type { CctpDocumentClassification } from "@/lib/skills/cctp-document-classifier";
 import type { CctpGenerationMode, CctpMarketProfile } from "@/lib/skills/cctp-generation-modes";
 
 /** Niveau de détail attendu pour la rédaction CCTP. */
@@ -28,6 +30,8 @@ export type CctpGenerationInput = {
   generationMode?: CctpGenerationMode;
   marketProfile?: CctpMarketProfile | null;
   refine?: CctpRefineInput;
+  checkedDocumentIds?: string[];
+  documentClassifications?: CctpDocumentClassification[];
 };
 
 /** Corps JSON POST /api/skills/cctp */
@@ -39,6 +43,8 @@ export type CctpRedactionRequestBody = {
   marketProfile?: CctpMarketProfile | null;
   refineSessionId?: string;
   refineInstruction?: string;
+  /** Ids checklist pièces (cat:libellé) pour audit documentaire. */
+  checkedDocumentIds?: string[];
 };
 
 /** Réponse API génération CCTP */
@@ -50,6 +56,8 @@ export type CctpRedactionResponseBody = {
   extractWarnings?: string[];
   generationMode?: CctpGenerationMode;
   refined?: boolean;
+  assistantInsights?: CctpAssistantInsights;
+  documentClassifications?: CctpDocumentClassification[];
 };
 
 /** Résumé session pour historique UI */

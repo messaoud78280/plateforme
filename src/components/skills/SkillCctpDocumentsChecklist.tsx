@@ -44,9 +44,10 @@ export function formatCheckedDocumentsPlain(state: CctpDocsCheckState): string {
 type Props = {
   availableDocumentsHint?: string;
   onSyncToForm?: (text: string) => void;
+  onCheckedIdsChange?: (ids: string[]) => void;
 };
 
-export function SkillCctpDocumentsChecklist({ availableDocumentsHint, onSyncToForm }: Props) {
+export function SkillCctpDocumentsChecklist({ availableDocumentsHint, onSyncToForm, onCheckedIdsChange }: Props) {
   const [open, setOpen] = useState(false);
   const [checked, setChecked] = useState<CctpDocsCheckState>({});
 
@@ -54,13 +55,21 @@ export function SkillCctpDocumentsChecklist({ availableDocumentsHint, onSyncToFo
     setChecked(loadState());
   }, []);
 
-  const toggle = useCallback((id: string) => {
-    setChecked((prev) => {
-      const next = { ...prev, [id]: !prev[id] };
-      saveState(next);
-      return next;
-    });
-  }, []);
+  const toggle = useCallback(
+    (id: string) => {
+      setChecked((prev) => {
+        const next = { ...prev, [id]: !prev[id] };
+        saveState(next);
+        onCheckedIdsChange?.(getCheckedDocumentIds(next));
+        return next;
+      });
+    },
+    [onCheckedIdsChange],
+  );
+
+  useEffect(() => {
+    onCheckedIdsChange?.(getCheckedDocumentIds(checked));
+  }, [checked, onCheckedIdsChange]);
 
   const syncToForm = useCallback(() => {
     const plain = formatCheckedDocumentsPlain(checked);

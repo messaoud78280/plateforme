@@ -13,6 +13,9 @@ import { SkillCctpModeSelector } from "@/components/skills/SkillCctpModeSelector
 import { SkillCctpNormPicker } from "@/components/skills/SkillCctpNormPicker";
 import { SkillCctpRefinePanel } from "@/components/skills/SkillCctpRefinePanel";
 import { SkillCctpSessionHistory } from "@/components/skills/SkillCctpSessionHistory";
+import { SkillCctpAssistantPanel } from "@/components/skills/SkillCctpAssistantPanel";
+import { SkillCctpWorkflowSteps } from "@/components/skills/SkillCctpWorkflowSteps";
+import type { CctpAssistantInsights } from "@/lib/skills/cctp-assistant-intelligence";
 import {
   getCctpModeLabel,
   getCctpModeRequestPlaceholder,
@@ -62,6 +65,7 @@ export function SkillCctpWorkspace({ initialSessions = [] }: Props) {
   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
   const [generationMode, setGenerationMode] = useState<CctpGenerationMode>("redaction");
   const [marketProfile, setMarketProfile] = useState<CctpMarketProfile | null>(null);
+  const [checkedDocumentIds, setCheckedDocumentIds] = useState<string[]>([]);
 
   const refreshSessions = useCallback(async () => {
     try {
@@ -130,6 +134,7 @@ export function SkillCctpWorkspace({ initialSessions = [] }: Props) {
         formData.append("normReferences", JSON.stringify(normReferences));
         formData.append("generationMode", generationMode);
         if (marketProfile) formData.append("marketProfile", marketProfile);
+        formData.append("checkedDocumentIds", JSON.stringify(checkedDocumentIds));
 
         if (opts?.refineInstruction && activeSessionId) {
           formData.append("refineSessionId", activeSessionId);
@@ -194,10 +199,26 @@ export function SkillCctpWorkspace({ initialSessions = [] }: Props) {
 
   return (
     <div className="space-y-6">
+      <SkillCctpWorkflowSteps activeStep={result ? 5 : context.lot ? 3 : 2} />
       <SkillCctpMethodologyPanel />
       <SkillCctpDocumentsChecklist
         availableDocumentsHint={context.availableDocuments}
         onSyncToForm={syncDocumentsToForm}
+        onCheckedIdsChange={setCheckedDocumentIds}
+      />
+      <SkillCctpAssistantPanel
+        context={context}
+        checkedDocumentIds={checkedDocumentIds}
+        insightsFromResult={
+          result?.assistantInsights
+            ? ({
+                ...result.assistantInsights,
+                documentClassifications:
+                  result.documentClassifications ?? result.assistantInsights.documentClassifications,
+              } as CctpAssistantInsights)
+            : undefined
+        }
+        compact={Boolean(result)}
       />
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-start">
@@ -205,7 +226,8 @@ export function SkillCctpWorkspace({ initialSessions = [] }: Props) {
           <div>
             <h2 className="font-heading text-lg font-bold text-[#0f172a]">Votre demande</h2>
             <p className="mt-1 text-sm text-slate-600">
-              Décrivez ce dont vous avez besoin : sommaire, article, relecture, analyse des manques…
+              Précisez lot, réservations, interfaces et contraintes chantier — l&apos;assistant structure un CCTP
+              exploitable et chiffrable.
             </p>
           </div>
 
@@ -271,7 +293,7 @@ export function SkillCctpWorkspace({ initialSessions = [] }: Props) {
                   onClick={insertOuvrageTemplate}
                   className="text-xs font-semibold text-[#2563eb] hover:underline"
                 >
-                  Insérer le modèle 13 rubriques
+                  Insérer le modèle 14 rubriques
                 </button>
               ) : null}
             </div>

@@ -5,10 +5,16 @@ import { canAccessBeWorkSkills } from "@/lib/be-work-skills-access";
 import { CCTP_MAX_REFERENCE_FILES } from "@/lib/skills/cctp-upload-config";
 import { uploadCctpSkillFile } from "@/lib/skills/cctp-skill-storage";
 import {
+  classifyCctpDocument,
+  classifiedExtractLabel,
+  type CctpDocumentClassification,
+} from "@/lib/skills/cctp-document-classifier";
+import {
   combineExtractedBlocks,
   extractTextFromBuffer,
   isCctpFileAccepted,
 } from "@/lib/skills/extract-upload-text";
+import { getCctpFileCategory } from "@/lib/skills/cctp-upload-config";
 import {
   type CctpGenerationMode,
   type CctpMarketProfile,
@@ -60,6 +66,7 @@ type PendingFileRecord = {
   fileSize: number;
   extractedText: string | null;
   buffer: Buffer;
+  classification: CctpDocumentClassification;
 };
 
 function parseDetailLevel(v: unknown): CctpDetailLevel {
@@ -77,6 +84,20 @@ function parseContext(raw: unknown): CctpProjectContext {
     detailLevel: parseDetailLevel(o.detailLevel),
     availableDocuments: typeof o.availableDocuments === "string" ? o.availableDocuments.trim() : "",
   };
+}
+
+function parseCheckedDocumentIds(raw: unknown): string[] {
+  if (!Array.isArray(raw)) {
+    if (typeof raw === "string") {
+      try {
+        return parseCheckedDocumentIds(JSON.parse(raw) as unknown);
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  }
+  return raw.filter((x): x is string => typeof x === "string").map((s) => s.trim()).filter(Boolean);
 }
 
 function parseNormReferences(raw: unknown): string[] {
@@ -101,6 +122,7 @@ async function processFile(
   blocks: { label: string; fileName: string; text: string; warning?: string }[],
   pending: PendingFileRecord[],
   extractWarnings: string[],
+  isPrimaryCctpSlot?: boolean,
 ) {
   if (!isCctpFileAccepted(file)) {
     extractWarnings.push(
@@ -111,7 +133,15 @@ async function processFile(
   const buffer = Buffer.from(await file.arrayBuffer());
   const { text, warning } = await extractTextFromBuffer(buffer, file.name, file.type);
   if (warning) extractWarnings.push(`${file.name} : ${warning}`);
-  blocks.push({ label, fileName: file.name, text, warning });
+  const classification = classifyCctpDocument({
+    fileName: file.name,
+    mimeType: file.type || null,
+    extractedText: text || null,
+    fileCategory: getCctpFileCategory(file.name, file.type || ""),
+    isPrimaryCctpSlot,
+  });
+  const blockLabel = classifiedExtractLabel(classification, label);
+  blocks.push({ label: blockLabel, fileName: file.name, text, warning });
   pending.push({
     kind,
     fileName: file.name,
@@ -119,6 +149,7 @@ async function processFile(
     fileSize: file.size,
     extractedText: text || null,
     buffer,
+    classification,
   });
 }
 
@@ -129,7 +160,7 @@ async function processUploads(formData: FormData) {
 
   const existing = formData.get("existingCctp");
   if (existing instanceof File && existing.size > 0) {
-    await processFile(existing, "existing_cctp", "CCTP existant", blocks, pending, extractWarnings);
+    await processFile(existing, "existing_cctp", "CCTP existant", blocks, pending, extractWarnings, true);
   }
 
   const refs = formData.getAll("referenceDocs").filter((f): f is File => f instanceof File && f.size > 0);
@@ -141,7 +172,13 @@ async function processUploads(formData: FormData) {
   }
 
   const extractedFromFiles = combineExtractedBlocks(blocks);
-  return { extractedFromFiles: extractedFromFiles || undefined, extractWarnings, pending };
+  const documentClassifications = pending.map((p) => p.classification);
+  return {
+    extractedFromFiles: extractedFromFiles || undefined,
+    extractWarnings,
+    pending,
+    documentClassifications,
+  };
 }
 
 async function persistFilesWithStorage(
@@ -192,6 +229,8 @@ export async function POST(request: NextRequest) {
     let marketProfile: CctpMarketProfile | null = null;
     let refineSessionId: string | undefined;
     let refineInstruction: string | undefined;
+    let checkedDocumentIds: string[] = [];
+    let documentClassifications: CctpDocumentClassification[] = [];
 
     if (contentType.includes("multipart/form-data")) {
       const formData = await request.formData();
@@ -205,6 +244,7 @@ export async function POST(request: NextRequest) {
         }
       }
       normReferences = parseNormReferences(formData.get("normReferences"));
+      checkedDocumentIds = parseCheckedDocumentIds(formData.get("checkedDocumentIds"));
       generationMode = parseGenerationMode(formData.get("generationMode"));
       marketProfile = parseMarketProfile(formData.get("marketProfile"));
       refineSessionId =
@@ -217,11 +257,13 @@ export async function POST(request: NextRequest) {
       extractedFromFiles = uploads.extractedFromFiles;
       extractWarnings = uploads.extractWarnings;
       pending = uploads.pending;
+      documentClassifications = uploads.documentClassifications;
     } else {
       const body = (await request.json().catch(() => ({}))) as Partial<CctpRedactionRequestBody>;
       reqText = typeof body.request === "string" ? body.request : "";
       context = parseContext(body.context);
       normReferences = parseNormReferences(body.normReferences);
+      checkedDocumentIds = parseCheckedDocumentIds(body.checkedDocumentIds);
       generationMode = parseGenerationMode(body.generationMode);
       marketProfile = parseMarketProfile(body.marketProfile);
       refineSessionId = typeof body.refineSessionId === "string" ? body.refineSessionId.trim() : undefined;
@@ -255,6 +297,8 @@ export async function POST(request: NextRequest) {
       context,
       extractedFromFiles,
       normReferences,
+      checkedDocumentIds,
+      documentClassifications: documentClassifications.length ? documentClassifications : undefined,
       generationMode,
       marketProfile,
       refine: isRefine
@@ -313,6 +357,9 @@ export async function POST(request: NextRequest) {
       ...result,
       sessionId,
       extractWarnings: extractWarnings.length ? extractWarnings : undefined,
+      documentClassifications: documentClassifications.length
+        ? documentClassifications
+        : result.documentClassifications,
     });
   } catch (e) {
     const err = e as { message?: string };

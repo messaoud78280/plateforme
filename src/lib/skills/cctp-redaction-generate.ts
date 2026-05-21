@@ -5,6 +5,11 @@ import {
   CCTP_SIX_STEPS,
   CCTP_NORMS_STANDARD_PHRASE,
 } from "@/content/cctp-methodology";
+import {
+  computeCctpAssistantInsights,
+  formatInsightsMarkdown,
+  formatIntelligenceBlockForPrompt,
+} from "@/lib/skills/cctp-assistant-intelligence";
 import { cctpNormLabelsByIds } from "@/content/cctp-norm-references";
 import { CCTP_REDACTION_SYSTEM_PROMPT } from "@/lib/skills/cctp-redaction-system-prompt";
 import type { CctpGenerationInput, CctpProjectContext, CctpRedactionResponseBody } from "@/lib/skills/cctp-redaction-types";
@@ -82,7 +87,26 @@ function buildUserMessage(input: CctpGenerationInput): string {
   } else {
     lines.push("", "## Demande utilisateur", request.trim());
   }
+
+  const insights = computeCctpAssistantInsights(context, {
+    extractedFromFiles,
+    checkedDocumentIds: input.checkedDocumentIds,
+    documentClassifications: input.documentClassifications,
+  });
+  lines.push("", formatIntelligenceBlockForPrompt(insights));
+
   return lines.join("\n");
+}
+
+function attachInsightsToMarkdown(
+  markdown: string,
+  insights: ReturnType<typeof computeCctpAssistantInsights>,
+  usedLlm: boolean,
+): string {
+  if (usedLlm) return markdown;
+  const prefix = formatInsightsMarkdown(insights);
+  if (markdown.includes("## Pilotage chantier BeWork")) return markdown;
+  return `${prefix}\n\n---\n\n${markdown}`;
 }
 
 function detectIntent(
@@ -345,14 +369,35 @@ export async function generateCctpRedaction(input: CctpGenerationInput): Promise
       messages.push({ role: "user", content: buildUserMessage(input) });
     }
     const markdown = await chatCompletion(messages);
-    return { markdown, usedLlm: true, generationMode: mode, refined: Boolean(input.refine) };
+    const insights = computeCctpAssistantInsights(input.context, {
+      extractedFromFiles: input.extractedFromFiles,
+      checkedDocumentIds: input.checkedDocumentIds,
+      documentClassifications: input.documentClassifications,
+    });
+    return {
+      markdown,
+      usedLlm: true,
+      generationMode: mode,
+      refined: Boolean(input.refine),
+      assistantInsights: insights,
+      documentClassifications: input.documentClassifications,
+    };
   }
 
+  const insights = computeCctpAssistantInsights(input.context, {
+    extractedFromFiles: input.extractedFromFiles,
+    checkedDocumentIds: input.checkedDocumentIds,
+    documentClassifications: input.documentClassifications,
+  });
+  const fallbackMd = attachInsightsToMarkdown(generateCctpFallback(input), insights, false);
+
   return {
-    markdown: generateCctpFallback(input),
+    markdown: fallbackMd,
     usedLlm: false,
     generationMode: mode,
     refined: Boolean(input.refine),
+    assistantInsights: insights,
+    documentClassifications: input.documentClassifications,
     notice:
       "Mode assisté BeWork (sans clé OpenAI). Ajoutez OPENAI_API_KEY dans les variables d'environnement pour activer la génération IA complète.",
   };

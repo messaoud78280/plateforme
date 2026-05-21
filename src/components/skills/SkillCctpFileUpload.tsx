@@ -9,6 +9,7 @@ import {
   getCctpFileCategory,
   isCctpFileAccepted,
 } from "@/lib/skills/cctp-upload-config";
+import { classifyCctpDocument } from "@/lib/skills/cctp-document-classifier";
 
 type Props = {
   existingCctp: File | null;
@@ -18,10 +19,37 @@ type Props = {
   onReject?: (message: string) => void;
 };
 
-function FileRow({ name, size, onRemove }: { name: string; size: number; onRemove: () => void }) {
+function FileTypeBadge({ fileName, mimeType }: { fileName: string; mimeType: string }) {
+  const c = classifyCctpDocument({
+    fileName,
+    mimeType,
+    fileCategory: getCctpFileCategory(fileName, mimeType),
+  });
+  return (
+    <span
+      className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-700 ring-1 ring-slate-200/90"
+      title={`${c.analysisLabel} — détection ${c.confidence}`}
+    >
+      {c.badge}
+    </span>
+  );
+}
+
+function FileRow({
+  name,
+  size,
+  mimeType,
+  onRemove,
+}: {
+  name: string;
+  size: number;
+  mimeType: string;
+  onRemove: () => void;
+}) {
   return (
     <li className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
       <span className="min-w-0 flex-1 truncate font-medium text-slate-800">{name}</span>
+      <FileTypeBadge fileName={name} mimeType={mimeType} />
       <span className="shrink-0 text-xs text-slate-500">{formatFileSize(size)}</span>
       <button
         type="button"
@@ -188,6 +216,7 @@ export function SkillCctpFileUpload({
             <FileRow
               name={existingCctp.name}
               size={existingCctp.size}
+              mimeType={existingCctp.type}
               onRemove={() => {
                 onExistingChange(null);
                 if (cctpInputRef.current) cctpInputRef.current.value = "";
@@ -209,7 +238,10 @@ export function SkillCctpFileUpload({
                 className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
               >
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate font-medium text-slate-800">{f.name}</span>
+                  <span className="flex items-center gap-2">
+                    <span className="truncate font-medium text-slate-800">{f.name}</span>
+                    <FileTypeBadge fileName={f.name} mimeType={f.type} />
+                  </span>
                   <span className="text-xs text-slate-500">
                     {formatFileSize(f.size)} · {getCctpFileCategory(f.name, f.type)}
                   </span>

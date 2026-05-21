@@ -124,20 +124,32 @@ export const CCTP_STRUCTURE_SECTIONS = [
   "Documents à remettre en fin de chantier",
 ] as const;
 
+/** Structure standardisée par ouvrage / article (Skill CCTP v2). */
 export const CCTP_OUVRAGE_TEMPLATE_FIELDS = [
-  "Titre de l'ouvrage",
-  "Localisation",
-  "Description technique",
+  "Objet des travaux",
+  "Prestations comprises",
+  "Prestations exclues",
   "Matériaux",
-  "Dimensions / épaisseurs",
-  "Performance attendue",
-  "Mode de mise en œuvre",
-  "Compris dans le prix",
-  "Non compris",
-  "Interfaces avec les autres lots",
-  "Contrôles attendus",
-  "Documents à fournir",
-  "Points à vérifier",
+  "Mise en œuvre",
+  "Références DTU et normes",
+  "Prescriptions techniques",
+  "Tolérances",
+  "Réservations",
+  "Interfaces inter-lots",
+  "Points de contrôle",
+  "Nettoyage chantier",
+  "Essais et validations",
+  "DOE et documents finaux",
+] as const;
+
+/** Champs enrichis pour fiches ouvrages connectables bibliothèque / DPGF. */
+export const CCTP_OUVRAGE_EXTENDED_FIELDS = [
+  ...CCTP_OUVRAGE_TEMPLATE_FIELDS,
+  "Localisation sur plans",
+  "Variantes acceptées",
+  "Limites de prestation",
+  "Contraintes de mise en œuvre",
+  "Contrôles avant réception",
 ] as const;
 
 export const CCTP_SIX_STEPS = [
@@ -217,9 +229,28 @@ export function formatCheckedDocumentsForPrompt(checkedIds: readonly string[]): 
 /** Bloc condensé injecté dans le prompt système (≤ contexte raisonnable). */
 export function getCctpMethodologySystemPromptBlock(): string {
   return `
-## Méthodologie BeWork — Établir un CCTP (référence obligatoire)
+## Méthodologie BeWork — Assistant travaux CCTP (référence obligatoire)
 
-Un bon CCTP est **clair, précis, cohérent avec les plans**, **chiffrable** et **exécutable**. Il doit dire : quoi faire, où, avec quels matériaux, selon quelles normes, comment mettre en œuvre, ce qui est compris / exclu, qui fait quoi, quels contrôles et quels documents remettre.
+Tu es un **assistant métier chantier**, pas un générateur de texte générique. Ton : conducteur de travaux, économiste, rédacteur CCTP — professionnel, terrain, crédible.
+
+Un bon CCTP est **clair, précis, cohérent avec les plans**, **chiffrable** et **exécutable**.
+
+### Langage chantier (obligatoire)
+- Dire : « L'entreprise devra… », « Les ouvrages comprendront… », « À valider avec le MOE avant exécution ».
+- Éviter : « Veuillez saisir », « En tant qu'IA », formulations startup.
+- Préférer : « Précisez les réservations, interfaces techniques et contraintes chantier. »
+
+### Pédagogie intégrée
+Pour les points sensibles, ajouter brièvement :
+- **Pourquoi cette information ?** (impact chiffrage / exécution)
+- **Risque chantier** si oubli
+- **Erreur fréquente** terrain
+
+### Vigilance technique
+Quand l'analyse métier BeWork est fournie, reprendre en tête de réponse :
+- Niveau de vigilance (faible / moyen / élevé / critique)
+- Alertes documentaires et interfaces inter-lots
+Puis produire le livrable demandé.
 
 ### Chaîne documentaire
 Besoin client → Plans + études + diagnostics → Description des ouvrages → Normes/DTU → Limites de prestation → CCTP final.
@@ -227,8 +258,10 @@ Besoin client → Plans + études + diagnostics → Description des ouvrages →
 ### Structure type d'un lot CCTP
 ${CCTP_STRUCTURE_SECTIONS.map((s, i) => `${i + 1}. ${s}`).join("\n")}
 
-### Fiche ouvrage (modèle à respecter pour chaque ouvrage)
+### Fiche ouvrage / article — rubriques obligatoires
 ${CCTP_OUVRAGE_TEMPLATE_FIELDS.map((f) => `- ${f}`).join("\n")}
+
+Chaque fiche peut aussi mentionner : localisation plans, variantes, limites de prestation, contrôles avant réception (connexion future bibliothèque BeWork / DPGF / DCE).
 
 ### Limites de prestation (indispensables)
 Préciser : compris / non compris / autre lot / réservations / rebouchages / protections / nettoyage / documents techniques.
@@ -244,6 +277,7 @@ ${CCTP_SIX_STEPS.map((s) => `${s.step}. ${s.title} — ${s.detail}`).join("\n")}
 - Ouvrage au CCTP absent du DPGF/devis.
 - Diagnostics rénovation ignorés.
 - Interfaces entre lots floues.
+- Confondre « jointifs » bois et « joints » de carrelage.
 
 ### Question finale avant validation
 « L'entreprise peut-elle comprendre, chiffrer et exécuter correctement les travaux avec ce document ? »`;

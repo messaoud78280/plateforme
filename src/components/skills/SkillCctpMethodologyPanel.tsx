@@ -84,7 +84,7 @@ export function SkillCctpMethodologyPanel() {
 
           <section className="rounded-lg border border-slate-200 bg-white p-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h3 className="font-semibold text-slate-900">Modèle fiche ouvrage (13 rubriques)</h3>
+              <h3 className="font-semibold text-slate-900">Modèle fiche ouvrage (14 rubriques)</h3>
               <button
                 type="button"
                 onClick={() => void copyTemplate()}

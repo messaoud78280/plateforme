@@ -110,6 +110,13 @@ export const TUTO_PAGE_SEO: Record<string, TutoPageSeo> = {
     ),
     keywords: ["DC4 sous-traitance", "acte spécial sous-traitance", "marché public BTP", "skill DC4"],
   },
+  "/ressources/tuto-skill-soged-bework": {
+    title: "Skill SOGED déchets chantier BTP : tutoriel AGEC & REP | BeWork",
+    description: tutoDesc(
+      "Skill SOGED : schéma déchets conforme AGEC, REP Bâtiment et Trackdéchets. PDF 9 pages et prompts Claude — 12 min par chantier",
+    ),
+    keywords: ["SOGED chantier", "gestion déchets BTP", "Trackdéchets", "REP Bâtiment", "skill SOGED"],
+  },
   "/ressources/tuto-skill-rdv-client-bework": {
     title: "Skill préparation RDV client BTP : tutoriel Claude | BeWork",
     description: tutoDesc(

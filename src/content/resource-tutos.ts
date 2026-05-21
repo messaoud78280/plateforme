@@ -41,6 +41,13 @@ export const RESOURCE_TUTO_ITEMS: readonly ResourceTutoItem[] = [
     icon: "document",
   },
   {
+    title: "Tuto Crée ton skill — SOGED (déchets chantier)",
+    desc: "SOGED conforme AGEC et REP en 12 min — Trackdéchets, filières, BSDA — PDF et prompts Claude pour tous vos chantiers BTP.",
+    href: "/ressources/tuto-skill-soged-bework",
+    status: "Tuto PDF",
+    icon: "document",
+  },
+  {
     title: "Tuto Crée ton bureau depuis ton chantier",
     desc: "Pairer PC et mobile, 8 commandes vocales BTP, sécurité et routine — PDF intégré, prompts à copier.",
     href: "/ressources/tuto-dispatch-bework",

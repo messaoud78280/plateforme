@@ -184,7 +184,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     commentSteps: [
       "Échange pour cadrer le volume et le type de missions.",
       "Choix du forfait et création de l’espace client.",
-      "Démarrage opérationnel en quelques jours selon disponibilité.",
+      "Prise en charge rapide selon disponibilité.",
     ],
     deepeningLinks: [
       { href: "/externaliser-administratif", label: "Approfondir l’externalisation" },

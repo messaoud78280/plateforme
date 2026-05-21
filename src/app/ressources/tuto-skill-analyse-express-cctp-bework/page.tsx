@@ -6,6 +6,7 @@ import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { CopyPromptButton } from "@/components/ressources/CopyPromptButton";
 import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/seo-landing-json-ld";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
+import { BeWorkStatsGrid } from "@/components/marketing/BeWorkStatsGrid";
 
 const pagePath = "/ressources/tuto-skill-analyse-express-cctp-bework";
 
@@ -495,20 +496,7 @@ export default function TutoSkillAnalyseExpressCctpBeworkPage() {
                 </Link>
               </p>
 
-              <div className="mt-14 grid gap-10 border-t border-slate-100 pt-10 sm:grid-cols-2 lg:grid-cols-3">
-                <div>
-                  <div className="text-3xl font-extrabold leading-tight text-[#1d4ed8] sm:text-4xl">3 À 5 JOURS</div>
-                  <div className="mt-2 text-xl font-bold uppercase tracking-wide text-slate-900">OPÉRATIONNEL</div>
-                </div>
-                <div>
-                  <div className="text-5xl font-extrabold text-[#1d4ed8]">0</div>
-                  <div className="mt-2 text-xl font-bold uppercase tracking-wide text-slate-900">RECRUTEMENT À FAIRE</div>
-                </div>
-                <div>
-                  <div className="text-5xl font-extrabold text-[#1d4ed8]">100 %</div>
-                  <div className="mt-2 text-xl font-bold uppercase tracking-wide text-slate-900">PILOTÉ EN FRANCE</div>
-                </div>
-              </div>
+              <BeWorkStatsGrid />
             </div>
           </section>
 

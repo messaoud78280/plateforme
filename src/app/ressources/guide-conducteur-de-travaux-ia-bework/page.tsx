@@ -5,6 +5,7 @@ import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/seo-landing-json-ld";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
+import { BeWorkStatsGrid } from "@/components/marketing/BeWorkStatsGrid";
 
 const pagePath = "/ressources/guide-conducteur-de-travaux-ia-bework";
 
@@ -389,25 +390,12 @@ export default function GuideConducteurTravauxIaBeworkPage() {
                 Pas le temps de le faire vous-même ?
               </p>
               <p className="mt-6 text-[1.0625rem] leading-relaxed text-slate-900">
-                BeWork propose un Assistant Travaux qui rédige vos livrables à votre place, augmenté par l&apos;IA, opérationnel en 3 à 5 jours, 100&nbsp;%
+                BeWork propose un Assistant Travaux qui rédige vos livrables à votre place, augmenté par l&apos;IA, avec une prise en charge rapide, 100&nbsp;%
                 piloté en France.
               </p>
               <p className="mt-8 text-2xl font-bold uppercase tracking-tight text-slate-900">ON TIENT LE BUREAU, VOUS TENEZ LE CHANTIER</p>
 
-              <div className="mt-14 grid gap-10 border-t border-slate-100 pt-10 sm:grid-cols-2 lg:grid-cols-3">
-                <div>
-                  <div className="text-3xl font-extrabold leading-tight text-[#1d4ed8] sm:text-4xl">3 À 5 JOURS</div>
-                  <div className="mt-2 text-xl font-bold uppercase tracking-wide text-slate-900">OPÉRATIONNEL</div>
-                </div>
-                <div>
-                  <div className="text-5xl font-extrabold text-[#1d4ed8]">0</div>
-                  <div className="mt-2 text-xl font-bold uppercase tracking-wide text-slate-900">RECRUTEMENT À FAIRE</div>
-                </div>
-                <div>
-                  <div className="text-5xl font-extrabold text-[#1d4ed8]">100 %</div>
-                  <div className="mt-2 text-xl font-bold uppercase tracking-wide text-slate-900">PILOTÉ EN FRANCE</div>
-                </div>
-              </div>
+              <BeWorkStatsGrid />
 
               <p className="mt-10 text-sm text-slate-600">Article publié le 11 mai 2026 par BeWork. Version 1.0 du guide.</p>
             </div>

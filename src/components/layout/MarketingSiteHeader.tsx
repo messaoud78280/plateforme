@@ -94,7 +94,7 @@ const RESOURCE_MENU_ENTRIES: {
 ];
 
 const REASSURANCE = [
-  "Opérationnel en 3 à 5 jours",
+  "Prise en charge rapide",
   "Pas de recrutement",
   "Supervision depuis la France",
   "Plateforme simple et sécurisée",

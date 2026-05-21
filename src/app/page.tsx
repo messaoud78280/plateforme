@@ -343,8 +343,7 @@ export default function HomePage() {
                       </svg>
                     </span>
                     <span className="min-w-0 text-left text-[15px] font-semibold leading-[1.2] tracking-tight text-[#171717]">
-                      <span className="block">Opérationnel</span>
-                      <span className="block text-slate-600">en 3 à 5 jours</span>
+                      Prise en charge rapide
                     </span>
                   </li>
                   <li className="flex min-h-[3.25rem] flex-1 items-center gap-3 px-2 py-4 sm:min-h-[3.75rem] sm:px-4 sm:py-4 lg:min-h-[3.5rem]">

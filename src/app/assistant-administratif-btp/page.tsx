@@ -63,7 +63,7 @@ export default function Page() {
       <h2>Pourquoi les entreprises BTP choisissent BeWork ?</h2>
       <p>
         Réactivité, équipe francophone, coût maîtrisé. Pas de recrutement ni d&apos;infrastructure : l&apos;assistant
-        externalisé est opérationnel rapidement. Supervision en France pour une qualité et une réactivité optimales.
+        externalisé bénéficie d&apos;une prise en charge rapide. Supervision en France pour une qualité et une réactivité optimales.
       </p>
 
       <h2>À qui s&apos;adresse ce service ?</h2>

@@ -27,7 +27,7 @@ export const RESOURCE_PDF_GUIDES: readonly ResourcePdfCatalogEntry[] = [
   },
 ] as const;
 
-/** 16 tutoriels PDF (skills Claude, 1 page = 1 tuto) */
+/** 17 tutoriels PDF (skills Claude, 1 page = 1 tuto) */
 export const RESOURCE_PDF_TUTOS: readonly ResourcePdfCatalogEntry[] = [
   { pdfFile: "tuto-skill-rdv-client-bework.pdf", kind: "tuto", href: "/ressources/tuto-skill-rdv-client-bework" },
   { pdfFile: "tuto-skill-analyse-dce-bework.pdf", kind: "tuto", href: "/ressources/tuto-skill-analyse-dce-bework" },
@@ -38,6 +38,7 @@ export const RESOURCE_PDF_TUTOS: readonly ResourcePdfCatalogEntry[] = [
   { pdfFile: "tuto-skill-doe-bework.pdf", kind: "tuto", href: "/ressources/tuto-skill-doe-bework" },
   { pdfFile: "tuto-skill-pic-bework.pdf", kind: "tuto", href: "/ressources/tuto-skill-pic-bework" },
   { pdfFile: "tuto-skill-ordre-de-service-bework.pdf", kind: "tuto", href: "/ressources/tuto-skill-ordre-de-service-bework" },
+  { pdfFile: "tuto-skill-dc4-bework.pdf", kind: "tuto", href: "/ressources/tuto-skill-dc4-bework" },
   { pdfFile: "tuto-dispatch-bework.pdf", kind: "tuto", href: "/ressources/tuto-dispatch-bework" },
   { pdfFile: "tuto-tri-dce-claude-chrome-bework.pdf", kind: "tuto", href: "/ressources/tuto-tri-dce-claude-chrome-bework" },
   { pdfFile: "tuto-skill-chiffrage-devis-bework.pdf", kind: "tuto", href: "/ressources/tuto-skill-chiffrage-devis-bework" },

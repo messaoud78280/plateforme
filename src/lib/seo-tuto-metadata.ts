@@ -103,6 +103,13 @@ export const TUTO_PAGE_SEO: Record<string, TutoPageSeo> = {
     ),
     keywords: ["ordre de service BTP", "skill OS chantier", "CCAG travaux"],
   },
+  "/ressources/tuto-skill-dc4-bework": {
+    title: "Skill DC4 sous-traitance BTP : tutoriel marchés publics | BeWork",
+    description: tutoDesc(
+      "Skill DC4 : acte spécial de sous-traitance conforme, 9 rubriques, paiement direct et mail MOA. PDF et prompts Claude",
+    ),
+    keywords: ["DC4 sous-traitance", "acte spécial sous-traitance", "marché public BTP", "skill DC4"],
+  },
   "/ressources/tuto-skill-rdv-client-bework": {
     title: "Skill préparation RDV client BTP : tutoriel Claude | BeWork",
     description: tutoDesc(

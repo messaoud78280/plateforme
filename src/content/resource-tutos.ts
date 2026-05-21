@@ -34,6 +34,13 @@ export const RESOURCE_TUTO_ITEMS: readonly ResourceTutoItem[] = [
     icon: "document",
   },
   {
+    title: "Tuto Crée ton skill — DC4 (sous-traitance)",
+    desc: "DC4 conforme en 12 min — 9 rubriques, paiement direct, pièces à joindre et mail MOA — PDF et prompts pour marchés publics BTP.",
+    href: "/ressources/tuto-skill-dc4-bework",
+    status: "Tuto PDF",
+    icon: "document",
+  },
+  {
     title: "Tuto Crée ton bureau depuis ton chantier",
     desc: "Pairer PC et mobile, 8 commandes vocales BTP, sécurité et routine — PDF intégré, prompts à copier.",
     href: "/ressources/tuto-dispatch-bework",

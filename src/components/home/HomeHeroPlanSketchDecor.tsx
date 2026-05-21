@@ -8,7 +8,7 @@ export function HomeHeroPlanSketchDecor() {
     <div className="absolute inset-0 overflow-hidden" aria-hidden>
       {/* Cotations & repères — trait bleu-gris façon DAO */}
       <svg
-        className="absolute left-1/2 top-0 h-[min(92vh,920px)] w-[min(145%,1480px)] -translate-x-1/2 text-[#2563eb] opacity-[0.22] motion-reduce:opacity-[0.14] sm:opacity-[0.26] md:h-full md:min-h-[640px] md:opacity-[0.28]"
+        className="absolute left-1/2 top-0 h-[min(92vh,920px)] w-[min(145%,1480px)] -translate-x-1/2 text-[#2563eb] opacity-[0.26] motion-reduce:opacity-[0.16] sm:opacity-[0.3] md:h-full md:min-h-[640px] md:opacity-[0.32]"
         viewBox="0 0 1200 780"
         preserveAspectRatio="xMidYMid slice"
       >
@@ -76,6 +76,23 @@ export function HomeHeroPlanSketchDecor() {
           <path d="M1050 520 L1078 548 L1050 576 L1022 548 Z" strokeDasharray="3 2" />
           <circle cx="1050" cy="548" r="4" opacity="0.75" />
         </g>
+
+        {/* Tracés plan d&apos;exécution — murs + ouverture */}
+        <g stroke="currentColor" strokeWidth="0.7" fill="none" opacity="0.5">
+          <rect x="780" y="300" width="168" height="112" strokeDasharray="5 4" rx="0.5" />
+          <line x1="864" y1="300" x2="864" y2="412" strokeDasharray="4 3" opacity="0.65" />
+          <path d="M828 412 h72" strokeWidth="0.55" opacity="0.55" />
+          <text x="792" y="292" fill="#1e40af" style={{ fontFamily: MONO, fontSize: "8px" }} opacity="0.72">
+            PE-02
+          </text>
+        </g>
+        <g stroke="currentColor" strokeWidth="0.55" opacity="0.38">
+          <line x1="260" y1="200" x2="420" y2="200" strokeDasharray="6 5" />
+          <line x1="260" y1="200" x2="260" y2="340" strokeDasharray="6 5" />
+          <text x="268" y="194" fill="#1e40af" style={{ fontFamily: MONO, fontSize: "8px" }} opacity="0.65">
+            axe B
+          </text>
+        </g>
       </svg>
 
       {/* Croquis bas-gauche : grue + ossature — effet crayon */}
@@ -121,7 +138,7 @@ export function HomeHeroPlanSketchDecor() {
 
       {/* Hachures coupe — coin droit */}
       <div
-        className="pointer-events-none absolute right-0 top-[10%] h-[44%] w-[40%] max-w-[min(520px,48vw)] opacity-[0.055] md:opacity-[0.07]"
+        className="pointer-events-none absolute right-0 top-[10%] h-[44%] w-[40%] max-w-[min(520px,48vw)] opacity-[0.065] md:opacity-[0.085]"
         style={{
           backgroundImage: `repeating-linear-gradient(
             -45deg,

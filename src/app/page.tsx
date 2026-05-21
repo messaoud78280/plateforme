@@ -42,6 +42,15 @@ const PRESENTATION_VIDEO_DURATION_ISO = "PT13S";
 
 const PRICE_BOUNDS = getPublicPriceBoundsLabels();
 
+const HERO_EXPERTISE_BADGES = [
+  "Analyse DCE",
+  "Compte rendu chantier",
+  "PPSPS",
+  "DOE",
+  "DICT",
+  "Relances devis",
+] as const;
+
 const HOME_FAQ_ITEMS = [
   {
     q: "Qu’est-ce qu’un « assistant travaux augmenté par l’IA » chez BeWork ?",
@@ -208,7 +217,7 @@ export default function HomePage() {
             }}
           />
           {/* Quadrillage plan — papier millimétré bleuté */}
-          <div className="pointer-events-none absolute inset-0 z-[3] bework-blueprint-grid--hero opacity-[0.58] md:opacity-[0.52]" aria-hidden />
+          <div className="pointer-events-none absolute inset-0 z-[3] bework-blueprint-grid--hero opacity-[0.62] md:opacity-[0.56]" aria-hidden />
           {/* Courbe métallique centrale — complète les arcs coins */}
           <div
             className="pointer-events-none absolute inset-x-[-8%] top-[-6%] z-[4] h-[min(48vh,480px)] opacity-[0.26] md:inset-x-[-4%] md:opacity-[0.22]"
@@ -256,57 +265,36 @@ export default function HomePage() {
               <BlueprintCotationHero />
               <div className="container-site relative z-[2]">
             <div className="grid items-center gap-10 text-center lg:grid-cols-[minmax(0,1.08fr)_minmax(280px,1fr)] lg:items-start lg:gap-x-10 xl:grid-cols-[minmax(0,1fr)_minmax(520px,1.15fr)] xl:gap-x-14 lg:gap-y-0 lg:text-left">
-              <div className="relative z-[2] mx-auto flex w-full min-w-0 max-w-[540px] flex-col gap-6 lg:mx-0 lg:max-w-none lg:gap-5 lg:pt-10 xl:max-w-[560px]">
-                <p className="mx-auto inline-flex max-w-full items-center gap-2 self-center rounded-full border border-[#93c5fd]/70 bg-gradient-to-r from-[#eff6ff] via-white to-[#eff6ff] px-3.5 py-1.5 text-[12.5px] font-semibold leading-snug tracking-tight text-[#1d4ed8] shadow-[0_8px_28px_-18px_rgba(37,99,235,0.35)] ring-1 ring-white/80 sm:gap-2.5 sm:px-4 sm:text-sm lg:mx-0 lg:self-start">
-                  <svg
-                    className="size-[15px] shrink-0 sm:size-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={1.85}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden
-                  >
-                    <rect width="8" height="4" x="8" y="2" rx="1" />
-                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-                    <path d="M9 10h6M9 14h6M9 18h4" />
-                  </svg>
-                  <span className="flex flex-col items-start gap-0.5 text-left sm:flex-row sm:items-center sm:gap-2">
-                    <span>Assistant de gestion travaux · Relais BTP</span>
-                    <span className="font-blueprint-note text-[11px] font-normal normal-case tracking-wide text-slate-600 sm:text-xs">
-                      Augmenté par l’IA · note chantier
-                    </span>
-                  </span>
+              <div className="relative z-[2] mx-auto flex w-full min-w-0 max-w-[540px] flex-col gap-5 lg:mx-0 lg:max-w-none lg:gap-4 lg:pt-10 xl:max-w-[560px]">
+                <p className="font-blueprint-note mx-auto max-w-[540px] text-[13px] font-medium uppercase leading-snug tracking-[0.12em] text-[#1d4ed8] lg:mx-0 lg:max-w-none lg:text-[13.5px]">
+                  Le relais BTP qui absorbe votre charge administrative.
                 </p>
 
-                <p className="mx-auto max-w-[540px] text-[15px] leading-relaxed text-balance text-slate-600 lg:mx-0 lg:max-w-none lg:text-[15px] lg:leading-relaxed">
-                  Le relais BTP qui vous aide à produire vos documents, suivre vos chantiers et répondre plus vite.
-                </p>
-
-                <h1
-                  className="font-heading text-balance text-[clamp(1.35rem,calc(0.55rem+2.35vw),2.35rem)] font-bold leading-[1.18] tracking-[-0.02em] sm:leading-[1.22] lg:max-w-[40rem]"
-                >
-                  <span className="text-[#0f172a]">Un assistant travaux à vos côtés pour </span>
-                  <span className="text-[#2563eb]">tenir le rythme du chantier</span>
-                  <span className="text-[#0f172a]">.</span>
+                <h1 className="font-heading text-balance text-[clamp(1.85rem,calc(0.75rem+3.1vw),2.9rem)] font-bold leading-[1.08] tracking-[-0.03em] lg:max-w-[40rem]">
+                  <span className="block text-[#0f172a]">On tient le bureau.</span>
+                  <span className="block text-[#2563eb]">Vous tenez le chantier.</span>
                 </h1>
 
-                <p className="mx-auto max-w-[540px] text-lg leading-[1.62] text-balance text-slate-600 lg:mx-0 lg:max-w-none lg:text-[19px] lg:leading-snug">
-                  BeWork accompagne les pros du BTP sur les tâches les plus chronophages&nbsp;: comptes rendus de chantier,
-                  analyse de DCE, PPSPS, mémoire technique, chiffrage de devis, dossiers travaux, relances et suivi administratif.
+                <p className="mx-auto max-w-[540px] text-[16px] leading-[1.55] text-balance text-slate-700 lg:mx-0 lg:max-w-none lg:text-[17px] lg:leading-snug">
+                  Comptes rendus, DCE, PPSPS, mémoire technique, relances, suivi fournisseurs et coordination travaux.
                 </p>
 
-                <div className="mx-auto -mt-1 flex w-full max-w-[540px] flex-wrap justify-center gap-2 lg:mx-0 lg:max-w-none lg:justify-start">
-                  {["DICT", "Commandes matériel", "Engins & locations", "RDV client", "Relances urgentes"].map((tag) => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center rounded-full border border-slate-200/90 bg-white/90 px-3 py-1 text-[11.5px] font-semibold tracking-tight text-slate-700 shadow-[0_6px_20px_-14px_rgba(15,23,42,0.14)] ring-1 ring-[#2563eb]/[0.07] backdrop-blur-[2px]"
-                    >
-                      {tag}
-                    </span>
+                <p className="mx-auto max-w-[540px] text-[14.5px] font-medium leading-snug text-slate-600 lg:mx-0 lg:max-w-none lg:text-[15px]">
+                  Assistants travaux augmentés par l&apos;IA. Supervisés depuis la France.
+                </p>
+
+                <ul
+                  className="mx-auto flex w-full max-w-[540px] flex-wrap justify-center gap-x-2 gap-y-2 lg:mx-0 lg:max-w-none lg:justify-start"
+                  aria-label="Expertises métiers"
+                >
+                  {HERO_EXPERTISE_BADGES.map((label) => (
+                    <li key={label}>
+                      <span className="inline-flex items-center rounded-sm border border-slate-300/85 border-l-2 border-l-[#2563eb]/75 bg-white/95 px-2.5 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.07em] text-slate-800 shadow-[0_4px_14px_-12px_rgba(15,23,42,0.12)] sm:text-[11px]">
+                        {label}
+                      </span>
+                    </li>
                   ))}
-                </div>
+                </ul>
 
                 {/* CTA hero : lien ressources uniquement — « Réserver un appel » est dans le header */}
                 <div className="mt-1 flex w-full lg:justify-start">
@@ -343,7 +331,8 @@ export default function HomePage() {
                       </svg>
                     </span>
                     <span className="min-w-0 text-left text-[15px] font-semibold leading-[1.2] tracking-tight text-[#171717]">
-                      Prise en charge rapide
+                      <span className="block">Déploiement</span>
+                      <span className="block text-slate-600">rapide</span>
                     </span>
                   </li>
                   <li className="flex min-h-[3.25rem] flex-1 items-center gap-3 px-2 py-4 sm:min-h-[3.75rem] sm:px-4 sm:py-4 lg:min-h-[3.5rem]">
@@ -400,7 +389,7 @@ export default function HomePage() {
                       </svg>
                     </span>
                     <span className="min-w-0 text-left text-[15px] font-semibold leading-[1.2] tracking-tight text-[#171717]">
-                      <span className="block">Piloté depuis</span>
+                      <span className="block">Supervisé depuis</span>
                       <span className="block text-slate-600">la France</span>
                     </span>
                   </li>

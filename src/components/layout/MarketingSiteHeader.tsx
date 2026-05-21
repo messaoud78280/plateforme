@@ -94,9 +94,9 @@ const RESOURCE_MENU_ENTRIES: {
 ];
 
 const REASSURANCE = [
-  "Prise en charge rapide",
+  "Déploiement rapide",
   "Pas de recrutement",
-  "Supervision depuis la France",
+  "Supervisé depuis la France",
   "Plateforme simple et sécurisée",
 ];
 

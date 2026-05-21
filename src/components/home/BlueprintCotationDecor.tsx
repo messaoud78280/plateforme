@@ -38,7 +38,7 @@ export function BlueprintCotationHero({ className }: { className?: string }) {
   return (
     <DecorRoot
       className={cx(
-        "absolute left-0 top-[1%] z-[1] h-[min(48vh,380px)] w-[min(100%,38rem)] max-sm:h-[min(40vh,280px)] max-sm:w-[min(100%,18rem)] max-sm:opacity-[0.52] sm:opacity-[0.62] md:top-[2%] md:h-[min(52vh,440px)] md:w-[min(100%,44rem)] md:opacity-[0.74] lg:opacity-[0.78]",
+        "absolute left-0 top-[1%] z-[1] h-[min(48vh,380px)] w-[min(100%,38rem)] max-sm:h-[min(40vh,280px)] max-sm:w-[min(100%,18rem)] max-sm:opacity-[0.56] sm:opacity-[0.68] md:top-[2%] md:h-[min(52vh,440px)] md:w-[min(100%,44rem)] md:opacity-[0.8] lg:opacity-[0.84]",
         className,
       )}
     >
@@ -156,6 +156,13 @@ export function BlueprintCotationHero({ className }: { className?: string }) {
           <text x={24} y={286} fill={M_SLATE} style={{ fontFamily: MONO, fontSize: 8.5 }} opacity={0.78}>
             ±0.2 mm
           </text>
+          {/* Repère plan d&apos;exécution */}
+          <g opacity={0.62}>
+            <rect x={228} y={168} width="72" height="48" stroke={TECH_BLUE} strokeWidth={0.55} fill="none" strokeDasharray="4 3" vectorEffect="nonScalingStroke" />
+            <text x={232} y={162} fill={TECH_BLUE} style={{ fontFamily: MONO, fontSize: 7.5 }} opacity={0.75}>
+              PE-01
+            </text>
+          </g>
           {/* L-frame zone titre */}
           <path
             d="M 18 28 L 18 200 M 18 28 L 320 28"

@@ -19,26 +19,26 @@ export function HomeProblemSection() {
     ConsequenceIcon: () => JSX.Element;
   }[] = [
     {
-      problem: "Devis non relancés",
-      consequence: "Chantiers perdus",
-      ProblemIcon: IconQuoteRelance,
-      ConsequenceIcon: IconConstructionLost,
+      problem: "Conducteurs de travaux saturés",
+      consequence: "Dossiers incomplets",
+      ProblemIcon: () => <IconUserWave className="h-[22px] w-[22px]" />,
+      ConsequenceIcon: IconFolderClock,
     },
     {
-      problem: "DICT / dossier chantier en retard",
-      consequence: "Démarrage qui se décale",
+      problem: "Validations MOA / MOE qui traînent",
+      consequence: "Situations bloquées",
       ProblemIcon: IconFolderClock,
       ConsequenceIcon: IconSad,
     },
     {
-      problem: "Fournisseurs / locations mal suivis",
-      consequence: "Équipe immobilisée",
+      problem: "Échanges dispersés (mail, WhatsApp, plateformes)",
+      consequence: "Perte de traçabilité",
       ProblemIcon: IconTasksPileUp,
-      ConsequenceIcon: IconFlameOverload,
+      ConsequenceIcon: IconTrackingOff,
     },
     {
-      problem: "Réserves / DOE repoussés",
-      consequence: "Fin de chantier qui traîne",
+      problem: "DOE, attachements, relances en retard",
+      consequence: "Paiements retardés",
       ProblemIcon: IconTrackingOff,
       ConsequenceIcon: IconEuroTrendDown,
     },
@@ -63,13 +63,17 @@ export function HomeProblemSection() {
             className="mt-8 font-normal tracking-[-0.02em] text-[clamp(1.125rem,calc(1.02rem+0.95vw),1.5rem)] leading-[1.28]"
             style={{ color: TEXT_PRIMARY }}
           >
-            Le quotidien des entreprises du <span style={{ color: BEWORK_BLUE }}>BTP.</span>
+            Vous avez gagné le marché.
+            <br />
+            <span style={{ color: BEWORK_BLUE }}>Maintenant il faut le tenir.</span>
           </h2>
 
           <div className="mt-6 h-[2px] w-16 rounded-full bg-slate-300/90" />
 
           <p className="mt-6 text-[18px] font-medium leading-[1.55] text-slate-600">
-            Le chantier avance. Le dossier doit suivre.
+            Gagner un marché ne suffit pas : il faut tenir les pièces, les échanges, les validations, les relances, les
+            photos, les comptes rendus, les DOE, les situations et les demandes du donneur d&apos;ordre — entre le terrain,
+            le bureau et la MOA / MOE.
           </p>
 
           <ul className="mt-8 divide-y divide-slate-200">
@@ -79,10 +83,10 @@ export function HomeProblemSection() {
                 style={{ backgroundColor: BEWORK_BLUE_SOFT, color: BEWORK_BLUE }}
                 aria-hidden
               >
-                <IconClockMini className="h-[22px] w-[22px]" />
+                <IconFolderMini className="h-[22px] w-[22px]" />
               </span>
               <p className="text-[18px] font-bold" style={{ color: TEXT_PRIMARY }}>
-                Devis <span style={{ color: BEWORK_BLUE }}>non relancés</span>
+                Pièces marché <span style={{ color: BEWORK_BLUE }}>à jour</span>
               </p>
             </li>
             <li className="flex items-center gap-5 py-4">
@@ -91,10 +95,10 @@ export function HomeProblemSection() {
                 style={{ backgroundColor: BEWORK_BLUE_SOFT, color: BEWORK_BLUE }}
                 aria-hidden
               >
-                <IconFolderMini className="h-[22px] w-[22px]" />
+                <IconClockMini className="h-[22px] w-[22px]" />
               </span>
               <p className="text-[18px] font-bold" style={{ color: TEXT_PRIMARY }}>
-                Dossier chantier <span style={{ color: BEWORK_BLUE }}>en retard</span>
+                Validations <span style={{ color: BEWORK_BLUE }}>qui traînent</span>
               </p>
             </li>
             <li className="flex items-center gap-5 py-4 pb-0 last:border-b-0">
@@ -106,7 +110,7 @@ export function HomeProblemSection() {
                 <IconUserWave className="h-[22px] w-[22px]" />
               </span>
               <p className="text-[18px] font-bold" style={{ color: TEXT_PRIMARY }}>
-                Client qui <span style={{ color: BEWORK_BLUE }}>attend une réponse</span>
+                Charge admin qui <span style={{ color: BEWORK_BLUE }}>explose avec le volume</span>
               </p>
             </li>
           </ul>
@@ -125,9 +129,8 @@ export function HomeProblemSection() {
               !
             </div>
             <p className="text-xl font-extrabold leading-snug" style={{ color: TEXT_PRIMARY }}>
-            Résultat : un planning qui dérape, des décisions prises sous pression…
-            <br />
-            et du cash qui se tend.
+              Résultat : conducteurs saturés, dossiers incomplets, situations bloquées, paiements retardés — et une
+              traçabilité qui se perd dès que le volume augmente.
             </p>
           </div>
         </div>

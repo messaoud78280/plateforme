@@ -112,7 +112,26 @@ export const SEO_KEYWORDS_GLOBAL: string[] = [
 ];
 
 /** Meta keywords homepage : fusion optimisée (personae + géo + technique). */
+/** Marchés travaux — homepage repositionnée relais administratif. */
+export const SEO_KEYWORDS_MARCHES_TRAVAUX = [
+  "relais administratif marchés travaux",
+  "gestion administrative marchés publics BTP",
+  "assistant administratif BTP",
+  "suivi administratif chantier",
+  "marchés privés BTP",
+  "accords-cadres BTP",
+  "comptes rendus chantier",
+  "situations travaux",
+  "attachements travaux",
+  "suivi donneurs d'ordre",
+  "entreprises BTP titulaires de marchés",
+  "dossiers d'intervention BTP",
+  "DOE marché travaux",
+  "coordination documentaire chantier",
+] as const;
+
 export const SEO_KEYWORDS_HOME: string[] = [
+  ...SEO_KEYWORDS_MARCHES_TRAVAUX,
   ...SEO_KEYWORDS_PARTENAIRE_CORE,
   ...SEO_KEYWORDS_BTP_PME,
   ...SEO_KEYWORDS_PERSONAS_BTP,

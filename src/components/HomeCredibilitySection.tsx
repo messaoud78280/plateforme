@@ -30,8 +30,9 @@ export function HomeCredibilitySection() {
             Une méthode née du terrain BTP<span className="text-[#1d4ed8]">.</span>
           </h2>
           <p className="mt-3 max-w-[720px] text-[15px] leading-relaxed text-slate-600 md:text-base">
-            BeWork n&apos;est pas une plateforme générique. L&apos;offre s&apos;appuie sur plus de 20 ans d&apos;expérience
-            terrain dans le bâtiment, la gestion de chantier et l&apos;administratif.
+            BeWork n&apos;est pas un outil IA générique ni un secrétariat classique. L&apos;offre s&apos;appuie sur plus de 20 ans
+            d&apos;expérience terrain dans le bâtiment, la tenue de marchés et l&apos;administratif chantier — assistants augmentés par
+            l&apos;IA, supervisés depuis la France.
           </p>
         </header>
 

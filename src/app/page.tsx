@@ -10,7 +10,7 @@ import { ExpertiseTableSection } from "@/components/ExpertiseTableSection";
 import { HomeCallCtaBanner } from "@/components/HomeCallCtaBanner";
 import { HomePricingSection } from "@/components/HomePricingSection";
 import { HomeSolutionSection } from "@/components/HomeSolutionSection";
-import { HomeSectorExamplesSection } from "@/components/HomeSectorExamplesSection";
+import { HomeTargetAudienceSection } from "@/components/HomeTargetAudienceSection";
 import { HomeHeroAside } from "@/components/home/HomeHeroAside";
 import { HomeBlueprintScrollDecor } from "@/components/home/HomeBlueprintScrollDecor";
 import { HomeHeroMetalCorners } from "@/components/home/HomeHeroMetalCorners";
@@ -29,7 +29,6 @@ import { jsonLdExpandedAreaServed } from "@/lib/jsonld-area-served";
 import {
   SEO_OG_ALTERNATE_LOCALES,
   hreflangFrancophonieLanguages,
-  metaDescriptionFrancophonie,
 } from "@/lib/seo-francophonie";
 import { SEO_KEYWORDS_HOME } from "@/lib/seo-keywords";
 import { EXTERNALISATION_ADMIN_BT_NAV } from "@/lib/externalisation-administrative-btp-geo";
@@ -43,37 +42,38 @@ const PRESENTATION_VIDEO_DURATION_ISO = "PT13S";
 const PRICE_BOUNDS = getPublicPriceBoundsLabels();
 
 const HERO_EXPERTISE_BADGES = [
-  "Analyse DCE",
-  "Compte rendu chantier",
-  "PPSPS",
+  "Marchés publics",
+  "Marchés privés",
+  "Accords-cadres",
   "DOE",
-  "DICT",
-  "Relances devis",
+  "Comptes rendus",
+  "Attachements",
+  "Situations travaux",
+  "Validations MOA",
 ] as const;
 
 const HOME_FAQ_ITEMS = [
   {
-    q: "Qu’est-ce qu’un « assistant travaux augmenté par l’IA » chez BeWork ?",
-    a: "C’est un relais opérationnel pour vos dossiers chantier et votre administratif lié au BTP : préparation de documents, relances, suivi et coordination cadrés. L’IA aide à structurer et accélérer la mise en forme ; un interlocuteur humain garde le fil, le cadre et la relation avec vous. Ce n’est pas un substitut à votre expertise terrain ni à vos validations sur les engagements.",
+    q: "Qu’est-ce que le relais administratif BeWork pour les marchés travaux ?",
+    a: "BeWork absorbe le flux administratif entre terrain, bureau et donneurs d’ordre : dossiers d’intervention, comptes rendus, DOE, attachements, situations, relances et coordination documentaire. L’IA structure et accélère ; un Beworker humain garde le fil et la relation. Vous validez les points qui engagent votre entreprise.",
   },
   {
-    q: "BeWork, c’est une assistante administrative ou une assistante travaux ?",
-    a: "BeWork est une assistante travaux BTP : un relais bureau-chantier qui tient vos dossiers de devis, relances, documents travaux, DICT, fournisseurs, comptes rendus et réserves pendant que vous êtes sur le terrain. Ce n’est pas un secrétariat généraliste.",
+    q: "BeWork s’adresse à quelles entreprises du BTP ?",
+    a: "Aux titulaires de marchés publics, privés, accords-cadres ou contrats récurrents — tous corps d’état : gros œuvre, VRD, réseaux, second œuvre, maintenance, réhabilitation, travaux multisites. Ce n’est pas un secrétariat généraliste ni un outil IA déconnecté du terrain.",
   },
   {
-    q: "Quels types de demandes chantier peut-on déléguer ?",
-    a: "Vous pouvez déléguer les tâches qui doivent avancer côté bureau : relances devis, préparation de documents, suivi DICT/DT, commandes fournisseurs, livraisons, locations matériel, comptes rendus, préparation de PV, organisation et relances clients.",
+    q: "Quelles missions administratives de marché peut-on déléguer ?",
+    a: "Suivi administratif de marchés, comptes rendus, photos chantier, relances MOA / MOE / fournisseurs / sous-traitants, attachements, situations, validations BPU / DPGF, DOE, classement des pièces marché, dossiers d’intervention et demandes d’autorisations selon besoin.",
   },
   {
     q: "Est-ce que je garde la validation finale ?",
-    a: "Oui. BeWork prépare, structure, relance et suit les dossiers, mais vous gardez la main sur toutes les décisions qui engagent votre entreprise : prix, validation technique, signature, engagement contractuel ou réponse client sensible.",
+    a: "Oui. BeWork prépare, structure, relance et suit les dossiers, mais vous gardez la main sur toutes les décisions qui engagent votre entreprise : prix, validation technique, signature, engagement contractuel ou réponse au donneur d’ordre.",
   },
 ] as const;
 
-const HOME_META_TITLE = "Assistant travaux BTP augmenté par l’IA | BeWork";
-const HOME_META_DESCRIPTION = metaDescriptionFrancophonie(
-  "Assistants travaux BTP : devis, relances, DOE, PPSPS, DCE et suivi bureau-chantier. On tient le bureau, vous le chantier",
-);
+const HOME_META_TITLE = "BeWork — Relais administratif pour marchés travaux BTP";
+const HOME_META_DESCRIPTION =
+  "BeWork accompagne les entreprises BTP titulaires de marchés publics, privés, accords-cadres et contrats récurrents : dossiers d'intervention, comptes rendus, DOE, attachements, situations, relances et suivi donneurs d'ordre.";
 
 export const metadata: Metadata = {
   title: { absolute: HOME_META_TITLE },
@@ -98,13 +98,13 @@ export const metadata: Metadata = {
         url: `${SITE_URL}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: "BeWork — Assistants travaux augmentés par l’IA pour artisans et conducteurs de travaux",
+        alt: "BeWork — Relais administratif pour marchés travaux BTP",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "BeWork — Assistants travaux augmentés par l’IA",
+    title: HOME_META_TITLE,
     description: HOME_META_DESCRIPTION,
   },
 };
@@ -116,10 +116,10 @@ const homeJsonLd = {
       "@type": "WebPage",
       "@id": `${SITE_URL}/#accueil`,
       url: SITE_URL,
-      name: "BeWork — Assistants travaux augmentés par l’IA (relais dossiers chantier)",
+      name: "BeWork — Relais administratif pour marchés travaux BTP",
       inLanguage: "fr-FR",
       description:
-        "Assistants travaux augmentés par l’IA : relais bureau‑chantier pour dossiers (devis, relances, DICT, fournisseurs, documents travaux) sans recruter. Démo vidéo et forfaits TTC.",
+        "Relais administratif pour entreprises BTP titulaires de marchés : dossiers d'intervention, comptes rendus, DOE, attachements, situations, relances et suivi donneurs d'ordre.",
       isPartOf: { "@id": `${SITE_URL}/#website` },
       video: { "@id": `${SITE_URL}/#video-presentation-bework` },
       about: [
@@ -136,17 +136,17 @@ const homeJsonLd = {
     {
       "@type": "Service",
       "@id": `${SITE_URL}/#service-btp`,
-      name: "Assistants travaux BTP — relais dossiers chantier (augmentés par l’IA)",
+      name: "Relais administratif marchés travaux BTP",
       description:
-        "Relais bureau‑chantier : devis & relances, situations de travaux, DICT/DT et dossiers chantier, coordination fournisseurs (commandes, livraisons, locations), comptes rendus et documents de réception/DOE — outils d’IA pour structurer et accélérer, sous validation sur les points sensibles.",
-      serviceType: "Assistants travaux BTP augmentés par l’IA",
-      category: "Assistance travaux et dossiers chantier (BTP)",
+        "Suivi administratif de marchés publics et privés : dossiers d'intervention, comptes rendus, DOE, attachements, situations, relances donneurs d'ordre, validations BPU / DPGF et coordination documentaire terrain ↔ bureau.",
+      serviceType: "Relais administratif marchés travaux BTP",
+      category: "Gestion administrative marchés travaux (BTP)",
       provider: { "@id": `${SITE_URL}/#organization` },
       areaServed: jsonLdExpandedAreaServed(),
       audience: {
         "@type": "BusinessAudience",
         audienceType:
-          "Artisans, conducteurs de travaux, chefs de chantier, chargés d’affaires, sous-traitants, dirigeants de TPE/PME et entreprises générales du bâtiment (France, Belgique, Suisse, Luxembourg)",
+          "Entreprises BTP titulaires de marchés publics, privés, accords-cadres et contrats récurrents — tous corps d'état, PME, entreprises générales et maintenance (France, Belgique, Suisse, Luxembourg)",
       },
       offers: {
         "@type": "AggregateOffer",
@@ -267,19 +267,24 @@ export default function HomePage() {
             <div className="grid items-center gap-10 text-center lg:grid-cols-[minmax(0,1.08fr)_minmax(280px,1fr)] lg:items-start lg:gap-x-10 xl:grid-cols-[minmax(0,1fr)_minmax(520px,1.15fr)] xl:gap-x-14 lg:gap-y-0 lg:text-left">
               <div className="relative z-[2] mx-auto flex w-full min-w-0 max-w-[540px] flex-col gap-5 lg:mx-0 lg:max-w-none lg:gap-4 lg:pt-10 xl:max-w-[560px]">
                 <p className="font-blueprint-note mx-auto max-w-[540px] text-[13px] font-medium uppercase leading-snug tracking-[0.12em] text-[#1d4ed8] lg:mx-0 lg:max-w-none lg:text-[13.5px]">
-                  Le relais BTP qui absorbe votre charge administrative.
+                  Relais administratif des marchés travaux
                 </p>
 
                 <h1 className="font-heading text-balance text-[clamp(1.85rem,calc(0.75rem+3.1vw),2.9rem)] font-bold leading-[1.08] tracking-[-0.03em] lg:max-w-[40rem]">
-                  <span className="block text-[#0f172a]">On tient le bureau.</span>
-                  <span className="block text-[#2563eb]">Vous tenez le chantier.</span>
+                  <span className="block text-[#0f172a]">Le relais administratif</span>
+                  <span className="block text-[#2563eb]">de vos marchés travaux.</span>
                 </h1>
 
                 <p className="mx-auto max-w-[540px] text-[16px] leading-[1.55] text-balance text-slate-700 lg:mx-0 lg:max-w-none lg:text-[17px] lg:leading-snug">
-                  Comptes rendus, DCE, PPSPS, mémoire technique, relances, suivi fournisseurs et coordination travaux.
+                  Dossiers d&apos;intervention, comptes rendus, DOE, attachements, situations, validations, relances et coordination
+                  documentaire chantier.
                 </p>
 
                 <p className="mx-auto max-w-[540px] text-[14.5px] font-medium leading-snug text-slate-600 lg:mx-0 lg:max-w-none lg:text-[15px]">
+                  Pour les entreprises BTP titulaires de marchés publics, privés, accords-cadres ou contrats récurrents.
+                </p>
+
+                <p className="mx-auto max-w-[540px] text-[13.5px] font-medium leading-snug text-slate-500 lg:mx-0 lg:max-w-none lg:text-[14px]">
                   Assistants travaux augmentés par l&apos;IA. Supervisés depuis la France.
                 </p>
 
@@ -296,16 +301,19 @@ export default function HomePage() {
                   ))}
                 </ul>
 
-                {/* CTA hero : lien ressources uniquement — « Réserver un appel » est dans le header */}
-                <div className="mt-1 flex w-full lg:justify-start">
+                <div className="mt-2 flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:justify-start">
                   <Link
-                    href="/ressources"
-                    className="inline-flex min-h-[2.75rem] items-center gap-2 text-left text-[15px] font-semibold text-[#1d4ed8] underline-offset-[6px] transition-colors hover:text-[#1e40af] hover:underline"
+                    href="/contact"
+                    className="inline-flex min-h-[2.75rem] items-center justify-center rounded-lg bg-[#1d4ed8] px-5 text-[15px] font-semibold text-white shadow-md transition-colors hover:bg-[#1e40af]"
+                    {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-hero-primary")}
                   >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 opacity-90" aria-hidden>
-                      <path d="M8 21V7l8-4v14M8 21l8-4M8 21H6a2 2 0 0 1-2-2v-9M16 17v4M16 3v14" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    Découvrir les ressources
+                    Demander un diagnostic
+                  </Link>
+                  <Link
+                    href="/assistants-administratifs-taches"
+                    className="inline-flex min-h-[2.75rem] items-center justify-center rounded-lg border border-slate-300/90 bg-white px-5 text-[15px] font-semibold text-[#1d4ed8] shadow-sm transition-colors hover:border-[#1d4ed8]/40 hover:bg-[#eff6ff]"
+                  >
+                    Voir les missions prises en charge
                   </Link>
                 </div>
 
@@ -412,26 +420,25 @@ export default function HomePage() {
                     BeWork, c’est quoi ?
                   </p>
                   <p className="mt-3 text-[15px] leading-relaxed text-slate-700 md:text-base">
-                    BeWork est un service d&apos;assistants travaux augmentés par l&apos;IA pour les entreprises du BTP. La
-                    plateforme aide les artisans, conducteurs de travaux, chefs de chantier et chargés d&apos;affaires à
-                    déléguer les tâches chronophages&nbsp;: comptes rendus de chantier, DOE, PPSPS, analyse de DCE, chiffrage
-                    de devis, relances, planning, demandes administratives et suivi opérationnel. L&apos;objectif est de
-                    libérer du temps terrain tout en structurant le suivi administratif et commercial des chantiers.
+                    BeWork est le relais administratif des marchés travaux pour les entreprises du BTP titulaires de marchés
+                    publics, privés, accords-cadres ou contrats récurrents. Nous absorbons le flux documentaire entre terrain,
+                    bureau et donneurs d&apos;ordre&nbsp;: dossiers d&apos;intervention, comptes rendus, DOE, attachements,
+                    situations, relances et validations — pour sécuriser les interventions et accélérer les paiements.
                   </p>
                   <p className="mt-3 text-center text-[13px] font-semibold text-slate-800 md:text-sm">
-                    On tient le bureau, vous tenez le chantier.
+                    Assistants travaux augmentés par l&apos;IA · expertise BTP terrain · supervision depuis la France
                   </p>
                   <hr className="my-6 border-slate-200/90" />
                   <p className="font-heading text-[11px] font-bold uppercase tracking-[0.2em] text-[#1d4ed8] md:text-[12px]">
                     C’est quoi un Beworker ?
                   </p>
                   <p className="mt-3 text-[15px] leading-relaxed text-slate-700 md:text-base">
-                    Un Beworker, c’est un assistant BTP dédié, formé aux outils du secteur et augmenté par l’IA. Il traite vos demandes, prépare vos
-                    livrables, suit vos dossiers et reste encadré par BeWork. Ce n’est pas un chatbot&nbsp;: c’est un relais humain, structuré, joignable
-                    et supervisé.
+                    Un Beworker, c’est un assistant travaux BTP dédié à vos marchés : il tient les dossiers, prépare les livrables,
+                    relance les donneurs d&apos;ordre et coordonne les échanges terrain ↔ bureau. Augmenté par l&apos;IA, encadré et
+                    supervisé depuis la France — ce n’est pas un chatbot ni un secrétariat généraliste.
                   </p>
                   <p className="font-blueprint-note mt-3 text-center text-[13px] text-slate-600 md:text-sm">
-                    Relais bureau ↔ chantier · suivi terrain
+                    Terrain ↔ bureau ↔ donneur d&apos;ordre
                   </p>
                   <p className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-center text-[12px] text-slate-600 md:text-sm">
                     <Link href="/services/assistant-travaux" className="text-[#1d4ed8] underline-offset-2 hover:underline">
@@ -504,12 +511,11 @@ export default function HomePage() {
                     Missions &amp; périmètre
                   </p>
                   <p className="mt-2.5 font-sans text-lg font-bold leading-snug tracking-tight text-[#0f172a] md:mx-auto md:max-w-[40rem] md:text-xl">
-                    Catalogue des missions : de l&apos;administratif à la coordination chantier
+                    Missions administratives de marchés travaux
                   </p>
                   <p className="mt-3 text-[15px] leading-relaxed text-slate-600 md:mx-auto md:max-w-[48rem] md:text-base md:leading-relaxed">
-                    Devis, factures, situations de travaux, DICT et dossiers administratifs, commandes & livraisons, locations
-                    matériel / engins / véhicules, planning, relances et suivi des litiges — le détail de ce que nous pouvons
-                    prendre en main pour vous. Voir aussi les{" "}
+                    Suivi de marchés, comptes rendus, DOE, attachements, situations, relances MOA / MOE, validations BPU / DPGF,
+                    dossiers d&apos;intervention et coordination documentaire — le détail de ce que nous prenons en charge. Voir aussi les{" "}
                     <Link href="/services" className="font-semibold text-[#1d4ed8] underline-offset-2 hover:underline">
                       pages services
                     </Link>{" "}
@@ -551,7 +557,7 @@ export default function HomePage() {
             </section>
 
             {/* Même fond courbe grise que le hero / sections précédentes */}
-            <HomeSectorExamplesSection />
+            <HomeTargetAudienceSection />
             <ConciergerieDirigeantSection />
             </div>
           </div>
@@ -640,8 +646,8 @@ export default function HomePage() {
               Questions fréquentes
             </h2>
             <p className="mt-5 text-lg leading-relaxed text-black">
-              Cadre, tarifs et collaboration : ce que les dirigeants du BTP veulent vérifier avant d&apos;externaliser leur
-              administratif.
+              Cadre, tarifs et collaboration : ce que les titulaires de marchés BTP veulent vérifier avant d&apos;externaliser le
+              suivi administratif de leurs marchés.
             </p>
             <p className="mt-4 text-sm font-medium text-black">
               Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.
@@ -663,11 +669,11 @@ export default function HomePage() {
             <div className="grid gap-12 md:grid-cols-3 md:items-center md:gap-16">
               <div className="md:col-span-2">
                 <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-                  Faire le point sur votre charge administrative ?
+                  Faire le point sur vos marchés et votre charge administrative ?
                 </h2>
                 <p className="mt-6 max-w-2xl text-lg leading-relaxed text-black">
-                  Un échange permet de vérifier l&apos;adéquation entre votre organisation, vos outils et le niveau de forfait
-                  — avant tout engagement. Nous dimensionnons le périmètre à votre réalité chantier et trésorerie.
+                  Un diagnostic permet de vérifier l&apos;adéquation entre vos marchés en cours, votre organisation documentaire et le
+                  niveau de forfait — avant tout engagement.
                 </p>
               </div>
               <div className="flex flex-col gap-4 md:items-end">

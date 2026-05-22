@@ -23,12 +23,17 @@ type CardConfig = {
 
 const CARDS: CardConfig[] = [
   {
-    title: "Devis, relances & situations",
-    bullets: ["Relances devis tenues", "Situations & factures préparées", "Suivi client clair (statuts, prochaines actions)"],
-    footerTitle: "+ de devis signés",
-    footerSub: "Plus d’opportunités, plus de CA.",
-    Icon: IconEuroDocument,
-    FooterIcon: IconBarsUp,
+    title: "Avant travaux / intervention",
+    bullets: [
+      "Préparation des dossiers d'intervention",
+      "Pièces administratives et demandes d'autorisations",
+      "DT / DICT si concerné, coordination planning",
+      "Collecte des documents nécessaires au démarrage",
+    ],
+    footerTitle: "Interventions sécurisées",
+    footerSub: "Dossiers prêts avant d'engager les équipes.",
+    Icon: IconClipboardChecks,
+    FooterIcon: IconShieldMini,
     stripe: "from-[#1e40af] via-[#2563eb] to-[#3b82f6]",
     blob: "bg-blue-600",
     wash: "from-blue-50/[0.78]",
@@ -39,12 +44,17 @@ const CARDS: CardConfig[] = [
     footerTitleClass: "text-[#1d4ed8]",
   },
   {
-    title: "Dossiers chantier & documents travaux",
-    bullets: ["DICT/DT et pièces suivies", "Documents travaux centralisés", "PV, réserves, DOE organisés"],
-    footerTitle: "Dossiers chantier carrés",
-    footerSub: "Moins d’oublis, moins de litiges.",
-    Icon: IconClipboardChecks,
-    FooterIcon: IconShieldMini,
+    title: "Pendant travaux",
+    bullets: [
+      "Comptes rendus et photos chantier",
+      "Suivi des demandes et échanges terrain",
+      "Relances MOA / MOE / fournisseurs / sous-traitants",
+      "Réservations et points bloquants suivis",
+    ],
+    footerTitle: "Fil documentaire tenu",
+    footerSub: "Le donneur d'ordre voit que le marché avance.",
+    Icon: IconPeopleCoord,
+    FooterIcon: IconTruckMini,
     stripe: "from-[#2563eb] via-[#3b82f6] to-[#60a5fa]",
     blob: "bg-blue-500",
     wash: "from-blue-50/[0.7]",
@@ -55,12 +65,17 @@ const CARDS: CardConfig[] = [
     footerTitleClass: "text-[#1d4ed8]",
   },
   {
-    title: "Fournisseurs, planning & urgences",
-    bullets: ["Commandes, livraisons, locations", "Planning et coordination", "Urgences traitées et arbitrages remontés"],
-    footerTitle: "Chantiers fluides",
-    footerSub: "Tout est au bon endroit, au bon moment.",
-    Icon: IconPeopleCoord,
-    FooterIcon: IconTruckMini,
+    title: "Après travaux / intervention",
+    bullets: [
+      "Attachements, situations et justificatifs",
+      "DOE, levée de réserves, archivage documentaire",
+      "Validations BPU / DPGF et relances paiement",
+      "Clôture propre côté donneur d'ordre",
+    ],
+    footerTitle: "Validations accélérées",
+    footerSub: "Moins de situations bloquées, moins de retard de paiement.",
+    Icon: IconEuroDocument,
+    FooterIcon: IconBarsUp,
     stripe: "from-[#3b82f6] via-[#60a5fa] to-[#93c5fd]",
     blob: "bg-blue-400",
     wash: "from-blue-50/[0.62]",
@@ -95,11 +110,12 @@ export function HomeSolutionSection() {
             className="mt-5 text-[clamp(1.875rem,calc(1rem+3.8vw),3rem)] font-bold leading-[1.08] tracking-[-0.025em]"
             style={{ color: TEXT_DARK }}
           >
-            <span style={{ color: BLUE }}>BeWork</span> prend le relais.
+            <span style={{ color: BLUE }}>BeWork</span> tient le fil entre le terrain, le bureau et le donneur d&apos;ordre.
           </h2>
 
-          <p className="mx-auto mt-3 max-w-xl text-[17px] leading-relaxed md:text-lg" style={{ color: TEXT_MUTED }}>
-            Vous avancez sur vos chantiers. On sécurise tout le reste.
+          <p className="mx-auto mt-3 max-w-2xl text-[17px] leading-relaxed md:text-lg" style={{ color: TEXT_MUTED }}>
+            BeWork absorbe la charge administrative de vos marchés travaux pour sécuriser les interventions, fluidifier
+            les échanges, maintenir la traçabilité et accélérer validations et paiements.
           </p>
         </header>
 

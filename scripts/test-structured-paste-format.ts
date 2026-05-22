@@ -6,6 +6,7 @@ import {
   detectStructuredPasteFormat,
   parseStructuredPasteBlock,
 } from "../src/lib/be-work-devis-structured-paste";
+import { tryParseChatGptMotherVariantsExport } from "../src/lib/be-work-devis-chatgpt-paste";
 
 const TEST1 = {
   fiche_mere: {
@@ -74,6 +75,46 @@ for (const c of cases) {
   console.log(`${ok ? "✓" : "✗"} ${c.name}`);
   console.log(`  detectStructuredPasteFormat → ${detected} (attendu: ${c.expected})`);
   console.log(`  parseStructuredPasteBlock → mode=${mode}, fiches=${mothers}, variantes=${variants}`);
+}
+
+const TEST_HAIE = {
+  code_categorie: "espaces_verts",
+  fiche_mere: {
+    designation: "Taille de reprise de haie sur 3 faces",
+    description: "Description haie test",
+  },
+  variantes: [
+    {
+      code: "12.6.136",
+      designation: "Taille de reprise de haie sur 3 faces — 50 ml",
+      unite: "ML",
+      temps_de_pose: "0,102",
+      pose_seule_41h: "4,18",
+      pose_seule_56h: "5,71",
+      fourniture_seule: "0,92",
+      fourniture_pose_41h: "5,10",
+      fourniture_pose_56h: "6,63",
+    },
+  ],
+};
+
+const haie = tryParseChatGptMotherVariantsExport(TEST_HAIE);
+if (!haie || haie.mothers.length !== 1) {
+  console.error("✗ TEST haie — parsing fiche_mere+variantes");
+  failed += 1;
+} else {
+  const m = haie.mothers[0]!;
+  const priceCount = m.priceEntries.length;
+  const unitOk = m.values.unit.toLowerCase() === "ml";
+  const lotOk = m.values.lot.toLowerCase().includes("espaces verts");
+  const pricesOk = priceCount === 5;
+  if (!pricesOk || !unitOk || !lotOk) failed += 1;
+  console.log(`${pricesOk && unitOk && lotOk ? "✓" : "✗"} TEST haie — prix FR décimaux`);
+  console.log(`  unit=${m.values.unit} lot=${m.values.lot} priceEntries=${priceCount} (attendu ml, Espaces verts, 5)`);
+  if (!pricesOk) {
+    console.log("  détail prix:", m.priceEntries.map((p) => p.sourceName));
+  }
+  if (m.warnings.length) console.log("  warnings:", m.warnings);
 }
 
 if (failed > 0) {

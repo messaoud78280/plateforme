@@ -4,7 +4,9 @@
  */
 
 import type { PriceEntryImportMeta } from "@/lib/be-work-devis-price-entry-import-meta";
-import { extractOrCoalescePriceEntriesFromPasteObject } from "@/lib/be-work-devis-price-entry-paste";
+import { extractOrCoalescePriceEntriesFromPasteObject, toPrismaDecimalUnknown } from "@/lib/be-work-devis-price-entry-paste";
+import { resolveFamilyCodeFromCodeCategorie } from "@/lib/bework-devis-family-codes";
+import { normalizeUnit } from "@/lib/be-work-devis-units";
 import {
   emptyStructuredPasteFormValues,
   extractPasteWorkItemCode,
@@ -84,6 +86,7 @@ const VARIANT_TECH_KEYS = [
   "ouvrage",
   "volume_max_m3",
   "temps_pose",
+  "temps_de_pose",
 ] as const;
 
 const PRIX_GRILLE_KEYS = [
@@ -93,6 +96,24 @@ const PRIX_GRILLE_KEYS = [
   "fourniture_pose_41h",
   "fourniture_pose_56h",
 ] as const;
+
+const PRIX_GRILLE_LABELS: Record<(typeof PRIX_GRILLE_KEYS)[number], string> = {
+  pose_seule_41h: "Pose seule (41h)",
+  pose_seule_56h: "Pose seule (56h)",
+  fourniture_seule: "Fourniture seule",
+  fourniture_pose_41h: "Fourniture + pose (41h)",
+  fourniture_pose_56h: "Fourniture + pose (56h)",
+};
+
+const CODE_CATEGORIE_KEYS = ["code_categorie", "codeCategorie", "code_category", "categorie_metier"] as const;
+
+/** Parse un montant collé (nombre ou chaîne FR « 4,18 » / « 1 234,50 »). */
+function parsePrixGrilleValue(v: unknown): number | null {
+  const d = toPrismaDecimalUnknown(v);
+  if (!d) return null;
+  const n = Number(d);
+  return Number.isFinite(n) && n >= 0 ? n : null;
+}
 
 /** Normalise pour comparaison de similarité (doublons fiche mère). */
 export function normalizeText(value: string): string {
@@ -221,29 +242,31 @@ function extractPrixGrille(variante: Record<string, unknown>): {
 
   if (isRecord(prix)) {
     for (const [k, val] of Object.entries(prix)) {
-      if (typeof val === "number" && Number.isFinite(val)) grille[k] = val;
+      const n = parsePrixGrilleValue(val);
+      if (n != null) grille[k] = n;
     }
     const unit =
-      prix.fourniture_pose_41h ??
-      prix.fourniture_pose_56h ??
-      prix.fourniture_seule ??
-      prix.pose_seule_41h ??
-      prix.pose_seule_56h ??
+      parsePrixGrilleValue(prix.fourniture_pose_41h) ??
+      parsePrixGrilleValue(prix.fourniture_pose_56h) ??
+      parsePrixGrilleValue(prix.fourniture_seule) ??
+      parsePrixGrilleValue(prix.pose_seule_41h) ??
+      parsePrixGrilleValue(prix.pose_seule_56h) ??
       null;
     return { unitPriceHT: unit, prixGrille: grille };
   }
 
   for (const k of PRIX_GRILLE_KEYS) {
-    if (variante[k] != null && typeof variante[k] === "number") {
-      grille[k] = variante[k] as number;
+    if (variante[k] != null) {
+      const n = parsePrixGrilleValue(variante[k]);
+      if (n != null) grille[k] = n;
     }
   }
 
   const unit =
-    variante.prix_reference ??
-    variante.prix_reference_ht ??
-    variante.puHt ??
-    variante.unitPriceHT;
+    parsePrixGrilleValue(variante.prix_reference) ??
+    parsePrixGrilleValue(variante.prix_reference_ht) ??
+    parsePrixGrilleValue(variante.puHt) ??
+    parsePrixGrilleValue(variante.unitPriceHT);
 
   return { unitPriceHT: unit, prixGrille: grille };
 }
@@ -358,7 +381,7 @@ function buildVariantImportMeta(
     : [];
 
   const caracteristiques = collectVariantCaracteristiques(variante);
-  const tempsPose = variante.temps_pose;
+  const tempsPose = variante.temps_pose ?? variante.temps_de_pose;
   const meta: PriceEntryImportMeta = {
     codeSource:
       pickPasteString(variante, ["code", "code_variante", "code_source", "ref", "reference"]) ?? undefined,
@@ -380,7 +403,9 @@ function buildVariantImportMeta(
 
   if (Object.keys(prixGrille).length > 0) meta.prixGrille = prixGrille;
   if (Object.keys(caracteristiques).length > 0) meta.caracteristiques = caracteristiques;
-  if (typeof tempsPose === "number" && Number.isFinite(tempsPose)) meta.temps_pose = tempsPose;
+  const tempsParsed = parsePrixGrilleValue(tempsPose);
+  if (tempsParsed != null) meta.temps_pose = tempsParsed;
+  else if (typeof tempsPose === "number" && Number.isFinite(tempsPose)) meta.temps_pose = tempsPose;
 
   return meta;
 }
@@ -430,18 +455,29 @@ export function mapVarianteToPriceEntryRaw(
   }
 
   const { unitPriceHT, prixGrille } = extractPrixGrille(variante);
+  const codeBase =
+    pickPasteString(variante, ["code", "code_variante", "code_source", "ref", "reference"]) ??
+    `V${varianteIndex + 1}`;
+
+  const grilleLines = Object.entries(prixGrille).filter(([, v]) => v > 0);
+  if (grilleLines.length > 0) {
+    return grilleLines.map(([key, price], subIndex) => {
+      const label = PRIX_GRILLE_LABELS[key as (typeof PRIX_GRILLE_KEYS)[number]] ?? key;
+      const raw: Record<string, unknown> = {
+        unitPriceHT: price,
+        sourceName: `${codeBase} · ${label}`,
+        quantity: variante.quantite_reference ?? variante.quantite ?? variante.quantity ?? 1,
+        vatRate: variante.tva ?? variante.vatRate ?? 0.2,
+      };
+      return enrichPriceEntryRaw(raw, variante, pasteCtx, varianteIndex, subIndex);
+    });
+  }
 
   const entry: Record<string, unknown> = {
     unitPriceHT,
     quantity: variante.quantite_reference ?? variante.quantite ?? variante.quantity ?? 1,
     vatRate: variante.tva ?? variante.vatRate ?? 0.2,
   };
-
-  if (Object.keys(prixGrille).length > 0 && !entry.unitPriceHT) {
-    entry.notes = `Grille prix: ${Object.entries(prixGrille)
-      .map(([k, v]) => `${k}=${v}`)
-      .join(", ")}`;
-  }
 
   return [enrichPriceEntryRaw(entry, variante, pasteCtx, varianteIndex)];
 }
@@ -472,10 +508,18 @@ function mapMotherFromOuvrageEntry(
     pickPasteString(entry, ["designation_complete", "designationComplete", "fullDescription", "description"]) ??
     ficheMere;
 
+  const codeCategorie =
+    pickPasteString(entry, CODE_CATEGORIE_KEYS) ??
+    (ficheRec && pickPasteString(ficheRec, CODE_CATEGORIE_KEYS)) ??
+    pickPasteString(root, CODE_CATEGORIE_KEYS);
+
+  const familyCodeFromCategorie = resolveFamilyCodeFromCodeCategorie(codeCategorie);
+
   const famille =
     pickPasteString(root, ["famille", "family", "lot", "corpsEtat"]) ??
     (ficheRec && pickPasteString(ficheRec, ["famille", "lot"])) ??
     pickPasteString(entry, ["famille", "lot"]) ??
+    (codeCategorie ? codeCategorie.replace(/_/g, " ") : null) ??
     "Non classé";
 
   const sousFamille =
@@ -485,7 +529,8 @@ function mapMotherFromOuvrageEntry(
 
   const categorie =
     (ficheRec && pickPasteString(ficheRec, ["categorie", "category"])) ??
-    pickPasteString(entry, ["categorie", "category"]);
+    pickPasteString(entry, ["categorie", "category"]) ??
+    codeCategorie;
 
   const materiaux =
     (ficheRec && pickPasteString(ficheRec, ["materiaux", "materials", "materiau"])) ??
@@ -504,16 +549,26 @@ function mapMotherFromOuvrageEntry(
     extractPasteWorkItemCode(root) ??
     slugifyWorkItemCode(ficheMere, motherIndex);
 
-  const unit =
+  const variantesListPreview = getVariantesArray(entry);
+  const firstVariantUnit = variantesListPreview
+    .map((v) => (isRecord(v) ? pickPasteString(v, ["unite", "unit", "unite_principale"]) : null))
+    .find((u): u is string => Boolean(u?.trim()));
+
+  const rawUnit =
     (ficheRec && pickPasteString(ficheRec, ["unite", "unit", "unite_principale", "unitePrincipale"])) ??
     pickPasteString(entry, ["unite_principale", "unitePrincipale", "unit", "unite"]) ??
+    firstVariantUnit ??
     "u";
+
+  const unit = normalizeUnit(rawUnit) ?? rawUnit;
 
   const pasteObj: Record<string, unknown> = {
     code,
     lot: famille,
     subLot: sousFamille ?? categorie ?? undefined,
     family: famille,
+    familyCode: familyCodeFromCategorie ?? undefined,
+    code_categorie: codeCategorie ?? undefined,
     title: ficheMere,
     fullDescription: designation,
     unit,

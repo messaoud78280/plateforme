@@ -8,6 +8,7 @@ import {
 } from "@/lib/be-work-devis-labels";
 import { buildWorkItemTradeWhere } from "@/lib/bework-devis-lot-trades";
 import { isKnownFamilyCode } from "@/lib/bework-devis-family-codes";
+import { buildVariantToCanonicalMap, rollupPriceAggregatesToCanonicals } from "@/lib/be-work-devis-price-roll-up";
 import { prisma } from "@/lib/prisma";
 import { WORK_ITEM_VISIBLE_IN_LIST } from "@/lib/work-item-merge";
 
@@ -351,20 +352,19 @@ export async function fetchWorkItemsWithPriceStats(
   const ids = items.map((i) => i.id);
   if (ids.length === 0) return [];
 
+  const canonicalIds = items.filter((i) => i.mergeStatus === "canonical").map((i) => i.id);
+  const variantToCanonical = await buildVariantToCanonicalMap(prisma, canonicalIds);
+  const variantIds = [...variantToCanonical.keys()];
+  const allPriceItemIds = [...new Set([...ids, ...variantIds])];
+
   const aggregates = await prisma.priceEntry.groupBy({
     by: ["workItemId"],
-    where: { workItemId: { in: ids } },
+    where: { workItemId: { in: allPriceItemIds } },
     _avg: { unitPriceHT: true },
     _count: { _all: true },
   });
 
-  const aggMap = new Map<string, ItemAgg>();
-  for (const a of aggregates) {
-    aggMap.set(a.workItemId, {
-      count: a._count._all,
-      avgHt: a._avg.unitPriceHT != null ? Number(a._avg.unitPriceHT) : null,
-    });
-  }
+  const aggMap = rollupPriceAggregatesToCanonicals(aggregates, variantToCanonical);
 
   const merged = mergeAggregates(items, aggMap);
   sortMergedWorkItems(merged, sort);

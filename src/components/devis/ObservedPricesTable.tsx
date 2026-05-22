@@ -16,6 +16,8 @@ type Props = {
   workItem: WorkItemContextSerialized;
   entries: ObservedPriceRowSerialized[];
   deletePriceEntry: (formData: FormData) => Promise<void>;
+  /** Message d’aide si la liste est vide (import collage, formulaire manuel). */
+  emptyHint?: string;
 };
 
 function DetailRow({ label, value }: { label: string; value: string | null | undefined }) {
@@ -157,7 +159,7 @@ function PriceEntryDetailPanel({
   );
 }
 
-export function ObservedPricesTable({ workItemId, workItem, entries, deletePriceEntry }: Props) {
+export function ObservedPricesTable({ workItemId, workItem, entries, deletePriceEntry, emptyHint }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const selectedEntry = entries.find((e) => e.id === selectedId) ?? null;
@@ -196,7 +198,8 @@ export function ObservedPricesTable({ workItemId, workItem, entries, deletePrice
             {entries.length === 0 ? (
               <tr>
                 <td colSpan={12} className="px-3 py-8 text-center text-slate-500">
-                  Aucun prix enregistré pour cet ouvrage.
+                  <p>Aucun prix enregistré pour cet ouvrage.</p>
+                  {emptyHint ? <p className="mx-auto mt-2 max-w-lg text-[13px] leading-relaxed">{emptyHint}</p> : null}
                 </td>
               </tr>
             ) : (

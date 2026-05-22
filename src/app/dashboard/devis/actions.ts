@@ -35,6 +35,7 @@ import {
   normalizeWorkItemLotFields,
   workItemLotNeedsNormalization,
 } from "@/lib/bework-devis-lot-normalize";
+import { resolveFamilyCodeFromCodeCategorie } from "@/lib/bework-devis-family-codes";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import { prisma } from "@/lib/prisma";
 
@@ -535,11 +536,24 @@ function buildWorkItemCreateDataFromPasteValues(
 ) {
   const code = v.code.trim();
   const title = v.title.trim() || "Sans titre";
+  const pasteFamilyHint =
+    (pasteObj &&
+      (typeof pasteObj.familyCode === "string"
+        ? pasteObj.familyCode
+        : typeof pasteObj.code_categorie === "string"
+          ? pasteObj.code_categorie
+          : typeof pasteObj.codeCategorie === "string"
+            ? pasteObj.codeCategorie
+            : null)) ??
+    null;
+  const hintedFamilyCode = resolveFamilyCodeFromCodeCategorie(pasteFamilyHint);
   const { lot, subLot, familyCode } = normalizeWorkItemLotFields({
     lot: v.lot.trim() || "Non classé",
     subLot: pasteStr(v.subLot),
     family: pasteStr(v.family),
+    familyCode: hintedFamilyCode ?? undefined,
     title,
+    fullDescription: v.fullDescription.trim() || undefined,
     itemType: "ouvrage_technique",
   });
   let fullDescription = v.fullDescription.trim();

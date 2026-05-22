@@ -167,6 +167,25 @@ export const BEWORK_DEVIS_FAMILY_LEXICON: BeWorkDevisFamilyDefinition[] = [
     matchTerms: ["façade / enduits", "façade", "facade", "enduit extérieur", "bardage", "ipe"],
   },
   {
+    code: "ESP",
+    label: "Espaces verts",
+    order: 19,
+    description: "Plantations, engazonnement, taille, haies, arrosage et entretien paysager.",
+    matchTerms: [
+      "espaces verts",
+      "espace vert",
+      "espaces_verts",
+      "paysager",
+      "plantation",
+      "engazonnement",
+      "haie",
+      "taille de haie",
+      "élagage",
+      "arrosage",
+      "gazon",
+    ],
+  },
+  {
     code: "GAR",
     label: "Garanties / Assurances / Frais contractuels",
     order: 99,
@@ -309,6 +328,32 @@ function matchFamilyFromHaystack(hay: string, opts: { allowGar: boolean }): stri
  * Déduit le code famille à partir du contexte ouvrage.
  * Retourne null si aucune règle ne correspond (repli : {@link DEFAULT_BEWORK_FAMILY_CODE}).
  */
+/** Alias `code_categorie` (exports ChatGPT) → code famille BeWork. */
+const CODE_CATEGORIE_TO_FAMILY: Record<string, string> = {
+  espaces_verts: "ESP",
+  espace_vert: "ESP",
+  espacesvert: "ESP",
+  assainissement: "VRD",
+  electricite: "ELE",
+  plomberie: "PLO",
+  terrassement: "TER",
+  maconnerie: "MAC",
+  couverture: "COU",
+  peinture: "PEI",
+};
+
+/**
+ * Résout un `code_categorie` ou libellé famille export (ex. espaces_verts → ESP).
+ */
+export function resolveFamilyCodeFromCodeCategorie(raw: string | null | undefined): string | null {
+  if (!raw?.trim()) return null;
+  const key = normalizeBeWorkMatchString(raw).replace(/\s+/g, "_");
+  const direct = CODE_CATEGORIE_TO_FAMILY[key];
+  if (direct && isKnownFamilyCode(direct)) return direct;
+  const hinted = suggestFamilyCodeFromWorkItem({ lot: raw.trim(), title: raw.trim(), itemType: "ouvrage_technique" });
+  return hinted;
+}
+
 export function suggestFamilyCodeFromWorkItem(input: WorkItemFamilySuggestionInput): string | null {
   const itemType = input.itemType?.trim();
   if (itemType === "garantie_assurance") return "GAR";

@@ -16,6 +16,7 @@ import {
 import { formatDateFr, formatEurFr } from "@/lib/be-work-devis-format";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import { getBeWorkFamilyLabel } from "@/lib/bework-devis-family-codes";
+import { workItemIdsForPriceRollUp } from "@/lib/be-work-devis-price-roll-up";
 import { prisma } from "@/lib/prisma";
 
 type Props = { params: Promise<{ id: string }> };
@@ -36,19 +37,23 @@ export default async function FicheOuvragePage({ params }: Props) {
   if (!itemWithVariants) notFound();
   const item = itemWithVariants;
   const mergedVariants = itemWithVariants.mergedVariants ?? [];
+  const priceWorkItemIds = await workItemIdsForPriceRollUp(prisma, {
+    id: item.id,
+    mergeStatus: item.mergeStatus,
+  });
 
   const [agg, countPrices, entries, sources, siteResourceLinks] = await Promise.all([
     prisma.priceEntry.aggregate({
-      where: { workItemId: id },
+      where: { workItemId: { in: priceWorkItemIds } },
       _min: { unitPriceHT: true },
       _max: { unitPriceHT: true },
       _avg: { unitPriceHT: true },
     }),
-    prisma.priceEntry.count({ where: { workItemId: id } }),
+    prisma.priceEntry.count({ where: { workItemId: { in: priceWorkItemIds } } }),
     prisma.priceEntry.findMany({
-      where: { workItemId: id },
+      where: { workItemId: { in: priceWorkItemIds } },
       orderBy: [{ updatedAt: "desc" }],
-      include: { priceSource: true },
+      include: { priceSource: true, workItem: { select: { code: true, title: true } } },
     }),
     prisma.priceSource.findMany({ orderBy: { name: "asc" } }),
     prisma.workItemSiteResource.findMany({
@@ -312,14 +317,26 @@ export default async function FicheOuvragePage({ params }: Props) {
           </div>
         </div>
 
+        {mergedVariants.length > 0 && countPrices > 0 ? (
+          <p className="text-sm text-violet-900/90">
+            Les prix des variantes regroupées sont inclus dans ce tableau ({countPrices} ligne
+            {countPrices > 1 ? "s" : ""}).
+          </p>
+        ) : null}
+
         <ObservedPricesTable
-          workItemId={id}
+          workItemId={item.id}
           workItem={workItemContext}
           entries={serializedEntries}
           deletePriceEntry={deletePriceEntry}
+          emptyHint={
+            countPrices === 0
+              ? "Aucun prix enregistré pour cet ouvrage. Ajoutez un prix ci-dessous, ou importez un collage JSON avec le champ workItemCode et un tableau priceEntries."
+              : undefined
+          }
         />
 
-        <PriceEntryCreateForm workItemId={id} sources={sources} />
+        <PriceEntryCreateForm workItemId={item.id} sources={sources} />
       </section>
     </div>
   );

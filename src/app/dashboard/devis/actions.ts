@@ -35,7 +35,10 @@ import {
   normalizeWorkItemLotFields,
   workItemLotNeedsNormalization,
 } from "@/lib/bework-devis-lot-normalize";
-import { resolveFamilyCodeFromCodeCategorie } from "@/lib/bework-devis-family-codes";
+import {
+  buildMergeClassificationPatch,
+  resolveClassificationFromPaste,
+} from "@/lib/be-work-devis-import-classification";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import { prisma } from "@/lib/prisma";
 
@@ -536,26 +539,7 @@ function buildWorkItemCreateDataFromPasteValues(
 ) {
   const code = v.code.trim();
   const title = v.title.trim() || "Sans titre";
-  const pasteFamilyHint =
-    (pasteObj &&
-      (typeof pasteObj.familyCode === "string"
-        ? pasteObj.familyCode
-        : typeof pasteObj.code_categorie === "string"
-          ? pasteObj.code_categorie
-          : typeof pasteObj.codeCategorie === "string"
-            ? pasteObj.codeCategorie
-            : null)) ??
-    null;
-  const hintedFamilyCode = resolveFamilyCodeFromCodeCategorie(pasteFamilyHint);
-  const { lot, subLot, familyCode } = normalizeWorkItemLotFields({
-    lot: v.lot.trim() || "Non classé",
-    subLot: pasteStr(v.subLot),
-    family: pasteStr(v.family),
-    familyCode: hintedFamilyCode ?? undefined,
-    title,
-    fullDescription: v.fullDescription.trim() || undefined,
-    itemType: "ouvrage_technique",
-  });
+  const classification = resolveClassificationFromPaste(v, pasteObj);
   let fullDescription = v.fullDescription.trim();
   if (isIncompleteDescriptionText(fullDescription)) {
     if (pasteObj) {
@@ -566,8 +550,6 @@ function buildWorkItemCreateDataFromPasteValues(
       fullDescription = "À compléter.";
     }
   }
-  const rawUnit = v.unit.trim();
-  const unit = normalizeUnit(rawUnit) ?? "m²";
   let statusRaw = v.status.trim();
   if (!isWorkItemStatus(statusRaw)) statusRaw = "brouillon";
   let qualityRaw = v.qualityLevel.trim();
@@ -575,14 +557,14 @@ function buildWorkItemCreateDataFromPasteValues(
 
   return {
     code,
-    lot,
-    subLot,
-    family: pasteStr(v.family),
-    familyCode,
+    lot: classification.lot,
+    subLot: classification.subLot,
+    family: classification.family,
+    familyCode: classification.familyCode,
     title,
     shortDescription: pasteStr(v.shortDescription),
     fullDescription,
-    unit,
+    unit: classification.unit,
     qualityLevel: qualityRaw as WorkItemQualityLevel,
     technicalReference: pasteStr(v.technicalReference),
     includedItems: pasteStr(v.includedItems),
@@ -679,9 +661,23 @@ export async function importWorkItemsBulk(
 
     const existing = await prisma.workItem.findUnique({ where: { code } });
     if (existing) {
-      if (mergeDuplicates && priceEntries.length > 0) {
-        await attachPriceEntries(existing.id, code, `Ligne ${i + 1}`, priceEntries);
-        mergedDuplicates += 1;
+      if (mergeDuplicates) {
+        const importedClassification = resolveClassificationFromPaste(values, pasteSource);
+        const metaPatch = buildMergeClassificationPatch(existing, importedClassification);
+        let merged = false;
+        if (metaPatch) {
+          await prisma.workItem.update({
+            where: { id: existing.id },
+            data: metaPatch,
+          });
+          merged = true;
+        }
+        if (priceEntries.length > 0) {
+          await attachPriceEntries(existing.id, code, `Ligne ${i + 1}`, priceEntries);
+          merged = true;
+        }
+        if (merged) mergedDuplicates += 1;
+        else skippedDuplicate += 1;
       } else {
         skippedDuplicate += 1;
       }

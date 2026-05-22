@@ -515,22 +515,24 @@ function mapMotherFromOuvrageEntry(
 
   const familyCodeFromCategorie = resolveFamilyCodeFromCodeCategorie(codeCategorie);
 
+  const categorieLabel =
+    (ficheRec && pickPasteString(ficheRec, ["categorie", "category"])) ??
+    pickPasteString(entry, ["categorie", "category"]);
+
+  const sousCategorie =
+    pickPasteString(entry, ["sous_categorie", "sousCategorie", "sous_categorie_metier"]) ??
+    (ficheRec && pickPasteString(ficheRec, ["sous_categorie", "sousCategorie", "sub_categorie"])) ??
+    pickPasteString(root, ["sous_famille", "sousFamille", "subLot"]) ??
+    (ficheRec && pickPasteString(ficheRec, ["sous_famille", "sousFamille", "subLot"])) ??
+    pickPasteString(entry, ["sous_famille", "subLot"]);
+
   const famille =
+    categorieLabel ??
     pickPasteString(root, ["famille", "family", "lot", "corpsEtat"]) ??
     (ficheRec && pickPasteString(ficheRec, ["famille", "lot"])) ??
     pickPasteString(entry, ["famille", "lot"]) ??
     (codeCategorie ? codeCategorie.replace(/_/g, " ") : null) ??
     "Non classé";
-
-  const sousFamille =
-    pickPasteString(root, ["sous_famille", "sousFamille", "subLot"]) ??
-    (ficheRec && pickPasteString(ficheRec, ["sous_famille", "sousFamille", "subLot"])) ??
-    pickPasteString(entry, ["sous_famille", "subLot"]);
-
-  const categorie =
-    (ficheRec && pickPasteString(ficheRec, ["categorie", "category"])) ??
-    pickPasteString(entry, ["categorie", "category"]) ??
-    codeCategorie;
 
   const materiaux =
     (ficheRec && pickPasteString(ficheRec, ["materiaux", "materials", "materiau"])) ??
@@ -564,9 +566,11 @@ function mapMotherFromOuvrageEntry(
 
   const pasteObj: Record<string, unknown> = {
     code,
-    lot: famille,
-    subLot: sousFamille ?? categorie ?? undefined,
-    family: famille,
+    lot: categorieLabel ?? famille,
+    subLot: sousCategorie ?? undefined,
+    family: sousCategorie ?? categorieLabel ?? famille,
+    categorie: categorieLabel ?? undefined,
+    sous_categorie: sousCategorie ?? undefined,
     familyCode: familyCodeFromCategorie ?? undefined,
     code_categorie: codeCategorie ?? undefined,
     title: ficheMere,
@@ -599,9 +603,9 @@ function mapMotherFromOuvrageEntry(
     if (vCode) variantCodes.push(vCode);
 
     const mapped = mapVarianteToPriceEntryRaw(item, ficheMere, vi, pickPasteString(item, ["designation", "libelle"]), {
-      famille,
-      sousFamille,
-      categorie,
+      famille: categorieLabel ?? famille,
+      sousFamille: sousCategorie,
+      categorie: categorieLabel,
       unite: unit,
       tags,
     });

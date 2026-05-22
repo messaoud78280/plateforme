@@ -7,6 +7,10 @@ import {
   parseStructuredPasteBlock,
 } from "../src/lib/be-work-devis-structured-paste";
 import { tryParseChatGptMotherVariantsExport } from "../src/lib/be-work-devis-chatgpt-paste";
+import {
+  buildMergeClassificationPatch,
+  resolveClassificationFromPaste,
+} from "../src/lib/be-work-devis-import-classification";
 
 const TEST1 = {
   fiche_mere: {
@@ -79,9 +83,11 @@ for (const c of cases) {
 
 const TEST_HAIE = {
   code_categorie: "espaces_verts",
+  categorie: "Espaces verts",
   fiche_mere: {
     designation: "Taille de reprise de haie sur 3 faces",
     description: "Description haie test",
+    unite: "ML",
   },
   variantes: [
     {
@@ -115,6 +121,28 @@ if (!haie || haie.mothers.length !== 1) {
     console.log("  détail prix:", m.priceEntries.map((p) => p.sourceName));
   }
   if (m.warnings.length) console.log("  warnings:", m.warnings);
+
+  const imported = resolveClassificationFromPaste(m.values, m.pasteSource);
+  const existingGeneric = {
+    familyCode: "DIV",
+    lot: "Divers / À classer",
+    family: "Non classé",
+    unit: "unité",
+    subLot: null,
+  };
+  const patch = buildMergeClassificationPatch(existingGeneric, imported);
+  const mergeOk =
+    patch?.familyCode === "ESP" &&
+    patch.lot === "Espaces verts" &&
+    patch.unit === "ml" &&
+    (patch.family?.toLowerCase().includes("espaces") ?? false);
+  if (!mergeOk) {
+    failed += 1;
+    console.log("✗ TEST haie — fusion métadonnées DIV → ESP");
+    console.log("  patch:", patch, "imported:", imported);
+  } else {
+    console.log("✓ TEST haie — fusion métadonnées DIV → ESP (lot, ml, ESP)");
+  }
 }
 
 if (failed > 0) {

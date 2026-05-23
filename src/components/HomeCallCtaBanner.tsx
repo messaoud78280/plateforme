@@ -1,10 +1,11 @@
-import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
+import Link from "next/link";
+import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 
 /** Bannière CTA premium — réservation d’appel, même courbe grise que la section crédibilité */
 export function HomeCallCtaBanner() {
   return (
     <section
-      id="reserver-appel"
+      id="contact-rapide"
       className="relative scroll-mt-28 overflow-hidden px-6 pb-14 pt-6 md:scroll-mt-32 md:pb-16 md:pt-10"
       aria-labelledby="cta-appel-heading"
     >
@@ -31,19 +32,20 @@ export function HomeCallCtaBanner() {
                 Besoin d&apos;en parler ?
               </h3>
               <p className="mt-1 text-sm leading-snug text-slate-600 md:text-[15px] md:leading-snug">
-                Réservez un appel avec un expert BeWork.
+                Décrivez votre besoin : réponse rapide de l&apos;équipe BeWork.
               </p>
             </div>
           </div>
 
           <div className="flex shrink-0 sm:justify-end">
-            <CalendlyBookingLink
-              trackLocation="home-cta-banner"
+            <Link
+              href="/contact#formulaire"
               className="inline-flex h-12 min-h-[3rem] w-full items-center justify-center gap-2 rounded-xl border border-[#2563eb]/70 bg-gradient-to-b from-[#3b82f6] via-[#2563eb] to-[#1d4ed8] px-6 text-base font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_4px_20px_rgba(29,78,216,0.32)] transition hover:border-[#3b82f6] hover:from-[#2563eb] hover:via-[#1d4ed8] hover:to-[#1e40af] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_6px_24px_rgba(29,78,216,0.38)] active:translate-y-px md:w-auto md:px-8"
+              {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_RENDEZ_VOUS, "home-cta-banner")}
             >
               <IconCalendar className="h-[18px] w-[18px] shrink-0 opacity-95" aria-hidden />
-              Réserver un appel
-            </CalendlyBookingLink>
+              Nous contacter
+            </Link>
           </div>
         </div>
       </div>

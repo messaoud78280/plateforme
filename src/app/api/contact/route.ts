@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { labelMainNeed, labelMarketType } from "@/lib/contact-form-options";
 import { sendEmail } from "@/lib/email";
+import { prisma } from "@/lib/prisma";
 
 function envTrim(s: string | undefined | null): string {
   return typeof s === "string" ? s.trim() : "";
@@ -26,19 +27,48 @@ function escapeHtml(s: string): string {
     .replace(/\n/g, "<br>");
 }
 
+function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(email);
+}
+
+/** Limite simple par IP (fenêtre glissante en mémoire). */
+const rateLimitWindowMs = 60 * 60 * 1000;
+const rateLimitMax = 8;
+const rateLimitByIp = new Map<string, number[]>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const hits = (rateLimitByIp.get(ip) ?? []).filter((t) => now - t < rateLimitWindowMs);
+  if (hits.length >= rateLimitMax) {
+    rateLimitByIp.set(ip, hits);
+    return true;
+  }
+  hits.push(now);
+  rateLimitByIp.set(ip, hits);
+  return false;
+}
+
 export async function POST(request: NextRequest) {
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip")?.trim() ||
+    "unknown";
+
+  if (isRateLimited(ip)) {
+    return NextResponse.json({ error: "Trop de demandes. Réessayez plus tard." }, { status: 429 });
+  }
+
   let body: {
-    structure?: string;
-    denominationSociale?: string;
-    contactName?: string;
+    companyName?: string;
     email?: string;
     phone?: string;
-    formule?: string;
+    marketType?: string;
+    tradeActivity?: string;
+    mainNeed?: string;
     message?: string;
-    rdvDate?: string;
-    rdvTime?: string;
-    sector?: string;
-    howKnown?: string;
+    consent?: boolean;
+    source?: string;
+    website?: string;
   };
 
   try {
@@ -47,66 +77,65 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Corps de requête invalide." }, { status: 400 });
   }
 
-  const structure = String(body.structure ?? "").trim();
-  const contactName = String(body.contactName ?? "").trim();
-  const email = String(body.email ?? "").trim();
+  if (String(body.website ?? "").trim()) {
+    return NextResponse.json({ ok: true });
+  }
 
-  if (!structure || !contactName || !email) {
+  const companyName = String(body.companyName ?? "").trim();
+  const email = String(body.email ?? "").trim().toLowerCase();
+  const phone = String(body.phone ?? "").trim();
+  const marketType = String(body.marketType ?? "").trim();
+  const tradeActivity = String(body.tradeActivity ?? "").trim();
+  const mainNeed = String(body.mainNeed ?? "").trim();
+  const message = String(body.message ?? "").trim().slice(0, 2000);
+  const source = String(body.source ?? "homepage_contact_form").trim().slice(0, 120) || "homepage_contact_form";
+  const consent = body.consent === true;
+
+  if (!companyName || !email || !marketType || !mainNeed) {
     return NextResponse.json(
-      { error: "Structure, nom du contact et email sont requis." },
+      { error: "Nom / entreprise, email, type de marché et besoin principal sont requis." },
       { status: 400 }
     );
   }
 
-  const denominationSociale = String(body.denominationSociale ?? "").trim();
-  const phone = String(body.phone ?? "").trim();
-  const formule = String(body.formule ?? "").trim();
-  const message = String(body.message ?? "").trim();
-  const rdvDate = String(body.rdvDate ?? "").trim();
-  const rdvTime = String(body.rdvTime ?? "").trim();
-  const sector = String(body.sector ?? "").trim();
-  const howKnown = String(body.howKnown ?? "").trim();
+  if (!isValidEmail(email)) {
+    return NextResponse.json({ error: "Adresse email invalide." }, { status: 400 });
+  }
 
-  const rdvDateOnly = rdvDate ? new Date(rdvDate + "T00:00:00.000Z") : null;
+  if (!consent) {
+    return NextResponse.json({ error: "Le consentement est obligatoire." }, { status: 400 });
+  }
+
+  const createdAt = new Date();
 
   try {
     await prisma.contactRequest.create({
       data: {
-        structure,
-        denominationSociale: denominationSociale || null,
-        contactName,
+        structure: companyName,
+        contactName: companyName,
         email,
         phone: phone || null,
-        formule: formule || null,
+        marketType,
+        tradeActivity: tradeActivity || null,
+        mainNeed,
         message: message || null,
-        rdvDate: rdvDateOnly,
-        rdvTime: rdvTime || null,
-        sector: sector || null,
-        howKnown: howKnown || null,
+        consent,
+        source,
       },
     });
   } catch (e) {
-    console.error("ContactRequest create error:", e);
+    console.error("[contact] ContactRequest create error");
     return NextResponse.json(
       { error: "Erreur lors de l’enregistrement de la demande." },
       { status: 500 }
     );
   }
 
-  const rdvLabel =
-    rdvDate && rdvTime
-      ? `${rdvDate} à ${rdvTime.replace(":", "h")}`
-      : rdvDate
-        ? rdvDate
-        : "Non indiqué";
-
-  const howKnownLabels: Record<string, string> = {
-    recherche: "Recherche internet",
-    recommandation: "Recommandation",
-    reseau: "Réseaux sociaux",
-    salon: "Salon / événement",
-    autre: "Autre",
-  };
+  const dateLabel = createdAt.toLocaleString("fr-FR", {
+    timeZone: "Europe/Paris",
+    dateStyle: "long",
+    timeStyle: "short",
+  });
 
   const html = `
 <!DOCTYPE html>
@@ -114,43 +143,28 @@ export async function POST(request: NextRequest) {
 <head><meta charset="utf-8"><title>Nouvelle demande de contact BeWork</title></head>
 <body style="font-family: sans-serif; line-height: 1.5; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
   <h1 style="color: #0f172a;">Nouvelle demande de contact</h1>
-  <p>Une nouvelle demande a été envoyée depuis le formulaire de contact BeWork.</p>
+  <p>Une demande a été envoyée depuis le formulaire BeWork.</p>
 
-  <h2 style="color: #1d4ed8; font-size: 1.1em; margin-top: 24px;">Structure</h2>
   <ul style="list-style: none; padding: 0;">
-    <li><strong>Nom de la structure :</strong> ${escapeHtml(structure)}</li>
-    ${denominationSociale ? `<li><strong>Dénomination sociale :</strong> ${escapeHtml(denominationSociale)}</li>` : ""}
-  </ul>
-
-  <h2 style="color: #1d4ed8; font-size: 1.1em; margin-top: 24px;">Contact</h2>
-  <ul style="list-style: none; padding: 0;">
-    <li><strong>Nom :</strong> ${escapeHtml(contactName)}</li>
+    <li><strong>Nom / entreprise :</strong> ${escapeHtml(companyName)}</li>
     <li><strong>Email :</strong> <a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></li>
     ${phone ? `<li><strong>Téléphone :</strong> ${escapeHtml(phone)}</li>` : ""}
+    <li><strong>Type de marché :</strong> ${escapeHtml(labelMarketType(marketType))}</li>
+    <li><strong>Corps d'état / activité :</strong> ${escapeHtml(tradeActivity || "—")}</li>
+    <li><strong>Besoin principal :</strong> ${escapeHtml(labelMainNeed(mainNeed))}</li>
+    <li><strong>Date de demande :</strong> ${escapeHtml(dateLabel)}</li>
+    <li><strong>Source :</strong> ${escapeHtml(source)}</li>
   </ul>
 
-  <h2 style="color: #1d4ed8; font-size: 1.1em; margin-top: 24px;">Formule et rendez-vous</h2>
-  <ul style="list-style: none; padding: 0;">
-    ${formule ? `<li><strong>Formule choisie :</strong> ${escapeHtml(formule)}</li>` : ""}
-    <li><strong>Créneau demandé :</strong> ${escapeHtml(rdvLabel)}</li>
-    <p style="margin-top: 8px; color: #64748b; font-size: 0.95em;">Lors du premier RDV en visioconférence, vous pourrez expliquer le mode opératoire et les conditions.</p>
-  </ul>
-
-  ${message ? `
-  <h2 style="color: #1d4ed8; font-size: 1.1em; margin-top: 24px;">Message</h2>
-  <p style="white-space: pre-wrap;">${escapeHtml(message)}</p>
-  ` : ""}
-
-  ${(sector || howKnown) ? `
-  <h2 style="color: #1d4ed8; font-size: 1.1em; margin-top: 24px;">Compléments</h2>
-  <ul style="list-style: none; padding: 0;">
-    ${sector ? `<li><strong>Secteur d'activité :</strong> ${escapeHtml(sector)}</li>` : ""}
-    ${howKnown ? `<li><strong>Comment nous a-t-il connu :</strong> ${howKnownLabels[howKnown] || howKnown}</li>` : ""}
-  </ul>
-  ` : ""}
+  ${
+    message
+      ? `<h2 style="color: #1d4ed8; font-size: 1.1em; margin-top: 24px;">Message</h2>
+  <p style="white-space: pre-wrap;">${escapeHtml(message)}</p>`
+      : ""
+  }
 
   <p style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #e0e4ea; font-size: 0.9em; color: #64748b;">
-    Répondez à <a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a> pour confirmer le rendez-vous et envoyer le lien de visioconférence.
+    Répondez à <a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a> pour recontacter le prospect.
   </p>
 </body>
 </html>
@@ -160,32 +174,24 @@ export async function POST(request: NextRequest) {
   let providerErrorMessage: string | null = null;
 
   if (contactRecipients.length === 0) {
-    console.warn(
-      "[contact] CONTACT_EMAIL vide ou invalide : ajoutez une ou plusieurs adresses valides (ex. contact@bework.fr)."
-    );
+    console.warn("[contact] CONTACT_EMAIL vide ou invalide (ex. contact@bework.fr).");
   } else {
     try {
       const r = await sendEmail({
         to: contactRecipients,
         replyTo: email,
-        subject: `[BeWork] Demande de contact – ${structure} – ${contactName}`,
+        subject: `[BeWork] Demande de contact – ${companyName}`,
         html,
       });
       if (!r.ok) {
         providerErrorMessage = `${r.reason}${r.status ? ` (status ${r.status})` : ""}`;
-        console.error("[contact] Email refusé:", r);
+        console.error("[contact] Email refusé:", r.reason);
       } else {
         emailSent = true;
-        console.info(
-          "[contact] Mail d’alerte envoyé via Brevo:",
-          r.messageId ?? "—",
-          "→",
-          contactRecipients.join(", ")
-        );
       }
-    } catch (e) {
-      providerErrorMessage = e instanceof Error ? e.message : String(e);
-      console.error("[contact] Erreur envoi email:", e);
+    } catch {
+      providerErrorMessage = "send_failed";
+      console.error("[contact] Erreur envoi email");
     }
   }
 

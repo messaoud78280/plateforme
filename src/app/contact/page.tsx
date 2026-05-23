@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
+import { ProspectContactForm } from "@/components/contact/ProspectContactForm";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
@@ -10,14 +10,14 @@ const pageUrl = absoluteUrl("/contact");
 const contactOgImage = absoluteUrl("/opengraph-image");
 
 export const metadata: Metadata = {
-  title: { absolute: "Contact BeWork : assistant travaux BTP | Rendez-vous" },
+  title: { absolute: "Contact BeWork : assistant travaux BTP | Demande" },
   description:
-    "Contactez BeWork pour un appel découverte : assistants travaux BTP en France, Belgique, Suisse et Luxembourg. Externalisez votre gestion bureau-chantier.",
+    "Contactez BeWork pour qualifier votre besoin : suivi administratif de marchés, DOE, comptes rendus et relances BTP en France, Belgique, Suisse et Luxembourg.",
   keywords: [
     "contact BeWork",
-    "appel découverte BTP",
-    "échange externalisation administrative",
-    "assistante travaux BTP",
+    "demande externalisation administrative",
+    "assistant travaux BTP",
+    "suivi marchés travaux",
   ],
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   openGraph: {
@@ -27,14 +27,14 @@ export const metadata: Metadata = {
     siteName: "BeWork",
     title: "Contact — BeWork",
     description:
-      "Contactez BeWork : appel découverte, FAQ et tarifs. Accompagnement administratif BTP en France, Belgique, Suisse, Luxembourg.",
+      "Formulaire de contact BeWork : qualification rapide de votre besoin administratif BTP. FAQ et tarifs.",
     images: [{ url: contactOgImage, width: 1200, height: 630, alt: "Contacter BeWork — partenaire administratif BTP" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Contact BeWork",
     description:
-      "Contactez BeWork : appel découverte, FAQ et tarifs. Accompagnement administratif BTP en France, Belgique, Suisse, Luxembourg.",
+      "Contactez BeWork pour qualifier votre besoin administratif BTP. Réponse rapide par l'équipe.",
   },
   robots: { index: true, follow: true },
 };
@@ -50,18 +50,19 @@ export default function ContactPage() {
             Contact & échange
           </h1>
           <p className="mt-4 text-base font-medium leading-relaxed text-black md:text-lg">
-            La prise de rendez-vous se fait en ligne sur notre page dédiée : choisissez un créneau qui vous convient pour un{" "}
-            <strong className="font-semibold text-black">appel découverte</strong> (visio). Pas de formulaire de créneaux sur ce
-            site — tout passe par le lien ci-dessous.
+            Décrivez votre contexte en quelques champs : BeWork qualifie votre demande et vous recontacte pour un{" "}
+            <strong className="font-semibold text-black">échange ciblé</strong> sur vos marchés et votre charge
+            administrative.
           </p>
 
-          <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
-            <CalendlyBookingLink
-              trackLocation="contact-page"
-              className="inline-flex min-h-[3rem] items-center justify-center rounded-xl bg-[#1d4ed8] px-8 py-3.5 text-center text-base font-semibold text-white shadow-md shadow-[#1d4ed8]/25 transition hover:bg-[#1e40af]"
-            >
-              Réserver un appel découverte
-            </CalendlyBookingLink>
+          <div
+            id="formulaire"
+            className="relative mt-10 scroll-mt-28 rounded-2xl border border-slate-200 bg-white/95 p-6 shadow-sm md:p-8"
+          >
+            <ProspectContactForm source="contact_page" />
+          </div>
+
+          <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
             <Link
               href="/faq"
               className="inline-flex min-h-[3rem] items-center justify-center rounded-xl border-2 border-slate-200 bg-white px-8 py-3.5 text-center text-base font-semibold text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"

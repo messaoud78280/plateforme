@@ -526,6 +526,11 @@ model ContactRequest {
   rdvTime             String?           // "09:00", "09:30", ...
   sector              String?
   howKnown            String?
+  marketType          String?
+  tradeActivity       String?
+  mainNeed            String?
+  consent             Boolean           @default(false)
+  source              String?           @default("homepage_contact_form")
   status              ContactRequestStatus @default(NOUVEAU)
   createdAt           DateTime          @default(now())
 

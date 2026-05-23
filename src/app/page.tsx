@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
+import { ProspectContactForm } from "@/components/contact/ProspectContactForm";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { HomeProblemSection } from "@/components/HomeProblemSection";
 import { HomeHowItWorksDetailSection } from "@/components/HomeHowItWorksDetailSection";
@@ -663,33 +663,28 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* CTA final */}
-        <section id="contact" className="px-6 py-24 md:py-28">
-          <div className="mx-auto max-w-site rounded-2xl surface-metallic-light surface-metallic-light--soft border-2 border-[#1d4ed8]/25 p-12 text-black shadow-lg md:p-16">
-            <div className="grid gap-12 md:grid-cols-3 md:items-center md:gap-16">
-              <div className="md:col-span-2">
+        {/* Contact / prospection */}
+        <section id="contact" className="px-6 py-24 md:py-28 scroll-mt-24">
+          <div className="mx-auto max-w-site rounded-2xl surface-metallic-light surface-metallic-light--soft border-2 border-[#1d4ed8]/25 p-8 text-black shadow-lg md:p-12 lg:p-14">
+            <div className="grid gap-10 lg:grid-cols-5 lg:gap-14">
+              <div className="lg:col-span-2">
                 <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
                   Faire le point sur vos marchés et votre charge administrative ?
                 </h2>
-                <p className="mt-6 max-w-2xl text-lg leading-relaxed text-black">
-                  Un diagnostic permet de vérifier l&apos;adéquation entre vos marchés en cours, votre organisation documentaire et le
-                  niveau de forfait — avant tout engagement.
+                <p className="mt-6 text-lg leading-relaxed text-black">
+                  Décrivez votre contexte en quelques champs : BeWork qualifie votre demande et vous recontacte pour un échange
+                  ciblé — avant tout engagement.
                 </p>
-              </div>
-              <div className="flex flex-col gap-4 md:items-end">
                 <Link
                   href="/tarifs"
-                  className="inline-flex w-full justify-center rounded-lg border-2 border-[#1d4ed8] bg-white px-8 py-4 font-semibold text-black shadow-md transition-all hover:bg-[#f8f9fb] md:w-auto"
+                  className="mt-8 inline-flex rounded-lg border-2 border-[#1d4ed8] bg-white px-6 py-3 font-semibold text-black shadow-sm transition hover:bg-[#f8f9fb]"
                   {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_TARIFS, "home-final-cta")}
                 >
                   Consulter les forfaits
                 </Link>
-                <CalendlyBookingLink
-                  trackLocation="home-final-cta"
-                  className="inline-flex w-full justify-center rounded-lg bg-[#1d4ed8] px-8 py-4 font-semibold text-white shadow-md transition-all hover:bg-[#1e40af] md:w-auto"
-                >
-                  Échanger sur votre besoin
-                </CalendlyBookingLink>
+              </div>
+              <div className="relative rounded-2xl border border-slate-200/90 bg-white/95 p-6 shadow-sm lg:col-span-3 md:p-8">
+                <ProspectContactForm source="homepage_contact_form" variant="compact" />
               </div>
             </div>
           </div>

@@ -240,7 +240,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             </Link>
             <CalendlyBookingLink trackLocation="header-desktop" className={HEADER_BTN_PRIMARY}>
               <IconCalendar className="h-4 w-4 shrink-0 text-white" aria-hidden />
-              <span className="whitespace-nowrap">Réserver un appel</span>
+              <span className="whitespace-nowrap">Nous contacter</span>
             </CalendlyBookingLink>
           </div>
           <nav
@@ -493,7 +493,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 className="mt-2 inline-flex min-h-[3rem] justify-center rounded-xl bg-[#1d4ed8] px-4 py-3 text-base font-semibold text-white bework-cta-primary-glow hover:bg-[#1e40af]"
                 onClick={() => setMobileOpen(false)}
               >
-                Réserver un appel
+                Nous contacter
               </CalendlyBookingLink>
             </div>
 
@@ -563,7 +563,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 onClick={() => setMobileOpen(false)}
               >
                 <IconCalendar className="h-[18px] w-[18px]" aria-hidden />
-                Réserver un appel
+                Nous contacter
               </CalendlyBookingLink>
             </div>
           </div>

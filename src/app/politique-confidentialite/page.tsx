@@ -139,8 +139,8 @@ export default function PolitiqueConfidentialitePage() {
           <strong>Envoi d’e-mails transactionnels</strong> : <strong>Brevo</strong> (API), lorsque les clés et paramètres d’expéditeur sont configurés.
         </li>
         <li>
-          <strong>Prise de rendez-vous</strong> : le site peut renvoyer vers <strong>Calendly</strong> ; les données saisies sur Calendly relèvent alors
-          de la politique de confidentialité de ce tiers.
+          <strong>Formulaire de contact</strong> : les demandes saisies sur le site sont enregistrées dans la base BeWork et traitées par l&apos;équipe
+          (voir finalités ci-dessus).
         </li>
         <li>
           <strong>Authentification</strong> des espaces connectés&nbsp;: <strong>NextAuth.js</strong> (cookies de session).

@@ -15,8 +15,21 @@ function parseEmailRecipients(raw: string): string[] {
     .filter((s) => s.includes("@") && s.length > 4);
 }
 
-const contactEmailRaw = envTrim(process.env.CONTACT_EMAIL);
-const contactRecipients = contactEmailRaw ? parseEmailRecipients(contactEmailRaw) : [];
+const PLACEHOLDER_CONTACT_EMAILS = new Set([
+  "contact@votredomaine.fr",
+  "contact@example.com",
+  "contact@yourdomain.com",
+]);
+
+function resolveContactRecipients(): string[] {
+  const raw = envTrim(process.env.CONTACT_EMAIL);
+  const parsed = raw ? parseEmailRecipients(raw) : [];
+  const usable = parsed.filter((e) => !PLACEHOLDER_CONTACT_EMAILS.has(e.toLowerCase()));
+  if (usable.length > 0) return usable;
+  return parseEmailRecipients("contact@bework.fr");
+}
+
+const contactRecipients = resolveContactRecipients();
 
 function escapeHtml(s: string): string {
   return s
@@ -188,6 +201,7 @@ export async function POST(request: NextRequest) {
         console.error("[contact] Email refusé:", r.reason);
       } else {
         emailSent = true;
+        console.info("[contact] Notification envoyée →", contactRecipients.join(", "));
       }
     } catch {
       providerErrorMessage = "send_failed";

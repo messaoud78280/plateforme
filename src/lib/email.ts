@@ -114,11 +114,21 @@ export async function sendEmail(params: {
     const bodyJson = isJson ? (JSON.parse(bodyText || "null") as unknown) : null;
 
     if (!res.ok) {
+      const detail =
+        typeof bodyJson === "object" && bodyJson !== null && "message" in bodyJson
+          ? String((bodyJson as { message?: unknown }).message ?? "")
+          : truncate(bodyText, 400);
       console.error("[Email] Brevo API refus", {
         status: res.status,
+        detail,
         body: truncate(typeof bodyJson === "object" && bodyJson ? JSON.stringify(bodyJson) : bodyText),
       });
-      return { ok: false, provider: "brevo", reason: "brevo_refused", status: res.status };
+      return {
+        ok: false,
+        provider: "brevo",
+        reason: detail ? `brevo_refused: ${detail}` : "brevo_refused",
+        status: res.status,
+      };
     }
 
     const messageId =

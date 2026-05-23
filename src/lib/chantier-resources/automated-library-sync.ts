@@ -329,24 +329,83 @@ export type LibrarySyncProgress = LibrarySyncBatchResult & {
   phase: "batch" | "finalize" | "done";
 };
 
+function isTransientDbError(e: unknown): boolean {
+  const msg = e instanceof Error ? e.message : String(e);
+  return /Server has closed the connection|ECONNRESET|Connection terminated|Can't reach database server|P1001|P1017|ETIMEDOUT|socket hang up/i.test(
+    msg,
+  );
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function withDbRetry<T>(
+  getClient: () => PrismaClient,
+  client: PrismaClient,
+  fn: (db: PrismaClient) => Promise<T>,
+  onReconnect?: () => void,
+): Promise<{ client: PrismaClient; value: T }> {
+  let db = client;
+  const maxAttempts = 6;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    try {
+      const value = await fn(db);
+      return { client: db, value };
+    } catch (e) {
+      if (!isTransientDbError(e) || attempt >= maxAttempts - 1) throw e;
+      onReconnect?.();
+      await db.$disconnect().catch(() => {});
+      await sleep(1500 * (attempt + 1));
+      db = getClient();
+    }
+  }
+
+  throw new Error("Échec après reconnexions répétées.");
+}
+
 /** Sync complète en une fois (scripts CLI — pas de limite HTTP). */
 export async function syncLibraryToChantierResourcesCore(
   prisma: PrismaClient,
-  opts?: { batchSize?: number; onProgress?: (p: LibrarySyncProgress) => void },
-): Promise<{ runId: string; stats: LibrarySyncStats }> {
+  opts?: {
+    batchSize?: number;
+    onProgress?: (p: LibrarySyncProgress) => void;
+    /** Recréer Prisma après coupure réseau (scripts CLI). */
+    createClient?: () => PrismaClient;
+    onReconnect?: () => void;
+  },
+): Promise<{ runId: string; stats: LibrarySyncStats; prisma: PrismaClient }> {
+  const batchSize = opts?.batchSize ?? 12;
+  const getClient = opts?.createClient ?? (() => prisma);
+  let client = prisma;
   let runId: string | null = null;
-  let result: LibrarySyncBatchResult;
+  let result!: LibrarySyncBatchResult;
   let loops = 0;
   const maxLoops = 5000;
 
   do {
-    result = await processLibrarySyncBatch(prisma, { runId, batchSize: opts?.batchSize ?? 25 });
+    const batch = await withDbRetry(
+      getClient,
+      client,
+      (db) => processLibrarySyncBatch(db, { runId, batchSize }),
+      opts?.onReconnect,
+    );
+    client = batch.client;
+    result = batch.value;
     runId = result.runId;
     opts?.onProgress?.({ ...result, phase: "batch" });
 
     if (result.needsFinalize && runId) {
       opts?.onProgress?.({ ...result, phase: "finalize" });
-      result = await finalizeLibrarySync(prisma, runId);
+      const fin = await withDbRetry(
+        getClient,
+        client,
+        (db) => finalizeLibrarySync(db, runId!),
+        opts?.onReconnect,
+      );
+      client = fin.client;
+      result = fin.value;
       opts?.onProgress?.({ ...result, phase: "done" });
       break;
     }
@@ -357,5 +416,5 @@ export async function syncLibraryToChantierResourcesCore(
     }
   } while (!result.done);
 
-  return { runId: result.runId, stats: result.stats };
+  return { runId: result.runId, stats: result.stats, prisma: client };
 }

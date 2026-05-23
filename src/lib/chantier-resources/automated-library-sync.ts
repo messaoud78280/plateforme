@@ -376,9 +376,12 @@ export async function syncLibraryToChantierResourcesCore(
     /** Recréer Prisma après coupure réseau (scripts CLI). */
     createClient?: () => PrismaClient;
     onReconnect?: () => void;
+    /** Recréer Prisma après chaque lot (connexions courtes — pooler Supabase). */
+    shortLivedConnections?: boolean;
   },
 ): Promise<{ runId: string; stats: LibrarySyncStats; prisma: PrismaClient }> {
-  const batchSize = opts?.batchSize ?? 12;
+  const batchSize = opts?.batchSize ?? 8;
+  const shortLived = opts?.shortLivedConnections ?? Boolean(opts?.createClient);
   const getClient = opts?.createClient ?? (() => prisma);
   let client = prisma;
   let runId: string | null = opts?.initialRunId?.trim() || null;
@@ -397,6 +400,11 @@ export async function syncLibraryToChantierResourcesCore(
     result = batch.value;
     runId = result.runId;
     opts?.onProgress?.({ ...result, phase: "batch" });
+
+    if (shortLived && opts?.createClient) {
+      await client.$disconnect().catch(() => {});
+      client = getClient();
+    }
 
     if (result.needsFinalize && runId) {
       opts?.onProgress?.({ ...result, phase: "finalize" });

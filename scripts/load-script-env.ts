@@ -25,18 +25,6 @@ export function getScriptDatabaseUrl(): string {
   return "";
 }
 
-/**
- * Jobs longs (synchro masse) : connexion directe db.*.supabase.co:5432.
- */
-export function getScriptDatabaseUrlForLongJobs(): string {
-  const direct = normalizeSupabaseDirectUrl((process.env.DIRECT_URL ?? "").trim());
-  const pool = normalizeSupabaseDirectUrl((process.env.DATABASE_URL ?? "").trim());
-
-  if (direct && isPgUrl(direct)) return direct;
-  if (pool && isPgUrl(pool)) return pool;
-  return "";
-}
-
 export function isPoolerDatabaseUrl(url: string): boolean {
   return /pooler\.supabase\.com/i.test(url) || /:6543\//.test(url) || /pgbouncer=true/i.test(url);
 }
@@ -50,36 +38,41 @@ export function isTrueSupabaseDirectUrl(url: string): boolean {
   }
 }
 
-/** pooler → db.[ref].supabase.co:5432 (évite « Can't reach database server at pooler:5432 »). */
-export function normalizeSupabaseDirectUrl(raw: string): string {
+/**
+ * Pooler Supabase en mode session (port 5432) — recommandé pour scripts longs depuis un Mac.
+ * Ne pas convertir en db.*.supabase.co (souvent inaccessible en IPv4).
+ */
+export function toSupabaseSessionPoolerUrl(raw: string): string {
   if (!raw || !isPgUrl(raw)) return raw;
-  if (isTrueSupabaseDirectUrl(raw)) return raw;
-
   try {
     const u = new URL(raw);
-    let projectRef = "";
-
-    if (u.username.startsWith("postgres.")) {
-      projectRef = u.username.slice("postgres.".length);
-      u.username = "postgres";
-    }
-
-    const supabasePublic = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim();
-    if (!projectRef && supabasePublic) {
-      const m = supabasePublic.match(/https:\/\/([a-z0-9]+)\.supabase\.co/i);
-      if (m?.[1]) projectRef = m[1];
-    }
-
-    if (u.hostname.includes("pooler.supabase.com") && projectRef) {
-      u.hostname = `db.${projectRef}.supabase.co`;
-      u.port = "5432";
-      u.searchParams.delete("pgbouncer");
-      if (!u.searchParams.has("sslmode")) u.searchParams.set("sslmode", "require");
-      return u.toString();
-    }
-
-    return raw;
+    if (!u.hostname.includes("supabase.com")) return raw;
+    u.port = "5432";
+    u.searchParams.delete("pgbouncer");
+    if (!u.searchParams.has("sslmode")) u.searchParams.set("sslmode", "require");
+    return u.toString();
   } catch {
     return raw;
   }
+}
+
+/** URLs à tester dans l’ordre (session pooler d’abord). */
+export function getScriptDatabaseUrlCandidatesForLongJobs(): string[] {
+  const pool = (process.env.DATABASE_URL ?? "").trim();
+  const direct = (process.env.DIRECT_URL ?? "").trim();
+  const out: string[] = [];
+  const add = (u: string) => {
+    if (u && isPgUrl(u) && !out.includes(u)) out.push(u);
+  };
+
+  if (pool) add(toSupabaseSessionPoolerUrl(pool));
+  if (direct.includes("pooler.supabase.com")) add(toSupabaseSessionPoolerUrl(direct));
+  else if (direct) add(direct);
+  if (pool) add(pool);
+
+  return out;
+}
+
+export function getScriptDatabaseUrlForLongJobs(): string {
+  return getScriptDatabaseUrlCandidatesForLongJobs()[0] ?? "";
 }

@@ -31,8 +31,8 @@ export function ChantierLibrarySyncCliPanel() {
         <li>Ouvrez un terminal à la racine du projet plateforme.</li>
         <li>
           Vérifiez que <code className="rounded bg-slate-100 px-1">.env.local</code> contient{" "}
-          <code className="rounded bg-slate-100 px-1">DIRECT_URL</code> (port 5432, connexion directe Supabase —{" "}
-          <strong>obligatoire</strong> pour les synchros longues ; le pooler 6543 coupe la connexion).
+          <code className="rounded bg-slate-100 px-1">DATABASE_URL</code> (Supabase, comme en prod). Le script teste
+          automatiquement la meilleure connexion (pooler session port 5432).
         </li>
         <li>
           Exécutez la commande ci-dessous et attendez la fin (souvent 15–45 min selon le nombre d&apos;ouvrages visibles

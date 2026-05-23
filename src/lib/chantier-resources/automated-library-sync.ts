@@ -319,16 +319,37 @@ export async function processLibrarySyncBatch(
   };
 }
 
-/** Sync complète en une fois (scripts CLI uniquement — pas pour une requête HTTP). */
+export type LibrarySyncProgress = LibrarySyncBatchResult & {
+  phase: "batch" | "finalize" | "done";
+};
+
+/** Sync complète en une fois (scripts CLI — pas de limite HTTP). */
 export async function syncLibraryToChantierResourcesCore(
   prisma: PrismaClient,
-  opts?: { batchSize?: number },
+  opts?: { batchSize?: number; onProgress?: (p: LibrarySyncProgress) => void },
 ): Promise<{ runId: string; stats: LibrarySyncStats }> {
   let runId: string | null = null;
   let result: LibrarySyncBatchResult;
+  let loops = 0;
+  const maxLoops = 5000;
+
   do {
-    result = await processLibrarySyncBatch(prisma, { runId, batchSize: opts?.batchSize ?? 80 });
+    result = await processLibrarySyncBatch(prisma, { runId, batchSize: opts?.batchSize ?? 25 });
     runId = result.runId;
+    opts?.onProgress?.({ ...result, phase: "batch" });
+
+    if (result.needsFinalize && runId) {
+      opts?.onProgress?.({ ...result, phase: "finalize" });
+      result = await finalizeLibrarySync(prisma, runId);
+      opts?.onProgress?.({ ...result, phase: "done" });
+      break;
+    }
+
+    loops += 1;
+    if (loops >= maxLoops) {
+      throw new Error("Synchronisation interrompue : trop de lots (vérifiez le curseur en base).");
+    }
   } while (!result.done);
+
   return { runId: result.runId, stats: result.stats };
 }

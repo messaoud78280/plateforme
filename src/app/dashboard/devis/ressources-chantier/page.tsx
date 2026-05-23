@@ -8,6 +8,7 @@ import {
   SITE_RESOURCE_STATUS_LABELS,
   SITE_RESOURCE_TYPE_LABELS,
 } from "@/lib/chantier-resources/labels";
+import { ChantierLibrarySyncCliPanel } from "@/components/devis/ChantierLibrarySyncCliPanel";
 import { ChantierResourceCleanupPanel } from "@/components/devis/ChantierResourceCleanupPanel";
 import { fetchChantierResourceStats, fetchChantierResourcesList } from "@/app/dashboard/devis/ressources-chantier-actions";
 
@@ -59,11 +60,17 @@ export default async function RessourcesChantierPage({ searchParams }: { searchP
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link
-            href="/dashboard/devis/ressources-chantier/extraction?force=1"
+          <a
+            href="#sync-cli"
             className="inline-flex rounded-xl bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e40af]"
           >
-            Synchroniser la bibliothèque
+            Extraire (méthode fiable)
+          </a>
+          <Link
+            href="/dashboard/devis/ressources-chantier/extraction?force=1"
+            className="inline-flex rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+          >
+            Synchro navigateur
           </Link>
           <Link
             href="/dashboard/devis/ressources-chantier/nouveau"
@@ -73,6 +80,10 @@ export default async function RessourcesChantierPage({ searchParams }: { searchP
           </Link>
         </div>
       </header>
+
+      <div id="sync-cli">
+        <ChantierLibrarySyncCliPanel />
+      </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">

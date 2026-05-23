@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChantierLibrarySyncCliPanel } from "@/components/devis/ChantierLibrarySyncCliPanel";
 import { LibrarySyncRunner } from "@/components/devis/LibrarySyncRunner";
 import { fetchChantierResourceStats, fetchLastLibrarySyncRun } from "@/app/dashboard/devis/ressources-chantier-actions";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
@@ -20,7 +21,8 @@ export default async function RessourcesChantierExtractionPage({ searchParams }:
   const lastMeta = (lastRun?.meta ?? null) as LibrarySyncRunMeta | null;
   const lastAge = lastRun ? Date.now() - lastRun.createdAt.getTime() : Infinity;
   const lastDone = lastMeta?.phase === "done";
-  const shouldAutoStart = forceSync || !lastRun || !lastDone || lastAge > oneHourMs;
+  /** Synchro navigateur : uniquement si l’utilisateur force explicitement (?force=1). */
+  const shouldAutoStart = forceSync;
 
   const displayStats: LibrarySyncStats | null =
     lastMeta?.phase === "done" ? lastMeta.stats : lastMeta?.stats ?? null;
@@ -34,19 +36,30 @@ export default async function RessourcesChantierExtractionPage({ searchParams }:
       <header className="px-1">
         <h1 className="font-heading text-2xl font-bold text-slate-900">Synchronisation bibliothèque → ressources</h1>
         <p className="mt-2 max-w-3xl text-sm text-slate-600">
-          Extraction automatique depuis la bibliothèque d&apos;ouvrages : matériaux, fournitures, locations engins /
-          outillage, sans doublons d&apos;alias. La page s&apos;affiche tout de suite ; la synchro se fait par lots en
-          arrière-plan (ne fermez pas l&apos;onglet).
+          Extraction depuis la bibliothèque d&apos;ouvrages : matériaux, fournitures, locations engins / outillage. Pour
+          les grosses bibliothèques (~2000 ouvrages), préférez la commande terminal ci-dessous.
         </p>
       </header>
 
-      <LibrarySyncRunner
+      <ChantierLibrarySyncCliPanel />
+
+      <details className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <summary className="cursor-pointer text-sm font-semibold text-slate-800">
+          Synchro dans le navigateur (peut expirer sur les gros volumes)
+        </summary>
+        <p className="mt-2 text-sm text-slate-600">
+          Lance uniquement si vous ne pouvez pas utiliser le terminal. Ne fermez pas l&apos;onglet pendant le traitement.
+        </p>
+        <div className="mt-4">
+          <LibrarySyncRunner
         autoStart={shouldAutoStart}
         resourceTotal={stats.total}
         lastRunAt={lastRun?.createdAt.toISOString() ?? null}
         initialStats={displayStats}
         forceSyncHref="/dashboard/devis/ressources-chantier/extraction?force=1"
-      />
+          />
+        </div>
+      </details>
     </div>
   );
 }

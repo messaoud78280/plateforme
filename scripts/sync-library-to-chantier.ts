@@ -13,13 +13,16 @@
 import { PrismaClient } from "@prisma/client";
 import {
   finalizeLibrarySync,
+  findResumableLibrarySyncRunId,
   syncLibraryToChantierResourcesCore,
   type LibrarySyncProgress,
 } from "../src/lib/chantier-resources/automated-library-sync";
 import {
   getScriptDatabaseUrlForLongJobs,
   isPoolerDatabaseUrl,
+  isTrueSupabaseDirectUrl,
   loadScriptEnv,
+  normalizeSupabaseDirectUrl,
 } from "./load-script-env";
 
 loadScriptEnv();
@@ -36,6 +39,7 @@ function createPrisma() {
 function parseArgs() {
   let batchSize = 12;
   let finalizeOnly: string | null = null;
+  let fresh = false;
   for (const arg of process.argv.slice(2)) {
     if (arg.startsWith("--batch-size=")) {
       batchSize = Math.min(40, Math.max(5, Number(arg.split("=")[1]) || 12));
@@ -43,8 +47,9 @@ function parseArgs() {
     if (arg.startsWith("--finalize-only=")) {
       finalizeOnly = arg.split("=")[1]?.trim() || null;
     }
+    if (arg === "--fresh") fresh = true;
   }
-  return { batchSize, finalizeOnly };
+  return { batchSize, finalizeOnly, fresh };
 }
 
 function formatProgress(p: LibrarySyncProgress): string {
@@ -58,14 +63,21 @@ function formatProgress(p: LibrarySyncProgress): string {
 }
 
 async function main() {
-  const { batchSize, finalizeOnly } = parseArgs();
+  const { batchSize, finalizeOnly, fresh } = parseArgs();
   const started = Date.now();
   let prisma = createPrisma();
 
-  if (isPoolerDatabaseUrl(connectionUrl)) {
+  const rawDirect = (process.env.DIRECT_URL ?? "").trim();
+  if (rawDirect && normalizeSupabaseDirectUrl(rawDirect) !== rawDirect) {
+    console.log("   URL directe normalisée : pooler → db.*.supabase.co\n");
+  }
+
+  if (!isTrueSupabaseDirectUrl(connectionUrl)) {
     console.warn(
-      "⚠ Connexion pooler (6543) détectée — risque de coupure. Ajoutez DIRECT_URL (port 5432) dans .env.local.\n",
+      "⚠ Connexion non directe — ajoutez DIRECT_URL avec db.[ref].supabase.co:5432 dans Supabase → Database.\n",
     );
+  } else if (isPoolerDatabaseUrl(connectionUrl)) {
+    console.warn("⚠ Pooler détecté — risque de coupure.\n");
   }
 
   if (finalizeOnly) {
@@ -80,13 +92,23 @@ async function main() {
   console.log("▶ Synchronisation bibliothèque → ressources chantier");
   console.log(`   Base : ${connectionUrl.replace(/:[^:@]+@/, ":***@")}`);
   console.log(`   Taille des lots : ${batchSize}`);
-  console.log("   Reprise automatique si la connexion est coupée.\n");
+
+  let initialRunId: string | null = null;
+  if (!fresh) {
+    initialRunId = await findResumableLibrarySyncRunId(prisma);
+    if (initialRunId) {
+      console.log(`   Reprise du run interrompu : ${initialRunId}`);
+    }
+  }
+
+  console.log("   Reconnexion auto si la connexion est coupée.\n");
 
   let lastLine = "";
   let reconnects = 0;
 
   const result = await syncLibraryToChantierResourcesCore(prisma, {
     batchSize,
+    initialRunId,
     createClient: createPrisma,
     onReconnect: () => {
       reconnects += 1;

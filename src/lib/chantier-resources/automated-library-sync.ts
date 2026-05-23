@@ -347,7 +347,7 @@ async function withDbRetry<T>(
   onReconnect?: () => void,
 ): Promise<{ client: PrismaClient; value: T }> {
   let db = client;
-  const maxAttempts = 6;
+  const maxAttempts = 12;
 
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     try {
@@ -357,7 +357,7 @@ async function withDbRetry<T>(
       if (!isTransientDbError(e) || attempt >= maxAttempts - 1) throw e;
       onReconnect?.();
       await db.$disconnect().catch(() => {});
-      await sleep(1500 * (attempt + 1));
+      await sleep(Math.min(30000, 2000 * (attempt + 1)));
       db = getClient();
     }
   }
@@ -370,6 +370,8 @@ export async function syncLibraryToChantierResourcesCore(
   prisma: PrismaClient,
   opts?: {
     batchSize?: number;
+    /** Reprendre un run interrompu (curseur en base). */
+    initialRunId?: string | null;
     onProgress?: (p: LibrarySyncProgress) => void;
     /** Recréer Prisma après coupure réseau (scripts CLI). */
     createClient?: () => PrismaClient;
@@ -379,7 +381,7 @@ export async function syncLibraryToChantierResourcesCore(
   const batchSize = opts?.batchSize ?? 12;
   const getClient = opts?.createClient ?? (() => prisma);
   let client = prisma;
-  let runId: string | null = null;
+  let runId: string | null = opts?.initialRunId?.trim() || null;
   let result!: LibrarySyncBatchResult;
   let loops = 0;
   const maxLoops = 5000;
@@ -416,5 +418,27 @@ export async function syncLibraryToChantierResourcesCore(
     }
   } while (!result.done);
 
-  return { runId: result.runId, stats: result.stats, prisma: client };
+  return {
+    runId: result.runId,
+    stats: result.stats,
+    prisma: client,
+  };
+}
+
+/** Dernier run synchro bibliothèque non terminé (reprise CLI). */
+export async function findResumableLibrarySyncRunId(prisma: PrismaClient): Promise<string | null> {
+  const runs = await prisma.siteResourceExtractionRun.findMany({
+    orderBy: { createdAt: "desc" },
+    take: 15,
+  });
+  for (const run of runs) {
+    const m = run.meta as LibrarySyncRunMeta | null;
+    if (
+      m?.mode === "automated_library_sync" &&
+      (m.phase === "processing" || m.phase === "finalizing")
+    ) {
+      return run.id;
+    }
+  }
+  return null;
 }

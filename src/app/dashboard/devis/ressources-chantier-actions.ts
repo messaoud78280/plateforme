@@ -984,6 +984,20 @@ export async function processLibrarySyncBatchAction(runId?: string | null) {
   }
 }
 
+export async function finalizeLibrarySyncAction(runId: string) {
+  await requireBeWorkDevisSession();
+  try {
+    const { finalizeLibrarySync } = await import("@/lib/chantier-resources/automated-library-sync");
+    const result = await finalizeLibrarySync(prisma, runId);
+    for (const p of REVALIDATE) revalidatePath(p);
+    revalidatePath("/dashboard/devis/ressources-chantier/extraction");
+    return { ok: true as const, ...result };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Erreur lors de la finalisation.";
+    return { ok: false as const, error: message };
+  }
+}
+
 export async function syncLibraryToChantierResources(opts?: { batchSize?: number }) {
   await requireBeWorkDevisSession();
   const { syncLibraryToChantierResourcesCore } = await import("@/lib/chantier-resources/automated-library-sync");

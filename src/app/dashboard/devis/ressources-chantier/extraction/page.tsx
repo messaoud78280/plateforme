@@ -4,7 +4,8 @@ import { fetchChantierResourceStats, fetchLastLibrarySyncRun } from "@/app/dashb
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import type { LibrarySyncRunMeta, LibrarySyncStats } from "@/lib/chantier-resources/automated-library-sync";
 
-export const maxDuration = 60;
+/** Lots + finalisation : requêtes longues (Railway / Node). */
+export const maxDuration = 300;
 
 type SearchParams = Promise<{ force?: string }>;
 

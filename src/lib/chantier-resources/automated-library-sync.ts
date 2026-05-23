@@ -3,7 +3,10 @@
  */
 
 import type { PrismaClient } from "@prisma/client";
-import { applyGroupingDraft } from "@/lib/chantier-resources/apply-grouping-draft";
+import {
+  applyGroupingDraft,
+  loadResourceDedupRowsForApply,
+} from "@/lib/chantier-resources/apply-grouping-draft";
 import {
   applyResourceDuplicateCleanup,
   buildResourceDuplicateCleanupPreview,
@@ -26,7 +29,7 @@ export type LibrarySyncStats = {
 
 export type LibrarySyncRunMeta = {
   mode: "automated_library_sync";
-  phase: "processing" | "done";
+  phase: "processing" | "finalizing" | "done";
   cursor: string | null;
   stats: LibrarySyncStats;
   totalWorkItems?: number;
@@ -35,6 +38,8 @@ export type LibrarySyncRunMeta = {
 export type LibrarySyncBatchResult = {
   runId: string;
   done: boolean;
+  /** Dernier lot traité : appeler finalize avant de considérer la synchro terminée. */
+  needsFinalize?: boolean;
   stats: LibrarySyncStats;
   batchWorkItems: number;
   totalWorkItems: number | null;
@@ -89,6 +94,32 @@ async function countActiveWorkItems(prisma: PrismaClient) {
   return prisma.workItem.count({ where: { status: { not: "archive" } } });
 }
 
+/** Nettoyage global (alias + fusions) — requête séparée pour éviter les timeouts HTTP. */
+export async function finalizeLibrarySync(prisma: PrismaClient, runId: string): Promise<LibrarySyncBatchResult> {
+  const run = await prisma.siteResourceExtractionRun.findUnique({ where: { id: runId } });
+  if (!run) throw new Error("Synchronisation introuvable.");
+  const m = run.meta as LibrarySyncRunMeta | null;
+  if (m?.mode !== "automated_library_sync") throw new Error("Run de synchronisation invalide.");
+  if (m.phase === "done") {
+    return {
+      runId,
+      done: true,
+      stats: m.stats,
+      batchWorkItems: 0,
+      totalWorkItems: m.totalWorkItems ?? null,
+    };
+  }
+  const stats = { ...EMPTY_STATS(), ...m?.stats };
+  await finalizeSync(prisma, runId, stats);
+  return {
+    runId,
+    done: true,
+    stats,
+    batchWorkItems: 0,
+    totalWorkItems: m?.totalWorkItems ?? null,
+  };
+}
+
 async function finalizeSync(prisma: PrismaClient, runId: string, stats: LibrarySyncStats) {
   const aliasDedupe = await dedupeAllResourceAliases(prisma);
   stats.aliasesRemoved = aliasDedupe.removed;
@@ -130,7 +161,7 @@ export async function processLibrarySyncBatch(
   prisma: PrismaClient,
   opts: { runId?: string | null; batchSize?: number },
 ): Promise<LibrarySyncBatchResult> {
-  const batchSize = Math.min(opts.batchSize ?? 35, 60);
+  const batchSize = Math.min(opts.batchSize ?? 12, 40);
   let runId = opts.runId?.trim() || null;
 
   let meta: LibrarySyncRunMeta | null = null;
@@ -145,6 +176,15 @@ export async function processLibrarySyncBatch(
       if (m?.mode === "automated_library_sync" && m.phase === "processing") {
         meta = m;
         stats = { ...EMPTY_STATS(), ...m.stats };
+      } else if (m?.mode === "automated_library_sync" && m.phase === "finalizing") {
+        return {
+          runId: run.id,
+          done: false,
+          needsFinalize: true,
+          stats: m.stats,
+          batchWorkItems: 0,
+          totalWorkItems: m.totalWorkItems ?? null,
+        };
       } else if (m?.mode === "automated_library_sync" && m.phase === "done") {
         return {
           runId: run.id,
@@ -192,15 +232,29 @@ export async function processLibrarySyncBatch(
   });
 
   if (batch.length === 0) {
-    await finalizeSync(prisma, runId, stats);
+    await prisma.siteResourceExtractionRun.update({
+      where: { id: runId },
+      data: {
+        meta: {
+          mode: "automated_library_sync",
+          phase: "finalizing",
+          cursor: null,
+          stats,
+          totalWorkItems: meta.totalWorkItems,
+        } satisfies LibrarySyncRunMeta,
+      },
+    });
     return {
       runId,
-      done: true,
+      done: false,
+      needsFinalize: true,
       stats,
       batchWorkItems: 0,
       totalWorkItems: meta.totalWorkItems ?? null,
     };
   }
+
+  let dedupRows = await loadResourceDedupRowsForApply(prisma);
 
   for (const wi of batch) {
     stats.workItemsProcessed += 1;
@@ -215,7 +269,8 @@ export async function processLibrarySyncBatch(
     });
 
     for (const p of proposals) {
-      const applied = await applyGroupingDraft(prisma, p, runId);
+      const applied = await applyGroupingDraft(prisma, p, runId, { dedupRows });
+      if (applied.dedupRows) dedupRows = applied.dedupRows;
         switch (applied.action) {
           case "alias":
             stats.aliasesMerged += 1;

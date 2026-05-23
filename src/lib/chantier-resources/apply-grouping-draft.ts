@@ -20,7 +20,9 @@ async function resolveActiveResourceId(db: Db, id: string | null | undefined): P
   return row?.id ?? null;
 }
 
-async function loadResourceDedupRows(db: PrismaClient) {
+export type ResourceDedupRow = ReturnType<typeof resourceToDedupRow>;
+
+export async function loadResourceDedupRowsForApply(db: PrismaClient): Promise<ResourceDedupRow[]> {
   const rows = await db.siteResource.findMany({
     where: { mergedIntoId: null, status: { not: "fusionne" } },
     include: {
@@ -172,7 +174,8 @@ export async function applyGroupingDraft(
   db: Db,
   p: GroupingProposalDraft,
   extractionRunId?: string,
-): Promise<ApplyGroupingDraftResult> {
+  opts?: { dedupRows?: ResourceDedupRow[] },
+): Promise<ApplyGroupingDraftResult & { dedupRows?: ResourceDedupRow[] }> {
   if (p.proposalType === "ignore") {
     return { resourceId: null, action: "skipped" };
   }
@@ -230,7 +233,10 @@ export async function applyGroupingDraft(
       confidenceScore: p.similarityScore,
     });
   } else if (proposalType === "new_resource" || proposalType === "keep_separate") {
-    const rows = await loadResourceDedupRows(db as PrismaClient);
+    let rows = opts?.dedupRows;
+    if (!rows) {
+      rows = await loadResourceDedupRowsForApply(db as PrismaClient);
+    }
     const match = findMatchingExistingResource(rows, {
       shortName: p.candidate.suggestedShortName,
       resourceType: p.candidate.taxonomy.resourceType,
@@ -254,7 +260,7 @@ export async function applyGroupingDraft(
         await linkWorkItemToResource(db, p.sourceWorkItemId, resourceId, p, extractionRunId);
         await syncWorkItemPricesToResource(db, resourceId, p.sourceWorkItemId);
       }
-      return { resourceId, action: "matched" };
+      return { resourceId, action: "matched", dedupRows: rows };
     }
     const created = await createSiteResourceFromCandidate(db, p, "a_verifier");
     resourceId = created.id;
@@ -262,7 +268,8 @@ export async function applyGroupingDraft(
       await linkWorkItemToResource(db, p.sourceWorkItemId, resourceId, p, extractionRunId);
       await syncWorkItemPricesToResource(db, resourceId, p.sourceWorkItemId);
     }
-    return { resourceId, action: "created" };
+    const refreshed = await loadResourceDedupRowsForApply(db as PrismaClient);
+    return { resourceId, action: "created", dedupRows: refreshed };
   }
 
   if (resourceId && p.sourceWorkItemId) {

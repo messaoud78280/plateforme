@@ -3,6 +3,7 @@
  */
 
 import type { PrismaClient } from "@prisma/client";
+import { WORK_ITEM_VISIBLE_IN_LIST } from "@/lib/work-item-merge";
 import {
   applyGroupingDraft,
   loadResourceDedupRowsForApply,
@@ -90,8 +91,13 @@ function pushVirtual(virtualCreated: ExistingResourceIndex[], p: GroupingProposa
   });
 }
 
+/** Même périmètre que la bibliothèque « Ouvrages (liste) » : canoniques + uniques, hors archivés. */
+const SYNC_WORK_ITEM_WHERE = {
+  AND: [WORK_ITEM_VISIBLE_IN_LIST, { status: { not: "archive" as const } }],
+};
+
 async function countActiveWorkItems(prisma: PrismaClient) {
-  return prisma.workItem.count({ where: { status: { not: "archive" } } });
+  return prisma.workItem.count({ where: SYNC_WORK_ITEM_WHERE });
 }
 
 /** Nettoyage global (alias + fusions) — requête séparée pour éviter les timeouts HTTP. */
@@ -224,7 +230,7 @@ export async function processLibrarySyncBatch(
   const virtualCreated: ExistingResourceIndex[] = [];
 
   const batch = await prisma.workItem.findMany({
-    where: { status: { not: "archive" } },
+    where: SYNC_WORK_ITEM_WHERE,
     select: WORK_ITEM_SELECT,
     orderBy: { id: "asc" },
     take: batchSize,

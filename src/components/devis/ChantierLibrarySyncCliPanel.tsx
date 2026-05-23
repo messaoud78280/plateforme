@@ -33,7 +33,10 @@ export function ChantierLibrarySyncCliPanel() {
           Vérifiez que <code className="rounded bg-slate-100 px-1">.env.local</code> contient{" "}
           <code className="rounded bg-slate-100 px-1">DATABASE_URL</code> (même base que la prod).
         </li>
-        <li>Exécutez la commande ci-dessous et attendez la fin (souvent 10–30 min pour ~2000 ouvrages).</li>
+        <li>
+          Exécutez la commande ci-dessous et attendez la fin (souvent 15–45 min selon le nombre d&apos;ouvrages visibles
+          dans la bibliothèque, ex. ~1400).
+        </li>
         <li>Rafraîchissez cette page pour voir les fiches mises à jour.</li>
       </ol>
 

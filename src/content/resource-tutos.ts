@@ -13,6 +13,13 @@ export type ResourceTutoItem = {
 /** Titres d’entrée : alignés sur les couvertures des PDF (« Crée ton skill », « Trie tes DCE… », etc.). */
 export const RESOURCE_TUTO_ITEMS: readonly ResourceTutoItem[] = [
   {
+    title: "BeWork × Maîtrise d’œuvre — la plaquette MOE/BET",
+    desc: "Relais documentaire pour bureaux d'études : CCTP, DPGF, RAO, OPC, DOE — chiffrage en crédits et forfaits TTC, PDF 10 pages.",
+    href: "/ressources/bework-maitrise-doeuvre",
+    status: "Tuto PDF",
+    icon: "document",
+  },
+  {
     title: "Tuto Crée ton skill — Préparation de RDV client",
     desc: "Brief contact, ordre du jour chronométré et trame de CR post-RDV en 15 min — PDF et prompts pour Claude.",
     href: "/ressources/tuto-skill-rdv-client-bework",

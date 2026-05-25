@@ -166,6 +166,22 @@ export const TUTO_PAGE_SEO: Record<string, TutoPageSeo> = {
     ),
     keywords: ["skill compte rendu chantier", "CR chantier BTP"],
   },
+  "/ressources/bework-maitrise-doeuvre": {
+    title: "BeWork × Maîtrise d’œuvre : relais MOE / bureaux d’études",
+    description: tutoDesc(
+      "Relais documentaire MOE/BET : CCTP, DPGF, RAO, comptes rendus OPC, DOE et mémoires techniques. Plaquette PDF 10 pages",
+    ),
+    keywords: [
+      "BeWork maîtrise d'œuvre",
+      "assistant MOE BTP",
+      "rédaction CCTP",
+      "DPGF cohérence",
+      "rapport analyse offres",
+      "compte rendu OPC",
+      "DOE bureau d'études",
+      "mémoire technique MOE",
+    ],
+  },
 };
 
 export function getTutoPageDescription(path: string): string {

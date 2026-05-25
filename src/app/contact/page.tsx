@@ -4,44 +4,77 @@ import { ProspectContactForm } from "@/components/contact/ProspectContactForm";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
+import {
+  SEO_OG_ALTERNATE_LOCALES,
+  SEO_OG_LOCALE_PRIMARY,
+  hreflangFrancophonieLanguages,
+} from "@/lib/seo-francophonie";
 import { absoluteUrl } from "@/lib/site";
 
 const pageUrl = absoluteUrl("/contact");
 const contactOgImage = absoluteUrl("/opengraph-image");
 
+const CONTACT_TITLE = "Contact BeWork — qualifier votre besoin administratif BTP";
+const CONTACT_DESCRIPTION =
+  "Formulaire BeWork pour qualifier votre besoin BTP : marché public, privé ou accord-cadre, DOE, comptes rendus, DICT, relances. FR · BE · CH · LU.";
+
 export const metadata: Metadata = {
-  title: { absolute: "Contact BeWork : assistant travaux BTP | Demande" },
-  description:
-    "Contactez BeWork pour qualifier votre besoin : suivi administratif de marchés, DOE, comptes rendus et relances BTP en France, Belgique, Suisse et Luxembourg.",
+  title: { absolute: CONTACT_TITLE },
+  description: CONTACT_DESCRIPTION,
   keywords: [
     "contact BeWork",
-    "demande externalisation administrative",
+    "demande externalisation administrative BTP",
     "assistant travaux BTP",
     "suivi marchés travaux",
+    "qualification besoin administratif chantier",
   ],
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
+  alternates: { canonical: pageUrl, languages: hreflangFrancophonieLanguages("/contact") },
   openGraph: {
     type: "website",
-    locale: "fr_FR",
+    locale: SEO_OG_LOCALE_PRIMARY,
+    alternateLocale: [...SEO_OG_ALTERNATE_LOCALES],
     url: pageUrl,
     siteName: "BeWork",
-    title: "Contact — BeWork",
-    description:
-      "Formulaire de contact BeWork : qualification rapide de votre besoin administratif BTP. FAQ et tarifs.",
+    title: CONTACT_TITLE,
+    description: CONTACT_DESCRIPTION,
     images: [{ url: contactOgImage, width: 1200, height: 630, alt: "Contacter BeWork — partenaire administratif BTP" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Contact BeWork",
-    description:
-      "Contactez BeWork pour qualifier votre besoin administratif BTP. Réponse rapide par l'équipe.",
+    title: "Contact BeWork — qualifier votre besoin BTP",
+    description: CONTACT_DESCRIPTION,
   },
   robots: { index: true, follow: true },
+};
+
+const contactJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "ContactPage",
+      "@id": `${pageUrl}#contact-page`,
+      url: pageUrl,
+      name: CONTACT_TITLE,
+      inLanguage: "fr-FR",
+      isPartOf: { "@id": `${absoluteUrl("/")}#website` },
+      description: CONTACT_DESCRIPTION,
+      mainEntity: { "@id": `${absoluteUrl("/")}#organization` },
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": `${pageUrl}#breadcrumb`,
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Accueil", item: absoluteUrl("/") },
+        { "@type": "ListItem", position: 2, name: "Contact", item: pageUrl },
+      ],
+    },
+  ],
 };
 
 export default function ContactPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#e0e4ea]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(contactJsonLd) }} />
       <MarketingSiteHeader plainBg />
 
       <main className="px-4 py-12 md:py-16">

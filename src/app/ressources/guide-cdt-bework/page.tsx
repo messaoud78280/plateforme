@@ -13,7 +13,7 @@ const pageUrl = absoluteUrl(pagePath);
 
 const pdfPath = "/ressources/pdf/guide-cdt-bework.pdf";
 
-const H1 = "Le guide du conducteur de travaux — 6 outils Claude pour piloter ton chantier de A à Z";
+const H1 = "Guide conducteur de travaux — 6 skills Claude prêts à l'emploi (version condensée)";
 
 
 const breadcrumbItems = [

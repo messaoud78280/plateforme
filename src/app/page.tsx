@@ -73,7 +73,7 @@ const HOME_FAQ_ITEMS = [
 
 const HOME_META_TITLE = "BeWork — Relais administratif pour marchés travaux BTP";
 const HOME_META_DESCRIPTION =
-  "BeWork accompagne les entreprises BTP titulaires de marchés publics, privés, accords-cadres et contrats récurrents : dossiers d'intervention, comptes rendus, DOE, attachements, situations, relances et suivi donneurs d'ordre.";
+  "BeWork, relais administratif BTP : dossiers d'intervention, comptes rendus, DOE, attachements, situations, relances et suivi donneurs d'ordre. FR · BE · CH · LU.";
 
 export const metadata: Metadata = {
   title: { absolute: HOME_META_TITLE },

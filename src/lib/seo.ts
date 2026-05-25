@@ -71,7 +71,7 @@ export function getGeoAeoBriefItems(priceFromLabel: string): readonly GeoAeoBrie
     {
       question: "Comment commencer avec BeWork ?",
       answer:
-        "Réserver un appel découverte (Calendly), créer un compte client, puis déposer une première mission depuis l’espace client. Connexion requise pour confier une tâche.",
+        "Compléter le formulaire de qualification sur /contact (type de marché, corps d’état, besoin principal). BeWork vous recontacte pour cadrer la première mission, puis vous déposez vos demandes depuis l’espace client.",
     },
     {
       question: "Quelles tâches BTP BeWork prend-elle en charge ?",

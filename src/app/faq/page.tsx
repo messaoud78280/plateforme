@@ -3,6 +3,11 @@ import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
+import {
+  SEO_OG_ALTERNATE_LOCALES,
+  SEO_OG_LOCALE_PRIMARY,
+  hreflangFrancophonieLanguages,
+} from "@/lib/seo-francophonie";
 import { absoluteUrl } from "@/lib/site";
 
 const faqUrl = absoluteUrl("/faq");
@@ -31,10 +36,11 @@ export const metadata: Metadata = {
     "forfaits BeWork",
     "IA BTP",
   ],
-  alternates: { canonical: faqUrl, languages: { fr: faqUrl, "x-default": faqUrl } },
+  alternates: { canonical: faqUrl, languages: hreflangFrancophonieLanguages("/faq") },
   openGraph: {
     type: "website",
-    locale: "fr_FR",
+    locale: SEO_OG_LOCALE_PRIMARY,
+    alternateLocale: [...SEO_OG_ALTERNATE_LOCALES],
     url: faqUrl,
     siteName: "BeWork",
     title: "FAQ BeWork — assistante travaux BTP (relais bureau-chantier)",

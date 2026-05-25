@@ -48,7 +48,7 @@ export function BeWorkLogo({
     <span className={`inline-flex flex-col ${className}`}>
       <Image
         src={LOGO_PATH}
-        alt="BeWork"
+        alt="BeWork — assistants travaux BTP"
         width={LOGO_WIDTH}
         height={LOGO_HEIGHT}
         className={`shrink-0 object-contain object-left ${imageClassBySize[size]} ${imageClassName}`}

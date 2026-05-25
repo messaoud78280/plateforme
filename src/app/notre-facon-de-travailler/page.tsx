@@ -4,33 +4,71 @@ import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
+import {
+  SEO_OG_ALTERNATE_LOCALES,
+  SEO_OG_LOCALE_PRIMARY,
+  hreflangFrancophonieLanguages,
+} from "@/lib/seo-francophonie";
 import { absoluteUrl } from "@/lib/site";
 
 const pageUrl = absoluteUrl("/notre-facon-de-travailler");
 const ogImage = absoluteUrl("/opengraph-image");
 
+const METHODE_TITLE = "Notre méthode BeWork : brief, préparation, validation BTP";
+const METHODE_DESCRIPTION =
+  "Méthode BeWork pour le BTP : brief, qualification, préparation, suivi et validation par vous avant tout envoi engageant. Process tracé, supervision FR.";
+
 export const metadata: Metadata = {
-  title: "Notre façon de travailler | Relais bureau-chantier (assistante travaux BTP) — BeWork",
-  description:
-    "Notre méthode : brief, préparation, suivi et validation avant tout engagement. Relais bureau-chantier BTP traçable.",
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
+  title: { absolute: METHODE_TITLE },
+  description: METHODE_DESCRIPTION,
+  keywords: [
+    "méthode assistant travaux BTP",
+    "process externalisation administrative BTP",
+    "validation chantier",
+    "relais bureau-chantier",
+    "assistant travaux BeWork",
+  ],
+  alternates: { canonical: pageUrl, languages: hreflangFrancophonieLanguages("/notre-facon-de-travailler") },
   openGraph: {
     type: "website",
-    locale: "fr_FR",
+    locale: SEO_OG_LOCALE_PRIMARY,
+    alternateLocale: [...SEO_OG_ALTERNATE_LOCALES],
     url: pageUrl,
     siteName: "BeWork",
-    title: "Notre méthode — BeWork",
-    description:
-      "Notre méthode : brief, préparation, suivi et validation avant tout engagement. Relais bureau-chantier BTP traçable.",
+    title: METHODE_TITLE,
+    description: METHODE_DESCRIPTION,
     images: [{ url: ogImage, width: 1200, height: 630, alt: "BeWork — méthode de travail BTP" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Notre méthode | BeWork",
-    description:
-      "Notre méthode : brief, préparation, suivi et validation avant tout engagement. Relais bureau-chantier BTP traçable.",
+    title: METHODE_TITLE,
+    description: METHODE_DESCRIPTION,
   },
   robots: { index: true, follow: true },
+};
+
+const methodeJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": `${pageUrl}#webpage`,
+      url: pageUrl,
+      name: METHODE_TITLE,
+      description: METHODE_DESCRIPTION,
+      inLanguage: "fr-FR",
+      isPartOf: { "@id": `${absoluteUrl("/")}#website` },
+      about: { "@id": `${absoluteUrl("/")}#organization` },
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": `${pageUrl}#breadcrumb`,
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Accueil", item: absoluteUrl("/") },
+        { "@type": "ListItem", position: 2, name: "Notre méthode", item: pageUrl },
+      ],
+    },
+  ],
 };
 
 const METHOD_STEPS = [
@@ -150,6 +188,7 @@ function SectionShell({
 export default function NotreFaconDeTravaillerPage() {
   return (
     <div className="min-h-screen bg-[#f8fafc]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(methodeJsonLd) }} />
       <FaqJsonLd />
       <MarketingSiteHeader />
 

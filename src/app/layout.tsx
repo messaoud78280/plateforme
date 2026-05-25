@@ -14,7 +14,7 @@ import {
   SEO_OG_LOCALE_PRIMARY,
   hreflangFrancophonieLanguages,
 } from "@/lib/seo-francophonie";
-import { absoluteUrl, CALENDLY_APPEL_DECOUVERTE_URL, getOrgSameAs, SITE_URL } from "@/lib/site";
+import { absoluteUrl, getOrgSameAs, SITE_URL } from "@/lib/site";
 import { formatPriceLabelFr, getPublicPriceBoundsLabels } from "@/lib/subscription-plans";
 
 const defaultOgImage = absoluteUrl("/opengraph-image");
@@ -160,8 +160,8 @@ const jsonLd = {
       image: { "@type": "ImageObject", url: defaultOgImage, width: 1200, height: 630 },
       potentialAction: {
         "@type": "ContactAction",
-        name: "Demander un rendez-vous découverte ou un échange",
-        target: CALENDLY_APPEL_DECOUVERTE_URL,
+        name: "Qualifier votre demande BTP via le formulaire BeWork",
+        target: absoluteUrl("/contact#formulaire"),
       },
     },
     {

@@ -43,8 +43,17 @@ type GuideCarouselItem = {
   badge?: ResourceGuideBadge;
 };
 
-const GUIDE_CAROUSEL_ITEMS: GuideCarouselItem[] = [
-  ...[...BLOG_SLUGS].map((slug) => {
+type BlogCarouselItem = {
+  key: string;
+  title: string;
+  excerpt: string;
+  href: string;
+  publishedTime: string;
+};
+
+/** Articles de blog publiés (triés du plus récent au plus ancien). Vide tant qu'aucun article n'est ajouté à BLOG_ARTICLES. */
+const BLOG_CAROUSEL_ITEMS: BlogCarouselItem[] = [...BLOG_SLUGS]
+  .map((slug) => {
     const a = BLOG_ARTICLES[slug];
     return {
       key: `blog:${slug}`,
@@ -53,16 +62,18 @@ const GUIDE_CAROUSEL_ITEMS: GuideCarouselItem[] = [
       href: `/blog/${slug}`,
       publishedTime: a.publishedTime,
     };
-  }),
-  ...RESOURCE_GUIDE_PAGE_ITEMS.map((g) => ({
-    key: `resource:${g.href}`,
-    title: g.title,
-    excerpt: g.excerpt,
-    href: g.href,
-    publishedTime: g.publishedTime,
-    badge: g.badge ?? ("Guide PDF" as const),
-  })),
-].sort((x, y) => new Date(y.publishedTime).getTime() - new Date(x.publishedTime).getTime());
+  })
+  .sort((x, y) => new Date(y.publishedTime).getTime() - new Date(x.publishedTime).getTime());
+
+/** Guides PDF (articles longs téléchargeables). Section distincte du blog. */
+const GUIDE_CAROUSEL_ITEMS: GuideCarouselItem[] = RESOURCE_GUIDE_PAGE_ITEMS.map((g) => ({
+  key: `resource:${g.href}`,
+  title: g.title,
+  excerpt: g.excerpt,
+  href: g.href,
+  publishedTime: g.publishedTime,
+  badge: g.badge ?? ("Guide PDF" as const),
+})).sort((x, y) => new Date(y.publishedTime).getTime() - new Date(x.publishedTime).getTime());
 
 const RESSOURCES_META_TITLE = "Ressources BTP : guides, tutos PDF et documents chantier";
 const RESSOURCES_META_DESC = metaDescriptionFrancophonie(
@@ -93,8 +104,8 @@ export const metadata: Metadata = {
 
 const FAQ_ITEMS = [
   {
-    q: "Quelle différence entre un tutoriel PDF et un guide (article blog) ?",
-    a: "Les tutoriels PDF sont des fiches téléchargeables, étape par étape, sur une tâche précise (PPSPS, DCE…). Les guides longs (articles) seront de nouveau proposés via le blog lorsque le catalogue sera enrichi ; pour l’instant, l’essentiel passe par les tutoriels et le hub ressources.",
+    q: "Quelle différence entre tutoriels, guides et articles de blog ?",
+    a: "Les tutoriels PDF sont des fiches courtes téléchargeables (méthode pas à pas sur une tâche précise — PPSPS, DCE, planning chantier…). Les guides PDF sont des compilations plus longues, à lire ou imprimer. Les articles de blog sont des contenus courts en ligne pour la veille métier, les retours d’expérience et les nouveautés BeWork.",
   },
   {
     q: "Le guide PDF « compte rendu de chantier » est-il gratuit ?",
@@ -124,7 +135,7 @@ function ResourcesCollectionJsonLd() {
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
 }
 
-function BadgeStatus({ status }: { status: ResourceStatus | "Cas client" | "Guide" | "Guide PDF" }) {
+function BadgeStatus({ status }: { status: ResourceStatus | "Cas client" | "Guide" | "Guide PDF" | "Article" }) {
   const base =
     "inline-flex shrink-0 items-center rounded-full px-1.5 py-0.5 text-[0.625rem] font-semibold ring-1 sm:px-2 sm:py-0.5 sm:text-[0.6875rem]";
   const map: Record<string, string> = {
@@ -132,6 +143,7 @@ function BadgeStatus({ status }: { status: ResourceStatus | "Cas client" | "Guid
     "Guide PDF": `${base} bg-amber-50 text-amber-950 ring-amber-200/90`,
     "Cas client": `${base} bg-amber-50 text-amber-950 ring-amber-200/90`,
     Guide: `${base} bg-violet-50 text-violet-950 ring-violet-200/90`,
+    Article: `${base} bg-sky-50 text-sky-950 ring-sky-200/90`,
   };
   return <span className={map[status] ?? map.Guide}>{status}</span>;
 }
@@ -191,7 +203,7 @@ function ResourceCarouselCard({
   pdfFileName,
 }: {
   title: string;
-  badge: ResourceStatus | "Cas client" | "Guide" | "Guide PDF";
+  badge: ResourceStatus | "Cas client" | "Guide" | "Guide PDF" | "Article";
   excerpt: ReactNode;
   href: string;
   cta: string;
@@ -247,6 +259,29 @@ function GuideCarouselCard({ item }: { item: (typeof GUIDE_CAROUSEL_ITEMS)[numbe
   );
 }
 
+function BlogArticleCard({ item }: { item: (typeof BLOG_CAROUSEL_ITEMS)[number] }) {
+  const dateLabel = new Date(item.publishedTime).toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  return (
+    <ResourceCarouselCard
+      title={item.title}
+      badge="Article"
+      excerpt={
+        <>
+          <span className="text-xs font-medium uppercase tracking-wide text-slate-500">{dateLabel}</span>
+          <span className="mt-1 block">{item.excerpt}</span>
+        </>
+      }
+      href={item.href}
+      cta="Lire l’article"
+      glyph={<GuideGlyph className="h-5 w-5 sm:h-[1.125rem] sm:w-[1.125rem]" />}
+    />
+  );
+}
+
 export default function RessourcesPage() {
   return (
     <div className="relative min-h-screen overflow-x-clip bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9]">
@@ -275,7 +310,9 @@ export default function RessourcesPage() {
             <Link href="/ressources/guides" className={resourcesBtnSecondary}>
               Liste des guides
             </Link>
-            <CalendlyBookingLink className={resourcesBtnSecondary}>Réserver un appel</CalendlyBookingLink>
+            <Link href="/blog" className={resourcesBtnSecondary}>
+              Lire le blog
+            </Link>
           </div>
         </header>
 
@@ -353,6 +390,46 @@ export default function RessourcesPage() {
                 aria-live="polite"
               >
                 Aucun guide publié pour l’instant. Les tutoriels ci-dessus restent disponibles ; les guides PDF seront ajoutés ici au fil des mises en ligne.
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section id="blog" className="mt-14 scroll-mt-28 md:mt-16 md:scroll-mt-32" aria-labelledby="titre-blog">
+          <ResourcesSectionHeader
+            id="titre-blog"
+            title="Blog"
+            description="Articles courts pour le BTP : pilotage administratif, marchés travaux, IA terrain et retours d’expérience BeWork."
+            linkHref={BLOG_CAROUSEL_ITEMS.length > 0 ? "/blog" : undefined}
+            linkLabel={BLOG_CAROUSEL_ITEMS.length > 0 ? "Tous les articles →" : undefined}
+          />
+          <div className="mx-auto mt-8 w-full max-w-6xl">
+            {BLOG_CAROUSEL_ITEMS.length > 0 ? (
+              <div className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {BLOG_CAROUSEL_ITEMS.slice(0, 6).map((item) => (
+                  <BlogArticleCard key={item.key} item={item} />
+                ))}
+              </div>
+            ) : (
+              <div
+                className="rounded-2xl border border-dashed border-slate-300/90 bg-white/80 px-6 py-12 text-center text-sm leading-relaxed text-slate-600"
+                aria-live="polite"
+              >
+                <p className="font-medium text-slate-800">
+                  Les premiers articles de blog arrivent prochainement.
+                </p>
+                <p className="mx-auto mt-2 max-w-xl">
+                  En attendant, les tutoriels PDF et les guides ci-dessus couvrent l’essentiel des sujets BTP traités par BeWork
+                  (CCTP, DCE, DOE, PPSPS, planning chantier, situations, relances).
+                </p>
+                <div className="mt-5 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                  <Link href="/ressources/tutos" className={resourcesBtnPrimary}>
+                    Voir les tutoriels
+                  </Link>
+                  <Link href="/ressources/guides" className={resourcesBtnSecondary}>
+                    Voir les guides
+                  </Link>
+                </div>
               </div>
             )}
           </div>

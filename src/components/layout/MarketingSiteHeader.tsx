@@ -20,7 +20,8 @@ type ResourceMenuIconId =
   | "users"
   | "document"
   | "question"
-  | "calculator";
+  | "calculator"
+  | "newspaper";
 
 const SOLUTION_MENU_ENTRIES: {
   href: string;
@@ -82,8 +83,14 @@ const RESOURCE_MENU_ENTRIES: {
   {
     href: "/ressources/guides",
     title: "Guides",
-    description: "Articles sur le pilotage administratif BTP, la trésorerie, la relance et l’externalisation.",
+    description: "Guides PDF longs : conduite de travaux, IA & skills, organisation bureau-chantier.",
     icon: "book",
+  },
+  {
+    href: "/blog",
+    title: "Blog",
+    description: "Articles BTP : planning chantier, aléas, CCAG, relances, trésorerie, retours d’expérience.",
+    icon: "newspaper",
   },
   {
     href: "/cas-clients",
@@ -624,6 +631,25 @@ function ResourceNavIcon({ id, className }: { id: ResourceMenuIconId; className?
           <path d="M8 21V3h11l5 5v13H8Z" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" strokeLinejoin="round" />
           <path d="M14 3v7h7M11 17h10M11 13h10" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
           <circle cx="8.75" cy="13.75" r="1.25" fill="currentColor" />
+        </svg>
+      );
+    case "newspaper":
+      return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+          <path
+            d="M3.5 6.5h13a1.5 1.5 0 0 1 1.5 1.5v10.25a1.75 1.75 0 0 0 1.75 1.75H4.5a1 1 0 0 1-1-1V6.5Z"
+            stroke="currentColor"
+            strokeWidth="1.55"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M18 9.5h2a1 1 0 0 1 1 1v8a1.5 1.5 0 0 1-1.5 1.5"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path d="M6.25 10.25h7.5M6.25 13.5h7.5M6.25 16.75h4.5" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
         </svg>
       );
     case "question":

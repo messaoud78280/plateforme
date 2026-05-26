@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     siteName: "BeWork",
     title: "Blog BeWork — Pilotage administratif & BTP",
     description:
-      "Blog BeWork : articles sur administratif chantier, relances, DICT et externalisation pour artisans et PME du bâtiment.",
+      "Blog BeWork : articles sur planning chantier, aléas, CCAG, relances, DICT et externalisation pour artisans et PME du bâtiment.",
     images: [{ url: blogOgImage, width: 1200, height: 630, alt: "Blog BeWork — administratif BTP" }],
   },
   twitter: {

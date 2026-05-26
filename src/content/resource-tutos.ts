@@ -13,6 +13,13 @@ export type ResourceTutoItem = {
 /** Titres d’entrée : alignés sur les couvertures des PDF (« Crée ton skill », « Trie tes DCE… », etc.). */
 export const RESOURCE_TUTO_ITEMS: readonly ResourceTutoItem[] = [
   {
+    title: "Tuto Crée ton skill — Planning chantier",
+    desc: "Recale ton planning en 30 min au lieu de 5 h : chemin critique, scénarios de rattrapage et note d'impact CCAG art. 19 — PDF 9 pages et prompts Claude.",
+    href: "/ressources/tuto-skill-planning-chantier-bework",
+    status: "Tuto PDF",
+    icon: "document",
+  },
+  {
     title: "BeWork × Maîtrise d’œuvre — la plaquette MOE/BET",
     desc: "Relais documentaire pour bureaux d'études : CCTP, DPGF, RAO, OPC, DOE — chiffrage en crédits et forfaits TTC, PDF 10 pages.",
     href: "/ressources/bework-maitrise-doeuvre",

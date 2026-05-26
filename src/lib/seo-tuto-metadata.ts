@@ -182,6 +182,22 @@ export const TUTO_PAGE_SEO: Record<string, TutoPageSeo> = {
       "mémoire technique MOE",
     ],
   },
+  "/ressources/tuto-skill-planning-chantier-bework": {
+    title: "Skill planning chantier BTP : tutoriel Claude | BeWork",
+    description: tutoDesc(
+      "Skill planning chantier : chemin critique, recalage des aléas et note d’impact CCAG art. 19. PDF 9 pages et prompts Claude",
+    ),
+    keywords: [
+      "skill planning chantier",
+      "planning chantier BTP",
+      "recalage planning chantier",
+      "note d'impact CCAG art 19",
+      "chemin critique BTP",
+      "prolongation de délai chantier",
+      "conducteur de travaux planning",
+      "Claude planning BTP",
+    ],
+  },
 };
 
 export function getTutoPageDescription(path: string): string {

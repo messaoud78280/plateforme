@@ -242,6 +242,13 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/ressources/doe-btp", label: "DOE BTP" },
     { href: "/tarifs", label: "Tarifs BeWork" },
   ],
+  "/ressources/tuto-skill-planning-chantier-bework": [
+    { href: "/ressources/planning-chantier-btp", label: "Guide planning chantier BTP" },
+    { href: "/ressources/tuto-skill-constat-retard-bework", label: "Skill constat de retard" },
+    { href: "/ressources/compte-rendu-chantier", label: "Compte rendu chantier" },
+    { href: "/services/assistant-conducteur-de-travaux", label: "Assistant conducteur de travaux" },
+    { href: "/chantier-mal-suivi", label: "Chantier mal suivi" },
+  ],
 };
 
 export function getSeoInternalLinks(path: string): SeoInternalLink[] {

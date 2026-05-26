@@ -27,8 +27,9 @@ export const RESOURCE_PDF_GUIDES: readonly ResourcePdfCatalogEntry[] = [
   },
 ] as const;
 
-/** 19 tutoriels PDF (skills Claude + plaquettes métier, 1 page = 1 tuto) */
+/** 20 tutoriels PDF (skills Claude + plaquettes métier, 1 page = 1 tuto) */
 export const RESOURCE_PDF_TUTOS: readonly ResourcePdfCatalogEntry[] = [
+  { pdfFile: "tuto-skill-planning-chantier-bework.pdf", kind: "tuto", href: "/ressources/tuto-skill-planning-chantier-bework" },
   { pdfFile: "bework-maitrise-doeuvre.pdf", kind: "tuto", href: "/ressources/bework-maitrise-doeuvre" },
   { pdfFile: "tuto-skill-rdv-client-bework.pdf", kind: "tuto", href: "/ressources/tuto-skill-rdv-client-bework" },
   { pdfFile: "tuto-skill-analyse-dce-bework.pdf", kind: "tuto", href: "/ressources/tuto-skill-analyse-dce-bework" },

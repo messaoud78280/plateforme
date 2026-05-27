@@ -8,7 +8,15 @@ import { MessageForm } from "@/components/MessageForm";
 import { ProjectAssignAgent } from "@/components/projects/ProjectAssignAgent";
 import { ProjectPpspsSection } from "@/components/projects/ProjectPpspsSection";
 import { ProjectReportsSection } from "@/components/projects/ProjectReportsSection";
+import { ChantierDossierSection } from "@/components/chantier/ChantierDossierSection";
 import { canAccessBeWorkSkills } from "@/lib/be-work-skills-access";
+import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
+import { ensureChantierFolders } from "@/lib/chantier-dossier/folders";
+import {
+  CHANTIER_STATUS_COLORS,
+  CHANTIER_STATUS_LABELS,
+  CHANTIER_MISSING_STATUSES,
+} from "@/lib/chantier-dossier/constants";
 
 export default async function ProjetDetailPage({
   params,
@@ -43,16 +51,53 @@ export default async function ProjetDetailPage({
 
   if (!project) notFound();
 
+  const access = await canAccessChantierProject(session.user, id);
+  if (!access.ok) notFound();
+
+  await ensureChantierFolders(id);
+
+  const [chantierFolders, missingCount] = await Promise.all([
+    prisma.chantierFolder.findMany({
+      where: { projectId: id },
+      orderBy: { sortOrder: "asc" },
+      include: {
+        files: {
+          orderBy: { createdAt: "desc" },
+          include: { addedBy: { select: { name: true } } },
+        },
+      },
+    }),
+    prisma.chantierFile.count({
+      where: { projectId: id, status: { in: CHANTIER_MISSING_STATUSES } },
+    }),
+  ]);
+
+  const dossierFolders = chantierFolders.map((folder) => ({
+    id: folder.id,
+    code: folder.code,
+    label: folder.label,
+    files: folder.files.map((f) => ({
+      id: f.id,
+      name: f.name,
+      fileUrl: f.fileUrl,
+      documentType: f.documentType,
+      status: f.status,
+      comment: f.comment,
+      createdAt: f.createdAt.toISOString(),
+      addedBy: f.addedBy,
+    })),
+  }));
+
   const projectActionsUsed = actionsConsumed._sum.actionsUsed ?? 0;
   const clientTotal = project?.client && "monthlyActionsTotal" in project.client ? (project.client as { monthlyActionsTotal: number }).monthlyActionsTotal : 0;
   const clientUsed = project?.client && "monthlyActionsUsed" in project.client ? (project.client as { monthlyActionsUsed: number }).monthlyActionsUsed : 0;
   const clientRemaining = Math.max(0, clientTotal - clientUsed);
 
   const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
-  const canAccess =
-    isAgence || project.clientId === session.user.id;
-
-  if (!canAccess) notFound();
+  const canEditDossier =
+    isAgence ||
+    session.user.role === "AGENT" ||
+    project.clientId === session.user.id;
 
   let agents: { id: string; name: string; email: string }[] = [];
   if (isAgence) {
@@ -78,7 +123,21 @@ export default async function ProjetDetailPage({
 
   return (
     <div className="space-y-6">
-      <BackLink href="/dashboard/projets">Retour aux projets</BackLink>
+      <BackLink href="/dashboard/projets">Retour aux chantiers</BackLink>
+
+      <div className="flex flex-wrap gap-3">
+        <a href="#dossier-chantier" className="rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e40af]">
+          Ouvrir le dossier
+        </a>
+        {missingCount > 0 ? (
+          <Link
+            href="/dashboard/projets/manquants"
+            className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-800 hover:bg-red-100"
+          >
+            {missingCount} pièce{missingCount > 1 ? "s" : ""} manquante{missingCount > 1 ? "s" : ""}
+          </Link>
+        ) : null}
+      </div>
 
       <div className="rounded-xl surface-metallic-light p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -89,6 +148,10 @@ export default async function ProjetDetailPage({
             )}
             <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-500">
               <span>Client : {project.client.name}</span>
+              {project.siteCity ? <span>{project.siteCity}</span> : null}
+              {project.internalManager ? (
+                <span>Resp. : {project.internalManager}</span>
+              ) : null}
               {project.assignedTo && (
                 <span className="rounded-full bg-blue-50 px-2.5 py-0.5 font-medium text-blue-800">
                   {isAgence ? "Agent : " : "Référent : "}{project.assignedTo.name}
@@ -96,11 +159,18 @@ export default async function ProjetDetailPage({
               )}
             </div>
           </div>
-          <span
-            className={`rounded-full px-3 py-1 text-sm font-medium ${urgencyColors[project.urgency] ?? "bg-slate-100 text-slate-800"}`}
-          >
-            Urgence : {urgencyLabels[project.urgency] ?? project.urgency}
-          </span>
+          <div className="flex flex-col items-end gap-2">
+            <span
+              className={`rounded-full px-3 py-1 text-sm font-medium ${CHANTIER_STATUS_COLORS[project.chantierStatus] ?? "bg-slate-100 text-slate-800"}`}
+            >
+              {CHANTIER_STATUS_LABELS[project.chantierStatus] ?? project.chantierStatus}
+            </span>
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-medium ${urgencyColors[project.urgency] ?? "bg-slate-100 text-slate-800"}`}
+            >
+              Urgence : {urgencyLabels[project.urgency] ?? project.urgency}
+            </span>
+          </div>
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
@@ -119,19 +189,48 @@ export default async function ProjetDetailPage({
           )}
         </div>
 
-        <div className="mt-6 grid gap-4 border-t border-slate-100 pt-6 sm:grid-cols-2">
-          {project.dateSouhaitee && (
+        <div className="mt-6 grid gap-4 border-t border-slate-100 pt-6 sm:grid-cols-2 lg:grid-cols-3">
+          {project.siteAddress ? (
+            <div>
+              <p className="text-xs font-medium uppercase text-slate-500">Adresse chantier</p>
+              <p className="text-slate-800">{project.siteAddress}</p>
+            </div>
+          ) : null}
+          {project.plannedStartDate ? (
+            <div>
+              <p className="text-xs font-medium uppercase text-slate-500">Démarrage prévu</p>
+              <p className="text-slate-800">{new Date(project.plannedStartDate).toLocaleDateString("fr-FR")}</p>
+            </div>
+          ) : project.dateSouhaitee ? (
             <div>
               <p className="text-xs font-medium uppercase text-slate-500">Date souhaitée (début)</p>
               <p className="text-slate-800">{new Date(project.dateSouhaitee).toLocaleDateString("fr-FR")}</p>
             </div>
-          )}
-          {project.deadline && (
+          ) : null}
+          {project.plannedEndDate ? (
             <div>
-              <p className="text-xs font-medium uppercase text-slate-500">Deadline d’exécution</p>
+              <p className="text-xs font-medium uppercase text-slate-500">Fin prévue</p>
+              <p className="text-slate-800">{new Date(project.plannedEndDate).toLocaleDateString("fr-FR")}</p>
+            </div>
+          ) : project.deadline ? (
+            <div>
+              <p className="text-xs font-medium uppercase text-slate-500">Deadline</p>
               <p className="text-slate-800">{new Date(project.deadline).toLocaleDateString("fr-FR")}</p>
             </div>
-          )}
+          ) : null}
+          {project.signedQuoteAmount != null ? (
+            <div>
+              <p className="text-xs font-medium uppercase text-slate-500">Devis signé</p>
+              <p className="font-semibold text-slate-800">
+                {Number(project.signedQuoteAmount).toLocaleString("fr-FR", {
+                  style: "currency",
+                  currency: "EUR",
+                  maximumFractionDigits: 0,
+                })}{" "}
+                HT
+              </p>
+            </div>
+          ) : null}
         </div>
 
         {project.notes && (
@@ -141,6 +240,8 @@ export default async function ProjetDetailPage({
           </div>
         )}
       </div>
+
+      <ChantierDossierSection projectId={id} folders={dossierFolders} canEdit={canEditDossier} />
 
       {/* Référent (client) ou gestion agent (agence) */}
       <ProjectAssignAgent

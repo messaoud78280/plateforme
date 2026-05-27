@@ -73,6 +73,8 @@ model User {
   actionsTransactions   ActionsTransaction[]
   skillCctpSessions     SkillCctpSession[]
   skillPpspsSessions    SkillPpspsSession[]
+  chantierFiles         ChantierFile[]
+  chantierFilesAdded    ChantierFile[] @relation("ChantierFileAddedBy")
 
   // NextAuth (magic link)
   accounts              Account[]
@@ -240,7 +242,7 @@ enum ContractStatus {
   SIGNED   // Contrat signé électroniquement
 }
 
-// Projets (liés à un client) – demande avec deadline, urgence, pièces jointes
+// Projets / chantiers (liés à un client) – dossier chantier numérique
 model Project {
   id            String         @id @default(cuid())
   title         String
@@ -252,6 +254,14 @@ model Project {
   deadline      DateTime?      // deadline d'exécution
   urgency       ProjectUrgency @default(MOYENNE)
   notes         String?        // instructions ou détails administratifs
+  // Champs dossier chantier BTP
+  siteAddress       String?
+  siteCity          String?
+  internalManager   String?    // responsable interne entreprise
+  signedQuoteAmount Decimal?   @db.Decimal(14, 2)
+  plannedStartDate  DateTime?  @db.Date
+  plannedEndDate    DateTime?  @db.Date
+  chantierStatus    ChantierStatus @default(ETUDE)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
@@ -266,6 +276,72 @@ model Project {
   appointments Appointment[]
   reports Report[]
   skillPpspsSessions SkillPpspsSession[]
+  chantierFolders ChantierFolder[]
+  chantierFiles   ChantierFile[]
+}
+
+// Statut métier du chantier (pilotage conducteur de travaux)
+enum ChantierStatus {
+  ETUDE
+  EN_COURS
+  EN_ATTENTE
+  RECEPTION
+  TERMINE
+}
+
+// Rubrique du classeur chantier (01 Devis, 02 Contrats, …)
+model ChantierFolder {
+  id        String   @id @default(cuid())
+  projectId String
+  code      String   // ex. "01"
+  label     String   // ex. "Devis & avenants"
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  project Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  files   ChantierFile[]
+
+  @@unique([projectId, code])
+  @@index([projectId, sortOrder])
+}
+
+// Fichier ou pièce attendue dans une rubrique chantier
+model ChantierFile {
+  id           String             @id @default(cuid())
+  projectId    String
+  folderId     String
+  clientId     String
+  name         String
+  fileUrl      String?            // null si statut MANQUANT (pièce attendue)
+  fileSize     Int?
+  mimeType     String?
+  documentType String?            // type libellé BTP (BL, assurance ST, CR n°12…)
+  status       ChantierFileStatus @default(RECU)
+  comment      String?
+  addedById    String?
+  // Préparation IA (classification, résumé, détection manquants) — non utilisé en V1
+  aiSummary           String?   @db.Text
+  aiClassifiedAt      DateTime?
+  aiSuggestedFolderId String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  project  Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  folder   ChantierFolder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  client   User           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  addedBy  User?          @relation("ChantierFileAddedBy", fields: [addedById], references: [id], onDelete: SetNull)
+
+  @@index([projectId, folderId])
+  @@index([clientId])
+  @@index([status])
+}
+
+enum ChantierFileStatus {
+  RECU
+  A_VERIFIER
+  VALIDE
+  MANQUANT
+  A_RELANCER
 }
 
 enum ProjectStatus {

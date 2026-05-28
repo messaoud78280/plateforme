@@ -12,6 +12,14 @@ export type ResourceGuidePageItem = {
 
 export const RESOURCE_GUIDE_PAGE_ITEMS: readonly ResourceGuidePageItem[] = [
   {
+    href: "/ressources/guide-moe-bework",
+    title: "Guide Maîtrise d’œuvre × IA — 12 missions MOE (Claude)",
+    excerpt:
+      "PDF 22 pages : tâches IA / mixte / humain pour MOE, BET, architectes et économistes — limites, checklist de relecture et méthode pour récupérer du temps (week-ends).",
+    publishedTime: "2026-05-28T08:00:00+02:00",
+    badge: "Guide PDF",
+  },
+  {
     href: "/ressources/guide-cdt-bework",
     title: "Le guide du conducteur de travaux — 6 outils Claude",
     excerpt:

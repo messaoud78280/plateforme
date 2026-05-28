@@ -159,6 +159,13 @@ export const TUTO_PAGE_SEO: Record<string, TutoPageSeo> = {
     ),
     keywords: ["conducteur de travaux IA", "IA BTP chantier", "guide BTP"],
   },
+  "/ressources/guide-moe-bework": {
+    title: "Guide MOE × IA : 12 missions et limites (Claude) | BeWork",
+    description: tutoDesc(
+      "Guide PDF 22 pages : missions MOE classées IA/mixte/humain, limites, checklist relecture et méthode pour gagner du temps (CR, suivi, DOE).",
+    ),
+    keywords: ["guide MOE IA", "maîtrise d’œuvre Claude", "BET organisation", "assistant MOE BTP"],
+  },
   "/ressources/compte-rendu-chantier-guide-btp": {
     title: "Skill compte rendu de chantier : tutoriel | BeWork",
     description: tutoDesc(

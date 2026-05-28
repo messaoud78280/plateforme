@@ -6,6 +6,7 @@ import Link from "next/link";
 import { BackLink } from "@/components/ui/BackLink";
 import { AssignAgentProject } from "@/components/clients/AssignAgentProject";
 import { AssignAgentTask } from "@/components/clients/AssignAgentTask";
+import { DeleteClientButton } from "@/components/clients/DeleteClientButton";
 
 const STATUS_LABELS: Record<string, string> = {
   NOUVEAU: "Nouveau",
@@ -92,15 +93,25 @@ export default async function ClientDetailPage({
     <div className="space-y-8">
       <BackLink href="/dashboard/clients">Retour aux clients</BackLink>
 
-      <div className="rounded-xl surface-metallic-light p-6 shadow-sm">
-        <h1 className="text-2xl font-bold text-black">{client.name}</h1>
-        <p className="mt-1 text-black">{client.email}</p>
-        {client.company && (
-          <p className="mt-1 text-sm text-black">Société : {client.company}</p>
-        )}
-        {client.phone && (
-          <p className="mt-1 text-sm text-black">Tél. : {client.phone}</p>
-        )}
+      <div className="flex flex-wrap items-start justify-between gap-4 rounded-xl surface-metallic-light p-6 shadow-sm">
+        <div>
+          <h1 className="text-2xl font-bold text-black">{client.name}</h1>
+          <p className="mt-1 text-black">{client.email}</p>
+          {client.company && (
+            <p className="mt-1 text-sm text-black">Société : {client.company}</p>
+          )}
+          {client.phone && (
+            <p className="mt-1 text-sm text-black">Tél. : {client.phone}</p>
+          )}
+        </div>
+        <DeleteClientButton
+          clientId={client.id}
+          clientName={client.name}
+          projectsCount={projects.length}
+          tasksCount={tasks.length}
+          label="Supprimer ce client"
+          className="px-3 py-1.5 text-sm"
+        />
       </div>
 
       {/* Projets du client */}

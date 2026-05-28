@@ -6,6 +6,7 @@ import {
   CHANTIER_FILE_STATUS_COLORS,
   CHANTIER_FILE_STATUS_LABELS,
 } from "@/lib/chantier-dossier/constants";
+import { DocumentPreviewModal, type DocumentPreviewItem } from "@/components/documents/DocumentPreviewModal";
 
 export type ChantierFolderWithFiles = {
   id: string;
@@ -15,6 +16,7 @@ export type ChantierFolderWithFiles = {
     id: string;
     name: string;
     fileUrl: string | null;
+    mimeType?: string | null;
     documentType: string | null;
     status: keyof typeof CHANTIER_FILE_STATUS_LABELS;
     comment: string | null;
@@ -36,6 +38,7 @@ export function ChantierDossierSection({
   const [expandedFolder, setExpandedFolder] = useState<string | null>(folders[0]?.id ?? null);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [preview, setPreview] = useState<DocumentPreviewItem | null>(null);
 
   async function uploadToFolder(folderId: string, file: File) {
     setBusy(folderId);
@@ -91,6 +94,11 @@ export function ChantierDossierSection({
 
   return (
     <section id="dossier-chantier" className="scroll-mt-24 rounded-xl border border-slate-200 bg-white shadow-sm">
+      <DocumentPreviewModal
+        open={Boolean(preview)}
+        onClose={() => setPreview(null)}
+        item={preview}
+      />
       <div className="border-b border-slate-100 px-6 py-5">
         <h2 className="text-xl font-semibold text-slate-900">Classeur chantier (documents)</h2>
         <p className="mt-1 text-sm text-slate-600">
@@ -183,14 +191,30 @@ export function ChantierDossierSection({
                             >
                               {CHANTIER_FILE_STATUS_LABELS[file.status]}
                             </span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setPreview({
+                                  name: file.name,
+                                  url: file.fileUrl,
+                                  mimeType: file.mimeType ?? null,
+                                  createdAtLabel: new Date(file.createdAt).toLocaleString("fr-FR"),
+                                  statusLabel: CHANTIER_FILE_STATUS_LABELS[file.status],
+                                })
+                              }
+                              className="rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                            >
+                              Aperçu
+                            </button>
                             {file.fileUrl ? (
                               <a
                                 href={file.fileUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-sm font-medium text-[#1d4ed8] hover:underline"
+                                download
+                                className="rounded-md bg-[#1d4ed8] px-2.5 py-1 text-xs font-semibold text-white hover:bg-[#1e40af]"
                               >
-                                Ouvrir
+                                Télécharger
                               </a>
                             ) : null}
                             {canEdit ? (

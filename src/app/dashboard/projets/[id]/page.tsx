@@ -80,6 +80,7 @@ export default async function ProjetDetailPage({
       id: f.id,
       name: f.name,
       fileUrl: f.fileUrl,
+      mimeType: f.mimeType,
       documentType: f.documentType,
       status: f.status,
       comment: f.comment,

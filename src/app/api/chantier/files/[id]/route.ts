@@ -4,6 +4,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
+import { createServiceRoleClient } from "@/lib/supabase";
+import { deleteChantierPdfPreview } from "@/lib/storage/chantier-pdf-preview";
 
 const STATUSES: ChantierFileStatus[] = ["RECU", "A_VERIFIER", "VALIDE", "MANQUANT", "A_RELANCER"];
 
@@ -89,6 +91,11 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   const access = await canAccessChantierProject(session.user, existing.projectId);
   if (!access.ok) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+  }
+
+  const supabase = createServiceRoleClient();
+  if (supabase) {
+    await deleteChantierPdfPreview(supabase, existing.projectId, id);
   }
 
   await prisma.chantierFile.delete({ where: { id } });

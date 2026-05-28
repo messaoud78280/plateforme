@@ -87,6 +87,11 @@ export function DocumentPreviewModal({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [officeEmbedUrl, setOfficeEmbedUrl] = useState<string | null>(null);
   const [textContent, setTextContent] = useState<string | null>(null);
+  const [showAsPdf, setShowAsPdf] = useState(false);
+
+  const chantierDownloadUrl = item?.chantierFileId
+    ? `${chantierPreviewUrl(item.chantierFileId)}?download=original`
+    : null;
 
   useEffect(() => {
     if (!open || !item) return;
@@ -94,6 +99,7 @@ export function DocumentPreviewModal({
     setTextContent(null);
     setPreviewUrl(null);
     setOfficeEmbedUrl(null);
+    setShowAsPdf(false);
 
     if (!item.url && !item.chantierFileId) return;
 
@@ -104,17 +110,35 @@ export function DocumentPreviewModal({
       const proxyUrl = item.chantierFileId ? chantierPreviewUrl(item.chantierFileId) : null;
       const mime = (item.mimeType ?? "").toLowerCase();
       const lowerName = item.name.toLowerCase();
+      const tryConvert = kind === "office" || kind === "iwork";
 
-      if (proxyUrl && (kind === "pdf" || kind === "image" || kind === "text")) {
-        if (!cancelled) setPreviewUrl(proxyUrl);
-        if (kind === "text") {
+      if (proxyUrl && (kind === "pdf" || kind === "image" || kind === "text" || tryConvert)) {
+        if (tryConvert) {
           try {
             const resp = await fetch(proxyUrl);
-            if (!resp.ok) throw new Error("fetch");
-            const t = await resp.text();
-            if (!cancelled) setTextContent(t);
+            if (cancelled) return;
+            if (resp.ok && resp.headers.get("content-type")?.includes("pdf")) {
+              setPreviewUrl(proxyUrl);
+              setShowAsPdf(true);
+            } else {
+              const data = (await resp.json().catch(() => ({}))) as { error?: string; hint?: string };
+              setError(data.hint ?? data.error ?? "Impossible de générer l’aperçu PDF.");
+            }
           } catch {
-            if (!cancelled) setError("Impossible de charger l’aperçu texte.");
+            if (!cancelled) setError("Erreur lors de la conversion en PDF.");
+          }
+        } else {
+          if (!cancelled) setPreviewUrl(proxyUrl);
+          if (kind === "pdf") setShowAsPdf(true);
+          if (kind === "text") {
+            try {
+              const resp = await fetch(proxyUrl);
+              if (!resp.ok) throw new Error("fetch");
+              const t = await resp.text();
+              if (!cancelled) setTextContent(t);
+            } catch {
+              if (!cancelled) setError("Impossible de charger l’aperçu texte.");
+            }
           }
         }
       } else if (item.url) {
@@ -154,7 +178,7 @@ export function DocumentPreviewModal({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  const downloadHref = previewUrl ?? item?.url ?? undefined;
+  const downloadHref = chantierDownloadUrl ?? previewUrl ?? item?.url ?? undefined;
 
   if (!open || !item) return null;
 
@@ -205,7 +229,9 @@ export function DocumentPreviewModal({
             </div>
           ) : loading ? (
             <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-700">
-              Chargement de l’aperçu…
+              {kind === "office" || kind === "iwork"
+                ? "Conversion en PDF pour l’aperçu… (quelques secondes)"
+                : "Chargement de l’aperçu…"}
             </div>
           ) : error ? (
             <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center text-red-800">
@@ -218,7 +244,7 @@ export function DocumentPreviewModal({
                 </p>
               ) : null}
             </div>
-          ) : kind === "pdf" && previewUrl ? (
+          ) : showAsPdf && previewUrl ? (
             <iframe
               src={`${previewUrl}#toolbar=1&navpanes=0&scrollbar=1&view=FitH`}
               className="h-[72vh] w-full rounded-xl border border-slate-200 bg-white"
@@ -246,27 +272,6 @@ export function DocumentPreviewModal({
               title={`Aperçu Office — ${item.name}`}
               onError={() => setError("L’aperçu en ligne n’a pas pu se charger.")}
             />
-          ) : kind === "iwork" ? (
-            <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-6">
-              <p className="text-sm font-semibold text-slate-900">Aperçu non disponible pour ce format Apple</p>
-              <p className="mt-2 text-sm leading-relaxed text-slate-700">
-                Les fichiers <strong>Numbers</strong>, <strong>Pages</strong> ou <strong>Keynote</strong> ne peuvent pas
-                s’afficher dans le navigateur. Exportez en <strong>PDF</strong> (ou Word/Excel) depuis votre Mac, puis
-                déposez la version PDF dans le classeur pour l’aperçu BeWork.
-              </p>
-              {downloadHref ? (
-                <a
-                  href={downloadHref}
-                  download={item.name}
-                  className="mt-4 inline-flex rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e40af]"
-                >
-                  Télécharger le fichier original
-                </a>
-              ) : null}
-              {item.mimeType ? (
-                <p className="mt-3 text-xs text-slate-500">Type : {item.mimeType}</p>
-              ) : null}
-            </div>
           ) : kind === "office" ? (
             <div className="rounded-xl border border-slate-200 bg-white p-6">
               <p className="text-sm font-semibold text-slate-900">Aperçu limité pour ce format</p>

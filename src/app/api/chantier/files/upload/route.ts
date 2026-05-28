@@ -1,9 +1,11 @@
+import { after } from "next/server";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createServiceRoleClient } from "@/lib/supabase";
 import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
+import { ensureChantierPdfPreview, needsPdfConversion } from "@/lib/storage/chantier-pdf-preview";
 
 // Dossier chantier : photos et documents terrain.
 // On évite uniquement les exécutables/paquets dangereux ; le reste est accepté.
@@ -126,6 +128,25 @@ export async function POST(request: Request) {
         addedById: session.user.id,
       },
     });
+
+    if (needsPdfConversion(file.type || null, displayName)) {
+      after(async () => {
+        try {
+          await ensureChantierPdfPreview({
+            supabase,
+            projectId,
+            fileId: created.id,
+            fileUrl: urlData.publicUrl,
+            name: displayName,
+            mimeType: file.type || null,
+            fileSize: file.size,
+          });
+        } catch (e) {
+          console.error("Conversion PDF chantier (arrière-plan):", e);
+        }
+      });
+    }
+
     return NextResponse.json({ id: created.id, fileUrl: created.fileUrl });
   } catch (error) {
     console.error("DB chantier file:", error);

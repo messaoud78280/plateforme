@@ -209,7 +209,7 @@ export function ChantierDossierSection({
                             </button>
                             {file.fileUrl ? (
                               <a
-                                href={`/api/chantier/files/${file.id}/preview`}
+                                href={`/api/chantier/files/${file.id}/preview?download=original`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 download={file.name}

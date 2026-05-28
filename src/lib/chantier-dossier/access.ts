@@ -25,3 +25,13 @@ export async function canAccessChantierProject(user: SessionUser, projectId: str
   }
   return { ok: false as const, project: null };
 }
+
+/** Suppression du chantier : client propriétaire ou direction BeWork (pas les agents seuls). */
+export function canDeleteChantierProject(
+  user: SessionUser,
+  project: { clientId: string }
+): boolean {
+  if (user.role === "MANAGER" || user.role === "AGENCE") return true;
+  if (project.clientId === user.id) return true;
+  return false;
+}

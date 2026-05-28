@@ -10,7 +10,8 @@ import { ProjectPpspsSection } from "@/components/projects/ProjectPpspsSection";
 import { ProjectReportsSection } from "@/components/projects/ProjectReportsSection";
 import { ChantierDossierSection } from "@/components/chantier/ChantierDossierSection";
 import { canAccessBeWorkSkills } from "@/lib/be-work-skills-access";
-import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
+import { canAccessChantierProject, canDeleteChantierProject } from "@/lib/chantier-dossier/access";
+import { DeleteChantierButton } from "@/components/chantier/DeleteChantierButton";
 import { ensureChantierFolders } from "@/lib/chantier-dossier/folders";
 import {
   CHANTIER_STATUS_COLORS,
@@ -100,6 +101,8 @@ export default async function ProjetDetailPage({
     session.user.role === "AGENT" ||
     project.clientId === session.user.id;
 
+  const canDeleteChantier = canDeleteChantierProject(session.user, project);
+
   let agents: { id: string; name: string; email: string }[] = [];
   if (isAgence) {
     agents = await prisma.user.findMany({
@@ -126,10 +129,19 @@ export default async function ProjetDetailPage({
     <div className="space-y-6">
       <BackLink href="/dashboard/projets">Retour aux chantiers</BackLink>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <a href="#dossier-chantier" className="rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e40af]">
           Ouvrir le dossier
         </a>
+        {canDeleteChantier ? (
+          <DeleteChantierButton
+            projectId={id}
+            projectTitle={project.title}
+            redirectTo="/dashboard/projets"
+            label="Supprimer le chantier"
+            className="px-4 py-2 text-sm"
+          />
+        ) : null}
         {missingCount > 0 ? (
           <Link
             href={`/dashboard/projets/manquants?chantier=${encodeURIComponent(id)}`}

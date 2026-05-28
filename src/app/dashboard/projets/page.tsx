@@ -5,9 +5,10 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { CreateChantierForm } from "@/components/chantier/CreateChantierForm";
+import { ChantierProjectsList } from "@/components/chantier/ChantierProjectsList";
 import { BackLink } from "@/components/ui/BackLink";
-import { isChantierStaff } from "@/lib/chantier-dossier/access";
-import { CHANTIER_STATUS_COLORS, CHANTIER_STATUS_LABELS } from "@/lib/chantier-dossier/constants";
+import { canDeleteChantierProject, isChantierStaff } from "@/lib/chantier-dossier/access";
+import { CHANTIER_STATUS_LABELS } from "@/lib/chantier-dossier/constants";
 
 const CHANTIER_STATUSES: ChantierStatus[] = ["ETUDE", "EN_COURS", "EN_ATTENTE", "RECEPTION", "TERMINE"];
 
@@ -172,40 +173,20 @@ export default async function ProjetsPage({
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {projects.map((project) => (
-            <Link
-              key={project.id}
-              href={`/dashboard/projets/${project.id}`}
-              className="block rounded-xl surface-metallic-light p-6 transition-shadow hover:shadow-md"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div className="min-w-0 flex-1">
-                  <h2 className="font-semibold text-slate-800">{project.title}</h2>
-                  {(project.siteAddress || project.siteCity) && (
-                    <p className="mt-1 text-sm text-slate-600">
-                      {[project.siteAddress, project.siteCity].filter(Boolean).join(" · ")}
-                    </p>
-                  )}
-                  <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
-                    <span>Modifié le {new Date(project.updatedAt).toLocaleDateString("fr-FR")}</span>
-                    <span>{project._count.chantierFiles} doc. dossier</span>
-                    {staff ? <span>Client : {project.client.name}</span> : null}
-                    {project.internalManager ? <span>Resp. {project.internalManager}</span> : null}
-                  </div>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-medium ${CHANTIER_STATUS_COLORS[project.chantierStatus]}`}
-                  >
-                    {CHANTIER_STATUS_LABELS[project.chantierStatus]}
-                  </span>
-                  <span className="text-slate-400">→</span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+        <ChantierProjectsList
+          projects={projects.map((project) => ({
+            id: project.id,
+            title: project.title,
+            siteAddress: project.siteAddress,
+            siteCity: project.siteCity,
+            internalManager: project.internalManager,
+            chantierStatus: project.chantierStatus,
+            updatedAt: project.updatedAt.toISOString(),
+            chantierFilesCount: project._count.chantierFiles,
+            clientName: staff ? project.client.name : undefined,
+            canDelete: canDeleteChantierProject(session.user, project),
+          }))}
+        />
       )}
     </div>
   );

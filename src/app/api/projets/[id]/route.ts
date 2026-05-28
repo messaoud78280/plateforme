@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { canDeleteChantierProject } from "@/lib/chantier-dossier/access";
+import { deleteChantierProjectStorage } from "@/lib/chantier-dossier/delete-project-storage";
+import { createServiceRoleClient } from "@/lib/supabase";
 
 /** PATCH /api/projets/[id] – Mettre à jour un projet (agence : assigner un agent) */
 export async function PATCH(
@@ -70,6 +73,53 @@ export async function PATCH(
     console.error(e);
     return NextResponse.json(
       { error: "Erreur lors de la mise à jour du projet" },
+      { status: 500 }
+    );
+  }
+}
+
+/** DELETE — Supprimer un chantier et son classeur (confirmation côté client). */
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  const project = await prisma.project.findUnique({
+    where: { id },
+    select: { id: true, title: true, clientId: true },
+  });
+  if (!project) {
+    return NextResponse.json({ error: "Chantier introuvable" }, { status: 404 });
+  }
+
+  if (!canDeleteChantierProject(session.user, project)) {
+    return NextResponse.json(
+      { error: "Vous n’avez pas l’autorisation de supprimer ce chantier." },
+      { status: 403 }
+    );
+  }
+
+  const supabase = createServiceRoleClient();
+  if (supabase) {
+    try {
+      await deleteChantierProjectStorage(supabase, id);
+    } catch (e) {
+      console.error("deleteChantierProjectStorage:", e);
+    }
+  }
+
+  try {
+    await prisma.project.delete({ where: { id } });
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    return NextResponse.json(
+      { error: "Erreur lors de la suppression du chantier." },
       { status: 500 }
     );
   }

@@ -27,10 +27,7 @@ function inlineFilename(name: string, pdf = false): string {
 function conversionHint(name: string): string {
   const ext = fileExtension(name);
   if ([".numbers", ".pages", ".key"].includes(ext)) {
-    if (!process.env.CONVERTAPI_SECRET?.trim()) {
-      return "Pour Numbers / Pages / Keynote : configurez CONVERTAPI_SECRET sur le serveur, ou exportez le fichier en PDF depuis votre Mac.";
-    }
-    return "La conversion Numbers / Pages / Keynote a échoué. Exportez en PDF depuis votre Mac et redéposez le fichier.";
+    return "Pour Numbers / Pages / Keynote : exportez le document en PDF depuis votre Mac, puis déposez le PDF dans le classeur pour l’aperçu et le partage.";
   }
   return "La conversion en PDF a échoué. Essayez d’exporter le document en PDF puis de le redéposer.";
 }

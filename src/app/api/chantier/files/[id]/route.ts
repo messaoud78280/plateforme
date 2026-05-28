@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
 import { createServiceRoleClient } from "@/lib/supabase";
 import { deleteChantierPdfPreview } from "@/lib/storage/chantier-pdf-preview";
+import { DOCUMENTS_BUCKET, extractStoragePathFromUrl } from "@/lib/storage/supabase-object";
 
 const STATUSES: ChantierFileStatus[] = ["RECU", "A_VERIFIER", "VALIDE", "MANQUANT", "A_RELANCER"];
 
@@ -66,7 +67,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const updated = await prisma.chantierFile.update({
     where: { id },
     data,
-    select: { id: true, status: true },
+    select: { id: true, status: true, name: true },
   });
 
   return NextResponse.json(updated);
@@ -82,7 +83,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   const { id } = await params;
   const existing = await prisma.chantierFile.findUnique({
     where: { id },
-    select: { projectId: true },
+    select: { projectId: true, fileUrl: true, name: true },
   });
   if (!existing) {
     return NextResponse.json({ error: "Introuvable" }, { status: 404 });
@@ -95,6 +96,15 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
 
   const supabase = createServiceRoleClient();
   if (supabase) {
+    if (existing.fileUrl) {
+      const path = extractStoragePathFromUrl(existing.fileUrl, DOCUMENTS_BUCKET);
+      if (path) {
+        const { error: storageError } = await supabase.storage.from(DOCUMENTS_BUCKET).remove([path]);
+        if (storageError) {
+          console.error("Suppression Storage chantier:", storageError.message, path);
+        }
+      }
+    }
     await deleteChantierPdfPreview(supabase, existing.projectId, id);
   }
 

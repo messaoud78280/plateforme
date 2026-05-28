@@ -7,6 +7,7 @@ import {
   CHANTIER_FILE_STATUS_LABELS,
 } from "@/lib/chantier-dossier/constants";
 import { DocumentPreviewModal, type DocumentPreviewItem } from "@/components/documents/DocumentPreviewModal";
+import { ChantierFileShareDialog } from "@/components/chantier/ChantierFileShareDialog";
 
 export type ChantierFolderWithFiles = {
   id: string;
@@ -39,6 +40,7 @@ export function ChantierDossierSection({
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [preview, setPreview] = useState<DocumentPreviewItem | null>(null);
+  const [shareFile, setShareFile] = useState<{ id: string; name: string } | null>(null);
 
   async function uploadToFolder(folderId: string, file: File) {
     setBusy(folderId);
@@ -92,12 +94,72 @@ export function ChantierDossierSection({
     }
   }
 
+  async function renameFile(fileId: string, currentName: string) {
+    const next = window.prompt("Nouveau nom du document :", currentName);
+    if (!next?.trim() || next.trim() === currentName) return;
+
+    setBusy(fileId);
+    setError("");
+    try {
+      const res = await fetch(`/api/chantier/files/${fileId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: next.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Impossible de renommer le document.");
+        return;
+      }
+      if (preview?.chantierFileId === fileId) {
+        setPreview((p) => (p ? { ...p, name: next.trim() } : p));
+      }
+      router.refresh();
+    } catch {
+      setError("Erreur réseau lors du renommage.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function deleteFile(fileId: string, fileName: string) {
+    const ok = window.confirm(
+      `Supprimer « ${fileName} » du classeur chantier ?\n\nCette action est définitive (fichier et aperçu PDF éventuel).`
+    );
+    if (!ok) return;
+
+    setBusy(fileId);
+    setError("");
+    if (preview?.chantierFileId === fileId) setPreview(null);
+
+    try {
+      const res = await fetch(`/api/chantier/files/${fileId}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError((data as { error?: string }).error ?? "Impossible de supprimer ce document.");
+        return;
+      }
+      router.refresh();
+    } catch {
+      setError("Erreur réseau lors de la suppression.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
   return (
     <section id="dossier-chantier" className="scroll-mt-24 rounded-xl border border-slate-200 bg-white shadow-sm">
       <DocumentPreviewModal
         open={Boolean(preview)}
         onClose={() => setPreview(null)}
         item={preview}
+      />
+      <ChantierFileShareDialog
+        open={Boolean(shareFile)}
+        onClose={() => setShareFile(null)}
+        projectId={projectId}
+        fileId={shareFile?.id ?? ""}
+        fileName={shareFile?.name ?? ""}
       />
       <div className="border-b border-slate-100 px-6 py-5">
         <h2 className="text-xl font-semibold text-slate-900">Classeur chantier (documents)</h2>
@@ -219,19 +281,50 @@ export function ChantierDossierSection({
                               </a>
                             ) : null}
                             {canEdit ? (
-                              <select
-                                value={file.status}
+                              <button
+                                type="button"
                                 disabled={busy === file.id}
-                                onChange={(e) => void updateStatus(file.id, e.target.value)}
-                                className="rounded border border-slate-300 px-2 py-1 text-xs"
-                                aria-label="Statut du document"
+                                onClick={() => void renameFile(file.id, file.name)}
+                                className="rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
                               >
-                                {Object.entries(CHANTIER_FILE_STATUS_LABELS).map(([k, label]) => (
-                                  <option key={k} value={k}>
-                                    {label}
-                                  </option>
-                                ))}
-                              </select>
+                                Renommer
+                              </button>
+                            ) : null}
+                            {canEdit && file.fileUrl ? (
+                              <button
+                                type="button"
+                                disabled={busy === file.id}
+                                onClick={() => setShareFile({ id: file.id, name: file.name })}
+                                className="rounded-md border border-[#1d4ed8]/40 bg-[#eff6ff] px-2.5 py-1 text-xs font-semibold text-[#1d4ed8] hover:bg-[#dbeafe] disabled:opacity-50"
+                              >
+                                Transférer
+                              </button>
+                            ) : null}
+                            {canEdit ? (
+                              <>
+                                <select
+                                  value={file.status}
+                                  disabled={busy === file.id}
+                                  onChange={(e) => void updateStatus(file.id, e.target.value)}
+                                  className="rounded border border-slate-300 px-2 py-1 text-xs"
+                                  aria-label="Statut du document"
+                                >
+                                  {Object.entries(CHANTIER_FILE_STATUS_LABELS).map(([k, label]) => (
+                                    <option key={k} value={k}>
+                                      {label}
+                                    </option>
+                                  ))}
+                                </select>
+                                <button
+                                  type="button"
+                                  disabled={busy === file.id}
+                                  onClick={() => void deleteFile(file.id, file.name)}
+                                  className="rounded-md border border-red-200 bg-white px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+                                  aria-label={`Supprimer ${file.name}`}
+                                >
+                                  {busy === file.id ? "…" : "Supprimer"}
+                                </button>
+                              </>
                             ) : null}
                           </div>
                         </li>

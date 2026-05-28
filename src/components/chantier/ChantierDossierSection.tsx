@@ -57,7 +57,7 @@ export function ChantierDossierSection({
   }
 
   async function addPlaceholder(folderId: string) {
-    const name = window.prompt("Intitulé de la pièce attendue :");
+    const name = window.prompt("Intitulé de la pièce à récupérer (ex. Assurance décennale ST, BL livraison menuiseries…) :");
     if (!name?.trim()) return;
     setBusy(folderId);
     setError("");
@@ -92,9 +92,9 @@ export function ChantierDossierSection({
   return (
     <section id="dossier-chantier" className="scroll-mt-24 rounded-xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-100 px-6 py-5">
-        <h2 className="text-xl font-semibold text-slate-900">Dossier chantier</h2>
+        <h2 className="text-xl font-semibold text-slate-900">Classeur chantier (documents)</h2>
         <p className="mt-1 text-sm text-slate-600">
-          Classeur par rubrique — déposez ou marquez les pièces comme sur un chantier terrain.
+          11 rubriques standard BTP — déposez les pièces au bon endroit, ou marquez une pièce à récupérer.
         </p>
         {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
       </div>
@@ -114,13 +114,13 @@ export function ChantierDossierSection({
                   <span className="font-mono text-xs font-semibold text-[#1d4ed8]">{folder.code}</span>
                   <span className="ml-2 font-medium text-slate-900">{folder.label}</span>
                   <span className="ml-2 text-sm text-slate-500">
-                    ({folder.files.length} élément{folder.files.length !== 1 ? "s" : ""})
+                    ({folder.files.length} doc{folder.files.length !== 1 ? "s" : ""})
                   </span>
                 </span>
                 <span className="flex shrink-0 items-center gap-2">
                   {missingCount > 0 ? (
                     <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-800">
-                      {missingCount} à suivre
+                      {missingCount} à récupérer
                     </span>
                   ) : null}
                   <span className="text-slate-400">{open ? "▾" : "▸"}</span>
@@ -150,13 +150,15 @@ export function ChantierDossierSection({
                         onClick={() => void addPlaceholder(folder.id)}
                         className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
                       >
-                        + Pièce manquante
+                        + Pièce à récupérer
                       </button>
                     </div>
                   ) : null}
 
                   {folder.files.length === 0 ? (
-                    <p className="text-sm text-slate-500">Aucun document dans cette rubrique.</p>
+                    <p className="text-sm text-slate-500">
+                      Aucun document pour l’instant. Déposez une pièce ou marquez une pièce à récupérer.
+                    </p>
                   ) : (
                     <ul className="space-y-2">
                       {folder.files.map((file) => (

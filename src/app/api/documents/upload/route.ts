@@ -4,9 +4,11 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createServerClient } from "@/lib/supabase";
 
-const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB (vidéos)
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB (photos/vidéos chantier)
 const ALLOWED_TYPES = [
   "application/pdf",
+  "application/zip",
+  "application/x-zip-compressed",
   "image/jpeg",
   "image/png",
   "image/jpg",
@@ -14,9 +16,14 @@ const ALLOWED_TYPES = [
   "image/webp",
   "image/bmp",
   "image/svg+xml",
+  "image/heic",
+  "image/heif",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/msword",
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "application/vnd.ms-excel",
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
   "text/csv",
   "application/csv",
   "text/plain",
@@ -117,7 +124,7 @@ export async function POST(request: Request) {
   for (const file of files) {
     if (!(file instanceof File) || !file.size) continue;
     if (file.size > MAX_FILE_SIZE) {
-      errors.push(`${file.name} : taille max 10 MB`);
+      errors.push(`${file.name} : taille max 100 MB`);
       continue;
     }
     const mime = file.type || "application/octet-stream";

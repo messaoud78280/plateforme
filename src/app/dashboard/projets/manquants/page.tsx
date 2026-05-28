@@ -11,9 +11,16 @@ import {
 } from "@/lib/chantier-dossier/constants";
 import { isChantierStaff } from "@/lib/chantier-dossier/access";
 
-export default async function ChantierManquantsPage() {
+export default async function ChantierManquantsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ chantier?: string }>;
+}) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect("/connexion?callbackUrl=/dashboard/projets/manquants");
+
+  const params = await searchParams;
+  const chantierId = params.chantier?.trim() || null;
 
   const staff = isChantierStaff(session.user.role);
   const whereProject = staff
@@ -25,7 +32,7 @@ export default async function ChantierManquantsPage() {
   const files = await prisma.chantierFile.findMany({
     where: {
       status: { in: CHANTIER_MISSING_STATUSES },
-      project: whereProject,
+      project: { ...whereProject, ...(chantierId ? { id: chantierId } : {}) },
     },
     include: {
       project: { select: { id: true, title: true, siteCity: true } },
@@ -40,15 +47,16 @@ export default async function ChantierManquantsPage() {
     <div className="space-y-6">
       <BackLink href="/dashboard/projets">Retour aux chantiers</BackLink>
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Pièces manquantes et à relancer</h1>
+        <h1 className="text-2xl font-bold text-slate-800">Pièces à récupérer (manquantes / à relancer)</h1>
         <p className="mt-1 text-slate-600">
           Vue de suivi pour récupérer les documents chantier — devis, assurances ST, BL, DOE…
+          {chantierId ? " (filtré sur un chantier)" : ""}
         </p>
       </div>
 
       {files.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-600">
-          Aucune pièce marquée manquante ou à relancer.
+          Aucune pièce à récupérer pour le moment.
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">

@@ -131,10 +131,10 @@ export default async function ProjetDetailPage({
         </a>
         {missingCount > 0 ? (
           <Link
-            href="/dashboard/projets/manquants"
+            href={`/dashboard/projets/manquants?chantier=${encodeURIComponent(id)}`}
             className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-800 hover:bg-red-100"
           >
-            {missingCount} pièce{missingCount > 1 ? "s" : ""} manquante{missingCount > 1 ? "s" : ""}
+            {missingCount} pièce{missingCount > 1 ? "s" : ""} à récupérer
           </Link>
         ) : null}
       </div>
@@ -150,7 +150,7 @@ export default async function ProjetDetailPage({
               <span>Client : {project.client.name}</span>
               {project.siteCity ? <span>{project.siteCity}</span> : null}
               {project.internalManager ? (
-                <span>Resp. : {project.internalManager}</span>
+                <span>Responsable : {project.internalManager}</span>
               ) : null}
               {project.assignedTo && (
                 <span className="rounded-full bg-blue-50 px-2.5 py-0.5 font-medium text-blue-800">
@@ -173,21 +173,19 @@ export default async function ProjetDetailPage({
           </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
-          <span className="rounded-full bg-[#1d4ed8]/10 px-3 py-1 font-medium text-[#1d4ed8]">
-            Crédits consommés par ce projet : {projectActionsUsed}
-          </span>
-          {isAgence && (
-            <>
-              <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">
-                Crédits client (mois) : {clientUsed} utilisés / {clientTotal} total
-              </span>
-              <span className="rounded-full bg-green-100 px-3 py-1 font-medium text-green-800">
-                Restantes : {clientRemaining}
-              </span>
-            </>
-          )}
-        </div>
+        {isAgence ? (
+          <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-600">
+            <span className="rounded-full bg-[#1d4ed8]/10 px-3 py-1 font-medium text-[#1d4ed8]">
+              Actions consommées (BeWork) : {projectActionsUsed}
+            </span>
+            <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">
+              Client : {clientUsed}/{clientTotal} actions (mois)
+            </span>
+            <span className="rounded-full bg-green-100 px-3 py-1 font-medium text-green-800">
+              Restant : {clientRemaining}
+            </span>
+          </div>
+        ) : null}
 
         <div className="mt-6 grid gap-4 border-t border-slate-100 pt-6 sm:grid-cols-2 lg:grid-cols-3">
           {project.siteAddress ? (

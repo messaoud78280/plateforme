@@ -5,19 +5,33 @@ import { prisma } from "@/lib/prisma";
 import { createServerClient } from "@/lib/supabase";
 import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
 
-const MAX_FILE_SIZE = 25 * 1024 * 1024;
-const ALLOWED_TYPES = [
-  "application/pdf",
-  "image/jpeg",
-  "image/png",
-  "image/jpg",
-  "image/webp",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  "application/vnd.ms-excel",
-  "text/csv",
-  "text/plain",
+// Dossier chantier : photos et documents terrain.
+// On évite uniquement les exécutables/paquets dangereux ; le reste est accepté.
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
+const BLOCKED_MIME_PREFIXES = [
+  "application/x-msdownload",
+  "application/x-msdos-program",
+  "application/x-executable",
+  "application/x-sh",
+  "application/x-bash",
+  "application/x-php",
+  "application/x-python",
+  "application/javascript",
+  "text/javascript",
 ];
+const ALLOWED_MIME_PREFIXES = [
+  "application/", // pdf, office, zip, etc.
+  "image/", // jpg, png, heic, etc.
+  "video/", // mp4, mov, etc.
+  "text/", // csv, txt
+];
+
+function isAllowedMime(mime: string | null | undefined) {
+  if (!mime) return true; // certains navigateurs envoient vide -> on accepte
+  const m = mime.toLowerCase();
+  if (BLOCKED_MIME_PREFIXES.some((p) => m.startsWith(p))) return false;
+  return ALLOWED_MIME_PREFIXES.some((p) => m.startsWith(p));
+}
 
 /** POST — Déposer un fichier dans une rubrique du dossier chantier */
 export async function POST(request: Request) {
@@ -61,9 +75,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Fichier requis" }, { status: 400 });
   }
   if (file.size > MAX_FILE_SIZE) {
-    return NextResponse.json({ error: "Fichier trop volumineux (max 25 Mo)" }, { status: 400 });
+    return NextResponse.json({ error: "Fichier trop volumineux (max 100 Mo)" }, { status: 400 });
   }
-  if (file.type && !ALLOWED_TYPES.includes(file.type)) {
+  if (!isAllowedMime(file.type)) {
     return NextResponse.json({ error: "Type de fichier non autorisé" }, { status: 400 });
   }
 

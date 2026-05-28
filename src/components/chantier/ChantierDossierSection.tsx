@@ -290,14 +290,14 @@ export function ChantierDossierSection({
                                 Renommer
                               </button>
                             ) : null}
-                            {canEdit && file.fileUrl ? (
+                            {file.fileUrl ? (
                               <button
                                 type="button"
                                 disabled={busy === file.id}
                                 onClick={() => setShareFile({ id: file.id, name: file.name })}
                                 className="rounded-md border border-[#1d4ed8]/40 bg-[#eff6ff] px-2.5 py-1 text-xs font-semibold text-[#1d4ed8] hover:bg-[#dbeafe] disabled:opacity-50"
                               >
-                                Transférer
+                                Partager
                               </button>
                             ) : null}
                             {canEdit ? (

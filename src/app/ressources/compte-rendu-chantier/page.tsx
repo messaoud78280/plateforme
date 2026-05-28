@@ -488,7 +488,7 @@ export default function CompteRenduChantierTutoPage() {
           <div className="mx-auto mt-12 max-w-3xl rounded-2xl border border-slate-200/90 bg-white p-8 shadow-[0_10px_40px_-16px_rgba(15,23,42,0.08)] ring-1 ring-slate-100/85 md:p-9">
             <h2 className="text-xl font-bold text-[#0F172A]">Vérifier l’adéquation avec votre charge</h2>
             <p className="mt-3 text-[15px] leading-relaxed text-slate-600">
-              BeWork intervient pour artisans, conducteurs de travaux et dirigeants BTP — avec des forfaits TTC cadrés par volume.
+              BeWork intervient pour artisans, conducteurs de travaux et dirigeants BTP — avec des forfaits HT cadrés par volume.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <CalendlyBookingLink className="inline-flex justify-center rounded-xl bg-[#1d4ed8] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[#1e40af]">

@@ -106,7 +106,7 @@ export default function ServicesHubPage() {
           <div className="mt-14 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
             <p className="text-base font-semibold text-slate-900">Passer à l’action</p>
             <p className="mt-2 text-sm leading-relaxed text-slate-600">
-              Forfaits TTC, espace client et appel découverte pour cadrer le volume avec votre réalité chantier.
+              Forfaits HT, espace client et appel découverte pour cadrer le volume avec votre réalité chantier.
             </p>
             <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <CalendlyBookingLink className="inline-flex min-h-[2.75rem] items-center justify-center rounded-lg bg-[#1d4ed8] px-5 text-sm font-semibold text-white hover:bg-[#1e40af]">

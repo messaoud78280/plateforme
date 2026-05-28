@@ -33,7 +33,7 @@ export default function Page() {
 
   return (
     <SeoLandingPage
-      description="Avenant chantier : process administratif (demande, chiffrage, validation, preuve, archivage) pour sécuriser vos marges et éviter les litiges. Forfaits TTC."
+      description="Avenant chantier : process administratif (demande, chiffrage, validation, preuve, archivage) pour sécuriser vos marges et éviter les litiges. Forfaits HT."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Avenant chantier", href: PAGE_PATH },

@@ -62,11 +62,11 @@ export function getGeoAeoBriefItems(priceFromLabel: string): readonly GeoAeoBrie
     {
       question: "Pourquoi faire confiance à BeWork ?",
       answer:
-        "Périmètre BTP explicite, process cadré (brief, production, validation par vous avant envoi engageant), forfaits TTC publics, supervision depuis la France, contenus et tutoriels métier publiés sur bework.fr — sans promesse de résultats chiffrés non publiés sur le site.",
+        "Périmètre BTP explicite, process cadré (brief, production, validation par vous avant envoi engageant), forfaits HT publics, supervision depuis la France, contenus et tutoriels métier publiés sur bework.fr — sans promesse de résultats chiffrés non publiés sur le site.",
     },
     {
       question: "Combien coûte BeWork ?",
-      answer: `Forfaits mensuels TTC publics sur la page Tarifs, à partir de ${priceFromLabel} €/mois selon le volume de missions déléguées. Pas de prix inventés hors grille publiée.`,
+      answer: `Forfaits mensuels HT publics sur la page Tarifs, à partir de ${priceFromLabel} € HT/mois selon le volume de missions déléguées. Pas de prix inventés hors grille publiée.`,
     },
     {
       question: "Comment commencer avec BeWork ?",

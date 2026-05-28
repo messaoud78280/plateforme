@@ -75,7 +75,7 @@ export function SeoLandingPage({
           <div className="mt-14 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
             <h2 className="font-heading text-[1.35rem] font-bold leading-snug text-black md:text-2xl">Passer à l’action</h2>
             <p className="mt-3 text-base leading-relaxed text-slate-700">
-              BeWork intervient pour artisans, conducteurs de travaux et dirigeants BTP en France, Belgique, Suisse et Luxembourg — forfaits TTC cadrés
+              BeWork intervient pour artisans, conducteurs de travaux et dirigeants BTP en France, Belgique, Suisse et Luxembourg — forfaits HT cadrés
               par volume. Connexion requise pour confier une tâche depuis l’espace client.
             </p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">

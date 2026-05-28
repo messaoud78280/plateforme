@@ -66,7 +66,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     ],
     deepeningLinks: [
       { href: "/assistants-administratifs-taches", label: "Catalogue des missions" },
-      { href: "/tarifs", label: "Forfaits TTC" },
+      { href: "/tarifs", label: "Forfaits HT" },
       { href: "/notre-facon-de-travailler", label: "Process BeWork" },
     ],
     seeAlsoSlugs: ["assistant-conducteur-de-travaux", "externalisation-administrative-btp"],
@@ -164,13 +164,13 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     slug: "externalisation-administrative-btp",
     metaTitle: "Externalisation administrative BTP | BeWork",
     metaDescription:
-      "Externalisation administrative BTP : relais travaux, forfaits TTC, accompagnement francophone FR · BE · CH · LU.",
+      "Externalisation administrative BTP : relais travaux, forfaits HT, accompagnement francophone FR · BE · CH · LU.",
     h1: "Externalisation administrative BTP avec un relais travaux encadré",
     intro:
       "L’externalisation administrative BTP ne se résume pas à « du secrétariat » : chez BeWork, il s’agit d’un relais travaux — dossiers chantier, relances, préparations documentaires — avec des forfaits clairs et un accompagnement à distance supervisé depuis la France.",
     pourQuiBullets: [
       "Dirigeants et responsables qui veulent structurer le suivi sans alourdir la masse salariale.",
-      "Entreprises francophones cherchant un cadre contractuel simple (forfaits TTC).",
+      "Entreprises francophones cherchant un cadre contractuel simple (forfaits HT).",
     ],
     priseEnChargeBullets: [
       "Missions listées dans le catalogue (comptes rendus, DCE, PPSPS, relances, etc.).",

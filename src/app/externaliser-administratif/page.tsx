@@ -9,7 +9,7 @@ export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 const faq = [
   {
     q: "Pourquoi externaliser l’administratif dans une entreprise BTP plutôt que tout internaliser ?",
-    a: "Parce que la charge varie fortement selon les chantiers : pics de devis, relances, documents. Externaliser permet de sécuriser le rythme côté bureau sans alourdir la masse salariale, avec des forfaits TTC et une équipe déjà opérationnelle.",
+    a: "Parce que la charge varie fortement selon les chantiers : pics de devis, relances, documents. Externaliser permet de sécuriser le rythme côté bureau sans alourdir la masse salariale, avec des forfaits HT et une équipe déjà opérationnelle.",
   },
   {
     q: "Quelles tâches administratives peut-on déléguer en priorité ?",
@@ -38,7 +38,7 @@ const faqJsonLd = {
 export default function Page() {
   return (
     <SeoLandingPage
-      description="Externaliser administratif PME : assistant virtuel pour devis, factures, relances. Sans recrutement. Dès 290 € TTC/mois. France, Belgique, Suisse, Luxembourg."
+      description="Externaliser administratif PME : assistant virtuel pour devis, factures, relances. Sans recrutement. Dès 290 € HT/mois. France, Belgique, Suisse, Luxembourg."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Externaliser son administratif", href: PAGE_PATH },
@@ -48,7 +48,7 @@ export default function Page() {
         <>
           Externaliser administratif PME permet de recentrer vos équipes sur le cœur de métier tout en sécurisant
           devis, factures et relances. BeWork propose un assistant administratif externalisé dédié, sans recrutement.
-          Dès 290 € TTC/mois — France, Belgique, Suisse, Luxembourg.
+          Dès 290 € HT/mois — France, Belgique, Suisse, Luxembourg.
         </>
       }
     >
@@ -69,7 +69,7 @@ export default function Page() {
 
       <h2>Externaliser administratif PME : combien ça coûte ?</h2>
       <p>
-        BeWork propose des forfaits dès 290 € TTC/mois (offre Structure). Pas de charges sociales, pas de recrutement :
+        BeWork propose des forfaits dès 290 € HT/mois (offre Structure). Pas de charges sociales, pas de recrutement :
         un forfait tout compris. Jusqu&apos;à 75 % d&apos;économie par rapport à un assistant en interne.
       </p>
 

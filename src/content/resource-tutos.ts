@@ -21,7 +21,7 @@ export const RESOURCE_TUTO_ITEMS: readonly ResourceTutoItem[] = [
   },
   {
     title: "BeWork × Maîtrise d’œuvre — la plaquette MOE/BET",
-    desc: "Relais documentaire pour bureaux d'études : CCTP, DPGF, RAO, OPC, DOE — chiffrage en crédits et forfaits TTC, PDF 10 pages.",
+    desc: "Relais documentaire pour bureaux d'études : CCTP, DPGF, RAO, OPC, DOE — chiffrage en crédits et forfaits HT, PDF 10 pages.",
     href: "/ressources/bework-maitrise-doeuvre",
     status: "Tuto PDF",
     icon: "document",

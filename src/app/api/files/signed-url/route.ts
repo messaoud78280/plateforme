@@ -2,25 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createServiceRoleClient } from "@/lib/supabase";
-
-function extractStoragePathFromUrl(url: string, bucket: string): string | null {
-  try {
-    const u = new URL(url);
-    const s = u.toString();
-    // formats typiques :
-    // .../storage/v1/object/public/<bucket>/<path>
-    // .../storage/v1/object/sign/<bucket>/<path>?token=...
-    const idx = s.indexOf("/storage/v1/object/");
-    if (idx === -1) return null;
-    const tail = s.slice(idx);
-    const m = tail.match(new RegExp(`/storage/v1/object/(public|sign)/${bucket}/(.+)$`));
-    if (!m?.[2]) return null;
-    const pathAndMaybeQuery = m[2];
-    return decodeURIComponent(pathAndMaybeQuery.split("?")[0] ?? "");
-  } catch {
-    return null;
-  }
-}
+import { extractStoragePathFromUrl } from "@/lib/storage/supabase-object";
 
 /** POST — Génère une URL signée temporaire pour un fichier Storage (si possible). */
 export async function POST(request: Request) {

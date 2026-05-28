@@ -7,6 +7,7 @@ import {
   SUBSCRIPTION_PLANS,
   creditsToDisplayHours,
   formatPriceLabelFr,
+  SUBSCRIPTION_PRICE_TAX_LABEL,
 } from "@/lib/subscription-plans";
 
 const PLAN_CARD_COPY: Record<
@@ -137,7 +138,9 @@ export function HomePricingSection() {
                     <p className="mt-1 tabular-nums text-[1.5rem] font-bold leading-none tracking-tight text-[#1d4ed8] md:text-[1.75rem]">
                       {formatPriceLabelFr(plan.priceLabel)} €
                     </p>
-                    <span className="mt-0.5 inline-block text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">TTC / mois</span>
+                    <span className="mt-0.5 inline-block text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                      {SUBSCRIPTION_PRICE_TAX_LABEL} / mois
+                    </span>
                   </div>
                 </div>
 

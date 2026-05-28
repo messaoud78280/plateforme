@@ -2,7 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { SUBSCRIPTION_PLANS, getPlan, PLAN_KEYS } from "@/lib/subscription-plans";
+import {
+  SUBSCRIPTION_PLANS,
+  SUBSCRIPTION_PRICE_DISCLAIMER,
+  SUBSCRIPTION_PRICE_TAX_LABEL,
+  formatPlanPriceMonthlyHt,
+  getPlan,
+  PLAN_KEYS,
+} from "@/lib/subscription-plans";
 
 type Props = {
   initialPlanKey: string;
@@ -146,7 +153,7 @@ export function SouscrireClient({
               >
                 <span className="font-medium">{p.name}</span>
                 <span className="mt-1 block text-xs text-slate-500">
-                  {p.priceLabel} € TTC / mois · {p.actionsLabel}
+                  {formatPlanPriceMonthlyHt(p.priceLabel)} · {p.actionsLabel}
                 </span>
               </button>
             );
@@ -165,7 +172,7 @@ export function SouscrireClient({
           <div className="flex justify-between">
             <dt className="text-slate-500">Prix</dt>
             <dd className="font-medium text-slate-800">
-              {effectivePlan.priceLabel} € TTC / mois
+              {formatPlanPriceMonthlyHt(effectivePlan.priceLabel)}
             </dd>
           </div>
           <div className="flex justify-between">
@@ -188,8 +195,10 @@ export function SouscrireClient({
           </div>
         </dl>
         <div className="mt-4 border-t border-slate-100 pt-3 text-xs text-slate-500">
-          <p>TTC, sans frais cachés · Sans engagement long terme · Démarrage rapide</p>
-          <p className="mt-1">Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.</p>
+          <p>
+            {SUBSCRIPTION_PRICE_TAX_LABEL}, sans frais cachés · Sans engagement long terme · Démarrage rapide
+          </p>
+          <p className="mt-1">{SUBSCRIPTION_PRICE_DISCLAIMER}</p>
         </div>
 
         {/* Contrat */}
@@ -239,7 +248,7 @@ export function SouscrireClient({
             <p className="text-sm text-slate-600">
               Montant à régler :{" "}
               <strong>
-                {effectivePlan.priceLabel} € TTC{effectivePlan.billing === "monthly" ? " / mois" : ""}
+                {formatPlanPriceMonthlyHt(effectivePlan.priceLabel)}
               </strong>
             </p>
             <p className="mt-2 text-xs text-slate-500">

@@ -5,6 +5,12 @@ import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/seo-landing-json-ld";
 import { getTutoPageDescription, tutoPageMetadata } from "@/lib/seo-tuto-metadata";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
+import {
+  PLAN_KEYS,
+  SUBSCRIPTION_PLANS,
+  creditsToDisplayHours,
+  formatPlanPriceMonthlyHt,
+} from "@/lib/subscription-plans";
 
 const pagePath = "/ressources/bework-maitrise-doeuvre";
 const pageUrl = absoluteUrl(pagePath);
@@ -79,29 +85,32 @@ const LOTS_TCE = [
   "Tous corps d’état — neuf et réhabilitation",
 ] as const;
 
-const PACKS = [
-  {
-    nom: "Structure",
-    prix: "290 € TTC / mois",
-    capacite: "≈ 20 h incluses · ≈ 100 crédits",
-    cible: "Pour tenir les dossiers chantier et éviter les oublis sur de petits projets MOE.",
-    inclus: ["Relances devis & pièces", "Mails clients et entreprises", "Classement documents travaux"],
-  },
-  {
-    nom: "Suivi",
-    prix: "490 € TTC / mois",
-    capacite: "≈ 37 h incluses · ≈ 185 crédits",
-    cible: "Pour ne plus perdre d’opportunités et tenir un rythme constant côté production documentaire.",
-    inclus: ["Suivi devis & relances", "Situations / factures chantier", "Fournisseurs & commandes"],
-  },
-  {
-    nom: "Pilotage",
-    prix: "1 190 € TTC / mois",
-    capacite: "≈ 100 h incluses · ≈ 500 crédits",
-    cible: "Pour un relais à forte capacité sur plusieurs dossiers, multi-agences, multi-projets.",
-    inclus: ["Suivi multi-dossiers MOE", "Réserves / DOE", "Coordination renforcée"],
-  },
-] as const;
+const PACKS = PLAN_KEYS.map((key) => {
+  const p = SUBSCRIPTION_PLANS[key];
+  const copyByKey = {
+    DECOUVERTE: {
+      cible: "Pour tenir les dossiers chantier et éviter les oublis sur de petits projets MOE.",
+      inclus: ["Relances devis & pièces", "Mails clients et entreprises", "Classement documents travaux"],
+    },
+    STANDARD: {
+      cible: "Pour ne plus perdre d’opportunités et tenir un rythme constant côté production documentaire.",
+      inclus: ["Suivi devis & relances", "Situations / factures chantier", "Fournisseurs & commandes"],
+    },
+    PREMIUM: {
+      cible: "Pour un relais à forte capacité sur plusieurs dossiers, multi-agences, multi-projets.",
+      inclus: ["Suivi multi-dossiers MOE", "Réserves / DOE", "Coordination renforcée"],
+    },
+  } as const;
+  const hoursApprox = creditsToDisplayHours(p.actionsIncluded);
+  const c = copyByKey[key];
+  return {
+    nom: p.name,
+    prix: formatPlanPriceMonthlyHt(p.priceLabel),
+    capacite: `≈ ${hoursApprox} h incluses · ≈ ${p.actionsIncluded} crédits`,
+    cible: c.cible,
+    inclus: c.inclus,
+  };
+});
 
 const FAQ_ITEMS = [
   {
@@ -352,7 +361,7 @@ export default function BeworkMaitriseDoeuvrePage() {
                 Trois packs, un seul rythme pour un bureau d’études multi-projets
               </h2>
               <p className="mt-4 text-[1.0625rem] leading-relaxed text-slate-700">
-                Forfaits TTC publics, alignés sur la grille tarifs BeWork. Vous démarrez avec le pack qui correspond à votre charge réelle et vous
+                Forfaits HT publics, alignés sur la grille tarifs BeWork. Vous démarrez avec le pack qui correspond à votre charge réelle et vous
                 ajustez librement d’un mois sur l’autre.
               </p>
               <div className="mt-8 grid gap-5 md:grid-cols-3">

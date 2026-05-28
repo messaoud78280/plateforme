@@ -76,7 +76,7 @@ ${line("Cas clients", "/cas-clients")}
 
 ${line("Accueil", "/")}
 ${line("Services", "/services")}
-${line("Tarifs", "/tarifs", "Forfaits TTC publics — ne pas inventer de prix hors page.")}
+${line("Tarifs", "/tarifs", "Forfaits HT publics — ne pas inventer de prix hors page.")}
 ${line("Contact & appel découverte", "/contact")}
 ${line("FAQ", "/faq")}
 

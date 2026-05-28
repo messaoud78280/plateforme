@@ -104,7 +104,7 @@ export const SEO_KEYWORDS_GLOBAL: string[] = [
   ...SEO_KEYWORDS_TECHNIQUE.slice(0, 6),
   "BeWork",
   "sans recruter",
-  "forfait administratif TTC",
+  "forfait administratif HT",
   "France Belgique Suisse Luxembourg",
   "Île-de-France administratif BTP",
   "rendez-vous découverte administratif",
@@ -150,8 +150,8 @@ export const SEO_KEYWORDS_HOME: string[] = [
 
 /** Meta description site (layout racine) — ~155 car., périmètre francophonie. */
 export const SEO_VALUE_PROPOSITION =
-  "Assistants travaux BTP par l’IA : devis, relances, DOE, PPSPS et dossiers chantier. Relais bureau-chantier, forfaits TTC. FR · BE · CH · LU.";
+  "Assistants travaux BTP par l’IA : devis, relances, DOE, PPSPS et dossiers chantier. Relais bureau-chantier, forfaits HT. FR · BE · CH · LU.";
 
 /** Proposition courte (OG, Twitter). */
 export const SEO_VALUE_PROPOSITION_SHORT =
-  "Assistants travaux BTP : bureau-chantier et documents chantier. Forfaits TTC. France, Belgique, Suisse, Luxembourg.";
+  "Assistants travaux BTP : bureau-chantier et documents chantier. Forfaits HT. France, Belgique, Suisse, Luxembourg.";

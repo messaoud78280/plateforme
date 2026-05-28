@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "BeWork — Administratif externalisé BTP (artisans & conducteurs travaux)",
     short_name: "BeWork",
     description:
-      "Administratif externalisé France, Belgique, Suisse, Luxembourg : artisans, conducteurs de travaux, devis et dossiers chantier — forfaits TTC.",
+      "Administratif externalisé France, Belgique, Suisse, Luxembourg : artisans, conducteurs de travaux, devis et dossiers chantier — forfaits HT.",
     start_url: "/",
     display: "standalone",
     background_color: "#f8f9fb",

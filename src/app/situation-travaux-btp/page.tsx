@@ -34,7 +34,7 @@ export default function Page() {
 
   return (
     <SeoLandingPage
-      description="Situation de travaux BTP : organisation, pièces, fréquence, modèle et suivi pour facturer au fil de l’eau. Pilotage administratif encadré, forfaits TTC."
+      description="Situation de travaux BTP : organisation, pièces, fréquence, modèle et suivi pour facturer au fil de l’eau. Pilotage administratif encadré, forfaits HT."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Situation de travaux BTP", href: PAGE_PATH },

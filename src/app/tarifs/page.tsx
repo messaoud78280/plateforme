@@ -9,6 +9,8 @@ import {
   CREDIT_MINUTES,
   PLAN_KEYS,
   SUBSCRIPTION_PLANS,
+  SUBSCRIPTION_PRICE_DISCLAIMER,
+  SUBSCRIPTION_PRICE_TAX_LABEL,
   creditsToDisplayHours,
   formatPriceLabelFr,
   getPublicPriceBoundsLabels,
@@ -25,14 +27,8 @@ import { absoluteUrl, SITE_URL } from "@/lib/site";
 const tarifsUrl = absoluteUrl("/tarifs");
 const tarifsOgImage = absoluteUrl("/opengraph-image");
 
-function formatPriceTtc(value: string) {
-  const n = parseInt(value.replace(/\s/g, ""), 10);
-  if (Number.isNaN(n)) return value;
-  return n.toLocaleString("fr-FR");
-}
-
 const TARIFS_META_DESC = metaDescriptionFrancophonie(
-  "Forfaits TTC pour externaliser bureau-chantier : devis, relances, DOE, PPSPS et dossiers. Assistants travaux BTP, sans recruter",
+  "Forfaits HT pour externaliser bureau-chantier : devis, relances, DOE, PPSPS et dossiers. Assistants travaux BTP, sans recruter",
 );
 
 export const metadata: Metadata = {
@@ -69,7 +65,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Tarifs BeWork — assistante travaux BTP",
-    description: "Forfaits TTC pour tenir vos dossiers chantier (devis, relances, situations, documents travaux) sans recruter.",
+    description: "Forfaits HT pour tenir vos dossiers chantier (devis, relances, situations, documents travaux) sans recruter.",
   },
   robots: { index: true, follow: true },
 };
@@ -87,8 +83,8 @@ const PLAN_VOLUME = Object.fromEntries(
   })
 ) as Record<(typeof PLAN_KEYS)[number], { hoursApprox: number; actionsApprox: number }>;
 
-function formatHourlyCost(priceTtc: string, hoursApprox: number) {
-  const p = parseFloat(priceTtc.replace(/\s/g, ""));
+function formatHourlyCost(priceHt: string, hoursApprox: number) {
+  const p = parseFloat(priceHt.replace(/\s/g, ""));
   if (!Number.isFinite(p) || hoursApprox <= 0) return null;
   const v = p / hoursApprox;
   return v.toLocaleString("fr-FR", { maximumFractionDigits: 1, minimumFractionDigits: 1 });
@@ -173,7 +169,7 @@ const faq = [
   },
   {
     q: "Les tarifs sont-ils adaptés aux artisans et petites entreprises du bâtiment ?",
-    a: "Oui : forfaits TTC, sans recrutement, avec une montée en charge progressive. Vous gardez la validation finale et les décisions qui engagent votre entreprise.",
+    a: "Oui : forfaits HT, sans recrutement, avec une montée en charge progressive. Vous gardez la validation finale et les décisions qui engagent votre entreprise.",
   },
 ];
 
@@ -194,6 +190,12 @@ const tarifsStructuredData = {
           description: plan.tagline,
           price: plan.price,
           priceCurrency: "EUR",
+          priceSpecification: {
+            "@type": "UnitPriceSpecification",
+            price: plan.price,
+            priceCurrency: "EUR",
+            valueAddedTaxIncluded: false,
+          },
           url: tarifsUrl,
           availability: "https://schema.org/InStock",
           seller: { "@type": "Organization", name: "BeWork", url: SITE_URL },
@@ -298,10 +300,12 @@ export default function TarifsPage() {
                 </h3>
                 <div className="mt-5 flex flex-wrap items-baseline gap-x-1.5 gap-y-0">
                   <span className="text-3xl font-bold tracking-tight text-[#1d4ed8] tabular-nums md:text-[2.125rem]">
-                    {formatPriceTtc(plan.price)}
+                    {formatPriceLabelFr(plan.price)}
                   </span>
                   <span className="text-xl font-semibold text-black">€</span>
-                  <span className="text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-black">TTC</span>
+                  <span className="text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-black">
+                    {SUBSCRIPTION_PRICE_TAX_LABEL}
+                  </span>
                   {plan.billing === "monthly" && (
                     <span className="text-base font-semibold text-black">/ mois</span>
                   )}
@@ -514,7 +518,7 @@ export default function TarifsPage() {
                   une disponibilité illimitée.
                 </p>
                 <p className="mt-4 text-xs font-medium uppercase tracking-[0.08em] text-black">
-                  Tous nos tarifs sont exprimés TTC / mois, sans frais supplémentaires.
+                  {SUBSCRIPTION_PRICE_DISCLAIMER}
                 </p>
               </div>
             </div>
@@ -746,13 +750,13 @@ export default function TarifsPage() {
               </thead>
               <tbody className="text-black">
                 <tr className="border-b border-[#e0e4ea]">
-                  <td className="px-4 py-3">Prix TTC / mois</td>
+                  <td className="px-4 py-3">Prix HT / mois</td>
                   {PLAN_KEYS.map((key) => (
                     <td key={key} className="px-4 py-3">
                       <span className="tarif-emphase text-black">
                         {formatPriceLabelFr(SUBSCRIPTION_PLANS[key].priceLabel)}
                       </span>{" "}
-                      € TTC
+                      € {SUBSCRIPTION_PRICE_TAX_LABEL}
                     </td>
                   ))}
                 </tr>
@@ -841,7 +845,9 @@ export default function TarifsPage() {
                 <h4 className="text-sm font-semibold uppercase tracking-wide text-[#1d4ed8]">BeWork</h4>
                 <p className="mt-4 text-3xl font-bold text-[#1d4ed8]">
                   {formatPriceLabelFr(PRICE_BOUNDS.low)} € à {formatPriceLabelFr(PRICE_BOUNDS.high)} €{" "}
-                  <span className="text-xs font-semibold uppercase tracking-wide text-black">TTC</span>{" "}
+                  <span className="text-xs font-semibold uppercase tracking-wide text-black">
+                    {SUBSCRIPTION_PRICE_TAX_LABEL}
+                  </span>{" "}
                   <span className="text-lg font-normal text-black">/ mois</span>
                 </p>
                 <p className="mt-1 text-black">Tout compris — sans frais cachés</p>

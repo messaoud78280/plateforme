@@ -197,6 +197,7 @@ export function ChantierDossierSection({
                                 setPreview({
                                   name: file.name,
                                   url: file.fileUrl,
+                                  chantierFileId: file.id,
                                   mimeType: file.mimeType ?? null,
                                   createdAtLabel: new Date(file.createdAt).toLocaleString("fr-FR"),
                                   statusLabel: CHANTIER_FILE_STATUS_LABELS[file.status],
@@ -208,10 +209,10 @@ export function ChantierDossierSection({
                             </button>
                             {file.fileUrl ? (
                               <a
-                                href={file.fileUrl}
+                                href={`/api/chantier/files/${file.id}/preview`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                download
+                                download={file.name}
                                 className="rounded-md bg-[#1d4ed8] px-2.5 py-1 text-xs font-semibold text-white hover:bg-[#1e40af]"
                               >
                                 Télécharger

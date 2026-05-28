@@ -162,7 +162,7 @@ const homeJsonLd = {
       "@id": `${SITE_URL}/#video-presentation-bework`,
       name: "Présentation BeWork — assistants travaux BTP augmentés par l’IA",
       description:
-        "Vidéo de présentation : dossiers chantier, devis & relances, DICT et coordination fournisseurs — service à distance, forfaits TTC (France · Belgique · Suisse · Luxembourg).",
+        "Vidéo de présentation : dossiers chantier, devis & relances, DICT et coordination fournisseurs — service à distance, forfaits HT (France · Belgique · Suisse · Luxembourg).",
       thumbnailUrl: [absoluteUrl("/opengraph-image")],
       uploadDate: "2026-04-11T12:00:00+02:00",
       duration: PRESENTATION_VIDEO_DURATION_ISO,
@@ -650,7 +650,7 @@ export default function HomePage() {
               suivi administratif de leurs marchés.
             </p>
             <p className="mt-4 text-sm font-medium text-black">
-              Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.
+              Tous nos tarifs sont exprimés HT, sans frais supplémentaires.
             </p>
             <dl className="mt-12 space-y-8">
               {HOME_FAQ_ITEMS.map((item, i) => (

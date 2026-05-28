@@ -98,7 +98,7 @@ export default async function ContractPage() {
                 const p = SUBSCRIPTION_PLANS[key];
                 return (
                   <li key={key}>
-                    {p.name} : {formatPriceLabelFr(p.priceLabel)} € TTC / mois
+                    {p.name} : {formatPriceLabelFr(p.priceLabel)} € HT / mois
                   </li>
                 );
               })}

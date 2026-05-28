@@ -23,6 +23,17 @@ export function formatPriceLabelFr(priceLabel: string): string {
   return Number.isFinite(n) ? n.toLocaleString("fr-FR") : priceLabel;
 }
 
+/** Libellé fiscal des forfaits publics (`priceLabel` = montant HT). */
+export const SUBSCRIPTION_PRICE_TAX_LABEL = "HT" as const;
+
+export const SUBSCRIPTION_PRICE_DISCLAIMER =
+  "Tous nos tarifs sont exprimés HT / mois, sans frais supplémentaires." as const;
+
+/** Ex. « 490 € HT / mois » */
+export function formatPlanPriceMonthlyHt(priceLabel: string): string {
+  return `${formatPriceLabelFr(priceLabel)} € ${SUBSCRIPTION_PRICE_TAX_LABEL} / mois`;
+}
+
 export const SUBSCRIPTION_PLANS = {
   DECOUVERTE: {
     planKey: "DECOUVERTE",
@@ -87,10 +98,16 @@ export function getPublicPriceBoundsLabels(): { low: string; high: string } {
   };
 }
 
+/** Borne basse publique, ex. « dès 290 € HT/mois » */
+export function formatPublicPriceFromHt(): string {
+  const { low } = getPublicPriceBoundsLabels();
+  return `dès ${formatPriceLabelFr(low)} € ${SUBSCRIPTION_PRICE_TAX_LABEL}/mois`;
+}
+
 /** Phrase AggregateOffer (offre Suivi = STANDARD). */
 export function getAggregateOfferDescription(): string {
   const suivi = SUBSCRIPTION_PLANS.STANDARD;
-  return `Trois forfaits TTC mensuels BTP : Structure, Suivi (${suivi.priceLabel} € TTC/mois — le plus adapté pour une activité régulière), Pilotage.`;
+  return `Trois forfaits HT mensuels BTP : Structure, Suivi (${formatPlanPriceMonthlyHt(suivi.priceLabel)} — le plus adapté pour une activité régulière), Pilotage.`;
 }
 
 export function getPlan(planKey: string) {

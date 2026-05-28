@@ -533,7 +533,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
         </section>
 
         <p className="text-xs text-slate-500">
-          Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.
+          Tous nos tarifs sont exprimés HT, sans frais supplémentaires.
         </p>
 
         {/* Messages + Boutons */}

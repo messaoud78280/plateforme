@@ -517,7 +517,7 @@ export default function AssistantsAdministratifsTachesPage() {
         <section className="px-6 py-16 md:py-20">
           <div className="mx-auto max-w-4xl rounded-2xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-8 text-center md:p-12">
             <h2 className="text-2xl font-bold text-black md:text-3xl">
-              Dès 290 € TTC/mois — sans recrutement
+              Dès 290 € HT/mois — sans recrutement
             </h2>
             <p className="mt-4 text-black">
               Un relais travaux bureau‑terrain, avec une assistante BTP augmentée par l’IA pour trier, synthétiser et structurer. Vous gardez la validation

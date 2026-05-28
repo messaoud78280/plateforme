@@ -89,7 +89,7 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
   "/admin-btp-sans-recruter": {
     title: "Admin BTP sans recruter : relais travaux BeWork",
     description: metaDescriptionFrancophonie(
-      "Tenez devis, relances et dossiers chantier sans embauche. Assistants travaux IA, forfaits TTC, supervision depuis la France",
+      "Tenez devis, relances et dossiers chantier sans embauche. Assistants travaux IA, forfaits HT, supervision depuis la France",
     ),
     keywords: ["admin BTP sans recruter", "externalisation administrative BTP", "relais travaux"],
   },
@@ -103,7 +103,7 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
   "/assistant-administratif-externalise": {
     title: "Assistant travaux externalisé pour PME et BTP",
     description: metaDescriptionFrancophonie(
-      "Externalisez le bureau-chantier : devis, relances, dossiers et suivi administratif BTP. Forfaits TTC clairs, validation avant engagement",
+      "Externalisez le bureau-chantier : devis, relances, dossiers et suivi administratif BTP. Forfaits HT clairs, validation avant engagement",
     ),
     keywords: SEO_KEYWORDS_ASSISTANT_TRAVAUX.slice(0, 10),
   },
@@ -117,7 +117,7 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
   "/assistant-administratif-distance": {
     title: "Assistant travaux à distance | PME et BTP francophones",
     description: metaDescriptionFrancophonie(
-      "Assistant travaux à distance : devis, relances et suivi dossiers pour le bâtiment. Plateforme supervisée, forfaits TTC publics",
+      "Assistant travaux à distance : devis, relances et suivi dossiers pour le bâtiment. Plateforme supervisée, forfaits HT publics",
     ),
     keywords: ["assistant travaux distance", "assistant BTP distance", "relais administratif distance"],
   },
@@ -131,7 +131,7 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
   "/externalisation-administrative-btp-france": {
     title: "Externalisation administrative BTP France | BeWork",
     description: metaDescriptionFrancophonie(
-      "Externalisation administrative BTP en France : devis, relances, situations, DOE. Assistants travaux IA, sans recruter — forfaits TTC",
+      "Externalisation administrative BTP en France : devis, relances, situations, DOE. Assistants travaux IA, sans recruter — forfaits HT",
       { withGeoTag: false },
     ),
     keywords: ["externalisation administrative BTP France", "assistant travaux France", ...SEO_KEYWORDS_GEO_SCOPE.slice(0, 4)],
@@ -140,7 +140,7 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
   "/externalisation-administrative-btp-belgique": {
     title: "Externalisation administrative BTP Belgique | BeWork",
     description: metaDescriptionFrancophonie(
-      "Belgique : déléguez dossiers chantier, devis et relances à un assistant travaux francophone. Wallonie, Bruxelles — forfaits TTC",
+      "Belgique : déléguez dossiers chantier, devis et relances à un assistant travaux francophone. Wallonie, Bruxelles — forfaits HT",
       { withGeoTag: false },
     ),
     keywords: ["externalisation administrative BTP Belgique", "assistant travaux Belgique", "BTP Wallonie"],
@@ -158,7 +158,7 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
   "/externalisation-administrative-btp-luxembourg": {
     title: "Externalisation administrative BTP Luxembourg",
     description: metaDescriptionFrancophonie(
-      "Luxembourg : assistant travaux pour devis, relances et dossiers chantier. Relais administratif BTP francophone, forfaits TTC",
+      "Luxembourg : assistant travaux pour devis, relances et dossiers chantier. Relais administratif BTP francophone, forfaits HT",
       { withGeoTag: false },
     ),
     keywords: ["externalisation administrative BTP Luxembourg", "assistant travaux Luxembourg"],

@@ -2,18 +2,34 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-type PreviewKind = "pdf" | "image" | "text" | "office" | "unknown" | "missing";
+type PreviewKind = "pdf" | "image" | "text" | "office" | "iwork" | "unknown" | "missing";
 
 export type DocumentPreviewItem = {
   name: string;
   url: string | null;
   mimeType?: string | null;
+  /** Si présent : aperçu via API BeWork (PDF/images/texte) — bucket privé OK */
+  chantierFileId?: string | null;
   createdAtLabel?: string;
   statusLabel?: string;
 };
 
+function isAppleIWork(mime: string, lowerName: string): boolean {
+  return (
+    /iwork|vnd\.apple\.(pages|numbers|key)|x-iwork-/.test(mime) ||
+    /\.(numbers|pages|key)$/i.test(lowerName)
+  );
+}
+
+function canUseMicrosoftOfficeViewer(mime: string, lowerName: string): boolean {
+  return (
+    /(word|excel|powerpoint|officedocument|msword|vnd\.ms-excel|spreadsheet|presentation)/.test(mime) ||
+    /\.(docx?|xlsx?|pptx?)$/i.test(lowerName)
+  );
+}
+
 function inferKind(item: DocumentPreviewItem): PreviewKind {
-  if (!item.url) return "missing";
+  if (!item.url && !item.chantierFileId) return "missing";
   const mime = (item.mimeType ?? "").toLowerCase();
   const lowerName = item.name.toLowerCase();
 
@@ -21,7 +37,8 @@ function inferKind(item: DocumentPreviewItem): PreviewKind {
   if (mime.startsWith("image/") || /\.(png|jpe?g|webp|gif|bmp|svg|heic|heif)$/i.test(lowerName)) return "image";
   if (mime.startsWith("text/") || /\.(txt|csv)$/i.test(lowerName)) return "text";
 
-  // Office / iWork : on affiche une fiche + téléchargement
+  if (isAppleIWork(mime, lowerName)) return "iwork";
+
   if (
     /(word|excel|powerpoint|officedocument|msword|vnd\.ms-excel|presentation)/.test(mime) ||
     /\.(docx?|xlsx?|pptx?|numbers|pages|key)$/i.test(lowerName)
@@ -47,6 +64,14 @@ async function getSignedUrl(url: string): Promise<string> {
   }
 }
 
+function chantierPreviewUrl(fileId: string): string {
+  return `/api/chantier/files/${fileId}/preview`;
+}
+
+function microsoftEmbedUrl(fileUrl: string): string {
+  return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileUrl)}`;
+}
+
 export function DocumentPreviewModal({
   open,
   onClose,
@@ -60,6 +85,7 @@ export function DocumentPreviewModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [officeEmbedUrl, setOfficeEmbedUrl] = useState<string | null>(null);
   const [textContent, setTextContent] = useState<string | null>(null);
 
   useEffect(() => {
@@ -67,26 +93,51 @@ export function DocumentPreviewModal({
     setError("");
     setTextContent(null);
     setPreviewUrl(null);
+    setOfficeEmbedUrl(null);
 
-    if (!item.url) return;
+    if (!item.url && !item.chantierFileId) return;
 
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const signed = await getSignedUrl(item.url ?? "");
-      if (cancelled) return;
-      setPreviewUrl(signed);
 
-      if (kind === "text") {
-        try {
-          const resp = await fetch(signed);
-          const t = await resp.text();
-          if (!cancelled) setTextContent(t);
-        } catch {
-          if (!cancelled) setError("Impossible de charger l’aperçu texte.");
+      const proxyUrl = item.chantierFileId ? chantierPreviewUrl(item.chantierFileId) : null;
+      const mime = (item.mimeType ?? "").toLowerCase();
+      const lowerName = item.name.toLowerCase();
+
+      if (proxyUrl && (kind === "pdf" || kind === "image" || kind === "text")) {
+        if (!cancelled) setPreviewUrl(proxyUrl);
+        if (kind === "text") {
+          try {
+            const resp = await fetch(proxyUrl);
+            if (!resp.ok) throw new Error("fetch");
+            const t = await resp.text();
+            if (!cancelled) setTextContent(t);
+          } catch {
+            if (!cancelled) setError("Impossible de charger l’aperçu texte.");
+          }
+        }
+      } else if (item.url) {
+        const signed = await getSignedUrl(item.url);
+        if (cancelled) return;
+        setPreviewUrl(signed);
+
+        if (kind === "text") {
+          try {
+            const resp = await fetch(signed);
+            const t = await resp.text();
+            if (!cancelled) setTextContent(t);
+          } catch {
+            if (!cancelled) setError("Impossible de charger l’aperçu texte.");
+          }
+        }
+
+        if (kind === "office" && canUseMicrosoftOfficeViewer(mime, lowerName)) {
+          if (!cancelled) setOfficeEmbedUrl(microsoftEmbedUrl(signed));
         }
       }
-      setLoading(false);
+
+      if (!cancelled) setLoading(false);
     })();
 
     return () => {
@@ -102,6 +153,8 @@ export function DocumentPreviewModal({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
+
+  const downloadHref = previewUrl ?? item?.url ?? undefined;
 
   if (!open || !item) return null;
 
@@ -124,12 +177,12 @@ export function DocumentPreviewModal({
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap items-center gap-2">
-            {item.url ? (
+            {downloadHref ? (
               <a
-                href={item.url}
+                href={downloadHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                download
+                download={item.name}
                 className="rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e40af]"
               >
                 Télécharger
@@ -157,6 +210,13 @@ export function DocumentPreviewModal({
           ) : error ? (
             <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center text-red-800">
               {error}
+              {downloadHref ? (
+                <p className="mt-3">
+                  <a href={downloadHref} className="font-semibold text-[#1d4ed8] hover:underline" download>
+                    Télécharger le fichier
+                  </a>
+                </p>
+              ) : null}
             </div>
           ) : kind === "pdf" && previewUrl ? (
             <iframe
@@ -179,23 +239,60 @@ export function DocumentPreviewModal({
                 {textContent ?? "Aperçu indisponible."}
               </pre>
             </div>
+          ) : kind === "office" && officeEmbedUrl ? (
+            <iframe
+              src={officeEmbedUrl}
+              className="h-[72vh] w-full rounded-xl border border-slate-200 bg-white"
+              title={`Aperçu Office — ${item.name}`}
+              onError={() => setError("L’aperçu en ligne n’a pas pu se charger.")}
+            />
+          ) : kind === "iwork" ? (
+            <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-6">
+              <p className="text-sm font-semibold text-slate-900">Aperçu non disponible pour ce format Apple</p>
+              <p className="mt-2 text-sm leading-relaxed text-slate-700">
+                Les fichiers <strong>Numbers</strong>, <strong>Pages</strong> ou <strong>Keynote</strong> ne peuvent pas
+                s’afficher dans le navigateur. Exportez en <strong>PDF</strong> (ou Word/Excel) depuis votre Mac, puis
+                déposez la version PDF dans le classeur pour l’aperçu BeWork.
+              </p>
+              {downloadHref ? (
+                <a
+                  href={downloadHref}
+                  download={item.name}
+                  className="mt-4 inline-flex rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e40af]"
+                >
+                  Télécharger le fichier original
+                </a>
+              ) : null}
+              {item.mimeType ? (
+                <p className="mt-3 text-xs text-slate-500">Type : {item.mimeType}</p>
+              ) : null}
+            </div>
           ) : kind === "office" ? (
             <div className="rounded-xl border border-slate-200 bg-white p-6">
               <p className="text-sm font-semibold text-slate-900">Aperçu limité pour ce format</p>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                Word / Excel / PowerPoint / Pages / Numbers ne s’affichent pas toujours correctement dans le navigateur.
-                Téléchargez le fichier pour l’ouvrir avec votre outil.
+                Ce document ne peut pas être prévisualisé ici. Téléchargez-le ou exportez-le en PDF pour un aperçu dans
+                BeWork.
               </p>
-              {previewUrl ? (
-                <p className="mt-3 text-xs text-slate-500">
-                  Type : {item.mimeType || "inconnu"}
-                </p>
+              {downloadHref ? (
+                <a
+                  href={downloadHref}
+                  download={item.name}
+                  className="mt-4 inline-flex rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+                >
+                  Télécharger
+                </a>
               ) : null}
             </div>
           ) : (
             <div className="rounded-xl border border-slate-200 bg-white p-6">
               <p className="text-sm font-semibold text-slate-900">Aperçu indisponible pour ce format</p>
-              <p className="mt-2 text-sm text-slate-600">Téléchargez le fichier pour le consulter.</p>
+              <p className="mt-2 text-sm text-slate-600">Téléchargez le fichier ou déposez une version PDF.</p>
+              {downloadHref ? (
+                <a href={downloadHref} download className="mt-3 inline-block text-sm font-semibold text-[#1d4ed8] hover:underline">
+                  Télécharger
+                </a>
+              ) : null}
             </div>
           )}
         </div>
@@ -203,4 +300,3 @@ export function DocumentPreviewModal({
     </div>
   );
 }
-

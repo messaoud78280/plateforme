@@ -36,7 +36,7 @@ export default function OpenGraphImage() {
           Administratif structuré pour artisans et entreprises du bâtiment
         </div>
         <div style={{ marginTop: 36, fontSize: 22, opacity: 0.85 }}>
-          Cadre forfaitaire TTC · France, Belgique, Suisse, Luxembourg · Dès 290 € / mois
+          Cadre forfaitaire HT · France, Belgique, Suisse, Luxembourg · Dès 290 € HT / mois
         </div>
       </div>
     ),

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getPlan } from "@/lib/subscription-plans";
+import { getPlan, SUBSCRIPTION_PRICE_DISCLAIMER, SUBSCRIPTION_PRICE_TAX_LABEL } from "@/lib/subscription-plans";
 import { BackLink } from "@/components/ui/BackLink";
 import { TARIFS_PLANS } from "@/lib/tarifs-plans";
 
@@ -152,7 +152,7 @@ export default async function AbonnementPage() {
           Choisissez une formule ou demandez un devis personnalisé pour un volume sur mesure.
         </p>
         <p className="mt-2 text-xs font-medium text-slate-700">
-          Tous nos tarifs sont exprimés TTC, sans frais supplémentaires.
+          {SUBSCRIPTION_PRICE_DISCLAIMER}
         </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {TARIFS_PLANS.map((plan) => (
@@ -169,7 +169,9 @@ export default async function AbonnementPage() {
               <p className="mt-1 flex flex-wrap items-baseline gap-x-1 text-xl font-bold text-[#1d4ed8]">
                 <span className="tabular-nums">{plan.price}</span>
                 <span>€</span>
-                <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-slate-500">TTC</span>
+                <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-slate-500">
+                  {SUBSCRIPTION_PRICE_TAX_LABEL}
+                </span>
                 {plan.billing === "monthly" && <span className="text-sm font-semibold text-slate-500">/ mois</span>}
               </p>
               <p className="mt-1 text-xs font-medium leading-snug text-slate-700">{plan.tagline}</p>

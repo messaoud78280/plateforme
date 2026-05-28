@@ -19,7 +19,7 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/contact", label: "Démarrer un échange" },
   ],
   "/contact": [
-    { href: "/tarifs", label: "Tarifs forfaits TTC" },
+    { href: "/tarifs", label: "Tarifs forfaits HT" },
     { href: "/notre-facon-de-travailler", label: "Notre méthode" },
     { href: "/services", label: "Services BeWork" },
     { href: "/faq", label: "FAQ" },
@@ -38,7 +38,7 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/ressources", label: "Ressources et guides" },
   ],
   "/notre-facon-de-travailler": [
-    { href: "/tarifs", label: "Tarifs forfaits TTC" },
+    { href: "/tarifs", label: "Tarifs forfaits HT" },
     { href: "/services", label: "Tous les services" },
     { href: "/contact", label: "Démarrer un échange" },
     { href: "/faq", label: "FAQ" },

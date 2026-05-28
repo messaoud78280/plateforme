@@ -15,7 +15,11 @@ import {
   hreflangFrancophonieLanguages,
 } from "@/lib/seo-francophonie";
 import { absoluteUrl, getOrgSameAs, SITE_URL } from "@/lib/site";
-import { formatPriceLabelFr, getPublicPriceBoundsLabels } from "@/lib/subscription-plans";
+import {
+  formatPriceLabelFr,
+  getPublicPriceBoundsLabels,
+  SUBSCRIPTION_PRICE_TAX_LABEL,
+} from "@/lib/subscription-plans";
 
 const defaultOgImage = absoluteUrl("/opengraph-image");
 const SITE_PRICE_LOW_FR = formatPriceLabelFr(getPublicPriceBoundsLabels().low);
@@ -90,7 +94,7 @@ export const metadata: Metadata = {
     url: SITE_URL,
     siteName: "BeWork",
     title: "BeWork — Assistants travaux BTP (France, Belgique, Suisse, Luxembourg)",
-    description: `${SEO_VALUE_PROPOSITION_SHORT} Dès ${SITE_PRICE_LOW_FR} € TTC.`,
+    description: `${SEO_VALUE_PROPOSITION_SHORT} À partir de ${SITE_PRICE_LOW_FR} € ${SUBSCRIPTION_PRICE_TAX_LABEL}.`,
     images: [
       {
         url: defaultOgImage,
@@ -103,7 +107,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "BeWork — Partenaire administratif externalisé BTP",
-    description: `${SEO_VALUE_PROPOSITION_SHORT} Dès ${SITE_PRICE_LOW_FR} € TTC.`,
+    description: `${SEO_VALUE_PROPOSITION_SHORT} À partir de ${SITE_PRICE_LOW_FR} € ${SUBSCRIPTION_PRICE_TAX_LABEL}.`,
     ...(process.env.NEXT_PUBLIC_TWITTER_SITE?.trim()
       ? { site: process.env.NEXT_PUBLIC_TWITTER_SITE.trim() }
       : {}),
@@ -214,7 +218,7 @@ const jsonLd = {
       "@type": "ProfessionalService",
       "@id": `${SITE_URL}/#service`,
       name: "BeWork — Partenaire administratif externalisé (BTP & PME)",
-      description: `Administratif externalisé pour artisans, conducteurs de travaux et chefs d’entreprise du BTP : devis, facturation chantier, relances, dossiers (DICT, situations, AO). France, Belgique, Suisse, Luxembourg. Forfaits TTC dès ${SITE_PRICE_LOW_FR} €.`,
+      description: `Administratif externalisé pour artisans, conducteurs de travaux et chefs d’entreprise du BTP : devis, facturation chantier, relances, dossiers (DICT, situations, AO). France, Belgique, Suisse, Luxembourg. Forfaits ${SUBSCRIPTION_PRICE_TAX_LABEL} dès ${SITE_PRICE_LOW_FR} €.`,
       url: SITE_URL,
       provider: { "@id": `${SITE_URL}/#organization` },
       areaServed: jsonLdExpandedAreaServed(),

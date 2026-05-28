@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { createServerClient } from "@/lib/supabase";
+import { createServiceRoleClient } from "@/lib/supabase";
 import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
 
 // Dossier chantier : photos et documents terrain.
@@ -40,9 +40,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
 
-  const supabase = createServerClient();
+  // Upload dossier chantier : on utilise service_role pour éviter les blocages de policies Storage
+  // (chemins /chantiers/*, rôle agent, etc.). Côté app, l'accès est déjà contrôlé.
+  const supabase = createServiceRoleClient();
   if (!supabase) {
-    return NextResponse.json({ error: "Stockage non configuré" }, { status: 503 });
+    return NextResponse.json({ error: "Stockage non configuré (service role)" }, { status: 503 });
   }
 
   let formData: FormData;
@@ -95,7 +97,14 @@ export async function POST(request: Request) {
   });
 
   if (uploadError) {
-    console.error("Upload chantier:", uploadError);
+    console.error("Upload chantier:", {
+      message: uploadError.message,
+      name: uploadError.name,
+      status: (uploadError as unknown as { statusCode?: number }).statusCode,
+      storagePath,
+      mimeType: file.type,
+      fileSize: file.size,
+    });
     return NextResponse.json({ error: "Échec de l'envoi du fichier" }, { status: 500 });
   }
 

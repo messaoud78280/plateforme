@@ -2,35 +2,13 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { createServerClient } from "@/lib/supabase";
-
-const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB (photos/vidéos chantier)
-const ALLOWED_TYPES = [
-  "application/pdf",
-  "application/zip",
-  "application/x-zip-compressed",
-  "image/jpeg",
-  "image/png",
-  "image/jpg",
-  "image/gif",
-  "image/webp",
-  "image/bmp",
-  "image/svg+xml",
-  "image/heic",
-  "image/heif",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  "application/vnd.ms-excel",
-  "application/vnd.ms-powerpoint",
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  "text/csv",
-  "application/csv",
-  "text/plain",
-  "video/mp4",
-  "video/webm",
-  "video/quicktime",
-];
+import { notifyManagers } from "@/lib/notifications";
+import { createServiceRoleClient } from "@/lib/supabase";
+import {
+  MISSION_DOCUMENT_MAX_BYTES,
+  missionDocumentRejectReason,
+} from "@/lib/storage/document-upload-policy";
+import { DOCUMENTS_BUCKET } from "@/lib/storage/supabase-object";
 
 const CATEGORY_MAP: Record<string, "FACTURE" | "CONTRAT" | "RH" | "FISCAL" | "AUTRE"> = {
   FACTURE: "FACTURE",
@@ -52,10 +30,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Réservé aux clients et aux agents" }, { status: 403 });
   }
 
-  const supabase = createServerClient();
+  const supabase = createServiceRoleClient();
   if (!supabase) {
     return NextResponse.json(
-      { error: "Stockage non configuré (NEXT_PUBLIC_SUPABASE_URL et ANON_KEY)" },
+      { error: "Stockage non configuré (service role)" },
       { status: 503 }
     );
   }
@@ -75,7 +53,7 @@ export async function POST(request: Request) {
 
   let clientIdForDoc: string = session.user.id;
   let projectIdForDoc: string | null = projectIdTrimmed;
-  let taskForAlert: { clientId: string; projectId: string | null } | null = null;
+  let taskForAlert: { clientId: string; projectId: string | null; title?: string } | null = null;
 
   if (projectIdTrimmed) {
     const project = await prisma.project.findFirst({
@@ -91,7 +69,7 @@ export async function POST(request: Request) {
       where: isClient
         ? { id: taskIdTrimmed, clientId: session.user.id }
         : { id: taskIdTrimmed, assignedToId: session.user.id },
-      select: { clientId: true, projectId: true },
+      select: { clientId: true, projectId: true, title: true },
     });
     if (!task) {
       return NextResponse.json({ error: "Tâche introuvable ou non autorisée" }, { status: 400 });
@@ -116,39 +94,45 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Aucun fichier envoyé" }, { status: 400 });
   }
 
-  const bucket = "documents";
   const clientId = clientIdForDoc;
   const created: { id: string; name: string }[] = [];
   const errors: string[] = [];
 
   for (const file of files) {
     if (!(file instanceof File) || !file.size) continue;
-    if (file.size > MAX_FILE_SIZE) {
-      errors.push(`${file.name} : taille max 100 MB`);
+    if (file.size > MISSION_DOCUMENT_MAX_BYTES) {
+      errors.push(`${file.name} : taille max 100 Mo`);
       continue;
     }
-    const mime = file.type || "application/octet-stream";
-    const allowedExt = /\.(pdf|jpg|jpeg|png|gif|webp|bmp|svg|docx|xlsx|xls|csv|txt|mp4|webm|mov)$/i;
-    if (!ALLOWED_TYPES.includes(mime) && !file.name.match(allowedExt)) {
-      errors.push(`${file.name} : type non accepté (PDF, images, Excel, CSV, DOCX, vidéos)`);
+    const rejectReason = missionDocumentRejectReason(file);
+    if (rejectReason) {
+      errors.push(rejectReason);
       continue;
     }
 
-    const storagePath = `${clientId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const storagePath = `${clientId}/${Date.now()}-${safeName}`;
+    const mime = file.type || "application/octet-stream";
 
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    const { error: uploadError } = await supabase.storage.from(bucket).upload(storagePath, buffer, {
+    const { error: uploadError } = await supabase.storage.from(DOCUMENTS_BUCKET).upload(storagePath, buffer, {
       contentType: mime,
       upsert: false,
     });
 
     if (uploadError) {
-      errors.push(`${file.name} : ${uploadError.message}`);
+      console.error("Upload document mission:", {
+        message: uploadError.message,
+        storagePath,
+        mimeType: mime,
+        fileSize: file.size,
+      });
+      errors.push(`${file.name} : échec de l'envoi (${uploadError.message})`);
       continue;
     }
 
-    const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(storagePath);
+    const { data: urlData } = supabase.storage.from(DOCUMENTS_BUCKET).getPublicUrl(storagePath);
     const fileUrl = urlData.publicUrl;
 
     const doc = await prisma.document.create({
@@ -180,6 +164,23 @@ export async function POST(request: Request) {
         // ignore si table Alert absente
       }
     }
+  }
+
+  if (isClient && taskIdTrimmed && created.length > 0) {
+    const taskTitle = taskForAlert?.title ?? "une mission";
+    await notifyManagers({
+      type: "NEW_TASK",
+      title: "Pièces jointes reçues",
+      message: `${created.length} document(s) joint(s) à la mission « ${taskTitle} ».`,
+      actionUrl: `/dashboard/missions?task=${taskIdTrimmed}`,
+    });
+  }
+
+  if (created.length === 0 && errors.length > 0) {
+    return NextResponse.json(
+      { error: errors.join(" "), created, errors },
+      { status: 400 }
+    );
   }
 
   return NextResponse.json({ created, errors });

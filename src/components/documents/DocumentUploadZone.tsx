@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, useRef } from "react";
+import {
+  MISSION_DOCUMENT_MAX_BYTES,
+  MISSION_DOCUMENT_MAX_LABEL,
+} from "@/lib/storage/document-upload-policy";
 
 const CATEGORY_LABELS: Record<string, string> = {
   FACTURE: "Facture",
@@ -38,16 +42,12 @@ export function DocumentUploadZone({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragging(false);
-    const list = Array.from(e.dataTransfer.files).filter(
-      (f) => f.size <= 10 * 1024 * 1024 && /\.(pdf|jpg|jpeg|png|docx|xlsx)$/i.test(f.name)
-    );
+    const list = Array.from(e.dataTransfer.files).filter((f) => f.size <= MISSION_DOCUMENT_MAX_BYTES);
     setFiles((prev) => [...prev, ...list]);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const list = Array.from(e.target.files ?? []).filter(
-      (f) => f.size <= 10 * 1024 * 1024 && /\.(pdf|jpg|jpeg|png|docx|xlsx)$/i.test(f.name)
-    );
+    const list = Array.from(e.target.files ?? []).filter((f) => f.size <= MISSION_DOCUMENT_MAX_BYTES);
     setFiles((prev) => [...prev, ...list]);
     if (inputRef.current) inputRef.current.value = "";
   };
@@ -119,7 +119,7 @@ export function DocumentUploadZone({
         </div>
       )}
       <p className="mb-2 text-sm font-medium text-slate-700">
-        Déposer des fichiers (PDF, JPG, PNG, DOCX, XLSX — max 10 Mo)
+        Déposer des fichiers (tous types — max {MISSION_DOCUMENT_MAX_LABEL})
       </p>
       <div
         onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
@@ -134,7 +134,6 @@ export function DocumentUploadZone({
           ref={inputRef}
           type="file"
           multiple
-          accept=".pdf,.jpg,.jpeg,.png,.docx,.xlsx"
           className="hidden"
           onChange={handleFileSelect}
         />

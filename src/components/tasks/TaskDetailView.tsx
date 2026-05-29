@@ -9,6 +9,7 @@ import { TaskConversation } from "./TaskConversation";
 import { TaskMessageConversation } from "./TaskMessageConversation";
 import { TaskInternalNotes } from "./TaskInternalNotes";
 import { DocumentUploadZone } from "@/components/documents/DocumentUploadZone";
+import { documentDownloadHref } from "@/lib/documents/download-url";
 
 interface TaskDetailViewProps {
   sessionUserId?: string;
@@ -372,7 +373,7 @@ export function TaskDetailView({
                     )}
                   </div>
                   <a
-                    href={doc.fileUrl}
+                    href={documentDownloadHref(doc.id)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="shrink-0 rounded-lg surface-metallic-light px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
@@ -408,7 +409,7 @@ export function TaskDetailView({
               >
                 <span className="min-w-0 truncate text-sm text-slate-800">{doc.name}</span>
                 <a
-                  href={doc.fileUrl}
+                  href={documentDownloadHref(doc.id)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="shrink-0 text-sm font-medium text-blue-600 hover:underline"

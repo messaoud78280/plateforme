@@ -12,10 +12,12 @@ import {
 } from "./constants";
 import { MissionSuggestions } from "@/components/missions/MissionSuggestions";
 import { MINUTES_PER_ACTION } from "@/lib/actions";
+import {
+  MISSION_DOCUMENT_MAX_BYTES,
+  MISSION_DOCUMENT_MAX_LABEL,
+} from "@/lib/storage/document-upload-policy";
 
 const DRAFT_KEY = "bework-nouvelle-demande-draft";
-const ACCEPTED_EXT = ".pdf,.doc,.docx,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.gif,.webp,.bmp,.svg,.zip";
-const MAX_FILE_SIZE = 25 * 1024 * 1024;
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} o`;
@@ -106,12 +108,12 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
-    const list = Array.from(e.dataTransfer.files).filter((f) => f.size <= MAX_FILE_SIZE);
+    const list = Array.from(e.dataTransfer.files).filter((f) => f.size <= MISSION_DOCUMENT_MAX_BYTES);
     setFiles((prev) => [...prev, ...list]);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const list = Array.from(e.target.files ?? []).filter((f) => f.size <= MAX_FILE_SIZE);
+    const list = Array.from(e.target.files ?? []).filter((f) => f.size <= MISSION_DOCUMENT_MAX_BYTES);
     setFiles((prev) => [...prev, ...list]);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -167,7 +169,31 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
         formData.set("taskId", taskId);
         formData.set("category", "AUTRE");
         files.forEach((f) => formData.append("files", f));
-        await fetch("/api/documents/upload", { method: "POST", body: formData });
+        const uploadRes = await fetch("/api/documents/upload", { method: "POST", body: formData });
+        const uploadData = await uploadRes.json().catch(() => ({}));
+        if (!uploadRes.ok) {
+          setError(
+            typeof uploadData.error === "string"
+              ? uploadData.error
+              : "Mission créée mais échec de l'envoi des pièces jointes."
+          );
+          setLoading(false);
+          setUploadProgress("");
+          return;
+        }
+        if ((uploadData.created?.length ?? 0) === 0) {
+          setError(
+            uploadData.errors?.length
+              ? `Pièces jointes non enregistrées : ${uploadData.errors.join(" ")}`
+              : "Pièces jointes non enregistrées."
+          );
+          setLoading(false);
+          setUploadProgress("");
+          return;
+        }
+        if (uploadData.errors?.length) {
+          setError(`Mission envoyée. Attention : ${uploadData.errors.join(" ")}`);
+        }
       }
       setUploadProgress("");
       clearDraft();
@@ -398,7 +424,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
         <section className="rounded-2xl surface-metallic-light p-6">
           <h2 className="text-base font-semibold text-slate-800 mb-4">2. Documents</h2>
           <p className="mb-3 text-sm text-slate-500">
-            PDF, Word, Excel, images, zip. Glissez-déposez ou cliquez pour ajouter.
+            Tous types de fichiers (PDF, Office, images, vidéos, archives…). Glissez-déposez ou cliquez pour ajouter.
           </p>
           <div
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -411,7 +437,6 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
               ref={fileInputRef}
               type="file"
               multiple
-              accept={ACCEPTED_EXT}
               className="hidden"
               onChange={handleFileSelect}
             />
@@ -419,7 +444,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
             <p className="mt-2 text-sm font-medium text-slate-600">
               {dragOver ? "Déposez les fichiers ici" : "Glissez-déposez ou cliquez pour ajouter des fichiers"}
             </p>
-            <p className="mt-0.5 text-xs text-slate-400">Max 25 Mo par fichier</p>
+            <p className="mt-0.5 text-xs text-slate-400">Max {MISSION_DOCUMENT_MAX_LABEL} par fichier</p>
           </div>
           {files.length > 0 && (
             <ul className="mt-4 space-y-2">

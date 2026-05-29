@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { documentDownloadHref } from "@/lib/documents/download-url";
 
 type MessageItem = {
   id: string;
@@ -456,7 +457,7 @@ export function MessagerieView({ sessionUserId }: { sessionUserId: string }) {
                     {projectDocuments.map((doc) => (
                       <li key={doc.id}>
                         <a
-                          href={doc.fileUrl}
+                          href={documentDownloadHref(doc.id)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="block truncate rounded surface-metallic-light px-2 py-1.5 text-xs text-[#1d4ed8] hover:underline"

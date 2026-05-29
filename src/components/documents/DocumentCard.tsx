@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Document } from "@prisma/client";
+import { documentDownloadHref } from "@/lib/documents/download-url";
 
 const STATUS_LABELS: Record<string, string> = {
   EN_ATTENTE: "En attente",
@@ -68,7 +69,7 @@ export function DocumentCard({ doc, onDelete, list }: DocumentCardProps) {
         </div>
         <div className="flex shrink-0 gap-2">
           <a
-            href={doc.fileUrl}
+            href={documentDownloadHref(doc.id)}
             target="_blank"
             rel="noopener noreferrer"
             className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
@@ -76,7 +77,7 @@ export function DocumentCard({ doc, onDelete, list }: DocumentCardProps) {
             Voir
           </a>
           <a
-            href={doc.fileUrl}
+            href={documentDownloadHref(doc.id)}
             download={doc.name}
             className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
           >
@@ -122,7 +123,7 @@ export function DocumentCard({ doc, onDelete, list }: DocumentCardProps) {
       </p>
       <div className="mt-4 flex flex-wrap gap-2">
         <a
-          href={doc.fileUrl}
+          href={documentDownloadHref(doc.id)}
           target="_blank"
           rel="noopener noreferrer"
           className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
@@ -130,7 +131,7 @@ export function DocumentCard({ doc, onDelete, list }: DocumentCardProps) {
           Voir
         </a>
         <a
-          href={doc.fileUrl}
+          href={documentDownloadHref(doc.id)}
           download={doc.name}
           className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
         >

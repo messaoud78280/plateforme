@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { DeleteTaskButton } from "@/components/tasks/DeleteTaskButton";
+import { documentDownloadHref } from "@/lib/documents/download-url";
 
 const STATUS_LABELS: Record<string, string> = {
   NOUVEAU: "Nouvelle",
@@ -899,7 +900,7 @@ export function MessagerieMissionsView({
                     {selectedMission.documents.map((d) => (
                       <li key={d.id}>
                         <a
-                          href={d.fileUrl}
+                          href={documentDownloadHref(d.id)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"

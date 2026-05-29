@@ -3,8 +3,10 @@
 import { useState, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 
-const ACCEPTED_EXT = ".pdf,.jpg,.jpeg,.png,.gif,.webp,.bmp,.svg,.docx,.xlsx,.xls,.csv,.txt,.mp4,.webm,.mov";
-const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 Mo
+import {
+  MISSION_DOCUMENT_MAX_BYTES,
+  MISSION_DOCUMENT_MAX_LABEL,
+} from "@/lib/storage/document-upload-policy";
 
 interface DepotTacheFormProps {
   projects: { id: string; title: string }[];
@@ -79,12 +81,12 @@ export function DepotTacheForm({ projects = [] }: DepotTacheFormProps) {
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const list = Array.from(e.dataTransfer.files).filter((f) => f.size <= MAX_FILE_SIZE);
+    const list = Array.from(e.dataTransfer.files).filter((f) => f.size <= MISSION_DOCUMENT_MAX_BYTES);
     setFiles((prev) => [...prev, ...list]);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const list = Array.from(e.target.files ?? []).filter((f) => f.size <= MAX_FILE_SIZE);
+    const list = Array.from(e.target.files ?? []).filter((f) => f.size <= MISSION_DOCUMENT_MAX_BYTES);
     setFiles((prev) => [...prev, ...list]);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -141,7 +143,21 @@ export function DepotTacheForm({ projects = [] }: DepotTacheFormProps) {
         const uploadData = await uploadRes.json();
         if (!uploadRes.ok) {
           setError(uploadData.error ?? "Tâche créée mais erreur lors de l'envoi des pièces jointes.");
-        } else if (uploadData.errors?.length) {
+          setLoading(false);
+          setUploadProgress("");
+          return;
+        }
+        if ((uploadData.created?.length ?? 0) === 0 && files.length > 0) {
+          setError(
+            uploadData.errors?.length
+              ? `Pièces jointes non enregistrées : ${uploadData.errors.join(" ")}`
+              : "Pièces jointes non enregistrées."
+          );
+          setLoading(false);
+          setUploadProgress("");
+          return;
+        }
+        if (uploadData.errors?.length) {
           setError(`Tâche créée. Pièces jointes : ${uploadData.errors.join(" ")}`);
         }
       }
@@ -239,7 +255,7 @@ export function DepotTacheForm({ projects = [] }: DepotTacheFormProps) {
             Pièces jointes (optionnel)
           </label>
           <p className="mb-2 text-xs text-slate-500">
-            Tableaux Excel, photos, captures d&apos;écran, PDF, tableau de suivi… — max 25 Mo par fichier
+            Tous types de fichiers — max {MISSION_DOCUMENT_MAX_LABEL} par fichier
           </p>
           <div
             onDragOver={(e) => e.preventDefault()}
@@ -251,16 +267,12 @@ export function DepotTacheForm({ projects = [] }: DepotTacheFormProps) {
               ref={fileInputRef}
               type="file"
               multiple
-              accept={ACCEPTED_EXT}
               className="hidden"
               onChange={handleFileSelect}
             />
             <span className="text-2xl">📎</span>
             <p className="mt-1 text-sm text-slate-600">
               Glissez-déposez ou cliquez pour ajouter des fichiers
-            </p>
-            <p className="mt-0.5 text-xs text-slate-400">
-              PDF, Excel, images, CSV, Word, vidéos
             </p>
           </div>
           {files.length > 0 && (

@@ -9,8 +9,10 @@ import {
   EXEMPLES_DEMANDES,
 } from "./constants";
 
-const ACCEPTED_EXT = ".pdf,.jpg,.jpeg,.png,.gif,.webp,.bmp,.svg,.docx,.xlsx,.xls,.csv,.txt,.mp4,.webm,.mov";
-const MAX_FILE_SIZE = 25 * 1024 * 1024;
+import {
+  MISSION_DOCUMENT_MAX_BYTES,
+  MISSION_DOCUMENT_MAX_LABEL,
+} from "@/lib/storage/document-upload-policy";
 
 type Props = {
   open: boolean;
@@ -72,11 +74,11 @@ export function NouvelleDemandeModal({ open, onClose }: Props) {
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const list = Array.from(e.dataTransfer.files).filter((f) => f.size <= MAX_FILE_SIZE);
+    const list = Array.from(e.dataTransfer.files).filter((f) => f.size <= MISSION_DOCUMENT_MAX_BYTES);
     setFiles((prev) => [...prev, ...list]);
   };
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const list = Array.from(e.target.files ?? []).filter((f) => f.size <= MAX_FILE_SIZE);
+    const list = Array.from(e.target.files ?? []).filter((f) => f.size <= MISSION_DOCUMENT_MAX_BYTES);
     setFiles((prev) => [...prev, ...list]);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -129,7 +131,31 @@ export function NouvelleDemandeModal({ open, onClose }: Props) {
         formData.set("taskId", taskId);
         formData.set("category", "AUTRE");
         files.forEach((f) => formData.append("files", f));
-        await fetch("/api/documents/upload", { method: "POST", body: formData });
+        const uploadRes = await fetch("/api/documents/upload", { method: "POST", body: formData });
+        const uploadData = await uploadRes.json().catch(() => ({}));
+        if (!uploadRes.ok) {
+          setError(
+            typeof uploadData.error === "string"
+              ? uploadData.error
+              : "Mission créée mais échec de l'envoi des pièces jointes."
+          );
+          setLoading(false);
+          setUploadProgress("");
+          return;
+        }
+        if ((uploadData.created?.length ?? 0) === 0) {
+          setError(
+            uploadData.errors?.length
+              ? `Pièces jointes non enregistrées : ${uploadData.errors.join(" ")}`
+              : "Pièces jointes non enregistrées."
+          );
+          setLoading(false);
+          setUploadProgress("");
+          return;
+        }
+        if (uploadData.errors?.length) {
+          setError(`Mission envoyée. Attention : ${uploadData.errors.join(" ")}`);
+        }
       }
       setUploadProgress("");
       setSuccess(true);
@@ -329,12 +355,13 @@ export function NouvelleDemandeModal({ open, onClose }: Props) {
                     ref={fileInputRef}
                     type="file"
                     multiple
-                    accept={ACCEPTED_EXT}
                     className="hidden"
                     onChange={handleFileSelect}
                   />
                   <span className="text-xl">📎</span>
-                  <p className="mt-1 text-sm text-slate-600">Glissez-déposez ou cliquez — max 25 Mo par fichier</p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Glissez-déposez ou cliquez — max {MISSION_DOCUMENT_MAX_LABEL} par fichier
+                  </p>
                 </div>
                 {files.length > 0 && (
                   <ul className="mt-2 space-y-1">

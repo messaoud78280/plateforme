@@ -19,6 +19,9 @@ export {
 /** Filtre Prisma : lignes visibles dans la liste principale (pas les variantes fusionnées). */
 import type { Prisma } from "@prisma/client";
 
+/** Fusionne N variantes max par requête (évite timeout). */
+export const WORK_ITEM_MERGE_MEMBER_CHUNK = 5;
+
 export const WORK_ITEM_VISIBLE_IN_LIST: Prisma.WorkItemWhereInput = {
   mergeStatus: { in: ["unique", "canonical"] },
 };

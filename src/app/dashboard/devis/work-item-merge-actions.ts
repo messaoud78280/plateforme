@@ -9,6 +9,7 @@ import {
   canonicalDesignationFromItem,
   normalizeWorkItemDesignation,
   workItemDesignationForMerge,
+  WORK_ITEM_MERGE_MEMBER_CHUNK,
   WORK_ITEM_VISIBLE_IN_LIST,
   type DuplicateCluster,
 } from "@/lib/work-item-merge";
@@ -19,9 +20,6 @@ const REVALIDATE = [
   "/dashboard/devis/bibliotheque/nettoyage",
   "/dashboard/devis/bibliotheque/nettoyage/doublons",
 ];
-
-/** Fusionne N variantes max par requête pour éviter timeout / blocage UI. */
-export const WORK_ITEM_MERGE_MEMBER_CHUNK = 5;
 
 function revalidateAll() {
   for (const p of REVALIDATE) revalidatePath(p);

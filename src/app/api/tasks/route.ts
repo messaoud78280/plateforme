@@ -61,7 +61,6 @@ export async function POST(request: NextRequest) {
       category,
       priority,
       desiredDate,
-      estimatedActions,
     } = body as {
       title: string;
       description?: string;
@@ -69,7 +68,6 @@ export async function POST(request: NextRequest) {
       category?: string | null;
       priority?: string | null;
       desiredDate?: string | null;
-      estimatedActions?: string | null;
     };
 
     if (!title || typeof title !== "string" || title.trim().length === 0) {

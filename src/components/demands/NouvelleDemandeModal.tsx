@@ -19,22 +19,6 @@ type Props = {
   onClose: () => void;
 };
 
-function computeEstimation(category: string, description: string): string {
-  const text = `${category} ${description}`.toLowerCase();
-  if (!text.trim()) return "";
-  if (text.includes("mission spécifique") || text.includes("demande complexe") || text.includes("audit")) return "Sur évaluation";
-  if (text.includes("recherche approfondie") || text.includes("analyse détaillée")) return "3 à 4 crédits";
-  if (text.includes("création") || text.includes("document administratif") || text.includes("dossier") || text.includes("documents")) return "2 à 3 crédits";
-  if (text.includes("comparatif") || text.includes("comparer") || text.includes("plusieurs prestataires")) return "2 à 3 crédits";
-  if (text.includes("facturation") || text.includes("devis")) return "2 à 3 crédits";
-  if (text.includes("suivi de dossier") || text.includes("coordination")) return "2 crédits";
-  if (text.includes("réservation") || text.includes("hôtel") || text.includes("transport")) return "1 à 2 crédits";
-  if (text.includes("rédaction") || text.includes("email professionnel")) return "2 crédits";
-  if (text.includes("recherche") || text.includes("trouver")) return "1 à 2 crédits";
-  if (text.includes("administratif")) return "1 à 2 crédits";
-  return "1 à 2 crédits";
-}
-
 function isVague(description: string): boolean {
   const d = description.trim().toLowerCase();
   if (d.length > 0 && d.length < 25) return true;
@@ -63,10 +47,6 @@ export function NouvelleDemandeModal({ open, onClose }: Props) {
   const [uploadProgress, setUploadProgress] = useState("");
   const [success, setSuccess] = useState(false);
 
-  const estimatedActions = useMemo(
-    () => computeEstimation(category, description),
-    [category, description],
-  );
   const showVagueWarning = useMemo(
     () => description.trim().length > 0 && isVague(description),
     [description],
@@ -114,7 +94,6 @@ export function NouvelleDemandeModal({ open, onClose }: Props) {
           category: category || undefined,
           priority: priority || undefined,
           desiredDate: desiredDate || undefined,
-          estimatedActions: estimatedActions || undefined,
         }),
       });
       const data = await res.json();
@@ -310,20 +289,10 @@ export function NouvelleDemandeModal({ open, onClose }: Props) {
                 </div>
               </div>
 
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <h3 className="text-sm font-semibold text-slate-800">Estimateur de crédits</h3>
-                <p className="mt-1 text-xs text-slate-500">
-                  Cette estimation est indicative et peut varier selon la complexité réelle de la demande.
+              <div className="rounded-xl border border-blue-100 bg-blue-50/60 p-4">
+                <p className="text-sm text-slate-700">
+                  Les crédits seront évalués par votre assistant après réception, en fonction du temps de traitement estimé.
                 </p>
-                {(category || description.trim()) ? (
-                  <p className="mt-2 text-sm text-slate-700">
-                    Estimation : <span className="font-medium">{estimatedActions || "—"}</span>
-                  </p>
-                ) : (
-                  <p className="mt-2 text-sm text-slate-500">
-                    Remplissez la catégorie ou la description pour voir une estimation (ex. 1 à 2 crédits, 2 à 3 crédits, Sur évaluation).
-                  </p>
-                )}
               </div>
 
               {showVagueWarning && (
@@ -382,7 +351,6 @@ export function NouvelleDemandeModal({ open, onClose }: Props) {
                   <div><dt className="inline font-medium">Titre : </dt><dd className="inline">{title || "—"}</dd></div>
                   <div><dt className="inline font-medium">Catégorie : </dt><dd className="inline">{category || "—"}</dd></div>
                   <div><dt className="inline font-medium">Priorité : </dt><dd className="inline">{DEMANDE_PRIORITIES.find((p) => p.value === priority)?.label ?? priority}</dd></div>
-                  <div><dt className="inline font-medium">Estimation : </dt><dd className="inline">{estimatedActions || "—"}</dd></div>
                   <div><dt className="inline font-medium">Pièces jointes : </dt><dd className="inline">{files.length} fichier(s)</dd></div>
                   <div><dt className="inline font-medium">Délai demandé : </dt><dd className="inline">{desiredDate ? new Date(desiredDate + "T12:00:00").toLocaleDateString("fr-FR") : "—"}</dd></div>
                 </dl>

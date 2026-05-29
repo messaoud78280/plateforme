@@ -6,12 +6,10 @@ import Link from "next/link";
 import {
   DEMANDE_CATEGORIES,
   DEMANDE_PRIORITIES,
-  DEMANDE_ESTIMATION_OPTIONS,
   DEMANDE_TEMPLATES,
   MISSION_SUGGESTIONS,
 } from "./constants";
 import { MissionSuggestions } from "@/components/missions/MissionSuggestions";
-import { MINUTES_PER_ACTION } from "@/lib/actions";
 import {
   MISSION_DOCUMENT_MAX_BYTES,
   MISSION_DOCUMENT_MAX_LABEL,
@@ -31,7 +29,6 @@ type DraftData = {
   description: string;
   priority: string;
   desiredDate: string;
-  estimatedActions: string;
 };
 
 type Props = {
@@ -46,7 +43,6 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("STANDARD");
   const [desiredDate, setDesiredDate] = useState("");
-  const [estimatedActions, setEstimatedActions] = useState("1 crédit");
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -71,12 +67,6 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
         if (data.description) setDescription(data.description);
         if (data.priority) setPriority(data.priority);
         if (data.desiredDate) setDesiredDate(data.desiredDate);
-        if (data.estimatedActions) {
-          let e = data.estimatedActions;
-          if (e === "1 action") e = "1 crédit";
-          if (e === "2 à 3 actions") e = "2 à 3 crédits";
-          setEstimatedActions(e);
-        }
       }
     } catch {
       // ignore
@@ -94,7 +84,6 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
       description,
       priority,
       desiredDate,
-      estimatedActions,
     };
     localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
     setDraftSaved(true);
@@ -126,7 +115,6 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
     setDescription("");
     setPriority("STANDARD");
     setDesiredDate("");
-    setEstimatedActions("1 crédit");
     setFiles([]);
     setError("");
     setSuccess(false);
@@ -152,7 +140,6 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
           category: category || undefined,
           priority: priority || undefined,
           desiredDate: desiredDate || undefined,
-          estimatedActions: estimatedActions || undefined,
         }),
       });
       const data = await res.json();
@@ -224,8 +211,8 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
           </h2>
           <p className="mt-2 text-slate-600">
             {firstRequest
-              ? "Votre première demande a été envoyée. Votre assistant l'analyse actuellement."
-              : "Votre assistant l'analyse et vous répond rapidement."}
+              ? "Votre première demande a été envoyée. Votre assistant l'analyse et évalue le nombre de crédits nécessaires."
+              : "Votre assistant analyse la mission et vous confirme le nombre de crédits avant traitement."}
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
@@ -277,7 +264,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
             Expliquez simplement ce que vous souhaitez déléguer
           </h2>
           <p className="mt-1 text-sm text-slate-500">
-            Écrivez avec vos mots. L&apos;assistant IA proposera un titre, une description et une estimation que vous pourrez modifier avant d&apos;envoyer.
+            Écrivez avec vos mots. L&apos;assistant IA proposera un titre et une description que vous pourrez modifier avant d&apos;envoyer.
           </p>
         </div>
         <textarea
@@ -311,7 +298,6 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
                   if (data.description) setDescription(data.description);
                   if (data.category) setCategory(data.category);
                   if (data.priority) setPriority(data.priority);
-                  if (data.estimatedActions) setEstimatedActions(data.estimatedActions);
                   setAiError(null);
                 }
               } catch {
@@ -385,14 +371,14 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
             </div>
             <div>
               <label htmlFor="nd-description" className="mb-1.5 block text-sm font-medium text-slate-700">
-                Description
+                Description et recommandations
               </label>
               <textarea
                 id="nd-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={5}
-                placeholder="Décrivez précisément votre besoin, le résultat attendu et les éventuelles échéances."
+                placeholder="Décrivez votre besoin, le résultat attendu, vos recommandations et les éventuelles échéances."
                 className="w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-800 placeholder:text-slate-400 focus:border-[#1d4ed8] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8]/20 resize-y min-h-[120px]"
                 disabled={loading}
               />
@@ -470,7 +456,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
 
         {/* Niveau de priorité */}
         <section className="rounded-2xl surface-metallic-light p-6">
-          <h2 className="text-base font-semibold text-slate-800 mb-4">Niveau de priorité</h2>
+          <h2 className="text-base font-semibold text-slate-800 mb-4">3. Niveau de priorité</h2>
           <div className="space-y-3">
             {DEMANDE_PRIORITIES.map((p) => (
               <label
@@ -499,49 +485,12 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
           </div>
         </section>
 
-        {/* Section 3 : Estimation */}
+        {/* Date limite souhaitée */}
         <section className="rounded-2xl surface-metallic-light p-6">
-          <h2 className="text-base font-semibold text-slate-800 mb-4">3. Estimation</h2>
-          <div className="flex flex-wrap gap-3 mb-4">
-            {DEMANDE_ESTIMATION_OPTIONS.map((opt) => (
-              <label
-                key={opt.value}
-                className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 px-4 py-3 transition has-[:checked]:border-[#1d4ed8] has-[:checked]:bg-blue-50/30"
-              >
-                <input
-                  type="radio"
-                  name="estimation"
-                  value={opt.value}
-                  checked={estimatedActions === opt.value}
-                  onChange={() => setEstimatedActions(opt.value)}
-                  className="h-4 w-4 border-slate-300 text-[#1d4ed8] focus:ring-[#1d4ed8]"
-                  disabled={loading}
-                />
-                <span className="text-sm font-medium text-slate-800">{opt.label}</span>
-              </label>
-            ))}
-          </div>
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-sm font-medium text-slate-800">
-              Nombre de crédits : <span className="text-[#1d4ed8]">{estimatedActions}</span>
-            </p>
-            <p className="mt-1 text-sm text-slate-600">
-              Temps estimé :{" "}
-              {estimatedActions === "1 crédit"
-                ? `environ ${MINUTES_PER_ACTION} minutes`
-                : estimatedActions === "2 à 3 crédits"
-                  ? `environ ${2 * MINUTES_PER_ACTION} à ${3 * MINUTES_PER_ACTION} minutes`
-                  : "à évaluer avec votre assistant"}
-            </p>
-            <p className="mt-3 text-xs text-slate-500">
-              Un crédit = {MINUTES_PER_ACTION} minutes de travail (indicatif : 5 crédits ≈ 1 h). L&apos;estimation est indicative ; le temps réel sera comptabilisé à la clôture de la mission.
-            </p>
-          </div>
-        </section>
-
-        {/* Bloc 6 : Date souhaitée */}
-        <section className="rounded-2xl surface-metallic-light p-6">
-          <h2 className="text-base font-semibold text-slate-800 mb-4">Date limite souhaitée</h2>
+          <h2 className="text-base font-semibold text-slate-800 mb-4">4. Date limite souhaitée</h2>
+          <p className="mb-4 text-sm text-slate-500">
+            Les crédits seront évalués par votre assistant après réception de la mission, en fonction du temps de traitement estimé.
+          </p>
           <div>
             <label htmlFor="nd-desired-date" className="mb-1.5 block text-sm font-medium text-slate-700">
               Facultatif

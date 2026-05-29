@@ -161,7 +161,7 @@ export function MesDemandesList({ tasks }: MesDemandesListProps) {
                       <span>
                         {task.actionsUsed != null
                           ? `${task.actionsUsed} crédit${task.actionsUsed > 1 ? "s" : ""} consommé${task.actionsUsed > 1 ? "s" : ""}`
-                          : task.estimatedActions ?? "—"}
+                          : "Crédits : à évaluer"}
                       </span>
                     </div>
                     <div className="mt-3 flex gap-1">

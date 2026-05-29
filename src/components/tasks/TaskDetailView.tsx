@@ -258,13 +258,17 @@ export function TaskDetailView({
             </Link>
           </p>
         )}
-        {(task.category || task.priority || task.desiredDate || task.estimatedActions) && (
+        {(task.category || task.priority || task.desiredDate) && (
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
             {task.category && <span><strong>Catégorie :</strong> {task.category}</span>}
             {task.priority && <span><strong>Priorité :</strong> {task.priority === "URGENT" ? "Urgent" : task.priority === "PRIORITAIRE" ? "Prioritaire" : "Standard"}</span>}
             {task.desiredDate && <span><strong>Date souhaitée :</strong> {new Date(task.desiredDate).toLocaleDateString("fr-FR")}</span>}
-            {task.estimatedActions && <span><strong>Estimation initiale :</strong> {task.estimatedActions}</span>}
           </div>
+        )}
+        {!isAgence && !isAgent && task.actionsUsed == null && (
+          <p className="mt-3 text-sm text-slate-500">
+            Crédits : en cours d&apos;évaluation par votre assistant.
+          </p>
         )}
         {task.description && (
           <p className="mt-4 text-slate-600">{task.description}</p>

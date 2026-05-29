@@ -12,6 +12,8 @@ type SeoLandingPageProps = {
   description: string;
   h1: string;
   intro: ReactNode;
+  /** Visuel entre l’intro et le corps (hero article, bannière…) */
+  cover?: ReactNode;
   children: ReactNode;
   /** Fil d’Ariane + JSON-LD WebPage / BreadcrumbList (dernier segment = page courante) */
   breadcrumbItems?: { name: string; href: string }[];
@@ -23,6 +25,7 @@ export function SeoLandingPage({
   description,
   h1,
   intro,
+  cover,
   children,
   breadcrumbItems,
   showGeoAeoBrief = false,
@@ -67,7 +70,8 @@ export function SeoLandingPage({
           ) : null}
           <h1 className="font-heading text-3xl font-bold tracking-tight text-black md:text-[2.35rem] md:leading-tight">{h1}</h1>
           <p className="mt-6 text-xl leading-relaxed text-black">{intro}</p>
-          <div className="mt-12 prose prose-slate prose-lg max-w-none prose-headings:text-black prose-p:text-black prose-li:text-black prose-strong:text-black prose-p:text-[1.0625rem] prose-p:leading-[1.75] prose-p:mb-5 prose-li:my-2 prose-li:leading-relaxed prose-ul:my-4 prose-ol:my-4 prose-h2:mt-14 prose-h2:scroll-mt-28 prose-h2:border-b prose-h2:border-slate-200 prose-h2:pb-3 prose-h2:text-[1.5rem] prose-h2:font-bold prose-h2:leading-snug prose-h2:first:mt-0 md:prose-h2:text-[1.625rem] prose-h3:mt-8 prose-h3:text-[1.1875rem] prose-h3:font-bold md:prose-h3:text-xl">
+          {cover ? <div className="not-prose mt-10">{cover}</div> : null}
+          <div className={`${cover ? "mt-10" : "mt-12"} prose prose-slate prose-lg max-w-none prose-headings:text-black prose-p:text-black prose-li:text-black prose-strong:text-black prose-p:text-[1.0625rem] prose-p:leading-[1.75] prose-p:mb-5 prose-li:my-2 prose-li:leading-relaxed prose-ul:my-4 prose-ol:my-4 prose-h2:mt-14 prose-h2:scroll-mt-28 prose-h2:border-b prose-h2:border-slate-200 prose-h2:pb-3 prose-h2:text-[1.5rem] prose-h2:font-bold prose-h2:leading-snug prose-h2:first:mt-0 md:prose-h2:text-[1.625rem] prose-h3:mt-8 prose-h3:text-[1.1875rem] prose-h3:font-bold md:prose-h3:text-xl`}>
             {children}
           </div>
           {showGeoAeoBrief ? <GeoAeoBrief className="mt-14" /> : null}

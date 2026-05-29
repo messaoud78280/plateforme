@@ -10,6 +10,8 @@ const PAGE_PATH = "/ressources/analyse-dce-chiffrage-btp";
 const pagePath = PAGE_PATH;
 const pageUrl = absoluteUrl(pagePath);
 const HERO_IMAGE = "/ressources/analyse-dce-chiffrage-btp-hero.png";
+const HERO_WIDTH = 1024;
+const HERO_HEIGHT = 576;
 
 export const metadata = resourceEditorialMetadata(PAGE_PATH);
 
@@ -89,20 +91,20 @@ export default function AnalyseDceChiffrageBtpPage() {
           { name: "Ressources", href: "/ressources" },
           { name: "Analyse DCE & chiffrage", href: pagePath },
         ]}
-      >
-        <section className="not-prose -mt-4 mb-10">
-          <figure className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        cover={
+          <figure className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_18px_50px_-30px_rgba(15,23,42,0.2)]">
             <Image
               src={HERO_IMAGE}
               alt="BeWork — relais administratif BTP pour l’analyse DCE et l’appui chiffrage des devis travaux"
-              width={1200}
-              height={630}
-              className="h-auto w-full object-cover"
+              width={HERO_WIDTH}
+              height={HERO_HEIGHT}
+              className="h-auto w-full"
               priority
+              sizes="(max-width: 768px) 100vw, 768px"
             />
           </figure>
-        </section>
-
+        }
+      >
         <section className="not-prose mb-10">
           <div className="rounded-2xl border border-slate-200 bg-white p-6 text-[13px] leading-relaxed text-slate-600 shadow-sm">
             Compléments utiles :{" "}

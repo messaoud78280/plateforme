@@ -320,7 +320,8 @@ model ChantierFile {
   status       ChantierFileStatus @default(RECU)
   comment      String?
   addedById    String?
-  taskId       String?            // mission BeWork liée (livrable / pièce de travail)
+  taskId             String?   // mission BeWork liée (livrable / pièce de travail)
+  sourceDocumentId   String?   @unique // copie classeur depuis pièce jointe mission (Document)
   // Préparation IA (classification, résumé, détection manquants) — non utilisé en V1
   aiSummary           String?   @db.Text
   aiClassifiedAt      DateTime?

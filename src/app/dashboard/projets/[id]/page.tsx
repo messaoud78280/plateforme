@@ -16,6 +16,11 @@ import { ProjectMissionsSection, type ChantierMissionRow } from "@/components/pr
 import { DeleteChantierButton } from "@/components/chantier/DeleteChantierButton";
 import { ensureChantierFolders } from "@/lib/chantier-dossier/folders";
 import {
+  syncProjectMissionDocuments,
+  findOrphanMissionDocumentsForProject,
+} from "@/lib/chantier-dossier/sync-mission-documents";
+import { ChantierOrphanMissionBanner } from "@/components/chantier/ChantierOrphanMissionBanner";
+import {
   CHANTIER_STATUS_COLORS,
   CHANTIER_STATUS_LABELS,
   CHANTIER_MISSING_STATUSES,
@@ -74,6 +79,21 @@ export default async function ProjetDetailPage({
   if (!access.ok) notFound();
 
   await ensureChantierFolders(id);
+
+  const isAgenceRole =
+    session.user.role === "AGENCE" || session.user.role === "MANAGER";
+
+  let syncBanner: { synced: number } | null = null;
+  try {
+    const syncResult = await syncProjectMissionDocuments(id);
+    if (syncResult.synced > 0) syncBanner = { synced: syncResult.synced };
+  } catch (e) {
+    console.error("[ProjetDetail] sync mission documents:", e);
+  }
+
+  const orphanMissions = isAgenceRole
+    ? await findOrphanMissionDocumentsForProject(id).catch(() => [])
+    : [];
 
   const [chantierFolders, missingCount] = await Promise.all([
     prisma.chantierFolder.findMany({
@@ -307,6 +327,13 @@ export default async function ProjetDetailPage({
         isAgence={isAgence}
       />
 
+      {syncBanner ? (
+        <p className="rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-800">
+          {syncBanner.synced} pièce{syncBanner.synced > 1 ? "s" : ""} importée
+          {syncBanner.synced > 1 ? "s" : ""} depuis les missions liées à ce chantier.
+        </p>
+      ) : null}
+      <ChantierOrphanMissionBanner projectId={id} orphans={orphanMissions} />
       <ChantierDossierSection projectId={id} folders={dossierFolders} canEdit={canEditDossier} />
 
       {/* Référent (client) ou gestion agent (agence) */}

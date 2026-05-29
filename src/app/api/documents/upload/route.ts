@@ -9,6 +9,7 @@ import {
   missionDocumentRejectReason,
 } from "@/lib/storage/document-upload-policy";
 import { DOCUMENTS_BUCKET } from "@/lib/storage/supabase-object";
+import { syncMissionDocumentToChantier } from "@/lib/chantier-dossier/sync-mission-documents";
 
 const CATEGORY_MAP: Record<string, "FACTURE" | "CONTRAT" | "RH" | "FISCAL" | "AUTRE"> = {
   FACTURE: "FACTURE",
@@ -149,6 +150,19 @@ export async function POST(request: Request) {
       },
     });
     created.push({ id: doc.id, name: doc.name });
+
+    const projectForChantier = projectIdForDoc ?? taskForAlert?.projectId;
+    if (taskIdTrimmed && projectForChantier) {
+      try {
+        await syncMissionDocumentToChantier(doc.id, {
+          addedById: session.user.id,
+          projectId: projectForChantier,
+          linkTaskToProject: !taskForAlert?.projectId,
+        });
+      } catch (e) {
+        console.error("Sync pièce mission → classeur:", e);
+      }
+    }
 
     if (taskIdTrimmed && taskForAlert?.clientId) {
       try {

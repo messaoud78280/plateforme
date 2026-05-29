@@ -47,3 +47,15 @@ export const MISSION_TITLES_BY_TYPE: Partial<Record<MissionType, string>> = {
   DOE: "Classer les documents DOE",
   PLANNING_CHANTIER: "Mettre à jour le tableau de suivi chantier",
 };
+
+/** Rubrique classeur chantier recommandée selon le type de mission (code 01–11) */
+export const MISSION_TYPE_FOLDER_CODE: Partial<Record<MissionType, string>> = {
+  DEVIS_CHIFFRAGE: "01",
+  DOSSIER_SOUS_TRAITANT: "04",
+  COMMANDES_BL_FOURNISSEURS: "05",
+  COMPTE_RENDU_CHANTIER: "06",
+  PLANNING_CHANTIER: "08",
+  SITUATION_TRAVAUX: "09",
+  DOE: "11",
+  ADMINISTRATIF_CHANTIER: "02",
+};

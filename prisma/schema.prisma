@@ -320,6 +320,7 @@ model ChantierFile {
   status       ChantierFileStatus @default(RECU)
   comment      String?
   addedById    String?
+  taskId       String?            // mission BeWork liée (livrable / pièce de travail)
   // Préparation IA (classification, résumé, détection manquants) — non utilisé en V1
   aiSummary           String?   @db.Text
   aiClassifiedAt      DateTime?
@@ -331,10 +332,12 @@ model ChantierFile {
   folder   ChantierFolder @relation(fields: [folderId], references: [id], onDelete: Cascade)
   client   User           @relation(fields: [clientId], references: [id], onDelete: Cascade)
   addedBy  User?          @relation("ChantierFileAddedBy", fields: [addedById], references: [id], onDelete: SetNull)
+  task     Task?          @relation(fields: [taskId], references: [id], onDelete: SetNull)
 
   @@index([projectId, folderId])
   @@index([clientId])
   @@index([status])
+  @@index([taskId])
 }
 
 enum ChantierFileStatus {
@@ -448,6 +451,7 @@ model Task {
   comments   TaskComment[]
   documents  Document[]
   taskMessages TaskMessage[]
+  chantierFiles ChantierFile[]
 }
 
 enum TaskStatus {

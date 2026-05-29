@@ -12,6 +12,7 @@ import { TaskClientReport } from "./TaskClientReport";
 import { DocumentUploadZone } from "@/components/documents/DocumentUploadZone";
 import { documentDownloadHref } from "@/lib/documents/download-url";
 import { missionTypeLabel } from "@/lib/tasks/mission-types";
+import { TaskChantierDocuments } from "./TaskChantierDocuments";
 
 interface TaskDetailViewProps {
   sessionUserId?: string;
@@ -483,6 +484,16 @@ export function TaskDetailView({
         </div>
       )}
         </div>
+      )}
+
+      {(isAgence || isAgent) && task.project && (
+        <TaskChantierDocuments
+          taskId={task.id}
+          projectId={task.project.id}
+          projectTitle={task.project.title}
+          missionType={task.missionType}
+          canEdit={isAgence || isAgent}
+        />
       )}
 
       {/* Pour l'agent : Informations mission + Historique (ordre Conversation → Documents → Infos → Historique) */}

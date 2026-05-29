@@ -88,6 +88,16 @@ export async function POST(request: Request) {
   const displayName = String(formData.get("name") ?? file.name).trim() || file.name;
   const documentType = String(formData.get("documentType") ?? "").trim() || null;
   const comment = String(formData.get("comment") ?? "").trim() || null;
+  const taskIdRaw = String(formData.get("taskId") ?? "").trim() || null;
+
+  let taskIdValid: string | null = null;
+  if (taskIdRaw) {
+    const linkedTask = await prisma.task.findFirst({
+      where: { id: taskIdRaw, projectId },
+      select: { id: true },
+    });
+    if (linkedTask) taskIdValid = linkedTask.id;
+  }
 
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
   const storagePath = `chantiers/${projectId}/${folder.code}/${Date.now()}-${safeName}`;
@@ -126,6 +136,7 @@ export async function POST(request: Request) {
         comment,
         status: "RECU",
         addedById: session.user.id,
+        taskId: taskIdValid,
       },
     });
 

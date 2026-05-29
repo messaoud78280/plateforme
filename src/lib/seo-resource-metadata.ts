@@ -24,6 +24,8 @@ export type ResourceEditorialSeo = {
   ogType?: "article" | "website";
   /** Chemin public optionnel (ex. /ressources/…-hero.png) pour Open Graph */
   ogImagePath?: string;
+  ogImageWidth?: number;
+  ogImageHeight?: number;
 };
 
 export const RESOURCE_EDITORIAL_SEO: Record<string, ResourceEditorialSeo> = {
@@ -92,10 +94,14 @@ export const RESOURCE_EDITORIAL_SEO: Record<string, ResourceEditorialSeo> = {
       "DQE",
       "assistant travaux",
       "relais administratif BTP",
+      "entreprise du bâtiment",
+      "points d’alerte DCE",
       "base de chiffrage",
     ],
     ogType: "article",
     ogImagePath: "/ressources/analyse-dce-chiffrage-btp-hero.png",
+    ogImageWidth: 1024,
+    ogImageHeight: 576,
   },
   "/ressources/planning-chantier-btp": {
     title: "Planning chantier BTP : jalons et pilotage",
@@ -130,6 +136,8 @@ export function resourceEditorialMetadata(path: string): Metadata {
   const ogType = seo.ogType ?? "article";
   const ogImageUrl = seo.ogImagePath ? absoluteUrl(seo.ogImagePath) : defaultOgImage;
   const ogAlt = seo.ogImagePath ? seo.title : seo.title;
+  const ogImageWidth = seo.ogImageWidth ?? 1200;
+  const ogImageHeight = seo.ogImageHeight ?? 630;
 
   return {
     title: { absolute: seo.title },
@@ -145,12 +153,13 @@ export function resourceEditorialMetadata(path: string): Metadata {
       siteName: "BeWork",
       title: seo.title,
       description: seo.description,
-      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: ogAlt }],
+      images: [{ url: ogImageUrl, width: ogImageWidth, height: ogImageHeight, alt: ogAlt }],
     },
     twitter: {
       card: "summary_large_image",
       title: seo.title,
       description: seo.description,
+      ...(seo.ogImagePath ? { images: [ogImageUrl] } : {}),
     },
   };
 }

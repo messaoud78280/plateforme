@@ -43,6 +43,8 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("STANDARD");
   const [desiredDate, setDesiredDate] = useState("");
+  const [projectId, setProjectId] = useState("");
+  const [chantiers, setChantiers] = useState<{ id: string; title: string }[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -76,6 +78,15 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
   useEffect(() => {
     if (packCommunication) setCategory("Communication digitale");
   }, [packCommunication]);
+
+  useEffect(() => {
+    fetch("/api/projets")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((list: { id: string; title: string }[]) => {
+        setChantiers(Array.isArray(list) ? list.map((p) => ({ id: p.id, title: p.title })) : []);
+      })
+      .catch(() => setChantiers([]));
+  }, []);
 
   const saveDraft = () => {
     const data: DraftData = {
@@ -140,6 +151,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
           category: category || undefined,
           priority: priority || undefined,
           desiredDate: desiredDate || undefined,
+          projectId: projectId || undefined,
         }),
       });
       const data = await res.json();
@@ -403,6 +415,25 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
                 ))}
               </select>
             </div>
+            {chantiers.length > 0 ? (
+              <div>
+                <label htmlFor="nd-chantier" className="mb-1.5 block text-sm font-medium text-slate-700">
+                  Chantier concerné (optionnel)
+                </label>
+                <select
+                  id="nd-chantier"
+                  value={projectId}
+                  onChange={(e) => setProjectId(e.target.value)}
+                  className="w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-800 focus:border-[#1d4ed8] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8]/20"
+                  disabled={loading}
+                >
+                  <option value="">— Aucun chantier —</option>
+                  {chantiers.map((p) => (
+                    <option key={p.id} value={p.id}>{p.title}</option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
           </div>
         </section>
 

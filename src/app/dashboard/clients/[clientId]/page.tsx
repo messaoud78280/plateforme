@@ -126,14 +126,22 @@ export default async function ClientDetailPage({
             <p className="mt-1 text-sm text-black">Tél. : {client.phone}</p>
           )}
         </div>
-        <DeleteClientButton
-          clientId={client.id}
-          clientName={client.name}
-          projectsCount={projects.length}
-          tasksCount={tasks.length}
-          label="Supprimer ce client"
-          className="px-3 py-1.5 text-sm"
-        />
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={`/dashboard/taches?clientId=${client.id}&creerMission=1`}
+            className="rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e40af]"
+          >
+            + Créer une mission
+          </Link>
+          <DeleteClientButton
+            clientId={client.id}
+            clientName={client.name}
+            projectsCount={projects.length}
+            tasksCount={tasks.length}
+            label="Supprimer ce client"
+            className="px-3 py-1.5 text-sm"
+          />
+        </div>
       </div>
 
       {/* Projets du client */}

@@ -14,7 +14,13 @@ import { BackLink } from "@/components/ui/BackLink";
 export default async function TachesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ statut?: string; nouvelle?: string }>;
+  searchParams: Promise<{
+    statut?: string;
+    nouvelle?: string;
+    clientId?: string;
+    projectId?: string;
+    creerMission?: string;
+  }>;
 }) {
   const session = await getServerSession(authOptions);
 
@@ -42,6 +48,7 @@ export default async function TachesPage({
   let projects: { id: string; title: string }[] = [];
   let agentSummary = { missionsAujourdhui: 0, missionsUrgentes: 0, missionsEnCours: 0 };
   let managerClients: { id: string; name: string; company: string | null }[] = [];
+  let managerProjects: { id: string; title: string; clientId: string }[] = [];
   let managerAgents: { id: string; name: string }[] = [];
   let managerBoard: {
     nouvelles: ManagerBoardTask[];
@@ -54,36 +61,49 @@ export default async function TachesPage({
     id: true,
     title: true,
     status: true,
+    priority: true,
+    missionType: true,
+    desiredDate: true,
+    estimatedActions: true,
     createdAt: true,
     updatedAt: true,
     client: { select: { id: true, name: true } },
     assignedTo: { select: { id: true, name: true } },
+    project: { select: { id: true, title: true } },
   } as const;
   type BoardRow = {
     id: string;
     title: string;
     status: string;
+    priority: string | null;
+    missionType: string | null;
+    desiredDate: Date | null;
+    estimatedActions: number | null;
     createdAt: Date;
     updatedAt: Date;
     client: { id: string; name: string };
     assignedTo: { id: string; name: string } | null;
+    project: { id: string; title: string } | null;
   };
   const toBoard = (t: BoardRow): ManagerBoardTask => ({
     id: t.id,
     title: t.title,
     status: t.status,
-    priority: null,
+    priority: t.priority,
+    missionType: t.missionType,
+    desiredDate: t.desiredDate,
+    estimatedActions: t.estimatedActions,
     createdAt: t.createdAt,
     updatedAt: t.updatedAt,
-    estimatedActions: null,
     client: t.client,
     assignedTo: t.assignedTo,
+    project: t.project,
   });
 
   try {
     if (prisma.task) {
       if (isManager) {
-        const [nouvelles, aAssigner, enCours, aValider, terminees, clientsRes, agentsRes] = await Promise.all([
+        const [nouvelles, aAssigner, enCours, aValider, terminees, clientsRes, agentsRes, projectsRes] = await Promise.all([
           prisma.task.findMany({
             where: { status: "NOUVEAU" },
             select: boardSelect,
@@ -119,9 +139,14 @@ export default async function TachesPage({
             select: { id: true, name: true },
             orderBy: { name: "asc" },
           }),
+          prisma.project.findMany({
+            select: { id: true, title: true, clientId: true },
+            orderBy: { title: "asc" },
+          }),
         ]);
         managerClients = clientsRes;
         managerAgents = agentsRes;
+        managerProjects = projectsRes;
         managerBoard = {
           nouvelles: (nouvelles as BoardRow[]).map(toBoard),
           aAssigner: (aAssigner as BoardRow[]).map(toBoard),
@@ -289,7 +314,13 @@ export default async function TachesPage({
               Tableau de gestion des missions. Créez, assignez les agents, suivez l&apos;avancement et validez les livrables.
             </p>
           </div>
-          <CreateMissionForm clients={managerClients} agents={managerAgents} />
+          <CreateMissionForm
+            clients={managerClients}
+            agents={managerAgents}
+            defaultClientId={params.clientId ?? ""}
+            defaultProjectId={params.projectId ?? ""}
+            defaultOpen={params.creerMission === "1"}
+          />
         </div>
         <ManagerMissionsBoard
           nouvelles={boardForFilter.nouvelles}
@@ -298,6 +329,7 @@ export default async function TachesPage({
           aValider={boardForFilter.aValider}
           terminees={boardForFilter.terminees}
           sessionUserId={session.user.id}
+          projects={managerProjects}
         />
       </div>
     );

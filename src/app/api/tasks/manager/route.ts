@@ -3,9 +3,11 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
+import { normalizeTaskPriority } from "@/lib/tasks/priority";
+import { MISSION_TYPES, type MissionType } from "@/lib/tasks/mission-types";
 
 function isManager(role?: string | null): boolean {
-  return role === "MANAGER";
+  return role === "MANAGER" || role === "AGENCE";
 }
 
 /** POST /api/tasks/manager — Créer une mission pour un client (gérant). */
@@ -29,6 +31,9 @@ export async function POST(request: NextRequest) {
       assignedToId,
       agencyNotes,
       desiredDate,
+      missionType,
+      priority,
+      estimatedActions,
     } = body as {
       clientId?: string;
       title?: string;
@@ -37,6 +42,9 @@ export async function POST(request: NextRequest) {
       assignedToId?: string | null;
       agencyNotes?: string | null;
       desiredDate?: string | null;
+      missionType?: string | null;
+      priority?: string | null;
+      estimatedActions?: number | null;
     };
 
     if (!clientId?.trim() || !title?.trim()) {
@@ -92,6 +100,20 @@ export async function POST(request: NextRequest) {
 
     const status = assignedId ? "ASSIGNEE" : "EN_ATTENTE";
 
+    let missionTypeValid: MissionType | null = null;
+    if (missionType?.trim()) {
+      const mt = missionType.trim().toUpperCase();
+      if ((MISSION_TYPES as readonly string[]).includes(mt)) {
+        missionTypeValid = mt as MissionType;
+      }
+    }
+
+    const priorityValid = normalizeTaskPriority(priority) ?? "STANDARD";
+    const estimatedValid =
+      typeof estimatedActions === "number" && estimatedActions >= 0
+        ? Math.round(estimatedActions)
+        : null;
+
     const task = await prisma.task.create({
       data: {
         title: title.trim(),
@@ -102,6 +124,10 @@ export async function POST(request: NextRequest) {
         assignedToId: assignedId,
         agencyNotes: agencyNotes?.trim() || null,
         desiredDate: desiredDateValid,
+        missionType: missionTypeValid,
+        priority: priorityValid,
+        estimatedActions: estimatedValid,
+        createdById: session.user.id,
       },
       include: {
         client: { select: { id: true, name: true } },

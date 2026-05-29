@@ -16,7 +16,8 @@ interface TaskItem {
   category?: string | null;
   priority?: string | null;
   desiredDate?: Date | string | null;
-  estimatedActions?: string | null;
+  estimatedActions?: number | string | null;
+  missionType?: string | null;
   project?: { id: string; title: string } | null;
   assignedTo?: { id: string; name: string; email: string } | null;
 }

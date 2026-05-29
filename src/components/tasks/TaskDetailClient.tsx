@@ -27,7 +27,8 @@ interface TaskDetailClientProps {
     category?: string | null;
     priority?: string | null;
     desiredDate?: Date | string | null;
-    estimatedActions?: string | null;
+    estimatedActions?: string | number | null;
+    missionType?: string | null;
     assignedTo?: { id: string; name: string; email: string } | null;
     project?: { id: string; title: string } | null;
     client?: { id: string; name: string };

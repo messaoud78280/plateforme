@@ -33,6 +33,9 @@ export async function GET(
         projectId: true,
         category: true,
         priority: true,
+        missionType: true,
+        estimatedActions: true,
+        clientVisibleNotes: true,
         desiredDate: true,
         assignedToId: true,
         agencyNotes: true,
@@ -104,14 +107,30 @@ export async function PUT(
     const body = await request.json();
     const validStatuses = ["NOUVEAU", "EN_ATTENTE", "ASSIGNEE", "EN_ANALYSE", "EN_COURS", "EN_ATTENTE_INFO", "A_VALIDER", "COMPLETE"] as const;
     const validPriorities = ["STANDARD", "PRIORITAIRE", "URGENT"] as const;
-    const { title, description, status, assignedToId, agencyNotes, timeSpentMinutes, priority } = body as {
+    const {
+      title,
+      description,
+      status,
+      assignedToId,
+      agencyNotes,
+      clientVisibleNotes,
+      timeSpentMinutes,
+      priority,
+      missionType,
+      estimatedActions,
+      projectId,
+    } = body as {
       title?: string;
       description?: string | null;
       status?: (typeof validStatuses)[number];
       assignedToId?: string | null;
       agencyNotes?: string | null;
+      clientVisibleNotes?: string | null;
       timeSpentMinutes?: number | null;
       priority?: (typeof validPriorities)[number] | null;
+      missionType?: string | null;
+      estimatedActions?: number | null;
+      projectId?: string | null;
     };
 
     const data: {
@@ -124,6 +143,10 @@ export async function PUT(
       timeSpentMinutes?: number | null;
       actionsUsed?: number | null;
       priority?: string | null;
+      missionType?: string | null;
+      estimatedActions?: number | null;
+      clientVisibleNotes?: string | null;
+      projectId?: string | null;
     } = {};
     if (typeof title === "string" && title.trim()) data.title = title.trim();
     if (body.hasOwnProperty("description")) data.description = description?.trim() ?? null;
@@ -145,6 +168,28 @@ export async function PUT(
       if (assigningAgent) data.status = "ASSIGNEE";
     }
     if (isAgence && body.hasOwnProperty("agencyNotes")) data.agencyNotes = agencyNotes?.trim() ?? null;
+    if (isAgence && body.hasOwnProperty("clientVisibleNotes")) {
+      data.clientVisibleNotes = clientVisibleNotes?.trim() ?? null;
+    }
+    if (isAgence && body.hasOwnProperty("missionType")) {
+      data.missionType = missionType?.trim() ? missionType.trim().toUpperCase() : null;
+    }
+    if (isAgence && body.hasOwnProperty("estimatedActions")) {
+      data.estimatedActions =
+        typeof estimatedActions === "number" && estimatedActions >= 0
+          ? Math.round(estimatedActions)
+          : null;
+    }
+    if (isAgence && body.hasOwnProperty("projectId")) {
+      if (projectId) {
+        const project = await prisma.project.findFirst({
+          where: { id: projectId, clientId: existing.clientId },
+        });
+        data.projectId = project ? project.id : null;
+      } else {
+        data.projectId = null;
+      }
+    }
 
     const previousPriority = existing.priority;
     let actionsToDeduct = 0;

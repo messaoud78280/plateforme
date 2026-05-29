@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { MissionDetailDrawer } from "./MissionDetailDrawer";
 import { DeleteTaskButton } from "./DeleteTaskButton";
+import { QualifyRequestButton } from "./QualifyRequestButton";
+import { missionTypeLabel, MISSION_TYPES, MISSION_TYPE_LABELS } from "@/lib/tasks/mission-types";
 
 const FILTER_ALL = "";
 const FILTER_UNASSIGNED = "__none__";
@@ -43,9 +45,12 @@ export type ManagerBoardTask = {
   priority: string | null;
   createdAt: Date;
   updatedAt?: Date;
-  estimatedActions?: string | null;
+  estimatedActions?: number | string | null;
+  missionType?: string | null;
+  desiredDate?: Date | string | null;
   client: { id: string; name: string };
   assignedTo: { id: string; name: string } | null;
+  project?: { id: string; title: string } | null;
 };
 
 function formatDate(d: Date) {
@@ -65,6 +70,7 @@ function MissionCard({
   task,
   columnId,
   agents,
+  projects,
   onOpenMission,
   onPriorityChange,
   onAssignAgent,
@@ -72,6 +78,7 @@ function MissionCard({
   task: ManagerBoardTask;
   columnId: string;
   agents: AgentOption[];
+  projects: { id: string; title: string; clientId?: string }[];
   onOpenMission: (taskId: string) => void;
   onPriorityChange: (taskId: string, priority: string | null) => void;
   onAssignAgent: (taskId: string, agentId: string) => void;
@@ -123,8 +130,22 @@ function MissionCard({
         <DeleteTaskButton taskId={task.id} />
       </div>
       <p className="mt-2 text-xs text-slate-600">
-        <span className="font-medium text-slate-700">Client :</span> {task.client.name}
+        <span className="font-medium text-slate-700">Client :</span>{" "}
+        <Link href={`/dashboard/clients/${task.client.id}`} className="text-blue-600 hover:underline">
+          {task.client.name}
+        </Link>
       </p>
+      {task.project ? (
+        <p className="mt-1 text-xs text-slate-600">
+          <span className="font-medium text-slate-700">Chantier :</span>{" "}
+          <Link href={`/dashboard/projets/${task.project.id}`} className="text-blue-600 hover:underline">
+            {task.project.title}
+          </Link>
+        </p>
+      ) : null}
+      {task.missionType ? (
+        <p className="mt-1 text-xs text-slate-500">{missionTypeLabel(task.missionType)}</p>
+      ) : null}
       <div className="mt-2 flex items-center gap-2">
         {task.assignedTo ? (
           <>
@@ -139,12 +160,25 @@ function MissionCard({
         <span className={`inline-flex ${priorityStyle.badgeClass}`}>
           {priorityStyle.label}
         </span>
-        {task.estimatedActions && (
-          <span className="text-xs text-slate-500">{task.estimatedActions}</span>
+        {task.estimatedActions != null && task.estimatedActions !== "" && (
+          <span className="text-xs text-slate-500">{task.estimatedActions} action(s) est.</span>
         )}
+        {task.desiredDate ? (
+          <span className="text-xs text-slate-500">
+            Éch. {new Date(task.desiredDate).toLocaleDateString("fr-FR")}
+          </span>
+        ) : null}
         <span className="text-xs text-slate-400">Créée le {formatDate(task.createdAt)}</span>
       </div>
       <div className="mt-4 flex flex-wrap items-center gap-2">
+        {columnId === "nouvelles" ? (
+          <QualifyRequestButton
+            taskId={task.id}
+            clientId={task.client.id}
+            projects={projects}
+            agents={agents}
+          />
+        ) : null}
         <div className="relative" ref={assignerRef}>
           <button
             type="button"
@@ -229,17 +263,25 @@ function filterTask(
   task: ManagerBoardTask,
   clientFilter: string,
   agentFilter: string,
+  projectFilter: string,
+  missionTypeFilter: string,
   searchQuery: string
 ): boolean {
   if (clientFilter !== FILTER_ALL && task.client.name !== clientFilter) return false;
   if (agentFilter === FILTER_UNASSIGNED && task.assignedTo?.name) return false;
   if (agentFilter !== FILTER_ALL && agentFilter !== FILTER_UNASSIGNED && task.assignedTo?.name !== agentFilter) return false;
+  if (projectFilter !== FILTER_ALL) {
+    if (projectFilter === FILTER_UNASSIGNED && task.project) return false;
+    if (projectFilter !== FILTER_UNASSIGNED && task.project?.title !== projectFilter) return false;
+  }
+  if (missionTypeFilter !== FILTER_ALL && (task.missionType ?? "") !== missionTypeFilter) return false;
   const q = searchQuery.trim().toLowerCase();
   if (q) {
     const title = (task.title ?? "").toLowerCase();
     const client = (task.client.name ?? "").toLowerCase();
     const agent = (task.assignedTo?.name ?? "").toLowerCase();
-    if (!title.includes(q) && !client.includes(q) && !agent.includes(q)) return false;
+    const project = (task.project?.title ?? "").toLowerCase();
+    if (!title.includes(q) && !client.includes(q) && !agent.includes(q) && !project.includes(q)) return false;
   }
   return true;
 }
@@ -251,6 +293,7 @@ export function ManagerMissionsBoard({
   aValider,
   terminees,
   sessionUserId,
+  projects = [],
 }: {
   nouvelles: ManagerBoardTask[];
   aAssigner: ManagerBoardTask[];
@@ -258,6 +301,7 @@ export function ManagerMissionsBoard({
   aValider: ManagerBoardTask[];
   terminees: ManagerBoardTask[];
   sessionUserId: string;
+  projects?: { id: string; title: string; clientId?: string }[];
 }) {
   const router = useRouter();
   const [drawerTaskId, setDrawerTaskId] = useState<string | null>(null);
@@ -273,6 +317,8 @@ export function ManagerMissionsBoard({
   const pendingMovesRef = useRef<Set<string>>(new Set());
   const [filterClient, setFilterClient] = useState(FILTER_ALL);
   const [filterAgent, setFilterAgent] = useState(FILTER_ALL);
+  const [filterProject, setFilterProject] = useState(FILTER_ALL);
+  const [filterMissionType, setFilterMissionType] = useState(FILTER_ALL);
   const [searchQuery, setSearchQuery] = useState("");
   const [agents, setAgents] = useState<AgentOption[]>([]);
 
@@ -354,16 +400,19 @@ export function ManagerMissionsBoard({
       .catch(() => setAgents([]));
   }, []);
 
-  const { clientNames, agentNames } = useMemo(() => {
+  const { clientNames, agentNames, projectNames } = useMemo(() => {
     const all = [...boardState.nouvelles, ...boardState.aAssigner, ...boardState.enCours, ...boardState.aValider, ...boardState.terminees];
     const clients = [...new Set(all.map((t) => t.client.name))].filter(Boolean).sort();
-    const agents = [...new Set(all.map((t) => t.assignedTo?.name).filter((n): n is string => !!n))].sort();
-    return { clientNames: clients, agentNames: agents };
+    const agentsList = [...new Set(all.map((t) => t.assignedTo?.name).filter((n): n is string => !!n))].sort();
+    const projs = [...new Set(all.map((t) => t.project?.title).filter((n): n is string => !!n))].sort();
+    return { clientNames: clients, agentNames: agentsList, projectNames: projs };
   }, [boardState]);
 
   const columns: Column[] = useMemo(() => {
     const fn = (tasks: ManagerBoardTask[]) =>
-      tasks.filter((t) => filterTask(t, filterClient, filterAgent, searchQuery));
+      tasks.filter((t) =>
+        filterTask(t, filterClient, filterAgent, filterProject, filterMissionType, searchQuery)
+      );
     return [
       { id: "nouvelles", title: "Nouvelles", tasks: fn(boardState.nouvelles) },
       { id: "a-assigner", title: "À assigner", tasks: fn(boardState.aAssigner) },
@@ -371,7 +420,7 @@ export function ManagerMissionsBoard({
       { id: "a-valider", title: "À valider", tasks: fn(boardState.aValider) },
       { id: "terminees", title: "Terminées", tasks: fn(boardState.terminees) },
     ];
-  }, [boardState, filterClient, filterAgent, searchQuery]);
+  }, [boardState, filterClient, filterAgent, filterProject, filterMissionType, searchQuery]);
 
   const handleDrop = useCallback(
     async (targetColumnId: string, taskId: string, sourceColumnId: string) => {
@@ -499,7 +548,12 @@ export function ManagerMissionsBoard({
     [router]
   );
 
-  const hasActiveFilter = filterClient !== FILTER_ALL || filterAgent !== FILTER_ALL || searchQuery.trim() !== "";
+  const hasActiveFilter =
+    filterClient !== FILTER_ALL ||
+    filterAgent !== FILTER_ALL ||
+    filterProject !== FILTER_ALL ||
+    filterMissionType !== FILTER_ALL ||
+    searchQuery.trim() !== "";
 
   return (
     <>
@@ -542,12 +596,35 @@ export function ManagerMissionsBoard({
             </option>
           ))}
         </select>
+        <select
+          value={filterProject}
+          onChange={(e) => setFilterProject(e.target.value)}
+          className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        >
+          <option value={FILTER_ALL}>Tous les chantiers</option>
+          <option value={FILTER_UNASSIGNED}>Sans chantier</option>
+          {projectNames.map((name) => (
+            <option key={name} value={name}>{name}</option>
+          ))}
+        </select>
+        <select
+          value={filterMissionType}
+          onChange={(e) => setFilterMissionType(e.target.value)}
+          className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        >
+          <option value={FILTER_ALL}>Tous les types</option>
+          {MISSION_TYPES.map((t) => (
+            <option key={t} value={t}>{MISSION_TYPE_LABELS[t]}</option>
+          ))}
+        </select>
         {hasActiveFilter && (
           <button
             type="button"
             onClick={() => {
               setFilterClient(FILTER_ALL);
               setFilterAgent(FILTER_ALL);
+              setFilterProject(FILTER_ALL);
+              setFilterMissionType(FILTER_ALL);
               setSearchQuery("");
             }}
             className="text-sm font-medium text-slate-600 underline hover:text-slate-800"
@@ -602,6 +679,7 @@ export function ManagerMissionsBoard({
                     task={task}
                     columnId={col.id}
                     agents={agents}
+                    projects={projects}
                     onOpenMission={setDrawerTaskId}
                     onPriorityChange={handlePriorityChange}
                     onAssignAgent={handleAssignAgent}

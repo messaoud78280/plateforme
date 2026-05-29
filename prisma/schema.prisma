@@ -56,6 +56,7 @@ model User {
   documents          Document[]
   tasks              Task[]
   tasksAssigned      Task[]     @relation("AssignedTasks")
+  tasksCreated       Task[]     @relation("TasksCreatedBy")
   taskComments       TaskComment[]
   taskMessagesSent   TaskMessage[]  @relation("TaskMessagesSent")
   taskMessagesReceived TaskMessage[] @relation("TaskMessagesReceived")
@@ -417,11 +418,14 @@ model Task {
   clientId       String
   projectId      String?   // projet auquel la tâche se rapporte (optionnel)
   category         String?   // Gestion d'emails, Recherche, Organisation, etc.
+  missionType      String?   // DEVIS_CHIFFRAGE, COMPTE_RENDU_CHANTIER, etc.
   priority         String?   // STANDARD | PRIORITAIRE | URGENT
   desiredDate      DateTime? @db.Date  // date souhaitée par le client
-  // estimatedActions String?   // estimation initiale — désactivé si colonne absente en prod ; réactiver après migration
-  assignedToId   String?   // agent (User rôle AGENCE) assigné par l'agence après prise en charge
-  agencyNotes    String?   // notes de l'agence pour l'agent (consignes, rappels)
+  estimatedActions Int?      // crédits / actions estimés
+  assignedToId   String?   // agent assigné
+  createdById    String?   // gérant créateur (mission interne)
+  agencyNotes    String?   // notes internes gérante / agent
+  clientVisibleNotes String? // notes visibles par le client
   correctionNote String?   // note quand le responsable demande une correction
   validatedAt    DateTime? // date de validation du travail par l'agence
   completedAt    DateTime?
@@ -440,6 +444,7 @@ model Task {
   client     User         @relation(fields: [clientId], references: [id], onDelete: Cascade)
   project    Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
   assignedTo User?        @relation("AssignedTasks", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy  User?        @relation("TasksCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   comments   TaskComment[]
   documents  Document[]
   taskMessages TaskMessage[]

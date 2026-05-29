@@ -11,6 +11,7 @@ import { TaskInternalNotes } from "./TaskInternalNotes";
 import { TaskClientReport } from "./TaskClientReport";
 import { DocumentUploadZone } from "@/components/documents/DocumentUploadZone";
 import { documentDownloadHref } from "@/lib/documents/download-url";
+import { missionTypeLabel } from "@/lib/tasks/mission-types";
 
 interface TaskDetailViewProps {
   sessionUserId?: string;
@@ -34,10 +35,11 @@ interface TaskDetailViewProps {
     category?: string | null;
     priority?: string | null;
     desiredDate?: Date | string | null;
-    estimatedActions?: string | null;
+    estimatedActions?: string | number | null;
+    missionType?: string | null;
     assignedTo?: { id: string; name: string; email: string } | null;
-    project?: { id: string; title: string } | null;
     client?: { id: string; name: string };
+    project?: { id: string; title: string } | null;
     documents?: { id: string; name: string; fileUrl: string; fileSize: number; mimeType: string | null; createdAt?: Date }[];
   };
   onStatusChange?: (newStatus: TaskStatus, timeSpentMinutes?: number) => void;
@@ -276,12 +278,25 @@ export function TaskDetailView({
             )}
           </div>
         </div>
+        {task.client && (isAgence || isAgent) && (
+          <p className="mt-2 text-sm text-slate-600">
+            Client :{" "}
+            <Link href={`/dashboard/clients/${task.client.id}`} className="font-medium text-blue-600 hover:underline">
+              {task.client.name}
+            </Link>
+          </p>
+        )}
         {task.project && (
           <p className="mt-2 text-sm text-slate-600">
-            Projet :{" "}
+            Chantier :{" "}
             <Link href={`/dashboard/projets/${task.project.id}`} className="font-medium text-blue-600 hover:underline">
               {task.project.title}
             </Link>
+          </p>
+        )}
+        {task.missionType && (
+          <p className="mt-1 text-sm text-slate-600">
+            Type : <span className="font-medium">{missionTypeLabel(task.missionType)}</span>
           </p>
         )}
         {(task.category || task.priority || task.desiredDate) && (

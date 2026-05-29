@@ -12,6 +12,7 @@ import { ChantierDossierSection } from "@/components/chantier/ChantierDossierSec
 import { canAccessBeWorkSkills } from "@/lib/be-work-skills-access";
 import { canAccessChantierProject, canDeleteChantierProject } from "@/lib/chantier-dossier/access";
 import { projectMessageVisibilityWhere } from "@/lib/messaging/access";
+import { ProjectMissionsSection, type ChantierMissionRow } from "@/components/projects/ProjectMissionsSection";
 import { DeleteChantierButton } from "@/components/chantier/DeleteChantierButton";
 import { ensureChantierFolders } from "@/lib/chantier-dossier/folders";
 import {
@@ -32,7 +33,7 @@ export default async function ProjetDetailPage({
     redirect("/connexion?callbackUrl=/dashboard");
   }
 
-  const [project, actionsConsumed] = await Promise.all([
+  const [project, actionsConsumed, chantierMissions] = await Promise.all([
     prisma.project.findUnique({
       where: { id },
       include: {
@@ -49,6 +50,21 @@ export default async function ProjetDetailPage({
     prisma.task.aggregate({
       where: { projectId: id, actionsUsed: { not: null } },
       _sum: { actionsUsed: true },
+    }),
+    prisma.task.findMany({
+      where: { projectId: id },
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        priority: true,
+        missionType: true,
+        desiredDate: true,
+        actionsUsed: true,
+        estimatedActions: true,
+        assignedTo: { select: { id: true, name: true } },
+      },
+      orderBy: { updatedAt: "desc" },
     }),
   ]);
 
@@ -108,11 +124,23 @@ export default async function ProjetDetailPage({
   let agents: { id: string; name: string; email: string }[] = [];
   if (isAgence) {
     agents = await prisma.user.findMany({
-      where: { role: "AGENCE" },
+      where: { role: { in: ["AGENT", "AGENCE"] } },
       select: { id: true, name: true, email: true },
       orderBy: { name: "asc" },
     });
   }
+
+  const missionsRows: ChantierMissionRow[] = chantierMissions.map((m) => ({
+    id: m.id,
+    title: m.title,
+    status: m.status,
+    priority: m.priority,
+    missionType: m.missionType,
+    desiredDate: m.desiredDate ? m.desiredDate.toISOString() : null,
+    actionsUsed: m.actionsUsed,
+    estimatedActions: m.estimatedActions,
+    assignedTo: m.assignedTo,
+  }));
 
   const urgencyLabels: Record<string, string> = {
     BASSE: "Basse",
@@ -253,6 +281,31 @@ export default async function ProjetDetailPage({
           </div>
         )}
       </div>
+
+      {missingCount > 0 ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-4">
+          <h2 className="text-sm font-semibold text-amber-900">À traiter sur ce chantier</h2>
+          <p className="mt-1 text-sm text-amber-800">
+            {missingCount} pièce{missingCount > 1 ? "s" : ""} manquante{missingCount > 1 ? "s" : ""} dans le classeur.
+          </p>
+          <Link
+            href={`/dashboard/projets/manquants?chantier=${encodeURIComponent(id)}`}
+            className="mt-2 inline-block text-sm font-medium text-amber-900 underline"
+          >
+            Voir les pièces à récupérer →
+          </Link>
+        </div>
+      ) : null}
+
+      <ProjectMissionsSection
+        projectId={id}
+        projectTitle={project.title}
+        clientId={project.clientId}
+        clientName={project.client.name}
+        missions={missionsRows}
+        agents={agents.map((a) => ({ id: a.id, name: a.name }))}
+        isAgence={isAgence}
+      />
 
       <ChantierDossierSection projectId={id} folders={dossierFolders} canEdit={canEditDossier} />
 

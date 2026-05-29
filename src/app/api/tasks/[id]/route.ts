@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { minutesToActions, syncUserCreditsExpiry } from "@/lib/actions";
+import { minutesToActions } from "@/lib/actions";
 import { createNotification } from "@/lib/notifications";
 import { normalizeTaskPriority } from "@/lib/tasks/priority";
+import { deductTaskCreditsIfNeeded } from "@/lib/tasks/deduct-credits";
 
 /** GET /api/tasks/[id] – Détail d'une tâche */
 export async function GET(
@@ -40,6 +41,9 @@ export async function GET(
         completedAt: true,
         timeSpentMinutes: true,
         actionsUsed: true,
+        creditsDeductedAt: true,
+        clientReport: true,
+        clientReportSentAt: true,
         createdAt: true,
         updatedAt: true,
         assignedTo: { select: { id: true, name: true, email: true } },
@@ -157,18 +161,8 @@ export async function PUT(
       include: { assignedTo: { select: { id: true, name: true, email: true } } },
     });
 
-    if (actionsToDeduct > 0 && task.clientId) {
-      await syncUserCreditsExpiry(task.clientId);
-      const client = await prisma.user.findUnique({
-        where: { id: task.clientId },
-        select: { monthlyActionsUsed: true, monthlyActionsTotal: true, actionsResetAt: true },
-      });
-      if (client && (client.monthlyActionsTotal ?? 0) > 0) {
-        await prisma.user.update({
-          where: { id: task.clientId },
-          data: { monthlyActionsUsed: { increment: actionsToDeduct } },
-        });
-      }
+    if (status === "COMPLETE") {
+      await deductTaskCreditsIfNeeded(id);
     }
 
     if (assigningAgent && task.assignedToId) {

@@ -8,6 +8,7 @@ import { TaskTimeline } from "./TaskTimeline";
 import { TaskConversation } from "./TaskConversation";
 import { TaskMessageConversation } from "./TaskMessageConversation";
 import { TaskInternalNotes } from "./TaskInternalNotes";
+import { TaskClientReport } from "./TaskClientReport";
 import { DocumentUploadZone } from "@/components/documents/DocumentUploadZone";
 import { documentDownloadHref } from "@/lib/documents/download-url";
 
@@ -27,6 +28,9 @@ interface TaskDetailViewProps {
     validatedAt?: Date | null;
     timeSpentMinutes?: number | null;
     actionsUsed?: number | null;
+    creditsDeductedAt?: Date | string | null;
+    clientReport?: string | null;
+    clientReportSentAt?: Date | string | null;
     category?: string | null;
     priority?: string | null;
     desiredDate?: Date | string | null;
@@ -52,6 +56,7 @@ interface TaskDetailViewProps {
   correctionSending?: boolean;
   validateSending?: boolean;
   validateError?: string | null;
+  onReportSent?: () => void | Promise<void>;
 }
 
 const statusColors: Record<TaskStatus, string> = {
@@ -84,6 +89,7 @@ export function TaskDetailView({
   correctionSending = false,
   validateSending = false,
   validateError = null,
+  onReportSent,
 }: TaskDetailViewProps) {
   const [agencyNotesLocal, setAgencyNotesLocal] = useState(task.agencyNotes ?? "");
   const [savingNotes, setSavingNotes] = useState(false);
@@ -155,6 +161,11 @@ export function TaskDetailView({
                 Demander modification
               </a>
             </>
+          )}
+          {task.status === "COMPLETE" && !task.clientReportSentAt && (
+            <a href="#compte-rendu" className="rounded-lg border border-[color:var(--accent-600)] bg-[color:var(--accent-600)] px-3 py-2 text-sm font-medium text-white hover:bg-[color:var(--accent-700)]">
+              Envoyer compte rendu
+            </a>
           )}
         </div>
       )}
@@ -231,6 +242,11 @@ export function TaskDetailView({
                   <span className="text-slate-600"> (≈ {task.timeSpentMinutes} min)</span>
                 ) : null}
                 <span className="text-slate-500"> — 1 crédit = 12 min</span>
+                {task.creditsDeductedAt && (
+                  <p className="mt-1 text-xs font-medium text-green-700">
+                    Décomptés du compteur client le {new Date(task.creditsDeductedAt).toLocaleDateString("fr-FR")}
+                  </p>
+                )}
               </div>
             )}
             {(isAgence || isAgent) && (task.status === "A_VALIDER" || task.status === "COMPLETE") && task.actionsUsed == null && (
@@ -799,6 +815,21 @@ export function TaskDetailView({
           </div>
         </div>
       )}
+
+      {/* Compte rendu client (gérante : envoi · client : lecture après envoi) */}
+      <TaskClientReport
+        taskId={task.id}
+        taskTitle={task.title}
+        clientName={task.client?.name}
+        actionsUsed={task.actionsUsed}
+        creditsDeductedAt={task.creditsDeductedAt}
+        clientReport={task.clientReport}
+        clientReportSentAt={task.clientReportSentAt}
+        isManager={Boolean(isManager)}
+        isClient={Boolean(!isAgence && !isAgent)}
+        taskStatus={task.status}
+        onSent={onReportSent}
+      />
 
       {/* Timeline */}
       <div className="rounded-xl surface-metallic-light p-6">

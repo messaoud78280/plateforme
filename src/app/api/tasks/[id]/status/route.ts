@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { minutesToActions, syncUserCreditsExpiry } from "@/lib/actions";
+import { minutesToActions } from "@/lib/actions";
+import { deductTaskCreditsIfNeeded } from "@/lib/tasks/deduct-credits";
 
 /** PATCH /api/tasks/[id]/status – Changer le statut d'une tâche (optionnel: timeSpentMinutes pour COMPLETE) */
 export async function PATCH(
@@ -73,20 +74,7 @@ export async function PATCH(
       } catch {
         // ignore si table Alert absente
       }
-    }
-
-    if (actionsToDeduct > 0 && task.clientId) {
-      await syncUserCreditsExpiry(task.clientId);
-      const client = await prisma.user.findUnique({
-        where: { id: task.clientId },
-        select: { monthlyActionsTotal: true },
-      });
-      if (client && (client.monthlyActionsTotal ?? 0) > 0) {
-        await prisma.user.update({
-          where: { id: task.clientId },
-          data: { monthlyActionsUsed: { increment: actionsToDeduct } },
-        });
-      }
+      await deductTaskCreditsIfNeeded(id);
     }
 
     return NextResponse.json(task);

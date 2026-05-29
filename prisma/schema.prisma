@@ -427,6 +427,10 @@ model Task {
   completedAt    DateTime?
   timeSpentMinutes Int?    // temps réel passé (minutes) — renseigné par l'agent
   actionsUsed      Int?    // actions déduites (ceil(min/10), min 1)
+  creditsDeductedAt DateTime? // date de débit effectif sur le compteur client
+  clientReport     String?   // compte rendu envoyé au client
+  clientReportSentAt DateTime?
+  clientReportSentById String?
   // Mémoire des missions (contacts et fournisseurs pour relance)
   contactsJson    Json?    // [{ name, email, role }]
   suppliersJson   Json?    // [{ name, contact }]

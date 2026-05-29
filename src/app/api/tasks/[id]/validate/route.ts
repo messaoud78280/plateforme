@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
+import { deductTaskCreditsIfNeeded } from "@/lib/tasks/deduct-credits";
 
 /** PATCH /api/tasks/[id]/validate – Valider le travail ou demander une correction (agence uniquement) */
 export async function PATCH(
@@ -94,7 +95,15 @@ export async function PATCH(
           actionUrl: `/dashboard/taches/${id}`,
         });
       }
-      return NextResponse.json(task);
+
+      await deductTaskCreditsIfNeeded(id);
+
+      const taskFinal = await prisma.task.findUnique({
+        where: { id },
+        include: { assignedTo: { select: { id: true, name: true, email: true } } },
+      });
+
+      return NextResponse.json(taskFinal ?? task);
     }
 
     if (action === "correction") {

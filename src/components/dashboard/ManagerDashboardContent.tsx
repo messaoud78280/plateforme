@@ -36,6 +36,14 @@ export type ManagerActivityItem = {
   client?: { name: string };
 };
 
+export type ManagerReportItem = {
+  id: string;
+  title: string;
+  clientReportSentAt: Date;
+  actionsUsed: number | null;
+  client: { name: string };
+};
+
 type ManagerDashboardContentProps = {
   nouvellesDemandes: ManagerTaskItem[];
   aAssigner: ManagerTaskItem[];
@@ -50,6 +58,7 @@ type ManagerDashboardContentProps = {
   agentsActifsCount?: number;
   actionsConsumees?: number;
   activiteRecente?: ManagerActivityItem[];
+  comptesRendusRecents?: ManagerReportItem[];
 };
 
 function TaskCard({
@@ -138,6 +147,7 @@ export function ManagerDashboardContent({
   agentsActifsCount = 0,
   actionsConsumees,
   activiteRecente = [],
+  comptesRendusRecents = [],
 }: ManagerDashboardContentProps) {
   const showKpis = typeof nouvellesCount === "number" || agentsActifsCount > 0;
   return (
@@ -219,6 +229,50 @@ export function ManagerDashboardContent({
             </div>
           )}
         </div>
+      )}
+
+      {/* Comptes rendus envoyés récemment */}
+      {comptesRendusRecents.length > 0 && (
+        <section className="rounded-2xl border border-green-200 bg-green-50/30 p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-slate-800">Comptes rendus envoyés</h3>
+            <Link
+              href="/dashboard/taches?statut=COMPLETE"
+              className="text-sm font-medium text-[color:var(--accent-600)] hover:underline"
+            >
+              Voir les missions terminées
+            </Link>
+          </div>
+          <ul className="space-y-3">
+            {comptesRendusRecents.slice(0, 8).map((r) => (
+              <li key={r.id} className="rounded-lg border border-green-100 bg-white p-4">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div>
+                    <Link
+                      href={`/dashboard/taches/${r.id}#compte-rendu`}
+                      className="font-medium text-slate-800 hover:text-[color:var(--accent-600)] hover:underline"
+                    >
+                      {r.title}
+                    </Link>
+                    <p className="mt-1 text-sm text-slate-500">
+                      Client : {r.client.name}
+                      {r.actionsUsed ? ` · ${r.actionsUsed} crédit${r.actionsUsed > 1 ? "s" : ""} décomptés` : ""}
+                    </p>
+                    <p className="mt-0.5 text-xs text-slate-400">
+                      Envoyé le {new Date(r.clientReportSentAt).toLocaleString("fr-FR")}
+                    </p>
+                  </div>
+                  <Link
+                    href={`/dashboard/taches/${r.id}#compte-rendu`}
+                    className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                  >
+                    Voir
+                  </Link>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       {/* 1. Nouvelles demandes */}
@@ -373,7 +427,11 @@ export function ManagerDashboardContent({
         ) : (
           <div className="space-y-3">
             {missionsTerminees.slice(0, 5).map((t) => (
-              <TaskCard key={t.id} task={t} />
+              <TaskCard
+                key={t.id}
+                task={t}
+                actions={[{ label: "Compte rendu", href: `/dashboard/taches/${t.id}#compte-rendu` }]}
+              />
             ))}
           </div>
         )}

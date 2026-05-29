@@ -21,6 +21,9 @@ interface TaskDetailClientProps {
     validatedAt?: Date | null;
     timeSpentMinutes?: number | null;
     actionsUsed?: number | null;
+    creditsDeductedAt?: Date | string | null;
+    clientReport?: string | null;
+    clientReportSentAt?: Date | string | null;
     category?: string | null;
     priority?: string | null;
     desiredDate?: Date | string | null;
@@ -204,6 +207,7 @@ export function TaskDetailClient({
       correctionSending={correctionSending}
       validateSending={validateSending}
       validateError={validateError}
+      onReportSent={afterTaskAction}
     />
   );
 }

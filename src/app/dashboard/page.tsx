@@ -13,7 +13,7 @@ import { ScrollToMessages } from "@/components/ScrollToMessages";
 import { ActionsWidget } from "@/components/dashboard/ActionsWidget";
 import { NouvelleDemandeTrigger } from "@/components/demands/NouvelleDemandeTrigger";
 import { ClientDashboardContent } from "@/components/dashboard/ClientDashboardContent";
-import { ManagerDashboardContent, type ManagerTaskItem } from "@/components/dashboard/ManagerDashboardContent";
+import { ManagerDashboardContent, type ManagerTaskItem, type ManagerReportItem } from "@/components/dashboard/ManagerDashboardContent";
 import { AgentDashboardContent } from "@/components/dashboard/AgentDashboardContent";
 import { BackLink } from "@/components/ui/BackLink";
 import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
@@ -315,6 +315,7 @@ export default async function DashboardPage({
     agentsActifsCount: number;
     actionsConsumees: number;
     activiteRecente: { id: string; title: string; detail: string | null; createdAt: Date; client?: { name: string } }[];
+    comptesRendusRecents: ManagerReportItem[];
   } = {
     nouvellesCount: 0,
     aAssignerCount: 0,
@@ -323,11 +324,12 @@ export default async function DashboardPage({
     agentsActifsCount: 0,
     actionsConsumees: 0,
     activiteRecente: [],
+    comptesRendusRecents: [],
   };
 
   if (isManager) {
     try {
-      const [nouvCount, aAssignCount, enCoursCount, aValiderCount, agentsCount, clientsActions, recentActivities] = await Promise.all([
+      const [nouvCount, aAssignCount, enCoursCount, aValiderCount, agentsCount, clientsActions, recentActivities, recentReports] = await Promise.all([
         prisma.task.count({ where: { status: "NOUVEAU" } }),
         prisma.task.count({ where: { status: "EN_ATTENTE", assignedToId: null } }),
         prisma.task.count({ where: { status: { in: ["ASSIGNEE", "EN_ANALYSE", "EN_COURS", "EN_ATTENTE_INFO"] } } }),
@@ -338,6 +340,18 @@ export default async function DashboardPage({
           orderBy: { createdAt: "desc" },
           take: 10,
           include: { client: { select: { name: true } } },
+        }),
+        prisma.task.findMany({
+          where: { clientReportSentAt: { not: null } },
+          orderBy: { clientReportSentAt: "desc" },
+          take: 10,
+          select: {
+            id: true,
+            title: true,
+            clientReportSentAt: true,
+            actionsUsed: true,
+            client: { select: { name: true } },
+          },
         }),
       ]);
       const actionsConsumees = (clientsActions as { monthlyActionsUsed: number | null }[]).reduce(
@@ -358,6 +372,15 @@ export default async function DashboardPage({
           createdAt: a.createdAt,
           client: a.client ? { name: a.client.name } : undefined,
         })),
+        comptesRendusRecents: recentReports
+          .filter((r) => r.clientReportSentAt)
+          .map((r) => ({
+            id: r.id,
+            title: r.title,
+            clientReportSentAt: r.clientReportSentAt as Date,
+            actionsUsed: r.actionsUsed,
+            client: { name: r.client.name },
+          })),
       };
     } catch {
       // ignore
@@ -601,6 +624,7 @@ export default async function DashboardPage({
             agentsActifsCount={managerKpis.agentsActifsCount}
             actionsConsumees={managerKpis.actionsConsumees}
             activiteRecente={managerKpis.activiteRecente}
+            comptesRendusRecents={managerKpis.comptesRendusRecents}
           />
           {clients.length > 0 && <ClientsSection clients={clients} />}
         </>

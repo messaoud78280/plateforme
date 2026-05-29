@@ -7,6 +7,7 @@ import { BackLink } from "@/components/ui/BackLink";
 import { AssignAgentProject } from "@/components/clients/AssignAgentProject";
 import { AssignAgentTask } from "@/components/clients/AssignAgentTask";
 import { DeleteClientButton } from "@/components/clients/DeleteClientButton";
+import { ClientCreditsBadge } from "@/components/clients/ClientCreditsBadge";
 
 const STATUS_LABELS: Record<string, string> = {
   NOUVEAU: "Nouveau",
@@ -125,6 +126,9 @@ export default async function ClientDetailPage({
           {client.phone && (
             <p className="mt-1 text-sm text-black">Tél. : {client.phone}</p>
           )}
+          <div className="mt-4 max-w-md">
+            <ClientCreditsBadge clientId={client.id} />
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Link

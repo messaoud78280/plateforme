@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { TaskDetailClient } from "@/components/tasks/TaskDetailClient";
 import { BackLink } from "@/components/ui/BackLink";
+import { parseClientDeliveryJson, filterDocumentsForClient } from "@/lib/tasks/client-delivery";
 
 export default async function TacheDetailPage({
   params,
@@ -69,6 +70,16 @@ export default async function TacheDetailPage({
   const canAccess = isAgence || isAgent || task.clientId === session.user.id;
   if (!canAccess) notFound();
 
+  const isClientUser = task.clientId === session.user.id;
+  const clientReportSentAt = (task as { clientReportSentAt?: Date | null }).clientReportSentAt ?? null;
+  const clientDeliveryJson = (task as { clientDeliveryJson?: unknown }).clientDeliveryJson;
+  const delivery = parseClientDeliveryJson(clientDeliveryJson);
+
+  let documentsForView = task.documents ?? [];
+  if (isClientUser) {
+    documentsForView = filterDocumentsForClient(documentsForView, clientReportSentAt, delivery);
+  }
+
   const canEdit = isAgence || isAgent || task.clientId === session.user.id;
 
   return (
@@ -93,7 +104,7 @@ export default async function TacheDetailPage({
           actionsUsed: task.actionsUsed ?? null,
           creditsDeductedAt: (task as { creditsDeductedAt?: Date | null }).creditsDeductedAt ?? null,
           clientReport: (task as { clientReport?: string | null }).clientReport ?? null,
-          clientReportSentAt: (task as { clientReportSentAt?: Date | null }).clientReportSentAt ?? null,
+          clientReportSentAt: clientReportSentAt ?? null,
           category: (task as { category?: string | null }).category ?? null,
           priority: (task as { priority?: string | null }).priority ?? null,
           desiredDate: (task as { desiredDate?: Date | null }).desiredDate ?? null,
@@ -102,7 +113,7 @@ export default async function TacheDetailPage({
           assignedTo: task.assignedTo ?? null,
           client: task.client,
           project: task.project ?? null,
-          documents: task.documents ?? [],
+          documents: documentsForView,
         }}
         canEdit={canEdit}
         isAgence={isAgence}

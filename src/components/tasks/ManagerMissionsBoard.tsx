@@ -6,6 +6,7 @@ import Link from "next/link";
 import { MissionDetailDrawer } from "./MissionDetailDrawer";
 import { DeleteTaskButton } from "./DeleteTaskButton";
 import { QualifyRequestButton } from "./QualifyRequestButton";
+import { ClientCreditsBadge } from "@/components/clients/ClientCreditsBadge";
 import { missionTypeLabel, MISSION_TYPES, MISSION_TYPE_LABELS } from "@/lib/tasks/mission-types";
 
 const FILTER_ALL = "";
@@ -135,6 +136,9 @@ function MissionCard({
           {task.client.name}
         </Link>
       </p>
+      <div className="mt-1.5">
+        <ClientCreditsBadge clientId={task.client.id} compact />
+      </div>
       {task.project ? (
         <p className="mt-1 text-xs text-slate-600">
           <span className="font-medium text-slate-700">Chantier :</span>{" "}

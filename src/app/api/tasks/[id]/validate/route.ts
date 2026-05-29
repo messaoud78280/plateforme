@@ -3,7 +3,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
-import { deductTaskCreditsIfNeeded } from "@/lib/tasks/deduct-credits";
 
 /** PATCH /api/tasks/[id]/validate – Valider le travail ou demander une correction (agence uniquement) */
 export async function PATCH(
@@ -19,9 +18,13 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  let body: { action?: string; correctionNote?: string };
+  let body: { action?: string; correctionNote?: string; actionsUsed?: number };
   try {
-    body = (await request.json()) as { action?: string; correctionNote?: string };
+    body = (await request.json()) as {
+      action?: string;
+      correctionNote?: string;
+      actionsUsed?: number;
+    };
   } catch {
     return NextResponse.json({ error: "JSON invalide" }, { status: 400 });
   }
@@ -60,9 +63,23 @@ export async function PATCH(
     }
 
     if (action === "validate") {
+      const updateData: {
+        validatedAt: Date;
+        status: "COMPLETE";
+        completedAt: Date;
+        actionsUsed?: number | null;
+      } = {
+        validatedAt: new Date(),
+        status: "COMPLETE",
+        completedAt: new Date(),
+      };
+      if (typeof body.actionsUsed === "number" && body.actionsUsed >= 0) {
+        updateData.actionsUsed = Math.round(body.actionsUsed);
+      }
+
       const task = await prisma.task.update({
         where: { id },
-        data: { validatedAt: new Date(), status: "COMPLETE" },
+        data: updateData,
         include: { assignedTo: { select: { id: true, name: true, email: true } } },
       });
       if (task.clientId) {
@@ -95,8 +112,6 @@ export async function PATCH(
           actionUrl: `/dashboard/taches/${id}`,
         });
       }
-
-      await deductTaskCreditsIfNeeded(id);
 
       const taskFinal = await prisma.task.findUnique({
         where: { id },

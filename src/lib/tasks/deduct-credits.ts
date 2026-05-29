@@ -11,6 +11,29 @@ export type DeductTaskCreditsResult = {
  * Débite le compteur client pour une mission (idempotent via creditsDeductedAt).
  * À appeler à la validation / clôture définitive (statut COMPLETE).
  */
+/**
+ * Met à jour le nombre de crédits à débiter (avant débit effectif).
+ */
+export async function setTaskActionsUsed(
+  taskId: string,
+  actionsUsed: number
+): Promise<{ ok: boolean; error?: string }> {
+  const task = await prisma.task.findUnique({
+    where: { id: taskId },
+    select: { creditsDeductedAt: true },
+  });
+  if (!task) return { ok: false, error: "Mission introuvable" };
+  if (task.creditsDeductedAt) {
+    return { ok: false, error: "Les crédits ont déjà été décomptés." };
+  }
+  const amount = Math.max(0, Math.round(actionsUsed));
+  await prisma.task.update({
+    where: { id: taskId },
+    data: { actionsUsed: amount > 0 ? amount : null },
+  });
+  return { ok: true };
+}
+
 export async function deductTaskCreditsIfNeeded(taskId: string): Promise<DeductTaskCreditsResult> {
   const task = await prisma.task.findUnique({
     where: { id: taskId },

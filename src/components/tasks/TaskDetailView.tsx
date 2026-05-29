@@ -8,7 +8,8 @@ import { TaskTimeline } from "./TaskTimeline";
 import { TaskConversation } from "./TaskConversation";
 import { TaskMessageConversation } from "./TaskMessageConversation";
 import { TaskInternalNotes } from "./TaskInternalNotes";
-import { TaskClientReport } from "./TaskClientReport";
+import { MissionClientTransmission } from "./MissionClientTransmission";
+import { ClientCreditsBadge } from "@/components/clients/ClientCreditsBadge";
 import { DocumentUploadZone } from "@/components/documents/DocumentUploadZone";
 import { documentDownloadHref } from "@/lib/documents/download-url";
 import { missionTypeLabel } from "@/lib/tasks/mission-types";
@@ -280,12 +281,15 @@ export function TaskDetailView({
           </div>
         </div>
         {task.client && (isAgence || isAgent) && (
-          <p className="mt-2 text-sm text-slate-600">
-            Client :{" "}
-            <Link href={`/dashboard/clients/${task.client.id}`} className="font-medium text-blue-600 hover:underline">
-              {task.client.name}
-            </Link>
-          </p>
+          <div className="mt-3 space-y-2">
+            <p className="text-sm text-slate-600">
+              Client :{" "}
+              <Link href={`/dashboard/clients/${task.client.id}`} className="font-medium text-blue-600 hover:underline">
+                {task.client.name}
+              </Link>
+            </p>
+            <ClientCreditsBadge clientId={task.client.id} />
+          </div>
         )}
         {task.project && (
           <p className="mt-2 text-sm text-slate-600">
@@ -700,10 +704,13 @@ export function TaskDetailView({
         </div>
       )}
 
-      {/* Demande de correction (visible par tous si présente) */}
-      {task.correctionNote && (
+      {/* Note de correction — visible équipe uniquement (sauf si transmise au client) */}
+      {task.correctionNote && (isAgence || isAgent) && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-          <p className="text-sm font-medium text-amber-800">Correction demandée par l'agence</p>
+          <p className="text-sm font-medium text-amber-800">Correction demandée (interne)</p>
+          <p className="mt-1 text-xs text-amber-700">
+            Non visible par le client sauf si vous l&apos;incluez lors de la transmission.
+          </p>
           <p className="mt-1 whitespace-pre-wrap text-sm text-amber-900">{task.correctionNote}</p>
         </div>
       )}
@@ -778,7 +785,8 @@ export function TaskDetailView({
         <div id="valider-section" className="scroll-mt-6 rounded-xl surface-metallic-light p-6">
           <h2 className="mb-4 text-lg font-semibold text-slate-800">Vérifier et valider le travail</h2>
           <p className="mb-4 text-sm text-slate-600">
-            Après vérification, validez le travail de l&apos;agent ou demandez une correction.
+            Validez le travail, demandez une correction si besoin, puis utilisez la section{" "}
+            <strong>Transmission au client</strong> ci-dessous pour ajuster les crédits et choisir les pièces visibles.
           </p>
           <div className="flex flex-wrap gap-4">
             <div className="flex flex-col gap-2">
@@ -842,20 +850,18 @@ export function TaskDetailView({
         </div>
       )}
 
-      {/* Compte rendu client (gérante : envoi · client : lecture après envoi) */}
-      <TaskClientReport
-        taskId={task.id}
-        taskTitle={task.title}
-        clientName={task.client?.name}
-        actionsUsed={task.actionsUsed}
-        creditsDeductedAt={task.creditsDeductedAt}
-        clientReport={task.clientReport}
-        clientReportSentAt={task.clientReportSentAt}
-        isManager={Boolean(isManager)}
-        isClient={Boolean(!isAgence && !isAgent)}
-        taskStatus={task.status}
-        onSent={onReportSent}
-      />
+      {/* Transmission client (équipe) / lecture (client) */}
+      {task.client && (isAgence || (!isAgence && !isAgent)) ? (
+        <MissionClientTransmission
+          taskId={task.id}
+          clientId={task.client.id}
+          clientName={task.client.name}
+          taskStatus={task.status}
+          isStaff={Boolean(isAgence)}
+          isClient={Boolean(!isAgence && !isAgent)}
+          onSent={onReportSent}
+        />
+      ) : null}
 
       {/* Timeline */}
       <div className="rounded-xl surface-metallic-light p-6">

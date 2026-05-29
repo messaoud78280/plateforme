@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { TASK_STATUS_LABELS, type TaskStatus } from "@/types";
 import { DeleteTaskButton } from "./DeleteTaskButton";
+import { ClientCreditsBadge } from "@/components/clients/ClientCreditsBadge";
 
 const STATUS_COLORS: Record<string, string> = {
   NOUVEAU: "bg-slate-100 text-slate-800",
@@ -62,6 +63,7 @@ export function AgentMissionsList({ missions }: AgentMissionsListProps) {
             </Link>
             <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm text-slate-600">
               <span>Client : {m.client.name}</span>
+              <ClientCreditsBadge clientId={m.client.id} compact />
               <span
                 className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                   PRIORITY_COLORS[m.priority ?? "STANDARD"] ?? PRIORITY_COLORS.STANDARD

@@ -5,33 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { BackLink } from "@/components/ui/BackLink";
 import { isWellFormedEmail } from "@/lib/email-validation";
-
-const FORMES_JURIDIQUES = [
-  "Profession libérale",
-  "SAS",
-  "EURL",
-  "SARL",
-  "SA",
-  "Auto-entrepreneur / Micro-entreprise",
-  "Association",
-  "SCI",
-  "Autre",
-] as const;
-
-const SECTEURS_ACTIVITE = [
-  "E-commerce",
-  "Juridique",
-  "Commercial",
-  "Réseaux sociaux / Médias",
-  "Événementiel",
-  "Agroalimentaire",
-  "Santé",
-  "BTP / Construction",
-  "Conseils / Consulting",
-  "Finance / Assurances",
-  "Industrie",
-  "Autre",
-] as const;
+import { FORMES_JURIDIQUES, SECTEURS_ACTIVITE } from "@/lib/client-profile-options";
 
 const labelClass =
   "mb-2 block text-xs font-semibold uppercase tracking-[0.1em] text-black";
@@ -59,6 +33,15 @@ export default function InscriptionPage() {
       setError(
         "Indiquez une adresse email complète (ex. nom@gmail.com, contact@entreprise.fr)."
       );
+      return;
+    }
+
+    if (!company.trim()) {
+      setError("Indiquez la raison sociale de votre entreprise.");
+      return;
+    }
+    if (!formeJuridique) {
+      setError("Sélectionnez la forme juridique de votre entreprise.");
       return;
     }
 

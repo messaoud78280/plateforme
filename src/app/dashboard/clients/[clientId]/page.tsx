@@ -38,7 +38,15 @@ export default async function ClientDetailPage({
     redirect("/dashboard");
   }
 
-  let client: { id: string; name: string; email: string; company: string | null; phone: string | null } | null = null;
+  let client: {
+    id: string;
+    name: string;
+    email: string;
+    company: string | null;
+    phone: string | null;
+    formeJuridique: string | null;
+    secteurActivite: string | null;
+  } | null = null;
   let projects: { id: string; title: string; status: string; assignedToId: string | null; assignedTo: { id: string; name: string; email: string } | null }[] = [];
   let tasks: { id: string; title: string; status: string; assignedToId: string | null; project: { id: string; title: string } | null; assignedTo: { id: string; name: string; email: string } | null }[] = [];
   let agents: { id: string; name: string; email: string }[] = [];
@@ -46,12 +54,20 @@ export default async function ClientDetailPage({
   try {
     const clientUser = await prisma.user.findUnique({
       where: { id: clientId },
-      select: { id: true, name: true, email: true, company: true, phone: true, role: true },
+      select: { id: true, name: true, email: true, company: true, phone: true, formeJuridique: true, secteurActivite: true, role: true },
     });
     if (!clientUser) {
       notFound();
     }
-    client = { id: clientUser.id, name: clientUser.name, email: clientUser.email, company: clientUser.company, phone: clientUser.phone };
+    client = {
+      id: clientUser.id,
+      name: clientUser.name,
+      email: clientUser.email,
+      company: clientUser.company,
+      phone: clientUser.phone,
+      formeJuridique: clientUser.formeJuridique,
+      secteurActivite: clientUser.secteurActivite,
+    };
 
     const [projectsRes, tasksRes, agentsRes] = await Promise.all([
       prisma.project.findMany({
@@ -99,6 +115,12 @@ export default async function ClientDetailPage({
           <p className="mt-1 text-black">{client.email}</p>
           {client.company && (
             <p className="mt-1 text-sm text-black">Société : {client.company}</p>
+          )}
+          {client.formeJuridique && (
+            <p className="mt-1 text-sm text-black">Forme juridique : {client.formeJuridique}</p>
+          )}
+          {client.secteurActivite && (
+            <p className="mt-1 text-sm text-black">Secteur : {client.secteurActivite}</p>
           )}
           {client.phone && (
             <p className="mt-1 text-sm text-black">Tél. : {client.phone}</p>

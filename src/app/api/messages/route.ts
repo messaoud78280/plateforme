@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import {
+  canAccessProjectMessaging,
+  projectMessageVisibilityWhere,
+} from "@/lib/messaging/access";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -11,15 +15,8 @@ export async function GET() {
   }
 
   try {
-    const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
-
     const messages = await prisma.message.findMany({
-      where: {
-        OR: [
-          { receiverId: session.user.id },
-          { senderId: session.user.id },
-        ],
-      },
+      where: projectMessageVisibilityWhere(session.user.id),
       include: {
         project: { select: { id: true, title: true } },
         sender: { select: { id: true, name: true } },
@@ -65,10 +62,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Projet introuvable" }, { status: 404 });
     }
 
+    const canMessage = await canAccessProjectMessaging(session.user, project);
+    if (!canMessage && session.user.role === "AGENT") {
+      return NextResponse.json({ error: "Accès refusé à ce projet." }, { status: 403 });
+    }
+
     const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
     let finalReceiverId: string;
 
     if (isAgence) {
+      if (!(await canAccessProjectMessaging(session.user, project))) {
+        return NextResponse.json(
+          { error: "Vous ne participez pas à la messagerie de ce chantier." },
+          { status: 403 }
+        );
+      }
       if (project.clientId === session.user.id) {
         return NextResponse.json(
           { error: "Accès refusé." },

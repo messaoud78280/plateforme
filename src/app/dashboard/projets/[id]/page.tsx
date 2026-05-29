@@ -11,6 +11,7 @@ import { ProjectReportsSection } from "@/components/projects/ProjectReportsSecti
 import { ChantierDossierSection } from "@/components/chantier/ChantierDossierSection";
 import { canAccessBeWorkSkills } from "@/lib/be-work-skills-access";
 import { canAccessChantierProject, canDeleteChantierProject } from "@/lib/chantier-dossier/access";
+import { projectMessageVisibilityWhere } from "@/lib/messaging/access";
 import { DeleteChantierButton } from "@/components/chantier/DeleteChantierButton";
 import { ensureChantierFolders } from "@/lib/chantier-dossier/folders";
 import {
@@ -38,6 +39,7 @@ export default async function ProjetDetailPage({
         client: true,
         assignedTo: { select: { id: true, name: true, email: true } },
         messages: {
+          where: projectMessageVisibilityWhere(session.user.id),
           include: { sender: true, receiver: true },
           orderBy: { createdAt: "asc" },
         },

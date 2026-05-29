@@ -3,8 +3,13 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
+import {
+  canAccessTaskThread,
+  isAgenceOrManager,
+  taskMessageVisibilityWhere,
+} from "@/lib/messaging/access";
 
-/** GET /api/tasks/[id]/messages — Messages de la tâche (client ne voit que les non-internes, et seulement si agent assigné) */
+/** GET /api/tasks/[id]/messages — Messages de la tâche (filtrés par participant). */
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -15,8 +20,6 @@ export async function GET(
   }
 
   const { id: taskId } = await params;
-  const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
-  const isAgent = session.user.role === "AGENT";
 
   try {
     const task = await prisma.task.findUnique({
@@ -27,20 +30,13 @@ export async function GET(
       return NextResponse.json({ error: "Tâche introuvable" }, { status: 404 });
     }
 
-    const isClient = task.clientId === session.user.id;
-    const isAssignedAgent = task.assignedToId === session.user.id;
-    const canRead = isAgence || isClient || (isAgent && isAssignedAgent);
+    const canRead = await canAccessTaskThread(session.user, task);
     if (!canRead) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
     }
 
-    const where: { taskId: string; isInternal?: boolean } = { taskId };
-    if (isClient) {
-      where.isInternal = false;
-    }
-
     const messages = await prisma.taskMessage.findMany({
-      where,
+      where: taskMessageVisibilityWhere(session.user, taskId),
       include: {
         sender: { select: { id: true, name: true } },
         receiver: { select: { id: true, name: true } },
@@ -69,7 +65,7 @@ export async function POST(
   }
 
   const { id: taskId } = await params;
-  const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
+  const isStaffManager = isAgenceOrManager(session.user.role);
   const isAgent = session.user.role === "AGENT";
 
   try {
@@ -92,11 +88,16 @@ export async function POST(
       return NextResponse.json({ error: "Tâche introuvable" }, { status: 404 });
     }
 
+    const canAccess = await canAccessTaskThread(session.user, task);
+    if (!canAccess) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+    }
+
     const isClient = task.clientId === session.user.id;
     const isAssignedAgent = task.assignedToId === session.user.id;
 
     let receiverIdFinal: string;
-    const internal = Boolean(isInternal) && (isAgence || isAgent);
+    const internal = Boolean(isInternal) && (isStaffManager || isAgent);
 
     if (isClient) {
       if (!task.assignedToId) {
@@ -120,7 +121,7 @@ export async function POST(
       } else {
         receiverIdFinal = task.clientId;
       }
-    } else if (isAgence) {
+    } else if (isStaffManager) {
       if (internal && receiverId) {
         const agent = await prisma.user.findFirst({ where: { id: receiverId, role: { in: ["AGENCE", "AGENT"] } } });
         if (!agent) {

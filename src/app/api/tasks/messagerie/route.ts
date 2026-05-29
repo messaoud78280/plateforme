@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import {
+  taskMessagerieWhere,
+  taskMessageVisibilityRelationWhere,
+} from "@/lib/messaging/access";
 
 /** GET /api/tasks/messagerie?filter=inbox|mes-missions|en-attente-client|en-cours|terminees
  * Retourne les tâches avec lastMessage et unreadCount pour la messagerie missions */
@@ -14,19 +18,8 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const filter = searchParams.get("filter") ?? "inbox";
 
-  const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
-  const isAgent = session.user.role === "AGENT";
-  const isClient = session.user.role === "CLIENT";
-
   try {
-    let taskWhere: Record<string, unknown> = {};
-
-    if (isClient) {
-      taskWhere = { clientId: session.user.id };
-    } else if (isAgent) {
-      taskWhere = { assignedToId: session.user.id };
-    }
-    // isAgence: pas de filtre client/agent
+    let taskWhere: Record<string, unknown> = taskMessagerieWhere(session.user);
 
     const statusFilters: Record<string, string[]> = {
       inbox: [], // toutes (avec priorité aux non lus)
@@ -47,6 +40,7 @@ export async function GET(request: NextRequest) {
         client: { select: { id: true, name: true } },
         assignedTo: { select: { id: true, name: true } },
         taskMessages: {
+          where: taskMessageVisibilityRelationWhere(session.user),
           orderBy: { createdAt: "desc" },
           take: 1,
           include: { sender: { select: { id: true, name: true } } },

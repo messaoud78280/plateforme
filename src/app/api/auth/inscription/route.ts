@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { isWellFormedEmail } from "@/lib/email-validation";
+import { isValidFormeJuridique, isValidSecteurActivite } from "@/lib/client-profile-options";
 import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
 import { Prisma, UserRole } from "@prisma/client";
 import { sendAdminNewUserNotification, sendWelcomeEmail } from "@/lib/email";
@@ -20,11 +21,23 @@ export async function POST(request: Request) {
       service,
     } = body;
 
-    if (!email || !password || !name) {
+    if (!email || !password || !name || !company || !formeJuridique) {
       return NextResponse.json(
-        { error: "Email, mot de passe et nom du contact sont requis." },
+        { error: "Email, mot de passe, nom du contact, raison sociale et forme juridique sont requis." },
         { status: 400 }
       );
+    }
+
+    const companyTrim = String(company).trim();
+    const formeTrim = String(formeJuridique).trim();
+    if (!companyTrim) {
+      return NextResponse.json({ error: "La raison sociale est requise." }, { status: 400 });
+    }
+    if (!isValidFormeJuridique(formeTrim)) {
+      return NextResponse.json({ error: "Forme juridique invalide." }, { status: 400 });
+    }
+    if (secteurActivite && !isValidSecteurActivite(String(secteurActivite))) {
+      return NextResponse.json({ error: "Secteur d'activité invalide." }, { status: 400 });
     }
 
     const emailRaw = String(email).trim();
@@ -60,8 +73,8 @@ export async function POST(request: Request) {
         name,
         role: UserRole.CLIENT, // Inscription toujours en tant que client (professionnel)
         phone: phone || undefined,
-        company: company || undefined,
-        formeJuridique: formeJuridique || undefined,
+        company: companyTrim,
+        formeJuridique: formeTrim,
         secteurActivite: secteurActivite || undefined,
         service: service || undefined,
         subscriptionPlan: "STANDARD",

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { BackLink } from "@/components/ui/BackLink";
 import { ClientsTable } from "@/components/clients/ClientsTable";
+import { CreateClientForm } from "@/components/clients/CreateClientForm";
 
 export default async function ClientsPage() {
   const session = await getServerSession(authOptions);
@@ -37,18 +38,21 @@ export default async function ClientsPage() {
   return (
     <div className="space-y-8">
       <BackLink href="/dashboard">Tableau de bord</BackLink>
-      <div>
-        <h1 className="text-2xl font-bold text-black">Clients</h1>
-        <p className="mt-1 text-black">
-          Répertoire de tous vos clients. Accédez à leurs projets et tâches, et attribuez un agent à chaque projet ou tâche.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-black">Clients</h1>
+          <p className="mt-1 text-black">
+            Répertoire de vos clients entreprises. Créez un compte, accédez à leurs projets et missions, attribuez un agent.
+          </p>
+        </div>
+        <CreateClientForm />
       </div>
 
       {clients.length === 0 ? (
         <div className="rounded-xl surface-metallic-light p-12 text-center">
           <p className="text-black">Aucun client pour le moment.</p>
           <p className="mt-2 text-sm text-black">
-            Les projets créés par les clients apparaîtront ici une fois qu&apos;ils auront un compte.
+            Cliquez sur « Nouveau client » pour créer un compte entreprise, ou attendez une inscription en ligne.
           </p>
         </div>
       ) : (

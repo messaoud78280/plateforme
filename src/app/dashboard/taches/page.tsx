@@ -8,6 +8,7 @@ import { DepotTacheForm } from "@/components/tasks/DepotTacheForm";
 import { MesDemandesList } from "@/components/tasks/MesDemandesList";
 import { AgentMissionsList } from "@/components/tasks/AgentMissionsList";
 import { ManagerMissionsBoard, type ManagerBoardTask } from "@/components/tasks/ManagerMissionsBoard";
+import { CreateMissionForm } from "@/components/tasks/CreateMissionForm";
 import { BackLink } from "@/components/ui/BackLink";
 
 export default async function TachesPage({
@@ -40,6 +41,8 @@ export default async function TachesPage({
   let tasks: Awaited<ReturnType<typeof prisma.task.findMany>> = [];
   let projects: { id: string; title: string }[] = [];
   let agentSummary = { missionsAujourdhui: 0, missionsUrgentes: 0, missionsEnCours: 0 };
+  let managerClients: { id: string; name: string; company: string | null }[] = [];
+  let managerAgents: { id: string; name: string }[] = [];
   let managerBoard: {
     nouvelles: ManagerBoardTask[];
     aAssigner: ManagerBoardTask[];
@@ -80,7 +83,7 @@ export default async function TachesPage({
   try {
     if (prisma.task) {
       if (isManager) {
-        const [nouvelles, aAssigner, enCours, aValider, terminees] = await Promise.all([
+        const [nouvelles, aAssigner, enCours, aValider, terminees, clientsRes, agentsRes] = await Promise.all([
           prisma.task.findMany({
             where: { status: "NOUVEAU" },
             select: boardSelect,
@@ -106,7 +109,19 @@ export default async function TachesPage({
             select: boardSelect,
             orderBy: { completedAt: "desc" },
           }),
+          prisma.user.findMany({
+            where: { role: "CLIENT" },
+            select: { id: true, name: true, company: true },
+            orderBy: { name: "asc" },
+          }),
+          prisma.user.findMany({
+            where: { role: { in: ["AGENT", "AGENCE"] } },
+            select: { id: true, name: true },
+            orderBy: { name: "asc" },
+          }),
         ]);
+        managerClients = clientsRes;
+        managerAgents = agentsRes;
         managerBoard = {
           nouvelles: (nouvelles as BoardRow[]).map(toBoard),
           aAssigner: (aAssigner as BoardRow[]).map(toBoard),
@@ -267,11 +282,14 @@ export default async function TachesPage({
     return (
       <div className="space-y-8">
         <BackLink href="/dashboard">Tableau de bord</BackLink>
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">Missions</h1>
-          <p className="mt-1 text-slate-600">
-            Tableau de gestion des missions. Assignez les agents, suivez l&apos;avancement et validez les livrables.
-          </p>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800">Missions</h1>
+            <p className="mt-1 text-slate-600">
+              Tableau de gestion des missions. Créez, assignez les agents, suivez l&apos;avancement et validez les livrables.
+            </p>
+          </div>
+          <CreateMissionForm clients={managerClients} agents={managerAgents} />
         </div>
         <ManagerMissionsBoard
           nouvelles={boardForFilter.nouvelles}

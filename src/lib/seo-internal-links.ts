@@ -91,10 +91,20 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/externaliser-administratif", label: "Externaliser l’administratif" },
   ],
   "/ressources/analyse-dce-btp": [
+    { href: "/ressources/analyse-dce-chiffrage-btp", label: "Analyse DCE & appui chiffrage" },
     { href: "/ressources/memoire-technique-btp", label: "Mémoire technique" },
     { href: "/services/analyse-dce-btp", label: "Analyse DCE avec BeWork" },
     { href: "/services/assistant-conducteur-de-travaux", label: "Assistant chargé d’affaires" },
     { href: "/relance-devis-btp", label: "Relance devis" },
+  ],
+  "/ressources/analyse-dce-chiffrage-btp": [
+    { href: "/ressources/analyse-dce-btp", label: "Guide analyse DCE" },
+    { href: "/ressources/chiffrage-devis-btp", label: "Méthode chiffrage devis" },
+    { href: "/devis-retard-btp", label: "Devis en retard" },
+    { href: "/services/chiffrage-devis-btp", label: "Appui chiffrage BeWork" },
+    { href: "/services/analyse-dce-btp", label: "Service analyse DCE" },
+    { href: "/ressources", label: "Hub ressources" },
+    { href: "/contact", label: "Contact" },
   ],
   "/ressources/compte-rendu-chantier": [
     { href: "/services/compte-rendu-chantier", label: "Comptes rendus avec BeWork" },
@@ -148,6 +158,7 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/faq", label: "FAQ BeWork" },
   ],
   "/ressources/chiffrage-devis-btp": [
+    { href: "/ressources/analyse-dce-chiffrage-btp", label: "Analyse DCE & appui chiffrage" },
     { href: "/relance-devis-btp", label: "Relance devis BTP" },
     { href: "/devis-retard-btp", label: "Devis en retard" },
     { href: "/services/chiffrage-devis-btp", label: "Chiffrage devis avec BeWork" },

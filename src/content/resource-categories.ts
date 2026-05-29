@@ -23,6 +23,7 @@ export const RESOURCE_GUIDE_CATEGORIES: readonly ResourceCategory[] = [
     description: "DCE, mémoires techniques et chiffrage.",
     links: [
       { href: "/ressources/analyse-dce-btp", label: "Analyse DCE" },
+      { href: "/ressources/analyse-dce-chiffrage-btp", label: "Analyse DCE & appui chiffrage" },
       { href: "/ressources/memoire-technique-btp", label: "Mémoire technique" },
       { href: "/ressources/chiffrage-devis-btp", label: "Chiffrage & devis" },
       { href: "/services/analyse-dce-btp", label: "Service analyse DCE" },

@@ -12,6 +12,13 @@ export type ResourceGuidePageItem = {
 
 export const RESOURCE_GUIDE_PAGE_ITEMS: readonly ResourceGuidePageItem[] = [
   {
+    href: "/ressources/analyse-dce-chiffrage-btp",
+    title: "Analyse DCE et appui chiffrage BTP",
+    excerpt:
+      "Comment BeWork aide les entreprises à analyser un DCE, structurer les postes, préparer une base de chiffrage et repérer les points d’alerte avant validation.",
+    publishedTime: "2026-05-29T10:00:00+02:00",
+  },
+  {
     href: "/ressources/guide-moe-bework",
     title: "Guide Maîtrise d’œuvre × IA — 12 missions MOE (Claude)",
     excerpt:

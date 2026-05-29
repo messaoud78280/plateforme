@@ -22,6 +22,8 @@ export type ResourceEditorialSeo = {
   description: string;
   keywords?: string[];
   ogType?: "article" | "website";
+  /** Chemin public optionnel (ex. /ressources/…-hero.png) pour Open Graph */
+  ogImagePath?: string;
 };
 
 export const RESOURCE_EDITORIAL_SEO: Record<string, ResourceEditorialSeo> = {
@@ -73,6 +75,28 @@ export const RESOURCE_EDITORIAL_SEO: Record<string, ResourceEditorialSeo> = {
     keywords: ["chiffrage devis BTP", "BPU DQE", "devis travaux BTP"],
     ogType: "article",
   },
+  "/ressources/analyse-dce-chiffrage-btp": {
+    title: "Analyse DCE et chiffrage BTP | BeWork",
+    description: resDesc(
+      "BeWork aide les entreprises BTP à analyser un DCE, structurer les postes, préparer une base de chiffrage et repérer les points d’alerte avant validation",
+    ),
+    keywords: [
+      "analyse DCE BTP",
+      "chiffrage BTP",
+      "devis BTP",
+      "appui chiffrage",
+      "préparation devis travaux",
+      "CCTP",
+      "DPGF",
+      "BPU",
+      "DQE",
+      "assistant travaux",
+      "relais administratif BTP",
+      "base de chiffrage",
+    ],
+    ogType: "article",
+    ogImagePath: "/ressources/analyse-dce-chiffrage-btp-hero.png",
+  },
   "/ressources/planning-chantier-btp": {
     title: "Planning chantier BTP : jalons et pilotage",
     description: resDesc(
@@ -104,6 +128,8 @@ export function resourceEditorialMetadata(path: string): Metadata {
   }
   const url = absoluteUrl(path);
   const ogType = seo.ogType ?? "article";
+  const ogImageUrl = seo.ogImagePath ? absoluteUrl(seo.ogImagePath) : defaultOgImage;
+  const ogAlt = seo.ogImagePath ? seo.title : seo.title;
 
   return {
     title: { absolute: seo.title },
@@ -119,7 +145,7 @@ export function resourceEditorialMetadata(path: string): Metadata {
       siteName: "BeWork",
       title: seo.title,
       description: seo.description,
-      images: [{ url: defaultOgImage, width: 1200, height: 630, alt: seo.title }],
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: ogAlt }],
     },
     twitter: {
       card: "summary_large_image",

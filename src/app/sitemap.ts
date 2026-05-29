@@ -39,6 +39,7 @@ const RESOURCE_EDITORIAL_PAGES = [
   "/ressources/analyse-dce-btp",
   "/ressources/memoire-technique-btp",
   "/ressources/chiffrage-devis-btp",
+  "/ressources/analyse-dce-chiffrage-btp",
   "/ressources/ppsps-btp",
   "/ressources/pv-levee-reserves-btp",
   "/ressources/doe-btp",

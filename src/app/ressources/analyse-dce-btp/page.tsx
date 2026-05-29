@@ -110,7 +110,14 @@ export default function AnalyseDceBtpTutoPage() {
 
         <section className="not-prose">
           <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-6 text-[13px] leading-relaxed text-slate-600 shadow-sm">
-            Déchiffrer un <strong>CCTP</strong> long avant chiffrage :{" "}
+            Appui complet analyse DCE + préparation chiffrage :{" "}
+            <Link
+              href="/ressources/analyse-dce-chiffrage-btp"
+              className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline"
+            >
+              guide analyse DCE et appui chiffrage BeWork
+            </Link>
+            . Déchiffrer un <strong>CCTP</strong> long avant chiffrage :{" "}
             <Link
               href="/ressources/tuto-skill-analyse-express-cctp-bework"
               className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline"

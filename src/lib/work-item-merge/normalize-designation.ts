@@ -16,7 +16,50 @@ const UNIT_SYNONYMS: Record<string, string> = {
   metres: "m",
   mètre: "m",
   mètres: "m",
+  "metre lineaire": "ml",
+  "metre linéaire": "ml",
+  "metres lineaires": "ml",
+  "metres linéaires": "ml",
+  "metre carre": "m2",
+  "metre carré": "m2",
+  "metres carres": "m2",
+  "metres carrés": "m2",
+  "metre cube": "m3",
+  "metre cubique": "m3",
+  "metres cubes": "m3",
+  u: "u",
+  unite: "u",
+  unité: "u",
+  ens: "ens",
+  ensemble: "ens",
+  forfait: "forfait",
 };
+
+const PHRASE_SYNONYMS: [RegExp, string][] = [
+  [/\bfourniture\s*\+\s*pose\b/gi, "fourniture et pose"],
+  [/\bf\+p\b/gi, "fourniture et pose"],
+  [/\bf\s*\/\s*p\b/gi, "fourniture et pose"],
+  [/\bm\s*²\b/gi, "m2"],
+  [/\bm\s*2\b/gi, "m2"],
+  [/\bm\s*³\b/gi, "m3"],
+  [/\bm\s*3\b/gi, "m3"],
+  [/\bml\b/gi, "ml"],
+  [/\bgros\s*oeuvre\b/gi, "gros oeuvre"],
+  [/\bgros\s*œuvre\b/gi, "gros oeuvre"],
+];
+
+const PLURAL_SUFFIXES = ["s", "x"] as const;
+
+/** Retire pluriels simples pour rapprocher des libellés proches. */
+function stripSimplePlural(token: string): string {
+  if (token.length < 5) return token;
+  for (const suf of PLURAL_SUFFIXES) {
+    if (token.endsWith(suf) && token.length - suf.length >= 4) {
+      return token.slice(0, -suf.length);
+    }
+  }
+  return token;
+}
 
 /** Normalise une désignation en clé de comparaison. */
 export function normalizeWorkItemDesignation(raw: string): string {
@@ -25,13 +68,19 @@ export function normalizeWorkItemDesignation(raw: string): string {
     .toLowerCase()
     .normalize("NFD")
     .replace(/\p{M}/gu, "")
+    .replace(/²/g, "2")
+    .replace(/³/g, "3")
     .replace(/[''`´’]/g, "'")
     .replace(/[""«»]/g, " ")
     .replace(/\s*\/\s*/g, " ")
     .replace(/\s+/g, " ");
 
   for (const [from, to] of Object.entries(UNIT_SYNONYMS)) {
-    s = s.replace(new RegExp(`\\b${from}\\b`, "gi"), to);
+    s = s.replace(new RegExp(`\\b${from.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "gi"), to);
+  }
+
+  for (const [re, repl] of PHRASE_SYNONYMS) {
+    s = s.replace(re, repl);
   }
 
   s = s
@@ -39,6 +88,13 @@ export function normalizeWorkItemDesignation(raw: string): string {
     .replace(/(\d+)\s*cm\b/gi, "$1cm")
     .replace(/(\d+)\s*mm\b/gi, "$1mm")
     .replace(/[^\p{L}\p{N}\s.'+-]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  s = s
+    .split(" ")
+    .map(stripSimplePlural)
+    .join(" ")
     .replace(/\s+/g, " ")
     .trim();
 

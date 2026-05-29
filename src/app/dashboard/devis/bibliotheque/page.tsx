@@ -201,6 +201,12 @@ export default async function BibliothequePage({ searchParams }: { searchParams:
           <HarmonizeLotsButton />
           <RepairImportClassificationButton />
           <Link
+            href="/dashboard/devis/bibliotheque/nettoyage"
+            className="inline-flex items-center justify-center rounded-xl border border-[#1d4ed8]/30 bg-[#eff6ff] px-4 py-2.5 text-sm font-semibold text-[#1e3a8a] shadow-sm hover:bg-[#dbeafe]"
+          >
+            Nettoyage bibliothèque
+          </Link>
+          <Link
             href="/dashboard/devis/bibliotheque/recodification"
             className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50"
           >

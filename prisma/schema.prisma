@@ -821,6 +821,7 @@ model WorkItem {
   siteResourceGroupingProposals SiteResourceGroupingProposal[]
   mergeProposalsAsCanonical WorkItemMergeProposal[] @relation("MergeProposalCanonical")
   mergeProposalMembers      WorkItemMergeProposalMember[]
+  classificationProposals   WorkItemClassificationProposal[]
 
   @@index([lot])
   @@index([status])
@@ -868,6 +869,91 @@ model WorkItemMergeProposalMember {
 
   @@unique([proposalId, workItemId])
   @@index([workItemId])
+}
+
+enum LibraryCleanupJobType {
+  classification_preview
+  classification_apply
+  duplicate_detection
+  duplicate_merge
+  recodification_preview
+  recodification_apply
+  normalize_designations
+}
+
+enum LibraryCleanupJobStatus {
+  pending
+  running
+  completed
+  failed
+  cancelled
+}
+
+enum WorkItemClassificationConfidence {
+  haute
+  moyenne
+  faible
+}
+
+enum WorkItemClassificationProposalStatus {
+  pending
+  approved
+  rejected
+  ignored
+}
+
+/// Journal des opérations de nettoyage bibliothèque (batch, dry-run, reprise)
+model LibraryCleanupJob {
+  id               String                  @id @default(cuid())
+  jobType          LibraryCleanupJobType
+  status           LibraryCleanupJobStatus @default(pending)
+  dryRun           Boolean                 @default(true)
+  batchSize        Int                     @default(50)
+  processedCount   Int                     @default(0)
+  successCount     Int                     @default(0)
+  errorCount       Int                     @default(0)
+  lastProcessedId  String?
+  cursorMeta       Json?
+  logs             Json?
+  errorMessage     String?                 @db.Text
+  startedAt        DateTime?
+  finishedAt       DateTime?
+  createdByUserId  String?
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+
+  classificationProposals WorkItemClassificationProposal[]
+
+  @@index([jobType])
+  @@index([status])
+  @@index([createdAt])
+}
+
+/// Proposition de reclassement famille/lot (validation humaine)
+model WorkItemClassificationProposal {
+  id                  String                               @id @default(cuid())
+  workItemId          String
+  workItem            WorkItem                             @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  jobId               String?
+  job                 LibraryCleanupJob?                   @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  currentFamilyCode   String?
+  currentLot          String?
+  proposedFamilyCode  String
+  proposedLot         String?
+  proposedFamily      String?
+  confidence          WorkItemClassificationConfidence
+  matchReason         String                               @db.Text
+  status              WorkItemClassificationProposalStatus @default(pending)
+  reviewedAt          DateTime?
+  reviewNote          String?                              @db.Text
+  createdAt           DateTime                             @default(now())
+  updatedAt           DateTime                             @updatedAt
+
+  @@index([workItemId])
+  @@index([jobId])
+  @@index([status])
+  @@index([confidence])
+  @@index([proposedFamilyCode])
 }
 
 // ─── BeWork Devis — ressources chantier (matériaux, consommables, locations…) ───

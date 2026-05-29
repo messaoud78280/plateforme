@@ -55,11 +55,21 @@ function groupFamiliesCompatible(members: (WorkItemForDuplicateScan & { familyCo
   return codes.every((c) => areFamilyCodesCompatible(first, c));
 }
 
+const EMPTY_PRICE_STATS = (id: string): WorkItemPriceStats => ({
+  workItemId: id,
+  priceCount: 0,
+  minHt: null,
+  maxHt: null,
+  avgHt: null,
+  referenceHt: null,
+});
+
 export function buildDuplicateReviewGroups(
   items: (WorkItemForDuplicateScan & { code: string; familyCode?: string | null })[],
   priceEntries: { workItemId: string; unitPriceHT: { toString(): string } | number }[],
+  precomputedPriceStats?: Map<string, WorkItemPriceStats>,
 ): DuplicateReviewGroup[] {
-  const priceStats = buildPriceStatsMap(priceEntries);
+  const priceStats = precomputedPriceStats ?? buildPriceStatsMap(priceEntries);
   const analysis = analyzeWorkItemDuplicates(items);
   const allClusters = [...analysis.autoMergeGroups, ...analysis.reviewGroups];
 
@@ -72,14 +82,7 @@ export function buildDuplicateReviewGroups(
     const enrichedMembers: DuplicateReviewMember[] = cluster.members.map((m) => ({
       ...m,
       designation: workItemDesignationForMerge(m),
-      priceStats: priceStats.get(m.id) ?? {
-        workItemId: m.id,
-        priceCount: 0,
-        minHt: null,
-        maxHt: null,
-        avgHt: null,
-        referenceHt: null,
-      },
+      priceStats: priceStats.get(m.id) ?? EMPTY_PRICE_STATS(m.id),
     }));
 
     const recommended = pickCanonicalWorkItemWithPrices(enrichedMembers, priceStats);

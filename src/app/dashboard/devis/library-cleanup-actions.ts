@@ -18,6 +18,7 @@ import {
   suggestWorkItemReclassification,
   type CleanupJobLogEntry,
   type DuplicateReviewGroup,
+  type WorkItemPriceStats,
 } from "@/lib/work-item-library-cleanup";
 
 const REVALIDATE_PATHS = [
@@ -428,7 +429,7 @@ export async function detectDuplicateGroupsBatch(opts?: {
   | { ok: false; error: string }
 > {
   await requireBeWorkDevisSession();
-  const batchSize = defaultBatchSize(opts?.batchSize ?? 500);
+  const batchSize = Math.min(Math.max(opts?.batchSize ?? 50, 20), 80);
 
   try {
     const items = await prisma.workItem.findMany({
@@ -446,12 +447,32 @@ export async function detectDuplicateGroupsBatch(opts?: {
     }
 
     const ids = items.map((i) => i.id);
-    const prices = await prisma.priceEntry.findMany({
+    const priceAgg = await prisma.priceEntry.groupBy({
+      by: ["workItemId"],
       where: { workItemId: { in: ids } },
-      select: { workItemId: true, unitPriceHT: true },
+      _count: { _all: true },
+      _max: { unitPriceHT: true },
+      _min: { unitPriceHT: true },
+      _avg: { unitPriceHT: true },
     });
 
-    const groups = buildDuplicateReviewGroups(items, prices);
+    const priceStatsMap = new Map<string, WorkItemPriceStats>();
+    for (const row of priceAgg) {
+      const count = row._count._all;
+      const minHt = row._min.unitPriceHT != null ? Number(row._min.unitPriceHT) : null;
+      const maxHt = row._max.unitPriceHT != null ? Number(row._max.unitPriceHT) : null;
+      const avgHt = row._avg.unitPriceHT != null ? Number(row._avg.unitPriceHT) : null;
+      priceStatsMap.set(row.workItemId, {
+        workItemId: row.workItemId,
+        priceCount: count,
+        minHt,
+        maxHt,
+        avgHt,
+        referenceHt: maxHt,
+      });
+    }
+
+    const groups = buildDuplicateReviewGroups(items, [], priceStatsMap);
     const nextCursorId = items[items.length - 1]!.id;
 
     return {
@@ -467,59 +488,103 @@ export async function detectDuplicateGroupsBatch(opts?: {
   }
 }
 
-/** Fusion d’un groupe validé — une opération = un groupe (sécurisé). */
+/** Fusion d’un groupe validé — par tranches de variantes (évite blocage). */
 export async function mergeDuplicateGroup(input: {
   canonicalId: string;
   memberIds: string[];
   dryRun?: boolean;
-}): Promise<{ ok: true; mergedCount: number; dryRun: boolean } | { ok: false; error: string }> {
+  /** Index de reprise dans memberIds (hors canonique). */
+  memberOffset?: number;
+  /** Nombre max de variantes fusionnées sur cet appel (défaut 5). */
+  chunkSize?: number;
+}): Promise<
+  | {
+      ok: true;
+      mergedCount: number;
+      dryRun: boolean;
+      done: boolean;
+      nextOffset: number;
+      totalMembers: number;
+    }
+  | { ok: false; error: string }
+> {
   await requireBeWorkDevisSession();
 
   const userId = await getSessionUserId();
   const dryRun = input.dryRun ?? false;
+  const allMembers = [...new Set(input.memberIds.filter((id) => id && id !== input.canonicalId))];
+  const chunkSize = Math.min(Math.max(input.chunkSize ?? 5, 1), 10);
+  const memberOffset = input.memberOffset ?? 0;
 
   if (dryRun) {
-    return { ok: true, mergedCount: input.memberIds.filter((id) => id !== input.canonicalId).length, dryRun: true };
+    return {
+      ok: true,
+      mergedCount: Math.min(chunkSize, allMembers.length - memberOffset),
+      dryRun: true,
+      done: memberOffset + chunkSize >= allMembers.length,
+      nextOffset: Math.min(memberOffset + chunkSize, allMembers.length),
+      totalMembers: allMembers.length,
+    };
+  }
+
+  if (memberOffset >= allMembers.length) {
+    return {
+      ok: true,
+      mergedCount: 0,
+      dryRun: false,
+      done: true,
+      nextOffset: allMembers.length,
+      totalMembers: allMembers.length,
+    };
   }
 
   try {
-    const job = await createLibraryCleanupJob({
-      jobType: "duplicate_merge",
-      dryRun: false,
-      batchSize: 1,
-    });
-
     const res = await applyWorkItemMerge(input.canonicalId, input.memberIds, {
       note: "Fusion bibliothèque nettoyage",
       mode: "library_cleanup",
+      maxMembers: chunkSize,
+      memberOffset,
+      skipRevalidate: memberOffset + chunkSize < allMembers.length,
     });
 
-    if (!res.ok) {
-      await prisma.libraryCleanupJob.update({
-        where: { id: job.id },
-        data: { status: "failed", errorMessage: res.error, finishedAt: new Date() },
-      });
-      return res;
+    if (!res.ok) return res;
+
+    if (res.done) {
+      try {
+        const job = await createLibraryCleanupJob({
+          jobType: "duplicate_merge",
+          dryRun: false,
+          batchSize: chunkSize,
+        });
+        await prisma.libraryCleanupJob.update({
+          where: { id: job.id },
+          data: {
+            status: "completed",
+            finishedAt: new Date(),
+            processedCount: allMembers.length,
+            successCount: allMembers.length,
+            createdByUserId: userId,
+            logs: appendJobLog([], {
+              level: "info",
+              message: `Fusion terminée : ${allMembers.length} variante(s) → ${input.canonicalId}`,
+              workItemId: input.canonicalId,
+            }),
+          },
+        });
+      } catch {
+        /* journal optionnel */
+      }
+      revalidateCleanup();
     }
 
-    await prisma.libraryCleanupJob.update({
-      where: { id: job.id },
-      data: {
-        status: "completed",
-        finishedAt: new Date(),
-        processedCount: 1,
-        successCount: 1,
-        createdByUserId: userId,
-        logs: appendJobLog([], {
-          level: "info",
-          message: `Fusion ${res.mergedCount} variante(s) → ${input.canonicalId}`,
-          workItemId: input.canonicalId,
-        }),
-      },
-    });
-
-    revalidateCleanup();
-    return { ok: true, mergedCount: res.mergedCount, dryRun: false };
+    return {
+      ok: true,
+      mergedCount: res.mergedCount,
+      dryRun: false,
+      done: res.done,
+      nextOffset: res.nextOffset,
+      totalMembers: res.totalMembers,
+    };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Erreur fusion";
     return { ok: false, error: msg };

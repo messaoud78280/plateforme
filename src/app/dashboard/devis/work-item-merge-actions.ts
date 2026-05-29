@@ -16,7 +16,12 @@ import {
 const REVALIDATE = [
   "/dashboard/devis/bibliotheque",
   "/dashboard/devis/bibliotheque/fusions",
+  "/dashboard/devis/bibliotheque/nettoyage",
+  "/dashboard/devis/bibliotheque/nettoyage/doublons",
 ];
+
+/** Fusionne N variantes max par requête pour éviter timeout / blocage UI. */
+export const WORK_ITEM_MERGE_MEMBER_CHUNK = 5;
 
 function revalidateAll() {
   for (const p of REVALIDATE) revalidatePath(p);
@@ -50,11 +55,32 @@ const SCAN_SELECT = {
 export async function applyWorkItemMerge(
   canonicalId: string,
   memberIds: string[],
-  opts?: { note?: string; mode?: string },
+  opts?: {
+    note?: string;
+    mode?: string;
+    /** Fusionner au plus N variantes (défaut : tout le lot passé). */
+    maxMembers?: number;
+    /** Offset dans la liste complète des variantes (fusion progressive). */
+    memberOffset?: number;
+    skipRevalidate?: boolean;
+  },
 ) {
   await requireBeWorkDevisSession();
-  const uniqueMembers = [...new Set(memberIds.filter((id) => id && id !== canonicalId))];
+  const allMembers = [...new Set(memberIds.filter((id) => id && id !== canonicalId))];
+  const offset = opts?.memberOffset ?? 0;
+  const limit = opts?.maxMembers ?? allMembers.length;
+  const uniqueMembers = allMembers.slice(offset, offset + limit);
+
   if (uniqueMembers.length === 0) {
+    if (offset > 0 && offset < allMembers.length) {
+      return {
+        ok: true as const,
+        mergedCount: 0,
+        done: true,
+        nextOffset: allMembers.length,
+        totalMembers: allMembers.length,
+      };
+    }
     return { ok: false as const, error: "Aucune variante à fusionner." };
   }
 
@@ -65,19 +91,21 @@ export async function applyWorkItemMerge(
   const normalized = normalizeWorkItemDesignation(designation);
   const now = new Date();
 
-  await prisma.$transaction([
-    prisma.workItem.update({
-      where: { id: canonicalId },
-      data: {
-        mergeStatus: "canonical",
-        canonicalWorkItemId: null,
-        normalizedDesignation: normalized,
-        mergedAt: null,
-        mergeNote: opts?.note ?? null,
-      },
-    }),
-    prisma.workItem.updateMany({
-      where: { id: { in: uniqueMembers } },
+  await prisma.workItem.update({
+    where: { id: canonicalId },
+    data: {
+      mergeStatus: "canonical",
+      canonicalWorkItemId: null,
+      normalizedDesignation: normalized,
+      mergedAt: null,
+      mergeNote: opts?.note ?? null,
+    },
+  });
+
+  for (let i = 0; i < uniqueMembers.length; i += WORK_ITEM_MERGE_MEMBER_CHUNK) {
+    const chunk = uniqueMembers.slice(i, i + WORK_ITEM_MERGE_MEMBER_CHUNK);
+    await prisma.workItem.updateMany({
+      where: { id: { in: chunk } },
       data: {
         mergeStatus: "merged",
         canonicalWorkItemId: canonicalId,
@@ -85,12 +113,24 @@ export async function applyWorkItemMerge(
         mergedAt: now,
         mergeNote: opts?.note ?? opts?.mode ?? null,
       },
-    }),
-  ]);
+    });
+  }
 
-  revalidateAll();
-  revalidatePath(`/dashboard/devis/bibliotheque/${canonicalId}`);
-  return { ok: true as const, mergedCount: uniqueMembers.length };
+  const nextOffset = offset + uniqueMembers.length;
+  const done = nextOffset >= allMembers.length;
+
+  if (!opts?.skipRevalidate) {
+    revalidateAll();
+    revalidatePath(`/dashboard/devis/bibliotheque/${canonicalId}`);
+  }
+
+  return {
+    ok: true as const,
+    mergedCount: uniqueMembers.length,
+    done,
+    nextOffset,
+    totalMembers: allMembers.length,
+  };
 }
 
 async function applyClusterMerge(cluster: DuplicateCluster, mode: string) {
@@ -132,56 +172,104 @@ async function createMergeProposal(cluster: DuplicateCluster) {
   });
 }
 
-/** Analyse globale + fusion auto (exact + score ≥ 90) + propositions 75–89. */
-export async function analyzeAndMergeWorkItemDuplicates(opts?: {
+export type MergeBatchProgress = MergeAnalysisSummary & {
+  hasMore: boolean;
+  nextCursorId: string | null;
+  batchSize: number;
+};
+
+const MERGE_SCAN_BATCH = 80;
+const MERGE_NORMALIZE_CHUNK = 25;
+const MERGE_AUTO_CLUSTERS_PER_BATCH = 2;
+
+async function normalizeDesignationsChunk(items: { id: string; title: string; shortDescription: string | null; fullDescription: string | null }[]) {
+  for (let i = 0; i < items.length; i += MERGE_NORMALIZE_CHUNK) {
+    const slice = items.slice(i, i + MERGE_NORMALIZE_CHUNK);
+    await Promise.all(
+      slice.map((item) => {
+        const n = normalizeWorkItemDesignation(workItemDesignationForMerge(item));
+        return prisma.workItem.update({
+          where: { id: item.id },
+          data: { normalizedDesignation: n },
+        });
+      }),
+    );
+  }
+}
+
+/** Analyse + fusion par lot (évite de traiter toute la base d’un coup). */
+export async function analyzeAndMergeWorkItemDuplicatesBatch(opts?: {
   lot?: string;
-  limit?: number;
-}): Promise<{ ok: true; summary: MergeAnalysisSummary } | { ok: false; error: string }> {
+  cursorId?: string;
+  batchSize?: number;
+  maxAutoMerges?: number;
+  skipAutoMerge?: boolean;
+}): Promise<{ ok: true; progress: MergeBatchProgress } | { ok: false; error: string }> {
   await requireBeWorkDevisSession();
 
   try {
+    const batchSize = Math.min(Math.max(opts?.batchSize ?? MERGE_SCAN_BATCH, 20), 100);
     const items = await prisma.workItem.findMany({
       where: {
         ...WORK_ITEM_VISIBLE_IN_LIST,
         ...(opts?.lot?.trim() ? { lot: { equals: opts.lot.trim(), mode: "insensitive" } } : {}),
+        ...(opts?.cursorId ? { id: { gt: opts.cursorId } } : {}),
       },
       select: SCAN_SELECT,
-      take: opts?.limit ?? 15_000,
-      orderBy: { updatedAt: "desc" },
+      take: batchSize + 1,
+      orderBy: { id: "asc" },
     });
 
-    const analysis = analyzeWorkItemDuplicates(items);
+    const batch = items.slice(0, batchSize);
+    const hasMore = items.length > batchSize;
+    if (batch.length === 0) {
+      return {
+        ok: true,
+        progress: {
+          analyzed: 0,
+          exactDuplicateGroups: 0,
+          quasiDuplicateGroups: 0,
+          autoMergedCount: 0,
+          proposalsCreated: 0,
+          skippedWithBlocker: 0,
+          hasMore: false,
+          nextCursorId: null,
+          batchSize,
+        },
+      };
+    }
+
+    const analysis = analyzeWorkItemDuplicates(batch);
 
     let autoMergedCount = 0;
-    for (const cluster of analysis.autoMergeGroups) {
-      autoMergedCount += await applyClusterMerge(cluster, cluster.mergeMode);
+    if (!opts?.skipAutoMerge) {
+      const maxAuto = opts?.maxAutoMerges ?? MERGE_AUTO_CLUSTERS_PER_BATCH;
+      for (const cluster of analysis.autoMergeGroups.slice(0, maxAuto)) {
+        autoMergedCount += await applyClusterMerge(cluster, cluster.mergeMode);
+      }
     }
 
     let proposalsCreated = 0;
-    for (const cluster of analysis.reviewGroups) {
+    for (const cluster of analysis.reviewGroups.slice(0, 5)) {
       const p = await createMergeProposal(cluster);
       if (p) proposalsCreated += 1;
     }
 
-    for (const item of items) {
-      const d = workItemDesignationForMerge(item);
-      const n = normalizeWorkItemDesignation(d);
-      await prisma.workItem.update({
-        where: { id: item.id },
-        data: { normalizedDesignation: n },
-      });
-    }
+    await normalizeDesignationsChunk(batch);
 
     revalidateAll();
     return {
       ok: true,
-      summary: {
+      progress: {
         analyzed: analysis.analyzed,
         exactDuplicateGroups: analysis.exactDuplicateGroups,
         quasiDuplicateGroups: analysis.quasiDuplicateGroups,
         autoMergedCount,
         proposalsCreated,
         skippedWithBlocker: analysis.skippedWithBlocker,
+        hasMore,
+        nextCursorId: batch[batch.length - 1]!.id,
+        batchSize,
       },
     };
   } catch (e) {
@@ -195,6 +283,20 @@ export async function analyzeAndMergeWorkItemDuplicates(opts?: {
     }
     return { ok: false, error: msg };
   }
+}
+
+/** @deprecated Préférer {@link analyzeAndMergeWorkItemDuplicatesBatch} — traite un lot limité. */
+export async function analyzeAndMergeWorkItemDuplicates(opts?: {
+  lot?: string;
+  limit?: number;
+}): Promise<{ ok: true; summary: MergeAnalysisSummary } | { ok: false; error: string }> {
+  const res = await analyzeAndMergeWorkItemDuplicatesBatch({
+    lot: opts?.lot,
+    batchSize: Math.min(opts?.limit ?? MERGE_SCAN_BATCH, 100),
+    maxAutoMerges: MERGE_AUTO_CLUSTERS_PER_BATCH,
+  });
+  if (!res.ok) return res;
+  return { ok: true, summary: res.progress };
 }
 
 export async function unmergeWorkItem(workItemId: string) {

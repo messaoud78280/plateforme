@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import {
   detectDuplicateGroupsBatch,
@@ -14,6 +15,7 @@ function formatPrice(v: number | null): string {
 }
 
 export function DuplicateReviewPanel() {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [groups, setGroups] = useState<DuplicateReviewGroup[]>([]);
   const [cursorId, setCursorId] = useState<string | undefined>();
@@ -21,12 +23,14 @@ export function DuplicateReviewPanel() {
   const [scanned, setScanned] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [mergeProgress, setMergeProgress] = useState<string | null>(null);
 
   function scan(next = false) {
     setError(null);
+    setMergeProgress(null);
     startTransition(async () => {
       const res = await detectDuplicateGroupsBatch({
-        batchSize: 500,
+        batchSize: 50,
         cursorId: next ? cursorId : undefined,
       });
       if (!res.ok) {
@@ -41,32 +45,68 @@ export function DuplicateReviewPanel() {
     });
   }
 
-  function mergeGroup(group: DuplicateReviewGroup, dryRun: boolean) {
-    setError(null);
-    startTransition(async () => {
-      const memberIds = group.members.map((m) => m.id);
+  async function mergeGroupPartByPart(group: DuplicateReviewGroup, dryRun: boolean) {
+    const memberIds = group.members.map((m) => m.id);
+    const total = memberIds.filter((id) => id !== group.recommendedCanonicalId).length;
+    let offset = 0;
+    let mergedTotal = 0;
+
+    while (offset < total) {
+      setMergeProgress(
+        dryRun
+          ? `Simulation ${Math.min(offset + 5, total)}/${total}…`
+          : `Fusion en cours ${offset}/${total}…`,
+      );
+
       const res = await mergeDuplicateGroup({
         canonicalId: group.recommendedCanonicalId,
         memberIds,
         dryRun,
+        memberOffset: offset,
+        chunkSize: 5,
       });
+
       if (!res.ok) {
         setError(res.error);
-        return;
+        setMergeProgress(null);
+        return false;
       }
-      setMessage(
-        dryRun
-          ? `Simulation : ${res.mergedCount} variante(s) fusionnée(s) dans ${group.recommendedCanonical.code}.`
-          : `Fusion OK : ${res.mergedCount} variante(s) → ${group.recommendedCanonical.code}.`,
-      );
-      if (!dryRun) {
-        setGroups((prev) => prev.filter((g) => g.groupKey !== group.groupKey));
-      }
+
+      mergedTotal += res.mergedCount;
+      offset = res.nextOffset;
+
+      if (res.done) break;
+    }
+
+    setMergeProgress(null);
+    setMessage(
+      dryRun
+        ? `Simulation : ${mergedTotal} variante(s) dans ${group.recommendedCanonical.code}.`
+        : `Fusion terminée : ${mergedTotal} variante(s) → ${group.recommendedCanonical.code}.`,
+    );
+
+    if (!dryRun) {
+      setGroups((prev) => prev.filter((g) => g.groupKey !== group.groupKey));
+      router.refresh();
+    }
+
+    return true;
+  }
+
+  function mergeGroup(group: DuplicateReviewGroup, dryRun: boolean) {
+    setError(null);
+    startTransition(async () => {
+      await mergeGroupPartByPart(group, dryRun);
     });
   }
 
   return (
     <div className="space-y-4">
+      <p className="rounded-xl border border-sky-100 bg-sky-50/80 px-4 py-3 text-sm text-sky-950">
+        Les fusions se font <strong>par tranches de 5 variantes</strong> pour éviter les blocages. La barre de progression
+        s&apos;affiche pendant l&apos;opération.
+      </p>
+
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
@@ -88,13 +128,18 @@ export function DuplicateReviewPanel() {
         ) : null}
       </div>
 
+      {mergeProgress ? (
+        <p className="text-sm font-medium text-[#1d4ed8]" role="status">
+          {mergeProgress}
+        </p>
+      ) : null}
       {error ? <p className="text-sm font-medium text-red-700">{error}</p> : null}
       {message ? <p className="text-sm font-medium text-emerald-800">{message}</p> : null}
       {scanned > 0 ? <p className="text-xs text-slate-500">{scanned} ouvrage(s) analysé(s) au total.</p> : null}
 
       {groups.length === 0 ? (
         <p className="rounded-xl border border-slate-200 bg-slate-50 p-6 text-sm text-slate-600">
-          Lancez la détection pour afficher les groupes de doublons probables.
+          Lancez la détection pour afficher les groupes de doublons probables (50 ouvrages par lot).
         </p>
       ) : (
         groups.map((g) => (
@@ -140,7 +185,10 @@ export function DuplicateReviewPanel() {
                       {m.familyCode ?? "DIV"} · {m.unit} · {m.priceStats.priceCount} prix · max {formatPrice(m.priceStats.maxHt)}
                     </span>
                   </div>
-                  <p className="mt-1 text-slate-800">{m.designation.slice(0, 140)}{m.designation.length > 140 ? "…" : ""}</p>
+                  <p className="mt-1 text-slate-800">
+                    {m.designation.slice(0, 140)}
+                    {m.designation.length > 140 ? "…" : ""}
+                  </p>
                 </li>
               ))}
             </ul>
@@ -158,12 +206,12 @@ export function DuplicateReviewPanel() {
                 type="button"
                 disabled={pending}
                 onClick={() => {
-                  if (!confirm(`Fusionner ${g.members.length - 1} variante(s) dans ${g.recommendedCanonical.code} ?`)) return;
+                  if (!confirm(`Fusionner ${g.members.length - 1} variante(s) par tranches de 5 dans ${g.recommendedCanonical.code} ?`)) return;
                   mergeGroup(g, false);
                 }}
                 className="rounded-lg bg-[#1d4ed8] px-3 py-2 text-xs font-semibold text-white hover:bg-[#1e40af] disabled:opacity-50"
               >
-                Fusionner ce groupe
+                Fusionner ce groupe (partie par partie)
               </button>
             </div>
           </article>

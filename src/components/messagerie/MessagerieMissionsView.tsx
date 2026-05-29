@@ -139,7 +139,9 @@ export function MessagerieMissionsView({
   const [directContent, setDirectContent] = useState("");
   const [sendingDirect, setSendingDirect] = useState(false);
   const [directMessages, setDirectMessages] = useState<DirectMessageItem[]>([]);
+  const [directThreadMessages, setDirectThreadMessages] = useState<DirectMessageItem[]>([]);
   const [loadingDirectMessages, setLoadingDirectMessages] = useState(false);
+  const [loadingDirectThread, setLoadingDirectThread] = useState(false);
   const [selectedDirectContactId, setSelectedDirectContactId] = useState<string>("");
   const [replyDirectContent, setReplyDirectContent] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
@@ -154,11 +156,16 @@ export function MessagerieMissionsView({
   const showEnvoyerTab = isAgence || isAgent;
   const navItems = showEnvoyerTab ? NAV_ITEMS : NAV_ITEMS.filter((i) => i.id !== "envoyer" && i.id !== "messages-directs");
 
+  const myDirectMessages = directMessages.filter(
+    (m) => m.sender.id === sessionUserId || m.receiver.id === sessionUserId
+  );
+
   // Conversations directes : regroupées par contact, avec dernier message et non-lus
   const directConversations = (() => {
     const byOther = new Map<string, { user: { id: string; name: string }; lastMessage: DirectMessageItem; unread: number }>();
-    for (const m of directMessages) {
+    for (const m of myDirectMessages) {
       const other = m.sender.id === sessionUserId ? m.receiver : m.sender;
+      if (other.id === sessionUserId) continue;
       const existing = byOther.get(other.id);
       const isNewer = !existing || new Date(m.createdAt) > new Date(existing.lastMessage.createdAt);
       const isToMe = (m.receiverId ?? m.receiver.id) === sessionUserId;
@@ -176,9 +183,33 @@ export function MessagerieMissionsView({
     );
   })();
 
-  const selectedDirectThread = directMessages
-    .filter((m) => m.sender.id === selectedDirectContactId || m.receiver.id === selectedDirectContactId)
-    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  const selectedDirectThread = directThreadMessages;
+
+  async function refreshDirectIndex() {
+    const res = await fetch("/api/messages/direct");
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? (data as DirectMessageItem[]) : [];
+  }
+
+  async function refreshDirectThread(contactId: string) {
+    if (!contactId) {
+      setDirectThreadMessages([]);
+      return;
+    }
+    setLoadingDirectThread(true);
+    try {
+      const res = await fetch(`/api/messages/direct?with=${encodeURIComponent(contactId)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setDirectThreadMessages(Array.isArray(data) ? data : []);
+      } else {
+        setDirectThreadMessages([]);
+      }
+    } finally {
+      setLoadingDirectThread(false);
+    }
+  }
 
   const selectedDirectContact = recipients.find((r) => r.id === selectedDirectContactId) ?? directConversations.find((c) => c.user.id === selectedDirectContactId)?.user;
 
@@ -189,14 +220,13 @@ export function MessagerieMissionsView({
     }
     if (filter === "messages-directs") {
       setLoadingDirectMessages(true);
-      fetch("/api/messages/direct")
-        .then((r) => (r.ok ? r.json() : []))
+      refreshDirectIndex()
         .then((data) => {
-          setDirectMessages(Array.isArray(data) ? data : []);
-          if (!selectedDirectContactId && Array.isArray(data) && data.length > 0) {
+          setDirectMessages(data);
+          if (!selectedDirectContactId && data.length > 0) {
             const first = data[0] as DirectMessageItem;
             const other = first.sender.id === sessionUserId ? first.receiver : first.sender;
-            if (other) setSelectedDirectContactId(other.id);
+            if (other?.id && other.id !== sessionUserId) setSelectedDirectContactId(other.id);
           }
         })
         .finally(() => setLoadingDirectMessages(false));
@@ -234,6 +264,14 @@ export function MessagerieMissionsView({
       .finally(() => setLoadingMessages(false));
   }, [selectedTaskId]);
 
+  useEffect(() => {
+    if (filter !== "messages-directs" || !selectedDirectContactId) {
+      setDirectThreadMessages([]);
+      return;
+    }
+    void refreshDirectThread(selectedDirectContactId);
+  }, [filter, selectedDirectContactId]);
+
   // Marquer comme lus les messages directs du contact sélectionné
   useEffect(() => {
     if (filter !== "messages-directs" || !selectedDirectContactId) return;
@@ -243,9 +281,7 @@ export function MessagerieMissionsView({
       body: JSON.stringify({ otherUserId: selectedDirectContactId }),
     })
       .then((r) => {
-        if (r.ok) {
-          return fetch("/api/messages/direct").then((res) => (res.ok ? res.json() : []));
-        }
+        if (r.ok) return refreshDirectIndex();
         return [];
       })
       .then((data) => {
@@ -258,13 +294,13 @@ export function MessagerieMissionsView({
   useEffect(() => {
     if (filter !== "messages-directs") return;
     const interval = setInterval(() => {
-      fetch("/api/messages/direct")
-        .then((r) => (r.ok ? r.json() : []))
-        .then((data) => setDirectMessages(Array.isArray(data) ? data : []))
-        .catch(() => {});
+      void refreshDirectIndex().then((data) => setDirectMessages(data));
+      if (selectedDirectContactId) {
+        void refreshDirectThread(selectedDirectContactId);
+      }
     }, 7000);
     return () => clearInterval(interval);
-  }, [filter]);
+  }, [filter, selectedDirectContactId]);
 
   // Rafraîchissement automatique des messages mission (toutes les 7 s)
   useEffect(() => {
@@ -280,7 +316,7 @@ export function MessagerieMissionsView({
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages.length]);
+  }, [messages.length, directThreadMessages.length]);
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
@@ -373,8 +409,9 @@ export function MessagerieMissionsView({
       if (res.ok) {
         setReplyDirectContent("");
         setReplyAttachments([]);
-        const list = await fetch("/api/messages/direct").then((r) => (r.ok ? r.json() : []));
-        setDirectMessages(Array.isArray(list) ? list : []);
+        const list = await refreshDirectIndex();
+        setDirectMessages(list);
+        await refreshDirectThread(selectedDirectContactId);
         router.refresh();
       } else {
         const err = await res.json().catch(() => ({}));
@@ -616,6 +653,9 @@ export function MessagerieMissionsView({
                 </div>
                 <div className="flex-1 overflow-y-auto p-4">
                   <div className="space-y-4">
+                    {loadingDirectThread ? (
+                      <p className="text-sm text-slate-500">Chargement de la conversation…</p>
+                    ) : null}
                     {selectedDirectThread.map((m) => {
                       const isMe = m.sender.id === sessionUserId;
                       return (

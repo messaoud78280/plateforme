@@ -12,14 +12,14 @@ export default async function MessageriePage() {
     redirect("/connexion?callbackUrl=/dashboard");
   }
 
-  const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
-  const isAgent = session.user.role === "AGENT";
+  const isManager = session.user.role === "MANAGER";
+  const isAgent = session.user.role === "AGENT" || session.user.role === "AGENCE";
   const isClient = session.user.role === "CLIENT";
 
   let agents: { id: string; name: string; role?: string }[] = [];
-  let recipients: { id: string; name: string; role: string }[] = []; // agents + managers pour "Envoyer un message"
+  let recipients: { id: string; name: string; role: string }[] = [];
   let managerId: string | null = null;
-  if (isAgence || isAgent) {
+  if (isManager || isAgent) {
     try {
       const [agentsRes, managersRes, managerFirst] = await Promise.all([
         prisma.user.findMany({
@@ -42,13 +42,15 @@ export default async function MessageriePage() {
       recipients = [
         ...agentsRes.map((a) => ({ ...a, role: "agent" as const })),
         ...managersRes.map((m) => ({ ...m, role: "gérant" as const })),
-      ].sort((a, b) => a.name.localeCompare(b.name));
+      ]
+        .filter((r) => r.id !== session.user.id)
+        .sort((a, b) => a.name.localeCompare(b.name));
     } catch {
       // ignore
     }
   }
 
-  const canChangeStatus = isAgence || isAgent;
+  const canChangeStatus = isManager || isAgent;
 
   return (
     <div className="space-y-6">
@@ -62,7 +64,7 @@ export default async function MessageriePage() {
         </p>
         <div className="mt-3 rounded-lg border border-blue-100 bg-blue-50/50 px-4 py-3 text-sm text-slate-700">
           <strong>Comment envoyer un message ?</strong>{" "}
-          {(isAgence || isAgent) && (
+          {(isManager || isAgent) && (
             <>Utilisez l&apos;onglet <strong>Envoyer un message</strong> pour écrire à n&apos;importe quel agent ou gérant. Sinon, </>
           )}
           sélectionnez une mission dans la liste du centre, puis utilisez le champ « Écrire un message » en bas à droite et le bouton <strong>Envoyer</strong>. Pour joindre un document : cliquez sur l&apos;icône trombone ou ouvrez la mission pour ajouter des pièces jointes.
@@ -71,7 +73,7 @@ export default async function MessageriePage() {
 
       <MessagerieMissionsView
         sessionUserId={session.user.id}
-        isAgence={isAgence}
+        isAgence={isManager}
         isAgent={isAgent}
         isClient={isClient}
         canChangeStatus={canChangeStatus}

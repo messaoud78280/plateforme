@@ -28,9 +28,8 @@ export async function POST(request: Request) {
   }
 
   const role = session.user.role;
-  const isAgence = role === "AGENCE" || role === "MANAGER";
-  const isAgent = role === "AGENT";
-  if (!isAgence && !isAgent) {
+  const allowed = role === "MANAGER" || role === "AGENT" || role === "AGENCE";
+  if (!allowed) {
     return NextResponse.json({ error: "Réservé aux gérants et agents" }, { status: 403 });
   }
 

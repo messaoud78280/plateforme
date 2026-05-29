@@ -3,8 +3,20 @@ import { prisma } from "@/lib/prisma";
 
 export type MessagingUser = { id: string; role?: string | null };
 
-export function isAgenceOrManager(role?: string | null): boolean {
-  return role === "AGENCE" || role === "MANAGER";
+export function isManagerRole(role?: string | null): boolean {
+  return role === "MANAGER";
+}
+
+/** Agent opérationnel (assistante / équipe terrain) — pas le gérant. */
+export function isStaffAgent(role?: string | null): boolean {
+  return role === "AGENT" || role === "AGENCE";
+}
+
+/** Uniquement les messages dont l'utilisateur est expéditeur ou destinataire. */
+export function participantTaskMessageWhere(userId: string): Prisma.TaskMessageWhereInput {
+  return {
+    OR: [{ senderId: userId }, { receiverId: userId }],
+  };
 }
 
 /** Tâches visibles dans la messagerie missions (liste). */
@@ -12,18 +24,16 @@ export function taskMessagerieWhere(user: MessagingUser): Prisma.TaskWhereInput 
   if (user.role === "CLIENT") {
     return { clientId: user.id };
   }
-  if (user.role === "AGENT") {
+  if (isStaffAgent(user.role)) {
     return { assignedToId: user.id };
   }
-  if (isAgenceOrManager(user.role)) {
+  if (isManagerRole(user.role)) {
     return {
       OR: [
         { assignedToId: user.id },
         {
           taskMessages: {
-            some: {
-              OR: [{ senderId: user.id }, { receiverId: user.id }],
-            },
+            some: participantTaskMessageWhere(user.id),
           },
         },
       ],
@@ -37,22 +47,12 @@ export function taskMessageVisibilityRelationWhere(
   user: MessagingUser
 ): Prisma.TaskMessageWhereInput {
   if (user.role === "CLIENT") {
-    return { isInternal: false };
-  }
-  if (user.role === "AGENT") {
     return {
-      OR: [
-        { isInternal: false },
-        {
-          isInternal: true,
-          OR: [{ senderId: user.id }, { receiverId: user.id }],
-        },
-      ],
+      isInternal: false,
+      ...participantTaskMessageWhere(user.id),
     };
   }
-  return {
-    OR: [{ senderId: user.id }, { receiverId: user.id }],
-  };
+  return participantTaskMessageWhere(user.id);
 }
 
 /** Messages d'une mission visibles par l'utilisateur (requête directe). */
@@ -68,14 +68,14 @@ export async function canAccessTaskThread(
   task: { id: string; clientId: string; assignedToId: string | null }
 ): Promise<boolean> {
   if (user.role === "CLIENT") return task.clientId === user.id;
-  if (user.role === "AGENT") return task.assignedToId === user.id;
+  if (isStaffAgent(user.role)) return task.assignedToId === user.id;
 
-  if (isAgenceOrManager(user.role)) {
+  if (isManagerRole(user.role)) {
     if (task.assignedToId === user.id) return true;
     const count = await prisma.taskMessage.count({
       where: {
         taskId: task.id,
-        OR: [{ senderId: user.id }, { receiverId: user.id }],
+        ...participantTaskMessageWhere(user.id),
       },
     });
     return count > 0;
@@ -95,9 +95,9 @@ export async function canAccessProjectMessaging(
   project: { id: string; clientId: string; assignedToId: string | null }
 ): Promise<boolean> {
   if (user.role === "CLIENT") return project.clientId === user.id;
-  if (user.role === "AGENT") return project.assignedToId === user.id;
+  if (isStaffAgent(user.role)) return project.assignedToId === user.id;
 
-  if (isAgenceOrManager(user.role)) {
+  if (isManagerRole(user.role)) {
     if (project.assignedToId === user.id) return true;
     const count = await prisma.message.count({
       where: {
@@ -109,4 +109,21 @@ export async function canAccessProjectMessaging(
   }
 
   return false;
+}
+
+/** Filtre strict : l'utilisateur doit être expéditeur ou destinataire. */
+export function directMessageParticipantWhere(userId: string) {
+  return {
+    OR: [{ senderId: userId }, { receiverId: userId }],
+  };
+}
+
+/** Fil d'une conversation 1:1 (les deux participants). */
+export function directMessageThreadWhere(userId: string, otherUserId: string) {
+  return {
+    OR: [
+      { senderId: userId, receiverId: otherUserId },
+      { senderId: otherUserId, receiverId: userId },
+    ],
+  };
 }

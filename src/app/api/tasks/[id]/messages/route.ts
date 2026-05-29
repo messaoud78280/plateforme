@@ -5,7 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
 import {
   canAccessTaskThread,
-  isAgenceOrManager,
+  isManagerRole,
+  isStaffAgent,
   taskMessageVisibilityWhere,
 } from "@/lib/messaging/access";
 
@@ -65,8 +66,8 @@ export async function POST(
   }
 
   const { id: taskId } = await params;
-  const isStaffManager = isAgenceOrManager(session.user.role);
-  const isAgent = session.user.role === "AGENT";
+  const isManager = isManagerRole(session.user.role);
+  const isAgent = isStaffAgent(session.user.role);
 
   try {
     const body = await request.json();
@@ -97,7 +98,7 @@ export async function POST(
     const isAssignedAgent = task.assignedToId === session.user.id;
 
     let receiverIdFinal: string;
-    const internal = Boolean(isInternal) && (isStaffManager || isAgent);
+    const internal = Boolean(isInternal) && (isManager || isAgent);
 
     if (isClient) {
       if (!task.assignedToId) {
@@ -121,7 +122,7 @@ export async function POST(
       } else {
         receiverIdFinal = task.clientId;
       }
-    } else if (isStaffManager) {
+    } else if (isManager) {
       if (internal && receiverId) {
         const agent = await prisma.user.findFirst({ where: { id: receiverId, role: { in: ["AGENCE", "AGENT"] } } });
         if (!agent) {

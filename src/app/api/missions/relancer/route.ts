@@ -55,7 +55,8 @@ export async function POST(request: NextRequest) {
         projectId: source.projectId,
         contactsJson: source.contactsJson ?? undefined,
         suppliersJson: source.suppliersJson ?? undefined,
-        // priority / estimatedActions : colonnes désactivées en prod
+        category: source.category,
+        priority: source.priority ?? "STANDARD",
       },
     });
 

@@ -84,7 +84,7 @@ export const TARIFS_PLANS = PLAN_KEYS.map((key) => {
     idealFor: c.idealFor,
     equivalentNote: c.equivalentNote,
     badge: c.badge,
-    /** Aligné quotas base : crédits / mois après souscription ou paiement. */
+    /** Quota crédits après achat — validité 30 jours (voir CREDITS_VALIDITY_NOTICE). */
     actionsIncluded: p.actionsIncluded,
     creditsMinutes: CREDIT_MINUTES,
   };

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notifyManagers } from "@/lib/notifications";
 import { sendNewTaskEmail } from "@/lib/email";
+import { normalizeTaskPriority, taskPriorityLabel } from "@/lib/tasks/priority";
 
 /** GET /api/tasks – Liste des tâches du client (ou toutes si agence) */
 export async function GET(request: NextRequest) {
@@ -91,6 +92,8 @@ export async function POST(request: NextRequest) {
       if (!Number.isNaN(d.getTime())) desiredDateValid = d;
     }
 
+    const priorityNormalized = normalizeTaskPriority(priority) ?? "STANDARD";
+
     const countBefore = await prisma.task.count({
       where: { clientId: session.user.id },
     });
@@ -102,15 +105,20 @@ export async function POST(request: NextRequest) {
         clientId: session.user.id,
         projectId: projectIdValid,
         desiredDate: desiredDateValid,
-        // priority / estimatedActions : colonnes désactivées en prod (réactiver après ALTER TABLE)
+        category: typeof category === "string" && category.trim() ? category.trim() : null,
+        priority: priorityNormalized,
       },
     });
     try {
       const clientName = session.user?.name ?? "Un client";
+      const priorityHint =
+        priorityNormalized !== "STANDARD"
+          ? ` — Priorité : ${taskPriorityLabel(priorityNormalized)}`
+          : "";
       await notifyManagers({
         type: "NEW_TASK",
         title: "Nouvelle demande",
-        message: `${clientName} a créé une demande : « ${task.title} ».`,
+        message: `${clientName} a créé une demande : « ${task.title} »${priorityHint}.`,
         actionUrl: `/dashboard/taches/${task.id}`,
       });
       await sendNewTaskEmail({

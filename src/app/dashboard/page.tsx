@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { shouldResetActions, getMonthStart } from "@/lib/actions";
+import { syncUserCreditsExpiry } from "@/lib/actions";
 import { DashboardKPIs } from "@/components/dashboard/DashboardKPIs";
 import { ActivityTimeline } from "@/components/dashboard/ActivityTimeline";
 import { AlertsSection } from "@/components/dashboard/AlertsSection";
@@ -42,6 +42,7 @@ export default async function DashboardPage({
     monthlyActionsTotal: number;
     monthlyActionsUsed: number;
     renewsAt: Date | null;
+    creditsExpiresAt: Date | null;
   } | null = null;
   if (isClient) {
     const u = await prisma.user.findUnique({
@@ -67,15 +68,15 @@ export default async function DashboardPage({
       // Subscription table may not exist yet
     }
     if (u) {
-      if (shouldResetActions(u.actionsResetAt ?? null)) {
-        await prisma.user.update({
-          where: { id: clientId },
-          data: { monthlyActionsUsed: 0, actionsResetAt: getMonthStart() },
-        });
-      }
+      await syncUserCreditsExpiry(clientId);
       const after = await prisma.user.findUnique({
         where: { id: clientId },
-        select: { monthlyActionsTotal: true, monthlyActionsUsed: true, subscriptionPlan: true },
+        select: {
+          monthlyActionsTotal: true,
+          monthlyActionsUsed: true,
+          subscriptionPlan: true,
+          actionsResetAt: true,
+        },
       });
       if (after) {
         actionsData = {
@@ -83,6 +84,7 @@ export default async function DashboardPage({
           monthlyActionsTotal: after.monthlyActionsTotal ?? SUBSCRIPTION_PLANS.STANDARD.actionsIncluded,
           monthlyActionsUsed: after.monthlyActionsUsed ?? 0,
           renewsAt,
+          creditsExpiresAt: after.actionsResetAt ?? null,
         };
       }
     }
@@ -544,6 +546,7 @@ export default async function DashboardPage({
               monthlyActionsTotal: SUBSCRIPTION_PLANS.STANDARD.actionsIncluded,
               monthlyActionsUsed: 0,
               renewsAt: null,
+              creditsExpiresAt: null,
             }
           }
           tasksEnCours={tasksEnCours}
@@ -657,6 +660,7 @@ export default async function DashboardPage({
           monthlyActionsTotal={actionsData.monthlyActionsTotal}
           monthlyActionsUsed={actionsData.monthlyActionsUsed}
           renewsAt={actionsData.renewsAt}
+          creditsExpiresAt={actionsData.creditsExpiresAt ?? null}
         />
       )}
 

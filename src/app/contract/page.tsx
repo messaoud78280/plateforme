@@ -90,6 +90,12 @@ export default async function ContractPage() {
 
             <h3 className="mb-2 mt-6 font-semibold text-black">5. Quota de crédits inclus dans les offres</h3>
             <p className="mb-4">Les offres BeWork sont exprimées en quota de crédits administratifs. Un crédit correspond à une tâche administrative simple réalisée par notre équipe. La plupart des crédits représentent environ 12 minutes de traitement administratif (équivalent indicatif : cinq crédits par heure). Ce quota ne constitue pas une mise à disposition d&apos;un salarié. Le prestataire organise librement ses ressources. Les assistants restent sous l&apos;autorité exclusive de BeWork. Le client ne dispose d&apos;aucun lien de subordination avec les assistants.</p>
+            <p className="mb-4"><strong>Validité des crédits :</strong> les crédits achetés ou crédités sont valables 30 jours à compter de la date d&apos;achat ou de créditation, quel que soit le forfait. Les crédits non utilisés à l&apos;issue de ce délai sont perdus sans remboursement ni report. Voir les{" "}
+              <Link href="/conditions-generales-vente" className="font-medium text-[#1d4ed8] underline hover:no-underline">
+                conditions générales de vente
+              </Link>
+              .
+            </p>
 
             <h3 className="mb-2 mt-6 font-semibold text-black">6. Tarifs et paiement</h3>
             <p className="mb-2">Les tarifs sont ceux affichés sur la page Tarifs du site :</p>

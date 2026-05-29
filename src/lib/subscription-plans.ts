@@ -26,8 +26,16 @@ export function formatPriceLabelFr(priceLabel: string): string {
 /** Libellé fiscal des forfaits publics (`priceLabel` = montant HT). */
 export const SUBSCRIPTION_PRICE_TAX_LABEL = "HT" as const;
 
+/** Durée de validité des crédits après achat ou créditation (tous forfaits). */
+export const CREDITS_VALIDITY_DAYS = 30;
+export const CREDITS_VALIDITY_LABEL = "30 jours";
+
+export const CREDITS_VALIDITY_NOTICE =
+  "Les crédits achetés ou crédités sont valables 30 jours à compter de la date d'achat ou de créditation, quel que soit le forfait. Les crédits non utilisés à l'issue de ce délai sont perdus sans remboursement ni report.";
+
 export const SUBSCRIPTION_PRICE_DISCLAIMER =
-  "Tous nos tarifs sont exprimés HT / mois, sans frais supplémentaires." as const;
+  "Tous nos tarifs sont exprimés HT / mois, sans frais supplémentaires. " +
+  "Les crédits inclus sont utilisables pendant 30 jours à compter de chaque achat ou renouvellement ; les crédits non consommés expirent à l'issue de ce délai.";
 
 /** Ex. « 490 € HT / mois » */
 export function formatPlanPriceMonthlyHt(priceLabel: string): string {

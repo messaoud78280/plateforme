@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
+import { buildCreditsGrantUpdate } from "@/lib/credits-lifecycle";
 
 export async function POST(request: Request) {
   try {
@@ -42,7 +43,7 @@ export async function POST(request: Request) {
         invitedById: inv.invitedById,
         teamRole: inv.role,
         subscriptionPlan: "STANDARD",
-        monthlyActionsTotal: SUBSCRIPTION_PLANS.STANDARD.actionsIncluded,
+        ...buildCreditsGrantUpdate(SUBSCRIPTION_PLANS.STANDARD.actionsIncluded),
       },
     });
     await prisma.invitation.update({

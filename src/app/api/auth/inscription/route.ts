@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { isWellFormedEmail } from "@/lib/email-validation";
 import { isValidFormeJuridique, isValidSecteurActivite } from "@/lib/client-profile-options";
 import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
+import { buildCreditsGrantUpdate } from "@/lib/credits-lifecycle";
 import { Prisma, UserRole } from "@prisma/client";
 import { sendAdminNewUserNotification, sendWelcomeEmail } from "@/lib/email";
 
@@ -78,7 +79,7 @@ export async function POST(request: Request) {
         secteurActivite: secteurActivite || undefined,
         service: service || undefined,
         subscriptionPlan: "STANDARD",
-        monthlyActionsTotal: SUBSCRIPTION_PLANS.STANDARD.actionsIncluded,
+        ...buildCreditsGrantUpdate(SUBSCRIPTION_PLANS.STANDARD.actionsIncluded),
       },
     });
 

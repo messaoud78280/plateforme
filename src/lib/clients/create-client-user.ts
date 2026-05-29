@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { isWellFormedEmail } from "@/lib/email-validation";
 import { isValidFormeJuridique, isValidSecteurActivite } from "@/lib/client-profile-options";
 import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
+import { buildCreditsGrantUpdate } from "@/lib/credits-lifecycle";
 import { sendAdminNewUserNotification, sendWelcomeEmail } from "@/lib/email";
 
 export type CreateClientInput = {
@@ -92,7 +93,7 @@ export async function createClientUser(
         secteurActivite: input.secteurActivite?.trim() || undefined,
         service: input.service?.trim() || undefined,
         subscriptionPlan: planKey,
-        monthlyActionsTotal: plan.actionsIncluded,
+        ...buildCreditsGrantUpdate(plan.actionsIncluded),
         contractStatus: input.contractStatus ?? ContractStatus.SIGNED,
       },
       select: { id: true, email: true, name: true, company: true, phone: true, role: true, createdAt: true },

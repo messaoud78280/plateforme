@@ -11,6 +11,8 @@ import {
   SUBSCRIPTION_PLANS,
   SUBSCRIPTION_PRICE_DISCLAIMER,
   SUBSCRIPTION_PRICE_TAX_LABEL,
+  CREDITS_VALIDITY_NOTICE,
+  CREDITS_VALIDITY_DAYS,
   creditsToDisplayHours,
   formatPriceLabelFr,
   getPublicPriceBoundsLabels,
@@ -148,8 +150,12 @@ const faq = [
     a: `1 crédit = ${ACTION_MINUTES} minutes. Chaque demande consomme des crédits selon le temps réellement passé : relance, mail, appel, suivi fournisseur, préparation d’une situation, mise au propre d’un compte rendu, etc.`,
   },
   {
+    q: "Combien de temps ai-je pour utiliser mes crédits ?",
+    a: `Tous les forfaits : les crédits achetés ou crédités sont valables ${CREDITS_VALIDITY_DAYS} jours à compter de la date d'achat ou de renouvellement. Les crédits non utilisés à l'issue de ce délai sont perdus (sans remboursement ni report).`,
+  },
+  {
     q: "À quoi correspondent les heures incluses ?",
-    a: "Les heures affichées sont un repère (conversion des crédits). Vous achetez un volume mensuel de traitement et de suivi, dans un cadre cadré (périmètres, priorités, circuit de validation).",
+    a: "Les heures affichées sont un repère (conversion des crédits). Vous achetez un volume de traitement utilisable pendant 30 jours, dans un cadre cadré (périmètres, priorités, circuit de validation).",
   },
   {
     q: "Quel forfait choisir pour une entreprise du BTP ?",
@@ -252,6 +258,13 @@ export default function TarifsPage() {
                 <span className="font-normal text-black">(relance, appel, mail, suivi fournisseur, doc chantier…)</span>
               </p>
             </div>
+          </div>
+          <div className="mx-auto mt-4 max-w-3xl rounded-xl border border-amber-200/80 bg-amber-50/90 px-5 py-4 text-center text-sm leading-relaxed text-amber-950">
+            <strong>Validité {CREDITS_VALIDITY_DAYS} jours — tous forfaits :</strong> {CREDITS_VALIDITY_NOTICE}
+            {" "}
+            <Link href="/conditions-generales-vente" className="font-semibold underline hover:no-underline">
+              Voir les CGV
+            </Link>
           </div>
           {/* Réassurance (premium, en 1 ligne) */}
           <ul className="mt-8 flex flex-wrap justify-center gap-4 md:gap-6" role="list">
@@ -369,7 +382,7 @@ export default function TarifsPage() {
                   <span className="hidden sm:inline">Demander un rendez-vous découverte</span>
                 </CalendlyBookingLink>
                 <p className="mt-3 text-center text-[11px] leading-relaxed text-black">
-                  Volume estimatif basé sur 1 crédit = {ACTION_MINUTES} min.
+                  Volume estimatif · 1 crédit = {ACTION_MINUTES} min · validité {CREDITS_VALIDITY_DAYS} jours
                 </p>
                 {plan.planKey === "PREMIUM" ? (
                   <p className="mt-2 text-center text-[11px] leading-relaxed text-black">

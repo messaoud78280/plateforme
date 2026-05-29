@@ -68,19 +68,9 @@ export async function canAccessTaskThread(
   task: { id: string; clientId: string; assignedToId: string | null }
 ): Promise<boolean> {
   if (user.role === "CLIENT") return task.clientId === user.id;
-  if (isStaffAgent(user.role)) return task.assignedToId === user.id;
-
-  if (isManagerRole(user.role)) {
-    if (task.assignedToId === user.id) return true;
-    const count = await prisma.taskMessage.count({
-      where: {
-        taskId: task.id,
-        ...participantTaskMessageWhere(user.id),
-      },
-    });
-    return count > 0;
-  }
-
+  // Gérant et agence : accès à toutes les missions (aligné GET /api/tasks/[id] isAgence)
+  if (isManagerRole(user.role) || user.role === "AGENCE") return true;
+  if (user.role === "AGENT") return task.assignedToId === user.id;
   return false;
 }
 

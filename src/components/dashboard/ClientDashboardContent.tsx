@@ -24,6 +24,7 @@ type ClientDashboardContentProps = {
     monthlyActionsTotal: number;
     monthlyActionsUsed: number;
     renewsAt: Date | null;
+    creditsExpiresAt?: Date | null;
   };
   tasksEnCours: number;
   tasksCompleteesCeMois: number;
@@ -153,6 +154,7 @@ export function ClientDashboardContent({
         monthlyActionsTotal={actionsData.monthlyActionsTotal}
         monthlyActionsUsed={actionsData.monthlyActionsUsed}
         renewsAt={actionsData.renewsAt}
+        creditsExpiresAt={actionsData.creditsExpiresAt ?? null}
       />
 
       {/* Activité récente */}

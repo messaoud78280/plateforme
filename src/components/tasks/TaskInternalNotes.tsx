@@ -30,15 +30,26 @@ export function TaskInternalNotes({ taskId }: TaskInternalNotesProps) {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
+      setLoadError(null);
       try {
         const res = await fetch(`/api/tasks/${taskId}/comments?internal=true`);
         if (res.ok) {
           const data = await res.json();
           setComments(Array.isArray(data) ? data : []);
+        } else {
+          const body = await res.json().catch(() => ({}));
+          setLoadError(
+            (body as { error?: string }).error ??
+              "Impossible de charger les notes internes."
+          );
         }
+      } catch {
+        setLoadError("Erreur réseau lors du chargement des notes.");
       } finally {
         setLoading(false);
       }
@@ -50,6 +61,7 @@ export function TaskInternalNotes({ taskId }: TaskInternalNotesProps) {
     e.preventDefault();
     if (!content.trim() || sending) return;
     setSending(true);
+    setError(null);
     try {
       const res = await fetch(`/api/tasks/${taskId}/comments`, {
         method: "POST",
@@ -64,7 +76,15 @@ export function TaskInternalNotes({ taskId }: TaskInternalNotesProps) {
           setComments(Array.isArray(data) ? data : []);
         }
         router.refresh();
+      } else {
+        const body = await res.json().catch(() => ({}));
+        setError(
+          (body as { error?: string }).error ??
+            "Impossible d'enregistrer la note. Vérifiez vos droits ou réessayez."
+        );
       }
+    } catch {
+      setError("Erreur réseau. Réessayez dans un instant.");
     } finally {
       setSending(false);
     }
@@ -85,6 +105,11 @@ export function TaskInternalNotes({ taskId }: TaskInternalNotesProps) {
       <p className="mb-4 text-xs text-slate-500">
         Visible uniquement par la gérante et l&apos;agent assigné.
       </p>
+      {loadError && (
+        <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+          {loadError}
+        </p>
+      )}
       <ul className="mb-4 max-h-64 space-y-3 overflow-y-auto">
         {comments.length === 0 ? (
           <li className="text-sm text-slate-500">Aucune note pour le moment.</li>
@@ -110,6 +135,11 @@ export function TaskInternalNotes({ taskId }: TaskInternalNotesProps) {
           rows={2}
           className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
         />
+        {error && (
+          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+            {error}
+          </p>
+        )}
         <button
           type="submit"
           disabled={!content.trim() || sending}

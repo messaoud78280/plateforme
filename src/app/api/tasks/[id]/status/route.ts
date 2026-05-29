@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { minutesToActions, shouldResetActions, getMonthStart } from "@/lib/actions";
+import { minutesToActions, syncUserCreditsExpiry } from "@/lib/actions";
 
 /** PATCH /api/tasks/[id]/status – Changer le statut d'une tâche (optionnel: timeSpentMinutes pour COMPLETE) */
 export async function PATCH(
@@ -76,20 +76,17 @@ export async function PATCH(
     }
 
     if (actionsToDeduct > 0 && task.clientId) {
+      await syncUserCreditsExpiry(task.clientId);
       const client = await prisma.user.findUnique({
         where: { id: task.clientId },
-        select: { actionsResetAt: true },
+        select: { monthlyActionsTotal: true },
       });
-      if (client && shouldResetActions(client.actionsResetAt ?? null)) {
+      if (client && (client.monthlyActionsTotal ?? 0) > 0) {
         await prisma.user.update({
           where: { id: task.clientId },
-          data: { monthlyActionsUsed: 0, actionsResetAt: getMonthStart() },
+          data: { monthlyActionsUsed: { increment: actionsToDeduct } },
         });
       }
-      await prisma.user.update({
-        where: { id: task.clientId },
-        data: { monthlyActionsUsed: { increment: actionsToDeduct } },
-      });
     }
 
     return NextResponse.json(task);

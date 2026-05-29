@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getPlan, SUBSCRIPTION_PRICE_DISCLAIMER, SUBSCRIPTION_PRICE_TAX_LABEL } from "@/lib/subscription-plans";
+import { getPlan, SUBSCRIPTION_PRICE_DISCLAIMER, SUBSCRIPTION_PRICE_TAX_LABEL, CREDITS_VALIDITY_NOTICE } from "@/lib/subscription-plans";
+import { syncUserCreditsExpiry, formatCreditsExpiryLabel } from "@/lib/credits-lifecycle";
 import { BackLink } from "@/components/ui/BackLink";
 import { TARIFS_PLANS } from "@/lib/tarifs-plans";
 
@@ -47,6 +48,7 @@ export default async function AbonnementPage() {
   let actionsTransactions: Awaited<ReturnType<typeof prisma.actionsTransaction.findMany>> = [];
 
   try {
+    await syncUserCreditsExpiry(session.user.id);
     const [userResult, tasksResult, subsResult, payResult, actionsResult] = await Promise.all([
       prisma.user.findUnique({
         where: { id: session.user.id },
@@ -140,6 +142,7 @@ export default async function AbonnementPage() {
   const used = user?.monthlyActionsUsed ?? 0;
   const remaining = Math.max(0, total - used);
   const percent = total > 0 ? Math.min(100, (used / total) * 100) : 0;
+  const creditsExpiryLabel = formatCreditsExpiryLabel(user?.actionsResetAt ?? null);
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
@@ -210,6 +213,7 @@ export default async function AbonnementPage() {
       {/* Bloc Abonnement et crédits — formule, KPIs, 3 CTA */}
       <section className="rounded-2xl surface-metallic-light p-6">
         <h2 className="text-lg font-semibold text-slate-800">Abonnement et crédits</h2>
+        <p className="mt-2 text-xs leading-relaxed text-slate-600">{CREDITS_VALIDITY_NOTICE}</p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Formule active</p>
@@ -228,6 +232,12 @@ export default async function AbonnementPage() {
             <p className="mt-0.5 font-semibold text-[#1d4ed8]">{remaining}</p>
           </div>
         </div>
+        {creditsExpiryLabel && total > 0 && (
+          <p className="mt-3 text-sm text-slate-600">
+            Validité des crédits en cours :{" "}
+            <span className="font-medium text-slate-800">jusqu&apos;au {creditsExpiryLabel}</span>
+          </p>
+        )}
         {activeSub?.renewsAt && (
           <p className="mt-3 text-sm text-slate-600">
             Date de renouvellement :{" "}
@@ -252,7 +262,7 @@ export default async function AbonnementPage() {
             />
           </div>
           <p className="mt-1.5 text-xs text-slate-500">
-            {used} / {total} crédits utilisés ce mois
+            {used} / {total} crédits utilisés sur la période en cours
           </p>
         </div>
         <div className="mt-6 flex flex-wrap gap-3">

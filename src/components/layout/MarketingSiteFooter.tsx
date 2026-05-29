@@ -260,6 +260,11 @@ export function MarketingSiteFooter() {
                 </Link>
               </li>
               <li>
+                <Link href="/conditions-generales-vente" className={COL_LINK}>
+                  Conditions générales de vente
+                </Link>
+              </li>
+              <li>
                 <Link href="/mentions-legales" className={COL_LINK}>
                   Mentions légales
                 </Link>

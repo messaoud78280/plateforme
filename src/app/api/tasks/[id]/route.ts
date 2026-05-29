@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { minutesToActions, shouldResetActions, getMonthStart } from "@/lib/actions";
+import { minutesToActions, syncUserCreditsExpiry } from "@/lib/actions";
 import { createNotification } from "@/lib/notifications";
+import { normalizeTaskPriority } from "@/lib/tasks/priority";
 
 /** GET /api/tasks/[id] – Détail d'une tâche */
 export async function GET(
@@ -29,7 +30,9 @@ export async function GET(
         status: true,
         clientId: true,
         projectId: true,
-        // desiredDate absent si colonne non migrée en prod
+        category: true,
+        priority: true,
+        desiredDate: true,
         assignedToId: true,
         agencyNotes: true,
         correctionNote: true,
@@ -116,11 +119,20 @@ export async function PUT(
       agencyNotes?: string | null;
       timeSpentMinutes?: number | null;
       actionsUsed?: number | null;
+      priority?: string | null;
     } = {};
     if (typeof title === "string" && title.trim()) data.title = title.trim();
     if (body.hasOwnProperty("description")) data.description = description?.trim() ?? null;
     if (status && validStatuses.includes(status)) data.status = status;
-    // priority : colonne désactivée en prod (réactiver après ALTER TABLE)
+    if (isAgence && body.hasOwnProperty("priority")) {
+      const rawPriority = priority as string | null | undefined;
+      const normalized = normalizeTaskPriority(rawPriority);
+      data.priority =
+        normalized ?? (rawPriority == null || rawPriority === "" ? "STANDARD" : null);
+      if (rawPriority != null && rawPriority !== "" && normalized === null) {
+        return NextResponse.json({ error: "Priorité invalide" }, { status: 400 });
+      }
+    }
     if (status === "COMPLETE") data.completedAt = new Date();
     if (status && status !== "COMPLETE") data.completedAt = null;
     const assigningAgent = isAgence && body.hasOwnProperty("assignedToId") && assignedToId;
@@ -130,6 +142,7 @@ export async function PUT(
     }
     if (isAgence && body.hasOwnProperty("agencyNotes")) data.agencyNotes = agencyNotes?.trim() ?? null;
 
+    const previousPriority = existing.priority;
     let actionsToDeduct = 0;
     if ((isAgence || isAgent) && status === "COMPLETE" && typeof timeSpentMinutes === "number" && timeSpentMinutes >= 0) {
       const actions = minutesToActions(timeSpentMinutes);
@@ -145,17 +158,12 @@ export async function PUT(
     });
 
     if (actionsToDeduct > 0 && task.clientId) {
+      await syncUserCreditsExpiry(task.clientId);
       const client = await prisma.user.findUnique({
         where: { id: task.clientId },
         select: { monthlyActionsUsed: true, monthlyActionsTotal: true, actionsResetAt: true },
       });
-      if (client) {
-        if (shouldResetActions(client.actionsResetAt ?? null)) {
-          await prisma.user.update({
-            where: { id: task.clientId },
-            data: { monthlyActionsUsed: 0, actionsResetAt: getMonthStart() },
-          });
-        }
+      if (client && (client.monthlyActionsTotal ?? 0) > 0) {
         await prisma.user.update({
           where: { id: task.clientId },
           data: { monthlyActionsUsed: { increment: actionsToDeduct } },
@@ -164,11 +172,35 @@ export async function PUT(
     }
 
     if (assigningAgent && task.assignedToId) {
+      const prio = task.priority;
+      const prioSuffix =
+        prio && prio !== "STANDARD"
+          ? ` — Priorité : ${prio === "URGENT" ? "Urgent" : prio === "PRIORITAIRE" ? "Prioritaire" : prio}`
+          : "";
       await createNotification({
         userId: task.assignedToId,
         type: "TASK_ASSIGNED",
         title: "Mission assignée",
-        message: `Une mission vous a été assignée : « ${task.title} ».`,
+        message: `Une mission vous a été assignée : « ${task.title} »${prioSuffix}.`,
+        actionUrl: `/dashboard/taches/${id}`,
+      });
+    }
+    if (
+      isAgence &&
+      body.hasOwnProperty("priority") &&
+      data.priority &&
+      data.priority !== previousPriority &&
+      data.priority !== "STANDARD" &&
+      task.assignedToId &&
+      task.assignedToId !== session.user.id
+    ) {
+      const label =
+        data.priority === "URGENT" ? "Urgent" : data.priority === "PRIORITAIRE" ? "Prioritaire" : data.priority;
+      await createNotification({
+        userId: task.assignedToId,
+        type: "TASK_ASSIGNED",
+        title: "Priorité mission mise à jour",
+        message: `La mission « ${task.title} » est passée en priorité ${label}.`,
         actionUrl: `/dashboard/taches/${id}`,
       });
     }

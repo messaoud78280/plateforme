@@ -39,7 +39,7 @@ model User {
   subscriptionPlan   String?   // STANDARD | STANDARD_PLUS | PREMIUM | FULLTIME
   monthlyActionsTotal Int      @default(120)  // selon abonnement
   monthlyActionsUsed  Int      @default(0)    // consommées ce mois
-  actionsResetAt      DateTime? // dernier reset (début du mois)
+  actionsResetAt      DateTime? // expiration des crédits en cours (J+30 après achat/crédit)
   invitedById         String?   // utilisateur qui a invité (équipe)
   teamRole            String?   // ADMIN | USER | SUPERVISEUR (si membre d'une équipe)
   createdAt DateTime @default(now())
@@ -416,9 +416,8 @@ model Task {
   status         TaskStatus @default(NOUVEAU)
   clientId       String
   projectId      String?   // projet auquel la tâche se rapporte (optionnel)
-  // Nouvelle demande intelligente (category désactivé si colonne absente en prod ; réactiver après ALTER TABLE "Task" ADD COLUMN "category" TEXT;)
-  // category         String?   // Gestion d'emails, Recherche, Organisation, Réservation, Rédaction, etc.
-  // priority         String?   // STANDARD | PRIORITAIRE | URGENT — désactivé si colonne absente en prod ; réactiver après migration
+  category         String?   // Gestion d'emails, Recherche, Organisation, etc.
+  priority         String?   // STANDARD | PRIORITAIRE | URGENT
   desiredDate      DateTime? @db.Date  // date souhaitée par le client
   // estimatedActions String?   // estimation initiale — désactivé si colonne absente en prod ; réactiver après migration
   assignedToId   String?   // agent (User rôle AGENCE) assigné par l'agence après prise en charge

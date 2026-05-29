@@ -1,15 +1,10 @@
-/**
- * Logique de crédit d'actions après paiement validé.
- */
-
 import { prisma } from "@/lib/prisma";
 import { getPlan } from "@/lib/subscription-plans";
-import { getMonthStart } from "@/lib/actions";
+import { buildCreditsGrantUpdate } from "@/lib/credits-lifecycle";
 
 /**
  * Après un paiement réussi : créditer les actions, mettre à jour User et Subscription.
- * - Structure (DECOUVERTE) : abonnement mensuel, crédit au niveau Structure
- * - Suivi / Pilotage : crédit mensuel, renouvellement à J+1 mois (Renfort historique : STANDARD_PLUS)
+ * Validité : 30 jours à compter de la date d'achat (tous forfaits).
  */
 export async function creditActionsAfterPayment(
   userId: string,
@@ -24,37 +19,31 @@ export async function creditActionsAfterPayment(
   const renewsAt = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate(), 0, 0, 0, 0);
 
   await prisma.$transaction(async (tx) => {
-    // 1. Crédit sur le compte User (remplace le quota du mois)
     const user = await tx.user.findUnique({
       where: { id: userId },
-      select: { monthlyActionsUsed: true, actionsResetAt: true },
+      select: { id: true },
     });
     if (!user) throw new Error("Utilisateur introuvable");
 
-    const monthStart = getMonthStart(now);
     await tx.user.update({
       where: { id: userId },
       data: {
         subscriptionPlan: planKey,
-        monthlyActionsTotal: plan.actionsIncluded,
-        monthlyActionsUsed: 0,
-        actionsResetAt: monthStart,
+        ...buildCreditsGrantUpdate(plan.actionsIncluded, now),
       },
     });
 
-    // 2. Enregistrer la transaction d'actions (historique)
     await tx.actionsTransaction.create({
       data: {
         userId,
         type: "CREDIT",
         source: "SUBSCRIPTION",
         amount: plan.actionsIncluded,
-        description: `Crédit ${plan.name} - ${plan.actionsLabel}`,
+        description: `Crédit ${plan.name} - ${plan.actionsLabel} (validité 30 jours)`,
         referenceId: paymentId,
       },
     });
 
-    // 3. Mettre à jour ou créer la Subscription
     if (subscriptionId) {
       await tx.subscription.update({
         where: { id: subscriptionId },

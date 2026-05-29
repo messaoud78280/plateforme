@@ -43,10 +43,15 @@ interface TaskDetailViewProps {
   onAssign?: (assignedToId: string | null) => void;
   onAgencyNotesChange?: (notes: string) => void;
   onValidate?: () => void;
-  onRequestCorrection?: () => void;
+  onRequestCorrection?: (note: string) => void | Promise<void>;
   onPriorityChange?: (priority: string | null) => void;
   correctionNoteInput?: string;
   onCorrectionNoteChange?: (value: string) => void;
+  correctionError?: string | null;
+  correctionSuccess?: string | null;
+  correctionSending?: boolean;
+  validateSending?: boolean;
+  validateError?: string | null;
 }
 
 const statusColors: Record<TaskStatus, string> = {
@@ -74,6 +79,11 @@ export function TaskDetailView({
   onPriorityChange,
   correctionNoteInput = "",
   onCorrectionNoteChange,
+  correctionError = null,
+  correctionSuccess = null,
+  correctionSending = false,
+  validateSending = false,
+  validateError = null,
 }: TaskDetailViewProps) {
   const [agencyNotesLocal, setAgencyNotesLocal] = useState(task.agencyNotes ?? "");
   const [savingNotes, setSavingNotes] = useState(false);
@@ -729,20 +739,26 @@ export function TaskDetailView({
             Après vérification, validez le travail de l&apos;agent ou demandez une correction.
           </p>
           <div className="flex flex-wrap gap-4">
-            <button
-              type="button"
-              onClick={onValidate}
-              className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
-            >
-              Valider le travail
-            </button>
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={onValidate}
+                disabled={validateSending || correctionSending}
+                className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+              >
+                {validateSending ? "Validation…" : "Valider le travail"}
+              </button>
+              {validateError && (
+                <p className="max-w-xs text-sm text-red-700">{validateError}</p>
+              )}
+            </div>
             <div id="correction-section" className="scroll-mt-6 flex flex-1 flex-col gap-3 min-w-[260px]">
               <label className="text-sm font-medium text-slate-700">Demander une modification</label>
               <textarea
                 value={correctionNoteInput}
                 onChange={(e) => onCorrectionNoteChange?.(e.target.value)}
                 placeholder="Précisez ce qui doit être corrigé… (vous pouvez aussi coller ici des liens vers des exemples, documents, captures d’écran, etc.)"
-                rows={2}
+                rows={3}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
               />
               <div className="rounded-lg border border-dashed border-amber-200 bg-amber-50/60 p-3">
@@ -756,14 +772,29 @@ export function TaskDetailView({
                   onUploadEnd={() => typeof window !== "undefined" && window.location.reload()}
                 />
               </div>
+              {correctionError && (
+                <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+                  {correctionError}
+                </p>
+              )}
+              {correctionSuccess && (
+                <p className="rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
+                  {correctionSuccess}
+                </p>
+              )}
               <button
                 type="button"
-                onClick={onRequestCorrection}
-                disabled={!correctionNoteInput.trim()}
+                onClick={() => onRequestCorrection?.(correctionNoteInput)}
+                disabled={correctionSending || validateSending}
                 className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-800 hover:bg-amber-100 disabled:opacity-50"
               >
-                Demander une correction
+                {correctionSending ? "Envoi…" : "Demander une correction"}
               </button>
+              {!correctionNoteInput.trim() && !correctionError && (
+                <p className="text-xs text-slate-500">
+                  Décrivez la correction dans le champ ci-dessus avant d&apos;envoyer.
+                </p>
+              )}
             </div>
           </div>
         </div>

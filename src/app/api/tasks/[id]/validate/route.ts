@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { createNotification } from "@/lib/notifications";
 
 /** PATCH /api/tasks/[id]/validate – Valider le travail ou demander une correction (agence uniquement) */
 export async function PATCH(
@@ -17,9 +18,16 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const body = await request.json();
-  const action = body?.action as string;
-  const correctionNote = typeof body?.correctionNote === "string" ? body.correctionNote.trim() : "";
+  let body: { action?: string; correctionNote?: string };
+  try {
+    body = (await request.json()) as { action?: string; correctionNote?: string };
+  } catch {
+    return NextResponse.json({ error: "JSON invalide" }, { status: 400 });
+  }
+
+  const action = body?.action;
+  const correctionNote =
+    typeof body?.correctionNote === "string" ? body.correctionNote.trim() : "";
 
   if (action !== "validate" && action !== "correction") {
     return NextResponse.json(
@@ -29,9 +37,25 @@ export async function PATCH(
   }
 
   try {
-    const existing = await prisma.task.findUnique({ where: { id } });
+    const existing = await prisma.task.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        clientId: true,
+        assignedToId: true,
+      },
+    });
     if (!existing) {
       return NextResponse.json({ error: "Tâche introuvable" }, { status: 404 });
+    }
+
+    if (existing.status !== "A_VALIDER") {
+      return NextResponse.json(
+        { error: "Cette mission n'est pas en attente de validation." },
+        { status: 400 }
+      );
     }
 
     if (action === "validate") {
@@ -53,27 +77,61 @@ export async function PATCH(
         } catch {
           // ignore si table Alert absente
         }
+        await createNotification({
+          userId: task.clientId,
+          type: "TASK_COMPLETED",
+          title: "Mission validée",
+          message: `Votre demande « ${task.title} » a été validée par l'équipe BeWork.`,
+          actionUrl: `/dashboard/taches/${id}`,
+        });
+      }
+      if (task.assignedToId) {
+        await createNotification({
+          userId: task.assignedToId,
+          type: "TASK_COMPLETED",
+          title: "Mission validée",
+          message: `Le travail sur « ${task.title} » a été validé par la gérante.`,
+          actionUrl: `/dashboard/taches/${id}`,
+        });
       }
       return NextResponse.json(task);
     }
 
     if (action === "correction") {
+      if (!correctionNote) {
+        return NextResponse.json(
+          { error: "Précisez ce qui doit être corrigé." },
+          { status: 400 }
+        );
+      }
+
       const task = await prisma.task.update({
         where: { id },
         data: {
           status: "EN_COURS",
           validatedAt: null,
           completedAt: null,
-          correctionNote: correctionNote || null,
+          correctionNote,
         },
         include: { assignedTo: { select: { id: true, name: true, email: true } } },
       });
+
+      if (task.assignedToId) {
+        await createNotification({
+          userId: task.assignedToId,
+          type: "TASK_ASSIGNED",
+          title: "Correction demandée",
+          message: `La gérante demande une correction sur « ${task.title} » : ${correctionNote.slice(0, 120)}${correctionNote.length > 120 ? "…" : ""}`,
+          actionUrl: `/dashboard/taches/${id}#correction-section`,
+        });
+      }
+
       return NextResponse.json(task);
     }
   } catch (e) {
-    console.error(e);
+    console.error("Task validate:", e);
     return NextResponse.json(
-      { error: "Erreur lors de l'opération" },
+      { error: "Erreur lors de l'opération. Réessayez ou contactez le support." },
       { status: 500 }
     );
   }

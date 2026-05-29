@@ -34,11 +34,30 @@ interface TaskDetailClientProps {
   isAgence: boolean;
   isAgent?: boolean;
   agents?: { id: string; name: string; email: string }[];
+  onTaskUpdated?: () => void | Promise<void>;
 }
 
-export function TaskDetailClient({ sessionUserId, task, canEdit, isAgence, isAgent = false, agents = [] }: TaskDetailClientProps) {
+export function TaskDetailClient({
+  sessionUserId,
+  task,
+  canEdit,
+  isAgence,
+  isAgent = false,
+  agents = [],
+  onTaskUpdated,
+}: TaskDetailClientProps) {
   const router = useRouter();
   const [correctionNote, setCorrectionNote] = useState("");
+  const [correctionError, setCorrectionError] = useState<string | null>(null);
+  const [correctionSuccess, setCorrectionSuccess] = useState<string | null>(null);
+  const [correctionSending, setCorrectionSending] = useState(false);
+  const [validateSending, setValidateSending] = useState(false);
+  const [validateError, setValidateError] = useState<string | null>(null);
+
+  async function afterTaskAction() {
+    await onTaskUpdated?.();
+    router.refresh();
+  }
 
   const handleStatusChange = async (newStatus: TaskStatus, timeSpentMinutes?: number) => {
     if (!canEdit) return;
@@ -52,7 +71,7 @@ export function TaskDetailClient({ sessionUserId, task, canEdit, isAgence, isAge
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      if (res.ok) router.refresh();
+      if (res.ok) await afterTaskAction();
     } catch {
       // ignore
     }
@@ -66,7 +85,7 @@ export function TaskDetailClient({ sessionUserId, task, canEdit, isAgence, isAge
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ assignedToId: assignedToId || null }),
       });
-      if (res.ok) router.refresh();
+      if (res.ok) await afterTaskAction();
     } catch {
       // ignore
     }
@@ -80,7 +99,7 @@ export function TaskDetailClient({ sessionUserId, task, canEdit, isAgence, isAge
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ agencyNotes: agencyNotes || null }),
       });
-      if (res.ok) router.refresh();
+      if (res.ok) await afterTaskAction();
     } catch {
       // ignore
     }
@@ -88,32 +107,62 @@ export function TaskDetailClient({ sessionUserId, task, canEdit, isAgence, isAge
 
   const handleValidate = async () => {
     if (!isAgence) return;
+    setValidateError(null);
+    setValidateSending(true);
     try {
       const res = await fetch(`/api/tasks/${task.id}/validate`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "validate" }),
       });
-      if (res.ok) router.refresh();
+      if (res.ok) {
+        await afterTaskAction();
+      } else {
+        const body = await res.json().catch(() => ({}));
+        setValidateError(
+          (body as { error?: string }).error ?? "Impossible de valider la mission."
+        );
+      }
     } catch {
-      // ignore
+      setValidateError("Erreur réseau. Réessayez dans un instant.");
+    } finally {
+      setValidateSending(false);
     }
   };
 
-  const handleRequestCorrection = async () => {
+  const handleRequestCorrection = async (note: string) => {
     if (!isAgence) return;
+    const trimmed = note.trim();
+    if (!trimmed) {
+      setCorrectionError("Décrivez la correction à apporter avant d'envoyer.");
+      setCorrectionSuccess(null);
+      return;
+    }
+
+    setCorrectionError(null);
+    setCorrectionSuccess(null);
+    setCorrectionSending(true);
     try {
       const res = await fetch(`/api/tasks/${task.id}/validate`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "correction", correctionNote }),
+        body: JSON.stringify({ action: "correction", correctionNote: trimmed }),
       });
       if (res.ok) {
         setCorrectionNote("");
-        router.refresh();
+        setCorrectionSuccess("Correction envoyée à l'agent. La mission repasse en cours.");
+        await afterTaskAction();
+      } else {
+        const body = await res.json().catch(() => ({}));
+        setCorrectionError(
+          (body as { error?: string }).error ??
+            "Impossible d'envoyer la demande de correction."
+        );
       }
     } catch {
-      // ignore
+      setCorrectionError("Erreur réseau. Réessayez dans un instant.");
+    } finally {
+      setCorrectionSending(false);
     }
   };
 
@@ -125,7 +174,7 @@ export function TaskDetailClient({ sessionUserId, task, canEdit, isAgence, isAge
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ priority }),
       });
-      if (res.ok) router.refresh();
+      if (res.ok) await afterTaskAction();
     } catch {
       // ignore
     }
@@ -145,7 +194,16 @@ export function TaskDetailClient({ sessionUserId, task, canEdit, isAgence, isAge
       onRequestCorrection={isAgence ? handleRequestCorrection : undefined}
       onPriorityChange={isAgence ? handlePriorityChange : undefined}
       correctionNoteInput={correctionNote}
-      onCorrectionNoteChange={setCorrectionNote}
+      onCorrectionNoteChange={(value) => {
+        setCorrectionNote(value);
+        if (correctionError) setCorrectionError(null);
+        if (correctionSuccess) setCorrectionSuccess(null);
+      }}
+      correctionError={correctionError}
+      correctionSuccess={correctionSuccess}
+      correctionSending={correctionSending}
+      validateSending={validateSending}
+      validateError={validateError}
     />
   );
 }

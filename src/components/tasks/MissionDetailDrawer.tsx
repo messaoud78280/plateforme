@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { TaskDetailClient } from "./TaskDetailClient";
@@ -13,33 +13,75 @@ interface MissionDetailDrawerProps {
   sessionUserId: string;
 }
 
+type DrawerTask = {
+  id: string;
+  title: string;
+  description: string | null;
+  status: TaskStatus;
+  completedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+  assignedToId?: string | null;
+  agencyNotes?: string | null;
+  correctionNote?: string | null;
+  validatedAt?: Date | null;
+  timeSpentMinutes?: number | null;
+  actionsUsed?: number | null;
+  priority?: string | null;
+  desiredDate?: string | null;
+  estimatedActions?: string | null;
+  assignedTo?: { id: string; name: string; email: string } | null;
+  project?: { id: string; title: string } | null;
+  client?: { id: string; name: string };
+  documents?: { id: string; name: string; fileUrl: string; fileSize: number; mimeType: string | null; createdAt?: Date }[];
+};
+
+function mapTaskFromApi(taskData: Record<string, unknown>): DrawerTask {
+  const docs = (taskData.documents as Array<{
+    id: string;
+    name: string;
+    fileUrl: string;
+    fileSize: number;
+    mimeType: string | null;
+    createdAt?: string;
+  }> | undefined)?.map((d) => ({
+    ...d,
+    createdAt: d.createdAt ? new Date(d.createdAt) : undefined,
+  }));
+
+  return {
+    ...(taskData as Omit<DrawerTask, "createdAt" | "updatedAt" | "completedAt" | "validatedAt" | "documents">),
+    createdAt: taskData.createdAt ? new Date(String(taskData.createdAt)) : new Date(),
+    updatedAt: taskData.updatedAt ? new Date(String(taskData.updatedAt)) : new Date(),
+    completedAt: taskData.completedAt ? new Date(String(taskData.completedAt)) : null,
+    validatedAt: taskData.validatedAt ? new Date(String(taskData.validatedAt)) : null,
+    documents: docs ?? [],
+  };
+}
+
 export function MissionDetailDrawer({ open, taskId, onClose, sessionUserId }: MissionDetailDrawerProps) {
   const router = useRouter();
-  const [task, setTask] = useState<{
-    id: string;
-    title: string;
-    description: string | null;
-    status: TaskStatus;
-    completedAt: Date | null;
-    createdAt: Date;
-    updatedAt: Date;
-    assignedToId?: string | null;
-    agencyNotes?: string | null;
-    correctionNote?: string | null;
-    validatedAt?: Date | null;
-    timeSpentMinutes?: number | null;
-    actionsUsed?: number | null;
-    priority?: string | null;
-    desiredDate?: string | null;
-    estimatedActions?: string | null;
-    assignedTo?: { id: string; name: string; email: string } | null;
-    project?: { id: string; title: string } | null;
-    client?: { id: string; name: string };
-    documents?: { id: string; name: string; fileUrl: string; fileSize: number; mimeType: string | null; createdAt?: Date }[];
-  } | null>(null);
+  const [task, setTask] = useState<DrawerTask | null>(null);
   const [agents, setAgents] = useState<{ id: string; name: string; email: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const loadTask = useCallback(async (id: string) => {
+    const r = await fetch(`/api/tasks/${id}`);
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      const msg =
+        (data && typeof data.error === "string")
+          ? data.error
+          : r.status === 404
+            ? "Mission introuvable"
+            : r.status === 401
+              ? "Session expirée"
+              : "Erreur au chargement";
+      throw new Error(msg);
+    }
+    return mapTaskFromApi(data as Record<string, unknown>);
+  }, []);
 
   useEffect(() => {
     if (!open || !taskId) {
@@ -52,35 +94,12 @@ export function MissionDetailDrawer({ open, taskId, onClose, sessionUserId }: Mi
     setLoading(true);
     setError(null);
     Promise.all([
-      fetch(`/api/tasks/${taskId}`).then(async (r) => {
-        const data = await r.json().catch(() => ({}));
-        if (!r.ok) {
-          const msg = (data && typeof data.error === "string") ? data.error : (r.status === 404 ? "Mission introuvable" : r.status === 401 ? "Session expirée" : "Erreur au chargement");
-          throw new Error(msg);
-        }
-        return data;
-      }),
+      loadTask(taskId),
       fetch("/api/agents").then((r) => (r.ok ? r.json() : [])),
     ])
       .then(([taskData, agentsData]) => {
         if (cancelled) return;
-        if (!taskData || taskData.error) {
-          setError(taskData?.error ?? "Mission introuvable");
-          setTask(null);
-          return;
-        }
-        const docs = taskData.documents?.map((d: { id: string; name: string; fileUrl: string; fileSize: number; mimeType: string | null; createdAt?: string }) => ({
-          ...d,
-          createdAt: d.createdAt ? new Date(d.createdAt) : undefined,
-        }));
-        setTask({
-          ...taskData,
-          createdAt: taskData.createdAt ? new Date(taskData.createdAt) : new Date(),
-          updatedAt: taskData.updatedAt ? new Date(taskData.updatedAt) : new Date(),
-          completedAt: taskData.completedAt ? new Date(taskData.completedAt) : null,
-          validatedAt: taskData.validatedAt ? new Date(taskData.validatedAt) : null,
-          documents: docs ?? [],
-        });
+        setTask(taskData);
         setAgents(Array.isArray(agentsData) ? agentsData : []);
         setError(null);
       })
@@ -96,7 +115,18 @@ export function MissionDetailDrawer({ open, taskId, onClose, sessionUserId }: Mi
     return () => {
       cancelled = true;
     };
-  }, [open, taskId]);
+  }, [open, taskId, loadTask]);
+
+  const handleTaskUpdated = useCallback(async () => {
+    if (!taskId) return;
+    try {
+      const fresh = await loadTask(taskId);
+      setTask(fresh);
+      router.refresh();
+    } catch {
+      // ignore — la page complète se rafraîchira si ouverte
+    }
+  }, [loadTask, router, taskId]);
 
   if (!open) return null;
 
@@ -150,6 +180,7 @@ export function MissionDetailDrawer({ open, taskId, onClose, sessionUserId }: Mi
               isAgence={true}
               isAgent={false}
               agents={agents}
+              onTaskUpdated={handleTaskUpdated}
             />
           )}
         </div>

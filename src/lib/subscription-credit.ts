@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getPlan } from "@/lib/subscription-plans";
-import { buildCreditsGrantUpdate } from "@/lib/credits-lifecycle";
+import { areCreditsExpired, buildCreditsGrantUpdate } from "@/lib/credits-lifecycle";
 
 /**
  * Après un paiement réussi : créditer les actions, mettre à jour User et Subscription.
@@ -21,15 +21,21 @@ export async function creditActionsAfterPayment(
   await prisma.$transaction(async (tx) => {
     const user = await tx.user.findUnique({
       where: { id: userId },
-      select: { id: true },
+      select: { id: true, actionsResetAt: true, monthlyActionsUsed: true },
     });
     if (!user) throw new Error("Utilisateur introuvable");
+
+    const creditsStillValid =
+      !!user.actionsResetAt && !areCreditsExpired(user.actionsResetAt);
+    const preserveUsed = creditsStillValid ? (user.monthlyActionsUsed ?? 0) : 0;
 
     await tx.user.update({
       where: { id: userId },
       data: {
         subscriptionPlan: planKey,
-        ...buildCreditsGrantUpdate(plan.actionsIncluded, now),
+        ...buildCreditsGrantUpdate(plan.actionsIncluded, now, {
+          preserveUsed,
+        }),
       },
     });
 

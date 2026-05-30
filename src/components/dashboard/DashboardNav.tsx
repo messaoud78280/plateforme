@@ -39,7 +39,7 @@ export function DashboardNav({ role }: { role?: string | null }) {
   const active = isAgent ? activeClassAgent : isClient ? activeClassClient : activeClass;
 
   return (
-    <nav className="border-b border-[#c8cdd6] bg-[#f8f9fb] px-3 sm:px-4" aria-label="Navigation tableau de bord">
+    <nav className="relative z-30 shrink-0 border-b border-[#c8cdd6] bg-[#f8f9fb] px-3 sm:px-4" aria-label="Navigation tableau de bord">
       <div className="dashboard-nav__links mx-auto flex max-w-site flex-nowrap items-center justify-start gap-x-0 py-1.5 sm:py-2">
         <NavLink href="/dashboard" pathname={pathname} matchExact activeClass={active}>
           Dashboard
@@ -64,29 +64,29 @@ export function DashboardNav({ role }: { role?: string | null }) {
           </>
         ) : isManager ? (
           <>
-            <NavLink href="/dashboard/taches" pathname={pathname} activeClass={active}>
-              Missions
-            </NavLink>
             <NavLink href="/dashboard/clients" pathname={pathname} activeClass={active}>
               Clients
-            </NavLink>
-            <NavLink href="/dashboard/agents" pathname={pathname} activeClass={active}>
-              Agents
-            </NavLink>
-            <NavLink href="/dashboard/messagerie" pathname={pathname} activeClass={active}>
-              Messagerie
             </NavLink>
             <NavLink href="/dashboard/projets" pathname={pathname} activeClass={active}>
               Chantiers
             </NavLink>
-            <NavLink href="/dashboard/rapports" pathname={pathname} activeClass={active}>
-              Rapports
+            <NavLink href="/dashboard/taches" pathname={pathname} activeClass={active}>
+              Missions
+            </NavLink>
+            <NavLink href="/dashboard/agents" pathname={pathname} activeClass={active}>
+              Agents
             </NavLink>
             <NavLink href="/dashboard/devis" pathname={pathname} activeClass={active}>
               Devis
             </NavLink>
             <NavLink href="/dashboard/skills" pathname={pathname} activeClass={active}>
               Skills
+            </NavLink>
+            <NavLink href="/dashboard/messagerie" pathname={pathname} activeClass={active}>
+              Messagerie
+            </NavLink>
+            <NavLink href="/dashboard/rapports" pathname={pathname} activeClass={active}>
+              Rapports
             </NavLink>
             <NavLink href="/dashboard/parametres" pathname={pathname} activeClass={active}>
               Paramètres

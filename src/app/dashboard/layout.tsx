@@ -26,8 +26,8 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-[#eef0f4]">
-      <header className="border-b border-[#c8cdd6] bg-[#f8f9fb]">
-        <div className="mx-auto flex max-w-site items-center justify-between gap-3 px-3 py-2.5 sm:px-4 sm:py-3">
+      <header className="relative z-40 shrink-0 overflow-visible border-b border-[#c8cdd6] bg-[#f8f9fb]">
+        <div className="mx-auto flex h-14 max-w-site items-center justify-between gap-2 overflow-visible px-3 sm:gap-3 sm:px-4">
           <Link
             href="/dashboard"
             className="shrink-0 text-xl font-extrabold tracking-tight bg-gradient-to-r from-[#1e3a5f] via-[#2563eb] to-[#0ea5e9] bg-clip-text text-transparent drop-shadow-[0_1px_2px_rgba(30,58,95,0.25)] md:text-2xl"
@@ -35,7 +35,7 @@ export default async function DashboardLayout({
           >
             BeWork
           </Link>
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <div className="flex shrink-0 flex-nowrap items-center gap-1 overflow-visible sm:gap-2">
             {session.user?.role === "CLIENT" && (
               <Link
                 href="/dashboard/nouvelle-demande"

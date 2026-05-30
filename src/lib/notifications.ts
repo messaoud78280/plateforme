@@ -5,7 +5,12 @@ type NotificationType =
   | "TASK_ASSIGNED"
   | "MESSAGE_RECEIVED"
   | "TASK_COMPLETED"
-  | "TASK_TO_VALIDATE";
+  | "TASK_TO_VALIDATE"
+  | "DOCUMENT_ADDED"
+  | "MISSING_PIECE"
+  | "DEADLINE_NEAR"
+  | "REPORT_CREATED"
+  | "DELIVERABLE_UPLOADED";
 
 export async function createNotification(params: {
   userId: string;

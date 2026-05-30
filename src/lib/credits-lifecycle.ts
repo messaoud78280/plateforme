@@ -17,10 +17,16 @@ export function areCreditsExpired(expiresAt: Date | string | null | undefined): 
   return Date.now() >= new Date(expiresAt).getTime();
 }
 
-export function buildCreditsGrantUpdate(actionsIncluded: number, from: Date = new Date()) {
+export function buildCreditsGrantUpdate(
+  actionsIncluded: number,
+  from: Date = new Date(),
+  options?: { preserveUsed?: number }
+) {
+  const used =
+    options?.preserveUsed != null ? Math.max(0, Math.round(options.preserveUsed)) : 0;
   return {
     monthlyActionsTotal: actionsIncluded,
-    monthlyActionsUsed: 0,
+    monthlyActionsUsed: used,
     actionsResetAt: getCreditsExpirationDate(from),
   };
 }

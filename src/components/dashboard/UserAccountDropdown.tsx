@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import { HeaderDropdown } from "@/components/ui/HeaderDropdown";
 
 function getInitials(name: string | null | undefined): string {
   if (!name || !name.trim()) return "?";
@@ -31,116 +31,103 @@ interface UserAccountDropdownProps {
 }
 
 export function UserAccountDropdown({ userName, userRole, userCompany }: UserAccountDropdownProps) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   const roleLabel =
     userRole === "MANAGER" ? "Gérant" : userRole === "AGENCE" || userRole === "AGENT" ? "Agent" : "Client";
 
   return (
-    <div className="relative" ref={ref}>
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-3 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-[#eef0f4] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8]/50"
-        aria-expanded={open}
-        aria-haspopup="true"
-      >
-        <div className="flex flex-col">
-          <span className="text-sm font-semibold leading-tight text-black">
-            {userName || "Utilisateur"}
-          </span>
-          <span className="text-xs font-medium text-black">{roleLabel}</span>
-        </div>
-        <div
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#475569] text-sm font-semibold text-white"
-          aria-hidden
+    <HeaderDropdown
+      panelId="user-account-dropdown-panel"
+      width={288}
+      align="right"
+      trigger={({ onClick, expanded, triggerRef }) => (
+        <button
+          ref={triggerRef}
+          type="button"
+          onClick={onClick}
+          className="flex max-w-[min(100%,14rem)] shrink-0 items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-[#eef0f4] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8]/50 sm:max-w-none sm:gap-3"
+          aria-expanded={expanded}
+          aria-haspopup="menu"
+          aria-controls="user-account-dropdown-panel"
         >
-          {getInitials(userName)}
-        </div>
-      </button>
-
-      {open && (
-        <div
-          className="absolute right-0 top-full z-50 mt-2 w-72 rounded-xl surface-metallic-light py-2 shadow-lg"
-          role="menu"
-        >
-          <div className="border-b border-[#e0e4ea] px-4 py-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#475569] text-base font-semibold text-white">
-                {getInitials(userName)}
-              </div>
-              <div className="min-w-0">
-                <p className="truncate font-semibold text-black">{userName || "Utilisateur"}</p>
-                <p className="text-sm text-black">{userCompany || "BeWork"}</p>
-                <p className="text-xs text-[#94a3b8]">{roleLabel}</p>
-              </div>
-            </div>
+          <div className="hidden min-w-0 flex-col sm:flex">
+            <span className="truncate text-sm font-semibold leading-tight text-black">
+              {userName || "Utilisateur"}
+            </span>
+            <span className="text-xs font-medium text-black">{roleLabel}</span>
           </div>
-          <ul className="py-1">
-            {menuItems.map((item) => (
-              <li key={item.label} className="border-b border-[#e5e7eb] last:border-b-0">
-                <Link
-                  href={item.href}
-                  onClick={(e) => {
-                    setOpen(false);
-                    if (item.href === "#") e.preventDefault();
-                  }}
-                  className="flex items-center gap-3 px-4 py-3 text-sm text-[#374151] transition-colors hover:bg-[#fafafa]"
-                  role="menuitem"
-                >
-                  <svg
-                    className="h-5 w-5 shrink-0 text-[#6b7280]"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
-                  </svg>
-                  <span>{item.label}</span>
-                  <svg
-                    className="ml-auto h-4 w-4 shrink-0 text-[#9ca3af]"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <div className="border-t border-[#e0e4ea] pt-2">
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                signOut({ callbackUrl: "/" });
+          <div
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#475569] text-sm font-semibold text-white sm:h-10 sm:w-10"
+            aria-hidden
+          >
+            {getInitials(userName)}
+          </div>
+        </button>
+      )}
+    >
+      <div className="border-b border-[#e0e4ea] px-4 py-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#475569] text-base font-semibold text-white">
+            {getInitials(userName)}
+          </div>
+          <div className="min-w-0">
+            <p className="truncate font-semibold text-black">{userName || "Utilisateur"}</p>
+            <p className="truncate text-sm text-black">{userCompany || "BeWork"}</p>
+            <p className="text-xs text-[#94a3b8]">{roleLabel}</p>
+          </div>
+        </div>
+      </div>
+      <ul className="max-h-[min(70vh,24rem)] overflow-y-auto py-1">
+        {menuItems.map((item) => (
+          <li key={item.label} className="border-b border-[#e5e7eb] last:border-b-0">
+            <Link
+              href={item.href}
+              onClick={(e) => {
+                if (item.href === "#") e.preventDefault();
               }}
-              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-black transition-colors hover:bg-[#f8f9fb] hover:text-black"
+              className="flex items-center gap-3 px-4 py-3 text-sm text-[#374151] transition-colors hover:bg-[#fafafa]"
               role="menuitem"
             >
-              <svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              <svg
+                className="h-5 w-5 shrink-0 text-[#6b7280]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
               </svg>
-              <span>Déconnexion</span>
-              <svg className="ml-auto h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span>{item.label}</span>
+              <svg
+                className="ml-auto h-4 w-4 shrink-0 text-[#9ca3af]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <div className="border-t border-[#e0e4ea] pt-2">
+        <button
+          type="button"
+          onClick={() => signOut({ callbackUrl: "/" })}
+          className="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-black transition-colors hover:bg-[#f8f9fb]"
+          role="menuitem"
+        >
+          <svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+            />
+          </svg>
+          <span>Déconnexion</span>
+        </button>
+      </div>
+    </HeaderDropdown>
   );
 }

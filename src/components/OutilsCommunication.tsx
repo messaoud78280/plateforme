@@ -14,7 +14,7 @@ const whatsappHref = phoneDigits
 
 export function OutilsCommunication() {
   return (
-    <div className="flex items-center gap-2 border-r border-slate-200 pr-4">
+    <div className="flex shrink-0 flex-nowrap items-center gap-1 border-r border-slate-200 pr-2 sm:gap-2 sm:pr-4">
       <span className="mr-1 hidden text-xs font-medium text-slate-500 sm:inline">
         Outils
       </span>

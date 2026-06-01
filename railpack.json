@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "provider": "node",
+  "packages": {
+    "node": "20"
+  },
+  "buildAptPackages": ["libreoffice-nogui", "fontconfig", "fonts-liberation"],
+  "steps": {
+    "install": {
+      "commands": ["npm ci"]
+    },
+    "build": {
+      "inputs": [{ "step": "install" }],
+      "commands": ["npm run build"]
+    }
+  },
+  "deploy": {
+    "startCommand": "npm start",
+    "aptPackages": ["libreoffice-nogui", "fontconfig", "fonts-liberation"]
+  }
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { signIn, signOut, getSession } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { isManager, isAgentRole, isClient } from "@/types";
@@ -74,6 +74,18 @@ export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
 
   const config = GATE_CONFIG[gate];
 
+  useEffect(() => {
+    const err = searchParams.get("error");
+    if (gate !== "clients" || !err) return;
+    if (err === "account_pending") {
+      setError(
+        "Votre inscription est en attente de validation par l'équipe BeWork. Vous recevrez un email dès que votre compte sera activé."
+      );
+    } else if (err === "account_rejected") {
+      setError("Votre demande d'accès n'a pas été validée. Contactez BeWork pour plus d'informations.");
+    }
+  }, [searchParams, gate]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -86,6 +98,11 @@ export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
 
     if (!result) {
       setError("Erreur de connexion au serveur. Vérifiez votre connexion et réessayez.");
+      return;
+    }
+
+    if (result.url) {
+      router.push(result.url);
       return;
     }
 

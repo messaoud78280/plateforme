@@ -2,9 +2,11 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import EmailProvider from "next-auth/providers/email";
 import bcrypt from "bcryptjs";
+import { ClientAccountStatus, UserRole } from "@prisma/client";
 import { prismaAdapterCaseInsensitiveEmail } from "./auth-adapter";
 import { prisma } from "./prisma";
 import { sendEmail } from "@/lib/email";
+import { isClientLoginAllowed } from "@/lib/client-account-approval";
 
 export const authOptions: NextAuthOptions = {
   adapter: prismaAdapterCaseInsensitiveEmail(prisma),
@@ -16,6 +18,18 @@ export const authOptions: NextAuthOptions = {
       // NextAuth utilise seulement ce callback pour envoyer le lien.
       from: process.env.EMAIL_FROM,
       async sendVerificationRequest({ identifier, url }) {
+        const emailNorm = identifier.trim().toLowerCase();
+        const existing = await prisma.user.findFirst({
+          where: { email: { equals: emailNorm, mode: "insensitive" } },
+          select: { role: true, accountStatus: true },
+        });
+        if (
+          existing?.role === UserRole.CLIENT &&
+          !isClientLoginAllowed(existing.accountStatus)
+        ) {
+          throw new Error("Compte client non validé");
+        }
+
         const subject = "Connexion BeWork — lien de connexion";
         const safeUrl = String(url);
         const html = `
@@ -72,6 +86,7 @@ export const authOptions: NextAuthOptions = {
             name: user.name,
             role: user.role,
             contractStatus: user.contractStatus,
+            accountStatus: user.accountStatus,
           };
         } catch (err) {
           console.error("[Auth] Erreur base de données:", err);
@@ -81,12 +96,31 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    async signIn({ user }) {
+      const userId = (user as { id?: string }).id;
+      if (!userId) return true;
+
+      const dbUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { role: true, accountStatus: true },
+      });
+
+      if (dbUser?.role === UserRole.CLIENT && !isClientLoginAllowed(dbUser.accountStatus)) {
+        if (dbUser.accountStatus === ClientAccountStatus.REJECTED) {
+          return "/connexion/clients?error=account_rejected";
+        }
+        return "/connexion/clients?error=account_pending";
+      }
+
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.role = (user as { id: string; role: string }).role;
         const u = user as unknown as Record<string, unknown>;
         token.contractStatus = typeof u.contractStatus === "string" ? u.contractStatus : undefined;
+        token.accountStatus = typeof u.accountStatus === "string" ? u.accountStatus : undefined;
       }
       return token;
     },
@@ -95,6 +129,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
         session.user.contractStatus = token.contractStatus as string;
+        session.user.accountStatus = token.accountStatus as string;
       }
       return session;
     },

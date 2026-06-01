@@ -3,10 +3,9 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { isWellFormedEmail } from "@/lib/email-validation";
 import { isValidFormeJuridique, isValidSecteurActivite } from "@/lib/client-profile-options";
-import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
-import { buildCreditsGrantUpdate } from "@/lib/credits-lifecycle";
-import { Prisma, UserRole } from "@prisma/client";
-import { sendAdminNewUserNotification, sendWelcomeEmail } from "@/lib/email";
+import { Prisma, UserRole, ClientAccountStatus, ContractStatus } from "@prisma/client";
+import { sendAdminNewUserNotification } from "@/lib/email";
+import { createClientApprovalToken } from "@/lib/client-account-approval";
 
 export async function POST(request: Request) {
   try {
@@ -79,29 +78,34 @@ export async function POST(request: Request) {
         secteurActivite: secteurActivite || undefined,
         service: service || undefined,
         subscriptionPlan: "STANDARD",
-        ...buildCreditsGrantUpdate(SUBSCRIPTION_PLANS.STANDARD.actionsIncluded),
+        accountStatus: ClientAccountStatus.PENDING_APPROVAL,
+        contractStatus: ContractStatus.PENDING,
+        monthlyActionsTotal: 0,
+        monthlyActionsUsed: 0,
+        actionsResetAt: null,
       },
     });
 
-    // Email de bienvenue (non bloquant : ne doit pas empêcher l'inscription)
     const baseUrl = new URL(request.url).origin;
-    sendWelcomeEmail({ email: user.email, name: user.name }, { baseUrl }).then((r) => {
-      if (!r.ok) {
-        console.error("[inscription] Mail de bienvenue non envoyé — raison:", r.reason);
-      }
-    }).catch((e) => {
-      console.error("sendWelcomeEmail route error:", e);
-    });
+    let approveUrl: string | null = null;
+    try {
+      const token = createClientApprovalToken(user.id);
+      approveUrl = `${baseUrl}/api/clients/approve-by-token?token=${encodeURIComponent(token)}`;
+    } catch (e) {
+      console.error("[inscription] Token approbation non généré:", e);
+    }
 
-    // Notification interne équipe BeWork (non bloquant)
-    sendAdminNewUserNotification({
-      name: user.name,
-      email: user.email,
-      phone: user.phone ?? null,
-      company: user.company ?? null,
-      role: user.role,
-      createdAt: user.createdAt,
-    }).catch((e) => {
+    sendAdminNewUserNotification(
+      {
+        name: user.name,
+        email: user.email,
+        phone: user.phone ?? null,
+        company: user.company ?? null,
+        role: user.role,
+        createdAt: user.createdAt,
+      },
+      { approveUrl }
+    ).catch((e) => {
       console.error("sendAdminNewUserNotification route error:", e);
     });
 

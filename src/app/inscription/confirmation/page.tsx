@@ -22,28 +22,30 @@ function ConfirmationContent() {
       <div className="relative mx-auto w-full max-w-lg">
         <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-[0_26px_70px_-38px_rgba(15,23,42,0.35)] md:p-9">
           <h1 className="font-sans text-[1.55rem] font-semibold leading-tight tracking-tight text-slate-900 md:text-[1.85rem]">
-            Vérifiez votre email
+            Demande enregistrée
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-slate-700 md:text-[0.9375rem]">
-            Nous venons de vous envoyer un email pour confirmer votre adresse{email ? " à " : "."}{" "}
+            Votre inscription{email ? " (" : ""}
             {email ? <span className="font-semibold text-slate-900">{email}</span> : null}
+            {email ? ")" : ""} est enregistrée. L&apos;équipe BeWork doit la valider avant que vous puissiez
+            accéder à la plateforme.
           </p>
 
-          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-700">
-            <p className="font-semibold text-slate-900">Vous ne le voyez pas ?</p>
+          <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-950">
+            <p className="font-semibold">Prochaines étapes</p>
             <ul className="mt-2 list-disc space-y-1 pl-5">
-              <li>Vérifiez vos spams / indésirables</li>
-              <li>Attendez 1–2 minutes (selon votre messagerie)</li>
-              <li>Assurez-vous que l’adresse email est correcte</li>
+              <li>Validation de votre dossier par BeWork (sous 48 h ouvrées en général)</li>
+              <li>Email de confirmation lorsque votre compte est activé</li>
+              <li>Connexion possible uniquement après cette validation</li>
             </ul>
           </div>
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
             <Link
-              href="/connexion/clients"
+              href="/contact"
               className="flex-1 rounded-xl border border-[color:var(--accent-600)]/70 bg-gradient-to-b from-[color:var(--accent-500)] via-[color:var(--accent-600)] to-[color:var(--accent-600)] px-4 py-3 text-center text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_4px_18px_rgba(29,78,216,0.38)] transition hover:border-[color:var(--accent-500)] hover:from-[color:var(--accent-600)] hover:via-[color:var(--accent-700)] hover:to-[color:var(--accent-700)] active:translate-y-px"
             >
-              Aller à la connexion
+              Contacter BeWork
             </Link>
             <Link
               href="/"

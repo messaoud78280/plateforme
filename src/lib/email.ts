@@ -361,14 +361,60 @@ function formatDateTimeFr(d: Date): string {
   }
 }
 
-export async function sendAdminNewUserNotification(user: {
-  name?: string | null;
-  company?: string | null;
-  email?: string | null;
-  phone?: string | null;
-  role?: string | null;
-  createdAt?: Date | string | null;
-}) {
+export async function sendClientAccountApprovedEmail(
+  user: { email: string; name?: string | null },
+  opts?: { baseUrl?: string }
+): Promise<SendWelcomeEmailResult> {
+  if (!isValidEmail(user.email) || !hasBrevoApiKey()) {
+    return { ok: false, reason: "no_mail_provider" };
+  }
+
+  const origin = canonicalRequestOrigin(opts?.baseUrl);
+  const loginUrl = `${origin}/connexion/clients`;
+  const firstName = (user.name ?? "").trim().split(/\s+/)[0] || "Bonjour";
+
+  const subject = "BeWork — votre compte est validé";
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body style="font-family: ui-sans-serif, system-ui, sans-serif; line-height: 1.55; color: #0f172a; padding: 24px;">
+  <h1 style="margin:0 0 12px 0; font-size:20px;">Compte validé</h1>
+  <p style="margin:0 0 16px 0; color:#334155; font-size:14px;">
+    Bonjour ${escapeHtml(firstName)}, l'équipe BeWork a validé votre inscription. Vous pouvez vous connecter à la plateforme.
+  </p>
+  <p style="margin:18px 0;">
+    <a href="${loginUrl}" style="display:inline-block; background:#1d4ed8; color:#fff; text-decoration:none; padding:10px 14px; border-radius:10px; font-weight:700;">
+      Se connecter
+    </a>
+  </p>
+  <p style="margin:18px 0 0 0; font-size:12px; color:#64748b;">
+    Prochaine étape : signature du contrat et souscription à un forfait depuis votre espace client.
+  </p>
+</body>
+</html>
+  `.trim();
+
+  try {
+    await sendEmail({ to: user.email.trim().toLowerCase(), subject, html });
+    return { ok: true };
+  } catch (e) {
+    console.error("sendClientAccountApprovedEmail:", e);
+    return { ok: false, reason: "send_failed" };
+  }
+}
+
+export async function sendAdminNewUserNotification(
+  user: {
+    name?: string | null;
+    company?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    role?: string | null;
+    createdAt?: Date | string | null;
+  },
+  opts?: { approveUrl?: string | null }
+) {
   const to = getAdminRecipients();
   if (to.length === 0) return;
   if (!hasBrevoApiKey()) return;
@@ -405,8 +451,18 @@ export async function sendAdminNewUserNotification(user: {
       </div>
 
       <p style="margin:14px 0 0 0; color:#334155; font-size:14px;">
-        <strong>Action :</strong> Contactez rapidement ce prospect pour qualifier son besoin et l’accompagner dans sa première demande.
+        <strong>Action :</strong> Validez l’inscription pour autoriser l’accès à la plateforme (aucune connexion tant que le compte n’est pas validé).
       </p>
+      ${
+        opts?.approveUrl
+          ? `<p style="margin:16px 0 0 0;">
+        <a href="${escapeHtml(opts.approveUrl)}" style="display:inline-block; background:#16a34a; color:#fff; text-decoration:none; padding:10px 14px; border-radius:10px; font-weight:700;">
+          Valider ce compte client
+        </a>
+      </p>
+      <p style="margin:10px 0 0 0; font-size:12px; color:#64748b;">Lien valable 7 jours — réservé à l’équipe BeWork.</p>`
+          : ""
+      }
     </div>
   </div>
 </body>

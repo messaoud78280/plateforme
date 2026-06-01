@@ -31,6 +31,10 @@ model User {
   formeJuridique  String?  // SAS, EURL, SARL, SA, profession libérale, etc.
   secteurActivite String?  // e-commerce, juridique, commercial, etc.
   service         String?  // Service / département du contact
+  // Validation inscription client (inscription publique → PENDING_APPROVAL)
+  accountStatus   ClientAccountStatus @default(APPROVED)
+  approvedAt      DateTime?
+  approvedById    String?
   // Signature électronique du contrat (activation compte)
   contractStatus  ContractStatus @default(PENDING)
   signedAt        DateTime?
@@ -48,6 +52,8 @@ model User {
   // Relations
   invitedBy           User?     @relation("TeamMembers", fields: [invitedById], references: [id], onDelete: SetNull)
   invitedUsers        User[]    @relation("TeamMembers")
+  approvedBy          User?     @relation("ApprovedClients", fields: [approvedById], references: [id], onDelete: SetNull)
+  clientsApproved     User[]    @relation("ApprovedClients")
   invitationsSent     Invitation[]
   messagesSent       Message[]  @relation("SentMessages")
   messagesReceived   Message[]  @relation("ReceivedMessages")
@@ -236,6 +242,12 @@ enum UserRole {
   AGENCE  // Agent agence (opérationnel)
   MANAGER // Gérant de l'agence
   AGENT   // Assistante virtuelle (exécution des tâches)
+}
+
+enum ClientAccountStatus {
+  PENDING_APPROVAL // Inscription en ligne — accès plateforme bloqué
+  APPROVED         // Validé par BeWork — connexion autorisée
+  REJECTED         // Inscription refusée
 }
 
 enum ContractStatus {

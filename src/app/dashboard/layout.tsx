@@ -8,6 +8,9 @@ import { OutilsCommunication } from "@/components/OutilsCommunication";
 import { DashboardNav } from "@/components/dashboard/DashboardNav";
 import { UserAccountDropdown } from "@/components/dashboard/UserAccountDropdown";
 import { NotificationsDropdown } from "@/components/dashboard/NotificationsDropdown";
+import { ClientAccountStatus, UserRole } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import { isClientLoginAllowed } from "@/lib/client-account-approval";
 
 export const metadata: Metadata = {
   robots: SEO_NOINDEX_ROBOTS,
@@ -22,6 +25,20 @@ export default async function DashboardLayout({
 
   if (!session) {
     redirect("/connexion?callbackUrl=/dashboard");
+  }
+
+  if (session.user?.role === UserRole.CLIENT) {
+    const client = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { accountStatus: true },
+    });
+    if (client && !isClientLoginAllowed(client.accountStatus)) {
+      redirect(
+        client.accountStatus === ClientAccountStatus.REJECTED
+          ? "/compte/inscription-refusee"
+          : "/compte/en-attente-validation"
+      );
+    }
   }
 
   return (

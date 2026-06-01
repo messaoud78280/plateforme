@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { ContractStatus, Prisma, UserRole } from "@prisma/client";
+import { ClientAccountStatus, ContractStatus, Prisma, UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { isWellFormedEmail } from "@/lib/email-validation";
 import { isValidFormeJuridique, isValidSecteurActivite } from "@/lib/client-profile-options";
@@ -94,6 +94,7 @@ export async function createClientUser(
         service: input.service?.trim() || undefined,
         subscriptionPlan: planKey,
         ...buildCreditsGrantUpdate(plan.actionsIncluded),
+        accountStatus: ClientAccountStatus.APPROVED,
         contractStatus: input.contractStatus ?? ContractStatus.SIGNED,
       },
       select: { id: true, email: true, name: true, company: true, phone: true, role: true, createdAt: true },

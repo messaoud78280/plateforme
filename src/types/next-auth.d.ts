@@ -8,6 +8,7 @@ declare module "next-auth" {
       name: string;
       role: string;
       contractStatus?: string;
+      accountStatus?: string;
       image?: string | null;
     };
   }
@@ -18,5 +19,6 @@ declare module "next-auth/jwt" {
     id: string;
     role: string;
     contractStatus?: string;
+    accountStatus?: string;
   }
 }

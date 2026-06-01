@@ -111,12 +111,14 @@ export default function InscriptionPage() {
             Accès réservé aux clients. Gérants et agents : compte créé par l&apos;agence.
           </p>
 
-          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-xs text-slate-700">
-            <span className="font-semibold text-slate-900">Espace sécurisé.</span> Vos informations restent confidentielles.
-            <span className="mx-2 text-slate-300" aria-hidden>
-              ·
-            </span>
-            <span className="font-semibold text-slate-900">Support rapide.</span> Notre équipe peut vous aider dès la création du compte.
+          <div className="mt-5 space-y-3">
+            <div className="rounded-2xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-xs text-amber-950">
+              <span className="font-semibold">Validation BeWork obligatoire.</span> Chaque inscription est vérifiée par
+              notre équipe avant l&apos;ouverture de l&apos;accès à la plateforme.
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-xs text-slate-700">
+              <span className="font-semibold text-slate-900">Espace sécurisé.</span> Vos informations restent confidentielles.
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-5">

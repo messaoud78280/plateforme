@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { BackLink } from "@/components/ui/BackLink";
 import { ClientsTable } from "@/components/clients/ClientsTable";
 import { CreateClientForm } from "@/components/clients/CreateClientForm";
+import { ClientsApprovalBanner } from "@/components/clients/ClientsApprovalBanner";
 
 export default async function ClientsPage() {
   const session = await getServerSession(authOptions);
@@ -28,16 +29,30 @@ export default async function ClientsPage() {
       subscriptionPlan: true,
       monthlyActionsTotal: true,
       monthlyActionsUsed: true,
+      accountStatus: true,
+      createdAt: true,
       _count: {
         select: { projects: true, tasks: true },
       },
     },
-    orderBy: { name: "asc" },
+    orderBy: { createdAt: "desc" },
   });
+
+  const sortedClients = [...clients].sort((a, b) => {
+    const rank = (s: string) =>
+      s === "PENDING_APPROVAL" ? 0 : s === "REJECTED" ? 2 : 1;
+    const diff = rank(a.accountStatus) - rank(b.accountStatus);
+    if (diff !== 0) return diff;
+    return b.createdAt.getTime() - a.createdAt.getTime();
+  });
+
+  const pendingCount = clients.filter((c) => c.accountStatus === "PENDING_APPROVAL").length;
 
   return (
     <div className="space-y-8">
       <BackLink href="/dashboard">Tableau de bord</BackLink>
+      <ClientsApprovalBanner pendingCount={pendingCount} />
+
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-black">Clients</h1>
@@ -57,7 +72,7 @@ export default async function ClientsPage() {
         </div>
       ) : (
         <ClientsTable
-          clients={clients.map((client) => ({
+          clients={sortedClients.map((client) => ({
             id: client.id,
             name: client.name,
             email: client.email,
@@ -66,6 +81,7 @@ export default async function ClientsPage() {
             tasksCount: client._count.tasks,
             monthlyActionsTotal: client.monthlyActionsTotal ?? 0,
             monthlyActionsUsed: client.monthlyActionsUsed ?? 0,
+            accountStatus: client.accountStatus,
           }))}
         />
       )}

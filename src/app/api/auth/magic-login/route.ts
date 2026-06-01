@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import type { JWT } from "next-auth/jwt";
 import { decode, encode } from "next-auth/jwt";
+import { UserRole } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import { isClientLoginAllowed } from "@/lib/client-account-approval";
 
 function getSessionCookieName(baseUrl: string) {
   const isSecure = baseUrl.startsWith("https://");
@@ -33,6 +36,19 @@ export async function GET(request: Request) {
 
   if (!userId || !email) {
     return NextResponse.redirect(new URL("/connexion/clients?error=magic_link_invalid", baseUrl));
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true, accountStatus: true },
+  });
+  if (
+    dbUser?.role === UserRole.CLIENT &&
+    !isClientLoginAllowed(dbUser.accountStatus)
+  ) {
+    const err =
+      dbUser.accountStatus === "REJECTED" ? "account_rejected" : "account_pending";
+    return NextResponse.redirect(new URL(`/connexion/clients?error=${err}`, baseUrl));
   }
 
   const sessionJwt = await encode({

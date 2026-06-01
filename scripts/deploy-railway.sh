@@ -19,6 +19,14 @@ ENVIRONMENT="${RAILWAY_ENVIRONMENT:-production}"
 echo "→ Vérification Railway CLI…"
 
 if [[ -n "${RAILWAY_TOKEN:-}" ]]; then
+  if ! $CLI whoami &>/dev/null; then
+    echo ""
+    echo "   Le token dans .env.railway est invalide ou expiré."
+    echo "   Railway → projet plateforme → Settings → Tokens → créez un nouveau token."
+    echo "   Puis mettez à jour .env.railway ou déployez via push GitHub (main)."
+    echo ""
+    exit 1
+  fi
   echo "   Token projet (.env.railway) détecté."
 elif $CLI whoami &>/dev/null; then
   echo "   Session CLI active ($($CLI whoami 2>/dev/null || echo 'ok'))."

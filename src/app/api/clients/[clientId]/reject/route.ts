@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { approveClientAccount } from "@/lib/client-account-approval";
+import { rejectClientAccount } from "@/lib/client-account-approval";
 
 function isManager(role?: string | null): boolean {
   return role === "MANAGER";
 }
 
-/** POST /api/clients/[id]/approve — Valider une inscription client */
+/** POST /api/clients/[clientId]/reject — Refuser une inscription client */
 export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  _request: Request,
+  { params }: { params: Promise<{ clientId: string }> }
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -20,13 +20,13 @@ export async function POST(
     return NextResponse.json({ error: "Réservé au gérant" }, { status: 403 });
   }
 
-  const { id } = await params;
-  const baseUrl = new URL(request.url).origin;
-  const result = await approveClientAccount(id, session.user.id, { baseUrl });
+  const { clientId } = await params;
+  const result = await rejectClientAccount(clientId, session.user.id);
 
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: result.status });
   }
 
-  return NextResponse.json({ success: true, userId: result.userId, email: result.email });
+  return NextResponse.json({ success: true, userId: result.userId });
 }
+

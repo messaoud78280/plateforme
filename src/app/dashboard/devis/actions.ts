@@ -990,8 +990,15 @@ export async function deleteWorkItem(formData: FormData) {
   await guard();
   const id = String(formData.get("id") ?? "").trim();
   if (!id) throw new Error("Identifiant manquant.");
-  await prisma.workItem.delete({ where: { id } });
+  try {
+    await prisma.workItem.delete({ where: { id } });
+  } catch (e) {
+    console.error("[deleteWorkItem]", id, e);
+    redirect("/dashboard/devis/bibliotheque?error=delete_failed");
+  }
   revalidatePath("/dashboard/devis/bibliotheque");
+  revalidatePath("/dashboard/devis/recherche");
+  revalidatePath("/dashboard/devis/prix");
   redirect("/dashboard/devis/bibliotheque");
 }
 
@@ -1019,7 +1026,15 @@ export async function bulkDeleteWorkItems(ids: string[]): Promise<{ ok: true } |
   await guard();
   if (!ids.length) return { ok: false, error: "Aucun ouvrage sélectionné." };
   if (ids.length > BULK_BIB_MAX) return { ok: false, error: `Maximum ${BULK_BIB_MAX} ouvrages par action.` };
-  await prisma.workItem.deleteMany({ where: { id: { in: ids } } });
+  try {
+    await prisma.workItem.deleteMany({ where: { id: { in: ids } } });
+  } catch (e) {
+    console.error("[bulkDeleteWorkItems]", e);
+    return {
+      ok: false,
+      error: "Suppression impossible (liens devis ou trigger base). Réessayez ou contactez le support.",
+    };
+  }
   revalidatePath("/dashboard/devis/bibliotheque");
   revalidatePath("/dashboard/devis/recherche");
   revalidatePath("/dashboard/devis/prix");

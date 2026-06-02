@@ -14,6 +14,7 @@ import {
   type DuplicateCluster,
 } from "@/lib/work-item-merge";
 import { mergeCatalogIntoWhere, resolveActiveWorkItemCatalogId } from "@/lib/work-item-catalog";
+import { requireCatalogAllowsBulkWrite } from "@/lib/work-item-catalog-policy";
 
 const REVALIDATE = [
   "/dashboard/devis/bibliotheque",
@@ -65,6 +66,7 @@ export async function applyWorkItemMerge(
   },
 ) {
   await requireBeWorkDevisSession();
+  await requireCatalogAllowsBulkWrite();
   const allMembers = [...new Set(memberIds.filter((id) => id && id !== canonicalId))];
   const offset = opts?.memberOffset ?? 0;
   const limit = opts?.maxMembers ?? allMembers.length;
@@ -205,6 +207,9 @@ export async function analyzeAndMergeWorkItemDuplicatesBatch(opts?: {
   skipAutoMerge?: boolean;
 }): Promise<{ ok: true; progress: MergeBatchProgress } | { ok: false; error: string }> {
   await requireBeWorkDevisSession();
+  if (!opts?.skipAutoMerge) {
+    await requireCatalogAllowsBulkWrite();
+  }
 
   try {
     const catalogId = await resolveActiveWorkItemCatalogId();

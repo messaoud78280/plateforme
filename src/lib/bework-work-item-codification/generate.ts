@@ -1,26 +1,30 @@
 import { BEWORK_CODE_REGEX } from "@/lib/bework-work-item-codification/lexicon";
 
-/** Préfixe sans variante : BW-GO-DEM-CLO */
-export function buildCodificationPrefix(lotCode: string, familleCode: string, ouvrageCode: string): string {
+/** Préfixe sans variante : BW-GO-DEM-CLO (segment 4 = sous-famille ou type d’ouvrage). */
+export function buildCodificationPrefix(
+  lotCode: string,
+  familleCode: string,
+  sousFamilleCode: string,
+): string {
   const lot = lotCode.trim().toUpperCase();
   const fam = familleCode.trim().toUpperCase();
-  const ouv = ouvrageCode.trim().toUpperCase();
+  const sf = sousFamilleCode.trim().toUpperCase();
   if (!/^[A-Z]{2,3}$/.test(lot)) throw new Error(`Code lot invalide : ${lotCode}`);
   if (!/^[A-Z]{3}$/.test(fam)) throw new Error(`Code famille invalide : ${familleCode}`);
-  if (!/^[A-Z]{3}$/.test(ouv)) throw new Error(`Code ouvrage invalide : ${ouvrageCode}`);
-  return `BW-${lot}-${fam}-${ouv}`;
+  if (!/^[A-Z]{3}$/.test(sf)) throw new Error(`Code sous-famille invalide : ${sousFamilleCode}`);
+  return `BW-${lot}-${fam}-${sf}`;
 }
 
 export function generateCodeBework(
   lotCode: string,
   familleCode: string,
-  ouvrageCode: string,
+  sousFamilleCode: string,
   variantIndex: number,
 ): string {
   if (!Number.isInteger(variantIndex) || variantIndex < 1 || variantIndex > 999) {
     throw new Error(`Variante invalide : ${variantIndex} (1–999)`);
   }
-  const prefix = buildCodificationPrefix(lotCode, familleCode, ouvrageCode);
+  const prefix = buildCodificationPrefix(lotCode, familleCode, sousFamilleCode);
   const num = String(variantIndex).padStart(3, "0");
   const code = `${prefix}-${num}`;
   if (!BEWORK_CODE_REGEX.test(code)) throw new Error(`Code généré invalide : ${code}`);

@@ -41,9 +41,9 @@ export function isBeworkStructuredCode(code: string | null | undefined): boolean
 export function codificationGroupKey(
   lotCode: string,
   familleCode: string,
-  ouvrageCode: string,
+  sousFamilleCode: string,
   normalizedDesignation: string,
 ): string {
   const stem = normalizedDesignation.slice(0, 72);
-  return `${lotCode}|${familleCode}|${ouvrageCode}|${stem}`;
+  return `${lotCode}|${familleCode}|${sousFamilleCode}|${stem}`;
 }

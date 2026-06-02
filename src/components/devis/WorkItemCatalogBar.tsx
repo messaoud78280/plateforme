@@ -34,10 +34,14 @@ export function WorkItemCatalogBar({ catalogs, activeCatalogId }: Props) {
           </p>
           {active?.slug === "historique" ? (
             <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
-              Référentiel historique : consultation et anciens devis. Pour repartir proprement, basculez sur{" "}
-              <strong>Artiprix BeWork 2026</strong>.
+              Référentiel historique : consultation et anciens devis uniquement. Import, codification, fusion et nettoyage de masse
+              sont bloqués par défaut. Pour tout nouveau travail, basculez sur <strong>Artiprix BeWork 2026</strong>.
             </p>
-          ) : null}
+          ) : (
+            <p className="mt-2 text-xs text-slate-600">
+              Catalogue de production : imports Artiprix, devis, DCE → BPU/DPGF et rapprochements IA utilisent ce référentiel.
+            </p>
+          )}
         </div>
         <label className="block min-w-[280px] text-sm">
           <span className="font-semibold text-slate-800">Catalogue</span>

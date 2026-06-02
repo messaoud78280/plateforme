@@ -40,8 +40,17 @@ import {
   resolveClassificationFromPaste,
 } from "@/lib/be-work-devis-import-classification";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
+import type { CodificationMappingRule } from "@/lib/bework-work-item-codification/classify";
+import {
+  resolveArtiprixImportRow,
+  type ResolvedArtiprixImport,
+} from "@/lib/bework-artiprix-import";
 import { prisma } from "@/lib/prisma";
 import { resolveActiveWorkItemCatalogId } from "@/lib/work-item-catalog";
+import {
+  checkCatalogAllowsBulkWrite,
+  requireCatalogAllowsBulkWrite,
+} from "@/lib/work-item-catalog-policy";
 
 function applyNormalizedLotFields(formData: FormData) {
   const normalized = normalizeWorkItemLotFields({
@@ -103,6 +112,8 @@ export async function createWorkItem(formData: FormData) {
     throw new Error("Statut, gamme, unité ou type d’ouvrage invalide.");
   }
 
+  await requireCatalogAllowsBulkWrite();
+
   const catalogId = await resolveActiveWorkItemCatalogId();
 
   await prisma.workItem.create({
@@ -160,7 +171,11 @@ function normalizeBulkImportRows(rowsInput: unknown): BulkImportWorkItemPayload[
             (x): x is Record<string, unknown> => typeof x === "object" && x !== null && !Array.isArray(x),
           )
         : [];
-      return { values, priceEntries: pe, pasteSource: o };
+      const pasteSource =
+        typeof o.pasteSource === "object" && o.pasteSource !== null && !Array.isArray(o.pasteSource)
+          ? (o.pasteSource as Record<string, unknown>)
+          : undefined;
+      return { values, priceEntries: pe, pasteSource };
     }
     const { values } = mapObjectToStructuredPasteFormValues(o);
     return {
@@ -544,6 +559,50 @@ function pasteStr(v: string): string | undefined {
   return t || undefined;
 }
 
+async function loadCodificationMappingRules(): Promise<CodificationMappingRule[]> {
+  try {
+    const rows = await prisma.workItemCodificationMapping.findMany({
+      where: { active: true },
+      orderBy: [{ priority: "desc" }, { sourcePattern: "asc" }],
+    });
+    return rows.map((r) => ({
+      sourcePattern: r.sourcePattern,
+      matchType: r.matchType,
+      lotCode: r.lotCode,
+      familleCode: r.familleCode,
+      ouvrageCode: r.ouvrageCode,
+      sousFamilleCode: r.sousFamilleCode,
+      sousFamilleNom: r.sousFamilleNom,
+      priority: r.priority,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+function mergeResolvedImportIntoCreateData(
+  base: ReturnType<typeof buildWorkItemCreateDataFromPasteValues>,
+  resolved: ResolvedArtiprixImport,
+) {
+  return {
+    ...base,
+    code: resolved.code,
+    codeBework: resolved.codeBework,
+    sourceCode: resolved.sourceCode,
+    importSource: resolved.importSource,
+    sourceLine: resolved.sourceLine,
+    lotCode: resolved.lotCode,
+    familleNom: resolved.familleNom,
+    sousFamilleCode: resolved.sousFamilleCode,
+    sousFamilleNom: resolved.sousFamilleNom,
+    ouvrageCode: resolved.ouvrageCode,
+    familyCode: resolved.familyCode ?? base.familyCode,
+    normalizedDesignation: resolved.normalizedDesignation,
+    designationSource: resolved.designationSource,
+    codificationStatus: resolved.codificationStatus,
+  };
+}
+
 function buildWorkItemCreateDataFromPasteValues(
   catalogId: string,
   v: StructuredPasteFormValues,
@@ -591,6 +650,98 @@ function buildWorkItemCreateDataFromPasteValues(
   };
 }
 
+export type BulkImportPreviewRow = {
+  index: number;
+  pastedCode: string;
+  resolvedCode: string;
+  sourceCode: string;
+  importSource: string | null;
+  duplicateDb: boolean;
+  duplicateBatch: boolean;
+  error?: string;
+};
+
+/** Prévisualise les codes BeWork générés (Artiprix → BW-…) dans le catalogue actif. */
+export async function previewBulkImportWorkItems(
+  rowsInput: unknown,
+): Promise<{ ok: true; rows: BulkImportPreviewRow[] } | { ok: false; error: string }> {
+  await guard();
+  const catalogId = await resolveActiveWorkItemCatalogId();
+  const bundles = normalizeBulkImportRows(rowsInput);
+  if (!bundles) return { ok: false, error: "Format invalide." };
+
+  const mappingRules = await loadCodificationMappingRules();
+  const existing = await prisma.workItem.findMany({
+    where: { catalogId },
+    select: { code: true, codeBework: true },
+    take: 15000,
+  });
+  const dbCodeSet = new Set<string>();
+  const usedCodes = new Set<string>();
+  for (const row of existing) {
+    if (row.code) dbCodeSet.add(row.code.trim().toUpperCase());
+    if (row.codeBework) dbCodeSet.add(row.codeBework.trim().toUpperCase());
+    if (row.code) usedCodes.add(row.code.trim().toUpperCase());
+    if (row.codeBework) usedCodes.add(row.codeBework.trim().toUpperCase());
+  }
+
+  const seenInBatch = new Set<string>();
+  const out: BulkImportPreviewRow[] = [];
+
+  bundles.forEach((bundle, index) => {
+    const pastedCode = bundle.values.code.trim();
+    if (!pastedCode) {
+      out.push({
+        index,
+        pastedCode: "",
+        resolvedCode: "",
+        sourceCode: "",
+        importSource: null,
+        duplicateDb: false,
+        duplicateBatch: false,
+        error: "Code manquant",
+      });
+      return;
+    }
+
+    const resolved = resolveArtiprixImportRow(
+      bundle.values,
+      bundle.pasteSource,
+      usedCodes,
+      mappingRules,
+    );
+    if ("error" in resolved) {
+      out.push({
+        index,
+        pastedCode,
+        resolvedCode: "",
+        sourceCode: "",
+        importSource: null,
+        duplicateDb: false,
+        duplicateBatch: false,
+        error: resolved.error,
+      });
+      return;
+    }
+
+    const resolvedCode = resolved.code;
+    const duplicateBatch = seenInBatch.has(resolvedCode.toUpperCase());
+    if (!duplicateBatch) seenInBatch.add(resolvedCode.toUpperCase());
+
+    out.push({
+      index,
+      pastedCode,
+      resolvedCode,
+      sourceCode: resolved.sourceCode,
+      importSource: resolved.importSource,
+      duplicateDb: dbCodeSet.has(resolvedCode.toUpperCase()),
+      duplicateBatch,
+    });
+  });
+
+  return { ok: true, rows: out };
+}
+
 /**
  * Import en masse depuis le collage JSON (sans redirection).
  * Ignore les codes déjà en base et les lignes sans code valide.
@@ -598,7 +749,7 @@ function buildWorkItemCreateDataFromPasteValues(
  */
 export async function importWorkItemsBulk(
   rowsInput: unknown,
-  options?: { mergeDuplicates?: boolean },
+  options?: { mergeDuplicates?: boolean; confirmHistoriqueImport?: boolean },
 ): Promise<
   | {
       ok: true;
@@ -610,10 +761,20 @@ export async function importWorkItemsBulk(
       skippedBatchDuplicate: number;
       errors: string[];
     }
-  | { ok: false; error: string }
+  | { ok: false; error: string; requiresHistoriqueConfirmation?: boolean }
 > {
   await guard();
-  const catalogId = await resolveActiveWorkItemCatalogId();
+  const writeCheck = await checkCatalogAllowsBulkWrite(undefined, {
+    confirmHistoriqueImport: options?.confirmHistoriqueImport === true,
+  });
+  if (!writeCheck.ok) {
+    return {
+      ok: false,
+      error: writeCheck.error,
+      requiresHistoriqueConfirmation: writeCheck.requiresHistoriqueConfirmation,
+    };
+  }
+  const catalogId = writeCheck.catalog.id;
   const mergeDuplicates = options?.mergeDuplicates === true;
   const bundles = normalizeBulkImportRows(rowsInput);
   if (!bundles) {
@@ -634,6 +795,17 @@ export async function importWorkItemsBulk(
   let skippedInvalid = 0;
   let skippedBatchDuplicate = 0;
   const seenInBatch = new Set<string>();
+  const mappingRules = await loadCodificationMappingRules();
+  const catalogCodes = await prisma.workItem.findMany({
+    where: { catalogId },
+    select: { code: true, codeBework: true },
+    take: 15000,
+  });
+  const usedCodes = new Set<string>();
+  for (const row of catalogCodes) {
+    if (row.code) usedCodes.add(row.code.trim().toUpperCase());
+    if (row.codeBework) usedCodes.add(row.codeBework.trim().toUpperCase());
+  }
 
   async function attachPriceEntries(
     workItemId: string,
@@ -660,21 +832,35 @@ export async function importWorkItemsBulk(
       bundle.pasteSource && typeof bundle.pasteSource === "object" && !Array.isArray(bundle.pasteSource)
         ? (bundle.pasteSource as Record<string, unknown>)
         : undefined;
-    const code = values.code.trim();
-    if (!code) {
+    const pastedCode = values.code.trim();
+    if (!pastedCode) {
       skippedInvalid += 1;
-      errors.push(`Ligne ${i + 1} : code BeWork manquant.`);
+      errors.push(`Ligne ${i + 1} : code manquant.`);
       continue;
     }
-    if (seenInBatch.has(code)) {
+
+    const resolved = resolveArtiprixImportRow(values, pasteSource, usedCodes, mappingRules);
+    if ("error" in resolved) {
+      skippedInvalid += 1;
+      errors.push(`Ligne ${i + 1} (${pastedCode}) : ${resolved.error}`);
+      continue;
+    }
+
+    const code = resolved.code;
+    if (seenInBatch.has(code.toUpperCase())) {
       skippedBatchDuplicate += 1;
-      errors.push(`Ligne ${i + 1} (${code}) : doublon dans le collage (code déjà présent plus haut).`);
+      errors.push(
+        `Ligne ${i + 1} (${pastedCode} → ${code}) : doublon dans le collage (code déjà présent plus haut).`,
+      );
       continue;
     }
-    seenInBatch.add(code);
+    seenInBatch.add(code.toUpperCase());
 
     const existing = await prisma.workItem.findFirst({
-      where: { catalogId, code },
+      where: {
+        catalogId,
+        OR: [{ code }, { codeBework: code }],
+      },
       select: {
         id: true,
         code: true,
@@ -709,7 +895,8 @@ export async function importWorkItemsBulk(
       continue;
     }
 
-    const data = buildWorkItemCreateDataFromPasteValues(catalogId, values, pasteSource);
+    const base = buildWorkItemCreateDataFromPasteValues(catalogId, values, pasteSource);
+    const data = mergeResolvedImportIntoCreateData(base, resolved);
     try {
       const workItem = await prisma.workItem.create({ data });
       created += 1;

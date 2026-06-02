@@ -76,6 +76,13 @@ function effectiveSourceCode(item: WorkItemCodificationInput): string {
   return (item.sourceCode?.trim() || item.code).trim();
 }
 
+function codificationSegment(cls: {
+  sousFamilleCode: string | null;
+  ouvrageCode: string;
+}): string {
+  return (cls.sousFamilleCode ?? cls.ouvrageCode ?? "GEN").toUpperCase();
+}
+
 /**
  * Propositions batch : regroupe les variantes similaires sous le même préfixe.
  */
@@ -121,7 +128,7 @@ export function buildWorkItemCodificationProposals(
     const norm =
       item.normalizedDesignation?.trim() ||
       normalizeWorkItemDesignation(item.title || item.fullDescription);
-    const gk = codificationGroupKey(cls.lotCode, cls.familleCode, cls.ouvrageCode, norm);
+    const gk = codificationGroupKey(cls.lotCode, cls.familleCode, codificationSegment(cls), norm);
     const list = groups.get(gk) ?? [];
     list.push(item);
     groups.set(gk, list);
@@ -149,15 +156,16 @@ export function buildWorkItemCodificationProposals(
       mappingRules,
     );
 
-    const prefix = buildCodificationPrefix(cls.lotCode, cls.familleCode, cls.ouvrageCode);
+    const seg = codificationSegment(cls);
+    const prefix = buildCodificationPrefix(cls.lotCode, cls.familleCode, seg);
     let variant = prefixCounters.get(prefix) ?? maxVariantIndexForPrefix(usedCodes, prefix);
 
     for (const item of sorted) {
       variant += 1;
-      let proposed = generateCodeBework(cls.lotCode, cls.familleCode, cls.ouvrageCode, variant);
+      let proposed = generateCodeBework(cls.lotCode, cls.familleCode, seg, variant);
       while (usedCodes.has(proposed.toUpperCase())) {
         variant += 1;
-        proposed = generateCodeBework(cls.lotCode, cls.familleCode, cls.ouvrageCode, variant);
+        proposed = generateCodeBework(cls.lotCode, cls.familleCode, seg, variant);
       }
       usedCodes.add(proposed.toUpperCase());
 
@@ -200,7 +208,7 @@ export function buildWorkItemCodificationProposals(
         proposedStatus,
         confidence: itemCls.confidence,
         matchReason: itemCls.matchReason,
-        groupKey: codificationGroupKey(itemCls.lotCode, itemCls.familleCode, itemCls.ouvrageCode, norm),
+        groupKey: codificationGroupKey(itemCls.lotCode, itemCls.familleCode, codificationSegment(itemCls), norm),
         variantIndex: variant,
         avgHt: item.avgHt,
         priceSourceCount: item.priceSourceCount,

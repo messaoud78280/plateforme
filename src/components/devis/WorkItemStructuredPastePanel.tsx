@@ -7,9 +7,11 @@ import {
   checkWorkItemsSimilarTitles,
   importObservedPricesForWorkItems,
   importWorkItemsBulk,
+  previewBulkImportWorkItems,
   previewObservedPricesPaste,
   type PreviewObservedPricePasteResultRow,
 } from "@/app/dashboard/devis/actions";
+import { HISTORIQUE_IMPORT_WARNING } from "@/lib/work-item-catalog-policy";
 import { WORK_ITEM_STATUS_LABELS } from "@/lib/be-work-devis-labels";
 import type { MotherVariantImportBundle } from "@/lib/be-work-devis-chatgpt-paste";
 import {
@@ -25,11 +27,17 @@ import type { PricePastePreviewCells } from "@/app/dashboard/devis/actions";
 type Props = {
   onApplyValues: (values: StructuredPasteFormValues) => void;
   onClearForm: () => void;
+  catalogIsHistorique?: boolean;
+  catalogName?: string;
 };
 
 type WorkItemPreviewRow = ParsedPasteBulkRow & {
+  pastedCode: string;
+  resolvedCode: string;
+  sourceCode: string;
   duplicateDb: boolean;
   duplicateBatch: boolean;
+  previewError?: string;
 };
 
 type MotherPreviewRow = MotherVariantImportBundle & {
@@ -50,7 +58,12 @@ function displayStatusLabel(statusRaw: string): string {
   return s;
 }
 
-export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Props) {
+export function WorkItemStructuredPastePanel({
+  onApplyValues,
+  onClearForm,
+  catalogIsHistorique = false,
+  catalogName,
+}: Props) {
   const router = useRouter();
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +77,7 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
   const [pasteKindLabel, setPasteKindLabel] = useState<string | null>(null);
   const [confirmSkipDuplicates, setConfirmSkipDuplicates] = useState(false);
   const [confirmMergeDuplicates, setConfirmMergeDuplicates] = useState(false);
+  const [confirmHistoriqueImport, setConfirmHistoriqueImport] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const clearMessages = useCallback(() => {
@@ -108,21 +122,37 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
   }, []);
 
   const buildWorkItemPreviewRows = useCallback(async (rows: ParsedPasteBulkRow[]) => {
-    const codes = rows.map((r) => r.values.code.trim()).filter(Boolean);
-    const existing = await checkWorkItemCodesExist(codes);
-    const existingSet = new Set(existing);
-    const seenInFile = new Set<string>();
+    const payload = rows.map((r) => ({
+      values: r.values,
+      priceEntries: r.priceEntries,
+      pasteSource: r.pasteSource,
+    }));
+    const preview = await previewBulkImportWorkItems(payload);
+    if (!preview.ok) {
+      setError(preview.error);
+      setWorkItemBulkRows(null);
+      return;
+    }
+    const byIndex = new Map(preview.rows.map((p) => [p.index, p]));
     const enriched: WorkItemPreviewRow[] = rows.map((row) => {
-      const code = row.values.code.trim();
-      const duplicateDb = Boolean(code && existingSet.has(code));
-      const duplicateBatch = Boolean(code && seenInFile.has(code));
-      if (code) seenInFile.add(code);
-      return { ...row, duplicateDb, duplicateBatch };
+      const p = byIndex.get(row.index);
+      const pastedCode = row.values.code.trim();
+      const resolvedCode = p?.resolvedCode ?? pastedCode;
+      return {
+        ...row,
+        pastedCode,
+        resolvedCode,
+        sourceCode: p?.sourceCode ?? pastedCode,
+        duplicateDb: p?.duplicateDb ?? false,
+        duplicateBatch: p?.duplicateBatch ?? false,
+        previewError: p?.error,
+      };
     });
     setWorkItemBulkRows(enriched);
     setMotherBulkRows(null);
     setConfirmSkipDuplicates(false);
     setConfirmMergeDuplicates(false);
+    setConfirmHistoriqueImport(false);
   }, []);
 
   /** Tableau / fiches mères+variantes / prix seuls / objet simple. */
@@ -253,7 +283,11 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
 
   const duplicateCount = workItemBulkRows?.filter((r) => r.duplicateDb || r.duplicateBatch).length ?? 0;
   const importableCount =
-    workItemBulkRows?.filter((r) => r.values.code.trim() && !r.duplicateDb && !r.duplicateBatch).length ?? 0;
+    workItemBulkRows?.filter(
+      (r) => r.resolvedCode.trim() && !r.duplicateDb && !r.duplicateBatch && !r.previewError,
+    ).length ?? 0;
+
+  const historiqueOk = !catalogIsHistorique || confirmHistoriqueImport;
 
   const motherDuplicateCount = motherBulkRows?.filter((r) => r.duplicateDb || r.duplicateBatch).length ?? 0;
   const motherDbDuplicateCount = motherBulkRows?.filter((r) => r.duplicateDb).length ?? 0;
@@ -266,6 +300,7 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
     workItemBulkRows &&
     workItemBulkRows.length > 0 &&
     importableCount > 0 &&
+    historiqueOk &&
     (duplicateCount === 0 || confirmSkipDuplicates);
 
   const motherPayloadCount =
@@ -303,15 +338,19 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
               pasteSource: r.pasteSource,
             }))
         : workItemBulkRows!
-            .filter((r) => r.values.code.trim() && !r.duplicateDb && !r.duplicateBatch)
+            .filter(
+              (r) => r.resolvedCode.trim() && !r.duplicateDb && !r.duplicateBatch && !r.previewError,
+            )
             .map((r) => ({
               values: r.values,
               priceEntries: r.priceEntries,
+              pasteSource: r.pasteSource,
             }));
 
     startTransition(async () => {
       const res = await importWorkItemsBulk(payload, {
         mergeDuplicates: confirmMergeDuplicates,
+        confirmHistoriqueImport: catalogIsHistorique && confirmHistoriqueImport,
       });
       if (!res.ok) {
         setError(res.error);
@@ -340,6 +379,8 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
     motherDuplicateCount,
     confirmSkipDuplicates,
     confirmMergeDuplicates,
+    catalogIsHistorique,
+    confirmHistoriqueImport,
     clearMessages,
     router,
   ]);
@@ -392,9 +433,21 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
       <h2 className="font-heading text-base font-bold text-slate-900">Ajout rapide depuis données structurées</h2>
       <p className="mt-2 text-sm text-slate-600">
         Collez un JSON complet (ChatGPT ou autre) : export <code className="rounded bg-slate-200 px-1">{`{ "famille", "ouvrages": [{ "fiche_mere", "variantes" }] }`}</code>, tableau
-        d’ouvrages, ou objet simple. <strong>« Analyser le collage »</strong> détecte le format ; les fiches mères importent toutes leurs
-        variantes en prix observés sur une seule fiche bibliothèque.
+        d’ouvrages, ou objet simple. <strong>« Analyser le collage »</strong> détecte le format ; les codes Artiprix (ex. 1.11.1) sont convertis en codes BeWork{" "}
+        <span className="font-mono text-xs">BW-[LOT]-[FAMILLE]-[SOUS-FAMILLE]-[N°]</span> dans le catalogue actif
+        {catalogName ? (
+          <>
+            {" "}
+            (<strong>{catalogName}</strong>)
+          </>
+        ) : null}
+        .
       </p>
+      {catalogIsHistorique ? (
+        <p className="mt-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-950" role="status">
+          {HISTORIQUE_IMPORT_WARNING}
+        </p>
+      ) : null}
       <details className="mt-3 text-sm text-slate-600">
         <summary className="cursor-pointer font-semibold text-[#1e3a5f] hover:underline">Voir des exemples</summary>
         <div className="mt-2 space-y-3">
@@ -712,7 +765,9 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
               <thead className="border-b border-slate-100 bg-slate-50 text-xs font-bold uppercase text-slate-600">
                 <tr>
                   <th className="px-2 py-2">#</th>
-                  <th className="px-2 py-2">Code</th>
+                  <th className="px-2 py-2">Code collé</th>
+                  <th className="px-2 py-2">Code BeWork</th>
+                  <th className="px-2 py-2">Source Artiprix</th>
                   <th className="px-2 py-2">Lot</th>
                   <th className="px-2 py-2">Titre</th>
                   <th className="px-2 py-2">Unité</th>
@@ -733,9 +788,11 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
                   return (
                     <tr key={row.index} className={dup ? "bg-amber-50/60" : undefined}>
                       <td className="whitespace-nowrap px-2 py-2 text-slate-500">{row.index + 1}</td>
+                      <td className="px-2 py-2 font-mono text-xs text-slate-600">{row.pastedCode || "—"}</td>
                       <td className="px-2 py-2 font-mono text-xs font-semibold text-[#1e3a5f]">
-                        {row.values.code.trim() || "—"}
+                        {row.resolvedCode || "—"}
                       </td>
+                      <td className="px-2 py-2 font-mono text-xs text-slate-700">{row.sourceCode || "—"}</td>
                       <td className="max-w-[120px] truncate px-2 py-2" title={row.values.lot}>
                         {row.values.lot.trim() || "—"}
                       </td>
@@ -781,6 +838,18 @@ export function WorkItemStructuredPastePanel({ onApplyValues, onClearForm }: Pro
                 <strong>{duplicateCount}</strong> ligne(s) marquées « Doublon détecté » (code déjà en bibliothèque ou répété dans le
                 collage).
               </span>
+            </label>
+          ) : null}
+
+          {catalogIsHistorique ? (
+            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-red-200 bg-red-50/80 p-3 text-sm text-red-950">
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={confirmHistoriqueImport}
+                onChange={(e) => setConfirmHistoriqueImport(e.target.checked)}
+              />
+              <span>{HISTORIQUE_IMPORT_WARNING}</span>
             </label>
           ) : null}
 

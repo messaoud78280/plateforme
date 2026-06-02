@@ -13,6 +13,7 @@ import { prisma } from "@/lib/prisma";
 import { Prisma, type WorkItemCodificationStatus } from "@prisma/client";
 import { WORK_ITEM_VISIBLE_IN_LIST } from "@/lib/work-item-merge";
 import { mergeCatalogIntoWhere, resolveActiveWorkItemCatalogId } from "@/lib/work-item-catalog";
+import { requireCatalogAllowsBulkWrite } from "@/lib/work-item-catalog-policy";
 
 const REVALIDATE = [
   "/dashboard/devis/bibliotheque",
@@ -309,6 +310,8 @@ export async function applyWorkItemCodificationBatch(
         report: preview.report,
       };
     }
+
+    await requireCatalogAllowsBulkWrite();
 
     let applied = 0;
     let skipped = 0;

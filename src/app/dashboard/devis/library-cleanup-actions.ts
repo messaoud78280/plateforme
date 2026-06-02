@@ -21,6 +21,7 @@ import {
   type WorkItemPriceStats,
 } from "@/lib/work-item-library-cleanup";
 import { mergeCatalogIntoWhere, resolveActiveWorkItemCatalogId } from "@/lib/work-item-catalog";
+import { requireCatalogAllowsBulkWrite } from "@/lib/work-item-catalog-policy";
 
 const REVALIDATE_PATHS = [
   "/dashboard/devis/bibliotheque",
@@ -264,6 +265,7 @@ export async function applyHighConfidenceClassificationsBatch(opts?: {
 > {
   await requireBeWorkDevisSession();
   const dryRun = opts?.dryRun ?? false;
+  if (!dryRun) await requireCatalogAllowsBulkWrite();
   const batchSize = defaultBatchSize(opts?.batchSize);
 
   try {
@@ -529,6 +531,8 @@ export async function mergeDuplicateGroup(input: {
       totalMembers: allMembers.length,
     };
   }
+
+  await requireCatalogAllowsBulkWrite();
 
   if (memberOffset >= allMembers.length) {
     return {

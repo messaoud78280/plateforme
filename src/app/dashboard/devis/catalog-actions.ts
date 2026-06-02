@@ -9,6 +9,7 @@ import {
   WORK_ITEM_CATALOG_COOKIE,
   type WorkItemCatalogSummary,
 } from "@/lib/work-item-catalog";
+import { preferProductionCatalogForImportRoute } from "@/lib/work-item-catalog-policy";
 
 const REVALIDATE = [
   "/dashboard/devis/bibliotheque",
@@ -50,6 +51,21 @@ export async function setActiveWorkItemCatalog(
 
   revalidateCatalogPaths();
   return { ok: true };
+}
+
+/** Page nouvel ouvrage / import : catalogue actif = Artiprix 2026 si l’historique était sélectionné. */
+export async function ensureArtiprixCatalogForImportRoute(): Promise<void> {
+  await requireBeWorkDevisSession();
+  await preferProductionCatalogForImportRoute(async (catalogId) => {
+    const jar = await cookies();
+    jar.set(WORK_ITEM_CATALOG_COOKIE, catalogId, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax",
+      httpOnly: true,
+    });
+    revalidateCatalogPaths();
+  });
 }
 
 export async function createWorkItemCatalog(input: {

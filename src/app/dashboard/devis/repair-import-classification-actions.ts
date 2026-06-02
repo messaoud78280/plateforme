@@ -8,6 +8,8 @@ import {
   workItemHasGenericClassification,
 } from "@/lib/be-work-devis-import-classification";
 import { prisma } from "@/lib/prisma";
+import { mergeCatalogIntoWhere, resolveActiveWorkItemCatalogId } from "@/lib/work-item-catalog";
+import { requireCatalogAllowsBulkWrite } from "@/lib/work-item-catalog-policy";
 
 async function guard() {
   await requireBeWorkDevisSession();
@@ -29,12 +31,14 @@ export async function repairWorkItemsClassificationFromImportMeta(opts?: {
   limit?: number;
 }): Promise<RepairImportClassificationResult | { ok: false; error: string }> {
   await guard();
+  await requireCatalogAllowsBulkWrite();
 
   const limit = Math.min(Math.max(opts?.limit ?? 500, 1), 5000);
+  const catalogId = await resolveActiveWorkItemCatalogId();
 
   try {
     const candidates = await prisma.workItem.findMany({
-      where: {
+      where: mergeCatalogIntoWhere(catalogId, {
         mergeStatus: { not: "merged" },
         OR: [
           { familyCode: null },
@@ -43,7 +47,7 @@ export async function repairWorkItemsClassificationFromImportMeta(opts?: {
           { family: { contains: "Non class", mode: "insensitive" } },
           { unit: { in: ["unité", "u", "U"] } },
         ],
-      },
+      }),
       select: {
         id: true,
         code: true,

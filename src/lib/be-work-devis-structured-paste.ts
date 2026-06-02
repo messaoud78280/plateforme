@@ -380,6 +380,8 @@ export type ParsedPasteBulkRow = {
   workItemCode?: string;
   warnings: string[];
   priceEntries: Record<string, unknown>[];
+  /** Objet JSON source (traçabilité Artiprix, source, catalogue…). */
+  pasteSource?: Record<string, unknown>;
   rootQuantity?: unknown;
 };
 
@@ -571,6 +573,7 @@ export function parseStructuredPasteBlock(raw: string):
         values,
         warnings,
         priceEntries,
+        pasteSource: rowObj,
         rootQuantity: rowObj.quantity,
       });
     });

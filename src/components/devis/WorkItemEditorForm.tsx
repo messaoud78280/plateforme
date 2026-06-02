@@ -24,9 +24,17 @@ type Props = {
   item?: WorkItem;
   /** Ajout rapide JSON — réservé à la page création. */
   enableStructuredPaste?: boolean;
+  catalogIsHistorique?: boolean;
+  catalogName?: string;
 };
 
-export function WorkItemEditorForm({ mode, item, enableStructuredPaste = false }: Props) {
+export function WorkItemEditorForm({
+  mode,
+  item,
+  enableStructuredPaste = false,
+  catalogIsHistorique = false,
+  catalogName,
+}: Props) {
   const action = mode === "create" ? createWorkItem : updateWorkItem;
 
   const editFamilyCode = mode === "edit" && item ? item.familyCode ?? "" : "";
@@ -71,7 +79,12 @@ export function WorkItemEditorForm({ mode, item, enableStructuredPaste = false }
   return (
     <div className="space-y-8">
       {enableStructuredPaste && mode === "create" ? (
-        <WorkItemStructuredPastePanel onApplyValues={applyPaste} onClearForm={clearPaste} />
+        <WorkItemStructuredPastePanel
+          onApplyValues={applyPaste}
+          onClearForm={clearPaste}
+          catalogIsHistorique={catalogIsHistorique}
+          catalogName={catalogName}
+        />
       ) : null}
 
       <form

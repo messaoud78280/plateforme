@@ -10,6 +10,7 @@ import {
 } from "@/lib/be-work-devis-recodification";
 import { DEFAULT_BEWORK_FAMILY_CODE, generateBeWorkCode, suggestFamilyCodeFromWorkItem } from "@/lib/bework-devis-family-codes";
 import { prisma } from "@/lib/prisma";
+import { requireCatalogAllowsBulkWrite } from "@/lib/work-item-catalog-policy";
 import type { PrismaClient } from "@prisma/client";
 
 type PrismaTx = Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends" | "$use">;
@@ -95,6 +96,7 @@ export async function applyWorkItemRecodification(workItemId: string): Promise<{
   if (!workItemId.trim()) return { ok: false, error: "Identifiant manquant." };
 
   try {
+    await requireCatalogAllowsBulkWrite();
     await prisma.$transaction(async (tx) => {
       const item = await tx.workItem.findUnique({
         where: { id: workItemId },

@@ -36,6 +36,10 @@ export default async function FicheOuvragePage({ params }: Props) {
   const itemWithVariants = await fetchWorkItemWithMergedVariants(id);
   if (!itemWithVariants) notFound();
   const item = itemWithVariants;
+  const catalog = await prisma.workItemCatalog.findUnique({
+    where: { id: item.catalogId },
+    select: { name: true },
+  });
   const mergedVariants = itemWithVariants.mergedVariants ?? [];
   const priceWorkItemIds = await workItemIdsForPriceRollUp(prisma, {
     id: item.id,
@@ -151,11 +155,29 @@ export default async function FicheOuvragePage({ params }: Props) {
           {" "}
           · Unité : <span className="font-semibold">{item.unit}</span>
         </p>
-        {(item.sourceCode || item.sourceLine) && (
+        {(catalog?.name || item.importSource || item.sourceCode || item.sourceLine || item.codeBework) && (
           <dl className="mt-4 grid gap-2 rounded-xl border border-slate-100 bg-slate-50/80 p-4 text-sm sm:grid-cols-2">
+            {catalog?.name ? (
+              <div>
+                <dt className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Catalogue</dt>
+                <dd className="mt-0.5 font-semibold text-slate-900">{catalog.name}</dd>
+              </div>
+            ) : null}
+            {item.codeBework && item.codeBework !== item.code ? (
+              <div>
+                <dt className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Code BeWork</dt>
+                <dd className="mt-0.5 font-mono text-slate-900">{item.codeBework}</dd>
+              </div>
+            ) : null}
+            {item.importSource ? (
+              <div>
+                <dt className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Source import</dt>
+                <dd className="mt-0.5 text-slate-900">{item.importSource}</dd>
+              </div>
+            ) : null}
             {item.sourceCode ? (
               <div>
-                <dt className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Ancien code source</dt>
+                <dt className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Code source (Artiprix / import)</dt>
                 <dd className="mt-0.5 font-mono text-slate-900">{item.sourceCode}</dd>
               </div>
             ) : null}

@@ -11,6 +11,7 @@ import {
 import { extractTextFromBuffer } from "@/lib/skills/extract-upload-text";
 import { prisma } from "@/lib/prisma";
 import { resolveActiveWorkItemCatalogId } from "@/lib/work-item-catalog";
+import { requireCatalogAllowsBulkWrite } from "@/lib/work-item-catalog-policy";
 import { WORK_ITEM_VISIBLE_IN_LIST } from "@/lib/work-item-merge";
 
 const REVALIDATE = ["/dashboard/devis/dce-remplissage"];
@@ -60,6 +61,7 @@ export async function createDceFillSessionFromUpload(formData: FormData): Promis
   | { ok: false; error: string }
 > {
   await requireBeWorkDevisSession();
+  await requireCatalogAllowsBulkWrite();
   const catalogId = await resolveActiveWorkItemCatalogId();
   const file = formData.get("dceFile");
   const title = String(formData.get("title") ?? "").trim() || "Extraction DCE";

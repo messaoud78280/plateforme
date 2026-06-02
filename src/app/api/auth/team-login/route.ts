@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
 import type { JWT } from "next-auth/jwt";
-import { encode } from "next-auth/jwt";
 import bcrypt from "bcryptjs";
 import { ClientAccountStatus, UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { isClientLoginAllowed } from "@/lib/client-account-approval";
-import { getNextAuthSessionCookieName } from "@/lib/auth-session-cookie";
+import {
+  createNextAuthSessionToken,
+  getNextAuthSessionCookieName,
+  nextAuthSessionCookieOptions,
+} from "@/lib/auth-session-cookie";
 import { isAgentRole, isClient, isManager } from "@/types";
-
 import type { TeamLoginGate } from "@/lib/auth-team-login";
+import { safeTeamLoginRedirect } from "@/lib/auth-team-login";
 
 function gateAllows(role: string, gate: TeamLoginGate): boolean {
   if (gate === "gerante") return isManager(role);
@@ -18,20 +21,75 @@ function gateAllows(role: string, gate: TeamLoginGate): boolean {
 
 function gateDeniedMessage(gate: TeamLoginGate): string {
   if (gate === "gerante") {
-    return "Cet espace est réservé à la gérante et aux managers. Utilisez l’accès Gérante ou un compte autorisé.";
+    return "Cet espace est réservé à la gérante et aux managers.";
   }
   if (gate === "agents") {
-    return "Cet espace est réservé aux agents. Utilisez l’accès Agents ou un compte agent.";
+    return "Cet espace est réservé aux agents.";
   }
   return "Cet espace est réservé aux clients.";
 }
 
+function gateLoginPath(gate: TeamLoginGate, error?: string, callbackUrl?: string): string {
+  const q = new URLSearchParams();
+  if (callbackUrl && callbackUrl !== "/dashboard") q.set("callbackUrl", callbackUrl);
+  if (error) q.set("error", error);
+  const qs = q.toString();
+  return `/connexion/${gate}${qs ? `?${qs}` : ""}`;
+}
+
+async function parseLoginBody(request: Request): Promise<{
+  email: string;
+  password: string;
+  gate: TeamLoginGate | null;
+  callbackUrl: string;
+}> {
+  const ct = request.headers.get("content-type") ?? "";
+  if (ct.includes("application/json")) {
+    const body = (await request.json()) as {
+      email?: string;
+      password?: string;
+      gate?: TeamLoginGate;
+      callbackUrl?: string;
+    };
+    return {
+      email: (body.email ?? "").trim().toLowerCase(),
+      password: (body.password ?? "").trim(),
+      gate: body.gate ?? null,
+      callbackUrl: (body.callbackUrl ?? "/dashboard").trim() || "/dashboard",
+    };
+  }
+
+  const fd = await request.formData();
+  const gateRaw = String(fd.get("gate") ?? "").trim();
+  const gate =
+    gateRaw === "gerante" || gateRaw === "agents" || gateRaw === "clients" ? gateRaw : null;
+  return {
+    email: String(fd.get("email") ?? "").trim().toLowerCase(),
+    password: String(fd.get("password") ?? "").trim(),
+    gate,
+    callbackUrl: String(fd.get("callbackUrl") ?? "/dashboard").trim() || "/dashboard",
+  };
+}
+
+function loginErrorRedirect(
+  baseUrl: string,
+  gate: TeamLoginGate,
+  code: string,
+  callbackUrl: string,
+): NextResponse {
+  return NextResponse.redirect(
+    new URL(gateLoginPath(gate, code, callbackUrl), baseUrl),
+  );
+}
+
 /**
  * Connexion email/mot de passe avec contrôle du portail (gérante / agents / clients).
- * Pose directement le cookie de session NextAuth (évite les échecs getSession() côté client).
+ * Redirection HTTP 302 + cookie session NextAuth (salt vide, compatible getServerSession).
  */
 export async function POST(request: Request) {
   const secret = process.env.NEXTAUTH_SECRET?.trim();
+  const baseUrl = new URL(request.url).origin;
+
   if (!secret) {
     return NextResponse.json(
       { ok: false, error: "Configuration serveur incomplète (NEXTAUTH_SECRET)." },
@@ -39,24 +97,27 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: { email?: string; password?: string; gate?: TeamLoginGate; callbackUrl?: string };
+  let email = "";
+  let password = "";
+  let gate: TeamLoginGate | null = null;
+  let callbackUrl = "/dashboard";
+
   try {
-    body = (await request.json()) as typeof body;
+    const parsed = await parseLoginBody(request);
+    email = parsed.email;
+    password = parsed.password;
+    gate = parsed.gate;
+    callbackUrl = safeTeamLoginRedirect(parsed.callbackUrl);
   } catch {
     return NextResponse.json({ ok: false, error: "Requête invalide." }, { status: 400 });
   }
 
-  const email = (body.email ?? "").trim().toLowerCase();
-  const password = (body.password ?? "").trim();
-  const gate = body.gate;
-  const callbackRaw = (body.callbackUrl ?? "/dashboard").trim() || "/dashboard";
-  const callbackUrl = callbackRaw.startsWith("/") ? callbackRaw : "/dashboard";
+  if (!gate) {
+    return NextResponse.redirect(new URL("/connexion?error=invalid_gate", baseUrl));
+  }
 
   if (!email || !password) {
-    return NextResponse.json({ ok: false, error: "Email et mot de passe requis." }, { status: 400 });
-  }
-  if (gate !== "gerante" && gate !== "agents" && gate !== "clients") {
-    return NextResponse.json({ ok: false, error: "Portail de connexion invalide." }, { status: 400 });
+    return loginErrorRedirect(baseUrl, gate, "missing_fields", callbackUrl);
   }
 
   try {
@@ -74,61 +135,37 @@ export async function POST(request: Request) {
     });
 
     if (!user?.password || !(await bcrypt.compare(password, user.password))) {
-      return NextResponse.json({ ok: false, error: "Email ou mot de passe incorrect." }, { status: 401 });
+      return loginErrorRedirect(baseUrl, gate, "invalid_credentials", callbackUrl);
     }
 
     if (!gateAllows(user.role, gate)) {
-      return NextResponse.json({ ok: false, error: gateDeniedMessage(gate) }, { status: 403 });
+      return loginErrorRedirect(baseUrl, gate, "wrong_gate", callbackUrl);
     }
 
     if (user.role === UserRole.CLIENT && !isClientLoginAllowed(user.accountStatus)) {
       const err =
         user.accountStatus === ClientAccountStatus.REJECTED ? "account_rejected" : "account_pending";
-      return NextResponse.json(
-        {
-          ok: false,
-          error:
-            err === "account_rejected"
-              ? "Votre demande d’accès a été refusée."
-              : "Votre compte est en attente de validation.",
-          redirect: `/connexion/clients?error=${err}`,
-        },
-        { status: 403 },
-      );
+      return NextResponse.redirect(new URL(`/connexion/clients?error=${err}`, baseUrl));
     }
 
-    const baseUrl = new URL(request.url).origin;
     const secure = baseUrl.startsWith("https://");
     const cookieName = getNextAuthSessionCookieName(secure);
 
-    const sessionJwt = await encode({
-      secret,
-      salt: cookieName,
-      token: {
-        sub: user.id,
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        contractStatus: user.contractStatus,
-        accountStatus: user.accountStatus,
-      } as JWT,
-    });
+    const sessionJwt = await createNextAuthSessionToken(secret, {
+      sub: user.id,
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      contractStatus: user.contractStatus,
+      accountStatus: user.accountStatus,
+    } as JWT);
 
-    const res = NextResponse.json({ ok: true, redirect: callbackUrl });
-    res.cookies.set(cookieName, sessionJwt, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure,
-      path: "/",
-      maxAge: 30 * 24 * 60 * 60,
-    });
+    const res = NextResponse.redirect(new URL(callbackUrl, baseUrl));
+    res.cookies.set(cookieName, sessionJwt, nextAuthSessionCookieOptions(secure));
     return res;
   } catch (e) {
     console.error("[team-login]", e);
-    return NextResponse.json(
-      { ok: false, error: "Erreur serveur lors de la connexion. Réessayez dans un instant." },
-      { status: 500 },
-    );
+    return loginErrorRedirect(baseUrl, gate, "server_error", callbackUrl);
   }
 }

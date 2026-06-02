@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import type { JWT } from "next-auth/jwt";
-import { decode, encode } from "next-auth/jwt";
+import { decode } from "next-auth/jwt";
 import { UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { isClientLoginAllowed } from "@/lib/client-account-approval";
 
-import { getNextAuthSessionCookieName } from "@/lib/auth-session-cookie";
+import { getNextAuthSessionCookieName, createNextAuthSessionToken, nextAuthSessionCookieOptions } from "@/lib/auth-session-cookie";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -48,29 +48,18 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL(`/connexion/clients?error=${err}`, baseUrl));
   }
 
-  const sessionJwt = await encode({
-    secret,
-    // NextAuth JWT utilise un salt lié au nom du cookie de session
-    salt: cookieName,
-    token: {
-      sub: userId,
-      id: userId,
-      email,
-      name,
-      role,
-      contractStatus,
-    } as JWT,
-  });
+  const sessionJwt = await createNextAuthSessionToken(secret, {
+    sub: userId,
+    id: userId,
+    email,
+    name,
+    role,
+    contractStatus,
+  } as JWT);
 
   const res = NextResponse.redirect(new URL(next.startsWith("/") ? next : "/dashboard", baseUrl));
 
-  res.cookies.set(cookieName, sessionJwt, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: baseUrl.startsWith("https://"),
-    path: "/",
-    maxAge: 30 * 24 * 60 * 60, // 30 jours
-  });
+  res.cookies.set(cookieName, sessionJwt, nextAuthSessionCookieOptions(baseUrl.startsWith("https://")));
 
   return res;
 }

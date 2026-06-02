@@ -1,9 +1,10 @@
 "use client";
 
-import type { TeamLoginGate } from "@/lib/auth-team-login";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import type { TeamLoginGate } from "@/lib/auth-team-login";
+import { safeTeamLoginRedirect } from "@/lib/auth-team-login";
 import { isManager, isAgentRole, isClient } from "@/types";
 
 export type ConnexionGate = "gerante" | "agents" | "clients";
@@ -66,58 +67,36 @@ const primaryButtonClassByGate: Record<ConnexionGate, string> = {
 
 export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const callbackUrl = safeTeamLoginRedirect(searchParams.get("callbackUrl") ?? "/dashboard");
   const [error, setError] = useState("");
 
   const config = GATE_CONFIG[gate];
 
   useEffect(() => {
     const err = searchParams.get("error");
-    if (gate !== "clients" || !err) return;
-    if (err === "account_pending") {
-      setError(
-        "Votre inscription est en attente de validation par l'équipe BeWork. Vous recevrez un email dès que votre compte sera activé."
-      );
-    } else if (err === "account_rejected") {
-      setError("Votre demande d'accès n'a pas été validée. Contactez BeWork pour plus d'informations.");
-    }
-  }, [searchParams, gate]);
+    if (!err) return;
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-
-    try {
-      const res = await fetch("/api/auth/team-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          email: email.trim().toLowerCase(),
-          password: password.trim(),
-          gate: gate as TeamLoginGate,
-          callbackUrl,
-        }),
-      });
-
-      const data = (await res.json()) as {
-        ok?: boolean;
-        error?: string;
-        redirect?: string;
-      };
-
-      if (!res.ok || !data.ok) {
-        setError(data.error ?? "Connexion impossible. Réessayez.");
+    if (gate === "clients") {
+      if (err === "account_pending") {
+        setError(
+          "Votre inscription est en attente de validation par l'équipe BeWork. Vous recevrez un email dès que votre compte sera activé.",
+        );
         return;
       }
-
-      window.location.assign(data.redirect ?? callbackUrl);
-    } catch {
-      setError("Erreur de connexion au serveur. Vérifiez votre connexion et réessayez.");
+      if (err === "account_rejected") {
+        setError("Votre demande d'accès n'a pas été validée. Contactez BeWork pour plus d'informations.");
+        return;
+      }
     }
-  }
+
+    const messages: Record<string, string> = {
+      invalid_credentials: "Email ou mot de passe incorrect.",
+      wrong_gate: config.errorMessage,
+      missing_fields: "Email et mot de passe requis.",
+      server_error: "Erreur serveur. Réessayez dans un instant.",
+    };
+    setError(messages[err] ?? "Connexion impossible. Réessayez.");
+  }, [searchParams, gate, config.errorMessage]);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#dce2ea] px-4 py-10 md:py-14">
@@ -150,16 +129,17 @@ export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
             </h1>
             <p className="mt-3 text-sm leading-relaxed text-black md:text-[0.9375rem]">{config.description}</p>
 
-            <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+            <form action="/api/auth/team-login" method="POST" className="mt-8 space-y-5">
+              <input type="hidden" name="gate" value={gate} />
+              <input type="hidden" name="callbackUrl" value={callbackUrl} />
               <div>
                 <label htmlFor="email" className={labelClass}>
                   Email
                 </label>
                 <input
                   id="email"
+                  name="email"
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                   required
                   className={fieldClass}
                   placeholder="vous@exemple.com"
@@ -173,9 +153,8 @@ export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
                 </label>
                 <input
                   id="password"
+                  name="password"
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                   required
                   className={fieldClass}
                   autoComplete="current-password"

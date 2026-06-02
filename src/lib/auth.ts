@@ -76,7 +76,8 @@ export const authOptions: NextAuthOptions = {
             where: { email: { equals: email, mode: "insensitive" } },
           });
 
-          if (!user || !(await bcrypt.compare(credentials.password, user.password))) {
+          if (!user?.password) return null;
+          if (!(await bcrypt.compare(credentials.password, user.password))) {
             return null;
           }
 

@@ -115,8 +115,18 @@ export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
       return;
     }
 
-    const session = await getSession();
-    const role = (session?.user as { role?: string } | undefined)?.role;
+    if (!result.ok) {
+      setError("Email ou mot de passe incorrect.");
+      return;
+    }
+
+    let role: string | undefined;
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const session = await getSession();
+      role = (session?.user as { role?: string } | undefined)?.role;
+      if (role) break;
+      await new Promise((r) => setTimeout(r, 120));
+    }
 
     if (!role || !config.allowed(role)) {
       await signOut({ redirect: false });

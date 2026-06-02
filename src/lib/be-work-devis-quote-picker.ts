@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { keywordSearchWhereClause } from "@/lib/be-work-devis-search";
+import { mergeCatalogIntoWhere, resolveActiveWorkItemCatalogId } from "@/lib/work-item-catalog";
 
 export type QuotePickerWorkItem = {
   id: string;
@@ -18,8 +19,9 @@ export type QuotePickerWorkItem = {
 const PICKER_MAX = 40;
 
 export async function searchWorkItemsForQuotePicker(q: string): Promise<QuotePickerWorkItem[]> {
+  const catalogId = await resolveActiveWorkItemCatalogId();
   const t = q.trim();
-  const where = t ? keywordSearchWhereClause(t) : {};
+  const where = mergeCatalogIntoWhere(catalogId, t ? keywordSearchWhereClause(t) : {});
   const items = await prisma.workItem.findMany({
     where,
     take: PICKER_MAX,

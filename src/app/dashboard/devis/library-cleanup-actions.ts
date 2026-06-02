@@ -20,6 +20,7 @@ import {
   type DuplicateReviewGroup,
   type WorkItemPriceStats,
 } from "@/lib/work-item-library-cleanup";
+import { mergeCatalogIntoWhere, resolveActiveWorkItemCatalogId } from "@/lib/work-item-catalog";
 
 const REVALIDATE_PATHS = [
   "/dashboard/devis/bibliotheque",
@@ -146,8 +147,9 @@ export async function runClassificationPreviewBatch(opts?: {
       data: { status: "running", startedAt: job.startedAt ?? new Date() },
     });
 
+    const catalogId = await resolveActiveWorkItemCatalogId();
     const items = await prisma.workItem.findMany({
-      where: {
+      where: mergeCatalogIntoWhere(catalogId, {
         ...WORK_ITEM_VISIBLE_IN_LIST,
         OR: [
           { familyCode: null },
@@ -157,7 +159,7 @@ export async function runClassificationPreviewBatch(opts?: {
           { lot: { equals: "Non classé", mode: "insensitive" } },
         ],
         ...(cursorId ? { id: { gt: cursorId } } : {}),
-      },
+      }),
       select: CLASSIFICATION_SELECT,
       orderBy: { id: "asc" },
       take: batchSize + 1,
@@ -432,11 +434,12 @@ export async function detectDuplicateGroupsBatch(opts?: {
   const batchSize = Math.min(Math.max(opts?.batchSize ?? 50, 20), 80);
 
   try {
+    const catalogId = await resolveActiveWorkItemCatalogId();
     const items = await prisma.workItem.findMany({
-      where: {
+      where: mergeCatalogIntoWhere(catalogId, {
         ...WORK_ITEM_VISIBLE_IN_LIST,
         ...(opts?.cursorId ? { id: { gt: opts.cursorId } } : {}),
-      },
+      }),
       select: DUPLICATE_SCAN_SELECT,
       orderBy: { id: "asc" },
       take: batchSize,
@@ -603,11 +606,12 @@ export async function normalizeDesignationsBatch(opts?: {
   const batchSize = defaultBatchSize(opts?.batchSize);
 
   try {
+    const catalogId = await resolveActiveWorkItemCatalogId();
     const items = await prisma.workItem.findMany({
-      where: {
+      where: mergeCatalogIntoWhere(catalogId, {
         ...WORK_ITEM_VISIBLE_IN_LIST,
         ...(opts?.cursorId ? { id: { gt: opts.cursorId } } : {}),
-      },
+      }),
       select: {
         id: true,
         title: true,

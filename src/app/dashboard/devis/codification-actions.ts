@@ -12,6 +12,7 @@ import type { CodificationMappingRule } from "@/lib/bework-work-item-codificatio
 import { prisma } from "@/lib/prisma";
 import { Prisma, type WorkItemCodificationStatus } from "@prisma/client";
 import { WORK_ITEM_VISIBLE_IN_LIST } from "@/lib/work-item-merge";
+import { mergeCatalogIntoWhere, resolveActiveWorkItemCatalogId } from "@/lib/work-item-catalog";
 
 const REVALIDATE = [
   "/dashboard/devis/bibliotheque",
@@ -80,10 +81,13 @@ async function loadMappingRules(): Promise<CodificationMappingRule[]> {
   }
 }
 
-async function fetchWorkItemsForCodification(filters?: CodificationListFilters) {
-  const where: Prisma.WorkItemWhereInput = {
+async function fetchWorkItemsForCodification(
+  catalogId: string,
+  filters?: CodificationListFilters,
+) {
+  const where: Prisma.WorkItemWhereInput = mergeCatalogIntoWhere(catalogId, {
     ...WORK_ITEM_VISIBLE_IN_LIST,
-  };
+  });
 
   if (filters?.lotCode) where.lotCode = filters.lotCode;
   if (filters?.familleCode) where.familyCode = filters.familleCode;
@@ -159,10 +163,11 @@ export async function getWorkItemCodificationProposals(
 ): Promise<{ proposals: CodificationProposalRow[]; report: CodificationBeforeAfterReport } | { error: string }> {
   await guard();
   try {
+    const catalogId = await resolveActiveWorkItemCatalogId();
     const [items, allBework, rules] = await Promise.all([
-      fetchWorkItemsForCodification(filters),
+      fetchWorkItemsForCodification(catalogId, filters),
       prisma.workItem.findMany({
-        where: { codeBework: { not: null } },
+        where: { catalogId, codeBework: { not: null } },
         select: { codeBework: true },
       }),
       loadMappingRules(),
@@ -191,7 +196,8 @@ export async function listWorkItemsForCodificationAdmin(
   const res = await getWorkItemCodificationProposals(filters);
   if ("error" in res) return res;
 
-  const items = await fetchWorkItemsForCodification(filters);
+  const catalogId = await resolveActiveWorkItemCatalogId();
+  const items = await fetchWorkItemsForCodification(catalogId, filters);
   const statusMap = new Map(items.map((i) => [i.id, i.codificationStatus]));
 
   const rows: CodificationListRow[] = res.proposals.map((p) => ({

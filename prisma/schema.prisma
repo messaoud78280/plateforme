@@ -801,10 +801,71 @@ enum WorkItemCodificationMappingMatchType {
   artiprix_chapter
 }
 
+enum WorkItemCatalogStatus {
+  active
+  archived
+}
+
+/// Bibliothèque d’ouvrages (référentiels séparés : historique, Artiprix, DCE…)
+model WorkItemCatalog {
+  id           String                @id @default(cuid())
+  slug         String                @unique
+  name         String
+  description  String?               @db.Text
+  status       WorkItemCatalogStatus @default(active)
+  isDefault    Boolean               @default(false)
+  sourceLabel  String?
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  workItems         WorkItem[]
+  dceFillSessions   DcePricingFillSession[]
+
+  @@index([status])
+  @@index([isDefault])
+}
+
+enum DcePricingFillStatus {
+  draft
+  extracting
+  extracted
+  matching
+  ready
+  failed
+}
+
+enum DcePricingTargetDocType {
+  dpgf
+  bpu
+}
+
+/// Session d’extraction DCE → lignes BPU/DPGF + rapprochement bibliothèque
+model DcePricingFillSession {
+  id            String                  @id @default(cuid())
+  catalogId     String
+  catalog       WorkItemCatalog         @relation(fields: [catalogId], references: [id], onDelete: Cascade)
+  title         String
+  targetDocType DcePricingTargetDocType @default(dpgf)
+  dceFileName   String?
+  extractedText String?                 @db.Text
+  lines         Json?
+  matchReport   Json?
+  status        DcePricingFillStatus    @default(draft)
+  errorMessage  String?                 @db.Text
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+
+  @@index([catalogId])
+  @@index([status])
+  @@index([createdAt])
+}
+
 /// Ouvrage BTP de la bibliothèque interne
 model WorkItem {
   id                   String               @id @default(cuid())
-  code                 String               @unique
+  catalogId            String
+  catalog              WorkItemCatalog      @relation(fields: [catalogId], references: [id], onDelete: Restrict)
+  code                 String
   lot                  String
   subLot               String?
   family               String?
@@ -829,7 +890,7 @@ model WorkItem {
   /// Référence de ligne dans la source (ex. 15.1)
   sourceLine           String?
   /// Code canonique BeWork : BW-[LOT]-[FAMILLE]-[OUVRAGE]-[VARIANTE]
-  codeBework           String?              @unique
+  codeBework           String?
   /// Libellé source d’import (Artiprix, Martin, VRD…)
   importSource         String?
   /// Code lot métier (GO, SO, VRD…)
@@ -885,6 +946,9 @@ model WorkItem {
   @@index([ouvrageCode])
   @@index([codificationStatus])
   @@index([importSource])
+  @@index([catalogId])
+  @@unique([catalogId, code])
+  @@unique([catalogId, codeBework])
 }
 
 /// Correspondance ancien code → structure BeWork (Artiprix, VRD-E09, préfixes…)

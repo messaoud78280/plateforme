@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { WorkItemCatalogBar } from "@/components/devis/WorkItemCatalogBar";
 import { WorkItemCodificationAdmin } from "@/components/devis/WorkItemCodificationAdmin";
+import { listWorkItemCatalogs, resolveActiveWorkItemCatalogId } from "@/lib/work-item-catalog";
 import { listWorkItemsForCodificationAdmin } from "@/app/dashboard/devis/codification-actions";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import {
@@ -68,6 +70,10 @@ export default async function BibliothequeCodificationPage({
   searchParams: SearchParams;
 }) {
   await requireBeWorkDevisSession();
+  const [catalogs, activeCatalogId] = await Promise.all([
+    listWorkItemCatalogs(),
+    resolveActiveWorkItemCatalogId(),
+  ]);
 
   return (
     <div className="space-y-8 px-1">
@@ -135,6 +141,8 @@ export default async function BibliothequeCodificationPage({
           </div>
         </div>
       </section>
+
+      <WorkItemCatalogBar catalogs={catalogs} activeCatalogId={activeCatalogId} />
 
       <Suspense
         fallback={<p className="text-sm text-slate-600">Chargement des propositions de codification…</p>}

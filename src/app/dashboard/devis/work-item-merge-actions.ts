@@ -13,6 +13,7 @@ import {
   WORK_ITEM_VISIBLE_IN_LIST,
   type DuplicateCluster,
 } from "@/lib/work-item-merge";
+import { mergeCatalogIntoWhere, resolveActiveWorkItemCatalogId } from "@/lib/work-item-catalog";
 
 const REVALIDATE = [
   "/dashboard/devis/bibliotheque",
@@ -206,13 +207,14 @@ export async function analyzeAndMergeWorkItemDuplicatesBatch(opts?: {
   await requireBeWorkDevisSession();
 
   try {
+    const catalogId = await resolveActiveWorkItemCatalogId();
     const batchSize = Math.min(Math.max(opts?.batchSize ?? MERGE_SCAN_BATCH, 20), 100);
     const items = await prisma.workItem.findMany({
-      where: {
+      where: mergeCatalogIntoWhere(catalogId, {
         ...WORK_ITEM_VISIBLE_IN_LIST,
         ...(opts?.lot?.trim() ? { lot: { equals: opts.lot.trim(), mode: "insensitive" } } : {}),
         ...(opts?.cursorId ? { id: { gt: opts.cursorId } } : {}),
-      },
+      }),
       select: SCAN_SELECT,
       take: batchSize + 1,
       orderBy: { id: "asc" },

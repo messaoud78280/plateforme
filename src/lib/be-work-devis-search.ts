@@ -11,6 +11,7 @@ import { isKnownFamilyCode } from "@/lib/bework-devis-family-codes";
 import { buildVariantToCanonicalMap, rollupPriceAggregatesToCanonicals } from "@/lib/be-work-devis-price-roll-up";
 import { prisma } from "@/lib/prisma";
 import { WORK_ITEM_VISIBLE_IN_LIST } from "@/lib/work-item-merge";
+import { workItemCatalogScope } from "@/lib/work-item-catalog";
 
 /** Tri côté application après agrégation des prix (pas de ORDER BY SQL sur les agrégats). */
 export const WORK_ITEM_SORT_KEYS = [
@@ -54,6 +55,8 @@ export function keywordSearchWhereClause(q: string): Prisma.WorkItemWhereInput {
 }
 
 export type WorkItemFilterParams = {
+  /** Catalogue actif (obligatoire pour isoler les bibliothèques). */
+  catalogId: string;
   q?: string;
   /** Filtre par corps de métier (code famille BeWork, ex. ELE, MAC). */
   trade?: string;
@@ -231,7 +234,7 @@ export function filterWorkItemsByAvgPriceRange(
 }
 
 export function buildWorkItemWhere(params: WorkItemFilterParams): Prisma.WorkItemWhereInput {
-  const AND: Prisma.WorkItemWhereInput[] = [WORK_ITEM_VISIBLE_IN_LIST];
+  const AND: Prisma.WorkItemWhereInput[] = [WORK_ITEM_VISIBLE_IN_LIST, workItemCatalogScope(params.catalogId)];
 
   const q = params.q?.trim();
   if (q) AND.push(keywordSearchWhereClause(q));

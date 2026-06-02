@@ -21,6 +21,7 @@ import { buildWorkItemTradeWhere, groupDistinctLotsByTrade } from "@/lib/bework-
 import { getBeWorkFamilyLexiconSorted, isKnownFamilyCode } from "@/lib/bework-devis-family-codes";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import { prisma } from "@/lib/prisma";
+import { resolveActiveWorkItemCatalogId } from "@/lib/work-item-catalog";
 
 type Sp = Promise<{
   q?: string;
@@ -36,9 +37,10 @@ type Sp = Promise<{
   sort?: string;
 }>;
 
-function toFilterParams(sp: Awaited<Sp>): WorkItemFilterParams {
+function toFilterParams(sp: Awaited<Sp>, catalogId: string): WorkItemFilterParams {
   const trade = sp.trade?.trim().toUpperCase();
   return {
+    catalogId,
     q: sp.q,
     trade: trade && isKnownFamilyCode(trade) ? trade : undefined,
     lot: sp.lot?.trim() || undefined,
@@ -52,9 +54,9 @@ function toFilterParams(sp: Awaited<Sp>): WorkItemFilterParams {
   };
 }
 
-function filterQueryString(sp: Awaited<Sp>): string {
+function filterQueryString(sp: Awaited<Sp>, catalogId: string): string {
   const qs = new URLSearchParams();
-  const p = toFilterParams(sp);
+  const p = toFilterParams(sp, catalogId);
   if (p.q) qs.set("q", p.q);
   if (p.trade) qs.set("trade", p.trade);
   if (p.lot) qs.set("lot", p.lot);
@@ -87,7 +89,9 @@ function hasActiveWorkItemFilters(sp: WorkItemFilterParams): boolean {
 export default async function RechercheDevisPage({ searchParams }: { searchParams: Sp }) {
   await requireBeWorkDevisSession();
   const sp = await searchParams;
-  const fp = toFilterParams(sp);
+  const catalogId = await resolveActiveWorkItemCatalogId();
+  const fp = toFilterParams(sp, catalogId);
+  const catalogScope = { catalogId };
   const q = fp.q?.trim() ?? "";
   const sort = parseWorkItemSortKey(sp.sort);
 
@@ -104,12 +108,14 @@ export default async function RechercheDevisPage({ searchParams }: { searchParam
       ? fetchWorkItemsWithPriceStats(buildWorkItemWhere(fp), sort)
       : Promise.resolve([]),
     prisma.workItem.findMany({
+      where: catalogScope,
       select: { lot: true },
       distinct: ["lot"],
       orderBy: { lot: "asc" },
     }),
     prisma.workItem.findMany({
       where: {
+        ...catalogScope,
         subLot: { not: null },
         ...(tradeWhere ? tradeWhere : {}),
       },
@@ -167,7 +173,7 @@ export default async function RechercheDevisPage({ searchParams }: { searchParam
   }));
   const subLots = subLotsRow.map((r) => r.subLot).filter((s): s is string => s != null && s !== "");
   const departments = deptRows.map((r) => r.department).filter((d): d is string => d != null && d !== "");
-  const qsStr = filterQueryString(sp);
+  const qsStr = filterQueryString(sp, catalogId);
   const sourceTypeKeys = Object.keys(SOURCE_TYPE_LABELS) as BeWorkPriceDocSourceType[];
 
   const showWorkSection = q.length >= 1 || hasActiveWorkItemFilters(fp);

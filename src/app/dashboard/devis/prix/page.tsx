@@ -8,6 +8,7 @@ import {
 import { formatDateFr, formatEurFr } from "@/lib/be-work-devis-format";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import { prisma } from "@/lib/prisma";
+import { resolveActiveWorkItemCatalogId } from "@/lib/work-item-catalog";
 
 type Sp = Promise<{
   stype?: string;
@@ -18,15 +19,18 @@ type Sp = Promise<{
   q?: string;
 }>;
 
-function buildWhere(sp: {
-  stype?: string;
-  lot?: string;
-  dept?: string;
-  gamme?: string;
-  fiab?: string;
-  q?: string;
-}): Prisma.PriceEntryWhereInput {
-  const AND: Prisma.PriceEntryWhereInput[] = [];
+function buildWhere(
+  catalogId: string,
+  sp: {
+    stype?: string;
+    lot?: string;
+    dept?: string;
+    gamme?: string;
+    fiab?: string;
+    q?: string;
+  },
+): Prisma.PriceEntryWhereInput {
+  const AND: Prisma.PriceEntryWhereInput[] = [{ workItem: { catalogId } }];
 
   const st = sp.stype?.trim();
   if (st && isBeWorkPriceDocSourceType(st)) AND.push({ sourceType: st });
@@ -71,7 +75,8 @@ function buildWhere(sp: {
 export default async function PrixObservesPage({ searchParams }: { searchParams: Sp }) {
   await requireBeWorkDevisSession();
   const sp = await searchParams;
-  const where = buildWhere(sp);
+  const catalogId = await resolveActiveWorkItemCatalogId();
+  const where = buildWhere(catalogId, sp);
 
   const [rows, lotsRow] = await Promise.all([
     prisma.priceEntry.findMany({
@@ -81,6 +86,7 @@ export default async function PrixObservesPage({ searchParams }: { searchParams:
       take: 500,
     }),
     prisma.workItem.findMany({
+      where: { catalogId },
       select: { lot: true },
       distinct: ["lot"],
       orderBy: { lot: "asc" },

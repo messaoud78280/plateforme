@@ -41,6 +41,7 @@ import {
 } from "@/lib/be-work-devis-import-classification";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import { prisma } from "@/lib/prisma";
+import { resolveActiveWorkItemCatalogId } from "@/lib/work-item-catalog";
 
 function applyNormalizedLotFields(formData: FormData) {
   const normalized = normalizeWorkItemLotFields({
@@ -102,8 +103,11 @@ export async function createWorkItem(formData: FormData) {
     throw new Error("Statut, gamme, unité ou type d’ouvrage invalide.");
   }
 
+  const catalogId = await resolveActiveWorkItemCatalogId();
+
   await prisma.workItem.create({
     data: {
+      catalogId,
       code,
       lot,
       subLot,
@@ -168,12 +172,16 @@ function normalizeBulkImportRows(rowsInput: unknown): BulkImportWorkItemPayload[
 }
 
 /** Codes déjà présents en base (comparaison exacte sur le champ `code`). */
-export async function checkWorkItemCodesExist(codesInput: string[]): Promise<string[]> {
+export async function checkWorkItemCodesExist(
+  codesInput: string[],
+  catalogIdInput?: string,
+): Promise<string[]> {
   await guard();
+  const catalogId = await resolveActiveWorkItemCatalogId(catalogIdInput);
   const codes = [...new Set(codesInput.map((c) => c.trim()).filter(Boolean))].slice(0, 2000);
   if (codes.length === 0) return [];
   const found = await prisma.workItem.findMany({
-    where: { code: { in: codes } },
+    where: { catalogId, code: { in: codes } },
     select: { code: true },
   });
   return found.map((r) => r.code);
@@ -196,8 +204,9 @@ export async function checkWorkItemsSimilarTitles(
     .slice(0, 200);
   if (rows.length === 0) return [];
 
+  const catalogId = await resolveActiveWorkItemCatalogId();
   const candidates = await prisma.workItem.findMany({
-    where: { mergeStatus: { not: "merged" } },
+    where: { catalogId, mergeStatus: { not: "merged" } },
     select: { code: true, title: true, lot: true },
     take: 5000,
   });
@@ -280,12 +289,13 @@ export async function previewObservedPricesPaste(
     rows.push({ index: idx, workItemCode: code, priceEntries: pe });
   }
 
+  const catalogId = await resolveActiveWorkItemCatalogId();
   const codes = [...new Set(rows.map((r) => r.workItemCode.trim()).filter(Boolean))];
   const workItems =
     codes.length === 0
       ? []
       : await prisma.workItem.findMany({
-          where: { code: { in: codes } },
+          where: { catalogId, code: { in: codes } },
           select: { id: true, code: true, title: true },
         });
   const byCode = new Map(workItems.map((w) => [w.code, w]));
@@ -432,8 +442,9 @@ export async function importObservedPricesForWorkItems(rowsInput: unknown): Prom
   }
 
   const codes = [...new Set(rows.map((r) => r.workItemCode.trim()).filter(Boolean))];
+  const catalogId = await resolveActiveWorkItemCatalogId();
   const workItems = await prisma.workItem.findMany({
-    where: { code: { in: codes } },
+    where: { catalogId, code: { in: codes } },
     select: { id: true, code: true },
   });
   const byCode = new Map(workItems.map((w) => [w.code, w]));
@@ -534,6 +545,7 @@ function pasteStr(v: string): string | undefined {
 }
 
 function buildWorkItemCreateDataFromPasteValues(
+  catalogId: string,
   v: StructuredPasteFormValues,
   pasteObj?: Record<string, unknown>,
 ) {
@@ -556,6 +568,7 @@ function buildWorkItemCreateDataFromPasteValues(
   if (!isWorkItemQualityLevel(qualityRaw)) qualityRaw = "standard";
 
   return {
+    catalogId,
     code,
     lot: classification.lot,
     subLot: classification.subLot,
@@ -600,6 +613,7 @@ export async function importWorkItemsBulk(
   | { ok: false; error: string }
 > {
   await guard();
+  const catalogId = await resolveActiveWorkItemCatalogId();
   const mergeDuplicates = options?.mergeDuplicates === true;
   const bundles = normalizeBulkImportRows(rowsInput);
   if (!bundles) {
@@ -659,7 +673,18 @@ export async function importWorkItemsBulk(
     }
     seenInBatch.add(code);
 
-    const existing = await prisma.workItem.findUnique({ where: { code } });
+    const existing = await prisma.workItem.findFirst({
+      where: { catalogId, code },
+      select: {
+        id: true,
+        code: true,
+        lot: true,
+        subLot: true,
+        family: true,
+        familyCode: true,
+        unit: true,
+      },
+    });
     if (existing) {
       if (mergeDuplicates) {
         const importedClassification = resolveClassificationFromPaste(values, pasteSource);
@@ -684,7 +709,7 @@ export async function importWorkItemsBulk(
       continue;
     }
 
-    const data = buildWorkItemCreateDataFromPasteValues(values, pasteSource);
+    const data = buildWorkItemCreateDataFromPasteValues(catalogId, values, pasteSource);
     try {
       const workItem = await prisma.workItem.create({ data });
       created += 1;

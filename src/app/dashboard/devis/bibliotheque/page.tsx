@@ -26,8 +26,10 @@ import {
 } from "@/lib/be-work-devis-search";
 import { buildWorkItemTradeWhere, groupDistinctLotsByTrade } from "@/lib/bework-devis-lot-trades";
 import { getBeWorkFamilyLexiconSorted, isKnownFamilyCode } from "@/lib/bework-devis-family-codes";
+import { WorkItemCatalogBar } from "@/components/devis/WorkItemCatalogBar";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import { prisma } from "@/lib/prisma";
+import { listWorkItemCatalogs, resolveActiveWorkItemCatalogId } from "@/lib/work-item-catalog";
 
 type SearchParams = Promise<{
   q?: string;
@@ -53,11 +55,13 @@ type SearchParams = Promise<{
   pricePaste?: string;
   pricePasteAdded?: string;
   pricePasteIgnored?: string;
+  catalog?: string;
 }>;
 
-function toFilterParams(sp: Awaited<SearchParams>): WorkItemFilterParams {
+function toFilterParams(sp: Awaited<SearchParams>, catalogId: string): WorkItemFilterParams {
   const trade = sp.trade?.trim().toUpperCase();
   return {
+    catalogId,
     q: sp.q,
     trade: trade && isKnownFamilyCode(trade) ? trade : undefined,
     lot: sp.lot?.trim() || undefined,
@@ -85,8 +89,13 @@ function parseGroupLots(sp: Awaited<SearchParams>): boolean {
 export default async function BibliothequePage({ searchParams }: { searchParams: SearchParams }) {
   await requireBeWorkDevisSession();
   const sp = await searchParams;
+  const [catalogs, activeCatalogId] = await Promise.all([
+    listWorkItemCatalogs(),
+    resolveActiveWorkItemCatalogId(sp.catalog),
+  ]);
   const sort = parseWorkItemSortKey(sp.sort);
-  const where = buildWorkItemWhere(toFilterParams(sp));
+  const where = buildWorkItemWhere(toFilterParams(sp, activeCatalogId));
+  const catalogScope = { catalogId: activeCatalogId };
 
   const tradeFilter = sp.trade?.trim().toUpperCase();
   const tradeWhere =
@@ -99,12 +108,14 @@ export default async function BibliothequePage({ searchParams }: { searchParams:
     prisma.workItem.count({ where }),
     hasAvgPriceFilter ? Promise.resolve(null) : fetchBibliothequeStatsFromDb(where),
     prisma.workItem.findMany({
+      where: catalogScope,
       select: { lot: true },
       distinct: ["lot"],
       orderBy: { lot: "asc" },
     }),
     prisma.workItem.findMany({
       where: {
+        ...catalogScope,
         subLot: { not: null },
         ...(tradeWhere ? tradeWhere : {}),
       },
@@ -189,6 +200,8 @@ export default async function BibliothequePage({ searchParams }: { searchParams:
         </div>
       ) : null}
 
+      <WorkItemCatalogBar catalogs={catalogs} activeCatalogId={activeCatalogId} />
+
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="font-heading text-xl font-bold text-slate-900 sm:text-2xl">Bibliothèque ouvrages</h1>
@@ -205,6 +218,12 @@ export default async function BibliothequePage({ searchParams }: { searchParams:
             className="inline-flex items-center justify-center rounded-xl border border-[#1d4ed8]/30 bg-[#eff6ff] px-4 py-2.5 text-sm font-semibold text-[#1e3a8a] shadow-sm hover:bg-[#dbeafe]"
           >
             Nettoyage bibliothèque
+          </Link>
+          <Link
+            href="/dashboard/devis/dce-remplissage"
+            className="inline-flex items-center justify-center rounded-xl border border-violet-200 bg-violet-50 px-4 py-2.5 text-sm font-semibold text-violet-900 shadow-sm hover:bg-violet-100"
+          >
+            DCE → BPU / DPGF
           </Link>
           <Link
             href="/dashboard/devis/bibliotheque/codification"

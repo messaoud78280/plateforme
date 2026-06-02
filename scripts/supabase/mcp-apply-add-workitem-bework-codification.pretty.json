@@ -1,0 +1,6 @@
+{
+  "project_id": "jaxgjtryrnlyelniisrf",
+  "name": "add_workitem_bework_codification",
+  "query_file": "prisma/migrations/add-workitem-bework-codification.sql",
+  "note": "Migration principale codification BW-LOT-FAM-OUV-VAR. Déjà appliquée sur Supabase le 2026-06-02 via MCP."
+}

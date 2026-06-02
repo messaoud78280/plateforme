@@ -786,6 +786,21 @@ enum BeWorkPriceDocSourceType {
   autre
 }
 
+/// Statut de la codification BeWork BW-[LOT]-[FAM]-[OUV]-[NNN]
+enum WorkItemCodificationStatus {
+  pending
+  auto
+  a_verifier
+  valide
+}
+
+enum WorkItemCodificationMappingMatchType {
+  exact
+  prefix
+  regex
+  artiprix_chapter
+}
+
 /// Ouvrage BTP de la bibliothèque interne
 model WorkItem {
   id                   String               @id @default(cuid())
@@ -813,6 +828,26 @@ model WorkItem {
   sourceCode           String?
   /// Référence de ligne dans la source (ex. 15.1)
   sourceLine           String?
+  /// Code canonique BeWork : BW-[LOT]-[FAMILLE]-[OUVRAGE]-[VARIANTE]
+  codeBework           String?              @unique
+  /// Libellé source d’import (Artiprix, Martin, VRD…)
+  importSource         String?
+  /// Code lot métier (GO, SO, VRD…)
+  lotCode              String?
+  /// Libellé famille technique (ex. Démolition / Dépose)
+  familleNom           String?
+  /// Code sous-famille (regroupement fin)
+  sousFamilleCode      String?
+  sousFamilleNom       String?
+  /// Type d’ouvrage (CLO, PLA, FOU…)
+  ouvrageCode          String?
+  /// Désignation d’origine (import)
+  designationSource    String?              @db.Text
+  /// Statut codification (auto / à vérifier / validé)
+  codificationStatus   WorkItemCodificationStatus @default(pending)
+  /// Instantané JSON pour annulation recodification
+  codificationSnapshot Json?
+  codificationAppliedAt DateTime?
   /// Clé normalisée pour détection doublons (désignation)
   normalizedDesignation String?
   /// Fiche principale si cette ligne est une variante fusionnée
@@ -834,6 +869,7 @@ model WorkItem {
   mergeProposalsAsCanonical WorkItemMergeProposal[] @relation("MergeProposalCanonical")
   mergeProposalMembers      WorkItemMergeProposalMember[]
   classificationProposals   WorkItemClassificationProposal[]
+  codificationRevertEntries WorkItemCodificationRevert[]
 
   @@index([lot])
   @@index([status])
@@ -843,6 +879,51 @@ model WorkItem {
   @@index([normalizedDesignation])
   @@index([canonicalWorkItemId])
   @@index([mergeStatus])
+  @@index([codeBework])
+  @@index([lotCode])
+  @@index([sousFamilleCode])
+  @@index([ouvrageCode])
+  @@index([codificationStatus])
+  @@index([importSource])
+}
+
+/// Correspondance ancien code → structure BeWork (Artiprix, VRD-E09, préfixes…)
+model WorkItemCodificationMapping {
+  id               String                              @id @default(cuid())
+  sourcePattern    String
+  matchType        WorkItemCodificationMappingMatchType @default(exact)
+  lotCode          String
+  familleCode      String
+  ouvrageCode      String
+  sousFamilleCode  String?
+  sousFamilleNom   String?
+  importSourceHint String?
+  priority         Int                                 @default(0)
+  note             String?                             @db.Text
+  active           Boolean                             @default(true)
+  createdAt        DateTime                            @default(now())
+  updatedAt        DateTime                            @updatedAt
+
+  @@index([active])
+  @@index([matchType])
+  @@index([priority])
+  @@index([lotCode, familleCode, ouvrageCode])
+}
+
+/// Historique réversible d’une recodification appliquée
+model WorkItemCodificationRevert {
+  id            String   @id @default(cuid())
+  workItemId    String
+  workItem      WorkItem @relation(fields: [workItemId], references: [id], onDelete: Cascade)
+  jobId         String?
+  snapshot      Json
+  appliedAt     DateTime @default(now())
+  revertedAt    DateTime?
+  createdAt     DateTime @default(now())
+
+  @@index([workItemId])
+  @@index([jobId])
+  @@index([appliedAt])
 }
 
 /// Proposition de fusion de doublons ouvrages (validation humaine)
@@ -890,6 +971,8 @@ enum LibraryCleanupJobType {
   duplicate_merge
   recodification_preview
   recodification_apply
+  workitem_codification_preview
+  workitem_codification_apply
   normalize_designations
 }
 

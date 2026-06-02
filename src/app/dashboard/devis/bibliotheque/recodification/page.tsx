@@ -22,12 +22,20 @@ export default async function RecodificationBibliothequePage() {
             . Les <span className="font-mono">PriceEntry</span> ne sont pas modifiés.
           </p>
         </div>
-        <Link
-          href="/dashboard/devis/bibliotheque"
-          className="inline-flex w-fit rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50"
-        >
-          ← Bibliothèque
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/dashboard/devis/bibliotheque/codification"
+            className="inline-flex w-fit rounded-xl border border-[#1e3a5f]/30 bg-[#1e3a5f]/5 px-4 py-2.5 text-sm font-semibold text-[#1e3a5f] shadow-sm hover:bg-[#1e3a5f]/10"
+          >
+            Nouvelle codification BW-LOT-FAM-OUV
+          </Link>
+          <Link
+            href="/dashboard/devis/bibliotheque"
+            className="inline-flex w-fit rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50"
+          >
+            ← Bibliothèque
+          </Link>
+        </div>
       </div>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

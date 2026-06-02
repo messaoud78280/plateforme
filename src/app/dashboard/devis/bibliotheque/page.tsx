@@ -207,10 +207,16 @@ export default async function BibliothequePage({ searchParams }: { searchParams:
             Nettoyage bibliothèque
           </Link>
           <Link
-            href="/dashboard/devis/bibliotheque/recodification"
-            className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50"
+            href="/dashboard/devis/bibliotheque/codification"
+            className="inline-flex items-center justify-center rounded-xl border border-[#1e3a5f]/30 bg-[#1e3a5f]/5 px-4 py-2.5 text-sm font-semibold text-[#1e3a5f] shadow-sm hover:bg-[#1e3a5f]/10"
           >
-            Recodification
+            Codification BeWork
+          </Link>
+          <Link
+            href="/dashboard/devis/bibliotheque/recodification"
+            className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm hover:bg-slate-50"
+          >
+            Recod. Martin (legacy)
           </Link>
           <Link
             href="/dashboard/devis/bibliotheque/nouveau"

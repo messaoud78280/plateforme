@@ -11,7 +11,7 @@ import {
   previewObservedPricesPaste,
   type PreviewObservedPricePasteResultRow,
 } from "@/app/dashboard/devis/actions";
-import { HISTORIQUE_IMPORT_WARNING } from "@/lib/work-item-catalog-policy";
+import { HISTORIQUE_IMPORT_WARNING } from "@/lib/work-item-catalog-constants";
 import { WORK_ITEM_STATUS_LABELS } from "@/lib/be-work-devis-labels";
 import type { MotherVariantImportBundle } from "@/lib/be-work-devis-chatgpt-paste";
 import {

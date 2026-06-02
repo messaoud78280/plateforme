@@ -4,8 +4,12 @@ import { prisma } from "@/lib/prisma";
 
 export const WORK_ITEM_CATALOG_COOKIE = "bework_work_catalog_id";
 
-export const CATALOG_HISTORIQUE_ID = "bework-catalog-historique";
-export const CATALOG_ARTIPRIX_2026_ID = "bework-catalog-artiprix-2026";
+import {
+  CATALOG_ARTIPRIX_2026_ID,
+  CATALOG_HISTORIQUE_ID,
+} from "@/lib/work-item-catalog-constants";
+
+export { CATALOG_ARTIPRIX_2026_ID, CATALOG_HISTORIQUE_ID };
 
 export type WorkItemCatalogSummary = Pick<
   WorkItemCatalog,

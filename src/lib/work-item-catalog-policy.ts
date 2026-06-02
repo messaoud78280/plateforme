@@ -2,19 +2,23 @@ import type { WorkItemCatalog } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
   CATALOG_ARTIPRIX_2026_ID,
+  CATALOG_ARTIPRIX_SLUG,
   CATALOG_HISTORIQUE_ID,
+  CATALOG_HISTORIQUE_SLUG,
+  HISTORIQUE_IMPORT_WARNING,
+  HISTORIQUE_WRITE_BLOCKED_MESSAGE,
+} from "@/lib/work-item-catalog-constants";
+import {
   getDefaultWorkItemCatalogId,
   resolveActiveWorkItemCatalogId,
 } from "@/lib/work-item-catalog";
 
-export const CATALOG_ARTIPRIX_SLUG = "artiprix-2026";
-export const CATALOG_HISTORIQUE_SLUG = "historique";
-
-export const HISTORIQUE_IMPORT_WARNING =
-  "Attention : vous êtes sur la bibliothèque historique. Elle est destinée à la consultation. Voulez-vous vraiment importer ici ?";
-
-export const HISTORIQUE_WRITE_BLOCKED_MESSAGE =
-  "La bibliothèque historique est en lecture seule. Basculez sur « Artiprix BeWork 2026 » pour importer, codifier, fusionner ou nettoyer.";
+export {
+  CATALOG_ARTIPRIX_SLUG,
+  CATALOG_HISTORIQUE_SLUG,
+  HISTORIQUE_IMPORT_WARNING,
+  HISTORIQUE_WRITE_BLOCKED_MESSAGE,
+} from "@/lib/work-item-catalog-constants";
 
 export type WorkItemCatalogContext = {
   id: string;

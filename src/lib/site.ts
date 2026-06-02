@@ -24,13 +24,24 @@ export const CALENDLY_APPEL_DECOUVERTE_URL =
  * Origine unique pour emails + magic link (évite mélange localhost / 127.0.0.1).
  * Ordre : NEXTAUTH_URL → NEXT_PUBLIC_SITE_URL → origine de la requête d’inscription.
  */
+function isUsableRequestOrigin(origin: string): boolean {
+  try {
+    const host = new URL(origin).hostname.toLowerCase();
+    // Railway / Docker : next start --hostname 0.0.0.0 → request.url.origin illisible côté navigateur
+    return host !== "0.0.0.0" && host !== "[::]" && host !== "::";
+  } catch {
+    return false;
+  }
+}
+
 export function canonicalRequestOrigin(preferredFromRequest?: string): string {
   const tryOrigin = (raw: string | undefined) => {
     if (!raw?.trim()) return null;
     const u = raw.trim().replace(/\/$/, "");
     if (!/^https?:\/\//i.test(u)) return null;
     try {
-      return new URL(u).origin;
+      const origin = new URL(u).origin;
+      return isUsableRequestOrigin(origin) ? origin : null;
     } catch {
       return null;
     }

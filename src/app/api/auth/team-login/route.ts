@@ -12,6 +12,7 @@ import {
 import { isAgentRole, isClient, isManager } from "@/types";
 import type { TeamLoginGate } from "@/lib/auth-team-login";
 import { safeTeamLoginRedirect } from "@/lib/auth-team-login";
+import { canonicalRequestOrigin } from "@/lib/site";
 
 function gateAllows(role: string, gate: TeamLoginGate): boolean {
   if (gate === "gerante") return isManager(role);
@@ -88,7 +89,7 @@ function loginErrorRedirect(
  */
 export async function POST(request: Request) {
   const secret = process.env.NEXTAUTH_SECRET?.trim();
-  const baseUrl = new URL(request.url).origin;
+  const baseUrl = canonicalRequestOrigin(new URL(request.url).origin);
 
   if (!secret) {
     return NextResponse.json(

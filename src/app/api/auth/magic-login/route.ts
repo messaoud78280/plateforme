@@ -6,12 +6,13 @@ import { prisma } from "@/lib/prisma";
 import { isClientLoginAllowed } from "@/lib/client-account-approval";
 
 import { getNextAuthSessionCookieName, createNextAuthSessionToken, nextAuthSessionCookieOptions } from "@/lib/auth-session-cookie";
+import { canonicalRequestOrigin } from "@/lib/site";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const token = (url.searchParams.get("token") ?? "").trim();
   const next = (url.searchParams.get("next") ?? "/dashboard").trim() || "/dashboard";
-  const baseUrl = url.origin;
+  const baseUrl = canonicalRequestOrigin(url.origin);
   const cookieName = getNextAuthSessionCookieName(baseUrl.startsWith("https://"));
 
   if (!token) {

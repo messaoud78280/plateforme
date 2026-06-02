@@ -20,6 +20,13 @@ export const RESOURCE_TUTO_ITEMS: readonly ResourceTutoItem[] = [
     icon: "document",
   },
   {
+    title: "Tuto Crée ton skill — Recouvrement & retenue de garantie",
+    desc: "Factures impayées, pénalités, indemnité 40 €, article 1799-1, libération de RG : construire un skill qui rédige courriers et suit les échéances — PDF 10 pages.",
+    href: "/ressources/tuto-skill-recouvrement-rg-bework",
+    status: "Tuto PDF",
+    icon: "document",
+  },
+  {
     title: "BeWork × Maîtrise d’œuvre — la plaquette MOE/BET",
     desc: "Relais documentaire pour bureaux d'études : CCTP, DPGF, RAO, OPC, DOE — chiffrage en crédits et forfaits HT, PDF 10 pages.",
     href: "/ressources/bework-maitrise-doeuvre",

@@ -26,6 +26,13 @@ export type TutoPageSeo = {
 };
 
 export const TUTO_PAGE_SEO: Record<string, TutoPageSeo> = {
+  "/ressources/tuto-skill-recouvrement-rg-bework": {
+    title: "Skill recouvrement & retenue de garantie : tutoriel | BeWork",
+    description: tutoDesc(
+      "Skill recouvrement : impayés, pénalités, indemnité 40 €, RG et garantie de paiement 1799-1. PDF gratuit et prompts pour relancer proprement",
+    ),
+    keywords: ["recouvrement BTP", "retenue de garantie", "mise en demeure BTP", "article 1799-1", "skill recouvrement"],
+  },
   "/ressources/tuto-skill-ppsps-bework": {
     title: "Skill PPSPS BTP : tutoriel Claude et prompts | BeWork",
     description: tutoDesc(

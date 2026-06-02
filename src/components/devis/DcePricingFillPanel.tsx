@@ -34,9 +34,9 @@ export function DcePricingFillPanel() {
     <form onSubmit={onSubmit} className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <h2 className="font-heading text-lg font-bold text-slate-900">Nouvelle extraction DCE</h2>
       <p className="text-sm text-slate-600">
-        Déposez le DPGF ou BPU du marché (PDF, Excel). L&apos;IA extrait les lignes et les rapproche de la{" "}
-        <strong>bibliothèque active</strong>. Configurez <span className="font-mono text-xs">OPENAI_API_KEY</span> pour
-        l&apos;extraction structurée ; sinon mode tableau automatique.
+        Déposez le DPGF ou BPU du marché (PDF, Excel, CSV). Les lignes sont extraites par analyse de tableau et
+        rapprochées de la <strong>bibliothèque active</strong>. Pour de meilleurs résultats, privilégiez un export
+        tabulé (Excel/CSV) ou un PDF à texte sélectionnable.
       </p>
       {error ? (
         <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">{error}</div>

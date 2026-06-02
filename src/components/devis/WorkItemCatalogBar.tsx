@@ -39,7 +39,7 @@ export function WorkItemCatalogBar({ catalogs, activeCatalogId }: Props) {
             </p>
           ) : (
             <p className="mt-2 text-xs text-slate-600">
-              Catalogue de production : imports Artiprix, devis, DCE → BPU/DPGF et rapprochements IA utilisent ce référentiel.
+              Catalogue de production : imports Artiprix, devis et DCE → BPU/DPGF utilisent ce référentiel.
             </p>
           )}
         </div>

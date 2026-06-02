@@ -4,8 +4,6 @@ import { WorkItemCatalogBar } from "@/components/devis/WorkItemCatalogBar";
 import { listDceFillSessions } from "@/app/dashboard/devis/dce-fill-actions";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import { listWorkItemCatalogs, resolveActiveWorkItemCatalogId } from "@/lib/work-item-catalog";
-import { isSkillsLlmConfigured } from "@/lib/skills/llm-chat";
-
 export default async function DceRemplissagePage() {
   await requireBeWorkDevisSession();
   const [catalogs, activeCatalogId, sessions] = await Promise.all([
@@ -13,7 +11,6 @@ export default async function DceRemplissagePage() {
     resolveActiveWorkItemCatalogId(),
     listDceFillSessions(),
   ]);
-  const llm = isSkillsLlmConfigured();
 
   return (
     <div className="space-y-8 px-1">
@@ -27,12 +24,6 @@ export default async function DceRemplissagePage() {
             Extraction des lignes du dossier de consultation, rapprochement avec la bibliothèque active, puis export vers
             vos documents de chiffrage. Les anciennes bibliothèques restent disponibles sans mélange de codes.
           </p>
-          {!llm ? (
-            <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
-              Mode assisté sans IA complète : ajoutez <span className="font-mono">OPENAI_API_KEY</span> pour une
-              extraction DPGF/BPU plus fiable sur PDF complexes.
-            </p>
-          ) : null}
         </div>
         <Link
           href="/dashboard/devis/bibliotheque"

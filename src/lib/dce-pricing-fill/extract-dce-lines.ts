@@ -1,5 +1,3 @@
-import { chatCompletion, isSkillsLlmConfigured } from "@/lib/skills/llm-chat";
-
 export type DceExtractedLine = {
   numero?: string;
   lot?: string;
@@ -50,46 +48,12 @@ export function parseTabularDceLines(text: string): DceExtractedLine[] {
   return lines.slice(0, 800);
 }
 
-export async function extractDceLinesWithAi(
+/** Extraction des lignes DPGF/BPU sans LLM (tableau, numérotation, texte structuré). */
+export function extractDceLines(
   extractedText: string,
-  targetDocType: "dpgf" | "bpu",
-): Promise<DceExtractedLine[]> {
-  if (!isSkillsLlmConfigured()) {
-    return parseTabularDceLines(extractedText);
-  }
-
-  const system = `Tu es un conducteur de travaux BTP. Extrais les lignes d'un document ${targetDocType.toUpperCase()} issu d'un DCE.
-Réponds UNIQUEMENT avec un JSON valide : { "lines": [ { "numero": "1.1", "lot": "GO", "designation": "...", "unite": "m²", "quantite": 12.5, "prixUnitaireHt": null } ] }
-Ne invente pas de prix si absents du texte. Maximum 400 lignes.`;
-
-  const content = await chatCompletion([
-    { role: "system", content: system },
-    {
-      role: "user",
-      content: `Texte extrait du DCE (tronqué si besoin):\n\n${extractedText.slice(0, 120_000)}`,
-    },
-  ]);
-
-  const jsonMatch = /\{[\s\S]*\}/.exec(content);
-  if (!jsonMatch) return parseTabularDceLines(extractedText);
-
-  try {
-    const parsed = JSON.parse(jsonMatch[0]) as { lines?: DceExtractedLine[] };
-    if (!Array.isArray(parsed.lines)) return parseTabularDceLines(extractedText);
-    return parsed.lines
-      .filter((l) => l?.designation?.trim())
-      .map((l) => ({
-        numero: l.numero?.trim(),
-        lot: l.lot?.trim(),
-        designation: l.designation.trim(),
-        unite: l.unite?.trim(),
-        quantite: typeof l.quantite === "number" ? l.quantite : undefined,
-        prixUnitaireHt: typeof l.prixUnitaireHt === "number" ? l.prixUnitaireHt : undefined,
-      }))
-      .slice(0, 400);
-  } catch {
-    return parseTabularDceLines(extractedText);
-  }
+  _targetDocType: "dpgf" | "bpu",
+): DceExtractedLine[] {
+  return parseTabularDceLines(extractedText);
 }
 
 export function matchDceLinesToCatalog(

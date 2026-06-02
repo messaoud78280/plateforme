@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import {
-  extractDceLinesWithAi,
+  extractDceLines,
   matchDceLinesToCatalog,
   type DceExtractedLine,
   type DceLineMatch,
@@ -95,7 +95,7 @@ export async function createDceFillSessionFromUpload(formData: FormData): Promis
       },
     });
 
-    const lines = await extractDceLinesWithAi(text, targetDocType);
+    const lines = extractDceLines(text, targetDocType);
     const catalogItems = await prisma.workItem.findMany({
       where: { catalogId, ...WORK_ITEM_VISIBLE_IN_LIST },
       select: {

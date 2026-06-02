@@ -122,6 +122,16 @@ export const authOptions: NextAuthOptions = {
         const u = user as unknown as Record<string, unknown>;
         token.contractStatus = typeof u.contractStatus === "string" ? u.contractStatus : undefined;
         token.accountStatus = typeof u.accountStatus === "string" ? u.accountStatus : undefined;
+      } else if (token.id && !token.role) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { role: true, contractStatus: true, accountStatus: true },
+        });
+        if (dbUser) {
+          token.role = dbUser.role;
+          token.contractStatus = dbUser.contractStatus;
+          token.accountStatus = dbUser.accountStatus;
+        }
       }
       return token;
     },

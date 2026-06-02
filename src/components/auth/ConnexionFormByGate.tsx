@@ -1,8 +1,8 @@
 "use client";
 
-import { signIn, signOut, getSession } from "next-auth/react";
+import type { TeamLoginGate } from "@/lib/auth-team-login";
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { isManager, isAgentRole, isClient } from "@/types";
 
@@ -65,7 +65,6 @@ const primaryButtonClassByGate: Record<ConnexionGate, string> = {
 };
 
 export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
   const [email, setEmail] = useState("");
@@ -90,52 +89,34 @@ export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
     e.preventDefault();
     setError("");
 
-    const result = await signIn("credentials", {
-      email: email.trim().toLowerCase(),
-      password: password.trim(),
-      redirect: false,
-    });
+    try {
+      const res = await fetch("/api/auth/team-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          password: password.trim(),
+          gate: gate as TeamLoginGate,
+          callbackUrl,
+        }),
+      });
 
-    if (!result) {
-      setError("Erreur de connexion au serveur. Vérifiez votre connexion et réessayez.");
-      return;
-    }
+      const data = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        redirect?: string;
+      };
 
-    if (result.url) {
-      router.push(result.url);
-      return;
-    }
-
-    if (result.error) {
-      if (result.error === "CredentialsSignin") {
-        setError("Email ou mot de passe incorrect.");
-      } else {
-        setError(`Erreur de connexion (${result.error}). Réessayez.`);
+      if (!res.ok || !data.ok) {
+        setError(data.error ?? "Connexion impossible. Réessayez.");
+        return;
       }
-      return;
-    }
 
-    if (!result.ok) {
-      setError("Email ou mot de passe incorrect.");
-      return;
+      window.location.assign(data.redirect ?? callbackUrl);
+    } catch {
+      setError("Erreur de connexion au serveur. Vérifiez votre connexion et réessayez.");
     }
-
-    let role: string | undefined;
-    for (let attempt = 0; attempt < 10; attempt++) {
-      const session = await getSession();
-      role = (session?.user as { role?: string } | undefined)?.role;
-      if (role) break;
-      await new Promise((r) => setTimeout(r, 120));
-    }
-
-    if (!role || !config.allowed(role)) {
-      await signOut({ redirect: false });
-      setError(config.errorMessage);
-      return;
-    }
-
-    router.push(callbackUrl);
-    router.refresh();
   }
 
   return (

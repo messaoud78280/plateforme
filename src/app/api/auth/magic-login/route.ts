@@ -5,17 +5,14 @@ import { UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { isClientLoginAllowed } from "@/lib/client-account-approval";
 
-function getSessionCookieName(baseUrl: string) {
-  const isSecure = baseUrl.startsWith("https://");
-  return isSecure ? "__Secure-next-auth.session-token" : "next-auth.session-token";
-}
+import { getNextAuthSessionCookieName } from "@/lib/auth-session-cookie";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const token = (url.searchParams.get("token") ?? "").trim();
   const next = (url.searchParams.get("next") ?? "/dashboard").trim() || "/dashboard";
   const baseUrl = url.origin;
-  const cookieName = getSessionCookieName(baseUrl);
+  const cookieName = getNextAuthSessionCookieName(baseUrl.startsWith("https://"));
 
   if (!token) {
     return NextResponse.redirect(new URL("/connexion/clients?error=magic_link_invalid", baseUrl));

@@ -7,6 +7,8 @@ import { prismaAdapterCaseInsensitiveEmail } from "./auth-adapter";
 import { prisma } from "./prisma";
 import { sendEmail } from "@/lib/email";
 import { isClientLoginAllowed } from "@/lib/client-account-approval";
+import { gateAllows, parseTeamLoginGate } from "@/lib/auth-team-login";
+import { canonicalRequestOrigin } from "@/lib/site";
 
 export const authOptions: NextAuthOptions = {
   adapter: prismaAdapterCaseInsensitiveEmail(prisma),
@@ -66,6 +68,7 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Mot de passe", type: "password" },
+        gate: { label: "Portail", type: "text" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
@@ -97,7 +100,13 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user }) {
+    async signIn({ user, credentials }) {
+      const role = (user as { role?: string }).role;
+      const gate = parseTeamLoginGate(credentials?.gate);
+      if (gate && role && !gateAllows(role, gate)) {
+        return `/connexion/${gate}?error=wrong_gate`;
+      }
+
       const userId = (user as { id?: string }).id;
       if (!userId) return true;
 
@@ -145,9 +154,14 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     redirect({ url, baseUrl }) {
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
-      if (new URL(url).origin === baseUrl) return url;
-      return baseUrl + "/dashboard";
+      const origin = canonicalRequestOrigin(baseUrl);
+      if (url.startsWith("/")) return `${origin}${url}`;
+      try {
+        if (new URL(url).origin === origin) return url;
+      } catch {
+        /* ignore malformed url */
+      }
+      return `${origin}/dashboard`;
     },
   },
   pages: {

@@ -1,9 +1,9 @@
 "use client";
 
+import { signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import type { TeamLoginGate } from "@/lib/auth-team-login";
 import { safeTeamLoginRedirect } from "@/lib/auth-team-login";
 import { isManager, isAgentRole, isClient } from "@/types";
 
@@ -58,17 +58,20 @@ const badgeClassByGate: Record<ConnexionGate, string> = {
 
 const primaryButtonClassByGate: Record<ConnexionGate, string> = {
   gerante:
-    "w-full rounded-xl border border-[color:var(--accent-600)]/70 bg-gradient-to-b from-[color:var(--accent-500)] via-[color:var(--accent-600)] to-[color:var(--accent-600)] px-4 py-3.5 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_4px_18px_rgba(29,78,216,0.38)] transition hover:border-[color:var(--accent-500)] hover:from-[color:var(--accent-600)] hover:via-[color:var(--accent-700)] hover:to-[color:var(--accent-700)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_6px_24px_rgba(29,78,216,0.45)] active:translate-y-px",
+    "w-full rounded-xl border border-[color:var(--accent-600)]/70 bg-gradient-to-b from-[color:var(--accent-500)] via-[color:var(--accent-600)] to-[color:var(--accent-600)] px-4 py-3.5 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_4px_18px_rgba(29,78,216,0.38)] transition hover:border-[color:var(--accent-500)] hover:from-[color:var(--accent-600)] hover:via-[color:var(--accent-700)] hover:to-[color:var(--accent-700)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_6px_24px_rgba(29,78,216,0.45)] active:translate-y-px disabled:opacity-60",
   agents:
-    "w-full rounded-xl border border-[color:var(--agent-600)]/70 bg-gradient-to-b from-[color:var(--agent-500)] via-[color:var(--agent-600)] to-[color:var(--agent-600)] px-4 py-3.5 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_4px_18px_rgba(124,58,237,0.34)] transition hover:border-[color:var(--agent-500)] hover:from-[color:var(--agent-600)] hover:via-[color:var(--agent-700)] hover:to-[color:var(--agent-700)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_6px_24px_rgba(124,58,237,0.4)] active:translate-y-px",
+    "w-full rounded-xl border border-[color:var(--agent-600)]/70 bg-gradient-to-b from-[color:var(--agent-500)] via-[color:var(--agent-600)] to-[color:var(--agent-600)] px-4 py-3.5 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_4px_18px_rgba(124,58,237,0.34)] transition hover:border-[color:var(--agent-500)] hover:from-[color:var(--agent-600)] hover:via-[color:var(--agent-700)] hover:to-[color:var(--agent-700)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_6px_24px_rgba(124,58,237,0.4)] active:translate-y-px disabled:opacity-60",
   clients:
-    "w-full rounded-xl border border-[color:var(--client-600)]/70 bg-gradient-to-b from-[color:var(--client-600)] via-[color:var(--client-600)] to-[color:var(--client-700)] px-4 py-3.5 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_4px_18px_rgba(22,163,74,0.28)] transition hover:border-[color:var(--client-600)] hover:from-[color:var(--client-600)] hover:via-[color:var(--client-700)] hover:to-[color:var(--client-700)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_6px_24px_rgba(22,163,74,0.32)] active:translate-y-px",
+    "w-full rounded-xl border border-[color:var(--client-600)]/70 bg-gradient-to-b from-[color:var(--client-600)] via-[color:var(--client-600)] to-[color:var(--client-700)] px-4 py-3.5 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_4px_18px_rgba(22,163,74,0.28)] transition hover:border-[color:var(--client-600)] hover:from-[color:var(--client-600)] hover:via-[color:var(--client-700)] hover:to-[color:var(--client-700)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_6px_24px_rgba(22,163,74,0.32)] active:translate-y-px disabled:opacity-60",
 };
 
 export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
   const searchParams = useSearchParams();
   const callbackUrl = safeTeamLoginRedirect(searchParams.get("callbackUrl") ?? "/dashboard");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const config = GATE_CONFIG[gate];
 
@@ -90,6 +93,7 @@ export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
     }
 
     const messages: Record<string, string> = {
+      CredentialsSignin: "Email ou mot de passe incorrect.",
       invalid_credentials: "Email ou mot de passe incorrect.",
       wrong_gate: config.errorMessage,
       missing_fields: "Email et mot de passe requis.",
@@ -97,6 +101,44 @@ export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
     };
     setError(messages[err] ?? "Connexion impossible. Réessayez.");
   }, [searchParams, gate, config.errorMessage]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const result = await signIn("credentials", {
+        email: email.trim().toLowerCase(),
+        password: password.trim(),
+        gate,
+        callbackUrl,
+        redirect: false,
+      });
+
+      if (result?.url && !result.ok) {
+        window.location.assign(result.url);
+        return;
+      }
+
+      if (result?.error) {
+        setError(
+          result.error === "CredentialsSignin"
+            ? "Email ou mot de passe incorrect."
+            : "Connexion impossible. Réessayez.",
+        );
+        return;
+      }
+
+      if (result?.ok) {
+        window.location.assign(callbackUrl);
+      }
+    } catch {
+      setError("Erreur de connexion au serveur. Vérifiez votre connexion et réessayez.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#f8f9fb] via-[#eef0f4] to-[#dce2ea] px-4 py-10 md:py-14">
@@ -129,17 +171,16 @@ export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
             </h1>
             <p className="mt-3 text-sm leading-relaxed text-black md:text-[0.9375rem]">{config.description}</p>
 
-            <form action="/api/auth/team-login" method="POST" className="mt-8 space-y-5">
-              <input type="hidden" name="gate" value={gate} />
-              <input type="hidden" name="callbackUrl" value={callbackUrl} />
+            <form onSubmit={handleSubmit} className="mt-8 space-y-5">
               <div>
                 <label htmlFor="email" className={labelClass}>
                   Email
                 </label>
                 <input
                   id="email"
-                  name="email"
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                   className={fieldClass}
                   placeholder="vous@exemple.com"
@@ -153,8 +194,9 @@ export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
                 </label>
                 <input
                   id="password"
-                  name="password"
                   type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                   className={fieldClass}
                   autoComplete="current-password"
@@ -172,9 +214,10 @@ export function ConnexionFormByGate({ gate }: ConnexionFormByGateProps) {
 
               <button
                 type="submit"
+                disabled={loading}
                 className={primaryButtonClassByGate[gate]}
               >
-                Se connecter
+                {loading ? "Connexion…" : "Se connecter"}
               </button>
             </form>
 

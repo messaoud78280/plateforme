@@ -3,7 +3,7 @@ import { Architects_Daughter, Geist_Mono, Inter, Rajdhani } from "next/font/goog
 import "./globals.css";
 import { PlausibleScript } from "@/components/analytics/PlausibleScript";
 import { Providers } from "@/components/Providers";
-import { SEO_KEYWORDS_GLOBAL, SEO_VALUE_PROPOSITION, SEO_VALUE_PROPOSITION_SHORT } from "@/lib/seo-keywords";
+import { SEO_KEYWORDS_GLOBAL, SEO_VALUE_PROPOSITION, SEO_VALUE_PROPOSITION_SHORT, BEWORK_SLOGAN } from "@/lib/seo-keywords";
 import { jsonLdCountriesServed, jsonLdExpandedAreaServed } from "@/lib/jsonld-area-served";
 import {
   buildSearchEngineVerification,
@@ -93,21 +93,21 @@ export const metadata: Metadata = {
     alternateLocale: [...SEO_OG_ALTERNATE_LOCALES],
     url: SITE_URL,
     siteName: "BeWork",
-    title: "BeWork — Assistants travaux BTP (France, Belgique, Suisse, Luxembourg)",
-    description: `${SEO_VALUE_PROPOSITION_SHORT} À partir de ${SITE_PRICE_LOW_FR} € ${SUBSCRIPTION_PRICE_TAX_LABEL}.`,
+    title: "BeWork — Assistants travaux augmentés par l’IA (France, Belgique, Suisse, Luxembourg)",
+    description: `${SEO_VALUE_PROPOSITION_SHORT} ${BEWORK_SLOGAN}`,
     images: [
       {
         url: defaultOgImage,
         width: 1200,
         height: 630,
-        alt: "BeWork — Administratif externalisé pour artisans et conducteurs de travaux (France, Belgique, Suisse, Luxembourg)",
+        alt: "BeWork — Assistants travaux augmentés par l’IA pour le BTP (France, Belgique, Suisse, Luxembourg)",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "BeWork — Partenaire administratif externalisé BTP",
-    description: `${SEO_VALUE_PROPOSITION_SHORT} À partir de ${SITE_PRICE_LOW_FR} € ${SUBSCRIPTION_PRICE_TAX_LABEL}.`,
+    title: "BeWork — Assistants travaux augmentés par l’IA pour le BTP",
+    description: `${SEO_VALUE_PROPOSITION_SHORT} ${BEWORK_SLOGAN}`,
     ...(process.env.NEXT_PUBLIC_TWITTER_SITE?.trim()
       ? { site: process.env.NEXT_PUBLIC_TWITTER_SITE.trim() }
       : {}),
@@ -152,11 +152,11 @@ const jsonLd = {
       url: SITE_URL,
       name: "BeWork",
       alternateName: [
-        "BeWork — partenaire administratif externalisé",
-        "BeWork — administratif BTP",
-        "BeWork prestataire administratif externalisé",
-        "BeWork pilotage administratif",
-        "Administratif chantier artisans conducteurs travaux",
+        "BeWork — assistants travaux augmentés par l’IA",
+        "BeWork — relais bureau-chantier BTP",
+        "BeWork administratif BTP",
+        "BeWork pilotage administratif chantier",
+        "Assistants travaux BTP France Belgique Suisse Luxembourg",
       ],
       description: SEO_VALUE_PROPOSITION,
       inLanguage: "fr-FR",
@@ -176,8 +176,8 @@ const jsonLd = {
       logo: { "@type": "ImageObject", url: defaultOgImage, width: 1200, height: 630 },
       image: defaultOgImage,
       description:
-        "Administratif externalisé pour artisans, conducteurs de travaux et dirigeants d’entreprises du bâtiment : devis, facturation, relances, dossiers chantier — France, Belgique, Suisse, Luxembourg. Coordination depuis la France.",
-      slogan: "Cadre, rigueur, pilotage et lecture terrain pour le BTP",
+        "Assistants travaux augmentés par l’IA pour artisans, conducteurs de travaux et dirigeants d’entreprises du bâtiment : devis, relances, dossiers chantier, appels d’offres — France, Belgique, Suisse, Luxembourg. Supervision depuis la France.",
+      slogan: BEWORK_SLOGAN,
       areaServed: jsonLdExpandedAreaServed(),
       founder: {
         "@type": "Person",
@@ -211,20 +211,20 @@ const jsonLd = {
         "Devis entreprise du bâtiment",
         "Externalisation administrative",
         "Partenaire administratif externalisé",
-        "Intelligence artificielle appliquée à l'administratif",
+        "Intelligence artificielle appliquée aux assistants travaux BTP",
       ],
     },
     {
       "@type": "ProfessionalService",
       "@id": `${SITE_URL}/#service`,
-      name: "BeWork — Partenaire administratif externalisé (BTP & PME)",
-      description: `Administratif externalisé pour artisans, conducteurs de travaux et chefs d’entreprise du BTP : devis, facturation chantier, relances, dossiers (DICT, situations, AO). France, Belgique, Suisse, Luxembourg. Forfaits ${SUBSCRIPTION_PRICE_TAX_LABEL} dès ${SITE_PRICE_LOW_FR} €.`,
+      name: "BeWork — Assistants travaux augmentés par l’IA (BTP)",
+      description: `Assistants travaux externalisés pour artisans, conducteurs de travaux et dirigeants du BTP : devis, relances, dossiers chantier, DCE, PPSPS, DOE. ${BEWORK_SLOGAN} Forfaits ${SUBSCRIPTION_PRICE_TAX_LABEL} dès ${SITE_PRICE_LOW_FR} €.`,
       url: SITE_URL,
       provider: { "@id": `${SITE_URL}/#organization` },
       areaServed: jsonLdExpandedAreaServed(),
       serviceType: [
-        "Externalisation administrative BTP",
-        "Assistante travaux et dossiers chantier",
+        "Assistants travaux augmentés par l’IA",
+        "Relais bureau-chantier BTP",
         "Suivi devis et relances clients",
         "Préparation documents travaux et réserves",
       ],
@@ -232,6 +232,26 @@ const jsonLd = {
         "@type": "BusinessAudience",
         audienceType: "Conducteurs de travaux, artisans, sous-traitants et dirigeants d’entreprises du bâtiment",
       },
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${SITE_URL}/#platform`,
+      name: "BeWork",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
+      url: SITE_URL,
+      description:
+        "Plateforme d’assistants travaux augmentés par l’IA : dépôt de missions, suivi des dossiers chantier et traçabilité bureau-chantier pour entreprises du BTP.",
+      offers: {
+        "@type": "Offer",
+        url: absoluteUrl("/tarifs"),
+        priceCurrency: "EUR",
+        price: SITE_PRICE_LOW_FR.replace(/\s/g, ""),
+        availability: "https://schema.org/InStock",
+        seller: { "@id": `${SITE_URL}/#organization` },
+      },
+      provider: { "@id": `${SITE_URL}/#organization` },
+      areaServed: jsonLdExpandedAreaServed(),
     },
   ],
 };

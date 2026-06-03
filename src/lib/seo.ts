@@ -2,6 +2,7 @@
  * Constantes et helpers SEO / GEO / AEO partagés (titres, définitions citables par les IA, métadonnées).
  */
 export {
+  BEWORK_SLOGAN,
   SEO_KEYWORDS_GLOBAL,
   SEO_KEYWORDS_HOME,
   SEO_KEYWORDS_PARTENAIRE_CORE,

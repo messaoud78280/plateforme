@@ -180,3 +180,38 @@ export function buildPublicPlanOffersJsonLd(
     seller: { "@id": SCHEMA_ORG_ID },
   }));
 }
+
+/** OfferCatalog pour la page /tarifs. */
+export function buildOfferCatalogJsonLd(
+  plans: readonly { name: string; price: string; description: string; tagline?: string }[],
+  pageUrl: string
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "OfferCatalog",
+    "@id": `${pageUrl}#offer-catalog`,
+    name: "Tarifs BeWork — assistants travaux augmentés par l’IA",
+    url: pageUrl,
+    numberOfItems: plans.length,
+    itemListElement: plans.map((plan, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": "Offer",
+        name: `${plan.name} — BeWork`,
+        description: plan.tagline ?? plan.description,
+        price: plan.price.replace(/\s/g, ""),
+        priceCurrency: "EUR",
+        priceSpecification: {
+          "@type": "UnitPriceSpecification",
+          price: plan.price.replace(/\s/g, ""),
+          priceCurrency: "EUR",
+          valueAddedTaxIncluded: false,
+        },
+        url: pageUrl,
+        availability: "https://schema.org/InStock",
+        seller: { "@id": SCHEMA_ORG_ID },
+      },
+    })),
+  };
+}

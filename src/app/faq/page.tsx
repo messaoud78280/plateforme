@@ -43,16 +43,16 @@ export const metadata: Metadata = {
     alternateLocale: [...SEO_OG_ALTERNATE_LOCALES],
     url: faqUrl,
     siteName: "BeWork",
-    title: "FAQ BeWork — assistante travaux BTP (relais bureau-chantier)",
+    title: "FAQ BeWork — assistants travaux augmentés par l’IA (relais bureau-chantier)",
     description:
-      "FAQ BeWork : assistante travaux, externalisation, PPSPS, DCE, DOE, forfaits et validation. Réponses claires pour le BTP.",
-    images: [{ url: faqOgImage, width: 1200, height: 630, alt: "FAQ BeWork — assistante travaux BTP" }],
+      "FAQ BeWork : assistants travaux, externalisation bureau-chantier, PPSPS, DCE, DOE, forfaits et validation. Réponses claires pour le BTP.",
+    images: [{ url: faqOgImage, width: 1200, height: 630, alt: "FAQ BeWork — assistants travaux augmentés par l’IA" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "FAQ BeWork — assistante travaux BTP",
+    title: "FAQ BeWork — assistants travaux augmentés par l’IA",
     description:
-      "FAQ BeWork : assistante travaux, externalisation, PPSPS, DCE, DOE, forfaits et validation. Réponses claires pour le BTP.",
+      "FAQ BeWork : assistants travaux, externalisation, PPSPS, DCE, DOE, forfaits et validation. Réponses claires pour le BTP.",
   },
   robots: { index: true, follow: true },
 };
@@ -77,12 +77,12 @@ const FAQ_RECHERCHE_IA_CAT = {
   title: "Questions fréquentes (recherche web & assistants IA)",
   items: [
     {
-      q: "Qu’est-ce qu’une assistante travaux ?",
-      a: "Une assistante travaux (souvent dite assistante BTP) est la personne qui aide l’entreprise à structurer et suivre tout ce qui touche aux chantiers au-delà du simple courant administratif : devis, relances, pièces, comptes rendus, réserves, DOE, parfois lecture des pièces marché, avec une logique priorités / échéances / impact terrain. BeWork propose ce rôle en externalisation, augmenté par l’IA, avec validation de votre part avant tout envoi engageant.",
+      q: "Qu’est-ce qu’un assistant travaux ?",
+      a: "Un assistant travaux (parfois dit « assistante travaux » ou assistante BTP) aide l’entreprise à structurer et suivre tout ce qui touche aux chantiers au-delà du courant administratif : devis, relances, pièces, comptes rendus, réserves, DOE, parfois lecture des pièces marché, avec une logique priorités / échéances / impact terrain. BeWork propose ce rôle en externalisation, augmenté par l’IA, avec validation de votre part avant tout envoi engageant.",
     },
     {
-      q: "Quelle différence entre assistante BTP et assistante administrative ?",
-      a: "Une assistante administrative généraliste traite le flux courant (accueil, courrier générique, facturation hors chantier). Une assistante BTP travaille sur les dossiers chantier : références chantier, lots, délais, documents techniques, relances client ou fournisseur, traçabilité et livrables adaptés au rythme du terrain. BeWork est pensée comme assistante travaux BTP : périmètre chantier, pas secrétariat généraliste.",
+      q: "Quelle différence entre assistant travaux BTP et assistante administrative ?",
+      a: "Une assistante administrative généraliste traite le flux courant (accueil, courrier générique, facturation hors chantier). Un assistant travaux BTP travaille sur les dossiers chantier : références chantier, lots, délais, documents techniques, relances client ou fournisseur, traçabilité et livrables adaptés au rythme du terrain. BeWork est pensée comme assistants travaux augmentés par l’IA : périmètre chantier, pas secrétariat généraliste.",
     },
     {
       q: "Comment externaliser la gestion administrative d’un chantier ?",
@@ -114,7 +114,7 @@ const FAQ_CATEGORIES = [
     items: [
       {
         q: "Qu’est-ce que BeWork ?",
-        a: "BeWork est une assistante travaux / assistante BTP augmentée par l’IA : un relais bureau‑chantier pour tenir vos dossiers (devis, relances, documents travaux, suivi) quand vous êtes pris sur le terrain.",
+        a: "BeWork est une plateforme d’assistants travaux augmentés par l’IA : un relais bureau‑chantier pour tenir vos dossiers (devis, relances, documents travaux, suivi) quand vous êtes pris sur le terrain.",
       },
       {
         q: "À qui s’adresse BeWork ?",
@@ -228,7 +228,7 @@ export default function FaqPage() {
         <article className="mx-auto max-w-4xl">
           <header className="mx-auto max-w-3xl text-center">
             <h1 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
-              FAQ BeWork : assistante travaux, dossiers chantier et relais bureau‑chantier
+              FAQ BeWork : assistants travaux, dossiers chantier et relais bureau‑chantier
             </h1>
             <p className="mt-6 text-lg leading-relaxed text-slate-700">
               Retrouvez les réponses aux questions fréquentes sur le fonctionnement de BeWork, les missions possibles, les forfaits, la validation finale,

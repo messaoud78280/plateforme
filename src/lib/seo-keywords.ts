@@ -148,10 +148,13 @@ export const SEO_KEYWORDS_HOME: string[] = [
   "conducteur de travaux France Belgique",
 ];
 
+/** Slogan BeWork — réutilisable contenu, OG, JSON-LD, llms.txt. */
+export const BEWORK_SLOGAN = "On tient le bureau, vous tenez le chantier.";
+
 /** Meta description site (layout racine) — ~155 car., périmètre francophonie. */
 export const SEO_VALUE_PROPOSITION =
-  "Assistants travaux BTP par l’IA : devis, relances, DOE, PPSPS et dossiers chantier. Relais bureau-chantier, forfaits HT. FR · BE · CH · LU.";
+  "Assistants travaux augmentés par l’IA pour le BTP : devis, relances, DOE, PPSPS et dossiers chantier. Relais bureau-chantier, forfaits HT. FR · BE · CH · LU.";
 
 /** Proposition courte (OG, Twitter). */
 export const SEO_VALUE_PROPOSITION_SHORT =
-  "Assistants travaux BTP : bureau-chantier et documents chantier. Forfaits HT. France, Belgique, Suisse, Luxembourg.";
+  "Assistants travaux augmentés par l’IA — relais bureau-chantier et documents chantier. Forfaits HT. France, Belgique, Suisse, Luxembourg.";

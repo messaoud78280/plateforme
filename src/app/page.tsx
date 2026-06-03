@@ -71,9 +71,9 @@ const HOME_FAQ_ITEMS = [
   },
 ] as const;
 
-const HOME_META_TITLE = "BeWork — Relais administratif pour marchés travaux BTP";
+const HOME_META_TITLE = "BeWork — Assistants travaux augmentés par l’IA pour le BTP";
 const HOME_META_DESCRIPTION =
-  "BeWork, relais administratif BTP : dossiers d'intervention, comptes rendus, DOE, attachements, situations, relances et suivi donneurs d'ordre. FR · BE · CH · LU.";
+  "Assistants travaux augmentés par l’IA : relais bureau-chantier pour marchés travaux, devis, DOE, relances et dossiers chantier. On tient le bureau, vous tenez le chantier. FR · BE · CH · LU.";
 
 export const metadata: Metadata = {
   title: { absolute: HOME_META_TITLE },
@@ -98,7 +98,7 @@ export const metadata: Metadata = {
         url: `${SITE_URL}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: "BeWork — Relais administratif pour marchés travaux BTP",
+        alt: "BeWork — Assistants travaux augmentés par l’IA pour le BTP",
       },
     ],
   },
@@ -116,10 +116,10 @@ const homeJsonLd = {
       "@type": "WebPage",
       "@id": `${SITE_URL}/#accueil`,
       url: SITE_URL,
-      name: "BeWork — Relais administratif pour marchés travaux BTP",
+      name: "BeWork — Assistants travaux augmentés par l’IA pour le BTP",
       inLanguage: "fr-FR",
       description:
-        "Relais administratif pour entreprises BTP titulaires de marchés : dossiers d'intervention, comptes rendus, DOE, attachements, situations, relances et suivi donneurs d'ordre.",
+        "Assistants travaux augmentés par l’IA : relais bureau-chantier pour marchés travaux, dossiers d'intervention, comptes rendus, DOE, attachements, situations, relances et suivi donneurs d'ordre.",
       isPartOf: { "@id": `${SITE_URL}/#website` },
       video: { "@id": `${SITE_URL}/#video-presentation-bework` },
       about: [
@@ -136,11 +136,11 @@ const homeJsonLd = {
     {
       "@type": "Service",
       "@id": `${SITE_URL}/#service-btp`,
-      name: "Relais administratif marchés travaux BTP",
+      name: "Assistants travaux augmentés par l’IA — relais bureau-chantier BTP",
       description:
-        "Suivi administratif de marchés publics et privés : dossiers d'intervention, comptes rendus, DOE, attachements, situations, relances donneurs d'ordre, validations BPU / DPGF et coordination documentaire terrain ↔ bureau.",
-      serviceType: "Relais administratif marchés travaux BTP",
-      category: "Gestion administrative marchés travaux (BTP)",
+        "Assistants travaux externalisés pour marchés publics et privés : dossiers d'intervention, comptes rendus, DOE, attachements, situations, relances donneurs d'ordre, validations BPU / DPGF et coordination documentaire terrain ↔ bureau.",
+      serviceType: "Assistants travaux augmentés par l’IA — relais bureau-chantier BTP",
+      category: "Assistants travaux et gestion administrative marchés travaux (BTP)",
       provider: { "@id": `${SITE_URL}/#organization` },
       areaServed: jsonLdExpandedAreaServed(),
       audience: {
@@ -267,17 +267,16 @@ export default function HomePage() {
             <div className="grid items-center gap-10 text-center lg:grid-cols-[minmax(0,1.08fr)_minmax(280px,1fr)] lg:items-start lg:gap-x-10 xl:grid-cols-[minmax(0,1fr)_minmax(520px,1.15fr)] xl:gap-x-14 lg:gap-y-0 lg:text-left">
               <div className="relative z-[2] mx-auto flex w-full min-w-0 max-w-[540px] flex-col gap-5 lg:mx-0 lg:max-w-none lg:gap-4 lg:pt-10 xl:max-w-[560px]">
                 <p className="font-blueprint-note mx-auto max-w-[540px] text-[13px] font-medium uppercase leading-snug tracking-[0.12em] text-[#1d4ed8] lg:mx-0 lg:max-w-none lg:text-[13.5px]">
-                  Relais administratif des marchés travaux
+                  Assistants travaux augmentés par l&apos;IA
                 </p>
 
                 <h1 className="font-heading text-balance text-[clamp(1.85rem,calc(0.75rem+3.1vw),2.9rem)] font-bold leading-[1.08] tracking-[-0.03em] lg:max-w-[40rem]">
-                  <span className="block text-[#0f172a]">Le relais administratif</span>
-                  <span className="block text-[#2563eb]">de vos marchés travaux.</span>
+                  <span className="block text-[#0f172a]">On tient le bureau,</span>
+                  <span className="block text-[#2563eb]">vous tenez le chantier.</span>
                 </h1>
 
                 <p className="mx-auto max-w-[540px] text-[16px] leading-[1.55] text-balance text-slate-700 lg:mx-0 lg:max-w-none lg:text-[17px] lg:leading-snug">
-                  Dossiers d&apos;intervention, comptes rendus, DOE, attachements, situations, validations, relances et coordination
-                  documentaire chantier.
+                  Relais bureau-chantier pour vos marchés travaux : dossiers d&apos;intervention, comptes rendus, DOE, attachements, situations, validations, relances et coordination documentaire.
                 </p>
 
                 <p className="mx-auto max-w-[540px] text-[14.5px] font-medium leading-snug text-slate-600 lg:mx-0 lg:max-w-none lg:text-[15px]">

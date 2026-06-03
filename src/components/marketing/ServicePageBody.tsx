@@ -33,6 +33,38 @@ export function ServicePageBody({ definition: d }: Props) {
         <p key={p}>{p}</p>
       ))}
 
+      {d.neRemplacePas && d.neRemplacePas.length > 0 ? (
+        <>
+          <h2>Ce que BeWork ne remplace pas</h2>
+          <p>
+            BeWork est un relais bureau-chantier augmenté par l&apos;IA. Les points suivants restent de votre
+            responsabilité ou celle de vos partenaires habilités :
+          </p>
+          <ul>
+            {d.neRemplacePas.map((t) => (
+              <li key={t}>{t}</li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+
+      {d.casUsage && d.casUsage.length > 0 ? (
+        <>
+          <h2>Exemple de cas d&apos;usage</h2>
+          {d.casUsage.map((c) => (
+            <div key={c.titre} className="not-prose mb-6">
+              <h3 className="text-lg font-bold text-black">{c.titre}</h3>
+              <p className="mt-2 text-black">
+                <strong>Situation :</strong> {c.scenario}
+              </p>
+              <p className="mt-2 text-black">
+                <strong>Résultat attendu :</strong> {c.resultat}
+              </p>
+            </div>
+          ))}
+        </>
+      ) : null}
+
       <h2>Comment ça fonctionne</h2>
       <ol>
         {d.commentSteps.map((t) => (

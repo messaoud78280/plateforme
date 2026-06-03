@@ -24,7 +24,8 @@ import {
   metaDescriptionFrancophonie,
 } from "@/lib/seo-francophonie";
 import { SEO_KEYWORDS_PARTENAIRE_CORE } from "@/lib/seo-keywords";
-import { absoluteUrl, SITE_URL } from "@/lib/site";
+import { buildOfferCatalogJsonLd } from "@/lib/schema";
+import { absoluteUrl } from "@/lib/site";
 
 const tarifsUrl = absoluteUrl("/tarifs");
 const tarifsOgImage = absoluteUrl("/opengraph-image");
@@ -53,20 +54,20 @@ export const metadata: Metadata = {
     alternateLocale: [...SEO_OG_ALTERNATE_LOCALES],
     url: tarifsUrl,
     siteName: "BeWork",
-    title: "Tarifs BeWork — assistante travaux BTP (relais dossiers chantier)",
+    title: "Tarifs BeWork — assistants travaux augmentés par l’IA (relais dossiers chantier)",
     description: TARIFS_META_DESC,
     images: [
       {
         url: tarifsOgImage,
         width: 1200,
         height: 630,
-        alt: "Tarifs BeWork — assistante travaux BTP (relais dossiers chantier)",
+        alt: "Tarifs BeWork — assistants travaux augmentés par l’IA (relais dossiers chantier)",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tarifs BeWork — assistante travaux BTP",
+    title: "Tarifs BeWork — assistants travaux augmentés par l’IA",
     description: "Forfaits HT pour tenir vos dossiers chantier (devis, relances, situations, documents travaux) sans recruter.",
   },
   robots: { index: true, follow: true },
@@ -182,32 +183,15 @@ const faq = [
 const tarifsStructuredData = {
   "@context": "https://schema.org",
   "@graph": [
-    {
-      "@type": "ItemList",
-      "@id": `${tarifsUrl}#plans`,
-      name: "Tarifs BeWork — assistante travaux BTP",
-      numberOfItems: TARIFS_PLANS.length,
-      itemListElement: TARIFS_PLANS.map((plan, i) => ({
-        "@type": "ListItem",
-        position: i + 1,
-        item: {
-          "@type": "Offer",
-          name: `${plan.name} — BeWork`,
-          description: plan.tagline,
-          price: plan.price,
-          priceCurrency: "EUR",
-          priceSpecification: {
-            "@type": "UnitPriceSpecification",
-            price: plan.price,
-            priceCurrency: "EUR",
-            valueAddedTaxIncluded: false,
-          },
-          url: tarifsUrl,
-          availability: "https://schema.org/InStock",
-          seller: { "@type": "Organization", name: "BeWork", url: SITE_URL },
-        },
+    buildOfferCatalogJsonLd(
+      TARIFS_PLANS.map((plan) => ({
+        name: plan.name,
+        price: plan.price,
+        description: plan.tagline,
+        tagline: plan.tagline,
       })),
-    },
+      tarifsUrl
+    ),
     {
       "@type": "FAQPage",
       "@id": `${tarifsUrl}#faq`,

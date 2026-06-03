@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: "/assistant-travaux-ia",
+        destination: "/services/assistant-travaux",
+        permanent: true,
+      },
+      {
         source: "/assistant-administratif-immobilier",
         destination: "/assistant-administratif-btp",
         permanent: true,

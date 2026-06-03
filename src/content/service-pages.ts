@@ -7,15 +7,20 @@ export type ServicePageSlug =
   | "assistant-travaux"
   | "assistant-conducteur-de-travaux"
   | "assistant-chef-de-chantier"
+  | "conducteur-travaux-deborde"
+  | "assistant-moex"
   | "externalisation-administrative-btp"
   | "compte-rendu-chantier"
   | "analyse-dce-btp"
+  | "dce-bpu-dpgf"
   | "ppsps"
   | "memoire-technique-btp"
   | "chiffrage-devis-btp"
   | "doe-btp";
 
 export type ServiceDeepeningLink = { href: string; label: string };
+
+export type ServiceCasUsage = { titre: string; scenario: string; resultat: string };
 
 export type ServicePageDefinition = {
   slug: ServicePageSlug;
@@ -30,6 +35,10 @@ export type ServicePageDefinition = {
   deepeningLinks: ServiceDeepeningLink[];
   /** Autres pages services (maillage) */
   seeAlsoSlugs?: ServicePageSlug[];
+  /** GEO/AEO — limites explicites (ce que BeWork ne remplace pas) */
+  neRemplacePas?: string[];
+  /** GEO/AEO — exemple concret chantier */
+  casUsage?: ServiceCasUsage[];
   faq: { q: string; a: string }[];
 };
 
@@ -70,6 +79,18 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
       { href: "/notre-facon-de-travailler", label: "Process BeWork" },
     ],
     seeAlsoSlugs: ["assistant-conducteur-de-travaux", "externalisation-administrative-btp"],
+    neRemplacePas: [
+      "Le conducteur de travaux sur le terrain et les arbitrages techniques",
+      "Les décisions commerciales, prix et engagements contractuels",
+      "Le bureau d’études, le maître d’œuvre ou le coordinateur SPS",
+    ],
+    casUsage: [
+      {
+        titre: "Relances devis en attente",
+        scenario: "Douze devis à relancer pendant une visite de réception.",
+        resultat: "BeWork prépare les relances, suit les réponses et remonte les blocages — vous validez avant envoi.",
+      },
+    ],
     faq: [
       {
         q: "Un assistant travaux BeWork remplace un conducteur de travaux ?",
@@ -113,7 +134,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
       { href: "/dict-dt-travaux", label: "DICT et dossiers travaux" },
       { href: "/ressources/planning-chantier-btp", label: "Ressource planning chantier" },
     ],
-    seeAlsoSlugs: ["assistant-chef-de-chantier", ...BASE_SEE],
+    seeAlsoSlugs: ["conducteur-travaux-deborde", "assistant-chef-de-chantier", ...BASE_SEE],
     faq: [
       {
         q: "BeWork peut-il rédiger des réponses à la MOA à ma place ?",
@@ -226,10 +247,21 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
       "Archivage et diffusion selon vos règles internes.",
     ],
     deepeningLinks: [
-      { href: "/ressources/compte-rendu-chantier", label: "Hub compte rendu de chantier" },
+      { href: "/ressources/compte-rendu-chantier", label: "Méthode compte rendu (ressource éditoriale)" },
       { href: "/ressources/compte-rendu-chantier-guide-btp", label: "Guide & méthode PDF" },
     ],
     seeAlsoSlugs: ["assistant-chef-de-chantier", "doe-btp"],
+    neRemplacePas: [
+      "La présence sur chantier et la validation des décisions actées",
+      "La signature officielle du compte rendu à votre place",
+    ],
+    casUsage: [
+      {
+        titre: "CR après réunion de coordination",
+        scenario: "Notes vocales et photos en fin de journée, réunion le lendemain matin.",
+        resultat: "BeWork structure un CR homogène (décisions, actions, responsables, échéances) — vous validez avant diffusion.",
+      },
+    ],
     faq: [
       {
         q: "BeWork signe-t-elle les comptes rendus à la place du conducteur ?",
@@ -264,10 +296,22 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
       "Remise pour revue interne avant décision de réponse.",
     ],
     deepeningLinks: [
-      { href: "/ressources/analyse-dce-btp", label: "Ressource analyse DCE" },
+      { href: "/services/dce-bpu-dpgf", label: "Service DCE, BPU et DPGF" },
+      { href: "/ressources/analyse-dce-btp", label: "Méthode analyse DCE (ressource éditoriale)" },
       { href: "/ressources/tuto-skill-analyse-dce-bework", label: "Tutoriel skill analyse DCE" },
     ],
-    seeAlsoSlugs: ["memoire-technique-btp", "chiffrage-devis-btp"],
+    seeAlsoSlugs: ["dce-bpu-dpgf", "memoire-technique-btp", "chiffrage-devis-btp"],
+    neRemplacePas: [
+      "Le chiffrage final et la stratégie de réponse à l’appel d’offres",
+      "Le bureau d’études et les validations techniques engageantes",
+    ],
+    casUsage: [
+      {
+        titre: "Go / No-go avant montage d’offre",
+        scenario: "DCE volumineux reçu avec délai court, équipe déjà mobilisée sur chantier.",
+        resultat: "BeWork trie les pièces et produit une synthèse de lecture (lots, risques, points à clarifier) pour votre arbitrage interne.",
+      },
+    ],
     faq: [
       {
         q: "BeWork garantit-elle le résultat d’une offre ?",
@@ -427,16 +471,179 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
       },
     ],
   },
+
+  "conducteur-travaux-deborde": {
+    slug: "conducteur-travaux-deborde",
+    metaTitle: "Conducteur de travaux débordé : relais bureau-chantier | BeWork",
+    metaDescription:
+      "Conducteur de travaux débordé ? Déléguez CR, relances, situations et dossiers pendant que vous pilotez le terrain. Assistants travaux augmentés par l’IA.",
+    h1: "Conducteur de travaux débordé : faire avancer le bureau sans lâcher le chantier",
+    intro:
+      "Quand le carnet déborde, ce ne sont pas seulement les mails qui s’accumulent : ce sont les relances oubliées, les pièces manquantes et les dossiers qui traînent. BeWork absorbe le train administratif pour redonner des plages de pilotage réel — sans remplacer vos arbitrages terrain.",
+    pourQuiBullets: [
+      "Conducteurs de travaux sur plusieurs chantiers simultanés.",
+      "Profils en entreprise générale, sous-traitance ou lot technique sous forte charge documentaire.",
+    ],
+    priseEnChargeBullets: [
+      "Préparation de comptes rendus et synthèses de réunion (sur brief).",
+      "Relances MOA, MOE, fournisseurs et sous-traitants dans le ton de votre entreprise.",
+      "Suivi des situations, factures et pièces administratives (selon cadrage).",
+      "Classement et coordination documentaire terrain ↔ bureau.",
+    ],
+    pourquoiParagraphs: [
+      "Passer la soirée à relancer pour obtenir une attestation, c’est du temps volé au pilotage. Externaliser le relais documentaire sécurise le suivi sans diluer votre présence sur le terrain.",
+    ],
+    commentSteps: [
+      "Brief : priorités, interlocuteurs, jalons et règles de validation.",
+      "Traitement des demandes dans le cadre du forfait, avec reporting régulier.",
+      "Validation finale systématique sur tout ce qui engage contractuellement ou techniquement.",
+    ],
+    deepeningLinks: [
+      { href: "/services/assistant-conducteur-de-travaux", label: "Assistant conducteur de travaux (détail mission)" },
+      { href: "/situation-travaux-btp", label: "Situations de travaux & suivi" },
+      { href: "/tarifs", label: "Forfaits HT" },
+    ],
+    seeAlsoSlugs: ["assistant-conducteur-de-travaux", "assistant-travaux", "compte-rendu-chantier"],
+    neRemplacePas: [
+      "Le pilotage opérationnel du chantier et les décisions techniques",
+      "La représentation officielle auprès du maître d’ouvrage à votre place",
+      "Le bureau d’études, le coordinateur SPS ou le maître d’œuvre",
+    ],
+    casUsage: [
+      {
+        titre: "Semaine à trois réceptions",
+        scenario: "Trois réceptions la même semaine, relances fournisseurs et CR en retard.",
+        resultat: "BeWork traite les relances et prépare les CR à partir de vos notes — vous validez et signez.",
+      },
+    ],
+    faq: [
+      {
+        q: "BeWork remplace-t-elle un second conducteur de travaux ?",
+        a: "Non. BeWork tient le relais administratif et documentaire. Le pilotage terrain, les arbitrages et les engagements restent les vôtres.",
+      },
+      {
+        q: "Quelle différence avec la page « assistant conducteur de travaux » ?",
+        a: "La page « conducteur débordé » cible la situation de surcharge ; la page « assistant conducteur » détaille le périmètre mission par mission. Les deux renvoient au même service BeWork.",
+      },
+    ],
+  },
+
+  "assistant-moex": {
+    slug: "assistant-moex",
+    metaTitle: "Assistant MOEX / MOA : suivi documentaire marchés | BeWork",
+    metaDescription:
+      "Assistant MOEX et MOA BTP : relances, synthèses, dossiers et coordination documentaire pour maîtrise d’œuvre et maîtrise d’ouvrage. Validation chez vous.",
+    h1: "Assistant MOEX / MOA : sécuriser le suivi documentaire des marchés travaux",
+    intro:
+      "Maîtrise d’ouvrage et maîtrise d’œuvre portent une charge documentaire dense : comptes rendus, validations, relances entreprises, pièces contractuelles. BeWork apporte un relais bureau-chantier pour structurer, suivre et relancer — sans se substituer à vos compétences MOA/MOEX.",
+    pourQuiBullets: [
+      "Assistants MOA, MOEX et chargés de mission en maîtrise d’ouvrage ou d’œuvre.",
+      "Bureaux de maîtrise d’œuvre et AMO avec plusieurs opérations en parallèle.",
+    ],
+    priseEnChargeBullets: [
+      "Préparation et mise en forme de comptes rendus et synthèses de réunion.",
+      "Suivi des relances entreprises, lots et pièces attendues (sur brief).",
+      "Classement des dossiers marché et checklists de conformité documentaire.",
+      "Appui sur réserves, PV et dossiers de clôture (selon cadrage).",
+    ],
+    pourquoiParagraphs: [
+      "Un oubli de relance ou une pièce mal classée peut retarder une validation MOA. Un relais cadré réduit ces frictions sans alourdir l’effectif permanent.",
+    ],
+    commentSteps: [
+      "Cadrage du périmètre (opération, lots, interlocuteurs, formats).",
+      "Traitement des demandes selon le forfait et les priorités convenues.",
+      "Validation par vos référents MOA/MOEX avant diffusion engageante.",
+    ],
+    deepeningLinks: [
+      { href: "/services/compte-rendu-chantier", label: "Service compte rendu de chantier" },
+      { href: "/services/doe-btp", label: "Service DOE BTP" },
+      { href: "/ressources/compte-rendu-chantier", label: "Méthode CR (ressource éditoriale)" },
+    ],
+    seeAlsoSlugs: ["compte-rendu-chantier", "doe-btp", "externalisation-administrative-btp"],
+    neRemplacePas: [
+      "Le rôle de maître d’œuvre ou de maître d’ouvrage",
+      "Les validations techniques, réglementaires et contractuelles engageantes",
+      "La direction de projet et la représentation officielle du MOA/MOEX",
+    ],
+    casUsage: [
+      {
+        titre: "Relances entreprises avant comité de pilotage",
+        scenario: "Comité dans 48 h, pièces attendues de trois lots encore manquantes.",
+        resultat: "BeWork relance, consolide les retours et prépare une synthèse des manquants — vous validez le contenu du comité.",
+      },
+    ],
+    faq: [
+      {
+        q: "BeWork peut-elle signer des documents MOA/MOEX ?",
+        a: "Non. BeWork prépare, structure et suit. La validation et la signature restent de la responsabilité de votre maîtrise d’ouvrage ou d’œuvre.",
+      },
+    ],
+  },
+
+  "dce-bpu-dpgf": {
+    slug: "dce-bpu-dpgf",
+    metaTitle: "DCE, BPU et DPGF BTP : structuration et synthèse | BeWork",
+    metaDescription:
+      "DCE, BPU et DPGF BTP : tri des pièces marché, structuration des bordereaux et synthèses pour chiffrer sans ambiguïté. Appui IA, validation chez vous.",
+    h1: "DCE, BPU et DPGF : structurer les pièces marché avant de chiffrer",
+    intro:
+      "Un marché mal lu se paie au chiffrage ou en exécution. BeWork aide à trier le DCE, recouper CCTP et bordereaux (BPU, DPGF, DQE), repérer les incohérences et préparer des synthèses exploitables — sans substituer votre jugement d’entreprise ni votre bureau d’études.",
+    pourQuiBullets: [
+      "Chargés d’affaires et conducteurs impliqués dans les réponses aux AO.",
+      "PME sans bureau d’études disponible immédiatement pour la première lecture.",
+    ],
+    priseEnChargeBullets: [
+      "Tri et classement des pièces DCE selon une méthode convenue.",
+      "Synthèses de lecture lots / risques / points à clarifier.",
+      "Appui sur structuration BPU, DPGF ou tableaux de prix (sur vos modèles).",
+      "Checklists de conformité documentaire avant montage d’offre.",
+    ],
+    pourquoiParagraphs: [
+      "Confondre une annexe prix et le CCTP principal expose à des impairs. Une première structuration réduit ce risque avant d’engager vos équipes de chiffrage.",
+    ],
+    commentSteps: [
+      "Réception du DCE et du calendrier cible.",
+      "Travail de structuration, recoupement BPU/DPGF et questions / remarques.",
+      "Remise pour revue interne avant décision de réponse et chiffrage.",
+    ],
+    deepeningLinks: [
+      { href: "/services/analyse-dce-btp", label: "Service analyse DCE" },
+      { href: "/services/chiffrage-devis-btp", label: "Service chiffrage & devis" },
+      { href: "/ressources/analyse-dce-btp", label: "Méthode analyse DCE (ressource éditoriale)" },
+    ],
+    seeAlsoSlugs: ["analyse-dce-btp", "chiffrage-devis-btp", "memoire-technique-btp"],
+    neRemplacePas: [
+      "Le chiffrage final, les marges et la stratégie commerciale",
+      "Le bureau d’études et les validations techniques engageantes",
+      "La décision Go / No-go et la signature de l’offre",
+    ],
+    casUsage: [
+      {
+        titre: "BPU à recouper avec le CCTP",
+        scenario: "Marché public avec DPGF volumineux et CCTP multi-lots reçu en fin de semaine.",
+        resultat: "BeWork classe les pièces, signale les écarts apparents et prépare une synthèse par lot pour orienter votre chiffrage.",
+      },
+    ],
+    faq: [
+      {
+        q: "BeWork chiffre-t-elle les ouvrages à votre place ?",
+        a: "Non. BeWork structure et synthétise les pièces marché. Les prix, quantités et choix techniques restent validés par votre entreprise.",
+      },
+    ],
+  },
 };
 
 /** Ordre d’affichage hub / sitemap */
 export const SERVICE_PAGE_ORDER: ServicePageSlug[] = [
   "assistant-travaux",
   "assistant-conducteur-de-travaux",
+  "conducteur-travaux-deborde",
   "assistant-chef-de-chantier",
+  "assistant-moex",
   "externalisation-administrative-btp",
   "compte-rendu-chantier",
   "analyse-dce-btp",
+  "dce-bpu-dpgf",
   "ppsps",
   "memoire-technique-btp",
   "chiffrage-devis-btp",

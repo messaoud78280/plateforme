@@ -92,5 +92,39 @@ export const TARIFS_PLANS = PLAN_KEYS.map((key) => {
 
 export type TarifMarketingPlan = (typeof TARIFS_PLANS)[number];
 
+/** 4e carte marketing — offre sur devis (hors checkout). */
+export const TARIFS_SUR_DEVIS = {
+  planKey: "SUR_DEVIS" as const,
+  name: "Sur devis",
+  isCustomQuote: true as const,
+  price: "",
+  billing: null as null,
+  detail: "",
+  tagline: "Pour les besoins spécifiques, gros volumes ou multi-sociétés.",
+  highlights: [] as string[],
+  idealFor: "",
+  equivalentNote: { line1: "", line2: "" },
+  badge: null as string | null,
+  actionsIncluded: 0,
+  creditsMinutes: CREDIT_MINUTES,
+  includes: [
+    "Périmètre sur mesure",
+    "Crédits adaptés à votre volume",
+    "Interlocuteur dédié",
+  ] as const,
+  results: [
+    "Offre calibrée à votre activité",
+    "Tarif optimisé au volume",
+    "Accompagnement prioritaire",
+  ] as const,
+};
+
+export type TarifSurDevisPlan = typeof TARIFS_SUR_DEVIS;
+
+export type TarifDisplayPlan = TarifMarketingPlan | TarifSurDevisPlan;
+
+/** Grille /tarifs : 3 forfaits + Sur devis. */
+export const TARIFS_DISPLAY_PLANS: TarifDisplayPlan[] = [...TARIFS_PLANS, TARIFS_SUR_DEVIS];
+
 /** Compatibilité typage ancien flux (uniquement clés publiques). */
 export type TarifPlanKey = Extract<PlanKey, PublicPlanKey>;

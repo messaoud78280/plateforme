@@ -4,7 +4,7 @@ import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { ComparatifReveal } from "@/components/tarifs/ComparatifReveal";
 import { StickyCtaMobile } from "@/components/tarifs/StickyCtaMobile";
-import { TARIFS_PLANS } from "@/lib/tarifs-plans";
+import { TARIFS_DISPLAY_PLANS, TARIFS_PLANS } from "@/lib/tarifs-plans";
 import {
   CREDIT_MINUTES,
   PLAN_KEYS,
@@ -72,7 +72,7 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-const plans = TARIFS_PLANS;
+const plans = TARIFS_DISPLAY_PLANS;
 
 const ACTION_MINUTES = CREDIT_MINUTES;
 
@@ -186,8 +186,8 @@ const tarifsStructuredData = {
       "@type": "ItemList",
       "@id": `${tarifsUrl}#plans`,
       name: "Tarifs BeWork — assistante travaux BTP",
-      numberOfItems: plans.length,
-      itemListElement: plans.map((plan, i) => ({
+      numberOfItems: TARIFS_PLANS.length,
+      itemListElement: TARIFS_PLANS.map((plan, i) => ({
         "@type": "ListItem",
         position: i + 1,
         item: {
@@ -286,16 +286,27 @@ export default function TarifsPage() {
             À partir d’environ <strong className="font-semibold text-black">12 €/h</strong> tout compris, sans recrutement, sans
             charges, sans contraintes.
           </p>
-          <div className="mx-auto grid max-w-site gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:items-stretch lg:gap-5">
+          <div className="mx-auto grid max-w-site gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:items-stretch lg:gap-5">
             {plans.map((plan) => {
+              const isCustomQuote = plan.planKey === "SUR_DEVIS";
               const isFeatured = plan.planKey === "STANDARD";
-              const volume = PLAN_VOLUME[plan.planKey];
-              const copy = PLAN_COPY[plan.planKey];
-              const hourlyCost = formatHourlyCost(plan.price, volume.hoursApprox);
+              const volume =
+                plan.planKey in PLAN_VOLUME
+                  ? PLAN_VOLUME[plan.planKey as keyof typeof PLAN_VOLUME]
+                  : null;
+              const copy =
+                plan.planKey in PLAN_COPY
+                  ? PLAN_COPY[plan.planKey as keyof typeof PLAN_COPY]
+                  : null;
+              const hourlyCost =
+                volume && plan.price ? formatHourlyCost(plan.price, volume.hoursApprox) : null;
+              const includes = isCustomQuote ? plan.includes : copy?.includes ?? [];
+              const results = isCustomQuote ? plan.results : copy?.results ?? [];
+              const hookLine = isCustomQuote ? plan.tagline : copy?.label ?? "";
               return (
               <article
                 id={`tarif-${plan.planKey}`}
-                key={plan.name}
+                key={plan.planKey}
                 style={{ scrollMarginTop: "5.5rem" }}
                 className={`relative flex flex-col rounded-xl border-2 surface-metallic-light surface-metallic-light--badge-pill transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${
                   isFeatured
@@ -311,33 +322,49 @@ export default function TarifsPage() {
                 <h3 className="border-b border-[#e2e8f0] pb-3 text-lg font-semibold tracking-tight text-black">
                   {plan.name}
                 </h3>
-                <div className="mt-5 flex flex-wrap items-baseline gap-x-1.5 gap-y-0">
-                  <span className="text-3xl font-bold tracking-tight text-[#1d4ed8] tabular-nums md:text-[2.125rem]">
-                    {formatPriceLabelFr(plan.price)}
-                  </span>
-                  <span className="text-xl font-semibold text-black">€</span>
-                  <span className="text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-black">
-                    {SUBSCRIPTION_PRICE_TAX_LABEL}
-                  </span>
-                  {plan.billing === "monthly" && (
-                    <span className="text-base font-semibold text-black">/ mois</span>
-                  )}
-                </div>
-                <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-black" aria-label="Volume inclus estimé">
-                  <span className="rounded-full border border-[#cbd5e1] bg-white/70 px-3 py-1">
-                    ~{volume.hoursApprox}h incluses
-                  </span>
-                  <span className="rounded-full border border-[#cbd5e1] bg-white/70 px-3 py-1">
-                    ≈ {volume.actionsApprox} crédits
-                  </span>
-                  {hourlyCost ? (
-                    <span className="rounded-full border border-[#cbd5e1] bg-white/70 px-3 py-1">
-                      ~{hourlyCost} €/h
+                {isCustomQuote ? (
+                  <div className="mt-5 flex flex-wrap items-baseline gap-x-1.5 gap-y-0">
+                    <span className="text-3xl font-bold tracking-tight text-[#1d4ed8] md:text-[2.125rem]">
+                      Sur devis
                     </span>
-                  ) : null}
-                </div>
+                  </div>
+                ) : (
+                  <div className="mt-5 flex flex-wrap items-baseline gap-x-1.5 gap-y-0">
+                    <span className="text-3xl font-bold tracking-tight text-[#1d4ed8] tabular-nums md:text-[2.125rem]">
+                      {formatPriceLabelFr(plan.price)}
+                    </span>
+                    <span className="text-xl font-semibold text-black">€</span>
+                    <span className="text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-black">
+                      {SUBSCRIPTION_PRICE_TAX_LABEL}
+                    </span>
+                    {plan.billing === "monthly" && (
+                      <span className="text-base font-semibold text-black">/ mois</span>
+                    )}
+                  </div>
+                )}
+                {isCustomQuote ? (
+                  <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-black" aria-label="Volume sur devis">
+                    <span className="rounded-full border border-[#cbd5e1] bg-white/70 px-3 py-1">
+                      Volume personnalisé
+                    </span>
+                  </div>
+                ) : volume ? (
+                  <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-black" aria-label="Volume inclus estimé">
+                    <span className="rounded-full border border-[#cbd5e1] bg-white/70 px-3 py-1">
+                      ~{volume.hoursApprox}h incluses
+                    </span>
+                    <span className="rounded-full border border-[#cbd5e1] bg-white/70 px-3 py-1">
+                      ≈ {volume.actionsApprox} crédits
+                    </span>
+                    {hourlyCost ? (
+                      <span className="rounded-full border border-[#cbd5e1] bg-white/70 px-3 py-1">
+                        ~{hourlyCost} €/h
+                      </span>
+                    ) : null}
+                  </div>
+                ) : null}
                 <p className="mt-4 border-t border-[#e2e8f0] pt-4 text-sm font-semibold leading-relaxed text-black">
-                  {copy.label}
+                  {hookLine}
                 </p>
                 {plan.detail ? (
                   <p className="mt-3 text-sm leading-relaxed text-black">{plan.detail}</p>
@@ -346,7 +373,7 @@ export default function TarifsPage() {
                   <div className="rounded-xl border border-[#dce3ec]/80 bg-white/60 p-4 shadow-sm backdrop-blur-sm">
                     <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#1d4ed8]">Inclus</p>
                     <ul className="mt-3 space-y-2 text-sm text-black" role="list">
-                      {copy.includes.map((h) => (
+                      {includes.map((h) => (
                         <li key={h} className="flex items-start gap-2.5">
                           <span
                             className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#eff6ff] text-[10px] font-bold text-[#1d4ed8]"
@@ -366,7 +393,7 @@ export default function TarifsPage() {
                   >
                     <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-black">Résultat</p>
                     <ul className="mt-3 space-y-2 text-sm text-black" role="list">
-                      {copy.results.map((r) => (
+                      {results.map((r) => (
                         <li key={r} className="flex items-start gap-2.5">
                           <span className="mt-0.5 text-[#16a34a]" aria-hidden>
                             ●
@@ -378,11 +405,19 @@ export default function TarifsPage() {
                   </div>
                 </div>
                 <CalendlyBookingLink className="mt-5 block w-full rounded-lg bg-[#1d4ed8] py-3 text-center text-sm font-semibold text-white transition hover:bg-[#1e40af]">
-                  <span className="sm:hidden">Rendez-vous découverte</span>
-                  <span className="hidden sm:inline">Demander un rendez-vous découverte</span>
+                  {isCustomQuote ? (
+                    "Demander un devis"
+                  ) : (
+                    <>
+                      <span className="sm:hidden">Rendez-vous découverte</span>
+                      <span className="hidden sm:inline">Demander un rendez-vous découverte</span>
+                    </>
+                  )}
                 </CalendlyBookingLink>
                 <p className="mt-3 text-center text-[11px] leading-relaxed text-black">
-                  Volume estimatif · 1 crédit = {ACTION_MINUTES} min · validité {CREDITS_VALIDITY_DAYS} jours
+                  {isCustomQuote
+                    ? "Devis personnalisé · sans engagement"
+                    : `Volume estimatif · 1 crédit = ${ACTION_MINUTES} min · validité ${CREDITS_VALIDITY_DAYS} jours`}
                 </p>
                 {plan.planKey === "PREMIUM" ? (
                   <p className="mt-2 text-center text-[11px] leading-relaxed text-black">

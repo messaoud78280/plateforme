@@ -225,7 +225,7 @@ export default function DoeBtpTutoPage() {
 
         <h2>Comment BeWork peut aider (sans remplacer un expert)</h2>
         <p>
-          BeWork peut vous aider à <strong>structurer</strong> la préparation du DOE (assistante travaux / assistante BTP)
+          BeWork peut vous aider à <strong>structurer</strong> la préparation du DOE (assistant travaux augmenté par l’IA)
           sur un périmètre cadré :
         </p>
         <ul>

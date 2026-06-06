@@ -174,7 +174,7 @@ const reassurance = [
 
 const faqItems = [
   {
-    q: "Quelles missions peut gérer une assistante travaux BeWork ?",
+    q: "Quelles missions peut gérer un assistant travaux BeWork ?",
     a: "Les missions qui doivent avancer côté bureau : relances devis, suivi client, dossiers chantier, DICT/DT, fournisseurs, comptes rendus, réserves, DOE et tableaux de suivi.",
   },
   {
@@ -260,7 +260,7 @@ export default function AssistantsAdministratifsTachesPage() {
           <div className="mx-auto max-w-3xl">
             <p className="text-black leading-relaxed">
               BeWork n’est pas un “secrétariat PME” généraliste. C’est une{" "}
-              <strong>assistante travaux / assistante BTP augmentée par l’IA</strong> : un relais bureau‑terrain pour tenir les{" "}
+              <strong>plateforme d’assistants travaux augmentés par l’IA</strong> : un relais bureau‑terrain pour tenir les{" "}
               <strong>dossiers chantier</strong>, les <strong>relances</strong>, les <strong>documents travaux</strong> et la{" "}
               <strong>coordination</strong> quand vous êtes pris sur le terrain. L’IA sert à trier, synthétiser et structurer — pas à “faire de la magie” :
               vous gardez la validation finale sur les décisions qui engagent votre entreprise.
@@ -520,7 +520,7 @@ export default function AssistantsAdministratifsTachesPage() {
               Dès 290 € HT/mois — sans recrutement
             </h2>
             <p className="mt-4 text-black">
-              Un relais travaux bureau‑terrain, avec une assistante BTP augmentée par l’IA pour trier, synthétiser et structurer. Vous gardez la validation
+              Un relais travaux bureau‑terrain, avec des assistants travaux augmentés par l’IA pour trier, synthétiser et structurer. Vous gardez la validation
               finale.
             </p>
             <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">

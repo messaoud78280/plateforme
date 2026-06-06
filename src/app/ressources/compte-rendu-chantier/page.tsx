@@ -398,7 +398,7 @@ export default function CompteRenduChantierTutoPage() {
               <>
                 <p className="!mt-2">
                   BeWork peut vous aider à préparer et exploiter vos comptes rendus{" "}
-                  <span className="text-[#3072F0] font-semibold">(assistante travaux / documents chantier)</span> :
+                  <span className="text-[#3072F0] font-semibold">(assistant travaux / documents chantier)</span> :
                 </p>
                 <ul>
                   <li>remise en forme des notes ;</li>

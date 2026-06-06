@@ -18,7 +18,7 @@ const path = "/services";
 const url = absoluteUrl(path);
 const title = "Services BeWork — assistants travaux augmentés par l’IA (BTP)";
 const description = metaDescriptionFrancophonie(
-  "Hub services BeWork : assistant travaux, CR, analyse DCE, PPSPS, devis, DOE. Pages par intention et ressources métier",
+  "Hub services BeWork : assistant travaux, conducteur débordé, MOEX, DCE/BPU, CR, PPSPS, devis, DOE. Pages par intention et ressources métier",
 );
 
 export const metadata: Metadata = {

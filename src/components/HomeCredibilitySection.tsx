@@ -1,3 +1,4 @@
+import { BeWorkValuePillars } from "@/components/marketing/BeWorkValuePillars";
 import Image from "next/image";
 import Link from "next/link";
 import { useId } from "react";
@@ -36,7 +37,10 @@ export function HomeCredibilitySection() {
           </p>
         </header>
 
-        {/* Fondatrice + Notre rôle (au-dessus des 3 cartes crédibilité) */}
+        {/* 6 atouts différenciants */}
+        <BeWorkValuePillars variant="grid" className="mb-7 md:mb-8" />
+
+        {/* Fondatrice + Notre rôle */}
         <div className="mb-7 grid gap-4 md:mb-8 md:grid-cols-2 md:items-stretch md:gap-5">
           <article className="overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-[0_4px_24px_-8px_rgba(15,23,42,0.08)]">
             <div className="flex h-full flex-col sm:flex-row">
@@ -87,74 +91,7 @@ export function HomeCredibilitySection() {
           </article>
         </div>
 
-        {/* 3 cartes — compactes (~180–210px), p-6 */}
-        <div className="grid gap-4 md:grid-cols-3 md:gap-5">
-          <article className="flex items-start gap-4 rounded-xl border border-slate-200/90 bg-white p-5 shadow-[0_4px_24px_-8px_rgba(15,23,42,0.08)] ring-1 ring-slate-100/80 md:min-h-[180px] md:gap-5 md:p-6">
-            <span
-              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#eff6ff] text-[#1d4ed8] shadow-sm shadow-blue-900/[0.05] ring-1 ring-blue-100/90 md:h-20 md:w-20"
-              aria-hidden
-            >
-              <IconHardHat className="h-9 w-9 md:h-11 md:w-11" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <h3 className="font-sans text-[15px] font-bold leading-snug tracking-tight text-[#0f172a] md:text-base">
-                +20 ans d&apos;expérience BTP
-              </h3>
-              <div
-                className="mt-2.5 h-1 w-[3.25rem] rounded-sm bg-[#1d4ed8] md:w-16"
-                aria-hidden
-              />
-              <p className="mt-3 text-[13px] leading-relaxed text-slate-600 md:text-sm">
-                Lecture terrain des contraintes chantier, délais, marges et urgences.
-              </p>
-            </div>
-          </article>
-
-          <article className="flex items-start gap-4 rounded-xl border border-slate-200/90 bg-white p-5 shadow-[0_4px_24px_-8px_rgba(15,23,42,0.08)] ring-1 ring-slate-100/80 md:min-h-[180px] md:gap-5 md:p-6">
-            <span
-              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#eff6ff] text-[#1d4ed8] shadow-sm shadow-blue-900/[0.05] ring-1 ring-blue-100/90 md:h-20 md:w-20"
-              aria-hidden
-            >
-              <IconBuilding2 className="h-9 w-9 md:h-11 md:w-11" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <h3 className="font-sans text-[15px] font-bold leading-snug tracking-tight text-[#0f172a] md:text-base">
-                Connaissance métier
-              </h3>
-              <div
-                className="mt-2.5 h-1 w-[3.25rem] rounded-sm bg-[#1d4ed8] md:w-16"
-                aria-hidden
-              />
-              <p className="mt-3 text-[13px] leading-relaxed text-slate-600 md:text-sm">
-                Devis, factures, relances, fournisseurs, dossiers chantier : on{" "}
-                <span className="font-semibold text-slate-800">parle le langage du BTP.</span>
-              </p>
-            </div>
-          </article>
-
-          <article className="flex items-start gap-4 rounded-xl border border-slate-200/90 bg-white p-5 shadow-[0_4px_24px_-8px_rgba(15,23,42,0.08)] ring-1 ring-slate-100/80 md:min-h-[180px] md:gap-5 md:p-6">
-            <span
-              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#eff6ff] text-[#1d4ed8] shadow-sm shadow-blue-900/[0.05] ring-1 ring-blue-100/90 md:h-20 md:w-20"
-              aria-hidden
-            >
-              <IconWorkflow className="h-9 w-9 md:h-11 md:w-11" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <h3 className="font-sans text-[15px] font-bold leading-snug tracking-tight text-[#0f172a] md:text-base">
-                Méthode &amp; outils
-              </h3>
-              <div
-                className="mt-2.5 h-1 w-[3.25rem] rounded-sm bg-[#1d4ed8] md:w-16"
-                aria-hidden
-              />
-              <p className="mt-3 text-[13px] leading-relaxed text-slate-600 md:text-sm">
-                BATIPRIX, suivi structuré, plateforme privée et IA : des process pour gagner du temps sans perdre le contrôle.
-              </p>
-            </div>
-          </article>
-        </div>
-
-        {/* Bandeau : gauche icône + texte + drapeau · séparateur · CTA */}
+        {/* Bandeau France */}
         <div className="mt-7 rounded-xl border border-slate-200/90 bg-white px-4 py-4 shadow-[0_2px_16px_-6px_rgba(15,23,42,0.06)] md:mt-8 md:flex md:min-h-[5.75rem] md:items-center md:px-7 md:py-5">
           <div className="flex w-full flex-col gap-3 md:flex-row md:items-center md:gap-6">
             <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 md:gap-4">
@@ -166,7 +103,7 @@ export function HomeCredibilitySection() {
               </span>
               <div className="flex min-w-0 flex-wrap items-center gap-2 md:gap-2">
                 <p className="min-w-0 max-w-[min(100%,28rem)] text-[14px] font-bold leading-snug text-[#0f172a] md:text-[15px] md:leading-snug">
-                  Société française, pilotée depuis la France, avec une plateforme privée et sécurisée.
+                  Société française — 100 % supervisé en France, plateforme privée et sécurisée.
                 </p>
                 <span
                   className="shrink-0 text-[2rem] leading-none md:text-[2.25rem]"
@@ -199,69 +136,7 @@ export function HomeCredibilitySection() {
   );
 }
 
-/** Casque de sécurité — tracé Lucide « HardHat » (arcs complets + bandeau) */
-function IconHardHat({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.65}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5" />
-      <path d="M14 6a6 6 0 0 1 6 6v3" />
-      <path d="M4 15v-3a6 6 0 0 1 6-6" />
-      <rect x="2" y="15" width="20" height="4" rx="1" />
-    </svg>
-  );
-}
-
-/** Immeuble / entreprise — tracé Lucide « Building2 » */
-function IconBuilding2({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.65}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M10 12h4" />
-      <path d="M10 8h4" />
-      <path d="M14 21v-3a2 2 0 0 0-4 0v3" />
-      <path d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2" />
-      <path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16" />
-    </svg>
-  );
-}
-
-/** Processus / méthode — tracé Lucide « Workflow » */
-function IconWorkflow({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.65}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <rect width="8" height="8" x="3" y="3" rx="2" />
-      <path d="M7 11v4a2 2 0 0 0 2 2h4" />
-      <rect width="8" height="8" x="13" y="13" rx="2" />
-    </svg>
-  );
-}
-
+/** Cible / rôle — tracé type Lucide Target */
 function IconTarget({ className }: { className?: string }) {
   return (
     <svg
@@ -282,7 +157,7 @@ function IconTarget({ className }: { className?: string }) {
   );
 }
 
-/** Bouclier échiqueté (privé / sécurisé) — même motif que logo type capture */
+/** Bouclier échiqueté (privé / sécurisé) */
 function IconShield({ className }: { className?: string }) {
   const clipId = useId().replace(/:/g, "");
   const d = "M12 3 5 6v6c0 5 4 9 7 9s7-4 7-9V6l-7-3Z";

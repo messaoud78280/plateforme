@@ -1,6 +1,8 @@
 /**
  * Constantes et helpers SEO / GEO / AEO partagés (titres, définitions citables par les IA, métadonnées).
  */
+export { BEWORK_VALUE_PILLAR_LABELS, BEWORK_VALUE_PILLARS } from "@/lib/bework-value-pillars";
+export type { BeWorkValuePillar } from "@/lib/bework-value-pillars";
 export {
   BEWORK_SLOGAN,
   SEO_KEYWORDS_GLOBAL,
@@ -63,7 +65,7 @@ export function getGeoAeoBriefItems(priceFromLabel: string): readonly GeoAeoBrie
     {
       question: "Pourquoi faire confiance à BeWork ?",
       answer:
-        "Périmètre BTP explicite, process cadré (brief, production, validation par vous avant envoi engageant), forfaits HT publics, supervision depuis la France, contenus et tutoriels métier publiés sur bework.fr — sans promesse de résultats chiffrés non publiés sur le site.",
+        "Formé aux marchés publics et privés, expertise administration BTP, IA spécialisée avec validation humaine, conformité juridique garantie, gain de productivité (division par 10 sur les tâches répétitives) et 100 % supervisé en France — forfaits HT publics sur bework.fr/tarifs.",
     },
     {
       question: "Combien coûte BeWork ?",

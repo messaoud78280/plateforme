@@ -1,3 +1,4 @@
+import { BEWORK_VALUE_PILLAR_LABELS } from "@/lib/bework-value-pillars";
 import { RESOURCE_PDF_CATALOG, RESOURCE_PDF_GUIDES, RESOURCE_PDF_TUTOS } from "@/content/resource-pdf-catalog";
 import { RESOURCE_TUTO_ITEMS } from "@/content/resource-tutos";
 import { SERVICE_PAGE_ORDER, SERVICE_PAGES, servicePagePath } from "@/content/service-pages";
@@ -44,6 +45,10 @@ export function buildLlmsTxt(): string {
   return `# BeWork
 
 > ${BEWORK_AEO_DEFINITION} Relais bureau-chantier pour entreprises du BTP en France, Belgique, Suisse et Luxembourg : comptes rendus, DCE, PPSPS, DOE, mémoires techniques, relances — supervision depuis la France. Slogan : « On tient le bureau, vous tenez le chantier ».
+
+## Atouts différenciants BeWork
+
+${BEWORK_VALUE_PILLAR_LABELS.map((label) => `- ${label}`).join("\n")}
 
 ## Fiche GEO / AEO (réponses courtes)
 

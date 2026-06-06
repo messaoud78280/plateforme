@@ -19,6 +19,7 @@ import { HomeHeroPlanSketchDecor } from "@/components/home/HomeHeroPlanSketchDec
 import { BlueprintCotationHero } from "@/components/home/BlueprintCotationDecor";
 import { ConciergerieDirigeantSection } from "@/components/ConciergerieDirigeantSection";
 import { HomeGeoExternalisationCards } from "@/components/HomeGeoExternalisationCards";
+import { BeWorkValuePillars } from "@/components/marketing/BeWorkValuePillars";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import {
   formatPriceLabelFr,
@@ -73,7 +74,7 @@ const HOME_FAQ_ITEMS = [
 
 const HOME_META_TITLE = "BeWork — Assistants travaux augmentés par l’IA pour le BTP";
 const HOME_META_DESCRIPTION =
-  "Assistants travaux augmentés par l’IA : relais bureau-chantier pour marchés travaux, devis, DOE, relances et dossiers chantier. On tient le bureau, vous tenez le chantier. FR · BE · CH · LU.";
+  "Assistants travaux IA pour le BTP : marchés publics et privés, administration chantier, validation humaine, conformité juridique, productivité ×10. 100 % supervisé en France.";
 
 export const metadata: Metadata = {
   title: { absolute: HOME_META_TITLE },
@@ -284,23 +285,12 @@ export default function HomePage() {
                 </p>
 
                 <p className="mx-auto max-w-[540px] text-[13.5px] font-medium leading-snug text-slate-500 lg:mx-0 lg:max-w-none lg:text-[14px]">
-                  Assistants travaux augmentés par l&apos;IA. Supervisés depuis la France.
+                  IA spécialisée BTP + validation humaine · 100 % supervisé en France
                 </p>
 
-                <ul
-                  className="mx-auto flex w-full max-w-[540px] flex-wrap justify-center gap-x-2 gap-y-2 lg:mx-0 lg:max-w-none lg:justify-start"
-                  aria-label="Expertises métiers"
-                >
-                  {HERO_EXPERTISE_BADGES.map((label) => (
-                    <li key={label}>
-                      <span className="inline-flex items-center rounded-sm border border-slate-300/85 border-l-2 border-l-[#2563eb]/75 bg-white/95 px-2.5 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.07em] text-slate-800 shadow-[0_4px_14px_-12px_rgba(15,23,42,0.12)] sm:text-[11px]">
-                        {label}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                <BeWorkValuePillars variant="hero" />
 
-                <div className="mt-2 flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:justify-start">
+                <div className="mt-4 flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:justify-start">
                   <Link
                     href="/contact"
                     className="inline-flex min-h-[2.75rem] items-center justify-center rounded-lg bg-[#1d4ed8] px-5 text-[15px] font-semibold text-white shadow-md transition-colors hover:bg-[#1e40af]"
@@ -317,89 +307,16 @@ export default function HomePage() {
                 </div>
 
                 <ul
-                  className="mt-6 flex w-full max-w-[580px] flex-col divide-y divide-slate-200 rounded-xl border border-slate-200/70 bg-white/[0.78] px-3 py-1 shadow-[0_8px_28px_-18px_rgba(15,23,42,0.1)] backdrop-blur-md sm:max-w-none sm:flex-row sm:divide-x sm:divide-y-0 sm:items-stretch sm:px-4 sm:py-2 lg:mx-0 lg:max-w-none"
-                  aria-label="Engagements"
+                  className="mx-auto flex w-full max-w-[540px] flex-wrap justify-center gap-x-2 gap-y-2 lg:mx-0 lg:max-w-none lg:justify-start"
+                  aria-label="Expertises métiers"
                 >
-                  <li className="flex min-h-[3.25rem] flex-1 items-center gap-3 px-2 py-4 sm:min-h-[3.75rem] sm:px-4 sm:py-4 lg:min-h-[3.5rem]">
-                    <span
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#dbeafe] text-[#2563eb] shadow-sm shadow-blue-900/5 ring-[0.5px] ring-[#bfdbfe]/90"
-                      aria-hidden
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        {/* Délais courts (type horloge) */}
-                        <path
-                          d="M12 6v7l6 6"
-                          stroke="currentColor"
-                          strokeWidth="1.65"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" />
-                      </svg>
-                    </span>
-                    <span className="min-w-0 text-left text-[15px] font-semibold leading-[1.2] tracking-tight text-[#171717]">
-                      <span className="block">Déploiement</span>
-                      <span className="block text-slate-600">rapide</span>
-                    </span>
-                  </li>
-                  <li className="flex min-h-[3.25rem] flex-1 items-center gap-3 px-2 py-4 sm:min-h-[3.75rem] sm:px-4 sm:py-4 lg:min-h-[3.5rem]">
-                    <span
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#dbeafe] text-[#2563eb] shadow-sm shadow-blue-900/5 ring-[0.5px] ring-[#bfdbfe]/90"
-                      aria-hidden
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        {/* Pas d’embauche : équipe externe */}
-                        <path
-                          d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"
-                          stroke="currentColor"
-                          strokeWidth="1.65"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <circle cx="9" cy="7" r="3.5" stroke="currentColor" strokeWidth="1.65" />
-                        <path
-                          d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
-                          stroke="currentColor"
-                          strokeWidth="1.65"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M18.5 14.5l2 2 4-4"
-                          stroke="currentColor"
-                          strokeWidth="1.65"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </span>
-                    <span className="min-w-0 text-left text-[15px] font-semibold leading-[1.2] tracking-tight text-[#171717]">
-                      <span className="block">Sans</span>
-                      <span className="block text-slate-600">recrutement</span>
-                    </span>
-                  </li>
-                  <li className="flex min-h-[3.25rem] flex-1 items-center gap-3 px-2 py-4 sm:min-h-[3.75rem] sm:px-4 sm:py-4 lg:min-h-[3.5rem]">
-                    <span
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#dbeafe] text-[#2563eb] shadow-sm shadow-blue-900/5 ring-[0.5px] ring-[#bfdbfe]/90"
-                      aria-hidden
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        {/* Ancrage France / siège */}
-                        <path
-                          d="M20 10c0 5.25-7.53 13.94-8.35 14.71a.5.5 0 0 1-.65 0C10.53 23.94 4 15.27 4 10a8 8 0 1 1 16 0Z"
-                          stroke="currentColor"
-                          strokeWidth="1.65"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <circle cx="12" cy="10" r="2.75" stroke="currentColor" strokeWidth="1.65" />
-                      </svg>
-                    </span>
-                    <span className="min-w-0 text-left text-[15px] font-semibold leading-[1.2] tracking-tight text-[#171717]">
-                      <span className="block">Supervisé depuis</span>
-                      <span className="block text-slate-600">la France</span>
-                    </span>
-                  </li>
+                  {HERO_EXPERTISE_BADGES.map((label) => (
+                    <li key={label}>
+                      <span className="inline-flex items-center rounded-sm border border-slate-300/85 border-l-2 border-l-[#2563eb]/75 bg-white/95 px-2.5 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.07em] text-slate-800 shadow-[0_4px_14px_-12px_rgba(15,23,42,0.12)] sm:text-[11px]">
+                        {label}
+                      </span>
+                    </li>
+                  ))}
                 </ul>
               </div>
 
@@ -424,8 +341,8 @@ export default function HomePage() {
                     bureau et donneurs d&apos;ordre&nbsp;: dossiers d&apos;intervention, comptes rendus, DOE, attachements,
                     situations, relances et validations — pour sécuriser les interventions et accélérer les paiements.
                   </p>
-                  <p className="mt-3 text-center text-[13px] font-semibold text-slate-800 md:text-sm">
-                    Assistants travaux augmentés par l&apos;IA · expertise BTP terrain · supervision depuis la France
+                  <p className="mt-5">
+                    <BeWorkValuePillars variant="inline" />
                   </p>
                   <hr className="my-6 border-slate-200/90" />
                   <p className="font-heading text-[11px] font-bold uppercase tracking-[0.2em] text-[#1d4ed8] md:text-[12px]">

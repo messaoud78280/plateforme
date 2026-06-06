@@ -1,22 +1,23 @@
+import { BEWORK_VALUE_PILLARS } from "@/lib/bework-value-pillars";
 import { Clock, Eye, ShieldCheck } from "lucide-react";
 import { HeroPresentationVideo } from "@/components/HeroPresentationVideo";
 import { HomeHeroIaPlanBadge } from "@/components/home/HomeHeroIaPlanBadge";
 
 const CALLOUTS = [
   {
-    Icon: Clock,
-    title: "Gagnez du temps",
-    description: "Automatisez les tâches administratives",
+    Icon: ShieldCheck,
+    title: BEWORK_VALUE_PILLARS[3]!.label,
+    description: "Process cadré · validation humaine",
   },
   {
-    Icon: ShieldCheck,
-    title: "Fiabilité & conformité",
-    description: "Données sécurisées et conformes RGPD",
+    Icon: Clock,
+    title: "Productivité ×10",
+    description: BEWORK_VALUE_PILLARS[4]!.detail.split(" — ")[0] ?? BEWORK_VALUE_PILLARS[4]!.label,
   },
   {
     Icon: Eye,
-    title: "Plus de visibilité",
-    description: "Pilotez vos chantiers en temps réel",
+    title: BEWORK_VALUE_PILLARS[5]!.label,
+    description: "Pilotage depuis la France",
   },
 ] as const;
 

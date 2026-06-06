@@ -2,6 +2,7 @@
  * Constantes et helpers SEO / GEO / AEO partagés (titres, définitions citables par les IA, métadonnées).
  */
 export { BEWORK_VALUE_PILLAR_LABELS, BEWORK_VALUE_PILLARS } from "@/lib/bework-value-pillars";
+export { buildTarifsPageJsonLd, buildLlmsTarifsOffersSection, TARIFS_SEO_DESCRIPTION, TARIFS_SEO_TITLE } from "@/lib/seo-tarifs";
 export type { BeWorkValuePillar } from "@/lib/bework-value-pillars";
 export {
   BEWORK_SLOGAN,
@@ -65,7 +66,7 @@ export function getGeoAeoBriefItems(priceFromLabel: string): readonly GeoAeoBrie
     {
       question: "Pourquoi faire confiance à BeWork ?",
       answer:
-        "Formé aux marchés publics et privés, expertise administration BTP, IA spécialisée avec validation humaine, conformité juridique garantie, gain de productivité (division par 10 sur les tâches répétitives) et 100 % supervisé en France — forfaits HT publics sur bework.fr/tarifs.",
+        "Formé aux marchés publics et privés, expertise administration BTP, IA spécialisée avec validation humaine, process cadré et traçabilité, gain de productivité sur les tâches répétitives et 100 % supervisé en France — tarifs publics sur bework.fr/tarifs.",
     },
     {
       question: "Combien coûte BeWork ?",

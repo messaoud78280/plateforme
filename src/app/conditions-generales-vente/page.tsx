@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BEWORK_PUBLIC_OFFERS, formatOfferPriceLabel } from "@/lib/bework-public-offers";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
-import { CREDITS_VALIDITY_DAYS, CREDITS_VALIDITY_NOTICE, SUBSCRIPTION_PLANS, PLAN_KEYS, formatPriceLabelFr } from "@/lib/subscription-plans";
+import { CREDITS_VALIDITY_DAYS, CREDITS_VALIDITY_NOTICE } from "@/lib/subscription-plans";
 import { absoluteUrl } from "@/lib/site";
 
 const path = "/conditions-generales-vente";
@@ -47,28 +48,33 @@ export default function ConditionsGeneralesVentePage() {
         facturées sous forme de forfaits mensuels incluant un quota de crédits administratifs.
       </p>
 
-      <h2>2. Forfaits et tarifs</h2>
-      <p>Les forfaits publics proposés à la souscription sont les suivants (montants HT / mois) :</p>
-      <ul>
-        {PLAN_KEYS.map((key) => {
-          const p = SUBSCRIPTION_PLANS[key];
-          return (
-            <li key={key}>
-              <strong>{p.name}</strong> — {formatPriceLabelFr(p.priceLabel)} € HT / mois — {p.actionsIncluded} crédits inclus
-            </li>
-          );
-        })}
-      </ul>
+      <h2>2. Offres et tarifs</h2>
       <p>
-        Les tarifs en vigueur sont ceux affichés sur la page{" "}
+        Les niveaux d&apos;accompagnement et les prix de départ HT sont présentés sur la page{" "}
         <Link href="/tarifs" className="font-medium text-[#1d4ed8] underline hover:no-underline">
           Tarifs
         </Link>{" "}
-        au moment de la commande. BeWork se réserve le droit de modifier ses tarifs pour les nouvelles souscriptions ; les tarifs
-        contractuellement acceptés restent applicables jusqu&apos;au renouvellement ou à la résiliation.
+        du site (mission ponctuelle, relais travaux mensuel, cellule externalisée, sur mesure).
+      </p>
+      <ul>
+        {BEWORK_PUBLIC_OFFERS.map((offer) => (
+          <li key={offer.key}>
+            <strong>{offer.name}</strong> — {formatOfferPriceLabel(offer)}
+          </li>
+        ))}
+      </ul>
+      <p>
+        Le tarif définitif est établi sur devis selon le périmètre réel (nombre de chantiers, volume de dossiers,
+        livrables, fréquence de suivi). BeWork se réserve le droit de modifier ses tarifs publics pour les nouvelles
+        souscriptions ; les conditions contractuellement acceptées restent applicables jusqu&apos;au renouvellement ou à la
+        résiliation.
       </p>
 
-      <h2>3. Crédits administratifs</h2>
+      <h2>3. Crédits administratifs (espace client)</h2>
+      <p>
+        Pour certains contrats conclus via l&apos;espace client, un quota de crédits administratifs peut s&apos;appliquer
+        selon les termes du contrat signé. Dans ce cas :
+      </p>
       <p>
         Un crédit correspond à une unité de traitement administrative (environ 12 minutes de travail, indicatif).
         Le nombre de crédits consommés par mission dépend du temps réellement passé par l&apos;équipe BeWork, évalué à la clôture de la mission.

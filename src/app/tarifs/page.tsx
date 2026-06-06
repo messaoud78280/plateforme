@@ -11,61 +11,51 @@ import {
   BEWORK_SCOPE_TAKEOVER,
   BEWORK_TARIFS_FAQ,
   BEWORK_TARIFS_PROCESS_STEPS,
-  beworkOffersForJsonLd,
 } from "@/lib/bework-public-offers";
 import {
   SEO_OG_ALTERNATE_LOCALES,
   SEO_OG_LOCALE_PRIMARY,
   hreflangFrancophonieLanguages,
 } from "@/lib/seo-francophonie";
-import { buildOfferCatalogJsonLd } from "@/lib/schema";
+import {
+  TARIFS_H1,
+  TARIFS_PAGE_PATH,
+  TARIFS_SEO_DESCRIPTION,
+  TARIFS_SEO_KEYWORDS,
+  TARIFS_SEO_TITLE,
+  buildTarifsPageJsonLd,
+} from "@/lib/seo-tarifs";
 import { absoluteUrl } from "@/lib/site";
 
-const tarifsUrl = absoluteUrl("/tarifs");
+const tarifsUrl = absoluteUrl(TARIFS_PAGE_PATH);
 const tarifsOgImage = absoluteUrl("/opengraph-image");
 
-const TARIFS_META_DESC =
-  "Découvrez les tarifs BeWork : missions ponctuelles, relais travaux mensuel et cellule travaux externalisée pour devis, DCE, PPSPS, DOE, relances et suivi chantier.";
-
 export const metadata: Metadata = {
-  title: { absolute: "Tarifs BeWork | Assistant travaux externalisé BTP" },
-  description: TARIFS_META_DESC,
-  keywords: [
-    "tarifs assistant travaux",
-    "assistant travaux externalisé",
-    "assistant administratif BTP",
-    "cellule travaux externalisée",
-    "suivi chantier externalisé",
-    "aide conducteur de travaux",
-    "DCE BTP",
-    "DOE BTP",
-    "PPSPS BTP",
-    "compte rendu de chantier",
-    "relance devis BTP",
-    "externalisation administrative BTP",
-  ],
-  alternates: { canonical: tarifsUrl, languages: hreflangFrancophonieLanguages("/tarifs") },
+  title: { absolute: TARIFS_SEO_TITLE },
+  description: TARIFS_SEO_DESCRIPTION,
+  keywords: [...TARIFS_SEO_KEYWORDS],
+  alternates: { canonical: tarifsUrl, languages: hreflangFrancophonieLanguages(TARIFS_PAGE_PATH) },
   openGraph: {
     type: "website",
     locale: SEO_OG_LOCALE_PRIMARY,
     alternateLocale: [...SEO_OG_ALTERNATE_LOCALES],
     url: tarifsUrl,
     siteName: "BeWork",
-    title: "Tarifs BeWork | Assistant travaux externalisé BTP",
-    description: TARIFS_META_DESC,
+    title: TARIFS_SEO_TITLE,
+    description: TARIFS_SEO_DESCRIPTION,
     images: [
       {
         url: tarifsOgImage,
         width: 1200,
         height: 630,
-        alt: "Tarifs BeWork — relais bureau-chantier pour entreprises du BTP",
+        alt: "Tarifs BeWork — assistant travaux externalisé BTP, relais bureau-chantier",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tarifs BeWork | Assistant travaux externalisé BTP",
-    description: TARIFS_META_DESC,
+    title: TARIFS_SEO_TITLE,
+    description: TARIFS_SEO_DESCRIPTION,
   },
   robots: { index: true, follow: true },
 };
@@ -83,23 +73,7 @@ const INTERNAL_LINKS = [
   { href: "/relance-devis-btp", label: "Relance devis BTP" },
 ] as const;
 
-const tarifsStructuredData = {
-  "@context": "https://schema.org",
-  "@graph": [
-    buildOfferCatalogJsonLd(beworkOffersForJsonLd(), tarifsUrl),
-    {
-      "@type": "FAQPage",
-      "@id": `${tarifsUrl}#faq`,
-      url: tarifsUrl,
-      inLanguage: "fr-FR",
-      mainEntity: BEWORK_TARIFS_FAQ.map((item) => ({
-        "@type": "Question",
-        name: item.q,
-        acceptedAnswer: { "@type": "Answer", text: item.a },
-      })),
-    },
-  ],
-};
+const tarifsStructuredData = buildTarifsPageJsonLd();
 
 export default function TarifsPage() {
   return (
@@ -115,7 +89,7 @@ export default function TarifsPage() {
         {/* Hero */}
         <section className="text-center">
           <h1 className="text-metallic-black font-sans text-3xl font-semibold tracking-tight md:text-4xl md:leading-tight">
-            Tarifs BeWork : déléguer le suivi travaux sans recruter
+            {TARIFS_H1}
           </h1>
           <p className="mx-auto mt-5 max-w-3xl text-lg leading-relaxed text-slate-700">
             Des missions ponctuelles aux cellules travaux externalisées, BeWork aide les entreprises du BTP à structurer leurs

@@ -75,7 +75,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     ],
     deepeningLinks: [
       { href: "/assistants-administratifs-taches", label: "Catalogue des missions" },
-      { href: "/tarifs", label: "Forfaits HT" },
+      { href: "/tarifs", label: "Tarifs BeWork" },
       { href: "/notre-facon-de-travailler", label: "Process BeWork" },
     ],
     seeAlsoSlugs: ["assistant-conducteur-de-travaux", "externalisation-administrative-btp"],
@@ -501,7 +501,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     deepeningLinks: [
       { href: "/services/assistant-conducteur-de-travaux", label: "Assistant conducteur de travaux (détail mission)" },
       { href: "/situation-travaux-btp", label: "Situations de travaux & suivi" },
-      { href: "/tarifs", label: "Forfaits HT" },
+      { href: "/tarifs", label: "Tarifs BeWork" },
     ],
     seeAlsoSlugs: ["assistant-conducteur-de-travaux", "assistant-travaux", "compte-rendu-chantier"],
     neRemplacePas: [

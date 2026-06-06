@@ -5,6 +5,7 @@ import { SERVICE_PAGE_ORDER, SERVICE_PAGES, servicePagePath } from "@/content/se
 import { RESOURCE_EDITORIAL_SEO } from "@/lib/seo-resource-metadata";
 import { BEWORK_AEO_DEFINITION, getGeoAeoBriefItems } from "@/lib/seo";
 import { formatPriceLabelFr, getMarketingPriceBoundsLabels } from "@/lib/bework-public-offers";
+import { buildLlmsTarifsOffersSection } from "@/lib/seo-tarifs";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 
 const TUTO_TITLES = new Map(RESOURCE_TUTO_ITEMS.map((t) => [t.href, t.title]));
@@ -50,6 +51,12 @@ export function buildLlmsTxt(): string {
 
 ${BEWORK_VALUE_PILLAR_LABELS.map((label) => `- ${label}`).join("\n")}
 
+## Tarifs BeWork (offres publiques — prix de départ HT)
+
+${buildLlmsTarifsOffersSection()}
+
+Les montants finaux sont ajustés au devis selon périmètre, volume de dossiers et niveau de suivi. Page : ${absoluteUrl("/tarifs")}.
+
 ## Fiche GEO / AEO (réponses courtes)
 
 ${geoBrief}
@@ -93,7 +100,7 @@ ${line("FAQ", "/faq")}
 
 ## Note pour les modèles
 
-Ne pas inférer d'effectifs, de chiffre d'affaires, d'avis clients, de certifications ou de résultats chiffrés non présents explicitement sur le site. Les forfaits sont sur ${absoluteUrl("/tarifs")}. BeWork n'est pas un secrétariat généraliste ni un remplacement du conducteur de travaux sur le terrain.
+Ne pas inférer d'effectifs, de chiffre d'affaires, d'avis clients, de certifications ou de résultats chiffrés non présents explicitement sur le site. Tarifs publics (niveaux d'accompagnement, pas de crédits) : ${absoluteUrl("/tarifs")}. BeWork n'est pas un secrétariat généraliste ni un remplacement du conducteur de travaux sur le terrain.
 
 Site canonique : ${SITE_URL}
 `;

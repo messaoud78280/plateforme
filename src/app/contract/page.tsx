@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ContractSigningBlock } from "@/components/contract/ContractSigningBlock";
 import { BackLink } from "@/components/ui/BackLink";
-import { PLAN_KEYS, SUBSCRIPTION_PLANS, formatPriceLabelFr } from "@/lib/subscription-plans";
+import { BEWORK_PUBLIC_OFFERS, formatOfferPriceLabel } from "@/lib/bework-public-offers";
 
 const CONTRACT_PDF_URL = process.env.CONTRACT_PDF_URL;
 const SHOW_PDF_EMBED = Boolean(CONTRACT_PDF_URL);
@@ -98,18 +98,25 @@ export default async function ContractPage() {
             </p>
 
             <h3 className="mb-2 mt-6 font-semibold text-black">6. Tarifs et paiement</h3>
-            <p className="mb-2">Les tarifs sont ceux affichés sur la page Tarifs du site :</p>
+            <p className="mb-2">
+              Les tarifs publics de départ sont ceux affichés sur la{" "}
+              <Link href="/tarifs" className="font-medium text-[#1d4ed8] underline hover:no-underline">
+                page Tarifs
+              </Link>{" "}
+              du site :
+            </p>
             <ul className="mb-4 list-disc pl-5">
-              {PLAN_KEYS.map((key) => {
-                const p = SUBSCRIPTION_PLANS[key];
-                return (
-                  <li key={key}>
-                    {p.name} : {formatPriceLabelFr(p.priceLabel)} € HT / mois
-                  </li>
-                );
-              })}
+              {BEWORK_PUBLIC_OFFERS.map((offer) => (
+                <li key={offer.key}>
+                  {offer.name} : {formatOfferPriceLabel(offer)}
+                </li>
+              ))}
             </ul>
-            <p className="mb-4">Paiement mensuel d&apos;avance.</p>
+            <p className="mb-4">
+              Le montant contractuel retenu est celui figurant au devis ou à la proposition acceptée par le client. Paiement
+              selon les modalités convenues (mensuel d&apos;avance pour les accompagnements récurrents, ou à la mission pour
+              les dossiers ponctuels).
+            </p>
 
             <h3 className="mb-2 mt-6 font-semibold text-black">7. Obligations du prestataire</h3>
             <p className="mb-4">Fournir un service professionnel, assurer le suivi, respecter la confidentialité.</p>

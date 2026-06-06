@@ -69,7 +69,8 @@ export function getGeoAeoBriefItems(priceFromLabel: string): readonly GeoAeoBrie
     },
     {
       question: "Combien coûte BeWork ?",
-      answer: `Forfaits mensuels HT publics sur la page Tarifs, à partir de ${priceFromLabel} € HT/mois selon le volume de missions déléguées. Pas de prix inventés hors grille publiée.`,
+      answer:
+        "Missions ponctuelles à partir de 250 € HT, accompagnements mensuels à partir de 790 € HT (Relais Travaux Essentiel), jusqu’à la Cellule Travaux Externalisée à partir de 3 500 € HT/mois. Détail sur bework.fr/tarifs — tarif final ajusté au périmètre sur devis.",
     },
     {
       question: "Comment commencer avec BeWork ?",

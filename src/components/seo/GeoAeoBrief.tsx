@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { BEWORK_AEO_DEFINITION, getGeoAeoBriefItems } from "@/lib/seo";
-import { formatPriceLabelFr, getPublicPriceBoundsLabels } from "@/lib/subscription-plans";
+import { formatPriceLabelFr, getMarketingPriceBoundsLabels } from "@/lib/bework-public-offers";
 
 type Props = {
   className?: string;
@@ -11,7 +11,7 @@ type Props = {
  * Style discret (bordure existante) — pas de changement de charte globale.
  */
 export function GeoAeoBrief({ className = "" }: Props) {
-  const priceFrom = formatPriceLabelFr(getPublicPriceBoundsLabels().low);
+  const priceFrom = formatPriceLabelFr(getMarketingPriceBoundsLabels().monthlyLow);
   const items = getGeoAeoBriefItems(priceFrom);
 
   return (

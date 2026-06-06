@@ -22,10 +22,9 @@ import { HomeGeoExternalisationCards } from "@/components/HomeGeoExternalisation
 import { BeWorkValuePillars } from "@/components/marketing/BeWorkValuePillars";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import {
-  formatPriceLabelFr,
-  getAggregateOfferDescription,
-  getPublicPriceBoundsLabels,
-} from "@/lib/subscription-plans";
+  getMarketingPriceBoundsLabels,
+  getMarketingAggregateOfferDescription,
+} from "@/lib/bework-public-offers";
 import { jsonLdExpandedAreaServed } from "@/lib/jsonld-area-served";
 import {
   SEO_OG_ALTERNATE_LOCALES,
@@ -40,7 +39,7 @@ import { SITE_URL, absoluteUrl } from "@/lib/site";
 const PRESENTATION_VIDEO_MP4 = "/video/presentation.mp4";
 const PRESENTATION_VIDEO_DURATION_ISO = "PT13S";
 
-const PRICE_BOUNDS = getPublicPriceBoundsLabels();
+const PRICE_BOUNDS = getMarketingPriceBoundsLabels();
 
 const HERO_EXPERTISE_BADGES = [
   "Marchés publics",
@@ -154,8 +153,8 @@ const homeJsonLd = {
         priceCurrency: "EUR",
         lowPrice: PRICE_BOUNDS.low,
         highPrice: PRICE_BOUNDS.high,
-        offerCount: "3",
-        description: getAggregateOfferDescription(),
+        offerCount: "5",
+        description: getMarketingAggregateOfferDescription(),
       },
     },
     {

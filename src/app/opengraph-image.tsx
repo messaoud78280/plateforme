@@ -36,7 +36,7 @@ export default function OpenGraphImage() {
           Administratif structuré pour artisans et entreprises du bâtiment
         </div>
         <div style={{ marginTop: 36, fontSize: 22, opacity: 0.85 }}>
-          Cadre forfaitaire HT · France, Belgique, Suisse, Luxembourg · Dès 290 € HT / mois
+          Relais travaux BTP · France, Belgique, Suisse, Luxembourg · Dès 790 € HT / mois
         </div>
       </div>
     ),

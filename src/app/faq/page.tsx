@@ -169,23 +169,23 @@ const FAQ_CATEGORIES = [
     ],
   },
   {
-    title: "Tarifs et forfaits",
+    title: "Tarifs et accompagnement",
     items: [
       {
-        q: "Comment fonctionnent les actions ?",
-        a: "Vous achetez un volume mensuel de traitement : chaque demande consomme des actions/crédits selon le temps réellement passé (relance, mail, appel, suivi, préparation de document, etc.).",
+        q: "Comment sont présentés les tarifs BeWork ?",
+        a: "Par niveau d’accompagnement : mission ponctuelle (à partir de 250 € HT), relais travaux mensuel (à partir de 790 € HT), cellule externalisée ou sur devis. Les prix affichés sont des points de départ — le détail est ajusté selon votre périmètre.",
       },
       {
-        q: "À quoi correspondent les heures incluses ?",
-        a: "C’est un repère de conversion des actions/crédits. Le forfait achète surtout un niveau de suivi et de priorisation dans un périmètre cadré.",
+        q: "BeWork fonctionne-t-il avec un système de crédits ?",
+        a: "Non sur le site vitrine : vous achetez un périmètre, des livrables et un niveau de suivi. Voir bework.fr/tarifs pour le détail des offres.",
       },
       {
-        q: "Puis-je changer de forfait ?",
-        a: "Oui. On ajuste selon votre charge et vos priorités, pour rester cohérent avec le volume réel et la qualité de suivi attendue.",
+        q: "Puis-je commencer sans abonnement mensuel ?",
+        a: "Oui, par une mission ponctuelle : analyse DCE, DOE, PPSPS, compte rendu, devis ou relances.",
       },
       {
-        q: "Que se passe-t-il si une demande dépasse le temps prévu ?",
-        a: "On vous propose un découpage, une estimation et un point de validation avant d’aller trop loin, pour garder de la visibilité.",
+        q: "Que se passe-t-il si le périmètre évolue ?",
+        a: "On ajuste la proposition avec vous : périmètre, fréquence de suivi et livrables — avec un point de validation avant d’étendre la mission.",
       },
     ],
   },

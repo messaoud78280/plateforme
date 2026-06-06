@@ -38,7 +38,7 @@ const faqJsonLd = {
 export default function Page() {
   return (
     <SeoLandingPage
-      description="L'assistant administratif externalisé BeWork prend en charge devis, factures, relances et suivi de dossiers pour les PME. Dès 290 € HT/mois. France, Belgique, Suisse, Luxembourg."
+      description="L'assistant administratif externalisé BeWork prend en charge devis, factures, relances et suivi de dossiers pour les PME. Dès 790 € HT/mois. France, Belgique, Suisse, Luxembourg."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Assistant administratif externalisé", href: PAGE_PATH },
@@ -48,7 +48,7 @@ export default function Page() {
         <>
           Un assistant administratif externalisé permet aux PME d&apos;externaliser leur administratif sans recruter.
           Devis, factures, relances, suivi de dossiers : BeWork accompagne les dirigeants avec un assistant virtuel
-          entreprise dédié. France, Belgique, Suisse, Luxembourg — dès 290 € HT/mois.
+          entreprise dédié. France, Belgique, Suisse, Luxembourg — dès 790 € HT/mois.
         </>
       }
     >
@@ -71,7 +71,7 @@ export default function Page() {
       <h2>Pour qui ?</h2>
       <p>
         Dirigeants, PME, TPE, indépendants et cabinets qui souhaitent externaliser administratif PME sans recruter.
-        BeWork propose des forfaits dès 290 € HT/mois, avec une équipe francophone supervisée depuis la France.
+        BeWork propose des forfaits dès 790 € HT/mois, avec une équipe francophone supervisée depuis la France.
       </p>
 
       <section className="not-prose" id="faq" aria-label="FAQ assistant administratif externalisé" style={{ scrollMarginTop: "6rem" }}>

@@ -17,12 +17,13 @@ import {
 import { absoluteUrl, getOrgSameAs, SITE_URL } from "@/lib/site";
 import {
   formatPriceLabelFr,
-  getPublicPriceBoundsLabels,
-  SUBSCRIPTION_PRICE_TAX_LABEL,
-} from "@/lib/subscription-plans";
+  getMarketingPriceBoundsLabels,
+  getMarketingAggregateOfferDescription,
+} from "@/lib/bework-public-offers";
+import { SUBSCRIPTION_PRICE_TAX_LABEL } from "@/lib/subscription-plans";
 
 const defaultOgImage = absoluteUrl("/opengraph-image");
-const SITE_PRICE_LOW_FR = formatPriceLabelFr(getPublicPriceBoundsLabels().low);
+const SITE_PRICE_LOW_FR = formatPriceLabelFr(getMarketingPriceBoundsLabels().monthlyLow);
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",

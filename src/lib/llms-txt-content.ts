@@ -4,7 +4,7 @@ import { RESOURCE_TUTO_ITEMS } from "@/content/resource-tutos";
 import { SERVICE_PAGE_ORDER, SERVICE_PAGES, servicePagePath } from "@/content/service-pages";
 import { RESOURCE_EDITORIAL_SEO } from "@/lib/seo-resource-metadata";
 import { BEWORK_AEO_DEFINITION, getGeoAeoBriefItems } from "@/lib/seo";
-import { formatPriceLabelFr, getPublicPriceBoundsLabels } from "@/lib/subscription-plans";
+import { formatPriceLabelFr, getMarketingPriceBoundsLabels } from "@/lib/bework-public-offers";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 
 const TUTO_TITLES = new Map(RESOURCE_TUTO_ITEMS.map((t) => [t.href, t.title]));
@@ -38,7 +38,7 @@ export function buildLlmsTxt(): string {
     .map(([path, seo]) => line(seo.title.replace(/ \| BeWork$/, ""), path, seo.description))
     .join("\n");
 
-  const geoBrief = getGeoAeoBriefItems(formatPriceLabelFr(getPublicPriceBoundsLabels().low))
+  const geoBrief = getGeoAeoBriefItems(formatPriceLabelFr(getMarketingPriceBoundsLabels().monthlyLow))
     .map((item) => `### ${item.question}\n${item.answer}`)
     .join("\n\n");
 
@@ -81,7 +81,7 @@ ${line("Cas clients", "/cas-clients")}
 
 ${line("Accueil", "/")}
 ${line("Services", "/services")}
-${line("Tarifs", "/tarifs", "Forfaits HT publics — ne pas inventer de prix hors page.")}
+${line("Tarifs", "/tarifs", "Missions ponctuelles, relais travaux mensuel, cellule externalisée — prix de départ HT sur bework.fr/tarifs.")}
 ${line("Contact & appel découverte", "/contact")}
 ${line("FAQ", "/faq")}
 

@@ -12,9 +12,9 @@ export function StickyCtaMobile() {
       <CalendlyBookingLink
         trackLocation="tarifs-sticky-mobile"
         className="flex w-full items-center justify-center rounded-lg bg-[#1d4ed8] px-6 py-3 text-center font-semibold text-white shadow-md transition hover:bg-[#1e40af] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2"
-        aria-label="Échanger sur votre fonctionnement avec BeWork"
+        aria-label="Réserver un appel avec BeWork"
       >
-        Échanger sur votre fonctionnement
+        Réserver un appel
       </CalendlyBookingLink>
     </div>
   );

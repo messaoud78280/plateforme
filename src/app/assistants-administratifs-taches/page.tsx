@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
+import { BEWORK_MARKETING_PRICE_LINE_SHORT } from "@/lib/bework-public-offers";
 import { absoluteUrl } from "@/lib/site";
 
 const pageUrl = absoluteUrl("/assistants-administratifs-taches");
@@ -517,7 +518,7 @@ export default function AssistantsAdministratifsTachesPage() {
         <section className="px-6 py-16 md:py-20">
           <div className="mx-auto max-w-4xl rounded-2xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-8 text-center md:p-12">
             <h2 className="text-2xl font-bold text-black md:text-3xl">
-              Dès 290 € HT/mois — sans recrutement
+              {BEWORK_MARKETING_PRICE_LINE_SHORT} — sans recrutement
             </h2>
             <p className="mt-4 text-black">
               Un relais travaux bureau‑terrain, avec des assistants travaux augmentés par l’IA pour trier, synthétiser et structurer. Vous gardez la validation

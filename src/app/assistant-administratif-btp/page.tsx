@@ -37,7 +37,7 @@ const faqJsonLd = {
 export default function Page() {
   return (
     <SeoLandingPage
-      description="Assistant administratif pour le BTP : devis chantiers, suivi sous-traitants, relances factures. PME BTP France, Belgique, Suisse. Dès 290 € HT/mois."
+      description="Assistant administratif pour le BTP : devis chantiers, suivi sous-traitants, relances factures. PME BTP France, Belgique, Suisse. Dès 790 € HT/mois."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Assistant administratif BTP", href: PAGE_PATH },
@@ -47,7 +47,7 @@ export default function Page() {
         <>
           Les entreprises du BTP peuvent externaliser leur administratif avec un assistant dédié : devis chantiers,
           suivi des sous-traitants, relances factures fournisseurs. BeWork accompagne les PME BTP en France, Belgique,
-          Suisse et Luxembourg. Dès 290 € HT/mois.
+          Suisse et Luxembourg. Dès 790 € HT/mois.
         </>
       }
     >

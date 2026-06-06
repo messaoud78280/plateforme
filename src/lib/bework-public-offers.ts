@@ -26,7 +26,7 @@ export type BeWorkPublicOffer = {
   name: string;
   /** Montant HT numérique sans espaces ; null = sur devis. */
   priceFrom: string | null;
-  priceUnit: "dossier" | "mois" | "devis";
+  priceUnit: "dossier" | "dossier_structure" | "mois" | "devis";
   positioning: string;
   tagline: string;
   includes: readonly string[];
@@ -40,27 +40,28 @@ export const BEWORK_PUBLIC_OFFERS: readonly BeWorkPublicOffer[] = [
     key: "MISSION_PONCTUELLE",
     name: "Mission ponctuelle",
     priceFrom: "250",
-    priceUnit: "dossier",
-    positioning: "Pour traiter un besoin précis, sans abonnement.",
-    tagline: "Pour déléguer un dossier précis sans engagement mensuel.",
+    priceUnit: "dossier_structure",
+    positioning:
+      "Pour traiter un besoin précis sans abonnement : analyse, préparation, remise au propre ou structuration d’un document chantier.",
+    tagline: "Pour déléguer un dossier clair avec un livrable exploitable.",
     examples: [
-      "Compte rendu de chantier",
       "Analyse DCE / CCTP",
       "Préparation PPSPS",
-      "Préparation DOE",
+      "Préparation ou reprise DOE",
       "Mémoire technique",
       "Audit devis ou dossier chantier",
-      "Relances clients, fournisseurs ou sous-traitants",
       "Structuration d’un dossier travaux",
+      "Compte rendu complexe avec photos, réserves et actions à suivre",
+      "Relances structurées liées à un dossier",
     ],
     includes: [
-      "Périmètre défini pour un dossier ou une mission",
-      "Livrables structurés et traçables",
+      "Périmètre défini avant démarrage",
+      "Livrable structuré et traçable",
       "Relecture humaine avant transmission",
       "Validation finale chez vous",
     ],
     cta: {
-      label: "Commencer par une mission ponctuelle",
+      label: "Obtenir un devis pour une mission",
       href: "/contact?sujet=Mission+ponctuelle",
     },
   },
@@ -146,6 +147,9 @@ export const BEWORK_PUBLIC_OFFERS: readonly BeWorkPublicOffer[] = [
   },
 ] as const;
 
+export const BEWORK_MISSION_PONCTUELLE_PRICING_NOTE =
+  "Les demandes simples et récurrentes, comme une mise en forme légère ou un compte rendu très court, sont généralement intégrées dans un accompagnement mensuel ou regroupées avec d’autres actions.";
+
 export const BEWORK_REPOSITIONING_POINTS = [
   "Moins d’oublis dans les dossiers",
   "Des relances mieux suivies",
@@ -203,7 +207,7 @@ export const BEWORK_TARIFS_PROCESS_STEPS = [
 export const BEWORK_TARIFS_FAQ = [
   {
     q: "Combien coûte un assistant travaux externalisé ?",
-    a: "Le coût dépend du volume de dossiers, du nombre de chantiers, des livrables attendus et du niveau de suivi demandé. BeWork propose des missions ponctuelles à partir de 250 € HT et des accompagnements mensuels à partir de 790 € HT.",
+    a: "Le coût dépend du volume de dossiers, du nombre de chantiers, des livrables attendus et du niveau de suivi demandé. BeWork propose des missions ponctuelles structurées à partir de 250 € HT / dossier et des accompagnements mensuels à partir de 790 € HT.",
   },
   {
     q: "Pourquoi BeWork affiche des prix « à partir de » ?",
@@ -219,7 +223,7 @@ export const BEWORK_TARIFS_FAQ = [
   },
   {
     q: "Peut-on commencer sans abonnement mensuel ?",
-    a: "Oui. Une entreprise peut commencer par une mission ponctuelle : analyse DCE, DOE, PPSPS, mémoire technique, compte rendu de chantier, devis ou relances.",
+    a: "Oui. Une entreprise peut commencer par une mission ponctuelle structurée : analyse DCE, DOE, PPSPS, mémoire technique, audit de dossier ou relances cadrées sur un périmètre défini.",
   },
   {
     q: "Qui valide les documents avant envoi ?",
@@ -264,6 +268,8 @@ export function formatOfferPriceLabel(offer: BeWorkPublicOffer): string {
   if (offer.priceFrom === null) return "Sur devis";
   const amount = formatPriceLabelFr(offer.priceFrom);
   if (offer.priceUnit === "dossier") return `À partir de ${amount} € ${SUBSCRIPTION_PRICE_TAX_LABEL} / dossier`;
+  if (offer.priceUnit === "dossier_structure")
+    return `À partir de ${amount} € ${SUBSCRIPTION_PRICE_TAX_LABEL} / dossier structuré`;
   if (offer.priceUnit === "mois") return `À partir de ${amount} € ${SUBSCRIPTION_PRICE_TAX_LABEL} / mois`;
   return "Sur devis";
 }

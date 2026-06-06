@@ -6,6 +6,7 @@ import { StickyCtaMobile } from "@/components/tarifs/StickyCtaMobile";
 import { TarifsPricingGrid } from "@/components/tarifs/TarifsPricingGrid";
 import {
   BEWORK_CLIENT_KEEPS,
+  BEWORK_MISSION_PONCTUELLE_PRICING_NOTE,
   BEWORK_PRICING_CRITERIA,
   BEWORK_REPOSITIONING_POINTS,
   BEWORK_SCOPE_TAKEOVER,
@@ -176,6 +177,9 @@ export default function TarifsPage() {
                 </li>
               ))}
             </ul>
+            <p className="mt-6 rounded-lg border border-slate-100 bg-[#f8fafc] px-4 py-3 text-[13px] leading-relaxed text-slate-600 md:text-sm">
+              {BEWORK_MISSION_PONCTUELLE_PRICING_NOTE}
+            </p>
           </div>
         </section>
 

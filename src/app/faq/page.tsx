@@ -107,8 +107,55 @@ const FAQ_RECHERCHE_IA_CAT = {
   ],
 } as const;
 
+const FAQ_APPELS_OFFRES_CAT = {
+  title: "Appels d'offres, marchés publics & Chorus Pro",
+  items: [
+    {
+      q: "BeWork peut-il répondre à un appel d'offres BTP ?",
+      a: "Oui sur le volet administratif et documentaire : analyse DCE (RC, CCAP, CCTP, BPU, DPGF), structuration des pièces, mémoire technique et suivi du dépôt. La décision Go/No-go, le prix et la signature restent chez vous. Voir /reponse-appel-offres-btp.",
+    },
+    {
+      q: "BeWork peut-il rédiger un mémoire technique ?",
+      a: "Oui : plan, rédaction à partir de vos références et méthodes, mise en forme et relecture. Vous validez le contenu technique avant dépôt. Service détaillé sur /services/memoire-technique-btp.",
+    },
+    {
+      q: "BeWork peut-il gérer Chorus Pro ?",
+      a: "Oui sur la préparation des situations, le dépôt encadré, le suivi des statuts et les relances administratives — vous gardez la validation des montants. Voir /facturation-chorus-pro-btp.",
+    },
+    {
+      q: "BeWork peut-il aider une entreprise déjà titulaire d'un marché public ?",
+      a: "Oui : suivi après attribution — situations, facturation publique, avenants documentés, DOE, relances et classement du dossier marché. Voir /gestion-marche-public-btp.",
+    },
+    {
+      q: "Comment transmettre un DCE à BeWork ?",
+      a: "Via le formulaire /contact ou votre espace client : déposez le dossier, précisez la date limite et le lot visé. Une première analyse peut être proposée en mission ponctuelle (à partir de 250 € HT).",
+    },
+    {
+      q: "Quels documents BeWork peut-il analyser ?",
+      a: "DCE et pièces marché (RC, CCAP, CCTP, BPU, DPGF, DQE), dossiers chantier (CR, PPSPS, DOE, DICT), devis, situations, factures et correspondances fournisseurs — selon périmètre cadré.",
+    },
+    {
+      q: "BeWork peut-il suivre les bons de commande d'un accord-cadre ?",
+      a: "Oui sur le suivi administratif : échéances, pièces attendues, relances et traçabilité des bons émis — le titulaire garde la responsabilité contractuelle.",
+    },
+    {
+      q: "BeWork intervient-il en France ?",
+      a: "Oui, partout en France à distance. Pages dédiées : /assistant-travaux-france et /externalisation-administrative-btp-france.",
+    },
+    {
+      q: "BeWork travaille-t-il avec la Belgique, la Suisse et le Luxembourg ?",
+      a: "Oui, en français et à distance pour le relais administratif chantier. Pages pays : assistant travaux et externalisation administrative BTP par pays (BE, CH, LU).",
+    },
+    {
+      q: "BeWork s'adresse-t-il aux artisans et aux PME du BTP ?",
+      a: "Oui : artisans, TPE, PME, conducteurs de travaux et chargés d'affaires qui veulent déléguer l'administratif chantier sans recruter — forfaits sur /tarifs.",
+    },
+  ],
+} as const;
+
 const FAQ_CATEGORIES = [
   FAQ_RECHERCHE_IA_CAT,
+  FAQ_APPELS_OFFRES_CAT,
   {
     title: "Comprendre BeWork",
     items: [

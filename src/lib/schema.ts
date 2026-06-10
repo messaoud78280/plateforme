@@ -58,6 +58,26 @@ export function buildWebPageAndBreadcrumbJsonLd(input: {
   };
 }
 
+/** Service (schema.org) pour une landing SEO dédiée (hors hub /services). */
+export function buildLandingServiceJsonLd(input: {
+  name: string;
+  description: string;
+  pageUrl: string;
+  serviceType?: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": `${input.pageUrl}#offering`,
+    name: input.name,
+    description: input.description,
+    url: input.pageUrl,
+    serviceType: input.serviceType ?? "Assistance administrative BTP",
+    provider: { "@id": SCHEMA_ORG_ID },
+    areaServed: jsonLdExpandedAreaServed(),
+  };
+}
+
 /** Service (schema.org) pour une page /services/[slug]. */
 export function buildServiceOfferingJsonLd(d: ServicePageDefinition, pageUrl: string) {
   return {

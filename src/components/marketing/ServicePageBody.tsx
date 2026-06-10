@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SeoChecklistCard, SeoEnResumeBlock } from "@/components/seo/SeoContentBlocks";
 import type { ServicePageDefinition, ServicePageSlug } from "@/content/service-pages";
 import { SERVICE_PAGES } from "@/content/service-pages";
 
@@ -14,6 +15,12 @@ export function ServicePageBody({ definition: d }: Props) {
 
   return (
     <>
+      {d.enResume ? (
+        <SeoEnResumeBlock>
+          <p>{d.enResume}</p>
+        </SeoEnResumeBlock>
+      ) : null}
+
       <h2>Pour qui</h2>
       <ul>
         {d.pourQuiBullets.map((t) => (
@@ -62,6 +69,15 @@ export function ServicePageBody({ definition: d }: Props) {
               </p>
             </div>
           ))}
+        </>
+      ) : null}
+
+      {d.erreursEviter && d.erreursEviter.length > 0 ? (
+        <>
+          <h2>Les erreurs que nous aidons à éviter</h2>
+          <div className="not-prose">
+            <SeoChecklistCard title="Points de vigilance" items={d.erreursEviter} />
+          </div>
         </>
       ) : null}
 

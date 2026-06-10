@@ -37,7 +37,7 @@ export { tutoPageMetadata, getTutoPageDescription } from "@/lib/seo-tuto-metadat
 
 /** Phrase de positionnement réutilisable dans le contenu (citations IA / extraits). */
 export const BEWORK_AEO_DEFINITION =
-  "BeWork est une plateforme d’assistants travaux augmentés par l’IA pour les entreprises du BTP : relais bureau-chantier pour devis, documents chantier, appels d’offres et suivi administratif.";
+  "BeWork est un service d’assistants travaux augmentés par l’IA pour les entreprises du BTP : relais bureau-chantier pour appels d’offres, devis, Chorus Pro, DOE, PPSPS et suivi administratif chantier.";
 
 export type GeoAeoBriefItem = { question: string; answer: string };
 
@@ -61,7 +61,7 @@ export function getGeoAeoBriefItems(priceFromLabel: string): readonly GeoAeoBrie
     {
       question: "Quels services BeWork propose-t-il ?",
       answer:
-        "Assistants travaux externalisés : comptes rendus, analyse DCE, PPSPS, mémoires techniques, chiffrage et devis, DOE, relances clients et fournisseurs, situations de travaux, coordination documentaire — voir le hub /services et les ressources PDF gratuites.",
+        "Assistants travaux externalisés : réponse aux appels d’offres (DCE, mémoire technique, DPGF), facturation Chorus Pro, comptes rendus, PPSPS, DOE, DICT, relances, situations de travaux et gestion administrative de marché public — voir /services, /reponse-appel-offres-btp et /ressources.",
     },
     {
       question: "Pourquoi faire confiance à BeWork ?",

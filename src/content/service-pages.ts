@@ -39,6 +39,10 @@ export type ServicePageDefinition = {
   neRemplacePas?: string[];
   /** GEO/AEO — exemple concret chantier */
   casUsage?: ServiceCasUsage[];
+  /** Bloc « En résumé » cité par les moteurs IA */
+  enResume?: string;
+  /** Erreurs fréquentes que BeWork aide à limiter */
+  erreursEviter?: string[];
   faq: { q: string; a: string }[];
 };
 
@@ -53,6 +57,13 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     h1: "Assistant travaux augmenté par l’IA pour entreprises du BTP",
     intro:
       "BeWork met à votre disposition un relais opérationnel entre le bureau et le chantier : préparation de documents, suivi des échéances et coordination cadrée. L’IA accélère la structuration et la relecture ; un interlocuteur humain garde le fil et le cadre.",
+    enResume:
+      "Un assistant travaux accompagne les entreprises du BTP dans la gestion administrative et documentaire des chantiers : appels d’offres, devis, situations, DOE, PPSPS, DICT, comptes rendus et facturation — avec validation finale chez vous.",
+    erreursEviter: [
+      "Devis envoyés sans relance ni statut de suivi",
+      "Dossiers chantier incomplets en fin de marché",
+      "Confondre secrétariat généraliste et relais métier BTP",
+    ],
     pourQuiBullets: [
       "Artisans, TPE et PME du bâtiment qui cumulent terrain et dossiers.",
       "Conducteurs de travaux, chefs de chantier et chargés d’affaires sous pression.",
@@ -75,6 +86,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     ],
     deepeningLinks: [
       { href: "/assistants-administratifs-taches", label: "Catalogue des missions" },
+      { href: "/reponse-appel-offres-btp", label: "Réponse appels d’offres" },
       { href: "/tarifs", label: "Tarifs BeWork" },
       { href: "/notre-facon-de-travailler", label: "Process BeWork" },
     ],
@@ -189,6 +201,13 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     h1: "Externalisation administrative BTP avec un relais travaux encadré",
     intro:
       "L’externalisation administrative BTP ne se résume pas à « du secrétariat » : chez BeWork, il s’agit d’un relais travaux — dossiers chantier, relances, préparations documentaires — avec des forfaits clairs et un accompagnement à distance supervisé depuis la France.",
+    enResume:
+      "Externaliser l’administratif chantier, c’est déléguer devis, relances, appels d’offres, Chorus Pro, DOE et suivi documentaire à un assistant travaux encadré — sans recruter, avec validation avant tout envoi engageant.",
+    erreursEviter: [
+      "Externaliser sans cadrage de périmètre ni circuit de validation",
+      "Attendre d’un prestataire qu’il engage le prix ou la technique à votre place",
+      "Mélanger courrier générique et dossiers chantier complexes",
+    ],
     pourQuiBullets: [
       "Dirigeants et responsables qui veulent structurer le suivi sans alourdir la masse salariale.",
       "Entreprises francophones cherchant un cadre contractuel simple (forfaits HT).",
@@ -209,6 +228,8 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     ],
     deepeningLinks: [
       { href: "/externaliser-administratif", label: "Approfondir l’externalisation" },
+      { href: "/gestion-marche-public-btp", label: "Gestion marché public" },
+      { href: "/facturation-chorus-pro-btp", label: "Facturation Chorus Pro" },
       { href: "/externalisation-administrative-btp-france", label: "Page France" },
       { href: "/externalisation-administrative-btp-belgique", label: "Page Belgique" },
     ],
@@ -229,6 +250,13 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     h1: "Compte rendu de chantier : structurer l’information sans y passer la soirée",
     intro:
       "Un compte rendu utile trace les décisions, les réserves et les suites à donner. BeWork aide à transformer vos notes ou enregistrements en documents clairs, homogènes et exploitables par l’équipe, avec l’appui d’outils d’IA pour accélérer la mise en forme.",
+    enResume:
+      "Le compte rendu de chantier formalise constatations, décisions, actions et responsables après une visite ou réunion de coordination.",
+    erreursEviter: [
+      "CR envoyé trop tard, sans décisions ni échéances",
+      "Photos et vocaux non reliés au texte",
+      "Réserves mentionnées sans suivi ni relance",
+    ],
     pourQuiBullets: [
       "Entreprises qui multiplient les visites, réunions de coordination et inspections.",
       "Équipes qui veulent homogénéiser le format des CR pour limiter les malentendus.",
@@ -278,6 +306,13 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     h1: "Analyse DCE BTP : y voir clair avant d’engager vos équipes",
     intro:
       "Un dossier de consultation peut être volumineux. BeWork aide à trier les pièces, repérer les incohérences évidentes et préparer des synthèses de lecture pour accélérer votre phase d’arbitrage. L’objectif est de gagner du temps de cadrage, pas de substituer votre jugement d’entreprise.",
+    enResume:
+      "Analyser un DCE, c’est lire RC, CCAP, CCTP et pièces de prix pour repérer délais, exigences et risques avant de chiffrer ou rédiger le mémoire technique.",
+    erreursEviter: [
+      "Chiffrer avant lecture du CCAP (pénalités, délais, paiement)",
+      "Oublier une annexe technique citée dans le CCTP",
+      "Lancer une réponse sans synthèse Go/No Go partagée en interne",
+    ],
     pourQuiBullets: [
       "Chargés d’affaires et conducteurs impliqués dans les réponses aux AO.",
       "PME qui n’ont pas toujours un bureau d’études disponible immédiatement.",
@@ -296,9 +331,10 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
       "Remise pour revue interne avant décision de réponse.",
     ],
     deepeningLinks: [
+      { href: "/reponse-appel-offres-btp", label: "Réponse appels d’offres" },
       { href: "/services/dce-bpu-dpgf", label: "Service DCE, BPU et DPGF" },
+      { href: "/blog/comment-analyser-dce-btp", label: "Article : analyser un DCE" },
       { href: "/ressources/analyse-dce-btp", label: "Méthode analyse DCE (ressource éditoriale)" },
-      { href: "/ressources/tuto-skill-analyse-dce-bework", label: "Tutoriel skill analyse DCE" },
     ],
     seeAlsoSlugs: ["dce-bpu-dpgf", "memoire-technique-btp", "chiffrage-devis-btp"],
     neRemplacePas: [
@@ -328,6 +364,13 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     h1: "PPSPS : avancer sur la mise en forme sans bricoler les rubriques essentielles",
     intro:
       "Le PPSPS doit être cohérent avec le risque réel du chantier. BeWork aide à structurer le document, intégrer vos données et accélérer la mise en page, sous réserve de vos validations sur les mesures de prévention et l’organisation des phases travaux.",
+    enResume:
+      "Le PPSPS (plan particulier sécurité et protection santé) décrit l’organisation sécurité de votre entreprise sur un chantier donné.",
+    erreursEviter: [
+      "PPSPS copié-collé d’un autre chantier sans adaptation",
+      "Rubriques obligatoires manquantes ou mal numérotées",
+      "Validation sécurité sautée par manque de temps",
+    ],
     pourQuiBullets: [
       "Entreprises qui produisent des PPSPS fréquents ou sur des formats exigeants.",
       "Responsables QSE / conducteurs qui manquent de temps pour la formalisation.",
@@ -346,6 +389,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
       "Validation finale par votre référent sécurité ou conducteur.",
     ],
     deepeningLinks: [
+      { href: "/blog/quest-ce-qu-un-ppsps", label: "Article : qu’est-ce qu’un PPSPS ?" },
       { href: "/ressources/ppsps-btp", label: "Ressource PPSPS" },
       { href: "/ressources/tuto-skill-ppsps-bework", label: "Tutoriel skill PPSPS" },
     ],
@@ -366,6 +410,13 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     h1: "Mémoire technique BTP : un fil clair pour une réponse lisible",
     intro:
       "Un mémoire technique doit démontrer votre méthode et votre compréhension du projet. BeWork aide à bâtir la structure, harmoniser le ton et intégrer vos contenus techniques, afin de livrer un dossier plus fluide à relire par la maîtrise d’ouvrage.",
+    enResume:
+      "Le mémoire technique BTP répond aux critères du règlement de consultation et démontre votre méthode, vos moyens et vos références pour le lot visé.",
+    erreursEviter: [
+      "Mémoire générique non aligné sur le CCTP du lot",
+      "Critères RC non repris comme plan du document",
+      "Références chantier non comparables au projet",
+    ],
     pourQuiBullets: [
       "Entreprises qui répondent à des consultations publics ou privés.",
       "Équipes où la charge rédactionnelle pèse sur peu de personnes.",
@@ -384,8 +435,9 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
       "Relecture finale avant envoi sous votre contrôle.",
     ],
     deepeningLinks: [
+      { href: "/reponse-appel-offres-btp", label: "Réponse appels d’offres" },
+      { href: "/blog/comment-rediger-memoire-technique-btp", label: "Article : rédiger un mémoire technique" },
       { href: "/ressources/memoire-technique-btp", label: "Ressource mémoire technique" },
-      { href: "/ressources/tuto-skill-memoire-technique-bework", label: "Tutoriel skill mémoire technique" },
     ],
     seeAlsoSlugs: ["analyse-dce-btp", "chiffrage-devis-btp"],
     faq: [
@@ -404,6 +456,13 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     h1: "Chiffrage et devis BTP : accélérer la préparation sans perdre le contrôle des prix",
     intro:
       "Le devis est un document commercial et technique : BeWork peut préparer les tableaux, centraliser les retours fournisseurs et suivre les relances, pendant que vous validez les taux, marges et positions commerciales.",
+    enResume:
+      "Le chiffrage devis BTP transforme une consultation (plans, CCTP, visite) en offre chiffrée claire, défendable et envoyée à temps.",
+    erreursEviter: [
+      "Devis envoyé sans relecture marge et oublis de postes",
+      "Relances clients absentes après envoi",
+      "Prix fournisseurs non consolidés avant envoi",
+    ],
     pourQuiBullets: [
       "Entreprises avec un fort volume de demandes de prix.",
       "Chargés d’affaires qui enchaînent les montages sous délais courts.",
@@ -442,6 +501,13 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     h1: "DOE BTP : avancer sur la constitution sans noyer le chantier dans l’administratif",
     intro:
       "Le dossier des ouvrages exécutés exige rigueur et complétude. BeWork aide à structurer les chapitres, suivre les pièces manquantes et préparer les livrables selon votre format, pour que la clôture documentaire soit plus prévisible.",
+    enResume:
+      "Le DOE BTP regroupe les documents décrivant les ouvrages réalisés (plans as-built, notices, attestations) pour la réception et le récolement.",
+    erreursEviter: [
+      "Collecte des pièces uniquement en fin de chantier",
+      "Notices fournisseurs jamais relancées",
+      "Arborescence DOE différente de celle exigée au CCTP",
+    ],
     pourQuiBullets: [
       "Entreprises générales et sous-traitants livrant des DOE exigeants.",
       "Chefs de chantier ou conducteurs en phase de réception.",
@@ -460,8 +526,9 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
       "Relectures et validation par vos référents.",
     ],
     deepeningLinks: [
+      { href: "/blog/comment-preparer-doe-chantier", label: "Article : préparer un DOE" },
       { href: "/ressources/doe-btp", label: "Ressource DOE" },
-      { href: "/ressources/tuto-skill-doe-bework", label: "Tutoriel skill DOE" },
+      { href: "/gestion-marche-public-btp", label: "Gestion marché public" },
     ],
     seeAlsoSlugs: ["compte-rendu-chantier", "ppsps"],
     faq: [
@@ -480,6 +547,13 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     h1: "Conducteur de travaux débordé : faire avancer le bureau sans lâcher le chantier",
     intro:
       "Quand le carnet déborde, ce ne sont pas seulement les mails qui s’accumulent : ce sont les relances oubliées, les pièces manquantes et les dossiers qui traînent. BeWork absorbe le train administratif pour redonner des plages de pilotage réel — sans remplacer vos arbitrages terrain.",
+    enResume:
+      "Un conducteur de travaux débordé manque de temps bureau : BeWork prend le relais documentaire (CR, relances, situations) pendant qu’il tient le chantier.",
+    erreursEviter: [
+      "Tout garder en tête sans tableau de priorités",
+      "Relances MOE ou fournisseurs repoussées chaque semaine",
+      "Situations et factures préparées en urgence le vendredi soir",
+    ],
     pourQuiBullets: [
       "Conducteurs de travaux sur plusieurs chantiers simultanés.",
       "Profils en entreprise générale, sous-traitance ou lot technique sous forte charge documentaire.",

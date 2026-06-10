@@ -83,6 +83,43 @@ export const SEO_KEYWORDS_GEO_SCOPE = [
   "gestion bureau chantier Hauts-de-France",
 ] as const;
 
+/** Appels d'offres & marchés publics travaux. */
+export const SEO_KEYWORDS_APPELS_OFFRES = [
+  "réponse appel d'offres BTP",
+  "réponse appel d'offres bâtiment",
+  "aide réponse marché public BTP",
+  "mémoire technique BTP",
+  "analyse DCE",
+  "analyse dossier consultation entreprise",
+  "DPGF BTP",
+  "BPU BTP",
+  "DQE BTP",
+  "marché public travaux",
+  "dossier appel d'offres BTP",
+  "appels d'offres artisans BTP",
+  "appels d'offres PME bâtiment",
+  "dépôt plateforme marché public",
+  "gestion administrative marché public",
+] as const;
+
+/** Administratif chantier & facturation publique. */
+export const SEO_KEYWORDS_CHANTIER_ADMIN = [
+  "gestion administrative chantier",
+  "gestion administrative BTP",
+  "facturation Chorus Pro BTP",
+  "situation de travaux",
+  "DOE BTP",
+  "PPSPS BTP",
+  "DICT travaux",
+  "compte rendu chantier",
+  "relance impayé BTP",
+  "suivi bons de commande travaux",
+  "externalisation administrative BTP",
+  "secrétariat BTP externalisé",
+  "assistant chantier",
+  "conducteur de travaux débordé",
+] as const;
+
 /** Techniques & intention (conversion + entités reliées aux pages piliers). */
 export const SEO_KEYWORDS_TECHNIQUE = [
   "relance devis BTP",
@@ -153,7 +190,7 @@ export const BEWORK_SLOGAN = "On tient le bureau, vous tenez le chantier.";
 
 /** Meta description site (layout racine) — ~155 car., périmètre francophonie. */
 export const SEO_VALUE_PROPOSITION =
-  "Assistants travaux augmentés par l’IA pour le BTP : devis, relances, DOE, PPSPS et dossiers chantier. Relais bureau-chantier, forfaits HT. FR · BE · CH · LU.";
+  "Assistants travaux augmentés par l’IA pour le BTP : appels d’offres, devis, Chorus Pro, DOE, PPSPS et dossiers chantier. Relais bureau-chantier, forfaits HT. FR · BE · CH · LU.";
 
 /** Proposition courte (OG, Twitter). */
 export const SEO_VALUE_PROPOSITION_SHORT =

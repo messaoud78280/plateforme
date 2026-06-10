@@ -493,9 +493,8 @@ export default async function BlogArticlePage({ params }: Props) {
               On tient le bureau. Vous tenez le chantier.
             </h2>
             <p className="mt-4 max-w-2xl text-[1rem] leading-relaxed text-slate-700 md:text-[1.05rem]">
-              BeWork prend en charge le recalage de planning, le chiffrage des scénarios et la rédaction des notes
-              d&apos;impact CCAG. Vous gardez la décision et le pilotage terrain — c&apos;est votre métier. Nous vous
-              rendons le temps de la prendre.
+              BeWork structure vos dossiers chantier, appels d&apos;offres, situations et relances. Vous gardez la
+              décision et le pilotage terrain — nous tenons le bureau pour que vous teniez le chantier.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link

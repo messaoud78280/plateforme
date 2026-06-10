@@ -1,6 +1,8 @@
 import { BEWORK_VALUE_PILLAR_LABELS } from "@/lib/bework-value-pillars";
 import { RESOURCE_PDF_CATALOG, RESOURCE_PDF_GUIDES, RESOURCE_PDF_TUTOS } from "@/content/resource-pdf-catalog";
 import { RESOURCE_TUTO_ITEMS } from "@/content/resource-tutos";
+import { BLOG_ARTICLES_SEO } from "@/content/blog-articles-seo";
+import { ASSISTANT_TRAVAUX_VILLE_PATHS, ASSISTANT_TRAVAUX_VILLES } from "@/lib/assistant-travaux-villes";
 import { SERVICE_PAGE_ORDER, SERVICE_PAGES, servicePagePath } from "@/content/service-pages";
 import { RESOURCE_EDITORIAL_SEO } from "@/lib/seo-resource-metadata";
 import { BEWORK_AEO_DEFINITION, getGeoAeoBriefItems } from "@/lib/seo";
@@ -91,6 +93,31 @@ ${line("Services", "/services")}
 ${line("Tarifs", "/tarifs", "Missions ponctuelles, relais travaux mensuel, cellule externalisée — prix de départ HT sur bework.fr/tarifs.")}
 ${line("Contact & appel découverte", "/contact")}
 ${line("FAQ", "/faq")}
+
+## Appels d'offres & marchés publics
+
+${line("Réponse aux appels d'offres BTP", "/reponse-appel-offres-btp", "DCE, mémoire technique, DPGF, dépôt plateforme.")}
+${line("Facturation Chorus Pro BTP", "/facturation-chorus-pro-btp", "Situations, dépôt, suivi et relances factures publiques.")}
+${line("Gestion administrative marché public", "/gestion-marche-public-btp", "Suivi après attribution : situations, DOE, avenants, accord-cadre.")}
+
+## Assistant travaux par pays
+
+${line("Assistant travaux France", "/assistant-travaux-france")}
+${line("Assistant travaux Belgique", "/assistant-travaux-belgique")}
+${line("Assistant travaux Suisse", "/assistant-travaux-suisse")}
+${line("Assistant travaux Luxembourg", "/assistant-travaux-luxembourg")}
+
+## Assistant travaux par ville
+
+${(Object.entries(ASSISTANT_TRAVAUX_VILLE_PATHS) as [keyof typeof ASSISTANT_TRAVAUX_VILLE_PATHS, string][])
+  .map(([key, path]) => line(`Assistant travaux ${ASSISTANT_TRAVAUX_VILLES[key].label}`, path))
+  .join("\n")}
+
+## Blog SEO (appels d'offres & administratif chantier)
+
+${Object.entries(BLOG_ARTICLES_SEO)
+  .map(([slug, a]) => line(a.title, `/blog/${slug}`, a.description))
+  .join("\n")}
 
 ## Fichiers machine
 

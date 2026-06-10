@@ -3,6 +3,8 @@ import { BLOG_ARTICLES, BLOG_SLUGS, type BlogArticle, type BlogSlug } from "@/co
 import { RESOURCE_PDF_CATALOG } from "@/content/resource-pdf-catalog";
 import { SERVICE_PAGE_ORDER, servicePagePath } from "@/content/service-pages";
 import { BTP_PAIN_PAGE_PATHS } from "@/lib/btp-pain-pages";
+import { ASSISTANT_TRAVAUX_GEO_PATHS } from "@/lib/assistant-travaux-geo";
+import { ASSISTANT_TRAVAUX_VILLE_PATHS } from "@/lib/assistant-travaux-villes";
 import { EXTERNALISATION_ADMIN_BT_PATHS } from "@/lib/externalisation-administrative-btp-geo";
 import { SITE_URL } from "@/lib/site";
 
@@ -26,6 +28,20 @@ const BTP_PAIN_SEO_PAGES = (Object.values(BTP_PAIN_PAGE_PATHS) as string[]).map(
 const GEO_EXTERNALISATION_ADMIN_BT_PAGES = (Object.values(EXTERNALISATION_ADMIN_BT_PATHS) as string[]).map((path) =>
   entry(path, 0.86)
 );
+
+const GEO_ASSISTANT_TRAVAUX_PAGES = (Object.values(ASSISTANT_TRAVAUX_GEO_PATHS) as string[]).map((path) =>
+  entry(path, 0.86)
+);
+
+const VILLE_ASSISTANT_TRAVAUX_PAGES = (Object.values(ASSISTANT_TRAVAUX_VILLE_PATHS) as string[]).map((path) =>
+  entry(path, 0.82)
+);
+
+const SEO_SERVICE_LANDING_PAGES = [
+  "/reponse-appel-offres-btp",
+  "/facturation-chorus-pro-btp",
+  "/gestion-marche-public-btp",
+] as const;
 
 const SERVICE_PAGES_SITEMAP: MetadataRoute.Sitemap = [
   entry("/services", 0.92),
@@ -81,6 +97,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     entry("/admin-btp-sans-recruter", 0.85),
     ...BTP_PAIN_SEO_PAGES,
     ...GEO_EXTERNALISATION_ADMIN_BT_PAGES,
+    ...GEO_ASSISTANT_TRAVAUX_PAGES,
+    ...VILLE_ASSISTANT_TRAVAUX_PAGES,
+    ...SEO_SERVICE_LANDING_PAGES.map((path) => entry(path, 0.9)),
     ...SERVICE_PAGES_SITEMAP,
   ];
 

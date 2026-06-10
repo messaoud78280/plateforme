@@ -98,7 +98,10 @@ export type BlogArticle = {
   body: BlogBodyBlock[];
 };
 
+import { BLOG_ARTICLES_SEO } from "@/content/blog-articles-seo";
+
 export const BLOG_ARTICLES: Record<string, BlogArticle> = {
+  ...BLOG_ARTICLES_SEO,
   "gerer-aleas-chantier": {
     title: "Gérer les aléas de chantier : éviter les pénalités de retard",
     description:

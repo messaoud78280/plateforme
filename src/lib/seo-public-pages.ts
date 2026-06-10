@@ -3,8 +3,15 @@
  * Titles ~45–60 car. · descriptions ~140–160 car. · hreflang francophonie.
  */
 
+import { hreflangAssistantTravauxCluster } from "@/lib/assistant-travaux-geo";
+import { ASSISTANT_TRAVAUX_VILLE_PATHS, ASSISTANT_TRAVAUX_VILLES } from "@/lib/assistant-travaux-villes";
 import { hreflangExternalisationAdministrativeBtpCluster, metaDescriptionFrancophonie } from "@/lib/seo-francophonie";
-import { SEO_KEYWORDS_ASSISTANT_TRAVAUX, SEO_KEYWORDS_GEO_SCOPE, SEO_KEYWORDS_TECHNIQUE } from "@/lib/seo-keywords";
+import {
+  SEO_KEYWORDS_APPELS_OFFRES,
+  SEO_KEYWORDS_ASSISTANT_TRAVAUX,
+  SEO_KEYWORDS_GEO_SCOPE,
+  SEO_KEYWORDS_TECHNIQUE,
+} from "@/lib/seo-keywords";
 
 export type PublicPageSeo = {
   title: string;
@@ -14,8 +21,29 @@ export type PublicPageSeo = {
 };
 
 const geoCluster = hreflangExternalisationAdministrativeBtpCluster();
+const assistantTravauxGeoCluster = hreflangAssistantTravauxCluster();
+
+const villePagesSeo: Record<string, PublicPageSeo> = Object.fromEntries(
+  (Object.entries(ASSISTANT_TRAVAUX_VILLE_PATHS) as [keyof typeof ASSISTANT_TRAVAUX_VILLE_PATHS, string][]).map(
+    ([key, path]) => {
+      const v = ASSISTANT_TRAVAUX_VILLES[key];
+      return [
+        path,
+        {
+          title: `Assistant travaux ${v.label.split(" &")[0]} | BeWork`,
+          description: metaDescriptionFrancophonie(
+            `Assistant travaux ${v.label} : relais bureau-chantier BTP, devis, marchés publics et dossiers chantier à distance`,
+            { withGeoTag: false },
+          ),
+          keywords: [`assistant travaux ${v.label}`, "assistant BTP", "externalisation administrative BTP"],
+        },
+      ];
+    },
+  ),
+);
 
 export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
+  ...villePagesSeo,
   "/relance-devis-btp": {
     title: "Relance devis BTP : ne laissez plus vos chantiers dormir",
     description: metaDescriptionFrancophonie(
@@ -170,6 +198,63 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
       "Exemples concrets : devis relancés, dossiers tenus, trésorerie sécurisée. Retours d’expérience d’entreprises du bâtiment avec BeWork",
     ),
     keywords: ["cas clients BTP", "retour expérience BTP", "organisation chantier"],
+  },
+  "/reponse-appel-offres-btp": {
+    title: "Réponse aux appels d'offres BTP : DCE, DPGF, mémoire technique | BeWork",
+    description: metaDescriptionFrancophonie(
+      "BeWork accompagne les entreprises BTP dans leurs réponses aux appels d'offres : analyse DCE, DPGF, mémoire technique et dépôt plateforme",
+    ),
+    keywords: [...SEO_KEYWORDS_APPELS_OFFRES.slice(0, 10)],
+  },
+  "/facturation-chorus-pro-btp": {
+    title: "Facturation Chorus Pro BTP : situations, dépôt et suivi | BeWork",
+    description: metaDescriptionFrancophonie(
+      "Facturation Chorus Pro BTP : préparation des situations, dépôt encadré, suivi des statuts et relances. Assistant travaux pour titulaires de marchés publics",
+    ),
+    keywords: ["facturation Chorus Pro BTP", "facture marché public Chorus Pro", "situation travaux BTP", "assistant travaux"],
+  },
+  "/gestion-marche-public-btp": {
+    title: "Gestion administrative de marché public BTP | BeWork",
+    description: metaDescriptionFrancophonie(
+      "Après attribution : situations, Chorus Pro, DOE, avenants et suivi documentaire de votre marché public travaux. Relais administratif BTP encadré",
+    ),
+    keywords: ["gestion marché public BTP", "suivi administratif marché public", "accord-cadre travaux", "assistant travaux"],
+  },
+  "/assistant-travaux-france": {
+    title: "Assistant travaux France : relais bureau-chantier BTP | BeWork",
+    description: metaDescriptionFrancophonie(
+      "Assistant travaux en France : devis, appels d'offres, situations, DOE et relances pour artisans et PME du bâtiment. Forfaits HT, validation chez vous",
+      { withGeoTag: false },
+    ),
+    keywords: ["assistant travaux France", "assistant travaux BTP France", "externalisation administrative BTP France"],
+    hreflangLanguages: assistantTravauxGeoCluster,
+  },
+  "/assistant-travaux-belgique": {
+    title: "Assistant travaux Belgique : support administratif BTP | BeWork",
+    description: metaDescriptionFrancophonie(
+      "Belgique : assistant travaux francophone pour devis, dossiers chantier et marchés publics. Relais bureau-chantier à distance, forfaits HT",
+      { withGeoTag: false },
+    ),
+    keywords: ["assistant travaux Belgique", "assistant BTP Belgique", "BTP Wallonie"],
+    hreflangLanguages: assistantTravauxGeoCluster,
+  },
+  "/assistant-travaux-suisse": {
+    title: "Assistant travaux Suisse : relais administratif BTP | BeWork",
+    description: metaDescriptionFrancophonie(
+      "Suisse romande : assistant travaux pour dossiers chantier, relances et suivi administratif BTP. Process cadré, validation chez vous",
+      { withGeoTag: false },
+    ),
+    keywords: ["assistant travaux Suisse", "assistant BTP Suisse romande"],
+    hreflangLanguages: assistantTravauxGeoCluster,
+  },
+  "/assistant-travaux-luxembourg": {
+    title: "Assistant travaux Luxembourg : accompagnement BTP | BeWork",
+    description: metaDescriptionFrancophonie(
+      "Luxembourg : assistant travaux pour devis, marchés publics et dossiers chantier. Relais administratif BTP francophone, forfaits HT",
+      { withGeoTag: false },
+    ),
+    keywords: ["assistant travaux Luxembourg", "assistant BTP Luxembourg"],
+    hreflangLanguages: assistantTravauxGeoCluster,
   },
   "/cas-clients/ccmi-martin-audit-devis": {
     title: "Cas client CCMI Martin : audit devis BTP avant signature",

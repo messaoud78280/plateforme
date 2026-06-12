@@ -1,9 +1,26 @@
+import type { Metadata } from "next";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 
 const PAGE_PATH = "/assistant-administratif-btp";
 
-export const metadata = landingPageMetadataFromPath(PAGE_PATH);
+const PAGE_META_DESCRIPTION =
+  "BeWork accompagne les PME du BTP en France et en Belgique : gestion administrative des marchés travaux déléguée et supervisée, sans embauche. Reprenez le terrain.";
+
+const baseMetadata = landingPageMetadataFromPath(PAGE_PATH);
+
+export const metadata: Metadata = {
+  ...baseMetadata,
+  description: PAGE_META_DESCRIPTION,
+  openGraph: {
+    ...(typeof baseMetadata.openGraph === "object" ? baseMetadata.openGraph : {}),
+    description: PAGE_META_DESCRIPTION,
+  },
+  twitter: {
+    ...(typeof baseMetadata.twitter === "object" ? baseMetadata.twitter : {}),
+    description: PAGE_META_DESCRIPTION,
+  },
+};
 
 const faq = [
   {

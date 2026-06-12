@@ -169,6 +169,20 @@ export const BEWORK_PUBLIC_OFFERS: readonly BeWorkPublicOffer[] = [
   },
 ] as const;
 
+/** Offres affichées sur la grille /tarifs (hors intervention ponctuelle et mission structurée). */
+export const BEWORK_TARIFS_GRID_OFFER_KEYS = [
+  "RELAIS_ESSENTIEL",
+  "RELAIS_PRO",
+  "CELLULE_TRAVAUX",
+  "SUR_MESURE",
+] as const satisfies readonly BeWorkPublicOfferKey[];
+
+export function getBeworkTarifsGridOffers(): BeWorkPublicOffer[] {
+  return BEWORK_TARIFS_GRID_OFFER_KEYS.map(
+    (key) => BEWORK_PUBLIC_OFFERS.find((o) => o.key === key)!,
+  );
+}
+
 export const BEWORK_TARIFS_TIER_PRICING_NOTE =
   "Les interventions à 150 € HT couvrent une demande ciblée et limitée. Dès qu’une analyse, une structuration documentaire ou un livrable d’envergure est nécessaire, la mission est cadrée en dossier structuré à partir de 250 € HT.";
 

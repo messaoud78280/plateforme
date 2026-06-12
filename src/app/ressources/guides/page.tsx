@@ -9,7 +9,6 @@ import {
   SEO_OG_ALTERNATE_LOCALES,
   SEO_OG_LOCALE_PRIMARY,
   hreflangFrancophonieLanguages,
-  metaDescriptionFrancophonie,
 } from "@/lib/seo-francophonie";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 
@@ -44,9 +43,8 @@ const GUIDE_INDEX: {
   })),
 ].sort((x, y) => new Date(y.publishedTime).getTime() - new Date(x.publishedTime).getTime());
 
-const GUIDES_META_DESC = metaDescriptionFrancophonie(
-  "Guides PDF BeWork : IA, skills Claude, gestion administrative chantier et externalisation bureau-chantier pour conducteurs",
-);
+const GUIDES_META_DESC =
+  "Guides BeWork pour les entreprises du BTP : analyser un DCE, sécuriser un PPSPS, monter un dossier travaux. Des méthodes concrètes, un gain de temps immédiat.";
 
 export const metadata: Metadata = {
   title: { absolute: "Guides BTP : conducteur de travaux et IA | BeWork" },
@@ -78,8 +76,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Guides BeWork",
-    description:
-      "Guides BeWork : méthodes et articles pour piloter l’administratif chantier, la trésorerie et l’externalisation en BTP.",
+    description: GUIDES_META_DESC,
   },
   robots: { index: true, follow: true },
 };

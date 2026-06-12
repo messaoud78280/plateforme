@@ -73,7 +73,7 @@ const HOME_FAQ_ITEMS = [
 
 const HOME_META_TITLE = "BeWork — Assistants travaux augmentés par l’IA pour le BTP";
 const HOME_META_DESCRIPTION =
-  "Assistants travaux IA pour le BTP : marchés publics et privés, administration chantier, validation humaine, conformité juridique, productivité ×10. 100 % supervisé en France.";
+  "Relais administratif des marchés travaux BTP augmenté par l'IA : DCE, CR de chantier, PPSPS, chiffrage. On tient le bureau, vous tenez le chantier.";
 
 export const metadata: Metadata = {
   title: { absolute: HOME_META_TITLE },

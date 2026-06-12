@@ -6,7 +6,7 @@ import {
 } from "@/lib/bework-public-offers";
 
 /** Aperçu tarifaire accueil — 3 offres clés, sans crédits ni calcul horaire. */
-const HOME_PREVIEW_KEYS = ["INTERVENTION_PONCTUELLE", "RELAIS_PRO", "CELLULE_TRAVAUX"] as const;
+const HOME_PREVIEW_KEYS = ["RELAIS_ESSENTIEL", "RELAIS_PRO", "CELLULE_TRAVAUX"] as const;
 
 export function HomePricingSection() {
   const previewOffers = HOME_PREVIEW_KEYS.map(
@@ -32,8 +32,8 @@ export function HomePricingSection() {
             Un niveau d&apos;accompagnement, <span className="text-[#1d4ed8]">pas des crédits.</span>
           </h2>
           <p className="mx-auto mt-2 max-w-lg text-[14px] leading-relaxed text-slate-600 md:text-[15px]">
-            Missions ponctuelles, relais travaux mensuel ou cellule externalisée — prix de départ HT, ajustés au devis selon
-            votre périmètre. Accessible pour tester, sérieux pour travailler.
+            Relais travaux mensuel, cellule externalisée ou sur mesure — prix de départ HT, ajustés au devis selon votre
+            périmètre. Sérieux pour travailler, premium pour durer.
           </p>
         </header>
 

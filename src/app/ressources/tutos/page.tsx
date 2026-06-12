@@ -11,7 +11,6 @@ import {
   SEO_OG_ALTERNATE_LOCALES,
   SEO_OG_LOCALE_PRIMARY,
   hreflangFrancophonieLanguages,
-  metaDescriptionFrancophonie,
 } from "@/lib/seo-francophonie";
 import { absoluteUrl } from "@/lib/site";
 
@@ -19,9 +18,8 @@ const pageUrl = absoluteUrl("/ressources/tutos");
 const ogImage = absoluteUrl("/opengraph-image");
 
 const TUTOS_META_TITLE = "Tutoriels BTP : skills Claude et PDF gratuits | BeWork";
-const TUTOS_META_DESC = metaDescriptionFrancophonie(
-  "Tutoriels BeWork : skills Claude pour DCE, PPSPS, DOE, devis, RDV client et CR. PDF gratuits et prompts pour le BTP",
-);
+const TUTOS_META_DESC =
+  "Tutoriels BeWork : créez vos skills IA pour analyser un DCE, générer un PPSPS, un DOE ou un devis. Guides pas à pas pour gagner du temps sur l'administratif BTP.";
 
 export const metadata: Metadata = {
   title: { absolute: TUTOS_META_TITLE },

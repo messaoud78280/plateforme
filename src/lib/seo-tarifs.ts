@@ -10,7 +10,6 @@ import {
   getMarketingAggregateOfferDescription,
 } from "@/lib/bework-public-offers";
 import { SEO_KEYWORDS_ASSISTANT_TRAVAUX, SEO_KEYWORDS_BTP_PME } from "@/lib/seo-keywords";
-import { metaDescriptionFrancophonie } from "@/lib/seo-francophonie";
 import { SCHEMA_ORG_ID, buildOfferCatalogJsonLd, buildWebPageAndBreadcrumbJsonLd } from "@/lib/schema";
 import { absoluteUrl } from "@/lib/site";
 
@@ -18,9 +17,8 @@ export const TARIFS_PAGE_PATH = "/tarifs" as const;
 
 export const TARIFS_SEO_TITLE = "Tarifs BeWork | Assistant travaux externalisé BTP";
 
-export const TARIFS_SEO_DESCRIPTION = metaDescriptionFrancophonie(
-  "Découvrez les tarifs BeWork : intervention ponctuelle, mission structurée, relais travaux mensuel et cellule travaux externalisée pour devis, DCE, PPSPS, DOE, relances et suivi chantier.",
-);
+export const TARIFS_SEO_DESCRIPTION =
+  "Tarifs de l'assistant travaux BTP BeWork : packs de crédits flexibles, facturation au réel, sans recrutement. Trouvez la formule adaptée à votre volume.";
 
 export const TARIFS_SEO_KEYWORDS = [
   "tarifs assistant travaux",

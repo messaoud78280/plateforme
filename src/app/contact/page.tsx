@@ -16,7 +16,7 @@ const contactOgImage = absoluteUrl("/opengraph-image");
 
 const CONTACT_TITLE = "Contact BeWork — qualifier votre besoin administratif BTP";
 const CONTACT_DESCRIPTION =
-  "Formulaire BeWork pour qualifier votre besoin BTP : marché public, privé ou accord-cadre, DOE, comptes rendus, DICT, relances. FR · BE · CH · LU.";
+  "Contactez BeWork et qualifiez votre besoin BTP en quelques minutes : type de marché, volume, délais. On vous rappelle pour cadrer la délégation administrative.";
 
 export const metadata: Metadata = {
   title: { absolute: CONTACT_TITLE },

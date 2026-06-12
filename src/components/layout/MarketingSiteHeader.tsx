@@ -108,12 +108,12 @@ const REASSURANCE = [
 ];
 
 const NAV_LINK =
-  "inline-flex items-center gap-1 rounded-lg px-3 py-2 text-[13px] font-medium tracking-normal text-slate-600 transition-[color,background,box-shadow] hover:bg-white/80 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8]/35";
+  "inline-flex items-center gap-1 rounded-lg px-3.5 py-2.5 text-base font-semibold tracking-normal text-slate-700 transition-[color,background,box-shadow] hover:bg-white/80 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8]/35";
 const NAV_LINK_OPEN = "bg-white text-[#1d4ed8] shadow-sm ring-1 ring-slate-200/70";
 const HEADER_BTN_SECONDARY =
-  "inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200/90 bg-white/95 px-3.5 text-sm font-medium text-slate-800 shadow-sm backdrop-blur-sm transition hover:border-slate-300 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8]/35";
+  "inline-flex h-11 items-center gap-2 rounded-lg border border-slate-200/90 bg-white/95 px-4 text-base font-semibold text-slate-800 shadow-sm backdrop-blur-sm transition hover:border-slate-300 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8]/35";
 const HEADER_BTN_PRIMARY =
-  "inline-flex h-10 items-center gap-2 rounded-lg bg-[#1d4ed8] px-4 text-sm font-semibold text-white shadow-sm bework-cta-primary-glow transition hover:bg-[#1e40af] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8]/50";
+  "inline-flex h-11 items-center gap-2 rounded-lg bg-[#1d4ed8] px-5 text-base font-semibold text-white shadow-sm bework-cta-primary-glow transition hover:bg-[#1e40af] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8]/50";
 
 export function MarketingSiteHeader({ plainBg = false }: Props) {
   const [scrolled, setScrolled] = useState(false);
@@ -283,7 +283,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                   aria-label="Solutions BTP"
                   role="menu"
                 >
-                  <p className="px-5 pb-3 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-[#1d4ed8]/95">
+                  <p className="px-5 pb-3 text-xs font-bold uppercase tracking-[0.12em] text-[#1d4ed8]/95">
                     Nos solutions BTP
                   </p>
                   <ul className="flex flex-col gap-3 px-3">
@@ -302,10 +302,10 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                             <SolutionNavIcon id={item.icon} className="h-[17px] w-[17px]" />
                           </span>
                           <div className="min-w-0 flex-1 pt-px">
-                            <span className="block text-[0.875rem] font-semibold leading-tight tracking-tight text-slate-900">
+                            <span className="block text-base font-semibold leading-tight tracking-tight text-slate-900">
                               {item.title}
                             </span>
-                            <span className="mt-1 block truncate text-[12px] leading-snug text-slate-600">{item.description}</span>
+                            <span className="mt-1 block truncate text-sm leading-snug text-slate-600">{item.description}</span>
                           </div>
                           <ChevronRightThin className="mt-1 h-4 w-4 shrink-0 self-start text-slate-400" />
                         </Link>
@@ -315,7 +315,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                   <div className="mt-3 border-t border-slate-200/80 px-5 pt-3">
                     <Link
                       href="/#notre-expertise"
-                      className="inline-flex items-center gap-1 text-[13px] font-semibold text-[#1d4ed8] transition-colors hover:text-[#1e40af]"
+                      className="inline-flex items-center gap-1 text-base font-semibold text-[#1d4ed8] transition-colors hover:text-[#1e40af]"
                       onClick={() => setSolutionsOpen(false)}
                     >
                       Voir toutes nos solutions
@@ -374,7 +374,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                   aria-label="Ressources"
                   role="menu"
                 >
-                  <p className="px-5 pb-3 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-[#1d4ed8]/95">
+                  <p className="px-5 pb-3 text-xs font-bold uppercase tracking-[0.12em] text-[#1d4ed8]/95">
                     À explorer
                   </p>
                   <ul className="flex flex-col gap-3 px-3" role="none">
@@ -393,10 +393,10 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                             <ResourceNavIcon id={item.icon} className="h-[17px] w-[17px]" />
                           </span>
                           <div className="min-w-0 flex-1 pt-px">
-                            <span className="block text-[0.875rem] font-semibold leading-tight tracking-tight text-slate-900">
+                            <span className="block text-base font-semibold leading-tight tracking-tight text-slate-900">
                               {item.title}
                             </span>
-                            <span className="mt-1 block truncate text-[12px] leading-snug text-slate-600">{item.description}</span>
+                            <span className="mt-1 block truncate text-sm leading-snug text-slate-600">{item.description}</span>
                           </div>
                           <ChevronRightThin className="mt-1 h-4 w-4 shrink-0 self-start text-slate-400" />
                         </Link>
@@ -406,7 +406,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                   <div className="mt-3 border-t border-slate-200/80 px-5 pt-3">
                     <Link
                       href="/ressources"
-                      className="inline-flex items-center gap-1 text-[13px] font-semibold text-[#1d4ed8] transition-colors hover:text-[#1e40af]"
+                      className="inline-flex items-center gap-1 text-base font-semibold text-[#1d4ed8] transition-colors hover:text-[#1e40af]"
                       onClick={() => setResourcesOpen(false)}
                     >
                       Vue d&apos;ensemble Ressources (carrousels)
@@ -452,7 +452,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
         <div className="h-[calc(100dvh-7.875rem-env(safe-area-inset-top,0px))] overflow-y-auto pb-10 pt-4 sm:h-[calc(100dvh-8.4375rem-env(safe-area-inset-top,0px))] md:h-[calc(100dvh-9rem-env(safe-area-inset-top,0px))]">
           <div className="container-site flex flex-col gap-6">
             <div>
-              <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[#1d4ed8]">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">
                 Nos solutions BTP
               </p>
               <ul className="mt-2 divide-y divide-slate-100 rounded-xl border border-slate-100">
@@ -470,8 +470,8 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                         <SolutionNavIcon id={item.icon} className="h-5 w-5" />
                       </span>
                       <div className="flex min-w-0 flex-1 flex-col gap-1">
-                        <span className="text-sm font-semibold leading-snug text-slate-900">{item.title}</span>
-                        <span className="text-[13px] leading-snug text-slate-600">{item.description}</span>
+                        <span className="text-base font-semibold leading-snug text-slate-900">{item.title}</span>
+                        <span className="text-sm leading-snug text-slate-600">{item.description}</span>
                       </div>
                       <ChevronRightThin className="h-5 w-5 shrink-0 self-center text-slate-400" />
                     </Link>
@@ -480,7 +480,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               </ul>
               <Link
                 href="/#notre-expertise"
-                className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-[#1d4ed8]"
+                className="mt-3 inline-flex items-center gap-1.5 text-base font-semibold text-[#1d4ed8]"
                 onClick={() => setMobileOpen(false)}
               >
                 Voir toutes nos solutions
@@ -489,8 +489,8 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             </div>
 
             <div className="flex flex-col gap-2 rounded-xl border border-slate-100 bg-slate-50/80 p-4">
-              <p className="text-sm font-semibold text-slate-900">Pourquoi nous ?</p>
-              <ul className="space-y-2 text-sm text-slate-600">
+              <p className="text-base font-semibold text-slate-900">Pourquoi nous ?</p>
+              <ul className="space-y-2 text-base text-slate-600">
                 {REASSURANCE.map((line) => (
                   <li key={line}>• {line}</li>
                 ))}
@@ -507,25 +507,25 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             <nav className="flex flex-col gap-1 border-t border-slate-100 pt-4" aria-label="Navigation mobile">
               <Link
                 href="/#process-bework"
-                className="rounded-lg px-3 py-3 text-sm font-[530] text-slate-800 hover:bg-slate-50"
+                className="rounded-lg px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50"
                 onClick={() => setMobileOpen(false)}
               >
                 Process BeWork
               </Link>
               <Link
                 href="/tarifs"
-                className="rounded-lg px-3 py-3 text-sm font-[530] text-slate-800 hover:bg-slate-50"
+                className="rounded-lg px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50"
                 onClick={() => setMobileOpen(false)}
                 {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_TARIFS, "header-mobile-nav")}
               >
                 Tarifs
               </Link>
-              <p className="mt-3 px-3 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-[#1d4ed8]">
+              <p className="mt-3 px-3 text-xs font-bold uppercase tracking-[0.12em] text-[#1d4ed8]">
                 Ressources
               </p>
               <Link
                 href="/ressources"
-                className="mx-3 mt-2 inline-flex min-h-[2.75rem] items-center justify-center rounded-lg border border-slate-200 bg-[#eff6ff]/40 px-3 text-sm font-semibold text-[#1d4ed8] transition hover:bg-[#eff6ff]"
+                className="mx-3 mt-2 inline-flex min-h-[3rem] items-center justify-center rounded-lg border border-slate-200 bg-[#eff6ff]/40 px-3 text-base font-semibold text-[#1d4ed8] transition hover:bg-[#eff6ff]"
                 onClick={() => setMobileOpen(false)}
               >
                 Vue d&apos;ensemble
@@ -545,8 +545,8 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                         <ResourceNavIcon id={item.icon} className="h-[18px] w-[18px]" />
                       </span>
                       <div className="flex min-w-0 flex-1 flex-col gap-1">
-                        <span className="text-sm font-semibold leading-snug text-slate-900">{item.title}</span>
-                        <span className="text-[13px] leading-snug text-slate-600">{item.description}</span>
+                        <span className="text-base font-semibold leading-snug text-slate-900">{item.title}</span>
+                        <span className="text-sm leading-snug text-slate-600">{item.description}</span>
                       </div>
                       <ChevronRightThin className="h-5 w-5 shrink-0 self-center text-slate-400" />
                     </Link>

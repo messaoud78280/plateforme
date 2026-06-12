@@ -270,7 +270,7 @@ export default function RootLayout({
         <PlausibleScript />
       </head>
       <body
-        className={`${inter.variable} ${rajdhani.variable} ${architectsDaughter.variable} ${geistMono.variable} min-w-0 overflow-x-clip antialiased text-black`}
+        className={`${inter.variable} ${rajdhani.variable} ${architectsDaughter.variable} ${geistMono.variable} min-w-0 overflow-x-clip antialiased text-base text-black`}
       >
         <script
           type="application/ld+json"

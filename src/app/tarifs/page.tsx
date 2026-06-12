@@ -92,15 +92,15 @@ export default function TarifsPage() {
       <main className="mx-auto max-w-site px-4 py-12 md:py-16">
         {/* Hero */}
         <section className="text-center">
-          <h1 className="text-metallic-black font-sans text-3xl font-semibold tracking-tight md:text-4xl md:leading-tight">
+          <h1 className="text-metallic-black font-sans text-4xl font-semibold tracking-tight md:text-5xl md:leading-tight">
             {TARIFS_H1}
           </h1>
-          <p className="mx-auto mt-5 max-w-3xl text-lg leading-relaxed text-slate-700">
+          <p className="mx-auto mt-5 max-w-3xl text-xl leading-relaxed text-slate-700 md:text-[1.35rem] md:leading-relaxed">
             Des missions ponctuelles aux cellules travaux externalisées, BeWork aide les entreprises du BTP à structurer leurs
             devis, dossiers chantier, DCE, PPSPS, DOE, relances et comptes rendus avec méthode, IA spécialisée et supervision
             humaine.
           </p>
-          <p className="mx-auto mt-4 max-w-3xl text-sm leading-relaxed text-slate-600 md:text-base">
+          <p className="mx-auto mt-4 max-w-3xl text-base leading-relaxed text-slate-600 md:text-lg">
             Les tarifs affichés sont des prix de départ. Le tarif final dépend du nombre de chantiers, du volume de
             dossiers, des livrables attendus, de la fréquence de suivi et du niveau de supervision nécessaire.
           </p>
@@ -122,10 +122,10 @@ export default function TarifsPage() {
 
         {/* Grille tarifaire */}
         <section className="mt-14" aria-labelledby="offres-heading">
-          <h2 id="offres-heading" className="text-center text-xl font-bold text-[#0f172a] md:text-2xl">
+          <h2 id="offres-heading" className="text-center text-2xl font-bold text-[#0f172a] md:text-3xl">
             Nos offres
           </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-slate-600">
+          <p className="mx-auto mt-3 max-w-2xl text-center text-base text-slate-600 md:text-lg">
             Niveaux d&apos;accompagnement — prix de départ HT, ajustés au devis selon votre périmètre réel.
           </p>
           <div className="mt-8">
@@ -136,10 +136,10 @@ export default function TarifsPage() {
         {/* Repositionnement — sous la grille tarifaire */}
         <section className="mx-auto mt-10 max-w-4xl md:mt-12" aria-labelledby="repositionnement-heading">
           <div className="rounded-2xl border border-slate-200/90 bg-white p-8 shadow-sm md:p-10">
-            <h2 id="repositionnement-heading" className="text-center text-xl font-bold text-[#0f172a] md:text-2xl">
+            <h2 id="repositionnement-heading" className="text-center text-2xl font-bold text-[#0f172a] md:text-3xl">
               Vous ne payez pas seulement du temps
             </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-center text-sm leading-relaxed text-slate-600 md:text-base">
+            <p className="mx-auto mt-4 max-w-2xl text-center text-base leading-relaxed text-slate-600 md:text-lg">
               BeWork n&apos;est pas une assistance administrative low-cost. Vous achetez de la méthode, de la traçabilité, une
               meilleure organisation documentaire et un relais bureau-chantier capable de soulager vos équipes travaux.
             </p>
@@ -147,7 +147,7 @@ export default function TarifsPage() {
               {BEWORK_REPOSITIONING_POINTS.map((point) => (
                 <li
                   key={point}
-                  className="flex items-start gap-3 rounded-xl border border-slate-100 bg-[#f8fafc] px-4 py-3 text-sm text-slate-700"
+                  className="flex items-start gap-3 rounded-xl border border-slate-100 bg-[#f8fafc] px-4 py-3.5 text-base text-slate-800"
                 >
                   <span className="mt-0.5 text-[#1d4ed8]" aria-hidden>
                     ✓
@@ -162,16 +162,16 @@ export default function TarifsPage() {
         {/* Calcul du tarif */}
         <section className="mx-auto mt-14 max-w-4xl" aria-labelledby="calcul-tarif-heading">
           <div className="rounded-2xl border border-slate-200/90 bg-white p-8 md:p-10">
-            <h2 id="calcul-tarif-heading" className="text-xl font-bold text-[#0f172a] md:text-2xl">
+            <h2 id="calcul-tarif-heading" className="text-2xl font-bold text-[#0f172a] md:text-3xl">
               Un tarif ajusté à votre organisation
             </h2>
-            <p className="mt-4 text-sm leading-relaxed text-slate-600 md:text-base">
+            <p className="mt-4 text-base leading-relaxed text-slate-600 md:text-lg">
               Le prix final dépend du périmètre réel de la mission. Une intervention ponctuelle n&apos;a pas le même
               niveau d&apos;engagement qu&apos;un suivi multi-chantiers ou qu&apos;une cellule travaux externalisée.
             </p>
             <ul className="mt-6 grid gap-2 sm:grid-cols-2" role="list">
               {BEWORK_PRICING_CRITERIA.map((criterion) => (
-                <li key={criterion} className="flex gap-2 text-sm text-slate-700">
+                <li key={criterion} className="flex gap-2 text-base text-slate-800">
                   <span className="text-[#1d4ed8]" aria-hidden>
                     •
                   </span>
@@ -179,7 +179,7 @@ export default function TarifsPage() {
                 </li>
               ))}
             </ul>
-            <p className="mt-6 rounded-lg border border-slate-100 bg-[#f8fafc] px-4 py-3 text-[13px] leading-relaxed text-slate-600 md:text-sm">
+            <p className="mt-6 rounded-lg border border-slate-100 bg-[#f8fafc] px-4 py-3.5 text-base leading-relaxed text-slate-700">
               {BEWORK_TARIFS_TIER_PRICING_NOTE}
             </p>
           </div>
@@ -187,12 +187,12 @@ export default function TarifsPage() {
 
         {/* Prise en charge */}
         <section className="mx-auto mt-14 max-w-5xl" aria-labelledby="prise-en-charge-heading">
-          <h2 id="prise-en-charge-heading" className="text-xl font-bold text-[#0f172a] md:text-2xl">
+          <h2 id="prise-en-charge-heading" className="text-2xl font-bold text-[#0f172a] md:text-3xl">
             Ce que BeWork peut prendre en charge
           </h2>
           <ul className="mt-6 grid gap-2 sm:grid-cols-2 md:grid-cols-3" role="list">
             {BEWORK_SCOPE_TAKEOVER.map((item) => (
-              <li key={item} className="flex items-center gap-2 rounded-lg border border-slate-100 bg-white px-3 py-2.5 text-sm text-slate-700">
+              <li key={item} className="flex items-center gap-2 rounded-lg border border-slate-100 bg-white px-3 py-3 text-base text-slate-800">
                 <span className="text-[#1d4ed8]" aria-hidden>
                   ✓
                 </span>
@@ -205,16 +205,16 @@ export default function TarifsPage() {
         {/* Ce que vous gardez */}
         <section className="mx-auto mt-14 max-w-4xl" aria-labelledby="client-garde-heading">
           <div className="rounded-2xl border-2 border-[#1d4ed8]/15 bg-[#eff6ff]/40 p-8 md:p-10">
-            <h2 id="client-garde-heading" className="text-xl font-bold text-[#0f172a] md:text-2xl">
+            <h2 id="client-garde-heading" className="text-2xl font-bold text-[#0f172a] md:text-3xl">
               Ce que vous gardez toujours
             </h2>
-            <p className="mt-4 text-sm leading-relaxed text-slate-700 md:text-base">
+            <p className="mt-4 text-base leading-relaxed text-slate-700 md:text-lg">
               BeWork prépare, structure, suit et alerte. L&apos;entreprise garde toujours la validation finale et les décisions
               engageantes.
             </p>
             <ul className="mt-6 grid gap-2 sm:grid-cols-2" role="list">
               {BEWORK_CLIENT_KEEPS.map((item) => (
-                <li key={item} className="flex gap-2 text-sm font-medium text-[#0f172a]">
+                <li key={item} className="flex gap-2 text-base font-medium text-[#0f172a]">
                   <span aria-hidden>→</span>
                   {item}
                 </li>
@@ -225,29 +225,29 @@ export default function TarifsPage() {
 
         {/* Pourquoi pas les moins chers */}
         <section className="mx-auto mt-14 max-w-3xl text-center" aria-labelledby="premium-heading">
-          <h2 id="premium-heading" className="text-xl font-bold text-[#0f172a] md:text-2xl">
+          <h2 id="premium-heading" className="text-2xl font-bold text-[#0f172a] md:text-3xl">
             Pourquoi nos tarifs ne sont pas les moins chers
           </h2>
-          <p className="mt-4 text-sm leading-relaxed text-slate-600 md:text-base">{WHY_NOT_CHEAPEST}</p>
-          <p className="mt-4 text-sm leading-relaxed text-slate-600 md:text-base">{WHY_NOT_CHEAPEST_COMPARE}</p>
+          <p className="mt-4 text-base leading-relaxed text-slate-600 md:text-lg">{WHY_NOT_CHEAPEST}</p>
+          <p className="mt-4 text-base leading-relaxed text-slate-600 md:text-lg">{WHY_NOT_CHEAPEST_COMPARE}</p>
         </section>
 
         {/* Processus */}
         <section className="mt-14" aria-labelledby="process-heading">
-          <h2 id="process-heading" className="text-center text-xl font-bold text-[#0f172a] md:text-2xl">
+          <h2 id="process-heading" className="text-center text-2xl font-bold text-[#0f172a] md:text-3xl">
             Comment démarrer avec BeWork ?
           </h2>
           <ol className="mx-auto mt-8 grid max-w-5xl list-none gap-4 md:grid-cols-2 lg:grid-cols-3">
             {BEWORK_TARIFS_PROCESS_STEPS.map((step, i) => (
               <li key={step.title} className="rounded-xl border border-slate-200/90 bg-white p-6 shadow-sm">
                 <span
-                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1d4ed8] text-sm font-bold text-white"
+                  className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#1d4ed8] text-base font-bold text-white"
                   aria-hidden
                 >
                   {i + 1}
                 </span>
-                <h3 className="mt-4 font-semibold text-[#0f172a]">{step.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{step.desc}</p>
+                <h3 className="mt-4 text-lg font-semibold text-[#0f172a]">{step.title}</h3>
+                <p className="mt-2 text-base leading-relaxed text-slate-700">{step.desc}</p>
               </li>
             ))}
           </ol>
@@ -256,7 +256,7 @@ export default function TarifsPage() {
         {/* Liens internes SEO */}
         <section className="mx-auto mt-14 max-w-5xl" aria-labelledby="ressources-heading">
           <div className="rounded-2xl border border-slate-200/90 bg-white p-8 md:p-10">
-            <h2 id="ressources-heading" className="text-lg font-semibold text-[#0f172a] md:text-xl">
+            <h2 id="ressources-heading" className="text-xl font-semibold text-[#0f172a] md:text-2xl">
               Aller plus loin
             </h2>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -264,14 +264,14 @@ export default function TarifsPage() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="rounded-xl border border-slate-100 px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-[#93c5fd] hover:bg-[#f8fafc]"
+                  className="rounded-xl border border-slate-100 px-4 py-3.5 text-base font-medium text-slate-800 transition hover:border-[#93c5fd] hover:bg-[#f8fafc]"
                 >
                   {link.label} <span className="text-[#1d4ed8]">→</span>
                 </Link>
               ))}
               <Link
                 href="/contact"
-                className="rounded-xl border border-slate-100 px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-[#93c5fd] hover:bg-[#f8fafc]"
+                className="rounded-xl border border-slate-100 px-4 py-3.5 text-base font-medium text-slate-800 transition hover:border-[#93c5fd] hover:bg-[#f8fafc]"
               >
                 Contact &amp; diagnostic <span className="text-[#1d4ed8]">→</span>
               </Link>
@@ -281,14 +281,14 @@ export default function TarifsPage() {
 
         {/* FAQ */}
         <section className="mt-14" aria-labelledby="faq-heading">
-          <h2 id="faq-heading" className="text-xl font-bold text-[#0f172a] md:text-2xl">
+          <h2 id="faq-heading" className="text-2xl font-bold text-[#0f172a] md:text-3xl">
             Questions fréquentes
           </h2>
           <ul className="mt-6 space-y-4">
             {BEWORK_TARIFS_FAQ.map(({ q, a }) => (
               <li key={q} className="rounded-xl border border-slate-200/90 bg-white shadow-sm">
                 <details className="group">
-                  <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-4 font-medium text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-inset [&::-webkit-details-marker]:hidden">
+                  <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-4 text-base font-semibold text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-inset [&::-webkit-details-marker]:hidden">
                     <span>{q}</span>
                     <span className="shrink-0 pl-2 text-slate-400 group-open:rotate-180">
                       <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -296,7 +296,7 @@ export default function TarifsPage() {
                       </svg>
                     </span>
                   </summary>
-                  <div className="border-t border-slate-100 px-4 py-3 text-sm leading-relaxed text-slate-600">{a}</div>
+                  <div className="border-t border-slate-100 px-5 py-4 text-base leading-relaxed text-slate-700">{a}</div>
                 </details>
               </li>
             ))}
@@ -305,8 +305,8 @@ export default function TarifsPage() {
 
         {/* CTA bas */}
         <section className="mt-14 rounded-2xl border-2 border-[#1d4ed8]/25 bg-[#eff6ff] p-8 text-center md:p-10">
-          <h2 className="text-xl font-bold text-[#0f172a] md:text-2xl">Parlons de votre organisation</h2>
-          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-600 md:text-base">
+          <h2 className="text-2xl font-bold text-[#0f172a] md:text-3xl">Parlons de votre organisation</h2>
+          <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-slate-600 md:text-lg">
             Nous cadrons ensemble le niveau d&apos;accompagnement adapté à vos chantiers et à votre volume de dossiers.
           </p>
           <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -326,7 +326,7 @@ export default function TarifsPage() {
         </section>
 
         <div className="mt-10 flex justify-center">
-          <Link href="/" className="text-sm font-medium text-slate-600 underline hover:text-[#0f172a]">
+          <Link href="/" className="text-base font-medium text-slate-600 underline hover:text-[#0f172a]">
             Retour à l&apos;accueil
           </Link>
         </div>

@@ -8,10 +8,10 @@ import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import { SITE_URL, getOrgSameAs } from "@/lib/site";
 
 const COL_LINK =
-  "text-sm text-slate-400 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70";
+  "text-base text-slate-400 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70";
 
 function ColumnTitle({ children }: { children: ReactNode }) {
-  return <h3 className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">{children}</h3>;
+  return <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">{children}</h3>;
 }
 
 function socialLabel(url: string): "linkedin" | "facebook" | "instagram" | "tiktok" | "youtube" | "other" {
@@ -85,7 +85,7 @@ export function MarketingSiteFooter() {
                 Be<span className="text-[color:var(--accent-500)]">Work</span>
               </span>
             </Link>
-            <p className="mt-4 text-sm leading-relaxed text-slate-400">
+            <p className="mt-4 text-base leading-relaxed text-slate-400">
               Assistants travaux BTP — relais bureau-chantier : devis, relances, DICT, dossiers chantier et pilotage administratif sans recruter.
             </p>
             <p className="mt-4 text-xs leading-relaxed text-slate-500">
@@ -281,7 +281,7 @@ export function MarketingSiteFooter() {
 
       <div className="border-t border-slate-800/90">
         <div className="mx-auto flex max-w-site flex-col gap-6 px-5 py-6 sm:px-6 md:flex-row md:items-center md:justify-between md:gap-4">
-          <p className="text-xs text-slate-500 sm:text-sm">
+          <p className="text-sm text-slate-500 sm:text-base">
             © {year} BeWork. Tous droits réservés.
           </p>
 
@@ -308,7 +308,7 @@ export function MarketingSiteFooter() {
                 <span className="hidden h-8 w-px bg-slate-700 sm:block" aria-hidden />
               </>
             ) : null}
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-slate-400 sm:text-sm">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium text-slate-400 sm:text-base">
               <Link href="/faq" className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70">
                 Centre d&apos;aide / FAQ
               </Link>

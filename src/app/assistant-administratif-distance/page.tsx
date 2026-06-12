@@ -37,7 +37,7 @@ const faqJsonLd = {
 export default function Page() {
   return (
     <SeoLandingPage
-      description="Assistant administratif à distance pour PME et indépendants. Devis, factures, relances, suivi dossiers. Plateforme supervisée depuis la France. Dès 790 € HT/mois."
+      description="Assistant administratif à distance pour PME et indépendants. Devis, factures, relances, suivi dossiers. Plateforme supervisée depuis la France. Dès 590 € HT/mois."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Assistant administratif à distance", href: PAGE_PATH },
@@ -47,7 +47,7 @@ export default function Page() {
         <>
           L&apos;assistant administratif à distance BeWork travaille depuis notre plateforme, supervisée depuis la France.
           Devis, factures, relances, agenda : vous déléguez l&apos;administratif sans recruter. Pour PME et indépendants
-          en France, Belgique, Suisse et Luxembourg. Dès 790 € HT/mois.
+          en France, Belgique, Suisse et Luxembourg. Dès 590 € HT/mois.
         </>
       }
     >
@@ -63,7 +63,7 @@ export default function Page() {
       <h2>Avantages pour les indépendants et PME</h2>
       <p>
         Gain de temps, flexibilité, coût maîtrisé. Un assistant virtuel entreprise à distance évite le recrutement et
-        les charges associées. Vous payez un forfait tout compris et réglez uniquement les crédits consommés.
+        les charges associées. Vous payez un forfait clair selon votre périmètre — pas de prix horaire ni de crédits.
       </p>
 
       <h2>Qualité et supervision</h2>

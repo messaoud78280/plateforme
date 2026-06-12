@@ -6,11 +6,10 @@ import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/seo-landing-json-ld";
 import { getTutoPageDescription, tutoPageMetadata } from "@/lib/seo-tuto-metadata";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 import {
-  PLAN_KEYS,
-  SUBSCRIPTION_PLANS,
-  creditsToDisplayHours,
-  formatPlanPriceMonthlyHt,
-} from "@/lib/subscription-plans";
+  BEWORK_PUBLIC_OFFERS,
+  BEWORK_TARIFS_TIER_PRICING_NOTE,
+  formatOfferPriceLabel,
+} from "@/lib/bework-public-offers";
 
 const pagePath = "/ressources/bework-maitrise-doeuvre";
 const pageUrl = absoluteUrl(pagePath);
@@ -29,49 +28,49 @@ const TACHES_MOE = [
     titre: "Rédaction CCTP",
     detail: "Trames par lot, articles techniques, références normes / DTU.",
     complexite: "Complexe",
-    credits: "15 à 35 crédits / lot",
+    engagement: "Mission structurée",
   },
   {
     titre: "DPGF — mise en forme & cohérence",
     detail: "Vérification quantités, cohérence avec CCTP, contrôles croisés.",
     complexite: "Moyen",
-    credits: "6 à 12 crédits",
+    engagement: "Mission structurée",
   },
   {
     titre: "Compte rendu OPC",
     detail: "Mise au propre des notes, structuration, diffusion sous 48 h.",
     complexite: "Simple",
-    credits: "2 à 4 crédits",
+    engagement: "Intervention ponctuelle",
   },
   {
     titre: "RAO — analyse offres entreprises",
     detail: "Tableau comparatif multi-lots, vérification des prix, synthèse motivée.",
     complexite: "Moyen",
-    credits: "8 à 15 crédits",
+    engagement: "Mission structurée",
   },
   {
     titre: "DOE structuré (fin de chantier)",
     detail: "Compilation plans EXE, fiches techniques, PV de réception, sommaire.",
     complexite: "Complexe",
-    credits: "10 à 20 crédits",
+    engagement: "Mission structurée",
   },
   {
     titre: "Mémoire technique MOE (AO public)",
     detail: "Réponse complète en tant que candidat MOE, plan attendu et critères.",
     complexite: "Complexe",
-    credits: "20 à 35 crédits",
+    engagement: "Mission structurée",
   },
   {
     titre: "Planning OPC — mise à jour",
     detail: "Recalage, alertes glissements, diffusion entreprises.",
     complexite: "Simple",
-    credits: "2 à 4 crédits",
+    engagement: "Intervention ponctuelle",
   },
   {
     titre: "Suivi co-traitants & pièces",
     detail: "Relances BET fluides / structure, centralisation, statuts à jour.",
     complexite: "Moyen",
-    credits: "3 à 6 crédits",
+    engagement: "Mission structurée",
   },
 ] as const;
 
@@ -85,30 +84,36 @@ const LOTS_TCE = [
   "Tous corps d’état — neuf et réhabilitation",
 ] as const;
 
-const PACKS = PLAN_KEYS.map((key) => {
-  const p = SUBSCRIPTION_PLANS[key];
-  const copyByKey = {
-    DECOUVERTE: {
-      cible: "Pour tenir les dossiers chantier et éviter les oublis sur de petits projets MOE.",
-      inclus: ["Relances devis & pièces", "Mails clients et entreprises", "Classement documents travaux"],
-    },
-    STANDARD: {
-      cible: "Pour ne plus perdre d’opportunités et tenir un rythme constant côté production documentaire.",
-      inclus: ["Suivi devis & relances", "Situations / factures chantier", "Fournisseurs & commandes"],
-    },
-    PREMIUM: {
-      cible: "Pour un relais à forte capacité sur plusieurs dossiers, multi-agences, multi-projets.",
-      inclus: ["Suivi multi-dossiers MOE", "Réserves / DOE", "Coordination renforcée"],
-    },
-  } as const;
-  const hoursApprox = creditsToDisplayHours(p.actionsIncluded);
-  const c = copyByKey[key];
+const MOE_PACK_KEYS = ["RELAIS_ESSENTIEL", "RELAIS_PRO", "CELLULE_TRAVAUX"] as const;
+
+const MOE_PACK_COPY: Record<
+  (typeof MOE_PACK_KEYS)[number],
+  { cible: string; inclus: readonly string[] }
+> = {
+  RELAIS_ESSENTIEL: {
+    cible: "Pour tenir les dossiers chantier et éviter les oublis sur de petits projets MOE.",
+    inclus: ["Relances devis & pièces", "Mails clients et entreprises", "Classement documents travaux"],
+  },
+  RELAIS_PRO: {
+    cible: "Pour ne plus perdre d’opportunités et tenir un rythme constant côté production documentaire.",
+    inclus: ["Suivi devis & relances", "CCTP / RAO / DOE", "Reporting hebdomadaire"],
+  },
+  CELLULE_TRAVAUX: {
+    cible: "Pour un relais à forte capacité sur plusieurs dossiers, multi-agences, multi-projets.",
+    inclus: ["Suivi multi-dossiers MOE", "Réserves / DOE", "Coordination renforcée"],
+  },
+};
+
+const PACKS = MOE_PACK_KEYS.map((key) => {
+  const offer = BEWORK_PUBLIC_OFFERS.find((o) => o.key === key)!;
+  const c = MOE_PACK_COPY[key];
   return {
-    nom: p.name,
-    prix: formatPlanPriceMonthlyHt(p.priceLabel),
-    capacite: `≈ ${hoursApprox} h incluses · ≈ ${p.actionsIncluded} crédits`,
+    nom: offer.name,
+    prix: formatOfferPriceLabel(offer),
+    capacite: offer.tagline,
     cible: c.cible,
     inclus: c.inclus,
+    recommended: offer.recommended ?? false,
   };
 });
 
@@ -122,8 +127,8 @@ const FAQ_ITEMS = [
     a: "Oui. BeWork prépare, met en forme et structure (CCTP, DPGF, RAO, OPC, DOE). Vos ingénieurs et économistes valident le contenu technique avant diffusion au maître d’ouvrage. Aucun document engageant n’est envoyé sans votre relecture.",
   },
   {
-    q: "Comment fonctionne le chiffrage en crédits ?",
-    a: "1 crédit = 12 minutes de travail BeWork. Le nombre de crédits par tâche est indicatif (par exemple 15 à 35 crédits pour un CCTP par lot, 8 à 15 pour une RAO). Les fourchettes sont affinées après audit d’un premier dossier réel.",
+    q: "Comment BeWork chiffre les missions MOE ?",
+    a: "BeWork ne facture pas à l’heure. Chaque mission est cadrée en intervention ponctuelle (demande simple), mission structurée (dossier avec livrable) ou accompagnement mensuel selon le volume de dossiers. Le tarif final dépend du périmètre réel — affiné après audit d’un premier dossier.",
   },
   {
     q: "Quels lots techniques BeWork peut couvrir en CCTP ?",
@@ -286,7 +291,7 @@ export default function BeworkMaitriseDoeuvrePage() {
                       <th scope="col" className="py-2 pr-4">Tâche</th>
                       <th scope="col" className="py-2 pr-4">Description</th>
                       <th scope="col" className="py-2 pr-4">Complexité</th>
-                      <th scope="col" className="py-2 pr-4">Crédits indicatifs</th>
+                      <th scope="col" className="py-2 pr-4">Niveau d&apos;engagement</th>
                     </tr>
                   </thead>
                   <tbody className="text-slate-800">
@@ -297,14 +302,14 @@ export default function BeworkMaitriseDoeuvrePage() {
                         </th>
                         <td className="py-3 pr-4 align-top text-slate-700">{t.detail}</td>
                         <td className="py-3 pr-4 align-top text-slate-600">{t.complexite}</td>
-                        <td className="rounded-r-lg py-3 pr-4 align-top font-semibold text-[#1d4ed8]">{t.credits}</td>
+                        <td className="rounded-r-lg py-3 pr-4 align-top font-semibold text-[#1d4ed8]">{t.engagement}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
               <p className="mt-5 text-sm leading-relaxed text-slate-500">
-                1 crédit = 12 minutes de travail BeWork. Fourchettes indicatives — affinées après audit d’un premier dossier réel.
+                {BEWORK_TARIFS_TIER_PRICING_NOTE} Le tarif final est ajusté après cadrage du périmètre réel.
               </p>
             </div>
           </section>
@@ -358,7 +363,7 @@ export default function BeworkMaitriseDoeuvrePage() {
           <section className="mb-14" aria-labelledby="packs-heading">
             <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm sm:p-10">
               <h2 id="packs-heading" className="text-2xl font-bold tracking-tight text-slate-900 md:text-[1.65rem]">
-                Trois packs, un seul rythme pour un bureau d’études multi-projets
+                Trois niveaux d&apos;accompagnement pour un bureau d&apos;études multi-projets
               </h2>
               <p className="mt-4 text-[1.0625rem] leading-relaxed text-slate-700">
                 Forfaits HT publics, alignés sur la grille tarifs BeWork. Vous démarrez avec le pack qui correspond à votre charge réelle et vous
@@ -366,8 +371,20 @@ export default function BeworkMaitriseDoeuvrePage() {
               </p>
               <div className="mt-8 grid gap-5 md:grid-cols-3">
                 {PACKS.map((p) => (
-                  <article key={p.nom} className="flex h-full flex-col rounded-2xl border border-slate-200 bg-slate-50 p-6">
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1d4ed8]">Pack {p.nom}</p>
+                  <article
+                    key={p.nom}
+                    className={`flex h-full flex-col rounded-2xl border p-6 ${
+                      p.recommended
+                        ? "border-[#1d4ed8]/40 bg-gradient-to-b from-[#eff6ff] to-white shadow-md shadow-[#1d4ed8]/10"
+                        : "border-slate-200 bg-slate-50"
+                    }`}
+                  >
+                    {p.recommended ? (
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#1d4ed8]">
+                        Offre recommandée
+                      </p>
+                    ) : null}
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1d4ed8]">{p.nom}</p>
                     <p className="mt-3 text-xl font-bold text-slate-900">{p.prix}</p>
                     <p className="mt-1 text-sm font-medium text-slate-600">{p.capacite}</p>
                     <p className="mt-4 text-[0.95rem] leading-relaxed text-slate-700">{p.cible}</p>
@@ -410,8 +427,7 @@ export default function BeworkMaitriseDoeuvrePage() {
                   projet en cours.
                 </li>
                 <li>
-                  <strong className="font-semibold">04 · Mode opérationnel</strong> — rythme cruise, consommation des crédits selon votre charge
-                  réelle.
+                  <strong className="font-semibold">04 · Mode opérationnel</strong> — rythme cruise, suivi régulier des dossiers selon votre charge réelle.
                 </li>
               </ol>
               <p className="mt-6 text-sm leading-relaxed text-slate-600">

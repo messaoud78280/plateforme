@@ -128,7 +128,7 @@ const FAQ_APPELS_OFFRES_CAT = {
     },
     {
       q: "Comment transmettre un DCE à BeWork ?",
-      a: "Via le formulaire /contact ou votre espace client : déposez le dossier, précisez la date limite et le lot visé. Une première analyse peut être proposée en mission ponctuelle (à partir de 250 € HT).",
+      a: "Via le formulaire /contact ou votre espace client : déposez le dossier, précisez la date limite et le lot visé. Une première analyse peut être proposée en intervention ponctuelle (à partir de 150 € HT) ou en mission structurée (à partir de 250 € HT).",
     },
     {
       q: "Quels documents BeWork peut-il analyser ?",
@@ -220,15 +220,15 @@ const FAQ_CATEGORIES = [
     items: [
       {
         q: "Comment sont présentés les tarifs BeWork ?",
-        a: "Par niveau d’accompagnement : mission ponctuelle (à partir de 250 € HT), relais travaux mensuel (à partir de 790 € HT), cellule externalisée ou sur devis. Les prix affichés sont des points de départ — le détail est ajusté selon votre périmètre.",
+        a: "Par niveau d’accompagnement : intervention ponctuelle (à partir de 150 € HT), mission structurée (à partir de 250 € HT), relais travaux mensuel (à partir de 590 € HT), cellule externalisée ou sur devis. Les prix affichés sont des points de départ — le détail est ajusté selon votre périmètre.",
       },
       {
-        q: "BeWork fonctionne-t-il avec un système de crédits ?",
-        a: "Non sur le site vitrine : vous achetez un périmètre, des livrables et un niveau de suivi. Voir bework.fr/tarifs pour le détail des offres.",
+        q: "BeWork facture-t-il à l’heure ?",
+        a: "Non sur le site vitrine : vous achetez un périmètre, des livrables et un niveau de suivi (intervention, mission structurée, forfait mensuel ou sur devis). Voir bework.fr/tarifs pour le détail des offres.",
       },
       {
         q: "Puis-je commencer sans abonnement mensuel ?",
-        a: "Oui, par une mission ponctuelle : analyse DCE, DOE, PPSPS, compte rendu, devis ou relances.",
+        a: "Oui, par une intervention ponctuelle ou une mission structurée : analyse DCE, DOE, PPSPS, mémoire technique, compte rendu, devis ou relances.",
       },
       {
         q: "Que se passe-t-il si le périmètre évolue ?",

@@ -19,7 +19,7 @@ export const TARIFS_PAGE_PATH = "/tarifs" as const;
 export const TARIFS_SEO_TITLE = "Tarifs BeWork | Assistant travaux externalisé BTP";
 
 export const TARIFS_SEO_DESCRIPTION = metaDescriptionFrancophonie(
-  "Tarifs BeWork : missions ponctuelles dès 250 € HT, relais travaux mensuel dès 790 € HT, cellule externalisée dès 3 500 € HT. Devis, DCE, PPSPS, DOE, relances et suivi chantier BTP.",
+  "Découvrez les tarifs BeWork : intervention ponctuelle, mission structurée, relais travaux mensuel et cellule travaux externalisée pour devis, DCE, PPSPS, DOE, relances et suivi chantier.",
 );
 
 export const TARIFS_SEO_KEYWORDS = [
@@ -91,8 +91,8 @@ export function buildTarifsPageJsonLd() {
         offers: {
           "@type": "AggregateOffer",
           priceCurrency: "EUR",
-          lowPrice: "250",
-          highPrice: "3500",
+          lowPrice: "150",
+          highPrice: "2900",
           offerCount: String(BEWORK_PUBLIC_OFFERS.length),
           description: getMarketingAggregateOfferDescription(),
         },

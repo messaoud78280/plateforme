@@ -74,7 +74,7 @@ export const ASSISTANT_TRAVAUX_VILLES: Record<AssistantTravauxVilleKey, Assistan
     faq: [
       {
         q: "Peut-on démarrer par une mission ponctuelle depuis Marseille ?",
-        a: "Oui — analyse DCE, DOE ou relances, à partir de 250 € HT. Détail sur /tarifs.",
+        a: "Oui — intervention ponctuelle dès 150 € HT ou mission structurée dès 250 € HT. Détail sur /tarifs.",
       },
     ],
   },

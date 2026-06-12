@@ -6,7 +6,7 @@ import { StickyCtaMobile } from "@/components/tarifs/StickyCtaMobile";
 import { TarifsPricingGrid } from "@/components/tarifs/TarifsPricingGrid";
 import {
   BEWORK_CLIENT_KEEPS,
-  BEWORK_MISSION_PONCTUELLE_PRICING_NOTE,
+  BEWORK_TARIFS_TIER_PRICING_NOTE,
   BEWORK_PRICING_CRITERIA,
   BEWORK_REPOSITIONING_POINTS,
   BEWORK_SCOPE_TAKEOVER,
@@ -62,7 +62,10 @@ export const metadata: Metadata = {
 };
 
 const WHY_NOT_CHEAPEST =
-  "BeWork n’a pas vocation à être l’option la moins chère du marché. Notre rôle est d’apporter un relais fiable aux entreprises du BTP qui perdent du temps sur les devis, relances, dossiers chantier, pièces marché, DOE, PPSPS ou comptes rendus. Nos offres sont pensées pour les dirigeants, conducteurs de travaux et chargés d’affaires qui veulent déléguer sérieusement sans recruter immédiatement.";
+  "BeWork n’a pas vocation à être l’option la moins chère du marché. Notre rôle est d’apporter un relais fiable aux entreprises du BTP qui perdent du temps sur les devis, relances, dossiers chantier, pièces marché, DOE, PPSPS ou comptes rendus. Nos offres sont pensées pour rester accessibles tout en conservant un niveau de méthode, de suivi et de supervision adapté aux enjeux du BTP.";
+
+const WHY_NOT_CHEAPEST_COMPARE =
+  "Comparer BeWork à une simple assistance administrative revient à comparer un appui travaux structuré avec une prestation de saisie. Notre valeur se situe dans le cadrage, la méthode, la traçabilité et la capacité à soulager vos équipes opérationnelles.";
 
 const INTERNAL_LINKS = [
   { href: "/notre-facon-de-travailler", label: "Notre façon de travailler" },
@@ -98,9 +101,8 @@ export default function TarifsPage() {
             humaine.
           </p>
           <p className="mx-auto mt-4 max-w-3xl text-sm leading-relaxed text-slate-600 md:text-base">
-            Nos tarifs sont affichés en prix de départ. Chaque accompagnement est ensuite ajusté selon votre nombre de
-            chantiers, votre volume de dossiers, les livrables attendus, la fréquence de suivi et le niveau de supervision
-            nécessaire.
+            Les tarifs affichés sont des prix de départ. Le tarif final dépend du nombre de chantiers, du volume de
+            dossiers, des livrables attendus, de la fréquence de suivi et du niveau de supervision nécessaire.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <CalendlyBookingLink
@@ -110,10 +112,10 @@ export default function TarifsPage() {
               Réserver un appel
             </CalendlyBookingLink>
             <Link
-              href="/contact?sujet=Mission+ponctuelle"
+              href="/contact?sujet=Intervention+ponctuelle"
               className="inline-flex min-h-[3rem] w-full items-center justify-center rounded-xl border-2 border-slate-200 bg-white px-7 py-3 text-base font-semibold text-[#0f172a] shadow-sm transition hover:border-[#1d4ed8]/30 hover:bg-[#f8fafc] sm:w-auto"
             >
-              Commencer par une mission ponctuelle
+              Demander une intervention ponctuelle
             </Link>
           </div>
         </section>
@@ -164,8 +166,8 @@ export default function TarifsPage() {
               Un tarif ajusté à votre organisation
             </h2>
             <p className="mt-4 text-sm leading-relaxed text-slate-600 md:text-base">
-              Le prix final dépend du périmètre réel de la mission. Un accompagnement pour un dossier ponctuel n&apos;a pas le
-              même niveau d&apos;engagement qu&apos;un suivi multi-chantiers ou qu&apos;une cellule travaux externalisée.
+              Le prix final dépend du périmètre réel de la mission. Une intervention ponctuelle n&apos;a pas le même
+              niveau d&apos;engagement qu&apos;un suivi multi-chantiers ou qu&apos;une cellule travaux externalisée.
             </p>
             <ul className="mt-6 grid gap-2 sm:grid-cols-2" role="list">
               {BEWORK_PRICING_CRITERIA.map((criterion) => (
@@ -178,7 +180,7 @@ export default function TarifsPage() {
               ))}
             </ul>
             <p className="mt-6 rounded-lg border border-slate-100 bg-[#f8fafc] px-4 py-3 text-[13px] leading-relaxed text-slate-600 md:text-sm">
-              {BEWORK_MISSION_PONCTUELLE_PRICING_NOTE}
+              {BEWORK_TARIFS_TIER_PRICING_NOTE}
             </p>
           </div>
         </section>
@@ -227,6 +229,7 @@ export default function TarifsPage() {
             Pourquoi nos tarifs ne sont pas les moins chers
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-slate-600 md:text-base">{WHY_NOT_CHEAPEST}</p>
+          <p className="mt-4 text-sm leading-relaxed text-slate-600 md:text-base">{WHY_NOT_CHEAPEST_COMPARE}</p>
         </section>
 
         {/* Processus */}
@@ -234,10 +237,13 @@ export default function TarifsPage() {
           <h2 id="process-heading" className="text-center text-xl font-bold text-[#0f172a] md:text-2xl">
             Comment démarrer avec BeWork ?
           </h2>
-          <ol className="mx-auto mt-8 grid max-w-5xl gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <ol className="mx-auto mt-8 grid max-w-5xl list-none gap-4 md:grid-cols-2 lg:grid-cols-3">
             {BEWORK_TARIFS_PROCESS_STEPS.map((step, i) => (
               <li key={step.title} className="rounded-xl border border-slate-200/90 bg-white p-6 shadow-sm">
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1d4ed8] text-sm font-bold text-white">
+                <span
+                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1d4ed8] text-sm font-bold text-white"
+                  aria-hidden
+                >
                   {i + 1}
                 </span>
                 <h3 className="mt-4 font-semibold text-[#0f172a]">{step.title}</h3>

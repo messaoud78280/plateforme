@@ -141,14 +141,15 @@ function PanelDemandes() {
       </ul>
 
       <div className="mt-4 rounded-[10px] border border-slate-100 bg-white p-3">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 md:text-[11px]">Avancement forfait</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 md:text-[11px]">Suivi du mois</p>
         <div className="mt-1.5 flex items-baseline justify-between gap-2">
-          <span className="text-xl font-bold tabular-nums text-slate-900 md:text-2xl">42</span>
-          <span className="text-[11px] text-slate-500 md:text-xs">/ 185 crédits utilisés</span>
+          <span className="text-xl font-bold tabular-nums text-slate-900 md:text-2xl">7</span>
+          <span className="text-[11px] text-slate-500 md:text-xs">dossiers traités ce mois</span>
         </div>
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
-          <div className="h-full w-[22.7%] rounded-full" style={{ backgroundColor: BLUE }} />
+          <div className="h-full w-[58%] rounded-full" style={{ backgroundColor: BLUE }} />
         </div>
+        <p className="mt-2 text-[10px] text-slate-500 md:text-[11px]">3 dossiers actifs · 2 en attente de validation</p>
       </div>
     </>
   );

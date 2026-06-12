@@ -8,7 +8,8 @@ import { formatPriceLabelFr, SUBSCRIPTION_PRICE_TAX_LABEL } from "@/lib/subscrip
 export { formatPriceLabelFr };
 
 export type BeWorkPublicOfferKey =
-  | "MISSION_PONCTUELLE"
+  | "INTERVENTION_PONCTUELLE"
+  | "MISSION_STRUCTUREE"
   | "RELAIS_ESSENTIEL"
   | "RELAIS_PRO"
   | "CELLULE_TRAVAUX"
@@ -26,7 +27,7 @@ export type BeWorkPublicOffer = {
   name: string;
   /** Montant HT numérique sans espaces ; null = sur devis. */
   priceFrom: string | null;
-  priceUnit: "dossier" | "dossier_structure" | "mois" | "devis";
+  priceUnit: "intervention" | "dossier_structure" | "mois" | "devis";
   positioning: string;
   tagline: string;
   includes: readonly string[];
@@ -37,12 +38,33 @@ export type BeWorkPublicOffer = {
 
 export const BEWORK_PUBLIC_OFFERS: readonly BeWorkPublicOffer[] = [
   {
-    key: "MISSION_PONCTUELLE",
-    name: "Mission ponctuelle",
+    key: "INTERVENTION_PONCTUELLE",
+    name: "Intervention ponctuelle",
+    priceFrom: "150",
+    priceUnit: "intervention",
+    positioning:
+      "Pour une demande ciblée, simple et limitée : mise au propre d’un document, relance structurée, reprise d’un compte rendu simple ou aide ponctuelle sur un dossier chantier.",
+    tagline: "Une porte d’entrée simple pour tester BeWork sans abonnement.",
+    examples: [
+      "Mise au propre d’un document chantier",
+      "Relance structurée client, fournisseur ou sous-traitant",
+      "Reprise d’un compte rendu simple",
+      "Aide ponctuelle sur un dossier chantier",
+      "Préparation d’un mail professionnel lié à un chantier",
+    ],
+    includes: [],
+    cta: {
+      label: "Demander une intervention ponctuelle",
+      href: "/contact?sujet=Intervention+ponctuelle",
+    },
+  },
+  {
+    key: "MISSION_STRUCTUREE",
+    name: "Mission structurée",
     priceFrom: "250",
     priceUnit: "dossier_structure",
     positioning:
-      "Pour traiter un besoin précis sans abonnement : analyse, préparation, remise au propre ou structuration d’un document chantier.",
+      "Pour un dossier nécessitant analyse, préparation, structuration documentaire ou livrable exploitable.",
     tagline: "Pour déléguer un dossier clair avec un livrable exploitable.",
     examples: [
       "Analyse DCE / CCTP",
@@ -58,21 +80,21 @@ export const BEWORK_PUBLIC_OFFERS: readonly BeWorkPublicOffer[] = [
       "Périmètre défini avant démarrage",
       "Livrable structuré et traçable",
       "Relecture humaine avant transmission",
-      "Validation finale chez vous",
+      "Validation finale chez le client",
     ],
     cta: {
       label: "Obtenir un devis pour une mission",
-      href: "/contact?sujet=Mission+ponctuelle",
+      href: "/contact?sujet=Mission+structuree",
     },
   },
   {
     key: "RELAIS_ESSENTIEL",
     name: "Relais Travaux Essentiel",
-    priceFrom: "790",
+    priceFrom: "590",
     priceUnit: "mois",
     positioning:
-      "Pour les artisans structurés, petites entreprises BTP et dirigeants débordés qui veulent reprendre le contrôle du suivi administratif et chantier sans recruter.",
-    tagline: "Pour reprendre le contrôle du suivi bureau-chantier sans créer un poste interne.",
+      "Pour les entreprises BTP qui veulent structurer leur suivi bureau-chantier sans créer immédiatement un poste interne.",
+    tagline: "Pour mieux suivre devis, relances et dossiers simples sans recruter.",
     includes: [
       "Suivi devis et relances",
       "Classement documentaire chantier",
@@ -86,12 +108,12 @@ export const BEWORK_PUBLIC_OFFERS: readonly BeWorkPublicOffer[] = [
   {
     key: "RELAIS_PRO",
     name: "Relais Travaux Pro",
-    priceFrom: "1900",
+    priceFrom: "1490",
     priceUnit: "mois",
     recommended: true,
     positioning:
-      "Pour les PME BTP, conducteurs de travaux, chargés d’affaires et entreprises qui gèrent plusieurs dossiers en parallèle.",
-    tagline: "Pour soulager vos conducteurs de travaux et fiabiliser le suivi bureau-chantier.",
+      "L’offre adaptée aux entreprises qui gèrent plusieurs dossiers actifs et veulent soulager leurs conducteurs de travaux sans recruter immédiatement.",
+    tagline: "Pour fiabiliser le suivi bureau-chantier quand plusieurs dossiers tournent en parallèle.",
     includes: [
       "Suivi régulier des dossiers chantier",
       "Comptes rendus structurés",
@@ -107,11 +129,11 @@ export const BEWORK_PUBLIC_OFFERS: readonly BeWorkPublicOffer[] = [
   {
     key: "CELLULE_TRAVAUX",
     name: "Cellule Travaux Externalisée",
-    priceFrom: "3500",
+    priceFrom: "2900",
     priceUnit: "mois",
     positioning:
-      "Pour entreprises générales, PME multi-chantiers, titulaires de marchés publics ou privés, structures qui veulent externaliser une partie organisée du suivi travaux.",
-    tagline: "Une cellule travaux à distance pour structurer vos dossiers sans recruter immédiatement.",
+      "Pour les entreprises multi-chantiers qui veulent externaliser une partie organisée du suivi travaux, sans recruter immédiatement.",
+    tagline: "Une cellule travaux à distance pour structurer vos dossiers sans embauche.",
     includes: [
       "Suivi multi-chantiers",
       "Centralisation documentaire",
@@ -147,8 +169,11 @@ export const BEWORK_PUBLIC_OFFERS: readonly BeWorkPublicOffer[] = [
   },
 ] as const;
 
-export const BEWORK_MISSION_PONCTUELLE_PRICING_NOTE =
-  "Les demandes simples et récurrentes, comme une mise en forme légère ou un compte rendu très court, sont généralement intégrées dans un accompagnement mensuel ou regroupées avec d’autres actions.";
+export const BEWORK_TARIFS_TIER_PRICING_NOTE =
+  "Les interventions à 150 € HT couvrent une demande ciblée et limitée. Dès qu’une analyse, une structuration documentaire ou un livrable d’envergure est nécessaire, la mission est cadrée en dossier structuré à partir de 250 € HT.";
+
+/** @deprecated Alias — préférer BEWORK_TARIFS_TIER_PRICING_NOTE */
+export const BEWORK_MISSION_PONCTUELLE_PRICING_NOTE = BEWORK_TARIFS_TIER_PRICING_NOTE;
 
 export const BEWORK_REPOSITIONING_POINTS = [
   "Moins d’oublis dans les dossiers",
@@ -198,24 +223,24 @@ export const BEWORK_CLIENT_KEEPS = [
 
 export const BEWORK_TARIFS_PROCESS_STEPS = [
   { title: "Vous réservez un appel", desc: "Premier échange pour comprendre votre organisation et vos priorités." },
-  { title: "Nous identifions vos besoins réels", desc: "Volume de dossiers, chantiers, livrables et niveau de suivi attendu." },
-  { title: "Nous définissons le périmètre de mission", desc: "Périmètre clair, livrables et fréquence de reporting." },
-  { title: "Vous recevez une proposition claire", desc: "Tarif ajusté au périmètre — pas de grille opaque au crédit ou à l’heure." },
-  { title: "BeWork démarre le suivi selon les priorités validées", desc: "Méthode, traçabilité et supervision humaine dès le lancement." },
+  { title: "Nous cadrons vos besoins", desc: "Volume de dossiers, chantiers, livrables et niveau de suivi attendu." },
+  { title: "Nous définissons le périmètre", desc: "Périmètre clair, livrables et fréquence de reporting." },
+  { title: "Vous recevez une proposition claire", desc: "Tarif ajusté au périmètre — pas de grille opaque à l’heure." },
+  { title: "BeWork démarre le suivi", desc: "Méthode, traçabilité et supervision humaine dès le lancement." },
 ] as const;
 
 export const BEWORK_TARIFS_FAQ = [
   {
+    q: "BeWork facture-t-il à l’heure ?",
+    a: "Non. BeWork fonctionne par intervention ponctuelle, mission structurée, accompagnement mensuel ou devis personnalisé. Vous achetez un périmètre clair, des livrables et un niveau de suivi, pas simplement du temps passé.",
+  },
+  {
     q: "Combien coûte un assistant travaux externalisé ?",
-    a: "Le coût dépend du volume de dossiers, du nombre de chantiers, des livrables attendus et du niveau de suivi demandé. BeWork propose des missions ponctuelles structurées à partir de 250 € HT / dossier et des accompagnements mensuels à partir de 790 € HT.",
+    a: "Le coût dépend du volume de dossiers, du nombre de chantiers, des livrables attendus et du niveau de suivi demandé. BeWork propose des interventions ponctuelles à partir de 150 € HT, des missions structurées à partir de 250 € HT et des accompagnements mensuels à partir de 590 € HT.",
   },
   {
     q: "Pourquoi BeWork affiche des prix « à partir de » ?",
     a: "Parce que chaque entreprise BTP a une organisation différente. Le tarif final dépend du périmètre réel : nombre de chantiers, fréquence de suivi, complexité des dossiers, livrables attendus et niveau de reporting.",
-  },
-  {
-    q: "BeWork fonctionne-t-il avec un système de crédits ?",
-    a: "Non, les offres commerciales BeWork sont présentées par mission, par niveau d’accompagnement ou sur devis. Le client achète un périmètre clair, des livrables et un niveau de suivi, pas des crédits.",
   },
   {
     q: "BeWork remplace-t-il un conducteur de travaux ?",
@@ -223,7 +248,7 @@ export const BEWORK_TARIFS_FAQ = [
   },
   {
     q: "Peut-on commencer sans abonnement mensuel ?",
-    a: "Oui. Une entreprise peut commencer par une mission ponctuelle structurée : analyse DCE, DOE, PPSPS, mémoire technique, audit de dossier ou relances cadrées sur un périmètre défini.",
+    a: "Oui. Une entreprise peut commencer par une intervention ponctuelle simple ou une mission structurée : analyse DCE, DOE, PPSPS, mémoire technique, compte rendu de chantier, devis ou relances.",
   },
   {
     q: "Qui valide les documents avant envoi ?",
@@ -236,25 +261,27 @@ export const BEWORK_TARIFS_FAQ = [
 ] as const;
 
 export const BEWORK_MARKETING_PRICE_LINE =
-  "Accompagnements dès 790 € HT/mois · missions ponctuelles dès 250 € HT";
+  "Interventions dès 150 € HT · missions structurées dès 250 € HT · accompagnements dès 590 € HT/mois";
 
-export const BEWORK_MARKETING_PRICE_LINE_SHORT = "Dès 790 € HT/mois · missions dès 250 € HT";
+export const BEWORK_MARKETING_PRICE_LINE_SHORT = "Dès 150 € HT · relais mensuel dès 590 € HT";
 
 export function getMarketingPriceBoundsLabels(): {
   low: string;
   high: string;
   monthlyLow: string;
+  interventionLow: string;
 } {
-  return { low: "250", high: "3500", monthlyLow: "790" };
+  return { interventionLow: "150", low: "250", high: "2900", monthlyLow: "590" };
 }
 
 export function getMarketingAggregateOfferDescription(): string {
   const f = formatPriceLabelFr;
   return (
-    `Cinq niveaux d’accompagnement : mission ponctuelle (à partir de ${f("250")} € ${SUBSCRIPTION_PRICE_TAX_LABEL}/dossier), ` +
-    `Relais Travaux Essentiel (${f("790")} € ${SUBSCRIPTION_PRICE_TAX_LABEL}/mois), ` +
-    `Relais Travaux Pro (${f("1900")} € ${SUBSCRIPTION_PRICE_TAX_LABEL}/mois — offre recommandée), ` +
-    `Cellule Travaux Externalisée (${f("3500")} € ${SUBSCRIPTION_PRICE_TAX_LABEL}/mois), sur devis.`
+    `Six niveaux d’accompagnement : intervention ponctuelle (à partir de ${f("150")} € ${SUBSCRIPTION_PRICE_TAX_LABEL}), ` +
+    `mission structurée (${f("250")} € ${SUBSCRIPTION_PRICE_TAX_LABEL}/dossier), ` +
+    `Relais Travaux Essentiel (${f("590")} € ${SUBSCRIPTION_PRICE_TAX_LABEL}/mois), ` +
+    `Relais Travaux Pro (${f("1490")} € ${SUBSCRIPTION_PRICE_TAX_LABEL}/mois — offre recommandée), ` +
+    `Cellule Travaux Externalisée (${f("2900")} € ${SUBSCRIPTION_PRICE_TAX_LABEL}/mois), sur devis.`
   );
 }
 
@@ -267,7 +294,7 @@ export function formatMarketingPublicPriceFromHt(): string {
 export function formatOfferPriceLabel(offer: BeWorkPublicOffer): string {
   if (offer.priceFrom === null) return "Sur devis";
   const amount = formatPriceLabelFr(offer.priceFrom);
-  if (offer.priceUnit === "dossier") return `À partir de ${amount} € ${SUBSCRIPTION_PRICE_TAX_LABEL} / dossier`;
+  if (offer.priceUnit === "intervention") return `À partir de ${amount} € ${SUBSCRIPTION_PRICE_TAX_LABEL}`;
   if (offer.priceUnit === "dossier_structure")
     return `À partir de ${amount} € ${SUBSCRIPTION_PRICE_TAX_LABEL} / dossier structuré`;
   if (offer.priceUnit === "mois") return `À partir de ${amount} € ${SUBSCRIPTION_PRICE_TAX_LABEL} / mois`;

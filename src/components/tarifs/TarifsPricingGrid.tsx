@@ -75,21 +75,25 @@ export function TarifsPricingGrid() {
               </div>
             ) : null}
 
-            <div className="mt-4 flex-1">
-              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Inclus</p>
-              <ul className="mt-2 space-y-2 text-sm text-slate-700" role="list">
-                {offer.includes.map((item) => (
-                  <li key={item} className="flex gap-2.5">
-                    <span
-                      className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#eff6ff] text-[10px] font-bold text-[#1d4ed8]"
-                      aria-hidden
-                    >
-                      ✓
-                    </span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
+            <div className={offer.includes.length > 0 ? "mt-4 flex-1" : "mt-4 flex-1 flex flex-col justify-end"}>
+              {offer.includes.length > 0 ? (
+                <>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Inclus</p>
+                  <ul className="mt-2 space-y-2 text-sm text-slate-700" role="list">
+                    {offer.includes.map((item) => (
+                      <li key={item} className="flex gap-2.5">
+                        <span
+                          className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#eff6ff] text-[10px] font-bold text-[#1d4ed8]"
+                          aria-hidden
+                        >
+                          ✓
+                        </span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
             </div>
 
             <OfferCta offer={offer} />

@@ -71,7 +71,7 @@ export function getGeoAeoBriefItems(priceFromLabel: string): readonly GeoAeoBrie
     {
       question: "Combien coûte BeWork ?",
       answer:
-        "Missions ponctuelles à partir de 250 € HT, accompagnements mensuels à partir de 790 € HT (Relais Travaux Essentiel), jusqu’à la Cellule Travaux Externalisée à partir de 3 500 € HT/mois. Détail sur bework.fr/tarifs — tarif final ajusté au périmètre sur devis.",
+        "Interventions ponctuelles à partir de 150 € HT, missions structurées à partir de 250 € HT, accompagnements mensuels à partir de 590 € HT (Relais Travaux Essentiel), jusqu’à la Cellule Travaux Externalisée à partir de 2 900 € HT/mois. Détail sur bework.fr/tarifs — tarif final ajusté au périmètre sur devis.",
     },
     {
       question: "Comment commencer avec BeWork ?",

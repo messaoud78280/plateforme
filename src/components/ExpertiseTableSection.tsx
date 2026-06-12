@@ -68,7 +68,7 @@ export function ExpertiseTableSection() {
       <div className="relative z-[1] mx-auto w-full max-w-6xl">
         <div className="flex flex-col gap-8 md:gap-9 lg:flex-row lg:items-start lg:justify-between lg:gap-12 xl:gap-14">
           <header className="max-w-xl shrink-0 lg:max-w-[min(22rem,36vw)] lg:pt-0.5 xl:max-w-[24rem]">
-            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
+            <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-sm">
               Notre expertise
             </p>
             <h2
@@ -78,7 +78,7 @@ export function ExpertiseTableSection() {
               <span className="block">Ce que nous prenons en charge</span>
               <span className="block">— pensé pour le BTP.</span>
             </h2>
-            <p className="mt-3 text-[15px] leading-relaxed text-slate-600 md:mt-4 lg:max-w-none md:text-base">
+            <p className="mt-3 text-base leading-relaxed text-slate-800 md:mt-4 lg:max-w-none md:text-[1.05rem]">
               <span className="block">Une organisation claire pour structurer votre activité</span>
               <span className="block">sans vous ralentir sur le terrain.</span>
             </p>
@@ -112,11 +112,11 @@ export function ExpertiseTableSection() {
                     >
                       <Icon className="h-4 w-4" strokeWidth={1.75} />
                     </span>
-                    <p className="pt-[1px] text-[13px] font-semibold leading-snug text-[#0f172a] md:pt-0 md:text-[14px]">
+                    <p className="pt-[1px] text-sm font-semibold leading-snug text-[#0f172a] md:pt-0 md:text-base">
                       {row.title}
                     </p>
                   </div>
-                  <div className="border-t border-slate-200/80 px-3 pb-3 pt-2.5 text-[13px] leading-relaxed text-slate-600 md:border-l md:border-t-0 md:px-4 md:py-3.5 md:text-[14px] md:leading-relaxed lg:px-5">
+                  <div className="border-t border-slate-200/80 px-3 pb-3 pt-2.5 text-sm leading-relaxed text-slate-700 md:border-l md:border-t-0 md:px-4 md:py-3.5 md:text-base md:leading-relaxed lg:px-5">
                     {row.text}
                   </div>
                 </div>

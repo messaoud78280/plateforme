@@ -32,7 +32,7 @@ export function HomeWhatWeHandleSection() {
       <BlueprintCotationWhatWeHandleAmbient />
       <div className="container-site relative z-10">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="font-heading text-[13px] font-semibold uppercase tracking-[0.18em] text-[#1d4ed8]">
+          <p className="font-heading text-sm font-semibold uppercase tracking-[0.18em] text-[#1d4ed8] md:text-base">
             Ce qu&apos;on prend en charge
           </p>
           <h2
@@ -43,11 +43,11 @@ export function HomeWhatWeHandleSection() {
             <br />
             <span className="text-[#1d4ed8]">de l&apos;intervention à la clôture.</span>
           </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-center text-lg leading-relaxed text-slate-600">
+          <p className="mx-auto mt-6 max-w-2xl text-center text-lg leading-relaxed text-slate-800 md:text-xl">
             Dossiers d&apos;intervention, comptes rendus, DOE, attachements, situations, relances et coordination
             documentaire — pour tous les corps d&apos;état titulaires de marchés.
           </p>
-          <p className="mx-auto mt-4 max-w-xl text-center text-[14px] font-medium text-slate-500">
+          <p className="mx-auto mt-4 max-w-xl text-center text-sm font-semibold text-slate-700 md:text-base">
             Assistants travaux augmentés par l&apos;IA · expertise BTP terrain · supervision depuis la France
           </p>
         </div>
@@ -63,7 +63,7 @@ export function HomeWhatWeHandleSection() {
                 <span className="mt-0.5 shrink-0 text-[15px] font-bold text-[#1d4ed8]" aria-hidden>
                   ✓
                 </span>
-                <span className="text-[15px] font-semibold leading-snug text-slate-800">{mission}</span>
+                <span className="text-base font-semibold leading-snug text-slate-900 md:text-[1.05rem]">{mission}</span>
               </li>
             ))}
           </ul>
@@ -71,17 +71,17 @@ export function HomeWhatWeHandleSection() {
 
         <div className="mt-10 md:mt-12">
           <div className="mx-auto max-w-5xl rounded-2xl border border-slate-200/90 bg-white p-6 shadow-[0_10px_40px_-16px_rgba(15,23,42,0.1)] ring-1 ring-slate-100/85 md:p-8">
-            <p className="font-heading text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
+            <p className="font-heading text-xs font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-sm">
               Volume de marchés
             </p>
             <h3 className="mt-2.5 text-balance font-sans text-xl font-bold tracking-tight text-[#0f172a] md:text-2xl">
               Quand le marché accélère, BeWork absorbe la charge.
             </h3>
-            <p className="mt-3 text-[15px] leading-relaxed text-slate-600 md:text-base">
+            <p className="mt-3 text-base leading-relaxed text-slate-800 md:text-[1.05rem]">
               Multi-interventions, relances donneurs d&apos;ordre, validations en attente, pièces manquantes : votre Beworker tient le fil
               documentaire, relance les bons interlocuteurs et vous fait valider avant tout engagement.
             </p>
-            <ul className="mt-5 grid gap-2 text-[14px] font-semibold text-slate-700 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="mt-5 grid gap-2 text-sm font-semibold text-slate-800 sm:grid-cols-2 lg:grid-cols-3 md:text-base">
               {[
                 "Relances MOA / MOE",
                 "Situations & attachements",
@@ -108,19 +108,19 @@ export function HomeWhatWeHandleSection() {
             </h3>
             <div className="mt-6 grid gap-5 md:grid-cols-2">
               <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm ring-1 ring-slate-100/85 md:p-7">
-                <p className="font-heading text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
+                <p className="font-heading text-xs font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-sm">
                   Conducteurs & chefs de chantier
                 </p>
-                <p className="mt-3 text-[15px] leading-relaxed text-slate-600 md:text-base">
+                <p className="mt-3 text-base leading-relaxed text-slate-800 md:text-[1.05rem]">
                   Comptes rendus, photos, réservations, relances MOA / MOE / OPC / SPS, suivi sous-traitants et points bloquants — sans saturer
                   l&apos;équipe terrain.
                 </p>
               </div>
               <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm ring-1 ring-slate-100/85 md:p-7">
-                <p className="font-heading text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
+                <p className="font-heading text-xs font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-sm">
                   Bureau marchés & chargés d&apos;affaires
                 </p>
-                <p className="mt-3 text-[15px] leading-relaxed text-slate-600 md:text-base">
+                <p className="mt-3 text-base leading-relaxed text-slate-800 md:text-[1.05rem]">
                   Dossiers d&apos;intervention, situations, attachements, DOE, classement pièces marché, validations BPU / DPGF et relances
                   donneurs d&apos;ordre.
                 </p>
@@ -131,7 +131,7 @@ export function HomeWhatWeHandleSection() {
 
         <div className="mt-10 md:mt-12">
           <div className="mx-auto max-w-5xl">
-            <p className="font-heading text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
+            <p className="font-heading text-xs font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-sm">
               Missions avancées BTP
             </p>
             <h3 className="mt-2.5 text-balance text-xl font-bold tracking-tight text-[#0f172a] md:text-2xl">
@@ -154,8 +154,8 @@ export function HomeWhatWeHandleSection() {
                   key={c.t}
                   className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-sm ring-1 ring-slate-100/85"
                 >
-                  <p className="text-[14px] font-bold leading-snug text-slate-900">{c.t}</p>
-                  <p className="mt-2 text-[13px] leading-relaxed text-slate-600">{c.b}</p>
+                  <p className="text-sm font-bold leading-snug text-slate-900 md:text-base">{c.t}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-700 md:text-[0.9375rem]">{c.b}</p>
                 </div>
               ))}
             </div>

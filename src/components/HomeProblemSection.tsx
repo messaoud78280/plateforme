@@ -54,7 +54,7 @@ export function HomeProblemSection() {
       <div className="container-site relative z-10 grid grid-cols-1 items-center gap-10 lg:grid-cols-[0.38fr_0.62fr] lg:gap-16">
         {/* Colonne gauche */}
         <div className="min-w-0">
-          <p className="text-[14px] font-bold tracking-[0.18em]" style={{ color: BEWORK_BLUE }}>
+          <p className="text-sm font-bold tracking-[0.18em] md:text-base" style={{ color: BEWORK_BLUE }}>
             LE&nbsp;PROBLÈME
           </p>
           <div className="mt-3 h-[3px] w-12 rounded-full" style={{ backgroundColor: BEWORK_BLUE }} />
@@ -70,7 +70,7 @@ export function HomeProblemSection() {
 
           <div className="mt-6 h-[2px] w-16 rounded-full bg-slate-300/90" />
 
-          <p className="mt-6 text-[18px] font-medium leading-[1.55] text-slate-600">
+          <p className="mt-6 text-lg font-medium leading-[1.55] text-slate-800 md:text-xl">
             Gagner un marché ne suffit pas : il faut tenir les pièces, les échanges, les validations, les relances, les
             photos, les comptes rendus, les DOE, les situations et les demandes du donneur d&apos;ordre — entre le terrain,
             le bureau et la MOA / MOE.
@@ -143,7 +143,7 @@ export function HomeProblemSection() {
             boxShadow: "0 20px 52px rgba(15,23,42,0.09)",
           }}
         >
-          <div className="grid grid-cols-[1fr_72px_1fr] items-center border-b border-slate-200 pb-4 text-[12px] font-extrabold uppercase tracking-[0.06em]">
+          <div className="grid grid-cols-[1fr_72px_1fr] items-center border-b border-slate-300 pb-4 text-sm font-extrabold uppercase tracking-[0.06em]">
             <span style={{ color: TEXT_PRIMARY }}>Problème</span>
             <span />
             <span className="text-right" style={{ color: RED_SOFT }}>
@@ -163,13 +163,13 @@ export function HomeProblemSection() {
               >
                 <row.ProblemIcon />
               </div>
-              <p className="text-[15px] font-semibold leading-snug" style={{ color: TEXT_PRIMARY }}>
+              <p className="text-base font-semibold leading-snug" style={{ color: TEXT_PRIMARY }}>
                 {row.problem}
               </p>
               <div className="text-center text-xl font-light" style={{ color: RED_SOFT }} aria-hidden>
                 →
               </div>
-              <p className="text-[15px] font-semibold leading-snug" style={{ color: TEXT_PRIMARY }}>
+              <p className="text-base font-semibold leading-snug" style={{ color: TEXT_PRIMARY }}>
                 {row.consequence}
               </p>
               <div
@@ -188,7 +188,7 @@ export function HomeProblemSection() {
           className="space-y-3 rounded-[22px] border bg-white p-5 shadow-[0_18px_48px_rgba(15,23,42,0.09)] lg:hidden"
           style={{ borderColor: CARD_BORDER }}
         >
-          <div className="grid grid-cols-2 gap-2 border-b border-slate-200 pb-3 text-[11px] font-extrabold uppercase tracking-[0.08em]">
+          <div className="grid grid-cols-2 gap-2 border-b border-slate-300 pb-3 text-xs font-extrabold uppercase tracking-[0.08em] sm:text-sm">
             <span style={{ color: TEXT_PRIMARY }}>Problème</span>
             <span className="text-right" style={{ color: RED_SOFT }}>
               Conséquence
@@ -207,7 +207,7 @@ export function HomeProblemSection() {
                 >
                   <row.ProblemIcon />
                 </div>
-                <p className="text-[15px] font-semibold leading-snug" style={{ color: TEXT_PRIMARY }}>
+                <p className="text-base font-semibold leading-snug" style={{ color: TEXT_PRIMARY }}>
                   {row.problem}
                 </p>
               </div>

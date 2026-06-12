@@ -66,10 +66,10 @@ export function HomeClientSpacePreview({
                 key={t}
                 type="button"
                 onClick={() => setTab(t)}
-                className={`rounded-full px-3 py-1.5 text-[11px] font-semibold transition-colors md:text-[12px] ${
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors md:text-sm ${
                   tab === t
                     ? "border-2 border-[#2563eb] bg-white text-[#0f172a] shadow-sm shadow-blue-900/8"
-                    : "border border-transparent bg-slate-50/90 text-slate-600 hover:border-slate-200 hover:text-slate-900"
+                    : "border border-transparent bg-slate-50/90 text-slate-700 hover:border-slate-200 hover:text-slate-900"
                 }`}
               >
                 {t}
@@ -78,14 +78,14 @@ export function HomeClientSpacePreview({
           </nav>
         </div>
 
-        <p className="mt-3 text-[12px] leading-relaxed text-slate-600 md:text-[13px]">{TAB_INTRO[tab]}</p>
+        <p className="mt-3 text-sm leading-relaxed text-slate-700 md:text-base">{TAB_INTRO[tab]}</p>
 
         {tab === "Demandes" && <PanelDemandes />}
         {tab === "Échanges" && <PanelEchanges />}
         {tab === "Documents" && <PanelDocuments />}
 
         {showCaption ? (
-          <p className="mt-3 text-center text-[11px] text-slate-400 md:text-[12px]">Aperçu illustratif de l’espace client</p>
+          <p className="mt-3 text-center text-xs text-slate-500 md:text-sm">Aperçu illustratif de l’espace client</p>
         ) : null}
       </div>
     </div>
@@ -98,13 +98,13 @@ function PanelDemandes() {
       <div className="mt-3.5 rounded-xl border border-slate-100 bg-slate-50/80 p-3 md:p-3.5">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
-            <p className="text-[13px] font-semibold leading-snug text-slate-900 md:text-sm">Mémoire technique — AO Mairie</p>
-            <p className="mt-0.5 text-[11px] leading-snug text-slate-500 md:text-[12px]">
+            <p className="text-sm font-semibold leading-snug text-slate-900 md:text-base">Mémoire technique — AO Mairie</p>
+            <p className="mt-0.5 text-xs leading-snug text-slate-600 md:text-sm">
               Dossier ouvert le 12 avr. · Réf. MT-2026-084
             </p>
           </div>
           <span
-            className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide md:text-[11px]"
+            className="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide md:text-xs"
             style={{ backgroundColor: "#dbeafe", color: "#1d4ed8" }}
           >
             En cours
@@ -112,16 +112,16 @@ function PanelDemandes() {
         </div>
 
         <div className="mt-2.5 flex flex-wrap gap-1.5" aria-hidden>
-          <span className="rounded-md border border-emerald-200 bg-white px-2 py-0.5 text-[10px] font-medium text-emerald-800 md:text-[11px]">
+          <span className="rounded-md border border-emerald-200 bg-white px-2 py-0.5 text-[11px] font-medium text-emerald-800 md:text-xs">
             Validé
           </span>
-          <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-medium text-slate-600 md:text-[11px]">
+          <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-700 md:text-xs">
             Terminé
           </span>
         </div>
       </div>
 
-      <ul className="mt-3.5 space-y-1.5 text-[12px] md:text-[13px] [&_svg]:h-4 [&_svg]:w-4">
+      <ul className="mt-3.5 space-y-1.5 text-sm md:text-base [&_svg]:h-4 [&_svg]:w-4">
         <li className="flex items-center justify-between rounded-lg border border-slate-100 bg-white px-2.5 py-2">
           <span className="text-slate-700">Demande créée</span>
           <span className="text-emerald-600" aria-label="Fait">
@@ -141,15 +141,15 @@ function PanelDemandes() {
       </ul>
 
       <div className="mt-4 rounded-[10px] border border-slate-100 bg-white p-3">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 md:text-[11px]">Suivi du mois</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-600 md:text-sm">Suivi du mois</p>
         <div className="mt-1.5 flex items-baseline justify-between gap-2">
           <span className="text-xl font-bold tabular-nums text-slate-900 md:text-2xl">7</span>
-          <span className="text-[11px] text-slate-500 md:text-xs">dossiers traités ce mois</span>
+          <span className="text-xs text-slate-600 md:text-sm">dossiers traités ce mois</span>
         </div>
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
           <div className="h-full w-[58%] rounded-full" style={{ backgroundColor: BLUE }} />
         </div>
-        <p className="mt-2 text-[10px] text-slate-500 md:text-[11px]">3 dossiers actifs · 2 en attente de validation</p>
+        <p className="mt-2 text-xs text-slate-600 md:text-sm">3 dossiers actifs · 2 en attente de validation</p>
       </div>
     </>
   );
@@ -158,7 +158,7 @@ function PanelDemandes() {
 function PanelEchanges() {
   return (
     <div className="mt-3.5 space-y-2.5">
-      <p className="text-[12px] font-semibold text-slate-900 md:text-sm">Échanges</p>
+      <p className="text-sm font-semibold text-slate-900 md:text-base">Échanges</p>
       <div className="space-y-2.5">
         {MESSAGES.map((m, i) => (
           <div
@@ -166,8 +166,8 @@ function PanelEchanges() {
             className="rounded-lg border border-slate-200/90 bg-gradient-to-b from-white to-slate-50/90 px-3 py-2.5 text-left shadow-sm shadow-slate-900/[0.04]"
           >
             <p className="text-xs font-semibold text-[#1d4ed8]">{m.from}</p>
-            <p className="mt-0.5 text-[12px] leading-snug text-slate-800 md:text-[13px]">{m.msg}</p>
-            <p className="mt-1 text-[10px] text-slate-400">{m.time}</p>
+            <p className="mt-0.5 text-sm leading-snug text-slate-800 md:text-base">{m.msg}</p>
+            <p className="mt-1 text-xs text-slate-500">{m.time}</p>
           </div>
         ))}
       </div>
@@ -178,16 +178,16 @@ function PanelEchanges() {
 function PanelDocuments() {
   return (
     <div className="mt-3.5">
-      <p className="text-[12px] font-semibold text-slate-900 md:text-sm">Documents du dossier</p>
+      <p className="text-sm font-semibold text-slate-900 md:text-base">Documents du dossier</p>
       <ul className="mt-2.5 space-y-2">
         {DOCS.map((d) => (
           <li
             key={d.name}
             className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 bg-white px-3 py-2.5 shadow-sm"
           >
-            <span className="min-w-0 text-[12px] font-medium leading-snug text-slate-800 md:text-[13px]">{d.name}</span>
+            <span className="min-w-0 text-sm font-medium leading-snug text-slate-800 md:text-base">{d.name}</span>
             <span
-              className={`shrink-0 rounded-md border px-2 py-0.5 text-[10px] font-semibold md:text-[11px] ${d.tagClass}`}
+              className={`shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-semibold md:text-xs ${d.tagClass}`}
             >
               {d.tag}
             </span>

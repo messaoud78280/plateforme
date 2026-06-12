@@ -37,8 +37,8 @@ function CalloutCard({
           <Icon className="h-[18px] w-[18px] stroke-[1.75]" aria-hidden />
         </span>
         <div className="min-w-0 pt-0.5">
-          <p className="text-[13px] font-semibold leading-tight tracking-tight text-[#0f172a] lg:text-[14px]">{title}</p>
-          <p className="mt-1 text-[11.5px] leading-snug text-slate-600 lg:text-[12px]">{description}</p>
+          <p className="text-sm font-semibold leading-tight tracking-tight text-[#0f172a] lg:text-base">{title}</p>
+          <p className="mt-1 text-xs leading-snug text-slate-700 lg:text-sm">{description}</p>
         </div>
       </div>
     </li>

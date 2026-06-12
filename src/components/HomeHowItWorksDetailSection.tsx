@@ -68,15 +68,15 @@ export function HomeHowItWorksDetailSection() {
         <header className="relative z-10 mx-auto mb-16 max-w-3xl text-center md:mb-20">
           <h2
             id="how-detail-heading"
-            className="font-heading text-[13px] font-semibold uppercase tracking-[0.22em]"
+            className="font-heading text-sm font-semibold uppercase tracking-[0.22em] md:text-base"
             style={{ color: BLUE }}
           >
             Process BeWork
           </h2>
-          <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-relaxed text-slate-600 md:mt-6 md:text-lg">
+          <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-slate-800 md:mt-6 md:text-xl">
             Un seul parcours, du premier message à une organisation plus fluide — sans vous noyer dans l’administratif.
           </p>
-          <p className="mx-auto mt-3 max-w-3xl text-sm leading-relaxed text-slate-500">
+          <p className="mx-auto mt-3 max-w-3xl text-base leading-relaxed text-slate-700">
             Vos Beworkers peuvent travailler avec vos outils existants : Excel, Google Sheets, Outlook, Gmail, Batigest, Onaya, EBP, Sage, MS Project,
             Drive, SharePoint, Chorus Pro, PLACE/AWS, ChatGPT et Claude.
           </p>
@@ -103,9 +103,9 @@ export function HomeHowItWorksDetailSection() {
                       <span className="mt-px shrink-0 [&_svg]:h-[17px] [&_svg]:w-[17px]" style={{ color: BLUE }} aria-hidden>
                         <s.Icon />
                       </span>
-                      <h3 className="text-[15px] font-semibold leading-snug text-slate-900 md:text-base">{s.title}</h3>
+                      <h3 className="text-base font-semibold leading-snug text-slate-900 md:text-lg">{s.title}</h3>
                     </div>
-                    <p className="mt-1.5 text-[13px] leading-relaxed text-slate-600 md:text-[14px]">{s.body}</p>
+                    <p className="mt-1.5 text-sm leading-relaxed text-slate-700 md:text-base">{s.body}</p>
                   </div>
                 </li>
               ))}

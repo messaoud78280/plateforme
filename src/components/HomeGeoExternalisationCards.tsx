@@ -11,7 +11,7 @@ export function HomeGeoExternalisationCards() {
         <h2 id="geo-pays-heading" className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-[1.65rem]">
           Une page par pays
         </h2>
-        <p className="mt-2 max-w-2xl text-base leading-relaxed text-slate-600">
+        <p className="mt-2 max-w-2xl text-base leading-relaxed text-slate-800 md:text-[1.05rem]">
           Contenus et angles adaptés à chaque marché — ouvrez la page qui correspond à votre zone.
         </p>
 

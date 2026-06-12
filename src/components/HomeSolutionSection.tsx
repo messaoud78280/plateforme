@@ -2,7 +2,7 @@ import type { JSX } from "react";
 
 const BLUE = "#2563eb";
 const TEXT_DARK = "#111827";
-const TEXT_MUTED = "#6b7280";
+const TEXT_MUTED = "#334155";
 
 type CardConfig = {
   title: string;
@@ -100,7 +100,7 @@ export function HomeSolutionSection() {
     >
       <div className="container-site relative z-[1]">
         <header className="mx-auto mb-14 max-w-3xl text-center md:mb-16">
-          <p className="font-heading text-[13px] font-semibold uppercase tracking-[0.2em]" style={{ color: BLUE }}>
+          <p className="font-heading text-sm font-semibold uppercase tracking-[0.2em] md:text-base" style={{ color: BLUE }}>
             LA&nbsp;SOLUTION&nbsp;BEWORK
           </p>
           <div className="mx-auto mt-2 h-[3px] w-12 rounded-full" style={{ backgroundColor: BLUE }} />
@@ -113,7 +113,7 @@ export function HomeSolutionSection() {
             <span style={{ color: BLUE }}>BeWork</span> tient le fil entre le terrain, le bureau et le donneur d&apos;ordre.
           </h2>
 
-          <p className="mx-auto mt-3 max-w-2xl text-[17px] leading-relaxed md:text-lg" style={{ color: TEXT_MUTED }}>
+          <p className="mx-auto mt-3 max-w-2xl text-lg leading-relaxed text-slate-800 md:text-xl">
             BeWork absorbe la charge administrative de vos marchés travaux pour sécuriser les interventions, fluidifier
             les échanges, maintenir la traçabilité et accélérer validations et paiements.
           </p>
@@ -158,8 +158,7 @@ export function HomeSolutionSection() {
 
               <div className="relative mb-6 flex w-full flex-1 justify-center">
                 <ul
-                  className="inline-flex min-h-0 flex-col gap-2.5 text-left text-[15px] leading-snug"
-                  style={{ color: TEXT_MUTED }}
+                  className="inline-flex min-h-0 flex-col gap-2.5 text-left text-base leading-snug text-slate-800"
                 >
                   {card.bullets.map((item) => (
                     <li
@@ -187,8 +186,8 @@ export function HomeSolutionSection() {
                   <card.FooterIcon />
                 </span>
                 <div className="min-w-0 text-center sm:text-left">
-                  <p className={`text-[15px] font-semibold ${card.footerTitleClass}`}>{card.footerTitle}</p>
-                  <p className="mt-1 text-[13px] leading-snug text-slate-600">{card.footerSub}</p>
+                  <p className={`text-base font-semibold ${card.footerTitleClass}`}>{card.footerTitle}</p>
+                  <p className="mt-1 text-sm leading-snug text-slate-700">{card.footerSub}</p>
                 </div>
               </div>
             </article>

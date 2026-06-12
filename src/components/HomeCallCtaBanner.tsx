@@ -31,7 +31,7 @@ export function HomeCallCtaBanner() {
               >
                 Besoin d&apos;en parler ?
               </h3>
-              <p className="mt-1 text-sm leading-snug text-slate-600 md:text-[15px] md:leading-snug">
+              <p className="mt-1 text-sm leading-snug text-slate-700 md:text-base md:leading-snug">
                 Décrivez votre besoin : réponse rapide de l&apos;équipe BeWork.
               </p>
             </div>

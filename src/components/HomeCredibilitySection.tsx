@@ -21,7 +21,7 @@ export function HomeCredibilitySection() {
       <div className="relative z-[1] mx-auto w-full max-w-6xl">
         {/* Header — max 720px, aligné gauche */}
         <header className="mb-6 text-left md:mb-7">
-          <p className="font-heading text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
+          <p className="font-heading text-xs font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-sm">
             Preuve &amp; crédibilité
           </p>
           <h2
@@ -30,7 +30,7 @@ export function HomeCredibilitySection() {
           >
             Une méthode née du terrain BTP<span className="text-[#1d4ed8]">.</span>
           </h2>
-          <p className="mt-3 max-w-[720px] text-[15px] leading-relaxed text-slate-600 md:text-base">
+          <p className="mt-3 max-w-[720px] text-base leading-relaxed text-slate-800 md:text-[1.05rem]">
             BeWork n&apos;est pas un outil IA générique ni un secrétariat classique. L&apos;offre s&apos;appuie sur plus de 20 ans
             d&apos;expérience terrain dans le bâtiment, la tenue de marchés et l&apos;administratif chantier — assistants augmentés par
             l&apos;IA, supervisés depuis la France.
@@ -58,11 +58,11 @@ export function HomeCredibilitySection() {
                 <p className="font-sans text-[15px] font-semibold leading-snug text-[#0f172a] md:text-base">
                   Laure Olivie — fondatrice BeWork
                 </p>
-                <p className="mt-1.5 text-[13px] text-slate-600 md:text-sm">
+                <p className="mt-1.5 text-sm text-slate-700 md:text-base">
                   Dirigeante BTP, 20 ans terrain en Île-de-France.
                 </p>
                 <div className="my-2.5 border-t border-slate-200/90" aria-hidden />
-                <p className="text-[13px] leading-relaxed text-slate-600 md:text-sm">
+                <p className="text-sm leading-relaxed text-slate-700 md:text-base">
                   Une approche issue du réel, pas de la théorie.
                 </p>
               </div>
@@ -79,12 +79,12 @@ export function HomeCredibilitySection() {
             <div className="min-w-0 flex-1">
               <h3 className="font-sans text-base font-bold text-[#0f172a] md:text-[1.05rem]">Notre rôle</h3>
               <div className="mt-2 h-1 w-14 rounded-sm bg-[#1d4ed8]" aria-hidden />
-              <p className="mt-2 text-[14px] font-semibold leading-snug text-[#0f172a] md:text-[15px]">
+              <p className="mt-2 text-sm font-semibold leading-snug text-[#0f172a] md:text-base">
                 Tenir un relais administratif fiable, dans un cadre clair et structuré.
               </p>
               <div className="my-2.5 border-t border-slate-300/60" aria-hidden />
-              <p className="text-[13px] leading-relaxed text-slate-600 md:text-sm">Pas empiler des dossiers.</p>
-              <p className="mt-1 text-[13px] leading-relaxed text-slate-600 md:text-sm">
+              <p className="text-sm leading-relaxed text-slate-700 md:text-base">Pas empiler des dossiers.</p>
+              <p className="mt-1 text-sm leading-relaxed text-slate-700 md:text-base">
                 Mettre en place une organisation qui tient.
               </p>
             </div>
@@ -102,7 +102,7 @@ export function HomeCredibilitySection() {
                 <IconShield className="h-[1.625rem] w-[1.625rem] md:h-7 md:w-7" />
               </span>
               <div className="flex min-w-0 flex-wrap items-center gap-2 md:gap-2">
-                <p className="min-w-0 max-w-[min(100%,28rem)] text-[14px] font-bold leading-snug text-[#0f172a] md:text-[15px] md:leading-snug">
+                <p className="min-w-0 max-w-[min(100%,28rem)] text-sm font-bold leading-snug text-[#0f172a] md:text-base md:leading-snug">
                   Société française — 100 % supervisé en France, plateforme privée et sécurisée.
                 </p>
                 <span

@@ -266,7 +266,7 @@ export default function HomePage() {
               <div className="container-site relative z-[2]">
             <div className="grid items-center gap-10 text-center lg:grid-cols-[minmax(0,1.08fr)_minmax(280px,1fr)] lg:items-start lg:gap-x-10 xl:grid-cols-[minmax(0,1fr)_minmax(520px,1.15fr)] xl:gap-x-14 lg:gap-y-0 lg:text-left">
               <div className="relative z-[2] mx-auto flex w-full min-w-0 max-w-[540px] flex-col gap-5 lg:mx-0 lg:max-w-none lg:gap-4 lg:pt-10 xl:max-w-[560px]">
-                <p className="font-blueprint-note mx-auto max-w-[540px] text-[13px] font-medium uppercase leading-snug tracking-[0.12em] text-[#1d4ed8] lg:mx-0 lg:max-w-none lg:text-[13.5px]">
+                <p className="font-blueprint-note mx-auto max-w-[540px] text-sm font-semibold uppercase leading-snug tracking-[0.12em] text-[#1d4ed8] lg:mx-0 lg:max-w-none lg:text-base">
                   Assistants travaux augmentés par l&apos;IA
                 </p>
 
@@ -275,15 +275,15 @@ export default function HomePage() {
                   <span className="block text-[#2563eb]">vous tenez le chantier.</span>
                 </h1>
 
-                <p className="mx-auto max-w-[540px] text-[16px] leading-[1.55] text-balance text-slate-700 lg:mx-0 lg:max-w-none lg:text-[17px] lg:leading-snug">
+                <p className="mx-auto max-w-[540px] text-lg leading-[1.55] text-balance text-slate-800 lg:mx-0 lg:max-w-none lg:text-xl lg:leading-snug">
                   Relais bureau-chantier pour vos marchés travaux : dossiers d&apos;intervention, comptes rendus, DOE, attachements, situations, validations, relances et coordination documentaire.
                 </p>
 
-                <p className="mx-auto max-w-[540px] text-[14.5px] font-medium leading-snug text-slate-600 lg:mx-0 lg:max-w-none lg:text-[15px]">
+                <p className="mx-auto max-w-[540px] text-base font-medium leading-snug text-slate-700 lg:mx-0 lg:max-w-none lg:text-[1.05rem]">
                   Pour les entreprises BTP titulaires de marchés publics, privés, accords-cadres ou contrats récurrents.
                 </p>
 
-                <p className="mx-auto max-w-[540px] text-[13.5px] font-medium leading-snug text-slate-500 lg:mx-0 lg:max-w-none lg:text-[14px]">
+                <p className="mx-auto max-w-[540px] text-sm font-semibold leading-snug text-slate-700 lg:mx-0 lg:max-w-none lg:text-base">
                   IA spécialisée BTP + validation humaine · 100 % supervisé en France
                 </p>
 
@@ -292,14 +292,14 @@ export default function HomePage() {
                 <div className="mt-4 flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:justify-start">
                   <Link
                     href="/contact"
-                    className="inline-flex min-h-[2.75rem] items-center justify-center rounded-lg bg-[#1d4ed8] px-5 text-[15px] font-semibold text-white shadow-md transition-colors hover:bg-[#1e40af]"
+                    className="inline-flex min-h-[3rem] items-center justify-center rounded-xl bg-[#1d4ed8] px-6 text-base font-semibold text-white shadow-md transition-colors hover:bg-[#1e40af]"
                     {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-hero-primary")}
                   >
                     Demander un diagnostic
                   </Link>
                   <Link
                     href="/assistants-administratifs-taches"
-                    className="inline-flex min-h-[2.75rem] items-center justify-center rounded-lg border border-slate-300/90 bg-white px-5 text-[15px] font-semibold text-[#1d4ed8] shadow-sm transition-colors hover:border-[#1d4ed8]/40 hover:bg-[#eff6ff]"
+                    className="inline-flex min-h-[3rem] items-center justify-center rounded-xl border-2 border-slate-300 bg-white px-6 text-base font-semibold text-[#1d4ed8] shadow-sm transition-colors hover:border-[#1d4ed8]/40 hover:bg-[#eff6ff]"
                   >
                     Voir les missions prises en charge
                   </Link>
@@ -311,7 +311,7 @@ export default function HomePage() {
                 >
                   {HERO_EXPERTISE_BADGES.map((label) => (
                     <li key={label}>
-                      <span className="inline-flex items-center rounded-sm border border-slate-300/85 border-l-2 border-l-[#2563eb]/75 bg-white/95 px-2.5 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.07em] text-slate-800 shadow-[0_4px_14px_-12px_rgba(15,23,42,0.12)] sm:text-[11px]">
+                      <span className="inline-flex items-center rounded-sm border border-slate-300 border-l-[3px] border-l-[#2563eb] bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-[0.06em] text-slate-900 shadow-sm sm:text-sm">
                         {label}
                       </span>
                     </li>
@@ -331,10 +331,10 @@ export default function HomePage() {
             <section className="relative bg-transparent px-6 pb-10 md:pb-12">
               <div className="container-site">
                 <div className="mx-auto max-w-4xl rounded-2xl border border-slate-200/90 bg-white p-6 shadow-[0_10px_40px_-16px_rgba(15,23,42,0.1)] ring-1 ring-slate-100/85 md:p-8">
-                  <p className="font-heading text-[11px] font-bold uppercase tracking-[0.2em] text-[#1d4ed8] md:text-[12px]">
+                  <p className="font-heading text-xs font-bold uppercase tracking-[0.2em] text-[#1d4ed8] md:text-sm">
                     BeWork, c’est quoi ?
                   </p>
-                  <p className="mt-3 text-[15px] leading-relaxed text-slate-700 md:text-base">
+                  <p className="mt-3 text-base leading-relaxed text-slate-800 md:text-[1.05rem]">
                     BeWork est le relais administratif des marchés travaux pour les entreprises du BTP titulaires de marchés
                     publics, privés, accords-cadres ou contrats récurrents. Nous absorbons le flux documentaire entre terrain,
                     bureau et donneurs d&apos;ordre&nbsp;: dossiers d&apos;intervention, comptes rendus, DOE, attachements,
@@ -344,18 +344,18 @@ export default function HomePage() {
                     <BeWorkValuePillars variant="inline" />
                   </p>
                   <hr className="my-6 border-slate-200/90" />
-                  <p className="font-heading text-[11px] font-bold uppercase tracking-[0.2em] text-[#1d4ed8] md:text-[12px]">
+                  <p className="font-heading text-xs font-bold uppercase tracking-[0.2em] text-[#1d4ed8] md:text-sm">
                     C’est quoi un Beworker ?
                   </p>
-                  <p className="mt-3 text-[15px] leading-relaxed text-slate-700 md:text-base">
+                  <p className="mt-3 text-base leading-relaxed text-slate-800 md:text-[1.05rem]">
                     Un Beworker, c’est un assistant travaux BTP dédié à vos marchés : il tient les dossiers, prépare les livrables,
                     relance les donneurs d&apos;ordre et coordonne les échanges terrain ↔ bureau. Augmenté par l&apos;IA, encadré et
                     supervisé depuis la France — ce n’est pas un chatbot ni un secrétariat généraliste.
                   </p>
-                  <p className="font-blueprint-note mt-3 text-center text-[13px] text-slate-600 md:text-sm">
+                  <p className="font-blueprint-note mt-3 text-center text-sm font-medium text-slate-700 md:text-base">
                     Terrain ↔ bureau ↔ donneur d&apos;ordre
                   </p>
-                  <p className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-center text-[12px] text-slate-600 md:text-sm">
+                  <p className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-center text-sm text-slate-700 md:text-base">
                     <Link href="/services/assistant-travaux" className="text-[#1d4ed8] underline-offset-2 hover:underline">
                       Assistant travaux
                     </Link>
@@ -395,7 +395,7 @@ export default function HomePage() {
                   <p className="mt-4 text-center">
                     <Link
                       href="/services"
-                      className="text-sm font-semibold text-[#1d4ed8] underline-offset-4 hover:underline"
+                      className="text-base font-semibold text-[#1d4ed8] underline-offset-4 hover:underline"
                     >
                       Voir les pages services
                     </Link>
@@ -422,13 +422,13 @@ export default function HomePage() {
               />
               <div className="relative z-[1] mx-auto w-full max-w-6xl">
                 <div className="rounded-2xl border border-slate-200/90 bg-white p-6 text-left shadow-[0_10px_40px_-16px_rgba(15,23,42,0.1)] ring-1 ring-slate-100/85 md:p-8 md:text-center">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
+                  <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-sm">
                     Missions &amp; périmètre
                   </p>
-                  <p className="mt-2.5 font-sans text-lg font-bold leading-snug tracking-tight text-[#0f172a] md:mx-auto md:max-w-[40rem] md:text-xl">
+                  <p className="mt-2.5 font-sans text-xl font-bold leading-snug tracking-tight text-[#0f172a] md:mx-auto md:max-w-[40rem] md:text-2xl">
                     Missions administratives de marchés travaux
                   </p>
-                  <p className="mt-3 text-[15px] leading-relaxed text-slate-600 md:mx-auto md:max-w-[48rem] md:text-base md:leading-relaxed">
+                  <p className="mt-3 text-base leading-relaxed text-slate-800 md:mx-auto md:max-w-[48rem] md:text-[1.05rem] md:leading-relaxed">
                     Suivi de marchés, comptes rendus, DOE, attachements, situations, relances MOA / MOE, validations BPU / DPGF,
                     dossiers d&apos;intervention et coordination documentaire — le détail de ce que nous prenons en charge. Voir aussi les{" "}
                     <Link href="/services" className="font-semibold text-[#1d4ed8] underline-offset-2 hover:underline">
@@ -436,7 +436,7 @@ export default function HomePage() {
                     </Link>{" "}
                     pour les intentions métier (conducteur de travaux, DCE, PPSPS, DOE…).
                   </p>
-                  <p className="mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5 text-[12px] text-slate-600 md:mt-4 md:max-w-[48rem] md:gap-x-3 md:text-sm md:leading-relaxed">
+                  <p className="mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5 text-sm text-slate-700 md:mt-4 md:max-w-[48rem] md:gap-x-3 md:text-base md:leading-relaxed">
                     <Link href="/services/assistant-conducteur-de-travaux" className="text-[#1d4ed8] underline-offset-2 hover:underline">
                       Assistant conducteur de travaux
                     </Link>
@@ -462,7 +462,7 @@ export default function HomePage() {
                   <div className="mt-2.5 h-1 w-14 rounded-sm bg-[#1d4ed8] md:mx-auto" aria-hidden />
                   <Link
                     href="/assistants-administratifs-taches"
-                    className="mt-5 inline-flex items-center gap-1.5 text-[14px] font-semibold text-[#1d4ed8] transition-colors hover:text-[#1e40af] md:mx-auto md:mt-6"
+                    className="mt-5 inline-flex items-center gap-1.5 text-base font-semibold text-[#1d4ed8] transition-colors hover:text-[#1e40af] md:mx-auto md:mt-6"
                   >
                     Voir le périmètre des missions
                     <span aria-hidden>→</span>
@@ -564,7 +564,7 @@ export default function HomePage() {
               Cadre, tarifs et collaboration : ce que les titulaires de marchés BTP veulent vérifier avant d&apos;externaliser le
               suivi administratif de leurs marchés.
             </p>
-            <p className="mt-4 text-sm font-medium text-black">
+            <p className="mt-4 text-base font-medium text-black">
               Tous nos tarifs sont exprimés HT, sans frais supplémentaires.
             </p>
             <dl className="mt-12 space-y-8">

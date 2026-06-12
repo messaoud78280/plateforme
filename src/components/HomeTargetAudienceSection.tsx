@@ -59,7 +59,7 @@ export function HomeTargetAudienceSection() {
       aria-labelledby="target-audience-heading"
     >
       <div className="mx-auto max-w-site">
-        <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-[12px]">
+        <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-sm">
           Pour qui
         </p>
         <h2
@@ -105,7 +105,7 @@ export function HomeTargetAudienceSection() {
                     </div>
                   </div>
 
-                  <ul className="mt-5 space-y-2.5 text-[14px] leading-snug text-slate-600">
+                  <ul className="mt-5 space-y-2.5 text-sm leading-snug text-slate-800 md:text-base">
                     {target.bullets.map((bullet) => (
                       <li key={bullet} className="flex gap-2">
                         <span className="mt-[3px] shrink-0 font-semibold text-[#1d4ed8]" aria-hidden>

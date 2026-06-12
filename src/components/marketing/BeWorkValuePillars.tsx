@@ -17,7 +17,7 @@ export function BeWorkValuePillars({ variant = "grid", className = "", id }: Pro
         aria-label="Atouts BeWork"
       >
         {BEWORK_VALUE_PILLARS.map((pillar) => (
-          <li key={pillar.label} className="flex items-start gap-2 text-[14px] leading-snug text-slate-800">
+          <li key={pillar.label} className="flex items-start gap-2 text-base leading-snug text-slate-900">
             <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#1d4ed8]" strokeWidth={2.5} aria-hidden />
             <span className="font-medium">{pillar.label}</span>
           </li>
@@ -41,7 +41,7 @@ export function BeWorkValuePillars({ variant = "grid", className = "", id }: Pro
             >
               <Check className="h-3 w-3" strokeWidth={3} />
             </span>
-            <span className="min-w-0 text-left text-[13px] font-semibold leading-snug tracking-tight text-[#171717] sm:text-[13.5px]">
+            <span className="min-w-0 text-left text-sm font-semibold leading-snug tracking-tight text-[#0f172a] sm:text-[0.9375rem]">
               {pillar.label}
             </span>
           </li>
@@ -68,11 +68,11 @@ export function BeWorkValuePillars({ variant = "grid", className = "", id }: Pro
             <Check className="h-5 w-5 md:h-[1.35rem] md:w-[1.35rem]" strokeWidth={2.5} />
           </span>
           <div className="min-w-0 flex-1">
-            <h3 className="font-sans text-[14px] font-bold leading-snug tracking-tight text-[#0f172a] md:text-[15px]">
+            <h3 className="font-sans text-base font-bold leading-snug tracking-tight text-[#0f172a] md:text-[1.05rem]">
               {pillar.label}
             </h3>
             <div className="mt-2 h-0.5 w-12 rounded-sm bg-[#1d4ed8]" aria-hidden />
-            <p className="mt-2.5 text-[13px] leading-relaxed text-slate-600 md:text-sm">{pillar.detail}</p>
+            <p className="mt-2.5 text-sm leading-relaxed text-slate-700 md:text-base">{pillar.detail}</p>
           </div>
         </article>
       ))}

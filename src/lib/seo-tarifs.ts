@@ -18,7 +18,7 @@ export const TARIFS_PAGE_PATH = "/tarifs" as const;
 export const TARIFS_SEO_TITLE = "Tarifs BeWork | Assistant travaux externalisé BTP";
 
 export const TARIFS_SEO_DESCRIPTION =
-  "Tarifs de l'assistant travaux BTP BeWork : packs de crédits flexibles, facturation au réel, sans recrutement. Trouvez la formule adaptée à votre volume.";
+  "Tarifs BeWork : forfaits HT pour déléguer le suivi travaux BTP — ponctuel dès 150 €, relais mensuel dès 590 €, cellule externalisée. Sans recrutement.";
 
 export const TARIFS_SEO_KEYWORDS = [
   "tarifs assistant travaux",

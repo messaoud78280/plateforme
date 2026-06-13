@@ -36,6 +36,8 @@ const nextConfig: NextConfig = {
       { source: "/ppsps-btp", destination: "/services/ppsps", permanent: true },
       { source: "/compte-rendu-chantier", destination: "/services/compte-rendu-chantier", permanent: true },
       { source: "/situations-travaux-btp", destination: "/situation-travaux-btp", permanent: true },
+      { source: "/tutoriels", destination: "/ressources/tutos", permanent: true },
+      { source: "/guides", destination: "/ressources/guides", permanent: true },
     ];
   },
 };

@@ -81,6 +81,12 @@ export default function Page() {
           </Link>{" "}
           et situations de travaux
         </li>
+        <li>
+          <Link href="/assistants-administratifs-taches#marches-publics-accords-cadres" className="text-[#1d4ed8] hover:underline">
+            Accords-cadres &amp; bons de commande
+          </Link>{" "}
+          (logement occupé, ECF, SS4)
+        </li>
         <li>Suivi des bons de commande (accord-cadre)</li>
         <li>Classement documentaire marché (CCTP, avenants, correspondances)</li>
         <li>

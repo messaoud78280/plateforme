@@ -99,6 +99,7 @@ ${line("FAQ", "/faq")}
 ${line("Réponse aux appels d'offres BTP", "/reponse-appel-offres-btp", "DCE, mémoire technique, DPGF, dépôt plateforme.")}
 ${line("Facturation Chorus Pro BTP", "/facturation-chorus-pro-btp", "Situations, dépôt, suivi et relances factures publiques.")}
 ${line("Gestion administrative marché public", "/gestion-marche-public-btp", "Suivi après attribution : situations, DOE, avenants, accord-cadre.")}
+${line("Marchés publics & accords-cadres", "/assistants-administratifs-taches#marches-publics-accords-cadres", "Bons de commande, logement occupé, ECF, SS4, pénalités — section missions.")}
 
 ## Assistant travaux par pays
 

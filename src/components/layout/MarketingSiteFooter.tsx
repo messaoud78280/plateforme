@@ -129,6 +129,11 @@ export function MarketingSiteFooter() {
                 </Link>
               </li>
               <li>
+                <Link href="/assistants-administratifs-taches#marches-publics-accords-cadres" className={COL_LINK}>
+                  Marchés publics &amp; accords-cadres
+                </Link>
+              </li>
+              <li>
                 <Link href="/externaliser-administratif" className={COL_LINK}>
                   Externaliser l&apos;administratif
                 </Link>

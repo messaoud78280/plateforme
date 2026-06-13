@@ -52,6 +52,15 @@ const HERO_EXPERTISE_BADGES = [
   "Validations MOA",
 ] as const;
 
+/** Badges hero cliquables — section marchés publics sur la page missions. */
+const HERO_BADGE_LINKS: Partial<Record<(typeof HERO_EXPERTISE_BADGES)[number], string>> = {
+  "Marchés publics": "/assistants-administratifs-taches#marches-publics-accords-cadres",
+  "Accords-cadres": "/assistants-administratifs-taches#marches-publics-accords-cadres",
+};
+
+const HERO_BADGE_CLASS =
+  "inline-flex items-center rounded-sm border border-slate-300 border-l-[3px] border-l-[#2563eb] bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-[0.06em] text-slate-900 shadow-sm transition-colors hover:border-[#1d4ed8]/50 hover:bg-[#eff6ff] sm:text-sm";
+
 const HOME_FAQ_ITEMS = [
   {
     q: "Qu’est-ce que le relais administratif BeWork pour les marchés travaux ?",
@@ -298,7 +307,7 @@ export default function HomePage() {
                     Demander un diagnostic
                   </Link>
                   <Link
-                    href="/assistants-administratifs-taches"
+                    href="/assistants-administratifs-taches#marches-publics-accords-cadres"
                     className="inline-flex min-h-[3rem] items-center justify-center rounded-xl border-2 border-slate-300 bg-white px-6 text-base font-semibold text-[#1d4ed8] shadow-sm transition-colors hover:border-[#1d4ed8]/40 hover:bg-[#eff6ff]"
                   >
                     Voir les missions prises en charge
@@ -311,9 +320,13 @@ export default function HomePage() {
                 >
                   {HERO_EXPERTISE_BADGES.map((label) => (
                     <li key={label}>
-                      <span className="inline-flex items-center rounded-sm border border-slate-300 border-l-[3px] border-l-[#2563eb] bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-[0.06em] text-slate-900 shadow-sm sm:text-sm">
-                        {label}
-                      </span>
+                      {HERO_BADGE_LINKS[label] ? (
+                        <Link href={HERO_BADGE_LINKS[label]!} className={HERO_BADGE_CLASS}>
+                          {label}
+                        </Link>
+                      ) : (
+                        <span className={HERO_BADGE_CLASS}>{label}</span>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -430,13 +443,29 @@ export default function HomePage() {
                   </p>
                   <p className="mt-3 text-base leading-relaxed text-slate-800 md:mx-auto md:max-w-[48rem] md:text-[1.05rem] md:leading-relaxed">
                     Suivi de marchés, comptes rendus, DOE, attachements, situations, relances MOA / MOE, validations BPU / DPGF,
-                    dossiers d&apos;intervention et coordination documentaire — le détail de ce que nous prenons en charge. Voir aussi les{" "}
+                    dossiers d&apos;intervention et coordination documentaire — le détail sur la{" "}
+                    <Link
+                      href="/assistants-administratifs-taches#marches-publics-accords-cadres"
+                      className="font-semibold text-[#1d4ed8] underline-offset-2 hover:underline"
+                    >
+                      page missions
+                    </Link>{" "}
+                    (dont marchés publics, accords-cadres et bons de commande). Voir aussi les{" "}
                     <Link href="/services" className="font-semibold text-[#1d4ed8] underline-offset-2 hover:underline">
                       pages services
                     </Link>{" "}
                     pour les intentions métier (conducteur de travaux, DCE, PPSPS, DOE…).
                   </p>
                   <p className="mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5 text-sm text-slate-700 md:mt-4 md:max-w-[48rem] md:gap-x-3 md:text-base md:leading-relaxed">
+                    <Link
+                      href="/assistants-administratifs-taches#marches-publics-accords-cadres"
+                      className="text-[#1d4ed8] underline-offset-2 hover:underline"
+                    >
+                      Marchés publics &amp; accords-cadres
+                    </Link>
+                    <span className="text-slate-300" aria-hidden>
+                      ·
+                    </span>
                     <Link href="/services/assistant-conducteur-de-travaux" className="text-[#1d4ed8] underline-offset-2 hover:underline">
                       Assistant conducteur de travaux
                     </Link>
@@ -461,7 +490,7 @@ export default function HomePage() {
                   </p>
                   <div className="mt-2.5 h-1 w-14 rounded-sm bg-[#1d4ed8] md:mx-auto" aria-hidden />
                   <Link
-                    href="/assistants-administratifs-taches"
+                    href="/assistants-administratifs-taches#marches-publics-accords-cadres"
                     className="mt-5 inline-flex items-center gap-1.5 text-base font-semibold text-[#1d4ed8] transition-colors hover:text-[#1e40af] md:mx-auto md:mt-6"
                   >
                     Voir le périmètre des missions

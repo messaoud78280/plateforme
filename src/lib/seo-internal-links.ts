@@ -52,10 +52,15 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/contact", label: "Démarrer un échange" },
   ],
   "/assistants-administratifs-taches": [
+    {
+      href: "/assistants-administratifs-taches#marches-publics-accords-cadres",
+      label: "Marchés publics & accords-cadres",
+    },
+    { href: "/gestion-marche-public-btp", label: "Gestion marché public" },
+    { href: "/reponse-appel-offres-btp", label: "Réponse appels d'offres" },
     { href: "/services/assistant-travaux", label: "Assistant travaux IA" },
     { href: "/tarifs", label: "Tarifs" },
-    { href: "/ressources", label: "Ressources BTP" },
-    { href: "/contact", label: "Démarrer un échange" },
+    { href: "/contact", label: "Parler de mon marché" },
   ],
   "/relance-devis-btp": [
     { href: "/ressources/chiffrage-devis-btp", label: "Chiffrage devis BTP" },
@@ -241,6 +246,10 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
   "/reponse-appel-offres-btp": [
     { href: "/services/analyse-dce-btp", label: "Analyse DCE BTP" },
     { href: "/services/memoire-technique-btp", label: "Mémoire technique" },
+    {
+      href: "/assistants-administratifs-taches#marches-publics-accords-cadres",
+      label: "Accords-cadres & bons de commande",
+    },
     { href: "/gestion-marche-public-btp", label: "Gestion marché public" },
     { href: "/tarifs", label: "Tarifs" },
     { href: "/contact", label: "Envoyer un DCE" },
@@ -248,12 +257,20 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
   ],
   "/facturation-chorus-pro-btp": [
     { href: "/situation-travaux-btp", label: "Situations de travaux" },
+    {
+      href: "/assistants-administratifs-taches#marches-publics-accords-cadres",
+      label: "Accords-cadres & bons de commande",
+    },
     { href: "/gestion-marche-public-btp", label: "Gestion marché public" },
     { href: "/impayes-btp-relances", label: "Relances impayés" },
     { href: "/tarifs", label: "Tarifs" },
     { href: "/contact", label: "Contact" },
   ],
   "/gestion-marche-public-btp": [
+    {
+      href: "/assistants-administratifs-taches#marches-publics-accords-cadres",
+      label: "Accords-cadres & bons de commande",
+    },
     { href: "/reponse-appel-offres-btp", label: "Réponse appels d'offres" },
     { href: "/facturation-chorus-pro-btp", label: "Chorus Pro BTP" },
     { href: "/services/doe-btp", label: "DOE BTP" },

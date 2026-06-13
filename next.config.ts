@@ -38,6 +38,11 @@ const nextConfig: NextConfig = {
       { source: "/situations-travaux-btp", destination: "/situation-travaux-btp", permanent: true },
       { source: "/tutoriels", destination: "/ressources/tutos", permanent: true },
       { source: "/guides", destination: "/ressources/guides", permanent: true },
+      {
+        source: "/marches-publics-accords-cadres",
+        destination: "/assistants-administratifs-taches#marches-publics-accords-cadres",
+        permanent: true,
+      },
     ];
   },
 };

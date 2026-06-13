@@ -136,7 +136,7 @@ const FAQ_APPELS_OFFRES_CAT = {
     },
     {
       q: "BeWork peut-il suivre les bons de commande d'un accord-cadre ?",
-      a: "Oui sur le suivi administratif : échéances, pièces attendues, relances et traçabilité des bons émis — le titulaire garde la responsabilité contractuelle.",
+      a: "Oui sur le suivi administratif : échéances, pièces attendues, relances et traçabilité des bons émis — le titulaire garde la responsabilité contractuelle. Voir la section marchés publics sur /assistants-administratifs-taches#marches-publics-accords-cadres.",
     },
     {
       q: "BeWork intervient-il en France ?",

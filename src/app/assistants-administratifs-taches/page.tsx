@@ -3,16 +3,48 @@ import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
+import {
+  MARCHES_PUBLICS_ANCHOR,
+  MARCHES_PUBLICS_FAQ,
+  MarchesPublicsAccordsCadresSection,
+} from "@/components/marketing/MarchesPublicsAccordsCadresSection";
 import { BEWORK_MARKETING_PRICE_LINE_SHORT } from "@/lib/bework-public-offers";
 import { absoluteUrl } from "@/lib/site";
 
 const pageUrl = absoluteUrl("/assistants-administratifs-taches");
 
 export const metadata: Metadata = {
-  title: { absolute: "Missions assistant travaux BTP : documents chantier | BeWork" },
+  title: { absolute: "Missions assistant travaux BTP : marchés publics & chantier | BeWork" },
   description:
-    "Catalogue des missions déléguables : compte rendu, DOE, PPSPS, analyse DCE, devis, relances et suivi administratif chantier. Assistant travaux augmenté par l’IA.",
+    "Missions déléguables BeWork : compte rendu, DOE, PPSPS, DCE, devis, relances — et suivi administratif marchés publics, accords-cadres, bons de commande, ECF, SS4 et pénalités.",
+  keywords: [
+    "missions assistant travaux BTP",
+    "assistant administratif BTP marché public",
+    "gestion accord-cadre logement occupé",
+    "suivi bons de commande BTP",
+    "marché à bons de commande bâtiment",
+    "gestion ECF BTP",
+    "amiante SS4 logement occupé",
+    "suivi pénalités marché public BTP",
+  ],
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    url: pageUrl,
+    siteName: "BeWork",
+    title: "Missions assistant travaux BTP : marchés publics & chantier | BeWork",
+    description:
+      "Catalogue des missions BeWork : chantier, documents travaux, et suivi administratif marchés publics & accords-cadres (bons de commande, ECF, pénalités).",
+    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Missions BeWork BTP" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Missions assistant travaux BTP | BeWork",
+    description:
+      "Missions déléguables : CR, DOE, DCE, relances — et marchés publics, accords-cadres, bons de commande.",
+  },
+  robots: { index: true, follow: true },
 };
 
 const top5Chronophages = [
@@ -174,6 +206,7 @@ const reassurance = [
 ];
 
 const faqItems = [
+  ...MARCHES_PUBLICS_FAQ,
   {
     q: "Quelles missions peut gérer un assistant travaux BeWork ?",
     a: "Les missions qui doivent avancer côté bureau : relances devis, suivi client, dossiers chantier, DICT/DT, fournisseurs, comptes rendus, réserves, DOE et tableaux de suivi.",
@@ -232,11 +265,19 @@ export default function AssistantsAdministratifsTachesPage() {
         <section className="px-6 pt-16 pb-12 md:pt-20 md:pb-16" style={{ scrollMarginTop: "6rem" }}>
           <div className="mx-auto max-w-4xl text-center">
             <h1 className="text-balance text-3xl font-bold tracking-tight text-black md:text-4xl lg:text-5xl">
-              Missions BeWork pour vos chantiers
+              Missions BeWork pour vos chantiers &amp; marchés publics
             </h1>
             <p className="mt-6 max-w-3xl mx-auto text-lg leading-relaxed text-black">
-              Devis, relances, dossiers chantier, DICT, fournisseurs, comptes rendus, réserves, DOE, DCE, CCTP : BeWork vous aide à tenir ce qui doit
-              avancer côté bureau pendant que vous gérez le terrain.
+              Devis, relances, dossiers chantier, DICT, fournisseurs, comptes rendus, réserves, DOE, DCE, CCTP — et suivi
+              administratif des marchés publics, accords-cadres et bons de commande (logement occupé, ECF, pénalités).
+            </p>
+            <p className="mt-4">
+              <Link
+                href={`#${MARCHES_PUBLICS_ANCHOR}`}
+                className="text-base font-semibold text-[#1d4ed8] underline-offset-4 hover:underline"
+              >
+                Aller au détail marchés publics &amp; accords-cadres
+              </Link>
             </p>
             <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
               <CalendlyBookingLink
@@ -268,6 +309,8 @@ export default function AssistantsAdministratifsTachesPage() {
             </p>
           </div>
         </section>
+
+        <MarchesPublicsAccordsCadresSection />
 
         {/* C) Les 5 tâches les plus chronophages */}
         <section className="px-6 py-12 md:py-16" aria-labelledby="top5-heading">

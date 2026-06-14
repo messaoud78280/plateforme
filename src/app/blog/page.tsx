@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
+import { SeoInternalLinks } from "@/components/seo/SeoInternalLinks";
 import { BLOG_ARTICLES, BLOG_SLUGS, type BlogSlug } from "@/content/blog-articles";
+import { hreflangFrancophonieLanguages } from "@/lib/seo-francophonie";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 
 const blogUrl = absoluteUrl("/blog");
@@ -37,7 +39,7 @@ export const metadata: Metadata = {
     "DPGF",
     "assistant administratif distance",
   ],
-  alternates: { canonical: blogUrl, languages: { fr: blogUrl, "x-default": blogUrl } },
+  alternates: { canonical: blogUrl, languages: hreflangFrancophonieLanguages("/blog") },
   openGraph: {
     type: "website",
     locale: "fr_FR",
@@ -162,6 +164,10 @@ export default function BlogPage() {
               ))}
             </div>
           </section>
+
+          <div className="mx-auto max-w-site px-6 pb-8">
+            <SeoInternalLinks path="/blog" />
+          </div>
         </div>
       </main>
 

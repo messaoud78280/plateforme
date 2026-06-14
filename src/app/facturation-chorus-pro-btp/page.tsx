@@ -110,6 +110,11 @@ export default function Page() {
           </Link>
         </li>
         <li>
+          <Link href="/assistants-administratifs-taches#marches-publics-accords-cadres" className="text-[#1d4ed8] hover:underline">
+            Situations &amp; Chorus Pro — bloc exécution marché
+          </Link>
+        </li>
+        <li>
           <Link href="/gestion-marche-public-btp" className="text-[#1d4ed8] hover:underline">
             Gestion administrative marché public
           </Link>

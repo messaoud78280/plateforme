@@ -3,49 +3,17 @@ import Link from "next/link";
 import { ProspectContactForm } from "@/components/contact/ProspectContactForm";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
+import { SeoInternalLinks } from "@/components/seo/SeoInternalLinks";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
-import {
-  SEO_OG_ALTERNATE_LOCALES,
-  SEO_OG_LOCALE_PRIMARY,
-  hreflangFrancophonieLanguages,
-} from "@/lib/seo-francophonie";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
+import { getPublicPageSeo } from "@/lib/seo-public-pages";
 import { absoluteUrl } from "@/lib/site";
 
-const pageUrl = absoluteUrl("/contact");
-const contactOgImage = absoluteUrl("/opengraph-image");
+const CONTACT_PAGE_PATH = "/contact" as const;
+const pageUrl = absoluteUrl(CONTACT_PAGE_PATH);
+const contactSeo = getPublicPageSeo(CONTACT_PAGE_PATH)!;
 
-const CONTACT_TITLE = "Contact BeWork — qualifier votre besoin administratif BTP";
-const CONTACT_DESCRIPTION =
-  "Contactez BeWork et qualifiez votre besoin BTP en quelques minutes : type de marché, volume, délais. On vous rappelle pour cadrer la délégation administrative.";
-
-export const metadata: Metadata = {
-  title: { absolute: CONTACT_TITLE },
-  description: CONTACT_DESCRIPTION,
-  keywords: [
-    "contact BeWork",
-    "demande externalisation administrative BTP",
-    "assistant travaux BTP",
-    "suivi marchés travaux",
-    "qualification besoin administratif chantier",
-  ],
-  alternates: { canonical: pageUrl, languages: hreflangFrancophonieLanguages("/contact") },
-  openGraph: {
-    type: "website",
-    locale: SEO_OG_LOCALE_PRIMARY,
-    alternateLocale: [...SEO_OG_ALTERNATE_LOCALES],
-    url: pageUrl,
-    siteName: "BeWork",
-    title: CONTACT_TITLE,
-    description: CONTACT_DESCRIPTION,
-    images: [{ url: contactOgImage, width: 1200, height: 630, alt: "Contacter BeWork — partenaire administratif BTP" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Contact BeWork — qualifier votre besoin BTP",
-    description: CONTACT_DESCRIPTION,
-  },
-  robots: { index: true, follow: true },
-};
+export const metadata: Metadata = landingPageMetadataFromPath(CONTACT_PAGE_PATH);
 
 const contactJsonLd = {
   "@context": "https://schema.org",
@@ -54,10 +22,10 @@ const contactJsonLd = {
       "@type": "ContactPage",
       "@id": `${pageUrl}#contact-page`,
       url: pageUrl,
-      name: CONTACT_TITLE,
+      name: contactSeo.title,
       inLanguage: "fr-FR",
       isPartOf: { "@id": `${absoluteUrl("/")}#website` },
-      description: CONTACT_DESCRIPTION,
+      description: contactSeo.description,
       mainEntity: { "@id": `${absoluteUrl("/")}#organization` },
     },
     {
@@ -127,6 +95,8 @@ export default function ContactPage() {
               ← Retour à l’accueil
             </Link>
           </p>
+
+          <SeoInternalLinks path={CONTACT_PAGE_PATH} className="mt-12" />
         </div>
       </main>
 

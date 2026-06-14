@@ -199,26 +199,83 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
     ),
     keywords: ["cas clients BTP", "retour expérience BTP", "organisation chantier"],
   },
+  "/faq": {
+    title: "FAQ assistant travaux BTP : marchés publics, Chorus Pro, DOE | BeWork",
+    description: metaDescriptionFrancophonie(
+      "FAQ BeWork : assistant travaux, exécution marché public, Chorus Pro, amiante SS4, DCE, DOE, forfaits et validation avant envoi",
+    ),
+    keywords: [
+      "FAQ BeWork",
+      "assistant travaux marché public",
+      "gestion administrative marché public BTP",
+      "facturation Chorus Pro BTP",
+      "DOE marché public BTP",
+      "amiante SS4 logement occupé",
+    ],
+  },
+  "/contact": {
+    title: "Contact BeWork — qualifier votre besoin administratif BTP",
+    description: metaDescriptionFrancophonie(
+      "Contactez BeWork : marchés publics, accords-cadres, chantier ou appels d'offres — qualification en quelques minutes, rappel cadré",
+    ),
+    keywords: ["contact BeWork", "assistant travaux BTP", "marché public BTP", "qualification besoin administratif"],
+  },
+  "/notre-facon-de-travailler": {
+    title: "Notre façon de travailler — méthode BeWork BTP",
+    description: metaDescriptionFrancophonie(
+      "Méthode BeWork : cadrage, validation humaine, traçabilité bureau-chantier pour entreprises du BTP en France, Belgique, Suisse et Luxembourg",
+    ),
+    keywords: ["méthode BeWork", "validation humaine BTP", "process assistant travaux", "relais bureau-chantier"],
+  },
+  "/assistants-administratifs-taches": {
+    title: "Missions assistant travaux BTP : marchés publics & exécution | BeWork",
+    description: metaDescriptionFrancophonie(
+      "Catalogue missions BeWork : chantier, appels d'offres, et exécution marché public — 7 blocs (documents, Chorus Pro, amiante SS4, réserves, DOE)",
+    ),
+    keywords: [
+      "missions assistant travaux BTP",
+      "gestion administrative marché public BTP",
+      "suivi documents exécution marché public",
+      "facturation Chorus Pro travaux",
+      "DOE marché public BTP",
+      "amiante SS4 logement occupé",
+      "suivi pénalités marché public travaux",
+      ...SEO_KEYWORDS_APPELS_OFFRES.slice(0, 4),
+    ],
+  },
   "/reponse-appel-offres-btp": {
     title: "Réponse aux appels d'offres BTP : DCE, DPGF, mémoire technique | BeWork",
     description: metaDescriptionFrancophonie(
-      "BeWork accompagne les entreprises BTP dans leurs réponses aux appels d'offres : analyse DCE, DPGF, mémoire technique et dépôt plateforme",
+      "BeWork sécurise vos réponses aux appels d'offres BTP : analyse DCE, mémoire technique, DPGF et dépôt plateforme — avant l'exécution du marché",
     ),
     keywords: [...SEO_KEYWORDS_APPELS_OFFRES.slice(0, 10)],
   },
   "/facturation-chorus-pro-btp": {
     title: "Facturation Chorus Pro BTP : situations, dépôt et suivi | BeWork",
     description: metaDescriptionFrancophonie(
-      "Facturation Chorus Pro BTP : préparation des situations, dépôt encadré, suivi des statuts et relances. Assistant travaux pour titulaires de marchés publics",
+      "Facturation Chorus Pro BTP : situations mensuelles, justificatifs, dépôt encadré, suivi paiement et relances — bloc exécution marché public BeWork",
     ),
-    keywords: ["facturation Chorus Pro BTP", "facture marché public Chorus Pro", "situation travaux BTP", "assistant travaux"],
+    keywords: [
+      "facturation Chorus Pro BTP",
+      "facture marché public Chorus Pro",
+      "situation travaux BTP",
+      "situations mensuelles marché public",
+      "assistant travaux marché public",
+    ],
   },
   "/gestion-marche-public-btp": {
-    title: "Gestion administrative de marché public BTP | BeWork",
+    title: "Gestion administrative de marché public BTP après attribution | BeWork",
     description: metaDescriptionFrancophonie(
-      "Après attribution : situations, Chorus Pro, DOE, avenants et suivi documentaire de votre marché public travaux. Relais administratif BTP encadré",
+      "Exécution marché public BTP : démarrage administratif, documents d'exécution, Chorus Pro, anti-pénalités, réserves et DOE au fil de l'eau",
     ),
-    keywords: ["gestion marché public BTP", "suivi administratif marché public", "accord-cadre travaux", "assistant travaux"],
+    keywords: [
+      "gestion marché public BTP",
+      "suivi administratif marché public",
+      "gestion administrative marché public BTP",
+      "accord-cadre travaux",
+      "DOE marché public BTP",
+      "assistant travaux",
+    ],
   },
   "/assistant-travaux-france": {
     title: "Assistant travaux France : relais bureau-chantier BTP | BeWork",

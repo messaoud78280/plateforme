@@ -123,9 +123,14 @@ export default function Page() {
 
       <h2>Pourquoi BeWork ?</h2>
       <p>
-        Lecture métier des pièces marché, pas de promesse de gain garanti, process cadré et tarifs publics. Voir aussi{" "}
+        Lecture métier des pièces marché, pas de promesse de gain garanti, process cadré et tarifs publics. Après
+        attribution, voir{" "}
         <Link href="/gestion-marche-public-btp" className="text-[#1d4ed8] hover:underline">
           gestion administrative après attribution
+        </Link>{" "}
+        et la{" "}
+        <Link href="/assistants-administratifs-taches#reponses-appels-offres" className="text-[#1d4ed8] hover:underline">
+          section réponses AO sur la page missions
         </Link>
         .
       </p>

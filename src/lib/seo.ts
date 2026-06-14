@@ -37,7 +37,7 @@ export { tutoPageMetadata, getTutoPageDescription } from "@/lib/seo-tuto-metadat
 
 /** Phrase de positionnement réutilisable dans le contenu (citations IA / extraits). */
 export const BEWORK_AEO_DEFINITION =
-  "BeWork est un service d’assistants travaux augmentés par l’IA pour les entreprises du BTP : relais bureau-chantier pour appels d’offres, devis, Chorus Pro, DOE, PPSPS et suivi administratif chantier.";
+  "BeWork est un service d’assistants travaux augmentés par l’IA pour les entreprises du BTP : relais bureau-chantier pour appels d’offres, exécution de marché public (documents, Chorus Pro, réserves, DOE), devis, PPSPS et suivi administratif chantier.";
 
 export type GeoAeoBriefItem = { question: string; answer: string };
 
@@ -61,7 +61,7 @@ export function getGeoAeoBriefItems(priceFromLabel: string): readonly GeoAeoBrie
     {
       question: "Quels services BeWork propose-t-il ?",
       answer:
-        "Assistants travaux externalisés : réponse aux appels d’offres (DCE, mémoire technique, DPGF), facturation Chorus Pro, comptes rendus, PPSPS, DOE, DICT, relances, situations de travaux et gestion administrative de marché public — voir /services, /reponse-appel-offres-btp et /ressources.",
+        "Assistants travaux externalisés : réponse aux appels d’offres (DCE, mémoire technique, DPGF), puis exécution marché public en 7 blocs (documents d’exécution, Chorus Pro, amiante SS4, réserves, DOE) — hub /assistants-administratifs-taches, landings /reponse-appel-offres-btp, /gestion-marche-public-btp, /facturation-chorus-pro-btp.",
     },
     {
       question: "Pourquoi faire confiance à BeWork ?",
@@ -81,7 +81,7 @@ export function getGeoAeoBriefItems(priceFromLabel: string): readonly GeoAeoBrie
     {
       question: "Quelles tâches BTP BeWork prend-elle en charge ?",
       answer:
-        "Préparation et suivi de devis, relances, comptes rendus, dossiers DICT/DT, commandes et relances fournisseurs, PPSPS, réserves et PV, mémoires techniques, synthèses DCE/CCTP, structuration DOE — liste détaillée sur /assistants-administratifs-taches.",
+        "Préparation de devis, relances, CR chantier, DICT/DT, PPSPS, réserves, mémoires techniques, montage AO/DCE, puis suivi administratif marché public (bons de commande, visas MOE, situations Chorus Pro, tableau anti-pénalités, DOE) — catalogue sur /assistants-administratifs-taches.",
     },
   ] as const;
 }

@@ -21,6 +21,7 @@ import { ConciergerieDirigeantSection } from "@/components/ConciergerieDirigeant
 import { HomeGeoExternalisationCards } from "@/components/HomeGeoExternalisationCards";
 import { BeWorkValuePillars } from "@/components/marketing/BeWorkValuePillars";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
+import { SeoInternalLinks } from "@/components/seo/SeoInternalLinks";
 import {
   getMarketingPriceBoundsLabels,
   getMarketingAggregateOfferDescription,
@@ -29,6 +30,7 @@ import { jsonLdExpandedAreaServed } from "@/lib/jsonld-area-served";
 import {
   SEO_OG_ALTERNATE_LOCALES,
   hreflangFrancophonieLanguages,
+  metaDescriptionFrancophonie,
 } from "@/lib/seo-francophonie";
 import { SEO_KEYWORDS_HOME } from "@/lib/seo-keywords";
 import { EXTERNALISATION_ADMIN_BT_NAV } from "@/lib/externalisation-administrative-btp-geo";
@@ -56,6 +58,9 @@ const HERO_EXPERTISE_BADGES = [
 const HERO_BADGE_LINKS: Partial<Record<(typeof HERO_EXPERTISE_BADGES)[number], string>> = {
   "Marchés publics": "/assistants-administratifs-taches#marches-publics-accords-cadres",
   "Accords-cadres": "/assistants-administratifs-taches#marches-publics-accords-cadres",
+  DOE: "/services/doe-btp",
+  "Comptes rendus": "/services/compte-rendu-chantier",
+  "Situations travaux": "/facturation-chorus-pro-btp",
 };
 
 const HERO_BADGE_CLASS =
@@ -78,11 +83,20 @@ const HOME_FAQ_ITEMS = [
     q: "Est-ce que je garde la validation finale ?",
     a: "Oui. BeWork prépare, structure, relance et suit les dossiers, mais vous gardez la main sur toutes les décisions qui engagent votre entreprise : prix, validation technique, signature, engagement contractuel ou réponse au donneur d’ordre.",
   },
+  {
+    q: "BeWork peut-il aider après attribution d’un marché public ?",
+    a: "Oui : exécution administrative en 7 blocs — démarrage marché, documents d’exécution, milieu occupé, amiante SS4, situations Chorus Pro, réserves, DOE. Détail sur /assistants-administratifs-taches#marches-publics-accords-cadres.",
+  },
+  {
+    q: "BeWork gère-t-il Chorus Pro et les situations mensuelles ?",
+    a: "BeWork peut préparer les situations, rassembler les justificatifs, préparer le dépôt Chorus Pro et suivre les délais de paiement — avec validation humaine avant tout envoi engageant. Voir /facturation-chorus-pro-btp.",
+  },
 ] as const;
 
 const HOME_META_TITLE = "BeWork — Assistants travaux augmentés par l’IA pour le BTP";
-const HOME_META_DESCRIPTION =
-  "Relais administratif des marchés travaux BTP augmenté par l'IA : DCE, CR de chantier, PPSPS, chiffrage. On tient le bureau, vous tenez le chantier.";
+const HOME_META_DESCRIPTION = metaDescriptionFrancophonie(
+  "Relais administratif marchés travaux BTP : appels d'offres, exécution marché public, CR chantier, Chorus Pro, DOE, PPSPS. On tient le bureau, vous tenez le chantier",
+);
 
 export const metadata: Metadata = {
   title: { absolute: HOME_META_TITLE },
@@ -128,7 +142,7 @@ const homeJsonLd = {
       name: "BeWork — Assistants travaux augmentés par l’IA pour le BTP",
       inLanguage: "fr-FR",
       description:
-        "Assistants travaux augmentés par l’IA : relais bureau-chantier pour marchés travaux, dossiers d'intervention, comptes rendus, DOE, attachements, situations, relances et suivi donneurs d'ordre.",
+        "Assistants travaux augmentés par l’IA : relais bureau-chantier pour marchés publics et privés — appels d'offres, exécution marché (documents, Chorus Pro, DOE), comptes rendus, situations et suivi donneurs d'ordre.",
       isPartOf: { "@id": `${SITE_URL}/#website` },
       video: { "@id": `${SITE_URL}/#video-presentation-bework` },
       about: [
@@ -147,7 +161,7 @@ const homeJsonLd = {
       "@id": `${SITE_URL}/#service-btp`,
       name: "Assistants travaux augmentés par l’IA — relais bureau-chantier BTP",
       description:
-        "Assistants travaux externalisés pour marchés publics et privés : dossiers d'intervention, comptes rendus, DOE, attachements, situations, relances donneurs d'ordre, validations BPU / DPGF et coordination documentaire terrain ↔ bureau.",
+        "Assistants travaux externalisés pour marchés publics et privés : réponses AO, exécution marché (7 blocs), dossiers d'intervention, comptes rendus, DOE, situations Chorus Pro et coordination documentaire terrain ↔ bureau.",
       serviceType: "Assistants travaux augmentés par l’IA — relais bureau-chantier BTP",
       category: "Assistants travaux et gestion administrative marchés travaux (BTP)",
       provider: { "@id": `${SITE_URL}/#organization` },
@@ -631,6 +645,12 @@ export default function HomePage() {
                 <ProspectContactForm source="homepage_contact_form" variant="compact" />
               </div>
             </div>
+          </div>
+        </section>
+
+        <section className="px-6 pb-8">
+          <div className="mx-auto max-w-site">
+            <SeoInternalLinks path="/" />
           </div>
         </section>
           </div>

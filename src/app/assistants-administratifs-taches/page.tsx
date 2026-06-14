@@ -13,52 +13,16 @@ import {
   MarchesPublicsAccordsCadresSection,
 } from "@/components/marketing/MarchesPublicsAccordsCadresSection";
 import { BEWORK_MARKETING_PRICE_LINE_SHORT } from "@/lib/bework-public-offers";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
+import { getPublicPageSeo } from "@/lib/seo-public-pages";
+import { SeoInternalLinks } from "@/components/seo/SeoInternalLinks";
+import { buildLandingServiceJsonLd, buildMissionsHubItemListJsonLd, buildWebPageAndBreadcrumbJsonLd } from "@/lib/schema";
 import { absoluteUrl } from "@/lib/site";
 
-const pageUrl = absoluteUrl("/assistants-administratifs-taches");
+const MISSIONS_PAGE_PATH = "/assistants-administratifs-taches" as const;
+const missionsSeo = getPublicPageSeo(MISSIONS_PAGE_PATH)!;
 
-export const metadata: Metadata = {
-  title: { absolute: "Missions assistant travaux BTP : marchés publics & chantier | BeWork" },
-  description:
-    "Missions déléguables BeWork : compte rendu, DOE, PPSPS, DCE, devis, relances — et exécution marché public : documents d'exécution, Chorus Pro, amiante SS4, réserves et anti-pénalités.",
-  keywords: [
-    "missions assistant travaux BTP",
-    "assistant administratif BTP marché public",
-    "gestion administrative marché public BTP",
-    "assistant travaux marché public",
-    "suivi administratif accord-cadre travaux",
-    "suivi documents exécution marché public",
-    "gestion accord-cadre logement occupé",
-    "suivi bons de commande BTP",
-    "facturation Chorus Pro travaux",
-    "DOE marché public BTP",
-    "suivi pénalités marché public travaux",
-    "amiante SS4 logement occupé",
-    "suivi réserves marché public",
-    "assistant conducteur de travaux marché public",
-    "assistance appel d'offres BTP",
-    "contrôle DCE",
-    "dépôt électronique marché public",
-  ],
-  alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
-  openGraph: {
-    type: "website",
-    locale: "fr_FR",
-    url: pageUrl,
-    siteName: "BeWork",
-    title: "Missions assistant travaux BTP : marchés publics & chantier | BeWork",
-    description:
-      "Catalogue des missions BeWork : chantier, documents travaux, et suivi administratif marchés publics & accords-cadres (bons de commande, ECF, pénalités).",
-    images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Missions BeWork BTP" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Missions assistant travaux BTP | BeWork",
-    description:
-      "Missions déléguables : CR, DOE, DCE, relances — et marchés publics, accords-cadres, bons de commande.",
-  },
-  robots: { index: true, follow: true },
-};
+export const metadata: Metadata = landingPageMetadataFromPath(MISSIONS_PAGE_PATH);
 
 const top5Chronophages = [
   {
@@ -244,6 +208,32 @@ const faqItems = [
   },
 ];
 
+function MissionsPageJsonLd() {
+  const webPage = buildWebPageAndBreadcrumbJsonLd({
+    pagePath: MISSIONS_PAGE_PATH,
+    h1: "Missions BeWork pour vos chantiers & marchés publics",
+    description: missionsSeo.description,
+    breadcrumbItems: [
+      { name: "Accueil", href: "/" },
+      { name: "Missions assistant travaux", href: MISSIONS_PAGE_PATH },
+    ],
+  });
+  const serviceLd = buildLandingServiceJsonLd({
+    name: "Missions assistant travaux BTP — marchés publics & chantier",
+    description: missionsSeo.description,
+    pageUrl: absoluteUrl(MISSIONS_PAGE_PATH),
+    serviceType: "Assistant travaux marché public et chantier BTP",
+  });
+  const itemListLd = buildMissionsHubItemListJsonLd(absoluteUrl(MISSIONS_PAGE_PATH));
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webPage) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
+    </>
+  );
+}
+
 function FaqJsonLd() {
   const schema = {
     "@context": "https://schema.org",
@@ -268,6 +258,7 @@ function FaqJsonLd() {
 export default function AssistantsAdministratifsTachesPage() {
   return (
     <div className="min-h-screen bg-[#f8fafc]">
+      <MissionsPageJsonLd />
       <FaqJsonLd />
       <MarketingSiteHeader />
 
@@ -608,6 +599,12 @@ export default function AssistantsAdministratifsTachesPage() {
                 Voir les tarifs
               </Link>
             </div>
+          </div>
+        </section>
+
+        <section className="px-6 pb-8">
+          <div className="mx-auto max-w-site">
+            <SeoInternalLinks path={MISSIONS_PAGE_PATH} />
           </div>
         </section>
       </main>

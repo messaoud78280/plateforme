@@ -83,6 +83,23 @@ export const SEO_KEYWORDS_GEO_SCOPE = [
   "gestion bureau chantier Hauts-de-France",
 ] as const;
 
+/** Exécution de marché public après attribution (7 blocs BeWork). */
+export const SEO_KEYWORDS_MARCHES_PUBLIC_EXECUTION = [
+  "gestion administrative marché public BTP",
+  "assistant travaux marché public",
+  "suivi administratif accord-cadre travaux",
+  "suivi documents exécution marché public",
+  "facturation Chorus Pro travaux",
+  "DOE marché public BTP",
+  "suivi pénalités marché public travaux",
+  "amiante SS4 logement occupé",
+  "suivi réserves marché public",
+  "assistant conducteur de travaux marché public",
+  "tableau anti-pénalités marché public",
+  "bons de commande accord-cadre BTP",
+  "milieu occupé marché public travaux",
+] as const;
+
 /** Appels d'offres & marchés publics travaux. */
 export const SEO_KEYWORDS_APPELS_OFFRES = [
   "réponse appel d'offres BTP",
@@ -114,6 +131,8 @@ export const SEO_KEYWORDS_CHANTIER_ADMIN = [
   "compte rendu chantier",
   "relance impayé BTP",
   "suivi bons de commande travaux",
+  "suivi administratif accord-cadre travaux",
+  "suivi réserves marché public",
   "externalisation administrative BTP",
   "secrétariat BTP externalisé",
   "assistant chantier",
@@ -165,6 +184,7 @@ export const SEO_KEYWORDS_MARCHES_TRAVAUX = [
   "dossiers d'intervention BTP",
   "DOE marché travaux",
   "coordination documentaire chantier",
+  ...SEO_KEYWORDS_MARCHES_PUBLIC_EXECUTION.slice(0, 6),
 ] as const;
 
 export const SEO_KEYWORDS_HOME: string[] = [
@@ -190,7 +210,7 @@ export const BEWORK_SLOGAN = "On tient le bureau, vous tenez le chantier.";
 
 /** Meta description site (layout racine) — ~155 car., périmètre francophonie. */
 export const SEO_VALUE_PROPOSITION =
-  "Assistants travaux augmentés par l’IA pour le BTP : appels d’offres, devis, Chorus Pro, DOE, PPSPS et dossiers chantier. Relais bureau-chantier, forfaits HT. FR · BE · CH · LU.";
+  "Assistants travaux augmentés par l’IA pour le BTP : appels d'offres, exécution marché public, Chorus Pro, DOE, PPSPS et dossiers chantier. Relais bureau-chantier, forfaits HT. FR · BE · CH · LU.";
 
 /** Proposition courte (OG, Twitter). */
 export const SEO_VALUE_PROPOSITION_SHORT =

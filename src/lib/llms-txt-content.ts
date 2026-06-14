@@ -89,17 +89,38 @@ ${line("Cas clients", "/cas-clients")}
 ## Pages clés
 
 ${line("Accueil", "/")}
+${line("Missions & catalogue déléguable", "/assistants-administratifs-taches", "Hub chantier + marchés publics : réponses AO/DCE et exécution de marché (7 blocs).")}
 ${line("Services", "/services")}
 ${line("Tarifs", "/tarifs", "Missions ponctuelles, relais travaux mensuel, cellule externalisée — prix de départ HT sur bework.fr/tarifs.")}
 ${line("Contact & appel découverte", "/contact")}
 ${line("FAQ", "/faq")}
 
+## Externalisation administrative BTP (pays)
+
+${line("Externalisation administrative France", "/externalisation-administrative-btp-france")}
+${line("Externalisation administrative Belgique", "/externalisation-administrative-btp-belgique")}
+${line("Externalisation administrative Suisse", "/externalisation-administrative-btp-suisse")}
+${line("Externalisation administrative Luxembourg", "/externalisation-administrative-btp-luxembourg")}
+
+## Douleurs business BTP
+
+${line("Relance devis BTP", "/relance-devis-btp")}
+${line("Devis en retard", "/devis-retard-btp")}
+${line("Chantier mal suivi", "/chantier-mal-suivi")}
+${line("Facture impayée BTP", "/facture-impayee-btp")}
+${line("Admin BTP sans recruter", "/admin-btp-sans-recruter")}
+
+## Méthode & confiance
+
+${line("Notre façon de travailler", "/notre-facon-de-travailler", "Process, validation humaine, traçabilité.")}
+
 ## Appels d'offres & marchés publics
 
-${line("Réponse aux appels d'offres BTP", "/reponse-appel-offres-btp", "DCE, mémoire technique, DPGF, dépôt plateforme.")}
-${line("Facturation Chorus Pro BTP", "/facturation-chorus-pro-btp", "Situations, dépôt, suivi et relances factures publiques.")}
-${line("Gestion administrative marché public", "/gestion-marche-public-btp", "Suivi après attribution : situations, DOE, avenants, accord-cadre.")}
-${line("Marchés publics & accords-cadres", "/assistants-administratifs-taches#marches-publics-accords-cadres", "Bons de commande, logement occupé, ECF, SS4, pénalités — section missions.")}
+${line("Réponse aux appels d'offres BTP", "/reponse-appel-offres-btp", "DCE, mémoire technique, DPGF, dépôt plateforme — phase candidature.")}
+${line("Réponses AO sur page missions", "/assistants-administratifs-taches#reponses-appels-offres", "Section intégrée : contrôle DCE, conformité, dépôt électronique.")}
+${line("Facturation Chorus Pro BTP", "/facturation-chorus-pro-btp", "Situations mensuelles, dépôt, suivi paiement et relances.")}
+${line("Gestion administrative marché public", "/gestion-marche-public-btp", "Landing exécution après attribution — renvoie vers le détail missions.")}
+${line("Marchés publics & exécution (7 blocs)", "/assistants-administratifs-taches#marches-publics-accords-cadres", "Démarrage marché, documents d'exécution, milieu occupé, amiante SS4, Chorus Pro, anti-pénalités, réserves, DOE.")}
 
 ## Assistant travaux par pays
 

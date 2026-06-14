@@ -14,7 +14,7 @@ export default function Page() {
   const faq = [
     {
       q: "BeWork peut-il aider une entreprise déjà titulaire d’un marché public ?",
-      a: "Oui : suivi administratif après attribution — situations, Chorus Pro, avenants documentés, DOE, relances et classement du dossier marché.",
+      a: "Oui : suivi administratif après attribution en 7 blocs — démarrage, documents d’exécution, milieu occupé, amiante SS4, Chorus Pro, réserves et DOE. Détail sur la page missions et la landing gestion marché public.",
     },
     {
       q: "BeWork peut-il suivre les bons de commande d’un accord-cadre ?",
@@ -33,7 +33,8 @@ export default function Page() {
   const faqLd = buildFaqPageJsonLd(faq, PAGE_URL);
   const serviceLd = buildLandingServiceJsonLd({
     name: "Gestion administrative de marché public BTP",
-    description: "Suivi après attribution : situations, Chorus Pro, DOE, avenants et dossier marché.",
+    description:
+      "Exécution marché public après attribution : 7 blocs BeWork (démarrage, documents, Chorus Pro, anti-pénalités, DOE).",
     pageUrl: PAGE_URL,
     serviceType: "Gestion marché public BTP",
   });
@@ -61,10 +62,21 @@ export default function Page() {
       <SeoEnResumeBlock>
         <p>
           <strong>Gestion administrative de marché public</strong> : tout ce qui entoure l&apos;exécution contractuelle
-          hors terrain — facturation, pièces obligatoires, délais CCAP, DOE, sous-traitance déclarée et traçabilité pour
-          la réception.
+          hors terrain — démarrage marché, documents d&apos;exécution, facturation, pièces obligatoires, délais CCAP,
+          tableau anti-pénalités, DOE et traçabilité pour la réception. BeWork ne fait pas les travaux : BeWork sécurise
+          tout ce qui permet aux travaux d&apos;être payés, réceptionnés et protégés contre les pénalités.
         </p>
       </SeoEnResumeBlock>
+
+      <h2>Les 7 blocs d&apos;exécution BeWork</h2>
+      <p>
+        Le détail opérationnel est structuré sur la{" "}
+        <Link href="/assistants-administratifs-taches#marches-publics-accords-cadres" className="text-[#1d4ed8] hover:underline">
+          page missions — section marchés publics
+        </Link>{" "}
+        : démarrage administratif, documents et visas, planning et réunions, milieu occupé / amiante SS4, situations et
+        Chorus Pro, réserves et preuves, DOE et clôture.
+      </p>
 
       <h2>Pour qui ?</h2>
       <ul>
@@ -83,9 +95,9 @@ export default function Page() {
         </li>
         <li>
           <Link href="/assistants-administratifs-taches#marches-publics-accords-cadres" className="text-[#1d4ed8] hover:underline">
-            Accords-cadres &amp; bons de commande
+            Exécution marché public (7 blocs)
           </Link>{" "}
-          (logement occupé, ECF, SS4)
+          : bons de commande, logement occupé, ECF, SS4, anti-pénalités
         </li>
         <li>Suivi des bons de commande (accord-cadre)</li>
         <li>Classement documentaire marché (CCTP, avenants, correspondances)</li>
@@ -126,6 +138,10 @@ export default function Page() {
         voir{" "}
         <Link href="/reponse-appel-offres-btp" className="text-[#1d4ed8] hover:underline">
           réponse aux appels d&apos;offres
+        </Link>{" "}
+        ou la{" "}
+        <Link href="/assistants-administratifs-taches#reponses-appels-offres" className="text-[#1d4ed8] hover:underline">
+          section AO sur la page missions
         </Link>
         .
       </p>

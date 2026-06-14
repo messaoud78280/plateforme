@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { BLOG_ARTICLES, BLOG_SLUGS, type BlogArticle, type BlogSlug } from "@/content/blog-articles";
+import { BLOG_ARTICLES_SEO } from "@/content/blog-articles-seo";
 import { RESOURCE_PDF_CATALOG } from "@/content/resource-pdf-catalog";
 import { SERVICE_PAGE_ORDER, servicePagePath } from "@/content/service-pages";
 import { BTP_PAIN_PAGE_PATHS } from "@/lib/btp-pain-pages";
@@ -71,9 +72,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     entry("/assistant-administratif-btp", 0.9),
     entry("/assistant-administratif-distance", 0.9),
     entry("/externaliser-administratif", 0.92),
-    entry("/assistants-administratifs-taches", 0.8),
+    entry("/assistants-administratifs-taches", 0.95, "weekly"),
     entry("/tarifs", 0.9),
-    entry("/faq", 0.7),
+    entry("/faq", 0.88),
     entry("/notre-facon-de-travailler", 0.85),
     entry("/cas-clients", 0.75),
     entry("/cas-clients/ccmi-martin-audit-devis", 0.72),
@@ -106,11 +107,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const blogPages: MetadataRoute.Sitemap = BLOG_SLUGS.map((slug) => {
     const article = BLOG_ARTICLES[slug as BlogSlug] as BlogArticle;
     const modified = article.modifiedTime ?? article.publishedTime;
+    const isSeoCluster = slug in BLOG_ARTICLES_SEO;
     return {
       url: `${SITE_URL}/blog/${slug}`,
       lastModified: new Date(modified),
       changeFrequency: "monthly" as const,
-      priority: 0.7,
+      priority: isSeoCluster ? 0.78 : 0.7,
     };
   });
 

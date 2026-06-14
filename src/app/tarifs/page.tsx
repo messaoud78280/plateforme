@@ -68,6 +68,12 @@ const WHY_NOT_CHEAPEST_COMPARE =
   "Comparer BeWork à une simple assistance administrative revient à comparer un appui travaux structuré avec une prestation de saisie. Notre valeur se situe dans le cadrage, la méthode, la traçabilité et la capacité à soulager vos équipes opérationnelles.";
 
 const INTERNAL_LINKS = [
+  { href: "/assistants-administratifs-taches", label: "Missions & marchés publics" },
+  {
+    href: "/assistants-administratifs-taches#marches-publics-accords-cadres",
+    label: "Exécution marché public (7 blocs)",
+  },
+  { href: "/gestion-marche-public-btp", label: "Gestion marché public" },
   { href: "/notre-facon-de-travailler", label: "Notre façon de travailler" },
   { href: "/ressources/compte-rendu-chantier", label: "Compte rendu de chantier" },
   { href: "/ressources/doe-btp", label: "DOE BTP" },

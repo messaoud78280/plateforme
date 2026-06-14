@@ -10,6 +10,7 @@ import {
   type BlogBodyBlock,
   type BlogSlug,
 } from "@/content/blog-articles";
+import { hreflangFrancophonieLanguages } from "@/lib/seo-francophonie";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${article.title} | BeWork Blog`,
     description: article.description,
     keywords: article.keywords,
-    alternates: { canonical: url, languages: { fr: url, "x-default": url } },
+    alternates: { canonical: url, languages: hreflangFrancophonieLanguages(`/blog/${slug}`) },
     openGraph: {
       type: "article",
       locale: "fr_FR",

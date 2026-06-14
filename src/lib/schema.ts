@@ -97,6 +97,34 @@ export function buildServiceOfferingJsonLd(d: ServicePageDefinition, pageUrl: st
   };
 }
 
+/** ItemList — hub missions (exécution marché public + AO). */
+export function buildMissionsHubItemListJsonLd(pageUrl: string) {
+  const items = [
+    { name: "Démarrage administratif du marché", url: `${pageUrl}#marches-publics-accords-cadres` },
+    { name: "Documents d'exécution et visas", url: `${pageUrl}#marches-publics-accords-cadres` },
+    { name: "Planning, relances et réunions", url: `${pageUrl}#marches-publics-accords-cadres` },
+    { name: "Milieu occupé, amiante et SS4", url: `${pageUrl}#marches-publics-accords-cadres` },
+    { name: "Situations mensuelles et Chorus Pro", url: `${pageUrl}#marches-publics-accords-cadres` },
+    { name: "Réserves, pénalités et preuves chantier", url: `${pageUrl}#marches-publics-accords-cadres` },
+    { name: "DOE et clôture du marché", url: `${pageUrl}#marches-publics-accords-cadres` },
+    { name: "Réponses appels d'offres & DCE", url: `${pageUrl}#reponses-appels-offres` },
+  ] as const;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "@id": `${pageUrl}#missions-list`,
+    name: "Missions BeWork — marchés publics et chantier",
+    numberOfItems: items.length,
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      item: item.url,
+    })),
+  };
+}
+
 /** ItemList pour le hub /services. */
 export function buildServicesHubItemListJsonLd(slugs: ServicePageSlug[]) {
   const pageUrl = absoluteUrl("/services");

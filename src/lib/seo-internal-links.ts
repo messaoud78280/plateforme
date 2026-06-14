@@ -4,10 +4,17 @@ export type SeoInternalLink = { href: string; label: string };
 
 export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
   "/": [
+    { href: "/assistants-administratifs-taches", label: "Missions & marchés publics" },
+    {
+      href: "/assistants-administratifs-taches#marches-publics-accords-cadres",
+      label: "Exécution marché public (7 blocs)",
+    },
+    { href: "/reponse-appel-offres-btp", label: "Réponse appels d'offres BTP" },
+    { href: "/gestion-marche-public-btp", label: "Gestion marché public" },
+    { href: "/facturation-chorus-pro-btp", label: "Chorus Pro BTP" },
     { href: "/tarifs", label: "Tarifs assistant travaux BTP" },
     { href: "/services/assistant-travaux", label: "Assistant travaux augmenté par l’IA" },
     { href: "/ressources", label: "Guides et tutoriels BTP" },
-    { href: "/assistants-administratifs-taches", label: "Missions déléguables" },
     { href: "/contact", label: "Qualifier votre besoin BTP" },
     { href: "/notre-facon-de-travailler", label: "Notre méthode BeWork" },
   ],
@@ -22,6 +29,11 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
   ],
   "/contact": [
     { href: "/tarifs", label: "Tarifs assistant travaux BTP" },
+    {
+      href: "/assistants-administratifs-taches#marches-publics-accords-cadres",
+      label: "Exécution marché public",
+    },
+    { href: "/reponse-appel-offres-btp", label: "Réponse appels d'offres" },
     { href: "/notre-facon-de-travailler", label: "Notre méthode" },
     { href: "/services", label: "Services BeWork" },
     { href: "/faq", label: "FAQ" },
@@ -29,6 +41,15 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
   "/faq": [
     { href: "/notre-facon-de-travailler", label: "Méthode et validation" },
     { href: "/tarifs", label: "Tarifs" },
+    {
+      href: "/assistants-administratifs-taches#marches-publics-accords-cadres",
+      label: "Exécution marché public (7 blocs)",
+    },
+    {
+      href: "/assistants-administratifs-taches#reponses-appels-offres",
+      label: "Réponses appels d'offres",
+    },
+    { href: "/gestion-marche-public-btp", label: "Gestion marché public" },
     { href: "/contact", label: "Contacter BeWork" },
     { href: "/services/assistant-travaux", label: "Assistant travaux" },
   ],
@@ -39,11 +60,117 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/services/doe-btp", label: "DOE BTP" },
     { href: "/ressources", label: "Ressources et guides" },
   ],
+  "/externaliser-administratif": [
+    { href: "/services/externalisation-administrative-btp", label: "Externalisation administrative BTP" },
+    { href: "/assistants-administratifs-taches", label: "Missions déléguables" },
+    { href: "/gestion-marche-public-btp", label: "Gestion marché public" },
+    { href: "/admin-btp-sans-recruter", label: "Admin BTP sans recruter" },
+    { href: "/tarifs", label: "Tarifs" },
+    { href: "/contact", label: "Contact" },
+  ],
+  "/assistant-administratif-externalise": [
+    { href: "/externaliser-administratif", label: "Externaliser l'administratif" },
+    { href: "/assistants-administratifs-taches", label: "Catalogue missions" },
+    { href: "/services/assistant-travaux", label: "Assistant travaux IA" },
+    { href: "/tarifs", label: "Tarifs" },
+  ],
+  "/assistant-administratif-pme": [
+    { href: "/assistant-administratif-externalise", label: "Assistant externalisé" },
+    { href: "/assistants-administratifs-taches", label: "Missions BTP" },
+    { href: "/admin-btp-sans-recruter", label: "Admin sans recruter" },
+    { href: "/tarifs", label: "Tarifs" },
+  ],
+  "/assistant-administratif-distance": [
+    { href: "/assistant-travaux-france", label: "Assistant travaux France" },
+    { href: "/assistants-administratifs-taches", label: "Missions déléguables" },
+    { href: "/externalisation-administrative-btp-france", label: "Externalisation France" },
+    { href: "/tarifs", label: "Tarifs" },
+  ],
+  "/avenant-chantier": [
+    { href: "/devis-retard-btp", label: "Devis en retard" },
+    { href: "/gestion-marche-public-btp", label: "Gestion marché public" },
+    { href: "/assistants-administratifs-taches", label: "Missions assistant travaux" },
+    { href: "/tarifs", label: "Tarifs" },
+  ],
+  "/suivi-fournisseurs-chantier": [
+    { href: "/assistants-administratifs-taches", label: "Missions logistique & fournisseurs" },
+    { href: "/dict-dt-travaux", label: "DICT & DT travaux" },
+    { href: "/chantier-mal-suivi", label: "Chantier mal suivi" },
+    { href: "/tarifs", label: "Tarifs" },
+  ],
+  "/admin-btp-sans-recruter": [
+    { href: "/assistants-administratifs-taches", label: "Missions déléguables" },
+    { href: "/externaliser-administratif", label: "Externaliser l'administratif" },
+    { href: "/gestion-marche-public-btp", label: "Gestion marché public" },
+    { href: "/tarifs", label: "Tarifs" },
+    { href: "/contact", label: "Contact" },
+  ],
+  "/blog": [
+    { href: "/reponse-appel-offres-btp", label: "Réponse appels d'offres BTP" },
+    { href: "/gestion-marche-public-btp", label: "Gestion marché public" },
+    {
+      href: "/assistants-administratifs-taches#marches-publics-accords-cadres",
+      label: "Exécution marché public",
+    },
+    { href: "/ressources/analyse-dce-btp", label: "Guide analyse DCE" },
+    { href: "/tarifs", label: "Tarifs" },
+  ],
   "/notre-facon-de-travailler": [
     { href: "/tarifs", label: "Tarifs assistant travaux BTP" },
+    { href: "/assistants-administratifs-taches", label: "Missions déléguables" },
     { href: "/services", label: "Tous les services" },
     { href: "/contact", label: "Démarrer un échange" },
     { href: "/faq", label: "FAQ" },
+  ],
+  "/assistant-travaux-lyon": [
+    { href: "/assistant-travaux-france", label: "France" },
+    { href: "/assistant-travaux-paris", label: "Paris" },
+    { href: "/assistant-travaux-marseille", label: "Marseille" },
+    { href: "/reponse-appel-offres-btp", label: "Appels d'offres BTP" },
+    { href: "/assistants-administratifs-taches#marches-publics-accords-cadres", label: "Marchés publics" },
+    { href: "/tarifs", label: "Tarifs" },
+  ],
+  "/assistant-travaux-marseille": [
+    { href: "/assistant-travaux-france", label: "France" },
+    { href: "/assistant-travaux-lyon", label: "Lyon" },
+    { href: "/assistant-travaux-toulouse", label: "Toulouse" },
+    { href: "/reponse-appel-offres-btp", label: "Appels d'offres" },
+    { href: "/tarifs", label: "Tarifs" },
+  ],
+  "/assistant-travaux-lille": [
+    { href: "/assistant-travaux-france", label: "France" },
+    { href: "/assistant-travaux-paris", label: "Paris" },
+    { href: "/assistant-travaux-belgique", label: "Belgique" },
+    { href: "/reponse-appel-offres-btp", label: "Appels d'offres" },
+    { href: "/tarifs", label: "Tarifs" },
+  ],
+  "/assistant-travaux-bordeaux": [
+    { href: "/assistant-travaux-france", label: "France" },
+    { href: "/assistant-travaux-toulouse", label: "Toulouse" },
+    { href: "/assistant-travaux-paris", label: "Paris" },
+    { href: "/reponse-appel-offres-btp", label: "Appels d'offres" },
+    { href: "/tarifs", label: "Tarifs" },
+  ],
+  "/assistant-travaux-toulouse": [
+    { href: "/assistant-travaux-france", label: "France" },
+    { href: "/assistant-travaux-bordeaux", label: "Bordeaux" },
+    { href: "/assistant-travaux-marseille", label: "Marseille" },
+    { href: "/reponse-appel-offres-btp", label: "Appels d'offres" },
+    { href: "/tarifs", label: "Tarifs" },
+  ],
+  "/assistant-travaux-bruxelles": [
+    { href: "/assistant-travaux-belgique", label: "Belgique" },
+    { href: "/assistant-travaux-france", label: "France" },
+    { href: "/assistant-travaux-geneve", label: "Genève" },
+    { href: "/services/assistant-travaux", label: "Assistant travaux" },
+    { href: "/tarifs", label: "Tarifs" },
+  ],
+  "/assistant-travaux-geneve": [
+    { href: "/assistant-travaux-suisse", label: "Suisse" },
+    { href: "/assistant-travaux-france", label: "France" },
+    { href: "/assistant-travaux-bruxelles", label: "Bruxelles" },
+    { href: "/services/assistant-travaux", label: "Assistant travaux" },
+    { href: "/tarifs", label: "Tarifs" },
   ],
   "/cas-clients": [
     { href: "/cas-clients/ccmi-martin-audit-devis", label: "Audit devis CCMI Martin" },
@@ -54,10 +181,15 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
   "/assistants-administratifs-taches": [
     {
       href: "/assistants-administratifs-taches#marches-publics-accords-cadres",
-      label: "Marchés publics & accords-cadres",
+      label: "Exécution marché public (7 blocs)",
+    },
+    {
+      href: "/assistants-administratifs-taches#reponses-appels-offres",
+      label: "Réponses appels d'offres & DCE",
     },
     { href: "/gestion-marche-public-btp", label: "Gestion marché public" },
-    { href: "/reponse-appel-offres-btp", label: "Réponse appels d'offres" },
+    { href: "/facturation-chorus-pro-btp", label: "Chorus Pro BTP" },
+    { href: "/reponse-appel-offres-btp", label: "Landing appels d'offres" },
     { href: "/services/assistant-travaux", label: "Assistant travaux IA" },
     { href: "/tarifs", label: "Tarifs" },
     { href: "/contact", label: "Parler de mon marché" },
@@ -240,6 +372,10 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
   "/situation-travaux-btp": [
     { href: "/impayes-btp-relances", label: "Impayés et relances" },
     { href: "/facturation-chorus-pro-btp", label: "Facturation Chorus Pro" },
+    {
+      href: "/assistants-administratifs-taches#marches-publics-accords-cadres",
+      label: "Situations marché public",
+    },
     { href: "/facture-impayee-btp", label: "Facture impayée BTP" },
     { href: "/services/assistant-travaux", label: "Assistant travaux" },
   ],
@@ -247,8 +383,12 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/services/analyse-dce-btp", label: "Analyse DCE BTP" },
     { href: "/services/memoire-technique-btp", label: "Mémoire technique" },
     {
+      href: "/assistants-administratifs-taches#reponses-appels-offres",
+      label: "Section AO sur page missions",
+    },
+    {
       href: "/assistants-administratifs-taches#marches-publics-accords-cadres",
-      label: "Accords-cadres & bons de commande",
+      label: "Exécution marché public (7 blocs)",
     },
     { href: "/gestion-marche-public-btp", label: "Gestion marché public" },
     { href: "/tarifs", label: "Tarifs" },
@@ -259,7 +399,7 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/situation-travaux-btp", label: "Situations de travaux" },
     {
       href: "/assistants-administratifs-taches#marches-publics-accords-cadres",
-      label: "Accords-cadres & bons de commande",
+      label: "Situations & Chorus Pro (7 blocs)",
     },
     { href: "/gestion-marche-public-btp", label: "Gestion marché public" },
     { href: "/impayes-btp-relances", label: "Relances impayés" },
@@ -269,9 +409,13 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
   "/gestion-marche-public-btp": [
     {
       href: "/assistants-administratifs-taches#marches-publics-accords-cadres",
-      label: "Accords-cadres & bons de commande",
+      label: "Détail exécution marché (7 blocs)",
     },
-    { href: "/reponse-appel-offres-btp", label: "Réponse appels d'offres" },
+    {
+      href: "/assistants-administratifs-taches#reponses-appels-offres",
+      label: "Réponses appels d'offres",
+    },
+    { href: "/reponse-appel-offres-btp", label: "Landing appels d'offres" },
     { href: "/facturation-chorus-pro-btp", label: "Chorus Pro BTP" },
     { href: "/services/doe-btp", label: "DOE BTP" },
     { href: "/services/externalisation-administrative-btp", label: "Externalisation administrative" },

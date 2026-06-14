@@ -36,6 +36,9 @@ export const TARIFS_SEO_KEYWORDS = [
   "PPSPS BTP",
   "compte rendu de chantier",
   "relance devis BTP",
+  "gestion administrative marché public BTP",
+  "facturation Chorus Pro travaux",
+  "DOE marché public BTP",
   ...SEO_KEYWORDS_ASSISTANT_TRAVAUX.slice(0, 6),
   ...SEO_KEYWORDS_BTP_PME.slice(0, 4),
 ] as const;

@@ -3,59 +3,17 @@ import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
-import {
-  SEO_OG_ALTERNATE_LOCALES,
-  SEO_OG_LOCALE_PRIMARY,
-  hreflangFrancophonieLanguages,
-} from "@/lib/seo-francophonie";
+import { SeoInternalLinks } from "@/components/seo/SeoInternalLinks";
+import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
+import { getPublicPageSeo } from "@/lib/seo-public-pages";
+import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/schema";
 import { absoluteUrl } from "@/lib/site";
 
-const faqUrl = absoluteUrl("/faq");
-const faqOgImage = absoluteUrl("/opengraph-image");
+const FAQ_PAGE_PATH = "/faq" as const;
+const faqUrl = absoluteUrl(FAQ_PAGE_PATH);
+const faqSeo = getPublicPageSeo(FAQ_PAGE_PATH)!;
 
-export const metadata: Metadata = {
-  title: { absolute: "FAQ assistant travaux BTP : BeWork et documents chantier" },
-  description:
-    "Questions fréquentes sur BeWork : assistant travaux BTP, externalisation bureau-chantier, PPSPS, DCE, DOE, forfaits et validation avant envoi.",
-  keywords: [
-    "BeWork",
-    "FAQ BeWork",
-    "assistante travaux",
-    "qu'est-ce qu'une assistante travaux",
-    "assistante BTP",
-    "différence assistante BTP administrative",
-    "externaliser gestion administrative chantier",
-    "PPSPS conducteur de travaux",
-    "comptes rendus de chantier",
-    "analyse DCE rapide",
-    "préparer DOE",
-    "relais bureau-chantier",
-    "dossiers chantier",
-    "documents travaux",
-    "validation finale",
-    "forfaits BeWork",
-    "IA BTP",
-  ],
-  alternates: { canonical: faqUrl, languages: hreflangFrancophonieLanguages("/faq") },
-  openGraph: {
-    type: "website",
-    locale: SEO_OG_LOCALE_PRIMARY,
-    alternateLocale: [...SEO_OG_ALTERNATE_LOCALES],
-    url: faqUrl,
-    siteName: "BeWork",
-    title: "FAQ BeWork — assistants travaux augmentés par l’IA (relais bureau-chantier)",
-    description:
-      "FAQ BeWork : assistants travaux, externalisation bureau-chantier, PPSPS, DCE, DOE, forfaits et validation. Réponses claires pour le BTP.",
-    images: [{ url: faqOgImage, width: 1200, height: 630, alt: "FAQ BeWork — assistants travaux augmentés par l’IA" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "FAQ BeWork — assistants travaux augmentés par l’IA",
-    description:
-      "FAQ BeWork : assistants travaux, externalisation, PPSPS, DCE, DOE, forfaits et validation. Réponses claires pour le BTP.",
-  },
-  robots: { index: true, follow: true },
-};
+export const metadata: Metadata = landingPageMetadataFromPath(FAQ_PAGE_PATH);
 
 /** Ancre stable par intitulé de question (réutilise la même logique que le sommaire). */
 function faqQuestionSlug(question: string): string {
@@ -124,7 +82,7 @@ const FAQ_APPELS_OFFRES_CAT = {
     },
     {
       q: "BeWork peut-il aider une entreprise déjà titulaire d'un marché public ?",
-      a: "Oui : suivi après attribution — situations, facturation publique, avenants documentés, DOE, relances et classement du dossier marché. Voir /gestion-marche-public-btp.",
+      a: "Oui : suivi administratif après attribution en 7 blocs — démarrage marché, documents d'exécution, milieu occupé, amiante SS4, situations Chorus Pro, réserves, DOE. Détail sur /assistants-administratifs-taches#marches-publics-accords-cadres et /gestion-marche-public-btp.",
     },
     {
       q: "Comment transmettre un DCE à BeWork ?",
@@ -136,7 +94,11 @@ const FAQ_APPELS_OFFRES_CAT = {
     },
     {
       q: "BeWork peut-il suivre les bons de commande d'un accord-cadre ?",
-      a: "Oui sur le suivi administratif : échéances, pièces attendues, relances et traçabilité des bons émis — le titulaire garde la responsabilité contractuelle. Voir la section marchés publics sur /assistants-administratifs-taches#marches-publics-accords-cadres.",
+      a: "Oui sur le suivi administratif : échéances, pièces attendues, relances et traçabilité des bons émis — intégré au bloc exécution marché public (logement occupé, ECF, SS4, facturation). Voir /assistants-administratifs-taches#marches-publics-accords-cadres.",
+    },
+    {
+      q: "BeWork peut-il limiter les pénalités sur un marché public ?",
+      a: "BeWork ne supprime pas les pénalités contractuelles, mais structure un tableau anti-pénalités : délais documents, réunions, réserves, facturation, DOE — avec alertes et relances. Selon le CCAP, les retards peuvent générer des pénalités journalières ou forfaitaires.",
     },
     {
       q: "BeWork intervient-il en France ?",
@@ -266,9 +228,20 @@ const FAQ_ITEMS_FLAT: { q: string; a: string }[] = FAQ_CATEGORIES.reduce<{ q: st
   return acc;
 }, []);
 
+const faqWebPageLd = buildWebPageAndBreadcrumbJsonLd({
+  pagePath: FAQ_PAGE_PATH,
+  h1: "FAQ BeWork : assistants travaux, dossiers chantier et relais bureau-chantier",
+  description: faqSeo.description,
+  breadcrumbItems: [
+    { name: "Accueil", href: "/" },
+    { name: "FAQ", href: FAQ_PAGE_PATH },
+  ],
+});
+
 export default function FaqPage() {
   return (
     <div className="min-h-screen bg-[#f8fafc]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqWebPageLd) }} />
       <MarketingSiteHeader plainBg />
 
       <main className="px-6 py-16 md:py-24">
@@ -361,6 +334,8 @@ export default function FaqPage() {
               </Link>
             </div>
           </div>
+
+          <SeoInternalLinks path={FAQ_PAGE_PATH} />
         </article>
       </main>
 

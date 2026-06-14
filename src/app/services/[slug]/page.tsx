@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ServicePageBody } from "@/components/marketing/ServicePageBody";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { SERVICE_PAGES, SERVICE_PAGE_ORDER, isServicePageSlug, servicePagePath } from "@/content/service-pages";
+import { hreflangFrancophonieLanguages } from "@/lib/seo-francophonie";
 import { buildFaqPageJsonLd, buildServiceOfferingJsonLd } from "@/lib/schema";
 import { absoluteUrl } from "@/lib/site";
 
@@ -16,11 +17,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   if (!isServicePageSlug(slug)) return {};
   const d = SERVICE_PAGES[slug];
-  const url = absoluteUrl(servicePagePath(slug));
+  const path = servicePagePath(slug);
+  const url = absoluteUrl(path);
   return {
     title: { absolute: d.metaTitle },
     description: d.metaDescription,
-    alternates: { canonical: url, languages: { fr: url, "x-default": url } },
+    alternates: { canonical: url, languages: hreflangFrancophonieLanguages(path) },
     robots: { index: true, follow: true },
     openGraph: {
       type: "website",

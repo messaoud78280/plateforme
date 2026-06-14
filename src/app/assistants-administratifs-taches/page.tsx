@@ -4,6 +4,10 @@ import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import {
+  APPELS_OFFRES_ANCHOR,
+  AppelsOffresDceSection,
+} from "@/components/marketing/AppelsOffresDceSection";
+import {
   MARCHES_PUBLICS_ANCHOR,
   MARCHES_PUBLICS_FAQ,
   MarchesPublicsAccordsCadresSection,
@@ -26,6 +30,11 @@ export const metadata: Metadata = {
     "gestion ECF BTP",
     "amiante SS4 logement occupé",
     "suivi pénalités marché public BTP",
+    "assistance appel d'offres BTP",
+    "préparation dossier appel d'offres bâtiment",
+    "contrôle DCE",
+    "mémoire technique BTP",
+    "dépôt électronique marché public",
   ],
   alternates: { canonical: pageUrl, languages: { fr: pageUrl, "x-default": pageUrl } },
   openGraph: {
@@ -96,15 +105,13 @@ const missionFamilies = [
     ],
   },
   {
-    h2: "Analyse de dossiers techniques (IA augmentée)",
-    benefice: "Trier, synthétiser, extraire l’essentiel pour décider plus vite.",
+    h2: "Synthèse technique & arbitrage interne",
+    benefice: "Extraire l’essentiel des pièces pour décider — en amont ou en parallèle du montage AO (voir section réponses appels d’offres).",
     items: [
-      "Tri et analyse DCE (pièces, exigences, manquants)",
-      "Synthèse CCTP (points clés, obligations)",
-      "Repérage des pièces importantes et des risques",
-      "Extraction des obligations (délais, livrables, pénalités)",
-      "Checklists de documents à préparer",
-      "Structuration d’un dossier de réponse (sans engagement technique à votre place)",
+      "Synthèse CCTP : obligations, interfaces lots, points sensibles",
+      "Repérage des risques contractuels pour Go/No-go interne",
+      "Extraction des délais et livrables pour votre planning de réponse",
+      "Points d’attention pour chiffrage (sans prix ni choix technique à votre place)",
     ],
   },
   {
@@ -147,8 +154,8 @@ const repetitiveVsAdvanced = {
     "DOE",
     "PPSPS",
     "DUERP (organisation des pièces / structure)",
-    "DCE (tri, checklists, pièces)",
-    "CCTP (synthèse des points clés)",
+    "Dossier AO (contrôle & dépôt — section dédiée)",
+    "CCTP (synthèse pour arbitrage)",
     "PV de levée de réserve",
     "Avenants",
     "Comptes rendus chantier",
@@ -161,7 +168,7 @@ const prepareVsValidate = {
     "Brouillons de mails et réponses (sur modèle)",
     "Tableaux de suivi et statuts",
     "Checklists de pièces et échéances",
-    "Synthèses (DCE/CCTP, échanges, points bloquants)",
+    "Synthèses chantier et échanges (hors montage AO complet)",
     "Comptes rendus mis au propre",
     "Dossiers organisés (DOE, réserves, pièces chantier)",
     "Relances et suivis jusqu’à réponse",
@@ -217,7 +224,7 @@ const faqItems = [
   },
   {
     q: "BeWork peut-elle analyser un DCE ou un CCTP ?",
-    a: "BeWork peut trier, structurer et synthétiser les pièces (DCE/CCTP), repérer les obligations et produire des checklists. Cela ne remplace pas un bureau d’études ni une décision technique : vous gardez la validation.",
+    a: "Oui : contrôle des pièces, tableaux de conformité, mémoire technique et dépôt électronique sont détaillés dans la section « Réponses aux appels d’offres » de cette page. Pour une synthèse CCTP ou un arbitrage interne, voir aussi le catalogue « Synthèse technique ». Vous gardez toujours la validation du prix et du contenu technique.",
   },
   {
     q: "Est-ce que BeWork peut relancer mes devis et mes clients ?",
@@ -271,12 +278,21 @@ export default function AssistantsAdministratifsTachesPage() {
               Devis, relances, dossiers chantier, DICT, fournisseurs, comptes rendus, réserves, DOE, DCE, CCTP — et suivi
               administratif des marchés publics, accords-cadres et bons de commande (logement occupé, ECF, pénalités).
             </p>
-            <p className="mt-4">
+            <p className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-base">
+              <Link
+                href={`#${APPELS_OFFRES_ANCHOR}`}
+                className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline"
+              >
+                Réponses appels d&apos;offres &amp; DCE
+              </Link>
+              <span className="text-slate-300" aria-hidden>
+                ·
+              </span>
               <Link
                 href={`#${MARCHES_PUBLICS_ANCHOR}`}
-                className="text-base font-semibold text-[#1d4ed8] underline-offset-4 hover:underline"
+                className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline"
               >
-                Aller au détail marchés publics &amp; accords-cadres
+                Marchés publics &amp; accords-cadres
               </Link>
             </p>
             <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
@@ -312,6 +328,8 @@ export default function AssistantsAdministratifsTachesPage() {
 
         <MarchesPublicsAccordsCadresSection />
 
+        <AppelsOffresDceSection />
+
         {/* C) Les 5 tâches les plus chronophages */}
         <section className="px-6 py-12 md:py-16" aria-labelledby="top5-heading">
           <div className="mx-auto max-w-site">
@@ -339,7 +357,11 @@ export default function AssistantsAdministratifsTachesPage() {
               Les missions BeWork (version chantier)
             </h2>
             <p className="mt-4 max-w-2xl text-black leading-relaxed">
-              Un aperçu structuré (sans liste interminable) des missions les plus fréquentes côté BTP.
+              Un aperçu structuré des missions côté chantier et bureau. Pour la{" "}
+              <Link href={`#${APPELS_OFFRES_ANCHOR}`} className="font-semibold text-[#1d4ed8] underline-offset-2 hover:underline">
+                préparation d&apos;appel d&apos;offres avant dépôt
+              </Link>
+              , voir la section dédiée plus haut.
             </p>
             <div className="mt-10 space-y-10">
               {missionFamilies.map((cat) => (

@@ -53,6 +53,7 @@ const architectsDaughter = Architects_Daughter({
 
 const searchEngineVerification = buildSearchEngineVerification();
 const llmsTxtUrl = absoluteUrl("/llms.txt");
+const aiTxtUrl = absoluteUrl("/ai.txt");
 const rssFeedUrl = absoluteUrl("/feed.xml");
 
 export const viewport: Viewport = {
@@ -274,6 +275,7 @@ export default function RootLayout({
     <html lang="fr">
       <head>
         <link rel="alternate" type="text/plain" href={llmsTxtUrl} title="Index pour assistants IA (llms.txt)" />
+        <link rel="alternate" type="text/plain" href={aiTxtUrl} title="Politique indexation moteurs IA (ai.txt)" />
         <link rel="alternate" type="application/rss+xml" href={rssFeedUrl} title="Flux RSS BeWork" />
         <PlausibleScript />
       </head>

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { SEO_AI_CRAWLER_USER_AGENTS } from "@/lib/seo-ai-discovery";
 
 /**
  * Configuration SEO partagée — Google, Bing, Apple (Safari/Siri), DuckDuckGo (via Bing),
- * Yandex, Yahoo, Meta, et crawlers IA (AEO).
+ * Yandex, Yahoo, Meta, moteurs européens, et crawlers IA mondiaux (AEO).
  */
 
 /** Chemins exclus de l’indexation (tous user-agents). */
@@ -21,14 +22,14 @@ export const SEO_DISALLOW_PATHS = [
 /**
  * User-agents explicitement autorisés (allow / + disallow privé).
  * DuckDuckGo indexe via Bing ; Safari Spotlight via Applebot + Google pour la recherche web.
+ * Les crawlers IA (SEO_AI_CRAWLER_USER_AGENTS) couvrent ChatGPT, Perplexity, Claude, Gemini, Copilot, Meta AI, etc.
  */
-export const SEO_CRAWLER_USER_AGENTS = [
+export const SEO_CLASSIC_CRAWLER_USER_AGENTS = [
   "*",
-  // Moteurs classiques
+  // Moteurs classiques — monde
   "Googlebot",
   "Googlebot-Image",
   "Googlebot-News",
-  "Google-Extended",
   "Bingbot",
   "BingPreview",
   "Applebot",
@@ -38,24 +39,22 @@ export const SEO_CRAWLER_USER_AGENTS = [
   "Baiduspider",
   "Sogou",
   "PetalBot",
+  // Europe
   "SeznamBot",
+  "MojeekBot",
+  "Exabot",
   // Réseaux / preview
   "facebookexternalhit",
   "Facebot",
-  "Meta-ExternalAgent",
   "FacebookBot",
   "Twitterbot",
   "LinkedInBot",
-  // IA / AEO
-  "OAI-SearchBot",
-  "GPTBot",
-  "ChatGPT-User",
-  "PerplexityBot",
-  "Perplexity-User",
-  "ClaudeBot",
-  "anthropic-ai",
-  "Claude-Web",
-  "cohere-ai",
+  "Pinterestbot",
+] as const;
+
+export const SEO_CRAWLER_USER_AGENTS = [
+  ...SEO_CLASSIC_CRAWLER_USER_AGENTS,
+  ...SEO_AI_CRAWLER_USER_AGENTS,
 ] as const;
 
 /** Directives robots pour pages publiques indexables. */

@@ -336,6 +336,12 @@ export function MarketingSiteFooter() {
               >
                 Index IA (llms.txt)
               </a>
+              <a
+                href={`${SITE_URL}/ai.txt`}
+                className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500/70"
+              >
+                Politique IA (ai.txt)
+              </a>
             </div>
           </div>
         </div>

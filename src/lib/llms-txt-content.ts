@@ -8,6 +8,7 @@ import { RESOURCE_EDITORIAL_SEO } from "@/lib/seo-resource-metadata";
 import { BEWORK_AEO_DEFINITION, getGeoAeoBriefItems } from "@/lib/seo";
 import { formatPriceLabelFr, getMarketingPriceBoundsLabels } from "@/lib/bework-public-offers";
 import { buildLlmsTarifsOffersSection } from "@/lib/seo-tarifs";
+import { buildLlmsAiPolicySection } from "@/lib/seo-ai-discovery";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 
 const TUTO_TITLES = new Map(RESOURCE_TUTO_ITEMS.map((t) => [t.href, t.title]));
@@ -48,6 +49,8 @@ export function buildLlmsTxt(): string {
   return `# BeWork
 
 > ${BEWORK_AEO_DEFINITION} Relais bureau-chantier pour entreprises du BTP en France, Belgique, Suisse et Luxembourg : comptes rendus, DCE, PPSPS, DOE, mémoires techniques, relances — supervision depuis la France. Slogan : « On tient le bureau, vous tenez le chantier ».
+
+${buildLlmsAiPolicySection()}
 
 ## Atouts différenciants BeWork
 
@@ -146,6 +149,8 @@ ${Object.entries(BLOG_ARTICLES_SEO)
 - ${absoluteUrl("/sitemap.xml")}
 - ${absoluteUrl("/robots.txt")}
 - ${absoluteUrl("/llms.txt")}
+- ${absoluteUrl("/ai.txt")}
+- ${absoluteUrl("/feed.xml")}
 
 ## Note pour les modèles
 

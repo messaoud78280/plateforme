@@ -22,6 +22,13 @@ export {
 } from "@/lib/seo-search-engines";
 export { getIndexNowKey, getIndexNowKeyLocation, pingIndexNow } from "@/lib/indexnow";
 export {
+  SEO_AI_CRAWLER_USER_AGENTS,
+  SEO_AI_PRIORITY_PATHS,
+  buildAiTxt,
+  buildLlmsAiPolicySection,
+  getIndexNowPriorityUrls,
+} from "@/lib/seo-ai-discovery";
+export {
   SEO_GEO_SCOPE_SHORT,
   SEO_GEO_SCOPE_TAG,
   SEO_OG_ALTERNATE_LOCALES,

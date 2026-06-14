@@ -1,10 +1,12 @@
 /**
  * Constantes et helpers SEO / GEO / AEO partagés (titres, définitions citables par les IA, métadonnées).
  */
+import { BEWORK_AEO_DEFINITION } from "@/lib/seo-keywords";
 export { BEWORK_VALUE_PILLAR_LABELS, BEWORK_VALUE_PILLARS } from "@/lib/bework-value-pillars";
 export { buildTarifsPageJsonLd, buildLlmsTarifsOffersSection, TARIFS_SEO_DESCRIPTION, TARIFS_SEO_TITLE } from "@/lib/seo-tarifs";
 export type { BeWorkValuePillar } from "@/lib/bework-value-pillars";
 export {
+  BEWORK_AEO_DEFINITION,
   BEWORK_SLOGAN,
   SEO_KEYWORDS_GLOBAL,
   SEO_KEYWORDS_HOME,
@@ -41,10 +43,6 @@ export {
 export { landingPageMetadata, landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 export { resourceEditorialMetadata } from "@/lib/seo-resource-metadata";
 export { tutoPageMetadata, getTutoPageDescription } from "@/lib/seo-tuto-metadata";
-
-/** Phrase de positionnement réutilisable dans le contenu (citations IA / extraits). */
-export const BEWORK_AEO_DEFINITION =
-  "BeWork est un service d’assistants travaux augmentés par l’IA pour les entreprises du BTP : relais bureau-chantier pour appels d’offres, exécution de marché public (documents, Chorus Pro, réserves, DOE), devis, PPSPS et suivi administratif chantier.";
 
 export type GeoAeoBriefItem = { question: string; answer: string };
 

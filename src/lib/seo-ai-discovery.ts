@@ -3,8 +3,7 @@
  * Objectif : visibilité dans ChatGPT Search, Perplexity, Claude, Gemini, Copilot, Meta AI, etc.
  */
 
-import { BEWORK_SLOGAN } from "@/lib/seo-keywords";
-import { BEWORK_AEO_DEFINITION } from "@/lib/seo";
+import { BEWORK_AEO_DEFINITION, BEWORK_SLOGAN } from "@/lib/seo-keywords";
 import { SEO_GEO_SCOPE_SHORT, SEO_GEO_SCOPE_TAG } from "@/lib/seo-francophonie";
 import { absoluteUrl, SITE_URL } from "@/lib/site";
 

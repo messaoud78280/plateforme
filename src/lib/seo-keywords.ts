@@ -208,6 +208,10 @@ export const SEO_KEYWORDS_HOME: string[] = [
 /** Slogan BeWork — réutilisable contenu, OG, JSON-LD, llms.txt. */
 export const BEWORK_SLOGAN = "On tient le bureau, vous tenez le chantier.";
 
+/** Phrase de positionnement citables par les IA / extraits AEO. */
+export const BEWORK_AEO_DEFINITION =
+  "BeWork est un service d’assistants travaux augmentés par l’IA pour les entreprises du BTP : relais bureau-chantier pour appels d’offres, exécution de marché public (documents, Chorus Pro, réserves, DOE), devis, PPSPS et suivi administratif chantier.";
+
 /** Meta description site (layout racine) — ~155 car., périmètre francophonie. */
 export const SEO_VALUE_PROPOSITION =
   "Assistants travaux augmentés par l’IA pour le BTP : appels d'offres, exécution marché public, Chorus Pro, DOE, PPSPS et dossiers chantier. Relais bureau-chantier, forfaits HT. FR · BE · CH · LU.";

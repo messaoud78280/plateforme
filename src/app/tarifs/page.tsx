@@ -104,7 +104,7 @@ export default function TarifsPage() {
             Les tarifs affichés sont des prix de départ. Le tarif final dépend du nombre de chantiers, du volume de
             dossiers, des livrables attendus, de la fréquence de suivi et du niveau de supervision nécessaire.
           </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
             <CalendlyBookingLink
               trackLocation="tarifs-hero-primary"
               className="inline-flex min-h-[3rem] w-full items-center justify-center rounded-xl bg-[#1d4ed8] px-7 py-3 text-base font-semibold text-white shadow-md transition hover:bg-[#1e40af] sm:w-auto"
@@ -116,6 +116,12 @@ export default function TarifsPage() {
               className="inline-flex min-h-[3rem] w-full items-center justify-center rounded-xl border-2 border-slate-200 bg-white px-7 py-3 text-base font-semibold text-[#0f172a] shadow-sm transition hover:border-[#1d4ed8]/30 hover:bg-[#f8fafc] sm:w-auto"
             >
               Demander une intervention ponctuelle
+            </Link>
+            <Link
+              href="/assistants-administratifs-taches"
+              className="inline-flex min-h-[3rem] w-full items-center justify-center rounded-xl border-2 border-slate-300 bg-white px-7 py-3 text-base font-semibold text-[#1d4ed8] shadow-sm transition-colors hover:border-[#1d4ed8]/40 hover:bg-[#eff6ff] sm:w-auto"
+            >
+              Voir les missions prises en charge
             </Link>
           </div>
         </section>

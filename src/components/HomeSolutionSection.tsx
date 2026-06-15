@@ -2,7 +2,6 @@ import type { JSX } from "react";
 
 const BLUE = "#2563eb";
 const TEXT_DARK = "#111827";
-const TEXT_MUTED = "#334155";
 
 type CardConfig = {
   title: string;
@@ -23,15 +22,15 @@ type CardConfig = {
 
 const CARDS: CardConfig[] = [
   {
-    title: "Avant travaux / intervention",
+    title: "Appels d'offres & préparation des dossiers",
     bullets: [
-      "Préparation des dossiers d'intervention",
-      "Pièces administratives et demandes d'autorisations",
-      "DT / DICT si concerné, coordination planning",
-      "Collecte des documents nécessaires au démarrage",
+      "Contrôle DCE et tableau de conformité",
+      "Mémoire technique et structuration AE / BPU / DQE",
+      "Aide au chiffrage et planning simplifié",
+      "Préparation et suivi du dépôt électronique",
     ],
-    footerTitle: "Interventions sécurisées",
-    footerSub: "Dossiers prêts avant d'engager les équipes.",
+    footerTitle: "Dossiers AO structurés",
+    footerSub: "Moins d'oublis, plus de réponses défendables.",
     Icon: IconClipboardChecks,
     FooterIcon: IconShieldMini,
     stripe: "from-[#1e40af] via-[#2563eb] to-[#3b82f6]",
@@ -44,15 +43,15 @@ const CARDS: CardConfig[] = [
     footerTitleClass: "text-[#1d4ed8]",
   },
   {
-    title: "Pendant travaux",
+    title: "Suivi administratif et technique des chantiers",
     bullets: [
-      "Comptes rendus et photos chantier",
-      "Suivi des demandes et échanges terrain",
-      "Relances MOA / MOE / fournisseurs / sous-traitants",
-      "Réservations et points bloquants suivis",
+      "Documents d'exécution et fiches techniques",
+      "Planning administratif, comptes rendus et relances",
+      "Coordination bureau-chantier et suivi fournisseurs",
+      "Photos, preuves et points bloquants suivis",
     ],
-    footerTitle: "Fil documentaire tenu",
-    footerSub: "Le donneur d'ordre voit que le marché avance.",
+    footerTitle: "Visibilité terrain ↔ bureau",
+    footerSub: "Le chantier avance avec une traçabilité claire.",
     Icon: IconPeopleCoord,
     FooterIcon: IconTruckMini,
     stripe: "from-[#2563eb] via-[#3b82f6] to-[#60a5fa]",
@@ -65,15 +64,15 @@ const CARDS: CardConfig[] = [
     footerTitleClass: "text-[#1d4ed8]",
   },
   {
-    title: "Après travaux / intervention",
+    title: "Marchés publics, réception et clôture",
     bullets: [
-      "Attachements, situations et justificatifs",
-      "DOE, levée de réserves, archivage documentaire",
-      "Validations BPU / DPGF et relances paiement",
-      "Clôture propre côté donneur d'ordre",
+      "Ordres de service et calendrier contractuel",
+      "Chorus Pro, situations mensuelles et facturation",
+      "Réserves, pénalités et preuves de suivi",
+      "DOE et documents de fin de chantier",
     ],
-    footerTitle: "Validations accélérées",
-    footerSub: "Moins de situations bloquées, moins de retard de paiement.",
+    footerTitle: "Clôture sécurisée",
+    footerSub: "Moins de pénalités, moins de retard de paiement.",
     Icon: IconEuroDocument,
     FooterIcon: IconBarsUp,
     stripe: "from-[#3b82f6] via-[#60a5fa] to-[#93c5fd]",
@@ -110,12 +109,12 @@ export function HomeSolutionSection() {
             className="mt-5 text-[clamp(1.875rem,calc(1rem+3.8vw),3rem)] font-bold leading-[1.08] tracking-[-0.025em]"
             style={{ color: TEXT_DARK }}
           >
-            <span style={{ color: BLUE }}>BeWork</span> tient le fil entre le terrain, le bureau et le donneur d&apos;ordre.
+            <span style={{ color: BLUE }}>BeWork</span> structure l&apos;assistance technique et administrative de vos opérations.
           </h2>
 
           <p className="mx-auto mt-3 max-w-2xl text-lg leading-relaxed text-slate-800 md:text-xl">
-            BeWork absorbe la charge administrative de vos marchés travaux pour sécuriser les interventions, fluidifier
-            les échanges, maintenir la traçabilité et accélérer validations et paiements.
+            De la réponse aux appels d&apos;offres à la clôture du marché, BeWork accompagne la préparation, le suivi et la
+            sécurisation documentaire de vos chantiers — avec validation humaine sur tout ce qui engage.
           </p>
         </header>
 
@@ -193,6 +192,11 @@ export function HomeSolutionSection() {
             </article>
           ))}
         </div>
+
+        <p className="mx-auto mt-12 max-w-3xl rounded-xl border border-slate-200/90 bg-white/90 px-5 py-4 text-center text-base leading-relaxed text-slate-800 shadow-sm md:px-6 md:py-5 md:text-[1.05rem]">
+          BeWork ne remplace pas le conducteur de travaux&nbsp;: nous l&apos;aidons à sécuriser les dossiers, les délais, les
+          preuves, la facturation et les obligations administratives qui conditionnent la rentabilité du chantier.
+        </p>
       </div>
     </section>
   );

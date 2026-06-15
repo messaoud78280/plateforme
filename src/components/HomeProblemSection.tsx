@@ -19,26 +19,26 @@ export function HomeProblemSection() {
     ConsequenceIcon: () => JSX.Element;
   }[] = [
     {
-      problem: "Conducteurs de travaux saturés",
-      consequence: "Dossiers incomplets",
+      problem: "DCE et chiffrages à traiter en urgence",
+      consequence: "Marge et délais AO compromis",
       ProblemIcon: () => <IconUserWave className="h-[22px] w-[22px]" />,
-      ConsequenceIcon: IconFolderClock,
+      ConsequenceIcon: IconEuroTrendDown,
     },
     {
-      problem: "Validations MOA / MOE qui traînent",
-      consequence: "Situations bloquées",
+      problem: "Délais contractuels et validations MOE",
+      consequence: "Situations et paiements bloqués",
       ProblemIcon: IconFolderClock,
       ConsequenceIcon: IconSad,
     },
     {
-      problem: "Échanges dispersés (mail, WhatsApp, plateformes)",
-      consequence: "Perte de traçabilité",
+      problem: "Marchés publics et pièces à suivre",
+      consequence: "Pénalités et dossiers incomplets",
       ProblemIcon: IconTasksPileUp,
-      ConsequenceIcon: IconTrackingOff,
+      ConsequenceIcon: IconFolderClock,
     },
     {
-      problem: "DOE, attachements, relances en retard",
-      consequence: "Paiements retardés",
+      problem: "DOE, réserves et facturation en retard",
+      consequence: "Clôture et trésorerie fragilisées",
       ProblemIcon: IconTrackingOff,
       ConsequenceIcon: IconEuroTrendDown,
     },
@@ -63,17 +63,17 @@ export function HomeProblemSection() {
             className="mt-8 font-normal tracking-[-0.02em] text-[clamp(1.125rem,calc(1.02rem+0.95vw),1.5rem)] leading-[1.28]"
             style={{ color: TEXT_PRIMARY }}
           >
-            Vous avez gagné le marché.
+            Entre le terrain et le bureau,
             <br />
-            <span style={{ color: BEWORK_BLUE }}>Maintenant il faut le tenir.</span>
+            <span style={{ color: BEWORK_BLUE }}>la marge se joue aussi sur les dossiers.</span>
           </h2>
 
           <div className="mt-6 h-[2px] w-16 rounded-full bg-slate-300/90" />
 
           <p className="mt-6 text-lg font-medium leading-[1.55] text-slate-800 md:text-xl">
-            Gagner un marché ne suffit pas : il faut tenir les pièces, les échanges, les validations, les relances, les
-            photos, les comptes rendus, les DOE, les situations et les demandes du donneur d&apos;ordre — entre le terrain,
-            le bureau et la MOA / MOE.
+            Les entreprises BTP perdent du temps et de la rentabilité sur les DCE à analyser, les devis et chiffrages à
+            préparer, les pièces administratives à produire, les marchés publics à suivre, les relances MOE / MOA /
+            fournisseurs, les réserves, le DOE, la facturation Chorus Pro et les pénalités contractuelles.
           </p>
 
           <ul className="mt-8 divide-y divide-slate-200">
@@ -86,7 +86,7 @@ export function HomeProblemSection() {
                 <IconFolderMini className="h-[22px] w-[22px]" />
               </span>
               <p className="text-[18px] font-bold" style={{ color: TEXT_PRIMARY }}>
-                Pièces marché <span style={{ color: BEWORK_BLUE }}>à jour</span>
+                Appels d&apos;offres &amp; <span style={{ color: BEWORK_BLUE }}>mémoires techniques</span>
               </p>
             </li>
             <li className="flex items-center gap-5 py-4">
@@ -98,7 +98,7 @@ export function HomeProblemSection() {
                 <IconClockMini className="h-[22px] w-[22px]" />
               </span>
               <p className="text-[18px] font-bold" style={{ color: TEXT_PRIMARY }}>
-                Validations <span style={{ color: BEWORK_BLUE }}>qui traînent</span>
+                Délais contractuels &amp; <span style={{ color: BEWORK_BLUE }}>validations</span>
               </p>
             </li>
             <li className="flex items-center gap-5 py-4 pb-0 last:border-b-0">
@@ -110,7 +110,7 @@ export function HomeProblemSection() {
                 <IconUserWave className="h-[22px] w-[22px]" />
               </span>
               <p className="text-[18px] font-bold" style={{ color: TEXT_PRIMARY }}>
-                Charge admin qui <span style={{ color: BEWORK_BLUE }}>explose avec le volume</span>
+                Suivi marché, DOE &amp; <span style={{ color: BEWORK_BLUE }}>facturation</span>
               </p>
             </li>
           </ul>
@@ -129,8 +129,8 @@ export function HomeProblemSection() {
               !
             </div>
             <p className="text-xl font-extrabold leading-snug" style={{ color: TEXT_PRIMARY }}>
-              Résultat : conducteurs saturés, dossiers incomplets, situations bloquées, paiements retardés — et une
-              traçabilité qui se perd dès que le volume augmente.
+              Résultat : conducteurs et chargés d&apos;affaires saturés, dossiers incomplets, situations bloquées, pénalités
+              évitables et une traçabilité qui se perd dès que le volume augmente.
             </p>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
-import { Building2, HardHat, Landmark, Wrench } from "lucide-react";
+import { Building2, ClipboardList, HardHat, Landmark } from "lucide-react";
 
 const TARGETS: {
   title: string;
@@ -11,42 +11,42 @@ const TARGETS: {
   linkLabel?: string;
 }[] = [
   {
-    title: "Entreprises générales & PME BTP",
+    title: "PME BTP & entreprises générales",
     icon: Building2,
     bullets: [
-      "Titulaires de marchés publics ou privés",
+      "Artisans structurés et PME en croissance",
       "Multi-lots, multi-sites, équipes terrain + bureau",
-      "Charge administrative qui suit le volume de marchés",
+      "Besoin d'appui technique et administratif sans recruter",
     ],
     stripe: "from-[#1e40af] via-[#2563eb] to-[#3b82f6]",
   },
   {
-    title: "Maintenance & contrats récurrents",
-    icon: Wrench,
+    title: "Appels d'offres & marchés publics",
+    icon: ClipboardList,
     bullets: [
-      "Marchés à bons de commande et accords-cadres",
-      "Interventions répétées, dossiers à tenir en continu",
-      "Relances et validations donneurs d'ordre",
+      "Entreprises répondant aux appels d'offres",
+      "Titulaires de marchés publics et accords-cadres",
+      "Analyse DCE, mémoire technique, suivi marché et Chorus Pro",
     ],
     stripe: "from-[#2563eb] via-[#3b82f6] to-[#60a5fa]",
   },
   {
-    title: "Sous-traitants & corps d'état",
+    title: "Conducteurs de travaux & chargés d'affaires",
     icon: HardHat,
     bullets: [
-      "Lots délégués par entreprises générales ou groupes",
-      "Comptes rendus, attachements, DOE, situations",
-      "Coordination MOA / MOE / OPC / fournisseurs",
+      "Assistant conducteur de travaux externalisé",
+      "Suivi documentaire, relances et comptes rendus",
+      "Coordination bureau-chantier et preuves de suivi",
     ],
     stripe: "from-[#3b82f6] via-[#60a5fa] to-[#93c5fd]",
   },
   {
-    title: "Donneurs d'ordre exigeants",
+    title: "Logement occupé & coordination MOEX / OPC",
     icon: Landmark,
     bullets: [
-      "Collectivités, bailleurs, syndics, promoteurs",
-      "Concessionnaires, industriels, maîtres d'ouvrage",
-      "Traçabilité documentaire et délais de validation",
+      "Interventions en milieu occupé et marchés sensibles",
+      "MOEX / OPC qui veulent déléguer une partie documentaire",
+      "Promoteurs, bailleurs et donneurs d'ordre exigeants",
     ],
     stripe: "from-[#2563eb] via-[#3b82f6] to-[#60a5fa]",
     href: "/promoteurs-immobiliers",
@@ -54,7 +54,7 @@ const TARGETS: {
   },
 ];
 
-/** Cibles marchés travaux — titulaires, accords-cadres, maintenance, multi-lots */
+/** Cibles — entreprises BTP, AO, marchés publics, conducteurs de travaux */
 export function HomeTargetAudienceSection() {
   return (
     <section
@@ -71,12 +71,12 @@ export function HomeTargetAudienceSection() {
           id="target-audience-heading"
           className="mt-2.5 max-w-3xl text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl"
         >
-          Pour les entreprises qui gèrent des marchés, pas seulement des chantiers isolés.
+          Pour les entreprises BTP qui veulent sécuriser délais, dossiers et rentabilité.
         </h2>
         <p className="mt-5 max-w-3xl text-lg leading-relaxed text-slate-700">
-          BeWork accompagne les titulaires de marchés publics, privés, accords-cadres et contrats récurrents — tous corps
-          d&apos;état du BTP — lorsque le flux administratif entre terrain, bureau et donneurs d&apos;ordre devient le goulet
-          d&apos;étranglement.
+          BeWork accompagne dirigeants, conducteurs de travaux, chargés d&apos;affaires et équipes marchés lorsque la
+          préparation des dossiers, le suivi technique et administratif des chantiers, ou l&apos;exécution de marchés publics
+          devient un goulet d&apos;étranglement.
         </p>
 
         <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:gap-5">

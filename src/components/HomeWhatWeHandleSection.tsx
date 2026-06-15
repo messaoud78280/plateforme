@@ -4,18 +4,18 @@ import {
 } from "@/components/home/BlueprintCotationDecor";
 
 const MISSIONS_GRID = [
-  "Suivi administratif de marchés",
-  "Comptes rendus chantier",
-  "DOE / DIUO",
-  "Situations travaux",
-  "Attachements",
-  "Relances donneurs d'ordre",
-  "Suivi BPU / DPGF",
-  "Collecte fiches techniques",
-  "Suivi sous-traitants",
-  "Coordination documentaire",
-  "Dossiers d'intervention",
-  "Classement pièces marché",
+  "Analyse DCE & contrôle conformité",
+  "Mémoire technique & aide au chiffrage",
+  "Suivi documentaire chantier",
+  "Comptes rendus & planning administratif",
+  "Documents d'exécution & fiches techniques",
+  "Marchés publics & accords-cadres",
+  "Chorus Pro & situations mensuelles",
+  "DOE & suivi réserves",
+  "Relances MOA / MOE / fournisseurs",
+  "Ordres de service & calendrier contractuel",
+  "Coordination bureau-chantier",
+  "Pénalités & preuves de suivi",
 ] as const;
 
 /**
@@ -39,13 +39,13 @@ export function HomeWhatWeHandleSection() {
             id="what-we-handle-heading"
             className="mt-4 text-balance text-3xl font-bold leading-[1.12] tracking-tight text-[#0f172a] md:text-4xl"
           >
-            Le flux administratif de vos marchés,
+            Assistance technique et administrative,
             <br />
-            <span className="text-[#1d4ed8]">de l&apos;intervention à la clôture.</span>
+            <span className="text-[#1d4ed8]">de l&apos;appel d&apos;offres à la clôture.</span>
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-center text-lg leading-relaxed text-slate-800 md:text-xl">
-            Dossiers d&apos;intervention, comptes rendus, DOE, attachements, situations, relances et coordination
-            documentaire — pour tous les corps d&apos;état titulaires de marchés.
+            Analyse DCE, mémoire technique, suivi de chantier, marchés publics, Chorus Pro, DOE, réserves et coordination
+            documentaire — pour les entreprises BTP qui veulent sécuriser délais, preuves et rentabilité.
           </p>
           <p className="mx-auto mt-4 max-w-xl text-center text-sm font-semibold text-slate-700 md:text-base">
             Assistants travaux augmentés par l&apos;IA · expertise BTP terrain · supervision depuis la France
@@ -75,20 +75,20 @@ export function HomeWhatWeHandleSection() {
               Volume de marchés
             </p>
             <h3 className="mt-2.5 text-balance font-sans text-xl font-bold tracking-tight text-[#0f172a] md:text-2xl">
-              Quand le marché accélère, BeWork absorbe la charge.
+              Quand le volume augmente, BeWork tient le fil documentaire.
             </h3>
             <p className="mt-3 text-base leading-relaxed text-slate-800 md:text-[1.05rem]">
-              Multi-interventions, relances donneurs d&apos;ordre, validations en attente, pièces manquantes : votre Beworker tient le fil
-              documentaire, relance les bons interlocuteurs et vous fait valider avant tout engagement.
+              Multi-chantiers, relances MOE / MOA, validations en attente, pièces manquantes, pénalités à anticiper&nbsp;: votre
+              Beworker structure le suivi, relance les bons interlocuteurs et vous fait valider avant tout engagement.
             </p>
             <ul className="mt-5 grid gap-2 text-sm font-semibold text-slate-800 sm:grid-cols-2 lg:grid-cols-3 md:text-base">
               {[
-                "Relances MOA / MOE",
-                "Situations & attachements",
+                "Analyse DCE & mémoire technique",
+                "Situations & Chorus Pro",
                 "DOE & réserves",
-                "Dossiers d'intervention",
-                "Validations BPU / DPGF",
-                "Coordination sous-traitants",
+                "Ordres de service",
+                "Documents d'exécution",
+                "Pénalités & preuves",
               ].map((i) => (
                 <li key={i} className="flex items-start gap-2 rounded-lg border border-slate-100 bg-slate-50/70 px-3 py-2">
                   <span className="mt-[2px] text-[#1d4ed8]" aria-hidden>
@@ -104,7 +104,7 @@ export function HomeWhatWeHandleSection() {
         <div className="mt-10 md:mt-12">
           <div className="mx-auto max-w-5xl">
             <h3 className="text-balance text-xl font-bold tracking-tight text-[#0f172a] md:text-2xl">
-              Un relais pour vos équipes terrain et votre bureau marchés.
+              Un relais pour conducteurs de travaux, chargés d&apos;affaires et bureau marchés.
             </h3>
             <div className="mt-6 grid gap-5 md:grid-cols-2">
               <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm ring-1 ring-slate-100/85 md:p-7">
@@ -112,8 +112,8 @@ export function HomeWhatWeHandleSection() {
                   Conducteurs & chefs de chantier
                 </p>
                 <p className="mt-3 text-base leading-relaxed text-slate-800 md:text-[1.05rem]">
-                  Comptes rendus, photos, réservations, relances MOA / MOE / OPC / SPS, suivi sous-traitants et points bloquants — sans saturer
-                  l&apos;équipe terrain.
+                  Comptes rendus, photos, réserves, relances MOE / OPC / SPS, suivi fournisseurs et points bloquants — sans
+                  saturer l&apos;équipe terrain ni prendre la direction technique du chantier.
                 </p>
               </div>
               <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm ring-1 ring-slate-100/85 md:p-7">
@@ -121,8 +121,8 @@ export function HomeWhatWeHandleSection() {
                   Bureau marchés & chargés d&apos;affaires
                 </p>
                 <p className="mt-3 text-base leading-relaxed text-slate-800 md:text-[1.05rem]">
-                  Dossiers d&apos;intervention, situations, attachements, DOE, classement pièces marché, validations BPU / DPGF et relances
-                  donneurs d&apos;ordre.
+                  DCE, mémoires techniques, situations, DOE, classement des pièces marché, Chorus Pro, validations BPU / DPGF
+                  et relances donneurs d&apos;ordre.
                 </p>
               </div>
             </div>

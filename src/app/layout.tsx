@@ -3,7 +3,7 @@ import { Architects_Daughter, Geist_Mono, Inter, Rajdhani } from "next/font/goog
 import "./globals.css";
 import { PlausibleScript } from "@/components/analytics/PlausibleScript";
 import { Providers } from "@/components/Providers";
-import { SEO_KEYWORDS_GLOBAL, SEO_VALUE_PROPOSITION, SEO_VALUE_PROPOSITION_SHORT, BEWORK_SLOGAN } from "@/lib/seo-keywords";
+import { SEO_KEYWORDS_GLOBAL, SEO_VALUE_PROPOSITION, SEO_VALUE_PROPOSITION_SHORT, BEWORK_SLOGAN, BEWORK_AEO_DEFINITION } from "@/lib/seo-keywords";
 import { jsonLdCountriesServed, jsonLdExpandedAreaServed } from "@/lib/jsonld-area-served";
 import {
   buildSearchEngineVerification,
@@ -65,7 +65,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "BeWork — Assistants travaux augmentés par l’IA pour le BTP",
+    default: "BeWork — Assistants travaux IA pour chantiers, AO et marchés publics",
     template: "%s | BeWork",
   },
   description: SEO_VALUE_PROPOSITION,
@@ -76,17 +76,16 @@ export const metadata: Metadata = {
   category: "business",
   keywords: [
     ...SEO_KEYWORDS_GLOBAL,
-    "agence pilotage administratif BTP",
-    "secrétaire externalisé BTP",
-    "organisation administrative bâtiment",
-    "assistant administratif entreprise bâtiment",
-    "situation de travaux artisan",
+    "assistance technique BTP",
+    "analyse DCE BTP",
+    "mémoire technique BTP",
+    "aide appel d'offres BTP",
+    "gestion administrative chantier",
+    "assistant conducteur de travaux",
+    "Chorus Pro travaux",
+    "suivi réserves chantier",
     "DICT déclaration travaux",
     "facturation chantier BTP",
-    "trésorerie artisan bâtiment",
-    "relances impayés BTP",
-    "administratif intelligence artificielle",
-    "vidéo présentation administratif BTP",
   ],
   robots: SEO_PUBLIC_ROBOTS,
   openGraph: {
@@ -95,20 +94,20 @@ export const metadata: Metadata = {
     alternateLocale: [...SEO_OG_ALTERNATE_LOCALES],
     url: SITE_URL,
     siteName: "BeWork",
-    title: "BeWork — Assistants travaux augmentés par l’IA (France, Belgique, Suisse, Luxembourg)",
+    title: "BeWork — Assistants travaux IA pour chantiers, appels d'offres et marchés publics",
     description: `${SEO_VALUE_PROPOSITION_SHORT} ${BEWORK_SLOGAN}`,
     images: [
       {
         url: defaultOgImage,
         width: 1200,
         height: 630,
-        alt: "BeWork — Assistants travaux augmentés par l’IA pour le BTP (France, Belgique, Suisse, Luxembourg)",
+        alt: "BeWork — Assistance technique et administrative BTP par assistants travaux augmentés par l’IA",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "BeWork — Assistants travaux augmentés par l’IA pour le BTP",
+    title: "BeWork — Assistants travaux IA pour chantiers, AO et marchés publics",
     description: `${SEO_VALUE_PROPOSITION_SHORT} ${BEWORK_SLOGAN}`,
     ...(process.env.NEXT_PUBLIC_TWITTER_SITE?.trim()
       ? { site: process.env.NEXT_PUBLIC_TWITTER_SITE.trim() }
@@ -155,9 +154,9 @@ const jsonLd = {
       name: "BeWork",
       alternateName: [
         "BeWork — assistants travaux augmentés par l’IA",
-        "BeWork — relais bureau-chantier BTP",
-        "BeWork administratif BTP",
-        "BeWork pilotage administratif chantier",
+        "BeWork — assistance technique et administrative BTP",
+        "BeWork assistant travaux BTP",
+        "BeWork appels d'offres et marchés publics",
         "Assistants travaux BTP France Belgique Suisse Luxembourg",
       ],
       description: SEO_VALUE_PROPOSITION,
@@ -178,7 +177,7 @@ const jsonLd = {
       logo: { "@type": "ImageObject", url: defaultOgImage, width: 1200, height: 630 },
       image: defaultOgImage,
       description:
-        "Assistants travaux augmentés par l’IA pour artisans, conducteurs de travaux et dirigeants d’entreprises du bâtiment : devis, relances, dossiers chantier, appels d’offres — France, Belgique, Suisse, Luxembourg. Supervision depuis la France.",
+        "Assistants travaux augmentés par l’IA pour entreprises du BTP : assistance technique et administrative — analyse DCE, aide au chiffrage, mémoire technique, suivi chantier, marchés publics, Chorus Pro, DOE et réserves. France, Belgique, Suisse, Luxembourg.",
       slogan: BEWORK_SLOGAN,
       areaServed: jsonLdExpandedAreaServed(),
       founder: {
@@ -189,9 +188,9 @@ const jsonLd = {
           "Bâtiment et travaux publics",
           "Conducteurs de travaux",
           "Direction d'entreprise",
-          "Externalisation administrative",
-          "Partenaire administratif externalisé",
-          "Prestataire administratif PME",
+          "Assistance technique BTP",
+          "Analyse DCE et appels d'offres",
+          "Suivi administratif de chantier",
         ],
       },
       contactPoint: [
@@ -206,7 +205,10 @@ const jsonLd = {
       ...(orgSameAs.length ? { sameAs: orgSameAs } : {}),
       knowsAbout: [
         "BTP",
-        "Artisanat du bâtiment",
+        "Assistance technique BTP",
+        "Analyse DCE",
+        "Mémoire technique BTP",
+        "Aide au chiffrage devis",
         "Conducteurs de travaux",
         "Entreprises générales et sous-traitants",
         "Marchés publics travaux",
@@ -214,10 +216,8 @@ const jsonLd = {
         "Facturation Chorus Pro",
         "DOE marché public",
         "Appels d'offres BTP",
-        "Facturation chantier",
-        "Devis entreprise du bâtiment",
-        "Externalisation administrative",
-        "Partenaire administratif externalisé",
+        "Suivi réserves chantier",
+        "Coordination documentaire chantier",
         "Intelligence artificielle appliquée aux assistants travaux BTP",
       ],
     },
@@ -225,22 +225,23 @@ const jsonLd = {
       "@type": "ProfessionalService",
       "@id": `${SITE_URL}/#service`,
       name: "BeWork — Assistants travaux augmentés par l’IA (BTP)",
-      description: `Assistants travaux externalisés pour artisans, conducteurs de travaux et dirigeants du BTP : devis, relances, dossiers chantier, DCE, PPSPS, DOE. ${BEWORK_SLOGAN} Forfaits ${SUBSCRIPTION_PRICE_TAX_LABEL} dès ${SITE_PRICE_LOW_FR} €.`,
+      description: `${BEWORK_AEO_DEFINITION} ${BEWORK_SLOGAN} Forfaits ${SUBSCRIPTION_PRICE_TAX_LABEL} dès ${SITE_PRICE_LOW_FR} €.`,
       url: SITE_URL,
       provider: { "@id": `${SITE_URL}/#organization` },
       areaServed: jsonLdExpandedAreaServed(),
       serviceType: [
+        "Assistance technique et administrative BTP",
         "Assistants travaux augmentés par l’IA",
-        "Relais bureau-chantier BTP",
-        "Réponse appels d'offres BTP",
+        "Analyse DCE et appels d'offres BTP",
+        "Aide au chiffrage et mémoire technique",
         "Exécution marché public travaux",
         "Facturation Chorus Pro BTP",
-        "Suivi devis et relances clients",
-        "Préparation documents travaux et DOE",
+        "Suivi documentaire chantier et DOE",
       ],
       audience: {
         "@type": "BusinessAudience",
-        audienceType: "Conducteurs de travaux, artisans, sous-traitants et dirigeants d’entreprises du bâtiment",
+        audienceType:
+          "PME BTP, conducteurs de travaux, chargés d’affaires, titulaires de marchés publics et répondants aux appels d’offres",
       },
     },
     {
@@ -251,7 +252,7 @@ const jsonLd = {
       operatingSystem: "Web",
       url: SITE_URL,
       description:
-        "Plateforme d’assistants travaux augmentés par l’IA : dépôt de missions, suivi des dossiers chantier et traçabilité bureau-chantier pour entreprises du BTP.",
+        "Plateforme d’assistants travaux augmentés par l’IA : assistance technique et administrative BTP, dépôt de missions, suivi documentaire chantier et traçabilité bureau-chantier.",
       offers: {
         "@type": "Offer",
         url: absoluteUrl("/tarifs"),

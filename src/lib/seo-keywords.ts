@@ -168,7 +168,7 @@ export const SEO_KEYWORDS_GLOBAL: string[] = [
 ];
 
 /** Meta keywords homepage : fusion optimisée (personae + géo + technique). */
-/** Marchés travaux — homepage repositionnée relais administratif. */
+/** Marchés travaux — homepage & signaux SEO globaux assistance technique BTP. */
 export const SEO_KEYWORDS_MARCHES_TRAVAUX = [
   "assistant travaux BTP",
   "assistance technique BTP",
@@ -212,12 +212,12 @@ export const BEWORK_SLOGAN = "On tient le bureau, vous tenez le chantier.";
 
 /** Phrase de positionnement citables par les IA / extraits AEO. */
 export const BEWORK_AEO_DEFINITION =
-  "BeWork est un service d’assistants travaux augmentés par l’IA pour les entreprises du BTP : relais bureau-chantier pour appels d’offres, exécution de marché public (documents, Chorus Pro, réserves, DOE), devis, PPSPS et suivi administratif chantier.";
+  "BeWork est une plateforme d’assistants travaux augmentés par l’IA pour les entreprises du BTP : assistance technique et administrative pour appels d’offres, analyse DCE, aide au chiffrage, mémoire technique, suivi de chantier, marchés publics, Chorus Pro, DOE, réserves et coordination documentaire terrain ↔ bureau.";
 
 /** Meta description site (layout racine) — ~155 car., périmètre francophonie. */
 export const SEO_VALUE_PROPOSITION =
-  "Assistants travaux augmentés par l’IA pour le BTP : appels d'offres, exécution marché public, Chorus Pro, DOE, PPSPS et dossiers chantier. Relais bureau-chantier, forfaits HT. FR · BE · CH · LU.";
+  "Assistance technique et administrative BTP par assistants travaux IA : appels d'offres, DCE, mémoire technique, chantier, marchés publics, Chorus Pro, DOE. On tient le bureau, vous tenez le chantier — forfaits HT. FR · BE · CH · LU.";
 
 /** Proposition courte (OG, Twitter). */
 export const SEO_VALUE_PROPOSITION_SHORT =
-  "Assistants travaux augmentés par l’IA — relais bureau-chantier et documents chantier. Forfaits HT. France, Belgique, Suisse, Luxembourg.";
+  "Assistants travaux augmentés par l’IA — assistance technique et administrative BTP. Forfaits HT. France, Belgique, Suisse, Luxembourg.";

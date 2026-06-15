@@ -48,7 +48,7 @@ export function buildLlmsTxt(): string {
 
   return `# BeWork
 
-> ${BEWORK_AEO_DEFINITION} Relais bureau-chantier pour entreprises du BTP en France, Belgique, Suisse et Luxembourg : comptes rendus, DCE, PPSPS, DOE, mémoires techniques, relances — supervision depuis la France. Slogan : « On tient le bureau, vous tenez le chantier ».
+> ${BEWORK_AEO_DEFINITION} Assistance technique et administrative pour entreprises du BTP en France, Belgique, Suisse et Luxembourg — appels d'offres, analyse DCE, suivi chantier, marchés publics, Chorus Pro, DOE et réserves. Supervision depuis la France. Slogan : « On tient le bureau, vous tenez le chantier ».
 
 ${buildLlmsAiPolicySection()}
 

@@ -228,27 +228,32 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
     keywords: ["méthode BeWork", "validation humaine BTP", "process assistant travaux", "relais bureau-chantier"],
   },
   "/assistants-administratifs-taches": {
-    title: "Missions assistant travaux BTP : marchés publics & exécution | BeWork",
+    title: "Missions assistant travaux BTP : AO, chantier & marchés publics | BeWork",
     description: metaDescriptionFrancophonie(
-      "Catalogue missions BeWork : chantier, appels d'offres, et exécution marché public — 7 blocs (documents, Chorus Pro, amiante SS4, réserves, DOE)",
+      "Catalogue missions BeWork : assistance technique et administrative — analyse DCE, suivi chantier, appels d'offres et exécution marché public (Chorus Pro, réserves, DOE)",
     ),
     keywords: [
       "missions assistant travaux BTP",
-      "gestion administrative marché public BTP",
+      "assistance technique BTP",
+      "analyse DCE BTP",
+      "aide au chiffrage BTP",
+      "gestion marché public BTP",
       "suivi documents exécution marché public",
       "facturation Chorus Pro travaux",
       "DOE marché public BTP",
-      "amiante SS4 logement occupé",
-      "suivi pénalités marché public travaux",
       ...SEO_KEYWORDS_APPELS_OFFRES.slice(0, 4),
     ],
   },
   "/reponse-appel-offres-btp": {
-    title: "Réponse aux appels d'offres BTP : DCE, DPGF, mémoire technique | BeWork",
+    title: "Réponse aux appels d'offres BTP : DCE, chiffrage, mémoire technique | BeWork",
     description: metaDescriptionFrancophonie(
-      "BeWork sécurise vos réponses aux appels d'offres BTP : analyse DCE, mémoire technique, DPGF et dépôt plateforme — avant l'exécution du marché",
+      "Assistance technique aux appels d'offres BTP : analyse DCE, aide au chiffrage, mémoire technique, DPGF et dépôt plateforme — validation finale chez vous",
     ),
-    keywords: [...SEO_KEYWORDS_APPELS_OFFRES.slice(0, 10)],
+    keywords: [
+      "assistance technique appel d'offres BTP",
+      "aide au chiffrage marché public",
+      ...SEO_KEYWORDS_APPELS_OFFRES.slice(0, 10),
+    ],
   },
   "/facturation-chorus-pro-btp": {
     title: "Facturation Chorus Pro BTP : situations, dépôt et suivi | BeWork",

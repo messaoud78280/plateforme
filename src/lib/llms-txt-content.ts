@@ -92,7 +92,7 @@ ${line("Cas clients", "/cas-clients")}
 ## Pages clés
 
 ${line("Accueil", "/")}
-${line("Missions & catalogue déléguable", "/assistants-administratifs-taches", "Hub chantier + marchés publics : réponses AO/DCE et exécution de marché (7 blocs).")}
+${line("Missions & catalogue déléguable", "/assistants-administratifs-taches", "Hub assistance technique et administrative : appels d'offres/DCE, suivi chantier et exécution marché public.")}
 ${line("Services", "/services")}
 ${line("Tarifs", "/tarifs", "Missions ponctuelles, relais travaux mensuel, cellule externalisée — prix de départ HT sur bework.fr/tarifs.")}
 ${line("Contact & appel découverte", "/contact")}
@@ -119,7 +119,7 @@ ${line("Notre façon de travailler", "/notre-facon-de-travailler", "Process, val
 
 ## Appels d'offres & marchés publics
 
-${line("Réponse aux appels d'offres BTP", "/reponse-appel-offres-btp", "DCE, mémoire technique, DPGF, dépôt plateforme — phase candidature.")}
+${line("Réponse aux appels d'offres BTP", "/reponse-appel-offres-btp", "Assistance technique : analyse DCE, aide au chiffrage, mémoire technique, DPGF, dépôt plateforme.")}
 ${line("Réponses AO sur page missions", "/assistants-administratifs-taches#reponses-appels-offres", "Section intégrée : contrôle DCE, conformité, dépôt électronique.")}
 ${line("Facturation Chorus Pro BTP", "/facturation-chorus-pro-btp", "Situations mensuelles, dépôt, suivi paiement et relances.")}
 ${line("Gestion administrative marché public", "/gestion-marche-public-btp", "Landing exécution après attribution — renvoie vers le détail missions.")}

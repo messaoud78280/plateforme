@@ -14,7 +14,7 @@ export default function Page() {
   const faq = [
     {
       q: "BeWork peut-il répondre à un appel d’offres BTP ?",
-      a: "Oui sur le volet administratif et documentaire : analyse DCE, structuration des pièces, mémoire technique, DPGF/BPU/DQE et suivi du dépôt. La décision Go/No-go, le prix final et la signature restent chez vous.",
+      a: "Oui sur l’assistance technique et administrative : analyse DCE, structuration des pièces, aide au chiffrage, mémoire technique, DPGF/BPU/DQE et suivi du dépôt. La décision Go/No-go, le prix final et la signature restent chez vous.",
     },
     {
       q: "Quelles pièces d’un marché public travaux BeWork peut-il analyser ?",
@@ -38,23 +38,23 @@ export default function Page() {
   const serviceLd = buildLandingServiceJsonLd({
     name: "Réponse aux appels d'offres BTP",
     description:
-      "Analyse DCE, mémoire technique, DPGF et dépôt plateforme pour entreprises du bâtiment — assistant travaux BeWork.",
+      "Assistance technique aux appels d'offres BTP : analyse DCE, aide au chiffrage, mémoire technique, DPGF et dépôt plateforme — assistants travaux BeWork.",
     pageUrl: PAGE_URL,
-    serviceType: "Réponse appels d'offres BTP",
+    serviceType: "Assistance technique appels d'offres BTP",
   });
 
   return (
     <SeoLandingPage
-      description="Réponse aux appels d’offres BTP : analyse DCE, mémoire technique, DPGF et dépôt plateforme — assistants travaux BeWork."
+      description="Assistance technique aux appels d’offres BTP : analyse DCE, aide au chiffrage, mémoire technique, DPGF et dépôt plateforme — assistants travaux BeWork."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Réponse appels d’offres BTP", href: PAGE_PATH },
       ]}
-      h1="Réponse aux appels d’offres BTP : DCE, mémoire technique, DPGF"
+      h1="Réponse aux appels d’offres BTP : DCE, chiffrage et mémoire technique"
       intro={
         <>
-          Répondre à un <strong>appel d&apos;offres BTP</strong> demande du temps : lecture du DCE, mémoire technique,
-          pièces administratives, chiffrage et dépôt sur la plateforme. BeWork structure votre{" "}
+          Répondre à un <strong>appel d&apos;offres BTP</strong> demande du temps : analyse du DCE, aide au chiffrage,
+          mémoire technique, pièces administratives et dépôt sur la plateforme. BeWork structure votre{" "}
           <strong>réponse marché public travaux</strong> pendant que vous tenez le terrain — avec validation finale
           avant tout envoi engageant.
         </>

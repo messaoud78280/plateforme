@@ -300,14 +300,14 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
 
   "analyse-dce-btp": {
     slug: "analyse-dce-btp",
-    metaTitle: "Analyse DCE BTP : synthèse et appels d’offres | BeWork",
+    metaTitle: "Analyse DCE BTP : synthèse, risques et appui chiffrage | BeWork",
     metaDescription:
-      "Analyse DCE BTP : tri des pièces et synthèses pour arbitrer avant appel d’offres. Sans remplacer votre chiffrage.",
-    h1: "Analyse DCE BTP : y voir clair avant d’engager vos équipes",
+      "Analyse DCE BTP : tri RC/CCAP/CCTP, synthèse des risques et points bloquants avant chiffrage et mémoire technique. Aide technique — validation et prix chez vous.",
+    h1: "Analyse DCE BTP : cadrer avant de chiffrer et d’engager vos équipes",
     intro:
-      "Un dossier de consultation peut être volumineux. BeWork aide à trier les pièces, repérer les incohérences évidentes et préparer des synthèses de lecture pour accélérer votre phase d’arbitrage. L’objectif est de gagner du temps de cadrage, pas de substituer votre jugement d’entreprise.",
+      "Un dossier de consultation peut être volumineux. BeWork aide à trier les pièces, repérer les incohérences et produire des synthèses de lecture pour accélérer votre arbitrage Go/No-go et orienter le chiffrage. L’objectif est de gagner du temps de cadrage technique et documentaire — pas de substituer votre jugement d’entreprise ni votre bureau d’études.",
     enResume:
-      "Analyser un DCE, c’est lire RC, CCAP, CCTP et pièces de prix pour repérer délais, exigences et risques avant de chiffrer ou rédiger le mémoire technique.",
+      "Analyser un DCE, c’est lire RC, CCAP, CCTP et pièces de prix pour repérer délais, exigences techniques, interfaces lots et risques contractuels avant de chiffrer ou rédiger le mémoire technique.",
     erreursEviter: [
       "Chiffrer avant lecture du CCAP (pénalités, délais, paiement)",
       "Oublier une annexe technique citée dans le CCTP",
@@ -319,11 +319,12 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     ],
     priseEnChargeBullets: [
       "Tri et classement des pièces selon une méthode convenue.",
-      "Synthèses de lecture (lots, risques apparents, points à clarifier).",
+      "Synthèses de lecture (lots, risques apparents, interfaces, points à clarifier).",
+      "Repérage des exigences CCTP impactant le chiffrage (sans prix à votre place).",
       "Préparation de checklists de conformité documentaire (sur brief).",
     ],
     pourquoiParagraphs: [
-      "Répondre sans avoir lu le bon CCTP ou la bonne annexe expose à des impairs techniques et financiers. Une première lecture structurée réduit ce risque.",
+      "Répondre sans avoir lu le bon CCTP, la bonne annexe ou les pénalités du CCAP expose à des impairs techniques et financiers. Une première lecture structurée réduit ce risque avant d’engager vos équipes sur le montage d’offre.",
     ],
     commentSteps: [
       "Réception du DCE et du calendrier cible.",

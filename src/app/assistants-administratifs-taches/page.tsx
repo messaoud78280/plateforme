@@ -204,14 +204,14 @@ const faqItems = [
   },
   {
     q: "BeWork remplace-t-elle un conducteur de travaux ou un bureau d’études ?",
-    a: "Non. BeWork est un relais travaux bureau-terrain pour tenir vos dossiers, relances et documents. Les décisions techniques et responsabilités restent chez vous (ou vos partenaires habilités).",
+    a: "Non. BeWork apporte une assistance technique et administrative bureau-chantier pour tenir vos dossiers, relances et documents. Les décisions techniques et responsabilités restent chez vous (ou vos partenaires habilités).",
   },
 ];
 
 function MissionsPageJsonLd() {
   const webPage = buildWebPageAndBreadcrumbJsonLd({
     pagePath: MISSIONS_PAGE_PATH,
-    h1: "Missions BeWork pour vos chantiers & marchés publics",
+    h1: "Missions BeWork : assistance technique et administrative sur chantiers & marchés publics",
     description: missionsSeo.description,
     breadcrumbItems: [
       { name: "Accueil", href: "/" },
@@ -219,10 +219,10 @@ function MissionsPageJsonLd() {
     ],
   });
   const serviceLd = buildLandingServiceJsonLd({
-    name: "Missions assistant travaux BTP — marchés publics & chantier",
+    name: "Missions assistant travaux BTP — assistance technique, chantier et marchés publics",
     description: missionsSeo.description,
     pageUrl: absoluteUrl(MISSIONS_PAGE_PATH),
-    serviceType: "Assistant travaux marché public et chantier BTP",
+    serviceType: "Assistance technique et administrative BTP — chantier et marchés publics",
   });
   const itemListLd = buildMissionsHubItemListJsonLd(absoluteUrl(MISSIONS_PAGE_PATH));
   return (
@@ -267,11 +267,11 @@ export default function AssistantsAdministratifsTachesPage() {
         <section className="px-6 pt-16 pb-12 md:pt-20 md:pb-16" style={{ scrollMarginTop: "6rem" }}>
           <div className="mx-auto max-w-4xl text-center">
             <h1 className="text-balance text-3xl font-bold tracking-tight text-black md:text-4xl lg:text-5xl">
-              Missions BeWork pour vos chantiers &amp; marchés publics
+              Missions BeWork : assistance technique et administrative sur chantiers &amp; marchés publics
             </h1>
             <p className="mt-6 max-w-3xl mx-auto text-lg leading-relaxed text-black">
-              Devis, relances, dossiers chantier, DICT, fournisseurs, comptes rendus, réserves, DOE, DCE, CCTP — et suivi
-              administratif des marchés publics, accords-cadres et bons de commande (logement occupé, ECF, pénalités).
+              Analyse DCE, aide au chiffrage, mémoires techniques, comptes rendus, relances, réserves, DOE — et suivi
+              des marchés publics, accords-cadres et bons de commande (documents d&apos;exécution, Chorus Pro, pénalités).
             </p>
             <p className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-base">
               <Link
@@ -313,9 +313,10 @@ export default function AssistantsAdministratifsTachesPage() {
           <div className="mx-auto max-w-3xl">
             <p className="text-black leading-relaxed">
               BeWork n’est pas un “secrétariat PME” généraliste. C’est une{" "}
-              <strong>plateforme d’assistants travaux augmentés par l’IA</strong> : un relais bureau‑terrain pour tenir les{" "}
-              <strong>dossiers chantier</strong>, les <strong>relances</strong>, les <strong>documents travaux</strong> et la{" "}
-              <strong>coordination</strong> quand vous êtes pris sur le terrain. L’IA sert à trier, synthétiser et structurer — pas à “faire de la magie” :
+              <strong>plateforme d’assistants travaux augmentés par l’IA</strong> pour l’
+              <strong>assistance technique et administrative BTP</strong> : analyse DCE, synthèse CCTP, dossiers chantier,{" "}
+              <strong>relances</strong>, <strong>documents travaux</strong> et <strong>coordination bureau-chantier</strong> quand
+              vous êtes sur le terrain. L’IA sert à trier, synthétiser et structurer — pas à “faire de la magie” :
               vous gardez la validation finale sur les décisions qui engagent votre entreprise.
             </p>
           </div>

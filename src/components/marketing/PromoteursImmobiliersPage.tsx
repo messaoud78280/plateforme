@@ -1,0 +1,502 @@
+import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
+import {
+  Building2,
+  Camera,
+  ClipboardList,
+  FileText,
+  MapPin,
+  Monitor,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
+import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
+import { SeoInternalLinks } from "@/components/seo/SeoInternalLinks";
+
+const PAGE_PATH = "/promoteurs-immobiliers" as const;
+
+const TRUST_ITEMS = [
+  "Comptes rendus",
+  "Relances entreprises",
+  "Suivi DOE",
+  "Réserves",
+  "Tableaux de bord",
+  "Reporting opération",
+  "Présence terrain possible",
+] as const;
+
+const INTERVENTION_MODES = [
+  {
+    title: "Suivi à distance",
+    text: "BeWork prend en charge le suivi administratif, les relances, les comptes rendus, les tableaux de bord, le suivi DOE, les réserves et le reporting opération depuis notre plateforme.",
+    missions: [
+      "Relances entreprises",
+      "Suivi documentaire",
+      "Comptes rendus",
+      "Tableaux de bord",
+      "DOE",
+      "Réserves",
+      "Reporting",
+    ],
+    icon: Monitor,
+  },
+  {
+    title: "Suivi hybride",
+    text: "BeWork combine le suivi à distance avec des visites ponctuelles sur chantier pour constater l’avancement, prendre des photos, remonter les points bloquants et actualiser les tableaux de suivi.",
+    missions: [
+      "Visites ponctuelles",
+      "Photos chantier",
+      "Remontées terrain",
+      "Suivi des points bloquants",
+      "Mise à jour des tableaux",
+      "Appui aux réunions",
+    ],
+    icon: Camera,
+  },
+  {
+    title: "Assistant travaux sur site",
+    text: "BeWork peut déléguer un assistant travaux sur site pour assurer une présence terrain régulière, suivre l’avancement, documenter les sujets en cours, faciliter la coordination et faire remonter les informations aux équipes du promoteur.",
+    missions: [
+      "Présence chantier",
+      "Suivi visuel de l’avancement",
+      "Participation aux réunions",
+      "Préparation ou rédaction de comptes rendus",
+      "Suivi des réserves",
+      "Prises de photos",
+      "Remontée des urgences",
+      "Coordination documentaire",
+      "Relance après visite",
+    ],
+    icon: MapPin,
+  },
+] as const;
+
+const MISSIONS = [
+  {
+    title: "Suivi documentaire chantier",
+    text: "Centralisation des documents, classement des pièces, suivi des documents manquants, relances entreprises, attestations, assurances, PPSPS, fiches techniques, DOE.",
+    icon: FileText,
+  },
+  {
+    title: "Comptes rendus et tableaux de suivi",
+    text: "Mise en forme des comptes rendus, synthèse des décisions, suivi des actions, points bloquants, responsables, échéances, preuves, photos et historique.",
+    icon: ClipboardList,
+  },
+  {
+    title: "Relance des entreprises",
+    text: "Relances structurées des entreprises, bureaux d’études, sous-traitants ou partenaires pour obtenir les documents, réponses, dates d’intervention ou éléments de suivi.",
+    icon: Users,
+  },
+  {
+    title: "Suivi des situations et pièces administratives",
+    text: "Appui au suivi des situations, factures, avenants, OS, marchés, documents contractuels et échanges administratifs liés à l’opération.",
+    icon: FileText,
+  },
+  {
+    title: "Préparation des livraisons et réserves",
+    text: "Suivi des OPR, tableaux de réserves, réserves par logement ou zone, relances de levée, suivi des PV et documents de livraison.",
+    icon: Building2,
+  },
+  {
+    title: "Présence terrain et remontées chantier",
+    text: "Assistant travaux délégué sur site pour constater l’avancement, prendre des photos, identifier les points bloquants, participer aux réunions et transmettre les informations utiles au promoteur.",
+    icon: MapPin,
+  },
+  {
+    title: "Reporting opération",
+    text: "Création de tableaux de bord clairs pour suivre l’avancement documentaire, les réserves, les urgences, les relances, les points en attente et les actions à mener.",
+    icon: Monitor,
+  },
+] as const;
+
+const ONSITE_MISSIONS = [
+  "Passage régulier ou ponctuel sur chantier",
+  "Prise de photos et remontée d’informations",
+  "Suivi visuel de l’avancement",
+  "Suivi des points bloquants",
+  "Présence aux réunions de chantier",
+  "Préparation ou rédaction des comptes rendus",
+  "Mise à jour des tableaux de bord",
+  "Suivi des réserves",
+  "Relance des entreprises après visite",
+  "Aide à la préparation des OPR et livraisons",
+  "Contrôle de présence des intervenants si demandé",
+  "Transmission des urgences au promoteur ou à la maîtrise d’œuvre",
+] as const;
+
+const BENEFITS = [
+  "Moins de temps perdu dans les relances",
+  "Meilleure traçabilité des échanges",
+  "Documents chantier mieux centralisés",
+  "Meilleur suivi des réserves",
+  "Vision claire des points bloquants",
+  "Présence terrain possible sans recrutement immédiat",
+  "Appui flexible selon les phases de l’opération",
+  "Soulagement des chargés d’opérations et équipes travaux",
+  "Reporting plus clair pour la direction",
+  "Meilleure préparation des livraisons",
+] as const;
+
+const USE_CASES = [
+  "Une opération avec plusieurs entreprises à relancer",
+  "Une livraison avec de nombreuses réserves à suivre",
+  "Un DOE incomplet à reconstituer",
+  "Des comptes rendus à structurer après chaque réunion",
+  "Un chargé d’opération débordé par le suivi administratif",
+  "Des tableaux de bord à produire pour la direction",
+  "Des documents entreprises à réclamer avant réception",
+  "Un chantier nécessitant une présence terrain ponctuelle",
+  "Une phase OPR/livraison à mieux structurer",
+  "Des photos chantier à centraliser et commenter",
+  "Des points bloquants à suivre entre deux réunions",
+] as const;
+
+const OFFERS = [
+  {
+    title: "Mission ponctuelle",
+    text: "Pour une livraison, un DOE, une phase de réserves, une remise en ordre documentaire ou un besoin urgent.",
+    ideal: ["Réserves", "DOE", "OPR", "Relances urgentes", "Mise à jour documentaire"],
+  },
+  {
+    title: "Suivi mensuel",
+    text: "Pour accompagner une opération en cours avec relances, comptes rendus, tableaux de bord, suivi documentaire et reporting.",
+    ideal: ["Opération en cours", "Chargé d’opération débordé", "Suivi régulier", "Reporting direction"],
+  },
+  {
+    title: "Assistant travaux sur site",
+    text: "Pour renforcer la présence terrain avec un relais chantier délégué, ponctuel ou régulier, chargé de suivre, documenter, remonter les informations et faciliter la coordination.",
+    ideal: [
+      "Chantier sensible",
+      "Livraison proche",
+      "Plusieurs entreprises à coordonner",
+      "Besoin de présence terrain",
+      "Suivi des réserves",
+      "Remontées photos",
+    ],
+  },
+] as const;
+
+function SectionHeading({ kicker, title, intro }: { kicker?: string; title: string; intro?: string }) {
+  return (
+    <div className="mx-auto max-w-3xl text-center">
+      {kicker ? (
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#1d4ed8]">{kicker}</p>
+      ) : null}
+      <h2 className={`font-heading text-2xl font-bold tracking-tight text-[#0f172a] md:text-3xl ${kicker ? "mt-2" : ""}`}>
+        {title}
+      </h2>
+      {intro ? <p className="mt-4 text-lg leading-relaxed text-slate-700">{intro}</p> : null}
+    </div>
+  );
+}
+
+function MissionCard({ title, text, icon: Icon }: { title: string; text: string; icon: LucideIcon }) {
+  return (
+    <article className="flex h-full flex-col rounded-xl border border-slate-200/90 bg-white p-6 shadow-sm ring-1 ring-black/[0.02]">
+      <div className="flex items-start gap-3">
+        <span
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8]"
+          aria-hidden
+        >
+          <Icon className="h-5 w-5" strokeWidth={2} />
+        </span>
+        <h3 className="pt-1 text-base font-bold text-[#0f172a] md:text-lg">{title}</h3>
+      </div>
+      <p className="mt-4 text-sm leading-relaxed text-slate-700 md:text-base">{text}</p>
+    </article>
+  );
+}
+
+export function PromoteursImmobiliersPage() {
+  return (
+    <main>
+      {/* Hero */}
+      <section className="px-6 pt-16 pb-14 md:pt-20 md:pb-16" style={{ scrollMarginTop: "6rem" }}>
+        <div className="mx-auto max-w-4xl text-center">
+          <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#1d4ed8]">Promoteurs immobiliers</p>
+          <h1 className="mt-3 text-balance text-3xl font-bold tracking-tight text-[#0f172a] md:text-4xl lg:text-[2.65rem] lg:leading-tight">
+            Assistant travaux pour promoteurs immobiliers
+          </h1>
+          <p className="mt-5 text-balance text-xl font-semibold leading-snug text-[#1e3a5f] md:text-2xl">
+            Un relais travaux pour vos opérations immobilières
+          </p>
+          <p className="mx-auto mt-6 max-w-3xl text-lg leading-relaxed text-slate-700">
+            BeWork accompagne les promoteurs immobiliers dans le suivi administratif, documentaire et opérationnel de
+            leurs chantiers, à distance ou avec un assistant travaux délégué sur site.
+          </p>
+          <p className="mx-auto mt-4 max-w-3xl text-base leading-relaxed text-slate-600">
+            Nous intervenons en appui de vos équipes travaux, de la maîtrise d’œuvre et des entreprises pour structurer
+            le suivi, fluidifier les échanges, documenter les points bloquants et renforcer la traçabilité de vos
+            opérations.
+          </p>
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
+            <CalendlyBookingLink
+              trackLocation="promoteurs-hero"
+              className="inline-flex min-h-[3rem] items-center justify-center rounded-lg bg-[#1d4ed8] px-6 text-base font-semibold text-white shadow-sm bework-cta-primary-glow hover:bg-[#1e40af]"
+            >
+              Demander un échange
+            </CalendlyBookingLink>
+            <Link
+              href="/assistants-administratifs-taches"
+              className="inline-flex min-h-[3rem] items-center justify-center rounded-lg border border-slate-200 bg-white px-6 text-base font-semibold text-slate-900 shadow-sm hover:bg-slate-50"
+            >
+              Découvrir nos missions
+            </Link>
+          </div>
+          <div className="mx-auto mt-10 max-w-3xl rounded-xl border border-slate-200/80 bg-white/90 px-5 py-4 shadow-sm">
+            <p className="text-sm font-semibold text-slate-800">Ce que nous prenons en charge</p>
+            <p className="mt-2 text-sm leading-relaxed text-slate-600">{TRUST_ITEMS.join(" · ")}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Problème */}
+      <section className="border-t border-slate-200/80 bg-white px-6 py-16 md:py-20">
+        <div className="mx-auto max-w-site">
+          <SectionHeading
+            title="Quand les opérations s’accumulent, le suivi devient chronophage"
+            intro="Entre les réunions de chantier, les relances d’entreprises, les documents manquants, les situations, les DOE, les réserves, les livraisons et les urgences terrain, les équipes de promotion immobilière perdent un temps précieux sur des tâches de suivi, de coordination et de traçabilité."
+          />
+          <p className="mx-auto mt-6 max-w-3xl text-center text-base leading-relaxed text-slate-700">
+            BeWork intervient pour structurer, suivre, relancer, documenter et remonter les informations utiles, sans se
+            substituer à la maîtrise d’œuvre ni aux responsabilités techniques des intervenants.
+          </p>
+        </div>
+      </section>
+
+      {/* Modes d'intervention */}
+      <section className="px-6 py-16 md:py-20">
+        <div className="mx-auto max-w-site">
+          <SectionHeading title="À distance, en hybride ou directement sur site" />
+          <div className="mt-12 grid gap-6 lg:grid-cols-3">
+            {INTERVENTION_MODES.map((mode) => {
+              const Icon = mode.icon;
+              return (
+                <article
+                  key={mode.title}
+                  className="flex h-full flex-col rounded-xl border border-slate-200 bg-white p-6 shadow-md shadow-slate-900/[0.04]"
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#1d4ed8] text-white"
+                      aria-hidden
+                    >
+                      <Icon className="h-5 w-5" strokeWidth={2.25} />
+                    </span>
+                    <h3 className="text-lg font-bold text-[#0f172a]">{mode.title}</h3>
+                  </div>
+                  <p className="mt-4 text-sm leading-relaxed text-slate-700 md:text-base">{mode.text}</p>
+                  <p className="mt-5 text-xs font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">Missions</p>
+                  <ul className="mt-3 flex flex-1 flex-col gap-2 text-sm text-slate-800">
+                    {mode.missions.map((m) => (
+                      <li key={m} className="flex gap-2">
+                        <span className="shrink-0 font-semibold text-[#1d4ed8]" aria-hidden>
+                          ✓
+                        </span>
+                        <span>{m}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Missions */}
+      <section className="border-t border-slate-200/80 bg-white px-6 py-16 md:py-20">
+        <div className="mx-auto max-w-site">
+          <SectionHeading title="Ce que BeWork peut prendre en charge pour un promoteur" />
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {MISSIONS.map((mission) => (
+              <MissionCard key={mission.title} {...mission} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Assistant sur site */}
+      <section className="px-6 py-16 md:py-20">
+        <div className="mx-auto max-w-site">
+          <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-start">
+            <div>
+              <SectionHeading title="Un assistant travaux délégué directement sur votre chantier" />
+              <p className="mt-6 text-base leading-relaxed text-slate-700 md:text-lg">
+                Pour les promoteurs qui souhaitent renforcer leur présence terrain sans recruter immédiatement, BeWork
+                peut déléguer un assistant travaux sur site. Il intervient comme relais opérationnel pour observer,
+                documenter, suivre les points en attente et transmettre les informations aux équipes du promoteur.
+              </p>
+              <div className="mt-6 rounded-xl border border-amber-200/80 bg-amber-50/60 p-5">
+                <p className="text-sm leading-relaxed text-slate-800 md:text-base">
+                  <strong>À préciser :</strong> son rôle est d’apporter de la visibilité, de la méthode et de la
+                  traçabilité. Il ne prend pas la direction technique du chantier et ne remplace pas les intervenants
+                  désignés.
+                </p>
+              </div>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+              <p className="text-sm font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">Missions terrain</p>
+              <ul className="mt-4 grid gap-2.5 sm:grid-cols-2">
+                {ONSITE_MISSIONS.map((item) => (
+                  <li key={item} className="flex gap-2 text-sm leading-snug text-slate-800">
+                    <span className="shrink-0 font-semibold text-[#1d4ed8]" aria-hidden>
+                      ✓
+                    </span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Bénéfices */}
+      <section className="border-t border-slate-200/80 bg-[#f1f5f9]/50 px-6 py-16 md:py-20">
+        <div className="mx-auto max-w-site">
+          <SectionHeading title="Pourquoi les promoteurs utilisent BeWork" />
+          <ul className="mx-auto mt-10 grid max-w-4xl gap-3 sm:grid-cols-2">
+            {BENEFITS.map((benefit) => (
+              <li
+                key={benefit}
+                className="flex items-start gap-3 rounded-lg border border-slate-200/70 bg-white px-4 py-3.5 text-sm text-slate-800 shadow-sm md:text-base"
+              >
+                <span className="mt-0.5 shrink-0 font-bold text-[#1d4ed8]" aria-hidden>
+                  ✓
+                </span>
+                <span>{benefit}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* Positionnement / protection */}
+      <section className="px-6 py-16 md:py-20">
+        <div className="mx-auto max-w-3xl">
+          <div className="rounded-2xl border-2 border-[#1e3a5f]/20 bg-white p-8 shadow-sm md:p-10">
+            <div className="flex items-start gap-4">
+              <span
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#1e3a5f] text-white"
+                aria-hidden
+              >
+                <ShieldCheck className="h-6 w-6" strokeWidth={2.25} />
+              </span>
+              <div>
+                <h2 className="font-heading text-xl font-bold text-[#0f172a] md:text-2xl">
+                  Un appui opérationnel, pas une substitution aux acteurs du chantier
+                </h2>
+                <p className="mt-4 text-base leading-relaxed text-slate-700">
+                  BeWork intervient en support des équipes du promoteur, de la maîtrise d’œuvre, des entreprises et des
+                  intervenants chantier. Nous aidons à organiser, suivre, relancer, documenter, produire des supports de
+                  pilotage et remonter les informations terrain.
+                </p>
+                <p className="mt-4 text-base leading-relaxed text-slate-700">
+                  L’assistant travaux BeWork, qu’il intervienne à distance ou sur site, ne se substitue pas au maître
+                  d’œuvre, au bureau de contrôle, au coordonnateur SPS, à l’OPC, aux entreprises ou aux responsables
+                  techniques désignés sur l’opération. Les responsabilités techniques, réglementaires, contractuelles et
+                  décisionnelles restent portées par les acteurs compétents.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Cas d'usage */}
+      <section className="border-t border-slate-200/80 bg-white px-6 py-16 md:py-20">
+        <div className="mx-auto max-w-site">
+          <SectionHeading title="Exemples d’interventions" />
+          <ul className="mx-auto mt-10 grid max-w-4xl gap-3 sm:grid-cols-2">
+            {USE_CASES.map((item) => (
+              <li key={item} className="flex gap-3 rounded-lg border border-slate-100 bg-slate-50/80 px-4 py-3.5 text-sm text-slate-800 md:text-base">
+                <span className="shrink-0 text-[#1d4ed8]" aria-hidden>
+                  →
+                </span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* Offres */}
+      <section className="px-6 py-16 md:py-20">
+        <div className="mx-auto max-w-site">
+          <SectionHeading
+            title="Une assistance flexible selon vos opérations"
+            intro="BeWork peut intervenir ponctuellement sur une opération, en renfort sur une phase critique ou de manière récurrente pour accompagner plusieurs chantiers. Nos interventions peuvent être 100 % à distance, hybrides ou inclure un assistant travaux délégué sur site."
+          />
+          <div className="mt-12 grid gap-6 lg:grid-cols-3">
+            {OFFERS.map((offer) => (
+              <article
+                key={offer.title}
+                className="flex h-full flex-col rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+              >
+                <h3 className="text-lg font-bold text-[#1d4ed8]">{offer.title}</h3>
+                <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-700 md:text-base">{offer.text}</p>
+                <p className="mt-5 text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Idéal pour</p>
+                <ul className="mt-2 flex flex-wrap gap-2">
+                  {offer.ideal.map((tag) => (
+                    <li
+                      key={tag}
+                      className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700"
+                    >
+                      {tag}
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            ))}
+          </div>
+          <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-slate-600">
+            Voir les{" "}
+            <Link href="/tarifs" className="font-semibold text-[#1d4ed8] hover:underline">
+              tarifs BeWork
+            </Link>{" "}
+            et notre{" "}
+            <Link href="/notre-facon-de-travailler" className="font-semibold text-[#1d4ed8] hover:underline">
+              méthode de travail
+            </Link>
+            .
+          </p>
+        </div>
+      </section>
+
+      {/* CTA final */}
+      <section className="border-t border-slate-200/80 bg-[#1e3a5f] px-6 py-16 text-white md:py-20">
+        <div className="mx-auto max-w-3xl text-center">
+          <h2 className="font-heading text-2xl font-bold tracking-tight md:text-3xl">
+            Vous gérez plusieurs opérations immobilières ? BeWork peut vous faire gagner du temps.
+          </h2>
+          <p className="mt-5 text-lg leading-relaxed text-blue-100">
+            Parlons de vos opérations, de vos points bloquants et du niveau d’appui dont vous avez besoin : suivi à
+            distance, renfort hybride ou assistant travaux sur site.
+          </p>
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <CalendlyBookingLink
+              trackLocation="promoteurs-cta-final"
+              className="inline-flex min-h-[3rem] items-center justify-center rounded-lg bg-white px-6 text-base font-semibold text-[#1e3a5f] shadow-sm hover:bg-slate-100"
+            >
+              Demander un échange
+            </CalendlyBookingLink>
+            <Link
+              href="/contact"
+              className="inline-flex min-h-[3rem] items-center justify-center rounded-lg border border-white/30 px-6 text-base font-semibold text-white hover:bg-white/10"
+            >
+              Nous écrire
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Maillage interne */}
+      <section className="px-6 py-14">
+        <div className="mx-auto max-w-site">
+          <SeoInternalLinks path={PAGE_PATH} />
+        </div>
+      </section>
+    </main>
+  );
+}

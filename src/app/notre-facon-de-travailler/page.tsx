@@ -388,6 +388,12 @@ export default function NotreFaconDeTravaillerPage() {
             >
               Voir les missions
             </Link>
+            <Link
+              href="/promoteurs-immobiliers"
+              className="inline-flex justify-center rounded-lg border border-slate-200 bg-white px-6 py-3 font-semibold text-slate-900 transition hover:bg-slate-50"
+            >
+              Promoteurs immobiliers
+            </Link>
           </div>
         </div>
 

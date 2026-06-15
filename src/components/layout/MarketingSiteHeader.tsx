@@ -329,6 +329,9 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             <Link href="/#process-bework" className={`${NAV_LINK} whitespace-nowrap`}>
               Process BeWork
             </Link>
+            <Link href="/promoteurs-immobiliers" className={`${NAV_LINK} whitespace-nowrap`}>
+              Promoteurs
+            </Link>
             <Link
               href="/tarifs"
               className={`${NAV_LINK} whitespace-nowrap`}
@@ -511,6 +514,13 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 onClick={() => setMobileOpen(false)}
               >
                 Process BeWork
+              </Link>
+              <Link
+                href="/promoteurs-immobiliers"
+                className="rounded-lg px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50"
+                onClick={() => setMobileOpen(false)}
+              >
+                Promoteurs
               </Link>
               <Link
                 href="/tarifs"

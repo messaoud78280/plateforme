@@ -11,6 +11,7 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     },
     { href: "/reponse-appel-offres-btp", label: "Réponse appels d'offres BTP" },
     { href: "/gestion-marche-public-btp", label: "Gestion marché public" },
+    { href: "/promoteurs-immobiliers", label: "Promoteurs immobiliers" },
     { href: "/facturation-chorus-pro-btp", label: "Chorus Pro BTP" },
     { href: "/tarifs", label: "Tarifs assistant travaux BTP" },
     { href: "/services/assistant-travaux", label: "Assistant travaux augmenté par l’IA" },
@@ -54,6 +55,7 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/services/assistant-travaux", label: "Assistant travaux" },
   ],
   "/services": [
+    { href: "/promoteurs-immobiliers", label: "Promoteurs immobiliers" },
     { href: "/services/assistant-travaux", label: "Assistant travaux BTP" },
     { href: "/services/compte-rendu-chantier", label: "Comptes rendus chantier" },
     { href: "/services/analyse-dce-btp", label: "Analyse DCE" },
@@ -118,6 +120,7 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
   "/notre-facon-de-travailler": [
     { href: "/tarifs", label: "Tarifs assistant travaux BTP" },
     { href: "/assistants-administratifs-taches", label: "Missions déléguables" },
+    { href: "/promoteurs-immobiliers", label: "Promoteurs immobiliers" },
     { href: "/services", label: "Tous les services" },
     { href: "/contact", label: "Démarrer un échange" },
     { href: "/faq", label: "FAQ" },
@@ -421,6 +424,16 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/services/externalisation-administrative-btp", label: "Externalisation administrative" },
     { href: "/tarifs", label: "Tarifs" },
     { href: "/contact", label: "Confier un dossier" },
+  ],
+  "/promoteurs-immobiliers": [
+    { href: "/assistants-administratifs-taches", label: "Catalogue des missions" },
+    { href: "/services/compte-rendu-chantier", label: "Comptes rendus chantier" },
+    { href: "/services/doe-btp", label: "DOE BTP" },
+    { href: "/ressources/pv-levee-reserves-btp", label: "PV levée de réserves" },
+    { href: "/ressources/compte-rendu-chantier", label: "Guide compte rendu chantier" },
+    { href: "/notre-facon-de-travailler", label: "Notre méthode BeWork" },
+    { href: "/tarifs", label: "Tarifs" },
+    { href: "/contact", label: "Demander un échange" },
   ],
   "/assistant-travaux-france": [
     { href: "/assistant-travaux-paris", label: "Paris & Île-de-France" },

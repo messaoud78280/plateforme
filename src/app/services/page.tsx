@@ -81,7 +81,11 @@ export default function ServicesHubPage() {
           </p>
           <p className="mt-4 text-base leading-relaxed text-slate-600">
             <span className="font-semibold text-slate-800">En résumé :</span> assistants travaux augmentés par l’IA pour structurer le suivi ; vous gardez la
-            validation sur tout ce qui engage.
+            validation sur tout ce qui engage.{" "}
+            <Link href="/promoteurs-immobiliers" className="font-semibold text-[#1d4ed8] hover:underline">
+              Promoteurs immobiliers
+            </Link>{" "}
+            : suivi documentaire, relances entreprises, réserves, DOE et assistant travaux sur site.
           </p>
 
           <ul className="mt-12 grid gap-4 sm:grid-cols-2">

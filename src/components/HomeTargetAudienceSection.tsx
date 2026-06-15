@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import Link from "next/link";
 import { Building2, HardHat, Landmark, Wrench } from "lucide-react";
 
 const TARGETS: {
@@ -6,6 +7,8 @@ const TARGETS: {
   icon: LucideIcon;
   bullets: string[];
   stripe: string;
+  href?: string;
+  linkLabel?: string;
 }[] = [
   {
     title: "Entreprises générales & PME BTP",
@@ -46,6 +49,8 @@ const TARGETS: {
       "Traçabilité documentaire et délais de validation",
     ],
     stripe: "from-[#2563eb] via-[#3b82f6] to-[#60a5fa]",
+    href: "/promoteurs-immobiliers",
+    linkLabel: "Promoteurs immobiliers →",
   },
 ];
 
@@ -115,6 +120,14 @@ export function HomeTargetAudienceSection() {
                       </li>
                     ))}
                   </ul>
+                  {target.href && target.linkLabel ? (
+                    <Link
+                      href={target.href}
+                      className="mt-5 inline-flex text-sm font-semibold text-[#1d4ed8] hover:underline"
+                    >
+                      {target.linkLabel}
+                    </Link>
+                  ) : null}
                 </div>
               </article>
             );

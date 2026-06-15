@@ -69,6 +69,7 @@ export const SEO_AI_PRIORITY_PATHS = [
   "/assistants-administratifs-taches#reponses-appels-offres",
   "/reponse-appel-offres-btp",
   "/gestion-marche-public-btp",
+  "/promoteurs-immobiliers",
   "/facturation-chorus-pro-btp",
   "/tarifs",
   "/faq",

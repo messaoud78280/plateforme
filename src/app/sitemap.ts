@@ -42,6 +42,7 @@ const SEO_SERVICE_LANDING_PAGES = [
   "/reponse-appel-offres-btp",
   "/facturation-chorus-pro-btp",
   "/gestion-marche-public-btp",
+  "/promoteurs-immobiliers",
 ] as const;
 
 const SERVICE_PAGES_SITEMAP: MetadataRoute.Sitemap = [

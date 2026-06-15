@@ -277,6 +277,29 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
       "assistant travaux",
     ],
   },
+  "/promoteurs-immobiliers": {
+    title: "Assistant travaux pour promoteurs immobiliers | BeWork",
+    description: metaDescriptionFrancophonie(
+      "BeWork accompagne les promoteurs immobiliers dans le suivi administratif, documentaire et opérationnel de leurs chantiers : relances entreprises, comptes rendus, DOE, réserves, reporting et assistant travaux sur site",
+    ),
+    keywords: [
+      "promoteur immobilier",
+      "suivi chantier promoteur",
+      "assistant travaux",
+      "assistant travaux sur site",
+      "relais chantier",
+      "suivi documentaire chantier",
+      "relance entreprises chantier",
+      "suivi DOE",
+      "suivi réserves",
+      "reporting chantier",
+      "opération immobilière",
+      "livraison logements",
+      "suivi OPR",
+      "présence chantier",
+      "coordination documentaire chantier",
+    ],
+  },
   "/assistant-travaux-france": {
     title: "Assistant travaux France : relais bureau-chantier BTP | BeWork",
     description: metaDescriptionFrancophonie(

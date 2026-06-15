@@ -122,7 +122,7 @@ ${line("Notre façon de travailler", "/notre-facon-de-travailler", "Process, val
 ${line("Réponse aux appels d'offres BTP", "/reponse-appel-offres-btp", "Assistance technique : analyse DCE, aide au chiffrage, mémoire technique, DPGF, dépôt plateforme.")}
 ${line("Réponses AO sur page missions", "/assistants-administratifs-taches#reponses-appels-offres", "Section intégrée : contrôle DCE, conformité, dépôt électronique.")}
 ${line("Facturation Chorus Pro BTP", "/facturation-chorus-pro-btp", "Situations mensuelles, dépôt, suivi paiement et relances.")}
-${line("Gestion administrative marché public", "/gestion-marche-public-btp", "Landing exécution après attribution — renvoie vers le détail missions.")}
+${line("Exécution marché public BTP", "/gestion-marche-public-btp", "Assistance technique et administrative après attribution : Chorus Pro, réserves, DOE — renvoie vers le détail missions.")}
 ${line("Promoteurs immobiliers", "/promoteurs-immobiliers", "Suivi administratif, documentaire et opérationnel pour promoteurs : relances, DOE, réserves, reporting et assistant travaux sur site.")}
 ${line("Marchés publics & exécution (7 blocs)", "/assistants-administratifs-taches#marches-publics-accords-cadres", "Démarrage marché, documents d'exécution, milieu occupé, amiante SS4, Chorus Pro, anti-pénalités, réserves, DOE.")}
 

@@ -14,7 +14,7 @@ export default function Page() {
   const faq = [
     {
       q: "BeWork peut-il aider une entreprise déjà titulaire d’un marché public ?",
-      a: "Oui : suivi administratif après attribution en 7 blocs — démarrage, documents d’exécution, milieu occupé, amiante SS4, Chorus Pro, réserves et DOE. Détail sur la page missions et la landing gestion marché public.",
+      a: "Oui : assistance technique et administrative après attribution en 7 blocs — démarrage, documents d’exécution, milieu occupé, amiante SS4, Chorus Pro, réserves et DOE. Détail sur la page missions et cette landing.",
     },
     {
       q: "BeWork peut-il suivre les bons de commande d’un accord-cadre ?",
@@ -22,7 +22,7 @@ export default function Page() {
     },
     {
       q: "Quelle différence avec un logiciel de gestion chantier ?",
-      a: "Un logiciel stocke et planifie ; BeWork produit et suit les livrables administratifs (pièces marché, relances, dossiers) avec une validation humaine avant envoi.",
+      a: "Un logiciel stocke et planifie ; BeWork produit et suit les livrables techniques et documentaires (pièces marché, situations, relances, DOE) avec validation humaine avant envoi.",
     },
     {
       q: "BeWork gère-t-il la sous-traitance marché public ?",
@@ -32,27 +32,28 @@ export default function Page() {
 
   const faqLd = buildFaqPageJsonLd(faq, PAGE_URL);
   const serviceLd = buildLandingServiceJsonLd({
-    name: "Gestion administrative de marché public BTP",
+    name: "Exécution marché public BTP — assistance technique et administrative",
     description:
-      "Exécution marché public après attribution : 7 blocs BeWork (démarrage, documents, Chorus Pro, anti-pénalités, DOE).",
+      "Assistance technique et administrative après attribution : documents d'exécution, situations Chorus Pro, anti-pénalités, réserves et DOE.",
     pageUrl: PAGE_URL,
-    serviceType: "Gestion marché public BTP",
+    serviceType: "Assistance technique exécution marché public BTP",
   });
 
   return (
     <SeoLandingPage
-      description="Gestion administrative de marché public BTP après attribution : situations, Chorus Pro, DOE, avenants et suivi documentaire."
+      description="Assistance technique et administrative après attribution de marché public BTP : situations, Chorus Pro, réserves, DOE et suivi documentaire."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
-        { name: "Gestion marché public BTP", href: PAGE_PATH },
+        { name: "Exécution marché public BTP", href: PAGE_PATH },
       ]}
-      h1="Gestion administrative de marché public BTP après attribution"
+      h1="Exécution marché public BTP : sécuriser le suivi après attribution"
       intro={
         <>
-          Gagner un <strong>marché public travaux</strong> n&apos;est que le début : situations,{" "}
-          <strong>facturation Chorus Pro</strong>, avenants, réserves, <strong>DOE BTP</strong> et relances
-          administratives. BeWork tient le fil du <strong>suivi administratif marché public</strong> pendant que vous
-          exécutez le chantier.
+          Gagner un <strong>marché public travaux</strong> n&apos;est que le début : documents d&apos;exécution,{" "}
+          <strong>situations de travaux</strong>, <strong>facturation Chorus Pro</strong>, réserves,{" "}
+          <strong>DOE BTP</strong> et relances MOE/MOA. BeWork structure l&apos;
+          <strong>assistance technique et administrative</strong> de l&apos;exécution pendant que vous tenez le
+          chantier — validation finale chez vous.
         </>
       }
     >
@@ -61,10 +62,11 @@ export default function Page() {
 
       <SeoEnResumeBlock>
         <p>
-          <strong>Gestion administrative de marché public</strong> : tout ce qui entoure l&apos;exécution contractuelle
-          hors terrain — démarrage marché, documents d&apos;exécution, facturation, pièces obligatoires, délais CCAP,
-          tableau anti-pénalités, DOE et traçabilité pour la réception. BeWork ne fait pas les travaux : BeWork sécurise
-          tout ce qui permet aux travaux d&apos;être payés, réceptionnés et protégés contre les pénalités.
+          <strong>Exécution de marché public BTP</strong> : tout ce qui entoure l&apos;exécution contractuelle hors
+          terrain — démarrage marché, documents d&apos;exécution et visas, facturation Chorus Pro, pièces obligatoires,
+          tableau anti-pénalités, réserves et DOE pour la réception. BeWork ne fait pas les travaux : BeWork sécurise
+          le suivi documentaire et administratif pour que le chantier soit payé, réceptionné et protégé contre les
+          pénalités.
         </p>
       </SeoEnResumeBlock>
 
@@ -134,8 +136,8 @@ export default function Page() {
 
       <h2>Pourquoi BeWork ?</h2>
       <p>
-        Spécialisation administratif BTP, pas de remplacement du conducteur de travaux, process cadré. Avant attribution,
-        voir{" "}
+        Spécialisation BTP terrain et administrative, pas de remplacement du conducteur de travaux, process cadré et
+        validation avant envoi. Avant attribution, voir{" "}
         <Link href="/reponse-appel-offres-btp" className="text-[#1d4ed8] hover:underline">
           réponse aux appels d&apos;offres
         </Link>{" "}

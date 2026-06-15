@@ -269,17 +269,19 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
     ],
   },
   "/gestion-marche-public-btp": {
-    title: "Gestion administrative de marché public BTP après attribution | BeWork",
+    title: "Exécution marché public BTP : Chorus Pro, réserves et DOE | BeWork",
     description: metaDescriptionFrancophonie(
-      "Exécution marché public BTP : démarrage administratif, documents d'exécution, Chorus Pro, anti-pénalités, réserves et DOE au fil de l'eau",
+      "Assistance technique et administrative après attribution : documents d'exécution, situations, Chorus Pro, anti-pénalités, réserves et DOE au fil de l'eau",
     ),
     keywords: [
+      "exécution marché public BTP",
+      "assistance technique marché public",
       "gestion marché public BTP",
       "suivi administratif marché public",
-      "gestion administrative marché public BTP",
-      "accord-cadre travaux",
+      "facturation Chorus Pro travaux",
       "DOE marché public BTP",
-      "assistant travaux",
+      "suivi réserves chantier",
+      "assistant travaux marché public",
     ],
   },
   "/promoteurs-immobiliers": {

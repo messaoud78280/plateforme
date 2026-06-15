@@ -190,13 +190,15 @@ export const BEWORK_TARIFS_TIER_PRICING_NOTE =
 export const BEWORK_MISSION_PONCTUELLE_PRICING_NOTE = BEWORK_TARIFS_TIER_PRICING_NOTE;
 
 export const BEWORK_REPOSITIONING_POINTS = [
-  "Moins d’oublis dans les dossiers",
-  "Des relances mieux suivies",
-  "Des documents mieux structurés",
-  "Des conducteurs de travaux moins saturés",
-  "Une meilleure traçabilité",
-  "Une supervision humaine avant transmission",
-  "Une validation finale qui reste chez l’entreprise",
+  "Dossiers chantier mieux structurés",
+  "Relances MOE, MOA et fournisseurs mieux suivies",
+  "Documents et preuves centralisés",
+  "Conducteurs de travaux moins saturés",
+  "Réserves suivies jusqu’à leur levée",
+  "DOE préparé au fil de l’eau",
+  "Facturation mieux anticipée",
+  "Supervision humaine avant transmission",
+  "Validation finale conservée par l’entreprise",
 ] as const;
 
 export const BEWORK_PRICING_CRITERIA = [

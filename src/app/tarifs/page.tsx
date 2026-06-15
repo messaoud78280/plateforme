@@ -149,11 +149,12 @@ export default function TarifsPage() {
         <section className="mx-auto mt-10 max-w-4xl md:mt-12" aria-labelledby="repositionnement-heading">
           <div className="rounded-2xl border border-slate-200/90 bg-white p-8 shadow-sm md:p-10">
             <h2 id="repositionnement-heading" className="text-center text-2xl font-bold text-[#0f172a] md:text-3xl">
-              Vous ne payez pas seulement du temps
+              Un relais bureau-chantier pour sécuriser vos dossiers
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-center text-base leading-relaxed text-slate-600 md:text-lg">
-              BeWork n&apos;est pas une assistance administrative low-cost. Vous achetez de la méthode, de la traçabilité, une
-              meilleure organisation documentaire et un relais bureau-chantier capable de soulager vos équipes travaux.
+              BeWork accompagne vos équipes dans le suivi administratif, documentaire et opérationnel de vos chantiers.
+              L&apos;objectif : mieux structurer vos dossiers, suivre les relances, centraliser les preuves, préparer les
+              situations, anticiper les réserves et sécuriser la facturation.
             </p>
             <ul className="mt-8 grid gap-3 sm:grid-cols-2" role="list">
               {BEWORK_REPOSITIONING_POINTS.map((point) => (

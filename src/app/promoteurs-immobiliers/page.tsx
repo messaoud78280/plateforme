@@ -41,7 +41,7 @@ export default function Page() {
     <div className="min-h-screen bg-[#f8fafc]">
       <PromoteursJsonLd />
       <MarketingSiteHeader plainBg />
-      <nav className="container-site px-6 pt-8" aria-label="Fil d’Ariane">
+      <nav className="container-site px-4 pt-6 sm:px-6 sm:pt-8" aria-label="Fil d’Ariane">
         <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-600">
           <li>
             <Link href="/" className="font-medium text-[#1d4ed8] hover:underline">

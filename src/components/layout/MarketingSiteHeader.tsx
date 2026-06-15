@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BeWorkLogo } from "@/components/BeWorkLogo";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
+import { MarketingDisclosure } from "@/components/marketing/MarketingDisclosure";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import { MarketingHeaderBlueprintDecor } from "@/components/layout/MarketingHeaderBlueprintDecor";
 
@@ -453,119 +454,116 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
         aria-hidden={!mobileOpen}
       >
         <div className="h-[calc(100dvh-7.875rem-env(safe-area-inset-top,0px))] overflow-y-auto pb-10 pt-4 sm:h-[calc(100dvh-8.4375rem-env(safe-area-inset-top,0px))] md:h-[calc(100dvh-9rem-env(safe-area-inset-top,0px))]">
-          <div className="container-site flex flex-col gap-6">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">
-                Nos solutions BTP
-              </p>
-              <ul className="mt-2 divide-y divide-slate-100 rounded-xl border border-slate-100">
-                {SOLUTION_MENU_ENTRIES.map((item) => (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className="flex items-start gap-3 px-3 py-3.5 transition hover:bg-[#f8fafc]"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      <span
-                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8]"
-                        aria-hidden
-                      >
-                        <SolutionNavIcon id={item.icon} className="h-5 w-5" />
-                      </span>
-                      <div className="flex min-w-0 flex-1 flex-col gap-1">
-                        <span className="text-base font-semibold leading-snug text-slate-900">{item.title}</span>
-                        <span className="text-sm leading-snug text-slate-600">{item.description}</span>
-                      </div>
-                      <ChevronRightThin className="h-5 w-5 shrink-0 self-center text-slate-400" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/#notre-expertise"
-                className="mt-3 inline-flex items-center gap-1.5 text-base font-semibold text-[#1d4ed8]"
-                onClick={() => setMobileOpen(false)}
-              >
-                Voir toutes nos solutions
-                <span aria-hidden>→</span>
-              </Link>
-            </div>
-
-            <div className="flex flex-col gap-2 rounded-xl border border-slate-100 bg-slate-50/80 p-4">
-              <p className="text-base font-semibold text-slate-900">Pourquoi nous ?</p>
-              <ul className="space-y-2 text-base text-slate-600">
-                {REASSURANCE.map((line) => (
-                  <li key={line}>• {line}</li>
-                ))}
-              </ul>
-              <CalendlyBookingLink
-                trackLocation="header-mobile-menu"
-                className="mt-2 inline-flex min-h-[3rem] justify-center rounded-xl bg-[#1d4ed8] px-4 py-3 text-base font-semibold text-white bework-cta-primary-glow hover:bg-[#1e40af]"
-                onClick={() => setMobileOpen(false)}
-              >
-                Nous contacter
-              </CalendlyBookingLink>
-            </div>
-
-            <nav className="flex flex-col gap-1 border-t border-slate-100 pt-4" aria-label="Navigation mobile">
-              <Link
-                href="/#process-bework"
-                className="rounded-lg px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50"
-                onClick={() => setMobileOpen(false)}
-              >
-                Process BeWork
-              </Link>
+          <div className="container-site flex flex-col gap-3">
+            {/* Liens rapides — visibles sans déplier */}
+            <div className="grid grid-cols-2 gap-2">
               <Link
                 href="/promoteurs-immobiliers"
-                className="rounded-lg px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50"
+                className="inline-flex min-h-[3rem] items-center justify-center rounded-xl border border-[#1d4ed8]/25 bg-[#eff6ff] px-3 text-center text-sm font-semibold text-[#1d4ed8] transition hover:bg-[#eff6ff]/80"
                 onClick={() => setMobileOpen(false)}
               >
                 Promoteurs
               </Link>
               <Link
                 href="/tarifs"
-                className="rounded-lg px-3 py-3 text-base font-semibold text-slate-800 hover:bg-slate-50"
+                className="inline-flex min-h-[3rem] items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-center text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
                 onClick={() => setMobileOpen(false)}
                 {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_TARIFS, "header-mobile-nav")}
               >
                 Tarifs
               </Link>
-              <p className="mt-3 px-3 text-xs font-bold uppercase tracking-[0.12em] text-[#1d4ed8]">
-                Ressources
-              </p>
+            </div>
+
+            <nav className="flex flex-col gap-2" aria-label="Navigation mobile">
+              <MarketingDisclosure title="Solutions BTP">
+                <ul className="divide-y divide-slate-100">
+                  {SOLUTION_MENU_ENTRIES.map((item) => (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        className="flex items-start gap-3 px-4 py-3.5 transition hover:bg-[#f8fafc] sm:px-5"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        <span
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8]"
+                          aria-hidden
+                        >
+                          <SolutionNavIcon id={item.icon} className="h-[17px] w-[17px]" />
+                        </span>
+                        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                          <span className="text-sm font-semibold leading-snug text-slate-900">{item.title}</span>
+                          <span className="text-xs leading-snug text-slate-600">{item.description}</span>
+                        </div>
+                        <ChevronRightThin className="h-4 w-4 shrink-0 self-center text-slate-400" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+                <div className="border-t border-slate-100 px-4 py-3 sm:px-5">
+                  <Link
+                    href="/#notre-expertise"
+                    className="inline-flex items-center gap-1 text-sm font-semibold text-[#1d4ed8]"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    Voir toutes nos solutions
+                    <span aria-hidden>→</span>
+                  </Link>
+                </div>
+              </MarketingDisclosure>
+
+              <MarketingDisclosure title="Ressources">
+                <div className="px-4 py-3 sm:px-5">
+                  <Link
+                    href="/ressources"
+                    className="inline-flex min-h-[2.75rem] w-full items-center justify-center rounded-lg border border-slate-200 bg-[#eff6ff]/50 text-sm font-semibold text-[#1d4ed8] transition hover:bg-[#eff6ff]"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    Vue d&apos;ensemble
+                  </Link>
+                </div>
+                <ul className="divide-y divide-slate-100 border-t border-slate-100">
+                  {RESOURCE_MENU_ENTRIES.map((item, index) => (
+                    <li key={`mobile-${item.title}-${index}`}>
+                      <Link
+                        href={item.href}
+                        className="flex items-start gap-3 px-4 py-3.5 transition hover:bg-[#f8fafc] sm:px-5"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        <span
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8]"
+                          aria-hidden
+                        >
+                          <ResourceNavIcon id={item.icon} className="h-[17px] w-[17px]" />
+                        </span>
+                        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                          <span className="text-sm font-semibold leading-snug text-slate-900">{item.title}</span>
+                          <span className="text-xs leading-snug text-slate-600">{item.description}</span>
+                        </div>
+                        <ChevronRightThin className="h-4 w-4 shrink-0 self-center text-slate-400" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </MarketingDisclosure>
+
               <Link
-                href="/ressources"
-                className="mx-3 mt-2 inline-flex min-h-[3rem] items-center justify-center rounded-lg border border-slate-200 bg-[#eff6ff]/40 px-3 text-base font-semibold text-[#1d4ed8] transition hover:bg-[#eff6ff]"
+                href="/#process-bework"
+                className="flex min-h-[3rem] items-center rounded-xl border border-slate-200/90 bg-white px-4 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50 sm:px-5 sm:text-base"
                 onClick={() => setMobileOpen(false)}
               >
-                Vue d&apos;ensemble
+                Process BeWork
               </Link>
-              <ul className="mt-2 divide-y divide-slate-100 rounded-xl border border-slate-100">
-                {RESOURCE_MENU_ENTRIES.map((item, index) => (
-                  <li key={`mobile-${item.title}-${index}`}>
-                    <Link
-                      href={item.href}
-                      className="flex items-start gap-3 px-3 py-3.5 transition hover:bg-[#f8fafc]"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      <span
-                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8]"
-                        aria-hidden
-                      >
-                        <ResourceNavIcon id={item.icon} className="h-[18px] w-[18px]" />
-                      </span>
-                      <div className="flex min-w-0 flex-1 flex-col gap-1">
-                        <span className="text-base font-semibold leading-snug text-slate-900">{item.title}</span>
-                        <span className="text-sm leading-snug text-slate-600">{item.description}</span>
-                      </div>
-                      <ChevronRightThin className="h-5 w-5 shrink-0 self-center text-slate-400" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
             </nav>
 
-            <div className="flex flex-col gap-2.5 pt-4">
+            <MarketingDisclosure title="Pourquoi BeWork ?" className="border-slate-100 bg-slate-50/80">
+              <div className="space-y-2 px-4 py-3 text-sm text-slate-600 sm:px-5">
+                {REASSURANCE.map((line) => (
+                  <p key={line}>• {line}</p>
+                ))}
+              </div>
+            </MarketingDisclosure>
+
+            <div className="flex flex-col gap-2.5 pt-1">
               <Link
                 href="/connexion"
                 className="inline-flex min-h-[3rem] items-center justify-center gap-2 rounded-[10px] border border-slate-200 bg-white px-4 py-3 text-base font-medium text-black hover:bg-slate-50"

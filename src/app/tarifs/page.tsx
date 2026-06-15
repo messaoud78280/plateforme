@@ -61,11 +61,14 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-const WHY_NOT_CHEAPEST =
-  "BeWork n’a pas vocation à être l’option la moins chère du marché. Notre rôle est d’apporter un relais fiable aux entreprises du BTP qui perdent du temps sur les devis, relances, dossiers chantier, pièces marché, DOE, PPSPS ou comptes rendus. Nos offres sont pensées pour rester accessibles tout en conservant un niveau de méthode, de suivi et de supervision adapté aux enjeux du BTP.";
+const TARIFS_VALUE_HEADING =
+  "Une assistance travaux structurée, pas une simple prestation de saisie";
 
-const WHY_NOT_CHEAPEST_COMPARE =
-  "Comparer BeWork à une simple assistance administrative revient à comparer un appui travaux structuré avec une prestation de saisie. Notre valeur se situe dans le cadrage, la méthode, la traçabilité et la capacité à soulager vos équipes opérationnelles.";
+const TARIFS_VALUE_PARAGRAPHS = [
+  "BeWork accompagne les entreprises du BTP dans le suivi administratif et documentaire de leurs chantiers, appels d’offres et marchés publics.",
+  "Notre rôle : aider vos équipes à garder des dossiers propres, des relances suivies, des preuves centralisées, des situations préparées et des délais mieux maîtrisés.",
+  "Vous gardez la décision finale. BeWork apporte la méthode, la rigueur et la continuité de suivi.",
+] as const;
 
 const INTERNAL_LINKS = [
   { href: "/assistants-administratifs-taches", label: "Missions & marchés publics" },
@@ -236,13 +239,16 @@ export default function TarifsPage() {
           </div>
         </section>
 
-        {/* Pourquoi pas les moins chers */}
+        {/* Positionnement tarifs */}
         <section className="mx-auto mt-14 max-w-3xl text-center" aria-labelledby="premium-heading">
           <h2 id="premium-heading" className="text-2xl font-bold text-[#0f172a] md:text-3xl">
-            Pourquoi nos tarifs ne sont pas les moins chers
+            {TARIFS_VALUE_HEADING}
           </h2>
-          <p className="mt-4 text-base leading-relaxed text-slate-600 md:text-lg">{WHY_NOT_CHEAPEST}</p>
-          <p className="mt-4 text-base leading-relaxed text-slate-600 md:text-lg">{WHY_NOT_CHEAPEST_COMPARE}</p>
+          {TARIFS_VALUE_PARAGRAPHS.map((paragraph) => (
+            <p key={paragraph} className="mt-4 text-base leading-relaxed text-slate-600 md:text-lg">
+              {paragraph}
+            </p>
+          ))}
         </section>
 
         {/* Processus */}

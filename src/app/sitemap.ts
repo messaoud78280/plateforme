@@ -98,6 +98,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     entry("/avenant-chantier", 0.75),
     entry("/suivi-fournisseurs-chantier", 0.75),
     entry("/admin-btp-sans-recruter", 0.85),
+    entry("/comparatif-assistance-travaux-btp", 0.84),
     ...BTP_PAIN_SEO_PAGES,
     ...GEO_EXTERNALISATION_ADMIN_BT_PAGES,
     ...GEO_ASSISTANT_TRAVAUX_PAGES,

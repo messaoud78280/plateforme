@@ -115,11 +115,23 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
     keywords: ["suivi fournisseurs chantier", "commandes chantier BTP", "logistique chantier"],
   },
   "/admin-btp-sans-recruter": {
-    title: "Admin BTP sans recruter : relais travaux BeWork",
+    title: "Admin BTP sans recruter : assistance travaux BeWork",
     description: metaDescriptionFrancophonie(
       "Tenez devis, relances et dossiers chantier sans embauche. Assistants travaux IA, forfaits HT, supervision depuis la France",
     ),
-    keywords: ["admin BTP sans recruter", "externalisation administrative BTP", "relais travaux"],
+    keywords: ["admin BTP sans recruter", "assistance travaux BTP", "externalisation chantier"],
+  },
+  "/comparatif-assistance-travaux-btp": {
+    title: "Comparatif : recruter, externaliser ou BeWork pour le BTP",
+    description: metaDescriptionFrancophonie(
+      "Recruter en interne, prestataire administratif ou BeWork ? Comparatif périmètre BTP, DCE, marchés publics, coût et validation",
+    ),
+    keywords: [
+      "comparatif assistant travaux BTP",
+      "recruter ou externaliser BTP",
+      "assistance travaux BTP",
+      "alternative recrutement conducteur travaux",
+    ],
   },
   "/assistant-administratif-btp": {
     title: "Assistant travaux BTP : assistance technique et administrative | BeWork",

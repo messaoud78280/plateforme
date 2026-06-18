@@ -120,6 +120,11 @@ export default function Page() {
       <h2>Aller plus loin</h2>
       <ul>
         <li>
+          <Link href="/comparatif-assistance-travaux-btp" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
+            Comparatif recruter / externaliser / BeWork
+          </Link>
+        </li>
+        <li>
           <Link href="/tarifs" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
             Découvrir les forfaits
           </Link>

@@ -20,6 +20,7 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/notre-facon-de-travailler", label: "Notre méthode BeWork" },
   ],
   "/tarifs": [
+    { href: "/comparatif-assistance-travaux-btp", label: "Comparatif recruter / BeWork" },
     { href: "/services/assistant-travaux", label: "Assistant travaux externalisé BTP" },
     { href: "/services/conducteur-travaux-deborde", label: "Aide conducteur de travaux" },
     { href: "/services/analyse-dce-btp", label: "Analyse DCE BTP" },
@@ -101,6 +102,7 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/tarifs", label: "Tarifs" },
   ],
   "/admin-btp-sans-recruter": [
+    { href: "/comparatif-assistance-travaux-btp", label: "Comparatif recruter / BeWork" },
     { href: "/assistants-administratifs-taches", label: "Missions déléguables" },
     { href: "/externaliser-administratif", label: "Externaliser l'administratif" },
     { href: "/gestion-marche-public-btp", label: "Gestion marché public" },
@@ -176,6 +178,7 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/tarifs", label: "Tarifs" },
   ],
   "/cas-clients": [
+    { href: "/comparatif-assistance-travaux-btp", label: "Recruter ou BeWork ?" },
     { href: "/cas-clients/ccmi-martin-audit-devis", label: "Audit devis CCMI Martin" },
     { href: "/services/assistant-travaux", label: "Assistant travaux" },
     { href: "/tarifs", label: "Tarifs" },
@@ -498,6 +501,13 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/ressources/compte-rendu-chantier", label: "Compte rendu chantier" },
     { href: "/services/assistant-conducteur-de-travaux", label: "Assistant conducteur de travaux" },
     { href: "/chantier-mal-suivi", label: "Chantier mal suivi" },
+  ],
+  "/comparatif-assistance-travaux-btp": [
+    { href: "/tarifs", label: "Tarifs BeWork" },
+    { href: "/admin-btp-sans-recruter", label: "Sans recruter" },
+    { href: "/assistants-administratifs-taches", label: "Catalogue missions" },
+    { href: "/cas-clients", label: "Cas clients" },
+    { href: "/contact", label: "Demander un échange" },
   ],
 };
 

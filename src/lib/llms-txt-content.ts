@@ -111,6 +111,7 @@ ${line("Relance devis BTP", "/relance-devis-btp")}
 ${line("Devis en retard", "/devis-retard-btp")}
 ${line("Chantier mal suivi", "/chantier-mal-suivi")}
 ${line("Facture impayée BTP", "/facture-impayee-btp")}
+${line("Comparatif assistance travaux BTP", "/comparatif-assistance-travaux-btp", "Recruter, prestataire généraliste ou BeWork — tableau décision.")}
 ${line("Admin BTP sans recruter", "/admin-btp-sans-recruter")}
 
 ## Méthode & confiance

@@ -54,10 +54,16 @@ export default function CasClientsPage() {
             BeWork apporte une assistance technique et administrative encadrée : relances, dossiers, pièces marché et
             validations — pour sécuriser vos opportunités et votre chiffre d’affaires.
           </p>
-          <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+          <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <CalendlyBookingLink className="inline-flex justify-center rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white hover:bg-[#1e40af]">
               Demander un rendez-vous découverte
             </CalendlyBookingLink>
+            <Link
+              href="/comparatif-assistance-travaux-btp"
+              className="inline-flex justify-center rounded-lg border-2 border-slate-300 px-6 py-3 font-semibold text-slate-800 hover:bg-white"
+            >
+              Recruter ou BeWork ?
+            </Link>
             <Link
               href="/tarifs"
               className="inline-flex justify-center rounded-lg border-2 border-[#1d4ed8] px-6 py-3 font-semibold text-[#1d4ed8] hover:bg-white"
@@ -67,7 +73,10 @@ export default function CasClientsPage() {
           </div>
         </header>
 
-        <section className="mx-auto mt-14 grid max-w-5xl gap-6 md:grid-cols-2 lg:grid-cols-3" aria-label="Cas clients">
+        <p className="mt-8 text-center text-sm text-slate-600">
+          Exemples anonymisés illustrant des situations types — périmètres et résultats ajustés au cadrage de chaque mission.
+        </p>
+        <section className="mx-auto mt-10 grid max-w-5xl gap-6 md:grid-cols-2 lg:grid-cols-3" aria-label="Cas clients">
           <CasClientFeaturedCard case={CCMI_MARTIN_CASE} />
           {CAS_CLIENT_SIMPLE_CASES.map((c) => (
             <CasClientSimpleCard key={c.title} case={c} />

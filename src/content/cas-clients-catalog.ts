@@ -3,8 +3,14 @@
 export type CasClientSimpleCase = {
   kind: "simple";
   title: string;
+  /** Profil entreprise (anonymisé) */
+  profil?: string;
+  /** Contexte chantier / marché */
+  contexte?: string;
   before: string;
   after: string;
+  /** Périmètre BeWork */
+  mission?: string;
   kpis: readonly string[];
 };
 
@@ -24,24 +30,33 @@ export type CasClientFeaturedCase = {
 export const CAS_CLIENT_SIMPLE_CASES: CasClientSimpleCase[] = [
   {
     kind: "simple",
-    title: "Relances devis : plus de réponses, moins d’oubli",
-    before: "Devis envoyés mais peu relancés, décisions client floues.",
-    after: "Rythme de relance + statuts + prochaines étapes, réponses plus rapides.",
-    kpis: ["Suivi J+2/J+7/J+14", "Traçabilité des réponses", "Décisions client clarifiées"],
+    title: "Appel d'offres : DCE analysé avant le week-end",
+    profil: "PME second œuvre — 18 salariés, Île-de-France",
+    contexte: "Lot peinture en marché public, dépôt dans 8 jours ouvrés, CT mobilisé sur deux réceptions.",
+    before: "DCE reçu tard, pas de synthèse partagée, risque de lancer le chiffrage sans lecture CCAP complète.",
+    mission: "Tri des pièces, synthèse lots/risques, plan de mémoire technique et checklist dépôt.",
+    after: "Go/No-go cadré en interne, mémoire structuré, dépôt validé par le dirigeant — sans sacrifier les chantiers en cours.",
+    kpis: ["Synthèse DCE en 48 h", "Points pénalités CCAP repérés", "Checklist dépôt complète"],
   },
   {
     kind: "simple",
-    title: "Trésorerie : factures et impayés mieux pilotés",
-    before: "Facturation en retard, relances irrégulières, stress sur l’encaissement.",
-    after: "Calendrier de relance + preuves + reporting, trésorerie plus stable.",
-    kpis: ["Relances cadrées", "Pièces classées par chantier", "Reporting impayés"],
+    title: "Marché public : situations et DOE au fil de l'eau",
+    profil: "Entreprise menuiserie — titulaire accord-cadre multi-sites",
+    contexte: "Situations mensuelles Chorus Pro, relances MOE et DOE lot par lot sur 4 sites.",
+    before: "Factures rejetées faute de pièces, DOE repoussé en fin de marché, stress sur pénalités.",
+    mission: "Tableau de suivi marché, préparation situations, relances pièces, compilation DOE progressive.",
+    after: "Situations déposées à date, pièces manquantes tracées, DOE avancé avant la réception — validation CT sur l'avancement terrain.",
+    kpis: ["Calendrier situations tenu", "Relances MOE tracées", "DOE structuré par site"],
   },
   {
     kind: "simple",
-    title: "Chantier : dossier propre (situations, avenants, DT/DICT)",
-    before: "Pièces dispersées, délais qui glissent, relances faites au dernier moment.",
-    after: "Process simple : préparation, suivi, classement, validations au bon moment.",
-    kpis: ["Tableau de suivi", "Checklists pièces", "Validation des points sensibles"],
+    title: "Conducteur débordé : trois chantiers, un fil documentaire",
+    profil: "Conducteur de travaux — entreprise générale, 3 chantiers actifs",
+    contexte: "Relances fournisseurs, CR en retard, réserves ouvertes sur deux opérations.",
+    before: "Mails et relances repoussés chaque semaine, pièces dispersées, MOE relancé trop tard.",
+    mission: "CR à partir de notes terrain, relances fournisseurs/MOE, tableau réserves et prochaines actions.",
+    after: "Relances tenues, CR diffusés après validation, réserves suivies avec preuves — le CT garde le pilotage terrain.",
+    kpis: ["CR hebdo prêts à valider", "Relances avec statuts", "Réserves numérotées et suivies"],
   },
 ];
 

@@ -49,10 +49,23 @@ export function CasClientSimpleCard({ case: c }: SimpleProps) {
   return (
     <article className="rounded-2xl surface-metallic-light p-7">
       <h2 className="text-lg font-semibold text-black">{c.title}</h2>
+      {c.profil ? (
+        <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-[#1e3a5f]">{c.profil}</p>
+      ) : null}
+      {c.contexte ? (
+        <p className="mt-3 text-sm leading-relaxed text-slate-700">
+          <span className="font-semibold text-black">Contexte :</span> {c.contexte}
+        </p>
+      ) : null}
       <div className="mt-4 space-y-3 text-sm text-black">
         <p>
           <span className="font-semibold text-black">Avant :</span> {c.before}
         </p>
+        {c.mission ? (
+          <p>
+            <span className="font-semibold text-black">Mission BeWork :</span> {c.mission}
+          </p>
+        ) : null}
         <p>
           <span className="font-semibold text-black">Après :</span> {c.after}
         </p>

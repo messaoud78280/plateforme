@@ -145,5 +145,19 @@ ${SEO_AI_PRIORITY_PATHS.slice(0, 10)
 
 /** URLs à notifier via IndexNow après déploiement SEO majeur. */
 export function getIndexNowPriorityUrls(): string[] {
-  return SEO_AI_PRIORITY_PATHS.filter((p) => !p.includes("#")).map((p) => absoluteUrl(p));
+  const extraPaths = [
+    "/comparatif-assistance-travaux-btp",
+    "/admin-btp-sans-recruter",
+    "/cas-clients",
+    "/assistant-travaux-france",
+    "/assistant-travaux-paris",
+    "/reponse-appel-offres-btp",
+    "/gestion-marche-public-btp",
+    "/facturation-chorus-pro-btp",
+    "/blog/comment-repondre-appel-offres-btp",
+    "/blog/chorus-pro-facture-refusee-que-faire",
+    "/blog/eviter-rejet-offre-marche-public",
+  ] as const;
+  const paths = [...SEO_AI_PRIORITY_PATHS.filter((p) => !p.includes("#")), ...extraPaths];
+  return [...new Set(paths)].map((p) => absoluteUrl(p));
 }

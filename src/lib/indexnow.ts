@@ -3,7 +3,6 @@ import { SITE_URL } from "@/lib/site";
 const INDEXNOW_ENDPOINTS = [
   "https://api.indexnow.org/indexnow",
   "https://www.bing.com/indexnow",
-  "https://yandex.com/indexnow/indexnow",
 ] as const;
 
 export function getIndexNowKey(): string | null {

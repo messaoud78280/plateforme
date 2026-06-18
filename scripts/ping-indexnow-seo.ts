@@ -5,8 +5,10 @@
  */
 import { getIndexNowPriorityUrls } from "../src/lib/seo-ai-discovery";
 import { pingIndexNow } from "../src/lib/indexnow";
+import { loadScriptEnv } from "./load-script-env";
 
 async function main() {
+  loadScriptEnv();
   const urls = getIndexNowPriorityUrls();
   console.info(`IndexNow — ${urls.length} URL(s) prioritaires…`);
   const result = await pingIndexNow(urls);

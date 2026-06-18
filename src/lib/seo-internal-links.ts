@@ -386,6 +386,8 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/services/assistant-travaux", label: "Assistant travaux" },
   ],
   "/reponse-appel-offres-btp": [
+    { href: "/blog/comment-repondre-appel-offres-btp", label: "Guide réponse AO BTP" },
+    { href: "/blog/eviter-rejet-offre-marche-public", label: "Éviter le rejet d'offre" },
     { href: "/services/analyse-dce-btp", label: "Analyse DCE BTP" },
     { href: "/services/memoire-technique-btp", label: "Mémoire technique" },
     {
@@ -402,6 +404,8 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/faq", label: "FAQ appels d'offres" },
   ],
   "/facturation-chorus-pro-btp": [
+    { href: "/blog/chorus-pro-facture-refusee-que-faire", label: "Facture Chorus Pro refusée" },
+    { href: "/blog/chorus-pro-entreprises-btp", label: "Guide Chorus Pro BTP" },
     { href: "/situation-travaux-btp", label: "Situations de travaux" },
     {
       href: "/assistants-administratifs-taches#marches-publics-accords-cadres",

@@ -86,7 +86,7 @@ export function MarketingSiteFooter() {
               </span>
             </Link>
             <p className="mt-4 text-base leading-relaxed text-slate-400">
-              Assistants travaux BTP — relais bureau-chantier : devis, relances, DICT, dossiers chantier et pilotage administratif sans recruter.
+              Assistants travaux BTP — assistance technique et administrative : devis, relances, DICT, dossiers chantier et pilotage sans recruter.
             </p>
             <p className="mt-4 text-xs leading-relaxed text-slate-500">
               Société française — Pilotage supervisé depuis la France.

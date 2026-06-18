@@ -60,6 +60,31 @@ export const BLOG_ARTICLES_SEO: Record<string, BlogArticle> = {
           "Dépôt sur la bonne plateforme, dans le fuseau horaire indiqué",
         ],
       },
+      { type: "h2", content: "Étape 4 — Checklist avant dépôt" },
+      {
+        type: "p",
+        content:
+          "La veille du dépôt, repassez pièce par pièce : attestations à jour, DC1/DC2 signés, mémoire dans le bon format, prix cohérents avec le bordereau. Une relecture croisée CCTP ↔ mémoire ↔ DPGF évite la majorité des rejets administratifs.",
+      },
+      {
+        type: "table",
+        headers: ["Contrôle", "À vérifier"],
+        rows: [
+          ["Délai", "Date et heure limite sur la plateforme indiquée dans le RC"],
+          ["Pièces obligatoires", "Liste du RC cochée une par une"],
+          ["Offre financière", "Montants et unités alignés sur le bordereau"],
+          ["Mémoire technique", "Critères du RC traités dans l'ordre imposé"],
+          ["Preuve de dépôt", "Accusé de réception ou horodatage conservé"],
+        ],
+        caption: "Checklist terrain avant envoi — à adapter selon le RC",
+      },
+      {
+        type: "callout",
+        variant: "info",
+        title: "Offre rejetée ?",
+        content:
+          "Voir aussi /blog/eviter-rejet-offre-marche-public pour les causes fréquentes et la checklist anti-rejet.",
+      },
       {
         type: "callout",
         variant: "highlight",
@@ -297,6 +322,90 @@ export const BLOG_ARTICLES_SEO: Record<string, BlogArticle> = {
             question: "BeWork garantit-il qu'une offre ne sera pas rejetée ?",
             answer:
               "Non. BeWork réduit les oublis via checklists et relectures — la conformité finale et le dépôt restent sous votre responsabilité.",
+          },
+        ],
+      },
+    ],
+  }),
+
+  "chorus-pro-facture-refusee-que-faire": seoArticle({
+    title: "Chorus Pro : facture refusée, que faire ?",
+    description:
+      "Facture Chorus Pro refusée sur marché public BTP : lire le motif, corriger la situation ou la facture, redéposer et relancer sans bloquer le paiement.",
+    keywords: [
+      "Chorus Pro facture refusée",
+      "rejet facture marché public",
+      "Chorus Pro BTP",
+      "situation travaux rejetée",
+      "corriger facture Chorus Pro",
+    ],
+    publishedTime: "2026-06-02T14:00:00+02:00",
+    articleSection: "Administratif chantier",
+    body: [
+      {
+        type: "tldr",
+        points: [
+          "Un rejet Chorus Pro bloque le paiement : lisez le motif avant toute correction.",
+          "Les causes fréquentes : référence marché erronée, PJ manquante, montant incohérent avec la situation.",
+          "Corrigez, redéposez et tracez chaque version pour éviter les doublons.",
+          "Relancez l'acheteur public après le délai contractuel si le statut reste bloqué.",
+        ],
+      },
+      { type: "h2", content: "Étape 1 — Comprendre le motif de rejet" },
+      {
+        type: "p",
+        content:
+          "Dans Chorus Pro, ouvrez la facture ou la situation refusée et notez le code ou le libellé du rejet. Ne corrigez pas au hasard : un mauvais numéro d'engagement, une référence de bon de commande ou un SIRET acheteur incorrect suffisent à bloquer le flux.",
+      },
+      {
+        type: "h2",
+        content: "Causes fréquentes sur marchés travaux",
+      },
+      {
+        type: "ul",
+        items: [
+          "Référence marché, bon de commande ou engagement juridique incorrect",
+          "Situation de travaux non validée ou montant différent de la facture",
+          "Pièce jointe absente (situation signée, attachement, PV de réception partielle)",
+          "TVA ou code service erroné côté acheteur public",
+          "Facture déjà déposée en doublon sous un autre numéro",
+        ],
+      },
+      { type: "h2", content: "Étape 2 — Corriger et redéposer" },
+      {
+        type: "ul",
+        items: [
+          "Recouper CCAP, bon de commande et dernière situation acceptée",
+          "Modifier la facture ou la situation selon le motif (nouveau numéro si nécessaire)",
+          "Joindre les PJ demandées au bon format (PDF lisible, nom explicite)",
+          "Conserver une copie de l'ancienne version et du motif pour votre dossier",
+        ],
+      },
+      {
+        type: "callout",
+        variant: "warning",
+        title: "À ne pas faire",
+        content:
+          "Redéposer la même facture sans correction, ou facturer un montant supérieur à la situation validée — cela prolonge le blocage et complique la relation avec le comptable public.",
+      },
+      { type: "h2", content: "Étape 3 — Suivre et relancer" },
+      {
+        type: "p",
+        content:
+          "Tenez un tableau : date de dépôt, statut, motif de rejet, date de correction, relance MOE ou service comptable. Après le délai de paiement prévu au CCAP, une relance factuelle (références marché, numéro de facture, date d'acceptation attendue) est légitime.",
+      },
+      {
+        type: "faq",
+        items: [
+          {
+            question: "Combien de temps pour débloquer une facture refusée ?",
+            answer:
+              "Selon la cause : quelques jours si c'est une référence ou une PJ, plus long si une situation doit être revalidée par le maître d'œuvre. Anticiper en préparant les situations au fil du chantier réduit ce délai.",
+          },
+          {
+            question: "BeWork peut-il gérer les rejets Chorus Pro ?",
+            answer:
+              "Oui sur l'analyse du motif, la préparation de la correction, le redépôt encadré et le suivi des statuts — validation des montants et signatures chez vous. Voir /facturation-chorus-pro-btp.",
           },
         ],
       },

@@ -31,7 +31,7 @@ export function AssistantTravauxVilleLanding({ villeKey }: { villeKey: Assistant
 
   return (
     <SeoLandingPage
-      description={`Assistant travaux ${content.label} : relais bureau-chantier BTP à distance, devis, marchés publics et dossiers chantier.`}
+      description={`Assistant travaux ${content.label} : assistance technique et administrative BTP à distance, devis, marchés publics et dossiers chantier.`}
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Assistant travaux", href: "/services/assistant-travaux" },
@@ -49,7 +49,7 @@ export function AssistantTravauxVilleLanding({ villeKey }: { villeKey: Assistant
 
       <SeoEnResumeBlock>
         <p>
-          <strong>Assistant travaux à {content.label.split(" &")[0]}</strong> : relais administratif pour devis,
+          <strong>Assistant travaux à {content.label.split(" &")[0]}</strong> : assistance technique et administrative pour devis,
           appels d&apos;offres, situations, DOE et relances — spécialisé BTP, pas secrétariat générique.
         </p>
       </SeoEnResumeBlock>

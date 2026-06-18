@@ -11,7 +11,7 @@ export default function Page() {
   const faq = [
     {
       q: "Peut-on gérer une entreprise BTP sans recruter d’assistante ?",
-      a: "Oui, si vous avez un relais bureau‑terrain structuré. L’enjeu est de tenir le suivi (devis, relances, documents, demandes) sans tout repousser au soir ou au week‑end.",
+      a: "Oui, si vous avez une assistance bureau‑terrain structurée. L’enjeu est de tenir le suivi (devis, relances, documents, demandes) sans tout repousser au soir ou au week‑end.",
     },
     {
       q: "Quand faut-il recruter une assistante BTP ?",
@@ -23,7 +23,7 @@ export default function Page() {
     },
     {
       q: "BeWork remplace-t-elle une assistante salariée ?",
-      a: "Non. BeWork est un relais travaux flexible et cadré : utile quand la charge varie ou quand vous ne voulez pas recruter trop tôt. Un poste interne reste pertinent si vous avez un besoin constant à temps plein.",
+      a: "Non. BeWork est une assistance travaux flexible et cadrée : utile quand la charge varie ou quand vous ne voulez pas recruter trop tôt. Un poste interne reste pertinent si vous avez un besoin constant à temps plein.",
     },
     {
       q: "Est-ce adapté à un artisan ou une petite entreprise du bâtiment ?",
@@ -52,11 +52,11 @@ export default function Page() {
         { name: "Accueil", href: "/" },
         { name: "BTP sans recruter", href: PAGE_PATH },
       ]}
-      h1="Gérer vos dossiers BTP sans recruter : le relais travaux BeWork"
+      h1="Gérer vos dossiers BTP sans recruter : l’assistance travaux BeWork"
       intro={
         <>
-          Une entreprise BTP peut avoir besoin d’un vrai relais bureau‑chantier avant d’avoir la charge suffisante pour recruter.
-          BeWork met en place un <strong>relais travaux</strong> cadré (demandes, suivis, livrables) avec <strong>validation finale</strong>{" "}
+          Une entreprise BTP peut avoir besoin d’une vraie assistance technique et administrative avant d’avoir la charge suffisante pour recruter.
+          BeWork met en place un <strong>accompagnement travaux</strong> cadré (demandes, suivis, livrables) avec <strong>validation finale</strong>{" "}
           côté client.
         </>
       }
@@ -71,7 +71,7 @@ export default function Page() {
         <li>Besoin d’un cadre souple et d’un volume adaptable.</li>
       </ul>
       <p>
-        Recruter devient très pertinent quand le besoin est stable et constant. Avant ça, un relais externe cadré peut éviter une embauche trop tôt.
+        Recruter devient très pertinent quand le besoin est stable et constant. Avant ça, une assistance externe cadrée peut éviter une embauche trop tôt.
       </p>
 
       <h2>Ce qu’il faut quand même tenir (même quand vous êtes sur chantier)</h2>
@@ -86,7 +86,7 @@ export default function Page() {
 
       <h2>Ce que BeWork apporte sans recruter</h2>
       <ul>
-        <li>Relais bureau‑terrain : demandes suivies, statuts et priorités</li>
+        <li>Assistance bureau‑terrain : demandes suivies, statuts et priorités</li>
         <li>Forfait clair et périmètre cadré</li>
         <li>Démarrage progressif et volume adaptable</li>
         <li>Livrables préparés et traçables</li>
@@ -98,7 +98,7 @@ export default function Page() {
         <li>Artisan débordé entre chantier, clients et bureau</li>
         <li>PME BTP en croissance (besoin récurrent mais variable)</li>
         <li>Conducteur de travaux sans appui bureau</li>
-        <li>Entreprise qui veut tester un relais avant de recruter</li>
+        <li>Entreprise qui veut tester une assistance avant de recruter</li>
         <li>Surcharge ponctuelle sur plusieurs chantiers</li>
       </ul>
 

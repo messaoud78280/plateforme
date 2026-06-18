@@ -32,7 +32,7 @@ const villePagesSeo: Record<string, PublicPageSeo> = Object.fromEntries(
         {
           title: `Assistant travaux ${v.label.split(" &")[0]} | BeWork`,
           description: metaDescriptionFrancophonie(
-            `Assistant travaux ${v.label} : relais bureau-chantier BTP, devis, marchés publics et dossiers chantier à distance`,
+            `Assistant travaux ${v.label} : assistance technique et administrative BTP, devis, marchés publics et dossiers chantier à distance`,
             { withGeoTag: false },
           ),
           keywords: [`assistant travaux ${v.label}`, "assistant BTP", "externalisation administrative BTP"],

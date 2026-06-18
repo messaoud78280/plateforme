@@ -8,7 +8,7 @@ import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/seo-landing-json-ld";
 
 const PAGE_PATH = "/cas-clients";
 
-const h1 = "Cas clients (BTP) : ce que vous gagnez vraiment";
+const h1 = "Cas clients BTP : ce que l’assistance travaux change sur le terrain";
 
 export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 
@@ -21,7 +21,7 @@ const casClientsJsonLd = buildWebPageAndBreadcrumbJsonLd({
   pagePath: PAGE_PATH,
   h1,
   description:
-    "Cas clients BTP : devis relancés, situations cadrées, dossiers tenus. Exemples concrets d’un pilotage administratif encadré.",
+    "Cas clients BTP : dossiers structurés, relances tenues, situations cadrées. Exemples concrets d’assistance technique et administrative encadrée.",
   breadcrumbItems: [...breadcrumbItems],
 });
 
@@ -51,7 +51,7 @@ export default function CasClientsPage() {
           </nav>
           <h1 className="text-3xl font-bold tracking-tight text-black md:text-4xl">{h1}</h1>
           <p className="mt-5 text-lg leading-relaxed text-black">
-            BeWork ne “fait pas de secrétariat”. On met en place un cadre de suivi : relances, dossiers, pièces, et
+            BeWork apporte une assistance technique et administrative encadrée : relances, dossiers, pièces marché et
             validations — pour sécuriser vos opportunités et votre chiffre d’affaires.
           </p>
           <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">

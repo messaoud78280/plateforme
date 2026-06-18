@@ -26,32 +26,32 @@ export const ASSISTANT_TRAVAUX_VILLES: Record<AssistantTravauxVilleKey, Assistan
   paris: {
     label: "Paris & Île-de-France",
     pays: "France",
-    h1: "Assistant travaux Paris : relais bureau-chantier pour entreprises BTP en Île-de-France",
+    h1: "Assistant travaux Paris : assistance technique et administrative BTP en Île-de-France",
     introLead:
-      "En Île-de-France, les entreprises du bâtiment enchaînent chantiers urbains, marchés publics et délais serrés — souvent avec peu de renfort administratif.",
+      "En Île-de-France, les entreprises du bâtiment enchaînent chantiers urbains, appels d’offres et marchés publics — souvent avec peu de renfort bureau pour structurer les dossiers.",
     localContext:
-      "Rénovation tertiaire, logement collectif, VRD en zone dense : les dossiers (AO, situations, DOE, DICT) s’accumulent vite. BeWork opère à distance avec supervision depuis la France — pas de présence physique sur site, mais un process cadré pour artisans, PME et conducteurs de travaux franciliens.",
+      "Rénovation tertiaire, logement collectif, VRD en zone dense : analyse DCE, situations Chorus Pro, DOE et relances s’accumulent vite. BeWork opère à distance avec supervision depuis la France — assistance travaux spécialisée BTP, pas prestation administrative généraliste.",
     casUsage:
-      "Lot second œuvre sur marché public en petite couronne : BeWork suit le DCE, prépare les situations Chorus Pro et compile le DOE pendant que le CT est sur trois réceptions la même semaine.",
+      "Lot second œuvre sur marché public en petite couronne : BeWork analyse le DCE, prépare les situations Chorus Pro et compile le DOE pendant que le CT est sur trois réceptions la même semaine.",
     faq: [
       {
         q: "BeWork accompagne-t-il les entreprises BTP en Île-de-France ?",
-        a: "Oui, à distance partout en IDF. Missions : devis, relances, appels d’offres, Chorus Pro, DOE, CR — validation finale chez vous.",
+        a: "Oui, à distance partout en IDF. Missions : analyse DCE, appels d’offres, comptes rendus, Chorus Pro, DOE, relances — validation finale chez vous.",
       },
       {
         q: "Faut-il un assistant sur place à Paris ?",
-        a: "Non. Le relais est documentaire et administratif à distance. L’essentiel est un canal clair et des priorités partagées.",
+        a: "Non. L’assistance est documentaire et technique à distance (dossiers chantier, pièces marché, suivi). L’essentiel est un canal clair et des priorités partagées.",
       },
     ],
   },
   lyon: {
     label: "Lyon & Auvergne-Rhône-Alpes",
     pays: "France",
-    h1: "Assistant travaux Lyon : support administratif BTP en Auvergne-Rhône-Alpes",
+    h1: "Assistant travaux Lyon : assistance technique et administrative BTP en Auvergne-Rhône-Alpes",
     introLead:
-      "À Lyon et en région, les PME du bâtiment cumulent logements, équipements publics et chantiers en co-activité — l’administratif suit mal le rythme terrain.",
+      "À Lyon et en région, les PME du bâtiment cumulent logements, équipements publics et chantiers en co-activité — les dossiers techniques et documentaires suivent mal le rythme terrain.",
     localContext:
-      "Marchés métropole, lots techniques et sous-traitance multi-corps d’état : BeWork structure devis, mémoires techniques et suivi marché public à distance, en français.",
+      "Marchés métropole, lots techniques et sous-traitance multi-corps d’état : BeWork structure analyse DCE, mémoires techniques et suivi marché public à distance, en français.",
     casUsage:
       "Entreprise de gros œuvre avec deux AO en parallèle : synthèse DCE et checklist dépôt préparées par BeWork — le dirigeant valide le Go/No Go et le prix.",
     faq: [
@@ -64,13 +64,13 @@ export const ASSISTANT_TRAVAUX_VILLES: Record<AssistantTravauxVilleKey, Assistan
   marseille: {
     label: "Marseille & Sud",
     pays: "France",
-    h1: "Assistant travaux Marseille : relais administratif chantier BTP",
+    h1: "Assistant travaux Marseille : assistance technique et administrative BTP",
     introLead:
-      "À Marseille et sur le littoral sud, les entreprises gèrent souvent plusieurs chantiers avec des équipes réduites au bureau.",
+      "À Marseille et sur le littoral sud, les entreprises gèrent souvent plusieurs chantiers avec des équipes réduites au bureau pour tenir les dossiers.",
     localContext:
-      "Réhabilitation, VRD, marchés à tranches : relances fournisseurs, situations et DOE peuvent être délégués à un assistant travaux BeWork — vous gardez le pilotage chantier.",
+      "Réhabilitation, VRD, marchés à tranches : relances fournisseurs, situations, réserves et DOE peuvent être confiés à un assistant travaux BeWork — vous gardez le pilotage technique chantier.",
     casUsage:
-      "Artisan électricité débordé : relances devis et classement dossiers chantier confiés à BeWork, avec tableau de suivi hebdomadaire.",
+      "Artisan électricité débordé : relances devis, classement dossiers chantier et suivi réserves confiés à BeWork, avec tableau de suivi hebdomadaire.",
     faq: [
       {
         q: "Peut-on démarrer par une mission ponctuelle depuis Marseille ?",
@@ -81,11 +81,11 @@ export const ASSISTANT_TRAVAUX_VILLES: Record<AssistantTravauxVilleKey, Assistan
   lille: {
     label: "Lille & Hauts-de-France",
     pays: "France",
-    h1: "Assistant travaux Lille : externalisation légère pour le BTP nord",
+    h1: "Assistant travaux Lille : assistance technique et administrative BTP dans le Nord",
     introLead:
-      "Dans les Hauts-de-France, les entreprises BTP cherchent souvent à tenir le bureau sans recruter — surtout sur les pics d’appels d’offres.",
+      "Dans les Hauts-de-France, les entreprises BTP cherchent souvent à sécuriser le bureau sans recruter — surtout sur les pics d’appels d’offres et d’exécution marché public.",
     localContext:
-      "BeWork propose un relais francophone : réponse AO, situations, impayés et CR structurés. Accompagnement à distance, forfaits HT publics.",
+      "BeWork propose une assistance travaux francophone : analyse DCE, réponse AO, situations Chorus Pro, réserves et DOE. Accompagnement à distance, forfaits HT publics.",
     casUsage:
       "PME menuiserie : préparation mémoire technique et relecture DPGF avant dépôt plateforme — validation interne en une demi-journée au lieu de trois.",
     faq: [
@@ -98,13 +98,13 @@ export const ASSISTANT_TRAVAUX_VILLES: Record<AssistantTravauxVilleKey, Assistan
   bordeaux: {
     label: "Bordeaux & Nouvelle-Aquitaine",
     pays: "France",
-    h1: "Assistant travaux Bordeaux : accompagnement administratif BTP",
+    h1: "Assistant travaux Bordeaux : assistance technique et administrative BTP",
     introLead:
-      "En Nouvelle-Aquitaine, la croissance du parc de chantiers s’accompagne souvent d’un retard sur les dossiers administratifs.",
+      "En Nouvelle-Aquitaine, la croissance du parc de chantiers s’accompagne souvent d’un retard sur les dossiers techniques et documentaires.",
     localContext:
-      "Construction neuve, rénovation énergétique, marchés publics locaux : BeWork aide à structurer AO, devis et fin de chantier (DOE, réserves).",
+      "Construction neuve, rénovation énergétique, marchés publics locaux : BeWork aide à structurer AO, analyse DCE, devis et clôture chantier (DOE, réserves).",
     casUsage:
-      "Conducteur sur lot CVC : comptes rendus et relances MOE préparés depuis les notes vocales du CT — diffusion après validation.",
+      "Conducteur sur lot CVC : comptes rendus et relances MOE préparés depuis les notes du CT — diffusion après validation.",
     faq: [
       {
         q: "Quels documents peut-on transmettre depuis Bordeaux ?",
@@ -115,47 +115,47 @@ export const ASSISTANT_TRAVAUX_VILLES: Record<AssistantTravauxVilleKey, Assistan
   toulouse: {
     label: "Toulouse & Occitanie",
     pays: "France",
-    h1: "Assistant travaux Toulouse : relais bureau-chantier BTP",
+    h1: "Assistant travaux Toulouse : assistance technique et administrative BTP",
     introLead:
-      "À Toulouse et en Occitanie, les entreprises aéronautiques adjacency et le BTP traditionnel partagent le même problème : trop d’administratif, pas assez de temps.",
+      "À Toulouse et en Occitanie, les entreprises BTP partagent le même enjeu : trop de dossiers à structurer, pas assez de temps pour l’analyse et le suivi documentaire.",
     localContext:
-      "BeWork prend en charge le flux documentaire (devis, AO, Chorus Pro, DICT) pendant que vos équipes sont sur site — process et traçabilité inclus.",
+      "BeWork prend en charge le flux technique et documentaire (analyse DCE, AO, Chorus Pro, DICT, DOE) pendant que vos équipes sont sur site — process cadré et traçabilité.",
     casUsage:
       "Lot VRD / terrassement : suivi DICT et classement pièces voirie avant démarrage — alertes sur échéances et manquants.",
     faq: [
       {
         q: "BeWork gère-t-il les DICT pour des chantiers à Toulouse ?",
-        a: "Oui sur le suivi dossier et administratif — voir /dict-dt-travaux. Les responsabilités réseaux restent chez l’entreprise.",
+        a: "Oui sur le suivi dossier et documentaire — voir /dict-dt-travaux. Les responsabilités réseaux restent chez l’entreprise.",
       },
     ],
   },
   bruxelles: {
     label: "Bruxelles",
     pays: "Belgique",
-    h1: "Assistant travaux Bruxelles : support administratif BTP francophone",
+    h1: "Assistant travaux Bruxelles : assistance technique et administrative BTP francophone",
     introLead:
-      "À Bruxelles, les entreprises de construction francophones jonglent entre chantiers urbains et dossiers administratifs souvent traités en fin de journée.",
+      "À Bruxelles, les entreprises de construction francophones jonglent entre chantiers urbains et dossiers techniques souvent traités en fin de journée.",
     localContext:
-      "BeWork assure un relais à distance en français : devis, relances, dossiers techniques et coordination documentaire — sans présence locale, avec validation chez vous.",
+      "BeWork assure une assistance travaux à distance en français : analyse DCE, devis, relances, comptes rendus et coordination documentaire — sans présence locale, validation chez vous.",
     casUsage:
-      "PME rénovation : externalisation des relances clients et suivi devis pendant une période de surcharge chantier.",
+      "PME rénovation : suivi devis, relances clients et préparation situations pendant une période de surcharge chantier.",
     faq: [
       {
         q: "BeWork est-il adapté aux entreprises bruxelloises ?",
-        a: "Oui pour le relais administratif francophone. Voir /assistant-travaux-belgique pour le périmètre pays.",
+        a: "Oui pour l’assistance travaux BTP francophone. Voir /assistant-travaux-belgique pour le périmètre pays.",
       },
     ],
   },
   geneve: {
     label: "Genève",
     pays: "Suisse",
-    h1: "Assistant travaux Genève : relais administratif BTP en Suisse romande",
+    h1: "Assistant travaux Genève : assistance technique et administrative BTP en Suisse romande",
     introLead:
-      "À Genève, les exigences documentaires et les délais serrés pèsent sur les PME du bâtiment qui n’ont pas de service administratif dédié.",
+      "À Genève, les exigences documentaires et les délais serrés pèsent sur les PME du bâtiment qui n’ont pas de renfort bureau dédié aux dossiers chantier.",
     localContext:
-      "BeWork structure dossiers chantier, relances et livrables en français. Nous ne remplaçons pas vos responsables techniques ni vos obligations contractuelles locales.",
+      "BeWork structure dossiers chantier, analyse pièces marché, relances et livrables en français. Nous ne remplaçons pas vos responsables techniques ni vos obligations contractuelles locales.",
     casUsage:
-      "Entreprise second œuvre : préparation devis structurés et relances fournisseurs avec suivi des statuts — le dirigeant valide les prix.",
+      "Entreprise second œuvre : préparation devis structurés, relances fournisseurs et suivi réserves — le dirigeant valide les prix.",
     faq: [
       {
         q: "BeWork travaille-t-il avec des entreprises genevoises ?",

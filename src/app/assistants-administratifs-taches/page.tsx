@@ -312,7 +312,7 @@ export default function AssistantsAdministratifsTachesPage() {
         <section className="px-6 py-12 md:py-16">
           <div className="mx-auto max-w-3xl">
             <p className="text-black leading-relaxed">
-              BeWork n’est pas un “secrétariat PME” généraliste. C’est une{" "}
+              BeWork n’est pas une prestation administrative généraliste. C’est une{" "}
               <strong>plateforme d’assistants travaux augmentés par l’IA</strong> pour l’
               <strong>assistance technique et administrative BTP</strong> : analyse DCE, synthèse CCTP, dossiers chantier,{" "}
               <strong>relances</strong>, <strong>documents travaux</strong> et <strong>coordination bureau-chantier</strong> quand

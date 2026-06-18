@@ -193,9 +193,9 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
     hreflangLanguages: geoCluster,
   },
   "/cas-clients": {
-    title: "Cas clients BTP : organisation et trésorerie chantier",
+    title: "Cas clients BTP : assistance travaux et résultats chantier",
     description: metaDescriptionFrancophonie(
-      "Exemples concrets : devis relancés, dossiers tenus, trésorerie sécurisée. Retours d’expérience d’entreprises du bâtiment avec BeWork",
+      "Exemples concrets : dossiers structurés, devis relancés, situations cadrées, trésorerie sécurisée. Retours d’expérience d’entreprises du bâtiment avec BeWork",
     ),
     keywords: ["cas clients BTP", "retour expérience BTP", "organisation chantier"],
   },

@@ -51,18 +51,18 @@ const BASE_SEE: ServicePageSlug[] = ["assistant-travaux", "externalisation-admin
 export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
   "assistant-travaux": {
     slug: "assistant-travaux",
-    metaTitle: "Assistant travaux BTP augmenté par l’IA | BeWork",
+    metaTitle: "Assistant travaux BTP : assistance technique et administrative | BeWork",
     metaDescription:
-      "Assistant travaux pour le BTP : relais bureau-chantier, dossiers chantier et relances. L’IA structure, vous validez ce qui engage votre entreprise.",
+      "Assistant travaux BTP : assistance technique et administrative sur chantiers, appels d’offres et marchés publics. L’IA structure, vous validez ce qui engage votre entreprise.",
     h1: "Assistant travaux augmenté par l’IA pour entreprises du BTP",
     intro:
-      "BeWork met à votre disposition un relais opérationnel entre le bureau et le chantier : préparation de documents, suivi des échéances et coordination cadrée. L’IA accélère la structuration et la relecture ; un interlocuteur humain garde le fil et le cadre.",
+      "BeWork apporte une assistance technique et administrative entre le bureau et le chantier : analyse DCE, documents d’exécution, suivi des échéances et coordination documentaire. L’IA accélère la structuration et la relecture ; un interlocuteur humain garde le fil et le cadre.",
     enResume:
-      "Un assistant travaux accompagne les entreprises du BTP dans la gestion administrative et documentaire des chantiers : appels d’offres, devis, situations, DOE, PPSPS, DICT, comptes rendus et facturation — avec validation finale chez vous.",
+      "Un assistant travaux accompagne les entreprises du BTP dans l’assistance technique et administrative des chantiers : appels d’offres, analyse DCE, situations, DOE, PPSPS, comptes rendus et facturation Chorus Pro — avec validation finale chez vous.",
     erreursEviter: [
       "Devis envoyés sans relance ni statut de suivi",
       "Dossiers chantier incomplets en fin de marché",
-      "Confondre secrétariat généraliste et relais métier BTP",
+      "Confondre prestation administrative généraliste et assistance travaux BTP",
     ],
     pourQuiBullets: [
       "Artisans, TPE et PME du bâtiment qui cumulent terrain et dossiers.",
@@ -70,9 +70,9 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
       "Dirigeants qui veulent sécuriser le suivi sans recruter immédiatement.",
     ],
     priseEnChargeBullets: [
-      "Préparation et mise en forme de livrables chantier (selon forfait).",
+      "Analyse DCE, synthèse CCTP et préparation de livrables chantier (selon forfait).",
       "Relances clients, fournisseurs et sous-traitants dans le ton de votre entreprise.",
-      "Suivi administratif des dossiers : statuts, pièces, relances et points de vigilance.",
+      "Suivi documentaire des dossiers : statuts, pièces, relances et points de vigilance.",
       "Coordination des allers-retours documents (sous votre validation sur les engagements).",
     ],
     pourquoiParagraphs: [
@@ -106,7 +106,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     faq: [
       {
         q: "Un assistant travaux BeWork remplace un conducteur de travaux ?",
-        a: "Non. Il tient le relais administratif et opérationnel léger (préparation, suivi, relances) pour que vous gardiez la maîtrise technique et la décision sur le chantier.",
+        a: "Non. BeWork apporte une assistance technique et administrative (préparation, suivi, relances, pièces marché) pour que vous gardiez la maîtrise technique et la décision sur le chantier.",
       },
       {
         q: "Que signifie « augmenté par l’IA » ?",
@@ -119,10 +119,10 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     slug: "assistant-conducteur-de-travaux",
     metaTitle: "Assistant conducteur de travaux BTP | BeWork",
     metaDescription:
-      "Assistant conducteur de travaux : déléguez CR, relances, situations et coordination fournisseurs. Relais bureau-chantier, validation chez vous.",
+      "Assistant conducteur de travaux : assistance technique et administrative — CR, relances, situations, analyse pièces marché. Validation chez vous.",
     h1: "Assistant conducteur de travaux : dossiers et suivi quand le carnet déborde",
     intro:
-      "Le conducteur de travaux est souvent le point de contact unique entre maîtrise d’ouvrage, entreprises et corps d’état. BeWork sécurise la partie « dossier qui doit avancer » : relances, pièces, plannings administratifs et préparations de synthèses, sans empiéter sur vos arbitrages terrain.",
+      "Le conducteur de travaux est souvent le point de contact unique entre maîtrise d’ouvrage, entreprises et corps d’état. BeWork sécurise la partie « dossier qui doit avancer » : relances, pièces, synthèses CCTP et préparations de comptes rendus, sans empiéter sur vos arbitrages terrain.",
     pourQuiBullets: [
       "Conducteurs de travaux en entreprise générale, sous-traitance ou lot technique.",
       "Profils qui gèrent plusieurs chantiers et une charge documentaire dense.",
@@ -134,7 +134,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
       "Coordination des échanges fournisseurs / locations sur la base de vos consignes.",
     ],
     pourquoiParagraphs: [
-      "Quand le conducteur passe son temps à relancer pour obtenir une pièce, le chantier avance mal. Externaliser le « train administratif » redonne des plages pour le pilotage réel.",
+      "Quand le conducteur passe son temps à relancer pour obtenir une pièce, le chantier avance mal. Déléguer le suivi documentaire redonne des plages pour le pilotage réel.",
     ],
     commentSteps: [
       "Brief clair : priorités, interlocuteurs, jalons.",
@@ -195,14 +195,14 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
 
   "externalisation-administrative-btp": {
     slug: "externalisation-administrative-btp",
-    metaTitle: "Externalisation administrative BTP | BeWork",
+    metaTitle: "Externalisation assistance travaux BTP | BeWork",
     metaDescription:
-      "Externalisation administrative BTP : relais travaux, forfaits HT, accompagnement francophone FR · BE · CH · LU.",
-    h1: "Externalisation administrative BTP avec un relais travaux encadré",
+      "Externalisation assistance travaux BTP : analyse DCE, dossiers chantier, marchés publics, forfaits HT, accompagnement francophone FR · BE · CH · LU.",
+    h1: "Externalisation assistance travaux BTP avec un cadre encadré",
     intro:
-      "L’externalisation administrative BTP ne se résume pas à « du secrétariat » : chez BeWork, il s’agit d’un relais travaux — dossiers chantier, relances, préparations documentaires — avec des forfaits clairs et un accompagnement à distance supervisé depuis la France.",
+      "Externaliser le suivi chantier ne signifie pas déléguer de la saisie administrative générique : chez BeWork, c’est une assistance technique et administrative BTP — analyse DCE, dossiers chantier, appels d’offres, Chorus Pro et DOE — avec des forfaits clairs et un accompagnement supervisé depuis la France.",
     enResume:
-      "Externaliser l’administratif chantier, c’est déléguer devis, relances, appels d’offres, Chorus Pro, DOE et suivi documentaire à un assistant travaux encadré — sans recruter, avec validation avant tout envoi engageant.",
+      "Externaliser l’assistance travaux, c’est déléguer analyse DCE, relances, appels d’offres, Chorus Pro, DOE et suivi documentaire à des assistants travaux encadrés — sans recruter, avec validation avant tout envoi engageant.",
     erreursEviter: [
       "Externaliser sans cadrage de périmètre ni circuit de validation",
       "Attendre d’un prestataire qu’il engage le prix ou la technique à votre place",
@@ -405,9 +405,9 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
 
   "memoire-technique-btp": {
     slug: "memoire-technique-btp",
-    metaTitle: "Mémoire technique BTP | BeWork",
+    metaTitle: "Mémoire technique BTP : assistance rédactionnelle | BeWork",
     metaDescription:
-      "Mémoire technique BTP : plan, fil rouge et relecture pour une réponse AO lisible par la maîtrise d’ouvrage.",
+      "Mémoire technique BTP : plan, fil rouge et relecture pour une réponse AO lisible. Assistance technique documentaire — validation contenu chez vous.",
     h1: "Mémoire technique BTP : un fil clair pour une réponse lisible",
     intro:
       "Un mémoire technique doit démontrer votre méthode et votre compréhension du projet. BeWork aide à bâtir la structure, harmoniser le ton et intégrer vos contenus techniques, afin de livrer un dossier plus fluide à relire par la maîtrise d’ouvrage.",
@@ -542,14 +542,14 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
 
   "conducteur-travaux-deborde": {
     slug: "conducteur-travaux-deborde",
-    metaTitle: "Conducteur de travaux débordé : relais bureau-chantier | BeWork",
+    metaTitle: "Conducteur de travaux débordé : assistance bureau-chantier | BeWork",
     metaDescription:
-      "Conducteur de travaux débordé ? Déléguez CR, relances, situations et dossiers pendant que vous pilotez le terrain. Assistants travaux augmentés par l’IA.",
+      "Conducteur de travaux débordé ? Assistance technique et administrative : CR, relances, situations, dossiers marché. Assistants travaux augmentés par l’IA.",
     h1: "Conducteur de travaux débordé : faire avancer le bureau sans lâcher le chantier",
     intro:
-      "Quand le carnet déborde, ce ne sont pas seulement les mails qui s’accumulent : ce sont les relances oubliées, les pièces manquantes et les dossiers qui traînent. BeWork absorbe le train administratif pour redonner des plages de pilotage réel — sans remplacer vos arbitrages terrain.",
+      "Quand le carnet déborde, ce ne sont pas seulement les mails qui s’accumulent : ce sont les relances oubliées, les pièces manquantes et les dossiers qui traînent. BeWork absorbe le suivi documentaire et technique pour redonner des plages de pilotage réel — sans remplacer vos arbitrages terrain.",
     enResume:
-      "Un conducteur de travaux débordé manque de temps bureau : BeWork prend le relais documentaire (CR, relances, situations) pendant qu’il tient le chantier.",
+      "Un conducteur de travaux débordé manque de temps bureau : BeWork prend l’assistance documentaire (CR, relances, situations, pièces marché) pendant qu’il tient le chantier.",
     erreursEviter: [
       "Tout garder en tête sans tableau de priorités",
       "Relances MOE ou fournisseurs repoussées chaque semaine",
@@ -594,7 +594,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     faq: [
       {
         q: "BeWork remplace-t-elle un second conducteur de travaux ?",
-        a: "Non. BeWork tient le relais administratif et documentaire. Le pilotage terrain, les arbitrages et les engagements restent les vôtres.",
+        a: "Non. BeWork apporte une assistance technique et administrative documentaire. Le pilotage terrain, les arbitrages et les engagements restent les vôtres.",
       },
       {
         q: "Quelle différence avec la page « assistant conducteur de travaux » ?",
@@ -657,9 +657,9 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
 
   "dce-bpu-dpgf": {
     slug: "dce-bpu-dpgf",
-    metaTitle: "DCE, BPU et DPGF BTP : structuration et synthèse | BeWork",
+    metaTitle: "DCE, BPU et DPGF BTP : analyse et structuration | BeWork",
     metaDescription:
-      "DCE, BPU et DPGF BTP : tri des pièces marché, structuration des bordereaux et synthèses pour chiffrer sans ambiguïté. Appui IA, validation chez vous.",
+      "DCE, BPU et DPGF BTP : assistance technique sur pièces marché, structuration des bordereaux et synthèses avant chiffrage. Validation chez vous.",
     h1: "DCE, BPU et DPGF : structurer les pièces marché avant de chiffrer",
     intro:
       "Un marché mal lu se paie au chiffrage ou en exécution. BeWork aide à trier le DCE, recouper CCTP et bordereaux (BPU, DPGF, DQE), repérer les incohérences et préparer des synthèses exploitables — sans substituer votre jugement d’entreprise ni votre bureau d’études.",

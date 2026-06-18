@@ -1,6 +1,6 @@
+import Link from "next/link";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
-import { SEO_KEYWORDS_PARTENAIRE_CORE } from "@/lib/seo-keywords";
 
 const PAGE_PATH = "/externaliser-administratif";
 
@@ -8,12 +8,12 @@ export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 
 const faq = [
   {
-    q: "Pourquoi externaliser l’administratif dans une entreprise BTP plutôt que tout internaliser ?",
-    a: "Parce que la charge varie fortement selon les chantiers : pics de devis, relances, documents. Externaliser permet de sécuriser le rythme côté bureau sans alourdir la masse salariale, avec des forfaits HT et une équipe déjà opérationnelle.",
+    q: "Pourquoi externaliser le suivi chantier dans une entreprise BTP plutôt que tout internaliser ?",
+    a: "Parce que la charge varie fortement selon les chantiers : pics de devis, appels d’offres, relances, clôture DOE. Externaliser permet de sécuriser le rythme côté bureau sans alourdir la masse salariale, avec des forfaits HT et une équipe déjà opérationnelle sur le métier.",
   },
   {
-    q: "Quelles tâches administratives peut-on déléguer en priorité ?",
-    a: "Les flux répétitifs et chronophages : relances de devis et factures, préparation de pièces, suivi de dossiers, structuration d’échanges, coordination écrite. Ce qui engage juridiquement ou techniquement reste arbitré chez vous.",
+    q: "Quelles tâches peut-on déléguer en priorité ?",
+    a: "Les flux chronophages et métier : analyse DCE, relances de devis et factures chantier, préparation de pièces, comptes rendus, suivi de situations marché public, structuration DOE/réserves. Ce qui engage juridiquement ou techniquement reste arbitré chez vous.",
   },
   {
     q: "L’externalisation convient-elle aux artisans du bâtiment et aux petites structures ?",
@@ -38,39 +38,47 @@ const faqJsonLd = {
 export default function Page() {
   return (
     <SeoLandingPage
-      description="Externaliser administratif PME : assistant virtuel pour devis, factures, relances. Sans recrutement. Dès 590 € HT/mois. France, Belgique, Suisse, Luxembourg."
+      description="Externaliser l'assistance travaux BTP : analyse DCE, relances, dossiers chantier et marchés publics. Sans recrutement. Dès 590 € HT/mois. France, Belgique, Suisse, Luxembourg."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Externaliser son administratif", href: PAGE_PATH },
       ]}
-      h1="Externaliser son administratif : tuto et bonnes pratiques"
+      h1="Externaliser le suivi chantier : assistance travaux BTP encadrée"
       intro={
         <>
-          Externaliser administratif PME permet de recentrer vos équipes sur le cœur de métier tout en sécurisant
-          devis, factures et relances. BeWork propose un assistant administratif externalisé dédié, sans recrutement.
-          Dès 590 € HT/mois — France, Belgique, Suisse, Luxembourg.
+          Externaliser ne veut pas dire déléguer de la saisie générique : pour le bâtiment, BeWork apporte une{" "}
+          <strong>assistance technique et administrative</strong> — analyse DCE, relances, dossiers chantier, appels
+          d&apos;offres et marchés publics. Dès 590 € HT/mois — France, Belgique, Suisse, Luxembourg.{" "}
+          <Link href="/services/externalisation-administrative-btp" className="text-[#1d4ed8] hover:underline">
+            Voir le service
+          </Link>
+          .
         </>
       }
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
-      <h2>Pourquoi externaliser l&apos;administratif ?</h2>
+      <h2>Pourquoi externaliser l’assistance travaux ?</h2>
       <p>
-        Les tâches administratives chronophages (emails, facturation, suivi dossiers) peuvent être externalisées avec
-        un assistant virtuel entreprise. Vous gagnez du temps, vous maîtrisez vos coûts et vous gardez la main sur la
-        qualité grâce à une équipe supervisée en France.
+        Les dossiers chantier, AO et clôture marché public sont chronophages. Les externaliser avec une équipe
+        spécialisée BTP permet de recentrer vos équipes sur le terrain tout en sécurisant délais, preuves et
+        traçabilité.
       </p>
 
       <h2>Que peut-on externaliser ?</h2>
       <p>
-        Secrétariat (agenda, courriers), facturation (devis, factures, relances), suivi de dossiers, saisie documentaire,
-        pré-comptabilité. BeWork couvre l&apos;essentiel de l&apos;administratif opérationnel des PME.
+        Analyse DCE, relances devis et situations, comptes rendus, suivi fournisseurs, préparation DOE et réserves,
+        facturation Chorus Pro (selon périmètre), coordination documentaire chantier. BeWork couvre l&apos;assistance
+        travaux opérationnelle — pas le courrier générique hors métier.
       </p>
 
-      <h2>Externaliser administratif PME : combien ça coûte ?</h2>
+      <h2>Combien ça coûte ?</h2>
       <p>
-        BeWork propose des forfaits dès 590 € HT/mois . Pas de charges sociales, pas de recrutement :
-        un forfait tout compris. Jusqu&apos;à 75 % d&apos;économie par rapport à un assistant en interne.
+        Forfaits dès 590 € HT/mois, tarifs publics sur{" "}
+        <Link href="/tarifs" className="text-[#1d4ed8] hover:underline">
+          bework.fr/tarifs
+        </Link>
+        . Pas de recrutement immédiat : niveaux d&apos;accompagnement ajustés au devis selon votre volume réel.
       </p>
 
       <section className="not-prose" id="faq" aria-label="FAQ externaliser son administratif" style={{ scrollMarginTop: "6rem" }}>

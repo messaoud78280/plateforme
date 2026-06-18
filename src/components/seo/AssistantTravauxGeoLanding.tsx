@@ -33,7 +33,7 @@ export function AssistantTravauxGeoLanding({ geoKey }: { geoKey: AssistantTravau
 
   return (
     <SeoLandingPage
-      description={`Assistant travaux en ${country} : relais bureau-chantier pour entreprises BTP, devis, dossiers et marchés publics.`}
+      description={`Assistant travaux en ${country} : assistance technique et administrative BTP — analyse DCE, dossiers chantier et marchés publics.`}
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: `Assistant travaux — ${country}`, href: pagePath },
@@ -41,8 +41,9 @@ export function AssistantTravauxGeoLanding({ geoKey }: { geoKey: AssistantTravau
       h1={content.h1}
       intro={
         <>
-          {content.introLead} BeWork propose un <strong>assistant travaux</strong> externalisé : devis, relances, appels
-          d&apos;offres, situations, DOE et suivi documentaire — avec <strong>validation finale</strong> chez vous.
+          {content.introLead} BeWork propose une <strong>assistance technique et administrative</strong> spécialisée
+          BTP : analyse DCE, appels d&apos;offres, situations, DOE et suivi documentaire — avec{" "}
+          <strong>validation finale</strong> chez vous.
         </>
       }
     >
@@ -50,8 +51,9 @@ export function AssistantTravauxGeoLanding({ geoKey }: { geoKey: AssistantTravau
 
       <SeoEnResumeBlock>
         <p>
-          <strong>Qu&apos;est-ce qu&apos;un assistant travaux ?</strong> Un relais bureau-chantier qui structure devis,
-          dossiers marché, comptes rendus, situations et relances pendant que vos équipes sont sur le terrain.
+          <strong>Qu&apos;est-ce qu&apos;un assistant travaux ?</strong> Une assistance technique et administrative
+          bureau-chantier : analyse DCE, dossiers marché, comptes rendus, situations et relances pendant que vos équipes
+          sont sur le terrain.
         </p>
       </SeoEnResumeBlock>
 
@@ -60,7 +62,7 @@ export function AssistantTravauxGeoLanding({ geoKey }: { geoKey: AssistantTravau
 
       <h2>Pour qui ?</h2>
       <ul>
-        <li>Artisans et PME du bâtiment débordés par l&apos;administratif</li>
+        <li>Artisans et PME du bâtiment débordés par les dossiers chantier</li>
         <li>Conducteurs de travaux et chargés d&apos;affaires sans renfort bureau</li>
         <li>Titulaires ou candidats sur marchés publics ou privés</li>
         <li>Entreprises multi-chantiers qui veulent un suivi documentaire fiable</li>
@@ -85,8 +87,8 @@ export function AssistantTravauxGeoLanding({ geoKey }: { geoKey: AssistantTravau
 
       <h2>Pourquoi BeWork ?</h2>
       <p>
-        Spécialisation BTP (pas secrétariat générique), IA pour accélérer le tri et la mise en forme, supervision
-        humaine et tarifs publics sur{" "}
+        Spécialisation BTP (assistance travaux, pas prestation administrative généraliste), IA pour accélérer le tri et
+        la mise en forme, supervision humaine et tarifs publics sur{" "}
         <Link href="/tarifs" className="text-[#1d4ed8] hover:underline">
           bework.fr/tarifs
         </Link>

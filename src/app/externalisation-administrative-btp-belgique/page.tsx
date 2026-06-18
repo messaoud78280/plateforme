@@ -24,7 +24,7 @@ export default function Page() {
     },
     {
       q: "BeWork remplace-t-elle une assistante salariée locale ?",
-      a: "Non. BeWork est un relais bureau‑chantier cadré, utile quand la charge varie ou avant une embauche. Un poste interne reste pertinent si le besoin est constant au quotidien.",
+        a: "Non. BeWork est une assistance travaux cadrée, utile quand la charge varie ou avant une embauche. Un poste interne reste pertinent si le besoin est constant au quotidien.",
     },
   ] as const;
 
@@ -40,17 +40,18 @@ export default function Page() {
 
   return (
     <SeoLandingPage
-      description="Externalisation administrative BTP en Belgique : un relais travaux pour tenir vos dossiers chantier (flux francophones)."
+      description="Assistance travaux BTP en Belgique : analyse DCE, dossiers chantier et marchés publics (flux francophones)."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
-        { name: "Externalisation administrative BTP — Belgique", href: PAGE_PATH },
+        { name: "Assistance travaux BTP — Belgique", href: PAGE_PATH },
       ]}
-      h1="Externalisation administrative BTP en Belgique : un relais bureau‑chantier pour vos dossiers"
+      h1="Assistance travaux BTP en Belgique : sécuriser vos dossiers chantier"
       intro={
         <>
-          En Belgique, beaucoup d’équipes avancent vite sur le terrain, mais le suivi bureau‑chantier se fragmente : devis non
-          relancés, situations qui traînent, documents introuvables, demandes client oubliées. Pour les entreprises francophones,
-          BeWork pose un <strong>relais travaux</strong> cadré (suivi, traçabilité, relances), sans recruter trop tôt.
+          En Belgique, beaucoup d’équipes avancent vite sur le terrain, mais le suivi documentaire se fragmente : devis non
+          relancés, situations qui traînent, pièces introuvables, demandes client oubliées. Pour les entreprises francophones,
+          BeWork apporte une <strong>assistance technique et administrative</strong> cadrée (suivi, traçabilité, relances),
+          sans recruter trop tôt.
         </>
       }
     >

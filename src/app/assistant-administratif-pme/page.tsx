@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 
@@ -7,16 +8,16 @@ export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 
 const faq = [
   {
-    q: "Une PME du BTP peut-elle externaliser une partie de son administratif sans tout déléguer ?",
-    a: "Oui. BeWork fonctionne par forfaits : on cible les flux qui bloquent (devis, relances, factures, dossiers chantier) tout en laissant chez vous la décision, la signature et les arbitrages sensibles.",
+    q: "Une PME du BTP peut-elle externaliser une partie du suivi chantier sans tout déléguer ?",
+    a: "Oui. BeWork fonctionne par forfaits : on cible les flux qui bloquent (analyse DCE, relances, dossiers chantier, marchés publics) tout en laissant chez vous la décision, la signature et les arbitrages sensibles.",
   },
   {
     q: "Quels services BeWork peut-il prendre en charge pour une PME ?",
-    a: "Relances et suivi de devis, préparation de mails et pièces, suivi de factures et situations, structuration de dossiers, aide à l’organisation des documents chantier, tableaux de suivi — selon le niveau de forfait et votre besoin terrain.",
+    a: "Analyse DCE, relances et suivi de devis, comptes rendus, situations marché public, structuration de dossiers, aide à l’organisation des pièces chantier, tableaux de suivi — selon le niveau de forfait et votre besoin terrain.",
   },
   {
-    q: "Est-ce adapté si l’entreprise a déjà une secrétaire ou une assistante en interne ?",
-    a: "Souvent oui : BeWork peut prendre la surcharge (pics d’activité, dossiers chantier lourds, relances) ou des missions spécialisées BTP pendant que votre équipe garde le quotidien interne. Le périmètre se définit ensemble.",
+    q: "Est-ce adapté si l’entreprise a déjà une personne bureau en interne ?",
+    a: "Souvent oui : BeWork peut prendre la surcharge (pics d’activité, dossiers chantier lourds, appels d’offres) ou des missions spécialisées BTP pendant que votre équipe garde le quotidien interne. Le périmètre se définit ensemble.",
   },
   {
     q: "Comment limiter les retards de devis, relances et documents chantier ?",
@@ -37,39 +38,47 @@ const faqJsonLd = {
 export default function Page() {
   return (
     <SeoLandingPage
-      description="Assistant administratif pour PME : externaliser devis, factures, relances. Assistant virtuel entreprise dès 590 € HT/mois. France, Belgique, Suisse, Luxembourg."
+      description="Assistant travaux pour PME BTP : analyse DCE, relances, dossiers chantier et marchés publics. Assistance encadrée dès 590 € HT/mois. France, Belgique, Suisse, Luxembourg."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Assistant administratif PME", href: PAGE_PATH },
       ]}
-      h1="Assistant administratif pour PME : externaliser sans recruter"
+      h1="Assistant administratif PME : pour le BTP, une assistance travaux structurée"
       intro={
         <>
-          Les PME peuvent externaliser leur administratif avec un assistant virtuel entreprise dédié. Devis, factures,
-          relances, suivi de dossiers : BeWork accompagne les dirigeants de PME en France, Belgique, Suisse et Luxembourg.
-          Assistant administratif externalisé dès 590 € HT/mois.
+          Les PME du bâtiment cherchent souvent un « assistant administratif ». BeWork répond avec une{" "}
+          <strong>assistance technique et administrative</strong> : analyse DCE, relances, dossiers chantier et suivi
+          marché public — sans recruter. France, Belgique, Suisse et Luxembourg. Dès 590 € HT/mois.{" "}
+          <Link href="/assistants-administratifs-taches" className="text-[#1d4ed8] hover:underline">
+            Voir le catalogue missions
+          </Link>
+          .
         </>
       }
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
-      <h2>Pourquoi externaliser administratif PME ?</h2>
+      <h2>Pourquoi une assistance travaux pour une PME ?</h2>
       <p>
-        Les PME manquent souvent de temps et de ressources pour gérer l&apos;administratif en interne. Un assistant
-        administratif à distance permet de déléguer devis, factures, relances et suivi de dossiers sans recruter,
-        sans charges sociales ni coût d&apos;infrastructure.
+        Les PME manquent souvent de temps pour structurer dossiers chantier, AO et clôture marché. Une assistance
+        travaux encadrée permet de déléguer l&apos;analyse et le suivi documentaire sans charges sociales ni
+        recrutement immédiat.
       </p>
 
-      <h2>Que fait un assistant administratif pour PME ?</h2>
+      <h2>Que fait un assistant travaux pour PME ?</h2>
       <p>
-        Emails, devis clients, factures, relances impayées, agenda, suivi des commandes, saisie documentaire,
-        pré-comptabilité. L&apos;assistant administratif PME s&apos;adapte à votre secteur et à vos outils.
+        Analyse de pièces marché, relances devis et situations, comptes rendus, suivi fournisseurs, préparation DOE
+        et réserves, coordination documentaire chantier — sur vos outils et selon votre périmètre.
       </p>
 
-      <h2>Combien coûte un assistant administratif pour PME ?</h2>
+      <h2>Combien coûte l’accompagnement ?</h2>
       <p>
-        BeWork propose des forfaits dès 590 € HT/mois . Externaliser administratif PME coûte jusqu&apos;à
-        75 % moins cher qu&apos;un recrutement interne. Tout est inclus : équipe francophone, supervision en France.
+        BeWork propose des forfaits dès 590 € HT/mois. Pas de crédits ni de prix horaire opaque : niveaux
+        d&apos;accompagnement publics sur{" "}
+        <Link href="/tarifs" className="text-[#1d4ed8] hover:underline">
+          bework.fr/tarifs
+        </Link>
+        , ajustés au devis selon votre volume réel.
       </p>
 
       <section className="not-prose" id="faq" aria-label="FAQ assistant administratif PME" style={{ scrollMarginTop: "6rem" }}>

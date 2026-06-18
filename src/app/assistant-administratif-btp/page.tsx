@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 
 const PAGE_PATH = "/assistant-administratif-btp";
 
 const PAGE_META_DESCRIPTION =
-  "BeWork accompagne les PME du BTP en France et en Belgique : gestion administrative des marchés travaux déléguée et supervisée, sans embauche. Reprenez le terrain.";
+  "Vous cherchez un assistant administratif BTP ? BeWork apporte une assistance technique et administrative spécialisée chantier : analyse DCE, dossiers, appels d'offres et marchés publics — sans embauche.";
 
 const baseMetadata = landingPageMetadataFromPath(PAGE_PATH);
 
@@ -24,8 +25,8 @@ export const metadata: Metadata = {
 
 const faq = [
   {
-    q: "Quelle différence entre une assistante administrative généraliste et un assistant BTP avec BeWork ?",
-    a: "Une assistante administrative classique traite le courant (courriels, facturation générique). Un assistant BTP BeWork est briefé sur les dossiers chantier : devis, relances, fournisseurs, documents travaux, réserves, plannings — avec un relais bureau‑chantier et des outils adaptés au rythme du terrain.",
+    q: "Quelle différence entre une prestation administrative généraliste et un assistant travaux BeWork ?",
+    a: "Une prestation hors métier bâtiment traite le courrier et la saisie générique. Un assistant travaux BeWork est briefé sur les dossiers chantier : analyse DCE, relances, fournisseurs, documents travaux, réserves, marchés publics — avec validation avant envoi engageant.",
   },
   {
     q: "BeWork peut-il aider un conducteur de travaux au quotidien ?",
@@ -33,7 +34,7 @@ const faq = [
   },
   {
     q: "Quelles tâches BTP peut-on déléguer concrètement ?",
-    a: "Suivi de devis et relances clients, préparation de documents chantier, relances fournisseurs et locations, aide à la structuration des comptes rendus, suivi des listes de pièces (DOE, dossiers, réserves) selon le besoin — toujours avec circuit de validation interne.",
+    a: "Analyse DCE, suivi de devis et relances clients, préparation de documents chantier, relances fournisseurs, comptes rendus, suivi des listes de pièces (DOE, réserves) et situations marché public — toujours avec circuit de validation interne.",
   },
   {
     q: "Est-ce adapté aux artisans et petites entreprises du bâtiment ?",
@@ -54,17 +55,22 @@ const faqJsonLd = {
 export default function Page() {
   return (
     <SeoLandingPage
-      description="Assistant administratif pour le BTP : devis chantiers, suivi sous-traitants, relances factures. PME BTP France, Belgique, Suisse. Dès 590 € HT/mois."
+      description="Assistant travaux BTP : analyse DCE, dossiers chantier, appels d'offres et marchés publics. PME BTP France, Belgique, Suisse. Dès 590 € HT/mois."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Assistant administratif BTP", href: PAGE_PATH },
       ]}
-      h1="Assistant administratif pour le BTP : devis, chantiers, relances"
+      h1="Assistant administratif BTP : en pratique, un assistant travaux pour vos chantiers"
       intro={
         <>
-          Les entreprises du BTP peuvent externaliser leur administratif avec un assistant dédié : devis chantiers,
-          suivi des sous-traitants, relances factures fournisseurs. BeWork accompagne les PME BTP en France, Belgique,
-          Suisse et Luxembourg. Dès 590 € HT/mois.
+          Beaucoup de dirigeants BTP cherchent un « assistant administratif » pour le bâtiment. BeWork répond avec une{" "}
+          <strong>assistance technique et administrative</strong> spécialisée : analyse DCE, dossiers chantier, relances,
+          appels d&apos;offres et marchés publics — pas une prestation administrative généraliste. France, Belgique,
+          Suisse et Luxembourg. Dès 590 € HT/mois. Voir aussi le{" "}
+          <Link href="/services/assistant-travaux" className="text-[#1d4ed8] hover:underline">
+            service assistant travaux
+          </Link>
+          .
         </>
       }
     >
@@ -72,21 +78,25 @@ export default function Page() {
 
       <h2>Missions clés pour le BTP</h2>
       <p>
-        Devis chantiers, suivi des sous-traitants, relances factures, mise à jour des plannings, coordination avec
-        les fournisseurs, archivage des pièces. Notre assistant administratif BTP s&apos;adapte à vos process et
-        à votre métier.
+        Analyse DCE, devis chantiers, suivi sous-traitants, relances MOE/MOA, comptes rendus, situations marché public,
+        coordination fournisseurs et classement des pièces. L&apos;assistant travaux BeWork s&apos;adapte à vos process
+        métier.
       </p>
 
       <h2>Pourquoi les entreprises BTP choisissent BeWork ?</h2>
       <p>
-        Réactivité, équipe francophone, coût maîtrisé. Pas de recrutement ni d&apos;infrastructure : l&apos;assistant
-        externalisé bénéficie d&apos;une prise en charge rapide. Supervision en France pour une qualité et une réactivité optimales.
+        Expertise chantier et marchés publics, équipe francophone, coût maîtrisé. Pas de recrutement ni
+        d&apos;infrastructure : prise en charge rapide, supervision en France, validation finale chez vous.
       </p>
 
       <h2>À qui s&apos;adresse ce service ?</h2>
       <p>
-        Artisans, PME BTP, entreprises de construction et de rénovation qui souhaitent déléguer l&apos;administratif
-        pour se concentrer sur les chantiers. BeWork propose des forfaits adaptés au volume de tâches.
+        Artisans, PME BTP, entreprises générales et titulaires de marchés publics qui veulent sécuriser le suivi
+        documentaire pour se concentrer sur le terrain. Catalogue complet sur{" "}
+        <Link href="/assistants-administratifs-taches" className="text-[#1d4ed8] hover:underline">
+          la page missions
+        </Link>
+        .
       </p>
 
       <section className="not-prose" id="faq" aria-label="FAQ assistant administratif BTP" style={{ scrollMarginTop: "6rem" }}>

@@ -40,17 +40,18 @@ export default function Page() {
 
   return (
     <SeoLandingPage
-      description="Externalisation administrative BTP en France : un relais travaux pour tenir vos dossiers chantier, sans recruter."
+      description="Assistance travaux BTP en France : analyse DCE, dossiers chantier et marchés publics — sans recruter."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
-        { name: "Externalisation administrative BTP — France", href: PAGE_PATH },
+        { name: "Assistance travaux BTP — France", href: PAGE_PATH },
       ]}
-      h1="Externalisation administrative BTP en France : un relais travaux pour vos dossiers chantier"
+      h1="Assistance travaux BTP en France : structurer vos dossiers chantier sans recruter"
       intro={
         <>
           En France, beaucoup d’entreprises du bâtiment tiennent le terrain… mais le bureau décroche dès que le carnet se remplit.
-          Le sujet n’est pas “faire du secrétariat” : c’est tenir un <strong>relais bureau‑chantier</strong> pour que les dossiers
-          avancent (devis, relances, situations, documents travaux, réserves), avec une <strong>validation finale</strong> côté client.
+          L’enjeu n’est pas une prestation administrative généraliste : c’est une{" "}
+          <strong>assistance technique et administrative BTP</strong> pour faire avancer dossiers, relances, situations,
+          pièces marché et réserves — avec une <strong>validation finale</strong> côté client.
         </>
       }
     >

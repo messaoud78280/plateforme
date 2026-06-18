@@ -40,17 +40,18 @@ export default function Page() {
 
   return (
     <SeoLandingPage
-      description="Externalisation administrative BTP en Suisse romande : un relais bureau‑chantier sobre, précis et traçable."
+      description="Assistance travaux BTP en Suisse romande : dossiers chantier structurés, relances et pièces marché."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
-        { name: "Externalisation administrative BTP — Suisse", href: PAGE_PATH },
+        { name: "Assistance travaux BTP — Suisse", href: PAGE_PATH },
       ]}
-      h1="Externalisation administrative BTP en Suisse romande : dossiers chantier clairs, sans recruter"
+      h1="Assistance travaux BTP en Suisse romande : dossiers chantier clairs, sans recruter"
       intro={
         <>
           En Suisse romande, les attentes de clarté et de rigueur documentaire sont élevées. Un dossier chantier bien structuré,
-          des statuts suivis et des relances propres évitent les pertes de temps et les tensions. BeWork apporte un relais
-          bureau‑chantier : préparation, classement, suivi — avec validation finale côté client.
+          des statuts suivis et des relances propres évitent les pertes de temps et les tensions. BeWork apporte une{" "}
+          <strong>assistance technique et administrative</strong> : préparation, classement, suivi — avec validation finale côté
+          client.
         </>
       }
     >

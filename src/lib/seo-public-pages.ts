@@ -122,74 +122,74 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
     keywords: ["admin BTP sans recruter", "externalisation administrative BTP", "relais travaux"],
   },
   "/assistant-administratif-btp": {
-    title: "Assistant travaux BTP : relais bureau-chantier | BeWork",
+    title: "Assistant travaux BTP : assistance technique et administrative | BeWork",
     description: metaDescriptionFrancophonie(
-      "Assistant travaux BTP : devis, relances, dossiers chantier et coordination documentaire. Spécialiste bâtiment, pas secrétariat généraliste",
+      "Assistant travaux BTP : analyse DCE, dossiers chantier, appels d'offres et marchés publics. Spécialiste bâtiment, pas prestation administrative généraliste",
     ),
-    keywords: [...SEO_KEYWORDS_ASSISTANT_TRAVAUX.slice(0, 8)],
+    keywords: [...SEO_KEYWORDS_ASSISTANT_TRAVAUX.slice(0, 8), "assistance technique BTP"],
   },
   "/assistant-administratif-externalise": {
-    title: "Assistant travaux externalisé pour PME et BTP",
+    title: "Assistant travaux externalisé pour PME et BTP | BeWork",
     description: metaDescriptionFrancophonie(
-      "Externalisez le bureau-chantier : devis, relances, dossiers et suivi administratif BTP. Forfaits HT clairs, validation avant engagement",
+      "Externalisez l'assistance travaux BTP : analyse DCE, dossiers chantier, relances et marchés publics. Forfaits HT clairs, validation avant engagement",
     ),
     keywords: SEO_KEYWORDS_ASSISTANT_TRAVAUX.slice(0, 10),
   },
   "/assistant-administratif-pme": {
-    title: "Assistant travaux PME : externaliser l’administratif",
+    title: "Assistant travaux PME : assistance chantier et marchés publics",
     description: metaDescriptionFrancophonie(
-      "PME du bâtiment : déléguez devis, relances et dossiers à un assistant travaux encadré. Accompagnement francophone à distance",
+      "PME du bâtiment : déléguez analyse DCE, relances, dossiers chantier et suivi marché public. Assistance travaux encadrée, francophone à distance",
     ),
-    keywords: ["assistant travaux PME", "externalisation administrative PME", "assistant BTP"],
+    keywords: ["assistant travaux PME", "assistance technique BTP PME", "assistant BTP"],
   },
   "/assistant-administratif-distance": {
     title: "Assistant travaux à distance | PME et BTP francophones",
     description: metaDescriptionFrancophonie(
-      "Assistant travaux à distance : devis, relances et suivi dossiers pour le bâtiment. Plateforme supervisée, forfaits HT publics",
+      "Assistant travaux à distance : analyse DCE, relances, comptes rendus et suivi dossiers chantier. Plateforme supervisée, forfaits HT publics",
     ),
-    keywords: ["assistant travaux distance", "assistant BTP distance", "relais administratif distance"],
+    keywords: ["assistant travaux distance", "assistant BTP distance", "assistance travaux à distance"],
   },
   "/externaliser-administratif": {
-    title: "Externaliser l’administratif BTP | Assistant travaux",
+    title: "Externaliser l'assistance travaux BTP | Assistant travaux",
     description: metaDescriptionFrancophonie(
-      "Externalisez l’administratif chantier : devis, factures, relances et dossiers sans recruter. Relais bureau-chantier spécialisé BTP",
+      "Externaliser le suivi chantier : analyse DCE, devis, relances, marchés publics et DOE sans recruter. Assistance travaux spécialisée BTP",
     ),
-    keywords: ["externaliser administratif", "externalisation administrative BTP", "assistant travaux"],
+    keywords: ["externaliser assistance travaux", "externalisation administrative BTP", "assistant travaux"],
   },
   "/externalisation-administrative-btp-france": {
-    title: "Externalisation administrative BTP France | BeWork",
+    title: "Assistance travaux BTP France | Externalisation encadrée",
     description: metaDescriptionFrancophonie(
-      "Externalisation administrative BTP en France : devis, relances, situations, DOE. Assistants travaux IA, sans recruter — forfaits HT",
+      "Assistance travaux BTP en France : analyse DCE, appels d'offres, situations, DOE. Assistants travaux IA, sans recruter — forfaits HT",
       { withGeoTag: false },
     ),
-    keywords: ["externalisation administrative BTP France", "assistant travaux France", ...SEO_KEYWORDS_GEO_SCOPE.slice(0, 4)],
+    keywords: ["assistance travaux BTP France", "assistant travaux France", ...SEO_KEYWORDS_GEO_SCOPE.slice(0, 4)],
     hreflangLanguages: geoCluster,
   },
   "/externalisation-administrative-btp-belgique": {
-    title: "Externalisation administrative BTP Belgique | BeWork",
+    title: "Assistance travaux BTP Belgique | BeWork",
     description: metaDescriptionFrancophonie(
-      "Belgique : déléguez dossiers chantier, devis et relances à un assistant travaux francophone. Wallonie, Bruxelles — forfaits HT",
+      "Belgique : assistance travaux francophone — analyse DCE, dossiers chantier, marchés publics. Wallonie, Bruxelles — forfaits HT",
       { withGeoTag: false },
     ),
-    keywords: ["externalisation administrative BTP Belgique", "assistant travaux Belgique", "BTP Wallonie"],
+    keywords: ["assistance travaux BTP Belgique", "assistant travaux Belgique", "BTP Wallonie"],
     hreflangLanguages: geoCluster,
   },
   "/externalisation-administrative-btp-suisse": {
-    title: "Externalisation administrative BTP Suisse | BeWork",
+    title: "Assistance travaux BTP Suisse romande | BeWork",
     description: metaDescriptionFrancophonie(
-      "Suisse romande : relais bureau-chantier pour dossiers, relances et suivi administratif BTP. Process cadré, validation chez vous",
+      "Suisse romande : assistance technique et administrative chantier — dossiers, relances, pièces marché. Process cadré, validation chez vous",
       { withGeoTag: false },
     ),
-    keywords: ["externalisation administrative BTP Suisse", "assistant travaux Suisse", "BTP Suisse romande"],
+    keywords: ["assistance travaux BTP Suisse", "assistant travaux Suisse romande"],
     hreflangLanguages: geoCluster,
   },
   "/externalisation-administrative-btp-luxembourg": {
-    title: "Externalisation administrative BTP Luxembourg",
+    title: "Assistance travaux BTP Luxembourg | BeWork",
     description: metaDescriptionFrancophonie(
-      "Luxembourg : assistant travaux pour devis, relances et dossiers chantier. Relais administratif BTP francophone, forfaits HT",
+      "Luxembourg : assistant travaux pour analyse DCE, marchés publics et dossiers chantier. Assistance BTP francophone, forfaits HT",
       { withGeoTag: false },
     ),
-    keywords: ["externalisation administrative BTP Luxembourg", "assistant travaux Luxembourg"],
+    keywords: ["assistance travaux BTP Luxembourg", "assistant travaux Luxembourg"],
     hreflangLanguages: geoCluster,
   },
   "/cas-clients": {
@@ -308,39 +308,39 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
     ],
   },
   "/assistant-travaux-france": {
-    title: "Assistant travaux France : relais bureau-chantier BTP | BeWork",
+    title: "Assistant travaux France : assistance technique BTP | BeWork",
     description: metaDescriptionFrancophonie(
-      "Assistant travaux en France : devis, appels d'offres, situations, DOE et relances pour artisans et PME du bâtiment. Forfaits HT, validation chez vous",
+      "Assistant travaux en France : analyse DCE, appels d'offres, situations, DOE et relances pour artisans et PME du bâtiment. Forfaits HT, validation chez vous",
       { withGeoTag: false },
     ),
-    keywords: ["assistant travaux France", "assistant travaux BTP France", "externalisation administrative BTP France"],
+    keywords: ["assistant travaux France", "assistance technique BTP France", "assistant travaux BTP France"],
     hreflangLanguages: assistantTravauxGeoCluster,
   },
   "/assistant-travaux-belgique": {
-    title: "Assistant travaux Belgique : support administratif BTP | BeWork",
+    title: "Assistant travaux Belgique : assistance technique BTP | BeWork",
     description: metaDescriptionFrancophonie(
-      "Belgique : assistant travaux francophone pour devis, dossiers chantier et marchés publics. Relais bureau-chantier à distance, forfaits HT",
+      "Belgique : assistant travaux francophone — analyse DCE, dossiers chantier et marchés publics. Assistance à distance, forfaits HT",
       { withGeoTag: false },
     ),
-    keywords: ["assistant travaux Belgique", "assistant BTP Belgique", "BTP Wallonie"],
+    keywords: ["assistant travaux Belgique", "assistance travaux BTP Belgique", "BTP Wallonie"],
     hreflangLanguages: assistantTravauxGeoCluster,
   },
   "/assistant-travaux-suisse": {
-    title: "Assistant travaux Suisse : relais administratif BTP | BeWork",
+    title: "Assistant travaux Suisse : assistance technique BTP | BeWork",
     description: metaDescriptionFrancophonie(
-      "Suisse romande : assistant travaux pour dossiers chantier, relances et suivi administratif BTP. Process cadré, validation chez vous",
+      "Suisse romande : assistant travaux pour dossiers chantier, pièces marché et relances. Process cadré, validation chez vous",
       { withGeoTag: false },
     ),
-    keywords: ["assistant travaux Suisse", "assistant BTP Suisse romande"],
+    keywords: ["assistant travaux Suisse", "assistance travaux BTP Suisse romande"],
     hreflangLanguages: assistantTravauxGeoCluster,
   },
   "/assistant-travaux-luxembourg": {
-    title: "Assistant travaux Luxembourg : accompagnement BTP | BeWork",
+    title: "Assistant travaux Luxembourg : assistance technique BTP | BeWork",
     description: metaDescriptionFrancophonie(
-      "Luxembourg : assistant travaux pour devis, marchés publics et dossiers chantier. Relais administratif BTP francophone, forfaits HT",
+      "Luxembourg : assistant travaux pour analyse DCE, marchés publics et dossiers chantier. Assistance BTP francophone, forfaits HT",
       { withGeoTag: false },
     ),
-    keywords: ["assistant travaux Luxembourg", "assistant BTP Luxembourg"],
+    keywords: ["assistant travaux Luxembourg", "assistance travaux BTP Luxembourg"],
     hreflangLanguages: assistantTravauxGeoCluster,
   },
   "/cas-clients/ccmi-martin-audit-devis": {

@@ -40,17 +40,17 @@ export default function Page() {
 
   return (
     <SeoLandingPage
-      description="Externalisation administrative BTP au Luxembourg : relais bureau‑chantier pour dossiers et relances, sans recruter."
+      description="Assistance travaux BTP au Luxembourg : dossiers chantier, relances et pièces marché — sans recruter."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
-        { name: "Externalisation administrative BTP — Luxembourg", href: PAGE_PATH },
+        { name: "Assistance travaux BTP — Luxembourg", href: PAGE_PATH },
       ]}
-      h1="Externalisation administrative BTP au Luxembourg : un relais bureau‑chantier traçable"
+      h1="Assistance travaux BTP au Luxembourg : suivi documentaire traçable"
       intro={
         <>
           Au Luxembourg, la coordination peut vite se complexifier : multi‑interlocuteurs, rythmes soutenus, dossiers qui passent
-          du bureau au terrain (et inversement). BeWork vous aide à tenir le suivi côté bureau : documents, relances, statuts,
-          points bloquants — avec un cadre clair et une validation finale côté client.
+          du bureau au terrain (et inversement). BeWork vous aide à tenir l&apos;<strong>assistance technique et administrative</strong>{" "}
+          côté bureau : documents, relances, statuts, points bloquants — avec un cadre clair et une validation finale côté client.
         </>
       }
     >

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 
@@ -7,12 +8,12 @@ export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 
 const faq = [
   {
-    q: "Comment fonctionne une assistante BTP à distance avec BeWork ?",
+    q: "Comment fonctionne un assistant travaux à distance avec BeWork ?",
     a: "Vous déposez vos demandes sur la plateforme (messagerie, tâches, pièces) : l’assistant traite à distance, documente l’avancement et rend des livrables clairs. Idéal quand vous êtes sur chantier : le bureau suit sans dépendre d’un présentiel.",
   },
   {
     q: "Quelles tâches peuvent être gérées sans présence sur chantier ?",
-    a: "Préparation de relances et mails, structuration de dossiers, suivi de devis et factures, classement de pièces, tableaux de suivi, coordination écrite fournisseurs — tout ce qui ne nécessite pas une présence physique sur site.",
+    a: "Analyse DCE, préparation de relances et mails chantier, structuration de dossiers, suivi de devis et situations, classement de pièces, tableaux de suivi, coordination écrite fournisseurs — tout ce qui ne nécessite pas une présence physique sur site.",
   },
   {
     q: "Comment transmettre les demandes à BeWork ?",
@@ -37,39 +38,43 @@ const faqJsonLd = {
 export default function Page() {
   return (
     <SeoLandingPage
-      description="Assistant administratif à distance pour PME et indépendants. Devis, factures, relances, suivi dossiers. Plateforme supervisée depuis la France. Dès 590 € HT/mois."
+      description="Assistant travaux à distance pour PME BTP : analyse DCE, relances, comptes rendus et suivi dossiers chantier. Plateforme supervisée depuis la France. Dès 590 € HT/mois."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Assistant administratif à distance", href: PAGE_PATH },
       ]}
-      h1="Assistant administratif à distance : même qualité qu&apos;en interne"
+      h1="Assistant administratif à distance : assistance travaux BTP sans présence bureau"
       intro={
         <>
-          L&apos;assistant administratif à distance BeWork travaille depuis notre plateforme, supervisée depuis la France.
-          Devis, factures, relances, agenda : vous déléguez l&apos;administratif sans recruter. Pour PME et indépendants
-          en France, Belgique, Suisse et Luxembourg. Dès 590 € HT/mois.
+          L&apos;assistant travaux BeWork travaille depuis la plateforme, supervisé depuis la France. Analyse DCE,
+          relances, comptes rendus et suivi documentaire chantier — une{" "}
+          <strong>assistance technique et administrative</strong> à distance, pas une prestation de saisie générique.
+          France, Belgique, Suisse et Luxembourg. Dès 590 € HT/mois.{" "}
+          <Link href="/services/assistant-travaux" className="text-[#1d4ed8] hover:underline">
+            Service assistant travaux
+          </Link>
+          .
         </>
       }
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
-      <h2>Comment fonctionne un assistant administratif à distance ?</h2>
+      <h2>Comment fonctionne l’assistance à distance ?</h2>
       <p>
-        Vous envoyez vos tâches via la plateforme BeWork, votre assistant les traite à distance et vous livre les résultats.
-        Messagerie intégrée, suivi des tâches en temps réel et historique complet. Aucun déplacement requis :
-        l&apos;assistant administratif à distance s&apos;adapte à votre rythme.
+        Vous envoyez vos demandes via la plateforme BeWork : l&apos;équipe traite à distance et vous livre des dossiers
+        structurés. Messagerie intégrée, suivi des tâches et historique complet — adapté au rythme du terrain.
       </p>
 
-      <h2>Avantages pour les indépendants et PME</h2>
+      <h2>Avantages pour les PME BTP</h2>
       <p>
-        Gain de temps, flexibilité, coût maîtrisé. Un assistant virtuel entreprise à distance évite le recrutement et
-        les charges associées. Vous payez un forfait clair selon votre périmètre — pas de prix horaire ni de crédits.
+        Gain de temps, flexibilité, coût maîtrisé. Une assistance travaux à distance évite le recrutement immédiat
+        tout en gardant un interlocuteur qui comprend lots, délais chantier et pièces marché.
       </p>
 
       <h2>Qualité et supervision</h2>
       <p>
-        Direction et supervision en France, assistants francophones Bac+5 formés à l&apos;IA. Même fuseau horaire,
-        même niveau d&apos;exigence. BeWork garantit une collaboration fluide et professionnelle.
+        Direction et supervision en France, process cadré et validation avant envoi engageant. BeWork ne remplace pas
+        le conducteur de travaux sur le terrain.
       </p>
 
       <section className="not-prose" id="faq" aria-label="FAQ assistant administratif à distance" style={{ scrollMarginTop: "6rem" }}>

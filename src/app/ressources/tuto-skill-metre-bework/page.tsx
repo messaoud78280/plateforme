@@ -254,7 +254,7 @@ export default function TutoSkillMetreBeworkPage() {
                 Réservez un appel
               </CalendlyBookingLink>
               <span className="text-sm leading-snug text-slate-600 sm:max-w-sm">
-                20&nbsp;minutes pour cadrer métré, DPGF ou relais administratif BTP — sans engagement.
+                20&nbsp;minutes pour cadrer métré, DPGF ou assistance travaux BTP — sans engagement.
               </span>
             </div>
           </header>

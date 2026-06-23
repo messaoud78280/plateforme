@@ -18,7 +18,7 @@ export const TARIFS_PAGE_PATH = "/tarifs" as const;
 export const TARIFS_SEO_TITLE = "Tarifs BeWork | Assistant travaux externalisé BTP";
 
 export const TARIFS_SEO_DESCRIPTION =
-  "Tarifs BeWork : forfaits HT pour déléguer le suivi travaux BTP — ponctuel dès 150 €, relais mensuel dès 590 €, cellule externalisée. Sans recrutement.";
+  "Tarifs BeWork : forfaits HT pour déléguer le suivi travaux BTP — ponctuel dès 150 €, accompagnement mensuel dès 590 €, cellule externalisée. Sans recrutement.";
 
 export const TARIFS_SEO_KEYWORDS = [
   "tarifs assistant travaux",
@@ -29,7 +29,7 @@ export const TARIFS_SEO_KEYWORDS = [
   "suivi chantier externalisé",
   "aide conducteur de travaux",
   "externalisation administrative BTP",
-  "relais bureau-chantier tarif",
+  "assistance technique et administrative BTP tarif",
   "mission ponctuelle BTP",
   "DCE BTP",
   "DOE BTP",
@@ -85,7 +85,7 @@ export function buildTarifsPageJsonLd() {
       {
         "@type": "Service",
         "@id": `${pageUrl}#service-tarifs`,
-        name: "Assistants travaux externalisés — relais bureau-chantier BTP",
+        name: "Assistants travaux externalisés — assistance technique et administrative BTP",
         description: getMarketingAggregateOfferDescription(),
         url: pageUrl,
         provider: { "@id": SCHEMA_ORG_ID },

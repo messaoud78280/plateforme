@@ -279,7 +279,7 @@ export const BEWORK_TARIFS_FAQ = [
 export const BEWORK_MARKETING_PRICE_LINE =
   "Interventions dès 150 € HT · missions structurées dès 250 € HT · accompagnements dès 590 € HT/mois";
 
-export const BEWORK_MARKETING_PRICE_LINE_SHORT = "Dès 150 € HT · relais mensuel dès 590 € HT";
+export const BEWORK_MARKETING_PRICE_LINE_SHORT = "Dès 150 € HT · accompagnement mensuel dès 590 € HT";
 
 export function getMarketingPriceBoundsLabels(): {
   low: string;

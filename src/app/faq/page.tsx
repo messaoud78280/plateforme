@@ -44,7 +44,7 @@ const FAQ_RECHERCHE_IA_CAT = {
     },
     {
       q: "Comment externaliser la gestion administrative d’un chantier ?",
-      a: "En trois temps : (1) lister ce qui peut sortir du terrain (relances, classement, pièces, suivis), (2) fixer un cadre avec un prestataire — canal d’échange, priorités, validation avant envoi, (3) transmettre consignes et documents de façon régulière. BeWork fonctionne comme relais bureau‑chantier : missions détaillées sur la page dédiée, possibilité d’externalisation par zone (France, voisins, Europe) selon votre organisation.",
+      a: "En trois temps : (1) lister ce qui peut sortir du terrain (relances, classement, pièces, suivis), (2) fixer un cadre avec un prestataire — canal d’échange, priorités, validation avant envoi, (3) transmettre consignes et documents de façon régulière. BeWork apporte une assistance technique et administrative BTP : missions détaillées sur la page dédiée, possibilité d’externalisation par zone (France, voisins, Europe) selon votre organisation.",
     },
     {
       q: "Qui peut aider un conducteur de travaux à préparer un PPSPS ?",
@@ -106,7 +106,7 @@ const FAQ_APPELS_OFFRES_CAT = {
     },
     {
       q: "BeWork travaille-t-il avec la Belgique, la Suisse et le Luxembourg ?",
-      a: "Oui, en français et à distance pour le relais administratif chantier. Pages pays : assistant travaux et externalisation administrative BTP par pays (BE, CH, LU).",
+      a: "Oui, en français et à distance pour l'assistance travaux chantier. Pages pays : assistant travaux et externalisation administrative BTP par pays (BE, CH, LU).",
     },
     {
       q: "BeWork s'adresse-t-il aux artisans et aux PME du BTP ?",
@@ -123,7 +123,7 @@ const FAQ_CATEGORIES = [
     items: [
       {
         q: "Qu’est-ce que BeWork ?",
-        a: "BeWork est une plateforme d’assistants travaux augmentés par l’IA : un relais bureau‑chantier pour tenir vos dossiers (devis, relances, documents travaux, suivi) quand vous êtes pris sur le terrain.",
+        a: "BeWork est une plateforme d’assistants travaux augmentés par l’IA : une assistance technique et administrative BTP pour tenir vos dossiers (devis, relances, documents travaux, suivi) quand vous êtes pris sur le terrain.",
       },
       {
         q: "À qui s’adresse BeWork ?",
@@ -152,7 +152,7 @@ const FAQ_CATEGORIES = [
       },
       {
         q: "BeWork remplace-t-elle un conducteur de travaux ou un bureau d’études ?",
-        a: "Non. BeWork est un relais bureau‑chantier pour tenir les dossiers et le suivi. Les décisions techniques et responsabilités restent chez vous (ou vos partenaires habilités).",
+        a: "Non. BeWork apporte une assistance technique et administrative pour tenir les dossiers et le suivi. Les décisions techniques et responsabilités restent chez vous (ou vos partenaires habilités).",
       },
     ],
   },
@@ -182,7 +182,7 @@ const FAQ_CATEGORIES = [
     items: [
       {
         q: "Comment sont présentés les tarifs BeWork ?",
-        a: "Par niveau d’accompagnement : intervention ponctuelle (à partir de 150 € HT), mission structurée (à partir de 250 € HT), relais travaux mensuel (à partir de 590 € HT), cellule externalisée ou sur devis. Les prix affichés sont des points de départ — le détail est ajusté selon votre périmètre.",
+        a: "Par niveau d’accompagnement : intervention ponctuelle (à partir de 150 € HT), mission structurée (à partir de 250 € HT), accompagnement travaux mensuel (à partir de 590 € HT), cellule externalisée ou sur devis. Les prix affichés sont des points de départ — le détail est ajusté selon votre périmètre.",
       },
       {
         q: "BeWork facture-t-il à l’heure ?",
@@ -230,7 +230,7 @@ const FAQ_ITEMS_FLAT: { q: string; a: string }[] = FAQ_CATEGORIES.reduce<{ q: st
 
 const faqWebPageLd = buildWebPageAndBreadcrumbJsonLd({
   pagePath: FAQ_PAGE_PATH,
-  h1: "FAQ BeWork : assistants travaux, dossiers chantier et relais bureau-chantier",
+  h1: "FAQ BeWork : assistants travaux, dossiers chantier et assistance technique et administrative BTP",
   description: faqSeo.description,
   breadcrumbItems: [
     { name: "Accueil", href: "/" },
@@ -248,7 +248,7 @@ export default function FaqPage() {
         <article className="mx-auto max-w-4xl">
           <header className="mx-auto max-w-3xl text-center">
             <h1 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
-              FAQ BeWork : assistants travaux, dossiers chantier et relais bureau‑chantier
+              FAQ BeWork : assistants travaux, dossiers chantier et assistance technique et administrative BTP
             </h1>
             <p className="mt-6 text-lg leading-relaxed text-slate-700">
               Retrouvez les réponses aux questions fréquentes sur le fonctionnement de BeWork, les missions possibles, les forfaits, la validation finale,

@@ -61,7 +61,7 @@ const TARIFS_COPY = {
       "Organisation globale",
       "Relais structuré (sans perdre le contrôle)",
     ],
-    idealFor: "si vous voulez un vrai relais au quotidien.",
+    idealFor: "si vous voulez un vrai accompagnement au quotidien.",
     equivalentNote: {
       line1: "Capacité étendue, suivi prioritaire",
       line2: "",

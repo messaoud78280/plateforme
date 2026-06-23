@@ -631,7 +631,7 @@ export const BLOG_ARTICLES_SEO: Record<string, BlogArticle> = {
     title: "Pourquoi externaliser l'administratif chantier ?",
     description:
       "Externalisation administrative BTP : quand la déléguer, ce qui peut sortir du terrain et ce qui doit rester validé chez vous.",
-    keywords: ["externalisation administrative BTP", "relais bureau-chantier", "assistant travaux"],
+    keywords: ["externalisation administrative BTP", "assistance technique et administrative BTP", "assistant travaux"],
     publishedTime: PUBLISHED,
     articleSection: "Administratif chantier",
     body: [
@@ -646,7 +646,7 @@ export const BLOG_ARTICLES_SEO: Record<string, BlogArticle> = {
       {
         type: "p",
         content:
-          "BeWork positionne l'externalisation comme relais bureau-chantier spécialisé BTP : vous tenez le chantier, nous structurons et suivons les livrables administratifs.",
+          "BeWork positionne l'externalisation comme assistance technique et administrative BTP spécialisé BTP : vous tenez le chantier, nous structurons et suivons les livrables administratifs.",
       },
       {
         type: "faq",

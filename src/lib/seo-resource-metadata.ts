@@ -93,7 +93,7 @@ export const RESOURCE_EDITORIAL_SEO: Record<string, ResourceEditorialSeo> = {
       "BPU",
       "DQE",
       "assistant travaux",
-      "relais administratif BTP",
+      "assistance travaux BTP",
       "entreprise du bâtiment",
       "points d’alerte DCE",
       "base de chiffrage",

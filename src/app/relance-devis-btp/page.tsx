@@ -141,7 +141,7 @@ export default function Page() {
 
       <h2>Parler de votre suivi devis</h2>
       <p>
-        Besoin d’un relais pour tenir vos relances et vos statuts de devis sans y passer vos soirées ?{" "}
+        Besoin d’une assistance pour tenir vos relances et vos statuts de devis sans y passer vos soirées ?{" "}
         <CalendlyBookingLink className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
           Réserver un échange
         </CalendlyBookingLink>

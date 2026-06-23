@@ -423,7 +423,7 @@ export default function TutoDispatchBeworkPage() {
               <ul className="mt-6 list-none space-y-3 text-[1.0625rem] leading-relaxed text-slate-900">
                 <li>▸ Accompagnement à la mise en place et aux bonnes pratiques.</li>
                 <li>▸ Calibration de commandes vocales adaptées à votre métier.</li>
-                <li>▸ Suite possible sur relais administratif chantier selon vos besoins.</li>
+                <li>▸ Suite possible sur assistance travaux chantier selon vos besoins.</li>
               </ul>
               <p className="mt-10 text-[1.0625rem] font-semibold text-slate-900">
                 Réservez un appel de cadrage de 20 minutes sur{" "}

@@ -49,7 +49,7 @@ export const metadata: Metadata = {
         url: tarifsOgImage,
         width: 1200,
         height: 630,
-        alt: "Tarifs BeWork — assistant travaux externalisé BTP, relais bureau-chantier",
+        alt: "Tarifs BeWork — assistant travaux externalisé BTP, assistance technique et administrative BTP",
       },
     ],
   },
@@ -152,7 +152,7 @@ export default function TarifsPage() {
         <section className="mx-auto mt-10 max-w-4xl md:mt-12" aria-labelledby="repositionnement-heading">
           <div className="rounded-2xl border border-slate-200/90 bg-white p-8 shadow-sm md:p-10">
             <h2 id="repositionnement-heading" className="text-center text-2xl font-bold text-[#0f172a] md:text-3xl">
-              Un relais bureau-chantier pour sécuriser vos dossiers
+              Une assistance technique et administrative BTP pour sécuriser vos dossiers
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-center text-base leading-relaxed text-slate-600 md:text-lg">
               BeWork accompagne vos équipes dans le suivi administratif, documentaire et opérationnel de vos chantiers.

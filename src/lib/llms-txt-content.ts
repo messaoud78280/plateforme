@@ -94,7 +94,7 @@ ${line("Cas clients", "/cas-clients")}
 ${line("Accueil", "/")}
 ${line("Missions & catalogue déléguable", "/assistants-administratifs-taches", "Hub assistance technique et administrative : appels d'offres/DCE, suivi chantier et exécution marché public.")}
 ${line("Services", "/services")}
-${line("Tarifs", "/tarifs", "Missions ponctuelles, relais travaux mensuel, cellule externalisée — prix de départ HT sur bework.fr/tarifs.")}
+${line("Tarifs", "/tarifs", "Missions ponctuelles, accompagnement travaux mensuel, cellule externalisée — prix de départ HT sur bework.fr/tarifs.")}
 ${line("Contact & appel découverte", "/contact")}
 ${line("FAQ", "/faq")}
 

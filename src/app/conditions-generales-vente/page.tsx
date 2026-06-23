@@ -44,7 +44,7 @@ export default function ConditionsGeneralesVentePage() {
     >
       <h2>1. Objet</h2>
       <p>
-        BeWork commercialise des prestations d&apos;assistance administrative et de relais travaux (BTP et activités connexes),
+        BeWork commercialise des prestations d&apos;assistance administrative et d'accompagnement travaux (BTP et activités connexes),
         facturées sous forme de forfaits mensuels incluant un quota de crédits administratifs.
       </p>
 
@@ -54,7 +54,7 @@ export default function ConditionsGeneralesVentePage() {
         <Link href="/tarifs" className="font-medium text-[#1d4ed8] underline hover:no-underline">
           Tarifs
         </Link>{" "}
-        du site (mission ponctuelle, relais travaux mensuel, cellule externalisée, sur mesure).
+        du site (mission ponctuelle, accompagnement travaux mensuel, cellule externalisée, sur mesure).
       </p>
       <ul>
         {BEWORK_PUBLIC_OFFERS.map((offer) => (

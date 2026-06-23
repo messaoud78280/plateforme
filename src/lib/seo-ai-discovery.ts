@@ -116,7 +116,7 @@ RSS: ${absoluteUrl("/feed.xml")}
 ${priorityPages}
 
 ## Topics (entity hints)
-assistant travaux BTP, relais bureau-chantier, marché public travaux, appel d'offres BTP, DCE, Chorus Pro, DOE marché public, accord-cadre logement occupé, amiante SS4, suivi administratif chantier, externalisation administrative BTP, conducteur de travaux
+assistant travaux BTP, assistance technique et administrative BTP, marché public travaux, appel d'offres BTP, DCE, Chorus Pro, DOE marché public, accord-cadre logement occupé, amiante SS4, suivi administratif chantier, externalisation administrative BTP, conducteur de travaux
 
 ## Geographic scope
 France, Belgique, Suisse, Luxembourg — assistants francophones, supervision depuis la France.

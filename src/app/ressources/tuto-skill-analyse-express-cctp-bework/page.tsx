@@ -242,7 +242,7 @@ export default function TutoSkillAnalyseExpressCctpBeworkPage() {
                 Réservez un appel
               </CalendlyBookingLink>
               <span className="text-sm leading-snug text-slate-600 sm:max-w-sm">
-                20&nbsp;minutes pour cadrer DCE/CCTP ou relais administratif chantier — sans engagement.
+                20&nbsp;minutes pour cadrer DCE/CCTP ou assistance travaux chantier — sans engagement.
               </span>
             </div>
           </header>

@@ -238,7 +238,7 @@ export function buildOfferCatalogJsonLd(
     "@context": "https://schema.org",
     "@type": "OfferCatalog",
     "@id": `${pageUrl}#offer-catalog`,
-    name: "Tarifs BeWork — relais bureau-chantier BTP (missions ponctuelles et accompagnements mensuels)",
+    name: "Tarifs BeWork — assistance technique et administrative BTP (missions ponctuelles et accompagnements mensuels)",
     url: pageUrl,
     numberOfItems: plans.length,
     itemListElement: plans.map((plan, i) => ({

@@ -22,7 +22,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "BeWork remplace-t-il un économiste de la construction ?",
-    a: "Non. BeWork intervient comme appui travaux et relais administratif pour structurer les informations, préparer les tableaux et repérer les points d’alerte.",
+    a: "Non. BeWork intervient comme appui travaux et assistance travaux pour structurer les informations, préparer les tableaux et repérer les points d’alerte.",
   },
   {
     q: "Quels documents faut-il transmettre ?",
@@ -82,7 +82,7 @@ export default function AnalyseDceChiffrageBtpPage() {
             Répondre à un DCE ou préparer un chiffrage BTP demande du temps, de la méthode et une vraie rigueur documentaire.
             Entre CCTP, plans, DPGF, BPU, DQE, notices et limites de prestations, les entreprises du bâtiment perdent souvent de
             nombreuses heures avant même de remettre une offre claire. BeWork intervient comme{" "}
-            <strong>relais administratif</strong> et <strong>assistant travaux externalisé</strong> : nous préparons, structurons,
+            <strong>assistance travaux</strong> et <strong>assistant travaux externalisé</strong> : nous préparons, structurons,
             alertons — l&apos;entreprise valide et engage son offre.
           </>
         }

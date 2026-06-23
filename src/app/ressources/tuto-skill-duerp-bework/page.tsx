@@ -215,7 +215,7 @@ export default function TutoSkillDuerpBeworkPage() {
                 Réservez un appel
               </CalendlyBookingLink>
               <span className="text-sm leading-snug text-slate-600 sm:max-w-sm">
-                20&nbsp;minutes pour cadrer votre besoin (DUERP, prévention BTP, relais administratif) — sans engagement.
+                20&nbsp;minutes pour cadrer votre besoin (DUERP, prévention BTP, assistance travaux) — sans engagement.
               </span>
             </div>
           </header>
@@ -263,7 +263,7 @@ export default function TutoSkillDuerpBeworkPage() {
           >
             <div className="min-w-0 sm:flex-1">
               <p className="text-base font-semibold text-slate-900 md:text-[1.05rem]">
-                Besoin d&apos;un relais pour votre DUERP, votre plan d&apos;action et le dépôt sur le portail national&nbsp;?
+                Besoin d&apos;une assistance pour votre DUERP, votre plan d&apos;action et le dépôt sur le portail national&nbsp;?
               </p>
               <p className="mt-2 text-sm leading-relaxed text-slate-600 md:text-[0.9375rem]">
                 Parlez-en avec BeWork sur un créneau de 20&nbsp;minutes : mise en forme, priorisation risques et calendrier de mise à jour.

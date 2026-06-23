@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     "méthode assistant travaux BTP",
     "process externalisation administrative BTP",
     "validation chantier",
-    "relais bureau-chantier",
+    "assistance technique et administrative BTP",
     "assistant travaux BeWork",
   ],
   alternates: { canonical: pageUrl, languages: hreflangFrancophonieLanguages("/notre-facon-de-travailler") },
@@ -199,7 +199,7 @@ export default function NotreFaconDeTravaillerPage() {
             Méthode BeWork
           </p>
           <h1 className="mt-3 text-3xl font-bold tracking-tight text-black md:text-4xl md:leading-tight">
-            Notre façon de travailler : un relais bureau‑chantier clair et suivi
+            Notre façon de travailler : une assistance travaux claire et suivie
           </h1>
           <p className="mx-auto mt-5 max-w-3xl text-base leading-relaxed text-slate-700 md:text-lg">
             Vous envoyez vos demandes, BeWork les analyse, prépare les livrables, suit les échéances et vous laisse valider ce qui engage votre

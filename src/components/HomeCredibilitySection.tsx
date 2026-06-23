@@ -80,7 +80,7 @@ export function HomeCredibilitySection() {
               <h3 className="font-sans text-base font-bold text-[#0f172a] md:text-[1.05rem]">Notre rôle</h3>
               <div className="mt-2 h-1 w-14 rounded-sm bg-[#1d4ed8]" aria-hidden />
               <p className="mt-2 text-sm font-semibold leading-snug text-[#0f172a] md:text-base">
-                Tenir un relais administratif fiable, dans un cadre clair et structuré.
+                Tenir une assistance technique et administrative fiable, dans un cadre clair et structuré.
               </p>
               <div className="my-2.5 border-t border-slate-300/60" aria-hidden />
               <p className="text-sm leading-relaxed text-slate-700 md:text-base">Pas empiler des dossiers.</p>

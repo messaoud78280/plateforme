@@ -35,7 +35,7 @@ export function BeWorkLogo({
   taglineSub,
   priority = false,
 }: BeWorkLogoProps) {
-  const defaultTagline = "L'assistant administratif à la demande";
+  const defaultTagline = "Assistance technique et administrative BTP";
 
   const sizesAttr =
     size === "sm"

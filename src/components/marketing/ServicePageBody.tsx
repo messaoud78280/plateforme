@@ -44,7 +44,7 @@ export function ServicePageBody({ definition: d }: Props) {
         <>
           <h2>Ce que BeWork ne remplace pas</h2>
           <p>
-            BeWork est un relais bureau-chantier augmenté par l&apos;IA. Les points suivants restent de votre
+            BeWork est une assistance travaux augmentée par l&apos;IA. Les points suivants restent de votre
             responsabilité ou celle de vos partenaires habilités :
           </p>
           <ul>

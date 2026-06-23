@@ -19,7 +19,7 @@ const MISSIONS_GRID = [
 ] as const;
 
 /**
- * Section « Ce qu'on prend en charge » — relais administratif marchés travaux.
+ * Section « Ce qu'on prend en charge » — assistance travaux marchés travaux.
  */
 export function HomeWhatWeHandleSection() {
   return (
@@ -104,7 +104,7 @@ export function HomeWhatWeHandleSection() {
         <div className="mt-10 md:mt-12">
           <div className="mx-auto max-w-5xl">
             <h3 className="text-balance text-xl font-bold tracking-tight text-[#0f172a] md:text-2xl">
-              Un relais pour conducteurs de travaux, chargés d&apos;affaires et bureau marchés.
+              Une assistance pour conducteurs de travaux, chargés d&apos;affaires et bureau marchés.
             </h3>
             <div className="mt-6 grid gap-5 md:grid-cols-2">
               <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm ring-1 ring-slate-100/85 md:p-7">

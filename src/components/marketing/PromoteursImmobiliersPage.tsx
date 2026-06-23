@@ -265,7 +265,7 @@ export function PromoteursImmobiliersPage() {
             Assistant travaux pour promoteurs immobiliers
           </h1>
           <p className="mt-5 text-balance text-lg font-semibold leading-snug text-[#1e3a5f] sm:text-xl md:text-2xl">
-            Un relais travaux pour vos opérations immobilières
+            Une assistance travaux pour vos opérations immobilières
           </p>
           <p className="mx-auto mt-6 max-w-3xl text-lg leading-relaxed text-slate-700">
             BeWork accompagne les promoteurs immobiliers dans le suivi administratif, documentaire et opérationnel de

@@ -143,7 +143,7 @@ export default function Page() {
 
       <h2>Parler de votre suivi fournisseurs</h2>
       <p>
-        Besoin d’un relais bureau‑terrain pour tenir confirmations, relances et statuts sans immobiliser vos équipes ?{" "}
+        Besoin d’une assistance bureau-terrain pour tenir confirmations, relances et statuts sans immobiliser vos équipes ?{" "}
         <CalendlyBookingLink className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
           Réserver un échange
         </CalendlyBookingLink>

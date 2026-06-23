@@ -128,7 +128,7 @@ export default function MemoireTechniqueBtpPage() {
 
         <section className="not-prose" aria-label="CTA">
           <div className="mt-10 rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
-            <p className="text-base font-bold text-slate-900">Structurer mémoire, pièces et relais administratif</p>
+            <p className="text-base font-bold text-slate-900">Structurer mémoire, pièces et assistance travaux</p>
             <p className="mt-2 text-sm text-slate-700">BeWork peut aider à cadrer le dossier de réponse et le suivi documents — vous validez le fond.</p>
             <div className="mt-5 flex flex-wrap gap-3">
               <CalendlyBookingLink className="inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white hover:bg-[#1e40af]">

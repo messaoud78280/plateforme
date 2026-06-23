@@ -225,7 +225,7 @@ export default function TutoSkillOrdreDeServiceBeworkPage() {
                 Réservez un appel
               </CalendlyBookingLink>
               <span className="text-sm leading-snug text-slate-600 sm:max-w-sm">
-                20&nbsp;minutes pour cadrer votre besoin (OS, plus-values, relais administratif BTP) — sans engagement.
+                20&nbsp;minutes pour cadrer votre besoin (OS, plus-values, assistance travaux BTP) — sans engagement.
               </span>
             </div>
           </header>
@@ -273,7 +273,7 @@ export default function TutoSkillOrdreDeServiceBeworkPage() {
           >
             <div className="min-w-0 sm:flex-1">
               <p className="text-base font-semibold text-slate-900 md:text-[1.05rem]">
-                Besoin d&apos;un relais sur vos ordres de service&nbsp;?
+                Besoin d&apos;une assistance sur vos ordres de service&nbsp;?
               </p>
               <p className="mt-2 text-sm leading-relaxed text-slate-600 md:text-[0.9375rem]">
                 Parlez-en avec BeWork pendant un créneau de 20&nbsp;minutes : analyse, réserves CCAG et chiffrage sous 48&nbsp;h.

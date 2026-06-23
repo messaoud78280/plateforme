@@ -473,7 +473,7 @@ export default function RessourcesPage() {
 
         <section className="mx-auto mt-16 max-w-3xl md:mt-20" aria-label="Découvrir BeWork">
           <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-6 text-center shadow-[0_10px_40px_-14px_rgba(15,23,42,0.1)] ring-1 ring-slate-100/85 sm:p-8 md:p-10">
-            <h2 className="font-heading text-2xl font-bold tracking-tight text-[#0f172a]">Besoin d&apos;un relais sur vos dossiers ?</h2>
+            <h2 className="font-heading text-2xl font-bold tracking-tight text-[#0f172a]">Besoin d&apos;une assistance sur vos dossiers ?</h2>
             <p className="mx-auto mt-3 max-w-lg text-base leading-relaxed text-slate-600">
               BeWork structure, relance et suit avec vous — vous gardez la validation terrain.
             </p>

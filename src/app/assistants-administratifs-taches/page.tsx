@@ -582,7 +582,7 @@ export default function AssistantsAdministratifsTachesPage() {
               {BEWORK_MARKETING_PRICE_LINE_SHORT} — sans recrutement
             </h2>
             <p className="mt-4 text-black">
-              Un relais travaux bureau‑terrain, avec des assistants travaux augmentés par l’IA pour trier, synthétiser et structurer. Vous gardez la validation
+              Une assistance travaux bureau-terrain, avec des assistants travaux augmentés par l’IA pour trier, synthétiser et structurer. Vous gardez la validation
               finale.
             </p>
             <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">

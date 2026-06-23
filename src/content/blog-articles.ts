@@ -338,7 +338,7 @@ export const BLOG_ARTICLES: Record<string, BlogArticle> = {
       {
         type: "p",
         content:
-          "C'est précisément le rôle d'un relais bureau-chantier. Pendant que vous tenez le terrain, nous tenons le bureau : recalage de planning, chiffrage des scénarios, note d'impact, suivi des aléas. Vous gardez la décision — c'est votre métier. Nous vous rendons le temps de la prendre.",
+          "C'est précisément le rôle d'une assistance travaux. Pendant que vous tenez le terrain, nous tenons le bureau : recalage de planning, chiffrage des scénarios, note d'impact, suivi des aléas. Vous gardez la décision — c'est votre métier. Nous vous rendons le temps de la prendre.",
       },
       {
         type: "p",
@@ -423,7 +423,7 @@ export const BLOG_ARTICLES: Record<string, BlogArticle> = {
           {
             question: "Peut-on déléguer le suivi du planning de chantier ?",
             answer:
-              "Oui, le suivi administratif du planning peut être délégué à un relais bureau-chantier externe. Le conducteur de travaux conserve la décision et le pilotage terrain, tandis que le prestataire prend en charge le recalage du planning, le chiffrage des scénarios et la rédaction des notes d'impact. Cela libère du temps pour la conduite opérationnelle du chantier.",
+              "Oui, le suivi administratif du planning peut être délégué à une assistance travaux externalisée. Le conducteur de travaux conserve la décision et le pilotage terrain, tandis que le prestataire prend en charge le recalage du planning, le chiffrage des scénarios et la rédaction des notes d'impact. Cela libère du temps pour la conduite opérationnelle du chantier.",
           },
         ],
       },

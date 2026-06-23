@@ -610,7 +610,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
       "Assistant MOEX et MOA BTP : relances, synthèses, dossiers et coordination documentaire pour maîtrise d’œuvre et maîtrise d’ouvrage. Validation chez vous.",
     h1: "Assistant MOEX / MOA : sécuriser le suivi documentaire des marchés travaux",
     intro:
-      "Maîtrise d’ouvrage et maîtrise d’œuvre portent une charge documentaire dense : comptes rendus, validations, relances entreprises, pièces contractuelles. BeWork apporte un relais bureau-chantier pour structurer, suivre et relancer — sans se substituer à vos compétences MOA/MOEX.",
+      "Maîtrise d’ouvrage et maîtrise d’œuvre portent une charge documentaire dense : comptes rendus, validations, relances entreprises, pièces contractuelles. BeWork apporte une assistance technique et administrative BTP pour structurer, suivre et relancer — sans se substituer à vos compétences MOA/MOEX.",
     pourQuiBullets: [
       "Assistants MOA, MOEX et chargés de mission en maîtrise d’ouvrage ou d’œuvre.",
       "Bureaux de maîtrise d’œuvre et AMO avec plusieurs opérations en parallèle.",

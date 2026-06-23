@@ -61,7 +61,7 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
   "/chantier-mal-suivi": {
     title: "Chantier mal suivi : reprendre le fil administratif",
     description: metaDescriptionFrancophonie(
-      "Chantier mal suivi côté bureau ? CR, réserves, fournisseurs et DOE structurés. Relais travaux BTP : vous validez, BeWork suit",
+      "Chantier mal suivi côté bureau ? CR, réserves, fournisseurs et DOE structurés. Assistance travaux BTP : vous validez, BeWork suit",
     ),
     keywords: ["chantier mal suivi", "suivi administratif chantier", "dossiers chantier BTP"],
   },
@@ -73,7 +73,7 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
     keywords: ["facture impayée BTP", "relance facture BTP", "impayés chantier", "trésorerie BTP"],
   },
   "/artisan-deborde-administratif": {
-    title: "Artisan débordé : déléguer le bureau-chantier BTP",
+    title: "Artisan débordé : déléguer l'assistance administrative chantier BTP",
     description: metaDescriptionFrancophonie(
       "Artisan débordé par l’administratif ? Déléguez devis, relances et dossiers à un assistant travaux BTP, sans recruter en interne",
     ),
@@ -82,7 +82,7 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
   "/impayes-btp-relances": {
     title: "Impayés BTP : relances factures et situations",
     description: metaDescriptionFrancophonie(
-      "Impayés BTP : suivez factures et situations, relancez à temps, limitez les retards de paiement. Relais administratif chantier encadré",
+      "Impayés BTP : suivez factures et situations, relancez à temps, limitez les retards de paiement. Assistance travaux chantier encadrée",
     ),
     keywords: ["impayés BTP", "relance facture BTP", "situation travaux impayée"],
   },
@@ -103,7 +103,7 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
   "/avenant-chantier": {
     title: "Avenant chantier BTP : cadrer et sécuriser le CA",
     description: metaDescriptionFrancophonie(
-      "Avenants travaux : formalisez demandes, chiffrage et preuves pour protéger vos marges. Relais bureau-chantier, validation chez vous",
+      "Avenants travaux : formalisez demandes, chiffrage et preuves pour protéger vos marges. Assistance travaux, validation chez vous",
     ),
     keywords: ["avenant chantier", "avenant travaux BTP", "modification marché travaux"],
   },
@@ -249,7 +249,7 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
     description: metaDescriptionFrancophonie(
       "Méthode BeWork : cadrage, validation humaine, traçabilité bureau-chantier pour entreprises du BTP en France, Belgique, Suisse et Luxembourg",
     ),
-    keywords: ["méthode BeWork", "validation humaine BTP", "process assistant travaux", "relais bureau-chantier"],
+    keywords: ["méthode BeWork", "validation humaine BTP", "process assistant travaux", "assistance technique et administrative BTP"],
   },
   "/assistants-administratifs-taches": {
     title: "Missions assistant travaux BTP : AO, chantier & marchés publics | BeWork",

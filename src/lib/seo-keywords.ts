@@ -14,7 +14,7 @@ export const SEO_KEYWORDS_ASSISTANT_TRAVAUX = [
   "assistant chargé d’affaires BTP",
   "gestion administrative BTP",
   "externalisation administrative BTP",
-  "relais bureau-chantier",
+  "assistance technique et administrative BTP",
   "documents chantier BTP",
   "plateforme assistant BTP",
   "assistant IA BTP",
@@ -32,7 +32,7 @@ export const SEO_KEYWORDS_PARTENAIRE_CORE = [
   "sous-traitance administrative",
   "délégation administrative entreprise",
   "assistant administratif externalisé",
-  "relais administratif entreprise",
+  "assistance travaux entreprise",
 ] as const;
 
 export const SEO_KEYWORDS_BTP_PME = [
@@ -76,7 +76,7 @@ export const SEO_KEYWORDS_GEO_SCOPE = [
   "Suisse romande administratif chantier",
   "assistante travaux BTP distance France",
   "externalisation administrative PACA",
-  "BTP relais administratif Auvergne-Rhône-Alpes",
+  "BTP assistance travaux Auvergne-Rhône-Alpes",
   "artisan bâtiment Nouvelle-Aquitaine gestion",
   "conducteur de travaux Grand Est administratif",
   "externalisation administrative Occitanie",
@@ -182,7 +182,7 @@ export const SEO_KEYWORDS_MARCHES_TRAVAUX = [
   "DOE chantier",
   "Chorus Pro travaux",
   "suivi réserves chantier",
-  "relais administratif marchés travaux",
+  "assistance administrative marchés travaux",
   "gestion administrative marchés publics BTP",
   "suivi administratif chantier",
   "marchés privés BTP",

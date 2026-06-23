@@ -33,7 +33,7 @@ export default function Page() {
     },
     {
       q: "BeWork remplace-t-elle un conducteur de travaux ?",
-      a: "Non. BeWork est un relais bureau‑chantier pour tenir les dossiers, la traçabilité et le suivi. Le conducteur de travaux, le maître d’œuvre et/ou le bureau d’études gardent la conduite technique et les arbitrages.",
+      a: "Non. BeWork apporte une assistance technique et administrative pour tenir les dossiers, la traçabilité et le suivi. Le conducteur de travaux, le maître d’œuvre et/ou le bureau d’études gardent la conduite technique et les arbitrages.",
     },
   ] as const;
 

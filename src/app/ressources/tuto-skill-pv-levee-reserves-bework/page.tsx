@@ -216,7 +216,7 @@ export default function TutoSkillPvLeveeReservesBeworkPage() {
                 Réservez un appel
               </CalendlyBookingLink>
               <span className="text-sm leading-snug text-slate-600 sm:max-w-sm">
-                20&nbsp;minutes pour cadrer votre besoin (PV, réception, relais administratif BTP) — sans engagement.
+                20&nbsp;minutes pour cadrer votre besoin (PV, réception, assistance travaux BTP) — sans engagement.
               </span>
             </div>
           </header>
@@ -264,7 +264,7 @@ export default function TutoSkillPvLeveeReservesBeworkPage() {
           >
             <div className="min-w-0 sm:flex-1">
               <p className="text-base font-semibold text-slate-900 md:text-[1.05rem]">
-                Besoin d&apos;un relais pour vos PV de levée et la libération des garanties&nbsp;?
+                Besoin d&apos;une assistance pour vos PV de levée et la libération des garanties&nbsp;?
               </p>
               <p className="mt-2 text-sm leading-relaxed text-slate-600 md:text-[0.9375rem]">
                 Parlez-en avec BeWork sur un créneau de 20&nbsp;minutes : aide à la formalisation et au suivi jusqu&apos;à signature MOA.

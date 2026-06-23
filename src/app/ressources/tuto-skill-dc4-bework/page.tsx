@@ -220,7 +220,7 @@ export default function TutoSkillDc4BeworkPage() {
                 Réservez un appel
               </CalendlyBookingLink>
               <span className="text-sm leading-snug text-slate-600 sm:max-w-sm">
-                20&nbsp;minutes pour cadrer vos DC4 et votre relais administratif marchés publics — sans engagement.
+                20&nbsp;minutes pour cadrer vos DC4 et votre assistance marchés publics BTP — sans engagement.
               </span>
             </div>
           </header>
@@ -268,7 +268,7 @@ export default function TutoSkillDc4BeworkPage() {
           >
             <div className="min-w-0 sm:flex-1">
               <p className="text-base font-semibold text-slate-900 md:text-[1.05rem]">
-                Besoin d&apos;un relais sur vos DC4 et sous-traitance&nbsp;?
+                Besoin d&apos;une assistance sur vos DC4 et sous-traitance&nbsp;?
               </p>
               <p className="mt-2 text-sm leading-relaxed text-slate-600 md:text-[0.9375rem]">
                 Parlez-en avec BeWork : DC4 conforme, contrôle marché et relance MOA jusqu&apos;à acceptation.

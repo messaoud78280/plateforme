@@ -458,7 +458,7 @@ export default function GuideCdtBeworkPage() {
             aria-label="Réserver un appel découverte"
           >
             <div className="min-w-0 sm:flex-1">
-              <p className="text-base font-semibold text-slate-900 md:text-[1.05rem]">Besoin d&apos;un relais sur vos livrables chantier&nbsp;?</p>
+              <p className="text-base font-semibold text-slate-900 md:text-[1.05rem]">Besoin d&apos;une assistance sur vos livrables chantier&nbsp;?</p>
               <p className="mt-2 text-sm leading-relaxed text-slate-600 md:text-[0.9375rem]">
                 DCE, PPSPS, CR, DOE — parlez-en avec BeWork en 20&nbsp;minutes.
               </p>

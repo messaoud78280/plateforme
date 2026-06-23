@@ -219,7 +219,7 @@ export default function TutoSkillDoeBeworkPage() {
                 Réservez un appel
               </CalendlyBookingLink>
               <span className="text-sm leading-snug text-slate-600 sm:max-w-sm">
-                20&nbsp;minutes pour cadrer votre besoin (DOE, livrables chantier, relais administratif BTP) — sans engagement.
+                20&nbsp;minutes pour cadrer votre besoin (DOE, livrables chantier, assistance travaux BTP) — sans engagement.
               </span>
             </div>
           </header>
@@ -267,7 +267,7 @@ export default function TutoSkillDoeBeworkPage() {
           >
             <div className="min-w-0 sm:flex-1">
               <p className="text-base font-semibold text-slate-900 md:text-[1.05rem]">
-                Besoin d&apos;un relais pour compiler et déposer votre DOE dans les délais&nbsp;?
+                Besoin d&apos;une assistance pour compiler et déposer votre DOE dans les délais&nbsp;?
               </p>
               <p className="mt-2 text-sm leading-relaxed text-slate-600 md:text-[0.9375rem]">
                 Parlez-en avec BeWork sur un créneau de 20&nbsp;minutes : indexation, relances sous-traitants, conformité CCAG / MOA.

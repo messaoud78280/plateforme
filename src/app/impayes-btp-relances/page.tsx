@@ -141,7 +141,7 @@ export default function Page() {
 
       <h2>Parler de votre suivi impayés</h2>
       <p>
-        Besoin d’un relais côté bureau pour tenir le suivi des factures, situations et relances sans y passer vos soirées ?{" "}
+        Besoin d’une assistance côté bureau pour tenir le suivi des factures, situations et relances sans y passer vos soirées ?{" "}
         <CalendlyBookingLink className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
           Réserver un échange
         </CalendlyBookingLink>

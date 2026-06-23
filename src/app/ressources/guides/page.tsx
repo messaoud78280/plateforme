@@ -205,7 +205,7 @@ export default function RessourcesGuidesPage() {
               <li className="font-medium text-black">Guides</li>
             </ol>
           </nav>
-          <h1 className="text-balance text-2xl font-bold tracking-tight text-black md:text-3xl">Guides</h1>
+          <h1 className="font-heading text-balance text-2xl font-bold tracking-tight text-black md:text-3xl">Guides</h1>
           <p className="mt-3 max-w-xl text-xs leading-snug text-slate-700 sm:text-sm sm:leading-relaxed md:text-[0.9375rem]">
             Guides PDF conducteur de travaux (compilation 52 pages, article IA &amp; skills). Pour les fiches pas à pas avec prompts, voir les
             pas à pas (prompts, skills), voir aussi les{" "}

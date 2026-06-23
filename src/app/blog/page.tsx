@@ -97,7 +97,7 @@ export default function BlogPage() {
 
       <main className="px-6 py-16 md:py-24">
         <div className="mx-auto max-w-3xl">
-          <h1 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
+          <h1 className="font-heading text-3xl font-bold tracking-tight text-black md:text-4xl">
             Blog BeWork
           </h1>
           <p className="mt-4 text-lg text-black">

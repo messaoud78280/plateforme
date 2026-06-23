@@ -69,7 +69,7 @@ export default function GuideMoeBeWorkPage() {
 
         <header className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#1d4ed8]">Guide PDF · 22 pages</p>
-          <h1 className="mt-3 text-balance text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+          <h1 className="font-heading mt-3 text-balance text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
             {H1}
           </h1>
           <p className="mt-3 max-w-3xl text-base leading-relaxed text-slate-600">

@@ -101,7 +101,7 @@ export default function TarifsPage() {
       <main className="mx-auto max-w-site px-4 py-12 md:py-16">
         {/* Hero */}
         <section className="text-center">
-          <h1 className="text-metallic-black font-sans text-4xl font-semibold tracking-tight md:text-5xl md:leading-tight">
+          <h1 className="font-heading text-metallic-black text-4xl font-bold tracking-tight md:text-5xl md:leading-tight">
             {TARIFS_H1}
           </h1>
           <p className="mx-auto mt-5 max-w-3xl text-xl leading-relaxed text-slate-700 md:text-[1.35rem] md:leading-relaxed">

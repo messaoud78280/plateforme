@@ -198,7 +198,7 @@ export default function NotreFaconDeTravaillerPage() {
           <p className="mx-auto max-w-full text-center text-[12px] font-semibold uppercase tracking-[0.2em] text-[#1d4ed8]">
             Méthode BeWork
           </p>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-black md:text-4xl md:leading-tight">
+          <h1 className="font-heading mt-3 text-3xl font-bold tracking-tight text-black md:text-4xl md:leading-tight">
             Notre façon de travailler : une assistance travaux claire et suivie
           </h1>
           <p className="mx-auto mt-5 max-w-3xl text-base leading-relaxed text-slate-700 md:text-lg">

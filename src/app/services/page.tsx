@@ -74,7 +74,7 @@ export default function ServicesHubPage() {
               <li className="font-medium text-slate-900">Services</li>
             </ol>
           </nav>
-          <h1 className="text-3xl font-bold tracking-tight text-black md:text-[2.35rem]">Services BeWork pour le BTP</h1>
+          <h1 className="font-heading text-3xl font-bold tracking-tight text-black md:text-[2.35rem]">Services BeWork pour le BTP</h1>
           <p className="mt-6 text-lg leading-relaxed text-slate-700">
             Chaque page répond à une intention précise (métier ou mission) et renvoie vers les ressources détaillées lorsqu’elles existent. BeWork est un{" "}
             <strong>service francophone à distance</strong>, piloté depuis la France, pour entreprises du bâtiment en France, Belgique, Suisse et Luxembourg.

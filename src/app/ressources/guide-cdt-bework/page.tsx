@@ -226,7 +226,7 @@ export default function GuideCdtBeworkPage() {
             <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">
               Guide PDF gratuit · Conducteur de travaux · Claude &amp; skills · BeWork
             </p>
-            <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl md:text-[2.35rem] md:leading-tight">
+            <h1 className="font-heading mt-3 text-balance text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl md:text-[2.35rem] md:leading-tight">
               {H1}
             </h1>
             <p className="mt-4 max-w-none text-lg leading-relaxed text-slate-600 sm:text-[1.125rem] sm:leading-[1.7]">

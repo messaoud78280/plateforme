@@ -247,7 +247,7 @@ export default function FaqPage() {
       <main className="px-6 py-16 md:py-24">
         <article className="mx-auto max-w-4xl">
           <header className="mx-auto max-w-3xl text-center">
-            <h1 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
+            <h1 className="font-heading text-3xl font-bold tracking-tight text-black md:text-4xl">
               FAQ BeWork : assistants travaux, dossiers chantier et assistance technique et administrative BTP
             </h1>
             <p className="mt-6 text-lg leading-relaxed text-slate-700">

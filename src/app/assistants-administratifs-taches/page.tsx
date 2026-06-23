@@ -266,7 +266,7 @@ export default function AssistantsAdministratifsTachesPage() {
         {/* A) Hero */}
         <section className="px-6 pt-16 pb-12 md:pt-20 md:pb-16" style={{ scrollMarginTop: "6rem" }}>
           <div className="mx-auto max-w-4xl text-center">
-            <h1 className="text-balance text-3xl font-bold tracking-tight text-black md:text-4xl lg:text-5xl">
+            <h1 className="font-heading text-balance text-3xl font-bold tracking-tight text-black md:text-4xl lg:text-5xl">
               Missions BeWork : assistance technique et administrative sur chantiers &amp; marchés publics
             </h1>
             <p className="mt-6 max-w-3xl mx-auto text-lg leading-relaxed text-black">

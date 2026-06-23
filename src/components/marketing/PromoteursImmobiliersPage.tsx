@@ -261,7 +261,7 @@ export function PromoteursImmobiliersPage() {
       <section className="px-4 pt-8 pb-12 sm:px-6 md:pt-16 md:pb-14 lg:pt-20 lg:pb-16" style={{ scrollMarginTop: "6rem" }}>
         <div className="mx-auto max-w-4xl text-center">
           <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#1d4ed8]">Promoteurs immobiliers</p>
-          <h1 className="mt-3 text-balance text-2xl font-bold tracking-tight text-[#0f172a] sm:text-3xl md:text-4xl lg:text-[2.65rem] lg:leading-tight">
+          <h1 className="font-heading mt-3 text-balance text-2xl font-bold tracking-tight text-[#0f172a] sm:text-3xl md:text-4xl lg:text-[2.65rem] lg:leading-tight">
             Assistant travaux pour promoteurs immobiliers
           </h1>
           <p className="mt-5 text-balance text-lg font-semibold leading-snug text-[#1e3a5f] sm:text-xl md:text-2xl">

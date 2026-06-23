@@ -47,7 +47,7 @@ export default function ContactPage() {
 
       <main className="px-4 py-12 md:py-16">
         <div className="mx-auto max-w-3xl">
-          <h1 className="text-metallic-black font-sans text-3xl font-semibold tracking-tight text-balance md:text-4xl">
+          <h1 className="font-heading text-metallic-black text-3xl font-bold tracking-tight text-balance md:text-4xl">
             Contact & échange
           </h1>
           <p className="mt-4 text-base font-medium leading-relaxed text-black md:text-lg">

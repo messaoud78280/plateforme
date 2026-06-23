@@ -49,7 +49,7 @@ export default function CasClientsPage() {
               ))}
             </ol>
           </nav>
-          <h1 className="text-3xl font-bold tracking-tight text-black md:text-4xl">{h1}</h1>
+          <h1 className="font-heading text-3xl font-bold tracking-tight text-black md:text-4xl">{h1}</h1>
           <p className="mt-5 text-lg leading-relaxed text-black">
             BeWork apporte une assistance technique et administrative encadrée : relances, dossiers, pièces marché et
             validations — pour sécuriser vos opportunités et votre chiffre d’affaires.

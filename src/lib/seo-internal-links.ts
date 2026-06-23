@@ -201,6 +201,7 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/contact", label: "Parler de mon marché" },
   ],
   "/relance-devis-btp": [
+    { href: "/blog/relancer-devis-btp-sans-perdre-client", label: "Relancer un devis sans perdre le client" },
     { href: "/ressources/chiffrage-devis-btp", label: "Chiffrage devis BTP" },
     { href: "/devis-retard-btp", label: "Devis en retard" },
     { href: "/tarifs", label: "Tarifs BeWork" },
@@ -376,6 +377,7 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/contact", label: "Démarrer un échange" },
   ],
   "/situation-travaux-btp": [
+    { href: "/blog/situation-travaux-marche-public-btp", label: "Situation travaux marché public" },
     { href: "/impayes-btp-relances", label: "Impayés et relances" },
     { href: "/facturation-chorus-pro-btp", label: "Facturation Chorus Pro" },
     {
@@ -386,6 +388,7 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/services/assistant-travaux", label: "Assistant travaux" },
   ],
   "/reponse-appel-offres-btp": [
+    { href: "/checklist-depot-appel-offres-btp", label: "Checklist dépôt AO BTP" },
     { href: "/blog/comment-repondre-appel-offres-btp", label: "Guide réponse AO BTP" },
     { href: "/blog/eviter-rejet-offre-marche-public", label: "Éviter le rejet d'offre" },
     { href: "/services/analyse-dce-btp", label: "Analyse DCE BTP" },
@@ -512,6 +515,13 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/assistants-administratifs-taches", label: "Catalogue missions" },
     { href: "/cas-clients", label: "Cas clients" },
     { href: "/contact", label: "Demander un échange" },
+  ],
+  "/checklist-depot-appel-offres-btp": [
+    { href: "/blog/comment-repondre-appel-offres-btp", label: "Guide réponse AO" },
+    { href: "/blog/eviter-rejet-offre-marche-public", label: "Éviter le rejet d'offre" },
+    { href: "/reponse-appel-offres-btp", label: "Landing appels d'offres" },
+    { href: "/services/analyse-dce-btp", label: "Analyse DCE" },
+    { href: "/tarifs", label: "Tarifs" },
   ],
 };
 

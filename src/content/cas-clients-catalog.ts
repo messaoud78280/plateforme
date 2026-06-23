@@ -95,10 +95,40 @@ export const CCMI_MARTIN_DTU_REPORT = {
   ],
 } as const;
 
-export const CCMI_MARTIN_SLIDES = Array.from({ length: 8 }, (_, i) => ({
-  src: `/cas-clients/ccmi-martin/carousel/slide-${String(i + 1).padStart(2, "0")}.jpg`,
-  alt: `Cas client CCMI Martin — visuel ${i + 1} sur 8`,
-}));
+export const CCMI_MARTIN_SLIDES = [
+  {
+    src: "/cas-clients/ccmi-martin/carousel/slide-01.jpg",
+    alt: "Audit devis CCMI Martin — couverture et synthèse du dossier client",
+  },
+  {
+    src: "/cas-clients/ccmi-martin/carousel/slide-02.jpg",
+    alt: "Audit devis CCMI — périmètre des 92 lignes analysées et montant initial",
+  },
+  {
+    src: "/cas-clients/ccmi-martin/carousel/slide-03.jpg",
+    alt: "Résultat audit devis — répartition lignes conformes, à préciser et à reformuler",
+  },
+  {
+    src: "/cas-clients/ccmi-martin/carousel/slide-04.jpg",
+    alt: "Audit devis BTP — rapprochement ligne de devis et DTU probablement applicable",
+  },
+  {
+    src: "/cas-clients/ccmi-martin/carousel/slide-05.jpg",
+    alt: "Exemple audit CCMI — désignation drainage périphérique à préciser",
+  },
+  {
+    src: "/cas-clients/ccmi-martin/carousel/slide-06.jpg",
+    alt: "Alertes de complétude devis — oublis structurants et points hors DTU",
+  },
+  {
+    src: "/cas-clients/ccmi-martin/carousel/slide-07.jpg",
+    alt: "Synthèse audit devis — avenants potentiels et niveaux de confiance par ligne",
+  },
+  {
+    src: "/cas-clients/ccmi-martin/carousel/slide-08.jpg",
+    alt: "Livrable audit devis CCMI Martin — recommandations avant engagement contractuel",
+  },
+] as const;
 
 export const CCMI_MARTIN_KEY_FIGURES = [
   { label: "Montant initial", value: "287 180 € TTC" },

@@ -7,7 +7,7 @@ import { BTP_PAIN_PAGE_PATHS } from "@/lib/btp-pain-pages";
 import { ASSISTANT_TRAVAUX_GEO_PATHS } from "@/lib/assistant-travaux-geo";
 import { ASSISTANT_TRAVAUX_VILLE_PATHS } from "@/lib/assistant-travaux-villes";
 import { EXTERNALISATION_ADMIN_BT_PATHS } from "@/lib/externalisation-administrative-btp-geo";
-import { SITE_URL } from "@/lib/site";
+import { SITE_URL, absoluteUrl } from "@/lib/site";
 
 type ChangeFreq = NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>;
 
@@ -99,6 +99,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     entry("/suivi-fournisseurs-chantier", 0.75),
     entry("/admin-btp-sans-recruter", 0.85),
     entry("/comparatif-assistance-travaux-btp", 0.84),
+    entry("/checklist-depot-appel-offres-btp", 0.83),
     ...BTP_PAIN_SEO_PAGES,
     ...GEO_EXTERNALISATION_ADMIN_BT_PAGES,
     ...GEO_ASSISTANT_TRAVAUX_PAGES,
@@ -116,6 +117,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(modified),
       changeFrequency: "monthly" as const,
       priority: isSeoCluster ? 0.78 : 0.7,
+      images: [absoluteUrl(`/blog/${slug}/opengraph-image`)],
     };
   });
 

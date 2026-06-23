@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const article = raw as BlogArticle;
   const url = absoluteUrl(`/blog/${slug}`);
   const modified = article.modifiedTime ?? article.publishedTime;
-  const ogImage = absoluteUrl("/opengraph-image");
+  const ogImage = absoluteUrl(`/blog/${slug}/opengraph-image`);
   return {
     title: `${article.title} | BeWork Blog`,
     description: article.description,
@@ -47,6 +47,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title: article.title,
       description: article.description,
+      images: [ogImage],
     },
     robots: { index: true, follow: true },
   };

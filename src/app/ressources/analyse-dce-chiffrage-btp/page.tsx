@@ -95,7 +95,7 @@ export default function AnalyseDceChiffrageBtpPage() {
           <figure className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_18px_50px_-30px_rgba(15,23,42,0.2)]">
             <Image
               src={HERO_IMAGE}
-              alt="BeWork — relais administratif BTP pour l’analyse DCE et l’appui chiffrage des devis travaux"
+              alt="BeWork — assistance technique BTP pour l'analyse DCE et l'appui au chiffrage devis travaux"
               width={HERO_WIDTH}
               height={HERO_HEIGHT}
               className="h-auto w-full"

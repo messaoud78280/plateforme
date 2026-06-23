@@ -13,6 +13,7 @@ function seoArticle(
 }
 
 const PUBLISHED = "2026-06-02T09:00:00+02:00";
+const PUBLISHED_JUNE_18 = "2026-06-18T09:00:00+02:00";
 
 export const BLOG_ARTICLES_SEO: Record<string, BlogArticle> = {
   "comment-repondre-appel-offres-btp": seoArticle({
@@ -689,6 +690,195 @@ export const BLOG_ARTICLES_SEO: Record<string, BlogArticle> = {
             question: "Qu'est-ce que BeWork ?",
             answer:
               "Service d'assistants travaux augmentés par l'IA pour le BTP — slogan : « On tient le bureau, vous tenez le chantier ». /services/assistant-travaux.",
+          },
+        ],
+      },
+    ],
+  }),
+
+  "situation-travaux-marche-public-btp": seoArticle({
+    title: "Situation de travaux sur marché public BTP",
+    description:
+      "Préparer une situation de travaux sur marché public : avancement, pièces justificatives, validation MOE et lien avec la facture Chorus Pro.",
+    keywords: [
+      "situation de travaux marché public",
+      "situation travaux BTP",
+      "facturation marché public",
+      "Chorus Pro situation",
+      "avancement chantier public",
+    ],
+    publishedTime: PUBLISHED_JUNE_18,
+    articleSection: "Marchés publics",
+    body: [
+      {
+        type: "tldr",
+        points: [
+          "La situation aligne avancement réel, pièces et montant facturable.",
+          "Préparer au fil du chantier — pas la veille de l'échéance CCAP.",
+          "Recouper CCTP, bon de commande et dernier PV avant chiffrage.",
+          "Tracer validations MOE/MOA : un blocage administratif retarde tout le paiement.",
+        ],
+      },
+      { type: "h2", content: "Contenu type d'une situation" },
+      {
+        type: "ul",
+        items: [
+          "Période et pourcentage d'avancement par lot ou poste",
+          "Références marché, bon de commande, engagement juridique",
+          "Pièces justificatives : photos, attestations, PV partiels si exigés",
+          "Montant HT de la période et cumul depuis l'origine",
+        ],
+      },
+      { type: "h2", content: "Erreurs qui bloquent la facture" },
+      {
+        type: "ul",
+        items: [
+          "Avancement surévalué sans pièce",
+          "Référence marché ou service acheteur erronée",
+          "Situation non validée par le maître d'œuvre alors que le CCAP l'exige",
+          "Décalage entre situation déposée et facture Chorus Pro",
+        ],
+      },
+      {
+        type: "callout",
+        variant: "highlight",
+        title: "Ressource BeWork",
+        content:
+          "BeWork peut structurer le tableau de suivi, préparer les situations et tracer les relances — validation des montants chez vous. Voir /situation-travaux-btp et /facturation-chorus-pro-btp.",
+      },
+      {
+        type: "faq",
+        items: [
+          {
+            question: "À quelle fréquence déposer une situation ?",
+            answer:
+              "Selon le CCAP : souvent mensuelle sur marchés publics. Anticiper la date limite et les délais de validation MOE.",
+          },
+        ],
+      },
+    ],
+  }),
+
+  "relancer-devis-btp-sans-perdre-client": seoArticle({
+    title: "Comment relancer un devis BTP sans perdre le client ?",
+    description:
+      "Relance devis BTP : timing, ton, canaux et suivi pour convertir plus d'offres sans harceler le prospect ni laisser dormir le dossier.",
+    keywords: [
+      "relance devis BTP",
+      "devis travaux sans réponse",
+      "suivi devis bâtiment",
+      "convertir devis chantier",
+      "relance client BTP",
+    ],
+    publishedTime: PUBLISHED_JUNE_18,
+    articleSection: "Administratif chantier",
+    body: [
+      {
+        type: "tldr",
+        points: [
+          "Un devis non relancé perd souvent face à un concurrent plus réactif.",
+          "J+3 à J+5 : relance courte, factuelle, avec rappel du périmètre.",
+          "Tracer statuts : envoyé, vu, en réflexion, à revoir, gagné, perdu.",
+          "Proposer un créneau ou une précision technique plutôt qu'un simple « des nouvelles ? ».",
+        ],
+      },
+      { type: "h2", content: "Séquence de relance terrain" },
+      {
+        type: "table",
+        headers: ["Délai", "Action"],
+        rows: [
+          ["J+0", "Envoi devis + récapitulatif clair inclus / exclusions"],
+          ["J+3", "Relance courte : disponibilité pour questions techniques"],
+          ["J+7", "Appel ou message : point sur planning et faisabilité"],
+          ["J+14", "Dernière relance structurée avant classement « en sommeil »"],
+        ],
+        caption: "À adapter selon urgence client et saisonnalité",
+      },
+      { type: "h2", content: "Ce qui fait gagner une relance" },
+      {
+        type: "ul",
+        items: [
+          "Rappeler une valeur : délai, méthode, garantie, réactivité",
+          "Lever un doute technique identifié à l'envoi",
+          "Proposer une variante ou un phasage si le prix bloque",
+          "Ne pas relancer sans mettre à jour le statut dans votre tableau",
+        ],
+      },
+      {
+        type: "callout",
+        variant: "info",
+        title: "Checklist dépôt AO",
+        content: "Pour les marchés publics, voir /checklist-depot-appel-offres-btp et /blog/eviter-rejet-offre-marche-public.",
+      },
+      {
+        type: "faq",
+        items: [
+          {
+            question: "BeWork peut-il gérer les relances devis ?",
+            answer: "Oui : suivi, relances rédigées et tableau de priorités — vous validez le ton et les montants. /relance-devis-btp.",
+          },
+        ],
+      },
+    ],
+  }),
+
+  "conducteur-travaux-deborde-que-deleguer": seoArticle({
+    title: "Conducteur de travaux débordé : que déléguer ?",
+    description:
+      "Conducteur de travaux débordé : prioriser le terrain, déléguer l'administratif chantier (devis, AO, situations, DOE) sans perdre le contrôle.",
+    keywords: [
+      "conducteur de travaux débordé",
+      "déléguer administratif chantier",
+      "assistant conducteur de travaux",
+      "surcharge conducteur travaux",
+      "externalisation dossiers chantier",
+    ],
+    publishedTime: PUBLISHED_JUNE_18,
+    articleSection: "Assistant travaux",
+    body: [
+      {
+        type: "tldr",
+        points: [
+          "Le CT doit rester sur les arbitrages techniques, réceptions et interfaces lots.",
+          "Déléguable : classement, relances, mise en forme, checklists, suivi pièces.",
+          "Non déléguable : choix techniques, signatures, prix engageants, sécurité.",
+          "Un cadre clair (canal, priorités, validation) évite le double travail.",
+        ],
+      },
+      { type: "h2", content: "À garder sur le terrain" },
+      {
+        type: "ul",
+        items: [
+          "Réunions de chantier et décisions d'exécution",
+          "Réceptions, réserves et levées",
+          "Coordination entreprises et sous-traitants",
+          "Alertes sécurité et aléas critiques",
+        ],
+      },
+      { type: "h2", content: "À déléguer au bureau (avec validation)" },
+      {
+        type: "ul",
+        items: [
+          "Synthèse DCE et checklist appels d'offres",
+          "Relances devis, fournisseurs, MOE, pièces manquantes",
+          "Situations, Chorus Pro, compilation DOE",
+          "Comptes rendus, classement et tableaux de suivi",
+        ],
+      },
+      {
+        type: "callout",
+        variant: "highlight",
+        title: "BeWork",
+        content:
+          "Assistance technique et administrative BTP — pas du secrétariat générique. /services/conducteur-travaux-deborde et /comparatif-assistance-travaux-btp.",
+      },
+      {
+        type: "faq",
+        items: [
+          {
+            question: "Combien de temps gagner ?",
+            answer:
+              "Variable selon volume : l'objectif est de libérer des demi-journées bureau par semaine pour le pilotage terrain — à cadrer sur devis.",
           },
         ],
       },

@@ -157,6 +157,10 @@ export function getIndexNowPriorityUrls(): string[] {
     "/blog/comment-repondre-appel-offres-btp",
     "/blog/chorus-pro-facture-refusee-que-faire",
     "/blog/eviter-rejet-offre-marche-public",
+    "/blog/situation-travaux-marche-public-btp",
+    "/blog/relancer-devis-btp-sans-perdre-client",
+    "/blog/conducteur-travaux-deborde-que-deleguer",
+    "/checklist-depot-appel-offres-btp",
   ] as const;
   const paths = [...SEO_AI_PRIORITY_PATHS.filter((p) => !p.includes("#")), ...extraPaths];
   return [...new Set(paths)].map((p) => absoluteUrl(p));

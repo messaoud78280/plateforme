@@ -133,6 +133,18 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
       "alternative recrutement conducteur travaux",
     ],
   },
+  "/checklist-depot-appel-offres-btp": {
+    title: "Checklist dépôt appel d'offres BTP | BeWork",
+    description: metaDescriptionFrancophonie(
+      "Checklist terrain avant dépôt AO : pièces administratives, mémoire technique, DPGF et contrôles anti-rejet pour marchés publics travaux",
+    ),
+    keywords: [
+      "checklist appel d'offres BTP",
+      "dépôt marché public travaux",
+      "pièces obligatoires AO BTP",
+      "éviter rejet offre",
+    ],
+  },
   "/assistant-administratif-btp": {
     title: "Assistant travaux BTP : assistance technique et administrative | BeWork",
     description: metaDescriptionFrancophonie(

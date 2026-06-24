@@ -72,7 +72,7 @@ const HERO_BADGE_CLASS =
 const HOME_FAQ_ITEMS = [
   {
     q: "Qu’est-ce que BeWork pour les entreprises du BTP ?",
-    a: "BeWork est un assistant travaux augmenté par l’IA : assistance technique et administrative pour appels d’offres, analyse DCE, aide au chiffrage, mémoire technique, suivi de chantier, marchés publics, DOE, réserves et facturation Chorus Pro. L’IA structure et accélère ; un Beworker humain garde le fil. Vous validez ce qui engage.",
+    a: "BeWork est un renfort travaux externalisé augmenté par l’IA : relais bureau-chantier et appui opérationnel pour conducteurs, chargés d’affaires et dirigeants — dossiers, validations, livrables et traçabilité terrain / MOA / MOE. Vous gardez les décisions ; BeWork tient le suivi.",
   },
   {
     q: "BeWork s’adresse à quelles entreprises du BTP ?",
@@ -99,7 +99,7 @@ const HOME_FAQ_ITEMS = [
 const HOME_META_TITLE =
   "Assistants travaux augmentés par l’IA — chantiers, appels d’offres et marchés publics | BeWork";
 const HOME_META_DESCRIPTION = metaDescriptionFrancophonie(
-  "Assistance technique et administrative BTP : analyse DCE, aide au chiffrage, mémoire technique, suivi chantier, Chorus Pro, DOE, réserves. On tient le bureau, vous tenez le chantier",
+  "Renfort travaux externalisé BTP : gestion chantier, marchés, dossiers et validations. Assistants travaux IA — vous décidez, BeWork tient le suivi",
 );
 
 export const metadata: Metadata = {
@@ -307,14 +307,14 @@ export default function HomePage() {
                 </p>
 
                 <p className="mx-auto max-w-[540px] text-lg leading-[1.55] text-balance text-slate-800 lg:mx-0 lg:max-w-none lg:text-xl lg:leading-snug">
-                  BeWork accompagne les entreprises du BTP dans l&apos;assistance technique et administrative&nbsp;: analyse DCE,
-                  aide au chiffrage, mémoire technique, suivi de chantier, DOE, réserves, facturation, Chorus Pro et gestion
-                  des marchés publics.
+                  <strong className="font-semibold text-[#0f172a]">Relais bureau-chantier et renfort opérationnel</strong>{" "}
+                  dans votre gestion travaux&nbsp;: BeWork soulage vos conducteurs, tient vos dossiers, suit les validations,
+                  prépare les livrables et maintient la traçabilité entre terrain, bureau, MOA et MOE.
                 </p>
 
                 <p className="mx-auto max-w-[540px] text-base font-medium leading-snug text-slate-700 lg:mx-0 lg:max-w-none lg:text-[1.05rem]">
-                  Appui aux conducteurs de travaux, chargés d&apos;affaires et dirigeants — sans remplacer la maîtrise d&apos;œuvre ni
-                  les responsabilités techniques désignées sur l&apos;opération.
+                  Renfort travaux externalisé pour conducteurs de travaux, chargés d&apos;affaires et dirigeants — décisions
+                  techniques et contractuelles chez vous, suivi administratif, documentaire et opérationnel côté BeWork.
                 </p>
 
                 <p className="mx-auto max-w-[540px] text-sm font-semibold leading-snug text-slate-700 lg:mx-0 lg:max-w-none lg:text-base">
@@ -365,6 +365,54 @@ export default function HomePage() {
               </div>
             </section>
 
+            {/* Renfort travaux — message clé sous le hero */}
+            <section className="relative bg-transparent px-6 pb-8 md:pb-10" aria-labelledby="renfort-travaux-heading">
+              <div className="container-site">
+                <div className="mx-auto max-w-4xl rounded-2xl border border-[#1d4ed8]/15 bg-gradient-to-br from-[#eff6ff]/70 via-white to-white p-6 shadow-[0_10px_40px_-20px_rgba(29,78,216,0.25)] ring-1 ring-slate-100/90 md:p-8">
+                  <p className="font-heading text-xs font-bold uppercase tracking-[0.2em] text-[#1d4ed8] md:text-sm">
+                    Renfort opérationnel
+                  </p>
+                  <h2
+                    id="renfort-travaux-heading"
+                    className="font-heading mt-2 text-balance text-xl font-bold tracking-tight text-[#0f172a] md:text-2xl"
+                  >
+                    Un renfort travaux, sans recrutement immédiat
+                  </h2>
+                  <p className="mt-3 text-base leading-relaxed text-slate-800 md:text-[1.05rem] md:leading-relaxed">
+                    Quand vos équipes terrain sont prises par l&apos;exécution, BeWork prend le relais sur la gestion travaux&nbsp;:
+                    comptes rendus, pièces marché, DOE, situations, relances, validations MOA/MOE et coordination documentaire.
+                    Vous gardez la décision, nous tenons le suivi.
+                  </p>
+                  <p className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm font-semibold md:text-base">
+                    <Link
+                      href="/admin-btp-sans-recruter"
+                      className="text-[#1d4ed8] underline-offset-2 hover:underline"
+                    >
+                      Gérer sans recruter
+                    </Link>
+                    <span className="text-slate-300" aria-hidden>
+                      ·
+                    </span>
+                    <Link
+                      href="/comparatif-assistance-travaux-btp"
+                      className="text-[#1d4ed8] underline-offset-2 hover:underline"
+                    >
+                      Recruter ou externaliser&nbsp;?
+                    </Link>
+                    <span className="text-slate-300" aria-hidden>
+                      ·
+                    </span>
+                    <Link
+                      href="/services/conducteur-travaux-deborde"
+                      className="text-[#1d4ed8] underline-offset-2 hover:underline"
+                    >
+                      Conducteur débordé
+                    </Link>
+                  </p>
+                </div>
+              </div>
+            </section>
+
             {/* Définition BeWork + rôle Beworker (AEO / GEO — une seule carte) */}
             <section className="relative bg-transparent px-6 pb-10 md:pb-12">
               <div className="container-site">
@@ -373,9 +421,9 @@ export default function HomePage() {
                     BeWork, c’est quoi ?
                   </p>
                   <p className="mt-3 text-base leading-relaxed text-slate-800 md:text-[1.05rem]">
-                    BeWork accompagne les entreprises du BTP dans la préparation, le suivi et la sécurisation administrative
-                    et technique de leurs chantiers, appels d&apos;offres et marchés publics&nbsp;: analyse DCE, aide au chiffrage,
-                    mémoire technique, suivi documentaire, Chorus Pro, réserves, DOE et coordination bureau-chantier.
+                    BeWork est un <strong>renfort travaux externalisé</strong> pour la préparation, le suivi et la sécurisation
+                    de vos chantiers et marchés&nbsp;: analyse DCE, comptes rendus, pièces marché, Chorus Pro, réserves, DOE et
+                    coordination bureau-chantier.
                   </p>
                   <p className="mt-4 text-sm leading-relaxed text-slate-700 md:text-base">
                     BeWork ne remplace pas le conducteur de travaux&nbsp;: nous l&apos;aidons à sécuriser les dossiers, les délais,

@@ -70,6 +70,7 @@ export type DpgfJsonPreviewResult = {
   duplicateCodesInFile: string[];
   priceFieldsRejected: string[];
   structureErrors: string[];
+  detectedFormat: string | null;
   rows: DpgfJsonPreviewRow[];
   canImport: boolean;
 };
@@ -249,32 +250,70 @@ function mapModeOperatoire(v: unknown): DpgfAnalysisSheetContent["modeOperatoire
 export function parseDpgfAnalysisJsonRoot(text: string): {
   root: Record<string, unknown>;
   fiches: Record<string, unknown>[];
+  detectedFormat: string;
 } {
   const cleaned = stripCodeFence(text);
   let parsed: unknown;
   try {
     parsed = JSON.parse(cleaned);
   } catch {
-    const start = cleaned.indexOf("{");
-    const end = cleaned.lastIndexOf("}");
-    if (start === -1 || end <= start) throw new Error("JSON invalide — vérifiez les accolades et guillemets.");
-    parsed = JSON.parse(cleaned.slice(start, end + 1));
+    const startObj = cleaned.indexOf("{");
+    const endObj = cleaned.lastIndexOf("}");
+    const startArr = cleaned.indexOf("[");
+    const endArr = cleaned.lastIndexOf("]");
+    if (startObj !== -1 && endObj > startObj) {
+      parsed = JSON.parse(cleaned.slice(startObj, endObj + 1));
+    } else if (startArr !== -1 && endArr > startArr) {
+      parsed = JSON.parse(cleaned.slice(startArr, endArr + 1));
+    } else {
+      throw new Error("JSON invalide — vérifiez les accolades, crochets et guillemets.");
+    }
   }
 
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-    throw new Error("Le JSON doit être un objet avec le tableau fiches_analyse_dpgf.");
+  // Tableau racine : [ { fiche_mere… }, … ]
+  if (Array.isArray(parsed)) {
+    const fiches = parsed.filter((f): f is Record<string, unknown> => f != null && typeof f === "object");
+    if (fiches.length === 0) throw new Error("Le tableau JSON ne contient aucune fiche valide.");
+    const root = (fiches[0]?.fiche_mere && typeof fiches[0].fiche_mere === "object"
+      ? {}
+      : {}) as Record<string, unknown>;
+    return { root, fiches, detectedFormat: "tableau de fiches" };
+  }
+
+  if (!parsed || typeof parsed !== "object") {
+    throw new Error("JSON attendu : objet ou tableau de fiches d'analyse DPGF.");
   }
 
   const root = parsed as Record<string, unknown>;
-  const rawFiches = root.fiches_analyse_dpgf;
-  if (!Array.isArray(rawFiches) || rawFiches.length === 0) {
-    throw new Error("Tableau fiches_analyse_dpgf introuvable ou vide.");
+
+  // Fiche unique à la racine : { fiche_mere, comprehension, … }
+  if (root.fiche_mere && typeof root.fiche_mere === "object") {
+    return { root: {}, fiches: [root], detectedFormat: "fiche unique" };
   }
 
-  const fiches = rawFiches.filter((f): f is Record<string, unknown> => f != null && typeof f === "object");
-  if (fiches.length === 0) throw new Error("Aucune fiche valide dans fiches_analyse_dpgf.");
+  const arrayKeys = [
+    "fiches_analyse_dpgf",
+    "fiches_analyse",
+    "fiches",
+    "fiches_dpgf",
+    "analyses",
+    "items",
+    "data",
+  ] as const;
 
-  return { root, fiches };
+  for (const key of arrayKeys) {
+    const raw = root[key];
+    if (Array.isArray(raw) && raw.length > 0) {
+      const fiches = raw.filter((f): f is Record<string, unknown> => f != null && typeof f === "object");
+      if (fiches.length > 0) {
+        return { root, fiches, detectedFormat: `objet.${key}` };
+      }
+    }
+  }
+
+  throw new Error(
+    "Format JSON non reconnu. Attendu : { \"fiches_analyse_dpgf\": […] }, un tableau […], ou une fiche unique avec \"fiche_mere\".",
+  );
 }
 
 export function mapJsonFicheToSheet(
@@ -394,9 +433,13 @@ export function buildDpgfJsonPreview(
   const structureErrors: string[] = [];
   let root: Record<string, unknown>;
   let fiches: Record<string, unknown>[];
+  let detectedFormat: string | null = null;
 
   try {
-    ({ root, fiches } = parseDpgfAnalysisJsonRoot(text));
+    const parsed = parseDpgfAnalysisJsonRoot(text);
+    root = parsed.root;
+    fiches = parsed.fiches;
+    detectedFormat = parsed.detectedFormat;
   } catch (e) {
     return {
       totalFiches: 0,
@@ -407,6 +450,7 @@ export function buildDpgfJsonPreview(
       duplicateCodesInFile: [],
       priceFieldsRejected: [],
       structureErrors: [e instanceof Error ? e.message : "Erreur structure JSON"],
+      detectedFormat: null,
       rows: [],
       canImport: false,
     };
@@ -485,6 +529,7 @@ export function buildDpgfJsonPreview(
     duplicateCodesInFile,
     priceFieldsRejected,
     structureErrors,
+    detectedFormat,
     rows,
     canImport,
   };

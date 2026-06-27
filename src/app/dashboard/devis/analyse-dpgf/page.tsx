@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { DpgfAnalysisInputTabs } from "@/components/devis/DpgfAnalysisInputTabs";
+import { DpgfAnalysisGeneratePanel } from "@/components/devis/DpgfAnalysisGeneratePanel";
+import { DpgfAnalysisJsonImportPanel } from "@/components/devis/DpgfAnalysisJsonImportPanel";
 import { DpgfAnalysisListTable } from "@/components/devis/DpgfAnalysisListTable";
 import { DpgfAnalysisStatsStrip } from "@/components/devis/DpgfAnalysisStatsStrip";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
@@ -88,12 +89,21 @@ export default async function AnalyseDpgfPage({ searchParams }: { searchParams: 
           >
             DCE importé → générer depuis une ligne
           </Link>
+          <a
+            href="#json-import"
+            className="rounded-xl border border-[#1e3a5f]/30 bg-[#eff6ff] px-4 py-2 text-sm font-semibold text-[#1e3a5f] hover:bg-[#dbeafe]"
+          >
+            Importer en JSON
+          </a>
         </div>
       </header>
 
       <DpgfAnalysisStatsStrip stats={stats} />
 
-      <DpgfAnalysisInputTabs aiAvailable={aiAvailable} />
+      <div className="space-y-6">
+        <DpgfAnalysisGeneratePanel aiAvailable={aiAvailable} />
+        <DpgfAnalysisJsonImportPanel />
+      </div>
 
       <section className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
         <h2 className="font-heading text-sm font-bold text-slate-900">Filtres</h2>

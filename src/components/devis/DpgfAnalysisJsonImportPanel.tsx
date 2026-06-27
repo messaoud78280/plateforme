@@ -8,9 +8,7 @@ import {
 } from "@/app/dashboard/devis/analyse-dpgf-actions";
 import type { DpgfJsonDuplicateMode, DpgfJsonPreviewResult } from "@/lib/dpgf-analysis/json-import";
 
-type Props = { embedded?: boolean };
-
-export function DpgfAnalysisJsonImportPanel({ embedded = false }: Props) {
+export function DpgfAnalysisJsonImportPanel() {
   const router = useRouter();
   const [text, setText] = useState("");
   const [preview, setPreview] = useState<DpgfJsonPreviewResult | null>(null);
@@ -60,23 +58,23 @@ export function DpgfAnalysisJsonImportPanel({ embedded = false }: Props) {
   const hasDbDuplicates = preview?.rows.some((r) => r.existsInDb) ?? false;
   const showPreviewTable = preview && preview.rows.length > 0;
 
-  const wrapperClass = embedded
-    ? ""
-    : "rounded-2xl border border-[#1e3a5f]/15 bg-gradient-to-br from-[#eff6ff]/50 to-white p-6 shadow-sm";
-
   return (
-    <div className={wrapperClass}>
-      {!embedded ? (
-        <>
-          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#1e3a5f]">Import structuré</p>
-          <h2 className="font-heading mt-1 text-lg font-bold text-slate-900">Ajout rapide depuis JSON</h2>
-        </>
-      ) : (
-        <h2 className="font-heading text-lg font-bold text-slate-900">Ajout rapide depuis JSON</h2>
-      )}
+    <section
+      id="json-import"
+      className="scroll-mt-24 rounded-2xl border border-dashed border-[#1e3a5f]/40 bg-[#f8fafc] p-6 shadow-sm"
+    >
+      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#1e3a5f]">Import structuré</p>
+      <h2 className="font-heading mt-1 text-lg font-bold text-slate-900">Ajout rapide depuis JSON</h2>
       <p className="mt-2 text-sm leading-relaxed text-slate-600">
         Collez un JSON structuré pour importer plusieurs fiches d&apos;analyse DPGF. Ce module crée des fiches de
         compréhension&nbsp;: <strong className="font-semibold text-slate-800">sans prix, sans chiffrage</strong>.
+      </p>
+      <p className="mt-2 text-sm text-slate-600">
+        Formats acceptés&nbsp;:{" "}
+        <code className="rounded bg-slate-200/80 px-1 text-xs">{`{ "fiches_analyse_dpgf": […] }`}</code>,{" "}
+        <code className="rounded bg-slate-200/80 px-1 text-xs">tableau de fiches</code>, ou{" "}
+        <code className="rounded bg-slate-200/80 px-1 text-xs">une fiche unique</code> avec{" "}
+        <code className="rounded bg-slate-200/80 px-1 text-xs">fiche_mere</code>.
       </p>
 
       <div className="mt-4 space-y-3">
@@ -92,8 +90,8 @@ export function DpgfAnalysisJsonImportPanel({ embedded = false }: Props) {
             clearMessages();
           }}
           rows={14}
-          placeholder='{ "famille": "…", "lot": "07", "fiches_analyse_dpgf": [ { "fiche_mere": { … }, "comprehension": { … } } ] }'
-          className="w-full rounded-xl border border-slate-200 px-3 py-2 font-mono text-xs leading-relaxed text-slate-800"
+          placeholder='{ "famille": "Plâtrerie - Cloisons", "lot": "07", "fiches_analyse_dpgf": [ { "fiche_mere": { "code": "ADPGF-07-CLO-001", … }, "comprehension": { … } } ] }'
+          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-xs leading-relaxed text-slate-800"
         />
       </div>
 
@@ -134,8 +132,13 @@ export function DpgfAnalysisJsonImportPanel({ embedded = false }: Props) {
       ) : null}
 
       {preview ? (
-        <div className="mt-6 space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-4">
+        <div className="mt-6 space-y-4 rounded-xl border border-slate-200 bg-white p-4">
           <h3 className="text-sm font-bold text-slate-900">Résultat de l&apos;analyse</h3>
+          {preview.detectedFormat ? (
+            <p className="text-xs text-slate-600">
+              Format détecté&nbsp;: <strong>{preview.detectedFormat}</strong>
+            </p>
+          ) : null}
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
             <Stat label="Fiches détectées" value={String(preview.totalFiches)} />
             <Stat label="Fiches valides" value={String(preview.validCount)} accent="emerald" />
@@ -198,7 +201,7 @@ export function DpgfAnalysisJsonImportPanel({ embedded = false }: Props) {
               Import bloqué tant que toutes les fiches ne sont pas valides et sans doublon dans le fichier.
             </p>
           ) : (
-            <p className="text-sm font-medium text-emerald-800">JSON prêt à importer.</p>
+            <p className="text-sm font-medium text-emerald-800">JSON prêt à importer — cliquez sur « Importer les fiches ».</p>
           )}
         </div>
       ) : null}
@@ -246,7 +249,7 @@ export function DpgfAnalysisJsonImportPanel({ embedded = false }: Props) {
           </table>
         </div>
       ) : null}
-    </div>
+    </section>
   );
 }
 
@@ -291,7 +294,7 @@ function Stat({
   const valueCls =
     accent === "amber" ? "text-amber-900" : accent === "emerald" ? "text-emerald-900" : "text-slate-900";
   return (
-    <div className="rounded-lg bg-white px-3 py-2 ring-1 ring-slate-100">
+    <div className="rounded-lg bg-slate-50 px-3 py-2 ring-1 ring-slate-100">
       <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{label}</p>
       <p className={`mt-0.5 text-sm font-semibold ${valueCls}`}>{value}</p>
     </div>

@@ -36,6 +36,14 @@ export default async function BeWorkDevisHomePage() {
       badge: "Référentiel",
     },
     {
+      title: "Analyse DPGF",
+      description:
+        "Fiches pédagogiques ligne par ligne : comprendre les désignations, vérifier CCTP et plans, repérer les pièges — sans prix.",
+      href: "/dashboard/devis/analyse-dpgf",
+      cta: "Ouvrir Analyse DPGF",
+      badge: "Formation",
+    },
+    {
       title: "Prix observés",
       description: "Centraliser les prix issus de devis, BPU, DPGF et estimations internes.",
       href: "/dashboard/devis/prix",

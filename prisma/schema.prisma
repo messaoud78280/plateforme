@@ -858,6 +858,70 @@ model DcePricingFillSession {
   @@index([catalogId])
   @@index([status])
   @@index([createdAt])
+
+  dpgfAnalysisSheets DpgfAnalysisSheet[]
+}
+
+enum DpgfAnalysisSheetSource {
+  dpgf
+  bpu
+  cctp
+  manuel
+  import
+}
+
+enum DpgfAnalysisComprehensionLevel {
+  debutant
+  intermediaire
+  confirme
+}
+
+/// Fiche pédagogique d’analyse DPGF — compréhension ligne par ligne (sans prix)
+model DpgfAnalysisSheet {
+  id                    String                         @id @default(cuid())
+  codeSheet             String                         @unique
+  lot                   String
+  /// Corps de métier BeWork (ex. CLO, CAR)
+  tradeCode             String?
+  /// Famille d’ouvrage (libellé)
+  familyName            String?
+  /// Type d’ouvrage (libellé court)
+  ouvrageType           String?
+  originalDesignation   String                         @db.Text
+  simplifiedDesignation String?
+  unit                  String
+  source                DpgfAnalysisSheetSource        @default(manuel)
+  status                WorkItemStatus                 @default(brouillon)
+  comprehensionLevel    DpgfAnalysisComprehensionLevel @default(intermediaire)
+  hasModeOperatoire     Boolean                        @default(false)
+  hasVigilancePoints    Boolean                        @default(false)
+  hasQuestions          Boolean                        @default(false)
+  /// Contenu pédagogique structuré (traduction, vigilance, mode opératoire…)
+  content               Json
+  /// Liens marché : session DCE, ligne, CCTP, plans…
+  links                 Json?
+  dceFillSessionId      String?
+  dceFillSession        DcePricingFillSession?         @relation(fields: [dceFillSessionId], references: [id], onDelete: SetNull)
+  dceLineIndex          Int?
+  workItemId            String?
+  workItem              WorkItem?                      @relation(fields: [workItemId], references: [id], onDelete: SetNull)
+  quoteDocumentId       String?
+  quoteDocument         QuoteDocument?                 @relation(fields: [quoteDocumentId], references: [id], onDelete: SetNull)
+  createdByUserId       String?
+  createdAt             DateTime                       @default(now())
+  updatedAt             DateTime                       @updatedAt
+
+  @@index([lot])
+  @@index([tradeCode])
+  @@index([status])
+  @@index([comprehensionLevel])
+  @@index([source])
+  @@index([hasModeOperatoire])
+  @@index([hasVigilancePoints])
+  @@index([hasQuestions])
+  @@index([updatedAt])
+  @@index([dceFillSessionId])
+  @@index([workItemId])
 }
 
 /// Ouvrage BTP de la bibliothèque interne
@@ -931,6 +995,7 @@ model WorkItem {
   mergeProposalMembers      WorkItemMergeProposalMember[]
   classificationProposals   WorkItemClassificationProposal[]
   codificationRevertEntries WorkItemCodificationRevert[]
+  dpgfAnalysisSheets        DpgfAnalysisSheet[]
 
   @@index([lot])
   @@index([status])
@@ -1503,6 +1568,7 @@ model QuoteDocument {
   updatedAt        DateTime            @updatedAt
 
   lines QuoteLine[]
+  dpgfAnalysisSheets DpgfAnalysisSheet[]
 
   @@index([projectId])
   @@index([status])

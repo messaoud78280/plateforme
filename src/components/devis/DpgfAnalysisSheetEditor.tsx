@@ -10,6 +10,7 @@ import {
   DPGF_ANALYSIS_STATUS_LABELS,
 } from "@/lib/dpgf-analysis/labels";
 import { joinLinesField, parseDpgfAnalysisContent, emptyDpgfAnalysisContent } from "@/lib/dpgf-analysis/content-utils";
+import { formatManualPriceHtForInput } from "@/lib/dpgf-analysis/manual-price";
 import type { DpgfAnalysisSheetLinks } from "@/lib/dpgf-analysis/types";
 import { WORK_ITEM_UNITS } from "@/lib/be-work-devis-labels";
 import { getBeWorkFamilyLexiconSorted } from "@/lib/bework-devis-family-codes";
@@ -88,6 +89,7 @@ export function DpgfAnalysisSheetEditor({ mode, sheet }: Props) {
         </div>
         <Textarea name="originalDesignation" label="Désignation DPGF d'origine *" required rows={3} defaultValue={sheet?.originalDesignation} />
         <Input name="simplifiedDesignation" label="Désignation simplifiée" defaultValue={sheet?.simplifiedDesignation ?? ""} />
+        <ManualPriceField defaultValue={formatManualPriceHtForInput(sheet?.manualPriceHt)} />
       </EditorSection>
 
       <EditorSection title="Liens marché (sans prix)">
@@ -275,6 +277,30 @@ function ReadOnlyField({ label, value }: { label: string; value: string }) {
     <div>
       <p className="text-xs font-semibold text-slate-700">{label}</p>
       <p className="mt-1 rounded-xl bg-slate-50 px-3 py-2 font-mono text-sm">{value}</p>
+    </div>
+  );
+}
+
+function ManualPriceField({ defaultValue }: { defaultValue: string }) {
+  return (
+    <div className="max-w-xs">
+      <label htmlFor="manualPriceHt" className="text-xs font-semibold text-slate-700">
+        Prix manuel HT
+      </label>
+      <div className="mt-1 flex items-center gap-2">
+        <input
+          id="manualPriceHt"
+          name="manualPriceHt"
+          type="text"
+          inputMode="decimal"
+          autoComplete="off"
+          placeholder="Ex. 250,00"
+          defaultValue={defaultValue}
+          className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+        />
+        <span className="shrink-0 text-sm font-medium text-slate-600">€ HT</span>
+      </div>
+      <p className="mt-1 text-xs text-slate-500">Saisie manuelle uniquement — laissez vide si non renseigné.</p>
     </div>
   );
 }

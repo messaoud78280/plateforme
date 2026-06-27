@@ -3,8 +3,10 @@ import type {
   DpgfAnalysisSheetSource,
   WorkItemStatus,
 } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { suggestFamilyCodeFromWorkItem } from "@/lib/bework-devis-family-codes";
 import { computeContentFlags } from "./content-utils";
+import { readManualPriceFromJson } from "./manual-price";
 import { resolveWhoDoesItFromJsonSources } from "./resolve-who-does-it";
 import type { DpgfAnalysisSheetContent, DpgfAnalysisSheetLinks } from "./types";
 
@@ -25,6 +27,13 @@ const FORBIDDEN_PRICE_KEYS = new Set([
   "prix_unitaire",
   "prix_ht",
   "prix_ttc",
+]);
+
+/** Clés autorisées pour un prix saisi manuellement (hors chiffrage automatique). */
+const ALLOWED_MANUAL_PRICE_KEYS = new Set([
+  "prix_manuel_ht",
+  "manual_price_ht",
+  "manualpriceht",
 ]);
 
 const REQUIRED_PATHS: { path: string; label: string }[] = [
@@ -92,6 +101,8 @@ export type ParsedDpgfJsonSheet = {
   links: DpgfAnalysisSheetLinks;
   flags: ReturnType<typeof computeContentFlags>;
   pedagogicalObjective?: string;
+  /** undefined = absent du JSON ; null = explicitement vide */
+  manualPriceHt?: Prisma.Decimal | null;
 };
 
 function stripCodeFence(raw: string): string {
@@ -135,7 +146,7 @@ function collectForbiddenPriceKeys(obj: unknown, prefix = "", out: string[] = []
   for (const [key, val] of Object.entries(obj as Record<string, unknown>)) {
     const nk = normalizeKey(key);
     const path = prefix ? `${prefix}.${key}` : key;
-    if (FORBIDDEN_PRICE_KEYS.has(nk)) out.push(path);
+    if (FORBIDDEN_PRICE_KEYS.has(nk) && !ALLOWED_MANUAL_PRICE_KEYS.has(nk)) out.push(path);
     collectForbiddenPriceKeys(val, path, out);
   }
   return out;
@@ -424,6 +435,7 @@ export function mapJsonFicheToSheet(
     links,
     flags: computeContentFlags(content),
     pedagogicalObjective: String(mere.objectif_pedagogique ?? "").trim() || undefined,
+    manualPriceHt: readManualPriceFromJson(fiche, mere),
   };
 }
 

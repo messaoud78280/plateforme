@@ -893,6 +893,8 @@ model DpgfAnalysisSheet {
   source                DpgfAnalysisSheetSource        @default(manuel)
   status                WorkItemStatus                 @default(brouillon)
   comprehensionLevel    DpgfAnalysisComprehensionLevel @default(intermediaire)
+  /// Prix HT saisi manuellement par l'utilisateur (optionnel, jamais calculé automatiquement)
+  manualPriceHt         Decimal?                       @db.Decimal(14, 4)
   hasModeOperatoire     Boolean                        @default(false)
   hasVigilancePoints    Boolean                        @default(false)
   hasQuestions          Boolean                        @default(false)

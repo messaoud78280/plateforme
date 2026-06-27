@@ -26,6 +26,7 @@ import {
   type DpgfJsonPreviewResult,
 } from "@/lib/dpgf-analysis/json-import";
 import { isDpgfAnalysisLevel, isDpgfAnalysisSource } from "@/lib/dpgf-analysis/labels";
+import { parseManualPriceHt } from "@/lib/dpgf-analysis/manual-price";
 import type { DpgfAnalysisSheetContent, DpgfAnalysisSheetLinks } from "@/lib/dpgf-analysis/types";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
@@ -176,6 +177,7 @@ function parseIdentification(raw: FormData) {
     dceLineIndex: raw.get("dceLineIndex") ? Number(raw.get("dceLineIndex")) : null,
     workItemId: String(raw.get("workItemId") ?? "").trim() || null,
     quoteDocumentId: String(raw.get("quoteDocumentId") ?? "").trim() || null,
+    manualPriceHt: parseManualPriceHt(String(raw.get("manualPriceHt") ?? "")),
   };
 }
 
@@ -262,6 +264,7 @@ export async function duplicateDpgfAnalysisSheet(id: string): Promise<{ ok: true
         dceLineIndex: source.dceLineIndex,
         workItemId: source.workItemId,
         quoteDocumentId: source.quoteDocumentId,
+        manualPriceHt: source.manualPriceHt,
         ...computeContentFlags(content),
         createdByUserId: session?.user?.id ?? null,
       },
@@ -370,7 +373,9 @@ export async function importDpgfAnalysisJson(
     const text = jsonText.trim();
     if (!text) return { ok: false, error: "JSON vide." };
 
-    const existingRows = await prisma.dpgfAnalysisSheet.findMany({ select: { id: true, codeSheet: true } });
+    const existingRows = await prisma.dpgfAnalysisSheet.findMany({
+      select: { id: true, codeSheet: true, manualPriceHt: true },
+    });
     const existingCodes = new Set(existingRows.map((r) => r.codeSheet));
     const preview = buildDpgfJsonPreview(text, existingCodes);
 
@@ -412,6 +417,7 @@ export async function importDpgfAnalysisJson(
         comprehensionLevel: parsed.comprehensionLevel,
         content: parsed.content,
         links: parsed.links,
+        manualPriceHt: parsed.manualPriceHt ?? null,
         ...parsed.flags,
         createdByUserId: session?.user?.id ?? null,
       };
@@ -419,6 +425,8 @@ export async function importDpgfAnalysisJson(
       if (resolved.action === "replace") {
         const existing = existingRows.find((r) => r.codeSheet === resolved.code);
         if (existing) {
+          const manualPriceHt =
+            parsed.manualPriceHt !== undefined ? parsed.manualPriceHt : existing.manualPriceHt;
           await prisma.dpgfAnalysisSheet.update({
             where: { id: existing.id },
             data: {
@@ -434,6 +442,7 @@ export async function importDpgfAnalysisJson(
               comprehensionLevel: sheetData.comprehensionLevel,
               content: sheetData.content,
               links: sheetData.links,
+              manualPriceHt,
               hasModeOperatoire: sheetData.hasModeOperatoire,
               hasVigilancePoints: sheetData.hasVigilancePoints,
               hasQuestions: sheetData.hasQuestions,

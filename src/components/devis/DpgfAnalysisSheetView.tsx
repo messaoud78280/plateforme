@@ -5,8 +5,10 @@ import {
   DPGF_ANALYSIS_STATUS_LABELS,
 } from "@/lib/dpgf-analysis/labels";
 import { parseDpgfAnalysisContent } from "@/lib/dpgf-analysis/content-utils";
+import { manualPriceHtToNumber } from "@/lib/dpgf-analysis/manual-price";
 import { isWhoDoesItLikelyMisassigned } from "@/lib/dpgf-analysis/resolve-who-does-it";
 import type { DpgfAnalysisSheetLinks } from "@/lib/dpgf-analysis/types";
+import { formatEurFrBpu } from "@/lib/be-work-devis-format";
 import { getBeWorkFamilyLabel } from "@/lib/bework-devis-family-codes";
 
 type Props = { sheet: DpgfAnalysisSheet };
@@ -23,6 +25,7 @@ export function DpgfAnalysisSheetView({ sheet }: Props) {
     tradeLabel,
   );
   const whoDoesItDisplay = whoDoesItMisassigned ? "" : whoDoesItRaw;
+  const manualPrice = manualPriceHtToNumber(sheet.manualPriceHt);
 
   return (
     <div className="space-y-6">
@@ -38,6 +41,10 @@ export function DpgfAnalysisSheetView({ sheet }: Props) {
             ["Source", DPGF_ANALYSIS_SOURCE_LABELS[sheet.source]],
             ["Statut", DPGF_ANALYSIS_STATUS_LABELS[sheet.status]],
             ["Niveau", DPGF_ANALYSIS_LEVEL_LABELS[sheet.comprehensionLevel]],
+            [
+              "Prix manuel HT",
+              manualPrice != null ? `${formatEurFrBpu(manualPrice)} HT` : "—",
+            ],
           ]}
         />
         <Block label="Désignation DPGF d'origine" text={sheet.originalDesignation} />

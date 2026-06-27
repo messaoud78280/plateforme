@@ -67,7 +67,10 @@ export function DpgfAnalysisJsonImportPanel() {
       <h2 className="font-heading mt-1 text-lg font-bold text-slate-900">Ajout rapide depuis JSON</h2>
       <p className="mt-2 text-sm leading-relaxed text-slate-600">
         Collez un JSON structuré pour importer plusieurs fiches d&apos;analyse DPGF. Ce module crée des fiches de
-        compréhension&nbsp;: <strong className="font-semibold text-slate-800">sans prix, sans chiffrage</strong>.
+        compréhension&nbsp;: <strong className="font-semibold text-slate-800">sans chiffrage automatique</strong>.
+        Vous pouvez renseigner un{" "}
+        <code className="rounded bg-slate-200/80 px-1 text-xs">prix_manuel_ht</code> optionnel dans{" "}
+        <code className="rounded bg-slate-200/80 px-1 text-xs">fiche_mere</code> (saisie manuelle uniquement).
       </p>
       <p className="mt-2 text-sm text-slate-600">
         Formats acceptés&nbsp;:{" "}

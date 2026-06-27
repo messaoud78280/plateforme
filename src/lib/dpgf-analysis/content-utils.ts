@@ -98,6 +98,14 @@ export function joinLinesField(items: string[] | undefined): string {
   return (items ?? []).filter(Boolean).join("\n");
 }
 
+/** Compare deux textes pédagogiques (ignore espaces / casse). */
+export function isSameTranslationText(a: string, b: string): boolean {
+  const norm = (s: string) => s.trim().replace(/\s+/g, " ").toLowerCase();
+  const na = norm(a);
+  const nb = norm(b);
+  return na.length > 0 && na === nb;
+}
+
 export function parseDpgfAnalysisContent(raw: unknown): DpgfAnalysisSheetContent {
   const base = emptyDpgfAnalysisContent();
   if (!raw || typeof raw !== "object") return base;

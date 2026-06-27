@@ -4,7 +4,7 @@ import {
   DPGF_ANALYSIS_SOURCE_LABELS,
   DPGF_ANALYSIS_STATUS_LABELS,
 } from "@/lib/dpgf-analysis/labels";
-import { parseDpgfAnalysisContent } from "@/lib/dpgf-analysis/content-utils";
+import { isSameTranslationText, parseDpgfAnalysisContent } from "@/lib/dpgf-analysis/content-utils";
 import {
   displayIntervenantConcerne,
   formatLotDpgfDisplay,
@@ -78,7 +78,9 @@ export function DpgfAnalysisSheetView({ sheet }: Props) {
 
       <Section title="B. Traduction simple">
         <Block label="Que veut dire cette ligne ?" text={content.translation.meaning} />
-        <Block label="Traduction débutant" text={content.translation.beginnerLanguage} />
+        {!isSameTranslationText(content.translation.meaning, content.translation.beginnerLanguage) ? (
+          <Block label="Traduction débutant" text={content.translation.beginnerLanguage} />
+        ) : null}
         <Block label="Mots techniques à expliquer" text={content.translation.technicalTerms} />
         <Block label="Exemple concret" text={content.translation.concreteExample} />
       </Section>

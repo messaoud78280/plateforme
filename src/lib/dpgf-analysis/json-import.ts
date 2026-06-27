@@ -352,11 +352,18 @@ export function mapJsonFicheToSheet(
   const lotNom = String(mere.lot_nom ?? root.lot_nom ?? "").trim();
   const linkedLots = formatLotDpgfDisplay(lot, lotNom);
   const intervenantRaw = resolveWhoDoesItFromJsonSources(fiche, comprehension, mere);
+  const explicationSimple = String(comprehension.explication_simple ?? "").trim();
+  const traductionDebutant = String(
+    comprehension.traduction_debutant ??
+      comprehension.explication_debutant ??
+      comprehension.langage_debutant ??
+      "",
+  ).trim();
 
   const content: DpgfAnalysisSheetContent = {
     translation: {
-      meaning: String(comprehension.explication_simple ?? "").trim(),
-      beginnerLanguage: String(comprehension.explication_simple ?? "").trim(),
+      meaning: explicationSimple,
+      beginnerLanguage: traductionDebutant,
       technicalTerms: formatTechnicalTerms(comprehension.mots_techniques),
       concreteExample: String(comprehension.exemple_concret ?? "").trim(),
     },

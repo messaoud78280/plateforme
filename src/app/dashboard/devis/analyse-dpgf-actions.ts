@@ -17,6 +17,14 @@ import {
   parseLinesField,
 } from "@/lib/dpgf-analysis/content-utils";
 import { generateDpgfAnalysisFromLine, isDpgfAnalysisAiAvailable } from "@/lib/dpgf-analysis/generate-sheet";
+import {
+  buildDpgfJsonPreview,
+  mapJsonFicheToSheet,
+  parseDpgfAnalysisJsonRoot,
+  resolveImportCodeSheet,
+  type DpgfJsonDuplicateMode,
+  type DpgfJsonPreviewResult,
+} from "@/lib/dpgf-analysis/json-import";
 import { isDpgfAnalysisLevel, isDpgfAnalysisSource } from "@/lib/dpgf-analysis/labels";
 import type { DpgfAnalysisSheetContent, DpgfAnalysisSheetLinks } from "@/lib/dpgf-analysis/types";
 import { prisma } from "@/lib/prisma";
@@ -329,5 +337,123 @@ export async function deleteDpgfAnalysisSheet(id: string): Promise<{ ok: true } 
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Erreur suppression." };
+  }
+}
+
+export async function previewDpgfAnalysisJsonImport(
+  jsonText: string,
+): Promise<{ ok: true; preview: DpgfJsonPreviewResult } | { ok: false; error: string }> {
+  try {
+    await requireBeWorkDevisSession();
+    const text = jsonText.trim();
+    if (!text) return { ok: false, error: "Collez un JSON dans le champ Données JSON." };
+
+    const existing = await prisma.dpgfAnalysisSheet.findMany({ select: { codeSheet: true } });
+    const existingCodes = new Set(existing.map((r) => r.codeSheet));
+    const preview = buildDpgfJsonPreview(text, existingCodes);
+    return { ok: true, preview };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Erreur analyse JSON." };
+  }
+}
+
+export async function importDpgfAnalysisJson(
+  jsonText: string,
+  duplicateMode: DpgfJsonDuplicateMode = "ignore",
+): Promise<
+  | { ok: true; imported: number; skipped: number; replaced: number; codes: string[] }
+  | { ok: false; error: string }
+> {
+  try {
+    await requireBeWorkDevisSession();
+    const session = await getServerSession(authOptions);
+    const text = jsonText.trim();
+    if (!text) return { ok: false, error: "JSON vide." };
+
+    const existingRows = await prisma.dpgfAnalysisSheet.findMany({ select: { id: true, codeSheet: true } });
+    const existingCodes = new Set(existingRows.map((r) => r.codeSheet));
+    const preview = buildDpgfJsonPreview(text, existingCodes);
+
+    if (!preview.canImport) {
+      const firstError =
+        preview.structureErrors[0] ??
+        preview.rows.find((r) => r.errors.length > 0)?.errors[0] ??
+        "JSON incomplet ou invalide — corrigez avant import.";
+      return { ok: false, error: firstError };
+    }
+
+    const { root, fiches } = parseDpgfAnalysisJsonRoot(text);
+    let imported = 0;
+    let skipped = 0;
+    let replaced = 0;
+    const codes: string[] = [];
+    const codesInDb = new Set(existingCodes);
+
+    for (const fiche of fiches) {
+      const parsed = mapJsonFicheToSheet(fiche, root);
+      const resolved = await resolveImportCodeSheet(parsed.codeSheet, duplicateMode, codesInDb);
+
+      if (resolved.action === "skip") {
+        skipped += 1;
+        continue;
+      }
+
+      const sheetData = {
+        codeSheet: resolved.code,
+        lot: parsed.lot,
+        tradeCode: parsed.tradeCode,
+        familyName: parsed.familyName,
+        ouvrageType: parsed.ouvrageType,
+        originalDesignation: parsed.originalDesignation,
+        simplifiedDesignation: parsed.simplifiedDesignation,
+        unit: parsed.unit,
+        source: parsed.source,
+        status: parsed.status,
+        comprehensionLevel: parsed.comprehensionLevel,
+        content: parsed.content,
+        links: parsed.links,
+        ...parsed.flags,
+        createdByUserId: session?.user?.id ?? null,
+      };
+
+      if (resolved.action === "replace") {
+        const existing = existingRows.find((r) => r.codeSheet === resolved.code);
+        if (existing) {
+          await prisma.dpgfAnalysisSheet.update({
+            where: { id: existing.id },
+            data: {
+              lot: sheetData.lot,
+              tradeCode: sheetData.tradeCode,
+              familyName: sheetData.familyName,
+              ouvrageType: sheetData.ouvrageType,
+              originalDesignation: sheetData.originalDesignation,
+              simplifiedDesignation: sheetData.simplifiedDesignation,
+              unit: sheetData.unit,
+              source: sheetData.source,
+              status: sheetData.status,
+              comprehensionLevel: sheetData.comprehensionLevel,
+              content: sheetData.content,
+              links: sheetData.links,
+              hasModeOperatoire: sheetData.hasModeOperatoire,
+              hasVigilancePoints: sheetData.hasVigilancePoints,
+              hasQuestions: sheetData.hasQuestions,
+            },
+          });
+          replaced += 1;
+          codes.push(resolved.code);
+          continue;
+        }
+      }
+
+      await prisma.dpgfAnalysisSheet.create({ data: sheetData });
+      codesInDb.add(resolved.code);
+      imported += 1;
+      codes.push(resolved.code);
+    }
+
+    revalidateDpgf();
+    return { ok: true, imported, skipped, replaced, codes };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Erreur import JSON." };
   }
 }

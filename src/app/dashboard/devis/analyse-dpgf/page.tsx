@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DpgfAnalysisGeneratePanel } from "@/components/devis/DpgfAnalysisGeneratePanel";
+import { DpgfAnalysisInputTabs } from "@/components/devis/DpgfAnalysisInputTabs";
 import { DpgfAnalysisListTable } from "@/components/devis/DpgfAnalysisListTable";
 import { DpgfAnalysisStatsStrip } from "@/components/devis/DpgfAnalysisStatsStrip";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
@@ -93,7 +93,7 @@ export default async function AnalyseDpgfPage({ searchParams }: { searchParams: 
 
       <DpgfAnalysisStatsStrip stats={stats} />
 
-      <DpgfAnalysisGeneratePanel aiAvailable={aiAvailable} />
+      <DpgfAnalysisInputTabs aiAvailable={aiAvailable} />
 
       <section className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
         <h2 className="font-heading text-sm font-bold text-slate-900">Filtres</h2>

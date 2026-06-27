@@ -6,7 +6,7 @@ export const DPGF_ANALYSIS_SOURCE_LABELS: Record<DpgfAnalysisSheetSource, string
   bpu: "BPU",
   cctp: "CCTP",
   manuel: "Manuel",
-  import: "Import",
+  import: "Import JSON",
 };
 
 export const DPGF_ANALYSIS_LEVEL_LABELS: Record<DpgfAnalysisComprehensionLevel, string> = {

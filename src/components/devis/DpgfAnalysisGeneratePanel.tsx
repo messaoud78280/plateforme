@@ -5,17 +5,27 @@ import { useState, useTransition } from "react";
 import { generateDpgfAnalysisSheetWithAi } from "@/app/dashboard/devis/analyse-dpgf-actions";
 import { DPGF_ANALYSIS_SOURCE_LABELS } from "@/lib/dpgf-analysis/labels";
 
-type Props = { aiAvailable?: boolean };
+type Props = { aiAvailable?: boolean; embedded?: boolean };
 
-export function DpgfAnalysisGeneratePanel({ aiAvailable = false }: Props) {
+export function DpgfAnalysisGeneratePanel({ aiAvailable = false, embedded = false }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   return (
-    <section className="rounded-2xl border border-[#1e3a5f]/15 bg-gradient-to-br from-[#eff6ff]/50 to-white p-6 shadow-sm">
-      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#1e3a5f]">Analyse pédagogique IA</p>
-      <h2 className="font-heading mt-1 text-lg font-bold text-slate-900">Analyser une ligne DPGF</h2>
+    <section
+      className={
+        embedded
+          ? ""
+          : "rounded-2xl border border-[#1e3a5f]/15 bg-gradient-to-br from-[#eff6ff]/50 to-white p-6 shadow-sm"
+      }
+    >
+      {!embedded ? (
+        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#1e3a5f]">Analyse pédagogique IA</p>
+      ) : null}
+      <h2 className={`font-heading text-lg font-bold text-slate-900 ${embedded ? "" : "mt-1"}`}>
+        Analyser une ligne DPGF
+      </h2>
       <p className="mt-2 text-sm leading-relaxed text-slate-600">
         Collez une désignation DPGF pour générer une fiche de compréhension — sans prix, sans chiffrage. La fiche est
         créée en statut <strong>À vérifier</strong>.

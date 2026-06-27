@@ -5,6 +5,7 @@ import type {
 } from "@prisma/client";
 import { suggestFamilyCodeFromWorkItem } from "@/lib/bework-devis-family-codes";
 import { computeContentFlags } from "./content-utils";
+import { resolveWhoDoesItFromJsonSources } from "./resolve-who-does-it";
 import type { DpgfAnalysisSheetContent, DpgfAnalysisSheetLinks } from "./types";
 
 /** Clés interdites (chiffrage / prix) — refusées à l'import. */
@@ -348,7 +349,7 @@ export function mapJsonFicheToSheet(
       whatIsIt: pointsReperer.join(" · ") || String(comprehension.explication_simple ?? "").trim(),
       purpose: String(comprehension.a_quoi_ca_sert ?? "").trim(),
       whereOnSite: String(comprehension.ou_on_le_trouve ?? "").trim(),
-      whoDoesIt: String(mere.corps_metier ?? "").trim(),
+      whoDoesIt: resolveWhoDoesItFromJsonSources(fiche, comprehension, mere),
       whenInProject: "",
       linkedLots: String(mere.lot_nom ?? root.lot_nom ?? "").trim(),
     },

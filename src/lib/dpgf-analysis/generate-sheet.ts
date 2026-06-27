@@ -35,7 +35,7 @@ Retourne un JSON avec cette structure exacte :
   "comprehensionLevel": "debutant|intermediaire|confirme",
   "content": {
     "translation": { "meaning", "beginnerLanguage", "technicalTerms", "concreteExample" },
-    "realWorld": { "whatIsIt", "purpose", "whereOnSite", "whoDoesIt", "whenInProject", "linkedLots" },
+    "realWorld": { "whatIsIt", "purpose", "whereOnSite", "whoDoesIt (acteur réel : entreprise, bureau de contrôle, commissaire de justice… — jamais le nom du lot ni le corps d'état)", "whenInProject", "linkedLots (lot DPGF rattaché)" },
     "included": { "supply", "installation", "accessories", "fixings", "preparation", "cuts", "adjustments", "cleaning", "protection", "minorItems" },
     "excluded": { "demolition", "wasteEvacuation", "substrateRepair", "specialTreatment", "finishing", "painting", "studies", "executionPlans", "accessMeans", "difficultHandling", "penetrations", "lotCoordination" },
     "documentsToCheck": { "cctp", "dpgf", "bpu", "architectPlans", "technicalPlans", "sectionDetails", "joineryBook", "manufacturerSheets", "notices", "dtuRules", "sitePhotos" },

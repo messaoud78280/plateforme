@@ -74,7 +74,9 @@ export function DpgfAnalysisJsonImportPanel() {
         <code className="rounded bg-slate-200/80 px-1 text-xs">{`{ "fiches_analyse_dpgf": […] }`}</code>,{" "}
         <code className="rounded bg-slate-200/80 px-1 text-xs">tableau de fiches</code>, ou{" "}
         <code className="rounded bg-slate-200/80 px-1 text-xs">une fiche unique</code> avec{" "}
-        <code className="rounded bg-slate-200/80 px-1 text-xs">fiche_mere</code>.
+        <code className="rounded bg-slate-200/80 px-1 text-xs">fiche_mere</code>. Pour « Qui le réalise ? », utilisez{" "}
+        <code className="rounded bg-slate-200/80 px-1 text-xs">comprehension.qui_le_realise</code> (pas{" "}
+        <code className="rounded bg-slate-200/80 px-1 text-xs">corps_metier</code>).
       </p>
 
       <div className="mt-4 space-y-3">

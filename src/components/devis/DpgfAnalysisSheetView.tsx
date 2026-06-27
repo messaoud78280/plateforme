@@ -5,6 +5,7 @@ import {
   DPGF_ANALYSIS_STATUS_LABELS,
 } from "@/lib/dpgf-analysis/labels";
 import { parseDpgfAnalysisContent } from "@/lib/dpgf-analysis/content-utils";
+import { isWhoDoesItLikelyMisassigned } from "@/lib/dpgf-analysis/resolve-who-does-it";
 import type { DpgfAnalysisSheetLinks } from "@/lib/dpgf-analysis/types";
 import { getBeWorkFamilyLabel } from "@/lib/bework-devis-family-codes";
 
@@ -13,6 +14,15 @@ type Props = { sheet: DpgfAnalysisSheet };
 export function DpgfAnalysisSheetView({ sheet }: Props) {
   const content = parseDpgfAnalysisContent(sheet.content);
   const links = (sheet.links ?? {}) as DpgfAnalysisSheetLinks;
+  const tradeLabel = sheet.tradeCode ? getBeWorkFamilyLabel(sheet.tradeCode) ?? sheet.tradeCode : "";
+  const whoDoesItRaw = content.realWorld.whoDoesIt;
+  const whoDoesItMisassigned = isWhoDoesItLikelyMisassigned(
+    whoDoesItRaw,
+    content.realWorld.linkedLots,
+    sheet.familyName ?? "",
+    tradeLabel,
+  );
+  const whoDoesItDisplay = whoDoesItMisassigned ? "" : whoDoesItRaw;
 
   return (
     <div className="space-y-6">
@@ -47,7 +57,13 @@ export function DpgfAnalysisSheetView({ sheet }: Props) {
         <Block label="C'est quoi ?" text={content.realWorld.whatIsIt} />
         <Block label="À quoi ça sert ?" text={content.realWorld.purpose} />
         <Block label="Où sur le chantier ?" text={content.realWorld.whereOnSite} />
-        <Block label="Qui le réalise ?" text={content.realWorld.whoDoesIt} />
+        <Block label="Qui le réalise ?" text={whoDoesItDisplay} />
+        {whoDoesItMisassigned ? (
+          <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+            Acteur de réalisation à préciser (ne pas confondre avec le lot DPGF). Complétez le champ « Qui le réalise
+            ? » ou ajoutez <code className="text-xs">comprehension.qui_le_realise</code> dans le JSON d&apos;import.
+          </p>
+        ) : null}
         <Block label="Quand dans le chantier ?" text={content.realWorld.whenInProject} />
         <Block label="Lots liés" text={content.realWorld.linkedLots} />
       </Section>

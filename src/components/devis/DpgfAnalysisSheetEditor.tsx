@@ -116,7 +116,7 @@ export function DpgfAnalysisSheetEditor({ mode, sheet }: Props) {
           ["What", "C'est quoi ?"],
           ["Purpose", "À quoi ça sert ?"],
           ["Where", "Où sur le chantier ?"],
-          ["Who", "Qui le réalise ?"],
+          ["Who", "Qui le réalise ? (acteur réel, pas le lot)"],
           ["When", "Quand dans le chantier ?"],
           ["LinkedLots", "Lots liés"],
         ]} content={content.realWorld} keyMap={{

@@ -17,6 +17,8 @@ export const SEO_DISALLOW_PATHS = [
   "/connexion/clients",
   "/invitation/",
   "/communication-digitale",
+  "/contract",
+  "/compte/",
 ] as const;
 
 /**

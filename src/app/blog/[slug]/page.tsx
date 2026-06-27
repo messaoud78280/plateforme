@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const modified = article.modifiedTime ?? article.publishedTime;
   const ogImage = absoluteUrl(`/blog/${slug}/opengraph-image`);
   return {
-    title: `${article.title} | BeWork Blog`,
+    title: { absolute: `${article.title} | BeWork Blog` },
     description: article.description,
     keywords: article.keywords,
     alternates: { canonical: url, languages: hreflangFrancophonieLanguages(`/blog/${slug}`) },

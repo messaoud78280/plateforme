@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SEO_NOINDEX_ROBOTS } from "@/lib/seo-search-engines";
 
 export const metadata: Metadata = {
-  title: "Inscription | BeWork",
+  title: { absolute: "Inscription | BeWork" },
   description: "Créer un compte client BeWork pour déléguer vos missions bureau-chantier BTP.",
   robots: SEO_NOINDEX_ROBOTS,
 };

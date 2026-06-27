@@ -41,9 +41,9 @@ export default function Page() {
       description="Assistant travaux à distance pour PME BTP : analyse DCE, relances, comptes rendus et suivi dossiers chantier. Plateforme supervisée depuis la France. Dès 590 € HT/mois."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
-        { name: "Assistant administratif à distance", href: PAGE_PATH },
+        { name: "Assistant travaux à distance", href: PAGE_PATH },
       ]}
-      h1="Assistant administratif à distance : assistance travaux BTP sans présence bureau"
+      h1="Assistant travaux à distance : renfort gestion travaux BTP sans présence bureau"
       intro={
         <>
           L&apos;assistant travaux BeWork travaille depuis la plateforme, supervisé depuis la France. Analyse DCE,
@@ -77,7 +77,7 @@ export default function Page() {
         le conducteur de travaux sur le terrain.
       </p>
 
-      <section className="not-prose" id="faq" aria-label="FAQ assistant administratif à distance" style={{ scrollMarginTop: "6rem" }}>
+      <section className="not-prose" id="faq" aria-label="FAQ assistant travaux à distance" style={{ scrollMarginTop: "6rem" }}>
         <h2 className="mt-12 text-xl font-bold tracking-tight text-black md:text-2xl">Questions fréquentes</h2>
         <dl className="mt-5 space-y-4">
           {faq.map((item) => (

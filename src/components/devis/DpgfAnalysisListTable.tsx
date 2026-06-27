@@ -7,7 +7,9 @@ import {
   DPGF_ANALYSIS_LEVEL_LABELS,
   DPGF_ANALYSIS_STATUS_LABELS,
 } from "@/lib/dpgf-analysis/labels";
-import { getBeWorkFamilyLabel } from "@/lib/bework-devis-family-codes";
+import {
+  readIntervenantConcerneRaw,
+} from "@/lib/dpgf-analysis/intervenant-concerne";
 import type { DpgfAnalysisListRow } from "@/lib/dpgf-analysis/types";
 
 type Props = { rows: DpgfAnalysisListRow[] };
@@ -31,8 +33,8 @@ export function DpgfAnalysisListTable({ rows }: Props) {
           <tr>
             <th className="px-4 py-3">Code</th>
             <th className="px-4 py-3">Désignation</th>
-            <th className="px-4 py-3">Lot</th>
-            <th className="px-4 py-3">Corps de métier</th>
+            <th className="px-4 py-3">Lot DPGF</th>
+            <th className="px-4 py-3">Intervenant concerné</th>
             <th className="px-4 py-3">Famille</th>
             <th className="px-4 py-3">Unité</th>
             <th className="px-4 py-3">Niveau</th>
@@ -50,8 +52,10 @@ export function DpgfAnalysisListTable({ rows }: Props) {
                 <p className="mt-0.5 line-clamp-2 text-xs text-slate-500">{row.originalDesignation}</p>
               </td>
               <td className="px-4 py-3 text-slate-700">{row.lot}</td>
-              <td className="px-4 py-3 text-slate-700">
-                {row.tradeCode ? getBeWorkFamilyLabel(row.tradeCode) ?? row.tradeCode : "—"}
+              <td className="max-w-xs px-4 py-3 text-slate-700">
+                <p className="line-clamp-2 text-sm">
+                  {readIntervenantConcerneRaw(row.intervenantConcerne) || "À définir selon le marché"}
+                </p>
               </td>
               <td className="px-4 py-3 text-slate-700">{row.familyName || "—"}</td>
               <td className="px-4 py-3 font-mono text-xs">{row.unit}</td>

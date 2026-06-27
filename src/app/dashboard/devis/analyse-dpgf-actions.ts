@@ -8,7 +8,6 @@ import type {
 } from "@prisma/client";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import { isWorkItemStatus } from "@/lib/be-work-devis-labels";
-import { suggestFamilyCodeFromWorkItem } from "@/lib/bework-devis-family-codes";
 import {
   computeContentFlags,
   emptyDpgfAnalysisContent,
@@ -146,10 +145,9 @@ function parseIdentification(raw: FormData) {
   if (!originalDesignation) throw new Error("La désignation DPGF d'origine est obligatoire.");
 
   const tradeRaw = String(raw.get("tradeCode") ?? "").trim().toUpperCase();
-  const tradeCode =
-    tradeRaw ||
-    suggestFamilyCodeFromWorkItem({ lot, family: String(raw.get("familyName") ?? ""), title: originalDesignation }) ||
-    null;
+  const tradeCode = tradeRaw || null;
+
+  const intervenantRaw = String(raw.get("intervenantConcerne") ?? "").trim();
 
   const sourceRaw = String(raw.get("source") ?? "manuel");
   const source: DpgfAnalysisSheetSource = isDpgfAnalysisSource(sourceRaw) ? sourceRaw : "manuel";
@@ -178,6 +176,20 @@ function parseIdentification(raw: FormData) {
     workItemId: String(raw.get("workItemId") ?? "").trim() || null,
     quoteDocumentId: String(raw.get("quoteDocumentId") ?? "").trim() || null,
     manualPriceHt: parseManualPriceHt(String(raw.get("manualPriceHt") ?? "")),
+    intervenantConcerne: intervenantRaw || null,
+  };
+}
+
+function syncIntervenantInContent(
+  content: DpgfAnalysisSheetContent,
+  intervenantConcerne: string | null,
+): DpgfAnalysisSheetContent {
+  return {
+    ...content,
+    realWorld: {
+      ...content.realWorld,
+      whoDoesIt: intervenantConcerne ?? "",
+    },
   };
 }
 
@@ -186,7 +198,11 @@ export async function createDpgfAnalysisSheet(formData: FormData): Promise<{ ok:
     await requireBeWorkDevisSession();
     const session = await getServerSession(authOptions);
     const idFields = parseIdentification(formData);
-    const content = parseContentFromForm(formData);
+    const links = parseLinks(formData);
+    let content = syncIntervenantInContent(parseContentFromForm(formData), idFields.intervenantConcerne);
+    if (links.lotNote) {
+      content = { ...content, realWorld: { ...content.realWorld, linkedLots: links.lotNote } };
+    }
     const flags = computeContentFlags(content);
     const codeSheet = await generateNextDpgfSheetCode();
 
@@ -195,7 +211,7 @@ export async function createDpgfAnalysisSheet(formData: FormData): Promise<{ ok:
         codeSheet,
         ...idFields,
         content,
-        links: parseLinks(formData),
+        links,
         ...flags,
         createdByUserId: session?.user?.id ?? null,
       },
@@ -215,7 +231,11 @@ export async function updateDpgfAnalysisSheet(formData: FormData): Promise<{ ok:
     if (!id) throw new Error("Identifiant fiche manquant.");
 
     const idFields = parseIdentification(formData);
-    const content = parseContentFromForm(formData);
+    const links = parseLinks(formData);
+    let content = syncIntervenantInContent(parseContentFromForm(formData), idFields.intervenantConcerne);
+    if (links.lotNote) {
+      content = { ...content, realWorld: { ...content.realWorld, linkedLots: links.lotNote } };
+    }
     const flags = computeContentFlags(content);
 
     await prisma.dpgfAnalysisSheet.update({
@@ -223,7 +243,7 @@ export async function updateDpgfAnalysisSheet(formData: FormData): Promise<{ ok:
       data: {
         ...idFields,
         content,
-        links: parseLinks(formData),
+        links,
         ...flags,
       },
     });
@@ -265,6 +285,7 @@ export async function duplicateDpgfAnalysisSheet(id: string): Promise<{ ok: true
         workItemId: source.workItemId,
         quoteDocumentId: source.quoteDocumentId,
         manualPriceHt: source.manualPriceHt,
+        intervenantConcerne: source.intervenantConcerne,
         ...computeContentFlags(content),
         createdByUserId: session?.user?.id ?? null,
       },
@@ -316,6 +337,7 @@ export async function generateDpgfAnalysisSheetWithAi(formData: FormData): Promi
         comprehensionLevel: generated.comprehensionLevel,
         content: generated.content,
         links: parseLinks(formData),
+        intervenantConcerne: generated.content.realWorld.whoDoesIt.trim() || null,
         dceFillSessionId: String(formData.get("dceFillSessionId") ?? "").trim() || null,
         dceLineIndex: formData.get("dceLineIndex") ? Number(formData.get("dceLineIndex")) : null,
         workItemId: String(formData.get("workItemId") ?? "").trim() || null,
@@ -374,7 +396,7 @@ export async function importDpgfAnalysisJson(
     if (!text) return { ok: false, error: "JSON vide." };
 
     const existingRows = await prisma.dpgfAnalysisSheet.findMany({
-      select: { id: true, codeSheet: true, manualPriceHt: true },
+      select: { id: true, codeSheet: true, manualPriceHt: true, intervenantConcerne: true },
     });
     const existingCodes = new Set(existingRows.map((r) => r.codeSheet));
     const preview = buildDpgfJsonPreview(text, existingCodes);
@@ -418,6 +440,7 @@ export async function importDpgfAnalysisJson(
         content: parsed.content,
         links: parsed.links,
         manualPriceHt: parsed.manualPriceHt ?? null,
+        intervenantConcerne: parsed.intervenantConcerne ?? null,
         ...parsed.flags,
         createdByUserId: session?.user?.id ?? null,
       };
@@ -427,6 +450,9 @@ export async function importDpgfAnalysisJson(
         if (existing) {
           const manualPriceHt =
             parsed.manualPriceHt !== undefined ? parsed.manualPriceHt : existing.manualPriceHt;
+          const intervenantConcerne =
+            parsed.intervenantConcerne !== undefined ? parsed.intervenantConcerne : existing.intervenantConcerne;
+          const content = syncIntervenantInContent(sheetData.content, intervenantConcerne);
           await prisma.dpgfAnalysisSheet.update({
             where: { id: existing.id },
             data: {
@@ -440,9 +466,10 @@ export async function importDpgfAnalysisJson(
               source: sheetData.source,
               status: sheetData.status,
               comprehensionLevel: sheetData.comprehensionLevel,
-              content: sheetData.content,
+              content,
               links: sheetData.links,
               manualPriceHt,
+              intervenantConcerne,
               hasModeOperatoire: sheetData.hasModeOperatoire,
               hasVigilancePoints: sheetData.hasVigilancePoints,
               hasQuestions: sheetData.hasQuestions,

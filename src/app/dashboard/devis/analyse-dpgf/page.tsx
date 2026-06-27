@@ -40,7 +40,7 @@ export default async function AnalyseDpgfPage({ searchParams }: { searchParams: 
         simplifiedDesignation: true,
         originalDesignation: true,
         lot: true,
-        tradeCode: true,
+        intervenantConcerne: true,
         familyName: true,
         unit: true,
         comprehensionLevel: true,

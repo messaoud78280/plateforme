@@ -1,5 +1,4 @@
 import { chatCompletion } from "@/lib/skills/llm-chat";
-import { suggestFamilyCodeFromWorkItem } from "@/lib/bework-devis-family-codes";
 import { parseDpgfAnalysisContent } from "./content-utils";
 import type { DpgfAnalysisSheetContent } from "./types";
 
@@ -29,7 +28,7 @@ Contexte marché : ${input.context?.trim() || "non précisé"}
 Retourne un JSON avec cette structure exacte :
 {
   "simplifiedDesignation": "string court",
-  "tradeCode": "code corps métier 3 lettres si déductible (CLO, CAR, ELE…)",
+  "tradeCode": "code corps métier BeWork 3 lettres uniquement si explicitement identifiable (CLO, CAR, ELE…) — sinon null",
   "familyName": "famille ouvrage",
   "ouvrageType": "type ouvrage",
   "comprehensionLevel": "debutant|intermediaire|confirme",
@@ -83,14 +82,7 @@ export async function generateDpgfAnalysisFromLine(input: GenerateDpgfSheetInput
   };
 
   const content = parseDpgfAnalysisContent(parsed.content);
-  const tradeCode =
-    parsed.tradeCode?.trim().toUpperCase() ||
-    suggestFamilyCodeFromWorkItem({
-      lot: input.lot ?? "",
-      family: parsed.familyName,
-      title: input.originalDesignation,
-    }) ||
-    null;
+  const tradeCode = parsed.tradeCode?.trim().toUpperCase() || null;
 
   const levelRaw = parsed.comprehensionLevel?.trim();
   const comprehensionLevel =

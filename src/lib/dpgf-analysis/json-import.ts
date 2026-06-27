@@ -4,8 +4,8 @@ import type {
   WorkItemStatus,
 } from "@prisma/client";
 import type { Prisma } from "@prisma/client";
-import { suggestFamilyCodeFromWorkItem } from "@/lib/bework-devis-family-codes";
 import { computeContentFlags } from "./content-utils";
+import { formatLotDpgfDisplay } from "./intervenant-concerne";
 import { readManualPriceFromJson } from "./manual-price";
 import { resolveWhoDoesItFromJsonSources } from "./resolve-who-does-it";
 import type { DpgfAnalysisSheetContent, DpgfAnalysisSheetLinks } from "./types";
@@ -103,6 +103,7 @@ export type ParsedDpgfJsonSheet = {
   pedagogicalObjective?: string;
   /** undefined = absent du JSON ; null = explicitement vide */
   manualPriceHt?: Prisma.Decimal | null;
+  intervenantConcerne?: string | null;
 };
 
 function stripCodeFence(raw: string): string {
@@ -348,6 +349,9 @@ export function mapJsonFicheToSheet(
   const exclusions = asStringArray(fiche.exclusions_ou_points_a_verifier);
   const pointsReperer = asStringArray(analyse.ce_qu_il_faut_reperer);
   const pointsEclaircir = asStringArray(analyse.points_a_eclaircir);
+  const lotNom = String(mere.lot_nom ?? root.lot_nom ?? "").trim();
+  const linkedLots = formatLotDpgfDisplay(lot, lotNom);
+  const intervenantRaw = resolveWhoDoesItFromJsonSources(fiche, comprehension, mere);
 
   const content: DpgfAnalysisSheetContent = {
     translation: {
@@ -360,9 +364,9 @@ export function mapJsonFicheToSheet(
       whatIsIt: pointsReperer.join(" · ") || String(comprehension.explication_simple ?? "").trim(),
       purpose: String(comprehension.a_quoi_ca_sert ?? "").trim(),
       whereOnSite: String(comprehension.ou_on_le_trouve ?? "").trim(),
-      whoDoesIt: resolveWhoDoesItFromJsonSources(fiche, comprehension, mere),
+      whoDoesIt: intervenantRaw,
       whenInProject: "",
-      linkedLots: String(mere.lot_nom ?? root.lot_nom ?? "").trim(),
+      linkedLots,
     },
     included: {
       supply: inclusions.find((x) => /fourniture/i.test(x)) ?? "",
@@ -406,16 +410,12 @@ export function mapJsonFicheToSheet(
     },
   };
 
-  const tradeCode =
-    suggestFamilyCodeFromWorkItem({
-      lot: String(mere.lot_nom ?? root.lot_nom ?? lot),
-      family: familyName,
-      title: originalDesignation,
-    }) ?? null;
+  const tradeCodeRaw = String(mere.corps_metier_code ?? mere.trade_code ?? mere.tradeCode ?? "").trim().toUpperCase();
+  const tradeCode = tradeCodeRaw || null;
 
   const importDate = new Date().toISOString();
   const links: DpgfAnalysisSheetLinks = {
-    lotNote: String(mere.lot_nom ?? root.lot_nom ?? "").trim() || undefined,
+    lotNote: lotNom || undefined,
     internalNote: `Import JSON ${importDate}${mere.objectif_pedagogique ? ` — ${mere.objectif_pedagogique}` : ""}`,
   };
 
@@ -436,6 +436,7 @@ export function mapJsonFicheToSheet(
     flags: computeContentFlags(content),
     pedagogicalObjective: String(mere.objectif_pedagogique ?? "").trim() || undefined,
     manualPriceHt: readManualPriceFromJson(fiche, mere),
+    intervenantConcerne: intervenantRaw || null,
   };
 }
 

@@ -10,6 +10,7 @@ import {
   DPGF_ANALYSIS_STATUS_LABELS,
 } from "@/lib/dpgf-analysis/labels";
 import { joinLinesField, parseDpgfAnalysisContent, emptyDpgfAnalysisContent } from "@/lib/dpgf-analysis/content-utils";
+import { readIntervenantConcerneRaw } from "@/lib/dpgf-analysis/intervenant-concerne";
 import { formatManualPriceHtForInput } from "@/lib/dpgf-analysis/manual-price";
 import type { DpgfAnalysisSheetLinks } from "@/lib/dpgf-analysis/types";
 import { WORK_ITEM_UNITS } from "@/lib/be-work-devis-labels";
@@ -28,6 +29,9 @@ export function DpgfAnalysisSheetEditor({ mode, sheet }: Props) {
   const [error, setError] = useState<string | null>(null);
   const content = sheet ? parseDpgfAnalysisContent(sheet.content) : emptyDpgfAnalysisContent();
   const links = (sheet?.links ?? {}) as DpgfAnalysisSheetLinks;
+  const intervenantDefault = sheet
+    ? readIntervenantConcerneRaw(sheet.intervenantConcerne, content.realWorld.whoDoesIt)
+    : "";
 
   return (
     <form
@@ -50,13 +54,8 @@ export function DpgfAnalysisSheetEditor({ mode, sheet }: Props) {
           {mode === "edit" && sheet ? (
             <ReadOnlyField label="Code fiche" value={sheet.codeSheet} />
           ) : null}
-          <Input name="lot" label="Lot *" required defaultValue={sheet?.lot} />
-          <Select
-            name="tradeCode"
-            label="Corps de métier"
-            defaultValue={sheet?.tradeCode ?? ""}
-            options={[{ value: "", label: "— Auto —" }, ...FAMILY_LEX.map((f) => ({ value: f.code, label: `${f.code} — ${f.label}` }))]}
-          />
+          <Input name="lot" label="Lot DPGF *" required defaultValue={sheet?.lot} placeholder="Ex. 01" />
+          <Input name="linkLotNote" label="Lot lié (libellé marché)" defaultValue={links.lotNote ?? content.realWorld.linkedLots ?? ""} placeholder="Ex. Lot 01 — Fondations / Gros œuvre" />
           <Input name="familyName" label="Famille d'ouvrage" defaultValue={sheet?.familyName ?? ""} />
           <Input name="ouvrageType" label="Type d'ouvrage" defaultValue={sheet?.ouvrageType ?? ""} />
           <Select
@@ -90,6 +89,28 @@ export function DpgfAnalysisSheetEditor({ mode, sheet }: Props) {
         <Textarea name="originalDesignation" label="Désignation DPGF d'origine *" required rows={3} defaultValue={sheet?.originalDesignation} />
         <Input name="simplifiedDesignation" label="Désignation simplifiée" defaultValue={sheet?.simplifiedDesignation ?? ""} />
         <ManualPriceField defaultValue={formatManualPriceHtForInput(sheet?.manualPriceHt)} />
+        <Textarea
+          name="intervenantConcerne"
+          label="Intervenant concerné"
+          rows={3}
+          defaultValue={intervenantDefault}
+          className="sm:col-span-2"
+        />
+        <p className="text-xs text-slate-500 sm:col-span-2">
+          Qui réalise ou pilote réellement la prestation — distinct du lot DPGF. Laissez vide pour afficher « À définir
+          selon le marché ».
+        </p>
+      </EditorSection>
+
+      <EditorSection title="Référencement interne (optionnel)">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <Select
+            name="tradeCode"
+            label="Code corps métier BeWork (filtre)"
+            defaultValue={sheet?.tradeCode ?? ""}
+            options={[{ value: "", label: "— Non renseigné —" }, ...FAMILY_LEX.map((f) => ({ value: f.code, label: `${f.code} — ${f.label}` }))]}
+          />
+        </div>
       </EditorSection>
 
       <EditorSection title="Liens marché (sans prix)">
@@ -97,7 +118,6 @@ export function DpgfAnalysisSheetEditor({ mode, sheet }: Props) {
           <Input name="linkCctp" label="Réf. CCTP" defaultValue={links.cctpReference ?? ""} />
           <Input name="linkPlan" label="Réf. plan" defaultValue={links.planReference ?? ""} />
           <Input name="linkDcePiece" label="Pièce DCE" defaultValue={links.dcePieceNote ?? ""} />
-          <Input name="linkLotNote" label="Note lot" defaultValue={links.lotNote ?? ""} />
           <Input name="dceFillSessionId" label="ID session DCE" defaultValue={sheet?.dceFillSessionId ?? ""} />
           <Input name="dceLineIndex" label="Index ligne DCE" defaultValue={sheet?.dceLineIndex?.toString() ?? ""} />
           <Input name="workItemId" label="ID ouvrage bibliothèque (lien optionnel)" defaultValue={sheet?.workItemId ?? ""} />
@@ -118,11 +138,10 @@ export function DpgfAnalysisSheetEditor({ mode, sheet }: Props) {
           ["What", "C'est quoi ?"],
           ["Purpose", "À quoi ça sert ?"],
           ["Where", "Où sur le chantier ?"],
-          ["Who", "Qui le réalise ? (acteur réel, pas le lot)"],
           ["When", "Quand dans le chantier ?"],
-          ["LinkedLots", "Lots liés"],
+          ["LinkedLots", "Lot lié (rappel)"],
         ]} content={content.realWorld} keyMap={{
-          What: "whatIsIt", Purpose: "purpose", Where: "whereOnSite", Who: "whoDoesIt", When: "whenInProject", LinkedLots: "linkedLots",
+          What: "whatIsIt", Purpose: "purpose", Where: "whereOnSite", When: "whenInProject", LinkedLots: "linkedLots",
         }} />
       </EditorSection>
 

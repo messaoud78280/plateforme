@@ -109,7 +109,7 @@ export type DpgfAnalysisListRow = {
   simplifiedDesignation: string | null;
   originalDesignation: string;
   lot: string;
-  tradeCode: string | null;
+  intervenantConcerne: string | null;
   familyName: string | null;
   unit: string;
   comprehensionLevel: DpgfAnalysisComprehensionLevel;

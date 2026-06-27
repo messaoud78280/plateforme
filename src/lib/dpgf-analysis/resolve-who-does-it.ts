@@ -19,6 +19,8 @@ export function resolveWhoDoesItFromJsonSources(
     ficheMere.qui_le_realise,
     ficheMere.realise_par,
     ficheMere.acteur_realisation,
+    ficheMere.intervenant_concerne,
+    fiche.intervenant_concerne,
   ];
 
   for (const c of candidates) {

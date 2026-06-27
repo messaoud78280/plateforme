@@ -5,26 +5,38 @@ import {
   DPGF_ANALYSIS_STATUS_LABELS,
 } from "@/lib/dpgf-analysis/labels";
 import { parseDpgfAnalysisContent } from "@/lib/dpgf-analysis/content-utils";
+import {
+  displayIntervenantConcerne,
+  formatLotDpgfDisplay,
+  formatLotLieDisplay,
+  isIntervenantExplicitlySet,
+} from "@/lib/dpgf-analysis/intervenant-concerne";
 import { manualPriceHtToNumber } from "@/lib/dpgf-analysis/manual-price";
-import { isWhoDoesItLikelyMisassigned } from "@/lib/dpgf-analysis/resolve-who-does-it";
 import type { DpgfAnalysisSheetLinks } from "@/lib/dpgf-analysis/types";
 import { formatEurFrBpu } from "@/lib/be-work-devis-format";
-import { getBeWorkFamilyLabel } from "@/lib/bework-devis-family-codes";
 
 type Props = { sheet: DpgfAnalysisSheet };
 
 export function DpgfAnalysisSheetView({ sheet }: Props) {
   const content = parseDpgfAnalysisContent(sheet.content);
   const links = (sheet.links ?? {}) as DpgfAnalysisSheetLinks;
-  const tradeLabel = sheet.tradeCode ? getBeWorkFamilyLabel(sheet.tradeCode) ?? sheet.tradeCode : "";
-  const whoDoesItRaw = content.realWorld.whoDoesIt;
-  const whoDoesItMisassigned = isWhoDoesItLikelyMisassigned(
-    whoDoesItRaw,
-    content.realWorld.linkedLots,
-    sheet.familyName ?? "",
-    tradeLabel,
+  const lotDpgf = formatLotDpgfDisplay(sheet.lot, links.lotNote);
+  const lotLie = formatLotLieDisplay(links.lotNote, content.realWorld.linkedLots, sheet.lot);
+  const intervenantContext = {
+    linkedLots: content.realWorld.linkedLots,
+    familyName: sheet.familyName ?? "",
+    lotLabel: links.lotNote ?? lotDpgf,
+  };
+  const intervenantDisplay = displayIntervenantConcerne(
+    sheet.intervenantConcerne,
+    content.realWorld.whoDoesIt,
+    intervenantContext,
   );
-  const whoDoesItDisplay = whoDoesItMisassigned ? "" : whoDoesItRaw;
+  const intervenantExplicit = isIntervenantExplicitlySet(
+    sheet.intervenantConcerne,
+    content.realWorld.whoDoesIt,
+    intervenantContext,
+  );
   const manualPrice = manualPriceHtToNumber(sheet.manualPriceHt);
 
   return (
@@ -33,8 +45,7 @@ export function DpgfAnalysisSheetView({ sheet }: Props) {
         <MetaGrid
           items={[
             ["Code fiche", sheet.codeSheet],
-            ["Lot", sheet.lot],
-            ["Corps de métier", sheet.tradeCode ? getBeWorkFamilyLabel(sheet.tradeCode) ?? sheet.tradeCode : "—"],
+            ["Lot DPGF", lotDpgf],
             ["Famille d'ouvrage", sheet.familyName ?? "—"],
             ["Type d'ouvrage", sheet.ouvrageType ?? "—"],
             ["Unité", sheet.unit],
@@ -45,8 +56,20 @@ export function DpgfAnalysisSheetView({ sheet }: Props) {
               "Prix manuel HT",
               manualPrice != null ? `${formatEurFrBpu(manualPrice)} HT` : "—",
             ],
+            [
+              "Intervenant concerné",
+              <span key="intervenant" className={intervenantExplicit ? "" : "text-slate-500 italic"}>
+                {intervenantDisplay}
+              </span>,
+            ],
           ]}
         />
+        {lotLie !== "—" && lotLie !== lotDpgf ? (
+          <div className="rounded-lg bg-slate-50 px-3 py-2">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Lot lié</p>
+            <p className="mt-0.5 text-sm font-medium text-slate-900">{lotLie}</p>
+          </div>
+        ) : null}
         <Block label="Désignation DPGF d'origine" text={sheet.originalDesignation} />
         {sheet.simplifiedDesignation ? (
           <Block label="Désignation simplifiée" text={sheet.simplifiedDesignation} />
@@ -64,15 +87,17 @@ export function DpgfAnalysisSheetView({ sheet }: Props) {
         <Block label="C'est quoi ?" text={content.realWorld.whatIsIt} />
         <Block label="À quoi ça sert ?" text={content.realWorld.purpose} />
         <Block label="Où sur le chantier ?" text={content.realWorld.whereOnSite} />
-        <Block label="Qui le réalise ?" text={whoDoesItDisplay} />
-        {whoDoesItMisassigned ? (
+        <Block label="Qui le réalise ?" text={intervenantExplicit ? intervenantDisplay : ""} />
+        {!intervenantExplicit ? (
           <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
-            Acteur de réalisation à préciser (ne pas confondre avec le lot DPGF). Complétez le champ « Qui le réalise
-            ? » ou ajoutez <code className="text-xs">comprehension.qui_le_realise</code> dans le JSON d&apos;import.
+            Intervenant à préciser dans le bloc Identification (« Intervenant concerné ») ou via{" "}
+            <code className="text-xs">comprehension.qui_le_realise</code> /{" "}
+            <code className="text-xs">intervenant_concerne</code> à l&apos;import JSON. Ne pas confondre avec le lot
+            DPGF.
           </p>
         ) : null}
         <Block label="Quand dans le chantier ?" text={content.realWorld.whenInProject} />
-        <Block label="Lots liés" text={content.realWorld.linkedLots} />
+        <Block label="Lot lié" text={lotLie !== "—" ? lotLie : content.realWorld.linkedLots} />
       </Section>
 
       <Section title="D. Ce que la ligne peut inclure">
@@ -214,7 +239,7 @@ function Block({ label, text }: { label: string; text: string }) {
   );
 }
 
-function MetaGrid({ items }: { items: [string, string][] }) {
+function MetaGrid({ items }: { items: [string, React.ReactNode][] }) {
   return (
     <dl className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
       {items.map(([k, v]) => (

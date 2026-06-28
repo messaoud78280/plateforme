@@ -32,7 +32,7 @@ export default async function AnalyseDpgfPage({ searchParams }: { searchParams: 
   const [rows, stats, lotsRow, familyRows, typeRows] = await Promise.all([
     prisma.dpgfAnalysisSheet.findMany({
       where,
-      orderBy: { updatedAt: "desc" },
+      orderBy: [{ lot: "asc" }, { familyName: "asc" }, { codeSheet: "asc" }],
       take: DPGF_ANALYSIS_LIST_LIMIT,
       select: {
         id: true,

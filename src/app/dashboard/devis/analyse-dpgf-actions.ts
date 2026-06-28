@@ -358,6 +358,7 @@ export async function deleteDpgfAnalysisSheet(id: string): Promise<{ ok: true } 
   try {
     await requireBeWorkDevisSession();
     await prisma.dpgfAnalysisSheet.delete({ where: { id } });
+    revalidateSheet(id);
     revalidateDpgf();
     return { ok: true };
   } catch (e) {

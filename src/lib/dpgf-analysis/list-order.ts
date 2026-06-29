@@ -1,7 +1,9 @@
 import type { DpgfAnalysisListRow } from "./types";
+import { formatLotDpgfDisplay } from "./intervenant-concerne";
 
 export type DpgfAnalysisListGroup = {
   lot: string;
+  lotLabel: string;
   familyName: string;
   familyCode: string | null;
   rows: DpgfAnalysisListRow[];
@@ -45,7 +47,10 @@ export function sortDpgfAnalysisListRows(rows: DpgfAnalysisListRow[]): DpgfAnaly
 }
 
 /** Regroupe les fiches par lot puis par famille d'ouvrage. */
-export function groupDpgfAnalysisListRows(rows: DpgfAnalysisListRow[]): DpgfAnalysisListGroup[] {
+export function groupDpgfAnalysisListRows(
+  rows: DpgfAnalysisListRow[],
+  lotLabels: Record<string, string> = {},
+): DpgfAnalysisListGroup[] {
   const sorted = sortDpgfAnalysisListRows(rows);
   const groups: DpgfAnalysisListGroup[] = [];
 
@@ -58,6 +63,7 @@ export function groupDpgfAnalysisListRows(rows: DpgfAnalysisListRow[]): DpgfAnal
     }
     groups.push({
       lot: row.lot,
+      lotLabel: lotLabels[row.lot] ?? formatLotDpgfDisplay(row.lot, null),
       familyName,
       familyCode: extractDpgfFamilyCodeFromSheet(row.codeSheet),
       rows: [row],

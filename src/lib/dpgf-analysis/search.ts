@@ -1,9 +1,15 @@
 import type { Prisma } from "@prisma/client";
 import { isWorkItemStatus } from "@/lib/be-work-devis-labels";
+import { formatLotDpgfDisplay } from "./intervenant-concerne";
 import { isDpgfAnalysisLevel, isDpgfAnalysisSource } from "./labels";
-import type { DpgfAnalysisFilterParams, DpgfAnalysisStats } from "./types";
+import type { DpgfAnalysisFilterParams, DpgfAnalysisStats, DpgfAnalysisSheetLinks } from "./types";
 
 export const DPGF_ANALYSIS_LIST_LIMIT = 200;
+
+export type DpgfLotOption = {
+  lot: string;
+  label: string;
+};
 
 export function buildDpgfAnalysisWhere(params: DpgfAnalysisFilterParams): Prisma.DpgfAnalysisSheetWhereInput {
   const and: Prisma.DpgfAnalysisSheetWhereInput[] = [];
@@ -77,4 +83,26 @@ export async function fetchDpgfAnalysisStats(where: Prisma.DpgfAnalysisSheetWher
     levelIntermediaire,
     levelConfirme,
   };
+}
+
+/** Libellés lot DPGF (ex. « Lot 01 - Fondations - Gros Œuvre ») depuis links.lotNote. */
+export async function fetchDpgfLotOptions(where: Prisma.DpgfAnalysisSheetWhereInput): Promise<DpgfLotOption[]> {
+  const { prisma } = await import("@/lib/prisma");
+
+  const sheets = await prisma.dpgfAnalysisSheet.findMany({
+    where,
+    select: { lot: true, links: true },
+    orderBy: [{ lot: "asc" }, { updatedAt: "desc" }],
+  });
+
+  const byLot = new Map<string, string>();
+  for (const sheet of sheets) {
+    if (byLot.has(sheet.lot)) continue;
+    const links = (sheet.links ?? {}) as DpgfAnalysisSheetLinks;
+    byLot.set(sheet.lot, formatLotDpgfDisplay(sheet.lot, links.lotNote));
+  }
+
+  return [...byLot.entries()]
+    .sort(([a], [b]) => a.localeCompare(b, "fr", { numeric: true, sensitivity: "base" }))
+    .map(([lot, label]) => ({ lot, label }));
 }

@@ -13,12 +13,12 @@ import { readIntervenantConcerneRaw } from "@/lib/dpgf-analysis/intervenant-conc
 import { groupDpgfAnalysisListRows } from "@/lib/dpgf-analysis/list-order";
 import type { DpgfAnalysisListRow } from "@/lib/dpgf-analysis/types";
 
-type Props = { rows: DpgfAnalysisListRow[] };
+type Props = { rows: DpgfAnalysisListRow[]; lotLabels?: Record<string, string> };
 
-export function DpgfAnalysisListTable({ rows }: Props) {
+export function DpgfAnalysisListTable({ rows, lotLabels = {} }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const groups = useMemo(() => groupDpgfAnalysisListRows(rows), [rows]);
+  const groups = useMemo(() => groupDpgfAnalysisListRows(rows, lotLabels), [rows, lotLabels]);
 
   if (rows.length === 0) {
     return (
@@ -44,7 +44,7 @@ export function DpgfAnalysisListTable({ rows }: Props) {
           <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-gradient-to-r from-[#f8fafc] to-[#eff6ff]/40 px-4 py-3">
             <div className="min-w-0">
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1e3a5f]/70">
-                Lot {group.lot}
+                {group.lotLabel}
                 {group.familyCode ? ` · ${group.familyCode}` : ""}
               </p>
               <h3 className="font-heading mt-0.5 text-base font-bold leading-snug text-slate-900">{group.familyName}</h3>

@@ -15,6 +15,7 @@ import {
   buildDpgfAnalysisWhere,
   DPGF_ANALYSIS_LIST_LIMIT,
   fetchDpgfAnalysisStats,
+  fetchDpgfLotOptions,
   parseDpgfAnalysisFilters,
 } from "@/lib/dpgf-analysis/search";
 import { prisma } from "@/lib/prisma";
@@ -29,7 +30,7 @@ export default async function AnalyseDpgfPage({ searchParams }: { searchParams: 
   const filters = parseDpgfAnalysisFilters(sp);
   const where = buildDpgfAnalysisWhere(filters);
 
-  const [rows, stats, lotsRow, familyRows, typeRows] = await Promise.all([
+  const [rows, stats, lotOptions, familyRows, typeRows] = await Promise.all([
     prisma.dpgfAnalysisSheet.findMany({
       where,
       orderBy: [{ lot: "asc" }, { familyName: "asc" }, { codeSheet: "asc" }],
@@ -49,7 +50,7 @@ export default async function AnalyseDpgfPage({ searchParams }: { searchParams: 
       },
     }),
     fetchDpgfAnalysisStats(where),
-    prisma.dpgfAnalysisSheet.findMany({ where, select: { lot: true }, distinct: ["lot"], orderBy: { lot: "asc" } }),
+    fetchDpgfLotOptions(where),
     prisma.dpgfAnalysisSheet.findMany({
       where: { ...where, familyName: { not: null } },
       select: { familyName: true },
@@ -65,6 +66,7 @@ export default async function AnalyseDpgfPage({ searchParams }: { searchParams: 
   ]);
 
   const aiAvailable = isDpgfAnalysisAiAvailable();
+  const lotLabels = Object.fromEntries(lotOptions.map((o) => [o.lot, o.label]));
 
   return (
     <div className="space-y-6">
@@ -116,9 +118,9 @@ export default async function AnalyseDpgfPage({ searchParams }: { searchParams: 
           />
           <select name="lot" defaultValue={sp.lot ?? ""} className="rounded-xl border border-slate-200 px-3 py-2 text-sm">
             <option value="">Tous les lots</option>
-            {lotsRow.map((r) => (
-              <option key={r.lot} value={r.lot}>
-                {r.lot}
+            {lotOptions.map((o) => (
+              <option key={o.lot} value={o.lot}>
+                {o.label}
               </option>
             ))}
           </select>
@@ -207,7 +209,7 @@ export default async function AnalyseDpgfPage({ searchParams }: { searchParams: 
         </form>
       </section>
 
-      <DpgfAnalysisListTable rows={rows} />
+      <DpgfAnalysisListTable rows={rows} lotLabels={lotLabels} />
     </div>
   );
 }

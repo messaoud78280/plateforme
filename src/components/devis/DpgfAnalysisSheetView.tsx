@@ -12,6 +12,7 @@ import {
   isIntervenantExplicitlySet,
 } from "@/lib/dpgf-analysis/intervenant-concerne";
 import { manualPriceHtToNumber } from "@/lib/dpgf-analysis/manual-price";
+import { hasTechnicalTermsContent, parseTechnicalTermsDisplay } from "@/lib/dpgf-analysis/technical-terms";
 import type { DpgfAnalysisSheetLinks } from "@/lib/dpgf-analysis/types";
 import { formatEurFrBpu } from "@/lib/be-work-devis-format";
 
@@ -133,7 +134,7 @@ export function DpgfAnalysisSheetView({ sheet }: Props) {
             {!isSameTranslationText(content.translation.meaning, content.translation.beginnerLanguage) ? (
               <ProseBlock label="Traduction débutant" text={content.translation.beginnerLanguage} />
             ) : null}
-            <ProseBlock label="Mots techniques à expliquer" text={content.translation.technicalTerms} />
+            <TechnicalTermsBlock text={content.translation.technicalTerms} />
             <ProseBlock label="Exemple concret" text={content.translation.concreteExample} />
           </Section>
 
@@ -335,6 +336,31 @@ function Section({
       </div>
       <div className={`${compact ? "mt-3" : "mt-5"} space-y-4`}>{children}</div>
     </section>
+  );
+}
+
+function TechnicalTermsBlock({ text }: { text: string }) {
+  if (!hasTechnicalTermsContent(text)) return null;
+
+  const lines = parseTechnicalTermsDisplay(text);
+
+  return (
+    <div className="rounded-xl border border-[#1e3a5f]/15 bg-[#1e3a5f]/[0.04] px-4 py-4">
+      <p className="text-[11px] font-bold uppercase tracking-wider text-[#1e3a5f]">Mots techniques à expliquer</p>
+      <ul className="mt-3 space-y-2">
+        {lines.map((line, i) => (
+          <li
+            key={`${line.term}-${i}`}
+            className="rounded-lg border border-white/80 bg-white px-3 py-2.5 shadow-sm"
+          >
+            <p className="text-sm font-bold tracking-wide text-[#1e3a5f]">{line.term}</p>
+            {line.definition ? (
+              <p className="mt-1 text-sm leading-relaxed text-slate-700">{line.definition}</p>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

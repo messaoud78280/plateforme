@@ -8,6 +8,7 @@ import { computeContentFlags } from "./content-utils";
 import { formatLotDpgfDisplay } from "./intervenant-concerne";
 import { readManualPriceFromJson } from "./manual-price";
 import { resolveWhoDoesItFromJsonSources } from "./resolve-who-does-it";
+import { resolveTechnicalTermsFromJson } from "./technical-terms";
 import type { DpgfAnalysisSheetContent, DpgfAnalysisSheetLinks } from "./types";
 
 /** Clés interdites (chiffrage / prix) — refusées à l'import. */
@@ -209,22 +210,6 @@ function asStringArray(v: unknown): string[] {
   }).filter(Boolean);
 }
 
-function formatTechnicalTerms(v: unknown): string {
-  if (!Array.isArray(v)) return "";
-  return v
-    .map((x) => {
-      if (typeof x === "string") return x;
-      if (x && typeof x === "object") {
-        const t = x as { terme?: string; definition?: string };
-        if (t.terme && t.definition) return `${t.terme} : ${t.definition}`;
-        if (t.terme) return t.terme;
-      }
-      return "";
-    })
-    .filter(Boolean)
-    .join("\n");
-}
-
 function mapDocumentsToCheck(docs: string[]): DpgfAnalysisSheetContent["documentsToCheck"] {
   const joined = docs.join("\n");
   const has = (needle: string) => docs.some((d) => d.toLowerCase().includes(needle));
@@ -364,7 +349,7 @@ export function mapJsonFicheToSheet(
     translation: {
       meaning: explicationSimple,
       beginnerLanguage: traductionDebutant,
-      technicalTerms: formatTechnicalTerms(comprehension.mots_techniques),
+      technicalTerms: resolveTechnicalTermsFromJson(fiche, comprehension, analyse),
       concreteExample: String(comprehension.exemple_concret ?? "").trim(),
     },
     realWorld: {

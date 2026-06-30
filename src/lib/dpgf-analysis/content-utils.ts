@@ -1,4 +1,5 @@
 import type { DpgfAnalysisSheetContent } from "./types";
+import { emptyModeOperatoireDetaille, hasModeOperatoireDetailleContent, parseModeOperatoireDetailleFromStored } from "./mode-operatoire-detaille";
 
 const DEFAULT_MODE_STEPS = [
   "Repérer l'ouvrage sur les plans",
@@ -73,6 +74,7 @@ export function emptyDpgfAnalysisContent(): DpgfAnalysisSheetContent {
       description: "",
       whyImportant: "",
     })),
+    modeOperatoireDetaille: emptyModeOperatoireDetaille(),
     vigilancePoints: [],
     questionsBeforeValidation: [],
     noviceErrors: [],
@@ -119,6 +121,7 @@ export function parseDpgfAnalysisContent(raw: unknown): DpgfAnalysisSheetContent
     cctpChecks: Array.isArray(o.cctpChecks) ? o.cctpChecks.map(String) : base.cctpChecks,
     planChecks: Array.isArray(o.planChecks) ? o.planChecks.map(String) : base.planChecks,
     modeOperatoire: Array.isArray(o.modeOperatoire) && o.modeOperatoire.length > 0 ? o.modeOperatoire : base.modeOperatoire,
+    modeOperatoireDetaille: parseModeOperatoireDetailleFromStored(o.modeOperatoireDetaille),
     vigilancePoints: Array.isArray(o.vigilancePoints) ? o.vigilancePoints.map(String) : base.vigilancePoints,
     questionsBeforeValidation: Array.isArray(o.questionsBeforeValidation)
       ? o.questionsBeforeValidation.map(String)
@@ -129,9 +132,10 @@ export function parseDpgfAnalysisContent(raw: unknown): DpgfAnalysisSheetContent
 }
 
 export function computeContentFlags(content: DpgfAnalysisSheetContent) {
-  const hasModeOperatoire = content.modeOperatoire.some(
-    (s) => s.description.trim().length > 0 || s.whyImportant.trim().length > 0,
-  );
+  const hasModeOperatoire =
+    content.modeOperatoire.some(
+      (s) => s.description.trim().length > 0 || s.whyImportant.trim().length > 0,
+    ) || hasModeOperatoireDetailleContent(content.modeOperatoireDetaille);
   const hasVigilancePoints = content.vigilancePoints.some((v) => v.trim().length > 0);
   const hasQuestions = content.questionsBeforeValidation.some((q) => q.trim().length > 0);
   return { hasModeOperatoire, hasVigilancePoints, hasQuestions };

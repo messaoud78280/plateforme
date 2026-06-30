@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DpgfAnalysisDeleteButton } from "@/components/devis/DpgfAnalysisDeleteButton";
+import { DpgfAnalysisExportButton } from "@/components/devis/DpgfAnalysisExportButton";
 import { DpgfAnalysisSheetView } from "@/components/devis/DpgfAnalysisSheetView";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import {
@@ -49,7 +50,12 @@ export default async function AnalyseDpgfDetailPage({ params }: Props) {
               </p>
             ) : null}
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-start gap-2">
+            <DpgfAnalysisExportButton
+              sheetId={sheet.id}
+              codeSheet={sheet.codeSheet}
+              familyName={sheet.familyName}
+            />
             <Link
               href={`/dashboard/devis/analyse-dpgf/${sheet.id}/modifier`}
               className="rounded-xl bg-[#1e3a5f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#162d4a]"

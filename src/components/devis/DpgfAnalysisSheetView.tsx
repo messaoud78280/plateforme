@@ -6,6 +6,10 @@ import {
 } from "@/lib/dpgf-analysis/labels";
 import { isSameTranslationText, parseDpgfAnalysisContent } from "@/lib/dpgf-analysis/content-utils";
 import {
+  hasModeOperatoireDetailleContent,
+  MODE_OPERATOIRE_DETAILLE_LIST_FIELDS,
+} from "@/lib/dpgf-analysis/mode-operatoire-detaille";
+import {
   displayIntervenantConcerne,
   formatLotDpgfDisplay,
   formatLotLieDisplay,
@@ -13,7 +17,7 @@ import {
 } from "@/lib/dpgf-analysis/intervenant-concerne";
 import { manualPriceHtToNumber } from "@/lib/dpgf-analysis/manual-price";
 import { hasTechnicalTermsContent, parseTechnicalTermsDisplay } from "@/lib/dpgf-analysis/technical-terms";
-import type { DpgfAnalysisSheetLinks } from "@/lib/dpgf-analysis/types";
+import type { DpgfAnalysisModeOperatoireDetaille, DpgfAnalysisSheetLinks } from "@/lib/dpgf-analysis/types";
 import { formatEurFrBpu } from "@/lib/be-work-devis-format";
 
 type Props = { sheet: DpgfAnalysisSheet };
@@ -28,6 +32,7 @@ const SECTION_NAV = [
   { id: "cctp", letter: "G", label: "CCTP" },
   { id: "plans", letter: "H", label: "Plans" },
   { id: "mode-operatoire", letter: "I", label: "Mode op." },
+  { id: "mode-operatoire-detaille", letter: "I+", label: "Mode op. dét." },
   { id: "vigilance", letter: "J", label: "Vigilance" },
   { id: "questions", letter: "K", label: "Questions" },
   { id: "novice", letter: "L", label: "Novice" },
@@ -245,6 +250,12 @@ export function DpgfAnalysisSheetView({ sheet }: Props) {
             </div>
           </Section>
 
+          {hasModeOperatoireDetailleContent(content.modeOperatoireDetaille) ? (
+            <Section id="mode-operatoire-detaille" letter="I+" title="Mode opératoire détaillé">
+              <ModeOperatoireDetailleView detail={content.modeOperatoireDetaille} />
+            </Section>
+          ) : null}
+
           <Section id="vigilance" letter="J" title="Points de vigilance">
             <BulletList items={content.vigilancePoints} variant="warning" />
           </Section>
@@ -336,6 +347,26 @@ function Section({
       </div>
       <div className={`${compact ? "mt-3" : "mt-5"} space-y-4`}>{children}</div>
     </section>
+  );
+}
+
+function ModeOperatoireDetailleView({ detail }: { detail: DpgfAnalysisModeOperatoireDetaille }) {
+  return (
+    <div className="space-y-5">
+      {detail.objectif.trim() ? (
+        <ProseBlock label="Objectif du mode opératoire" text={detail.objectif} prominent />
+      ) : null}
+      {MODE_OPERATOIRE_DETAILLE_LIST_FIELDS.map(({ key, label }) => {
+        const items = detail[key];
+        if (!items.length) return null;
+        return (
+          <div key={key} className="rounded-xl border border-[#1e3a5f]/10 bg-[#1e3a5f]/[0.03] px-4 py-3">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-[#1e3a5f]">{label}</p>
+            <BulletList items={items} variant="check" />
+          </div>
+        );
+      })}
+    </div>
   );
 }
 

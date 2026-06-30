@@ -10,9 +10,10 @@ import {
   DPGF_ANALYSIS_STATUS_LABELS,
 } from "@/lib/dpgf-analysis/labels";
 import { joinLinesField, parseDpgfAnalysisContent, emptyDpgfAnalysisContent } from "@/lib/dpgf-analysis/content-utils";
+import { DpgfAnalysisModeOperatoireDetailleFields } from "@/components/devis/DpgfAnalysisModeOperatoireDetailleFields";
 import { readIntervenantConcerneRaw } from "@/lib/dpgf-analysis/intervenant-concerne";
 import { formatManualPriceHtForInput } from "@/lib/dpgf-analysis/manual-price";
-import type { DpgfAnalysisSheetLinks } from "@/lib/dpgf-analysis/types";
+import type { DpgfAnalysisModeOperatoireDetaille, DpgfAnalysisSheetLinks } from "@/lib/dpgf-analysis/types";
 import { WORK_ITEM_UNITS } from "@/lib/be-work-devis-labels";
 import { getBeWorkFamilyLexiconSorted } from "@/lib/bework-devis-family-codes";
 
@@ -29,6 +30,9 @@ export function DpgfAnalysisSheetEditor({ mode, sheet }: Props) {
   const [error, setError] = useState<string | null>(null);
   const content = sheet ? parseDpgfAnalysisContent(sheet.content) : emptyDpgfAnalysisContent();
   const links = (sheet?.links ?? {}) as DpgfAnalysisSheetLinks;
+  const [modeOperatoireDetaille, setModeOperatoireDetaille] = useState<DpgfAnalysisModeOperatoireDetaille>(
+    content.modeOperatoireDetaille,
+  );
   const intervenantDefault = sheet
     ? readIntervenantConcerneRaw(sheet.intervenantConcerne, content.realWorld.whoDoesIt)
     : "";
@@ -210,6 +214,17 @@ export function DpgfAnalysisSheetEditor({ mode, sheet }: Props) {
                 <Textarea name={`moWhy${i + 1}`} label="Pourquoi c'est important" rows={2} defaultValue={step.whyImportant} />
               </div>
         ))}
+      </EditorSection>
+
+      <EditorSection title="I+. Mode opératoire détaillé">
+        <p className="text-xs text-slate-500">
+          Étapes concrètes pour former un novice — distinct du mode opératoire simplifié ci-dessus.
+        </p>
+        <DpgfAnalysisModeOperatoireDetailleFields
+          value={modeOperatoireDetaille}
+          onChange={setModeOperatoireDetaille}
+          hiddenInputName="modeOperatoireDetailleJson"
+        />
       </EditorSection>
 
       <EditorSection title="J. à L. Vigilance, questions, erreurs novice">

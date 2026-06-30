@@ -4,6 +4,16 @@ import type {
   WorkItemStatus,
 } from "@prisma/client";
 
+export type DpgfAnalysisModeOperatoireDetaille = {
+  objectif: string;
+  preparationAvantDemarrage: string[];
+  materielEtMoyens: string[];
+  etapesExecution: string[];
+  controlesEnCours: string[];
+  controlesFinaux: string[];
+  livrablesOuPreuves: string[];
+};
+
 export type DpgfAnalysisModeOperatoireStep = {
   order: number;
   title: string;
@@ -68,6 +78,7 @@ export type DpgfAnalysisSheetContent = {
   cctpChecks: string[];
   planChecks: string[];
   modeOperatoire: DpgfAnalysisModeOperatoireStep[];
+  modeOperatoireDetaille: DpgfAnalysisModeOperatoireDetaille;
   vigilancePoints: string[];
   questionsBeforeValidation: string[];
   noviceErrors: string[];

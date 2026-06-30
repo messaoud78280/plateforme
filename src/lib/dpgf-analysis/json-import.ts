@@ -8,6 +8,7 @@ import { computeContentFlags } from "./content-utils";
 import { formatLotDpgfDisplay } from "./intervenant-concerne";
 import { readManualPriceFromJson } from "./manual-price";
 import { resolveWhoDoesItFromJsonSources } from "./resolve-who-does-it";
+import { parseModeOperatoireDetailleFromJson, validateModeOperatoireDetailleJson } from "./mode-operatoire-detaille";
 import { resolveTechnicalTermsFromJson } from "./technical-terms";
 import type { DpgfAnalysisSheetContent, DpgfAnalysisSheetLinks } from "./types";
 
@@ -390,6 +391,7 @@ export function mapJsonFicheToSheet(
     cctpChecks: [...asStringArray(fiche.points_cctp), ...pointsEclaircir],
     planChecks: asStringArray(fiche.points_plans),
     modeOperatoire: mapModeOperatoire(fiche.mode_operatoire_comprehension),
+    modeOperatoireDetaille: parseModeOperatoireDetailleFromJson(fiche.mode_operatoire_detaille),
     vigilancePoints: asStringArray(fiche.points_de_vigilance),
     questionsBeforeValidation: asStringArray(fiche.questions_a_poser),
     noviceErrors: asStringArray(fiche.erreurs_frequentes_novice),
@@ -485,6 +487,7 @@ export function buildDpgfJsonPreview(
     const warnings: string[] = [];
     if (!mere.statut) warnings.push("Statut absent → « à vérifier » par défaut");
     if (!mere.source) warnings.push("Source absente → « Import JSON » par défaut");
+    warnings.push(...validateModeOperatoireDetailleJson(fiche.mode_operatoire_detaille));
 
     return {
       index: index + 1,

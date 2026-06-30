@@ -26,6 +26,8 @@ import {
 } from "@/lib/dpgf-analysis/json-import";
 import { isDpgfAnalysisLevel, isDpgfAnalysisSource } from "@/lib/dpgf-analysis/labels";
 import { parseManualPriceHt } from "@/lib/dpgf-analysis/manual-price";
+import { parseModeOperatoireDetailleFromFormJson } from "@/lib/dpgf-analysis/mode-operatoire-detaille";
+import { exportDpgfAnalysisSheetsJson } from "@/lib/dpgf-analysis/json-export";
 import type { DpgfAnalysisSheetContent, DpgfAnalysisSheetLinks } from "@/lib/dpgf-analysis/types";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
@@ -122,6 +124,7 @@ function parseContentFromForm(raw: FormData): DpgfAnalysisSheetContent {
       description: get(`moDesc${i + 1}`),
       whyImportant: get(`moWhy${i + 1}`),
     })),
+    modeOperatoireDetaille: parseModeOperatoireDetailleFromFormJson(get("modeOperatoireDetailleJson")),
     vigilancePoints: parseLinesField(get("listVigilance")),
     questionsBeforeValidation: parseLinesField(get("listQuestions")),
     noviceErrors: parseLinesField(get("listNoviceErrors")),
@@ -492,5 +495,36 @@ export async function importDpgfAnalysisJson(
     return { ok: true, imported, skipped, replaced, codes };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Erreur import JSON." };
+  }
+}
+
+export async function exportDpgfAnalysisSheetJson(
+  id: string,
+): Promise<{ ok: true; json: string } | { ok: false; error: string }> {
+  try {
+    await requireBeWorkDevisSession();
+    const sheet = await prisma.dpgfAnalysisSheet.findUnique({ where: { id } });
+    if (!sheet) return { ok: false, error: "Fiche introuvable." };
+    return { ok: true, json: exportDpgfAnalysisSheetsJson([sheet]) };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Erreur export JSON." };
+  }
+}
+
+export async function exportDpgfAnalysisFamilyJson(
+  familyName: string,
+): Promise<{ ok: true; json: string } | { ok: false; error: string }> {
+  try {
+    await requireBeWorkDevisSession();
+    const name = familyName.trim();
+    if (!name) return { ok: false, error: "Famille non renseignée." };
+    const sheets = await prisma.dpgfAnalysisSheet.findMany({
+      where: { familyName: name },
+      orderBy: [{ lot: "asc" }, { codeSheet: "asc" }],
+    });
+    if (sheets.length === 0) return { ok: false, error: `Aucune fiche pour la famille « ${name} ».` };
+    return { ok: true, json: exportDpgfAnalysisSheetsJson(sheets) };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Erreur export famille." };
   }
 }

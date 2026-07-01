@@ -114,10 +114,6 @@ export type DpgfAnalysisFilterParams = {
   hasModeOperatoire?: boolean;
   hasVigilance?: boolean;
   hasQuestions?: boolean;
-  /** Filtre rapide : statut à vérifier */
-  onlyToVerify?: boolean;
-  /** Filtre rapide : statut à compléter */
-  onlyIncomplete?: boolean;
 };
 
 export type DpgfAnalysisListRow = {
@@ -132,19 +128,6 @@ export type DpgfAnalysisListRow = {
   comprehensionLevel: DpgfAnalysisComprehensionLevel;
   status: WorkItemStatus;
   updatedAt: Date;
-  numeroDpgf: string | null;
-};
-
-export type DpgfAnalysisQualityMetrics = {
-  totalSheets: number;
-  filteredCount: number;
-  lotsCovered: number;
-  toVerify: number;
-  validated: number;
-  withoutDpgfNumber: number;
-  duplicateDpgfNumbers: number;
-  familiesWithGaps: number;
-  incompleteCount: number;
 };
 
 export type DpgfAnalysisStats = {

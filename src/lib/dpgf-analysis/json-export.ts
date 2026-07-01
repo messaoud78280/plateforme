@@ -60,6 +60,7 @@ export function mapDpgfAnalysisSheetToJsonFiche(sheet: DpgfAnalysisSheet): Recor
       statut: sheet.status,
       niveau: sheet.comprehensionLevel,
       corps_metier_code: sheet.tradeCode ?? undefined,
+      numero_dpgf: links.numeroDpgf || undefined,
     },
     comprehension,
     analyse_designation: {

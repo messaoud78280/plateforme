@@ -1,21 +1,21 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import { DpgfAnalysisFiltersPanel } from "@/components/devis/DpgfAnalysisFiltersPanel";
 import { DpgfAnalysisGeneratePanel } from "@/components/devis/DpgfAnalysisGeneratePanel";
 import { DpgfAnalysisJsonImportPanel } from "@/components/devis/DpgfAnalysisJsonImportPanel";
 import { DpgfAnalysisListTable } from "@/components/devis/DpgfAnalysisListTable";
-import { DpgfAnalysisStatsStrip } from "@/components/devis/DpgfAnalysisStatsStrip";
+import { DpgfAnalysisQualityPanel } from "@/components/devis/DpgfAnalysisQualityPanel";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
-import { WORK_ITEM_STATUS_LABELS, WORK_ITEM_UNITS } from "@/lib/be-work-devis-labels";
 import { getBeWorkFamilyLexiconSorted } from "@/lib/bework-devis-family-codes";
-import {
-  DPGF_ANALYSIS_LEVEL_LABELS,
-  DPGF_ANALYSIS_SOURCE_LABELS,
-} from "@/lib/dpgf-analysis/labels";
 import { isDpgfAnalysisAiAvailable } from "@/lib/dpgf-analysis/generate-sheet";
+import { parseDpgfAnalysisViewMode } from "@/lib/dpgf-analysis/list-order";
 import {
   buildDpgfAnalysisWhere,
+  computeDpgfAnalysisQualityMetrics,
   DPGF_ANALYSIS_LIST_LIMIT,
   fetchDpgfAnalysisStats,
   fetchDpgfLotOptions,
+  mapDpgfAnalysisListRows,
   parseDpgfAnalysisFilters,
 } from "@/lib/dpgf-analysis/search";
 import { prisma } from "@/lib/prisma";
@@ -28,9 +28,10 @@ export default async function AnalyseDpgfPage({ searchParams }: { searchParams: 
   await requireBeWorkDevisSession();
   const sp = await searchParams;
   const filters = parseDpgfAnalysisFilters(sp);
+  const viewMode = parseDpgfAnalysisViewMode(sp.view);
   const where = buildDpgfAnalysisWhere(filters);
 
-  const [rows, stats, lotOptions, familyRows, typeRows] = await Promise.all([
+  const [rawRows, stats, globalTotal, lotOptions, familyRows, typeRows] = await Promise.all([
     prisma.dpgfAnalysisSheet.findMany({
       where,
       orderBy: [{ lot: "asc" }, { familyName: "asc" }, { codeSheet: "asc" }],
@@ -47,9 +48,12 @@ export default async function AnalyseDpgfPage({ searchParams }: { searchParams: 
         comprehensionLevel: true,
         status: true,
         updatedAt: true,
+        links: true,
+        dceLineIndex: true,
       },
     }),
     fetchDpgfAnalysisStats(where),
+    prisma.dpgfAnalysisSheet.count(),
     fetchDpgfLotOptions(where),
     prisma.dpgfAnalysisSheet.findMany({
       where: { ...where, familyName: { not: null } },
@@ -65,20 +69,32 @@ export default async function AnalyseDpgfPage({ searchParams }: { searchParams: 
     }),
   ]);
 
+  const rows = mapDpgfAnalysisListRows(rawRows);
+  const qualityMetrics = computeDpgfAnalysisQualityMetrics(rows);
   const aiAvailable = isDpgfAnalysisAiAvailable();
   const lotLabels = Object.fromEntries(lotOptions.map((o) => [o.lot, o.label]));
 
+  const familyOptions = familyRows
+    .filter((r): r is { familyName: string } => Boolean(r.familyName))
+    .map((r) => ({ familyName: r.familyName }));
+
+  const typeOptions = typeRows
+    .filter((r): r is { ouvrageType: string } => Boolean(r.ouvrageType))
+    .map((r) => ({ ouvrageType: r.ouvrageType }));
+
+  const tradeOptions = FAMILY_LEX.map((f) => ({ code: f.code, label: f.label }));
+
   return (
-    <div className="space-y-6">
-      <header className="space-y-2">
+    <div className="-mx-1 space-y-6 bg-slate-50/80 px-1 pb-8 sm:mx-0 sm:px-0">
+      <header className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
         <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#1e3a5f]/80">Compréhension & vigilance</p>
-        <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-900">Analyse DPGF</h1>
-        <p className="max-w-3xl text-sm leading-relaxed text-slate-600">
+        <h1 className="font-heading mt-1 text-2xl font-bold tracking-tight text-slate-900">Analyse DPGF</h1>
+        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600">
           Comprendre les désignations ligne par ligne : prestation attendue, documents à vérifier, points de vigilance et
           questions à poser. Module pédagogique —{" "}
           <strong className="font-semibold text-slate-800">sans prix ni bibliothèque tarifaire</strong>.
         </p>
-        <div className="flex flex-wrap gap-2 pt-1">
+        <div className="mt-4 flex flex-wrap gap-2">
           <Link
             href="/dashboard/devis/analyse-dpgf/nouveau"
             className="rounded-xl bg-[#1e3a5f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#162d4a]"
@@ -93,123 +109,44 @@ export default async function AnalyseDpgfPage({ searchParams }: { searchParams: 
           </Link>
           <a
             href="#json-import"
-            className="rounded-xl border border-[#1e3a5f]/30 bg-[#eff6ff] px-4 py-2 text-sm font-semibold text-[#1e3a5f] hover:bg-[#dbeafe]"
+            className="rounded-xl border border-[#1e3a5f]/25 bg-[#eff6ff]/60 px-4 py-2 text-sm font-semibold text-[#1e3a5f] hover:bg-[#dbeafe]"
           >
             Importer en JSON
           </a>
         </div>
       </header>
 
-      <DpgfAnalysisStatsStrip stats={stats} />
+      <DpgfAnalysisQualityPanel metrics={qualityMetrics} globalTotal={globalTotal} />
 
-      <div className="space-y-6">
+      <div className="grid gap-4 xl:grid-cols-2">
         <DpgfAnalysisGeneratePanel aiAvailable={aiAvailable} />
         <DpgfAnalysisJsonImportPanel />
       </div>
 
-      <section className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
-        <h2 className="font-heading text-sm font-bold text-slate-900">Filtres</h2>
-        <form method="get" className="mt-3 grid gap-3 lg:grid-cols-4">
-          <input
-            name="q"
-            defaultValue={sp.q ?? ""}
-            placeholder="Mot-clé (désignation, code…)"
-            className="rounded-xl border border-slate-200 px-3 py-2 text-sm lg:col-span-2"
-          />
-          <select name="lot" defaultValue={sp.lot ?? ""} className="rounded-xl border border-slate-200 px-3 py-2 text-sm">
-            <option value="">Tous les lots</option>
-            {lotOptions.map((o) => (
-              <option key={o.lot} value={o.lot}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-          <select name="trade" defaultValue={sp.trade ?? ""} className="rounded-xl border border-slate-200 px-3 py-2 text-sm">
-            <option value="">Tous corps de métier</option>
-            {FAMILY_LEX.map((f) => (
-              <option key={f.code} value={f.code}>
-                {f.label}
-              </option>
-            ))}
-          </select>
-          <select name="family" defaultValue={sp.family ?? ""} className="rounded-xl border border-slate-200 px-3 py-2 text-sm">
-            <option value="">Toutes familles</option>
-            {familyRows.map((r) =>
-              r.familyName ? (
-                <option key={r.familyName} value={r.familyName}>
-                  {r.familyName}
-                </option>
-              ) : null,
-            )}
-          </select>
-          <select name="ouvrageType" defaultValue={sp.ouvrageType ?? ""} className="rounded-xl border border-slate-200 px-3 py-2 text-sm">
-            <option value="">Tous types d&apos;ouvrage</option>
-            {typeRows.map((r) =>
-              r.ouvrageType ? (
-                <option key={r.ouvrageType} value={r.ouvrageType}>
-                  {r.ouvrageType}
-                </option>
-              ) : null,
-            )}
-          </select>
-          <select name="unit" defaultValue={sp.unit ?? ""} className="rounded-xl border border-slate-200 px-3 py-2 text-sm">
-            <option value="">Toutes unités</option>
-            {WORK_ITEM_UNITS.map((u) => (
-              <option key={u} value={u}>
-                {u}
-              </option>
-            ))}
-          </select>
-          <select name="level" defaultValue={sp.level ?? ""} className="rounded-xl border border-slate-200 px-3 py-2 text-sm">
-            <option value="">Tous niveaux</option>
-            {Object.entries(DPGF_ANALYSIS_LEVEL_LABELS).map(([k, v]) => (
-              <option key={k} value={k}>
-                {v}
-              </option>
-            ))}
-          </select>
-          <select name="status" defaultValue={sp.status ?? ""} className="rounded-xl border border-slate-200 px-3 py-2 text-sm">
-            <option value="">Tous statuts</option>
-            {Object.entries(WORK_ITEM_STATUS_LABELS)
-              .filter(([k]) => k !== "archive")
-              .map(([k, v]) => (
-                <option key={k} value={k}>
-                  {v}
-                </option>
-              ))}
-          </select>
-          <select name="source" defaultValue={sp.source ?? ""} className="rounded-xl border border-slate-200 px-3 py-2 text-sm">
-            <option value="">Toutes sources</option>
-            {Object.entries(DPGF_ANALYSIS_SOURCE_LABELS).map(([k, v]) => (
-              <option key={k} value={k}>
-                {v}
-              </option>
-            ))}
-          </select>
-          <label className="flex items-center gap-2 text-sm text-slate-700">
-            <input type="checkbox" name="hasMode" value="1" defaultChecked={sp.hasMode === "1"} />
-            Mode opératoire renseigné
-          </label>
-          <label className="flex items-center gap-2 text-sm text-slate-700">
-            <input type="checkbox" name="hasVigilance" value="1" defaultChecked={sp.hasVigilance === "1"} />
-            Points de vigilance
-          </label>
-          <label className="flex items-center gap-2 text-sm text-slate-700">
-            <input type="checkbox" name="hasQuestions" value="1" defaultChecked={sp.hasQuestions === "1"} />
-            Questions à poser
-          </label>
-          <div className="flex flex-wrap gap-2 lg:col-span-4">
-            <button type="submit" className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
-              Filtrer
-            </button>
-            <Link href="/dashboard/devis/analyse-dpgf" className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700">
-              Réinitialiser
-            </Link>
-          </div>
-        </form>
-      </section>
+      <Suspense fallback={<div className="h-40 animate-pulse rounded-2xl bg-slate-200/60" />}>
+        <DpgfAnalysisFiltersPanel
+          filters={filters}
+          viewMode={viewMode}
+          lotOptions={lotOptions}
+          familyOptions={familyOptions}
+          typeOptions={typeOptions}
+          tradeOptions={tradeOptions}
+          resultCount={rows.length}
+        />
+      </Suspense>
 
-      <DpgfAnalysisListTable rows={rows} lotLabels={lotLabels} />
+      {rows.length >= DPGF_ANALYSIS_LIST_LIMIT ? (
+        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+          Affichage limité à {DPGF_ANALYSIS_LIST_LIMIT} fiches — affinez les filtres pour voir le détail complet.
+        </p>
+      ) : null}
+
+      <DpgfAnalysisListTable rows={rows} lotLabels={lotLabels} viewMode={viewMode} />
+
+      <p className="text-center text-[11px] text-slate-400">
+        {stats.totalSheets.toLocaleString("fr-FR")} fiche{stats.totalSheets > 1 ? "s" : ""} dans le périmètre filtré ·{" "}
+        {stats.validated} validée{stats.validated > 1 ? "s" : ""} · {stats.toVerify} à vérifier
+      </p>
     </div>
   );
 }

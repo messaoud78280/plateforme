@@ -408,8 +408,10 @@ export function mapJsonFicheToSheet(
   const tradeCode = tradeCodeRaw || null;
 
   const importDate = new Date().toISOString();
+  const numeroDpgf = String(mere.numero_dpgf ?? mere.numeroDpgf ?? "").trim();
   const links: DpgfAnalysisSheetLinks = {
     lotNote: lotNom || undefined,
+    numeroDpgf: numeroDpgf || undefined,
     internalNote: `Import JSON ${importDate}${mere.objectif_pedagogique ? ` — ${mere.objectif_pedagogique}` : ""}`,
   };
 

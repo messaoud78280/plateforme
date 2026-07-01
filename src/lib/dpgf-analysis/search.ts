@@ -2,7 +2,8 @@ import type { Prisma } from "@prisma/client";
 import { isWorkItemStatus } from "@/lib/be-work-devis-labels";
 import { formatLotDpgfDisplay } from "./intervenant-concerne";
 import { isDpgfAnalysisLevel, isDpgfAnalysisSource } from "./labels";
-import type { DpgfAnalysisFilterParams, DpgfAnalysisStats, DpgfAnalysisSheetLinks } from "./types";
+import type { DpgfAnalysisFilterParams, DpgfAnalysisStats, DpgfAnalysisSheetLinks, DpgfAnalysisQualityMetrics, DpgfAnalysisListRow } from "./types";
+import { resolveNumeroDpgf, findMissingDpgfNumbers, countDuplicateDpgfNumbers } from "./dpgf-number";
 
 export const DPGF_ANALYSIS_LIST_LIMIT = 200;
 
@@ -40,6 +41,8 @@ export function buildDpgfAnalysisWhere(params: DpgfAnalysisFilterParams): Prisma
   if (params.hasModeOperatoire) and.push({ hasModeOperatoire: true });
   if (params.hasVigilance) and.push({ hasVigilancePoints: true });
   if (params.hasQuestions) and.push({ hasQuestions: true });
+  if (params.onlyToVerify) and.push({ status: "a_verifier" });
+  if (params.onlyIncomplete) and.push({ status: "a_completer" });
 
   return and.length > 0 ? { AND: and } : {};
 }
@@ -58,6 +61,8 @@ export function parseDpgfAnalysisFilters(sp: Record<string, string | undefined>)
     hasModeOperatoire: sp.hasMode === "1",
     hasVigilance: sp.hasVigilance === "1",
     hasQuestions: sp.hasQuestions === "1",
+    onlyToVerify: sp.onlyToVerify === "1",
+    onlyIncomplete: sp.onlyIncomplete === "1",
   };
 }
 
@@ -105,4 +110,69 @@ export async function fetchDpgfLotOptions(where: Prisma.DpgfAnalysisSheetWhereIn
   return [...byLot.entries()]
     .sort(([a], [b]) => a.localeCompare(b, "fr", { numeric: true, sensitivity: "base" }))
     .map(([lot, label]) => ({ lot, label }));
+}
+
+type RawListRow = {
+  id: string;
+  codeSheet: string;
+  simplifiedDesignation: string | null;
+  originalDesignation: string;
+  lot: string;
+  intervenantConcerne: string | null;
+  familyName: string | null;
+  unit: string;
+  comprehensionLevel: DpgfAnalysisListRow["comprehensionLevel"];
+  status: DpgfAnalysisListRow["status"];
+  updatedAt: Date;
+  links: unknown;
+  dceLineIndex: number | null;
+};
+
+export function mapDpgfAnalysisListRows(raw: RawListRow[]): DpgfAnalysisListRow[] {
+  return raw.map((r) => ({
+    id: r.id,
+    codeSheet: r.codeSheet,
+    simplifiedDesignation: r.simplifiedDesignation,
+    originalDesignation: r.originalDesignation,
+    lot: r.lot,
+    intervenantConcerne: r.intervenantConcerne,
+    familyName: r.familyName,
+    unit: r.unit,
+    comprehensionLevel: r.comprehensionLevel,
+    status: r.status,
+    updatedAt: r.updatedAt,
+    numeroDpgf: resolveNumeroDpgf(r.links as DpgfAnalysisSheetLinks, r.dceLineIndex),
+  }));
+}
+
+export function computeDpgfAnalysisQualityMetrics(rows: DpgfAnalysisListRow[]): DpgfAnalysisQualityMetrics {
+  const lots = new Set(rows.map((r) => r.lot));
+  const numbers = rows.map((r) => r.numeroDpgf);
+  const withoutDpgfNumber = rows.filter((r) => !r.numeroDpgf).length;
+
+  const byFamily = new Map<string, DpgfAnalysisListRow[]>();
+  for (const row of rows) {
+    const key = `${row.lot}::${row.familyName?.trim() || "—"}`;
+    const list = byFamily.get(key) ?? [];
+    list.push(row);
+    byFamily.set(key, list);
+  }
+
+  let familiesWithGaps = 0;
+  for (const familyRows of byFamily.values()) {
+    const missing = findMissingDpgfNumbers(familyRows.map((r) => r.numeroDpgf));
+    if (missing.length > 0) familiesWithGaps += 1;
+  }
+
+  return {
+    totalSheets: rows.length,
+    filteredCount: rows.length,
+    lotsCovered: lots.size,
+    toVerify: rows.filter((r) => r.status === "a_verifier").length,
+    validated: rows.filter((r) => r.status === "valide").length,
+    withoutDpgfNumber,
+    duplicateDpgfNumbers: countDuplicateDpgfNumbers(numbers),
+    familiesWithGaps,
+    incompleteCount: rows.filter((r) => r.status === "a_completer" || r.status === "brouillon").length,
+  };
 }

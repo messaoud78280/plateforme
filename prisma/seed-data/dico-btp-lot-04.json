@@ -1,0 +1,1397 @@
+[
+  {
+    "terme": "A*2 E*5 V*A3",
+    "definition_courte": "Classement AEV minimal demandé pour certaines menuiseries.",
+    "explication_pedagogique": "Il indique le niveau de performance à l'air, à l'eau et au vent.",
+    "exemple_utilisation": "Le CCTP demande un classement A*2 E*5 V*A3 minimum pour les portes d'entrée d'immeuble.",
+    "points_vigilance": [
+      "Vérifier les PV d'essais ou fiches techniques, pas seulement la mention commerciale."
+    ]
+  },
+  {
+    "terme": "Acoustique 30 dB",
+    "definition_courte": "Performance d'affaiblissement acoustique demandée en façade.",
+    "explication_pedagogique": "Elle limite la transmission des bruits extérieurs vers les logements.",
+    "exemple_utilisation": "Le CCTP impose un affaiblissement acoustique standardisé des menuiseries de 30 dB.",
+    "points_vigilance": [
+      "Menuiserie, coffre de volet roulant et pose doivent être cohérents, sinon la performance globale chute."
+    ]
+  },
+  {
+    "terme": "AEV",
+    "definition_courte": "Classement Air, Eau, Vent d'une menuiserie extérieure.",
+    "explication_pedagogique": "Il qualifie la résistance de la fenêtre aux infiltrations d'air, d'eau et aux pressions du vent.",
+    "exemple_utilisation": "Le CCTP demande A*2 E*5 V*A3 minimum pour certains ensembles aluminium.",
+    "points_vigilance": [
+      "Ne pas confondre classement produit et qualité de pose sur chantier."
+    ]
+  },
+  {
+    "terme": "Affaiblissement acoustique",
+    "definition_courte": "Capacité d'un élément à réduire le bruit transmis.",
+    "explication_pedagogique": "Il protège les logements contre les bruits extérieurs.",
+    "exemple_utilisation": "Le CCTP indique R = 31 dB pour plusieurs fenêtres PVC et 30 dB pour la façade.",
+    "points_vigilance": [
+      "Un coffre de volet mal traité peut dégrader l'ensemble même si le vitrage est performant."
+    ]
+  },
+  {
+    "terme": "Aimant de blocage",
+    "definition_courte": "Petit dispositif magnétique maintenant la tringle de volet roulant.",
+    "explication_pedagogique": "Il évite que la manoeuvre se balade ou cogne.",
+    "exemple_utilisation": "Le CCTP prévoit une tringle oscillante blanche avec blocage par aimant.",
+    "points_vigilance": [
+      "À contrôler au fonctionnement, surtout dans les logements livrés occupables."
+    ]
+  },
+  {
+    "terme": "Alignement",
+    "definition_courte": "Position correcte d'une menuiserie dans l'axe et le plan prévu.",
+    "explication_pedagogique": "Il garantit l'aspect, l'étanchéité et le bon fonctionnement.",
+    "exemple_utilisation": "Le CCTP demande pose, calage, aplomb, alignement et niveau corrects.",
+    "points_vigilance": [
+      "Un défaut d'alignement se voit en façade et peut gêner l'ouverture."
+    ]
+  },
+  {
+    "terme": "Aluminium extrudé",
+    "definition_courte": "Profil aluminium obtenu par extrusion pour former une section précise.",
+    "explication_pedagogique": "Il sert aux cadres, volets, profilés et pièces de menuiserie.",
+    "exemple_utilisation": "Les volets battants aluminium utilisent un cadre en profil creux aluminium extrudé.",
+    "points_vigilance": [
+      "Vérifier épaisseur, rigidité, thermolaquage et compatibilité avec les fixations."
+    ]
+  },
+  {
+    "terme": "Anti-corrosion",
+    "definition_courte": "Protection empêchant la rouille ou l'oxydation des pièces métalliques.",
+    "explication_pedagogique": "Elle assure la durabilité des ferrures, gonds et éléments de serrurerie.",
+    "exemple_utilisation": "La variante volets bois prévoit des éléments de serrurerie avec protection anti-corrosion.",
+    "points_vigilance": [
+      "Les parties exposées en façade doivent être protégées durablement."
+    ]
+  },
+  {
+    "terme": "Anti-effraction",
+    "definition_courte": "Performance visant à retarder ou empêcher l'intrusion.",
+    "explication_pedagogique": "Elle concerne certains vitrages ou fermetures exposés.",
+    "exemple_utilisation": "Le CCTP prévoit du vitrage anti-effraction type Stadip Protect/SP10 en RDC pour certaines pièces d'eau.",
+    "points_vigilance": [
+      "Ne pas équiper ces menuiseries de volets roulants si le CCTP l'exclut."
+    ]
+  },
+  {
+    "terme": "Antivandalisme",
+    "definition_courte": "Conception renforcée contre les dégradations volontaires.",
+    "explication_pedagogique": "Elle concerne surtout les accès collectifs.",
+    "exemple_utilisation": "Le CCTP demande un ferme-porte hydraulique à glissière anti-vandalisme.",
+    "points_vigilance": [
+      "À privilégier sur portes de halls et SAS exposés."
+    ]
+  },
+  {
+    "terme": "Aplomb",
+    "definition_courte": "Verticalité exacte de la menuiserie ou du cadre.",
+    "explication_pedagogique": "Il conditionne le bon fonctionnement des ouvrants.",
+    "exemple_utilisation": "Le CCTP demande un aplomb correct lors de la pose.",
+    "points_vigilance": [
+      "Un défaut d'aplomb crée frottements, mauvais jeux et défauts d'étanchéité."
+    ]
+  },
+  {
+    "terme": "Arrêt automatique mural",
+    "definition_courte": "Pièce maintenant un volet battant ouvert contre la façade.",
+    "explication_pedagogique": "Elle évite que le volet batte au vent.",
+    "exemple_utilisation": "Le CCTP prévoit des arrêts automatiques muraux pour volets battants aluminium et bois.",
+    "points_vigilance": [
+      "Vérifier position, support et résistance au vent."
+    ]
+  },
+  {
+    "terme": "Avis Technique CSTB",
+    "definition_courte": "Document validant un produit ou système dans des conditions d'emploi.",
+    "explication_pedagogique": "Il sert à justifier les performances et la conformité.",
+    "exemple_utilisation": "Le CCTP demande avis technique CSTB pour certains ensembles menuisés.",
+    "points_vigilance": [
+      "L'avis doit être en cours de validité et correspondre au produit posé."
+    ]
+  },
+  {
+    "terme": "Bande d'éveil de vitrage",
+    "definition_courte": "Marquage visuel sur vitrage pour signaler une paroi transparente.",
+    "explication_pedagogique": "Elle aide les personnes à repérer le vitrage et répond aux exigences PMR.",
+    "exemple_utilisation": "Le CCTP demande des bandes d'éveil sur deux hauteurs pour portes vitrées.",
+    "points_vigilance": [
+      "Contrôler hauteur, contraste et continuité après pose."
+    ]
+  },
+  {
+    "terme": "Barre anti-soulèvement",
+    "definition_courte": "Dispositif empêchant de relever un volet roulant depuis l'extérieur.",
+    "explication_pedagogique": "Elle améliore la sécurité contre l'intrusion.",
+    "exemple_utilisation": "Le CCTP impose des barres anti-soulèvement en RDC avec percussions dans les coulisses.",
+    "points_vigilance": [
+      "Important sur les fenêtres accessibles depuis l'extérieur."
+    ]
+  },
+  {
+    "terme": "Barre de tirage",
+    "definition_courte": "Poignée longue permettant de tirer une porte.",
+    "explication_pedagogique": "Elle facilite l'usage et participe à l'esthétique de la porte.",
+    "exemple_utilisation": "Le CCTP prévoit une barre de tirage renforcée teintée dans la masse.",
+    "points_vigilance": [
+      "Vérifier hauteur, solidité et cohérence avec PMR."
+    ]
+  },
+  {
+    "terme": "Bavette aluminium",
+    "definition_courte": "Pièce en aluminium placée en appui pour évacuer l'eau vers l'extérieur.",
+    "explication_pedagogique": "Elle protège l'appui maçonné et limite les infiltrations.",
+    "exemple_utilisation": "Le CCTP prévoit bavette aluminium recouvrant les appuis en maçonnerie.",
+    "points_vigilance": [
+      "Contrôler pente, recouvrement et joint Compriband."
+    ]
+  },
+  {
+    "terme": "Blanc d'Espagne / Blanc de Meudon",
+    "definition_courte": "Produit blanc appliqué sur vitrage pour le signaler et le protéger visuellement.",
+    "explication_pedagogique": "Il évite les chocs dans les vitrages pendant chantier.",
+    "exemple_utilisation": "Le CCTP demande le marquage des vitrages au blanc d'Espagne après pose.",
+    "points_vigilance": [
+      "À nettoyer sur les deux faces avant réception."
+    ]
+  },
+  {
+    "terme": "Bloc baie",
+    "definition_courte": "Ensemble menuiserie + coffre de volet roulant solidaire.",
+    "explication_pedagogique": "Il facilite la pose et coordonne fenêtre, volet et coffre.",
+    "exemple_utilisation": "Le CCTP indique que les coffres seront intégrés aux menuiseries PVC en bloc baie.",
+    "points_vigilance": [
+      "Contrôler acoustique, thermique et étanchéité du coffre autant que la fenêtre."
+    ]
+  },
+  {
+    "terme": "Bloc volet roulant",
+    "definition_courte": "Ensemble comprenant coffre, tablier, coulisses et manoeuvre.",
+    "explication_pedagogique": "Il occulte la baie et protège du soleil ou de l'intrusion.",
+    "exemple_utilisation": "Le CCTP prévoit des blocs volets roulants PVC ou aluminium selon largeur.",
+    "points_vigilance": [
+      "Vérifier dimensions, manoeuvre, coffre, isolation et sécurité."
+    ]
+  },
+  {
+    "terme": "Bouton d'ouverture intégré",
+    "definition_courte": "Commande intégrée dans le châssis de porte.",
+    "explication_pedagogique": "Elle permet d'actionner l'ouverture sans élément apparent séparé.",
+    "exemple_utilisation": "Le CCTP prévoit un bouton d'ouverture de porte intégré dans le châssis.",
+    "points_vigilance": [
+      "Coordination avec électricité et contrôle d'accès si ventouses."
+    ]
+  },
+  {
+    "terme": "Butoir de porte",
+    "definition_courte": "Pièce empêchant la porte de heurter mur ou façade.",
+    "explication_pedagogique": "Il protège la menuiserie et les ouvrages voisins.",
+    "exemple_utilisation": "Le CCTP prévoit un butoir Vachette fixé environ 60 cm de la charnière.",
+    "points_vigilance": [
+      "Position à vérifier selon sens d'ouverture et obstacle réel."
+    ]
+  },
+  {
+    "terme": "Béquillage simple",
+    "definition_courte": "Ensemble poignée/béquille simple pour manoeuvrer une fenêtre ou porte.",
+    "explication_pedagogique": "Il permet l'ouverture et la fermeture depuis l'intérieur.",
+    "exemple_utilisation": "Les fenêtres PVC sont prévues avec béquillage simple dans la teinte des profilés.",
+    "points_vigilance": [
+      "Vérifier teinte, sens d'ouverture et confort de manoeuvre."
+    ]
+  },
+  {
+    "terme": "Calage",
+    "definition_courte": "Mise en place de cales pour régler la menuiserie avant fixation.",
+    "explication_pedagogique": "Il garantit aplomb, niveau, alignement et jeux réguliers.",
+    "exemple_utilisation": "Le CCTP demande les précautions nécessaires à la pose et au calage.",
+    "points_vigilance": [
+      "Un mauvais calage entraîne déformation du dormant et problèmes d'étanchéité."
+    ]
+  },
+  {
+    "terme": "Calfeutrement",
+    "definition_courte": "Traitement des joints entre menuiserie et gros oeuvre.",
+    "explication_pedagogique": "Il assure l'étanchéité à l'air et à l'eau autour de la baie.",
+    "exemple_utilisation": "Le CCTP met le calfeutrement intérieur et extérieur à la charge du lot menuiseries extérieures.",
+    "points_vigilance": [
+      "C'est un point critique pour les tests d'étanchéité à l'air."
+    ]
+  },
+  {
+    "terme": "CEKAL",
+    "definition_courte": "Certification de qualité des vitrages isolants ou feuilletés.",
+    "explication_pedagogique": "Elle atteste les performances et la durabilité du vitrage.",
+    "exemple_utilisation": "Le CCTP demande des vitrages avec marquage CEKAL.",
+    "points_vigilance": [
+      "Vérifier le marquage sur les vitrages livrés."
+    ]
+  },
+  {
+    "terme": "Charnière",
+    "definition_courte": "Organe de rotation d'une porte ou d'un volet.",
+    "explication_pedagogique": "Elle permet l'ouverture du vantail.",
+    "exemple_utilisation": "Le butoir de porte est positionné environ 60 cm de la charnière dans le CCTP.",
+    "points_vigilance": [
+      "Vérifier réglage et fixation, surtout sur portes lourdes."
+    ]
+  },
+  {
+    "terme": "Châssis fixe",
+    "definition_courte": "Partie vitrée non ouvrante d'une menuiserie.",
+    "explication_pedagogique": "Il apporte lumière ou complète un ensemble de porte ou porte-fenêtre.",
+    "exemple_utilisation": "Le CCTP prévoit des châssis fixes associés aux ouvrants selon dessin de façade.",
+    "points_vigilance": [
+      "Ne pas oublier dans les quantités et les performances thermiques/acoustiques."
+    ]
+  },
+  {
+    "terme": "Classement acoustique de façade",
+    "definition_courte": "Niveau de performance acoustique demandé à l'ensemble façade/menuiserie/coffre.",
+    "explication_pedagogique": "Il protège les logements des bruits extérieurs.",
+    "exemple_utilisation": "Le CCTP demande un classement acoustique standardisé avec affaiblissement de 30 dB.",
+    "points_vigilance": [
+      "La pose et les joints sont aussi importants que le vitrage."
+    ]
+  },
+  {
+    "terme": "Cloison de doublage",
+    "definition_courte": "Cloison intérieure rapportée devant le mur extérieur.",
+    "explication_pedagogique": "Elle doit être reprise par tapées ou dormant adapté.",
+    "exemple_utilisation": "Les dormants monoblocs PVC reçoivent la cloison de doublage.",
+    "points_vigilance": [
+      "Vérifier épaisseur de doublage, ici tapées 120 mm sur certains ouvrages."
+    ]
+  },
+  {
+    "terme": "Coffre apparent intérieur",
+    "definition_courte": "Coffre de volet roulant visible côté intérieur.",
+    "explication_pedagogique": "Il contient l'enroulement du volet et doit rester accessible.",
+    "exemple_utilisation": "Le CCTP prévoit des coffres apparents intérieurs en PVC blanc pour volets motorisés.",
+    "points_vigilance": [
+      "Contrôler accessibilité maintenance et performance Uc/acoustique."
+    ]
+  },
+  {
+    "terme": "Coffre de volet roulant",
+    "definition_courte": "Caisson contenant le tablier du volet roulant enroulé.",
+    "explication_pedagogique": "Il doit assurer isolation thermique, acoustique et étanchéité.",
+    "exemple_utilisation": "Le CCTP exige Uc ≤ 1,50 ou ≤ 1,10 W/m²K selon type, et traitement acoustique.",
+    "points_vigilance": [
+      "Un coffre mal isolé devient un pont thermique et acoustique."
+    ]
+  },
+  {
+    "terme": "Coloris au choix architecte",
+    "definition_courte": "Teinte finale à faire valider par l'architecte.",
+    "explication_pedagogique": "Elle concerne aluminium, volets, profilés et accessoires visibles.",
+    "exemple_utilisation": "Le CCTP indique coloris au choix de l'architecte dans la gamme.",
+    "points_vigilance": [
+      "Ne pas commander sans validation des RAL ou teintes."
+    ]
+  },
+  {
+    "terme": "Compriband",
+    "definition_courte": "Joint mousse pré-comprimé utilisé pour l'étanchéité périphérique.",
+    "explication_pedagogique": "Il assure un calfeutrement souple entre menuiserie et support.",
+    "exemple_utilisation": "Le CCTP demande Compriband en mise en oeuvre et parfois traitement 4 faces en plus.",
+    "points_vigilance": [
+      "Respecter plage de compression et support propre."
+    ]
+  },
+  {
+    "terme": "Contre-penture",
+    "definition_courte": "Renfort horizontal ou diagonal d'un volet bois côté intérieur.",
+    "explication_pedagogique": "Elle rigidifie le volet et maintient les lames.",
+    "exemple_utilisation": "La variante volets bois prévoit pentures et contre-pentures.",
+    "points_vigilance": [
+      "Vérifier protection anti-corrosion et fixation."
+    ]
+  },
+  {
+    "terme": "Coulisse",
+    "definition_courte": "Profil vertical guidant le tablier du volet roulant.",
+    "explication_pedagogique": "Elle maintient les lames pendant la montée et descente.",
+    "exemple_utilisation": "Le CCTP cite coulisses aluminium laqué et percussions dans les coulisses.",
+    "points_vigilance": [
+      "Contrôler alignement, fixation et absence de frottement."
+    ]
+  },
+  {
+    "terme": "Couvre-joint clipsé",
+    "definition_courte": "Profil de finition qui masque la jonction entre dormant et support.",
+    "explication_pedagogique": "Il améliore l'aspect intérieur de la menuiserie.",
+    "exemple_utilisation": "Le CCTP prévoit une fixation intérieure par profilé couvre-joint clipsé sur dormant.",
+    "points_vigilance": [
+      "Ne remplace pas l'étanchéité principale."
+    ]
+  },
+  {
+    "terme": "Crémone encastrée 3 points",
+    "definition_courte": "Système de fermeture intégré avec verrouillage en plusieurs points.",
+    "explication_pedagogique": "Il améliore la tenue et la sécurité de la fenêtre ou porte-fenêtre.",
+    "exemple_utilisation": "Le CCTP demande des crémones encastrées 3 points à rouleau.",
+    "points_vigilance": [
+      "À régler correctement pour éviter effort excessif et mauvais verrouillage."
+    ]
+  },
+  {
+    "terme": "Dimension en tableau",
+    "definition_courte": "Dimension de la baie mesurée dans la maçonnerie.",
+    "explication_pedagogique": "Elle sert de base au relevé avant fabrication.",
+    "exemple_utilisation": "Le CCTP précise que les dimensions indiquées sont des dimensions en tableaux.",
+    "points_vigilance": [
+      "Relever les cotes sur place avant fabrication."
+    ]
+  },
+  {
+    "terme": "Dormant",
+    "definition_courte": "Cadre fixe de la menuiserie, scellé ou fixé au gros oeuvre.",
+    "explication_pedagogique": "Il reçoit l'ouvrant, les joints et parfois le doublage.",
+    "exemple_utilisation": "Le CCTP décrit dormants aluminium et PVC monoblocs.",
+    "points_vigilance": [
+      "Un dormant déformé compromet l'étanchéité et le fonctionnement."
+    ]
+  },
+  {
+    "terme": "Dormant monobloc",
+    "definition_courte": "Dormant intégrant une partie adaptée au doublage ou à la pose.",
+    "explication_pedagogique": "Il simplifie la liaison avec l'isolation intérieure.",
+    "exemple_utilisation": "Les fenêtres PVC sont prévues avec dormant monobloc à chambres multiples.",
+    "points_vigilance": [
+      "Vérifier la compatibilité avec l'épaisseur de doublage."
+    ]
+  },
+  {
+    "terme": "Double joint périphérique",
+    "definition_courte": "Deux lignes de joints autour de l'ouvrant.",
+    "explication_pedagogique": "Elles renforcent l'étanchéité air/eau entre dormant et ouvrant.",
+    "exemple_utilisation": "Le CCTP prévoit joint central ou double joint périphérique en élastomère.",
+    "points_vigilance": [
+      "Contrôler continuité des joints dans les angles."
+    ]
+  },
+  {
+    "terme": "Double ventouse électromagnétique",
+    "definition_courte": "Système de verrouillage magnétique de porte en deux points.",
+    "explication_pedagogique": "Elle maintient une porte fermée tant qu'elle est alimentée.",
+    "exemple_utilisation": "Le CCTP prévoit une double ventouse électromagnétique à rupture de courant.",
+    "points_vigilance": [
+      "Coordination avec contrôle d'accès, sécurité incendie et électricité."
+    ]
+  },
+  {
+    "terme": "Double vitrage isolant",
+    "definition_courte": "Vitrage composé de deux verres séparés par une lame d'air ou de gaz.",
+    "explication_pedagogique": "Il améliore isolation thermique et acoustique.",
+    "exemple_utilisation": "Le CCTP prévoit double vitrage isolant faible émissivité et certifié CEKAL.",
+    "points_vigilance": [
+      "Les compositions doivent respecter étude thermique et acoustique."
+    ]
+  },
+  {
+    "terme": "Dressement des tableaux",
+    "definition_courte": "Préparation des faces de baie par le gros oeuvre avant pose ou calfeutrement.",
+    "explication_pedagogique": "Il crée un support plan pour recevoir la menuiserie.",
+    "exemple_utilisation": "Le CCTP évoque le calfeutrement après dressement des tableaux.",
+    "points_vigilance": [
+      "Un tableau irrégulier rend le joint périphérique difficile."
+    ]
+  },
+  {
+    "terme": "DTU 36.5",
+    "definition_courte": "Référence de mise en oeuvre des fenêtres et portes extérieures.",
+    "explication_pedagogique": "Il fixe les règles de pose des menuiseries bois, PVC, alu ou mixtes.",
+    "exemple_utilisation": "Le CCTP cite le DTU 36.5.",
+    "points_vigilance": [
+      "Base à utiliser pour calfeutrement, fixation, jeux et réception."
+    ]
+  },
+  {
+    "terme": "DTU 37.1",
+    "definition_courte": "Référence concernant les menuiseries métalliques.",
+    "explication_pedagogique": "Il encadre les menuiseries aluminium et métalliques.",
+    "exemple_utilisation": "Le CCTP cite le DTU 37.1.",
+    "points_vigilance": [
+      "À vérifier pour portes aluminium et châssis métalliques."
+    ]
+  },
+  {
+    "terme": "DTU 39",
+    "definition_courte": "Référence pour les travaux de miroiterie et vitrerie.",
+    "explication_pedagogique": "Il encadre le choix et la pose des vitrages.",
+    "exemple_utilisation": "Le CCTP cite DTU 39 et DTU 39-5.",
+    "points_vigilance": [
+      "Important pour vitrage sécurit, épaisseurs et mise en oeuvre."
+    ]
+  },
+  {
+    "terme": "Débit d'entrée d'air",
+    "definition_courte": "Quantité d'air amenée par une grille de ventilation.",
+    "explication_pedagogique": "Elle participe au fonctionnement de la VMC.",
+    "exemple_utilisation": "Le CCTP prévoit la pose de grilles d'entrée d'air fournies par le lot VMC.",
+    "points_vigilance": [
+      "Vérifier localisation en pièces sèches et compatibilité acoustique."
+    ]
+  },
+  {
+    "terme": "Emboîture",
+    "definition_courte": "Traverse d'extrémité assemblée dans un volet bois.",
+    "explication_pedagogique": "Elle rigidifie les lames verticales du volet.",
+    "exemple_utilisation": "La variante volets bois prévoit des volets sapin avec emboîture à deux vantaux.",
+    "points_vigilance": [
+      "À contrôler pour éviter déformation du volet dans le temps."
+    ]
+  },
+  {
+    "terme": "Entrée d'air",
+    "definition_courte": "Ouverture calibrée permettant l'arrivée d'air neuf dans une pièce.",
+    "explication_pedagogique": "Elle participe à la ventilation du logement avec la VMC.",
+    "exemple_utilisation": "Le CCTP prévoit des grilles d'entrée d'air posées par le présent lot et fournies par le lot VMC.",
+    "points_vigilance": [
+      "Ne pas oublier les pièces sèches, sinon la VMC fonctionne mal."
+    ]
+  },
+  {
+    "terme": "EPDM",
+    "definition_courte": "Caoutchouc synthétique utilisé pour joints.",
+    "explication_pedagogique": "Il résiste bien aux intempéries et au vieillissement.",
+    "exemple_utilisation": "Le CCTP prévoit joints de vitrage et de recouvrement en EPDM.",
+    "points_vigilance": [
+      "Vérifier continuité, compression et absence de pincement."
+    ]
+  },
+  {
+    "terme": "Espagnolette",
+    "definition_courte": "Système de fermeture vertical courant sur volets battants.",
+    "explication_pedagogique": "Elle verrouille les vantaux en haut et en bas.",
+    "exemple_utilisation": "Le CCTP prévoit fermeture par espagnolettes pour volets battants aluminium et bois.",
+    "points_vigilance": [
+      "À régler pour une fermeture sans jeu excessif."
+    ]
+  },
+  {
+    "terme": "Faible émissivité",
+    "definition_courte": "Traitement de vitrage limitant les pertes de chaleur par rayonnement.",
+    "explication_pedagogique": "Il améliore la performance thermique du double vitrage.",
+    "exemple_utilisation": "Le CCTP prévoit des vitrages faiblement émissifs e<0,05.",
+    "points_vigilance": [
+      "Vérifier que la composition respecte l'étude thermique."
+    ]
+  },
+  {
+    "terme": "FD P 20-201",
+    "definition_courte": "Mémento pour choisir les fenêtres selon leur exposition.",
+    "explication_pedagogique": "Il aide à adapter les performances au vent, pluie et situation.",
+    "exemple_utilisation": "Le CCTP cite FD P 20-201, référence DTU 36.1/37.1.",
+    "points_vigilance": [
+      "Utile pour vérifier classement AEV adapté."
+    ]
+  },
+  {
+    "terme": "Ferme-porte hydraulique",
+    "definition_courte": "Appareil qui referme automatiquement une porte.",
+    "explication_pedagogique": "Il assure la fermeture contrôlée des portes d'accès.",
+    "exemple_utilisation": "Le CCTP prévoit ferme-porte hydraulique à glissière anti-vandalisme force 3 minimum.",
+    "points_vigilance": [
+      "Régler vitesse, à-coup final et effort PMR."
+    ]
+  },
+  {
+    "terme": "Ferrage",
+    "definition_courte": "Ensemble des pièces permettant l'articulation et le fonctionnement d'un ouvrant.",
+    "explication_pedagogique": "Il comprend fiches, paumelles, charnières et accessoires.",
+    "exemple_utilisation": "Le CCTP prévoit ferrage par fiches réglables sur dormant et ouvrant.",
+    "points_vigilance": [
+      "Un ferrage mal réglé provoque frottements et mauvais verrouillage."
+    ]
+  },
+  {
+    "terme": "Feuillure",
+    "definition_courte": "Décroché dans un profil recevant un ouvrant ou un vitrage.",
+    "explication_pedagogique": "Elle améliore recouvrement et étanchéité.",
+    "exemple_utilisation": "Le CCTP parle d'ouvrant à recouvrement en feuillure.",
+    "points_vigilance": [
+      "À vérifier pour la continuité des joints."
+    ]
+  },
+  {
+    "terme": "Fiche réglable",
+    "definition_courte": "Paumelle ou charnière réglable permettant d'ajuster l'ouvrant.",
+    "explication_pedagogique": "Elle sert au réglage fin après pose.",
+    "exemple_utilisation": "Les fenêtres PVC sont prévues avec fiches réglables sur dormant et ouvrant.",
+    "points_vigilance": [
+      "À régler avant réception pour éviter frottements."
+    ]
+  },
+  {
+    "terme": "Fond de joint butyl",
+    "definition_courte": "Support préformé placé derrière un joint mastic.",
+    "explication_pedagogique": "Il règle la profondeur du joint et améliore son comportement.",
+    "exemple_utilisation": "Le CCTP prévoit joint silicone sur fond de joint préformé type BUTYL.",
+    "points_vigilance": [
+      "Sans fond de joint, le mastic peut mal travailler ou se décoller."
+    ]
+  },
+  {
+    "terme": "Force 3",
+    "definition_courte": "Classe de puissance d'un ferme-porte.",
+    "explication_pedagogique": "Elle indique l'effort de fermeture disponible.",
+    "exemple_utilisation": "Le CCTP demande force 3 minimum sur le vantail principal.",
+    "points_vigilance": [
+      "Doit rester compatible avec effort d'ouverture inférieur à 50 N."
+    ]
+  },
+  {
+    "terme": "Gabarit de pose",
+    "definition_courte": "Document ou pièce indiquant dimensions et position des menuiseries.",
+    "explication_pedagogique": "Il sert au gros oeuvre pour préparer les baies.",
+    "exemple_utilisation": "Le CCTP demande de fournir plans ou gabarits au lot Gros oeuvre.",
+    "points_vigilance": [
+      "Un mauvais gabarit entraîne réservations ou tableaux inadaptés."
+    ]
+  },
+  {
+    "terme": "Gaine pour câble",
+    "definition_courte": "Conduit permettant le passage d'un câble électrique.",
+    "explication_pedagogique": "Elle protège et anticipe le raccordement des équipements.",
+    "exemple_utilisation": "Le CCTP prévoit une gaine pour câble d'alimentation des ventouses.",
+    "points_vigilance": [
+      "Coordonner avec le lot électricité avant fermeture."
+    ]
+  },
+  {
+    "terme": "Garniture d'étanchéité",
+    "definition_courte": "Ensemble des joints et dispositifs assurant l'étanchéité.",
+    "explication_pedagogique": "Elle traite les liaisons ouvrant/dormant et dormant/gros oeuvre.",
+    "exemple_utilisation": "Le CCTP détaille joints SNJF, EPDM, silicone et Compriband.",
+    "points_vigilance": [
+      "Contrôler la continuité sur tout le pourtour."
+    ]
+  },
+  {
+    "terme": "Gond scellé",
+    "definition_courte": "Axe ou support de rotation fixé dans le mur par scellement.",
+    "explication_pedagogique": "Il porte les volets battants.",
+    "exemple_utilisation": "Le CCTP prévoit fixation murale par gonds scellés adaptés au support.",
+    "points_vigilance": [
+      "Le scellement doit reprendre poids du volet et efforts de vent."
+    ]
+  },
+  {
+    "terme": "Goulotte de récupération",
+    "definition_courte": "Rainure ou canal recueillant eau de condensation ou pluie.",
+    "explication_pedagogique": "Elle évacue l'eau vers l'extérieur.",
+    "exemple_utilisation": "Les pièces d'appui PVC comportent rainures et goulottes de récupération.",
+    "points_vigilance": [
+      "Vérifier que les évacuations ne sont pas bouchées."
+    ]
+  },
+  {
+    "terme": "Grille d'entrée d'air",
+    "definition_courte": "Accessoire ventilant posé dans une menuiserie ou un coffre.",
+    "explication_pedagogique": "Elle laisse entrer l'air neuf dans les pièces sèches.",
+    "exemple_utilisation": "Le CCTP prévoit mortaise et pose de grilles fournies par le lot VMC.",
+    "points_vigilance": [
+      "Attention au débit et à l'acoustique selon logement."
+    ]
+  },
+  {
+    "terme": "Habillage intérieur / extérieur",
+    "definition_courte": "Profil ou finition masquant les raccords autour d'une menuiserie.",
+    "explication_pedagogique": "Il complète l'étanchéité et l'aspect fini.",
+    "exemple_utilisation": "Le CCTP met les habillages extérieurs et intérieurs à la charge du présent lot.",
+    "points_vigilance": [
+      "Ne pas confondre habillage esthétique et calfeutrement étanche."
+    ]
+  },
+  {
+    "terme": "Indice R",
+    "definition_courte": "Indice d'affaiblissement acoustique d'un élément.",
+    "explication_pedagogique": "Il exprime la réduction du bruit en dB.",
+    "exemple_utilisation": "Le CCTP demande R = 31 dB pour plusieurs menuiseries PVC.",
+    "points_vigilance": [
+      "Vérifier la composition vitrage + menuiserie + coffre."
+    ]
+  },
+  {
+    "terme": "Isolation thermique intérieure du coffre",
+    "definition_courte": "Isolation placée dans le coffre de volet roulant.",
+    "explication_pedagogique": "Elle limite les pertes thermiques par le caisson.",
+    "exemple_utilisation": "Le CCTP demande des coffres avec isolation thermique intérieure.",
+    "points_vigilance": [
+      "Vérifier Uc demandé selon type de volet."
+    ]
+  },
+  {
+    "terme": "Joint central",
+    "definition_courte": "Joint placé au centre du profil entre ouvrant et dormant.",
+    "explication_pedagogique": "Il participe à l'étanchéité air/eau.",
+    "exemple_utilisation": "Le CCTP prévoit joint central ou double joint périphérique en élastomère.",
+    "points_vigilance": [
+      "Un joint coupé ou mal comprimé annule la performance."
+    ]
+  },
+  {
+    "terme": "Joint de recouvrement",
+    "definition_courte": "Joint assurant l'étanchéité entre ouvrant et dormant au niveau du recouvrement.",
+    "explication_pedagogique": "Il limite les infiltrations d'air et d'eau.",
+    "exemple_utilisation": "Le CCTP prévoit des joints de recouvrement en EPDM.",
+    "points_vigilance": [
+      "Contrôler continuité dans les angles."
+    ]
+  },
+  {
+    "terme": "Joint de vitrage",
+    "definition_courte": "Joint maintenant et étanchant le vitrage dans son cadre.",
+    "explication_pedagogique": "Il évite l'eau, l'air et les vibrations autour du vitrage.",
+    "exemple_utilisation": "Le CCTP prévoit joints de vitrage EPDM ou intégrés aux parcloses.",
+    "points_vigilance": [
+      "À contrôler après pose usine ou chantier."
+    ]
+  },
+  {
+    "terme": "Joint silicone première catégorie",
+    "definition_courte": "Mastic souple de qualité adaptée aux joints extérieurs.",
+    "explication_pedagogique": "Il assure le calfeutrement entre menuiserie et gros oeuvre.",
+    "exemple_utilisation": "Le CCTP prévoit un joint silicone de première catégorie sur fond de joint butyl.",
+    "points_vigilance": [
+      "Le support doit être propre, sec et compatible."
+    ]
+  },
+  {
+    "terme": "Label NF",
+    "definition_courte": "Certification française attestant la conformité et la qualité du produit.",
+    "explication_pedagogique": "Il sécurise le choix des menuiseries ou fermetures.",
+    "exemple_utilisation": "Le CCTP demande label NF pour certains ensembles et NF Fermetures pour volets.",
+    "points_vigilance": [
+      "Demander les justificatifs dans le DOE."
+    ]
+  },
+  {
+    "terme": "Lame d'air",
+    "definition_courte": "Espace entre deux vitrages d'un double vitrage.",
+    "explication_pedagogique": "Elle participe à l'isolation thermique et acoustique.",
+    "exemple_utilisation": "Le CCTP précise que l'épaisseur de lame d'air est impérative.",
+    "points_vigilance": [
+      "Ne pas modifier la composition sans vérifier les performances."
+    ]
+  },
+  {
+    "terme": "Lame finale",
+    "definition_courte": "Dernière lame basse du tablier de volet roulant.",
+    "explication_pedagogique": "Elle rigidifie le volet et améliore la fermeture.",
+    "exemple_utilisation": "Le CCTP prévoit lame finale en aluminium laqué.",
+    "points_vigilance": [
+      "Contrôler contact, verrouillage et alignement."
+    ]
+  },
+  {
+    "terme": "Lame PVC / aluminium",
+    "definition_courte": "Élément horizontal composant le tablier d'un volet roulant.",
+    "explication_pedagogique": "Les lames s'enroulent dans le coffre et ferment la baie.",
+    "exemple_utilisation": "Le CCTP prévoit lames PVC sous 1,80 m et lames aluminium pour volets motorisés.",
+    "points_vigilance": [
+      "Le matériau impacte rigidité, acoustique, sécurité et entretien."
+    ]
+  },
+  {
+    "terme": "Lames verticales",
+    "definition_courte": "Planches verticales composant un volet battant bois.",
+    "explication_pedagogique": "Elles forment le panneau du volet.",
+    "exemple_utilisation": "La variante bois prévoit des lames verticales en sapin du nord.",
+    "points_vigilance": [
+      "Vérifier assemblage, impression 4 faces et finition peinture."
+    ]
+  },
+  {
+    "terme": "Largeur de passage",
+    "definition_courte": "Largeur réellement libre pour circuler quand la porte est ouverte.",
+    "explication_pedagogique": "Elle est importante pour accessibilité et usage.",
+    "exemple_utilisation": "Le CCTP demande 1 m pour certaines portes et 90 cm minimum pour SAS.",
+    "points_vigilance": [
+      "Ne pas confondre dimension de baie et passage libre."
+    ]
+  },
+  {
+    "terme": "Logement adapté",
+    "definition_courte": "Logement conçu pour l'accessibilité ou l'adaptation PMR.",
+    "explication_pedagogique": "Il reçoit souvent des équipements motorisés ou seuils adaptés.",
+    "exemple_utilisation": "Le CCTP mentionne les logements adaptés 17 et 21 pour volets roulants motorisés.",
+    "points_vigilance": [
+      "Bien repérer ces logements sur plans et nomenclature."
+    ]
+  },
+  {
+    "terme": "Manoeuvre par tringle oscillante",
+    "definition_courte": "Commande manuelle de volet roulant avec tringle articulée.",
+    "explication_pedagogique": "Elle permet de monter et descendre le tablier depuis l'intérieur.",
+    "exemple_utilisation": "Le CCTP prévoit cette manoeuvre pour volets roulants non motorisés.",
+    "points_vigilance": [
+      "Vérifier accessibilité et fonctionnement fluide."
+    ]
+  },
+  {
+    "terme": "Marquage CEKAL",
+    "definition_courte": "Marque visible attestant la certification du vitrage.",
+    "explication_pedagogique": "Elle permet de vérifier la conformité du produit posé.",
+    "exemple_utilisation": "Le CCTP demande marquage CEKAL pour les vitrages.",
+    "points_vigilance": [
+      "À contrôler avant réception, avant disparition des étiquettes."
+    ]
+  },
+  {
+    "terme": "Menuiserie aluminium",
+    "definition_courte": "Menuiserie réalisée avec profilés aluminium.",
+    "explication_pedagogique": "Elle est utilisée pour halls, SAS et portes collectives.",
+    "exemple_utilisation": "Le CCTP prévoit portes d'entrée et SAS d'immeuble en aluminium.",
+    "points_vigilance": [
+      "Vérifier rupture de pont thermique si exigée."
+    ]
+  },
+  {
+    "terme": "Menuiserie PVC",
+    "definition_courte": "Menuiserie réalisée avec profilés en PVC.",
+    "explication_pedagogique": "Elle est courante en logements pour fenêtres et portes-fenêtres.",
+    "exemple_utilisation": "Le CCTP prévoit menuiseries PVC blanches à chambres multiples.",
+    "points_vigilance": [
+      "Contrôler renforts acier, soudure étanche et performances."
+    ]
+  },
+  {
+    "terme": "Mise en jeu",
+    "definition_courte": "Réglage des jeux entre ouvrant et dormant.",
+    "explication_pedagogique": "Elle assure une ouverture correcte sans frottement ni fuite.",
+    "exemple_utilisation": "Le CCTP demande les réglages nécessaires et mises en jeu avant réception.",
+    "points_vigilance": [
+      "Un jeu trop faible bloque, un jeu trop fort fuit."
+    ]
+  },
+  {
+    "terme": "Monobloc",
+    "definition_courte": "Ensemble ou dormant formé comme une seule unité intégrée.",
+    "explication_pedagogique": "Il simplifie la pose et limite certains raccords.",
+    "exemple_utilisation": "Le CCTP parle de dormant monobloc et de volets motorisés monobloc.",
+    "points_vigilance": [
+      "Vérifier dimensions réelles avant fabrication."
+    ]
+  },
+  {
+    "terme": "Mortaise",
+    "definition_courte": "Entaille réalisée dans une menuiserie ou coffre.",
+    "explication_pedagogique": "Elle permet d'intégrer une grille d'entrée d'air ou accessoire.",
+    "exemple_utilisation": "Le CCTP prévoit réalisation de mortaise pour les grilles d'entrée d'air.",
+    "points_vigilance": [
+      "Ne pas fragiliser le profil ou dégrader l'acoustique sans accessoire adapté."
+    ]
+  },
+  {
+    "terme": "Niveau",
+    "definition_courte": "Horizontalité ou altitude correcte d'un élément posé.",
+    "explication_pedagogique": "Il garantit fonctionnement et esthétique.",
+    "exemple_utilisation": "Le CCTP demande un niveau correct des menuiseries.",
+    "points_vigilance": [
+      "Un seuil ou dormant hors niveau crée dysfonctionnement et infiltration."
+    ]
+  },
+  {
+    "terme": "Nomenclature architecte",
+    "definition_courte": "Tableau ou repérage listant les menuiseries par type, dimensions et localisation.",
+    "explication_pedagogique": "Elle sert à vérifier quantités et caractéristiques.",
+    "exemple_utilisation": "Le CCTP renvoie aux plans, façades et nomenclature de l'architecte.",
+    "points_vigilance": [
+      "Les quantités CCTP sont indicatives : l'entreprise doit les vérifier."
+    ]
+  },
+  {
+    "terme": "NRA",
+    "definition_courte": "Nouvelle Réglementation Acoustique applicable aux logements.",
+    "explication_pedagogique": "Elle fixe des exigences acoustiques minimales.",
+    "exemple_utilisation": "Le CCTP cite la NRA et l'arrêté du 30 juin 1999.",
+    "points_vigilance": [
+      "À relier aux performances menuiseries/coffres/façade."
+    ]
+  },
+  {
+    "terme": "NV 65",
+    "definition_courte": "Règles historiques de calcul des effets neige et vent.",
+    "explication_pedagogique": "Elles servent notamment au choix des menuiseries selon exposition.",
+    "exemple_utilisation": "Le CCTP cite les règles NV 65.",
+    "points_vigilance": [
+      "Impact possible sur classement au vent et fixations."
+    ]
+  },
+  {
+    "terme": "Ouvrant",
+    "definition_courte": "Partie mobile d'une fenêtre ou porte.",
+    "explication_pedagogique": "Il s'ouvre pour permettre passage, ventilation ou accès.",
+    "exemple_utilisation": "Le CCTP décrit ouvrants renforcés aluminium et PVC.",
+    "points_vigilance": [
+      "À régler pour étanchéité, effort et sécurité."
+    ]
+  },
+  {
+    "terme": "Ouvrant à recouvrement",
+    "definition_courte": "Ouvrant qui vient recouvrir une partie du dormant.",
+    "explication_pedagogique": "Il améliore étanchéité et aspect.",
+    "exemple_utilisation": "Les portes aluminium ont un ouvrant renforcé à recouvrement en feuillure.",
+    "points_vigilance": [
+      "Vérifier compression des joints."
+    ]
+  },
+  {
+    "terme": "Pareclose",
+    "definition_courte": "Profil maintenant le vitrage dans le châssis.",
+    "explication_pedagogique": "Elle permet la pose et le remplacement du vitrage.",
+    "exemple_utilisation": "Le CCTP prévoit vitrages posés sous parcloses intégrant le joint.",
+    "points_vigilance": [
+      "Une pareclose mal clipsée peut créer bruit, fuite ou risque sécurité."
+    ]
+  },
+  {
+    "terme": "Pareclose autobloquante",
+    "definition_courte": "Pareclose conçue pour rester verrouillée après pose.",
+    "explication_pedagogique": "Elle sécurise le vitrage côté intérieur.",
+    "exemple_utilisation": "Les menuiseries PVC sont prévues avec parecloses autobloquantes intérieures.",
+    "points_vigilance": [
+      "Vérifier clipsage et finition."
+    ]
+  },
+  {
+    "terme": "Passage libre",
+    "definition_courte": "Largeur réellement disponible pour passer.",
+    "explication_pedagogique": "Elle est essentielle pour accessibilité et conformité.",
+    "exemple_utilisation": "Le CCTP demande passage libre 90 cm minimum pour les portes de SAS.",
+    "points_vigilance": [
+      "À mesurer porte ouverte, hors obstacles et quincailleries."
+    ]
+  },
+  {
+    "terme": "Pentures",
+    "definition_courte": "Ferrures longues fixées sur un volet battant.",
+    "explication_pedagogique": "Elles relient le volet aux gonds et participent à la rigidité.",
+    "exemple_utilisation": "La variante bois prévoit pentures et contre-pentures.",
+    "points_vigilance": [
+      "Protection anticorrosion obligatoire."
+    ]
+  },
+  {
+    "terme": "Percussion dans coulisse",
+    "definition_courte": "Dispositif ou réservation dans les coulisses participant à l'anti-soulèvement.",
+    "explication_pedagogique": "Elle bloque le tablier contre une tentative de relevage.",
+    "exemple_utilisation": "Le CCTP prévoit barres anti-soulèvement y compris percussions dans les coulisses.",
+    "points_vigilance": [
+      "À vérifier sur les volets RDC."
+    ]
+  },
+  {
+    "terme": "Pièce d'appui PVC",
+    "definition_courte": "Profil bas d'une fenêtre reposant sur l'appui maçonné.",
+    "explication_pedagogique": "Elle évacue l'eau et fait la liaison avec la bavette.",
+    "exemple_utilisation": "Le CCTP prévoit pièce d'appui PVC et bavette aluminium.",
+    "points_vigilance": [
+      "Contrôler pente, évacuations et continuité des joints."
+    ]
+  },
+  {
+    "terme": "PMR",
+    "definition_courte": "Personne à mobilité réduite ou exigences d'accessibilité associées.",
+    "explication_pedagogique": "Cela impose seuils, efforts, passages et repérages adaptés.",
+    "exemple_utilisation": "Le CCTP mentionne seuil PMR, bandes d'éveil et effort inférieur à 50 N.",
+    "points_vigilance": [
+      "Vérifier en situation réelle, pas seulement sur fiche produit."
+    ]
+  },
+  {
+    "terme": "Porte d'entrée d'immeuble",
+    "definition_courte": "Porte principale donnant accès au bâtiment collectif.",
+    "explication_pedagogique": "Elle doit être robuste, étanche, accessible et souvent contrôlée électriquement.",
+    "exemple_utilisation": "Le CCTP prévoit portes d'entrée aluminium avec ventouses et ferme-porte.",
+    "points_vigilance": [
+      "Coordination avec électricité, contrôle d'accès et serrurerie."
+    ]
+  },
+  {
+    "terme": "Porte de SAS",
+    "definition_courte": "Porte intérieure ou intermédiaire d'un sas d'immeuble.",
+    "explication_pedagogique": "Elle contrôle les circulations entre hall et parties communes.",
+    "exemple_utilisation": "Le CCTP prévoit portes de SAS aluminium avec serrure à rouleau.",
+    "points_vigilance": [
+      "Vérifier passage libre, effort et fermeture."
+    ]
+  },
+  {
+    "terme": "Porte-fenêtre",
+    "definition_courte": "Menuiserie vitrée descendant jusqu'au sol et permettant le passage.",
+    "explication_pedagogique": "Elle donne accès à terrasse, balcon ou extérieur.",
+    "exemple_utilisation": "Le CCTP prévoit portes-fenêtres un ou deux vantaux avec seuil PMR.",
+    "points_vigilance": [
+      "Soigner seuil, drainage et accessibilité."
+    ]
+  },
+  {
+    "terme": "Profil à chambres multiples",
+    "definition_courte": "Profil PVC ou aluminium comportant plusieurs cavités internes.",
+    "explication_pedagogique": "Il améliore rigidité et performance thermique.",
+    "exemple_utilisation": "Le CCTP prévoit profilés tubulaires PVC à chambres multiples et aluminium multi chambres.",
+    "points_vigilance": [
+      "Vérifier renforts et compatibilité avec les performances."
+    ]
+  },
+  {
+    "terme": "Profilé tubulaire PVC",
+    "definition_courte": "Profil creux en PVC utilisé pour dormant ou ouvrant.",
+    "explication_pedagogique": "Il constitue la structure de la menuiserie PVC.",
+    "exemple_utilisation": "Le CCTP prévoit profilés tubulaires PVC assemblés par soudure étanche.",
+    "points_vigilance": [
+      "Les soudures d'angle doivent être propres et étanches."
+    ]
+  },
+  {
+    "terme": "Profilé à rupture de pont thermique",
+    "definition_courte": "Profil séparant les faces intérieure et extérieure pour limiter les pertes thermiques.",
+    "explication_pedagogique": "Il améliore la performance Uw et le confort.",
+    "exemple_utilisation": "Le CCTP prévoit profilés aluminium à rupture de pont thermique pour portes d'entrée.",
+    "points_vigilance": [
+      "Indispensable sur menuiseries aluminium extérieures chauffées."
+    ]
+  },
+  {
+    "terme": "Protection des ouvrages",
+    "definition_courte": "Mesures évitant les dégradations pendant chantier.",
+    "explication_pedagogique": "Elle protège menuiseries, vitrages, volets et finitions.",
+    "exemple_utilisation": "Le CCTP rappelle protection des ouvrages et remises en état.",
+    "points_vigilance": [
+      "Les menuiseries posées tôt sont très exposées aux chocs."
+    ]
+  },
+  {
+    "terme": "PVC teinté dans la masse",
+    "definition_courte": "PVC coloré dans toute son épaisseur.",
+    "explication_pedagogique": "Il limite la visibilité des rayures superficielles.",
+    "exemple_utilisation": "Le CCTP prévoit volets PVC blancs teintés dans la masse.",
+    "points_vigilance": [
+      "À distinguer d'un simple film ou peinture de surface."
+    ]
+  },
+  {
+    "terme": "Rainure de récupération",
+    "definition_courte": "Canal dans la pièce d'appui pour guider l'eau.",
+    "explication_pedagogique": "Elle évacue condensation ou pluie vers l'extérieur.",
+    "exemple_utilisation": "Le CCTP indique rainures et goulottes dans les pièces d'appui PVC.",
+    "points_vigilance": [
+      "Nettoyer et vérifier qu'elles ne sont pas obstruées."
+    ]
+  },
+  {
+    "terme": "RAL",
+    "definition_courte": "Nuancier standard de couleurs.",
+    "explication_pedagogique": "Il permet de définir précisément les teintes des ouvrages.",
+    "exemple_utilisation": "Le CCTP prévoit finition thermolaquée au choix de l'architecte dans la gamme RAL.",
+    "points_vigilance": [
+      "Toujours faire valider le RAL avant fabrication."
+    ]
+  },
+  {
+    "terme": "Recouvrement en feuillure",
+    "definition_courte": "Configuration où l'ouvrant vient recouvrir une partie du dormant dans une feuillure.",
+    "explication_pedagogique": "Elle améliore étanchéité et résistance.",
+    "exemple_utilisation": "Le CCTP décrit les ouvrants aluminium renforcés à recouvrement en feuillure.",
+    "points_vigilance": [
+      "Contrôler la bonne compression du joint."
+    ]
+  },
+  {
+    "terme": "Regarnissage maçonné",
+    "definition_courte": "Reprise de maçonnerie autour d'une réservation ou baie.",
+    "explication_pedagogique": "Il rétablit le support autour de la menuiserie.",
+    "exemple_utilisation": "Le CCTP indique que les réservations et regarnissages maçonnés sont au lot Gros oeuvre.",
+    "points_vigilance": [
+      "Bien coordonner avant calfeutrement final."
+    ]
+  },
+  {
+    "terme": "Relevé de cotes",
+    "definition_courte": "Mesure réelle sur chantier avant fabrication.",
+    "explication_pedagogique": "Il évite les erreurs dues aux dimensions indicatives des plans.",
+    "exemple_utilisation": "Le CCTP impose de relever les cotes sur place avant fabrication.",
+    "points_vigilance": [
+      "Ne jamais lancer fabrication uniquement sur les cotes indicatives."
+    ]
+  },
+  {
+    "terme": "Rupture de courant",
+    "definition_courte": "Principe où la ventouse libère la porte en cas de coupure électrique.",
+    "explication_pedagogique": "Il est important pour la sécurité incendie et l'évacuation.",
+    "exemple_utilisation": "Le CCTP prévoit une double ventouse électromagnétique à rupture de courant.",
+    "points_vigilance": [
+      "À valider avec bureau de contrôle et lot électricité."
+    ]
+  },
+  {
+    "terme": "Rupture de pont thermique",
+    "definition_courte": "Dispositif limitant la continuité thermique entre extérieur et intérieur.",
+    "explication_pedagogique": "Il évite pertes de chaleur et condensation.",
+    "exemple_utilisation": "Le CCTP prévoit profilés et seuils à rupture de pont thermique.",
+    "points_vigilance": [
+      "Vérifier la continuité avec doublage et appuis."
+    ]
+  },
+  {
+    "terme": "Réglage des ouvrages",
+    "definition_courte": "Ajustement final des portes, fenêtres et volets.",
+    "explication_pedagogique": "Il assure fonctionnement, jeux, fermeture et étanchéité.",
+    "exemple_utilisation": "Le CCTP impose réglages nécessaires avant réception.",
+    "points_vigilance": [
+      "À faire après pose, mais aussi après premiers mouvements du bâtiment si besoin."
+    ]
+  },
+  {
+    "terme": "Réservations",
+    "definition_courte": "Vides prévus dans le gros oeuvre pour recevoir les menuiseries.",
+    "explication_pedagogique": "Elles doivent correspondre aux dimensions et positions demandées.",
+    "exemple_utilisation": "Le CCTP précise que réservations maçonnées sont au lot Gros oeuvre.",
+    "points_vigilance": [
+      "Les plans/gabarits du menuisier doivent être transmis tôt."
+    ]
+  },
+  {
+    "terme": "Sapin du nord",
+    "definition_courte": "Essence de bois utilisée pour la variante volets battants bois.",
+    "explication_pedagogique": "Elle sert à fabriquer des volets à peindre.",
+    "exemple_utilisation": "Le CCTP prévoit des volets de 32 mm en sapin du nord.",
+    "points_vigilance": [
+      "Protection, impression et peinture sont essentielles en extérieur."
+    ]
+  },
+  {
+    "terme": "SAS d'immeuble",
+    "definition_courte": "Espace tampon entre extérieur et intérieur du bâtiment.",
+    "explication_pedagogique": "Il améliore confort, sécurité et gestion des accès.",
+    "exemple_utilisation": "Le CCTP prévoit des portes de SAS aluminium.",
+    "points_vigilance": [
+      "Vérifier sens d'ouverture et largeur de passage."
+    ]
+  },
+  {
+    "terme": "Satinovo",
+    "definition_courte": "Vitrage dépoli ou translucide de Saint-Gobain ou équivalent.",
+    "explication_pedagogique": "Il préserve l'intimité dans les pièces d'eau.",
+    "exemple_utilisation": "Le CCTP prévoit Satinovo pour salles de bains, salles d'eau et WC.",
+    "points_vigilance": [
+      "En RDC, vérifier si l'anti-effraction est aussi demandé."
+    ]
+  },
+  {
+    "terme": "Scellement",
+    "definition_courte": "Fixation durable dans le gros oeuvre.",
+    "explication_pedagogique": "Il maintient menuiseries ou gonds en place.",
+    "exemple_utilisation": "Le scellement des menuiseries est à la charge du présent lot.",
+    "points_vigilance": [
+      "Adapter scellement au support et aux efforts."
+    ]
+  },
+  {
+    "terme": "Serrure à rouleau",
+    "definition_courte": "Serrure dont le pêne est remplacé ou complété par un rouleau réglable.",
+    "explication_pedagogique": "Elle facilite la fermeture des portes de passage.",
+    "exemple_utilisation": "Le CCTP prévoit serrure à rouleau pour portes de SAS.",
+    "points_vigilance": [
+      "À régler avec ferme-porte pour fermeture sans claquement excessif."
+    ]
+  },
+  {
+    "terme": "Seuil métallique PMR",
+    "definition_courte": "Seuil bas compatible avec l'accessibilité.",
+    "explication_pedagogique": "Il facilite le passage des personnes à mobilité réduite.",
+    "exemple_utilisation": "Le CCTP prévoit seuil métallique PMR et seuil plat aluminium ou inox selon portes.",
+    "points_vigilance": [
+      "Contrôler ressaut, drainage et étanchéité."
+    ]
+  },
+  {
+    "terme": "Seuil plat aluminium",
+    "definition_courte": "Seuil bas en aluminium pour porte ou porte-fenêtre.",
+    "explication_pedagogique": "Il facilite l'accès aux terrasses ou SAS.",
+    "exemple_utilisation": "Le CCTP demande un seuil plat aluminium pour accessibilité aux terrasses.",
+    "points_vigilance": [
+      "Point sensible aux infiltrations : drainage obligatoire."
+    ]
+  },
+  {
+    "terme": "Simple vitrage sécurit",
+    "definition_courte": "Verre de sécurité en une seule épaisseur ou composition adaptée.",
+    "explication_pedagogique": "Il limite les risques de blessure en cas de casse.",
+    "exemple_utilisation": "Le CCTP prévoit simple vitrage sécurit sur portes de SAS.",
+    "points_vigilance": [
+      "Vérifier conformité selon dimensions et usage public."
+    ]
+  },
+  {
+    "terme": "SNJF",
+    "definition_courte": "Label qualité pour mastics de joints de construction.",
+    "explication_pedagogique": "Il garantit des performances adaptées aux joints.",
+    "exemple_utilisation": "Le CCTP demande des joints avec label SNJF.",
+    "points_vigilance": [
+      "Important pour durabilité du calfeutrement extérieur."
+    ]
+  },
+  {
+    "terme": "Soudure étanche PVC",
+    "definition_courte": "Assemblage soudé des profilés PVC aux angles.",
+    "explication_pedagogique": "Il assure continuité mécanique et étanchéité du cadre.",
+    "exemple_utilisation": "Le CCTP prévoit profilés PVC assemblés par soudure étanche.",
+    "points_vigilance": [
+      "Contrôler aspect des soudures et absence de défauts."
+    ]
+  },
+  {
+    "terme": "SP10",
+    "definition_courte": "Type de vitrage feuilleté anti-effraction souvent assimilé à Stadip Protect.",
+    "explication_pedagogique": "Il renforce la sécurité des baies accessibles.",
+    "exemple_utilisation": "Le CCTP exclut certains volets roulants sur menuiseries recevant vitrage anti-effraction type SP10.",
+    "points_vigilance": [
+      "Bien repérer ces menuiseries dans la nomenclature."
+    ]
+  },
+  {
+    "terme": "Stadip Protect",
+    "definition_courte": "Vitrage feuilleté de sécurité/anti-effraction de Saint-Gobain ou équivalent.",
+    "explication_pedagogique": "Il retarde l'intrusion et protège les personnes.",
+    "exemple_utilisation": "Le CCTP prévoit Stadip Protect pour pièces d'eau en RDC.",
+    "points_vigilance": [
+      "Vérifier composition exacte et marquage CEKAL."
+    ]
+  },
+  {
+    "terme": "Swe / Swc",
+    "definition_courte": "Facteurs solaires été/hiver ou selon conditions de protection solaire indiqués dans l'étude thermique.",
+    "explication_pedagogique": "Ils mesurent la part d'énergie solaire transmise par la menuiserie.",
+    "exemple_utilisation": "Le CCTP demande les documents attestant Swe et Swc.",
+    "points_vigilance": [
+      "À fournir avec Uw et Ujn pour conformité thermique."
+    ]
+  },
+  {
+    "terme": "Tableau de baie",
+    "definition_courte": "Faces intérieures de l'ouverture maçonnée recevant la menuiserie.",
+    "explication_pedagogique": "Il sert de référence de dimension et de support de pose.",
+    "exemple_utilisation": "Le CCTP parle de dimensions en tableaux et dressement des tableaux.",
+    "points_vigilance": [
+      "Un tableau irrégulier complique pose et étanchéité."
+    ]
+  },
+  {
+    "terme": "Tapée d'isolation",
+    "definition_courte": "Profil complémentaire du dormant permettant de reprendre l'épaisseur du doublage.",
+    "explication_pedagogique": "Elle assure la liaison entre menuiserie et isolation intérieure.",
+    "exemple_utilisation": "Le CCTP prévoit tapées aluminium de 120 mm et tapées à rupture de pont thermique.",
+    "points_vigilance": [
+      "Vérifier épaisseur exacte du doublage avant commande."
+    ]
+  },
+  {
+    "terme": "Teinté dans la masse",
+    "definition_courte": "Matériau coloré dans son épaisseur.",
+    "explication_pedagogique": "Il conserve mieux son aspect en cas de rayure légère.",
+    "exemple_utilisation": "Le CCTP prévoit barre de tirage et volets blancs teintés dans la masse.",
+    "points_vigilance": [
+      "À distinguer d'un thermolaquage ou d'une peinture."
+    ]
+  },
+  {
+    "terme": "Thermobloc",
+    "definition_courte": "Type ou référence de bloc volet roulant motorisé performant.",
+    "explication_pedagogique": "Il associe volet, coffre et performance thermique/acoustique.",
+    "exemple_utilisation": "Le CCTP cite Thermobloc ou équivalent pour volets motorisés.",
+    "points_vigilance": [
+      "L'équivalent doit respecter Uc, acoustique et intégration."
+    ]
+  },
+  {
+    "terme": "Thermolaquage",
+    "definition_courte": "Finition peinture poudre cuite au four sur métal.",
+    "explication_pedagogique": "Elle protège et colore les volets aluminium.",
+    "exemple_utilisation": "Le CCTP prévoit thermolaquage 200°C et choix RAL pour volets battants aluminium.",
+    "points_vigilance": [
+      "Contrôler teinte, brillance et qualité avant pose."
+    ]
+  },
+  {
+    "terme": "Traverse",
+    "definition_courte": "Profil horizontal d'une menuiserie ou d'un volet.",
+    "explication_pedagogique": "Elle rigidifie et sépare les parties du châssis ou panneau.",
+    "exemple_utilisation": "Le CCTP parle de traverse basse, traverses d'ouvrants et traverse horizontale des volets.",
+    "points_vigilance": [
+      "Contrôler alignement avec les dessins de façade."
+    ]
+  },
+  {
+    "terme": "Traverse basse",
+    "definition_courte": "Profil inférieur du dormant ou de la menuiserie.",
+    "explication_pedagogique": "Elle concentre les risques d'eau et de passage.",
+    "exemple_utilisation": "Le CCTP prévoit une traverse basse avec récupération des eaux pluviales.",
+    "points_vigilance": [
+      "Point critique pour drainage et étanchéité."
+    ]
+  },
+  {
+    "terme": "Tringle oscillante",
+    "definition_courte": "Commande manuelle articulée d'un volet roulant.",
+    "explication_pedagogique": "Elle actionne le mécanisme depuis l'intérieur.",
+    "exemple_utilisation": "Le CCTP prévoit une tringle oscillante blanche avec sortie de coffre inférieure.",
+    "points_vigilance": [
+      "Vérifier longueur, manoeuvre et blocage par aimant."
+    ]
+  },
+  {
+    "terme": "Uc",
+    "definition_courte": "Coefficient thermique du coffre de volet roulant.",
+    "explication_pedagogique": "Plus il est faible, plus le coffre est isolant.",
+    "exemple_utilisation": "Le CCTP demande Uc ≤ 1,50 W/m²K ou Uc ≤ 1,10 W/m²K selon coffre.",
+    "points_vigilance": [
+      "Vérifier les justificatifs fabricant."
+    ]
+  },
+  {
+    "terme": "Ujn",
+    "definition_courte": "Coefficient thermique jour/nuit d'une menuiserie avec fermeture selon étude.",
+    "explication_pedagogique": "Il prend en compte l'effet de la fermeture dans certains calculs.",
+    "exemple_utilisation": "Le CCTP demande documents attestant les valeurs Ujn.",
+    "points_vigilance": [
+      "À fournir avec Uw, Swe et Swc."
+    ]
+  },
+  {
+    "terme": "Uw",
+    "definition_courte": "Coefficient de transmission thermique de la fenêtre complète.",
+    "explication_pedagogique": "Plus il est faible, plus la menuiserie isole.",
+    "exemple_utilisation": "Le CCTP prévoit Uw entre 1,30 et 1,80 ou Uw = 1,4 selon menuiseries.",
+    "points_vigilance": [
+      "La valeur doit concerner la fenêtre complète, pas seulement le vitrage."
+    ]
+  },
+  {
+    "terme": "Vantail",
+    "definition_courte": "Partie ouvrante d'une porte, fenêtre ou volet.",
+    "explication_pedagogique": "Il peut être simple, double, principal ou secondaire.",
+    "exemple_utilisation": "Le CCTP distingue fenêtres simple vantail, deux vantaux et vantail principal.",
+    "points_vigilance": [
+      "Contrôler sens d'ouverture, largeur et réglage."
+    ]
+  },
+  {
+    "terme": "Ventouse électromagnétique",
+    "definition_courte": "Dispositif de verrouillage par aimant alimenté électriquement.",
+    "explication_pedagogique": "Elle maintient la porte fermée et peut se libérer en sécurité.",
+    "exemple_utilisation": "Le CCTP prévoit une double ventouse électromagnétique sur les portes d'entrée.",
+    "points_vigilance": [
+      "Coordination indispensable avec alimentation, contrôle d'accès et sécurité incendie."
+    ]
+  },
+  {
+    "terme": "Vitrage sécurit",
+    "definition_courte": "Vitrage de sécurité limitant les risques en cas de casse.",
+    "explication_pedagogique": "Il protège les usagers dans les portes ou zones accessibles.",
+    "exemple_utilisation": "Le CCTP prévoit double vitrage isolant sécurit et simple vitrage sécurit.",
+    "points_vigilance": [
+      "Vérifier type exact : trempé, feuilleté ou composition demandée."
+    ]
+  },
+  {
+    "terme": "Volet battant aluminium",
+    "definition_courte": "Fermeture extérieure à vantaux ouvrant sur gonds.",
+    "explication_pedagogique": "Elle protège la baie et participe à l'aspect façade.",
+    "exemple_utilisation": "Le CCTP prévoit volets battants aluminium EHRET type TIZO-ROM ou équivalent.",
+    "points_vigilance": [
+      "Contrôler dimensions, gonds, arrêts, espagnolettes et RAL."
+    ]
+  },
+  {
+    "terme": "Volet battant bois",
+    "definition_courte": "Variante exigée remplaçant les volets battants aluminium.",
+    "explication_pedagogique": "Elle prévoit volets sapin du nord à peindre.",
+    "exemple_utilisation": "Le CCTP prévoit une moins-value avec volets bois 32 mm, pentures et contre-pentures.",
+    "points_vigilance": [
+      "Ne pas confondre base aluminium et variante bois."
+    ]
+  },
+  {
+    "terme": "Volet roulant motorisé",
+    "definition_courte": "Volet roulant actionné par moteur électrique.",
+    "explication_pedagogique": "Il améliore confort et accessibilité, notamment logements adaptés.",
+    "exemple_utilisation": "Le CCTP prévoit volets roulants motorisés pour portes-fenêtres et logements adaptés 17/21.",
+    "points_vigilance": [
+      "Coordonner alimentation électrique et commandes."
+    ]
+  },
+  {
+    "terme": "Volet roulant sans ajours",
+    "definition_courte": "Tablier sans ouvertures entre lames.",
+    "explication_pedagogique": "Il améliore occultation et sécurité.",
+    "exemple_utilisation": "Le CCTP demande lames sans ajours pour volets roulants.",
+    "points_vigilance": [
+      "Vérifier ventilation réglementaire par grilles d'entrée d'air séparées."
+    ]
+  },
+  {
+    "terme": "Échantillon / modèle",
+    "definition_courte": "Exemple soumis à validation avant commande ou pose.",
+    "explication_pedagogique": "Il permet de valider aspect, teinte et système.",
+    "exemple_utilisation": "Le CCTP rappelle que les échantillons et modèles réclamés sont dus.",
+    "points_vigilance": [
+      "À faire valider pour volets, aluminium, poignées et teintes."
+    ]
+  },
+  {
+    "terme": "Élastomère",
+    "definition_courte": "Matière souple utilisée pour joints d'étanchéité.",
+    "explication_pedagogique": "Elle garde une certaine déformation sans se rompre.",
+    "exemple_utilisation": "Le CCTP prévoit joints en élastomère et EPDM.",
+    "points_vigilance": [
+      "Un joint rigide ou discontinu nuit à l'étanchéité."
+    ]
+  },
+  {
+    "terme": "Équerre galvanisée",
+    "definition_courte": "Pièce métallique en angle utilisée pour fixer une menuiserie au gros oeuvre.",
+    "explication_pedagogique": "Elle transmet les efforts entre dormant et support.",
+    "exemple_utilisation": "Le CCTP prévoit fixation par équerres galvanisées.",
+    "points_vigilance": [
+      "Contrôler entraxe, support et protection anticorrosion."
+    ]
+  },
+  {
+    "terme": "Étanchéité 4 faces",
+    "definition_courte": "Traitement continu autour des quatre côtés de la menuiserie.",
+    "explication_pedagogique": "Il renforce l'étanchéité à l'air et à l'eau.",
+    "exemple_utilisation": "Le CCTP demande un traitement d'étanchéité à l'air 4 faces en plus du Compriband si demandé.",
+    "points_vigilance": [
+      "Point très important pour tests de perméabilité à l'air."
+    ]
+  },
+  {
+    "terme": "Étanchéité à l'air",
+    "definition_courte": "Capacité de la menuiserie et de sa pose à empêcher les fuites d'air.",
+    "explication_pedagogique": "Elle influence confort, thermique et conformité réglementaire.",
+    "exemple_utilisation": "Le CCTP demande de vérifier qu'aucun défaut ne nuit à l'étanchéité à l'air.",
+    "points_vigilance": [
+      "Les raccords dormant/gros oeuvre sont souvent les points faibles."
+    ]
+  },
+  {
+    "terme": "Étanchéité à l'eau",
+    "definition_courte": "Capacité à empêcher les infiltrations d'eau de pluie.",
+    "explication_pedagogique": "Elle dépend de la menuiserie, des joints, appuis et bavettes.",
+    "exemple_utilisation": "Le CCTP impose calfeutrement et dispositifs de récupération des eaux pluviales.",
+    "points_vigilance": [
+      "Tester les points bas, seuils, bavettes et tableaux."
+    ]
+  }
+]

@@ -1,0 +1,1883 @@
+[
+  {
+    "terme": "ACV - Analyse du Cycle de Vie",
+    "definition_courte": "Méthode utilisée pour évaluer l'impact environnemental d'un produit ou d'un bâtiment.",
+    "explication_pedagogique": "Dans un chantier RE2020, elle permet de vérifier que les produits posés ne dégradent pas les objectifs environnementaux.",
+    "exemple_utilisation": "choisir un revêtement PVC ou un carrelage avec données environnementales exploitables.",
+    "points_vigilance": [
+      "demander les fiches environnementales dès la préparation, pas en fin de chantier."
+    ]
+  },
+  {
+    "terme": "Affaiblissement acoustique",
+    "definition_courte": "Réduction du bruit transmise par un système de sol, une sous-couche ou une chape flottante.",
+    "explication_pedagogique": "Limiter les bruits d'impact entre logements ou entre parties communes et logements.",
+    "exemple_utilisation": "le CCTP demande un résilient phonique avec ΔLw = 19 dB minimum sous chape.",
+    "points_vigilance": [
+      "plus la mise en œuvre est propre en périphérie, plus la performance acoustique réelle est fiable."
+    ]
+  },
+  {
+    "terme": "Agréé par le bureau de contrôle",
+    "definition_courte": "Expression indiquant qu'un produit ou procédé doit être accepté par le bureau de contrôle avant mise en œuvre.",
+    "explication_pedagogique": "Éviter la pose d'un système non conforme ou non justifié techniquement.",
+    "exemple_utilisation": "colles à carrelage et produits de protection sous faïence doivent bénéficier d'avis techniques.",
+    "points_vigilance": [
+      "conserver les fiches techniques, avis techniques et PV dans le DOE."
+    ]
+  },
+  {
+    "terme": "Ambiance décorative",
+    "definition_courte": "Ensemble de teintes, textures et finitions choisies pour un local ou un logement.",
+    "explication_pedagogique": "Harmoniser carrelage, faïence, sol PVC, plinthes et peinture.",
+    "exemple_utilisation": "le CCTP évoque trois ambiances pour les salles d'eau et salles de bains.",
+    "points_vigilance": [
+      "vérifier le calepinage et la localisation de chaque ambiance avant commande."
+    ]
+  },
+  {
+    "terme": "Angle rentrant",
+    "definition_courte": "Angle intérieur formé par deux parois qui se rencontrent, comme un coin de pièce côté intérieur.",
+    "explication_pedagogique": "Il impose des coupes, joints ou pièces spéciales pour les plinthes et faïences.",
+    "exemple_utilisation": "les plinthes peuvent nécessiter des pièces spéciales pour angles rentrants.",
+    "points_vigilance": [
+      "les coupes mal ajustées se voient fortement après jointoiement."
+    ]
+  },
+  {
+    "terme": "Angle saillant",
+    "definition_courte": "Angle extérieur exposé aux chocs, par exemple l'arête d'un mur ou d'un retour de cloison.",
+    "explication_pedagogique": "Il nécessite souvent une baguette d'angle ou un profil de protection.",
+    "exemple_utilisation": "baguette métallique dans les angles saillants du local poubelles.",
+    "points_vigilance": [
+      "un angle saillant non protégé s'épaufre rapidement."
+    ]
+  },
+  {
+    "terme": "Appareil à sonde hygrométrique",
+    "definition_courte": "Outil de mesure utilisé pour contrôler l'humidité relative d'équilibre d'un support béton.",
+    "explication_pedagogique": "Vérifier que le support est suffisamment sec avant pose d'un sol souple.",
+    "exemple_utilisation": "le CCTP fixe un HRE inférieur ou égal à 85 % selon cette méthode.",
+    "points_vigilance": [
+      "une pose sur support trop humide peut provoquer cloques, décollements et moisissures."
+    ]
+  },
+  {
+    "terme": "Appareil sanitaire",
+    "definition_courte": "Équipement de plomberie comme baignoire, douche, lavabo, meuble vasque, évier ou WC.",
+    "explication_pedagogique": "Le carreleur doit raccorder proprement les revêtements autour de ces appareils.",
+    "exemple_utilisation": "joints silicone au droit des appareils sanitaires après pose de la faïence.",
+    "points_vigilance": [
+      "traiter les liaisons sol/mur/appareil pour éviter les infiltrations."
+    ]
+  },
+  {
+    "terme": "Arase de carrelage",
+    "definition_courte": "Niveau fini du carrelage par rapport aux seuils, portes, siphons et autres revêtements.",
+    "explication_pedagogique": "Éviter les ressauts et garantir l'accessibilité.",
+    "exemple_utilisation": "informer le gros œuvre des réservations nécessaires pour respecter le niveau de sol fini.",
+    "points_vigilance": [
+      "coordonner épaisseur isolant + chape + colle + carreau."
+    ]
+  },
+  {
+    "terme": "Arrêt vertical de faïence",
+    "definition_courte": "Limite nette où la faïence s'arrête verticalement sur un mur.",
+    "explication_pedagogique": "Obtenir une finition propre au bord d'une zone carrelée.",
+    "exemple_utilisation": "le CCTP prévoit une baguette PVC pour l'arrêt vertical des faïences.",
+    "points_vigilance": [
+      "l'arrêt doit être aligné avec le calepinage et les appareils sanitaires."
+    ]
+  },
+  {
+    "terme": "ASOUR CHAPE 19",
+    "definition_courte": "Sous-couche ou résilient phonique cité pour obtenir une performance acoustique sous chape.",
+    "explication_pedagogique": "Limiter les bruits de chocs transmis par les sols.",
+    "exemple_utilisation": "le CCTP demande un affaiblissement acoustique ΔLw = 19 dB minimum.",
+    "points_vigilance": [
+      "éviter toute liaison rigide entre chape flottante et parois."
+    ]
+  },
+  {
+    "terme": "Avis technique",
+    "definition_courte": "Document validant l'aptitude à l'emploi d'un produit ou procédé non traditionnel.",
+    "explication_pedagogique": "Justifier qu'une colle, un ragréage, un SEL ou un système de douche peut être utilisé.",
+    "exemple_utilisation": "les produits de ragréage doivent justifier d'un avis technique CSTB favorable.",
+    "points_vigilance": [
+      "sans avis technique valide, le bureau de contrôle peut refuser la solution."
+    ]
+  },
+  {
+    "terme": "Bac à douche",
+    "definition_courte": "Élément recevant l'eau de douche et l'évacuant vers un siphon.",
+    "explication_pedagogique": "Il conditionne la hauteur de faïence, les joints et les raccords d'étanchéité.",
+    "exemple_utilisation": "le CCTP prévoit 2,00 m de faïence à partir du bac à douche.",
+    "points_vigilance": [
+      "contrôler les pentes et l'étanchéité périphérique."
+    ]
+  },
+  {
+    "terme": "Baguette 1/4 de rond",
+    "definition_courte": "Profil de finition arrondi utilisé pour terminer proprement un angle ou un bord de faïence.",
+    "explication_pedagogique": "Protéger l'arête et donner une finition régulière.",
+    "exemple_utilisation": "baguette PVC 1/4 de rond pour la faïence cuisine.",
+    "points_vigilance": [
+      "choisir une teinte compatible avec la faïence et les joints."
+    ]
+  },
+  {
+    "terme": "Baguette d'angle",
+    "definition_courte": "Profil posé dans ou sur un angle pour protéger et finir le revêtement.",
+    "explication_pedagogique": "Éviter les angles coupants, les éclats et les finitions irrégulières.",
+    "exemple_utilisation": "baguette métallique dans les angles saillants du local poubelles.",
+    "points_vigilance": [
+      "poser droit, d'aplomb et aligné sur le calepinage."
+    ]
+  },
+  {
+    "terme": "Baguette de finition",
+    "definition_courte": "Profil utilisé pour terminer un bord de revêtement ou une transition.",
+    "explication_pedagogique": "Rendre propre la jonction entre faïence, peinture, sol ou plinthe.",
+    "exemple_utilisation": "baguettes horizontales et verticales prévues en cuisine.",
+    "points_vigilance": [
+      "une baguette mal choisie donne immédiatement un aspect chantier bas de gamme."
+    ]
+  },
+  {
+    "terme": "Baignoire",
+    "definition_courte": "Appareil sanitaire destiné au bain, générant des zones murales exposées à l'eau.",
+    "explication_pedagogique": "Elle détermine les hauteurs de faïence, les retombées et les joints périphériques.",
+    "exemple_utilisation": "faïence sur 1,50 m au-dessus du rebord de baignoire et sur trois pans de murs.",
+    "points_vigilance": [
+      "l'imperméabilisation doit être réalisée avant pose de la baignoire."
+    ]
+  },
+  {
+    "terme": "Bande de renfort",
+    "definition_courte": "Bande technique placée dans les angles ou points sensibles d'un système d'étanchéité.",
+    "explication_pedagogique": "Renforcer les zones susceptibles de fissurer ou de laisser passer l'eau.",
+    "exemple_utilisation": "les angles autour des baignoires et douches doivent être traités par bandes de renfort jusqu'au sol.",
+    "points_vigilance": [
+      "sans bande, l'étanchéité est fragile dans les angles."
+    ]
+  },
+  {
+    "terme": "Bande KERDI-KERBA",
+    "definition_courte": "Bande d'étanchéité du système Schluter utilisée pour traiter angles et traversées.",
+    "explication_pedagogique": "Assurer la continuité de l'étanchéité dans une douche carrelée.",
+    "exemple_utilisation": "utilisée en variante pour les douches à l'italienne carrelées.",
+    "points_vigilance": [
+      "respecter les recouvrements et prescriptions du fabricant."
+    ]
+  },
+  {
+    "terme": "Bande podotactile",
+    "definition_courte": "Dispositif au sol avec reliefs, destiné à alerter les personnes aveugles ou malvoyantes d'un danger ou d'un changement de niveau.",
+    "explication_pedagogique": "Sécuriser les approches d'escaliers communs.",
+    "exemple_utilisation": "pose à 50 cm de la première marche à chaque palier d'escalier commun.",
+    "points_vigilance": [
+      "la pose ne doit pas créer un relief dangereux ou un risque de chute."
+    ]
+  },
+  {
+    "terme": "Bande résiliente périphérique",
+    "definition_courte": "Bande souple posée en périphérie d'une chape ou d'un sol pour éviter les contacts rigides avec les murs.",
+    "explication_pedagogique": "Limiter les ponts acoustiques et permettre les mouvements du complexe de sol.",
+    "exemple_utilisation": "TRAMIPLINTHE ou équivalent en périphérie de chape.",
+    "points_vigilance": [
+      "elle doit remonter suffisamment avant coupe après finition."
+    ]
+  },
+  {
+    "terme": "Barre de seuil",
+    "definition_courte": "Profil posé au passage d'une porte entre deux revêtements ou deux pièces.",
+    "explication_pedagogique": "Protéger le bord du revêtement et gérer la transition.",
+    "exemple_utilisation": "barre de seuil PVC au droit de la porte des salles d'eau en sol souple.",
+    "points_vigilance": [
+      "éviter les ressauts incompatibles avec l'accessibilité PMR."
+    ]
+  },
+  {
+    "terme": "Bfl-s1",
+    "definition_courte": "Classement européen de réaction au feu pour revêtements de sol.",
+    "explication_pedagogique": "Définir le comportement du revêtement en cas d'incendie.",
+    "exemple_utilisation": "certains PVC des parties communes sont demandés en Bfl-s1.",
+    "points_vigilance": [
+      "Bfl-s1 est généralement plus performant que Cfl-s1."
+    ]
+  },
+  {
+    "terme": "Blocage receveur",
+    "definition_courte": "Calage ou maintien d'un receveur de douche pour éviter ses mouvements.",
+    "explication_pedagogique": "Garantir la stabilité et la bonne tenue des joints périphériques.",
+    "exemple_utilisation": "le CCTP indique que le blocage des receveurs de douche est sans objet pour ce lot.",
+    "points_vigilance": [
+      "vérifier quel lot le doit réellement, souvent plomberie ou plâtrerie selon projet."
+    ]
+  },
+  {
+    "terme": "Bombe au carbure",
+    "definition_courte": "Appareil de mesure de l'humidité résiduelle d'un support par réaction chimique.",
+    "explication_pedagogique": "Vérifier si une chape ou dalle est assez sèche pour recevoir un revêtement collé.",
+    "exemple_utilisation": "le CCTP demande un taux d'humidité résiduel inférieur ou égal à 4,5 % en poids.",
+    "points_vigilance": [
+      "prélèvement à la bonne profondeur, sinon la mesure peut être trompeuse."
+    ]
+  },
+  {
+    "terme": "Bureau de contrôle",
+    "definition_courte": "Organisme chargé de contrôler certains points techniques et réglementaires du chantier.",
+    "explication_pedagogique": "Donner un avis sur les produits, procédés et points sensibles.",
+    "exemple_utilisation": "les colles et procédés certifiés doivent être acceptés par le bureau de contrôle.",
+    "points_vigilance": [
+      "anticiper ses demandes pour ne pas bloquer les travaux."
+    ]
+  },
+  {
+    "terme": "Cahier CSTB",
+    "definition_courte": "Document technique édité par le CSTB, utilisé comme référence de mise en œuvre.",
+    "explication_pedagogique": "Encadrer la préparation des supports ou la pose de certains revêtements.",
+    "exemple_utilisation": "le CCTP vise le cahier des charges de préparation des supports pour sols minces.",
+    "points_vigilance": [
+      "le CSTB est souvent cité pour avis techniques, classements et prescriptions."
+    ]
+  },
+  {
+    "terme": "Calepinage",
+    "definition_courte": "Plan de répartition des carreaux, joints, découpes, formats, ambiances et alignements.",
+    "explication_pedagogique": "Prévoir les coupes avant la pose pour obtenir un rendu propre.",
+    "exemple_utilisation": "faïence suivant plans et calepinage de l'architecte.",
+    "points_vigilance": [
+      "éviter les petites coupes disgracieuses en bout de mur ou autour des appareils."
+    ]
+  },
+  {
+    "terme": "Canevas de pose",
+    "definition_courte": "Document préparatoire montrant comment les matériaux seront posés et répartis.",
+    "explication_pedagogique": "Permettre au maître d'œuvre de valider les principes avant exécution.",
+    "exemple_utilisation": "le CCTP demande les canevas de pose suffisamment tôt pour ne pas perturber le chantier.",
+    "points_vigilance": [
+      "ne pas attendre la livraison du carrelage pour proposer le canevas."
+    ]
+  },
+  {
+    "terme": "Carreau rectifié",
+    "definition_courte": "Carreau recoupé mécaniquement après cuisson pour obtenir des bords très réguliers.",
+    "explication_pedagogique": "Permettre des joints plus fins et réguliers.",
+    "exemple_utilisation": "en variante douche carrelée, le CCTP précise un sol non rectifié.",
+    "points_vigilance": [
+      "le choix rectifié/non rectifié influence la largeur des joints et le rendu."
+    ]
+  },
+  {
+    "terme": "Carrelage",
+    "definition_courte": "Revêtement dur constitué de carreaux posés au sol ou au mur.",
+    "explication_pedagogique": "Assurer une surface résistante, lavable et durable.",
+    "exemple_utilisation": "grès cérame en RDC des maisons ou dans les halls des bâtiments.",
+    "points_vigilance": [
+      "support, colle, joints, fractionnement et désolidarisation conditionnent la durabilité."
+    ]
+  },
+  {
+    "terme": "Carrelage collé",
+    "definition_courte": "Pose de carreaux avec un mortier-colle sur support préparé.",
+    "explication_pedagogique": "Obtenir une pose rapide et régulière sur chape ou support conforme.",
+    "exemple_utilisation": "carrelage grès cérame posé collé sur chape.",
+    "points_vigilance": [
+      "vérifier planéité, humidité, primaire éventuel et compatibilité de la colle."
+    ]
+  },
+  {
+    "terme": "Carrelage scellé",
+    "definition_courte": "Pose traditionnelle où les carreaux sont incorporés dans un mortier de scellement.",
+    "explication_pedagogique": "Réaliser certains sols durs selon DTU 52.1.",
+    "exemple_utilisation": "le DTU 52.1 est cité dans les références du lot.",
+    "points_vigilance": [
+      "ne pas confondre pose scellée et pose collée."
+    ]
+  },
+  {
+    "terme": "CCTC",
+    "definition_courte": "Cahier des Clauses Techniques Communes, document qui complète les CCTP de lots.",
+    "explication_pedagogique": "Donner les prescriptions communes applicables à plusieurs entreprises.",
+    "exemple_utilisation": "le lot carrelage renvoie aux dispositions générales du CCTC.",
+    "points_vigilance": [
+      "une entreprise doit lire le CCTC même si son CCTP est court."
+    ]
+  },
+  {
+    "terme": "CCTP",
+    "definition_courte": "Cahier des Clauses Techniques Particulières, document décrivant les travaux attendus par lot.",
+    "explication_pedagogique": "Définir les matériaux, prestations, localisations et exigences de mise en œuvre.",
+    "exemple_utilisation": "ce lot décrit chapes, carrelages, faïences, sols PVC, tapis et variantes.",
+    "points_vigilance": [
+      "le CCTP prime pour comprendre ce qui est dû techniquement."
+    ]
+  },
+  {
+    "terme": "Cfl-s1",
+    "definition_courte": "Classement européen de réaction au feu pour revêtements de sol.",
+    "explication_pedagogique": "Vérifier que le revêtement respecte les exigences incendie du local.",
+    "exemple_utilisation": "le PVC logement TX Habitat est indiqué avec réaction au feu Cfl-s1.",
+    "points_vigilance": [
+      "conserver les fiches produits pour prouver le classement."
+    ]
+  },
+  {
+    "terme": "Chape",
+    "definition_courte": "Couche de mortier réalisée sur un plancher pour obtenir un niveau, une planéité ou recevoir un revêtement.",
+    "explication_pedagogique": "Constituer le support du carrelage ou du sol fini.",
+    "exemple_utilisation": "chape ciment armée de 6 cm tirée à la règle sur repères.",
+    "points_vigilance": [
+      "respecter épaisseur, séchage, fractionnement et bandes périphériques."
+    ]
+  },
+  {
+    "terme": "Chape armée",
+    "definition_courte": "Chape renforcée par une armature ou un treillis selon les prescriptions.",
+    "explication_pedagogique": "Limiter les fissurations et améliorer le comportement de la chape.",
+    "exemple_utilisation": "le CCTP prévoit une chape ciment armée de 6 cm.",
+    "points_vigilance": [
+      "l'armature ne remplace pas les joints de fractionnement."
+    ]
+  },
+  {
+    "terme": "Chape ciment",
+    "definition_courte": "Chape à base de ciment, sable et eau, utilisée comme support de revêtement.",
+    "explication_pedagogique": "Préparer une surface résistante pour carrelage ou autre sol.",
+    "exemple_utilisation": "chape tirée à la règle sur repères.",
+    "points_vigilance": [
+      "contrôler humidité résiduelle avant pose de sols sensibles."
+    ]
+  },
+  {
+    "terme": "Chape flottante",
+    "definition_courte": "Chape séparée du support et des murs par une sous-couche isolante ou résiliente.",
+    "explication_pedagogique": "Améliorer acoustique et/ou thermique.",
+    "exemple_utilisation": "chape sur isolant phonique et thermique en RDC.",
+    "points_vigilance": [
+      "aucun pont rigide ne doit relier la chape aux murs ou réseaux."
+    ]
+  },
+  {
+    "terme": "Chape pour forme de pente",
+    "definition_courte": "Chape réalisée avec une pente volontaire pour diriger l'eau vers une évacuation.",
+    "explication_pedagogique": "Évacuer l'eau dans les zones humides ou locaux techniques.",
+    "exemple_utilisation": "chape pour forme de pente au local poubelles ou en douche à l'italienne.",
+    "points_vigilance": [
+      "pente insuffisante = stagnation d'eau ; pente excessive = inconfort ou problème PMR."
+    ]
+  },
+  {
+    "terme": "Classe A - sonorité à la marche",
+    "definition_courte": "Indication de performance acoustique liée au bruit entendu lors de la marche sur un sol souple.",
+    "explication_pedagogique": "Améliorer le confort sonore dans les logements.",
+    "exemple_utilisation": "le revêtement PVC des logements indique sonorité à la marche Classe A.",
+    "points_vigilance": [
+      "la sous-couche et la pose en plein influencent le résultat réel."
+    ]
+  },
+  {
+    "terme": "Classement P2 / P3",
+    "definition_courte": "Classe de résistance au poinçonnement ou aux sollicitations mécaniques d'un produit de sol.",
+    "explication_pedagogique": "Adapter le ragréage ou le revêtement à l'usage du local.",
+    "exemple_utilisation": "enduit de lissage qualité P2 ou P3 selon les revêtements mis en œuvre.",
+    "points_vigilance": [
+      "un produit sous-classé peut se marquer, fissurer ou décoller."
+    ]
+  },
+  {
+    "terme": "Classement UPEC",
+    "definition_courte": "Classement français indiquant la résistance d'un sol à l'usure, au poinçonnement, à l'eau et aux agents chimiques.",
+    "explication_pedagogique": "Choisir un revêtement adapté au trafic et à l'usage du local.",
+    "exemple_utilisation": "U4 P4 E3 C2 pour certains carrelages, U4P3 pour les parties communes.",
+    "points_vigilance": [
+      "U = usure, P = poinçonnement, E = eau, C = chimie."
+    ]
+  },
+  {
+    "terme": "Cloison sèche",
+    "definition_courte": "Cloison légère en plaques de plâtre, différente d'un mur béton ou maçonné.",
+    "explication_pedagogique": "Support courant pour faïence, plinthes ou finitions murales.",
+    "exemple_utilisation": "les murs supports peuvent être en béton, carreaux de plâtre ou cloisons sèches.",
+    "points_vigilance": [
+      "vérifier la compatibilité colle/support et la résistance en zone humide."
+    ]
+  },
+  {
+    "terme": "Collage en plein",
+    "definition_courte": "Pose où toute la surface du revêtement est collée au support.",
+    "explication_pedagogique": "Éviter les mouvements, cloques et déformations du revêtement.",
+    "exemple_utilisation": "sol PVC des logements posé par collage en plein.",
+    "points_vigilance": [
+      "maroufler correctement pour chasser l'air."
+    ]
+  },
+  {
+    "terme": "Colle carrelage",
+    "definition_courte": "Mortier-colle utilisé pour fixer les carreaux sur leur support.",
+    "explication_pedagogique": "Assurer l'adhérence durable du carrelage ou de la faïence.",
+    "exemple_utilisation": "pose au ciment-colle agréé par le bureau de contrôle.",
+    "points_vigilance": [
+      "choisir une colle compatible avec support, format, humidité et usage."
+    ]
+  },
+  {
+    "terme": "Colle sol PVC",
+    "definition_courte": "Adhésif utilisé pour coller les revêtements de sol souples en lés.",
+    "explication_pedagogique": "Maintenir le revêtement sans cloques ni déplacements.",
+    "exemple_utilisation": "pose par collage en plein suivant prescriptions du fabricant.",
+    "points_vigilance": [
+      "respecter temps de gommage, température, hygrométrie et propreté du support."
+    ]
+  },
+  {
+    "terme": "Compagnonnage avec autres lots",
+    "definition_courte": "Coordination pratique entre entreprises pour gérer niveaux, réservations, appareils sanitaires et finitions.",
+    "explication_pedagogique": "Éviter les oublis aux interfaces entre gros œuvre, plomberie, plâtrerie, peinture et sols.",
+    "exemple_utilisation": "réservations pour niveau de sol fini à communiquer au gros œuvre.",
+    "points_vigilance": [
+      "les erreurs d'interface coûtent cher une fois le revêtement posé."
+    ]
+  },
+  {
+    "terme": "Concept Douche Tarkett",
+    "definition_courte": "Système de sol souple destiné aux douches à l'italienne, avec remontées et soudure des lés.",
+    "explication_pedagogique": "Réaliser une salle d'eau étanche et accessible en sol PVC.",
+    "exemple_utilisation": "système prévu pour les salles de bains PMR en RDC.",
+    "points_vigilance": [
+      "la soudure à chaud et les remontées en plinthes sont déterminantes."
+    ]
+  },
+  {
+    "terme": "Couche d'usure",
+    "definition_courte": "Partie supérieure d'un sol PVC qui résiste au trafic et à l'abrasion.",
+    "explication_pedagogique": "Déterminer la durabilité du revêtement.",
+    "exemple_utilisation": "le PVC d'escaliers communs mentionne une épaisseur d'usure de 0,85 mm.",
+    "points_vigilance": [
+      "plus l'usage est intense, plus la couche d'usure doit être adaptée."
+    ]
+  },
+  {
+    "terme": "Coupes d'onglets",
+    "definition_courte": "Coupes à 45 degrés permettant de raccorder proprement deux pièces dans un angle.",
+    "explication_pedagogique": "Obtenir une jonction esthétique des plinthes ou profils.",
+    "exemple_utilisation": "assemblage des plinthes par coupes d'onglets.",
+    "points_vigilance": [
+      "les angles de bâtiment ne sont pas toujours parfaitement à 90 degrés."
+    ]
+  },
+  {
+    "terme": "Crédence",
+    "definition_courte": "Revêtement mural placé derrière un plan de travail, un évier ou une vasque pour protéger le mur.",
+    "explication_pedagogique": "Protéger contre éclaboussures et faciliter le nettoyage.",
+    "exemple_utilisation": "une rangée de carreaux au-dessus du meuble vasque placé en angle.",
+    "points_vigilance": [
+      "soigner les joints périphériques et arrêts."
+    ]
+  },
+  {
+    "terme": "CSTB",
+    "definition_courte": "Centre Scientifique et Technique du Bâtiment, organisme de référence pour avis techniques et prescriptions.",
+    "explication_pedagogique": "Sécuriser l'emploi de produits et systèmes constructifs.",
+    "exemple_utilisation": "colles, ragréages et procédés certifiés par le CSTB.",
+    "points_vigilance": [
+      "un produit sans document CSTB peut poser problème en contrôle."
+    ]
+  },
+  {
+    "terme": "Dallage",
+    "definition_courte": "Ouvrage béton formant un plancher bas ou une surface support.",
+    "explication_pedagogique": "Supporter chape, carrelage ou ragréage.",
+    "exemple_utilisation": "le plancher peut être constitué d'un dallage ou d'une dalle.",
+    "points_vigilance": [
+      "contrôler planimétrie, fissures et humidité avant revêtement."
+    ]
+  },
+  {
+    "terme": "Dalle béton",
+    "definition_courte": "Élément horizontal en béton servant de structure ou support de sol.",
+    "explication_pedagogique": "Recevoir ragréage, chape, carrelage ou sol PVC.",
+    "exemple_utilisation": "support des revêtements PVC des parties communes.",
+    "points_vigilance": [
+      "une dalle trop humide ou fissurée compromet la pose."
+    ]
+  },
+  {
+    "terme": "Dalle préfabriquée",
+    "definition_courte": "Élément de plancher fabriqué hors site puis posé sur chantier.",
+    "explication_pedagogique": "Former un support de sol ou plancher structurel.",
+    "exemple_utilisation": "le CCTP mentionne dallage ou dalle préfabriquée ou non.",
+    "points_vigilance": [
+      "vérifier joints, planéité et raccords entre éléments."
+    ]
+  },
+  {
+    "terme": "Débord de faïence",
+    "definition_courte": "Partie de faïence qui dépasse la limite stricte d'un appareil sanitaire pour protéger davantage le mur.",
+    "explication_pedagogique": "Limiter les projections d'eau hors zone prévue.",
+    "exemple_utilisation": "débord de 10 cm de part et d'autre autour de la baignoire.",
+    "points_vigilance": [
+      "le débord doit rester cohérent avec le calepinage."
+    ]
+  },
+  {
+    "terme": "Découpe autour tuyauterie",
+    "definition_courte": "Adaptation du revêtement autour des tubes, évacuations et réseaux traversants.",
+    "explication_pedagogique": "Permettre la pose continue tout en laissant passer les équipements.",
+    "exemple_utilisation": "toutes les découpes autour des tuyauteries et appareils sanitaires sont comprises.",
+    "points_vigilance": [
+      "trop grand jour autour d'un tube = finition médiocre et risque d'infiltration."
+    ]
+  },
+  {
+    "terme": "Déformabilité admissible",
+    "definition_courte": "Capacité d'un support ou d'un revêtement à accepter de petites déformations sans désordre.",
+    "explication_pedagogique": "Éviter fissures et décollements.",
+    "exemple_utilisation": "le CCTP impose le respect des tolérances et limites réglementaires.",
+    "points_vigilance": [
+      "supports bois, planchers souples ou grandes surfaces demandent une attention particulière."
+    ]
+  },
+  {
+    "terme": "Délai de séchage",
+    "definition_courte": "Temps nécessaire pour qu'un support ou une chape atteigne une humidité compatible avec le revêtement.",
+    "explication_pedagogique": "Sécuriser la pose collée et éviter les désordres.",
+    "exemple_utilisation": "mesure d'humidité avant sols souples selon DTU 53.2.",
+    "points_vigilance": [
+      "ne pas confondre surface sèche au toucher et support réellement sec."
+    ]
+  },
+  {
+    "terme": "Désolidarisation",
+    "definition_courte": "Séparation volontaire entre deux éléments pour éviter transmission de bruit, mouvement ou fissuration.",
+    "explication_pedagogique": "Améliorer acoustique et durabilité.",
+    "exemple_utilisation": "joints souples périphériques de désolidarisation en carrelage et plinthes désolidarisées du sol.",
+    "points_vigilance": [
+      "une liaison rigide peut annuler une performance acoustique."
+    ]
+  },
+  {
+    "terme": "Détails d'exécution",
+    "definition_courte": "Plans ou croquis techniques précisant comment exécuter un ouvrage.",
+    "explication_pedagogique": "Lever les ambiguïtés avant pose.",
+    "exemple_utilisation": "les détails nécessaires à l'exécution sont à la charge de l'entreprise.",
+    "points_vigilance": [
+      "faire valider les détails avant commande et pose."
+    ]
+  },
+  {
+    "terme": "Douche à l'italienne",
+    "definition_courte": "Douche de plain-pied ou quasi plain-pied, avec pente vers siphon intégré au sol.",
+    "explication_pedagogique": "Faciliter l'accessibilité, notamment PMR, et supprimer le ressaut d'un receveur classique.",
+    "exemple_utilisation": "prévue en système sol souple en base, et en carrelage en variante.",
+    "points_vigilance": [
+      "pente, siphon, étanchéité et seuil sont les points critiques."
+    ]
+  },
+  {
+    "terme": "DTU",
+    "definition_courte": "Document Technique Unifié définissant les règles de l'art pour un type de travaux.",
+    "explication_pedagogique": "Servir de référence contractuelle et technique.",
+    "exemple_utilisation": "DTU 26.2, 52.1, 53.2 et 55 sont cités dans le lot.",
+    "points_vigilance": [
+      "une entreprise ne peut pas ignorer un DTU applicable."
+    ]
+  },
+  {
+    "terme": "DTU 20.1",
+    "definition_courte": "Référence concernant les ouvrages en maçonnerie de petits éléments.",
+    "explication_pedagogique": "Encadrer certains supports maçonnés recevant des revêtements.",
+    "exemple_utilisation": "cité dans les documents de référence du lot.",
+    "points_vigilance": [
+      "l'état du support maçonné influence la pose des revêtements."
+    ]
+  },
+  {
+    "terme": "DTU 26.2",
+    "definition_courte": "Référence pour chapes, dalles à base de liants hydrauliques et sous-couches isolantes.",
+    "explication_pedagogique": "Encadrer la chape avec isolant phonique et thermique.",
+    "exemple_utilisation": "chape sur isolant en RDC des logements et parties communes.",
+    "points_vigilance": [
+      "respecter épaisseurs, fractionnement, séchage et périphéries."
+    ]
+  },
+  {
+    "terme": "DTU 52.1",
+    "definition_courte": "Référence pour les revêtements de sols scellés.",
+    "explication_pedagogique": "Définir les règles de pose des carrelages scellés.",
+    "exemple_utilisation": "cité dans les documents de référence du lot carrelage.",
+    "points_vigilance": [
+      "pour une pose collée, d'autres textes ou avis peuvent aussi s'appliquer."
+    ]
+  },
+  {
+    "terme": "DTU 53.2",
+    "definition_courte": "Référence pour les revêtements de sol plastiques collés.",
+    "explication_pedagogique": "Encadrer la pose des sols PVC et les mesures d'humidité.",
+    "exemple_utilisation": "la mesure d'humidité des supports est réalisée selon le DTU 53.2.",
+    "points_vigilance": [
+      "un sol souple est très sensible à l'humidité et à la planéité."
+    ]
+  },
+  {
+    "terme": "DTU 55",
+    "definition_courte": "Référence pour les revêtements muraux scellés dans certains locaux.",
+    "explication_pedagogique": "Encadrer certaines poses murales de carreaux/faïence.",
+    "exemple_utilisation": "cité parmi les documents de référence du lot.",
+    "points_vigilance": [
+      "vérifier la nature de pose exacte : collée, scellée ou système spécifique."
+    ]
+  },
+  {
+    "terme": "Échantillon",
+    "definition_courte": "Morceau ou élément de produit présenté pour validation avant commande définitive.",
+    "explication_pedagogique": "Faire valider couleur, texture, aspect et gamme.",
+    "exemple_utilisation": "le CCTP impose la fourniture d'échantillons sous 15 jours après signature du marché.",
+    "points_vigilance": [
+      "conserver les surfaces témoins jusqu'en fin de travaux."
+    ]
+  },
+  {
+    "terme": "Efficacité acoustique ΔLw",
+    "definition_courte": "Valeur exprimant la réduction du bruit de choc apportée par un système de sol.",
+    "explication_pedagogique": "Vérifier les performances acoustiques des sous-couches et sols PVC.",
+    "exemple_utilisation": "certains revêtements PVC indiquent ΔLw = 18, 19 ou 20 dB.",
+    "points_vigilance": [
+      "ΔLw se lit toujours avec le système complet de pose."
+    ]
+  },
+  {
+    "terme": "Enduit de lissage",
+    "definition_courte": "Produit fin appliqué sur support pour obtenir une surface lisse avant sol souple.",
+    "explication_pedagogique": "Corriger les petits défauts avant collage du PVC.",
+    "exemple_utilisation": "enduit de lissage qualité P2/P3, épaisseur 3 mm.",
+    "points_vigilance": [
+      "ne pas confondre lissage avec rattrapage important de niveau."
+    ]
+  },
+  {
+    "terme": "Épaisseur d'usure",
+    "definition_courte": "Épaisseur de la couche supérieure résistante d'un revêtement PVC.",
+    "explication_pedagogique": "Déterminer la capacité du sol à supporter le trafic.",
+    "exemple_utilisation": "0,85 mm pour le revêtement PVC des escaliers communs.",
+    "points_vigilance": [
+      "demander la fiche technique pour vérifier la valeur réelle du produit proposé."
+    ]
+  },
+  {
+    "terme": "Époxy",
+    "definition_courte": "Résine utilisée dans certains joints très résistants à l'eau, aux taches et aux produits chimiques.",
+    "explication_pedagogique": "Réaliser des joints performants dans des locaux sollicités.",
+    "exemple_utilisation": "joints époxy certifiés CSTB au local poubelles.",
+    "points_vigilance": [
+      "la mise en œuvre doit être très propre car les résidus époxy sont difficiles à retirer."
+    ]
+  },
+  {
+    "terme": "Erreur de planimétrie",
+    "definition_courte": "Défaut de planéité ou de régularité du support livré par le maçon.",
+    "explication_pedagogique": "Identifier les reprises nécessaires avant sol fini.",
+    "exemple_utilisation": "l'entreprise doit avertir l'architecte si la planimétrie est insuffisante.",
+    "points_vigilance": [
+      "commencer la pose vaut souvent réception tacite du support."
+    ]
+  },
+  {
+    "terme": "Escalier commun",
+    "definition_courte": "Escalier desservant plusieurs logements ou parties communes.",
+    "explication_pedagogique": "Il reçoit un revêtement adapté au trafic et des bandes podotactiles.",
+    "exemple_utilisation": "revêtement PVC U4P3 sur escaliers et paliers béton des bâtiments A et B.",
+    "points_vigilance": [
+      "traiter nez de marche, seuils, antidérapance et finitions."
+    ]
+  },
+  {
+    "terme": "Faïençage",
+    "definition_courte": "Microfissuration superficielle d'un support ou d'un revêtement, ressemblant à un réseau de fines fissures.",
+    "explication_pedagogique": "Indiquer un support potentiellement impropre à recevoir un revêtement sans traitement.",
+    "exemple_utilisation": "le support ne doit présenter ni faïençage ni croûtes superficielles.",
+    "points_vigilance": [
+      "rechercher la cause avant de couvrir."
+    ]
+  },
+  {
+    "terme": "Faïence",
+    "definition_courte": "Carreau mural souvent utilisé dans les salles d'eau, salles de bains et cuisines.",
+    "explication_pedagogique": "Protéger les parois contre l'eau et faciliter le nettoyage.",
+    "exemple_utilisation": "faïence 40 x 25 cm ou 31 x 61 cm dans les salles d'eau.",
+    "points_vigilance": [
+      "la faïence n'est pas une étanchéité à elle seule ; le support doit être protégé si nécessaire."
+    ]
+  },
+  {
+    "terme": "Faïence cuisine",
+    "definition_courte": "Revêtement mural posé en crédence au-dessus des équipements de cuisine.",
+    "explication_pedagogique": "Protéger le mur des éclaboussures et salissures.",
+    "exemple_utilisation": "3 rangs de 20 x 20 cm à partir de 85 cm du sol brut avec retour de 60 cm.",
+    "points_vigilance": [
+      "vérifier la hauteur par rapport au plan de travail fini."
+    ]
+  },
+  {
+    "terme": "Faïence PMR",
+    "definition_courte": "Faïence adaptée aux salles de bains pour personnes à mobilité réduite.",
+    "explication_pedagogique": "Protéger toute hauteur en cas de projections plus importantes.",
+    "exemple_utilisation": "dans les salles de bain PMR, le CCTP prévoit tous les murs toute hauteur en base.",
+    "points_vigilance": [
+      "une variante peut réduire la faïence hors zone de douche."
+    ]
+  },
+  {
+    "terme": "Fiche technique",
+    "definition_courte": "Document fabricant détaillant caractéristiques, classement, mise en œuvre et limites d'emploi.",
+    "explication_pedagogique": "Justifier la conformité du produit au CCTP.",
+    "exemple_utilisation": "colle, ragréage, sol PVC, carrelage, SEL et sous-couches doivent être documentés.",
+    "points_vigilance": [
+      "vérifier que la fiche correspond exactement à la référence posée."
+    ]
+  },
+  {
+    "terme": "Finition antidérapante",
+    "definition_courte": "Finition visant à limiter le risque de glissade.",
+    "explication_pedagogique": "Sécuriser entrées, douches, escaliers ou tapis gratte-pieds.",
+    "exemple_utilisation": "profils du tapis gratte-pieds avec finition textile, vinyle ou antidérapante au choix.",
+    "points_vigilance": [
+      "l'antidérapance doit rester compatible avec le nettoyage."
+    ]
+  },
+  {
+    "terme": "Finition des joints",
+    "definition_courte": "Aspect final des joints entre carreaux, plinthes, faïences ou éléments sanitaires.",
+    "explication_pedagogique": "Assurer esthétique, hygiène et protection.",
+    "exemple_utilisation": "joints blancs de 1 à 2 mm pour faïence salle d'eau.",
+    "points_vigilance": [
+      "couleur, largeur et régularité doivent être validées."
+    ]
+  },
+  {
+    "terme": "Fissure > 0,3 mm",
+    "definition_courte": "Fissure de support dépassant un seuil nécessitant un traitement avant finition.",
+    "explication_pedagogique": "Prévenir la réapparition des fissures dans le revêtement.",
+    "exemple_utilisation": "le CCTP demande de traiter les fissures de plus de 0,3 mm avant enduit.",
+    "points_vigilance": [
+      "une fissure active doit être analysée, pas seulement rebouchée."
+    ]
+  },
+  {
+    "terme": "Fixation mécanique",
+    "definition_courte": "Fixation par vis, chevilles ou systèmes mécaniques, par opposition à un simple collage.",
+    "explication_pedagogique": "Maintenir solidement certains accessoires ou bandes.",
+    "exemple_utilisation": "bandes podotactiles fixées mécaniquement ou collées selon fournisseur.",
+    "points_vigilance": [
+      "vérifier compatibilité avec le support et absence de ressaut dangereux."
+    ]
+  },
+  {
+    "terme": "Forme de pente",
+    "definition_courte": "Volume de mortier ou chape inclinée pour orienter l'eau vers une évacuation.",
+    "explication_pedagogique": "Éviter les flaques dans douches, locaux poubelles ou zones humides.",
+    "exemple_utilisation": "forme de pente dans l'emplacement de la salle de bains PMR.",
+    "points_vigilance": [
+      "coordonner avec siphon, seuil et épaisseur de revêtement."
+    ]
+  },
+  {
+    "terme": "Fractionnement",
+    "definition_courte": "Découpage d'une surface de chape ou carrelage par joints pour limiter les fissurations.",
+    "explication_pedagogique": "Permettre les mouvements et réduire les contraintes.",
+    "exemple_utilisation": "joints de fractionnement tous les 40 m² et tous les 6 ml, plus aux changements de direction.",
+    "points_vigilance": [
+      "les joints doivent être prévus au calepinage, pas improvisés après pose."
+    ]
+  },
+  {
+    "terme": "Grattage du support",
+    "definition_courte": "Action de retirer poussières, laitance, colle, plâtre ou produits étrangers avant ragréage.",
+    "explication_pedagogique": "Améliorer l'adhérence du primaire et de l'enduit de lissage.",
+    "exemple_utilisation": "le CCTP demande de gratter pour faire disparaître tout produit étranger.",
+    "points_vigilance": [
+      "un support mal préparé entraîne décollement du sol souple."
+    ]
+  },
+  {
+    "terme": "Gravois",
+    "definition_courte": "Déchets de chantier issus des coupes, préparations et nettoyages.",
+    "explication_pedagogique": "Ils doivent être évacués pour maintenir le chantier propre.",
+    "exemple_utilisation": "nettoyage et évacuation des gravois à la benne dans les prestations de plinthes.",
+    "points_vigilance": [
+      "ne pas laisser poussière et gravats dans les locaux avant finition."
+    ]
+  },
+  {
+    "terme": "Grès cérame",
+    "definition_courte": "Carrelage très dense et résistant, adapté aux sols sollicités.",
+    "explication_pedagogique": "Réaliser des revêtements durables en logements, halls et locaux annexes.",
+    "exemple_utilisation": "carrelage grès cérame 60 x 60 cm dans les halls et circulations RDC.",
+    "points_vigilance": [
+      "il existe différents formats, aspects et classements UPEC."
+    ]
+  },
+  {
+    "terme": "Halls d'entrée",
+    "definition_courte": "Espaces communs d'accès aux bâtiments.",
+    "explication_pedagogique": "Ils reçoivent des revêtements résistants et faciles d'entretien.",
+    "exemple_utilisation": "carrelage grès cérame et tapis gratte-pieds dans les halls A et B.",
+    "points_vigilance": [
+      "gérer les seuils, tapis encastrés et bandes d'accessibilité."
+    ]
+  },
+  {
+    "terme": "HRE - Humidité Relative d'Équilibre",
+    "definition_courte": "Taux d'humidité mesuré dans le support par sonde hygrométrique.",
+    "explication_pedagogique": "Vérifier la compatibilité du support avec la pose d'un sol souple.",
+    "exemple_utilisation": "HRE inférieur ou égal à 85 % dans le CCTP.",
+    "points_vigilance": [
+      "une HRE trop élevée bloque normalement la pose."
+    ]
+  },
+  {
+    "terme": "Humidité résiduelle",
+    "definition_courte": "Humidité restant dans une chape ou dalle après séchage.",
+    "explication_pedagogique": "Déterminer si le support peut recevoir un revêtement collé.",
+    "exemple_utilisation": "taux inférieur ou égal à 4,5 % en poids à la bombe au carbure.",
+    "points_vigilance": [
+      "le PVC est particulièrement sensible à l'humidité."
+    ]
+  },
+  {
+    "terme": "Imperméabilisation sous faïence",
+    "definition_courte": "Produit ou système appliqué sur les parois avant faïence dans les zones exposées à l'eau.",
+    "explication_pedagogique": "Protéger le support car la faïence et ses joints ne suffisent pas toujours.",
+    "exemple_utilisation": "produit de type Webersys Protec autour des baignoires et douches.",
+    "points_vigilance": [
+      "poser avant baignoire et traiter les angles avec bandes de renfort."
+    ]
+  },
+  {
+    "terme": "Isolant phonique",
+    "definition_courte": "Matériau limitant la transmission des bruits d'impact.",
+    "explication_pedagogique": "Améliorer le confort acoustique entre niveaux ou logements.",
+    "exemple_utilisation": "résilient ASOUR CHAPE 19 ou équivalent sous chape.",
+    "points_vigilance": [
+      "continuité et désolidarisation périphérique sont essentielles."
+    ]
+  },
+  {
+    "terme": "Isolant thermique",
+    "definition_courte": "Matériau limitant les pertes de chaleur par le sol.",
+    "explication_pedagogique": "Respecter l'étude thermique et améliorer le confort.",
+    "exemple_utilisation": "UNIMAT SOL ULTRACHAPE BD60 avec R = 1,90 m².K/W.",
+    "points_vigilance": [
+      "vérifier épaisseur, résistance thermique et compatibilité avec chape."
+    ]
+  },
+  {
+    "terme": "Joint annulaire",
+    "definition_courte": "Joint autour d'une sortie, pénétration ou élément traversant un support.",
+    "explication_pedagogique": "Assurer finition, étanchéité et protection contre l'eau ou l'air.",
+    "exemple_utilisation": "autour de siphons, tuyaux ou appareils sanitaires.",
+    "points_vigilance": [
+      "la découpe doit être propre pour permettre un joint régulier."
+    ]
+  },
+  {
+    "terme": "Joint blanc",
+    "definition_courte": "Joint de couleur blanche souvent utilisé avec faïence murale.",
+    "explication_pedagogique": "Donner un aspect propre et lumineux.",
+    "exemple_utilisation": "joints de faïence de 1 à 2 mm de largeur, blancs.",
+    "points_vigilance": [
+      "les joints blancs se salissent vite si la mise en œuvre et l'entretien sont mauvais."
+    ]
+  },
+  {
+    "terme": "Joint ciment",
+    "definition_courte": "Joint minéral réalisé avec un mortier de jointoiement à base de ciment.",
+    "explication_pedagogique": "Remplir les espaces entre carreaux et protéger les chants.",
+    "exemple_utilisation": "façon de joints au ciment blanc en faïence cuisine.",
+    "points_vigilance": [
+      "en zone très humide ou agressive, vérifier si un joint époxy est exigé."
+    ]
+  },
+  {
+    "terme": "Joint d'étanchéité",
+    "definition_courte": "Joint destiné à empêcher le passage de l'eau entre deux éléments.",
+    "explication_pedagogique": "Protéger les liaisons autour des appareils sanitaires, plinthes et sols.",
+    "exemple_utilisation": "joint périphérique entre sol et plinthe réalisé par le présent lot.",
+    "points_vigilance": [
+      "un joint esthétique n'est pas forcément un joint d'étanchéité durable."
+    ]
+  },
+  {
+    "terme": "Joint de fractionnement",
+    "definition_courte": "Joint qui divise une grande surface de chape ou carrelage en zones plus petites.",
+    "explication_pedagogique": "Limiter fissures et tensions dues aux retraits ou mouvements.",
+    "exemple_utilisation": "à prévoir tous les 40 m² et 6 ml selon CCTP.",
+    "points_vigilance": [
+      "respecter le plan de joint jusque dans le revêtement si nécessaire."
+    ]
+  },
+  {
+    "terme": "Joint filant",
+    "definition_courte": "Joint aligné de manière continue entre les carreaux.",
+    "explication_pedagogique": "Donner un rendu ordonné et régulier.",
+    "exemple_utilisation": "joints filants entre carreaux, couleur au choix de l'architecte.",
+    "points_vigilance": [
+      "le calepinage doit éviter les décalages involontaires."
+    ]
+  },
+  {
+    "terme": "Joint périphérique",
+    "definition_courte": "Joint situé en bordure de pièce, contre murs, plinthes ou seuils.",
+    "explication_pedagogique": "Permettre les mouvements et assurer une finition étanche ou acoustique.",
+    "exemple_utilisation": "joints souples périphériques de désolidarisation.",
+    "points_vigilance": [
+      "ne pas remplir de mortier rigide un joint qui doit rester souple."
+    ]
+  },
+  {
+    "terme": "Joint silicone",
+    "definition_courte": "Joint souple utilisé dans les zones sanitaires et raccords entre appareils et revêtements.",
+    "explication_pedagogique": "Assurer une liaison étanche et flexible.",
+    "exemple_utilisation": "joints d'étanchéité silicone au droit des appareils sanitaires après faïence.",
+    "points_vigilance": [
+      "support propre, sec et dégraissé avant application."
+    ]
+  },
+  {
+    "terme": "Joint souple",
+    "definition_courte": "Joint élastique capable d'accepter des mouvements entre deux ouvrages.",
+    "explication_pedagogique": "Éviter fissures et ponts rigides.",
+    "exemple_utilisation": "plinthes désolidarisées du sol par un joint souple élastomère.",
+    "points_vigilance": [
+      "il est indispensable aux liaisons soumises aux mouvements."
+    ]
+  },
+  {
+    "terme": "KERDI-DRAIN-BASE",
+    "definition_courte": "Kit de siphon du système Schluter pour douche à l'italienne carrelée.",
+    "explication_pedagogique": "Raccorder l'étanchéité et l'évacuation d'eau dans un système cohérent.",
+    "exemple_utilisation": "prévu en variante pour douches carrelées.",
+    "points_vigilance": [
+      "suivre strictement le système complet fabricant."
+    ]
+  },
+  {
+    "terme": "KERDI-SHOWER T",
+    "definition_courte": "Receveur ou panneau de douche avec pente intégrée du système Schluter.",
+    "explication_pedagogique": "Créer une pente régulière vers le siphon en douche carrelée.",
+    "exemple_utilisation": "receveur avec pente 2 % vers le siphon.",
+    "points_vigilance": [
+      "vérifier la compatibilité avec format de carrelage et hauteur disponible."
+    ]
+  },
+  {
+    "terme": "Laitance",
+    "definition_courte": "Fine pellicule de ciment ou résidus en surface d'un béton ou d'une chape.",
+    "explication_pedagogique": "Elle doit souvent être éliminée pour garantir l'adhérence.",
+    "exemple_utilisation": "préparation des supports avant ragréage ou collage.",
+    "points_vigilance": [
+      "une laitance conservée peut provoquer le décollement du revêtement."
+    ]
+  },
+  {
+    "terme": "Lé",
+    "definition_courte": "Large bande de revêtement souple déroulée au sol.",
+    "explication_pedagogique": "Constituer les surfaces de PVC ou vinyle posées en rouleaux.",
+    "exemple_utilisation": "revêtement PVC en lés dans les parties communes et logements.",
+    "points_vigilance": [
+      "les joints entre lés doivent être soudés ou traités selon système."
+    ]
+  },
+  {
+    "terme": "Liaison sol/mur",
+    "definition_courte": "Raccord entre le revêtement de sol et le revêtement mural ou la plinthe.",
+    "explication_pedagogique": "Assurer finition, étanchéité et durabilité.",
+    "exemple_utilisation": "liaison entre sols durs ou souples et plinthes/faïences.",
+    "points_vigilance": [
+      "zone critique dans pièces humides."
+    ]
+  },
+  {
+    "terme": "Local poubelles",
+    "definition_courte": "Local annexe destiné au stockage des déchets, souvent très sollicité et lavable.",
+    "explication_pedagogique": "Il reçoit des revêtements résistants à l'eau, aux chocs et au nettoyage.",
+    "exemple_utilisation": "carrelage grès cérame au sol et murs avec SEL et joints époxy.",
+    "points_vigilance": [
+      "traiter pentes, siphon, angles et remontées."
+    ]
+  },
+  {
+    "terme": "Maître d'ouvrage",
+    "definition_courte": "Client ou donneur d'ordre de l'opération.",
+    "explication_pedagogique": "Il valide certains choix avec l'architecte, notamment teintes et gammes.",
+    "exemple_utilisation": "couleurs et aspects au choix du maître d'ouvrage et de l'architecte.",
+    "points_vigilance": [
+      "ses exigences sont traduites dans le CCTP et les validations."
+    ]
+  },
+  {
+    "terme": "Maître d'œuvre",
+    "definition_courte": "Professionnel chargé de concevoir, diriger et contrôler l'exécution des travaux.",
+    "explication_pedagogique": "Il valide échantillons, équivalences, teintes, détails et exécution.",
+    "exemple_utilisation": "choix des couleurs et appréciation de l'équivalence des matériaux.",
+    "points_vigilance": [
+      "ne pas commander sans validation quand le CCTP l'exige."
+    ]
+  },
+  {
+    "terme": "Manchon d'étanchéité",
+    "definition_courte": "Pièce assurant l'étanchéité autour d'une traversée ou d'un siphon.",
+    "explication_pedagogique": "Garantir la continuité de l'étanchéité dans une douche ou zone humide.",
+    "exemple_utilisation": "manchon prévu en variante douche à l'italienne carrelée.",
+    "points_vigilance": [
+      "une traversée non traitée est une fuite en puissance."
+    ]
+  },
+  {
+    "terme": "Marouflage",
+    "definition_courte": "Action de presser un revêtement collé pour assurer son adhérence et chasser l'air.",
+    "explication_pedagogique": "Éviter cloques et défauts sous sol PVC.",
+    "exemple_utilisation": "nécessaire après pose par collage en plein.",
+    "points_vigilance": [
+      "utiliser l'outil adapté et respecter le temps ouvert de la colle."
+    ]
+  },
+  {
+    "terme": "Matériau équivalent",
+    "definition_courte": "Produit proposé en remplacement d'une référence citée, avec performances au moins équivalentes.",
+    "explication_pedagogique": "Permettre une variante de marque sans dégrader la qualité.",
+    "exemple_utilisation": "beaucoup de références sont suivies de la mention 'ou équivalent'.",
+    "points_vigilance": [
+      "l'équivalence doit être justifiée et acceptée par le maître d'œuvre."
+    ]
+  },
+  {
+    "terme": "Matériau non prévu au marché",
+    "definition_courte": "Produit présent sur chantier alors qu'il n'est pas accepté contractuellement.",
+    "explication_pedagogique": "Le CCTP interdit la présence de produits non prévus ou non utilisés.",
+    "exemple_utilisation": "bidons de colle dessertis non en cours d'utilisation interdits.",
+    "points_vigilance": [
+      "tenir le chantier propre et les produits identifiables."
+    ]
+  },
+  {
+    "terme": "Mesure d'humidité",
+    "definition_courte": "Contrôle réalisé avant pose pour vérifier le taux d'eau restant dans le support.",
+    "explication_pedagogique": "Sécuriser l'adhérence et éviter les désordres de sols souples.",
+    "exemple_utilisation": "bombe au carbure ou sonde hygrométrique selon le CCTP.",
+    "points_vigilance": [
+      "elle est à la charge du titulaire du présent lot."
+    ]
+  },
+  {
+    "terme": "Mise au point préalable",
+    "definition_courte": "Phase de préparation où l'entreprise valide détails, échantillons, plans et matériaux.",
+    "explication_pedagogique": "Éviter les décisions prises au dernier moment sur chantier.",
+    "exemple_utilisation": "détails d'exécution et échantillons demandés avant exécution.",
+    "points_vigilance": [
+      "une mauvaise préparation retarde les commandes et la pose."
+    ]
+  },
+  {
+    "terme": "Mortier colle",
+    "definition_courte": "Produit à base de liant utilisé pour coller carrelage ou faïence.",
+    "explication_pedagogique": "Assurer l'adhérence des carreaux sur le support.",
+    "exemple_utilisation": "pose au ciment colle pour les faïences.",
+    "points_vigilance": [
+      "respecter l'épaisseur de colle, le peignage et le double encollage si nécessaire."
+    ]
+  },
+  {
+    "terme": "Mortier lissé",
+    "definition_courte": "Mortier tiré et fini de manière régulière pour recevoir un cadre ou revêtement.",
+    "explication_pedagogique": "Former une surface propre sous certains équipements.",
+    "exemple_utilisation": "ragréage au mortier lissé pour tapis gratte-pieds.",
+    "points_vigilance": [
+      "le lissé doit rester compatible avec la colle ou le scellement prévu."
+    ]
+  },
+  {
+    "terme": "Mouillage de surface",
+    "definition_courte": "Méthode consistant à humidifier un support pour faire apparaître certaines fissures.",
+    "explication_pedagogique": "Repérer les fissures avant traitement.",
+    "exemple_utilisation": "recherche de fissures par mouillage de surface.",
+    "points_vigilance": [
+      "ne pas poser un revêtement sur fissures non traitées."
+    ]
+  },
+  {
+    "terme": "NF EN 1307",
+    "definition_courte": "Norme liée aux revêtements textiles, citée dans les références des revêtements et classements d'usage.",
+    "explication_pedagogique": "Attester la conformité de certains revêtements.",
+    "exemple_utilisation": "le CCTP cite NF EN 1307 et NF EN 1470 avec classement UPEC.",
+    "points_vigilance": [
+      "les normes citées servent de base de contrôle même si tous les revêtements ne sont pas textiles."
+    ]
+  },
+  {
+    "terme": "NF P 98-351",
+    "definition_courte": "Norme concernant les dispositifs podotactiles d'éveil de vigilance.",
+    "explication_pedagogique": "Définir les caractéristiques des bandes podotactiles pour personnes malvoyantes.",
+    "exemple_utilisation": "le CCTP impose la conformité à cette norme.",
+    "points_vigilance": [
+      "positionnement et relief doivent être conformes."
+    ]
+  },
+  {
+    "terme": "Nomenclature",
+    "definition_courte": "Liste organisée des matériaux, références, localisations et caractéristiques.",
+    "explication_pedagogique": "Vérifier que chaque produit est bien associé au bon local.",
+    "exemple_utilisation": "les échantillons doivent être accompagnés des nomenclatures techniques et localisations.",
+    "points_vigilance": [
+      "éviter les inversions de gammes entre logements, halls et locaux annexes."
+    ]
+  },
+  {
+    "terme": "NOVOCERAM",
+    "definition_courte": "Marque ou référence de carrelage/faïence citée dans le CCTP.",
+    "explication_pedagogique": "Fixer un niveau de qualité et d'aspect attendu.",
+    "exemple_utilisation": "Novoceram Vertige pour logements, NOVOCERAM 20 x 20 cm en cuisine.",
+    "points_vigilance": [
+      "toute équivalence doit être validée."
+    ]
+  },
+  {
+    "terme": "Nuway Tutiguard",
+    "definition_courte": "Gamme de tapis d'entrée type gratte-pieds citée au CCTP.",
+    "explication_pedagogique": "Retenir les salissures et protéger les sols des halls.",
+    "exemple_utilisation": "tapis dans les halls d'entrée des bâtiments A et B, surface minimum 2 m².",
+    "points_vigilance": [
+      "gérer cadre, réservation, ressaut et accessibilité."
+    ]
+  },
+  {
+    "terme": "Pare-douche",
+    "definition_courte": "Élément vitré ou paroi limitant les projections d'eau de douche.",
+    "explication_pedagogique": "Protéger les murs et sols périphériques.",
+    "exemple_utilisation": "bacs à douche encloisonnés sur 3 faces ou 2 faces + pare-douche vitre.",
+    "points_vigilance": [
+      "coordonner avec plomberie, faïence et joints."
+    ]
+  },
+  {
+    "terme": "Parties communes",
+    "definition_courte": "Espaces partagés d'un bâtiment collectif : halls, circulations, escaliers, paliers.",
+    "explication_pedagogique": "Ils reçoivent des revêtements résistants au trafic collectif.",
+    "exemple_utilisation": "PVC U4P3 en circulations R+1 et escaliers communs.",
+    "points_vigilance": [
+      "choisir classement, réaction au feu et acoustique adaptés."
+    ]
+  },
+  {
+    "terme": "Pavigrès Hidraulico",
+    "definition_courte": "Référence de carrelage citée pour les logements.",
+    "explication_pedagogique": "Définir un aspect et un niveau de produit attendu.",
+    "exemple_utilisation": "Pavigrès Hidraulico DD2 MIX est cité avec Novoceram Vertige.",
+    "points_vigilance": [
+      "vérifier dimensions, teinte, disponibilité et classement UPEC."
+    ]
+  },
+  {
+    "terme": "Pente 2 %",
+    "definition_courte": "Inclinaison de 2 cm par mètre permettant l'écoulement de l'eau.",
+    "explication_pedagogique": "Diriger l'eau vers le siphon dans une douche à l'italienne.",
+    "exemple_utilisation": "receveur KERDI-SHOWER T avec pente 2 %.",
+    "points_vigilance": [
+      "pente insuffisante = stagnation ; pente trop forte = inconfort."
+    ]
+  },
+  {
+    "terme": "Percement du support",
+    "definition_courte": "Trou réalisé dans le support pour mesurer l'humidité ou intégrer un élément.",
+    "explication_pedagogique": "Exemple pour sonde hygrométrique : permettre la mesure à profondeur définie.",
+    "exemple_utilisation": "percement sur 5 cm pour mesure HRE.",
+    "points_vigilance": [
+      "reboucher ou traiter selon destination du support."
+    ]
+  },
+  {
+    "terme": "Pièce humide",
+    "definition_courte": "Local exposé à l'eau : salle de bains, salle d'eau, douche, local technique humide.",
+    "explication_pedagogique": "Imposer des protections, joints et revêtements adaptés.",
+    "exemple_utilisation": "salles de bains, salles d'eau et douches à l'italienne.",
+    "points_vigilance": [
+      "ne jamais compter uniquement sur le carrelage pour faire l'étanchéité."
+    ]
+  },
+  {
+    "terme": "Pièce spéciale",
+    "definition_courte": "Élément de finition fabriqué pour un angle, une bordure ou un raccord particulier.",
+    "explication_pedagogique": "Obtenir une finition propre sans bricolage de coupe.",
+    "exemple_utilisation": "pièces spéciales pour angles rentrants ou sortants de plinthes.",
+    "points_vigilance": [
+      "commander les pièces spéciales en même temps que le revêtement."
+    ]
+  },
+  {
+    "terme": "Planimétrie",
+    "definition_courte": "Qualité de planéité générale d'un sol ou support.",
+    "explication_pedagogique": "Garantir une pose régulière du carrelage ou sol souple.",
+    "exemple_utilisation": "le carreleur doit vérifier si le support livré par le maçon présente une planimétrie suffisante.",
+    "points_vigilance": [
+      "les défauts se voient beaucoup sous sols PVC minces."
+    ]
+  },
+  {
+    "terme": "Plinthe",
+    "definition_courte": "Élément posé en pied de mur pour protéger et finir la jonction sol/mur.",
+    "explication_pedagogique": "Protéger les bas de murs et masquer la périphérie du revêtement.",
+    "exemple_utilisation": "plinthes assorties au carrelage grès cérame.",
+    "points_vigilance": [
+      "aligner les joints de plinthes avec ceux du sol quand demandé."
+    ]
+  },
+  {
+    "terme": "Plinthe carrelée",
+    "definition_courte": "Plinthe réalisée en carreau ou dans la gamme du carrelage.",
+    "explication_pedagogique": "Assurer une finition résistante et lavable.",
+    "exemple_utilisation": "plinthes carrelées dans la variante douche à l'italienne carrelée.",
+    "points_vigilance": [
+      "prévoir coupes, angles rentrants, sortants et joint souple en pied."
+    ]
+  },
+  {
+    "terme": "Plinthe désolidarisée",
+    "definition_courte": "Plinthe non reliée rigidement au carrelage du sol.",
+    "explication_pedagogique": "Éviter les ponts acoustiques et les fissures au raccord.",
+    "exemple_utilisation": "le CCTP précise que la plinthe sera désolidarisée du carrelage.",
+    "points_vigilance": [
+      "utiliser un joint souple adapté entre sol et plinthe."
+    ]
+  },
+  {
+    "terme": "PMR",
+    "definition_courte": "Personne à Mobilité Réduite.",
+    "explication_pedagogique": "Définir des exigences d'accessibilité, de ressaut, de douche et de sécurité.",
+    "exemple_utilisation": "salles de bains PMR avec sol de douche à l'italienne et faïence toute hauteur en base.",
+    "points_vigilance": [
+      "contrôler seuils, ressauts, pentes et glissance."
+    ]
+  },
+  {
+    "terme": "Poinçonnement rémanent",
+    "definition_courte": "Déformation restante après une charge ponctuelle sur un revêtement de sol.",
+    "explication_pedagogique": "Évaluer la capacité d'un sol PVC à reprendre sa forme après meuble ou trafic.",
+    "exemple_utilisation": "revêtements PVC avec poinçonnement rémanent 0,10 mm.",
+    "points_vigilance": [
+      "sols trop tendres marqués par meubles, roulettes ou charges."
+    ]
+  },
+  {
+    "terme": "Pose à joints serrés",
+    "definition_courte": "Pose avec joints très fins entre carreaux.",
+    "explication_pedagogique": "Obtenir un rendu visuel plus continu.",
+    "exemple_utilisation": "faïence cuisine ou local poubelles en pose à joints serrés.",
+    "points_vigilance": [
+      "nécessite carreaux réguliers et support bien préparé."
+    ]
+  },
+  {
+    "terme": "Pose collée",
+    "definition_courte": "Pose d'un revêtement au moyen d'une colle ou mortier-colle.",
+    "explication_pedagogique": "Fixer carrelage, faïence, plinthes ou sols PVC au support.",
+    "exemple_utilisation": "carrelage grès cérame collé sur chape ; PVC collé selon avis technique.",
+    "points_vigilance": [
+      "colle, support et conditions climatiques doivent être compatibles."
+    ]
+  },
+  {
+    "terme": "Pose droite",
+    "definition_courte": "Pose où les carreaux ou dalles sont alignés sans décalage décoratif.",
+    "explication_pedagogique": "Obtenir une trame simple et régulière.",
+    "exemple_utilisation": "faïence cuisine en pose droite à joints serrés.",
+    "points_vigilance": [
+      "les défauts d'équerrage ou d'alignement se voient vite."
+    ]
+  },
+  {
+    "terme": "Prélèvement d'humidité",
+    "definition_courte": "Prise d'un échantillon du support pour mesurer son taux d'humidité.",
+    "explication_pedagogique": "Vérifier la siccité avant revêtement.",
+    "exemple_utilisation": "prélèvement sur 4 cm minimum pour bombe au carbure.",
+    "points_vigilance": [
+      "la profondeur de prélèvement est importante."
+    ]
+  },
+  {
+    "terme": "Préparation des supports",
+    "definition_courte": "Ensemble des opérations de nettoyage, grattage, contrôle, primaire et ragréage avant pose.",
+    "explication_pedagogique": "Obtenir un support compatible avec le revêtement final.",
+    "exemple_utilisation": "préparation conforme au cahier CSTB pour revêtements de sols minces.",
+    "points_vigilance": [
+      "commencer la pose vaut réception du support."
+    ]
+  },
+  {
+    "terme": "Primaire d'accrochage",
+    "definition_courte": "Produit appliqué avant ragréage ou collage pour améliorer l'adhérence.",
+    "explication_pedagogique": "Réguler la porosité et assurer l'accroche du produit suivant.",
+    "exemple_utilisation": "application d'un primaire avant enduit de lissage.",
+    "points_vigilance": [
+      "respecter dilution, séchage et compatibilité fabricant."
+    ]
+  },
+  {
+    "terme": "Produit d'imperméabilisation",
+    "definition_courte": "Produit appliqué sous revêtement mural pour protéger le support contre l'eau.",
+    "explication_pedagogique": "Empêcher les infiltrations derrière la faïence.",
+    "exemple_utilisation": "Webersys Protec autour des baignoires et douches.",
+    "points_vigilance": [
+      "traiter avant pose des appareils et jusqu'aux zones demandées."
+    ]
+  },
+  {
+    "terme": "Produit étranger",
+    "definition_courte": "Substance présente sur support mais incompatible avec la pose : plâtre, colle, poussière, peinture, graisse.",
+    "explication_pedagogique": "Il doit être retiré avant primaire, ragréage ou collage.",
+    "exemple_utilisation": "le CCTP demande de faire disparaître tout produit étranger avant travaux.",
+    "points_vigilance": [
+      "un support sale compromet l'adhérence."
+    ]
+  },
+  {
+    "terme": "Profil de jonction",
+    "definition_courte": "Profil assurant la liaison entre deux revêtements ou entre sol et mur.",
+    "explication_pedagogique": "Protéger les bords et garantir une finition propre.",
+    "exemple_utilisation": "profil de jonction entre plinthe remontée et revêtement mural/faïence en douche sol souple.",
+    "points_vigilance": [
+      "choisir le bon profil pour les contraintes d'eau et d'accessibilité."
+    ]
+  },
+  {
+    "terme": "Profilé périphérique",
+    "definition_courte": "Profil ou élément placé autour d'un tapis, seuil ou revêtement.",
+    "explication_pedagogique": "Encadrer et finir un ouvrage.",
+    "exemple_utilisation": "cadre de tapis gratte-pieds avec finition des profilés au choix de l'architecte.",
+    "points_vigilance": [
+      "vérifier le ressaut fini et la solidité au trafic."
+    ]
+  },
+  {
+    "terme": "PVC alvéolaire",
+    "definition_courte": "Semelle ou couche du sol PVC comportant des alvéoles, souvent pour confort ou acoustique.",
+    "explication_pedagogique": "Améliorer confort à la marche et absorption des bruits de choc.",
+    "exemple_utilisation": "vinyle sur semelle PVC alvéolaire type TX Habitat.",
+    "points_vigilance": [
+      "suivre la méthode de collage du fabricant."
+    ]
+  },
+  {
+    "terme": "Ragréage",
+    "definition_courte": "Enduit mince appliqué au sol pour obtenir une surface plane et lisse.",
+    "explication_pedagogique": "Préparer la pose des sols souples ou corriger de petits défauts.",
+    "exemple_utilisation": "ragréage Facil'lisse sur béton, Solfibré sur plancher bois.",
+    "points_vigilance": [
+      "l'épaisseur prévue est souvent limitée ; ce n'est pas une chape de rattrapage."
+    ]
+  },
+  {
+    "terme": "Ragréage fibré",
+    "definition_courte": "Ragréage renforcé par fibres, adapté à certains supports comme plancher bois.",
+    "explication_pedagogique": "Améliorer la résistance aux micro-mouvements.",
+    "exemple_utilisation": "184 Solfibré de Parexlanko sur plancher bois.",
+    "points_vigilance": [
+      "vérifier primaire, épaisseur et support avant application."
+    ]
+  },
+  {
+    "terme": "Réaction au feu",
+    "definition_courte": "Comportement d'un matériau lorsqu'il est exposé au feu.",
+    "explication_pedagogique": "Vérifier la conformité incendie du revêtement.",
+    "exemple_utilisation": "Bfl-s1 ou Cfl-s1 pour les revêtements PVC.",
+    "points_vigilance": [
+      "conserver les PV ou fiches de classement."
+    ]
+  },
+  {
+    "terme": "Réception des supports",
+    "definition_courte": "Contrôle par l'entreprise du support avant démarrage de ses travaux.",
+    "explication_pedagogique": "Valider que le support est apte à recevoir le revêtement.",
+    "exemple_utilisation": "le début d'exécution entraîne implicitement une réception sans réserve du support.",
+    "points_vigilance": [
+      "formaliser les réserves avant de poser."
+    ]
+  },
+  {
+    "terme": "Référence fabricant",
+    "definition_courte": "Nom commercial ou référence indiquant le produit attendu.",
+    "explication_pedagogique": "Fixer un niveau de qualité, d'aspect et de performance.",
+    "exemple_utilisation": "Tarkett Excellence, Tapiflex, TX Habitat, Saloni, Novoceram.",
+    "points_vigilance": [
+      "vérifier les équivalences avant substitution."
+    ]
+  },
+  {
+    "terme": "Réglage des pentes",
+    "definition_courte": "Mise en forme du support pour obtenir les inclinaisons nécessaires à l'écoulement.",
+    "explication_pedagogique": "Éviter l'eau stagnante.",
+    "exemple_utilisation": "la chape comprend le réglage des pentes si nécessaire.",
+    "points_vigilance": [
+      "contrôler au niveau et à l'eau avant revêtement."
+    ]
+  },
+  {
+    "terme": "Remontée en plinthe",
+    "definition_courte": "Sol souple qui remonte verticalement en bas de mur pour former une plinthe étanche.",
+    "explication_pedagogique": "Protéger les pieds de murs dans les salles d'eau.",
+    "exemple_utilisation": "système douche sol souple avec revêtement remonté en plinthes.",
+    "points_vigilance": [
+      "angles, soudures et profils de jonction doivent être parfaitement traités."
+    ]
+  },
+  {
+    "terme": "Réservation",
+    "definition_courte": "Espace prévu dans un ouvrage pour recevoir un élément futur ou respecter une épaisseur finie.",
+    "explication_pedagogique": "Permettre tapis encastré, siphon, seuil ou niveau fini correct.",
+    "exemple_utilisation": "réservation de 10 mm minimum pour le cadre du tapis gratte-pieds.",
+    "points_vigilance": [
+      "à demander avant coulage ou finition du support."
+    ]
+  },
+  {
+    "terme": "Résilient phonique",
+    "definition_courte": "Couche souple placée sous chape ou revêtement pour réduire les bruits d'impact.",
+    "explication_pedagogique": "Améliorer l'acoustique des planchers.",
+    "exemple_utilisation": "ASOUR CHAPE 19 sous chape.",
+    "points_vigilance": [
+      "éviter les perforations, recouvrements mal faits ou contacts rigides."
+    ]
+  },
+  {
+    "terme": "Ressaut",
+    "definition_courte": "Différence de niveau ponctuelle entre deux surfaces.",
+    "explication_pedagogique": "Un ressaut mal maîtrisé gêne l'accessibilité et crée un risque de chute.",
+    "exemple_utilisation": "tapis gratte-pieds avec ressaut inférieur à 2 cm pour accessibilité handicapé.",
+    "points_vigilance": [
+      "rechercher le ressaut le plus faible possible en pratique."
+    ]
+  },
+  {
+    "terme": "Revêtement de sol mince",
+    "definition_courte": "Revêtement de faible épaisseur, souvent sensible aux défauts du support.",
+    "explication_pedagogique": "Désigne notamment certains sols PVC ou vinyles collés.",
+    "exemple_utilisation": "préparation des ouvrages pour pose de revêtements de sols minces.",
+    "points_vigilance": [
+      "la moindre bosse ou poussière peut se voir après pose."
+    ]
+  },
+  {
+    "terme": "Revêtement PVC",
+    "definition_courte": "Sol souple en polychlorure de vinyle, souvent posé en lés collés.",
+    "explication_pedagogique": "Réaliser un sol souple, lavable, acoustique et économique.",
+    "exemple_utilisation": "PVC U4P3 en parties communes, U2SP3 en logements.",
+    "points_vigilance": [
+      "support sec, lisse et propre obligatoire."
+    ]
+  },
+  {
+    "terme": "Revêtement sol dur",
+    "definition_courte": "Revêtement rigide comme carrelage ou grès cérame.",
+    "explication_pedagogique": "Offrir résistance mécanique, facilité d'entretien et durabilité.",
+    "exemple_utilisation": "carrelage grès cérame dans les RDC de maisons et halls.",
+    "points_vigilance": [
+      "joints, désolidarisation et fractionnement sont essentiels."
+    ]
+  },
+  {
+    "terme": "Revêtement sol souple",
+    "definition_courte": "Revêtement flexible comme PVC ou vinyle, généralement collé au support.",
+    "explication_pedagogique": "Offrir confort, acoustique et mise en œuvre rapide.",
+    "exemple_utilisation": "sol PVC logements, parties communes et douches PMR.",
+    "points_vigilance": [
+      "très sensible à l'humidité et aux défauts de planéité."
+    ]
+  },
+  {
+    "terme": "Saloni",
+    "definition_courte": "Fabricant ou gamme de carrelage/faïence cité dans le CCTP.",
+    "explication_pedagogique": "Définir des références d'aspect et de qualité pour faïence et carrelage.",
+    "exemple_utilisation": "faïences Saloni, carrelages 60 x 60 cm et variantes douches carrelées.",
+    "points_vigilance": [
+      "valider la référence exacte et les délais d'approvisionnement."
+    ]
+  },
+  {
+    "terme": "Schluter Systems",
+    "definition_courte": "Fabricant de systèmes techniques pour étanchéité, douche et pose carrelée.",
+    "explication_pedagogique": "Réaliser des douches à l'italienne carrelées avec système complet.",
+    "exemple_utilisation": "variante exigée avec KERDI-SHOWER, KERDI-DRAIN et bandes KERDI.",
+    "points_vigilance": [
+      "ne pas mélanger plusieurs systèmes sans validation technique."
+    ]
+  },
+  {
+    "terme": "SEL - Système d'Étanchéité Liquide",
+    "definition_courte": "Système appliqué liquide formant une membrane d'étanchéité après séchage.",
+    "explication_pedagogique": "Protéger sols et murs en locaux humides avant carrelage.",
+    "exemple_utilisation": "sous-couche d'étanchéité type SEL au local poubelles.",
+    "points_vigilance": [
+      "respecter primaire, couches, délais, épaisseurs et relevés."
+    ]
+  },
+  {
+    "terme": "Semelle PVC alvéolaire",
+    "definition_courte": "Couche sous-jacente d'un revêtement vinyle qui apporte confort et acoustique.",
+    "explication_pedagogique": "Améliorer le comportement à la marche du sol PVC.",
+    "exemple_utilisation": "revêtement TX Habitat avec semelle PVC alvéolaire.",
+    "points_vigilance": [
+      "ne pas remplacer par un produit sans performance acoustique équivalente."
+    ]
+  },
+  {
+    "terme": "Seuil de douche PVC",
+    "definition_courte": "Profil de seuil posé à l'entrée d'une douche ou salle d'eau.",
+    "explication_pedagogique": "Gérer la transition et limiter les sorties d'eau.",
+    "exemple_utilisation": "seuil de douche PVC Gerflor prévu en variante douche carrelée.",
+    "points_vigilance": [
+      "compatibilité avec accessibilité PMR et étanchéité."
+    ]
+  },
+  {
+    "terme": "Siccité",
+    "definition_courte": "État de sécheresse d'un support.",
+    "explication_pedagogique": "Savoir si le support peut recevoir un revêtement collé.",
+    "exemple_utilisation": "le support béton ne doit pas dépasser les niveaux de siccité fixés par le CCTP.",
+    "points_vigilance": [
+      "une chape sèche en surface peut rester humide en profondeur."
+    ]
+  },
+  {
+    "terme": "Siphon de sol",
+    "definition_courte": "Dispositif d'évacuation encastré au sol avec garde d'eau contre les odeurs.",
+    "explication_pedagogique": "Évacuer l'eau des douches ou locaux lavables.",
+    "exemple_utilisation": "pose du siphon dans le système douche à l'italienne sol souple.",
+    "points_vigilance": [
+      "raccordement, pente et étanchéité autour du siphon sont critiques."
+    ]
+  },
+  {
+    "terme": "Sol brut",
+    "definition_courte": "Niveau du support avant chape, ragréage ou revêtement fini.",
+    "explication_pedagogique": "Servir de référence pour certaines hauteurs de pose.",
+    "exemple_utilisation": "faïence cuisine démarrant à 85 cm du sol brut.",
+    "points_vigilance": [
+      "ne pas confondre sol brut et sol fini."
+    ]
+  },
+  {
+    "terme": "Sol fini",
+    "definition_courte": "Niveau final du sol après toutes les couches de revêtement.",
+    "explication_pedagogique": "Définir seuils, portes, plinthes et accessibilité.",
+    "exemple_utilisation": "réservations à transmettre au gros œuvre pour respecter le niveau de sol fini.",
+    "points_vigilance": [
+      "additionner toutes les épaisseurs réelles."
+    ]
+  },
+  {
+    "terme": "Sol PVC acoustique",
+    "definition_courte": "Revêtement PVC présentant une performance de réduction des bruits de choc.",
+    "explication_pedagogique": "Améliorer le confort dans logements et circulations.",
+    "exemple_utilisation": "PVC logements avec ΔLw = 20 dB ; parties communes avec ΔLw = 19 dB.",
+    "points_vigilance": [
+      "la performance dépend de la référence exacte et de la pose."
+    ]
+  },
+  {
+    "terme": "Sol U2SP3",
+    "definition_courte": "Classement UPEC adapté à certains locaux d'habitation pour revêtements de sol.",
+    "explication_pedagogique": "Définir la résistance attendue du PVC dans les logements.",
+    "exemple_utilisation": "revêtement PVC des logements U2SP3.",
+    "points_vigilance": [
+      "ne pas utiliser en parties communes si U4P3 est exigé."
+    ]
+  },
+  {
+    "terme": "Sol U3SP3",
+    "definition_courte": "Classement de revêtement sol souple plus résistant que U2S sur l'usage.",
+    "explication_pedagogique": "Variante exigée pour certains logements.",
+    "exemple_utilisation": "revêtement PVC des logements U3SP3 en variante.",
+    "points_vigilance": [
+      "vérifier l'incidence financière en moins-value ou variante."
+    ]
+  },
+  {
+    "terme": "Sol U4P3",
+    "definition_courte": "Classement de sol adapté à un trafic plus intense, notamment parties communes.",
+    "explication_pedagogique": "Assurer résistance à l'usure et au poinçonnement.",
+    "exemple_utilisation": "PVC des parties communes et escaliers communs U4P3.",
+    "points_vigilance": [
+      "classement à prouver par fiche technique."
+    ]
+  },
+  {
+    "terme": "Solivage",
+    "definition_courte": "Structure de sol en bois ou éléments porteurs pouvant recevoir un plancher.",
+    "explication_pedagogique": "Certains supports bois demandent un ragréage adapté.",
+    "exemple_utilisation": "ragréage fibré sur plancher bois.",
+    "points_vigilance": [
+      "support bois = contrôle de rigidité et compatibilité des produits."
+    ]
+  },
+  {
+    "terme": "Soudure à chaud",
+    "definition_courte": "Technique de liaison des lés PVC avec un cordon soudé à chaud.",
+    "explication_pedagogique": "Rendre les joints continus et étanches, notamment en douche.",
+    "exemple_utilisation": "système douche à l'italienne sol souple avec soudure à chaud des lés.",
+    "points_vigilance": [
+      "une soudure mal faite est un point de fuite."
+    ]
+  },
+  {
+    "terme": "Sous-couche acoustique",
+    "definition_courte": "Couche placée sous un revêtement pour améliorer l'isolation aux bruits de choc.",
+    "explication_pedagogique": "Réduire les bruits transmis aux locaux voisins ou inférieurs.",
+    "exemple_utilisation": "TARKOMOUSSE sous le système douche sol souple.",
+    "points_vigilance": [
+      "la sous-couche doit être compatible avec le revêtement et la colle."
+    ]
+  },
+  {
+    "terme": "Sous-couche d'étanchéité",
+    "definition_courte": "Couche technique posée sous revêtement pour empêcher la pénétration d'eau.",
+    "explication_pedagogique": "Protéger support et ouvrages en zones humides.",
+    "exemple_utilisation": "SEL sur murs et sol du local poubelles.",
+    "points_vigilance": [
+      "traiter angles, relevés, siphons et traversées."
+    ]
+  },
+  {
+    "terme": "Support béton banché",
+    "definition_courte": "Mur ou voile béton coulé dans des banches, servant de support à revêtement.",
+    "explication_pedagogique": "Recevoir plinthes, faïences ou carrelage mural selon localisation.",
+    "exemple_utilisation": "support possible pour plinthes et faïence cuisine.",
+    "points_vigilance": [
+      "vérifier propreté, planéité et absence de laitance."
+    ]
+  },
+  {
+    "terme": "Support bois",
+    "definition_courte": "Plancher ou surface à base de bois recevant un ragréage ou revêtement.",
+    "explication_pedagogique": "Nécessite produits adaptés à ses mouvements.",
+    "exemple_utilisation": "ragréage fibré 184 Solfibré sur plancher bois.",
+    "points_vigilance": [
+      "contrôle de stabilité et humidité avant pose."
+    ]
+  },
+  {
+    "terme": "Support glacé",
+    "definition_courte": "Surface trop lisse et fermée, défavorable à l'adhérence.",
+    "explication_pedagogique": "Elle doit être préparée avant pose.",
+    "exemple_utilisation": "le support doit être lisse mais non glacé.",
+    "points_vigilance": [
+      "un support glacé peut nécessiter ponçage ou primaire spécifique."
+    ]
+  },
+  {
+    "terme": "Support lisse",
+    "definition_courte": "Surface régulière permettant une pose correcte du revêtement.",
+    "explication_pedagogique": "Éviter bosses, creux et défauts visibles.",
+    "exemple_utilisation": "surface lisse, finie et régulière exigée avant revêtement.",
+    "points_vigilance": [
+      "lisse ne veut pas dire glissant ou fermé à l'adhérence."
+    ]
+  },
+  {
+    "terme": "Surbau béton",
+    "definition_courte": "Petit relevé ou socle en béton réalisé localement.",
+    "explication_pedagogique": "Protéger ou encadrer un élément technique comme une nourrice.",
+    "exemple_utilisation": "surbau au droit des nourrices des logements.",
+    "points_vigilance": [
+      "vérifier hauteur, emplacement et finitions avec plomberie."
+    ]
+  },
+  {
+    "terme": "Surface témoin",
+    "definition_courte": "Zone ou échantillon posé conservé pour servir de référence de qualité et d'aspect.",
+    "explication_pedagogique": "Comparer l'exécution finale à ce qui a été validé.",
+    "exemple_utilisation": "surfaces témoins conservées jusqu'en fin de travaux.",
+    "points_vigilance": [
+      "documenter leur validation."
+    ]
+  },
+  {
+    "terme": "Tablier de baignoire",
+    "definition_courte": "Habillage vertical de la baignoire, souvent carrelé ou prévu par un autre lot.",
+    "explication_pedagogique": "Fermer la face visible et permettre une finition propre.",
+    "exemple_utilisation": "le CCTP indique que le tablier de baignoire faïence est prévu au lot plomberie.",
+    "points_vigilance": [
+      "vérifier les limites de prestation pour éviter un oubli."
+    ]
+  },
+  {
+    "terme": "Tapis gratte-pieds",
+    "definition_courte": "Tapis d'entrée encastré ou posé pour retenir eau, poussière et salissures.",
+    "explication_pedagogique": "Protéger les sols des halls et améliorer la propreté.",
+    "exemple_utilisation": "tapis dans les halls A et B, avec cadre de 10 mm.",
+    "points_vigilance": [
+      "réservation, ressaut et nettoyage doivent être anticipés."
+    ]
+  },
+  {
+    "terme": "Tarkett Excellence",
+    "definition_courte": "Référence de revêtement PVC citée pour les parties communes.",
+    "explication_pedagogique": "Fixer le niveau de performance du sol PVC en circulation.",
+    "exemple_utilisation": "PVC en lés, U4P3, ΔLw = 19 dB, Bfl-s1.",
+    "points_vigilance": [
+      "toute équivalence doit tenir classement, acoustique et feu."
+    ]
+  },
+  {
+    "terme": "Tarkett Tapiflex",
+    "definition_courte": "Référence de revêtement PVC citée pour escaliers communs.",
+    "explication_pedagogique": "Assurer résistance et confort acoustique en circulation verticale.",
+    "exemple_utilisation": "PVC U4P3, ΔLw = 18 dB, épaisseur d'usure 0,85 mm.",
+    "points_vigilance": [
+      "traiter nez de marche et paliers selon prescriptions fabricant."
+    ]
+  },
+  {
+    "terme": "Tarkett TX Habitat",
+    "definition_courte": "Revêtement vinyle/PVC cité pour les logements.",
+    "explication_pedagogique": "Sol souple acoustique pour pièces de logement.",
+    "exemple_utilisation": "épaisseur 3 mm, U2S P3 E2/3 C2, ΔLw = 20 dB.",
+    "points_vigilance": [
+      "ne pas confondre avec les revêtements U4P3 des parties communes."
+    ]
+  },
+  {
+    "terme": "TARKOMOUSSE",
+    "definition_courte": "Sous-couche acoustique associée à un système de sol souple.",
+    "explication_pedagogique": "Améliorer l'acoustique sous revêtement PVC.",
+    "exemple_utilisation": "sous-couche dans le système douche à l'italienne sol souple.",
+    "points_vigilance": [
+      "vérifier compatibilité en zone humide."
+    ]
+  },
+  {
+    "terme": "Teinte",
+    "definition_courte": "Couleur choisie pour un carrelage, une faïence, un PVC ou un profil.",
+    "explication_pedagogique": "Assurer l'aspect architectural attendu.",
+    "exemple_utilisation": "teintes au choix du maître d'ouvrage sur proposition de l'architecte.",
+    "points_vigilance": [
+      "vérifier bains de fabrication et uniformité du ton."
+    ]
+  },
+  {
+    "terme": "Tirée à la règle",
+    "definition_courte": "Méthode de dressage d'une chape avec une règle pour obtenir planéité et niveau.",
+    "explication_pedagogique": "Réaliser une chape régulière sur repères.",
+    "exemple_utilisation": "chape ciment armée de 6 cm tirée à la règle sur repères.",
+    "points_vigilance": [
+      "les repères doivent être correctement calés au niveau fini."
+    ]
+  },
+  {
+    "terme": "Tolérance d'exécution",
+    "definition_courte": "Écart admissible entre l'ouvrage réalisé et la valeur théorique.",
+    "explication_pedagogique": "Déterminer si un support ou revêtement est acceptable.",
+    "exemple_utilisation": "les ouvrages doivent respecter les limites réglementaires en vigueur.",
+    "points_vigilance": [
+      "mesurer avant réception, pas seulement juger à l'œil."
+    ]
+  },
+  {
+    "terme": "TRAMIPLINTHE",
+    "definition_courte": "Résilient périphérique cité pour chapes, utilisé en pied de parois.",
+    "explication_pedagogique": "Désolidariser la chape des murs et éviter les ponts acoustiques.",
+    "exemple_utilisation": "TRAMIPLINTHE de Tramico ou équivalent en périphérie.",
+    "points_vigilance": [
+      "ne pas le couper trop tôt avant finition du sol."
+    ]
+  },
+  {
+    "terme": "U - Usure",
+    "definition_courte": "Lettre du classement UPEC indiquant la résistance à l'usure due au passage.",
+    "explication_pedagogique": "Adapter le sol au trafic.",
+    "exemple_utilisation": "U4 en parties communes, U2S ou U3S pour logements selon cas.",
+    "points_vigilance": [
+      "plus le chiffre est élevé, plus le sol est résistant à l'usure."
+    ]
+  },
+  {
+    "terme": "Uniformité du ton",
+    "definition_courte": "Homogénéité de couleur entre carreaux ou lots de faïence.",
+    "explication_pedagogique": "Éviter les différences visibles une fois posé.",
+    "exemple_utilisation": "le CCTP exige que l'uniformité du ton soit parfaitement assurée.",
+    "points_vigilance": [
+      "contrôler les bains et mélanger les boîtes si recommandé."
+    ]
+  },
+  {
+    "terme": "UNIMAT SOL ULTRACHAPE",
+    "definition_courte": "Isolant thermique cité pour la chape avec isolant.",
+    "explication_pedagogique": "Contribuer à la performance thermique du plancher.",
+    "exemple_utilisation": "R = 1,90 m².K/W dans le CCTP.",
+    "points_vigilance": [
+      "vérifier l'épaisseur réelle disponible dans le complexe sol."
+    ]
+  },
+  {
+    "terme": "UPEC - C",
+    "definition_courte": "Lettre du classement UPEC liée à la résistance aux agents chimiques.",
+    "explication_pedagogique": "Vérifier la tenue face aux produits d'entretien et salissures.",
+    "exemple_utilisation": "C2 pour plusieurs sols du CCTP.",
+    "points_vigilance": [
+      "important dans locaux poubelles, sanitaires et parties communes."
+    ]
+  },
+  {
+    "terme": "UPEC - E",
+    "definition_courte": "Lettre du classement UPEC liée à la présence d'eau.",
+    "explication_pedagogique": "Adapter le revêtement aux pièces humides ou lavables.",
+    "exemple_utilisation": "E2/3 ou E3 selon les revêtements.",
+    "points_vigilance": [
+      "E ne remplace pas un système d'étanchéité quand il est requis."
+    ]
+  },
+  {
+    "terme": "UPEC - P",
+    "definition_courte": "Lettre du classement UPEC liée au poinçonnement par charges, meubles ou trafic.",
+    "explication_pedagogique": "Éviter les marquages et déformations excessives.",
+    "exemple_utilisation": "P3 pour PVC, P4 pour certains carrelages.",
+    "points_vigilance": [
+      "vérifier P dans les zones de trafic et d'équipements lourds."
+    ]
+  },
+  {
+    "terme": "Variante exigée",
+    "definition_courte": "Solution alternative demandée dans le dossier, à chiffrer en plus ou en moins-value.",
+    "explication_pedagogique": "Permettre au maître d'ouvrage de comparer plusieurs options techniques ou économiques.",
+    "exemple_utilisation": "PVC logements U3SP3, douches à l'italienne carrelées, faïence PMR réduite.",
+    "points_vigilance": [
+      "bien distinguer base et variante dans le chiffrage et l'analyse."
+    ]
+  },
+  {
+    "terme": "Vinyle",
+    "definition_courte": "Revêtement de sol souple souvent assimilé au PVC.",
+    "explication_pedagogique": "Réaliser des sols confortables, faciles d'entretien et acoustiques.",
+    "exemple_utilisation": "revêtement de sol souple en lés, en vinyle sur semelle PVC alvéolaire.",
+    "points_vigilance": [
+      "vérifier classement UPEC, réaction au feu et avis technique."
+    ]
+  },
+  {
+    "terme": "Webersys Protec",
+    "definition_courte": "Produit d'imperméabilisation cité pour protéger les parois avant faïence.",
+    "explication_pedagogique": "Limiter les infiltrations autour des baignoires et douches.",
+    "exemple_utilisation": "application avant collage de la faïence et avant pose de la baignoire.",
+    "points_vigilance": [
+      "angles traités avec bandes de renfort jusqu'au sol."
+    ]
+  },
+  {
+    "terme": "Zone de douche",
+    "definition_courte": "Surface directement exposée à l'eau de douche.",
+    "explication_pedagogique": "Déterminer les protections d'étanchéité et la localisation des revêtements.",
+    "exemple_utilisation": "zone environ 120 x 90 cm pour variante faïence PMR réduite.",
+    "points_vigilance": [
+      "les limites de zone doivent être lisibles sur plans et calepinage."
+    ]
+  }
+]

@@ -1,0 +1,1946 @@
+[
+  {
+    "terme": "A - aire d’absorption équivalente",
+    "definition_courte": "Valeur utilisée pour mesurer la capacité d’un plafond ou d’une paroi à absorber les sons dans un local.",
+    "explication_pedagogique": "Vérifier que les halls et circulations ne résonnent pas trop.",
+    "exemple_utilisation": "les plafonds acoustiques doivent satisfaire au calcul A = S x αw avec A supérieur ou égal à 1/4 de la surface au sol.",
+    "points_vigilance": [
+      "ne pas confondre surface posée et performance acoustique : le coefficient αw compte autant que la surface."
+    ]
+  },
+  {
+    "terme": "A2-s1, d0",
+    "definition_courte": "Classe européenne de réaction au feu indiquant une très faible contribution au feu, peu de fumées et pas de gouttelettes enflammées.",
+    "explication_pedagogique": "Vérifier que les plaques, plafonds ou cloisons respectent les exigences incendie.",
+    "exemple_utilisation": "plusieurs ouvrages sont demandés avec réaction au feu A2-s1, d0.",
+    "points_vigilance": [
+      "ne pas confondre réaction au feu du matériau et résistance au feu de l’ouvrage complet."
+    ]
+  },
+  {
+    "terme": "Absorption acoustique",
+    "definition_courte": "Capacité d’un matériau à absorber une partie du bruit au lieu de le réfléchir.",
+    "explication_pedagogique": "Améliorer le confort sonore dans les halls, circulations et locaux communs.",
+    "exemple_utilisation": "des plafonds acoustiques en plaques perforées ou dalles de laine de roche sont prévus.",
+    "points_vigilance": [
+      "contrôler les fiches techniques et la surface réellement posée."
+    ]
+  },
+  {
+    "terme": "Accessibilité PMR",
+    "definition_courte": "Ensemble des dispositions permettant l’usage des locaux par des personnes à mobilité réduite.",
+    "explication_pedagogique": "Prévoir les renforts pour les barres d’appui, sièges, accessoires et meubles adaptés.",
+    "exemple_utilisation": "des renforts bois sont demandés pour les accessoires de salle de bain PMR dans certains logements.",
+    "points_vigilance": [
+      "anticiper les renforts avant fermeture des cloisons, sinon il faut rouvrir."
+    ]
+  },
+  {
+    "terme": "Accessoires de pose",
+    "definition_courte": "Petites pièces nécessaires à la mise en œuvre : rails, suspentes, vis, bandes, cornières, profils, éclisses, appuis ou fixations.",
+    "explication_pedagogique": "Assurer que l’ouvrage est complet, stable et conforme au système du fabricant.",
+    "exemple_utilisation": "plusieurs articles indiquent “compris accessoires de pose, traitement des joints et sujétions diverses”.",
+    "points_vigilance": [
+      "dans un DPGF, ces accessoires sont souvent inclus dans le prix de l’ouvrage principal."
+    ]
+  },
+  {
+    "terme": "ACERMI",
+    "definition_courte": "Certification française des performances des isolants thermiques.",
+    "explication_pedagogique": "Prouver que les résistances thermiques annoncées par le fabricant sont contrôlées.",
+    "exemple_utilisation": "la certification ACERMI est demandée pour tous les isolants et pour l’isolant soufflé des combles.",
+    "points_vigilance": [
+      "exiger le certificat correspondant au produit réellement livré, pas seulement une brochure commerciale."
+    ]
+  },
+  {
+    "terme": "Acoustique",
+    "definition_courte": "Domaine qui concerne la propagation et l’atténuation des bruits.",
+    "explication_pedagogique": "Limiter les nuisances entre logements, pièces principales, gaines techniques et parties communes.",
+    "exemple_utilisation": "les cloisons et gaines techniques sont associées à des performances comme Rw 42 dB, 37 dB ou 48 dB(A).",
+    "points_vigilance": [
+      "une petite fuite, un mauvais joint ou une gaine non traitée peut dégrader fortement le résultat."
+    ]
+  },
+  {
+    "terme": "Adhérence",
+    "definition_courte": "Capacité d’un produit à tenir correctement sur son support.",
+    "explication_pedagogique": "Éviter les décollements de doublages, bandes ou enduits.",
+    "exemple_utilisation": "le CCTP demande la reconnaissance des supports, notamment cohésion et conditions d’adhérence.",
+    "points_vigilance": [
+      "un support poussiéreux, humide ou friable doit être repris avant pose."
+    ]
+  },
+  {
+    "terme": "Aire de surface S",
+    "definition_courte": "Surface prise en compte dans le calcul acoustique d’une paroi ou d’un plafond.",
+    "explication_pedagogique": "Calculer la contribution acoustique réelle d’un plafond absorbant.",
+    "exemple_utilisation": "S intervient dans la formule A = S x αw pour les plafonds acoustiques.",
+    "points_vigilance": [
+      "bien prendre la surface utile posée, en tenant compte des trémies, luminaires et interruptions."
+    ]
+  },
+  {
+    "terme": "Alpha w - coefficient d’absorption (αw)",
+    "definition_courte": "Coefficient acoustique indiquant la capacité d’un matériau à absorber le bruit.",
+    "explication_pedagogique": "Calculer la performance acoustique d’un plafond ou d’un revêtement.",
+    "exemple_utilisation": "il est utilisé dans la formule A = S x αw pour les plafonds acoustiques.",
+    "points_vigilance": [
+      "un matériau avec faible αw nécessite plus de surface pour obtenir le même résultat."
+    ]
+  },
+  {
+    "terme": "Âme alvéolaire",
+    "definition_courte": "Structure intérieure en nid d’abeilles, souvent en carton, placée entre deux plaques de plâtre.",
+    "explication_pedagogique": "Alléger une cloison tout en conservant une séparation intérieure simple.",
+    "exemple_utilisation": "les cloisons Placopan 50 sont constituées de deux plaques de plâtre collées sur une âme alvéolaire.",
+    "points_vigilance": [
+      "ce type de cloison accepte moins bien les charges lourdes sans renfort adapté."
+    ]
+  },
+  {
+    "terme": "Angles saillants",
+    "definition_courte": "Angles sortants d’une cloison ou d’un doublage, exposés aux chocs.",
+    "explication_pedagogique": "Protéger les arêtes et obtenir une finition droite avant peinture.",
+    "exemple_utilisation": "des arêtes métalliques ou bandes armées sont prévues sur les angles saillants et abouts de cloisons.",
+    "points_vigilance": [
+      "sans protection, les angles s’abîment vite au passage des entreprises."
+    ]
+  },
+  {
+    "terme": "Aplomb",
+    "definition_courte": "Verticalité d’une paroi ou d’un ouvrage.",
+    "explication_pedagogique": "Garantir des cloisons droites et des finitions correctes.",
+    "exemple_utilisation": "le faux aplomb sur hauteur d’étage ne doit pas excéder 5 mm.",
+    "points_vigilance": [
+      "contrôler avant joints et peinture, car les reprises sont difficiles après finition."
+    ]
+  },
+  {
+    "terme": "Arêtes de protection",
+    "definition_courte": "Profilés ou bandes armées posés sur les angles pour les renforcer.",
+    "explication_pedagogique": "Résister aux coups, aligner l’angle et préparer une finition peinture propre.",
+    "exemple_utilisation": "le CCTP prévoit la fourniture et pose de protections des angles saillants avec enduit de finition.",
+    "points_vigilance": [
+      "contrôler la rectitude des arêtes avant réception du support peinture."
+    ]
+  },
+  {
+    "terme": "Aspect de surface",
+    "definition_courte": "État visuel et tactile du parement après pose et traitement des joints.",
+    "explication_pedagogique": "Permettre l’application des peintures ou revêtements sans défaut majeur.",
+    "exemple_utilisation": "le parement ne doit présenter ni pulvérulence superficielle, ni trou après traitement des joints.",
+    "points_vigilance": [
+      "les défauts visibles sous lumière rasante ressortent fortement après peinture."
+    ]
+  },
+  {
+    "terme": "Auto-contrôle",
+    "definition_courte": "Contrôle réalisé par l’entreprise sur ses propres ouvrages.",
+    "explication_pedagogique": "Détecter les défauts avant passage du maître d’œuvre ou du bureau de contrôle.",
+    "exemple_utilisation": "le CCTP demande un auto-contrôle avec équerrage et récolement à fournir.",
+    "points_vigilance": [
+      "un autocontrôle doit être écrit et exploitable, pas seulement verbal."
+    ]
+  },
+  {
+    "terme": "Avis Technique",
+    "definition_courte": "Document d’évaluation technique d’un produit ou procédé délivré pour encadrer son emploi.",
+    "explication_pedagogique": "Sécuriser l’utilisation de systèmes non traditionnels ou spécifiques.",
+    "exemple_utilisation": "les produits doivent faire l’objet d’un avis technique valide ou être soumis au bureau de contrôle.",
+    "points_vigilance": [
+      "vérifier le domaine d’emploi : feu, humidité, hauteur, support et performance."
+    ]
+  },
+  {
+    "terme": "BA10",
+    "definition_courte": "Plaque de plâtre de 10 mm d’épaisseur.",
+    "explication_pedagogique": "Former certains doublages ou parements légers.",
+    "exemple_utilisation": "le doublage laine minérale 60+10 comprend une plaque de plâtre de 10 mm collée sur isolant.",
+    "points_vigilance": [
+      "vérifier l’épaisseur réelle exigée car BA10, BA13 et plaques multiples n’ont pas les mêmes performances."
+    ]
+  },
+  {
+    "terme": "BA13",
+    "definition_courte": "Plaque de plâtre de 13 mm d’épaisseur, courante en cloisons, doublages et plafonds.",
+    "explication_pedagogique": "Réaliser les parements intérieurs avant finition peinture ou faïence.",
+    "exemple_utilisation": "les faux plafonds et cloisons Placostil utilisent des plaques BA13.",
+    "points_vigilance": [
+      "adapter le type de plaque aux pièces humides, au feu et à l’acoustique."
+    ]
+  },
+  {
+    "terme": "BA13 hydrofuge",
+    "definition_courte": "Plaque de plâtre résistante à l’humidité, généralement de couleur verte.",
+    "explication_pedagogique": "Protéger les parements en salles d’eau, salles de bains et pièces humides.",
+    "exemple_utilisation": "les parements hydrofuges sont demandés pour toutes les pièces humides.",
+    "points_vigilance": [
+      "hydrofuge ne signifie pas étanche : les protections en pied et SPEC éventuels restent nécessaires selon locaux."
+    ]
+  },
+  {
+    "terme": "Bande à joint",
+    "definition_courte": "Bande papier ou armée noyée dans l’enduit pour traiter les joints entre plaques.",
+    "explication_pedagogique": "Obtenir une surface continue et limiter les fissures aux raccords.",
+    "exemple_utilisation": "les bandes à joints en papier fort micro-perforé sont prévues avec enduit prêt à l’emploi.",
+    "points_vigilance": [
+      "mauvais marouflage, manque d’enduit ou séchage insuffisant créent des fissures et cloques."
+    ]
+  },
+  {
+    "terme": "Bande armée",
+    "definition_courte": "Bande renforcée utilisée pour protéger ou redresser les angles sortants.",
+    "explication_pedagogique": "Renforcer les arêtes exposées et améliorer la finition.",
+    "exemple_utilisation": "elle est citée comme dispositif possible de protection des angles saillants.",
+    "points_vigilance": [
+      "poser parfaitement droit car une bande armée décalée se voit après peinture."
+    ]
+  },
+  {
+    "terme": "Bande autoadhésive",
+    "definition_courte": "Bande collante utilisée pour traiter certaines liaisons et améliorer l’étanchéité à l’air.",
+    "explication_pedagogique": "Fermer les raccords entre pare-vapeur, faux plafond, maçonnerie et passages de réseaux.",
+    "exemple_utilisation": "le CCTP mentionne une bande autoadhésive de 100 mm ou un enduit d’étanchéité.",
+    "points_vigilance": [
+      "la surface doit être propre et compatible, sinon la bande se décolle."
+    ]
+  },
+  {
+    "terme": "Bande résiliente",
+    "definition_courte": "Bande souple placée entre ossature et support pour limiter la transmission des vibrations.",
+    "explication_pedagogique": "Améliorer l’isolation acoustique des cloisons et gaines.",
+    "exemple_utilisation": "un résiliant acoustique de type Phaltex est prévu sous les rails hauts et bas des cloisons 72/48.",
+    "points_vigilance": [
+      "une bande interrompue ou écrasée réduit la performance acoustique."
+    ]
+  },
+  {
+    "terme": "Bords amincis",
+    "definition_courte": "Bords légèrement creusés sur les plaques de plâtre pour recevoir bande et enduit.",
+    "explication_pedagogique": "Permettre un joint plat sans surépaisseur.",
+    "exemple_utilisation": "le doublage Prégytherm comporte une plaque de plâtre à bords amincis de 13 mm.",
+    "points_vigilance": [
+      "les coupes sans bord aminci demandent un traitement plus soigné."
+    ]
+  },
+  {
+    "terme": "Bouches",
+    "definition_courte": "Équipements de ventilation traversant cloisons ou plafonds.",
+    "explication_pedagogique": "Permettre l’extraction ou le soufflage d’air dans les logements et parties communes.",
+    "exemple_utilisation": "les réservations en cloisons ou plafonds sont prévues pour grilles, luminaires, bouches et autres.",
+    "points_vigilance": [
+      "bien coordonner avec le lot VMC pour éviter les découpes approximatives."
+    ]
+  },
+  {
+    "terme": "Bourrage en laine de verre",
+    "definition_courte": "Remplissage local en laine de verre au pied ou en tête d’un doublage.",
+    "explication_pedagogique": "Éviter les ponts acoustiques et compléter les vides.",
+    "exemple_utilisation": "le doublage laine minérale prévoit un bourrage en pied et tête de doublage.",
+    "points_vigilance": [
+      "ne pas tasser excessivement l’isolant, car cela peut dégrader certaines performances."
+    ]
+  },
+  {
+    "terme": "Bureau de contrôle",
+    "definition_courte": "Organisme chargé de vérifier la conformité technique et réglementaire de certains ouvrages.",
+    "explication_pedagogique": "Valider les points sensibles : feu, acoustique, stabilité, avis techniques et sécurité.",
+    "exemple_utilisation": "les produits et procédés doivent être soumis au bureau de contrôle quand nécessaire.",
+    "points_vigilance": [
+      "prévoir les fiches techniques et PV avant exécution, pas après pose."
+    ]
+  },
+  {
+    "terme": "Calepinage",
+    "definition_courte": "Organisation des plaques, dalles, joints, suspentes ou motifs selon une trame définie.",
+    "explication_pedagogique": "Obtenir un rendu régulier et coordonné avec l’architecture.",
+    "exemple_utilisation": "les plafonds acoustiques et démontables sont localisés selon plans, coupes et calepinage de l’architecte.",
+    "points_vigilance": [
+      "valider le calepinage avant commandes et perçages des réseaux."
+    ]
+  },
+  {
+    "terme": "Calfeutrement",
+    "definition_courte": "Traitement des vides autour d’un ouvrage pour finir, isoler ou étancher.",
+    "explication_pedagogique": "Assurer la continuité de finition, d’air, d’acoustique ou de feu selon le cas.",
+    "exemple_utilisation": "les pieds de doublage sont calfeutrés pour assurer l’étanchéité à l’air.",
+    "points_vigilance": [
+      "ne pas remplacer un vrai traitement acoustique ou coupe-feu par un simple joint décoratif."
+    ]
+  },
+  {
+    "terme": "Calibel",
+    "definition_courte": "Doublage thermo-acoustique de type plaque de plâtre collée sur laine minérale.",
+    "explication_pedagogique": "Isoler les murs tout en créant un parement intérieur prêt à peindre.",
+    "exemple_utilisation": "le CCTP cite Calibel de chez Isover ou équivalent pour le doublage laine minérale 60+10.",
+    "points_vigilance": [
+      "un équivalent doit prouver la même performance thermique et acoustique."
+    ]
+  },
+  {
+    "terme": "Caroplatre Hydro 7",
+    "definition_courte": "Carreau de plâtre hydrofuge de 70 mm utilisé pour certaines cloisons techniques.",
+    "explication_pedagogique": "Réaliser des parois de gaines avec résistance au feu et tenue en ambiance humide.",
+    "exemple_utilisation": "il est cité pour les cloisons séparatives et latérales des gaines techniques palières.",
+    "points_vigilance": [
+      "vérifier le mode de liaison en tête, les renforts d’angle et la compatibilité avec les trappes."
+    ]
+  },
+  {
+    "terme": "Carreau de plâtre",
+    "definition_courte": "Élément massif en plâtre utilisé pour monter des cloisons non porteuses.",
+    "explication_pedagogique": "Construire des parois rigides, souvent en gaines techniques ou locaux particuliers.",
+    "exemple_utilisation": "des cloisons en carreaux de plâtre de 70 mm sont prévues pour des gaines techniques.",
+    "points_vigilance": [
+      "attention au poids, à l’humidité et aux jonctions avec structures."
+    ]
+  },
+  {
+    "terme": "Certification produit",
+    "definition_courte": "Preuve que le produit respecte des caractéristiques déclarées et contrôlées.",
+    "explication_pedagogique": "Sécuriser le choix des matériaux avant achat et pose.",
+    "exemple_utilisation": "les produits doivent porter la marque NF, disposer d’un avis technique et les isolants être certifiés ACERMI.",
+    "points_vigilance": [
+      "la certification doit correspondre à la référence exacte livrée."
+    ]
+  },
+  {
+    "terme": "Charges lourdes",
+    "definition_courte": "Équipements qui exercent un effort important sur une cloison ou un doublage : radiateurs, meubles hauts, lavabos, barres d’appui.",
+    "explication_pedagogique": "Prévoir des renforts adaptés avant fermeture des parois.",
+    "exemple_utilisation": "le CCTP prévoit des dispositifs d’accrochage des charges lourdes dans cloisons et doublages.",
+    "points_vigilance": [
+      "une fixation dans une simple plaque sans renfort peut arracher le parement."
+    ]
+  },
+  {
+    "terme": "Cloison 50 mm",
+    "definition_courte": "Cloison légère de 50 mm d’épaisseur, souvent préfabriquée avec âme alvéolaire.",
+    "explication_pedagogique": "Créer des séparations intérieures simples dans les logements.",
+    "exemple_utilisation": "les cloisons cotées 0,05 m sont prévues en Placopan 50 ou équivalent.",
+    "points_vigilance": [
+      "prévoir renforts, huisseries et passages de réseaux avant fermeture."
+    ]
+  },
+  {
+    "terme": "Cloison 72/48",
+    "definition_courte": "Cloison sur ossature métallique de 48 mm avec une plaque de BA13 de chaque côté, pour une épaisseur totale d’environ 72 mm.",
+    "explication_pedagogique": "Améliorer l’acoustique et permettre le passage d’isolant dans le vide intérieur.",
+    "exemple_utilisation": "elle est demandée avec laine minérale de 45 mm et performance Rw 42 dB.",
+    "points_vigilance": [
+      "respecter entraxes, résilient périphérique et traitement des joints pour atteindre la performance."
+    ]
+  },
+  {
+    "terme": "Cloison 98/48",
+    "definition_courte": "Cloison renforcée sur ossature de 48 mm avec plusieurs plaques, pour une meilleure performance feu ou acoustique.",
+    "explication_pedagogique": "Traiter des gaines ou séparations plus sensibles qu’une cloison simple.",
+    "exemple_utilisation": "les gaines techniques 98/48 comportent plusieurs plaques et un matelas de laine minérale.",
+    "points_vigilance": [
+      "le CCTP mentionne aussi “92/48” : vérifier la coupe et le détail fabricant avant exécution."
+    ]
+  },
+  {
+    "terme": "Cloison de distribution",
+    "definition_courte": "Cloison intérieure non porteuse séparant les pièces.",
+    "explication_pedagogique": "Organiser les logements et recevoir portes, réseaux et finitions.",
+    "exemple_utilisation": "le CCTP décrit les cloisons de distribution standard, hydrofuges et 72/48.",
+    "points_vigilance": [
+      "ne pas oublier les renforts ponctuels et la coordination avec les huisseries."
+    ]
+  },
+  {
+    "terme": "Cloison hydrofuge",
+    "definition_courte": "Cloison réalisée avec plaques ou panneaux adaptés aux pièces humides.",
+    "explication_pedagogique": "Limiter les désordres dus à l’humidité dans salles d’eau et salles de bains.",
+    "exemple_utilisation": "les cloisons de distribution des salles d’eau et salles de bains sont en qualité hydrofuge.",
+    "points_vigilance": [
+      "traiter aussi le pied de cloison avec calfeutrement et protection adaptée."
+    ]
+  },
+  {
+    "terme": "Cloison préfabriquée",
+    "definition_courte": "Cloison fournie sous forme de panneaux prêts à assembler.",
+    "explication_pedagogique": "Accélérer la pose des séparations intérieures courantes.",
+    "exemple_utilisation": "les cloisons Placopan 50 sont des panneaux monoblocs de hauteur d’étage.",
+    "points_vigilance": [
+      "les découpes et réservations doivent rester compatibles avec l’avis technique."
+    ]
+  },
+  {
+    "terme": "Coffre de volet roulant",
+    "definition_courte": "Caisson recevant le volet roulant, souvent au-dessus d’une menuiserie extérieure.",
+    "explication_pedagogique": "Assurer la continuité du doublage autour des menuiseries.",
+    "exemple_utilisation": "le CCTP demande une pose soignée du doublage au-dessus des coffres de VR.",
+    "points_vigilance": [
+      "c’est un point sensible pour l’air, l’acoustique et les ponts thermiques."
+    ]
+  },
+  {
+    "terme": "Cohésion du support",
+    "definition_courte": "Solidité de surface du support qui reçoit l’enduit, le collage ou le parement.",
+    "explication_pedagogique": "Vérifier que le support ne farine pas et peut recevoir la pose.",
+    "exemple_utilisation": "la reconnaissance des supports anciens doit porter notamment sur la cohésion et l’adhérence.",
+    "points_vigilance": [
+      "un support fragile doit être traité avant collage ou enduisage."
+    ]
+  },
+  {
+    "terme": "Collage par mortier adhésif",
+    "definition_courte": "Pose d’un doublage au moyen de plots ou bandes de mortier-colle adapté.",
+    "explication_pedagogique": "Fixer les complexes de doublage sur maçonnerie ou voile béton.",
+    "exemple_utilisation": "le doublage Prégytherm est collé par mortier adhésif du fabricant.",
+    "points_vigilance": [
+      "respecter la quantité, l’espacement et le temps ouvert du produit."
+    ]
+  },
+  {
+    "terme": "Combles",
+    "definition_courte": "Volume situé sous toiture, accessible ou non, souvent isolé thermiquement.",
+    "explication_pedagogique": "Recevoir l’isolation soufflée, les trappes d’accès et parfois des cheminements techniques.",
+    "exemple_utilisation": "l’isolation des combles est prévue par laine de roche soufflée de 515 mm.",
+    "points_vigilance": [
+      "protéger les accès, rehausses et zones de passage pour ne pas écraser l’isolant."
+    ]
+  },
+  {
+    "terme": "Comportement au feu",
+    "definition_courte": "Ensemble des performances incendie attendues pour les matériaux et ouvrages.",
+    "explication_pedagogique": "Assurer la sécurité des occupants et respecter la notice de sécurité.",
+    "exemple_utilisation": "les ouvrages sont réputés posséder les comportements au feu définis dans la notice de sécurité.",
+    "points_vigilance": [
+      "demander les PV feu des systèmes complets et pas seulement des plaques."
+    ]
+  },
+  {
+    "terme": "Composition polychromique",
+    "definition_courte": "Choix de plusieurs teintes ou finitions selon indication architecte.",
+    "explication_pedagogique": "Adapter les faux plafonds et accessoires à l’ambiance architecturale.",
+    "exemple_utilisation": "le maître d’œuvre peut demander une composition polychromique sans plus-value.",
+    "points_vigilance": [
+      "ne pas commander avant validation des teintes et accessoires associés."
+    ]
+  },
+  {
+    "terme": "Contrôle qualité",
+    "definition_courte": "Vérification organisée des documents, matériaux et ouvrages réalisés.",
+    "explication_pedagogique": "Réduire les erreurs avant visa et réception.",
+    "exemple_utilisation": "l’entreprise doit effectuer un contrôle qualité interne et externe des documents d’exécution.",
+    "points_vigilance": [
+      "un document non contrôlé peut être refusé au visa et retarder le chantier."
+    ]
+  },
+  {
+    "terme": "Cornière de renfort d’angle",
+    "definition_courte": "Profilé posé sur un angle pour le renforcer et obtenir une arête nette.",
+    "explication_pedagogique": "Protéger les angles de cloisons exposés aux chocs.",
+    "exemple_utilisation": "les cloisons Placopan comprennent bandes ou cornières de renfort d’angle selon nécessité.",
+    "points_vigilance": [
+      "vérifier la compatibilité avec l’enduit de finition."
+    ]
+  },
+  {
+    "terme": "Coupe-feu",
+    "definition_courte": "Capacité d’un ouvrage à empêcher le passage du feu pendant une durée donnée.",
+    "explication_pedagogique": "Limiter la propagation d’un incendie entre locaux ou niveaux.",
+    "exemple_utilisation": "les faux plafonds et soffites peuvent être demandés CF 1/2h ou CF 1h selon localisation.",
+    "points_vigilance": [
+      "la performance dépend du système complet : plaques, ossature, suspentes, joints et traversées."
+    ]
+  },
+  {
+    "terme": "CPT CSTB",
+    "definition_courte": "Cahier de Prescriptions Techniques publié par le CSTB.",
+    "explication_pedagogique": "Encadrer la mise en œuvre de procédés ou produits de construction.",
+    "exemple_utilisation": "les CPT du CSTB font partie des documents de référence du lot.",
+    "points_vigilance": [
+      "ne pas se limiter au CCTP si le produit renvoie à un CPT ou un avis technique."
+    ]
+  },
+  {
+    "terme": "CSTB",
+    "definition_courte": "Centre scientifique et technique du bâtiment.",
+    "explication_pedagogique": "Référence pour avis techniques, règles, cahiers de prescriptions et évaluations de produits.",
+    "exemple_utilisation": "les avis techniques CSTB et enduits bénéficiant d’avis CSTB sont cités dans le CCTP.",
+    "points_vigilance": [
+      "vérifier que l’avis est valide à la date du chantier."
+    ]
+  },
+  {
+    "terme": "D.P.G.F.",
+    "definition_courte": "Décomposition du Prix Global et Forfaitaire.",
+    "explication_pedagogique": "Lister et chiffrer les prestations du lot poste par poste.",
+    "exemple_utilisation": "le CCTP indique que certaines prestations d’études sont valorisées dans le cadre de la DPGF.",
+    "points_vigilance": [
+      "une ligne courte de DPGF peut cacher beaucoup de sujétions incluses dans le CCTP."
+    ]
+  },
+  {
+    "terme": "Dalle béton",
+    "definition_courte": "Support horizontal en béton pouvant recevoir rails, plafonds ou suspentes.",
+    "explication_pedagogique": "Servir de support aux cloisons, plafonds suspendus ou équipements.",
+    "exemple_utilisation": "les rails doivent être fixés à 5 cm minimum du bord de la dalle béton pour certaines cloisons.",
+    "points_vigilance": [
+      "contrôler le support avant perçage pour éviter éclats ou fixation insuffisante."
+    ]
+  },
+  {
+    "terme": "Débourrage au décapeur thermique",
+    "definition_courte": "Retrait local de l’isolant par chauffage contrôlé pour dégager un passage.",
+    "explication_pedagogique": "Permettre le passage de câbles laissés en attente dans un doublage.",
+    "exemple_utilisation": "le CCTP prévoit le débourrage de l’isolant au droit des passages de câbles de l’électricien.",
+    "points_vigilance": [
+      "procéder proprement sans brûler le parement ni dégrader la performance du complexe."
+    ]
+  },
+  {
+    "terme": "Déclaration environnementale",
+    "definition_courte": "Information sur les performances environnementales et sanitaires d’un produit de construction.",
+    "explication_pedagogique": "Alimenter les exigences du maître d’ouvrage et les données environnementales du projet.",
+    "exemple_utilisation": "l’entreprise doit fournir les informations en référence à la norme NF P 01-010.",
+    "points_vigilance": [
+      "prévoir les fiches avant validation des produits, surtout pour isolants et plaques."
+    ]
+  },
+  {
+    "terme": "Découpe du doublage",
+    "definition_courte": "Ouverture ou adaptation réalisée dans le complexe de doublage.",
+    "explication_pedagogique": "S’ajuster aux gaines techniques, menuiseries, coffres et réseaux.",
+    "exemple_utilisation": "le CCTP prévoit les découpes du doublage au niveau des gaines techniques.",
+    "points_vigilance": [
+      "les découpes doivent être rebouchées et calfeutrées pour conserver l’air et l’acoustique."
+    ]
+  },
+  {
+    "terme": "Degré coupe-feu EI 30",
+    "definition_courte": "Classement indiquant une étanchéité et isolation au feu pendant 30 minutes.",
+    "explication_pedagogique": "Assurer une protection incendie minimale sur certaines traversées ou gaines.",
+    "exemple_utilisation": "les gaines techniques 98/48 indiquent un degré coupe-feu de traversée EI 30.",
+    "points_vigilance": [
+      "contrôler les rebouchages et traversées de réseaux, souvent points faibles du coupe-feu."
+    ]
+  },
+  {
+    "terme": "Degré coupe-feu EI 60",
+    "definition_courte": "Classement indiquant une étanchéité et isolation au feu pendant 60 minutes.",
+    "explication_pedagogique": "Assurer une protection incendie renforcée sur certains ouvrages.",
+    "exemple_utilisation": "les carreaux de plâtre de 70 mm pour gaines techniques indiquent une résistance au feu EI 60.",
+    "points_vigilance": [
+      "l’ouvrage doit être posé comme dans le PV ou l’avis technique."
+    ]
+  },
+  {
+    "terme": "DOE - Dossier des Ouvrages Exécutés",
+    "definition_courte": "Dossier remis en fin de chantier avec plans, fiches techniques, notices et justificatifs.",
+    "explication_pedagogique": "Permettre l’exploitation, la maintenance et la traçabilité des ouvrages.",
+    "exemple_utilisation": "le CCTP intègre les études, la synthèse et le DOE dans les obligations du lot.",
+    "points_vigilance": [
+      "archiver les fiches produits et plans de récolement au fil du chantier."
+    ]
+  },
+  {
+    "terme": "Doublage",
+    "definition_courte": "Parement ajouté devant un mur pour améliorer l’isolation, la finition ou les performances acoustiques.",
+    "explication_pedagogique": "Créer une paroi intérieure prête à recevoir peinture ou faïence.",
+    "exemple_utilisation": "le lot comprend doublages thermiques collés et doublages en laine minérale.",
+    "points_vigilance": [
+      "bien coordonner avec menuiseries extérieures, électricité, plomberie et étanchéité à l’air."
+    ]
+  },
+  {
+    "terme": "Doublage laine minérale 60+10",
+    "definition_courte": "Complexe associant un isolant en laine minérale et une plaque de plâtre de 10 mm.",
+    "explication_pedagogique": "Traiter l’isolation thermo-acoustique de murs séparatifs ou zones particulières.",
+    "exemple_utilisation": "le CCTP cite Calibel ou équivalent, avec bourrage en pied et tête.",
+    "points_vigilance": [
+      "contrôler l’épaisseur réelle, les performances et la continuité aux rives."
+    ]
+  },
+  {
+    "terme": "Doublage thermique collé",
+    "definition_courte": "Complexe isolant + plaque de plâtre collé directement sur un support maçonné ou béton.",
+    "explication_pedagogique": "Isoler les murs extérieurs ou séparatifs sans ossature métallique.",
+    "exemple_utilisation": "le CCTP cite Prégytherm 120+13 avec R=4.75 m2.K/W minimum.",
+    "points_vigilance": [
+      "support propre, plan et compatible indispensable pour éviter décollement et faux aplomb."
+    ]
+  },
+  {
+    "terme": "Doublage thermo-acoustique",
+    "definition_courte": "Doublage visant à améliorer à la fois l’isolation thermique et l’isolation aux bruits.",
+    "explication_pedagogique": "Traiter les pertes de chaleur et les nuisances sonores.",
+    "exemple_utilisation": "les doublages collés et en laine minérale sont décrits comme thermo-acoustiques.",
+    "points_vigilance": [
+      "ne pas créer de ponts acoustiques aux pieds, têtes, gaines et coffres."
+    ]
+  },
+  {
+    "terme": "DTU",
+    "definition_courte": "Document Technique Unifié définissant les règles de l’art pour certains travaux.",
+    "explication_pedagogique": "Servir de référence de mise en œuvre et de contrôle.",
+    "exemple_utilisation": "les DTU font partie des documents de référence du lot plâtrerie.",
+    "points_vigilance": [
+      "toujours appliquer la dernière version contractuellement applicable."
+    ]
+  },
+  {
+    "terme": "DTU 25.41",
+    "definition_courte": "Référence de mise en œuvre des ouvrages en plaques de plâtre sur ossature.",
+    "explication_pedagogique": "Encadrer cloisons, doublages et habillages en plaques de plâtre.",
+    "exemple_utilisation": "la mise en œuvre des gaines techniques doit être conforme au DTU 25.41 et aux recommandations fabricant.",
+    "points_vigilance": [
+      "vérifier entraxes, vissage, plaques, joints et dispositions en pièces humides."
+    ]
+  },
+  {
+    "terme": "DTU 58.1",
+    "definition_courte": "Référence pour la mise en œuvre des plafonds suspendus.",
+    "explication_pedagogique": "Encadrer ossatures, suspentes, fixations et tolérances des plafonds.",
+    "exemple_utilisation": "les faux plafonds par plaques de plâtre sont à exécuter conformément au DTU 58.1.",
+    "points_vigilance": [
+      "ne pas improviser les suspentes ou entraxes hors système validé."
+    ]
+  },
+  {
+    "terme": "Échafaudages et moyens de levage",
+    "definition_courte": "Matériels permettant de travailler en hauteur ou de manutentionner les matériaux.",
+    "explication_pedagogique": "Réaliser les plafonds, cloisons hautes, trappes et ouvrages difficiles d’accès.",
+    "exemple_utilisation": "l’entreprise doit inclure ses échafaudages, moyens de levage et prestations de sécurité.",
+    "points_vigilance": [
+      "les moyens communs ne couvrent pas toujours les besoins propres du lot."
+    ]
+  },
+  {
+    "terme": "Emmaillotage des tuyaux",
+    "definition_courte": "Enveloppement de tuyaux avec laine minérale ou matériau isolant.",
+    "explication_pedagogique": "Limiter les bruits d’écoulement et améliorer la performance acoustique des gaines ou soffites.",
+    "exemple_utilisation": "les tuyaux dans gaines techniques et soffites sont emmaillotés par laine minérale de 45 mm.",
+    "points_vigilance": [
+      "un tuyau non emmailloté peut transmettre fortement les bruits d’eaux usées."
+    ]
+  },
+  {
+    "terme": "Enduit à joint",
+    "definition_courte": "Enduit utilisé avec les bandes pour traiter les raccords entre plaques.",
+    "explication_pedagogique": "Créer un parement continu avant peinture.",
+    "exemple_utilisation": "la finition des joints se fait par bandes et enduits suivant les prescriptions fabricant.",
+    "points_vigilance": [
+      "respecter les temps de séchage entre passes."
+    ]
+  },
+  {
+    "terme": "Enduit d’étanchéité",
+    "definition_courte": "Produit appliqué en raccord pour contribuer à l’étanchéité à l’air.",
+    "explication_pedagogique": "Traiter les rives, jonctions et traversées sensibles.",
+    "exemple_utilisation": "le CCTP prévoit bande autoadhésive ou enduit d’étanchéité pour certaines liaisons de faux plafond.",
+    "points_vigilance": [
+      "ne pas confondre enduit d’étanchéité à l’air et enduit décoratif de finition."
+    ]
+  },
+  {
+    "terme": "Enduit de finition",
+    "definition_courte": "Couche finale d’enduit permettant d’obtenir une surface prête à peindre.",
+    "explication_pedagogique": "Rattraper les bandes, protections d’angles et petites irrégularités.",
+    "exemple_utilisation": "les protections des angles saillants comprennent un enduit de finition.",
+    "points_vigilance": [
+      "la qualité finale dépend du ponçage, de la lumière et du niveau de finition attendu."
+    ]
+  },
+  {
+    "terme": "Enduit hydrofugé",
+    "definition_courte": "Enduit à joint adapté aux pièces humides.",
+    "explication_pedagogique": "Conserver la cohérence du système hydrofuge sur cloisons et doublages.",
+    "exemple_utilisation": "les cloisons hydrofuges utilisent un enduit hydrofugé prêt à l’emploi bénéficiant d’un avis technique.",
+    "points_vigilance": [
+      "utiliser les produits compatibles avec les plaques hydrofuges."
+    ]
+  },
+  {
+    "terme": "Entraxe des montants",
+    "definition_courte": "Distance régulière entre deux montants d’ossature.",
+    "explication_pedagogique": "Garantir la rigidité et la performance des cloisons ou gaines.",
+    "exemple_utilisation": "les montants sont souvent espacés tous les 60 cm.",
+    "points_vigilance": [
+      "adapter l’entraxe selon hauteur sous plafond, charges, feu et prescriptions fabricant."
+    ]
+  },
+  {
+    "terme": "Équerrage",
+    "definition_courte": "Vérification des angles à 90 degrés et de la géométrie des pièces.",
+    "explication_pedagogique": "Garantir une pose correcte des cloisons, menuiseries et revêtements.",
+    "exemple_utilisation": "le CCTP demande un autocontrôle avec équerrage et récolement.",
+    "points_vigilance": [
+      "les défauts d’équerrage compliquent pose de portes, placards et carrelages."
+    ]
+  },
+  {
+    "terme": "Étanchéité à l’air",
+    "definition_courte": "Capacité d’un bâtiment à limiter les infiltrations d’air non maîtrisées.",
+    "explication_pedagogique": "Respecter les performances thermiques et éviter les fuites autour des réseaux et doublages.",
+    "exemple_utilisation": "l’entreprise doit les rebouchages soignés et étanches autour des tuyaux et traversées.",
+    "points_vigilance": [
+      "chaque traversée de gaine, cloison ou faux plafond est un point sensible."
+    ]
+  },
+  {
+    "terme": "Étude thermique",
+    "definition_courte": "Document qui fixe les performances d’isolation et les résistances thermiques attendues.",
+    "explication_pedagogique": "Choisir les bons isolants et épaisseurs.",
+    "exemple_utilisation": "le doublage et l’isolation des combles doivent être conformes à l’étude thermique.",
+    "points_vigilance": [
+      "si l’entreprise propose un équivalent, elle doit prouver la cohérence thermique."
+    ]
+  },
+  {
+    "terme": "Évacuation des gravats",
+    "definition_courte": "Enlèvement des déchets produits par les travaux.",
+    "explication_pedagogique": "Maintenir le chantier propre et libérer les zones pour les corps d’état suivants.",
+    "exemple_utilisation": "le présent lot doit évacuer ses gravats dans ses propres bennes.",
+    "points_vigilance": [
+      "les déchets de plâtre doivent être triés selon les consignes chantier."
+    ]
+  },
+  {
+    "terme": "Exécution soignée",
+    "definition_courte": "Réalisation conforme aux règles de l’art avec attention portée aux détails.",
+    "explication_pedagogique": "Obtenir un support propre pour peinture, carrelage et réception.",
+    "exemple_utilisation": "la prestation de plâtre traditionnel est demandée soignée pour finition au lot peinture.",
+    "points_vigilance": [
+      "les défauts du plâtrier ressortent souvent au lot peinture."
+    ]
+  },
+  {
+    "terme": "Façon de gorge lumineuse",
+    "definition_courte": "Réalisation d’un creux ou volume dans le plafond pour intégrer un éclairage indirect.",
+    "explication_pedagogique": "Permettre au lot électricité d’incorporer des luminaires selon le dessin architectural.",
+    "exemple_utilisation": "les plafonds acoustiques comprennent des façons de gorge lumineuse périphérique.",
+    "points_vigilance": [
+      "coordination indispensable avec électricien avant fermeture."
+    ]
+  },
+  {
+    "terme": "Façon de joue",
+    "definition_courte": "Réalisation d’une face verticale latérale en plaque de plâtre.",
+    "explication_pedagogique": "Habiller une retombée, un soffite, un plafond ou un volume technique.",
+    "exemple_utilisation": "les plafonds acoustiques comprennent des façons de joues et de retombées.",
+    "points_vigilance": [
+      "contrôler alignement, angles et traitement des joints."
+    ]
+  },
+  {
+    "terme": "Façon de retombée",
+    "definition_courte": "Partie verticale descendant sous un plafond ou un ouvrage horizontal.",
+    "explication_pedagogique": "Masquer réseaux, créer un volume architectural ou traiter une différence de niveau.",
+    "exemple_utilisation": "les plafonds acoustiques et soffites comprennent des retombées en plaques de plâtre.",
+    "points_vigilance": [
+      "bien vérifier les hauteurs libres et l’impact sur les luminaires ou portes."
+    ]
+  },
+  {
+    "terme": "Faux aplomb",
+    "definition_courte": "Écart entre la paroi posée et la verticale parfaite.",
+    "explication_pedagogique": "Contrôler la qualité géométrique des cloisons.",
+    "exemple_utilisation": "le faux aplomb mesuré sur hauteur d’étage courante ne doit pas excéder 5 mm.",
+    "points_vigilance": [
+      "reprendre avant finition, car la peinture ne corrige pas la géométrie."
+    ]
+  },
+  {
+    "terme": "Faux plafond",
+    "definition_courte": "Plafond rapporté sous une structure existante.",
+    "explication_pedagogique": "Masquer les réseaux, améliorer le feu, l’acoustique ou l’esthétique.",
+    "exemple_utilisation": "le CCTP décrit des faux plafonds par plaque de plâtre CF 1/2h et CF 1h.",
+    "points_vigilance": [
+      "vérifier suspentes, ossature, feu, trappes, réseaux et étanchéité à l’air."
+    ]
+  },
+  {
+    "terme": "Faux plafond CF 1/2h",
+    "definition_courte": "Faux plafond conçu pour assurer une performance coupe-feu d’une demi-heure.",
+    "explication_pedagogique": "Protéger certains volumes selon notice de sécurité.",
+    "exemple_utilisation": "les maisons individuelles prévoient une plaque de plâtre de 13 mm sous combles.",
+    "points_vigilance": [
+      "respecter le système validé, notamment entraxes et fixations."
+    ]
+  },
+  {
+    "terme": "Faux plafond CF 1h",
+    "definition_courte": "Faux plafond conçu pour assurer une performance coupe-feu d’une heure.",
+    "explication_pedagogique": "Renforcer la protection incendie dans les zones concernées.",
+    "exemple_utilisation": "les logements collectifs prévoient deux plaques croisées de plâtre de 13 mm sous combles.",
+    "points_vigilance": [
+      "une plaque manquante ou mal vissée peut annuler la performance du système."
+    ]
+  },
+  {
+    "terme": "Fiche technique",
+    "definition_courte": "Document fabricant décrivant caractéristiques, mise en œuvre et performances d’un produit.",
+    "explication_pedagogique": "Justifier le choix et contrôler la conformité avant pose.",
+    "exemple_utilisation": "les produits doivent être soumis à l’acceptation du maître d’œuvre et du bureau de contrôle.",
+    "points_vigilance": [
+      "demander la fiche de la référence exacte et pas seulement une gamme générale."
+    ]
+  },
+  {
+    "terme": "Film décoratif blanc",
+    "definition_courte": "Finition de surface blanche appliquée sur certaines dalles de plafond.",
+    "explication_pedagogique": "Donner un aspect fini et lumineux aux plafonds démontables.",
+    "exemple_utilisation": "le plafond démontable type Tonga A22 est revêtu d’un film décoratif blanc.",
+    "points_vigilance": [
+      "protéger les dalles jusqu’à réception car elles marquent facilement."
+    ]
+  },
+  {
+    "terme": "Fixation du rail",
+    "definition_courte": "Ancrage mécanique du rail haut ou bas sur son support.",
+    "explication_pedagogique": "Assurer la tenue de la cloison ou de la gaine.",
+    "exemple_utilisation": "le rail doit être fixé à 5 cm minimum du bord de la dalle béton pour les cloisons 72/48.",
+    "points_vigilance": [
+      "adapter chevilles et entraxes au support réel."
+    ]
+  },
+  {
+    "terme": "Fourrure",
+    "definition_courte": "Profilé métallique secondaire servant à fixer les plaques de plâtre en plafond ou doublage.",
+    "explication_pedagogique": "Constituer l’ossature support des plaques.",
+    "exemple_utilisation": "les faux plafonds prévoient fourrures et suspentes en acier galvanisé.",
+    "points_vigilance": [
+      "une fourrure mal alignée crée des vagues visibles au plafond."
+    ]
+  },
+  {
+    "terme": "Fourrure d’ossature primaire",
+    "definition_courte": "Profil principal qui reprend les charges et sert de base à l’ossature du plafond.",
+    "explication_pedagogique": "Former le support principal des plaques lorsque nécessaire.",
+    "exemple_utilisation": "elle peut faire office de solivage selon nécessité dans les faux plafonds.",
+    "points_vigilance": [
+      "valider le dimensionnement selon portée, charge et système fabricant."
+    ]
+  },
+  {
+    "terme": "Gaine technique",
+    "definition_courte": "Volume fermé permettant le passage de réseaux : eau, VMC, électricité ou autres.",
+    "explication_pedagogique": "Regrouper les réseaux tout en respectant acoustique, feu et accessibilité aux trappes.",
+    "exemple_utilisation": "le lot décrit des gaines en carreaux de plâtre, gaines 37 dB et gaines 98/48.",
+    "points_vigilance": [
+      "ne pas fermer les gaines avant validation de la maîtrise d’œuvre lorsque le CCTP l’exige."
+    ]
+  },
+  {
+    "terme": "Gaine technique 37 dB",
+    "definition_courte": "Gaine dont l’indice acoustique Rw+C doit être au moins égal à 37 dB.",
+    "explication_pedagogique": "Limiter les bruits transmis depuis les réseaux vers les pièces humides.",
+    "exemple_utilisation": "elle est réalisée en Placostil 72/48 avec laine minérale 45 mm.",
+    "points_vigilance": [
+      "soigner trappes, joints et pieds de cloisons pour ne pas perdre la performance."
+    ]
+  },
+  {
+    "terme": "Gaine technique 98/48",
+    "definition_courte": "Gaine renforcée avec ossature métallique, plusieurs plaques de plâtre et laine minérale.",
+    "explication_pedagogique": "Traiter les gaines mitoyennes à une pièce principale en logements collectifs.",
+    "exemple_utilisation": "le CCTP prévoit quatre plaques, laine semi-rigide, EI 30 et isolation acoustique 48 dB(A).",
+    "points_vigilance": [
+      "vérifier les plans car le texte mentionne aussi une réalisation en 92/48."
+    ]
+  },
+  {
+    "terme": "Gorge lumineuse",
+    "definition_courte": "Volume périphérique destiné à recevoir un éclairage indirect.",
+    "explication_pedagogique": "Intégrer l’éclairage dans le plafond sans appareil apparent classique.",
+    "exemple_utilisation": "les plafonds acoustiques des halls prévoient des gorges lumineuses pour le lot électricité.",
+    "points_vigilance": [
+      "attention aux réservations, alimentations et accès maintenance."
+    ]
+  },
+  {
+    "terme": "Gravats / gravois",
+    "definition_courte": "Déchets de chantier issus des découpes, chutes et rebouchages.",
+    "explication_pedagogique": "Maintenir la sécurité, la propreté et la progression des autres corps d’état.",
+    "exemple_utilisation": "le CCTP impose nettoyage et évacuation des gravois en cours et fin de chantier.",
+    "points_vigilance": [
+      "les gravats au sol gênent les sols souples, carrelage et peinture."
+    ]
+  },
+  {
+    "terme": "GTL - Gaine Technique Logement",
+    "definition_courte": "Volume technique électrique du logement recevant tableau et réseaux associés.",
+    "explication_pedagogique": "Prévoir les cloisons autour des équipements électriques selon les prescriptions Enedis.",
+    "exemple_utilisation": "le CCTP mentionne les cloisons des GTL selon le guide pratique Enedis V11.",
+    "points_vigilance": [
+      "respecter les dimensions, accès et contraintes du lot électricité."
+    ]
+  },
+  {
+    "terme": "Halls",
+    "definition_courte": "Espaces d’entrée communs des bâtiments.",
+    "explication_pedagogique": "Recevoir des plafonds acoustiques et finitions plus visibles.",
+    "exemple_utilisation": "les plafonds acoustiques en plaques perforées sont localisés dans les halls des bâtiments A et B.",
+    "points_vigilance": [
+      "la finition doit être particulièrement soignée car zone très visible."
+    ]
+  },
+  {
+    "terme": "Hauteur sous plafond",
+    "definition_courte": "Distance entre sol fini et sous-face du plafond.",
+    "explication_pedagogique": "Déterminer l’entraxe, le nombre de montants et les systèmes de plafond ou gaine.",
+    "exemple_utilisation": "l’entraxe et le nombre de montants des gaines 98/48 sont adaptés selon la hauteur sous plafond.",
+    "points_vigilance": [
+      "toujours contrôler sur site avant fabrication ou commande."
+    ]
+  },
+  {
+    "terme": "Horizontalité",
+    "definition_courte": "Niveau horizontal d’une ossature ou d’un plafond.",
+    "explication_pedagogique": "Garantir un plafond régulier et des lignes propres.",
+    "exemple_utilisation": "l’écart de niveau avec le plan de référence doit être inférieur à 3 mm/m sans dépasser 2 cm.",
+    "points_vigilance": [
+      "contrôler avant pose des plaques et avant traitement des joints."
+    ]
+  },
+  {
+    "terme": "Huisserie",
+    "definition_courte": "Cadre de porte recevant le vantail.",
+    "explication_pedagogique": "Permettre la pose et le bon fonctionnement des portes de distribution.",
+    "exemple_utilisation": "les huisseries de portes de distribution dans les ouvrages de plâtrerie sont posées par ce lot.",
+    "points_vigilance": [
+      "vérifier aplomb, équerrage, réservation et niveau fini avant fermeture."
+    ]
+  },
+  {
+    "terme": "Humidité en pied de cloison",
+    "definition_courte": "Risque de remontée ou d’infiltration d’eau au bas des cloisons.",
+    "explication_pedagogique": "Prévenir gonflement, moisissures ou désordres en pièces humides.",
+    "exemple_utilisation": "le CCTP prévoit profilé plastique, polyane 100 microns et mastic souple aux pieds des pièces humides.",
+    "points_vigilance": [
+      "le relevé doit dépasser le sol fini d’au moins 2 cm selon le texte."
+    ]
+  },
+  {
+    "terme": "Hydrofuge",
+    "definition_courte": "Qualité d’un matériau traité pour mieux résister à l’humidité.",
+    "explication_pedagogique": "Adapter les plaques, joints et cloisons aux salles d’eau et salles de bains.",
+    "exemple_utilisation": "les parements hydrofuges de couleur verte sont demandés dans toutes les pièces humides.",
+    "points_vigilance": [
+      "utiliser aussi les accessoires et enduits compatibles hydrofuges."
+    ]
+  },
+  {
+    "terme": "Imposte de finition",
+    "definition_courte": "Partie haute ou élément de finition au-dessus d’un ouvrage.",
+    "explication_pedagogique": "Fermer proprement un volume, un placard ou une zone technique.",
+    "exemple_utilisation": "les faux plafonds mentionnent des impostes de finitions.",
+    "points_vigilance": [
+      "coordonner avec menuiseries et peinture pour éviter les raccords visibles."
+    ]
+  },
+  {
+    "terme": "Incorporation",
+    "definition_courte": "Intégration d’un élément dans une cloison ou un plafond avant fermeture.",
+    "explication_pedagogique": "Prévoir grilles, luminaires, réseaux, renforts et fixations.",
+    "exemple_utilisation": "le lot doit les réservations pour incorporations de grilles, luminaires, bouches et autres.",
+    "points_vigilance": [
+      "toute incorporation oubliée entraîne découpe et reprise."
+    ]
+  },
+  {
+    "terme": "Indice Rw",
+    "definition_courte": "Indice d’affaiblissement acoustique d’un ouvrage.",
+    "explication_pedagogique": "Évaluer la capacité d’une cloison ou gaine à réduire le bruit.",
+    "exemple_utilisation": "les cloisons 72/48 doivent répondre à Rw = 42 dB.",
+    "points_vigilance": [
+      "la performance annoncée suppose une mise en œuvre complète et conforme."
+    ]
+  },
+  {
+    "terme": "Indice Rw + C",
+    "definition_courte": "Indice acoustique tenant compte d’un correctif adapté à certains bruits.",
+    "explication_pedagogique": "Définir plus précisément l’exigence acoustique des gaines techniques.",
+    "exemple_utilisation": "les gaines techniques 37 dB doivent avoir un indice Rw + C supérieur ou égal à 37 dB.",
+    "points_vigilance": [
+      "demander le PV acoustique correspondant au système réellement posé."
+    ]
+  },
+  {
+    "terme": "Interface",
+    "definition_courte": "Zone de coordination entre deux lots ou deux ouvrages.",
+    "explication_pedagogique": "Éviter les oublis et conflits entre plâtrerie, menuiserie, électricité, plomberie et VMC.",
+    "exemple_utilisation": "le CCTP rappelle les interfaces, scellements, rebouchages et finitions liées aux autres entreprises.",
+    "points_vigilance": [
+      "les interfaces sont souvent les principales sources de réserves."
+    ]
+  },
+  {
+    "terme": "Isolant amovible",
+    "definition_courte": "Pièce isolante pouvant être retirée puis remise en place.",
+    "explication_pedagogique": "Assurer l’isolation au droit d’une trappe tout en permettant l’accès.",
+    "exemple_utilisation": "la trappe d’accès aux combles comporte un isolant amovible en laine polyester R 8,24 m2.K/W.",
+    "points_vigilance": [
+      "remettre correctement l’isolant après intervention en combles."
+    ]
+  },
+  {
+    "terme": "Isolation acoustique",
+    "definition_courte": "Capacité d’un ouvrage à limiter la transmission du bruit.",
+    "explication_pedagogique": "Protéger les logements des bruits de réseaux, escaliers, voisins et parties communes.",
+    "exemple_utilisation": "les gaines 98/48 annoncent une isolation acoustique de 48 dB(A).",
+    "points_vigilance": [
+      "les fuites aux joints et trappes peuvent ruiner la performance."
+    ]
+  },
+  {
+    "terme": "Isolation des combles",
+    "definition_courte": "Mise en place d’isolant dans le volume sous toiture.",
+    "explication_pedagogique": "Limiter les pertes thermiques par le haut du bâtiment.",
+    "exemple_utilisation": "le CCTP prévoit de la laine de roche soufflée de 515 mm avec R >= 11.5 m2.K/W.",
+    "points_vigilance": [
+      "protéger l’isolant autour des trappes, passages et zones de maintenance."
+    ]
+  },
+  {
+    "terme": "Isolation thermique",
+    "definition_courte": "Capacité d’un matériau à limiter les transferts de chaleur.",
+    "explication_pedagogique": "Respecter l’étude thermique et améliorer le confort.",
+    "exemple_utilisation": "les doublages et l’isolation des combles sont définis par résistance thermique R.",
+    "points_vigilance": [
+      "un pont thermique non traité peut dégrader le résultat global."
+    ]
+  },
+  {
+    "terme": "Jetrock 2",
+    "definition_courte": "Référence de laine de roche soufflée citée pour l’isolation des combles.",
+    "explication_pedagogique": "Atteindre la résistance thermique exigée par l’étude thermique.",
+    "exemple_utilisation": "le CCTP cite Jetrock 2 de chez Rockwool ou équivalent en 515 mm.",
+    "points_vigilance": [
+      "un équivalent doit prouver R, avis technique et certification ACERMI."
+    ]
+  },
+  {
+    "terme": "Joint acrylique",
+    "definition_courte": "Mastic souple peignable utilisé en finition entre ouvrages.",
+    "explication_pedagogique": "Fermer proprement les petits raccords avant peinture.",
+    "exemple_utilisation": "le plâtrier nettoie les surplus d’enduit pour permettre les joints acryliques par le lot peinture.",
+    "points_vigilance": [
+      "un joint acrylique n’est pas un traitement structurel, acoustique ou coupe-feu."
+    ]
+  },
+  {
+    "terme": "Joint souple",
+    "definition_courte": "Joint élastique capable d’absorber de petits mouvements.",
+    "explication_pedagogique": "Traiter les pieds de cloison et raccords sensibles à l’humidité ou à l’air.",
+    "exemple_utilisation": "les pieds de cloisons humides sont protégés avec mastic souple et polyane.",
+    "points_vigilance": [
+      "choisir un produit compatible avec support, humidité et finition."
+    ]
+  },
+  {
+    "terme": "Joint thermo-acoustique",
+    "definition_courte": "Joint destiné à traiter à la fois l’air, la thermique et l’acoustique.",
+    "explication_pedagogique": "Fermer le pied d’un doublage pour éviter fuites et transmissions.",
+    "exemple_utilisation": "le doublage Prégytherm prévoit un joint thermo-acoustique en pied pour l’étanchéité à l’air.",
+    "points_vigilance": [
+      "continuité indispensable sur toute la longueur, notamment aux angles."
+    ]
+  },
+  {
+    "terme": "Jonction",
+    "definition_courte": "Raccord entre deux éléments de construction.",
+    "explication_pedagogique": "Assurer continuité esthétique, acoustique, thermique, feu ou air selon le cas.",
+    "exemple_utilisation": "les ouvrages comprennent éléments de jonction, liaisons et sujétions diverses.",
+    "points_vigilance": [
+      "les jonctions mal traitées créent fissures, fuites d’air et ponts acoustiques."
+    ]
+  },
+  {
+    "terme": "Joue",
+    "definition_courte": "Face verticale latérale d’un habillage, d’un soffite ou d’une retombée.",
+    "explication_pedagogique": "Fermer proprement un volume technique ou architectural.",
+    "exemple_utilisation": "les plafonds acoustiques comprennent des façons de joues.",
+    "points_vigilance": [
+      "contrôler l’alignement avec les autres parois et les luminaires."
+    ]
+  },
+  {
+    "terme": "Laine de roche soufflée",
+    "definition_courte": "Isolant minéral projeté mécaniquement en vrac dans les combles.",
+    "explication_pedagogique": "Isoler de grandes surfaces irrégulières rapidement.",
+    "exemple_utilisation": "l’isolation des combles est prévue par laine de roche soufflée de 515 mm.",
+    "points_vigilance": [
+      "contrôler l’épaisseur après tassement et la présence de piges de repérage."
+    ]
+  },
+  {
+    "terme": "Laine de verre",
+    "definition_courte": "Isolant minéral fibreux utilisé en bourrage ou complément.",
+    "explication_pedagogique": "Limiter les ponts acoustiques ou thermiques dans certains vides.",
+    "exemple_utilisation": "le CCTP mentionne un bourrage par laine de verre en pied et tête de doublage.",
+    "points_vigilance": [
+      "porter les EPI adaptés lors de la manipulation."
+    ]
+  },
+  {
+    "terme": "Laine minérale",
+    "definition_courte": "Famille d’isolants fibreux comprenant laine de verre et laine de roche.",
+    "explication_pedagogique": "Améliorer thermique, acoustique et parfois comportement au feu.",
+    "exemple_utilisation": "elle est utilisée dans doublages, cloisons, gaines, plafonds et soffites.",
+    "points_vigilance": [
+      "ne pas comprimer excessivement si la performance dépend de l’épaisseur."
+    ]
+  },
+  {
+    "terme": "Laine polyester",
+    "definition_courte": "Isolant fibreux synthétique utilisé ici pour une pièce amovible.",
+    "explication_pedagogique": "Compléter l’isolation d’une trappe tout en restant manipulable.",
+    "exemple_utilisation": "la trappe d’accès aux combles prévoit un isolant amovible en laine polyester R 8,24.",
+    "points_vigilance": [
+      "s’assurer qu’il reste en place après chaque accès aux combles."
+    ]
+  },
+  {
+    "terme": "Liaison faux plafond / maçonnerie",
+    "definition_courte": "Raccord entre le faux plafond et un mur ou support maçonné.",
+    "explication_pedagogique": "Assurer continuité d’air, finition et parfois acoustique ou feu.",
+    "exemple_utilisation": "le CCTP demande un soin particulier aux liaisons faux-plafond/maçonnerie.",
+    "points_vigilance": [
+      "les rives sont des points sensibles aux fissures et fuites d’air."
+    ]
+  },
+  {
+    "terme": "Luminaires",
+    "definition_courte": "Appareils d’éclairage encastrés ou incorporés dans plafonds et gorges.",
+    "explication_pedagogique": "Coordonner réservations et ossatures avec le lot électricité.",
+    "exemple_utilisation": "les réservations de luminaires et gorges lumineuses sont prévues dans les plafonds.",
+    "points_vigilance": [
+      "vérifier dimensions, poids, dégagement thermique et accès maintenance."
+    ]
+  },
+  {
+    "terme": "Maître d’œuvre",
+    "definition_courte": "Intervenant qui conçoit, dirige et contrôle l’exécution des travaux.",
+    "explication_pedagogique": "Valider plans, produits, échantillons et choix techniques.",
+    "exemple_utilisation": "les produits doivent être soumis à l’acceptation du maître d’œuvre et du bureau de contrôle.",
+    "points_vigilance": [
+      "ne pas poser un produit non validé si le CCTP exige une approbation préalable."
+    ]
+  },
+  {
+    "terme": "Marque NF",
+    "definition_courte": "Marquage attestant la conformité d’un produit à une norme ou certification française.",
+    "explication_pedagogique": "Sécuriser la qualité et la reconnaissance des produits posés.",
+    "exemple_utilisation": "tous les produits doivent obligatoirement porter la marque NF selon le CCTP.",
+    "points_vigilance": [
+      "vérifier la marque sur la référence réellement fournie."
+    ]
+  },
+  {
+    "terme": "Mastic souple",
+    "definition_courte": "Produit de calfeutrement restant légèrement élastique après séchage.",
+    "explication_pedagogique": "Traiter les raccords en pied de cloison, l’air ou l’humidité selon le système.",
+    "exemple_utilisation": "les pieds de cloisons en pièces humides sont protégés par polyane et mastic souple.",
+    "points_vigilance": [
+      "choisir un mastic adapté au support et à la finition ultérieure."
+    ]
+  },
+  {
+    "terme": "Matelas de laine minérale semi-rigide",
+    "definition_courte": "Panneau isolant fibreux qui tient entre montants sans s’affaisser facilement.",
+    "explication_pedagogique": "Améliorer l’acoustique et le feu dans une gaine ou cloison.",
+    "exemple_utilisation": "les gaines 98/48 comportent un matelas de laine minérale semi-rigide entre montants.",
+    "points_vigilance": [
+      "découper à bonne largeur pour éviter vides ou compression excessive."
+    ]
+  },
+  {
+    "terme": "Mise à l’abri",
+    "definition_courte": "Protection du bâtiment et des matériaux contre les intempéries.",
+    "explication_pedagogique": "Éviter que les plaques et matériaux à base de plâtre ne prennent l’humidité.",
+    "exemple_utilisation": "le bâtiment doit être mis à l’abri et les matériaux à base de plâtre stockés à l’abri des intempéries.",
+    "points_vigilance": [
+      "des plaques humides peuvent se déformer, moisir ou perdre leurs performances."
+    ]
+  },
+  {
+    "terme": "Mise en œuvre",
+    "definition_courte": "Façon de poser un produit conformément aux règles et prescriptions.",
+    "explication_pedagogique": "Assurer la performance et la garantie des ouvrages.",
+    "exemple_utilisation": "le CCTP renvoie souvent aux prescriptions fabricant, avis CSTB et DTU.",
+    "points_vigilance": [
+      "un bon produit mal posé devient non conforme."
+    ]
+  },
+  {
+    "terme": "Montant métallique",
+    "definition_courte": "Profil vertical d’une ossature de cloison ou de gaine.",
+    "explication_pedagogique": "Recevoir les plaques et donner la rigidité à l’ouvrage.",
+    "exemple_utilisation": "les montants de 48 mm sont utilisés dans les cloisons 72/48 et gaines techniques.",
+    "points_vigilance": [
+      "respecter entraxes, doublages éventuels et renforts selon hauteur."
+    ]
+  },
+  {
+    "terme": "Mortier adhésif",
+    "definition_courte": "Colle à base de mortier utilisée pour fixer des complexes de doublage.",
+    "explication_pedagogique": "Assurer l’adhérence du doublage au mur support.",
+    "exemple_utilisation": "le doublage Prégytherm est collé avec le mortier adhésif du fabricant.",
+    "points_vigilance": [
+      "utiliser le produit compatible avec le complexe, pas une colle quelconque."
+    ]
+  },
+  {
+    "terme": "Mousse de polyuréthane",
+    "definition_courte": "Mousse expansive ou souple utilisée en calfeutrement selon prescriptions.",
+    "explication_pedagogique": "Traiter certains pieds de cloisons hydrofuges ou vides.",
+    "exemple_utilisation": "les cloisons hydrofuges prévoient un calfeutrement en mousse de polyuréthane et joints souples.",
+    "points_vigilance": [
+      "ne pas surdoser : l’expansion peut déformer ou salir les ouvrages."
+    ]
+  },
+  {
+    "terme": "Mur parpaing",
+    "definition_courte": "Mur en blocs béton maçonnés.",
+    "explication_pedagogique": "Servir de support à doublage ou enduit de plâtre traditionnel.",
+    "exemple_utilisation": "le doublage collé est prévu sur murs en blocs de parpaings ou voiles béton banché.",
+    "points_vigilance": [
+      "vérifier planéité, propreté et humidité avant collage."
+    ]
+  },
+  {
+    "terme": "Nettoyage du chantier",
+    "definition_courte": "Évacuation des déchets et nettoyage des zones de travail.",
+    "explication_pedagogique": "Laisser un support propre aux lots suivants.",
+    "exemple_utilisation": "le présent lot doit nettoyer les lieux et effacer les taches de plâtre ou colle sur les autres supports.",
+    "points_vigilance": [
+      "un mauvais nettoyage peut bloquer la pose des revêtements de sol."
+    ]
+  },
+  {
+    "terme": "NF P 01-010",
+    "definition_courte": "Norme citée pour les informations environnementales et sanitaires des produits de construction.",
+    "explication_pedagogique": "Fournir les données liées aux impacts sanitaires et environnementaux.",
+    "exemple_utilisation": "le CCTP y fait référence pour les déclarations ou étiquetages environnementaux.",
+    "points_vigilance": [
+      "vérifier si des FDES ou données actualisées sont demandées par ailleurs."
+    ]
+  },
+  {
+    "terme": "Niveau de référence",
+    "definition_courte": "Repère altimétrique utilisé pour contrôler hauteurs et horizontalité.",
+    "explication_pedagogique": "Régler correctement ossatures, plafonds, huisseries et trappes.",
+    "exemple_utilisation": "l’écart avec le plan de référence sert au contrôle de l’horizontalité.",
+    "points_vigilance": [
+      "un trait de niveau perdu ou déplacé crée des erreurs en cascade."
+    ]
+  },
+  {
+    "terme": "Notes de calcul",
+    "definition_courte": "Documents justifiant le dimensionnement d’un ouvrage.",
+    "explication_pedagogique": "Démontrer que l’ossature, les plafonds ou fixations tiennent les charges prévues.",
+    "exemple_utilisation": "les documents d’exécution comprennent plans, notes de calculs et carnets de détail si nécessaires.",
+    "points_vigilance": [
+      "prévoir les notes avant exécution lorsque le bureau de contrôle les réclame."
+    ]
+  },
+  {
+    "terme": "Ossature métallique",
+    "definition_courte": "Structure en rails, montants, fourrures et suspentes recevant les plaques.",
+    "explication_pedagogique": "Former cloisons, gaines, plafonds et soffites.",
+    "exemple_utilisation": "les cloisons Placostil, gaines techniques et plafonds sont réalisés sur ossature métallique.",
+    "points_vigilance": [
+      "respecter les entraxes et composants du système fabricant."
+    ]
+  },
+  {
+    "terme": "Ossature primaire",
+    "definition_courte": "Structure principale du plafond qui reprend les charges avant les fourrures secondaires.",
+    "explication_pedagogique": "Assurer la tenue du plafond lorsque la portée ou les charges l’exigent.",
+    "exemple_utilisation": "elle est prévue “si nécessaire” dans les faux plafonds et soffites.",
+    "points_vigilance": [
+      "ne pas supprimer une ossature primaire sans vérification technique."
+    ]
+  },
+  {
+    "terme": "Ouverture invisible par pousser-lâcher",
+    "definition_courte": "Système permettant d’ouvrir une trappe par pression sans poignée apparente.",
+    "explication_pedagogique": "Obtenir une finition discrète et propre.",
+    "exemple_utilisation": "la trappe d’accès aux combles RT-W est décrite avec ouverture invisible par pousser-lâcher.",
+    "points_vigilance": [
+      "contrôler le réglage avant réception pour éviter blocage ou mauvais affleurement."
+    ]
+  },
+  {
+    "terme": "Ouvrage de menuiserie posé par le plâtrier",
+    "definition_courte": "Élément fourni par le lot menuiserie mais posé dans un ouvrage de plâtrerie.",
+    "explication_pedagogique": "Coordonner les interfaces entre cloisons, huisseries et trappes.",
+    "exemple_utilisation": "le plâtrier pose les huisseries de portes, trappes de visite et trappes d’accès dans certains cas.",
+    "points_vigilance": [
+      "bien vérifier qui fournit, qui pose et qui règle."
+    ]
+  },
+  {
+    "terme": "Panneau isolant",
+    "definition_courte": "Panneau destiné à améliorer la performance thermique ou acoustique.",
+    "explication_pedagogique": "Constituer la partie isolante d’un doublage ou d’un plafond.",
+    "exemple_utilisation": "le doublage laine minérale associe une plaque de plâtre à un panneau isolant.",
+    "points_vigilance": [
+      "vérifier épaisseur, conductivité, classement feu et certification."
+    ]
+  },
+  {
+    "terme": "Pare-vapeur",
+    "definition_courte": "Membrane limitant la migration de vapeur d’eau dans une paroi isolée.",
+    "explication_pedagogique": "Protéger l’isolation et contribuer à l’étanchéité à l’air.",
+    "exemple_utilisation": "le CCTP demande un soin particulier aux rives entre pare-vapeur et faux plafond.",
+    "points_vigilance": [
+      "percements et raccords doivent être traités avec bandes ou produits adaptés."
+    ]
+  },
+  {
+    "terme": "Parement",
+    "definition_courte": "Face visible ou support de finition d’une plaque ou d’un doublage.",
+    "explication_pedagogique": "Recevoir peinture, faïence ou autre revêtement.",
+    "exemple_utilisation": "le CCTP exige un état de surface permettant les revêtements de finition.",
+    "points_vigilance": [
+      "les défauts du parement ressortent après peinture."
+    ]
+  },
+  {
+    "terme": "Parement hydrofuge",
+    "definition_courte": "Face en plaque hydrofuge adaptée aux pièces humides.",
+    "explication_pedagogique": "Limiter les désordres liés à l’humidité.",
+    "exemple_utilisation": "les plaques vertes sont demandées dans toutes les pièces humides.",
+    "points_vigilance": [
+      "toujours associer avec joints et protections en pied adaptés."
+    ]
+  },
+  {
+    "terme": "PHALTEX",
+    "definition_courte": "Produit cité comme résilient acoustique ou équivalent sous rails.",
+    "explication_pedagogique": "Limiter la transmission vibratoire entre cloison et support.",
+    "exemple_utilisation": "les cloisons 72/48 prévoient une mousse souple de type Phaltex sous rails hauts et bas.",
+    "points_vigilance": [
+      "ne pas interrompre le résilient aux raccords."
+    ]
+  },
+  {
+    "terme": "Pièce humide",
+    "definition_courte": "Local exposé à l’eau ou à l’humidité : salle d’eau, salle de bains, WC selon cas.",
+    "explication_pedagogique": "Adapter plaques, joints, pieds de cloisons et protections.",
+    "exemple_utilisation": "les pièces humides reçoivent parements hydrofuges et protections en pied.",
+    "points_vigilance": [
+      "ne pas traiter une pièce humide comme une pièce sèche."
+    ]
+  },
+  {
+    "terme": "Placopan 50",
+    "definition_courte": "Cloison préfabriquée de 50 mm à âme alvéolaire.",
+    "explication_pedagogique": "Réaliser les cloisons de distribution courantes des logements.",
+    "exemple_utilisation": "le CCTP cite Placopan 50 de Placoplâtre ou équivalent.",
+    "points_vigilance": [
+      "prévoir renforts spécifiques pour charges lourdes et accessoires."
+    ]
+  },
+  {
+    "terme": "Placostil 72/48",
+    "definition_courte": "Système de cloison sur rails et montants de 48 mm avec plaques de plâtre.",
+    "explication_pedagogique": "Créer des cloisons acoustiques ou techniques plus performantes qu’un panneau alvéolaire.",
+    "exemple_utilisation": "utilisé pour cloisons donnant sur trémies, autour des gaines et ballons thermodynamiques.",
+    "points_vigilance": [
+      "respecter le guide fabricant, notamment près des trémies d’escalier."
+    ]
+  },
+  {
+    "terme": "Plafond acoustique",
+    "definition_courte": "Plafond conçu pour absorber les sons et limiter la réverbération.",
+    "explication_pedagogique": "Améliorer le confort acoustique des halls ou circulations.",
+    "exemple_utilisation": "le CCTP prévoit des plaques perforées avec laine minérale et voile noir.",
+    "points_vigilance": [
+      "faire valider les calculs d’absorption et la fiche technique."
+    ]
+  },
+  {
+    "terme": "Plafond acoustique démontable",
+    "definition_courte": "Plafond suspendu composé de dalles démontables sur ossature apparente.",
+    "explication_pedagogique": "Permettre l’accès aux réseaux au-dessus du plafond tout en traitant l’acoustique.",
+    "exemple_utilisation": "les circulations communes reçoivent des dalles type Tonga A22 sur ossature T15 ou T24.",
+    "points_vigilance": [
+      "prévoir les découpes propres autour luminaires, bouches et trappes."
+    ]
+  },
+  {
+    "terme": "Plafond suspendu",
+    "definition_courte": "Plafond porté par une ossature accrochée à la structure.",
+    "explication_pedagogique": "Créer un faux plafond démontable ou fixe pour réseaux, acoustique ou feu.",
+    "exemple_utilisation": "les plafonds acoustiques et démontables sont des plafonds suspendus.",
+    "points_vigilance": [
+      "contrôler suspentes, charges admissibles et hauteur finie."
+    ]
+  },
+  {
+    "terme": "Plan de traçage",
+    "definition_courte": "Plan indiquant l’implantation précise des cloisons, plafonds et ouvrages.",
+    "explication_pedagogique": "Préparer le chantier et éviter les erreurs d’implantation.",
+    "exemple_utilisation": "les documents d’exécution peuvent comprendre des plans de traçage.",
+    "points_vigilance": [
+      "faire valider avant pose des rails."
+    ]
+  },
+  {
+    "terme": "Planéité",
+    "definition_courte": "Qualité d’une surface plane sans creux ni bosses excessifs.",
+    "explication_pedagogique": "Obtenir un support correct pour finitions et alignements.",
+    "exemple_utilisation": "la sous-face de l’ossature ne doit pas présenter d’irrégularité supérieure à 5 mm sous règle de 2 m.",
+    "points_vigilance": [
+      "contrôler avec règle adaptée avant fermeture."
+    ]
+  },
+  {
+    "terme": "Plans d’exécution",
+    "definition_courte": "Plans détaillés établis par l’entreprise pour réaliser les ouvrages.",
+    "explication_pedagogique": "Préciser dimensions, détails, supports, fixations et réservations.",
+    "exemple_utilisation": "l’entreprise doit proposer schémas, plans et détails d’exécution avant réalisation.",
+    "points_vigilance": [
+      "un plan non visé ne doit pas servir de base définitive au chantier."
+    ]
+  },
+  {
+    "terme": "Plaque de plâtre",
+    "definition_courte": "Panneau composé d’un cœur en plâtre entre deux parements cartonnés.",
+    "explication_pedagogique": "Réaliser cloisons, doublages, plafonds et habillages intérieurs.",
+    "exemple_utilisation": "le lot utilise des plaques de 10 mm, 13 mm, hydrofuges, perforées ou multiples selon ouvrages.",
+    "points_vigilance": [
+      "choisir le bon type : standard, hydrofuge, acoustique, feu ou perforé."
+    ]
+  },
+  {
+    "terme": "Plaque perforée",
+    "definition_courte": "Plaque de plâtre avec perforations régulières, souvent associée à un voile et isolant.",
+    "explication_pedagogique": "Améliorer l’absorption acoustique d’un plafond.",
+    "exemple_utilisation": "les halls reçoivent des plaques perforées type Rigitone 8-15-20 super ou équivalent.",
+    "points_vigilance": [
+      "respecter calepinage, taux de perforation et traitement des joints spécifique."
+    ]
+  },
+  {
+    "terme": "Plâtre traditionnel",
+    "definition_courte": "Enduit de plâtre appliqué manuellement sur support maçonné.",
+    "explication_pedagogique": "Créer une surface lissée prête pour peinture.",
+    "exemple_utilisation": "un enduit de plâtre traditionnel lissé est prévu sur mur parpaing.",
+    "points_vigilance": [
+      "la planéité et le séchage doivent être suffisants avant peinture."
+    ]
+  },
+  {
+    "terme": "Polyane 100 microns",
+    "definition_courte": "Film plastique mince utilisé comme protection en pied de cloison humide.",
+    "explication_pedagogique": "Limiter les remontées d’humidité dans les plaques ou cloisons.",
+    "exemple_utilisation": "le CCTP prévoit un polyane 100 microns relevé d’au moins 2 cm au-dessus du sol fini.",
+    "points_vigilance": [
+      "le relevé doit rester continu et non percé."
+    ]
+  },
+  {
+    "terme": "Pont acoustique",
+    "definition_courte": "Passage indirect du bruit par une liaison rigide ou un vide mal traité.",
+    "explication_pedagogique": "Préserver les performances des cloisons et doublages.",
+    "exemple_utilisation": "le CCTP prévoit bourrage en laine de verre en pied et tête pour éviter les ponts acoustiques.",
+    "points_vigilance": [
+      "rails, gaines, trappes et percements sont des points sensibles."
+    ]
+  },
+  {
+    "terme": "Pont thermique",
+    "definition_courte": "Zone où la chaleur passe plus facilement à travers l’enveloppe du bâtiment.",
+    "explication_pedagogique": "Préserver la performance énergétique et éviter condensation ou inconfort.",
+    "exemple_utilisation": "les doublages thermiques et coffres de VR doivent être posés soigneusement.",
+    "points_vigilance": [
+      "toute rupture d’isolant autour d’un réseau ou coffre peut créer un point froid."
+    ]
+  },
+  {
+    "terme": "Pose droite",
+    "definition_courte": "Pose alignée suivant une trame régulière, sans orientation particulière.",
+    "explication_pedagogique": "Donner un plafond ou un ouvrage régulier.",
+    "exemple_utilisation": "les plafonds acoustiques et démontables sont prévus en pose droite.",
+    "points_vigilance": [
+      "vérifier l’alignement avec les axes architecte et luminaires."
+    ]
+  },
+  {
+    "terme": "Prégytherm 120+13",
+    "definition_courte": "Complexe de doublage associant isolant PSE et plaque de plâtre de 13 mm.",
+    "explication_pedagogique": "Réaliser un doublage thermique collé performant.",
+    "exemple_utilisation": "le CCTP cite Prégytherm 120+13 de Siniat ou similaire avec R=4.75 minimum.",
+    "points_vigilance": [
+      "valider la performance et la compatibilité avec le support."
+    ]
+  },
+  {
+    "terme": "Profil de rive",
+    "definition_courte": "Profil de finition placé en bord de plafond ou d’ouvrage.",
+    "explication_pedagogique": "Assurer une bordure propre et alignée.",
+    "exemple_utilisation": "les profils de rives font partie des accessoires dont les teintes peuvent être choisies par le maître d’œuvre.",
+    "points_vigilance": [
+      "coordonner couleur et finition avant commande."
+    ]
+  },
+  {
+    "terme": "Profilé plastique rigide",
+    "definition_courte": "Profil posé en pied de cloison pour protéger contre l’humidité.",
+    "explication_pedagogique": "Limiter les remontées d’eau dans les pièces humides.",
+    "exemple_utilisation": "les pieds de cloisons humides sont protégés par profilé plastique rigide, polyane et mastic.",
+    "points_vigilance": [
+      "ne pas l’oublier derrière les zones qui seront ensuite carrelées."
+    ]
+  },
+  {
+    "terme": "Protection des ouvrages",
+    "definition_courte": "Mesures prises pour éviter dégradation des ouvrages posés.",
+    "explication_pedagogique": "Maintenir les plaques, plafonds et finitions en bon état jusqu’à réception.",
+    "exemple_utilisation": "l’entreprise doit protéger ses ouvrages jusqu’à réception des travaux.",
+    "points_vigilance": [
+      "les plaques et dalles de plafond sont sensibles aux chocs et à l’humidité."
+    ]
+  },
+  {
+    "terme": "PSE élastifié",
+    "definition_courte": "Polystyrène expansé traité pour améliorer certaines performances, notamment acoustiques.",
+    "explication_pedagogique": "Constituer l’isolant d’un doublage thermo-acoustique collé.",
+    "exemple_utilisation": "le Prégytherm 120+13 comporte un isolant thermique en PSE élastifié.",
+    "points_vigilance": [
+      "vérifier que le produit proposé offre les mêmes performances."
+    ]
+  },
+  {
+    "terme": "Pulvérulence superficielle",
+    "definition_courte": "Surface qui poudre ou farine lorsqu’on la frotte.",
+    "explication_pedagogique": "Identifier un support ou parement non prêt pour finition.",
+    "exemple_utilisation": "le CCTP indique que le parement ne doit présenter aucune pulvérulence superficielle.",
+    "points_vigilance": [
+      "un support pulvérulent doit être repris avant peinture ou collage."
+    ]
+  },
+  {
+    "terme": "Qualité hydrofuge",
+    "definition_courte": "Niveau de résistance à l’humidité demandé pour certains ouvrages.",
+    "explication_pedagogique": "Adapter les cloisons et parements aux locaux humides.",
+    "exemple_utilisation": "les cloisons de distribution des salles d’eau et salles de bains sont en qualité hydrofuge.",
+    "points_vigilance": [
+      "la qualité hydrofuge doit concerner aussi joints, enduits et protections en pied."
+    ]
+  },
+  {
+    "terme": "R - résistance thermique",
+    "definition_courte": "Valeur indiquant la capacité d’un matériau ou complexe à s’opposer au passage de la chaleur.",
+    "explication_pedagogique": "Vérifier la conformité à l’étude thermique.",
+    "exemple_utilisation": "le doublage Prégytherm exige R=4.75 et l’isolation des combles R >= 11.5 m2.K/W.",
+    "points_vigilance": [
+      "plus R est élevé, plus l’isolation est performante."
+    ]
+  },
+  {
+    "terme": "Rail bas",
+    "definition_courte": "Profil horizontal fixé au sol pour recevoir les montants d’une cloison.",
+    "explication_pedagogique": "Définir l’implantation et maintenir la base de l’ossature.",
+    "exemple_utilisation": "les cloisons sur ossature métallique comportent rails et montants.",
+    "points_vigilance": [
+      "traiter résilient, humidité et fixation selon support."
+    ]
+  },
+  {
+    "terme": "Rail haut",
+    "definition_courte": "Profil horizontal fixé en tête de cloison.",
+    "explication_pedagogique": "Maintenir les montants et assurer la stabilité de la cloison.",
+    "exemple_utilisation": "les cloisons Placopan s’assemblent sur rail haut et semelles basses.",
+    "points_vigilance": [
+      "prévoir jeu, liaison et calfeutrement selon prescriptions fabricant."
+    ]
+  },
+  {
+    "terme": "Réaction au feu",
+    "definition_courte": "Comportement d’un matériau lorsqu’il est exposé au feu.",
+    "explication_pedagogique": "Classer les matériaux utilisés dans les cloisons, plafonds et doublages.",
+    "exemple_utilisation": "plusieurs ouvrages indiquent B-s1,d0, A2-s1,d0 ou M1 minimum.",
+    "points_vigilance": [
+      "ne pas confondre avec la résistance au feu de l’ouvrage complet."
+    ]
+  },
+  {
+    "terme": "Réception des supports",
+    "definition_courte": "Contrôle de l’état des supports avant de démarrer les travaux.",
+    "explication_pedagogique": "Éviter de poser sur un support non conforme.",
+    "exemple_utilisation": "l’entreprise doit vérifier l’état des supports livrés par les autres entreprises.",
+    "points_vigilance": [
+      "signaler immédiatement les défauts au maître d’œuvre."
+    ]
+  },
+  {
+    "terme": "Récolement",
+    "definition_courte": "Relevé de ce qui a réellement été exécuté.",
+    "explication_pedagogique": "Mettre à jour les plans et justifier les ouvrages en fin de chantier.",
+    "exemple_utilisation": "le CCTP demande un autocontrôle avec équerrage et récolement à fournir.",
+    "points_vigilance": [
+      "utile pour retrouver renforts, trappes et passages de réseaux."
+    ]
+  },
+  {
+    "terme": "Référence produit",
+    "definition_courte": "Nom commercial ou technique précis du produit retenu.",
+    "explication_pedagogique": "Comparer le produit posé à celui prévu au marché.",
+    "exemple_utilisation": "le CCTP cite Prégytherm, Calibel, Placopan, Placostil, Rigitone, Tonga et autres équivalents.",
+    "points_vigilance": [
+      "un “équivalent” doit être validé et prouver ses performances."
+    ]
+  },
+  {
+    "terme": "Règle de 2 mètres",
+    "definition_courte": "Outil utilisé pour contrôler la planéité d’une surface ou ossature.",
+    "explication_pedagogique": "Mesurer les irrégularités sur une longueur représentative.",
+    "exemple_utilisation": "la planéité de la sous-face d’ossature est contrôlée sous une règle de 2,00 m.",
+    "points_vigilance": [
+      "faire le contrôle dans plusieurs directions et pas seulement à un endroit."
+    ]
+  },
+  {
+    "terme": "Réglementation incendie",
+    "definition_courte": "Ensemble des exigences relatives à la sécurité contre l’incendie.",
+    "explication_pedagogique": "Définir les performances feu des parois, plafonds, gaines et traversées.",
+    "exemple_utilisation": "la sécurité incendie fait partie des documents réglementaires à respecter.",
+    "points_vigilance": [
+      "la notice de sécurité et les observations du bureau de contrôle priment en cas de doute."
+    ]
+  },
+  {
+    "terme": "Renfort bois",
+    "definition_courte": "Pièce en bois incorporée dans une cloison pour recevoir une fixation.",
+    "explication_pedagogique": "Permettre la pose fiable d’accessoires, barres d’appui ou meubles.",
+    "exemple_utilisation": "des renforts bois sont demandés pour les barres d’accroche des accessoires de salle de bain PMR.",
+    "points_vigilance": [
+      "repérer précisément leur position pour les lots suivants."
+    ]
+  },
+  {
+    "terme": "Renfort ponctuel",
+    "definition_courte": "Renforcement localisé dans une cloison ou un doublage.",
+    "explication_pedagogique": "Permettre la fixation d’un équipement spécifique.",
+    "exemple_utilisation": "le CCTP demande toutes les sujétions nécessaires aux renforts ponctuels.",
+    "points_vigilance": [
+      "à prévoir avant fermeture, surtout pour radiateurs, lavabos et meubles hauts."
+    ]
+  },
+  {
+    "terme": "Réservations",
+    "definition_courte": "Ouvertures ou espaces prévus dans un ouvrage pour le passage d’équipements.",
+    "explication_pedagogique": "Permettre l’intégration de réseaux, grilles, luminaires, bouches ou trappes.",
+    "exemple_utilisation": "le lot doit l’ensemble des réservations en cloisons ou plafonds.",
+    "points_vigilance": [
+      "les dimensions doivent être coordonnées avec chaque corps d’état concerné."
+    ]
+  },
+  {
+    "terme": "Résilient acoustique",
+    "definition_courte": "Matériau souple interposé pour réduire les transmissions de bruit et vibrations.",
+    "explication_pedagogique": "Améliorer la performance acoustique d’une cloison.",
+    "exemple_utilisation": "les cloisons 72/48 prévoient un résilient acoustique périphérique.",
+    "points_vigilance": [
+      "la continuité du résilient est aussi importante que le matériau lui-même."
+    ]
+  },
+  {
+    "terme": "Retombée",
+    "definition_courte": "Partie verticale descendant sous plafond pour fermer un volume ou masquer un réseau.",
+    "explication_pedagogique": "Habiller un soffite, créer une gorge ou finir un plafond.",
+    "exemple_utilisation": "les plafonds acoustiques comprennent retombées en plaques de plâtre.",
+    "points_vigilance": [
+      "surveiller les hauteurs libres et alignements avec menuiseries."
+    ]
+  },
+  {
+    "terme": "Rigitone 8-15-20 super",
+    "definition_courte": "Référence de plaque de plâtre perforée acoustique.",
+    "explication_pedagogique": "Créer un plafond absorbant dans les halls.",
+    "exemple_utilisation": "le CCTP cite Rigitone 8-15-20 super de Placoplâtre ou équivalent avec taux de perforation 18% minimum.",
+    "points_vigilance": [
+      "respecter les prescriptions spécifiques de joints et calepinage."
+    ]
+  },
+  {
+    "terme": "Rive de plafond",
+    "definition_courte": "Bord du plafond au contact d’un mur ou d’un autre ouvrage.",
+    "explication_pedagogique": "Traiter la finition, l’air et parfois l’acoustique.",
+    "exemple_utilisation": "le CCTP demande un soin particulier au traitement des joints et rives.",
+    "points_vigilance": [
+      "les rives mal traitées fissurent ou fuient à l’air."
+    ]
+  },
+  {
+    "terme": "Rw + C 37 dB",
+    "definition_courte": "Performance acoustique minimale demandée pour certaines gaines techniques.",
+    "explication_pedagogique": "Limiter les bruits de réseaux vers les pièces humides.",
+    "exemple_utilisation": "les gaines techniques 37 dB doivent avoir Rw + C supérieur ou égal à 37 dB.",
+    "points_vigilance": [
+      "les trappes et traversées doivent être compatibles avec la performance."
+    ]
+  },
+  {
+    "terme": "Rw 42 dB",
+    "definition_courte": "Performance acoustique demandée pour certaines cloisons.",
+    "explication_pedagogique": "Réduire les bruits entre zones séparées.",
+    "exemple_utilisation": "les cloisons 72/48 doivent répondre à Rw = 42 dB.",
+    "points_vigilance": [
+      "la performance suppose plaques, laine, résilient et joints conformes."
+    ]
+  },
+  {
+    "terme": "Salle d’eau",
+    "definition_courte": "Pièce humide comportant douche ou équipements sanitaires.",
+    "explication_pedagogique": "Déterminer l’usage de plaques hydrofuges, protections en pied et renforts PMR.",
+    "exemple_utilisation": "les cloisons des salles d’eau et salles de bains sont traitées en qualité hydrofuge.",
+    "points_vigilance": [
+      "anticiper les supports pour barres, sièges, meubles et faïence."
+    ]
+  },
+  {
+    "terme": "Scellement",
+    "definition_courte": "Fixation d’un élément par mortier, plâtre ou autre produit dans un support.",
+    "explication_pedagogique": "Maintenir huisseries, accessoires ou éléments incorporés.",
+    "exemple_utilisation": "les scellements et rebouchages sont exécutés par chaque entreprise pour ses travaux, avec lissages de finition par le plâtrier.",
+    "points_vigilance": [
+      "bien définir qui fait quoi entre lots pour éviter les oublis."
+    ]
+  },
+  {
+    "terme": "Semelle basse",
+    "definition_courte": "Pièce horizontale au sol recevant une cloison préfabriquée ou un panneau.",
+    "explication_pedagogique": "Guider et stabiliser la base de la cloison.",
+    "exemple_utilisation": "les cloisons Placopan s’assemblent sur rail haut et semelles basses.",
+    "points_vigilance": [
+      "vérifier l’implantation au trait bleu avant pose."
+    ]
+  },
+  {
+    "terme": "Siniat",
+    "definition_courte": "Fabricant cité comme référence pour certains systèmes de doublage.",
+    "explication_pedagogique": "Identifier le niveau de performance attendu.",
+    "exemple_utilisation": "le CCTP cite Prégytherm 120+13 de chez Siniat ou similaire.",
+    "points_vigilance": [
+      "un similaire doit être validé avant commande."
+    ]
+  },
+  {
+    "terme": "Soffite",
+    "definition_courte": "Habillage en plafond servant à masquer ou protéger un dévoiement de réseau.",
+    "explication_pedagogique": "Cacher des tuyaux et assurer feu ou acoustique selon localisation.",
+    "exemple_utilisation": "les soffites sont réalisés en plaques de plâtre sur ossature métallique avec laine minérale.",
+    "points_vigilance": [
+      "les soffites communes aux locaux communs et logements sont CF 1H."
+    ]
+  },
+  {
+    "terme": "Sol fini",
+    "definition_courte": "Niveau final du sol après revêtement.",
+    "explication_pedagogique": "Servir de référence pour relevés, protections et hauteurs.",
+    "exemple_utilisation": "le polyane en pied de cloison doit dépasser après relevé d’au moins 2 cm du niveau du sol fini.",
+    "points_vigilance": [
+      "bien connaître l’épaisseur des revêtements de sol avant exécution."
+    ]
+  },
+  {
+    "terme": "Soufflage mécanique",
+    "definition_courte": "Mise en œuvre d’un isolant en vrac par machine.",
+    "explication_pedagogique": "Répartir la laine soufflée dans les combles.",
+    "exemple_utilisation": "l’isolation des combles est mise en œuvre par soufflage mécanique sur support en plaques de plâtre.",
+    "points_vigilance": [
+      "contrôler densité, épaisseur et répartition homogène."
+    ]
+  },
+  {
+    "terme": "Sous-face",
+    "definition_courte": "Face inférieure visible ou support d’un élément horizontal.",
+    "explication_pedagogique": "Contrôler la planéité d’un plafond ou habillage.",
+    "exemple_utilisation": "la sous-face de l’ossature ne doit pas présenter d’irrégularité excessive.",
+    "points_vigilance": [
+      "une sous-face ondulée se voit fortement après éclairage."
+    ]
+  },
+  {
+    "terme": "Support",
+    "definition_courte": "Surface ou structure sur laquelle on vient poser un ouvrage.",
+    "explication_pedagogique": "Recevoir doublage, cloison, plafond, suspente ou enduit.",
+    "exemple_utilisation": "les supports cités sont murs parpaings, voiles béton, plancher béton et plafond plâtre.",
+    "points_vigilance": [
+      "toujours réceptionner le support avant intervention."
+    ]
+  },
+  {
+    "terme": "Suspente",
+    "definition_courte": "Pièce reliant une ossature de plafond au support porteur.",
+    "explication_pedagogique": "Tenir le plafond suspendu à la bonne hauteur.",
+    "exemple_utilisation": "les fourrures et suspentes en acier galvanisé assurent la liaison avec les solives bois.",
+    "points_vigilance": [
+      "utiliser le bon type de suspente selon support, feu et charge."
+    ]
+  },
+  {
+    "terme": "Synthèse",
+    "definition_courte": "Coordination des plans et réseaux entre lots techniques et architecturaux.",
+    "explication_pedagogique": "Éviter conflits entre cloisons, plafonds, gaines, luminaires, VMC et plomberie.",
+    "exemple_utilisation": "le lot mentionne Études - synthèse - DOE.",
+    "points_vigilance": [
+      "une mauvaise synthèse crée des réservations oubliées et des reprises de plafond."
+    ]
+  },
+  {
+    "terme": "T15 / T24",
+    "definition_courte": "Largeurs courantes de profils d’ossature apparente pour plafonds démontables.",
+    "explication_pedagogique": "Porter les dalles de plafond et définir l’aspect du quadrillage.",
+    "exemple_utilisation": "le plafond démontable type Tonga A22 est posé sur ossature métallique laquée blanche T15 ou T24.",
+    "points_vigilance": [
+      "valider le choix avec l’architecte et les dimensions des dalles."
+    ]
+  },
+  {
+    "terme": "Taux de perforation",
+    "definition_courte": "Pourcentage de surface ouverte sur une plaque perforée.",
+    "explication_pedagogique": "Influencer l’absorption acoustique du plafond.",
+    "exemple_utilisation": "les plaques Rigitone doivent avoir un taux de perforation de 18% minimum.",
+    "points_vigilance": [
+      "un modèle visuellement proche peut avoir une performance acoustique différente."
+    ]
+  },
+  {
+    "terme": "Tête de cloison",
+    "definition_courte": "Extrémité ou about vertical visible d’une cloison.",
+    "explication_pedagogique": "Recevoir protection d’angle et finition.",
+    "exemple_utilisation": "les cloisons de distribution comprennent les têtes de cloisons selon plans.",
+    "points_vigilance": [
+      "protéger les abouts exposés aux chocs."
+    ]
+  },
+  {
+    "terme": "Tonga A22",
+    "definition_courte": "Référence de dalle de plafond acoustique en laine de roche rigide.",
+    "explication_pedagogique": "Réaliser des plafonds démontables acoustiques en circulations communes.",
+    "exemple_utilisation": "le CCTP cite Tonga A22 de chez Eurocoustic ou équivalent.",
+    "points_vigilance": [
+      "contrôler format 60 x 140 cm, ossature T15/T24 et classement feu."
+    ]
+  },
+  {
+    "terme": "Traçage",
+    "definition_courte": "Marquage au sol ou sur murs de l’emplacement des ouvrages.",
+    "explication_pedagogique": "Guider la pose des rails, cloisons et huisseries.",
+    "exemple_utilisation": "le tracé et la pose des cloisons sont à la charge du présent lot.",
+    "points_vigilance": [
+      "valider le traçage avec plans architecte avant perçage."
+    ]
+  },
+  {
+    "terme": "Trait de niveau",
+    "definition_courte": "Repère horizontal tracé sur les murs pour donner une référence commune de hauteur.",
+    "explication_pedagogique": "Implanter cloisons, huisseries, plafonds et équipements au bon niveau.",
+    "exemple_utilisation": "le trait de niveau général est dû par le gros œuvre et maintenu par le présent lot dans ses pièces.",
+    "points_vigilance": [
+      "ne jamais effacer un trait de niveau sans le reporter correctement."
+    ]
+  },
+  {
+    "terme": "Trappe d’accès aux combles",
+    "definition_courte": "Trappe permettant d’entrer dans les combles pour inspection ou maintenance.",
+    "explication_pedagogique": "Donner accès aux volumes isolés sans dégrader l’isolation.",
+    "exemple_utilisation": "les maisons reçoivent des trappes isolées RT-W 550 x 550 mm avec rehausses en placo.",
+    "points_vigilance": [
+      "traiter l’étanchéité à l’air par joint souple et conserver l’isolant amovible."
+    ]
+  },
+  {
+    "terme": "Trappe de visite",
+    "definition_courte": "Ouvrant discret permettant l’accès à une gaine ou un équipement.",
+    "explication_pedagogique": "Permettre maintenance sans démolir la cloison.",
+    "exemple_utilisation": "le plâtrier pose les trappes de visite fournies par le lot menuiserie intérieure.",
+    "points_vigilance": [
+      "une trappe doit rester accessible après finitions et respecter l’acoustique/feu si exigé."
+    ]
+  },
+  {
+    "terme": "Traversée de gaine",
+    "definition_courte": "Passage d’un réseau à travers une cloison, un plafond ou une gaine technique.",
+    "explication_pedagogique": "Permettre le cheminement des réseaux tout en maintenant les performances.",
+    "exemple_utilisation": "le CCTP demande rebouchages soignés et étanches autour des traversées de gaines, cloisons et faux plafonds.",
+    "points_vigilance": [
+      "chaque traversée doit être traitée pour l’air, le feu et l’acoustique selon le cas."
+    ]
+  },
+  {
+    "terme": "Validation de la maîtrise d’œuvre",
+    "definition_courte": "Accord donné par le maître d’œuvre avant poursuite ou fermeture de certains ouvrages.",
+    "explication_pedagogique": "S’assurer que les ouvrages cachés sont contrôlés avant d’être rendus inaccessibles.",
+    "exemple_utilisation": "les gaines ne doivent être fermées qu’après validation de la maîtrise d’œuvre.",
+    "points_vigilance": [
+      "prévenir suffisamment tôt pour éviter de bloquer le planning."
+    ]
+  },
+  {
+    "terme": "Vide intérieur",
+    "definition_courte": "Espace entre les deux parements d’une cloison sur ossature.",
+    "explication_pedagogique": "Recevoir laine minérale ou certains réseaux selon le système.",
+    "exemple_utilisation": "les cloisons 72/48 sont remplies par panneaux de laine minérale dans le vide intérieur.",
+    "points_vigilance": [
+      "éviter de saturer le vide avec réseaux non prévus qui dégradent l’acoustique."
+    ]
+  },
+  {
+    "terme": "Vis auto-foreuse",
+    "definition_courte": "Vis capable de percer directement une ossature métallique légère.",
+    "explication_pedagogique": "Fixer les plaques de plâtre sur les fourrures ou montants.",
+    "exemple_utilisation": "les plaques sous combles sont vissées au moyen de vis auto-foreuses.",
+    "points_vigilance": [
+      "respecter entraxe de vissage et profondeur de tête."
+    ]
+  },
+  {
+    "terme": "Visa",
+    "definition_courte": "Avis donné par la maîtrise d’œuvre sur un document d’exécution ou une fiche technique.",
+    "explication_pedagogique": "Autoriser l’utilisation d’un document comme base de chantier.",
+    "exemple_utilisation": "les documents d’exécution sont soumis au visa du maître d’œuvre.",
+    "points_vigilance": [
+      "un visa ne remplace pas la responsabilité d’exécution de l’entreprise."
+    ]
+  },
+  {
+    "terme": "Voile béton banché",
+    "definition_courte": "Mur en béton armé coulé dans des banches.",
+    "explication_pedagogique": "Servir de support au doublage collé ou à certains raccords.",
+    "exemple_utilisation": "le doublage thermique collé peut être posé sur voiles béton banché.",
+    "points_vigilance": [
+      "contrôler planéité, laitance, humidité et accrochage avant collage."
+    ]
+  },
+  {
+    "terme": "Voile noir",
+    "definition_courte": "Voile textile noir placé derrière certaines plaques perforées acoustiques.",
+    "explication_pedagogique": "Masquer l’isolant et améliorer l’aspect des perforations.",
+    "exemple_utilisation": "les plafonds acoustiques prévoient laine minérale de 45 mm avec voile noir.",
+    "points_vigilance": [
+      "ne pas l’oublier, sinon les perforations peuvent laisser voir l’isolant."
+    ]
+  },
+  {
+    "terme": "Würth RT-W",
+    "definition_courte": "Référence de trappe isolée en acier citée pour l’accès aux combles.",
+    "explication_pedagogique": "Assurer un accès discret et isolé au comble.",
+    "exemple_utilisation": "le CCTP cite une trappe isolée type RT-W de chez Würth, dimension 550 x 550 mm.",
+    "points_vigilance": [
+      "un équivalent doit garantir isolation, finition, ouverture et étanchéité à l’air."
+    ]
+  },
+  {
+    "terme": "Zone de passage des réseaux",
+    "definition_courte": "Endroit où passent tuyaux, gaines électriques, VMC ou autres réseaux.",
+    "explication_pedagogique": "Prévoir réservations, rebouchages et traitements adaptés.",
+    "exemple_utilisation": "les rebouchages étanches sont demandés autour des tuyaux laissés en attente par plombier et électricien.",
+    "points_vigilance": [
+      "toujours coordonner avant fermeture des doublages, gaines et faux plafonds."
+    ]
+  }
+]

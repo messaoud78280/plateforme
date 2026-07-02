@@ -1,0 +1,1266 @@
+[
+  {
+    "terme": "Accès de chantier",
+    "definition_courte": "Zone organisée pour faire entrer les personnes, engins, camions et matériaux sur le chantier.",
+    "explication_pedagogique": "Il sert à sécuriser les circulations et à éviter les conflits avec la voie publique.",
+    "exemple_utilisation": "Le lot Gros oeuvre doit gérer clôtures, portail, signalisation et maintien propre des accès.",
+    "points_vigilance": ["Un mauvais accès provoque vite salissures, blocages, risques piétons et remarques SPS."]
+  },
+  {
+    "terme": "ACERMI",
+    "definition_courte": "Certification utilisée pour les isolants thermiques.",
+    "explication_pedagogique": "Elle permet de vérifier que les performances annoncées de l'isolant sont contrôlées.",
+    "exemple_utilisation": "Dans le CCTP, l'isolant sous dalle portée doit être certifié ACERMI ou sous avis technique.",
+    "points_vigilance": ["Ne pas se contenter d'une fiche commerciale : demander le certificat ou l'avis technique."]
+  },
+  {
+    "terme": "Acier HA - Haute adhérence",
+    "definition_courte": "Acier nervuré utilisé dans le béton armé pour mieux accrocher le béton.",
+    "explication_pedagogique": "Il reprend les efforts de traction que le béton reprend mal seul.",
+    "exemple_utilisation": "Le CCTP prévoit des armatures en acier haute adhérence pour semelles, longrines, poteaux et poutres.",
+    "points_vigilance": ["Les aciers doivent être propres, bien positionnés et maintenus avec cales avant coulage."]
+  },
+  {
+    "terme": "Aciers en attente",
+    "definition_courte": "Barres d'armature laissées en attente pour raccorder un ouvrage futur.",
+    "explication_pedagogique": "Elles assurent la continuité du ferraillage entre deux phases de bétonnage.",
+    "exemple_utilisation": "Le CCTP indique que certains aciers en attente doivent être pliés puis dépliés.",
+    "points_vigilance": ["Une attente mal protégée, déplacée ou coupée peut empêcher la reprise structurelle correcte."]
+  },
+  {
+    "terme": "Adjuvant",
+    "definition_courte": "Produit ajouté au béton ou au mortier pour modifier son comportement.",
+    "explication_pedagogique": "Il peut améliorer l'ouvrabilité, accélérer la prise, hydrofuger ou plastifier le béton.",
+    "exemple_utilisation": "Le CCTP prévoit que l'emploi d'adjuvants est soumis à l'accord de l'architecte, du BET et du bureau de contrôle.",
+    "points_vigilance": ["Un adjuvant mal choisi peut modifier la prise, la résistance ou l'aspect du béton."]
+  },
+  {
+    "terme": "Agglo",
+    "definition_courte": "Nom courant du bloc de béton utilisé en maçonnerie.",
+    "explication_pedagogique": "Il sert à monter des murs porteurs, séparatifs, libages ou ouvrages maçonnés.",
+    "exemple_utilisation": "Le CCTP parle d'agglos pleins, creux ou perforés montés à joints croisés.",
+    "points_vigilance": ["Vérifier l'épaisseur, le type de bloc, le marquage NF et la fonction porteuse ou non."]
+  },
+  {
+    "terme": "Aplomb",
+    "definition_courte": "Verticalité exacte d'un mur, poteau ou parement.",
+    "explication_pedagogique": "Il garantit que l'ouvrage est droit et conforme aux tolérances.",
+    "exemple_utilisation": "Le CCTP demande l'absence de faux aplomb et le respect des tolérances DTU.",
+    "points_vigilance": ["Un défaut d'aplomb complique la pose des menuiseries, doublages et revêtements."]
+  },
+  {
+    "terme": "Appareil d'appui en néoprène fretté",
+    "definition_courte": "Pièce souple renforcée placée entre deux éléments structurels pour transmettre les efforts.",
+    "explication_pedagogique": "Elle permet l'appui contrôlé d'une poutre ou d'un élément béton tout en absorbant certains mouvements.",
+    "exemple_utilisation": "Le CCTP cite les appareils d'appui en néoprène fretté pour les poutres et linteaux.",
+    "points_vigilance": ["Ils doivent être prévus au bon emplacement et compatibles avec les charges à reprendre."]
+  },
+  {
+    "terme": "Appui de baie",
+    "definition_courte": "Élément horizontal situé en partie basse d'une fenêtre.",
+    "explication_pedagogique": "Il reçoit la menuiserie et aide à évacuer l'eau vers l'extérieur.",
+    "exemple_utilisation": "Le présent lot doit réaliser les appuis nécessaires à la pose des menuiseries avec rejingot.",
+    "points_vigilance": ["Un appui mal profilé peut créer des infiltrations sous la menuiserie."]
+  },
+  {
+    "terme": "Arase",
+    "definition_courte": "Niveau supérieur fini d'un ouvrage maçonné ou béton.",
+    "explication_pedagogique": "Elle sert de référence pour poser l'élément suivant à la bonne hauteur.",
+    "exemple_utilisation": "Les planchers et murs doivent être livrés aux arases demandées selon les revêtements prévus.",
+    "points_vigilance": ["Une arase fausse entraîne des rattrapages, surépaisseurs ou défauts de niveaux."]
+  },
+  {
+    "terme": "Arase étanche",
+    "definition_courte": "Coupure horizontale hydrofuge placée dans la maçonnerie pour bloquer les remontées d'humidité.",
+    "explication_pedagogique": "Elle empêche l'eau du sol de remonter par capillarité dans les murs.",
+    "exemple_utilisation": "Le CCTP impose une coupure de capillarité à au moins +15 cm au-dessus du sol fini extérieur.",
+    "points_vigilance": ["Bien respecter l'altimétrie et la continuité de l'arase sur tous les libages."]
+  },
+  {
+    "terme": "Armature",
+    "definition_courte": "Ensemble des aciers incorporés dans le béton armé.",
+    "explication_pedagogique": "Elle renforce le béton et reprend les efforts de traction, flexion ou cisaillement.",
+    "exemple_utilisation": "Le CCTP détaille les prescriptions générales des armatures, leur propreté et leur enrobage.",
+    "points_vigilance": ["Avant coulage, contrôler diamètre, nombre, position, recouvrement, calage et enrobage."]
+  },
+  {
+    "terme": "Armatures en chapeaux",
+    "definition_courte": "Aciers placés en partie supérieure d'une dalle au droit des appuis.",
+    "explication_pedagogique": "Ils reprennent les efforts négatifs et limitent la fissuration en zone tendue.",
+    "exemple_utilisation": "Le CCTP demande une attention particulière aux armatures en chapeaux dans les dalles pleines.",
+    "points_vigilance": ["Elles doivent rester en haut de dalle, pas descendre pendant le coulage."]
+  },
+  {
+    "terme": "Avaloir",
+    "definition_courte": "Dispositif de récupération des eaux de surface.",
+    "explication_pedagogique": "Il collecte les eaux pluviales d'un balcon, d'une terrasse ou d'une zone extérieure.",
+    "exemple_utilisation": "Les balcons peuvent recevoir des avaloirs à la jonction des descentes EP extérieures.",
+    "points_vigilance": ["Contrôler pente, raccordement EP et accessibilité pour entretien."]
+  },
+  {
+    "terme": "Avis technique",
+    "definition_courte": "Document d'évaluation d'un produit ou procédé non traditionnel.",
+    "explication_pedagogique": "Il permet de vérifier que le produit est reconnu pour l'usage prévu.",
+    "exemple_utilisation": "L'isolant sous dalle portée doit être certifié ACERMI ou sous avis technique.",
+    "points_vigilance": ["Vérifier que l'avis technique est valide et couvre exactement la mise en oeuvre prévue."]
+  },
+  {
+    "terme": "BA",
+    "acronyme": "Béton armé",
+    "definition_courte": "Béton renforcé par des armatures en acier.",
+    "explication_pedagogique": "Il permet de réaliser fondations, poutres, poteaux, voiles, dalles et escaliers.",
+    "exemple_utilisation": "Le CCTP prévoit des planchers BA, garde-corps BA, voiles BA et relevés béton.",
+    "points_vigilance": ["Le béton seul ne suffit pas : le ferraillage, l'enrobage et le coulage sont essentiels."]
+  },
+  {
+    "terme": "Balcon en porte à faux",
+    "definition_courte": "Balcon qui dépasse de la façade sans appui vertical en bout.",
+    "explication_pedagogique": "Il est repris par la structure du bâtiment, souvent par continuité avec le plancher.",
+    "exemple_utilisation": "Le CCTP demande que le coulage des balcons soit réalisé en même temps que le plancher mitoyen.",
+    "points_vigilance": ["La position des aciers supérieurs est capitale : une erreur peut être grave structurellement."]
+  },
+  {
+    "terme": "Balèvre",
+    "definition_courte": "Petite surépaisseur ou bavure de béton visible après décoffrage.",
+    "explication_pedagogique": "Elle apparaît souvent aux joints de coffrage ou aux raccords de panneaux.",
+    "exemple_utilisation": "Le CCTP prévoit ponçage et ragréage des balèvres avant intervention du peintre.",
+    "points_vigilance": ["Sur parement visible, les balèvres doivent être traitées sans abîmer le nu du béton."]
+  },
+  {
+    "terme": "Banche",
+    "definition_courte": "Grand panneau de coffrage utilisé pour couler un voile béton.",
+    "explication_pedagogique": "Elle donne la forme et le parement du mur en béton banché.",
+    "exemple_utilisation": "Le CCTP prévoit le rebouchage des trous de banche en béton.",
+    "points_vigilance": ["Les réservations, huisseries et incorporations doivent être placées avant coulage."]
+  },
+  {
+    "terme": "Bande podotactile",
+    "definition_courte": "Bande d'éveil à la vigilance destinée aux personnes malvoyantes.",
+    "explication_pedagogique": "Elle signale un danger ou une rupture de niveau, notamment en haut d'escalier.",
+    "exemple_utilisation": "Le CCTP demande des bandes podotactiles à chaque palier haut d'escalier.",
+    "points_vigilance": ["Respecter la distance au nez de marche, la fixation et la compatibilité avec le revêtement."]
+  },
+  {
+    "terme": "Barbotine",
+    "definition_courte": "Mélange très liquide de ciment et d'eau.",
+    "explication_pedagogique": "Elle est parfois utilisée comme couche d'accrochage, mais pas toujours autorisée.",
+    "exemple_utilisation": "Le CCTP interdit l'usage de barbotine de ciment sur certaines reprises de bétonnage.",
+    "points_vigilance": ["Toujours vérifier le CCTP : une solution habituelle peut être interdite sur un chantier donné."]
+  },
+  {
+    "terme": "Bouchardage",
+    "definition_courte": "Action de rendre une surface rugueuse par piquage mécanique.",
+    "explication_pedagogique": "Il améliore l'accrochage d'un enduit ou d'une reprise.",
+    "exemple_utilisation": "Le CCTP évoque le bouchardage du support avant certains raccords d'enduit ciment.",
+    "points_vigilance": ["Il faut dépoussiérer et nettoyer avant d'appliquer le mortier ou l'enduit."]
+  },
+  {
+    "terme": "BPS",
+    "acronyme": "Béton à propriétés spécifiées",
+    "definition_courte": "Béton commandé selon des performances précises, notamment classe de résistance et exposition.",
+    "explication_pedagogique": "Il garantit que le béton livré correspond aux exigences de l'ouvrage.",
+    "exemple_utilisation": "Le CCTP autorise les bétons BPS provenant d'une centrale bénéficiant de la marque NF.",
+    "points_vigilance": ["Contrôler les bons de livraison : classe, consistance, exposition, ajout d'eau et heure de chargement."]
+  },
+  {
+    "terme": "Buton",
+    "definition_courte": "Élément de soutènement utilisé pour maintenir deux parois ou blindages écartés.",
+    "explication_pedagogique": "Il évite l'effondrement d'une fouille ou d'un soutènement provisoire.",
+    "exemple_utilisation": "Le CCTP inclut les soutènements par éperons ou butons dans les sujétions de terrassement.",
+    "points_vigilance": ["Ne jamais déplacer un buton sans validation des conditions de sécurité."]
+  },
+  {
+    "terme": "Bâchage",
+    "definition_courte": "Protection provisoire par bâches.",
+    "explication_pedagogique": "Il limite les projections, protège les ouvrages ou sécurise les abords.",
+    "exemple_utilisation": "Le lot Gros oeuvre doit prévoir les bâchages nécessaires, notamment contre les projections sur voie publique.",
+    "points_vigilance": ["Un bâchage doit être fixé et entretenu, surtout en cas de vent."]
+  },
+  {
+    "terme": "Béton banché",
+    "definition_courte": "Béton coulé entre deux banches pour former un voile.",
+    "explication_pedagogique": "Il permet d'obtenir des murs porteurs résistants et précis.",
+    "exemple_utilisation": "Le CCTP prévoit des voiles en béton banché avec coffrage, armatures et réservations.",
+    "points_vigilance": ["Contrôler coffrage, étanchéité, vibration, réservations et rebouchage des trous de banche."]
+  },
+  {
+    "terme": "Béton de propreté",
+    "definition_courte": "Fine couche de béton non structurel coulée sous une fondation.",
+    "explication_pedagogique": "Elle crée un support propre, plan et stable pour poser les armatures.",
+    "exemple_utilisation": "Le CCTP impose une forme de propreté de 5 cm sous tous les ouvrages BA de fondations.",
+    "points_vigilance": ["Ne jamais couler une semelle BA directement sur la terre si le CCTP impose cette couche."]
+  },
+  {
+    "terme": "Béton précontraint",
+    "definition_courte": "Béton dans lequel des aciers tendus améliorent la résistance de l'élément.",
+    "explication_pedagogique": "Il permet de franchir des portées ou de réduire certaines déformations.",
+    "exemple_utilisation": "Le CCTP cite les longrines en béton précontraint et les prédalles précontraintes.",
+    "points_vigilance": ["La manutention et les appuis doivent respecter les prescriptions du fabricant et du BET."]
+  },
+  {
+    "terme": "Caillebottis",
+    "definition_courte": "Grille rigide, souvent métallique, utilisée comme surface de passage ou de drainage.",
+    "explication_pedagogique": "Il permet de créer un passage accessible tout en laissant l'eau s'écouler.",
+    "exemple_utilisation": "Le CCTP prévoit des grilles en caillebottis acier galvanisé maille 19 x 19 mm.",
+    "points_vigilance": ["Vérifier la maille, le niveau fini, le ressaut PMR et la tenue à la corrosion."]
+  },
+  {
+    "terme": "Canalisation CR4 / CR8",
+    "definition_courte": "Classe de rigidité annulaire d'une canalisation PVC d'assainissement.",
+    "explication_pedagogique": "Elle indique la résistance de la canalisation aux charges et à l'écrasement.",
+    "exemple_utilisation": "Le CCTP prévoit du PVC CR8 sous dallage et du PVC CR4 sous dalles portées.",
+    "points_vigilance": ["Ne pas remplacer une classe par une autre sans accord, surtout sous charge ou remblai."]
+  },
+  {
+    "terme": "Caniveau à grille",
+    "definition_courte": "Ouvrage linéaire de collecte des eaux avec une grille en surface.",
+    "explication_pedagogique": "Il récupère les eaux de ruissellement des terrasses, seuils ou zones extérieures.",
+    "exemple_utilisation": "Le CCTP prévoit des caniveaux à grilles avec raccordement sur réseau EP.",
+    "points_vigilance": ["Contrôler fil d'eau, pente, étanchéité, nettoyage et compatibilité PMR."]
+  },
+  {
+    "terme": "Capillarité",
+    "definition_courte": "Remontée de l'eau dans un matériau poreux.",
+    "explication_pedagogique": "Elle explique pourquoi l'humidité peut remonter dans les murs depuis le sol.",
+    "exemple_utilisation": "Le CCTP impose des coupures de capillarité par arase étanche.",
+    "points_vigilance": ["Une coupure discontinue ou trop basse perd son efficacité."]
+  },
+  {
+    "terme": "Chaise d'implantation",
+    "definition_courte": "Dispositif provisoire en bois servant à matérialiser les axes de construction.",
+    "explication_pedagogique": "Elle permet de reporter précisément l'implantation des ouvrages sur le terrain.",
+    "exemple_utilisation": "Le CCTP demande piquets et chaises pour déterminer le contour des ouvrages.",
+    "points_vigilance": ["Les chaises doivent être protégées et vérifiées avant terrassement."]
+  },
+  {
+    "terme": "Chanfrein",
+    "definition_courte": "Petit biseau réalisé sur une arête.",
+    "explication_pedagogique": "Il évite les arêtes vives fragiles et améliore l'aspect du béton.",
+    "exemple_utilisation": "Le CCTP prévoit des arêtes de poutres chanfreinées sur les deux angles inférieurs.",
+    "points_vigilance": ["Le chanfrein doit être prévu au coffrage, pas improvisé après décoffrage."]
+  },
+  {
+    "terme": "Chaperon",
+    "definition_courte": "Couronnement en partie haute d'un muret ou garde-corps.",
+    "explication_pedagogique": "Il protège l'ouvrage des eaux de pluie et finit l'arase supérieure.",
+    "exemple_utilisation": "Le CCTP demande des chaperons avec goutte d'eau et pente vers l'intérieur.",
+    "points_vigilance": ["Attention aux réservations pour platines et à la continuité avec l'étanchéité."]
+  },
+  {
+    "terme": "Charges d'exploitation",
+    "definition_courte": "Charges variables liées à l'usage du bâtiment.",
+    "explication_pedagogique": "Elles servent au dimensionnement de la structure.",
+    "exemple_utilisation": "Le CCTP indique 150 daN/m² pour logement, 350 daN/m² pour balcons et 250 daN/m² pour circulations.",
+    "points_vigilance": ["Ne pas les confondre avec les charges permanentes."]
+  },
+  {
+    "terme": "Charges permanentes",
+    "definition_courte": "Charges fixes dues au poids propre des ouvrages et équipements permanents.",
+    "explication_pedagogique": "Elles entrent dans les calculs de structure.",
+    "exemple_utilisation": "Le CCTP cite ossature, revêtements de sols, faux plafonds, gaines et réseaux.",
+    "points_vigilance": ["Un oubli de charge permanente peut sous-dimensionner un élément."]
+  },
+  {
+    "terme": "Chaînage horizontal",
+    "definition_courte": "Élément en béton armé qui ceinture les murs horizontalement.",
+    "explication_pedagogique": "Il solidarise les maçonneries et répartit les efforts.",
+    "exemple_utilisation": "Le CCTP prévoit des chaînages horizontaux dans les maçonneries porteuses.",
+    "points_vigilance": ["Il doit être continu et bien raccordé aux chaînages verticaux."]
+  },
+  {
+    "terme": "Chaînage vertical",
+    "definition_courte": "Élément BA vertical intégré dans une maçonnerie.",
+    "explication_pedagogique": "Il rigidifie les murs et participe à la stabilité de l'ensemble.",
+    "exemple_utilisation": "Le CCTP prévoit des chaînages verticaux formant poteaux dans les murs maçonnés.",
+    "points_vigilance": ["Vérifier implantation aux angles, refends, ouvertures et jonctions."]
+  },
+  {
+    "terme": "Clavetage",
+    "definition_courte": "Liaison béton ou métallique entre deux éléments structurels.",
+    "explication_pedagogique": "Il assure la continuité ou le blocage entre pièces préfabriquées ou coulées en place.",
+    "exemple_utilisation": "Le CCTP mentionne les broches métalliques et clavetages entre poutres principales.",
+    "points_vigilance": ["Le clavetage doit être prévu dans les plans d'exécution et contrôlé avant fermeture."]
+  },
+  {
+    "terme": "Coffrage",
+    "definition_courte": "Moule provisoire dans lequel on coule le béton.",
+    "explication_pedagogique": "Il donne la forme, les dimensions et l'aspect du parement béton.",
+    "exemple_utilisation": "Le CCTP classe les coffrages C1 à C6 selon la destination et la qualité du parement.",
+    "points_vigilance": ["Étanchéité, rigidité, propreté et huile de démoulage conditionnent le résultat."]
+  },
+  {
+    "terme": "Coffrage perdu biodégradable",
+    "definition_courte": "Coffrage laissé en place sous dalle portée, souvent en carton alvéolaire.",
+    "explication_pedagogique": "Il crée un vide ou un espace technique après dégradation ou injection d'eau.",
+    "exemple_utilisation": "Le CCTP cite des panneaux type BIOCOFRA VS ou PLAKASOL sous dalle portée.",
+    "points_vigilance": ["Contrôler épaisseur, films polyéthylène, tubes d'injection et prescriptions de l'étude de sol."]
+  },
+  {
+    "terme": "Compacité du béton",
+    "definition_courte": "Capacité du béton à être dense, serré et peu poreux.",
+    "explication_pedagogique": "Elle améliore résistance, durabilité et imperméabilité.",
+    "exemple_utilisation": "Le CCTP prévoit l'ajout possible de sables fins ou fillers pour augmenter la compacité.",
+    "points_vigilance": ["La compacité dépend aussi du dosage, du malaxage, de la vibration et du rapport eau/ciment."]
+  },
+  {
+    "terme": "Compactage",
+    "definition_courte": "Action de densifier un remblai ou une plateforme.",
+    "explication_pedagogique": "Il limite les tassements et permet d'atteindre la portance demandée.",
+    "exemple_utilisation": "Le CCTP demande des remblais par couches avec compactage et objectifs Proctor.",
+    "points_vigilance": ["Compacter par couches, pas uniquement en surface."]
+  },
+  {
+    "terme": "Constat contradictoire",
+    "definition_courte": "Constat réalisé en présence des parties concernées.",
+    "explication_pedagogique": "Il protège l'entreprise et le maître d'ouvrage en fixant l'état existant avant travaux.",
+    "exemple_utilisation": "Le CCTP impose un constat d'état des lieux par huissier avant et parfois après travaux.",
+    "points_vigilance": ["Indispensable près des voiries, mitoyens, clôtures, trottoirs et bâtiments voisins."]
+  },
+  {
+    "terme": "Contrôleur technique",
+    "definition_courte": "Organisme chargé de contrôler certains aspects techniques du projet.",
+    "explication_pedagogique": "Il donne des observations sur plans, calculs, exécution et conformité réglementaire.",
+    "exemple_utilisation": "Le CCTP demande de soumettre les plans, études et calculs au contrôleur technique.",
+    "points_vigilance": ["Ses remarques doivent être intégrées avant exécution, pas découvertes en fin de chantier."]
+  },
+  {
+    "terme": "Corbeau béton",
+    "definition_courte": "Console ou saillie servant d'appui à un élément de structure.",
+    "explication_pedagogique": "Il permet de reprendre localement une poutre, dalle ou pièce de structure.",
+    "exemple_utilisation": "Le CCTP inclut les corbeaux nécessaires à la reprise des éléments de structure sur poteaux.",
+    "points_vigilance": ["Contrôler niveau, dimension, ferraillage et surface d'appui."]
+  },
+  {
+    "terme": "Cote NGF",
+    "definition_courte": "Altitude exprimée selon le Nivellement Général de la France.",
+    "explication_pedagogique": "Elle sert de référence altimétrique officielle sur le chantier.",
+    "exemple_utilisation": "Le CCTP impose de faire dresser une cote d'altitude repère NGF.",
+    "points_vigilance": ["Une erreur de référence NGF se répercute sur tous les niveaux du bâtiment."]
+  },
+  {
+    "terme": "Coulage",
+    "definition_courte": "Mise en place du béton frais dans le coffrage ou l'ouvrage.",
+    "explication_pedagogique": "C'est l'étape où le béton prend sa forme définitive avant prise et durcissement.",
+    "exemple_utilisation": "Le CCTP fixe des règles pour coulage par couches, reprise et protection par temps sec ou gel.",
+    "points_vigilance": ["Éviter ségrégation, interruption non prévue, mauvais serrage et défaut de cure."]
+  },
+  {
+    "terme": "Coupe-feu",
+    "definition_courte": "Capacité d'un ouvrage à résister au feu tout en limitant passage des flammes et fumées.",
+    "explication_pedagogique": "Elle participe à la sécurité incendie du bâtiment.",
+    "exemple_utilisation": "Le CCTP demande des éléments stables au feu et coupe-feu suivant la notice de sécurité.",
+    "points_vigilance": ["Le rebouchage des réservations doit conserver les performances feu et acoustiques attendues."]
+  },
+  {
+    "terme": "Coupure de capillarité",
+    "definition_courte": "Dispositif empêchant les remontées d'humidité dans les murs.",
+    "explication_pedagogique": "Elle protège les maçonneries et finitions intérieures.",
+    "exemple_utilisation": "Dans le CCTP, elle est réalisée au mortier hydrofuge ou par système équivalent.",
+    "points_vigilance": ["Elle doit être continue et au bon niveau par rapport au terrain naturel."]
+  },
+  {
+    "terme": "CTBA / CTBP+ termites",
+    "definition_courte": "Références d'agrément ou de certification liées au traitement anti-termites.",
+    "explication_pedagogique": "Elles encadrent les produits et applicateurs spécialisés.",
+    "exemple_utilisation": "Le CCTP demande un produit type Termifilm et un organisme agréé CTBA+ termites.",
+    "points_vigilance": ["Exiger le certificat d'intervention en fin de prestation."]
+  },
+  {
+    "terme": "Cunette",
+    "definition_courte": "Petit canal profilé au fond d'un ouvrage pour guider l'écoulement.",
+    "explication_pedagogique": "Elle facilite l'évacuation des eaux vers le point bas.",
+    "exemple_utilisation": "Le CCTP prévoit une résine époxy en fond de caniveaux et dans les cunettes.",
+    "points_vigilance": ["Le fil d'eau doit être continu, sans contre-pente."]
+  },
+  {
+    "terme": "Dalle portée",
+    "definition_courte": "Dalle qui repose sur les fondations ou éléments porteurs, sans être simplement appuyée sur le sol.",
+    "explication_pedagogique": "Elle évite de transmettre les mouvements du sol directement à la dalle.",
+    "exemple_utilisation": "Le CCTP prévoit un plancher bas porté par les fondations sur vide d'air.",
+    "points_vigilance": ["Ne pas confondre avec un dallage sur terre-plein."]
+  },
+  {
+    "terme": "daN/m²",
+    "definition_courte": "Unité de charge surfacique utilisée en structure.",
+    "explication_pedagogique": "Elle exprime une charge répartie sur un mètre carré.",
+    "exemple_utilisation": "Le CCTP donne des charges d'exploitation en daN/m² pour logements, balcons et circulations.",
+    "points_vigilance": ["1 daN est proche de 1 kg de force, mais les calculs doivent rester dans les unités du BET."]
+  },
+  {
+    "terme": "Delta MS",
+    "definition_courte": "Nappe à excroissances utilisée en protection de murs enterrés.",
+    "explication_pedagogique": "Elle protège l'imperméabilisation et facilite le drainage périphérique.",
+    "exemple_utilisation": "Le CCTP demande un Delta MS ou équivalent avec système de drainage en fond de fouille.",
+    "points_vigilance": ["Ne pas le poser comme une simple décoration : orientation, fixation et drainage comptent."]
+  },
+  {
+    "terme": "DOE",
+    "acronyme": "Dossier des Ouvrages Exécutés",
+    "definition_courte": "Dossier remis en fin de travaux avec plans, fiches, essais et documents d'exécution.",
+    "explication_pedagogique": "Il sert à conserver la trace de ce qui a réellement été construit.",
+    "exemple_utilisation": "Le CCTP exige plans des ouvrages exécutés, notes de calcul, PV d'essais et fiches techniques.",
+    "points_vigilance": ["Le DOE se prépare pendant le chantier, pas seulement à la réception."]
+  },
+  {
+    "terme": "DTU",
+    "acronyme": "Document Technique Unifié",
+    "definition_courte": "Document de référence décrivant les règles de l'art pour un type d'ouvrage.",
+    "explication_pedagogique": "Il encadre les méthodes de mise en oeuvre reconnues.",
+    "exemple_utilisation": "Le CCTP cite notamment DTU 21, DTU 20.1, DTU 26.1 et DTU 60.1.",
+    "points_vigilance": ["Toujours vérifier le DTU applicable et la version mentionnée au marché."]
+  },
+  {
+    "terme": "Décaissé",
+    "definition_courte": "Zone abaissée ou réservation en creux dans un plancher ou support.",
+    "explication_pedagogique": "Il permet de recevoir un revêtement plus épais ou un équipement.",
+    "exemple_utilisation": "Le CCTP cite les décaissés pour différence d'épaisseur de revêtement.",
+    "points_vigilance": ["Un oubli de décaissé oblige souvent à casser ou à créer des ressauts."]
+  },
+  {
+    "terme": "Décoffrage",
+    "definition_courte": "Retrait du coffrage après durcissement suffisant du béton.",
+    "explication_pedagogique": "Il libère l'ouvrage et révèle le parement.",
+    "exemple_utilisation": "Le CCTP impose un décoffrage sans choc lorsque le béton a acquis un durcissement suffisant.",
+    "points_vigilance": ["Décoffrer trop tôt peut fissurer, déformer ou abîmer l'ouvrage."]
+  },
+  {
+    "terme": "Décoffrant",
+    "definition_courte": "Produit appliqué sur le coffrage pour faciliter le démoulage du béton.",
+    "explication_pedagogique": "Il évite que le béton accroche au coffrage.",
+    "exemple_utilisation": "Le CCTP recommande des décoffrants de synthèse pulvérisés et proscrit les excès.",
+    "points_vigilance": ["Un mauvais décoffrant peut créer taches, farinage ou défauts d'adhérence des peintures."]
+  },
+  {
+    "terme": "Eau de gâchage",
+    "definition_courte": "Eau utilisée pour fabriquer béton ou mortier.",
+    "explication_pedagogique": "Elle permet l'hydratation du ciment et rend le mélange ouvrable.",
+    "exemple_utilisation": "Le CCTP limite les matières en suspension et sels dissous dans l'eau de gâchage.",
+    "points_vigilance": ["Ajouter de l'eau sur chantier modifie la résistance et peut être interdit."]
+  },
+  {
+    "terme": "Empattement",
+    "definition_courte": "Débord d'un ouvrage inférieur par rapport à l'ouvrage qu'il supporte.",
+    "explication_pedagogique": "Il répartit mieux les charges et assure une assise correcte.",
+    "exemple_utilisation": "La forme de propreté et le gros béton doivent avoir un empattement minimum de 5 cm.",
+    "points_vigilance": ["Ne pas rogner l'empattement en fouille étroite sans validation."]
+  },
+  {
+    "terme": "Enduit hydrofugé",
+    "definition_courte": "Enduit contenant un produit limitant la pénétration de l'eau.",
+    "explication_pedagogique": "Il protège certaines maçonneries exposées ou enterrées.",
+    "exemple_utilisation": "Le CCTP prévoit une imperméabilisation des libages par enduit hydrofugé ou bitumineux.",
+    "points_vigilance": ["Hydrofugé ne veut pas dire étanchéité totale : regarder la destination de l'ouvrage."]
+  },
+  {
+    "terme": "Enrobage",
+    "definition_courte": "Épaisseur de béton entre l'armature et la surface extérieure de l'ouvrage.",
+    "explication_pedagogique": "Il protège les aciers contre corrosion, feu et agressions extérieures.",
+    "exemple_utilisation": "Le CCTP prévoit 3 cm mini en élévation et 5 cm mini pour les fondations.",
+    "points_vigilance": ["Les cales d'armatures sont indispensables pour garantir l'enrobage."]
+  },
+  {
+    "terme": "EP",
+    "acronyme": "Eaux pluviales",
+    "definition_courte": "Eaux provenant de la pluie et du ruissellement.",
+    "explication_pedagogique": "Elles sont collectées par descentes, caniveaux, avaloirs et réseaux EP.",
+    "exemple_utilisation": "Le CCTP impose 1 % de pente minimale pour les réseaux EP suivant DTU 60.1.",
+    "points_vigilance": ["Contrôler exutoires, pentes et absence de contre-pente."]
+  },
+  {
+    "terme": "EU",
+    "acronyme": "Eaux usées",
+    "definition_courte": "Eaux provenant des lavabos, douches, cuisines ou équipements sanitaires hors WC.",
+    "explication_pedagogique": "Elles sont collectées par les réseaux d'assainissement.",
+    "exemple_utilisation": "Le CCTP prévoit des réseaux EU séparés des EV et EP.",
+    "points_vigilance": ["Vérifier pente, diamètre, regards et essais d'étanchéité."]
+  },
+  {
+    "terme": "Eurocodes",
+    "definition_courte": "Normes européennes de calcul des structures.",
+    "explication_pedagogique": "Elles encadrent le dimensionnement des ouvrages béton, acier, bois, charges, sismique, etc.",
+    "exemple_utilisation": "Le CCTP cite les Eurocodes 0 à 9 et leurs annexes nationales.",
+    "points_vigilance": ["Les notes de calcul doivent suivre les Eurocodes applicables au projet."]
+  },
+  {
+    "terme": "EV",
+    "acronyme": "Eaux vannes",
+    "definition_courte": "Eaux provenant des WC.",
+    "explication_pedagogique": "Elles sont évacuées par un réseau d'assainissement adapté.",
+    "exemple_utilisation": "Le CCTP prévoit des canalisations PVC pour EU, EV et EP.",
+    "points_vigilance": ["Ne pas mélanger les attentes ou inverser les réseaux."]
+  },
+  {
+    "terme": "EV2",
+    "definition_courte": "Module de déformation mesuré lors d'un essai de plaque sur plateforme.",
+    "explication_pedagogique": "Il donne une indication de portance du sol ou de la plateforme.",
+    "exemple_utilisation": "Le CCTP demande des plateformes EV2 > 20 MPa sous dalles portées.",
+    "points_vigilance": ["Un résultat EV2 insuffisant impose reprise, compactage ou traitement."]
+  },
+  {
+    "terme": "Exutoire EP",
+    "definition_courte": "Point où les eaux pluviales sont évacuées.",
+    "explication_pedagogique": "Il reçoit les eaux collectées par pentes, caniveaux, avaloirs ou pissettes.",
+    "exemple_utilisation": "Les balcons doivent être livrés pentés vers les exutoires EP.",
+    "points_vigilance": ["Un exutoire trop haut ou mal placé crée de la stagnation."]
+  },
+  {
+    "terme": "FD P 18-503",
+    "definition_courte": "Référentiel lié à l'état de surface et aux parements béton.",
+    "explication_pedagogique": "Il aide à qualifier le niveau de parement attendu.",
+    "exemple_utilisation": "Le CCTP renvoie au FD P 18-503 pour les catégories de coffrage.",
+    "points_vigilance": ["Bien relier le type de coffrage au revêtement prévu ou au béton apparent."]
+  },
+  {
+    "terme": "Ferraillage",
+    "definition_courte": "Ensemble des armatures d'un ouvrage béton armé.",
+    "explication_pedagogique": "Il transforme le béton en béton armé capable de reprendre les efforts.",
+    "exemple_utilisation": "Semelles, longrines, planchers, poteaux et poutres sont ferraillés suivant calculs.",
+    "points_vigilance": ["Avant coulage, faire contrôler ferraillage, attentes, recouvrements et réservations."]
+  },
+  {
+    "terme": "Feuillure",
+    "definition_courte": "Entaille ou réservation en retrait pour recevoir un autre élément.",
+    "explication_pedagogique": "Elle permet la pose de menuiseries, cadres ou pièces encastrées.",
+    "exemple_utilisation": "Le CCTP demande les feuillures nécessaires pour certaines menuiseries.",
+    "points_vigilance": ["Une feuillure oubliée oblige souvent à reprendre le béton ou la maçonnerie."]
+  },
+  {
+    "terme": "Fil d'eau",
+    "definition_courte": "Niveau bas intérieur d'une canalisation ou d'un caniveau où s'écoule l'eau.",
+    "explication_pedagogique": "Il sert à vérifier les pentes et altitudes des réseaux.",
+    "exemple_utilisation": "Le plan de récolement doit indiquer les fils d'eau des réseaux.",
+    "points_vigilance": ["Contrôler les fils d'eau avant coulage du plancher bas."]
+  },
+  {
+    "terme": "Filler",
+    "definition_courte": "Particule très fine ajoutée à un granulat ou béton.",
+    "explication_pedagogique": "Il peut améliorer la compacité et la granulométrie du béton.",
+    "exemple_utilisation": "Le CCTP mentionne fines, farines ou fillers inférieurs à 1 mm.",
+    "points_vigilance": ["La proportion de fines doit rester maîtrisée pour ne pas nuire au béton."]
+  },
+  {
+    "terme": "Fond de fouille",
+    "definition_courte": "Surface inférieure d'une excavation sur laquelle repose l'ouvrage.",
+    "explication_pedagogique": "Il reçoit béton de propreté, semelle ou réseau.",
+    "exemple_utilisation": "Le CCTP demande réglage à la main et nettoyage du fond de fouille.",
+    "points_vigilance": ["Un fond remanié, boueux ou non purgé compromet l'assise."]
+  },
+  {
+    "terme": "Fond de gaine technique",
+    "definition_courte": "Remplissage béton en bas de gaine technique.",
+    "explication_pedagogique": "Il ferme proprement la gaine et facilite la finition en pied.",
+    "exemple_utilisation": "Le CCTP prévoit des fonds de gaine en béton maigre jusqu'à hauteur de plinthe.",
+    "points_vigilance": ["Coordonner avec les lots techniques pour ne pas bloquer les réseaux."]
+  },
+  {
+    "terme": "Forme de propreté",
+    "definition_courte": "Couche de béton de propreté sous ouvrage BA.",
+    "explication_pedagogique": "Elle offre un support propre pour le ferraillage et le coulage.",
+    "exemple_utilisation": "Le CCTP impose 5 cm d'épaisseur avec 5 cm de débord minimum.",
+    "points_vigilance": ["Elle n'est pas destinée à reprendre les charges comme une semelle."]
+  },
+  {
+    "terme": "Fouille",
+    "definition_courte": "Excavation réalisée dans le sol pour fondation, réseau ou ouvrage enterré.",
+    "explication_pedagogique": "Elle permet d'atteindre le niveau d'assise prévu.",
+    "exemple_utilisation": "Le CCTP parle de terrassements en rigoles, trous ou puits.",
+    "points_vigilance": ["Sécuriser talus, blindages, accès, eau et fond de fouille."]
+  },
+  {
+    "terme": "Fourreau",
+    "definition_courte": "Tube ou gaine permettant le passage d'une canalisation ou d'un câble.",
+    "explication_pedagogique": "Il protège les réseaux et permet leur traversée des murs, libages ou longrines.",
+    "exemple_utilisation": "Le CCTP prévoit des fourreautages sous plancher bas pour les lots techniques.",
+    "points_vigilance": ["Position, diamètre, pente et obturation temporaire doivent être contrôlés."]
+  },
+  {
+    "terme": "G2 AVP / G2 PRO",
+    "definition_courte": "Missions géotechniques d'avant-projet et de projet.",
+    "explication_pedagogique": "Elles donnent les hypothèses de sol, fondations et contraintes géotechniques.",
+    "exemple_utilisation": "Le CCTP se base sur une étude G2 AVP en attente des conclusions G2 PRO.",
+    "points_vigilance": ["Une évolution du rapport géotechnique peut modifier les fondations."]
+  },
+  {
+    "terme": "Garde-corps BA",
+    "definition_courte": "Garde-corps réalisé en béton armé.",
+    "explication_pedagogique": "Il protège les usagers contre les chutes et peut servir de support d'étanchéité.",
+    "exemple_utilisation": "Le CCTP prévoit garde-corps BA avec coffrage C3/C6, joints de fractionnement et chaperons.",
+    "points_vigilance": ["Respecter normes, hauteur, pente, réservations et continuité d'étanchéité."]
+  },
+  {
+    "terme": "Gobetis",
+    "definition_courte": "Première couche d'enduit rugueuse servant d'accrochage.",
+    "explication_pedagogique": "Il améliore l'adhérence du corps d'enduit sur le support.",
+    "exemple_utilisation": "Le CCTP cite le gobetis comme couche d'accrochage possible.",
+    "points_vigilance": ["Le support doit être propre, humidifié et adapté."]
+  },
+  {
+    "terme": "Goutte d'eau",
+    "definition_courte": "Petit profil en sous-face empêchant l'eau de revenir sous l'ouvrage.",
+    "explication_pedagogique": "Elle force l'eau à tomber au lieu de cheminer sous un appui, balcon ou chaperon.",
+    "exemple_utilisation": "Le CCTP demande une goutte d'eau périphérique en sous-face des balcons.",
+    "points_vigilance": ["Une goutte d'eau absente favorise coulures et infiltrations."]
+  },
+  {
+    "terme": "Granulats",
+    "definition_courte": "Sables, gravillons, cailloux ou pierres entrant dans la composition du béton.",
+    "explication_pedagogique": "Ils constituent le squelette du béton.",
+    "exemple_utilisation": "Le CCTP fixe qualité, provenance, granulométrie et propreté des granulats.",
+    "points_vigilance": ["Impuretés, granulats plats ou mauvais lavage peuvent nuire à la résistance."]
+  },
+  {
+    "terme": "Gros béton",
+    "definition_courte": "Béton souvent non armé utilisé en rattrapage, remplissage ou sous fondation.",
+    "explication_pedagogique": "Il sert notamment à atteindre le bon sol ou rattraper des niveaux.",
+    "exemple_utilisation": "Le CCTP prévoit du gros béton B3 sous semelles pour ancrage jusqu'au bon sol ou redan 3/2.",
+    "points_vigilance": ["Ne pas le confondre avec une semelle armée dimensionnée."]
+  },
+  {
+    "terme": "Grue de chantier",
+    "definition_courte": "Engin de levage utilisé pour approvisionner matériaux et éléments lourds.",
+    "explication_pedagogique": "Elle facilite la manutention sur le chantier.",
+    "exemple_utilisation": "Le CCTP demande un plan d'implantation de grue si l'entreprise l'utilise.",
+    "points_vigilance": ["Prévoir alimentation 400 V TRI+N+T, emprise, survol, SPS et autorisations."]
+  },
+  {
+    "terme": "Géomètre agréé",
+    "definition_courte": "Professionnel chargé de mesures, implantation et nivellement.",
+    "explication_pedagogique": "Il garantit la position exacte des ouvrages et repères.",
+    "exemple_utilisation": "Le CCTP impose une vérification systématique par géomètre agréé.",
+    "points_vigilance": ["Conserver les plans d'implantation et PV de repérage."]
+  },
+  {
+    "terme": "Harpage",
+    "definition_courte": "Liaison entre deux maçonneries ou entre maçonnerie et voile béton.",
+    "explication_pedagogique": "Il solidarise les ouvrages et limite les fissures de jonction.",
+    "exemple_utilisation": "Le CCTP prévoit l'harpage entre maçonneries et voiles béton par liaisons acier type Stabox.",
+    "points_vigilance": ["À prévoir avant coulage ou montage, pas après coup."]
+  },
+  {
+    "terme": "HQE",
+    "acronyme": "Haute Qualité Environnementale",
+    "definition_courte": "Démarche visant à réduire l'impact environnemental du bâtiment.",
+    "explication_pedagogique": "Elle influence le choix de certains produits et méthodes.",
+    "exemple_utilisation": "Le CCTP impose des huiles de décoffrage végétales et biodégradables à plus de 80 %.",
+    "points_vigilance": ["Conserver les justificatifs produits pour le DOE ou les contrôles."]
+  },
+  {
+    "terme": "Hydrocurage",
+    "definition_courte": "Nettoyage de réseaux par jet d'eau sous pression.",
+    "explication_pedagogique": "Il retire boues, gravats et dépôts avant inspection ou réception.",
+    "exemple_utilisation": "Le CCTP demande la remise de réseaux parfaitement propres avant essais.",
+    "points_vigilance": ["Les déchets de curage doivent être traités en centre agréé avec justificatifs."]
+  },
+  {
+    "terme": "Hydrofuge de masse",
+    "definition_courte": "Adjuvant intégré dans le béton ou mortier pour limiter la pénétration d'eau.",
+    "explication_pedagogique": "Il améliore la résistance à l'humidité de certains ouvrages enterrés.",
+    "exemple_utilisation": "Le CCTP indique une incorporation d'hydrofuge de masse pour ouvrages enterrés.",
+    "points_vigilance": ["Il ne remplace pas forcément une étanchéité complète si celle-ci est prévue."]
+  },
+  {
+    "terme": "Implantation",
+    "definition_courte": "Report sur le terrain de la position exacte des bâtiments et ouvrages.",
+    "explication_pedagogique": "Elle transforme les plans en repères physiques sur chantier.",
+    "exemple_utilisation": "Le CCTP demande un plan d'implantation approuvé avant commencement des travaux.",
+    "points_vigilance": ["Vérifier axes, limites, retraits, niveaux et réseaux enterrés avant terrassement."]
+  },
+  {
+    "terme": "Incorporation",
+    "definition_courte": "Élément intégré dans le béton avant coulage.",
+    "explication_pedagogique": "Elle permet de passer gaines, réservations, inserts ou pièces des lots techniques.",
+    "exemple_utilisation": "Le CCTP inclut les incorporations des gaines électriques, canalisations et divers.",
+    "points_vigilance": ["Tout oubli d'incorporation entraîne percement, reprise ou surcoût."]
+  },
+  {
+    "terme": "Infrastructure",
+    "definition_courte": "Partie basse du bâtiment située sous ou près du niveau du sol.",
+    "explication_pedagogique": "Elle comprend fondations, libages, longrines, réseaux sous plancher et ouvrages enterrés.",
+    "exemple_utilisation": "Le CCTP localise les fourreautages sous plancher bas en infrastructure.",
+    "points_vigilance": ["C'est une zone difficile à corriger après remblaiement ou coulage."]
+  },
+  {
+    "terme": "Insert",
+    "definition_courte": "Pièce incorporée dans le béton pour permettre une fixation future.",
+    "explication_pedagogique": "Il sert à accrocher charpente, serrurerie, bardage ou équipements.",
+    "exemple_utilisation": "Le CCTP prévoit tous les inserts nécessaires à la fixation des bardages et ouvrages de serrurerie.",
+    "points_vigilance": ["Coordonner très tôt avec les lots concernés pour position et efforts."]
+  },
+  {
+    "terme": "Isolation sous dalle portée",
+    "definition_courte": "Isolant placé sous une dalle portée, généralement sous locaux chauffés.",
+    "explication_pedagogique": "Il limite les déperditions thermiques par le plancher bas.",
+    "exemple_utilisation": "Le CCTP demande R = 4,10 m².K/W et 14 cm d'épaisseur sous locaux chauffés.",
+    "points_vigilance": ["Contrôler certification, fixation, continuité et absence de pont thermique."]
+  },
+  {
+    "terme": "Jambage",
+    "definition_courte": "Partie verticale latérale d'une baie ou ouverture.",
+    "explication_pedagogique": "Il participe à la tenue de la menuiserie et de la maçonnerie autour de l'ouverture.",
+    "exemple_utilisation": "Le CCTP prévoit linteaux et jambages nécessaires à la tenue des menuiseries.",
+    "points_vigilance": ["Vérifier aplomb, largeur de tableau, feuillures et réservations."]
+  },
+  {
+    "terme": "Joint croisé",
+    "definition_courte": "Disposition des blocs de maçonnerie avec joints verticaux décalés d'un rang à l'autre.",
+    "explication_pedagogique": "Elle améliore la stabilité et évite les lignes de faiblesse continues.",
+    "exemple_utilisation": "Le CCTP impose le montage des agglos et libages à joints croisés.",
+    "points_vigilance": ["Un alignement vertical des joints affaiblit la maçonnerie."]
+  },
+  {
+    "terme": "Joint de dilatation",
+    "definition_courte": "Joint permettant à deux parties d'ouvrage de bouger sans se fissurer mutuellement.",
+    "explication_pedagogique": "Il absorbe mouvements thermiques, retraits ou tassements différentiels.",
+    "exemple_utilisation": "Le CCTP cite les appuis glissants au droit des joints de dilatation.",
+    "points_vigilance": ["Ne jamais le bloquer avec un mortier ou un rebouchage rigide."]
+  },
+  {
+    "terme": "Joint de fractionnement",
+    "definition_courte": "Joint destiné à maîtriser l'apparition des fissures de retrait.",
+    "explication_pedagogique": "Il localise la fissuration à un endroit prévu.",
+    "exemple_utilisation": "Le CCTP prévoit des joints de fractionnement tous les 6 ml sur garde-corps BA.",
+    "points_vigilance": ["Il doit intéresser l'épaisseur prévue et être traité avec le bon mastic si demandé."]
+  },
+  {
+    "terme": "Laitier",
+    "definition_courte": "Résidu issu du soudage ou terme pouvant désigner une matière superficielle à éliminer.",
+    "explication_pedagogique": "Dans le CCTP, il est cité pour vérifier la qualité du métal déposé par soudure.",
+    "exemple_utilisation": "Le laitier ne doit pas être trop abondant et doit pouvoir s'enlever facilement.",
+    "points_vigilance": ["Contrôler les soudures, surtout sur pièces incorporées ou éléments métalliques."]
+  },
+  {
+    "terme": "Liant",
+    "definition_courte": "Matière qui agglomère les granulats, comme le ciment dans béton et mortier.",
+    "explication_pedagogique": "Il donne la cohésion et participe à la résistance après prise.",
+    "exemple_utilisation": "Le CCTP demande des liants à prise lente sauf indication contraire.",
+    "points_vigilance": ["Un liant éventé ou grumeleux ne doit pas être utilisé."]
+  },
+  {
+    "terme": "Libage",
+    "definition_courte": "Ouvrage maçonné de soubassement entre fondation et élévation.",
+    "explication_pedagogique": "Il sert de support aux murs et permet de régler les niveaux.",
+    "exemple_utilisation": "Le CCTP prévoit des libages maçonnés en blocs béton pleins ou perforés.",
+    "points_vigilance": ["Prévoir arase sanitaire, imperméabilisation et protection type Delta MS si demandé."]
+  },
+  {
+    "terme": "Linteau",
+    "definition_courte": "Élément horizontal placé au-dessus d'une ouverture.",
+    "explication_pedagogique": "Il reprend les charges au-dessus d'une baie, porte ou passage.",
+    "exemple_utilisation": "Le CCTP prévoit des poutres et linteaux en béton armé coulés en place.",
+    "points_vigilance": ["Vérifier appuis, ferraillage, réservations de volets roulants et classe de coffrage."]
+  },
+  {
+    "terme": "Longrine",
+    "definition_courte": "Poutre horizontale de fondation reliant des appuis ou semelles.",
+    "explication_pedagogique": "Elle répartit les charges et sert de support aux murs ou planchers.",
+    "exemple_utilisation": "Le CCTP prévoit des longrines en béton B6 minimum avec armatures HA.",
+    "points_vigilance": ["Contrôler réservations, enrobage, niveau, appuis et continuité."]
+  },
+  {
+    "terme": "Malaxage",
+    "definition_courte": "Mélange du béton ou mortier jusqu'à homogénéité.",
+    "explication_pedagogique": "Il permet d'enrober correctement les granulats par le liant.",
+    "exemple_utilisation": "Le CCTP demande un béton homogène avec granulats parfaitement enrobés.",
+    "points_vigilance": ["Un malaxage insuffisant provoque nids de cailloux, ségrégation ou résistance irrégulière."]
+  },
+  {
+    "terme": "Mastic élastomère",
+    "definition_courte": "Mastic souple utilisé pour joints exposés aux mouvements.",
+    "explication_pedagogique": "Il assure un calfeutrement durable tout en acceptant de petites déformations.",
+    "exemple_utilisation": "Le CCTP prévoit un mastic élastomère 1ère catégorie pour certains fractionnements.",
+    "points_vigilance": ["Le support doit être propre et le fond de joint adapté."]
+  },
+  {
+    "terme": "Maçonnerie porteuse",
+    "definition_courte": "Mur maçonné qui reprend des charges du bâtiment.",
+    "explication_pedagogique": "Elle participe à la structure, contrairement à une simple cloison.",
+    "exemple_utilisation": "Le CCTP prévoit des maçonneries porteuses en blocs creux, pleins/perforés et briques.",
+    "points_vigilance": ["Ne jamais modifier une maçonnerie porteuse sans validation structure."]
+  },
+  {
+    "terme": "MOE",
+    "acronyme": "Maîtrise d'oeuvre",
+    "definition_courte": "Équipe qui conçoit, dirige ou contrôle l'exécution des travaux.",
+    "explication_pedagogique": "Elle donne avis, visas, directives et valide certains choix techniques.",
+    "exemple_utilisation": "Le CCTP indique que les plans d'exécution doivent être soumis à l'agrément de la MOE.",
+    "points_vigilance": ["Ne pas exécuter une adaptation importante sans visa MOE."]
+  },
+  {
+    "terme": "Mortier",
+    "definition_courte": "Mélange de ciment, sable et eau, parfois adjuvanté.",
+    "explication_pedagogique": "Il sert à hourder, calfeutrer, sceller, chaper ou réaliser certains enduits.",
+    "exemple_utilisation": "Le CCTP distingue plusieurs mortiers M1 à M4 selon l'usage.",
+    "points_vigilance": ["Respecter dosage, temps d'utilisation et destination."]
+  },
+  {
+    "terme": "Mortier hydrofuge",
+    "definition_courte": "Mortier contenant un hydrofuge pour limiter les remontées ou pénétrations d'eau.",
+    "explication_pedagogique": "Il sert notamment aux arases étanches.",
+    "exemple_utilisation": "Le CCTP prévoit une arase au mortier hydrofuge dosé entre 500 et 600 kg de ciment.",
+    "points_vigilance": ["L'épaisseur et la continuité sont aussi importantes que le dosage."]
+  },
+  {
+    "terme": "Mur de refend",
+    "definition_courte": "Mur intérieur porteur participant à la structure du bâtiment.",
+    "explication_pedagogique": "Il reprend des charges de planchers, toiture ou voiles.",
+    "exemple_utilisation": "Le CCTP précise que certains murs de refends seront arasés sous couverture.",
+    "points_vigilance": ["Ne pas le traiter comme une cloison démontable."]
+  },
+  {
+    "terme": "NF",
+    "definition_courte": "Marque ou référence de conformité à une norme française.",
+    "explication_pedagogique": "Elle atteste qu'un produit respecte des exigences contrôlées.",
+    "exemple_utilisation": "Le CCTP exige des blocs béton certifiés marque NF.",
+    "points_vigilance": ["Demander les certificats produits pour vérification et DOE."]
+  },
+  {
+    "terme": "Niveau fini",
+    "definition_courte": "Altitude finale d'un sol ou ouvrage après tous les revêtements.",
+    "explication_pedagogique": "Il sert à régler arases, seuils, pentes et réservations.",
+    "exemple_utilisation": "Le niveau fini du plancher bas RDC sert de référence dans le CCTP.",
+    "points_vigilance": ["Toujours distinguer niveau brut, niveau dalle et niveau fini."]
+  },
+  {
+    "terme": "Nu",
+    "definition_courte": "Plan de référence d'une face finie ou brute d'un mur.",
+    "explication_pedagogique": "Il permet de positionner correctement murs, enduits, doublages et revêtements.",
+    "exemple_utilisation": "Le CCTP demande de livrer les supports aux nus et arases demandés.",
+    "points_vigilance": ["Une erreur de nu décale les menuiseries, revêtements et alignements."]
+  },
+  {
+    "terme": "Parement",
+    "definition_courte": "Surface visible ou destinée à recevoir une finition.",
+    "explication_pedagogique": "Il définit l'aspect attendu du béton ou de la maçonnerie.",
+    "exemple_utilisation": "Le CCTP classe les parements élémentaire, courant, soigné ou très soigné.",
+    "points_vigilance": ["La qualité du parement dépend du coffrage, du décoffrant, de la vibration et du ragréage."]
+  },
+  {
+    "terme": "Passage caméra",
+    "definition_courte": "Inspection vidéo intérieure d'un réseau.",
+    "explication_pedagogique": "Il vérifie pente, état, emboîtements, défauts et propreté des canalisations.",
+    "exemple_utilisation": "Le CCTP demande une visite caméra des réseaux posés avec rapport en trois exemplaires.",
+    "points_vigilance": ["Tout réseau non conforme est repris aux frais de l'entrepreneur."]
+  },
+  {
+    "terme": "Perméabilité à l'air",
+    "definition_courte": "Capacité d'un bâtiment à limiter les fuites d'air parasites.",
+    "explication_pedagogique": "Elle influence la performance énergétique et la conformité réglementaire.",
+    "exemple_utilisation": "Le CCTP impose au Gros oeuvre de reprendre ses ouvrages si les tests l'exigent.",
+    "points_vigilance": ["Soigner traversées, réservations, rebouchages et jonctions entre lots."]
+  },
+  {
+    "terme": "PF1 / PF2",
+    "definition_courte": "Classe de plateforme caractérisant la qualité de portance pour les travaux.",
+    "explication_pedagogique": "Elle indique si la plateforme peut recevoir circulation, fondations ou dalles.",
+    "exemple_utilisation": "Le VRD doit livrer une plateforme PF2 et des zones PF1 sous dalle portée.",
+    "points_vigilance": ["Réceptionner la plateforme avant de démarrer les ouvrages portés dessus."]
+  },
+  {
+    "terme": "PGC SPS",
+    "definition_courte": "Plan Général de Coordination Sécurité et Protection de la Santé.",
+    "explication_pedagogique": "Il fixe les mesures de sécurité collective et d'organisation du chantier.",
+    "exemple_utilisation": "Le CCTP renvoie au PGCSPS pour installations, clôtures, base vie et sécurité.",
+    "points_vigilance": ["Les prescriptions SPS sont contractuelles et doivent être intégrées au prix."]
+  },
+  {
+    "terme": "Piquetage",
+    "definition_courte": "Matérialisation sur le terrain de points, axes ou réseaux.",
+    "explication_pedagogique": "Il permet de repérer l'implantation ou les ouvrages enterrés.",
+    "exemple_utilisation": "Le CCTP prévoit un piquetage spécial des ouvrages souterrains ou enterrés.",
+    "points_vigilance": ["Le piquetage des réseaux évite les détériorations accidentelles."]
+  },
+  {
+    "terme": "Pissette",
+    "definition_courte": "Petit rejet d'eau traversant un balcon ou une terrasse.",
+    "explication_pedagogique": "Elle évacue ponctuellement les eaux pluviales vers l'extérieur.",
+    "exemple_utilisation": "Le CCTP prévoit des pissettes selon détails architecte pour certains balcons.",
+    "points_vigilance": ["Vérifier pente, débouché et absence de rejet gênant en façade."]
+  },
+  {
+    "terme": "Plan de récolement",
+    "definition_courte": "Plan indiquant ce qui a réellement été exécuté.",
+    "explication_pedagogique": "Il sert au DOE, à la maintenance et aux interventions futures.",
+    "exemple_utilisation": "Le CCTP exige un plan de récolement des réseaux avant coulage du plancher bas.",
+    "points_vigilance": ["Le relever avant remblaiement, sinon les informations deviennent difficiles à vérifier."]
+  },
+  {
+    "terme": "Planelle de rive",
+    "definition_courte": "Élément posé en rive de plancher pour traiter le nez de dalle.",
+    "explication_pedagogique": "Elle limite les ponts thermiques et sert de coffrage périphérique.",
+    "exemple_utilisation": "Le CCTP prévoit des planelles de rive avec résistance thermique certifiée.",
+    "points_vigilance": ["Contrôler continuité thermique, position et intégration avant coulage."]
+  },
+  {
+    "terme": "Planéité",
+    "definition_courte": "Caractère d'une surface plane dans les tolérances admises.",
+    "explication_pedagogique": "Elle conditionne la pose des revêtements, enduits, menuiseries et équipements.",
+    "exemple_utilisation": "Le CCTP fixe 5 mm sous règle de 2 m et 2 mm sous réglette de 0,20 m pour certains parements.",
+    "points_vigilance": ["Un défaut de planéité entraîne enduit de dressement ou reprise à la charge de l'entreprise."]
+  },
+  {
+    "terme": "Plateforme",
+    "definition_courte": "Surface préparée pour recevoir circulation, fondations ou dallages.",
+    "explication_pedagogique": "Elle constitue le support de départ des ouvrages.",
+    "exemple_utilisation": "La plateforme livrée par le lot VRD doit permettre la circulation des engins.",
+    "points_vigilance": ["Réceptionner portance, niveau et propreté avant intervention du Gros oeuvre."]
+  },
+  {
+    "terme": "Platelage sur trémie",
+    "definition_courte": "Protection provisoire posée sur une ouverture de plancher.",
+    "explication_pedagogique": "Elle évite les chutes de personnes ou de matériaux.",
+    "exemple_utilisation": "Le CCTP cite le platelage sur trémies parmi les dispositifs de sécurité.",
+    "points_vigilance": ["Il doit être résistant, fixé et signalé."]
+  },
+  {
+    "terme": "Plot béton",
+    "definition_courte": "Petit massif béton servant d'appui ou de support localisé.",
+    "explication_pedagogique": "Il reprend un poteau, une ossature bois ou un équipement.",
+    "exemple_utilisation": "Le CCTP prévoit des plots béton support d'ossature des carports.",
+    "points_vigilance": ["Vérifier altimétrie, dimensions, scellements et ferraillage éventuel."]
+  },
+  {
+    "terme": "Polyane",
+    "definition_courte": "Film polyéthylène utilisé sous dalle ou coffrage perdu.",
+    "explication_pedagogique": "Il limite les remontées d'humidité ou sert de séparation/protection.",
+    "exemple_utilisation": "Le CCTP prévoit un polyane 200 microns sous plancher bas porté.",
+    "points_vigilance": ["Assurer recouvrements, remontées en rive et continuité du film."]
+  },
+  {
+    "terme": "Portance",
+    "definition_courte": "Capacité d'un sol ou support à reprendre les charges sans tassement excessif.",
+    "explication_pedagogique": "Elle conditionne les fondations et plateformes.",
+    "exemple_utilisation": "Le CCTP évoque la portance admissible du sol et les plateformes EV2.",
+    "points_vigilance": ["Une portance insuffisante impose adaptation, purge ou renforcement."]
+  },
+  {
+    "terme": "Poteau BA",
+    "definition_courte": "Élément vertical en béton armé reprenant des charges.",
+    "explication_pedagogique": "Il transmet les charges des poutres ou planchers vers les fondations.",
+    "exemple_utilisation": "Le CCTP prévoit des poteaux BA avec béton B8 minimum et coffrage C6.",
+    "points_vigilance": ["Contrôler ferraillage, réservations, aplomb, surface d'appui et protection après coulage."]
+  },
+  {
+    "terme": "Proctor modifié",
+    "definition_courte": "Essai de laboratoire définissant la densité maximale d'un matériau compacté.",
+    "explication_pedagogique": "Il sert de référence pour contrôler le compactage des remblais.",
+    "exemple_utilisation": "Le CCTP impose 90 % ou 95 % du maximum Proctor modifié selon la fonction du remblai.",
+    "points_vigilance": ["Les essais doivent être réalisés par tranche de volume selon le CCTP."]
+  },
+  {
+    "terme": "Pré-scellement",
+    "definition_courte": "Pièce ou réservation mise en place avant scellement définitif.",
+    "explication_pedagogique": "Il prépare la fixation d'éléments comme charpente ou serrurerie.",
+    "exemple_utilisation": "Le CCTP prévoit les supports de pré-scellements de la charpente bois.",
+    "points_vigilance": ["Coordonner avec le lot charpente pour entraxes, niveaux et efforts."]
+  },
+  {
+    "terme": "Prédalle précontrainte",
+    "definition_courte": "Élément mince préfabriqué qui sert de coffrage et partie résistante d'un plancher.",
+    "explication_pedagogique": "Elle permet de réaliser un plancher avec dalle de compression coulée sur site.",
+    "exemple_utilisation": "Le CCTP prévoit des planchers coulés sur prédalles précontraintes par fils adhérents.",
+    "points_vigilance": ["Respecter appuis, étaiement, réservations et plan de pose."]
+  },
+  {
+    "terme": "Purge",
+    "definition_courte": "Retrait de matériaux impropres ou instables dans le sol.",
+    "explication_pedagogique": "Elle permet de repartir sur un support sain avant remblai ou fondation.",
+    "exemple_utilisation": "Le CCTP prévoit des purges locales avec remblaiement en tout-venant compacté.",
+    "points_vigilance": ["Tracer les purges et contrôler le matériau de remplacement."]
+  },
+  {
+    "terme": "Rabattement",
+    "definition_courte": "Abaissement temporaire du niveau d'eau dans le sol.",
+    "explication_pedagogique": "Il permet de travailler à sec ou de stabiliser une fouille.",
+    "exemple_utilisation": "Le CCTP évoque les rabattements en lien avec le risque d'entraînement des fines.",
+    "points_vigilance": ["Un rabattement mal maîtrisé peut tasser les existants voisins."]
+  },
+  {
+    "terme": "Ragréage",
+    "definition_courte": "Reprise fine d'une surface pour corriger défauts ou irrégularités.",
+    "explication_pedagogique": "Il prépare un support avant peinture, revêtement ou finition.",
+    "exemple_utilisation": "Le CCTP prévoit ragréage des parements béton si le fini requis n'est pas obtenu.",
+    "points_vigilance": ["Le ragréage ne doit pas créer de surépaisseur visible sur béton apparent."]
+  },
+  {
+    "terme": "Raidisseur vertical",
+    "definition_courte": "Élément vertical renforçant une maçonnerie.",
+    "explication_pedagogique": "Il augmente la stabilité du mur.",
+    "exemple_utilisation": "Le CCTP prévoit des raidisseurs verticaux en béton armé dans les ossatures béton.",
+    "points_vigilance": ["Vérifier position, liaison avec chaînages et ferraillage."]
+  },
+  {
+    "terme": "Ravinement",
+    "definition_courte": "Dégradation par écoulement d'eau qui emporte les matériaux.",
+    "explication_pedagogique": "Il peut fragiliser un sol, un remblai ou un réseau.",
+    "exemple_utilisation": "Le CCTP demande de renforcer ponctuellement le réseau dans le vide d'air contre les inondations et ravinement.",
+    "points_vigilance": ["Prévoir protections et liaisons béton aux points exposés."]
+  },
+  {
+    "terme": "Redan 3/2",
+    "definition_courte": "Rattrapage de niveau en gradins selon une pente ou proportion définie.",
+    "explication_pedagogique": "Il permet d'adapter les fondations à un terrain en pente ou à des niveaux différents.",
+    "exemple_utilisation": "Le CCTP prévoit du gros béton pour redan 3/2 entre semelles.",
+    "points_vigilance": ["Doit être validé par l'étude de sol et les plans structure."]
+  },
+  {
+    "terme": "Regard étanche",
+    "definition_courte": "Ouvrage visitable sur réseau, conçu pour éviter les fuites.",
+    "explication_pedagogique": "Il permet inspection, changement de direction et entretien.",
+    "exemple_utilisation": "Le CCTP prévoit des regards préfabriqués étanches aux jonctions et pieds de chute.",
+    "points_vigilance": ["Contrôler altimétrie, tampon, étanchéité et raccords."]
+  },
+  {
+    "terme": "Rejingot",
+    "definition_courte": "Relief sur appui ou seuil empêchant les infiltrations sous menuiserie.",
+    "explication_pedagogique": "Il bloque l'eau et sert d'appui au dormant.",
+    "exemple_utilisation": "Le CCTP prévoit rejingots pour appuis de baies et seuils.",
+    "points_vigilance": ["Respecter dimensions et position selon le lot menuiserie."]
+  },
+  {
+    "terme": "Remblai",
+    "definition_courte": "Matériau rapporté pour combler une fouille ou régler un niveau.",
+    "explication_pedagogique": "Il reconstitue le terrain autour ou sous les ouvrages.",
+    "exemple_utilisation": "Le CCTP demande des remblais par couches successives de 20 à 30 cm compactées.",
+    "points_vigilance": ["Matériau, épaisseur de couche, humidité et compactage sont déterminants."]
+  },
+  {
+    "terme": "Renformis",
+    "definition_courte": "Recharge localisée au mortier pour rattraper une irrégularité.",
+    "explication_pedagogique": "Il corrige les défauts de planimétrie avant enduit.",
+    "exemple_utilisation": "Le CCTP prévoit un renformis ou dressement en surcharge selon l'épaisseur à recharger.",
+    "points_vigilance": ["Au-delà de certaines épaisseurs, une armature ou maçonnerie compatible est nécessaire."]
+  },
+  {
+    "terme": "Reprise de bétonnage",
+    "definition_courte": "Zone où un nouveau béton est coulé contre un béton déjà pris.",
+    "explication_pedagogique": "Elle permet de continuer un ouvrage après interruption.",
+    "exemple_utilisation": "Le CCTP impose repiquage, nettoyage, mouillage et orientation correcte des reprises.",
+    "points_vigilance": ["Une mauvaise reprise crée un plan de faiblesse ou une fuite."]
+  },
+  {
+    "terme": "Ressaut",
+    "definition_courte": "Différence de niveau entre deux surfaces.",
+    "explication_pedagogique": "Il est surveillé pour l'accessibilité PMR.",
+    "exemple_utilisation": "Le CCTP demande un ressaut inférieur à 2 cm entre extérieur et intérieur au droit des balcons et portes.",
+    "points_vigilance": ["Coordonner seuils, caillebottis, revêtements et menuiseries."]
+  },
+  {
+    "terme": "Retrait",
+    "definition_courte": "Réduction dimensionnelle du béton ou mortier pendant séchage/durcissement.",
+    "explication_pedagogique": "Il peut provoquer des fissures si les joints et armatures ne sont pas adaptés.",
+    "exemple_utilisation": "Le CCTP parle de joints permettant de localiser les fissurations de retrait.",
+    "points_vigilance": ["Cure, fractionnement, dosage et armatures limitent les désordres."]
+  },
+  {
+    "terme": "Rive de plancher",
+    "definition_courte": "Bord périphérique d'un plancher.",
+    "explication_pedagogique": "Elle demande souvent traitement thermique, coffrage et finition particulière.",
+    "exemple_utilisation": "Le CCTP prévoit des planelles d'about de dalle en rive de plancher.",
+    "points_vigilance": ["Attention aux ponts thermiques, alignement façade et coffrage périphérique."]
+  },
+  {
+    "terme": "Référé préventif",
+    "definition_courte": "Procédure judiciaire avant travaux pour constater l'état des avoisinants.",
+    "explication_pedagogique": "Elle protège en cas de réclamations de voisins après désordres allégués.",
+    "exemple_utilisation": "Le CCTP permet à l'entrepreneur de proposer un référé préventif au maître d'ouvrage.",
+    "points_vigilance": ["Utile en mitoyenneté, démolition, terrassement profond ou zone sensible."]
+  },
+  {
+    "terme": "Réservation",
+    "definition_courte": "Vide prévu dans un ouvrage pour passage, fixation ou équipement futur.",
+    "explication_pedagogique": "Elle évite de percer après coup.",
+    "exemple_utilisation": "Le CCTP met à la charge du lot GO les réservations demandées par les lots techniques.",
+    "points_vigilance": ["Les plans de réservation doivent être transmis en temps utile et vérifiés avant coulage."]
+  },
+  {
+    "terme": "Scléromètre",
+    "definition_courte": "Appareil mesurant un indice de dureté superficielle du béton.",
+    "explication_pedagogique": "Il aide à estimer la résistance du béton en place.",
+    "exemple_utilisation": "Le CCTP prévoit des relevés d'indices sclérométriques selon DTU 21.",
+    "points_vigilance": ["Ce n'est pas toujours suffisant : des essais sur éprouvettes peuvent être demandés."]
+  },
+  {
+    "terme": "Semelle filante",
+    "definition_courte": "Fondation continue sous un mur ou une ligne de charges.",
+    "explication_pedagogique": "Elle répartit les charges du bâtiment sur le sol.",
+    "exemple_utilisation": "Le CCTP prévoit des semelles filantes en béton B6 avec ferraillage HA.",
+    "points_vigilance": ["Dimensions et ferraillage sont calculés selon sol et descentes de charges."]
+  },
+  {
+    "terme": "Semelle isolée",
+    "definition_courte": "Fondation ponctuelle sous poteau ou appui local.",
+    "explication_pedagogique": "Elle transmet une charge concentrée au sol.",
+    "exemple_utilisation": "Le CCTP prévoit des semelles isolées et plots béton pour carports.",
+    "points_vigilance": ["Contrôler centrage, niveau, ferraillage et profondeur d'assise."]
+  },
+  {
+    "terme": "SF/CF - Stable au feu / Coupe-feu",
+    "definition_courte": "Anciennes appellations liées au comportement au feu des ouvrages.",
+    "explication_pedagogique": "Elles indiquent la durée de résistance et de compartimentage attendue.",
+    "exemple_utilisation": "Le CCTP indique une stabilité au feu SF/CF 1/2 h, soit REI 30 en zones courantes.",
+    "points_vigilance": ["Vérifier correspondance avec la notice sécurité et les rebouchages."]
+  },
+  {
+    "terme": "Siphon de sol",
+    "definition_courte": "Évacuation au sol avec garde d'eau limitant les remontées d'odeurs.",
+    "explication_pedagogique": "Il collecte les eaux de lavage ou de ruissellement dans un local.",
+    "exemple_utilisation": "Le CCTP prévoit des siphons inox de 100 mm dans locaux techniques ou vélos.",
+    "points_vigilance": ["Contrôler niveau, pente vers siphon, raccordement et scellement."]
+  },
+  {
+    "terme": "Sommiers béton",
+    "definition_courte": "Massifs ou appuis béton recevant une charge localisée.",
+    "explication_pedagogique": "Ils servent souvent à reprendre une pièce de charpente ou poutre.",
+    "exemple_utilisation": "Le CCTP prévoit la réalisation de sommiers béton pour la charpente bois.",
+    "points_vigilance": ["Coordonner avec plans charpente et vérifier la reprise de charge."]
+  },
+  {
+    "terme": "Sous-face",
+    "definition_courte": "Face inférieure d'un ouvrage horizontal ou incliné.",
+    "explication_pedagogique": "Elle est visible sous balcon, plancher, dalle ou poutre.",
+    "exemple_utilisation": "Le CCTP demande une sous-face soignée destinée à recevoir une peinture pour certains planchers.",
+    "points_vigilance": ["Les joints de prédalles et réservations doivent être calfeutrés proprement."]
+  },
+  {
+    "terme": "Soutènement",
+    "definition_courte": "Ouvrage ou dispositif maintenant des terres ou une construction.",
+    "explication_pedagogique": "Il sécurise une fouille ou protège les avoisinants.",
+    "exemple_utilisation": "Le CCTP inclut blindage, soutènement, éperons et butons dans les terrassements.",
+    "points_vigilance": ["Adapter au sol, à la profondeur, à l'eau et aux constructions voisines."]
+  },
+  {
+    "terme": "Stabox",
+    "definition_courte": "Boîte d'attentes ou système de liaison acier pour reprendre une continuité de ferraillage.",
+    "explication_pedagogique": "Elle permet de raccorder un voile béton et une maçonnerie ou un ouvrage ultérieur.",
+    "exemple_utilisation": "Le CCTP cite des liaisons acier type Stabox pour l'harpage.",
+    "points_vigilance": ["Vérifier position avant coulage et protection des attentes."]
+  },
+  {
+    "terme": "Ségrégation du béton",
+    "definition_courte": "Séparation des constituants du béton frais.",
+    "explication_pedagogique": "Elle crée des zones pauvres en mortier ou riches en granulats.",
+    "exemple_utilisation": "Le CCTP interdit que transport et mise en place donnent lieu à ségrégation.",
+    "points_vigilance": ["Éviter chutes trop hautes, excès d'eau, vibration inadaptée et transport brutal."]
+  },
+  {
+    "terme": "Taloche",
+    "definition_courte": "Outil de finition utilisé pour dresser ou lisser mortier et béton frais.",
+    "explication_pedagogique": "Elle permet d'obtenir une surface régulière.",
+    "exemple_utilisation": "Le CCTP demande des surfaces lissées à la taloche et livrées pentées vers les EP.",
+    "points_vigilance": ["La finition doit rester compatible avec le revêtement futur."]
+  },
+  {
+    "terme": "Talus",
+    "definition_courte": "Pente de terre en bord de fouille ou plateforme.",
+    "explication_pedagogique": "Il assure la transition de niveau et la stabilité du terrain excavé.",
+    "exemple_utilisation": "Le CCTP demande d'éviter l'érosion des talus par les eaux de ruissellement.",
+    "points_vigilance": ["Surveiller eau, pluie, surcharge en tête et stabilité."]
+  },
+  {
+    "terme": "Tassement différentiel",
+    "definition_courte": "Affaissement inégal entre deux zones d'un ouvrage.",
+    "explication_pedagogique": "Il peut fissurer murs, planchers et réseaux.",
+    "exemple_utilisation": "Le CCTP prévoit des fourreaux ou gaines souples pour permettre les tassements différentiels.",
+    "points_vigilance": ["Important aux interfaces fondations, réseaux, remblais et existants."]
+  },
+  {
+    "terme": "Termifilm",
+    "definition_courte": "Film anti-termites utilisé comme barrière physique ou physico-chimique.",
+    "explication_pedagogique": "Il protège les bâtiments contre les remontées de termites depuis le sol.",
+    "exemple_utilisation": "Le CCTP cite une solution type Termifilm agréée CTBA P+.",
+    "points_vigilance": ["La pose doit enrober les fondations et remonter sur la face extérieure du libage."]
+  },
+  {
+    "terme": "TN",
+    "acronyme": "Terrain naturel",
+    "definition_courte": "Niveau du terrain existant ou fini selon le contexte avant ouvrage.",
+    "explication_pedagogique": "Il sert de référence pour arases, relevés et altimétries extérieures.",
+    "exemple_utilisation": "Le CCTP impose une garde de +15 cm par rapport au TN sous maçonneries extérieures.",
+    "points_vigilance": ["Bien distinguer TN, terrain fini, dalle brute et sol fini."]
+  },
+  {
+    "terme": "Trait de niveau",
+    "definition_courte": "Repère horizontal tracé sur les murs à une hauteur constante.",
+    "explication_pedagogique": "Il sert de référence aux lots pour régler hauteurs et ouvrages.",
+    "exemple_utilisation": "Le CCTP impose un trait de niveau entretenu par l'entreprise de Gros oeuvre.",
+    "points_vigilance": ["Utiliser un produit qui ne réapparaisse pas à travers les revêtements futurs."]
+  },
+  {
+    "terme": "Treillis soudé",
+    "definition_courte": "Nappe d'aciers soudés utilisée pour armer dalles et ouvrages béton.",
+    "explication_pedagogique": "Il répartit les efforts et limite la fissuration.",
+    "exemple_utilisation": "Le CCTP cite les treillis soudés haute adhérence et anti-fissuration.",
+    "points_vigilance": ["Contrôler recouvrements, calage et position dans l'épaisseur de la dalle."]
+  },
+  {
+    "terme": "Trumeau",
+    "definition_courte": "Partie de mur située entre deux ouvertures.",
+    "explication_pedagogique": "Il peut être porteur selon sa largeur et sa composition.",
+    "exemple_utilisation": "Le CCTP précise que les trumeaux porteurs de moins de 0,80 m bruts doivent être réalisés en béton.",
+    "points_vigilance": ["Ne pas remplacer un trumeau béton par de la maçonnerie sans accord structure."]
+  },
+  {
+    "terme": "Trémie",
+    "definition_courte": "Ouverture dans un plancher ou une dalle.",
+    "explication_pedagogique": "Elle permet le passage d'escalier, gaine, réseau ou équipement.",
+    "exemple_utilisation": "Le CCTP prévoit toutes les trémies nécessaires aux corps d'état.",
+    "points_vigilance": ["Protéger immédiatement les trémies contre les chutes."]
+  },
+  {
+    "terme": "Vide d'air",
+    "definition_courte": "Espace laissé sous un plancher porté ou entre sol et dalle.",
+    "explication_pedagogique": "Il isole le plancher du terrain et limite certains effets du sol.",
+    "exemple_utilisation": "Le CCTP prévoit un plancher bas porté par les fondations sur vide d'air.",
+    "points_vigilance": ["Prévoir réseaux, protections contre ravinement et accessibilité si nécessaire."]
+  },
+  {
+    "terme": "Voile en béton banché",
+    "definition_courte": "Mur en béton armé coulé dans des banches.",
+    "explication_pedagogique": "Il reprend des charges verticales et horizontales.",
+    "exemple_utilisation": "Le CCTP prévoit voiles banchés avec coffrage C3/C4, armatures et réservations.",
+    "points_vigilance": ["Coordonner huisseries à bancher, feuillures, rebouchages et perméabilité à l'air."]
+  },
+  {
+    "terme": "VRD",
+    "acronyme": "Voirie et Réseaux Divers",
+    "definition_courte": "Lot chargé des voiries, réseaux extérieurs et plateformes selon périmètre marché.",
+    "explication_pedagogique": "Il prépare souvent les accès, plateformes et raccordements extérieurs.",
+    "exemple_utilisation": "Le CCTP indique que la préparation du terrain et certains terrassements généraux sont effectués par le lot VRD.",
+    "points_vigilance": ["Bien vérifier les limites de prestation entre VRD et Gros oeuvre."]
+  },
+  {
+    "terme": "Vérification des cotes",
+    "definition_courte": "Contrôle des dimensions et niveaux figurant sur les plans.",
+    "explication_pedagogique": "Elle permet de détecter incohérences, omissions ou erreurs avant exécution.",
+    "exemple_utilisation": "Le CCTP rend l'entrepreneur responsable des erreurs non signalées.",
+    "points_vigilance": ["Comparer plans architecte, structure, CCTP et plans techniques avant coulage."]
+  },
+  {
+    "terme": "Échafaudage",
+    "definition_courte": "Structure provisoire permettant d'accéder aux zones de travail en hauteur.",
+    "explication_pedagogique": "Il sert à réaliser les ouvrages en sécurité.",
+    "exemple_utilisation": "Le CCTP met les sujétions d'échafaudage à la charge de l'entreprise.",
+    "points_vigilance": ["Vérifier accès, garde-corps, ancrages, conformité et maintien en état."]
+  },
+  {
+    "terme": "Épaufrure",
+    "definition_courte": "Éclat ou cassure sur une arête de béton ou de maçonnerie.",
+    "explication_pedagogique": "Elle indique un défaut d'aspect ou parfois une fragilité locale.",
+    "exemple_utilisation": "Le CCTP refuse les têtes de poteaux avec épaufrures avant mise en oeuvre des poutres.",
+    "points_vigilance": ["Protéger les arêtes après décoffrage et pendant les manutentions."]
+  },
+  {
+    "terme": "Épreuve de chargement",
+    "definition_courte": "Essai consistant à charger un ouvrage pour vérifier son comportement.",
+    "explication_pedagogique": "Elle permet de lever un doute sur la résistance d'un plancher, voile ou élément BA.",
+    "exemple_utilisation": "Le CCTP prévoit des épreuves aux frais de l'entrepreneur en cas de doute.",
+    "points_vigilance": ["Un ouvrage non satisfaisant peut être renforcé, démoli ou reconstruit."]
+  },
+  {
+    "terme": "Épuisement",
+    "definition_courte": "Pompage ou évacuation des eaux présentes dans une fouille.",
+    "explication_pedagogique": "Il permet de terrasser et couler dans de bonnes conditions.",
+    "exemple_utilisation": "Le CCTP inclut les épuisements en cas de venues d'eau ou de boue liquide.",
+    "points_vigilance": ["Attention à l'entraînement des fines, qui peut provoquer tassements et désordres."]
+  }
+]

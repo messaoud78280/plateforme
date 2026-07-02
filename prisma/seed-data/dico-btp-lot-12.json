@@ -1,0 +1,2418 @@
+[
+  {
+    "terme": "Abattage",
+    "definition_courte": "Opération qui consiste à couper et supprimer des arbres présents dans l'emprise du projet.",
+    "explication_pedagogique": "Libérer les zones de terrassement, de voirie ou de réseaux avant intervention des engins.",
+    "points_vigilance": [
+      "Vérifier les arbres à conserver, les autorisations éventuelles et l'évacuation des souches."
+    ]
+  },
+  {
+    "terme": "Accessibilité PMR",
+    "definition_courte": "Ensemble des dispositions permettant l'usage des cheminements et stationnements par les personnes à mobilité réduite.",
+    "explication_pedagogique": "Garantir des pentes, ressauts, largeurs et dévers compatibles avec l'usage des piétons et fauteuils.",
+    "points_vigilance": [
+      "Contrôler les pentes, paliers de repos, ressauts de 2 cm maximum et largeur minimale de cheminement."
+    ]
+  },
+  {
+    "terme": "Accotement",
+    "definition_courte": "Partie latérale d'une voie située entre la chaussée et le fossé, le talus ou les espaces verts.",
+    "explication_pedagogique": "Servir d'appui, de transition ou de zone de sécurité le long d'une chaussée.",
+    "points_vigilance": [
+      "Ne pas y stocker durablement des déblais si cela gêne la circulation ou l'écoulement des eaux."
+    ]
+  },
+  {
+    "terme": "Adjuvant",
+    "definition_courte": "Produit incorporé au béton ou au mortier pour modifier certaines propriétés : prise, maniabilité, cure ou résistance.",
+    "explication_pedagogique": "Adapter le béton aux conditions de chantier et aux performances attendues.",
+    "points_vigilance": [
+      "Utiliser uniquement des produits compatibles avec les normes et les fiches techniques validées."
+    ]
+  },
+  {
+    "terme": "Agrément du maître d’œuvre",
+    "definition_courte": "Accord donné par le maître d'œuvre sur un matériau, un fournisseur, une méthode ou un produit proposé.",
+    "explication_pedagogique": "Éviter qu'une entreprise mette en œuvre un procédé non validé dans le marché.",
+    "points_vigilance": [
+      "Ne pas confondre avec une simple fiche fournisseur : l'accord écrit reste indispensable."
+    ]
+  },
+  {
+    "terme": "Aire de lavage",
+    "definition_courte": "Zone prévue pour nettoyer les roues ou parties basses des camions et engins avant sortie du chantier.",
+    "explication_pedagogique": "Limiter les salissures sur la voie publique pendant les terrassements.",
+    "points_vigilance": [
+      "Prévoir l'entretien régulier de l'aire et la gestion des boues produites."
+    ]
+  },
+  {
+    "terme": "Altitude repère",
+    "definition_courte": "Cote de référence servant à positionner les ouvrages en hauteur.",
+    "explication_pedagogique": "Permettre le nivellement fiable des plateformes, fonds de forme, regards et réseaux.",
+    "points_vigilance": [
+      "Un mauvais repère entraîne des erreurs de pente, de niveau fini ou de raccordement."
+    ]
+  },
+  {
+    "terme": "Aménagement de la circulation",
+    "definition_courte": "Organisation provisoire de la circulation pendant les travaux : alternat, déviation, signalisation ou demi-chaussée.",
+    "explication_pedagogique": "Maintenir la sécurité des usagers et l'accès aux riverains pendant les interventions.",
+    "points_vigilance": [
+      "Une voie ne doit pas être barrée sans arrêté ou autorisation adaptée."
+    ]
+  },
+  {
+    "terme": "Amenée de matériel",
+    "definition_courte": "Transport et mise à disposition sur chantier des engins, équipements, matériaux et installations nécessaires.",
+    "explication_pedagogique": "Rendre possible le démarrage effectif des travaux dans les délais prévus.",
+    "points_vigilance": [
+      "Inclure aussi le repli en fin de chantier dans l'organisation et le prix."
+    ]
+  },
+  {
+    "terme": "Analyse granulométrique",
+    "definition_courte": "Essai qui détermine la répartition des tailles de grains dans un matériau.",
+    "explication_pedagogique": "Vérifier qu'une grave, un sable ou un remblai correspond bien au fuseau demandé.",
+    "points_vigilance": [
+      "Un matériau mal gradué peut se compacter difficilement ou perdre sa portance."
+    ]
+  },
+  {
+    "terme": "Apport de matériaux",
+    "definition_courte": "Fourniture de matériaux extérieurs au site pour réaliser remblais, couches de chaussée ou réglages.",
+    "explication_pedagogique": "Compléter ou remplacer les terres du site lorsqu'elles ne sont pas réutilisables.",
+    "points_vigilance": [
+      "Contrôler provenance, qualité, classement GTR et aptitude au compactage."
+    ]
+  },
+  {
+    "terme": "Arceau de parking",
+    "definition_courte": "Équipement métallique servant à réserver ou protéger une place de stationnement.",
+    "explication_pedagogique": "Empêcher le stationnement non autorisé ou matérialiser une place dédiée.",
+    "points_vigilance": [
+      "Vérifier l'implantation, la fixation et la compatibilité avec la circulation PMR."
+    ]
+  },
+  {
+    "terme": "Arrêté de circulation",
+    "definition_courte": "Autorisation temporaire modifiant la circulation pendant les travaux.",
+    "explication_pedagogique": "Permettre les déviations, alternats, interdictions de stationner ou fermetures partielles.",
+    "points_vigilance": [
+      "Sans arrêté, l'entreprise engage sa responsabilité en cas de gêne ou d'accident."
+    ]
+  },
+  {
+    "terme": "Arrêté de voirie",
+    "definition_courte": "Autorisation administrative permettant d'occuper ou d'intervenir sur le domaine public routier.",
+    "explication_pedagogique": "Encadrer les travaux de tranchée, branchement, dépôt ou emprise de chantier.",
+    "points_vigilance": [
+      "Respecter les dates, emprises, prescriptions et conditions de remise en état."
+    ]
+  },
+  {
+    "terme": "Arrêté municipal",
+    "definition_courte": "Décision officielle de la commune autorisant ou encadrant une modification de circulation, de stationnement ou d'occupation de voirie.",
+    "explication_pedagogique": "Donner un cadre légal aux travaux sur domaine public ou aux restrictions de circulation.",
+    "points_vigilance": [
+      "La demande doit être anticipée, souvent plusieurs jours avant l'intervention."
+    ]
+  },
+  {
+    "terme": "Arrosage sous chaussée",
+    "definition_courte": "Fourreau ou réservation posé sous chaussée pour permettre le passage futur d'un réseau d'arrosage.",
+    "explication_pedagogique": "Éviter de casser la chaussée neuve pour passer un réseau ultérieurement.",
+    "points_vigilance": [
+      "Bien repérer les fourreaux sur les plans de récolement."
+    ]
+  },
+  {
+    "terme": "ASQUAL",
+    "definition_courte": "Certification utilisée notamment pour les géotextiles afin de garantir certaines caractéristiques de qualité.",
+    "explication_pedagogique": "Prouver que le géotextile respecte les performances annoncées.",
+    "points_vigilance": [
+      "À défaut de certificat, des essais complémentaires peuvent être exigés."
+    ]
+  },
+  {
+    "terme": "Assainissement",
+    "definition_courte": "Ensemble des ouvrages permettant de collecter, transporter, stocker ou évacuer les eaux usées et eaux pluviales.",
+    "explication_pedagogique": "Protéger le bâtiment, la voirie et l'environnement contre les eaux non maîtrisées.",
+    "points_vigilance": [
+      "Séparer clairement EU et EP quand le projet le prévoit."
+    ]
+  },
+  {
+    "terme": "Attachement",
+    "definition_courte": "Document de suivi permettant de justifier des quantités ou travaux réalisés sur chantier.",
+    "explication_pedagogique": "Servir de base aux situations, factures ou contrôles contradictoires.",
+    "points_vigilance": [
+      "Les bons de décharge peuvent être demandés à l'appui des attachements."
+    ]
+  },
+  {
+    "terme": "Autorisation d’ouverture de chantier",
+    "definition_courte": "Accord préalable nécessaire avant de démarrer certains travaux, notamment lorsque des concessionnaires ou voiries sont concernés.",
+    "explication_pedagogique": "S'assurer que les conditions administratives et techniques de démarrage sont réunies.",
+    "points_vigilance": [
+      "Ne pas commencer sans avis favorables et documents de sécurité nécessaires."
+    ]
+  },
+  {
+    "terme": "Avaloir",
+    "definition_courte": "Ouvrage de voirie qui capte les eaux de ruissellement en surface pour les envoyer vers le réseau EP.",
+    "explication_pedagogique": "Éviter les flaques, les ruissellements incontrôlés et les dégradations de chaussée.",
+    "points_vigilance": [
+      "Contrôler son positionnement au point bas et son raccordement au réseau pluvial."
+    ]
+  },
+  {
+    "terme": "Bâchage des camions",
+    "definition_courte": "Protection posée sur les bennes transportant les déblais ou enrobés.",
+    "explication_pedagogique": "Éviter les envols, pertes de matériaux et refroidissement excessif des enrobés.",
+    "points_vigilance": [
+      "Le CCTP impose notamment le bâchage des camions d'enrobés."
+    ]
+  },
+  {
+    "terme": "Baliroad",
+    "definition_courte": "Séparateur plastique lestable utilisé pour matérialiser et protéger une emprise de chantier.",
+    "explication_pedagogique": "Séparer les usagers de la zone de travaux.",
+    "points_vigilance": [
+      "Il doit rester stable, visible et adapté à la circulation réelle."
+    ]
+  },
+  {
+    "terme": "Banquette de tranchée",
+    "definition_courte": "Zone latérale ou palier aménagé dans une fouille selon la profondeur et le mode de terrassement.",
+    "explication_pedagogique": "Stabiliser la fouille, faciliter l'accès et limiter les risques d'éboulement.",
+    "points_vigilance": [
+      "Respecter les règles de sécurité et utiliser un blindage si nécessaire."
+    ]
+  },
+  {
+    "terme": "Barrière de chantier",
+    "definition_courte": "Équipement de clôture ou de protection placé autour d'une zone de travaux.",
+    "explication_pedagogique": "Empêcher l'accès du public ou des véhicules à une zone dangereuse.",
+    "points_vigilance": [
+      "Elle doit être maintenue en état pendant toute la durée des travaux."
+    ]
+  },
+  {
+    "terme": "Batardeau",
+    "definition_courte": "Ouvrage provisoire étanche permettant d'isoler une zone de travaux de l'eau.",
+    "explication_pedagogique": "Travailler au sec en présence d'eau superficielle ou de nappe.",
+    "points_vigilance": [
+      "Son principe doit être validé par le maître d'œuvre selon la nature du sol et les risques."
+    ]
+  },
+  {
+    "terme": "BBSG - Béton Bitumineux Semi-Grenu",
+    "definition_courte": "Enrobé couramment utilisé en couche de roulement de chaussée.",
+    "explication_pedagogique": "Former une surface circulable résistante et durable.",
+    "points_vigilance": [
+      "Contrôler formulation, granulométrie, compactage, température et pourcentage de vides."
+    ]
+  },
+  {
+    "terme": "Béton bitumineux",
+    "definition_courte": "Mélange de granulats et de bitume, posé à chaud ou selon prescription, pour réaliser une chaussée.",
+    "explication_pedagogique": "Constituer une couche de roulement ou une couche structurante.",
+    "points_vigilance": [
+      "La mise en œuvre dépend de la température, de l'épaisseur et du compactage."
+    ]
+  },
+  {
+    "terme": "Béton coulé dans l’eau",
+    "definition_courte": "Béton prévu pour être mis en place en présence d'eau, avec dosage et liant adaptés.",
+    "explication_pedagogique": "Réaliser certains ouvrages hydrauliques ou massifs lorsque l'assèchement n'est pas possible.",
+    "points_vigilance": [
+      "Éviter le délavage du ciment et respecter le dosage prescrit."
+    ]
+  },
+  {
+    "terme": "Béton de propreté",
+    "definition_courte": "Couche de béton maigre mise en fond de fouille ou sous ouvrage pour obtenir une surface propre.",
+    "explication_pedagogique": "Éviter le contact direct de l'ouvrage avec la terre et faciliter le réglage.",
+    "points_vigilance": [
+      "Respecter l'épaisseur et le niveau avant pose de l'ouvrage définitif."
+    ]
+  },
+  {
+    "terme": "Béton désactivé",
+    "definition_courte": "Béton décoratif dont la surface est lavée après application d'un désactivant pour faire apparaître les granulats.",
+    "explication_pedagogique": "Créer des cheminements piétons ou trottoirs antidérapants et esthétiques.",
+    "points_vigilance": [
+      "Maîtriser le délai de lavage, le produit de cure et l'échantillon validé par la maîtrise d'ouvrage."
+    ]
+  },
+  {
+    "terme": "Béton maigre",
+    "definition_courte": "Béton faiblement dosé en ciment, utilisé pour propreté, calage ou formes non structurelles.",
+    "explication_pedagogique": "Créer un support propre et stable pour certains ouvrages.",
+    "points_vigilance": [
+      "Ne pas l'utiliser comme béton structurel s'il n'est pas prévu pour reprendre des efforts."
+    ]
+  },
+  {
+    "terme": "Bitume 35/50",
+    "definition_courte": "Liant hydrocarboné de classe de pénétrabilité utilisée dans certains enrobés.",
+    "explication_pedagogique": "Assurer la cohésion du mélange bitumineux.",
+    "points_vigilance": [
+      "Vérifier la conformité du bitume à la formulation d'enrobé validée."
+    ]
+  },
+  {
+    "terme": "Blindage",
+    "definition_courte": "Dispositif provisoire de maintien des parois d'une tranchée ou d'une fouille.",
+    "explication_pedagogique": "Protéger les ouvriers contre l'éboulement et préserver les ouvrages voisins.",
+    "points_vigilance": [
+      "Indispensable lorsque la profondeur, la nature du sol ou l'environnement l'exigent."
+    ]
+  },
+  {
+    "terme": "Bois d’étaiement",
+    "definition_courte": "Pièce de bois utilisée provisoirement pour soutenir ou maintenir un ouvrage ou une fouille.",
+    "explication_pedagogique": "Stabiliser une installation temporaire ou un coffrage.",
+    "points_vigilance": [
+      "Les bois doivent être adaptés aux contraintes, même si l'ouvrage est provisoire."
+    ]
+  },
+  {
+    "terme": "Bordure béton",
+    "definition_courte": "Élément préfabriqué en béton qui délimite chaussée, trottoir, stationnement ou espace vert.",
+    "explication_pedagogique": "Contenir les revêtements et guider les eaux de surface.",
+    "points_vigilance": [
+      "Contrôler l'alignement, l'altimétrie, les joints et le calage béton."
+    ]
+  },
+  {
+    "terme": "Bouche d’égout",
+    "definition_courte": "Ouvrage qui reçoit les eaux de surface et les conduit vers le réseau pluvial.",
+    "explication_pedagogique": "Collecter les eaux de ruissellement en bordure ou point bas de voirie.",
+    "points_vigilance": [
+      "Vérifier la capacité d'absorption et la compatibilité avec la bordure."
+    ]
+  },
+  {
+    "terme": "Bourrage",
+    "definition_courte": "Remplissage d'un vide autour d'un tuyau, fourreau ou ouvrage avec un matériau adapté.",
+    "explication_pedagogique": "Assurer le calage, l'étanchéité ou la protection mécanique.",
+    "points_vigilance": [
+      "Ne pas utiliser un matériau agressif ou rigide lorsque le réseau doit rester désolidarisé."
+    ]
+  },
+  {
+    "terme": "Branchement",
+    "definition_courte": "Raccordement d'un bâtiment, d'un regard ou d'un avaloir à un collecteur principal.",
+    "explication_pedagogique": "Permettre à chaque point de collecte d'être relié au réseau.",
+    "points_vigilance": [
+      "Respecter pente, diamètre, étanchéité et prescriptions du gestionnaire."
+    ]
+  },
+  {
+    "terme": "Branchement EP",
+    "definition_courte": "Raccordement destiné aux eaux pluviales.",
+    "explication_pedagogique": "Évacuer les eaux de toiture, voirie ou espaces extérieurs vers le réseau pluvial ou l'ouvrage de gestion.",
+    "points_vigilance": [
+      "Ne pas le raccorder par erreur au réseau EU."
+    ]
+  },
+  {
+    "terme": "Branchement EU",
+    "definition_courte": "Raccordement destiné aux eaux usées domestiques.",
+    "explication_pedagogique": "Acheminer les eaux usées vers le réseau d'assainissement adapté.",
+    "points_vigilance": [
+      "Assurer l'étanchéité et le respect des contrôles du gestionnaire."
+    ]
+  },
+  {
+    "terme": "Busage",
+    "definition_courte": "Mise en place d'un tuyau ou ouvrage sous un fossé ou un passage pour maintenir l'écoulement.",
+    "explication_pedagogique": "Permettre un accès ou un franchissement sans interrompre les eaux.",
+    "points_vigilance": [
+      "Vérifier diamètre, pente, tête de pont et protection contre l'érosion."
+    ]
+  },
+  {
+    "terme": "Caillebotis",
+    "definition_courte": "Grille rigide ajourée, souvent métallique, posée en passage ou devant une porte.",
+    "explication_pedagogique": "Permettre l'écoulement de l'eau tout en conservant un passage praticable.",
+    "points_vigilance": [
+      "Le CCTP demande une conformité PMR pour les grilles de porte."
+    ]
+  },
+  {
+    "terme": "Calage",
+    "definition_courte": "Mise à niveau et maintien d'un ouvrage avant fixation ou remblaiement.",
+    "explication_pedagogique": "Garantir le bon alignement d'une bordure, grille, regard ou canalisation.",
+    "points_vigilance": [
+      "Ne pas remblayer avant contrôle des niveaux et de la stabilité."
+    ]
+  },
+  {
+    "terme": "Calcul justificatif",
+    "definition_courte": "Note démontrant que le matériau ou l'ouvrage répond aux efforts et contraintes prévus.",
+    "explication_pedagogique": "Valider notamment les classes de tuyaux, les remblais ou certains ouvrages béton.",
+    "points_vigilance": [
+      "À fournir avant exécution lorsque le CCTP ou le maître d'œuvre l'exige."
+    ]
+  },
+  {
+    "terme": "Canalisation",
+    "definition_courte": "Tuyau destiné à transporter de l'eau, des effluents ou un réseau technique enterré.",
+    "explication_pedagogique": "Assurer la continuité hydraulique ou technique entre les ouvrages.",
+    "points_vigilance": [
+      "Contrôler diamètre, pente, lit de pose, enrobage et étanchéité."
+    ]
+  },
+  {
+    "terme": "Caniveau",
+    "definition_courte": "Ouvrage linéaire qui collecte et guide l'eau en surface.",
+    "explication_pedagogique": "Conduire les eaux de ruissellement vers les avaloirs ou exutoires.",
+    "points_vigilance": [
+      "Un mauvais fil d'eau crée des stagnations et des désordres de chaussée."
+    ]
+  },
+  {
+    "terme": "Caniveau préfabriqué",
+    "definition_courte": "Caniveau réalisé avec des éléments fabriqués en usine puis posés sur chantier.",
+    "explication_pedagogique": "Gagner en régularité et en rapidité de pose.",
+    "points_vigilance": [
+      "Contrôler calage, pente, joints et raccordement aux ouvrages EP."
+    ]
+  },
+  {
+    "terme": "Caractéristique des constituants",
+    "definition_courte": "Ensemble des propriétés exigées pour ciment, sable, gravillons, eau, aciers ou coffrages.",
+    "explication_pedagogique": "S'assurer que les bétons et ouvrages auront la qualité attendue.",
+    "points_vigilance": [
+      "Les produits doivent être conformes aux normes et acceptés avant mise en œuvre."
+    ]
+  },
+  {
+    "terme": "CCAG - Cahier des Clauses Administratives Générales",
+    "definition_courte": "Référentiel administratif encadrant certains marchés publics de travaux.",
+    "explication_pedagogique": "Définir des règles générales sur délais, responsabilités, réception et litiges.",
+    "points_vigilance": [
+      "À distinguer du CCTP, qui décrit les prescriptions techniques."
+    ]
+  },
+  {
+    "terme": "CCTG - Cahier des Clauses Techniques Générales",
+    "definition_courte": "Référentiel technique général applicable aux marchés de travaux publics.",
+    "explication_pedagogique": "Fixer les règles communes d'exécution, contrôles et réception des ouvrages.",
+    "points_vigilance": [
+      "Le CCTP peut compléter ou préciser ces règles mais ne doit pas être ignoré."
+    ]
+  },
+  {
+    "terme": "CCTP - Cahier des Clauses Techniques Particulières",
+    "definition_courte": "Document qui décrit précisément les travaux et exigences techniques d'un lot.",
+    "explication_pedagogique": "Savoir ce qui est dû par l'entreprise, comment l'exécuter et avec quels contrôles.",
+    "points_vigilance": [
+      "Lire le CCTP avec les plans, car les deux se complètent."
+    ]
+  },
+  {
+    "terme": "Centrale d’enrobés",
+    "definition_courte": "Installation de fabrication des enrobés bitumineux.",
+    "explication_pedagogique": "Produire un mélange conforme et homogène pour les couches de chaussée.",
+    "points_vigilance": [
+      "La centrale doit être agréée et sa production contrôlable."
+    ]
+  },
+  {
+    "terme": "Chaussée",
+    "definition_courte": "Partie de la voirie destinée principalement à la circulation des véhicules.",
+    "explication_pedagogique": "Supporter les charges roulantes et assurer une surface régulière.",
+    "points_vigilance": [
+      "La structure de chaussée dépend du trafic, du sol support et du compactage."
+    ]
+  },
+  {
+    "terme": "Chemin provisoire",
+    "definition_courte": "Voie temporaire créée pour permettre la circulation des engins pendant les travaux.",
+    "explication_pedagogique": "Organiser le chantier sans détériorer les zones définitives ou les accès existants.",
+    "points_vigilance": [
+      "Prévoir son entretien et sa remise en état en fin d'intervention."
+    ]
+  },
+  {
+    "terme": "Cheminement piéton",
+    "definition_courte": "Parcours destiné aux piétons, souvent soumis aux règles d'accessibilité.",
+    "explication_pedagogique": "Relier les accès, stationnements, bâtiments et espaces communs.",
+    "points_vigilance": [
+      "Contrôler largeur, pente, dévers, ressauts et revêtement non glissant."
+    ]
+  },
+  {
+    "terme": "Classe de résistance",
+    "definition_courte": "Niveau de résistance mécanique exigé pour un tuyau, béton, tampon ou matériau.",
+    "explication_pedagogique": "Adapter l'ouvrage aux charges et conditions de service.",
+    "points_vigilance": [
+      "Une classe insuffisante peut provoquer rupture, affaissement ou refus du gestionnaire."
+    ]
+  },
+  {
+    "terme": "Classement GTR",
+    "definition_courte": "Classification des sols et matériaux selon le Guide des Terrassements Routiers.",
+    "explication_pedagogique": "Choisir les matériaux réutilisables et les conditions de mise en œuvre.",
+    "points_vigilance": [
+      "À contrôler avant réemploi ou apport de remblais."
+    ]
+  },
+  {
+    "terme": "Coffrage",
+    "definition_courte": "Moule provisoire permettant de donner sa forme au béton frais.",
+    "explication_pedagogique": "Réaliser massifs, bordures coulées, ouvrages béton ou finitions propres.",
+    "points_vigilance": [
+      "Contrôler rigidité, propreté, alignement et décoffrage."
+    ]
+  },
+  {
+    "terme": "Cohérence de signalisation",
+    "definition_courte": "Principe selon lequel la signalisation provisoire doit être lisible, stable et adaptée à l'avancement du chantier.",
+    "explication_pedagogique": "Éviter les contradictions entre panneaux permanents et provisoires.",
+    "points_vigilance": [
+      "Modifier les panneaux au fur et à mesure des phases de travaux."
+    ]
+  },
+  {
+    "terme": "Collecteur",
+    "definition_courte": "Canalisation principale recevant plusieurs branchements.",
+    "explication_pedagogique": "Acheminer les eaux vers un exutoire, un réseau existant ou un ouvrage de stockage.",
+    "points_vigilance": [
+      "Son diamètre, sa pente et son étanchéité sont essentiels."
+    ]
+  },
+  {
+    "terme": "Collecteur EP",
+    "definition_courte": "Collecteur dédié aux eaux pluviales.",
+    "explication_pedagogique": "Transporter les eaux de ruissellement, de toiture ou de voirie.",
+    "points_vigilance": [
+      "Vérifier les raccordements, la capacité hydraulique et les ouvrages de stockage."
+    ]
+  },
+  {
+    "terme": "Collecteur EU",
+    "definition_courte": "Collecteur dédié aux eaux usées.",
+    "explication_pedagogique": "Acheminer les eaux domestiques vers le réseau d'assainissement.",
+    "points_vigilance": [
+      "La réception impose souvent étanchéité, inspection caméra et contrôle gestionnaire."
+    ]
+  },
+  {
+    "terme": "Comblement éventuel",
+    "definition_courte": "Remplissage d'un vide, trou, ancienne fouille ou zone impropre avant modelage.",
+    "explication_pedagogique": "Obtenir un support continu et stable pour les ouvrages futurs.",
+    "points_vigilance": [
+      "Purger les matériaux inadaptés avant comblement."
+    ]
+  },
+  {
+    "terme": "Compacité",
+    "definition_courte": "Degré de serrage d'un matériau compacté par rapport à une référence.",
+    "explication_pedagogique": "Vérifier que le remblai ou la couche de chaussée est suffisamment dense.",
+    "points_vigilance": [
+      "Une compacité insuffisante crée tassements, fissures ou ornières."
+    ]
+  },
+  {
+    "terme": "Compactage",
+    "definition_courte": "Action de densifier un sol ou un matériau par vibration, pression ou passage d'engin.",
+    "explication_pedagogique": "Augmenter la portance et limiter les tassements ultérieurs.",
+    "points_vigilance": [
+      "Contrôler l'épaisseur des couches, la teneur en eau et les essais demandés."
+    ]
+  },
+  {
+    "terme": "Concessionnaire",
+    "definition_courte": "Organisme gestionnaire d'un réseau public ou privé : eau, électricité, télécom, gaz, assainissement.",
+    "explication_pedagogique": "Donner les prescriptions et contrôler les raccordements ou travaux proches de ses ouvrages.",
+    "points_vigilance": [
+      "Consulter les concessionnaires avant intervention à proximité des réseaux."
+    ]
+  },
+  {
+    "terme": "Contrôle de conformité",
+    "definition_courte": "Vérification que matériaux, ouvrages ou travaux respectent les prescriptions du marché.",
+    "explication_pedagogique": "Sécuriser la réception et éviter les reprises tardives.",
+    "points_vigilance": [
+      "Les contrôles doivent être prévus dans le planning."
+    ]
+  },
+  {
+    "terme": "Contrôle télévisuel",
+    "definition_courte": "Inspection vidéo d'une canalisation par caméra.",
+    "explication_pedagogique": "Détecter défauts de pente, casse, ovalisation, mauvais joint ou obstacle.",
+    "points_vigilance": [
+      "À réaliser après nettoyage et avant réception des réseaux."
+    ]
+  },
+  {
+    "terme": "Coordination des travaux",
+    "definition_courte": "Organisation des interventions entre entreprises, concessionnaires et maîtrise d'œuvre.",
+    "explication_pedagogique": "Éviter conflits d'emprise, reprises inutiles ou blocage des autres lots.",
+    "points_vigilance": [
+      "Le lot VRD interfère fortement avec gros œuvre, paysage, réseaux et accès."
+    ]
+  },
+  {
+    "terme": "Cordeau",
+    "definition_courte": "Fil tendu servant à aligner ou guider une implantation.",
+    "explication_pedagogique": "Poser bordures, tranchées ou ouvrages avec un alignement régulier.",
+    "points_vigilance": [
+      "Le cordeau ne remplace pas un contrôle altimétrique précis."
+    ]
+  },
+  {
+    "terme": "Cordon de déblais",
+    "definition_courte": "Dépôt longitudinal provisoire de terres extraites le long d'une tranchée.",
+    "explication_pedagogique": "Stocker temporairement les matériaux avant remblaiement ou évacuation.",
+    "points_vigilance": [
+      "Ne pas gêner circulation, sécurité ou écoulement des eaux."
+    ]
+  },
+  {
+    "terme": "Cote finie",
+    "definition_courte": "Niveau définitif attendu après exécution des travaux.",
+    "explication_pedagogique": "Servir de référence pour terrassements, couches de chaussée, seuils et regards.",
+    "points_vigilance": [
+      "Toujours vérifier les épaisseurs de structure avant de terrasser."
+    ]
+  },
+  {
+    "terme": "Cote projet",
+    "definition_courte": "Niveau prévu sur les plans du projet.",
+    "explication_pedagogique": "Guider le nivellement et le réglage des fonds de forme.",
+    "points_vigilance": [
+      "Un écart de cote peut perturber pentes, seuils et raccordements."
+    ]
+  },
+  {
+    "terme": "Couche de base",
+    "definition_courte": "Couche de chaussée située sous la couche de roulement et participant à la portance.",
+    "explication_pedagogique": "Répartir les charges de circulation vers la couche de fondation.",
+    "points_vigilance": [
+      "Contrôler matériau, épaisseur, compactage et réception avant suite."
+    ]
+  },
+  {
+    "terme": "Couche de fondation",
+    "definition_courte": "Couche inférieure de la structure de chaussée posée sur le fond de forme.",
+    "explication_pedagogique": "Donner une assise stable à la chaussée.",
+    "points_vigilance": [
+      "Ne pas la poser sur un fond de forme non réceptionné."
+    ]
+  },
+  {
+    "terme": "Couche de roulement",
+    "definition_courte": "Couche supérieure de la chaussée, directement en contact avec les véhicules.",
+    "explication_pedagogique": "Assurer confort, adhérence, imperméabilité relative et durabilité.",
+    "points_vigilance": [
+      "Sa mise en œuvre exige une préparation correcte du support."
+    ]
+  },
+  {
+    "terme": "Cunette",
+    "definition_courte": "Forme hydraulique en fond de regard qui guide l'écoulement des eaux.",
+    "explication_pedagogique": "Éviter les stagnations et favoriser l'autocurage du réseau.",
+    "points_vigilance": [
+      "Une cunette mal orientée gêne l'écoulement et peut provoquer des dépôts."
+    ]
+  },
+  {
+    "terme": "Curage",
+    "definition_courte": "Nettoyage d'un ouvrage ou réseau pour enlever boues, dépôts ou obstacles.",
+    "explication_pedagogique": "Rendre le réseau apte à l'inspection et au fonctionnement.",
+    "points_vigilance": [
+      "Souvent préalable au passage caméra."
+    ]
+  },
+  {
+    "terme": "Déblais",
+    "definition_courte": "Terres ou matériaux extraits lors des terrassements.",
+    "explication_pedagogique": "Créer les niveaux nécessaires aux plateformes, tranchées ou voiries.",
+    "points_vigilance": [
+      "Trier les déblais réutilisables et évacuer les impropres en décharge agréée."
+    ]
+  },
+  {
+    "terme": "Débroussaillage",
+    "definition_courte": "Nettoyage de la végétation basse avant travaux.",
+    "explication_pedagogique": "Libérer l'emprise et permettre l'accès aux engins.",
+    "points_vigilance": [
+      "Ne pas confondre avec l'abattage d'arbres ou le dessouchage."
+    ]
+  },
+  {
+    "terme": "Décapage de terre végétale",
+    "definition_courte": "Retrait de la couche superficielle fertile du sol.",
+    "explication_pedagogique": "Séparer la terre végétale des matériaux de terrassement et la stocker pour réemploi.",
+    "points_vigilance": [
+      "Ne pas mélanger avec des terres argileuses ou matériaux pollués."
+    ]
+  },
+  {
+    "terme": "Décharge agréée",
+    "definition_courte": "Site autorisé à recevoir des déchets ou déblais selon leur nature.",
+    "explication_pedagogique": "Assurer une gestion conforme des déchets du chantier.",
+    "points_vigilance": [
+      "Conserver les bons de décharge comme justificatifs."
+    ]
+  },
+  {
+    "terme": "Déchets inertes",
+    "definition_courte": "Déchets minéraux ne se décomposant pas et ne polluant pas chimiquement dans des conditions normales.",
+    "explication_pedagogique": "Organiser l'évacuation des gravats, déblais et matériaux de démolition adaptés.",
+    "points_vigilance": [
+      "Les dépôts sauvages et brûlages sur site sont interdits."
+    ]
+  },
+  {
+    "terme": "Déclaration de travaux - DT",
+    "definition_courte": "Déclaration préalable faite par le responsable de projet pour connaître les réseaux existants.",
+    "explication_pedagogique": "Préparer les travaux à proximité de réseaux enterrés.",
+    "points_vigilance": [
+      "Le numéro de DT sert ensuite à établir les DICT des entreprises."
+    ]
+  },
+  {
+    "terme": "Découpe de chaussée",
+    "definition_courte": "Sciage ou tranchage propre d'un revêtement existant avant ouverture de tranchée.",
+    "explication_pedagogique": "Obtenir une limite nette pour la réfection et éviter les dégradations périphériques.",
+    "points_vigilance": [
+      "Découper avant terrassement sous voirie enrobée ou bétonnée."
+    ]
+  },
+  {
+    "terme": "Demande de renseignements",
+    "definition_courte": "Démarche pour obtenir des informations sur les réseaux et contraintes existants.",
+    "explication_pedagogique": "Compléter les plans et repérer les ouvrages enterrés non visibles.",
+    "points_vigilance": [
+      "Les plans fournis sont indicatifs : l'entreprise doit vérifier."
+    ]
+  },
+  {
+    "terme": "Demi-chaussée",
+    "definition_courte": "Moitié de la largeur d'une chaussée maintenue ouverte ou travaillée par phase.",
+    "explication_pedagogique": "Permettre les tranchées transversales tout en gardant une circulation partielle.",
+    "points_vigilance": [
+      "Prévoir protection, alternat et signalisation adaptés."
+    ]
+  },
+  {
+    "terme": "Dépôt de matériaux",
+    "definition_courte": "Stockage temporaire de matériaux sur l'emprise autorisée du chantier.",
+    "explication_pedagogique": "Organiser l'approvisionnement sans bloquer les accès.",
+    "points_vigilance": [
+      "Aucun dépôt n'est autorisé hors limites fixées par le maître d'ouvrage ou les services."
+    ]
+  },
+  {
+    "terme": "Désactivation du béton",
+    "definition_courte": "Traitement retardant la prise superficielle du béton pour révéler les granulats après lavage.",
+    "explication_pedagogique": "Créer l'aspect du béton désactivé.",
+    "points_vigilance": [
+      "Respecter dosage, météo, délai de lavage et cure finale."
+    ]
+  },
+  {
+    "terme": "Dessouchage",
+    "definition_courte": "Extraction des souches et racines après abattage.",
+    "explication_pedagogique": "Éviter les vides, pourrissements et tassements dans les futures plateformes.",
+    "points_vigilance": [
+      "Remblayer et compacter correctement les trous de souches."
+    ]
+  },
+  {
+    "terme": "Déviation",
+    "definition_courte": "Itinéraire provisoire imposé aux usagers pendant une coupure ou restriction de voirie.",
+    "explication_pedagogique": "Maintenir la circulation en sécurité autour du chantier.",
+    "points_vigilance": [
+      "Elle doit être autorisée, fléchée et cohérente avec les contraintes locales."
+    ]
+  },
+  {
+    "terme": "DICT - Déclaration d’Intention de Commencement de Travaux",
+    "definition_courte": "Déclaration faite par l'entreprise avant de travailler à proximité de réseaux.",
+    "explication_pedagogique": "Obtenir les réponses des exploitants et réduire les risques d'endommagement.",
+    "points_vigilance": [
+      "Ne pas démarrer les terrassements sans retours DICT pertinents."
+    ]
+  },
+  {
+    "terme": "Diorite 40/70",
+    "definition_courte": "Granulat de calibre 40/70 utilisé ici pour remplir les massifs de stockage alvéolaires.",
+    "explication_pedagogique": "Créer des vides de stockage pour les eaux pluviales.",
+    "points_vigilance": [
+      "Contrôler la granulométrie, la propreté et l'indice de vides annoncé."
+    ]
+  },
+  {
+    "terme": "Dossier de récolement",
+    "definition_courte": "Dossier remis en fin de travaux décrivant les ouvrages réellement exécutés.",
+    "explication_pedagogique": "Conserver la mémoire exacte des réseaux, niveaux, matériaux et contrôles.",
+    "points_vigilance": [
+      "Inclure plans, profils, rapports caméra, essais et documents demandés."
+    ]
+  },
+  {
+    "terme": "Dossier d’exécution",
+    "definition_courte": "Ensemble des plans, notes, fiches techniques et calculs nécessaires avant travaux.",
+    "explication_pedagogique": "Permettre au maître d'œuvre de vérifier les choix de l'entreprise.",
+    "points_vigilance": [
+      "À transmettre avant mise en œuvre des ouvrages concernés."
+    ]
+  },
+  {
+    "terme": "Drain",
+    "definition_courte": "Canalisation perforée ou ouvrage filtrant destiné à collecter des eaux infiltrées.",
+    "explication_pedagogique": "Limiter l'eau autour des constructions ou dans les structures drainantes.",
+    "points_vigilance": [
+      "Prévoir pente, filtration, exutoire et regards d'inspection."
+    ]
+  },
+  {
+    "terme": "Drain périphérique",
+    "definition_courte": "Drain posé autour d'une construction pour maîtriser les eaux près des fondations.",
+    "explication_pedagogique": "Réduire les risques liés à l'eau et aux sols sensibles.",
+    "points_vigilance": [
+      "Respecter les prescriptions DTU et le traitement des argiles si concerné."
+    ]
+  },
+  {
+    "terme": "Drainage périphérique",
+    "definition_courte": "Système complet de collecte et d'évacuation des eaux autour d'un bâtiment.",
+    "explication_pedagogique": "Protéger les constructions contre les accumulations d'eau en périphérie.",
+    "points_vigilance": [
+      "Un drainage sans exutoire ou mal filtré ne fonctionne pas durablement."
+    ]
+  },
+  {
+    "terme": "DTU 20.1",
+    "definition_courte": "Document technique relatif notamment aux ouvrages de maçonnerie et cité pour les sols sensibles aux argiles.",
+    "explication_pedagogique": "Servir de référence pour certains traitements périphériques de construction.",
+    "points_vigilance": [
+      "Ne pas l'appliquer isolément : vérifier aussi l'étude de sol et les plans."
+    ]
+  },
+  {
+    "terme": "Eau de gâchage",
+    "definition_courte": "Eau utilisée pour fabriquer béton ou mortier.",
+    "explication_pedagogique": "Permettre l'hydratation du ciment et la maniabilité du mélange.",
+    "points_vigilance": [
+      "Elle doit être conforme et ne pas contenir d'éléments nuisibles."
+    ]
+  },
+  {
+    "terme": "Eaux pluviales - EP",
+    "definition_courte": "Eaux provenant des pluies, toitures, voiries et ruissellements extérieurs.",
+    "explication_pedagogique": "Les collecter, stocker ou évacuer pour éviter inondations et dégradations.",
+    "points_vigilance": [
+      "Ne pas les confondre avec les eaux usées."
+    ]
+  },
+  {
+    "terme": "Eaux usées - EU",
+    "definition_courte": "Eaux domestiques issues des sanitaires, cuisines ou logements.",
+    "explication_pedagogique": "Les acheminer vers le réseau d'assainissement prévu.",
+    "points_vigilance": [
+      "Le réseau EU doit être étanche et contrôlé avant réception."
+    ]
+  },
+  {
+    "terme": "Échantillon",
+    "definition_courte": "Exemple de matériau ou finition soumis à validation.",
+    "explication_pedagogique": "Permettre au maître d'ouvrage ou maître d'œuvre de choisir ou approuver une qualité.",
+    "points_vigilance": [
+      "Conserver parfois un échantillon témoin jusqu'à la fin du chantier."
+    ]
+  },
+  {
+    "terme": "Écoulement",
+    "definition_courte": "Mouvement de l'eau dans une canalisation, un fossé ou en surface.",
+    "explication_pedagogique": "Vérifier que les eaux partent dans le bon sens sans stagnation.",
+    "points_vigilance": [
+      "Contrôler les pentes et les points bas."
+    ]
+  },
+  {
+    "terme": "Élément préfabriqué",
+    "definition_courte": "Ouvrage fabriqué en usine puis posé sur chantier : regard, bordure, caniveau ou tête de pont.",
+    "explication_pedagogique": "Gagner en qualité et rapidité d'exécution.",
+    "points_vigilance": [
+      "Contrôler les dimensions, l'état à la livraison et le calage à la pose."
+    ]
+  },
+  {
+    "terme": "Emprise du chantier",
+    "definition_courte": "Surface autorisée pour réaliser et organiser les travaux.",
+    "explication_pedagogique": "Délimiter où l'entreprise peut circuler, stocker et travailler.",
+    "points_vigilance": [
+      "Ne pas occuper une zone non autorisée, surtout sur domaine public."
+    ]
+  },
+  {
+    "terme": "Enduit d’imprégnation",
+    "definition_courte": "Application de liant bitumineux sur une couche support avant enrobé.",
+    "explication_pedagogique": "Favoriser l'accrochage de la couche de roulement.",
+    "points_vigilance": [
+      "Respecter dosage, propreté du support et conditions météo."
+    ]
+  },
+  {
+    "terme": "Engazonnement",
+    "definition_courte": "Mise en place d'une surface végétalisée par semis ou dalles engazonnées selon lot concerné.",
+    "explication_pedagogique": "Stabiliser et aménager les espaces verts ou certains stationnements.",
+    "points_vigilance": [
+      "Vérifier les limites entre lot VRD et lot espaces verts."
+    ]
+  },
+  {
+    "terme": "Engin de chantier",
+    "definition_courte": "Matériel motorisé utilisé pour terrasser, transporter, compacter ou poser les ouvrages.",
+    "explication_pedagogique": "Réaliser les travaux en sécurité et avec rendement adapté.",
+    "points_vigilance": [
+      "Les engins doivent être entretenus, conformes et compatibles avec l'emprise."
+    ]
+  },
+  {
+    "terme": "Enrobé à chaud",
+    "definition_courte": "Mélange bitumineux fabriqué et posé à température élevée.",
+    "explication_pedagogique": "Former des couches de chaussée résistantes.",
+    "points_vigilance": [
+      "La température, le transport bâché et le compactage conditionnent la qualité finale."
+    ]
+  },
+  {
+    "terme": "Épreuve d’étanchéité",
+    "definition_courte": "Essai permettant de vérifier qu'une canalisation ou un regard ne fuit pas.",
+    "explication_pedagogique": "Valider le réseau avant réception et remblaiement définitif si applicable.",
+    "points_vigilance": [
+      "Les PV d'essais sont à conserver dans le dossier de fin de travaux."
+    ]
+  },
+  {
+    "terme": "Épuisement",
+    "definition_courte": "Pompage ou évacuation d'eau présente dans une fouille ou une tranchée.",
+    "explication_pedagogique": "Permettre de travailler dans des conditions sèches ou maîtrisées.",
+    "points_vigilance": [
+      "Éviter l'entraînement des fines et les tassements voisins."
+    ]
+  },
+  {
+    "terme": "Essai de compactage",
+    "definition_courte": "Contrôle de la densité ou qualité de compactage d'une couche de remblai ou chaussée.",
+    "explication_pedagogique": "Prouver que le support atteint les performances attendues.",
+    "points_vigilance": [
+      "Prévoir le délai d'intervention du laboratoire dans le planning."
+    ]
+  },
+  {
+    "terme": "Essai de plaque",
+    "definition_courte": "Essai de portance réalisé sur une plateforme avec une plaque chargée.",
+    "explication_pedagogique": "Mesurer la déformabilité du support, notamment avec EV1 et EV2.",
+    "points_vigilance": [
+      "Le CCTP exige une portance minimale et un rapport EV2/EV1 contrôlé."
+    ]
+  },
+  {
+    "terme": "Essai d’orniérage",
+    "definition_courte": "Essai qui vérifie la résistance d'un enrobé à la formation d'ornières sous trafic.",
+    "explication_pedagogique": "S'assurer que la couche de roulement résiste aux déformations.",
+    "points_vigilance": [
+      "À vérifier pour les formulations d'enrobés lorsque prescrit."
+    ]
+  },
+  {
+    "terme": "Essai PCG",
+    "definition_courte": "Essai de compactage à la presse à cisaillement giratoire pour les enrobés.",
+    "explication_pedagogique": "Évaluer le pourcentage de vides et le comportement de la formulation.",
+    "points_vigilance": [
+      "Un mauvais résultat peut imposer une reformulation."
+    ]
+  },
+  {
+    "terme": "EV1",
+    "definition_courte": "Premier module mesuré lors d'un essai de plaque.",
+    "explication_pedagogique": "Servir de référence pour apprécier la réponse initiale du sol.",
+    "points_vigilance": [
+      "À interpréter avec EV2 et le rapport EV2/EV1."
+    ]
+  },
+  {
+    "terme": "EV2",
+    "definition_courte": "Second module mesuré lors d'un essai de plaque, utilisé comme indicateur de portance.",
+    "explication_pedagogique": "Valider la plateforme support avant couches de chaussée.",
+    "points_vigilance": [
+      "Le CCTP demande notamment EV2 > 60 MPa pour certaines plateformes."
+    ]
+  },
+  {
+    "terme": "EV2/EV1",
+    "definition_courte": "Rapport entre le second et le premier module de l'essai de plaque.",
+    "explication_pedagogique": "Apprécier la qualité du compactage et la stabilisation du support.",
+    "points_vigilance": [
+      "Un rapport trop élevé indique souvent un compactage insuffisant."
+    ]
+  },
+  {
+    "terme": "Évacuation des déblais",
+    "definition_courte": "Transport hors site des terres ou matériaux non conservés.",
+    "explication_pedagogique": "Libérer le chantier et évacuer les matériaux impropres ou excédentaires.",
+    "points_vigilance": [
+      "Utiliser une décharge agréée et conserver les bons."
+    ]
+  },
+  {
+    "terme": "Existant",
+    "definition_courte": "Ouvrage, réseau, voirie ou équipement déjà présent avant les travaux.",
+    "explication_pedagogique": "Adapter les travaux sans dégrader ce qui doit être conservé.",
+    "points_vigilance": [
+      "Toute découverte non indiquée doit être signalée immédiatement."
+    ]
+  },
+  {
+    "terme": "Fascicule 23",
+    "definition_courte": "Partie du CCTG relative notamment aux granulats employés dans les chaussées.",
+    "explication_pedagogique": "Définir les exigences de fourniture et qualité des matériaux granulaires.",
+    "points_vigilance": [
+      "À prendre en compte pour les graves et matériaux de chaussée."
+    ]
+  },
+  {
+    "terme": "Fascicule 25",
+    "definition_courte": "Partie du CCTG relative à l'exécution des corps de chaussées.",
+    "explication_pedagogique": "Encadrer la mise en œuvre des couches de chaussée.",
+    "points_vigilance": [
+      "Contrôler les prescriptions applicables avant réalisation."
+    ]
+  },
+  {
+    "terme": "Fascicule 27",
+    "definition_courte": "Référence technique relative aux enrobés dans les marchés publics de travaux.",
+    "explication_pedagogique": "Encadrer fabrication, transport et mise en œuvre des matériaux enrobés.",
+    "points_vigilance": [
+      "À rapprocher des normes d'enrobés mentionnées au CCTP."
+    ]
+  },
+  {
+    "terme": "Fascicule 31",
+    "definition_courte": "Référence technique applicable aux bordures et caniveaux préfabriqués.",
+    "explication_pedagogique": "Définir exigences de qualité et mise en œuvre de ces éléments.",
+    "points_vigilance": [
+      "Contrôler conformité des fournitures avant pose."
+    ]
+  },
+  {
+    "terme": "Fascicule 70",
+    "definition_courte": "Référence du CCTG relative aux ouvrages d'assainissement.",
+    "explication_pedagogique": "Encadrer pose, contrôles et réception des réseaux EU/EP.",
+    "points_vigilance": [
+      "Souvent cité pour piquetage, essais et réception des canalisations."
+    ]
+  },
+  {
+    "terme": "Fascicule 71",
+    "definition_courte": "Référence technique liée aux réseaux et prescriptions de travaux publics selon le contexte.",
+    "explication_pedagogique": "Servir de base complémentaire aux exigences de réseaux.",
+    "points_vigilance": [
+      "Vérifier son champ d'application exact selon les pièces du marché."
+    ]
+  },
+  {
+    "terme": "Fines argileuses",
+    "definition_courte": "Particules très fines de nature argileuse présentes dans un matériau.",
+    "explication_pedagogique": "Elles influencent fortement la sensibilité à l'eau et le compactage.",
+    "points_vigilance": [
+      "Trop de fines argileuses peuvent rendre une grave ou un remblai impropre."
+    ]
+  },
+  {
+    "terme": "Fléchage",
+    "definition_courte": "Signalisation directionnelle temporaire guidant les véhicules ou piétons autour du chantier.",
+    "explication_pedagogique": "Assurer la continuité des cheminements pendant les travaux.",
+    "points_vigilance": [
+      "Il doit être visible de jour comme de nuit si nécessaire."
+    ]
+  },
+  {
+    "terme": "Fond de forme",
+    "definition_courte": "Surface finale obtenue après terrassement avant mise en place des couches de structure.",
+    "explication_pedagogique": "Servir de support aux voiries, cheminements ou plateformes.",
+    "points_vigilance": [
+      "Il doit être réglé, compacté et réceptionné avant poursuite."
+    ]
+  },
+  {
+    "terme": "Fond de fouille",
+    "definition_courte": "Surface au fond d'une tranchée ou excavation sur laquelle repose un ouvrage.",
+    "explication_pedagogique": "Recevoir le lit de pose, la canalisation, le béton ou l'ouvrage prévu.",
+    "points_vigilance": [
+      "Il doit être propre, stable, sans point dur sous les tuyaux."
+    ]
+  },
+  {
+    "terme": "Fossé",
+    "definition_courte": "Ouvrage linéaire ouvert servant à collecter ou évacuer les eaux de surface.",
+    "explication_pedagogique": "Gérer les ruissellements et raccordements pluviaux.",
+    "points_vigilance": [
+      "Maintenir pente, profil et exutoire libres."
+    ]
+  },
+  {
+    "terme": "Fossé à remodeler",
+    "definition_courte": "Fossé existant repris pour modifier son profil ou son fonctionnement.",
+    "explication_pedagogique": "Adapter l'écoulement existant au projet.",
+    "points_vigilance": [
+      "Évacuer les déchets et respecter les plans EP."
+    ]
+  },
+  {
+    "terme": "Fouille",
+    "definition_courte": "Excavation réalisée dans le sol pour un ouvrage ou un réseau.",
+    "explication_pedagogique": "Permettre la pose de canalisations, regards, massifs ou fondations.",
+    "points_vigilance": [
+      "Sécuriser les parois et contrôler les venues d'eau."
+    ]
+  },
+  {
+    "terme": "Fourreau",
+    "definition_courte": "Tube de protection ou réservation permettant le passage d'un réseau.",
+    "explication_pedagogique": "Protéger un câble, une canalisation ou un futur réseau sous chaussée ou ouvrage.",
+    "points_vigilance": [
+      "Le repérer précisément au récolement."
+    ]
+  },
+  {
+    "terme": "Fuseau granulométrique",
+    "definition_courte": "Plage de répartition des grains qu'un matériau doit respecter.",
+    "explication_pedagogique": "Assurer une qualité stable de grave, sable ou remblai.",
+    "points_vigilance": [
+      "Comparer les analyses du fournisseur au fuseau exigé."
+    ]
+  },
+  {
+    "terme": "Géocomposite",
+    "definition_courte": "Produit associant plusieurs géosynthétiques, par exemple géomembrane et géotextile.",
+    "explication_pedagogique": "Remplir plusieurs fonctions : étanchéité, drainage ou protection anti-poinçonnement.",
+    "points_vigilance": [
+      "Respecter le sens de pose, les recouvrements et les raccords."
+    ]
+  },
+  {
+    "terme": "Géomembrane",
+    "definition_courte": "Membrane étanche utilisée pour bloquer ou orienter les eaux dans le sol.",
+    "explication_pedagogique": "Protéger certaines zones sensibles ou limiter les infiltrations.",
+    "points_vigilance": [
+      "Contrôler continuité, recouvrements et absence de poinçonnement."
+    ]
+  },
+  {
+    "terme": "Géomètre expert VRD",
+    "definition_courte": "Professionnel chargé des relevés, implantations et aspects topographiques du projet VRD.",
+    "explication_pedagogique": "Garantir les positions et niveaux des ouvrages.",
+    "points_vigilance": [
+      "Les erreurs d'implantation se répercutent sur tous les lots."
+    ]
+  },
+  {
+    "terme": "Géotextile",
+    "definition_courte": "Nappe synthétique utilisée pour séparer, filtrer, protéger ou renforcer des couches de sol.",
+    "explication_pedagogique": "Éviter le mélange des matériaux et améliorer la pérennité des structures.",
+    "points_vigilance": [
+      "Respecter masse surfacique, recouvrement et certificat qualité."
+    ]
+  },
+  {
+    "terme": "GNT - Grave Non Traitée",
+    "definition_courte": "Mélange granulaire non lié au ciment ni au bitume, utilisé en couche de chaussée.",
+    "explication_pedagogique": "Constituer des couches de fondation ou de base compactées.",
+    "points_vigilance": [
+      "Contrôler granulométrie, propreté, teneur en eau et compactage."
+    ]
+  },
+  {
+    "terme": "Granulat",
+    "definition_courte": "Matériau minéral en grains : sable, gravillon, grave ou caillou concassé.",
+    "explication_pedagogique": "Entrer dans la composition des bétons, enrobés, remblais et couches de chaussée.",
+    "points_vigilance": [
+      "La qualité dépend de la granulométrie, propreté et résistance mécanique."
+    ]
+  },
+  {
+    "terme": "Granulométrie",
+    "definition_courte": "Distribution des dimensions des grains dans un matériau.",
+    "explication_pedagogique": "Déterminer l'aptitude au compactage, au drainage ou au bétonnage.",
+    "points_vigilance": [
+      "Un mauvais fuseau peut provoquer ségrégation ou manque de portance."
+    ]
+  },
+  {
+    "terme": "Gravats",
+    "definition_courte": "Débris issus de travaux, démolition, purge ou nettoyage.",
+    "explication_pedagogique": "À évacuer pour maintenir le chantier propre et éviter les mélanges impropres.",
+    "points_vigilance": [
+      "Les gravats ne doivent pas être abandonnés dans les remblais sensibles."
+    ]
+  },
+  {
+    "terme": "Grave",
+    "definition_courte": "Mélange de granulats de plusieurs tailles utilisé en chaussée ou remblai technique.",
+    "explication_pedagogique": "Former une couche compacte et portante.",
+    "points_vigilance": [
+      "Vérifier la catégorie et l'absence excessive de fines argileuses."
+    ]
+  },
+  {
+    "terme": "Gravillon",
+    "definition_courte": "Granulat de taille supérieure au sable, utilisé en béton, drainage ou structure.",
+    "explication_pedagogique": "Participer à la résistance, au drainage ou à l'aspect du béton désactivé.",
+    "points_vigilance": [
+      "Contrôler propreté, résistance Los Angeles et Micro-Deval selon besoin."
+    ]
+  },
+  {
+    "terme": "Grille concave",
+    "definition_courte": "Grille de regard ou avaloir légèrement creusée pour mieux capter les eaux.",
+    "explication_pedagogique": "Augmenter l'efficacité d'absorption en point bas.",
+    "points_vigilance": [
+      "Veiller à ne pas créer d'obstacle dangereux pour piétons ou roues."
+    ]
+  },
+  {
+    "terme": "Grille de porte",
+    "definition_courte": "Grille ou caillebotis devant une entrée pour gérer l'eau et le passage.",
+    "explication_pedagogique": "Assurer une zone propre et drainante devant les portes.",
+    "points_vigilance": [
+      "Elle doit être calée et conforme aux contraintes PMR."
+    ]
+  },
+  {
+    "terme": "Groupe motopompe",
+    "definition_courte": "Pompe motorisée utilisée pour évacuer les eaux d'une tranchée ou fouille.",
+    "explication_pedagogique": "Maintenir le chantier hors d'eau pendant certains travaux.",
+    "points_vigilance": [
+      "Choisir une capacité adaptée et suivre les heures de fonctionnement si nécessaire."
+    ]
+  },
+  {
+    "terme": "Guide GTR",
+    "definition_courte": "Guide des Terrassements Routiers servant à classer et utiliser les sols en terrassement.",
+    "explication_pedagogique": "Orienter le réemploi, le traitement et les conditions de compactage.",
+    "points_vigilance": [
+      "À utiliser avec l'étude géotechnique et les essais chantier."
+    ]
+  },
+  {
+    "terme": "Humidité de mise en œuvre",
+    "definition_courte": "Teneur en eau d'un matériau au moment du compactage ou de la pose.",
+    "explication_pedagogique": "Atteindre la densité souhaitée avec un matériau granulaire.",
+    "points_vigilance": [
+      "Trop sec ou trop humide, le matériau se compacte mal."
+    ]
+  },
+  {
+    "terme": "Hydraulique",
+    "definition_courte": "Domaine relatif à l'écoulement et à la gestion de l'eau.",
+    "explication_pedagogique": "Dimensionner pentes, diamètres, avaloirs, regards et stockages.",
+    "points_vigilance": [
+      "Une incohérence hydraulique entraîne débordements ou stagnations."
+    ]
+  },
+  {
+    "terme": "Hydrocurage",
+    "definition_courte": "Nettoyage haute pression des canalisations ou réseaux.",
+    "explication_pedagogique": "Retirer dépôts et résidus avant inspection caméra ou réception.",
+    "points_vigilance": [
+      "À réaliser sans endommager les ouvrages neufs."
+    ]
+  },
+  {
+    "terme": "Implantation",
+    "definition_courte": "Report sur le terrain de la position des ouvrages prévus aux plans.",
+    "explication_pedagogique": "Placer correctement tranchées, voiries, plateformes, regards et bordures.",
+    "points_vigilance": [
+      "L'entreprise reste responsable des erreurs d'implantation."
+    ]
+  },
+  {
+    "terme": "Imprégnation",
+    "definition_courte": "Application d'un liant sur une surface pour préparer l'accrochage ou la protection.",
+    "explication_pedagogique": "Favoriser l'adhérence entre support et enrobé ou stabiliser une couche.",
+    "points_vigilance": [
+      "Support propre et dosage conforme sont indispensables."
+    ]
+  },
+  {
+    "terme": "Indice de vides",
+    "definition_courte": "Pourcentage de vide disponible dans un matériau ou massif drainant.",
+    "explication_pedagogique": "Calculer le volume de stockage des eaux pluviales.",
+    "points_vigilance": [
+      "Un indice de vides surestimé réduit la capacité réelle de stockage."
+    ]
+  },
+  {
+    "terme": "Inspection caméra",
+    "definition_courte": "Contrôle vidéo de l'intérieur d'une canalisation.",
+    "explication_pedagogique": "Repérer défauts de pose, fissures, contre-pentes, intrusions ou dépôts.",
+    "points_vigilance": [
+      "Le rapport et la vidéo sont à joindre au dossier de récolement."
+    ]
+  },
+  {
+    "terme": "Inspection visuelle",
+    "definition_courte": "Contrôle par observation directe de l'état apparent d'un ouvrage.",
+    "explication_pedagogique": "Repérer anomalies visibles avant essais plus lourds.",
+    "points_vigilance": [
+      "Ne remplace pas les essais d'étanchéité ou de compactage."
+    ]
+  },
+  {
+    "terme": "Installation de chantier",
+    "definition_courte": "Ensemble des locaux, clôtures, protections, réseaux provisoires et moyens nécessaires au chantier.",
+    "explication_pedagogique": "Assurer sécurité, hygiène, logistique et organisation des travaux.",
+    "points_vigilance": [
+      "Doit être entretenue et repliée en fin d'opération."
+    ]
+  },
+  {
+    "terme": "Itinéraire accessible",
+    "definition_courte": "Cheminement utilisable par une personne à mobilité réduite.",
+    "explication_pedagogique": "Permettre d'accéder aux bâtiments, stationnements et parties communes.",
+    "points_vigilance": [
+      "Pentes, largeurs, ressauts et dévers doivent être contrôlés."
+    ]
+  },
+  {
+    "terme": "Jalonnement",
+    "definition_courte": "Mise en place de repères ou panneaux pour guider usagers ou engins.",
+    "explication_pedagogique": "Sécuriser les déplacements provisoires autour du chantier.",
+    "points_vigilance": [
+      "Adapter le jalonnement à chaque phase."
+    ]
+  },
+  {
+    "terme": "Joint caoutchouc",
+    "definition_courte": "Joint souple assurant l'étanchéité entre éléments de canalisation ou regard.",
+    "explication_pedagogique": "Permettre une liaison étanche et légèrement tolérante aux mouvements.",
+    "points_vigilance": [
+      "Vérifier propreté, bon emboîtement et absence de pincement."
+    ]
+  },
+  {
+    "terme": "Joint de construction",
+    "definition_courte": "Séparation prévue entre deux phases ou parties d'ouvrage béton.",
+    "explication_pedagogique": "Maîtriser la reprise de bétonnage ou les mouvements.",
+    "points_vigilance": [
+      "Un joint mal traité peut devenir un point faible ou une fuite."
+    ]
+  },
+  {
+    "terme": "Joint de tuyau",
+    "definition_courte": "Zone de raccordement entre deux éléments de canalisation.",
+    "explication_pedagogique": "Assurer continuité hydraulique et étanchéité.",
+    "points_vigilance": [
+      "Contrôler à l'épreuve d'étanchéité et à l'inspection caméra."
+    ]
+  },
+  {
+    "terme": "Joint étanche",
+    "definition_courte": "Liaison empêchant les infiltrations ou fuites d'eau.",
+    "explication_pedagogique": "Garantir le fonctionnement du réseau ou de l'ouvrage.",
+    "points_vigilance": [
+      "Une fuite peut entraîner affouillement, pollution ou refus de réception."
+    ]
+  },
+  {
+    "terme": "Laboratoire de contrôle",
+    "definition_courte": "Organisme ou prestataire réalisant essais matériaux, compactage ou conformité.",
+    "explication_pedagogique": "Apporter une preuve indépendante de la qualité des travaux.",
+    "points_vigilance": [
+      "Planifier ses interventions pour ne pas bloquer le chantier."
+    ]
+  },
+  {
+    "terme": "Liant hydraulique",
+    "definition_courte": "Liant comme le ciment qui durcit par réaction avec l'eau.",
+    "explication_pedagogique": "Entrer dans les bétons, mortiers et certaines couches traitées.",
+    "points_vigilance": [
+      "Contrôler la classe, le dosage et les conditions de stockage."
+    ]
+  },
+  {
+    "terme": "Liant hydrocarboné",
+    "definition_courte": "Liant à base de bitume utilisé dans les enrobés et enduits.",
+    "explication_pedagogique": "Coller les granulats et former un revêtement routier cohérent.",
+    "points_vigilance": [
+      "Choisir la classe de bitume adaptée à la formulation."
+    ]
+  },
+  {
+    "terme": "Limite de prestation",
+    "definition_courte": "Frontière entre ce qui est dû par un lot et ce qui relève d'un autre lot.",
+    "explication_pedagogique": "Éviter les oublis, doublons ou conflits entre entreprises.",
+    "points_vigilance": [
+      "À vérifier avec plans, CCTP et interfaces des autres lots."
+    ]
+  },
+  {
+    "terme": "Loi ELAN",
+    "definition_courte": "Texte réglementaire cité dans le CCTP pour les dispositions liées aux sols argileux et constructions.",
+    "explication_pedagogique": "Prendre en compte certains risques de retrait-gonflement des argiles.",
+    "points_vigilance": [
+      "Vérifier les exigences applicables avec l'étude de sol et le DTU concerné."
+    ]
+  },
+  {
+    "terme": "Los Angeles - LA",
+    "definition_courte": "Essai mesurant la résistance d'un granulat aux chocs et à la fragmentation.",
+    "explication_pedagogique": "Évaluer la qualité mécanique des gravillons ou granulats.",
+    "points_vigilance": [
+      "Un LA trop élevé indique un granulat plus fragile."
+    ]
+  },
+  {
+    "terme": "Lutte contre le bruit",
+    "definition_courte": "Mesures pour limiter les nuisances sonores du chantier.",
+    "explication_pedagogique": "Protéger riverains et respecter les horaires autorisés.",
+    "points_vigilance": [
+      "Les travaux bruyants peuvent être interdits la nuit, dimanche ou jours fériés sauf dérogation."
+    ]
+  },
+  {
+    "terme": "Marquage au sol",
+    "definition_courte": "Signalisation horizontale peinte ou appliquée sur chaussée ou parking.",
+    "explication_pedagogique": "Organiser stationnements, circulations et passages piétons.",
+    "points_vigilance": [
+      "Support propre, sec et conforme au plan avant application."
+    ]
+  },
+  {
+    "terme": "Marquage CE",
+    "definition_courte": "Marquage indiquant qu'un produit de construction répond à des exigences européennes applicables.",
+    "explication_pedagogique": "Faciliter la conformité des produits mis en œuvre.",
+    "points_vigilance": [
+      "Ne dispense pas de vérifier les performances techniques demandées au marché."
+    ]
+  },
+  {
+    "terme": "Massif de stockage",
+    "definition_courte": "Ouvrage enterré permettant de stocker temporairement des eaux pluviales.",
+    "explication_pedagogique": "Limiter les débits rejetés et gérer les pluies du projet.",
+    "points_vigilance": [
+      "Contrôler volume utile, indice de vides, géotextile, drain et raccordement."
+    ]
+  },
+  {
+    "terme": "Matériau inerte",
+    "definition_courte": "Matériau qui ne se décompose pas et ne réagit pas chimiquement de manière significative.",
+    "explication_pedagogique": "Peut être évacué ou parfois réutilisé selon sa qualité et les prescriptions.",
+    "points_vigilance": [
+      "Même inerte, il peut être impropre s'il nuit à la portance ou au fonctionnement."
+    ]
+  },
+  {
+    "terme": "Matériau non traité",
+    "definition_courte": "Matériau granulaire utilisé sans liant ciment ou bitume.",
+    "explication_pedagogique": "Constituer certaines couches de chaussée ou remblais techniques.",
+    "points_vigilance": [
+      "La qualité dépend du compactage, de la granulométrie et de l'eau."
+    ]
+  },
+  {
+    "terme": "Matériau sain",
+    "definition_courte": "Matériau propre, stable et apte à rester dans l'ouvrage sans nuire à sa tenue.",
+    "explication_pedagogique": "Réaliser remblais ou fonds de forme durables.",
+    "points_vigilance": [
+      "Écarter matières organiques, argiles sensibles, déchets et matériaux pollués."
+    ]
+  },
+  {
+    "terme": "Micro-Deval - MDE",
+    "definition_courte": "Essai évaluant la résistance d'un granulat à l'usure par frottement en présence d'eau.",
+    "explication_pedagogique": "Choisir des granulats adaptés à une structure routière durable.",
+    "points_vigilance": [
+      "À lire avec l'essai Los Angeles pour juger la qualité mécanique."
+    ]
+  },
+  {
+    "terme": "Mise à niveau",
+    "definition_courte": "Action d'amener une surface ou un ouvrage à la cote prévue.",
+    "explication_pedagogique": "Préparer plateformes, voiries, regards ou espaces verts.",
+    "points_vigilance": [
+      "Vérifier avec les cotes projet et les niveaux finis."
+    ]
+  },
+  {
+    "terme": "Mise en forme",
+    "definition_courte": "Modelage du terrain ou d'une couche pour obtenir les pentes et profils demandés.",
+    "explication_pedagogique": "Diriger les eaux et préparer la pose des couches suivantes.",
+    "points_vigilance": [
+      "Ne pas laisser de contre-pente ou de point bas non prévu."
+    ]
+  },
+  {
+    "terme": "Mise en stock",
+    "definition_courte": "Stockage provisoire de matériaux sur chantier pour réemploi ultérieur.",
+    "explication_pedagogique": "Réutiliser terre végétale ou matériaux sains lorsque le projet le permet.",
+    "points_vigilance": [
+      "Stocker séparément par nature et éviter la pollution des matériaux."
+    ]
+  },
+  {
+    "terme": "Mobilier urbain",
+    "definition_courte": "Équipements présents sur l'espace public : potelets, panneaux, bancs, bornes, candélabres.",
+    "explication_pedagogique": "À protéger ou déposer pendant les travaux selon le cas.",
+    "points_vigilance": [
+      "Tout dommage peut être imputé à l'entreprise."
+    ]
+  },
+  {
+    "terme": "Modelage du terrain",
+    "definition_courte": "Façonnage des surfaces pour obtenir les formes, pentes et niveaux prévus.",
+    "explication_pedagogique": "Assurer drainage, esthétique et raccordement aux ouvrages.",
+    "points_vigilance": [
+      "Le modelage doit respecter les plans et éviter les stagnations."
+    ]
+  },
+  {
+    "terme": "Module de richesse K",
+    "definition_courte": "Paramètre de formulation des enrobés lié à la quantité de liant par rapport aux granulats.",
+    "explication_pedagogique": "Aider à caractériser un enrobé comme le BBSG.",
+    "points_vigilance": [
+      "Une formulation non conforme peut affecter durabilité et orniérage."
+    ]
+  },
+  {
+    "terme": "Motopompe",
+    "definition_courte": "Pompe autonome motorisée utilisée pour évacuer l'eau.",
+    "explication_pedagogique": "Assécher fouilles et tranchées pendant les travaux.",
+    "points_vigilance": [
+      "Choisir le débit adapté et éviter le rejet d'eau chargé sans précaution."
+    ]
+  },
+  {
+    "terme": "Mouvement de terre",
+    "definition_courte": "Ensemble des déblais, remblais, transports et modelages de sols.",
+    "explication_pedagogique": "Créer les niveaux du projet à partir du terrain existant.",
+    "points_vigilance": [
+      "Anticiper les volumes, réemplois, évacuations et apports."
+    ]
+  },
+  {
+    "terme": "Nappe phréatique",
+    "definition_courte": "Niveau d'eau souterraine pouvant être rencontré pendant les fouilles.",
+    "explication_pedagogique": "Influencer tranchées, stabilité et pose des réseaux.",
+    "points_vigilance": [
+      "Un rabattement peut être nécessaire et doit être prévu au planning."
+    ]
+  },
+  {
+    "terme": "Nivellement",
+    "definition_courte": "Opération topographique permettant de déterminer ou reporter les altitudes.",
+    "explication_pedagogique": "Garantir les pentes des réseaux et niveaux de voirie.",
+    "points_vigilance": [
+      "Une erreur de nivellement peut bloquer l'écoulement gravitaire."
+    ]
+  },
+  {
+    "terme": "Norme NF",
+    "definition_courte": "Référentiel français de qualité ou de performance pour un produit ou une mise en œuvre.",
+    "explication_pedagogique": "Encadrer les exigences techniques minimales.",
+    "points_vigilance": [
+      "La conformité à une norme ne suffit pas si le CCTP demande plus."
+    ]
+  },
+  {
+    "terme": "Note de calcul",
+    "definition_courte": "Document justifiant un dimensionnement ou une résistance.",
+    "explication_pedagogique": "Valider tuyaux, remblais, structures, ouvrages béton ou hydraulique.",
+    "points_vigilance": [
+      "Doit être fournie et visée avant travaux lorsque demandée."
+    ]
+  },
+  {
+    "terme": "Notice technique",
+    "definition_courte": "Document fabricant décrivant caractéristiques, mise en œuvre et limites d'un produit.",
+    "explication_pedagogique": "Permettre la validation et le contrôle des matériaux proposés.",
+    "points_vigilance": [
+      "À transmettre avant commande lorsque le produit est soumis à accord."
+    ]
+  },
+  {
+    "terme": "OPM - Optimum Proctor Modifié",
+    "definition_courte": "Référence de teneur en eau et densité permettant d'apprécier le compactage d'un matériau.",
+    "explication_pedagogique": "Guider la mise en œuvre des graves ou remblais.",
+    "points_vigilance": [
+      "La teneur en eau chantier doit rester dans la plage prévue."
+    ]
+  },
+  {
+    "terme": "Organisme de contrôle",
+    "definition_courte": "Bureau ou laboratoire intervenant pour vérifier la conformité des ouvrages.",
+    "explication_pedagogique": "Sécuriser la réception technique du projet.",
+    "points_vigilance": [
+      "Son intervention doit être intégrée au planning."
+    ]
+  },
+  {
+    "terme": "Ouvrage de visite",
+    "definition_courte": "Regard ou accès permettant d'inspecter et entretenir un réseau enterré.",
+    "explication_pedagogique": "Faciliter maintenance, hydrocurage et contrôle caméra.",
+    "points_vigilance": [
+      "Positionner les tampons au bon niveau fini."
+    ]
+  },
+  {
+    "terme": "Ouvrage enterré",
+    "definition_courte": "Réseau ou structure situé sous le sol : canalisation, fourreau, regard, câble ou massif.",
+    "explication_pedagogique": "À repérer avant terrassement et à préserver si existant.",
+    "points_vigilance": [
+      "Un dommage sur ouvrage enterré peut avoir des conséquences graves."
+    ]
+  },
+  {
+    "terme": "Palier de repos",
+    "definition_courte": "Surface horizontale aménagée sur un cheminement accessible en haut, bas ou cours de pente.",
+    "explication_pedagogique": "Permettre aux personnes à mobilité réduite de s'arrêter ou manœuvrer.",
+    "points_vigilance": [
+      "Respecter dimensions et fréquence selon la pente."
+    ]
+  },
+  {
+    "terme": "Palplanche",
+    "definition_courte": "Profil métallique battu dans le sol pour retenir la terre ou l'eau.",
+    "explication_pedagogique": "Stabiliser une fouille, créer un batardeau ou maîtriser la nappe.",
+    "points_vigilance": [
+      "Le choix doit être adapté au sol et soumis à validation si prescrit."
+    ]
+  },
+  {
+    "terme": "Panneau de chantier",
+    "definition_courte": "Panneau d'information réglementaire ou contractuel placé à l'entrée du chantier.",
+    "explication_pedagogique": "Informer le public, les intervenants et services sur l'opération.",
+    "points_vigilance": [
+      "Il doit être maintenu propre, lisible et à jour."
+    ]
+  },
+  {
+    "terme": "Passage caméra",
+    "definition_courte": "Inspection vidéo des réseaux après pose et nettoyage.",
+    "explication_pedagogique": "Contrôler la bonne exécution avant réception.",
+    "points_vigilance": [
+      "Toute anomalie détectée doit être corrigée sans justifier de retard."
+    ]
+  },
+  {
+    "terme": "Passage piéton",
+    "definition_courte": "Zone matérialisée permettant aux piétons de traverser une voie.",
+    "explication_pedagogique": "Sécuriser les croisements entre véhicules et cheminements accessibles.",
+    "points_vigilance": [
+      "Prévoir éveil de vigilance et signalisation lorsque nécessaire."
+    ]
+  },
+  {
+    "terme": "Pénétromètre dynamique",
+    "definition_courte": "Essai de contrôle du compactage ou de la résistance du sol par enfoncement dynamique.",
+    "explication_pedagogique": "Contrôler les remblais de tranchée ou abords de réseaux.",
+    "points_vigilance": [
+      "Respecter les points de contrôle prévus : tronçons, regards, branchements."
+    ]
+  },
+  {
+    "terme": "Pente",
+    "definition_courte": "Inclinaison d'une surface ou canalisation.",
+    "explication_pedagogique": "Assurer l'écoulement gravitaire et l'accessibilité des cheminements.",
+    "points_vigilance": [
+      "Trop faible, l'eau stagne ; trop forte, le cheminement peut devenir non conforme."
+    ]
+  },
+  {
+    "terme": "Pente en long",
+    "definition_courte": "Inclinaison dans le sens principal d'un cheminement, d'une chaussée ou d'un réseau.",
+    "explication_pedagogique": "Contrôler accessibilité et écoulement.",
+    "points_vigilance": [
+      "Comparer aux limites PMR pour les cheminements extérieurs."
+    ]
+  },
+  {
+    "terme": "Période de préparation",
+    "definition_courte": "Temps avant travaux destiné aux études d'exécution, planning, visas et organisation.",
+    "explication_pedagogique": "Anticiper les interfaces, documents et méthodes.",
+    "points_vigilance": [
+      "Les oublis en préparation se paient souvent par des retards de chantier."
+    ]
+  },
+  {
+    "terme": "Piquet",
+    "definition_courte": "Repère physique planté dans le sol pour matérialiser un point.",
+    "explication_pedagogique": "Servir au piquetage, nivellement ou alignement.",
+    "points_vigilance": [
+      "Le protéger pour éviter déplacement ou perte de repère."
+    ]
+  },
+  {
+    "terme": "Piquetage",
+    "definition_courte": "Matérialisation sur terrain des axes, points ou ouvrages au moyen de piquets et repères.",
+    "explication_pedagogique": "Guider l'exécution des réseaux et voiries.",
+    "points_vigilance": [
+      "Doit être vérifié et maintenu jusqu'à réalisation."
+    ]
+  },
+  {
+    "terme": "Plan de circulation",
+    "definition_courte": "Organisation temporaire ou définitive des flux de véhicules et piétons.",
+    "explication_pedagogique": "Gérer l'impact du chantier et la sécurité des usagers.",
+    "points_vigilance": [
+      "À faire valider par les services compétents si domaine public."
+    ]
+  },
+  {
+    "terme": "Plan de récolement",
+    "definition_courte": "Plan indiquant les ouvrages tels qu'ils ont réellement été réalisés.",
+    "explication_pedagogique": "Permettre l'exploitation, la maintenance et les interventions futures.",
+    "points_vigilance": [
+      "Doit intégrer réseaux, regards, profils, profondeurs et matériaux réels."
+    ]
+  },
+  {
+    "terme": "Plan d’exécution",
+    "definition_courte": "Plan détaillé produit par l'entreprise pour réaliser précisément les ouvrages.",
+    "explication_pedagogique": "Préciser tracés, niveaux, diamètres, matériaux et détails de mise en œuvre.",
+    "points_vigilance": [
+      "Ne pas confondre avec le plan de consultation, souvent insuffisant pour exécuter."
+    ]
+  },
+  {
+    "terme": "Plan EP",
+    "definition_courte": "Plan des eaux pluviales du projet.",
+    "explication_pedagogique": "Situer collecteurs, regards, avaloirs, fossés, massifs de stockage et exutoires.",
+    "points_vigilance": [
+      "À suivre pour les raccordements et le dimensionnement des ouvrages pluviaux."
+    ]
+  },
+  {
+    "terme": "Plan VRD",
+    "definition_courte": "Plan décrivant voirie, réseaux divers, niveaux, plateformes et aménagements extérieurs.",
+    "explication_pedagogique": "Coordonner les travaux extérieurs et interfaces réseaux.",
+    "points_vigilance": [
+      "Lire avec CCTP, profils et plans architecte."
+    ]
+  },
+  {
+    "terme": "Planche de convenance",
+    "definition_courte": "Zone d'essai permettant de valider méthode, matériel et matériau avant généralisation.",
+    "explication_pedagogique": "Définir les paramètres de compactage ou mise en œuvre.",
+    "points_vigilance": [
+      "Utile lorsque les matériaux ou conditions sont sensibles."
+    ]
+  },
+  {
+    "terme": "Plateforme bâtiment",
+    "definition_courte": "Surface préparée pour recevoir un bâtiment ou ses ouvrages de fondation.",
+    "explication_pedagogique": "Donner une assise à la construction et aux interventions du gros œuvre.",
+    "points_vigilance": [
+      "Respecter niveau, portance, drainage et propreté."
+    ]
+  },
+  {
+    "terme": "Plateforme voirie",
+    "definition_courte": "Support terrassé et réglé avant réalisation de la structure de chaussée.",
+    "explication_pedagogique": "Recevoir les couches de fondation, base et roulement.",
+    "points_vigilance": [
+      "Contrôler portance et compactage avant fermeture."
+    ]
+  },
+  {
+    "terme": "Poinçonnement",
+    "definition_courte": "Déformation ou perforation localisée causée par une charge concentrée.",
+    "explication_pedagogique": "À surveiller sur géomembranes, géotextiles, caillebotis ou revêtements.",
+    "points_vigilance": [
+      "Utiliser une protection anti-poinçonnement si nécessaire."
+    ]
+  },
+  {
+    "terme": "Point bas",
+    "definition_courte": "Zone où les eaux se concentrent naturellement selon les pentes.",
+    "explication_pedagogique": "Implanter avaloirs ou grilles de collecte.",
+    "points_vigilance": [
+      "Si le point bas n'est pas traité, l'eau stagne."
+    ]
+  },
+  {
+    "terme": "Portance",
+    "definition_courte": "Capacité d'un sol ou d'une plateforme à supporter les charges sans déformation excessive.",
+    "explication_pedagogique": "Valider la qualité des fonds de forme et structures de chaussée.",
+    "points_vigilance": [
+      "Mesurée notamment par essais de plaque EV2."
+    ]
+  },
+  {
+    "terme": "Produit de cure",
+    "definition_courte": "Produit appliqué sur béton frais pour limiter l'évaporation de l'eau.",
+    "explication_pedagogique": "Réduire les fissurations et améliorer la qualité de surface.",
+    "points_vigilance": [
+      "Particulièrement important pour le béton désactivé ou les surfaces exposées."
+    ]
+  },
+  {
+    "terme": "Profil en long",
+    "definition_courte": "Représentation des niveaux d'un réseau ou d'une voirie suivant son axe.",
+    "explication_pedagogique": "Contrôler pentes, profondeurs, croisements et raccordements.",
+    "points_vigilance": [
+      "Indispensable pour les réseaux gravitaires EU/EP."
+    ]
+  },
+  {
+    "terme": "Profil en travers",
+    "definition_courte": "Coupe transversale d'une voirie, plateforme ou fossé.",
+    "explication_pedagogique": "Montrer largeurs, dévers, couches et pentes latérales.",
+    "points_vigilance": [
+      "À vérifier pour accessibilité, eaux de ruissellement et structure."
+    ]
+  },
+  {
+    "terme": "Protection des réseaux",
+    "definition_courte": "Mesures prises pour éviter d'endommager les réseaux existants ou posés.",
+    "explication_pedagogique": "Garantir sécurité et continuité de service.",
+    "points_vigilance": [
+      "Respecter DICT, marquage-piquetage, fouilles prudentes et prescriptions concessionnaires."
+    ]
+  },
+  {
+    "terme": "Protection des talus",
+    "definition_courte": "Dispositions évitant l'érosion ou l'effondrement des pentes de fouille ou remblai.",
+    "explication_pedagogique": "Sécuriser les travailleurs et préserver la stabilité du chantier.",
+    "points_vigilance": [
+      "Prévoir évacuation des eaux de ruissellement et blindage si nécessaire."
+    ]
+  },
+  {
+    "terme": "Protection des végétaux",
+    "definition_courte": "Mesures de conservation des arbres et plantations proches du chantier.",
+    "explication_pedagogique": "Limiter les dégâts sur l'environnement existant.",
+    "points_vigilance": [
+      "Éviter blessures des troncs, compactage des racines et dépôts au pied des arbres."
+    ]
+  },
+  {
+    "terme": "Purge",
+    "definition_courte": "Retrait localisé d'un matériau impropre pour le remplacer par un matériau sain.",
+    "explication_pedagogique": "Améliorer la portance ou supprimer un point faible.",
+    "points_vigilance": [
+      "Ne pas remblayer une purge sans contrôle de fond et compactage adapté."
+    ]
+  },
+  {
+    "terme": "Qualité des matériaux",
+    "definition_courte": "Ensemble des critères permettant de juger si un matériau est acceptable pour l'ouvrage.",
+    "explication_pedagogique": "Garantir la performance et la durabilité des travaux.",
+    "points_vigilance": [
+      "Fiches techniques, essais et certificats doivent correspondre aux exigences du CCTP."
+    ]
+  },
+  {
+    "terme": "Rabattement de nappe",
+    "definition_courte": "Abaissement temporaire du niveau d'eau souterraine par pompage ou autre procédé.",
+    "explication_pedagogique": "Permettre la pose des réseaux ou ouvrages sous le niveau naturel de la nappe.",
+    "points_vigilance": [
+      "Anticiper les effets sur sols, ouvrages voisins et planning."
+    ]
+  },
+  {
+    "terme": "Raccordement à l’existant",
+    "definition_courte": "Connexion du projet à un ouvrage ou réseau déjà en place.",
+    "explication_pedagogique": "Assurer la continuité avec le réseau public ou l'exutoire existant.",
+    "points_vigilance": [
+      "Vérifier cote, diamètre, état de l'existant et autorisation du gestionnaire."
+    ]
+  },
+  {
+    "terme": "Rapport d’étanchéité",
+    "definition_courte": "Procès-verbal indiquant les résultats des essais d'étanchéité.",
+    "explication_pedagogique": "Justifier que les réseaux ne fuient pas.",
+    "points_vigilance": [
+      "À conserver dans le DOE ou dossier de récolement."
+    ]
+  },
+  {
+    "terme": "Rapport d’inspection",
+    "definition_courte": "Document décrivant les résultats du passage caméra ou contrôle visuel.",
+    "explication_pedagogique": "Prouver l'état du réseau avant réception.",
+    "points_vigilance": [
+      "À fournir avec vidéos et exemplaires demandés au récolement."
+    ]
+  },
+  {
+    "terme": "Réception de plateforme",
+    "definition_courte": "Validation d'un fond de forme ou support avant couches suivantes.",
+    "explication_pedagogique": "Éviter de construire sur un support insuffisant.",
+    "points_vigilance": [
+      "Doit s'appuyer sur contrôles de niveaux, portance et compactage."
+    ]
+  },
+  {
+    "terme": "Réception des matériaux",
+    "definition_courte": "Contrôle des fournitures avant leur mise en œuvre.",
+    "explication_pedagogique": "Refuser les produits non conformes avant qu'ils ne soient incorporés.",
+    "points_vigilance": [
+      "Examiner notamment tuyaux, regards, bordures et granulats."
+    ]
+  },
+  {
+    "terme": "Réception des travaux",
+    "definition_courte": "Acte par lequel le maître d'ouvrage accepte les ouvrages avec ou sans réserves.",
+    "explication_pedagogique": "Déclencher garanties et fin de certaines obligations contractuelles.",
+    "points_vigilance": [
+      "Les essais et dossiers doivent être fournis avant réception."
+    ]
+  },
+  {
+    "terme": "Récolement",
+    "definition_courte": "Relevé exact des ouvrages après exécution.",
+    "explication_pedagogique": "Documenter ce qui a réellement été construit.",
+    "points_vigilance": [
+      "Indispensable pour réseaux enterrés, car ils deviennent invisibles."
+    ]
+  },
+  {
+    "terme": "Réemploi des terres",
+    "definition_courte": "Utilisation sur site de matériaux excavés compatibles avec les ouvrages.",
+    "explication_pedagogique": "Limiter les évacuations et apports extérieurs.",
+    "points_vigilance": [
+      "Ne réemployer que des terres saines et conformes."
+    ]
+  },
+  {
+    "terme": "Réfection de chaussée",
+    "definition_courte": "Remise en état d'une chaussée après ouverture ou dégradation.",
+    "explication_pedagogique": "Rétablir la sécurité, la portance et l'aspect de la voirie.",
+    "points_vigilance": [
+      "Respecter les prescriptions du gestionnaire et les couches existantes."
+    ]
+  },
+  {
+    "terme": "Regard",
+    "definition_courte": "Ouvrage enterré accessible permettant inspection, raccordement, changement de direction ou entretien d'un réseau.",
+    "explication_pedagogique": "Faciliter la maintenance des réseaux EU/EP.",
+    "points_vigilance": [
+      "Régler le tampon au niveau fini et vérifier la cunette."
+    ]
+  },
+  {
+    "terme": "Regard avaloir",
+    "definition_courte": "Regard combiné à une grille ou avaloir pour collecter les eaux de surface.",
+    "explication_pedagogique": "Capter les ruissellements et les envoyer au réseau EP.",
+    "points_vigilance": [
+      "Le placer au bon point bas et bien compacter autour."
+    ]
+  },
+  {
+    "terme": "Regard avec surverse",
+    "definition_courte": "Regard intégrant un dispositif de débordement contrôlé vers un autre ouvrage ou exutoire.",
+    "explication_pedagogique": "Gérer les niveaux d'eau et situations de surcharge.",
+    "points_vigilance": [
+      "Vérifier la cote de surverse et le sens d'écoulement."
+    ]
+  },
+  {
+    "terme": "Regard de branchement PVC",
+    "definition_courte": "Petit regard de raccordement, souvent en PVC, placé sur un branchement de réseau.",
+    "explication_pedagogique": "Permettre inspection et entretien au droit d'un raccordement.",
+    "points_vigilance": [
+      "Contrôler le tampon, la cheminée, la cunette et le remblai sable compacté."
+    ]
+  },
+  {
+    "terme": "Regard de visite Ø1000",
+    "definition_courte": "Regard de visite préfabriqué de diamètre 1000 mm.",
+    "explication_pedagogique": "Permettre accès plus confortable aux réseaux importants.",
+    "points_vigilance": [
+      "Régler le tampon et compacter soigneusement autour de l'ouvrage."
+    ]
+  },
+  {
+    "terme": "Regard de visite Ø800",
+    "definition_courte": "Regard de visite préfabriqué de diamètre 800 mm.",
+    "explication_pedagogique": "Permettre accès et contrôle du réseau.",
+    "points_vigilance": [
+      "Respecter tampon, cunette, rehausses, dalle de réduction et prescriptions gestionnaire."
+    ]
+  },
+  {
+    "terme": "Réglage",
+    "definition_courte": "Mise à la cote précise d'une surface ou d'un ouvrage avant validation.",
+    "explication_pedagogique": "Obtenir les niveaux et pentes prévus.",
+    "points_vigilance": [
+      "À faire avant compactage final ou pose des couches suivantes."
+    ]
+  },
+  {
+    "terme": "Règlementation accessibilité",
+    "definition_courte": "Ensemble des obligations relatives aux cheminements, stationnements et accès pour tous.",
+    "explication_pedagogique": "Garantir un usage sécurisé et non discriminant des espaces extérieurs.",
+    "points_vigilance": [
+      "Vérifier chaque détail : pente, dévers, ressaut, largeur, espace de manœuvre."
+    ]
+  },
+  {
+    "terme": "Rehausse de regard",
+    "definition_courte": "Élément ajouté sur un regard pour atteindre la cote du tampon fini.",
+    "explication_pedagogique": "Adapter la hauteur de l'ouvrage au niveau de voirie ou terrain fini.",
+    "points_vigilance": [
+      "Contrôler stabilité, étanchéité et alignement vertical."
+    ]
+  },
+  {
+    "terme": "Remblai",
+    "definition_courte": "Matériau mis en place pour combler ou rehausser une zone.",
+    "explication_pedagogique": "Former plateformes, combler tranchées ou modeler le terrain.",
+    "points_vigilance": [
+      "Mettre en couches, compacter et utiliser des matériaux adaptés."
+    ]
+  },
+  {
+    "terme": "Remblai compacté",
+    "definition_courte": "Remblai mis en œuvre par couches puis densifié.",
+    "explication_pedagogique": "Limiter tassements et garantir la tenue de l'ouvrage.",
+    "points_vigilance": [
+      "La qualité dépend de l'épaisseur des couches, de l'eau et de l'engin utilisé."
+    ]
+  },
+  {
+    "terme": "Remblaiement de tranchée",
+    "definition_courte": "Comblement d'une tranchée après pose du réseau.",
+    "explication_pedagogique": "Protéger le tuyau et reconstituer le support de chaussée ou terrain.",
+    "points_vigilance": [
+      "Respecter lit de pose, enrobage, couches et contrôles de compactage."
+    ]
+  },
+  {
+    "terme": "Remise en état",
+    "definition_courte": "Travaux nécessaires pour restituer un site, une voie ou un ouvrage après intervention.",
+    "explication_pedagogique": "Rétablir propreté, sécurité et fonctionnalité.",
+    "points_vigilance": [
+      "À la charge de l'entreprise lorsqu'elle a dégradé ou occupé la zone."
+    ]
+  },
+  {
+    "terme": "Repère provisoire",
+    "definition_courte": "Point temporaire de nivellement ou d'implantation utilisé pendant les travaux.",
+    "explication_pedagogique": "Maintenir la précision des cotes pendant l'avancement.",
+    "points_vigilance": [
+      "Le protéger et le vérifier régulièrement."
+    ]
+  },
+  {
+    "terme": "Réseau EP",
+    "definition_courte": "Ensemble des ouvrages dédiés aux eaux pluviales.",
+    "explication_pedagogique": "Collecter, stocker et évacuer les eaux de pluie du projet.",
+    "points_vigilance": [
+      "Contrôler les raccordements et volumes de stockage."
+    ]
+  },
+  {
+    "terme": "Réseau EU",
+    "definition_courte": "Ensemble des ouvrages dédiés aux eaux usées.",
+    "explication_pedagogique": "Acheminer les effluents domestiques vers le gestionnaire.",
+    "points_vigilance": [
+      "Étanchéité et conformité sont contrôlées avant réception."
+    ]
+  },
+  {
+    "terme": "Réseau existant",
+    "definition_courte": "Réseau déjà présent avant les travaux, visible ou enterré.",
+    "explication_pedagogique": "À préserver ou raccorder selon le projet.",
+    "points_vigilance": [
+      "Vérifier position réelle avant terrassement."
+    ]
+  },
+  {
+    "terme": "Ressaut",
+    "definition_courte": "Différence brusque de niveau sur un cheminement.",
+    "explication_pedagogique": "Doit rester faible pour ne pas gêner les piétons ou fauteuils.",
+    "points_vigilance": [
+      "En accessibilité, le ressaut est généralement limité à 2 cm selon contexte."
+    ]
+  },
+  {
+    "terme": "Retardateur de prise",
+    "definition_courte": "Produit appliqué pour ralentir la prise superficielle du béton.",
+    "explication_pedagogique": "Permettre le lavage du béton désactivé.",
+    "points_vigilance": [
+      "Respecter dosage et délai selon température et météo."
+    ]
+  },
+  {
+    "terme": "Retrait-gonflement des argiles",
+    "definition_courte": "Variation de volume des sols argileux selon humidité et sécheresse.",
+    "explication_pedagogique": "Peut affecter les constructions et leurs abords.",
+    "points_vigilance": [
+      "Prévoir drainage, géomembrane ou dispositions selon étude et prescriptions."
+    ]
+  },
+  {
+    "terme": "Revêtement de chaussée",
+    "definition_courte": "Couche visible et circulable d'une voirie : enrobé, béton ou autre.",
+    "explication_pedagogique": "Assurer roulement, sécurité et protection des couches inférieures.",
+    "points_vigilance": [
+      "La qualité dépend de la préparation du support."
+    ]
+  },
+  {
+    "terme": "Ruissellement",
+    "definition_courte": "Écoulement des eaux de pluie à la surface du sol ou de la chaussée.",
+    "explication_pedagogique": "À maîtriser pour éviter érosion, flaques et surcharge des réseaux.",
+    "points_vigilance": [
+      "Le modelage et les avaloirs doivent l'orienter correctement."
+    ]
+  },
+  {
+    "terme": "Sable compacté",
+    "definition_courte": "Sable mis en œuvre et densifié autour d'un ouvrage ou d'une canalisation.",
+    "explication_pedagogique": "Caler et protéger les regards, tuyaux ou ouvrages préfabriqués.",
+    "points_vigilance": [
+      "Compacter sans déplacer l'ouvrage ni endommager les joints."
+    ]
+  },
+  {
+    "terme": "SAUR",
+    "definition_courte": "Gestionnaire cité pour les réseaux d'eau potable, eaux usées ou eaux pluviales selon contexte local.",
+    "explication_pedagogique": "Donner prescriptions et contrôler certains raccordements.",
+    "points_vigilance": [
+      "Respecter ses demandes avant réception du réseau."
+    ]
+  },
+  {
+    "terme": "Scie à sol",
+    "definition_courte": "Machine utilisée pour découper proprement un revêtement béton ou enrobé.",
+    "explication_pedagogique": "Préparer une ouverture de tranchée nette.",
+    "points_vigilance": [
+      "Repérer les réseaux et protéger les usagers avant découpe."
+    ]
+  },
+  {
+    "terme": "SETRA",
+    "definition_courte": "Ancien service technique de référence pour les routes, cité pour les directives de matériaux et terrassements.",
+    "explication_pedagogique": "Fournir des guides techniques comme ceux sur les remblais ou couches de forme.",
+    "points_vigilance": [
+      "À utiliser comme référence lorsque le CCTP le demande."
+    ]
+  },
+  {
+    "terme": "Signalisation de chantier",
+    "definition_courte": "Panneaux, balises, séparateurs et dispositifs temporaires autour des travaux.",
+    "explication_pedagogique": "Informer, guider et protéger usagers et ouvriers.",
+    "points_vigilance": [
+      "Elle doit être stable, lisible, cohérente et maintenue jour/nuit si nécessaire."
+    ]
+  },
+  {
+    "terme": "Signalisation horizontale",
+    "definition_courte": "Marquage réalisé au sol : lignes, places, passages, flèches.",
+    "explication_pedagogique": "Organiser la circulation et le stationnement.",
+    "points_vigilance": [
+      "Appliquer sur support propre et selon plan validé."
+    ]
+  },
+  {
+    "terme": "Signalisation verticale",
+    "definition_courte": "Panneaux et supports installés verticalement le long des voies.",
+    "explication_pedagogique": "Informer, réglementer ou guider les usagers.",
+    "points_vigilance": [
+      "Vérifier implantation, visibilité, hauteur et compatibilité avec cheminements."
+    ]
+  },
+  {
+    "terme": "Sol meuble",
+    "definition_courte": "Sol qui se déforme facilement sous charge ou qui manque de cohésion.",
+    "explication_pedagogique": "À identifier avant de réaliser une plateforme ou chaussée.",
+    "points_vigilance": [
+      "Peut nécessiter purge, traitement ou remplacement."
+    ]
+  },
+  {
+    "terme": "Sol non glissant",
+    "definition_courte": "Revêtement offrant une adhérence suffisante pour les piétons.",
+    "explication_pedagogique": "Répondre aux exigences de sécurité et d'accessibilité.",
+    "points_vigilance": [
+      "Éviter surfaces trop lisses, réfléchissantes ou instables."
+    ]
+  },
+  {
+    "terme": "Sondage préliminaire",
+    "definition_courte": "Reconnaissance locale du sol avant tranchée ou ouvrage.",
+    "explication_pedagogique": "Vérifier nature du sol, réseaux ou contraintes non visibles.",
+    "points_vigilance": [
+      "À réaliser avant certaines tranchées sous voirie."
+    ]
+  },
+  {
+    "terme": "Soubassement béton",
+    "definition_courte": "Partie basse en béton servant de support ou de retenue à une clôture ou ouvrage.",
+    "explication_pedagogique": "Stabiliser et protéger la base d'un aménagement.",
+    "points_vigilance": [
+      "Contrôler alignement, fondation et interfaces avec niveaux finis."
+    ]
+  },
+  {
+    "terme": "Stationnement PMR",
+    "definition_courte": "Place de parking adaptée aux personnes à mobilité réduite.",
+    "explication_pedagogique": "Permettre l'accès sécurisé aux bâtiments depuis une place élargie.",
+    "points_vigilance": [
+      "Largeur, pente, dévers et cheminement adjacent doivent être conformes."
+    ]
+  },
+  {
+    "terme": "Stockage des terres",
+    "definition_courte": "Mise en dépôt temporaire des terres destinées au réemploi.",
+    "explication_pedagogique": "Préserver la terre végétale ou les matériaux sains.",
+    "points_vigilance": [
+      "Séparer par nature et éviter l'eau, les déchets et le mélange avec matériaux impropres."
+    ]
+  },
+  {
+    "terme": "Structure alvéolaire",
+    "definition_courte": "Structure à vides utilisée pour créer du stockage d'eau pluviale ou une structure légère.",
+    "explication_pedagogique": "Augmenter le volume utile de rétention ou infiltration.",
+    "points_vigilance": [
+      "Contrôler géotextile, matériau de remplissage, indice de vides et stabilité."
+    ]
+  },
+  {
+    "terme": "Structure de chaussée",
+    "definition_courte": "Empilement de couches constituant une voirie : fond de forme, fondation, base, roulement.",
+    "explication_pedagogique": "Répartir les charges et garantir la durabilité de la voie.",
+    "points_vigilance": [
+      "Chaque couche doit être contrôlée avant la suivante."
+    ]
+  },
+  {
+    "terme": "Sujétion",
+    "definition_courte": "Contrainte particulière incluse dans l'exécution d'un prix ou d'une prestation.",
+    "explication_pedagogique": "Rappeler que certaines difficultés prévisibles sont à la charge de l'entreprise.",
+    "points_vigilance": [
+      "Lire les sujétions pour éviter les oublis de chiffrage."
+    ]
+  },
+  {
+    "terme": "Surverse",
+    "definition_courte": "Dispositif permettant à l'eau de déborder vers un autre ouvrage à une cote déterminée.",
+    "explication_pedagogique": "Sécuriser le fonctionnement hydraulique en cas de niveau haut.",
+    "points_vigilance": [
+      "Contrôler la cote de seuil et l'exutoire."
+    ]
+  },
+  {
+    "terme": "Talus",
+    "definition_courte": "Surface inclinée de terrain en bord de fouille, remblai ou fossé.",
+    "explication_pedagogique": "Assurer la transition entre deux niveaux.",
+    "points_vigilance": [
+      "Protéger contre érosion et instabilité."
+    ]
+  },
+  {
+    "terme": "Tamis de 5 mm",
+    "definition_courte": "Tamis utilisé pour contrôler la présence de grains supérieurs à 5 mm dans un sable.",
+    "explication_pedagogique": "Vérifier la conformité granulométrique du sable.",
+    "points_vigilance": [
+      "Une proportion trop forte de gros grains peut rendre le mortier non conforme."
+    ]
+  },
+  {
+    "terme": "Tampon fonte 250 kN",
+    "definition_courte": "Couvercle de regard en fonte prévu pour une charge de service de 250 kN.",
+    "explication_pedagogique": "Fermer un regard situé en zone moins fortement circulée selon prescription.",
+    "points_vigilance": [
+      "Choisir la classe adaptée au trafic réel."
+    ]
+  },
+  {
+    "terme": "Tampon fonte 400 kN",
+    "definition_courte": "Couvercle de regard en fonte prévu pour une charge de service de 400 kN.",
+    "explication_pedagogique": "Fermer un regard en zone circulée avec résistance suffisante.",
+    "points_vigilance": [
+      "Régler au niveau fini et vérifier la stabilité du cadre."
+    ]
+  },
+  {
+    "terme": "Teneur en eau",
+    "definition_courte": "Quantité d'eau contenue dans un matériau au moment de sa mise en œuvre.",
+    "explication_pedagogique": "Conditionner le compactage et la portance.",
+    "points_vigilance": [
+      "À comparer à l'optimum Proctor pour les matériaux concernés."
+    ]
+  },
+  {
+    "terme": "Terrassement",
+    "definition_courte": "Travaux de déplacement, extraction, apport, modelage et compactage des terres.",
+    "explication_pedagogique": "Préparer les plateformes, voiries, réseaux et espaces extérieurs.",
+    "points_vigilance": [
+      "Contrôler déblais, remblais, portance, eaux et sécurité des fouilles."
+    ]
+  },
+  {
+    "terme": "Terre végétale",
+    "definition_courte": "Couche superficielle du sol riche en matière organique.",
+    "explication_pedagogique": "Utilisée pour les espaces verts après décapage et stockage.",
+    "points_vigilance": [
+      "Ne pas l'utiliser comme remblai structurel sous voirie ou bâtiment."
+    ]
+  },
+  {
+    "terme": "Tête de pont",
+    "definition_courte": "Ouvrage préfabriqué en béton placé à l'extrémité d'un busage ou d'une canalisation de fossé.",
+    "explication_pedagogique": "Stabiliser l'entrée ou sortie d'eau et protéger contre l'érosion.",
+    "points_vigilance": [
+      "Adapter au diamètre du tuyau et bien remblayer autour."
+    ]
+  },
+  {
+    "terme": "Tôle pressée",
+    "definition_courte": "Tôle métallique formée par pressage, utilisée ici pour certains caillebotis ou grilles.",
+    "explication_pedagogique": "Créer une surface résistante et drainante.",
+    "points_vigilance": [
+      "Vérifier épaisseur, appui, antidérapance et conformité PMR."
+    ]
+  },
+  {
+    "terme": "Tracé",
+    "definition_courte": "Ligne prévue pour un réseau, une bordure, une voie ou un cheminement.",
+    "explication_pedagogique": "Guider l'implantation et l'exécution.",
+    "points_vigilance": [
+      "Vérifier les croisements, pentes et raccordements avant travaux."
+    ]
+  },
+  {
+    "terme": "Tranchée",
+    "definition_courte": "Fouille linéaire destinée à recevoir une canalisation, un fourreau ou un réseau.",
+    "explication_pedagogique": "Permettre la pose de réseaux enterrés.",
+    "points_vigilance": [
+      "Sécuriser, blinder si besoin, poser sur lit adapté et remblayer correctement."
+    ]
+  },
+  {
+    "terme": "Tranchée longitudinale",
+    "definition_courte": "Tranchée réalisée dans le sens de la route ou du cheminement.",
+    "explication_pedagogique": "Poser un réseau parallèle à la voie.",
+    "points_vigilance": [
+      "Ouvrir au fur et à mesure de la pose pour limiter les risques et gênes."
+    ]
+  },
+  {
+    "terme": "Tranchée transversale",
+    "definition_courte": "Tranchée traversant une chaussée ou un cheminement.",
+    "explication_pedagogique": "Permettre un branchement ou croisement de réseau.",
+    "points_vigilance": [
+      "Souvent exécutée par moitié de chaussée pour maintenir la circulation."
+    ]
+  },
+  {
+    "terme": "Trancheuse",
+    "definition_courte": "Machine permettant de découper ou ouvrir une tranchée étroite.",
+    "explication_pedagogique": "Réaliser une découpe nette avant ouverture sous revêtement.",
+    "points_vigilance": [
+      "Choisir l'outil selon profondeur, largeur et présence de réseaux."
+    ]
+  },
+  {
+    "terme": "Transport des déblais",
+    "definition_courte": "Acheminement des terres ou gravats vers stockage ou décharge.",
+    "explication_pedagogique": "Évacuer les matériaux inutiles ou impropres.",
+    "points_vigilance": [
+      "Bâcher si nécessaire et éviter de salir la voie publique."
+    ]
+  },
+  {
+    "terme": "Tronçon",
+    "definition_courte": "Portion identifiable d'un réseau entre deux regards ou points de contrôle.",
+    "explication_pedagogique": "Faciliter les essais, mesures et rapports d'inspection.",
+    "points_vigilance": [
+      "Les essais d'étanchéité sont souvent réalisés tronçon par tronçon."
+    ]
+  },
+  {
+    "terme": "Trottoir",
+    "definition_courte": "Cheminement latéral destiné aux piétons le long d'une voie.",
+    "explication_pedagogique": "Séparer les piétons de la circulation et assurer l'accès aux bâtiments.",
+    "points_vigilance": [
+      "Contrôler largeur, dévers, pente et revêtement."
+    ]
+  },
+  {
+    "terme": "Tuyau béton",
+    "definition_courte": "Canalisation ou élément préfabriqué en béton pour réseaux ou busage.",
+    "explication_pedagogique": "Transporter des eaux ou réaliser un ouvrage robuste.",
+    "points_vigilance": [
+      "Contrôler diamètre, classe, joints et lit de pose."
+    ]
+  },
+  {
+    "terme": "Tuyau PVC",
+    "definition_courte": "Canalisation plastique utilisée pour certains branchements ou réseaux.",
+    "explication_pedagogique": "Acheminer eaux ou réseaux avec une pose légère et rapide.",
+    "points_vigilance": [
+      "Respecter classe, pente, emboîtement et protection mécanique."
+    ]
+  },
+  {
+    "terme": "Véhicule de chantier",
+    "definition_courte": "Camion, fourgon ou engin utilisé pour approvisionnement, évacuation ou travaux.",
+    "explication_pedagogique": "Assurer la logistique quotidienne du chantier.",
+    "points_vigilance": [
+      "Ne pas perturber abusivement la circulation ou stationner hors autorisation."
+    ]
+  },
+  {
+    "terme": "Vérification du projet",
+    "definition_courte": "Analyse par l'entreprise des plans, cotes, pièces écrites et contraintes avant exécution.",
+    "explication_pedagogique": "Détecter erreurs ou omissions avant qu'elles ne produisent des reprises.",
+    "points_vigilance": [
+      "Toute omission non signalée peut être réputée acceptée."
+    ]
+  },
+  {
+    "terme": "Viabilité",
+    "definition_courte": "Ensemble des aménagements permettant de rendre un terrain utilisable : accès, voirie, réseaux, assainissement.",
+    "explication_pedagogique": "Permettre l'usage normal des logements et espaces extérieurs.",
+    "points_vigilance": [
+      "Coordonner les réseaux avec les niveaux et accès."
+    ]
+  },
+  {
+    "terme": "Voie publique",
+    "definition_courte": "Espace de circulation appartenant ou ouvert au public.",
+    "explication_pedagogique": "Implique des autorisations particulières pour travaux, stationnement ou coupure.",
+    "points_vigilance": [
+      "Respecter sécurité des usagers et prescriptions municipales."
+    ]
+  },
+  {
+    "terme": "Voirie",
+    "definition_courte": "Ensemble des voies, cheminements, stationnements et revêtements extérieurs.",
+    "explication_pedagogique": "Permettre circulation, accès, stationnement et évacuation des eaux.",
+    "points_vigilance": [
+      "La qualité dépend de la structure, des pentes et de la réception du support."
+    ]
+  },
+  {
+    "terme": "Volume de stockage",
+    "definition_courte": "Capacité d'un ouvrage à retenir temporairement une quantité d'eau.",
+    "explication_pedagogique": "Dimensionner la gestion des eaux pluviales.",
+    "points_vigilance": [
+      "Le volume utile dépend des dimensions et de l'indice de vides réel."
+    ]
+  },
+  {
+    "terme": "VRD - Voirie et Réseaux Divers",
+    "definition_courte": "Domaine regroupant voiries, terrassements, réseaux extérieurs et aménagements associés.",
+    "explication_pedagogique": "Coordonner les accès, réseaux et niveaux extérieurs d'un projet.",
+    "points_vigilance": [
+      "Toujours lire les plans VRD avec les lots bâtiment, paysage et réseaux."
+    ]
+  }
+]

@@ -5,23 +5,23 @@ export type BtpDicoLot = {
   label: string;
 };
 
-/** Les 16 lots travaux BeWork — évolutif, lot 09 prioritaire. */
+/** Les 16 lots travaux BeWork — référentiel Dico BTP. */
 export const BTP_DICO_LOTS: BtpDicoLot[] = [
-  { code: "01", name: "Fondations / Gros œuvre", label: "Lot 01 - Fondations / Gros œuvre" },
-  { code: "02", name: "Charpente / Couverture", label: "Lot 02 - Charpente / Couverture" },
-  { code: "03", name: "Étanchéité", label: "Lot 03 - Étanchéité" },
+  { code: "01", name: "Fondations - Gros Oeuvre", label: "Lot 01 - Fondations - Gros Oeuvre" },
+  { code: "02", name: "Enduits de façades", label: "Lot 02 - Enduits de façades" },
+  { code: "03", name: "Charpente bois et couverture", label: "Lot 03 - Charpente bois et couverture" },
   { code: "04", name: "Menuiseries extérieures", label: "Lot 04 - Menuiseries extérieures" },
   { code: "05", name: "Menuiseries intérieures", label: "Lot 05 - Menuiseries intérieures" },
   { code: "06", name: "Serrurerie", label: "Lot 06 - Serrurerie" },
-  { code: "07", name: "Plâtrerie", label: "Lot 07 - Plâtrerie" },
-  { code: "08", name: "CVC / Plomberie / Sanitaire", label: "Lot 08 - CVC / Plomberie / Sanitaire" },
-  { code: "09", name: "Électricité CFO CFA", label: "Lot 09 - Électricité CFO CFA" },
-  { code: "10", name: "Sols souples / Carrelage / Faïence", label: "Lot 10 - Sols souples / Carrelage / Faïence" },
+  { code: "07", name: "Plâtrerie - Isolation", label: "Lot 07 - Plâtrerie - Isolation" },
+  { code: "08", name: "CVC Plomberie Sanitaire", label: "Lot 08 - CVC Plomberie Sanitaire" },
+  { code: "09", name: "Electricite CFO-CFA", label: "Lot 09 - Electricite CFO-CFA" },
+  { code: "10", name: "Carrelage, faïences et sols souples", label: "Lot 10 - Carrelage, faïences et sols souples" },
   { code: "11", name: "Peinture", label: "Lot 11 - Peinture" },
-  { code: "12", name: "Terrassement / Voirie / EU / EP", label: "Lot 12 - Terrassement / Voirie / EU / EP" },
-  { code: "13", name: "Réseaux basse tension / Télécom", label: "Lot 13 - Réseaux basse tension / Télécom" },
-  { code: "14", name: "AEP / Défense incendie / Arrosage", label: "Lot 14 - AEP / Défense incendie / Arrosage" },
-  { code: "15", name: "Paysage / Espaces verts", label: "Lot 15 - Paysage / Espaces verts" },
+  { code: "12", name: "Terrassements, assainissements EP et EU, voirie", label: "Lot 12 - Terrassements, assainissements EP et EU, voirie" },
+  { code: "13", name: "Réseaux basse tension - Télécom - Éclairage et IRVE", label: "Lot 13 - Réseaux basse tension - Télécom - Éclairage et IRVE" },
+  { code: "14", name: "Réseau adduction eau potable - Défense incendie", label: "Lot 14 - Réseau adduction eau potable - Défense incendie" },
+  { code: "15", name: "Paysage", label: "Lot 15 - Paysage" },
   { code: "16", name: "Démolition", label: "Lot 16 - Démolition" },
 ];
 

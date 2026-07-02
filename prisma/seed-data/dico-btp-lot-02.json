@@ -1,0 +1,1067 @@
+[
+  {
+    "terme": "Accrochage de l'enduit",
+    "definition_courte": "Capacité de l'enduit à adhérer correctement au support.",
+    "explication_pedagogique": "Il évite le décollement, les cloques et les fissures prématurées.",
+    "exemple_utilisation": "Le CCTP demande un support rugueux permettant une adhérence et un accrochage parfaits.",
+    "points_vigilance": [
+      "Support sale, trop lisse, gelé ou mal humidifié = risque d'enduit qui ne tient pas."
+    ]
+  },
+  {
+    "terme": "Acheminement",
+    "definition_courte": "Transport du matériel jusqu'au chantier.",
+    "explication_pedagogique": "Il fait partie des prestations nécessaires à la mise en place des échafaudages et matériels.",
+    "exemple_utilisation": "Le CCTP inclut l'acheminement et le double transport aller-retour des échafaudages.",
+    "points_vigilance": [
+      "Ne pas oublier ces coûts dans le chiffrage du poste échafaudage."
+    ]
+  },
+  {
+    "terme": "Adhérence",
+    "definition_courte": "Liaison mécanique ou chimique entre l'enduit et son support.",
+    "explication_pedagogique": "Elle garantit que l'enduit reste solidaire de la façade.",
+    "exemple_utilisation": "Le support doit être propre, rugueux et humidifié pour permettre l'adhérence.",
+    "points_vigilance": [
+      "Une mauvaise adhérence se voit souvent par son creux, des fissures ou un décollement."
+    ]
+  },
+  {
+    "terme": "Armature d'enduit",
+    "definition_courte": "Renfort intégré dans l'enduit, souvent en treillis de fibre de verre ou armature métallique.",
+    "explication_pedagogique": "Elle limite les fissures aux zones sensibles et changements de matériaux.",
+    "exemple_utilisation": "Le CCTP impose des renforts aux planelles, linteaux, angles d'ouvertures et changements de matériaux.",
+    "points_vigilance": [
+      "Les armatures doivent être noyées dans l'enduit, avec recouvrements suffisants."
+    ]
+  },
+  {
+    "terme": "Arrosage préalable",
+    "definition_courte": "Humidification du support avant application de l'enduit.",
+    "explication_pedagogique": "Elle évite que le support pompe trop vite l'eau du mortier.",
+    "exemple_utilisation": "Le CCTP prévoit un arrosage du support avant la première passe.",
+    "points_vigilance": [
+      "Humidifier sans détremper : un support mouillé ou ruisselant est interdit."
+    ]
+  },
+  {
+    "terme": "Avis Technique CSTB",
+    "definition_courte": "Document validant l'emploi d'un procédé ou produit dans des conditions données.",
+    "explication_pedagogique": "Il rassure sur la compatibilité et les limites d'utilisation du produit.",
+    "exemple_utilisation": "Les enduits monocouches proposés doivent avoir une certification ou un Avis Technique CSTB valide.",
+    "points_vigilance": [
+      "Vérifier que l'avis couvre bien le support, l'exposition et le mode de pose prévus."
+    ]
+  },
+  {
+    "terme": "Bacs acier emboutis",
+    "definition_courte": "Plateformes métalliques d'échafaudage formées pour être rigides et antidérapantes.",
+    "explication_pedagogique": "Ils servent de plancher de travail sécurisé sur l'échafaudage.",
+    "exemple_utilisation": "Le CCTP prévoit des plates-formes modulaires en bacs acier emboutis pré-perforés.",
+    "points_vigilance": [
+      "Contrôler leur bon verrouillage et leur état antidérapant."
+    ]
+  },
+  {
+    "terme": "Bandeau décoratif",
+    "definition_courte": "Élément horizontal ou vertical en façade créant un relief ou une différence d'aspect.",
+    "explication_pedagogique": "Il participe au dessin architectural de la façade.",
+    "exemple_utilisation": "Le CCTP comprend un poste bandeau décoratif et des sujétions de modénatures.",
+    "points_vigilance": [
+      "Bien vérifier largeur, relief, teinte, alignement et continuité sur plans de façade."
+    ]
+  },
+  {
+    "terme": "Bouchardage",
+    "definition_courte": "Action de rendre une surface rugueuse par piquage mécanique.",
+    "explication_pedagogique": "Il améliore l'accrochage de l'enduit sur un support trop lisse.",
+    "exemple_utilisation": "Le CCTP indique que le subjectile peut être piqué, bouchardé ou brossé.",
+    "points_vigilance": [
+      "Après bouchardage, dépoussiérer avant humidification et enduisage."
+    ]
+  },
+  {
+    "terme": "Bracon",
+    "definition_courte": "Pièce inclinée servant à stabiliser une structure provisoire comme un échafaudage.",
+    "explication_pedagogique": "Il participe au contreventement et à la stabilité.",
+    "exemple_utilisation": "Le CCTP cite les bracons parmi les accessoires d'échafaudage.",
+    "points_vigilance": [
+      "Ne jamais supprimer un bracon pour faciliter un passage sans accord."
+    ]
+  },
+  {
+    "terme": "Brossage du support",
+    "definition_courte": "Nettoyage mécanique de la surface avant application de l'enduit.",
+    "explication_pedagogique": "Il enlève poussières, parties non adhérentes et salissures.",
+    "exemple_utilisation": "Le CCTP prévoit que le support peut être brossé avant l'application.",
+    "points_vigilance": [
+      "Un simple balayage ne suffit pas si le support est poudreux ou pollué."
+    ]
+  },
+  {
+    "terme": "Bâche humidifiée",
+    "definition_courte": "Protection fixée sur l'échafaudage, parfois humidifiée pour limiter le dessèchement.",
+    "explication_pedagogique": "Elle protège l'enduit frais du soleil et du vent.",
+    "exemple_utilisation": "Le CCTP prévoit une bâche humidifiée en cas de vent ou de soleil.",
+    "points_vigilance": [
+      "Une bâche mal fixée peut devenir dangereuse et gêner l'application."
+    ]
+  },
+  {
+    "terme": "Cahier CSTB 2669",
+    "definition_courte": "Référence technique concernant les enduits monocouches d'imperméabilisation.",
+    "explication_pedagogique": "Il précise les prescriptions d'emploi et de mise en œuvre.",
+    "exemple_utilisation": "Le CCTP cite les Cahiers CSTB 2669-1 et 2669-2 avec modificatif.",
+    "points_vigilance": [
+      "À consulter en cas de doute sur support, épaisseur, conditions climatiques ou finition."
+    ]
+  },
+  {
+    "terme": "Camarteau",
+    "definition_courte": "Pièce ou dispositif de répartition sous appui d'échafaudage.",
+    "explication_pedagogique": "Il répartit les descentes de charges au sol.",
+    "exemple_utilisation": "Le CCTP prévoit des réseaux de camarteaux en répartition des charges.",
+    "points_vigilance": [
+      "Indispensable si le sol ou remblai n'est pas assez résistant localement."
+    ]
+  },
+  {
+    "terme": "Cellier",
+    "definition_courte": "Local annexe de rangement, souvent traité en façade comme les autres volumes.",
+    "explication_pedagogique": "Il peut recevoir le même enduit que les murs extérieurs ou un traitement particulier.",
+    "exemple_utilisation": "Le CCTP localise l'enduit sur les murs intérieurs et extérieurs des celliers.",
+    "points_vigilance": [
+      "Vérifier faces à traiter, teinte et finition sur plans architecte."
+    ]
+  },
+  {
+    "terme": "Centre-ville",
+    "definition_courte": "Contexte urbain contraint avec accès, stationnement et voisinage sensibles.",
+    "explication_pedagogique": "Il impose des autorisations et une organisation plus rigoureuse.",
+    "exemple_utilisation": "Le CCTP rappelle les contraintes particulières d'un chantier en centre-ville.",
+    "points_vigilance": [
+      "Anticiper arrêtés, stationnement, livraisons, échafaudages et cheminements piétons."
+    ]
+  },
+  {
+    "terme": "Certification CSTB",
+    "definition_courte": "Reconnaissance technique délivrée ou référencée par le CSTB.",
+    "explication_pedagogique": "Elle atteste que l'enduit monocouche respecte un référentiel de performance.",
+    "exemple_utilisation": "Les enduits extérieurs monocouches doivent bénéficier de la certification CSTB.",
+    "points_vigilance": [
+      "Demander la fiche produit et la certification avant validation du matériau."
+    ]
+  },
+  {
+    "terme": "Changement de matériaux",
+    "definition_courte": "Zone où deux supports différents se rencontrent.",
+    "explication_pedagogique": "C'est une zone sensible à la fissuration car les matériaux travaillent différemment.",
+    "exemple_utilisation": "Le CCTP impose un renfort d'enduit à chaque changement de matériaux.",
+    "points_vigilance": [
+      "Toujours armer ces jonctions selon prescriptions fabricant."
+    ]
+  },
+  {
+    "terme": "Changement de teinte",
+    "definition_courte": "Passage d'une couleur d'enduit à une autre sur une même façade.",
+    "explication_pedagogique": "Il crée le dessin architectural et les effets de façade.",
+    "exemple_utilisation": "Le CCTP inclut les sujétions pour changements de teintes.",
+    "points_vigilance": [
+      "Prévoir arrêts nets, calepinage, protections et validation des échantillons."
+    ]
+  },
+  {
+    "terme": "Chaînage de façade",
+    "definition_courte": "Élément structurel souvent visible ou marqué en façade selon le dessin architectural.",
+    "explication_pedagogique": "Il peut recevoir une surépaisseur d'enduit ou une modénature.",
+    "exemple_utilisation": "Le CCTP prévoit des plus-values pour modénatures type chaînages.",
+    "points_vigilance": [
+      "Bien distinguer chaînage structurel et imitation décorative en enduit."
+    ]
+  },
+  {
+    "terme": "Chemin d'échelle",
+    "definition_courte": "Accès vertical intégré à l'échafaudage.",
+    "explication_pedagogique": "Il permet aux compagnons de monter et descendre en sécurité.",
+    "exemple_utilisation": "Le CCTP prévoit trappes d'accès et chemins d'échelles.",
+    "points_vigilance": [
+      "Les accès doivent rester dégagés, sécurisés et conformes."
+    ]
+  },
+  {
+    "terme": "Classe OC2 / OC3",
+    "definition_courte": "Classe d'enduit monocouche selon ses caractéristiques et son usage.",
+    "explication_pedagogique": "Elle guide le choix de l'enduit selon le support et les contraintes.",
+    "exemple_utilisation": "Le CCTP demande un enduit de catégorie OC2 ou OC3 selon support.",
+    "points_vigilance": [
+      "Ne pas choisir la classe au hasard : vérifier support RT2/RT3 et fiche fabricant."
+    ]
+  },
+  {
+    "terme": "Classe RT2 / RT3",
+    "definition_courte": "Classe de résistance du support au sens du NF DTU 26.1.",
+    "explication_pedagogique": "Elle permet d'adapter le type d'enduit au support.",
+    "exemple_utilisation": "Le CCTP vise les supports classés RT3 ou RT2 selon NF DTU 20.1 et NF DTU 26.1.",
+    "points_vigilance": [
+      "Un enduit trop rigide ou mal adapté peut fissurer ou se décoller."
+    ]
+  },
+  {
+    "terme": "Cloquage",
+    "definition_courte": "Décollement local de l'enduit formant une cloque.",
+    "explication_pedagogique": "C'est un désordre révélant souvent humidité, support pollué ou mauvaise adhérence.",
+    "exemple_utilisation": "Le CCTP insiste sur la préparation propre et rugueuse du support.",
+    "points_vigilance": [
+      "Traiter la cause avant réparation, sinon le défaut revient."
+    ]
+  },
+  {
+    "terme": "Compte prorata",
+    "definition_courte": "Compte commun servant à répartir certaines dépenses de chantier entre entreprises.",
+    "explication_pedagogique": "Il finance souvent des dépenses communes comme bennes, nettoyage ou consommations.",
+    "exemple_utilisation": "Le CCTP renvoie au lot 00 pour le compte prorata.",
+    "points_vigilance": [
+      "Identifier ce qui relève du lot propre et ce qui passe au compte prorata."
+    ]
+  },
+  {
+    "terme": "Conditions climatiques",
+    "definition_courte": "Température, vent, pluie, soleil et humidité au moment de l'application.",
+    "explication_pedagogique": "Elles conditionnent la bonne prise et l'aspect de l'enduit.",
+    "exemple_utilisation": "Le CCTP interdit l'enduit sous +5 °C, sous pluie, brouillard, forte chaleur ou vent desséchant.",
+    "points_vigilance": [
+      "Une façade réussie dépend autant de la météo que du produit."
+    ]
+  },
+  {
+    "terme": "Coordination corps d'état",
+    "definition_courte": "Organisation entre entreprises dont les ouvrages se croisent.",
+    "explication_pedagogique": "Elle évite les oublis, dégradations et reprises inutiles.",
+    "exemple_utilisation": "L'enduiseur doit se rapprocher du Gros oeuvre et des Menuiseries extérieures.",
+    "points_vigilance": [
+      "Valider appuis, menuiseries, protections, soubassements et remblaiements avant enduit."
+    ]
+  },
+  {
+    "terme": "Couche de finition",
+    "definition_courte": "Dernière couche visible de l'enduit.",
+    "explication_pedagogique": "Elle donne l'aspect final : gratté, taloché, teinte et texture.",
+    "exemple_utilisation": "Le CCTP précise que la couche de finition ne doit pas être exécutée par projection d'eau ou de ciment sec.",
+    "points_vigilance": [
+      "Les reprises doivent être placées sur joint ou zone non apparente."
+    ]
+  },
+  {
+    "terme": "DCE",
+    "acronyme": "Dossier de Consultation des Entreprises",
+    "definition_courte": "Ensemble des pièces remises aux entreprises pour chiffrer le marché.",
+    "explication_pedagogique": "Il contient notamment CCTP, plans, CCAP et pièces communes.",
+    "exemple_utilisation": "Le CCTP du lot 02 fait partie du DCE du projet Millas Nord.",
+    "points_vigilance": [
+      "Toujours croiser CCTP, plans de façade et lot 00 avant chiffrage."
+    ]
+  },
+  {
+    "terme": "Double transport",
+    "definition_courte": "Transport aller et retour du matériel entre dépôt et chantier.",
+    "explication_pedagogique": "Il concerne notamment les échafaudages loués ou amortis.",
+    "exemple_utilisation": "Le CCTP inclut le double transport aller-retour dans le poste échafaudages.",
+    "points_vigilance": [
+      "À intégrer dans les prix, surtout avec chantier éloigné ou phasé."
+    ]
+  },
+  {
+    "terme": "DTU 26.1",
+    "acronyme": "Document Technique Unifié",
+    "definition_courte": "Document Technique Unifié relatif aux travaux d'enduits de mortiers.",
+    "explication_pedagogique": "Il fixe les règles de préparation, application, supports et conditions d'exécution.",
+    "exemple_utilisation": "Le CCTP cite le DTU 26.1 comme référence principale du lot.",
+    "points_vigilance": [
+      "C'est la base à vérifier pour tout désaccord sur la mise en oeuvre."
+    ]
+  },
+  {
+    "terme": "Délai de prise",
+    "definition_courte": "Temps pendant lequel le mortier passe de l'état frais à l'état durci.",
+    "explication_pedagogique": "Il détermine le temps disponible pour appliquer et finir l'enduit.",
+    "exemple_utilisation": "Le CCTP interdit d'utiliser un mortier ayant commencé sa prise.",
+    "points_vigilance": [
+      "Ne jamais rebattre un mortier qui a commencé à tirer."
+    ]
+  },
+  {
+    "terme": "Désassemblage d'échafaudage",
+    "definition_courte": "Démontage ordonné des éléments d'échafaudage.",
+    "explication_pedagogique": "Il permet le repli du chantier en sécurité.",
+    "exemple_utilisation": "Le CCTP inclut assemblage, désassemblage, montage, démontage, dépose et retour atelier.",
+    "points_vigilance": [
+      "Le démontage doit conserver la stabilité jusqu'au dernier élément."
+    ]
+  },
+  {
+    "terme": "Enduit de façade",
+    "definition_courte": "Revêtement extérieur appliqué sur les murs pour protéger et finir la façade.",
+    "explication_pedagogique": "Il assure une fonction esthétique et participe à l'imperméabilisation.",
+    "exemple_utilisation": "Le lot 02 porte sur les travaux d'enduit de façade du projet.",
+    "points_vigilance": [
+      "La réussite dépend du support, de la météo, du produit et du geste d'application."
+    ]
+  },
+  {
+    "terme": "Enduit hydraulique",
+    "definition_courte": "Enduit à base de liants hydrauliques, qui durcit avec l'eau.",
+    "explication_pedagogique": "Il est courant en façade pour protéger les maçonneries.",
+    "exemple_utilisation": "Le CCTP prévoit un enduit de façade hydraulique teinté dans la masse.",
+    "points_vigilance": [
+      "Respecter dosage d'eau, temps ouvert et conditions climatiques."
+    ]
+  },
+  {
+    "terme": "Enduit monocouche",
+    "definition_courte": "Enduit industriel formulé pour assurer corps d'enduit et finition dans un système simplifié.",
+    "explication_pedagogique": "Il protège la façade et donne l'aspect final en une application organisée.",
+    "exemple_utilisation": "Le CCTP demande un enduit monocouche type Weber Pral F ou équivalent.",
+    "points_vigilance": [
+      "Monocouche ne veut pas toujours dire une seule passe : ici la mise en oeuvre est en 2 passes frais sur frais."
+    ]
+  },
+  {
+    "terme": "Enduit monocouche d'imperméabilisation",
+    "definition_courte": "Enduit certifié pour limiter la pénétration d'eau dans la façade.",
+    "explication_pedagogique": "Il protège les maçonneries extérieures contre les intempéries.",
+    "exemple_utilisation": "Le CCTP exige la certification CSTB des enduits monocouches d'imperméabilisation.",
+    "points_vigilance": [
+      "Il ne corrige pas un défaut de support, de fissure structurelle ou d'étanchéité de baie."
+    ]
+  },
+  {
+    "terme": "Entretiens et révisions",
+    "definition_courte": "Contrôles réguliers du matériel pendant la durée de mobilisation.",
+    "explication_pedagogique": "Ils maintiennent les échafaudages en état sûr.",
+    "exemple_utilisation": "Le CCTP prévoit entretiens et révisions régulières des échafaudages.",
+    "points_vigilance": [
+      "Après vent, choc ou modification, l'échafaudage doit être vérifié."
+    ]
+  },
+  {
+    "terme": "Façade",
+    "definition_courte": "Face extérieure visible d'un bâtiment.",
+    "explication_pedagogique": "Elle reçoit l'enduit, les modénatures, tableaux, linteaux et finitions.",
+    "exemple_utilisation": "Le CCTP localise l'enduit sur l'ensemble des murs de façades.",
+    "points_vigilance": [
+      "Toujours se référer aux plans de façades pour teintes, bandeaux et zones particulières."
+    ]
+  },
+  {
+    "terme": "Faïençage",
+    "definition_courte": "Microfissuration en réseau à la surface d'un enduit.",
+    "explication_pedagogique": "C'est un désordre esthétique et parfois un signe de dessèchement ou excès d'eau.",
+    "exemple_utilisation": "Le CCTP demande un gâchage avec quantité d'eau nécessaire mais sans excès pour éviter le faïençage.",
+    "points_vigilance": [
+      "Excès d'eau, soleil, vent ou support trop absorbant favorisent le faïençage."
+    ]
+  },
+  {
+    "terme": "Fibre de verre",
+    "definition_courte": "Treillis synthétique utilisé comme renfort dans les enduits.",
+    "explication_pedagogique": "Il limite les fissures aux points sensibles.",
+    "exemple_utilisation": "Le CCTP prévoit des treillis de fibre de verre aux points singuliers.",
+    "points_vigilance": [
+      "Employer une trame compatible enduit extérieur, résistante aux alcalins."
+    ]
+  },
+  {
+    "terme": "Finition gratté fin",
+    "definition_courte": "Aspect obtenu en grattant l'enduit après début de durcissement.",
+    "explication_pedagogique": "Il donne une texture régulière et mate aux parties courantes.",
+    "exemple_utilisation": "Le CCTP prévoit une finition gratté fin en parties courantes.",
+    "points_vigilance": [
+      "Le moment du grattage est crucial pour éviter taches, arrachements ou différences d'aspect."
+    ]
+  },
+  {
+    "terme": "Finition taloché fin",
+    "definition_courte": "Aspect lissé à la taloche avec grain fin.",
+    "explication_pedagogique": "Il est souvent utilisé en soubassement ou modénature pour un rendu plus serré.",
+    "exemple_utilisation": "Le CCTP prévoit une finition taloché fin en soubassements et éléments de modénatures.",
+    "points_vigilance": [
+      "Un talochage irrégulier se voit fortement avec la lumière rasante."
+    ]
+  },
+  {
+    "terme": "Frais sur frais",
+    "definition_courte": "Application d'une passe sur une précédente encore fraîche.",
+    "explication_pedagogique": "Elle permet une bonne liaison entre les passes.",
+    "exemple_utilisation": "Le CCTP demande une mise en œuvre en 2 passes frais sur frais.",
+    "points_vigilance": [
+      "Ne pas laisser sécher la première passe avant la seconde si le système impose le frais sur frais."
+    ]
+  },
+  {
+    "terme": "Gainage PVC de pied",
+    "definition_courte": "Protection colorée autour des tubes bas d'échafaudage.",
+    "explication_pedagogique": "Elle signale et protège les zones de passage près des pieds d'échafaudage.",
+    "exemple_utilisation": "Le CCTP prévoit des gainages renforcés en PVC rouge ou orange.",
+    "points_vigilance": [
+      "Utile en zone de circulation pour limiter les chocs et améliorer la visibilité."
+    ]
+  },
+  {
+    "terme": "Galvano-zingué",
+    "definition_courte": "Métal protégé contre la corrosion par galvanisation ou zingage.",
+    "explication_pedagogique": "Il augmente la durabilité des éléments d'échafaudage exposés.",
+    "exemple_utilisation": "Le CCTP prévoit des tubulures et plateformes galvano-zinguées.",
+    "points_vigilance": [
+      "Surveiller les éléments abîmés ou rouillés malgré la protection."
+    ]
+  },
+  {
+    "terme": "Garde-corps de balcon",
+    "definition_courte": "Protection périphérique d'un balcon.",
+    "explication_pedagogique": "Dans ce lot, il peut recevoir un enduit sur ses faces béton.",
+    "exemple_utilisation": "Le CCTP localise l'enduit sur les garde-corps des balcons, deux faces.",
+    "points_vigilance": [
+      "Contrôler accessibilité, angles, retours, gouttes d'eau et protection des éléments de serrurerie."
+    ]
+  },
+  {
+    "terme": "Garde-corps réglementaire",
+    "definition_courte": "Protection collective empêchant la chute depuis une hauteur.",
+    "explication_pedagogique": "Il sécurise les plateformes d'échafaudage.",
+    "exemple_utilisation": "Le CCTP inclut garde-corps réglementaires et plinthes dans les échafaudages.",
+    "points_vigilance": [
+      "Indispensable à tous les niveaux de travail exposés au vide."
+    ]
+  },
+  {
+    "terme": "Gravois",
+    "definition_courte": "Déchets de chantier issus de travaux ou nettoyage.",
+    "explication_pedagogique": "Ils doivent être triés et évacués.",
+    "exemple_utilisation": "Le CCTP impose le tri et l'enlèvement des gravois dans les bennes du compte prorata.",
+    "points_vigilance": [
+      "Un chantier sale dégrade les supports et augmente les risques de projection sur enduit frais."
+    ]
+  },
+  {
+    "terme": "Gâchage",
+    "definition_courte": "Mélange du mortier avec l'eau avant application.",
+    "explication_pedagogique": "Il donne au mortier sa consistance de pose.",
+    "exemple_utilisation": "Le CCTP demande un gâchage au fur et à mesure de l'avancement des travaux.",
+    "points_vigilance": [
+      "Trop d'eau affaiblit l'enduit et favorise le faïençage."
+    ]
+  },
+  {
+    "terme": "Humidification à refus",
+    "definition_courte": "Humidification répétée jusqu'à ce que le support n'absorbe presque plus l'eau.",
+    "explication_pedagogique": "Elle limite le pompage brutal de l'eau du mortier par le support.",
+    "exemple_utilisation": "Le CCTP demande une humidification à refus en plusieurs fois à un quart d'heure d'intervalle.",
+    "points_vigilance": [
+      "Ne pas appliquer sur support ruisselant malgré l'humidification."
+    ]
+  },
+  {
+    "terme": "Imperméabilisation",
+    "definition_courte": "Capacité d'un revêtement à limiter la pénétration d'eau.",
+    "explication_pedagogique": "Elle protège les murs extérieurs exposés à la pluie.",
+    "exemple_utilisation": "Le CCTP vise des enduits monocouches d'imperméabilisation certifiés CSTB.",
+    "points_vigilance": [
+      "L'imperméabilisation dépend aussi des détails : appuis, tableaux, fissures et points singuliers."
+    ]
+  },
+  {
+    "terme": "Interface",
+    "definition_courte": "Zone de contact entre deux lots ou deux ouvrages.",
+    "explication_pedagogique": "Elle doit être coordonnée pour éviter conflits et défauts.",
+    "exemple_utilisation": "Le CCTP demande de contacter les corps d'état présentant des interfaces avec les surfaces à enduire.",
+    "points_vigilance": [
+      "Les interfaces sensibles sont menuiseries, gros oeuvre, soubassements, balcons et loggias."
+    ]
+  },
+  {
+    "terme": "Lattis métallique nervuré",
+    "definition_courte": "Support métallique ajouré permettant d'accrocher un enduit sur support difficile.",
+    "explication_pedagogique": "Il sert de support d'enduit sur parement bois ou zone incompatible.",
+    "exemple_utilisation": "Le CCTP prévoit un lattis métallique nervuré sur parement bois en cas de décalage de toiture.",
+    "points_vigilance": [
+      "Fixation, recouvrement et compatibilité avec l'enduit sont essentiels."
+    ]
+  },
+  {
+    "terme": "Libage",
+    "definition_courte": "Ouvrage de soubassement en maçonnerie ou béton.",
+    "explication_pedagogique": "Il peut être enduit comme partie basse de façade.",
+    "exemple_utilisation": "Le CCTP localise l'enduit sur les libages et soubassements.",
+    "points_vigilance": [
+      "Traiter soigneusement les zones proches du sol, exposées aux chocs et à l'humidité."
+    ]
+  },
+  {
+    "terme": "Ligne de joint",
+    "definition_courte": "Joint existant ou prévu servant de limite naturelle entre deux zones.",
+    "explication_pedagogique": "Elle permet de placer une reprise d'enduit sans qu'elle soit visible.",
+    "exemple_utilisation": "Le CCTP demande de faire les reprises de finition sur une ligne de joint ou zone non apparente.",
+    "points_vigilance": [
+      "Éviter les reprises au milieu d'un grand panneau de façade."
+    ]
+  },
+  {
+    "terme": "Linteau",
+    "definition_courte": "Élément au-dessus d'une ouverture.",
+    "explication_pedagogique": "Il constitue un point singulier à renforcer dans l'enduit.",
+    "exemple_utilisation": "Le CCTP prévoit renforts aux linteaux et retours en linteaux.",
+    "points_vigilance": [
+      "Les angles de linteaux sont des zones classiques de fissuration."
+    ]
+  },
+  {
+    "terme": "Loggia",
+    "definition_courte": "Espace extérieur couvert ou en retrait dans le volume du bâtiment.",
+    "explication_pedagogique": "Elle comporte des retours, poteaux et surfaces à enduire.",
+    "exemple_utilisation": "Le CCTP localise l'enduit sur les poteaux, poutres et retours de loggias et terrasses.",
+    "points_vigilance": [
+      "Attention aux zones difficiles d'accès et aux différences de lumière qui révèlent les défauts."
+    ]
+  },
+  {
+    "terme": "Maçonnerie de parpaings",
+    "definition_courte": "Mur composé de blocs béton.",
+    "explication_pedagogique": "C'est l'un des supports possibles de l'enduit monocouche.",
+    "exemple_utilisation": "Le CCTP cite les maçonneries de parpaings comme support classé RT2 ou RT3.",
+    "points_vigilance": [
+      "Vérifier joints, planéité, humidité et propreté avant enduit."
+    ]
+  },
+  {
+    "terme": "Maître d'oeuvre",
+    "definition_courte": "Intervenant chargé de concevoir et suivre l'exécution des travaux.",
+    "explication_pedagogique": "Il valide les choix techniques, échantillons et conformité d'exécution.",
+    "exemple_utilisation": "Les surfaces témoins sont réalisées pour accord du maître d'ouvrage et de l'architecte concepteur.",
+    "points_vigilance": [
+      "Obtenir validation avant application généralisée."
+    ]
+  },
+  {
+    "terme": "Modénature",
+    "definition_courte": "Élément décoratif en relief ou en creux sur une façade.",
+    "explication_pedagogique": "Elle anime la façade : bandeaux, encadrements, faux volets, colombages, soubassements.",
+    "exemple_utilisation": "Le CCTP prévoit une plus-value pour surépaisseur en traitement des modénatures.",
+    "points_vigilance": [
+      "Les modénatures demandent calepinage, arêtes nettes, teinte et épaisseur régulières."
+    ]
+  },
+  {
+    "terme": "Mortier rebattu",
+    "definition_courte": "Mortier qui a commencé sa prise et que l'on remélange pour tenter de le réutiliser.",
+    "explication_pedagogique": "Cette pratique est interdite car elle dégrade les performances.",
+    "exemple_utilisation": "Le CCTP indique que le mortier ne pourra pas être rebattu.",
+    "points_vigilance": [
+      "Rebattre un mortier augmente les risques de faïençage, perte d'adhérence et désordre."
+    ]
+  },
+  {
+    "terme": "Nettoyage journalier",
+    "definition_courte": "Nettoyage quotidien des zones de travail.",
+    "explication_pedagogique": "Il maintient le chantier propre et limite les risques de salissures.",
+    "exemple_utilisation": "Le CCTP impose les nettoyages journaliers dans les obligations de l'entreprise.",
+    "points_vigilance": [
+      "Les projections d'enduit doivent être nettoyées avant durcissement."
+    ]
+  },
+  {
+    "terme": "NF DTU 20.1",
+    "definition_courte": "Référence technique pour les ouvrages en maçonnerie.",
+    "explication_pedagogique": "Elle classe notamment les supports maçonnés pouvant recevoir l'enduit.",
+    "exemple_utilisation": "Le CCTP cite les supports conformes à NF DTU 20.1, classés RT3 ou RT2.",
+    "points_vigilance": [
+      "Le support doit être conforme avant réception par l'enduiseur."
+    ]
+  },
+  {
+    "terme": "OC",
+    "definition_courte": "Classement des enduits monocouches selon leur usage et performances.",
+    "explication_pedagogique": "Il aide à choisir l'enduit selon le support et les contraintes.",
+    "exemple_utilisation": "Le CCTP demande OC2 ou OC3 selon support.",
+    "points_vigilance": [
+      "Toujours vérifier la compatibilité dans la fiche technique fabricant."
+    ]
+  },
+  {
+    "terme": "Ossature d'échafaudage",
+    "definition_courte": "Structure porteuse de l'échafaudage.",
+    "explication_pedagogique": "Elle supporte plateformes, travailleurs, matériaux et protections.",
+    "exemple_utilisation": "Le CCTP prévoit des ossatures calibrées en tubulures normalisées.",
+    "points_vigilance": [
+      "Le dimensionnement dépend de la configuration et des descentes de charges."
+    ]
+  },
+  {
+    "terme": "Parement bois",
+    "definition_courte": "Surface en bois visible ou support d'un traitement particulier.",
+    "explication_pedagogique": "Dans ce lot, il peut recevoir un lattis métallique avant enduit.",
+    "exemple_utilisation": "Le CCTP prévoit un lattis métallique nervuré sur parement bois en cas de décalage de toiture.",
+    "points_vigilance": [
+      "Le bois seul n'est pas un support classique d'enduit hydraulique."
+    ]
+  },
+  {
+    "terme": "Parties courantes",
+    "definition_courte": "Zones principales et répétitives d'une façade, hors points particuliers.",
+    "explication_pedagogique": "Elles reçoivent souvent la finition standard.",
+    "exemple_utilisation": "Le CCTP prévoit une finition gratté fin en parties courantes.",
+    "points_vigilance": [
+      "Les grandes surfaces révèlent les différences de teinte, reprises et défauts de planéité."
+    ]
+  },
+  {
+    "terme": "Passe d'enduit",
+    "definition_courte": "Couche appliquée lors d'une phase d'enduisage.",
+    "explication_pedagogique": "Elle construit l'épaisseur et prépare la finition.",
+    "exemple_utilisation": "Le CCTP demande une mise en œuvre en 2 passes frais sur frais.",
+    "points_vigilance": [
+      "Respecter épaisseur, temps entre passes et consignes fabricant."
+    ]
+  },
+  {
+    "terme": "Piquage du support",
+    "definition_courte": "Action de rendre un support plus rugueux en créant de petites aspérités.",
+    "explication_pedagogique": "Il améliore l'accrochage de l'enduit.",
+    "exemple_utilisation": "Le CCTP prévoit que le subjectile en maçonnerie peut être piqué.",
+    "points_vigilance": [
+      "Dépoussiérer après piquage, sinon l'enduit accroche sur la poussière."
+    ]
+  },
+  {
+    "terme": "Piétement à vérin",
+    "definition_courte": "Pied réglable d'échafaudage permettant de rattraper le niveau du sol.",
+    "explication_pedagogique": "Il stabilise l'échafaudage et règle son horizontalité.",
+    "exemple_utilisation": "Le CCTP prévoit des piétements à vérins vissés et platines d'appui.",
+    "points_vigilance": [
+      "Le vérin doit reposer sur une platine et un support stable."
+    ]
+  },
+  {
+    "terme": "Plan de façade",
+    "definition_courte": "Plan architectural représentant les élévations extérieures du bâtiment.",
+    "explication_pedagogique": "Il indique localisation, teintes, modénatures et zones à traiter.",
+    "exemple_utilisation": "Le CCTP localise les échafaudages et enduits suivant les plans de façades.",
+    "points_vigilance": [
+      "C'est indispensable pour ne pas oublier les retours, tableaux, loggias et soubassements."
+    ]
+  },
+  {
+    "terme": "Planelle de plancher",
+    "definition_courte": "Élément de rive de plancher visible ou proche de la façade.",
+    "explication_pedagogique": "C'est une zone sensible car elle marque un changement de support.",
+    "exemple_utilisation": "Le CCTP impose un renfort d'enduit au droit des planelles de planchers.",
+    "points_vigilance": [
+      "Sans armature, fissuration fréquente à la jonction dalle/maçonnerie."
+    ]
+  },
+  {
+    "terme": "Platine d'appui",
+    "definition_courte": "Plaque placée sous un pied d'échafaudage pour répartir la charge.",
+    "explication_pedagogique": "Elle évite l'enfoncement local du pied dans le sol.",
+    "exemple_utilisation": "Le CCTP prévoit des piétements à vérins vissés et platines d'appui.",
+    "points_vigilance": [
+      "À poser sur support stable, avec répartition adaptée si remblai fragile."
+    ]
+  },
+  {
+    "terme": "Plinthe d'échafaudage",
+    "definition_courte": "Planche ou élément bas empêchant la chute d'objets depuis la plateforme.",
+    "explication_pedagogique": "Elle complète le garde-corps pour la sécurité collective.",
+    "exemple_utilisation": "Le CCTP inclut les plinthes dans les dispositifs de sécurité.",
+    "points_vigilance": [
+      "Elle doit être continue sur les zones exposées."
+    ]
+  },
+  {
+    "terme": "Point singulier",
+    "definition_courte": "Zone particulière où le risque de fissure ou défaut est plus élevé.",
+    "explication_pedagogique": "Il nécessite souvent un renfort ou une attention spécifique.",
+    "exemple_utilisation": "Le CCTP cite planelles, linteaux, angles d'ouvertures et changements de matériaux.",
+    "points_vigilance": [
+      "Les points singuliers doivent être traités avant la finition, pas après fissuration."
+    ]
+  },
+  {
+    "terme": "Poteau",
+    "definition_courte": "Élément vertical porteur pouvant être situé en façade, loggia ou terrasse.",
+    "explication_pedagogique": "Il reçoit l'enduit si sa surface est incluse dans le lot.",
+    "exemple_utilisation": "Le CCTP localise l'enduit sur poteaux, poutres et retours de loggias et terrasses.",
+    "points_vigilance": [
+      "Les angles de poteaux demandent arêtes régulières et protections."
+    ]
+  },
+  {
+    "terme": "Poutre",
+    "definition_courte": "Élément horizontal porteur, parfois visible en façade ou loggia.",
+    "explication_pedagogique": "Elle peut recevoir le même traitement d'enduit que les murs.",
+    "exemple_utilisation": "Le CCTP prévoit l'enduit sur les poutres et retours de loggias.",
+    "points_vigilance": [
+      "Contrôler raccords avec murs, sous-faces et angles."
+    ]
+  },
+  {
+    "terme": "Projection d'eau ou de ciment sec",
+    "definition_courte": "Pratique consistant à corriger ou finir une surface en ajoutant eau ou ciment sec.",
+    "explication_pedagogique": "Elle est interdite dans le CCTP pour la couche de finition.",
+    "exemple_utilisation": "La couche de finition ne pourra pas être exécutée par projection d'eau ou de ciment sec.",
+    "points_vigilance": [
+      "Cette pratique peut créer taches, farinage, faïençage ou mauvaise résistance."
+    ]
+  },
+  {
+    "terme": "Protection des menuiseries",
+    "definition_courte": "Bâchage, masquage ou protection physique des fenêtres et portes avant enduit.",
+    "explication_pedagogique": "Elle évite salissures, rayures et détériorations.",
+    "exemple_utilisation": "Le CCTP impose la protection des menuiseries, garde-corps, etc. avant application.",
+    "points_vigilance": [
+      "Nettoyer immédiatement les projections accidentelles."
+    ]
+  },
+  {
+    "terme": "Protection des ouvrages existants",
+    "definition_courte": "Dispositifs empêchant la dégradation des ouvrages déjà réalisés.",
+    "explication_pedagogique": "Elle protège menuiseries, garde-corps, sols, abords et équipements.",
+    "exemple_utilisation": "Le CCTP met cette protection à la charge de l'entreprise avant travaux.",
+    "points_vigilance": [
+      "Un ouvrage détérioré doit être nettoyé, remis en état ou remplacé."
+    ]
+  },
+  {
+    "terme": "Préparation du support",
+    "definition_courte": "Ensemble des opérations avant application : réception, nettoyage, piquage, brossage, humidification.",
+    "explication_pedagogique": "Elle conditionne la tenue et l'aspect de l'enduit.",
+    "exemple_utilisation": "Le CCTP consacre un article à la réception et préparation des supports.",
+    "points_vigilance": [
+      "C'est souvent là que naissent les désordres d'enduit."
+    ]
+  },
+  {
+    "terme": "Rebattre un mortier",
+    "definition_courte": "Remélanger un mortier en cours de prise pour le rendre à nouveau utilisable.",
+    "explication_pedagogique": "Cette pratique cherche à prolonger artificiellement le temps d'emploi.",
+    "exemple_utilisation": "Le CCTP interdit le mortier rebattu.",
+    "points_vigilance": [
+      "Jeter le mortier commencé plutôt que compromettre la façade."
+    ]
+  },
+  {
+    "terme": "Remblai au pourtour des bâtiments",
+    "definition_courte": "Terre ou matériau rapporté autour des constructions.",
+    "explication_pedagogique": "Il peut recevoir les appuis d'échafaudage après vérification de stabilité.",
+    "exemple_utilisation": "L'entrepreneur doit s'assurer de la stabilité des remblais avant installation des équipements.",
+    "points_vigilance": [
+      "Un remblai récent ou mal compacté peut provoquer l'affaissement d'un échafaudage."
+    ]
+  },
+  {
+    "terme": "Remise en état",
+    "definition_courte": "Réparation ou nettoyage après dégradation causée par les travaux.",
+    "explication_pedagogique": "Elle ramène l'ouvrage ou les abords à leur état acceptable.",
+    "exemple_utilisation": "Le CCTP prévoit nettoyage, remise en état ou changement des ouvrages détériorés.",
+    "points_vigilance": [
+      "Photographier avant/après aide à gérer les litiges."
+    ]
+  },
+  {
+    "terme": "Renfort d'angle",
+    "definition_courte": "Armature ou protection placée aux angles d'ouvertures ou arêtes.",
+    "explication_pedagogique": "Il limite les fissures et éclats dans les zones sensibles.",
+    "exemple_utilisation": "Le CCTP impose des renforts aux angles d'ouvertures.",
+    "points_vigilance": [
+      "Les fissures partent souvent des angles de baies si le renfort manque."
+    ]
+  },
+  {
+    "terme": "Renfort métallique",
+    "definition_courte": "Armature en métal intégrée ou supportant l'enduit.",
+    "explication_pedagogique": "Il renforce une zone ou sert de support sur matériau particulier.",
+    "exemple_utilisation": "Le CCTP prévoit armature métallique ou treillis fibre de verre et lattis métallique nervuré.",
+    "points_vigilance": [
+      "Vérifier corrosion, fixation et compatibilité avec enduit hydraulique."
+    ]
+  },
+  {
+    "terme": "Reprise de finition",
+    "definition_courte": "Raccord entre deux zones d'enduit exécutées à des moments différents.",
+    "explication_pedagogique": "Elle permet de poursuivre l'ouvrage sans défaut visible si elle est bien placée.",
+    "exemple_utilisation": "Le CCTP demande de placer les reprises sur une ligne de joint ou zone non apparente.",
+    "points_vigilance": [
+      "Les reprises en plein panneau se voient souvent après séchage."
+    ]
+  },
+  {
+    "terme": "Resserrage / lissage",
+    "definition_courte": "Action de travailler la surface fraîche de l'enduit pour fermer ou régler l'aspect.",
+    "explication_pedagogique": "Il intervient selon la finition recherchée.",
+    "exemple_utilisation": "Le CCTP interdit le lissage sur mortier frais dans certains cas de finition.",
+    "points_vigilance": [
+      "Respecter la méthode fabricant selon gratté fin ou taloché fin."
+    ]
+  },
+  {
+    "terme": "Retour de loggia",
+    "definition_courte": "Partie de façade en retour dans une loggia ou terrasse.",
+    "explication_pedagogique": "Elle reçoit l'enduit comme les autres surfaces visibles.",
+    "exemple_utilisation": "Le CCTP localise l'enduit sur les retours de loggias et terrasses.",
+    "points_vigilance": [
+      "Ces zones sont parfois oubliées au chiffrage car moins visibles sur plans."
+    ]
+  },
+  {
+    "terme": "Retour en tableau",
+    "definition_courte": "Surface latérale intérieure d'une ouverture de fenêtre ou porte.",
+    "explication_pedagogique": "Elle doit être enduite pour finir proprement l'encadrement.",
+    "exemple_utilisation": "Le CCTP inclut les retours en tableaux et linteaux.",
+    "points_vigilance": [
+      "Contrôler épaisseur, arête, protection menuiserie et absence de pont d'eau."
+    ]
+  },
+  {
+    "terme": "RICT",
+    "acronyme": "Rapport Initial de Contrôle Technique",
+    "definition_courte": "Rapport Initial de Contrôle Technique.",
+    "explication_pedagogique": "Il regroupe les premières observations du contrôleur technique.",
+    "exemple_utilisation": "Le CCTP mentionne une version avec relecture du RICT.",
+    "points_vigilance": [
+      "Les remarques du RICT peuvent modifier des points d'exécution ou de contrôle."
+    ]
+  },
+  {
+    "terme": "Réception des supports",
+    "definition_courte": "Contrôle contradictoire des supports avant application de l'enduit.",
+    "explication_pedagogique": "Elle permet d'accepter ou refuser le support avant d'engager sa responsabilité.",
+    "exemple_utilisation": "Le CCTP prévoit une réception en présence du Gros oeuvre et du maître d'oeuvre.",
+    "points_vigilance": [
+      "Sans réception, les supports sont considérés comme acceptés par l'entrepreneur."
+    ]
+  },
+  {
+    "terme": "Soubassement",
+    "definition_courte": "Partie basse d'un mur de façade, proche du sol.",
+    "explication_pedagogique": "Elle est plus exposée aux chocs, salissures et remontées d'humidité.",
+    "exemple_utilisation": "Le CCTP prévoit une finition taloché fin en soubassements.",
+    "points_vigilance": [
+      "Attention à l'enduit avant remblaiement et aux protections contre éclaboussures."
+    ]
+  },
+  {
+    "terme": "Stabilisateur d'échafaudage",
+    "definition_courte": "Élément améliorant la stabilité de l'échafaudage.",
+    "explication_pedagogique": "Il limite le risque de basculement ou déformation.",
+    "exemple_utilisation": "Le CCTP cite les stabilisateurs en raccord avec les bâtiments.",
+    "points_vigilance": [
+      "Leur suppression ou déplacement doit être validé."
+    ]
+  },
+  {
+    "terme": "Subjectile",
+    "definition_courte": "Support sur lequel on applique un revêtement.",
+    "explication_pedagogique": "En façade, il peut s'agir de maçonnerie, béton, brique ou support préparé.",
+    "exemple_utilisation": "Le CCTP indique que le subjectile en maçonnerie sera piqué, bouchardé ou brossé au besoin.",
+    "points_vigilance": [
+      "Identifier le subjectile avant de choisir enduit, classe et préparation."
+    ]
+  },
+  {
+    "terme": "Support béton",
+    "definition_courte": "Surface en béton recevant l'enduit.",
+    "explication_pedagogique": "Elle nécessite parfois préparation spécifique pour l'accrochage.",
+    "exemple_utilisation": "Le CCTP cite le béton parmi les supports admissibles.",
+    "points_vigilance": [
+      "Attention aux huiles de décoffrage, laitance, surface trop lisse et humidité."
+    ]
+  },
+  {
+    "terme": "Support gelé",
+    "definition_courte": "Support dont l'eau contenue est gelée.",
+    "explication_pedagogique": "Il est interdit d'y appliquer un enduit.",
+    "exemple_utilisation": "Le CCTP interdit l'exécution lorsque les supports sont gelés.",
+    "points_vigilance": [
+      "Même si l'air remonte en température, le support peut rester froid ou gelé."
+    ]
+  },
+  {
+    "terme": "Support mouillé",
+    "definition_courte": "Support saturé ou ruisselant au moment de l'application.",
+    "explication_pedagogique": "Il empêche une bonne tenue de l'enduit.",
+    "exemple_utilisation": "Le CCTP interdit l'application par pluie, brouillard ou sur supports mouillés.",
+    "points_vigilance": [
+      "Humidifier à refus ne veut pas dire enduire sous ruissellement."
+    ]
+  },
+  {
+    "terme": "Support propre",
+    "definition_courte": "Surface débarrassée de poussière, peinture, plâtre, salpêtre et impuretés.",
+    "explication_pedagogique": "Elle permet l'adhérence correcte de l'enduit.",
+    "exemple_utilisation": "Le CCTP exige une surface nette, propre et exempte d'impuretés.",
+    "points_vigilance": [
+      "La poussière agit comme une couche de séparation."
+    ]
+  },
+  {
+    "terme": "Support rugueux",
+    "definition_courte": "Surface présentant des aspérités suffisantes pour accrocher l'enduit.",
+    "explication_pedagogique": "Elle favorise l'accrochage mécanique.",
+    "exemple_utilisation": "Le CCTP exige un support rugueux de telle sorte qu'il permette un accrochage parfait.",
+    "points_vigilance": [
+      "Un béton lisse peut nécessiter piquage, bouchardage ou primaire selon fabricant."
+    ]
+  },
+  {
+    "terme": "Surface témoin",
+    "definition_courte": "Zone d'essai réalisée sur chantier pour valider le rendu final.",
+    "explication_pedagogique": "Elle sert de référence de teinte, grain et finition.",
+    "exemple_utilisation": "Le CCTP impose des surfaces témoins pour accord du maître d'ouvrage et de l'architecte.",
+    "points_vigilance": [
+      "Conserver la surface témoin jusqu'à la réception si possible."
+    ]
+  },
+  {
+    "terme": "Surépaisseur",
+    "definition_courte": "Épaisseur supplémentaire d'enduit localisée.",
+    "explication_pedagogique": "Elle sert à créer des modénatures ou effets de relief.",
+    "exemple_utilisation": "Le CCTP prévoit une plus-value pour surépaisseur des modénatures.",
+    "points_vigilance": [
+      "Contrôler compatibilité avec l'épaisseur maximale du produit."
+    ]
+  },
+  {
+    "terme": "Tableau",
+    "definition_courte": "Côté vertical d'une baie entre façade extérieure et menuiserie.",
+    "explication_pedagogique": "Il doit être enduit proprement pour finir l'ouverture.",
+    "exemple_utilisation": "Le CCTP inclut les retours en tableaux.",
+    "points_vigilance": [
+      "Les tableaux doivent avoir arêtes nettes et être protégés autour des menuiseries."
+    ]
+  },
+  {
+    "terme": "Taloché fin",
+    "definition_courte": "Finition serrée réalisée à la taloche.",
+    "explication_pedagogique": "Elle donne un aspect plus lisse et compact que le gratté.",
+    "exemple_utilisation": "Le CCTP prévoit taloché fin en soubassements et éléments de modénatures.",
+    "points_vigilance": [
+      "Demande un geste régulier pour éviter nuançages et traces."
+    ]
+  },
+  {
+    "terme": "Teinté dans la masse",
+    "definition_courte": "Enduit dont la couleur est intégrée au mortier, pas seulement appliquée en surface.",
+    "explication_pedagogique": "Il donne la teinte finale directement dans l'épaisseur de l'enduit.",
+    "exemple_utilisation": "Le CCTP demande un enduit hydraulique teinté dans la masse.",
+    "points_vigilance": [
+      "Les différences de gâchage, météo ou séchage peuvent créer des nuances."
+    ]
+  },
+  {
+    "terme": "Temps de brouillard",
+    "definition_courte": "Condition météo humide avec visibilité réduite.",
+    "explication_pedagogique": "Elle ralentit le séchage et peut nuire à la finition.",
+    "exemple_utilisation": "Le CCTP interdit l'exécution par temps de pluie ou de brouillard.",
+    "points_vigilance": [
+      "Même sans pluie visible, le brouillard peut rendre le support trop humide."
+    ]
+  },
+  {
+    "terme": "Temps de forte chaleur",
+    "definition_courte": "Condition où l'air ou le support dépasse la température admissible.",
+    "explication_pedagogique": "Elle accélère le séchage et favorise fissures et faïençage.",
+    "exemple_utilisation": "Le CCTP interdit l'application au-delà de +30 °C sur air ambiant ou support.",
+    "points_vigilance": [
+      "Travailler tôt, protéger ou reporter selon prescriptions."
+    ]
+  },
+  {
+    "terme": "Temps de pluie",
+    "definition_courte": "Condition météo où l'eau atteint le support ou l'enduit frais.",
+    "explication_pedagogique": "Elle empêche une application correcte et peut laver l'enduit.",
+    "exemple_utilisation": "Le CCTP interdit l'exécution par temps de pluie.",
+    "points_vigilance": [
+      "Surveiller météo avant de lancer une façade complète."
+    ]
+  },
+  {
+    "terme": "Ton pierre",
+    "definition_courte": "Teinte d'enduit proche de la couleur de pierre naturelle claire ou foncée.",
+    "explication_pedagogique": "Elle donne l'aspect architectural demandé.",
+    "exemple_utilisation": "Le CCTP prévoit ton pierre clair et foncé pour maisons, bâtiments, celliers et garages.",
+    "points_vigilance": [
+      "Faire valider les références exactes par échantillons."
+    ]
+  },
+  {
+    "terme": "Trappe d'accès",
+    "definition_courte": "Ouverture dans un plancher d'échafaudage pour accéder à un niveau supérieur.",
+    "explication_pedagogique": "Elle sécurise la montée entre niveaux.",
+    "exemple_utilisation": "Le CCTP prévoit des trappes d'accès dans l'échafaudage.",
+    "points_vigilance": [
+      "Les trappes doivent rester fermées hors passage."
+    ]
+  },
+  {
+    "terme": "Treillis de fibre de verre",
+    "definition_courte": "Trame synthétique incorporée dans l'enduit pour le renforcer.",
+    "explication_pedagogique": "Elle limite les fissurations aux points singuliers.",
+    "exemple_utilisation": "Le CCTP prévoit un treillis de fibre de verre aux planelles, linteaux et angles.",
+    "points_vigilance": [
+      "Respecter recouvrements, positionnement et compatibilité avec l'enduit."
+    ]
+  },
+  {
+    "terme": "Tubulure normalisée",
+    "definition_courte": "Tube d'échafaudage conforme aux dimensions et normes attendues.",
+    "explication_pedagogique": "Elle compose l'ossature principale de l'échafaudage.",
+    "exemple_utilisation": "Le CCTP prévoit des tubulures normalisées galvano-zinguées 40-49 minimum.",
+    "points_vigilance": [
+      "Ne pas mélanger des éléments incompatibles ou non conformes."
+    ]
+  },
+  {
+    "terme": "Tête de mur",
+    "definition_courte": "Partie supérieure d'un mur ou muret.",
+    "explication_pedagogique": "Elle doit être protégée pour éviter les infiltrations derrière l'enduit.",
+    "exemple_utilisation": "Le CCTP demande de vérifier les protections des arêtes supérieures au droit des têtes de murs.",
+    "points_vigilance": [
+      "Une tête de mur non protégée laisse l'eau pénétrer dans l'enduit."
+    ]
+  },
+  {
+    "terme": "Vent desséchant",
+    "definition_courte": "Vent qui accélère fortement l'évaporation de l'eau dans l'enduit.",
+    "explication_pedagogique": "Il provoque séchage trop rapide et fissurations.",
+    "exemple_utilisation": "Le CCTP interdit l'application sur supports exposés à des vents desséchants.",
+    "points_vigilance": [
+      "Prévoir bâches ou reporter l'intervention."
+    ]
+  },
+  {
+    "terme": "Weber Pral F",
+    "definition_courte": "Enduit monocouche de façade cité comme référence produit.",
+    "explication_pedagogique": "Il sert de base de performance ou d'équivalence pour le choix de l'enduit.",
+    "exemple_utilisation": "Le CCTP demande un enduit type WEBER PRAL F ou équivalent.",
+    "points_vigilance": [
+      "Un équivalent doit offrir les mêmes performances et être accepté par MOE/MOA."
+    ]
+  },
+  {
+    "terme": "Échafaudage de pied",
+    "definition_courte": "Échafaudage posé au sol le long de la façade.",
+    "explication_pedagogique": "Il permet d'accéder aux surfaces à enduire en sécurité.",
+    "exemple_utilisation": "Le CCTP prévoit des échafaudages extérieurs de pied pour l'ensemble des façades.",
+    "points_vigilance": [
+      "Vérifier stabilité du sol, ancrages, garde-corps, plinthes et accès."
+    ]
+  },
+  {
+    "terme": "Échantillon",
+    "definition_courte": "Petit ouvrage ou panneau permettant de valider aspect, teinte et finition.",
+    "explication_pedagogique": "Il sert de référence avant exécution générale.",
+    "exemple_utilisation": "Le CCTP impose des surfaces témoins pour accord du maître d'ouvrage et de l'architecte.",
+    "points_vigilance": [
+      "Ne pas commander ou appliquer partout avant validation écrite de l'échantillon."
+    ]
+  }
+]

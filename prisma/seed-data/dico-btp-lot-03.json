@@ -1,0 +1,1558 @@
+[
+  {
+    "terme": "About de faîtière",
+    "definition_courte": "Pièce de finition placée en extrémité d'un faîtage.",
+    "explication_pedagogique": "Il ferme proprement la ligne de faîtage et évite les infiltrations ou entrées d'animaux.",
+    "exemple_utilisation": "Le CCTP prévoit des abouts de faîtières dans la pose des faîtières et arêtiers.",
+    "points_vigilance": [
+      "Vérifier la compatibilité avec la tuile et le sens des vents dominants."
+    ]
+  },
+  {
+    "terme": "AC",
+    "acronyme": "Courant alternatif",
+    "definition_courte": "Courant électrique qui change de sens périodiquement.",
+    "explication_pedagogique": "Il correspond au courant utilisé par le réseau domestique après transformation par l'onduleur.",
+    "exemple_utilisation": "Le CCTP cite le coffret de protection AC et les liaisons onduleur / coffret AC.",
+    "points_vigilance": [
+      "Ne pas confondre avec le courant continu produit par les tuiles photovoltaïques."
+    ]
+  },
+  {
+    "terme": "Acier galvanisé",
+    "definition_courte": "Acier protégé contre la corrosion par une couche de zinc.",
+    "explication_pedagogique": "Il est utilisé pour les connecteurs, crochets, platines et fixations exposées.",
+    "exemple_utilisation": "Le CCTP demande connecteurs, crochets de sécurité et pièces de fixation en acier galvanisé.",
+    "points_vigilance": [
+      "Une galvanisation abîmée peut rouiller, surtout en toiture."
+    ]
+  },
+  {
+    "terme": "Ancrage",
+    "definition_courte": "Fixation solide d'un élément dans une structure porteuse.",
+    "explication_pedagogique": "Il assure la tenue au vent, aux charges et aux efforts de sécurité.",
+    "exemple_utilisation": "Les tuiles photovoltaïques doivent être fixées en trois points d'ancrage.",
+    "points_vigilance": [
+      "Contrôler la reprise dans la charpente et l'étanchéité autour des fixations."
+    ]
+  },
+  {
+    "terme": "Anti-déversement",
+    "definition_courte": "Dispositif empêchant une pièce de charpente de basculer latéralement.",
+    "explication_pedagogique": "Il garantit la stabilité des chevrons, pannes ou éléments porteurs.",
+    "exemple_utilisation": "Le CCTP demande des systèmes anti-déversement pour les marquises et celliers.",
+    "points_vigilance": [
+      "Une pièce élancée sans anti-déversement peut tourner ou perdre sa capacité portante."
+    ]
+  },
+  {
+    "terme": "Anti-flambement",
+    "definition_courte": "Dispositif limitant le flambement d'une pièce comprimée.",
+    "explication_pedagogique": "Il évite qu'un bois porteur se déforme sous l'effort.",
+    "exemple_utilisation": "Le CCTP demande des systèmes anti-flambement pour les chevrons porteurs.",
+    "points_vigilance": [
+      "À vérifier sur les pièces longues, comprimées ou faiblement maintenues."
+    ]
+  },
+  {
+    "terme": "Arêtier",
+    "definition_courte": "Ligne saillante formée par la rencontre de deux pans de toiture.",
+    "explication_pedagogique": "Il reçoit des tuiles d'arêtier pour assurer la finition et l'étanchéité.",
+    "exemple_utilisation": "Le CCTP prévoit des tuiles faîtières et d'arêtiers assorties.",
+    "points_vigilance": [
+      "Respecter le recouvrement et les prescriptions fabricant."
+    ]
+  },
+  {
+    "terme": "Assemblage visible",
+    "definition_courte": "Jonction apparente entre deux pièces de charpente.",
+    "explication_pedagogique": "Il doit être à la fois solide et propre visuellement.",
+    "exemple_utilisation": "Le CCTP demande des détails d'assemblage visibles pour approbation de la maîtrise d'oeuvre.",
+    "points_vigilance": [
+      "Les platines visibles doivent souvent être cachées ou traitées proprement."
+    ]
+  },
+  {
+    "terme": "Asservissement désenfumage",
+    "definition_courte": "Commande automatique ou manuelle qui déclenche l'ouverture d'un châssis de désenfumage.",
+    "explication_pedagogique": "Il permet l'évacuation des fumées en cas d'incendie.",
+    "exemple_utilisation": "Le CCTP cite un asservissement type SEVM-P SK06 soumis à approbation du bureau de contrôle.",
+    "points_vigilance": [
+      "Vérifier compatibilité réglementaire, commande accessible et essais de fonctionnement."
+    ]
+  },
+  {
+    "terme": "Autoclave classe 3",
+    "definition_courte": "Traitement du bois en profondeur pour usage extérieur exposé.",
+    "explication_pedagogique": "Il protège contre humidité, insectes et champignons selon la classe d'emploi.",
+    "exemple_utilisation": "Les bois des carports sont demandés en bois traité autoclave classe 3.",
+    "points_vigilance": [
+      "Classe 3 ne remplace pas une bonne conception contre l'eau stagnante."
+    ]
+  },
+  {
+    "terme": "Avant-toit",
+    "definition_courte": "Partie de toiture qui déborde de la façade.",
+    "explication_pedagogique": "Il protège la façade et reçoit souvent sous-face, bandeaux et gouttières.",
+    "exemple_utilisation": "Le CCTP prévoit des sous-faces PVC sur les débords de toit.",
+    "points_vigilance": [
+      "Contrôler alignement, ventilation et finition des rives."
+    ]
+  },
+  {
+    "terme": "Baguette de finition",
+    "definition_courte": "Profil de finition posé en rive d'un habillage.",
+    "explication_pedagogique": "Elle masque les joints et donne une finition propre.",
+    "exemple_utilisation": "Le CCTP prévoit une baguette de finition contre la façade pour les sous-faces PVC.",
+    "points_vigilance": [
+      "Une baguette mal posée se voit immédiatement en façade."
+    ]
+  },
+  {
+    "terme": "Bandeau PVC",
+    "definition_courte": "Planche ou profil PVC posé en rive ou égout de toiture.",
+    "explication_pedagogique": "Il habille le nez des fermes et supporte parfois la gouttière.",
+    "exemple_utilisation": "Le CCTP demande des bandeaux de rive et d'égout en PVC blanc.",
+    "points_vigilance": [
+      "La rectitude doit être parfaite, aucun défaut de linéarité n'est accepté."
+    ]
+  },
+  {
+    "terme": "Bavette laquée",
+    "definition_courte": "Pièce métallique de raccordement assurant l'écoulement de l'eau.",
+    "explication_pedagogique": "Elle participe à l'étanchéité autour d'un châssis ou d'une sortie.",
+    "exemple_utilisation": "Le châssis d'accès toiture comporte un raccordement d'étanchéité intégré avec bavette laquée.",
+    "points_vigilance": [
+      "Vérifier recouvrement et continuité avec les tuiles."
+    ]
+  },
+  {
+    "terme": "Bois apparent",
+    "definition_courte": "Bois visible une fois l'ouvrage terminé.",
+    "explication_pedagogique": "Il doit être raboté et prêt à recevoir la finition peinture ou traitement.",
+    "exemple_utilisation": "Le CCTP demande que tous les bois apparents soient rabotés sur les faces vues.",
+    "points_vigilance": [
+      "Ne pas livrer un bois brut si une finition visible est prévue."
+    ]
+  },
+  {
+    "terme": "Bois C24",
+    "definition_courte": "Classe mécanique d'un bois de structure.",
+    "explication_pedagogique": "Elle indique une résistance minimale utilisée dans les calculs.",
+    "exemple_utilisation": "Le CCTP prévoit des chevrons porteurs en bois massif de classe C24.",
+    "points_vigilance": [
+      "Vérifier le marquage et les sections prévues aux plans d'exécution."
+    ]
+  },
+  {
+    "terme": "Bois classe 2",
+    "definition_courte": "Bois traité pour un usage abrité, avec risque ponctuel d'humidité.",
+    "explication_pedagogique": "Il convient à certaines charpentes non exposées directement aux intempéries.",
+    "exemple_utilisation": "Les fermettes et liteaux sont prévus en sapin traité classe II.",
+    "points_vigilance": [
+      "Ne pas utiliser classe 2 pour un bois extérieur exposé durablement."
+    ]
+  },
+  {
+    "terme": "Bracon",
+    "definition_courte": "Pièce inclinée participant au support ou à la stabilité d'un ouvrage.",
+    "explication_pedagogique": "Il reprend des efforts et rigidifie une marquise ou un élément de charpente.",
+    "exemple_utilisation": "La marquise repose sur des bracons selon le CCTP.",
+    "points_vigilance": [
+      "Contrôler assemblages et fixations, surtout si les bracons sont visibles."
+    ]
+  },
+  {
+    "terme": "Bureau de contrôle",
+    "definition_courte": "Organisme chargé de vérifier certains points techniques et réglementaires.",
+    "explication_pedagogique": "Il valide ou observe les notes de calcul, plans et dispositifs de sécurité.",
+    "exemple_utilisation": "Le CCTP impose la validation des études par le bureau de contrôle.",
+    "points_vigilance": [
+      "Ne pas fabriquer avant validation si un visa est attendu."
+    ]
+  },
+  {
+    "terme": "Cale",
+    "definition_courte": "Petite pièce en bois ou métal utilisée pour régler ou appuyer un assemblage.",
+    "explication_pedagogique": "Elle sert à ajuster les niveaux ou assurer un appui correct.",
+    "exemple_utilisation": "Le CCTP prévoit des cales bois ou métalliques dans les charpentes traditionnelles.",
+    "points_vigilance": [
+      "Les cales doivent être durables, stables et compatibles avec l'ouvrage."
+    ]
+  },
+  {
+    "terme": "Calepinage de toiture",
+    "definition_courte": "Organisation précise de la pose des tuiles et accessoires.",
+    "explication_pedagogique": "Il évite les coupes inutiles et positionne sorties, chatières et éléments techniques.",
+    "exemple_utilisation": "Le CCTP renvoie au calepinage du présent lot pour sorties et tuiles à douilles.",
+    "points_vigilance": [
+      "Un mauvais calepinage crée des raccords faibles ou des éléments mal alignés."
+    ]
+  },
+  {
+    "terme": "Carport",
+    "definition_courte": "Abri ouvert destiné au stationnement d'un véhicule.",
+    "explication_pedagogique": "Il reçoit une charpente et une couverture, ici avec option traditionnelle ou industrielle.",
+    "exemple_utilisation": "Le CCTP décrit les charpentes de carports et une variante exigée en charpente industrielle.",
+    "points_vigilance": [
+      "Bien vérifier la variante applicable avant chiffrage."
+    ]
+  },
+  {
+    "terme": "CE",
+    "acronyme": "Marquage CE",
+    "definition_courte": "Marquage attestant qu'un produit répond aux exigences européennes applicables.",
+    "explication_pedagogique": "Il est demandé pour les bois de charpente et certains équipements.",
+    "exemple_utilisation": "Le CCTP demande que les bois de charpente soient sous marquage CE.",
+    "points_vigilance": [
+      "Demander les certificats pour le DOE."
+    ]
+  },
+  {
+    "terme": "Cellier",
+    "definition_courte": "Local annexe pouvant recevoir une petite charpente et couverture.",
+    "explication_pedagogique": "Il est traité comme un volume couvert avec pannes ou chevrons selon cas.",
+    "exemple_utilisation": "Le CCTP décrit une charpente des celliers et une variante industrielle.",
+    "points_vigilance": [
+      "Ne pas oublier les sous-faces, rives et descentes associées."
+    ]
+  },
+  {
+    "terme": "Chatière",
+    "definition_courte": "Tuile spéciale permettant la ventilation sous toiture ou des combles.",
+    "explication_pedagogique": "Elle évite la condensation et assure une circulation d'air.",
+    "exemple_utilisation": "Le CCTP prévoit des tuiles chatières avec grillage moustiquaire si nécessaire.",
+    "points_vigilance": [
+      "Le nombre dépend des obligations de ventilation et des variantes sous-toiture."
+    ]
+  },
+  {
+    "terme": "Chevron",
+    "definition_courte": "Pièce inclinée de charpente recevant liteaux ou couverture.",
+    "explication_pedagogique": "Il transmet les charges vers pannes, murs ou fermes.",
+    "exemple_utilisation": "Les marquises et celliers utilisent des chevrons porteurs en bois massif C24.",
+    "points_vigilance": [
+      "Contrôler section, entraxe, appuis et traitement du bois."
+    ]
+  },
+  {
+    "terme": "Chevronnage",
+    "definition_courte": "Ensemble des chevrons d'une toiture.",
+    "explication_pedagogique": "Il forme le support de la couverture ou des liteaux.",
+    "exemple_utilisation": "Le CCTP prévoit le chevronnage des carports.",
+    "points_vigilance": [
+      "L'entraxe doit être cohérent avec la couverture et les charges."
+    ]
+  },
+  {
+    "terme": "Châssis d'accès toiture",
+    "definition_courte": "Fenêtre ou trappe permettant l'accès au toit.",
+    "explication_pedagogique": "Il facilite les interventions de maintenance.",
+    "exemple_utilisation": "Le CCTP prévoit un châssis type GVT Velux avec marchepied antidérapant.",
+    "points_vigilance": [
+      "Vérifier passage libre, raccordement d'étanchéité et compatibilité couverture."
+    ]
+  },
+  {
+    "terme": "Châssis de désenfumage",
+    "definition_courte": "Ouvrant en toiture destiné à évacuer les fumées.",
+    "explication_pedagogique": "Il participe à la sécurité incendie des cages d'escalier.",
+    "exemple_utilisation": "Le CCTP demande un châssis de 1 m² de surface utile avec ouverture supérieure ou égale à 110 degrés.",
+    "points_vigilance": [
+      "Essais, commandes et conformité réglementaire sont indispensables."
+    ]
+  },
+  {
+    "terme": "Combles perdus",
+    "definition_courte": "Volume sous toiture non destiné à être aménagé en pièce habitable.",
+    "explication_pedagogique": "Il peut contenir VMC, trappes d'accès et chemins de maintenance.",
+    "exemple_utilisation": "Les fermettes industrielles sont prévues en W à combles perdus.",
+    "points_vigilance": [
+      "Ne pas couper ou modifier les fermettes pour rendre les combles praticables."
+    ]
+  },
+  {
+    "terme": "Compte prorata",
+    "definition_courte": "Compte commun de chantier pour certaines dépenses partagées.",
+    "explication_pedagogique": "Il finance des frais communs définis au lot 00.",
+    "exemple_utilisation": "Le CCTP renvoie au compte prorata pour certaines obligations de chantier.",
+    "points_vigilance": [
+      "Distinguer ce qui est propre au lot et ce qui est commun."
+    ]
+  },
+  {
+    "terme": "Connecteur métallique",
+    "definition_courte": "Pièce métallique qui assemble les éléments d'une charpente industrialisée.",
+    "explication_pedagogique": "Il assure la liaison mécanique entre bois d'une fermette.",
+    "exemple_utilisation": "Les fermettes sont assemblées avec connecteurs acier galvanisé type Mitek.",
+    "points_vigilance": [
+      "Ne jamais percer, déplacer ou affaiblir un connecteur."
+    ]
+  },
+  {
+    "terme": "Consuel",
+    "definition_courte": "Attestation de conformité des installations électriques.",
+    "explication_pedagogique": "Elle peut être nécessaire pour la partie photovoltaïque raccordée au logement.",
+    "exemple_utilisation": "Le CCTP demande les certificats Consuel pour les installations électriques.",
+    "points_vigilance": [
+      "À anticiper avec le lot électricité pour éviter un blocage à la réception."
+    ]
+  },
+  {
+    "terme": "Contre-bandeau",
+    "definition_courte": "Pièce support située derrière ou sous le bandeau de rive.",
+    "explication_pedagogique": "Il rigidifie et permet la fixation du bandeau.",
+    "exemple_utilisation": "Le CCTP prévoit un contre-bandeau en pin de section conforme aux calculs.",
+    "points_vigilance": [
+      "Contrôler rectitude et fixation avant pose du PVC."
+    ]
+  },
+  {
+    "terme": "Contre-liteau",
+    "definition_courte": "Pièce de bois posée entre écran sous-toiture et liteaux pour créer une lame d'air.",
+    "explication_pedagogique": "Il favorise ventilation et écoulement éventuel sous couverture.",
+    "exemple_utilisation": "Le CCTP prévoit contre-liteaux en base, mais la variante exige leur suppression sauf maison I.",
+    "points_vigilance": [
+      "Bien appliquer la variante exigée selon les toitures."
+    ]
+  },
+  {
+    "terme": "Couverture tuile",
+    "definition_courte": "Ensemble des tuiles et accessoires formant la protection supérieure de la toiture.",
+    "explication_pedagogique": "Elle assure l'écoulement de l'eau et la protection du bâtiment.",
+    "exemple_utilisation": "Le CCTP prévoit des tuiles romanes à emboîtement type Canal S.",
+    "points_vigilance": [
+      "Respecter pente, fixation, recouvrement, accessoires et calepinage."
+    ]
+  },
+  {
+    "terme": "Crochet de gouttière",
+    "definition_courte": "Pièce qui supporte et fixe la gouttière.",
+    "explication_pedagogique": "Il maintient la pente et la stabilité de l'ouvrage d'évacuation EP.",
+    "exemple_utilisation": "Les gouttières sont fixées sur planches d'égout par crochets adaptés vissés ou clipsés.",
+    "points_vigilance": [
+      "Un mauvais réglage crée stagnation ou débordement d'eau."
+    ]
+  },
+  {
+    "terme": "Crochet de sécurité",
+    "definition_courte": "Point d'ancrage en toiture pour intervention avec longe.",
+    "explication_pedagogique": "Il permet un déplacement sécurisé des intervenants.",
+    "exemple_utilisation": "Le CCTP demande des crochets galvanisés résistants à 2 000 daN.",
+    "points_vigilance": [
+      "Contrôler implantation, étanchéité autour des crochets et reprise dans la charpente."
+    ]
+  },
+  {
+    "terme": "Crochets en toiture",
+    "definition_courte": "Fixations ou ancrages dont les charges doivent être prises en compte.",
+    "explication_pedagogique": "Ils créent des efforts supplémentaires sur la charpente.",
+    "exemple_utilisation": "Le CCTP demande d'intégrer les charges induites par les crochets en toiture.",
+    "points_vigilance": [
+      "À intégrer dans les notes de calcul."
+    ]
+  },
+  {
+    "terme": "Culotte EP",
+    "definition_courte": "Pièce de raccordement permettant de rejoindre plusieurs descentes ou conduites.",
+    "explication_pedagogique": "Elle organise les changements de direction ou regroupements des eaux pluviales.",
+    "exemple_utilisation": "Le CCTP cite les culottes parmi les pièces de descentes aluminium.",
+    "points_vigilance": [
+      "Contrôler diamètre, pente et étanchéité des assemblages."
+    ]
+  },
+  {
+    "terme": "Câble solaire anti-UV",
+    "definition_courte": "Câble conçu pour l'extérieur et les installations photovoltaïques.",
+    "explication_pedagogique": "Il résiste aux UV et transporte le courant produit par les modules.",
+    "exemple_utilisation": "Le CCTP prévoit des câbles solaires anti-UV double isolation 4 mm².",
+    "points_vigilance": [
+      "Utiliser des câbles non adaptés en toiture peut provoquer vieillissement prématuré et risque électrique."
+    ]
+  },
+  {
+    "terme": "Dauphin",
+    "definition_courte": "Partie basse renforcée d'une descente d'eaux pluviales.",
+    "explication_pedagogique": "Il protège la descente contre les chocs près du sol.",
+    "exemple_utilisation": "Le CCTP prévoit des dauphins aluminium extrudé de hauteur 2 m sur cheminements piétons ou voiries.",
+    "points_vigilance": [
+      "Indispensable dans les zones exposées aux chocs."
+    ]
+  },
+  {
+    "terme": "DC",
+    "acronyme": "Courant continu",
+    "definition_courte": "Courant électrique produit directement par les modules photovoltaïques.",
+    "explication_pedagogique": "Il est transformé en courant alternatif par l'onduleur.",
+    "exemple_utilisation": "Le CCTP mentionne les spécifications d'entrée solaire DC de l'onduleur.",
+    "points_vigilance": [
+      "Les protections et câbles DC doivent être adaptés au photovoltaïque."
+    ]
+  },
+  {
+    "terme": "Descente EP",
+    "definition_courte": "Conduite verticale évacuant les eaux pluviales depuis la gouttière.",
+    "explication_pedagogique": "Elle conduit l'eau vers le réseau au sol.",
+    "exemple_utilisation": "Le CCTP prévoit des descentes rondes en aluminium avec coudes, colliers et manchons.",
+    "points_vigilance": [
+      "Vérifier implantation selon plans, fixation et raccordement en pied."
+    ]
+  },
+  {
+    "terme": "Diode by-pass",
+    "definition_courte": "Composant électrique permettant de contourner une cellule ou zone ombragée.",
+    "explication_pedagogique": "Elle limite les pertes et échauffements dans un module photovoltaïque.",
+    "exemple_utilisation": "Le CCTP demande une diode by-pass par tuile photovoltaïque.",
+    "points_vigilance": [
+      "Important en cas d'ombrage partiel ou défaut cellule."
+    ]
+  },
+  {
+    "terme": "Disjoncteur 20A+N",
+    "definition_courte": "Protection électrique phase + neutre calibrée à 20 ampères.",
+    "explication_pedagogique": "Il protège l'alimentation de l'installation photovoltaïque ou du circuit associé.",
+    "exemple_utilisation": "Le CCTP demande un disjoncteur 20A+N fourni par le présent lot et installé dans la GTL par l'électricité.",
+    "points_vigilance": [
+      "Coordination obligatoire avec le lot électricité."
+    ]
+  },
+  {
+    "terme": "Disjoncteur différentiel 20A 30mA",
+    "definition_courte": "Protection contre surintensités et défauts différentiels.",
+    "explication_pedagogique": "Il protège les personnes et le circuit électrique.",
+    "exemple_utilisation": "Le coffret AC peut comprendre un disjoncteur différentiel 20A 30mA.",
+    "points_vigilance": [
+      "Vérifier sélectivité et conformité avec l'étude électrique."
+    ]
+  },
+  {
+    "terme": "DOE",
+    "acronyme": "Dossier des ouvrages exécutés",
+    "definition_courte": "Dossier final regroupant plans, certificats, notices et essais.",
+    "explication_pedagogique": "Il permet la maintenance et la preuve de conformité.",
+    "exemple_utilisation": "Le CCTP demande la constitution des dossiers de fin de travaux conformément au lot 00.",
+    "points_vigilance": [
+      "Collecter certificats bois, PV, notices, fiches produits et garanties pendant le chantier."
+    ]
+  },
+  {
+    "terme": "Dormant",
+    "definition_courte": "Partie fixe d'un châssis ou d'une fenêtre.",
+    "explication_pedagogique": "Il reçoit l'ouvrant et assure le raccord avec la toiture.",
+    "exemple_utilisation": "Le châssis d'accès toiture comprend un dormant en polyuréthane moulé noir.",
+    "points_vigilance": [
+      "Contrôler raccordement d'étanchéité autour du dormant."
+    ]
+  },
+  {
+    "terme": "Double longe",
+    "definition_courte": "Système d'antichute avec deux longes permettant de rester accroché en permanence.",
+    "explication_pedagogique": "Il sécurise les déplacements en toiture.",
+    "exemple_utilisation": "Le CCTP impose des crochets permettant un déplacement à la double longe.",
+    "points_vigilance": [
+      "L'espacement des crochets doit rendre ce déplacement possible."
+    ]
+  },
+  {
+    "terme": "Double vitrage",
+    "definition_courte": "Vitrage composé de deux feuilles de verre séparées par une lame d'air ou gaz.",
+    "explication_pedagogique": "Il améliore isolation et confort.",
+    "exemple_utilisation": "Le châssis d'accès toiture prévoit un double vitrage classique.",
+    "points_vigilance": [
+      "Vérifier compatibilité avec usage toiture et raccords."
+    ]
+  },
+  {
+    "terme": "DTU 31.1",
+    "definition_courte": "Document Technique Unifié relatif aux charpentes et escaliers en bois.",
+    "explication_pedagogique": "Il sert de référence pour la mise en oeuvre des charpentes bois traditionnelles.",
+    "exemple_utilisation": "Le CCTP cite le DTU 31.1 dans les règles d'exécution.",
+    "points_vigilance": [
+      "À consulter pour assemblages, sections, stabilité et mise en oeuvre."
+    ]
+  },
+  {
+    "terme": "DTU 31.3",
+    "definition_courte": "Document Technique Unifié relatif aux charpentes bois assemblées par connecteurs ou goussets.",
+    "explication_pedagogique": "Il encadre les charpentes industrialisées type fermettes.",
+    "exemple_utilisation": "Le CCTP cite le DTU 31.3.",
+    "points_vigilance": [
+      "Important pour les fermettes industrielles et leurs connecteurs."
+    ]
+  },
+  {
+    "terme": "Débord de toit",
+    "definition_courte": "Partie de toiture dépassant du nu de façade.",
+    "explication_pedagogique": "Il protège les façades et reçoit bandeaux, sous-faces et gouttières.",
+    "exemple_utilisation": "Le CCTP consacre un poste aux débords de toits.",
+    "points_vigilance": [
+      "Contrôler sous-face, rive, égout et alignement."
+    ]
+  },
+  {
+    "terme": "Désenfumage",
+    "definition_courte": "Évacuation des fumées en cas d'incendie.",
+    "explication_pedagogique": "Il améliore la sécurité des occupants et l'intervention des secours.",
+    "exemple_utilisation": "Le CCTP prévoit des châssis de désenfumage pour les cages d'escalier.",
+    "points_vigilance": [
+      "Les essais de déclenchement doivent être réalisés avant réception."
+    ]
+  },
+  {
+    "terme": "Eurocode 1",
+    "definition_courte": "Norme européenne définissant notamment les actions de neige et de vent.",
+    "explication_pedagogique": "Elle sert au calcul des structures exposées.",
+    "exemple_utilisation": "Le CCTP cite l'Eurocode 1 pour effets de neige et vent.",
+    "points_vigilance": [
+      "Les hypothèses climatiques doivent être reprises dans les notes de calcul."
+    ]
+  },
+  {
+    "terme": "FAG / FOG / PM / TP / ARD",
+    "definition_courte": "Modèles ou familles de modules photovoltaïques compatibles selon fabricant.",
+    "explication_pedagogique": "Ils définissent dimensions, pureau et intégration des tuiles photovoltaïques.",
+    "exemple_utilisation": "Le CCTP cite ces modèles ou équivalents.",
+    "points_vigilance": [
+      "Vérifier compatibilité avec tuiles Canal S et Avis Technique CSTB."
+    ]
+  },
+  {
+    "terme": "Faston",
+    "definition_courte": "Cosse plate de raccordement électrique rapide.",
+    "explication_pedagogique": "Elle permet la liaison de terre ou de connexion sur châssis.",
+    "exemple_utilisation": "Le CCTP prévoit cosses faston et faston doubles pour la mise à la terre des tuiles photovoltaïques.",
+    "points_vigilance": [
+      "Contrôler serrage, continuité électrique et protection contre corrosion."
+    ]
+  },
+  {
+    "terme": "Faîtage",
+    "definition_courte": "Ligne haute de rencontre entre deux pans de toiture.",
+    "explication_pedagogique": "Il doit être couvert par des faîtières assurant ventilation et étanchéité.",
+    "exemple_utilisation": "Le CCTP prévoit faîtières, closoir, lisse de rehausse et abouts.",
+    "points_vigilance": [
+      "Respecter le sens opposé aux vents dominants."
+    ]
+  },
+  {
+    "terme": "Faîtière",
+    "definition_courte": "Tuile spéciale posée au faîtage.",
+    "explication_pedagogique": "Elle protège la jonction haute des pans de toiture.",
+    "exemple_utilisation": "Le CCTP demande des tuiles faîtières assorties et adaptées.",
+    "points_vigilance": [
+      "Bien fixer et traiter les abouts."
+    ]
+  },
+  {
+    "terme": "Ferme traditionnelle",
+    "definition_courte": "Assemblage de pièces bois formant un triangle porteur.",
+    "explication_pedagogique": "Elle supporte les pannes et la couverture.",
+    "exemple_utilisation": "Le CCTP prévoit des fermes traditionnelles apparentes pour carports.",
+    "points_vigilance": [
+      "Soigner les assemblages visibles et leur validation architecte."
+    ]
+  },
+  {
+    "terme": "Fermette industrielle",
+    "definition_courte": "Élément triangulé préfabriqué de charpente légère.",
+    "explication_pedagogique": "Elle supporte la couverture et répartit les charges vers les appuis.",
+    "exemple_utilisation": "Le CCTP prévoit des fermettes industrielles W à combles perdus, entraxe 60 cm maximum.",
+    "points_vigilance": [
+      "Ne jamais couper une fermette sans étude spécifique."
+    ]
+  },
+  {
+    "terme": "Film sous-toiture",
+    "definition_courte": "Membrane posée sous les tuiles pour améliorer la protection.",
+    "explication_pedagogique": "Elle limite les infiltrations accidentelles et poussières sous couverture.",
+    "exemple_utilisation": "Le CCTP prévoit initialement un film, puis la variante exige sa suppression sauf maison I.",
+    "points_vigilance": [
+      "Bien intégrer l'impact sur contre-litonnage et ventilation."
+    ]
+  },
+  {
+    "terme": "Fond de gouttière",
+    "definition_courte": "Pièce fermant l'extrémité d'une gouttière.",
+    "explication_pedagogique": "Elle empêche l'eau de sortir en bout.",
+    "exemple_utilisation": "Le CCTP inclut fonds, naissances, angles et coudes dans les gouttières.",
+    "points_vigilance": [
+      "Contrôler étanchéité des jonctions."
+    ]
+  },
+  {
+    "terme": "Fond de noue",
+    "definition_courte": "Support bois placé sous une noue métallique.",
+    "explication_pedagogique": "Il reçoit le zinc ou aluminium de noue.",
+    "exemple_utilisation": "Le CCTP prévoit un fond de noue habillé en zinc.",
+    "points_vigilance": [
+      "Doit être continu, stable et compatible avec la zinguerie."
+    ]
+  },
+  {
+    "terme": "Fongicide",
+    "definition_courte": "Produit de traitement protégeant le bois contre les champignons.",
+    "explication_pedagogique": "Il participe à la préservation des charpentes.",
+    "exemple_utilisation": "Tous les bois doivent être traités aux produits fongicides et insecticides.",
+    "points_vigilance": [
+      "Demander les certificats de traitement."
+    ]
+  },
+  {
+    "terme": "Fourreau",
+    "definition_courte": "Gaine ou tube permettant le passage protégé d'un câble ou réseau.",
+    "explication_pedagogique": "Il facilite le raccordement entre toiture et GTL.",
+    "exemple_utilisation": "Le CCTP prévoit un fourreau si nécessaire dans doublages et cloisons pour rejoindre la GTL.",
+    "points_vigilance": [
+      "Coordination nécessaire avant fermeture des doublages."
+    ]
+  },
+  {
+    "terme": "Garde-corps en combles",
+    "definition_courte": "Protection en rive d'un platelage ou accès dans les combles.",
+    "explication_pedagogique": "Il sécurise les interventions ultérieures.",
+    "exemple_utilisation": "Le CCTP prévoit une façon de garde-corps pour le platelage en combles perdus.",
+    "points_vigilance": [
+      "À prévoir si risque de chute autour du cheminement."
+    ]
+  },
+  {
+    "terme": "Gousset",
+    "definition_courte": "Plaque d'assemblage reliant plusieurs pièces d'une charpente industrialisée.",
+    "explication_pedagogique": "Il assure la transmission des efforts dans les noeuds de fermettes.",
+    "exemple_utilisation": "Le CCTP cite charpentes assemblées par connecteurs métalliques ou goussets.",
+    "points_vigilance": [
+      "Ne pas altérer les goussets lors des percements ou modifications."
+    ]
+  },
+  {
+    "terme": "Gouttière demi-ronde",
+    "definition_courte": "Profil de gouttière en forme de demi-cercle.",
+    "explication_pedagogique": "Elle recueille les eaux pluviales à l'égout de toiture.",
+    "exemple_utilisation": "Le CCTP prévoit des gouttières aluminium type demi-rond.",
+    "points_vigilance": [
+      "Respecter pente, naissances et fixation."
+    ]
+  },
+  {
+    "terme": "GTL",
+    "acronyme": "Gaine Technique Logement",
+    "definition_courte": "Zone regroupant les équipements électriques et de communication d'un logement.",
+    "explication_pedagogique": "Elle reçoit certains éléments liés au photovoltaïque.",
+    "exemple_utilisation": "Le CCTP indique que le disjoncteur et la platine peuvent être installés dans la GTL.",
+    "points_vigilance": [
+      "Coordonner avec le lot électricité et garder les volumes accessibles."
+    ]
+  },
+  {
+    "terme": "Gélivure",
+    "definition_courte": "Fente ou défaut du bois lié au gel pendant la croissance de l'arbre.",
+    "explication_pedagogique": "Elle peut fragiliser une pièce de bois.",
+    "exemple_utilisation": "Le CCTP refuse les bois présentant gélivure ou roulure.",
+    "points_vigilance": [
+      "À contrôler à la réception des bois."
+    ]
+  },
+  {
+    "terme": "Habillage bois qualité marine",
+    "definition_courte": "Panneau bois résistant mieux à l'humidité.",
+    "explication_pedagogique": "Il sert d'habillage dans certains décalages de toiture.",
+    "exemple_utilisation": "Le CCTP prévoit un habillage en panneaux de bois qualité marine fixé sur fermette.",
+    "points_vigilance": [
+      "Vérifier protection, support et compatibilité avec finition/enduit éventuel."
+    ]
+  },
+  {
+    "terme": "Insecticide",
+    "definition_courte": "Produit de traitement protégeant le bois contre les insectes.",
+    "explication_pedagogique": "Il évite les attaques d'insectes à larves xylophages ou termites.",
+    "exemple_utilisation": "Le CCTP impose un traitement insecticide des bois.",
+    "points_vigilance": [
+      "Certificat de traitement à fournir à la maîtrise d'oeuvre et au bureau de contrôle."
+    ]
+  },
+  {
+    "terme": "Intégré en toiture",
+    "definition_courte": "Système photovoltaïque incorporé au plan de couverture.",
+    "explication_pedagogique": "Il remplace ou s'insère dans les éléments de couverture.",
+    "exemple_utilisation": "Le CCTP demande un kit photovoltaïque encastré et intégré dans la toiture en tuile.",
+    "points_vigilance": [
+      "L'étanchéité par emboîtement/recouvrement est un point critique."
+    ]
+  },
+  {
+    "terme": "IP 65",
+    "definition_courte": "Indice de protection contre poussières et projections d'eau.",
+    "explication_pedagogique": "Il définit la protection minimale d'un coffret.",
+    "exemple_utilisation": "Le coffret de protection photovoltaïque doit avoir un degré minimum IP65.",
+    "points_vigilance": [
+      "Vérifier l'adaptation à son emplacement réel."
+    ]
+  },
+  {
+    "terme": "IP 67",
+    "definition_courte": "Indice de protection élevé contre poussières et immersion temporaire.",
+    "explication_pedagogique": "Il qualifie certains équipements utilisables à l'extérieur.",
+    "exemple_utilisation": "L'onduleur prévu est IP67 pour utilisation extérieure.",
+    "points_vigilance": [
+      "Même IP67, le matériel doit être posé selon notice fabricant."
+    ]
+  },
+  {
+    "terme": "IRABOIS",
+    "definition_courte": "Référence de recommandations professionnelles pour la charpente bois.",
+    "explication_pedagogique": "Elle complète les règles techniques de conception et mise en oeuvre.",
+    "exemple_utilisation": "Le CCTP cite le cahier des charges IRABOIS.",
+    "points_vigilance": [
+      "À utiliser comme référence pour les prescriptions charpente."
+    ]
+  },
+  {
+    "terme": "Joint debout",
+    "definition_courte": "Technique de couverture métallique avec relevés sertis verticalement.",
+    "explication_pedagogique": "Elle assure l'étanchéité de certaines toitures métalliques ou raccords.",
+    "exemple_utilisation": "Le CCTP mentionne un raccordement d'étanchéité à la toiture à joint debout pour désenfumage.",
+    "points_vigilance": [
+      "À traiter selon prescriptions fabricant."
+    ]
+  },
+  {
+    "terme": "Lambris PVC",
+    "definition_courte": "Lames PVC d'habillage de sous-face.",
+    "explication_pedagogique": "Il donne une finition propre sous les débords ou carports.",
+    "exemple_utilisation": "Le CCTP prévoit du lambris PVC blanc épaisseur 10 mm pour les carports.",
+    "points_vigilance": [
+      "Contrôler fixation inox, alignement et baguettes."
+    ]
+  },
+  {
+    "terme": "Laminé Verre / Tedlar",
+    "definition_courte": "Composition d'un module photovoltaïque avec verre et film arrière Tedlar.",
+    "explication_pedagogique": "Elle protège les cellules et assure la tenue du module.",
+    "exemple_utilisation": "Le CCTP décrit les tuiles PV en laminé Verre / Tedlar noir sur châssis aluminium.",
+    "points_vigilance": [
+      "Vérifier garanties et certifications CEI."
+    ]
+  },
+  {
+    "terme": "Lanterne",
+    "definition_courte": "Accessoire posé sur une tuile à douille pour sortie de ventilation.",
+    "explication_pedagogique": "Elle protège la sortie et favorise l'évacuation de l'air.",
+    "exemple_utilisation": "Le CCTP prévoit des lanternes de diamètre adapté pour tuiles à douilles.",
+    "points_vigilance": [
+      "Le diamètre doit correspondre au réseau ventilé."
+    ]
+  },
+  {
+    "terme": "Liaison équipotentielle",
+    "definition_courte": "Liaison électrique entre masses métalliques pour éviter les différences de potentiel.",
+    "explication_pedagogique": "Elle protège les personnes et installations en cas de défaut ou foudre.",
+    "exemple_utilisation": "Le CCTP impose la continuité de liaison équipotentielle des châssis photovoltaïques.",
+    "points_vigilance": [
+      "Contrôler continuité avec mesure si nécessaire."
+    ]
+  },
+  {
+    "terme": "Lisse de rehausse",
+    "definition_courte": "Pièce bois supportant les faîtières ou arêtiers à la bonne hauteur.",
+    "explication_pedagogique": "Elle permet la pose à sec et la ventilation sous faîtage.",
+    "exemple_utilisation": "Le CCTP prévoit une lisse de rehausse en sapin traité classe II.",
+    "points_vigilance": [
+      "Vérifier hauteur, alignement et fixation."
+    ]
+  },
+  {
+    "terme": "Liteau",
+    "definition_courte": "Pièce de bois horizontale recevant les tuiles.",
+    "explication_pedagogique": "Il sert d'appui et de point de fixation à la couverture.",
+    "exemple_utilisation": "Le CCTP prévoit des liteaux sapin traité classe 2 section 27 x 32 mm.",
+    "points_vigilance": [
+      "L'entraxe dépend du pureau de la tuile."
+    ]
+  },
+  {
+    "terme": "Liteau de basculement",
+    "definition_courte": "Liteau spécifique en bas de pente pour régler l'angle de la première tuile.",
+    "explication_pedagogique": "Il assure le bon alignement à l'égout.",
+    "exemple_utilisation": "Le CCTP prévoit un liteau de basculement au droit des chéneaux et gouttières.",
+    "points_vigilance": [
+      "Indispensable pour éviter une première rangée mal inclinée."
+    ]
+  },
+  {
+    "terme": "Main d'arrêt",
+    "definition_courte": "Repère ou limite liée aux fentes d'entrée d'air en égout.",
+    "explication_pedagogique": "Elle sert à ne pas gêner la ventilation basse de toiture.",
+    "exemple_utilisation": "Le CCTP indique que le niveau supérieur de la planche d'égout sera inférieur à la main d'arrêt des fentes d'entrée d'air.",
+    "points_vigilance": [
+      "Ne pas bloquer la ventilation d'égout avec le bandeau."
+    ]
+  },
+  {
+    "terme": "Manchette",
+    "definition_courte": "Pièce de raccordement ou protection autour d'un passage.",
+    "explication_pedagogique": "Elle participe à l'étanchéité ou au raccord des descentes.",
+    "exemple_utilisation": "Le CCTP cite les manchettes parmi les pièces de descentes.",
+    "points_vigilance": [
+      "À adapter au diamètre et au support."
+    ]
+  },
+  {
+    "terme": "Manchon",
+    "definition_courte": "Pièce de raccord entre deux éléments de descente ou canalisation.",
+    "explication_pedagogique": "Il assure la continuité de l'évacuation EP.",
+    "exemple_utilisation": "Le CCTP cite les manchons dans les descentes aluminium.",
+    "points_vigilance": [
+      "Vérifier emboîtement, fixation et étanchéité."
+    ]
+  },
+  {
+    "terme": "Marquise",
+    "definition_courte": "Petit auvent au-dessus d'une entrée ou passage.",
+    "explication_pedagogique": "Elle protège localement de la pluie et reçoit une petite charpente/couverture.",
+    "exemple_utilisation": "Le CCTP décrit des marquises sur logements 10, 11, 37 et 38.",
+    "points_vigilance": [
+      "Soigner bracons, chevrons porteurs, pentes et finition visible."
+    ]
+  },
+  {
+    "terme": "MITEK",
+    "definition_courte": "Fabricant ou référence de connecteurs et systèmes de fermettes industrielles.",
+    "explication_pedagogique": "Il sert de référence technique pour les connecteurs galvanisés.",
+    "exemple_utilisation": "Le CCTP cite MITEK INDUSTRIES ou équivalent.",
+    "points_vigilance": [
+      "Un équivalent doit être justifié techniquement."
+    ]
+  },
+  {
+    "terme": "Module photovoltaïque",
+    "definition_courte": "Élément produisant de l'électricité à partir du soleil.",
+    "explication_pedagogique": "Il transforme le rayonnement solaire en courant continu.",
+    "exemple_utilisation": "Le CCTP prévoit 8 tuiles photovoltaïques de 100 Wc.",
+    "points_vigilance": [
+      "Vérifier puissance, orientation, certification et raccordement."
+    ]
+  },
+  {
+    "terme": "Monocristallin",
+    "definition_courte": "Type de cellule photovoltaïque à base de silicium monocristallin.",
+    "explication_pedagogique": "Il offre généralement un bon rendement.",
+    "exemple_utilisation": "Le CCTP décrit des cellules monocristallines 156 x 156 mm.",
+    "points_vigilance": [
+      "Attention à l'ombrage, qui peut réduire fortement la production."
+    ]
+  },
+  {
+    "terme": "Muraillère",
+    "definition_courte": "Pièce de bois fixée contre un mur pour porter chevrons ou pannes.",
+    "explication_pedagogique": "Elle sert d'appui à une charpente contre façade.",
+    "exemple_utilisation": "Le CCTP prévoit des pannes portées sur muraillères et fixation en tête par muraillère.",
+    "points_vigilance": [
+      "Fixation au support gros oeuvre à dimensionner et valider."
+    ]
+  },
+  {
+    "terme": "Naissance de gouttière",
+    "definition_courte": "Pièce qui relie la gouttière à une descente EP.",
+    "explication_pedagogique": "Elle évacue l'eau collectée vers la descente.",
+    "exemple_utilisation": "Le CCTP prévoit naissances et naissances provisoires pour dévoiement des EP.",
+    "points_vigilance": [
+      "Contrôler position par rapport aux descentes définitives."
+    ]
+  },
+  {
+    "terme": "NOTC",
+    "definition_courte": "Température nominale de fonctionnement d'un module photovoltaïque.",
+    "explication_pedagogique": "Elle sert à comparer le comportement thermique des modules.",
+    "exemple_utilisation": "Le CCTP indique NOTC : 45 °C.",
+    "points_vigilance": [
+      "Plus la température augmente, plus le rendement peut baisser."
+    ]
+  },
+  {
+    "terme": "Noue",
+    "definition_courte": "Angle rentrant entre deux pans de toiture où se concentre l'eau.",
+    "explication_pedagogique": "Elle nécessite une zinguerie très soignée.",
+    "exemple_utilisation": "Le CCTP prévoit des noues zinc ou aluminium laqué sur fond de noue bois.",
+    "points_vigilance": [
+      "Zone à haut risque d'infiltration si mal exécutée."
+    ]
+  },
+  {
+    "terme": "Ondulation de toiture",
+    "definition_courte": "Déformation visible de l'avancée ou du plan de toiture.",
+    "explication_pedagogique": "Elle traduit un manque de rigidité ou un mauvais dimensionnement.",
+    "exemple_utilisation": "Le CCTP attire l'attention sur les avancées importantes pour éviter tout mouvement ou ondulation.",
+    "points_vigilance": [
+      "Les avancées doivent être dimensionnées dès l'étude."
+    ]
+  },
+  {
+    "terme": "Onduleur",
+    "definition_courte": "Appareil transformant le courant continu photovoltaïque en courant alternatif.",
+    "explication_pedagogique": "Il permet d'utiliser ou injecter l'électricité produite dans l'installation du bâtiment.",
+    "exemple_utilisation": "Le CCTP prévoit un onduleur Enphase M215 ou équivalent.",
+    "points_vigilance": [
+      "Vérifier puissance, IP, rendement, protection AC et emplacement."
+    ]
+  },
+  {
+    "terme": "Ossature secondaire",
+    "definition_courte": "Structure complémentaire supportant un habillage.",
+    "explication_pedagogique": "Elle sert de support aux sous-faces PVC ou lambris.",
+    "exemple_utilisation": "Le CCTP prévoit une ossature secondaire bois pour les sous-faces PVC.",
+    "points_vigilance": [
+      "Doit être plane, ventilée si nécessaire et correctement fixée."
+    ]
+  },
+  {
+    "terme": "Panne",
+    "definition_courte": "Pièce horizontale de charpente supportant les chevrons.",
+    "explication_pedagogique": "Elle transmet les charges aux fermes, murs ou poteaux.",
+    "exemple_utilisation": "Le CCTP prévoit des pannes bois pour les carports.",
+    "points_vigilance": [
+      "Vérifier section, portée, appuis et fixation."
+    ]
+  },
+  {
+    "terme": "Panneau photovoltaïque / tuile photovoltaïque",
+    "definition_courte": "Élément de couverture produisant de l'électricité.",
+    "explication_pedagogique": "Il combine fonction de couverture et production solaire.",
+    "exemple_utilisation": "Le CCTP parle de tuiles photovoltaïques intégrées à la toiture.",
+    "points_vigilance": [
+      "Étanchéité, orientation et raccordement électrique sont les trois points majeurs."
+    ]
+  },
+  {
+    "terme": "Pannetonnage",
+    "definition_courte": "Fixation mécanique des tuiles par crochet ou fil selon exposition.",
+    "explication_pedagogique": "Il évite l'arrachement au vent.",
+    "exemple_utilisation": "Le CCTP prévoit le pannetonnage des tuiles si nécessaire.",
+    "points_vigilance": [
+      "À adapter à la zone de vent, pente, rive et prescriptions fabricant."
+    ]
+  },
+  {
+    "terme": "Parafoudre varistance",
+    "definition_courte": "Protection contre les surtensions transitoires.",
+    "explication_pedagogique": "Il complète la protection électrique de l'installation photovoltaïque.",
+    "exemple_utilisation": "Le CCTP prévoit un parafoudre varistance dans le coffret si nécessaire.",
+    "points_vigilance": [
+      "À vérifier selon exposition, normes et étude électrique."
+    ]
+  },
+  {
+    "terme": "Parafoudre éclateur",
+    "definition_courte": "Dispositif de protection contre les surtensions liées à la foudre.",
+    "explication_pedagogique": "Il évacue une surtension importante vers la terre.",
+    "exemple_utilisation": "Le coffret de protection peut contenir un parafoudre éclateur.",
+    "points_vigilance": [
+      "Coordonner avec la mise à la terre et le lot électricité."
+    ]
+  },
+  {
+    "terme": "Paratonnerre",
+    "definition_courte": "Dispositif de protection externe contre la foudre.",
+    "explication_pedagogique": "Il peut imposer des sections de liaisons équipotentielles plus importantes.",
+    "exemple_utilisation": "Le CCTP indique qu'en présence d'un paratonnerre, les liaisons peuvent être portées à 16 mm².",
+    "points_vigilance": [
+      "Vérifier l'existence du paratonnerre et les guides UTE applicables."
+    ]
+  },
+  {
+    "terme": "Pare-pluie Delta-Vent S",
+    "definition_courte": "Écran souple de sous-toiture cité comme référence.",
+    "explication_pedagogique": "Il protège sous couverture tout en laissant migrer la vapeur selon produit.",
+    "exemple_utilisation": "Le CCTP cite Delta-Vent S ou équivalent.",
+    "points_vigilance": [
+      "Attention à la variante qui supprime le film sous-toiture sauf maison I."
+    ]
+  },
+  {
+    "terme": "Pattes de scellement",
+    "definition_courte": "Pièces métalliques destinées à être scellées dans un support.",
+    "explication_pedagogique": "Elles fixent durablement un élément de charpente ou une ferrure.",
+    "exemple_utilisation": "Le CCTP prévoit pattes de scellement et pattes métalliques nécessaires.",
+    "points_vigilance": [
+      "La position doit être coordonnée avec le gros oeuvre."
+    ]
+  },
+  {
+    "terme": "Peigne d'égout",
+    "definition_courte": "Accessoire placé en bas de couverture pour empêcher l'entrée d'oiseaux et petits animaux.",
+    "explication_pedagogique": "Il conserve la ventilation tout en fermant l'accès sous tuiles.",
+    "exemple_utilisation": "Le CCTP prévoit des peignes en égout des toitures.",
+    "points_vigilance": [
+      "Ne pas bloquer la ventilation basse."
+    ]
+  },
+  {
+    "terme": "Pièce de faîtage",
+    "definition_courte": "Élément de charpente ou couverture lié au sommet de la toiture.",
+    "explication_pedagogique": "Elle contribue à la stabilité ou à la finition du faîtage.",
+    "exemple_utilisation": "Le CCTP inclut toutes pièces de faîtage et de stabilité dans les fermettes.",
+    "points_vigilance": [
+      "Vérifier cohérence avec plans de pose."
+    ]
+  },
+  {
+    "terme": "Plan d'exécution",
+    "definition_courte": "Plan détaillé réalisé par l'entreprise pour fabriquer et poser l'ouvrage.",
+    "explication_pedagogique": "Il précise fixations, sections, assemblages, détails et réservations.",
+    "exemple_utilisation": "Le CCTP impose plans d'exécution et notes de calcul soumis à approbation.",
+    "points_vigilance": [
+      "Aucune fabrication sensible ne devrait partir sans visa."
+    ]
+  },
+  {
+    "terme": "Plan de toiture",
+    "definition_courte": "Plan indiquant pentes, pans, noues, rives, sorties et accessoires de toiture.",
+    "explication_pedagogique": "Il sert à localiser les ouvrages de charpente, couverture et zinguerie.",
+    "exemple_utilisation": "Le CCTP renvoie souvent aux plans de toiture de l'architecte.",
+    "points_vigilance": [
+      "Indispensable pour ne pas oublier châssis, noues, chatières et sorties."
+    ]
+  },
+  {
+    "terme": "Plancher / platelage bois en combles",
+    "definition_courte": "Surface bois aménagée pour circulation ou support technique dans les combles.",
+    "explication_pedagogique": "Il permet l'accès futur à un équipement comme la VMC.",
+    "exemple_utilisation": "Le CCTP prévoit 3 m² de platelage bois par bloc pour support du groupe VMC.",
+    "points_vigilance": [
+      "Ne pas poser sur isolant sans ossature adaptée."
+    ]
+  },
+  {
+    "terme": "Platine d'assemblage",
+    "definition_courte": "Plaque métallique reliant des pièces de charpente.",
+    "explication_pedagogique": "Elle permet un assemblage résistant et réglé.",
+    "exemple_utilisation": "Le CCTP demande que les platines visibles soient généralement cachées à la vue.",
+    "points_vigilance": [
+      "Vérifier traitement anticorrosion et validation esthétique."
+    ]
+  },
+  {
+    "terme": "Platine galva",
+    "definition_courte": "Platine en acier galvanisé servant d'appui ou fixation.",
+    "explication_pedagogique": "Elle protège la base des poteaux bois et reprend les efforts.",
+    "exemple_utilisation": "Le CCTP prévoit des poteaux bois sur platines galva si nécessaire.",
+    "points_vigilance": [
+      "Éviter le contact direct bois/sol et vérifier ancrage."
+    ]
+  },
+  {
+    "terme": "Platine Plug and Play",
+    "definition_courte": "Support préparé pour recevoir onduleur et coffret photovoltaïque.",
+    "explication_pedagogique": "Elle simplifie la pose et le raccordement.",
+    "exemple_utilisation": "Le CCTP prévoit une platine Plug and Play Edilians ou équivalent dans la GTL.",
+    "points_vigilance": [
+      "Prévoir le passage des goulottes GTL derrière la platine."
+    ]
+  },
+  {
+    "terme": "Pointes inox",
+    "definition_courte": "Clous inoxydables utilisés pour fixer les habillages extérieurs.",
+    "explication_pedagogique": "Ils évitent les traces de rouille sur PVC ou lambris.",
+    "exemple_utilisation": "Le CCTP prévoit fixation par pointes inox à tête dans le ton.",
+    "points_vigilance": [
+      "Utiliser des fixations non inox peut tacher les sous-faces."
+    ]
+  },
+  {
+    "terme": "Poteau bois",
+    "definition_courte": "Élément vertical porteur en bois.",
+    "explication_pedagogique": "Il reprend les charges d'une charpente de carport ou ouvrage traditionnel.",
+    "exemple_utilisation": "Le CCTP prévoit poteaux bois sur platines galva si nécessaire.",
+    "points_vigilance": [
+      "Protéger le pied du bois contre l'eau et les chocs."
+    ]
+  },
+  {
+    "terme": "Poutre au vent",
+    "definition_courte": "Élément de contreventement reprenant les efforts horizontaux de vent.",
+    "explication_pedagogique": "Elle stabilise la charpente longitudinalement ou transversalement.",
+    "exemple_utilisation": "Le CCTP demande la stabilité par poutres au vent triangulées ou autre système.",
+    "points_vigilance": [
+      "Le gros oeuvre ne reprend pas les efforts horizontaux selon le nota du CCTP."
+    ]
+  },
+  {
+    "terme": "Prise de mesures",
+    "definition_courte": "Contrôle dimensionnel sur site avant fabrication.",
+    "explication_pedagogique": "Elle évite les erreurs entre plans et réalité du gros oeuvre.",
+    "exemple_utilisation": "Le CCTP rappelle la réception des supports et prises de mesures.",
+    "points_vigilance": [
+      "Indispensable avant fabrication de charpente ou habillages."
+    ]
+  },
+  {
+    "terme": "Protection collective",
+    "definition_courte": "Dispositif protégeant tous les intervenants contre un risque de chute ou accident.",
+    "explication_pedagogique": "Elle prime sur les protections individuelles quand elle est possible.",
+    "exemple_utilisation": "Le CCTP inclut échafaudages, matériels de levage et protections collectives nécessaires.",
+    "points_vigilance": [
+      "À maintenir pendant toute la durée d'intervention."
+    ]
+  },
+  {
+    "terme": "Préservation du bois",
+    "definition_courte": "Traitements et choix de bois destinés à éviter pourriture, insectes et champignons.",
+    "explication_pedagogique": "Elle garantit la durabilité de la charpente.",
+    "exemple_utilisation": "Le CCTP impose traitement fongicide et insecticide et certificats correspondants.",
+    "points_vigilance": [
+      "Classe d'emploi et exposition doivent être cohérentes."
+    ]
+  },
+  {
+    "terme": "Pureau",
+    "definition_courte": "Partie visible d'une tuile entre deux recouvrements.",
+    "explication_pedagogique": "Il détermine l'espacement des liteaux.",
+    "exemple_utilisation": "Le CCTP indique un pureau de pose entre 340 et 375 mm pour les tuiles photovoltaïques selon modèle.",
+    "points_vigilance": [
+      "Un mauvais pureau désorganise la couverture et l'étanchéité."
+    ]
+  },
+  {
+    "terme": "PV",
+    "acronyme": "Photovoltaïque",
+    "definition_courte": "Technologie transformant la lumière solaire en électricité.",
+    "explication_pedagogique": "Elle produit une partie de l'énergie du logement.",
+    "exemple_utilisation": "Le CCTP prévoit un kit photovoltaïque d'autoconsommation intégré en toiture.",
+    "points_vigilance": [
+      "Coordonner couverture, étanchéité, électricité, Consuel et mise en service."
+    ]
+  },
+  {
+    "terme": "Raboter",
+    "definition_courte": "Usiner une face de bois pour la rendre plane et propre.",
+    "explication_pedagogique": "Cela améliore l'aspect des bois visibles.",
+    "exemple_utilisation": "Le CCTP demande des bois apparents rabotés sur toutes faces vues.",
+    "points_vigilance": [
+      "À contrôler avant peinture."
+    ]
+  },
+  {
+    "terme": "Raccordement à la terre",
+    "definition_courte": "Liaison d'un équipement métallique ou électrique à la prise de terre.",
+    "explication_pedagogique": "Il protège les personnes en cas de défaut électrique.",
+    "exemple_utilisation": "Le CCTP impose la mise à la terre des châssis photovoltaïques par câbles 6 mm².",
+    "points_vigilance": [
+      "Contrôler continuité de terre et sections."
+    ]
+  },
+  {
+    "terme": "Recouvrement",
+    "definition_courte": "Chevauchement entre deux éléments de couverture.",
+    "explication_pedagogique": "Il empêche l'eau de pénétrer sous la toiture.",
+    "exemple_utilisation": "Les tuiles PV assurent l'étanchéité par emboîtement/recouvrement.",
+    "points_vigilance": [
+      "Toujours respecter le sens d'écoulement et les prescriptions fabricant."
+    ]
+  },
+  {
+    "terme": "Refoulement VMC",
+    "definition_courte": "Sortie d'air rejeté par le groupe VMC vers l'extérieur.",
+    "explication_pedagogique": "Il doit traverser la toiture sans fuite.",
+    "exemple_utilisation": "Le CCTP prévoit la pose des sorties de toiture fournies par le lot Plomberie.",
+    "points_vigilance": [
+      "L'étanchéité autour de la sortie est à la charge du présent lot."
+    ]
+  },
+  {
+    "terme": "Rendement européen",
+    "definition_courte": "Indicateur de rendement moyen d'un onduleur selon profil normalisé.",
+    "explication_pedagogique": "Il compare l'efficacité des onduleurs.",
+    "exemple_utilisation": "Le CCTP demande un rendement européen de 95,4 %.",
+    "points_vigilance": [
+      "Un rendement plus faible diminue la production utile."
+    ]
+  },
+  {
+    "terme": "Rive",
+    "definition_courte": "Bord latéral d'un pan de toiture.",
+    "explication_pedagogique": "Elle reçoit tuiles de rive, bandeaux et finitions.",
+    "exemple_utilisation": "Le CCTP prévoit bandeaux de rive et solins de rive.",
+    "points_vigilance": [
+      "Les rives sont très exposées au vent."
+    ]
+  },
+  {
+    "terme": "Roulure",
+    "definition_courte": "Défaut interne du bois correspondant à un décollement entre cernes.",
+    "explication_pedagogique": "Elle peut affaiblir une pièce de charpente.",
+    "exemple_utilisation": "Le CCTP refuse les bois présentant une roulure.",
+    "points_vigilance": [
+      "Contrôler les bois avant pose."
+    ]
+  },
+  {
+    "terme": "Règles CB 71",
+    "definition_courte": "Anciennes règles françaises de calcul des charpentes en bois.",
+    "explication_pedagogique": "Elles sont citées comme référence de conception.",
+    "exemple_utilisation": "Le CCTP cite les règles CB 71.",
+    "points_vigilance": [
+      "À articuler avec les Eurocodes selon les pièces du marché."
+    ]
+  },
+  {
+    "terme": "Règles PS 92",
+    "definition_courte": "Règles parasismiques françaises citées pour les bâtiments.",
+    "explication_pedagogique": "Elles encadrent certains principes de construction en zone sismique.",
+    "exemple_utilisation": "Le CCTP cite les règles PS 92.",
+    "points_vigilance": [
+      "Même si la zone est faible, vérifier la cohérence avec les hypothèses du projet."
+    ]
+  },
+  {
+    "terme": "Réservations",
+    "definition_courte": "Ouvertures ou emplacements prévus pour passages et raccordements.",
+    "explication_pedagogique": "Elles évitent les reprises après pose.",
+    "exemple_utilisation": "Le CCTP prévoit réservations pour raccords de noue et passages de sorties toiture.",
+    "points_vigilance": [
+      "À coordonner avant fermeture de la couverture."
+    ]
+  },
+  {
+    "terme": "Résistance à la chute 1200 joules",
+    "definition_courte": "Capacité d'un châssis à résister à un choc de sécurité.",
+    "explication_pedagogique": "Elle limite le risque de traversée accidentelle.",
+    "exemple_utilisation": "Le châssis de désenfumage doit avoir une résistance à la chute de 1200 joules.",
+    "points_vigilance": [
+      "Vérifier fiche technique et conformité du modèle proposé."
+    ]
+  },
+  {
+    "terme": "Sapin traité",
+    "definition_courte": "Bois résineux traité pour améliorer sa durabilité.",
+    "explication_pedagogique": "Il est utilisé pour fermettes, liteaux, lisse de rehausse et chevêtres.",
+    "exemple_utilisation": "Le CCTP cite le sapin traité classe II à plusieurs reprises.",
+    "points_vigilance": [
+      "Vérifier classe de traitement selon l'exposition."
+    ]
+  },
+  {
+    "terme": "Scellement",
+    "definition_courte": "Fixation par mortier, résine ou intégration dans un support.",
+    "explication_pedagogique": "Il immobilise une patte, ferrure ou pièce de charpente.",
+    "exemple_utilisation": "Le CCTP inclut pose, scellement et finition des ouvrages.",
+    "points_vigilance": [
+      "Le scellement doit être compatible avec les efforts à reprendre."
+    ]
+  },
+  {
+    "terme": "Sortie de toiture",
+    "definition_courte": "Élément traversant la couverture pour ventilation, VMC, antenne ou autre réseau.",
+    "explication_pedagogique": "Elle doit permettre le passage sans compromettre l'étanchéité.",
+    "exemple_utilisation": "Le CCTP prévoit étanchéité de toutes sorties de toiture.",
+    "points_vigilance": [
+      "Chaque traversée de toiture est un point sensible."
+    ]
+  },
+  {
+    "terme": "Souche VMC",
+    "definition_courte": "Sortie en toiture liée au rejet d'un réseau de ventilation.",
+    "explication_pedagogique": "Elle évacue l'air extrait par la VMC.",
+    "exemple_utilisation": "Le CCTP cite les souches VMC dans les sorties de toiture.",
+    "points_vigilance": [
+      "Vérifier position, hauteur et étanchéité."
+    ]
+  },
+  {
+    "terme": "Sous-face PVC",
+    "definition_courte": "Habillage PVC placé sous le débord de toiture.",
+    "explication_pedagogique": "Il protège et finit la partie inférieure de l'avant-toit.",
+    "exemple_utilisation": "Le CCTP prévoit des panneaux PVC blancs rainurés épaisseur 10 mm.",
+    "points_vigilance": [
+      "Alignement et fixation doivent être propres car très visibles."
+    ]
+  },
+  {
+    "terme": "Stabilité longitudinale",
+    "definition_courte": "Stabilité dans le sens de la longueur du bâtiment ou de la charpente.",
+    "explication_pedagogique": "Elle évite le déplacement ou la déformation globale.",
+    "exemple_utilisation": "Le CCTP demande la stabilité des fermettes dans les deux sens.",
+    "points_vigilance": [
+      "Elle doit être justifiée par contreventements ou systèmes adaptés."
+    ]
+  },
+  {
+    "terme": "Stabilité transversale",
+    "definition_courte": "Stabilité dans le sens perpendiculaire à la longueur du bâtiment.",
+    "explication_pedagogique": "Elle complète la stabilité longitudinale.",
+    "exemple_utilisation": "Le CCTP demande stabilité longitudinale et transversale des fermettes.",
+    "points_vigilance": [
+      "À vérifier sur plans de pose et notes de calcul."
+    ]
+  },
+  {
+    "terme": "Surface utile de désenfumage",
+    "definition_courte": "Surface réellement efficace pour évacuer les fumées.",
+    "explication_pedagogique": "Elle est utilisée pour vérifier la conformité du désenfumage.",
+    "exemple_utilisation": "Le CCTP demande 1,00 m² de surface utile.",
+    "points_vigilance": [
+      "Ne pas confondre avec la dimension extérieure du châssis."
+    ]
+  },
+  {
+    "terme": "Système d'autoconsommation",
+    "definition_courte": "Installation photovoltaïque dont la production est consommée sur place.",
+    "explication_pedagogique": "Elle réduit les besoins d'achat d'électricité du logement.",
+    "exemple_utilisation": "Le CCTP prévoit un kit photovoltaïque d'autoconsommation.",
+    "points_vigilance": [
+      "Vérifier raccordement, protections et mise en service."
+    ]
+  },
+  {
+    "terme": "Teinte au choix architecte",
+    "definition_courte": "Couleur finale validée par la maîtrise d'oeuvre ou architecte.",
+    "explication_pedagogique": "Elle concerne tuiles, gouttières, descentes et éléments visibles.",
+    "exemple_utilisation": "Le CCTP indique plusieurs teintes au choix de l'architecte.",
+    "points_vigilance": [
+      "Ne pas commander sans validation écrite des teintes."
+    ]
+  },
+  {
+    "terme": "Termites",
+    "definition_courte": "Insectes pouvant dégrader le bois.",
+    "explication_pedagogique": "Le traitement insecticide vise notamment leur prévention selon exposition.",
+    "exemple_utilisation": "Le CCTP mentionne résistance aux termites pour certains bois de classe d'emploi 3.",
+    "points_vigilance": [
+      "Demander les justificatifs de traitement."
+    ]
+  },
+  {
+    "terme": "Tirant",
+    "definition_courte": "Pièce travaillant en traction pour stabiliser un ouvrage.",
+    "explication_pedagogique": "Il peut participer à l'échafaudage ou à un assemblage.",
+    "exemple_utilisation": "Le CCTP cite tirants et renforts dans les accessoires d'échafaudage.",
+    "points_vigilance": [
+      "Ne pas supprimer un tirant sans recalcul ou validation."
+    ]
+  },
+  {
+    "terme": "Traitement classe 3",
+    "definition_courte": "Protection du bois pour exposition extérieure hors contact permanent avec le sol.",
+    "explication_pedagogique": "Il est nécessaire pour charpentes exposées comme carports, marquises ou celliers.",
+    "exemple_utilisation": "Le CCTP demande classe d'emploi 3 sur plusieurs bois extérieurs.",
+    "points_vigilance": [
+      "Les coupes doivent être retraitées si la notice le demande."
+    ]
+  },
+  {
+    "terme": "Trappe d'accès aux combles",
+    "definition_courte": "Ouverture permettant d'accéder au volume de combles.",
+    "explication_pedagogique": "Elle doit rester libre de fermettes ou obstacles.",
+    "exemple_utilisation": "Le CCTP demande que les fermettes ne passent pas au-dessus d'une trappe d'accès.",
+    "points_vigilance": [
+      "À coordonner avec plans architecte et lots techniques."
+    ]
+  },
+  {
+    "terme": "Traverse",
+    "definition_courte": "Pièce horizontale reliant des éléments verticaux ou inclinés.",
+    "explication_pedagogique": "Elle participe aux assemblages visibles de charpente traditionnelle.",
+    "exemple_utilisation": "Le CCTP cite assemblages poteaux/traverses et pannes/traverses.",
+    "points_vigilance": [
+      "Les détails visibles doivent être approuvés par la maîtrise d'oeuvre."
+    ]
+  },
+  {
+    "terme": "Tuile Canal S",
+    "definition_courte": "Modèle de tuile romane à emboîtement cité comme référence.",
+    "explication_pedagogique": "Elle constitue la couverture principale du projet.",
+    "exemple_utilisation": "Le CCTP cite Canal S de chez Edilians ou équivalent.",
+    "points_vigilance": [
+      "Vérifier pente minimale, pureau, fixation et accessoires compatibles."
+    ]
+  },
+  {
+    "terme": "Tuile d'égout",
+    "definition_courte": "Tuile située en bas de pan de toiture.",
+    "explication_pedagogique": "Elle assure la première rangée et l'écoulement vers gouttière.",
+    "exemple_utilisation": "Le CCTP prévoit des tuiles d'égout fixées.",
+    "points_vigilance": [
+      "Le réglage avec le liteau de basculement est important."
+    ]
+  },
+  {
+    "terme": "Tuile de rive",
+    "definition_courte": "Tuile spéciale utilisée sur le bord latéral du toit.",
+    "explication_pedagogique": "Elle protège la rive et finit le pan de toiture.",
+    "exemple_utilisation": "Le CCTP prévoit des tuiles de rives fixées.",
+    "points_vigilance": [
+      "Zone exposée au vent, fixation indispensable."
+    ]
+  },
+  {
+    "terme": "Tuile photovoltaïque",
+    "definition_courte": "Tuile intégrant une fonction de production électrique solaire.",
+    "explication_pedagogique": "Elle remplace localement des tuiles classiques en conservant l'étanchéité.",
+    "exemple_utilisation": "Le CCTP prévoit 8 tuiles photovoltaïques de 100 Wc sur la maison I.",
+    "points_vigilance": [
+      "Contrôler orientation, intégration, fixation, câblage et mise à la terre."
+    ]
+  },
+  {
+    "terme": "Tuile à douille",
+    "definition_courte": "Tuile spéciale permettant le passage d'une ventilation ou conduite.",
+    "explication_pedagogique": "Elle assure la sortie en toiture tout en conservant l'étanchéité.",
+    "exemple_utilisation": "Le CCTP prévoit des tuiles à douille avec lanternes adaptées.",
+    "points_vigilance": [
+      "Bien raccorder au réseau et respecter le calepinage."
+    ]
+  },
+  {
+    "terme": "Tuiles romanes à emboîtement",
+    "definition_courte": "Tuiles profilées qui s'assemblent par emboîtement latéral et longitudinal.",
+    "explication_pedagogique": "Elles couvrent les pans de toiture en assurant recouvrement et écoulement.",
+    "exemple_utilisation": "Le CCTP prévoit des tuiles romanes à emboîtement.",
+    "points_vigilance": [
+      "Le pureau et la pente doivent respecter la notice fabricant."
+    ]
+  },
+  {
+    "terme": "U1000R2V 3G2.5 mm²",
+    "definition_courte": "Type de câble électrique rigide utilisé pour alimentation basse tension.",
+    "explication_pedagogique": "Il sert ici aux liaisons onduleur / coffret AC.",
+    "exemple_utilisation": "Le CCTP prévoit des câbles U1000R2V 3G2.5 mm².",
+    "points_vigilance": [
+      "Vérifier cheminement, protection mécanique et raccordement."
+    ]
+  },
+  {
+    "terme": "VDE DIN 0126",
+    "definition_courte": "Référence normative pour certains onduleurs raccordés réseau.",
+    "explication_pedagogique": "Elle encadre la sécurité de découplage et raccordement.",
+    "exemple_utilisation": "Le CCTP demande un onduleur conforme VDE DIN 0126.",
+    "points_vigilance": [
+      "Vérifier la fiche technique de l'onduleur proposé."
+    ]
+  },
+  {
+    "terme": "Vent dominant",
+    "definition_courte": "Direction habituelle des vents forts ou fréquents.",
+    "explication_pedagogique": "Elle influence le sens de recouvrement des faîtières et tuiles.",
+    "exemple_utilisation": "Le CCTP demande le recouvrement des tuiles dans le sens opposé aux vents dominants.",
+    "points_vigilance": [
+      "Une pose inversée augmente le risque d'infiltration."
+    ]
+  },
+  {
+    "terme": "Ventilation de chute",
+    "definition_courte": "Ventilation d'une colonne d'évacuation EU/EV.",
+    "explication_pedagogique": "Elle évite les désiphonnages et équilibre les pressions.",
+    "exemple_utilisation": "Le CCTP prévoit des tuiles à douille pour ventilations primaires des chutes EU diamètre 100 mm.",
+    "points_vigilance": [
+      "Coordonner diamètre et emplacement avec le lot plomberie."
+    ]
+  },
+  {
+    "terme": "Ventilation des combles",
+    "definition_courte": "Circulation d'air dans le volume sous toiture.",
+    "explication_pedagogique": "Elle limite condensation et surchauffe.",
+    "exemple_utilisation": "Le CCTP prévoit chatières si nécessaire pour ventilation des toitures.",
+    "points_vigilance": [
+      "La suppression du film sous-toiture peut modifier le nombre de chatières."
+    ]
+  },
+  {
+    "terme": "Voc",
+    "acronyme": "Tension de circuit ouvert",
+    "definition_courte": "Tension maximale d'un module photovoltaïque sans charge.",
+    "explication_pedagogique": "Elle sert au dimensionnement électrique.",
+    "exemple_utilisation": "Le CCTP indique Voc = 10 V pour les tuiles photovoltaïques.",
+    "points_vigilance": [
+      "À vérifier dans le calcul des chaînes et protections."
+    ]
+  },
+  {
+    "terme": "Vérin pneumatique",
+    "definition_courte": "Mécanisme d'ouverture utilisant un gaz ou pression.",
+    "explication_pedagogique": "Il ouvre le châssis de désenfumage.",
+    "exemple_utilisation": "Le CCTP prévoit une ouverture par vérins pneumatiques.",
+    "points_vigilance": [
+      "À tester lors de la mise en service du désenfumage."
+    ]
+  },
+  {
+    "terme": "Wc",
+    "acronyme": "Watt-crête",
+    "definition_courte": "Unité de puissance maximale d'un module photovoltaïque en conditions standard.",
+    "explication_pedagogique": "Elle permet de comparer la puissance des modules solaires.",
+    "exemple_utilisation": "Le CCTP prévoit des tuiles de 100 Wc.",
+    "points_vigilance": [
+      "La production réelle dépend orientation, température, ombrage et rendement."
+    ]
+  },
+  {
+    "terme": "Zinguerie",
+    "definition_courte": "Ensemble des ouvrages métalliques d'évacuation et d'étanchéité en toiture.",
+    "explication_pedagogique": "Elle comprend noues, solins, gouttières, descentes et raccords.",
+    "exemple_utilisation": "Le CCTP consacre un chapitre à la zinguerie.",
+    "points_vigilance": [
+      "C'est un lot très sensible aux infiltrations."
+    ]
+  },
+  {
+    "terme": "Zone climatique H2C",
+    "definition_courte": "Zone réglementaire utilisée notamment pour calculs thermiques.",
+    "explication_pedagogique": "Elle situe le projet dans un contexte climatique donné.",
+    "exemple_utilisation": "Le CCTP indique zone climatique H2C.",
+    "points_vigilance": [
+      "À reprendre si les choix toiture impactent thermique ou photovoltaïque."
+    ]
+  },
+  {
+    "terme": "Zone neige A2",
+    "definition_courte": "Zone de référence pour les charges de neige.",
+    "explication_pedagogique": "Elle sert au dimensionnement des charpentes.",
+    "exemple_utilisation": "Le CCTP indique région A2 pour la neige.",
+    "points_vigilance": [
+      "Les charges neige doivent apparaître dans les notes de calcul."
+    ]
+  },
+  {
+    "terme": "Zone vent 1 site normal",
+    "definition_courte": "Hypothèse de vent utilisée pour le calcul.",
+    "explication_pedagogique": "Elle influence charpente, fixations et couverture.",
+    "exemple_utilisation": "Le CCTP indique zone 1 pour le vent, site normal.",
+    "points_vigilance": [
+      "Même en zone faible, rives, égouts et avancées restent sensibles."
+    ]
+  },
+  {
+    "terme": "Échantillon / modèle",
+    "definition_courte": "Exemple de produit ou finition soumis à validation.",
+    "explication_pedagogique": "Il permet de confirmer aspect, teinte ou modèle avant pose générale.",
+    "exemple_utilisation": "Le CCTP rappelle que les échantillons et modèles réclamés sont dus par l'entreprise.",
+    "points_vigilance": [
+      "À faire valider par écrit pour éviter les changements tardifs."
+    ]
+  },
+  {
+    "terme": "Écran pare-pluie",
+    "definition_courte": "Membrane posée sous couverture pour protéger des infiltrations accidentelles.",
+    "explication_pedagogique": "Elle complète la couverture et améliore la protection au vent et à l'eau.",
+    "exemple_utilisation": "Le CCTP prévoit un pare-pluie type Delta-Vent S en base.",
+    "points_vigilance": [
+      "La variante exige la suppression des films sous-toiture sauf maison I photovoltaïque."
+    ]
+  },
+  {
+    "terme": "Égout de toiture",
+    "definition_courte": "Ligne basse du pan de toiture où l'eau est recueillie.",
+    "explication_pedagogique": "Il reçoit gouttière, bandeau, peigne et tuiles d'égout.",
+    "exemple_utilisation": "Le CCTP prévoit peignes en égout et bandeaux d'égout.",
+    "points_vigilance": [
+      "Contrôler ventilation, fixation et écoulement vers gouttière."
+    ]
+  },
+  {
+    "terme": "Épis de toiture",
+    "definition_courte": "Pièces de finition décoratives ou techniques en rencontre de toitures.",
+    "explication_pedagogique": "Ils terminent certains points hauts ou rencontres de couverture.",
+    "exemple_utilisation": "Le CCTP prévoit des tuiles épis assorties à la couverture.",
+    "points_vigilance": [
+      "Vérifier emplacement sur plans de toiture."
+    ]
+  }
+]

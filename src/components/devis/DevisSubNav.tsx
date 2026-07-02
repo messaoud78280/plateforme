@@ -13,6 +13,7 @@ export function DevisSubNav() {
     { href: "/dashboard/devis/bibliotheque", label: "Ouvrages & prix" },
     { href: "/dashboard/devis/dce-remplissage", label: "DCE → BPU/DPGF" },
     { href: "/dashboard/devis/analyse-dpgf", label: "Analyse DPGF" },
+    { href: "/dashboard/devis/dico-btp", label: "Dico BTP" },
     { href: "/dashboard/devis/ressources-chantier", label: "Ressources chantier" },
     { href: "/dashboard/devis/creer", label: "Créer un devis" },
     { href: "/dashboard/devis/projets", label: "Projets" },

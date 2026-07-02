@@ -1696,3 +1696,37 @@ model SkillPpspsFile {
 
   @@index([sessionId])
 }
+
+/// Dico BTP — lexique interne : définitions, acronymes et explications par lot travaux
+model BtpDictionaryTerm {
+  id                 String   @id @default(cuid())
+  term               String
+  acronym            String?
+  lotCode            String?
+  lotName            String?
+  family             String?
+  /// Catégorie : technique, document, materiau, materiel, mise_en_oeuvre, vigilance, norme, securite
+  category           String?
+  shortDefinition    String   @db.Text
+  beginnerExplanation String? @db.Text
+  usageExample       String?  @db.Text
+  keywords           String[]
+  synonyms           String[]
+  vigilancePoints    String[]
+  linkedDocuments    String[]
+  /// Niveau : débutant / intermédiaire / confirmé
+  level              String   @default("débutant")
+  source             String?
+  /// Statut : à vérifier / validé / brouillon
+  status             String   @default("à vérifier")
+  createdByUserId    String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([term])
+  @@index([lotCode])
+  @@index([family])
+  @@index([category])
+  @@index([status])
+  @@index([updatedAt])
+}

@@ -1,0 +1,1235 @@
+[
+  {
+    "terme": "Ampère",
+    "acronyme": "A",
+    "famille": "Grandeurs et unités",
+    "categorie": "technique",
+    "definition_courte": "Unité de courant électrique.",
+    "explication_pedagogique": "Le calibre d'une protection est souvent exprimé en ampères.",
+    "exemple_utilisation": "Disjoncteur 16A, 20A, 32A, 40A.",
+    "mots_cles": ["courant", "calibre", "protection"]
+  },
+  {
+    "terme": "AGCP",
+    "acronyme": "Appareil Général de Commande et de Protection",
+    "famille": "Protection et sécurité",
+    "categorie": "securite",
+    "definition_courte": "Dispositif principal qui permet de couper et protéger l'installation électrique d'un logement.",
+    "explication_pedagogique": "Dans le CCTP, le disjoncteur de branchement joue ce rôle. L'AGCP doit rester accessible et se trouve dans l'espace électrique du logement.",
+    "points_vigilance": ["Doit rester accessible", "Situé dans l'espace électrique du logement (ETEL/GTL)"],
+    "mots_cles": ["commande", "protection", "disjoncteur de branchement", "GTL"]
+  },
+  {
+    "terme": "Alimentation secourue",
+    "famille": "Distribution et branchement",
+    "categorie": "technique",
+    "definition_courte": "Alimentation maintenue par batterie ou secours en cas de coupure électrique.",
+    "explication_pedagogique": "À quoi ça sert : maintenir certains équipements en fonctionnement.",
+    "points_vigilance": ["Dans le CCTP, certaines ventouses ne sont pas prévues avec alimentation secourue"],
+    "mots_cles": ["secours", "batterie", "coupure"]
+  },
+  {
+    "terme": "AQC",
+    "acronyme": "Attestation / essai de bon fonctionnement",
+    "famille": "Documents et schémas",
+    "categorie": "document",
+    "definition_courte": "Documents d'essais permettant de prouver que les installations fonctionnent correctement.",
+    "explication_pedagogique": "Servent de preuve au maître d'œuvre, au bureau de contrôle et au DOE. Les essais AQC sont à fournir en fin de travaux.",
+    "documents_lies": ["DOE"],
+    "mots_cles": ["essais", "preuve", "réception", "DOE"]
+  },
+  {
+    "terme": "Balun RJ45/F",
+    "famille": "Communication et réseaux",
+    "categorie": "materiel",
+    "definition_courte": "Adaptateur permettant de faire la liaison entre un connecteur RJ45 et une connectique TV de type F.",
+    "explication_pedagogique": "À quoi ça sert : adapter la distribution TV sur un câblage de communication.",
+    "mots_cles": ["RJ45", "TV", "connectique F", "adaptateur"]
+  },
+  {
+    "terme": "Ballon ECS",
+    "famille": "Chauffage et ECS",
+    "categorie": "materiel",
+    "definition_courte": "Appareil de production ou stockage d'eau chaude sanitaire.",
+    "explication_pedagogique": "À quoi ça sert : alimenter le logement en eau chaude. Côté électricité, il nécessite une alimentation protégée et adaptée.",
+    "mots_cles": ["ECS", "eau chaude", "alimentation protégée"]
+  },
+  {
+    "terme": "Ballon thermodynamique",
+    "famille": "Chauffage et ECS",
+    "categorie": "materiel",
+    "definition_courte": "Ballon d'eau chaude fonctionnant avec une pompe à chaleur intégrée ou associée.",
+    "explication_pedagogique": "À quoi ça sert : produire l'ECS avec une meilleure performance énergétique.",
+    "mots_cles": ["ECS", "pompe à chaleur", "performance énergétique"]
+  },
+  {
+    "terme": "Bandeau de brassage",
+    "famille": "Communication et réseaux",
+    "categorie": "materiel",
+    "definition_courte": "Support équipé de connecteurs RJ45 permettant de répartir les liaisons réseau.",
+    "explication_pedagogique": "À quoi ça sert : relier les prises RJ45 du logement à la box ou au switch.",
+    "mots_cles": ["RJ45", "brassage", "réseau", "switch"]
+  },
+  {
+    "terme": "Bobine à émission",
+    "famille": "Protection et sécurité",
+    "categorie": "materiel",
+    "definition_courte": "Accessoire électrique permettant de déclencher un disjoncteur à distance.",
+    "explication_pedagogique": "À quoi ça sert : couper automatiquement une alimentation en cas d'ordre ou de sécurité.",
+    "mots_cles": ["déclenchement", "disjoncteur", "sécurité"]
+  },
+  {
+    "terme": "Bornier",
+    "famille": "Matériel de tableau",
+    "categorie": "materiel",
+    "definition_courte": "Ensemble de bornes permettant de raccorder proprement les câbles dans une armoire ou un tableau.",
+    "explication_pedagogique": "À quoi ça sert : faciliter les raccordements, le repérage, la maintenance et les mesures.",
+    "points_vigilance": ["Dans le CCTP, le raccordement sur borniers est obligatoire"],
+    "mots_cles": ["bornes", "raccordement", "armoire", "tableau"]
+  },
+  {
+    "terme": "Câble coaxial",
+    "famille": "Câbles et conduits",
+    "categorie": "materiau",
+    "definition_courte": "Câble utilisé pour la télévision et certains signaux radio.",
+    "explication_pedagogique": "À quoi ça sert : transporter les signaux TV/FM/SAT avec une impédance adaptée. Il est différent du câble RJ45.",
+    "mots_cles": ["TV", "coaxial", "signal", "impédance"]
+  },
+  {
+    "terme": "Câble F/UTP catégorie 6",
+    "famille": "Câbles et conduits",
+    "categorie": "materiau",
+    "definition_courte": "Câble réseau informatique avec écran général, utilisé pour les prises RJ45.",
+    "explication_pedagogique": "À quoi ça sert : distribuer internet, téléphone et réseau informatique dans le logement.",
+    "exemple_utilisation": "F/UTP catégorie 6 - 250 MHz.",
+    "mots_cles": ["RJ45", "réseau", "catégorie 6", "internet"]
+  },
+  {
+    "terme": "Calibre",
+    "famille": "Grandeurs et unités",
+    "categorie": "technique",
+    "definition_courte": "Valeur nominale d'une protection électrique.",
+    "explication_pedagogique": "Il indique le courant maximal que le disjoncteur peut laisser passer avant déclenchement.",
+    "exemple_utilisation": "10A, 16A, 20A, 32A.",
+    "mots_cles": ["protection", "disjoncteur", "courant nominal"]
+  },
+  {
+    "terme": "Carnet de câbles",
+    "famille": "Documents et schémas",
+    "categorie": "document",
+    "definition_courte": "Document listant les câbles avec longueurs, sections, repérages, bornes et destinations.",
+    "explication_pedagogique": "À quoi ça sert : faciliter le câblage, le contrôle, la maintenance et les plans de récolement.",
+    "documents_lies": ["Plans de récolement", "DOE"],
+    "mots_cles": ["câbles", "repérage", "sections", "maintenance"]
+  },
+  {
+    "terme": "CCPC",
+    "acronyme": "Coupe-Circuit Principal Collectif",
+    "famille": "Distribution et branchement",
+    "categorie": "securite",
+    "definition_courte": "Dispositif de coupure principal utilisé pour une installation collective ou une alimentation commune.",
+    "explication_pedagogique": "Il protège et permet la coupure d'une alimentation collective avant distribution vers les logements ou les services généraux.",
+    "mots_cles": ["coupure", "collectif", "branchement", "services généraux"]
+  },
+  {
+    "terme": "CCPI",
+    "acronyme": "Coupe-Circuit Principal Individuel",
+    "famille": "Distribution et branchement",
+    "categorie": "securite",
+    "definition_courte": "Coffret ou dispositif de coupure principal placé généralement en limite de propriété ou en façade pour un logement individuel.",
+    "explication_pedagogique": "Il permet de couper et protéger l'arrivée électrique avant le tableau du logement. C'est un élément important de l'origine de l'installation CFO.",
+    "mots_cles": ["coupure", "individuel", "branchement", "origine installation"]
+  },
+  {
+    "terme": "Chute de tension",
+    "famille": "Grandeurs et unités",
+    "categorie": "technique",
+    "definition_courte": "Perte de tension dans un câble entre le tableau et le point d'utilisation.",
+    "explication_pedagogique": "À quoi ça sert : vérifier que l'équipement reçoit une tension suffisante. Dans le CCTP : 3 % pour l'éclairage et 5 % pour les autres usages.",
+    "points_vigilance": ["Plus le câble est long ou sous-dimensionné, plus la chute de tension augmente"],
+    "mots_cles": ["tension", "câble", "dimensionnement", "section"]
+  },
+  {
+    "terme": "CIBE",
+    "acronyme": "Coffret Individuel de Branchement Électrique",
+    "famille": "Distribution et branchement",
+    "categorie": "materiel",
+    "definition_courte": "Coffret de branchement utilisé pour les logements individuels.",
+    "explication_pedagogique": "Il reçoit les éléments de raccordement Enedis en limite de propriété ou sur façade. Dans le CCTP, certains logements individuels ont pour origine des coffrets CIBE.",
+    "mots_cles": ["coffret", "branchement", "Enedis", "individuel"]
+  },
+  {
+    "terme": "Classe II",
+    "famille": "Protection et sécurité",
+    "categorie": "securite",
+    "definition_courte": "Matériel électrique à double isolation.",
+    "explication_pedagogique": "À quoi ça sert : renforcer la sécurité sans nécessiter forcément une liaison de terre sur l'appareil.",
+    "exemple_utilisation": "Certains luminaires en salle d'eau ou extérieur.",
+    "mots_cles": ["double isolation", "sécurité", "luminaire"]
+  },
+  {
+    "terme": "Comptage d'énergie RE2020",
+    "famille": "Environnement / RE2020",
+    "categorie": "technique",
+    "definition_courte": "Système permettant de suivre les consommations par usage.",
+    "explication_pedagogique": "À quoi ça sert : permettre au logement de suivre ses consommations d'énergie. Exemples d'usages : chauffage, refroidissement, ECS, prises électriques, autres usages.",
+    "mots_cles": ["comptage", "RE2020", "consommation", "usages"]
+  },
+  {
+    "terme": "Connectique type F",
+    "famille": "Communication et réseaux",
+    "categorie": "materiel",
+    "definition_courte": "Connecteur utilisé pour les câbles coaxiaux TV/SAT.",
+    "explication_pedagogique": "À quoi ça sert : raccorder antennes, répartiteurs, prises TV et équipements satellite.",
+    "mots_cles": ["TV", "SAT", "coaxial", "connecteur"]
+  },
+  {
+    "terme": "Consuel",
+    "famille": "Documents et schémas",
+    "categorie": "document",
+    "definition_courte": "Attestation de conformité des installations électriques.",
+    "explication_pedagogique": "À quoi ça sert : prouver que l'installation respecte les règles avant mise en service.",
+    "points_vigilance": ["Sans Consuel, la mise sous tension peut être bloquée"],
+    "mots_cles": ["conformité", "mise en service", "attestation"]
+  },
+  {
+    "terme": "Contact sec",
+    "famille": "Contrôle-commande",
+    "categorie": "technique",
+    "definition_courte": "Contact électrique sans tension propre.",
+    "explication_pedagogique": "À quoi ça sert : transmettre une information de commande ou de défaut entre deux équipements.",
+    "exemple_utilisation": "Pressostat VMC vers voyant défaut.",
+    "mots_cles": ["contact", "commande", "défaut", "signal"]
+  },
+  {
+    "terme": "Convecteur électrique",
+    "famille": "Chauffage et ECS",
+    "categorie": "materiel",
+    "definition_courte": "Appareil de chauffage qui chauffe l'air par convection.",
+    "explication_pedagogique": "À quoi ça sert : chauffer une pièce par circulation d'air chaud.",
+    "mots_cles": ["chauffage", "convection", "radiateur"]
+  },
+  {
+    "terme": "Cordon de brassage",
+    "famille": "Communication et réseaux",
+    "categorie": "materiel",
+    "definition_courte": "Petit câble utilisé dans le tableau de communication pour relier les ports RJ45.",
+    "explication_pedagogique": "À quoi ça sert : affecter internet, téléphone ou réseau à une prise du logement.",
+    "mots_cles": ["brassage", "RJ45", "tableau de communication"]
+  },
+  {
+    "terme": "CR1",
+    "famille": "Câbles et conduits",
+    "categorie": "materiau",
+    "definition_courte": "Câble résistant au feu ou utilisé pour des circuits nécessitant une tenue particulière.",
+    "explication_pedagogique": "Dans le CCTP, il est cité pour l'alimentation de certains équipements VMC.",
+    "points_vigilance": ["Son cheminement doit respecter les prescriptions incendie"],
+    "mots_cles": ["résistant au feu", "incendie", "VMC"]
+  },
+  {
+    "terme": "DAAF",
+    "acronyme": "Détecteur Autonome Avertisseur de Fumée",
+    "famille": "Sécurité incendie",
+    "categorie": "securite",
+    "definition_courte": "Détecteur de fumée autonome installé dans les logements.",
+    "explication_pedagogique": "À quoi ça sert : alerter les occupants en cas de fumée ou départ d'incendie.",
+    "points_vigilance": ["Doit être conforme à la norme NF EN 14604"],
+    "documents_lies": ["NF EN 14604"],
+    "mots_cles": ["détecteur", "fumée", "incendie", "SSI"]
+  },
+  {
+    "terme": "DB90",
+    "acronyme": "Disjoncteur de Branchement",
+    "famille": "Protection et sécurité",
+    "categorie": "materiel",
+    "definition_courte": "Disjoncteur d'abonné fourni ou imposé dans le cadre du branchement.",
+    "explication_pedagogique": "Il protège l'installation et permet la coupure générale du logement ou des services généraux.",
+    "exemple_utilisation": "DB90 bipolaire 30/60A différentiel 500mA sélectif.",
+    "mots_cles": ["disjoncteur", "branchement", "coupure générale"]
+  },
+  {
+    "terme": "DCL",
+    "acronyme": "Dispositif de Connexion Luminaire",
+    "famille": "Éclairage",
+    "categorie": "materiel",
+    "definition_courte": "Boîtier ou connecteur normalisé pour raccorder un luminaire.",
+    "explication_pedagogique": "À quoi ça sert : permettre le raccordement propre et sécurisé d'un point lumineux.",
+    "exemple_utilisation": "1 DCL au plafond commandé par simple allumage ou va-et-vient.",
+    "mots_cles": ["luminaire", "point lumineux", "connexion"]
+  },
+  {
+    "terme": "DDR",
+    "acronyme": "Dispositif Différentiel Résiduel",
+    "famille": "Protection et sécurité",
+    "categorie": "securite",
+    "definition_courte": "Protection qui coupe le courant en cas de fuite électrique vers la terre.",
+    "explication_pedagogique": "À quoi ça sert : protéger les personnes contre les risques d'électrocution.",
+    "exemple_utilisation": "DDR 30mA type A ou type AC.",
+    "mots_cles": ["différentiel", "protection des personnes", "30mA", "terre"]
+  },
+  {
+    "terme": "DDR type A",
+    "famille": "Protection et sécurité",
+    "categorie": "securite",
+    "definition_courte": "Différentiel adapté à certains circuits spécialisés comme cuisson, lave-linge, IRVE ou équipements électroniques.",
+    "explication_pedagogique": "Il détecte certains défauts que le type AC ne couvre pas toujours.",
+    "mots_cles": ["différentiel", "type A", "cuisson", "IRVE"]
+  },
+  {
+    "terme": "DDR type AC",
+    "famille": "Protection et sécurité",
+    "categorie": "securite",
+    "definition_courte": "Différentiel utilisé pour les circuits classiques.",
+    "explication_pedagogique": "Il protège les circuits courants contre les défauts d'isolement alternatifs.",
+    "mots_cles": ["différentiel", "type AC", "circuits classiques"]
+  },
+  {
+    "terme": "Dérivation individuelle",
+    "famille": "Distribution et branchement",
+    "categorie": "technique",
+    "definition_courte": "Liaison entre la colonne ou le coffret de distribution et le tableau d'abonné du logement.",
+    "explication_pedagogique": "Elle amène l'électricité propre à chaque logement.",
+    "points_vigilance": ["Doit être dimensionnée selon longueur, section, puissance et chute de tension"],
+    "mots_cles": ["colonne", "tableau abonné", "dimensionnement"]
+  },
+  {
+    "terme": "Disjoncteur divisionnaire",
+    "famille": "Protection et sécurité",
+    "categorie": "materiel",
+    "definition_courte": "Disjoncteur protégeant un circuit particulier du logement ou du bâtiment.",
+    "explication_pedagogique": "Il coupe le circuit en cas de surcharge ou de court-circuit.",
+    "exemple_utilisation": "Circuit éclairage, circuit prises, plaque de cuisson, VMC, ECS, PAC.",
+    "mots_cles": ["disjoncteur", "circuit", "surcharge", "court-circuit"]
+  },
+  {
+    "terme": "Disjoncteur magnétothermique",
+    "famille": "Protection et sécurité",
+    "categorie": "materiel",
+    "definition_courte": "Protection contre les surcharges et les courts-circuits.",
+    "explication_pedagogique": "La partie thermique protège contre les surcharges, la partie magnétique contre les courts-circuits. C'est le disjoncteur classique des tableaux électriques.",
+    "mots_cles": ["disjoncteur", "thermique", "magnétique", "protection"]
+  },
+  {
+    "terme": "Distributeur de niveau",
+    "famille": "Distribution et branchement",
+    "categorie": "materiel",
+    "definition_courte": "Équipement placé à un étage pour distribuer l'électricité vers les logements du niveau.",
+    "explication_pedagogique": "Il permet de répartir la colonne montante vers les dérivations individuelles.",
+    "mots_cles": ["distribution", "colonne montante", "étage"]
+  },
+  {
+    "terme": "DTI",
+    "acronyme": "Dispositif de Terminaison Intérieur",
+    "famille": "Communication et réseaux",
+    "categorie": "materiel",
+    "definition_courte": "Point de terminaison du réseau téléphonique cuivre dans le logement.",
+    "explication_pedagogique": "À quoi ça sert : séparer le réseau opérateur du réseau intérieur du logement.",
+    "mots_cles": ["téléphone", "cuivre", "terminaison"]
+  },
+  {
+    "terme": "DTIO",
+    "acronyme": "Dispositif de Terminaison Intérieur Optique",
+    "famille": "Communication et réseaux",
+    "categorie": "materiel",
+    "definition_courte": "Point d'arrivée de la fibre optique dans le logement.",
+    "explication_pedagogique": "Recevoir la fibre de l'opérateur et permettre le raccordement à la box ou au coffret de communication. C'est l'équivalent fibre du DTI.",
+    "synonymes": ["terminaison optique"],
+    "mots_cles": ["fibre", "optique", "box", "terminaison"]
+  },
+  {
+    "terme": "ECS",
+    "acronyme": "Eau Chaude Sanitaire",
+    "famille": "Chauffage et ECS",
+    "categorie": "technique",
+    "definition_courte": "Eau chaude utilisée pour les douches, lavabos, éviers.",
+    "explication_pedagogique": "Dans un CCTP électricité, ECS apparaît souvent pour les alimentations de ballons ou équipements de production d'eau chaude.",
+    "mots_cles": ["eau chaude", "ballon", "alimentation"]
+  },
+  {
+    "terme": "ETEL",
+    "acronyme": "Espace Technique Électrique du Logement",
+    "famille": "Distribution et branchement",
+    "categorie": "technique",
+    "definition_courte": "Volume réservé à l'électricité et aux communications dans le logement.",
+    "explication_pedagogique": "Dans le CCTP, l'ETEL accueille la GTL et doit avoir une dimension minimum intérieure de 600 mm x 250 mm sur toute hauteur. Il regroupe proprement les arrivées, départs, tableaux et équipements de communication.",
+    "points_vigilance": ["Espace réservé aux équipements électriques et de communication", "Dimension minimale intérieure 600 mm x 250 mm sur toute hauteur"],
+    "documents_lies": ["CCTP", "NF C 15-100"],
+    "mots_cles": ["GTL", "logement", "tableau", "communication"]
+  },
+  {
+    "terme": "FAI",
+    "acronyme": "Fournisseur d'Accès Internet",
+    "famille": "Communication et réseaux",
+    "categorie": "technique",
+    "definition_courte": "Opérateur internet comme Orange, Free, SFR, Bouygues.",
+    "explication_pedagogique": "À quoi ça sert : fournir l'accès internet et les services associés.",
+    "mots_cles": ["internet", "opérateur", "box"]
+  },
+  {
+    "terme": "FDES / PEP",
+    "famille": "Environnement / RE2020",
+    "categorie": "document",
+    "definition_courte": "Documents environnementaux décrivant l'impact carbone ou environnemental d'un produit.",
+    "explication_pedagogique": "À quoi ça sert : alimenter l'étude RE2020 et l'analyse de cycle de vie.",
+    "documents_lies": ["RE2020", "INIES"],
+    "mots_cles": ["environnement", "carbone", "RE2020", "cycle de vie"]
+  },
+  {
+    "terme": "Fibre monomode 9/125",
+    "famille": "Câbles et conduits",
+    "categorie": "materiau",
+    "definition_courte": "Type de fibre optique utilisé pour les réseaux très haut débit.",
+    "explication_pedagogique": "À quoi ça sert : transmettre les données sur de longues distances avec peu de perte.",
+    "mots_cles": ["fibre", "optique", "très haut débit"]
+  },
+  {
+    "terme": "Fil pilote 6 ordres",
+    "famille": "Chauffage et ECS",
+    "categorie": "technique",
+    "definition_courte": "Fil de commande utilisé pour piloter certains radiateurs électriques.",
+    "explication_pedagogique": "Les ordres classiques sont : Confort, Confort -1°C, Confort -2°C, Eco, Hors-Gel, Arrêt. Il permet de programmer ou centraliser les modes de chauffage.",
+    "mots_cles": ["fil pilote", "chauffage", "radiateur", "ordres"]
+  },
+  {
+    "terme": "G657",
+    "famille": "Câbles et conduits",
+    "categorie": "materiau",
+    "definition_courte": "Type de fibre optique à faible rayon de courbure.",
+    "explication_pedagogique": "À quoi ça sert : faciliter la pose dans les logements, coffrets et gaines avec des courbes serrées.",
+    "mots_cles": ["fibre", "courbure", "pose"]
+  },
+  {
+    "terme": "Gâche électrique",
+    "famille": "Contrôle d'accès",
+    "categorie": "materiel",
+    "definition_courte": "Système placé dans la serrure permettant l'ouverture électrique d'une porte.",
+    "explication_pedagogique": "À quoi ça sert : déverrouiller une porte à distance ou par badge.",
+    "mots_cles": ["porte", "serrure", "ouverture", "badge"]
+  },
+  {
+    "terme": "Gaine SG",
+    "acronyme": "Gaine Services Généraux",
+    "famille": "Distribution et branchement",
+    "categorie": "materiau",
+    "definition_courte": "Gaine technique réservée aux réseaux des parties communes.",
+    "explication_pedagogique": "Elle permet le passage des câbles, colonnes, départs électriques et équipements communs.",
+    "mots_cles": ["gaine", "services généraux", "parties communes"]
+  },
+  {
+    "terme": "Grade 2 / Grade 3 TV",
+    "famille": "Communication et réseaux",
+    "categorie": "technique",
+    "definition_courte": "Catégories de câblage résidentiel pour les réseaux de communication.",
+    "explication_pedagogique": "Grade 2 permet la distribution téléphone, internet et réseau. Grade 3 TV permet aussi des usages plus performants, notamment la distribution TV selon configuration.",
+    "points_vigilance": ["Le CCTP peut mentionner des grades différents selon les chapitres ; vérifier la cohérence avant exécution"],
+    "mots_cles": ["grade", "câblage", "TV", "communication"]
+  },
+  {
+    "terme": "GTL",
+    "acronyme": "Gaine Technique Logement",
+    "famille": "Distribution et branchement",
+    "categorie": "technique",
+    "definition_courte": "Gaine ou ensemble technique installé dans l'ETEL, matérialisant le volume où sont installés les équipements électriques du logement.",
+    "explication_pedagogique": "Elle accueille généralement : le panneau de contrôle, le compteur Linky, le disjoncteur de branchement, le tableau de protection, le tableau de communication, les arrivées et départs des circuits de puissance et des réseaux de communication.",
+    "documents_lies": ["NF C 15-100"],
+    "mots_cles": ["GTL", "ETEL", "tableau", "compteur", "Linky"]
+  },
+  {
+    "terme": "H07V-K",
+    "famille": "Câbles et conduits",
+    "categorie": "materiau",
+    "definition_courte": "Fil électrique souple utilisé notamment dans les armoires.",
+    "explication_pedagogique": "À quoi ça sert : réaliser le câblage interne des tableaux avec embouts.",
+    "points_vigilance": ["Les extrémités doivent être équipées d'embouts ou cosses adaptées"],
+    "mots_cles": ["fil souple", "armoire", "embout", "câblage"]
+  },
+  {
+    "terme": "H07V-U",
+    "famille": "Câbles et conduits",
+    "categorie": "materiau",
+    "definition_courte": "Fil électrique rigide utilisé dans les conduits.",
+    "explication_pedagogique": "À quoi ça sert : réaliser les circuits intérieurs sous gaine ou conduit.",
+    "exemple_utilisation": "Éclairage, prises, commandes.",
+    "mots_cles": ["fil rigide", "conduit", "circuit"]
+  },
+  {
+    "terme": "HNI",
+    "famille": "Communication et réseaux",
+    "categorie": "materiel",
+    "definition_courte": "Équipement ou prise de raccordement TV mentionné dans le coffret de communication.",
+    "explication_pedagogique": "Dans le CCTP, il est associé à une prise F et à un cordon Balun RJ45/F. Il concerne la distribution TV dans le tableau de communication.",
+    "mots_cles": ["TV", "coffret communication", "prise F"]
+  },
+  {
+    "terme": "Horloge astronomique",
+    "famille": "Éclairage",
+    "categorie": "materiel",
+    "definition_courte": "Module qui commande automatiquement l'éclairage selon les heures de lever et coucher du soleil.",
+    "explication_pedagogique": "À quoi ça sert : piloter l'éclairage extérieur sans cellule classique.",
+    "exemple_utilisation": "Éclairage extérieur en marche/arrêt/auto.",
+    "mots_cles": ["éclairage extérieur", "commande", "automatique"]
+  },
+  {
+    "terme": "I défaut",
+    "famille": "Grandeurs et unités",
+    "categorie": "technique",
+    "definition_courte": "Courant de défaut utilisé pour vérifier la protection contre les contacts indirects.",
+    "explication_pedagogique": "À quoi ça sert : s'assurer qu'en cas de défaut d'isolement, la protection coupera bien.",
+    "mots_cles": ["courant de défaut", "contacts indirects", "protection"]
+  },
+  {
+    "terme": "IB",
+    "acronyme": "Courant d'emploi",
+    "famille": "Grandeurs et unités",
+    "categorie": "technique",
+    "definition_courte": "Courant réellement utilisé ou prévu par un circuit.",
+    "explication_pedagogique": "Il sert au calcul des chutes de tension et au dimensionnement des câbles et protections.",
+    "mots_cles": ["courant d'emploi", "dimensionnement", "câble"]
+  },
+  {
+    "terme": "ICC",
+    "acronyme": "Intensité de Court-Circuit",
+    "famille": "Grandeurs et unités",
+    "categorie": "technique",
+    "definition_courte": "Courant très élevé qui peut apparaître en cas de court-circuit.",
+    "explication_pedagogique": "À quoi ça sert : dimensionner les protections électriques. Le CCTP demande les ICC pour les départs et protections.",
+    "mots_cles": ["court-circuit", "intensité", "protection", "dimensionnement"]
+  },
+  {
+    "terme": "ICC1 / ICC3",
+    "famille": "Grandeurs et unités",
+    "categorie": "technique",
+    "definition_courte": "Valeurs de court-circuit selon les cas de calcul.",
+    "explication_pedagogique": "ICC1 correspond généralement à un court-circuit monophasé, ICC3 à un court-circuit triphasé. À vérifier que les protections fonctionneront correctement.",
+    "mots_cles": ["court-circuit", "monophasé", "triphasé", "calcul"]
+  },
+  {
+    "terme": "ICT / ICTA",
+    "famille": "Câbles et conduits",
+    "categorie": "materiau",
+    "definition_courte": "Gaine annelée isolante utilisée pour passer les fils ou câbles en encastré.",
+    "explication_pedagogique": "À quoi ça sert : protéger les conducteurs dans les cloisons, doublages, dalles ou réservations.",
+    "exemple_utilisation": "Gaine ICTA Ø25 fibre, ICTA Ø32 TV, ICTA Ø63 Enedis.",
+    "mots_cles": ["gaine", "annelée", "encastré", "conducteur"]
+  },
+  {
+    "terme": "IK",
+    "acronyme": "Indice de résistance aux chocs",
+    "famille": "Grandeurs et unités",
+    "categorie": "technique",
+    "definition_courte": "Indice qui indique la résistance mécanique d'un matériel.",
+    "explication_pedagogique": "À quoi ça sert : choisir un équipement résistant dans les parties communes, locaux techniques, parkings ou accès extérieurs.",
+    "exemple_utilisation": "IK02, IK08, IK10.",
+    "mots_cles": ["indice", "chocs", "résistance mécanique"]
+  },
+  {
+    "terme": "INIES",
+    "famille": "Environnement / RE2020",
+    "categorie": "document",
+    "definition_courte": "Base de données française regroupant les fiches environnementales des produits de construction.",
+    "explication_pedagogique": "À quoi ça sert : vérifier les FDES et PEP utilisés pour le projet.",
+    "documents_lies": ["FDES", "PEP", "RE2020"],
+    "mots_cles": ["environnement", "FDES", "PEP", "base de données"]
+  },
+  {
+    "terme": "Interphonie",
+    "famille": "Contrôle d'accès",
+    "categorie": "materiel",
+    "definition_courte": "Système permettant de communiquer entre l'entrée du bâtiment et le résident.",
+    "explication_pedagogique": "À quoi ça sert : identifier un visiteur et commander l'ouverture de porte.",
+    "mots_cles": ["interphone", "accès", "porte", "visiteur"]
+  },
+  {
+    "terme": "Interrupteur à voyant",
+    "famille": "Éclairage",
+    "categorie": "materiel",
+    "definition_courte": "Interrupteur équipé d'un voyant lumineux.",
+    "explication_pedagogique": "À quoi ça sert : voir l'état d'un éclairage ou repérer la commande dans l'obscurité.",
+    "exemple_utilisation": "Commande d'éclairage extérieur ou sanitaire.",
+    "mots_cles": ["interrupteur", "voyant", "commande"]
+  },
+  {
+    "terme": "Interrupteur-sectionneur",
+    "famille": "Protection et sécurité",
+    "categorie": "materiel",
+    "definition_courte": "Appareil permettant de couper manuellement une alimentation électrique.",
+    "explication_pedagogique": "Il permet d'isoler un équipement ou un tableau pour intervention.",
+    "exemple_utilisation": "Interrupteur-sectionneur VISTOP cadenassable pour les groupes VMC.",
+    "mots_cles": ["coupure", "isolement", "intervention", "VISTOP"]
+  },
+  {
+    "terme": "IP",
+    "acronyme": "Indice de Protection",
+    "famille": "Grandeurs et unités",
+    "categorie": "technique",
+    "definition_courte": "Indice qui indique la protection contre les corps solides et l'eau.",
+    "explication_pedagogique": "À quoi ça sert : choisir le matériel selon le lieu (intérieur sec, extérieur, salle d'eau, local technique).",
+    "exemple_utilisation": "IP20, IP44, IP54, IP55, IP68.",
+    "mots_cles": ["indice", "protection", "eau", "salle d'eau"]
+  },
+  {
+    "terme": "IRC / Ra",
+    "acronyme": "Indice de Rendu des Couleurs",
+    "famille": "Éclairage",
+    "categorie": "technique",
+    "definition_courte": "Indicateur de qualité de la lumière.",
+    "explication_pedagogique": "Plus l'indice est élevé, plus les couleurs sont bien restituées.",
+    "exemple_utilisation": "Ra supérieur ou égal à 80.",
+    "mots_cles": ["éclairage", "rendu des couleurs", "lumière"]
+  },
+  {
+    "terme": "IRL",
+    "famille": "Câbles et conduits",
+    "categorie": "materiau",
+    "definition_courte": "Conduit rigide utilisé en apparent.",
+    "explication_pedagogique": "À quoi ça sert : protéger les câbles lorsqu'ils ne peuvent pas être encastrés.",
+    "exemple_utilisation": "Câble sous conduit IRL dans les zones sans faux plafond.",
+    "mots_cles": ["conduit", "rigide", "apparent"]
+  },
+  {
+    "terme": "IRVE",
+    "acronyme": "Infrastructure de Recharge de Véhicule Électrique",
+    "famille": "IRVE",
+    "categorie": "technique",
+    "definition_courte": "Ensemble des équipements permettant la recharge des véhicules électriques.",
+    "explication_pedagogique": "À quoi ça sert : prééquiper ou équiper les places de stationnement pour la recharge. Dans le CCTP, des bornes de recharge sont prévues sur certaines places.",
+    "documents_lies": ["UTE C 15-722"],
+    "mots_cles": ["recharge", "véhicule électrique", "borne", "stationnement"]
+  },
+  {
+    "terme": "kVA",
+    "acronyme": "Kilovoltampère",
+    "famille": "Grandeurs et unités",
+    "categorie": "technique",
+    "definition_courte": "Unité de puissance apparente utilisée pour les abonnements électriques.",
+    "explication_pedagogique": "Plus le nombre de kVA est élevé, plus l'installation peut alimenter d'équipements en même temps.",
+    "exemple_utilisation": "6 kVA, 18 kVA, 22 kVA.",
+    "mots_cles": ["puissance", "abonnement", "kVA"]
+  },
+  {
+    "terme": "L80 B50",
+    "famille": "Éclairage",
+    "categorie": "technique",
+    "definition_courte": "Indication de durée de vie des LED.",
+    "explication_pedagogique": "L80 signifie qu'après une certaine durée, le luminaire conserve environ 80 % de son flux lumineux. B50 signifie qu'environ 50 % des produits peuvent être en dessous de cette valeur à cette échéance. C'est une donnée de performance et de vieillissement des luminaires.",
+    "mots_cles": ["LED", "durée de vie", "flux lumineux", "luminaire"]
+  },
+  {
+    "terme": "Liaison équipotentielle",
+    "famille": "Protection et sécurité",
+    "categorie": "securite",
+    "definition_courte": "Liaison électrique entre les masses métalliques pour les mettre au même potentiel.",
+    "explication_pedagogique": "À quoi ça sert : éviter qu'une différence de tension dangereuse apparaisse entre deux éléments métalliques.",
+    "exemple_utilisation": "Huisseries métalliques, baignoires, carcasses métalliques, appareils électriques.",
+    "mots_cles": ["équipotentielle", "masse", "terre", "sécurité"]
+  },
+  {
+    "terme": "Lux",
+    "famille": "Éclairage",
+    "categorie": "technique",
+    "definition_courte": "Unité de mesure du niveau d'éclairement.",
+    "explication_pedagogique": "À quoi ça sert : vérifier que l'éclairage est suffisant dans une pièce ou une circulation.",
+    "mots_cles": ["éclairement", "lux", "éclairage"]
+  },
+  {
+    "terme": "mA",
+    "acronyme": "Milliampère",
+    "famille": "Grandeurs et unités",
+    "categorie": "technique",
+    "definition_courte": "Unité utilisée notamment pour la sensibilité des protections différentielles.",
+    "explication_pedagogique": "Le 30mA protège les personnes contre les défauts d'isolement.",
+    "exemple_utilisation": "DDR 30mA, différentiel 500mA, différentiel 300mA.",
+    "mots_cles": ["milliampère", "différentiel", "sensibilité"]
+  },
+  {
+    "terme": "Masse métallique",
+    "famille": "Protection et sécurité",
+    "categorie": "securite",
+    "definition_courte": "Partie métallique d'un équipement qui peut devenir dangereuse si un défaut électrique apparaît.",
+    "explication_pedagogique": "Elle doit être reliée à la terre pour protéger les personnes.",
+    "mots_cles": ["masse", "terre", "défaut", "sécurité"]
+  },
+  {
+    "terme": "MIFARE",
+    "famille": "Contrôle d'accès",
+    "categorie": "materiel",
+    "definition_courte": "Technologie de badge sans contact.",
+    "explication_pedagogique": "À quoi ça sert : identifier un badge résident auprès d'un lecteur de contrôle d'accès.",
+    "mots_cles": ["badge", "sans contact", "contrôle d'accès"]
+  },
+  {
+    "terme": "Mode de charge 2 / Mode de charge 3",
+    "famille": "IRVE",
+    "categorie": "technique",
+    "definition_courte": "Modes de recharge des véhicules électriques.",
+    "explication_pedagogique": "Mode 2 : recharge avec câble intégrant un dispositif de contrôle. Mode 3 : recharge via borne dédiée avec communication entre véhicule et borne. Le mode 3 est le mode courant pour les bornes fixes.",
+    "mots_cles": ["recharge", "mode 2", "mode 3", "borne"]
+  },
+  {
+    "terme": "Monophasé",
+    "famille": "Distribution et branchement",
+    "categorie": "technique",
+    "definition_courte": "Alimentation électrique composée d'une phase et d'un neutre.",
+    "explication_pedagogique": "C'est le type d'alimentation classique de nombreux logements.",
+    "exemple_utilisation": "Compteur monophasé pour logement.",
+    "mots_cles": ["monophasé", "phase", "neutre", "alimentation"]
+  },
+  {
+    "terme": "NF C 14-100",
+    "famille": "Normes",
+    "categorie": "norme",
+    "definition_courte": "Norme concernant les branchements entre le réseau public de distribution et l'origine des installations intérieures.",
+    "explication_pedagogique": "À quoi ça sert : encadrer les règles de raccordement Enedis, colonnes et branchements.",
+    "mots_cles": ["norme", "branchement", "Enedis", "raccordement"]
+  },
+  {
+    "terme": "NF C 15-100",
+    "famille": "Normes",
+    "categorie": "norme",
+    "definition_courte": "Norme française principale pour les installations électriques basse tension des bâtiments.",
+    "explication_pedagogique": "Elle fixe les règles de sécurité, de protection, de circuits, de tableaux et d'équipements dans les logements.",
+    "points_vigilance": ["Incontournable pour l'électricien"],
+    "mots_cles": ["norme", "basse tension", "installation", "sécurité"]
+  },
+  {
+    "terme": "NF C 15-103",
+    "famille": "Normes",
+    "categorie": "norme",
+    "definition_courte": "Norme liée au choix des matériels selon les influences externes.",
+    "explication_pedagogique": "À quoi ça sert : choisir le bon matériel selon l'humidité, les chocs, l'environnement, les locaux et indices IP/IK.",
+    "mots_cles": ["norme", "influences externes", "IP", "IK"]
+  },
+  {
+    "terme": "NF EN 14604",
+    "famille": "Normes",
+    "categorie": "norme",
+    "definition_courte": "Norme relative aux détecteurs de fumée.",
+    "explication_pedagogique": "À quoi ça sert : garantir que les DAAF répondent aux exigences de sécurité incendie.",
+    "documents_lies": ["DAAF"],
+    "mots_cles": ["norme", "détecteur de fumée", "DAAF", "incendie"]
+  },
+  {
+    "terme": "NF EN 60598",
+    "famille": "Normes",
+    "categorie": "norme",
+    "definition_courte": "Norme relative aux luminaires.",
+    "explication_pedagogique": "À quoi ça sert : vérifier la conformité des appareils d'éclairage.",
+    "mots_cles": ["norme", "luminaire", "éclairage", "conformité"]
+  },
+  {
+    "terme": "NO / NF",
+    "famille": "Contrôle-commande",
+    "categorie": "technique",
+    "definition_courte": "NO signifie Normalement Ouvert, NF signifie Normalement Fermé.",
+    "explication_pedagogique": "À quoi ça sert : décrire l'état d'un contact électrique au repos.",
+    "exemple_utilisation": "Bouton poussoir avec contact NO et contact NF.",
+    "mots_cles": ["contact", "normalement ouvert", "normalement fermé"]
+  },
+  {
+    "terme": "ONT",
+    "famille": "Communication et réseaux",
+    "categorie": "materiel",
+    "definition_courte": "Boîtier ou module qui convertit le signal fibre optique en signal exploitable par la box.",
+    "explication_pedagogique": "À quoi ça sert : faire la jonction entre la fibre et les équipements réseau du logement.",
+    "mots_cles": ["fibre", "box", "convertisseur", "optique"]
+  },
+  {
+    "terme": "PAC",
+    "acronyme": "Pompe à Chaleur",
+    "famille": "Chauffage et ECS",
+    "categorie": "materiel",
+    "definition_courte": "Équipement de chauffage ou production d'eau chaude utilisant les calories de l'air, du sol ou de l'eau.",
+    "explication_pedagogique": "Dans le CCTP, on distingue unité extérieure, unité intérieure et liaison de communication. L'électricien prévoit les alimentations et attentes électriques, mais le raccordement final peut relever du lot CVC.",
+    "points_vigilance": ["Le raccordement final peut relever du lot CVC — vérifier les limites de prestation"],
+    "mots_cles": ["pompe à chaleur", "chauffage", "ECS", "CVC"]
+  },
+  {
+    "terme": "Panneau de contrôle",
+    "famille": "Distribution et branchement",
+    "categorie": "materiel",
+    "definition_courte": "Partie de la GTL recevant généralement le compteur et le disjoncteur de branchement.",
+    "explication_pedagogique": "Il concentre les organes principaux liés au branchement électrique du logement.",
+    "mots_cles": ["GTL", "compteur", "disjoncteur de branchement"]
+  },
+  {
+    "terme": "Panneau rayonnant",
+    "famille": "Chauffage et ECS",
+    "categorie": "materiel",
+    "definition_courte": "Radiateur électrique qui chauffe par rayonnement.",
+    "explication_pedagogique": "À quoi ça sert : chauffer une pièce avec un confort supérieur à un convecteur simple.",
+    "mots_cles": ["chauffage", "rayonnement", "radiateur"]
+  },
+  {
+    "terme": "PC",
+    "acronyme": "Prise de Courant",
+    "famille": "Appareillage",
+    "categorie": "materiel",
+    "definition_courte": "Point de raccordement pour brancher un appareil électrique.",
+    "explication_pedagogique": "Dans les CCTP, PC signifie souvent prise de courant, pas ordinateur.",
+    "exemple_utilisation": "PC 10/16A, PC dans gaine SG, PC proche VMC.",
+    "mots_cles": ["prise de courant", "appareillage", "raccordement"]
+  },
+  {
+    "terme": "PDL",
+    "acronyme": "Point De Livraison",
+    "famille": "Distribution et branchement",
+    "categorie": "technique",
+    "definition_courte": "Référence du point où l'électricité est livrée par le distributeur.",
+    "explication_pedagogique": "Il identifie administrativement et techniquement l'alimentation électrique d'un logement ou d'un service général.",
+    "points_vigilance": ["La demande de PDL fait partie des démarches à prévoir avec Enedis"],
+    "mots_cles": ["point de livraison", "Enedis", "alimentation"]
+  },
+  {
+    "terme": "PdC",
+    "acronyme": "Pouvoir de Coupure",
+    "famille": "Protection et sécurité",
+    "categorie": "securite",
+    "definition_courte": "Capacité d'un disjoncteur à couper un courant de court-circuit sans danger.",
+    "explication_pedagogique": "À vérifier que la protection est adaptée au niveau de court-circuit possible à l'endroit où elle est installée.",
+    "points_vigilance": ["Un mauvais pouvoir de coupure peut rendre la protection dangereuse ou non conforme"],
+    "mots_cles": ["pouvoir de coupure", "court-circuit", "disjoncteur"]
+  },
+  {
+    "terme": "PEP Eco Passeport",
+    "famille": "Environnement / RE2020",
+    "categorie": "document",
+    "definition_courte": "Profil environnemental d'un équipement électrique.",
+    "explication_pedagogique": "À quoi ça sert : justifier l'impact environnemental d'un produit dans le cadre RE2020.",
+    "exemple_utilisation": "Appareillage, colliers, éco-compteurs.",
+    "documents_lies": ["RE2020", "INIES"],
+    "mots_cles": ["PEP", "environnement", "RE2020"]
+  },
+  {
+    "terme": "Pied de colonne",
+    "famille": "Distribution et branchement",
+    "categorie": "technique",
+    "definition_courte": "Point bas de la colonne électrique dans un immeuble collectif.",
+    "explication_pedagogique": "Il reçoit l'alimentation principale avant distribution vers les niveaux ou logements. C'est un point clé de départ de la distribution collective.",
+    "mots_cles": ["colonne", "collectif", "distribution"]
+  },
+  {
+    "terme": "Plan de borniers",
+    "famille": "Documents et schémas",
+    "categorie": "document",
+    "definition_courte": "Plan indiquant comment les câbles sont raccordés sur les borniers.",
+    "explication_pedagogique": "À quoi ça sert : identifier chaque fil et chaque borne dans une armoire ou un tableau.",
+    "mots_cles": ["plan", "bornier", "raccordement", "armoire"]
+  },
+  {
+    "terme": "Plans de récolement",
+    "famille": "Documents et schémas",
+    "categorie": "document",
+    "definition_courte": "Plans mis à jour après travaux, montrant ce qui a réellement été exécuté.",
+    "explication_pedagogique": "À quoi ça sert : permettre la maintenance, les interventions futures et la constitution du DOE.",
+    "documents_lies": ["DOE"],
+    "mots_cles": ["récolement", "DOE", "maintenance", "plan"]
+  },
+  {
+    "terme": "Platine de comptage",
+    "famille": "Distribution et branchement",
+    "categorie": "materiel",
+    "definition_courte": "Support recevant le compteur électrique et certains organes de branchement.",
+    "explication_pedagogique": "Elle permet l'installation propre du comptage Enedis.",
+    "mots_cles": ["comptage", "compteur", "Enedis", "branchement"]
+  },
+  {
+    "terme": "Point lumineux",
+    "famille": "Éclairage",
+    "categorie": "technique",
+    "definition_courte": "Emplacement prévu pour un éclairage.",
+    "explication_pedagogique": "Il peut être constitué d'un DCL, d'une applique, d'un plafonnier ou d'un luminaire.",
+    "mots_cles": ["éclairage", "DCL", "luminaire", "plafonnier"]
+  },
+  {
+    "terme": "Pressostat",
+    "famille": "VMC",
+    "categorie": "materiel",
+    "definition_courte": "Capteur qui détecte une pression ou une dépression d'air.",
+    "explication_pedagogique": "Sur une VMC, il peut signaler un défaut de fonctionnement.",
+    "exemple_utilisation": "Voyant défaut VMC commandé par contact sec du pressostat.",
+    "mots_cles": ["pressostat", "VMC", "défaut", "pression"]
+  },
+  {
+    "terme": "Prise à éclipse",
+    "famille": "Appareillage",
+    "categorie": "securite",
+    "definition_courte": "Prise équipée d'obturateurs de sécurité.",
+    "explication_pedagogique": "Elle empêche l'introduction accidentelle d'un objet dans un seul trou de la prise. Les prises de logement doivent être sécurisées.",
+    "mots_cles": ["prise", "éclipse", "obturateur", "sécurité"]
+  },
+  {
+    "terme": "Prise de terre",
+    "famille": "Protection et sécurité",
+    "categorie": "securite",
+    "definition_courte": "Dispositif reliant l'installation électrique à la terre.",
+    "explication_pedagogique": "Dans le CCTP, elle est réalisée par un câble cuivre nu à fond de fouille. Elle permet d'évacuer les courants de défaut et de faire fonctionner les protections différentielles.",
+    "mots_cles": ["terre", "cuivre nu", "fond de fouille", "différentiel"]
+  },
+  {
+    "terme": "Rail DIN",
+    "famille": "Matériel de tableau",
+    "categorie": "materiel",
+    "definition_courte": "Rail métallique normalisé permettant de fixer des modules dans les tableaux ou coffrets.",
+    "explication_pedagogique": "À quoi ça sert : installer proprement disjoncteurs, DTI, DTIO, borniers, modules.",
+    "mots_cles": ["rail DIN", "tableau", "module", "fixation"]
+  },
+  {
+    "terme": "RE2020",
+    "famille": "Environnement / RE2020",
+    "categorie": "norme",
+    "definition_courte": "Réglementation environnementale applicable aux bâtiments neufs.",
+    "explication_pedagogique": "Dans le lot électricité, elle influence notamment le suivi des consommations, les équipements, les fiches environnementales et les performances énergétiques. L'électricien doit fournir certains justificatifs produits et respecter les choix liés à l'étude RE2020.",
+    "documents_lies": ["FDES", "PEP", "INIES"],
+    "mots_cles": ["réglementation", "environnement", "consommation", "performance"]
+  },
+  {
+    "terme": "Régime TT",
+    "famille": "Protection et sécurité",
+    "categorie": "technique",
+    "definition_courte": "Régime de neutre où le neutre du distributeur est relié à la terre et les masses de l'installation sont reliées à une prise de terre locale.",
+    "explication_pedagogique": "C'est le régime très courant dans les logements.",
+    "points_vigilance": ["Nécessite une bonne prise de terre et des différentiels adaptés"],
+    "mots_cles": ["régime de neutre", "TT", "terre", "différentiel"]
+  },
+  {
+    "terme": "REMBT",
+    "famille": "Distribution et branchement",
+    "categorie": "materiel",
+    "definition_courte": "Coffret de raccordement basse tension utilisé par Enedis pour regrouper plusieurs départs.",
+    "explication_pedagogique": "Il permet d'alimenter plusieurs logements ou départs depuis un même coffret réseau.",
+    "exemple_utilisation": "Coffret de coupure REMBT 12 plages.",
+    "mots_cles": ["coffret", "basse tension", "Enedis", "départs"]
+  },
+  {
+    "terme": "Repérage des circuits",
+    "famille": "Documents et schémas",
+    "categorie": "mise_en_oeuvre",
+    "definition_courte": "Identification claire des circuits sur les tableaux, câbles, borniers et plans.",
+    "explication_pedagogique": "À quoi ça sert : éviter les erreurs, faciliter la maintenance et permettre une intervention rapide.",
+    "points_vigilance": ["Le repérage des circuits est obligatoire"],
+    "mots_cles": ["repérage", "circuit", "tableau", "maintenance"]
+  },
+  {
+    "terme": "Répartiteur TV",
+    "famille": "Communication et réseaux",
+    "categorie": "materiel",
+    "definition_courte": "Équipement qui divise un signal TV vers plusieurs directions.",
+    "explication_pedagogique": "À quoi ça sert : distribuer le signal TV vers plusieurs logements ou prises.",
+    "points_vigilance": ["Doit être à faible perte pour éviter une mauvaise réception"],
+    "mots_cles": ["TV", "répartiteur", "signal", "distribution"]
+  },
+  {
+    "terme": "RFID",
+    "famille": "Contrôle d'accès",
+    "categorie": "materiel",
+    "definition_courte": "Technologie de badge ou carte sans contact.",
+    "explication_pedagogique": "À quoi ça sert : autoriser ou gérer l'accès à une borne de recharge, une porte ou un contrôle d'accès.",
+    "mots_cles": ["RFID", "badge", "contrôle d'accès", "sans contact"]
+  },
+  {
+    "terme": "RGPD",
+    "acronyme": "Règlement Général sur la Protection des Données",
+    "famille": "Environnement / RE2020",
+    "categorie": "norme",
+    "definition_courte": "Règlement encadrant la protection des données personnelles.",
+    "explication_pedagogique": "Dans le lot électricité/CFA, il concerne les systèmes connectés, contrôle d'accès, interphonie, données personnelles et smart grids.",
+    "points_vigilance": ["Les équipements communicants doivent respecter la confidentialité des données"],
+    "mots_cles": ["RGPD", "données personnelles", "CFA", "smart grids"]
+  },
+  {
+    "terme": "RJ45",
+    "famille": "Communication et réseaux",
+    "categorie": "materiel",
+    "definition_courte": "Connecteur réseau utilisé pour internet, téléphone, informatique et parfois TV selon l'installation.",
+    "explication_pedagogique": "À quoi ça sert : distribuer les services de communication dans les pièces. Dans les logements modernes, les prises RJ45 remplacent souvent les anciennes prises téléphoniques.",
+    "mots_cles": ["RJ45", "réseau", "internet", "prise"]
+  },
+  {
+    "terme": "Schéma multifilaire",
+    "famille": "Documents et schémas",
+    "categorie": "document",
+    "definition_courte": "Schéma détaillé représentant les différents conducteurs d'un circuit.",
+    "explication_pedagogique": "À quoi ça sert : comprendre précisément les commandes, raccordements et circuits de commande.",
+    "mots_cles": ["schéma", "multifilaire", "conducteur", "commande"]
+  },
+  {
+    "terme": "Schéma unifilaire",
+    "famille": "Documents et schémas",
+    "categorie": "document",
+    "definition_courte": "Schéma électrique simplifié représentant les circuits avec une seule ligne par liaison.",
+    "explication_pedagogique": "À quoi ça sert : comprendre rapidement la distribution électrique et les protections.",
+    "mots_cles": ["schéma", "unifilaire", "distribution", "protection"]
+  },
+  {
+    "terme": "Sélectivité",
+    "famille": "Protection et sécurité",
+    "categorie": "technique",
+    "definition_courte": "Principe consistant à faire déclencher uniquement la protection la plus proche du défaut.",
+    "explication_pedagogique": "À quoi ça sert : éviter que tout le bâtiment soit coupé pour un défaut local.",
+    "exemple_utilisation": "Si une prise est en défaut, seul le disjoncteur du circuit prise doit déclencher, pas tout le tableau.",
+    "mots_cles": ["sélectivité", "protection", "déclenchement", "défaut"]
+  },
+  {
+    "terme": "Sélectivité verticale",
+    "famille": "Protection et sécurité",
+    "categorie": "technique",
+    "definition_courte": "Coordination entre protections placées les unes au-dessus des autres dans la distribution.",
+    "explication_pedagogique": "À quoi ça sert : garantir que la coupure se fait au bon niveau de l'installation.",
+    "mots_cles": ["sélectivité", "coordination", "distribution"]
+  },
+  {
+    "terme": "SG",
+    "acronyme": "Services Généraux",
+    "famille": "Distribution et branchement",
+    "categorie": "technique",
+    "definition_courte": "Équipements communs d'un bâtiment collectif.",
+    "explication_pedagogique": "Exemples : éclairage des parties communes, éclairage extérieur, prises de service, contrôle d'accès, VMC, ECS, IRVE. Les services généraux sont alimentés par un tableau ou une armoire dédiée.",
+    "mots_cles": ["services généraux", "parties communes", "collectif"]
+  },
+  {
+    "terme": "Simple allumage",
+    "famille": "Éclairage",
+    "categorie": "mise_en_oeuvre",
+    "definition_courte": "Commande d'éclairage depuis un seul interrupteur.",
+    "explication_pedagogique": "Exemple : interrupteur à l'entrée d'une pièce pour allumer un plafonnier.",
+    "mots_cles": ["allumage", "interrupteur", "éclairage"]
+  },
+  {
+    "terme": "Smart grids",
+    "famille": "Environnement / RE2020",
+    "categorie": "technique",
+    "definition_courte": "Réseaux intelligents capables de communiquer des données de consommation ou de gestion d'énergie.",
+    "explication_pedagogique": "À quoi ça sert : suivre, optimiser ou piloter les consommations.",
+    "points_vigilance": ["Dès qu'il y a données personnelles ou d'usage, le RGPD doit être respecté"],
+    "mots_cles": ["smart grid", "réseau intelligent", "énergie", "RGPD"]
+  },
+  {
+    "terme": "SSI Logement",
+    "acronyme": "Système de Sécurité Incendie Logement",
+    "famille": "Sécurité incendie",
+    "categorie": "securite",
+    "definition_courte": "Ensemble des dispositifs liés à la sécurité incendie dans les logements.",
+    "explication_pedagogique": "Dans ce CCTP, il s'agit principalement des DAAF. À quoi ça sert : détecter et alerter les occupants en cas d'incendie.",
+    "documents_lies": ["DAAF"],
+    "mots_cles": ["SSI", "incendie", "DAAF", "sécurité"]
+  },
+  {
+    "terme": "SYT1",
+    "famille": "Câbles et conduits",
+    "categorie": "materiau",
+    "definition_courte": "Câble courants faibles utilisé pour interphonie, contrôle d'accès ou commandes.",
+    "explication_pedagogique": "À quoi ça sert : transmettre des signaux faibles entre centrale, platine, gâche, ventouse ou bouton poussoir.",
+    "points_vigilance": ["Ne doit pas cheminer n'importe comment à proximité des courants forts"],
+    "mots_cles": ["courants faibles", "interphonie", "contrôle d'accès"]
+  },
+  {
+    "terme": "T2S",
+    "famille": "IRVE",
+    "categorie": "materiel",
+    "definition_courte": "Type de prise de recharge pour véhicule électrique avec obturateurs de sécurité.",
+    "explication_pedagogique": "À quoi ça sert : permettre une recharge sécurisée sur borne IRVE.",
+    "mots_cles": ["prise", "recharge", "IRVE", "sécurité"]
+  },
+  {
+    "terme": "Tableau de communication",
+    "famille": "Communication et réseaux",
+    "categorie": "materiel",
+    "definition_courte": "Coffret dédié aux réseaux de communication du logement.",
+    "explication_pedagogique": "Il centralise la fibre, le téléphone, les RJ45, la TV et parfois la box internet. Il permet de distribuer internet, téléphone et télévision dans les différentes pièces.",
+    "mots_cles": ["tableau communication", "fibre", "RJ45", "TV"]
+  },
+  {
+    "terme": "Tableau de protection",
+    "famille": "Protection et sécurité",
+    "categorie": "materiel",
+    "definition_courte": "Tableau électrique principal du logement.",
+    "explication_pedagogique": "Il reçoit les disjoncteurs, les différentiels, les protections des circuits et les repérages. Il distribue et protège tous les circuits électriques du logement : éclairage, prises, plaque de cuisson, VMC, chauffage, ECS, IRVE, etc.",
+    "points_vigilance": ["Le repérage des circuits est obligatoire"],
+    "mots_cles": ["tableau", "disjoncteur", "différentiel", "circuit"]
+  },
+  {
+    "terme": "Tarif bleu",
+    "famille": "Distribution et branchement",
+    "categorie": "technique",
+    "definition_courte": "Ancienne appellation courante pour une puissance électrique basse tension de faible ou moyenne puissance.",
+    "explication_pedagogique": "Dans le CCTP, il est cité pour les comptages des services généraux. C'est une indication de type de contrat et de puissance électrique.",
+    "mots_cles": ["tarif bleu", "basse tension", "comptage", "services généraux"]
+  },
+  {
+    "terme": "TDSG",
+    "acronyme": "Tableau Divisionnaire Services Généraux",
+    "famille": "Distribution et branchement",
+    "categorie": "materiel",
+    "definition_courte": "Tableau électrique dédié aux services généraux.",
+    "explication_pedagogique": "Il alimente les équipements communs : éclairage, prises, VMC, contrôle d'accès, ECS, IRVE. Il est souvent placé en gaine technique ou local technique.",
+    "mots_cles": ["tableau divisionnaire", "services généraux", "équipements communs"]
+  },
+  {
+    "terme": "Télérupteur",
+    "famille": "Éclairage",
+    "categorie": "materiel",
+    "definition_courte": "Module permettant de commander un éclairage depuis plusieurs boutons poussoirs.",
+    "explication_pedagogique": "Très utilisé dans les circulations, escaliers ou parties communes.",
+    "mots_cles": ["télérupteur", "bouton poussoir", "éclairage", "circulation"]
+  },
+  {
+    "terme": "Temporisation",
+    "famille": "Contrôle-commande",
+    "categorie": "technique",
+    "definition_courte": "Durée réglable pendant laquelle une action reste active.",
+    "explication_pedagogique": "Exemple : temps d'ouverture d'une porte après appui sur bouton poussoir ou validation badge.",
+    "mots_cles": ["temporisation", "durée", "porte", "commande"]
+  },
+  {
+    "terme": "Tétraphasé / Triphasé",
+    "famille": "Distribution et branchement",
+    "categorie": "technique",
+    "definition_courte": "Alimentation avec plusieurs phases, utilisée pour des puissances plus importantes.",
+    "explication_pedagogique": "Dans le CCTP, les services généraux sont prévus avec un comptage tarif bleu tétraphasé. On le retrouve souvent pour les parties communes, équipements techniques ou puissances plus élevées.",
+    "mots_cles": ["triphasé", "tétraphasé", "phases", "puissance"]
+  },
+  {
+    "terme": "TGBT",
+    "acronyme": "Tableau Général Basse Tension",
+    "famille": "Distribution et branchement",
+    "categorie": "materiel",
+    "definition_courte": "Armoire électrique principale qui distribue les départs électriques d'un bâtiment ou d'une zone.",
+    "explication_pedagogique": "Dans le CCTP, les TGBT SG alimentent les installations électriques des parties communes. C'est le grand tableau de départ pour les services généraux.",
+    "mots_cles": ["TGBT", "armoire", "basse tension", "services généraux"]
+  },
+  {
+    "terme": "Thermostat",
+    "famille": "Chauffage et ECS",
+    "categorie": "materiel",
+    "definition_courte": "Appareil de régulation de température.",
+    "explication_pedagogique": "À quoi ça sert : commander le chauffage ou la PAC selon la température souhaitée.",
+    "mots_cles": ["thermostat", "régulation", "chauffage", "PAC"]
+  },
+  {
+    "terme": "TPC",
+    "famille": "Câbles et conduits",
+    "categorie": "materiau",
+    "definition_courte": "Fourreau enterré utilisé pour les réseaux extérieurs.",
+    "explication_pedagogique": "À quoi ça sert : protéger les câbles enterrés entre coffrets, bâtiments, réseaux et gaines techniques.",
+    "exemple_utilisation": "TPC Ø110 rouge pour l'électricité.",
+    "mots_cles": ["fourreau", "enterré", "réseau extérieur"]
+  },
+  {
+    "terme": "TV/FM/SAT",
+    "famille": "Communication et réseaux",
+    "categorie": "technique",
+    "definition_courte": "Distribution télévision, radio FM et satellite.",
+    "explication_pedagogique": "À quoi ça sert : amener les signaux TV et radio dans les logements.",
+    "exemple_utilisation": "Prise TV/FM/SAT dans le séjour.",
+    "mots_cles": ["TV", "FM", "satellite", "distribution"]
+  },
+  {
+    "terme": "Type E",
+    "famille": "Appareillage",
+    "categorie": "materiel",
+    "definition_courte": "Prise domestique française avec terre.",
+    "explication_pedagogique": "À quoi ça sert : peut servir à certains modes de charge lente ou usages simples.",
+    "mots_cles": ["prise", "type E", "terre", "charge lente"]
+  },
+  {
+    "terme": "U1000AR2V",
+    "famille": "Câbles et conduits",
+    "categorie": "materiau",
+    "definition_courte": "Câble similaire au U1000R2V mais avec âme aluminium.",
+    "explication_pedagogique": "À quoi ça sert : utilisé pour certaines liaisons de puissance ou alimentations de colonne selon dimensionnement.",
+    "mots_cles": ["câble", "aluminium", "puissance", "colonne"]
+  },
+  {
+    "terme": "U1000R2V",
+    "famille": "Câbles et conduits",
+    "categorie": "materiau",
+    "definition_courte": "Câble électrique rigide utilisé pour les installations fixes.",
+    "explication_pedagogique": "À quoi ça sert : alimenter des tableaux, circuits, équipements ou distributions en apparent, sous conduit ou selon prescription. Très fréquent en bâtiment.",
+    "mots_cles": ["câble", "rigide", "installation fixe", "puissance"]
+  },
+  {
+    "terme": "Unité extérieure PAC",
+    "famille": "Chauffage et ECS",
+    "categorie": "materiel",
+    "definition_courte": "Partie extérieure de la pompe à chaleur.",
+    "explication_pedagogique": "Elle capte ou rejette les calories. Côté électricité, elle doit recevoir une alimentation dédiée et protégée.",
+    "mots_cles": ["PAC", "unité extérieure", "alimentation dédiée"]
+  },
+  {
+    "terme": "Unité intérieure PAC",
+    "famille": "Chauffage et ECS",
+    "categorie": "materiel",
+    "definition_courte": "Partie intérieure de la pompe à chaleur.",
+    "explication_pedagogique": "Elle assure la distribution ou le pilotage du chauffage/ECS selon le système. Côté électricité, elle peut nécessiter plusieurs alimentations distinctes.",
+    "mots_cles": ["PAC", "unité intérieure", "chauffage", "ECS"]
+  },
+  {
+    "terme": "UTE C 15-722",
+    "famille": "Normes",
+    "categorie": "norme",
+    "definition_courte": "Guide ou prescription technique concernant les infrastructures de recharge de véhicules électriques.",
+    "explication_pedagogique": "À quoi ça sert : encadrer le dimensionnement et la sécurité des IRVE.",
+    "documents_lies": ["IRVE"],
+    "mots_cles": ["UTE", "IRVE", "recharge", "sécurité"]
+  },
+  {
+    "terme": "UTE C 90-483",
+    "famille": "Normes",
+    "categorie": "norme",
+    "definition_courte": "Recommandation concernant les réseaux de communication dans les logements.",
+    "explication_pedagogique": "À quoi ça sert : encadrer la distribution téléphone, internet, informatique et RJ45.",
+    "mots_cles": ["UTE", "communication", "RJ45", "réseau"]
+  },
+  {
+    "terme": "Va-et-vient",
+    "famille": "Éclairage",
+    "categorie": "mise_en_oeuvre",
+    "definition_courte": "Commande d'un même éclairage depuis deux endroits différents.",
+    "explication_pedagogique": "Exemple : couloir, escalier, grande pièce.",
+    "mots_cles": ["va-et-vient", "éclairage", "commande", "interrupteur"]
+  },
+  {
+    "terme": "Ventouse électromagnétique",
+    "famille": "Contrôle d'accès",
+    "categorie": "materiel",
+    "definition_courte": "Système de verrouillage maintenant une porte fermée par aimantation.",
+    "explication_pedagogique": "À quoi ça sert : assurer la fermeture contrôlée d'un accès.",
+    "points_vigilance": ["En cas de coupure secteur, selon conception, la porte peut se libérer"],
+    "mots_cles": ["ventouse", "verrouillage", "porte", "aimantation"]
+  },
+  {
+    "terme": "VIGIK+",
+    "famille": "Contrôle d'accès",
+    "categorie": "materiel",
+    "definition_courte": "Système de contrôle d'accès pour les immeubles, notamment pour les intervenants extérieurs autorisés.",
+    "explication_pedagogique": "À quoi ça sert : permettre l'accès sécurisé à certains professionnels ou services. Dans le CCTP, les portes collectives sont prévues avec contrôle d'accès VIGIK+ et résidents.",
+    "mots_cles": ["VIGIK", "contrôle d'accès", "immeuble", "intervenant"]
+  },
+  {
+    "terme": "VISTOP",
+    "famille": "VMC",
+    "categorie": "materiel",
+    "definition_courte": "Modèle ou type d'interrupteur-sectionneur à coupure visible.",
+    "explication_pedagogique": "Il permet une coupure de sécurité claire et visible, souvent utilisée pour les armoires ou équipements techniques.",
+    "synonymes": ["interrupteur-sectionneur à coupure visible"],
+    "mots_cles": ["VISTOP", "sectionneur", "coupure visible", "VMC"]
+  },
+  {
+    "terme": "VMC",
+    "acronyme": "Ventilation Mécanique Contrôlée",
+    "famille": "VMC",
+    "categorie": "materiel",
+    "definition_courte": "Système qui extrait l'air vicié des logements ou locaux.",
+    "explication_pedagogique": "À quoi ça sert : renouveler l'air intérieur. Dans le CCTP, le lot électricité prévoit certaines alimentations, voyants défauts et prises de maintenance liées à la VMC.",
+    "mots_cles": ["VMC", "ventilation", "air", "alimentation"]
+  },
+  {
+    "terme": "Volume 0 / 1 / 2 / 3 en salle d'eau",
+    "famille": "Protection et sécurité",
+    "categorie": "securite",
+    "definition_courte": "Zones réglementaires autour de la baignoire ou douche.",
+    "explication_pedagogique": "À quoi ça sert : déterminer quel matériel électrique peut être posé et avec quel indice IP.",
+    "points_vigilance": ["Les interrupteurs et luminaires doivent respecter ces volumes"],
+    "mots_cles": ["volume", "salle d'eau", "IP", "sécurité"]
+  }
+]

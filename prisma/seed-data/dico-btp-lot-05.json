@@ -1,0 +1,1604 @@
+[
+  {
+    "terme": "A2P",
+    "definition_courte": "Certification de résistance à l’effraction pour les serrures et certains blocs-portes.",
+    "explication_pedagogique": "Elle donne un niveau de sécurité reconnu pour limiter les risques d’ouverture forcée.",
+    "exemple_utilisation": "les portes d’entrée et portes palières sont prévues avec serrure 3 points A2P*.",
+    "points_vigilance": [
+      "vérifier que le PV ou l’attestation correspond bien au modèle posé."
+    ]
+  },
+  {
+    "terme": "About de cloison",
+    "definition_courte": "Extrémité visible d’une cloison, souvent fragile et exposée aux chocs.",
+    "explication_pedagogique": "Le poteau d’about habille et protège cette extrémité de cloison.",
+    "exemple_utilisation": "poteaux d’about en profil U en sapin du Nord, à peindre.",
+    "points_vigilance": [
+      "coordonner fourniture menuiserie et pose par le lot plâtrerie."
+    ]
+  },
+  {
+    "terme": "Accessibilité PMR",
+    "definition_courte": "Règles permettant l’usage des ouvrages par les personnes à mobilité réduite.",
+    "explication_pedagogique": "Garantir des passages, hauteurs et équipements compatibles avec l’usage par tous.",
+    "exemple_utilisation": "certaines boîtes aux lettres doivent être accessibles aux personnes handicapées.",
+    "points_vigilance": [
+      "PMR impacte les hauteurs, largeurs de passage, commandes et dimensions de marches."
+    ]
+  },
+  {
+    "terme": "Acier électrozingué",
+    "definition_courte": "Acier recouvert d’une fine couche de zinc par procédé électrolytique.",
+    "explication_pedagogique": "Protéger les huisseries métalliques contre la corrosion avant peinture ou finition.",
+    "exemple_utilisation": "huisseries en tôle d’acier électrozinguée pour les portes d’entrée.",
+    "points_vigilance": [
+      "ne pas confondre avec acier galvanisé, même si les deux visent la protection anticorrosion."
+    ]
+  },
+  {
+    "terme": "Acier galvanisé",
+    "definition_courte": "Acier protégé par une couche de zinc, utilisé pour limiter la corrosion.",
+    "explication_pedagogique": "Rendre les rails, profils ou tôles plus durables en milieu intérieur ou semi-exposé.",
+    "exemple_utilisation": "rails hauts et bas de placards en acier galvanisé blanc.",
+    "points_vigilance": [
+      "une coupe ou rayure non protégée peut devenir un point de corrosion."
+    ]
+  },
+  {
+    "terme": "Acrylique",
+    "definition_courte": "Mastic souple utilisé pour traiter les petits joints avant peinture.",
+    "explication_pedagogique": "Fermer proprement les jours entre menuiseries, murs, plinthes et habillages.",
+    "exemple_utilisation": "joints acryliques sur plinthes, huisseries et habillages de tuyauteries.",
+    "points_vigilance": [
+      "l’acrylique se peint, mais il ne remplace pas un vrai calfeutrement technique."
+    ]
+  },
+  {
+    "terme": "Aluminium anodisé",
+    "definition_courte": "Aluminium traité en surface pour améliorer sa résistance et son aspect.",
+    "explication_pedagogique": "Obtenir une finition durable pour poignées, béquilles, cadres ou accessoires.",
+    "exemple_utilisation": "ensembles de porte en aluminium anodisé type Jazz ou Osmose.",
+    "points_vigilance": [
+      "l’anodisation est une finition, pas une peinture classique."
+    ]
+  },
+  {
+    "terme": "Âme alvéolaire",
+    "definition_courte": "Remplissage léger à structure alvéolée placé à l’intérieur d’une porte.",
+    "explication_pedagogique": "Alléger le vantail et réduire le coût pour les portes de distribution courantes.",
+    "exemple_utilisation": "portes de distribution avec âme alvéolaire.",
+    "points_vigilance": [
+      "moins performante acoustiquement et mécaniquement qu’une âme pleine."
+    ]
+  },
+  {
+    "terme": "Âme isolante",
+    "definition_courte": "Remplissage intérieur d’une porte destiné à améliorer l’isolation thermique ou acoustique.",
+    "explication_pedagogique": "Limiter les pertes de chaleur, les bruits et parfois contribuer à la résistance au feu.",
+    "exemple_utilisation": "porte d’entrée métallique avec remplissage par âme isolante et coupe-feu.",
+    "points_vigilance": [
+      "l’âme doit correspondre au PV d’essai du fabricant."
+    ]
+  },
+  {
+    "terme": "Âme pleine",
+    "definition_courte": "Porte dont l’intérieur est rempli par un matériau plein ou dense.",
+    "explication_pedagogique": "Améliorer la solidité, l’acoustique et la tenue au feu par rapport à une âme alvéolaire.",
+    "exemple_utilisation": "portes palières et portes acoustiques avec âme pleine.",
+    "points_vigilance": [
+      "une porte âme pleine est plus lourde et demande un ferrage adapté."
+    ]
+  },
+  {
+    "terme": "Anti-dégondage",
+    "definition_courte": "Dispositif empêchant ou retardant la sortie du vantail hors de ses paumelles.",
+    "explication_pedagogique": "Renforcer la sécurité contre l’arrachement ou le dégondage de la porte.",
+    "exemple_utilisation": "paumelles avec pions ou système anti-dégondable en acier.",
+    "points_vigilance": [
+      "vérifier le sens d’ouverture et la présence réelle des pions."
+    ]
+  },
+  {
+    "terme": "Anti-effraction BP1",
+    "definition_courte": "Classe ou niveau de résistance à l’effraction associé à certains blocs-portes.",
+    "explication_pedagogique": "Retarder l’intrusion en renforçant la porte, la serrure, le bâti et les points faibles.",
+    "exemple_utilisation": "portes Athena Anti-effraction BP1 et portes palières Isoblinde 39BP1.",
+    "points_vigilance": [
+      "la performance concerne l’ensemble bloc-porte, pas seulement la serrure."
+    ]
+  },
+  {
+    "terme": "Anti-vandale grade 3",
+    "definition_courte": "Niveau de résistance renforcée pour des équipements exposés aux dégradations.",
+    "explication_pedagogique": "Protéger les boîtes aux lettres extérieures contre les chocs, tentatives d’ouverture et usages intensifs.",
+    "exemple_utilisation": "façades PRYSM anti-vandale grade 3 pour les boîtes aux lettres.",
+    "points_vigilance": [
+      "utile en parties communes et zones accessibles au public."
+    ]
+  },
+  {
+    "terme": "Bâti",
+    "definition_courte": "Cadre fixe recevant un ouvrant, une trappe ou une porte.",
+    "explication_pedagogique": "Supporter le vantail et assurer son alignement, sa fermeture et son jeu de fonctionnement.",
+    "exemple_utilisation": "bâti de trappe d’accès aux combles fourni pour pose au lot plâtrerie.",
+    "points_vigilance": [
+      "un bâti mal posé entraîne frottements, mauvais jeu ou défaut d’étanchéité."
+    ]
+  },
+  {
+    "terme": "Batteuse",
+    "definition_courte": "Petite serrure ou verrou de fermeture utilisé sur trappes, gaines ou équipements techniques.",
+    "explication_pedagogique": "Fermer simplement un panneau ou une trappe sans serrure complexe.",
+    "exemple_utilisation": "batteuse à triangle, carré ou carré pour trappe de combles.",
+    "points_vigilance": [
+      "le type de clé doit correspondre au concessionnaire ou à l’exploitant."
+    ]
+  },
+  {
+    "terme": "Batteuse à carré",
+    "definition_courte": "Batteuse commandée par une clé ou empreinte carrée.",
+    "explication_pedagogique": "Réserver l’accès aux techniciens ou exploitants sans multiplier les clés individuelles.",
+    "exemple_utilisation": "fermeture de la trappe d’accès aux combles par batteuse à carré.",
+    "points_vigilance": [
+      "souvent utilisée pour gaines, trappes et locaux techniques."
+    ]
+  },
+  {
+    "terme": "Batteuse à triangle",
+    "definition_courte": "Batteuse commandée par une empreinte triangulaire.",
+    "explication_pedagogique": "Permettre l’accès aux réseaux ou gaines par les concessionnaires concernés.",
+    "exemple_utilisation": "fermeture de façades de gaines par batteuse triangle ou carré selon concessionnaires.",
+    "points_vigilance": [
+      "valider le standard demandé avant commande."
+    ]
+  },
+  {
+    "terme": "Bec de cane",
+    "definition_courte": "Type de serrure simple permettant la fermeture par demi-tour sans clé.",
+    "explication_pedagogique": "Fermer une porte intérieure courante par action de la poignée.",
+    "exemple_utilisation": "serrures bec de cane pour portes de distribution et locaux techniques.",
+    "points_vigilance": [
+      "peut être simple, à condamnation ou associé à un pêne dormant selon la pièce."
+    ]
+  },
+  {
+    "terme": "Béquillage",
+    "definition_courte": "Ensemble de poignées, plaques, rosaces et accessoires permettant de manœuvrer une porte.",
+    "explication_pedagogique": "Ouvrir, fermer et parfois condamner la porte.",
+    "exemple_utilisation": "béquillage double sur plaque, gamme Tempo, Disco, Jazz ou Osmose.",
+    "points_vigilance": [
+      "vérifier modèle, finition, sens et compatibilité avec la serrure."
+    ]
+  },
+  {
+    "terme": "Béquillage provisoire",
+    "definition_courte": "Poignées ou accessoires temporaires posés pendant le chantier.",
+    "explication_pedagogique": "Permettre l’usage des portes avant la pose des cylindres et garnitures définitifs.",
+    "exemple_utilisation": "cylindres et béquillages provisoires type PRATIC pour toute la durée du chantier.",
+    "points_vigilance": [
+      "récupérer ou remplacer proprement les éléments provisoires en fin de chantier."
+    ]
+  },
+  {
+    "terme": "Bloc-porte",
+    "definition_courte": "Ensemble complet composé au minimum d’une huisserie et d’un vantail, avec ferrage et quincaillerie selon cas.",
+    "explication_pedagogique": "Livrer une solution cohérente pour l’ouverture, la fermeture, l’acoustique, la sécurité ou le feu.",
+    "exemple_utilisation": "blocs-portes d’entrée, palières, de distribution, acoustiques et techniques.",
+    "points_vigilance": [
+      "analyser un bloc-porte revient à vérifier la porte, le bâti, les joints, la serrure, le seuil et les PV."
+    ]
+  },
+  {
+    "terme": "Boîte aux lettres",
+    "definition_courte": "Équipement destiné à recevoir le courrier des logements ou locaux.",
+    "explication_pedagogique": "Organiser la distribution du courrier en logement collectif ou groupé.",
+    "exemple_utilisation": "ensembles extérieurs RENZ Classica ou équivalent, posés sur pieds.",
+    "points_vigilance": [
+      "vérifier nombre de boîtes, accessibilité PMR, clés et implantation sur plans."
+    ]
+  },
+  {
+    "terme": "Bord droit",
+    "definition_courte": "Profil de plinthe sans moulure particulière, avec arêtes droites.",
+    "explication_pedagogique": "Donner une finition simple et sobre en pied de mur.",
+    "exemple_utilisation": "plinthes droites en sapin de 70 x 10 mm ou 100 x 10 mm.",
+    "points_vigilance": [
+      "la qualité de coupe et de joint fait la finition."
+    ]
+  },
+  {
+    "terme": "Butoir de porte",
+    "definition_courte": "Accessoire servant à arrêter la course d’une porte avant qu’elle ne tape contre un mur ou un équipement.",
+    "explication_pedagogique": "Protéger murs, plinthes, poignées et revêtements.",
+    "exemple_utilisation": "butées de portes en caoutchouc blanc, pose au sol, fixation invisible.",
+    "points_vigilance": [
+      "poser à bonne distance de la charnière et éviter de percer un réseau incorporé."
+    ]
+  },
+  {
+    "terme": "Calage des seuils à la suisse",
+    "definition_courte": "Maintien et réglage provisoire ou définitif du seuil pour conserver sa position pendant le chantier.",
+    "explication_pedagogique": "Éviter les déformations avant chape, carrelage ou finitions.",
+    "exemple_utilisation": "calage des seuils à la suisse des portes palières à prévoir par le lot Gros œuvre.",
+    "points_vigilance": [
+      "un seuil mal calé peut créer un jour, une gêne PMR ou une mauvaise étanchéité."
+    ]
+  },
+  {
+    "terme": "Calfeutrement",
+    "definition_courte": "Traitement des vides ou joints autour d’un ouvrage pour assurer finition, étanchéité ou acoustique.",
+    "explication_pedagogique": "Supprimer les jours, limiter les passages d’air et obtenir une finition propre.",
+    "exemple_utilisation": "calfeutrement, habillage et finition des ouvrages de menuiserie intérieure à la charge du lot.",
+    "points_vigilance": [
+      "ne pas confondre un simple joint esthétique avec un traitement acoustique ou feu."
+    ]
+  },
+  {
+    "terme": "Cane à encoche",
+    "definition_courte": "Organe de fermeture renforcé utilisé sur certaines boîtes aux lettres.",
+    "explication_pedagogique": "Verrouiller la porte de la boîte tout en permettant une ouverture normalisée.",
+    "exemple_utilisation": "fermeture 1 point par cane à encoche renforcée.",
+    "points_vigilance": [
+      "à contrôler avec la clé individuelle et la clé passe-partout."
+    ]
+  },
+  {
+    "terme": "Carrelage support",
+    "definition_courte": "Revêtement de sol pouvant recevoir certains accessoires de menuiserie comme les butoirs.",
+    "explication_pedagogique": "Déterminer le type de perçage, cheville et implantation.",
+    "exemple_utilisation": "butoirs posés sur carrelage, dalle peinte, parquet stratifié ou sol souple.",
+    "points_vigilance": [
+      "sur carrelage, il est demandé de fixer si possible dans un joint."
+    ]
+  },
+  {
+    "terme": "CCAP",
+    "definition_courte": "Cahier des Clauses Administratives Particulières du marché.",
+    "explication_pedagogique": "Définir les obligations administratives, délais, pénalités, documents et règles contractuelles.",
+    "exemple_utilisation": "l’entreprise doit respecter les dispositions prévues au CCAP.",
+    "points_vigilance": [
+      "le CCTP explique le technique, le CCAP encadre le marché."
+    ]
+  },
+  {
+    "terme": "CCTP",
+    "definition_courte": "Cahier des Clauses Techniques Particulières.",
+    "explication_pedagogique": "Décrire précisément les prestations, matériaux, performances et localisations attendues.",
+    "exemple_utilisation": "le CCTP du lot 05 décrit les blocs-portes, placards, plinthes, gaines, escaliers et ouvrages annexes.",
+    "points_vigilance": [
+      "les plans et le CCTP se complètent ; il faut toujours croiser les deux."
+    ]
+  },
+  {
+    "terme": "CF 1h",
+    "definition_courte": "Abréviation courante de coupe-feu une heure, utilisée pour désigner une performance de résistance au feu.",
+    "explication_pedagogique": "Limiter la propagation du feu pendant une durée donnée.",
+    "exemple_utilisation": "portes de locaux techniques intérieurs à âme pleine CF 1h.",
+    "points_vigilance": [
+      "demander le PV feu correspondant au bloc-porte complet."
+    ]
+  },
+  {
+    "terme": "Champ plat",
+    "definition_courte": "Baguette plate utilisée pour habiller ou masquer un joint entre deux ouvrages.",
+    "explication_pedagogique": "Obtenir une finition propre autour d’une huisserie, d’un escalier ou d’une paillasse.",
+    "exemple_utilisation": "champs plats en médium posés sous paillasse ou autour de portes palières.",
+    "points_vigilance": [
+      "coupe, collage et joints acryliques conditionnent le rendu final."
+    ]
+  },
+  {
+    "terme": "Chant",
+    "definition_courte": "Bord visible d’un panneau ou d’une porte.",
+    "explication_pedagogique": "Protéger le panneau et donner une finition propre sur les arêtes.",
+    "exemple_utilisation": "chants à recouvrement pour portes, chants plaqués visibles en mélaminé pour tablettes.",
+    "points_vigilance": [
+      "les chants mal protégés prennent vite les chocs et l’humidité."
+    ]
+  },
+  {
+    "terme": "Chant à recouvrement",
+    "definition_courte": "Profil de chant qui recouvre partiellement l’huisserie ou le dormant.",
+    "explication_pedagogique": "Améliorer l’aspect, limiter les jours visibles et participer à l’acoustique selon conception.",
+    "exemple_utilisation": "vantail laqué isoplane avec chants à recouvrement.",
+    "points_vigilance": [
+      "vérifier compatibilité avec l’huisserie prévue."
+    ]
+  },
+  {
+    "terme": "Chapelière",
+    "definition_courte": "Tablette haute dans un placard, souvent placée au-dessus de la tringle.",
+    "explication_pedagogique": "Ranger valises, boîtes, linge ou effets peu utilisés.",
+    "exemple_utilisation": "tablette chapelière toute longueur à 1,80 m de hauteur.",
+    "points_vigilance": [
+      "vérifier hauteur, fixation et flèche admissible sous charge."
+    ]
+  },
+  {
+    "terme": "Charnière",
+    "definition_courte": "Organe d’articulation d’un ouvrant autour d’un axe.",
+    "explication_pedagogique": "Permettre la rotation d’une porte, trappe ou panneau.",
+    "exemple_utilisation": "fixation des butoirs environ 60 cm de la charnière des portes.",
+    "points_vigilance": [
+      "sur les blocs-portes, le terme technique utilisé est souvent paumelle."
+    ]
+  },
+  {
+    "terme": "Châssis de trappe",
+    "definition_courte": "Cadre supportant une trappe d’accès.",
+    "explication_pedagogique": "Assurer la tenue, l’ouverture, la fermeture et l’étanchéité périphérique de la trappe.",
+    "exemple_utilisation": "cadre de trappe fourni pour pose au lot plâtrerie.",
+    "points_vigilance": [
+      "il doit être aligné avec le plafond et compatible avec l’isolant."
+    ]
+  },
+  {
+    "terme": "Clé individuelle",
+    "definition_courte": "Clé propre à une boîte, porte ou cylindre donné.",
+    "explication_pedagogique": "Donner un accès réservé à l’utilisateur du logement ou de l’équipement.",
+    "exemple_utilisation": "deux clés par boîte aux lettres et trois jeux de clés par cylindre définitif.",
+    "points_vigilance": [
+      "organiser la remise des clés et le tableau des cylindres en fin de chantier."
+    ]
+  },
+  {
+    "terme": "Clé passe-partout",
+    "definition_courte": "Clé permettant d’ouvrir plusieurs serrures prévues dans un organigramme.",
+    "explication_pedagogique": "Faciliter l’accès de l’administration, du bailleur ou de l’exploitant.",
+    "exemple_utilisation": "boîtes aux lettres manœuvrables par clé passe-partout de l’Administration.",
+    "points_vigilance": [
+      "ne pas confondre avec le pass technique des locaux d’entretien."
+    ]
+  },
+  {
+    "terme": "Cloison 50/72 mm",
+    "definition_courte": "Épaisseur courante de cloison intérieure indiquée pour choisir l’huisserie adaptée.",
+    "explication_pedagogique": "Commander la bonne huisserie enrobante ou métallique selon la cloison.",
+    "exemple_utilisation": "portes de distribution pour cloisons de 50 et 72 mm ; portes acoustiques pour cloison de 72 mm.",
+    "points_vigilance": [
+      "mauvaise épaisseur = habillage difficile, jour visible ou pose impossible."
+    ]
+  },
+  {
+    "terme": "Condamnation",
+    "definition_courte": "Dispositif de verrouillage simple, souvent utilisé pour WC, salle de bains ou salle d’eau.",
+    "explication_pedagogique": "Permettre de fermer une pièce de l’intérieur sans clé classique.",
+    "exemple_utilisation": "portes des salles de bains, salles d’eau et WC avec serrure bec de cane à condamnation.",
+    "points_vigilance": [
+      "la condamnation doit rester décondamnable de l’extérieur en cas d’urgence selon les cas."
+    ]
+  },
+  {
+    "terme": "Contremarche",
+    "definition_courte": "Partie verticale entre deux marches d’escalier.",
+    "explication_pedagogique": "Fermer l’escalier et améliorer son aspect ou sa sécurité.",
+    "exemple_utilisation": "escaliers deux quarts tournants comprenant marches et contremarches.",
+    "points_vigilance": [
+      "contrôler hauteur régulière et finition avant lasure."
+    ]
+  },
+  {
+    "terme": "Coordination inter-lots",
+    "definition_courte": "Organisation entre plusieurs corps d’état pour éviter oublis, doublons ou incompatibilités.",
+    "explication_pedagogique": "Assurer que huisseries, trappes, poteaux et finitions soient posés au bon moment.",
+    "exemple_utilisation": "le menuisier doit se rapprocher des lots Gros œuvre et Plâtrerie.",
+    "points_vigilance": [
+      "en menuiserie intérieure, beaucoup d’ouvrages sont fournis par un lot et posés par un autre."
+    ]
+  },
+  {
+    "terme": "Coupe d’onglet",
+    "definition_courte": "Coupe en biais, généralement à 45°, permettant d’assembler proprement deux éléments en angle.",
+    "explication_pedagogique": "Obtenir une finition nette sur les angles de plinthes, cadres et habillages.",
+    "exemple_utilisation": "traitement des angles à coupe d’onglet pour les plinthes.",
+    "points_vigilance": [
+      "une mauvaise coupe se voit fortement après peinture."
+    ]
+  },
+  {
+    "terme": "Cylindre de chantier",
+    "definition_courte": "Cylindre provisoire utilisé pendant les travaux.",
+    "explication_pedagogique": "Sécuriser et utiliser les portes avant la pose des cylindres définitifs.",
+    "exemple_utilisation": "cylindres type PRATIC de BRICARD ou équivalent pendant toute la durée du chantier.",
+    "points_vigilance": [
+      "remplacer tous les cylindres provisoires avant livraison."
+    ]
+  },
+  {
+    "terme": "Cylindre définitif",
+    "definition_courte": "Cylindre final livré avec les clés de l’utilisateur ou de l’exploitant.",
+    "explication_pedagogique": "Assurer la fermeture définitive des portes, portillons et locaux.",
+    "exemple_utilisation": "cylindres de type européen référence Alpha de chez BRICARD.",
+    "points_vigilance": [
+      "respecter l’organigramme, les variures et les pass techniques."
+    ]
+  },
+  {
+    "terme": "Cylindre européen",
+    "definition_courte": "Format courant de cylindre de serrure, reconnaissable à sa forme profilée standardisée.",
+    "explication_pedagogique": "Permettre le remplacement et la compatibilité avec de nombreuses serrures.",
+    "exemple_utilisation": "fermeture par cylindre européen pour portes palières et cylindres définitifs.",
+    "points_vigilance": [
+      "longueur, panneton et niveau de sécurité doivent être adaptés à la porte."
+    ]
+  },
+  {
+    "terme": "daN/dm2",
+    "definition_courte": "Unité de charge utilisée ici pour vérifier la résistance d’une tablette de placard.",
+    "explication_pedagogique": "Définir la charge que la tablette doit supporter sans fléchir excessivement.",
+    "exemple_utilisation": "charge de 1 daN/dm2 sans flèche instantanée supérieure à 1/200 de la portée.",
+    "points_vigilance": [
+      "l’épaisseur des tablettes dépend de la portée et de la sollicitation."
+    ]
+  },
+  {
+    "terme": "DCE",
+    "definition_courte": "Dossier de Consultation des Entreprises.",
+    "explication_pedagogique": "Regrouper les pièces permettant aux entreprises de répondre au marché.",
+    "exemple_utilisation": "CCTP, plans, CCAP, DPGF et pièces communes.",
+    "points_vigilance": [
+      "le DCE sert à chiffrer et comprendre les obligations avant travaux."
+    ]
+  },
+  {
+    "terme": "Degré PF",
+    "definition_courte": "Ancienne terminologie indiquant une performance pare-flammes.",
+    "explication_pedagogique": "Indiquer une tenue au feu empêchant le passage des flammes pendant une durée donnée.",
+    "exemple_utilisation": "portes d’entrée devant justifier d’un degré PF 1/4 h ; portes palières EI 30 (PF 1/2 h).",
+    "points_vigilance": [
+      "demander les justificatifs actuels compatibles avec la réglementation applicable."
+    ]
+  },
+  {
+    "terme": "Demi-tour",
+    "definition_courte": "Partie mobile de la serrure actionnée par la poignée pour maintenir la porte fermée.",
+    "explication_pedagogique": "Fermer la porte sans actionner une clé.",
+    "exemple_utilisation": "serrures à mortaiser avec pênes dormants et demi-tour.",
+    "points_vigilance": [
+      "le demi-tour n’est pas un verrouillage de sûreté à lui seul."
+    ]
+  },
+  {
+    "terme": "Détalonnage",
+    "definition_courte": "Découpe ou espace laissé en partie basse d’une porte.",
+    "explication_pedagogique": "Permettre le passage de l’air entre pièces pour la ventilation VMC.",
+    "exemple_utilisation": "détalonnage de 15 mm en partie basse des portes de distribution.",
+    "points_vigilance": [
+      "trop faible = mauvaise ventilation ; trop important = gêne acoustique ou esthétique."
+    ]
+  },
+  {
+    "terme": "Double encollage néoprène",
+    "definition_courte": "Méthode de collage consistant à appliquer la colle sur les deux supports avant assemblage.",
+    "explication_pedagogique": "Obtenir une adhérence forte pour plinthes et champs plats.",
+    "exemple_utilisation": "pose des plinthes et habillages par double encollage néoprène.",
+    "points_vigilance": [
+      "respecter temps de gommage, propreté du support et alignement, car la reprise est difficile."
+    ]
+  },
+  {
+    "terme": "DTU 36.1",
+    "definition_courte": "Document Technique Unifié relatif aux menuiseries en bois.",
+    "explication_pedagogique": "Donner les règles de l’art pour les ouvrages de menuiserie bois.",
+    "exemple_utilisation": "DTU 36.1 cité comme texte de référence du lot menuiseries intérieures.",
+    "points_vigilance": [
+      "le DTU complète les prescriptions particulières du CCTP."
+    ]
+  },
+  {
+    "terme": "Échantillon",
+    "definition_courte": "Exemple physique de matériau, quincaillerie ou finition soumis à validation.",
+    "explication_pedagogique": "Permettre au maître d’œuvre et au maître d’ouvrage de choisir ou valider avant commande.",
+    "exemple_utilisation": "quincailleries choisies sur présentation d’échantillons et PV d’essais.",
+    "points_vigilance": [
+      "ne pas commander en masse avant validation écrite."
+    ]
+  },
+  {
+    "terme": "Échiffre",
+    "definition_courte": "Mur ou paroi latérale située le long d’un escalier.",
+    "explication_pedagogique": "Supporter ou border l’escalier, et recevoir parfois un habillage ou calfeutrement.",
+    "exemple_utilisation": "calfeutrement du joint de dilatation le long des murs d’échiffre des escaliers.",
+    "points_vigilance": [
+      "terme fréquent dans les plans et détails d’escaliers."
+    ]
+  },
+  {
+    "terme": "EI 30",
+    "definition_courte": "Classement de résistance au feu indiquant étanchéité et isolation pendant 30 minutes.",
+    "explication_pedagogique": "Protéger les circulations, logements ou locaux contre la propagation du feu.",
+    "exemple_utilisation": "portes palières intérieures avec résistance au feu EI 30.",
+    "points_vigilance": [
+      "le classement porte sur le bloc complet posé selon PV."
+    ]
+  },
+  {
+    "terme": "Emmarchement",
+    "definition_courte": "Largeur utile d’un escalier ou forme suivie par les marches.",
+    "explication_pedagogique": "Déterminer le confort de passage et les découpes de finitions.",
+    "exemple_utilisation": "plinthes crémaillère découpées soigneusement selon emmarchement.",
+    "points_vigilance": [
+      "l’emmarchement se vérifie sur plans et sur site."
+    ]
+  },
+  {
+    "terme": "Empennage",
+    "definition_courte": "Ensemble ou adaptation liée au mécanisme de serrure et à ses points de fermeture.",
+    "explication_pedagogique": "Assurer le fonctionnement correct des points de condamnation dans le bâti.",
+    "exemple_utilisation": "serrures 3 points comprises avec empennage et gâches plates.",
+    "points_vigilance": [
+      "à contrôler au réglage final de la porte."
+    ]
+  },
+  {
+    "terme": "Enrobage décor",
+    "definition_courte": "Revêtement décoratif appliqué sur un profil pour améliorer son aspect.",
+    "explication_pedagogique": "Harmoniser les profils de placards avec les panneaux et la finition intérieure.",
+    "exemple_utilisation": "profils-poignées de placards recouverts d’un enrobage décor.",
+    "points_vigilance": [
+      "vérifier teinte, résistance et échantillon avant fabrication."
+    ]
+  },
+  {
+    "terme": "Ensemble de porte",
+    "definition_courte": "Expression désignant les accessoires de manœuvre : béquilles, plaques, rosaces et parfois ressorts.",
+    "explication_pedagogique": "Compléter la porte pour qu’elle soit utilisable au quotidien.",
+    "exemple_utilisation": "ensemble de porte en aluminium anodisé type Jazz avec béquillage sur plaque 2 faces.",
+    "points_vigilance": [
+      "ne pas oublier ces accessoires dans le chiffrage."
+    ]
+  },
+  {
+    "terme": "Entreprise titulaire du lot",
+    "definition_courte": "Entreprise responsable des ouvrages décrits dans son lot de marché.",
+    "explication_pedagogique": "Déterminer qui fournit, pose, règle, protège et livre les ouvrages.",
+    "exemple_utilisation": "le présent lot doit fournir de nombreux éléments, certains posés par d’autres lots.",
+    "points_vigilance": [
+      "toujours vérifier les limites de prestation."
+    ]
+  },
+  {
+    "terme": "Étanchéité à l’air",
+    "definition_courte": "Capacité d’un ouvrage à limiter les infiltrations d’air parasites.",
+    "explication_pedagogique": "Améliorer la performance énergétique et réussir les tests d’infiltrométrie.",
+    "exemple_utilisation": "étanchéité à l’air particulièrement soignée pour les portes d’entrée.",
+    "points_vigilance": [
+      "joints, seuils, réglages et calfeutrements sont déterminants."
+    ]
+  },
+  {
+    "terme": "Façade coulissante de placard",
+    "definition_courte": "Ensemble de portes coulissantes fermant un placard.",
+    "explication_pedagogique": "Fermer un rangement sans empiéter dans la pièce comme une porte battante.",
+    "exemple_utilisation": "panneaux mélaminés blancs, profils-poignées, rails hauts et bas et système anti-déraillement.",
+    "points_vigilance": [
+      "vérifier aplomb, niveau, largeur et compensation de plinthes."
+    ]
+  },
+  {
+    "terme": "Façade de gaine technique",
+    "definition_courte": "Habillage menuisé fermant une gaine contenant des réseaux techniques.",
+    "explication_pedagogique": "Masquer les réseaux tout en permettant leur accès pour maintenance.",
+    "exemple_utilisation": "façades pour gaines EDF, AEP, SG, FT/TV.",
+    "points_vigilance": [
+      "respecter dimensions, ventilation éventuelle, accès et type de fermeture concessionnaire."
+    ]
+  },
+  {
+    "terme": "FASTE",
+    "definition_courte": "Classement utilisé pour caractériser des blocs-portes selon plusieurs critères de performance.",
+    "explication_pedagogique": "Synthétiser des performances comme feu, acoustique, stabilité, thermique ou effraction selon référentiel.",
+    "exemple_utilisation": "portes d’entrée et portes palières demandées avec classement NF FASTE.",
+    "points_vigilance": [
+      "demander la fiche fabricant ou le certificat correspondant au modèle exact."
+    ]
+  },
+  {
+    "terme": "Ferme-porte à compas",
+    "definition_courte": "Dispositif mécanique refermant automatiquement une porte, avec bras articulé appelé compas.",
+    "explication_pedagogique": "Assurer la fermeture d’une porte technique ou coupe-feu après passage.",
+    "exemple_utilisation": "ferme-porte à compas force 3 type FP 620 pour portes de locaux techniques.",
+    "points_vigilance": [
+      "régler vitesse, à-coup final et force pour éviter claquements ou non-fermeture."
+    ]
+  },
+  {
+    "terme": "Ferrage",
+    "definition_courte": "Ensemble des pièces métalliques permettant la rotation et la tenue d’un ouvrant.",
+    "explication_pedagogique": "Porter le poids de la porte et permettre son réglage.",
+    "exemple_utilisation": "ferrage par paumelles réglables dans trois directions.",
+    "points_vigilance": [
+      "un bon ferrage évite frottements, affaissement et mauvais fonctionnement."
+    ]
+  },
+  {
+    "terme": "Feuillure",
+    "definition_courte": "Profil en retrait dans lequel vient s’appuyer la porte, le joint ou le vitrage selon le cas.",
+    "explication_pedagogique": "Guider la fermeture, recevoir un joint et améliorer l’étanchéité.",
+    "exemple_utilisation": "joint périphérique isophonique à lèvre en fond de feuillure.",
+    "points_vigilance": [
+      "une feuillure encrassée ou mal réglée dégrade le joint."
+    ]
+  },
+  {
+    "terme": "Finition à lasurer",
+    "definition_courte": "Finition bois par lasure, laissant généralement apparaître le veinage.",
+    "explication_pedagogique": "Protéger et embellir les escaliers en bois.",
+    "exemple_utilisation": "escaliers en sapin à lasurer, après ponçage par le menuisier.",
+    "points_vigilance": [
+      "ponçage, dépoussiérage et protection chantier influencent beaucoup le rendu."
+    ]
+  },
+  {
+    "terme": "Finition à peindre",
+    "definition_courte": "Ouvrage livré prêt à recevoir une peinture par le lot concerné.",
+    "explication_pedagogique": "Séparer la fabrication ou pose de la finition décorative.",
+    "exemple_utilisation": "portes techniques, poteaux d’about, médium et encadrements à peindre.",
+    "points_vigilance": [
+      "les supports doivent être propres, rebouchés et prêts pour le peintre."
+    ]
+  },
+  {
+    "terme": "Finition laquée usine",
+    "definition_courte": "Finition appliquée en atelier ou usine avant livraison.",
+    "explication_pedagogique": "Obtenir un rendu régulier et durable sans peinture chantier.",
+    "exemple_utilisation": "portes acoustiques intérieures avec finition laquée blanc usine.",
+    "points_vigilance": [
+      "protéger soigneusement pendant chantier car les reprises sont visibles."
+    ]
+  },
+  {
+    "terme": "Fixation invisible",
+    "definition_courte": "Mode de fixation masqué dans l’ouvrage fini.",
+    "explication_pedagogique": "Améliorer l’aspect esthétique en évitant vis apparentes.",
+    "exemple_utilisation": "butoirs de porte avec pose au sol et fixation invisible.",
+    "points_vigilance": [
+      "invisible ne veut pas dire démontable facilement."
+    ]
+  },
+  {
+    "terme": "Flèche instantanée",
+    "definition_courte": "Déformation immédiate d’une tablette ou pièce sous charge.",
+    "explication_pedagogique": "Vérifier que l’aménagement ne fléchit pas trop sous le poids prévu.",
+    "exemple_utilisation": "flèche instantanée limitée à 1/200 de la portée des tablettes.",
+    "points_vigilance": [
+      "plus la portée est grande, plus l’épaisseur ou le renfort doit être adapté."
+    ]
+  },
+  {
+    "terme": "Fourrure compensatrice de plinthe",
+    "definition_courte": "Profil ajouté pour compenser l’épaisseur d’une plinthe et aligner une façade de placard.",
+    "explication_pedagogique": "Permettre au rail ou au panneau coulissant de fonctionner malgré la présence de plinthe.",
+    "exemple_utilisation": "fourrure verticale carrée en PVC blanc compensateur de plinthes.",
+    "points_vigilance": [
+      "à prévoir avant mesure définitive des placards."
+    ]
+  },
+  {
+    "terme": "Gâche",
+    "definition_courte": "Pièce fixée dans l’huisserie qui reçoit le pêne de la serrure.",
+    "explication_pedagogique": "Permettre la fermeture et le verrouillage de la porte.",
+    "exemple_utilisation": "gâches plates comprises avec les serrures des portes palières.",
+    "points_vigilance": [
+      "une gâche mal réglée empêche la fermeture ou crée du jeu."
+    ]
+  },
+  {
+    "terme": "Gaine technique",
+    "definition_courte": "Volume vertical ou horizontal regroupant des réseaux techniques.",
+    "explication_pedagogique": "Faire passer EDF, AEP, services généraux, télécom ou ventilation de façon accessible.",
+    "exemple_utilisation": "façades de gaines techniques palières pour EDF, AEP, SG, FT/TV.",
+    "points_vigilance": [
+      "la menuiserie doit permettre l’accès sans dégrader les finitions."
+    ]
+  },
+  {
+    "terme": "Garde-corps",
+    "definition_courte": "Protection contre la chute en bord de vide, palier, escalier ou trémie.",
+    "explication_pedagogique": "Sécuriser les circulations et escaliers.",
+    "exemple_utilisation": "garde-corps d’arrivée sur palier avec barreaudage vertical section 50 x 50.",
+    "points_vigilance": [
+      "conformité à la norme NFP 01-012 demandée dans le CCTP."
+    ]
+  },
+  {
+    "terme": "Glace argentée",
+    "definition_courte": "Miroir composé d’une glace recevant un traitement réfléchissant argenté.",
+    "explication_pedagogique": "Réaliser un miroir mural durable et clair.",
+    "exemple_utilisation": "miroir en glace argentée de 6 mm d’épaisseur, toute hauteur.",
+    "points_vigilance": [
+      "valider le système de fixation avec l’architecte."
+    ]
+  },
+  {
+    "terme": "Habillage",
+    "definition_courte": "Pièce de finition venant recouvrir, masquer ou protéger un ouvrage.",
+    "explication_pedagogique": "Donner un rendu propre autour de tuyauteries, escaliers, huisseries ou gaines.",
+    "exemple_utilisation": "habillages de tuyauteries apparentes, sous-face escalier et nez de plancher.",
+    "points_vigilance": [
+      "un habillage doit rester compatible avec les accès de maintenance."
+    ]
+  },
+  {
+    "terme": "Habillage de tuyauteries apparentes",
+    "definition_courte": "Coffrage ou panneau masquant des canalisations visibles.",
+    "explication_pedagogique": "Améliorer la finition dans les salles de bains et salles d’eau.",
+    "exemple_utilisation": "habillage en panneaux de mélaminé CTBH.",
+    "points_vigilance": [
+      "prévoir démontabilité ou accès si nécessaire selon les réseaux."
+    ]
+  },
+  {
+    "terme": "Huisserie",
+    "definition_courte": "Cadre fixe scellé ou posé dans la paroi, recevant la porte.",
+    "explication_pedagogique": "Tenir le vantail, recevoir les paumelles, joints et gâches.",
+    "exemple_utilisation": "huisseries métalliques pour portes d’entrée, palières et de distribution.",
+    "points_vigilance": [
+      "l’huisserie doit être commandée selon épaisseur de mur ou cloison."
+    ]
+  },
+  {
+    "terme": "Huisserie enrobante",
+    "definition_courte": "Huisserie qui recouvre ou enveloppe l’épaisseur de la cloison.",
+    "explication_pedagogique": "Obtenir une finition propre sans habillage important autour de la porte.",
+    "exemple_utilisation": "huisserie métallique enrobant acier 15/10 avec tampons amortisseurs.",
+    "points_vigilance": [
+      "très dépendante de l’épaisseur réelle de cloison."
+    ]
+  },
+  {
+    "terme": "Huisserie métallique",
+    "definition_courte": "Cadre de porte réalisé en acier, souvent posé avant ou pendant les cloisons ou voiles.",
+    "explication_pedagogique": "Apporter rigidité, durabilité et compatibilité avec portes techniques ou acoustiques.",
+    "exemple_utilisation": "huisseries métalliques fournies au lot Gros œuvre ou Plâtrerie selon support.",
+    "points_vigilance": [
+      "protéger les pieds d’huisseries jusqu’aux chapes et finitions."
+    ]
+  },
+  {
+    "terme": "Imposte fixe",
+    "definition_courte": "Partie fixe située au-dessus d’un ouvrant ou intégrée à une façade de gaine.",
+    "explication_pedagogique": "Fermer une hauteur tout en gardant des vantaux accessibles en dessous.",
+    "exemple_utilisation": "imposte fixe en panneau médium de 22 mm pour façades de gaines.",
+    "points_vigilance": [
+      "vérifier accès réseaux et dimensions selon plans."
+    ]
+  },
+  {
+    "terme": "Indice d’affaiblissement acoustique",
+    "definition_courte": "Mesure de performance indiquant la capacité d’un ouvrage à réduire le bruit.",
+    "explication_pedagogique": "Choisir une porte adaptée aux exigences acoustiques entre logement, palier ou extérieur.",
+    "exemple_utilisation": "Rw + C mini 38 dB et portes palières 39 dB minimum.",
+    "points_vigilance": [
+      "la performance dépend de la porte, des joints, du seuil et de la pose."
+    ]
+  },
+  {
+    "terme": "Infiltrométrie",
+    "definition_courte": "Essai mesurant les infiltrations d’air d’un bâtiment.",
+    "explication_pedagogique": "Vérifier la perméabilité à l’air exigée par la réglementation énergétique.",
+    "exemple_utilisation": "les portes d’entrée doivent être soignées pour obtenir de bons résultats aux tests.",
+    "points_vigilance": [
+      "les défauts de réglage ou de joints peuvent faire échouer le test."
+    ]
+  },
+  {
+    "terme": "Isoblinde 39BP1",
+    "definition_courte": "Référence de bloc-porte palière acoustique et anti-effraction citée au CCTP.",
+    "explication_pedagogique": "Répondre aux exigences de sécurité, feu et acoustique des portes de logements collectifs.",
+    "exemple_utilisation": "bloc porte palière acoustique MALERBA type ISOBLINDE 39BP1.",
+    "points_vigilance": [
+      "modèle ou équivalent doit justifier les mêmes performances."
+    ]
+  },
+  {
+    "terme": "Isogil",
+    "definition_courte": "Parement de porte à surface plane cité pour les vantaux de portes palières.",
+    "explication_pedagogique": "Constituer les faces visibles du vantail avec une finition régulière.",
+    "exemple_utilisation": "vantail composé de deux parements isogil à surface plane.",
+    "points_vigilance": [
+      "vérifier finition prévue au lot peinture."
+    ]
+  },
+  {
+    "terme": "Isolant sur trappe",
+    "definition_courte": "Panneau isolant fixé sur la trappe d’accès aux combles.",
+    "explication_pedagogique": "Limiter les pertes thermiques au droit de la trappe.",
+    "exemple_utilisation": "panneau isolant sur trappe avec R = 5,70 selon étude thermique.",
+    "points_vigilance": [
+      "l’isolant ne doit pas bloquer l’ouverture ni créer un pont thermique."
+    ]
+  },
+  {
+    "terme": "Isophonique",
+    "definition_courte": "Qualifie un joint ou seuil conçu pour limiter la transmission du bruit.",
+    "explication_pedagogique": "Améliorer l’affaiblissement acoustique d’un bloc-porte.",
+    "exemple_utilisation": "seuil isophonique, joints isophoniques en huisserie et trappe.",
+    "points_vigilance": [
+      "un joint coupé, écrasé ou absent annule une partie de la performance."
+    ]
+  },
+  {
+    "terme": "Joint à lèvre",
+    "definition_courte": "Joint souple avec une ou plusieurs lèvres venant s’écraser à la fermeture.",
+    "explication_pedagogique": "Améliorer l’étanchéité à l’air et au bruit.",
+    "exemple_utilisation": "joint périphérique isophonique à lèvre en fond de feuillure.",
+    "points_vigilance": [
+      "la compression doit être régulière sur les quatre côtés."
+    ]
+  },
+  {
+    "terme": "Joint acoustique",
+    "definition_courte": "Joint destiné à limiter le passage du bruit autour d’une porte ou d’une trappe.",
+    "explication_pedagogique": "Assurer la continuité acoustique entre vantail et huisserie.",
+    "exemple_utilisation": "portes acoustiques à âme pleine avec joint acoustique.",
+    "points_vigilance": [
+      "l’acoustique se joue souvent dans les petits jours périphériques."
+    ]
+  },
+  {
+    "terme": "Joint de dilatation",
+    "definition_courte": "Espace prévu entre deux ouvrages pour absorber mouvements et déformations.",
+    "explication_pedagogique": "Éviter fissures ou contraintes entre éléments différents.",
+    "exemple_utilisation": "calfeutrement du joint de dilatation le long des murs d’échiffre des escaliers.",
+    "points_vigilance": [
+      "ne pas bloquer un joint structurel avec un matériau rigide."
+    ]
+  },
+  {
+    "terme": "Joint périphérique",
+    "definition_courte": "Joint disposé sur le pourtour d’une porte, trappe ou huisserie.",
+    "explication_pedagogique": "Améliorer étanchéité à l’air, acoustique, feu ou confort de fermeture selon sa nature.",
+    "exemple_utilisation": "joint périphérique des portes d’entrée et portes palières.",
+    "points_vigilance": [
+      "vérifier continuité aux angles et au seuil."
+    ]
+  },
+  {
+    "terme": "Joint souple",
+    "definition_courte": "Joint flexible conservant une capacité de mouvement.",
+    "explication_pedagogique": "Traiter la jonction entre plinthe et sol carrelé sans fissuration immédiate.",
+    "exemple_utilisation": "joint souple de finition sous plinthe lorsque le sol est carrelé.",
+    "points_vigilance": [
+      "ne pas utiliser un joint trop dur sur une liaison susceptible de bouger."
+    ]
+  },
+  {
+    "terme": "Larder",
+    "definition_courte": "Encastrement d’une serrure dans l’épaisseur de la porte, proche de l’expression à mortaiser.",
+    "explication_pedagogique": "Intégrer le mécanisme de serrure dans le vantail.",
+    "exemple_utilisation": "serrure de sûreté à larder à 3 points pour portes palières.",
+    "points_vigilance": [
+      "exige une porte compatible et une pose précise."
+    ]
+  },
+  {
+    "terme": "Limon",
+    "definition_courte": "Pièce latérale ou centrale portant les marches d’un escalier.",
+    "explication_pedagogique": "Assurer la structure de l’escalier.",
+    "exemple_utilisation": "escaliers en sapin avec limons, marches et parfois contremarches.",
+    "points_vigilance": [
+      "stabilité, fixation et désolidarisation acoustique doivent être contrôlées."
+    ]
+  },
+  {
+    "terme": "Main courante",
+    "definition_courte": "Élément que l’on tient avec la main pour sécuriser la montée ou la descente d’un escalier.",
+    "explication_pedagogique": "Aider au déplacement et prévenir les chutes.",
+    "exemple_utilisation": "main courante en bois sur écuyer métal, continue, rigide et facilement préhensible.",
+    "points_vigilance": [
+      "prolongement horizontal au-delà de la première et dernière marche demandé."
+    ]
+  },
+  {
+    "terme": "Marquage NF-SNFQ",
+    "definition_courte": "Marquage de qualité demandé pour certains éléments de quincaillerie.",
+    "explication_pedagogique": "Apporter une garantie sur la conformité et la qualité des accessoires.",
+    "exemple_utilisation": "quincailleries avec marquage NF-SNFQ.",
+    "points_vigilance": [
+      "conserver fiches techniques et justificatifs dans le DOE."
+    ]
+  },
+  {
+    "terme": "MDF",
+    "definition_courte": "Panneau de fibres de bois de densité moyenne, aussi appelé médium.",
+    "explication_pedagogique": "Réaliser panneaux, habillages, encadrements et façades à peindre.",
+    "exemple_utilisation": "panneaux MDF de 22 mm pour façades de gaines techniques.",
+    "points_vigilance": [
+      "sensible à l’humidité si la qualité n’est pas adaptée."
+    ]
+  },
+  {
+    "terme": "Médium",
+    "definition_courte": "Nom courant du MDF, panneau de fibres utilisé en menuiserie intérieure.",
+    "explication_pedagogique": "Faire des champs plats, encadrements, panneaux et habillages avec surface lisse.",
+    "exemple_utilisation": "champ plat en médium, encadrement de miroir, habillage de nez de plancher.",
+    "points_vigilance": [
+      "très pratique pour peinture, mais les chants doivent être bien préparés."
+    ]
+  },
+  {
+    "terme": "Mélaminé",
+    "definition_courte": "Panneau décoratif recouvert d’une surface mélaminée résistante et facile à nettoyer.",
+    "explication_pedagogique": "Réaliser tablettes, façades de placard et habillages économiques et propres.",
+    "exemple_utilisation": "panneaux mélaminés blancs pour placards et habillages CTBH.",
+    "points_vigilance": [
+      "protéger les chants et éviter l’humidité prolongée."
+    ]
+  },
+  {
+    "terme": "Microviseur",
+    "definition_courte": "Petit œilleton intégré à une porte permettant de voir côté extérieur.",
+    "explication_pedagogique": "Identifier une personne avant ouverture de la porte.",
+    "exemple_utilisation": "microviseur prévu sur portes d’entrée et portes palières.",
+    "points_vigilance": [
+      "vérifier hauteur, sens et compatibilité avec exigences PMR selon cas."
+    ]
+  },
+  {
+    "terme": "Miroir toute hauteur",
+    "definition_courte": "Miroir occupant une grande hauteur de mur, souvent dans un hall.",
+    "explication_pedagogique": "Équiper les parties communes et améliorer perception et usage de l’espace.",
+    "exemple_utilisation": "miroir en glace argentée de 6 mm, toute hauteur, en halls A et B.",
+    "points_vigilance": [
+      "fixation, sécurité et alignement doivent être validés."
+    ]
+  },
+  {
+    "terme": "Mise en jeu",
+    "definition_courte": "Réglage des espaces fonctionnels entre vantail, huisserie, sol et joints.",
+    "explication_pedagogique": "Permettre une ouverture-fermeture fluide sans frottement.",
+    "exemple_utilisation": "réglages nécessaires et mises en jeu avant réception.",
+    "points_vigilance": [
+      "à faire après peinture et revêtements de sol, car les niveaux peuvent changer."
+    ]
+  },
+  {
+    "terme": "Mortaiser",
+    "definition_courte": "Créer une réservation dans une porte pour intégrer une serrure ou quincaillerie.",
+    "explication_pedagogique": "Poser une serrure encastrée proprement dans le chant du vantail.",
+    "exemple_utilisation": "serrures bec de cane et serrures de sûreté à mortaiser.",
+    "points_vigilance": [
+      "mortaise trop large = affaiblissement du vantail ou mauvais maintien de serrure."
+    ]
+  },
+  {
+    "terme": "Mur banché",
+    "definition_courte": "Mur en béton armé coulé entre banches.",
+    "explication_pedagogique": "Former des parois porteuses ou séparatives solides dans le collectif.",
+    "exemple_utilisation": "murs recevant les huisseries des portes palières en murs banchés de 180 ou 200 mm.",
+    "points_vigilance": [
+      "huisserie à fournir au gros œuvre pour incorporation correcte."
+    ]
+  },
+  {
+    "terme": "Nez de plancher",
+    "definition_courte": "Bord visible d’un plancher au droit d’une trémie ou d’un escalier.",
+    "explication_pedagogique": "Être habillé pour obtenir une finition propre et protéger l’arête.",
+    "exemple_utilisation": "habillage du nez de plancher en médium à peindre de 18 mm avec retombée.",
+    "points_vigilance": [
+      "alignement et retombée doivent suivre le détail architecte."
+    ]
+  },
+  {
+    "terme": "NF P 01-012",
+    "definition_courte": "Norme française citée pour les garde-corps et la sécurité contre les chutes.",
+    "explication_pedagogique": "Définir notamment des règles de dimensions et de protection.",
+    "exemple_utilisation": "garde-corps des escaliers conformes à la norme NFP 01-012.",
+    "points_vigilance": [
+      "vérifier hauteurs, vides entre barreaux et zones de risque."
+    ]
+  },
+  {
+    "terme": "NF P 23-101",
+    "definition_courte": "Norme de terminologie pour les menuiseries en bois.",
+    "explication_pedagogique": "Harmoniser le vocabulaire technique des ouvrages de menuiserie.",
+    "exemple_utilisation": "norme citée dans les règles d’exécution du lot.",
+    "points_vigilance": [
+      "utile pour comprendre les termes bâti, vantail, huisserie, ferrage, etc."
+    ]
+  },
+  {
+    "terme": "NF P 23-300 à 23-304",
+    "definition_courte": "Série de normes relatives aux caractéristiques des portes palières et intérieures en bois.",
+    "explication_pedagogique": "Donner des exigences sur les performances et caractéristiques des portes.",
+    "exemple_utilisation": "normes citées comme référence du lot menuiseries intérieures.",
+    "points_vigilance": [
+      "le CCTP peut demander des performances plus précises que la norme de base."
+    ]
+  },
+  {
+    "terme": "Nœud de bois",
+    "definition_courte": "Défaut ou singularité visible dans une pièce de bois, correspondant à l’ancienne naissance d’une branche.",
+    "explication_pedagogique": "À contrôler avant peinture car il peut créer reliefs, taches ou défauts visuels.",
+    "exemple_utilisation": "rebouchage des nœuds et défauts à la pâte à bois avant peinture.",
+    "points_vigilance": [
+      "un bois à peindre doit être préparé avant finition."
+    ]
+  },
+  {
+    "terme": "Organigramme de clés",
+    "definition_courte": "Organisation hiérarchisée des cylindres et clés d’un bâtiment.",
+    "explication_pedagogique": "Définir quelles clés ouvrent quelles portes : logement, local entretien, pass technique, etc.",
+    "exemple_utilisation": "même variure pour certaines portes et pass technique par copropriété.",
+    "points_vigilance": [
+      "à valider très tôt pour éviter erreurs de cylindres à la livraison."
+    ]
+  },
+  {
+    "terme": "Paillasse d’escalier",
+    "definition_courte": "Sous-face ou structure inclinée supportant un escalier, surtout en béton ou selon configuration.",
+    "explication_pedagogique": "Former le support sous les marches et recevoir parfois des habillages.",
+    "exemple_utilisation": "champs plats en médium posés sous la paillasse.",
+    "points_vigilance": [
+      "terme fréquent dans les détails de sous-face d’escalier."
+    ]
+  },
+  {
+    "terme": "Palier",
+    "definition_courte": "Plateforme horizontale située en haut, en bas ou entre deux volées d’escalier.",
+    "explication_pedagogique": "Permettre le changement de direction, le repos et la distribution des circulations.",
+    "exemple_utilisation": "garde-corps d’arrivée sur le palier du dernier niveau.",
+    "points_vigilance": [
+      "vérifier raccords avec garde-corps, nez de plancher et plinthes."
+    ]
+  },
+  {
+    "terme": "Panneau CTBH",
+    "definition_courte": "Panneau bois dérivé adapté à certains milieux présentant une humidité temporaire.",
+    "explication_pedagogique": "Réaliser des habillages plus résistants qu’un panneau standard dans des pièces d’eau.",
+    "exemple_utilisation": "habillage des tuyauteries apparentes en panneaux mélaminés CTBH.",
+    "points_vigilance": [
+      "ne signifie pas étanche à l’eau permanente."
+    ]
+  },
+  {
+    "terme": "Panneau d’affichage",
+    "definition_courte": "Support mural destiné à afficher des informations dans les parties communes.",
+    "explication_pedagogique": "Mettre à disposition les avis, consignes ou informations de copropriété/bailleur.",
+    "exemple_utilisation": "panneau avec médium stratifié, cadre aluminium, fond feutrine, porte vitrée et serrure.",
+    "points_vigilance": [
+      "localisation et dimensions à vérifier sur plans et détails architecte."
+    ]
+  },
+  {
+    "terme": "Panneau MDF qualité intérieure",
+    "definition_courte": "Panneau MDF destiné à un usage intérieur sec.",
+    "explication_pedagogique": "Réaliser des vantaux, façades ou habillages à peindre ou à intégrer en intérieur.",
+    "exemple_utilisation": "vantaux de gaines en panneaux MDF qualité intérieure de 22 mm.",
+    "points_vigilance": [
+      "éviter les zones humides sans qualité adaptée."
+    ]
+  },
+  {
+    "terme": "Panneau mélaminé",
+    "definition_courte": "Panneau recouvert d’un décor ou film mélaminé, souvent blanc en aménagement intérieur.",
+    "explication_pedagogique": "Créer des placards, tablettes et façades faciles d’entretien.",
+    "exemple_utilisation": "panneaux mélaminés blancs de 10 mm pour façades coulissantes.",
+    "points_vigilance": [
+      "surveiller épaisseur, planéité et protection des chants."
+    ]
+  },
+  {
+    "terme": "Parement",
+    "definition_courte": "Face extérieure visible d’un panneau ou d’un vantail.",
+    "explication_pedagogique": "Constituer l’aspect et parfois participer à la résistance de la porte.",
+    "exemple_utilisation": "porte métallique avec deux parements en tôle d’acier galvanisée.",
+    "points_vigilance": [
+      "l’épaisseur et la nature des parements influencent robustesse et sécurité."
+    ]
+  },
+  {
+    "terme": "Parties communes",
+    "definition_courte": "Espaces partagés d’un bâtiment collectif : halls, paliers, escaliers, circulations, locaux communs.",
+    "explication_pedagogique": "Situer certains ouvrages spécifiques comme plinthes, panneaux d’affichage ou miroirs.",
+    "exemple_utilisation": "plinthes 100 x 10 mm en parties communes des étages des bâtiments A et B.",
+    "points_vigilance": [
+      "plus exposées aux chocs et à l’usage intensif."
+    ]
+  },
+  {
+    "terme": "Passe technique",
+    "definition_courte": "Clé ou système permettant l’accès technique à plusieurs locaux définis.",
+    "explication_pedagogique": "Faciliter l’exploitation et la maintenance sans multiplier les clés.",
+    "exemple_utilisation": "pass technique par copropriété pour les locaux entretien des bâtiments A et B.",
+    "points_vigilance": [
+      "à intégrer à l’organigramme des cylindres."
+    ]
+  },
+  {
+    "terme": "Pâte à bois",
+    "definition_courte": "Produit de rebouchage utilisé pour corriger petits défauts du bois avant finition.",
+    "explication_pedagogique": "Reboucher nœuds, éclats ou trous pour préparer la peinture.",
+    "exemple_utilisation": "rebouchage des nœuds et défauts des plinthes avant peinture.",
+    "points_vigilance": [
+      "poncer après séchage pour éviter les surépaisseurs."
+    ]
+  },
+  {
+    "terme": "Patte à scellement",
+    "definition_courte": "Pièce métallique fixée à une huisserie pour l’ancrer dans un mur ou une réservation.",
+    "explication_pedagogique": "Assurer la tenue de l’huisserie dans le support.",
+    "exemple_utilisation": "six pattes à scellement pour les portes d’entrée extérieures.",
+    "points_vigilance": [
+      "nombre, position et scellement doivent respecter les prescriptions fabricant."
+    ]
+  },
+  {
+    "terme": "Paumelle",
+    "definition_courte": "Pièce de ferrage articulée permettant à la porte de pivoter.",
+    "explication_pedagogique": "Porter le vantail et permettre son réglage.",
+    "exemple_utilisation": "deux ou quatre paumelles selon les portes, réglables dans trois directions.",
+    "points_vigilance": [
+      "plus la porte est lourde ou technique, plus le ferrage doit être robuste."
+    ]
+  },
+  {
+    "terme": "Paumelle invisible",
+    "definition_courte": "Paumelle masquée lorsque l’ouvrant est fermé.",
+    "explication_pedagogique": "Améliorer l’esthétique et parfois la sécurité d’un panneau ou d’une façade.",
+    "exemple_utilisation": "façades de gaines ferrées par paumelles invisibles.",
+    "points_vigilance": [
+      "réglage plus précis qu’une paumelle apparente."
+    ]
+  },
+  {
+    "terme": "Pêne demi-tour",
+    "definition_courte": "Pêne biseauté actionné par la poignée et/ou se rétractant à la fermeture.",
+    "explication_pedagogique": "Maintenir la porte fermée sans verrouillage par clé.",
+    "exemple_utilisation": "serrure pêne dormant demi-tour pour portes de chambres.",
+    "points_vigilance": [
+      "vérifier le sens du pêne selon le sens d’ouverture."
+    ]
+  },
+  {
+    "terme": "Pêne dormant",
+    "definition_courte": "Partie de serrure qui verrouille la porte par action d’une clé ou condamnation.",
+    "explication_pedagogique": "Assurer le verrouillage réel de la porte.",
+    "exemple_utilisation": "chambres avec serrure pêne dormant demi-tour et portes d’entrée avec pênes dormants.",
+    "points_vigilance": [
+      "différent du demi-tour qui maintient simplement la porte fermée."
+    ]
+  },
+  {
+    "terme": "Plinthe",
+    "definition_courte": "Élément posé en pied de mur pour protéger et finir la jonction mur-sol.",
+    "explication_pedagogique": "Masquer les coupes de revêtement, protéger le mur et finir la pièce.",
+    "exemple_utilisation": "plinthes droites en sapin et plinthes crémaillère en médium.",
+    "points_vigilance": [
+      "coupes, joints, collage et préparation peinture sont très visibles."
+    ]
+  },
+  {
+    "terme": "Plinthe crémaillère",
+    "definition_courte": "Plinthe découpée en forme de dents pour suivre les marches d’un escalier.",
+    "explication_pedagogique": "Assurer la finition le long d’un escalier.",
+    "exemple_utilisation": "plinthes à crémaillère en médium le long des marches.",
+    "points_vigilance": [
+      "découpe selon emmarchement et raccords propres indispensables."
+    ]
+  },
+  {
+    "terme": "Plinthe droite",
+    "definition_courte": "Plinthe linéaire posée en partie basse des murs droits.",
+    "explication_pedagogique": "Protéger le pied de mur et assurer une finition continue.",
+    "exemple_utilisation": "plinthes en sapin 70 x 10 mm pour logements et 100 x 10 mm pour parties communes.",
+    "points_vigilance": [
+      "privilégier les grands linéaires, éviter l’assemblage de petits morceaux."
+    ]
+  },
+  {
+    "terme": "Porte acoustique intérieure",
+    "definition_courte": "Porte intérieure conçue pour limiter la transmission du bruit.",
+    "explication_pedagogique": "Isoler une pièce contenant un équipement bruyant ou donnant sur une pièce principale.",
+    "exemple_utilisation": "portes des locaux recevant les ballons thermodynamiques.",
+    "points_vigilance": [
+      "le joint et le détalonnage éventuel influencent la performance."
+    ]
+  },
+  {
+    "terme": "Porte de distribution",
+    "definition_courte": "Porte intérieure courante séparant les pièces d’un logement.",
+    "explication_pedagogique": "Distribuer chambres, WC, salle de bains, salle d’eau et pièces annexes.",
+    "exemple_utilisation": "blocs-portes SVEDEX ou équivalent, 83 x 204 cm, passage libre 80 cm.",
+    "points_vigilance": [
+      "elles sont souvent fournies par le menuisier et posées avec la plâtrerie selon organisation."
+    ]
+  },
+  {
+    "terme": "Porte d’entrée extérieure",
+    "definition_courte": "Porte d’accès principal d’une maison ou d’un logement depuis l’extérieur.",
+    "explication_pedagogique": "Assurer sécurité, étanchéité à l’air, acoustique, thermique et fermeture.",
+    "exemple_utilisation": "porte Athena acoustique, anti-effraction BP1, Rw + C 38 dB, Up 1,70 W/m2.K.",
+    "points_vigilance": [
+      "vérifier seuil, joints, serrure, microviseur, paumelles et PV."
+    ]
+  },
+  {
+    "terme": "Porte palière",
+    "definition_courte": "Porte séparant un logement collectif de la circulation commune.",
+    "explication_pedagogique": "Assurer sécurité, acoustique, résistance au feu et intimité du logement.",
+    "exemple_utilisation": "portes palières Isoblinde 39BP1, EI 30, 39 dB minimum.",
+    "points_vigilance": [
+      "pose dans murs banchés et coordination avec le gros œuvre."
+    ]
+  },
+  {
+    "terme": "Porte technique",
+    "definition_courte": "Porte donnant sur un local technique ou de service, avec exigences particulières.",
+    "explication_pedagogique": "Fermer et protéger des locaux comme rangements sous escaliers ou locaux d’entretien.",
+    "exemple_utilisation": "portes de locaux techniques intérieurs à âme pleine CF 1h avec ferme-porte.",
+    "points_vigilance": [
+      "souvent plus technique qu’une porte intérieure classique."
+    ]
+  },
+  {
+    "terme": "Prévention PGCSPS",
+    "definition_courte": "Transmission d’informations de prévention au coordonnateur SPS pour établir le plan général de sécurité.",
+    "explication_pedagogique": "Anticiper les risques liés aux travaux, manutentions, protections et coactivité.",
+    "exemple_utilisation": "l’entreprise doit transmettre ses éléments de prévention pour le PGCSPS.",
+    "points_vigilance": [
+      "ne pas attendre le démarrage chantier pour traiter les risques."
+    ]
+  },
+  {
+    "terme": "Profil U",
+    "definition_courte": "Profil en forme de U utilisé comme poteau, renfort ou réservation de finition.",
+    "explication_pedagogique": "Habiller un about de cloison ou recevoir un élément adjacent.",
+    "exemple_utilisation": "poteaux d’about en profil U et profil U sous limon central pour recevoir la cloison.",
+    "points_vigilance": [
+      "vérifier section, hauteur et interface avec plâtrerie."
+    ]
+  },
+  {
+    "terme": "Profil-poignée",
+    "definition_courte": "Profil intégré à une façade de placard servant à la fois de bord et de prise en main.",
+    "explication_pedagogique": "Manipuler les portes coulissantes sans poignée rapportée.",
+    "exemple_utilisation": "profils-poignées acier galvanisé laqué ou enrobé décor.",
+    "points_vigilance": [
+      "participe aussi à la rigidité du panneau."
+    ]
+  },
+  {
+    "terme": "Protection provisoire",
+    "definition_courte": "Protection temporaire maintenue pendant le chantier pour éviter dégradations.",
+    "explication_pedagogique": "Préserver huisseries, escaliers et finitions jusqu’à la réception.",
+    "exemple_utilisation": "protection des pieds d’huisseries et protection rigide des escaliers par feutrine et isorel.",
+    "points_vigilance": [
+      "enlever uniquement au bon moment et réparer les défauts avant réception."
+    ]
+  },
+  {
+    "terme": "PV anti-effraction",
+    "definition_courte": "Procès-verbal justifiant la performance anti-effraction d’un produit testé.",
+    "explication_pedagogique": "Prouver que le modèle proposé atteint le niveau demandé.",
+    "exemple_utilisation": "PV anti-effraction à fournir pour les portes palières.",
+    "points_vigilance": [
+      "un descriptif commercial ne remplace pas un PV d’essai."
+    ]
+  },
+  {
+    "terme": "PV d’essai",
+    "definition_courte": "Document officiel attestant d’un résultat d’essai réalisé sur un ouvrage ou produit.",
+    "explication_pedagogique": "Justifier acoustique, feu, effraction ou autre performance.",
+    "exemple_utilisation": "indice acoustique attesté par procès-verbal d’essai.",
+    "points_vigilance": [
+      "vérifier la validité, le modèle exact et la configuration de pose testée."
+    ]
+  },
+  {
+    "terme": "Quincaillerie",
+    "definition_courte": "Ensemble des accessoires métalliques d’une menuiserie : serrures, paumelles, poignées, cylindres, gâches, ferme-portes.",
+    "explication_pedagogique": "Rendre la porte fonctionnelle, réglable, sécurisée et durable.",
+    "exemple_utilisation": "quincaillerie avec marquage NF-SNFQ et validation par échantillons.",
+    "points_vigilance": [
+      "la quincaillerie pèse lourd dans la qualité finale."
+    ]
+  },
+  {
+    "terme": "Rail haut et bas",
+    "definition_courte": "Profils guidant une porte coulissante en partie haute et basse.",
+    "explication_pedagogique": "Permettre le coulissement régulier des façades de placards.",
+    "exemple_utilisation": "rails hauts et bas en acier galvanisé blanc, traités anti-corrosion.",
+    "points_vigilance": [
+      "poser parfaitement de niveau et d’aplomb."
+    ]
+  },
+  {
+    "terme": "Rampe",
+    "definition_courte": "Ensemble de protection et d’appui situé le long d’un escalier.",
+    "explication_pedagogique": "Sécuriser la montée et la descente, surtout côté vide.",
+    "exemple_utilisation": "rampes avec barreaudage vertical section 50 x 50.",
+    "points_vigilance": [
+      "rampe, main courante et garde-corps ne sont pas toujours la même chose."
+    ]
+  },
+  {
+    "terme": "RDC",
+    "definition_courte": "Rez-de-chaussée, niveau bas d’un bâtiment au contact principal avec l’extérieur ou les accès.",
+    "explication_pedagogique": "Localiser des ouvrages selon les plans et niveaux.",
+    "exemple_utilisation": "salles de bains à RDC, locaux de rangement en RDC, escaliers d’accès aux étages.",
+    "points_vigilance": [
+      "les prestations peuvent varier selon RDC, étage et parties communes."
+    ]
+  },
+  {
+    "terme": "Réception des supports",
+    "definition_courte": "Vérification par l’entreprise que les supports sont prêts à recevoir ses ouvrages.",
+    "explication_pedagogique": "Éviter de poser sur un support non conforme ou non fini.",
+    "exemple_utilisation": "réception des supports et prises de mesures à la charge de l’entreprise.",
+    "points_vigilance": [
+      "si le support est mauvais, il faut émettre une réserve avant pose."
+    ]
+  },
+  {
+    "terme": "REI 30",
+    "definition_courte": "Classement feu indiquant résistance mécanique, étanchéité et isolation pendant 30 minutes.",
+    "explication_pedagogique": "Garantir la tenue au feu d’un élément dans une configuration définie.",
+    "exemple_utilisation": "trappe d’accès aux combles bois demandée REI 30.",
+    "points_vigilance": [
+      "la trappe, son bâti, les joints et la pose doivent correspondre au classement."
+    ]
+  },
+  {
+    "terme": "Rejet d’eau",
+    "definition_courte": "Profil ou forme permettant d’éloigner l’eau d’une porte ou façade.",
+    "explication_pedagogique": "Éviter ruissellement, infiltration ou stagnation au droit d’un seuil ou d’une façade.",
+    "exemple_utilisation": "plinthe aluminium rejet d’eau sur porte d’entrée et rejet d’eau supérieur sur boîtes aux lettres.",
+    "points_vigilance": [
+      "contrôler pente, sens et continuité."
+    ]
+  },
+  {
+    "terme": "Réservations",
+    "definition_courte": "Vides ou emplacements prévus dans un ouvrage pour recevoir un autre élément.",
+    "explication_pedagogique": "Permettre la pose ultérieure d’huisseries, trappes, réseaux ou accessoires.",
+    "exemple_utilisation": "réservations et regarnissages maçonnés à la charge du lot Gros œuvre.",
+    "points_vigilance": [
+      "une réservation oubliée crée reprise, retard et surcoût."
+    ]
+  },
+  {
+    "terme": "Ressort de rappel",
+    "definition_courte": "Mécanisme ramenant automatiquement la béquille ou poignée en position initiale.",
+    "explication_pedagogique": "Éviter que les poignées restent tombantes ou mal positionnées.",
+    "exemple_utilisation": "ensembles de porte avec ressort de rappel.",
+    "points_vigilance": [
+      "détail discret mais important pour la durabilité et le confort."
+    ]
+  },
+  {
+    "terme": "Rosace",
+    "definition_courte": "Petite plaque de finition autour d’un cylindre, bouton, clé ou batteuse.",
+    "explication_pedagogique": "Protéger la découpe et améliorer l’aspect de la quincaillerie.",
+    "exemple_utilisation": "rosace de cylindre, rosace de finition aluminium pour gaines.",
+    "points_vigilance": [
+      "finition et teinte à valider avec le maître d’œuvre."
+    ]
+  },
+  {
+    "terme": "Rw + C",
+    "definition_courte": "Indice acoustique corrigé utilisé pour caractériser l’affaiblissement au bruit aérien.",
+    "explication_pedagogique": "Comparer la performance acoustique d’une porte ou paroi.",
+    "exemple_utilisation": "Rw + C mini 38 dB pour les portes d’entrée extérieures.",
+    "points_vigilance": [
+      "ne pas confondre performance laboratoire et résultat réel après pose."
+    ]
+  },
+  {
+    "terme": "Sapin",
+    "definition_courte": "Essence de bois résineux utilisée en menuiserie intérieure.",
+    "explication_pedagogique": "Réaliser plinthes, escaliers, cadres ou poteaux à peindre/lasurer.",
+    "exemple_utilisation": "plinthes en sapin, escaliers en sapin, cadre de gaine en sapin.",
+    "points_vigilance": [
+      "prévoir préparation, ponçage, rebouchage des nœuds et protection."
+    ]
+  },
+  {
+    "terme": "Sapin du Nord 1er choix",
+    "definition_courte": "Bois résineux de qualité sélectionnée pour ouvrages apparents ou à peindre.",
+    "explication_pedagogique": "Obtenir des pièces plus régulières pour poteaux d’about ou menuiseries visibles.",
+    "exemple_utilisation": "poteaux d’about en sapin du Nord 1er choix.",
+    "points_vigilance": [
+      "même en 1er choix, une préparation avant peinture reste nécessaire."
+    ]
+  },
+  {
+    "terme": "Scellement d’huisserie",
+    "definition_courte": "Fixation d’une huisserie dans un support béton, maçonné ou cloisonné.",
+    "explication_pedagogique": "Garantir la tenue mécanique et la bonne géométrie du bloc-porte.",
+    "exemple_utilisation": "scellement par le gros œuvre dans murs de refend BA, par le lot cloisons dans plaques de plâtre.",
+    "points_vigilance": [
+      "contrôler aplomb, niveau, équerrage et protection des pieds."
+    ]
+  },
+  {
+    "terme": "Serrure 3 points",
+    "definition_courte": "Serrure verrouillant la porte en trois points de condamnation.",
+    "explication_pedagogique": "Améliorer la résistance à l’effraction et la tenue du vantail.",
+    "exemple_utilisation": "portes d’entrée et portes palières avec serrure de sûreté 3 points A2P*.",
+    "points_vigilance": [
+      "vérifier réglage des trois points et compatibilité avec la gâche."
+    ]
+  },
+  {
+    "terme": "Serrure à larder",
+    "definition_courte": "Serrure encastrée dans l’épaisseur du vantail.",
+    "explication_pedagogique": "Obtenir une fermeture discrète et robuste.",
+    "exemple_utilisation": "portes palières avec serrure de sûreté à larder à 3 points.",
+    "points_vigilance": [
+      "nécessite une préparation précise du chant de porte."
+    ]
+  },
+  {
+    "terme": "Serrure à mortaiser",
+    "definition_courte": "Serrure encastrée dans une mortaise réalisée dans la porte.",
+    "explication_pedagogique": "Permettre fermeture, verrouillage ou condamnation sans boîtier apparent.",
+    "exemple_utilisation": "serrures bec de cane à mortaiser et serrures de sûreté à mortaiser.",
+    "points_vigilance": [
+      "dimensions et axe doivent correspondre au béquillage prévu."
+    ]
+  },
+  {
+    "terme": "Seuil à la suisse",
+    "definition_courte": "Seuil de porte profilé utilisé notamment pour améliorer étanchéité, acoustique et passage.",
+    "explication_pedagogique": "Traiter la liaison entre porte et sol en partie basse.",
+    "exemple_utilisation": "seuil à la suisse aluminium extrudé drainé ou inox avec joint isophonique.",
+    "points_vigilance": [
+      "hauteur, drainage, calage et compatibilité PMR doivent être contrôlés."
+    ]
+  },
+  {
+    "terme": "Sous-face d’escalier",
+    "definition_courte": "Face inférieure visible d’un escalier ou d’une paillasse.",
+    "explication_pedagogique": "Être finie ou habillée pour un rendu propre dans les locaux sous escalier.",
+    "exemple_utilisation": "habillage sous-face escalier par champs plats en médium.",
+    "points_vigilance": [
+      "traiter les joints et raccords avant peinture."
+    ]
+  },
+  {
+    "terme": "Tablette",
+    "definition_courte": "Planche horizontale utilisée dans un placard pour le rangement.",
+    "explication_pedagogique": "Porter vêtements, boîtes ou objets.",
+    "exemple_utilisation": "tablettes mélaminées de 19 à 30 mm selon sollicitation.",
+    "points_vigilance": [
+      "respecter portée, épaisseur, taquets et flèche maximale."
+    ]
+  },
+  {
+    "terme": "Tampon amortisseur",
+    "definition_courte": "Petit élément souple limitant le bruit ou le choc à la fermeture d’une porte.",
+    "explication_pedagogique": "Améliorer le confort d’usage et protéger l’huisserie.",
+    "exemple_utilisation": "huisseries métalliques enrobantes avec tampons amortisseurs.",
+    "points_vigilance": [
+      "détail simple mais important pour les portes intérieures."
+    ]
+  },
+  {
+    "terme": "Taquet équerre",
+    "definition_courte": "Petit support de fixation en forme d’équerre pour tablette ou séparation.",
+    "explication_pedagogique": "Porter les tablettes et assurer leur maintien contre les parois.",
+    "exemple_utilisation": "fixation des tablettes par taquets équerres.",
+    "points_vigilance": [
+      "adapter vis et chevilles à la nature du support."
+    ]
+  },
+  {
+    "terme": "Tôle 15/10e",
+    "definition_courte": "Épaisseur de tôle exprimée en dixièmes de millimètre : 15/10e = 1,5 mm.",
+    "explication_pedagogique": "Définir la robustesse minimale d’une huisserie ou d’un parement métallique.",
+    "exemple_utilisation": "huisseries en acier 15/10e ou 20/10e selon portes.",
+    "points_vigilance": [
+      "ne pas lire 15/10 comme 15 mm."
+    ]
+  },
+  {
+    "terme": "Tôle 20/10e",
+    "definition_courte": "Épaisseur de tôle de 2 mm.",
+    "explication_pedagogique": "Donner plus de rigidité aux cadres d’huisseries techniques ou acoustiques.",
+    "exemple_utilisation": "cadres d’huisserie métallique en tôle d’acier de 20/10e minimum.",
+    "points_vigilance": [
+      "plus l’épaisseur est élevée, plus l’huisserie est robuste."
+    ]
+  },
+  {
+    "terme": "Trappe d’accès aux combles",
+    "definition_courte": "Ouvrage ouvrant permettant d’accéder aux combles depuis un plafond.",
+    "explication_pedagogique": "Assurer l’accès maintenance tout en maintenant isolation et sécurité feu.",
+    "exemple_utilisation": "trappe bois 80 x 80 cm, isolant R=5,70, joint isophonique, vérins et REI 30.",
+    "points_vigilance": [
+      "vérifier ouverture, hauteur de remontée, cadre, isolation et classement feu."
+    ]
+  },
+  {
+    "terme": "Traverses verticales",
+    "definition_courte": "Éléments verticaux structurant l’aménagement intérieur d’un placard.",
+    "explication_pedagogique": "Séparer penderie et rayonnages, et supporter tablettes ou accessoires.",
+    "exemple_utilisation": "séparation verticale de 1,80 m en partie centrale.",
+    "points_vigilance": [
+      "leur position doit correspondre aux usages prévus."
+    ]
+  },
+  {
+    "terme": "Trémie",
+    "definition_courte": "Ouverture dans un plancher permettant le passage d’un escalier ou accès vertical.",
+    "explication_pedagogique": "Créer la communication entre deux niveaux.",
+    "exemple_utilisation": "habillage du nez de plancher en périphérie de la trémie.",
+    "points_vigilance": [
+      "traiter garde-corps, finitions et sécurité en rive de trémie."
+    ]
+  },
+  {
+    "terme": "Tringle ovale",
+    "definition_courte": "Barre de penderie de section ovale, souvent en acier chromé.",
+    "explication_pedagogique": "Suspendre les vêtements dans un placard.",
+    "exemple_utilisation": "tringle ovale sous tablette sur 2/3 de longueur ou toute longueur selon placard.",
+    "points_vigilance": [
+      "fixation sous tablette et portée doivent éviter la déformation."
+    ]
+  },
+  {
+    "terme": "Up",
+    "definition_courte": "Coefficient de transmission thermique d’une porte ou paroi.",
+    "explication_pedagogique": "Mesurer la quantité de chaleur qui traverse l’ouvrage ; plus il est faible, meilleure est l’isolation.",
+    "exemple_utilisation": "porte d’entrée demandée avec Up = 1,70 W/m2.K.",
+    "points_vigilance": [
+      "vérifier la valeur sur fiche technique du fabricant."
+    ]
+  },
+  {
+    "terme": "Vantail",
+    "definition_courte": "Partie mobile d’une porte, trappe ou façade battante.",
+    "explication_pedagogique": "Constituer l’ouvrant que l’on manipule.",
+    "exemple_utilisation": "vantaux de portes, vantaux battants de gaines techniques et panneaux coulissants de placards.",
+    "points_vigilance": [
+      "une porte peut avoir un ou plusieurs vantaux selon le cas."
+    ]
+  },
+  {
+    "terme": "Variure",
+    "definition_courte": "Combinaison propre à un cylindre et à sa clé.",
+    "explication_pedagogique": "Définir quelles clés ouvrent quelles serrures.",
+    "exemple_utilisation": "même variure pour les portes d’entrée et celliers des maisons individuelles.",
+    "points_vigilance": [
+      "une erreur de variure peut bloquer la remise des clés."
+    ]
+  },
+  {
+    "terme": "Vérin hydraulique",
+    "definition_courte": "Dispositif d’assistance à l’ouverture ou au maintien d’un ouvrant.",
+    "explication_pedagogique": "Faciliter l’ouverture d’une trappe et éviter une descente brutale.",
+    "exemple_utilisation": "trappe d’accès aux combles avec dispositif d’ouverture par vérins hydrauliques.",
+    "points_vigilance": [
+      "vérifier force, encombrement et accessibilité pour maintenance."
+    ]
+  },
+  {
+    "terme": "VMC",
+    "definition_courte": "Ventilation Mécanique Contrôlée.",
+    "explication_pedagogique": "Renouveler l’air du logement en extrayant l’air humide ou vicié.",
+    "exemple_utilisation": "détalonnage des portes de distribution pour circulation d’air et ventilation des locaux par VMC.",
+    "points_vigilance": [
+      "ne pas supprimer le détalonnage demandé lors des ajustements de portes."
+    ]
+  },
+  {
+    "terme": "Voile de refend BA",
+    "definition_courte": "Mur intérieur porteur en béton armé séparant ou stabilisant des parties du bâtiment.",
+    "explication_pedagogique": "Porter et contreventer la structure, tout en recevant parfois des huisseries.",
+    "exemple_utilisation": "scellement des huisseries métalliques dans les murs de refends en béton armé par le gros œuvre.",
+    "points_vigilance": [
+      "coordination menuiserie/gros œuvre indispensable avant coulage ou pose."
+    ]
+  },
+  {
+    "terme": "Volée d’escalier",
+    "definition_courte": "Suite continue de marches entre deux paliers ou changements de direction.",
+    "explication_pedagogique": "Décrire les parties d’un escalier pour main courante et sécurité.",
+    "exemple_utilisation": "main courante prolongée au-delà de la première et dernière marche de chaque volée.",
+    "points_vigilance": [
+      "contrôler continuité et absence d’obstacle dans la circulation."
+    ]
+  }
+]

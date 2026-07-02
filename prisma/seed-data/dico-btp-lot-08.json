@@ -1,0 +1,3656 @@
+[
+  {
+    "terme": "Abergement",
+    "definition_courte": "Pièce d’étanchéité autour d’une sortie en toiture.",
+    "explication_pedagogique": "Empêcher les infiltrations autour des sorties VMC ou ventilation primaire.",
+    "exemple_utilisation": "les sorties de toiture peuvent être avec abergement en plomb ou système équivalent.",
+    "points_vigilance": [
+      "coordination avec couverture/étanchéité obligatoire."
+    ]
+  },
+  {
+    "terme": "Absence prolongée",
+    "definition_courte": "Mode de régulation réduisant ou adaptant le fonctionnement en cas d’absence.",
+    "explication_pedagogique": "Économiser l’énergie sans arrêter complètement l’installation.",
+    "exemple_utilisation": "la régulation PAC intègre une fonction Absence.",
+    "points_vigilance": [
+      "expliquer à l’occupant pour éviter les mauvais réglages."
+    ]
+  },
+  {
+    "terme": "Accessoires de pose",
+    "definition_courte": "Ensemble des petites pièces nécessaires à la pose complète : raccords, colliers, supports, joints, rosaces, bouchons, fixations, fourreaux ou manchettes.",
+    "explication_pedagogique": "Éviter qu’une ligne DPGF soit sous-chiffrée parce que seuls les gros équipements sont visibles.",
+    "exemple_utilisation": "le CCTP indique régulièrement “y compris accessoires”, supports, raccords et sujétions.",
+    "points_vigilance": [
+      "demander la liste exacte des accessoires prévus pour les appareils, réseaux et VMC."
+    ]
+  },
+  {
+    "terme": "ACERMI",
+    "definition_courte": "Certification française qui atteste les performances déclarées d’un isolant.",
+    "explication_pedagogique": "Prouver qu’un isolant calorifuge ou thermique correspond à la performance annoncée.",
+    "exemple_utilisation": "des isolants et produits d’isolation sont demandés avec performances vérifiables.",
+    "points_vigilance": [
+      "exiger le certificat correspondant à la référence réellement posée."
+    ]
+  },
+  {
+    "terme": "ACI hybride",
+    "definition_courte": "Système de protection anticorrosion utilisé sur certains ballons d’eau chaude, associant généralement une anode active et une protection magnésium.",
+    "explication_pedagogique": "Prolonger la durée de vie de la cuve du ballon ECS.",
+    "exemple_utilisation": "le CCTP cite des ballons Atlantic ACI hybride et Zénéo.",
+    "points_vigilance": [
+      "contrôler le raccordement électrique et l’entretien, sinon la protection anticorrosion peut perdre son efficacité."
+    ]
+  },
+  {
+    "terme": "Acoustique",
+    "definition_courte": "Domaine qui traite des bruits générés ou transmis par les équipements, réseaux, canalisations, VMC et PAC.",
+    "explication_pedagogique": "Garantir le confort des occupants et éviter les nuisances entre logements.",
+    "exemple_utilisation": "le CCTP impose des limites de bruit, notamment 30 dB(A) dans les pièces principales et 35 dB(A) dans les cuisines.",
+    "points_vigilance": [
+      "les colliers, gaines, passages de plancher et caissons doivent être traités, pas seulement les appareils."
+    ]
+  },
+  {
+    "terme": "Adhésif à solvant fort",
+    "definition_courte": "Colle utilisée pour certains assemblages PVC par emboîtement collé.",
+    "explication_pedagogique": "Assurer l’étanchéité et la tenue mécanique des évacuations PVC.",
+    "exemple_utilisation": "les assemblages PVC sont réalisés par emboîtements collés aux adhésifs à solvants forts.",
+    "points_vigilance": [
+      "respecter les temps de séchage, la propreté des emboîtures et la compatibilité du tube/raccord."
+    ]
+  },
+  {
+    "terme": "Aéraulique",
+    "definition_courte": "Domaine qui concerne les mouvements de l’air dans les conduits, bouches, caissons, entrées d’air et extracteurs.",
+    "explication_pedagogique": "Dimensionner correctement une installation de VMC.",
+    "exemple_utilisation": "les PAC, ventilateurs et bouches doivent disposer d’essais aérauliques.",
+    "points_vigilance": [
+      "une gaine écrasée, une vitesse trop élevée ou une perte de charge excessive dégrade les débits."
+    ]
+  },
+  {
+    "terme": "Aérothermie",
+    "definition_courte": "Technique qui récupère les calories contenues dans l’air pour produire chauffage ou eau chaude.",
+    "explication_pedagogique": "Comprendre le fonctionnement des pompes à chaleur air/eau et ballons thermodynamiques.",
+    "exemple_utilisation": "le lot prévoit des PAC air/eau et des ballons ECS thermodynamiques.",
+    "points_vigilance": [
+      "les performances dépendent de la température d’air, des débits et du bon entretien des filtres."
+    ]
+  },
+  {
+    "terme": "Afficheur digital",
+    "definition_courte": "Écran intégré à un équipement pour afficher température, mode de fonctionnement, défauts ou programmation.",
+    "explication_pedagogique": "Faciliter la mise en service et l’exploitation par l’utilisateur ou la maintenance.",
+    "exemple_utilisation": "le ballon Aquacosy SV prévoit un afficheur digital pour marche/arrêt, température et cycle anti-légionellose.",
+    "points_vigilance": [
+      "prévoir l’accessibilité visuelle et physique après pose."
+    ]
+  },
+  {
+    "terme": "Air extrait",
+    "definition_courte": "Air vicié évacué depuis les pièces humides : cuisine, salle de bains, WC, cellier ou local technique.",
+    "explication_pedagogique": "Renouveler l’air intérieur et évacuer humidité et odeurs.",
+    "exemple_utilisation": "les VMC extraient l’air dans les pièces techniques.",
+    "points_vigilance": [
+      "vérifier que chaque bouche est raccordée et que les débits mesurés correspondent à la note de calcul."
+    ]
+  },
+  {
+    "terme": "Air neuf",
+    "definition_courte": "Air entrant dans le logement par les entrées d’air des pièces principales.",
+    "explication_pedagogique": "Compenser l’air extrait par la VMC et assurer le renouvellement d’air.",
+    "exemple_utilisation": "les bases de calcul prévoient des entrées d’air hygroréglables type EH.",
+    "points_vigilance": [
+      "si les entrées d’air sont obstruées, la VMC ne fonctionne pas correctement."
+    ]
+  },
+  {
+    "terme": "Alarme VMC",
+    "definition_courte": "Signal de défaut associé au fonctionnement d’un extracteur ou d’un caisson de ventilation.",
+    "explication_pedagogique": "Prévenir en cas d’arrêt ou de défaut de dépression.",
+    "exemple_utilisation": "le CCTP prévoit une alarme dans la partie VMC collective.",
+    "points_vigilance": [
+      "vérifier l’interface avec l’armoire électrique et le report de défaut."
+    ]
+  },
+  {
+    "terme": "Alfea Extensa M Duo 6",
+    "definition_courte": "Pompe à chaleur air/eau Atlantic double service citée comme référence.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "le CCTP cite Atlantic Alfea Extensa M Duo 6 ou équivalent pour les maisons.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "Algaine",
+    "definition_courte": "Gaine souple utilisée pour raccorder certains éléments de ventilation.",
+    "explication_pedagogique": "Faire la liaison entre caisson, réseau ou bouche en limitant les contraintes mécaniques.",
+    "exemple_utilisation": "le CCTP mentionne la liaison caisson ventilateur/réseau par Algaine PVC isolée.",
+    "points_vigilance": [
+      "respecter le rayon de courbure et éviter les affaissements qui réduisent le débit."
+    ]
+  },
+  {
+    "terme": "Alimentation ECS",
+    "definition_courte": "Réseau qui distribue l’eau chaude sanitaire depuis un ballon ou module intérieur vers les points de puisage.",
+    "explication_pedagogique": "Alimenter douches, lavabos, éviers et autres appareils en eau chaude.",
+    "exemple_utilisation": "les départs ECS sont équipés de vannes d’isolement, mitigeur thermostatique et repérage rouge.",
+    "points_vigilance": [
+      "limiter la température à 50°C en distribution pour réduire le risque de brûlure."
+    ]
+  },
+  {
+    "terme": "Alimentation EF",
+    "definition_courte": "Réseau qui amène l’eau froide jusqu’aux logements et appareils.",
+    "explication_pedagogique": "Distribuer l’eau potable vers les sanitaires, ballons, robinets de puisage et nourrices.",
+    "exemple_utilisation": "l’alimentation EF part des compteurs et chemine en PEHD, cuivre, PVC pression ou PER selon zones.",
+    "points_vigilance": [
+      "contrôler pression, protection antigel, clapet anti-retour et accessibilité des vannes."
+    ]
+  },
+  {
+    "terme": "Alimentation électrique en attente",
+    "definition_courte": "Câble ou boîte laissé par le lot électricité pour alimenter un équipement posé par le lot CVC/PBS.",
+    "explication_pedagogique": "Permettre le raccordement des PAC, ballons, groupes VMC, thermostats ou meubles vasques.",
+    "exemple_utilisation": "le CCTP répartit les attentes électriques entre le lot électricité et le lot CVC.",
+    "points_vigilance": [
+      "bien clarifier qui fournit, qui pose et qui raccorde pour éviter les trous dans l’offre."
+    ]
+  },
+  {
+    "terme": "Aller chauffage",
+    "definition_courte": "Canalisation qui envoie l’eau chaude de chauffage depuis le générateur vers les radiateurs.",
+    "explication_pedagogique": "Distribuer l’énergie vers les corps de chauffe.",
+    "exemple_utilisation": "les collecteurs départ/retour doivent être repérés par étiquette rouge ou bleue.",
+    "points_vigilance": [
+      "ne pas inverser aller et retour lors des raccordements radiateurs."
+    ]
+  },
+  {
+    "terme": "Analyse D1",
+    "definition_courte": "Analyse d’eau réalisée après travaux et rinçage pour contrôler la qualité sanitaire de l’eau distribuée.",
+    "explication_pedagogique": "Prouver que le réseau EF/ECS est propre avant livraison.",
+    "exemple_utilisation": "une analyse de l’eau en sortie de robinetterie après travaux et rinçage est demandée.",
+    "points_vigilance": [
+      "en cas d’écart, l’entreprise doit mener les actions correctives et transmettre les résultats."
+    ]
+  },
+  {
+    "terme": "Analyse de l’eau",
+    "definition_courte": "Contrôle des caractéristiques sanitaires ou chimiques de l’eau.",
+    "explication_pedagogique": "Adapter les traitements et vérifier la conformité après travaux.",
+    "exemple_utilisation": "le DCE comprend une analyse eau et le CCTP prévoit des contrôles après rinçage.",
+    "points_vigilance": [
+      "les résultats doivent être cohérents avec la nature des matériaux et du réseau."
+    ]
+  },
+  {
+    "terme": "Anode magnésium",
+    "definition_courte": "Pièce sacrificielle qui protège une cuve acier émaillé contre la corrosion.",
+    "explication_pedagogique": "Éviter que le ballon ECS ne rouille prématurément.",
+    "exemple_utilisation": "certains ballons mentionnent une anode magnésium ou hybride.",
+    "points_vigilance": [
+      "contrôler l’entretien selon notice fabricant."
+    ]
+  },
+  {
+    "terme": "Anode titane",
+    "definition_courte": "Électrode durable utilisée pour protéger la cuve d’un ballon contre la corrosion.",
+    "explication_pedagogique": "Assurer une protection anticorrosion active ou permanente.",
+    "exemple_utilisation": "l’Aquacosy SV comprend une anode de protection titane.",
+    "points_vigilance": [
+      "son fonctionnement dépend du système électrique et de la notice constructeur."
+    ]
+  },
+  {
+    "terme": "Anti-bélier",
+    "definition_courte": "Dispositif qui amortit les coups de pression dans les canalisations lors des fermetures rapides de robinets.",
+    "explication_pedagogique": "Éviter bruits, vibrations et fatigue des réseaux.",
+    "exemple_utilisation": "le CCTP prévoit un anti-bélier en tête de colonne EF dans les collectifs.",
+    "points_vigilance": [
+      "à placer au bon endroit et dimensionner selon le réseau."
+    ]
+  },
+  {
+    "terme": "Anti-légionellose",
+    "definition_courte": "Fonction ou cycle qui élève périodiquement la température pour limiter le développement des légionelles.",
+    "explication_pedagogique": "Sécuriser la production d’eau chaude sanitaire.",
+    "exemple_utilisation": "le ballon thermodynamique affiche un cycle anti-légionellose.",
+    "points_vigilance": [
+      "ne pas désactiver sans validation ; attention aux températures et au risque de brûlure."
+    ]
+  },
+  {
+    "terme": "Antivibratile",
+    "definition_courte": "Élément souple ou support qui limite la transmission des vibrations au bâtiment.",
+    "explication_pedagogique": "Réduire les bruits solidiens produits par PAC, VMC, canalisations ou ballons.",
+    "exemple_utilisation": "les PAC, ballons et extracteurs sont posés sur plots ou supports antivibratiles.",
+    "points_vigilance": [
+      "un bon appareil mal désolidarisé peut rester bruyant."
+    ]
+  },
+  {
+    "terme": "Appareil le plus défavorisé",
+    "definition_courte": "Point du réseau recevant la pression ou le débit le plus difficile à garantir.",
+    "explication_pedagogique": "Dimensionner les réseaux dans le cas le plus contraignant.",
+    "exemple_utilisation": "le CCTP parle du robinet le plus défavorisé et de la bouche la plus défavorisée.",
+    "points_vigilance": [
+      "ne pas dimensionner uniquement sur les appareils proches du compteur ou caisson."
+    ]
+  },
+  {
+    "terme": "Appareil sanitaire",
+    "definition_courte": "Équipement utilisé pour l’hygiène ou l’usage de l’eau : WC, lavabo, douche, évier, baignoire, lave-mains, vidoir.",
+    "explication_pedagogique": "Identifier les fournitures à poser, raccorder, protéger et essayer.",
+    "exemple_utilisation": "le CCTP détaille la pose et le raccordement des appareils sanitaires.",
+    "points_vigilance": [
+      "vérifier fixation, étanchéité, protection chantier et raccordements EF/ECS/EU/EV."
+    ]
+  },
+  {
+    "terme": "Appoint électrique",
+    "definition_courte": "Résistance électrique qui complète une PAC ou un ballon lorsque la production thermodynamique ne suffit pas.",
+    "explication_pedagogique": "Garantir la température d’eau ou de chauffage en conditions défavorables.",
+    "exemple_utilisation": "l’Aquacosy comporte une épingle électrique d’appoint et les PAC ont un appoint chauffage.",
+    "points_vigilance": [
+      "bien contrôler puissance, alimentation et asservissement tarifaire."
+    ]
+  },
+  {
+    "terme": "AQC",
+    "definition_courte": "Agence Qualité Construction ; par extension, fiches d’attestation d’essais et contrôles de bon fonctionnement.",
+    "explication_pedagogique": "Formaliser les essais avant réception et pour le DOE.",
+    "exemple_utilisation": "le CCTP demande les essais selon fiches d’attestation AQC.",
+    "points_vigilance": [
+      "sans fiches signées, la réception technique peut être bloquée."
+    ]
+  },
+  {
+    "terme": "Aquacosy SV",
+    "definition_courte": "Ballon d’eau chaude sanitaire thermodynamique Atlantic sur air extrait.",
+    "explication_pedagogique": "Produire l’ECS des logements collectifs avec récupération sur la ventilation.",
+    "exemple_utilisation": "le CCTP cite un préparateur ECS mixte vertical Atlantic Aquacosy SV de 200 litres.",
+    "points_vigilance": [
+      "l’équivalent doit valider COP, acoustique, débits d’air, dimensions et certification NF."
+    ]
+  },
+  {
+    "terme": "Armaflex",
+    "definition_courte": "Isolant élastomère souple utilisé pour calorifuger les tuyauteries.",
+    "explication_pedagogique": "Limiter les pertes thermiques et protéger certains réseaux.",
+    "exemple_utilisation": "le CCTP demande un calorifuge Armaflex 19 mm sur des raccordements et canalisations.",
+    "points_vigilance": [
+      "soigner les joints, coudes et points singuliers pour éviter les ponts thermiques."
+    ]
+  },
+  {
+    "terme": "Armoire électrique",
+    "definition_courte": "Coffret recevant alimentations, protections et reports d’alarme.",
+    "explication_pedagogique": "Raccorder certains équipements VMC ou CVC.",
+    "exemple_utilisation": "le dépressostat d’extracteur est à ramener sur l’armoire électrique.",
+    "points_vigilance": [
+      "clarifier la limite avec le lot électricité."
+    ]
+  },
+  {
+    "terme": "Arrivée EF",
+    "definition_courte": "Point d’entrée du réseau d’eau froide dans un bâtiment ou un logement.",
+    "explication_pedagogique": "Positionner les vannes, compteurs, réducteurs de pression et clapets.",
+    "exemple_utilisation": "l’arrivée EF se fait depuis compteur, gaine technique ou pénétration logement.",
+    "points_vigilance": [
+      "doit rester accessible, repérée et protégée du gel si hors volume chauffé."
+    ]
+  },
+  {
+    "terme": "Assemblage coulissant",
+    "definition_courte": "Raccordement qui permet à une canalisation PVC de se dilater sans casser.",
+    "explication_pedagogique": "Absorber les variations dimensionnelles des évacuations.",
+    "exemple_utilisation": "le CCTP impose des assemblages coulissants au-delà de certaines longueurs entre points fixes.",
+    "points_vigilance": [
+      "ne pas inverser les manchons verticaux et horizontaux."
+    ]
+  },
+  {
+    "terme": "Assemblage par collage",
+    "definition_courte": "Mode de raccordement des tuyaux PVC par emboîtement et colle spécifique.",
+    "explication_pedagogique": "Assurer une évacuation étanche et durable.",
+    "exemple_utilisation": "en gaine inaccessible ou pose encastrée, le collage est imposé pour certains réseaux PVC.",
+    "points_vigilance": [
+      "nettoyer, dépolir si nécessaire et respecter les temps de prise."
+    ]
+  },
+  {
+    "terme": "Asservissement tarifaire",
+    "definition_courte": "Commande qui adapte le fonctionnement d’un ballon selon les périodes tarifaires électriques.",
+    "explication_pedagogique": "Optimiser la consommation électrique.",
+    "exemple_utilisation": "les ballons ECS sont asservis aux trois modes tarifaires.",
+    "points_vigilance": [
+      "vérifier la liaison électrique et la programmation."
+    ]
+  },
+  {
+    "terme": "Assistance technique constructeur",
+    "definition_courte": "Intervention ou support du fabricant pour plans, suivi, essais, réglages ou formation.",
+    "explication_pedagogique": "Sécuriser la mise en service des équipements complexes.",
+    "exemple_utilisation": "le CCTP impose l’assistance technique du constructeur pour certains équipements.",
+    "points_vigilance": [
+      "prévoir le coût et les rendez-vous dans le planning."
+    ]
+  },
+  {
+    "terme": "ATOLE",
+    "definition_courte": "Marque citée pour cache nourrice acier blanc.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "les nourrices visibles sont protégées par cache nourrice ATOLE ou équivalent.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "Attente",
+    "definition_courte": "Point préparé par un autre lot ou une phase précédente pour recevoir un raccordement.",
+    "explication_pedagogique": "Coordonner les travaux entre lots.",
+    "exemple_utilisation": "le CCTP cite des attentes électriques, attentes en dalle EU/EV et attentes pour PAC.",
+    "points_vigilance": [
+      "une attente mal positionnée entraîne reprises, percements ou conflits de responsabilité."
+    ]
+  },
+  {
+    "terme": "Atténuation acoustique",
+    "definition_courte": "Réduction mesurable d’un bruit par traitement ou caisson.",
+    "explication_pedagogique": "Limiter les nuisances de PAC ou VMC.",
+    "exemple_utilisation": "le caisson Climeleon annonce -7 dB(A) minimum.",
+    "points_vigilance": [
+      "une atténuation dépend des conditions réelles de pose."
+    ]
+  },
+  {
+    "terme": "Auto-serrage",
+    "definition_courte": "Système de collier qui serre automatiquement ou par clipsage.",
+    "explication_pedagogique": "Fixer rapidement les tuyaux PVC ou fonte.",
+    "exemple_utilisation": "le CCTP autorise des colliers à auto-serrage pour supports.",
+    "points_vigilance": [
+      "s’assurer qu’il reste compatible avec dilatation et acoustique."
+    ]
+  },
+  {
+    "terme": "Autopack PVC",
+    "definition_courte": "Finition PVC autour d’un calorifuge en laine de roche.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "les canalisations hors volume chauffé sont calorifugées avec finition PVC AUTOPACK.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "Avis Technique",
+    "definition_courte": "Document évaluant un produit ou procédé et définissant son domaine d’emploi.",
+    "explication_pedagogique": "Justifier les produits non traditionnels ou systèmes sous certification.",
+    "exemple_utilisation": "le CCTP demande des avis techniques et documents d’application.",
+    "points_vigilance": [
+      "vérifier que l’avis technique correspond bien au cas du chantier."
+    ]
+  },
+  {
+    "terme": "Bague résiliente",
+    "definition_courte": "Pièce souple placée entre un collier et une canalisation.",
+    "explication_pedagogique": "Limiter les vibrations et bruits transmis au support.",
+    "exemple_utilisation": "les supports de tuyaux prévoient une bague en matériau résilient.",
+    "points_vigilance": [
+      "une bague absente ou écrasée annule l’effet acoustique."
+    ]
+  },
+  {
+    "terme": "Baignoire",
+    "definition_courte": "Appareil sanitaire destiné au bain, raccordé en EF, ECS et évacuation.",
+    "explication_pedagogique": "Identifier débit, vidage, siphon, robinetterie et désolidarisation acoustique.",
+    "exemple_utilisation": "le CCTP impose notamment une évacuation séparée de la baignoire jusqu’au collecteur de chute.",
+    "points_vigilance": [
+      "vérifier joint mousse, pieds, tablier, accès au siphon et débit d’évacuation."
+    ]
+  },
+  {
+    "terme": "Ballon de stockage",
+    "definition_courte": "Cuve qui stocke de l’eau chaude sanitaire avant distribution.",
+    "explication_pedagogique": "Assurer une réserve d’eau chaude suffisante.",
+    "exemple_utilisation": "les ballons thermodynamiques ou électriques alimentent les départs ECS.",
+    "points_vigilance": [
+      "protéger contre corrosion, surpression, brûlure et vibrations."
+    ]
+  },
+  {
+    "terme": "Ballon ECS",
+    "definition_courte": "Équipement de production ou de stockage d’eau chaude sanitaire.",
+    "explication_pedagogique": "Alimenter les logements ou locaux communs en eau chaude.",
+    "exemple_utilisation": "le CCTP prévoit des ballons thermodynamiques, électriques verticaux et sous-évier.",
+    "points_vigilance": [
+      "contrôler capacité, fixation, groupe de sécurité, mitigeur et évacuation."
+    ]
+  },
+  {
+    "terme": "Ballon thermodynamique",
+    "definition_courte": "Chauffe-eau qui utilise une petite pompe à chaleur pour produire l’ECS.",
+    "explication_pedagogique": "Réduire les consommations par rapport à un ballon électrique classique.",
+    "exemple_utilisation": "les collectifs reçoivent des ballons Atlantic Aquacosy SV sur air extrait.",
+    "points_vigilance": [
+      "vérifier acoustique, débit d’air, filtre et raccordement VMC."
+    ]
+  },
+  {
+    "terme": "Barre de douche",
+    "definition_courte": "Support mural pour douchette à main, généralement réglable en hauteur.",
+    "explication_pedagogique": "Permettre l’usage confortable de la douche.",
+    "exemple_utilisation": "les ensembles de douche comprennent une barre de 600 mm.",
+    "points_vigilance": [
+      "contrôler fixation et étanchéité au support, surtout en pièces humides."
+    ]
+  },
+  {
+    "terme": "Barre de relèvement",
+    "definition_courte": "Barre d’appui pour aider une personne à se relever ou se transférer.",
+    "explication_pedagogique": "Rendre les WC ou douches accessibles PMR.",
+    "exemple_utilisation": "le CCTP prévoit des barres de relèvement Delabie dans certains logements PMR.",
+    "points_vigilance": [
+      "les renforts dans cloisons doivent être anticipés avant fermeture."
+    ]
+  },
+  {
+    "terme": "Bec pivotant",
+    "definition_courte": "Bec de robinet pouvant tourner latéralement.",
+    "explication_pedagogique": "Faciliter l’usage d’un évier ou d’un lave-mains.",
+    "exemple_utilisation": "la robinetterie d’évier comporte un bec tube pivotant.",
+    "points_vigilance": [
+      "vérifier la zone de rotation et éviter les chocs contre mur ou crédence."
+    ]
+  },
+  {
+    "terme": "BEE+",
+    "definition_courte": "Référentiel de labellisation environnementale et énergétique mentionné pour l’opération.",
+    "explication_pedagogique": "Encadrer les exigences de performance du bâtiment.",
+    "exemple_utilisation": "les logements s’inscrivent dans une certification PRESTATERRE BEE+ / RE2020.",
+    "points_vigilance": [
+      "les choix de produits et fiches environnementales doivent rester compatibles avec la certification."
+    ]
+  },
+  {
+    "terme": "BET fluides",
+    "definition_courte": "Bureau d’études chargé des études thermiques, CVC, plomberie, ventilation et parfois électricité.",
+    "explication_pedagogique": "Définir les principes techniques et prescriptions de dimensionnement.",
+    "exemple_utilisation": "le CCTP est établi par Math Ingénierie, BET thermique et fluides.",
+    "points_vigilance": [
+      "en phase chantier, les dimensionnements d’exécution restent à valider par l’entreprise."
+    ]
+  },
+  {
+    "terme": "Bi-service",
+    "definition_courte": "Se dit d’une PAC qui assure deux fonctions : chauffage et production d’eau chaude sanitaire.",
+    "explication_pedagogique": "Réduire le nombre d’équipements dans le logement.",
+    "exemple_utilisation": "les maisons sont équipées de PAC double service.",
+    "points_vigilance": [
+      "vérifier les deux fonctions séparément lors de la mise en service."
+    ]
+  },
+  {
+    "terme": "Bitube",
+    "definition_courte": "Réseau de chauffage avec un tube aller et un tube retour pour alimenter les radiateurs.",
+    "explication_pedagogique": "Permettre un équilibrage et une distribution plus régulière.",
+    "exemple_utilisation": "la distribution chauffage est du type bitube sous dallage et en plinthe.",
+    "points_vigilance": [
+      "repérer départ et retour, et équilibrer chaque corps de chauffe."
+    ]
+  },
+  {
+    "terme": "Boîte Plexo",
+    "definition_courte": "Boîte électrique étanche ou protégée utilisée pour laisser une alimentation ou un raccordement.",
+    "explication_pedagogique": "Recevoir les raccordements proches d’un équipement CVC.",
+    "exemple_utilisation": "le lot électricité laisse des boîtes Plexo à proximité des groupes ou thermostats.",
+    "points_vigilance": [
+      "vérifier indice de protection, emplacement et accès après pose."
+    ]
+  },
+  {
+    "terme": "Bonde",
+    "definition_courte": "Pièce d’évacuation placée au fond d’un évier, lavabo, douche ou baignoire.",
+    "explication_pedagogique": "Assurer l’écoulement vers le siphon.",
+    "exemple_utilisation": "les appareils sanitaires sont livrés avec bondes, trop-pleins et vidages selon équipements.",
+    "points_vigilance": [
+      "contrôler serrage, joints et compatibilité avec le siphon."
+    ]
+  },
+  {
+    "terme": "Bouche cuisine",
+    "definition_courte": "Bouche d’extraction VMC placée en cuisine, souvent à débit variable ou de pointe.",
+    "explication_pedagogique": "Extraire humidité, odeurs et polluants de cuisson.",
+    "exemple_utilisation": "les débits cuisine sont détaillés selon typologie T1 à T5.",
+    "points_vigilance": [
+      "la commande de débit de pointe doit fonctionner et rester accessible."
+    ]
+  },
+  {
+    "terme": "Bouche d’extraction",
+    "definition_courte": "Terminal de VMC qui extrait l’air vicié d’une pièce.",
+    "explication_pedagogique": "Assurer le renouvellement d’air dans les pièces humides.",
+    "exemple_utilisation": "les bouches doivent avoir des essais aérauliques et acoustiques.",
+    "points_vigilance": [
+      "ne pas peindre, boucher ou monter sans joint d’étanchéité."
+    ]
+  },
+  {
+    "terme": "Bouche hygroréglable",
+    "definition_courte": "Bouche dont le débit varie selon l’humidité ou la présence.",
+    "explication_pedagogique": "Adapter la ventilation aux besoins réels du logement.",
+    "exemple_utilisation": "le CCTP prévoit des systèmes VMC Hygro B.",
+    "points_vigilance": [
+      "vérifier le sens, la commande, les plages de débit et l’avis technique."
+    ]
+  },
+  {
+    "terme": "Bouche sanitaire",
+    "definition_courte": "Bouche VMC destinée aux salles de bains, WC ou celliers.",
+    "explication_pedagogique": "Extraire l’humidité et les odeurs des pièces techniques.",
+    "exemple_utilisation": "les réservations sanitaires sont indiquées avec diamètres spécifiques.",
+    "points_vigilance": [
+      "respecter le diamètre de réservation pour éviter les fuites et mauvais serrage."
+    ]
+  },
+  {
+    "terme": "Bouchon à vis",
+    "definition_courte": "Obturateur temporaire ou permanent vissé sur une évacuation.",
+    "explication_pedagogique": "Empêcher l’entrée de gravois pendant chantier.",
+    "exemple_utilisation": "les évacuations machines à laver doivent être obturées par bouchons à vis.",
+    "points_vigilance": [
+      "retirer uniquement au moment du raccordement final."
+    ]
+  },
+  {
+    "terme": "Bouchon de terminaison",
+    "definition_courte": "Pièce qui ferme l’extrémité d’un collecteur ou d’un réseau.",
+    "explication_pedagogique": "Terminer proprement un réseau et permettre une extension ou un démontage selon cas.",
+    "exemple_utilisation": "les collecteurs chauffage comprennent raccords, supports et bouchons de terminaison.",
+    "points_vigilance": [
+      "un bouchon oublié ou mal serré provoque une fuite à la mise en eau."
+    ]
+  },
+  {
+    "terme": "Boucle",
+    "definition_courte": "Circuit fermé permettant un retour vers un générateur ou un organe de réglage.",
+    "explication_pedagogique": "Assurer circulation, réglage ou distribution homogène.",
+    "exemple_utilisation": "les essais prévoient mesure de température et débit de chaque boucle au niveau de l’organe de réglage.",
+    "points_vigilance": [
+      "identifier les boucles avant équilibrage."
+    ]
+  },
+  {
+    "terme": "Branchement eau froide",
+    "definition_courte": "Liaison entre compteur, regard ou gaine technique et le logement ou bâtiment.",
+    "explication_pedagogique": "Amener l’eau potable au point de distribution.",
+    "exemple_utilisation": "les branchements EF incluent PEHD, compteurs, clapets, réducteurs et vannes.",
+    "points_vigilance": [
+      "clarifier ce qui relève du VRD, du concessionnaire et du lot plomberie."
+    ]
+  },
+  {
+    "terme": "Brasure capillaire",
+    "definition_courte": "Technique d’assemblage du cuivre par métal d’apport qui pénètre par capillarité.",
+    "explication_pedagogique": "Réaliser des raccordements cuivre fiables.",
+    "exemple_utilisation": "le CCTP cite des raccords à brasure capillaire et une température de 850°C.",
+    "points_vigilance": [
+      "interdiction de braser près de matériaux sensibles sans protection incendie."
+    ]
+  },
+  {
+    "terme": "Bruit d’équipement",
+    "definition_courte": "Bruit généré par un appareil ou réseau : PAC, VMC, robinetterie, évacuation, pompe ou radiateur.",
+    "explication_pedagogique": "Vérifier le confort acoustique réglementaire.",
+    "exemple_utilisation": "le CCTP impose des limites LnAT pour équipements individuels et collectifs.",
+    "points_vigilance": [
+      "faire des essais acoustiques quand ils sont demandés à la réception."
+    ]
+  },
+  {
+    "terme": "Bureau de contrôle",
+    "definition_courte": "Organisme de contrôle technique chargé de vérifier certains points réglementaires.",
+    "explication_pedagogique": "Valider sécurité, acoustique, feu et conformité.",
+    "exemple_utilisation": "le CCTP demande PV et documents au bureau de contrôle avant réception.",
+    "points_vigilance": [
+      "anticiper les fiches techniques plutôt que régulariser après pose."
+    ]
+  },
+  {
+    "terme": "Butée à 38°C",
+    "definition_courte": "Sécurité sur mitigeur thermostatique empêchant de dépasser facilement 38°C.",
+    "explication_pedagogique": "Limiter les risques de brûlure dans douche ou baignoire.",
+    "exemple_utilisation": "la robinetterie Grotherm mentionne une butée à 38°C.",
+    "points_vigilance": [
+      "contrôler réglage et bon fonctionnement eau chaude/eau froide."
+    ]
+  },
+  {
+    "terme": "Butée éco",
+    "definition_courte": "Point dur ou bouton permettant de limiter volontairement le débit d’un robinet ou mitigeur.",
+    "explication_pedagogique": "Économiser l’eau sans empêcher l’usage normal.",
+    "exemple_utilisation": "les mitigeurs doivent disposer d’une butée escamotable ou bouton éco.",
+    "points_vigilance": [
+      "ne pas confondre économie de débit et sous-alimentation du réseau."
+    ]
+  },
+  {
+    "terme": "Cache nourrice",
+    "definition_courte": "Habillage métallique ou panneau qui protège et masque une nourrice de distribution.",
+    "explication_pedagogique": "Protéger mécaniquement les départs EF/ECS tout en gardant un accès.",
+    "exemple_utilisation": "le CCTP cite des caches nourrices acier blanc ATOLE ou équivalent.",
+    "points_vigilance": [
+      "la trappe doit rester démontable et les vannes accessibles."
+    ]
+  },
+  {
+    "terme": "Cache unité extérieure",
+    "definition_courte": "Habillage esthétique posé autour de l’unité extérieure de PAC.",
+    "explication_pedagogique": "Intégrer le groupe extérieur dans l’architecture et parfois réduire le bruit.",
+    "exemple_utilisation": "le CCTP prévoit des caches côté rue et un caisson acoustique côté jardin.",
+    "points_vigilance": [
+      "ne pas gêner la ventilation, les pertes de charge et l’accès maintenance."
+    ]
+  },
+  {
+    "terme": "Caisson d’atténuation acoustique",
+    "definition_courte": "Enveloppe conçue pour réduire le bruit émis par une unité extérieure ou un équipement.",
+    "explication_pedagogique": "Limiter les nuisances sonores côté jardin ou voisinage.",
+    "exemple_utilisation": "un caisson Atlantic Climeleon ou équivalent est prévu avec atténuation -7 dB(A) minimum.",
+    "points_vigilance": [
+      "vérifier la perte de charge, la résistance aux intempéries et le démontage."
+    ]
+  },
+  {
+    "terme": "Caisson VMC",
+    "definition_courte": "Groupe motorisé qui assure l’extraction d’air dans une installation de ventilation.",
+    "explication_pedagogique": "Créer la dépression nécessaire pour extraire l’air des logements.",
+    "exemple_utilisation": "les caissons Hygrocosy, Comète ou Cosmos sont cités selon logements individuels ou collectifs.",
+    "points_vigilance": [
+      "contrôler débit, dépression, acoustique, suspension et accès maintenance."
+    ]
+  },
+  {
+    "terme": "Calage des appareils",
+    "definition_courte": "Mise à niveau et stabilisation d’un équipement lors de la pose.",
+    "explication_pedagogique": "Éviter mouvements, vibrations, mauvaises pentes ou défauts d’étanchéité.",
+    "exemple_utilisation": "les meubles, éviers et sanitaires doivent être adaptés et calés au site.",
+    "points_vigilance": [
+      "un appareil mal calé peut fissurer les joints ou vibrer."
+    ]
+  },
+  {
+    "terme": "Calorifuge",
+    "definition_courte": "Isolation posée autour d’une canalisation pour limiter pertes thermiques, condensation ou gel.",
+    "explication_pedagogique": "Protéger les réseaux ECS, chauffage ou EF en volume froid.",
+    "exemple_utilisation": "le CCTP prévoit Armaflex 19 mm, laine de roche 25 mm et coquilles selon diamètres.",
+    "points_vigilance": [
+      "soigner les continuités au droit des colliers, vannes et coudes."
+    ]
+  },
+  {
+    "terme": "Canalisation apparente",
+    "definition_courte": "Tuyau visible, généralement en local technique, placard ou sous appareil.",
+    "explication_pedagogique": "Permettre une maintenance plus facile et éviter certains encastrements.",
+    "exemple_utilisation": "les réseaux apparents sont réalisés en cuivre rouge écroui.",
+    "points_vigilance": [
+      "l’esthétique, les colliers et la protection mécanique restent à traiter."
+    ]
+  },
+  {
+    "terme": "Canalisation encastrée",
+    "definition_courte": "Tuyau intégré dans une dalle, cloison ou réservation, généralement sous fourreau.",
+    "explication_pedagogique": "Masquer les réseaux et distribuer les appareils.",
+    "exemple_utilisation": "les canalisations encastrées sont prévues en PER sous fourreau sans assemblage sous dalle.",
+    "points_vigilance": [
+      "aucun raccord non accessible ne doit être oublié sous dalle."
+    ]
+  },
+  {
+    "terme": "Canalisation PEHD",
+    "definition_courte": "Tuyau en polyéthylène haute densité utilisé pour l’alimentation eau potable enterrée.",
+    "explication_pedagogique": "Relier compteurs, bâtiments et alimentations principales.",
+    "exemple_utilisation": "les réseaux après compteurs sont en PEHD spécial eau potable.",
+    "points_vigilance": [
+      "respecter profondeur, tranchée, filet avertisseur et absence de raccord inutile."
+    ]
+  },
+  {
+    "terme": "Caniveau technique",
+    "definition_courte": "Volume ou cheminement pouvant recevoir des réseaux.",
+    "explication_pedagogique": "Protéger et organiser certaines distributions.",
+    "exemple_utilisation": "les finitions de calorifuge en caniveau doivent être soignées.",
+    "points_vigilance": [
+      "attention à l’étanchéité en zones humides ou ruissellement."
+    ]
+  },
+  {
+    "terme": "Capacité 200 litres",
+    "definition_courte": "Volume de stockage d’un ballon ECS de 200 L.",
+    "explication_pedagogique": "Adapter la réserve d’eau chaude au logement.",
+    "exemple_utilisation": "l’Aquacosy SV est prévu en capacité 200 litres pour les logements collectifs.",
+    "points_vigilance": [
+      "vérifier les exigences V40td selon typologie de logement."
+    ]
+  },
+  {
+    "terme": "Capillarité",
+    "definition_courte": "Phénomène permettant à la brasure de pénétrer dans l’espace entre tube et raccord.",
+    "explication_pedagogique": "Réaliser une liaison cuivre étanche.",
+    "exemple_utilisation": "les tubes cuivre sont assemblés par raccords à souder par capillarité.",
+    "points_vigilance": [
+      "un mauvais nettoyage ou mauvais jeu empêche une bonne brasure."
+    ]
+  },
+  {
+    "terme": "Cartouche C3",
+    "definition_courte": "Cartouche de robinetterie associée à un niveau de confort ou performance.",
+    "explication_pedagogique": "Garantir le comportement du mitigeur dans les usages sanitaires.",
+    "exemple_utilisation": "les robinetteries indiquent des classements C3.",
+    "points_vigilance": [
+      "contrôler la fiche technique de la référence posée."
+    ]
+  },
+  {
+    "terme": "CCTP",
+    "definition_courte": "Cahier des Clauses Techniques Particulières.",
+    "explication_pedagogique": "Décrire techniquement les travaux attendus par lot.",
+    "exemple_utilisation": "le lot 08 définit chauffage, ventilation, plomberie sanitaire.",
+    "points_vigilance": [
+      "à lire avec plans, DPGF, CCAP, RICT, PGC et études."
+    ]
+  },
+  {
+    "terme": "CE",
+    "definition_courte": "Marquage réglementaire indiquant qu’un produit répond aux exigences européennes applicables.",
+    "explication_pedagogique": "Autoriser la mise sur le marché d’un équipement.",
+    "exemple_utilisation": "certains ballons sous-évier sont mentionnés avec marquage CE.",
+    "points_vigilance": [
+      "ne remplace pas une certification NF quand elle est exigée."
+    ]
+  },
+  {
+    "terme": "CGR CMI",
+    "definition_courte": "Manchette isolante de collier citée pour les canalisations EF.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "les collectifs prévoient colliers avec manchette isolante CGR type CMI.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "CGR FSTT",
+    "definition_courte": "Cordon antigel autorégulant cité pour réseaux en volume non chauffé.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "le CCTP cite CGR FSTT ou équivalent.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "Chape en plâtre de protection",
+    "definition_courte": "Protection provisoire mise sur certains appareils pour éviter leur usage ou l’entrée de gravats.",
+    "explication_pedagogique": "Protéger les WC et évacuations pendant chantier.",
+    "exemple_utilisation": "les cuvettes WC peuvent être obturées par tampon de sciure avec chape en plâtre.",
+    "points_vigilance": [
+      "retirer et nettoyer avant essais et réception."
+    ]
+  },
+  {
+    "terme": "Chasse d’eau",
+    "definition_courte": "Dispositif qui évacue les matières d’une cuvette WC par arrivée d’eau contrôlée.",
+    "explication_pedagogique": "Assurer le fonctionnement du WC.",
+    "exemple_utilisation": "les WC avec réservoir de chasse ont des débits et diamètres définis dans les tableaux.",
+    "points_vigilance": [
+      "contrôler robinet flotteur, robinet d’arrêt et fuite éventuelle."
+    ]
+  },
+  {
+    "terme": "Chute de température",
+    "definition_courte": "Différence entre température aller et retour chauffage.",
+    "explication_pedagogique": "Dimensionner le débit chauffage.",
+    "exemple_utilisation": "la distribution chauffage est calculée avec chute de température de 10°C.",
+    "points_vigilance": [
+      "modifier ce delta change les débits et diamètres."
+    ]
+  },
+  {
+    "terme": "Chute EU/EV",
+    "definition_courte": "Canalisation verticale qui collecte les eaux usées ou eaux vannes.",
+    "explication_pedagogique": "Acheminer les évacuations vers les réseaux bas.",
+    "exemple_utilisation": "les évacuations sont raccordées aux chutes avec ventilation primaire.",
+    "points_vigilance": [
+      "traiter les traversées de plancher, acoustique et accès aux tampons."
+    ]
+  },
+  {
+    "terme": "Clapet anti-retour type EA",
+    "definition_courte": "Dispositif empêchant le retour d’eau polluée ou stagnante vers le réseau d’eau potable.",
+    "explication_pedagogique": "Protéger le réseau contre les retours d’eau.",
+    "exemple_utilisation": "le CCTP impose des clapets anti-retour NF type EA selon EN 13959.",
+    "points_vigilance": [
+      "respecter sens de pose et accessibilité pour contrôle."
+    ]
+  },
+  {
+    "terme": "Classe C compteur",
+    "definition_courte": "Classe de précision d’un compteur d’eau.",
+    "explication_pedagogique": "Assurer une mesure fiable des consommations.",
+    "exemple_utilisation": "les compteurs individuels ou généraux sont mentionnés en classe C.",
+    "points_vigilance": [
+      "le compteur peut être fourni par concessionnaire mais posé par le lot selon CCTP."
+    ]
+  },
+  {
+    "terme": "Classe d’usure U3",
+    "definition_courte": "Classe caractérisant la durabilité mécanique de robinetterie.",
+    "explication_pedagogique": "Sécuriser la tenue dans le temps des robinets et mitigeurs.",
+    "exemple_utilisation": "le CCTP impose une classe d’usure U3.",
+    "points_vigilance": [
+      "contrôler la certification de la référence proposée."
+    ]
+  },
+  {
+    "terme": "Classe de confort C3",
+    "definition_courte": "Classe de robinetterie liée au confort d’usage.",
+    "explication_pedagogique": "Vérifier que les mitigeurs répondent au niveau exigé.",
+    "exemple_utilisation": "toutes les robinetteries doivent avoir une classe de confort C3.",
+    "points_vigilance": [
+      "un équivalent doit conserver le même classement."
+    ]
+  },
+  {
+    "terme": "Coefficient de frottement",
+    "definition_courte": "Valeur utilisée dans les calculs d’écoulement des évacuations.",
+    "explication_pedagogique": "Dimensionner pentes, diamètres et capacités d’écoulement.",
+    "exemple_utilisation": "le CCTP mentionne un coefficient 0,16 pour tuyaux pleins au 5/10e.",
+    "points_vigilance": [
+      "ne pas changer le matériau ou le diamètre sans recalcul."
+    ]
+  },
+  {
+    "terme": "Coefficient de simultanéité",
+    "definition_courte": "Coefficient tenant compte du fait que tous les appareils ne fonctionnent pas ensemble.",
+    "explication_pedagogique": "Dimensionner les réseaux sans les surdimensionner inutilement.",
+    "exemple_utilisation": "les coefficients de simultanéité sont conformes au DTU 60.11.",
+    "points_vigilance": [
+      "ne pas additionner naïvement tous les débits de base."
+    ]
+  },
+  {
+    "terme": "Collecteur",
+    "definition_courte": "Élément qui regroupe plusieurs départs ou retours de réseau.",
+    "explication_pedagogique": "Distribuer EF/ECS ou chauffage vers plusieurs appareils.",
+    "exemple_utilisation": "les collecteurs départ/retour et nourrices sont repérés et munis de vannes.",
+    "points_vigilance": [
+      "étiqueter et laisser accessible pour maintenance."
+    ]
+  },
+  {
+    "terme": "Collecteur chauffage",
+    "definition_courte": "Pièce de répartition du réseau aller/retour vers les radiateurs.",
+    "explication_pedagogique": "Organiser le chauffage bitube depuis l’unité intérieure.",
+    "exemple_utilisation": "la distribution chauffage est organisée à partir de collecteurs COMAP ou équivalent.",
+    "points_vigilance": [
+      "chaque départ et retour doit avoir sa vanne d’isolement."
+    ]
+  },
+  {
+    "terme": "Collier à contrepartie démontable",
+    "definition_courte": "Collier composé de deux parties permettant de maintenir et démonter le tube.",
+    "explication_pedagogique": "Faciliter la pose et la maintenance des canalisations.",
+    "exemple_utilisation": "le CCTP en demande pour les tubes cuivre.",
+    "points_vigilance": [
+      "éviter le serrage excessif qui bloque la dilatation."
+    ]
+  },
+  {
+    "terme": "Collier antivibratile",
+    "definition_courte": "Collier intégrant une partie souple pour limiter les vibrations.",
+    "explication_pedagogique": "Réduire les bruits transmis par les canalisations.",
+    "exemple_utilisation": "les évacuations et supports doivent être désolidarisés acoustiquement.",
+    "points_vigilance": [
+      "la fixation directe sur paroi légère peut dégrader l’acoustique."
+    ]
+  },
+  {
+    "terme": "Collier isophonique",
+    "definition_courte": "Collier de fixation conçu pour limiter les transmissions sonores.",
+    "explication_pedagogique": "Fixer les canalisations sans créer de pont phonique.",
+    "exemple_utilisation": "les tubes cuivre sont fixés par colliers isophoniques avec éléments résilients.",
+    "points_vigilance": [
+      "respecter l’espacement maximal des colliers."
+    ]
+  },
+  {
+    "terme": "Colonne montante EF",
+    "definition_courte": "Canalisation verticale principale d’eau froide dans un bâtiment collectif.",
+    "explication_pedagogique": "Alimenter les compteurs ou départs logements à chaque niveau.",
+    "exemple_utilisation": "les collectifs prévoient une colonne montante EF en cuivre.",
+    "points_vigilance": [
+      "prévoir vidange en pied, anti-bélier en tête et calorifuge si nécessaire."
+    ]
+  },
+  {
+    "terme": "COMAP MultiSkin4",
+    "definition_courte": "Tube multicouche ALU pré-fourreauté cité pour distribution chauffage.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "la distribution chauffage sous dallage est prévue en COMAP MultiSkin4 ou équivalent.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "Commande à distance radio fréquence",
+    "definition_courte": "Thermostat ou commande sans fil communiquant par radio.",
+    "explication_pedagogique": "Piloter la PAC sans câble de commande direct.",
+    "exemple_utilisation": "la régulation PAC prévoit une commande radio fréquence sans fil.",
+    "points_vigilance": [
+      "vérifier portée et emplacement."
+    ]
+  },
+  {
+    "terme": "Compresseur inverter",
+    "definition_courte": "Compresseur à vitesse variable qui adapte sa puissance aux besoins.",
+    "explication_pedagogique": "Améliorer rendement, confort et stabilité de fonctionnement.",
+    "exemple_utilisation": "l’Aquacosy et la PAC air/eau citent un compresseur inverter.",
+    "points_vigilance": [
+      "les performances doivent être justifiées par fiches constructeur."
+    ]
+  },
+  {
+    "terme": "Compteur d’eau",
+    "definition_courte": "Appareil mesurant la consommation d’eau d’un logement, bâtiment ou local.",
+    "explication_pedagogique": "Permettre le comptage et la facturation.",
+    "exemple_utilisation": "le CCTP distingue compteur général, compteur individuel, compteur arrosage et compteurs concessionnaires.",
+    "points_vigilance": [
+      "clarifier fourniture, pose et accès selon concessionnaire et lot VRD."
+    ]
+  },
+  {
+    "terme": "Compteur divisionnaire",
+    "definition_courte": "Compteur secondaire affecté à un logement ou usage particulier.",
+    "explication_pedagogique": "Mesurer la consommation d’une partie du bâtiment.",
+    "exemple_utilisation": "les départs logements depuis compteur individuel sont prévus en gaine technique.",
+    "points_vigilance": [
+      "prévoir filtre, clapet, réducteur et vannes selon détail."
+    ]
+  },
+  {
+    "terme": "Concessionnaire",
+    "definition_courte": "Organisme exploitant ou fournissant un réseau public, par exemple eau potable.",
+    "explication_pedagogique": "Délimiter ce qui est fourni par l’exploitant et ce qui revient à l’entreprise.",
+    "exemple_utilisation": "le compteur d’eau peut être fourni par le concessionnaire.",
+    "points_vigilance": [
+      "les limites de prestation doivent être lues attentivement."
+    ]
+  },
+  {
+    "terme": "Condenseur",
+    "definition_courte": "Organe d’une pompe à chaleur qui transfère la chaleur au fluide à chauffer.",
+    "explication_pedagogique": "Produire l’ECS ou l’eau de chauffage.",
+    "exemple_utilisation": "le ballon thermodynamique mentionne un condenseur à l’extérieur de la cuve.",
+    "points_vigilance": [
+      "vérifier la notice pour entretien et performances."
+    ]
+  },
+  {
+    "terme": "Conduit flexible",
+    "definition_courte": "Conduit souple utilisé pour certains raccordements de ventilation.",
+    "explication_pedagogique": "Raccorder une bouche ou un ballon à un réseau sans contrainte excessive.",
+    "exemple_utilisation": "les terminaux peuvent être en manchettes flexibles étanches.",
+    "points_vigilance": [
+      "limiter longueurs, coudes et écrasements."
+    ]
+  },
+  {
+    "terme": "Conduit rigide galvanisé",
+    "definition_courte": "Réseau d’air en tôle d’acier galvanisé.",
+    "explication_pedagogique": "Garantir tenue mécanique et étanchéité du réseau VMC.",
+    "exemple_utilisation": "le CCTP prévoit des conduits rigides classe C à raccord à joint.",
+    "points_vigilance": [
+      "contrôler classe d’étanchéité et supports."
+    ]
+  },
+  {
+    "terme": "Confort acoustique",
+    "definition_courte": "Niveau de calme ressenti dans un logement ou local.",
+    "explication_pedagogique": "Limiter les nuisances des équipements techniques.",
+    "exemple_utilisation": "des mesures acoustiques sont prévues pour certains équipements.",
+    "points_vigilance": [
+      "un défaut de désolidarisation peut être invisible mais audible."
+    ]
+  },
+  {
+    "terme": "Consigne",
+    "definition_courte": "Valeur de température demandée par l’utilisateur ou la régulation.",
+    "explication_pedagogique": "Piloter chauffage ou ECS selon besoins.",
+    "exemple_utilisation": "la régulation PAC affiche ou programme des consignes hebdomadaires.",
+    "points_vigilance": [
+      "éviter de placer le thermostat dans une zone faussée par soleil ou source de chaleur."
+    ]
+  },
+  {
+    "terme": "COP",
+    "definition_courte": "Coefficient de performance d’une pompe à chaleur : rapport entre énergie utile produite et énergie électrique consommée.",
+    "explication_pedagogique": "Comparer le rendement d’une PAC ou d’un ballon thermodynamique.",
+    "exemple_utilisation": "l’Aquacosy SV indique des COP certifiés selon débits d’air.",
+    "points_vigilance": [
+      "un COP n’est valable que dans les conditions d’essai annoncées."
+    ]
+  },
+  {
+    "terme": "Cordon antigel",
+    "definition_courte": "Câble chauffant posé sur un réseau exposé au gel.",
+    "explication_pedagogique": "Protéger les canalisations hors volume chauffé.",
+    "exemple_utilisation": "le CCTP cite un ruban chauffant Raychem ou cordon CGR FSTT.",
+    "points_vigilance": [
+      "prévoir alimentation électrique, thermostat éventuel et calorifuge compatible."
+    ]
+  },
+  {
+    "terme": "Corps de chauffe",
+    "definition_courte": "Émetteur qui diffuse la chaleur dans une pièce, par exemple radiateur.",
+    "explication_pedagogique": "Chauffer les locaux selon les déperditions calculées.",
+    "exemple_utilisation": "le lot chauffage prévoit des radiateurs acier Finimetal Reggane 3010 ou équivalent.",
+    "points_vigilance": [
+      "le dimensionnement pièce par pièce est à la charge de l’entreprise."
+    ]
+  },
+  {
+    "terme": "Cosmos Atlantic",
+    "definition_courte": "Extracteur ou ventilateur VMC collectif cité comme référence.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "les extracteurs sont de type COSMOS de chez Atlantic ou équivalent.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "Coude de sortie de dalle",
+    "definition_courte": "Pièce permettant de faire remonter un tube encastré proprement depuis la dalle.",
+    "explication_pedagogique": "Éviter pliage, frottement et sortie désordonnée des tubes.",
+    "exemple_utilisation": "les sorties de dalle COMAP ou équivalent sont exigées pour PER ou multicouche.",
+    "points_vigilance": [
+      "les tubes nus non parallèles ou sortis sans pièce adaptée sont refusables."
+    ]
+  },
+  {
+    "terme": "Courbure",
+    "definition_courte": "Rayon donné à une gaine ou un tube lors d’un changement de direction.",
+    "explication_pedagogique": "Éviter pliage, perte de débit ou usure du réseau.",
+    "exemple_utilisation": "le CCTP demande de respecter le rayon de courbure de l’Algaine et du PER.",
+    "points_vigilance": [
+      "une courbure trop serrée peut écraser la section."
+    ]
+  },
+  {
+    "terme": "Cuivre écroui",
+    "definition_courte": "Tube cuivre rigide, durci par écrouissage, utilisé en apparent ou colonnes.",
+    "explication_pedagogique": "Réaliser des distributions robustes et visibles.",
+    "exemple_utilisation": "les canalisations apparentes et colonnes peuvent être en cuivre écroui.",
+    "points_vigilance": [
+      "prévoir colliers isophoniques et brasures conformes."
+    ]
+  },
+  {
+    "terme": "Cuve émaillée",
+    "definition_courte": "Réservoir acier recouvert d’émail pour résister à la corrosion.",
+    "explication_pedagogique": "Stocker l’eau chaude sanitaire.",
+    "exemple_utilisation": "les ballons Atlantic sont décrits avec cuve émaillée protégée.",
+    "points_vigilance": [
+      "la protection par anode reste nécessaire."
+    ]
+  },
+  {
+    "terme": "Cuvette WC",
+    "definition_courte": "Appareil sanitaire recevant les eaux vannes.",
+    "explication_pedagogique": "Assurer l’usage des toilettes et le raccordement à la chute EV.",
+    "exemple_utilisation": "les WC sont décrits avec pipe WC Nicoll, réservoir, robinetterie et accessoires.",
+    "points_vigilance": [
+      "protéger les cuvettes pendant chantier pour éviter gravats et bouchons."
+    ]
+  },
+  {
+    "terme": "CVC",
+    "definition_courte": "Acronyme de Chauffage, Ventilation et Climatisation.",
+    "explication_pedagogique": "Identifier le périmètre technique du lot avec plomberie sanitaire.",
+    "exemple_utilisation": "le CCTP du lot 08 concerne chauffage, ventilation, plomberie sanitaire.",
+    "points_vigilance": [
+      "dans ce projet, la climatisation n’est pas forcément une prestation active malgré le terme CVC."
+    ]
+  },
+  {
+    "terme": "Dalle extérieure PAC",
+    "definition_courte": "Support béton extérieur destiné à recevoir le groupe extérieur de pompe à chaleur.",
+    "explication_pedagogique": "Stabiliser l’unité extérieure et permettre le passage des liaisons.",
+    "exemple_utilisation": "le lot gros œuvre doit la dalle extérieure avec attente et fourreau TPC.",
+    "points_vigilance": [
+      "vérifier niveau, évacuation d’eau, vibrations et dégagements autour du groupe."
+    ]
+  },
+  {
+    "terme": "Dalle flottante",
+    "definition_courte": "Dalle désolidarisée acoustiquement du support.",
+    "explication_pedagogique": "Limiter les transmissions de bruit d’impact ou d’équipement.",
+    "exemple_utilisation": "le CCTP mentionne le cas d’une dalle flottante sous baignoire.",
+    "points_vigilance": [
+      "les baignoires et tabliers doivent rester désolidarisés selon configuration."
+    ]
+  },
+  {
+    "terme": "dB(A)",
+    "definition_courte": "Unité de niveau sonore pondérée selon la sensibilité de l’oreille humaine.",
+    "explication_pedagogique": "Mesurer les bruits d’équipements et comparer aux exigences acoustiques.",
+    "exemple_utilisation": "le CCTP indique des seuils de 30 dB(A), 35 dB(A), 39 dB ou -7 dB(A).",
+    "points_vigilance": [
+      "les mesures doivent être faites dans les conditions prévues par l’étude acoustique."
+    ]
+  },
+  {
+    "terme": "Débit",
+    "definition_courte": "Volume d’eau ou d’air écoulé par unité de temps.",
+    "explication_pedagogique": "Dimensionner réseaux, bouches, robinets et évacuations.",
+    "exemple_utilisation": "les tableaux donnent des débits EF/ECS, EU/EV et VMC.",
+    "points_vigilance": [
+      "ne pas confondre débit de base, débit de pointe et débit mesuré en réception."
+    ]
+  },
+  {
+    "terme": "Débit de base",
+    "definition_courte": "Débit conventionnel utilisé pour dimensionner un appareil ou réseau.",
+    "explication_pedagogique": "Calculer les diamètres et simultanéités.",
+    "exemple_utilisation": "les bases de calcul indiquent les débits de base des appareils sanitaires.",
+    "points_vigilance": [
+      "les valeurs réelles peuvent varier, mais le dimensionnement doit suivre le DTU."
+    ]
+  },
+  {
+    "terme": "Débit de croisière",
+    "definition_courte": "Débit courant ou minimal d’une bouche de ventilation.",
+    "explication_pedagogique": "Assurer un renouvellement d’air permanent.",
+    "exemple_utilisation": "le CCTP limite les fuites du réseau à 10 % de la somme des débits de croisière.",
+    "points_vigilance": [
+      "mesurer les débits après équilibrage."
+    ]
+  },
+  {
+    "terme": "Débit de fuite",
+    "definition_courte": "Air perdu par défaut d’étanchéité dans le réseau VMC.",
+    "explication_pedagogique": "Évaluer la qualité du réseau aéraulique.",
+    "exemple_utilisation": "les fuites ne doivent pas excéder 10 % des débits de croisière.",
+    "points_vigilance": [
+      "soigner raccords, joints, trappes et piquages."
+    ]
+  },
+  {
+    "terme": "Débit de pointe",
+    "definition_courte": "Débit plus élevé déclenché ponctuellement, souvent en cuisine ou WC.",
+    "explication_pedagogique": "Extraire rapidement humidité ou odeurs.",
+    "exemple_utilisation": "les bouches cuisine et WC indiquent des plages 10/45-135 m3/h ou déclenchement présence.",
+    "points_vigilance": [
+      "contrôler la commande et le retour au débit normal."
+    ]
+  },
+  {
+    "terme": "Débitmètre",
+    "definition_courte": "Instrument de mesure du débit.",
+    "explication_pedagogique": "Vérifier et équilibrer installations.",
+    "exemple_utilisation": "les essais demandent des mesures de débits d’air et d’eau.",
+    "points_vigilance": [
+      "les mesures doivent être consignées."
+    ]
+  },
+  {
+    "terme": "Déclenchement infrarouge",
+    "definition_courte": "Commande automatique par détection de présence.",
+    "explication_pedagogique": "Augmenter le débit VMC lorsqu’une pièce est utilisée.",
+    "exemple_utilisation": "les bouches WC/SDB collectives peuvent avoir déclenchement par détection de présence type FBI/FP.",
+    "points_vigilance": [
+      "vérifier alimentation ou piles, champ de détection et temporisation."
+    ]
+  },
+  {
+    "terme": "DECO clim",
+    "definition_courte": "Marque citée pour caches esthétiques d’unités extérieures.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "les caches côté rue sont de marque DECO clim ou équivalent.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "Dégazeur",
+    "definition_courte": "Organe qui évacue l’air présent dans un circuit hydraulique.",
+    "explication_pedagogique": "Éviter bruits, corrosion et pertes de circulation.",
+    "exemple_utilisation": "le CCTP cite un dégazeur parmi les accessoires ECS/EF.",
+    "points_vigilance": [
+      "installer au bon point hydraulique et vérifier purge."
+    ]
+  },
+  {
+    "terme": "Delabie 5081 N",
+    "definition_courte": "Barre de relèvement WC coudée 135° citée pour PMR.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "le CCTP cite Delabie 5081 N pour WC PMR.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "Delabie 510430 N",
+    "definition_courte": "Siège de douche relevable avec pied rentrant articulé cité pour PMR.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "le CCTP cite Delabie 510430 N.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "Delabie 5490 N",
+    "definition_courte": "Barre en T pour siège de douche citée pour PMR.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "le CCTP cite Delabie 5490 N.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "Dépression",
+    "definition_courte": "Pression inférieure à la pression ambiante créée par un extracteur.",
+    "explication_pedagogique": "Faire circuler l’air depuis les entrées d’air vers les bouches d’extraction.",
+    "exemple_utilisation": "la dépression disponible aux bouches est bornée dans les bases de calcul.",
+    "points_vigilance": [
+      "une dépression trop forte crée bruit et inconfort ; trop faible donne mauvais débit."
+    ]
+  },
+  {
+    "terme": "Dépressostat",
+    "definition_courte": "Appareil qui détecte une différence de pression.",
+    "explication_pedagogique": "Surveiller le fonctionnement d’un ventilateur ou extracteur.",
+    "exemple_utilisation": "les extracteurs Cosmos sont équipés d’un dépressostat à ramener sur armoire électrique.",
+    "points_vigilance": [
+      "vérifier le raccordement du report d’alarme."
+    ]
+  },
+  {
+    "terme": "Désinfection des réseaux",
+    "definition_courte": "Opération de nettoyage sanitaire des réseaux d’eau après travaux.",
+    "explication_pedagogique": "Éliminer résidus, goûts, odeurs ou contaminations avant livraison.",
+    "exemple_utilisation": "le CCTP demande rinçage, analyse D1 et actions correctives si écarts.",
+    "points_vigilance": [
+      "rincer avec un volume d’eau suffisant et éviter les stagnations."
+    ]
+  },
+  {
+    "terme": "Désolidarisation",
+    "definition_courte": "Séparation par matériau souple entre un équipement et son support.",
+    "explication_pedagogique": "Réduire les transmissions acoustiques et vibrations.",
+    "exemple_utilisation": "le CCTP impose désolidarisation des appareils sanitaires, canalisations et conduits.",
+    "points_vigilance": [
+      "les liaisons rigides non traitées sont une source fréquente de bruit."
+    ]
+  },
+  {
+    "terme": "Détendeur",
+    "definition_courte": "Organe qui abaisse ou stabilise la pression d’eau.",
+    "explication_pedagogique": "Protéger l’installation et les appareils.",
+    "exemple_utilisation": "le CCTP cite un détendeur ou réducteur de pression NF.",
+    "points_vigilance": [
+      "régler la pression à la valeur attendue, souvent 3 bars à l’origine du logement."
+    ]
+  },
+  {
+    "terme": "Dévoiement",
+    "definition_courte": "Changement de direction d’une canalisation ou gaine.",
+    "explication_pedagogique": "Adapter le tracé aux contraintes du bâtiment.",
+    "exemple_utilisation": "les dévoiements d’évacuation doivent recevoir alourdissement acoustique.",
+    "points_vigilance": [
+      "les coudes créent pertes de charge, bruit et bouchons."
+    ]
+  },
+  {
+    "terme": "Diamètre DN",
+    "definition_courte": "Dimension nominale d’une canalisation ou raccord.",
+    "explication_pedagogique": "Choisir les sections d’alimentation ou d’évacuation.",
+    "exemple_utilisation": "les tableaux donnent des DN PVC 32, 40, 50, 90 ou 100 selon appareils.",
+    "points_vigilance": [
+      "ne pas réduire un diamètre sans recalcul et validation."
+    ]
+  },
+  {
+    "terme": "Diamètre intérieur",
+    "definition_courte": "Dimension utile à l’intérieur d’un tube.",
+    "explication_pedagogique": "Calculer débit, pertes de charge et vitesse.",
+    "exemple_utilisation": "le CCTP donne les diamètres intérieurs minima des canalisations.",
+    "points_vigilance": [
+      "un diamètre extérieur identique ne garantit pas le même diamètre intérieur selon matériau."
+    ]
+  },
+  {
+    "terme": "Disconnecteur",
+    "definition_courte": "Dispositif de protection contre les retours d’eau polluée vers le réseau potable.",
+    "explication_pedagogique": "Sécuriser le réseau d’alimentation.",
+    "exemple_utilisation": "les fosses compteurs abritent compteurs et disconnecteurs.",
+    "points_vigilance": [
+      "à entretenir et vérifier selon prescriptions sanitaires."
+    ]
+  },
+  {
+    "terme": "Distribution chauffage",
+    "definition_courte": "Réseau qui relie la PAC ou chaudière aux radiateurs.",
+    "explication_pedagogique": "Amener l’eau de chauffage aux corps de chauffe.",
+    "exemple_utilisation": "le CCTP prévoit une distribution bitube en multicouche ALU et cuivre apparent.",
+    "points_vigilance": [
+      "vérifier vitesse, équilibrage, repérage et sorties de dalle."
+    ]
+  },
+  {
+    "terme": "Distribution EF/ECS",
+    "definition_courte": "Réseau d’eau froide et d’eau chaude vers les appareils sanitaires.",
+    "explication_pedagogique": "Alimenter chaque point de puisage.",
+    "exemple_utilisation": "les distributions se font en PER sous fourreau, cuivre apparent et nourrices.",
+    "points_vigilance": [
+      "prévoir vannes, étiquetage bleu/rouge, aucun raccord sous dalle."
+    ]
+  },
+  {
+    "terme": "DIUO",
+    "definition_courte": "Dossier d’Interventions Ultérieures sur l’Ouvrage.",
+    "explication_pedagogique": "Faciliter les interventions futures de maintenance ou sécurité.",
+    "exemple_utilisation": "le DCE demande la prise en compte du projet DIUO.",
+    "points_vigilance": [
+      "les notices, plans et accès maintenance doivent être cohérents."
+    ]
+  },
+  {
+    "terme": "DN 100",
+    "definition_courte": "Diamètre nominal courant pour évacuation WC.",
+    "explication_pedagogique": "Permettre l’évacuation des eaux vannes.",
+    "exemple_utilisation": "les cuvettes WC sont indiquées avec DN 100 dans les bases de calcul.",
+    "points_vigilance": [
+      "respecter pente, ventilation primaire et raccord à la chute."
+    ]
+  },
+  {
+    "terme": "DN 40",
+    "definition_courte": "Diamètre nominal courant pour évier, douche, lave-linge ou lave-vaisselle selon cas.",
+    "explication_pedagogique": "Assurer une évacuation suffisante.",
+    "exemple_utilisation": "les tableaux indiquent DN 40 pour plusieurs appareils.",
+    "points_vigilance": [
+      "respecter les regroupements autorisés par le DTU."
+    ]
+  },
+  {
+    "terme": "Douche à l’italienne",
+    "definition_courte": "Douche de plain-pied avec siphon de sol ou receveur intégré.",
+    "explication_pedagogique": "Assurer accessibilité et confort.",
+    "exemple_utilisation": "le lot revêtement de sol fournit et pose certains siphons de sol de douches à l’italienne.",
+    "points_vigilance": [
+      "bien coordonner pentes, étanchéité, siphon et réservation."
+    ]
+  },
+  {
+    "terme": "Douchette anticalcaire",
+    "definition_courte": "Douchette conçue pour limiter l’accumulation de calcaire sur les picots.",
+    "explication_pedagogique": "Faciliter l’entretien et maintenir le débit.",
+    "exemple_utilisation": "les ensembles de douche Grohe Tempesta indiquent un procédé anti-calcaire.",
+    "points_vigilance": [
+      "le tartre reste à surveiller en eau dure."
+    ]
+  },
+  {
+    "terme": "DTU 60.1",
+    "definition_courte": "Document Technique Unifié relatif aux travaux de plomberie sanitaire.",
+    "explication_pedagogique": "Encadrer les règles générales de mise en œuvre plomberie.",
+    "exemple_utilisation": "il est cité dans les normes du CCTP.",
+    "points_vigilance": [
+      "à croiser avec les DTU spécifiques évacuations, cuivre, pression et ECS."
+    ]
+  },
+  {
+    "terme": "DTU 60.11",
+    "definition_courte": "Règles de calcul des installations de plomberie sanitaire et évacuations.",
+    "explication_pedagogique": "Dimensionner débits, diamètres, simultanéités et évacuations.",
+    "exemple_utilisation": "le CCTP l’utilise pour les bases de calcul EF/ECS et EU/EV.",
+    "points_vigilance": [
+      "les tableaux du CCTP reprennent des valeurs minimales à respecter."
+    ]
+  },
+  {
+    "terme": "DTU 60.31",
+    "definition_courte": "Règles pour canalisations PVC non plastifié eau froide avec pression.",
+    "explication_pedagogique": "Encadrer l’emploi du PVC pression en alimentation EF.",
+    "exemple_utilisation": "il est cité dans les DTU applicables.",
+    "points_vigilance": [
+      "vérifier compatibilité eau potable, pression et température."
+    ]
+  },
+  {
+    "terme": "DTU 60.33",
+    "definition_courte": "Règles pour canalisations PVC d’évacuation des eaux usées et eaux vannes.",
+    "explication_pedagogique": "Encadrer raccords, supports, dilatation et pose des évacuations.",
+    "exemple_utilisation": "le CCTP y renvoie pour les canalisations PVC.",
+    "points_vigilance": [
+      "respecter points fixes, manchons de dilatation et collage."
+    ]
+  },
+  {
+    "terme": "DTU 60.5",
+    "definition_courte": "Règles relatives aux canalisations en cuivre.",
+    "explication_pedagogique": "Encadrer les réseaux cuivre apparents ou colonnes.",
+    "exemple_utilisation": "il est cité dans les normes du CCTP.",
+    "points_vigilance": [
+      "vérifier brasage, supportage et protection galvanique."
+    ]
+  },
+  {
+    "terme": "DTU 65.10",
+    "definition_courte": "Règles pour canalisations d’eau chaude et froide sous pression.",
+    "explication_pedagogique": "Encadrer les réseaux hydrauliques sous pression.",
+    "exemple_utilisation": "il est cité dans les normes applicables.",
+    "points_vigilance": [
+      "utile pour distribution ECS/EF et chauffage selon cas."
+    ]
+  },
+  {
+    "terme": "DTU 65.20",
+    "definition_courte": "Règles concernant l’isolation des circuits à température supérieure à l’ambiante.",
+    "explication_pedagogique": "Définir le calorifugeage des réseaux chauds.",
+    "exemple_utilisation": "il est cité dans les normes du CCTP.",
+    "points_vigilance": [
+      "vérifier épaisseur, continuité et classement feu."
+    ]
+  },
+  {
+    "terme": "DTU 68.1",
+    "definition_courte": "Document relatif au dimensionnement des installations de VMC.",
+    "explication_pedagogique": "Aider à calculer les débits et réseaux de ventilation.",
+    "exemple_utilisation": "il est cité dans le CCTP avec le DTU 68.3.",
+    "points_vigilance": [
+      "vérifier la compatibilité avec les avis techniques Hygro B."
+    ]
+  },
+  {
+    "terme": "DTU 68.3",
+    "definition_courte": "Règles d’exécution des installations de VMC.",
+    "explication_pedagogique": "Définir la mise en œuvre des réseaux, bouches et extracteurs.",
+    "exemple_utilisation": "le CCTP l’impose pour les installations VMC.",
+    "points_vigilance": [
+      "à utiliser avec la note de calcul de dimensionnement."
+    ]
+  },
+  {
+    "terme": "E00 / E0",
+    "definition_courte": "Classement de débit économe pour certaines robinetteries.",
+    "explication_pedagogique": "Réduire les consommations d’eau.",
+    "exemple_utilisation": "lavabo, bidet, lave-mains et évier sont demandés E00 ou E0.",
+    "points_vigilance": [
+      "le classement doit être prouvé par la fiche technique."
+    ]
+  },
+  {
+    "terme": "E1",
+    "definition_courte": "Classement de débit demandé pour les douches.",
+    "explication_pedagogique": "Limiter la consommation d’eau tout en gardant un usage confortable.",
+    "exemple_utilisation": "le CCTP impose Douche : E1.",
+    "points_vigilance": [
+      "vérifier que le pommeau et le mitigeur conservent le débit requis."
+    ]
+  },
+  {
+    "terme": "E3",
+    "definition_courte": "Classement de débit plus élevé demandé pour baignoire.",
+    "explication_pedagogique": "Remplir la baignoire dans un temps acceptable.",
+    "exemple_utilisation": "le CCTP impose Baignoire E3.",
+    "points_vigilance": [
+      "ne pas mettre une robinetterie trop restrictive sur baignoire."
+    ]
+  },
+  {
+    "terme": "Eau chaude sanitaire - ECS",
+    "definition_courte": "Eau chaude destinée aux usages sanitaires : douche, lavabo, évier.",
+    "explication_pedagogique": "Assurer l’hygiène et le confort des occupants.",
+    "exemple_utilisation": "l’ECS est produite par PAC double service, ballon thermodynamique ou ballon électrique selon zones.",
+    "points_vigilance": [
+      "contrôler température, protection anti-brûlure et rinçage sanitaire."
+    ]
+  },
+  {
+    "terme": "Eau froide - EF",
+    "definition_courte": "Eau potable froide alimentant les logements et appareils.",
+    "explication_pedagogique": "Fournir l’eau de base pour sanitaires, ballons et points de puisage.",
+    "exemple_utilisation": "le CCTP détaille branchements EF, colonnes, compteurs et nourrices.",
+    "points_vigilance": [
+      "pression limitée à 3 bars selon prescription."
+    ]
+  },
+  {
+    "terme": "Eau potable",
+    "definition_courte": "Eau destinée à la consommation humaine.",
+    "explication_pedagogique": "Alimenter les logements sans risque sanitaire.",
+    "exemple_utilisation": "les réseaux PEHD sont spécifiques eau potable.",
+    "points_vigilance": [
+      "employer des matériaux compatibles et réaliser analyses/rinçages."
+    ]
+  },
+  {
+    "terme": "Eaux usées - EU",
+    "definition_courte": "Eaux évacuées des lavabos, douches, éviers, machines et baignoires.",
+    "explication_pedagogique": "Évacuer les eaux domestiques hors WC.",
+    "exemple_utilisation": "les évacuations EU sont dimensionnées selon DTU 60.11.",
+    "points_vigilance": [
+      "respecter pentes et regroupements autorisés."
+    ]
+  },
+  {
+    "terme": "Eaux vannes - EV",
+    "definition_courte": "Eaux provenant des WC.",
+    "explication_pedagogique": "Évacuer les matières vers le réseau d’assainissement.",
+    "exemple_utilisation": "les WC sont raccordés aux chutes EV avec ventilation primaire.",
+    "points_vigilance": [
+      "ventilation, diamètre et acoustique sont sensibles."
+    ]
+  },
+  {
+    "terme": "Échantillons",
+    "definition_courte": "Exemples de produits proposés au maître d’ouvrage ou maître d’œuvre.",
+    "explication_pedagogique": "Valider esthétique et qualité avant commande.",
+    "exemple_utilisation": "les pièces annexes comprennent liste de marques et types, et échantillons demandés.",
+    "points_vigilance": [
+      "ne pas commander en masse avant validation."
+    ]
+  },
+  {
+    "terme": "Ecoperl AIR 65",
+    "definition_courte": "Mousseur ou accessoire de robinetterie à économie d’eau.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "le CCTP cite Ecoperl AIR 65 ou équivalent.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "Écran anti-oxygène",
+    "definition_courte": "Couche intégrée à certains tubes PER ou multicouches pour limiter la diffusion d’oxygène.",
+    "explication_pedagogique": "Protéger les réseaux hydrauliques contre corrosion et boues.",
+    "exemple_utilisation": "les tubes PER doivent comporter un écran s’opposant à la diffusion d’oxygène.",
+    "points_vigilance": [
+      "contrôler la fiche technique du tube fourni."
+    ]
+  },
+  {
+    "terme": "Électricité Performance",
+    "definition_courte": "Certification NF appliquée à certains chauffe-eau électriques.",
+    "explication_pedagogique": "Garantir le niveau de performance du ballon.",
+    "exemple_utilisation": "les ballons ECS sont estampillés NF Electricité Performance catégorie B, C ou 2 selon cas.",
+    "points_vigilance": [
+      "ne pas remplacer par une référence non certifiée sans validation."
+    ]
+  },
+  {
+    "terme": "Émetteur de chaleur",
+    "definition_courte": "Équipement qui transmet la chaleur à une pièce, comme un radiateur.",
+    "explication_pedagogique": "Chauffer chaque local selon les déperditions.",
+    "exemple_utilisation": "le CCTP demande le calcul des émetteurs pièce par pièce.",
+    "points_vigilance": [
+      "dimensionner au régime d’eau prévu, ici 55/45°C pour radiateurs."
+    ]
+  },
+  {
+    "terme": "EN 16147",
+    "definition_courte": "Document de référence technique concernant les essais de performance des chauffe-eau thermodynamiques.",
+    "explication_pedagogique": "Donner les règles de calcul, de mise en œuvre ou de contrôle applicables au lot.",
+    "exemple_utilisation": "le CCTP cite EN 16147 dans les normes et règlements du lot CVC / plomberie sanitaire.",
+    "points_vigilance": [
+      "ne jamais se limiter au nom du DTU : vérifier la version applicable, le domaine d’emploi et les prescriptions du fabricant."
+    ]
+  },
+  {
+    "terme": "Entonnoir siphonné",
+    "definition_courte": "Pièce recevant une vidange tout en assurant une garde d’eau anti-odeur.",
+    "explication_pedagogique": "Raccorder groupe de sécurité ou vidange ECS au réseau d’évacuation.",
+    "exemple_utilisation": "le CCTP cite des entonnoirs siphonnés PVC Nicoll ou équivalent.",
+    "points_vigilance": [
+      "prévoir accessibilité et éviter les refoulements."
+    ]
+  },
+  {
+    "terme": "Entrée d’air",
+    "definition_courte": "Dispositif posé en menuiserie ou façade pour faire entrer l’air neuf.",
+    "explication_pedagogique": "Permettre le balayage d’air dans le logement.",
+    "exemple_utilisation": "les entrées d’air sont posées par le lot menuiserie extérieure lorsqu’elles ne sont pas en maçonnerie.",
+    "points_vigilance": [
+      "ne pas les boucher en peinture ou par l’utilisateur."
+    ]
+  },
+  {
+    "terme": "EP",
+    "definition_courte": "Eaux pluviales.",
+    "explication_pedagogique": "Distinguer les réseaux pluviaux des EU/EV.",
+    "exemple_utilisation": "les EP extérieures sont hors lot CVC/PBS et liées au lot couverture/étanchéité ou VRD.",
+    "points_vigilance": [
+      "ne pas raccorder eaux pluviales sur réseau EU/EV sans prescription."
+    ]
+  },
+  {
+    "terme": "Équilibrage",
+    "definition_courte": "Réglage des débits d’eau ou d’air dans les réseaux.",
+    "explication_pedagogique": "Assurer que chaque logement ou pièce reçoit le bon débit.",
+    "exemple_utilisation": "le CCTP prévoit réglage et équilibrage des installations, VMC et chauffage.",
+    "points_vigilance": [
+      "mesurer et consigner les valeurs dans les fiches d’essais."
+    ]
+  },
+  {
+    "terme": "Équivalent",
+    "definition_courte": "Produit alternatif proposé à la référence citée.",
+    "explication_pedagogique": "Permettre une variante sans baisser la qualité.",
+    "exemple_utilisation": "le CCTP cite souvent “ou équivalent”.",
+    "points_vigilance": [
+      "l’équivalence doit être prouvée en performances, certifications et dimensions."
+    ]
+  },
+  {
+    "terme": "Essai à chaud",
+    "definition_courte": "Essai réalisé avec installation en température.",
+    "explication_pedagogique": "Contrôler fonctionnement chauffage ou ECS en conditions proches de l’usage.",
+    "exemple_utilisation": "les essais à froid et à chaud sont prévus pour les canalisations.",
+    "points_vigilance": [
+      "ne pas se limiter à un contrôle visuel."
+    ]
+  },
+  {
+    "terme": "Essai à froid",
+    "definition_courte": "Essai réalisé sans mise en température, souvent pour étanchéité ou pression.",
+    "explication_pedagogique": "Vérifier les réseaux avant mise en service complète.",
+    "exemple_utilisation": "le CCTP mentionne les essais à froid de toutes les canalisations.",
+    "points_vigilance": [
+      "les fuites doivent être reprises avant fermeture ou réception."
+    ]
+  },
+  {
+    "terme": "Essai d’étanchéité",
+    "definition_courte": "Mise en pression ou observation permettant de détecter les fuites.",
+    "explication_pedagogique": "Valider les réseaux EF/ECS/chauffage ou évacuations.",
+    "exemple_utilisation": "les réseaux sont éprouvés à 1,1 fois la pression de fonctionnement admissible pendant 10 min.",
+    "points_vigilance": [
+      "réaliser avant habillages définitifs quand c’est possible."
+    ]
+  },
+  {
+    "terme": "Étiquetage bleu/rouge",
+    "definition_courte": "Repérage coloré des réseaux eau froide et eau chaude.",
+    "explication_pedagogique": "Identifier rapidement les départs et éviter les inversions.",
+    "exemple_utilisation": "le CCTP demande bleu pour eau froide et rouge pour eau chaude.",
+    "points_vigilance": [
+      "l’étiquetage doit rester visible dans les placards et gaines."
+    ]
+  },
+  {
+    "terme": "Eurotherm",
+    "definition_courte": "Marque/type de mitigeur thermostatique cité pour limitation de température ECS.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "le CCTP cite Eurotherm ou équivalent en sortie de ballon.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "Évier",
+    "definition_courte": "Appareil sanitaire de cuisine raccordé en EF, ECS et évacuation.",
+    "explication_pedagogique": "Permettre les usages de cuisine.",
+    "exemple_utilisation": "le CCTP cite un évier inox Franke ou équivalent avec meuble support.",
+    "points_vigilance": [
+      "contrôler vidage, trop-plein, joint sanitaire et emplacement lave-vaisselle."
+    ]
+  },
+  {
+    "terme": "Extracteur",
+    "definition_courte": "Ventilateur ou caisson qui extrait l’air d’un réseau.",
+    "explication_pedagogique": "Créer le débit de ventilation requis.",
+    "exemple_utilisation": "les extracteurs collectifs type Cosmos ou équivalent sont cités.",
+    "points_vigilance": [
+      "prévoir support antivibratoire, dépressostat et accès maintenance."
+    ]
+  },
+  {
+    "terme": "Extraction",
+    "definition_courte": "Action d’évacuer l’air vicié par VMC.",
+    "explication_pedagogique": "Renouveler l’air et évacuer humidité/odeurs.",
+    "exemple_utilisation": "les bouches d’extraction sont en cuisine, bains, WC et celliers.",
+    "points_vigilance": [
+      "mesurer les débits à la réception."
+    ]
+  },
+  {
+    "terme": "Faux plafond non démontable",
+    "definition_courte": "Plafond fermé qui rend les réseaux inaccessibles sans démolition.",
+    "explication_pedagogique": "Savoir quelle garantie et quels essais prévoir avant fermeture.",
+    "exemple_utilisation": "le CCTP distingue travaux inaccessibles en faux plafond non démontable.",
+    "points_vigilance": [
+      "faire essais et photos avant fermeture."
+    ]
+  },
+  {
+    "terme": "FDES",
+    "definition_courte": "Fiche de Déclaration Environnementale et Sanitaire d’un produit de construction.",
+    "explication_pedagogique": "Justifier l’impact environnemental en RE2020/ACV.",
+    "exemple_utilisation": "le CCTP demande des fiches FDES pour les variantes affectant l’analyse du cycle de vie.",
+    "points_vigilance": [
+      "fournir les FDES du produit réellement posé, pas une fiche générique inadaptée."
+    ]
+  },
+  {
+    "terme": "Fib’Air Isol",
+    "definition_courte": "Isolant cité pour réseau ou éléments VMC.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "le CCTP cite un isolant de type Fib’air Isol.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "Filet avertisseur",
+    "definition_courte": "Grillage coloré placé au-dessus d’un réseau enterré.",
+    "explication_pedagogique": "Signaler la présence d’une canalisation lors de futurs terrassements.",
+    "exemple_utilisation": "le lot VRD doit les tranchées et grillages avertisseurs pour branchements EF.",
+    "points_vigilance": [
+      "vérifier la limite de prestation VRD/plomberie."
+    ]
+  },
+  {
+    "terme": "Filtre à tamis",
+    "definition_courte": "Filtre mécanique retenant les particules dans l’eau.",
+    "explication_pedagogique": "Protéger compteurs, robinets, clapets et appareils.",
+    "exemple_utilisation": "les compteurs individuels en gaine technique sont prévus avec filtre à tamis.",
+    "points_vigilance": [
+      "prévoir nettoyage et accessibilité."
+    ]
+  },
+  {
+    "terme": "Filtre G4",
+    "definition_courte": "Filtre grossier utilisé sur certaines entrées d’air ou équipements thermodynamiques.",
+    "explication_pedagogique": "Protéger le ventilateur ou la PAC des poussières.",
+    "exemple_utilisation": "l’Aquacosy SV comporte un filtre G4 de protection.",
+    "points_vigilance": [
+      "l’entretien du filtre conditionne les performances et le bruit."
+    ]
+  },
+  {
+    "terme": "Finimetal Reggane 3010",
+    "definition_courte": "Radiateur acier cité comme référence.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "les radiateurs sont de marque Finimetal type Reggane 3010 ou équivalent.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "FIXOPLAC",
+    "definition_courte": "Raccord à sertir ou sortie de cloison cité pour réseaux EF/ECS.",
+    "explication_pedagogique": "Réaliser des sorties propres et solides au droit des cloisons.",
+    "exemple_utilisation": "le CCTP cite des raccords à sertir en laiton FIXOPLAC ou équivalent.",
+    "points_vigilance": [
+      "vérifier compatibilité tube, sertissage et support."
+    ]
+  },
+  {
+    "terme": "Flexible de raccordement",
+    "definition_courte": "Tuyau souple reliant robinetterie ou appareil au réseau.",
+    "explication_pedagogique": "Faciliter le raccordement final.",
+    "exemple_utilisation": "la robinetterie évier comporte des flexibles de raccordement souples.",
+    "points_vigilance": [
+      "éviter torsion, traction et rayon trop serré."
+    ]
+  },
+  {
+    "terme": "Fluide R134a",
+    "definition_courte": "Fluide frigorigène utilisé dans certains ballons thermodynamiques.",
+    "explication_pedagogique": "Permettre le cycle frigorifique de la pompe à chaleur.",
+    "exemple_utilisation": "l’Aquacosy SV mentionne une PAC au fluide R134a.",
+    "points_vigilance": [
+      "la manipulation relève d’intervenants habilités selon réglementation fluides."
+    ]
+  },
+  {
+    "terme": "Fonte SMU",
+    "definition_courte": "Canalisation en fonte utilisée pour certaines évacuations, notamment zones sensibles ou collectives.",
+    "explication_pedagogique": "Améliorer robustesse et acoustique des évacuations.",
+    "exemple_utilisation": "les locaux vélos et parkings prévoient des évacuations en fonte série SMU.",
+    "points_vigilance": [
+      "contrôler supports, joints et raccordement à l’attente en dalle."
+    ]
+  },
+  {
+    "terme": "Fosse compteur",
+    "definition_courte": "Regard extérieur recevant compteur, clapets ou disconnecteurs.",
+    "explication_pedagogique": "Organiser le branchement eau froide.",
+    "exemple_utilisation": "l’AEP arrive dans des regards de comptage extérieurs.",
+    "points_vigilance": [
+      "prévoir isolation, accès et limite de prestation concessionnaire."
+    ]
+  },
+  {
+    "terme": "Fourreau",
+    "definition_courte": "Gaine de protection dans laquelle passe une canalisation.",
+    "explication_pedagogique": "Protéger le tube, permettre dilatation et traversée de parois.",
+    "exemple_utilisation": "les traversées de murs/planchers et passages en dalle se font sous fourreaux.",
+    "points_vigilance": [
+      "laisser le jeu demandé et colmater correctement le vide annulaire."
+    ]
+  },
+  {
+    "terme": "Fourreau ICT",
+    "definition_courte": "Gaine annelée isolante couramment utilisée en traversées ou passages protégés.",
+    "explication_pedagogique": "Protéger les canalisations dans murs, cloisons ou planchers.",
+    "exemple_utilisation": "les traversées de murs et cloisons se font sous fourreau ICT non fendu.",
+    "points_vigilance": [
+      "un fourreau fendu ou trop serré ne protège pas correctement."
+    ]
+  },
+  {
+    "terme": "Fourreau TPC",
+    "definition_courte": "Gaine enterrée rouge ou annelée utilisée pour passages électriques/frigorifiques selon usage chantier.",
+    "explication_pedagogique": "Préparer le passage des liaisons vers le groupe extérieur PAC.",
+    "exemple_utilisation": "la dalle extérieure PAC comporte attente et fourreau TPC.",
+    "points_vigilance": [
+      "coordonner diamètre, rayon et position avant coulage."
+    ]
+  },
+  {
+    "terme": "France Air GEA",
+    "definition_courte": "Grille d’air aluminium anodisé avec grillage anti-moustique citée pour locaux.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "le CCTP cite France Air type GEA ou équivalent.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "Franke MAN 721-1200",
+    "definition_courte": "Évier inox cité comme référence.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "les cuisines prévoient un évier Franke type MAN 721-1200 ou équivalent.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "Gaine double peau",
+    "definition_courte": "Conduit ou gaine avec deux parois, souvent pour améliorer isolation ou finition.",
+    "explication_pedagogique": "Raccorder un ballon thermodynamique ou un réseau avec meilleure protection.",
+    "exemple_utilisation": "le CCTP prévoit une gaine double peau entre sortie ballon et faux plafond.",
+    "points_vigilance": [
+      "contrôler habillage tôle galvanisée et étanchéité."
+    ]
+  },
+  {
+    "terme": "Gaine souple",
+    "definition_courte": "Manchon ou matériau souple interposé autour d’une traversée.",
+    "explication_pedagogique": "Désolidariser acoustiquement et protéger la canalisation.",
+    "exemple_utilisation": "le CCTP cite Talmisol autour des traversées.",
+    "points_vigilance": [
+      "doit dépasser de part et d’autre de la paroi selon prescription."
+    ]
+  },
+  {
+    "terme": "Gaine technique",
+    "definition_courte": "Volume vertical ou horizontal regroupant les réseaux.",
+    "explication_pedagogique": "Faire passer canalisations, VMC, compteurs et trappes de visite.",
+    "exemple_utilisation": "les gaines techniques collectives reçoivent réseaux EF, EU/EV et VMC.",
+    "points_vigilance": [
+      "attention aux supports indépendants, acoustique et accès maintenance."
+    ]
+  },
+  {
+    "terme": "Garantie biennale",
+    "definition_courte": "Garantie de deux ans souvent applicable aux équipements dissociables accessibles.",
+    "explication_pedagogique": "Couvrir certains défauts de fonctionnement après réception.",
+    "exemple_utilisation": "le CCTP indique deux ans pour les travaux accessibles.",
+    "points_vigilance": [
+      "ne pas confondre avec décennale pour éléments encastrés ou inaccessibles."
+    ]
+  },
+  {
+    "terme": "Garantie décennale",
+    "definition_courte": "Garantie de dix ans applicable aux ouvrages ou éléments pouvant affecter la solidité ou destination.",
+    "explication_pedagogique": "Couvrir les travaux inaccessibles ou incorporés selon CCTP.",
+    "exemple_utilisation": "le CCTP mentionne dix ans pour travaux inaccessibles, encastrés ou en faux plafond non démontable.",
+    "points_vigilance": [
+      "les produits sans document d’application peuvent nécessiter assurance volontaire."
+    ]
+  },
+  {
+    "terme": "Garde d’eau",
+    "definition_courte": "Hauteur d’eau dans un siphon empêchant les odeurs de remonter.",
+    "explication_pedagogique": "Assurer l’hygiène des évacuations.",
+    "exemple_utilisation": "siphons et entonnoirs siphonnés sont prévus.",
+    "points_vigilance": [
+      "un siphon sec laisse passer les odeurs."
+    ]
+  },
+  {
+    "terme": "Génératrice du tuyau",
+    "definition_courte": "Ligne extérieure d’un tube prise comme référence de position.",
+    "explication_pedagogique": "Contrôler l’enrobage ou la distance au-dessus d’un tube.",
+    "exemple_utilisation": "les incorporations en dalle se font 50 mm au-dessus de la génératrice du tuyau ou fourreau.",
+    "points_vigilance": [
+      "important pour éviter fissuration, écrasement ou non-conformité."
+    ]
+  },
+  {
+    "terme": "Gravois",
+    "definition_courte": "Déchets de chantier issus des travaux.",
+    "explication_pedagogique": "Maintenir le chantier propre et éviter bouchons.",
+    "exemple_utilisation": "le CCTP impose évacuation quotidienne des gravois et détritus.",
+    "points_vigilance": [
+      "ne jamais jeter gravats dans les évacuations."
+    ]
+  },
+  {
+    "terme": "Grille anti-moustique",
+    "definition_courte": "Grillage placé dans une grille d’air pour empêcher l’entrée d’insectes.",
+    "explication_pedagogique": "Protéger les locaux ventilés.",
+    "exemple_utilisation": "le CCTP cite une grille France Air GEA avec grillage anti-moustique.",
+    "points_vigilance": [
+      "prévoir entretien car l’encrassement réduit le débit."
+    ]
+  },
+  {
+    "terme": "GROHE Grotherm 1000",
+    "definition_courte": "Mitigeur thermostatique de douche ou bain/douche cité comme niveau de qualité.",
+    "explication_pedagogique": "Assurer sécurité anti-brûlure et confort d’usage.",
+    "exemple_utilisation": "les références Grotherm 1000 sont citées pour douche et bain/douche.",
+    "points_vigilance": [
+      "l’équivalent doit conserver classements, butée, clapets et sécurité."
+    ]
+  },
+  {
+    "terme": "Grohe Tempesta 100",
+    "definition_courte": "Ensemble de douche cité comme référence.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "le CCTP cite Grohe Tempesta 100 ensemble de douche 2 jets.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "Groupe de sécurité",
+    "definition_courte": "Organe de sécurité d’un ballon ECS qui évacue la surpression lors de la chauffe.",
+    "explication_pedagogique": "Protéger la cuve contre l’excès de pression.",
+    "exemple_utilisation": "les ballons doivent être raccordés à un groupe de sécurité avec entonnoir siphon.",
+    "points_vigilance": [
+      "prévoir évacuation visible et accessible."
+    ]
+  },
+  {
+    "terme": "Groupe extérieur PAC",
+    "definition_courte": "Unité dehors d’une pompe à chaleur contenant ventilateur, échangeur et compresseur selon système.",
+    "explication_pedagogique": "Récupérer les calories de l’air extérieur.",
+    "exemple_utilisation": "les groupes extérieurs sont posés sur dalle et parfois cachés par habillage.",
+    "points_vigilance": [
+      "respecter distances, bruit, maintenance, condensats et circulation d’air."
+    ]
+  },
+  {
+    "terme": "Groupe intérieur PAC",
+    "definition_courte": "Module hydraulique intérieur raccordé au chauffage et à l’ECS.",
+    "explication_pedagogique": "Distribuer l’énergie produite par la PAC aux réseaux du logement.",
+    "exemple_utilisation": "les groupes intérieurs sont dans les placards de salles de bains RDC.",
+    "points_vigilance": [
+      "support lourd, alimentation électrique, thermostat et accès maintenance à vérifier."
+    ]
+  },
+  {
+    "terme": "Horloge hebdomadaire",
+    "definition_courte": "Programmateur permettant des consignes différentes selon les jours/heures.",
+    "explication_pedagogique": "Adapter le chauffage au rythme d’occupation.",
+    "exemple_utilisation": "le thermostat d’ambiance est à horloge hebdomadaire.",
+    "points_vigilance": [
+      "programmer et expliquer au futur occupant."
+    ]
+  },
+  {
+    "terme": "Hors volume chauffé",
+    "definition_courte": "Zone non chauffée où les réseaux sont exposés au froid.",
+    "explication_pedagogique": "Déterminer les besoins de calorifuge et antigel.",
+    "exemple_utilisation": "les canalisations non enterrées hors volume chauffé sont isolées et parfois équipées de ruban chauffant.",
+    "points_vigilance": [
+      "risque de gel si protection oubliée."
+    ]
+  },
+  {
+    "terme": "Hydraulique",
+    "definition_courte": "Relatif aux réseaux d’eau sous pression ou de chauffage.",
+    "explication_pedagogique": "Comprendre les raccordements PAC, EF/ECS et radiateurs.",
+    "exemple_utilisation": "les documents PAC doivent préciser les essais hydrauliques.",
+    "points_vigilance": [
+      "pression, purge, débit et équilibrage sont liés."
+    ]
+  },
+  {
+    "terme": "Hygro B",
+    "definition_courte": "Système de VMC hygroréglable où les entrées d’air et bouches adaptent les débits selon humidité.",
+    "explication_pedagogique": "Optimiser ventilation et consommation énergétique.",
+    "exemple_utilisation": "le CCTP prévoit une VMC hygro collective Atlantic type Hygro B.",
+    "points_vigilance": [
+      "respecter les avis techniques et débits par typologie."
+    ]
+  },
+  {
+    "terme": "Hygrocosy BC",
+    "definition_courte": "Système ou caisson de VMC Atlantic cité pour logements individuels.",
+    "explication_pedagogique": "Assurer l’extraction VMC des maisons.",
+    "exemple_utilisation": "la ventilation individuelle est de type Atlantic Hygrocosy BC ou équivalent.",
+    "points_vigilance": [
+      "vérifier débit, acoustique, raccords et suspension en comble."
+    ]
+  },
+  {
+    "terme": "ICD",
+    "definition_courte": "Conduit ou gaine électrique destinée à protéger un câble de commande.",
+    "explication_pedagogique": "Relier thermostat et unité intérieure selon lot électricité.",
+    "exemple_utilisation": "le CCTP mentionne le conduit ICD entre groupe et thermostat.",
+    "points_vigilance": [
+      "coordination électricité/CVC indispensable."
+    ]
+  },
+  {
+    "terme": "Imperméabilité à l’air",
+    "definition_courte": "Capacité d’un bâtiment et de ses traversées à limiter les infiltrations parasites.",
+    "explication_pedagogique": "Atteindre les performances RE2020 et label.",
+    "exemple_utilisation": "le CCTP impose un test et des seuils de 0,6 m3/(h.m2) en maisons et 1 m3/(h.m2) en collectif.",
+    "points_vigilance": [
+      "chaque percement CVC/PBS doit être rebouché et jointé."
+    ]
+  },
+  {
+    "terme": "Insert réglable",
+    "definition_courte": "Pièce de robinetterie radiateur permettant un réglage de débit.",
+    "explication_pedagogique": "Équilibrer le radiateur et optimiser le chauffage.",
+    "exemple_utilisation": "les corps de chauffe prévoient insert réglable et tête thermostatique.",
+    "points_vigilance": [
+      "régler selon étude et ne pas laisser tous les inserts ouverts par défaut."
+    ]
+  },
+  {
+    "terme": "Interface utilisateur",
+    "definition_courte": "Écran ou commande permettant d’utiliser un équipement.",
+    "explication_pedagogique": "Régler PAC, ballon, température ou modes.",
+    "exemple_utilisation": "l’unité intérieure PAC comprend une régulation avec interface utilisateur.",
+    "points_vigilance": [
+      "doit rester accessible et compréhensible par l’occupant."
+    ]
+  },
+  {
+    "terme": "Inverseur",
+    "definition_courte": "Commande qui bascule un débit ou une fonction, par exemple vitesse VMC ou sortie bain/douche.",
+    "explication_pedagogique": "Changer de mode d’utilisation.",
+    "exemple_utilisation": "le CCTP mentionne raccordement de l’inverseur cuisine/WC et inverseur pour deux sorties sur mitigeur.",
+    "points_vigilance": [
+      "clarifier s’il relève de la plomberie, VMC ou électricité."
+    ]
+  },
+  {
+    "terme": "Jaquette métallique",
+    "definition_courte": "Habillage extérieur d’un ballon ou équipement.",
+    "explication_pedagogique": "Protéger l’isolant et donner une finition robuste.",
+    "exemple_utilisation": "l’Aquacosy SV possède isolation 55 mm et jaquette métallique.",
+    "points_vigilance": [
+      "attention aux chocs lors du chantier."
+    ]
+  },
+  {
+    "terme": "Jeu tube/fourreau",
+    "definition_courte": "Espace libre entre un tube et son fourreau.",
+    "explication_pedagogique": "Permettre dilatation, remplacement et protection.",
+    "exemple_utilisation": "le CCTP demande plus de 30 % pour PER et 50 % pour multicouche chauffage.",
+    "points_vigilance": [
+      "un jeu insuffisant bloque le tube et peut créer bruit ou rupture."
+    ]
+  },
+  {
+    "terme": "Joint annulaire",
+    "definition_courte": "Joint autour d’un tube à sa sortie de dalle ou traversée.",
+    "explication_pedagogique": "Assurer étanchéité à l’air et finition.",
+    "exemple_utilisation": "les sorties de dalle PER sont colmatées au mastic silicone.",
+    "points_vigilance": [
+      "nettoyer le support avant joint et vérifier continuité."
+    ]
+  },
+  {
+    "terme": "Joint mousse autocollant",
+    "definition_courte": "Bande souple interposée entre appareil sanitaire et paroi.",
+    "explication_pedagogique": "Désolidariser acoustiquement et éviter contact dur.",
+    "exemple_utilisation": "les lavabos, éviers et baignoires sont désolidarisés par joint mousse.",
+    "points_vigilance": [
+      "compléter ensuite par joint silicone sanitaire adapté."
+    ]
+  },
+  {
+    "terme": "Joint silicone",
+    "definition_courte": "Mastic souple utilisé pour étanchéité à l’air ou à l’eau.",
+    "explication_pedagogique": "Traiter traversées, appareils sanitaires et sorties de dalle.",
+    "exemple_utilisation": "le CCTP impose joint silicone entre fourreaux et réseaux et au droit des fixations.",
+    "points_vigilance": [
+      "un joint mal adhérent ou discontinu ne fonctionne pas."
+    ]
+  },
+  {
+    "terme": "Joint torique",
+    "definition_courte": "Joint circulaire assurant étanchéité dans un emboîtement.",
+    "explication_pedagogique": "Maintenir et étancher certaines bouches ou raccords.",
+    "exemple_utilisation": "les bouches peuvent être montées avec joint torique.",
+    "points_vigilance": [
+      "vérifier présence et bon positionnement à la pose."
+    ]
+  },
+  {
+    "terme": "Lavabo",
+    "definition_courte": "Appareil sanitaire de salle d’eau ou salle de bains.",
+    "explication_pedagogique": "Permettre lavage des mains et toilette.",
+    "exemple_utilisation": "les tableaux indiquent débits EF/ECS et diamètres pour lavabo.",
+    "points_vigilance": [
+      "fixation sur cloison sèche nécessite renfort adapté."
+    ]
+  },
+  {
+    "terme": "Lave-linge - MAL",
+    "definition_courte": "Machine à laver à alimenter en EF et raccorder à une vidange.",
+    "explication_pedagogique": "Prévoir points de branchement dans cuisine, salle de bain ou rangement.",
+    "exemple_utilisation": "le CCTP prévoit deux branchements MAL par logement selon cas.",
+    "points_vigilance": [
+      "robinets et siphons doivent être proches des prises électriques mais sans conflit de sécurité."
+    ]
+  },
+  {
+    "terme": "Lave-mains",
+    "definition_courte": "Petit appareil sanitaire pour lavage des mains.",
+    "explication_pedagogique": "Équiper WC ou locaux communs.",
+    "exemple_utilisation": "les tableaux donnent les débits et diamètres du lave-mains.",
+    "points_vigilance": [
+      "attention à la hauteur et au dégagement PMR si concerné."
+    ]
+  },
+  {
+    "terme": "Légionelles",
+    "definition_courte": "Bactéries pouvant se développer dans les réseaux d’eau chaude mal maîtrisés.",
+    "explication_pedagogique": "Justifier température, rinçage et traitement sanitaire.",
+    "exemple_utilisation": "le CCTP prévoit cycle anti-légionellose et analyses d’eau.",
+    "points_vigilance": [
+      "éviter les bras morts et températures tièdes prolongées."
+    ]
+  },
+  {
+    "terme": "Liaison frigorifique",
+    "definition_courte": "Tubes reliant unité extérieure et unité intérieure d’une PAC split.",
+    "explication_pedagogique": "Transporter le fluide frigorigène entre modules.",
+    "exemple_utilisation": "la dalle PAC prévoit fourreau TPC pour liaisons frigorifiques et électriques.",
+    "points_vigilance": [
+      "pose par personnel qualifié, respect longueurs et isolation."
+    ]
+  },
+  {
+    "terme": "Liaison hydraulique",
+    "definition_courte": "Raccordement d’eau entre équipement et réseau.",
+    "explication_pedagogique": "Connecter PAC, ballon, radiateurs ou nourrices.",
+    "exemple_utilisation": "le démontage PAC doit être possible sans déconnexion hydraulique pour maintenance courante.",
+    "points_vigilance": [
+      "prévoir vannes, manchettes démontables et accès."
+    ]
+  },
+  {
+    "terme": "Limiteur de débit",
+    "definition_courte": "Dispositif qui limite le débit d’eau dans une robinetterie.",
+    "explication_pedagogique": "Réduire la consommation d’eau.",
+    "exemple_utilisation": "les mitigeurs d’évier et douche mentionnent limiteur ou économie d’eau.",
+    "points_vigilance": [
+      "ne pas réduire au point de nuire au confort ou au fonctionnement ECS."
+    ]
+  },
+  {
+    "terme": "LnAT",
+    "definition_courte": "Niveau de bruit normalisé des équipements dans les logements.",
+    "explication_pedagogique": "Contrôler le respect de la réglementation acoustique.",
+    "exemple_utilisation": "le CCTP impose LnAT inférieur ou égal à 30 dB(A) dans pièces principales et 35 dB(A) en cuisine.",
+    "points_vigilance": [
+      "les mesures doivent être réalisées avec méthode adaptée."
+    ]
+  },
+  {
+    "terme": "Local OM",
+    "definition_courte": "Local ordures ménagères.",
+    "explication_pedagogique": "Prévoir point d’eau, robinet de puisage, ventilation ou grille selon cas.",
+    "exemple_utilisation": "le local OM reçoit alimentation EF et grille de ventilation selon lots.",
+    "points_vigilance": [
+      "protéger mécaniquement les remontées de réseau."
+    ]
+  },
+  {
+    "terme": "Local vélo",
+    "definition_courte": "Local destiné au stationnement vélos.",
+    "explication_pedagogique": "Peut recevoir réseaux, grilles, évacuations ou équipements.",
+    "exemple_utilisation": "les réseaux d’évacuation en locaux vélos cheminent en fonte jusqu’à attente en dalle.",
+    "points_vigilance": [
+      "attention aux chocs et à la ventilation."
+    ]
+  },
+  {
+    "terme": "Logement témoin",
+    "definition_courte": "Logement réalisé en avance pour valider principes et finitions.",
+    "explication_pedagogique": "Contrôler notamment étanchéité à l’air et interfaces.",
+    "exemple_utilisation": "au moins un logement témoin est prévu pour contrôler l’étanchéité à l’air.",
+    "points_vigilance": [
+      "les corrections du témoin doivent être reproduites sur les autres logements."
+    ]
+  },
+  {
+    "terme": "Loi d’eau",
+    "definition_courte": "Régulation qui adapte la température de départ chauffage à la température extérieure.",
+    "explication_pedagogique": "Améliorer confort et performance de la PAC.",
+    "exemple_utilisation": "la PAC régule la température de départ en fonction de la température extérieure.",
+    "points_vigilance": [
+      "paramétrer la pente selon bâtiment et émetteurs."
+    ]
+  },
+  {
+    "terme": "Main d’œuvre de maintenance",
+    "definition_courte": "Temps et actions nécessaires pour entretenir un équipement.",
+    "explication_pedagogique": "Prévoir accessibilité et démontabilité.",
+    "exemple_utilisation": "le CCTP impose démontage PAC/ventilateur sans déconnexion lourde.",
+    "points_vigilance": [
+      "un équipement impossible à démonter générera des réserves."
+    ]
+  },
+  {
+    "terme": "MAL",
+    "definition_courte": "Abréviation de machine à laver.",
+    "explication_pedagogique": "Repérer alimentation et vidange prévues pour lave-linge.",
+    "exemple_utilisation": "les tableaux et descriptifs citent les branchements MAL.",
+    "points_vigilance": [
+      "prévoir robinet NF, siphon et accès."
+    ]
+  },
+  {
+    "terme": "Manchette démontable",
+    "definition_courte": "Raccord démontable placé avec vannes pour permettre maintenance ou remplacement.",
+    "explication_pedagogique": "Isoler et déposer un équipement sans couper tout le réseau.",
+    "exemple_utilisation": "les accessoires ECS prévoient manchette démontable avec vannes.",
+    "points_vigilance": [
+      "prévoir espace de démontage réel."
+    ]
+  },
+  {
+    "terme": "Manchette isolante CMI",
+    "definition_courte": "Élément isolant autour d’un collier ou support de canalisation.",
+    "explication_pedagogique": "Limiter pont thermique et vibration.",
+    "exemple_utilisation": "le CCTP cite des colliers avec manchette isolante CGR type CMI.",
+    "points_vigilance": [
+      "contrôler continuité du calorifuge au droit des supports."
+    ]
+  },
+  {
+    "terme": "Manchon de dilatation",
+    "definition_courte": "Raccord permettant l’allongement ou la rétractation d’une canalisation PVC.",
+    "explication_pedagogique": "Éviter fissures et efforts sur les évacuations.",
+    "exemple_utilisation": "le CCTP distingue manchons verticaux et horizontaux.",
+    "points_vigilance": [
+      "ne pas inverser les modèles sur chantier."
+    ]
+  },
+  {
+    "terme": "Marque NF",
+    "definition_courte": "Certification française attestant la conformité d’un produit à des exigences contrôlées.",
+    "explication_pedagogique": "Sécuriser robinetterie, compteurs, clapets, ballons ou appareils.",
+    "exemple_utilisation": "le CCTP demande de nombreux équipements certifiés NF.",
+    "points_vigilance": [
+      "une simple déclaration fabricant ne remplace pas une certification exigée."
+    ]
+  },
+  {
+    "terme": "Mastic silicone",
+    "definition_courte": "Mastic souple utilisé pour joints sanitaires et étanchéité.",
+    "explication_pedagogique": "Traiter jonctions appareils/parois et traversées.",
+    "exemple_utilisation": "les joints annulaire et appareils sanitaires sont traités au mastic silicone.",
+    "points_vigilance": [
+      "utiliser une qualité sanitaire adaptée en pièces humides."
+    ]
+  },
+  {
+    "terme": "Matelas antivibratile",
+    "definition_courte": "Support souple sous un équipement pour absorber les vibrations.",
+    "explication_pedagogique": "Limiter transmission au bâtiment.",
+    "exemple_utilisation": "les extracteurs ou équipements sont posés sur support/matelas antivibratoire.",
+    "points_vigilance": [
+      "ne pas shunter le support par une fixation rigide."
+    ]
+  },
+  {
+    "terme": "Mitigeur",
+    "definition_courte": "Robinet mélangeant eau chaude et eau froide avec une seule commande.",
+    "explication_pedagogique": "Régler température et débit au point de puisage.",
+    "exemple_utilisation": "les lavabos, éviers et douches sont équipés de mitigeurs ou thermostatiques.",
+    "points_vigilance": [
+      "contrôler classements E/C/A/U et butées."
+    ]
+  },
+  {
+    "terme": "Mitigeur thermostatique",
+    "definition_courte": "Mitigeur maintenant automatiquement une température réglée.",
+    "explication_pedagogique": "Limiter les risques de brûlure et stabiliser la température ECS.",
+    "exemple_utilisation": "à la sortie des ballons, il limite la distribution à 50°C maximum.",
+    "points_vigilance": [
+      "doit être accessible et compatible avec les débits."
+    ]
+  },
+  {
+    "terme": "Module hydraulique",
+    "definition_courte": "Partie intérieure d’une PAC qui gère échange, circulation, appoint et distribution hydraulique.",
+    "explication_pedagogique": "Faire le lien entre PAC et réseaux chauffage/ECS.",
+    "exemple_utilisation": "les maisons distribuent EF/ECS depuis le module intérieur de la PAC.",
+    "points_vigilance": [
+      "prévoir purge, soupape, vase d’expansion et maintenance."
+    ]
+  },
+  {
+    "terme": "Monophasé",
+    "definition_courte": "Alimentation électrique en une phase, souvent 230 V.",
+    "explication_pedagogique": "Alimenter certains équipements domestiques.",
+    "exemple_utilisation": "l’unité intérieure PAC indique 230V / 1Ph / 50Hz.",
+    "points_vigilance": [
+      "vérifier puissance disponible et protections électriques."
+    ]
+  },
+  {
+    "terme": "Mousseur",
+    "definition_courte": "Embout de robinet mélangeant air et eau pour réguler le jet.",
+    "explication_pedagogique": "Réduire consommation et éclaboussures.",
+    "exemple_utilisation": "le CCTP cite mousseur avec fente et économies d’eau.",
+    "points_vigilance": [
+      "peut s’entartrer et nécessiter entretien."
+    ]
+  },
+  {
+    "terme": "Multicouche ALU",
+    "definition_courte": "Tube composite avec couche aluminium utilisé en chauffage ou plomberie.",
+    "explication_pedagogique": "Allier souplesse, tenue et barrière à l’oxygène.",
+    "exemple_utilisation": "le chauffage utilise du tube multicouche ALU pré-fourreauté COMAP MultiSkin4.",
+    "points_vigilance": [
+      "respecter raccords, rayon de cintrage, jeu dans fourreau et sorties adaptées."
+    ]
+  },
+  {
+    "terme": "Navilink 225 Connect",
+    "definition_courte": "Thermostat modulant sans fil connecté cité pour la régulation PAC.",
+    "explication_pedagogique": "Piloter chauffage, programmation et confort.",
+    "exemple_utilisation": "le CCTP cite Navilink 225 Connect ou équivalent.",
+    "points_vigilance": [
+      "doit fonctionner même sans connexion WiFi selon prescription."
+    ]
+  },
+  {
+    "terme": "NF A 48-720",
+    "definition_courte": "Document de référence technique concernant les tuyaux fonte série SMU.",
+    "explication_pedagogique": "Donner les règles de calcul, de mise en œuvre ou de contrôle applicables au lot.",
+    "exemple_utilisation": "le CCTP cite NF A 48-720 dans les normes et règlements du lot CVC / plomberie sanitaire.",
+    "points_vigilance": [
+      "ne jamais se limiter au nom du DTU : vérifier la version applicable, le domaine d’emploi et les prescriptions du fabricant."
+    ]
+  },
+  {
+    "terme": "NF EN 13959",
+    "definition_courte": "Norme associée aux clapets anti-retour de type EA.",
+    "explication_pedagogique": "Encadrer la protection contre les retours d’eau.",
+    "exemple_utilisation": "le CCTP cite clapet anti-retour NF type EA EN13959.",
+    "points_vigilance": [
+      "vérifier sens de pose et accessibilité."
+    ]
+  },
+  {
+    "terme": "NF EN 15804/CN",
+    "definition_courte": "Document de référence technique concernant les déclarations environnementales FDES.",
+    "explication_pedagogique": "Donner les règles de calcul, de mise en œuvre ou de contrôle applicables au lot.",
+    "exemple_utilisation": "le CCTP cite NF EN 15804/CN dans les normes et règlements du lot CVC / plomberie sanitaire.",
+    "points_vigilance": [
+      "ne jamais se limiter au nom du DTU : vérifier la version applicable, le domaine d’emploi et les prescriptions du fabricant."
+    ]
+  },
+  {
+    "terme": "NF EN 16567",
+    "definition_courte": "Document de référence technique concernant la robinetterie de réglage et sécurité sur réseaux d’eau.",
+    "explication_pedagogique": "Donner les règles de calcul, de mise en œuvre ou de contrôle applicables au lot.",
+    "exemple_utilisation": "le CCTP cite NF EN 16567 dans les normes et règlements du lot CVC / plomberie sanitaire.",
+    "points_vigilance": [
+      "ne jamais se limiter au nom du DTU : vérifier la version applicable, le domaine d’emploi et les prescriptions du fabricant."
+    ]
+  },
+  {
+    "terme": "NF P 41.015",
+    "definition_courte": "Document de référence technique concernant la mesure du bruit émis par la robinetterie de puisage.",
+    "explication_pedagogique": "Donner les règles de calcul, de mise en œuvre ou de contrôle applicables au lot.",
+    "exemple_utilisation": "le CCTP cite NF P 41.015 dans les normes et règlements du lot CVC / plomberie sanitaire.",
+    "points_vigilance": [
+      "ne jamais se limiter au nom du DTU : vérifier la version applicable, le domaine d’emploi et les prescriptions du fabricant."
+    ]
+  },
+  {
+    "terme": "NF P 41.016",
+    "definition_courte": "Document de référence technique concernant la mesure du bruit émis par la robinetterie de bâtiment.",
+    "explication_pedagogique": "Donner les règles de calcul, de mise en œuvre ou de contrôle applicables au lot.",
+    "exemple_utilisation": "le CCTP cite NF P 41.016 dans les normes et règlements du lot CVC / plomberie sanitaire.",
+    "points_vigilance": [
+      "ne jamais se limiter au nom du DTU : vérifier la version applicable, le domaine d’emploi et les prescriptions du fabricant."
+    ]
+  },
+  {
+    "terme": "NF P 41.201",
+    "definition_courte": "Document de référence technique concernant les conditions minimales d’exécution des travaux de plomberie et installations sanitaires.",
+    "explication_pedagogique": "Donner les règles de calcul, de mise en œuvre ou de contrôle applicables au lot.",
+    "exemple_utilisation": "le CCTP cite NF P 41.201 dans les normes et règlements du lot CVC / plomberie sanitaire.",
+    "points_vigilance": [
+      "ne jamais se limiter au nom du DTU : vérifier la version applicable, le domaine d’emploi et les prescriptions du fabricant."
+    ]
+  },
+  {
+    "terme": "NF P 41.401",
+    "definition_courte": "Document de référence technique concernant la terminologie de distribution d’eau chaude ou froide.",
+    "explication_pedagogique": "Donner les règles de calcul, de mise en œuvre ou de contrôle applicables au lot.",
+    "exemple_utilisation": "le CCTP cite NF P 41.401 dans les normes et règlements du lot CVC / plomberie sanitaire.",
+    "points_vigilance": [
+      "ne jamais se limiter au nom du DTU : vérifier la version applicable, le domaine d’emploi et les prescriptions du fabricant."
+    ]
+  },
+  {
+    "terme": "NF P 41.402",
+    "definition_courte": "Document de référence technique concernant la terminologie des évacuations d’eaux usées.",
+    "explication_pedagogique": "Donner les règles de calcul, de mise en œuvre ou de contrôle applicables au lot.",
+    "exemple_utilisation": "le CCTP cite NF P 41.402 dans les normes et règlements du lot CVC / plomberie sanitaire.",
+    "points_vigilance": [
+      "ne jamais se limiter au nom du DTU : vérifier la version applicable, le domaine d’emploi et les prescriptions du fabricant."
+    ]
+  },
+  {
+    "terme": "NF P 43",
+    "definition_courte": "Document de référence technique concernant la robinetterie du bâtiment.",
+    "explication_pedagogique": "Donner les règles de calcul, de mise en œuvre ou de contrôle applicables au lot.",
+    "exemple_utilisation": "le CCTP cite NF P 43 dans les normes et règlements du lot CVC / plomberie sanitaire.",
+    "points_vigilance": [
+      "ne jamais se limiter au nom du DTU : vérifier la version applicable, le domaine d’emploi et les prescriptions du fabricant."
+    ]
+  },
+  {
+    "terme": "NF Robinetterie",
+    "definition_courte": "Certification des robinets et équipements de bâtiment.",
+    "explication_pedagogique": "Garantir qualité, durabilité et performances acoustiques/hydrauliques.",
+    "exemple_utilisation": "toutes les robinetteries collectives EF/ECS doivent être certifiées NF.",
+    "points_vigilance": [
+      "contrôler la référence exacte proposée."
+    ]
+  },
+  {
+    "terme": "NFC 15-100",
+    "definition_courte": "Document de référence technique concernant les installations électriques basse tension liées aux équipements.",
+    "explication_pedagogique": "Donner les règles de calcul, de mise en œuvre ou de contrôle applicables au lot.",
+    "exemple_utilisation": "le CCTP cite NFC 15-100 dans les normes et règlements du lot CVC / plomberie sanitaire.",
+    "points_vigilance": [
+      "ne jamais se limiter au nom du DTU : vérifier la version applicable, le domaine d’emploi et les prescriptions du fabricant."
+    ]
+  },
+  {
+    "terme": "NFE 51-060",
+    "definition_courte": "Document de référence technique concernant la distribution et diffusion de l’air.",
+    "explication_pedagogique": "Donner les règles de calcul, de mise en œuvre ou de contrôle applicables au lot.",
+    "exemple_utilisation": "le CCTP cite NFE 51-060 dans les normes et règlements du lot CVC / plomberie sanitaire.",
+    "points_vigilance": [
+      "ne jamais se limiter au nom du DTU : vérifier la version applicable, le domaine d’emploi et les prescriptions du fabricant."
+    ]
+  },
+  {
+    "terme": "NFP 42",
+    "definition_courte": "Document de référence technique concernant les appareils sanitaires ménagers.",
+    "explication_pedagogique": "Donner les règles de calcul, de mise en œuvre ou de contrôle applicables au lot.",
+    "exemple_utilisation": "le CCTP cite NFP 42 dans les normes et règlements du lot CVC / plomberie sanitaire.",
+    "points_vigilance": [
+      "ne jamais se limiter au nom du DTU : vérifier la version applicable, le domaine d’emploi et les prescriptions du fabricant."
+    ]
+  },
+  {
+    "terme": "Nicoll",
+    "definition_courte": "Marque citée pour pipes WC, siphons et entonnoirs PVC.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "le CCTP cite Pipe WC Nicoll et siphon PVC Nicoll ou équivalent.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "Nourrice",
+    "definition_courte": "Collecteur de distribution avec plusieurs départs vers appareils.",
+    "explication_pedagogique": "Organiser les réseaux EF/ECS par appareil.",
+    "exemple_utilisation": "les nourrices sont prévues avec vannes d’isolement par appareils.",
+    "points_vigilance": [
+      "doit rester accessible et protégée par cache si hors placard technique."
+    ]
+  },
+  {
+    "terme": "Odéo",
+    "definition_courte": "Petit chauffe-eau électrique sous évier Atlantic cité pour local entretien.",
+    "explication_pedagogique": "Produire une petite quantité d’ECS localement.",
+    "exemple_utilisation": "le bâtiment A prévoit un ballon sous évier Atlantic Odéo 15 L.",
+    "points_vigilance": [
+      "vérifier fixation, groupe de sécurité et raccord diélectrique."
+    ]
+  },
+  {
+    "terme": "Omega de protection",
+    "definition_courte": "Protection mécanique en forme de capot ou profil autour d’une remontée de réseau.",
+    "explication_pedagogique": "Éviter les chocs sur canalisation exposée.",
+    "exemple_utilisation": "le local OM prévoit une protection mécanique type Omega.",
+    "points_vigilance": [
+      "utile dans locaux communs ou zones de passage."
+    ]
+  },
+  {
+    "terme": "Organe de réglage",
+    "definition_courte": "Élément permettant d’ajuster débit, pression ou température.",
+    "explication_pedagogique": "Réaliser équilibrage et mise au point.",
+    "exemple_utilisation": "les essais mesurent température et débit au niveau de l’organe de réglage.",
+    "points_vigilance": [
+      "doit être repéré et accessible."
+    ]
+  },
+  {
+    "terme": "PAC",
+    "definition_courte": "Pompe à chaleur.",
+    "explication_pedagogique": "Produire chauffage et/ou eau chaude en utilisant une source d’énergie extérieure.",
+    "exemple_utilisation": "le lot comprend des PAC double service pour les maisons.",
+    "points_vigilance": [
+      "vérifier performances, acoustique, antivibratile et maintenance."
+    ]
+  },
+  {
+    "terme": "PAC air/eau",
+    "definition_courte": "Pompe à chaleur qui récupère les calories de l’air extérieur pour chauffer de l’eau.",
+    "explication_pedagogique": "Alimenter chauffage hydraulique et parfois ECS.",
+    "exemple_utilisation": "le CCTP cite Atlantic Alfea Extensa M Duo 6 ou équivalent.",
+    "points_vigilance": [
+      "les performances dépendent du climat, de la loi d’eau et du régime radiateurs."
+    ]
+  },
+  {
+    "terme": "PAC double service",
+    "definition_courte": "PAC assurant chauffage et production ECS.",
+    "explication_pedagogique": "Regrouper deux usages dans un équipement.",
+    "exemple_utilisation": "les maisons ont production ECS et chauffage par PAC double service.",
+    "points_vigilance": [
+      "contrôler ballons, appoints, régulation et débits chauffage."
+    ]
+  },
+  {
+    "terme": "Panneau rayonnant",
+    "definition_courte": "Émetteur électrique de chauffage.",
+    "explication_pedagogique": "Chauffer localement certaines pièces.",
+    "exemple_utilisation": "les panneaux rayonnants électriques sont au lot électricité.",
+    "points_vigilance": [
+      "ne pas les chiffrer dans le lot CVC/PBS sauf interface claire."
+    ]
+  },
+  {
+    "terme": "Paroi lourde",
+    "definition_courte": "Mur ou support avec masse suffisante pour recevoir un équipement.",
+    "explication_pedagogique": "Limiter vibrations et assurer fixation.",
+    "exemple_utilisation": "le groupe intérieur PAC doit être fixé sur paroi lourde >=150 kg/m2 ou cloison renforcée.",
+    "points_vigilance": [
+      "ne pas fixer un équipement lourd sur cloison simple sans renfort."
+    ]
+  },
+  {
+    "terme": "PE à bande bleue",
+    "definition_courte": "Tube polyéthylène identifié eau potable.",
+    "explication_pedagogique": "Distribuer l’eau froide enterrée.",
+    "exemple_utilisation": "les réseaux principaux en sol peuvent être en tube PE à bande bleue.",
+    "points_vigilance": [
+      "respecter compatibilité alimentaire et absence de raccord non accessible."
+    ]
+  },
+  {
+    "terme": "PEHD",
+    "definition_courte": "Polyéthylène haute densité.",
+    "explication_pedagogique": "Réaliser des branchements eau froide enterrés robustes.",
+    "exemple_utilisation": "les réseaux après compteurs et branchements collectifs sont en PEHD.",
+    "points_vigilance": [
+      "prévoir lit de pose et protection selon VRD."
+    ]
+  },
+  {
+    "terme": "PER",
+    "definition_courte": "Polyéthylène réticulé, tube souple utilisé en plomberie encastrée.",
+    "explication_pedagogique": "Distribuer EF/ECS en dalle sous fourreau.",
+    "exemple_utilisation": "le CCTP impose PER sous fourreau sans assemblage sous dalle.",
+    "points_vigilance": [
+      "respecter jeu, sorties de dalle et écran anti-oxygène."
+    ]
+  },
+  {
+    "terme": "PER sous fourreau",
+    "definition_courte": "Tube PER protégé dans une gaine.",
+    "explication_pedagogique": "Permettre remplacement éventuel et dilatation.",
+    "exemple_utilisation": "les passages en dalle sont en PER sous fourreau COMAP ou équivalent.",
+    "points_vigilance": [
+      "aucun raccord sous dalle et jeu supérieur à 30 %."
+    ]
+  },
+  {
+    "terme": "Perte de charge",
+    "definition_courte": "Perte de pression due aux frottements, coudes, accessoires et longueurs.",
+    "explication_pedagogique": "Dimensionner les réseaux d’air et d’eau.",
+    "exemple_utilisation": "le CCTP limite pertes de charge en VMC et caisson unité extérieure.",
+    "points_vigilance": [
+      "un réseau mal tracé augmente bruit et consommation."
+    ]
+  },
+  {
+    "terme": "PF 755",
+    "definition_courte": "Marque ou certification de qualité citée pour raccords PVC.",
+    "explication_pedagogique": "Garantir la conformité des raccords d’évacuation.",
+    "exemple_utilisation": "les raccords PVC doivent être titulaires de la marque PF 755.",
+    "points_vigilance": [
+      "ne pas mélanger raccords non certifiés."
+    ]
+  },
+  {
+    "terme": "PFA",
+    "definition_courte": "Pression de fonctionnement admissible.",
+    "explication_pedagogique": "Servir de référence aux essais de pression.",
+    "exemple_utilisation": "les essais sont faits à 1,1 fois la PFA pendant 10 minutes.",
+    "points_vigilance": [
+      "connaître la PFA réelle du réseau avant essai."
+    ]
+  },
+  {
+    "terme": "PGC SPS",
+    "definition_courte": "Plan Général de Coordination Sécurité et Protection de la Santé.",
+    "explication_pedagogique": "Définir les mesures de sécurité chantier.",
+    "exemple_utilisation": "le CCTP renvoie au PGC pour installations, sécurité et moyens propres.",
+    "points_vigilance": [
+      "chaque entreprise doit intégrer ses moyens de sécurité."
+    ]
+  },
+  {
+    "terme": "Piège à son",
+    "definition_courte": "Élément acoustique placé dans un réseau d’air pour réduire la transmission du bruit.",
+    "explication_pedagogique": "Limiter bruit de VMC et diaphonie entre logements.",
+    "exemple_utilisation": "le CCTP prévoit des pièges à son en VMC collective.",
+    "points_vigilance": [
+      "contrôler emplacement, accessibilité et pertes de charge."
+    ]
+  },
+  {
+    "terme": "Pipe WC",
+    "definition_courte": "Raccord entre sortie de cuvette WC et évacuation.",
+    "explication_pedagogique": "Assurer l’écoulement des eaux vannes.",
+    "exemple_utilisation": "le CCTP cite des pipes WC Nicoll.",
+    "points_vigilance": [
+      "doit être étanche, alignée et désolidarisée si exigence acoustique."
+    ]
+  },
+  {
+    "terme": "Placard technique",
+    "definition_courte": "Volume accessible où sont regroupés ballons, nourrices, PAC ou réseaux.",
+    "explication_pedagogique": "Permettre maintenance et protection des équipements.",
+    "exemple_utilisation": "certaines nourrices hors placard technique reçoivent un cache.",
+    "points_vigilance": [
+      "ne pas condamner les accès par mobilier ou finition."
+    ]
+  },
+  {
+    "terme": "Planning prévisionnel",
+    "definition_courte": "Calendrier général de travaux.",
+    "explication_pedagogique": "Coordonner interventions et essais.",
+    "exemple_utilisation": "les entreprises doivent réaliser leurs travaux conformément au planning.",
+    "points_vigilance": [
+      "les essais doivent être anticipés avant réception."
+    ]
+  },
+  {
+    "terme": "Plomberie sanitaire",
+    "definition_courte": "Ensemble des réseaux et appareils EF/ECS/EU/EV liés aux usages sanitaires.",
+    "explication_pedagogique": "Alimenter et évacuer les appareils des logements.",
+    "exemple_utilisation": "le lot 08 couvre plomberie sanitaire individuels et collectifs.",
+    "points_vigilance": [
+      "à coordonner avec plâtrerie, GO, carrelage, électricité et VRD."
+    ]
+  },
+  {
+    "terme": "Plot antivibratile",
+    "definition_courte": "Petit support souple placé sous un équipement.",
+    "explication_pedagogique": "Éviter transmission vibratoire au bâti.",
+    "exemple_utilisation": "les PAC et ballons sont posés sur plots antivibratiles.",
+    "points_vigilance": [
+      "choisir la charge adaptée et ne pas comprimer excessivement."
+    ]
+  },
+  {
+    "terme": "Point fixe",
+    "definition_courte": "Blocage volontaire d’une canalisation pour maîtriser sa dilatation.",
+    "explication_pedagogique": "Organiser les mouvements du réseau PVC.",
+    "exemple_utilisation": "le CCTP définit point fixe par encastrement, scellement ou collier serré.",
+    "points_vigilance": [
+      "le positionnement des points fixes conditionne les manchons de dilatation."
+    ]
+  },
+  {
+    "terme": "Pompe à chaleur",
+    "definition_courte": "Machine thermodynamique qui transfère la chaleur d’une source froide vers un usage chaud.",
+    "explication_pedagogique": "Produire chauffage ou ECS avec performance énergétique élevée.",
+    "exemple_utilisation": "le CCTP prévoit PAC air/eau et ballons thermodynamiques.",
+    "points_vigilance": [
+      "vérifier COP, acoustique, fluide, raccordements et mise en service."
+    ]
+  },
+  {
+    "terme": "Pompe à chaleur sur air extrait",
+    "definition_courte": "PAC utilisant l’air extrait de la VMC comme source de calories.",
+    "explication_pedagogique": "Produire l’ECS tout en valorisant l’air vicié.",
+    "exemple_utilisation": "l’Aquacosy SV utilise une PAC sur air extrait.",
+    "points_vigilance": [
+      "la VMC et le ballon doivent être compatibles en débit et pertes de charge."
+    ]
+  },
+  {
+    "terme": "Pont phonique",
+    "definition_courte": "Liaison rigide qui transmet le bruit entre deux éléments.",
+    "explication_pedagogique": "Identifier les défauts acoustiques invisibles.",
+    "exemple_utilisation": "les canalisations doivent être désolidarisées par matériaux résilients.",
+    "points_vigilance": [
+      "un simple contact dur dans une traversée peut transmettre le bruit."
+    ]
+  },
+  {
+    "terme": "Porcher Ulysse+",
+    "definition_courte": "Receveur ou sanitaire céramique cité comme référence.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "le CCTP cite Porcher série Ulysse+ ou équivalent.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "Préparateur ECS",
+    "definition_courte": "Équipement qui produit et stocke l’eau chaude sanitaire.",
+    "explication_pedagogique": "Alimenter les points de puisage ECS.",
+    "exemple_utilisation": "le CCTP cite préparateurs ECS thermodynamiques ou électriques.",
+    "points_vigilance": [
+      "contrôler capacité, certification, groupe de sécurité, mitigeur et vidange."
+    ]
+  },
+  {
+    "terme": "Pression disponible",
+    "definition_courte": "Pression restant utilisable à un point du réseau après pertes de charge.",
+    "explication_pedagogique": "Assurer débits corrects aux bouches ou robinets.",
+    "exemple_utilisation": "la VMC prévoit une pression disponible à la bouche la plus défavorisée.",
+    "points_vigilance": [
+      "un réseau trop résistant peut laisser une pression insuffisante."
+    ]
+  },
+  {
+    "terme": "Pression résiduelle",
+    "definition_courte": "Pression minimale restant au robinet le plus défavorisé.",
+    "explication_pedagogique": "Garantir le fonctionnement des appareils.",
+    "exemple_utilisation": "elle ne doit pas être inférieure à 1 bar ni supérieure à 3 bars au robinet le plus exposé.",
+    "points_vigilance": [
+      "vérifier après réducteur, hauteur et pertes de charge."
+    ]
+  },
+  {
+    "terme": "Protection mécanique",
+    "definition_courte": "Dispositif qui protège un réseau ou équipement contre les chocs.",
+    "explication_pedagogique": "Éviter détérioration en local commun, gaine ou zone accessible.",
+    "exemple_utilisation": "le CCTP cite cache nourrice, Omega et habillages.",
+    "points_vigilance": [
+      "ne pas empêcher l’accès aux vannes ou organes de réglage."
+    ]
+  },
+  {
+    "terme": "Purgeur d’air",
+    "definition_courte": "Organe permettant d’évacuer l’air d’un réseau hydraulique.",
+    "explication_pedagogique": "Éviter bruits, mauvais débit et corrosion.",
+    "exemple_utilisation": "PAC et ballons sont équipés de purgeurs d’air.",
+    "points_vigilance": [
+      "à installer et maintenir accessible."
+    ]
+  },
+  {
+    "terme": "PVC M1",
+    "definition_courte": "PVC avec classement de réaction au feu M1 dans certaines traversées.",
+    "explication_pedagogique": "Limiter la contribution au feu.",
+    "exemple_utilisation": "à chaque traversée de plancher le PVC doit être de type M1.",
+    "points_vigilance": [
+      "contrôler le certificat du tube réellement posé."
+    ]
+  },
+  {
+    "terme": "PVC pression",
+    "definition_courte": "Tube PVC conçu pour réseau sous pression.",
+    "explication_pedagogique": "Utiliser en alimentation eau froide ou colonnes selon prescription.",
+    "exemple_utilisation": "l’alimentation EF peut être en PVC pression avant compteurs/colonnes.",
+    "points_vigilance": [
+      "ne pas utiliser du PVC évacuation à la place."
+    ]
+  },
+  {
+    "terme": "Quart de tour",
+    "definition_courte": "Robinet ou vanne qui s’ouvre/se ferme par rotation de 90°.",
+    "explication_pedagogique": "Permettre une coupure rapide et lisible.",
+    "exemple_utilisation": "des vannes d’isolement 1/4 tour sont prévues sur EF, ECS et locaux.",
+    "points_vigilance": [
+      "laisser la poignée manœuvrable et repérée."
+    ]
+  },
+  {
+    "terme": "Raccord à sertir",
+    "definition_courte": "Raccord métallique assemblé par sertissage mécanique.",
+    "explication_pedagogique": "Raccorder rapidement et sûrement PER, multicouche ou sorties de cloison.",
+    "exemple_utilisation": "le CCTP cite des raccords à sertir en laiton FIXOPLAC.",
+    "points_vigilance": [
+      "utiliser la bonne mâchoire de sertissage et contrôler le sertissage."
+    ]
+  },
+  {
+    "terme": "Raccord diélectrique bimétallique",
+    "definition_courte": "Raccord évitant la corrosion galvanique entre métaux différents.",
+    "explication_pedagogique": "Protéger ballon et canalisations.",
+    "exemple_utilisation": "le ballon sous évier est fourni avec raccord diélectrique bimétallique.",
+    "points_vigilance": [
+      "indispensable aux raccordements ECS sensibles."
+    ]
+  },
+  {
+    "terme": "Raccord en S",
+    "definition_courte": "Raccord excentré utilisé pour ajuster l’entraxe d’un mitigeur mural.",
+    "explication_pedagogique": "Permettre la pose propre de robinetteries douche/baignoire.",
+    "exemple_utilisation": "les robinetteries Grohe mentionnent des raccords en S.",
+    "points_vigilance": [
+      "vérifier entraxe, niveau et rosaces."
+    ]
+  },
+  {
+    "terme": "Raccord frigorifique Gaz/Liquide",
+    "definition_courte": "Connexions frigorifiques de l’unité intérieure PAC.",
+    "explication_pedagogique": "Relier circuits fluide gaz et liquide entre unités.",
+    "exemple_utilisation": "l’unité intérieure liste raccord frigorifique Gaz et Liquide.",
+    "points_vigilance": [
+      "pose par intervenant habilité et test d’étanchéité obligatoire."
+    ]
+  },
+  {
+    "terme": "Raccordement électrique",
+    "definition_courte": "Connexion finale d’un équipement sur une alimentation laissée en attente.",
+    "explication_pedagogique": "Mettre en service PAC, ballon, VMC ou commande.",
+    "exemple_utilisation": "le CCTP répartit attentes et raccordements entre lot électricité et CVC.",
+    "points_vigilance": [
+      "clarifier limite pour éviter non-raccordement à la réception."
+    ]
+  },
+  {
+    "terme": "Radiateur acier",
+    "definition_courte": "Émetteur de chauffage hydraulique en acier.",
+    "explication_pedagogique": "Diffuser la chaleur produite par la PAC.",
+    "exemple_utilisation": "les radiateurs sont de marque Finimetal Reggane 3010 ou équivalent.",
+    "points_vigilance": [
+      "dimensionner pour régime 55/45°C et poser sur consoles adaptées."
+    ]
+  },
+  {
+    "terme": "Raychem",
+    "definition_courte": "Marque citée pour ruban chauffant antigel.",
+    "explication_pedagogique": "Protéger des canalisations en volume froid.",
+    "exemple_utilisation": "le CCTP cite un ruban chauffant antigel Raychem ou équivalent.",
+    "points_vigilance": [
+      "vérifier puissance, alimentation et calorifuge."
+    ]
+  },
+  {
+    "terme": "RE2020",
+    "definition_courte": "Réglementation environnementale française applicable aux bâtiments neufs.",
+    "explication_pedagogique": "Encadrer performance énergétique et impact environnemental.",
+    "exemple_utilisation": "l’opération doit répondre à la RE2020.",
+    "points_vigilance": [
+      "les variantes produits peuvent imposer de refaire les calculs environnementaux."
+    ]
+  },
+  {
+    "terme": "Rebouchage",
+    "definition_courte": "Fermeture d’un percement ou d’une traversée après passage de réseau.",
+    "explication_pedagogique": "Restituer acoustique, feu, étanchéité à l’air et finition.",
+    "exemple_utilisation": "le CCTP impose rebouchages dans la nature de liant du support et joints silicone.",
+    "points_vigilance": [
+      "un rebouchage décoratif ne suffit pas pour l’air ou l’acoustique."
+    ]
+  },
+  {
+    "terme": "Réducteur de pression",
+    "definition_courte": "Organe qui limite la pression d’eau en aval.",
+    "explication_pedagogique": "Protéger les installations et éviter surpression.",
+    "exemple_utilisation": "la pression est limitée à 3 bars à l’origine de chaque logement.",
+    "points_vigilance": [
+      "contrôler réglage et accessibilité."
+    ]
+  },
+  {
+    "terme": "Refoulement",
+    "definition_courte": "Sortie d’air rejeté par un extracteur ou VMC vers l’extérieur.",
+    "explication_pedagogique": "Évacuer l’air vicié hors du bâtiment.",
+    "exemple_utilisation": "le refoulement de l’air vicié est réalisé hors toiture.",
+    "points_vigilance": [
+      "la sortie ne doit pas créer une perte de charge excessive."
+    ]
+  },
+  {
+    "terme": "Régime 55/45°C",
+    "definition_courte": "Températures d’eau aller/retour chauffage utilisées pour dimensionner les radiateurs.",
+    "explication_pedagogique": "Calculer la puissance réelle des corps de chauffe.",
+    "exemple_utilisation": "les radiateurs sont dimensionnés en régime d’eau 55/45°C.",
+    "points_vigilance": [
+      "un radiateur dimensionné pour un autre régime peut être insuffisant."
+    ]
+  },
+  {
+    "terme": "Réglage",
+    "definition_courte": "Action d’ajuster un organe pour atteindre une valeur de débit, température ou pression.",
+    "explication_pedagogique": "Mettre l’installation en état de marche conforme.",
+    "exemple_utilisation": "le CCTP prévoit réglage et équilibrage des installations.",
+    "points_vigilance": [
+      "documenter les valeurs de réglage dans le DOE."
+    ]
+  },
+  {
+    "terme": "Régulation",
+    "definition_courte": "Système qui ajuste le fonctionnement d’un équipement selon consignes et températures.",
+    "explication_pedagogique": "Optimiser confort et consommation.",
+    "exemple_utilisation": "la PAC utilise thermostat, loi d’eau, DC inverter et programmation.",
+    "points_vigilance": [
+      "paramètres à régler lors de la mise en service."
+    ]
+  },
+  {
+    "terme": "Réservations",
+    "definition_courte": "Ouvertures prévues à l’avance dans structure ou cloison pour passer des réseaux.",
+    "explication_pedagogique": "Éviter carottages et reprises tardives.",
+    "exemple_utilisation": "les réservations en maçonnerie >75 mm relèvent du gros œuvre selon limites.",
+    "points_vigilance": [
+      "transmettre les plans de réservations tôt."
+    ]
+  },
+  {
+    "terme": "Retour chauffage",
+    "definition_courte": "Canalisation ramenant l’eau refroidie des radiateurs vers la PAC.",
+    "explication_pedagogique": "Fermer la boucle du circuit chauffage.",
+    "exemple_utilisation": "les collecteurs départ/retour sont étiquetés.",
+    "points_vigilance": [
+      "inversion aller/retour nuit au fonctionnement."
+    ]
+  },
+  {
+    "terme": "RICT",
+    "definition_courte": "Rapport Initial de Contrôle Technique.",
+    "explication_pedagogique": "Lister les avis et points à traiter du bureau de contrôle.",
+    "exemple_utilisation": "le DCE comprend le RICT à prendre en compte.",
+    "points_vigilance": [
+      "les remarques doivent être intégrées dès l’offre."
+    ]
+  },
+  {
+    "terme": "Rinçage",
+    "definition_courte": "Circulation d’eau dans les réseaux pour évacuer résidus après travaux.",
+    "explication_pedagogique": "Préparer les analyses et la mise en service.",
+    "exemple_utilisation": "le CCTP exige des lavages répétés jusqu’à disparition goût/odeur.",
+    "points_vigilance": [
+      "ne pas livrer un réseau sans rinçage documenté."
+    ]
+  },
+  {
+    "terme": "Riquier sortie de dalle",
+    "definition_courte": "Boîtier métallique laqué blanc pour sortie sous radiateur.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "le CCTP cite Riquier type boitier seul ou équivalent.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "Robinet de barrage",
+    "definition_courte": "Robinet principal permettant de couper l’alimentation d’un logement.",
+    "explication_pedagogique": "Isoler rapidement un logement en cas de fuite ou intervention.",
+    "exemple_utilisation": "un robinet de barrage quart de tour 20/27 est prévu à 0,90 m.",
+    "points_vigilance": [
+      "doit rester accessible PMR."
+    ]
+  },
+  {
+    "terme": "Robinet de puisage",
+    "definition_courte": "Robinet permettant de tirer de l’eau, souvent extérieur ou local technique.",
+    "explication_pedagogique": "Alimenter jardin, local OM ou entretien.",
+    "exemple_utilisation": "un robinet de puisage EF est prévu dans chaque jardin privatif et locaux.",
+    "points_vigilance": [
+      "prévoir vanne de coupure intérieure et protection antigel si exposé."
+    ]
+  },
+  {
+    "terme": "Robinet flotteur",
+    "definition_courte": "Robinet de remplissage automatique du réservoir WC.",
+    "explication_pedagogique": "Remplir le réservoir après chaque chasse.",
+    "exemple_utilisation": "les WC doivent respecter NF 1 pour le robinet flotteur.",
+    "points_vigilance": [
+      "contrôler bruit et absence de fuite."
+    ]
+  },
+  {
+    "terme": "Robinetterie thermostatique",
+    "definition_courte": "Robinetterie qui maintient une température constante automatiquement.",
+    "explication_pedagogique": "Sécuriser douches, baignoires ou départ ECS.",
+    "exemple_utilisation": "les douches et baignoires utilisent Grotherm 1000 ou équivalent.",
+    "points_vigilance": [
+      "nettoyer filtres et vérifier anti-brûlure."
+    ]
+  },
+  {
+    "terme": "Ronal Solino SOLT1",
+    "definition_courte": "Paroi ou équipement de douche cité comme référence.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "le CCTP cite Ronal type Solino SOLT1 ou équivalent.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "Rosace",
+    "definition_courte": "Pièce de finition autour d’un tube, robinet ou traversée.",
+    "explication_pedagogique": "Masquer le percement et améliorer la finition.",
+    "exemple_utilisation": "les tubes cuivre et robinetteries mentionnent rosaces ou rosaces métalliques.",
+    "points_vigilance": [
+      "ne remplace pas un calfeutrement technique."
+    ]
+  },
+  {
+    "terme": "Ruban chauffant",
+    "definition_courte": "Câble chauffant posé sur canalisation.",
+    "explication_pedagogique": "Empêcher le gel des réseaux en zone froide.",
+    "exemple_utilisation": "le CCTP cite Raychem ou CGR FSTT.",
+    "points_vigilance": [
+      "à associer à calorifuge et alimentation protégée."
+    ]
+  },
+  {
+    "terme": "Salle de bains",
+    "definition_courte": "Pièce humide contenant baignoire, lavabo, douche ou WC selon logement.",
+    "explication_pedagogique": "Regrouper plusieurs appareils et réseaux.",
+    "exemple_utilisation": "les débits VMC et appareils sanitaires sont détaillés pour salles de bains.",
+    "points_vigilance": [
+      "attention aux fixations sur cloisons, joints et ventilation."
+    ]
+  },
+  {
+    "terme": "Scellement chimique",
+    "definition_courte": "Fixation par résine utilisée dans support maçonné ou béton.",
+    "explication_pedagogique": "Fixer solidement un ballon ou équipement lourd.",
+    "exemple_utilisation": "le ballon 100 L est suspendu avec fixations adéquates et scellement chimique.",
+    "points_vigilance": [
+      "respecter diamètre, profondeur, nettoyage du trou et temps de prise."
+    ]
+  },
+  {
+    "terme": "Sèche-serviettes",
+    "definition_courte": "Radiateur ou appareil électrique de salle de bains servant à chauffer et sécher les serviettes.",
+    "explication_pedagogique": "Confort thermique en pièce humide.",
+    "exemple_utilisation": "les sèche-serviettes électriques sont à la charge du lot électricité.",
+    "points_vigilance": [
+      "ne pas les inclure dans le lot chauffage sauf indication contraire."
+    ]
+  },
+  {
+    "terme": "Sécurité anti-brûlure",
+    "definition_courte": "Dispositif empêchant une température excessive à l’usage.",
+    "explication_pedagogique": "Protéger les occupants, notamment enfants et PMR.",
+    "exemple_utilisation": "mitigeurs thermostatiques, butée 38°C et limitation à 50°C sont demandés.",
+    "points_vigilance": [
+      "tester coupure eau froide et température maximum."
+    ]
+  },
+  {
+    "terme": "Série SMU",
+    "definition_courte": "Gamme de tuyaux fonte pour évacuations.",
+    "explication_pedagogique": "Réaliser des réseaux résistants et acoustiques.",
+    "exemple_utilisation": "les tuyaux fonte série SMU sont conformes NF A 48-720.",
+    "points_vigilance": [
+      "employer raccords compatibles et supports adaptés."
+    ]
+  },
+  {
+    "terme": "Siphon",
+    "definition_courte": "Pièce formant une garde d’eau pour empêcher les odeurs de remonter.",
+    "explication_pedagogique": "Raccorder appareils sanitaires aux évacuations.",
+    "exemple_utilisation": "lavabos, éviers, MAL, entonnoirs et siphons de sol sont cités.",
+    "points_vigilance": [
+      "prévoir accès nettoyage et pente correcte."
+    ]
+  },
+  {
+    "terme": "Siphon de sol",
+    "definition_courte": "Siphon intégré au sol, souvent local technique ou douche.",
+    "explication_pedagogique": "Évacuer les eaux de lavage ou douche.",
+    "exemple_utilisation": "les siphons de sol sont à certains lots selon limites de prestation.",
+    "points_vigilance": [
+      "vérifier pente, garde d’eau et étanchéité périphérique."
+    ]
+  },
+  {
+    "terme": "Siphon PVC Nicoll",
+    "definition_courte": "Siphon en PVC cité comme référence pour machines ou vidanges.",
+    "explication_pedagogique": "Raccorder proprement les évacuations d’appareils.",
+    "exemple_utilisation": "le CCTP cite siphon PVC Nicoll à sortie verticale pour MAL.",
+    "points_vigilance": [
+      "l’équivalent doit conserver diamètre et certification NF."
+    ]
+  },
+  {
+    "terme": "Sonde de condensation",
+    "definition_courte": "Capteur surveillant un risque de condensation.",
+    "explication_pedagogique": "Protéger certains équipements ou modes de fonctionnement.",
+    "exemple_utilisation": "l’unité intérieure PAC comprend une sonde de condensation.",
+    "points_vigilance": [
+      "vérifier raccordement et réglages."
+    ]
+  },
+  {
+    "terme": "Sortie de dalle",
+    "definition_courte": "Point où un tube encastré ressort du plancher.",
+    "explication_pedagogique": "Raccorder appareil, radiateur ou nourrice proprement.",
+    "exemple_utilisation": "les sorties de dalle COMAP/Riquier sont demandées sous radiateurs et PER.",
+    "points_vigilance": [
+      "les sorties non parallèles ou sans pièce adaptée sont refusées."
+    ]
+  },
+  {
+    "terme": "Sortie de toiture",
+    "definition_courte": "Terminal qui rejette l’air ou prolonge une ventilation au-dessus du toit.",
+    "explication_pedagogique": "Évacuer air vicié ou ventilation primaire hors locaux habités.",
+    "exemple_utilisation": "VMC et ventilations primaires sortent hors toiture.",
+    "points_vigilance": [
+      "prévoir abergement, étanchéité et perte de charge limitée."
+    ]
+  },
+  {
+    "terme": "Souche en toiture",
+    "definition_courte": "Ouvrage de traversée ou sortie en toiture.",
+    "explication_pedagogique": "Permettre sortie VMC ou ventilation primaire.",
+    "exemple_utilisation": "la souche en toiture est indiquée dans les limites avec le gros œuvre/couverture.",
+    "points_vigilance": [
+      "coordonner étanchéité toiture et reprise par couvreur."
+    ]
+  },
+  {
+    "terme": "Soudo-brasure",
+    "definition_courte": "Assemblage de tubes par chauffage et métal d’apport.",
+    "explication_pedagogique": "Réaliser des raccordements cuivre résistants.",
+    "exemple_utilisation": "les raccordements cuivre se font par soudo-brasure ou brasure capillaire.",
+    "points_vigilance": [
+      "protéger contre incendie et nettoyer après intervention."
+    ]
+  },
+  {
+    "terme": "Soupape de sécurité",
+    "definition_courte": "Organe qui s’ouvre en cas de pression excessive.",
+    "explication_pedagogique": "Protéger un circuit hydraulique.",
+    "exemple_utilisation": "l’unité intérieure PAC comprend une soupape de sécurité.",
+    "points_vigilance": [
+      "raccorder l’évacuation si nécessaire et vérifier tarage."
+    ]
+  },
+  {
+    "terme": "Split inverter",
+    "definition_courte": "PAC en deux unités avec compresseur à vitesse variable.",
+    "explication_pedagogique": "Adapter la puissance et améliorer performance.",
+    "exemple_utilisation": "la PAC air/eau est de type split inverter.",
+    "points_vigilance": [
+      "vérifier liaisons frigorifiques et mise en service constructeur."
+    ]
+  },
+  {
+    "terme": "STI PA J",
+    "definition_courte": "Té souche isolé Atlantic cité pour VMC.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "l’installation VMC utilise un TE SOUCHE PA isolé type STI PA J ou équivalent.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "Supportage",
+    "definition_courte": "Ensemble des supports, consoles, pendards ou colliers d’un réseau.",
+    "explication_pedagogique": "Maintenir les canalisations en respectant pentes et dilatations.",
+    "exemple_utilisation": "le CCTP donne des espacements maximum selon diamètres.",
+    "points_vigilance": [
+      "un support insuffisant provoque flèche, bruit ou fuite."
+    ]
+  },
+  {
+    "terme": "Talmisol",
+    "definition_courte": "Matériau souple cité pour traiter les traversées de canalisations.",
+    "explication_pedagogique": "Désolidariser et améliorer acoustique/étanchéité autour des tubes.",
+    "exemple_utilisation": "le CCTP demande Talmisol ou équivalent aux traversées.",
+    "points_vigilance": [
+      "doit dépasser de la paroi selon prescription."
+    ]
+  },
+  {
+    "terme": "Tampon de visite",
+    "definition_courte": "Ouverture démontable permettant l’accès à un réseau.",
+    "explication_pedagogique": "Nettoyer, inspecter ou entretenir les conduits.",
+    "exemple_utilisation": "le CCTP demande trappes et tampons de visite pour entretien VMC.",
+    "points_vigilance": [
+      "prévoir accès réel après faux plafond ou habillage."
+    ]
+  },
+  {
+    "terme": "Té de réglage",
+    "definition_courte": "Organe sur radiateur permettant d’ajuster ou isoler le retour.",
+    "explication_pedagogique": "Équilibrer le réseau chauffage.",
+    "exemple_utilisation": "les radiateurs comportent tés de réglage.",
+    "points_vigilance": [
+      "le réglage doit correspondre à l’étude, pas rester ouvert au hasard."
+    ]
+  },
+  {
+    "terme": "Té pied de biche",
+    "definition_courte": "Raccord d’évacuation permettant un raccordement favorable à l’écoulement.",
+    "explication_pedagogique": "Limiter turbulences et bouchons en pied de chute.",
+    "exemple_utilisation": "le CCTP cite des tés type pied de biche pour l’écoulement.",
+    "points_vigilance": [
+      "respecter sens et pente."
+    ]
+  },
+  {
+    "terme": "Température extérieure de base",
+    "definition_courte": "Température de calcul utilisée pour dimensionner chauffage.",
+    "explication_pedagogique": "Déterminer les déperditions à couvrir.",
+    "exemple_utilisation": "le CCTP indique -6°C pour calcul de déperdition.",
+    "points_vigilance": [
+      "ne pas utiliser une température arbitraire."
+    ]
+  },
+  {
+    "terme": "Température intérieure",
+    "definition_courte": "Consigne de température à maintenir dans les locaux.",
+    "explication_pedagogique": "Dimensionner chauffage et confort.",
+    "exemple_utilisation": "le CCTP indique 19°C sauf salles d’eau à 21°C.",
+    "points_vigilance": [
+      "le radiateur doit être calculé pièce par pièce."
+    ]
+  },
+  {
+    "terme": "Tempesta 100",
+    "definition_courte": "Ensemble de douche Grohe cité comme référence.",
+    "explication_pedagogique": "Assurer douchette, barre, flexible et économie d’eau.",
+    "exemple_utilisation": "le CCTP cite Tempesta 100 ensemble de douche 2 jets.",
+    "points_vigilance": [
+      "l’équivalent doit maintenir débit, confort et anticalcaire."
+    ]
+  },
+  {
+    "terme": "Tête thermostatique",
+    "definition_courte": "Commande sur radiateur qui régule localement le débit selon température ambiante.",
+    "explication_pedagogique": "Ajuster le chauffage pièce par pièce.",
+    "exemple_utilisation": "les chambres d’étage reçoivent des têtes thermostatiques COMAP Sensity M30.",
+    "points_vigilance": [
+      "laisser espace pour manœuvre de la tête."
+    ]
+  },
+  {
+    "terme": "Thermostat d’ambiance",
+    "definition_courte": "Commande qui mesure la température intérieure et pilote le chauffage.",
+    "explication_pedagogique": "Réguler la PAC selon le confort demandé.",
+    "exemple_utilisation": "le thermostat est placé dans le séjour, hors soleil et source de chaleur.",
+    "points_vigilance": [
+      "ne pas le placer derrière une porte ouverte en permanence."
+    ]
+  },
+  {
+    "terme": "Thermostat de sécurité",
+    "definition_courte": "Organe qui coupe ou limite en cas de surchauffe.",
+    "explication_pedagogique": "Protéger l’équipement et l’utilisateur.",
+    "exemple_utilisation": "l’unité intérieure PAC comprend un thermostat de sécurité.",
+    "points_vigilance": [
+      "à vérifier lors de la mise en service."
+    ]
+  },
+  {
+    "terme": "Tôle galvanisée",
+    "definition_courte": "Tôle d’acier protégée par zinc contre la corrosion.",
+    "explication_pedagogique": "Réaliser conduits VMC, habillages ou gaines.",
+    "exemple_utilisation": "les réseaux VMC et gaines double peau utilisent acier galvanisé.",
+    "points_vigilance": [
+      "contrôler découpe, protection des arêtes et étanchéité des joints."
+    ]
+  },
+  {
+    "terme": "Tout-à-l’égout",
+    "definition_courte": "Réseau public ou collectif d’évacuation des eaux usées.",
+    "explication_pedagogique": "Recevoir les eaux évacuées du bâtiment.",
+    "exemple_utilisation": "les essais d’évacuation vont jusqu’au raccord au tout-à-l’égout extérieur.",
+    "points_vigilance": [
+      "vérifier la limite avec le lot VRD."
+    ]
+  },
+  {
+    "terme": "Tranchée",
+    "definition_courte": "Excavation permettant de poser une canalisation enterrée.",
+    "explication_pedagogique": "Passer les branchements EF ou réseaux extérieurs.",
+    "exemple_utilisation": "le VRD doit tranchées, fond de fouille et filet avertisseur.",
+    "points_vigilance": [
+      "contrôler profondeur, lit de pose, remblais et grillage."
+    ]
+  },
+  {
+    "terme": "Trappe de visite",
+    "definition_courte": "Accès démontable à un réseau ou équipement caché.",
+    "explication_pedagogique": "Permettre maintenance et contrôle.",
+    "exemple_utilisation": "VMC et gaines doivent prévoir trappes et tampons de visite.",
+    "points_vigilance": [
+      "un ouvrage sans accès peut être refusé."
+    ]
+  },
+  {
+    "terme": "Trémie",
+    "definition_courte": "Ouverture dans un plancher ou mur pour passage de réseaux.",
+    "explication_pedagogique": "Anticiper les traversées avant coulage.",
+    "exemple_utilisation": "le gros œuvre met en place fourreaux ou bétons cellulaires dans les trémies.",
+    "points_vigilance": [
+      "les réservations supérieures à certains diamètres relèvent du gros œuvre selon limites."
+    ]
+  },
+  {
+    "terme": "Tube cuivre",
+    "definition_courte": "Canalisation métallique utilisée en plomberie et chauffage.",
+    "explication_pedagogique": "Réaliser des réseaux apparents, raccordements ou colonnes.",
+    "exemple_utilisation": "les réseaux apparents sont en cuivre rouge écroui.",
+    "points_vigilance": [
+      "brasure, supports et protection anticorrosion sont essentiels."
+    ]
+  },
+  {
+    "terme": "Tube multicouche ALU",
+    "definition_courte": "Tube composite utilisé notamment pour chauffage sous fourreau.",
+    "explication_pedagogique": "Distribuer l’eau de chauffage vers radiateurs.",
+    "exemple_utilisation": "le CCTP cite COMAP MultiSkin4 ou équivalent.",
+    "points_vigilance": [
+      "respecter jeu de 50 % dans le fourreau."
+    ]
+  },
+  {
+    "terme": "Tube PE 20/25",
+    "definition_courte": "Tube polyéthylène de dimension 20/25 utilisé pour certains branchements EF.",
+    "explication_pedagogique": "Alimenter logements ou espaces communs depuis gaine technique.",
+    "exemple_utilisation": "les branchements logements et communs sont en tube PE 20/25 sous fourreau.",
+    "points_vigilance": [
+      "vérifier raccords et protection en dalle."
+    ]
+  },
+  {
+    "terme": "Tube PVC évacuation",
+    "definition_courte": "Canalisation plastique utilisée pour EU/EV.",
+    "explication_pedagogique": "Évacuer eaux usées et eaux vannes.",
+    "exemple_utilisation": "le CCTP impose normes, raccords PF 755, collage et dilatation.",
+    "points_vigilance": [
+      "traiter acoustique, points fixes et traversées."
+    ]
+  },
+  {
+    "terme": "Tuyauterie",
+    "definition_courte": "Ensemble des tuyaux et raccords d’un réseau.",
+    "explication_pedagogique": "Transporter eau, air, évacuations ou chauffage.",
+    "exemple_utilisation": "le CCTP prévoit essais de toutes les tuyauteries de distribution et évacuation.",
+    "points_vigilance": [
+      "les essais doivent être faits avant réception."
+    ]
+  },
+  {
+    "terme": "Unité extérieure",
+    "definition_courte": "Partie extérieure d’une PAC contenant ventilateur et échangeur.",
+    "explication_pedagogique": "Capturer les calories de l’air extérieur.",
+    "exemple_utilisation": "les unités extérieures sont protégées par caches ou caisson acoustique.",
+    "points_vigilance": [
+      "ne pas bloquer le refoulement d’air."
+    ]
+  },
+  {
+    "terme": "Unité intérieure",
+    "definition_courte": "Module intérieur d’une PAC raccordé aux réseaux du logement.",
+    "explication_pedagogique": "Produire ou distribuer chauffage et ECS.",
+    "exemple_utilisation": "l’unité intérieure comprend circulateur, vannes, vase, ballon ECS et régulation.",
+    "points_vigilance": [
+      "vérifier accessibilité et support lourd."
+    ]
+  },
+  {
+    "terme": "V40td",
+    "definition_courte": "Volume d’eau chaude équivalent produit quotidiennement à 40°C en mode thermodynamique.",
+    "explication_pedagogique": "Comparer la capacité utile d’un chauffe-eau thermodynamique.",
+    "exemple_utilisation": "le CCTP donne des valeurs V40td selon T1, T2, T3 et T4.",
+    "points_vigilance": [
+      "ne pas se limiter au volume de cuve en litres."
+    ]
+  },
+  {
+    "terme": "Vanne d’arrêt",
+    "definition_courte": "Robinet permettant de couper un réseau.",
+    "explication_pedagogique": "Isoler un appareil ou une zone pour intervention.",
+    "exemple_utilisation": "le CCTP prévoit vannes après compteur, départs ECS/EF, locaux OM et nourrices.",
+    "points_vigilance": [
+      "chaque vanne doit être accessible et repérée."
+    ]
+  },
+  {
+    "terme": "Vanne d’isolement",
+    "definition_courte": "Vanne permettant de séparer un appareil ou départ du réseau.",
+    "explication_pedagogique": "Intervenir sans couper toute l’installation.",
+    "exemple_utilisation": "chaque départ EF/ECS et chauffage doit être muni de vanne selon CCTP.",
+    "points_vigilance": [
+      "ne pas oublier les vannes sur nourrices et collecteurs."
+    ]
+  },
+  {
+    "terme": "Vanne de vidange",
+    "definition_courte": "Vanne permettant de vider une partie du réseau.",
+    "explication_pedagogique": "Faciliter maintenance, purge ou hivernage.",
+    "exemple_utilisation": "le CCTP cite vannes de vidange en pied ou sur équipements.",
+    "points_vigilance": [
+      "prévoir rejet maîtrisé et accès."
+    ]
+  },
+  {
+    "terme": "Vanne papillon",
+    "definition_courte": "Vanne compacte dont l’obturateur pivote dans le passage.",
+    "explication_pedagogique": "Isoler rapidement un départ ou retour.",
+    "exemple_utilisation": "les départs EF/ECS et chauffage peuvent être munis de vannes type papillon.",
+    "points_vigilance": [
+      "contrôler sens, accessibilité et position ouverte/fermée."
+    ]
+  },
+  {
+    "terme": "Variation temporelle ΔVT",
+    "definition_courte": "Indicateur de performance d’une régulation de robinet thermostatique.",
+    "explication_pedagogique": "Évaluer la stabilité de température.",
+    "exemple_utilisation": "la tête thermostatique COMAP indique une valeur CERTITA ΔVT.",
+    "points_vigilance": [
+      "vérifier la certification de la référence."
+    ]
+  },
+  {
+    "terme": "Vase d’expansion",
+    "definition_courte": "Réservoir absorbant la dilatation de l’eau dans un circuit fermé.",
+    "explication_pedagogique": "Éviter les surpressions en chauffage.",
+    "exemple_utilisation": "l’unité intérieure PAC comprend un vase d’expansion.",
+    "points_vigilance": [
+      "vérifier pression de gonflage et volume adapté."
+    ]
+  },
+  {
+    "terme": "Ventilateur",
+    "definition_courte": "Machine qui met l’air en mouvement dans une VMC.",
+    "explication_pedagogique": "Créer extraction et dépression.",
+    "exemple_utilisation": "le fabricant doit fournir les conditions d’essais aérauliques et acoustiques.",
+    "points_vigilance": [
+      "l’accès maintenance doit permettre démontage sans déconnexion du réseau."
+    ]
+  },
+  {
+    "terme": "Ventilation primaire",
+    "definition_courte": "Prolongation des chutes d’évacuation jusqu’à l’air libre.",
+    "explication_pedagogique": "Éviter désiphonnage et mauvaises odeurs.",
+    "exemple_utilisation": "les colonnes EU sont prolongées dans leur diamètre au-dessus des locaux habités.",
+    "points_vigilance": [
+      "ne pas réduire le diamètre sans justification."
+    ]
+  },
+  {
+    "terme": "Vidage",
+    "definition_courte": "Ensemble bonde, siphon et raccord d’évacuation d’un appareil.",
+    "explication_pedagogique": "Évacuer l’eau d’un sanitaire.",
+    "exemple_utilisation": "les appareils sanitaires comprennent vidage et siphon.",
+    "points_vigilance": [
+      "tester débit et absence de fuite."
+    ]
+  },
+  {
+    "terme": "Vidange ECS",
+    "definition_courte": "Évacuation d’un groupe de sécurité ou d’un ballon.",
+    "explication_pedagogique": "Permettre l’écoulement des eaux de sécurité ou maintenance.",
+    "exemple_utilisation": "la vidange ECS thermodynamique est raccordée par entonnoir siphonné PVC.",
+    "points_vigilance": [
+      "ne jamais obturer la sortie du groupe de sécurité."
+    ]
+  },
+  {
+    "terme": "Vide sanitaire meuble évier",
+    "definition_courte": "Espace arrière du meuble permettant passage et accès aux réseaux.",
+    "explication_pedagogique": "Faciliter les raccordements sous évier.",
+    "exemple_utilisation": "le meuble évier prévu dispose d’un dos amovible et vide sanitaire standard.",
+    "points_vigilance": [
+      "ne pas bloquer l’accès avec des réseaux mal placés."
+    ]
+  },
+  {
+    "terme": "Vitesse d’écoulement",
+    "definition_courte": "Vitesse de l’eau ou de l’air dans un réseau.",
+    "explication_pedagogique": "Limiter bruit, pertes de charge et usure.",
+    "exemple_utilisation": "les bases de calcul donnent 2 m/s locaux techniques, 1,5 m/s colonnes, 1 m/s branchements ; chauffage 0,8 m/s.",
+    "points_vigilance": [
+      "une vitesse trop élevée crée bruit et pertes de charge."
+    ]
+  },
+  {
+    "terme": "VMC",
+    "definition_courte": "Ventilation Mécanique Contrôlée.",
+    "explication_pedagogique": "Assurer le renouvellement d’air des logements.",
+    "exemple_utilisation": "le lot réalise les VMC individuelles et collectives.",
+    "points_vigilance": [
+      "contrôler débits, acoustique, étanchéité réseau et équilibrage."
+    ]
+  },
+  {
+    "terme": "VMC collective",
+    "definition_courte": "Ventilation desservant plusieurs logements via caisson et réseau commun.",
+    "explication_pedagogique": "Assurer extraction des collectifs.",
+    "exemple_utilisation": "le CCTP prévoit des caissons Comète/Cosmos Atlantic ou équivalent.",
+    "points_vigilance": [
+      "attention au raccordement des ballons sur air extrait et au report d’alarme."
+    ]
+  },
+  {
+    "terme": "VMC hygroréglable",
+    "definition_courte": "VMC dont les débits s’adaptent à l’humidité et/ou présence.",
+    "explication_pedagogique": "Ventiler selon occupation en limitant les pertes énergétiques.",
+    "exemple_utilisation": "le système type Hygro B est prescrit.",
+    "points_vigilance": [
+      "respecter bouches, entrées d’air et avis techniques du même système."
+    ]
+  },
+  {
+    "terme": "Volume chauffé",
+    "definition_courte": "Zone intérieure maintenue en température.",
+    "explication_pedagogique": "Savoir où les réseaux doivent être protégés du gel.",
+    "exemple_utilisation": "les canalisations hors volume chauffé sont calorifugées et parfois chauffées.",
+    "points_vigilance": [
+      "ne pas oublier garages, locaux vélo, gaines froides ou extérieurs."
+    ]
+  },
+  {
+    "terme": "Volume tampon",
+    "definition_courte": "Petit volume d’eau intégré au circuit pour stabiliser le fonctionnement d’une PAC.",
+    "explication_pedagogique": "Limiter les courts cycles et améliorer la régulation.",
+    "exemple_utilisation": "l’unité intérieure PAC comprend un volume tampon de 16 L vidangeable.",
+    "points_vigilance": [
+      "vérifier purge et vidange."
+    ]
+  },
+  {
+    "terme": "VRD",
+    "definition_courte": "Voiries et Réseaux Divers.",
+    "explication_pedagogique": "Identifier les travaux extérieurs et limites avec plomberie.",
+    "exemple_utilisation": "le VRD réalise tranchées, grillages avertisseurs, compteurs ou réseaux avant compteur selon cas.",
+    "points_vigilance": [
+      "bien lire limites de prestation."
+    ]
+  },
+  {
+    "terme": "WC à l’anglaise",
+    "definition_courte": "Cuvette WC au sol avec réservoir, configuration courante en logement.",
+    "explication_pedagogique": "Équiper les sanitaires des logements.",
+    "exemple_utilisation": "le CCTP détaille les WC à l’anglaise et accessoires.",
+    "points_vigilance": [
+      "vérifier fixation, alimentation, pipe, chasse et protection chantier."
+    ]
+  },
+  {
+    "terme": "WC PMR",
+    "definition_courte": "WC adapté aux personnes à mobilité réduite.",
+    "explication_pedagogique": "Permettre accessibilité et transfert latéral.",
+    "exemple_utilisation": "les logements T2 n°17 et n°21 reçoivent barres de relèvement et accessoires PMR.",
+    "points_vigilance": [
+      "renforts et dimensions doivent être prévus avant finitions."
+    ]
+  },
+  {
+    "terme": "Zénéo",
+    "definition_courte": "Ballon électrique Atlantic ACI hybride cité comme référence.",
+    "explication_pedagogique": "Identifier le niveau de qualité attendu lorsque le CCTP cite une marque ou une référence.",
+    "exemple_utilisation": "le bâtiment B prévoit un ballon ACI Hybride type Zénéo.",
+    "points_vigilance": [
+      "un équivalent doit prouver les mêmes performances, certificats, dimensions, maintenance et compatibilités."
+    ]
+  },
+  {
+    "terme": "Zone climatique H2c",
+    "definition_courte": "Zone climatique utilisée pour calculs thermiques.",
+    "explication_pedagogique": "Dimensionner chauffage et performances RE2020.",
+    "exemple_utilisation": "le CCTP indique zone climatique H2c.",
+    "points_vigilance": [
+      "les performances PAC doivent rester compatibles avec cette zone."
+    ]
+  },
+  {
+    "terme": "Zone de bruit BR1",
+    "definition_courte": "Classement acoustique extérieur utilisé dans les bases de calcul.",
+    "explication_pedagogique": "Encadrer certains choix liés aux équipements extérieurs.",
+    "exemple_utilisation": "le CCTP indique zone de bruit BR1.",
+    "points_vigilance": [
+      "à croiser avec étude acoustique et implantation PAC."
+    ]
+  }
+]

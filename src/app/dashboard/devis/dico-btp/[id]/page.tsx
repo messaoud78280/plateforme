@@ -2,14 +2,17 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CategoryBadge, LevelBadge, LotBadge, StatusBadge } from "@/components/devis/dico/BtpDicoBadges";
 import { BtpDicoDeleteButton } from "@/components/devis/dico/BtpDicoDeleteButton";
-import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
+import { BtpDicoImagePanel } from "@/components/devis/dico/BtpDicoImagePanel";
+import { BtpDicoNoteEditor } from "@/components/devis/dico/BtpDicoNoteEditor";
+import { canManageBeWorkDico, requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import { lotLabelFromCode } from "@/lib/btp-dico/lots";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export default async function DicoBtpTermPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireBeWorkDevisSession();
+  const session = await requireBeWorkDevisSession();
+  const canManage = canManageBeWorkDico(session.user.role);
   const { id } = await params;
 
   const term = await prisma.btpDictionaryTerm.findUnique({ where: { id } });
@@ -67,9 +70,13 @@ export default async function DicoBtpTermPage({ params }: { params: Promise<{ id
               <BulletList items={term.vigilancePoints} />
             </Section>
           ) : null}
+
+          <BtpDicoNoteEditor termId={term.id} note={term.personalNote} canManage={canManage} />
         </div>
 
         <aside className="space-y-6">
+          <BtpDicoImagePanel termId={term.id} imageUrl={term.imageUrl} canManage={canManage} />
+
           <Section title="Classement">
             <dl className="space-y-2 text-sm">
               <Row label="Lot" value={term.lotCode ? lotLabelFromCode(term.lotCode) : "—"} />

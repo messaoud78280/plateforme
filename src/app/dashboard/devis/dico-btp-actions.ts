@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
+import { canManageBeWorkDico, requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import { isBtpDicoCategory, normalizeCategory, normalizeLevel } from "@/lib/btp-dico/labels";
 import {
   buildBtpDicoPreview,
@@ -12,6 +12,8 @@ import {
 } from "@/lib/btp-dico/json-io";
 import { lotNameFromCode, normalizeLotCode } from "@/lib/btp-dico/lots";
 import { prisma } from "@/lib/prisma";
+import { DOCUMENTS_BUCKET, extractStoragePathFromUrl } from "@/lib/storage/supabase-object";
+import { createServiceRoleClient } from "@/lib/supabase";
 
 const LIST_PATH = "/dashboard/devis/dico-btp";
 
@@ -100,6 +102,55 @@ export async function deleteBtpDicoTerm(id: string): Promise<{ ok: true } | { ok
   }
 }
 
+/** Enregistre / met à jour la note personnelle d'un terme (édition inline sur la fiche). */
+export async function updateBtpDicoNote(
+  id: string,
+  note: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const session = await requireBeWorkDevisSession();
+  if (!canManageBeWorkDico(session.user.role)) {
+    return { ok: false, error: "Réservé aux gérants." };
+  }
+  try {
+    const trimmed = note.trim();
+    await prisma.btpDictionaryTerm.update({
+      where: { id },
+      data: { personalNote: trimmed || null },
+    });
+    revalidatePath(`${LIST_PATH}/${id}`);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Enregistrement impossible." };
+  }
+}
+
+/** Retire l'image illustrative d'un terme (base + objet Storage best-effort). */
+export async function removeBtpDicoImage(id: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const session = await requireBeWorkDevisSession();
+  if (!canManageBeWorkDico(session.user.role)) {
+    return { ok: false, error: "Réservé aux gérants." };
+  }
+  try {
+    const term = await prisma.btpDictionaryTerm.findUnique({ where: { id }, select: { imageUrl: true } });
+    if (!term) return { ok: false, error: "Terme introuvable." };
+
+    await prisma.btpDictionaryTerm.update({ where: { id }, data: { imageUrl: null } });
+
+    if (term.imageUrl) {
+      const supabase = createServiceRoleClient();
+      const path = extractStoragePathFromUrl(term.imageUrl, DOCUMENTS_BUCKET);
+      if (supabase && path) {
+        await supabase.storage.from(DOCUMENTS_BUCKET).remove([path]);
+      }
+    }
+
+    revalidatePath(`${LIST_PATH}/${id}`);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Suppression de l'image impossible." };
+  }
+}
+
 async function existingKeySet(): Promise<Set<string>> {
   const rows = await prisma.btpDictionaryTerm.findMany({ select: { term: true, lotCode: true } });
   return new Set(rows.map((r) => dedupeKey(r.term, r.lotCode)));
@@ -122,6 +173,9 @@ export async function importBtpDicoJson(
   duplicateMode: BtpDicoDuplicateMode,
 ): Promise<{ ok: true; imported: number; skipped: number; replaced: number } | { ok: false; error: string }> {
   const session = await requireBeWorkDevisSession();
+  // Notes personnelles et images = enrichissements réservés aux gérants :
+  // un import par un autre rôle ne doit ni les créer ni écraser celles existantes.
+  const isManager = canManageBeWorkDico(session.user.role);
   try {
     const keys = await existingKeySet();
     const preview = buildBtpDicoPreview(rawText, keys);
@@ -146,13 +200,19 @@ export async function importBtpDicoJson(
           select: { id: true },
         });
         if (existing) {
-          await prisma.btpDictionaryTerm.update({ where: { id: existing.id }, data: row.parsed });
+          const { personalNote, imageUrl, ...rest } = row.parsed;
+          const updateData = isManager ? { ...rest, personalNote, imageUrl } : rest;
+          await prisma.btpDictionaryTerm.update({ where: { id: existing.id }, data: updateData });
           replaced += 1;
           continue;
         }
       }
+      const { personalNote, imageUrl, ...rest } = row.parsed;
+      const createData = isManager
+        ? { ...rest, personalNote, imageUrl }
+        : { ...rest, personalNote: null, imageUrl: null };
       await prisma.btpDictionaryTerm.create({
-        data: { ...row.parsed, createdByUserId: session.user.id },
+        data: { ...createData, createdByUserId: session.user.id },
       });
       imported += 1;
     }

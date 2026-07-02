@@ -1710,6 +1710,10 @@ model BtpDictionaryTerm {
   shortDefinition    String   @db.Text
   beginnerExplanation String? @db.Text
   usageExample       String?  @db.Text
+  /// Note / définition personnelle ajoutée par l'utilisateur pour enrichir la fiche
+  personalNote       String?  @db.Text
+  /// URL publique d'une image illustrative téléversée sur la fiche
+  imageUrl           String?
   keywords           String[]
   synonyms           String[]
   vigilancePoints    String[]

@@ -12,6 +12,8 @@ export type BtpDicoParsedTerm = {
   shortDefinition: string;
   beginnerExplanation: string | null;
   usageExample: string | null;
+  personalNote: string | null;
+  imageUrl: string | null;
   keywords: string[];
   synonyms: string[];
   vigilancePoints: string[];
@@ -83,6 +85,8 @@ const FR_KEYS = {
   shortDefinition: ["definition_courte", "définition_courte", "short_definition", "definition", "définition"],
   beginnerExplanation: ["explication_pedagogique", "explication_pédagogique", "beginner_explanation", "explication"],
   usageExample: ["exemple_utilisation", "usage_example", "exemple"],
+  personalNote: ["note_personnelle", "note", "personal_note", "personalNote"],
+  imageUrl: ["image", "image_url", "imageUrl", "photo"],
   keywords: ["mots_cles", "mots_clés", "keywords"],
   synonyms: ["synonymes", "synonyms"],
   vigilancePoints: ["points_vigilance", "points_de_vigilance", "vigilance_points"],
@@ -127,6 +131,8 @@ export function parseBtpDicoEntry(raw: unknown): { parsed: BtpDicoParsedTerm | n
     shortDefinition: shortDefinition ?? "",
     beginnerExplanation: toStr(pick(obj, FR_KEYS.beginnerExplanation)),
     usageExample: toStr(pick(obj, FR_KEYS.usageExample)),
+    personalNote: toStr(pick(obj, FR_KEYS.personalNote)),
+    imageUrl: toStr(pick(obj, FR_KEYS.imageUrl)),
     keywords: toStringArray(pick(obj, FR_KEYS.keywords)),
     synonyms: toStringArray(pick(obj, FR_KEYS.synonyms)),
     vigilancePoints: toStringArray(pick(obj, FR_KEYS.vigilancePoints)),
@@ -245,6 +251,8 @@ export function btpDicoTermToJson(t: {
   shortDefinition: string;
   beginnerExplanation: string | null;
   usageExample: string | null;
+  personalNote: string | null;
+  imageUrl: string | null;
   keywords: string[];
   synonyms: string[];
   vigilancePoints: string[];
@@ -263,6 +271,8 @@ export function btpDicoTermToJson(t: {
     definition_courte: t.shortDefinition,
     explication_pedagogique: t.beginnerExplanation ?? undefined,
     exemple_utilisation: t.usageExample ?? undefined,
+    note_personnelle: t.personalNote ?? undefined,
+    image: t.imageUrl ?? undefined,
     mots_cles: t.keywords.length ? t.keywords : undefined,
     synonymes: t.synonyms.length ? t.synonyms : undefined,
     points_vigilance: t.vigilancePoints.length ? t.vigilancePoints : undefined,

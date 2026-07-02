@@ -7,6 +7,14 @@ export function canAccessBeWorkDevis(role: string | undefined | null): boolean {
   return role === "MANAGER" || role === "AGENCE" || role === "AGENT";
 }
 
+/**
+ * Gestion des enrichissements Dico BTP (notes personnelles + images) :
+ * réservée aux gérants. Les autres membres de l'équipe consultent seulement.
+ */
+export function canManageBeWorkDico(role: string | undefined | null): boolean {
+  return role === "MANAGER";
+}
+
 /** Session obligatoire + rôle interne ; sinon redirection. */
 export async function requireBeWorkDevisSession() {
   const session = await getServerSession(authOptions);

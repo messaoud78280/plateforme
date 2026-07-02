@@ -1,0 +1,1796 @@
+[
+  {
+    "terme": "Accessibilité handicapé",
+    "definition_courte": "Exigence permettant à une personne en situation de handicap de se repérer et d'utiliser les locaux.",
+    "exemple_utilisation": "Dans le lot peinture, cela concerne notamment la signalétique et les repères visuels.",
+    "points_vigilance": [
+      "les plaques, numéros et indications doivent rester lisibles, bien positionnés et conformes à la charte demandée."
+    ]
+  },
+  {
+    "terme": "Acrylique",
+    "definition_courte": "Famille de résines utilisée dans de nombreuses peintures à l'eau.",
+    "explication_pedagogique": "Obtenir une peinture moins odorante, plus simple à appliquer et adaptée aux supports intérieurs courants.",
+    "exemple_utilisation": "Dans le CCTP, plusieurs impressions et finitions sont à base de résines acryliques."
+  },
+  {
+    "terme": "ADFORS",
+    "definition_courte": "Marque citée pour la toile de verre ou revêtement mural en fibre de verre.",
+    "explication_pedagogique": "Renforcer ou décorer un mur avant peinture, notamment dans les circulations communes.",
+    "points_vigilance": [
+      "le produit équivalent doit offrir les mêmes performances et être accepté par la maîtrise d'œuvre."
+    ]
+  },
+  {
+    "terme": "Adhérence",
+    "definition_courte": "Capacité d'une peinture, colle ou revêtement à rester fixé sur son support.",
+    "exemple_utilisation": "une toile de verre collée sur un voile béton doit adhérer sans décollement ni cloquage.",
+    "points_vigilance": [
+      "l'adhérence dépend beaucoup de la préparation du subjectile."
+    ]
+  },
+  {
+    "terme": "Alkyde",
+    "definition_courte": "Résine utilisée dans certaines peintures, souvent pour améliorer le tendu, la résistance et l'aspect de finition.",
+    "exemple_utilisation": "Dans le CCTP, des peintures à base de résines alkydes et acryliques sont prévues.",
+    "points_vigilance": [
+      "bien vérifier la compatibilité avec le support et la destination du local."
+    ]
+  },
+  {
+    "terme": "Alkyde en émulsion",
+    "definition_courte": "Peinture utilisant une résine alkyde dispersée dans l'eau.",
+    "explication_pedagogique": "Avoir certains avantages d'une peinture alkyde avec une mise en œuvre plus proche d'une peinture à l'eau.",
+    "points_vigilance": [
+      "respecter les temps de séchage entre couches."
+    ]
+  },
+  {
+    "terme": "Aluminium adhésif",
+    "definition_courte": "Support courant pour des étiquettes de signalétique rigides ou semi-rigides.",
+    "exemple_utilisation": "étiquettes de locaux communs de dimensions 80 x 80 mm environ.",
+    "points_vigilance": [
+      "la pose doit être droite, propre et durable."
+    ]
+  },
+  {
+    "terme": "Angle adjacent à la baie",
+    "definition_courte": "Angle proche d'une fenêtre ou d'une ouverture éclairante servant de point de départ pour poser un revêtement mural.",
+    "explication_pedagogique": "Limiter la visibilité des raccords et améliorer le rendu esthétique.",
+    "exemple_utilisation": "Dans le CCTP, la pose des revêtements muraux doit partir d'un angle adjacent à la baie d'éclairage naturel."
+  },
+  {
+    "terme": "Angles saillants",
+    "definition_courte": "Angles qui sortent vers l'extérieur, par opposition aux angles rentrants.",
+    "exemple_utilisation": "retour de cloison, poteau, encadrement ou angle de circulation.",
+    "points_vigilance": [
+      "les angles saillants sont exposés aux chocs ; ils peuvent recevoir cornières, toile ou protection adaptée."
+    ]
+  },
+  {
+    "terme": "Apprêt",
+    "definition_courte": "Préparation appliquée avant la finition pour améliorer l'accrochage et régulariser le support.",
+    "explication_pedagogique": "Préparer un support bois, métal, plâtre ou béton avant les couches de finition.",
+    "points_vigilance": [
+      "sans apprêt adapté, la peinture peut cloquer, fariner ou mal couvrir."
+    ]
+  },
+  {
+    "terme": "AQUALINE EVO IMPRESS",
+    "definition_courte": "Produit d'impression cité dans le CCTP pour support plâtre.",
+    "explication_pedagogique": "Préparer le support avant l'application des couches de peinture lisse.",
+    "points_vigilance": [
+      "produit ou équivalent à valider selon prescriptions du marché."
+    ]
+  },
+  {
+    "terme": "AQUALINE IMPRESS",
+    "definition_courte": "Impression citée pour la peinture gouttelette écrasée fine sur support plâtre.",
+    "explication_pedagogique": "Uniformiser l'absorption du support et préparer la projection.",
+    "points_vigilance": [
+      "l'impression précède la finition gouttelette."
+    ]
+  },
+  {
+    "terme": "AQUARYL IMPRESS",
+    "definition_courte": "Couche d'impression citée pour les plafonds en gouttelette fine.",
+    "explication_pedagogique": "Préparer les plaques de plâtre avant projection de la gouttelette.",
+    "points_vigilance": [
+      "le CCTP indique une impression bénéficiant du label NF Environnement."
+    ]
+  },
+  {
+    "terme": "AQUARYL VELOUR",
+    "definition_courte": "Peinture citée pour toile de verre et peinture de propreté.",
+    "explication_pedagogique": "Obtenir un rendu velouté, plus résistant qu'un mat pur et adapté aux parties communes.",
+    "points_vigilance": [
+      "vérifier la teinte choisie par l'architecte."
+    ]
+  },
+  {
+    "terme": "Arasement",
+    "definition_courte": "Découpe propre d'un revêtement au droit d'un angle, d'un plafond, d'une plinthe ou d'une huisserie.",
+    "exemple_utilisation": "araser un lé de revêtement mural au droit d'un encadrement.",
+    "points_vigilance": [
+      "un arasement irrégulier se voit immédiatement en finition."
+    ]
+  },
+  {
+    "terme": "Arrêt vertical",
+    "definition_courte": "Ligne de fin propre d'un revêtement ou d'une faïence, souvent matérialisée par une baguette.",
+    "explication_pedagogique": "Donner une limite nette et durable à une zone traitée.",
+    "points_vigilance": [
+      "alignement et aplomb à contrôler."
+    ]
+  },
+  {
+    "terme": "Aspect brillant",
+    "definition_courte": "Finition très réfléchissante, plus visible en défauts que le mat ou le satin.",
+    "exemple_utilisation": "laque antirouille pouvant présenter un aspect brillant selon produit.",
+    "points_vigilance": [
+      "plus l'aspect est brillant, plus la préparation du support est importante."
+    ]
+  },
+  {
+    "terme": "Aspect mat",
+    "definition_courte": "Finition peu réfléchissante, souvent utilisée pour plafonds ou murs où l'on veut limiter les reflets.",
+    "exemple_utilisation": "AQUALINE EVO MAT selon parois.",
+    "points_vigilance": [
+      "le mat est souvent moins lessivable qu'un velours ou satiné."
+    ]
+  },
+  {
+    "terme": "Aspect mat velouté",
+    "definition_courte": "Finition intermédiaire entre mat et velours, avec faible brillance et rendu soigné.",
+    "exemple_utilisation": "Dans le CCTP, elle est citée pour la peinture extérieure sur béton.",
+    "points_vigilance": [
+      "l'aspect dépend du support, du rouleau et du nombre de couches."
+    ]
+  },
+  {
+    "terme": "Aspect satiné",
+    "definition_courte": "Finition légèrement brillante, plus résistante et lavable qu'un mat courant.",
+    "exemple_utilisation": "peinture satinée sur bois, métal, canalisations apparentes.",
+    "points_vigilance": [
+      "le satiné révèle davantage les défauts de préparation."
+    ]
+  },
+  {
+    "terme": "Atmosphère humide",
+    "definition_courte": "Ambiance d'une pièce exposée à l'eau ou à la vapeur : salle de bain, cuisine, WC, local humide.",
+    "explication_pedagogique": "Choisir des peintures et préparations adaptées aux pièces humides.",
+    "points_vigilance": [
+      "les produits doivent résister à l'humidité et aux nettoyages."
+    ]
+  },
+  {
+    "terme": "Autorisations de stationnement",
+    "definition_courte": "Autorisations nécessaires pour accès, livraison ou stationnement en zone contrainte.",
+    "exemple_utilisation": "Dans le CCTP, le titulaire doit demander et fournir les autorisations nécessaires en centre-ville.",
+    "points_vigilance": [
+      "c'est une contrainte d'organisation et de planning, pas seulement de peinture."
+    ]
+  },
+  {
+    "terme": "BA13",
+    "definition_courte": "Plaque de plâtre de 13 mm d'épaisseur, support courant des peintures et finitions intérieures.",
+    "exemple_utilisation": "murs ou plafonds en plaques de plâtre recevant impression, gouttelette ou peinture lisse.",
+    "points_vigilance": [
+      "les bandes et joints doivent être correctement poncés avant peinture."
+    ]
+  },
+  {
+    "terme": "Bagar Rubis",
+    "definition_courte": "Enduit ou produit de projection cité pour la gouttelette fine et la gouttelette écrasée.",
+    "explication_pedagogique": "Réaliser une finition projetée sur plafonds ou murs.",
+    "points_vigilance": [
+      "l'équivalent doit offrir un rendu et une lavabilité comparables."
+    ]
+  },
+  {
+    "terme": "Bande à joint",
+    "definition_courte": "Bande utilisée sur plaques de plâtre pour traiter les jonctions entre plaques.",
+    "explication_pedagogique": "Obtenir une surface continue avant peinture.",
+    "points_vigilance": [
+      "mal poncée ou mal enduite, elle ressort en lumière rasante."
+    ]
+  },
+  {
+    "terme": "Bande de masquage",
+    "definition_courte": "Adhésif temporaire utilisé pour protéger les zones qui ne doivent pas être peintes.",
+    "exemple_utilisation": "protection d'huisseries, plinthes, appareillages ou carrelages.",
+    "points_vigilance": [
+      "enlever au bon moment pour éviter d'arracher la peinture."
+    ]
+  },
+  {
+    "terme": "Bâtiment A et B",
+    "definition_courte": "Repérage des bâtiments collectifs dans le CCTP.",
+    "explication_pedagogique": "Localiser les prestations : circulations, halls, SAS, locaux vélos, locaux poubelles.",
+    "points_vigilance": [
+      "toujours croiser avec les plans architecte."
+    ]
+  },
+  {
+    "terme": "Béton armé",
+    "definition_courte": "Béton contenant des armatures métalliques, souvent support de peinture ou de revêtement mural.",
+    "exemple_utilisation": "voile en béton armé support de toile de verre ou peinture après ratissage.",
+    "points_vigilance": [
+      "un béton doit être propre, sec et préparé avant finition."
+    ]
+  },
+  {
+    "terme": "Béton banché",
+    "definition_courte": "Voile béton coulé entre des banches, souvent utilisé pour murs structurels.",
+    "explication_pedagogique": "Support possible pour peinture, toile de verre ou revêtement mural acoustique.",
+    "points_vigilance": [
+      "contrôler bullage, laitance, planéité et humidité avant finition."
+    ]
+  },
+  {
+    "terme": "Boîtes aux lettres",
+    "definition_courte": "Équipements recevant une identification par étiquettes dans le lot peinture/signalétique.",
+    "exemple_utilisation": "étiquettes PVC 20 x 20 mm portant le numéro de chaque logement.",
+    "points_vigilance": [
+      "la numérotation doit correspondre aux logements et à la charte du maître d'ouvrage."
+    ]
+  },
+  {
+    "terme": "Brossage",
+    "definition_courte": "Action de brosser le support pour retirer poussières, parties friables ou salissures.",
+    "exemple_utilisation": "Dans le CCTP, il est cité avant gouttelette et vitrification d'escalier.",
+    "points_vigilance": [
+      "un support mal brossé nuit à l'accrochage."
+    ]
+  },
+  {
+    "terme": "Cachet violet",
+    "definition_courte": "Mention associée à une gouttelette lavable dans le CCTP.",
+    "explication_pedagogique": "Identifier une qualité ou catégorie de produit de projection lavable.",
+    "points_vigilance": [
+      "vérifier la fiche technique du produit proposé."
+    ]
+  },
+  {
+    "terme": "Cadres et façades de gaines techniques",
+    "definition_courte": "Éléments menuisés ou panneaux de gaines recevant une peinture satinée sur bois.",
+    "exemple_utilisation": "façades de gaines des parties communes peintes sur les faces vues ou double face selon CCTP.",
+    "points_vigilance": [
+      "prévoir les chants, retours et zones visibles."
+    ]
+  },
+  {
+    "terme": "Calepinage",
+    "definition_courte": "Plan ou organisation de la pose d'un revêtement en lés, plaques ou panneaux.",
+    "explication_pedagogique": "Prévoir les raccords, alignements et découpes avant pose.",
+    "points_vigilance": [
+      "le CCTP exige de limiter le nombre de joints et interdit les joints horizontaux dans la hauteur d'un lé."
+    ]
+  },
+  {
+    "terme": "Canalisations apparentes",
+    "definition_courte": "Tuyaux visibles, par exemple cuivre, PER ou PVC, pouvant recevoir une peinture de finition.",
+    "exemple_utilisation": "Dans le CCTP, elles sont traitées en peinture satinée avec primaire et laque.",
+    "points_vigilance": [
+      "adapter la préparation à la nature du tube."
+    ]
+  },
+  {
+    "terme": "Carrelage déjà posé",
+    "definition_courte": "Ouvrage d'un autre lot à protéger pendant les travaux de peinture.",
+    "explication_pedagogique": "Éviter taches de peinture, projections, rayures ou salissures.",
+    "points_vigilance": [
+      "la protection des ouvrages d'autres corps d'état est due par le peintre."
+    ]
+  },
+  {
+    "terme": "Catégorie B",
+    "definition_courte": "Niveau de finition mentionné pour plusieurs prestations de peinture.",
+    "explication_pedagogique": "Définir le rendu attendu : défauts corrigés mais planéité initiale non transformée.",
+    "points_vigilance": [
+      "la finition B admet quelques défauts d'épiderme et traces d'outils."
+    ]
+  },
+  {
+    "terme": "CCAP",
+    "definition_courte": "Cahier des Clauses Administratives Particulières.",
+    "explication_pedagogique": "Fixer les obligations administratives du marché.",
+    "exemple_utilisation": "Dans le CCTP, le rappel de l'étendue des obligations renvoie aux dispositions prévues au CCAP."
+  },
+  {
+    "terme": "CCTP",
+    "definition_courte": "Cahier des Clauses Techniques Particulières.",
+    "explication_pedagogique": "Décrire techniquement les prestations attendues par lot.",
+    "points_vigilance": [
+      "le lexique sert à comprendre les mots utilisés dans ce document."
+    ]
+  },
+  {
+    "terme": "Centre-ville",
+    "definition_courte": "Contrainte de contexte de chantier mentionnée dans le CCTP.",
+    "explication_pedagogique": "Anticiper accès, stationnement, livraisons et autorisations.",
+    "points_vigilance": [
+      "ces contraintes peuvent impacter l'organisation du lot peinture."
+    ]
+  },
+  {
+    "terme": "Chant",
+    "definition_courte": "Tranche visible d'un élément bois ou panneau.",
+    "exemple_utilisation": "chants de portes, plinthes, panneaux ou trappes à peindre si visibles.",
+    "points_vigilance": [
+      "oublier les chants crée une finition incomplète."
+    ]
+  },
+  {
+    "terme": "Charte graphique",
+    "definition_courte": "Ensemble des règles visuelles du maître d'ouvrage pour les numéros, plaques et signalétique.",
+    "exemple_utilisation": "Dans le CCTP, la signalétique doit suivre la charte de Gironde Habitat.",
+    "points_vigilance": [
+      "valider formats, couleurs, typo et positions avant commande."
+    ]
+  },
+  {
+    "terme": "Cloisons sèches",
+    "definition_courte": "Parois légères, souvent en plaques de plâtre, recevant peinture ou revêtement mural.",
+    "explication_pedagogique": "Support courant pour peinture lisse, gouttelette ou revêtement vinyle.",
+    "points_vigilance": [
+      "vérifier planéité, bandes, vis, poussière et humidité."
+    ]
+  },
+  {
+    "terme": "Coffres de volets roulants",
+    "definition_courte": "Habillages situés au-dessus des menuiseries extérieures, à nettoyer en livraison.",
+    "exemple_utilisation": "Dans le CCTP nettoyage, les dessus de coffres et tabliers de volets roulants sont à traiter.",
+    "points_vigilance": [
+      "ce sont des points souvent oubliés en nettoyage final."
+    ]
+  },
+  {
+    "terme": "Collage",
+    "definition_courte": "Mode de pose d'un revêtement mural ou d'une toile par colle adaptée.",
+    "exemple_utilisation": "toile de verre ou revêtement vinyle MURASPEC posé par collage.",
+    "points_vigilance": [
+      "utiliser la colle préconisée par le fabricant et compatible avec le support."
+    ]
+  },
+  {
+    "terme": "Colle préconisée",
+    "definition_courte": "Colle recommandée par le fabricant du revêtement.",
+    "explication_pedagogique": "Garantir l'adhérence, la durabilité et la conformité technique.",
+    "exemple_utilisation": "Dans le CCTP, les colles doivent être adaptées au revêtement, au subjectile, au chantier et à l'usage."
+  },
+  {
+    "terme": "Coloris",
+    "definition_courte": "Couleur de finition choisie pour une peinture, signalétique ou revêtement.",
+    "explication_pedagogique": "Répondre aux choix architecte et maître d'ouvrage.",
+    "points_vigilance": [
+      "faire valider les échantillons avant application générale."
+    ]
+  },
+  {
+    "terme": "Communes",
+    "definition_courte": "Parties communes des bâtiments : halls, circulations, SAS, locaux techniques, locaux vélos.",
+    "explication_pedagogique": "Identifier les zones non privatives ayant souvent des finitions plus résistantes.",
+    "exemple_utilisation": "toile de verre dans les circulations communes."
+  },
+  {
+    "terme": "Compte prorata",
+    "definition_courte": "Compte utilisé pour répartir certaines dépenses communes de chantier entre entreprises.",
+    "exemple_utilisation": "Dans le CCTP, le lot peinture est concerné par le tri, les bennes et le compte prorata selon lot commun.",
+    "points_vigilance": [
+      "ce n'est pas un ouvrage, mais une obligation financière et organisationnelle."
+    ]
+  },
+  {
+    "terme": "Consignes de sécurité",
+    "definition_courte": "Documents ou panneaux indiquant les règles à suivre en cas d'incendie ou d'évacuation.",
+    "exemple_utilisation": "Dans le CCTP peinture, les plans d'évacuation et consignes sont indiqués sans objet, prévus au lot plomberie.",
+    "points_vigilance": [
+      "bien vérifier les limites de prestations entre lots."
+    ]
+  },
+  {
+    "terme": "Cornière PVC",
+    "definition_courte": "Profil de protection ou finition posé sur angle saillant, parfois peint dans le ton de la toile.",
+    "explication_pedagogique": "Protéger les angles et obtenir une finition régulière.",
+    "exemple_utilisation": "Dans le CCTP, elle est prévue avec la toile de verre sur angles saillants."
+  },
+  {
+    "terme": "Couche d'impression",
+    "definition_courte": "Première couche appliquée sur un support préparé avant la finition.",
+    "explication_pedagogique": "Uniformiser l'absorption, améliorer l'accrochage et préparer la teinte.",
+    "points_vigilance": [
+      "ne pas la confondre avec une couche de finition."
+    ]
+  },
+  {
+    "terme": "Couche de finition",
+    "definition_courte": "Couche finale donnant l'aspect, la teinte et une partie des performances.",
+    "exemple_utilisation": "2 couches de peinture lisse ou 1 couche de finition peinture de propreté.",
+    "points_vigilance": [
+      "son rendu dépend directement de la préparation."
+    ]
+  },
+  {
+    "terme": "Couche primaire",
+    "definition_courte": "Produit d'accrochage ou de protection appliqué avant finition, notamment sur métal ou sol.",
+    "exemple_utilisation": "PROTECPRIM sur métal ou HYDROFOND sur sol béton.",
+    "points_vigilance": [
+      "choisir le primaire adapté au support."
+    ]
+  },
+  {
+    "terme": "Couches minimales",
+    "definition_courte": "Nombre de couches indiqué comme minimum dans le CCTP.",
+    "explication_pedagogique": "Donner la base attendue sans limiter l'obligation de résultat.",
+    "points_vigilance": [
+      "l'entreprise doit ajouter les couches nécessaires si le rendu n'est pas conforme."
+    ]
+  },
+  {
+    "terme": "Cuisine",
+    "definition_courte": "Pièce humide ou exposée aux projections et nettoyages, traitée en peinture lisse dans le CCTP.",
+    "explication_pedagogique": "Prévoir une finition plus adaptée qu'une gouttelette murale sèche.",
+    "points_vigilance": [
+      "raccord avec faïences et meubles."
+    ]
+  },
+  {
+    "terme": "Débullage",
+    "definition_courte": "Défaut de petits trous ou bulles visibles dans un support béton ou enduit.",
+    "explication_pedagogique": "À repérer avant ratissage et peinture.",
+    "points_vigilance": [
+      "sur béton, un ratissage peut être nécessaire pour obtenir une finition correcte."
+    ]
+  },
+  {
+    "terme": "Décor",
+    "definition_courte": "Aspect décoratif choisi : couleur, relief, motif, gamme ou finition.",
+    "exemple_utilisation": "Dans le CCTP, les teintes, aspects et décors sont laissés au choix du maître d'ouvrage et du maître d'œuvre.",
+    "points_vigilance": [
+      "ne pas commander sans validation."
+    ]
+  },
+  {
+    "terme": "Défaut d'épiderme",
+    "definition_courte": "Petit défaut de surface visible sur le support ou la peinture : grain, rayure, marque, aspérité.",
+    "exemple_utilisation": "Dans les finitions A/B/C, le niveau de tolérance aux défauts varie.",
+    "points_vigilance": [
+      "la lumière rasante révèle fortement ces défauts."
+    ]
+  },
+  {
+    "terme": "Dépose des protections",
+    "definition_courte": "Retrait des films, adhésifs, cartons ou protections posés pendant le chantier.",
+    "exemple_utilisation": "Dans le nettoyage final, l'enlèvement des étiquettes et protections de menuiseries est prévu.",
+    "points_vigilance": [
+      "utiliser des méthodes qui ne rayent pas les supports."
+    ]
+  },
+  {
+    "terme": "Dépoussiérage",
+    "definition_courte": "Action d'enlever la poussière après ponçage, égrenage ou brossage.",
+    "explication_pedagogique": "Permettre l'adhérence des impressions, peintures ou colles.",
+    "points_vigilance": [
+      "peindre sur poussière provoque défauts et décollements."
+    ]
+  },
+  {
+    "terme": "Détrempe",
+    "definition_courte": "Ramollissement ou dégradation d'une ancienne peinture par humidité ou produit appliqué.",
+    "explication_pedagogique": "Identifier les supports sensibles avant travaux.",
+    "points_vigilance": [
+      "un support douteux doit être testé et préparé."
+    ]
+  },
+  {
+    "terme": "DTU 59.1",
+    "definition_courte": "Document Technique Unifié relatif aux travaux de peinture des bâtiments.",
+    "exemple_utilisation": "Dans le CCTP, les travaux de préparation, apprêt et peinture doivent s'y référer.",
+    "points_vigilance": [
+      "c'est une référence majeure du lot peinture."
+    ]
+  },
+  {
+    "terme": "DTU 59.3",
+    "definition_courte": "Document Technique Unifié relatif aux peintures de sols.",
+    "explication_pedagogique": "Encadrer la mise en œuvre des peintures sur sols béton.",
+    "points_vigilance": [
+      "humidité, préparation et compatibilité du support sont essentiels."
+    ]
+  },
+  {
+    "terme": "DTU 59.4",
+    "definition_courte": "Document Technique Unifié relatif aux papiers peints et revêtements muraux.",
+    "exemple_utilisation": "Dans le CCTP, il est cité pour la mise en œuvre des revêtements muraux.",
+    "points_vigilance": [
+      "il concerne notamment les lés, joints, colles et préparations."
+    ]
+  },
+  {
+    "terme": "Échafaudage",
+    "definition_courte": "Équipement temporaire permettant de travailler en hauteur.",
+    "exemple_utilisation": "Dans le CCTP, le lot peinture doit prévoir les échafaudages et protections nécessaires à ses ouvrages.",
+    "points_vigilance": [
+      "il faut intégrer sécurité, accès et protection des existants."
+    ]
+  },
+  {
+    "terme": "Échantillon",
+    "definition_courte": "Exemple physique de produit, couleur, texture ou finition soumis à validation.",
+    "explication_pedagogique": "Permettre au maître d'œuvre et au maître d'ouvrage de choisir et contrôler le rendu.",
+    "points_vigilance": [
+      "les travaux exécutés doivent correspondre aux échantillons retenus."
+    ]
+  },
+  {
+    "terme": "Éclairage naturel",
+    "definition_courte": "Lumière venant d'une baie ou fenêtre, importante pour la visibilité des joints et défauts.",
+    "exemple_utilisation": "Dans le CCTP revêtements muraux, la pose démarre à partir d'un angle adjacent à la baie d'éclairage naturel.",
+    "points_vigilance": [
+      "la lumière rasante peut rendre les défauts très visibles."
+    ]
+  },
+  {
+    "terme": "Écolabel européen",
+    "definition_courte": "Label environnemental demandé pour certains produits comme le vitrificateur d'escalier.",
+    "explication_pedagogique": "Garantir un niveau environnemental selon le référentiel du label.",
+    "points_vigilance": [
+      "fournir la fiche produit ou preuve de conformité."
+    ]
+  },
+  {
+    "terme": "Égrenage",
+    "definition_courte": "Ponçage léger permettant de supprimer grains, aspérités ou reliefs avant la couche suivante.",
+    "exemple_utilisation": "égrenage avant gouttelette, peinture lisse ou peinture de propreté.",
+    "points_vigilance": [
+      "il améliore la qualité d'aspect et l'adhérence."
+    ]
+  },
+  {
+    "terme": "Enduit",
+    "definition_courte": "Produit de préparation servant à reboucher, lisser ou ratisser un support.",
+    "explication_pedagogique": "Corriger les défauts avant impression et finition.",
+    "points_vigilance": [
+      "l'enduit doit être sec et poncé avant peinture."
+    ]
+  },
+  {
+    "terme": "Enduit d'impression",
+    "definition_courte": "Terme parfois utilisé pour désigner une couche préparatoire ou impression.",
+    "explication_pedagogique": "Régulariser la porosité et l'accrochage.",
+    "points_vigilance": [
+      "ne remplace pas forcément un enduit de lissage."
+    ]
+  },
+  {
+    "terme": "Enduit de peinture",
+    "definition_courte": "Produit réglementé cité par la norme NF T 30-608 pour travaux intérieurs.",
+    "explication_pedagogique": "Préparer les subjectiles avant application de peinture.",
+    "points_vigilance": [
+      "adapter l'enduit au support et au niveau de finition demandé."
+    ]
+  },
+  {
+    "terme": "Époussetage",
+    "definition_courte": "Nettoyage de la poussière fine après ponçage ou égrenage.",
+    "exemple_utilisation": "Dans le CCTP, il est cité pour la peinture de propreté.",
+    "points_vigilance": [
+      "une poussière résiduelle peut créer un farinage ou un mauvais accrochage."
+    ]
+  },
+  {
+    "terme": "Étiquette adhésive",
+    "definition_courte": "Élément de signalétique collé sur une porte, boîte aux lettres ou gaine.",
+    "exemple_utilisation": "identification des locaux, logements, boîtes aux lettres ou gaines palières.",
+    "points_vigilance": [
+      "support propre, position droite et informations exactes."
+    ]
+  },
+  {
+    "terme": "Étiquette laiton",
+    "definition_courte": "Plaquette de numérotation ou identification en laiton, mentionnée pour les portes de logements.",
+    "explication_pedagogique": "Donner une identification durable et qualitative.",
+    "points_vigilance": [
+      "respecter dimensions et charte graphique."
+    ]
+  },
+  {
+    "terme": "Euroclass",
+    "definition_courte": "Classement européen de réaction au feu des matériaux.",
+    "exemple_utilisation": "revêtement mural acoustique Euroclass B-s2,d0.",
+    "points_vigilance": [
+      "ne pas remplacer par un produit sans classement équivalent."
+    ]
+  },
+  {
+    "terme": "Exempt de graisse",
+    "definition_courte": "État d'un support sans film gras empêchant l'adhérence.",
+    "exemple_utilisation": "Dans le CCTP, le fond du revêtement mural doit être exempt de toute graisse et poussière.",
+    "points_vigilance": [
+      "dégraisser si nécessaire avant collage."
+    ]
+  },
+  {
+    "terme": "Faïençage",
+    "definition_courte": "Réseau de microfissures en surface d'un enduit, béton ou peinture.",
+    "explication_pedagogique": "Identifier un support fragile ou mal préparé.",
+    "points_vigilance": [
+      "traiter avant finition selon diagnostic."
+    ]
+  },
+  {
+    "terme": "Faïence",
+    "definition_courte": "Revêtement mural carrelé, notamment en salles d'eau et cuisines.",
+    "exemple_utilisation": "Dans le lot peinture, elle intervient comme ouvrage à protéger et nettoyer.",
+    "points_vigilance": [
+      "les raccords peinture/faïence doivent être propres."
+    ]
+  },
+  {
+    "terme": "Farinage",
+    "definition_courte": "Dégradation d'une peinture ou d'un support qui laisse une poudre en surface.",
+    "explication_pedagogique": "Alerter sur un support non recevable en l'état.",
+    "points_vigilance": [
+      "un support farineux doit être fixé, lavé ou préparé avant peinture."
+    ]
+  },
+  {
+    "terme": "Fermeté du fond",
+    "definition_courte": "Capacité d'un support à rester stable et cohésif avant collage ou peinture.",
+    "exemple_utilisation": "Dans le CCTP, le fond pour revêtement mural doit être plat, ferme et sec en permanence.",
+    "points_vigilance": [
+      "un support friable doit être repris avant travaux."
+    ]
+  },
+  {
+    "terme": "Fil à plomb",
+    "definition_courte": "Outil ou méthode permettant de vérifier la verticalité.",
+    "exemple_utilisation": "Dans le CCTP, la pose des revêtements muraux est réglée au fil à plomb.",
+    "points_vigilance": [
+      "important pour éviter des lés de travers."
+    ]
+  },
+  {
+    "terme": "Film de peinture",
+    "definition_courte": "Pellicule formée par la peinture sèche sur le support.",
+    "exemple_utilisation": "Dans la finition C, le film couvre le subjectile sans corriger son état.",
+    "points_vigilance": [
+      "un film trop mince couvre mal ; trop épais, il peut craqueler ou couler."
+    ]
+  },
+  {
+    "terme": "Finition A",
+    "definition_courte": "Niveau de finition élevé où la planéité finale est satisfaisante et les défauts très peu perceptibles.",
+    "explication_pedagogique": "Définir un rendu soigné pour des zones exigeantes.",
+    "points_vigilance": [
+      "plus coûteux et plus préparatoire qu'une finition B."
+    ]
+  },
+  {
+    "terme": "Finition B",
+    "definition_courte": "Niveau de finition courant du CCTP : défauts accidentels corrigés, quelques traces admises.",
+    "exemple_utilisation": "peinture lisse catégorie B, revêtements muraux avec état de finition B.",
+    "points_vigilance": [
+      "c'est souvent le niveau contractuel attendu dans ce lot."
+    ]
+  },
+  {
+    "terme": "Finition C",
+    "definition_courte": "Niveau de finition simple où la peinture couvre sans améliorer réellement l'état du support.",
+    "explication_pedagogique": "Définir un niveau basique de couverture.",
+    "points_vigilance": [
+      "ne pas confondre avec un rendu lisse ou soigné."
+    ]
+  },
+  {
+    "terme": "Finition gouttelette",
+    "definition_courte": "Finition projetée créant un grain fin en surface.",
+    "exemple_utilisation": "plafonds de logements en gouttelette fine.",
+    "points_vigilance": [
+      "masque certains défauts mais doit rester régulière."
+    ]
+  },
+  {
+    "terme": "Finition grain fin",
+    "definition_courte": "Aspect de gouttelette ou revêtement avec texture fine.",
+    "explication_pedagogique": "Obtenir un rendu homogène et peu grossier.",
+    "points_vigilance": [
+      "la régularité de projection est essentielle."
+    ]
+  },
+  {
+    "terme": "Finition lisse",
+    "definition_courte": "Aspect sans relief volontaire, obtenu après préparation soignée du support.",
+    "exemple_utilisation": "murs des pièces humides en peinture lisse.",
+    "points_vigilance": [
+      "la préparation des bandes, joints et ratissages est déterminante."
+    ]
+  },
+  {
+    "terme": "Finition microporeuse",
+    "definition_courte": "Peinture laissant respirer le support tout en le protégeant.",
+    "exemple_utilisation": "peinture sur bois intérieur ou extérieur.",
+    "points_vigilance": [
+      "utile pour le bois, car elle limite les désordres liés à l'humidité emprisonnée."
+    ]
+  },
+  {
+    "terme": "Finition satinée",
+    "definition_courte": "Aspect semi-brillant, lessivable et plus résistant aux frottements.",
+    "exemple_utilisation": "bois, métal, canalisations apparentes.",
+    "points_vigilance": [
+      "nécessite une préparation propre car les défauts ressortent."
+    ]
+  },
+  {
+    "terme": "Finition velours",
+    "definition_courte": "Aspect intermédiaire entre mat et satiné.",
+    "explication_pedagogique": "Concilier rendu doux et meilleure résistance qu'un mat classique.",
+    "exemple_utilisation": "Dans le CCTP, plusieurs produits type AQUARYL VELOUR ou AQUALINE EVO VELOUR sont cités."
+  },
+  {
+    "terme": "Fluage",
+    "definition_courte": "Déformation lente ou phénomène de mouvement dans un matériau ; le terme apparaît dans la préparation de peinture de sol.",
+    "explication_pedagogique": "Alerter sur la nécessité de traiter le support s'il présente des défauts ou mouvements.",
+    "points_vigilance": [
+      "vérifier la fiche technique du système de sol."
+    ]
+  },
+  {
+    "terme": "Fond",
+    "definition_courte": "Support préparé avant peinture, colle ou revêtement mural.",
+    "exemple_utilisation": "le fond doit être plat, ferme, sec, sans graisse ni poussière.",
+    "points_vigilance": [
+      "un bon fond conditionne la qualité finale."
+    ]
+  },
+  {
+    "terme": "Gamme OSAKA",
+    "definition_courte": "Gamme de revêtement mural vinyle MURASPEC citée au CCTP.",
+    "explication_pedagogique": "Traiter les murs des SAS d'entrée avec un revêtement mural décoratif et technique.",
+    "points_vigilance": [
+      "modèle et calepinage à valider par l'architecte."
+    ]
+  },
+  {
+    "terme": "Garde-corps",
+    "definition_courte": "Ouvrage de sécurité contre les chutes, pouvant recevoir une peinture sur métal ou bois selon cas.",
+    "exemple_utilisation": "Dans le CCTP, les garde-corps et mains courantes des escaliers intérieurs sont localisés en peinture métallique.",
+    "points_vigilance": [
+      "vérifier primaire, anticorrosion et finition."
+    ]
+  },
+  {
+    "terme": "Garnissant",
+    "definition_courte": "Caractère d'une peinture capable de couvrir et remplir légèrement le support.",
+    "exemple_utilisation": "peinture de propreté avec une couche de finition garnissante.",
+    "points_vigilance": [
+      "une peinture garnissante ne remplace pas un vrai rebouchage."
+    ]
+  },
+  {
+    "terme": "Glycérophtalique",
+    "definition_courte": "Peinture à base de résines alkydes en solution, traditionnellement utilisée pour métaux et finitions résistantes.",
+    "exemple_utilisation": "Dans le CCTP, elle est citée pour la peinture satinée sur ouvrages métalliques.",
+    "points_vigilance": [
+      "respecter ventilation, temps de séchage et compatibilité."
+    ]
+  },
+  {
+    "terme": "Gouttelette écrasée",
+    "definition_courte": "Finition projetée puis légèrement écrasée pour créer un aspect régulier et moins pointu.",
+    "exemple_utilisation": "Dans le CCTP, elle est prévue sur les murs des pièces sèches des logements.",
+    "points_vigilance": [
+      "l'écrasement doit être homogène sur toute la paroi."
+    ]
+  },
+  {
+    "terme": "Gouttelette fine",
+    "definition_courte": "Finition projetée à grain fin, souvent utilisée sur plafonds.",
+    "exemple_utilisation": "Dans le CCTP, elle est prévue sur les plafonds de l'ensemble des logements.",
+    "points_vigilance": [
+      "le ton demandé est blanc pur."
+    ]
+  },
+  {
+    "terme": "Gouttelette lavable",
+    "definition_courte": "Gouttelette présentant une résistance au nettoyage supérieure à une projection standard.",
+    "explication_pedagogique": "Faciliter l'entretien des surfaces traitées.",
+    "points_vigilance": [
+      "la lavabilité dépend du produit et de son application."
+    ]
+  },
+  {
+    "terme": "Grain",
+    "definition_courte": "Relief ou texture visible d'une peinture projetée, enduit ou revêtement.",
+    "exemple_utilisation": "finition grain fin pour gouttelette.",
+    "points_vigilance": [
+      "un grain irrégulier donne un aspect non professionnel."
+    ]
+  },
+  {
+    "terme": "Grammage",
+    "definition_courte": "Poids d'un revêtement par unité de surface, souvent exprimé en g/m².",
+    "exemple_utilisation": "Dans le CCTP, la toile de verre est indiquée avec un grammage de 230 g/m².",
+    "points_vigilance": [
+      "un grammage différent peut changer résistance et aspect."
+    ]
+  },
+  {
+    "terme": "Grattage",
+    "definition_courte": "Action de retirer dépôts, colles, salissures ou excédents sur un support.",
+    "exemple_utilisation": "nettoyage final des sols et revêtements par grattage, lavage et balayage.",
+    "points_vigilance": [
+      "gratter sans rayer ni détériorer le support."
+    ]
+  },
+  {
+    "terme": "Gravois",
+    "definition_courte": "Déchets de chantier issus des travaux : poussières, emballages, chutes, enduits, protections.",
+    "exemple_utilisation": "Dans le CCTP, l'entreprise doit trier et enlever ses gravois.",
+    "points_vigilance": [
+      "nettoyage journalier et fin de chantier font partie de l'obligation."
+    ]
+  },
+  {
+    "terme": "Huisserie",
+    "definition_courte": "Cadre dormant d'une porte, souvent en bois ou métal.",
+    "exemple_utilisation": "joints acryliques autour des huisseries intérieures et peinture des huisseries métalliques.",
+    "points_vigilance": [
+      "protéger les quincailleries et traiter les raccords proprement."
+    ]
+  },
+  {
+    "terme": "Humidité de construction",
+    "definition_courte": "Humidité encore présente dans un support neuf après construction.",
+    "exemple_utilisation": "Dans le CCTP, le taux d'humidité du fond ne doit pas dépasser 6% pour le revêtement mural acoustique.",
+    "points_vigilance": [
+      "mesurer ou vérifier avant collage."
+    ]
+  },
+  {
+    "terme": "Humidité inférieure à 5%",
+    "definition_courte": "Condition de support sec indiquée pour la peinture de sol.",
+    "explication_pedagogique": "Éviter cloquage, mauvais accrochage ou décollement de la peinture de sol.",
+    "points_vigilance": [
+      "un sol béton trop humide est un risque majeur."
+    ]
+  },
+  {
+    "terme": "HYDROFOND",
+    "definition_courte": "Primaire cité pour la peinture de sol sur béton.",
+    "explication_pedagogique": "Préparer le béton avant la peinture de sol.",
+    "points_vigilance": [
+      "appliquer sur support conforme et suffisamment sec."
+    ]
+  },
+  {
+    "terme": "Hydrophobe",
+    "definition_courte": "Qui repousse l'eau.",
+    "exemple_utilisation": "Dans le CCTP, une peinture extérieure hydrophobe est prévue sur béton.",
+    "points_vigilance": [
+      "utile pour limiter la pénétration d'eau dans les supports extérieurs."
+    ]
+  },
+  {
+    "terme": "Imprégnation",
+    "definition_courte": "Couche pénétrante appliquée dans le support, notamment sur bois d'escalier.",
+    "exemple_utilisation": "Dans le CCTP, une couche d'imprégnation est prévue avant vitrification des marches et contre-marches.",
+    "points_vigilance": [
+      "elle prépare le bois et améliore le rendu final."
+    ]
+  },
+  {
+    "terme": "Impression",
+    "definition_courte": "Couche préparatoire appliquée avant peinture ou revêtement.",
+    "exemple_utilisation": "impression d'uniformisation avant toile de verre ou revêtement vinyle.",
+    "points_vigilance": [
+      "choisir l'impression selon support plâtre, béton, bois ou métal."
+    ]
+  },
+  {
+    "terme": "Impression d'uniformisation",
+    "definition_courte": "Couche destinée à homogénéiser l'aspect ou l'absorption du support.",
+    "exemple_utilisation": "Dans le CCTP, elle est prévue avant la toile de verre.",
+    "points_vigilance": [
+      "elle évite les différences d'absorption visibles en finition."
+    ]
+  },
+  {
+    "terme": "Impression sur les 4 faces",
+    "definition_courte": "Application de l'impression sur toutes les faces d'un élément bois.",
+    "exemple_utilisation": "ouvrages intérieurs et extérieurs en bois.",
+    "points_vigilance": [
+      "oublier la face cachée peut favoriser déformation, humidité ou finition incomplète."
+    ]
+  },
+  {
+    "terme": "Joint acrylique",
+    "definition_courte": "Mastic de finition pouvant être peint, utilisé en raccord entre deux ouvrages.",
+    "exemple_utilisation": "Dans le CCTP, il est prévu autour de menuiseries, trappes, huisseries et habillages.",
+    "points_vigilance": [
+      "il sert à obtenir une finition impeccable avant peinture."
+    ]
+  },
+  {
+    "terme": "Joint horizontal",
+    "definition_courte": "Joint entre deux lés ou revêtements posé horizontalement.",
+    "exemple_utilisation": "Dans le CCTP, aucun joint horizontal n'est admis dans la hauteur d'un lé.",
+    "points_vigilance": [
+      "respecter cette règle de pose pour les revêtements muraux."
+    ]
+  },
+  {
+    "terme": "Joint ouvert",
+    "definition_courte": "Joint qui laisse apparaître un espace entre deux lés ou éléments.",
+    "exemple_utilisation": "Dans le CCTP, tout joint ouvert est refusé.",
+    "points_vigilance": [
+      "c'est un défaut de finition important."
+    ]
+  },
+  {
+    "terme": "KALIT ULTRA",
+    "definition_courte": "Produit cité pour la peinture extérieure sur béton.",
+    "explication_pedagogique": "Appliquer une impression et finition sur sous-faces, rives, loggias ou poteaux béton.",
+    "points_vigilance": [
+      "vérifier la compatibilité avec béton neuf extérieur."
+    ]
+  },
+  {
+    "terme": "Label NF Environnement",
+    "definition_courte": "Label environnemental mentionné pour certaines impressions et peintures.",
+    "explication_pedagogique": "Garantir un niveau d'exigence environnementale du produit.",
+    "points_vigilance": [
+      "conserver les fiches techniques pour le DOE si demandé."
+    ]
+  },
+  {
+    "terme": "Laque antirouille",
+    "definition_courte": "Peinture de finition destinée à protéger le métal contre la corrosion.",
+    "exemple_utilisation": "UNILOX FER BRILLANT sur ouvrages métalliques ou canalisations selon CCTP.",
+    "points_vigilance": [
+      "appliquer sur primaire compatible et support préparé."
+    ]
+  },
+  {
+    "terme": "Lavage",
+    "definition_courte": "Nettoyage à l'eau ou avec produit adapté en cours ou fin de chantier.",
+    "exemple_utilisation": "nettoyage des revêtements de sols, carrelages, sanitaires ou vitrages.",
+    "points_vigilance": [
+      "choisir un produit compatible avec chaque surface."
+    ]
+  },
+  {
+    "terme": "Lé",
+    "definition_courte": "Bande verticale ou horizontale de revêtement mural ou vinyle posée sur un mur.",
+    "exemple_utilisation": "revêtement mural MURASPEC en lés de largeur 130 cm.",
+    "points_vigilance": [
+      "limiter le nombre de joints et éviter les lés coupés multiples."
+    ]
+  },
+  {
+    "terme": "Lessivage",
+    "definition_courte": "Nettoyage en profondeur avec solution adaptée, souvent avant peinture ou en nettoyage final.",
+    "exemple_utilisation": "carrelages, plinthes et faïences nettoyés par grattage et lessivage.",
+    "points_vigilance": [
+      "bien rincer et laisser sécher si le support doit être peint."
+    ]
+  },
+  {
+    "terme": "Liseré clair",
+    "definition_courte": "Fine ligne claire visible au niveau d'un joint de revêtement de teinte soutenue.",
+    "exemple_utilisation": "Dans le CCTP, il est toléré dans certains cas de revêtements de teinte soutenue.",
+    "points_vigilance": [
+      "cela ne doit pas masquer un joint ouvert."
+    ]
+  },
+  {
+    "terme": "Local OM",
+    "definition_courte": "Local ordures ménagères, aussi appelé local poubelles.",
+    "exemple_utilisation": "Dans le CCTP peinture, il est concerné par peinture de propreté, signalétique et nettoyage.",
+    "points_vigilance": [
+      "locaux techniques et OM sont souvent exposés aux salissures."
+    ]
+  },
+  {
+    "terme": "Locaux vélos",
+    "definition_courte": "Locaux communs destinés au stationnement des vélos.",
+    "exemple_utilisation": "Dans le CCTP, les murs et sols des locaux vélos reçoivent des traitements de peinture et nettoyage.",
+    "points_vigilance": [
+      "prévoir résistance et propreté d'usage."
+    ]
+  },
+  {
+    "terme": "Loggias",
+    "definition_courte": "Espaces extérieurs couverts ou en retrait de façade.",
+    "exemple_utilisation": "sous-faces et rives de balcons et loggias en peinture extérieure sur béton.",
+    "points_vigilance": [
+      "supports exposés aux intempéries et variations de température."
+    ]
+  },
+  {
+    "terme": "Mains courantes",
+    "definition_courte": "Éléments d'appui dans les escaliers, souvent métalliques ou bois.",
+    "exemple_utilisation": "Dans le CCTP, les mains courantes métalliques des escaliers intérieurs reçoivent une peinture satinée.",
+    "points_vigilance": [
+      "protection antirouille et résistance aux manipulations."
+    ]
+  },
+  {
+    "terme": "Maître d'ouvrage",
+    "definition_courte": "Client ou donneur d'ordre de l'opération.",
+    "exemple_utilisation": "Gironde Habitat choisit ou valide des teintes et éléments de signalétique avec la maîtrise d'œuvre.",
+    "points_vigilance": [
+      "respecter sa charte et ses exigences."
+    ]
+  },
+  {
+    "terme": "Maître d'œuvre",
+    "definition_courte": "Professionnel chargé de concevoir et contrôler la conformité des travaux.",
+    "exemple_utilisation": "Dans le CCTP, il valide les teintes, aspects, décors, échantillons et certains calepinages.",
+    "points_vigilance": [
+      "ne pas modifier un produit ou un rendu sans son accord."
+    ]
+  },
+  {
+    "terme": "Mastic",
+    "definition_courte": "Produit souple utilisé pour joints, calfeutrements ou raccords.",
+    "exemple_utilisation": "joint acrylique avant peinture ou joints de finition autour des ouvrages.",
+    "points_vigilance": [
+      "choisir un mastic compatible avec peinture et support."
+    ]
+  },
+  {
+    "terme": "Mat velouté",
+    "definition_courte": "Aspect de peinture avec faible brillance et rendu doux.",
+    "exemple_utilisation": "Dans le CCTP, l'aspect mat velouté apparaît pour peinture extérieure sur béton.",
+    "points_vigilance": [
+      "la préparation reste importante même avec un aspect peu brillant."
+    ]
+  },
+  {
+    "terme": "Menuiseries extérieures",
+    "definition_courte": "Fenêtres, portes-fenêtres ou portes extérieures à protéger et nettoyer.",
+    "exemple_utilisation": "Dans le lot peinture, elles sont concernées par joints acryliques sur les 4 côtés et nettoyage final.",
+    "points_vigilance": [
+      "ne pas peindre ou salir les joints et quincailleries."
+    ]
+  },
+  {
+    "terme": "Menuiseries intérieures",
+    "definition_courte": "Portes, trappes, plinthes, cadres et éléments bois intérieurs pouvant être peints.",
+    "exemple_utilisation": "portes palières, trappes de gaines techniques, encadrements de miroirs.",
+    "points_vigilance": [
+      "coordonner avec le lot menuiserie pour supports et états de livraison."
+    ]
+  },
+  {
+    "terme": "Microporeux",
+    "definition_courte": "Caractère d'une peinture laissant passer la vapeur d'eau tout en protégeant le support.",
+    "explication_pedagogique": "Très utile pour les bois intérieurs et extérieurs.",
+    "points_vigilance": [
+      "ne pas bloquer l'humidité dans le bois."
+    ]
+  },
+  {
+    "terme": "Miroirs",
+    "definition_courte": "Équipements à nettoyer et dont l'encadrement peut être peint.",
+    "exemple_utilisation": "Dans le CCTP, les encadrements de miroirs des halls sont en peinture sur bois, et les miroirs sont nettoyés à la livraison.",
+    "points_vigilance": [
+      "protéger les surfaces vitrées pendant peinture."
+    ]
+  },
+  {
+    "terme": "Monobrosse",
+    "definition_courte": "Machine de nettoyage des sols utilisée avec produit adapté.",
+    "exemple_utilisation": "Dans le CCTP nettoyage, les sols des logements peuvent être nettoyés à la monobrosse.",
+    "points_vigilance": [
+      "utiliser une brosse ou disque compatible avec le revêtement."
+    ]
+  },
+  {
+    "terme": "MURASPEC",
+    "definition_courte": "Marque citée pour le revêtement mural en vinyle des SAS d'entrée.",
+    "explication_pedagogique": "Apporter un revêtement mural décoratif et résistant dans des zones de passage.",
+    "points_vigilance": [
+      "respecter DTU 59.4 et prescriptions fabricant."
+    ]
+  },
+  {
+    "terme": "Netteté des arêtes",
+    "definition_courte": "Qualité d'une limite ou d'un angle peint propre, sans bavure ni surépaisseur.",
+    "explication_pedagogique": "Donner un rendu professionnel aux raccords et angles.",
+    "points_vigilance": [
+      "utiliser protections, rubans et reprises adaptées."
+    ]
+  },
+  {
+    "terme": "Nettoyage complet",
+    "definition_courte": "Nettoyage général prévu avant pré-réception et livraison.",
+    "exemple_utilisation": "Dans le CCTP, le nettoyage est prévu en trois phases : OPR, pré-réceptions et livraison.",
+    "points_vigilance": [
+      "il couvre sols, vitrages, sanitaires, VMC, appareillages, menuiseries et parties communes."
+    ]
+  },
+  {
+    "terme": "Nettoyage journalier",
+    "definition_courte": "Nettoyage réalisé au fur et à mesure des travaux.",
+    "explication_pedagogique": "Maintenir le chantier propre et éviter d'abîmer les ouvrages terminés.",
+    "points_vigilance": [
+      "souvent contrôlé en réunion de chantier."
+    ]
+  },
+  {
+    "terme": "NF Environnement",
+    "definition_courte": "Label cité pour certaines impressions et peintures.",
+    "explication_pedagogique": "Justifier une qualité environnementale conforme aux prescriptions du marché.",
+    "points_vigilance": [
+      "conserver les références et fiches techniques."
+    ]
+  },
+  {
+    "terme": "NF T 30-608",
+    "definition_courte": "Norme citée pour les enduits de peinture pour travaux intérieurs.",
+    "explication_pedagogique": "Encadrer les caractéristiques des enduits utilisés en préparation.",
+    "points_vigilance": [
+      "respecter les normes même si elles ne sont pas toutes détaillées dans le CCTP."
+    ]
+  },
+  {
+    "terme": "NF T 36-005",
+    "definition_courte": "Norme citée pour la classification des peintures, vernis et produits connexes.",
+    "explication_pedagogique": "Classer et identifier correctement les produits de peinture.",
+    "points_vigilance": [
+      "base réglementaire du lot peinture."
+    ]
+  },
+  {
+    "terme": "NRA",
+    "definition_courte": "Nouvelle Réglementation Acoustique.",
+    "exemple_utilisation": "Dans le CCTP, elle est citée avec l'arrêté du 30 juin 1999 relatif aux caractéristiques acoustiques des bâtiments d'habitation.",
+    "points_vigilance": [
+      "certains revêtements peuvent participer à l'acoustique ou ne pas la dégrader."
+    ]
+  },
+  {
+    "terme": "Nuancier",
+    "definition_courte": "Catalogue de teintes disponible chez un fabricant.",
+    "exemple_utilisation": "couleur au choix de l'architecte selon nuancier pour peinture de sol.",
+    "points_vigilance": [
+      "toujours faire valider la référence exacte."
+    ]
+  },
+  {
+    "terme": "OPR",
+    "definition_courte": "Opérations Préalables à la Réception.",
+    "exemple_utilisation": "Dans le CCTP, un nettoyage partiel est prévu pour les OPR.",
+    "points_vigilance": [
+      "les OPR servent à relever les réserves avant réception."
+    ]
+  },
+  {
+    "terme": "Panneau d'indication",
+    "definition_courte": "Élément de signalétique indiquant l'organisation des bâtiments aux entrées de résidence.",
+    "exemple_utilisation": "panneaux 60 x 80 cm prévus aux entrées selon CCTP.",
+    "points_vigilance": [
+      "respecter charte, emplacement et lisibilité."
+    ]
+  },
+  {
+    "terme": "Papier peint",
+    "definition_courte": "Revêtement mural couvert par le DTU 59.4, même si le CCTP vise surtout revêtements muraux techniques.",
+    "explication_pedagogique": "Comprendre le domaine de référence des revêtements muraux collés.",
+    "points_vigilance": [
+      "appliquer les règles de pose des lés et joints."
+    ]
+  },
+  {
+    "terme": "Paroi",
+    "definition_courte": "Surface verticale ou horizontale recevant peinture ou revêtement : mur, plafond, poteau, sous-face.",
+    "explication_pedagogique": "Identifier le support et son traitement spécifique.",
+    "points_vigilance": [
+      "chaque paroi peut avoir une finition différente selon plans."
+    ]
+  },
+  {
+    "terme": "Peinture acrylique",
+    "definition_courte": "Peinture à l'eau à base de résines acryliques.",
+    "exemple_utilisation": "peinture lisse UNIKALO ou équivalent sur pièces humides.",
+    "points_vigilance": [
+      "elle demande un support préparé, propre et sec."
+    ]
+  },
+  {
+    "terme": "Peinture de propreté",
+    "definition_courte": "Peinture simple destinée à rendre un local propre et présentable, sans finition décorative poussée.",
+    "exemple_utilisation": "Dans le CCTP, elle concerne notamment les murs des locaux vélos et poubelles.",
+    "points_vigilance": [
+      "ce n'est pas une peinture technique de sol ou forte sollicitation."
+    ]
+  },
+  {
+    "terme": "Peinture de sol",
+    "definition_courte": "Peinture spécifique appliquée sur béton pour résister au passage et à l'usure.",
+    "exemple_utilisation": "locaux vélos avec primaire HYDROFOND et peinture UNIKOSOL MONCRYL.",
+    "points_vigilance": [
+      "support sec, propre et préparé obligatoire."
+    ]
+  },
+  {
+    "terme": "Peinture extérieure",
+    "definition_courte": "Peinture utilisée sur supports exposés aux intempéries ou à l'extérieur.",
+    "exemple_utilisation": "peinture pliolite mate sur béton ou peinture microporeuse sur bois extérieur.",
+    "points_vigilance": [
+      "les produits doivent être adaptés à l'exposition."
+    ]
+  },
+  {
+    "terme": "Peinture gouttelette",
+    "definition_courte": "Finition projetée en gouttes fines sur support préparé.",
+    "exemple_utilisation": "plafonds en gouttelette fine et murs secs en gouttelette écrasée.",
+    "points_vigilance": [
+      "uniformité de projection et protection des ouvrages voisins."
+    ]
+  },
+  {
+    "terme": "Peinture hydrophobe",
+    "definition_courte": "Peinture qui limite la pénétration de l'eau dans le support.",
+    "exemple_utilisation": "Dans le CCTP, elle est prévue sur ouvrages extérieurs neufs en béton.",
+    "points_vigilance": [
+      "utile pour rives, sous-faces et poteaux exposés."
+    ]
+  },
+  {
+    "terme": "Peinture lisse",
+    "definition_courte": "Système de peinture sans relief volontaire, avec préparation plus soignée.",
+    "exemple_utilisation": "Dans le CCTP, elle est prévue sur les murs des pièces humides : salles de bain, cuisines et WC.",
+    "points_vigilance": [
+      "le support doit être bien poncé, ratissé si nécessaire, et imprimé."
+    ]
+  },
+  {
+    "terme": "Peinture pliolite",
+    "definition_courte": "Peinture de façade ou extérieure à base de résine pliolite, réputée pour son adhérence sur supports minéraux.",
+    "exemple_utilisation": "Dans le CCTP, une peinture pliolite mate est prévue sur ouvrages extérieurs neufs en béton.",
+    "points_vigilance": [
+      "vérifier compatibilité avec béton neuf et conditions météo d'application."
+    ]
+  },
+  {
+    "terme": "Peinture satinée sur bois",
+    "definition_courte": "Finition pour ouvrages bois intérieurs ou extérieurs.",
+    "exemple_utilisation": "plinthes, portes palières, trappes, charpente apparente sous carports.",
+    "points_vigilance": [
+      "impression des 4 faces et préparation du bois."
+    ]
+  },
+  {
+    "terme": "Peinture satinée sur métal",
+    "definition_courte": "Finition appliquée sur ouvrages métalliques après primaire adapté.",
+    "exemple_utilisation": "portes et huisseries métalliques, garde-corps et mains courantes.",
+    "points_vigilance": [
+      "le traitement antirouille est indispensable."
+    ]
+  },
+  {
+    "terme": "PER",
+    "definition_courte": "Polyéthylène réticulé, tube plastique utilisé en plomberie.",
+    "exemple_utilisation": "Dans le CCTP peinture, les canalisations apparentes en PER peuvent recevoir une finition selon localisation.",
+    "points_vigilance": [
+      "les préparations ne sont pas les mêmes que sur cuivre ou acier."
+    ]
+  },
+  {
+    "terme": "Phase aqueuse",
+    "definition_courte": "Produit dont le diluant principal est l'eau.",
+    "exemple_utilisation": "peinture extérieure hydrophobe et microporeuse en phase aqueuse.",
+    "points_vigilance": [
+      "moins odorant mais nécessite conditions de température et support adaptées."
+    ]
+  },
+  {
+    "terme": "Pièce humide",
+    "definition_courte": "Pièce exposée à l'humidité : salle de bain, cuisine, WC.",
+    "exemple_utilisation": "Dans le CCTP, les murs de ces pièces reçoivent une peinture lisse.",
+    "points_vigilance": [
+      "utiliser des produits compatibles avec l'humidité."
+    ]
+  },
+  {
+    "terme": "Pièce sèche",
+    "definition_courte": "Pièce non exposée fortement à l'eau, comme séjour, chambre ou dégagement sec.",
+    "exemple_utilisation": "Dans le CCTP, les murs des pièces sèches reçoivent une gouttelette écrasée fine.",
+    "points_vigilance": [
+      "ne pas appliquer automatiquement la même finition partout."
+    ]
+  },
+  {
+    "terme": "Pigment au phosphate de zinc",
+    "definition_courte": "Composant anticorrosion utilisé dans certains primaires pour métal.",
+    "exemple_utilisation": "Dans le CCTP, PROTECPRIM est cité comme primaire pigmenté au phosphate de zinc.",
+    "points_vigilance": [
+      "respecter le système complet primaire + finition."
+    ]
+  },
+  {
+    "terme": "Plafond gouttelette",
+    "definition_courte": "Plafond recevant une projection de gouttelette fine.",
+    "exemple_utilisation": "Dans le CCTP, cela concerne les plafonds de l'ensemble des logements.",
+    "points_vigilance": [
+      "la projection doit être homogène et blanche."
+    ]
+  },
+  {
+    "terme": "Planéité",
+    "definition_courte": "Degré de régularité d'une surface.",
+    "exemple_utilisation": "Dans le CCTP, une règle de 2 m ne doit pas faire apparaître plus de 5 mm de différence pour certains revêtements.",
+    "points_vigilance": [
+      "la peinture ne corrige pas une mauvaise planéité."
+    ]
+  },
+  {
+    "terme": "Plaque adhésive PVC",
+    "definition_courte": "Support de signalétique collé, souvent utilisé dans les parties communes.",
+    "exemple_utilisation": "signalétique des communs selon charte Gironde Habitat.",
+    "points_vigilance": [
+      "format, texte et emplacement doivent être validés."
+    ]
+  },
+  {
+    "terme": "Plaque de plâtre",
+    "definition_courte": "Support intérieur courant pour peinture, gouttelette ou revêtement mural.",
+    "exemple_utilisation": "plafonds et murs de logements avant impression et finition.",
+    "points_vigilance": [
+      "traiter bandes, vis, ponçage et poussière avant peinture."
+    ]
+  },
+  {
+    "terme": "Plinthe",
+    "definition_courte": "Élément bas de mur, bois ou autre, recevant peinture ou nettoyage selon cas.",
+    "exemple_utilisation": "plinthes droites ou plinthes à crémaillère en peinture satinée sur bois.",
+    "points_vigilance": [
+      "traiter dessus, chants et raccords."
+    ]
+  },
+  {
+    "terme": "Pliolite",
+    "definition_courte": "Résine utilisée dans certaines peintures extérieures.",
+    "explication_pedagogique": "Assurer une bonne tenue sur supports minéraux extérieurs.",
+    "points_vigilance": [
+      "respecter support sec, température et fiche technique."
+    ]
+  },
+  {
+    "terme": "Ponçage",
+    "definition_courte": "Action d'abraser légèrement le support avec papier abrasif pour lisser ou préparer.",
+    "exemple_utilisation": "ponçage des bandes avant peinture lisse ou ponçage des escaliers avant vitrification.",
+    "points_vigilance": [
+      "toujours dépoussiérer après ponçage."
+    ]
+  },
+  {
+    "terme": "Ponçage grains 80 > 100 > 120",
+    "definition_courte": "Suite de ponçages du plus gros au plus fin, citée pour les escaliers bois.",
+    "explication_pedagogique": "Préparer progressivement les marches avant imprégnation et vitrification.",
+    "points_vigilance": [
+      "ne pas sauter les étapes si le bois est brut ou marqué."
+    ]
+  },
+  {
+    "terme": "Porte palière",
+    "definition_courte": "Porte d'entrée d'un logement collectif donnant sur une circulation commune.",
+    "exemple_utilisation": "Dans le CCTP, les portes palières sont peintes sur les deux faces en peinture satinée sur bois.",
+    "points_vigilance": [
+      "vérifier faces, chants et protection de la quincaillerie."
+    ]
+  },
+  {
+    "terme": "Poteau béton",
+    "definition_courte": "Élément vertical en béton pouvant recevoir une peinture extérieure.",
+    "exemple_utilisation": "Dans le CCTP, les poteaux béton des bâtiments collectifs sont localisés en peinture pliolite mate.",
+    "points_vigilance": [
+      "préparation béton et conditions extérieures."
+    ]
+  },
+  {
+    "terme": "Poteau d'about",
+    "definition_courte": "Élément de finition en bout de cloison, souvent à peindre.",
+    "exemple_utilisation": "Dans le CCTP, il est concerné par la peinture bois et les joints acryliques.",
+    "points_vigilance": [
+      "c'est une petite pièce mais très visible en finition."
+    ]
+  },
+  {
+    "terme": "Pré-réception",
+    "definition_courte": "Contrôle avant réception finale permettant de vérifier l'état d'achèvement.",
+    "exemple_utilisation": "Dans le CCTP, un nettoyage complet est prévu pour les pré-réceptions.",
+    "points_vigilance": [
+      "les finitions peinture doivent être propres et retouchées avant cette étape."
+    ]
+  },
+  {
+    "terme": "Préparation des supports",
+    "definition_courte": "Ensemble des opérations avant finition : brossage, égrenage, rebouchage, ponçage, ratissage, dépoussiérage.",
+    "explication_pedagogique": "Assurer l'adhérence et la qualité esthétique.",
+    "points_vigilance": [
+      "c'est souvent la partie la plus importante du lot peinture."
+    ]
+  },
+  {
+    "terme": "Primaire",
+    "definition_courte": "Couche technique d'accrochage ou de protection appliquée avant finition.",
+    "exemple_utilisation": "PROTECPRIM sur métal, HYDROFOND sur sol béton.",
+    "points_vigilance": [
+      "le primaire doit être compatible avec le support et la finition."
+    ]
+  },
+  {
+    "terme": "PROTECPRIM",
+    "definition_courte": "Primaire à séchage rapide cité pour métal et canalisations apparentes.",
+    "explication_pedagogique": "Préparer et protéger le support avant laque antirouille.",
+    "points_vigilance": [
+      "il est pigmenté au phosphate de zinc dans le CCTP."
+    ]
+  },
+  {
+    "terme": "Protection collective",
+    "definition_courte": "Dispositifs de sécurité pour protéger les travailleurs et tiers sur chantier.",
+    "exemple_utilisation": "Dans le CCTP, les échafaudages et protections collectives nécessaires sont à prévoir par l'entreprise.",
+    "points_vigilance": [
+      "ne pas confondre avec simple protection des ouvrages."
+    ]
+  },
+  {
+    "terme": "Protection des ouvrages",
+    "definition_courte": "Mise en place de bâches, films, cartons ou protections pour ne pas salir ou abîmer les ouvrages déjà posés.",
+    "exemple_utilisation": "sanitaires, carrelages, menuiseries et appareillages électriques.",
+    "points_vigilance": [
+      "le peintre intervient souvent en fin de chantier, donc il doit protéger les autres lots."
+    ]
+  },
+  {
+    "terme": "PVC",
+    "definition_courte": "Matière plastique utilisée pour tuyaux, étiquettes, plaques ou baguettes.",
+    "exemple_utilisation": "Dans le CCTP, on retrouve PVC pour canalisations, étiquettes et signalétique.",
+    "points_vigilance": [
+      "la peinture sur PVC nécessite une préparation adaptée."
+    ]
+  },
+  {
+    "terme": "Ratissage",
+    "definition_courte": "Application d'un enduit mince sur toute la surface pour lisser le support.",
+    "exemple_utilisation": "ratissage des voiles béton avant peinture lisse ou revêtement mural.",
+    "points_vigilance": [
+      "le ratissage améliore le rendu mais demande ponçage et dépoussiérage."
+    ]
+  },
+  {
+    "terme": "Rebouchage",
+    "definition_courte": "Remplissage de trous, défauts ou petites reprises avant finition.",
+    "exemple_utilisation": "rebouchage éventuel sur plaques de plâtre cartonnées.",
+    "points_vigilance": [
+      "le rebouchage doit être poncé et sec avant impression."
+    ]
+  },
+  {
+    "terme": "Réception des subjectiles",
+    "definition_courte": "Acceptation des supports avant démarrage des travaux de peinture ou revêtement.",
+    "explication_pedagogique": "Vérifier que les surfaces sont aptes à recevoir les finitions.",
+    "points_vigilance": [
+      "commencer les travaux vaut souvent acceptation du support."
+    ]
+  },
+  {
+    "terme": "Réglage au fil à plomb",
+    "definition_courte": "Contrôle de verticalité lors de la pose d'un revêtement mural.",
+    "explication_pedagogique": "Poser les lés droits et éviter les dérives de motif ou joint.",
+    "points_vigilance": [
+      "surtout important dans les zones visibles comme halls et SAS."
+    ]
+  },
+  {
+    "terme": "Réglet de 20 cm",
+    "definition_courte": "Petit outil de contrôle de planéité locale.",
+    "exemple_utilisation": "Dans le CCTP, il ne doit pas faire apparaître plus de 1 mm de différence pour certains revêtements.",
+    "points_vigilance": [
+      "contrôle plus fin que la règle de 2 m."
+    ]
+  },
+  {
+    "terme": "Remise en état",
+    "definition_courte": "Travaux de correction ou nettoyage après dégradation, salissure ou intervention.",
+    "exemple_utilisation": "Dans le CCTP, l'entreprise doit protéger les ouvrages et assurer les remises en état.",
+    "points_vigilance": [
+      "une mauvaise protection peut coûter cher en reprises."
+    ]
+  },
+  {
+    "terme": "Remise en jeu des menuiseries",
+    "definition_courte": "Réglage ou ajustement des portes après pose, pouvant abîmer les finitions.",
+    "exemple_utilisation": "Dans le CCTP, le peintre doit les retouches consécutives à cette remise en jeu.",
+    "points_vigilance": [
+      "prévoir les retouches en fin de chantier."
+    ]
+  },
+  {
+    "terme": "Résine",
+    "definition_courte": "Liant principal d'une peinture, influençant adhérence, résistance et aspect.",
+    "exemple_utilisation": "résine acrylique, alkyde, glycérophtalique ou pliolite.",
+    "points_vigilance": [
+      "choisir la résine adaptée au support et à l'environnement."
+    ]
+  },
+  {
+    "terme": "Résine alkyde",
+    "definition_courte": "Résine utilisée pour des peintures de finition résistantes, souvent sur métal ou bois.",
+    "exemple_utilisation": "Dans le CCTP, elle apparaît dans les peintures lisses et laques antirouille.",
+    "points_vigilance": [
+      "suivre les prescriptions fabricant."
+    ]
+  },
+  {
+    "terme": "Retouche",
+    "definition_courte": "Petite reprise de peinture après choc, réglage, salissure ou intervention d'un autre lot.",
+    "exemple_utilisation": "Dans le CCTP, les retouches après remise en jeu des menuiseries sont dues.",
+    "points_vigilance": [
+      "conserver les références exactes de teinte et produit."
+    ]
+  },
+  {
+    "terme": "Revêtement mural acoustique",
+    "definition_courte": "Revêtement mural technique participant au confort acoustique ou au traitement des parois.",
+    "exemple_utilisation": "Dans le CCTP, un vinyle MURASPEC gamme OSAKA est prévu dans les SAS d'entrée.",
+    "points_vigilance": [
+      "respecter calepinage, collage, support sec et classement feu."
+    ]
+  },
+  {
+    "terme": "Revêtement mural vinyle",
+    "definition_courte": "Revêtement de mur en vinyle collé, décoratif et résistant.",
+    "exemple_utilisation": "MURASPEC dans les SAS d'entrée des bâtiments A et B.",
+    "points_vigilance": [
+      "le fond doit être plat, ferme, sec et propre."
+    ]
+  },
+  {
+    "terme": "Rives de balcons",
+    "definition_courte": "Bords ou retombées de balcons pouvant recevoir une peinture extérieure.",
+    "exemple_utilisation": "Dans le CCTP, elles sont localisées en peinture pliolite mate sur béton.",
+    "points_vigilance": [
+      "zone exposée, nécessitant produit extérieur adapté."
+    ]
+  },
+  {
+    "terme": "Salles de bain",
+    "definition_courte": "Pièces humides recevant peinture lisse sur les zones prévues hors faïence selon plans.",
+    "exemple_utilisation": "Dans la variante, certaines peintures lisses intérieures peuvent être supprimées en moins-value.",
+    "points_vigilance": [
+      "croiser avec faïence, PMR et plans."
+    ]
+  },
+  {
+    "terme": "SAS d'entrée",
+    "definition_courte": "Espace tampon à l'entrée d'un bâtiment collectif.",
+    "exemple_utilisation": "Dans le CCTP, les murs des SAS reçoivent un revêtement mural acoustique toute hauteur.",
+    "points_vigilance": [
+      "zone très visible et sollicitée."
+    ]
+  },
+  {
+    "terme": "Séchage",
+    "definition_courte": "Temps nécessaire entre application et recouvrement ou mise en service.",
+    "explication_pedagogique": "Éviter cloques, marques, arrachements ou mauvais durcissement.",
+    "points_vigilance": [
+      "température, humidité et ventilation influencent le séchage."
+    ]
+  },
+  {
+    "terme": "Signalétique",
+    "definition_courte": "Ensemble des plaques, étiquettes, numéros et panneaux d'information.",
+    "exemple_utilisation": "Dans le lot peinture, elle concerne logements, locaux, boîtes aux lettres, gaines et communs.",
+    "points_vigilance": [
+      "elle doit suivre la charte graphique de Gironde Habitat."
+    ]
+  },
+  {
+    "terme": "Sous-face",
+    "definition_courte": "Face inférieure d'un ouvrage : balcon, escalier, plafond, élément bois ou béton.",
+    "exemple_utilisation": "sous-faces visibles d'escalier bois, sous-faces de balcons en peinture extérieure.",
+    "points_vigilance": [
+      "souvent oubliée si elle n'est pas clairement repérée."
+    ]
+  },
+  {
+    "terme": "Subjectile",
+    "definition_courte": "Support sur lequel on applique peinture, enduit, colle ou revêtement.",
+    "exemple_utilisation": "plaque de plâtre, béton, bois, métal, PVC, cuivre.",
+    "points_vigilance": [
+      "le mot est très important en peinture ; le traitement dépend du subjectile."
+    ]
+  },
+  {
+    "terme": "Support sec",
+    "definition_courte": "Support dont l'humidité est compatible avec l'application prévue.",
+    "exemple_utilisation": "peinture de sol sur support sec avec humidité inférieure à 5%.",
+    "points_vigilance": [
+      "un support humide peut provoquer cloquage et décollement."
+    ]
+  },
+  {
+    "terme": "Surface témoin",
+    "definition_courte": "Zone échantillon conservée pour comparer la qualité finale.",
+    "explication_pedagogique": "Servir de référence pendant les contrôles.",
+    "points_vigilance": [
+      "obtenir l'accord de la maîtrise d'œuvre avant généralisation."
+    ]
+  },
+  {
+    "terme": "Système de peinture",
+    "definition_courte": "Ensemble cohérent primaire + impression + couches de finition + préparation.",
+    "exemple_utilisation": "primaire PROTECPRIM puis 2 couches de laque antirouille.",
+    "points_vigilance": [
+      "changer un seul produit peut remettre en cause la compatibilité du système."
+    ]
+  },
+  {
+    "terme": "Tablier de volet roulant",
+    "definition_courte": "Partie mobile du volet roulant, à nettoyer en fin de chantier selon le CCTP nettoyage.",
+    "explication_pedagogique": "Ne pas oublier les éléments visibles côté intérieur et extérieur.",
+    "points_vigilance": [
+      "ne pas rayer ni déformer les lames."
+    ]
+  },
+  {
+    "terme": "Teinte",
+    "definition_courte": "Couleur exacte retenue pour une peinture ou un revêtement.",
+    "exemple_utilisation": "Dans le CCTP, les teintes sont au choix de l'architecte et du maître d'ouvrage.",
+    "points_vigilance": [
+      "toujours noter la référence pour les retouches."
+    ]
+  },
+  {
+    "terme": "Température de fond",
+    "definition_courte": "Température du support avant application ou collage.",
+    "exemple_utilisation": "Dans le CCTP, le fond du revêtement mural doit être à 10°C minimum.",
+    "points_vigilance": [
+      "un support trop froid peut empêcher une bonne adhérence."
+    ]
+  },
+  {
+    "terme": "Toile de verre",
+    "definition_courte": "Revêtement en fibre de verre collé sur mur puis peint.",
+    "exemple_utilisation": "Dans le CCTP, elle est prévue dans les circulations communes des bâtiments A et B.",
+    "points_vigilance": [
+      "grammage, classement feu, angles et peinture de finition sont à contrôler."
+    ]
+  },
+  {
+    "terme": "Ton blanc pur",
+    "definition_courte": "Couleur blanche demandée pour les finitions gouttelette du CCTP.",
+    "explication_pedagogique": "Garantir un rendu clair et homogène dans les logements.",
+    "points_vigilance": [
+      "éviter les différences de blanc entre zones reprises."
+    ]
+  },
+  {
+    "terme": "Trace d'outil",
+    "definition_courte": "Marque visible laissée par rouleau, spatule, couteau, brosse ou raclette.",
+    "exemple_utilisation": "Dans les finitions A/B/C, la tolérance aux traces d'outils est encadrée.",
+    "points_vigilance": [
+      "une finition B admet quelques traces, mais pas un rendu négligé."
+    ]
+  },
+  {
+    "terme": "Traitement antirouille",
+    "definition_courte": "Protection contre la corrosion des supports métalliques.",
+    "exemple_utilisation": "primaire au phosphate de zinc et laque antirouille sur métal.",
+    "points_vigilance": [
+      "les ouvrages métalliques doivent être révisés avant finition."
+    ]
+  },
+  {
+    "terme": "Travaux préparatoires",
+    "definition_courte": "Opérations avant application : nettoyage, ponçage, rebouchage, impression, ratissage.",
+    "explication_pedagogique": "Conditionner l'aspect et la durabilité de la finition.",
+    "points_vigilance": [
+      "en peinture, la préparation compte autant que la couche finale."
+    ]
+  },
+  {
+    "terme": "UNIKALO",
+    "definition_courte": "Fabricant cité à plusieurs reprises dans le CCTP pour impressions, peintures, primaires et vitrificateurs.",
+    "explication_pedagogique": "Fixer un niveau de qualité et des références produits.",
+    "points_vigilance": [
+      "tout équivalent doit être techniquement comparable et accepté."
+    ]
+  },
+  {
+    "terme": "UNIKOSOL MONCRYL",
+    "definition_courte": "Peinture de sol citée pour les locaux vélos.",
+    "explication_pedagogique": "Réaliser une finition de sol sur béton après primaire.",
+    "points_vigilance": [
+      "support sec, préparé et application selon avis technique fabricant."
+    ]
+  },
+  {
+    "terme": "UNIKOSOL VBC",
+    "definition_courte": "Vitrificateur cité pour les marches et contre-marches des escaliers bois.",
+    "explication_pedagogique": "Protéger le bois contre l'usure et faciliter l'entretien.",
+    "points_vigilance": [
+      "appliquer sur bois correctement poncé et dépoussiéré."
+    ]
+  },
+  {
+    "terme": "UNILOX FER BRILLANT",
+    "definition_courte": "Laque antirouille citée pour ouvrages métalliques et canalisations apparentes.",
+    "explication_pedagogique": "Protéger et finir les supports métalliques ou préparés.",
+    "points_vigilance": [
+      "elle s'applique après primaire adapté."
+    ]
+  },
+  {
+    "terme": "UNISTOP BOIS AQUA",
+    "definition_courte": "Peinture microporeuse pour bois citée pour ouvrages intérieurs et escaliers.",
+    "explication_pedagogique": "Peindre les éléments bois en finition satinée.",
+    "points_vigilance": [
+      "prévoir impression et couches de finition selon CCTP."
+    ]
+  },
+  {
+    "terme": "UNISTOP BOIS EVO PRIM",
+    "definition_courte": "Peinture ou système cité pour ouvrages extérieurs en bois.",
+    "explication_pedagogique": "Protéger poteaux, charpente apparente sous carports ou volets bois selon variante.",
+    "points_vigilance": [
+      "application sur les 4 faces et préparation du bois."
+    ]
+  },
+  {
+    "terme": "Vitrages",
+    "definition_courte": "Surfaces vitrées à nettoyer en fin de chantier, sur les deux faces.",
+    "exemple_utilisation": "Dans le CCTP nettoyage, les vitrages intérieurs et extérieurs sont inclus.",
+    "points_vigilance": [
+      "éviter rayures, traces et coulures."
+    ]
+  },
+  {
+    "terme": "Vitrificateur",
+    "definition_courte": "Produit transparent ou teinté formant une protection résistante sur bois, notamment escaliers.",
+    "exemple_utilisation": "Dans le CCTP, deux couches de vitrificateur sont prévues sur marches et contre-marches.",
+    "points_vigilance": [
+      "le ponçage et dépoussiérage conditionnent le résultat."
+    ]
+  },
+  {
+    "terme": "Vitrification",
+    "definition_courte": "Application d'un vitrificateur sur bois pour le protéger de l'usure.",
+    "exemple_utilisation": "escaliers bois intérieurs des maisons.",
+    "points_vigilance": [
+      "bien respecter grains de ponçage et séchage."
+    ]
+  },
+  {
+    "terme": "Voile béton",
+    "definition_courte": "Mur ou paroi en béton, souvent à ratisser avant peinture ou revêtement.",
+    "exemple_utilisation": "Dans le CCTP, ratissage des voiles béton est prévu pour certaines peintures lisses.",
+    "points_vigilance": [
+      "le béton brut n'est pas toujours prêt à peindre."
+    ]
+  },
+  {
+    "terme": "Volets bois extérieurs",
+    "definition_courte": "Variante exigée de peinture satinée sur ouvrages extérieurs en bois.",
+    "explication_pedagogique": "Prévoir la finition peinture si les volets bois remplacent une autre solution.",
+    "points_vigilance": [
+      "bois exotique ou prépeint nécessite préparation adaptée."
+    ]
+  },
+  {
+    "terme": "Zone de douche",
+    "definition_courte": "Zone autour de la douche pouvant recevoir un traitement différent des autres murs.",
+    "exemple_utilisation": "Dans la variante PMR, certaines faïences hors zone de douche sont remplacées par peinture lisse au lot peinture.",
+    "points_vigilance": [
+      "bien lire les plans et variantes."
+    ]
+  }
+]

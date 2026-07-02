@@ -1,0 +1,1559 @@
+[
+  {
+    "terme": "Accessibilité PMR",
+    "definition_courte": "Ensemble des règles permettant l’usage des ouvrages par les personnes à mobilité réduite.",
+    "explication_pedagogique": "Adapter les mains courantes, passages, hauteurs et équipements pour que les circulations soient utilisables par tous.",
+    "exemple_utilisation": "la main courante d’escalier est demandée conforme à la réglementation d’accessibilité aux personnes handicapées.",
+    "points_vigilance": [
+      "contrôler la continuité, la préhension et le prolongement de la main courante en haut et en bas des volées."
+    ]
+  },
+  {
+    "terme": "Acier galvanisé",
+    "definition_courte": "Acier recouvert d’une couche de zinc pour limiter la corrosion.",
+    "explication_pedagogique": "Protéger les garde-corps, lisses, portes, grilles, arceaux vélos et pièces exposées à l’humidité.",
+    "exemple_utilisation": "les garde-corps extérieurs, lisses, portes et équipements vélos sont prévus en acier galvanisé selon les articles concernés.",
+    "points_vigilance": [
+      "toute coupe, perçage ou rayure doit être repris ou protégé pour éviter un départ de rouille."
+    ]
+  },
+  {
+    "terme": "Acier inoxydable",
+    "definition_courte": "Acier résistant naturellement mieux à la corrosion grâce à sa composition.",
+    "explication_pedagogique": "Sécuriser la durabilité de la visserie et de certains accessoires en ambiance humide ou agressive.",
+    "exemple_utilisation": "la quincaillerie et la visserie doivent être en acier inoxydable ou protégées contre la corrosion.",
+    "points_vigilance": [
+      "ne pas mélanger sans précaution des métaux incompatibles, car certains contacts peuvent favoriser la corrosion galvanique."
+    ]
+  },
+  {
+    "terme": "Acier laminé à chaud",
+    "definition_courte": "Profilé acier fabriqué par passage du métal chaud entre des rouleaux pour obtenir une forme donnée.",
+    "explication_pedagogique": "Créer des profilés résistants pour des ouvrages métalliques comme garde-corps, lisses et structures de serrurerie.",
+    "exemple_utilisation": "les profilés en acier laminés à chaud destinés à l’extérieur doivent être protégés après sablage et galvanisation.",
+    "points_vigilance": [
+      "la protection de surface doit être adaptée à l’exposition extérieure et à l’atmosphère marine."
+    ]
+  },
+  {
+    "terme": "Acier laqué",
+    "definition_courte": "Acier recevant une finition de surface par peinture ou laquage.",
+    "explication_pedagogique": "Donner une couleur finie et protéger le métal contre l’usure et la corrosion.",
+    "exemple_utilisation": "les grilles de ventilation sont décrites en acier laqué avec lames pare-pluie soudées.",
+    "points_vigilance": [
+      "vérifier les retouches après pose, surtout aux points de fixation et aux assemblages."
+    ]
+  },
+  {
+    "terme": "Acier pré-peint",
+    "definition_courte": "Acier livré avec une première finition de peinture appliquée avant ou pendant la fabrication.",
+    "explication_pedagogique": "Réduire le travail de finition sur chantier et protéger le produit avant pose.",
+    "exemple_utilisation": "les portes métalliques de celliers sont prévues avec panneaux en acier galvanisé pré-peint.",
+    "points_vigilance": [
+      "pré-peint ne veut pas toujours dire finition finale ; vérifier si le lot peinture doit intervenir."
+    ]
+  },
+  {
+    "terme": "Aluminium anodisé",
+    "definition_courte": "Aluminium traité en surface pour améliorer son aspect et sa résistance.",
+    "explication_pedagogique": "Obtenir des poignées, plaques ou accessoires durables et propres en parties communes.",
+    "exemple_utilisation": "les poignées de tirage double face sont demandées en aluminium anodisé type OSMOSE de chez BRICARD ou équivalent.",
+    "points_vigilance": [
+      "ne pas confondre anodisation et thermolaquage : ce sont deux finitions différentes."
+    ]
+  },
+  {
+    "terme": "Aluminium brossé",
+    "definition_courte": "Finition d’aluminium présentant un aspect légèrement strié ou satiné.",
+    "explication_pedagogique": "Donner une finition propre aux petits accessoires comme les supports de butoirs.",
+    "exemple_utilisation": "les butoirs des portes métalliques de celliers sont prévus en caoutchouc sur support alu brossé.",
+    "points_vigilance": [
+      "poser les butoirs après réglage définitif des portes pour éviter une mauvaise position."
+    ]
+  },
+  {
+    "terme": "Ambiance extérieure",
+    "definition_courte": "Condition d’exposition d’un ouvrage aux intempéries, UV, humidité et variations de température.",
+    "explication_pedagogique": "Choisir le bon traitement de surface et éviter les désordres prématurés.",
+    "exemple_utilisation": "les ouvrages de serrurerie extérieure doivent être sablés, galvanisés à chaud puis thermolaqués en usine.",
+    "points_vigilance": [
+      "un ouvrage intérieur et un ouvrage extérieur ne demandent pas le même niveau de protection."
+    ]
+  },
+  {
+    "terme": "Âme pleine",
+    "definition_courte": "Remplissage dense à l’intérieur d’un vantail ou d’une porte.",
+    "explication_pedagogique": "Améliorer la solidité, la tenue mécanique, l’acoustique et parfois la sécurité.",
+    "exemple_utilisation": "les portes de service métalliques sont prévues avec vantail en tôle d’acier deux faces à âme pleine.",
+    "points_vigilance": [
+      "le poids du vantail impose un ferrage et un ferme-porte adaptés."
+    ]
+  },
+  {
+    "terme": "Anti-corrosion",
+    "definition_courte": "Traitement ou choix de matériau destiné à empêcher ou ralentir la rouille.",
+    "explication_pedagogique": "Assurer la durabilité des éléments métalliques, surtout en extérieur et dans les locaux humides.",
+    "exemple_utilisation": "la boulonnerie, visserie, quincaillerie et grilles doivent recevoir un traitement anticorrosion ou être inoxydables.",
+    "points_vigilance": [
+      "les reprises de peinture et les zones de soudure sont des points sensibles."
+    ]
+  },
+  {
+    "terme": "Anti-dégondable",
+    "definition_courte": "Dispositif qui empêche le vantail de sortir facilement de ses paumelles.",
+    "explication_pedagogique": "Renforcer la sécurité d’une porte et limiter les tentatives d’arrachement.",
+    "exemple_utilisation": "les portes de service des locaux communs et techniques ont un système anti-dégondable en acier.",
+    "points_vigilance": [
+      "vérifier que le dispositif est bien compatible avec le sens d’ouverture et la pose prévue."
+    ]
+  },
+  {
+    "terme": "Antirouille",
+    "definition_courte": "Peinture ou traitement de protection appliqué sur le métal pour limiter la corrosion.",
+    "explication_pedagogique": "Protéger les ouvrages métalliques intérieurs avant la finition du lot peinture.",
+    "exemple_utilisation": "les ouvrages intérieurs non galvanisés doivent être livrés avec une protection antirouille appliquée en usine.",
+    "points_vigilance": [
+      "les retouches après montage sont indispensables au droit des assemblages."
+    ]
+  },
+  {
+    "terme": "Applique intérieure",
+    "definition_courte": "Mode de pose où l’ouvrage est fixé contre la face intérieure du support.",
+    "explication_pedagogique": "Positionner une huisserie ou une porte en fonction du mur, de l’épaisseur et de la finition intérieure.",
+    "exemple_utilisation": "les portes métalliques simples vantaux de celliers sont prévues avec huisserie tubulaire en pose applique intérieure.",
+    "points_vigilance": [
+      "vérifier les réservations, les jeux et l’encombrement avant fabrication."
+    ]
+  },
+  {
+    "terme": "Arceau galvanisé",
+    "definition_courte": "Support métallique en forme d’arceau destiné au stationnement des vélos.",
+    "explication_pedagogique": "Permettre l’attache et le rangement des vélos dans un local dédié.",
+    "exemple_utilisation": "les locaux vélos reçoivent des range-vélos type arceau galvanisé PAR0473 ou équivalent.",
+    "points_vigilance": [
+      "contrôler l’implantation pour conserver les circulations et éviter les conflits avec les portes."
+    ]
+  },
+  {
+    "terme": "Assemblage",
+    "definition_courte": "Zone où deux pièces métalliques sont reliées entre elles par soudure, boulonnage, vissage ou autre procédé.",
+    "explication_pedagogique": "Créer un ouvrage complet à partir de profils, tôles, platines et accessoires.",
+    "exemple_utilisation": "les retouches nécessaires sont demandées notamment au droit des assemblages après montage.",
+    "points_vigilance": [
+      "un assemblage mal protégé devient vite un point de corrosion."
+    ]
+  },
+  {
+    "terme": "Atmosphère marine",
+    "definition_courte": "Ambiance chargée en humidité et sels, plus agressive pour les métaux.",
+    "explication_pedagogique": "Adapter les protections de surface des ouvrages exposés.",
+    "exemple_utilisation": "les traitements doivent résister aux conditions d’atmosphère marine.",
+    "points_vigilance": [
+      "exiger les attestations de traitement et les systèmes compatibles avec cette exposition."
+    ]
+  },
+  {
+    "terme": "Balcon extérieur",
+    "definition_courte": "Plate-forme extérieure associée à un logement, souvent protégée par un garde-corps.",
+    "explication_pedagogique": "Sécuriser les occupants tout en respectant l’architecture de façade.",
+    "exemple_utilisation": "les lisses horizontales sont prévues sur les murets des garde-corps des balcons extérieurs des bâtiments A et B.",
+    "points_vigilance": [
+      "bien coordonner avec le gros œuvre, l’étanchéité et les chaperons béton."
+    ]
+  },
+  {
+    "terme": "Barreau acier",
+    "definition_courte": "Élément métallique simple, rond, carré ou rectangulaire, utilisé comme prise, support ou renfort.",
+    "explication_pedagogique": "Servir d’appui ou de point d’accrochage dans un ouvrage de serrurerie.",
+    "exemple_utilisation": "un barreau en acier est prévu sous la trappe d’accès aux combles pour permettre l’accès.",
+    "points_vigilance": [
+      "vérifier la solidité de la fixation et l’absence d’arête coupante."
+    ]
+  },
+  {
+    "terme": "Barreaudage vertical",
+    "definition_courte": "Remplissage de garde-corps constitué de barreaux verticaux.",
+    "explication_pedagogique": "Empêcher le passage ou la chute tout en laissant une transparence visuelle.",
+    "exemple_utilisation": "les garde-corps d’escaliers intérieurs comportent un barreaudage vertical en tubes carrés droits de 20 x 20 mm espacés de 0,10 m.",
+    "points_vigilance": [
+      "l’espacement des barreaux est un point de sécurité à contrôler strictement."
+    ]
+  },
+  {
+    "terme": "Béquillage",
+    "definition_courte": "Ensemble de poignées, plaques et accessoires permettant de manœuvrer une porte.",
+    "explication_pedagogique": "Ouvrir, fermer et parfois condamner une porte.",
+    "exemple_utilisation": "les portes métalliques de celliers reçoivent un béquillage double sur plaque, gamme Tempo, type Disco de chez BRICARD ou équivalent.",
+    "points_vigilance": [
+      "vérifier la compatibilité avec la serrure, le cylindre et le sens de la porte."
+    ]
+  },
+  {
+    "terme": "Bloc-porte métallique",
+    "definition_courte": "Ensemble composé d’une huisserie métallique, d’un ou plusieurs vantaux et de la quincaillerie associée.",
+    "explication_pedagogique": "Former une porte complète prête à poser et à faire fonctionner.",
+    "exemple_utilisation": "les portes extérieures métalliques des locaux communs et techniques sont des blocs-portes métalliques.",
+    "points_vigilance": [
+      "analyser le bloc complet : cadre, vantail, ferrage, serrure, ferme-porte, poignée, finition et pose."
+    ]
+  },
+  {
+    "terme": "Bouchonnage soudé",
+    "definition_courte": "Fermeture d’une extrémité de tube par une pièce soudée.",
+    "explication_pedagogique": "Éviter les entrées d’eau, améliorer l’esthétique et supprimer les arêtes dangereuses.",
+    "exemple_utilisation": "les mains courantes d’escalier sont prévues en tubes rectangulaires continus et bouchonnés soudés aux extrémités.",
+    "points_vigilance": [
+      "les soudures et bouchons doivent être propres, protégés et sans aspérité."
+    ]
+  },
+  {
+    "terme": "Boulonnerie",
+    "definition_courte": "Ensemble des boulons, écrous et rondelles utilisés pour fixer ou assembler des pièces.",
+    "explication_pedagogique": "Assurer la tenue mécanique des grilles, platines et accessoires métalliques.",
+    "exemple_utilisation": "la boulonnerie des grilles de ventilation doit être traitée anticorrosion.",
+    "points_vigilance": [
+      "serrer correctement et choisir une qualité compatible avec l’exposition."
+    ]
+  },
+  {
+    "terme": "BRICARD",
+    "definition_courte": "Marque de quincaillerie citée comme référence ou équivalent dans le CCTP.",
+    "explication_pedagogique": "Définir un niveau attendu pour poignées, ferme-portes, serrures ou accessoires.",
+    "exemple_utilisation": "les références OSMOSE, FP 620, Tempo, Disco et série 8150 sont citées comme exemples ou équivalents.",
+    "points_vigilance": [
+      "un produit équivalent doit offrir des performances et une qualité comparables."
+    ]
+  },
+  {
+    "terme": "Bureau de contrôle",
+    "definition_courte": "Organisme chargé de vérifier certains points techniques et réglementaires du projet.",
+    "explication_pedagogique": "Sécuriser la conformité des ouvrages et demander des justificatifs si nécessaire.",
+    "exemple_utilisation": "les contrôles et essais réclamés par le bureau de contrôle sont à la charge de l’entreprise.",
+    "points_vigilance": [
+      "prévoir les PV, notes de calcul, fiches techniques et réponses aux observations."
+    ]
+  },
+  {
+    "terme": "Butoir de porte",
+    "definition_courte": "Accessoire qui arrête la porte avant qu’elle ne tape contre le mur ou un équipement.",
+    "explication_pedagogique": "Protéger les murs, poignées, plinthes et finitions.",
+    "exemple_utilisation": "les portes métalliques de celliers reçoivent des butoirs en caoutchouc sur support alu brossé.",
+    "points_vigilance": [
+      "poser le butoir à la bonne position après vérification de l’ouverture réelle."
+    ]
+  },
+  {
+    "terme": "Cadenas",
+    "definition_courte": "Dispositif de fermeture amovible commandé par clé ou code.",
+    "explication_pedagogique": "Sécuriser un accès ponctuel ou technique sans poser une serrure intégrée complexe.",
+    "exemple_utilisation": "l’échelle d’accès aux combles est prévue avec système d’accrochage au mur et fermeture par cadenas.",
+    "points_vigilance": [
+      "prévoir la gestion des clés et l’accessibilité pour maintenance."
+    ]
+  },
+  {
+    "terme": "Cadre métallique",
+    "definition_courte": "Cadre en acier ou autre métal servant de support ou de fixation.",
+    "explication_pedagogique": "Recevoir une porte, une grille, un contre-cadre ou un équipement.",
+    "exemple_utilisation": "les grilles de ventilation sont fixées sur cadre métallique.",
+    "points_vigilance": [
+      "vérifier aplomb, niveau, fixation et compatibilité avec le support maçonné."
+    ]
+  },
+  {
+    "terme": "Calepinage",
+    "definition_courte": "Organisation des dimensions, découpes et répartitions des panneaux ou motifs.",
+    "explication_pedagogique": "Obtenir un rendu régulier et compatible avec les contraintes de fabrication.",
+    "exemple_utilisation": "la tôle découpée au laser doit tenir compte du calepinage des découpes choisi par l’architecte.",
+    "points_vigilance": [
+      "valider le dessin et les joints avant fabrication pour éviter les reprises coûteuses."
+    ]
+  },
+  {
+    "terme": "Calfeutrement",
+    "definition_courte": "Traitement des vides et raccords entre deux ouvrages.",
+    "explication_pedagogique": "Assurer une finition propre, limiter les passages d’air et compléter l’étanchéité locale.",
+    "exemple_utilisation": "l’entreprise doit prévoir les couvre-joints, habillages, calfeutrements et éléments de finition nécessaires.",
+    "points_vigilance": [
+      "un calfeutrement esthétique ne remplace pas une fixation ou une étanchéité technique."
+    ]
+  },
+  {
+    "terme": "Carnet de détail architecte",
+    "definition_courte": "Document de plans et détails précisant l’aspect, les dimensions et les principes de certains ouvrages.",
+    "explication_pedagogique": "Compléter les plans généraux et sécuriser la fabrication.",
+    "exemple_utilisation": "les garde-corps extérieurs des portes-fenêtres et terrasses sont localisés selon plans et carnet de détail architecte.",
+    "points_vigilance": [
+      "toujours croiser CCTP, plans de façade, carnet de détail et plans de repérage."
+    ]
+  },
+  {
+    "terme": "Cellier",
+    "definition_courte": "Petit local de rangement associé à un logement ou à une partie de bâtiment.",
+    "explication_pedagogique": "Recevoir des portes métalliques simples et résistantes.",
+    "exemple_utilisation": "les portes métalliques simples vantaux sont localisées aux portes des celliers.",
+    "points_vigilance": [
+      "vérifier les dimensions 0,80 x 2,15 m et le sens d’ouverture sur plans."
+    ]
+  },
+  {
+    "terme": "Cheville",
+    "definition_courte": "Pièce de fixation insérée dans un support pour recevoir une vis.",
+    "explication_pedagogique": "Fixer un accessoire dans béton, maçonnerie ou autre support.",
+    "exemple_utilisation": "les butoirs sont fixés par cheville et vis.",
+    "points_vigilance": [
+      "choisir la cheville selon le support réel : béton, parpaing, brique, plaque ou doublage."
+    ]
+  },
+  {
+    "terme": "Compas de ferme-porte",
+    "definition_courte": "Bras articulé du ferme-porte permettant de refermer automatiquement un vantail.",
+    "explication_pedagogique": "Maîtriser la fermeture d’une porte de service et limiter les portes laissées ouvertes.",
+    "exemple_utilisation": "les portes extérieures métalliques des locaux communs et techniques reçoivent un ferme-porte à compas de force 3.",
+    "points_vigilance": [
+      "régler la vitesse et le coup final après mise en service."
+    ]
+  },
+  {
+    "terme": "Compte prorata",
+    "definition_courte": "Compte commun de chantier destiné à gérer certaines dépenses partagées.",
+    "explication_pedagogique": "Répartir les coûts communs comme bennes, nettoyage ou installations selon les règles du marché.",
+    "exemple_utilisation": "le tri et l’enlèvement des gravois dans les bennes du compte prorata sont mentionnés dans les obligations de l’entreprise.",
+    "points_vigilance": [
+      "ne pas confondre avec les prestations propres au lot, qui restent dues par l’entreprise."
+    ]
+  },
+  {
+    "terme": "Contre-cadre",
+    "definition_courte": "Cadre secondaire servant à recevoir ou maintenir un élément comme une grille.",
+    "explication_pedagogique": "Faciliter la pose, l’alignement et la fixation d’un ouvrage dans une réservation.",
+    "exemple_utilisation": "les grilles de ventilation sont constituées de lames pare-pluie soudées sur contre-cadre.",
+    "points_vigilance": [
+      "les dimensions doivent être communiquées au gros œuvre pour prévoir les réservations."
+    ]
+  },
+  {
+    "terme": "Coordonnateur SPS",
+    "definition_courte": "Intervenant chargé de la coordination sécurité et protection de la santé sur le chantier.",
+    "explication_pedagogique": "Faire respecter les principes de prévention entre les entreprises.",
+    "exemple_utilisation": "l’entreprise doit transmettre ses éléments de prévention pour l’établissement du PGCSPS et suivre les instructions SPS.",
+    "points_vigilance": [
+      "intégrer les risques de manutention, travail en hauteur, perçage, meulage et levage des ouvrages."
+    ]
+  },
+  {
+    "terme": "Corps d’état",
+    "definition_courte": "Entreprise ou spécialité intervenant sur un lot de travaux.",
+    "explication_pedagogique": "Organiser la coordination entre gros œuvre, peinture, électricité, menuiseries, serrurerie et autres lots.",
+    "exemple_utilisation": "le serrurier doit s’entendre avec les autres corps d’état pour ajuster ses ouvrages aux supports livrés.",
+    "points_vigilance": [
+      "la mauvaise coordination crée souvent réservations oubliées, jeux insuffisants ou finitions reprises."
+    ]
+  },
+  {
+    "terme": "Corrosion",
+    "definition_courte": "Dégradation d’un métal par réaction avec l’air, l’eau, les sels ou d’autres agents.",
+    "explication_pedagogique": "Comprendre pourquoi les traitements galvanisés, inox, antirouille ou thermolaqués sont imposés.",
+    "exemple_utilisation": "le CCTP exige des protections anticorrosion pour la quincaillerie, la visserie, les ouvrages extérieurs et intérieurs.",
+    "points_vigilance": [
+      "surveiller particulièrement les coupes, soudures, rayures, percements et zones non accessibles."
+    ]
+  },
+  {
+    "terme": "Couvre-joint",
+    "definition_courte": "Profil ou baguette de finition qui masque un joint ou un raccord.",
+    "explication_pedagogique": "Améliorer le rendu final autour d’une porte, d’une grille ou d’un ouvrage métallique.",
+    "exemple_utilisation": "l’entreprise doit prévoir les couvre-joints nécessaires pour une finition soignée.",
+    "points_vigilance": [
+      "un couvre-joint ne doit pas cacher un défaut de fixation ou un mauvais calage."
+    ]
+  },
+  {
+    "terme": "Cylindre européen",
+    "definition_courte": "Barillet de serrure au format européen, généralement commandé par clé.",
+    "explication_pedagogique": "Permettre le verrouillage d’une porte avec un organigramme de clés si nécessaire.",
+    "exemple_utilisation": "les portes métalliques de celliers reçoivent un cylindre européen de sécurité fourni par le menuisier intérieur.",
+    "points_vigilance": [
+      "coordonner les cylindres avec le lot menuiseries intérieures et la gestion des clés."
+    ]
+  },
+  {
+    "terme": "Débordement de main courante",
+    "definition_courte": "Prolongement de la main courante au-delà de la première et de la dernière marche.",
+    "explication_pedagogique": "Sécuriser le début et la fin d’escalier, notamment pour l’accessibilité.",
+    "exemple_utilisation": "un débordement de 0,30 m minimum est demandé par rapport aux nez de la première et de la dernière marche.",
+    "points_vigilance": [
+      "le prolongement ne doit pas créer d’obstacle dans les circulations."
+    ]
+  },
+  {
+    "terme": "Découpe laser",
+    "definition_courte": "Découpe de tôle réalisée par faisceau laser selon un dessin précis.",
+    "explication_pedagogique": "Créer des panneaux décoratifs ou ajourés avec un motif architectural.",
+    "exemple_utilisation": "les garde-corps des terrasses comportent des panneaux de tôle découpée au laser suivant le dessin choisi par l’architecte.",
+    "points_vigilance": [
+      "l’épaisseur, la déformation et la protection des chants découpés doivent être contrôlées."
+    ]
+  },
+  {
+    "terme": "Demi-tour",
+    "definition_courte": "Pêne mobile commandé par la poignée, permettant la fermeture sans verrouillage à clé.",
+    "explication_pedagogique": "Maintenir une porte fermée au quotidien.",
+    "exemple_utilisation": "les serrures des portes métalliques de celliers comprennent pênes dormants et demi-tour.",
+    "points_vigilance": [
+      "régler la gâche pour éviter les claquements ou difficultés de fermeture."
+    ]
+  },
+  {
+    "terme": "Dimensionnement",
+    "definition_courte": "Détermination des sections, épaisseurs, fixations et assemblages nécessaires.",
+    "explication_pedagogique": "Garantir la résistance mécanique et la conformité réglementaire de l’ouvrage.",
+    "exemple_utilisation": "les dimensions du CCTP sont des minimums esthétiques et doivent être modifiées si la réglementation l’exige.",
+    "points_vigilance": [
+      "les garde-corps doivent être validés par le calcul de l’entreprise."
+    ]
+  },
+  {
+    "terme": "Dispositif complémentaire de sécurité",
+    "definition_courte": "Élément ajouté pour atteindre un niveau de sécurité ou de conformité.",
+    "explication_pedagogique": "Adapter un ouvrage si les dimensions initiales ne suffisent pas.",
+    "exemple_utilisation": "le CCTP prévoit la possibilité de dispositifs complémentaires de sécurité si nécessaire.",
+    "points_vigilance": [
+      "ne jamais se limiter au dessin architectural si la norme impose plus contraignant."
+    ]
+  },
+  {
+    "terme": "Dossier de fin de travaux",
+    "definition_courte": "Ensemble des documents remis en fin de chantier : plans, notices, PV, fiches, DOE selon marché.",
+    "explication_pedagogique": "Prouver ce qui a été posé et faciliter maintenance et réception.",
+    "exemple_utilisation": "la constitution des dossiers de fin de travaux est demandée conformément au CCTP lot 01 dispositions communes.",
+    "points_vigilance": [
+      "récupérer les PV et fiches techniques avant la fin de chantier évite les blocages à la réception."
+    ]
+  },
+  {
+    "terme": "Double face",
+    "definition_courte": "Accessoire présent des deux côtés d’un vantail.",
+    "explication_pedagogique": "Permettre la manœuvre ou la traction de la porte côté intérieur et extérieur.",
+    "exemple_utilisation": "les portes de service sont prévues avec une poignée de tirage double face sur plaques.",
+    "points_vigilance": [
+      "vérifier le tirant/poussant et l’encombrement avec le ferme-porte."
+    ]
+  },
+  {
+    "terme": "Échantillon",
+    "definition_courte": "Exemple physique d’un produit ou d’une finition présenté avant validation.",
+    "explication_pedagogique": "Permettre au maître d’œuvre et au maître d’ouvrage de choisir ou valider la qualité et l’aspect.",
+    "exemple_utilisation": "la quincaillerie doit être choisie sur présentation d’échantillons et procès-verbaux d’essais.",
+    "points_vigilance": [
+      "conserver la trace écrite des validations avant commande."
+    ]
+  },
+  {
+    "terme": "Échelle double aluminium",
+    "definition_courte": "Échelle en aluminium composée de deux parties ou deux pans selon le modèle.",
+    "explication_pedagogique": "Permettre l’accès aux combles pour maintenance ou intervention technique.",
+    "exemple_utilisation": "une échelle double en aluminium est prévue pour accès aux combles des bâtiments A et B.",
+    "points_vigilance": [
+      "vérifier stabilité, accrochage au mur, verrouillage par cadenas et sécurité d’utilisation."
+    ]
+  },
+  {
+    "terme": "Écuyer",
+    "definition_courte": "Support métallique mural qui tient une main courante.",
+    "explication_pedagogique": "Fixer la main courante au mur avec un déport suffisant pour la préhension.",
+    "exemple_utilisation": "la main courante d’escalier est fixée par écuyers en acier sur platines murales.",
+    "points_vigilance": [
+      "contrôler espacement, alignement, résistance et absence d’arêtes vives."
+    ]
+  },
+  {
+    "terme": "Épaisseur de tôle",
+    "definition_courte": "Dimension de la tôle exprimée en millimètres ou en dixièmes de millimètre.",
+    "explication_pedagogique": "Assurer rigidité, résistance et tenue aux traitements de finition.",
+    "exemple_utilisation": "l’épaisseur de la tôle découpée au laser des garde-corps de terrasse est définie par l’entreprise.",
+    "points_vigilance": [
+      "une tôle trop fine peut se déformer au thermolaquage ou sous efforts."
+    ]
+  },
+  {
+    "terme": "Essais mécaniques",
+    "definition_courte": "Essais destinés à vérifier la résistance d’un ouvrage ou d’une quincaillerie.",
+    "explication_pedagogique": "Prouver la conformité aux exigences de sécurité et de tenue.",
+    "exemple_utilisation": "la quincaillerie et la visserie doivent permettre aux ouvrages de répondre aux essais mécaniques spécifiques de la réglementation.",
+    "points_vigilance": [
+      "demander les PV adaptés au modèle réellement posé."
+    ]
+  },
+  {
+    "terme": "Étanchéité maçonnerie-serrurerie",
+    "definition_courte": "Traitement du raccord entre le support maçonné et l’ouvrage métallique.",
+    "explication_pedagogique": "Limiter les infiltrations, passages d’air et dégradations autour des fixations.",
+    "exemple_utilisation": "tous les joints nécessaires doivent être prévus entre maçonnerie et ouvrages de serrurerie.",
+    "points_vigilance": [
+      "le joint ne doit pas empêcher l’évacuation de l’eau ou cacher un défaut de support."
+    ]
+  },
+  {
+    "terme": "Façade",
+    "definition_courte": "Face extérieure du bâtiment visible depuis l’extérieur.",
+    "explication_pedagogique": "Localiser garde-corps, lisses, portes-fenêtres et ouvrages métalliques extérieurs.",
+    "exemple_utilisation": "les lisses horizontales sont prévues au droit des menuiseries extérieures selon plans de façades.",
+    "points_vigilance": [
+      "respecter les alignements architecturaux et les teintes validées."
+    ]
+  },
+  {
+    "terme": "Fer plat",
+    "definition_courte": "Profil métallique plat, généralement rectangulaire.",
+    "explication_pedagogique": "Réaliser des lisses, renforts ou pièces d’assemblage.",
+    "exemple_utilisation": "les garde-corps de terrasses comportent des lisses basses en fer plat de 30 x 20 mm.",
+    "points_vigilance": [
+      "contrôler la rigidité et la protection des arêtes."
+    ]
+  },
+  {
+    "terme": "Ferme-porte",
+    "definition_courte": "Appareil qui referme automatiquement une porte après ouverture.",
+    "explication_pedagogique": "Éviter qu’une porte reste ouverte et garantir la sécurité ou le contrôle d’accès.",
+    "exemple_utilisation": "les portes de service reçoivent un ferme-porte à compas de force 3 de type FP 620 ou équivalent.",
+    "points_vigilance": [
+      "régler la force, la vitesse et le coup final après pose."
+    ]
+  },
+  {
+    "terme": "Fermeture par cadenas",
+    "definition_courte": "Fermeture assurée par un cadenas indépendant.",
+    "explication_pedagogique": "Sécuriser un équipement comme une échelle d’accès sans serrure intégrée.",
+    "exemple_utilisation": "l’échelle d’accès aux combles est prévue avec fermeture par cadenas.",
+    "points_vigilance": [
+      "prévoir la gestion des clés avec le maître d’ouvrage ou l’exploitant."
+    ]
+  },
+  {
+    "terme": "Fermeture par gâche électrique",
+    "definition_courte": "Fermeture commandée électriquement au niveau de la gâche.",
+    "explication_pedagogique": "Permettre le contrôle d’accès ou l’ouverture à distance d’une porte.",
+    "exemple_utilisation": "les portes de service des locaux communs et techniques ont une gâche électrique encastrée alimentée par le lot électricité.",
+    "points_vigilance": [
+      "coordonner réservation, alimentation, tension, contrôle d’accès et essais avec l’électricien."
+    ]
+  },
+  {
+    "terme": "Fermeture par serrure 1 point",
+    "definition_courte": "Serrure avec un seul point de verrouillage.",
+    "explication_pedagogique": "Assurer une fermeture simple pour local secondaire ou cellier selon besoin.",
+    "exemple_utilisation": "les portes métalliques de celliers reçoivent une serrure 1 point à mortaiser.",
+    "points_vigilance": [
+      "ne pas utiliser à la place d’une fermeture renforcée si le local exige un niveau de sûreté supérieur."
+    ]
+  },
+  {
+    "terme": "Ferrage",
+    "definition_courte": "Ensemble des paumelles, pivots, fiches et organes permettant la rotation d’une porte.",
+    "explication_pedagogique": "Assurer l’ouverture, la fermeture et le bon maintien du vantail.",
+    "exemple_utilisation": "les portes de service sont ferrées par paumelles réglables dans les 3 directions.",
+    "points_vigilance": [
+      "un mauvais ferrage provoque frottements, jeux irréguliers et usure prématurée."
+    ]
+  },
+  {
+    "terme": "Finition laquée",
+    "definition_courte": "Finition peinte ou laquée donnant l’aspect final d’un ouvrage.",
+    "explication_pedagogique": "Protéger et uniformiser l’aspect des garde-corps, mains courantes ou portes.",
+    "exemple_utilisation": "les garde-corps intérieurs et mains courantes ont une finition laquée prévue au lot peinture.",
+    "points_vigilance": [
+      "distinguer ce qui est à la charge du serrurier et ce qui est à la charge du lot peinture."
+    ]
+  },
+  {
+    "terme": "Fixation invisible",
+    "definition_courte": "Fixation dissimulée dans l’ouvrage ou le support.",
+    "explication_pedagogique": "Obtenir un aspect plus propre, sans platine apparente.",
+    "exemple_utilisation": "les garde-corps extérieurs et lisses peuvent être fixés par scellement ou fixation invisible, sans platine visible en tableau.",
+    "points_vigilance": [
+      "la fixation invisible doit rester contrôlable et justifiable par calcul."
+    ]
+  },
+  {
+    "terme": "Fixation par platine",
+    "definition_courte": "Fixation réalisée au moyen d’une plaque métallique percée et vissée ou boulonnée.",
+    "explication_pedagogique": "Répartir les efforts et ancrer un garde-corps ou une main courante au support.",
+    "exemple_utilisation": "les garde-corps d’escaliers et de terrasses comprennent des platines à dimensionner suivant réglementation.",
+    "points_vigilance": [
+      "la platine, ses ancrages et le support doivent être compatibles avec les efforts normatifs."
+    ]
+  },
+  {
+    "terme": "Fixation par scellement",
+    "definition_courte": "Fixation d’une pièce dans la maçonnerie ou le béton par scellement.",
+    "explication_pedagogique": "Rendre la fixation solide et souvent moins visible.",
+    "exemple_utilisation": "les garde-corps et lisses peuvent être fixés par scellement dans les tableaux ou murets maçonnés.",
+    "points_vigilance": [
+      "prévoir réservations, profondeur, produit de scellement et délai de prise."
+    ]
+  },
+  {
+    "terme": "Fixation par vis à tête fraisée",
+    "definition_courte": "Fixation par vis dont la tête s’encastre dans une fraisure pour affleurer la surface.",
+    "explication_pedagogique": "Obtenir une finition plus propre et limiter les accroches.",
+    "exemple_utilisation": "les garde-corps intérieurs et les platines de terrasses comportent des vis à têtes fraisées.",
+    "points_vigilance": [
+      "la fraisure doit être adaptée pour ne pas fragiliser la platine."
+    ]
+  },
+  {
+    "terme": "Force 3",
+    "definition_courte": "Niveau de force de fermeture d’un ferme-porte, adapté au poids et à la largeur du vantail.",
+    "explication_pedagogique": "Assurer la fermeture sans effort excessif ni claquement.",
+    "exemple_utilisation": "les portes extérieures métalliques des locaux communs et techniques reçoivent un ferme-porte à compas de force 3.",
+    "points_vigilance": [
+      "vérifier compatibilité avec accessibilité PMR et conditions de vent éventuelles."
+    ]
+  },
+  {
+    "terme": "Fourniture au gros œuvre",
+    "definition_courte": "Transmission par le serrurier des pièces à incorporer dans les ouvrages de structure.",
+    "explication_pedagogique": "Permettre au gros œuvre de sceller ou incorporer correctement les accessoires avant coulage ou maçonnerie.",
+    "exemple_utilisation": "le serrurier doit fournir au lot gros œuvre les matériels et accessoires de fixation à sceller dans la structure.",
+    "points_vigilance": [
+      "anticiper en période de préparation pour éviter les réservations oubliées."
+    ]
+  },
+  {
+    "terme": "Gâche électrique",
+    "definition_courte": "Pièce de serrure commandée électriquement qui libère ou bloque le pêne.",
+    "explication_pedagogique": "Permettre une ouverture contrôlée depuis un interphone, badge ou système de contrôle d’accès.",
+    "exemple_utilisation": "les portes de service des locaux communs et techniques sont prévues avec gâche électrique encastrée.",
+    "points_vigilance": [
+      "coordonner avec le lot électricité : alimentation, câbles, essais, sens de fonctionnement."
+    ]
+  },
+  {
+    "terme": "Galvanisation",
+    "definition_courte": "Protection de l’acier par dépôt de zinc.",
+    "explication_pedagogique": "Limiter la rouille sur les ouvrages exposés.",
+    "exemple_utilisation": "les profilés non thermolaqués doivent au minimum être protégés par galvanisation, avec peinture finale au lot peinture si prévu.",
+    "points_vigilance": [
+      "la galvanisation ne doit pas être meulée ou percée sans reprise de protection."
+    ]
+  },
+  {
+    "terme": "Galvanisation à chaud",
+    "definition_courte": "Procédé où l’acier est plongé dans un bain de zinc en fusion.",
+    "explication_pedagogique": "Offrir une protection anticorrosion robuste, notamment en extérieur.",
+    "exemple_utilisation": "les ouvrages extérieurs doivent être protégés après sablage et galvanisation à chaud avant thermolaquage.",
+    "points_vigilance": [
+      "prévoir trous d’évacuation et détails compatibles avec le bain de galvanisation."
+    ]
+  },
+  {
+    "terme": "Gamme RAL",
+    "definition_courte": "Nuancier de couleurs standardisé utilisé pour choisir les teintes de peinture ou thermolaquage.",
+    "explication_pedagogique": "Permettre un choix de couleur clair et reproductible.",
+    "exemple_utilisation": "les couleurs de thermolaquage sont au choix du maître d’ouvrage et du maître d’œuvre dans la gamme RAL.",
+    "points_vigilance": [
+      "faire valider la référence exacte avant fabrication."
+    ]
+  },
+  {
+    "terme": "Garde-corps",
+    "definition_courte": "Protection placée en bord de vide, escalier, balcon, terrasse ou fenêtre.",
+    "explication_pedagogique": "Empêcher la chute des personnes et sécuriser les circulations.",
+    "exemple_utilisation": "le lot comprend garde-corps intérieurs, extérieurs de portes-fenêtres, terrasses, lisses sur fenêtres et lisses sur garde-corps béton.",
+    "points_vigilance": [
+      "contrôler hauteur, résistance, espacement, fixations et conformité NF P 01-012/NF P 01-013."
+    ]
+  },
+  {
+    "terme": "Garde-corps à l’anglaise",
+    "definition_courte": "Pose du garde-corps sur le côté du support, en applique latérale.",
+    "explication_pedagogique": "Libérer le dessus de la volée ou du palier et s’adapter à certains escaliers.",
+    "exemple_utilisation": "les garde-corps d’escaliers intérieurs sont posés à l’anglaise sur les volées.",
+    "points_vigilance": [
+      "les efforts sur fixation latérale sont importants et doivent être justifiés."
+    ]
+  },
+  {
+    "terme": "Garde-corps à la française",
+    "definition_courte": "Pose du garde-corps sur le dessus du support, généralement sur palier ou dalle.",
+    "explication_pedagogique": "Fixer la protection directement sur la zone horizontale.",
+    "exemple_utilisation": "les garde-corps d’escaliers intérieurs sont posés à la française sur les paliers.",
+    "points_vigilance": [
+      "vérifier l’ancrage et la distance aux bords pour éviter l’éclatement du support."
+    ]
+  },
+  {
+    "terme": "Garde-corps béton",
+    "definition_courte": "Protection maçonnée ou en béton armé servant de support ou de protection en balcon/terrasse.",
+    "explication_pedagogique": "Recevoir éventuellement des lisses métalliques complémentaires.",
+    "exemple_utilisation": "des lisses horizontales sont prévues sur les murets des garde-corps béton des balcons extérieurs.",
+    "points_vigilance": [
+      "coordonner avec le lot gros œuvre pour réservations et supports."
+    ]
+  },
+  {
+    "terme": "Garde-corps de porte-fenêtre",
+    "definition_courte": "Protection extérieure placée devant une porte-fenêtre lorsqu’il existe un risque de chute.",
+    "explication_pedagogique": "Sécuriser l’ouverture tout en conservant l’éclairage et l’esthétique de façade.",
+    "exemple_utilisation": "les portes-fenêtres des bâtiments A et B reçoivent des garde-corps en acier galvanisé et thermolaqué.",
+    "points_vigilance": [
+      "ne pas poser de platine visible en tableau si le CCTP impose scellement ou fixation invisible."
+    ]
+  },
+  {
+    "terme": "Garde-corps de terrasse",
+    "definition_courte": "Protection périphérique autour d’une terrasse en hauteur.",
+    "explication_pedagogique": "Empêcher les chutes et participer à l’aspect architectural.",
+    "exemple_utilisation": "les terrasses des bâtiments A et B ont des garde-corps avec panneaux de tôle découpée au laser.",
+    "points_vigilance": [
+      "contrôler la tenue des panneaux, les fixations par platines et la hauteur 1,01 m."
+    ]
+  },
+  {
+    "terme": "Garde-corps intérieur",
+    "definition_courte": "Protection placée à l’intérieur, généralement autour d’un escalier ou d’un palier.",
+    "explication_pedagogique": "Sécuriser les circulations intérieures.",
+    "exemple_utilisation": "les escaliers des bâtiments A et B reçoivent des garde-corps intérieurs en acier avec traitement antirouille.",
+    "points_vigilance": [
+      "la finition finale étant au lot peinture, les reprises antirouille doivent rester propres."
+    ]
+  },
+  {
+    "terme": "Gravois",
+    "definition_courte": "Déchets de chantier issus des travaux.",
+    "explication_pedagogique": "Maintenir le chantier propre et respecter les règles de tri.",
+    "exemple_utilisation": "le tri et l’enlèvement des gravois dans les bennes du compte prorata font partie des obligations de l’entreprise.",
+    "points_vigilance": [
+      "ne pas laisser chutes métalliques, emballages et poussières dans les circulations."
+    ]
+  },
+  {
+    "terme": "Grille de ventilation",
+    "definition_courte": "Élément ajouré permettant le passage de l’air tout en protégeant l’ouverture.",
+    "explication_pedagogique": "Ventiler un local vélo, local OM ou local technique.",
+    "exemple_utilisation": "des grilles 20 x 20 cm sont prévues pour les locaux vélos et OM, en acier laqué avec lames pare-pluie.",
+    "points_vigilance": [
+      "communiquer les dimensions exactes au gros œuvre pour les réservations."
+    ]
+  },
+  {
+    "terme": "Habillage",
+    "definition_courte": "Pièce de finition permettant de masquer un raccord ou une réservation.",
+    "explication_pedagogique": "Obtenir un rendu propre autour des ouvrages métalliques.",
+    "exemple_utilisation": "l’entreprise doit prévoir les habillages nécessaires à la finition des ouvrages de serrurerie.",
+    "points_vigilance": [
+      "un habillage doit rester compatible avec la maintenance et ne pas bloquer les joints."
+    ]
+  },
+  {
+    "terme": "Hauteur 1,01 m",
+    "definition_courte": "Hauteur finie demandée dans le CCTP pour plusieurs garde-corps et lisses.",
+    "explication_pedagogique": "Garantir la protection contre les chutes selon le projet et les normes applicables.",
+    "exemple_utilisation": "les garde-corps et lisses sont décrits avec une hauteur de 1,01 m en tous points ou depuis le sol intérieur.",
+    "points_vigilance": [
+      "mesurer depuis la zone d’appui réelle, sol fini ou appui intérieur selon le cas."
+    ]
+  },
+  {
+    "terme": "Huisserie métallique",
+    "definition_courte": "Cadre fixe métallique dans lequel vient se fermer un vantail.",
+    "explication_pedagogique": "Recevoir la porte, les paumelles, la gâche et assurer le bon fonctionnement.",
+    "exemple_utilisation": "les portes extérieures métalliques ont un cadre d’huisserie métallique en tôle d’acier 20/10e minimum.",
+    "points_vigilance": [
+      "contrôler aplomb, niveau, équerrage et scellement avant pose du vantail."
+    ]
+  },
+  {
+    "terme": "Huisserie tubulaire",
+    "definition_courte": "Huisserie fabriquée à partir d’un profil tubulaire métallique.",
+    "explication_pedagogique": "Donner rigidité et support de fixation aux portes métalliques.",
+    "exemple_utilisation": "les portes métalliques de celliers ont une huisserie tubulaire en acier galvanisé avec revêtement d’apprêt.",
+    "points_vigilance": [
+      "vérifier les pattes à scellement et l’adaptation à la pose en applique intérieure."
+    ]
+  },
+  {
+    "terme": "Implantation",
+    "definition_courte": "Position exacte d’un ouvrage sur les plans ou sur le chantier.",
+    "explication_pedagogique": "Poser garde-corps, portes, grilles et arceaux au bon endroit.",
+    "exemple_utilisation": "les portes, locaux vélos, grilles et garde-corps sont localisés selon plans architecte ou plans de repérage.",
+    "points_vigilance": [
+      "ne jamais fabriquer uniquement avec le DPGF : il faut vérifier les plans."
+    ]
+  },
+  {
+    "terme": "Incorporation",
+    "definition_courte": "Mise en place d’une pièce dans le béton ou la maçonnerie pendant l’exécution du support.",
+    "explication_pedagogique": "Préparer les fixations ou réservations avant pose de l’ouvrage métallique.",
+    "exemple_utilisation": "les accessoires de fixation à sceller doivent être fournis au gros œuvre en temps utile.",
+    "points_vigilance": [
+      "une incorporation oubliée entraîne carottage, scellement complémentaire ou reprise coûteuse."
+    ]
+  },
+  {
+    "terme": "Inox",
+    "definition_courte": "Nom courant de l’acier inoxydable.",
+    "explication_pedagogique": "Limiter la corrosion sur visserie et quincaillerie.",
+    "exemple_utilisation": "la visserie et la quincaillerie doivent être en acier inoxydable ou protégées.",
+    "points_vigilance": [
+      "choisir la nuance adaptée à l’exposition, surtout en atmosphère marine."
+    ]
+  },
+  {
+    "terme": "Joint",
+    "definition_courte": "Traitement souple ou profil placé entre deux ouvrages.",
+    "explication_pedagogique": "Assurer raccord, étanchéité, finition ou absorption de petits mouvements.",
+    "exemple_utilisation": "tous les joints nécessaires sont prévus entre maçonnerie et ouvrages de serrurerie.",
+    "points_vigilance": [
+      "un joint mal choisi peut se fissurer, se décoller ou laisser entrer l’eau."
+    ]
+  },
+  {
+    "terme": "Joint d’étanchéité",
+    "definition_courte": "Joint destiné principalement à empêcher le passage de l’eau ou de l’air.",
+    "explication_pedagogique": "Protéger les interfaces entre structure et serrurerie.",
+    "exemple_utilisation": "les raccords entre maçonnerie et ouvrages de serrurerie doivent être étanches.",
+    "points_vigilance": [
+      "préparer le support propre, sec et compatible avec le mastic utilisé."
+    ]
+  },
+  {
+    "terme": "Label QUALIMARINE",
+    "definition_courte": "Label de qualité associé aux traitements de surface adaptés aux ambiances agressives, notamment marines.",
+    "explication_pedagogique": "Renforcer l’exigence de durabilité pour les ouvrages thermolaqués extérieurs.",
+    "exemple_utilisation": "le thermolaquage d’usine des ouvrages extérieurs doit posséder le label QUALIMARINE.",
+    "points_vigilance": [
+      "demander l’attestation du traitement et vérifier que le système complet est conforme."
+    ]
+  },
+  {
+    "terme": "Label SNFQ",
+    "definition_courte": "Référence de qualité demandée pour la quincaillerie.",
+    "explication_pedagogique": "S’assurer que les accessoires choisis ont un niveau de qualité reconnu.",
+    "exemple_utilisation": "les éléments de quincaillerie doivent être de première qualité, avec label SNFQ exigé.",
+    "points_vigilance": [
+      "un équivalent doit être justifié, pas seulement annoncé."
+    ]
+  },
+  {
+    "terme": "Lame pare-pluie",
+    "definition_courte": "Lame inclinée ou profilée qui laisse passer l’air tout en limitant l’entrée de pluie.",
+    "explication_pedagogique": "Ventiler un local sans laisser pénétrer directement l’eau.",
+    "exemple_utilisation": "les grilles de ventilation sont constituées de lames pare-pluie soudées sur contre-cadre.",
+    "points_vigilance": [
+      "vérifier orientation, pente et protection anticorrosion."
+    ]
+  },
+  {
+    "terme": "Laquage",
+    "definition_courte": "Application d’une finition de type peinture laquée sur un ouvrage.",
+    "explication_pedagogique": "Protéger et donner l’aspect final demandé.",
+    "exemple_utilisation": "les ouvrages intérieurs peuvent recevoir une protection par laquage ou une finition au lot peinture.",
+    "points_vigilance": [
+      "éviter les reprises visibles et respecter la teinte validée."
+    ]
+  },
+  {
+    "terme": "Largeur de passage",
+    "definition_courte": "Largeur libre permettant de circuler à travers une porte.",
+    "explication_pedagogique": "Garantir l’usage normal et l’accessibilité du local.",
+    "exemple_utilisation": "les portes extérieures métalliques des locaux communs et techniques ont une largeur de passage de 1,00 m.",
+    "points_vigilance": [
+      "mesurer la largeur libre réelle après pose du bâti et du vantail."
+    ]
+  },
+  {
+    "terme": "Lisse basse",
+    "definition_courte": "Élément horizontal placé en partie basse d’un garde-corps ou d’une protection.",
+    "explication_pedagogique": "Participer au remplissage et à la rigidité de l’ensemble.",
+    "exemple_utilisation": "les garde-corps intérieurs ont une lisse basse en tube 20 x 20 mm ; les garde-corps terrasses ont une lisse basse en fer plat 30 x 20 mm.",
+    "points_vigilance": [
+      "vérifier la hauteur, l’espacement et les risques d’escalade selon la configuration."
+    ]
+  },
+  {
+    "terme": "Lisse haute",
+    "definition_courte": "Élément horizontal placé en partie supérieure d’un garde-corps.",
+    "explication_pedagogique": "Rigidifier la protection et parfois servir de limite haute.",
+    "exemple_utilisation": "les garde-corps intérieurs comportent une lisse haute en tube de 20 x 20 mm.",
+    "points_vigilance": [
+      "ne pas confondre avec la main courante si les deux éléments sont distincts."
+    ]
+  },
+  {
+    "terme": "Lisse horizontale",
+    "definition_courte": "Tube ou profil horizontal posé devant une fenêtre ou sur un garde-corps béton.",
+    "explication_pedagogique": "Créer une protection complémentaire ou respecter une hauteur de sécurité.",
+    "exemple_utilisation": "des lisses horizontales 40 x 20 mm sont prévues sur fenêtres et sur garde-corps béton.",
+    "points_vigilance": [
+      "contrôler la hauteur depuis le sol intérieur ou la zone d’appui réelle."
+    ]
+  },
+  {
+    "terme": "Local OM",
+    "definition_courte": "Local destiné aux ordures ménagères.",
+    "explication_pedagogique": "Recevoir une porte métallique et une ventilation adaptée.",
+    "exemple_utilisation": "le local OM commun du bâtiment B reçoit une porte extérieure métallique et une grille de ventilation 20 x 20 cm.",
+    "points_vigilance": [
+      "prévoir résistance, ventilation et nettoyage faciles."
+    ]
+  },
+  {
+    "terme": "Local technique",
+    "definition_courte": "Local recevant des équipements techniques ou de service.",
+    "explication_pedagogique": "Limiter l’accès, protéger les installations et permettre la maintenance.",
+    "exemple_utilisation": "les portes extérieures métalliques concernent les locaux communs et techniques.",
+    "points_vigilance": [
+      "coordonner serrures, contrôle d’accès, ventilation et exigences feu si elles existent dans les autres documents."
+    ]
+  },
+  {
+    "terme": "Local vélos",
+    "definition_courte": "Local destiné au stationnement des vélos.",
+    "explication_pedagogique": "Recevoir portes, arceaux et grilles de ventilation.",
+    "exemple_utilisation": "les locaux vélos des bâtiments A et B reçoivent portes métalliques, arceaux galvanisés et grilles de ventilation.",
+    "points_vigilance": [
+      "vérifier l’implantation des arceaux pour conserver les dégagements."
+    ]
+  },
+  {
+    "terme": "Main courante",
+    "definition_courte": "Élément que l’on tient avec la main le long d’un escalier ou d’une circulation.",
+    "explication_pedagogique": "Aider au déplacement et sécuriser la montée ou la descente.",
+    "exemple_utilisation": "les mains courantes sont en tube rectangulaire 40 x 20 mm, continues, avec débordement de 0,30 m.",
+    "points_vigilance": [
+      "contrôler continuité, hauteur, fixation, préhension et absence d’obstacle."
+    ]
+  },
+  {
+    "terme": "Maître d’œuvre",
+    "definition_courte": "Intervenant chargé de concevoir et suivre l’exécution technique et architecturale du projet.",
+    "explication_pedagogique": "Valider choix, teintes, échantillons et conformité aux documents du marché.",
+    "exemple_utilisation": "les teintes, quincailleries et certains dessins sont laissés au choix ou à la validation du maître d’œuvre.",
+    "points_vigilance": [
+      "obtenir les validations écrites avant fabrication."
+    ]
+  },
+  {
+    "terme": "Maître d’ouvrage",
+    "definition_courte": "Client ou donneur d’ordre de l’opération.",
+    "explication_pedagogique": "Définir les besoins, valider certains choix et réceptionner les ouvrages.",
+    "exemple_utilisation": "le choix des teintes et quincailleries peut être fait par le maître d’ouvrage et le maître d’œuvre.",
+    "points_vigilance": [
+      "ne pas commander les finitions sans validation du maître d’ouvrage si le CCTP l’impose."
+    ]
+  },
+  {
+    "terme": "Métallisation",
+    "definition_courte": "Projection d’un métal protecteur sur un support acier.",
+    "explication_pedagogique": "Protéger contre la corrosion avant finition.",
+    "exemple_utilisation": "elle est citée parmi les traitements préalables possibles pour les ouvrages métalliques intérieurs.",
+    "points_vigilance": [
+      "vérifier si métallisation, galvanisation, laquage ou antirouille est réellement prévu selon l’ouvrage."
+    ]
+  },
+  {
+    "terme": "Mise en fonction",
+    "definition_courte": "Action de rendre un ouvrage opérationnel après pose.",
+    "explication_pedagogique": "S’assurer que la porte, la serrure, la gâche, le ferme-porte et les accessoires fonctionnent.",
+    "exemple_utilisation": "les portes extérieures métalliques sont prévues avec fourniture, pose et mise en fonction.",
+    "points_vigilance": [
+      "faire des essais d’ouverture, fermeture, verrouillage et alimentation électrique."
+    ]
+  },
+  {
+    "terme": "Mise en œuvre extérieure",
+    "definition_courte": "Pose d’un ouvrage exposé à l’extérieur.",
+    "explication_pedagogique": "Déterminer les protections contre pluie, UV, corrosion et variations climatiques.",
+    "exemple_utilisation": "les ouvrages de serrurerie extérieure sont traités par sablage, galvanisation à chaud et thermolaquage d’usine.",
+    "points_vigilance": [
+      "la qualité de traitement doit être supérieure à celle d’un ouvrage intérieur."
+    ]
+  },
+  {
+    "terme": "Mise en œuvre intérieure",
+    "definition_courte": "Pose d’un ouvrage à l’intérieur du bâtiment.",
+    "explication_pedagogique": "Déterminer les protections, finitions et contraintes de chantier.",
+    "exemple_utilisation": "les ouvrages métalliques intérieurs non protégés doivent être livrés avec peinture antirouille.",
+    "points_vigilance": [
+      "ne pas oublier les retouches après montage avant peinture définitive."
+    ]
+  },
+  {
+    "terme": "Montant intermédiaire",
+    "definition_courte": "Profil vertical placé entre deux appuis ou extrémités d’une lisse.",
+    "explication_pedagogique": "Rigidifier les lisses et répartir les efforts.",
+    "exemple_utilisation": "les lisses horizontales sur fenêtres et garde-corps béton comprennent des montants intermédiaires en carré de 12 x 12.",
+    "points_vigilance": [
+      "contrôler l’alignement et la fixation dans le support."
+    ]
+  },
+  {
+    "terme": "Montant vertical",
+    "definition_courte": "Élément vertical d’un garde-corps ou d’une protection.",
+    "explication_pedagogique": "Porter les lisses et transmettre les efforts aux fixations.",
+    "exemple_utilisation": "les garde-corps extérieurs des portes-fenêtres comprennent des montants verticaux en tube de 20 x 20 mm.",
+    "points_vigilance": [
+      "le nombre et la section doivent être compatibles avec les efforts calculés."
+    ]
+  },
+  {
+    "terme": "Mur banché",
+    "definition_courte": "Mur en béton armé coulé dans des banches.",
+    "explication_pedagogique": "Recevoir certaines huisseries ou réservations incorporées au gros œuvre.",
+    "exemple_utilisation": "le cadre d’huisserie métallique des portes extérieures est à fournir au gros œuvre qui le met en place pour les murs banchés.",
+    "points_vigilance": [
+      "la coordination doit se faire avant coulage, sinon les reprises sont lourdes."
+    ]
+  },
+  {
+    "terme": "Muret maçonné",
+    "definition_courte": "Petit mur en maçonnerie servant de support ou de protection.",
+    "explication_pedagogique": "Recevoir des lisses, scellements ou fixations invisibles.",
+    "exemple_utilisation": "les lisses sur garde-corps béton sont fixées dans le muret maçonné ou par fixation invisible.",
+    "points_vigilance": [
+      "vérifier solidité, épaisseur et qualité du support avant scellement."
+    ]
+  },
+  {
+    "terme": "Nez de marche",
+    "definition_courte": "Bord avant d’une marche d’escalier.",
+    "explication_pedagogique": "Servir de repère pour prolonger correctement la main courante.",
+    "exemple_utilisation": "les mains courantes débordent de 0,30 m minimum par rapport aux nez de première et dernière marche.",
+    "points_vigilance": [
+      "le repère doit être pris sur l’escalier fini."
+    ]
+  },
+  {
+    "terme": "NF P 01-012",
+    "definition_courte": "Norme française relative aux dimensions et règles de sécurité des garde-corps et rampes d’escalier.",
+    "explication_pedagogique": "Définir les exigences dimensionnelles de sécurité pour éviter les chutes.",
+    "exemple_utilisation": "le CCTP cite cette norme comme référence pour les garde-corps et rampes.",
+    "points_vigilance": [
+      "toujours vérifier la version et les exigences applicables au projet."
+    ]
+  },
+  {
+    "terme": "NF P 01-013",
+    "definition_courte": "Norme française relative aux essais des garde-corps, méthodes et critères.",
+    "explication_pedagogique": "Vérifier la résistance mécanique des garde-corps sous efforts.",
+    "exemple_utilisation": "le CCTP indique que les ouvrages doivent être modifiés si les dimensions sont insuffisantes au regard de cette norme.",
+    "points_vigilance": [
+      "la conformité passe par le dimensionnement et les essais, pas seulement par l’aspect."
+    ]
+  },
+  {
+    "terme": "Normes en vigueur",
+    "definition_courte": "Ensemble des textes techniques applicables au moment du projet.",
+    "explication_pedagogique": "Servir de base à la conception, fabrication, pose et contrôle des ouvrages.",
+    "exemple_utilisation": "les matériaux et ouvrages doivent répondre aux exigences des normes en vigueur.",
+    "points_vigilance": [
+      "une liste de normes dans le CCTP n’est pas exhaustive ; l’entreprise doit respecter les textes applicables."
+    ]
+  },
+  {
+    "terme": "Ouvrage de serrurerie extérieure",
+    "definition_courte": "Ouvrage métallique posé dehors ou exposé à l’environnement extérieur.",
+    "explication_pedagogique": "Réaliser garde-corps, lisses, portes, grilles ou protections durables.",
+    "exemple_utilisation": "les profilés extérieurs doivent être protégés par sablage, galvanisation à chaud et thermolaquage QUALIMARINE.",
+    "points_vigilance": [
+      "contrôler exposition, traitements, teinte RAL et retouches après pose."
+    ]
+  },
+  {
+    "terme": "Ouvrage de serrurerie intérieure",
+    "definition_courte": "Ouvrage métallique posé à l’intérieur du bâtiment.",
+    "explication_pedagogique": "Réaliser garde-corps, mains courantes, portes ou accessoires non directement exposés aux intempéries.",
+    "exemple_utilisation": "les ouvrages intérieurs non protégés contre la corrosion sont livrés avec peinture antirouille appliquée en usine.",
+    "points_vigilance": [
+      "les reprises aux assemblages restent nécessaires après montage."
+    ]
+  },
+  {
+    "terme": "Ouvrage scellé",
+    "definition_courte": "Ouvrage ou pièce dont la fixation est incorporée dans le béton ou la maçonnerie.",
+    "explication_pedagogique": "Assurer une fixation résistante et durable.",
+    "exemple_utilisation": "les matériels et accessoires de fixation à sceller dans la structure sont fournis par le serrurier au gros œuvre.",
+    "points_vigilance": [
+      "anticiper les réservations et les plans de scellement."
+    ]
+  },
+  {
+    "terme": "Panneau de tôle découpée",
+    "definition_courte": "Panneau métallique ajouré ou décoratif réalisé dans une tôle.",
+    "explication_pedagogique": "Former le remplissage architectural d’un garde-corps.",
+    "exemple_utilisation": "les garde-corps des terrasses reçoivent des panneaux de tôle découpée au laser suivant dessin de l’architecte.",
+    "points_vigilance": [
+      "vérifier que les ouvertures ne créent pas un risque de franchissement ou de non-conformité."
+    ]
+  },
+  {
+    "terme": "Pare-pluie",
+    "definition_courte": "Forme ou pièce destinée à empêcher l’entrée directe de l’eau de pluie.",
+    "explication_pedagogique": "Protéger un local tout en conservant une ventilation.",
+    "exemple_utilisation": "les grilles de ventilation ont des lames pare-pluie soudées.",
+    "points_vigilance": [
+      "orienter correctement les lames vers l’extérieur."
+    ]
+  },
+  {
+    "terme": "Pattes à scellement",
+    "definition_courte": "Pattes métalliques fixées à une huisserie pour l’ancrer dans le support.",
+    "explication_pedagogique": "Maintenir solidement une porte ou un cadre dans la maçonnerie.",
+    "exemple_utilisation": "les huisseries tubulaires des portes métalliques de celliers comprennent des pattes à scellement.",
+    "points_vigilance": [
+      "contrôler leur nombre, leur position et leur scellement réel."
+    ]
+  },
+  {
+    "terme": "Paumelle",
+    "definition_courte": "Organe de rotation d’une porte, équivalent courant d’une charnière robuste.",
+    "explication_pedagogique": "Permettre au vantail de pivoter tout en supportant son poids.",
+    "exemple_utilisation": "les portes métalliques de celliers sont ferrées par quatre paumelles.",
+    "points_vigilance": [
+      "graisser, régler et vérifier l’alignement après pose."
+    ]
+  },
+  {
+    "terme": "Paumelle réglable 3 directions",
+    "definition_courte": "Paumelle permettant d’ajuster la position du vantail en hauteur, largeur et profondeur.",
+    "explication_pedagogique": "Faciliter les réglages pour obtenir un jeu régulier et une bonne fermeture.",
+    "exemple_utilisation": "les portes de service des locaux communs et techniques sont ferrées par paumelles réglables dans les 3 directions.",
+    "points_vigilance": [
+      "ne pas masquer un mauvais aplomb de bâti par un réglage excessif."
+    ]
+  },
+  {
+    "terme": "Peinture antirouille",
+    "definition_courte": "Peinture de protection appliquée avant la peinture de finition.",
+    "explication_pedagogique": "Protéger les ouvrages métalliques intérieurs contre la corrosion.",
+    "exemple_utilisation": "les ouvrages intérieurs doivent être livrés avec une protection par peinture antirouille appliquée en usine.",
+    "points_vigilance": [
+      "les retouches après assemblage doivent être faites avant peinture finale."
+    ]
+  },
+  {
+    "terme": "Peinture définitive",
+    "definition_courte": "Finition finale appliquée après préparation et protections initiales.",
+    "explication_pedagogique": "Donner l’aspect final et compléter la protection.",
+    "exemple_utilisation": "la peinture définitive de certains ouvrages intérieurs est à la charge du lot Peinture.",
+    "points_vigilance": [
+      "bien distinguer dans le chiffrage les protections dues par le serrurier et les finitions dues par le peintre."
+    ]
+  },
+  {
+    "terme": "Pêne dormant",
+    "definition_courte": "Partie de serrure qui sort dans la gâche pour verrouiller la porte avec la clé.",
+    "explication_pedagogique": "Assurer le verrouillage réel de la porte.",
+    "exemple_utilisation": "les serrures des portes métalliques de celliers comprennent pênes dormants et demi-tour.",
+    "points_vigilance": [
+      "vérifier l’engagement du pêne dans la gâche après réglage."
+    ]
+  },
+  {
+    "terme": "PGCSPS",
+    "definition_courte": "Plan Général de Coordination en matière de Sécurité et de Protection de la Santé.",
+    "explication_pedagogique": "Organiser les mesures de prévention entre entreprises sur chantier.",
+    "exemple_utilisation": "l’entreprise doit transmettre ses éléments de prévention pour l’établissement du PGCSPS.",
+    "points_vigilance": [
+      "identifier les risques de travail en hauteur, manutention des garde-corps et perçages."
+    ]
+  },
+  {
+    "terme": "Platine",
+    "definition_courte": "Plaque métallique servant de base de fixation.",
+    "explication_pedagogique": "Transmettre les efforts de l’ouvrage au support.",
+    "exemple_utilisation": "les garde-corps intérieurs et de terrasses comportent des platines à dimensionner suivant réglementation.",
+    "points_vigilance": [
+      "vérifier épaisseur, ancrages, entraxes, support et protection anticorrosion."
+    ]
+  },
+  {
+    "terme": "Platine murale",
+    "definition_courte": "Platine fixée sur un mur pour recevoir un écuyer ou un support.",
+    "explication_pedagogique": "Maintenir une main courante avec un ancrage solide.",
+    "exemple_utilisation": "les mains courantes d’escalier sont fixées par écuyers en acier sur platines murales.",
+    "points_vigilance": [
+      "contrôler la qualité du support avant perçage."
+    ]
+  },
+  {
+    "terme": "Poignée de tirage",
+    "definition_courte": "Poignée permettant de tirer une porte sans actionner forcément une béquille.",
+    "explication_pedagogique": "Faciliter la manœuvre de portes de service ou de parties communes.",
+    "exemple_utilisation": "les portes extérieures métalliques reçoivent une poignée de tirage double face sur plaques en aluminium anodisé.",
+    "points_vigilance": [
+      "vérifier hauteur, robustesse, accessibilité et compatibilité avec la gâche électrique."
+    ]
+  },
+  {
+    "terme": "Porte de service",
+    "definition_courte": "Porte technique ou secondaire destinée à un local commun, technique ou de service.",
+    "explication_pedagogique": "Fermer un local tout en restant robuste et fonctionnelle.",
+    "exemple_utilisation": "les blocs-portes métalliques extérieurs comprennent une porte de service à âme pleine.",
+    "points_vigilance": [
+      "contrôler ferrage, serrure, ferme-porte, gâche électrique et finition."
+    ]
+  },
+  {
+    "terme": "Porte métallique",
+    "definition_courte": "Porte dont le vantail et/ou l’huisserie sont principalement en acier ou métal.",
+    "explication_pedagogique": "Apporter résistance, durabilité et sécurité pour locaux techniques, celliers ou communs.",
+    "exemple_utilisation": "le lot comprend portes extérieures métalliques des locaux communs et techniques et portes métalliques de celliers.",
+    "points_vigilance": [
+      "vérifier distinction entre porte de service, porte de cellier, finitions et quincaillerie associée."
+    ]
+  },
+  {
+    "terme": "Porte simple vantail",
+    "definition_courte": "Porte composée d’un seul ouvrant.",
+    "explication_pedagogique": "Fermer une ouverture courante sans second vantail.",
+    "exemple_utilisation": "les portes métalliques de celliers sont des portes simples vantaux de dimensions 0,80 x 2,15 m.",
+    "points_vigilance": [
+      "contrôler sens d’ouverture et encombrement dans le local."
+    ]
+  },
+  {
+    "terme": "Procès-verbal d’essais",
+    "definition_courte": "Document prouvant qu’un produit ou ouvrage a été testé selon une norme ou méthode.",
+    "explication_pedagogique": "Justifier la conformité auprès du maître d’œuvre et du bureau de contrôle.",
+    "exemple_utilisation": "les quincailleries sont choisies sur présentation d’échantillons et procès-verbaux d’essais.",
+    "points_vigilance": [
+      "le PV doit correspondre au modèle réellement fourni."
+    ]
+  },
+  {
+    "terme": "Profilé acier",
+    "definition_courte": "Pièce métallique longue fabriquée avec une section définie : tube, plat, carré, U, etc.",
+    "explication_pedagogique": "Constituer les garde-corps, lisses, mains courantes et cadres.",
+    "exemple_utilisation": "le CCTP décrit de nombreux profilés : tubes 40 x 20, tubes 20 x 20, carré 12 x 12, fer plat 30 x 20.",
+    "points_vigilance": [
+      "les sections indiquées peuvent être minimums et doivent être validées par calcul."
+    ]
+  },
+  {
+    "terme": "Protection des personnes",
+    "definition_courte": "Ensemble des moyens de prévention destinés à éviter accidents et chutes.",
+    "explication_pedagogique": "Sécuriser le chantier pendant la pose des ouvrages métalliques.",
+    "exemple_utilisation": "l’entreprise doit prévoir tous les moyens nécessaires à la protection des personnes selon instructions du coordonnateur SPS.",
+    "points_vigilance": [
+      "inclure EPI, balisage, manutention, travail en hauteur et protections collectives."
+    ]
+  },
+  {
+    "terme": "Protection provisoire",
+    "definition_courte": "Protection temporaire mise en place pendant le chantier.",
+    "explication_pedagogique": "Éviter les dégradations avant réception.",
+    "exemple_utilisation": "l’entreprise doit assurer la protection des ouvrages et les remises en état.",
+    "points_vigilance": [
+      "protéger les finitions thermolaquées contre rayures, chocs et projections."
+    ]
+  },
+  {
+    "terme": "Quincaillerie",
+    "definition_courte": "Ensemble des accessoires de fonctionnement : paumelles, serrures, poignées, ferme-portes, visserie.",
+    "explication_pedagogique": "Permettre l’usage, la sécurité et la durabilité des portes et ouvrages.",
+    "exemple_utilisation": "la quincaillerie doit être de première qualité, label SNFQ exigé, protégée contre la corrosion.",
+    "points_vigilance": [
+      "contrôler modèle, finition, compatibilité, PV d’essais et garantie."
+    ]
+  },
+  {
+    "terme": "RAL",
+    "definition_courte": "Système de références de couleurs utilisé pour les peintures et thermolaquages.",
+    "explication_pedagogique": "Définir précisément la teinte des ouvrages métalliques.",
+    "exemple_utilisation": "la couleur du thermolaquage est au choix dans la gamme RAL.",
+    "points_vigilance": [
+      "noter la référence validée pour éviter les différences entre lots."
+    ]
+  },
+  {
+    "terme": "Range-vélos",
+    "definition_courte": "Équipement destiné à maintenir ou attacher des vélos.",
+    "explication_pedagogique": "Organiser le stationnement vélo dans les locaux communs.",
+    "exemple_utilisation": "le CCTP demande des range-vélos type arceau galvanisé PAR0473 de chez ABC mobilier ou équivalent.",
+    "points_vigilance": [
+      "vérifier entraxes, fixation au sol ou support et circulation autour."
+    ]
+  },
+  {
+    "terme": "Réception des supports",
+    "definition_courte": "Contrôle des supports avant pose des ouvrages.",
+    "explication_pedagogique": "Vérifier que les murs, tableaux, sols ou murets permettent la pose prévue.",
+    "exemple_utilisation": "la réception des supports et prises de mesures fait partie des obligations de l’entreprise.",
+    "points_vigilance": [
+      "signaler par écrit les supports non conformes avant fabrication ou pose."
+    ]
+  },
+  {
+    "terme": "Réglage de porte",
+    "definition_courte": "Ajustement du vantail, des paumelles, de la serrure et du ferme-porte.",
+    "explication_pedagogique": "Obtenir une ouverture et fermeture sans frottement ni claquement.",
+    "exemple_utilisation": "les paumelles réglables dans les 3 directions facilitent les réglages des portes de service.",
+    "points_vigilance": [
+      "réaliser les réglages après finitions, joints et mise en service des équipements électriques."
+    ]
+  },
+  {
+    "terme": "Remise en état",
+    "definition_courte": "Réparation ou reprise après dégradation ou intervention.",
+    "explication_pedagogique": "Livrer un ouvrage propre et conforme à la réception.",
+    "exemple_utilisation": "le CCTP mentionne la protection des ouvrages et les remises en état.",
+    "points_vigilance": [
+      "les rayures sur thermolaquage ou galvanisation doivent être traitées correctement."
+    ]
+  },
+  {
+    "terme": "Remplissage de garde-corps",
+    "definition_courte": "Partie située entre les montants ou lisses d’un garde-corps.",
+    "explication_pedagogique": "Empêcher le passage et participer à l’esthétique.",
+    "exemple_utilisation": "le remplissage des terrasses est prévu par panneaux de tôle découpée au laser.",
+    "points_vigilance": [
+      "vérifier conformité des vides et non-escaladabilité selon la configuration."
+    ]
+  },
+  {
+    "terme": "Réservation",
+    "definition_courte": "Vide prévu dans le béton ou la maçonnerie pour recevoir un ouvrage ou passage.",
+    "explication_pedagogique": "Permettre la pose sans reprise lourde du support.",
+    "exemple_utilisation": "le serrurier doit indiquer au gros œuvre les dimensions exactes des grilles pour les réservations nécessaires.",
+    "points_vigilance": [
+      "une réservation trop petite ou mal placée bloque la pose."
+    ]
+  },
+  {
+    "terme": "Retouche",
+    "definition_courte": "Reprise locale de protection ou de finition après pose, coupe ou assemblage.",
+    "explication_pedagogique": "Éviter les points de corrosion et corriger les petits défauts visibles.",
+    "exemple_utilisation": "les retouches sont dues notamment au droit des assemblages après montage.",
+    "points_vigilance": [
+      "utiliser un produit compatible avec la galvanisation, l’antirouille ou le thermolaquage."
+    ]
+  },
+  {
+    "terme": "Revêtement d’apprêt",
+    "definition_courte": "Couche préparatoire appliquée avant peinture de finition.",
+    "explication_pedagogique": "Améliorer l’accroche de la peinture et protéger temporairement.",
+    "exemple_utilisation": "les huisseries tubulaires des portes métalliques ont un revêtement d’apprêt.",
+    "points_vigilance": [
+      "l’apprêt n’est pas toujours une finition définitive."
+    ]
+  },
+  {
+    "terme": "Sablage",
+    "definition_courte": "Préparation de surface par projection d’abrasif.",
+    "explication_pedagogique": "Nettoyer et rugosifier l’acier avant galvanisation ou peinture.",
+    "exemple_utilisation": "les profilés extérieurs doivent être protégés après sablage et galvanisation à chaud.",
+    "points_vigilance": [
+      "une mauvaise préparation de surface réduit la tenue du thermolaquage."
+    ]
+  },
+  {
+    "terme": "Scellement",
+    "definition_courte": "Fixation d’une pièce dans un support à l’aide d’un mortier, résine ou incorporation.",
+    "explication_pedagogique": "Assurer la tenue mécanique des garde-corps, lisses ou huisseries.",
+    "exemple_utilisation": "plusieurs ouvrages sont prévus avec fixation par scellement dans tableaux, murets ou support.",
+    "points_vigilance": [
+      "dimensionner profondeur et produit selon efforts, support et environnement."
+    ]
+  },
+  {
+    "terme": "Serrure 1 point à mortaiser",
+    "definition_courte": "Serrure encastrée dans la porte avec un seul point de verrouillage.",
+    "explication_pedagogique": "Fermer une porte métallique simple de façon discrète.",
+    "exemple_utilisation": "les portes métalliques de celliers reçoivent une serrure 1 point à mortaiser, pênes dormants et demi-tour.",
+    "points_vigilance": [
+      "vérifier compatibilité avec cylindre européen et béquillage."
+    ]
+  },
+  {
+    "terme": "Serrurerie",
+    "definition_courte": "Métier des ouvrages métalliques de bâtiment : garde-corps, mains courantes, portes, grilles, supports.",
+    "explication_pedagogique": "Fabriquer, poser et régler des ouvrages métalliques techniques et de sécurité.",
+    "exemple_utilisation": "le lot 06 couvre garde-corps, mains courantes, portes métalliques, équipements vélos, grilles et échelles d’accès aux combles.",
+    "points_vigilance": [
+      "la serrurerie engage souvent sécurité des personnes et conformité normative."
+    ]
+  },
+  {
+    "terme": "SNFQ",
+    "definition_courte": "Label ou référence de qualité demandé pour la quincaillerie.",
+    "explication_pedagogique": "Garantir un niveau de qualité sur les accessoires de fonctionnement.",
+    "exemple_utilisation": "le CCTP exige le label SNFQ pour les éléments de quincaillerie.",
+    "points_vigilance": [
+      "ne pas remplacer par un produit bas de gamme sans validation."
+    ]
+  },
+  {
+    "terme": "Support livré",
+    "definition_courte": "État réel du support remis par un autre lot avant intervention.",
+    "explication_pedagogique": "Adapter les ouvrages métalliques aux dimensions réellement exécutées.",
+    "exemple_utilisation": "le serrurier doit ajuster le dimensionnement de ses ouvrages aux supports livrés par le gros œuvre.",
+    "points_vigilance": [
+      "faire une prise de cotes sur site avant fabrication définitive."
+    ]
+  },
+  {
+    "terme": "Système anti-dégondable",
+    "definition_courte": "Dispositif renforçant une porte contre l’arrachement du vantail.",
+    "explication_pedagogique": "Améliorer la sécurité d’une porte métallique.",
+    "exemple_utilisation": "les portes de service métalliques sont prévues avec système anti-dégondable en acier.",
+    "points_vigilance": [
+      "vérifier présence réelle à la pose et compatibilité avec les paumelles."
+    ]
+  },
+  {
+    "terme": "Système d’accrochage mural",
+    "definition_courte": "Dispositif permettant de suspendre ou maintenir un équipement au mur.",
+    "explication_pedagogique": "Ranger l’échelle d’accès aux combles de manière stable et sécurisée.",
+    "exemple_utilisation": "l’échelle double aluminium est prévue avec système d’accrochage au mur.",
+    "points_vigilance": [
+      "la fixation murale doit reprendre le poids et les manipulations répétées."
+    ]
+  },
+  {
+    "terme": "Tableau",
+    "definition_courte": "Face verticale intérieure d’une ouverture dans un mur, autour d’une baie ou d’une porte-fenêtre.",
+    "explication_pedagogique": "Recevoir certains scellements ou fixations de garde-corps.",
+    "exemple_utilisation": "les garde-corps de portes-fenêtres et lisses peuvent être fixés par scellement dans les tableaux.",
+    "points_vigilance": [
+      "vérifier largeur, profondeur, nature du support et absence de platine visible si demandé."
+    ]
+  },
+  {
+    "terme": "Tapée intérieure",
+    "definition_courte": "Position de pose située côté intérieur de l’ouverture ou du dormant.",
+    "explication_pedagogique": "Adapter l’alignement de la porte avec le nu intérieur et les finitions.",
+    "exemple_utilisation": "les portes extérieures métalliques des locaux communs et techniques sont posées en tapée intérieure.",
+    "points_vigilance": [
+      "contrôler raccords de finition, jeux et sens d’ouverture."
+    ]
+  },
+  {
+    "terme": "Tête fraisée",
+    "definition_courte": "Tête de vis conique destinée à s’encastrer dans une fraisure.",
+    "explication_pedagogique": "Permettre une fixation affleurante et propre.",
+    "exemple_utilisation": "les garde-corps et platines utilisent des vis à têtes fraisées.",
+    "points_vigilance": [
+      "la tête doit affleurer sans dépasser ni fragiliser le support."
+    ]
+  },
+  {
+    "terme": "Thermolaquage",
+    "definition_courte": "Finition par poudre cuite au four, appliquée sur métal.",
+    "explication_pedagogique": "Donner une teinte durable et une protection de surface.",
+    "exemple_utilisation": "les ouvrages extérieurs sont galvanisés puis thermolaqués en usine, avec teinte au choix dans la gamme RAL.",
+    "points_vigilance": [
+      "une rayure de thermolaquage doit être reprise avec un système compatible."
+    ]
+  },
+  {
+    "terme": "Tôle acier 20/10e",
+    "definition_courte": "Tôle d’acier d’épaisseur 20 dixièmes de millimètre, soit environ 2 mm.",
+    "explication_pedagogique": "Former une huisserie robuste pour porte métallique.",
+    "exemple_utilisation": "les cadres d’huisserie métalliques sont en tôle d’acier de 20/10e minimum.",
+    "points_vigilance": [
+      "ne pas réduire l’épaisseur sans validation technique."
+    ]
+  },
+  {
+    "terme": "Tôle d’acier deux faces",
+    "definition_courte": "Vantail composé de deux parements en tôle acier, un de chaque côté.",
+    "explication_pedagogique": "Créer une porte métallique rigide et durable.",
+    "exemple_utilisation": "les portes de service comprennent un vantail en tôle d’acier deux faces à âme pleine.",
+    "points_vigilance": [
+      "contrôler planéité, protection des chants et finitions."
+    ]
+  },
+  {
+    "terme": "Tôle découpée au laser",
+    "definition_courte": "Tôle façonnée avec des motifs ou ouvertures par découpe laser.",
+    "explication_pedagogique": "Réaliser un remplissage de garde-corps décoratif et précis.",
+    "exemple_utilisation": "les garde-corps de terrasses reçoivent des panneaux de tôle découpée au laser.",
+    "points_vigilance": [
+      "valider le dessin, l’épaisseur et la tenue aux traitements de finition."
+    ]
+  },
+  {
+    "terme": "Traitement préalable",
+    "definition_courte": "Protection appliquée avant la finition finale : métallisation, galvanisation, laquage ou antirouille.",
+    "explication_pedagogique": "Préparer le métal à durer dans le temps.",
+    "exemple_utilisation": "les ouvrages métalliques non protégés contre la corrosion doivent recevoir une protection avant chantier.",
+    "points_vigilance": [
+      "contrôler que le traitement couvre aussi assemblages, soudures et zones cachées."
+    ]
+  },
+  {
+    "terme": "Trappe d’accès aux combles",
+    "definition_courte": "Ouverture permettant d’accéder aux combles.",
+    "explication_pedagogique": "Permettre l’entretien et les interventions techniques.",
+    "exemple_utilisation": "un barreau en acier sous la trappe est prévu pour faciliter l’accès aux combles.",
+    "points_vigilance": [
+      "coordonner avec l’échelle, la trappe et la sécurité d’utilisation."
+    ]
+  },
+  {
+    "terme": "Tube carré 20 x 20 mm",
+    "definition_courte": "Profil métallique creux de section carrée 20 x 20 mm.",
+    "explication_pedagogique": "Réaliser barreaux, lisses ou montants de garde-corps.",
+    "exemple_utilisation": "les garde-corps intérieurs utilisent des tubes carrés droits de 20 x 20 mm espacés de 0,10 m.",
+    "points_vigilance": [
+      "la section doit être validée par calcul si nécessaire."
+    ]
+  },
+  {
+    "terme": "Tube rectangulaire 40 x 20 mm",
+    "definition_courte": "Profil métallique creux de section rectangulaire 40 x 20 mm.",
+    "explication_pedagogique": "Former des mains courantes ou lisses résistantes et faciles à intégrer.",
+    "exemple_utilisation": "les mains courantes et lisses principales sont souvent en tube rectangulaire 40 x 20 mm.",
+    "points_vigilance": [
+      "respecter l’orientation du tube pour l’esthétique et la préhension."
+    ]
+  },
+  {
+    "terme": "Vantail",
+    "definition_courte": "Partie mobile d’une porte.",
+    "explication_pedagogique": "Ouvrir et fermer le passage.",
+    "exemple_utilisation": "les portes de service et portes métalliques simples comprennent un vantail en tôle ou panneaux acier.",
+    "points_vigilance": [
+      "contrôler jeux périphériques, aplomb, fonctionnement et ferrage."
+    ]
+  },
+  {
+    "terme": "Vis à tête fraisée",
+    "definition_courte": "Vis avec tête conique affleurante après pose.",
+    "explication_pedagogique": "Fixer proprement platines et éléments métalliques.",
+    "exemple_utilisation": "les garde-corps et platines sont fixés par vis à tête fraisée.",
+    "points_vigilance": [
+      "utiliser une visserie compatible anticorrosion et bien serrée."
+    ]
+  },
+  {
+    "terme": "Visserie anticorrosion",
+    "definition_courte": "Visserie protégée contre la rouille ou réalisée en inox.",
+    "explication_pedagogique": "Garantir la tenue durable des ouvrages et éviter les coulures de rouille.",
+    "exemple_utilisation": "la visserie des grilles de ventilation et la quincaillerie doivent être traitées anticorrosion.",
+    "points_vigilance": [
+      "les vis non adaptées en extérieur dégradent rapidement l’aspect des façades."
+    ]
+  },
+  {
+    "terme": "Volée d’escalier",
+    "definition_courte": "Suite de marches entre deux paliers.",
+    "explication_pedagogique": "Localiser les garde-corps et mains courantes dans un escalier.",
+    "exemple_utilisation": "les garde-corps sont posés à l’anglaise sur les volées et les mains courantes se prolongent au-delà des premières et dernières marches.",
+    "points_vigilance": [
+      "contrôler continuité au droit des paliers intermédiaires."
+    ]
+  },
+  {
+    "terme": "Zone d’appui",
+    "definition_courte": "Surface sur laquelle une personne peut prendre appui et depuis laquelle la hauteur de protection est mesurée.",
+    "explication_pedagogique": "Déterminer la hauteur utile d’un garde-corps ou d’une lisse.",
+    "exemple_utilisation": "les lisses sur garde-corps béton ont une hauteur finie depuis la zone d’appui de 1,01 m.",
+    "points_vigilance": [
+      "toujours mesurer depuis le sol fini ou la zone réellement accessible."
+    ]
+  }
+]

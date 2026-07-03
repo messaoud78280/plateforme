@@ -1,0 +1,1783 @@
+[
+  {
+    "terme": "Abattage de végétation",
+    "definition_courte": "Suppression des arbres, arbustes, haies et souches présents dans l'emprise à démolir.",
+    "explication_pedagogique": "Il libère les zones de travail avant démolition des ouvrages et fondations.",
+    "exemple_utilisation": "Le CCTP place l'abattage de la végétation après la neutralisation des réseaux.",
+    "points_vigilance": [
+      "Vérifier les limites, les sujets à conserver et l'évacuation des souches enterrées."
+    ]
+  },
+  {
+    "terme": "Accès chantier",
+    "definition_courte": "Entrée et cheminement permettant aux engins, camions et personnels d'atteindre la zone de travaux.",
+    "explication_pedagogique": "Il conditionne la sécurité, la cadence et la propreté du chantier.",
+    "exemple_utilisation": "Le CCTP demande de prendre en compte les moyens d'accès et les contraintes du site.",
+    "points_vigilance": [
+      "Adapter les accès sans dégrader durablement trottoirs, bordures ou voirie publique."
+    ]
+  },
+  {
+    "terme": "ADR",
+    "definition_courte": "Réglementation relative au transport routier des matières dangereuses.",
+    "explication_pedagogique": "Elle encadre notamment certains déchets ou produits issus de dépollution.",
+    "exemple_utilisation": "Le CCTP cite l'arrêté relatif au transport de matières dangereuses par route.",
+    "points_vigilance": [
+      "Obtenir les attestations du transporteur si des déchets dangereux sont évacués."
+    ]
+  },
+  {
+    "terme": "Air libératoire",
+    "definition_courte": "Air contrôlé après retrait ou confinement d'amiante pour valider la restitution d'une zone.",
+    "explication_pedagogique": "Il permet de vérifier que la concentration en fibres est conforme avant poursuite des travaux.",
+    "exemple_utilisation": "Le CCTP indique que la démolition ne peut intervenir qu'après résultat favorable de l'analyse libératoire.",
+    "points_vigilance": [
+      "Ne pas démonter les installations ni lancer la démolition tant que le résultat n'est pas favorable."
+    ]
+  },
+  {
+    "terme": "Alimentation provisoire électrique",
+    "definition_courte": "Installation électrique temporaire pour alimenter base vie, coffrets et matériels de chantier.",
+    "explication_pedagogique": "Elle permet d'exécuter les travaux en sécurité avec une alimentation contrôlée.",
+    "exemple_utilisation": "Le CCTP prévoit une installation basse tension protégée et réceptionnée par bureau de contrôle.",
+    "points_vigilance": [
+      "Utiliser des équipements adaptés et conserver le rapport de réception sur site."
+    ]
+  },
+  {
+    "terme": "Alimentation provisoire en eau",
+    "definition_courte": "Branchement temporaire destiné aux besoins du chantier.",
+    "explication_pedagogique": "Elle sert aux sanitaires, au nettoyage, à l'arrosage anti-poussières ou aux besoins d'exécution.",
+    "exemple_utilisation": "Le CCTP met les alimentations et comptages provisoires en eau à charge de l'entreprise si nécessaire.",
+    "points_vigilance": [
+      "Prévoir comptage, protection contre fuites et remise en état après repli."
+    ]
+  },
+  {
+    "terme": "Amenée du matériel",
+    "definition_courte": "Transport et mise à disposition sur site des engins, outils et équipements de démolition.",
+    "explication_pedagogique": "Elle rend possible le démarrage effectif des travaux.",
+    "exemple_utilisation": "Le CCTP met à charge l'amenée du matériel adapté au mode exécutif.",
+    "points_vigilance": [
+      "Vérifier gabarit, accès, autorisations et protection des voiries empruntées."
+    ]
+  },
+  {
+    "terme": "Amiante",
+    "definition_courte": "Matériau fibreux dangereux historiquement utilisé dans de nombreux produits de construction.",
+    "explication_pedagogique": "Sa présence impose des procédures de repérage, retrait, confinement et évacuation spécifiques.",
+    "exemple_utilisation": "Le CCTP cite de nombreux textes relatifs à l'amiante, même si le diagnostic joint est négatif.",
+    "points_vigilance": [
+      "Toujours se référer au diagnostic et arrêter les travaux en cas de découverte suspecte."
+    ]
+  },
+  {
+    "terme": "Amiante-ciment",
+    "definition_courte": "Produit contenant de l'amiante lié dans une matrice ciment.",
+    "explication_pedagogique": "Il peut se trouver dans plaques, conduits, couvertures ou canalisations anciennes.",
+    "exemple_utilisation": "Le CCTP cite la circulaire relative à l'élimination des déchets d'amiante-ciment.",
+    "points_vigilance": [
+      "Évacuer en filière autorisée avec conditionnement et traçabilité adaptés si découvert."
+    ]
+  },
+  {
+    "terme": "Analyse libératoire",
+    "definition_courte": "Contrôle réglementaire réalisé après travaux de retrait ou confinement d'amiante.",
+    "explication_pedagogique": "Elle confirme que la zone peut être rendue ou que la démolition peut continuer.",
+    "exemple_utilisation": "Le CCTP demande un résultat favorable avant démolition des bâtiments concernés.",
+    "points_vigilance": [
+      "Classer le rapport dans le dossier chantier et ne pas anticiper les étapes suivantes."
+    ]
+  },
+  {
+    "terme": "Anomalie du dossier",
+    "definition_courte": "Erreur, omission ou incohérence repérée dans les pièces de consultation.",
+    "explication_pedagogique": "Elle doit être signalée avant remise de l'offre pour éviter litiges et plus-values.",
+    "exemple_utilisation": "Le CCTP demande à l'entrepreneur d'informer le maître d'oeuvre des anomalies pendant la consultation.",
+    "points_vigilance": [
+      "Après signature, l'entreprise est réputée avoir intégré les imprécisions dans son prix."
+    ]
+  },
+  {
+    "terme": "Aplani",
+    "definition_courte": "Terrain remis à plat ou réglé après retrait des ouvrages et déchets.",
+    "explication_pedagogique": "Il prépare l'intervention du gros oeuvre ou des lots suivants.",
+    "exemple_utilisation": "Le CCTP demande de laisser le terrain exempt de tout déchet et aplani.",
+    "points_vigilance": [
+      "Contrôler les points bas, matériaux restants et affaissements avant constat final."
+    ]
+  },
+  {
+    "terme": "Armoire générale de chantier",
+    "definition_courte": "Coffret principal de distribution électrique provisoire.",
+    "explication_pedagogique": "Elle alimente les baraquements, coffrets secondaires et matériels de chantier.",
+    "exemple_utilisation": "Le CCTP met sa fourniture et sa pose à charge du présent lot pendant son intervention.",
+    "points_vigilance": [
+      "Faire contrôler l'installation et protéger l'armoire contre chocs et intempéries."
+    ]
+  },
+  {
+    "terme": "Arrêté du 19/03/93",
+    "definition_courte": "Texte fixant la liste de certains travaux dangereux.",
+    "explication_pedagogique": "Il sert de référence pour identifier les interventions à risques particuliers.",
+    "exemple_utilisation": "Le CCTP cite cet arrêté dans les prescriptions réglementaires.",
+    "points_vigilance": [
+      "Relier ces travaux au PPSPS et aux protections collectives prévues."
+    ]
+  },
+  {
+    "terme": "Attestation transporteur",
+    "definition_courte": "Document prouvant que le transporteur respecte les règles applicables aux matières transportées.",
+    "explication_pedagogique": "Elle sécurise la traçabilité des déchets dangereux ou réglementés.",
+    "exemple_utilisation": "Le CCTP demande l'attestation de conformité du transporteur avant réception.",
+    "points_vigilance": [
+      "Vérifier qu'elle correspond bien à la nature des déchets évacués."
+    ]
+  },
+  {
+    "terme": "Autorisation de voirie",
+    "definition_courte": "Accord administratif pour occuper, modifier ou utiliser la voirie publique.",
+    "explication_pedagogique": "Elle permet les accès, stationnements, travaux provisoires ou adaptations d'entrée de chantier.",
+    "exemple_utilisation": "Le CCTP met les demandes d'autorisations de voirie à charge du présent lot.",
+    "points_vigilance": [
+      "Ne pas intervenir sur trottoir ou chaussée sans accord des services compétents."
+    ]
+  },
+  {
+    "terme": "Avoisinants",
+    "definition_courte": "Bâtiments, murs, voiries ou ouvrages voisins pouvant être affectés par les démolitions.",
+    "explication_pedagogique": "Leur état sert de référence pour éviter ou traiter les litiges.",
+    "exemple_utilisation": "Le CCTP mentionne un contrôle des avoisinants après démolition.",
+    "points_vigilance": [
+      "Protéger, surveiller et documenter les existants avant et après intervention."
+    ]
+  },
+  {
+    "terme": "Balisage spécifique",
+    "definition_courte": "Dispositif de barrières, rubans, panneaux et signalisation propre au chantier.",
+    "explication_pedagogique": "Il interdit les accès non autorisés et informe sur les risques.",
+    "exemple_utilisation": "Le CCTP demande un balisage approuvé par maître d'oeuvre, SPS et organismes concernés.",
+    "points_vigilance": [
+      "Le maintenir permanent, lisible et adapté à l'avancement du chantier."
+    ]
+  },
+  {
+    "terme": "Base vie",
+    "definition_courte": "Ensemble des locaux provisoires destinés aux ouvriers : vestiaires, sanitaires, réfectoire si prévu.",
+    "explication_pedagogique": "Elle assure les conditions minimales d'hygiène et d'organisation du chantier.",
+    "exemple_utilisation": "Le CCTP demande une base de vie avec maintenance pendant l'intervention.",
+    "points_vigilance": [
+      "La retirer au repli et remettre les zones utilisées en état."
+    ]
+  },
+  {
+    "terme": "Bâtiment existant",
+    "definition_courte": "Construction présente sur la parcelle avant l'opération.",
+    "explication_pedagogique": "Il constitue l'objet principal des travaux de démolition.",
+    "exemple_utilisation": "Le CCTP prévoit la démolition de l'ensemble des bâtiments existants selon plan d'état des lieux.",
+    "points_vigilance": [
+      "Vérifier structure, réseaux, mitoyennetés et diagnostics avant intervention."
+    ]
+  },
+  {
+    "terme": "Bilan aéraulique",
+    "definition_courte": "Contrôle des flux d'air dans une zone confinée.",
+    "explication_pedagogique": "Il vérifie que le confinement fonctionne correctement pendant une opération amiante.",
+    "exemple_utilisation": "Le CCTP cite les bilans aérauliques parmi les contrôles intermédiaires possibles.",
+    "points_vigilance": [
+      "Conserver les résultats et corriger tout défaut de dépression ou extraction."
+    ]
+  },
+  {
+    "terme": "Bordereau d'acceptation des déchets",
+    "definition_courte": "Document attestant qu'une installation accepte les déchets produits.",
+    "explication_pedagogique": "Il assure la traçabilité réglementaire de l'évacuation.",
+    "exemple_utilisation": "Le CCTP demande les bordereaux d'acceptation des déchets avant réception.",
+    "points_vigilance": [
+      "Les bordereaux doivent correspondre aux filières, dates, quantités et natures réelles."
+    ]
+  },
+  {
+    "terme": "Bordure de voirie",
+    "definition_courte": "Élément séparant chaussée, trottoir ou accotement.",
+    "explication_pedagogique": "Elle peut être dégradée par les engins et doit être remise en état.",
+    "exemple_utilisation": "Le CCTP met à charge la réparation des bordures dégradées par le chantier.",
+    "points_vigilance": [
+      "Faire un état initial et protéger les zones de passage répétées."
+    ]
+  },
+  {
+    "terme": "Bureau de contrôle",
+    "definition_courte": "Organisme chargé de vérifier certains aspects techniques ou réglementaires.",
+    "explication_pedagogique": "Il contrôle notamment l'installation électrique provisoire et peut demander des rapports.",
+    "exemple_utilisation": "Le CCTP cite DEKRA et prévoit une réception de l'installation par bureau de contrôle.",
+    "points_vigilance": [
+      "Prévoir les délais de contrôle avant démarrage effectif."
+    ]
+  },
+  {
+    "terme": "Câble endommagé",
+    "definition_courte": "Réseau électrique ou de communication détérioré par les travaux.",
+    "explication_pedagogique": "Il peut provoquer arrêt de service, danger électrique et coût de réparation.",
+    "exemple_utilisation": "Le CCTP met la remise en service aux frais de l'entreprise responsable.",
+    "points_vigilance": [
+      "Repérer les réseaux avant travaux et intervenir avec prudence en zone incertaine."
+    ]
+  },
+  {
+    "terme": "Cadre de Décomposition du Prix Forfaitaire",
+    "definition_courte": "Document détaillant les postes composant le prix global de l'entreprise.",
+    "explication_pedagogique": "Il aide à comprendre ce qui est inclus dans l'offre.",
+    "exemple_utilisation": "Le CCTP demande de compléter ce cadre après prise de renseignements.",
+    "points_vigilance": [
+      "Ne pas oublier sujétions, protections, contrôles, évacuations et installations."
+    ]
+  },
+  {
+    "terme": "Cahier des Clauses Techniques Particulières",
+    "definition_courte": "Document contractuel décrivant les travaux et exigences techniques d'un lot.",
+    "explication_pedagogique": "Il sert de référence pour exécuter, contrôler et réceptionner les travaux.",
+    "exemple_utilisation": "Le CCTP du lot 16 décrit les démolitions, installations, sécurité et évacuations.",
+    "points_vigilance": [
+      "Lire aussi les pièces annexes : diagnostics, PGC, plans et CCAP."
+    ]
+  },
+  {
+    "terme": "Canalisation",
+    "definition_courte": "Tuyau transportant eau, gaz, eaux usées, eaux pluviales ou autres fluides.",
+    "explication_pedagogique": "Elle doit être neutralisée, protégée, déposée ou conservée selon son usage.",
+    "exemple_utilisation": "Le CCTP cite eau, gaz, EU, EP et EV parmi les réseaux à traiter.",
+    "points_vigilance": [
+      "Confirmer l'état hors service avant coupe ou démolition."
+    ]
+  },
+  {
+    "terme": "Caractérisation des déchets",
+    "definition_courte": "Identification de la nature des déchets avant tri et évacuation.",
+    "explication_pedagogique": "Elle oriente vers la bonne filière : inerte, non dangereux, dangereux ou spécifique.",
+    "exemple_utilisation": "Le CCTP demande évacuation vers décharge habilitée selon les matériaux produits.",
+    "points_vigilance": [
+      "Ne pas mélanger déchets dangereux, amiantés ou pollués avec les gravats courants."
+    ]
+  },
+  {
+    "terme": "Casque de chantier",
+    "definition_courte": "Équipement de protection individuelle protégeant la tête.",
+    "explication_pedagogique": "Il protège contre chutes d'objets, chocs et projections.",
+    "exemple_utilisation": "Le CCTP cite les casques parmi les équipements individuels de sécurité.",
+    "points_vigilance": [
+      "Port obligatoire dans les zones exposées, avec modèle homologué et en bon état."
+    ]
+  },
+  {
+    "terme": "Cave enterrée",
+    "definition_courte": "Volume souterrain éventuellement découvert pendant la démolition.",
+    "explication_pedagogique": "Elle doit être démolie et évacuée sur la profondeur prescrite.",
+    "exemple_utilisation": "Le CCTP prévoit la démolition des caves ou constructions souterraines rencontrées.",
+    "points_vigilance": [
+      "Sécuriser contre effondrement, présence d'eau, gaz ou réseaux."
+    ]
+  },
+  {
+    "terme": "CCAP",
+    "acronyme": "Cahier des Clauses Administratives Particulières",
+    "definition_courte": "Cahier des Clauses Administratives Particulières.",
+    "explication_pedagogique": "Il complète le CCTP sur les conditions administratives, financières et contractuelles.",
+    "exemple_utilisation": "Le CCTP indique que certains frais annexes sont mentionnés au CCAP.",
+    "points_vigilance": [
+      "Croiser CCAP et CCTP pour éviter les oublis de prix."
+    ]
+  },
+  {
+    "terme": "CCS",
+    "acronyme": "Cahier des Clauses Spéciales",
+    "definition_courte": "Cahier des Clauses Spéciales associé à certains DTU.",
+    "explication_pedagogique": "Il complète les règles techniques applicables aux travaux.",
+    "exemple_utilisation": "Le CCTP impose normes NF, DTU et leurs CCS en vigueur.",
+    "points_vigilance": [
+      "Vérifier la version applicable à la date de soumission."
+    ]
+  },
+  {
+    "terme": "Chaudière déposée",
+    "definition_courte": "Équipement de chauffage retiré avant ou pendant démolition intérieure.",
+    "explication_pedagogique": "Elle fait partie des équipements intérieurs à évacuer.",
+    "exemple_utilisation": "Le CCTP cite les chaudières dans les équipements intérieurs à démolir.",
+    "points_vigilance": [
+      "Vérifier énergie, raccordements, fluides et éventuelles pollutions avant dépose."
+    ]
+  },
+  {
+    "terme": "Chaussée souillée",
+    "definition_courte": "Voirie salie par boues, poussières ou matériaux issus du chantier.",
+    "explication_pedagogique": "Elle doit être nettoyée pour maintenir sécurité et image du chantier.",
+    "exemple_utilisation": "Le CCTP demande le nettoyage des chaussées souillées par les engins.",
+    "points_vigilance": [
+      "Intervenir régulièrement, pas uniquement en fin de chantier."
+    ]
+  },
+  {
+    "terme": "Cheminement extérieur",
+    "definition_courte": "Allée, passage ou circulation extérieure existante.",
+    "explication_pedagogique": "Il est démoli ou remis en état selon le périmètre des travaux.",
+    "exemple_utilisation": "Le CCTP inclut la démolition des terrasses et cheminements extérieurs.",
+    "points_vigilance": [
+      "Vérifier conservation éventuelle d'accès utiles au chantier."
+    ]
+  },
+  {
+    "terme": "Clôture de chantier",
+    "definition_courte": "Barrière provisoire fermant l'emprise de travaux.",
+    "explication_pedagogique": "Elle sécurise le site et empêche l'accès du public.",
+    "exemple_utilisation": "Le CCTP demande la fourniture et pose des clôtures nécessaires.",
+    "points_vigilance": [
+      "Contrôler stabilité, continuité, portails et signalisation."
+    ]
+  },
+  {
+    "terme": "Clôture mitoyenne",
+    "definition_courte": "Clôture située en limite avec un voisin.",
+    "explication_pedagogique": "Elle peut devoir être conservée contrairement aux clôtures internes à démolir.",
+    "exemple_utilisation": "Le CCTP prévoit la conservation des clôtures mitoyennes.",
+    "points_vigilance": [
+      "Identifier clairement ce qui est mitoyen avant toute dépose."
+    ]
+  },
+  {
+    "terme": "CNAMTS R343",
+    "definition_courte": "Recommandation de prévention relative aux couvertures en matériaux peu résistants.",
+    "explication_pedagogique": "Elle encadre les risques de chute lors de travaux sur couverture.",
+    "exemple_utilisation": "Le CCTP cite la recommandation CNAMTS R343.",
+    "points_vigilance": [
+      "Prévoir protections contre chute et accès sécurisés en toiture."
+    ]
+  },
+  {
+    "terme": "CNAMTS R345",
+    "definition_courte": "Recommandation de prévention pour les travaux de démolition mécaniques ou manuels.",
+    "explication_pedagogique": "Elle guide l'organisation et la sécurité des démolitions.",
+    "exemple_utilisation": "Le CCTP cite la recommandation CNAMTS R345.",
+    "points_vigilance": [
+      "Adapter méthode, phasage et protections au procédé retenu."
+    ]
+  },
+  {
+    "terme": "Coffret de chantier",
+    "definition_courte": "Coffret électrique secondaire distribuant l'énergie près des zones de travail.",
+    "explication_pedagogique": "Il alimente les outils et équipements de façon sécurisée.",
+    "exemple_utilisation": "Le CCTP prévoit l'installation de coffrets de chantier à partir de l'armoire générale.",
+    "points_vigilance": [
+      "Protéger contre chocs, humidité et branchements non conformes."
+    ]
+  },
+  {
+    "terme": "Confinement",
+    "definition_courte": "Isolement d'une zone de travaux pour éviter dispersion de fibres ou poussières dangereuses.",
+    "explication_pedagogique": "Il protège travailleurs, riverains et environnement.",
+    "exemple_utilisation": "Le CCTP évoque les activités de confinement et de retrait de l'amiante.",
+    "points_vigilance": [
+      "Valider sas, extracteurs, dépression et contrôles avant travaux."
+    ]
+  },
+  {
+    "terme": "Conservation d'ouvrages",
+    "definition_courte": "Maintien d'éléments existants à ne pas démolir.",
+    "explication_pedagogique": "Elle évite d'endommager murs, soutènements, réseaux ou limites conservés.",
+    "exemple_utilisation": "Le CCTP demande de protéger les éléments devant être conservés.",
+    "points_vigilance": [
+      "Marquer physiquement les ouvrages conservés et briefer les équipes."
+    ]
+  },
+  {
+    "terme": "Constat d'huissier",
+    "definition_courte": "Constat contradictoire d'état des lieux établi avant travaux.",
+    "explication_pedagogique": "Il sert de référence en cas de litige sur les avoisinants.",
+    "exemple_utilisation": "Le CCTP indique qu'un constat par référé préventif est joint au dossier.",
+    "points_vigilance": [
+      "Comparer l'état réel au rapport au démarrage et signaler les écarts."
+    ]
+  },
+  {
+    "terme": "Constat de fin de travaux",
+    "definition_courte": "Vérification contradictoire à l'achèvement des démolitions.",
+    "explication_pedagogique": "Il valide que le terrain est prêt pour l'intervention suivante.",
+    "exemple_utilisation": "Le CCTP prévoit un constat en présence du maître d'oeuvre et de l'entreprise de gros oeuvre.",
+    "points_vigilance": [
+      "Ne pas le demander avant évacuation complète et nettoyage."
+    ]
+  },
+  {
+    "terme": "Construction souterraine",
+    "definition_courte": "Ouvrage enterré découvert sous le terrain : cave, fosse, local ou structure ancienne.",
+    "explication_pedagogique": "Il doit être démoli et évacué si présent dans l'emprise.",
+    "exemple_utilisation": "Le CCTP impose la démolition des constructions souterraines rencontrées.",
+    "points_vigilance": [
+      "Rechercher risques de stabilité, cuves, réseaux ou pollution."
+    ]
+  },
+  {
+    "terme": "Continuité de service",
+    "definition_courte": "Maintien en fonctionnement des réseaux nécessaires aux bâtiments existants ou voisins.",
+    "explication_pedagogique": "Elle évite coupure d'eau, gaz, électricité ou évacuation non prévue.",
+    "exemple_utilisation": "Le CCTP impose la continuité de service des réseaux privés ou publics à conserver.",
+    "points_vigilance": [
+      "Distinguer réseaux inutiles à désactiver et réseaux à protéger ou dévoyer."
+    ]
+  },
+  {
+    "terme": "Contrôle intermédiaire",
+    "definition_courte": "Vérification réalisée pendant les travaux, avant réception.",
+    "explication_pedagogique": "Il permet de suivre les risques et la conformité en cours d'exécution.",
+    "exemple_utilisation": "Le CCTP cite mesures de concentration, bilans aérauliques et mesures de dépression.",
+    "points_vigilance": [
+      "Transmettre les résultats demandés sans attendre la fin du chantier."
+    ]
+  },
+  {
+    "terme": "Contrôle libératoire",
+    "definition_courte": "Contrôle final permettant de libérer une zone après intervention réglementée.",
+    "explication_pedagogique": "Il conditionne la réception ou la poursuite des démolitions.",
+    "exemple_utilisation": "Le CCTP demande les résultats des contrôles libératoires avant réception.",
+    "points_vigilance": [
+      "Archiver les résultats et lever les non-conformités immédiatement."
+    ]
+  },
+  {
+    "terme": "Coordonnateur SPS",
+    "definition_courte": "Intervenant chargé de la coordination sécurité et protection de la santé.",
+    "explication_pedagogique": "Il donne des prescriptions et vérifie l'organisation prévention.",
+    "exemple_utilisation": "Le CCTP impose de se conformer aux instructions du coordonnateur SPS.",
+    "points_vigilance": [
+      "Transmettre PPSPS et modes opératoires dans les délais."
+    ]
+  },
+  {
+    "terme": "CRAMA",
+    "definition_courte": "Organisme cité dans le CCTP pour les exigences de prévention et contrôles.",
+    "explication_pedagogique": "Il peut demander ou imposer certains essais et mesures de sécurité.",
+    "exemple_utilisation": "Le CCTP mentionne la CRAMA pour balisage, essais et instructions.",
+    "points_vigilance": [
+      "Intégrer ses demandes dans le planning et le coût de chantier."
+    ]
+  },
+  {
+    "terme": "Curage",
+    "definition_courte": "Dépose préalable des équipements, matériaux et éléments non structurels avant démolition lourde.",
+    "explication_pedagogique": "Il permet le tri, réduit les risques et prépare la démolition sélective.",
+    "exemple_utilisation": "Le CCTP liste la dépose d'équipements avant démolition des structures.",
+    "points_vigilance": [
+      "Séparer les flux : métaux, bois, équipements, déchets dangereux et gravats."
+    ]
+  },
+  {
+    "terme": "Cuve enterrée",
+    "definition_courte": "Réservoir souterrain pouvant contenir ou avoir contenu hydrocarbures, eau ou autres produits.",
+    "explication_pedagogique": "Elle doit être dégazée, déposée et évacuée si rencontrée.",
+    "exemple_utilisation": "Le CCTP prévoit la démolition des cuves enterrées éventuelles après dégazage.",
+    "points_vigilance": [
+      "Faire intervenir une entreprise spécialisée et obtenir les certificats nécessaires."
+    ]
+  },
+  {
+    "terme": "Dallage",
+    "definition_courte": "Ouvrage horizontal en béton au sol.",
+    "explication_pedagogique": "Il doit être démoli et évacué lorsqu'il appartient aux existants à supprimer.",
+    "exemple_utilisation": "Le CCTP demande la démolition et l'évacuation de l'ensemble des dallages.",
+    "points_vigilance": [
+      "Vérifier épaisseur, armatures, réseaux noyés et fondations associées."
+    ]
+  },
+  {
+    "terme": "Déblai de démolition",
+    "definition_courte": "Matériau retiré du site après démolition.",
+    "explication_pedagogique": "Il doit être trié, fractionné et évacué vers une filière appropriée.",
+    "exemple_utilisation": "Le CCTP impose l'évacuation au fur et à mesure des matériaux produits.",
+    "points_vigilance": [
+      "Ne pas stocker en surcharge ou contre des ouvrages conservés."
+    ]
+  },
+  {
+    "terme": "Décharge habilitée",
+    "definition_courte": "Installation autorisée à recevoir une catégorie donnée de déchets.",
+    "explication_pedagogique": "Elle garantit une élimination ou valorisation conforme.",
+    "exemple_utilisation": "Le CCTP demande l'évacuation vers une décharge habilitée à recevoir les matériaux.",
+    "points_vigilance": [
+      "Vérifier l'acceptation préalable et conserver les justificatifs."
+    ]
+  },
+  {
+    "terme": "Déchets dangereux",
+    "definition_courte": "Déchets présentant un risque pour santé ou environnement.",
+    "explication_pedagogique": "Ils exigent des filières, contenants et bordereaux spécifiques.",
+    "exemple_utilisation": "Le CCTP cite matières dangereuses, amiante et attestations de transport.",
+    "points_vigilance": [
+      "Identifier avant mélange avec déchets inertes ou non dangereux."
+    ]
+  },
+  {
+    "terme": "Déchets de chantier",
+    "definition_courte": "Ensemble des matériaux et résidus produits par les travaux.",
+    "explication_pedagogique": "Ils doivent être retirés régulièrement pour maintenir sécurité et propreté.",
+    "exemple_utilisation": "Le CCTP met l'enlèvement hors chantier de tous les déchets et gravois à charge du lot.",
+    "points_vigilance": [
+      "Organiser tri, stockage temporaire et évacuation avec traçabilité."
+    ]
+  },
+  {
+    "terme": "Déchets inertes",
+    "definition_courte": "Déchets minéraux ne se décomposant pas et ne polluant pas significativement.",
+    "explication_pedagogique": "Ils peuvent suivre des filières de recyclage ou stockage adaptées.",
+    "exemple_utilisation": "Les gravats issus de béton ou maçonnerie peuvent relever de cette catégorie selon pollution.",
+    "points_vigilance": [
+      "Ne pas classer inerte un matériau contaminé, souillé ou amianté."
+    ]
+  },
+  {
+    "terme": "Déconstruction",
+    "definition_courte": "Démolition organisée par étapes avec séparation et tri des matériaux.",
+    "explication_pedagogique": "Elle favorise recyclage, sécurité et maîtrise des nuisances.",
+    "exemple_utilisation": "Le CCTP demande une déconstruction avec tri des matériaux pour recyclage.",
+    "points_vigilance": [
+      "Prévoir zones de tri et filières avant le démarrage."
+    ]
+  },
+  {
+    "terme": "Déconstruction sélective",
+    "definition_courte": "Méthode consistant à déposer les éléments par familles avant démolition générale.",
+    "explication_pedagogique": "Elle améliore la valorisation et limite les déchets mélangés.",
+    "exemple_utilisation": "Le CCTP indique que les démolitions s'effectuent de manière sélective.",
+    "points_vigilance": [
+      "Respecter l'ordre de dépose et ne pas tout broyer sans tri préalable."
+    ]
+  },
+  {
+    "terme": "Décontamination",
+    "definition_courte": "Nettoyage ou procédure visant à éliminer une contamination dangereuse.",
+    "explication_pedagogique": "Elle protège les travailleurs et évite la dispersion hors zone.",
+    "exemple_utilisation": "Elle peut être associée aux procédures de désamiantage si un matériau est identifié.",
+    "points_vigilance": [
+      "Mettre en place sas, procédures et contrôles adaptés à la nature du risque."
+    ]
+  },
+  {
+    "terme": "Décroutage",
+    "definition_courte": "Retrait d'une couche de surface comme enduit, revêtement ou matériau adhérent.",
+    "explication_pedagogique": "Il peut faire partie d'un curage ou d'une préparation à la démolition.",
+    "exemple_utilisation": "Le CCTP ne le nomme pas directement, mais vise la dépose complète des éléments démolis.",
+    "points_vigilance": [
+      "Identifier la nature du revêtement avant retrait, surtout en présence possible de plomb ou amiante."
+    ]
+  },
+  {
+    "terme": "Défaut de conservation",
+    "definition_courte": "État dégradé d'un ouvrage existant.",
+    "explication_pedagogique": "Il influence la méthode de démolition et les risques de stabilité.",
+    "exemple_utilisation": "Le CCTP demande la reconnaissance du degré de conservation des existants.",
+    "points_vigilance": [
+      "Adapter étaiement, confortement ou phasage si l'existant est fragile."
+    ]
+  },
+  {
+    "terme": "Dégazage",
+    "definition_courte": "Opération spécialisée supprimant les vapeurs dangereuses dans une cuve.",
+    "explication_pedagogique": "Elle rend la cuve plus sûre avant découpe ou enlèvement.",
+    "exemple_utilisation": "Le CCTP impose un dégazage complet avant évacuation des cuves enterrées éventuelles.",
+    "points_vigilance": [
+      "Exiger certificat et entreprise qualifiée avant toute intervention mécanique."
+    ]
+  },
+  {
+    "terme": "Démolition à la main",
+    "definition_courte": "Démolition réalisée manuellement avec outils portatifs.",
+    "explication_pedagogique": "Elle permet une intervention précise en zone sensible ou proche d'ouvrages conservés.",
+    "exemple_utilisation": "Le CCTP cite les recommandations relatives aux démolitions mécaniques ou à la main.",
+    "points_vigilance": [
+      "Prévoir protections contre chutes, poussières, efforts et projections."
+    ]
+  },
+  {
+    "terme": "Démolition des clôtures",
+    "definition_courte": "Suppression des clôtures et murets non conservés.",
+    "explication_pedagogique": "Elle libère les limites ou emprises selon le plan de démolition.",
+    "exemple_utilisation": "Le CCTP prévoit la démolition des clôtures et murets sur voirie et côté jardin.",
+    "points_vigilance": [
+      "Conserver les clôtures mitoyennes et protéger les limites voisines."
+    ]
+  },
+  {
+    "terme": "Démolition des fondations",
+    "definition_courte": "Destruction et retrait des ouvrages enterrés portant les constructions.",
+    "explication_pedagogique": "Elle évite de laisser des obstacles aux futurs terrassements ou constructions.",
+    "exemple_utilisation": "Le CCTP impose la démolition des fondations jusqu'à 2 m sous terrain actuel.",
+    "points_vigilance": [
+      "Contrôler profondeur, évacuation et absence de restes béton."
+    ]
+  },
+  {
+    "terme": "Démolition des murs d'élévation",
+    "definition_courte": "Destruction des murs verticaux porteurs ou de façade.",
+    "explication_pedagogique": "Elle intervient après les étapes préparatoires et la démolition de la toiture.",
+    "exemple_utilisation": "Le CCTP place cette étape après les toitures et charpentes.",
+    "points_vigilance": [
+      "Respecter le phasage pour éviter effondrement non maîtrisé."
+    ]
+  },
+  {
+    "terme": "Démolition des planchers",
+    "definition_courte": "Dépose ou destruction des planchers existants.",
+    "explication_pedagogique": "Elle fait partie de la suppression complète des bâtiments.",
+    "exemple_utilisation": "Le CCTP cite la démolition des planchers dans l'ordre des travaux.",
+    "points_vigilance": [
+      "Identifier sens porteur et stabilité avant intervention."
+    ]
+  },
+  {
+    "terme": "Démolition des toitures",
+    "definition_courte": "Dépose ou destruction des couvertures et éléments de toiture.",
+    "explication_pedagogique": "Elle précède souvent la démolition des murs et structures verticales.",
+    "exemple_utilisation": "Le CCTP prévoit la démolition des toitures et charpentes.",
+    "points_vigilance": [
+      "Prendre en compte chute de hauteur, matériaux fragiles et diagnostics."
+    ]
+  },
+  {
+    "terme": "Démolition mécanique",
+    "definition_courte": "Démolition réalisée avec engins : pelle, pince, brise-roche ou équipement adapté.",
+    "explication_pedagogique": "Elle permet d'abattre les ouvrages lourds avec rendement.",
+    "exemple_utilisation": "Le CCTP demande du matériel adapté au mode exécutif.",
+    "points_vigilance": [
+      "Maîtriser vibrations, poussières, projections et distances de sécurité."
+    ]
+  },
+  {
+    "terme": "Démolition sélective",
+    "definition_courte": "Démolition organisée pour séparer les matériaux et ouvrages par nature.",
+    "explication_pedagogique": "Elle facilite recyclage, évacuation et maîtrise des risques.",
+    "exemple_utilisation": "Le CCTP demande une démolition sélective et le tri des matériaux.",
+    "points_vigilance": [
+      "Prévoir bennes et zones différenciées dès le démarrage."
+    ]
+  },
+  {
+    "terme": "Démolition totale",
+    "definition_courte": "Suppression complète d'un bâtiment ou ouvrage.",
+    "explication_pedagogique": "Elle remet l'emprise à nu pour les travaux ultérieurs.",
+    "exemple_utilisation": "Le CCTP intitule l'article principal Démolitions totales.",
+    "points_vigilance": [
+      "Inclure fondations, dallages, réseaux inutiles, terrasses et ouvrages enterrés."
+    ]
+  },
+  {
+    "terme": "Déplombage",
+    "definition_courte": "Retrait ou traitement d'éléments contenant du plomb.",
+    "explication_pedagogique": "Il protège les travailleurs et évite la dispersion de poussières toxiques.",
+    "exemple_utilisation": "Le CCTP mentionne le diagnostic plomb et le déplombage.",
+    "points_vigilance": [
+      "Même si le diagnostic est négatif, rester attentif aux peintures anciennes suspectes."
+    ]
+  },
+  {
+    "terme": "Dépollution",
+    "definition_courte": "Travaux visant à retirer ou maîtriser des matériaux ou substances polluantes.",
+    "explication_pedagogique": "Elle sécurise le site avant démolition ou construction.",
+    "exemple_utilisation": "Le CCTP consacre un article aux dépollutions, désamiantage et déplombage.",
+    "points_vigilance": [
+      "Ne pas limiter la vigilance au diagnostic initial en cas de découverte imprévue."
+    ]
+  },
+  {
+    "terme": "Dépose",
+    "definition_courte": "Retrait d'un élément sans nécessairement le casser.",
+    "explication_pedagogique": "Elle s'applique aux équipements, réseaux, mobiliers ou organes intérieurs.",
+    "exemple_utilisation": "Le CCTP prévoit la dépose des équipements organiques et intérieurs.",
+    "points_vigilance": [
+      "Identifier les éléments à conserver, recycler ou évacuer."
+    ]
+  },
+  {
+    "terme": "Dépose des équipements organiques",
+    "definition_courte": "Retrait des équipements techniques ou fonctionnels avant démolition structurelle.",
+    "explication_pedagogique": "Elle prépare le curage et réduit les risques pendant l'abattage.",
+    "exemple_utilisation": "Le CCTP place cette dépose avant la démolition des équipements structuraux.",
+    "points_vigilance": [
+      "Isoler les réseaux et fluides avant dépose."
+    ]
+  },
+  {
+    "terme": "Dépose du mobilier",
+    "definition_courte": "Retrait des meubles ou équipements mobiliers existants.",
+    "explication_pedagogique": "Elle libère les volumes avant curage et démolition.",
+    "exemple_utilisation": "Le CCTP cite le matériel d'équipement et le mobilier dans l'ordre des démolitions.",
+    "points_vigilance": [
+      "Trier ce qui relève du déchet, du réemploi ou d'une filière spécifique."
+    ]
+  },
+  {
+    "terme": "Désactivation des réseaux",
+    "definition_courte": "Mise hors service des réseaux inutiles avant démolition.",
+    "explication_pedagogique": "Elle évite fuite, incendie, électrocution ou pollution.",
+    "exemple_utilisation": "Le CCTP demande la désactivation ou dépose des réseaux eau, gaz, EU, EP, EV inutiles.",
+    "points_vigilance": [
+      "Obtenir confirmation avant toute coupe et conserver les réseaux utiles en service."
+    ]
+  },
+  {
+    "terme": "Désamiantage",
+    "definition_courte": "Travaux de retrait ou confinement de matériaux contenant de l'amiante.",
+    "explication_pedagogique": "Ils protègent les travailleurs et l'environnement avant démolition.",
+    "exemple_utilisation": "Le CCTP détaille les généralités de désamiantage et se réfère au diagnostic AC Environnement.",
+    "points_vigilance": [
+      "Suivre le plan de retrait et les délais réglementaires si un matériau amianté est identifié."
+    ]
+  },
+  {
+    "terme": "Détérioration accidentelle",
+    "definition_courte": "Dégradation involontaire d'un réseau, ouvrage ou voirie pendant les travaux.",
+    "explication_pedagogique": "Elle doit être réparée par l'entreprise responsable.",
+    "exemple_utilisation": "Le CCTP prévoit la remise en état complète du tronçon détérioré.",
+    "points_vigilance": [
+      "Déclarer immédiatement et sécuriser la zone avant réparation."
+    ]
+  },
+  {
+    "terme": "Dévoiement de réseau",
+    "definition_courte": "Modification du tracé d'un réseau à conserver.",
+    "explication_pedagogique": "Il permet de maintenir la continuité de service pendant démolition.",
+    "exemple_utilisation": "Le CCTP prévoit que les réseaux à maintenir seront conservés ou dévoyés si nécessaire.",
+    "points_vigilance": [
+      "Coordonner avec gestionnaires et autres lots avant intervention."
+    ]
+  },
+  {
+    "terme": "Diagnostic amiante",
+    "definition_courte": "Rapport repérant les matériaux et produits contenant de l'amiante.",
+    "explication_pedagogique": "Il conditionne la méthode de démolition et les précautions à prendre.",
+    "exemple_utilisation": "Le CCTP cite le rapport AC Environnement du 08/07/2025.",
+    "points_vigilance": [
+      "Lire le rapport complet et demander des précisions si un doute subsiste."
+    ]
+  },
+  {
+    "terme": "Diagnostic plomb",
+    "definition_courte": "Rapport identifiant la présence de plomb dans les revêtements ou ouvrages.",
+    "explication_pedagogique": "Il permet d'adapter les protections et filières de déchets.",
+    "exemple_utilisation": "Le CCTP indique que le diagnostic amiante et plomb ne met pas en évidence de produit concerné.",
+    "points_vigilance": [
+      "Rester vigilant sur peintures anciennes ou zones non accessibles au diagnostic."
+    ]
+  },
+  {
+    "terme": "Directive européenne 92/57",
+    "definition_courte": "Directive relative aux prescriptions minimales de sécurité sur chantiers temporaires ou mobiles.",
+    "explication_pedagogique": "Elle fonde une partie de la coordination SPS.",
+    "exemple_utilisation": "Le CCTP cite la loi transposant cette directive.",
+    "points_vigilance": [
+      "La traduire concrètement dans PGC, PPSPS et organisation de chantier."
+    ]
+  },
+  {
+    "terme": "Document de référence",
+    "definition_courte": "Pièce contractuelle ou constat servant de base aux contrôles ultérieurs.",
+    "explication_pedagogique": "Il protège les parties en cas de discussion sur l'état initial.",
+    "exemple_utilisation": "Le CCTP indique que le constat d'état des lieux joint fait office de document de référence.",
+    "points_vigilance": [
+      "Comparer systématiquement le terrain réel au document avant démarrage."
+    ]
+  },
+  {
+    "terme": "DTU",
+    "acronyme": "Documents Techniques Unifiés",
+    "definition_courte": "Documents Techniques Unifiés fixant des règles professionnelles de construction.",
+    "explication_pedagogique": "Ils complètent les normes et règles de l'art applicables.",
+    "exemple_utilisation": "Le CCTP impose le respect des DTU et additifs en vigueur.",
+    "points_vigilance": [
+      "Appliquer les règles pertinentes même si elles ne sont pas recopiées dans le CCTP."
+    ]
+  },
+  {
+    "terme": "Échafaudage ou accès en hauteur",
+    "definition_courte": "Moyen provisoire pour intervenir en sécurité sur zones hautes.",
+    "explication_pedagogique": "Il peut être nécessaire pour toitures, façades ou protections.",
+    "exemple_utilisation": "Le CCTP impose la protection du personnel et des équipements collectifs.",
+    "points_vigilance": [
+      "Contrôler montage, stabilité, garde-corps et accès avant usage."
+    ]
+  },
+  {
+    "terme": "Électricité provisoire",
+    "definition_courte": "Réseau temporaire d'alimentation électrique de chantier.",
+    "explication_pedagogique": "Elle permet d'alimenter éclairage, outillage et base vie.",
+    "exemple_utilisation": "Le CCTP la met à charge de l'entreprise si elle la juge nécessaire.",
+    "points_vigilance": [
+      "Respecter NF C 15-100 et réception par bureau de contrôle."
+    ]
+  },
+  {
+    "terme": "Élément creux enterré",
+    "definition_courte": "Volume vide enterré, comme cuve, fosse ou ouvrage souterrain.",
+    "explication_pedagogique": "Il peut présenter un risque d'effondrement, gaz ou pollution.",
+    "exemple_utilisation": "Le CCTP prévoit de déterrer et évacuer tous les éléments creux enterrés rencontrés.",
+    "points_vigilance": [
+      "Reconnaître avant engin lourd et traiter les atmosphères dangereuses."
+    ]
+  },
+  {
+    "terme": "Élément maintenu",
+    "definition_courte": "Ouvrage ou partie d'ouvrage devant rester en place pendant ou après démolition.",
+    "explication_pedagogique": "Il doit être protégé contre chocs, vibrations et erreurs de démolition.",
+    "exemple_utilisation": "Le CCTP cite murs de soutènement, murs mitoyens et clôtures conservées.",
+    "points_vigilance": [
+      "Marquer clairement et prévoir confortement si nécessaire."
+    ]
+  },
+  {
+    "terme": "Éléments fractionnés",
+    "definition_courte": "Matériaux de démolition découpés ou réduits en morceaux transportables.",
+    "explication_pedagogique": "Ils peuvent être chargés et évacués plus facilement.",
+    "exemple_utilisation": "Le CCTP demande de fractionner les matériaux en éléments transportables.",
+    "points_vigilance": [
+      "Fractionner sans disperser poussières, projections ou déchets non triés."
+    ]
+  },
+  {
+    "terme": "Émissions de poussière",
+    "definition_courte": "Poussières générées par démolition, circulation d'engins ou chargement.",
+    "explication_pedagogique": "Elles créent des nuisances et risques respiratoires.",
+    "exemple_utilisation": "Le CCTP demande de limiter au minimum les émissions de poussière.",
+    "points_vigilance": [
+      "Mettre arrosage, brumisation, nettoyage et protections respiratoires si nécessaire."
+    ]
+  },
+  {
+    "terme": "Enceinte du chantier",
+    "definition_courte": "Périmètre fermé ou contrôlé dans lequel se déroulent les travaux.",
+    "explication_pedagogique": "Elle organise circulation, sécurité et accès autorisés.",
+    "exemple_utilisation": "Le CCTP demande de limiter la circulation des engins dans l'enceinte au strict indispensable.",
+    "points_vigilance": [
+      "Séparer piétons, engins, stockage et zones dangereuses."
+    ]
+  },
+  {
+    "terme": "Engin de démolition",
+    "definition_courte": "Matériel mécanique utilisé pour abattre, charger ou trier les ouvrages.",
+    "explication_pedagogique": "Il accélère les travaux lourds de démolition.",
+    "exemple_utilisation": "Le CCTP demande du matériel adapté au mode exécutif.",
+    "points_vigilance": [
+      "Adapter taille, outil et rayon d'action au site urbain et aux avoisinants."
+    ]
+  },
+  {
+    "terme": "Enlèvement hors chantier",
+    "definition_courte": "Transport des déchets et gravois en dehors de l'emprise.",
+    "explication_pedagogique": "Il maintient le chantier propre et limite les risques.",
+    "exemple_utilisation": "Le CCTP demande l'enlèvement régulier hors chantier des déchets.",
+    "points_vigilance": [
+      "Ne pas attendre l'accumulation qui gêne circulation ou sécurité."
+    ]
+  },
+  {
+    "terme": "Enregistrement de dépression",
+    "definition_courte": "Suivi des valeurs de pression négative dans une zone confinée.",
+    "explication_pedagogique": "Il prouve le maintien du confinement pendant travaux amiante.",
+    "exemple_utilisation": "Le CCTP cite les enregistrements des mesures de dépression.",
+    "points_vigilance": [
+      "Analyser les écarts et intervenir immédiatement en cas de perte de confinement."
+    ]
+  },
+  {
+    "terme": "Entreprise spécialisée",
+    "definition_courte": "Société disposant de compétences ou qualifications particulières.",
+    "explication_pedagogique": "Elle est nécessaire pour opérations sensibles comme dégazage ou désamiantage.",
+    "exemple_utilisation": "Le CCTP impose une entreprise spécialisée pour le dégazage complet des cuves.",
+    "points_vigilance": [
+      "Vérifier assurances, qualifications et documents de fin d'intervention."
+    ]
+  },
+  {
+    "terme": "Équipement intérieur",
+    "definition_courte": "Élément présent dans les bâtiments : chaudières, tuyauteries, mobiliers, ascenseurs ou monte-charges.",
+    "explication_pedagogique": "Il est retiré avant ou pendant la démolition des volumes.",
+    "exemple_utilisation": "Le CCTP liste ces équipements dans l'ordre de démolition.",
+    "points_vigilance": [
+      "Isoler énergies, fluides et pièces lourdes avant dépose."
+    ]
+  },
+  {
+    "terme": "Équipement organique",
+    "definition_courte": "Équipement technique ou fonctionnel qui n'est pas la structure principale.",
+    "explication_pedagogique": "Sa dépose prépare la démolition structurale.",
+    "exemple_utilisation": "Le CCTP prévoit la dépose des équipements organiques.",
+    "points_vigilance": [
+      "Identifier les matériaux spécifiques et filières avant évacuation."
+    ]
+  },
+  {
+    "terme": "Équipement structural",
+    "definition_courte": "Élément participant à la structure ou aux fondations d'un ouvrage.",
+    "explication_pedagogique": "Sa démolition engage la stabilité générale.",
+    "exemple_utilisation": "Le CCTP prévoit la démolition des équipements structuraux y compris fondations.",
+    "points_vigilance": [
+      "Respecter l'ordre de démolition et les éventuels confortements."
+    ]
+  },
+  {
+    "terme": "Équipements de protection collective",
+    "definition_courte": "Dispositifs protégeant plusieurs personnes : garde-corps, balisage, filets, protections de trémies.",
+    "explication_pedagogique": "Ils réduisent les risques à la source.",
+    "exemple_utilisation": "Le CCTP demande la mise en place et l'entretien des équipements de sécurité collectifs.",
+    "points_vigilance": [
+      "Les maintenir en état pendant toute la durée des travaux."
+    ]
+  },
+  {
+    "terme": "Équipements de protection individuelle",
+    "definition_courte": "Protections portées par les travailleurs : casque, gants, masques, chaussures, lunettes.",
+    "explication_pedagogique": "Ils complètent les protections collectives.",
+    "exemple_utilisation": "Le CCTP cite casques, gants, masques et modèles homologués.",
+    "points_vigilance": [
+      "Former les équipes et contrôler le port effectif."
+    ]
+  },
+  {
+    "terme": "Essais et contrôles",
+    "definition_courte": "Vérifications obligatoires ou demandées par organismes compétents.",
+    "explication_pedagogique": "Ils confirment la conformité réglementaire et la sécurité du chantier.",
+    "exemple_utilisation": "Le CCTP met les frais d'essais et contrôles à charge de l'entrepreneur.",
+    "points_vigilance": [
+      "Les intégrer au planning et au prix dès l'offre."
+    ]
+  },
+  {
+    "terme": "État d'origine",
+    "definition_courte": "Situation initiale d'une voirie ou d'un ouvrage avant intervention.",
+    "explication_pedagogique": "Il sert de référence pour la remise en état.",
+    "exemple_utilisation": "Le CCTP demande de maintenir les voiries publiques dans leur état d'origine.",
+    "points_vigilance": [
+      "Faire des photos datées avant installation de chantier."
+    ]
+  },
+  {
+    "terme": "État des lieux contradictoire",
+    "definition_courte": "Constat réalisé avec plusieurs parties pour fixer l'état initial.",
+    "explication_pedagogique": "Il limite les contestations après démolition.",
+    "exemple_utilisation": "Le CCTP mentionne un constat par référé préventif joint au dossier.",
+    "points_vigilance": [
+      "Signaler par écrit tout écart observé au démarrage."
+    ]
+  },
+  {
+    "terme": "Évacuation des gravois",
+    "definition_courte": "Retrait des gravats issus des démolitions.",
+    "explication_pedagogique": "Elle libère le site et évite accumulation dangereuse.",
+    "exemple_utilisation": "Le CCTP demande l'enlèvement des déchets et gravois régulièrement.",
+    "points_vigilance": [
+      "Utiliser bennes et filières adaptées selon la nature du matériau."
+    ]
+  },
+  {
+    "terme": "Évacuation des produits contaminés",
+    "definition_courte": "Sortie du chantier des matériaux pollués ou dangereux selon procédure dédiée.",
+    "explication_pedagogique": "Elle doit précéder les autres démolitions si nécessaire.",
+    "exemple_utilisation": "Le CCTP prévoit l'évacuation préalable de tous les produits contaminés.",
+    "points_vigilance": [
+      "Assurer conditionnement, transport et bordereaux réglementaires."
+    ]
+  },
+  {
+    "terme": "Expert référé préventif",
+    "definition_courte": "Expert nommé pour constater les avoisinants avant et après les travaux.",
+    "explication_pedagogique": "Il contribue à déterminer si des désordres sont liés au chantier.",
+    "exemple_utilisation": "Le CCTP indique que l'expert nommé aura une mission de contrôle après démolitions.",
+    "points_vigilance": [
+      "Coopérer aux visites et conserver les observations."
+    ]
+  },
+  {
+    "terme": "Extracteur d'air",
+    "definition_courte": "Équipement créant une extraction contrôlée dans une zone confinée.",
+    "explication_pedagogique": "Il maintient la dépression et limite la dispersion de fibres ou poussières.",
+    "exemple_utilisation": "Le CCTP demande la localisation des extracteurs d'air dans le mode opératoire.",
+    "points_vigilance": [
+      "Dimensionner et contrôler les débits avant travaux."
+    ]
+  },
+  {
+    "terme": "Fibres d'amiante",
+    "definition_courte": "Particules respirables dangereuses libérées par certains matériaux amiantés.",
+    "explication_pedagogique": "Elles justifient les mesures de retrait, confinement et contrôles d'air.",
+    "exemple_utilisation": "Le CCTP évoque la teneur résiduelle en fibres d'amiante.",
+    "points_vigilance": [
+      "Ne jamais percer, casser ou broyer un matériau suspect sans vérification."
+    ]
+  },
+  {
+    "terme": "Fondation",
+    "definition_courte": "Ouvrage enterré transmettant les charges du bâtiment au sol.",
+    "explication_pedagogique": "Elle doit être retirée pour libérer le terrain aux futurs travaux.",
+    "exemple_utilisation": "Le CCTP demande la démolition des fondations jusqu'à une profondeur minimale de 2 m.",
+    "points_vigilance": [
+      "Contrôler que les anciennes semelles et massifs ne restent pas en place."
+    ]
+  },
+  {
+    "terme": "Gants de protection",
+    "definition_courte": "EPI protégeant les mains contre coupures, abrasions, produits ou projections.",
+    "explication_pedagogique": "Ils sont indispensables en curage, dépose et manutention.",
+    "exemple_utilisation": "Le CCTP cite les gants parmi les équipements individuels.",
+    "points_vigilance": [
+      "Adapter le type de gant au risque : coupure, chimique, manutention ou chaleur."
+    ]
+  },
+  {
+    "terme": "Gaz",
+    "definition_courte": "Réseau ou fluide dangereux pouvant être présent dans les existants.",
+    "explication_pedagogique": "Il doit être neutralisé avant toute démolition.",
+    "exemple_utilisation": "Le CCTP cite le gaz parmi les réseaux inutiles à désactiver ou déposer.",
+    "points_vigilance": [
+      "Obtenir confirmation de coupure et purger les conduites si nécessaire."
+    ]
+  },
+  {
+    "terme": "Gravois",
+    "definition_courte": "Débris de maçonnerie, béton, plâtre ou matériaux issus de démolition.",
+    "explication_pedagogique": "Ils doivent être chargés, triés et évacués régulièrement.",
+    "exemple_utilisation": "Le CCTP mentionne l'enlèvement hors chantier des déchets et gravois.",
+    "points_vigilance": [
+      "Éviter les tas instables, poussiéreux ou mélangés avec déchets dangereux."
+    ]
+  },
+  {
+    "terme": "Gros oeuvre",
+    "definition_courte": "Lot ou entreprise intervenant après démolition pour les ouvrages structurels neufs.",
+    "explication_pedagogique": "Il doit recevoir un terrain libre et conforme.",
+    "exemple_utilisation": "Le CCTP prévoit un constat avec l'entreprise de gros oeuvre après démolition.",
+    "points_vigilance": [
+      "Coordonner le niveau de remise en état attendu avant son intervention."
+    ]
+  },
+  {
+    "terme": "Hygiène de chantier",
+    "definition_courte": "Ensemble des mesures garantissant propreté, sanitaires et conditions de travail.",
+    "explication_pedagogique": "Elle protège les personnels et limite les nuisances.",
+    "exemple_utilisation": "Le CCTP renvoie aux dispositions législatives et réglementaires d'hygiène et sécurité.",
+    "points_vigilance": [
+      "Maintenir base vie, nettoyage journalier et gestion des déchets."
+    ]
+  },
+  {
+    "terme": "INRS",
+    "acronyme": "Institut National de Recherche et de Sécurité",
+    "definition_courte": "Institut National de Recherche et de Sécurité.",
+    "explication_pedagogique": "Il publie des guides de prévention utiles pour les travaux à risques.",
+    "exemple_utilisation": "Le CCTP cite le guide INRS sur retrait ou confinement d'amiante.",
+    "points_vigilance": [
+      "Utiliser ces guides pour compléter les modes opératoires."
+    ]
+  },
+  {
+    "terme": "Inspection du travail",
+    "definition_courte": "Administration chargée de veiller à l'application du droit du travail.",
+    "explication_pedagogique": "Elle peut formuler des exigences ou contrôler les conditions de sécurité.",
+    "exemple_utilisation": "Le CCTP demande de se soumettre aux instructions de l'inspection du travail.",
+    "points_vigilance": [
+      "Anticiper les documents obligatoires et l'organisation prévention."
+    ]
+  },
+  {
+    "terme": "Installation de chantier",
+    "definition_courte": "Ensemble des moyens provisoires : clôtures, base vie, réseaux, signalisation, accès.",
+    "explication_pedagogique": "Elle permet l'exécution organisée et sécurisée des travaux.",
+    "exemple_utilisation": "Le CCTP consacre un article aux installations propres du présent lot.",
+    "points_vigilance": [
+      "Inclure maintenance, raccordements, nettoyage et repli dans le prix."
+    ]
+  },
+  {
+    "terme": "Installation électrique IP4X",
+    "definition_courte": "Niveau de protection des équipements électriques contre l'accès aux parties dangereuses et corps solides.",
+    "explication_pedagogique": "Il participe à la sécurité électrique du chantier.",
+    "exemple_utilisation": "Le CCTP demande des équipements électriques de type IP4X.",
+    "points_vigilance": [
+      "Contrôler l'indice réel du matériel fourni et son bon état."
+    ]
+  },
+  {
+    "terme": "Interruption de chantier en phase",
+    "definition_courte": "Arrêt ou reprise des travaux lié au phasage de l'opération.",
+    "explication_pedagogique": "Elle peut être nécessaire selon les contraintes urbaines ou réglementaires.",
+    "exemple_utilisation": "Le CCTP indique que l'offre doit tenir compte des interruptions et réinstallations éventuelles.",
+    "points_vigilance": [
+      "Intégrer ces contraintes dans planning, prix et mobilisation des engins."
+    ]
+  },
+  {
+    "terme": "Maître d'oeuvre",
+    "definition_courte": "Équipe chargée de concevoir, suivre et contrôler les travaux pour le maître d'ouvrage.",
+    "explication_pedagogique": "Elle valide méthodes, signale réserves et participe aux constats.",
+    "exemple_utilisation": "Le CCTP demande de signaler au maître d'oeuvre les anomalies du dossier.",
+    "points_vigilance": [
+      "Obtenir validations avant modifications importantes de méthode ou périmètre."
+    ]
+  },
+  {
+    "terme": "Maître d'ouvrage",
+    "definition_courte": "Client ou donneur d'ordre de l'opération.",
+    "explication_pedagogique": "Il réceptionne les travaux et reçoit les documents finaux.",
+    "exemple_utilisation": "Le CCTP est établi pour Gironde Habitat.",
+    "points_vigilance": [
+      "Transmettre contrôles, plans et justificatifs demandés avant réception."
+    ]
+  },
+  {
+    "terme": "Marché forfaitaire",
+    "definition_courte": "Contrat dans lequel l'entreprise s'engage sur un prix global.",
+    "explication_pedagogique": "Il limite les plus-values pour omissions ou imprécisions non signalées.",
+    "exemple_utilisation": "Le CCTP insiste sur le prix forfaitaire invariable et les prestations nécessaires.",
+    "points_vigilance": [
+      "Vérifier le périmètre avant remise d'offre et chiffrer les sujétions."
+    ]
+  },
+  {
+    "terme": "Masque respiratoire",
+    "definition_courte": "EPI protégeant contre poussières ou fibres respirables.",
+    "explication_pedagogique": "Il réduit l'exposition des travailleurs pendant curage, démolition ou dépollution.",
+    "exemple_utilisation": "Le CCTP cite les masques parmi les équipements individuels.",
+    "points_vigilance": [
+      "Choisir le niveau de protection selon risque réel et former au port."
+    ]
+  },
+  {
+    "terme": "Matériau amiantifère",
+    "definition_courte": "Matériau contenant de l'amiante.",
+    "explication_pedagogique": "Il impose un retrait, confinement ou traitement spécifique avant démolition.",
+    "exemple_utilisation": "Le CCTP indique que le rapport joint détaille les matériaux amiantifères identifiés, puis conclut à l'absence de produit concerné.",
+    "points_vigilance": [
+      "En cas de contradiction ou doute, demander clarification avant travaux."
+    ]
+  },
+  {
+    "terme": "Matériau transportable",
+    "definition_courte": "Fragment de démolition réduit à une taille compatible avec chargement et transport.",
+    "explication_pedagogique": "Il facilite l'évacuation en sécurité.",
+    "exemple_utilisation": "Le CCTP demande de fractionner les matériaux en éléments transportables.",
+    "points_vigilance": [
+      "Éviter les dimensions instables ou les chargements dépassant les règles de transport."
+    ]
+  },
+  {
+    "terme": "Médecine du travail",
+    "definition_courte": "Service chargé du suivi de la santé des travailleurs.",
+    "explication_pedagogique": "Elle peut imposer ou recommander des mesures de prévention.",
+    "exemple_utilisation": "Le CCTP demande de se soumettre aux instructions de la médecine du travail.",
+    "points_vigilance": [
+      "Assurer suivi médical adapté aux risques poussières, bruit, amiante ou plomb."
+    ]
+  },
+  {
+    "terme": "Milieu urbain",
+    "definition_courte": "Contexte de travaux proche de riverains, voiries, bâtiments ou réseaux.",
+    "explication_pedagogique": "Il augmente les exigences de nuisances, sécurité et circulation.",
+    "exemple_utilisation": "Le CCTP précise que les démolitions s'effectuent en milieu urbain.",
+    "points_vigilance": [
+      "Limiter bruit, poussières, vibrations et circulation d'engins."
+    ]
+  },
+  {
+    "terme": "Mode opératoire",
+    "definition_courte": "Document décrivant la méthode d'exécution détaillée.",
+    "explication_pedagogique": "Il précise phasage, protections, matériels et zones de travail.",
+    "exemple_utilisation": "Le CCTP demande le mode opératoire avec zones confinées, sas et extracteurs.",
+    "points_vigilance": [
+      "Le faire valider avant démarrage des travaux sensibles."
+    ]
+  },
+  {
+    "terme": "Monte-charge",
+    "definition_courte": "Équipement de levage vertical existant dans un bâtiment.",
+    "explication_pedagogique": "Il fait partie des équipements intérieurs à déposer ou démolir.",
+    "exemple_utilisation": "Le CCTP cite ascenseurs et monte-charges dans les équipements intérieurs.",
+    "points_vigilance": [
+      "Sécuriser câbles, contrepoids, gaines et alimentation avant dépose."
+    ]
+  },
+  {
+    "terme": "Mur d'élévation",
+    "definition_courte": "Mur vertical formant les façades ou parois porteuses d'un bâtiment.",
+    "explication_pedagogique": "Il est démoli après les étapes préparatoires selon le phasage.",
+    "exemple_utilisation": "Le CCTP mentionne la démolition des murs d'élévation.",
+    "points_vigilance": [
+      "Contrôler stabilité résiduelle et éviter basculement incontrôlé."
+    ]
+  },
+  {
+    "terme": "Mur de soutènement",
+    "definition_courte": "Mur retenant des terres ou différences de niveau.",
+    "explication_pedagogique": "Il peut être conservé pour maintenir la stabilité des abords.",
+    "exemple_utilisation": "Le CCTP cite le mur de soutènement le long des rues parmi les éléments à conserver ou maintenir.",
+    "points_vigilance": [
+      "Ne pas le fragiliser sans étude et protection adaptée."
+    ]
+  },
+  {
+    "terme": "Mur mitoyen",
+    "definition_courte": "Mur partagé ou situé en limite avec une propriété voisine.",
+    "explication_pedagogique": "Il doit être sondé, protégé ou conservé selon le cas.",
+    "exemple_utilisation": "Le CCTP met le sondage des murs mitoyens à charge du lot.",
+    "points_vigilance": [
+      "Définir précisément la limite et prévoir confortement si nécessaire."
+    ]
+  },
+  {
+    "terme": "Nettoyage journalier",
+    "definition_courte": "Nettoyage quotidien des zones de travaux.",
+    "explication_pedagogique": "Il limite risques, poussières, déchets et nuisances.",
+    "exemple_utilisation": "Le PGC rappelé par le CCTP impose le nettoyage journalier des zones de travaux.",
+    "points_vigilance": [
+      "Ne pas attendre la fin de chantier pour évacuer les déchets courants."
+    ]
+  },
+  {
+    "terme": "Neutralisation des réseaux",
+    "definition_courte": "Coupure, sécurisation ou mise hors service des réseaux avant démolition.",
+    "explication_pedagogique": "Elle est la première étape pour éviter accidents graves.",
+    "exemple_utilisation": "Le CCTP place la neutralisation des réseaux en premier dans l'ordre des démolitions.",
+    "points_vigilance": [
+      "Obtenir preuves de coupure et repérer les réseaux privatifs comme publics."
+    ]
+  },
+  {
+    "terme": "NF C 15-100",
+    "definition_courte": "Norme française de référence pour les installations électriques basse tension.",
+    "explication_pedagogique": "Elle s'applique aux installations provisoires de chantier si concernées.",
+    "exemple_utilisation": "Le CCTP cite la norme NF C 15-100 pour les travaux électriques.",
+    "points_vigilance": [
+      "Faire vérifier conformité et protections différentielles."
+    ]
+  },
+  {
+    "terme": "Notice de maintenance",
+    "definition_courte": "Document décrivant entretien ou contrôle périodique d'un équipement maintenu.",
+    "explication_pedagogique": "Elle est remise avant réception lorsque des dispositifs restent en place.",
+    "exemple_utilisation": "Le CCTP demande les notices de maintenance et de contrôle périodique.",
+    "points_vigilance": [
+      "Vérifier l'utilité réelle selon les ouvrages conservés ou dispositifs livrés."
+    ]
+  },
+  {
+    "terme": "Nuisance sonore",
+    "definition_courte": "Bruit généré par engins, chocs, marteaux, sciage ou chargement.",
+    "explication_pedagogique": "Elle doit être réduite pour les riverains et travailleurs.",
+    "exemple_utilisation": "Le CCTP demande de limiter les nuisances sonores.",
+    "points_vigilance": [
+      "Choisir horaires, méthodes et matériels moins bruyants si possible."
+    ]
+  },
+  {
+    "terme": "OPPBTP",
+    "definition_courte": "Organisme professionnel de prévention du bâtiment et des travaux publics.",
+    "explication_pedagogique": "Il peut émettre recommandations ou demandes de prévention.",
+    "exemple_utilisation": "Le CCTP demande de se soumettre aux instructions de l'OPPBTP.",
+    "points_vigilance": [
+      "Intégrer ses recommandations dans PPSPS et modes opératoires."
+    ],
+    "acronyme": "Organisme professionnel de prévention du bâtiment et des travaux publics"
+  },
+  {
+    "terme": "Ouvrage conservé",
+    "definition_courte": "Ouvrage existant devant rester en place pendant ou après démolition.",
+    "explication_pedagogique": "Il nécessite protection et parfois confortement.",
+    "exemple_utilisation": "Le CCTP demande de prendre toutes précautions vis-à-vis des ouvrages conservés.",
+    "points_vigilance": [
+      "Protéger contre chocs, vibrations, poussières et arrachements."
+    ]
+  },
+  {
+    "terme": "Parfait achèvement des démolitions",
+    "definition_courte": "Achèvement complet des travaux de démolition et prestations associées.",
+    "explication_pedagogique": "Il conditionne l'intervention de l'entreprise de gros oeuvre.",
+    "exemple_utilisation": "Le CCTP précise que le gros oeuvre n'intervient qu'après parfait achèvement des démolitions.",
+    "points_vigilance": [
+      "Inclure nettoyage, évacuation, consolidations et constats."
+    ]
+  },
+  {
+    "terme": "Période de consultation",
+    "definition_courte": "Phase durant laquelle l'entreprise analyse le dossier avant remise de son offre.",
+    "explication_pedagogique": "Elle sert à poser questions et signaler anomalies.",
+    "exemple_utilisation": "Le CCTP demande de signaler erreurs ou omissions durant cette période.",
+    "points_vigilance": [
+      "Faire une visite de site sérieuse avant chiffrage."
+    ]
+  },
+  {
+    "terme": "PGC SPS",
+    "definition_courte": "Plan Général de Coordination en matière de sécurité et protection de la santé.",
+    "explication_pedagogique": "Il fixe les règles de prévention communes du chantier.",
+    "exemple_utilisation": "Le CCTP impose de se conformer au PGC SPS.",
+    "points_vigilance": [
+      "Adapter PPSPS, installations et protections aux prescriptions du PGC."
+    ],
+    "acronyme": "Plan Général de Coordination en matière de sécurité et protection de la santé"
+  },
+  {
+    "terme": "Phase de démolition",
+    "definition_courte": "Étape définie dans l'ordre d'exécution des démolitions.",
+    "explication_pedagogique": "Elle évite les interventions désordonnées et les risques de stabilité.",
+    "exemple_utilisation": "Le CCTP détaille un ordre en 17 étapes.",
+    "points_vigilance": [
+      "Respecter l'enchaînement ou justifier toute adaptation par mode opératoire."
+    ]
+  },
+  {
+    "terme": "Plan de localisation des zones traitées",
+    "definition_courte": "Plan indiquant précisément les zones démolies, dépolluées ou traitées.",
+    "explication_pedagogique": "Il sert à la traçabilité et au dossier final.",
+    "exemple_utilisation": "Le CCTP demande quatre exemplaires dont un reproductible.",
+    "points_vigilance": [
+      "Mettre à jour selon l'exécution réelle."
+    ]
+  },
+  {
+    "terme": "Plan de retrait",
+    "definition_courte": "Document réglementaire décrivant le retrait d'amiante ou matériaux dangereux.",
+    "explication_pedagogique": "Il précise méthode, protections, contrôles et filières.",
+    "exemple_utilisation": "Le CCTP demande le plan de retrait si les travaux de désamiantage le nécessitent.",
+    "points_vigilance": [
+      "Le transmettre dans les délais réglementaires aux organismes concernés."
+    ]
+  },
+  {
+    "terme": "Plan de retrait et de confinement",
+    "definition_courte": "Document explicitant la méthodologie de retrait ou confinement amiante.",
+    "explication_pedagogique": "Il structure la prévention et les contrôles.",
+    "exemple_utilisation": "Le CCTP demande d'expliciter clairement le choix méthodologique dans ce plan.",
+    "points_vigilance": [
+      "Ne pas démarrer les travaux réglementés sans plan validé."
+    ]
+  },
+  {
+    "terme": "Plancher",
+    "definition_courte": "Élément horizontal séparant deux niveaux ou supportant les charges.",
+    "explication_pedagogique": "Il doit être démoli dans l'ordre prévu après sécurisation.",
+    "exemple_utilisation": "Le CCTP cite la démolition des planchers.",
+    "points_vigilance": [
+      "Anticiper risques de chute, instabilité et surcharge de gravats."
+    ]
+  },
+  {
+    "terme": "Planning des tâches",
+    "definition_courte": "Calendrier détaillant les différentes interventions.",
+    "explication_pedagogique": "Il coordonne neutralisation, dépollution, curage, démolition et évacuation.",
+    "exemple_utilisation": "Le CCTP demande les plannings des diverses tâches.",
+    "points_vigilance": [
+      "Intégrer contrôles, autorisations, délais amiante et contraintes de voirie."
+    ]
+  },
+  {
+    "terme": "Plomb",
+    "definition_courte": "Métal toxique pouvant être présent dans peintures anciennes ou canalisations.",
+    "explication_pedagogique": "Il impose des protections et filières adaptées s'il est identifié.",
+    "exemple_utilisation": "Le CCTP demande de prendre en compte les rapports sur le plomb.",
+    "points_vigilance": [
+      "Le diagnostic indique absence de produit concerné, mais rester vigilant en découverte imprévue."
+    ]
+  },
+  {
+    "terme": "Poussière d'amiante",
+    "definition_courte": "Poussière contenant des fibres d'amiante inhalables.",
+    "explication_pedagogique": "Elle représente un risque sanitaire majeur.",
+    "exemple_utilisation": "Le CCTP cite les risques liés à l'inhalation de poussières d'amiante.",
+    "points_vigilance": [
+      "Stopper toute intervention en cas de suspicion non couverte par diagnostic."
+    ]
+  },
+  {
+    "terme": "PPSPS",
+    "definition_courte": "Plan Particulier de Sécurité et de Protection de la Santé.",
+    "explication_pedagogique": "Il décrit les mesures de prévention propres à l'entreprise.",
+    "exemple_utilisation": "Le CCTP demande de remettre le PPSPS au coordonnateur SPS.",
+    "points_vigilance": [
+      "Le mettre à jour en cas de changement de méthode ou phasage."
+    ],
+    "acronyme": "Plan Particulier de Sécurité et de Protection de la Santé"
+  },
+  {
+    "terme": "Prix forfaitaire",
+    "definition_courte": "Prix global couvrant toutes les prestations nécessaires.",
+    "explication_pedagogique": "Il engage l'entreprise sur une prestation complète.",
+    "exemple_utilisation": "Le CCTP demande un prix forfaitaire comprenant matériel, fournitures, ouvrages et main d'oeuvre.",
+    "points_vigilance": [
+      "Inclure sujétions, contrôles, protections, nettoyage et évacuations."
+    ]
+  },
+  {
+    "terme": "Procédé mécanique",
+    "definition_courte": "Méthode de démolition utilisant des engins ou outils mécaniques.",
+    "explication_pedagogique": "Il permet de traiter rapidement les ouvrages lourds.",
+    "exemple_utilisation": "Le CCTP cite les travaux de démolition par procédés mécaniques.",
+    "points_vigilance": [
+      "Maîtriser vibrations, projections, poussières et zones d'exclusion."
+    ]
+  },
+  {
+    "terme": "Produit contaminé",
+    "definition_courte": "Matériau souillé par amiante, plomb, hydrocarbures ou autre pollution.",
+    "explication_pedagogique": "Il doit être évacué avant les démolitions courantes.",
+    "exemple_utilisation": "Le CCTP prévoit l'évacuation préalable de tous les produits contaminés.",
+    "points_vigilance": [
+      "Utiliser filière et conditionnement adaptés à la contamination."
+    ]
+  },
+  {
+    "terme": "Protection des réseaux",
+    "definition_courte": "Mesures évitant d'endommager les réseaux conservés ou voisins.",
+    "explication_pedagogique": "Elle maintient sécurité et continuité de service.",
+    "exemple_utilisation": "Le CCTP met cette protection à charge de l'entreprise.",
+    "points_vigilance": [
+      "Repérer, baliser, protéger mécaniquement et travailler doucement à proximité."
+    ]
+  },
+  {
+    "terme": "Protection des travailleurs",
+    "definition_courte": "Ensemble des mesures de sécurité appliquées au personnel.",
+    "explication_pedagogique": "Elle réduit les accidents et expositions dangereuses.",
+    "exemple_utilisation": "Le CCTP impose les règles de protection du personnel sans restriction.",
+    "points_vigilance": [
+      "Combiner protections collectives, EPI, formations et modes opératoires."
+    ]
+  },
+  {
+    "terme": "Référé préventif",
+    "definition_courte": "Procédure permettant de constater l'état des avoisinants avant travaux.",
+    "explication_pedagogique": "Elle protège juridiquement les parties en cas de désordre.",
+    "exemple_utilisation": "Le CCTP indique qu'un état des lieux contradictoire a été réalisé par référé préventif.",
+    "points_vigilance": [
+      "Utiliser le rapport comme référence au démarrage et à la fin."
+    ]
+  },
+  {
+    "terme": "Réglementation routière",
+    "definition_courte": "Règles applicables au transport, à la circulation et à l'occupation de voirie.",
+    "explication_pedagogique": "Elle encadre camions, matières dangereuses, accès et propreté de voirie.",
+    "exemple_utilisation": "Le CCTP demande une attestation du transporteur et les autorisations de voirie.",
+    "points_vigilance": [
+      "Vérifier charges, itinéraires, horaires et documents de transport."
+    ]
+  },
+  {
+    "terme": "Règles de l'art",
+    "definition_courte": "Bonnes pratiques professionnelles reconnues.",
+    "explication_pedagogique": "Elles complètent le CCTP pour livrer une prestation correctement terminée.",
+    "exemple_utilisation": "Le CCTP demande de prévoir toutes les sujétions nécessaires suivant les règles de l'art.",
+    "points_vigilance": [
+      "Ne pas se limiter à une lecture minimale de la description."
+    ]
+  },
+  {
+    "terme": "Règles professionnelles",
+    "definition_courte": "Référentiels et pratiques propres au métier.",
+    "explication_pedagogique": "Elles servent à juger la conformité de l'exécution.",
+    "exemple_utilisation": "Le CCTP indique que l'entreprise doit la parfaite finition dans le cadre des règles professionnelles.",
+    "points_vigilance": [
+      "Appliquer les méthodes reconnues même si chaque détail n'est pas écrit."
+    ]
+  },
+  {
+    "terme": "Remise en état de voirie",
+    "definition_courte": "Réparation des trottoirs, bordures ou chaussées dégradés par le chantier.",
+    "explication_pedagogique": "Elle restitue l'espace public dans son état initial.",
+    "exemple_utilisation": "Le CCTP met ces remises en état à charge de l'entreprise selon directives de la ville.",
+    "points_vigilance": [
+      "Faire valider par les services de voirie de Créon si nécessaire."
+    ]
+  },
+  {
+    "terme": "Remise en état du terrain",
+    "definition_courte": "Nettoyage, réglage et aplani après démolition.",
+    "explication_pedagogique": "Elle prépare le terrain aux travaux suivants.",
+    "exemple_utilisation": "Le CCTP place la remise en état du terrain en dernière étape.",
+    "points_vigilance": [
+      "Vérifier absence de déchets, fondations résiduelles et cuves."
+    ]
+  },
+  {
+    "terme": "Répertoire des réseaux",
+    "definition_courte": "Informations sur le tracé des réseaux existants.",
+    "explication_pedagogique": "Il évite les détériorations accidentelles.",
+    "exemple_utilisation": "Le CCTP demande de prendre tous renseignements auprès des services techniques de la ville.",
+    "points_vigilance": [
+      "Compléter par DICT, plans, sondages ou détection si nécessaire."
+    ]
+  },
+  {
+    "terme": "Repli du matériel",
+    "definition_courte": "Retrait des engins, installations et outils à la fin de l'intervention.",
+    "explication_pedagogique": "Il clôt l'installation de chantier et libère le site.",
+    "exemple_utilisation": "Le CCTP met le repli du matériel à charge de l'entrepreneur.",
+    "points_vigilance": [
+      "Nettoyer chaussées et abords avant départ définitif."
+    ]
+  },
+  {
+    "terme": "Réseau à conserver",
+    "definition_courte": "Canalisation ou câble devant rester actif pendant les travaux.",
+    "explication_pedagogique": "Il assure la continuité de service des bâtiments existants ou voisins.",
+    "exemple_utilisation": "Le CCTP demande de conserver ou dévoyer les réseaux nécessaires.",
+    "points_vigilance": [
+      "Protéger physiquement et repérer clairement dans l'emprise."
+    ]
+  },
+  {
+    "terme": "Réseau EP",
+    "definition_courte": "Réseau d'eaux pluviales.",
+    "explication_pedagogique": "Il peut croiser les zones de démolition et de circulation.",
+    "exemple_utilisation": "Le CCTP cite les EP parmi les réseaux existants.",
+    "points_vigilance": [
+      "Maintenir l'évacuation des eaux utiles ou neutraliser proprement."
+    ]
+  },
+  {
+    "terme": "Réseau EU",
+    "definition_courte": "Réseau d'eaux usées.",
+    "explication_pedagogique": "Il peut être neutralisé, déposé ou conservé selon son usage.",
+    "exemple_utilisation": "Le CCTP cite les EU parmi les réseaux à traiter.",
+    "points_vigilance": [
+      "Éviter écoulements non maîtrisés et odeurs pendant la dépose."
+    ]
+  },
+  {
+    "terme": "Réseau EV",
+    "definition_courte": "Réseau d'eaux vannes.",
+    "explication_pedagogique": "Il concerne les évacuations sanitaires.",
+    "exemple_utilisation": "Le CCTP cite les EV parmi les fluides inutiles à désactiver ou déposer.",
+    "points_vigilance": [
+      "Obturer et sécuriser pour éviter odeurs, effluents ou affaissements."
+    ]
+  },
+  {
+    "terme": "Réseau gaz",
+    "definition_courte": "Canalisation alimentant un bâtiment en gaz.",
+    "explication_pedagogique": "Il présente un risque d'explosion s'il n'est pas neutralisé.",
+    "exemple_utilisation": "Le CCTP cite le gaz dans les réseaux à désactiver ou déposer.",
+    "points_vigilance": [
+      "Obtenir coupure officielle et vérifier absence de gaz avant travaux."
+    ]
+  },
+  {
+    "terme": "Réseau privatif",
+    "definition_courte": "Réseau appartenant au site ou à un bâtiment privé.",
+    "explication_pedagogique": "Il doit être neutralisé ou protégé comme les réseaux publics.",
+    "exemple_utilisation": "Le CCTP inclut les réseaux privatifs dans la neutralisation.",
+    "points_vigilance": [
+      "Ne pas supposer qu'un réseau privé est hors service."
+    ]
+  },
+  {
+    "terme": "Réseau public",
+    "definition_courte": "Réseau géré par un service public ou concessionnaire.",
+    "explication_pedagogique": "Il peut devoir rester en service pour les voisins ou usagers.",
+    "exemple_utilisation": "Le CCTP impose la protection des réseaux publics nécessaires.",
+    "points_vigilance": [
+      "Contacter les services compétents avant intervention."
+    ]
+  },
+  {
+    "terme": "Réserve de réception",
+    "definition_courte": "Observation ou défaut relevé lors d'une réception ou pré-réception.",
+    "explication_pedagogique": "Elle doit être levée avant acceptation complète.",
+    "exemple_utilisation": "Le CCTP conditionne l'intervention suivante au parfait achèvement des démolitions.",
+    "points_vigilance": [
+      "Traiter immédiatement les déchets restants, reprises ou documents manquants."
+    ]
+  },
+  {
+    "terme": "Résultat de contrôle",
+    "definition_courte": "Rapport ou mesure prouvant la conformité d'une étape.",
+    "explication_pedagogique": "Il permet au maître d'ouvrage de suivre les risques et valider l'avancement.",
+    "exemple_utilisation": "Le CCTP demande les résultats de contrôles intermédiaires et libératoires.",
+    "points_vigilance": [
+      "Transmettre en format lisible et conserver dans le dossier final."
+    ]
+  },
+  {
+    "terme": "RICT",
+    "definition_courte": "Rapport initial de contrôle technique.",
+    "explication_pedagogique": "Il peut entraîner des ajustements du dossier après relecture.",
+    "exemple_utilisation": "La page de garde du CCTP indique une diffusion après relecture RICT.",
+    "points_vigilance": [
+      "Vérifier si des observations RICT touchent la démolition ou la sécurité."
+    ],
+    "acronyme": "Rapport initial de contrôle technique"
+  },
+  {
+    "terme": "Ruine localisée",
+    "definition_courte": "Ouvrage en ruine repéré sur le plan de démolition.",
+    "explication_pedagogique": "Elle doit être évacuée avec l'ensemble des démolitions.",
+    "exemple_utilisation": "Le CCTP inclut l'évacuation de la ruine localisée sur le plan.",
+    "points_vigilance": [
+      "Sécuriser avant approche car la stabilité peut être incertaine."
+    ]
+  },
+  {
+    "terme": "Sas de confinement",
+    "definition_courte": "Passage contrôlé entre zone confinée et extérieur.",
+    "explication_pedagogique": "Il limite la sortie de fibres ou poussières dangereuses.",
+    "exemple_utilisation": "Le CCTP demande la localisation des sas dans le mode opératoire.",
+    "points_vigilance": [
+      "Prévoir procédures d'entrée, sortie et décontamination."
+    ]
+  },
+  {
+    "terme": "Sécurité collective",
+    "definition_courte": "Mesures protégeant l'ensemble des intervenants ou usagers.",
+    "explication_pedagogique": "Elle prime sur les seules protections individuelles.",
+    "exemple_utilisation": "Le CCTP demande la mise en place et l'entretien des équipements de sécurité collectives.",
+    "points_vigilance": [
+      "Ne pas retirer une protection pour faciliter un passage sans solution équivalente."
+    ]
+  },
+  {
+    "terme": "Service de voirie",
+    "definition_courte": "Service municipal compétent pour chaussées, trottoirs et autorisations.",
+    "explication_pedagogique": "Il valide ou impose certaines remises en état.",
+    "exemple_utilisation": "Le CCTP demande de se rapprocher des services de voirie de la ville de Créon.",
+    "points_vigilance": [
+      "Respecter leurs directives pour accès provisoires et réparations."
+    ]
+  },
+  {
+    "terme": "Signalisation permanente",
+    "definition_courte": "Panneaux et indications maintenus pendant toute la durée du chantier.",
+    "explication_pedagogique": "Elle informe sur nature des travaux, risques et interdictions.",
+    "exemple_utilisation": "Le CCTP demande une signalisation permanente approuvée.",
+    "points_vigilance": [
+      "La remplacer si elle devient illisible, déplacée ou inadaptée."
+    ]
+  },
+  {
+    "terme": "Sondage de mur mitoyen",
+    "definition_courte": "Reconnaissance ponctuelle d'un mur partagé ou en limite.",
+    "explication_pedagogique": "Elle permet de comprendre sa composition et sa stabilité.",
+    "exemple_utilisation": "Le CCTP met à charge le sondage des murs mitoyens.",
+    "points_vigilance": [
+      "Faire valider la méthode pour ne pas fragiliser le voisinage."
+    ]
+  },
+  {
+    "terme": "Souche enterrée",
+    "definition_courte": "Partie racinaire restante après abattage d'un arbre.",
+    "explication_pedagogique": "Elle peut gêner terrassements et fondations futurs.",
+    "exemple_utilisation": "Le CCTP inclut arbres, arbustes, haies et souches enterrées.",
+    "points_vigilance": [
+      "Dessoucher complètement dans l'emprise à libérer."
+    ]
+  },
+  {
+    "terme": "Stockage provisoire",
+    "definition_courte": "Entreposage temporaire de matériaux ou déchets avant évacuation.",
+    "explication_pedagogique": "Il organise le chantier entre tri, chargement et transport.",
+    "exemple_utilisation": "Le CCTP demande l'enlèvement régulier des déchets.",
+    "points_vigilance": [
+      "Limiter durée, hauteur, poussières et mélanges de catégories."
+    ]
+  },
+  {
+    "terme": "Structure porteuse",
+    "definition_courte": "Éléments assurant la stabilité du bâtiment : murs, planchers, charpentes, fondations.",
+    "explication_pedagogique": "Sa démolition doit suivre un phasage maîtrisé.",
+    "exemple_utilisation": "Le CCTP prévoit la démolition des équipements structuraux.",
+    "points_vigilance": [
+      "Ne pas retirer un élément porteur sans analyse de stabilité."
+    ]
+  },
+  {
+    "terme": "Sujétion de chantier",
+    "definition_courte": "Contrainte particulière incluse dans le prix : accès, sécurité, phasage, nettoyage ou contrôles.",
+    "explication_pedagogique": "Elle représente les conditions pratiques nécessaires à l'exécution.",
+    "exemple_utilisation": "Le CCTP indique que toutes sujétions de chantier sont comprises dans le prix.",
+    "points_vigilance": [
+      "Les identifier avant offre pour éviter sous-chiffrage."
+    ]
+  },
+  {
+    "terme": "Surface nettoyée et réglée",
+    "definition_courte": "Surface débarrassée des débris et mise au niveau attendu après démolition.",
+    "explication_pedagogique": "Elle constitue l'état de livraison demandé pour le terrain.",
+    "exemple_utilisation": "Le CCTP demande la remise de surfaces parfaitement nettoyées et réglées.",
+    "points_vigilance": [
+      "Contrôler visuellement et altimétriquement si nécessaire avant constat."
+    ]
+  },
+  {
+    "terme": "Teneur résiduelle en fibres",
+    "definition_courte": "Quantité de fibres d'amiante restant après intervention.",
+    "explication_pedagogique": "Elle est contrôlée pour valider la restitution ou la poursuite du chantier.",
+    "exemple_utilisation": "Le CCTP mentionne la teneur résiduelle en fibres d'amiante.",
+    "points_vigilance": [
+      "Attendre le résultat favorable avant suite des travaux."
+    ]
+  },
+  {
+    "terme": "Terrasse extérieure",
+    "definition_courte": "Ouvrage extérieur horizontal attenant ou proche du bâtiment.",
+    "explication_pedagogique": "Elle est supprimée si elle fait partie des existants à démolir.",
+    "exemple_utilisation": "Le CCTP inclut la démolition des terrasses et cheminements extérieurs.",
+    "points_vigilance": [
+      "Vérifier fondations, réseaux dessous et limites de conservation."
+    ]
+  },
+  {
+    "terme": "Trottoir",
+    "definition_courte": "Partie de voirie réservée aux piétons.",
+    "explication_pedagogique": "Il peut être emprunté, protégé ou remis en état pendant le chantier.",
+    "exemple_utilisation": "Le CCTP met les dégradations sur trottoir à charge de l'entreprise.",
+    "points_vigilance": [
+      "Protéger les cheminements publics et demander autorisation si occupation."
+    ]
+  },
+  {
+    "terme": "Tuyauterie",
+    "definition_courte": "Canalisation intérieure ou technique déposée avant démolition.",
+    "explication_pedagogique": "Elle fait partie des équipements intérieurs à retirer.",
+    "exemple_utilisation": "Le CCTP cite les tuyauteries dans les équipements intérieurs.",
+    "points_vigilance": [
+      "Vérifier fluide, purge, obturation et filière de recyclage."
+    ]
+  },
+  {
+    "terme": "Vibration",
+    "definition_courte": "Oscillation générée par engins, chocs ou démolition mécanique.",
+    "explication_pedagogique": "Elle peut affecter les bâtiments voisins et ouvrages conservés.",
+    "exemple_utilisation": "Le CCTP demande de limiter les vibrations.",
+    "points_vigilance": [
+      "Adapter méthode, distance, cadence et surveillance des avoisinants."
+    ]
+  },
+  {
+    "terme": "Voirie publique",
+    "definition_courte": "Chaussée, trottoir et espaces routiers accessibles au public.",
+    "explication_pedagogique": "Elle doit rester propre, autorisée et remise en état.",
+    "exemple_utilisation": "Le CCTP demande de maintenir les voiries publiques dans leur état d'origine.",
+    "points_vigilance": [
+      "Nettoyer les boues et réparer les dégradations selon directives municipales."
+    ]
+  },
+  {
+    "terme": "Zone confinée",
+    "definition_courte": "Zone isolée pour travaux présentant un risque de pollution ou fibres.",
+    "explication_pedagogique": "Elle évite la dispersion vers le reste du chantier.",
+    "exemple_utilisation": "Le CCTP demande la localisation des zones confinées dans le mode opératoire.",
+    "points_vigilance": [
+      "Contrôler accès, dépression, sas et extraction."
+    ]
+  },
+  {
+    "terme": "Zone d'exclusion",
+    "definition_courte": "Périmètre interdit autour d'une zone dangereuse.",
+    "explication_pedagogique": "Elle protège contre chute de matériaux, engins et projections.",
+    "exemple_utilisation": "Le CCTP impose balisage, protections et interdiction d'accès aux personnes non autorisées.",
+    "points_vigilance": [
+      "Adapter le périmètre à la hauteur, au rayon des engins et au vent."
+    ]
+  }
+]

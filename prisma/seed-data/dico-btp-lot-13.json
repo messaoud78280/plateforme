@@ -1,0 +1,2651 @@
+[
+  {
+    "terme": "0/4",
+    "definition_courte": "Granularité d'un sable dont les grains sont compris entre 0 et 4 mm.",
+    "explication_pedagogique": "Elle sert à l'enrobage propre des câbles, gaines et fourreaux.",
+    "exemple_utilisation": "Le CCTP demande un sable d'enrobage 0/4 pour les réseaux BT et IRVE.",
+    "points_vigilance": [
+      "Le sable doit être propre, sans matière organique ni pierre agressive."
+    ]
+  },
+  {
+    "terme": "100 daN",
+    "definition_courte": "Effort de traction de référence indiqué pour le filin d'aiguillage télécom.",
+    "explication_pedagogique": "Il garantit que le filin peut servir au tirage sans casser immédiatement.",
+    "exemple_utilisation": "Le CCTP prévoit un filin 180/100 avec résistance 100 daN pour l'aiguillage du réseau télécom.",
+    "points_vigilance": [
+      "Vérifier que le filin reste présent et accessible dans chaque fourreau après essais."
+    ]
+  },
+  {
+    "terme": "25 mm2 cuivre nu",
+    "definition_courte": "Section minimale du conducteur de terre prévu pour l'éclairage public.",
+    "explication_pedagogique": "Elle assure la liaison équipotentielle des candélabres, lanternes et armoires.",
+    "exemple_utilisation": "Le CCTP prévoit un câble cuivre nu de 25 mm2 posé parallèlement au câble d'alimentation.",
+    "points_vigilance": [
+      "Contrôler la continuité de terre et les connexions à chaque candélabre."
+    ]
+  },
+  {
+    "terme": "2700K",
+    "definition_courte": "Température de couleur chaude des lanternes LED.",
+    "explication_pedagogique": "Elle donne une lumière plutôt chaude, moins blanche qu'un 4000K.",
+    "exemple_utilisation": "Le CCTP demande des lanternes CIRKO LYRE en 2700K.",
+    "points_vigilance": [
+      "Vérifier que la teinte livrée correspond bien au choix et à l'étude d'éclairage."
+    ]
+  },
+  {
+    "terme": "2S",
+    "definition_courte": "Type de prise ou de sortie utilisé sur certaines bornes de recharge.",
+    "explication_pedagogique": "Elle fait partie des possibilités de connexion offertes par la borne IRVE.",
+    "exemple_utilisation": "La borne IRVE du CCTP comprend des prises type E/F et 2S.",
+    "points_vigilance": [
+      "Confirmer la compatibilité avec le matériel réellement retenu et les usages attendus."
+    ]
+  },
+  {
+    "terme": "30 Ohms",
+    "definition_courte": "Valeur maximale demandée pour certaines mises à la terre du neutre.",
+    "explication_pedagogique": "Elle limite les risques électriques et permet le bon fonctionnement des protections.",
+    "exemple_utilisation": "Le CCTP indique que les mises à la terre du neutre doivent être inférieures à 30 Ohms.",
+    "points_vigilance": [
+      "Mesurer la prise de terre après réalisation, pas seulement la prévoir au plan."
+    ]
+  },
+  {
+    "terme": "4x10 mm2",
+    "definition_courte": "Composition de câble avec quatre conducteurs de 10 mm2.",
+    "explication_pedagogique": "Elle est utilisée pour alimenter certains réseaux d'éclairage sous fourreau.",
+    "exemple_utilisation": "Le CCTP cite un câble monophasé U1000 R2V 4x10 mm2 pour l'éclairage public.",
+    "points_vigilance": [
+      "Vérifier la section par note de calcul, notamment chute de tension et longueur."
+    ]
+  },
+  {
+    "terme": "4x16 mm2",
+    "definition_courte": "Composition courante de câble basse tension aluminium à quatre conducteurs.",
+    "explication_pedagogique": "Elle peut raccorder un coffret ou une borne selon puissance et longueur.",
+    "exemple_utilisation": "Le CCTP cite les sections 4x16, 4x25 et 4x35 mm2 en raccordement BT.",
+    "points_vigilance": [
+      "La section retenue doit être validée par calcul et prescriptions ENEDIS."
+    ]
+  },
+  {
+    "terme": "4x25 mm2",
+    "definition_courte": "Section de câble BT aluminium mentionnée pour les raccordements.",
+    "explication_pedagogique": "Elle transporte davantage d'intensité qu'un 4x16 mm2.",
+    "exemple_utilisation": "Le CCTP cite le raccordement de câbles NF C 33-210 en 4x25 mm2.",
+    "points_vigilance": [
+      "Contrôler le rayon de courbure et le serrage dans les bornes adaptées."
+    ]
+  },
+  {
+    "terme": "4x35 mm2",
+    "definition_courte": "Section de câble basse tension plus importante pour certains départs.",
+    "explication_pedagogique": "Elle peut être nécessaire selon longueur, intensité ou chute de tension.",
+    "exemple_utilisation": "Le CCTP cite le 4x35 mm2 pour raccordement sur équipement primaire.",
+    "points_vigilance": [
+      "Ne jamais forcer un câble dans un coffret non prévu pour cette section."
+    ]
+  },
+  {
+    "terme": "5 Ohms",
+    "definition_courte": "Valeur globale cible pour un départ de mise à la terre du neutre.",
+    "explication_pedagogique": "Elle complète les exigences de sécurité du réseau basse tension.",
+    "exemple_utilisation": "Le CCTP indique une valeur globale de départ inférieure ou égale à 5 Ohms.",
+    "points_vigilance": [
+      "La valeur se vérifie par mesure et procès-verbal, pas par estimation."
+    ]
+  },
+  {
+    "terme": "AA3 + AA6",
+    "definition_courte": "Classe ou type de conduits de protection mécanique pour traversées.",
+    "explication_pedagogique": "Elle désigne les buses plastiques prévues sous chaussée pour réseaux électriques, éclairage et IRVE.",
+    "exemple_utilisation": "Le CCTP demande des conduits type AA3 + AA6 conformes NF C 68-171.",
+    "points_vigilance": [
+      "Confirmer la classe exacte avec le fournisseur et le gestionnaire avant pose."
+    ]
+  },
+  {
+    "terme": "Accessibilité PMR",
+    "definition_courte": "Exigence permettant l'usage des espaces par les personnes handicapées.",
+    "explication_pedagogique": "Elle impacte cheminements, éclairage, implantations et obstacles.",
+    "exemple_utilisation": "Le CCTP rappelle que le projet est soumis à la réglementation d'accessibilité.",
+    "points_vigilance": [
+      "Contrôler l'éclairement, les émergences de coffrets et la position des mâts dans les circulations."
+    ]
+  },
+  {
+    "terme": "Affouillement",
+    "definition_courte": "Dégradation ou creusement du sol par eau, pluie ou ruissellement.",
+    "explication_pedagogique": "Il peut déstabiliser une tranchée ou un massif.",
+    "exemple_utilisation": "Le CCTP demande de prendre les précautions contre les affouillements liés au gel ou à la pluie.",
+    "points_vigilance": [
+      "Sécuriser les fouilles et reprendre les fonds dégradés avant pose du réseau."
+    ]
+  },
+  {
+    "terme": "Agréage des matériaux",
+    "definition_courte": "Validation de la provenance et de la qualité des matériaux.",
+    "explication_pedagogique": "Elle évite de poser des produits non conformes au marché.",
+    "exemple_utilisation": "Le CCTP demande des matériaux issus d'usines, carrières ou fournisseurs agréés.",
+    "points_vigilance": [
+      "Garder fiches techniques, certificats et bons de livraison."
+    ]
+  },
+  {
+    "terme": "Aiguillage",
+    "definition_courte": "Mise en place d'un filin dans un fourreau pour faciliter le tirage ultérieur.",
+    "explication_pedagogique": "Il permet de tirer câbles ou fibre sans rouvrir la tranchée.",
+    "exemple_utilisation": "Le CCTP demande l'aiguillage du réseau télécom avec filin 180/100.",
+    "points_vigilance": [
+      "Chaque alvéole doit rester aiguillée après mandrinage et bouchonnage."
+    ]
+  },
+  {
+    "terme": "Alimentation générale",
+    "definition_courte": "Point d'origine électrique alimentant un réseau ou une armoire.",
+    "explication_pedagogique": "Elle sert de départ aux câbles de distribution.",
+    "exemple_utilisation": "Le CCTP prévoit des fourreaux depuis le point d'alimentation général.",
+    "points_vigilance": [
+      "Identifier précisément ce point avec ENEDIS et les plans d'exécution."
+    ]
+  },
+  {
+    "terme": "Âme massive aluminium",
+    "definition_courte": "Conducteur de câble en aluminium plein ou compact.",
+    "explication_pedagogique": "Elle est utilisée dans certains câbles basse tension souterrains.",
+    "exemple_utilisation": "Le CCTP cite des câbles aluminium à âme massive NF C 33-210.",
+    "points_vigilance": [
+      "Utiliser les accessoires adaptés aluminium pour éviter échauffements et mauvais contacts."
+    ]
+  },
+  {
+    "terme": "Approbation des plans",
+    "definition_courte": "Validation des plans d'exécution par le maître d'oeuvre ou gestionnaire.",
+    "explication_pedagogique": "Elle conditionne souvent le démarrage des travaux réseaux.",
+    "exemple_utilisation": "Le CCTP met à charge de l'entreprise l'approbation des plans auprès d'ORANGE et ENEDIS.",
+    "points_vigilance": [
+      "Ne pas lancer terrassements ou commandes critiques avant validation."
+    ]
+  },
+  {
+    "terme": "Arasement",
+    "definition_courte": "Mise à niveau ou suppression d'un obstacle maçonné en fond de tranchée.",
+    "explication_pedagogique": "Il permet de créer un fond propre et compatible avec le lit de pose.",
+    "exemple_utilisation": "Le CCTP demande d'araser les maçonneries rencontrées à 0,10 m sous le fond de tranchée.",
+    "points_vigilance": [
+      "Évacuer ou purger les éléments durs pouvant blesser les gaines."
+    ]
+  },
+  {
+    "terme": "Armoire de commande",
+    "definition_courte": "Coffret électrique qui pilote et protège les départs d'éclairage.",
+    "explication_pedagogique": "Elle regroupe commandes, protections, horloge, contacteurs et raccordements.",
+    "exemple_utilisation": "Le CCTP détaille une armoire de commande avec réserve de 25 %.",
+    "points_vigilance": [
+      "Contrôler repérage, ventilation, fermeture, schéma électrique et place disponible."
+    ]
+  },
+  {
+    "terme": "Armoire de distribution générale",
+    "definition_courte": "Enveloppe regroupant les protections et départs principaux.",
+    "explication_pedagogique": "Elle distribue l'énergie vers les secteurs d'éclairage.",
+    "exemple_utilisation": "Le CCTP prévoit sectionnement à fusibles, disjoncteurs différentiels, contacteurs et prise de courant.",
+    "points_vigilance": [
+      "La mise en service exige un contrôle électrique et un repérage indélébile."
+    ]
+  },
+  {
+    "terme": "Arrêté municipal",
+    "definition_courte": "Autorisation officielle modifiant circulation ou stationnement.",
+    "explication_pedagogique": "Il permet d'intervenir sur voirie en sécurité et légalement.",
+    "exemple_utilisation": "Le CCTP interdit de barrer une voie sans arrêté municipal.",
+    "points_vigilance": [
+      "Déposer la demande assez tôt, notamment 15 jours avant si exigé."
+    ]
+  },
+  {
+    "terme": "Attachements",
+    "definition_courte": "Constats contradictoires servant à justifier des quantités ou travaux réalisés.",
+    "explication_pedagogique": "Ils appuient les factures ou situations quand les travaux ne sont plus visibles.",
+    "exemple_utilisation": "Le CCTP évoque les bons de décharge à fournir à l'appui des attachements.",
+    "points_vigilance": [
+      "Faire signer avant remblaiement les profondeurs, longueurs et éventuels imprévus."
+    ]
+  },
+  {
+    "terme": "Attestation de conformité",
+    "definition_courte": "Document confirmant que l'ouvrage respecte les règles ou exigences du gestionnaire.",
+    "explication_pedagogique": "Elle conditionne la réception ou la mise en service d'un réseau.",
+    "exemple_utilisation": "Le CCTP demande l'attestation de conformité délivrée par le service concessionnaire.",
+    "points_vigilance": [
+      "Sans cette attestation, la réception du réseau peut être bloquée."
+    ]
+  },
+  {
+    "terme": "Attestation de contrôle",
+    "definition_courte": "Document émis par un organisme agréé après vérification.",
+    "explication_pedagogique": "Elle prouve que l'installation d'éclairage ou électrique est contrôlée.",
+    "exemple_utilisation": "Le CCTP demande une attestation de contrôle par organisme agréé pour l'éclairage public.",
+    "points_vigilance": [
+      "Prévoir le délai de contrôle dans le planning."
+    ]
+  },
+  {
+    "terme": "Attestation de mesurage",
+    "definition_courte": "Document présentant les résultats de mesure d'éclairement.",
+    "explication_pedagogique": "Elle vérifie que les niveaux lumineux réels correspondent aux exigences.",
+    "exemple_utilisation": "Le CCTP demande une attestation de mesurage du niveau d'éclairement extérieur.",
+    "points_vigilance": [
+      "Les mesures doivent être faites dans des conditions pertinentes, souvent de nuit."
+    ]
+  },
+  {
+    "terme": "Avis favorable",
+    "definition_courte": "Réponse positive d'un service ou propriétaire autorisant le démarrage.",
+    "explication_pedagogique": "Il sécurise administrativement l'ouverture du chantier.",
+    "exemple_utilisation": "Le CCTP conditionne le début des travaux à la réception des avis favorables.",
+    "points_vigilance": [
+      "Classer les avis dans le dossier préparatoire remis au maître d'oeuvre."
+    ]
+  },
+  {
+    "terme": "Avis Technique",
+    "definition_courte": "Document validant l'aptitude à l'emploi d'un produit non couvert par norme courante.",
+    "explication_pedagogique": "Il rassure sur la conformité d'un matériau ou système particulier.",
+    "exemple_utilisation": "Le CCTP demande une validation si le produit relève seulement d'un agrément CSTB.",
+    "points_vigilance": [
+      "Vérifier la validité et le domaine d'emploi exact."
+    ]
+  },
+  {
+    "terme": "Baliroads",
+    "definition_courte": "Séparateur plastique lestable utilisé pour sécuriser une zone de chantier.",
+    "explication_pedagogique": "Il matérialise et protège l'emprise des travaux.",
+    "exemple_utilisation": "Le CCTP cite des glissières de sécurité type Baliroads ou similaire.",
+    "points_vigilance": [
+      "S'assurer du lestage, de la continuité et de la visibilité nocturne."
+    ]
+  },
+  {
+    "terme": "BCN B15",
+    "definition_courte": "Classe de béton citée pour béton de propreté ou béton maigre.",
+    "explication_pedagogique": "Elle correspond à un béton moins résistant qu'un béton structurel.",
+    "exemple_utilisation": "Le CCTP prévoit BCN B15 dosé à 150 kg/m3 pour béton maigre.",
+    "points_vigilance": [
+      "Ne pas utiliser ce dosage pour des massifs porteurs sans validation."
+    ]
+  },
+  {
+    "terme": "BCN B22",
+    "definition_courte": "Classe de béton utilisée pour mortier ou fondations de bordures selon le CCTP.",
+    "explication_pedagogique": "Elle participe à la tenue des ouvrages simples.",
+    "exemple_utilisation": "Le CCTP cite BCN B22 pour mortier au ciment et béton de massifs de bordures.",
+    "points_vigilance": [
+      "Respecter le dosage prescrit et la destination du béton."
+    ]
+  },
+  {
+    "terme": "BCN B32",
+    "definition_courte": "Classe de béton plus résistante citée pour plusieurs usages.",
+    "explication_pedagogique": "Elle peut concerner chapes, joints étanches ou bétons non armés.",
+    "exemple_utilisation": "Le CCTP cite BCN B32 avec dosages de 300 à 500 kg/m3 selon usage.",
+    "points_vigilance": [
+      "Adapter le dosage au type d'ouvrage réellement exécuté."
+    ]
+  },
+  {
+    "terme": "Béton de gravillon",
+    "definition_courte": "Béton formulé avec gravillons pour remplir ou fonder un ouvrage.",
+    "explication_pedagogique": "Il sert notamment aux massifs de candélabres.",
+    "exemple_utilisation": "Le CCTP prévoit un remplissage en béton de gravillon dosé à 350 kg pour les massifs.",
+    "points_vigilance": [
+      "Vérifier dimensions, enrobage des tiges et finition lissée."
+    ]
+  },
+  {
+    "terme": "Béton de propreté",
+    "definition_courte": "Couche de béton maigre permettant de travailler sur un support propre.",
+    "explication_pedagogique": "Elle évite de poser directement sur un sol irrégulier ou pollué.",
+    "exemple_utilisation": "Le CCTP cite le béton de propreté dans le tableau des bétons.",
+    "points_vigilance": [
+      "Ne pas le confondre avec un béton de fondation porteur."
+    ]
+  },
+  {
+    "terme": "Béton maigre",
+    "definition_courte": "Béton faiblement dosé en ciment utilisé pour calage ou protection.",
+    "explication_pedagogique": "Il protège parfois une buse ou forme une chape de finition.",
+    "exemple_utilisation": "Le CCTP demande un bétonnage maigre autour des fourreaux sous chaussée.",
+    "points_vigilance": [
+      "Contrôler l'épaisseur et la position avant fermeture de tranchée."
+    ]
+  },
+  {
+    "terme": "Béton PMES",
+    "definition_courte": "Béton adapté à certains environnements ou coulages dans l'eau.",
+    "explication_pedagogique": "Il est cité pour les bétons coulés dans l'eau.",
+    "exemple_utilisation": "Le CCTP prévoit un béton PMES dosé à 350 kg pour béton coulé dans l'eau.",
+    "points_vigilance": [
+      "À employer seulement si les conditions de chantier le nécessitent."
+    ]
+  },
+  {
+    "terme": "Blindage",
+    "definition_courte": "Soutènement provisoire des parois de fouille ou tranchée.",
+    "explication_pedagogique": "Il protège les ouvriers contre les éboulements.",
+    "exemple_utilisation": "Le CCTP prévoit les blindages nécessaires selon profondeur et nature du terrain.",
+    "points_vigilance": [
+      "Le blindage doit être en place avant intervention en fond de fouille."
+    ]
+  },
+  {
+    "terme": "Boîte à bornes",
+    "definition_courte": "Boîtier de raccordement situé dans ou près d'un candélabre.",
+    "explication_pedagogique": "Elle permet la connexion entre câble réseau et filerie du luminaire.",
+    "exemple_utilisation": "Le CCTP indique que les câbles en attente peuvent sortir sur une boîte à bornes.",
+    "points_vigilance": [
+      "Protéger les attentes contre l'humidité et les chocs."
+    ]
+  },
+  {
+    "terme": "Borne de branchement",
+    "definition_courte": "Coffret ou borne permettant de raccorder un usager au réseau BT.",
+    "explication_pedagogique": "Elle assure la transition entre réseau public et installation privative.",
+    "exemple_utilisation": "Le CCTP mentionne les bornes de branchement et équipements primaires.",
+    "points_vigilance": [
+      "Respecter les modèles acceptés par ENEDIS."
+    ]
+  },
+  {
+    "terme": "Borne IRVE",
+    "definition_courte": "Borne de recharge pour véhicules électriques.",
+    "explication_pedagogique": "Elle permet de délivrer l'énergie aux véhicules sur les stationnements concernés.",
+    "exemple_utilisation": "Le CCTP prévoit une borne IRVE type SPARK DBT ou similaire.",
+    "points_vigilance": [
+      "Vérifier puissance, nombre de points de charge, protections et accessibilité."
+    ]
+  },
+  {
+    "terme": "Bouchon en plâtre",
+    "definition_courte": "Obturation provisoire d'un fourreau en attente.",
+    "explication_pedagogique": "Elle évite l'entrée de terre, eau ou déchets dans le conduit.",
+    "exemple_utilisation": "Le CCTP demande l'obturation des fourreaux en attente par bouchon en plâtre.",
+    "points_vigilance": [
+      "À retirer sans casser le fourreau avant tirage ou raccordement."
+    ]
+  },
+  {
+    "terme": "Bouchonnage",
+    "definition_courte": "Fermeture des fourreaux après contrôle ou en attente.",
+    "explication_pedagogique": "Il protège les conduits contre les intrusions d'eau, terre et animaux.",
+    "exemple_utilisation": "Le CCTP demande un bouchonnage systématique sur chaque chambre télécom.",
+    "points_vigilance": [
+      "Utiliser des obturateurs adaptés, pas une obturation bricolée."
+    ]
+  },
+  {
+    "terme": "Bureau de contrôle",
+    "definition_courte": "Organisme indépendant contrôlant la conformité de certains ouvrages.",
+    "explication_pedagogique": "Il peut demander essais, attestations et corrections avant réception.",
+    "exemple_utilisation": "Le CCTP cite DEKRA comme bureau de contrôle du projet.",
+    "points_vigilance": [
+      "Anticiper ses demandes pour éviter une reprise en fin de chantier."
+    ]
+  },
+  {
+    "terme": "C 11-201",
+    "definition_courte": "Norme citée pour la mise à la terre du neutre en réseau BT.",
+    "explication_pedagogique": "Elle encadre les valeurs et dispositions de terre.",
+    "exemple_utilisation": "Le CCTP renvoie à la norme C 11-201 pour les mises à la terre du neutre.",
+    "points_vigilance": [
+      "Vérifier la version applicable et les exigences ENEDIS."
+    ]
+  },
+  {
+    "terme": "C 12-100",
+    "definition_courte": "Norme UTE citée pour la protection des masses métalliques en éclairage.",
+    "explication_pedagogique": "Elle oriente la mise à la terre des équipements.",
+    "exemple_utilisation": "Le CCTP mentionne les mesures issues de la norme UTE C 12-100.",
+    "points_vigilance": [
+      "Contrôler candélabres, lanternes et armoires, pas seulement le câble principal."
+    ]
+  },
+  {
+    "terme": "Câblage",
+    "definition_courte": "Pose et raccordement des câbles électriques.",
+    "explication_pedagogique": "Il transforme le génie civil en réseau fonctionnel.",
+    "exemple_utilisation": "Le CCTP inclut le câblage BT, éclairage et IRVE selon les prestations.",
+    "points_vigilance": [
+      "Tester isolement, continuité et repérage avant mise sous tension."
+    ]
+  },
+  {
+    "terme": "Câble armé",
+    "definition_courte": "Câble protégé mécaniquement par une armure.",
+    "explication_pedagogique": "Il est adapté aux réseaux souterrains exposés aux contraintes de sol.",
+    "exemple_utilisation": "Le CCTP indique un réseau d'éclairage en câble armé type U1000.",
+    "points_vigilance": [
+      "Vérifier la section et le mode de raccordement imposés."
+    ]
+  },
+  {
+    "terme": "Câble basse tension",
+    "definition_courte": "Câble transportant l'électricité du réseau BT vers coffrets ou bâtiments.",
+    "explication_pedagogique": "Il alimente maisons individuelles, collectifs ou équipements.",
+    "exemple_utilisation": "Le CCTP prévoit câbles BT depuis le point d'alimentation jusqu'aux coffrets et pieds de colonne.",
+    "points_vigilance": [
+      "Respecter profondeurs, sable, grillage avertisseur et rayon de courbure."
+    ]
+  },
+  {
+    "terme": "Câble cuivre nu",
+    "definition_courte": "Conducteur non isolé utilisé pour la terre.",
+    "explication_pedagogique": "Il relie les masses métalliques à la prise de terre.",
+    "exemple_utilisation": "Le CCTP prévoit un cuivre nu 25 mm2 en tranchée pour l'éclairage public.",
+    "points_vigilance": [
+      "Ne pas l'interrompre sans raccord validé et protégé."
+    ]
+  },
+  {
+    "terme": "Câble U1000 R2V",
+    "definition_courte": "Câble d'énergie basse tension couramment utilisé en installation fixe.",
+    "explication_pedagogique": "Il sert à alimenter des équipements comme l'éclairage.",
+    "exemple_utilisation": "Le CCTP cite U1000 R2V 4x10 mm2 et filerie U1000 R02V Cu 2,5 mm2.",
+    "points_vigilance": [
+      "Confirmer le type exact, la section et le mode de pose."
+    ]
+  },
+  {
+    "terme": "Cahier des prescriptions communes",
+    "definition_courte": "Document de référence pour les réseaux d'éclairage public.",
+    "explication_pedagogique": "Il fixe des règles de conception et de mise en oeuvre.",
+    "exemple_utilisation": "Le CCTP renvoie à la circulaire 74-140 du 14 mars 1974.",
+    "points_vigilance": [
+      "Ne pas limiter le contrôle aux seules pages du CCTP."
+    ]
+  },
+  {
+    "terme": "Calepinage",
+    "definition_courte": "Organisation préalable des éléments, joints ou coffrages.",
+    "explication_pedagogique": "Il permet de prévoir l'implantation et les dimensions avant exécution.",
+    "exemple_utilisation": "Le CCTP évoque les coffrages modulaires dans le cas d'un calepinage.",
+    "points_vigilance": [
+      "Utile pour massifs ou ouvrages béton visibles."
+    ]
+  },
+  {
+    "terme": "Candélabre",
+    "definition_courte": "Support complet de luminaire extérieur, souvent constitué d'un mât et d'une lanterne.",
+    "explication_pedagogique": "Il éclaire les voiries, cheminements ou parkings.",
+    "exemple_utilisation": "Le CCTP prévoit des candélabres fixés sur socles béton et alimentés en souterrain.",
+    "points_vigilance": [
+      "Contrôler verticalité, orientation, mise à la terre et protection anticorrosion."
+    ]
+  },
+  {
+    "terme": "Carottage",
+    "definition_courte": "Perçage circulaire dans un ouvrage existant.",
+    "explication_pedagogique": "Il permet de pénétrer une chambre existante sans démolition massive.",
+    "exemple_utilisation": "Le CCTP prévoit un raccordement télécom par carottage dans la chambre existante.",
+    "points_vigilance": [
+      "Étancher et reprendre proprement la maçonnerie après passage."
+    ]
+  },
+  {
+    "terme": "Certificat de qualité",
+    "definition_courte": "Document attribué par un organisme agréé pour qualifier un produit.",
+    "explication_pedagogique": "Il justifie la conformité d'un matériau quand une norme manque.",
+    "exemple_utilisation": "Le CCTP accepte certains certificats de qualité pour les produits non normalisés.",
+    "points_vigilance": [
+      "Vérifier qu'il correspond au produit livré, pas seulement à la marque."
+    ]
+  },
+  {
+    "terme": "Chambre de collecte",
+    "definition_courte": "Chambre destinée à recevoir et organiser des réseaux ou câbles.",
+    "explication_pedagogique": "Elle facilite les tirages et interventions sur le réseau IRVE.",
+    "exemple_utilisation": "Le CCTP prévoit des chambres de collecte pour le génie civil IRVE.",
+    "points_vigilance": [
+      "Contrôler dimensions, accessibilité et cohérence avec les regards de tirage."
+    ]
+  },
+  {
+    "terme": "Chambre de tirage",
+    "definition_courte": "Ouvrage enterré permettant le tirage, le raccordement ou le changement de direction des câbles.",
+    "explication_pedagogique": "Elle évite de tirer les câbles sur de trop longues distances ou dans des angles impossibles.",
+    "exemple_utilisation": "Le CCTP prévoit des chambres de tirage télécom et IRVE.",
+    "points_vigilance": [
+      "Vérifier type, niveau du cadre, propreté, masques et obturation."
+    ]
+  },
+  {
+    "terme": "Chambre existante",
+    "definition_courte": "Chambre déjà présente sur le réseau public ou ancien réseau.",
+    "explication_pedagogique": "Elle sert souvent de point de raccordement.",
+    "exemple_utilisation": "Le CCTP prévoit le raccordement télécom depuis une chambre existante rue Yves Montand.",
+    "points_vigilance": [
+      "Confirmer son état, son niveau et l'autorisation du gestionnaire."
+    ]
+  },
+  {
+    "terme": "Chambre K",
+    "definition_courte": "Type de chambre télécom destinée aux zones circulées.",
+    "explication_pedagogique": "Elle supporte les contraintes d'une chaussée ou parking.",
+    "exemple_utilisation": "Le CCTP indique que les chambres K1C à K3C sont placées sous chaussée circulée.",
+    "points_vigilance": [
+      "Vérifier classe de résistance du tampon et implantation réelle."
+    ]
+  },
+  {
+    "terme": "Chambre L",
+    "definition_courte": "Type de chambre télécom plutôt destinée aux trottoirs ou parkings légers.",
+    "explication_pedagogique": "Elle sert au tirage et à l'épissurage en zone non fortement circulée.",
+    "exemple_utilisation": "Le CCTP mentionne les chambres L1T à L3T sur trottoir ou parking.",
+    "points_vigilance": [
+      "Ne pas la substituer à une chambre K sans validation."
+    ]
+  },
+  {
+    "terme": "Chaussée circulée",
+    "definition_courte": "Zone de voirie empruntée par les véhicules.",
+    "explication_pedagogique": "Elle impose des chambres et protections adaptées aux charges routières.",
+    "exemple_utilisation": "Le CCTP place les chambres K sous chaussée circulée.",
+    "points_vigilance": [
+      "Ne pas poser une chambre de trottoir en zone circulée."
+    ]
+  },
+  {
+    "terme": "CIBE",
+    "definition_courte": "Type de coffret ou borne de branchement conforme aux prescriptions ENEDIS.",
+    "explication_pedagogique": "Il permet le raccordement ou la coupure en limite de propriété.",
+    "exemple_utilisation": "Le CCTP cite les coffrets de type CIBE parmi les matériels possibles.",
+    "points_vigilance": [
+      "Utiliser le modèle exact demandé par le gestionnaire."
+    ]
+  },
+  {
+    "terme": "Ciment CPJ-CEM II",
+    "definition_courte": "Ciment courant utilisé pour bétons ou mortiers.",
+    "explication_pedagogique": "Il entre dans la composition des ouvrages béton du lot.",
+    "exemple_utilisation": "Le CCTP cite CPJ-CEM II parmi les ciments admis.",
+    "points_vigilance": [
+      "Respecter stockage au sec et date limite d'utilisation."
+    ]
+  },
+  {
+    "terme": "CINQ exemplaires",
+    "definition_courte": "Nombre de dossiers papier demandés pour certains plans de récolement.",
+    "explication_pedagogique": "Il assure la diffusion aux intervenants concernés.",
+    "exemple_utilisation": "Le CCTP demande un plan de récolement en cinq exemplaires pour l'éclairage.",
+    "points_vigilance": [
+      "Prévoir aussi le format numérique si demandé en réunion."
+    ]
+  },
+  {
+    "terme": "Circulation maintenue",
+    "definition_courte": "Principe consistant à garder le passage des véhicules ou piétons pendant travaux.",
+    "explication_pedagogique": "Il limite la gêne et sécurise les usagers.",
+    "exemple_utilisation": "Le CCTP demande de laisser la circulation possible sur certaines périodes.",
+    "points_vigilance": [
+      "Adapter phasage, signalisation, platelages et protections."
+    ]
+  },
+  {
+    "terme": "CIRKO LYRE",
+    "definition_courte": "Modèle de lanterne ou luminaire prévu au CCTP.",
+    "explication_pedagogique": "Il définit l'aspect et la performance de l'éclairage.",
+    "exemple_utilisation": "Le CCTP demande des lanternes CIRKO LYRE ASY27 12LED 2700K 700mA.",
+    "points_vigilance": [
+      "Tout équivalent doit être validé esthétiquement et techniquement."
+    ]
+  },
+  {
+    "terme": "Classe de résistance des canalisations",
+    "definition_courte": "Niveau de résistance mécanique d'une canalisation ou fourreau.",
+    "explication_pedagogique": "Il garantit que le réseau supporte les contraintes de sol et trafic.",
+    "exemple_utilisation": "Le CCTP demande des notes de calcul justifiant la classe de résistance.",
+    "points_vigilance": [
+      "La classe doit être cohérente avec profondeur, remblai et charges."
+    ]
+  },
+  {
+    "terme": "Clôture de chantier",
+    "definition_courte": "Protection matérialisant l'emprise des travaux.",
+    "explication_pedagogique": "Elle sécurise les riverains et limite l'accès non autorisé.",
+    "exemple_utilisation": "Le CCTP inclut les installations provisoires et protections grillagées.",
+    "points_vigilance": [
+      "Maintenir la clôture stable, propre et continue."
+    ]
+  },
+  {
+    "terme": "Coffrage",
+    "definition_courte": "Moule provisoire donnant sa forme au béton coulé.",
+    "explication_pedagogique": "Il permet de réaliser massifs, longrines ou ouvrages béton.",
+    "exemple_utilisation": "Le CCTP distingue coffrages ordinaires, soignés et spéciaux.",
+    "points_vigilance": [
+      "Décoffrer sans détériorer les arêtes et respecter les cotes."
+    ]
+  },
+  {
+    "terme": "Coffret de branchement",
+    "definition_courte": "Coffret recevant un branchement électrique en limite de lot ou bâtiment.",
+    "explication_pedagogique": "Il permet coupure, comptage ou raccordement selon le type.",
+    "exemple_utilisation": "Le CCTP prévoit la pose de coffrets en façade de chaque lot.",
+    "points_vigilance": [
+      "Coordonner hauteur, accessibilité et alignement avec façades et limites."
+    ]
+  },
+  {
+    "terme": "Coffret de comptage",
+    "definition_courte": "Coffret accueillant les équipements de comptage électrique.",
+    "explication_pedagogique": "Il mesure la consommation et sert souvent de point d'origine.",
+    "exemple_utilisation": "Le CCTP indique que l'éclairage public part du coffret de comptage et armoire de commande.",
+    "points_vigilance": [
+      "Valider son emplacement avec le gestionnaire et les plans."
+    ]
+  },
+  {
+    "terme": "Coffret inox 304",
+    "definition_courte": "Enveloppe en acier inoxydable de qualité 304.",
+    "explication_pedagogique": "Elle protège les composants de la borne IRVE contre corrosion et chocs.",
+    "exemple_utilisation": "Le CCTP décrit la borne IRVE avec coffret INOX 304.",
+    "points_vigilance": [
+      "Vérifier l'état de surface et la protection en environnement extérieur."
+    ]
+  },
+  {
+    "terme": "Coffret S2000",
+    "definition_courte": "Coffret télécom lié aux chambres de tirage.",
+    "explication_pedagogique": "Il sert au raccordement ou à la distribution télécom.",
+    "exemple_utilisation": "Le CCTP prévoit des coffrets S2000 fixés sur longrines.",
+    "points_vigilance": [
+      "Soigner la fixation, l'altimétrie et l'accès pour maintenance."
+    ]
+  },
+  {
+    "terme": "Cohérence du masque",
+    "definition_courte": "Correspondance entre l'ordre des fourreaux au départ et à l'arrivée d'une chambre.",
+    "explication_pedagogique": "Elle permet de repérer correctement chaque alvéole.",
+    "exemple_utilisation": "Le CCTP demande de vérifier la cohérence du masque entre départ et arrivée.",
+    "points_vigilance": [
+      "Une inversion complique les tirages et les raccordements futurs."
+    ]
+  },
+  {
+    "terme": "Collage des tubes",
+    "definition_courte": "Assemblage de tubes PVC avec colle adaptée.",
+    "explication_pedagogique": "Il rend la continuité mécanique et limite les désalignements.",
+    "exemple_utilisation": "Le CCTP prévoit des tubes prémanchonnés assemblés par collage.",
+    "points_vigilance": [
+      "Respecter propreté, emboîtement et temps de prise avant remblai."
+    ]
+  },
+  {
+    "terme": "Commutateur à clé",
+    "definition_courte": "Commande par clé permettant d'autoriser ou piloter un équipement.",
+    "explication_pedagogique": "Il limite l'usage aux personnes habilitées.",
+    "exemple_utilisation": "Le CCTP décrit une borne IRVE avec lancement de charge par RFID et commutateur à clé.",
+    "points_vigilance": [
+      "Vérifier le nombre de clés, leur gestion et la notice d'exploitation."
+    ]
+  },
+  {
+    "terme": "Compactage",
+    "definition_courte": "Densification des remblais par passes ou tranches.",
+    "explication_pedagogique": "Il évite tassements ultérieurs, affaissements de voirie et désordres.",
+    "exemple_utilisation": "Le CCTP demande remblais en matériaux sains et compactage par tranches.",
+    "points_vigilance": [
+      "Faire contrôler les compactages avant couches de finition."
+    ]
+  },
+  {
+    "terme": "Concessionnaire",
+    "definition_courte": "Gestionnaire d'un réseau public ou privé, comme ENEDIS ou ORANGE.",
+    "explication_pedagogique": "Il impose prescriptions, validations et réceptions.",
+    "exemple_utilisation": "Le CCTP demande de se conformer aux services publics ou concessionnaires.",
+    "points_vigilance": [
+      "Leur accord prime souvent sur une solution seulement pratique chantier."
+    ]
+  },
+  {
+    "terme": "Conducteur de protection",
+    "definition_courte": "Conducteur destiné à la sécurité électrique et à la mise à la terre.",
+    "explication_pedagogique": "Il évite qu'une masse métallique reste dangereusement sous tension.",
+    "exemple_utilisation": "Le CCTP impose la mise à la terre des masses métalliques de l'éclairage.",
+    "points_vigilance": [
+      "Contrôler continuité jusqu'aux candélabres et armoires."
+    ]
+  },
+  {
+    "terme": "Contacteur",
+    "definition_courte": "Appareil électrique commandant l'ouverture ou la fermeture d'un circuit.",
+    "explication_pedagogique": "Il permet de piloter des départs d'éclairage.",
+    "exemple_utilisation": "Le CCTP prévoit des contacteurs dans l'armoire de commande.",
+    "points_vigilance": [
+      "Vérifier calibre, repérage et commande par horloge ou système prévu."
+    ]
+  },
+  {
+    "terme": "Contrôle d'isolement",
+    "definition_courte": "Mesure vérifiant qu'un câble n'a pas de fuite électrique vers la terre ou un autre conducteur.",
+    "explication_pedagogique": "Il sécurise la mise sous tension du réseau.",
+    "exemple_utilisation": "Le CCTP demande une mesure de contrôle de l'isolement des câbles avant mise sous tension.",
+    "points_vigilance": [
+      "À faire en présence du représentant du gestionnaire si demandé."
+    ]
+  },
+  {
+    "terme": "Contrôle télévisuel",
+    "definition_courte": "Inspection vidéo d'un ouvrage ou réseau.",
+    "explication_pedagogique": "Il sert surtout à vérifier l'état intérieur d'un réseau inaccessible.",
+    "exemple_utilisation": "Le CCTP cite les organismes de contrôle dont contrôles télévisuels des ouvrages.",
+    "points_vigilance": [
+      "Prévoir les essais pertinents selon réseaux réellement concernés."
+    ]
+  },
+  {
+    "terme": "Cordon de déblais",
+    "definition_courte": "Alignement de terres extraites le long d'une tranchée.",
+    "explication_pedagogique": "Il permet un stockage provisoire avant réemploi ou évacuation.",
+    "exemple_utilisation": "Le CCTP autorise les terres en cordon sur accotement ou trottoir selon conditions.",
+    "points_vigilance": [
+      "Ne pas gêner circulation, accès riverains ou sécurité de la fouille."
+    ]
+  },
+  {
+    "terme": "Cote -0,80 m",
+    "definition_courte": "Profondeur courante de pose mesurée depuis le sol fini.",
+    "explication_pedagogique": "Elle protège les câbles et fourreaux contre les agressions de surface.",
+    "exemple_utilisation": "Le CCTP demande souvent l'axe du câble ou de la gaine à -0,80 m.",
+    "points_vigilance": [
+      "Vérifier la cote après lit de sable et avant remblaiement."
+    ]
+  },
+  {
+    "terme": "Cote -1,10 m",
+    "definition_courte": "Sur-profondeur autorisée sous chaussée, accès ou parking.",
+    "explication_pedagogique": "Elle permet de franchir des obstacles ou renforcer la protection.",
+    "exemple_utilisation": "Le CCTP autorise une profondeur jusqu'à -1,10 m en traversée de chaussée.",
+    "points_vigilance": [
+      "Informer le gestionnaire si une profondeur non standard devient nécessaire."
+    ]
+  },
+  {
+    "terme": "Cote 0,00",
+    "definition_courte": "Référence altimétrique correspondant généralement au sol fini.",
+    "explication_pedagogique": "Elle sert à mesurer la profondeur de pose.",
+    "exemple_utilisation": "Le CCTP précise que la cote 0,00 est celle du sol fini.",
+    "points_vigilance": [
+      "Attention aux sols provisoires de chantier qui ne sont pas le niveau final."
+    ]
+  },
+  {
+    "terme": "Couche de sable",
+    "definition_courte": "Épaisseur de sable autour d'un câble ou fourreau.",
+    "explication_pedagogique": "Elle protège contre les pierres et facilite la pose.",
+    "exemple_utilisation": "Le CCTP demande 10 cm sous le câble et 20 cm au-dessus selon cas.",
+    "points_vigilance": [
+      "Utiliser un sable propre et contrôler l'épaisseur avant remblai."
+    ]
+  },
+  {
+    "terme": "Courant de charge",
+    "definition_courte": "Énergie délivrée à un véhicule électrique par la borne IRVE.",
+    "explication_pedagogique": "Il permet la recharge selon la puissance disponible.",
+    "exemple_utilisation": "Le CCTP prévoit une puissance de 6 kW par prise sur la borne IRVE.",
+    "points_vigilance": [
+      "Vérifier la protection électrique et la simultanéité des points de charge."
+    ]
+  },
+  {
+    "terme": "Couvercle béton",
+    "definition_courte": "Plaque en béton recouvrant un regard.",
+    "explication_pedagogique": "Il ferme l'ouvrage et protège l'accès.",
+    "exemple_utilisation": "Le CCTP prévoit des regards 30x30 cm recouverts d'un couvercle béton.",
+    "points_vigilance": [
+      "Adapter le couvercle à la zone de passage et au niveau fini."
+    ]
+  },
+  {
+    "terme": "CRAM",
+    "definition_courte": "Organisme cité dans la chaîne de sécurité chantier.",
+    "explication_pedagogique": "Il peut être informé en cas d'arrêt pour risque grave.",
+    "exemple_utilisation": "Le CCTP mentionne la CRAM parmi les organismes associés.",
+    "points_vigilance": [
+      "Respecter les prescriptions SPS pour éviter arrêt de chantier."
+    ]
+  },
+  {
+    "terme": "Cuvette d'équipement primaire",
+    "definition_courte": "Partie du coffret recevant directement les raccordements des câbles.",
+    "explication_pedagogique": "Elle assure l'interface électrique principale.",
+    "exemple_utilisation": "Le CCTP indique que les câbles 4x16 à 4x35 se raccordent sur la cuvette de l'équipement primaire.",
+    "points_vigilance": [
+      "Respecter couple de serrage, accessoires et compatibilité aluminium."
+    ]
+  },
+  {
+    "terme": "DALI",
+    "definition_courte": "Protocole de commande numérique d'éclairage.",
+    "explication_pedagogique": "Il permet de piloter ou graduer certains luminaires et détecteurs.",
+    "exemple_utilisation": "Le CCTP cite une sortie DALI sur le détecteur SIR Wireless.",
+    "points_vigilance": [
+      "Vérifier compatibilité entre détecteur, driver de luminaire et armoire."
+    ]
+  },
+  {
+    "terme": "Déblai",
+    "definition_courte": "Terre ou matériau extrait lors du terrassement.",
+    "explication_pedagogique": "Il peut être réemployé ou évacué selon sa qualité.",
+    "exemple_utilisation": "Le CCTP prévoit l'évacuation des terres impropres et excédents.",
+    "points_vigilance": [
+      "Trier les déblais et conserver les bons de décharge."
+    ]
+  },
+  {
+    "terme": "Décharge agréée",
+    "definition_courte": "Site autorisé à recevoir des déchets ou terres de chantier.",
+    "explication_pedagogique": "Elle évite les dépôts sauvages et sécurise la traçabilité.",
+    "exemple_utilisation": "Le CCTP impose l'évacuation des déblais vers une décharge agréée.",
+    "points_vigilance": [
+      "Conserver les bons pour facturation et contrôle."
+    ]
+  },
+  {
+    "terme": "Déclaration d'intention de commencement de travaux",
+    "definition_courte": "Démarche réglementaire avant travaux près de réseaux existants.",
+    "explication_pedagogique": "Elle permet d'identifier les réseaux et consignes de sécurité.",
+    "exemple_utilisation": "Le CCTP demande l'établissement des DICT à partir du numéro de DT.",
+    "points_vigilance": [
+      "Ne jamais commencer une tranchée sans retours et plans nécessaires."
+    ]
+  },
+  {
+    "terme": "Déclaration préalable",
+    "definition_courte": "Dossier administratif préalable auprès d'un gestionnaire ou service.",
+    "explication_pedagogique": "Elle fait partie des démarches nécessaires aux réseaux.",
+    "exemple_utilisation": "Le CCTP met à charge de l'entreprise la constitution du dossier administratif et déclaration préalable.",
+    "points_vigilance": [
+      "Prévoir ces démarches dans la période de préparation."
+    ]
+  },
+  {
+    "terme": "Déclenchement de charge par RFID",
+    "definition_courte": "Autorisation de recharge par carte sans contact.",
+    "explication_pedagogique": "Elle réserve l'usage de la borne IRVE aux utilisateurs autorisés.",
+    "exemple_utilisation": "Le CCTP prévoit un lancement de charge par carte RFID.",
+    "points_vigilance": [
+      "Tester les badges et le fonctionnement avant livraison."
+    ]
+  },
+  {
+    "terme": "Découpe à la scie",
+    "definition_courte": "Ouverture nette d'un revêtement avant tranchée.",
+    "explication_pedagogique": "Elle limite les dégradations périphériques de chaussée ou béton.",
+    "exemple_utilisation": "Le CCTP demande la découpe à la trancheuse ou à la scie sous voirie enrobée ou bétonnée.",
+    "points_vigilance": [
+      "La découpe doit être rectiligne pour une réfection propre."
+    ]
+  },
+  {
+    "terme": "Détecteur de présence",
+    "definition_courte": "Capteur qui détecte une personne ou un mouvement.",
+    "explication_pedagogique": "Il permet d'adapter l'éclairage aux usages et de réduire les consommations.",
+    "exemple_utilisation": "Le CCTP prévoit un détecteur de présence par mât, SIR Wireless ou équivalent.",
+    "points_vigilance": [
+      "Régler zone, temporisation et communication avec le luminaire."
+    ]
+  },
+  {
+    "terme": "DICT",
+    "acronyme": "Déclaration d'Intention de Commencement de Travaux",
+    "definition_courte": "Déclaration d'Intention de Commencement de Travaux.",
+    "explication_pedagogique": "Elle informe les exploitants de réseaux avant intervention au sol.",
+    "exemple_utilisation": "Le CCTP impose aux entreprises d'établir leur DICT avec numéro de DT.",
+    "points_vigilance": [
+      "Archiver réponses et prescriptions avant terrassement."
+    ]
+  },
+  {
+    "terme": "Disjoncteur différentiel tétrapolaire",
+    "definition_courte": "Protection électrique coupant quatre pôles en cas de défaut différentiel ou surintensité selon modèle.",
+    "explication_pedagogique": "Il protège les personnes et installations triphasées.",
+    "exemple_utilisation": "Le CCTP prévoit des disjoncteurs différentiels tétrapolaires dans l'armoire.",
+    "points_vigilance": [
+      "Vérifier calibre, sensibilité et sélectivité."
+    ]
+  },
+  {
+    "terme": "Disposition des réseaux",
+    "definition_courte": "Organisation des différents réseaux dans une tranchée.",
+    "explication_pedagogique": "Elle garantit distances réglementaires et maintenance future.",
+    "exemple_utilisation": "Le CCTP demande un plan de coordination en tranchée commune.",
+    "points_vigilance": [
+      "Faire valider l'ordre et les distances par les gestionnaires."
+    ]
+  },
+  {
+    "terme": "Distance réglementaire",
+    "definition_courte": "Écart minimal à respecter entre réseaux ou ouvrages.",
+    "explication_pedagogique": "Elle limite les risques d'interaction, échauffement ou dommage.",
+    "exemple_utilisation": "Le CCTP renvoie aux dispositions au voisinage des réseaux de l'arrêté du 13 février 1970.",
+    "points_vigilance": [
+      "Contrôler les distances en tranchée commune avant remblai."
+    ]
+  },
+  {
+    "terme": "Dossier administratif",
+    "definition_courte": "Ensemble des démarches, autorisations et pièces nécessaires au réseau.",
+    "explication_pedagogique": "Il permet au gestionnaire et au maître d'oeuvre de valider les travaux.",
+    "exemple_utilisation": "Le CCTP met à charge de l'entreprise le dossier administratif pour BT et IRVE.",
+    "points_vigilance": [
+      "Ne pas le confondre avec le dossier de récolement en fin de chantier."
+    ]
+  },
+  {
+    "terme": "Dossier de récolement",
+    "definition_courte": "Dossier final indiquant les ouvrages réellement exécutés.",
+    "explication_pedagogique": "Il sert à exploiter, maintenir et localiser les réseaux.",
+    "exemple_utilisation": "Le CCTP demande des plans de récolement pour télécom, BT, éclairage et IRVE.",
+    "points_vigilance": [
+      "Relever avant remblaiement avec cotes fiables et repères durables."
+    ]
+  },
+  {
+    "terme": "Droit de regard",
+    "definition_courte": "Pouvoir du gestionnaire de contrôler les travaux.",
+    "explication_pedagogique": "Il assure que le réseau livré respecte ses exigences.",
+    "exemple_utilisation": "Le CCTP indique que le service gestionnaire exerce un contrôle jusqu'à réception.",
+    "points_vigilance": [
+      "Intégrer ses observations sans attendre la fin du chantier."
+    ]
+  },
+  {
+    "terme": "DT",
+    "definition_courte": "Déclaration de Travaux initiale donnant un numéro de référence.",
+    "explication_pedagogique": "Elle précède les DICT des entreprises.",
+    "exemple_utilisation": "Le CCTP demande le numéro de DT à 16 chiffres à la maîtrise d'oeuvre.",
+    "points_vigilance": [
+      "Sans ce numéro, la DICT ne peut pas être correctement établie."
+    ]
+  },
+  {
+    "terme": "DTU",
+    "definition_courte": "Document Technique Unifié servant de règle professionnelle.",
+    "explication_pedagogique": "Il encadre certains travaux et devient souvent norme de référence.",
+    "exemple_utilisation": "Le CCTP rappelle que les DTU prennent progressivement le statut de normes.",
+    "points_vigilance": [
+      "Toujours vérifier les documents applicables au lot concerné."
+    ]
+  },
+  {
+    "terme": "Éclairage interne d'armoire",
+    "definition_courte": "Petit éclairage dans une armoire électrique.",
+    "explication_pedagogique": "Il facilite les interventions de maintenance.",
+    "exemple_utilisation": "Le CCTP prévoit l'éclairage interne dans l'armoire de distribution générale.",
+    "points_vigilance": [
+      "Vérifier alimentation, protection et fonctionnement à l'ouverture."
+    ]
+  },
+  {
+    "terme": "Éclairage public",
+    "definition_courte": "Installation lumineuse des voies, parkings et espaces extérieurs.",
+    "explication_pedagogique": "Il assure visibilité, sécurité et accessibilité.",
+    "exemple_utilisation": "Le CCTP prévoit réseau, candélabres, lanternes, armoire et essais d'éclairage public.",
+    "points_vigilance": [
+      "Contrôler étude d'éclairage, implantation, terre et niveau mesuré."
+    ]
+  },
+  {
+    "terme": "Écrou inférieur de réglage",
+    "definition_courte": "Écrou utilisé sous platine pour régler verticalité et niveau d'un candélabre.",
+    "explication_pedagogique": "Il permet d'ajuster le mât avant blocage définitif.",
+    "exemple_utilisation": "Le CCTP prévoit réglage vertical par écrous inférieurs et blocage par écrous supérieurs.",
+    "points_vigilance": [
+      "Après réglage, protéger tiges et platines contre la corrosion."
+    ]
+  },
+  {
+    "terme": "Écrou supérieur de blocage",
+    "definition_courte": "Écrou serrant la platine du candélabre sur ses tiges.",
+    "explication_pedagogique": "Il assure la stabilité finale du mât.",
+    "exemple_utilisation": "Le CCTP prévoit quatre écrous supérieurs pour le blocage.",
+    "points_vigilance": [
+      "Contrôler couple, rondelles et protection anticorrosion."
+    ]
+  },
+  {
+    "terme": "Effacement des graffitis",
+    "definition_courte": "Nettoyage des inscriptions sur installations de chantier.",
+    "explication_pedagogique": "Il participe au maintien en état de propreté.",
+    "exemple_utilisation": "Le CCTP demande un maintien en parfait état des installations, graffitis compris.",
+    "points_vigilance": [
+      "Inclure ce nettoyage dans le suivi de chantier, pas seulement à la fin."
+    ]
+  },
+  {
+    "terme": "ENEDIS",
+    "definition_courte": "Gestionnaire du réseau public de distribution d'électricité.",
+    "explication_pedagogique": "Il fixe les conditions techniques du réseau BT et IRVE.",
+    "exemple_utilisation": "Le CCTP demande de prendre contact avec ENEDIS à Mérignac.",
+    "points_vigilance": [
+      "Ses prescriptions peuvent préciser les coffrets, câbles, raccordements et essais."
+    ]
+  },
+  {
+    "terme": "Enrobage béton",
+    "definition_courte": "Béton entourant des fourreaux ou gaines pour les protéger.",
+    "explication_pedagogique": "Il augmente la tenue mécanique et stabilise les arrivées en chambre.",
+    "exemple_utilisation": "Le CCTP demande un enrobage béton sur 1 m aux arrivées dans les chambres.",
+    "points_vigilance": [
+      "Utiliser des peignes pour laisser pénétrer le béton entre les fourreaux."
+    ]
+  },
+  {
+    "terme": "Enrobage sable",
+    "definition_courte": "Sable placé autour d'un câble ou fourreau.",
+    "explication_pedagogique": "Il protège l'ouvrage contre poinçonnement et frottement.",
+    "exemple_utilisation": "Le CCTP prévoit lit de sable de 0,10 m et recouvrement de 0,20 m.",
+    "points_vigilance": [
+      "Ne pas remplacer par grave ou matériau pierreux au contact des câbles."
+    ]
+  },
+  {
+    "terme": "Épissure",
+    "definition_courte": "Jonction technique entre câbles de télécommunication.",
+    "explication_pedagogique": "Elle peut être réalisée dans une chambre adaptée.",
+    "exemple_utilisation": "Le CCTP indique que les chambres ont un espace pour boîtiers d'épissure.",
+    "points_vigilance": [
+      "Prévoir le volume et les réserves de câble nécessaires."
+    ]
+  },
+  {
+    "terme": "Équipement primaire",
+    "definition_courte": "Partie principale d'un coffret électrique recevant les câbles réseau.",
+    "explication_pedagogique": "Il assure le raccordement et la distribution initiale.",
+    "exemple_utilisation": "Le CCTP cite l'arrivée sur l'équipement primaire des coffrets.",
+    "points_vigilance": [
+      "L'accès et le serrage doivent rester conformes aux prescriptions gestionnaire."
+    ]
+  },
+  {
+    "terme": "Essai de compactage",
+    "definition_courte": "Contrôle de la qualité de densification des remblais.",
+    "explication_pedagogique": "Il évite affaissements et reprises de voirie.",
+    "exemple_utilisation": "Le CCTP demande de tenir compte des essais de compactage dans le planning.",
+    "points_vigilance": [
+      "Les essais doivent être faits avant couches définitives."
+    ]
+  },
+  {
+    "terme": "Essai de conformité",
+    "definition_courte": "Vérification finale que l'installation respecte prescriptions et performances.",
+    "explication_pedagogique": "Il conditionne l'acceptation de la prestation.",
+    "exemple_utilisation": "Le CCTP prévoit des essais de conformité de nuit pour l'éclairage.",
+    "points_vigilance": [
+      "Préparer présence du maître d'oeuvre et du fournisseur d'énergie."
+    ]
+  },
+  {
+    "terme": "Essai de mandrinage",
+    "definition_courte": "Contrôle de libre passage dans un fourreau avec un mandrin calibré.",
+    "explication_pedagogique": "Il détecte fourreau écrasé, ovalisé, bouché ou encombré.",
+    "exemple_utilisation": "Le CCTP impose cet essai pour chaque alvéole télécom.",
+    "points_vigilance": [
+      "Consigner les résultats par chambre et reprendre toute alvéole non passante."
+    ]
+  },
+  {
+    "terme": "Essai divers",
+    "definition_courte": "Contrôle technique prévu avant réception d'un réseau.",
+    "explication_pedagogique": "Il peut concerner mandrinage, isolement, éclairement ou fonctionnement.",
+    "exemple_utilisation": "Le CCTP inclut des essais divers pour télécom, BT, éclairage et IRVE.",
+    "points_vigilance": [
+      "Définir la liste exacte avec maître d'oeuvre et gestionnaires."
+    ]
+  },
+  {
+    "terme": "Étude d'éclairage",
+    "definition_courte": "Calcul permettant de dimensionner les luminaires et leur implantation.",
+    "explication_pedagogique": "Elle garantit un niveau lumineux conforme et homogène.",
+    "exemple_utilisation": "Le CCTP met à charge de l'entreprise l'étude d'éclairage.",
+    "points_vigilance": [
+      "Comparer étude, implantation réelle et mesures finales."
+    ]
+  },
+  {
+    "terme": "Évacuation des déblais",
+    "definition_courte": "Transport des terres ou matériaux non réemployés hors chantier.",
+    "explication_pedagogique": "Elle libère l'emprise et évite les dépôts gênants.",
+    "exemple_utilisation": "Le CCTP impose l'évacuation des excédents dans les plus brefs délais.",
+    "points_vigilance": [
+      "Nettoyer les chaussées souillées par les transports."
+    ]
+  },
+  {
+    "terme": "Feu",
+    "definition_courte": "Terme utilisé dans le CCTP pour désigner le luminaire ou la lanterne.",
+    "explication_pedagogique": "Il produit l'éclairage du point lumineux.",
+    "exemple_utilisation": "Le CCTP demande des feux conformes à la fiche technique constructeur.",
+    "points_vigilance": [
+      "Pour un équivalent, faire valider performance et esthétique."
+    ]
+  },
+  {
+    "terme": "Feuillard polypropylène",
+    "definition_courte": "Renfort longitudinal intégré dans certains grillages avertisseurs.",
+    "explication_pedagogique": "Il améliore la tenue et le repérage du grillage.",
+    "exemple_utilisation": "Le CCTP décrit un grillage polyéthylène renforcé de deux feuillards.",
+    "points_vigilance": [
+      "Vérifier largeur, couleur et hauteur de pose au-dessus du réseau."
+    ]
+  },
+  {
+    "terme": "Fiche de mandrinage",
+    "definition_courte": "Document qui trace les résultats du passage de mandrin.",
+    "explication_pedagogique": "Elle prouve que les fourreaux télécom sont utilisables.",
+    "exemple_utilisation": "Le CCTP demande une fiche de mandrinage pour chaque chambre.",
+    "points_vigilance": [
+      "Indiquer chambre, alvéole, sens, résultat et anomalies."
+    ]
+  },
+  {
+    "terme": "Fiche technique constructeur",
+    "definition_courte": "Document décrivant performances, dimensions et conditions de pose d'un produit.",
+    "explication_pedagogique": "Elle sert à vérifier la conformité du matériel proposé.",
+    "exemple_utilisation": "Le CCTP demande des feux conformes aux fiches techniques constructeur.",
+    "points_vigilance": [
+      "Comparer les fiches aux exigences CCTP avant commande."
+    ]
+  },
+  {
+    "terme": "Filerie de liaison",
+    "definition_courte": "Petits câbles reliant la boîte de jonction au luminaire.",
+    "explication_pedagogique": "Elle alimente la lanterne depuis le réseau du candélabre.",
+    "exemple_utilisation": "Le CCTP prévoit une filerie cuivre U1000 R02V Cu 2,5 mm2.",
+    "points_vigilance": [
+      "Protéger la filerie dans le mât et contrôler les connexions."
+    ]
+  },
+  {
+    "terme": "Filin 180/100",
+    "definition_courte": "Filin d'aiguillage prévu dans les alvéoles télécom.",
+    "explication_pedagogique": "Il permet de tirer les câbles ou éléments futurs.",
+    "exemple_utilisation": "Le CCTP demande un filin 180/100 avec résistance 100 daN.",
+    "points_vigilance": [
+      "Vérifier qu'il n'est pas perdu pendant le mandrinage ou le nettoyage."
+    ]
+  },
+  {
+    "terme": "Finition lissée",
+    "definition_courte": "Aspect final lisse d'un béton frais en surface.",
+    "explication_pedagogique": "Elle donne un massif propre et limite les aspérités.",
+    "exemple_utilisation": "Le CCTP prévoit une finition lissée pour les massifs de candélabres.",
+    "points_vigilance": [
+      "Ne pas laisser une surface haute ou rugueuse gênant la platine."
+    ]
+  },
+  {
+    "terme": "Fourgon de raccordement",
+    "definition_courte": "Véhicule nécessaire aux interventions de tirage ou raccordement.",
+    "explication_pedagogique": "Son stationnement influence l'emplacement des chambres.",
+    "exemple_utilisation": "Le CCTP demande de placer les chambres dans des endroits facilitant le stationnement du fourgon.",
+    "points_vigilance": [
+      "Anticiper accès et sécurité sans gêner durablement la circulation."
+    ]
+  },
+  {
+    "terme": "Fourreau",
+    "definition_courte": "Conduit protégeant un câble et facilitant son tirage.",
+    "explication_pedagogique": "Il est indispensable pour traversées, attentes et réseaux enterrés.",
+    "exemple_utilisation": "Le CCTP prévoit des fourreaux pour BT, télécom, éclairage et IRVE.",
+    "points_vigilance": [
+      "Respecter diamètre, profondeur, aiguillage, obturation et rayons de courbure."
+    ]
+  },
+  {
+    "terme": "Fourreau d'étanchéité",
+    "definition_courte": "Accessoire thermorétractable protégeant une extrémité de câble.",
+    "explication_pedagogique": "Il empêche l'entrée d'humidité et fiabilise le raccordement.",
+    "exemple_utilisation": "Le CCTP prévoit un fourreau d'étanchéité sur chaque câble en raccordement BT.",
+    "points_vigilance": [
+      "Ne pas laisser les extrémités de câbles ouvertes aux intempéries."
+    ]
+  },
+  {
+    "terme": "Fourreau en attente",
+    "definition_courte": "Conduit posé maintenant pour un raccordement futur.",
+    "explication_pedagogique": "Il évite de rouvrir une chaussée ou un trottoir.",
+    "exemple_utilisation": "Le CCTP prévoit repérage, bouchon en plâtre et aiguille pour les fourreaux en attente.",
+    "points_vigilance": [
+      "Repérer précisément les extrémités dans le récolement."
+    ]
+  },
+  {
+    "terme": "France Télécom",
+    "definition_courte": "Ancien nom ou interlocuteur télécom cité au CCTP.",
+    "explication_pedagogique": "Il correspond aux prescriptions du réseau télécom historique.",
+    "exemple_utilisation": "Le CCTP indique ORANGE / FRANCE TELECOM UPR Sud Ouest.",
+    "points_vigilance": [
+      "Vérifier les coordonnées actuelles du gestionnaire avant travaux."
+    ]
+  },
+  {
+    "terme": "Furet calibré",
+    "definition_courte": "Outil tiré dans un fourreau pour vérifier le passage.",
+    "explication_pedagogique": "Il fait partie de l'ensemble furet-mandrin.",
+    "exemple_utilisation": "Le CCTP demande le libre passage d'un furet calibré de chambre à chambre.",
+    "points_vigilance": [
+      "Si le furet bloque, rechercher écrasement, coude ou obstruction."
+    ]
+  },
+  {
+    "terme": "Gaine",
+    "definition_courte": "Conduit souple ou rigide protégeant un câble.",
+    "explication_pedagogique": "Elle organise et protège les réseaux enterrés.",
+    "exemple_utilisation": "Le CCTP cite gaines télécom PVC et gaines pour réseaux BT/IRVE.",
+    "points_vigilance": [
+      "Ne pas confondre gaine de protection et câble lui-même."
+    ]
+  },
+  {
+    "terme": "Gaine d'isolement du neutre",
+    "definition_courte": "Accessoire isolant placé sur le conducteur neutre au raccordement.",
+    "explication_pedagogique": "Il évite contact ou défaut électrique.",
+    "exemple_utilisation": "Le CCTP prévoit une gaine d'isolement du neutre en raccordement de câble.",
+    "points_vigilance": [
+      "Vérifier sa présence avant fermeture du coffret."
+    ]
+  },
+  {
+    "terme": "Gaine NF T 54-018",
+    "definition_courte": "Gaine télécom conforme à une norme matière et dimensionnelle.",
+    "explication_pedagogique": "Elle garantit un niveau de qualité du tube PVC.",
+    "exemple_utilisation": "Le CCTP demande une gaine NF T 54-018 pour les fourreaux PVC 42/45.",
+    "points_vigilance": [
+      "Contrôler marquage et fiche fournisseur à la livraison."
+    ]
+  },
+  {
+    "terme": "Gaine PPT",
+    "definition_courte": "Gaine conforme à une spécification CNET pour télécommunications.",
+    "explication_pedagogique": "Elle est prévue pour les réseaux télécom souterrains.",
+    "exemple_utilisation": "Le CCTP cite la gaine PPT conforme à la spécification L1552 du CNET.",
+    "points_vigilance": [
+      "Valider l'équivalence si le fournisseur propose un autre produit."
+    ]
+  },
+  {
+    "terme": "Gestionnaire de réseau",
+    "definition_courte": "Service qui exploite un réseau public ou privé.",
+    "explication_pedagogique": "Il valide les plans, contrôle les travaux et autorise la mise en service.",
+    "exemple_utilisation": "Le CCTP cite ENEDIS, ORANGE et autres gestionnaires.",
+    "points_vigilance": [
+      "Tenir un tableau de suivi des visas et retours gestionnaires."
+    ]
+  },
+  {
+    "terme": "Glissière de sécurité",
+    "definition_courte": "Séparation physique protégeant chantier et usagers.",
+    "explication_pedagogique": "Elle canalise la circulation et évite l'intrusion dans l'emprise.",
+    "exemple_utilisation": "Le CCTP prévoit des glissières type Baliroads ou similaires.",
+    "points_vigilance": [
+      "Les dispositifs doivent être visibles, stables et maintenus."
+    ]
+  },
+  {
+    "terme": "Grave-ciment",
+    "definition_courte": "Matériau de remblai traité au ciment.",
+    "explication_pedagogique": "Il peut remplacer ou compléter certaines couches sous chaussée.",
+    "exemple_utilisation": "Le CCTP prévoit 40 cm de grave-ciment ou matériau équivalent sur certains fourreaux.",
+    "points_vigilance": [
+      "Vérifier compatibilité avec structure de chaussée et prescriptions voirie."
+    ]
+  },
+  {
+    "terme": "Gravillon 5/25",
+    "definition_courte": "Granulat de dimension comprise entre 5 et 25 mm.",
+    "explication_pedagogique": "Il entre dans la composition du béton.",
+    "exemple_utilisation": "Le CCTP prévoit une granularité de gravillons 5/25 pour béton.",
+    "points_vigilance": [
+      "Contrôler propreté et absence d'éléments trop plats."
+    ]
+  },
+  {
+    "terme": "Grillage avertisseur",
+    "definition_courte": "Filet coloré posé au-dessus d'un réseau enterré.",
+    "explication_pedagogique": "Il alerte lors de terrassements futurs avant d'atteindre le câble ou fourreau.",
+    "exemple_utilisation": "Le CCTP prévoit grillage rouge pour BT/IRVE et vert pour télécom.",
+    "points_vigilance": [
+      "Contrôler couleur, largeur et hauteur, souvent 20 ou 30 cm au-dessus du réseau."
+    ]
+  },
+  {
+    "terme": "Grillage avertisseur rouge",
+    "definition_courte": "Repérage des réseaux électriques enterrés.",
+    "explication_pedagogique": "Il prévient les futurs terrassements de la présence de câbles électriques.",
+    "exemple_utilisation": "Le CCTP demande du rouge pour BT, éclairage et IRVE.",
+    "points_vigilance": [
+      "Ne pas utiliser la couleur télécom par erreur."
+    ]
+  },
+  {
+    "terme": "Grillage avertisseur vert",
+    "definition_courte": "Repérage des réseaux télécom enterrés.",
+    "explication_pedagogique": "Il signale la présence de fourreaux de télécommunication.",
+    "exemple_utilisation": "Le CCTP demande des grillages plastifiés verts de 0,30 m pour le télécom.",
+    "points_vigilance": [
+      "La couleur doit rester visible et placée à la bonne cote."
+    ]
+  },
+  {
+    "terme": "Guide SETRA",
+    "definition_courte": "Référence technique pour remblais, couches de forme et matériaux.",
+    "explication_pedagogique": "Il aide à classer et réemployer les sols.",
+    "exemple_utilisation": "Le CCTP demande la classification des matériaux selon le guide SETRA.",
+    "points_vigilance": [
+      "Faire valider le classement par le géotechnicien si réemploi prévu."
+    ]
+  },
+  {
+    "terme": "Horloge astronomique",
+    "definition_courte": "Programmateur qui calcule les heures d'allumage selon lever et coucher du soleil.",
+    "explication_pedagogique": "Elle pilote l'éclairage public automatiquement.",
+    "exemple_utilisation": "Le CCTP prévoit une horloge astronomique dans l'armoire.",
+    "points_vigilance": [
+      "Régler localisation, horaires, changement saisonnier et éventuelles dérogations."
+    ]
+  },
+  {
+    "terme": "Implantation",
+    "definition_courte": "Positionnement en plan et en altitude des ouvrages.",
+    "explication_pedagogique": "Elle garantit que réseaux, chambres, coffrets et candélabres sont au bon endroit.",
+    "exemple_utilisation": "Le CCTP met l'implantation des fouilles et ouvrages à charge de l'entreprise.",
+    "points_vigilance": [
+      "Vérifier avec plans, piquetage et ouvrages voisins avant terrassement."
+    ]
+  },
+  {
+    "terme": "Indice de plasticité non mesurable",
+    "definition_courte": "Caractéristique d'un sable non argileux.",
+    "explication_pedagogique": "Elle garantit que le sable ne se déforme pas comme une terre plastique.",
+    "exemple_utilisation": "Le CCTP exige un sable d'enrobage à indice de plasticité non mesurable.",
+    "points_vigilance": [
+      "Refuser un sable trop argileux ou humide."
+    ]
+  },
+  {
+    "terme": "Inspection du Travail",
+    "definition_courte": "Autorité administrative pouvant intervenir sur sécurité chantier.",
+    "explication_pedagogique": "Elle peut être informée lors d'un arrêt pour risque grave.",
+    "exemple_utilisation": "Le CCTP cite l'Inspecteur du Travail parmi les organismes associés.",
+    "points_vigilance": [
+      "Le respect PPSPS et blindage évite des situations d'arrêt."
+    ]
+  },
+  {
+    "terme": "Installation de chantier",
+    "definition_courte": "Ensemble des moyens provisoires pour réaliser le lot.",
+    "explication_pedagogique": "Elle comprend locaux, stockage, signalisation, clôture, protections et éclairage.",
+    "exemple_utilisation": "Le CCTP détaille les installations à la charge de l'entreprise.",
+    "points_vigilance": [
+      "Inclure entretien, nettoyage, repli et remise en état."
+    ]
+  },
+  {
+    "terme": "Interrupteur provisoire",
+    "definition_courte": "Commande temporaire ou de service installée dans l'armoire.",
+    "explication_pedagogique": "Il permet des mises en service séparées pendant réglage ou maintenance.",
+    "exemple_utilisation": "Le CCTP prévoit des interrupteurs provisoires et voyants pour secteurs d'éclairage.",
+    "points_vigilance": [
+      "Les identifier clairement pour éviter manoeuvres accidentelles."
+    ]
+  },
+  {
+    "terme": "IP44",
+    "definition_courte": "Indice de protection contre corps solides et projections d'eau.",
+    "explication_pedagogique": "Il qualifie notamment les prises de la borne IRVE.",
+    "exemple_utilisation": "Le CCTP indique IP44 pour les prises de la borne IRVE.",
+    "points_vigilance": [
+      "Vérifier que l'indice reste valable capots fermés et en usage extérieur."
+    ]
+  },
+  {
+    "terme": "IP55",
+    "definition_courte": "Indice de protection d'une enveloppe contre poussières et jets d'eau.",
+    "explication_pedagogique": "Il convient à une borne extérieure mieux protégée.",
+    "exemple_utilisation": "Le CCTP demande IP55 pour l'enveloppe de la borne IRVE.",
+    "points_vigilance": [
+      "Contrôler joints, portes et presse-étoupes après raccordement."
+    ]
+  },
+  {
+    "terme": "IRVE",
+    "acronyme": "Infrastructure de Recharge pour Véhicules Électriques",
+    "definition_courte": "Infrastructure de Recharge pour Véhicules Électriques.",
+    "explication_pedagogique": "Elle regroupe génie civil, câbles, bornes et raccordements de recharge.",
+    "exemple_utilisation": "Le CCTP prévoit le génie civil IRVE et la pose de bornes.",
+    "points_vigilance": [
+      "Coordonner avec ENEDIS, protections électriques, accessibilité et exploitation."
+    ]
+  },
+  {
+    "terme": "Isolement des câbles",
+    "definition_courte": "Capacité des câbles à ne pas laisser fuir le courant.",
+    "explication_pedagogique": "Il garantit sécurité et bon fonctionnement avant mise sous tension.",
+    "exemple_utilisation": "Le CCTP demande une mesure d'isolement avant mise sous tension.",
+    "points_vigilance": [
+      "Une mauvaise valeur impose recherche du défaut avant réception."
+    ]
+  },
+  {
+    "terme": "Jalon de fourreau",
+    "definition_courte": "Repère matérialisant une attente de fourreau.",
+    "explication_pedagogique": "Il permet de retrouver l'extrémité après remblai ou finitions.",
+    "exemple_utilisation": "Le CCTP prévoit un piquet scellé dans un massif en plâtre pour repérage.",
+    "points_vigilance": [
+      "Reporter le repère dans le plan de récolement."
+    ]
+  },
+  {
+    "terme": "Janolène",
+    "definition_courte": "Tube annelé ou conduit de protection souvent utilisé pour réseaux enterrés.",
+    "explication_pedagogique": "Il peut servir à enfiler des tubes télécom sous chaussée.",
+    "exemple_utilisation": "Le CCTP mentionne des tubes type Janolène ou similaire.",
+    "points_vigilance": [
+      "Valider diamètre, résistance et compatibilité avec l'usage."
+    ]
+  },
+  {
+    "terme": "K1C à K3C",
+    "definition_courte": "Famille de chambres télécom adaptées aux zones circulées.",
+    "explication_pedagogique": "Elle varie selon dimensions et besoins de tirage.",
+    "exemple_utilisation": "Le CCTP cite les chambres K1C à K3C sous chaussée circulée.",
+    "points_vigilance": [
+      "Choisir le type selon plans, câbles et contraintes de raccordement."
+    ]
+  },
+  {
+    "terme": "L1T à L3T",
+    "definition_courte": "Famille de chambres télécom posées sur trottoirs ou parkings.",
+    "explication_pedagogique": "Elle offre un volume adapté au tirage et aux réserves.",
+    "exemple_utilisation": "Le CCTP cite les chambres L1T à L3T.",
+    "points_vigilance": [
+      "Confirmer la classe selon emplacement et charges réelles."
+    ]
+  },
+  {
+    "terme": "Label qualité",
+    "definition_courte": "Marquage ou certification d'un produit.",
+    "explication_pedagogique": "Il ne suffit pas à lui seul si l'ouvrage est défectueux.",
+    "exemple_utilisation": "Le CCTP précise que marques et poinçons ne garantissent pas seuls l'acceptation.",
+    "points_vigilance": [
+      "Contrôler la mise en oeuvre autant que le produit."
+    ]
+  },
+  {
+    "terme": "Lamelle",
+    "definition_courte": "Terme du CCTP lié au boulonnage sur les tiges de scellement du candélabre.",
+    "explication_pedagogique": "Elle participe à la fixation ou à l'appui du mât.",
+    "exemple_utilisation": "Le CCTP indique que le boulonnage de lamelle se fait avec écrous de réglage et blocage.",
+    "points_vigilance": [
+      "Vérifier montage selon notice fabricant du candélabre."
+    ]
+  },
+  {
+    "terme": "Lanterne",
+    "definition_courte": "Bloc lumineux fixé en tête de mât.",
+    "explication_pedagogique": "Elle contient les LED, optiques et drivers.",
+    "exemple_utilisation": "Le CCTP prévoit des lanternes CIRKO LYRE.",
+    "points_vigilance": [
+      "Orientation, inclinaison et optique doivent correspondre à l'étude d'éclairage."
+    ]
+  },
+  {
+    "terme": "Largeur de tranchée",
+    "definition_courte": "Dimension transversale de la fouille.",
+    "explication_pedagogique": "Elle permet de poser réseaux avec distances et rayons suffisants.",
+    "exemple_utilisation": "Le CCTP prévoit 0,40 m minimum pour un câble BT et 0,50 m pour certaines tranchées simples.",
+    "points_vigilance": [
+      "Adapter la largeur en tranchée commune ou câbles multiples."
+    ]
+  },
+  {
+    "terme": "LED",
+    "definition_courte": "Diode électroluminescente utilisée dans les luminaires modernes.",
+    "explication_pedagogique": "Elle assure l'éclairage avec faible consommation.",
+    "exemple_utilisation": "Le CCTP demande des lanternes 12LED pour l'éclairage public.",
+    "points_vigilance": [
+      "Contrôler puissance, température de couleur et distribution lumineuse."
+    ]
+  },
+  {
+    "terme": "Ligne de tenue générale",
+    "definition_courte": "Conducteur de terre commun suivant le réseau d'éclairage.",
+    "explication_pedagogique": "Elle permet le raccordement des masses des candélabres.",
+    "exemple_utilisation": "Le CCTP prévoit un câble cuivre 25 mm2 comme ligne de tenue générale.",
+    "points_vigilance": [
+      "Vérifier continuité électrique de bout en bout."
+    ]
+  },
+  {
+    "terme": "Limite de prestation",
+    "definition_courte": "Frontière entre ce que l'entreprise doit et ce qui relève d'un autre intervenant.",
+    "explication_pedagogique": "Elle évite oublis ou doublons.",
+    "exemple_utilisation": "Le CCTP précise les prestations depuis coffrets, réseaux et points d'alimentation.",
+    "points_vigilance": [
+      "Clarifier les limites avant chantier, surtout raccordements ENEDIS/ORANGE."
+    ]
+  },
+  {
+    "terme": "Lit de sable",
+    "definition_courte": "Couche de sable au fond de la tranchée.",
+    "explication_pedagogique": "Elle crée un appui régulier et protège le câble.",
+    "exemple_utilisation": "Le CCTP prévoit 0,10 m de lit de sable sous câble ou gaine.",
+    "points_vigilance": [
+      "Régler le fond avant de poser, sans pierres ni maçonnerie saillante."
+    ]
+  },
+  {
+    "terme": "Longrine",
+    "definition_courte": "Élément allongé en béton servant de support.",
+    "explication_pedagogique": "Elle peut recevoir un coffret ou répartir les efforts.",
+    "exemple_utilisation": "Le CCTP prévoit la fixation des coffrets S2000 sur longrines réalisées par le lot.",
+    "points_vigilance": [
+      "Vérifier niveau, alignement et ancrage avant fixation."
+    ]
+  },
+  {
+    "terme": "Luminescence",
+    "definition_courte": "Terme utilisé au CCTP pour évoquer le rendement ou résultat lumineux.",
+    "explication_pedagogique": "Elle renvoie à la qualité d'éclairage obtenue après réglage.",
+    "exemple_utilisation": "Le CCTP demande des réglages pour obtenir une luminescence conforme.",
+    "points_vigilance": [
+      "Comparer le vocabulaire à l'objectif réel : niveau d'éclairement et uniformité."
+    ]
+  },
+  {
+    "terme": "Maintenance des installations de chantier",
+    "definition_courte": "Entretien des clôtures, panneaux, protections et zones provisoires.",
+    "explication_pedagogique": "Elle garantit sécurité et image du chantier pendant toute la durée des travaux.",
+    "exemple_utilisation": "Le CCTP demande une maintenance permanente de la signalisation et clôture.",
+    "points_vigilance": [
+      "Contrôler après intempéries, livraison et modifications de phasage."
+    ]
+  },
+  {
+    "terme": "Mandrin",
+    "definition_courte": "Pièce calibrée tirée dans un fourreau pour tester son passage.",
+    "explication_pedagogique": "Elle détecte écrasements ou obstacles internes.",
+    "exemple_utilisation": "Le CCTP associe furet et mandrin dans l'essai de mandrinage.",
+    "points_vigilance": [
+      "Utiliser le bon diamètre de mandrin selon le fourreau."
+    ]
+  },
+  {
+    "terme": "Marquage CE",
+    "definition_courte": "Marquage réglementaire des produits de construction.",
+    "explication_pedagogique": "Il indique que le produit respecte les exigences européennes applicables.",
+    "exemple_utilisation": "Le CCTP demande que tous les produits de construction portent le marquage CE.",
+    "points_vigilance": [
+      "Le marquage ne remplace pas les contrôles de qualité et de pose."
+    ]
+  },
+  {
+    "terme": "Marquage spécifique du tube",
+    "definition_courte": "Informations imprimées sur un tube PVC.",
+    "explication_pedagogique": "Elles identifient fabricant, matière, classe, dimensions et date.",
+    "exemple_utilisation": "Le CCTP détaille le marquage demandé sur chaque tube télécom.",
+    "points_vigilance": [
+      "Contrôler le marquage à réception avant enfouissement."
+    ]
+  },
+  {
+    "terme": "Massif béton",
+    "definition_courte": "Bloc de béton servant de fondation ou support.",
+    "explication_pedagogique": "Il stabilise les candélabres, piquets ou équipements.",
+    "exemple_utilisation": "Le CCTP prévoit des massifs pour candélabres et repérage de fourreaux.",
+    "points_vigilance": [
+      "Respecter dimensions, profondeur hors gel et altimétrie."
+    ]
+  },
+  {
+    "terme": "Mât cylindro-conique",
+    "definition_courte": "Mât dont le diamètre varie progressivement avec une forme cylindro-conique.",
+    "explication_pedagogique": "Il sert de support esthétique et mécanique au luminaire.",
+    "exemple_utilisation": "Le CCTP prévoit un mât AURIGA VALMONT hauteur 4,50 m.",
+    "points_vigilance": [
+      "Contrôler hauteur, galvanisation, RAL et verticalité."
+    ]
+  },
+  {
+    "terme": "Matériau de remblai",
+    "definition_courte": "Matériau replacé dans la tranchée après pose du réseau.",
+    "explication_pedagogique": "Il reconstitue le sol et supporte les revêtements futurs.",
+    "exemple_utilisation": "Le CCTP demande des matériaux sains, peu sensibles aux conditions météorologiques.",
+    "points_vigilance": [
+      "Contrôler granulométrie, humidité, compactage et absence d'éléments agressifs."
+    ]
+  },
+  {
+    "terme": "Matériaux inertes",
+    "definition_courte": "Déchets minéraux non dangereux comme gravats ou terres propres.",
+    "explication_pedagogique": "Ils doivent être évacués ou traités dans une filière adaptée.",
+    "exemple_utilisation": "Le CCTP traite l'évacuation des déblais et matériaux inertes.",
+    "points_vigilance": [
+      "Conserver traçabilité et éviter tout brûlage ou dépôt sauvage."
+    ]
+  },
+  {
+    "terme": "Matière thermorétractable",
+    "definition_courte": "Matière qui se rétracte à chaud autour d'un câble ou accessoire.",
+    "explication_pedagogique": "Elle assure isolement, étanchéité et protection mécanique.",
+    "exemple_utilisation": "Le CCTP prévoit des extrémités d'épanouissement en matière thermorétractable.",
+    "points_vigilance": [
+      "La mise en oeuvre doit respecter la notice et éviter brûlure du câble."
+    ]
+  },
+  {
+    "terme": "Mise à la terre",
+    "definition_courte": "Connexion d'une masse ou du neutre à la terre.",
+    "explication_pedagogique": "Elle protège les personnes et facilite le déclenchement des protections.",
+    "exemple_utilisation": "Le CCTP impose mise à la terre des candélabres, lanternes, armoires et neutre BT.",
+    "points_vigilance": [
+      "Mesurer les résistances et documenter les résultats."
+    ]
+  },
+  {
+    "terme": "Mise à niveau du cadre",
+    "definition_courte": "Réglage final du cadre d'une chambre ou regard au niveau fini.",
+    "explication_pedagogique": "Elle assure sécurité, accessibilité et bonne intégration au sol.",
+    "exemple_utilisation": "Le CCTP prévoit la mise à niveau du cadre à la demande du maître d'oeuvre.",
+    "points_vigilance": [
+      "Ne pas régler trop tôt si les revêtements ne sont pas définitifs."
+    ]
+  },
+  {
+    "terme": "Mise en service",
+    "definition_courte": "Moment où un réseau devient fonctionnel et alimenté.",
+    "explication_pedagogique": "Elle conditionne souvent la réception des ouvrages.",
+    "exemple_utilisation": "Le CCTP subordonne la réception BT à la mise en service du réseau.",
+    "points_vigilance": [
+      "Préparer raccordements, essais et présence du gestionnaire."
+    ]
+  },
+  {
+    "terme": "Mise sous tension",
+    "definition_courte": "Alimentation électrique effective d'une installation.",
+    "explication_pedagogique": "Elle ne doit intervenir qu'après contrôles et autorisations.",
+    "exemple_utilisation": "Le CCTP prévoit mise sous tension de l'éclairage en présence du directeur des travaux.",
+    "points_vigilance": [
+      "Vérifier isolement, terre, protections et repérage avant cette étape."
+    ]
+  },
+  {
+    "terme": "Mode opératoire de terrassement",
+    "definition_courte": "Choix des moyens et séquences pour ouvrir les fouilles.",
+    "explication_pedagogique": "Il évite nuisances, éboulements et dommages aux réseaux.",
+    "exemple_utilisation": "Le CCTP laisse le choix des moyens mécaniques sous réserve de ne pas créer de nuisance dangereuse.",
+    "points_vigilance": [
+      "Adapter aux sols, réseaux existants et contraintes riverains."
+    ]
+  },
+  {
+    "terme": "Mortier de ciment",
+    "definition_courte": "Mélange ciment, sable et eau utilisé pour joints ou scellements.",
+    "explication_pedagogique": "Il sert aux reprises, scellements et finitions.",
+    "exemple_utilisation": "Le CCTP cite le mortier au ciment dosé selon usage.",
+    "points_vigilance": [
+      "Ne pas l'utiliser comme béton structurel si granulats nécessaires."
+    ]
+  },
+  {
+    "terme": "NF C 14-100",
+    "definition_courte": "Norme française citée pour certaines installations de branchement basse tension.",
+    "explication_pedagogique": "Elle encadre les prescriptions électriques associées au raccordement.",
+    "exemple_utilisation": "Le CCTP mentionne NFC 14-100 pour BT et IRVE.",
+    "points_vigilance": [
+      "Se référer à la version applicable demandée par ENEDIS."
+    ]
+  },
+  {
+    "terme": "NF C 33-210",
+    "definition_courte": "Norme de câble basse tension souterrain.",
+    "explication_pedagogique": "Elle définit les câbles BT utilisés pour les réseaux.",
+    "exemple_utilisation": "Le CCTP demande des câbles type UTE NF C 33-210.",
+    "points_vigilance": [
+      "Vérifier marquage câble et conformité fournisseur."
+    ]
+  },
+  {
+    "terme": "NF C 68-171",
+    "definition_courte": "Norme de conduits de protection électrique.",
+    "explication_pedagogique": "Elle encadre les buses plastiques pour traversées.",
+    "exemple_utilisation": "Le CCTP demande une buse plastique conforme NF C 68-171.",
+    "points_vigilance": [
+      "Vérifier conformité, classe et diamètre avant pose."
+    ]
+  },
+  {
+    "terme": "NF EN 13242",
+    "definition_courte": "Norme relative aux granulats pour chaussées en graves traitées ou non.",
+    "explication_pedagogique": "Elle sert de référence pour les matériaux sous chaussée.",
+    "exemple_utilisation": "Le CCTP la cite pour les matériaux non traités en assise de chaussée.",
+    "points_vigilance": [
+      "Demander les fiches granulats et courbes granulométriques."
+    ]
+  },
+  {
+    "terme": "NF EN 1461",
+    "definition_courte": "Norme de galvanisation à chaud citée pour les mâts acier.",
+    "explication_pedagogique": "Elle protège l'acier contre la corrosion.",
+    "exemple_utilisation": "Le CCTP prévoit des mâts galvanisés selon EN ISO 1461.",
+    "points_vigilance": [
+      "Contrôler absence d'éclats de galvanisation après manutention."
+    ]
+  },
+  {
+    "terme": "NF EN 206-1",
+    "definition_courte": "Norme béton citée pour la qualité des bétons.",
+    "explication_pedagogique": "Elle définit spécification, performance et conformité des bétons.",
+    "exemple_utilisation": "Le CCTP cite NF EN 206-1 pour béton.",
+    "points_vigilance": [
+      "Les bons de livraison doivent correspondre à la formulation demandée."
+    ]
+  },
+  {
+    "terme": "NF P 16-100",
+    "definition_courte": "Norme citée pour critères d'aptitude à la fonction en absence d'autres références.",
+    "explication_pedagogique": "Elle sert de base d'appréciation pour produits non normalisés.",
+    "exemple_utilisation": "Le CCTP la mentionne en cas d'absence de normes ou avis techniques.",
+    "points_vigilance": [
+      "Faire valider par le maître d'oeuvre avant mise en oeuvre."
+    ]
+  },
+  {
+    "terme": "NF P 98-050",
+    "definition_courte": "Référence normative pour certains éléments de chambres ou ouvrages de voirie.",
+    "explication_pedagogique": "Elle encadre dimensions ou exigences des chambres préfabriquées.",
+    "exemple_utilisation": "Le CCTP demande des chambres conformes NF P 98-050 et textes associés.",
+    "points_vigilance": [
+      "Contrôler le bon type de chambre à la livraison."
+    ]
+  },
+  {
+    "terme": "Niveau d'éclairement",
+    "definition_courte": "Quantité de lumière reçue sur une surface.",
+    "explication_pedagogique": "Il permet de vérifier l'efficacité de l'éclairage extérieur.",
+    "exemple_utilisation": "Le CCTP demande le contrôle du niveau d'éclairement et une attestation de mesurage.",
+    "points_vigilance": [
+      "Mesurer selon une méthode cohérente avec l'étude et les règles d'accessibilité."
+    ]
+  },
+  {
+    "terme": "Nivellement",
+    "definition_courte": "Détermination ou réglage des altitudes.",
+    "explication_pedagogique": "Il assure le bon raccordement aux ouvrages voisins et niveaux finis.",
+    "exemple_utilisation": "Le CCTP met à charge de l'entreprise l'implantation et le nivellement théorique.",
+    "points_vigilance": [
+      "Attention aux cadres de chambres, coffrets et massifs par rapport aux sols finis."
+    ]
+  },
+  {
+    "terme": "Note de calcul de câble",
+    "definition_courte": "Calcul justifiant section, chute de tension et protections.",
+    "explication_pedagogique": "Elle prouve que les câbles sont correctement dimensionnés.",
+    "exemple_utilisation": "Le CCTP demande les notes de calcul de section de câble pour l'éclairage.",
+    "points_vigilance": [
+      "À fournir avant commande et avant contrôle final."
+    ]
+  },
+  {
+    "terme": "Note de calcul de résistance",
+    "definition_courte": "Justification technique de la résistance d'un ouvrage ou tuyau.",
+    "explication_pedagogique": "Elle permet de valider un choix de produit.",
+    "exemple_utilisation": "Le CCTP demande des notes de calcul pour la résistance des tuyaux ou canalisations.",
+    "points_vigilance": [
+      "La note doit correspondre aux charges et profondeurs réelles."
+    ]
+  },
+  {
+    "terme": "Obturateur",
+    "definition_courte": "Pièce de fermeture adaptée à un fourreau.",
+    "explication_pedagogique": "Elle protège le conduit tout en restant démontable.",
+    "exemple_utilisation": "Le CCTP demande des obturateurs après mandrinage dans les chambres télécom.",
+    "points_vigilance": [
+      "Éviter les bouchons improvisés qui se dégradent ou restent coincés."
+    ]
+  },
+  {
+    "terme": "OPM",
+    "acronyme": "Optimum Proctor Modifié",
+    "definition_courte": "Optimum Proctor Modifié, référence de compactage d'un matériau.",
+    "explication_pedagogique": "Il sert à définir la densité et teneur en eau de mise en oeuvre.",
+    "exemple_utilisation": "Le CCTP donne des compacités minimales à l'OPM pour GNT.",
+    "points_vigilance": [
+      "Contrôler la teneur en eau pour rester dans la plage prévue."
+    ]
+  },
+  {
+    "terme": "ORANGE",
+    "definition_courte": "Gestionnaire ou opérateur des infrastructures télécom mentionné au CCTP.",
+    "explication_pedagogique": "Il valide point de livraison, prescriptions et plans télécom.",
+    "exemple_utilisation": "Le CCTP demande de prendre contact avec ORANGE / France Télécom.",
+    "points_vigilance": [
+      "Ses retours conditionnent raccordement et réception du réseau."
+    ]
+  },
+  {
+    "terme": "Organisme agréé",
+    "definition_courte": "Structure habilitée à réaliser un contrôle technique.",
+    "explication_pedagogique": "Elle apporte un avis indépendant sur une installation.",
+    "exemple_utilisation": "Le CCTP demande un contrôle par organisme agréé pour l'éclairage.",
+    "points_vigilance": [
+      "Planifier son intervention avant réception."
+    ]
+  },
+  {
+    "terme": "P400",
+    "definition_courte": "Type de coffret ou borne conforme aux prescriptions de réseau électrique.",
+    "explication_pedagogique": "Il peut servir à la coupure ou au branchement.",
+    "exemple_utilisation": "Le CCTP cite P400 parmi les coffrets possibles.",
+    "points_vigilance": [
+      "Valider le modèle exact avec ENEDIS."
+    ]
+  },
+  {
+    "terme": "Panneau de chantier",
+    "definition_courte": "Panneau d'information obligatoire sur le chantier.",
+    "explication_pedagogique": "Il informe le public et identifie l'opération.",
+    "exemple_utilisation": "Le CCTP met à charge de l'entreprise un ou plusieurs panneaux d'information.",
+    "points_vigilance": [
+      "Mettre à jour les informations si le maître d'ouvrage le demande."
+    ]
+  },
+  {
+    "terme": "Peigne",
+    "definition_courte": "Accessoire maintenant l'écartement entre fourreaux en arrivée de chambre.",
+    "explication_pedagogique": "Il permet au béton de pénétrer correctement entre les gaines.",
+    "exemple_utilisation": "Le CCTP demande l'utilisation de peignes pour l'enrobage aux arrivées de chambre.",
+    "points_vigilance": [
+      "Sans peigne, l'enrobage peut être incomplet et les fourreaux désordonnés."
+    ]
+  },
+  {
+    "terme": "Pendage des couches",
+    "definition_courte": "Inclinaison naturelle des couches de terrain.",
+    "explication_pedagogique": "Elle influence la stabilité des fouilles.",
+    "exemple_utilisation": "Le CCTP indique que le blindage dépend notamment du pendage des couches.",
+    "points_vigilance": [
+      "Adapter blindage et terrassement à la géologie rencontrée."
+    ]
+  },
+  {
+    "terme": "Pied acier anti-corrosion",
+    "definition_courte": "Support métallique traité contre la corrosion.",
+    "explication_pedagogique": "Il garantit la tenue de la borne IRVE en extérieur.",
+    "exemple_utilisation": "Le CCTP décrit une borne IRVE avec pied acier traité anti-corrosion.",
+    "points_vigilance": [
+      "Contrôler revêtement après manutention et scellement."
+    ]
+  },
+  {
+    "terme": "Pied de colonne",
+    "definition_courte": "Point d'arrivée des réseaux en bas d'une colonne technique de bâtiment collectif.",
+    "explication_pedagogique": "Il distribue ensuite vers les logements ou équipements.",
+    "exemple_utilisation": "Le CCTP prévoit le réseau BT et télécom jusqu'au pied de colonne des bâtiments collectifs.",
+    "points_vigilance": [
+      "Coordonner avec le lot bâtiment pour réservation et accessibilité."
+    ]
+  },
+  {
+    "terme": "Piquet scellé",
+    "definition_courte": "Repère vertical fixé dans un petit massif.",
+    "explication_pedagogique": "Il signale une attente de fourreau ou un ouvrage enterré.",
+    "exemple_utilisation": "Le CCTP prévoit un piquet scellé dans un massif en plâtre pour repérer les fourreaux en attente.",
+    "points_vigilance": [
+      "Le piquet doit rester visible jusqu'à la reprise par l'intervenant suivant."
+    ]
+  },
+  {
+    "terme": "Piquetage des points lumineux",
+    "definition_courte": "Repérage sur terrain de l'emplacement des candélabres.",
+    "explication_pedagogique": "Il valide la position avant massif et tranchée.",
+    "exemple_utilisation": "Le CCTP met à charge de l'entreprise le piquetage des points lumineux.",
+    "points_vigilance": [
+      "Vérifier passages, entrées, arbres et réseaux existants avant bétonnage."
+    ]
+  },
+  {
+    "terme": "Plan de coordination",
+    "definition_courte": "Plan organisant plusieurs réseaux dans une tranchée commune.",
+    "explication_pedagogique": "Il évite conflits et non-respect des distances réglementaires.",
+    "exemple_utilisation": "Le CCTP demande ce plan en cas de tranchée commune.",
+    "points_vigilance": [
+      "Le faire valider avant ouverture, surtout en présence BT, télécom et éclairage."
+    ]
+  },
+  {
+    "terme": "Plan de ferraillage",
+    "definition_courte": "Plan indiquant les armatures d'un ouvrage en béton armé.",
+    "explication_pedagogique": "Il permet de réaliser un béton armé conforme.",
+    "exemple_utilisation": "Le CCTP demande les plans de ferraillage et coffrage des ouvrages béton armé.",
+    "points_vigilance": [
+      "S'assurer qu'il concerne les ouvrages réellement armés du lot."
+    ]
+  },
+  {
+    "terme": "Plan de récolement",
+    "definition_courte": "Plan final montrant ce qui a été réellement posé.",
+    "explication_pedagogique": "Il est essentiel pour l'exploitation future des réseaux enterrés.",
+    "exemple_utilisation": "Le CCTP demande les plans de récolement pour tous les réseaux.",
+    "points_vigilance": [
+      "Lever les réseaux avant remblai et indiquer profondeurs, diamètres, chambres et coffrets."
+    ]
+  },
+  {
+    "terme": "Planche de convenance",
+    "definition_courte": "Essai de mise en oeuvre permettant de valider matériaux et compactage.",
+    "explication_pedagogique": "Elle sert à démontrer qu'une méthode atteint le résultat demandé.",
+    "exemple_utilisation": "Le CCTP évoque éventuellement une planche de convenance pour matériaux de remblai.",
+    "points_vigilance": [
+      "La réaliser avant production courante si demandée."
+    ]
+  },
+  {
+    "terme": "Platine de pied de fût",
+    "definition_courte": "Plaque de base d'un mât de candélabre.",
+    "explication_pedagogique": "Elle transmet les efforts aux tiges de scellement et au massif.",
+    "exemple_utilisation": "Le CCTP exige une protection anticorrosion de la platine de pied de fût.",
+    "points_vigilance": [
+      "Appliquer deux couches bitumineuses ou protection équivalente."
+    ]
+  },
+  {
+    "terme": "Polycarbonate renforcé",
+    "definition_courte": "Matière plastique résistante utilisée en façade de borne.",
+    "explication_pedagogique": "Elle protège les organes tout en restant durable.",
+    "exemple_utilisation": "Le CCTP décrit une borne IRVE avec façade polycarbonate renforcé.",
+    "points_vigilance": [
+      "Contrôler absence de fissures et compatibilité UV."
+    ]
+  },
+  {
+    "terme": "Pont piéton",
+    "definition_courte": "Passerelle provisoire permettant de franchir une tranchée.",
+    "explication_pedagogique": "Elle maintient les cheminements pendant travaux.",
+    "exemple_utilisation": "Le CCTP prévoit la fourniture de ponts piéton ou voiture si nécessaire.",
+    "points_vigilance": [
+      "Installer garde-corps et surfaces antidérapantes."
+    ]
+  },
+  {
+    "terme": "Pont voiture",
+    "definition_courte": "Dispositif provisoire permettant aux véhicules de franchir une tranchée.",
+    "explication_pedagogique": "Il maintient des accès riverains ou chantier.",
+    "exemple_utilisation": "Le CCTP inclut la mise en oeuvre de ponts voiture.",
+    "points_vigilance": [
+      "Vérifier capacité de charge et stabilité."
+    ]
+  },
+  {
+    "terme": "Pose en coupure",
+    "definition_courte": "Raccordement d'un câble traversant un appareil avec entrée et sortie.",
+    "explication_pedagogique": "Elle permet d'alimenter un candélabre tout en poursuivant le réseau.",
+    "exemple_utilisation": "Le CCTP indique que le câble d'alimentation passe en coupure dans les candélabres.",
+    "points_vigilance": [
+      "Soigner le repérage pour éviter inversion départ/arrivée."
+    ]
+  },
+  {
+    "terme": "Poussières de chantier",
+    "definition_courte": "Particules générées par terrassement, sciage ou nettoyage.",
+    "explication_pedagogique": "Elles gênent les riverains et peuvent être réglementées.",
+    "exemple_utilisation": "Le CCTP demande de prendre les dispositions contre la dispersion de poussières.",
+    "points_vigilance": [
+      "Arroser, bâcher ou adapter les méthodes selon conditions météo."
+    ]
+  },
+  {
+    "terme": "Prise de courant d'armoire",
+    "definition_courte": "Prise intégrée à une armoire électrique pour maintenance.",
+    "explication_pedagogique": "Elle facilite les interventions de service.",
+    "exemple_utilisation": "Le CCTP prévoit une prise de courant dans l'armoire de distribution générale.",
+    "points_vigilance": [
+      "La prise doit être protégée et clairement repérée."
+    ]
+  },
+  {
+    "terme": "Prise E/F",
+    "definition_courte": "Type de prise électrique domestique européenne.",
+    "explication_pedagogique": "Elle permet la recharge ou branchement compatible selon borne.",
+    "exemple_utilisation": "Le CCTP prévoit des prises type E/F sur la borne IRVE.",
+    "points_vigilance": [
+      "Vérifier protection, obturateurs et usage autorisé."
+    ]
+  },
+  {
+    "terme": "Produit similaire",
+    "definition_courte": "Produit proposé comme équivalent à une référence du CCTP.",
+    "explication_pedagogique": "Il doit offrir performances et qualité au moins équivalentes.",
+    "exemple_utilisation": "Le CCTP permet de soumettre un produit similaire à l'approbation du maître d'oeuvre.",
+    "points_vigilance": [
+      "Ne pas substituer sans fiche technique et validation écrite."
+    ]
+  },
+  {
+    "terme": "Profondeur de tranchée",
+    "definition_courte": "Distance entre sol fini et fond ou axe du réseau.",
+    "explication_pedagogique": "Elle garantit protection et conformité des réseaux enterrés.",
+    "exemple_utilisation": "Le CCTP fixe souvent l'axe des gaines ou câbles à 0,80 m sous sol fini.",
+    "points_vigilance": [
+      "Faire contrôler la profondeur avant remblaiement."
+    ]
+  },
+  {
+    "terme": "Protection anticorrosion",
+    "definition_courte": "Traitement empêchant la corrosion des pièces métalliques.",
+    "explication_pedagogique": "Elle prolonge la durée de vie des mâts, platines, bornes et tiges.",
+    "exemple_utilisation": "Le CCTP prévoit galvanisation et peinture bitumineuse sur pièces de candélabres.",
+    "points_vigilance": [
+      "Reprendre toute protection abîmée après manutention."
+    ]
+  },
+  {
+    "terme": "Protection des végétaux",
+    "definition_courte": "Mesures pour préserver arbres et plantations pendant travaux.",
+    "explication_pedagogique": "Elle limite les dommages environnementaux et reprises paysagères.",
+    "exemple_utilisation": "Le CCTP demande de respecter les arbres et plantations environnantes.",
+    "points_vigilance": [
+      "Protéger troncs, racines et zones de stockage."
+    ]
+  },
+  {
+    "terme": "Protection grillagée",
+    "definition_courte": "Clôture ou grillage isolant le stockage ou l'emprise.",
+    "explication_pedagogique": "Elle limite les intrusions et accidents.",
+    "exemple_utilisation": "Le CCTP prévoit le stockage isolé par protection grillagée.",
+    "points_vigilance": [
+      "Vérifier fermeture hors horaires de travail."
+    ]
+  },
+  {
+    "terme": "Purge",
+    "definition_courte": "Retrait d'une partie de sol impropre ou inconsistante.",
+    "explication_pedagogique": "Elle remplace un support instable par un matériau sain.",
+    "exemple_utilisation": "Le CCTP demande de purger les parties de sol inconsistantes et de les remplacer par du tout-venant.",
+    "points_vigilance": [
+      "Ne pas poser de fourreau sur un fond mou non traité."
+    ]
+  },
+  {
+    "terme": "PVC 42/45",
+    "definition_courte": "Tube PVC télécom de diamètre nominal intérieur/extérieur courant.",
+    "explication_pedagogique": "Il sert de fourreau pour réseaux de télécommunication.",
+    "exemple_utilisation": "Le CCTP prévoit des fourreaux PVC 42/45 en barres de 6 m prémanchonnées.",
+    "points_vigilance": [
+      "Contrôler collage, alignement et libre passage par mandrinage."
+    ]
+  },
+  {
+    "terme": "PVC gris",
+    "definition_courte": "Couleur et matière des tubes télécom prévus.",
+    "explication_pedagogique": "Elle identifie visuellement les fourreaux avant pose.",
+    "exemple_utilisation": "Le CCTP indique une matière PVC de couleur grise pour le télécom.",
+    "points_vigilance": [
+      "La couleur ne dispense pas du grillage avertisseur vert."
+    ]
+  },
+  {
+    "terme": "PVC rigide à tenue élevée au choc",
+    "definition_courte": "Tube résistant aux chocs et contraintes de pose.",
+    "explication_pedagogique": "Il limite les fissures, ruptures et écrasements.",
+    "exemple_utilisation": "Le CCTP demande un PVC rigide conforme DIN 8061, résistant au gel.",
+    "points_vigilance": [
+      "Vérifier conditions de stockage pour éviter fragilisation."
+    ]
+  },
+  {
+    "terme": "Rabattement de nappe",
+    "definition_courte": "Pompage ou abaissement provisoire de l'eau souterraine.",
+    "explication_pedagogique": "Il permet de travailler en fond de fouille sec ou stable.",
+    "exemple_utilisation": "Le CCTP prévoit le rabattement de nappe éventuel pour certains travaux.",
+    "points_vigilance": [
+      "Anticiper rejet des eaux, autorisations et stabilité des fouilles."
+    ]
+  },
+  {
+    "terme": "Raccordement au réseau existant",
+    "definition_courte": "Connexion du nouveau réseau à un réseau déjà en service.",
+    "explication_pedagogique": "Il rend l'installation utilisable.",
+    "exemple_utilisation": "Le CCTP prévoit raccordement télécom rue Yves Montand et raccordement BT au réseau.",
+    "points_vigilance": [
+      "Obtenir autorisations et coordonner coupures ou interventions gestionnaire."
+    ]
+  },
+  {
+    "terme": "Raccordement des câbles",
+    "definition_courte": "Connexion électrique ou télécom entre câble et équipement.",
+    "explication_pedagogique": "Il assure la continuité du réseau.",
+    "exemple_utilisation": "Le CCTP détaille raccordement dans bornes, coffrets et chambres.",
+    "points_vigilance": [
+      "Respecter accessoires, serrage, isolement et repérage."
+    ]
+  },
+  {
+    "terme": "Radier armé",
+    "definition_courte": "Dalle de fond d'une chambre renforcée par treillis soudé.",
+    "explication_pedagogique": "Elle assure la stabilité et la résistance de la chambre.",
+    "exemple_utilisation": "Le CCTP demande que le radier soit armé dans les chambres télécom.",
+    "points_vigilance": [
+      "Vérifier mise en place du treillis avant béton."
+    ]
+  },
+  {
+    "terme": "RAL au choix",
+    "definition_courte": "Teinte normalisée choisie par le maître d'ouvrage ou architecte.",
+    "explication_pedagogique": "Elle garantit une couleur définie pour les mâts ou équipements visibles.",
+    "exemple_utilisation": "Le CCTP prévoit RAL au choix du maître d'ouvrage pour les mâts.",
+    "points_vigilance": [
+      "Faire valider la teinte avant commande."
+    ]
+  },
+  {
+    "terme": "Rayon minimal de câble",
+    "definition_courte": "Courbure minimale à respecter lors de la pose d'un câble.",
+    "explication_pedagogique": "Elle évite d'endommager l'isolant ou l'âme du câble.",
+    "exemple_utilisation": "Le CCTP demande un rayon supérieur à 10 fois le diamètre du câble.",
+    "points_vigilance": [
+      "Contrôler dans chambres, tranchées et entrées de coffret."
+    ]
+  },
+  {
+    "terme": "Réception des ouvrages",
+    "definition_courte": "Acceptation des travaux après contrôles et corrections éventuelles.",
+    "explication_pedagogique": "Elle marque la livraison technique du réseau.",
+    "exemple_utilisation": "Le CCTP subordonne certaines réceptions à mise en service et attestations.",
+    "points_vigilance": [
+      "Préparer essais, DOE, récolements et levée de réserves."
+    ]
+  },
+  {
+    "terme": "Récolement altimétrique",
+    "definition_courte": "Relevé des profondeurs et niveaux des ouvrages exécutés.",
+    "explication_pedagogique": "Il permet de retrouver les réseaux sans ambiguïté.",
+    "exemple_utilisation": "Le CCTP demande des plans de récolement complets.",
+    "points_vigilance": [
+      "Inclure sol fini de référence, profondeurs et niveaux de cadres."
+    ]
+  },
+  {
+    "terme": "Réfection de chaussée",
+    "definition_courte": "Remise en état de la voirie après tranchée.",
+    "explication_pedagogique": "Elle rétablit circulation, sécurité et aspect.",
+    "exemple_utilisation": "Le CCTP évoque les réfections nécessaires avant réception.",
+    "points_vigilance": [
+      "Contrôler compactage, structure et finitions de surface."
+    ]
+  },
+  {
+    "terme": "Regard 30x30",
+    "definition_courte": "Petit ouvrage préfabriqué en béton de 30 par 30 cm.",
+    "explication_pedagogique": "Il donne accès à un réseau ou point de tirage.",
+    "exemple_utilisation": "Le CCTP prévoit des regards préfabriqués 30x30 cm avec couvercle béton.",
+    "points_vigilance": [
+      "Choisir l'emplacement accessible et compatible avec le sol fini."
+    ]
+  },
+  {
+    "terme": "Regard de tirage",
+    "definition_courte": "Petit ouvrage permettant de tirer ou raccorder les câbles.",
+    "explication_pedagogique": "Il limite les longueurs de tirage et facilite maintenance.",
+    "exemple_utilisation": "Le CCTP prévoit des regards de tirage pour le génie civil IRVE.",
+    "points_vigilance": [
+      "Vérifier dimensions, accessibilité et passage des rayons de câble."
+    ]
+  },
+  {
+    "terme": "Règles de l'art",
+    "definition_courte": "Bonnes pratiques techniques reconnues d'une profession.",
+    "explication_pedagogique": "Elles complètent le CCTP pour livrer un ouvrage fonctionnel.",
+    "exemple_utilisation": "Le CCTP demande tous les travaux nécessaires selon les règles de l'art.",
+    "points_vigilance": [
+      "Ne pas limiter la prestation à une lecture minimale des lignes du CCTP."
+    ]
+  },
+  {
+    "terme": "REM BT",
+    "definition_courte": "Type de coffret ou matériel réseau basse tension.",
+    "explication_pedagogique": "Il fait partie des matériels acceptés par le gestionnaire.",
+    "exemple_utilisation": "Le CCTP cite REMBT ou modèle postérieur.",
+    "points_vigilance": [
+      "Valider modèle, génération et accessoires avec ENEDIS."
+    ]
+  },
+  {
+    "terme": "Remblaiement",
+    "definition_courte": "Remise en place de matériaux après pose des réseaux.",
+    "explication_pedagogique": "Il referme la tranchée et reconstitue la portance.",
+    "exemple_utilisation": "Le CCTP demande remblais sains, triés et compactés par tranches.",
+    "points_vigilance": [
+      "Ne pas remblayer avant contrôle des réseaux, grillages et récolement."
+    ]
+  },
+  {
+    "terme": "Réseau basse tension",
+    "definition_courte": "Réseau électrique distribuant l'énergie à basse tension.",
+    "explication_pedagogique": "Il alimente logements, coffrets et certains équipements.",
+    "exemple_utilisation": "Le CCTP traite la construction du réseau électricité basse tension.",
+    "points_vigilance": [
+      "Respecter prescriptions ENEDIS, câbles NF C 33-210 et essais."
+    ]
+  },
+  {
+    "terme": "Réseau de distribution",
+    "definition_courte": "Ensemble des câbles et organes qui alimentent plusieurs points.",
+    "explication_pedagogique": "Il distribue énergie ou services depuis un point d'origine.",
+    "exemple_utilisation": "Le CCTP parle de réseau de distribution télécom, BT et éclairage.",
+    "points_vigilance": [
+      "Repérer les départs et les limites de chaque réseau."
+    ]
+  },
+  {
+    "terme": "Réseau souterrain",
+    "definition_courte": "Réseau posé sous terre dans tranchées, gaines ou fourreaux.",
+    "explication_pedagogique": "Il protège les câbles et libère l'espace aérien.",
+    "exemple_utilisation": "Le CCTP porte principalement sur des réseaux souterrains.",
+    "points_vigilance": [
+      "La qualité du récolement est critique car le réseau devient invisible."
+    ]
+  },
+  {
+    "terme": "Réserve de 25 %",
+    "definition_courte": "Marge de capacité supplémentaire dans l'armoire.",
+    "explication_pedagogique": "Elle permet ajouts ou maintenance sans saturation immédiate.",
+    "exemple_utilisation": "Le CCTP demande une armoire dimensionnée avec une réserve égale à 25 %.",
+    "points_vigilance": [
+      "Vérifier physiquement l'espace disponible après câblage."
+    ]
+  },
+  {
+    "terme": "Réserve de câble",
+    "definition_courte": "Longueur supplémentaire de câble laissée en chambre ou coffret.",
+    "explication_pedagogique": "Elle permet raccordements, épissures et maintenance.",
+    "exemple_utilisation": "Le CCTP indique que les chambres doivent avoir l'espace pour réserves de câbles.",
+    "points_vigilance": [
+      "Former les boucles sans dépasser le rayon minimal."
+    ]
+  },
+  {
+    "terme": "RFID",
+    "definition_courte": "Technologie d'identification par carte ou badge sans contact.",
+    "explication_pedagogique": "Elle autorise l'utilisation de la borne IRVE.",
+    "exemple_utilisation": "Le CCTP prévoit le lancement de charge par carte RFID.",
+    "points_vigilance": [
+      "Tester plusieurs badges et consigner le mode d'exploitation."
+    ]
+  },
+  {
+    "terme": "Sable exempt de matière organique",
+    "definition_courte": "Sable propre sans végétaux, humus ou pollution.",
+    "explication_pedagogique": "Il évite tassement, décomposition et mauvais comportement autour des réseaux.",
+    "exemple_utilisation": "Le CCTP exige un sable 0/4 exempt de matières organiques.",
+    "points_vigilance": [
+      "Refuser tout sable noir, terreux ou pollué."
+    ]
+  },
+  {
+    "terme": "Sable tout-venant",
+    "definition_courte": "Matériau de comblement utilisé pour reboucher certains trous.",
+    "explication_pedagogique": "Il peut remplacer des volumes après extraction de souches.",
+    "exemple_utilisation": "Le CCTP demande de combler les trous de souches en sable tout venant ou matériaux sains.",
+    "points_vigilance": [
+      "Compacter pour éviter tassements localisés."
+    ]
+  },
+  {
+    "terme": "Scellement",
+    "definition_courte": "Fixation durable dans du béton ou de la maçonnerie.",
+    "explication_pedagogique": "Il maintient tiges, piquets, cadres ou supports.",
+    "exemple_utilisation": "Le CCTP prévoit des tiges de scellement pour candélabres et piquets scellés.",
+    "points_vigilance": [
+      "Respecter profondeur, alignement et temps de prise."
+    ]
+  },
+  {
+    "terme": "Section de câble",
+    "definition_courte": "Surface conductrice d'un câble, exprimée en mm2.",
+    "explication_pedagogique": "Elle détermine intensité admissible et chute de tension.",
+    "exemple_utilisation": "Le CCTP demande des notes de calcul de section de câble.",
+    "points_vigilance": [
+      "Ne pas choisir la section seulement par habitude chantier."
+    ]
+  },
+  {
+    "terme": "Sectionnement à fusibles",
+    "definition_courte": "Dispositif permettant coupure et protection par fusibles.",
+    "explication_pedagogique": "Il équipe certains départs ou arrivées dans l'armoire.",
+    "exemple_utilisation": "Le CCTP prévoit le sectionnement à fusibles principal.",
+    "points_vigilance": [
+      "Prévoir calibres, repérage et fusibles de rechange si demandé."
+    ]
+  },
+  {
+    "terme": "SETRA",
+    "definition_courte": "Service technique dont les guides servent aux remblais et chaussées.",
+    "explication_pedagogique": "Il fournit des références pour réutilisation des matériaux.",
+    "exemple_utilisation": "Le CCTP demande une classification selon le guide SETRA.",
+    "points_vigilance": [
+      "À relier aux essais de sol et au compactage demandé."
+    ]
+  },
+  {
+    "terme": "Signal avertisseur",
+    "definition_courte": "Dispositif coloré placé au-dessus d'un réseau enterré.",
+    "explication_pedagogique": "Il prévient d'un réseau lors d'un terrassement futur.",
+    "exemple_utilisation": "Le CCTP décrit un grillage rouge renforcé posé 0,20 m au-dessus du réseau.",
+    "points_vigilance": [
+      "Ne pas le poser trop bas au contact du câble."
+    ]
+  },
+  {
+    "terme": "Signalisation de chantier",
+    "definition_courte": "Panneaux, balisage et dispositifs temporaires pour informer et protéger.",
+    "explication_pedagogique": "Elle organise circulation et sécurité autour du chantier.",
+    "exemple_utilisation": "Le CCTP la rend obligatoire de jour comme de nuit.",
+    "points_vigilance": [
+      "Adapter la signalisation à l'avancement réel."
+    ]
+  },
+  {
+    "terme": "SIR Wireless",
+    "definition_courte": "Détecteur communicant prévu pour l'éclairage public.",
+    "explication_pedagogique": "Il pilote ou informe le réseau d'éclairage selon présence.",
+    "exemple_utilisation": "Le CCTP cite SIR Wireless de SOGEXI avec câble 5 m et sortie DALI.",
+    "points_vigilance": [
+      "Vérifier paramétrage, communication et compatibilité du pré-câblage."
+    ]
+  },
+  {
+    "terme": "Socle béton",
+    "definition_courte": "Base en béton recevant un candélabre ou équipement.",
+    "explication_pedagogique": "Il assure stabilité et ancrage.",
+    "exemple_utilisation": "Le CCTP demande des socles béton dimensionnés par l'entrepreneur.",
+    "points_vigilance": [
+      "Tenir compte du vent, du gel, du terrain et de la hauteur du mât."
+    ]
+  },
+  {
+    "terme": "Sol fini",
+    "definition_courte": "Niveau définitif du terrain, chaussée ou trottoir.",
+    "explication_pedagogique": "Il sert de référence aux profondeurs et altimétries.",
+    "exemple_utilisation": "Le CCTP mesure les profondeurs depuis le niveau fini du sol.",
+    "points_vigilance": [
+      "Anticiper les épaisseurs de revêtement pour ne pas poser trop haut ou trop bas."
+    ]
+  },
+  {
+    "terme": "Sondage préliminaire",
+    "definition_courte": "Reconnaissance ponctuelle du sol avant travaux.",
+    "explication_pedagogique": "Elle permet d'identifier nature du terrain et réseaux possibles.",
+    "exemple_utilisation": "Le CCTP demande des sondages préliminaires avant tranchée sous voirie enrobée ou bétonnée.",
+    "points_vigilance": [
+      "Prévoir ces frais et ne pas les oublier dans le planning."
+    ]
+  },
+  {
+    "terme": "Sur-profondeur",
+    "definition_courte": "Profondeur supplémentaire autorisée ou nécessaire.",
+    "explication_pedagogique": "Elle permet de franchir obstacles ou traversées de chaussée.",
+    "exemple_utilisation": "Le CCTP autorise jusqu'à -1,10 m sous chaussées, accès ou parkings.",
+    "points_vigilance": [
+      "Documenter toute sur-profondeur dans le récolement."
+    ]
+  },
+  {
+    "terme": "Surcharge près de fouille",
+    "definition_courte": "Charge placée à proximité d'une tranchée ou fouille.",
+    "explication_pedagogique": "Elle peut provoquer l'effondrement des parois.",
+    "exemple_utilisation": "Le CCTP demande une distance au moins égale à la profondeur de la fouille.",
+    "points_vigilance": [
+      "Éloigner engins, stocks et matériaux du bord de tranchée."
+    ]
+  },
+  {
+    "terme": "Surlargeur de tranchée",
+    "definition_courte": "Largeur ajoutée pour accueillir un réseau supplémentaire.",
+    "explication_pedagogique": "Elle respecte distances entre câbles ou fourreaux.",
+    "exemple_utilisation": "Le CCTP prévoit chaque surlargeur de tranchée à 0,50 m pour certains réseaux.",
+    "points_vigilance": [
+      "Ne pas serrer les réseaux pour gagner du terrassement."
+    ]
+  },
+  {
+    "terme": "Tableau d'armoire",
+    "definition_courte": "Organisation interne des protections et commandes.",
+    "explication_pedagogique": "Il rend l'installation lisible et maintenable.",
+    "exemple_utilisation": "Le CCTP demande une armoire câblée, repérée et raccordée.",
+    "points_vigilance": [
+      "Un repérage propre évite les erreurs lors des interventions futures."
+    ]
+  },
+  {
+    "terme": "Télécom",
+    "definition_courte": "Réseau de télécommunications, notamment téléphone ou fibre.",
+    "explication_pedagogique": "Il dessert les maisons et bâtiments collectifs.",
+    "exemple_utilisation": "Le CCTP prévoit construction du réseau télécom avec chambres de tirage.",
+    "points_vigilance": [
+      "Respecter prescriptions ORANGE, mandrinage, aiguillage et récolement."
+    ]
+  },
+  {
+    "terme": "Téléreport",
+    "definition_courte": "Transmission à distance d'informations de comptage ou de réseau.",
+    "explication_pedagogique": "Il peut accompagner les réseaux électriques ou IRVE.",
+    "exemple_utilisation": "Le CCTP mentionne le téléreport dans la distribution BT et IRVE.",
+    "points_vigilance": [
+      "Coordonner les fourreaux et câbles nécessaires avec le gestionnaire."
+    ]
+  },
+  {
+    "terme": "Teneur en eau",
+    "definition_courte": "Quantité d'eau contenue dans un matériau de remblai.",
+    "explication_pedagogique": "Elle influence fortement le compactage.",
+    "exemple_utilisation": "Le CCTP fixe une plage autour de Wopm pour les GNT.",
+    "points_vigilance": [
+      "Mesurer ou apprécier avant compactage, surtout après pluie."
+    ]
+  },
+  {
+    "terme": "Tige de scellement",
+    "definition_courte": "Tige métallique noyée ou fixée dans le massif pour boulonner un mât.",
+    "explication_pedagogique": "Elle transmet les efforts du candélabre au béton.",
+    "exemple_utilisation": "Le CCTP demande une fixation des tiges garantissant leur adhérence dans le massif.",
+    "points_vigilance": [
+      "Contrôler entraxe, verticalité et dépassement avant coulage."
+    ]
+  },
+  {
+    "terme": "Tout-venant",
+    "definition_courte": "Matériau granulaire courant utilisé en remblai ou substitution.",
+    "explication_pedagogique": "Il remplace des sols inconsistants après purge.",
+    "exemple_utilisation": "Le CCTP demande de remplacer les parties inconsistantes par du tout-venant.",
+    "points_vigilance": [
+      "Choisir un matériau sain et compactable."
+    ]
+  },
+  {
+    "terme": "Tranchée commune",
+    "definition_courte": "Tranchée recevant plusieurs réseaux.",
+    "explication_pedagogique": "Elle limite terrassements mais impose une coordination stricte.",
+    "exemple_utilisation": "Le CCTP prévoit souvent éclairage, BT et télécom en tranchée commune.",
+    "points_vigilance": [
+      "Respecter distances, ordre de pose, grillages et plans de coordination."
+    ]
+  },
+  {
+    "terme": "Tranchée longitudinale",
+    "definition_courte": "Tranchée ouverte dans le sens de la voie.",
+    "explication_pedagogique": "Elle suit souvent le tracé principal d'un réseau.",
+    "exemple_utilisation": "Le CCTP demande de l'ouvrir au fur et à mesure de la pose.",
+    "points_vigilance": [
+      "Limiter la longueur ouverte pour sécurité et circulation."
+    ]
+  },
+  {
+    "terme": "Tranchée simple",
+    "definition_courte": "Tranchée ne contenant qu'un seul réseau.",
+    "explication_pedagogique": "Elle a une largeur minimale plus simple à gérer.",
+    "exemple_utilisation": "Le CCTP indique une largeur minimale de 0,50 m pour les tranchées simples télécom/éclairage.",
+    "points_vigilance": [
+      "Adapter si le réseau ou le blindage nécessite plus."
+    ]
+  },
+  {
+    "terme": "Tranchée transversale",
+    "definition_courte": "Tranchée traversant une chaussée.",
+    "explication_pedagogique": "Elle gêne fortement la circulation et doit être phasée.",
+    "exemple_utilisation": "Le CCTP demande de ne l'ouvrir que par moitié de chaussée.",
+    "points_vigilance": [
+      "Prévoir platelage ou phasage si accès à maintenir."
+    ]
+  },
+  {
+    "terme": "Trancheuse",
+    "definition_courte": "Machine découpant un revêtement ou sol de manière régulière.",
+    "explication_pedagogique": "Elle prépare l'ouverture propre de tranchées.",
+    "exemple_utilisation": "Le CCTP autorise la découpe à la trancheuse avant tranchée sous voirie.",
+    "points_vigilance": [
+      "Contrôler profondeur de coupe et présence de réseaux existants."
+    ]
+  },
+  {
+    "terme": "Treillis soudé",
+    "definition_courte": "Armature métallique en mailles soudées noyée dans le béton.",
+    "explication_pedagogique": "Il renforce un radier ou dalle béton.",
+    "exemple_utilisation": "Le CCTP demande un radier armé par treillis soudé dans les chambres.",
+    "points_vigilance": [
+      "Maintenir l'armature correctement positionnée, non posée au fond nu."
+    ]
+  },
+  {
+    "terme": "Tube prémanchonné",
+    "definition_courte": "Tube livré avec manchon pour faciliter l'assemblage.",
+    "explication_pedagogique": "Il accélère la pose et assure l'alignement des tronçons.",
+    "exemple_utilisation": "Le CCTP prévoit des tubes PVC télécom en barres de 6 m prémanchonnées.",
+    "points_vigilance": [
+      "Coller correctement les emboîtements."
+    ]
+  },
+  {
+    "terme": "Tube PVC",
+    "definition_courte": "Conduit en polychlorure de vinyle.",
+    "explication_pedagogique": "Il sert de fourreau pour télécom, BT, éclairage ou IRVE selon type.",
+    "exemple_utilisation": "Le CCTP prévoit des tuyaux PVC de diamètres variables assemblés par collage.",
+    "points_vigilance": [
+      "Vérifier que le tube est adapté à l'usage et non écrasé à la pose."
+    ]
+  },
+  {
+    "terme": "U1000",
+    "definition_courte": "Désignation de câble basse tension isolé pour tension assignée 0,6/1 kV.",
+    "explication_pedagogique": "Il est courant en alimentation extérieure ou industrielle.",
+    "exemple_utilisation": "Le CCTP cite des câbles U1000 pour éclairage.",
+    "points_vigilance": [
+      "Vérifier mode de pose, protection mécanique et section."
+    ]
+  },
+  {
+    "terme": "UPR Sud Ouest",
+    "definition_courte": "Unité ou service ORANGE / France Télécom cité pour le raccordement.",
+    "explication_pedagogique": "Elle sert d'interlocuteur pour le point de livraison télécom.",
+    "exemple_utilisation": "Le CCTP indique UPR Sud Ouest service conseillers immobiliers.",
+    "points_vigilance": [
+      "Confirmer l'interlocuteur actuel avant envoi de dossiers."
+    ]
+  },
+  {
+    "terme": "UTE",
+    "definition_courte": "Union Technique de l'Électricité, référence historique de normes électriques.",
+    "explication_pedagogique": "Ses textes encadrent les installations et réseaux.",
+    "exemple_utilisation": "Le CCTP renvoie aux normes UTE en vigueur.",
+    "points_vigilance": [
+      "Vérifier les versions applicables et équivalences actuelles."
+    ]
+  },
+  {
+    "terme": "Valeur de terre",
+    "definition_courte": "Résistance mesurée d'une prise ou réseau de terre.",
+    "explication_pedagogique": "Elle indique la qualité de la mise à la terre.",
+    "exemple_utilisation": "Le CCTP fixe 30 Ohms et 5 Ohms selon cas pour le neutre.",
+    "points_vigilance": [
+      "Mesurer par méthode adaptée et conserver le procès-verbal."
+    ]
+  },
+  {
+    "terme": "Ventilation haute et basse",
+    "definition_courte": "Ouvertures d'aération dans une armoire électrique.",
+    "explication_pedagogique": "Elles évitent surchauffe et condensation.",
+    "exemple_utilisation": "Le CCTP prévoit ventilation haute et basse dans l'armoire générale.",
+    "points_vigilance": [
+      "Ne pas obstruer les ventilations après pose ou câblage."
+    ]
+  },
+  {
+    "terme": "Visa du maître d'oeuvre",
+    "definition_courte": "Validation formelle d'un document d'exécution.",
+    "explication_pedagogique": "Il autorise la poursuite ou précise des observations.",
+    "exemple_utilisation": "Le CCTP prévoit le retour des documents revêtus du visa du maître d'oeuvre.",
+    "points_vigilance": [
+      "Traiter les observations avant exécution."
+    ]
+  },
+  {
+    "terme": "Voie publique souillée",
+    "definition_courte": "Chaussée salie par engins ou matériaux de chantier.",
+    "explication_pedagogique": "Elle doit être nettoyée pour sécurité et image du chantier.",
+    "exemple_utilisation": "Le CCTP impose le nettoyage des chaussées publiques utilisées.",
+    "points_vigilance": [
+      "Organiser balayage et lavage, surtout par temps humide."
+    ]
+  },
+  {
+    "terme": "Voyant de service",
+    "definition_courte": "Indicateur lumineux signalant un état électrique ou une commande.",
+    "explication_pedagogique": "Il facilite l'exploitation d'une armoire.",
+    "exemple_utilisation": "Le CCTP prévoit voyants pour mise en service séparée des secteurs d'éclairage.",
+    "points_vigilance": [
+      "Repérer la fonction de chaque voyant."
+    ]
+  },
+  {
+    "terme": "Wopm",
+    "definition_courte": "Teneur en eau optimale Proctor Modifié.",
+    "explication_pedagogique": "Elle sert de référence au compactage des graves.",
+    "exemple_utilisation": "Le CCTP fixe la teneur en eau entre Wopm - 1 et Wopm + 0,5.",
+    "points_vigilance": [
+      "Un matériau trop sec ou trop humide se compacte mal."
+    ]
+  },
+  {
+    "terme": "XP P 18-545",
+    "definition_courte": "Norme relative aux granulats et à leurs définitions.",
+    "explication_pedagogique": "Elle complète les exigences des matériaux de chaussée.",
+    "exemple_utilisation": "Le CCTP la cite pour les granulats des couches de chaussées.",
+    "points_vigilance": [
+      "Vérifier conformité fournisseur et bons de livraison."
+    ]
+  },
+  {
+    "terme": "Zone de stockage",
+    "definition_courte": "Emplacement réservé aux matériaux et matériels.",
+    "explication_pedagogique": "Elle doit être organisée, protégée et dans l'emprise autorisée.",
+    "exemple_utilisation": "Le CCTP interdit les dépôts hors limites de l'emprise fixée.",
+    "points_vigilance": [
+      "Éviter surcharge près des fouilles et gêne aux riverains."
+    ]
+  }
+]

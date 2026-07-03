@@ -1,0 +1,2169 @@
+[
+  {
+    "terme": "0,10 m au-dessus de la génératrice",
+    "definition_courte": "Hauteur de sable prescrite au-dessus de la canalisation.",
+    "explication_pedagogique": "Elle protège le tuyau avant le remblai général.",
+    "exemple_utilisation": "Le CCTP demande du sable jusqu'à 0,10 m au-dessus de la génératrice supérieure.",
+    "points_vigilance": [
+      "Ne pas remblayer directement avec des matériaux caillouteux sur le tuyau."
+    ]
+  },
+  {
+    "terme": "0,20 m par couche",
+    "definition_courte": "Épaisseur maximale d'une couche de remblai à compacter.",
+    "explication_pedagogique": "Elle permet un compactage efficace et homogène.",
+    "exemple_utilisation": "Le CCTP demande des couches successives de 0,20 m maximum damées à refus.",
+    "points_vigilance": [
+      "Des couches trop épaisses provoquent des tassements après réception."
+    ]
+  },
+  {
+    "terme": "0,40 m au-dessus de la canalisation",
+    "definition_courte": "Position du grillage avertisseur bleu par rapport au tuyau.",
+    "explication_pedagogique": "Elle permet de signaler le réseau avant de l'atteindre lors d'un futur terrassement.",
+    "exemple_utilisation": "Le CCTP place le grillage bleu à +0,40 m de la génératrice supérieure.",
+    "points_vigilance": [
+      "Vérifier la cote avant fermeture complète de tranchée."
+    ]
+  },
+  {
+    "terme": "0,50 m d'appui de bâche",
+    "definition_courte": "Largeur de l'assise béton utilisée par la bâche souple.",
+    "explication_pedagogique": "Elle garantit un appui périphérique stable de la réserve incendie.",
+    "exemple_utilisation": "Le CCTP indique que la bâche repose sur 0,50 m de l'assise béton.",
+    "points_vigilance": [
+      "Respecter le détail pour éviter poinçonnement ou glissement de la bâche."
+    ]
+  },
+  {
+    "terme": "0/30 IP<4",
+    "definition_courte": "Grave de minière de granulométrie 0/30 avec indice de plasticité inférieur à 4.",
+    "explication_pedagogique": "Elle sert au remblai de tranchée sous chaussée ou trottoir selon prescriptions.",
+    "exemple_utilisation": "Le CCTP prévoit de la grave de minière 0/30 IP<4 jusqu'à la couche de base.",
+    "points_vigilance": [
+      "Contrôler la qualité et l'agrément du matériau avant remblai."
+    ]
+  },
+  {
+    "terme": "0/4",
+    "definition_courte": "Granularité d'un sable dont les grains sont compris entre 0 et 4 mm.",
+    "explication_pedagogique": "Elle sert à l'enrobage propre des canalisations et fourreaux.",
+    "exemple_utilisation": "Le CCTP demande un sable d'enrobage 0/4 pour le réseau AEP.",
+    "points_vigilance": [
+      "Le sable doit être propre, sans matière organique ni élément dur."
+    ]
+  },
+  {
+    "terme": "1,00 m de circulation périphérique",
+    "definition_courte": "Largeur libre autour de la bâche souple incendie.",
+    "explication_pedagogique": "Elle permet l'accès, le contrôle et la maintenance autour de l'ouvrage.",
+    "exemple_utilisation": "Le CCTP prévoit une circulation libre de 1,00 m autour de la bâche.",
+    "points_vigilance": [
+      "Ne pas encombrer cet espace avec talus, clôture ou équipements."
+    ]
+  },
+  {
+    "terme": "1,50 m d'assise béton",
+    "definition_courte": "Largeur totale de l'assise béton autour de la bâche incendie.",
+    "explication_pedagogique": "Elle sert à porter la bâche et créer une circulation périphérique.",
+    "exemple_utilisation": "Le CCTP prévoit une assise béton de largeur 1,50 m en périphérie.",
+    "points_vigilance": [
+      "Contrôler largeur, planéité et niveau avant pose de la bâche."
+    ]
+  },
+  {
+    "terme": "120 m3",
+    "definition_courte": "Volume de la bâche souple prévue pour la défense incendie.",
+    "explication_pedagogique": "Il correspond à la réserve d'eau disponible pour les secours.",
+    "exemple_utilisation": "Le CCTP demande une bâche souple de 120 m3.",
+    "points_vigilance": [
+      "Confirmer le volume utile avec le SDIS ou le gestionnaire incendie si demandé."
+    ]
+  },
+  {
+    "terme": "25 bars",
+    "definition_courte": "Pression de service demandée pour les branchements PEHD.",
+    "explication_pedagogique": "Elle caractérise la résistance du branchement individuel.",
+    "exemple_utilisation": "Le CCTP prévoit des canalisations de branchement PEHD qualité alimentaire 25 bars.",
+    "points_vigilance": [
+      "Vérifier le marquage et les certificats du tube livré."
+    ]
+  },
+  {
+    "terme": "250 kN",
+    "definition_courte": "Classe de résistance de la couverture acier de la fosse compteur générale.",
+    "explication_pedagogique": "Elle permet de supporter des charges importantes selon l'emplacement.",
+    "exemple_utilisation": "Le CCTP prévoit une couverture acier 250 kN sur la fosse compteur générale.",
+    "points_vigilance": [
+      "Adapter la classe si la fosse est sous zone circulée plus contraignante."
+    ]
+  },
+  {
+    "terme": "3 points fixes",
+    "definition_courte": "Nombre minimum de repères pour localiser les vannes.",
+    "explication_pedagogique": "Il permet de retrouver les organes enterrés après travaux.",
+    "exemple_utilisation": "Le CCTP demande le repérage des vannes par rapport à au moins trois points fixes.",
+    "points_vigilance": [
+      "Choisir des points durables : bordures, limites de parcelles, angles d'ouvrages."
+    ]
+  },
+  {
+    "terme": "30 minutes",
+    "definition_courte": "Durée d'application de la pression d'épreuve.",
+    "explication_pedagogique": "Elle permet de vérifier la tenue du réseau AEP sous pression.",
+    "exemple_utilisation": "Le CCTP demande un essai de pression pendant 30 minutes.",
+    "points_vigilance": [
+      "Maintenir la surveillance et noter toute chute de pression."
+    ]
+  },
+  {
+    "terme": "500 ml",
+    "definition_courte": "Longueur maximale d'un tronçon soumis à l'essai de pression.",
+    "explication_pedagogique": "Elle limite la zone d'essai pour rendre le contrôle fiable.",
+    "exemple_utilisation": "Le CCTP limite les essais pression à des tronçons de 500 ml.",
+    "points_vigilance": [
+      "Ne pas tester une longueur plus grande sans accord du service de l'eau."
+    ]
+  },
+  {
+    "terme": "95 % Proctor modifié",
+    "definition_courte": "Compacité minimale demandée pour le remblai de tranchée.",
+    "explication_pedagogique": "Elle limite les tassements sous voirie et espaces aménagés.",
+    "exemple_utilisation": "Le CCTP demande une compacité égale ou supérieure à 95 % de l'OPM.",
+    "points_vigilance": [
+      "Prévoir essais de compactage et reprises si résultat insuffisant."
+    ]
+  },
+  {
+    "terme": "Accessibilité PMR",
+    "definition_courte": "Exigence permettant l'usage des espaces par les personnes handicapées.",
+    "explication_pedagogique": "Elle influence l'implantation des regards, émergences et cheminements.",
+    "exemple_utilisation": "Le CCTP rappelle que l'intégralité du projet est soumise à l'accessibilité.",
+    "points_vigilance": [
+      "Vérifier que regards et coffrets ne créent pas d'obstacle."
+    ]
+  },
+  {
+    "terme": "Accessoire de canalisation",
+    "definition_courte": "Pièce complémentaire au tuyau : coude, vanne, ventouse, purge ou raccord.",
+    "explication_pedagogique": "Il permet de raccorder, isoler, purger ou orienter le réseau.",
+    "exemple_utilisation": "Le CCTP inclut les accessoires dans la prestation AEP.",
+    "points_vigilance": [
+      "Chaque accessoire doit être compatible avec la pression, le matériau et le diamètre."
+    ]
+  },
+  {
+    "terme": "Adduction eau potable",
+    "definition_courte": "Acheminement de l'eau potable depuis le réseau public vers l'opération.",
+    "explication_pedagogique": "Elle alimente maisons individuelles, bâtiments collectifs et points techniques.",
+    "exemple_utilisation": "Le CCTP prévoit la construction du réseau de desserte en eau potable.",
+    "points_vigilance": [
+      "Respecter les prescriptions du concessionnaire et les essais sanitaires."
+    ]
+  },
+  {
+    "terme": "AEP",
+    "acronyme": "Adduction d'Eau Potable",
+    "definition_courte": "Abréviation d'Adduction d'Eau Potable.",
+    "explication_pedagogique": "Elle désigne le réseau distribuant l'eau potable aux bâtiments et lots.",
+    "exemple_utilisation": "Le CCTP traite la construction du réseau AEP de l'opération.",
+    "points_vigilance": [
+      "Ne pas confondre avec réseau arrosage ou défense incendie."
+    ]
+  },
+  {
+    "terme": "Agréage des matériaux",
+    "definition_courte": "Validation des matériaux avant leur mise en oeuvre.",
+    "explication_pedagogique": "Elle évite les produits non conformes au CCTP ou au gestionnaire.",
+    "exemple_utilisation": "Le CCTP demande des matériaux issus de carrières, sablières, usines ou fournisseurs agréés.",
+    "points_vigilance": [
+      "Conserver fiches techniques, certificats et bons de livraison."
+    ]
+  },
+  {
+    "terme": "Aiguille en fil de fer galvanisé",
+    "definition_courte": "Fil laissé dans un fourreau en attente pour faciliter un passage futur.",
+    "explication_pedagogique": "Elle permet de retrouver et tirer un élément sans rouvrir la chaussée.",
+    "exemple_utilisation": "Le CCTP prévoit une aiguille en fil de fer galvanisé dans les fourreaux en attente.",
+    "points_vigilance": [
+      "S'assurer qu'elle traverse tout le fourreau et reste accessible."
+    ]
+  },
+  {
+    "terme": "Analyse bactériologique",
+    "definition_courte": "Contrôle en laboratoire de la qualité sanitaire de l'eau.",
+    "explication_pedagogique": "Elle vérifie que le réseau neuf ne contamine pas l'eau potable.",
+    "exemple_utilisation": "Le CCTP demande un prélèvement et une analyse avant raccordement.",
+    "points_vigilance": [
+      "Ne pas raccorder le réseau si l'analyse n'est pas conforme."
+    ]
+  },
+  {
+    "terme": "Anneau de caoutchouc",
+    "definition_courte": "Joint souple utilisé pour assembler tuyaux et pièces de raccord.",
+    "explication_pedagogique": "Il assure l'étanchéité entre éléments du réseau.",
+    "exemple_utilisation": "Le CCTP prévoit des anneaux de caoutchouc spécial maintenus par brides fontes.",
+    "points_vigilance": [
+      "Contrôler propreté du joint, lubrification et absence de pincement."
+    ]
+  },
+  {
+    "terme": "Approbation des plans",
+    "definition_courte": "Validation des plans par le maître d'oeuvre ou le service gestionnaire.",
+    "explication_pedagogique": "Elle autorise l'exécution selon une implantation acceptée.",
+    "exemple_utilisation": "Le CCTP met à charge de l'entreprise l'approbation des plans.",
+    "points_vigilance": [
+      "Ne pas démarrer les travaux sensibles avant retour du gestionnaire."
+    ]
+  },
+  {
+    "terme": "Armure P 2/2",
+    "definition_courte": "Type d'armure textile indiqué pour la bâche souple.",
+    "explication_pedagogique": "Elle décrit l'organisation du tissu support de la bâche.",
+    "exemple_utilisation": "Le CCTP mentionne une armure P 2/2 pour la bâche incendie.",
+    "points_vigilance": [
+      "Vérifier que la fiche technique proposée reprend bien cette caractéristique ou un équivalent validé."
+    ]
+  },
+  {
+    "terme": "Arrêté municipal",
+    "definition_courte": "Autorisation officielle pour modifier circulation ou stationnement.",
+    "explication_pedagogique": "Il rend possible l'intervention sur voie publique en sécurité.",
+    "exemple_utilisation": "Le CCTP interdit de barrer une voie sans arrêté municipal.",
+    "points_vigilance": [
+      "Faire la demande dans les délais imposés par la commune."
+    ]
+  },
+  {
+    "terme": "Assise béton",
+    "definition_courte": "Support béton périphérique ou de fondation d'un ouvrage.",
+    "explication_pedagogique": "Elle stabilise la bâche incendie et crée une zone de circulation.",
+    "exemple_utilisation": "Le CCTP prévoit une assise béton de 0,20 m d'épaisseur autour de la bâche.",
+    "points_vigilance": [
+      "Contrôler planéité, épaisseur et absence d'arêtes agressives."
+    ]
+  },
+  {
+    "terme": "Attachements",
+    "definition_courte": "Constats contradictoires justifiant des travaux exécutés.",
+    "explication_pedagogique": "Ils servent pour les quantités ou travaux devenant invisibles.",
+    "exemple_utilisation": "Le CCTP demande des bons de décharge à l'appui des attachements ou factures.",
+    "points_vigilance": [
+      "Faire constater profondeurs, longueurs et conditions avant remblai."
+    ]
+  },
+  {
+    "terme": "Avis favorable",
+    "definition_courte": "Accord donné par un service ou propriétaire avant démarrage.",
+    "explication_pedagogique": "Il sécurise l'autorisation de commencer les travaux.",
+    "exemple_utilisation": "Le CCTP conditionne le démarrage à la réception des avis favorables.",
+    "points_vigilance": [
+      "Classer les avis dans le dossier préparatoire."
+    ]
+  },
+  {
+    "terme": "Avis Technique",
+    "definition_courte": "Document validant l'aptitude à l'emploi d'un produit.",
+    "explication_pedagogique": "Il peut être demandé quand il n'existe pas de norme claire.",
+    "exemple_utilisation": "Le CCTP prévoit une validation par avis technique ou certificat selon les produits.",
+    "points_vigilance": [
+      "Vérifier la validité et le domaine d'emploi exact."
+    ]
+  },
+  {
+    "terme": "Bâche incendie",
+    "definition_courte": "Réserve d'eau dédiée à la défense contre l'incendie.",
+    "explication_pedagogique": "Elle permet aux secours de disposer d'un volume mobilisable.",
+    "exemple_utilisation": "Le CCTP demande la fourniture et pose d'une bâche souple pour défense incendie.",
+    "points_vigilance": [
+      "Valider emplacement, volume, raccords et accessibilité avec les exigences incendie."
+    ]
+  },
+  {
+    "terme": "Bâche souple",
+    "definition_courte": "Réservoir souple de stockage d'eau.",
+    "explication_pedagogique": "Elle sert ici de réserve pour la défense incendie.",
+    "exemple_utilisation": "Le CCTP prévoit une bâche souple de 120 m3.",
+    "points_vigilance": [
+      "Soigner support, protection, accès et validation de la fiche technique."
+    ]
+  },
+  {
+    "terme": "Baliroads",
+    "definition_courte": "Séparateur plastique lestable utilisé pour protéger une zone de chantier.",
+    "explication_pedagogique": "Il sécurise l'emprise de travaux vis-à-vis des usagers.",
+    "exemple_utilisation": "Le CCTP cite des glissières type Baliroads ou similaires.",
+    "points_vigilance": [
+      "Contrôler continuité, stabilité et visibilité nocturne."
+    ]
+  },
+  {
+    "terme": "BCN B15",
+    "definition_courte": "Classe de béton citée pour béton de propreté ou béton maigre.",
+    "explication_pedagogique": "Elle sert aux ouvrages non structurels ou de propreté.",
+    "exemple_utilisation": "Le CCTP prévoit BCN B15 dosé à 150 kg/m3.",
+    "points_vigilance": [
+      "Ne pas l'utiliser pour une butée de canalisation sans vérification."
+    ]
+  },
+  {
+    "terme": "BCN B22",
+    "definition_courte": "Classe de béton utilisée pour mortiers ou fondations simples.",
+    "explication_pedagogique": "Elle peut concerner massifs ou fondations selon usage.",
+    "exemple_utilisation": "Le CCTP cite BCN B22 dans le tableau des bétons.",
+    "points_vigilance": [
+      "Respecter le dosage et la destination prévue."
+    ]
+  },
+  {
+    "terme": "BCN B32",
+    "definition_courte": "Classe de béton plus dosée citée pour plusieurs usages.",
+    "explication_pedagogique": "Elle peut servir à des joints étanches ou bétons non armés.",
+    "exemple_utilisation": "Le CCTP cite BCN B32 avec plusieurs dosages selon destination.",
+    "points_vigilance": [
+      "Adapter au cas réel et aux prescriptions du maître d'oeuvre."
+    ]
+  },
+  {
+    "terme": "Béton de gravillons",
+    "definition_courte": "Béton contenant des gravillons pour former un massif ou une butée.",
+    "explication_pedagogique": "Il reprend les efforts des canalisations sous pression.",
+    "exemple_utilisation": "Le CCTP prévoit des massifs de butée en béton de gravillons dosé à 350 kg.",
+    "points_vigilance": [
+      "Ne pas noyer les joints qui doivent rester accessibles ou libres."
+    ]
+  },
+  {
+    "terme": "Béton de propreté",
+    "definition_courte": "Couche de béton maigre créant un support propre.",
+    "explication_pedagogique": "Elle évite de travailler directement sur un fond irrégulier.",
+    "exemple_utilisation": "Le CCTP cite le béton de propreté dans les usages du béton.",
+    "points_vigilance": [
+      "Ne pas le compter comme élément porteur principal."
+    ]
+  },
+  {
+    "terme": "Béton PMES",
+    "definition_courte": "Béton adapté à certains coulages en présence d'eau.",
+    "explication_pedagogique": "Il est prévu pour des cas particuliers de chantier humide.",
+    "exemple_utilisation": "Le CCTP cite du béton coulé dans l'eau PMES.",
+    "points_vigilance": [
+      "À utiliser seulement si les conditions le justifient et si validé."
+    ]
+  },
+  {
+    "terme": "Blindage",
+    "definition_courte": "Soutènement provisoire des parois de fouille.",
+    "explication_pedagogique": "Il protège les ouvriers contre les éboulements.",
+    "exemple_utilisation": "Le CCTP inclut les blindages nécessaires dans le forfait.",
+    "points_vigilance": [
+      "Adapter au sol, profondeur et présence d'eau."
+    ]
+  },
+  {
+    "terme": "Bon de décharge",
+    "definition_courte": "Justificatif de dépôt des déblais en site autorisé.",
+    "explication_pedagogique": "Il prouve la bonne filière d'évacuation des déchets.",
+    "exemple_utilisation": "Le CCTP demande tous les bons de décharge à l'appui des factures.",
+    "points_vigilance": [
+      "Conserver les bons avec date, nature et quantité."
+    ]
+  },
+  {
+    "terme": "Bouche à clé",
+    "definition_courte": "Petit regard de surface permettant d'accéder à une vanne enterrée.",
+    "explication_pedagogique": "Elle permet de manoeuvrer robinet-vanne, purge ou arrêt sans terrassement.",
+    "exemple_utilisation": "Le CCTP précise plusieurs formes de têtes de bouches à clé.",
+    "points_vigilance": [
+      "Contrôler la forme, la série lourde et le niveau fini."
+    ]
+  },
+  {
+    "terme": "Bouche à clé carrée",
+    "definition_courte": "Tête de bouche à clé destinée aux vidanges et purges.",
+    "explication_pedagogique": "Elle différencie l'organe depuis la surface.",
+    "exemple_utilisation": "Le CCTP demande des têtes carrées pour vidanges et purges.",
+    "points_vigilance": [
+      "Ne pas mélanger les formes, sinon l'exploitation devient confuse."
+    ]
+  },
+  {
+    "terme": "Bouche à clé hexagonale",
+    "definition_courte": "Tête de bouche à clé destinée aux robinets-vannes.",
+    "explication_pedagogique": "Elle permet d'identifier l'organe sous chaussée ou trottoir.",
+    "exemple_utilisation": "Le CCTP prévoit des têtes hexagonales pour robinets-vannes.",
+    "points_vigilance": [
+      "Vérifier forme et emplacement au récolement."
+    ]
+  },
+  {
+    "terme": "Bouche à clé ronde",
+    "definition_courte": "Tête de bouche à clé destinée aux robinets d'arrêt quart de tour.",
+    "explication_pedagogique": "Elle identifie les arrêts de branchement.",
+    "exemple_utilisation": "Le CCTP prévoit des têtes rondes pour robinets d'arrêt 1/4 de tour.",
+    "points_vigilance": [
+      "Contrôler que la bouche reste accessible après revêtements."
+    ]
+  },
+  {
+    "terme": "Bouchon en plâtre",
+    "definition_courte": "Obturation provisoire d'un fourreau en attente.",
+    "explication_pedagogique": "Elle empêche l'entrée de terre ou d'eau.",
+    "exemple_utilisation": "Le CCTP prévoit l'obturation des fourreaux par bouchon en plâtre.",
+    "points_vigilance": [
+      "Ne pas oublier l'aiguille avant bouchonnage."
+    ]
+  },
+  {
+    "terme": "Branchement individuel",
+    "definition_courte": "Raccordement d'une maison ou d'un lot au réseau principal.",
+    "explication_pedagogique": "Il amène l'eau jusqu'au regard compteur ou point de livraison.",
+    "exemple_utilisation": "Le CCTP prévoit un regard individuel pour chaque maison individuelle.",
+    "points_vigilance": [
+      "Repérer chaque branchement dans le carnet de branchement."
+    ]
+  },
+  {
+    "terme": "Bride fonte",
+    "definition_courte": "Pièce de serrage ou maintien en fonte autour d'un joint ou raccord.",
+    "explication_pedagogique": "Elle maintient l'assemblage étanche entre éléments.",
+    "exemple_utilisation": "Le CCTP prévoit des anneaux caoutchouc maintenus par brides fontes.",
+    "points_vigilance": [
+      "Respecter serrage et compatibilité avec le diamètre."
+    ]
+  },
+  {
+    "terme": "Bureau de contrôle",
+    "definition_courte": "Organisme chargé de contrôles techniques sur l'opération.",
+    "explication_pedagogique": "Il peut demander notes, essais ou corrections.",
+    "exemple_utilisation": "Le CCTP cite DEKRA comme bureau de contrôle.",
+    "points_vigilance": [
+      "Anticiper les justificatifs pour éviter réserves tardives."
+    ]
+  },
+  {
+    "terme": "Cahier des Charges du Gestionnaire",
+    "definition_courte": "Prescriptions techniques du service exploitant le réseau.",
+    "explication_pedagogique": "Elles complètent ou précisent le CCTP.",
+    "exemple_utilisation": "Le CCTP demande la conformité aux cahiers des charges du gestionnaire ou syndicat.",
+    "points_vigilance": [
+      "Demander la version applicable avant choix des matériels."
+    ]
+  },
+  {
+    "terme": "Canalisation",
+    "definition_courte": "Tuyau transportant l'eau potable, l'arrosage ou l'eau incendie.",
+    "explication_pedagogique": "Elle constitue l'ossature du réseau.",
+    "exemple_utilisation": "Le CCTP prévoit la fourniture et pose des canalisations AEP et défense incendie.",
+    "points_vigilance": [
+      "Soigner lit de pose, joints, butées, essais et récolement."
+    ]
+  },
+  {
+    "terme": "Canalisation de branchement",
+    "definition_courte": "Tuyau reliant le réseau principal au compteur ou au lot.",
+    "explication_pedagogique": "Elle dessert individuellement un logement ou une zone.",
+    "exemple_utilisation": "Le CCTP prévoit des branchements en PEHD qualité alimentaire 25 bars.",
+    "points_vigilance": [
+      "Poser intégralement sous fourreau sous chaussée si prescrit."
+    ]
+  },
+  {
+    "terme": "Canalisation PEHD",
+    "definition_courte": "Tuyau en polyéthylène haute densité.",
+    "explication_pedagogique": "Il est souple, résistant et courant pour les branchements.",
+    "exemple_utilisation": "Le CCTP prévoit des branchements en PEHD alimentaire 25 bars.",
+    "points_vigilance": [
+      "Contrôler courbure, raccords et protection sous chaussée."
+    ]
+  },
+  {
+    "terme": "Canalisation principale",
+    "definition_courte": "Tuyau principal du réseau d'eau potable.",
+    "explication_pedagogique": "Elle distribue l'eau vers les branchements.",
+    "exemple_utilisation": "Le CCTP prévoit des canalisations principales en PVC alimentaire 16 bars.",
+    "points_vigilance": [
+      "Vérifier diamètre, pression nominale et prescriptions du gestionnaire."
+    ]
+  },
+  {
+    "terme": "Canalisation PVC",
+    "definition_courte": "Tuyau en polychlorure de vinyle.",
+    "explication_pedagogique": "Il peut être utilisé pour le réseau principal d'eau potable.",
+    "exemple_utilisation": "Le CCTP prévoit des canalisations principales en PVC qualité alimentaire.",
+    "points_vigilance": [
+      "Les canalisations PVC doivent posséder la marque NF."
+    ]
+  },
+  {
+    "terme": "Canalisation sous pression",
+    "definition_courte": "Canalisation transportant de l'eau avec pression interne.",
+    "explication_pedagogique": "Elle nécessite joints adaptés, butées et essais.",
+    "exemple_utilisation": "Le CCTP traite un réseau AEP à pression de service 16 ou 25 bars.",
+    "points_vigilance": [
+      "Dimensionner les butées aux coudes, tés et changements de direction."
+    ]
+  },
+  {
+    "terme": "Carnet de branchement d'eau",
+    "definition_courte": "Document listant les branchements et leurs repères.",
+    "explication_pedagogique": "Il facilite l'exploitation et la maintenance du réseau.",
+    "exemple_utilisation": "Le CCTP demande un carnet de branchement d'eau dans le récolement.",
+    "points_vigilance": [
+      "Y indiquer lot, diamètre, position, compteur et repères."
+    ]
+  },
+  {
+    "terme": "Certificat de qualité",
+    "definition_courte": "Document prouvant la conformité d'un produit par organisme agréé.",
+    "explication_pedagogique": "Il peut compléter l'absence d'avis technique ou de norme.",
+    "exemple_utilisation": "Le CCTP accepte des certificats de qualité pour certains produits.",
+    "points_vigilance": [
+      "Vérifier qu'il concerne exactement le produit livré."
+    ]
+  },
+  {
+    "terme": "Chaussée revêtue d'enrobé",
+    "definition_courte": "Voirie dont la couche de roulement est en enrobé bitumineux.",
+    "explication_pedagogique": "Elle impose une réfection adaptée après tranchée.",
+    "exemple_utilisation": "Le CCTP prévoit une couche de base en grave bitume sous chaussée revêtue d'enrobé.",
+    "points_vigilance": [
+      "Reconstituer le revêtement selon les épaisseurs d'origine."
+    ]
+  },
+  {
+    "terme": "Chaussée revêtue en bicouche",
+    "definition_courte": "Voirie traitée par un revêtement superficiel bicouche.",
+    "explication_pedagogique": "Elle reçoit une base différente de l'enrobé.",
+    "exemple_utilisation": "Le CCTP prévoit du calcaire 40/70 sous chaussée revêtue d'un bicouche.",
+    "points_vigilance": [
+      "Respecter les prescriptions de voirie locales."
+    ]
+  },
+  {
+    "terme": "Clapet antipollution",
+    "definition_courte": "Dispositif empêchant le retour d'eau potentiellement polluée vers le réseau.",
+    "explication_pedagogique": "Il protège la qualité de l'eau potable.",
+    "exemple_utilisation": "Le CCTP demande un clapet antipollution sur tous les branchements individuels.",
+    "points_vigilance": [
+      "Contrôler sens de pose et accessibilité pour maintenance."
+    ]
+  },
+  {
+    "terme": "Classe 2 CPV",
+    "definition_courte": "Classe de fourreau indiquée pour protection mécanique AEP/arrosage.",
+    "explication_pedagogique": "Elle définit les caractéristiques du conduit sous chaussée.",
+    "exemple_utilisation": "Le CCTP demande des fourreaux série EU en CPV classe 2.",
+    "points_vigilance": [
+      "Valider le produit avec le gestionnaire avant pose."
+    ]
+  },
+  {
+    "terme": "Classe de résistance",
+    "definition_courte": "Niveau de résistance d'un tuyau ou ouvrage.",
+    "explication_pedagogique": "Elle garantit l'aptitude aux charges et pressions.",
+    "exemple_utilisation": "Le CCTP demande des notes justifiant la classe de résistance des canalisations.",
+    "points_vigilance": [
+      "La classe doit être cohérente avec profondeur, trafic et pression."
+    ]
+  },
+  {
+    "terme": "Coffrage ordinaire",
+    "definition_courte": "Coffrage destiné aux surfaces non visibles ou simples.",
+    "explication_pedagogique": "Il permet de couler les massifs de béton.",
+    "exemple_utilisation": "Le CCTP prévoit un coffrage ordinaire pour les butées de canalisations.",
+    "points_vigilance": [
+      "Soigner tout de même dimensions et absence de contact avec les joints."
+    ]
+  },
+  {
+    "terme": "Collectif alimenté au pied de colonne",
+    "definition_courte": "Principe d'alimentation des bâtiments collectifs jusqu'à leur point bas technique.",
+    "explication_pedagogique": "Il crée la limite avec les réseaux intérieurs du bâtiment.",
+    "exemple_utilisation": "Le CCTP prévoit l'alimentation des bâtiments collectifs jusqu'au pied de colonne.",
+    "points_vigilance": [
+      "Coordonner avec plomberie et gros oeuvre pour réservations."
+    ]
+  },
+  {
+    "terme": "Collier de prise en charge",
+    "definition_courte": "Collier fixé sur une canalisation pour créer un branchement.",
+    "explication_pedagogique": "Il permet de raccorder un robinet de branchement sans couper toute la conduite.",
+    "exemple_utilisation": "Le CCTP prévoit un collier adapté à la nature de la canalisation.",
+    "points_vigilance": [
+      "Vérifier diamètre, matériau et étanchéité."
+    ]
+  },
+  {
+    "terme": "Compacité",
+    "definition_courte": "Niveau de densité obtenu après compactage.",
+    "explication_pedagogique": "Elle mesure la qualité du remblai mis en oeuvre.",
+    "exemple_utilisation": "Le CCTP demande au moins 95 % de l'OPM.",
+    "points_vigilance": [
+      "Contrôler par essais, surtout sous chaussée."
+    ]
+  },
+  {
+    "terme": "Compactage",
+    "definition_courte": "Densification du remblai après pose de la canalisation.",
+    "explication_pedagogique": "Il évite les tassements et affaissements de voirie.",
+    "exemple_utilisation": "Le CCTP demande un compactage soigné par couches successives.",
+    "points_vigilance": [
+      "Réaliser les essais nécessaires avant couche de finition."
+    ]
+  },
+  {
+    "terme": "Compactage à mi-hauteur du tuyau",
+    "definition_courte": "Soin particulier du remblai latéral jusqu'au milieu de la canalisation.",
+    "explication_pedagogique": "Il cale correctement le tuyau sans le déplacer.",
+    "exemple_utilisation": "Le CCTP demande un compactage particulièrement soigné jusqu'à mi-hauteur du tuyau.",
+    "points_vigilance": [
+      "Compactage trop brutal ou dissymétrique peut déformer la canalisation."
+    ]
+  },
+  {
+    "terme": "Concessionnaire",
+    "definition_courte": "Service ou exploitant du réseau.",
+    "explication_pedagogique": "Il définit les prescriptions et contrôle les ouvrages.",
+    "exemple_utilisation": "Le CCTP demande de se conformer aux dispositions du concessionnaire AEP.",
+    "points_vigilance": [
+      "Ses exigences peuvent préciser matériel, essais et raccordement."
+    ]
+  },
+  {
+    "terme": "Conduite en porte-à-faux",
+    "definition_courte": "Tuyau qui ne repose pas correctement sur le lit de pose.",
+    "explication_pedagogique": "Elle risque de casser ou se déformer sous remblai.",
+    "exemple_utilisation": "Le CCTP interdit que le tuyau soit en porte-à-faux.",
+    "points_vigilance": [
+      "Dresser le fond de fouille et supprimer les points durs."
+    ]
+  },
+  {
+    "terme": "Constat photographique",
+    "definition_courte": "Reportage photo de l'état initial ou des installations.",
+    "explication_pedagogique": "Il sert de preuve pour remise en état et suivi chantier.",
+    "exemple_utilisation": "Le CCTP demande un constat photographique du site transmis au maître d'ouvrage.",
+    "points_vigilance": [
+      "Faire les photos avant démarrage et avant dégradation possible."
+    ]
+  },
+  {
+    "terme": "Cordeau de tranchée",
+    "definition_courte": "Repère d'alignement utilisé pour implanter une fouille ou canalisation.",
+    "explication_pedagogique": "Il aide à respecter le tracé prévu.",
+    "exemple_utilisation": "Le CCTP demande l'implantation en plan et altitude des ouvrages.",
+    "points_vigilance": [
+      "Vérifier l'alignement avec les plans et réseaux existants."
+    ]
+  },
+  {
+    "terme": "Couche de base",
+    "definition_courte": "Couche structurelle sous le revêtement de chaussée.",
+    "explication_pedagogique": "Elle reprend les charges et supporte la couche de roulement.",
+    "exemple_utilisation": "Le CCTP définit une couche de base de 0,15 m après tranchée.",
+    "points_vigilance": [
+      "Choisir grave bitume, calcaire ou grave selon revêtement existant."
+    ]
+  },
+  {
+    "terme": "Couche de roulement",
+    "definition_courte": "Couche supérieure de la chaussée.",
+    "explication_pedagogique": "Elle assure confort, adhérence et étanchéité de surface.",
+    "exemple_utilisation": "Le CCTP demande de reconstituer le revêtement selon matériaux et épaisseurs d'origine.",
+    "points_vigilance": [
+      "Vérifier raccords propres et absence de tassement."
+    ]
+  },
+  {
+    "terme": "Coudes",
+    "definition_courte": "Pièces permettant de changer la direction d'une canalisation.",
+    "explication_pedagogique": "Ils créent des efforts hydrauliques qui nécessitent souvent des butées.",
+    "exemple_utilisation": "Le CCTP cite les coudes parmi les accessoires AEP.",
+    "points_vigilance": [
+      "Prévoir butées et repérage au récolement."
+    ]
+  },
+  {
+    "terme": "Couverture acier",
+    "definition_courte": "Couvercle métallique fermant une fosse ou regard.",
+    "explication_pedagogique": "Elle protège l'ouvrage tout en permettant l'accès.",
+    "exemple_utilisation": "Le CCTP prévoit une couverture acier 250 kN pour la fosse compteur générale.",
+    "points_vigilance": [
+      "Adapter l'antidérapance et la classe selon l'emplacement."
+    ]
+  },
+  {
+    "terme": "Déblai",
+    "definition_courte": "Terre ou matériau extrait pendant le terrassement.",
+    "explication_pedagogique": "Il peut être réutilisé ou évacué selon qualité.",
+    "exemple_utilisation": "Le CCTP prévoit l'évacuation des déblais impropres ou excédentaires.",
+    "points_vigilance": [
+      "Trier et tracer les évacuations."
+    ]
+  },
+  {
+    "terme": "Décharge agréée",
+    "definition_courte": "Site autorisé à recevoir les déblais et gravats.",
+    "explication_pedagogique": "Elle évite les dépôts sauvages.",
+    "exemple_utilisation": "Le CCTP interdit les décharges sauvages et exige une décharge agréée.",
+    "points_vigilance": [
+      "Garder les bons de décharge."
+    ]
+  },
+  {
+    "terme": "Déclaration d'intention de commencement de travaux",
+    "definition_courte": "Démarche réglementaire avant travaux à proximité de réseaux.",
+    "explication_pedagogique": "Elle permet d'obtenir les informations de sécurité des exploitants.",
+    "exemple_utilisation": "Le CCTP demande les DICT avec le numéro de DT.",
+    "points_vigilance": [
+      "Ne pas ouvrir de tranchée sans retours exploitants."
+    ]
+  },
+  {
+    "terme": "Déclaration préalable",
+    "definition_courte": "Démarche administrative avant exécution de certains travaux réseaux.",
+    "explication_pedagogique": "Elle fait partie du dossier à constituer auprès des services publics.",
+    "exemple_utilisation": "Le CCTP met à charge de l'entreprise la déclaration préalable pour l'AEP.",
+    "points_vigilance": [
+      "Prévoir les délais dans la préparation de chantier."
+    ]
+  },
+  {
+    "terme": "Défense incendie",
+    "definition_courte": "Dispositif fournissant de l'eau pour la lutte contre l'incendie.",
+    "explication_pedagogique": "Elle peut être assurée par réseau, poteau, réserve ou bâche.",
+    "exemple_utilisation": "Le CCTP prévoit une bâche souple pour défense incendie.",
+    "points_vigilance": [
+      "Valider volume, accès et équipements avec les prescriptions applicables."
+    ]
+  },
+  {
+    "terme": "Désinfection du réseau",
+    "definition_courte": "Traitement sanitaire des canalisations neuves avant mise en service.",
+    "explication_pedagogique": "Elle élimine les contaminations introduites pendant les travaux.",
+    "exemple_utilisation": "Le CCTP prévoit désinfection par permanganate de potassium ou eau de javel.",
+    "points_vigilance": [
+      "Rincer ensuite et obtenir une analyse conforme."
+    ]
+  },
+  {
+    "terme": "Diamètre 50",
+    "definition_courte": "Diamètre des fourreaux de protection pour branchements.",
+    "explication_pedagogique": "Il permet le passage protégé des conduites de branchement.",
+    "exemple_utilisation": "Le CCTP prévoit des fourreaux diamètre 50 pour les branchements.",
+    "points_vigilance": [
+      "Vérifier compatibilité avec la canalisation et les raccords."
+    ]
+  },
+  {
+    "terme": "DICT",
+    "acronyme": "Déclaration d'Intention de Commencement de Travaux",
+    "definition_courte": "Déclaration d'Intention de Commencement de Travaux.",
+    "explication_pedagogique": "Elle est obligatoire pour sécuriser les travaux près de réseaux existants.",
+    "exemple_utilisation": "Le CCTP demande aux entreprises titulaires d'établir leur DICT.",
+    "points_vigilance": [
+      "Conserver réponses et prescriptions sur chantier."
+    ]
+  },
+  {
+    "terme": "Disconnecteur",
+    "definition_courte": "Dispositif évitant le retour d'eau polluée vers le réseau potable.",
+    "explication_pedagogique": "Il est important pour un réseau d'arrosage.",
+    "exemple_utilisation": "Le CCTP indique que le disconnecteur arrosage est à la charge du lot espaces verts.",
+    "points_vigilance": [
+      "Coordonner l'interface pour ne pas livrer un réseau incomplet."
+    ]
+  },
+  {
+    "terme": "Dispositif de manoeuvre",
+    "definition_courte": "Ensemble permettant d'actionner une vanne enterrée depuis la surface.",
+    "explication_pedagogique": "Il comprend tabernacle ou cloche, tube allonge et tête de bouche à clé.",
+    "exemple_utilisation": "Le CCTP demande la fourniture et pose de ce dispositif.",
+    "points_vigilance": [
+      "Faire valider le matériel avant pose."
+    ]
+  },
+  {
+    "terme": "Dossier administratif",
+    "definition_courte": "Ensemble des pièces et démarches auprès des services publics.",
+    "explication_pedagogique": "Il conditionne l'autorisation et le contrôle des travaux.",
+    "exemple_utilisation": "Le CCTP le met à charge de l'entreprise pour le réseau AEP.",
+    "points_vigilance": [
+      "Ne pas le confondre avec le dossier de récolement final."
+    ]
+  },
+  {
+    "terme": "Dossier de récolement",
+    "definition_courte": "Dossier final décrivant les ouvrages réellement posés.",
+    "explication_pedagogique": "Il sert à l'exploitation, la maintenance et la localisation future.",
+    "exemple_utilisation": "Le CCTP demande cinq exemplaires et fichiers DWG ou DXF.",
+    "points_vigilance": [
+      "Inclure X, Y, Z, vannes, ventouses, vidanges, branchements et essais."
+    ]
+  },
+  {
+    "terme": "DT",
+    "acronyme": "Déclaration de Travaux",
+    "definition_courte": "Déclaration de Travaux donnant un numéro de référence.",
+    "explication_pedagogique": "Elle sert à établir les DICT des entreprises.",
+    "exemple_utilisation": "Le CCTP demande le numéro de DT à 16 chiffres.",
+    "points_vigilance": [
+      "Le récupérer auprès de la maîtrise d'oeuvre avant les déclarations."
+    ]
+  },
+  {
+    "terme": "DWG",
+    "definition_courte": "Format informatique de plan utilisé en DAO.",
+    "explication_pedagogique": "Il permet de remettre les plans de récolement exploitables.",
+    "exemple_utilisation": "Le CCTP demande les plans sur CD au format DWG ou DXF.",
+    "points_vigilance": [
+      "Vérifier système de coordonnées et calques demandés."
+    ]
+  },
+  {
+    "terme": "DXF",
+    "definition_courte": "Format d'échange de plans DAO.",
+    "explication_pedagogique": "Il permet au gestionnaire d'intégrer les plans dans son système.",
+    "exemple_utilisation": "Le CCTP accepte le format DXF pour le récolement.",
+    "points_vigilance": [
+      "Contrôler lisibilité et géoréférencement avant remise."
+    ]
+  },
+  {
+    "terme": "Eau bactériologiquement stérile",
+    "definition_courte": "Eau sans contamination bactérienne utilisée pour essais.",
+    "explication_pedagogique": "Elle évite de polluer le réseau pendant les essais pression.",
+    "exemple_utilisation": "Le CCTP demande une eau stérile pour les essais.",
+    "points_vigilance": [
+      "Ne pas utiliser une eau douteuse de chantier."
+    ]
+  },
+  {
+    "terme": "Eau de javel",
+    "definition_courte": "Produit chloré utilisé pour désinfecter les canalisations.",
+    "explication_pedagogique": "Elle sert à éliminer les bactéries avant mise en service.",
+    "exemple_utilisation": "Le CCTP permet la désinfection à l'eau de javel.",
+    "points_vigilance": [
+      "Respecter dosage, temps de contact et rinçage."
+    ]
+  },
+  {
+    "terme": "Échantillonnage NF X 06-621",
+    "definition_courte": "Méthode de réception par prélèvement d'échantillons.",
+    "explication_pedagogique": "Elle peut servir en absence de norme ou avis technique.",
+    "exemple_utilisation": "Le CCTP cite la norme NF X 06-621 pour la réception des lots concernés.",
+    "points_vigilance": [
+      "Faire valider les critères avant commande."
+    ]
+  },
+  {
+    "terme": "Enduction PVC",
+    "definition_courte": "Revêtement PVC appliqué sur le textile de la bâche.",
+    "explication_pedagogique": "Il assure étanchéité et protection de la réserve souple.",
+    "exemple_utilisation": "Le CCTP demande une bâche avec enduction PVC.",
+    "points_vigilance": [
+      "Vérifier fiche technique, épaisseur et résistance."
+    ]
+  },
+  {
+    "terme": "Enrobage",
+    "definition_courte": "Matériau protecteur autour d'une canalisation.",
+    "explication_pedagogique": "Il protège le tuyau et répartit les charges.",
+    "exemple_utilisation": "Le CCTP prévoit un enrobage en sable autour des réseaux AEP.",
+    "points_vigilance": [
+      "Soigner les flancs et le dessus de canalisation."
+    ]
+  },
+  {
+    "terme": "Entretien pendant un an",
+    "definition_courte": "Obligation de maintenir les réfections de chaussée après réception.",
+    "explication_pedagogique": "Elle couvre les tassements ou désordres liés aux tranchées.",
+    "exemple_utilisation": "Le CCTP impose l'entretien des portions de chaussées pendant un an.",
+    "points_vigilance": [
+      "Surveiller les reprises après pluie et circulation."
+    ]
+  },
+  {
+    "terme": "Essai d'étanchéité",
+    "definition_courte": "Contrôle vérifiant l'absence de fuite.",
+    "explication_pedagogique": "Il participe à la réception d'un réseau sous pression.",
+    "exemple_utilisation": "Le CCTP évoque les essais d'étanchéité dans le planning de contrôle.",
+    "points_vigilance": [
+      "Organiser essais avant remblai complet si les joints doivent rester visibles."
+    ]
+  },
+  {
+    "terme": "Essai de compactage",
+    "definition_courte": "Contrôle de densité des remblais.",
+    "explication_pedagogique": "Il prouve que la tranchée est suffisamment compactée.",
+    "exemple_utilisation": "Le CCTP demande de tenir compte des essais de compactage.",
+    "points_vigilance": [
+      "Planifier avant réfection définitive."
+    ]
+  },
+  {
+    "terme": "Essai de pression",
+    "definition_courte": "Épreuve hydraulique du réseau d'eau.",
+    "explication_pedagogique": "Elle vérifie résistance et étanchéité avant réception.",
+    "exemple_utilisation": "Le CCTP demande des essais pression sous surveillance du service de l'eau.",
+    "points_vigilance": [
+      "Prévoir pompe, manomètre, plaques pleines, butées et eau stérile."
+    ]
+  },
+  {
+    "terme": "Essais divers",
+    "definition_courte": "Contrôles à réaliser avant réception.",
+    "explication_pedagogique": "Ils peuvent inclure pression, désinfection, analyse et compactage.",
+    "exemple_utilisation": "Le CCTP inclut les essais divers dans les prestations AEP.",
+    "points_vigilance": [
+      "Lister les essais avec le gestionnaire avant fin de chantier."
+    ]
+  },
+  {
+    "terme": "Extrémité pleine",
+    "definition_courte": "Bouchon ou plaque fermant temporairement un tronçon pour essai.",
+    "explication_pedagogique": "Elle permet de mettre un tronçon sous pression.",
+    "exemple_utilisation": "Le CCTP évoque les plaques pleines et bouts d'extrémité pour essais.",
+    "points_vigilance": [
+      "Dimensionner les butées d'essai pour éviter arrachement."
+    ]
+  },
+  {
+    "terme": "Fascicule 67-7 bis",
+    "definition_courte": "Référence citée pour la fourniture et pose de canalisations d'eau.",
+    "explication_pedagogique": "Elle regroupe des prescriptions communes applicables au réseau.",
+    "exemple_utilisation": "Le CCTP renvoie au fascicule 67-7 bis pour les prescriptions techniques.",
+    "points_vigilance": [
+      "Vérifier les exigences actuelles et équivalences."
+    ]
+  },
+  {
+    "terme": "Fascicule 71",
+    "definition_courte": "Référence CCTG pour fourniture et pose de canalisations d'eau, accessoires et branchements.",
+    "explication_pedagogique": "Il définit les règles générales du réseau AEP.",
+    "exemple_utilisation": "Le CCTP impose la conformité au fascicule n°71.",
+    "points_vigilance": [
+      "S'y référer pour les prescriptions non détaillées dans le CCTP."
+    ]
+  },
+  {
+    "terme": "Fascicule 73",
+    "definition_courte": "Référence technique CCTG mentionnée pour les fournitures et matériaux.",
+    "explication_pedagogique": "Elle complète les règles applicables selon ouvrages.",
+    "exemple_utilisation": "Le CCTP demande de s'assurer que les fabricants se conforment aux fascicules 71, 73 et 74.",
+    "points_vigilance": [
+      "Vérifier le domaine exact selon les fournitures proposées."
+    ]
+  },
+  {
+    "terme": "Fascicule 74",
+    "definition_courte": "Référence technique CCTG mentionnée pour les fournitures et matériaux.",
+    "explication_pedagogique": "Elle complète les prescriptions de certains ouvrages d'eau.",
+    "exemple_utilisation": "Le CCTP cite le fascicule 74 avec les fascicules 71 et 73.",
+    "points_vigilance": [
+      "Faire préciser par le gestionnaire si une exigence particulière s'applique."
+    ]
+  },
+  {
+    "terme": "Fiche technique",
+    "definition_courte": "Document fabricant décrivant le produit proposé.",
+    "explication_pedagogique": "Elle permet de valider bâche, tuyaux, raccords ou accessoires.",
+    "exemple_utilisation": "Le CCTP demande la fiche technique de la bâche soumise au gestionnaire.",
+    "points_vigilance": [
+      "Ne pas commander avant validation si le produit est sensible."
+    ]
+  },
+  {
+    "terme": "Fil 1100 dtex",
+    "definition_courte": "Caractéristique du fil textile de la bâche.",
+    "explication_pedagogique": "Elle participe à la résistance mécanique du tissu.",
+    "exemple_utilisation": "Le CCTP mentionne un fil 1100 dtex ISO 2060.",
+    "points_vigilance": [
+      "Vérifier que la fiche technique de la bâche reprend cette valeur."
+    ]
+  },
+  {
+    "terme": "Finition laquée acrylique",
+    "definition_courte": "Finition de surface de la bâche souple.",
+    "explication_pedagogique": "Elle améliore la protection et l'entretien.",
+    "exemple_utilisation": "Le CCTP demande une finition laquée acrylique.",
+    "points_vigilance": [
+      "Contrôler compatibilité avec UV, nettoyage et usage extérieur."
+    ]
+  },
+  {
+    "terme": "Fond de fouille dressé",
+    "definition_courte": "Fond de tranchée réglé et propre avant pose.",
+    "explication_pedagogique": "Il garantit l'appui continu du tuyau.",
+    "exemple_utilisation": "Le CCTP demande un fond de fouille soigneusement dressé.",
+    "points_vigilance": [
+      "Supprimer points durs et irrégularités avant pose."
+    ]
+  },
+  {
+    "terme": "Fonte",
+    "definition_courte": "Matériau métallique utilisé pour vannes, raccords et bouches à clé.",
+    "explication_pedagogique": "Elle offre robustesse et durabilité enterrée.",
+    "exemple_utilisation": "Le CCTP cite brides fontes, tubes allonge fonte et robinets fonte.",
+    "points_vigilance": [
+      "Protéger contre corrosion et vérifier compatibilité avec autres matériaux."
+    ]
+  },
+  {
+    "terme": "Forfait de terrassement",
+    "definition_courte": "Part du marché couvrant les travaux de fouilles, remblais et sujétions.",
+    "explication_pedagogique": "Il inclut souvent manutentions, protections, épuisements et évacuations.",
+    "exemple_utilisation": "Le CCTP décrit la consistance du forfait terrassements généraux.",
+    "points_vigilance": [
+      "Ne pas oublier les sujétions comme blindage, rabattement et nettoyage."
+    ]
+  },
+  {
+    "terme": "Fourreau",
+    "definition_courte": "Conduit de protection mécanique pour une canalisation ou branchement.",
+    "explication_pedagogique": "Il protège en traversée de chaussée et facilite remplacement futur.",
+    "exemple_utilisation": "Le CCTP prévoit des fourreaux sous chaussée pour AEP et arrosage.",
+    "points_vigilance": [
+      "Repérer, obturer et aiguiller les fourreaux en attente."
+    ]
+  },
+  {
+    "terme": "Fourreau en attente",
+    "definition_courte": "Fourreau posé pour un raccordement ou usage ultérieur.",
+    "explication_pedagogique": "Il évite de réouvrir la chaussée.",
+    "exemple_utilisation": "Le CCTP demande repérage par piquet, bouchon en plâtre et aiguille.",
+    "points_vigilance": [
+      "Reporter les extrémités précisément au récolement."
+    ]
+  },
+  {
+    "terme": "Fourreau sous chaussée",
+    "definition_courte": "Protection mécanique lors d'une traversée de chaussée.",
+    "explication_pedagogique": "Elle évite que les charges de trafic endommagent le branchement.",
+    "exemple_utilisation": "Le CCTP prévoit des fourreaux diamètre 50 pour les branchements.",
+    "points_vigilance": [
+      "Respecter profondeur, alignement et prescriptions du gestionnaire."
+    ]
+  },
+  {
+    "terme": "Génératrice inférieure",
+    "definition_courte": "Ligne basse extérieure d'un tuyau.",
+    "explication_pedagogique": "Elle doit reposer régulièrement sur le lit de pose.",
+    "exemple_utilisation": "Le CCTP demande que le tuyau porte sur toute sa génératrice inférieure.",
+    "points_vigilance": [
+      "Un appui ponctuel crée un risque de casse."
+    ]
+  },
+  {
+    "terme": "Génératrice supérieure",
+    "definition_courte": "Ligne haute extérieure d'un tuyau.",
+    "explication_pedagogique": "Elle sert de référence pour enrobage et grillage avertisseur.",
+    "exemple_utilisation": "Le CCTP définit sable à 0,10 m au-dessus et grillage à +0,40 m.",
+    "points_vigilance": [
+      "Mesurer depuis le tuyau, pas depuis le fond de fouille."
+    ]
+  },
+  {
+    "terme": "Géoréférencement",
+    "definition_courte": "Relevé des ouvrages dans un système de coordonnées.",
+    "explication_pedagogique": "Il permet de retrouver précisément les réseaux.",
+    "exemple_utilisation": "Le CCTP demande un relevé géoréférencé des tranchées en X, Y, Z.",
+    "points_vigilance": [
+      "Utiliser une méthode compatible avec les attentes du gestionnaire."
+    ]
+  },
+  {
+    "terme": "Géotechnicien",
+    "definition_courte": "Spécialiste des sols.",
+    "explication_pedagogique": "Il donne un avis sur réemploi des matériaux et stabilité.",
+    "exemple_utilisation": "Le CCTP demande l'avis du géotechnicien pour réutilisation des matériaux du site.",
+    "points_vigilance": [
+      "Demander l'avis avant de remblayer avec des matériaux incertains."
+    ]
+  },
+  {
+    "terme": "GNT",
+    "acronyme": "Grave non traitée",
+    "definition_courte": "Grave non traitée utilisée en chaussée ou remblai structurant.",
+    "explication_pedagogique": "Elle participe à la portance des chaussées.",
+    "exemple_utilisation": "Le CCTP donne les compacités minimales pour GNT A, B1 et B2.",
+    "points_vigilance": [
+      "Contrôler granulométrie, propreté et compactage."
+    ]
+  },
+  {
+    "terme": "Grave bitume dosée à 3,5 %",
+    "definition_courte": "Mélange granulaire lié au bitume.",
+    "explication_pedagogique": "Elle sert de couche de base sous chaussée en enrobé.",
+    "exemple_utilisation": "Le CCTP prévoit 0,15 m de grave bitume dosée à 3,5 %.",
+    "points_vigilance": [
+      "Respecter épaisseur et raccord avec structure existante."
+    ]
+  },
+  {
+    "terme": "Grave de minière",
+    "definition_courte": "Matériau granulaire utilisé en remblai ou couche de structure.",
+    "explication_pedagogique": "Elle reconstitue la tranchée sous trottoir ou chaussée.",
+    "exemple_utilisation": "Le CCTP cite la grave de minière 0/30 IP<4.",
+    "points_vigilance": [
+      "Faire valider le matériau par le maître d'oeuvre."
+    ]
+  },
+  {
+    "terme": "Gravier tout-venant de rivière",
+    "definition_courte": "Matériau d'apport possible en cas de manque de déblais.",
+    "explication_pedagogique": "Il peut remplacer des produits de fouille insuffisants.",
+    "exemple_utilisation": "Le CCTP prévoit l'apport de sable ou gravier tout-venant de rivière si nécessaire.",
+    "points_vigilance": [
+      "Soumettre le matériau à l'agrément du maître d'oeuvre."
+    ]
+  },
+  {
+    "terme": "Grillage avertisseur bleu",
+    "definition_courte": "Filet de signalisation des réseaux d'eau potable enterrés.",
+    "explication_pedagogique": "Il alerte avant d'atteindre la canalisation lors de terrassements futurs.",
+    "exemple_utilisation": "Le CCTP demande un grillage bleu de largeur 0,40 m.",
+    "points_vigilance": [
+      "Respecter couleur, largeur et hauteur de pose."
+    ]
+  },
+  {
+    "terme": "Guide SETRA",
+    "definition_courte": "Référence de classement et réutilisation des matériaux de terrassement.",
+    "explication_pedagogique": "Il aide à choisir les remblais adaptés.",
+    "exemple_utilisation": "Le CCTP demande la classification des matériaux selon le guide SETRA.",
+    "points_vigilance": [
+      "Joindre le classement dans l'offre ou les documents d'exécution."
+    ]
+  },
+  {
+    "terme": "Humidité du matériau",
+    "definition_courte": "Teneur en eau du remblai.",
+    "explication_pedagogique": "Elle conditionne la qualité du compactage.",
+    "exemple_utilisation": "Le CCTP prévoit de modifier l'humidité si nécessaire pour atteindre le compactage optimum.",
+    "points_vigilance": [
+      "Ne pas compacter un matériau trop sec ou trop humide."
+    ]
+  },
+  {
+    "terme": "Indice de plasticité non mesurable",
+    "definition_courte": "Caractéristique d'un sable non argileux.",
+    "explication_pedagogique": "Elle garantit un matériau stable et non plastique autour du réseau.",
+    "exemple_utilisation": "Le CCTP exige ce critère pour le sable d'enrobage.",
+    "points_vigilance": [
+      "Refuser un sable terreux ou argileux."
+    ]
+  },
+  {
+    "terme": "IP<4",
+    "acronyme": "Indice de plasticité inférieur à 4",
+    "definition_courte": "Indice de plasticité inférieur à 4.",
+    "explication_pedagogique": "Il indique un matériau peu plastique, adapté au remblai routier.",
+    "exemple_utilisation": "Le CCTP demande une grave de minière 0/30 IP<4.",
+    "points_vigilance": [
+      "Demander un justificatif fournisseur si nécessaire."
+    ]
+  },
+  {
+    "terme": "Joint caoutchouc",
+    "definition_courte": "Joint souple assurant l'étanchéité des assemblages.",
+    "explication_pedagogique": "Il compense les petits mouvements et assure la continuité hydraulique.",
+    "exemple_utilisation": "Le CCTP demande des canalisations équipées de joints caoutchouc.",
+    "points_vigilance": [
+      "Contrôler propreté des emboîtures et absence de torsion."
+    ]
+  },
+  {
+    "terme": "Joint découvert",
+    "definition_courte": "Joint laissé visible pendant l'essai pression.",
+    "explication_pedagogique": "Il permet de repérer facilement une fuite.",
+    "exemple_utilisation": "Le CCTP demande des essais à joints découverts partout où possible.",
+    "points_vigilance": [
+      "Ne pas remblayer complètement avant contrôle si le gestionnaire le demande."
+    ]
+  },
+  {
+    "terme": "Jumbo",
+    "definition_courte": "Type de regard compteur prévu pour branchements individuels.",
+    "explication_pedagogique": "Il accueille compteur, robinet avant compteur et clapet antipollution.",
+    "exemple_utilisation": "Le CCTP demande un regard type Jumbo pour chaque maison individuelle.",
+    "points_vigilance": [
+      "Le modèle doit répondre aux prescriptions du concessionnaire."
+    ]
+  },
+  {
+    "terme": "Laboratoire agréé",
+    "definition_courte": "Laboratoire habilité à réaliser des analyses de qualité d'eau.",
+    "explication_pedagogique": "Il fournit un résultat reconnu pour la réception sanitaire.",
+    "exemple_utilisation": "Le CCTP demande une analyse de contrôle par laboratoire agréé.",
+    "points_vigilance": [
+      "Prévoir délai de prélèvement, analyse et retour des résultats."
+    ]
+  },
+  {
+    "terme": "Largeur 0,40 m",
+    "definition_courte": "Largeur du grillage avertisseur bleu.",
+    "explication_pedagogique": "Elle assure un signalement suffisant au-dessus de la canalisation.",
+    "exemple_utilisation": "Le CCTP impose un grillage polyéthylène de largeur 0,40 m.",
+    "points_vigilance": [
+      "Vérifier le rouleau livré avant pose."
+    ]
+  },
+  {
+    "terme": "Lit de pose",
+    "definition_courte": "Couche réglée sur laquelle repose la canalisation.",
+    "explication_pedagogique": "Elle assure un appui continu et protège le tuyau.",
+    "exemple_utilisation": "Le CCTP prévoit sable ou terre débarrassée de cailloux pour corriger le fond.",
+    "points_vigilance": [
+      "Ne jamais poser sur un élément dur ou une cale."
+    ]
+  },
+  {
+    "terme": "Maçonnerie de fosse compteur",
+    "definition_courte": "Ouvrage maçonné recevant le compteur général.",
+    "explication_pedagogique": "Elle protège les équipements et permet l'accès exploitation.",
+    "exemple_utilisation": "Le CCTP demande une fosse compteur générale maçonnée.",
+    "points_vigilance": [
+      "Respecter dimensions, drainage éventuel et couverture 250 kN."
+    ]
+  },
+  {
+    "terme": "Manomètre",
+    "definition_courte": "Appareil mesurant la pression pendant l'essai.",
+    "explication_pedagogique": "Il permet de suivre la tenue du réseau.",
+    "exemple_utilisation": "Le CCTP demande une sensibilité de 0,1 bar et une lecture à mi-échelle.",
+    "points_vigilance": [
+      "Utiliser un manomètre étalonné et adapté à la pression d'épreuve."
+    ]
+  },
+  {
+    "terme": "Marquage CE",
+    "definition_courte": "Marquage réglementaire européen des produits de construction.",
+    "explication_pedagogique": "Il indique la conformité aux exigences applicables.",
+    "exemple_utilisation": "Le CCTP demande que tous les produits de construction portent le marquage CE.",
+    "points_vigilance": [
+      "Le marquage ne remplace pas la validation du gestionnaire."
+    ]
+  },
+  {
+    "terme": "Marque NF",
+    "definition_courte": "Certification française de conformité produit.",
+    "explication_pedagogique": "Elle atteste que le produit respecte des exigences normatives.",
+    "exemple_utilisation": "Le CCTP demande la marque NF pour les canalisations PVC.",
+    "points_vigilance": [
+      "Contrôler le marquage sur les tubes avant pose."
+    ]
+  },
+  {
+    "terme": "Massif de stockage sous voirie",
+    "definition_courte": "Ouvrage de stockage enterré sous voirie, mentionné comme point particulier.",
+    "explication_pedagogique": "Il concerne la gestion des eaux ou volumes techniques du projet.",
+    "exemple_utilisation": "Le CCTP signale un massif de stockage sous voirie.",
+    "points_vigilance": [
+      "Coordonner avec les autres lots VRD pour éviter conflits de réseaux."
+    ]
+  },
+  {
+    "terme": "Massif en béton",
+    "definition_courte": "Bloc béton utilisé pour butée, support ou ancrage.",
+    "explication_pedagogique": "Il reprend des efforts ou matérialise un point.",
+    "exemple_utilisation": "Le CCTP prévoit des massifs pour butées des canalisations.",
+    "points_vigilance": [
+      "Dimensionner selon pression, diamètre et nature du sol."
+    ]
+  },
+  {
+    "terme": "Matériau agréé",
+    "definition_courte": "Matériau accepté par le maître d'oeuvre ou gestionnaire.",
+    "explication_pedagogique": "Il peut remplacer un matériau de fouille non conforme.",
+    "exemple_utilisation": "Le CCTP prévoit la substitution par matériaux agréés si les conditions l'exigent.",
+    "points_vigilance": [
+      "Obtenir l'accord avant mise en oeuvre."
+    ]
+  },
+  {
+    "terme": "Matériau peu sensible aux conditions météorologiques",
+    "definition_courte": "Remblai qui garde une bonne aptitude au compactage malgré la météo.",
+    "explication_pedagogique": "Il limite les arrêts de chantier et tassements.",
+    "exemple_utilisation": "Le CCTP demande ce type de matériau pour les remblais.",
+    "points_vigilance": [
+      "Surveiller quand même la teneur en eau après pluie."
+    ]
+  },
+  {
+    "terme": "Matière PES",
+    "definition_courte": "Polyester servant de support textile de bâche.",
+    "explication_pedagogique": "Il participe à la résistance de la membrane.",
+    "exemple_utilisation": "Le CCTP demande une matière PES ISO 2076.",
+    "points_vigilance": [
+      "Contrôler l'équivalence si un autre produit est proposé."
+    ]
+  },
+  {
+    "terme": "Mise en eau",
+    "definition_courte": "Remplissage du réseau ou de la bâche.",
+    "explication_pedagogique": "Elle précède les essais et la mise en service.",
+    "exemple_utilisation": "Le CCTP prévoit remplissage des canalisations pour essais pression.",
+    "points_vigilance": [
+      "Utiliser une eau conforme et purger l'air correctement."
+    ]
+  },
+  {
+    "terme": "Mise en service",
+    "definition_courte": "Moment où le réseau peut fonctionner pour l'usager ou l'exploitation.",
+    "explication_pedagogique": "Elle intervient après essais, désinfection et validation.",
+    "exemple_utilisation": "Le CCTP conditionne la réception aux contrôles et documents.",
+    "points_vigilance": [
+      "Ne pas livrer sans analyse, pression et récolement."
+    ]
+  },
+  {
+    "terme": "Mise hors gel",
+    "definition_courte": "Disposition évitant le gel des canalisations ou équipements.",
+    "explication_pedagogique": "Elle protège le réseau en période froide.",
+    "exemple_utilisation": "Le CCTP évoque la tenue au froid de la bâche et des matériaux.",
+    "points_vigilance": [
+      "Vérifier profondeurs, isolation éventuelle et prescriptions locales."
+    ]
+  },
+  {
+    "terme": "Mortier au ciment",
+    "definition_courte": "Mélange de ciment, sable et eau.",
+    "explication_pedagogique": "Il sert aux rejointoiements, scellements ou petits ouvrages.",
+    "exemple_utilisation": "Le CCTP cite le mortier au ciment dans le tableau béton/ciment.",
+    "points_vigilance": [
+      "Adapter le dosage au type de reprise."
+    ]
+  },
+  {
+    "terme": "Nettoyage de canalisation",
+    "definition_courte": "Rinçage des conduites neuves avant mise en service.",
+    "explication_pedagogique": "Il élimine poussières, dépôts et produits de chantier.",
+    "exemple_utilisation": "Le CCTP demande le nettoyage par rinçage sous surveillance du Service de l'Eau.",
+    "points_vigilance": [
+      "Prévoir points de vidange et gestion de l'eau rejetée."
+    ]
+  },
+  {
+    "terme": "NF E 29-161 à 163",
+    "definition_courte": "Normes applicables au matériel de branchement et robinet de prise en charge.",
+    "explication_pedagogique": "Elles encadrent les exigences techniques des robinets et accessoires.",
+    "exemple_utilisation": "Le CCTP demande du matériel conforme NF E 29.161 à 163.",
+    "points_vigilance": [
+      "Vérifier conformité fournisseur avant commande."
+    ]
+  },
+  {
+    "terme": "NF E 29-324",
+    "definition_courte": "Norme citée pour les robinets-vannes.",
+    "explication_pedagogique": "Elle encadre les caractéristiques de certaines vannes de sectionnement.",
+    "exemple_utilisation": "Le CCTP demande du matériel conforme NF E 29.324.",
+    "points_vigilance": [
+      "Contrôler fiche technique et sens de fermeture."
+    ]
+  },
+  {
+    "terme": "NF EN 1097",
+    "definition_courte": "Norme d'essais sur granulats.",
+    "explication_pedagogique": "Elle sert à caractériser les matériaux de remblai ou de chaussée.",
+    "exemple_utilisation": "Le CCTP demande que la réutilisation des matériaux corresponde à NF EN 1097 et NF EN 933.",
+    "points_vigilance": [
+      "Demander les essais si réemploi de matériaux du site."
+    ]
+  },
+  {
+    "terme": "NF EN 12620",
+    "definition_courte": "Norme relative aux granulats pour béton.",
+    "explication_pedagogique": "Elle définit les granulats admissibles dans les bétons.",
+    "exemple_utilisation": "Le CCTP la cite pour les bétons et ciments.",
+    "points_vigilance": [
+      "Vérifier les bons fournisseurs."
+    ]
+  },
+  {
+    "terme": "NF EN 13242",
+    "definition_courte": "Norme relative aux granulats pour chaussées.",
+    "explication_pedagogique": "Elle encadre graves traitées ou non traitées.",
+    "exemple_utilisation": "Le CCTP la cite pour les tranchées sous chaussées.",
+    "points_vigilance": [
+      "Contrôler conformité des matériaux de réfection."
+    ]
+  },
+  {
+    "terme": "NF EN 1421",
+    "definition_courte": "Norme d'essai de résistance à la rupture des textiles enduits.",
+    "explication_pedagogique": "Elle qualifie la résistance de la bâche.",
+    "exemple_utilisation": "Le CCTP demande 4200/4000 N/50 mm selon EN ISO 1421/V1.",
+    "points_vigilance": [
+      "Comparer les valeurs fabricant aux valeurs CCTP."
+    ]
+  },
+  {
+    "terme": "NF EN 1876-1",
+    "definition_courte": "Norme citée pour la tenue au froid de la bâche.",
+    "explication_pedagogique": "Elle vérifie le comportement à basse température.",
+    "exemple_utilisation": "Le CCTP demande une tenue à froid de -30 °C.",
+    "points_vigilance": [
+      "Valider que la bâche supporte les conditions extérieures."
+    ]
+  },
+  {
+    "terme": "NF EN 206-1",
+    "definition_courte": "Norme béton.",
+    "explication_pedagogique": "Elle encadre spécification et conformité du béton.",
+    "exemple_utilisation": "Le CCTP cite NF EN 206-1.",
+    "points_vigilance": [
+      "Les bons béton doivent correspondre à la classe et au dosage."
+    ]
+  },
+  {
+    "terme": "NF EN 933",
+    "definition_courte": "Norme d'essais géométriques des granulats.",
+    "explication_pedagogique": "Elle sert à qualifier les matériaux réemployés ou apportés.",
+    "exemple_utilisation": "Le CCTP cite NF EN 933 pour la réutilisation des matériaux.",
+    "points_vigilance": [
+      "Contrôler si les matériaux du site sont utilisés."
+    ]
+  },
+  {
+    "terme": "NF P 16-100",
+    "definition_courte": "Norme citée pour critères d'aptitude à la fonction.",
+    "explication_pedagogique": "Elle sert de base si aucune norme produit n'existe.",
+    "exemple_utilisation": "Le CCTP la cite en cas d'absence de norme ou avis technique.",
+    "points_vigilance": [
+      "Faire valider par le maître d'oeuvre avant pose."
+    ]
+  },
+  {
+    "terme": "Nivellement",
+    "definition_courte": "Réglage des altitudes des ouvrages.",
+    "explication_pedagogique": "Il assure cohérence avec sol fini, regards et raccordements.",
+    "exemple_utilisation": "Le CCTP met l'implantation et le nivellement à charge de l'entreprise.",
+    "points_vigilance": [
+      "Relever les niveaux avant remblaiement et finitions."
+    ]
+  },
+  {
+    "terme": "Noeud de réseau",
+    "definition_courte": "Point où plusieurs canalisations ou accessoires se rencontrent.",
+    "explication_pedagogique": "Il nécessite un détail précis pour exploitation.",
+    "exemple_utilisation": "Le CCTP demande les plans de détail des noeuds et branchements.",
+    "points_vigilance": [
+      "Coter diamètres, pièces, profondeurs et organes."
+    ]
+  },
+  {
+    "terme": "Notice technique",
+    "definition_courte": "Document décrivant caractéristiques et mise en oeuvre d'un produit.",
+    "explication_pedagogique": "Elle justifie le choix des matériaux.",
+    "exemple_utilisation": "Le CCTP demande les notices techniques des matériaux mis en oeuvre.",
+    "points_vigilance": [
+      "Les fournir avant validation et conserver au DOE."
+    ]
+  },
+  {
+    "terme": "OPM",
+    "acronyme": "Optimum Proctor Modifié",
+    "definition_courte": "Optimum Proctor Modifié.",
+    "explication_pedagogique": "Il sert de référence pour mesurer le compactage.",
+    "exemple_utilisation": "Le CCTP demande 95 % de l'OPM pour les remblais.",
+    "points_vigilance": [
+      "Faire correspondre l'essai au matériau réellement posé."
+    ]
+  },
+  {
+    "terme": "Panneau de chantier",
+    "definition_courte": "Panneau d'information placé sur le chantier.",
+    "explication_pedagogique": "Il identifie l'opération et informe les riverains.",
+    "exemple_utilisation": "Le CCTP demande un ou plusieurs panneaux d'information.",
+    "points_vigilance": [
+      "Maintenir visible et à jour."
+    ]
+  },
+  {
+    "terme": "PEHD",
+    "acronyme": "Polyéthylène haute densité",
+    "definition_courte": "Polyéthylène haute densité.",
+    "explication_pedagogique": "Il est utilisé pour les branchements d'eau potable.",
+    "exemple_utilisation": "Le CCTP demande des canalisations de branchement en PEHD alimentaire 25 bars.",
+    "points_vigilance": [
+      "Vérifier qualité alimentaire et pression de service."
+    ]
+  },
+  {
+    "terme": "Permanganate de potassium",
+    "definition_courte": "Produit chimique utilisé pour désinfecter les réseaux d'eau.",
+    "explication_pedagogique": "Il permet de traiter les canalisations avant mise en service.",
+    "exemple_utilisation": "Le CCTP cite le permanganate de potassium comme solution de désinfection.",
+    "points_vigilance": [
+      "Respecter dosage et rinçage exigés par le Service de l'Eau."
+    ]
+  },
+  {
+    "terme": "Pièce de raccord",
+    "definition_courte": "Accessoire reliant deux tuyaux ou changeant direction, diamètre ou matériau.",
+    "explication_pedagogique": "Elle assure continuité hydraulique et mécanique.",
+    "exemple_utilisation": "Le CCTP demande des pièces de raccord satisfaisant aux mêmes conditions que les tuyaux.",
+    "points_vigilance": [
+      "Utiliser des pièces compatibles avec la classe de pression."
+    ]
+  },
+  {
+    "terme": "Pièce spéciale",
+    "definition_courte": "Organe particulier du réseau : vanne, purge, ventouse, robinet ou butée.",
+    "explication_pedagogique": "Elle permet l'exploitation et la sécurité du réseau.",
+    "exemple_utilisation": "Le CCTP consacre un article aux pièces spéciales.",
+    "points_vigilance": [
+      "Vérifier accessibilité et repérage de chaque pièce."
+    ]
+  },
+  {
+    "terme": "Piquet scellé",
+    "definition_courte": "Repère vertical fixé dans un petit massif.",
+    "explication_pedagogique": "Il matérialise un fourreau en attente.",
+    "exemple_utilisation": "Le CCTP prévoit un piquet scellé dans un massif en plâtre.",
+    "points_vigilance": [
+      "Reporter ce repère dans le récolement."
+    ]
+  },
+  {
+    "terme": "Plan d'implantation",
+    "definition_courte": "Plan indiquant la position exacte des réseaux et ouvrages.",
+    "explication_pedagogique": "Il sert à l'exécution et au récolement.",
+    "exemple_utilisation": "Le CCTP demande un plan au 1/200 ou 1/500 du réseau AEP.",
+    "points_vigilance": [
+      "Coter les ouvrages en X, Y et Z."
+    ]
+  },
+  {
+    "terme": "Plan de récolement",
+    "definition_courte": "Plan de ce qui a réellement été construit.",
+    "explication_pedagogique": "Il remplace le plan projet pour l'exploitation future.",
+    "exemple_utilisation": "Le CCTP demande des plans de récolement complets.",
+    "points_vigilance": [
+      "Lever avant remblai les profondeurs, diamètres et accessoires."
+    ]
+  },
+  {
+    "terme": "Plan de situation",
+    "definition_courte": "Plan général localisant le réseau dans l'opération.",
+    "explication_pedagogique": "Il donne le contexte des voies et ouvrages.",
+    "exemple_utilisation": "Le CCTP demande un plan de situation au 1/2000.",
+    "points_vigilance": [
+      "Y faire figurer canalisations, vannes, vidanges et ventouses."
+    ]
+  },
+  {
+    "terme": "Planche de convenance",
+    "definition_courte": "Essai préalable validant méthode, matériau ou compactage.",
+    "explication_pedagogique": "Elle prouve que l'entreprise peut atteindre la qualité demandée.",
+    "exemple_utilisation": "Le CCTP évoque une planche de convenance pour matériaux de remblai.",
+    "points_vigilance": [
+      "À réaliser si le maître d'oeuvre ou le contrôle le demande."
+    ]
+  },
+  {
+    "terme": "Plaque pleine",
+    "definition_courte": "Pièce fermant une extrémité de canalisation pour essai.",
+    "explication_pedagogique": "Elle permet la mise sous pression d'un tronçon.",
+    "exemple_utilisation": "Le CCTP cite les plaques pleines dans les travaux préparatoires d'essai.",
+    "points_vigilance": [
+      "Buter correctement la plaque contre les efforts de pression."
+    ]
+  },
+  {
+    "terme": "Point bas",
+    "definition_courte": "Partie la plus basse d'un réseau ou tronçon.",
+    "explication_pedagogique": "Il sert au remplissage, à l'épreuve ou à la vidange.",
+    "exemple_utilisation": "Le CCTP demande la pompe d'épreuve au point bas et le prélèvement en point bas.",
+    "points_vigilance": [
+      "Prévoir vidange et purge d'air pour éviter mesures faussées."
+    ]
+  },
+  {
+    "terme": "Point haut",
+    "definition_courte": "Partie la plus haute d'un réseau.",
+    "explication_pedagogique": "Il concentre l'air et reçoit souvent une ventouse.",
+    "exemple_utilisation": "Le CCTP prévoit une purge d'air par ventouse 3 fonctions en point haut.",
+    "points_vigilance": [
+      "Ne pas oublier les points hauts du profil altimétrique."
+    ]
+  },
+  {
+    "terme": "Porte-à-faux",
+    "definition_courte": "Situation où le tuyau n'est pas soutenu sur sa longueur.",
+    "explication_pedagogique": "Elle fragilise la conduite sous charge.",
+    "exemple_utilisation": "Le CCTP interdit la pose en porte-à-faux.",
+    "points_vigilance": [
+      "Reprendre le lit de pose si un vide apparaît sous tuyau."
+    ]
+  },
+  {
+    "terme": "Prélèvement d'échantillon",
+    "definition_courte": "Prise d'eau pour analyse sanitaire.",
+    "explication_pedagogique": "Il vérifie la qualité du réseau neuf.",
+    "exemple_utilisation": "Le CCTP prévoit un prélèvement via colonne et robinet de puisage en point bas.",
+    "points_vigilance": [
+      "Désinfecter le point de prélèvement et utiliser un laboratoire agréé."
+    ]
+  },
+  {
+    "terme": "Pression d'épreuve",
+    "definition_courte": "Pression appliquée lors de l'essai de réception.",
+    "explication_pedagogique": "Elle vérifie la tenue du réseau avant mise en service.",
+    "exemple_utilisation": "Le CCTP demande des essais pression destinés à la réception.",
+    "points_vigilance": [
+      "Faire sous surveillance du service de l'eau."
+    ]
+  },
+  {
+    "terme": "Pression de service 16 bars",
+    "definition_courte": "Pression admissible demandée pour les canalisations principales PVC.",
+    "explication_pedagogique": "Elle qualifie la résistance normale du réseau principal.",
+    "exemple_utilisation": "Le CCTP impose 16 bars pour les canalisations principales.",
+    "points_vigilance": [
+      "Vérifier que le tube et les raccords ont la même classe."
+    ]
+  },
+  {
+    "terme": "Pression de service 25 bars",
+    "definition_courte": "Pression admissible demandée pour les branchements PEHD.",
+    "explication_pedagogique": "Elle donne une marge de résistance sur les petits branchements.",
+    "exemple_utilisation": "Le CCTP impose 25 bars pour les canalisations de branchement.",
+    "points_vigilance": [
+      "Ne pas mélanger raccords de classe inférieure."
+    ]
+  },
+  {
+    "terme": "Produit des fouilles",
+    "definition_courte": "Matériau extrait de la tranchée.",
+    "explication_pedagogique": "Il peut être réutilisé si sa qualité est reconnue convenable.",
+    "exemple_utilisation": "Le CCTP autorise les produits de fouilles pour lit ou remblai si acceptés.",
+    "points_vigilance": [
+      "Refuser les matériaux avec cailloux, argile ou pollution."
+    ]
+  },
+  {
+    "terme": "Produit similaire",
+    "definition_courte": "Produit proposé en équivalence d'une référence CCTP.",
+    "explication_pedagogique": "Il doit être soumis à approbation.",
+    "exemple_utilisation": "Le CCTP autorise tout autre produit similaire après accord du maître d'oeuvre.",
+    "points_vigilance": [
+      "Fournir fiches techniques et justifier l'équivalence."
+    ]
+  },
+  {
+    "terme": "Profondeur de conduite",
+    "definition_courte": "Distance entre sol fini et canalisation.",
+    "explication_pedagogique": "Elle protège contre gel, charges et interventions futures.",
+    "exemple_utilisation": "Le CCTP demande des profondeurs précisément cotées au récolement.",
+    "points_vigilance": [
+      "Mesurer avant remblai complet."
+    ]
+  },
+  {
+    "terme": "Protection des joints",
+    "definition_courte": "Disposition évitant de noyer ou bloquer les joints dans le béton de butée.",
+    "explication_pedagogique": "Elle préserve la mobilité et l'étanchéité des assemblages.",
+    "exemple_utilisation": "Le CCTP insiste sur la protection des joints non pris dans la masse de béton.",
+    "points_vigilance": [
+      "Ne pas couler la butée directement sur les joints."
+    ]
+  },
+  {
+    "terme": "Protection des végétaux",
+    "definition_courte": "Mesures pour éviter de détériorer arbres et plantations.",
+    "explication_pedagogique": "Elle limite les reprises paysagères et dommages aux racines.",
+    "exemple_utilisation": "Le CCTP demande de respecter les plantations environnantes.",
+    "points_vigilance": [
+      "Ne pas stocker déblais ou engins au pied des arbres."
+    ]
+  },
+  {
+    "terme": "Purge d'air",
+    "definition_courte": "Dispositif évacuant l'air emprisonné dans le réseau.",
+    "explication_pedagogique": "Elle évite coups de bélier, mauvais remplissage et pertes de performance.",
+    "exemple_utilisation": "Le CCTP prévoit une ventouse 3 fonctions en point haut.",
+    "points_vigilance": [
+      "Installer au bon endroit et avec robinet d'isolement."
+    ]
+  },
+  {
+    "terme": "Purge réseau",
+    "definition_courte": "Organe permettant de vider ou nettoyer une partie du réseau.",
+    "explication_pedagogique": "Elle facilite maintenance et essais.",
+    "exemple_utilisation": "Le CCTP inclut les vannes et purges dans les travaux AEP.",
+    "points_vigilance": [
+      "Repérer les purges et vérifier leur évacuation."
+    ]
+  },
+  {
+    "terme": "PVC qualité alimentaire",
+    "definition_courte": "Tuyau PVC compatible avec le transport d'eau potable.",
+    "explication_pedagogique": "Il évite toute contamination de l'eau distribuée.",
+    "exemple_utilisation": "Le CCTP demande du PVC qualité alimentaire pour les canalisations principales.",
+    "points_vigilance": [
+      "Contrôler certificat sanitaire et marque NF."
+    ]
+  },
+  {
+    "terme": "Rabattement de nappe",
+    "definition_courte": "Abaissement provisoire de l'eau souterraine.",
+    "explication_pedagogique": "Il permet d'exécuter les fouilles au sec.",
+    "exemple_utilisation": "Le CCTP inclut le rabattement de nappe pendant chantier si nécessaire.",
+    "points_vigilance": [
+      "Prévoir autorisation de rejet et stabilité des fouilles."
+    ]
+  },
+  {
+    "terme": "Raccordement sur attente",
+    "definition_courte": "Connexion au point préparé par le concessionnaire.",
+    "explication_pedagogique": "Elle relie le réseau de l'opération au réseau existant.",
+    "exemple_utilisation": "Le CCTP prévoit le raccordement sur l'attente en limite de propriété.",
+    "points_vigilance": [
+      "Valider position, état et diamètre de l'attente avant travaux."
+    ]
+  },
+  {
+    "terme": "Réaction au feu",
+    "definition_courte": "Comportement d'un matériau face à l'inflammation.",
+    "explication_pedagogique": "Elle qualifie la sécurité de la bâche souple.",
+    "exemple_utilisation": "Le CCTP demande une vitesse d'inflammation inférieure à 100 mm/min ISO 3795.",
+    "points_vigilance": [
+      "Vérifier le certificat fabricant."
+    ]
+  },
+  {
+    "terme": "Réception des ouvrages",
+    "definition_courte": "Acceptation technique après essais, contrôles et documents.",
+    "explication_pedagogique": "Elle marque la livraison des réseaux au maître d'ouvrage ou gestionnaire.",
+    "exemple_utilisation": "Le CCTP prévoit réception sous contrôle du service gestionnaire.",
+    "points_vigilance": [
+      "Préparer essais, analyses, récolement et levée de réserves."
+    ]
+  },
+  {
+    "terme": "Récolement X Y Z",
+    "definition_courte": "Relevé des coordonnées planimétriques et altimétriques.",
+    "explication_pedagogique": "Il localise précisément les ouvrages enterrés.",
+    "exemple_utilisation": "Le CCTP demande les ouvrages cotés en X, Y et Z.",
+    "points_vigilance": [
+      "Utiliser un système clair et compatible avec les plans."
+    ]
+  },
+  {
+    "terme": "Regard arrosage",
+    "definition_courte": "Regard destiné au réseau d'arrosage.",
+    "explication_pedagogique": "Il prépare l'alimentation ou l'accès à l'équipement d'arrosage.",
+    "exemple_utilisation": "Le CCTP prévoit un regard type Jumbo pour le réseau d'arrosage.",
+    "points_vigilance": [
+      "Le disconnecteur reste à coordonner avec le lot espaces verts."
+    ]
+  },
+  {
+    "terme": "Regard compteur",
+    "definition_courte": "Ouvrage accueillant un compteur d'eau et ses accessoires.",
+    "explication_pedagogique": "Il permet lecture, entretien et coupure.",
+    "exemple_utilisation": "Le CCTP prévoit des regards type Jumbo pour les maisons.",
+    "points_vigilance": [
+      "Vérifier accessibilité, sens de pose et protection contre l'eau stagnante."
+    ]
+  },
+  {
+    "terme": "Règles de l'art",
+    "definition_courte": "Bonnes pratiques professionnelles reconnues.",
+    "explication_pedagogique": "Elles complètent les prescriptions écrites du CCTP.",
+    "exemple_utilisation": "Le CCTP demande tous travaux nécessaires selon les règles de l'art.",
+    "points_vigilance": [
+      "Ne pas limiter la prestation à une lecture minimale du bordereau."
+    ]
+  },
+  {
+    "terme": "Remblai par couches",
+    "definition_courte": "Méthode consistant à remplir la tranchée en couches successives.",
+    "explication_pedagogique": "Elle permet un compactage homogène.",
+    "exemple_utilisation": "Le CCTP demande des couches de 0,20 m maximum.",
+    "points_vigilance": [
+      "Contrôler chaque couche sous chaussée."
+    ]
+  },
+  {
+    "terme": "Remblaiement",
+    "definition_courte": "Fermeture de la tranchée après pose et contrôle.",
+    "explication_pedagogique": "Il protège la canalisation et reconstitue le terrain.",
+    "exemple_utilisation": "Le CCTP détaille sable, produits de fouille et compactage.",
+    "points_vigilance": [
+      "Ne pas remblayer avant contrôle du lit, des joints et du grillage."
+    ]
+  },
+  {
+    "terme": "Réparation des dégâts",
+    "definition_courte": "Remise en état des dommages causés par chantier ou intempéries.",
+    "explication_pedagogique": "Elle fait partie du forfait de l'entreprise.",
+    "exemple_utilisation": "Le CCTP inclut la réparation des dégâts causés aux tiers ou par intempéries.",
+    "points_vigilance": [
+      "Documenter l'état initial et intervenir rapidement."
+    ]
+  },
+  {
+    "terme": "Réserve incendie",
+    "definition_courte": "Volume d'eau disponible pour les secours.",
+    "explication_pedagogique": "Elle compense l'absence ou l'insuffisance d'un réseau incendie classique.",
+    "exemple_utilisation": "Le CCTP prévoit une bâche souple de 120 m3.",
+    "points_vigilance": [
+      "Assurer accès, signalisation et maintien en eau."
+    ]
+  },
+  {
+    "terme": "Résistance rupture chaîne/trame",
+    "definition_courte": "Résistance mécanique du tissu dans deux directions.",
+    "explication_pedagogique": "Elle qualifie la solidité de la bâche souple.",
+    "exemple_utilisation": "Le CCTP exige 4200/4000 N/50 mm.",
+    "points_vigilance": [
+      "Comparer précisément les valeurs de la fiche technique."
+    ]
+  },
+  {
+    "terme": "Rinçage",
+    "definition_courte": "Circulation d'eau pour nettoyer la canalisation.",
+    "explication_pedagogique": "Il élimine déchets et produits de désinfection.",
+    "exemple_utilisation": "Le CCTP prévoit le nettoyage par rinçage sous surveillance du Service de l'Eau.",
+    "points_vigilance": [
+      "Prévoir points d'évacuation sans polluer le chantier."
+    ]
+  },
+  {
+    "terme": "Robinet avant compteur",
+    "definition_courte": "Organe de coupure placé avant le compteur d'eau.",
+    "explication_pedagogique": "Il permet d'isoler le branchement avant comptage.",
+    "exemple_utilisation": "Le CCTP demande un robinet avant compteur dans chaque regard Jumbo.",
+    "points_vigilance": [
+      "Vérifier accessibilité et sens de manoeuvre."
+    ]
+  },
+  {
+    "terme": "Robinet d'arrêt 1/4 de tour",
+    "definition_courte": "Robinet qui se ferme par un quart de tour.",
+    "explication_pedagogique": "Il permet une coupure rapide du branchement.",
+    "exemple_utilisation": "Le CCTP associe les têtes rondes aux robinets d'arrêt 1/4 de tour.",
+    "points_vigilance": [
+      "Contrôler manoeuvre et repérage."
+    ]
+  },
+  {
+    "terme": "Robinet d'isolement",
+    "definition_courte": "Robinet permettant d'isoler un appareil ou une portion de réseau.",
+    "explication_pedagogique": "Il facilite maintenance et remplacement.",
+    "exemple_utilisation": "Le CCTP prévoit une ventouse avec robinet d'isolement incorporé.",
+    "points_vigilance": [
+      "Tester la manoeuvre avant remblai ou fermeture."
+    ]
+  },
+  {
+    "terme": "Robinet de prise en charge",
+    "definition_courte": "Robinet installé sur le collier de branchement.",
+    "explication_pedagogique": "Il permet de créer et isoler le branchement.",
+    "exemple_utilisation": "Le CCTP demande un ensemble robinet de branchement 1/4 de tour en fonte.",
+    "points_vigilance": [
+      "Le collier doit être adapté à la canalisation support."
+    ]
+  },
+  {
+    "terme": "Robinet de puisage",
+    "definition_courte": "Robinet utilisé pour prélever de l'eau.",
+    "explication_pedagogique": "Il sert aux analyses de contrôle.",
+    "exemple_utilisation": "Le CCTP prévoit un robinet de puisage en point bas pour prélèvement bactériologique.",
+    "points_vigilance": [
+      "Désinfecter avant prélèvement et éviter toute contamination externe."
+    ]
+  },
+  {
+    "terme": "Robinet-vanne",
+    "definition_courte": "Vanne de sectionnement enterrée manoeuvrable depuis une bouche à clé.",
+    "explication_pedagogique": "Elle permet d'isoler une partie du réseau.",
+    "exemple_utilisation": "Le CCTP prévoit des robinets-vannes à opercule caoutchouc.",
+    "points_vigilance": [
+      "Respecter norme, sens de fermeture et repérage."
+    ]
+  },
+  {
+    "terme": "Sable d'enrobage",
+    "definition_courte": "Sable placé autour de la canalisation.",
+    "explication_pedagogique": "Il protège et cale le tuyau.",
+    "exemple_utilisation": "Le CCTP demande un sable 0/4 exempt de matières organiques.",
+    "points_vigilance": [
+      "Contrôler propreté et absence de cailloux."
+    ]
+  },
+  {
+    "terme": "Sable intérieur d'assise",
+    "definition_courte": "Sable remplissant l'intérieur de l'assise béton sous la bâche.",
+    "explication_pedagogique": "Il forme le support souple de la réserve.",
+    "exemple_utilisation": "Le CCTP demande de remplir l'intérieur de l'assise avec du sable avant pose de la bâche.",
+    "points_vigilance": [
+      "Éviter les cailloux ou aspérités qui peuvent percer la membrane."
+    ]
+  },
+  {
+    "terme": "Sable sans caillou",
+    "definition_courte": "Matériau fin utilisé pour corriger le fond de tranchée.",
+    "explication_pedagogique": "Il évite les appuis ponctuels sur le tuyau.",
+    "exemple_utilisation": "Le CCTP demande de la terre débarrassée de tout caillou si nécessaire.",
+    "points_vigilance": [
+      "Inspecter le fond avant descente de canalisation."
+    ]
+  },
+  {
+    "terme": "SAUR",
+    "definition_courte": "Gestionnaire cité pour les réseaux d'eau potable et assainissement.",
+    "explication_pedagogique": "Il peut être interlocuteur pour prescriptions et contrôle.",
+    "exemple_utilisation": "Le CCTP cite SAUR pour eau potable, eaux usées et eaux pluviales.",
+    "points_vigilance": [
+      "Confirmer l'interlocuteur exact du réseau AEP."
+    ]
+  },
+  {
+    "terme": "Scellement",
+    "definition_courte": "Fixation durable dans un massif ou ouvrage maçonné.",
+    "explication_pedagogique": "Il maintient piquets, couvertures ou organes.",
+    "exemple_utilisation": "Le CCTP prévoit un piquet scellé dans un massif en plâtre pour repérage.",
+    "points_vigilance": [
+      "Assurer visibilité et tenue jusqu'à intervention suivante."
+    ]
+  },
+  {
+    "terme": "Sens de fermeture antihoraire",
+    "definition_courte": "Sens de manoeuvre d'une vanne pour la fermer.",
+    "explication_pedagogique": "Il uniformise l'exploitation du réseau.",
+    "exemple_utilisation": "Le CCTP demande des robinets-vannes à sens de fermeture antihoraire.",
+    "points_vigilance": [
+      "Contrôler avec le gestionnaire et le matériel livré."
+    ]
+  },
+  {
+    "terme": "Service de l'Eau",
+    "definition_courte": "Service gestionnaire ou contrôleur du réseau d'eau potable.",
+    "explication_pedagogique": "Il surveille essais, nettoyage et conformité.",
+    "exemple_utilisation": "Le CCTP prévoit rinçage et essais sous surveillance du Service de l'Eau.",
+    "points_vigilance": [
+      "Planifier sa présence suffisamment tôt."
+    ]
+  },
+  {
+    "terme": "Signal avertisseur",
+    "definition_courte": "Grillage ou dispositif signalant un réseau enterré.",
+    "explication_pedagogique": "Il protège le réseau lors de futurs terrassements.",
+    "exemple_utilisation": "Le CCTP prévoit un grillage bleu pour AEP.",
+    "points_vigilance": [
+      "Poser à la bonne hauteur et largeur."
+    ]
+  },
+  {
+    "terme": "Signalisation de chantier",
+    "definition_courte": "Balisage temporaire de sécurité et d'information.",
+    "explication_pedagogique": "Elle protège usagers, riverains et personnel.",
+    "exemple_utilisation": "Le CCTP demande une signalisation diurne et nocturne conforme.",
+    "points_vigilance": [
+      "Adapter au phasage et aux tranchées ouvertes."
+    ]
+  },
+  {
+    "terme": "Sondage préalable",
+    "definition_courte": "Reconnaissance du terrain ou des réseaux avant travaux.",
+    "explication_pedagogique": "Elle réduit le risque de découverte imprévue.",
+    "exemple_utilisation": "Le CCTP demande les dossiers d'exécution en tenant compte des sondages éventuels.",
+    "points_vigilance": [
+      "Faire les sondages avant calage définitif des plans."
+    ]
+  },
+  {
+    "terme": "Souche non visible",
+    "definition_courte": "Reste d'arbre enterré dans l'emprise.",
+    "explication_pedagogique": "Elle doit être extraite pour éviter tassements ou obstacles.",
+    "exemple_utilisation": "Le CCTP prévoit l'extraction soignée des souches non visibles.",
+    "points_vigilance": [
+      "Combler les trous avec sable tout-venant ou matériaux sains."
+    ]
+  },
+  {
+    "terme": "Stagnation d'eau",
+    "definition_courte": "Accumulation d'eau sur le remblai ou fond de fouille.",
+    "explication_pedagogique": "Elle peut dégrader la cohésion du remblai.",
+    "exemple_utilisation": "Le CCTP demande de niveler la face supérieure pour éviter toute stagnation.",
+    "points_vigilance": [
+      "Prévoir pente ou évacuation provisoire."
+    ]
+  },
+  {
+    "terme": "Sujétion de chantier",
+    "definition_courte": "Contrainte particulière incluse dans la prestation.",
+    "explication_pedagogique": "Elle peut concerner circulation, réseaux existants, météo ou riverains.",
+    "exemple_utilisation": "Le CCTP indique que l'entrepreneur ne peut demander d'indemnité pour certaines coordinations.",
+    "points_vigilance": [
+      "Intégrer ces contraintes dans prix et planning."
+    ]
+  },
+  {
+    "terme": "Surlargeur",
+    "definition_courte": "Largeur supplémentaire de fouille due à contraintes ou réseaux.",
+    "explication_pedagogique": "Elle peut être nécessaire pour travailler correctement.",
+    "exemple_utilisation": "Le CCTP demande l'implantation en tenant compte des surlargeurs et sujétions.",
+    "points_vigilance": [
+      "Ne pas réduire la fouille au détriment de la sécurité."
+    ]
+  },
+  {
+    "terme": "Tabernacle",
+    "definition_courte": "Protection ou support autour d'une vanne enterrée.",
+    "explication_pedagogique": "Il fait partie du dispositif de manoeuvre.",
+    "exemple_utilisation": "Le CCTP prévoit tabernacles ou cloches selon localisation.",
+    "points_vigilance": [
+      "Choisir le modèle validé par le maître d'oeuvre."
+    ]
+  },
+  {
+    "terme": "Tableau des essais de pression",
+    "definition_courte": "Tableau récapitulant les résultats d'essais AEP.",
+    "explication_pedagogique": "Il prouve la conformité des tronçons contrôlés.",
+    "exemple_utilisation": "Le CCTP demande les tableaux des essais de pression dans le récolement.",
+    "points_vigilance": [
+      "Indiquer tronçon, date, pression, durée, résultat et observateur."
+    ]
+  },
+  {
+    "terme": "Te à tubulure",
+    "definition_courte": "Pièce en T avec départ pour brancher un équipement.",
+    "explication_pedagogique": "Elle permet de raccorder une ventouse sur le réseau.",
+    "exemple_utilisation": "Le CCTP prévoit un té à tubulure pour branchement des ventouses.",
+    "points_vigilance": [
+      "Vérifier diamètre, orientation et accessibilité."
+    ]
+  },
+  {
+    "terme": "Tenue à chaud +70 °C",
+    "definition_courte": "Résistance de la bâche aux hautes températures.",
+    "explication_pedagogique": "Elle garantit son comportement en conditions extérieures chaudes.",
+    "exemple_utilisation": "Le CCTP demande une tenue à la chaleur de +70 °C.",
+    "points_vigilance": [
+      "Contrôler certificat fabricant."
+    ]
+  },
+  {
+    "terme": "Tenue à froid -30 °C",
+    "definition_courte": "Résistance de la bâche aux basses températures.",
+    "explication_pedagogique": "Elle évite fissuration ou fragilisation.",
+    "exemple_utilisation": "Le CCTP demande une tenue à froid de -30 °C.",
+    "points_vigilance": [
+      "Attention aux manutentions par temps froid."
+    ]
+  },
+  {
+    "terme": "Tête de bouche à clé réglable",
+    "definition_courte": "Partie supérieure ajustable d'une bouche à clé.",
+    "explication_pedagogique": "Elle permet de régler le niveau au sol fini.",
+    "exemple_utilisation": "Le CCTP prévoit des têtes réglables en fonte.",
+    "points_vigilance": [
+      "Régler après finition de chaussée ou trottoir."
+    ]
+  },
+  {
+    "terme": "Traçabilité des matériaux",
+    "definition_courte": "Capacité à prouver origine et caractéristiques des fournitures.",
+    "explication_pedagogique": "Elle sécurise la réception et la responsabilité de l'entreprise.",
+    "exemple_utilisation": "Le CCTP demande origine et lieu de fabrication des fournitures.",
+    "points_vigilance": [
+      "Conserver fiches, bons et certificats."
+    ]
+  },
+  {
+    "terme": "Tranchée",
+    "definition_courte": "Fouille linéaire destinée à recevoir une canalisation.",
+    "explication_pedagogique": "Elle permet la pose du réseau AEP, arrosage ou défense incendie.",
+    "exemple_utilisation": "Le CCTP prévoit l'ouverture et la fermeture des tranchées.",
+    "points_vigilance": [
+      "Sécuriser, blinder si nécessaire et récolement avant remblai."
+    ]
+  },
+  {
+    "terme": "Tranchée sous chaussée",
+    "definition_courte": "Fouille réalisée sous une zone circulée.",
+    "explication_pedagogique": "Elle impose protections et réfections particulières.",
+    "exemple_utilisation": "Le CCTP encadre fourreaux et réfection sous chaussée.",
+    "points_vigilance": [
+      "Respecter autorisation de voirie et structure de réfection."
+    ]
+  },
+  {
+    "terme": "Tube allonge",
+    "definition_courte": "Tube vertical reliant l'organe enterré à la tête de bouche à clé.",
+    "explication_pedagogique": "Il permet la manoeuvre depuis la surface.",
+    "exemple_utilisation": "Le CCTP prévoit tube allonge à emboîtement en fonte.",
+    "points_vigilance": [
+      "Régler verticalité et niveau pour ne pas bloquer la clé."
+    ]
+  },
+  {
+    "terme": "Tuyau alimentaire",
+    "definition_courte": "Canalisation compatible avec l'eau potable.",
+    "explication_pedagogique": "Elle ne doit pas altérer la qualité sanitaire de l'eau.",
+    "exemple_utilisation": "Le CCTP impose PVC et PEHD de qualité alimentaire.",
+    "points_vigilance": [
+      "Demander certificats sanitaires."
+    ]
+  },
+  {
+    "terme": "Vanne de sectionnement",
+    "definition_courte": "Organe permettant d'isoler une partie du réseau.",
+    "explication_pedagogique": "Elle facilite interventions, essais et maintenance.",
+    "exemple_utilisation": "Le CCTP prévoit des robinets-vannes à opercule caoutchouc.",
+    "points_vigilance": [
+      "Repérer et rendre manoeuvrable depuis une bouche à clé."
+    ]
+  },
+  {
+    "terme": "Vanne de vidange",
+    "definition_courte": "Organe permettant de vider une portion de réseau.",
+    "explication_pedagogique": "Elle sert au nettoyage, maintenance ou mise hors service.",
+    "exemple_utilisation": "Le CCTP prévoit des vannes de vidange avec bout de tuyau vers réseau pluvial.",
+    "points_vigilance": [
+      "Soigner le rejet et le rejointoiement."
+    ]
+  },
+  {
+    "terme": "Ventouse 3 fonctions",
+    "definition_courte": "Appareil automatique évacuant ou admettant l'air selon les phases du réseau.",
+    "explication_pedagogique": "Elle protège le réseau au remplissage, en service et à la vidange.",
+    "exemple_utilisation": "Le CCTP prévoit une ventouse 3 fonctions en point haut.",
+    "points_vigilance": [
+      "Installer avec robinet d'isolement et té de raccordement."
+    ]
+  },
+  {
+    "terme": "Visa du maître d'oeuvre",
+    "definition_courte": "Validation formelle d'un document d'exécution.",
+    "explication_pedagogique": "Il autorise ou encadre la suite des travaux.",
+    "exemple_utilisation": "Le CCTP prévoit le retour des documents avec visa et observations.",
+    "points_vigilance": [
+      "Traiter les observations avant exécution."
+    ]
+  },
+  {
+    "terme": "X Y Z",
+    "definition_courte": "Coordonnées planimétriques et altimétriques d'un ouvrage.",
+    "explication_pedagogique": "Elles permettent de localiser précisément les réseaux enterrés.",
+    "exemple_utilisation": "Le CCTP demande les ouvrages cotés en X, Y et Z.",
+    "points_vigilance": [
+      "Ne pas remettre un récolement seulement approximatif."
+    ]
+  },
+  {
+    "terme": "Zone de circulation autour de bâche",
+    "definition_courte": "Cheminement libre périphérique pour accès et maintenance.",
+    "explication_pedagogique": "Il permet de contrôler et intervenir autour de la réserve incendie.",
+    "exemple_utilisation": "Le CCTP demande 1,00 m libre autour de la bâche.",
+    "points_vigilance": [
+      "Conserver libre après aménagements paysagers."
+    ]
+  }
+]

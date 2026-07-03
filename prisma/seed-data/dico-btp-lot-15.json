@@ -1,0 +1,2264 @@
+[
+  {
+    "terme": "0,10 m de terre pour gazon",
+    "definition_courte": "Épaisseur minimale de terre végétale non foisonnee prévue pour les surfaces engazonnees.",
+    "explication_pedagogique": "Elle permet d'installer une couche de croissance suffisante pour l'herbe.",
+    "exemple_utilisation": "Le CCTP indique 0,10 m minimum pour les gazons.",
+    "points_vigilance": [
+      "Controler le niveau fini, qui doit rester 2 a 3 cm sous les revêtements voisins."
+    ]
+  },
+  {
+    "terme": "0,30 m pour vivaces et graminées",
+    "definition_courte": "Épaisseur de terre végétale demandee pour vivaces, graminées, grimpantes et couvre-sols.",
+    "explication_pedagogique": "Elle donne assez de volume aux racines fines pour s'installer.",
+    "exemple_utilisation": "Le CCTP prévoit 0,30 m sur ces massifs.",
+    "points_vigilance": [
+      "Ne pas reduire l'épaisseur pres des bordures ou des facades."
+    ]
+  },
+  {
+    "terme": "0,40 m pour arbustes",
+    "definition_courte": "Épaisseur de terre végétale prévue pour les massifs arbustifs.",
+    "explication_pedagogique": "Elle assure un volume de sol plus important que pour les vivaces.",
+    "exemple_utilisation": "Le CCTP demande 0,40 m pour les arbustes.",
+    "points_vigilance": [
+      "Vérifier le decompactage du fond avant apport de terre."
+    ]
+  },
+  {
+    "terme": "1,00 m barrière anti-racines",
+    "definition_courte": "Hauteur minimale de membrane anti-racinaire posee en paroi verticale.",
+    "explication_pedagogique": "Elle guide les racines et protège voiries, parkings ou reseaux proches.",
+    "exemple_utilisation": "Le CCTP demande une hauteur minimale de 1,00 m autour de certaines fosses.",
+    "points_vigilance": [
+      "La face lisse doit etre côté racines et l'arase doit affleurer le sol fini."
+    ]
+  },
+  {
+    "terme": "1,20 m clôture jardin",
+    "definition_courte": "Hauteur courante des clôtures de jardins privatifs.",
+    "explication_pedagogique": "Elle sépare les espaces sans produire une fermeture trop massive.",
+    "exemple_utilisation": "Le CCTP prévoit des treillis ou portillons de hauteur environ 1,20 m.",
+    "points_vigilance": [
+      "Controler l'alignement et l'espace sous panneau, limite a 11 cm."
+    ]
+  },
+  {
+    "terme": "1,50 m ganivelle",
+    "definition_courte": "Hauteur de la ganivelle renforcee prévue autour de la bâche incendie.",
+    "explication_pedagogique": "Elle sécurise l'ouvrage tout en gardant un aspect bois paysager.",
+    "exemple_utilisation": "Le CCTP demande une ganivelle renforcee de 1,50 m.",
+    "points_vigilance": [
+      "Vérifier la rigidite, les jambes de force et le portillon d'acces SDIS."
+    ]
+  },
+  {
+    "terme": "11 tontes minimum",
+    "definition_courte": "Nombre minimal de tontes prévu sur une année normale.",
+    "explication_pedagogique": "Il maintient les gazons propres pendant la période de croissance.",
+    "exemple_utilisation": "Le CCTP prévoit au minimum 11 tontes d'avril a octobre.",
+    "points_vigilance": [
+      "Ne pas blesser collets et écorces avec debroussailleuse."
+    ]
+  },
+  {
+    "terme": "2 a 3 cm sous revêtement",
+    "definition_courte": "Decalage de niveau demande entre terres ou mulch et surfaces dures voisines.",
+    "explication_pedagogique": "Il évite que la terre ou le paillage deborde sur les cheminements.",
+    "exemple_utilisation": "Le CCTP impose les terres de gazon et le haut du mulch 2 a 3 cm sous les revêtements.",
+    "points_vigilance": [
+      "Refuser les terres bombees ou au-dessus des bordures."
+    ]
+  },
+  {
+    "terme": "3 m3 fosse d'arbre",
+    "definition_courte": "Volume minimal de fosse prévu pour arbres tiges et cépées.",
+    "explication_pedagogique": "Il donne au sujet un volume utile de terre pour l'enracinement.",
+    "exemple_utilisation": "Le CCTP indique 1,60 m x 1,60 m x 1,20 m, soit environ 3 m3.",
+    "points_vigilance": [
+      "Implanter la fosse sans conflit avec reseaux, ouvrages et végétaux existants."
+    ]
+  },
+  {
+    "terme": "8 a 10 cm de paillage",
+    "definition_courte": "Épaisseur de paillage organique a maintenir sur les massifs.",
+    "explication_pedagogique": "Elle limite evaporation, adventices et battance du sol.",
+    "exemple_utilisation": "Le CCTP demande le contrôle et le maintien du paillage sur 8 a 10 cm.",
+    "points_vigilance": [
+      "Completer le paillage pendant l'entretien si l'épaisseur baisse."
+    ]
+  },
+  {
+    "terme": "Accessibilité PMR",
+    "definition_courte": "Exigence permettant l'usage des espaces par les personnes a mobilite reduite.",
+    "explication_pedagogique": "Elle influence cheminements, acces, mobilier et signalisation provisoire.",
+    "exemple_utilisation": "Le CCTP cite le maintien des accessibilites, y compris PMR si besoin.",
+    "points_vigilance": [
+      "Ne pas creer d'obstacle avec clôtures, stockage ou travaux provisoires."
+    ]
+  },
+  {
+    "terme": "Adventices",
+    "definition_courte": "Plantes indésirables qui poussent dans les terres, massifs ou gazons.",
+    "explication_pedagogique": "Leur gestion évite la concurrence avec les plantations.",
+    "exemple_utilisation": "Le CCTP demande arrachage, désherbage et maintien propre des terres.",
+    "points_vigilance": [
+      "Intervenir avant graines et sans blesser les végétaux plantes."
+    ]
+  },
+  {
+    "terme": "Agrafe de grillage",
+    "definition_courte": "Petite fixation reliant le treillis au fil ou au poteau.",
+    "explication_pedagogique": "Elle maintient la clôture tendue et régulière.",
+    "exemple_utilisation": "Le CCTP prévoit des agrafes sur les clôtures en treillis soude souple.",
+    "points_vigilance": [
+      "Respecter la densite de fixation pour eviter les zones flottantes."
+    ]
+  },
+  {
+    "terme": "Aire mineralisee",
+    "definition_courte": "Surface exterieure non végétale : voirie, parking, allee ou revêtement.",
+    "explication_pedagogique": "Elle doit rester propre après tontes, terrassements ou plantations.",
+    "exemple_utilisation": "Le CCTP demande l'enlevement des herbes projetees sur les aires mineralisees.",
+    "points_vigilance": [
+      "Balayer ou souffler sans repousser les dechets dans les massifs."
+    ]
+  },
+  {
+    "terme": "Alignement altimetrique",
+    "definition_courte": "Réglage des hauteurs d'un ouvrage sur son profil.",
+    "explication_pedagogique": "Il assure un rendu propre des clôtures, potelets et niveaux de sols.",
+    "exemple_utilisation": "Le CCTP demande l'alignement altimetrique des poteaux et grillages.",
+    "points_vigilance": [
+      "Vérifier au cordeau et au niveau avant scellement definitif."
+    ]
+  },
+  {
+    "terme": "Alignement géométrique",
+    "definition_courte": "Réglage en plan de l'implantation d'un ouvrage.",
+    "explication_pedagogique": "Il garantit une clôture droite, lisible et conforme aux plans.",
+    "exemple_utilisation": "Le CCTP insiste sur l'alignement géométrique des clôtures.",
+    "points_vigilance": [
+      "Corriger avant béton, car les reprises après scellement sont lourdes."
+    ]
+  },
+  {
+    "terme": "Amarre a percussion",
+    "definition_courte": "Tige d'ancrage metal utilisée pour fixer les bute-roues bois.",
+    "explication_pedagogique": "Elle immobilise la traverse sur son support.",
+    "exemple_utilisation": "Le CCTP prévoit deux amarres a percussion par traverse de bute-roues.",
+    "points_vigilance": [
+      "Controler longueur, galvanisation et enfoncement complet."
+    ]
+  },
+  {
+    "terme": "Amendement organique",
+    "definition_courte": "Apport de matiere organique mélange a la terre végétale.",
+    "explication_pedagogique": "Il améliore structure, vie biologique et fertilite du sol.",
+    "exemple_utilisation": "Le CCTP demande un amendement selon les analyses de terre.",
+    "points_vigilance": [
+      "Faire valider la fiche technique et respecter les dosages par type de plantation."
+    ]
+  },
+  {
+    "terme": "Analyse de terre",
+    "definition_courte": "Examen en laboratoire des caracteristiques physiques et chimiques du sol.",
+    "explication_pedagogique": "Elle permet d'ajuster amendement, fertilisation et acceptation de la terre.",
+    "exemple_utilisation": "Le CCTP demande des analyses pour la terre fournie ou reprise.",
+    "points_vigilance": [
+      "Realiser les prélèvements hors gel, hors stress hydrique et hors apport recent."
+    ]
+  },
+  {
+    "terme": "Arbre a conserver",
+    "definition_courte": "Sujet existant maintenu dans le projet.",
+    "explication_pedagogique": "Il doit etre protège contre chocs, compaction et blessures racinaires.",
+    "exemple_utilisation": "Le CCTP prévoit protections bois, barrierage et interdiction de stockage sous houppier.",
+    "points_vigilance": [
+      "Toute racine ou branche arrachee doit etre recoupee proprement et traitee."
+    ]
+  },
+  {
+    "terme": "Arbre fruitier",
+    "definition_courte": "Arbre produisant des fruits, avec fosse de volume specifique.",
+    "explication_pedagogique": "Il apporte un usage nourricier ou paysager aux espaces verts.",
+    "exemple_utilisation": "Le CCTP prévoit une fosse minimale d'environ 2 m3 pour arbres fruitiers.",
+    "points_vigilance": [
+      "Respecter implantation, volume et qualité de terre."
+    ]
+  },
+  {
+    "terme": "Arbre tige",
+    "definition_courte": "Arbre forme avec un tronc unique et une couronne en hauteur.",
+    "explication_pedagogique": "Il structure les espaces exterieurs et les stationnements.",
+    "exemple_utilisation": "Le CCTP demande arbres tiges en motte grillagée et transplantations adaptees.",
+    "points_vigilance": [
+      "Vérifier rectitude, absence de blessures et attache non blessante."
+    ]
+  },
+  {
+    "terme": "Arrachage soigne",
+    "definition_courte": "Opération de sortie des végétaux de pepiniere sans abimer les racines.",
+    "explication_pedagogique": "Il préserve le chevelu racinaire et la reprise après plantation.",
+    "exemple_utilisation": "Le CCTP exige un arrachage avec soin des plantes fournies.",
+    "points_vigilance": [
+      "Refuser les mottes cassees, racines sechees ou chignons importants."
+    ]
+  },
+  {
+    "terme": "Arrosage goutte-a-goutte",
+    "definition_courte": "Système d'irrigation localisee apportant l'eau au pied des plantes.",
+    "explication_pedagogique": "Il limite les pertes d'eau et facilite la reprise des végétaux.",
+    "exemple_utilisation": "Le CCTP prévoit un reseau goutte-a-goutte avec kits de depart et électrovannes.",
+    "points_vigilance": [
+      "Vérifier pression, filtration, programmation et hivernage."
+    ]
+  },
+  {
+    "terme": "Arrosage manuel de secours",
+    "definition_courte": "Apport d'eau ponctuel si le reseau automatique ne suffit pas.",
+    "explication_pedagogique": "Il évite la perte des végétaux en période sèche ou de panne.",
+    "exemple_utilisation": "Le CCTP impose a l'entreprise de prendre les dispositions d'arrosage indispensables.",
+    "points_vigilance": [
+      "Ne pas attendre le deperissement pour completer l'arrosage."
+    ]
+  },
+  {
+    "terme": "Attache de collier",
+    "definition_courte": "Lien reliant tuteur, arbre et protection sans blesser l'écorce.",
+    "explication_pedagogique": "Elle stabilise le sujet pendant son enracinement.",
+    "exemple_utilisation": "Le CCTP demande des colliers reglables en caoutchouc ou avec protection.",
+    "points_vigilance": [
+      "Le fil de fer ne doit jamais etre en contact direct avec le tronc."
+    ]
+  },
+  {
+    "terme": "Bâche PLA",
+    "definition_courte": "Film biodegradable ou biosource employe en paillage de plantation.",
+    "explication_pedagogique": "Elle reduit les adventices et protège le sol sur certains massifs.",
+    "exemple_utilisation": "Le CCTP cite une bâche PLA dans les accessoires de plantation.",
+    "points_vigilance": [
+      "Soigner recouvrements et fixations pour eviter arrachement au vent."
+    ]
+  },
+  {
+    "terme": "Balisage provisoire",
+    "definition_courte": "Signalisation temporaire protegeant usagers et zones de chantier.",
+    "explication_pedagogique": "Il permet de maintenir circulation, acces riverains et sécurité.",
+    "exemple_utilisation": "Le CCTP met a charge la signalisation provisoire de l'entreprise.",
+    "points_vigilance": [
+      "Adapter de jour comme de nuit et maintenir jusqu'au repli."
+    ]
+  },
+  {
+    "terme": "Baliveau",
+    "definition_courte": "Jeune arbre ou arbuste forme, déjà ramifie et destine a etre plante.",
+    "explication_pedagogique": "Il permet de creer rapidement une structure végétale.",
+    "exemple_utilisation": "Le CCTP demande des baliveaux bien ramifies et sans chignon racinaire.",
+    "points_vigilance": [
+      "Vérifier calibre, racines et absence de blessures."
+    ]
+  },
+  {
+    "terme": "Barre de tension",
+    "definition_courte": "Element rigide tendant un grillage souple en debut ou fin de ligne.",
+    "explication_pedagogique": "Elle donne la planeite au treillis et évite l'affaissement.",
+    "exemple_utilisation": "Le CCTP inclut barres de tension dans le treillis soude souple.",
+    "points_vigilance": [
+      "Controler la verticalite et la tension avant réception."
+    ]
+  },
+  {
+    "terme": "Barrierage temporaire",
+    "definition_courte": "Protection provisoire autour d'un arbre, massif ou zone dangereuse.",
+    "explication_pedagogique": "Il évite acces, stockage ou choc pendant les travaux.",
+    "exemple_utilisation": "Le CCTP demande un barrierage solidement fixe pour les végétaux conserves.",
+    "points_vigilance": [
+      "Le deplacer seulement après accord de la maîtrise d'oeuvre."
+    ]
+  },
+  {
+    "terme": "Barrière anti-racinaire",
+    "definition_courte": "Membrane posee en fosse pour limiter la progression des racines vers les ouvrages.",
+    "explication_pedagogique": "Elle protège enrobés, bordures, reseaux et fondations proches.",
+    "exemple_utilisation": "Le CCTP prévoit une membrane non tissee en polypropylene sur certaines fosses.",
+    "points_vigilance": [
+      "Elle doit etre continue, bien orientee et non dechiree."
+    ]
+  },
+  {
+    "terme": "Bastaing de protection",
+    "definition_courte": "Pièce de bois utilisée dans une protection d'arbre ou de chantier.",
+    "explication_pedagogique": "Elle absorbe les chocs et rigidifie l'ouvrage provisoire.",
+    "exemple_utilisation": "Le CCTP cite des lignes de bastaings dans les protections bois.",
+    "points_vigilance": [
+      "Les fixer solidement sans contact blessant avec l'arbre."
+    ]
+  },
+  {
+    "terme": "Bâtonnet d'arrosage",
+    "definition_courte": "Element ou accessoire permettant de diriger l'eau vers une zone précise.",
+    "explication_pedagogique": "Il aide les jeunes plantations a recevoir l'eau utile.",
+    "exemple_utilisation": "Le CCTP traite les accessoires d'arrosage localise autour des plantations.",
+    "points_vigilance": [
+      "Vérifier que l'eau atteint bien la motte et non seulement la surface."
+    ]
+  },
+  {
+    "terme": "Bêchage",
+    "definition_courte": "Travail manuel du sol a la beche.",
+    "explication_pedagogique": "Il ameublit les petites surfaces et incorpore amendements.",
+    "exemple_utilisation": "Le CCTP cite le binage, hersage ou bêchage selon les preparations de sol.",
+    "points_vigilance": [
+      "Travailler sur sol ressuye pour ne pas lisser ou compacter."
+    ]
+  },
+  {
+    "terme": "Binage",
+    "definition_courte": "Travail superficiel du sol pour casser la croute et aerer.",
+    "explication_pedagogique": "Il facilite l'infiltration et limite les adventices.",
+    "exemple_utilisation": "Le CCTP accepte le binage pour incorporer l'amendement.",
+    "points_vigilance": [
+      "Ne pas abimer racines superficielles des jeunes plantations."
+    ]
+  },
+  {
+    "terme": "Bordure voisine",
+    "definition_courte": "Element separant massif, gazon ou revêtement.",
+    "explication_pedagogique": "Elle sert de reference de niveau pour les terres.",
+    "exemple_utilisation": "Le CCTP exige les terres sous le niveau des bordures et revêtements voisins.",
+    "points_vigilance": [
+      "Controler les niveaux avant paillage ou semis."
+    ]
+  },
+  {
+    "terme": "Bouchage de trou de plantation",
+    "definition_courte": "Remplissage de la fosse après mise en place du sujet.",
+    "explication_pedagogique": "Il stabilise la plante et remet le sol au bon niveau.",
+    "exemple_utilisation": "Le CCTP impose un délai maximum entre ouverture et rebouchage des fosses.",
+    "points_vigilance": [
+      "Ne pas laisser une fosse ouverte trop longtemps ou remplie d'eau."
+    ]
+  },
+  {
+    "terme": "Broyat",
+    "definition_courte": "Branches broyees en fragments de quelques millimetres.",
+    "explication_pedagogique": "Il peut servir de mulch si la maîtrise d'oeuvre le valide.",
+    "exemple_utilisation": "Le CCTP indique un broyage possible des branches en 6 a 20 mm.",
+    "points_vigilance": [
+      "Ne pas reutiliser de broyat malade ou pollue."
+    ]
+  },
+  {
+    "terme": "Bute-roues bois",
+    "definition_courte": "Traverse bois posee en parking pour limiter l'avance des vehicules.",
+    "explication_pedagogique": "Elle protège plantations, cheminements ou ouvrages en fond de place.",
+    "exemple_utilisation": "Le CCTP prévoit des bute-roues en pin autoclave classe IV.",
+    "points_vigilance": [
+      "Vérifier fixation, longueur, absence d'echardes et positionnement."
+    ]
+  },
+  {
+    "terme": "Calage de portillon",
+    "definition_courte": "Réglage d'un portillon pour assurer ouverture, fermeture et aplomb.",
+    "explication_pedagogique": "Il conditionne l'usage quotidien des jardins ou acces techniques.",
+    "exemple_utilisation": "Le CCTP inclut ajustements et calages des portillons.",
+    "points_vigilance": [
+      "Tester la manoeuvre avant réception, y compris serrure et jeu au sol."
+    ]
+  },
+  {
+    "terme": "Calepinage de clôture",
+    "definition_courte": "Plan de repartition des panneaux, poteaux, angles et raccords.",
+    "explication_pedagogique": "Il évite coupes maladroites et mauvaises finitions.",
+    "exemple_utilisation": "Le CCTP demande plans et details d'exécution avant pose de panneaux.",
+    "points_vigilance": [
+      "Valider les raccordements aux facades, DEP et regards EP."
+    ]
+  },
+  {
+    "terme": "Carottage de revêtement",
+    "definition_courte": "Percement cylindrique dans un sol fini pour poser un poteau.",
+    "explication_pedagogique": "Il limite les dégradations par rapport a une ouverture large.",
+    "exemple_utilisation": "Le CCTP cite les carottages pour clôtures en panneaux.",
+    "points_vigilance": [
+      "Finir au mortier sans retrait teinte proche du sol."
+    ]
+  },
+  {
+    "terme": "Catadioptre",
+    "definition_courte": "Reflecteur pose sur certains potelets pour ameliorer la visibilite.",
+    "explication_pedagogique": "Il signale les obstacles aux vehicules ou piétons.",
+    "exemple_utilisation": "Le CCTP demande des catadioptres sur une partie des bornes bois.",
+    "points_vigilance": [
+      "Les fixer a la bonne hauteur avec vis inox."
+    ]
+  },
+  {
+    "terme": "Cépée",
+    "definition_courte": "Arbre ou grand arbuste forme en plusieurs troncs partant de la base.",
+    "explication_pedagogique": "Elle donne un effet naturel et volumineux dans les espaces verts.",
+    "exemple_utilisation": "Le CCTP prévoit des cépées en motte grillagée.",
+    "points_vigilance": [
+      "Vérifier nombre de troncs, equilibre et volume de fosse."
+    ]
+  },
+  {
+    "terme": "Chevelu racinaire",
+    "definition_courte": "Racines fines responsables de l'absorption d'eau et nutriments.",
+    "explication_pedagogique": "Il conditionne la reprise des végétaux.",
+    "exemple_utilisation": "Le CCTP demande de preserver le chevelu lors de l'arrachage.",
+    "points_vigilance": [
+      "Refuser les plantes aux racines desséchées ou coupees brutalement."
+    ]
+  },
+  {
+    "terme": "Chignon racinaire",
+    "definition_courte": "Racines enroulees en spirale dans un conteneur.",
+    "explication_pedagogique": "Il gêne la reprise et peut etrangler la plante.",
+    "exemple_utilisation": "Le CCTP exige des végétaux sans chignon.",
+    "points_vigilance": [
+      "Derouler legerement si possible ou refuser les sujets trop deformes."
+    ]
+  },
+  {
+    "terme": "Cicatrisant",
+    "definition_courte": "Produit applique sur une coupe ou blessure végétale.",
+    "explication_pedagogique": "Il limite le dessèchement et les contaminations selon prescription.",
+    "exemple_utilisation": "Le CCTP demande un cicatrisant sur racines ou branches arrachees.",
+    "points_vigilance": [
+      "Appliquer sur coupe franche et propre, pas sur dechirure non reprise."
+    ]
+  },
+  {
+    "terme": "Clapet-vanne",
+    "definition_courte": "Organe d'arrosage permettant de prelever ou isoler l'eau.",
+    "explication_pedagogique": "Il sert a l'exploitation du reseau et aux arrosages complementaires.",
+    "exemple_utilisation": "Le CCTP cite les clapets-vannes pour l'approvisionnement en eau.",
+    "points_vigilance": [
+      "Vérifier accessibilite, protection et sens de pose."
+    ]
+  },
+  {
+    "terme": "Classe IV bois",
+    "definition_courte": "Traitement du bois adapte au contact du sol et a l'humidité.",
+    "explication_pedagogique": "Il prolonge la duree de vie des poteaux, lisses et bute-roues.",
+    "exemple_utilisation": "Le CCTP demande du pin classe IV bain brun pour plusieurs ouvrages.",
+    "points_vigilance": [
+      "Exiger certificats de traitement et garanties annoncees."
+    ]
+  },
+  {
+    "terme": "Clôture en panneau",
+    "definition_courte": "Clôture rigide composee de panneaux treillis soudes entre poteaux.",
+    "explication_pedagogique": "Elle sépare les jardins avec une bonne tenue mécanique.",
+    "exemple_utilisation": "Le CCTP prévoit des panneaux RAL 7016 autour des jardins privatifs.",
+    "points_vigilance": [
+      "Poser picots en bas et maintenir les fondations sous niveau fini."
+    ]
+  },
+  {
+    "terme": "Clôture paddock",
+    "definition_courte": "Clôture basse en bois avec poteaux et lisses horizontales.",
+    "explication_pedagogique": "Elle marque une limite paysagere sans fermer completement.",
+    "exemple_utilisation": "Le CCTP prévoit une clôture paddock en pin traite bain brun.",
+    "points_vigilance": [
+      "Controler scellements, drainage en pied et entraxes."
+    ]
+  },
+  {
+    "terme": "Clôture souple",
+    "definition_courte": "Grillage en rouleau tendu entre poteaux.",
+    "explication_pedagogique": "Elle ferme les jardins de façon economique et continue.",
+    "exemple_utilisation": "Le CCTP prévoit du treillis soude souple RAL 7016 avec poteaux bois.",
+    "points_vigilance": [
+      "La tension doit etre régulière et les tendeurs alignes."
+    ]
+  },
+  {
+    "terme": "Collier d'attache",
+    "definition_courte": "Lien reglable qui maintient un arbre sur son tuteur.",
+    "explication_pedagogique": "Il limite le mouvement excessif sans etrangler le tronc.",
+    "exemple_utilisation": "Le CCTP demande le contrôle des colliers pendant l'entretien.",
+    "points_vigilance": [
+      "Desserrer ou remplacer si le tronc grossit."
+    ]
+  },
+  {
+    "terme": "Compactage de remblai",
+    "definition_courte": "Densification des terres remises autour d'un ouvrage.",
+    "explication_pedagogique": "Il évite tassements autour clôtures, barrieres ou reseaux d'arrosage.",
+    "exemple_utilisation": "Le CCTP demande remblaiement et compactage pour protections anti-racines ou poteaux.",
+    "points_vigilance": [
+      "Compacter sans blesser membrane, tuyaux ou racines."
+    ]
+  },
+  {
+    "terme": "Compost végétal",
+    "definition_courte": "Amendement issu de matieres organiques végétales compostees.",
+    "explication_pedagogique": "Il enrichit le sol sans apport animal ou boue non souhaitee.",
+    "exemple_utilisation": "Le CCTP demande un compost 100 % végétal, sans tourbe, fumier, lisier ni boue.",
+    "points_vigilance": [
+      "Vérifier label, maturite, granulometrie et absence d'odeur anormale."
+    ]
+  },
+  {
+    "terme": "Constat de blessures",
+    "definition_courte": "Relevé des dommages sur arbres ou arbustes.",
+    "explication_pedagogique": "Il declenche les reprises ou remplacements a charge de l'entreprise.",
+    "exemple_utilisation": "Le CCTP signale qu'une blessure par debroussailleuse peut entrainer remplacement.",
+    "points_vigilance": [
+      "Photographier et declarer rapidement toute blessure."
+    ]
+  },
+  {
+    "terme": "Contrôle continu",
+    "definition_courte": "Autocontrole régulier de l'exécution par l'entreprise.",
+    "explication_pedagogique": "Il maintient une qualité constante et documentee.",
+    "exemple_utilisation": "Le CCTP demande des fiches de contrôle transmises au maître d'ouvrage.",
+    "points_vigilance": [
+      "Ne pas attendre la réception pour decouvrir les non-conformites."
+    ]
+  },
+  {
+    "terme": "Contrôle phytosanitaire",
+    "definition_courte": "Verification de l'etat sanitaire des végétaux avant plantation.",
+    "explication_pedagogique": "Il évite d'introduire maladies ou parasites.",
+    "exemple_utilisation": "Le CCTP exige des contrôles phytosanitaires sur les végétaux fournis.",
+    "points_vigilance": [
+      "Refuser sujets malades, moussés, gerces ou affaiblis."
+    ]
+  },
+  {
+    "terme": "Coordination avec VRD",
+    "definition_courte": "Organisation entre lot paysage et lot voirie-reseaux.",
+    "explication_pedagogique": "Elle évite conflits de niveaux, fourreaux, dalles et fosses.",
+    "exemple_utilisation": "Le CCTP liste plusieurs prestations a charge du lot VRD avant paysage.",
+    "points_vigilance": [
+      "Vérifier fonds de forme et attentes avant intervention."
+    ]
+  },
+  {
+    "terme": "Cordeau",
+    "definition_courte": "Fil tendu servant a aligner poteaux, bordures ou plantations.",
+    "explication_pedagogique": "Il donne une implantation droite et visible.",
+    "exemple_utilisation": "Le CCTP demande piquetages et alignements valides avec la maîtrise d'oeuvre.",
+    "points_vigilance": [
+      "Ne pas poser au seul oeil sur de grandes longueurs."
+    ]
+  },
+  {
+    "terme": "Coupe franche",
+    "definition_courte": "Section nette d'une branche ou racine abimee.",
+    "explication_pedagogique": "Elle facilite la cicatrisation et limite les maladies.",
+    "exemple_utilisation": "Le CCTP demande une coupe soigneuse des racines ou branches arrachees.",
+    "points_vigilance": [
+      "Utiliser un outil propre et bien affute."
+    ]
+  },
+  {
+    "terme": "Couronne d'arbre",
+    "definition_courte": "Volume occupe par les branches principales autour du tronc.",
+    "explication_pedagogique": "Elle sert de repere pour proteger le houppier et la zone racinaire.",
+    "exemple_utilisation": "Le CCTP place certaines protections au droit de la couronne.",
+    "points_vigilance": [
+      "Interdire stockage et circulation sous cette zone."
+    ]
+  },
+  {
+    "terme": "Couvre-sol",
+    "definition_courte": "Plante basse couvrant rapidement la surface du sol.",
+    "explication_pedagogique": "Il limite les adventices et complete les massifs.",
+    "exemple_utilisation": "Le CCTP prévoit une épaisseur de terre de 0,30 m pour couvre-sols.",
+    "points_vigilance": [
+      "Respecter densite de plantation et paillage."
+    ]
+  },
+  {
+    "terme": "Cuvette d'arrosage",
+    "definition_courte": "Leger creux au pied d'un arbre ou arbuste pour retenir l'eau.",
+    "explication_pedagogique": "Elle facilite l'arrosage au demarrage.",
+    "exemple_utilisation": "Le CCTP demande de preserver une cuvette autour des pieds d'arbres pendant l'entretien.",
+    "points_vigilance": [
+      "Ne pas la compacter ni la remplir de dechets."
+    ]
+  },
+  {
+    "terme": "Debroussailleuse a fil",
+    "definition_courte": "Outil de finition autour des obstacles.",
+    "explication_pedagogique": "Elle sert aux bordures mais peut blesser les troncs.",
+    "exemple_utilisation": "Le CCTP impose precautions et remplacements en cas de blessure.",
+    "points_vigilance": [
+      "Ne pas l'utiliser a moins de 50 cm des troncs."
+    ]
+  },
+  {
+    "terme": "Debroussailleuse a fleaux",
+    "definition_courte": "Materiel de coupe a fleaux pour vegetations plus fortes.",
+    "explication_pedagogique": "Elle peut etre agressive pour gazons et plantations.",
+    "exemple_utilisation": "Le CCTP interdit son usage pour les tontes d'entretien.",
+    "points_vigilance": [
+      "Choisir tondeuse ou outil plus adapte."
+    ]
+  },
+  {
+    "terme": "Decompactage",
+    "definition_courte": "Ameublissement profond d'un sol tasse avant apport de terre.",
+    "explication_pedagogique": "Il restaure porosite, infiltration et developpement racinaire.",
+    "exemple_utilisation": "Le CCTP demande le decompactage avant amenée des terres végétales.",
+    "points_vigilance": [
+      "Vérifier que les fonds de forme ne restent pas lisses ou compactés."
+    ]
+  },
+  {
+    "terme": "Decoupe soignee",
+    "definition_courte": "Adaptation propre d'un matériau a une geometrie de chantier.",
+    "explication_pedagogique": "Elle concerne membranes, clôtures, bois ou revêtements.",
+    "exemple_utilisation": "Le CCTP demande decoupes soignées pour barrieres anti-racines et clôtures.",
+    "points_vigilance": [
+      "Proteger les chants coupes, surtout sur acier peint."
+    ]
+  },
+  {
+    "terme": "Défaut de reprise",
+    "definition_courte": "Echec d'un végétal qui ne redemarre pas après plantation.",
+    "explication_pedagogique": "Il impose remplacement pendant garantie ou entretien.",
+    "exemple_utilisation": "Le CCTP prévoit une garantie de reprise des végétaux morts.",
+    "points_vigilance": [
+      "Identifier cause : eau, sol, plantation, maladie ou vandalisme."
+    ]
+  },
+  {
+    "terme": "Délai d'ouverture de fosse",
+    "definition_courte": "Temps entre excavation et rebouchage de la fosse.",
+    "explication_pedagogique": "Il limite dessèchement, instabilite et accumulation d'eau.",
+    "exemple_utilisation": "Le CCTP impose 8 jours maximum entre ouverture et rebouchage.",
+    "points_vigilance": [
+      "Baliser les fosses ouvertes et les proteger des eaux."
+    ]
+  },
+  {
+    "terme": "DEP",
+    "acronyme": "Descente d'eaux pluviales",
+    "definition_courte": "Descente d'eaux pluviales en facade.",
+    "explication_pedagogique": "Elle peut gener l'implantation de clôtures et finitions.",
+    "exemple_utilisation": "Le CCTP demande coordination au droit des facades, DEP et regards EP.",
+    "points_vigilance": [
+      "Ne pas bloquer une descente ou creer un point d'eau stagnant."
+    ]
+  },
+  {
+    "terme": "Désherbage",
+    "definition_courte": "Suppression des adventices dans terres, massifs ou pieds d'arbres.",
+    "explication_pedagogique": "Il reduit la concurrence hydrique et donne un aspect entretenu.",
+    "exemple_utilisation": "Le CCTP demande au minimum quatre desherbages par an dans les massifs.",
+    "points_vigilance": [
+      "Intervenir manuellement ou avec methode validee, sans endommager les plantations."
+    ]
+  },
+  {
+    "terme": "DOE",
+    "acronyme": "Dossier des ouvrages executes",
+    "definition_courte": "Dossier des ouvrages executes remis en fin de chantier.",
+    "explication_pedagogique": "Il rassemble plans, fiches, garanties et documents de réception.",
+    "exemple_utilisation": "Le CCTP renvoie au DOE pour plans de récolement et documents finaux.",
+    "points_vigilance": [
+      "Le préparer au fil du chantier pour eviter les oublis."
+    ]
+  },
+  {
+    "terme": "Drageon",
+    "definition_courte": "Pousse sortant au pied ou sur les racines d'un arbre.",
+    "explication_pedagogique": "Il detourne l'energie du sujet et nuit a la forme.",
+    "exemple_utilisation": "Le CCTP demande la suppression des drageons au pied des troncs.",
+    "points_vigilance": [
+      "Couper proprement, sans arracher l'écorce."
+    ]
+  },
+  {
+    "terme": "Drainage de regard",
+    "definition_courte": "Couche drainante en gravillons et feutre dans un regard d'arrosage.",
+    "explication_pedagogique": "Elle évite stagnation d'eau autour des électrovannes.",
+    "exemple_utilisation": "Le CCTP demande 12 cm de drainage avec feutre anti-contaminant.",
+    "points_vigilance": [
+      "Maintenir la proprete du regard avant mise en service."
+    ]
+  },
+  {
+    "terme": "Drainage en pied de poteau",
+    "definition_courte": "Lit de gravillons sous poteau bois ou massif.",
+    "explication_pedagogique": "Il limite la stagnation d'eau et prolonge la duree de vie.",
+    "exemple_utilisation": "Le CCTP demande 10 cm de drainage sous poteaux bois.",
+    "points_vigilance": [
+      "Ne pas sceller le bois dans une poche d'eau."
+    ]
+  },
+  {
+    "terme": "Dressement du terrain",
+    "definition_courte": "Mise en forme finale des terres selon pentes et profils.",
+    "explication_pedagogique": "Il donne le niveau fini avant semis, paillage ou plantation.",
+    "exemple_utilisation": "Le CCTP demande un dressement a la côté avec tolérance de 0,03 a 0,05 m.",
+    "points_vigilance": [
+      "Vérifier absence de bosses, creux et contrepentes."
+    ]
+  },
+  {
+    "terme": "Ebourgeonnage",
+    "definition_courte": "Suppression de jeunes pousses indesirees sur le tronc.",
+    "explication_pedagogique": "Il conserve une forme propre aux jeunes arbres.",
+    "exemple_utilisation": "Le CCTP prévoit l'ebourgeonnage des gourmands deux fois par an.",
+    "points_vigilance": [
+      "Intervenir tot pour eviter grosses coupes."
+    ]
+  },
+  {
+    "terme": "Échalas",
+    "definition_courte": "Piquet fendu de chataignier composant une ganivelle.",
+    "explication_pedagogique": "Il forme la clôture bois traditionnelle.",
+    "exemple_utilisation": "Le CCTP demande des échalas fendus, écorces et ponces si besoin.",
+    "points_vigilance": [
+      "Vérifier espacement maximum et absence d'echardes dangereuses."
+    ]
+  },
+  {
+    "terme": "Échantillon",
+    "definition_courte": "Produit ou element presente avant validation.",
+    "explication_pedagogique": "Il permet d'accepter aspect, teinte ou qualité avant pose en masse.",
+    "exemple_utilisation": "Le CCTP demande fiches techniques et echantillons, notamment pour bois ou terres.",
+    "points_vigilance": [
+      "Ne pas commander toute la fourniture sans validation."
+    ]
+  },
+  {
+    "terme": "Écorce ligneuse",
+    "definition_courte": "Partie protectrice du tronc ou des branches.",
+    "explication_pedagogique": "Elle ne doit pas etre blessée par outils ou engins.",
+    "exemple_utilisation": "Le CCTP demande de respecter écorces et collets pendant l'entretien.",
+    "points_vigilance": [
+      "Une blessure au collet peut condamner le sujet."
+    ]
+  },
+  {
+    "terme": "Électrovanne",
+    "definition_courte": "Vanne commandee electriquement pour ouvrir un secteur d'arrosage.",
+    "explication_pedagogique": "Elle automatise l'apport d'eau selon programmation.",
+    "exemple_utilisation": "Le CCTP prévoit électrovannes, regards et numerotation.",
+    "points_vigilance": [
+      "Etiqueter chaque électrovanne et tester ouverture/fermeture."
+    ]
+  },
+  {
+    "terme": "Engazonnement",
+    "definition_courte": "Creation d'une surface en gazon par semis.",
+    "explication_pedagogique": "Il stabilise et habille les surfaces végétales basses.",
+    "exemple_utilisation": "Le CCTP traite les semences et travaux d'engazonnement.",
+    "points_vigilance": [
+      "Semer sur sol finement prepare, ressuyé et propre."
+    ]
+  },
+  {
+    "terme": "Engrais a diffusion lente",
+    "definition_courte": "Fertilisant libérant les éléments nutritifs progressivement.",
+    "explication_pedagogique": "Il accompagne la reprise sans bruler les racines.",
+    "exemple_utilisation": "Le CCTP cite un engrais NPK enrichi en oligo-éléments pour plantations.",
+    "points_vigilance": [
+      "Respecter les doses par arbre ou arbuste."
+    ]
+  },
+  {
+    "terme": "Engrais Nitrophoska",
+    "definition_courte": "Engrais compose cite pour l'entretien des massifs.",
+    "explication_pedagogique": "Il apporte des nutriments pendant la garantie d'entretien.",
+    "exemple_utilisation": "Le CCTP prévoit un engrais type Nitrophoska permanent ou similaire.",
+    "points_vigilance": [
+      "Transmettre la specification avant application."
+    ]
+  },
+  {
+    "terme": "Entraxe de poteaux",
+    "definition_courte": "Distance entre deux poteaux consecutifs.",
+    "explication_pedagogique": "Il conditionne la rigidite d'une clôture ou d'un paddock.",
+    "exemple_utilisation": "Le CCTP donne des entraxes pour ganivelle et paddock.",
+    "points_vigilance": [
+      "Respecter les entraxes pour eviter flambement et mauvais alignement."
+    ]
+  },
+  {
+    "terme": "Entretien annuel",
+    "definition_courte": "Soins effectues pendant une année complete de végétation.",
+    "explication_pedagogique": "Il garantit la bonne reprise et l'aspect des espaces verts communs.",
+    "exemple_utilisation": "Le CCTP prévoit entretien après réception definitive pendant un cycle complet.",
+    "points_vigilance": [
+      "Planifier tontes, arrosage, tailles, désherbage et contrôles."
+    ]
+  },
+  {
+    "terme": "Epaufrure",
+    "definition_courte": "Éclat ou blessure sur une peinture, un poteau ou un béton.",
+    "explication_pedagogique": "Elle cree un défaut visuel et peut provoquer corrosion.",
+    "exemple_utilisation": "Le CCTP demande reprises RAL 7016 des epaufrures sur clôtures.",
+    "points_vigilance": [
+      "Reprendre avec système compatible, pas seulement au marqueur."
+    ]
+  },
+  {
+    "terme": "Épierrage",
+    "definition_courte": "Retrait des pierres en surface ou dans la couche de terre.",
+    "explication_pedagogique": "Il prepare un sol fin pour semis et plantations.",
+    "exemple_utilisation": "Le CCTP demande épierrage par griffage ou ramassage manuel si nécessaire.",
+    "points_vigilance": [
+      "Evacuer les pierres au lieu de les enfouir dans les massifs."
+    ]
+  },
+  {
+    "terme": "Essai de convenance",
+    "definition_courte": "Essai prealable validant une methode ou un rendu.",
+    "explication_pedagogique": "Il sécurise la pose avant generalisation.",
+    "exemple_utilisation": "Le CCTP demande essais d'angle et de lasure pour poteaux bois.",
+    "points_vigilance": [
+      "Conserver l'essai valide comme reference chantier."
+    ]
+  },
+  {
+    "terme": "Essai et réglage d'arrosage",
+    "definition_courte": "Verification du fonctionnement du reseau d'arrosage.",
+    "explication_pedagogique": "Elle permet d'ajuster debit, secteurs et programmation.",
+    "exemple_utilisation": "Le CCTP inclut essais et réglages du programmateur.",
+    "points_vigilance": [
+      "Tester en conditions reelles et corriger les zones non arrosées."
+    ]
+  },
+  {
+    "terme": "Étiquette botanique",
+    "definition_courte": "Marquage indiquant genre, espece, variété ou quantite.",
+    "explication_pedagogique": "Il permet de vérifier la conformité des végétaux livres.",
+    "exemple_utilisation": "Le CCTP demande des étiquettes indélébiles sur les lots de plantes.",
+    "points_vigilance": [
+      "Ne pas retirer avant validation et plantation."
+    ]
+  },
+  {
+    "terme": "Évacuation des dechets",
+    "definition_courte": "Transport des debris vers une filière adaptee.",
+    "explication_pedagogique": "Elle maintient le chantier propre et conforme.",
+    "exemple_utilisation": "Le CCTP impose évacuation des branches, adventices, terres et dechets.",
+    "points_vigilance": [
+      "Conserver les justificatifs si demandes."
+    ]
+  },
+  {
+    "terme": "Exportation des résidus de fauche",
+    "definition_courte": "Retrait des produits de fauche hors prairie.",
+    "explication_pedagogique": "Elle favorise la diversite floristique en limitant l'enrichissement du sol.",
+    "exemple_utilisation": "Le CCTP demande exportation une ou deux semaines après fauche de prairie.",
+    "points_vigilance": [
+      "Ne pas laisser un feutrage qui etouffe les jeunes plantes."
+    ]
+  },
+  {
+    "terme": "Fascicule 35",
+    "definition_courte": "Reference technique des travaux d'espaces verts.",
+    "explication_pedagogique": "Il cadre plantations, garanties et entretien.",
+    "exemple_utilisation": "Le CCTP renvoie au fascicule 35 pour garantie de reprise et travaux paysagers.",
+    "points_vigilance": [
+      "S'y referer pour les points non detailles dans le CCTP."
+    ]
+  },
+  {
+    "terme": "Fauchage de prairie",
+    "definition_courte": "Coupe periodique d'une prairie fleurie.",
+    "explication_pedagogique": "Il regenere le couvert et contrôle la hauteur.",
+    "exemple_utilisation": "Le CCTP prévoit deux fauchages par an maximum.",
+    "points_vigilance": [
+      "Ne pas couper sous 10 cm pour preserver les rosettes."
+    ]
+  },
+  {
+    "terme": "Feutre anti-contaminant",
+    "definition_courte": "Geotextile separant gravillons et terre dans un drainage.",
+    "explication_pedagogique": "Il évite que les fines bouchent la couche drainante.",
+    "exemple_utilisation": "Le CCTP le prévoit sous les regards d'électrovannes.",
+    "points_vigilance": [
+      "Bien le recouvrir sans dechirement."
+    ]
+  },
+  {
+    "terme": "Fiche d'agrément",
+    "definition_courte": "Document de validation d'un produit, matériau ou système.",
+    "explication_pedagogique": "Elle sert a faire approuver avant commande ou pose.",
+    "exemple_utilisation": "Le CCTP demande fiches d'agrément pour clôtures, amendements et fournitures.",
+    "points_vigilance": [
+      "Attendre le visa avant mise en oeuvre."
+    ]
+  },
+  {
+    "terme": "Fiche de contrôle",
+    "definition_courte": "Document d'autocontrole rempli pendant le chantier.",
+    "explication_pedagogique": "Elle prouve la qualité d'exécution et les verifications.",
+    "exemple_utilisation": "Le CCTP demande transmission des fiches de contrôle au maître d'ouvrage.",
+    "points_vigilance": [
+      "Les remplir au moment des travaux, pas a posteriori."
+    ]
+  },
+  {
+    "terme": "Fiche technique",
+    "definition_courte": "Notice fabricant donnant caracteristiques du produit.",
+    "explication_pedagogique": "Elle permet de vérifier la conformité au CCTP.",
+    "exemple_utilisation": "Le CCTP demande fiches techniques, notamment pour amendement, clôtures et arrosage.",
+    "points_vigilance": [
+      "Comparer les valeurs utiles, pas seulement le nom commercial."
+    ]
+  },
+  {
+    "terme": "Fil de tension",
+    "definition_courte": "Fil horizontal qui tend un grillage souple.",
+    "explication_pedagogique": "Il maintient la clôture plane sur toute sa hauteur.",
+    "exemple_utilisation": "Le CCTP demande des fils de tension a intervalles reguliers.",
+    "points_vigilance": [
+      "Tendre sans déformer les poteaux."
+    ]
+  },
+  {
+    "terme": "Fil galvanisé",
+    "definition_courte": "Fil d'acier protégé par zinc contre la corrosion.",
+    "explication_pedagogique": "Il est utilisé dans la ganivelle ou les clôtures.",
+    "exemple_utilisation": "Le CCTP demande fils double galvanisés classe A pour ganivelle.",
+    "points_vigilance": [
+      "Vérifier diamètre, classe et absence de rouille a la livraison."
+    ]
+  },
+  {
+    "terme": "Finition RAL 7016",
+    "definition_courte": "Teinte gris anthracite prescrite pour plusieurs ouvrages metalliques.",
+    "explication_pedagogique": "Elle assure l'homogénéité des clôtures et portillons.",
+    "exemple_utilisation": "Le CCTP prévoit RAL 7016 pour treillis, panneaux, portillons et reprises.",
+    "points_vigilance": [
+      "Toute retouche doit reprendre la meme teinte et le bon système anticorrosion."
+    ]
+  },
+  {
+    "terme": "Floraison avril-octobre",
+    "definition_courte": "Période recherchee pour la prairie fleurie.",
+    "explication_pedagogique": "Elle donne un intérêt paysager long et favorable a la biodiversité.",
+    "exemple_utilisation": "Le CCTP indique une floraison d'avril a octobre pour le mélange de prairie.",
+    "points_vigilance": [
+      "Adapter semis et fauche pour ne pas casser le cycle de floraison."
+    ]
+  },
+  {
+    "terme": "Fosse de plantation",
+    "definition_courte": "Excavation préparée pour recevoir arbre, cépée ou fruitier.",
+    "explication_pedagogique": "Elle apporte le volume de terre ameublie nécessaire a la reprise.",
+    "exemple_utilisation": "Le CCTP précise les dimensions minimales des fosses d'arbres.",
+    "points_vigilance": [
+      "Controler dimensions, drainage, terre et implantation avant rebouchage."
+    ]
+  },
+  {
+    "terme": "Fourreau d'arrosage",
+    "definition_courte": "Conduit réserve sous voirie pour passer une canalisation d'arrosage.",
+    "explication_pedagogique": "Il évite de recasser les revêtements après coup.",
+    "exemple_utilisation": "Le CCTP indique des fourreaux sous espaces revetus a charge VRD.",
+    "points_vigilance": [
+      "Vérifier presence, diamètre et aiguillage avant pose du PEHD."
+    ]
+  },
+  {
+    "terme": "Fourreau de protection de tronc",
+    "definition_courte": "Tube dur place autour d'un tronc pour protection temporaire.",
+    "explication_pedagogique": "Il protège contre chocs d'engins ou frottements.",
+    "exemple_utilisation": "Le CCTP cite des fourreaux durs autour des troncs jusqu'à 2 ou 3 m.",
+    "points_vigilance": [
+      "Ne pas serrer le tronc ni enfermer l'humidité."
+    ]
+  },
+  {
+    "terme": "Gaine technique exterieure",
+    "definition_courte": "Réserve ou passage technique en exterieur.",
+    "explication_pedagogique": "Elle peut croiser les espaces verts ou clôtures.",
+    "exemple_utilisation": "Le CCTP impose coordination avec reseaux, regards et ouvrages existants.",
+    "points_vigilance": [
+      "Vérifier avant terrassement pour eviter arrachement."
+    ]
+  },
+  {
+    "terme": "Ganivelle",
+    "definition_courte": "Clôture traditionnelle en échalas de chataignier relies par fils.",
+    "explication_pedagogique": "Elle delimite de façon rustique et permeable.",
+    "exemple_utilisation": "Le CCTP prévoit une ganivelle renforcee autour de la bâche incendie.",
+    "points_vigilance": [
+      "Respecter hauteur, espacement, renforts et absence d'echardes."
+    ]
+  },
+  {
+    "terme": "Garantie de parfait achevement",
+    "definition_courte": "Obligation de reparer les desordres signales après réception.",
+    "explication_pedagogique": "Elle couvre les manquements contractuels pendant 12 mois.",
+    "exemple_utilisation": "Le CCTP rappelle la GPA pour le lot paysage.",
+    "points_vigilance": [
+      "Distinguer GPA, entretien et garantie de reprise des végétaux."
+    ]
+  },
+  {
+    "terme": "Garantie de reprise",
+    "definition_courte": "Engagement de remplacement des végétaux morts pendant la période prévue.",
+    "explication_pedagogique": "Elle assure que les plantations livrees deviennent viables.",
+    "exemple_utilisation": "Le CCTP inclut la garantie de reprise pendant l'entretien.",
+    "points_vigilance": [
+      "Remplacer les sujets morts par des sujets conformes au marche."
+    ]
+  },
+  {
+    "terme": "Gazons",
+    "definition_courte": "Surfaces herbeuses semees et tondues régulièrement.",
+    "explication_pedagogique": "Ils couvrent les espaces ouverts et stabilisent le sol.",
+    "exemple_utilisation": "Le CCTP prévoit semences conformes et entretien par tontes.",
+    "points_vigilance": [
+      "Ne pas semer sur terre grossiere, sèche ou pleine d'adventices."
+    ]
+  },
+  {
+    "terme": "Gestion des acces riverains",
+    "definition_courte": "Maintien des passages aux habitants et usagers voisins.",
+    "explication_pedagogique": "Elle limite les nuisances pendant chantier.",
+    "exemple_utilisation": "Le CCTP inclut maintien des acces aux riverains dans l'installation de chantier.",
+    "points_vigilance": [
+      "Baliser et informer en cas de modification temporaire."
+    ]
+  },
+  {
+    "terme": "Godet",
+    "definition_courte": "Petit conteneur de culture pour vivaces, couvre-sols ou jeunes plantes.",
+    "explication_pedagogique": "Il facilite la fourniture et plantation des petits sujets.",
+    "exemple_utilisation": "Le CCTP demande des godets bien racines.",
+    "points_vigilance": [
+      "Vérifier que la motte tient sans chignon ni dessèchement."
+    ]
+  },
+  {
+    "terme": "Gourmand",
+    "definition_courte": "Pousse vigoureuse et indésirable sur tronc ou branche.",
+    "explication_pedagogique": "Elle desequilibre la forme de l'arbre.",
+    "exemple_utilisation": "Le CCTP demande l'ebourgeonnage des gourmands sous couronne.",
+    "points_vigilance": [
+      "Supprimer tot, proprement, sans arracher l'écorce."
+    ]
+  },
+  {
+    "terme": "Graminée",
+    "definition_courte": "Plante de type herbe ornementale utilisée en massif ou prairie.",
+    "explication_pedagogique": "Elle apporte texture, mouvement et rusticite.",
+    "exemple_utilisation": "Le CCTP inclut graminées dans les massifs et prairies.",
+    "points_vigilance": [
+      "Respecter densite, sol et période de taille."
+    ]
+  },
+  {
+    "terme": "Grattage de peinture",
+    "definition_courte": "Test ou action pouvant endommager le revêtement anticorrosion.",
+    "explication_pedagogique": "Il permet parfois de controler le traitement applique.",
+    "exemple_utilisation": "Le CCTP evoque des tests de grattage par MOA ou MOE.",
+    "points_vigilance": [
+      "Reprendre ensuite avec système anticorrosion et teinte identique."
+    ]
+  },
+  {
+    "terme": "Gravillons drainants",
+    "definition_courte": "Granulats propres utilises pour creer une couche drainante.",
+    "explication_pedagogique": "Ils evitent l'eau stagnante sous poteaux ou regards.",
+    "exemple_utilisation": "Le CCTP demande lit de gravillons sous potelets et dans regards d'arrosage.",
+    "points_vigilance": [
+      "Ne pas melanger avec terre fine."
+    ]
+  },
+  {
+    "terme": "Griffage",
+    "definition_courte": "Travail superficiel a dents pour briser mottes et retirer pierres.",
+    "explication_pedagogique": "Il prepare le lit de semis ou les massifs.",
+    "exemple_utilisation": "Le CCTP demande griffage ou ramassage manuel pour épierrage.",
+    "points_vigilance": [
+      "Eviter de detruire les racines des végétaux existants."
+    ]
+  },
+  {
+    "terme": "Griffe",
+    "definition_courte": "Outil a dents utilisé pour ameublir ou regler la terre.",
+    "explication_pedagogique": "Elle sert aux finitions manuelles de terre végétale.",
+    "exemple_utilisation": "Le CCTP cite la griffe pour mise en forme des sols.",
+    "points_vigilance": [
+      "Travailler sans remonter de mauvais matériaux en surface."
+    ]
+  },
+  {
+    "terme": "Grillage avertisseur",
+    "definition_courte": "Filet colore pose au-dessus d'un reseau enterré.",
+    "explication_pedagogique": "Il signale le reseau lors de futures fouilles.",
+    "exemple_utilisation": "Le CCTP VRD prévoit des fourreaux et reseaux a coordonner avec l'arrosage.",
+    "points_vigilance": [
+      "Poser la bonne couleur et le bon niveau selon reseau."
+    ]
+  },
+  {
+    "terme": "Habillage bois",
+    "definition_courte": "Lames ou planches bois ajoutées sur un panneau ou portillon.",
+    "explication_pedagogique": "Il améliore l'occultation et l'aspect des clôtures.",
+    "exemple_utilisation": "Le CCTP prévoit remplissage bois sur certains panneaux et portillons.",
+    "points_vigilance": [
+      "Soigner fixations, alignement, traitement et dilatation."
+    ]
+  },
+  {
+    "terme": "Haie conservee",
+    "definition_courte": "Alignement végétal existant maintenu en limite ou sur site.",
+    "explication_pedagogique": "Elle doit etre nettoyee et taillée sans perdre sa fonction.",
+    "exemple_utilisation": "Le CCTP prévoit nettoyage et taille de végétation conservee.",
+    "points_vigilance": [
+      "Valider les sujets a conserver avec la maîtrise d'oeuvre avant intervention."
+    ]
+  },
+  {
+    "terme": "Haubanage",
+    "definition_courte": "Dispositif de stabilisation d'un arbre par câbles ou liens.",
+    "explication_pedagogique": "Il peut remplacer ou completer le tuteurage selon sujet.",
+    "exemple_utilisation": "Le CCTP mentionne le contrôle des tuteurs et haubans pendant entretien.",
+    "points_vigilance": [
+      "Regler sans blesser et retirer quand il n'est plus utile."
+    ]
+  },
+  {
+    "terme": "Herse",
+    "definition_courte": "Outil a dents utilisé pour regler et ameublir les grandes surfaces.",
+    "explication_pedagogique": "Elle permet un nivellement fin sans outil rotatif agressif.",
+    "exemple_utilisation": "Le CCTP privilegie herse ou cultivateur pour le réglage des terres.",
+    "points_vigilance": [
+      "Eviter fraise ou rotavator quand le CCTP les exclut."
+    ]
+  },
+  {
+    "terme": "Hivernage arrosage",
+    "definition_courte": "Mise hors service saisonniere du reseau pour eviter gel et dégradations.",
+    "explication_pedagogique": "Il protège tuyaux, électrovannes et programmateur.",
+    "exemple_utilisation": "Le CCTP inclut l'hivernage dans le contrôle du reseau d'arrosage.",
+    "points_vigilance": [
+      "Purger les lignes et documenter la remise en service."
+    ]
+  },
+  {
+    "terme": "Houppier",
+    "definition_courte": "Ensemble des branches et du feuillage d'un arbre.",
+    "explication_pedagogique": "Il indique la zone sensible au sol et en hauteur.",
+    "exemple_utilisation": "Le CCTP interdit stockage sous houppier des arbres conserves.",
+    "points_vigilance": [
+      "Protégée aussi les racines, pas seulement le tronc."
+    ]
+  },
+  {
+    "terme": "Implantation",
+    "definition_courte": "Positionnement precis des ouvrages ou plantations selon plans.",
+    "explication_pedagogique": "Elle évite conflits et garantit le projet paysager.",
+    "exemple_utilisation": "Le CCTP demande piquetage, relevés et validation avec maîtrise d'oeuvre.",
+    "points_vigilance": [
+      "Vérifier reseaux et distances avant terrassement."
+    ]
+  },
+  {
+    "terme": "Jambe de force",
+    "definition_courte": "Element incline stabilisant un poteau de clôture.",
+    "explication_pedagogique": "Elle reprend les efforts de tension et d'angle.",
+    "exemple_utilisation": "Le CCTP prévoit jambes de force aux angles et longueurs selon clôture.",
+    "points_vigilance": [
+      "Ne pas les supprimer pour gagner du temps ou de la place."
+    ]
+  },
+  {
+    "terme": "Jardin privatif",
+    "definition_courte": "Espace exterieur associe a un logement.",
+    "explication_pedagogique": "Il recoit clôtures, portillons, gazon ou plantations selon plans.",
+    "exemple_utilisation": "Le CCTP localise plusieurs clôtures au niveau des jardins privatifs.",
+    "points_vigilance": [
+      "Coordonner avec robinets exterieurs et limites de lots."
+    ]
+  },
+  {
+    "terme": "Kit de depart goutte-a-goutte",
+    "definition_courte": "Ensemble d'organes au depart d'un reseau goutte-a-goutte.",
+    "explication_pedagogique": "Il gère filtration, regulation et depart de secteur.",
+    "exemple_utilisation": "Le CCTP prévoit des kits de depart 1 pouce avec regulateur.",
+    "points_vigilance": [
+      "Vérifier debit disponible et compatibilite avec électrovanne."
+    ]
+  },
+  {
+    "terme": "Label Ecocert",
+    "definition_courte": "Certification environnementale citee pour l'amendement.",
+    "explication_pedagogique": "Elle atteste un niveau de conformité du produit propose.",
+    "exemple_utilisation": "Le CCTP demande un amendement utilisable en agriculture biologique et labellise.",
+    "points_vigilance": [
+      "Vérifier que le certificat concerne le lot livre."
+    ]
+  },
+  {
+    "terme": "Label Rouge gazon",
+    "definition_courte": "Signe de qualité applicable a certaines semences de gazon.",
+    "explication_pedagogique": "Il garantit des caracteristiques varietales superieures.",
+    "exemple_utilisation": "Le CCTP demande des semences conformes, avec references de qualité.",
+    "points_vigilance": [
+      "Controler étiquettes de sacs et numeros de conditionnement."
+    ]
+  },
+  {
+    "terme": "Labour",
+    "definition_courte": "Travail profond du sol avant préparation fine.",
+    "explication_pedagogique": "Il decompacte et retourne la terre sur grandes surfaces.",
+    "exemple_utilisation": "Le CCTP demande labour sur sol bien ressuye avec rotobeche ou charrue.",
+    "points_vigilance": [
+      "Ne pas labourer un sol détrempé."
+    ]
+  },
+  {
+    "terme": "Lasure",
+    "definition_courte": "Produit de finition et protection du bois.",
+    "explication_pedagogique": "Elle protège poteaux et pièces bois tout en gardant l'aspect.",
+    "exemple_utilisation": "Le CCTP demande essai de lasure et reprise après coupes en biseau.",
+    "points_vigilance": [
+      "Valider la teinte avant generalisation."
+    ]
+  },
+  {
+    "terme": "Levée de réserves",
+    "definition_courte": "Suppression des défauts releves a réception ou pre-réception.",
+    "explication_pedagogique": "Elle conditionne la réception sans réserve et le depart de certaines garanties.",
+    "exemple_utilisation": "Le CCTP demande que les réserves soient levées avant réception definitive.",
+    "points_vigilance": [
+      "Tracer chaque correction avec date et contrôle."
+    ]
+  },
+  {
+    "terme": "Limite de prestation",
+    "definition_courte": "Frontiere entre ce qui est dû par le lot paysage et les autres lots.",
+    "explication_pedagogique": "Elle évite doublons ou oublis entre VRD, GOE, plomberie et paysage.",
+    "exemple_utilisation": "Le CCTP detaille les travaux a charge des autres lots et du lot paysage.",
+    "points_vigilance": [
+      "Vérifier en synthese avant de chiffrer ou d'exécuter."
+    ]
+  },
+  {
+    "terme": "Lisse de paddock",
+    "definition_courte": "Pièce horizontale d'une clôture paddock.",
+    "explication_pedagogique": "Elle relie les poteaux et forme la barrière basse.",
+    "exemple_utilisation": "Le CCTP prévoit des lisses bois de section 68 x 68 mm environ.",
+    "points_vigilance": [
+      "Controler entraxe, fixation et hauteur finie."
+    ]
+  },
+  {
+    "terme": "Livraison des végétaux",
+    "definition_courte": "Acheminement des plantes depuis la pepiniere vers le chantier.",
+    "explication_pedagogique": "Elle doit preserver motte, humidité et etiquetage.",
+    "exemple_utilisation": "Le CCTP impose origine, contrôles et conformité des végétaux.",
+    "points_vigilance": [
+      "Protegger du vent et planter rapidement après livraison."
+    ]
+  },
+  {
+    "terme": "Lot GOE",
+    "definition_courte": "Lot gros oeuvre ou gros oeuvre etendu cite comme responsable de certaines installations.",
+    "explication_pedagogique": "Il peut porter base vie ou clôtures de chantier selon CCTP.",
+    "exemple_utilisation": "Le CCTP indique base vie et clôtures de chantier sans objet, a charge GOE.",
+    "points_vigilance": [
+      "Ne pas integrer deux fois ces postes dans le lot paysage."
+    ]
+  },
+  {
+    "terme": "Malaxage",
+    "definition_courte": "Mélange mécanique ou manuel de terre et amendement.",
+    "explication_pedagogique": "Il repartit les apports de façon homogène.",
+    "exemple_utilisation": "Le CCTP cite malaxage, hersage ou binage pour incorporer l'amendement.",
+    "points_vigilance": [
+      "Eviter poches concentrees d'amendement au contact des racines."
+    ]
+  },
+  {
+    "terme": "Marquage en pepiniere",
+    "definition_courte": "Selection et identification des végétaux avant livraison.",
+    "explication_pedagogique": "Il permet a la MOE de controler les sujets.",
+    "exemple_utilisation": "Le CCTP permet un marquage en pepiniere et demande photos ou visites.",
+    "points_vigilance": [
+      "Ne pas substituer les sujets marques sans accord."
+    ]
+  },
+  {
+    "terme": "Massif arbustif",
+    "definition_courte": "Zone plantee principalement d'arbustes.",
+    "explication_pedagogique": "Il structure les espaces verts et limite les vues.",
+    "exemple_utilisation": "Le CCTP prévoit terrassement et terre de 0,40 m pour arbustes.",
+    "points_vigilance": [
+      "Respecter densites, paillage et entretien."
+    ]
+  },
+  {
+    "terme": "Massif de vivaces",
+    "definition_courte": "Zone plantee de plantes herbacees perennes.",
+    "explication_pedagogique": "Il apporte floraison et diversite saisonniere.",
+    "exemple_utilisation": "Le CCTP prévoit 0,30 m de terre pour vivaces.",
+    "points_vigilance": [
+      "Planter hors sol compacté et maintenir le paillage."
+    ]
+  },
+  {
+    "terme": "Matiere organique",
+    "definition_courte": "Partie organique du sol ou de l'amendement.",
+    "explication_pedagogique": "Elle nourrit la vie du sol et améliore la structure.",
+    "exemple_utilisation": "Le CCTP donne des valeurs attendues de matiere organique pour terre et amendement.",
+    "points_vigilance": [
+      "Trop peu appauvrit le sol, trop ou mal stabilisee peut bruler les plantes."
+    ]
+  },
+  {
+    "terme": "Mise en eau arrosage",
+    "definition_courte": "Remplissage et activation du reseau d'arrosage.",
+    "explication_pedagogique": "Elle precede essais, programmation et entretien saisonnier.",
+    "exemple_utilisation": "Le CCTP met a charge la mise en eau de l'installation.",
+    "points_vigilance": [
+      "Surveiller fuites, pression et fonctionnement des secteurs."
+    ]
+  },
+  {
+    "terme": "Motte grillagée",
+    "definition_courte": "Motte de terre maintenue par un grillage autour des racines.",
+    "explication_pedagogique": "Elle protège les racines des grands sujets a la livraison.",
+    "exemple_utilisation": "Le CCTP demande arbres tiges et cépées en motte grillagée.",
+    "points_vigilance": [
+      "Ne pas casser la motte et suivre les consignes sur grillage au collet."
+    ]
+  },
+  {
+    "terme": "Mulch bois",
+    "definition_courte": "Paillage en bois ou broyat applique sur les massifs.",
+    "explication_pedagogique": "Il reduit evaporation et pousse des adventices.",
+    "exemple_utilisation": "Le CCTP cite le mulch et demande un niveau fini contrôle.",
+    "points_vigilance": [
+      "Maintenir le haut du mulch 2 a 3 cm sous les revêtements."
+    ]
+  },
+  {
+    "terme": "Nettoyage de fin de chantier",
+    "definition_courte": "Remise propre des zones traitees et abords après travaux.",
+    "explication_pedagogique": "Elle conditionne la réception et l'image du chantier.",
+    "exemple_utilisation": "Le CCTP demande nettoyage des zones, parcours et facades salies par poussiere.",
+    "points_vigilance": [
+      "Ne pas limiter au seul balayage des surfaces du lot."
+    ]
+  },
+  {
+    "terme": "Nivellement fin",
+    "definition_courte": "Réglage final des terres végétales plantees ou engazonnees.",
+    "explication_pedagogique": "Il donne le profil fini avant paillage, plantation ou semis.",
+    "exemple_utilisation": "Le CCTP demande une tolérance de plus ou moins 0,03 m sur les surfaces finies.",
+    "points_vigilance": [
+      "Controler les pentes, les raccords et l'absence de bombe."
+    ]
+  },
+  {
+    "terme": "Norme NFU 44-051",
+    "definition_courte": "Norme francaise applicable aux amendements organiques.",
+    "explication_pedagogique": "Elle encadre la qualité du compost ou support organique.",
+    "exemple_utilisation": "Le CCTP demande un amendement conforme NFU 44-051.",
+    "points_vigilance": [
+      "Vérifier certificat et composition."
+    ]
+  },
+  {
+    "terme": "Normes V 12 031 a V 12 059",
+    "definition_courte": "Series de normes relatives aux végétaux de pepiniere.",
+    "explication_pedagogique": "Elles encadrent qualité, dimensions et presentation des plantes.",
+    "exemple_utilisation": "Le CCTP demande la conformité des plantations a ces normes.",
+    "points_vigilance": [
+      "Controler calibres, categories et etat sanitaire."
+    ]
+  },
+  {
+    "terme": "Numero de conditionnement",
+    "definition_courte": "Identifiant inscrit sur un sac de semences.",
+    "explication_pedagogique": "Il permet de tracer origine et composition du mélange.",
+    "exemple_utilisation": "Le CCTP demande les étiquettes de sacs avec numero de conditionnement.",
+    "points_vigilance": [
+      "Conserver les étiquettes dans le DOE ou dossier chantier."
+    ]
+  },
+  {
+    "terme": "Obligation de resultat",
+    "definition_courte": "Engagement d'obtenir un ouvrage conforme et fonctionnel.",
+    "explication_pedagogique": "Elle depasse la simple exécution minimale des lignes du DPGF.",
+    "exemple_utilisation": "Le CCTP indique que l'entreprise ne peut se prevaloir d'erreurs ou omissions.",
+    "points_vigilance": [
+      "Traiter les travaux nécessaires selon regles de l'art."
+    ]
+  },
+  {
+    "terme": "Oligo-éléments",
+    "definition_courte": "Éléments nutritifs presents en faible quantite mais utiles aux plantes.",
+    "explication_pedagogique": "Ils completent NPK pour la reprise et la croissance.",
+    "exemple_utilisation": "Le CCTP cite un engrais enrichi en oligo-éléments.",
+    "points_vigilance": [
+      "Respecter doses pour eviter carences ou excès."
+    ]
+  },
+  {
+    "terme": "Ouverture de fosse",
+    "definition_courte": "Terrassement initial d'une fosse de plantation.",
+    "explication_pedagogique": "Elle prepare le volume de sol avant plantation.",
+    "exemple_utilisation": "Le CCTP detaille dimensions et profondeur selon type d'arbre.",
+    "points_vigilance": [
+      "Baliser et proteger les fosses jusqu'au rebouchage."
+    ]
+  },
+  {
+    "terme": "Paillage",
+    "definition_courte": "Couche de protection pose sur le sol des plantations.",
+    "explication_pedagogique": "Il conserve humidité, limite adventices et améliore l'aspect.",
+    "exemple_utilisation": "Le CCTP prévoit mulch bois, bâche PLA et maintien du paillage.",
+    "points_vigilance": [
+      "Ne pas coller le paillage contre le collet."
+    ]
+  },
+  {
+    "terme": "Paillotin",
+    "definition_courte": "Protection en natte autour du tronc d'un jeune arbre.",
+    "explication_pedagogique": "Il protège du vent, du froid et du soleil.",
+    "exemple_utilisation": "Le CCTP prévoit paillotin en natte bambou avec bourrelets.",
+    "points_vigilance": [
+      "Vérifier qu'il ne retient pas l'humidité au point de blesser l'écorce."
+    ]
+  },
+  {
+    "terme": "Panneau treillis soude",
+    "definition_courte": "Panneau rigide compose de fils acier soudes.",
+    "explication_pedagogique": "Il sert de clôture durable et régulière.",
+    "exemple_utilisation": "Le CCTP précise hauteur, mailles, fils, poteaux et RAL 7016.",
+    "points_vigilance": [
+      "Vérifier picots en bas, aplomb et traitement anticorrosion."
+    ]
+  },
+  {
+    "terme": "Panneaux avec remplissage bois",
+    "definition_courte": "Clôture rigide occultante avec lames bois.",
+    "explication_pedagogique": "Elle préserve intimite et cohérence paysagere.",
+    "exemple_utilisation": "Le CCTP prévoit lattes en meleze fixées sur panneaux RAL 7016.",
+    "points_vigilance": [
+      "Soigner fixation, ventilation et alignement des lames."
+    ]
+  },
+  {
+    "terme": "Passage camera",
+    "definition_courte": "Contrôle video d'un reseau enterré, si applicable aux interfaces VRD.",
+    "explication_pedagogique": "Il permet de vérifier et localiser certains reseaux avant travaux.",
+    "exemple_utilisation": "Le lot paysage doit se coordonner avec les reseaux existants ou crees.",
+    "points_vigilance": [
+      "Demander les plans ou contrôles VRD avant terrassements sensibles."
+    ]
+  },
+  {
+    "terme": "PEFC",
+    "definition_courte": "Certification de gestion durable des forêts.",
+    "explication_pedagogique": "Elle peut etre exigee pour les bois fournis.",
+    "exemple_utilisation": "Le CCTP cite du bois PEFC pour la clôture paddock.",
+    "points_vigilance": [
+      "Vérifier attestation fournisseur et classe d'emploi."
+    ]
+  },
+  {
+    "terme": "PEHD arrosage",
+    "definition_courte": "Tube polyethylene haute densite pour transport d'eau d'arrosage.",
+    "explication_pedagogique": "Il alimente secteurs, clapets et goutte-a-goutte.",
+    "exemple_utilisation": "Le CCTP prévoit des reseaux PEHD, notamment sous fourreaux.",
+    "points_vigilance": [
+      "Respecter diametres, raccords et profondeur de pose."
+    ]
+  },
+  {
+    "terme": "Pepiniere regionale",
+    "definition_courte": "Pepiniere situee dans un climat ou sol proche du chantier.",
+    "explication_pedagogique": "Elle fournit des végétaux mieux adaptes.",
+    "exemple_utilisation": "Le CCTP demande des pepinieres regionales ou conditions plus rudes.",
+    "points_vigilance": [
+      "Valider origine dans les 40 jours suivant ordre de service."
+    ]
+  },
+  {
+    "terme": "Période de végétation",
+    "definition_courte": "Phase annuelle de croissance active des plantes.",
+    "explication_pedagogique": "Elle sert de reference a l'entretien et a la garantie de reprise.",
+    "exemple_utilisation": "Le CCTP parle d'une année complete de végétation.",
+    "points_vigilance": [
+      "Ne pas confondre avec une simple année calendaire."
+    ]
+  },
+  {
+    "terme": "Piquetage",
+    "definition_courte": "Marquage sur site des implantations avant travaux.",
+    "explication_pedagogique": "Il permet validation avant terrassement ou pose.",
+    "exemple_utilisation": "Le CCTP demande piquetages a valider avec le maître d'oeuvre.",
+    "points_vigilance": [
+      "Faire valider angles, limites, fosses et clôtures avant exécution."
+    ]
+  },
+  {
+    "terme": "Plan d'exécution",
+    "definition_courte": "Plan detaille produit par l'entreprise avant travaux.",
+    "explication_pedagogique": "Il précise implantation, details et methodes.",
+    "exemple_utilisation": "Le CCTP demande plans d'EXE, fiches techniques et echantillons.",
+    "points_vigilance": [
+      "Le plan doit integrer les contraintes reellement relevees sur site."
+    ]
+  },
+  {
+    "terme": "Plan de récolement",
+    "definition_courte": "Plan conforme a ce qui a ete réalisé.",
+    "explication_pedagogique": "Il sert au futur entretien et aux interventions ulterieures.",
+    "exemple_utilisation": "Le CCTP demande plans de récolement dans le DOE.",
+    "points_vigilance": [
+      "Relever avant fermeture ou disparition des ouvrages."
+    ]
+  },
+  {
+    "terme": "Planche bois de protection",
+    "definition_courte": "Planche fixee autour d'un arbre ou ouvrage pour le proteger.",
+    "explication_pedagogique": "Elle cree une barrière physique contre les chocs.",
+    "exemple_utilisation": "Le CCTP decrit des protections par planches de bois autour des arbres.",
+    "points_vigilance": [
+      "Ne jamais clouer ou fixer directement sur le tronc."
+    ]
+  },
+  {
+    "terme": "Plantation",
+    "definition_courte": "Mise en place de végétaux dans les fosses ou massifs prepares.",
+    "explication_pedagogique": "Elle donne la structure végétale finale du projet.",
+    "exemple_utilisation": "Le CCTP traite arbres, cépées, arbustes, vivaces, graminées et gazons.",
+    "points_vigilance": [
+      "Respecter saison, arrosage, paillage et contrôle de conformité."
+    ]
+  },
+  {
+    "terme": "Plante grimpante",
+    "definition_courte": "Végétal destine a se developper verticalement sur support.",
+    "explication_pedagogique": "Elle couvre clôture, facade ou structure selon projet.",
+    "exemple_utilisation": "Le CCTP inclut les grimpantes dans les epaisseurs de terre de 0,30 m.",
+    "points_vigilance": [
+      "Prevoir support et attaches non blessantes si nécessaire."
+    ]
+  },
+  {
+    "terme": "Plante vivace",
+    "definition_courte": "Plante herbacee qui revient plusieurs annees.",
+    "explication_pedagogique": "Elle compose les massifs durables.",
+    "exemple_utilisation": "Le CCTP prévoit massifs de vivaces et entretien après floraison.",
+    "points_vigilance": [
+      "Supprimer hampes florales après floraison selon entretien."
+    ]
+  },
+  {
+    "terme": "Pluviometre",
+    "definition_courte": "Appareil mesurant les precipitations.",
+    "explication_pedagogique": "Il aide a ajuster l'arrosage automatique.",
+    "exemple_utilisation": "Le CCTP demande la fourniture et pose d'un pluviometre.",
+    "points_vigilance": [
+      "Le positionner dans une zone representative, non abritee."
+    ]
+  },
+  {
+    "terme": "Pluviometrie horaire",
+    "definition_courte": "Quantite d'eau apportee par heure sur un secteur d'arrosage.",
+    "explication_pedagogique": "Elle sert a programmer la duree d'arrosage.",
+    "exemple_utilisation": "Le CCTP demande un document de pluviometrie moyenne horaire par secteur.",
+    "points_vigilance": [
+      "Utiliser ce document pour eviter sous-arrosage ou gaspillage."
+    ]
+  },
+  {
+    "terme": "Point de raccordement AEP",
+    "definition_courte": "Endroit ou l'arrosage se connecte a l'alimentation en eau.",
+    "explication_pedagogique": "Il conditionne debit, pression et protection sanitaire.",
+    "exemple_utilisation": "Le CCTP prévoit l'arrosage depuis le compteur vert.",
+    "points_vigilance": [
+      "Coordonner avec plomberie ou gestionnaire pour disconnecteur et comptage."
+    ]
+  },
+  {
+    "terme": "Portillon de jardin",
+    "definition_courte": "Petit portail piéton donnant acces a un jardin privatif.",
+    "explication_pedagogique": "Il assure passage, fermeture et sécurité de l'espace.",
+    "exemple_utilisation": "Le CCTP prévoit portillons RAL 7016 avec remplissage treillis et bois.",
+    "points_vigilance": [
+      "Vérifier largeur de passage, serrure, poignées et cylindre."
+    ]
+  },
+  {
+    "terme": "Portillon SDIS",
+    "definition_courte": "Portillon donnant acces a la bâche incendie pour les secours.",
+    "explication_pedagogique": "Il doit etre compatible avec les cles ou outils du SDIS.",
+    "exemple_utilisation": "Le CCTP demande une serrure tricoise conforme SDIS 33.",
+    "points_vigilance": [
+      "Tester ouverture, fermeture automatique et angle de 90 degres."
+    ]
+  },
+  {
+    "terme": "Poteau bois",
+    "definition_courte": "Element vertical supportant clôture ou paddock.",
+    "explication_pedagogique": "Il doit resister au sol, a l'humidité et aux efforts.",
+    "exemple_utilisation": "Le CCTP prévoit poteaux pin classe IV bain brun pour plusieurs ouvrages.",
+    "points_vigilance": [
+      "Assurer coupe en biseau, lasure et drainage en pied."
+    ]
+  },
+  {
+    "terme": "Poteau metallique",
+    "definition_courte": "Support acier de panneau ou portillon.",
+    "explication_pedagogique": "Il assure rigidite et alignement de l'ouvrage.",
+    "exemple_utilisation": "Le CCTP précise poteaux plastifies RAL 7016 pour panneaux.",
+    "points_vigilance": [
+      "Proteger les coupes et reprises contre corrosion."
+    ]
+  },
+  {
+    "terme": "Potelet bois",
+    "definition_courte": "Borne basse en bois servant a limiter acces ou proteger espaces.",
+    "explication_pedagogique": "Elle marque les limites et protège certains aménagements.",
+    "exemple_utilisation": "Le CCTP prévoit potelets pin autoclave avec catadioptres sur certains éléments.",
+    "points_vigilance": [
+      "Vérifier hauteur hors sol, pointe non saillante et scellement."
+    ]
+  },
+  {
+    "terme": "Prairie fleurie",
+    "definition_courte": "Surface semee avec graminées et fleurs sauvages.",
+    "explication_pedagogique": "Elle favorise biodiversité et floraison longue.",
+    "exemple_utilisation": "Le CCTP prévoit un mélange avec 30 % graminées et 70 % fleurs sauvages.",
+    "points_vigilance": [
+      "Adapter fauche pour permettre regeneration naturelle."
+    ]
+  },
+  {
+    "terme": "Pre-réception",
+    "definition_courte": "Contrôle intermediaire avant réception finale.",
+    "explication_pedagogique": "Elle permet de lever les réserves progressivement.",
+    "exemple_utilisation": "Le CCTP prévoit pre-réception si travaux acheves, essais concluants et récolement transmis.",
+    "points_vigilance": [
+      "Ne pas demander trop tot si documents ou essais manquent."
+    ]
+  },
+  {
+    "terme": "Préparation de sol",
+    "definition_courte": "Ensemble des travaux avant plantation ou semis.",
+    "explication_pedagogique": "Elle conditionne la reprise et le rendu final.",
+    "exemple_utilisation": "Le CCTP demande decompactage, terre végétale, amendement, épierrage et nivellement.",
+    "points_vigilance": [
+      "Une mauvaise préparation ne se rattrape pas par l'arrosage seul."
+    ]
+  },
+  {
+    "terme": "Produit similaire",
+    "definition_courte": "Produit propose en alternative a une reference précise.",
+    "explication_pedagogique": "Il doit prouver une equivalence technique et esthetique.",
+    "exemple_utilisation": "Le CCTP accepte des produits similaires après validation.",
+    "points_vigilance": [
+      "Fournir fiches, performances, garanties et echantillons."
+    ]
+  },
+  {
+    "terme": "Programmateur autonome",
+    "definition_courte": "Appareil pilotant automatiquement les cycles d'arrosage.",
+    "explication_pedagogique": "Il ouvre les secteurs selon planning et saison.",
+    "exemple_utilisation": "Le CCTP prévoit un programmateur avec essais, réglages et documents.",
+    "points_vigilance": [
+      "Programmer selon saisons, pluies et sécheresses."
+    ]
+  },
+  {
+    "terme": "Protection des arbres",
+    "definition_courte": "Dispositifs evitant chocs, tassement et blessures sur arbres conserves.",
+    "explication_pedagogique": "Elle préserve le patrimoine végétal pendant les travaux.",
+    "exemple_utilisation": "Le CCTP prévoit planches, poteaux, fourreaux et barrieres selon cas.",
+    "points_vigilance": [
+      "Installer avant travaux et maintenir jusqu'à la fin."
+    ]
+  },
+  {
+    "terme": "Protection hivernale",
+    "definition_courte": "Mesure de protection contre gel ou froid.",
+    "explication_pedagogique": "Elle concerne jeunes végétaux et arrosage.",
+    "exemple_utilisation": "Le CCTP demande retrait des protections hivernales après les gelees.",
+    "points_vigilance": [
+      "Ne pas les laisser etouffer la végétation au printemps."
+    ]
+  },
+  {
+    "terme": "Protection jusqu'à réception",
+    "definition_courte": "Maintien en bon etat des ouvrages après pose jusqu'à acceptance.",
+    "explication_pedagogique": "Elle évite dégradations avant transfert au maître d'ouvrage.",
+    "exemple_utilisation": "Le CCTP le rappelle pour clôtures, membranes, arrosage et ouvrages.",
+    "points_vigilance": [
+      "Remplacer ou reparer les éléments abimes avant réception."
+    ]
+  },
+  {
+    "terme": "Raccord goutte-a-goutte",
+    "definition_courte": "Pièce reliant tubes, lignes et accessoires d'arrosage localise.",
+    "explication_pedagogique": "Elle assure continuite et étanchéité du reseau.",
+    "exemple_utilisation": "Le CCTP inclut raccordements et sujétions du goutte-a-goutte.",
+    "points_vigilance": [
+      "Tester sous pression avant rebouchage ou paillage."
+    ]
+  },
+  {
+    "terme": "Racine abimee",
+    "definition_courte": "Racine coupee, arrachee ou blessée pendant travaux.",
+    "explication_pedagogique": "Elle peut compromettre la stabilité ou la reprise du végétal.",
+    "exemple_utilisation": "Le CCTP exige coupe franche et cicatrisant en cas de racine abimee.",
+    "points_vigilance": [
+      "Ne pas arracher avec godet sans reprise propre."
+    ]
+  },
+  {
+    "terme": "RAL 7016",
+    "definition_courte": "Code couleur gris anthracite.",
+    "explication_pedagogique": "Il donne une teinte commune aux clôtures et portillons.",
+    "exemple_utilisation": "Le CCTP demande RAL 7016 pour plusieurs ouvrages metalliques.",
+    "points_vigilance": [
+      "Vérifier les bains, retouches et éléments accessoires."
+    ]
+  },
+  {
+    "terme": "Ramassage manuel",
+    "definition_courte": "Retrait a la main des pierres, dechets ou adventices.",
+    "explication_pedagogique": "Il complete les outils mecaniques sur zones fines.",
+    "exemple_utilisation": "Le CCTP cite le ramassage manuel pour l'épierrage.",
+    "points_vigilance": [
+      "Prevoir temps suffisant pour les petites surfaces visibles."
+    ]
+  },
+  {
+    "terme": "Ray-grass anglais",
+    "definition_courte": "Espece de gazon courante a installation rapide.",
+    "explication_pedagogique": "Elle entre dans certains melanges de semences.",
+    "exemple_utilisation": "Le CCTP limite le ray-grass anglais de deuxième ou troisième generation a 30 %.",
+    "points_vigilance": [
+      "Vérifier la composition exacte du mélange propose."
+    ]
+  },
+  {
+    "terme": "Rebouchage en terre",
+    "definition_courte": "Remise de terre après arrachage, taille ou terrassement.",
+    "explication_pedagogique": "Il remet le terrain a niveau et sécurise les abords.",
+    "exemple_utilisation": "Le CCTP cite le rebouchage et nivellement proches si nécessaire.",
+    "points_vigilance": [
+      "Ne pas laisser trous, ornieres ou affaissements."
+    ]
+  },
+  {
+    "terme": "Réception finale",
+    "definition_courte": "Acceptation globale de l'ensemble des ouvrages du projet.",
+    "explication_pedagogique": "Elle intervient après receptions partielles sans réserve.",
+    "exemple_utilisation": "Le CCTP prévoit une seule réception finale pour l'ensemble du projet.",
+    "points_vigilance": [
+      "Préparer contrôles, DOE, levées de réserves et nettoyage."
+    ]
+  },
+  {
+    "terme": "Regard d'électrovanne",
+    "definition_courte": "Boite enterrée donnant acces a une électrovanne.",
+    "explication_pedagogique": "Elle permet entretien, réglage et remplacement.",
+    "exemple_utilisation": "Le CCTP demande regards avec drainage pour électrovannes.",
+    "points_vigilance": [
+      "Ne pas enterrer ou recouvrir sous mulch sans repere accessible."
+    ]
+  },
+  {
+    "terme": "Réglage grosso modo",
+    "definition_courte": "Premier etalement de la terre avant finition.",
+    "explication_pedagogique": "Il prepare le nivellement fin et les formes generales.",
+    "exemple_utilisation": "Le CCTP cite le reglement grosso-modo des terres végétales.",
+    "points_vigilance": [
+      "Ne pas confondre avec le dressement final."
+    ]
+  },
+  {
+    "terme": "Regulateur de debit",
+    "definition_courte": "Organe stabilisant le debit d'un secteur d'arrosage.",
+    "explication_pedagogique": "Il equilibre l'apport d'eau entre lignes.",
+    "exemple_utilisation": "Le CCTP inclut un regulateur dans les kits de depart goutte-a-goutte.",
+    "points_vigilance": [
+      "Vérifier debit reel et compatibilite avec la pression disponible."
+    ]
+  },
+  {
+    "terme": "Remblaiement",
+    "definition_courte": "Remise de matériaux dans une fouille ou autour d'un ouvrage.",
+    "explication_pedagogique": "Il stabilise fosses, membranes, poteaux et reseaux.",
+    "exemple_utilisation": "Le CCTP mentionne remblaiement pour anti-racines, clôtures et travaux divers.",
+    "points_vigilance": [
+      "Remblayer par couches adaptees, sans deplacer les ouvrages."
+    ]
+  },
+  {
+    "terme": "Remise en service arrosage",
+    "definition_courte": "Redemarrage du reseau après hiver ou interruption.",
+    "explication_pedagogique": "Elle garantit l'arrosage au moment utile.",
+    "exemple_utilisation": "Le CCTP demande remise en service après les gelees.",
+    "points_vigilance": [
+      "Controler fuites et reprogrammer selon saison."
+    ]
+  },
+  {
+    "terme": "Repliement du chantier",
+    "definition_courte": "Retrait complet du materiel, produits et installations.",
+    "explication_pedagogique": "Il marque la fin effective des interventions.",
+    "exemple_utilisation": "Le CCTP inclut le repliement complet du chantier.",
+    "points_vigilance": [
+      "Vérifier qu'aucun dechet ou stock n'est laisse sur site."
+    ]
+  },
+  {
+    "terme": "Reprise de lasure",
+    "definition_courte": "Application de protection sur une coupe ou blessure bois.",
+    "explication_pedagogique": "Elle évite absorption d'eau et différence d'aspect.",
+    "exemple_utilisation": "Le CCTP demande reprise en lasure des coupes biseautees de poteaux.",
+    "points_vigilance": [
+      "Traiter toutes les coupes, pas seulement les faces visibles."
+    ]
+  },
+  {
+    "terme": "Reprise de surface détériorée",
+    "definition_courte": "Remise en etat d'une zone abimee par elagage ou travaux.",
+    "explication_pedagogique": "Elle évite de livrer des dommages collateraux.",
+    "exemple_utilisation": "Le CCTP met ces reprises a charge selon interventions.",
+    "points_vigilance": [
+      "Documenter l'etat initial pour distinguer existant et dégradation chantier."
+    ]
+  },
+  {
+    "terme": "Resineux limite",
+    "definition_courte": "Part maximale de bois resineux dans l'amendement végétal.",
+    "explication_pedagogique": "Elle évite un compost desequilibre ou acidifiant.",
+    "exemple_utilisation": "Le CCTP limite les resineux a moins de 10 % dans l'amendement.",
+    "points_vigilance": [
+      "Demander composition et analyse."
+    ]
+  },
+  {
+    "terme": "Ressuyage du sol",
+    "definition_courte": "Etat d'un sol ni détrempé ni trop sec après pluie.",
+    "explication_pedagogique": "Il permet travail du sol sans compactage ni lissage.",
+    "exemple_utilisation": "Le CCTP demande labour sur sol bien ressuye.",
+    "points_vigilance": [
+      "Reporter l'intervention si la terre colle aux outils."
+    ]
+  },
+  {
+    "terme": "Restauration écologique",
+    "definition_courte": "Semis ou aménagement visant a reconstituer un milieu naturel.",
+    "explication_pedagogique": "Elle favorise biodiversité et adaptation locale.",
+    "exemple_utilisation": "Le CCTP decrit la prairie fleurie comme restauration écologique de milieu naturel.",
+    "points_vigilance": [
+      "Choisir un mélange coherent avec sol, exposition et entretien."
+    ]
+  },
+  {
+    "terme": "Retouche anticorrosion",
+    "definition_courte": "Reprise de protection sur acier coupe ou abime.",
+    "explication_pedagogique": "Elle évite la rouille sous peinture.",
+    "exemple_utilisation": "Le CCTP demande reprises anticorrosion et peinture en cas de decoupes ou dégradations.",
+    "points_vigilance": [
+      "Respecter préparation du support et nombre de couches."
+    ]
+  },
+  {
+    "terme": "Rotavator",
+    "definition_courte": "Outil rotatif de travail du sol.",
+    "explication_pedagogique": "Il peut trop affiner ou destructurer certains sols.",
+    "exemple_utilisation": "Le CCTP exclut les outils rotatifs type fraise ou rotavator pour certains réglages.",
+    "points_vigilance": [
+      "Employer herse ou cultivateur lorsque prescrit."
+    ]
+  },
+  {
+    "terme": "Rotobeche",
+    "definition_courte": "Outil de travail du sol par bêchage mécanique.",
+    "explication_pedagogique": "Il peut servir au labour sur grandes surfaces.",
+    "exemple_utilisation": "Le CCTP cite la rotobeche pour travailler un sol ressuye.",
+    "points_vigilance": [
+      "Adapter profondeur et ne pas pulveriser excessivement la structure."
+    ]
+  },
+  {
+    "terme": "Saison de plantation",
+    "definition_courte": "Période favorable a l'installation des végétaux.",
+    "explication_pedagogique": "Elle conditionne la reprise et les besoins en arrosage.",
+    "exemple_utilisation": "Le CCTP impose un entretien sur cycle complet de végétation après plantation.",
+    "points_vigilance": [
+      "Eviter plantation en stress hydrique, gel ou forte chaleur sans mesures."
+    ]
+  },
+  {
+    "terme": "Scellement béton",
+    "definition_courte": "Massif béton maintenant poteau, potelet ou clôture.",
+    "explication_pedagogique": "Il assure stabilité de l'ouvrage.",
+    "exemple_utilisation": "Le CCTP demande fondations et scellements avec haut du plot sous niveau fini.",
+    "points_vigilance": [
+      "Ne pas laisser le béton apparent en zone végétale."
+    ]
+  },
+  {
+    "terme": "SDIS 33",
+    "acronyme": "Service departemental d'incendie et de secours de Gironde.",
+    "definition_courte": "Service departemental d'incendie et de secours de Gironde.",
+    "explication_pedagogique": "Il peut imposer des conditions d'acces a la bâche incendie.",
+    "exemple_utilisation": "Le CCTP demande une serrure tricoise conforme aux cles SDIS 33.",
+    "points_vigilance": [
+      "Valider le modele avant pose du portillon incendie."
+    ]
+  },
+  {
+    "terme": "Semences gazon",
+    "definition_courte": "Graines composant le mélange de gazon.",
+    "explication_pedagogique": "Elles determinent résistance, aspect et entretien du gazon.",
+    "exemple_utilisation": "Le CCTP demande des semences conformes au catalogue officiel et aux regles de vente.",
+    "points_vigilance": [
+      "Conserver étiquettes, composition et certificats."
+    ]
+  },
+  {
+    "terme": "Serrure a larder",
+    "definition_courte": "Serrure encastree dans le cadre ou montant du portillon.",
+    "explication_pedagogique": "Elle donne une fermeture propre et durable.",
+    "exemple_utilisation": "Le CCTP prévoit serrure a larder pour portillons de jardins.",
+    "points_vigilance": [
+      "Tester cylindre, cles, poignee PMR et alignement."
+    ]
+  },
+  {
+    "terme": "Serrure tricoise",
+    "definition_courte": "Serrure manouvrable avec cle tricoise de secours.",
+    "explication_pedagogique": "Elle facilite l'acces des services incendie.",
+    "exemple_utilisation": "Le CCTP la demande sur le portillon d'acces a la bâche incendie.",
+    "points_vigilance": [
+      "Valider compatibilite avec SDIS avant réception."
+    ]
+  },
+  {
+    "terme": "Sol compacté",
+    "definition_courte": "Sol tasse qui limite infiltration et racines.",
+    "explication_pedagogique": "Il penalise plantations et gazons.",
+    "exemple_utilisation": "Le CCTP demande decompactage et évite stockage sous houppier.",
+    "points_vigilance": [
+      "Ne pas planter directement dans un fond dur."
+    ]
+  },
+  {
+    "terme": "SOSED / SOGED",
+    "definition_courte": "Documents d'organisation de la gestion des dechets de chantier.",
+    "explication_pedagogique": "Ils decrivent tri, évacuation et filieres.",
+    "exemple_utilisation": "Le CCTP cite ces documents dans les pièces et obligations.",
+    "points_vigilance": [
+      "Les mettre a jour selon dechets reels du lot paysage."
+    ]
+  },
+  {
+    "terme": "Souche",
+    "definition_courte": "Base d'un arbre après coupe, avec racines principales.",
+    "explication_pedagogique": "Elle peut devoir etre evacuee lors de nettoyage végétation.",
+    "exemple_utilisation": "Le CCTP cite évacuation de troncs, branchages, broyats si nécessaire et souche.",
+    "points_vigilance": [
+      "Vérifier si dessouchage est prévu ou si conservation est demandee."
+    ]
+  },
+  {
+    "terme": "Stimulateur racinaire",
+    "definition_courte": "Produit favorisant le developpement des racines.",
+    "explication_pedagogique": "Il aide les végétaux en demarrage difficile.",
+    "exemple_utilisation": "Le CCTP prévoit son application par paysagistes agrees si nécessaire.",
+    "points_vigilance": [
+      "Respecter dosage fabricant et tracer les applications."
+    ]
+  },
+  {
+    "terme": "Stockage de terre végétale",
+    "definition_courte": "Mise en tas temporaire des terres.",
+    "explication_pedagogique": "Il doit preserver la qualité biologique et eviter compaction.",
+    "exemple_utilisation": "Le CCTP refuse un stockage de terre sur plus de 2,00 m de haut.",
+    "points_vigilance": [
+      "Eviter mélange avec sous-sol, debris ou terres polluees."
+    ]
+  },
+  {
+    "terme": "Surface engazonnee",
+    "definition_courte": "Zone destinee a recevoir un semis de gazon.",
+    "explication_pedagogique": "Elle demande terre fine, nivellement et entretien par tonte.",
+    "exemple_utilisation": "Le CCTP prévoit préparation, semences et tontes d'entretien.",
+    "points_vigilance": [
+      "Proteger du piétinement pendant la levée."
+    ]
+  },
+  {
+    "terme": "Taille de formation",
+    "definition_courte": "Taille des jeunes arbres pour structurer leur couronne.",
+    "explication_pedagogique": "Elle accompagne la croissance et la sécurité future.",
+    "exemple_utilisation": "Le CCTP prévoit une taille de formation en debut d'année.",
+    "points_vigilance": [
+      "Adapter a l'espece et ne pas supprimer trop de volume."
+    ]
+  },
+  {
+    "terme": "Taille des arbustes",
+    "definition_courte": "Entretien visant a eclaircir et renouveler les rameaux.",
+    "explication_pedagogique": "Elle maintient forme naturelle et sécurité des circulations.",
+    "exemple_utilisation": "Le CCTP demande de tailler au secateur en respectant la forme naturelle.",
+    "points_vigilance": [
+      "Pour arbustes a fleurs, intervenir après floraison."
+    ]
+  },
+  {
+    "terme": "Taille douce",
+    "definition_courte": "Elagage respectueux de la forme et de la physiologie de l'arbre.",
+    "explication_pedagogique": "Elle conserve le sujet sans coupes excessives.",
+    "exemple_utilisation": "Le CCTP demande taille douce des arbres et végétaux conserves.",
+    "points_vigilance": [
+      "Eviter etetage, grosses coupes injustifiees et blessures."
+    ]
+  },
+  {
+    "terme": "Talus ou modele",
+    "definition_courte": "Forme de terrain en pente ou relief paysager.",
+    "explication_pedagogique": "Il peut recevoir terres, gazons ou plantations.",
+    "exemple_utilisation": "Le CCTP evoque modeles de sous-couche et mouvements de sol légers.",
+    "points_vigilance": [
+      "Vérifier stabilité, ruissellement et niveaux avec ouvrages voisins."
+    ]
+  },
+  {
+    "terme": "Tendeur",
+    "definition_courte": "Pièce permettant de tendre un fil de clôture.",
+    "explication_pedagogique": "Il maintient le grillage sous tension dans le temps.",
+    "exemple_utilisation": "Le CCTP demande tendeurs alignes verticalement.",
+    "points_vigilance": [
+      "Les placer aux bons intervalles et les regler après pose."
+    ]
+  },
+  {
+    "terme": "Terre maraichere interdite",
+    "definition_courte": "Terre de culture maraichere refusee par le CCTP.",
+    "explication_pedagogique": "Elle peut contenir dechets, parasites ou caracteristiques non souhaitees.",
+    "exemple_utilisation": "Le CCTP interdit terres maraicheres et terres enrichies de dechets urbains.",
+    "points_vigilance": [
+      "Vérifier origine de la terre fournie."
+    ]
+  },
+  {
+    "terme": "Terre non calcaire",
+    "definition_courte": "Terre dont le pH reste sous la limite prescrite.",
+    "explication_pedagogique": "Elle convient aux plantations prévues si le projet l'exige.",
+    "exemple_utilisation": "Le CCTP demande une terre non calcaire avec pH inferieur a 7,5.",
+    "points_vigilance": [
+      "Controler par analyse, pas seulement declaration fournisseur."
+    ]
+  },
+  {
+    "terme": "Terre végétale",
+    "definition_courte": "Couche fertile de sol utilisée pour plantations et gazons.",
+    "explication_pedagogique": "Elle fournit support physique, eau et nutriments.",
+    "exemple_utilisation": "Le CCTP detaille fourniture, reprise, analyses, epaisseurs et mise en place.",
+    "points_vigilance": [
+      "Elle doit etre exempte de cailloux, verre, rhizomes, parasites et dechets."
+    ]
+  },
+  {
+    "terme": "Tolérance de niveau",
+    "definition_courte": "Ecart admis entre niveau réalisé et niveau projet.",
+    "explication_pedagogique": "Elle garantit un rendu propre des surfaces végétales.",
+    "exemple_utilisation": "Le CCTP fixe environ +/- 0,05 m après terre et +/- 0,03 m en nivellement fin.",
+    "points_vigilance": [
+      "Faire des contrôles avant semis ou paillage."
+    ]
+  },
+  {
+    "terme": "Tonte",
+    "definition_courte": "Coupe régulière du gazon.",
+    "explication_pedagogique": "Elle maintient hauteur, densite et aspect propre.",
+    "exemple_utilisation": "Le CCTP demande que l'herbe ne depasse jamais 12 cm et minimum 11 tontes.",
+    "points_vigilance": [
+      "Ramasser dechets et evacuer sous 48 heures."
+    ]
+  },
+  {
+    "terme": "Tontine",
+    "definition_courte": "Enveloppe ou conditionnement autour d'une motte d'arbuste.",
+    "explication_pedagogique": "Elle protège les racines pendant transport et plantation.",
+    "exemple_utilisation": "Le CCTP accepte arbustes en motte tontine ou conteneur.",
+    "points_vigilance": [
+      "Vérifier que la tontine ne gêne pas le collet selon consignes."
+    ]
+  },
+  {
+    "terme": "Tranchee anti-racines",
+    "definition_courte": "Fouille etroite accueillant une membrane de protection racinaire.",
+    "explication_pedagogique": "Elle permet de proteger voiries et reseaux proches des arbres.",
+    "exemple_utilisation": "Le CCTP inclut terrassement en tranchee pour la barrière anti-racinaire.",
+    "points_vigilance": [
+      "Remblayer et compacter sans deplacer la membrane."
+    ]
+  },
+  {
+    "terme": "Transplantation en pepiniere",
+    "definition_courte": "Opération de déplacement d'un végétal en culture pour densifier ses racines.",
+    "explication_pedagogique": "Elle améliore la qualité de reprise des grands sujets.",
+    "exemple_utilisation": "Le CCTP fixe un nombre minimal de transplantations selon calibres.",
+    "points_vigilance": [
+      "Demander la fiche de culture ou preuve pepiniere."
+    ]
+  },
+  {
+    "terme": "Treillis soude souple",
+    "definition_courte": "Grillage en rouleau compose de fils soudes.",
+    "explication_pedagogique": "Il est utilisé pour clôtures de jardins privatifs.",
+    "exemple_utilisation": "Le CCTP prévoit maille 100 x 50, fils galvanisés/plastifies et RAL 7016.",
+    "points_vigilance": [
+      "Assurer tension, agrafage et scellements propres."
+    ]
+  },
+  {
+    "terme": "Tricoise",
+    "definition_courte": "Cle triangulaire ou outil utilisé par services techniques et secours.",
+    "explication_pedagogique": "Elle permet d'ouvrir certains acces normalises.",
+    "exemple_utilisation": "Le CCTP demande une serrure tricoise pour l'acces bâche incendie.",
+    "points_vigilance": [
+      "Vérifier le type exact demande par le SDIS 33."
+    ]
+  },
+  {
+    "terme": "Tronc protège",
+    "definition_courte": "Tronc entoure ou isole pour eviter chocs et frottements.",
+    "explication_pedagogique": "Il préserve l'écorce pendant chantier.",
+    "exemple_utilisation": "Le CCTP prévoit protections par planches ou fourreaux autour des troncs.",
+    "points_vigilance": [
+      "Laisser ventilation et ne pas comprimer l'arbre."
+    ]
+  },
+  {
+    "terme": "Tuteur simple",
+    "definition_courte": "Pieu unique maintenant une cépée ou un jeune sujet.",
+    "explication_pedagogique": "Il stabilise pendant l'enracinement.",
+    "exemple_utilisation": "Le CCTP prévoit tuteur simple pour cépées, pose en biais.",
+    "points_vigilance": [
+      "Regler l'attache pour que le tronc ne frotte pas."
+    ]
+  },
+  {
+    "terme": "Tuteurage double",
+    "definition_courte": "Deux tuteurs relies par planchettes pour un arbre tige.",
+    "explication_pedagogique": "Il stabilise l'arbre sans contraindre son tronc.",
+    "exemple_utilisation": "Le CCTP prévoit deux tuteurs avec planchettes pour arbres tiges.",
+    "points_vigilance": [
+      "Controler tenue et colliers pendant l'entretien."
+    ]
+  },
+  {
+    "terme": "Unite de recuperation",
+    "definition_courte": "Filière ou zone de depot pour branches et végétaux coupes.",
+    "explication_pedagogique": "Elle organise l'évacuation ou valorisation.",
+    "exemple_utilisation": "Le CCTP demande évacuation des branches en unites de recuperation.",
+    "points_vigilance": [
+      "Eviter mélange avec dechets non végétaux."
+    ]
+  },
+  {
+    "terme": "Validation variétale",
+    "definition_courte": "Verification que l'espece et la variété livrees sont conformes.",
+    "explication_pedagogique": "Elle garantit le respect du projet de plantation.",
+    "exemple_utilisation": "Le CCTP prévoit verification au plus tard a la premiere période de végétation.",
+    "points_vigilance": [
+      "Remplacer les végétaux non conformes meme s'ils sont vivants."
+    ]
+  },
+  {
+    "terme": "Vanne d'arrosage",
+    "definition_courte": "Organe qui ouvre ou ferme une partie du reseau.",
+    "explication_pedagogique": "Elle permet isolation, entretien et exploitation.",
+    "exemple_utilisation": "Le CCTP prévoit vannes, clapets et électrovannes pour l'arrosage.",
+    "points_vigilance": [
+      "Les rendre accessibles et reperees."
+    ]
+  },
+  {
+    "terme": "Végétal conserve",
+    "definition_courte": "Arbre, arbuste ou haie existant garde dans le projet.",
+    "explication_pedagogique": "Il exige protection et entretien pendant chantier.",
+    "exemple_utilisation": "Le CCTP demande protection des parties aériennes et souterraines.",
+    "points_vigilance": [
+      "Ne pas stocker matériaux ou engins dans sa zone racinaire."
+    ]
+  },
+  {
+    "terme": "Végétaux de premier choix",
+    "definition_courte": "Plantes de qualité superieure, homogenes et sans défaut.",
+    "explication_pedagogique": "Elles donnent une meilleure reprise et un rendu homogène.",
+    "exemple_utilisation": "Le CCTP demande des lots homogenes et de premier choix.",
+    "points_vigilance": [
+      "Refuser sujets faibles, mal formes ou heterogenes."
+    ]
+  },
+  {
+    "terme": "Végétaux mutiles",
+    "definition_courte": "Plantes blessées par outils, travaux ou entretien.",
+    "explication_pedagogique": "Elles doivent etre remplacees si les dommages compromettent leur avenir.",
+    "exemple_utilisation": "Le CCTP impose remplacement en cas de mutilation par debroussailleuse.",
+    "points_vigilance": [
+      "Former les equipes d'entretien aux zones sensibles."
+    ]
+  },
+  {
+    "terme": "VI 01 entretien",
+    "definition_courte": "Variante exigee portant sur la moins-value de l'entretien des espaces communs.",
+    "explication_pedagogique": "Elle permet au maître d'ouvrage d'isoler le cout de cette prestation.",
+    "exemple_utilisation": "Le CCTP liste VI 01 pour l'entretien.",
+    "points_vigilance": [
+      "Ne pas melanger cette variante avec la garantie de reprise si elle reste due."
+    ]
+  },
+  {
+    "terme": "VI 02 protection végétaux",
+    "definition_courte": "Variante exigee concernant la moins-value de protection des végétaux.",
+    "explication_pedagogique": "Elle permet de comparer l'impact financier des protections.",
+    "exemple_utilisation": "Le CCTP liste VI 02 pour la protection des végétaux.",
+    "points_vigilance": [
+      "Vérifier que la suppression eventuelle ne met pas les arbres en risque."
+    ]
+  },
+  {
+    "terme": "VI 03 bute-roues",
+    "definition_courte": "Variante exigee concernant les bute-roues.",
+    "explication_pedagogique": "Elle isole le cout de cet equipement de parking.",
+    "exemple_utilisation": "Le CCTP liste VI 03 pour les bute-roues.",
+    "points_vigilance": [
+      "Garder la cohérence avec protection des espaces verts et circulation."
+    ]
+  },
+  {
+    "terme": "Viabilites provisoires",
+    "definition_courte": "Raccordements ou moyens temporaires nécessaires au chantier.",
+    "explication_pedagogique": "Elles permettent d'assurer travaux, sécurité et acces.",
+    "exemple_utilisation": "Le CCTP inclut viabilites provisoires ou non dans l'installation.",
+    "points_vigilance": [
+      "Les supprimer ou remettre en etat au repli."
+    ]
+  },
+  {
+    "terme": "Zone racinaire",
+    "definition_courte": "Volume de sol occupe ou exploite par les racines.",
+    "explication_pedagogique": "Il est sensible au compactage, terrassement et stockage.",
+    "exemple_utilisation": "Le CCTP protège les parties souterraines des arbres conserves.",
+    "points_vigilance": [
+      "Limiter fouilles et imposer travail manuel a proximite."
+    ]
+  }
+]

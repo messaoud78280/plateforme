@@ -104,6 +104,23 @@ export default async function DicoBtpPage({ searchParams }: { searchParams: Prom
       {/* Recherche mise en avant */}
       <BtpDicoSearchBar />
 
+      {/* Import JSON (replié) — en haut pour accès direct sans scroll */}
+      <details id="import-json" className="group scroll-mt-24 rounded-2xl border border-[#1e3a5f]/20 bg-white shadow-sm">
+        <summary className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-5 py-4 marker:content-none hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
+          <span>
+            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#1e3a5f]">Import structuré</span>
+            <span className="font-heading mt-0.5 block text-base font-bold text-slate-900">Importer des termes en JSON</span>
+          </span>
+          <span className="shrink-0 rounded-lg border border-[#1e3a5f]/30 bg-white px-3 py-1.5 text-xs font-semibold text-[#1e3a5f]">
+            <span className="group-open:hidden">Ouvrir</span>
+            <span className="hidden group-open:inline">Fermer</span>
+          </span>
+        </summary>
+        <div className="px-3 pb-3 sm:px-4 sm:pb-4">
+          <BtpDicoJsonImportPanel />
+        </div>
+      </details>
+
       {/* Filtres mobile (repliés) */}
       <details className="group rounded-2xl border border-slate-200/80 bg-white shadow-sm lg:hidden">
         <summary className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-4 py-3 marker:content-none hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
@@ -235,23 +252,6 @@ export default async function DicoBtpPage({ searchParams }: { searchParams: Prom
           )}
         </div>
       </div>
-
-      {/* Import JSON (replié) */}
-      <details id="import-json" className="group scroll-mt-24 rounded-2xl border border-[#1e3a5f]/20 bg-white shadow-sm">
-        <summary className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl px-5 py-4 marker:content-none hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
-          <span>
-            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#1e3a5f]">Import structuré</span>
-            <span className="font-heading mt-0.5 block text-base font-bold text-slate-900">Importer des termes en JSON</span>
-          </span>
-          <span className="shrink-0 rounded-lg border border-[#1e3a5f]/30 bg-white px-3 py-1.5 text-xs font-semibold text-[#1e3a5f]">
-            <span className="group-open:hidden">Ouvrir</span>
-            <span className="hidden group-open:inline">Fermer</span>
-          </span>
-        </summary>
-        <div className="px-3 pb-3 sm:px-4 sm:pb-4">
-          <BtpDicoJsonImportPanel />
-        </div>
-      </details>
     </div>
   );
 }

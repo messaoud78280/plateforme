@@ -1,4 +1,4 @@
-import type { DemoScenario } from "./types";
+import type { DemoScenario } from "../types";
 
 const F = true as const;
 

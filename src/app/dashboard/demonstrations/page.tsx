@@ -1,11 +1,5 @@
 import Link from "next/link";
 import { BackLink } from "@/components/ui/BackLink";
-import {
-  archiveDemoPilotageLink,
-  createDemoPilotageLink,
-  revokeDemoPilotageLink,
-  updateDemoCommercialNotes,
-} from "@/app/dashboard/demonstrations/actions";
 import { requireDemoStaffSession } from "@/lib/demo-pilotage/access";
 import { DEMO_SCENARIO_LIST } from "@/lib/demo-pilotage/scenarios";
 import { prisma } from "@/lib/prisma";
@@ -106,14 +100,6 @@ export default async function DemonstrationsAdminPage() {
           </tbody>
         </table>
       </section>
-
-      {/* keep server actions referenced for tree-shaking clarity */}
-      <div className="hidden">
-        <form action={createDemoPilotageLink} />
-        <form action={revokeDemoPilotageLink} />
-        <form action={archiveDemoPilotageLink} />
-        <form action={updateDemoCommercialNotes} />
-      </div>
     </div>
   );
 }

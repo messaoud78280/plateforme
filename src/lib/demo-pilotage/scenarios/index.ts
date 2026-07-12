@@ -1,4 +1,4 @@
-import type { DemoScenario, DemoScenarioId } from "../types";
+import type { DemoAction, DemoBlocker, DemoScenario, DemoScenarioId } from "../types";
 import { SCENARIO_GO_LOGEMENTS } from "./main";
 
 function cloneMain(overrides: Partial<DemoScenario> & Pick<DemoScenario, "id" | "label" | "pitch" | "commercialAngle">): DemoScenario {
@@ -84,7 +84,11 @@ const SCENARIO_ELEC = cloneMain({
   adminProgressPct: 78,
   doeProgressPct: 52,
   blockers: [],
-  actions: SCENARIO_GO_LOGEMENTS.actions.map((a) => ({ ...a, overdue: false, status: a.overdue ? "En cours" : a.status })),
+  actions: SCENARIO_GO_LOGEMENTS.actions.map((a: DemoAction) => ({
+    ...a,
+    overdue: false,
+    status: a.overdue ? "En cours" : a.status,
+  })),
 });
 
 const SCENARIO_MULTI_ST = cloneMain({
@@ -126,7 +130,11 @@ const SCENARIO_DIFFICULTE = cloneMain({
   adminProgressPct: 34,
   doeProgressPct: 22,
   blockers: [
-    ...SCENARIO_GO_LOGEMENTS.blockers.map((b) => ({ ...b, severity: "Critique" as const, daysOpen: b.daysOpen + 10 })),
+    ...SCENARIO_GO_LOGEMENTS.blockers.map((b: DemoBlocker) => ({
+      ...b,
+      severity: "Critique",
+      daysOpen: b.daysOpen + 10,
+    })),
     {
       id: "b-d3",
       title: "Situation contestée par la MOE",
@@ -160,7 +168,7 @@ const SCENARIO_RECEPTION = cloneMain({
     { id: "m4", title: "DOE", category: "DOE", status: "En cours", plannedLabel: "15/07/2026", sortOrder: 90 },
     { id: "m5", title: "Levée de réserves / DGD", category: "Réception", status: "À préparer", plannedLabel: "30/08/2026", sortOrder: 100 },
   ],
-  actions: SCENARIO_GO_LOGEMENTS.actions.slice(0, 4).map((a) => ({
+  actions: SCENARIO_GO_LOGEMENTS.actions.slice(0, 4).map((a: DemoAction) => ({
     ...a,
     overdue: false,
     status: "En cours",

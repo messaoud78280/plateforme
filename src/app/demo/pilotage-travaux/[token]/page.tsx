@@ -1,11 +1,14 @@
 import { cookies } from "next/headers";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { DemoPilotageShell } from "@/components/demo-pilotage/DemoPilotageShell";
 import { DemoAccessCodeForm } from "@/components/demo-pilotage/DemoAccessCodeForm";
 import { resolveDemoLinkAccess } from "@/lib/demo-pilotage/access";
 import { getDemoScenario } from "@/lib/demo-pilotage/scenarios";
 import type { DemoPersonalization } from "@/lib/demo-pilotage/types";
 import { SEO_NOINDEX_ROBOTS } from "@/lib/seo-search-engines";
+import { Alert } from "@/components/ui/Alert";
+import { Card, CardHeader } from "@/components/ui/Card";
 
 export const metadata: Metadata = {
   title: "Démonstration Pilotage travaux | BeWork",
@@ -61,13 +64,15 @@ export default async function DemoPilotageTokenPage({
 
 function DemoDenied({ reason }: { reason: string }) {
   return (
-    <div className="mx-auto max-w-lg py-16 text-center">
-      <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-950">
-        Démonstration BeWork — Données fictives
-      </p>
-      <h1 className="mt-6 text-xl font-bold text-slate-900">Accès indisponible</h1>
-      <p className="mt-2 text-sm text-slate-600">{reason}</p>
-      <p className="mt-4 text-xs text-slate-500">Contactez votre interlocuteur BeWork pour un nouveau lien.</p>
+    <div className="mx-auto max-w-lg space-y-4 py-16">
+      <Alert tone="watch">Démonstration BeWork — Données fictives</Alert>
+      <Card hover={false} className="text-center">
+        <CardHeader title="Accès indisponible" description={reason} />
+        <p className="text-xs text-bework-muted">Contactez votre interlocuteur BeWork pour un nouveau lien.</p>
+        <Link href="/contact" className="btn-cc-primary mt-4 inline-flex">
+          Contacter BeWork
+        </Link>
+      </Card>
     </div>
   );
 }

@@ -1,5 +1,16 @@
 import Link from "next/link";
 import { BackLink } from "@/components/ui/BackLink";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Badge } from "@/components/ui/Badge";
+import { EmptyState } from "@/components/ui/EmptyState";
+import {
+  DataTable,
+  DataTableBody,
+  DataTableHead,
+  DataTableRow,
+  DataTableTd,
+  DataTableTh,
+} from "@/components/ui/DataTable";
 import { requireDemoStaffSession } from "@/lib/demo-pilotage/access";
 import { DEMO_SCENARIO_LIST } from "@/lib/demo-pilotage/scenarios";
 import { prisma } from "@/lib/prisma";
@@ -22,63 +33,75 @@ export default async function DemonstrationsAdminPage() {
   return (
     <div className="space-y-6">
       <BackLink href="/dashboard">Tableau de bord</BackLink>
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Démonstrations Pilotage travaux</h1>
-          <p className="mt-1 max-w-2xl text-sm text-slate-600">
-            Espace commercial isolé : données fictives uniquement. Générez un lien temporaire pour un prospect ou
-            présentez en partage d’écran.
-          </p>
-        </div>
-        <Link
-          href="/demo/pilotage-travaux"
-          className="rounded-lg bg-[#1e3a5f] px-4 py-2 text-sm font-semibold text-white"
-        >
-          Lancer une démo (mode rendez-vous)
-        </Link>
-      </header>
+      <PageHeader
+        eyebrow="Espace commercial"
+        title="Démonstrations Pilotage travaux"
+        description="Espace isolé : données fictives uniquement. Générez un lien temporaire pour un prospect ou présentez en partage d’écran."
+        actions={
+          <Link href="/demo/pilotage-travaux" className="btn-cc-primary">
+            Lancer une démo (mode rendez-vous)
+          </Link>
+        }
+      />
 
       <CreateDemoLinkForm scenarios={DEMO_SCENARIO_LIST.map((s) => ({ id: s.id, label: s.label }))} />
 
-      <section className="pilotage-card overflow-x-auto p-0">
-        <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-slate-100 bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-            <tr>
-              <th className="px-4 py-3">Prospect</th>
-              <th className="px-4 py-3">Scénario</th>
-              <th className="px-4 py-3">Statut</th>
-              <th className="px-4 py-3">Vues</th>
-              <th className="px-4 py-3">Expiration</th>
-              <th className="px-4 py-3">Lien</th>
-              <th className="px-4 py-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-50">
+      {links.length === 0 ? (
+        <EmptyState
+          title="Aucune démonstration"
+          description="Créez un lien prospect ci-dessus pour démarrer une démo sécurisée."
+        />
+      ) : (
+        <DataTable minWidth="920px">
+          <DataTableHead>
+            <DataTableTh>Prospect</DataTableTh>
+            <DataTableTh>Scénario</DataTableTh>
+            <DataTableTh>Statut</DataTableTh>
+            <DataTableTh>Vues</DataTableTh>
+            <DataTableTh>Expiration</DataTableTh>
+            <DataTableTh>Lien</DataTableTh>
+            <DataTableTh>Actions</DataTableTh>
+          </DataTableHead>
+          <DataTableBody>
             {links.map((l) => {
               const url = `${baseUrl}/demo/pilotage-travaux/${l.token}`;
               return (
-                <tr key={l.id}>
-                  <td className="px-4 py-3">
-                    <p className="font-semibold text-slate-900">{l.prospectCompany ?? "—"}</p>
-                    <p className="text-xs text-slate-500">{l.prospectName ?? l.createdBy?.name ?? "—"}</p>
-                  </td>
-                  <td className="px-4 py-3 text-xs">{l.scenarioId}</td>
-                  <td className="px-4 py-3 text-xs font-semibold">{l.status}</td>
-                  <td className="px-4 py-3 tabular-nums">
-                    {l.viewCount}
-                    {l.maxViews != null ? ` / ${l.maxViews}` : ""}
-                  </td>
-                  <td className="px-4 py-3 text-xs">{l.expiresAt.toLocaleDateString("fr-FR")}</td>
-                  <td className="px-4 py-3">
+                <DataTableRow key={l.id}>
+                  <DataTableTd>
+                    <p className="font-semibold text-bework-ink">{l.prospectCompany ?? "—"}</p>
+                    <p className="text-xs text-bework-muted">{l.prospectName ?? l.createdBy?.name ?? "—"}</p>
+                  </DataTableTd>
+                  <DataTableTd>
+                    <span className="text-xs text-bework-muted">{l.scenarioId}</span>
+                  </DataTableTd>
+                  <DataTableTd>
+                    <Badge
+                      tone={
+                        l.status === "ACTIVE" ? "ok" : l.status === "REVOKED" ? "critical" : "neutral"
+                      }
+                    >
+                      {l.status}
+                    </Badge>
+                  </DataTableTd>
+                  <DataTableTd>
+                    <span className="tabular-nums">
+                      {l.viewCount}
+                      {l.maxViews != null ? ` / ${l.maxViews}` : ""}
+                    </span>
+                  </DataTableTd>
+                  <DataTableTd>
+                    <span className="text-xs">{l.expiresAt.toLocaleDateString("fr-FR")}</span>
+                  </DataTableTd>
+                  <DataTableTd>
                     {l.status === "ACTIVE" ? (
-                      <a href={url} className="text-xs font-semibold text-[#1e3a5f] break-all hover:underline">
+                      <a href={url} className="text-xs font-semibold text-bework-navy break-all hover:underline">
                         Ouvrir
                       </a>
                     ) : (
-                      <span className="text-xs text-slate-400">—</span>
+                      <span className="text-xs text-bework-muted">—</span>
                     )}
-                  </td>
-                  <td className="px-4 py-3">
+                  </DataTableTd>
+                  <DataTableTd>
                     <DemoAdminActions
                       id={l.id}
                       status={l.status}
@@ -86,20 +109,13 @@ export default async function DemonstrationsAdminPage() {
                       interests={Array.isArray(l.interests) ? (l.interests as string[]) : []}
                       sections={Array.isArray(l.sectionsVisited) ? (l.sectionsVisited as string[]) : []}
                     />
-                  </td>
-                </tr>
+                  </DataTableTd>
+                </DataTableRow>
               );
             })}
-            {links.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-sm text-slate-500">
-                  Aucune démonstration créée.
-                </td>
-              </tr>
-            ) : null}
-          </tbody>
-        </table>
-      </section>
+          </DataTableBody>
+        </DataTable>
+      )}
     </div>
   );
 }

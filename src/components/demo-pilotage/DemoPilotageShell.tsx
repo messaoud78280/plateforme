@@ -162,11 +162,11 @@ export function DemoPilotageShell({
         {mode === "prospect" ? " · Accès lecture seule sécurisé" : ""}
       </div>
 
-      <header className="overflow-hidden rounded-2xl border border-[#1e3a5f]/10 bg-gradient-to-br from-[#1e3a5f] via-[#243f66] to-[#162d4a] p-6 text-white shadow-sm">
+      <header className="overflow-hidden rounded-[var(--cc-radius-lg)] border border-bework-navy/15 bg-gradient-to-br from-bework-navy via-[#243f66] to-bework-navy-deep p-6 text-white shadow-[var(--cc-shadow)]">
         <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/60">
           {companyLabel} · {scenario.marketType}
         </p>
-        <h1 className={`mt-1 font-bold tracking-tight ${presentation ? "text-3xl" : "text-2xl"}`}>
+        <h1 className={`font-heading mt-1 font-bold tracking-tight ${presentation ? "text-3xl" : "text-2xl"}`}>
           {scenario.worksiteTitle}
         </h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/80">{welcome}</p>
@@ -177,7 +177,7 @@ export function DemoPilotageShell({
           <button
             type="button"
             onClick={() => setPresentation((v) => !v)}
-            className="rounded-lg bg-white px-3.5 py-2 text-xs font-semibold text-[#1e3a5f]"
+            className="rounded-lg bg-white px-3.5 py-2 text-xs font-semibold text-bework-navy"
           >
             {presentation ? "Quitter la présentation" : "Activer le mode présentation"}
           </button>
@@ -188,28 +188,28 @@ export function DemoPilotageShell({
               setTourStep(0);
               setTab("vue");
             }}
-            className="rounded-lg border border-white/25 bg-white/10 px-3.5 py-2 text-xs font-semibold text-white"
+            className="rounded-lg border border-white/25 bg-white/10 px-3.5 py-2 text-xs font-semibold text-white hover:bg-white/15"
           >
             Visite guidée
           </button>
           <button
             type="button"
             onClick={() => setShowTips((v) => !v)}
-            className="rounded-lg border border-white/25 bg-white/10 px-3.5 py-2 text-xs font-semibold text-white"
+            className="rounded-lg border border-white/25 bg-white/10 px-3.5 py-2 text-xs font-semibold text-white hover:bg-white/15"
           >
             {showTips ? "Masquer les explications" : "Afficher les explications"}
           </button>
           <button
             type="button"
             onClick={resetSandbox}
-            className="rounded-lg border border-white/25 bg-white/10 px-3.5 py-2 text-xs font-semibold text-white"
+            className="rounded-lg border border-white/25 bg-white/10 px-3.5 py-2 text-xs font-semibold text-white hover:bg-white/15"
           >
             Réinitialiser la démonstration
           </button>
           {conclusionHref ? (
             <Link
               href={conclusionHref}
-              className="rounded-lg border border-white/25 bg-white/10 px-3.5 py-2 text-xs font-semibold text-white"
+              className="rounded-lg border border-white/25 bg-white/10 px-3.5 py-2 text-xs font-semibold text-white hover:bg-white/15"
             >
               Conclusion commerciale
             </Link>
@@ -218,20 +218,20 @@ export function DemoPilotageShell({
       </header>
 
       {sandboxMsg ? (
-        <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-medium text-emerald-900">
+        <p className="rounded-[var(--cc-radius)] border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-medium text-emerald-900">
           {sandboxMsg}
         </p>
       ) : null}
 
       {tip ? (
-        <aside className="rounded-xl border border-violet-200/70 bg-violet-50/60 px-4 py-3 text-sm text-violet-950">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-violet-700/80">Valeur BeWork</p>
+        <aside className="rounded-[var(--cc-radius)] border border-bework-intel/25 bg-violet-50/70 px-4 py-3 text-sm text-violet-950">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-bework-intel">Valeur BeWork</p>
           <p className="mt-1 leading-relaxed">{tip}</p>
         </aside>
       ) : null}
 
       <nav
-        className={`flex gap-1 overflow-x-auto rounded-xl border border-slate-200/80 bg-white p-1.5 shadow-sm ${
+        className={`flex gap-1 overflow-x-auto rounded-xl border border-bework-navy/10 bg-white p-1.5 shadow-sm ${
           presentation ? "sticky top-10 z-20" : ""
         }`}
         aria-label="Rubriques démonstration"
@@ -242,7 +242,9 @@ export function DemoPilotageShell({
             type="button"
             onClick={() => setTab(t.id)}
             className={`shrink-0 rounded-lg px-3 py-2 text-xs font-semibold whitespace-nowrap ${
-              tab === t.id ? "bg-[#1e3a5f] text-white" : "text-slate-600 hover:bg-slate-50"
+              tab === t.id
+                ? "bg-bework-navy text-white shadow-sm"
+                : "text-bework-ink/80 hover:bg-bework-navy-soft hover:text-bework-navy"
             }`}
           >
             {t.label}
@@ -488,7 +490,7 @@ export function DemoPilotageShell({
                     {!validated && d.status !== "Conforme" ? (
                       <button
                         type="button"
-                        className="rounded-lg border px-2 py-1 text-[11px] font-semibold text-[#1e3a5f]"
+                        className="rounded-lg border px-2 py-1 text-[11px] font-semibold text-bework-navy"
                         onClick={() => {
                           persistSandbox({
                             ...sandbox,
@@ -572,7 +574,7 @@ export function DemoPilotageShell({
                     }
                     className={`rounded-full px-3 py-1.5 text-xs font-semibold ring-1 ${
                       on
-                        ? "bg-[#1e3a5f] text-white ring-[#1e3a5f]"
+                        ? "bg-bework-navy text-white ring-bework-navy"
                         : "bg-white text-slate-700 ring-slate-200 hover:bg-slate-50"
                     }`}
                   >
@@ -593,7 +595,7 @@ export function DemoPilotageShell({
             <button
               type="button"
               onClick={() => void saveInterests()}
-              className="mt-3 rounded-lg bg-[#1e3a5f] px-4 py-2 text-xs font-semibold text-white"
+              className="mt-3 rounded-lg bg-bework-navy px-4 py-2 text-xs font-semibold text-white"
             >
               Enregistrer mon intérêt
             </button>
@@ -621,7 +623,7 @@ export function DemoPilotageShell({
       {tourOpen ? (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 p-4 sm:items-center">
           <div className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-xl">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#1e3a5f]">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-bework-navy">
               Visite guidée · {tourStep + 1}/{DEMO_TOUR_STEPS.length}
             </p>
             <h3 className="mt-1 text-lg font-bold text-slate-900">{DEMO_TOUR_STEPS[tourStep]?.title}</h3>
@@ -649,7 +651,7 @@ export function DemoPilotageShell({
                 </button>
                 <button
                   type="button"
-                  className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-semibold text-white"
+                  className="rounded-lg bg-bework-navy px-3 py-2 text-xs font-semibold text-white"
                   onClick={() => {
                     if (tourStep >= DEMO_TOUR_STEPS.length - 1) {
                       setTourOpen(false);
@@ -732,8 +734,8 @@ function DemoBeforeAfter() {
           <li>· Conducteurs surchargés</li>
         </ul>
       </section>
-      <section className="rounded-2xl border border-[#1e3a5f]/20 bg-white p-5 shadow-sm">
-        <h2 className="text-sm font-bold text-[#1e3a5f]">Organisation avec BeWork</h2>
+      <section className="rounded-2xl border border-bework-navy/20 bg-white p-5 shadow-sm">
+        <h2 className="text-sm font-bold text-bework-navy">Organisation avec BeWork</h2>
         <ul className="mt-3 space-y-2 text-sm text-slate-700">
           <li>· Obligations centralisées</li>
           <li>· Responsables affectés</li>

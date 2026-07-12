@@ -6,6 +6,10 @@ import { SimulationController } from "@/components/simulation/SimulationControll
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { BackLink } from "@/components/ui/BackLink";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Card, CardHeader } from "@/components/ui/Card";
+import { Alert } from "@/components/ui/Alert";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export default async function SimulationPage() {
   const session = await getServerSession(authOptions);
@@ -32,74 +36,77 @@ export default async function SimulationPage() {
   });
 
   return (
-    <div className="space-y-8">
-      <BackLink href="/dashboard">Dashboard</BackLink>
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Simulation BelleVie</h1>
-        <p className="mt-1 text-slate-600">
-          Testez les workflows de la plateforme avec le scénario BelleVie Cosmétiques.
-        </p>
-      </div>
+    <div className="space-y-6">
+      <BackLink href="/dashboard">Tableau de bord</BackLink>
+      <PageHeader
+        eyebrow="Bac à sable"
+        title="Simulation BelleVie"
+        description="Testez les workflows de la plateforme avec le scénario BelleVie Cosmétiques."
+      />
 
       {!project ? (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-6">
-          <h2 className="font-semibold text-amber-800">Données manquantes</h2>
-          <p className="mt-2 text-sm text-amber-900">
-            Exécutez le script SQL <code className="rounded bg-amber-100 px-1">prisma/supabase-simulation-tables.sql</code> dans
-            Supabase, puis lancez :
+        <Alert tone="watch" title="Données manquantes">
+          <p>
+            Exécutez le script SQL{" "}
+            <code className="rounded bg-amber-100/80 px-1">prisma/supabase-simulation-tables.sql</code> dans Supabase,
+            puis lancez :
           </p>
-          <pre className="mt-3 rounded-lg bg-slate-800 p-4 text-sm text-slate-100">
+          <pre className="mt-3 overflow-x-auto rounded-[var(--cc-radius)] bg-bework-ink p-4 text-sm text-white">
             npm run db:seed:simulation
           </pre>
-          <p className="mt-2 text-sm text-amber-800">
+          <p className="mt-2">
             Cela crée Sophie Mercier (client), Laure Olivie (gérante), Amina Benali (agent) et le projet BelleVie.
           </p>
-        </div>
+        </Alert>
       ) : (
         <>
           <SimulationController projectId={project.id} />
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-xl surface-metallic-light p-6">
-              <h2 className="mb-4 font-semibold text-slate-800">Projet BelleVie</h2>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Card hover={false}>
+              <CardHeader title="Projet BelleVie" />
               <dl className="space-y-2 text-sm">
                 <div>
-                  <dt className="text-slate-500">Client</dt>
-                  <dd className="font-medium text-slate-800">
+                  <dt className="text-bework-muted">Client</dt>
+                  <dd className="font-medium text-bework-ink">
                     {project.client.name} — {project.client.company}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-slate-500">Agent assigné</dt>
-                  <dd className="font-medium text-slate-800">{project.assignedTo?.name ?? "—"}</dd>
+                  <dt className="text-bework-muted">Agent assigné</dt>
+                  <dd className="font-medium text-bework-ink">{project.assignedTo?.name ?? "—"}</dd>
                 </div>
                 <div>
-                  <dt className="text-slate-500">Statistiques</dt>
-                  <dd className="text-slate-700">
-                    {project._count.tasks} tâches · {project._count.messages} messages ·{" "}
-                    {project._count.documents} documents
+                  <dt className="text-bework-muted">Statistiques</dt>
+                  <dd className="text-bework-ink/80">
+                    {project._count.tasks} tâches · {project._count.messages} messages · {project._count.documents}{" "}
+                    documents
                   </dd>
                 </div>
               </dl>
               <Link
                 href={`/dashboard/projets/${project.id}`}
-                className="mt-4 inline-block text-sm font-medium text-blue-600 hover:underline"
+                className="mt-4 inline-block text-sm font-semibold text-bework-navy hover:underline"
               >
                 Voir le projet →
               </Link>
-            </div>
+            </Card>
 
-            <div className="rounded-xl surface-metallic-light p-6">
-              <h2 className="mb-4 font-semibold text-slate-800">Activités récentes</h2>
+            <Card hover={false}>
+              <CardHeader title="Activités récentes" />
               {recentActivities.length === 0 ? (
-                <p className="text-sm text-slate-500">
-                  Aucune activité. Lancez un jour de simulation pour générer des événements.
-                </p>
+                <EmptyState
+                  title="Aucune activité"
+                  description="Lancez un jour de simulation pour générer des événements."
+                />
               ) : (
                 <ul className="space-y-2 text-sm">
                   {recentActivities.map((a) => (
-                    <li key={a.id} className="flex gap-2 border-b border-slate-100 pb-2 last:border-0">
-                      <span className="text-slate-500">
+                    <li
+                      key={a.id}
+                      className="flex gap-2 border-b border-[color:var(--cc-chrome-border)] pb-2 last:border-0"
+                    >
+                      <span className="shrink-0 text-bework-muted">
                         {new Date(a.createdAt).toLocaleString("fr-FR", {
                           day: "2-digit",
                           month: "short",
@@ -107,12 +114,12 @@ export default async function SimulationPage() {
                           minute: "2-digit",
                         })}
                       </span>
-                      <span className="text-slate-800">{a.title}</span>
+                      <span className="text-bework-ink">{a.title}</span>
                     </li>
                   ))}
                 </ul>
               )}
-            </div>
+            </Card>
           </div>
         </>
       )}

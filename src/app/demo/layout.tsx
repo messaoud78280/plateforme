@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function DemoLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-[color:var(--pilotage-bg,#f4f6f9)]">
+    <div className="cc-shell min-h-screen bg-[color:var(--cc-surface-muted,#f4f6f9)]">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{children}</div>
     </div>
   );

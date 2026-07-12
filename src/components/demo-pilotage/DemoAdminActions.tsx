@@ -7,6 +7,8 @@ import {
   revokeDemoPilotageLink,
   updateDemoCommercialNotes,
 } from "@/app/dashboard/demonstrations/actions";
+import { Button } from "@/components/ui/Button";
+import { Textarea } from "@/components/ui/Input";
 
 export function DemoAdminActions({
   id,
@@ -26,24 +28,25 @@ export function DemoAdminActions({
   const [localNotes, setLocalNotes] = useState(notes ?? "");
 
   return (
-    <div className="space-y-2 min-w-[180px]">
-      <p className="text-[10px] text-slate-500">
+    <div className="min-w-[200px] space-y-2">
+      <p className="text-[10px] text-bework-muted">
         Sections : {sections.length ? sections.join(", ") : "—"}
         <br />
         Intérêts : {interests.length ? interests.join(", ") : "—"}
       </p>
-      <textarea
+      <Textarea
         value={localNotes}
         onChange={(e) => setLocalNotes(e.target.value)}
         rows={2}
         placeholder="Note commerciale"
-        className="w-full rounded border border-slate-200 px-2 py-1 text-[11px]"
+        className="!min-h-0 text-[11px]"
       />
       <div className="flex flex-wrap gap-1">
-        <button
+        <Button
           type="button"
+          size="sm"
+          variant="secondary"
           disabled={pending}
-          className="rounded border px-2 py-1 text-[10px] font-semibold"
           onClick={() => {
             const fd = new FormData();
             fd.set("id", id);
@@ -55,12 +58,13 @@ export function DemoAdminActions({
           }}
         >
           Sauver note
-        </button>
+        </Button>
         {status === "ACTIVE" ? (
-          <button
+          <Button
             type="button"
+            size="sm"
+            variant="danger"
             disabled={pending}
-            className="rounded border border-red-200 bg-red-50 px-2 py-1 text-[10px] font-semibold text-red-800"
             onClick={() => {
               if (!confirm("Révoquer ce lien prospect ?")) return;
               const fd = new FormData();
@@ -72,12 +76,13 @@ export function DemoAdminActions({
             }}
           >
             Révoquer
-          </button>
+          </Button>
         ) : null}
-        <button
+        <Button
           type="button"
+          size="sm"
+          variant="ghost"
           disabled={pending}
-          className="rounded border px-2 py-1 text-[10px] font-semibold"
           onClick={() => {
             const fd = new FormData();
             fd.set("id", id);
@@ -88,7 +93,7 @@ export function DemoAdminActions({
           }}
         >
           Archiver
-        </button>
+        </Button>
       </div>
     </div>
   );

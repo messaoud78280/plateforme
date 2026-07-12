@@ -52,6 +52,9 @@ export function DashboardNav({ role }: { role?: string | null }) {
             <NavLink href="/dashboard/projets" pathname={pathname} activeClass={activeClassClient}>
               Chantiers
             </NavLink>
+            <NavLink href="/dashboard/pilotage-travaux" pathname={pathname} activeClass={active}>
+              Pilotage travaux
+            </NavLink>
             <NavLink href="/dashboard/messagerie" pathname={pathname} activeClass={active}>
               Messagerie
             </NavLink>
@@ -69,6 +72,9 @@ export function DashboardNav({ role }: { role?: string | null }) {
             </NavLink>
             <NavLink href="/dashboard/projets" pathname={pathname} activeClass={active}>
               Chantiers
+            </NavLink>
+            <NavLink href="/dashboard/pilotage-travaux" pathname={pathname} activeClass={active}>
+              Pilotage travaux
             </NavLink>
             <NavLink href="/dashboard/taches" pathname={pathname} activeClass={active}>
               Missions
@@ -99,6 +105,9 @@ export function DashboardNav({ role }: { role?: string | null }) {
             </NavLink>
             <NavLink href="/dashboard/projets" pathname={pathname} activeClass={active}>
               Chantiers
+            </NavLink>
+            <NavLink href="/dashboard/pilotage-travaux" pathname={pathname} activeClass={active}>
+              Pilotage travaux
             </NavLink>
             <NavLink href="/dashboard/messagerie" pathname={pathname} activeClass={active}>
               Messagerie

@@ -83,6 +83,13 @@ model User {
   chantierFiles         ChantierFile[]
   chantierFilesAdded    ChantierFile[] @relation("ChantierFileAddedBy")
 
+  // Pilotage administratif des travaux
+  worksitePilotagesCreated   WorksitePilotage[] @relation("PilotageCreatedBy")
+  worksitePilotagesConducteur WorksitePilotage[] @relation("PilotageConducteur")
+  worksitePilotagesAssistant WorksitePilotage[] @relation("PilotageAssistant")
+  pilotageActionsAssigned    PilotageAction[]   @relation("PilotageActionAssignee")
+  pilotageActionsCreated     PilotageAction[]   @relation("PilotageActionCreator")
+
   // NextAuth (magic link)
   accounts              Account[]
   sessions              Session[]
@@ -291,6 +298,7 @@ model Project {
   skillPpspsSessions SkillPpspsSession[]
   chantierFolders ChantierFolder[]
   chantierFiles   ChantierFile[]
+  worksitePilotages WorksitePilotage[]
 }
 
 // Statut métier du chantier (pilotage conducteur de travaux)
@@ -1733,4 +1741,413 @@ model BtpDictionaryTerm {
   @@index([category])
   @@index([status])
   @@index([updatedAt])
+}
+
+// =============================================================================
+// Pilotage administratif des travaux (après attribution marché)
+// Rattaché à Project (chantier) et User CLIENT — pas de doublon Client/Chantier.
+// =============================================================================
+
+enum PilotageStatus {
+  A_PREPARER
+  EN_COURS
+  SOUS_SURVEILLANCE
+  BLOQUE
+  TERMINE
+  ARCHIVE
+}
+
+model WorksitePilotage {
+  id                    String         @id @default(cuid())
+  projectId             String
+  clientId              String
+  internalRef           String?
+  lot                   String?
+  corpsEtat             String?
+  marketAmountHt        Decimal?       @db.Decimal(14, 2)
+  notificationDate      DateTime?      @db.Date
+  startDate             DateTime?      @db.Date
+  contractualDurationDays Int?
+  plannedEndDate        DateTime?      @db.Date
+  conducteurId          String?
+  assistantId           String?
+  clientContactName     String?
+  maitreOuvrage         String?
+  maitreOeuvre          String?
+  bureauControle        String?
+  coordinateurSps       String?
+  status                PilotageStatus @default(A_PREPARER)
+  description           String?        @db.Text
+  adminProgressPct      Int            @default(0)
+  doeProgressPct        Int            @default(0)
+  createdById           String?
+  archivedAt            DateTime?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  project    Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy  User?   @relation("PilotageCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  conducteur User?   @relation("PilotageConducteur", fields: [conducteurId], references: [id], onDelete: SetNull)
+  assistant  User?   @relation("PilotageAssistant", fields: [assistantId], references: [id], onDelete: SetNull)
+
+  marketDocuments  PilotageMarketDocument[]
+  obligations      ContractObligation[]
+  requiredDocuments RequiredDocument[]
+  actions          PilotageAction[]
+  plans            PlanRegister[]
+  doeItems         DoeItem[]
+  subcontractors   PilotageSubcontractor[]
+  situations       WorkSituation[]
+  extraWorks       ExtraWork[]
+  activities       PilotageActivity[]
+  reports          PilotageReport[]
+
+  @@unique([projectId])
+  @@index([clientId])
+  @@index([status])
+  @@index([assistantId])
+  @@index([conducteurId])
+  @@index([archivedAt])
+  @@index([plannedEndDate])
+}
+
+model PilotageMarketDocument {
+  id              String    @id @default(cuid())
+  pilotageId      String
+  docType         String
+  title           String
+  version         String?
+  indice          String?
+  documentDate    DateTime? @db.Date
+  depositedAt     DateTime  @default(now())
+  emitter         String?
+  status          String    @default("Reçu")
+  comment         String?   @db.Text
+  isCurrent       Boolean   @default(true)
+  replacesId      String?
+  fileUrl         String?
+  fileName        String?
+  fileSize        Int?
+  mimeType        String?
+  uploadedById    String?
+  archivedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+  replaces PilotageMarketDocument?  @relation("MarketDocVersions", fields: [replacesId], references: [id], onDelete: SetNull)
+  replacedBy PilotageMarketDocument[] @relation("MarketDocVersions")
+
+  @@index([pilotageId, docType])
+  @@index([pilotageId, isCurrent])
+  @@index([status])
+}
+
+model ContractObligation {
+  id                String    @id @default(cuid())
+  pilotageId        String
+  title             String
+  description       String?   @db.Text
+  category          String    @default("Contractuel")
+  sourceDocument    String?
+  articleRef        String?
+  pageRef           String?
+  dueDate           DateTime? @db.Date
+  dueRule           String?
+  responsibleName   String?
+  validatorName     String?
+  priority          String    @default("Normale")
+  status            String    @default("À préparer")
+  expectedPiece     String?
+  proofUrl          String?
+  sentAt            DateTime?
+  validatedAt       DateTime?
+  comment           String?   @db.Text
+  riskLevel         String?
+  consequences      String?   @db.Text
+  isRecurring       Boolean   @default(false)
+  alertNotifiedAt   DateTime?
+  archivedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+
+  @@index([pilotageId, status])
+  @@index([pilotageId, dueDate])
+  @@index([priority])
+}
+
+model RequiredDocument {
+  id                  String    @id @default(cuid())
+  pilotageId          String
+  name                String
+  category            String    @default("Administratif")
+  sourceDocument      String?
+  isMandatory         Boolean   @default(true)
+  producerName        String?
+  validatorName       String?
+  recipient           String?
+  requestedAt         DateTime? @db.Date
+  dueDate             DateTime? @db.Date
+  receivedAt          DateTime? @db.Date
+  sentAt              DateTime? @db.Date
+  validatedAt         DateTime? @db.Date
+  version             String?
+  status              String    @default("Manquant")
+  comment             String?   @db.Text
+  fileUrl             String?
+  proofUrl            String?
+  alertNotifiedAt     DateTime?
+  archivedAt          DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+
+  @@index([pilotageId, status])
+  @@index([pilotageId, dueDate])
+}
+
+model PilotageAction {
+  id                String    @id @default(cuid())
+  pilotageId        String
+  title             String
+  description       String?   @db.Text
+  category          String    @default("Autre")
+  linkedEntityType  String?
+  linkedEntityId    String?
+  assigneeId        String?
+  assigneeName      String?
+  createdById       String?
+  externalRecipient String?
+  startDate         DateTime? @db.Date
+  dueDate           DateTime? @db.Date
+  priority          String    @default("Normale")
+  status            String    @default("À faire")
+  reminderAt        DateTime?
+  comment           String?   @db.Text
+  completedAt       DateTime?
+  alertNotifiedAt   DateTime?
+  archivedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  pilotage  WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+  assignee  User?            @relation("PilotageActionAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  createdBy User?            @relation("PilotageActionCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([pilotageId, status])
+  @@index([pilotageId, dueDate])
+  @@index([assigneeId])
+  @@index([priority])
+}
+
+model PlanRegister {
+  id                String    @id @default(cuid())
+  pilotageId        String
+  reference         String
+  title             String
+  planType          String?
+  lot               String?
+  zone              String?
+  indice            String    @default("A")
+  version           String?
+  author            String?
+  createdDocAt      DateTime? @db.Date
+  sentAt            DateTime? @db.Date
+  recipient         String?
+  visaDueDate       DateTime? @db.Date
+  respondedAt       DateTime? @db.Date
+  visaType          String?
+  status            String    @default("À produire")
+  observations      String?   @db.Text
+  fileUrl           String?
+  isCurrent         Boolean   @default(true)
+  proofUrl          String?
+  alertNotifiedAt   DateTime?
+  archivedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+
+  @@index([pilotageId, status])
+  @@index([pilotageId, visaDueDate])
+  @@index([reference])
+}
+
+model DoeItem {
+  id                String    @id @default(cuid())
+  pilotageId        String
+  title             String
+  category          String    @default("Autres")
+  isMandatory       Boolean   @default(true)
+  responsibleName   String?
+  expectedAt        DateTime? @db.Date
+  status            String    @default("Manquant")
+  version           String?
+  fileUrl           String?
+  verifiedByName    String?
+  verifiedAt        DateTime?
+  observation       String?   @db.Text
+  archivedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+
+  @@index([pilotageId, status])
+  @@index([pilotageId, category])
+}
+
+model PilotageSubcontractor {
+  id                String    @id @default(cuid())
+  pilotageId        String
+  companyName       String
+  siren             String?
+  prestation        String?
+  amountHt          Decimal?  @db.Decimal(14, 2)
+  contactName       String?
+  phone             String?
+  email             String?
+  plannedStart      DateTime? @db.Date
+  plannedEnd        DateTime? @db.Date
+  approvalStatus    String    @default("En attente")
+  dossierStatus     String    @default("Incomplet")
+  observations      String?   @db.Text
+  archivedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  pilotage  WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+  documents PilotageSubcontractorDoc[]
+
+  @@index([pilotageId])
+  @@index([dossierStatus])
+}
+
+model PilotageSubcontractorDoc {
+  id              String    @id @default(cuid())
+  subcontractorId String
+  docType         String
+  receivedAt      DateTime? @db.Date
+  expiresAt       DateTime? @db.Date
+  status          String    @default("Manquant")
+  fileUrl         String?
+  comment         String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  subcontractor PilotageSubcontractor @relation(fields: [subcontractorId], references: [id], onDelete: Cascade)
+
+  @@index([subcontractorId])
+  @@index([expiresAt])
+}
+
+model WorkSituation {
+  id                    String    @id @default(cuid())
+  pilotageId            String
+  number                String
+  periodLabel           String?
+  marketInitialHt       Decimal?  @db.Decimal(14, 2)
+  amendmentsHt          Decimal?  @db.Decimal(14, 2)
+  marketUpdatedHt       Decimal?  @db.Decimal(14, 2)
+  executedPeriodHt      Decimal?  @db.Decimal(14, 2)
+  executedCumulativeHt  Decimal?  @db.Decimal(14, 2)
+  requestedHt           Decimal?  @db.Decimal(14, 2)
+  validatedHt           Decimal?  @db.Decimal(14, 2)
+  paidHt                Decimal?  @db.Decimal(14, 2)
+  retentionHt           Decimal?  @db.Decimal(14, 2)
+  advanceHt             Decimal?  @db.Decimal(14, 2)
+  advanceRepaymentHt    Decimal?  @db.Decimal(14, 2)
+  priceRevisionHt       Decimal?  @db.Decimal(14, 2)
+  penaltiesHt           Decimal?  @db.Decimal(14, 2)
+  otherRetentionsHt     Decimal?  @db.Decimal(14, 2)
+  preparedAt            DateTime? @db.Date
+  sentAt                DateTime? @db.Date
+  validatedAt           DateTime? @db.Date
+  paidAt                DateTime? @db.Date
+  status                String    @default("À préparer")
+  comment               String?   @db.Text
+  fileUrl               String?
+  paymentCertificateUrl String?
+  proofUrl              String?
+  archivedAt            DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+
+  @@index([pilotageId, status])
+}
+
+model ExtraWork {
+  id                String    @id @default(cuid())
+  pilotageId        String
+  reference         String?
+  description       String    @db.Text
+  requestOrigin     String?
+  requester         String?
+  requestedAt       DateTime? @db.Date
+  urgency           String    @default("Normale")
+  responsibleName   String?
+  estimatedHt       Decimal?  @db.Decimal(14, 2)
+  proposedHt        Decimal?  @db.Decimal(14, 2)
+  validatedHt       Decimal?  @db.Decimal(14, 2)
+  quoteFileUrl      String?
+  quoteSentAt       DateTime? @db.Date
+  writtenValidation Boolean   @default(false)
+  osReceived        Boolean   @default(false)
+  amendmentReceived Boolean   @default(false)
+  validatedAt       DateTime? @db.Date
+  realizedAt        DateTime? @db.Date
+  invoiced          Boolean   @default(false)
+  paid              Boolean   @default(false)
+  startedWithoutValidation Boolean @default(false)
+  status            String    @default("Identifié")
+  comment           String?   @db.Text
+  archivedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+
+  @@index([pilotageId, status])
+}
+
+model PilotageActivity {
+  id            String   @id @default(cuid())
+  pilotageId    String
+  userId        String?
+  userName      String?
+  actionType    String
+  entityType    String?
+  entityId      String?
+  entityLabel   String?
+  oldValue      String?  @db.Text
+  newValue      String?  @db.Text
+  comment       String?  @db.Text
+  createdAt     DateTime @default(now())
+
+  pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+
+  @@index([pilotageId, createdAt(sort: Desc)])
+}
+
+model PilotageReport {
+  id            String   @id @default(cuid())
+  pilotageId    String
+  title         String
+  periodStart   DateTime? @db.Date
+  periodEnd     DateTime? @db.Date
+  contentJson   Json
+  contentHtml   String?  @db.Text
+  createdById   String?
+  createdByName String?
+  createdAt     DateTime @default(now())
+
+  pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+
+  @@index([pilotageId, createdAt(sort: Desc)])
 }

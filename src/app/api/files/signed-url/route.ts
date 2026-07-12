@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createServiceRoleClient } from "@/lib/supabase";
-import { extractStoragePathFromUrl } from "@/lib/storage/supabase-object";
+import { DOCUMENTS_BUCKET } from "@/lib/storage/supabase-object";
+import { resolveDownloadUrl } from "@/lib/storage/signed-url";
 
 /** POST — Génère une URL signée temporaire pour un fichier Storage (si possible). */
 export async function POST(request: Request) {
@@ -21,25 +22,18 @@ export async function POST(request: Request) {
   const url = String(body.url ?? "").trim();
   if (!url) return NextResponse.json({ error: "URL requise" }, { status: 400 });
 
-  const bucket = String(body.bucket ?? "documents").trim() || "documents";
-  const expiresIn = Math.min(60 * 60, Math.max(60, Number(body.expiresIn ?? 10 * 60))); // 1 min → 1h
+  const bucket = String(body.bucket ?? DOCUMENTS_BUCKET).trim() || DOCUMENTS_BUCKET;
+  const expiresIn = Math.min(60 * 60, Math.max(60, Number(body.expiresIn ?? 10 * 60)));
 
   const supabase = createServiceRoleClient();
   if (!supabase) {
-    return NextResponse.json({ error: "Stockage non configuré (service role)" }, { status: 503 });
+    return NextResponse.json({ signedUrl: url, fallback: true, signed: false });
   }
 
-  const path = extractStoragePathFromUrl(url, bucket);
-  if (!path) {
-    // fallback : on ne peut pas signer, on renvoie l'URL telle quelle
-    return NextResponse.json({ signedUrl: url, fallback: true });
-  }
-
-  const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, expiresIn);
-  if (error || !data?.signedUrl) {
-    return NextResponse.json({ signedUrl: url, fallback: true });
-  }
-
-  return NextResponse.json({ signedUrl: data.signedUrl, fallback: false });
+  const resolved = await resolveDownloadUrl(supabase, url, { bucket, expiresIn });
+  return NextResponse.json({
+    signedUrl: resolved.url,
+    fallback: resolved.fallback,
+    signed: resolved.signed,
+  });
 }
-

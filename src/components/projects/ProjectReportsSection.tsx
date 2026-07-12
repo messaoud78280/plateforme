@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { SignedFileLink } from "@/components/files/SignedFileLink";
 
 type ReportItem = {
   id: string;
@@ -330,14 +331,9 @@ export function ProjectReportsSection({ projectId, isAgence }: ProjectReportsSec
                   <ul className="mt-1 flex flex-wrap gap-2">
                     {report.attachments.map((a) => (
                       <li key={a.id}>
-                        <a
-                          href={a.fileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:underline"
-                        >
+                        <SignedFileLink url={a.fileUrl} className="text-sm text-blue-600 hover:underline">
                           {a.name}
-                        </a>
+                        </SignedFileLink>
                       </li>
                     ))}
                   </ul>

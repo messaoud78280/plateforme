@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { StatusBadge } from "@/components/pilotage/PilotageBadges";
+import { SignedFileLink } from "@/components/files/SignedFileLink";
 import {
   EnsureHandoverButton,
   QuickAddDelayEvent,
@@ -700,9 +701,12 @@ export function PilotageAdvancedTabs({
                   <p className="text-xs text-slate-500">
                     {p.category} · {p.zone ?? "Sans zone"} · {formatDateFr(p.takenAt)}
                   </p>
-                  <a href={p.fileUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs font-semibold text-[#1e3a5f] hover:underline">
+                  <SignedFileLink
+                    url={p.fileUrl}
+                    className="mt-2 inline-block text-xs font-semibold text-[#1e3a5f] hover:underline"
+                  >
                     Ouvrir le fichier
-                  </a>
+                  </SignedFileLink>
                 </li>
               ))
             )}

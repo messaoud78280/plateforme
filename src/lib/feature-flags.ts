@@ -9,7 +9,10 @@ export type FeatureFlagKey =
   | "uiPreferences"
   | "uxTelemetry"
   | "legacyUiFallback"
-  | "clientDeliverableValidation";
+  | "clientDeliverableValidation"
+  | "secureStorageSignedUrls"
+  | "gedLinkWithoutCopy"
+  | "organizationMultiUser";
 
 const DEFAULTS: Record<FeatureFlagKey, boolean> = {
   commandCenterUi: true,
@@ -17,8 +20,13 @@ const DEFAULTS: Record<FeatureFlagKey, boolean> = {
   uiPreferences: true,
   uxTelemetry: false,
   legacyUiFallback: false,
-  /** Cycle livré → accepter / réserve / refuser (hub mission) */
   clientDeliverableValidation: true,
+  /** Téléchargements via URL signée (TTL) ; fallback URL stockée si échec */
+  secureStorageSignedUrls: true,
+  /** Mission → classeur : référence le même objet Storage (pas de copie binaire) */
+  gedLinkWithoutCopy: true,
+  /** Organisation multi-users — schéma pas encore déployé */
+  organizationMultiUser: false,
 };
 
 function envBool(name: string): boolean | undefined {
@@ -35,6 +43,9 @@ const ENV_KEYS: Record<FeatureFlagKey, string> = {
   uxTelemetry: "NEXT_PUBLIC_FF_UX_TELEMETRY",
   legacyUiFallback: "NEXT_PUBLIC_FF_LEGACY_UI_FALLBACK",
   clientDeliverableValidation: "NEXT_PUBLIC_FF_CLIENT_DELIVERABLE_VALIDATION",
+  secureStorageSignedUrls: "NEXT_PUBLIC_FF_SECURE_STORAGE_SIGNED_URLS",
+  gedLinkWithoutCopy: "NEXT_PUBLIC_FF_GED_LINK_WITHOUT_COPY",
+  organizationMultiUser: "NEXT_PUBLIC_FF_ORGANIZATION_MULTI_USER",
 };
 
 export function isFeatureEnabled(flag: FeatureFlagKey): boolean {
@@ -45,8 +56,9 @@ export function isFeatureEnabled(flag: FeatureFlagKey): boolean {
 
 export const FEATURE_FLAG_DOCS = [
   "Activation par environnement : variables NEXT_PUBLIC_FF_* sur Railway / Vercel.",
-  "Activation par module : un flag par capacité (onboarding, préférences, télémétrie, validation client).",
   "Validation livrable client : NEXT_PUBLIC_FF_CLIENT_DELIVERABLE_VALIDATION (défaut on).",
-  "Activation par rôle / org / user : à brancher plus tard sur User.preferences JSON (sans migration destructive).",
-  "Retour arrière : NEXT_PUBLIC_FF_LEGACY_UI_FALLBACK=true pendant validation.",
+  "URLs signées : NEXT_PUBLIC_FF_SECURE_STORAGE_SIGNED_URLS (défaut on).",
+  "GED sans copie : NEXT_PUBLIC_FF_GED_LINK_WITHOUT_COPY (défaut on).",
+  "Organisation multi-users : NEXT_PUBLIC_FF_ORGANIZATION_MULTI_USER (défaut off — plan dans lib/organization/plan.ts).",
+  "Retour arrière : désactiver le flag concerné ou NEXT_PUBLIC_FF_LEGACY_UI_FALLBACK=true.",
 ] as const;

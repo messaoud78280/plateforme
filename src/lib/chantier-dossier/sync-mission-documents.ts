@@ -3,6 +3,7 @@ import { createServiceRoleClient } from "@/lib/supabase";
 import { DOCUMENTS_BUCKET, downloadStorageObject, extractStoragePathFromUrl } from "@/lib/storage/supabase-object";
 import { ensureChantierFolders } from "@/lib/chantier-dossier/folders";
 import { MISSION_TYPE_FOLDER_CODE, type MissionType } from "@/lib/tasks/mission-types";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 
 function folderCodeForTask(task: { missionType: string | null; title: string }): string {
   if (task.missionType) {
@@ -73,11 +74,6 @@ export async function syncMissionDocumentToChantier(
     });
   }
 
-  const supabase = createServiceRoleClient();
-  if (!supabase) {
-    return { ok: false, error: "Stockage non configuré" };
-  }
-
   await ensureChantierFolders(projectId);
 
   const folderCode = folderCodeForTask(doc.task);
@@ -91,6 +87,34 @@ export async function syncMissionDocumentToChantier(
   const storagePath = extractStoragePathFromUrl(doc.fileUrl, DOCUMENTS_BUCKET);
   if (!storagePath) {
     return { ok: false, error: "Chemin fichier introuvable" };
+  }
+
+  // Mode GED unique : une entrée classeur pointe vers le même objet Storage (pas de 2e binaire).
+  if (isFeatureEnabled("gedLinkWithoutCopy")) {
+    const created = await prisma.chantierFile.create({
+      data: {
+        projectId,
+        folderId: folder.id,
+        clientId: doc.clientId,
+        name: doc.name,
+        fileUrl: doc.fileUrl,
+        storagePath,
+        fileSize: doc.fileSize,
+        mimeType: doc.mimeType,
+        documentType: "Mission BeWork",
+        status: "RECU",
+        comment: `Lié depuis la mission « ${doc.task.title} » (référence unique, sans copie)`,
+        addedById: options?.addedById ?? null,
+        taskId: doc.taskId,
+        sourceDocumentId: documentId,
+      },
+    });
+    return { ok: true, chantierFileId: created.id };
+  }
+
+  const supabase = createServiceRoleClient();
+  if (!supabase) {
+    return { ok: false, error: "Stockage non configuré" };
   }
 
   const downloaded = await downloadStorageObject(supabase, DOCUMENTS_BUCKET, storagePath);
@@ -120,6 +144,7 @@ export async function syncMissionDocumentToChantier(
       clientId: doc.clientId,
       name: doc.name,
       fileUrl: urlData.publicUrl,
+      storagePath: targetPath,
       fileSize: doc.fileSize,
       mimeType: doc.mimeType,
       documentType: "Mission BeWork",

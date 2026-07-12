@@ -4,7 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { canAccessDocument } from "@/lib/documents/access";
 import { createServiceRoleClient } from "@/lib/supabase";
-import { DOCUMENTS_BUCKET, extractStoragePathFromUrl } from "@/lib/storage/supabase-object";
+import { DOCUMENTS_BUCKET } from "@/lib/storage/supabase-object";
+import { resolveDownloadUrl } from "@/lib/storage/signed-url";
 
 /** GET — Téléchargement sécurisé via URL signée (bucket privé). */
 export async function GET(
@@ -38,22 +39,13 @@ export async function GET(
 
   const supabase = createServiceRoleClient();
   if (!supabase) {
-    return NextResponse.json({ error: "Stockage non configuré" }, { status: 503 });
-  }
-
-  const path = extractStoragePathFromUrl(doc.fileUrl, DOCUMENTS_BUCKET);
-  if (!path) {
     return NextResponse.redirect(doc.fileUrl);
   }
 
-  const { data, error } = await supabase.storage
-    .from(DOCUMENTS_BUCKET)
-    .createSignedUrl(path, 60 * 60);
+  const resolved = await resolveDownloadUrl(supabase, doc.fileUrl, {
+    bucket: DOCUMENTS_BUCKET,
+    expiresIn: 60 * 60,
+  });
 
-  if (error || !data?.signedUrl) {
-    console.error("Signed URL document:", error?.message ?? "inconnue", { documentId: id, path });
-    return NextResponse.json({ error: "Fichier inaccessible" }, { status: 502 });
-  }
-
-  return NextResponse.redirect(data.signedUrl);
+  return NextResponse.redirect(resolved.url);
 }

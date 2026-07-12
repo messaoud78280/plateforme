@@ -39,7 +39,8 @@ cp .env.example .env
 # - NEXTAUTH_SECRET, NEXTAUTH_URL
 # - NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY (pour upload de documents)
 
-# Créer le bucket Supabase Storage "documents" (Storage → New bucket → nom: documents, public: oui)
+# Créer le bucket Supabase Storage "documents" (privé recommandé ; les téléchargements passent par URL signée).
+# Si le bucket reste public temporairement, le fallback URL stockée continue de fonctionner.
 
 # Créer les tables dans Supabase
 npx prisma migrate dev --name init

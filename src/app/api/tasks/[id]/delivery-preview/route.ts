@@ -38,6 +38,9 @@ export async function GET(
       clientReportSentAt: true,
       correctionNote: true,
       clientDeliveryJson: true,
+      clientDecision: true,
+      clientDecisionAt: true,
+      clientDecisionNote: true,
       client: { select: { id: true, name: true } },
       documents: {
         orderBy: { createdAt: "asc" },
@@ -87,6 +90,9 @@ export async function GET(
     clientReportSentAt: task.clientReportSentAt,
     correctionNote: task.correctionNote,
     clientDelivery: delivery,
+    clientDecision: task.clientDecision,
+    clientDecisionAt: task.clientDecisionAt,
+    clientDecisionNote: task.clientDecisionNote,
     clientCredits,
     documents: task.documents,
     chantierFiles: task.chantierFiles.map((f) => ({

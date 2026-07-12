@@ -9,6 +9,7 @@ import { TaskConversation } from "./TaskConversation";
 import { TaskMessageConversation } from "./TaskMessageConversation";
 import { TaskInternalNotes } from "./TaskInternalNotes";
 import { MissionClientTransmission } from "./MissionClientTransmission";
+import { MissionExchangeHub } from "./MissionExchangeHub";
 import { ClientCreditsBadge } from "@/components/clients/ClientCreditsBadge";
 import { DocumentUploadZone } from "@/components/documents/DocumentUploadZone";
 import { documentDownloadHref } from "@/lib/documents/download-url";
@@ -34,6 +35,7 @@ interface TaskDetailViewProps {
     creditsDeductedAt?: Date | string | null;
     clientReport?: string | null;
     clientReportSentAt?: Date | string | null;
+    clientDecision?: string | null;
     category?: string | null;
     priority?: string | null;
     desiredDate?: Date | string | null;
@@ -320,6 +322,14 @@ export function TaskDetailView({
           <p className="mt-4 text-slate-600">{task.description}</p>
         )}
       </div>
+
+      <MissionExchangeHub
+        hasMessages={Boolean(sessionUserId && task.assignedToId)}
+        awaitingClientDecision={
+          Boolean(task.clientReportSentAt) &&
+          (!task.clientDecision || task.clientDecision === "EN_ATTENTE_CLIENT")
+        }
+      />
 
       {/* Historique de la mission (client uniquement — agent le voit après Documents) */}
       {!isAgence && (

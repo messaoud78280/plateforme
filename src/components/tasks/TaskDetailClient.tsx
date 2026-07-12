@@ -24,6 +24,7 @@ interface TaskDetailClientProps {
     creditsDeductedAt?: Date | string | null;
     clientReport?: string | null;
     clientReportSentAt?: Date | string | null;
+    clientDecision?: string | null;
     category?: string | null;
     priority?: string | null;
     desiredDate?: Date | string | null;

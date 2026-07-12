@@ -7,6 +7,7 @@ import { sendEmail } from "@/lib/email";
 import { absoluteUrl } from "@/lib/site";
 import { deductTaskCreditsIfNeeded, setTaskActionsUsed } from "@/lib/tasks/deduct-credits";
 import type { ClientDeliveryPayload } from "@/lib/tasks/client-delivery";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 
 /** GET /api/tasks/[id]/client-report — Compte rendu client (client ou équipe) */
 export async function GET(
@@ -34,6 +35,9 @@ export async function GET(
       creditsDeductedAt: true,
       clientDeliveryJson: true,
       correctionNote: true,
+      clientDecision: true,
+      clientDecisionAt: true,
+      clientDecisionNote: true,
       documents: { select: { id: true, name: true } },
       chantierFiles: {
         where: { fileUrl: { not: null } },
@@ -95,6 +99,9 @@ export async function GET(
     documents,
     chantierFiles,
     correctionNoteForClient: clientCorrection,
+    clientDecision: task.clientDecision,
+    clientDecisionAt: task.clientDecisionAt,
+    clientDecisionNote: task.clientDecisionNote,
   });
 }
 
@@ -212,6 +219,13 @@ export async function POST(
         clientReportSentById: session.user.id,
         clientDeliveryJson: clientDelivery,
         actionsUsed,
+        ...(isFeatureEnabled("clientDeliverableValidation")
+          ? {
+              clientDecision: "EN_ATTENTE_CLIENT",
+              clientDecisionAt: null,
+              clientDecisionNote: null,
+            }
+          : {}),
       },
       select: {
         id: true,
@@ -221,18 +235,22 @@ export async function POST(
         actionsUsed: true,
         creditsDeductedAt: true,
         clientId: true,
+        clientDecision: true,
       },
     });
 
     const creditsLabel = `${updated.actionsUsed ?? 0} crédit${(updated.actionsUsed ?? 0) > 1 ? "s" : ""}`;
     const piecesCount = visibleDocumentIds.length + visibleChantierFileIds.length;
     const managerName = session.user.name ?? "L'équipe BeWork";
+    const validationHint = isFeatureEnabled("clientDeliverableValidation")
+      ? " Merci de valider, formuler des réserves ou refuser le livrable dans votre espace."
+      : "";
 
     await createNotification({
       userId: task.clientId,
       type: "TASK_COMPLETED",
       title: "Compte rendu de mission",
-      message: `${managerName} vous a transmis le compte rendu de « ${task.title} » (${creditsLabel} décomptés${piecesCount > 0 ? `, ${piecesCount} pièce${piecesCount > 1 ? "s" : ""}` : ""}).`,
+      message: `${managerName} vous a transmis le compte rendu de « ${task.title} » (${creditsLabel} décomptés${piecesCount > 0 ? `, ${piecesCount} pièce${piecesCount > 1 ? "s" : ""}` : ""}).${validationHint}`,
       actionUrl: `/dashboard/taches/${id}#compte-rendu`,
     });
 
@@ -275,6 +293,11 @@ export async function POST(
           ${correctionHtml}
           ${piecesHtml}
           <p><strong>Crédits décomptés :</strong> ${creditsLabel}</p>
+          ${
+            isFeatureEnabled("clientDeliverableValidation")
+              ? `<p><strong>À faire :</strong> ouvrez votre espace pour <em>accepter</em>, formuler des <em>réserves</em> ou <em>refuser</em> le livrable. Expliquez les conséquences si vous refusez ou émettez des réserves.</p>`
+              : ""
+          }
           <p><a href="${taskUrl}">Consulter sur votre espace BeWork</a></p>
         `,
       });

@@ -8,7 +8,8 @@ export type FeatureFlagKey =
   | "roleOnboarding"
   | "uiPreferences"
   | "uxTelemetry"
-  | "legacyUiFallback";
+  | "legacyUiFallback"
+  | "clientDeliverableValidation";
 
 const DEFAULTS: Record<FeatureFlagKey, boolean> = {
   commandCenterUi: true,
@@ -16,6 +17,8 @@ const DEFAULTS: Record<FeatureFlagKey, boolean> = {
   uiPreferences: true,
   uxTelemetry: false,
   legacyUiFallback: false,
+  /** Cycle livré → accepter / réserve / refuser (hub mission) */
+  clientDeliverableValidation: true,
 };
 
 function envBool(name: string): boolean | undefined {
@@ -31,6 +34,7 @@ const ENV_KEYS: Record<FeatureFlagKey, string> = {
   uiPreferences: "NEXT_PUBLIC_FF_UI_PREFERENCES",
   uxTelemetry: "NEXT_PUBLIC_FF_UX_TELEMETRY",
   legacyUiFallback: "NEXT_PUBLIC_FF_LEGACY_UI_FALLBACK",
+  clientDeliverableValidation: "NEXT_PUBLIC_FF_CLIENT_DELIVERABLE_VALIDATION",
 };
 
 export function isFeatureEnabled(flag: FeatureFlagKey): boolean {
@@ -41,7 +45,8 @@ export function isFeatureEnabled(flag: FeatureFlagKey): boolean {
 
 export const FEATURE_FLAG_DOCS = [
   "Activation par environnement : variables NEXT_PUBLIC_FF_* sur Railway / Vercel.",
-  "Activation par module : un flag par capacité (onboarding, préférences, télémétrie).",
+  "Activation par module : un flag par capacité (onboarding, préférences, télémétrie, validation client).",
+  "Validation livrable client : NEXT_PUBLIC_FF_CLIENT_DELIVERABLE_VALIDATION (défaut on).",
   "Activation par rôle / org / user : à brancher plus tard sur User.preferences JSON (sans migration destructive).",
   "Retour arrière : NEXT_PUBLIC_FF_LEGACY_UI_FALLBACK=true pendant validation.",
 ] as const;

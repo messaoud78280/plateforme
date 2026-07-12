@@ -105,6 +105,7 @@ export default async function TacheDetailPage({
           creditsDeductedAt: (task as { creditsDeductedAt?: Date | null }).creditsDeductedAt ?? null,
           clientReport: (task as { clientReport?: string | null }).clientReport ?? null,
           clientReportSentAt: clientReportSentAt ?? null,
+          clientDecision: (task as { clientDecision?: string | null }).clientDecision ?? null,
           category: (task as { category?: string | null }).category ?? null,
           priority: (task as { priority?: string | null }).priority ?? null,
           desiredDate: (task as { desiredDate?: Date | null }).desiredDate ?? null,

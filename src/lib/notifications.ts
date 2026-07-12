@@ -10,7 +10,8 @@ type NotificationType =
   | "MISSING_PIECE"
   | "DEADLINE_NEAR"
   | "REPORT_CREATED"
-  | "DELIVERABLE_UPLOADED";
+  | "DELIVERABLE_UPLOADED"
+  | "CLIENT_DECISION";
 
 export async function createNotification(params: {
   userId: string;

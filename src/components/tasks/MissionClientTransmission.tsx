@@ -4,6 +4,11 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ClientCreditsBadge } from "@/components/clients/ClientCreditsBadge";
 import { documentDownloadHref } from "@/lib/documents/download-url";
+import { isFeatureEnabled } from "@/lib/feature-flags";
+import {
+  CLIENT_DECISION_LABELS,
+  type ClientDecision,
+} from "@/lib/tasks/client-decision";
 
 type DeliveryPreview = {
   status: string;
@@ -22,6 +27,9 @@ type DeliveryPreview = {
     visibleChantierFileIds: string[];
     showCorrectionNote: boolean;
   } | null;
+  clientDecision?: string | null;
+  clientDecisionAt?: string | null;
+  clientDecisionNote?: string | null;
 };
 
 type Props = {
@@ -66,6 +74,9 @@ export function MissionClientTransmission({
   const [validating, setValidating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [decisionNote, setDecisionNote] = useState("");
+  const [deciding, setDeciding] = useState<ClientDecision | null>(null);
+  const validationEnabled = isFeatureEnabled("clientDeliverableValidation");
 
   const loadPreview = useCallback(async () => {
     setLoading(true);
@@ -97,14 +108,22 @@ export function MissionClientTransmission({
           defaultVisibleDocumentIds: [],
           defaultVisibleChantierFileIds: [],
           clientDelivery: data.clientDelivery,
+          clientDecision: data.clientDecision ?? null,
+          clientDecisionAt: data.clientDecisionAt ?? null,
+          clientDecisionNote: data.clientDecisionNote ?? null,
         });
       } else {
-        setPreview(data as DeliveryPreview);
         setContent(data.clientReport ?? "");
         setActionsUsed(String(data.actionsUsed ?? ""));
         setVisibleDocIds(new Set(data.defaultVisibleDocumentIds ?? []));
         setVisibleChantierIds(new Set(data.defaultVisibleChantierFileIds ?? []));
         setShowCorrectionNote(Boolean(data.clientDelivery?.showCorrectionNote));
+        setPreview({
+          ...(data as DeliveryPreview),
+          clientDecision: data.clientDecision ?? null,
+          clientDecisionAt: data.clientDecisionAt ?? null,
+          clientDecisionNote: data.clientDecisionNote ?? null,
+        });
       }
     } catch {
       setError("Erreur réseau.");
@@ -191,7 +210,9 @@ export function MissionClientTransmission({
         return;
       }
       setSuccess(
-        `Compte rendu transmis à ${clientName ?? "le client"}. ${credits} crédit${credits > 1 ? "s" : ""} décompté${credits > 1 ? "s" : ""}.`
+        `Compte rendu transmis à ${clientName ?? "le client"}. ${credits} crédit${credits > 1 ? "s" : ""} décompté${credits > 1 ? "s" : ""}.${
+          validationEnabled ? " En attente de validation client." : ""
+        }`
       );
       await onSent?.();
       router.refresh();
@@ -201,6 +222,68 @@ export function MissionClientTransmission({
     } finally {
       setSending(false);
     }
+  }
+
+  async function handleClientDecision(decision: Exclude<ClientDecision, "EN_ATTENTE_CLIENT">) {
+    if (decision !== "ACCEPTE" && decisionNote.trim().length < 5) {
+      setError(
+        decision === "REFUSE"
+          ? "Indiquez le motif du refus et ce que BeWork doit corriger."
+          : "Précisez vos réserves (ce qui reste à clarifier ou corriger)."
+      );
+      return;
+    }
+    setDeciding(decision);
+    setError(null);
+    try {
+      const res = await fetch(`/api/tasks/${taskId}/client-decision`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ decision, note: decisionNote.trim() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError((data as { error?: string }).error ?? "Enregistrement impossible.");
+        return;
+      }
+      setSuccess(CLIENT_DECISION_LABELS[decision]);
+      await onSent?.();
+      router.refresh();
+      await loadPreview();
+    } catch {
+      setError("Erreur réseau.");
+    } finally {
+      setDeciding(null);
+    }
+  }
+
+  function DecisionStatusBlock({
+    decision,
+    at,
+    note,
+  }: {
+    decision: string | null | undefined;
+    at?: string | null;
+    note?: string | null;
+  }) {
+    if (!validationEnabled || !decision) return null;
+    const label =
+      decision in CLIENT_DECISION_LABELS
+        ? CLIENT_DECISION_LABELS[decision as ClientDecision]
+        : decision;
+    const tone =
+      decision === "ACCEPTE"
+        ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+        : decision === "EN_ATTENTE_CLIENT"
+          ? "border-amber-200 bg-amber-50 text-amber-950"
+          : "border-red-200 bg-red-50 text-red-900";
+    return (
+      <div id="validation-client" className={`mt-4 scroll-mt-6 rounded-lg border p-3 text-sm ${tone}`}>
+        <p className="font-semibold">{label}</p>
+        {at ? <p className="mt-1 text-xs opacity-80">Le {formatDate(at)}</p> : null}
+        {note ? <p className="mt-2 whitespace-pre-wrap">{note}</p> : null}
+      </div>
+    );
   }
 
   if (isClient) {
@@ -273,6 +356,76 @@ export function MissionClientTransmission({
             </ul>
           </div>
         ) : null}
+
+        <DecisionStatusBlock
+          decision={
+            preview.clientDecision && preview.clientDecision !== "EN_ATTENTE_CLIENT"
+              ? preview.clientDecision
+              : null
+          }
+          at={preview.clientDecisionAt}
+          note={preview.clientDecisionNote}
+        />
+
+        {validationEnabled &&
+        (!preview.clientDecision || preview.clientDecision === "EN_ATTENTE_CLIENT") ? (
+          <div
+            id="validation-client"
+            className="mt-5 scroll-mt-6 rounded-xl border border-bework-navy/20 bg-white p-4"
+          >
+            <h3 className="text-base font-semibold text-bework-ink">Valider ce livrable</h3>
+            <p className="mt-1 text-sm text-bework-muted">
+              Accepter confirme que le travail répond à votre demande. Un refus ou des réserves
+              doivent expliquer ce qui bloque — BeWork pourra corriger.
+            </p>
+            <label className="mt-3 block text-sm font-medium text-slate-700">
+              Motif (obligatoire pour réserves ou refus)
+              <textarea
+                value={decisionNote}
+                onChange={(e) => setDecisionNote(e.target.value)}
+                rows={3}
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                placeholder="Ex. : manque le plan d’exécution mis à jour, ou la quantité n’est pas claire…"
+              />
+            </label>
+            {error ? (
+              <p className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+                {error}
+              </p>
+            ) : null}
+            {success ? (
+              <p className="mt-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
+                {success}
+              </p>
+            ) : null}
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                disabled={Boolean(deciding)}
+                onClick={() => void handleClientDecision("ACCEPTE")}
+                className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50"
+              >
+                {deciding === "ACCEPTE" ? "Enregistrement…" : "Accepter"}
+              </button>
+              <button
+                type="button"
+                disabled={Boolean(deciding)}
+                onClick={() => void handleClientDecision("RESERVES")}
+                className="rounded-lg border border-amber-400 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-950 hover:bg-amber-100 disabled:opacity-50"
+              >
+                {deciding === "RESERVES" ? "Enregistrement…" : "Accepter avec réserves"}
+              </button>
+              <button
+                type="button"
+                disabled={Boolean(deciding)}
+                onClick={() => void handleClientDecision("REFUSE")}
+                className="rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-sm font-medium text-red-900 hover:bg-red-100 disabled:opacity-50"
+              >
+                {deciding === "REFUSE" ? "Enregistrement…" : "Refuser"}
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
     );
   }
@@ -294,6 +447,11 @@ export function MissionClientTransmission({
         <p className="mb-3 text-xs text-slate-500">Envoyé le {formatDate(preview.clientReportSentAt)}</p>
         <ClientCreditsBadge clientId={clientId} className="mb-4" />
         <div className="rounded-lg border bg-white p-4 text-sm whitespace-pre-wrap">{preview.clientReport}</div>
+        <DecisionStatusBlock
+          decision={preview.clientDecision}
+          at={preview.clientDecisionAt}
+          note={preview.clientDecisionNote}
+        />
       </div>
     );
   }

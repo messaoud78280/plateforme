@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import {
+  createBlocker,
   createExtraWork,
   createMarketDocument,
   createPilotageAction,
@@ -11,14 +12,135 @@ import {
   createRequiredDocument,
   createSubcontractor,
   createWorkSituation,
+  ensureDefaultMilestones,
   generatePilotageReport,
+  resolveBlocker,
   updateDoeItemStatus,
+  updateMilestoneStatus,
   updatePilotageActionStatus,
 } from "@/app/dashboard/pilotage-travaux/actions";
 import { MARKET_DOC_TYPES } from "@/lib/pilotage/constants";
 import { StatusBadge } from "./PilotageBadges";
 
 type Props = { pilotageId: string; canEdit: boolean };
+
+export function QuickAddBlocker({ pilotageId, canEdit }: Props) {
+  return (
+    <QuickForm
+      canEdit={canEdit}
+      title="Signaler un blocage"
+      emptyHint="Aucun blocage signalé."
+      fields={[
+        { name: "title", label: "Sujet *", required: true },
+        {
+          name: "severity",
+          label: "Niveau",
+          options: ["Critique", "Important", "À surveiller"],
+          defaultValue: "Important",
+        },
+        { name: "consequence", label: "Conséquence" },
+        { name: "nextAction", label: "Prochaine action" },
+        { name: "internalOwner", label: "Responsable interne" },
+        { name: "externalDecider", label: "Décideur externe" },
+        { name: "nextFollowUpAt", label: "Prochaine relance", type: "date" },
+      ]}
+      onSubmit={async (fd) => {
+        fd.set("pilotageId", pilotageId);
+        return createBlocker(fd);
+      }}
+    />
+  );
+}
+
+export function ResolveBlockerButton({ blockerId, canEdit }: { blockerId: string; canEdit: boolean }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  if (!canEdit) return null;
+  return (
+    <button
+      type="button"
+      disabled={pending}
+      className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-800 disabled:opacity-60"
+      onClick={() => {
+        const fd = new FormData();
+        fd.set("blockerId", blockerId);
+        startTransition(async () => {
+          await resolveBlocker(fd);
+          router.refresh();
+        });
+      }}
+    >
+      {pending ? "…" : "Résoudre"}
+    </button>
+  );
+}
+
+export function MilestoneStatusSelect({
+  milestoneId,
+  status,
+  canEdit,
+}: {
+  milestoneId: string;
+  status: string;
+  canEdit: boolean;
+}) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  if (!canEdit) return <StatusBadge status={status} />;
+  return (
+    <select
+      disabled={pending}
+      defaultValue={status}
+      className="rounded-lg border border-slate-200 px-2 py-1 text-xs"
+      onChange={(e) => {
+        const fd = new FormData();
+        fd.set("milestoneId", milestoneId);
+        fd.set("status", e.target.value);
+        startTransition(async () => {
+          await updateMilestoneStatus(fd);
+          router.refresh();
+        });
+      }}
+    >
+      {[
+        "Non démarré",
+        "À préparer",
+        "Prêt",
+        "En cours",
+        "Bloqué",
+        "Atteint",
+        "Reporté",
+        "Annulé",
+        "Non applicable",
+      ].map((s) => (
+        <option key={s} value={s}>
+          {s}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+export function EnsureMilestonesButton({ pilotageId, canEdit }: Props) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  if (!canEdit) return null;
+  return (
+    <button
+      type="button"
+      disabled={pending}
+      className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-[#1e3a5f] disabled:opacity-60"
+      onClick={() => {
+        startTransition(async () => {
+          await ensureDefaultMilestones(pilotageId);
+          router.refresh();
+        });
+      }}
+    >
+      {pending ? "Initialisation…" : "Initialiser les jalons types"}
+    </button>
+  );
+}
 
 export function QuickAddObligation({ pilotageId, canEdit }: Props) {
   return (

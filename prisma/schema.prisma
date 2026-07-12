@@ -89,6 +89,7 @@ model User {
   worksitePilotagesAssistant WorksitePilotage[] @relation("PilotageAssistant")
   pilotageActionsAssigned    PilotageAction[]   @relation("PilotageActionAssignee")
   pilotageActionsCreated     PilotageAction[]   @relation("PilotageActionCreator")
+  demoPilotageLinksCreated  DemoPilotageLink[] @relation("DemoPilotageLinkCreatedBy")
 
   // NextAuth (magic link)
   accounts              Account[]
@@ -1780,6 +1781,13 @@ model WorksitePilotage {
   description           String?        @db.Text
   adminProgressPct      Int            @default(0)
   doeProgressPct        Int            @default(0)
+  /// Score santé 0-100 (calculé) — nullable pour anciens pilotages
+  healthScore           Int?
+  /// CONFORME | A_SURVEILLER | EN_DIFFICULTE | CRITIQUE | TERMINE
+  healthLabel           String?
+  healthUpdatedAt       DateTime?
+  /// ESSENTIEL | RENFORCE | COMPLET
+  serviceLevel          String         @default("ESSENTIEL")
   createdById           String?
   archivedAt            DateTime?
   createdAt             DateTime       @default(now())
@@ -1801,6 +1809,8 @@ model WorksitePilotage {
   extraWorks       ExtraWork[]
   activities       PilotageActivity[]
   reports          PilotageReport[]
+  milestones       PilotageMilestone[]
+  blockers         PilotageBlocker[]
 
   @@unique([projectId])
   @@index([clientId])
@@ -1809,6 +1819,7 @@ model WorksitePilotage {
   @@index([conducteurId])
   @@index([archivedAt])
   @@index([plannedEndDate])
+  @@index([healthLabel])
 }
 
 model PilotageMarketDocument {
@@ -2150,4 +2161,97 @@ model PilotageReport {
   pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
 
   @@index([pilotageId, createdAt(sort: Desc)])
+}
+
+/// Jalons de pilotage (timeline chantier)
+model PilotageMilestone {
+  id              String    @id @default(cuid())
+  pilotageId      String
+  title           String
+  category        String    @default("Travaux")
+  sortOrder       Int       @default(0)
+  plannedAt       DateTime? @db.Date
+  actualAt        DateTime? @db.Date
+  responsibleName String?
+  validatorName   String?
+  status          String    @default("Non démarré")
+  progressPct     Int       @default(0)
+  prerequisites   String?   @db.Text
+  proofUrl        String?
+  sourceType      String    @default("Modèle BeWork")
+  verificationStatus String @default("À vérifier")
+  archivedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+
+  @@index([pilotageId, sortOrder])
+  @@index([pilotageId, status])
+  @@index([plannedAt])
+}
+
+/// Blocages et décisions attendues — agrégation opérationnelle
+model PilotageBlocker {
+  id                String    @id @default(cuid())
+  pilotageId        String
+  title             String
+  severity          String    @default("Important")
+  originType        String?
+  originId          String?
+  originLabel       String?
+  consequence       String?   @db.Text
+  impactedMilestone String?
+  internalOwner     String?
+  externalDecider   String?
+  nextAction        String?
+  nextFollowUpAt    DateTime? @db.Date
+  priority          String    @default("Haute")
+  status            String    @default("Ouvert")
+  openedAt          DateTime  @default(now())
+  resolvedAt        DateTime?
+  archivedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+
+  @@index([pilotageId, status])
+  @@index([severity])
+  @@index([openedAt])
+}
+
+/// Liens de démonstration commerciale Pilotage — isolés des données métier.
+/// Ne stocke aucune donnée de chantier réel : uniquement scénario fictif + suivi commercial.
+model DemoPilotageLink {
+  id                 String    @id @default(cuid())
+  token              String    @unique
+  scenarioId         String    @default("go-logements-public")
+  prospectName       String?
+  prospectCompany    String?
+  accessCodeHash     String?
+  expiresAt          DateTime
+  maxViews           Int?
+  viewCount          Int       @default(0)
+  firstViewedAt      DateTime?
+  lastViewedAt       DateTime?
+  revokedAt          DateTime?
+  /// ACTIVE | REVOKED | EXPIRED | ARCHIVED
+  status             String    @default("ACTIVE")
+  personalization    Json?
+  sectionsVisited    Json?
+  interests          Json?
+  interestNote       String?   @db.Text
+  commercialNotes    String?   @db.Text
+  sandboxResetAt     DateTime?
+  createdById        String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  createdBy User? @relation("DemoPilotageLinkCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([expiresAt])
+  @@index([createdById])
+  @@index([prospectCompany])
 }

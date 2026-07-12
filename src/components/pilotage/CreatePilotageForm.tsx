@@ -12,13 +12,19 @@ type UserOption = { id: string; name: string };
 export function CreatePilotageForm({
   projects,
   staffUsers,
+  defaultTemplateId,
 }: {
   projects: ProjectOption[];
   staffUsers: UserOption[];
+  defaultTemplateId?: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const templateDefault =
+    defaultTemplateId && PILOTAGE_TEMPLATES.some((t) => t.id === defaultTemplateId)
+      ? defaultTemplateId
+      : PILOTAGE_TEMPLATES[0]?.id;
 
   if (projects.length === 0) {
     return (
@@ -123,7 +129,7 @@ export function CreatePilotageForm({
           <input type="checkbox" name="applyTemplate" value="1" defaultChecked className="mt-1" />
           <span>
             Générer la structure à partir d’un modèle
-            <select name="templateId" className="ml-2 rounded-lg border border-slate-200 px-2 py-1 text-sm">
+            <select name="templateId" defaultValue={templateDefault} className="ml-2 rounded-lg border border-slate-200 px-2 py-1 text-sm">
               {PILOTAGE_TEMPLATES.map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.label}

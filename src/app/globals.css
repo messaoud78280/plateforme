@@ -107,6 +107,75 @@ body {
 
   /* Largeur canonique du contenu (marketing + dashboard) */
   --site-max-width: 1200px;
+
+  /* —— Design system Pilotage travaux (cockpit BeWork) —— */
+  --pilotage-navy: #1e3a5f;
+  --pilotage-navy-deep: #162d4a;
+  --pilotage-navy-soft: #eef2f7;
+  --pilotage-slate: #64748b;
+  --pilotage-bg: #f4f6f9;
+  --pilotage-ok: #059669;
+  --pilotage-watch: #d97706;
+  --pilotage-critical: #dc2626;
+  --pilotage-intel: #6d28d9;
+  --pilotage-radius: 0.875rem;
+  --pilotage-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(30, 58, 95, 0.04);
+  --pilotage-shadow-hover: 0 4px 16px rgba(30, 58, 95, 0.1);
+  --pilotage-transition: 160ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --pilotage-transition: 0ms;
+  }
+}
+
+.pilotage-card {
+  border-radius: var(--pilotage-radius);
+  border: 1px solid rgba(30, 58, 95, 0.08);
+  background: #fff;
+  box-shadow: var(--pilotage-shadow);
+  transition: box-shadow var(--pilotage-transition), border-color var(--pilotage-transition), transform var(--pilotage-transition);
+}
+
+.pilotage-card:hover {
+  border-color: rgba(30, 58, 95, 0.18);
+  box-shadow: var(--pilotage-shadow-hover);
+}
+
+.pilotage-kpi {
+  border-radius: var(--pilotage-radius);
+  border: 1px solid rgba(30, 58, 95, 0.08);
+  background: #fff;
+  padding: 0.875rem 1rem;
+  transition: border-color var(--pilotage-transition), background var(--pilotage-transition);
+}
+
+.pilotage-kpi:hover {
+  border-color: rgba(30, 58, 95, 0.22);
+  background: var(--pilotage-navy-soft);
+}
+
+.pilotage-health-bar {
+  width: 4px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+/* Mode présentation commerciale — densité et lisibilité grand écran */
+.demo-presentation .pilotage-card {
+  box-shadow: var(--pilotage-shadow-hover);
+}
+.demo-presentation h1,
+.demo-presentation h2 {
+  letter-spacing: -0.01em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-presentation * {
+    transition: none !important;
+    animation: none !important;
+  }
 }
 
 @theme inline {

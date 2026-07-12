@@ -10,6 +10,7 @@ import { SEO_AI_CRAWLER_USER_AGENTS } from "@/lib/seo-ai-discovery";
 export const SEO_DISALLOW_PATHS = [
   "/dashboard/",
   "/api/",
+  "/demo/",
   "/connexion",
   "/inscription",
   "/connexion/gerente",

@@ -34,6 +34,8 @@ export type PilotageTemplate = {
   id: string;
   label: string;
   lot: string;
+  category: "lot" | "marché" | "chantier";
+  version: string;
   obligations: TemplateObligation[];
   requiredDocuments: TemplateRequiredDoc[];
   doeItems: TemplateDoeItem[];
@@ -45,6 +47,8 @@ export const TEMPLATE_GROS_OEUVRE: PilotageTemplate = {
   id: "gros-oeuvre",
   label: "Gros œuvre",
   lot: "Gros œuvre",
+  category: "lot",
+  version: "1.0",
   obligations: [
     {
       title: "Remise du PPSPS avant démarrage",
@@ -102,8 +106,82 @@ export const TEMPLATE_GROS_OEUVRE: PilotageTemplate = {
   ],
 };
 
-export const PILOTAGE_TEMPLATES: PilotageTemplate[] = [TEMPLATE_GROS_OEUVRE];
+function lotStub(
+  id: string,
+  label: string,
+  extras?: Partial<Pick<PilotageTemplate, "requiredDocuments" | "obligations" | "doeItems">>,
+): PilotageTemplate {
+  return {
+    id,
+    label,
+    lot: label,
+    category: "lot",
+    version: "1.0",
+    obligations: extras?.obligations ?? [
+      {
+        title: `PPSPS — lot ${label}`,
+        description: "Remettre le PPSPS avant démarrage du lot.",
+        category: "Sécurité",
+        priority: "Critique",
+        expectedPiece: "PPSPS",
+      },
+    ],
+    requiredDocuments: extras?.requiredDocuments ?? [
+      { name: "PPSPS", category: "Sécurité", isMandatory: true },
+      { name: "Planning d’exécution", category: "Études", isMandatory: true },
+      { name: "Attestations d’assurance", category: "Administratif", isMandatory: true },
+    ],
+    doeItems: extras?.doeItems ?? [
+      { title: "Plans de recollement", category: "Plans de recollement", isMandatory: true },
+      { title: "Fiches techniques", category: "Fiches techniques", isMandatory: true },
+    ],
+    actions: [
+      {
+        title: `Structurer le pilotage — ${label}`,
+        category: "Document",
+        priority: "Haute",
+      },
+    ],
+    plans: [],
+  };
+}
+
+export const PILOTAGE_TEMPLATES: PilotageTemplate[] = [
+  TEMPLATE_GROS_OEUVRE,
+  lotStub("terrassement-vrd", "Terrassement et VRD"),
+  lotStub("charpente-couverture", "Charpente et couverture"),
+  lotStub("menuiseries-ext", "Menuiseries extérieures"),
+  lotStub("menuiseries-int", "Menuiseries intérieures"),
+  lotStub("serrurerie", "Serrurerie"),
+  lotStub("platrerie", "Plâtrerie"),
+  lotStub("cvc-plomberie", "CVC et plomberie"),
+  lotStub("electricite", "Électricité CFO/CFA"),
+  lotStub("carrelage-sols", "Carrelage et sols"),
+  lotStub("peinture", "Peinture"),
+  lotStub("demolition", "Démolition"),
+];
+
+export const MARKET_TEMPLATES = [
+  { id: "marche-public", label: "Marché public", category: "marché", items: 12 },
+  { id: "marche-prive", label: "Marché privé", category: "marché", items: 10 },
+  { id: "sous-traitance", label: "Sous-traitance", category: "marché", items: 8 },
+  { id: "accord-cadre", label: "Accord-cadre", category: "marché", items: 9 },
+  { id: "logements-collectifs", label: "Logements collectifs", category: "chantier", items: 14 },
+] as const;
 
 export function getTemplateById(id: string): PilotageTemplate | undefined {
   return PILOTAGE_TEMPLATES.find((t) => t.id === id);
+}
+
+const DEFAULT_MILESTONES_COUNT = 10;
+
+export function templateItemCount(t: PilotageTemplate): number {
+  return (
+    t.obligations.length +
+    t.requiredDocuments.length +
+    t.doeItems.length +
+    t.actions.length +
+    t.plans.length +
+    DEFAULT_MILESTONES_COUNT
+  );
 }

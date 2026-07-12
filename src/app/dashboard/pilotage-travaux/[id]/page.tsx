@@ -3,10 +3,19 @@ import { notFound } from "next/navigation";
 import { BackLink } from "@/components/ui/BackLink";
 import { ProgressBar, StatusBadge } from "@/components/pilotage/PilotageBadges";
 import {
+  HealthPanel,
+  MilestoneTimeline,
+  ProgressRing,
+} from "@/components/pilotage/PilotageCockpit";
+import { PilotageDetailNav } from "@/components/pilotage/PilotageDetailNav";
+import {
   ActionStatusButtons,
   DoeStatusSelect,
+  EnsureMilestonesButton,
   GenerateReportButton,
+  MilestoneStatusSelect,
   QuickAddAction,
+  QuickAddBlocker,
   QuickAddExtraWork,
   QuickAddMarketDoc,
   QuickAddObligation,
@@ -14,6 +23,7 @@ import {
   QuickAddRequiredDoc,
   QuickAddSituation,
   QuickAddSubcontractor,
+  ResolveBlockerButton,
 } from "@/components/pilotage/PilotageQuickForms";
 import {
   canEditPilotageOperational,
@@ -28,8 +38,11 @@ import {
   isDueWithinDays,
   isOverdue,
   isVisaPending,
+  startOfDay,
+  addDays,
 } from "@/lib/pilotage/calculations";
-import { DETAIL_TABS, PILOTAGE_LIST_PATH, type DetailTabId } from "@/lib/pilotage/constants";
+import { PILOTAGE_LIST_PATH, SERVICE_LEVEL_LABELS, type DetailTabId } from "@/lib/pilotage/constants";
+import { countHealthSignals } from "@/lib/pilotage/health";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -54,7 +67,25 @@ export default async function PilotageDetailPage({
   await requirePilotageAccess({ id: session.user.id, role: session.user.role }, id);
 
   const tabRaw = first(sp, "onglet") ?? "vue";
-  const tab = (DETAIL_TABS.some((t) => t.id === tabRaw) ? tabRaw : "vue") as DetailTabId;
+  const validTabs = [
+    "vue",
+    "a-traiter",
+    "blocages",
+    "pieces",
+    "obligations",
+    "documents",
+    "actions",
+    "plans",
+    "calendrier",
+    "jalons",
+    "sous-traitants",
+    "situations",
+    "ts",
+    "doe",
+    "rapports",
+    "historique",
+  ] as const;
+  const tab = (validTabs.includes(tabRaw as (typeof validTabs)[number]) ? tabRaw : "vue") as DetailTabId;
   const canEdit = canEditPilotageOperational(session.user.role);
 
   const pilotage = await prisma.worksitePilotage.findUnique({
@@ -76,6 +107,8 @@ export default async function PilotageDetailPage({
       extraWorks: { where: { archivedAt: null }, orderBy: { createdAt: "desc" } },
       activities: { orderBy: { createdAt: "desc" }, take: 40 },
       reports: { orderBy: { createdAt: "desc" }, take: 20 },
+      milestones: { where: { archivedAt: null }, orderBy: { sortOrder: "asc" } },
+      blockers: { where: { archivedAt: null }, orderBy: [{ severity: "asc" }, { openedAt: "desc" }] },
     },
   });
   if (!pilotage) notFound();
@@ -88,153 +121,374 @@ export default async function PilotageDetailPage({
   const incompleteSt = pilotage.subcontractors.filter((s) => s.dossierStatus !== "Complet");
   const situationsTodo = pilotage.situations.filter((s) => ["À préparer", "En préparation"].includes(s.status));
   const tsAlert = pilotage.extraWorks.filter((e) => e.startedWithoutValidation && !e.writtenValidation);
+  const openBlockers = pilotage.blockers.filter((b) => b.status === "Ouvert" || b.status === "En cours");
+  const health = countHealthSignals({
+    status: pilotage.status,
+    actions: pilotage.actions,
+    obligations: pilotage.obligations,
+    requiredDocuments: pilotage.requiredDocuments,
+    plans: pilotage.plans,
+    extraWorks: pilotage.extraWorks,
+    doeItems: pilotage.doeItems,
+    blockers: pilotage.blockers,
+    milestones: pilotage.milestones,
+  });
+  const today = startOfDay();
+  const weekEnd = addDays(today, 7);
+  const nextMilestone = pilotage.milestones.find((m) => !["Atteint", "Annulé", "Non applicable"].includes(m.status));
+  const nextDue = [
+    ...pilotage.actions.filter((a) => a.dueDate && isActionOpen(a.status)).map((a) => ({ d: a.dueDate!, label: a.title })),
+    ...pilotage.obligations
+      .filter((o) => o.dueDate && !["Validée", "Non applicable"].includes(o.status))
+      .map((o) => ({ d: o.dueDate!, label: o.title })),
+  ].sort((a, b) => new Date(a.d).getTime() - new Date(b.d).getTime())[0];
 
   const hrefTab = (t: string) => `${PILOTAGE_LIST_PATH}/${id}?onglet=${t}`;
+  const navBadges: Partial<Record<DetailTabId, number>> = {
+    "a-traiter": overdueActions.length + situationsTodo.length,
+    blocages: openBlockers.length,
+    documents: missingDocs.length,
+    plans: visas.length,
+    doe: doe.manquant,
+  };
 
   return (
     <div className="space-y-5">
       <BackLink href={PILOTAGE_LIST_PATH}>Pilotage travaux</BackLink>
 
-      <header className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-bold text-slate-900">{pilotage.project.title}</h1>
-              <StatusBadge status={pilotage.status} />
+      <header className="pilotage-card overflow-hidden p-0">
+        <div className="border-b border-slate-100 bg-gradient-to-r from-[#1e3a5f]/5 to-transparent px-5 py-4">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                {pilotage.project.client.company ?? pilotage.project.client.name}
+                {pilotage.lot ? ` · ${pilotage.lot}` : ""}
+              </p>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <h1 className="text-2xl font-bold text-slate-900">{pilotage.project.title}</h1>
+                <StatusBadge status={pilotage.status} />
+              </div>
+              <p className="mt-1 text-xs text-slate-500">
+                Conducteur : {pilotage.conducteur?.name ?? "—"} · Assistant : {pilotage.assistant?.name ?? "—"} ·{" "}
+                {formatDateFr(pilotage.startDate)} → {formatDateFr(pilotage.plannedEndDate)}
+                {pilotage.internalRef ? ` · Réf. ${pilotage.internalRef}` : ""}
+              </p>
+              <p className="mt-1 text-[11px] font-medium text-[#1e3a5f]/80">
+                {SERVICE_LEVEL_LABELS[pilotage.serviceLevel] ?? pilotage.serviceLevel}
+              </p>
             </div>
-            <p className="mt-1 text-sm text-slate-600">
-              {pilotage.project.client.company ?? pilotage.project.client.name}
-              {pilotage.lot ? ` · ${pilotage.lot}` : ""}
-              {pilotage.internalRef ? ` · Réf. ${pilotage.internalRef}` : ""}
-            </p>
-            <p className="mt-1 text-xs text-slate-500">
-              Conducteur : {pilotage.conducteur?.name ?? "—"} · Assistant : {pilotage.assistant?.name ?? "—"} ·{" "}
-              {formatDateFr(pilotage.startDate)} → {formatDateFr(pilotage.plannedEndDate)}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href={hrefTab("actions")}
-              className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700"
-            >
-              Ajouter une action
-            </Link>
-            <Link
-              href={hrefTab("pieces")}
-              className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700"
-            >
-              Ajouter un document
-            </Link>
-            <GenerateReportButton pilotageId={id} />
+            <div className="flex flex-wrap gap-2">
+              <Link href={hrefTab("a-traiter")} className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-semibold text-white">
+                À traiter
+              </Link>
+              <Link href={hrefTab("blocages")} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700">
+                Blocages
+              </Link>
+              <GenerateReportButton pilotageId={id} />
+            </div>
           </div>
         </div>
-
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
-          <MiniStat label="Retards" value={overdueActions.length} danger={overdueActions.length > 0} />
-          <MiniStat label="Docs manquants" value={missingDocs.length} warn={missingDocs.length > 0} />
-          <MiniStat label="Obligations ouvertes" value={openObligations.length} />
-          <MiniStat label="Visas" value={visas.length} warn={visas.length > 0} />
-          <MiniStat label="ST incomplets" value={incompleteSt.length} warn={incompleteSt.length > 0} />
-          <MiniStat label="Situations" value={situationsTodo.length} />
-          <MiniStat label="TS sans validation" value={tsAlert.length} danger={tsAlert.length > 0} />
-          <div className="rounded-xl bg-slate-50 px-3 py-2">
-            <ProgressBar value={doe.pct} label="DOE" />
+        <div className="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          <HealthPanel health={health} causesHref={hrefTab("blocages")} compact />
+          <div className="pilotage-card flex items-center p-3">
+            <ProgressRing value={pilotage.adminProgressPct} label="Admin" />
           </div>
+          <div className="pilotage-card p-3">
+            <ProgressBar value={doe.pct} label="DOE" />
+            <p className="mt-2 text-xs text-slate-500">{doe.manquant} manquant(s)</p>
+          </div>
+          <MiniStat label="Prochain jalon" valueLabel={nextMilestone?.title ?? "—"} />
+          <MiniStat label="Prochaine échéance" valueLabel={nextDue ? `${formatDateFr(nextDue.d)}` : "—"} sub={nextDue?.label} />
+          <MiniStat label="Blocages ouverts" value={openBlockers.length} danger={openBlockers.length > 0} />
         </div>
       </header>
 
-      <nav className="flex gap-1 overflow-x-auto rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-sm">
-        {DETAIL_TABS.map((t) => (
-          <Link
-            key={t.id}
-            href={hrefTab(t.id)}
-            className={`shrink-0 rounded-xl px-3 py-2 text-xs font-semibold whitespace-nowrap ${
-              tab === t.id ? "bg-[#1e3a5f] text-white" : "text-slate-600 hover:bg-slate-50"
-            }`}
-          >
-            {t.label}
-          </Link>
-        ))}
-      </nav>
+      <PilotageDetailNav pilotageId={id} active={tab} badges={navBadges} />
 
       {tab === "vue" && (
-        <div className="grid gap-4 lg:grid-cols-2">
-          <Card title="Urgences">
-            <UrgencyList
-              items={[
-                ...overdueActions.map((a) => ({ label: `Retard action : ${a.title}`, tone: "red" as const })),
-                ...tsAlert.map((e) => ({
-                  label: `Travaux commencés sans validation écrite : ${e.reference ?? e.description.slice(0, 60)}`,
-                  tone: "red" as const,
-                })),
-                ...visas.filter((p) => isOverdue(p.visaDueDate, p.status)).map((p) => ({
-                  label: `Visa en retard : ${p.reference}`,
-                  tone: "amber" as const,
-                })),
-                ...pilotage.actions
-                  .filter((a) => isActionOpen(a.status) && isDueWithinDays(a.dueDate, 7) && !isOverdue(a.dueDate, a.status))
-                  .map((a) => ({ label: `Échéance < 7 j : ${a.title}`, tone: "amber" as const })),
-              ]}
-            />
-          </Card>
-          <Card title="Prochaines échéances">
-            <ul className="space-y-2 text-sm">
-              {[
-                ...pilotage.actions.filter((a) => a.dueDate && isActionOpen(a.status)),
-                ...pilotage.obligations.filter((o) => o.dueDate && !["Validée", "Non applicable"].includes(o.status)),
-                ...pilotage.requiredDocuments.filter((d) => d.dueDate && isDocMissing(d.status)),
-              ]
-                .sort((a, b) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime())
-                .slice(0, 15)
-                .map((item) => (
-                  <li key={item.id} className="flex justify-between gap-2 border-b border-slate-50 pb-2">
-                    <span className="truncate">{"title" in item ? item.title : "name" in item ? item.name : "—"}</span>
-                    <span className="shrink-0 text-xs text-slate-500">{formatDateFr(item.dueDate)}</span>
+        <div className="grid gap-4 lg:grid-cols-3">
+          <div className="space-y-4 lg:col-span-2">
+            <Card title="À traiter aujourd’hui">
+              <UrgencyList
+                items={[
+                  ...overdueActions.map((a) => ({ label: `Retard action : ${a.title}`, tone: "red" as const })),
+                  ...tsAlert.map((e) => ({
+                    label: `TS sans validation écrite : ${e.reference ?? e.description.slice(0, 60)}`,
+                    tone: "red" as const,
+                  })),
+                  ...openBlockers.slice(0, 4).map((b) => ({
+                    label: `Blocage : ${b.title}`,
+                    tone: (b.severity === "Critique" ? "red" : "amber") as "red" | "amber",
+                  })),
+                  ...visas
+                    .filter((p) => isOverdue(p.visaDueDate, p.status))
+                    .map((p) => ({ label: `Visa en retard : ${p.reference}`, tone: "amber" as const })),
+                  ...pilotage.actions
+                    .filter((a) => isActionOpen(a.status) && isDueWithinDays(a.dueDate, 7) && !isOverdue(a.dueDate, a.status))
+                    .map((a) => ({ label: `Échéance < 7 j : ${a.title}`, tone: "amber" as const })),
+                ]}
+              />
+            </Card>
+            <Card title="Blocages principaux">
+              {openBlockers.length === 0 ? (
+                <p className="text-sm text-slate-500">Aucun blocage ouvert.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {openBlockers.slice(0, 5).map((b) => (
+                    <li key={b.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm">
+                      <span className="font-semibold text-slate-900">{b.title}</span>
+                      <StatusBadge status={b.severity} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <Link href={hrefTab("blocages")} className="mt-3 inline-block text-xs font-semibold text-[#1e3a5f] hover:underline">
+                Voir tous les blocages
+              </Link>
+            </Card>
+            <Card title="Prochaines échéances">
+              <ul className="space-y-2 text-sm">
+                {[
+                  ...pilotage.actions.filter((a) => a.dueDate && isActionOpen(a.status)),
+                  ...pilotage.obligations.filter((o) => o.dueDate && !["Validée", "Non applicable"].includes(o.status)),
+                  ...pilotage.requiredDocuments.filter((d) => d.dueDate && isDocMissing(d.status)),
+                ]
+                  .sort((a, b) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime())
+                  .slice(0, 12)
+                  .map((item) => (
+                    <li key={item.id} className="flex justify-between gap-2 border-b border-slate-50 pb-2">
+                      <span className="truncate">{"title" in item ? item.title : "name" in item ? item.name : "—"}</span>
+                      <span className="shrink-0 text-xs text-slate-500">{formatDateFr(item.dueDate)}</span>
+                    </li>
+                  ))}
+              </ul>
+            </Card>
+            <Card title="Activité récente">
+              <ul className="space-y-2 text-sm">
+                {pilotage.activities.length === 0 ? (
+                  <li className="text-slate-500">Aucune activité pour le moment.</li>
+                ) : (
+                  pilotage.activities.slice(0, 10).map((a) => (
+                    <li key={a.id} className="flex flex-wrap gap-2 border-b border-slate-50 pb-2">
+                      <span className="text-xs text-slate-400">{formatDateFr(a.createdAt)}</span>
+                      <span className="font-semibold text-slate-800">{a.actionType}</span>
+                      <span className="text-slate-600">{a.entityLabel ?? a.comment ?? ""}</span>
+                    </li>
+                  ))
+                )}
+              </ul>
+            </Card>
+          </div>
+          <div className="space-y-4">
+            <HealthPanel health={health} causesHref={hrefTab("blocages")} />
+            <Card title="Progression par catégorie">
+              <div className="space-y-3">
+                <ProgressBar value={pilotage.adminProgressPct} label="Avancement administratif et documentaire" />
+                <ProgressBar value={doe.pct} label="DOE" />
+                <p className="text-xs text-slate-600">Obligations ouvertes : {openObligations.length}</p>
+                <p className="text-xs text-slate-600">Documents manquants : {missingDocs.length}</p>
+                <p className="text-xs text-slate-600">Plans / visas : {visas.length}</p>
+                <p className="text-xs text-slate-600">Sous-traitants incomplets : {incompleteSt.length}</p>
+              </div>
+            </Card>
+            <Card title="Jalons">
+              <MilestoneTimeline milestones={pilotage.milestones} />
+              <Link href={hrefTab("jalons")} className="mt-3 inline-block text-xs font-semibold text-[#1e3a5f] hover:underline">
+                Gérer les jalons
+              </Link>
+            </Card>
+            <Card title="Contacts principaux">
+              <dl className="grid gap-2 text-sm">
+                <Contact label="Conducteur" value={pilotage.conducteur?.name} />
+                <Contact label="Assistant BeWork" value={pilotage.assistant?.name} />
+                <Contact label="Responsable client" value={pilotage.clientContactName} />
+                <Contact label="Maître d’ouvrage" value={pilotage.maitreOuvrage} />
+                <Contact label="Maître d’œuvre" value={pilotage.maitreOeuvre} />
+                <Contact label="Bureau de contrôle" value={pilotage.bureauControle} />
+                <Contact label="Coordonnateur SPS" value={pilotage.coordinateurSps} />
+              </dl>
+            </Card>
+            <Card title="Documents récents">
+              <ul className="space-y-2 text-sm">
+                {pilotage.marketDocuments.slice(0, 5).map((d) => (
+                  <li key={d.id} className="flex justify-between gap-2">
+                    <span className="truncate">{d.title}</span>
+                    <StatusBadge status={d.status} />
                   </li>
                 ))}
-              {pilotage.actions.length === 0 && pilotage.obligations.length === 0 ? (
-                <li className="text-slate-500">Aucune échéance planifiée.</li>
-              ) : null}
-            </ul>
-          </Card>
-          <Card title="Progression">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <ProgressBar value={pilotage.adminProgressPct} label="Administratif" />
-              <ProgressBar value={doe.pct} label="DOE" />
-              <p className="text-xs text-slate-600">Obligations : {pilotage.obligations.length}</p>
-              <p className="text-xs text-slate-600">Documents : {pilotage.requiredDocuments.length}</p>
-              <p className="text-xs text-slate-600">Plans : {pilotage.plans.length}</p>
-              <p className="text-xs text-slate-600">Sous-traitants : {pilotage.subcontractors.length}</p>
-            </div>
-          </Card>
-          <Card title="Contacts">
-            <dl className="grid gap-2 text-sm">
-              <Contact label="Conducteur" value={pilotage.conducteur?.name} />
-              <Contact label="Assistant BeWork" value={pilotage.assistant?.name} />
-              <Contact label="Responsable client" value={pilotage.clientContactName} />
-              <Contact label="Maître d’ouvrage" value={pilotage.maitreOuvrage} />
-              <Contact label="Maître d’œuvre" value={pilotage.maitreOeuvre} />
-              <Contact label="Bureau de contrôle" value={pilotage.bureauControle} />
-              <Contact label="Coordonnateur SPS" value={pilotage.coordinateurSps} />
-            </dl>
-          </Card>
-          <Card title="Dernières activités" className="lg:col-span-2">
-            <ul className="space-y-2 text-sm">
-              {pilotage.activities.length === 0 ? (
-                <li className="text-slate-500">Aucune activité pour le moment.</li>
-              ) : (
-                pilotage.activities.slice(0, 12).map((a) => (
-                  <li key={a.id} className="flex flex-wrap gap-2 border-b border-slate-50 pb-2">
-                    <span className="text-xs text-slate-400">{formatDateFr(a.createdAt)}</span>
-                    <span className="font-semibold text-slate-800">{a.actionType}</span>
-                    <span className="text-slate-600">{a.entityLabel ?? a.comment ?? ""}</span>
-                    <span className="text-xs text-slate-400">{a.userName ?? ""}</span>
-                  </li>
-                ))
-              )}
-            </ul>
-          </Card>
+                {pilotage.marketDocuments.length === 0 ? (
+                  <li className="text-slate-500">Aucune pièce dépôtée.</li>
+                ) : null}
+              </ul>
+            </Card>
+            <Card title="Accès rapides">
+              <div className="flex flex-wrap gap-2">
+                {[
+                  ["documents", "Documents"],
+                  ["plans", "Plans"],
+                  ["doe", "DOE"],
+                  ["obligations", "Obligations"],
+                  ["actions", "Actions"],
+                ].map(([tid, label]) => (
+                  <Link
+                    key={tid}
+                    href={hrefTab(tid)}
+                    className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:border-[#1e3a5f]/40"
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </div>
+            </Card>
+          </div>
         </div>
+      )}
+
+      {tab === "a-traiter" && (
+        <Panel>
+          <h2 className="text-sm font-bold text-slate-900">File de travail quotidienne</h2>
+          <div className="mt-4 space-y-6">
+            <WorkSection title="En retard" tone="red">
+              {overdueActions.map((a) => (
+                <WorkRow key={a.id} title={a.title} meta={`Échéance ${formatDateFr(a.dueDate)}`}>
+                  <ActionStatusButtons actionId={a.id} status={a.status} canEdit={canEdit} />
+                </WorkRow>
+              ))}
+              {overdueActions.length === 0 ? <p className="text-sm text-slate-500">Rien en retard.</p> : null}
+            </WorkSection>
+            <WorkSection title="Cette semaine" tone="amber">
+              {pilotage.actions
+                .filter(
+                  (a) =>
+                    isActionOpen(a.status) &&
+                    a.dueDate &&
+                    a.dueDate >= today &&
+                    a.dueDate <= weekEnd &&
+                    !isOverdue(a.dueDate, a.status),
+                )
+                .map((a) => (
+                  <WorkRow key={a.id} title={a.title} meta={formatDateFr(a.dueDate)}>
+                    <ActionStatusButtons actionId={a.id} status={a.status} canEdit={canEdit} />
+                  </WorkRow>
+                ))}
+            </WorkSection>
+            <WorkSection title="À valider / documents" tone="neutral">
+              {missingDocs.map((d) => (
+                <WorkRow key={d.id} title={d.name} meta={`Statut : ${d.status}`} />
+              ))}
+              {visas.map((p) => (
+                <WorkRow key={p.id} title={`Visa ${p.reference}`} meta={p.title} />
+              ))}
+              {situationsTodo.map((s) => (
+                <WorkRow key={s.id} title={`Situation ${s.number}`} meta={s.periodLabel ?? s.status} />
+              ))}
+            </WorkSection>
+            <WorkSection title="Décisions / TS" tone="red">
+              {tsAlert.map((e) => (
+                <WorkRow key={e.id} title={e.reference ?? "TS"} meta={e.description.slice(0, 80)} />
+              ))}
+              {openBlockers.map((b) => (
+                <WorkRow key={b.id} title={b.title} meta={b.nextAction ?? b.severity}>
+                  <ResolveBlockerButton blockerId={b.id} canEdit={canEdit} />
+                </WorkRow>
+              ))}
+            </WorkSection>
+          </div>
+        </Panel>
+      )}
+
+      {tab === "blocages" && (
+        <Panel>
+          <QuickAddBlocker pilotageId={id} canEdit={canEdit} />
+          <div className="mt-4 grid gap-3">
+            {pilotage.blockers.length === 0 ? (
+              <p className="text-sm text-slate-500">Aucun blocage. Signalez les décisions attendues et les points critiques ici.</p>
+            ) : (
+              pilotage.blockers.map((b) => {
+                const days = Math.floor((Date.now() - new Date(b.openedAt).getTime()) / 86400000);
+                return (
+                  <div
+                    key={b.id}
+                    className={`pilotage-card flex gap-3 p-4 ${
+                      b.severity === "Critique"
+                        ? "border-red-200"
+                        : b.severity === "À surveiller"
+                          ? "border-amber-200"
+                          : ""
+                    }`}
+                  >
+                    <div
+                      className={`w-1 shrink-0 rounded-full ${
+                        b.severity === "Critique" ? "bg-red-600" : b.severity === "Important" ? "bg-orange-500" : "bg-amber-400"
+                      }`}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-semibold text-slate-900">{b.title}</p>
+                        <StatusBadge status={b.severity} />
+                        <StatusBadge status={b.status} />
+                        <span className="text-[11px] text-slate-500">{days} j</span>
+                      </div>
+                      {b.consequence ? <p className="mt-1 text-sm text-slate-600">{b.consequence}</p> : null}
+                      <p className="mt-2 text-xs text-slate-500">
+                        Interne : {b.internalOwner ?? "—"} · Décideur : {b.externalDecider ?? "—"} · Prochaine action :{" "}
+                        {b.nextAction ?? "—"} · Relance : {formatDateFr(b.nextFollowUpAt)}
+                      </p>
+                    </div>
+                    {b.status !== "Résolu" ? <ResolveBlockerButton blockerId={b.id} canEdit={canEdit} /> : null}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </Panel>
+      )}
+
+      {tab === "jalons" && (
+        <Panel>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-sm font-bold text-slate-900">Timeline des jalons</h2>
+            <EnsureMilestonesButton pilotageId={id} canEdit={canEdit} />
+          </div>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <MilestoneTimeline milestones={pilotage.milestones} />
+            <Table
+              headers={["Jalon", "Catégorie", "Prévu", "Statut", "Source"]}
+              rows={pilotage.milestones.map((m) => [
+                m.title,
+                m.category,
+                formatDateFr(m.plannedAt),
+                <MilestoneStatusSelect key="s" milestoneId={m.id} status={m.status} canEdit={canEdit} />,
+                m.verificationStatus,
+              ])}
+              empty="Aucun jalon. Cliquez sur « Initialiser les jalons types »."
+            />
+          </div>
+        </Panel>
+      )}
+
+      {tab === "calendrier" && (
+        <Panel>
+          <h2 className="text-sm font-bold text-slate-900">Échéances du chantier</h2>
+          <Table
+            headers={["Date", "Type", "Élément", "Statut"]}
+            rows={[
+              ...pilotage.actions
+                .filter((a) => a.dueDate)
+                .map((a) => [formatDateFr(a.dueDate), "Action", a.title, <StatusBadge key="s" status={a.status} />]),
+              ...pilotage.obligations
+                .filter((o) => o.dueDate)
+                .map((o) => [formatDateFr(o.dueDate), "Obligation", o.title, <StatusBadge key="s" status={o.status} />]),
+              ...pilotage.plans
+                .filter((p) => p.visaDueDate)
+                .map((p) => [formatDateFr(p.visaDueDate), "Visa", p.reference, <StatusBadge key="s" status={p.status} />]),
+              ...pilotage.milestones
+                .filter((m) => m.plannedAt)
+                .map((m) => [formatDateFr(m.plannedAt), "Jalon", m.title, <StatusBadge key="s" status={m.status} />]),
+            ].sort((a, b) => String(a[0]).localeCompare(String(b[0]), "fr"))}
+            empty="Aucune date planifiée sur ce chantier."
+          />
+        </Panel>
       )}
 
       {tab === "pieces" && (
@@ -288,7 +542,7 @@ export default async function PilotageDetailPage({
               <StatusBadge key="s" status={d.status} />,
               d.producerName ?? "—",
             ])}
-            empty="Aucun document à remettre n’a encore été ajouté. Ajoutez manuellement un document ou utilisez un modèle de checklist."
+            empty="Aucun document à remettre n’a encore été ajouté."
           />
         </Panel>
       )}
@@ -342,7 +596,7 @@ export default async function PilotageDetailPage({
               <StatusBadge key="d" status={s.dossierStatus} />,
               s.contactName ?? s.email ?? "—",
             ])}
-            empty="Aucun sous-traitant. L’alerte dossier incomplet est administrative uniquement."
+            empty="Aucun sous-traitant."
           />
         </Panel>
       )}
@@ -360,7 +614,7 @@ export default async function PilotageDetailPage({
               s.paidHt?.toString() ?? "—",
               <StatusBadge key="s" status={s.status} />,
             ])}
-            empty="Aucune situation. Suivi administratif du réalisé / demandé / validé / payé."
+            empty="Aucune situation."
           />
         </Panel>
       )}
@@ -404,7 +658,7 @@ export default async function PilotageDetailPage({
               d.isMandatory ? "Oui" : "Non",
               <DoeStatusSelect key="s" itemId={d.id} status={d.status} canEdit={canEdit} />,
             ])}
-            empty="Aucun élément DOE. Préparez le DOE dès le démarrage du chantier."
+            empty="Aucun élément DOE."
           />
         </Panel>
       )}
@@ -414,7 +668,7 @@ export default async function PilotageDetailPage({
           <GenerateReportButton pilotageId={id} />
           <ul className="mt-4 space-y-2">
             {pilotage.reports.length === 0 ? (
-              <li className="text-sm text-slate-500">Aucun rapport archivé. Générez un rapport à partir des données réelles.</li>
+              <li className="text-sm text-slate-500">Aucun rapport archivé.</li>
             ) : (
               pilotage.reports.map((r) => (
                 <li key={r.id} className="rounded-xl border border-slate-100 px-4 py-3 text-sm">
@@ -463,18 +717,29 @@ export default async function PilotageDetailPage({
 function MiniStat({
   label,
   value,
+  valueLabel,
+  sub,
   danger,
   warn,
 }: {
   label: string;
-  value: number;
+  value?: number;
+  valueLabel?: string;
+  sub?: string;
   danger?: boolean;
   warn?: boolean;
 }) {
   return (
     <div className="rounded-xl bg-slate-50 px-3 py-2">
       <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{label}</p>
-      <p className={`text-lg font-bold ${danger ? "text-red-700" : warn ? "text-amber-700" : "text-slate-900"}`}>{value}</p>
+      {valueLabel != null ? (
+        <>
+          <p className="truncate text-sm font-bold text-slate-900">{valueLabel}</p>
+          {sub ? <p className="truncate text-[11px] text-slate-500">{sub}</p> : null}
+        </>
+      ) : (
+        <p className={`text-lg font-bold ${danger ? "text-red-700" : warn ? "text-amber-700" : "text-slate-900"}`}>{value}</p>
+      )}
     </div>
   );
 }
@@ -489,7 +754,7 @@ function Card({
   className?: string;
 }) {
   return (
-    <section className={`rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm ${className}`}>
+    <section className={`pilotage-card p-5 ${className}`}>
       <h2 className="text-sm font-bold text-slate-900">{title}</h2>
       <div className="mt-3">{children}</div>
     </section>
@@ -516,14 +781,51 @@ function UrgencyList({ items }: { items: { label: string; tone: "red" | "amber" 
       {items.slice(0, 12).map((i, idx) => (
         <li
           key={idx}
-          className={`rounded-lg px-3 py-2 text-sm ${
-            i.tone === "red" ? "bg-red-50 text-red-800" : "bg-amber-50 text-amber-900"
-          }`}
+          className={`rounded-lg px-3 py-2 text-sm ${i.tone === "red" ? "bg-red-50 text-red-800" : "bg-amber-50 text-amber-900"}`}
         >
           {i.label}
         </li>
       ))}
     </ul>
+  );
+}
+
+function WorkSection({
+  title,
+  tone,
+  children,
+}: {
+  title: string;
+  tone: "red" | "amber" | "neutral";
+  children: React.ReactNode;
+}) {
+  const border =
+    tone === "red" ? "border-red-100" : tone === "amber" ? "border-amber-100" : "border-slate-100";
+  return (
+    <section className={`rounded-xl border ${border} p-3`}>
+      <h3 className="text-xs font-bold uppercase tracking-wide text-slate-600">{title}</h3>
+      <div className="mt-2 space-y-2">{children}</div>
+    </section>
+  );
+}
+
+function WorkRow({
+  title,
+  meta,
+  children,
+}: {
+  title: string;
+  meta?: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-white px-3 py-2 text-sm shadow-sm ring-1 ring-slate-100">
+      <div className="min-w-0">
+        <p className="font-semibold text-slate-900">{title}</p>
+        {meta ? <p className="text-xs text-slate-500">{meta}</p> : null}
+      </div>
+      {children}
+    </div>
   );
 }
 

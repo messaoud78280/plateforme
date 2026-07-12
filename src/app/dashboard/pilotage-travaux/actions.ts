@@ -10,47 +10,70 @@ import {
   requirePilotageSession,
 } from "@/lib/pilotage/access";
 import { computeAdminProgress, computeDoeProgress } from "@/lib/pilotage/calculations";
-import { PILOTAGE_LIST_PATH } from "@/lib/pilotage/constants";
+import { DEFAULT_MILESTONES, PILOTAGE_LIST_PATH } from "@/lib/pilotage/constants";
+import { countHealthSignals } from "@/lib/pilotage/health";
 import { logPilotageActivity } from "@/lib/pilotage/history";
 import { getTemplateById } from "@/lib/pilotage/templates";
 
 function revalidatePilotage(id?: string) {
   revalidatePath(PILOTAGE_LIST_PATH);
+  revalidatePath(`${PILOTAGE_LIST_PATH}/a-traiter`);
+  revalidatePath(`${PILOTAGE_LIST_PATH}/blocages`);
+  revalidatePath(`${PILOTAGE_LIST_PATH}/calendrier`);
   if (id) revalidatePath(`${PILOTAGE_LIST_PATH}/${id}`);
 }
 
 async function refreshProgress(pilotageId: string) {
-  const [obligations, docs, plans, doeItems] = await Promise.all([
-    prisma.contractObligation.findMany({
-      where: { pilotageId, archivedAt: null },
-      select: { status: true },
-    }),
-    prisma.requiredDocument.findMany({
-      where: { pilotageId, archivedAt: null },
-      select: { status: true },
-    }),
-    prisma.planRegister.findMany({
-      where: { pilotageId, archivedAt: null },
-      select: { status: true },
-    }),
-    prisma.doeItem.findMany({
-      where: { pilotageId, archivedAt: null },
-      select: { status: true },
-    }),
-  ]);
-  const doe = computeDoeProgress(doeItems);
+  const pilotage = await prisma.worksitePilotage.findUnique({
+    where: { id: pilotageId },
+    select: {
+      status: true,
+      actions: { where: { archivedAt: null }, select: { dueDate: true, status: true, priority: true } },
+      obligations: { where: { archivedAt: null }, select: { dueDate: true, status: true, priority: true } },
+      requiredDocuments: { where: { archivedAt: null }, select: { status: true } },
+      plans: { where: { archivedAt: null }, select: { visaDueDate: true, status: true } },
+      extraWorks: {
+        where: { archivedAt: null },
+        select: { startedWithoutValidation: true, writtenValidation: true, status: true },
+      },
+      doeItems: { where: { archivedAt: null }, select: { status: true } },
+      blockers: { where: { archivedAt: null }, select: { severity: true, status: true } },
+      milestones: { where: { archivedAt: null }, select: { status: true } },
+    },
+  });
+  if (!pilotage) return;
+
+  const doe = computeDoeProgress(pilotage.doeItems);
   const admin = computeAdminProgress({
-    obligationsTotal: obligations.length,
-    obligationsDone: obligations.filter((o) => o.status === "Validée" || o.status === "Non applicable").length,
-    docsTotal: docs.length,
-    docsDone: docs.filter((d) => d.status === "Validé" || d.status === "Non applicable").length,
-    plansTotal: plans.length,
-    plansDone: plans.filter((p) => ["Validé", "Bon pour exécution", "Obsolète"].includes(p.status)).length,
+    obligationsTotal: pilotage.obligations.length,
+    obligationsDone: pilotage.obligations.filter((o) => o.status === "Validée" || o.status === "Non applicable").length,
+    docsTotal: pilotage.requiredDocuments.length,
+    docsDone: pilotage.requiredDocuments.filter((d) => d.status === "Validé" || d.status === "Non applicable").length,
+    plansTotal: pilotage.plans.length,
+    plansDone: pilotage.plans.filter((p) => ["Validé", "Bon pour exécution", "Obsolète"].includes(p.status)).length,
     doePct: doe.pct,
   });
+  const health = countHealthSignals({
+    status: pilotage.status,
+    actions: pilotage.actions,
+    obligations: pilotage.obligations,
+    requiredDocuments: pilotage.requiredDocuments,
+    plans: pilotage.plans,
+    extraWorks: pilotage.extraWorks,
+    doeItems: pilotage.doeItems,
+    blockers: pilotage.blockers,
+    milestones: pilotage.milestones,
+  });
+
   await prisma.worksitePilotage.update({
     where: { id: pilotageId },
-    data: { adminProgressPct: admin, doeProgressPct: doe.pct },
+    data: {
+      adminProgressPct: admin,
+      doeProgressPct: doe.pct,
+      healthScore: health.score,
+      healthLabel: health.label,
+      healthUpdatedAt: new Date(),
+    },
   });
 }
 
@@ -225,6 +248,17 @@ async function applyTemplateToPilotage(
         title: p.title,
         planType: p.planType,
         status: "À produire",
+      })),
+    }),
+    prisma.pilotageMilestone.createMany({
+      data: DEFAULT_MILESTONES.map((m) => ({
+        pilotageId,
+        title: m.title,
+        category: m.category,
+        sortOrder: m.sortOrder,
+        status: "Non démarré",
+        verificationStatus: "À vérifier",
+        sourceType: "Modèle BeWork",
       })),
     }),
   ]);
@@ -740,3 +774,137 @@ export async function generatePilotageReport(
   revalidatePilotage(pilotageId);
   return { ok: true, reportId: report.id };
 }
+
+export async function ensureDefaultMilestones(pilotageId: string) {
+  const session = await requirePilotageSession();
+  if (!canEditPilotageOperational(session.user.role)) return { ok: false as const, error: "Droits insuffisants." };
+  await requirePilotageAccess({ id: session.user.id, role: session.user.role }, pilotageId);
+
+  const count = await prisma.pilotageMilestone.count({ where: { pilotageId, archivedAt: null } });
+  if (count > 0) return { ok: true as const, created: 0 };
+
+  await prisma.pilotageMilestone.createMany({
+    data: DEFAULT_MILESTONES.map((m) => ({
+      pilotageId,
+      title: m.title,
+      category: m.category,
+      sortOrder: m.sortOrder,
+      status: "Non démarré",
+      verificationStatus: "À vérifier",
+      sourceType: "Modèle BeWork",
+    })),
+  });
+  await logPilotageActivity({
+    pilotageId,
+    userId: session.user.id,
+    userName: session.user.name,
+    actionType: "jalons initialisés",
+    entityType: "milestone",
+    entityLabel: `${DEFAULT_MILESTONES.length} jalons`,
+  });
+  revalidatePilotage(pilotageId);
+  return { ok: true as const, created: DEFAULT_MILESTONES.length };
+}
+
+export async function updateMilestoneStatus(formData: FormData) {
+  const session = await requirePilotageSession();
+  if (!canEditPilotageOperational(session.user.role)) return { ok: false as const, error: "Droits insuffisants." };
+
+  const milestoneId = String(formData.get("milestoneId") ?? "").trim();
+  const status = String(formData.get("status") ?? "").trim();
+  if (!milestoneId || !status) return { ok: false as const, error: "Données manquantes." };
+
+  const item = await prisma.pilotageMilestone.findUnique({ where: { id: milestoneId } });
+  if (!item) return { ok: false as const, error: "Jalon introuvable." };
+  await requirePilotageAccess({ id: session.user.id, role: session.user.role }, item.pilotageId);
+
+  await prisma.pilotageMilestone.update({
+    where: { id: milestoneId },
+    data: {
+      status,
+      actualAt: status === "Atteint" ? new Date() : item.actualAt,
+      progressPct: status === "Atteint" ? 100 : status === "En cours" ? Math.max(item.progressPct, 40) : item.progressPct,
+    },
+  });
+  await logPilotageActivity({
+    pilotageId: item.pilotageId,
+    userId: session.user.id,
+    userName: session.user.name,
+    actionType: "jalon mis à jour",
+    entityType: "milestone",
+    entityId: milestoneId,
+    entityLabel: item.title,
+    oldValue: item.status,
+    newValue: status,
+  });
+  await refreshProgress(item.pilotageId);
+  revalidatePilotage(item.pilotageId);
+  return { ok: true as const };
+}
+
+export async function createBlocker(formData: FormData) {
+  const session = await requirePilotageSession();
+  if (!canEditPilotageOperational(session.user.role)) return { ok: false as const, error: "Droits insuffisants." };
+
+  const pilotageId = String(formData.get("pilotageId") ?? "").trim();
+  const title = String(formData.get("title") ?? "").trim();
+  if (!pilotageId || !title) return { ok: false as const, error: "Titre et chantier obligatoires." };
+  await requirePilotageAccess({ id: session.user.id, role: session.user.role }, pilotageId);
+
+  const blocker = await prisma.pilotageBlocker.create({
+    data: {
+      pilotageId,
+      title,
+      severity: String(formData.get("severity") ?? "Important").trim() || "Important",
+      consequence: String(formData.get("consequence") ?? "").trim() || null,
+      nextAction: String(formData.get("nextAction") ?? "").trim() || null,
+      internalOwner: String(formData.get("internalOwner") ?? "").trim() || null,
+      externalDecider: String(formData.get("externalDecider") ?? "").trim() || null,
+      priority: String(formData.get("priority") ?? "Haute").trim() || "Haute",
+      nextFollowUpAt: parseDate(formData.get("nextFollowUpAt")),
+      status: "Ouvert",
+    },
+  });
+  await logPilotageActivity({
+    pilotageId,
+    userId: session.user.id,
+    userName: session.user.name,
+    actionType: "blocage créé",
+    entityType: "blocker",
+    entityId: blocker.id,
+    entityLabel: title,
+  });
+  await refreshProgress(pilotageId);
+  revalidatePilotage(pilotageId);
+  return { ok: true as const };
+}
+
+export async function resolveBlocker(formData: FormData) {
+  const session = await requirePilotageSession();
+  if (!canEditPilotageOperational(session.user.role)) return { ok: false as const, error: "Droits insuffisants." };
+
+  const blockerId = String(formData.get("blockerId") ?? "").trim();
+  if (!blockerId) return { ok: false as const, error: "Blocage manquant." };
+
+  const item = await prisma.pilotageBlocker.findUnique({ where: { id: blockerId } });
+  if (!item) return { ok: false as const, error: "Blocage introuvable." };
+  await requirePilotageAccess({ id: session.user.id, role: session.user.role }, item.pilotageId);
+
+  await prisma.pilotageBlocker.update({
+    where: { id: blockerId },
+    data: { status: "Résolu", resolvedAt: new Date() },
+  });
+  await logPilotageActivity({
+    pilotageId: item.pilotageId,
+    userId: session.user.id,
+    userName: session.user.name,
+    actionType: "blocage résolu",
+    entityType: "blocker",
+    entityId: blockerId,
+    entityLabel: item.title,
+  });
+  await refreshProgress(item.pilotageId);
+  revalidatePilotage(item.pilotageId);
+  return { ok: true as const };
+}
+

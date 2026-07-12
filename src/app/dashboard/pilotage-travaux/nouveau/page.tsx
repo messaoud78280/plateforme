@@ -10,11 +10,19 @@ import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export default async function NouveauPilotagePage() {
+export default async function NouveauPilotagePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await requirePilotageSession();
   if (!canEditPilotageOperational(session.user.role)) {
     redirect(PILOTAGE_LIST_PATH);
   }
+
+  const sp = await searchParams;
+  const modeleRaw = sp.modele;
+  const defaultTemplateId = Array.isArray(modeleRaw) ? modeleRaw[0] : modeleRaw;
 
   const existingIds = (
     await prisma.worksitePilotage.findMany({
@@ -49,9 +57,9 @@ export default async function NouveauPilotagePage() {
     <div className="mx-auto max-w-3xl space-y-6">
       <BackLink href={PILOTAGE_LIST_PATH}>Pilotage travaux</BackLink>
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Nouveau pilotage chantier</h1>
+        <h1 className="text-2xl font-bold text-slate-800">Mise en route du marché</h1>
         <p className="mt-1 text-sm text-slate-600">
-          Rattachez le pilotage à un chantier existant. Les pièces et obligations pourront être complétées ensuite.
+          Structurez obligations, documents, jalons et DOE dès l’attribution. Les éléments du modèle restent à vérifier.
         </p>
       </div>
       <CreatePilotageForm
@@ -61,6 +69,7 @@ export default async function NouveauPilotagePage() {
           clientName: p.client.company ?? p.client.name,
         }))}
         staffUsers={staffUsers}
+        defaultTemplateId={defaultTemplateId}
       />
     </div>
   );

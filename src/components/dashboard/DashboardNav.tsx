@@ -76,6 +76,9 @@ export function DashboardNav({ role }: { role?: string | null }) {
             <NavLink href="/dashboard/pilotage-travaux" pathname={pathname} activeClass={active}>
               Pilotage travaux
             </NavLink>
+            <NavLink href="/dashboard/demonstrations" pathname={pathname} activeClass={active}>
+              Démos
+            </NavLink>
             <NavLink href="/dashboard/taches" pathname={pathname} activeClass={active}>
               Missions
             </NavLink>
@@ -109,6 +112,11 @@ export function DashboardNav({ role }: { role?: string | null }) {
             <NavLink href="/dashboard/pilotage-travaux" pathname={pathname} activeClass={active}>
               Pilotage travaux
             </NavLink>
+            {role === "AGENCE" ? (
+              <NavLink href="/dashboard/demonstrations" pathname={pathname} activeClass={active}>
+                Démos
+              </NavLink>
+            ) : null}
             <NavLink href="/dashboard/messagerie" pathname={pathname} activeClass={active}>
               Messagerie
             </NavLink>

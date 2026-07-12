@@ -4,6 +4,7 @@ import { UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
 import { buildCreditsGrantUpdate } from "@/lib/credits-lifecycle";
+import { addMemberToOwnerOrganization } from "@/lib/organization/access";
 
 export async function POST(request: Request) {
   try {
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
       );
     }
     const hashedPassword = await bcrypt.hash(password, 12);
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         email: inv.email,
         password: hashedPassword,
@@ -50,6 +51,11 @@ export async function POST(request: Request) {
       where: { id: inv.id },
       data: { status: "ACCEPTED" },
     });
+    try {
+      await addMemberToOwnerOrganization(inv.invitedById, user.id, inv.role);
+    } catch (e) {
+      console.error("Organization member after invite:", e);
+    }
     return NextResponse.json({ success: true });
   } catch (e) {
     console.error("Accept invitation:", e);

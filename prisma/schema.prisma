@@ -93,6 +93,10 @@ model User {
   pilotageActionsCreated     PilotageAction[]   @relation("PilotageActionCreator")
   demoPilotageLinksCreated  DemoPilotageLink[] @relation("DemoPilotageLinkCreatedBy")
 
+  // Organisation multi-utilisateurs
+  organizationsOwned     Organization[]       @relation("OrganizationOwner")
+  organizationMemberships OrganizationMember[]
+
   // NextAuth (magic link)
   accounts              Account[]
   sessions              Session[]
@@ -160,6 +164,47 @@ enum InvitationStatus {
   PENDING
   ACCEPTED
   EXPIRED
+}
+
+/// Entreprise cliente (tenant) — le User CLIENT propriétaire reste pour facturation / legacy.
+model Organization {
+  id          String   @id @default(cuid())
+  name        String
+  siret       String?
+  ownerUserId String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner    User                 @relation("OrganizationOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  members  OrganizationMember[]
+  projects Project[]
+  tasks    Task[]
+
+  @@index([ownerUserId])
+  @@unique([ownerUserId])
+}
+
+model OrganizationMember {
+  id             String                 @id @default(cuid())
+  organizationId String
+  userId         String
+  role           OrganizationMemberRole @default(MEMBER)
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@index([organizationId])
+}
+
+enum OrganizationMemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
 }
 
 // Formule / abonnement client (historique et état)
@@ -272,6 +317,7 @@ model Project {
   description   String?
   status        ProjectStatus  @default(EN_COURS)
   clientId      String
+  organizationId String?
   assignedToId  String?        // agent (User rôle AGENCE) en charge du projet
   dateSouhaitee DateTime?      // date souhaitée pour le début
   deadline      DateTime?      // deadline d'exécution
@@ -289,6 +335,7 @@ model Project {
   updatedAt     DateTime       @updatedAt
 
   client     User       @relation("ClientProjects", fields: [clientId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   assignedTo User?      @relation("AssignedProjects", fields: [assignedToId], references: [id], onDelete: SetNull)
   messages   Message[]
   documents  Document[]
@@ -302,6 +349,8 @@ model Project {
   chantierFolders ChantierFolder[]
   chantierFiles   ChantierFile[]
   worksitePilotages WorksitePilotage[]
+
+  @@index([organizationId])
 }
 
 // Statut métier du chantier (pilotage conducteur de travaux)
@@ -523,6 +572,7 @@ model Task {
   description    String?
   status         TaskStatus @default(NOUVEAU)
   clientId       String
+  organizationId String?
   projectId      String?   // projet auquel la tâche se rapporte (optionnel)
   category         String?   // Gestion d'emails, Recherche, Organisation, etc.
   missionType      String?   // DEVIS_CHIFFRAGE, COMPTE_RENDU_CHANTIER, etc.
@@ -554,6 +604,7 @@ model Task {
   updatedAt      DateTime  @updatedAt
 
   client     User         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   project    Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
   assignedTo User?        @relation("AssignedTasks", fields: [assignedToId], references: [id], onDelete: SetNull)
   createdBy  User?        @relation("TasksCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
@@ -561,6 +612,8 @@ model Task {
   documents  Document[]
   taskMessages TaskMessage[]
   chantierFiles ChantierFile[]
+
+  @@index([organizationId])
 }
 
 enum TaskStatus {

@@ -13,6 +13,7 @@ import { BackLink } from "@/components/ui/BackLink";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { KpiTile } from "@/components/ui/KpiTile";
 import { FilterBar, FilterChip } from "@/components/ui/FilterBar";
+import { projectWhereForClientUser, taskWhereForClientUser } from "@/lib/organization/access";
 
 export default async function TachesPage({
   searchParams,
@@ -159,7 +160,9 @@ export default async function TachesPage({
         };
         tasks = [...nouvelles, ...aAssigner, ...enCours, ...aValider, ...terminees] as unknown as Awaited<ReturnType<typeof prisma.task.findMany>>;
       } else {
-        const taskWhere = isAgent ? { assignedToId: session.user.id } : { clientId: session.user.id };
+        const taskWhere = isAgent
+          ? { assignedToId: session.user.id }
+          : await taskWhereForClientUser(session.user.id);
         tasks = await prisma.task.findMany({
           where: { ...taskWhere, ...statusWhere },
           include: {
@@ -204,7 +207,7 @@ export default async function TachesPage({
     }
     if (isClient && prisma.project) {
       projects = await prisma.project.findMany({
-        where: { clientId: session.user.id },
+        where: await projectWhereForClientUser(session.user.id),
         select: { id: true, title: true },
         orderBy: { title: "asc" },
       });

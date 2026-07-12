@@ -13,6 +13,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { FilterBar, FilterChip } from "@/components/ui/FilterBar";
 import { canDeleteChantierProject, isChantierStaff } from "@/lib/chantier-dossier/access";
 import { CHANTIER_STATUS_LABELS } from "@/lib/chantier-dossier/constants";
+import { projectWhereForClientUser } from "@/lib/organization/access";
 
 const CHANTIER_STATUSES: ChantierStatus[] = ["ETUDE", "EN_COURS", "EN_ATTENTE", "RECEPTION", "TERMINE"];
 
@@ -40,7 +41,7 @@ export default async function ProjetsPage({
     ? session.user.role === "AGENT"
       ? { assignedToId: session.user.id }
       : {}
-    : { clientId: session.user.id };
+    : await projectWhereForClientUser(session.user.id);
 
   const where = {
     ...whereProject,

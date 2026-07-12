@@ -1,39 +1,25 @@
 /**
- * Architecture proposée — Organisation multi-utilisateurs (P1 audit).
+ * Architecture Organisation multi-utilisateurs (P1 audit) — déployée.
  *
- * Problème : le tenant = User CLIENT. Un collaborateur invité a son propre User.id
- * et ne voit pas les chantiers / missions de l’entreprise invitante.
- *
- * Cible (sans migration destructive immédiate) :
- *
- * 1. Organization { id, name, siret?, billing… }
- * 2. OrganizationMember { organizationId, userId, role: OWNER|ADMIN|MEMBER|VIEWER }
- * 3. Project.organizationId (+ conserver clientId legacy = owner User)
- * 4. Scoping API : where organizationId in memberships OR clientId = session.user.id
- *
- * Migration :
- * - Créer Organization depuis User CLIENT existants (1:1 au départ)
- * - Feature flag organizationMultiUser = false jusqu’à bascule
- * - Pas de suppression de clientId
- *
- * Ne pas implémenter le schéma tant que le hub GED / validation client n’est pas stabilisé en prod.
+ * Dual-read : Project/Task accessibles via clientId (legacy) OU organizationId.
+ * Facturation reste sur User propriétaire (ownerUserId).
  */
 
 export const ORGANIZATION_ARCHITECTURE = {
-  status: "planned" as const,
+  status: "active" as const,
   featureFlag: "organizationMultiUser" as const,
   phases: [
-    "Phase A — schéma Organization + Member (nullable orgId sur Project/Task)",
-    "Phase B — backfill 1 org par CLIENT propriétaire",
-    "Phase C — invitations rattachées à OrganizationMember (plus de User isolé)",
-    "Phase D — UI équipe + scoping access.ts centralisé",
+    "Phase A — schéma Organization + Member ✅",
+    "Phase B — backfill 1 org par CLIENT propriétaire ✅",
+    "Phase C — invitations → OrganizationMember ✅",
+    "Phase D — scoping listes + création projet/mission ✅",
   ],
   risks: [
-    "Double facturation si crédits restent sur User au lieu d’Organization",
-    "Fuite cross-tenant si un endpoint oublie le filtre org",
+    "Crédits toujours sur User owner — pas encore mutualisés au niveau Organization",
+    "Endpoints non migrés peuvent encore filtrer seulement clientId",
   ],
   doNot: [
-    "Fusionner automatiquement les comptes existants sans validation gérant",
-    "Supprimer clientId avant dual-read stabilisé",
+    "Supprimer clientId tant que dual-read n’est pas généralisé",
+    "Fusionner des entreprises sans validation gérant",
   ],
 } as const;

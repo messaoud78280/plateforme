@@ -67,7 +67,23 @@ export default async function TacheDetailPage({
 
   const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
   const isAgent = session.user.role === "AGENT";
-  const canAccess = isAgence || isAgent || task.clientId === session.user.id;
+  let canAccess = isAgence || isAgent || task.clientId === session.user.id;
+  if (!canAccess && session.user.role === "CLIENT") {
+    const { getUserOrganizationIds, canClientAccessProject } = await import(
+      "@/lib/organization/access"
+    );
+    const orgIds = await getUserOrganizationIds(session.user.id);
+    const taskOrg = (task as { organizationId?: string | null }).organizationId;
+    if (taskOrg && orgIds.includes(taskOrg)) {
+      canAccess = true;
+    } else if (task.project) {
+      const project = await prisma.project.findUnique({
+        where: { id: task.project.id },
+        select: { clientId: true, organizationId: true },
+      });
+      if (project) canAccess = await canClientAccessProject(session.user.id, project);
+    }
+  }
   if (!canAccess) notFound();
 
   const isClientUser = task.clientId === session.user.id;

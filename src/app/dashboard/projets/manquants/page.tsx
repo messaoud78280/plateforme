@@ -10,6 +10,7 @@ import {
   CHANTIER_MISSING_STATUSES,
 } from "@/lib/chantier-dossier/constants";
 import { isChantierStaff } from "@/lib/chantier-dossier/access";
+import { projectWhereForClientUser } from "@/lib/organization/access";
 
 export default async function ChantierManquantsPage({
   searchParams,
@@ -27,7 +28,7 @@ export default async function ChantierManquantsPage({
     ? session.user.role === "AGENT"
       ? { assignedToId: session.user.id }
       : {}
-    : { clientId: session.user.id };
+    : await projectWhereForClientUser(session.user.id);
 
   const files = await prisma.chantierFile.findMany({
     where: {

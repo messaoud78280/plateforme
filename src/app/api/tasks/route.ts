@@ -5,6 +5,11 @@ import { prisma } from "@/lib/prisma";
 import { notifyManagers } from "@/lib/notifications";
 import { sendNewTaskEmail } from "@/lib/email";
 import { normalizeTaskPriority, taskPriorityLabel } from "@/lib/tasks/priority";
+import {
+  canClientAccessProject,
+  resolveClientTenant,
+  taskWhereForClientUser,
+} from "@/lib/organization/access";
 
 /** GET /api/tasks – Liste des tâches du client (ou toutes si agence) */
 export async function GET(request: NextRequest) {
@@ -18,9 +23,10 @@ export async function GET(request: NextRequest) {
   const status = searchParams.get("status") ?? undefined;
 
   try {
+    const clientWhere = isAgence ? {} : await taskWhereForClientUser(session.user.id);
     const tasks = await prisma.task.findMany({
       where: {
-        ...(isAgence ? {} : { clientId: session.user.id }),
+        ...clientWhere,
         ...(status ? { status: status as "NOUVEAU" | "EN_ATTENTE" | "ASSIGNEE" | "EN_ANALYSE" | "EN_COURS" | "EN_ATTENTE_INFO" | "A_VALIDER" | "COMPLETE" } : {}),
       },
       include: {
@@ -79,11 +85,20 @@ export async function POST(request: NextRequest) {
     }
 
     let projectIdValid: string | null = null;
+    let organizationId: string | null = null;
+    const tenant = await resolveClientTenant(session.user.id);
+
     if (projectId && typeof projectId === "string" && projectId.trim()) {
       const project = await prisma.project.findFirst({
-        where: { id: projectId.trim(), clientId: session.user.id },
+        where: { id: projectId.trim() },
+        select: { id: true, clientId: true, organizationId: true },
       });
-      if (project) projectIdValid = project.id;
+      if (project && (await canClientAccessProject(session.user.id, project))) {
+        projectIdValid = project.id;
+        organizationId = project.organizationId ?? tenant.organizationId;
+      }
+    } else {
+      organizationId = tenant.organizationId;
     }
 
     let desiredDateValid: Date | null = null;
@@ -95,14 +110,15 @@ export async function POST(request: NextRequest) {
     const priorityNormalized = normalizeTaskPriority(priority) ?? "STANDARD";
 
     const countBefore = await prisma.task.count({
-      where: { clientId: session.user.id },
+      where: { clientId: tenant.clientId },
     });
     const task = await prisma.task.create({
       data: {
         title: title.trim(),
         description: description?.trim() ?? null,
         status: "NOUVEAU",
-        clientId: session.user.id,
+        clientId: tenant.clientId,
+        organizationId,
         projectId: projectIdValid,
         desiredDate: desiredDateValid,
         category: typeof category === "string" && category.trim() ? category.trim() : null,

@@ -4,6 +4,11 @@ import type { ChantierStatus, ProjectUrgency } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ensureChantierFolders } from "@/lib/chantier-dossier/folders";
+import {
+  ensureOrganizationForOwner,
+  projectWhereForClientUser,
+  resolveClientTenant,
+} from "@/lib/organization/access";
 
 const CHANTIER_STATUSES: ChantierStatus[] = ["ETUDE", "EN_COURS", "EN_ATTENTE", "RECEPTION", "TERMINE"];
 const URGENCIES: ProjectUrgency[] = ["BASSE", "MOYENNE", "HAUTE", "URGENTE"];
@@ -43,7 +48,7 @@ export async function GET() {
         ? session.user.role === "AGENT"
           ? { assignedToId: session.user.id }
           : {}
-        : { clientId: session.user.id },
+        : await projectWhereForClientUser(session.user.id),
       select: {
         id: true,
         title: true,
@@ -94,7 +99,13 @@ export async function POST(request: Request) {
     session.user.role === "AGENT";
 
   let clientId = session.user.id;
-  if (isStaff && body.clientId) {
+  let organizationId: string | null = null;
+
+  if (!isStaff) {
+    const tenant = await resolveClientTenant(session.user.id);
+    clientId = tenant.clientId;
+    organizationId = tenant.organizationId;
+  } else if (isStaff && body.clientId) {
     const target = await prisma.user.findFirst({
       where: { id: String(body.clientId), role: "CLIENT" },
       select: { id: true },
@@ -103,6 +114,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Client introuvable." }, { status: 400 });
     }
     clientId = target.id;
+    organizationId = await ensureOrganizationForOwner(clientId);
   } else if (isStaff && !body.clientId) {
     return NextResponse.json({ error: "Sélectionnez un client pour ce chantier." }, { status: 400 });
   }
@@ -138,6 +150,7 @@ export async function POST(request: Request) {
         description: body.description ? String(body.description).trim() || null : null,
         notes: body.notes ? String(body.notes).trim() || null : null,
         clientId,
+        organizationId,
         status: mapChantierToProjectStatus(chantierStatus),
         chantierStatus,
         urgency,

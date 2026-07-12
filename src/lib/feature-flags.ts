@@ -25,8 +25,8 @@ const DEFAULTS: Record<FeatureFlagKey, boolean> = {
   secureStorageSignedUrls: true,
   /** Mission → classeur : référence le même objet Storage (pas de copie binaire) */
   gedLinkWithoutCopy: true,
-  /** Organisation multi-users — schéma pas encore déployé */
-  organizationMultiUser: false,
+  /** Organisation multi-users — schéma déployé ; dual-read clientId + organizationId */
+  organizationMultiUser: true,
 };
 
 function envBool(name: string): boolean | undefined {
@@ -59,6 +59,6 @@ export const FEATURE_FLAG_DOCS = [
   "Validation livrable client : NEXT_PUBLIC_FF_CLIENT_DELIVERABLE_VALIDATION (défaut on).",
   "URLs signées : NEXT_PUBLIC_FF_SECURE_STORAGE_SIGNED_URLS (défaut on).",
   "GED sans copie : NEXT_PUBLIC_FF_GED_LINK_WITHOUT_COPY (défaut on).",
-  "Organisation multi-users : NEXT_PUBLIC_FF_ORGANIZATION_MULTI_USER (défaut off — plan dans lib/organization/plan.ts).",
+  "Organisation multi-users : NEXT_PUBLIC_FF_ORGANIZATION_MULTI_USER (défaut on).",
   "Retour arrière : désactiver le flag concerné ou NEXT_PUBLIC_FF_LEGACY_UI_FALLBACK=true.",
 ] as const;

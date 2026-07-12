@@ -3,6 +3,17 @@ import { listQuoteDocuments } from "@/app/dashboard/devis/quote-actions";
 import { QuoteSchemaMissingCallout } from "@/components/devis/QuoteSchemaMissingCallout";
 import { QUOTE_DOCUMENT_STATUS_LABELS, QUOTE_DOCUMENT_TYPE_LABELS } from "@/lib/be-work-devis-quote-labels";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Badge } from "@/components/ui/Badge";
+import {
+  DataTable,
+  DataTableBody,
+  DataTableHead,
+  DataTableRow,
+  DataTableTd,
+  DataTableTh,
+} from "@/components/ui/DataTable";
 
 type SearchParams = Promise<{ project?: string }>;
 
@@ -20,97 +31,98 @@ export default async function DevisDocumentsPage({ searchParams }: { searchParam
   }
 
   return (
-    <div className="space-y-6 px-1">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#1e3a5f]/80">Chiffrage</p>
-          <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-900">Documents</h1>
-          <p className="mt-1 max-w-xl text-sm text-slate-600">
-            Devis estimatifs, DPGF de consultation, comparatifs et autres documents liés aux projets.
-          </p>
-          {projectId ? (
-            <p className="mt-2 text-xs text-slate-500">
-              Filtre actif sur un projet.{" "}
-              <Link href="/dashboard/devis/documents" className="font-semibold text-[#1e3a5f] hover:underline">
-                Afficher tous les documents
-              </Link>
-            </p>
-          ) : null}
-        </div>
-        {quoteSchemaOk ? (
-          <Link
-            href="/dashboard/devis/creer"
-            className="inline-flex w-fit items-center rounded-xl bg-[#1e3a5f] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#152a45]"
-          >
-            Créer un devis
+    <div className="space-y-6">
+      <PageHeader
+        eyebrow="Chiffrage"
+        title="Documents"
+        description="Devis estimatifs, DPGF de consultation, comparatifs et autres documents liés aux projets."
+        actions={
+          quoteSchemaOk ? (
+            <Link href="/dashboard/devis/creer" className="btn-cc-primary">
+              Créer un devis
+            </Link>
+          ) : null
+        }
+      />
+
+      {projectId ? (
+        <p className="text-xs text-bework-muted">
+          Filtre actif sur un projet.{" "}
+          <Link href="/dashboard/devis/documents" className="font-semibold text-bework-navy hover:underline">
+            Afficher tous les documents
           </Link>
-        ) : null}
-      </header>
+        </p>
+      ) : null}
 
       {!quoteSchemaOk ? <QuoteSchemaMissingCallout /> : null}
 
       {quoteSchemaOk ? (
-        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <table className="min-w-[900px] w-full border-collapse text-left text-sm">
-          <thead className="bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-600">
-            <tr>
-              <th className="border-b border-slate-200 px-4 py-3">N°</th>
-              <th className="border-b border-slate-200 px-4 py-3">Titre</th>
-              <th className="border-b border-slate-200 px-4 py-3">Type</th>
-              <th className="border-b border-slate-200 px-4 py-3">Statut</th>
-              <th className="border-b border-slate-200 px-4 py-3">Client / projet</th>
-              <th className="border-b border-slate-200 px-4 py-3">Émission</th>
-              <th className="border-b border-slate-200 px-4 py-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {docs.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-slate-500">
-                  Aucun document.{" "}
-                  <Link href="/dashboard/devis/creer" className="font-semibold text-[#1e3a5f] hover:underline">
-                    Créer un devis
-                  </Link>
-                </td>
-              </tr>
-            ) : (
-              docs.map((d) => (
-                <tr key={d.id} className="border-b border-slate-100 hover:bg-slate-50/80">
-                  <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-slate-800">{d.documentNumber}</td>
-                  <td className="px-4 py-3 font-medium text-slate-900">{d.title}</td>
-                  <td className="px-4 py-3 text-slate-600">{QUOTE_DOCUMENT_TYPE_LABELS[d.documentType]}</td>
-                  <td className="px-4 py-3 text-slate-600">{QUOTE_DOCUMENT_STATUS_LABELS[d.status]}</td>
-                  <td className="px-4 py-3 text-slate-600">
+        docs.length === 0 ? (
+          <EmptyState
+            title="Aucun document"
+            description="Créez un devis pour démarrer le chiffrage de ce chantier."
+            actionHref="/dashboard/devis/creer"
+            actionLabel="Créer un devis"
+          />
+        ) : (
+          <DataTable minWidth="900px">
+            <DataTableHead>
+              <DataTableTh>N°</DataTableTh>
+              <DataTableTh>Titre</DataTableTh>
+              <DataTableTh>Type</DataTableTh>
+              <DataTableTh>Statut</DataTableTh>
+              <DataTableTh>Client / projet</DataTableTh>
+              <DataTableTh>Émission</DataTableTh>
+              <DataTableTh>Actions</DataTableTh>
+            </DataTableHead>
+            <DataTableBody>
+              {docs.map((d) => (
+                <DataTableRow key={d.id}>
+                  <DataTableTd>
+                    <span className="font-mono text-xs text-bework-ink">{d.documentNumber}</span>
+                  </DataTableTd>
+                  <DataTableTd>
+                    <span className="font-semibold text-bework-ink">{d.title}</span>
+                  </DataTableTd>
+                  <DataTableTd>{QUOTE_DOCUMENT_TYPE_LABELS[d.documentType]}</DataTableTd>
+                  <DataTableTd>
+                    <Badge>{QUOTE_DOCUMENT_STATUS_LABELS[d.status]}</Badge>
+                  </DataTableTd>
+                  <DataTableTd>
                     {d.project.clientName}
-                    <span className="block text-xs text-slate-500">{d.project.projectName}</span>
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-slate-600">
-                    {new Date(d.issueDate).toLocaleDateString("fr-FR")}
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3">
-                    <div className="flex flex-wrap gap-2">
-                      <Link href={`/dashboard/devis/documents/${d.id}/modifier`} className="font-semibold text-[#1e3a5f] hover:underline">
+                    <span className="block text-xs text-bework-muted">{d.project.projectName}</span>
+                  </DataTableTd>
+                  <DataTableTd>
+                    <span className="whitespace-nowrap text-bework-muted">
+                      {new Date(d.issueDate).toLocaleDateString("fr-FR")}
+                    </span>
+                  </DataTableTd>
+                  <DataTableTd>
+                    <div className="flex flex-wrap gap-2 text-xs font-semibold">
+                      <Link
+                        href={`/dashboard/devis/documents/${d.id}/modifier`}
+                        className="text-bework-navy hover:underline"
+                      >
                         Modifier
                       </Link>
-                      <Link href={`/dashboard/devis/documents/${d.id}`} className="text-slate-600 hover:underline">
+                      <Link href={`/dashboard/devis/documents/${d.id}`} className="text-bework-muted hover:underline">
                         Fiche
                       </Link>
                       <a
                         href={`/dashboard/devis/documents/${d.id}/pdf`}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-slate-600 hover:underline"
+                        className="text-bework-muted hover:underline"
                       >
                         PDF
                       </a>
                     </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-        </div>
+                  </DataTableTd>
+                </DataTableRow>
+              ))}
+            </DataTableBody>
+          </DataTable>
+        )
       ) : null}
     </div>
   );

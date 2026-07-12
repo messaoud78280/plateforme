@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { ErrorState } from "@/components/ui/ErrorState";
 
 export default function Error({
   error,
@@ -14,21 +15,12 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center px-4">
-      <h1 className="text-xl font-semibold text-slate-800">Une erreur est survenue</h1>
-      <p className="mt-2 text-center text-sm text-slate-600">
-        Rechargez la page ou consultez les logs serveur (Railway → Deployments → View logs).
-        {error.digest && (
-          <span className="mt-1 block text-slate-500">Référence : {error.digest}</span>
-        )}
-      </p>
-      <button
-        type="button"
-        onClick={() => reset()}
-        className="mt-6 rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e40af]"
-      >
-        Réessayer
-      </button>
-    </div>
+    <ErrorState
+      digest={error.digest}
+      onRetry={reset}
+      backHref="/"
+      backLabel="Accueil"
+      description="Rechargez la page ou consultez les logs serveur si le problème persiste."
+    />
   );
 }

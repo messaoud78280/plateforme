@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { DashboardErrorBoundary } from "@/components/ui/ErrorState";
 
 export default function ClientDetailError({
   error,
@@ -16,36 +16,17 @@ export default function ClientDetailError({
     error.message?.includes("connect");
 
   return (
-    <div className="flex min-h-[40vh] flex-col items-center justify-center rounded-xl surface-metallic-light p-8">
-      <h2 className="text-lg font-semibold text-slate-800">Erreur de chargement du client</h2>
-      <p className="mt-2 max-w-md text-center text-sm text-slate-600">
-        {isDbError
-          ? "Problème de connexion à la base de données. Vérifiez sur Railway : Variables → DATABASE_URL (ou DIRECT_URL)."
-          : "Une erreur inattendue s'est produite."}
-      </p>
-      <p className="mt-3 max-w-lg text-center text-xs text-slate-500">
-        En production, le détail est masqué. Consultez <strong>Railway → Deployments → View logs</strong> et cherchez &quot;[ClientDetailPage]&quot; pour voir l&apos;erreur réelle.
-      </p>
-      {error.message && !error.message.includes("omitted in production") && (
-        <p className="mt-2 max-w-lg break-words rounded bg-slate-100 px-3 py-2 text-xs text-slate-600">
-          {error.message}
-        </p>
-      )}
-      <div className="mt-6 flex gap-3">
-        <button
-          type="button"
-          onClick={reset}
-          className="rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e40af]"
-        >
-          Réessayer
-        </button>
-        <Link
-          href="/dashboard/clients"
-          className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Retour aux clients
-        </Link>
-      </div>
-    </div>
+    <DashboardErrorBoundary
+      error={error}
+      reset={reset}
+      title="Erreur de chargement du client"
+      description={
+        isDbError
+          ? "Problème de connexion à la base de données. Vérifiez DATABASE_URL sur Railway."
+          : "Une erreur inattendue s’est produite lors du chargement de cette fiche client."
+      }
+      backHref="/dashboard/clients"
+      backLabel="Retour aux clients"
+    />
   );
 }

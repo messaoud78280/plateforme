@@ -249,6 +249,28 @@ body {
   box-shadow: var(--cc-focus-ring);
 }
 
+/* Entrée page légère (désactivée si reduced-motion) */
+@keyframes cc-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.cc-enter {
+  animation: cc-enter var(--cc-transition) ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cc-enter {
+    animation: none;
+  }
+}
+
 /* Mode présentation commerciale — densité et lisibilité grand écran */
 .demo-presentation .pilotage-card {
   box-shadow: var(--pilotage-shadow-hover);
@@ -377,6 +399,9 @@ body {
   }
   .btn-cc-primary:hover {
     background: var(--cc-navy-deep);
+  }
+  .btn-cc-primary:active:not(:disabled) {
+    transform: translateY(1px);
   }
   .btn-cc-primary:focus-visible {
     outline: none;

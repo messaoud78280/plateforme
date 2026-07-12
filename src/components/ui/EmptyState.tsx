@@ -1,19 +1,24 @@
 import { cn } from "@/lib/cn";
 import { Button } from "@/components/ui/Button";
+import Link from "next/link";
 
 export function EmptyState({
   title,
   description,
   actionLabel,
   onAction,
+  actionHref,
   className,
 }: {
   title: string;
   description: string;
   actionLabel?: string;
   onAction?: () => void;
+  actionHref?: string;
   className?: string;
 }) {
+  const showAction = Boolean(actionLabel && (onAction || actionHref));
+
   return (
     <div
       className={cn(
@@ -23,11 +28,17 @@ export function EmptyState({
     >
       <p className="font-heading text-base font-bold text-bework-ink">{title}</p>
       <p className="mx-auto mt-1.5 max-w-md text-sm text-bework-muted">{description}</p>
-      {actionLabel && onAction ? (
+      {showAction ? (
         <div className="mt-4">
-          <Button type="button" onClick={onAction}>
-            {actionLabel}
-          </Button>
+          {actionHref ? (
+            <Link href={actionHref} className="btn-cc-primary inline-flex">
+              {actionLabel}
+            </Link>
+          ) : (
+            <Button type="button" onClick={onAction}>
+              {actionLabel}
+            </Button>
+          )}
         </div>
       ) : null}
     </div>

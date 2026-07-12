@@ -1,0 +1,1227 @@
+Abattage :
+Définition : Opération qui consiste à couper et supprimer des arbres présents dans l'emprise du projet.
+À quoi ça sert ? : Libérer les zones de terrassement, de voirie ou de réseaux avant intervention des engins.
+Point de vigilance : Vérifier les arbres à conserver, les autorisations éventuelles et l'évacuation des souches.
+Accessibilité PMR :
+Définition : Ensemble des dispositions permettant l'usage des cheminements et stationnements par les personnes à mobilité réduite.
+À quoi ça sert ? : Garantir des pentes, ressauts, largeurs et dévers compatibles avec l'usage des piétons et fauteuils.
+Point de vigilance : Contrôler les pentes, paliers de repos, ressauts de 2 cm maximum et largeur minimale de cheminement.
+Accotement :
+Définition : Partie latérale d'une voie située entre la chaussée et le fossé, le talus ou les espaces verts.
+À quoi ça sert ? : Servir d'appui, de transition ou de zone de sécurité le long d'une chaussée.
+Point de vigilance : Ne pas y stocker durablement des déblais si cela gêne la circulation ou l'écoulement des eaux.
+Adjuvant :
+Définition : Produit incorporé au béton ou au mortier pour modifier certaines propriétés : prise, maniabilité, cure ou résistance.
+À quoi ça sert ? : Adapter le béton aux conditions de chantier et aux performances attendues.
+Point de vigilance : Utiliser uniquement des produits compatibles avec les normes et les fiches techniques validées.
+Agrément du maître d’œuvre :
+Définition : Accord donné par le maître d'œuvre sur un matériau, un fournisseur, une méthode ou un produit proposé.
+À quoi ça sert ? : Éviter qu'une entreprise mette en œuvre un procédé non validé dans le marché.
+Point de vigilance : Ne pas confondre avec une simple fiche fournisseur : l'accord écrit reste indispensable.
+Aire de lavage :
+Définition : Zone prévue pour nettoyer les roues ou parties basses des camions et engins avant sortie du chantier.
+À quoi ça sert ? : Limiter les salissures sur la voie publique pendant les terrassements.
+Point de vigilance : Prévoir l'entretien régulier de l'aire et la gestion des boues produites.
+Altitude repère :
+Définition : Cote de référence servant à positionner les ouvrages en hauteur.
+À quoi ça sert ? : Permettre le nivellement fiable des plateformes, fonds de forme, regards et réseaux.
+Point de vigilance : Un mauvais repère entraîne des erreurs de pente, de niveau fini ou de raccordement.
+Aménagement de la circulation :
+Définition : Organisation provisoire de la circulation pendant les travaux : alternat, déviation, signalisation ou demi-chaussée.
+À quoi ça sert ? : Maintenir la sécurité des usagers et l'accès aux riverains pendant les interventions.
+Point de vigilance : Une voie ne doit pas être barrée sans arrêté ou autorisation adaptée.
+Amenée de matériel :
+Définition : Transport et mise à disposition sur chantier des engins, équipements, matériaux et installations nécessaires.
+À quoi ça sert ? : Rendre possible le démarrage effectif des travaux dans les délais prévus.
+Point de vigilance : Inclure aussi le repli en fin de chantier dans l'organisation et le prix.
+Analyse granulométrique :
+Définition : Essai qui détermine la répartition des tailles de grains dans un matériau.
+À quoi ça sert ? : Vérifier qu'une grave, un sable ou un remblai correspond bien au fuseau demandé.
+Point de vigilance : Un matériau mal gradué peut se compacter difficilement ou perdre sa portance.
+Apport de matériaux :
+Définition : Fourniture de matériaux extérieurs au site pour réaliser remblais, couches de chaussée ou réglages.
+À quoi ça sert ? : Compléter ou remplacer les terres du site lorsqu'elles ne sont pas réutilisables.
+Point de vigilance : Contrôler provenance, qualité, classement GTR et aptitude au compactage.
+Arceau de parking :
+Définition : Équipement métallique servant à réserver ou protéger une place de stationnement.
+À quoi ça sert ? : Empêcher le stationnement non autorisé ou matérialiser une place dédiée.
+Point de vigilance : Vérifier l'implantation, la fixation et la compatibilité avec la circulation PMR.
+Arrêté de circulation :
+Définition : Autorisation temporaire modifiant la circulation pendant les travaux.
+À quoi ça sert ? : Permettre les déviations, alternats, interdictions de stationner ou fermetures partielles.
+Point de vigilance : Sans arrêté, l'entreprise engage sa responsabilité en cas de gêne ou d'accident.
+Arrêté de voirie :
+Définition : Autorisation administrative permettant d'occuper ou d'intervenir sur le domaine public routier.
+À quoi ça sert ? : Encadrer les travaux de tranchée, branchement, dépôt ou emprise de chantier.
+Point de vigilance : Respecter les dates, emprises, prescriptions et conditions de remise en état.
+Arrêté municipal :
+Définition : Décision officielle de la commune autorisant ou encadrant une modification de circulation, de stationnement ou d'occupation de voirie.
+À quoi ça sert ? : Donner un cadre légal aux travaux sur domaine public ou aux restrictions de circulation.
+Point de vigilance : La demande doit être anticipée, souvent plusieurs jours avant l'intervention.
+Arrosage sous chaussée :
+Définition : Fourreau ou réservation posé sous chaussée pour permettre le passage futur d'un réseau d'arrosage.
+À quoi ça sert ? : Éviter de casser la chaussée neuve pour passer un réseau ultérieurement.
+Point de vigilance : Bien repérer les fourreaux sur les plans de récolement.
+ASQUAL :
+Définition : Certification utilisée notamment pour les géotextiles afin de garantir certaines caractéristiques de qualité.
+À quoi ça sert ? : Prouver que le géotextile respecte les performances annoncées.
+Point de vigilance : À défaut de certificat, des essais complémentaires peuvent être exigés.
+Assainissement :
+Définition : Ensemble des ouvrages permettant de collecter, transporter, stocker ou évacuer les eaux usées et eaux pluviales.
+À quoi ça sert ? : Protéger le bâtiment, la voirie et l'environnement contre les eaux non maîtrisées.
+Point de vigilance : Séparer clairement EU et EP quand le projet le prévoit.
+Attachement :
+Définition : Document de suivi permettant de justifier des quantités ou travaux réalisés sur chantier.
+À quoi ça sert ? : Servir de base aux situations, factures ou contrôles contradictoires.
+Point de vigilance : Les bons de décharge peuvent être demandés à l'appui des attachements.
+Autorisation d’ouverture de chantier :
+Définition : Accord préalable nécessaire avant de démarrer certains travaux, notamment lorsque des concessionnaires ou voiries sont concernés.
+À quoi ça sert ? : S'assurer que les conditions administratives et techniques de démarrage sont réunies.
+Point de vigilance : Ne pas commencer sans avis favorables et documents de sécurité nécessaires.
+Avaloir :
+Définition : Ouvrage de voirie qui capte les eaux de ruissellement en surface pour les envoyer vers le réseau EP.
+À quoi ça sert ? : Éviter les flaques, les ruissellements incontrôlés et les dégradations de chaussée.
+Point de vigilance : Contrôler son positionnement au point bas et son raccordement au réseau pluvial.
+B
+Bâchage des camions :
+Définition : Protection posée sur les bennes transportant les déblais ou enrobés.
+À quoi ça sert ? : Éviter les envols, pertes de matériaux et refroidissement excessif des enrobés.
+Point de vigilance : Le CCTP impose notamment le bâchage des camions d'enrobés.
+Baliroad :
+Définition : Séparateur plastique lestable utilisé pour matérialiser et protéger une emprise de chantier.
+À quoi ça sert ? : Séparer les usagers de la zone de travaux.
+Point de vigilance : Il doit rester stable, visible et adapté à la circulation réelle.
+Banquette de tranchée :
+Définition : Zone latérale ou palier aménagé dans une fouille selon la profondeur et le mode de terrassement.
+À quoi ça sert ? : Stabiliser la fouille, faciliter l'accès et limiter les risques d'éboulement.
+Point de vigilance : Respecter les règles de sécurité et utiliser un blindage si nécessaire.
+Barrière de chantier :
+Définition : Équipement de clôture ou de protection placé autour d'une zone de travaux.
+À quoi ça sert ? : Empêcher l'accès du public ou des véhicules à une zone dangereuse.
+Point de vigilance : Elle doit être maintenue en état pendant toute la durée des travaux.
+Batardeau :
+Définition : Ouvrage provisoire étanche permettant d'isoler une zone de travaux de l'eau.
+À quoi ça sert ? : Travailler au sec en présence d'eau superficielle ou de nappe.
+Point de vigilance : Son principe doit être validé par le maître d'œuvre selon la nature du sol et les risques.
+BBSG - Béton Bitumineux Semi-Grenu :
+Définition : Enrobé couramment utilisé en couche de roulement de chaussée.
+À quoi ça sert ? : Former une surface circulable résistante et durable.
+Point de vigilance : Contrôler formulation, granulométrie, compactage, température et pourcentage de vides.
+Béton bitumineux :
+Définition : Mélange de granulats et de bitume, posé à chaud ou selon prescription, pour réaliser une chaussée.
+À quoi ça sert ? : Constituer une couche de roulement ou une couche structurante.
+Point de vigilance : La mise en œuvre dépend de la température, de l'épaisseur et du compactage.
+Béton coulé dans l’eau :
+Définition : Béton prévu pour être mis en place en présence d'eau, avec dosage et liant adaptés.
+À quoi ça sert ? : Réaliser certains ouvrages hydrauliques ou massifs lorsque l'assèchement n'est pas possible.
+Point de vigilance : Éviter le délavage du ciment et respecter le dosage prescrit.
+Béton de propreté :
+Définition : Couche de béton maigre mise en fond de fouille ou sous ouvrage pour obtenir une surface propre.
+À quoi ça sert ? : Éviter le contact direct de l'ouvrage avec la terre et faciliter le réglage.
+Point de vigilance : Respecter l'épaisseur et le niveau avant pose de l'ouvrage définitif.
+Béton désactivé :
+Définition : Béton décoratif dont la surface est lavée après application d'un désactivant pour faire apparaître les granulats.
+À quoi ça sert ? : Créer des cheminements piétons ou trottoirs antidérapants et esthétiques.
+Point de vigilance : Maîtriser le délai de lavage, le produit de cure et l'échantillon validé par la maîtrise d'ouvrage.
+Béton maigre :
+Définition : Béton faiblement dosé en ciment, utilisé pour propreté, calage ou formes non structurelles.
+À quoi ça sert ? : Créer un support propre et stable pour certains ouvrages.
+Point de vigilance : Ne pas l'utiliser comme béton structurel s'il n'est pas prévu pour reprendre des efforts.
+Bitume 35/50 :
+Définition : Liant hydrocarboné de classe de pénétrabilité utilisée dans certains enrobés.
+À quoi ça sert ? : Assurer la cohésion du mélange bitumineux.
+Point de vigilance : Vérifier la conformité du bitume à la formulation d'enrobé validée.
+Blindage :
+Définition : Dispositif provisoire de maintien des parois d'une tranchée ou d'une fouille.
+À quoi ça sert ? : Protéger les ouvriers contre l'éboulement et préserver les ouvrages voisins.
+Point de vigilance : Indispensable lorsque la profondeur, la nature du sol ou l'environnement l'exigent.
+Bois d’étaiement :
+Définition : Pièce de bois utilisée provisoirement pour soutenir ou maintenir un ouvrage ou une fouille.
+À quoi ça sert ? : Stabiliser une installation temporaire ou un coffrage.
+Point de vigilance : Les bois doivent être adaptés aux contraintes, même si l'ouvrage est provisoire.
+Bordure béton :
+Définition : Élément préfabriqué en béton qui délimite chaussée, trottoir, stationnement ou espace vert.
+À quoi ça sert ? : Contenir les revêtements et guider les eaux de surface.
+Point de vigilance : Contrôler l'alignement, l'altimétrie, les joints et le calage béton.
+Bouche d’égout :
+Définition : Ouvrage qui reçoit les eaux de surface et les conduit vers le réseau pluvial.
+À quoi ça sert ? : Collecter les eaux de ruissellement en bordure ou point bas de voirie.
+Point de vigilance : Vérifier la capacité d'absorption et la compatibilité avec la bordure.
+Bourrage :
+Définition : Remplissage d'un vide autour d'un tuyau, fourreau ou ouvrage avec un matériau adapté.
+À quoi ça sert ? : Assurer le calage, l'étanchéité ou la protection mécanique.
+Point de vigilance : Ne pas utiliser un matériau agressif ou rigide lorsque le réseau doit rester désolidarisé.
+Branchement :
+Définition : Raccordement d'un bâtiment, d'un regard ou d'un avaloir à un collecteur principal.
+À quoi ça sert ? : Permettre à chaque point de collecte d'être relié au réseau.
+Point de vigilance : Respecter pente, diamètre, étanchéité et prescriptions du gestionnaire.
+Branchement EP :
+Définition : Raccordement destiné aux eaux pluviales.
+À quoi ça sert ? : Évacuer les eaux de toiture, voirie ou espaces extérieurs vers le réseau pluvial ou l'ouvrage de gestion.
+Point de vigilance : Ne pas le raccorder par erreur au réseau EU.
+Branchement EU :
+Définition : Raccordement destiné aux eaux usées domestiques.
+À quoi ça sert ? : Acheminer les eaux usées vers le réseau d'assainissement adapté.
+Point de vigilance : Assurer l'étanchéité et le respect des contrôles du gestionnaire.
+Busage :
+Définition : Mise en place d'un tuyau ou ouvrage sous un fossé ou un passage pour maintenir l'écoulement.
+À quoi ça sert ? : Permettre un accès ou un franchissement sans interrompre les eaux.
+Point de vigilance : Vérifier diamètre, pente, tête de pont et protection contre l'érosion.
+C
+Caillebotis :
+Définition : Grille rigide ajourée, souvent métallique, posée en passage ou devant une porte.
+À quoi ça sert ? : Permettre l'écoulement de l'eau tout en conservant un passage praticable.
+Point de vigilance : Le CCTP demande une conformité PMR pour les grilles de porte.
+Calage :
+Définition : Mise à niveau et maintien d'un ouvrage avant fixation ou remblaiement.
+À quoi ça sert ? : Garantir le bon alignement d'une bordure, grille, regard ou canalisation.
+Point de vigilance : Ne pas remblayer avant contrôle des niveaux et de la stabilité.
+Calcul justificatif :
+Définition : Note démontrant que le matériau ou l'ouvrage répond aux efforts et contraintes prévus.
+À quoi ça sert ? : Valider notamment les classes de tuyaux, les remblais ou certains ouvrages béton.
+Point de vigilance : À fournir avant exécution lorsque le CCTP ou le maître d'œuvre l'exige.
+Canalisation :
+Définition : Tuyau destiné à transporter de l'eau, des effluents ou un réseau technique enterré.
+À quoi ça sert ? : Assurer la continuité hydraulique ou technique entre les ouvrages.
+Point de vigilance : Contrôler diamètre, pente, lit de pose, enrobage et étanchéité.
+Caniveau :
+Définition : Ouvrage linéaire qui collecte et guide l'eau en surface.
+À quoi ça sert ? : Conduire les eaux de ruissellement vers les avaloirs ou exutoires.
+Point de vigilance : Un mauvais fil d'eau crée des stagnations et des désordres de chaussée.
+Caniveau préfabriqué :
+Définition : Caniveau réalisé avec des éléments fabriqués en usine puis posés sur chantier.
+À quoi ça sert ? : Gagner en régularité et en rapidité de pose.
+Point de vigilance : Contrôler calage, pente, joints et raccordement aux ouvrages EP.
+Caractéristique des constituants :
+Définition : Ensemble des propriétés exigées pour ciment, sable, gravillons, eau, aciers ou coffrages.
+À quoi ça sert ? : S'assurer que les bétons et ouvrages auront la qualité attendue.
+Point de vigilance : Les produits doivent être conformes aux normes et acceptés avant mise en œuvre.
+CCAG - Cahier des Clauses Administratives Générales :
+Définition : Référentiel administratif encadrant certains marchés publics de travaux.
+À quoi ça sert ? : Définir des règles générales sur délais, responsabilités, réception et litiges.
+Point de vigilance : À distinguer du CCTP, qui décrit les prescriptions techniques.
+CCTG - Cahier des Clauses Techniques Générales :
+Définition : Référentiel technique général applicable aux marchés de travaux publics.
+À quoi ça sert ? : Fixer les règles communes d'exécution, contrôles et réception des ouvrages.
+Point de vigilance : Le CCTP peut compléter ou préciser ces règles mais ne doit pas être ignoré.
+CCTP - Cahier des Clauses Techniques Particulières :
+Définition : Document qui décrit précisément les travaux et exigences techniques d'un lot.
+À quoi ça sert ? : Savoir ce qui est dû par l'entreprise, comment l'exécuter et avec quels contrôles.
+Point de vigilance : Lire le CCTP avec les plans, car les deux se complètent.
+Centrale d’enrobés :
+Définition : Installation de fabrication des enrobés bitumineux.
+À quoi ça sert ? : Produire un mélange conforme et homogène pour les couches de chaussée.
+Point de vigilance : La centrale doit être agréée et sa production contrôlable.
+Chaussée :
+Définition : Partie de la voirie destinée principalement à la circulation des véhicules.
+À quoi ça sert ? : Supporter les charges roulantes et assurer une surface régulière.
+Point de vigilance : La structure de chaussée dépend du trafic, du sol support et du compactage.
+Chemin provisoire :
+Définition : Voie temporaire créée pour permettre la circulation des engins pendant les travaux.
+À quoi ça sert ? : Organiser le chantier sans détériorer les zones définitives ou les accès existants.
+Point de vigilance : Prévoir son entretien et sa remise en état en fin d'intervention.
+Cheminement piéton :
+Définition : Parcours destiné aux piétons, souvent soumis aux règles d'accessibilité.
+À quoi ça sert ? : Relier les accès, stationnements, bâtiments et espaces communs.
+Point de vigilance : Contrôler largeur, pente, dévers, ressauts et revêtement non glissant.
+Classe de résistance :
+Définition : Niveau de résistance mécanique exigé pour un tuyau, béton, tampon ou matériau.
+À quoi ça sert ? : Adapter l'ouvrage aux charges et conditions de service.
+Point de vigilance : Une classe insuffisante peut provoquer rupture, affaissement ou refus du gestionnaire.
+Classement GTR :
+Définition : Classification des sols et matériaux selon le Guide des Terrassements Routiers.
+À quoi ça sert ? : Choisir les matériaux réutilisables et les conditions de mise en œuvre.
+Point de vigilance : À contrôler avant réemploi ou apport de remblais.
+Coffrage :
+Définition : Moule provisoire permettant de donner sa forme au béton frais.
+À quoi ça sert ? : Réaliser massifs, bordures coulées, ouvrages béton ou finitions propres.
+Point de vigilance : Contrôler rigidité, propreté, alignement et décoffrage.
+Cohérence de signalisation :
+Définition : Principe selon lequel la signalisation provisoire doit être lisible, stable et adaptée à l'avancement du chantier.
+À quoi ça sert ? : Éviter les contradictions entre panneaux permanents et provisoires.
+Point de vigilance : Modifier les panneaux au fur et à mesure des phases de travaux.
+Collecteur :
+Définition : Canalisation principale recevant plusieurs branchements.
+À quoi ça sert ? : Acheminer les eaux vers un exutoire, un réseau existant ou un ouvrage de stockage.
+Point de vigilance : Son diamètre, sa pente et son étanchéité sont essentiels.
+Collecteur EP :
+Définition : Collecteur dédié aux eaux pluviales.
+À quoi ça sert ? : Transporter les eaux de ruissellement, de toiture ou de voirie.
+Point de vigilance : Vérifier les raccordements, la capacité hydraulique et les ouvrages de stockage.
+Collecteur EU :
+Définition : Collecteur dédié aux eaux usées.
+À quoi ça sert ? : Acheminer les eaux domestiques vers le réseau d'assainissement.
+Point de vigilance : La réception impose souvent étanchéité, inspection caméra et contrôle gestionnaire.
+Comblement éventuel :
+Définition : Remplissage d'un vide, trou, ancienne fouille ou zone impropre avant modelage.
+À quoi ça sert ? : Obtenir un support continu et stable pour les ouvrages futurs.
+Point de vigilance : Purger les matériaux inadaptés avant comblement.
+Compacité :
+Définition : Degré de serrage d'un matériau compacté par rapport à une référence.
+À quoi ça sert ? : Vérifier que le remblai ou la couche de chaussée est suffisamment dense.
+Point de vigilance : Une compacité insuffisante crée tassements, fissures ou ornières.
+Compactage :
+Définition : Action de densifier un sol ou un matériau par vibration, pression ou passage d'engin.
+À quoi ça sert ? : Augmenter la portance et limiter les tassements ultérieurs.
+Point de vigilance : Contrôler l'épaisseur des couches, la teneur en eau et les essais demandés.
+Concessionnaire :
+Définition : Organisme gestionnaire d'un réseau public ou privé : eau, électricité, télécom, gaz, assainissement.
+À quoi ça sert ? : Donner les prescriptions et contrôler les raccordements ou travaux proches de ses ouvrages.
+Point de vigilance : Consulter les concessionnaires avant intervention à proximité des réseaux.
+Contrôle de conformité :
+Définition : Vérification que matériaux, ouvrages ou travaux respectent les prescriptions du marché.
+À quoi ça sert ? : Sécuriser la réception et éviter les reprises tardives.
+Point de vigilance : Les contrôles doivent être prévus dans le planning.
+Contrôle télévisuel :
+Définition : Inspection vidéo d'une canalisation par caméra.
+À quoi ça sert ? : Détecter défauts de pente, casse, ovalisation, mauvais joint ou obstacle.
+Point de vigilance : À réaliser après nettoyage et avant réception des réseaux.
+Coordination des travaux :
+Définition : Organisation des interventions entre entreprises, concessionnaires et maîtrise d'œuvre.
+À quoi ça sert ? : Éviter conflits d'emprise, reprises inutiles ou blocage des autres lots.
+Point de vigilance : Le lot VRD interfère fortement avec gros œuvre, paysage, réseaux et accès.
+Cordeau :
+Définition : Fil tendu servant à aligner ou guider une implantation.
+À quoi ça sert ? : Poser bordures, tranchées ou ouvrages avec un alignement régulier.
+Point de vigilance : Le cordeau ne remplace pas un contrôle altimétrique précis.
+Cordon de déblais :
+Définition : Dépôt longitudinal provisoire de terres extraites le long d'une tranchée.
+À quoi ça sert ? : Stocker temporairement les matériaux avant remblaiement ou évacuation.
+Point de vigilance : Ne pas gêner circulation, sécurité ou écoulement des eaux.
+Cote finie :
+Définition : Niveau définitif attendu après exécution des travaux.
+À quoi ça sert ? : Servir de référence pour terrassements, couches de chaussée, seuils et regards.
+Point de vigilance : Toujours vérifier les épaisseurs de structure avant de terrasser.
+Cote projet :
+Définition : Niveau prévu sur les plans du projet.
+À quoi ça sert ? : Guider le nivellement et le réglage des fonds de forme.
+Point de vigilance : Un écart de cote peut perturber pentes, seuils et raccordements.
+Couche de base :
+Définition : Couche de chaussée située sous la couche de roulement et participant à la portance.
+À quoi ça sert ? : Répartir les charges de circulation vers la couche de fondation.
+Point de vigilance : Contrôler matériau, épaisseur, compactage et réception avant suite.
+Couche de fondation :
+Définition : Couche inférieure de la structure de chaussée posée sur le fond de forme.
+À quoi ça sert ? : Donner une assise stable à la chaussée.
+Point de vigilance : Ne pas la poser sur un fond de forme non réceptionné.
+Couche de roulement :
+Définition : Couche supérieure de la chaussée, directement en contact avec les véhicules.
+À quoi ça sert ? : Assurer confort, adhérence, imperméabilité relative et durabilité.
+Point de vigilance : Sa mise en œuvre exige une préparation correcte du support.
+Cunette :
+Définition : Forme hydraulique en fond de regard qui guide l'écoulement des eaux.
+À quoi ça sert ? : Éviter les stagnations et favoriser l'autocurage du réseau.
+Point de vigilance : Une cunette mal orientée gêne l'écoulement et peut provoquer des dépôts.
+Curage :
+Définition : Nettoyage d'un ouvrage ou réseau pour enlever boues, dépôts ou obstacles.
+À quoi ça sert ? : Rendre le réseau apte à l'inspection et au fonctionnement.
+Point de vigilance : Souvent préalable au passage caméra.
+D
+Déblais :
+Définition : Terres ou matériaux extraits lors des terrassements.
+À quoi ça sert ? : Créer les niveaux nécessaires aux plateformes, tranchées ou voiries.
+Point de vigilance : Trier les déblais réutilisables et évacuer les impropres en décharge agréée.
+Débroussaillage :
+Définition : Nettoyage de la végétation basse avant travaux.
+À quoi ça sert ? : Libérer l'emprise et permettre l'accès aux engins.
+Point de vigilance : Ne pas confondre avec l'abattage d'arbres ou le dessouchage.
+Décapage de terre végétale :
+Définition : Retrait de la couche superficielle fertile du sol.
+À quoi ça sert ? : Séparer la terre végétale des matériaux de terrassement et la stocker pour réemploi.
+Point de vigilance : Ne pas mélanger avec des terres argileuses ou matériaux pollués.
+Décharge agréée :
+Définition : Site autorisé à recevoir des déchets ou déblais selon leur nature.
+À quoi ça sert ? : Assurer une gestion conforme des déchets du chantier.
+Point de vigilance : Conserver les bons de décharge comme justificatifs.
+Déchets inertes :
+Définition : Déchets minéraux ne se décomposant pas et ne polluant pas chimiquement dans des conditions normales.
+À quoi ça sert ? : Organiser l'évacuation des gravats, déblais et matériaux de démolition adaptés.
+Point de vigilance : Les dépôts sauvages et brûlages sur site sont interdits.
+Déclaration de travaux - DT :
+Définition : Déclaration préalable faite par le responsable de projet pour connaître les réseaux existants.
+À quoi ça sert ? : Préparer les travaux à proximité de réseaux enterrés.
+Point de vigilance : Le numéro de DT sert ensuite à établir les DICT des entreprises.
+Découpe de chaussée :
+Définition : Sciage ou tranchage propre d'un revêtement existant avant ouverture de tranchée.
+À quoi ça sert ? : Obtenir une limite nette pour la réfection et éviter les dégradations périphériques.
+Point de vigilance : Découper avant terrassement sous voirie enrobée ou bétonnée.
+Demande de renseignements :
+Définition : Démarche pour obtenir des informations sur les réseaux et contraintes existants.
+À quoi ça sert ? : Compléter les plans et repérer les ouvrages enterrés non visibles.
+Point de vigilance : Les plans fournis sont indicatifs : l'entreprise doit vérifier.
+Demi-chaussée :
+Définition : Moitié de la largeur d'une chaussée maintenue ouverte ou travaillée par phase.
+À quoi ça sert ? : Permettre les tranchées transversales tout en gardant une circulation partielle.
+Point de vigilance : Prévoir protection, alternat et signalisation adaptés.
+Dépôt de matériaux :
+Définition : Stockage temporaire de matériaux sur l'emprise autorisée du chantier.
+À quoi ça sert ? : Organiser l'approvisionnement sans bloquer les accès.
+Point de vigilance : Aucun dépôt n'est autorisé hors limites fixées par le maître d'ouvrage ou les services.
+Désactivation du béton :
+Définition : Traitement retardant la prise superficielle du béton pour révéler les granulats après lavage.
+À quoi ça sert ? : Créer l'aspect du béton désactivé.
+Point de vigilance : Respecter dosage, météo, délai de lavage et cure finale.
+Dessouchage :
+Définition : Extraction des souches et racines après abattage.
+À quoi ça sert ? : Éviter les vides, pourrissements et tassements dans les futures plateformes.
+Point de vigilance : Remblayer et compacter correctement les trous de souches.
+Déviation :
+Définition : Itinéraire provisoire imposé aux usagers pendant une coupure ou restriction de voirie.
+À quoi ça sert ? : Maintenir la circulation en sécurité autour du chantier.
+Point de vigilance : Elle doit être autorisée, fléchée et cohérente avec les contraintes locales.
+DICT - Déclaration d’Intention de Commencement de Travaux :
+Définition : Déclaration faite par l'entreprise avant de travailler à proximité de réseaux.
+À quoi ça sert ? : Obtenir les réponses des exploitants et réduire les risques d'endommagement.
+Point de vigilance : Ne pas démarrer les terrassements sans retours DICT pertinents.
+Diorite 40/70 :
+Définition : Granulat de calibre 40/70 utilisé ici pour remplir les massifs de stockage alvéolaires.
+À quoi ça sert ? : Créer des vides de stockage pour les eaux pluviales.
+Point de vigilance : Contrôler la granulométrie, la propreté et l'indice de vides annoncé.
+Dossier de récolement :
+Définition : Dossier remis en fin de travaux décrivant les ouvrages réellement exécutés.
+À quoi ça sert ? : Conserver la mémoire exacte des réseaux, niveaux, matériaux et contrôles.
+Point de vigilance : Inclure plans, profils, rapports caméra, essais et documents demandés.
+Dossier d’exécution :
+Définition : Ensemble des plans, notes, fiches techniques et calculs nécessaires avant travaux.
+À quoi ça sert ? : Permettre au maître d'œuvre de vérifier les choix de l'entreprise.
+Point de vigilance : À transmettre avant mise en œuvre des ouvrages concernés.
+Drain :
+Définition : Canalisation perforée ou ouvrage filtrant destiné à collecter des eaux infiltrées.
+À quoi ça sert ? : Limiter l'eau autour des constructions ou dans les structures drainantes.
+Point de vigilance : Prévoir pente, filtration, exutoire et regards d'inspection.
+Drain périphérique :
+Définition : Drain posé autour d'une construction pour maîtriser les eaux près des fondations.
+À quoi ça sert ? : Réduire les risques liés à l'eau et aux sols sensibles.
+Point de vigilance : Respecter les prescriptions DTU et le traitement des argiles si concerné.
+Drainage périphérique :
+Définition : Système complet de collecte et d'évacuation des eaux autour d'un bâtiment.
+À quoi ça sert ? : Protéger les constructions contre les accumulations d'eau en périphérie.
+Point de vigilance : Un drainage sans exutoire ou mal filtré ne fonctionne pas durablement.
+DTU 20.1 :
+Définition : Document technique relatif notamment aux ouvrages de maçonnerie et cité pour les sols sensibles aux argiles.
+À quoi ça sert ? : Servir de référence pour certains traitements périphériques de construction.
+Point de vigilance : Ne pas l'appliquer isolément : vérifier aussi l'étude de sol et les plans.
+E
+Eau de gâchage :
+Définition : Eau utilisée pour fabriquer béton ou mortier.
+À quoi ça sert ? : Permettre l'hydratation du ciment et la maniabilité du mélange.
+Point de vigilance : Elle doit être conforme et ne pas contenir d'éléments nuisibles.
+Eaux pluviales - EP :
+Définition : Eaux provenant des pluies, toitures, voiries et ruissellements extérieurs.
+À quoi ça sert ? : Les collecter, stocker ou évacuer pour éviter inondations et dégradations.
+Point de vigilance : Ne pas les confondre avec les eaux usées.
+Eaux usées - EU :
+Définition : Eaux domestiques issues des sanitaires, cuisines ou logements.
+À quoi ça sert ? : Les acheminer vers le réseau d'assainissement prévu.
+Point de vigilance : Le réseau EU doit être étanche et contrôlé avant réception.
+Échantillon :
+Définition : Exemple de matériau ou finition soumis à validation.
+À quoi ça sert ? : Permettre au maître d'ouvrage ou maître d'œuvre de choisir ou approuver une qualité.
+Point de vigilance : Conserver parfois un échantillon témoin jusqu'à la fin du chantier.
+Écoulement :
+Définition : Mouvement de l'eau dans une canalisation, un fossé ou en surface.
+À quoi ça sert ? : Vérifier que les eaux partent dans le bon sens sans stagnation.
+Point de vigilance : Contrôler les pentes et les points bas.
+Élément préfabriqué :
+Définition : Ouvrage fabriqué en usine puis posé sur chantier : regard, bordure, caniveau ou tête de pont.
+À quoi ça sert ? : Gagner en qualité et rapidité d'exécution.
+Point de vigilance : Contrôler les dimensions, l'état à la livraison et le calage à la pose.
+Emprise du chantier :
+Définition : Surface autorisée pour réaliser et organiser les travaux.
+À quoi ça sert ? : Délimiter où l'entreprise peut circuler, stocker et travailler.
+Point de vigilance : Ne pas occuper une zone non autorisée, surtout sur domaine public.
+Enduit d’imprégnation :
+Définition : Application de liant bitumineux sur une couche support avant enrobé.
+À quoi ça sert ? : Favoriser l'accrochage de la couche de roulement.
+Point de vigilance : Respecter dosage, propreté du support et conditions météo.
+Engazonnement :
+Définition : Mise en place d'une surface végétalisée par semis ou dalles engazonnées selon lot concerné.
+À quoi ça sert ? : Stabiliser et aménager les espaces verts ou certains stationnements.
+Point de vigilance : Vérifier les limites entre lot VRD et lot espaces verts.
+Engin de chantier :
+Définition : Matériel motorisé utilisé pour terrasser, transporter, compacter ou poser les ouvrages.
+À quoi ça sert ? : Réaliser les travaux en sécurité et avec rendement adapté.
+Point de vigilance : Les engins doivent être entretenus, conformes et compatibles avec l'emprise.
+Enrobé à chaud :
+Définition : Mélange bitumineux fabriqué et posé à température élevée.
+À quoi ça sert ? : Former des couches de chaussée résistantes.
+Point de vigilance : La température, le transport bâché et le compactage conditionnent la qualité finale.
+Épreuve d’étanchéité :
+Définition : Essai permettant de vérifier qu'une canalisation ou un regard ne fuit pas.
+À quoi ça sert ? : Valider le réseau avant réception et remblaiement définitif si applicable.
+Point de vigilance : Les PV d'essais sont à conserver dans le dossier de fin de travaux.
+Épuisement :
+Définition : Pompage ou évacuation d'eau présente dans une fouille ou une tranchée.
+À quoi ça sert ? : Permettre de travailler dans des conditions sèches ou maîtrisées.
+Point de vigilance : Éviter l'entraînement des fines et les tassements voisins.
+Essai de compactage :
+Définition : Contrôle de la densité ou qualité de compactage d'une couche de remblai ou chaussée.
+À quoi ça sert ? : Prouver que le support atteint les performances attendues.
+Point de vigilance : Prévoir le délai d'intervention du laboratoire dans le planning.
+Essai de plaque :
+Définition : Essai de portance réalisé sur une plateforme avec une plaque chargée.
+À quoi ça sert ? : Mesurer la déformabilité du support, notamment avec EV1 et EV2.
+Point de vigilance : Le CCTP exige une portance minimale et un rapport EV2/EV1 contrôlé.
+Essai d’orniérage :
+Définition : Essai qui vérifie la résistance d'un enrobé à la formation d'ornières sous trafic.
+À quoi ça sert ? : S'assurer que la couche de roulement résiste aux déformations.
+Point de vigilance : À vérifier pour les formulations d'enrobés lorsque prescrit.
+Essai PCG :
+Définition : Essai de compactage à la presse à cisaillement giratoire pour les enrobés.
+À quoi ça sert ? : Évaluer le pourcentage de vides et le comportement de la formulation.
+Point de vigilance : Un mauvais résultat peut imposer une reformulation.
+EV1 :
+Définition : Premier module mesuré lors d'un essai de plaque.
+À quoi ça sert ? : Servir de référence pour apprécier la réponse initiale du sol.
+Point de vigilance : À interpréter avec EV2 et le rapport EV2/EV1.
+EV2 :
+Définition : Second module mesuré lors d'un essai de plaque, utilisé comme indicateur de portance.
+À quoi ça sert ? : Valider la plateforme support avant couches de chaussée.
+Point de vigilance : Le CCTP demande notamment EV2 > 60 MPa pour certaines plateformes.
+EV2/EV1 :
+Définition : Rapport entre le second et le premier module de l'essai de plaque.
+À quoi ça sert ? : Apprécier la qualité du compactage et la stabilisation du support.
+Point de vigilance : Un rapport trop élevé indique souvent un compactage insuffisant.
+Évacuation des déblais :
+Définition : Transport hors site des terres ou matériaux non conservés.
+À quoi ça sert ? : Libérer le chantier et évacuer les matériaux impropres ou excédentaires.
+Point de vigilance : Utiliser une décharge agréée et conserver les bons.
+Existant :
+Définition : Ouvrage, réseau, voirie ou équipement déjà présent avant les travaux.
+À quoi ça sert ? : Adapter les travaux sans dégrader ce qui doit être conservé.
+Point de vigilance : Toute découverte non indiquée doit être signalée immédiatement.
+F
+Fascicule 23 :
+Définition : Partie du CCTG relative notamment aux granulats employés dans les chaussées.
+À quoi ça sert ? : Définir les exigences de fourniture et qualité des matériaux granulaires.
+Point de vigilance : À prendre en compte pour les graves et matériaux de chaussée.
+Fascicule 25 :
+Définition : Partie du CCTG relative à l'exécution des corps de chaussées.
+À quoi ça sert ? : Encadrer la mise en œuvre des couches de chaussée.
+Point de vigilance : Contrôler les prescriptions applicables avant réalisation.
+Fascicule 27 :
+Définition : Référence technique relative aux enrobés dans les marchés publics de travaux.
+À quoi ça sert ? : Encadrer fabrication, transport et mise en œuvre des matériaux enrobés.
+Point de vigilance : À rapprocher des normes d'enrobés mentionnées au CCTP.
+Fascicule 31 :
+Définition : Référence technique applicable aux bordures et caniveaux préfabriqués.
+À quoi ça sert ? : Définir exigences de qualité et mise en œuvre de ces éléments.
+Point de vigilance : Contrôler conformité des fournitures avant pose.
+Fascicule 70 :
+Définition : Référence du CCTG relative aux ouvrages d'assainissement.
+À quoi ça sert ? : Encadrer pose, contrôles et réception des réseaux EU/EP.
+Point de vigilance : Souvent cité pour piquetage, essais et réception des canalisations.
+Fascicule 71 :
+Définition : Référence technique liée aux réseaux et prescriptions de travaux publics selon le contexte.
+À quoi ça sert ? : Servir de base complémentaire aux exigences de réseaux.
+Point de vigilance : Vérifier son champ d'application exact selon les pièces du marché.
+Fines argileuses :
+Définition : Particules très fines de nature argileuse présentes dans un matériau.
+À quoi ça sert ? : Elles influencent fortement la sensibilité à l'eau et le compactage.
+Point de vigilance : Trop de fines argileuses peuvent rendre une grave ou un remblai impropre.
+Fléchage :
+Définition : Signalisation directionnelle temporaire guidant les véhicules ou piétons autour du chantier.
+À quoi ça sert ? : Assurer la continuité des cheminements pendant les travaux.
+Point de vigilance : Il doit être visible de jour comme de nuit si nécessaire.
+Fond de forme :
+Définition : Surface finale obtenue après terrassement avant mise en place des couches de structure.
+À quoi ça sert ? : Servir de support aux voiries, cheminements ou plateformes.
+Point de vigilance : Il doit être réglé, compacté et réceptionné avant poursuite.
+Fond de fouille :
+Définition : Surface au fond d'une tranchée ou excavation sur laquelle repose un ouvrage.
+À quoi ça sert ? : Recevoir le lit de pose, la canalisation, le béton ou l'ouvrage prévu.
+Point de vigilance : Il doit être propre, stable, sans point dur sous les tuyaux.
+Fossé :
+Définition : Ouvrage linéaire ouvert servant à collecter ou évacuer les eaux de surface.
+À quoi ça sert ? : Gérer les ruissellements et raccordements pluviaux.
+Point de vigilance : Maintenir pente, profil et exutoire libres.
+Fossé à remodeler :
+Définition : Fossé existant repris pour modifier son profil ou son fonctionnement.
+À quoi ça sert ? : Adapter l'écoulement existant au projet.
+Point de vigilance : Évacuer les déchets et respecter les plans EP.
+Fouille :
+Définition : Excavation réalisée dans le sol pour un ouvrage ou un réseau.
+À quoi ça sert ? : Permettre la pose de canalisations, regards, massifs ou fondations.
+Point de vigilance : Sécuriser les parois et contrôler les venues d'eau.
+Fourreau :
+Définition : Tube de protection ou réservation permettant le passage d'un réseau.
+À quoi ça sert ? : Protéger un câble, une canalisation ou un futur réseau sous chaussée ou ouvrage.
+Point de vigilance : Le repérer précisément au récolement.
+Fuseau granulométrique :
+Définition : Plage de répartition des grains qu'un matériau doit respecter.
+À quoi ça sert ? : Assurer une qualité stable de grave, sable ou remblai.
+Point de vigilance : Comparer les analyses du fournisseur au fuseau exigé.
+G
+Géocomposite :
+Définition : Produit associant plusieurs géosynthétiques, par exemple géomembrane et géotextile.
+À quoi ça sert ? : Remplir plusieurs fonctions : étanchéité, drainage ou protection anti-poinçonnement.
+Point de vigilance : Respecter le sens de pose, les recouvrements et les raccords.
+Géomembrane :
+Définition : Membrane étanche utilisée pour bloquer ou orienter les eaux dans le sol.
+À quoi ça sert ? : Protéger certaines zones sensibles ou limiter les infiltrations.
+Point de vigilance : Contrôler continuité, recouvrements et absence de poinçonnement.
+Géomètre expert VRD :
+Définition : Professionnel chargé des relevés, implantations et aspects topographiques du projet VRD.
+À quoi ça sert ? : Garantir les positions et niveaux des ouvrages.
+Point de vigilance : Les erreurs d'implantation se répercutent sur tous les lots.
+Géotextile :
+Définition : Nappe synthétique utilisée pour séparer, filtrer, protéger ou renforcer des couches de sol.
+À quoi ça sert ? : Éviter le mélange des matériaux et améliorer la pérennité des structures.
+Point de vigilance : Respecter masse surfacique, recouvrement et certificat qualité.
+GNT - Grave Non Traitée :
+Définition : Mélange granulaire non lié au ciment ni au bitume, utilisé en couche de chaussée.
+À quoi ça sert ? : Constituer des couches de fondation ou de base compactées.
+Point de vigilance : Contrôler granulométrie, propreté, teneur en eau et compactage.
+Granulat :
+Définition : Matériau minéral en grains : sable, gravillon, grave ou caillou concassé.
+À quoi ça sert ? : Entrer dans la composition des bétons, enrobés, remblais et couches de chaussée.
+Point de vigilance : La qualité dépend de la granulométrie, propreté et résistance mécanique.
+Granulométrie :
+Définition : Distribution des dimensions des grains dans un matériau.
+À quoi ça sert ? : Déterminer l'aptitude au compactage, au drainage ou au bétonnage.
+Point de vigilance : Un mauvais fuseau peut provoquer ségrégation ou manque de portance.
+Gravats :
+Définition : Débris issus de travaux, démolition, purge ou nettoyage.
+À quoi ça sert ? : À évacuer pour maintenir le chantier propre et éviter les mélanges impropres.
+Point de vigilance : Les gravats ne doivent pas être abandonnés dans les remblais sensibles.
+Grave :
+Définition : Mélange de granulats de plusieurs tailles utilisé en chaussée ou remblai technique.
+À quoi ça sert ? : Former une couche compacte et portante.
+Point de vigilance : Vérifier la catégorie et l'absence excessive de fines argileuses.
+Gravillon :
+Définition : Granulat de taille supérieure au sable, utilisé en béton, drainage ou structure.
+À quoi ça sert ? : Participer à la résistance, au drainage ou à l'aspect du béton désactivé.
+Point de vigilance : Contrôler propreté, résistance Los Angeles et Micro-Deval selon besoin.
+Grille concave :
+Définition : Grille de regard ou avaloir légèrement creusée pour mieux capter les eaux.
+À quoi ça sert ? : Augmenter l'efficacité d'absorption en point bas.
+Point de vigilance : Veiller à ne pas créer d'obstacle dangereux pour piétons ou roues.
+Grille de porte :
+Définition : Grille ou caillebotis devant une entrée pour gérer l'eau et le passage.
+À quoi ça sert ? : Assurer une zone propre et drainante devant les portes.
+Point de vigilance : Elle doit être calée et conforme aux contraintes PMR.
+Groupe motopompe :
+Définition : Pompe motorisée utilisée pour évacuer les eaux d'une tranchée ou fouille.
+À quoi ça sert ? : Maintenir le chantier hors d'eau pendant certains travaux.
+Point de vigilance : Choisir une capacité adaptée et suivre les heures de fonctionnement si nécessaire.
+Guide GTR :
+Définition : Guide des Terrassements Routiers servant à classer et utiliser les sols en terrassement.
+À quoi ça sert ? : Orienter le réemploi, le traitement et les conditions de compactage.
+Point de vigilance : À utiliser avec l'étude géotechnique et les essais chantier.
+H
+Humidité de mise en œuvre :
+Définition : Teneur en eau d'un matériau au moment du compactage ou de la pose.
+À quoi ça sert ? : Atteindre la densité souhaitée avec un matériau granulaire.
+Point de vigilance : Trop sec ou trop humide, le matériau se compacte mal.
+Hydraulique :
+Définition : Domaine relatif à l'écoulement et à la gestion de l'eau.
+À quoi ça sert ? : Dimensionner pentes, diamètres, avaloirs, regards et stockages.
+Point de vigilance : Une incohérence hydraulique entraîne débordements ou stagnations.
+Hydrocurage :
+Définition : Nettoyage haute pression des canalisations ou réseaux.
+À quoi ça sert ? : Retirer dépôts et résidus avant inspection caméra ou réception.
+Point de vigilance : À réaliser sans endommager les ouvrages neufs.
+I
+Implantation :
+Définition : Report sur le terrain de la position des ouvrages prévus aux plans.
+À quoi ça sert ? : Placer correctement tranchées, voiries, plateformes, regards et bordures.
+Point de vigilance : L'entreprise reste responsable des erreurs d'implantation.
+Imprégnation :
+Définition : Application d'un liant sur une surface pour préparer l'accrochage ou la protection.
+À quoi ça sert ? : Favoriser l'adhérence entre support et enrobé ou stabiliser une couche.
+Point de vigilance : Support propre et dosage conforme sont indispensables.
+Indice de vides :
+Définition : Pourcentage de vide disponible dans un matériau ou massif drainant.
+À quoi ça sert ? : Calculer le volume de stockage des eaux pluviales.
+Point de vigilance : Un indice de vides surestimé réduit la capacité réelle de stockage.
+Inspection caméra :
+Définition : Contrôle vidéo de l'intérieur d'une canalisation.
+À quoi ça sert ? : Repérer défauts de pose, fissures, contre-pentes, intrusions ou dépôts.
+Point de vigilance : Le rapport et la vidéo sont à joindre au dossier de récolement.
+Inspection visuelle :
+Définition : Contrôle par observation directe de l'état apparent d'un ouvrage.
+À quoi ça sert ? : Repérer anomalies visibles avant essais plus lourds.
+Point de vigilance : Ne remplace pas les essais d'étanchéité ou de compactage.
+Installation de chantier :
+Définition : Ensemble des locaux, clôtures, protections, réseaux provisoires et moyens nécessaires au chantier.
+À quoi ça sert ? : Assurer sécurité, hygiène, logistique et organisation des travaux.
+Point de vigilance : Doit être entretenue et repliée en fin d'opération.
+Itinéraire accessible :
+Définition : Cheminement utilisable par une personne à mobilité réduite.
+À quoi ça sert ? : Permettre d'accéder aux bâtiments, stationnements et parties communes.
+Point de vigilance : Pentes, largeurs, ressauts et dévers doivent être contrôlés.
+J
+Jalonnement :
+Définition : Mise en place de repères ou panneaux pour guider usagers ou engins.
+À quoi ça sert ? : Sécuriser les déplacements provisoires autour du chantier.
+Point de vigilance : Adapter le jalonnement à chaque phase.
+Joint caoutchouc :
+Définition : Joint souple assurant l'étanchéité entre éléments de canalisation ou regard.
+À quoi ça sert ? : Permettre une liaison étanche et légèrement tolérante aux mouvements.
+Point de vigilance : Vérifier propreté, bon emboîtement et absence de pincement.
+Joint de construction :
+Définition : Séparation prévue entre deux phases ou parties d'ouvrage béton.
+À quoi ça sert ? : Maîtriser la reprise de bétonnage ou les mouvements.
+Point de vigilance : Un joint mal traité peut devenir un point faible ou une fuite.
+Joint de tuyau :
+Définition : Zone de raccordement entre deux éléments de canalisation.
+À quoi ça sert ? : Assurer continuité hydraulique et étanchéité.
+Point de vigilance : Contrôler à l'épreuve d'étanchéité et à l'inspection caméra.
+Joint étanche :
+Définition : Liaison empêchant les infiltrations ou fuites d'eau.
+À quoi ça sert ? : Garantir le fonctionnement du réseau ou de l'ouvrage.
+Point de vigilance : Une fuite peut entraîner affouillement, pollution ou refus de réception.
+L
+Laboratoire de contrôle :
+Définition : Organisme ou prestataire réalisant essais matériaux, compactage ou conformité.
+À quoi ça sert ? : Apporter une preuve indépendante de la qualité des travaux.
+Point de vigilance : Planifier ses interventions pour ne pas bloquer le chantier.
+Liant hydraulique :
+Définition : Liant comme le ciment qui durcit par réaction avec l'eau.
+À quoi ça sert ? : Entrer dans les bétons, mortiers et certaines couches traitées.
+Point de vigilance : Contrôler la classe, le dosage et les conditions de stockage.
+Liant hydrocarboné :
+Définition : Liant à base de bitume utilisé dans les enrobés et enduits.
+À quoi ça sert ? : Coller les granulats et former un revêtement routier cohérent.
+Point de vigilance : Choisir la classe de bitume adaptée à la formulation.
+Limite de prestation :
+Définition : Frontière entre ce qui est dû par un lot et ce qui relève d'un autre lot.
+À quoi ça sert ? : Éviter les oublis, doublons ou conflits entre entreprises.
+Point de vigilance : À vérifier avec plans, CCTP et interfaces des autres lots.
+Loi ELAN :
+Définition : Texte réglementaire cité dans le CCTP pour les dispositions liées aux sols argileux et constructions.
+À quoi ça sert ? : Prendre en compte certains risques de retrait-gonflement des argiles.
+Point de vigilance : Vérifier les exigences applicables avec l'étude de sol et le DTU concerné.
+Los Angeles - LA :
+Définition : Essai mesurant la résistance d'un granulat aux chocs et à la fragmentation.
+À quoi ça sert ? : Évaluer la qualité mécanique des gravillons ou granulats.
+Point de vigilance : Un LA trop élevé indique un granulat plus fragile.
+Lutte contre le bruit :
+Définition : Mesures pour limiter les nuisances sonores du chantier.
+À quoi ça sert ? : Protéger riverains et respecter les horaires autorisés.
+Point de vigilance : Les travaux bruyants peuvent être interdits la nuit, dimanche ou jours fériés sauf dérogation.
+M
+Marquage au sol :
+Définition : Signalisation horizontale peinte ou appliquée sur chaussée ou parking.
+À quoi ça sert ? : Organiser stationnements, circulations et passages piétons.
+Point de vigilance : Support propre, sec et conforme au plan avant application.
+Marquage CE :
+Définition : Marquage indiquant qu'un produit de construction répond à des exigences européennes applicables.
+À quoi ça sert ? : Faciliter la conformité des produits mis en œuvre.
+Point de vigilance : Ne dispense pas de vérifier les performances techniques demandées au marché.
+Massif de stockage :
+Définition : Ouvrage enterré permettant de stocker temporairement des eaux pluviales.
+À quoi ça sert ? : Limiter les débits rejetés et gérer les pluies du projet.
+Point de vigilance : Contrôler volume utile, indice de vides, géotextile, drain et raccordement.
+Matériau inerte :
+Définition : Matériau qui ne se décompose pas et ne réagit pas chimiquement de manière significative.
+À quoi ça sert ? : Peut être évacué ou parfois réutilisé selon sa qualité et les prescriptions.
+Point de vigilance : Même inerte, il peut être impropre s'il nuit à la portance ou au fonctionnement.
+Matériau non traité :
+Définition : Matériau granulaire utilisé sans liant ciment ou bitume.
+À quoi ça sert ? : Constituer certaines couches de chaussée ou remblais techniques.
+Point de vigilance : La qualité dépend du compactage, de la granulométrie et de l'eau.
+Matériau sain :
+Définition : Matériau propre, stable et apte à rester dans l'ouvrage sans nuire à sa tenue.
+À quoi ça sert ? : Réaliser remblais ou fonds de forme durables.
+Point de vigilance : Écarter matières organiques, argiles sensibles, déchets et matériaux pollués.
+Micro-Deval - MDE :
+Définition : Essai évaluant la résistance d'un granulat à l'usure par frottement en présence d'eau.
+À quoi ça sert ? : Choisir des granulats adaptés à une structure routière durable.
+Point de vigilance : À lire avec l'essai Los Angeles pour juger la qualité mécanique.
+Mise à niveau :
+Définition : Action d'amener une surface ou un ouvrage à la cote prévue.
+À quoi ça sert ? : Préparer plateformes, voiries, regards ou espaces verts.
+Point de vigilance : Vérifier avec les cotes projet et les niveaux finis.
+Mise en forme :
+Définition : Modelage du terrain ou d'une couche pour obtenir les pentes et profils demandés.
+À quoi ça sert ? : Diriger les eaux et préparer la pose des couches suivantes.
+Point de vigilance : Ne pas laisser de contre-pente ou de point bas non prévu.
+Mise en stock :
+Définition : Stockage provisoire de matériaux sur chantier pour réemploi ultérieur.
+À quoi ça sert ? : Réutiliser terre végétale ou matériaux sains lorsque le projet le permet.
+Point de vigilance : Stocker séparément par nature et éviter la pollution des matériaux.
+Mobilier urbain :
+Définition : Équipements présents sur l'espace public : potelets, panneaux, bancs, bornes, candélabres.
+À quoi ça sert ? : À protéger ou déposer pendant les travaux selon le cas.
+Point de vigilance : Tout dommage peut être imputé à l'entreprise.
+Modelage du terrain :
+Définition : Façonnage des surfaces pour obtenir les formes, pentes et niveaux prévus.
+À quoi ça sert ? : Assurer drainage, esthétique et raccordement aux ouvrages.
+Point de vigilance : Le modelage doit respecter les plans et éviter les stagnations.
+Module de richesse K :
+Définition : Paramètre de formulation des enrobés lié à la quantité de liant par rapport aux granulats.
+À quoi ça sert ? : Aider à caractériser un enrobé comme le BBSG.
+Point de vigilance : Une formulation non conforme peut affecter durabilité et orniérage.
+Motopompe :
+Définition : Pompe autonome motorisée utilisée pour évacuer l'eau.
+À quoi ça sert ? : Assécher fouilles et tranchées pendant les travaux.
+Point de vigilance : Choisir le débit adapté et éviter le rejet d'eau chargé sans précaution.
+Mouvement de terre :
+Définition : Ensemble des déblais, remblais, transports et modelages de sols.
+À quoi ça sert ? : Créer les niveaux du projet à partir du terrain existant.
+Point de vigilance : Anticiper les volumes, réemplois, évacuations et apports.
+N
+Nappe phréatique :
+Définition : Niveau d'eau souterraine pouvant être rencontré pendant les fouilles.
+À quoi ça sert ? : Influencer tranchées, stabilité et pose des réseaux.
+Point de vigilance : Un rabattement peut être nécessaire et doit être prévu au planning.
+Nivellement :
+Définition : Opération topographique permettant de déterminer ou reporter les altitudes.
+À quoi ça sert ? : Garantir les pentes des réseaux et niveaux de voirie.
+Point de vigilance : Une erreur de nivellement peut bloquer l'écoulement gravitaire.
+Norme NF :
+Définition : Référentiel français de qualité ou de performance pour un produit ou une mise en œuvre.
+À quoi ça sert ? : Encadrer les exigences techniques minimales.
+Point de vigilance : La conformité à une norme ne suffit pas si le CCTP demande plus.
+Note de calcul :
+Définition : Document justifiant un dimensionnement ou une résistance.
+À quoi ça sert ? : Valider tuyaux, remblais, structures, ouvrages béton ou hydraulique.
+Point de vigilance : Doit être fournie et visée avant travaux lorsque demandée.
+Notice technique :
+Définition : Document fabricant décrivant caractéristiques, mise en œuvre et limites d'un produit.
+À quoi ça sert ? : Permettre la validation et le contrôle des matériaux proposés.
+Point de vigilance : À transmettre avant commande lorsque le produit est soumis à accord.
+O
+OPM - Optimum Proctor Modifié :
+Définition : Référence de teneur en eau et densité permettant d'apprécier le compactage d'un matériau.
+À quoi ça sert ? : Guider la mise en œuvre des graves ou remblais.
+Point de vigilance : La teneur en eau chantier doit rester dans la plage prévue.
+Organisme de contrôle :
+Définition : Bureau ou laboratoire intervenant pour vérifier la conformité des ouvrages.
+À quoi ça sert ? : Sécuriser la réception technique du projet.
+Point de vigilance : Son intervention doit être intégrée au planning.
+Ouvrage de visite :
+Définition : Regard ou accès permettant d'inspecter et entretenir un réseau enterré.
+À quoi ça sert ? : Faciliter maintenance, hydrocurage et contrôle caméra.
+Point de vigilance : Positionner les tampons au bon niveau fini.
+Ouvrage enterré :
+Définition : Réseau ou structure situé sous le sol : canalisation, fourreau, regard, câble ou massif.
+À quoi ça sert ? : À repérer avant terrassement et à préserver si existant.
+Point de vigilance : Un dommage sur ouvrage enterré peut avoir des conséquences graves.
+P
+Palier de repos :
+Définition : Surface horizontale aménagée sur un cheminement accessible en haut, bas ou cours de pente.
+À quoi ça sert ? : Permettre aux personnes à mobilité réduite de s'arrêter ou manœuvrer.
+Point de vigilance : Respecter dimensions et fréquence selon la pente.
+Palplanche :
+Définition : Profil métallique battu dans le sol pour retenir la terre ou l'eau.
+À quoi ça sert ? : Stabiliser une fouille, créer un batardeau ou maîtriser la nappe.
+Point de vigilance : Le choix doit être adapté au sol et soumis à validation si prescrit.
+Panneau de chantier :
+Définition : Panneau d'information réglementaire ou contractuel placé à l'entrée du chantier.
+À quoi ça sert ? : Informer le public, les intervenants et services sur l'opération.
+Point de vigilance : Il doit être maintenu propre, lisible et à jour.
+Passage caméra :
+Définition : Inspection vidéo des réseaux après pose et nettoyage.
+À quoi ça sert ? : Contrôler la bonne exécution avant réception.
+Point de vigilance : Toute anomalie détectée doit être corrigée sans justifier de retard.
+Passage piéton :
+Définition : Zone matérialisée permettant aux piétons de traverser une voie.
+À quoi ça sert ? : Sécuriser les croisements entre véhicules et cheminements accessibles.
+Point de vigilance : Prévoir éveil de vigilance et signalisation lorsque nécessaire.
+Pénétromètre dynamique :
+Définition : Essai de contrôle du compactage ou de la résistance du sol par enfoncement dynamique.
+À quoi ça sert ? : Contrôler les remblais de tranchée ou abords de réseaux.
+Point de vigilance : Respecter les points de contrôle prévus : tronçons, regards, branchements.
+Pente :
+Définition : Inclinaison d'une surface ou canalisation.
+À quoi ça sert ? : Assurer l'écoulement gravitaire et l'accessibilité des cheminements.
+Point de vigilance : Trop faible, l'eau stagne ; trop forte, le cheminement peut devenir non conforme.
+Pente en long :
+Définition : Inclinaison dans le sens principal d'un cheminement, d'une chaussée ou d'un réseau.
+À quoi ça sert ? : Contrôler accessibilité et écoulement.
+Point de vigilance : Comparer aux limites PMR pour les cheminements extérieurs.
+Période de préparation :
+Définition : Temps avant travaux destiné aux études d'exécution, planning, visas et organisation.
+À quoi ça sert ? : Anticiper les interfaces, documents et méthodes.
+Point de vigilance : Les oublis en préparation se paient souvent par des retards de chantier.
+Piquet :
+Définition : Repère physique planté dans le sol pour matérialiser un point.
+À quoi ça sert ? : Servir au piquetage, nivellement ou alignement.
+Point de vigilance : Le protéger pour éviter déplacement ou perte de repère.
+Piquetage :
+Définition : Matérialisation sur terrain des axes, points ou ouvrages au moyen de piquets et repères.
+À quoi ça sert ? : Guider l'exécution des réseaux et voiries.
+Point de vigilance : Doit être vérifié et maintenu jusqu'à réalisation.
+Plan de circulation :
+Définition : Organisation temporaire ou définitive des flux de véhicules et piétons.
+À quoi ça sert ? : Gérer l'impact du chantier et la sécurité des usagers.
+Point de vigilance : À faire valider par les services compétents si domaine public.
+Plan de récolement :
+Définition : Plan indiquant les ouvrages tels qu'ils ont réellement été réalisés.
+À quoi ça sert ? : Permettre l'exploitation, la maintenance et les interventions futures.
+Point de vigilance : Doit intégrer réseaux, regards, profils, profondeurs et matériaux réels.
+Plan d’exécution :
+Définition : Plan détaillé produit par l'entreprise pour réaliser précisément les ouvrages.
+À quoi ça sert ? : Préciser tracés, niveaux, diamètres, matériaux et détails de mise en œuvre.
+Point de vigilance : Ne pas confondre avec le plan de consultation, souvent insuffisant pour exécuter.
+Plan EP :
+Définition : Plan des eaux pluviales du projet.
+À quoi ça sert ? : Situer collecteurs, regards, avaloirs, fossés, massifs de stockage et exutoires.
+Point de vigilance : À suivre pour les raccordements et le dimensionnement des ouvrages pluviaux.
+Plan VRD :
+Définition : Plan décrivant voirie, réseaux divers, niveaux, plateformes et aménagements extérieurs.
+À quoi ça sert ? : Coordonner les travaux extérieurs et interfaces réseaux.
+Point de vigilance : Lire avec CCTP, profils et plans architecte.
+Planche de convenance :
+Définition : Zone d'essai permettant de valider méthode, matériel et matériau avant généralisation.
+À quoi ça sert ? : Définir les paramètres de compactage ou mise en œuvre.
+Point de vigilance : Utile lorsque les matériaux ou conditions sont sensibles.
+Plateforme bâtiment :
+Définition : Surface préparée pour recevoir un bâtiment ou ses ouvrages de fondation.
+À quoi ça sert ? : Donner une assise à la construction et aux interventions du gros œuvre.
+Point de vigilance : Respecter niveau, portance, drainage et propreté.
+Plateforme voirie :
+Définition : Support terrassé et réglé avant réalisation de la structure de chaussée.
+À quoi ça sert ? : Recevoir les couches de fondation, base et roulement.
+Point de vigilance : Contrôler portance et compactage avant fermeture.
+Poinçonnement :
+Définition : Déformation ou perforation localisée causée par une charge concentrée.
+À quoi ça sert ? : À surveiller sur géomembranes, géotextiles, caillebotis ou revêtements.
+Point de vigilance : Utiliser une protection anti-poinçonnement si nécessaire.
+Point bas :
+Définition : Zone où les eaux se concentrent naturellement selon les pentes.
+À quoi ça sert ? : Implanter avaloirs ou grilles de collecte.
+Point de vigilance : Si le point bas n'est pas traité, l'eau stagne.
+Portance :
+Définition : Capacité d'un sol ou d'une plateforme à supporter les charges sans déformation excessive.
+À quoi ça sert ? : Valider la qualité des fonds de forme et structures de chaussée.
+Point de vigilance : Mesurée notamment par essais de plaque EV2.
+Produit de cure :
+Définition : Produit appliqué sur béton frais pour limiter l'évaporation de l'eau.
+À quoi ça sert ? : Réduire les fissurations et améliorer la qualité de surface.
+Point de vigilance : Particulièrement important pour le béton désactivé ou les surfaces exposées.
+Profil en long :
+Définition : Représentation des niveaux d'un réseau ou d'une voirie suivant son axe.
+À quoi ça sert ? : Contrôler pentes, profondeurs, croisements et raccordements.
+Point de vigilance : Indispensable pour les réseaux gravitaires EU/EP.
+Profil en travers :
+Définition : Coupe transversale d'une voirie, plateforme ou fossé.
+À quoi ça sert ? : Montrer largeurs, dévers, couches et pentes latérales.
+Point de vigilance : À vérifier pour accessibilité, eaux de ruissellement et structure.
+Protection des réseaux :
+Définition : Mesures prises pour éviter d'endommager les réseaux existants ou posés.
+À quoi ça sert ? : Garantir sécurité et continuité de service.
+Point de vigilance : Respecter DICT, marquage-piquetage, fouilles prudentes et prescriptions concessionnaires.
+Protection des talus :
+Définition : Dispositions évitant l'érosion ou l'effondrement des pentes de fouille ou remblai.
+À quoi ça sert ? : Sécuriser les travailleurs et préserver la stabilité du chantier.
+Point de vigilance : Prévoir évacuation des eaux de ruissellement et blindage si nécessaire.
+Protection des végétaux :
+Définition : Mesures de conservation des arbres et plantations proches du chantier.
+À quoi ça sert ? : Limiter les dégâts sur l'environnement existant.
+Point de vigilance : Éviter blessures des troncs, compactage des racines et dépôts au pied des arbres.
+Purge :
+Définition : Retrait localisé d'un matériau impropre pour le remplacer par un matériau sain.
+À quoi ça sert ? : Améliorer la portance ou supprimer un point faible.
+Point de vigilance : Ne pas remblayer une purge sans contrôle de fond et compactage adapté.
+Q
+Qualité des matériaux :
+Définition : Ensemble des critères permettant de juger si un matériau est acceptable pour l'ouvrage.
+À quoi ça sert ? : Garantir la performance et la durabilité des travaux.
+Point de vigilance : Fiches techniques, essais et certificats doivent correspondre aux exigences du CCTP.
+R
+Rabattement de nappe :
+Définition : Abaissement temporaire du niveau d'eau souterraine par pompage ou autre procédé.
+À quoi ça sert ? : Permettre la pose des réseaux ou ouvrages sous le niveau naturel de la nappe.
+Point de vigilance : Anticiper les effets sur sols, ouvrages voisins et planning.
+Raccordement à l’existant :
+Définition : Connexion du projet à un ouvrage ou réseau déjà en place.
+À quoi ça sert ? : Assurer la continuité avec le réseau public ou l'exutoire existant.
+Point de vigilance : Vérifier cote, diamètre, état de l'existant et autorisation du gestionnaire.
+Rapport d’étanchéité :
+Définition : Procès-verbal indiquant les résultats des essais d'étanchéité.
+À quoi ça sert ? : Justifier que les réseaux ne fuient pas.
+Point de vigilance : À conserver dans le DOE ou dossier de récolement.
+Rapport d’inspection :
+Définition : Document décrivant les résultats du passage caméra ou contrôle visuel.
+À quoi ça sert ? : Prouver l'état du réseau avant réception.
+Point de vigilance : À fournir avec vidéos et exemplaires demandés au récolement.
+Réception de plateforme :
+Définition : Validation d'un fond de forme ou support avant couches suivantes.
+À quoi ça sert ? : Éviter de construire sur un support insuffisant.
+Point de vigilance : Doit s'appuyer sur contrôles de niveaux, portance et compactage.
+Réception des matériaux :
+Définition : Contrôle des fournitures avant leur mise en œuvre.
+À quoi ça sert ? : Refuser les produits non conformes avant qu'ils ne soient incorporés.
+Point de vigilance : Examiner notamment tuyaux, regards, bordures et granulats.
+Réception des travaux :
+Définition : Acte par lequel le maître d'ouvrage accepte les ouvrages avec ou sans réserves.
+À quoi ça sert ? : Déclencher garanties et fin de certaines obligations contractuelles.
+Point de vigilance : Les essais et dossiers doivent être fournis avant réception.
+Récolement :
+Définition : Relevé exact des ouvrages après exécution.
+À quoi ça sert ? : Documenter ce qui a réellement été construit.
+Point de vigilance : Indispensable pour réseaux enterrés, car ils deviennent invisibles.
+Réemploi des terres :
+Définition : Utilisation sur site de matériaux excavés compatibles avec les ouvrages.
+À quoi ça sert ? : Limiter les évacuations et apports extérieurs.
+Point de vigilance : Ne réemployer que des terres saines et conformes.
+Réfection de chaussée :
+Définition : Remise en état d'une chaussée après ouverture ou dégradation.
+À quoi ça sert ? : Rétablir la sécurité, la portance et l'aspect de la voirie.
+Point de vigilance : Respecter les prescriptions du gestionnaire et les couches existantes.
+Regard :
+Définition : Ouvrage enterré accessible permettant inspection, raccordement, changement de direction ou entretien d'un réseau.
+À quoi ça sert ? : Faciliter la maintenance des réseaux EU/EP.
+Point de vigilance : Régler le tampon au niveau fini et vérifier la cunette.
+Regard avaloir :
+Définition : Regard combiné à une grille ou avaloir pour collecter les eaux de surface.
+À quoi ça sert ? : Capter les ruissellements et les envoyer au réseau EP.
+Point de vigilance : Le placer au bon point bas et bien compacter autour.
+Regard avec surverse :
+Définition : Regard intégrant un dispositif de débordement contrôlé vers un autre ouvrage ou exutoire.
+À quoi ça sert ? : Gérer les niveaux d'eau et situations de surcharge.
+Point de vigilance : Vérifier la cote de surverse et le sens d'écoulement.
+Regard de branchement PVC :
+Définition : Petit regard de raccordement, souvent en PVC, placé sur un branchement de réseau.
+À quoi ça sert ? : Permettre inspection et entretien au droit d'un raccordement.
+Point de vigilance : Contrôler le tampon, la cheminée, la cunette et le remblai sable compacté.
+Regard de visite Ø1000 :
+Définition : Regard de visite préfabriqué de diamètre 1000 mm.
+À quoi ça sert ? : Permettre accès plus confortable aux réseaux importants.
+Point de vigilance : Régler le tampon et compacter soigneusement autour de l'ouvrage.
+Regard de visite Ø800 :
+Définition : Regard de visite préfabriqué de diamètre 800 mm.
+À quoi ça sert ? : Permettre accès et contrôle du réseau.
+Point de vigilance : Respecter tampon, cunette, rehausses, dalle de réduction et prescriptions gestionnaire.
+Réglage :
+Définition : Mise à la cote précise d'une surface ou d'un ouvrage avant validation.
+À quoi ça sert ? : Obtenir les niveaux et pentes prévus.
+Point de vigilance : À faire avant compactage final ou pose des couches suivantes.
+Règlementation accessibilité :
+Définition : Ensemble des obligations relatives aux cheminements, stationnements et accès pour tous.
+À quoi ça sert ? : Garantir un usage sécurisé et non discriminant des espaces extérieurs.
+Point de vigilance : Vérifier chaque détail : pente, dévers, ressaut, largeur, espace de manœuvre.
+Rehausse de regard :
+Définition : Élément ajouté sur un regard pour atteindre la cote du tampon fini.
+À quoi ça sert ? : Adapter la hauteur de l'ouvrage au niveau de voirie ou terrain fini.
+Point de vigilance : Contrôler stabilité, étanchéité et alignement vertical.
+Remblai :
+Définition : Matériau mis en place pour combler ou rehausser une zone.
+À quoi ça sert ? : Former plateformes, combler tranchées ou modeler le terrain.
+Point de vigilance : Mettre en couches, compacter et utiliser des matériaux adaptés.
+Remblai compacté :
+Définition : Remblai mis en œuvre par couches puis densifié.
+À quoi ça sert ? : Limiter tassements et garantir la tenue de l'ouvrage.
+Point de vigilance : La qualité dépend de l'épaisseur des couches, de l'eau et de l'engin utilisé.
+Remblaiement de tranchée :
+Définition : Comblement d'une tranchée après pose du réseau.
+À quoi ça sert ? : Protéger le tuyau et reconstituer le support de chaussée ou terrain.
+Point de vigilance : Respecter lit de pose, enrobage, couches et contrôles de compactage.
+Remise en état :
+Définition : Travaux nécessaires pour restituer un site, une voie ou un ouvrage après intervention.
+À quoi ça sert ? : Rétablir propreté, sécurité et fonctionnalité.
+Point de vigilance : À la charge de l'entreprise lorsqu'elle a dégradé ou occupé la zone.
+Repère provisoire :
+Définition : Point temporaire de nivellement ou d'implantation utilisé pendant les travaux.
+À quoi ça sert ? : Maintenir la précision des cotes pendant l'avancement.
+Point de vigilance : Le protéger et le vérifier régulièrement.
+Réseau EP :
+Définition : Ensemble des ouvrages dédiés aux eaux pluviales.
+À quoi ça sert ? : Collecter, stocker et évacuer les eaux de pluie du projet.
+Point de vigilance : Contrôler les raccordements et volumes de stockage.
+Réseau EU :
+Définition : Ensemble des ouvrages dédiés aux eaux usées.
+À quoi ça sert ? : Acheminer les effluents domestiques vers le gestionnaire.
+Point de vigilance : Étanchéité et conformité sont contrôlées avant réception.
+Réseau existant :
+Définition : Réseau déjà présent avant les travaux, visible ou enterré.
+À quoi ça sert ? : À préserver ou raccorder selon le projet.
+Point de vigilance : Vérifier position réelle avant terrassement.
+Ressaut :
+Définition : Différence brusque de niveau sur un cheminement.
+À quoi ça sert ? : Doit rester faible pour ne pas gêner les piétons ou fauteuils.
+Point de vigilance : En accessibilité, le ressaut est généralement limité à 2 cm selon contexte.
+Retardateur de prise :
+Définition : Produit appliqué pour ralentir la prise superficielle du béton.
+À quoi ça sert ? : Permettre le lavage du béton désactivé.
+Point de vigilance : Respecter dosage et délai selon température et météo.
+Retrait-gonflement des argiles :
+Définition : Variation de volume des sols argileux selon humidité et sécheresse.
+À quoi ça sert ? : Peut affecter les constructions et leurs abords.
+Point de vigilance : Prévoir drainage, géomembrane ou dispositions selon étude et prescriptions.
+Revêtement de chaussée :
+Définition : Couche visible et circulable d'une voirie : enrobé, béton ou autre.
+À quoi ça sert ? : Assurer roulement, sécurité et protection des couches inférieures.
+Point de vigilance : La qualité dépend de la préparation du support.
+Ruissellement :
+Définition : Écoulement des eaux de pluie à la surface du sol ou de la chaussée.
+À quoi ça sert ? : À maîtriser pour éviter érosion, flaques et surcharge des réseaux.
+Point de vigilance : Le modelage et les avaloirs doivent l'orienter correctement.
+S
+Sable compacté :
+Définition : Sable mis en œuvre et densifié autour d'un ouvrage ou d'une canalisation.
+À quoi ça sert ? : Caler et protéger les regards, tuyaux ou ouvrages préfabriqués.
+Point de vigilance : Compacter sans déplacer l'ouvrage ni endommager les joints.
+SAUR :
+Définition : Gestionnaire cité pour les réseaux d'eau potable, eaux usées ou eaux pluviales selon contexte local.
+À quoi ça sert ? : Donner prescriptions et contrôler certains raccordements.
+Point de vigilance : Respecter ses demandes avant réception du réseau.
+Scie à sol :
+Définition : Machine utilisée pour découper proprement un revêtement béton ou enrobé.
+À quoi ça sert ? : Préparer une ouverture de tranchée nette.
+Point de vigilance : Repérer les réseaux et protéger les usagers avant découpe.
+SETRA :
+Définition : Ancien service technique de référence pour les routes, cité pour les directives de matériaux et terrassements.
+À quoi ça sert ? : Fournir des guides techniques comme ceux sur les remblais ou couches de forme.
+Point de vigilance : À utiliser comme référence lorsque le CCTP le demande.
+Signalisation de chantier :
+Définition : Panneaux, balises, séparateurs et dispositifs temporaires autour des travaux.
+À quoi ça sert ? : Informer, guider et protéger usagers et ouvriers.
+Point de vigilance : Elle doit être stable, lisible, cohérente et maintenue jour/nuit si nécessaire.
+Signalisation horizontale :
+Définition : Marquage réalisé au sol : lignes, places, passages, flèches.
+À quoi ça sert ? : Organiser la circulation et le stationnement.
+Point de vigilance : Appliquer sur support propre et selon plan validé.
+Signalisation verticale :
+Définition : Panneaux et supports installés verticalement le long des voies.
+À quoi ça sert ? : Informer, réglementer ou guider les usagers.
+Point de vigilance : Vérifier implantation, visibilité, hauteur et compatibilité avec cheminements.
+Sol meuble :
+Définition : Sol qui se déforme facilement sous charge ou qui manque de cohésion.
+À quoi ça sert ? : À identifier avant de réaliser une plateforme ou chaussée.
+Point de vigilance : Peut nécessiter purge, traitement ou remplacement.
+Sol non glissant :
+Définition : Revêtement offrant une adhérence suffisante pour les piétons.
+À quoi ça sert ? : Répondre aux exigences de sécurité et d'accessibilité.
+Point de vigilance : Éviter surfaces trop lisses, réfléchissantes ou instables.
+Sondage préliminaire :
+Définition : Reconnaissance locale du sol avant tranchée ou ouvrage.
+À quoi ça sert ? : Vérifier nature du sol, réseaux ou contraintes non visibles.
+Point de vigilance : À réaliser avant certaines tranchées sous voirie.
+Soubassement béton :
+Définition : Partie basse en béton servant de support ou de retenue à une clôture ou ouvrage.
+À quoi ça sert ? : Stabiliser et protéger la base d'un aménagement.
+Point de vigilance : Contrôler alignement, fondation et interfaces avec niveaux finis.
+Stationnement PMR :
+Définition : Place de parking adaptée aux personnes à mobilité réduite.
+À quoi ça sert ? : Permettre l'accès sécurisé aux bâtiments depuis une place élargie.
+Point de vigilance : Largeur, pente, dévers et cheminement adjacent doivent être conformes.
+Stockage des terres :
+Définition : Mise en dépôt temporaire des terres destinées au réemploi.
+À quoi ça sert ? : Préserver la terre végétale ou les matériaux sains.
+Point de vigilance : Séparer par nature et éviter l'eau, les déchets et le mélange avec matériaux impropres.
+Structure alvéolaire :
+Définition : Structure à vides utilisée pour créer du stockage d'eau pluviale ou une structure légère.
+À quoi ça sert ? : Augmenter le volume utile de rétention ou infiltration.
+Point de vigilance : Contrôler géotextile, matériau de remplissage, indice de vides et stabilité.
+Structure de chaussée :
+Définition : Empilement de couches constituant une voirie : fond de forme, fondation, base, roulement.
+À quoi ça sert ? : Répartir les charges et garantir la durabilité de la voie.
+Point de vigilance : Chaque couche doit être contrôlée avant la suivante.
+Sujétion :
+Définition : Contrainte particulière incluse dans l'exécution d'un prix ou d'une prestation.
+À quoi ça sert ? : Rappeler que certaines difficultés prévisibles sont à la charge de l'entreprise.
+Point de vigilance : Lire les sujétions pour éviter les oublis de chiffrage.
+Surverse :
+Définition : Dispositif permettant à l'eau de déborder vers un autre ouvrage à une cote déterminée.
+À quoi ça sert ? : Sécuriser le fonctionnement hydraulique en cas de niveau haut.
+Point de vigilance : Contrôler la cote de seuil et l'exutoire.
+T
+Talus :
+Définition : Surface inclinée de terrain en bord de fouille, remblai ou fossé.
+À quoi ça sert ? : Assurer la transition entre deux niveaux.
+Point de vigilance : Protéger contre érosion et instabilité.
+Tamis de 5 mm :
+Définition : Tamis utilisé pour contrôler la présence de grains supérieurs à 5 mm dans un sable.
+À quoi ça sert ? : Vérifier la conformité granulométrique du sable.
+Point de vigilance : Une proportion trop forte de gros grains peut rendre le mortier non conforme.
+Tampon fonte 250 kN :
+Définition : Couvercle de regard en fonte prévu pour une charge de service de 250 kN.
+À quoi ça sert ? : Fermer un regard situé en zone moins fortement circulée selon prescription.
+Point de vigilance : Choisir la classe adaptée au trafic réel.
+Tampon fonte 400 kN :
+Définition : Couvercle de regard en fonte prévu pour une charge de service de 400 kN.
+À quoi ça sert ? : Fermer un regard en zone circulée avec résistance suffisante.
+Point de vigilance : Régler au niveau fini et vérifier la stabilité du cadre.
+Teneur en eau :
+Définition : Quantité d'eau contenue dans un matériau au moment de sa mise en œuvre.
+À quoi ça sert ? : Conditionner le compactage et la portance.
+Point de vigilance : À comparer à l'optimum Proctor pour les matériaux concernés.
+Terrassement :
+Définition : Travaux de déplacement, extraction, apport, modelage et compactage des terres.
+À quoi ça sert ? : Préparer les plateformes, voiries, réseaux et espaces extérieurs.
+Point de vigilance : Contrôler déblais, remblais, portance, eaux et sécurité des fouilles.
+Terre végétale :
+Définition : Couche superficielle du sol riche en matière organique.
+À quoi ça sert ? : Utilisée pour les espaces verts après décapage et stockage.
+Point de vigilance : Ne pas l'utiliser comme remblai structurel sous voirie ou bâtiment.
+Tête de pont :
+Définition : Ouvrage préfabriqué en béton placé à l'extrémité d'un busage ou d'une canalisation de fossé.
+À quoi ça sert ? : Stabiliser l'entrée ou sortie d'eau et protéger contre l'érosion.
+Point de vigilance : Adapter au diamètre du tuyau et bien remblayer autour.
+Tôle pressée :
+Définition : Tôle métallique formée par pressage, utilisée ici pour certains caillebotis ou grilles.
+À quoi ça sert ? : Créer une surface résistante et drainante.
+Point de vigilance : Vérifier épaisseur, appui, antidérapance et conformité PMR.
+Tracé :
+Définition : Ligne prévue pour un réseau, une bordure, une voie ou un cheminement.
+À quoi ça sert ? : Guider l'implantation et l'exécution.
+Point de vigilance : Vérifier les croisements, pentes et raccordements avant travaux.
+Tranchée :
+Définition : Fouille linéaire destinée à recevoir une canalisation, un fourreau ou un réseau.
+À quoi ça sert ? : Permettre la pose de réseaux enterrés.
+Point de vigilance : Sécuriser, blinder si besoin, poser sur lit adapté et remblayer correctement.
+Tranchée longitudinale :
+Définition : Tranchée réalisée dans le sens de la route ou du cheminement.
+À quoi ça sert ? : Poser un réseau parallèle à la voie.
+Point de vigilance : Ouvrir au fur et à mesure de la pose pour limiter les risques et gênes.
+Tranchée transversale :
+Définition : Tranchée traversant une chaussée ou un cheminement.
+À quoi ça sert ? : Permettre un branchement ou croisement de réseau.
+Point de vigilance : Souvent exécutée par moitié de chaussée pour maintenir la circulation.
+Trancheuse :
+Définition : Machine permettant de découper ou ouvrir une tranchée étroite.
+À quoi ça sert ? : Réaliser une découpe nette avant ouverture sous revêtement.
+Point de vigilance : Choisir l'outil selon profondeur, largeur et présence de réseaux.
+Transport des déblais :
+Définition : Acheminement des terres ou gravats vers stockage ou décharge.
+À quoi ça sert ? : Évacuer les matériaux inutiles ou impropres.
+Point de vigilance : Bâcher si nécessaire et éviter de salir la voie publique.
+Tronçon :
+Définition : Portion identifiable d'un réseau entre deux regards ou points de contrôle.
+À quoi ça sert ? : Faciliter les essais, mesures et rapports d'inspection.
+Point de vigilance : Les essais d'étanchéité sont souvent réalisés tronçon par tronçon.
+Trottoir :
+Définition : Cheminement latéral destiné aux piétons le long d'une voie.
+À quoi ça sert ? : Séparer les piétons de la circulation et assurer l'accès aux bâtiments.
+Point de vigilance : Contrôler largeur, dévers, pente et revêtement.
+Tuyau béton :
+Définition : Canalisation ou élément préfabriqué en béton pour réseaux ou busage.
+À quoi ça sert ? : Transporter des eaux ou réaliser un ouvrage robuste.
+Point de vigilance : Contrôler diamètre, classe, joints et lit de pose.
+Tuyau PVC :
+Définition : Canalisation plastique utilisée pour certains branchements ou réseaux.
+À quoi ça sert ? : Acheminer eaux ou réseaux avec une pose légère et rapide.
+Point de vigilance : Respecter classe, pente, emboîtement et protection mécanique.
+V
+Véhicule de chantier :
+Définition : Camion, fourgon ou engin utilisé pour approvisionnement, évacuation ou travaux.
+À quoi ça sert ? : Assurer la logistique quotidienne du chantier.
+Point de vigilance : Ne pas perturber abusivement la circulation ou stationner hors autorisation.
+Vérification du projet :
+Définition : Analyse par l'entreprise des plans, cotes, pièces écrites et contraintes avant exécution.
+À quoi ça sert ? : Détecter erreurs ou omissions avant qu'elles ne produisent des reprises.
+Point de vigilance : Toute omission non signalée peut être réputée acceptée.
+Viabilité :
+Définition : Ensemble des aménagements permettant de rendre un terrain utilisable : accès, voirie, réseaux, assainissement.
+À quoi ça sert ? : Permettre l'usage normal des logements et espaces extérieurs.
+Point de vigilance : Coordonner les réseaux avec les niveaux et accès.
+Voie publique :
+Définition : Espace de circulation appartenant ou ouvert au public.
+À quoi ça sert ? : Implique des autorisations particulières pour travaux, stationnement ou coupure.
+Point de vigilance : Respecter sécurité des usagers et prescriptions municipales.
+Voirie :
+Définition : Ensemble des voies, cheminements, stationnements et revêtements extérieurs.
+À quoi ça sert ? : Permettre circulation, accès, stationnement et évacuation des eaux.
+Point de vigilance : La qualité dépend de la structure, des pentes et de la réception du support.
+Volume de stockage :
+Définition : Capacité d'un ouvrage à retenir temporairement une quantité d'eau.
+À quoi ça sert ? : Dimensionner la gestion des eaux pluviales.
+Point de vigilance : Le volume utile dépend des dimensions et de l'indice de vides réel.
+VRD - Voirie et Réseaux Divers :
+Définition : Domaine regroupant voiries, terrassements, réseaux extérieurs et aménagements associés.
+À quoi ça sert ? : Coordonner les accès, réseaux et niveaux extérieurs d'un projet.
+Point de vigilance : Toujours lire les plans VRD avec les lots bâtiment, paysage et réseaux.

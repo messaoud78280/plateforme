@@ -82,6 +82,8 @@ model User {
   skillPpspsSessions    SkillPpspsSession[]
   chantierFiles         ChantierFile[]
   chantierFilesAdded    ChantierFile[] @relation("ChantierFileAddedBy")
+  chantierFileComments  ChantierFileComment[] @relation("ChantierFileCommentAuthor")
+  chantierFileFavorites ChantierFileFavorite[]
 
   // Pilotage administratif des travaux
   worksitePilotagesCreated   WorksitePilotage[] @relation("PilotageCreatedBy")
@@ -327,7 +329,7 @@ model ChantierFolder {
   @@index([projectId, sortOrder])
 }
 
-// Fichier ou pièce attendue dans une rubrique chantier
+// Fichier ou pièce attendue dans une rubrique chantier (GED chantier)
 model ChantierFile {
   id           String             @id @default(cuid())
   projectId    String
@@ -347,6 +349,24 @@ model ChantierFile {
   aiSummary           String?   @db.Text
   aiClassifiedAt      DateTime?
   aiSuggestedFolderId String?
+  /// GED universelle — classification & versionnage
+  category             String?
+  subcategory          String?
+  tags                 String?
+  versionLabel         String?   @default("1")
+  indice               String?
+  visibility           String    @default("Interne entreprise cliente")
+  isCurrentVersion     Boolean   @default(true)
+  replacesFileId       String?
+  checksum             String?
+  classificationStatus String    @default("CLASSE") // A_CLASSER | CLASSE
+  storagePath          String?
+  previewStatus        String?   // Aperçu disponible | Aperçu indisponible | Traitement | …
+  documentDate         DateTime? @db.Date
+  emitterName          String?
+  financialMeta        Json?
+  deletedAt            DateTime?
+  archivedAt           DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -355,11 +375,73 @@ model ChantierFile {
   client   User           @relation(fields: [clientId], references: [id], onDelete: Cascade)
   addedBy  User?          @relation("ChantierFileAddedBy", fields: [addedById], references: [id], onDelete: SetNull)
   task     Task?          @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  replacesFile ChantierFile?  @relation("ChantierFileVersions", fields: [replacesFileId], references: [id], onDelete: SetNull)
+  replacedByFiles ChantierFile[] @relation("ChantierFileVersions")
+  links    ChantierFileLink[]
+  comments ChantierFileComment[]
+  favorites ChantierFileFavorite[]
+  marketDocuments PilotageMarketDocument[]
 
   @@index([projectId, folderId])
   @@index([clientId])
   @@index([status])
   @@index([taskId])
+  @@index([classificationStatus])
+  @@index([deletedAt])
+  @@index([isCurrentVersion])
+  @@index([checksum])
+}
+
+/// Lien document GED ↔ élément Pilotage / chantier
+model ChantierFileLink {
+  id          String   @id @default(cuid())
+  fileId      String
+  entityType  String
+  entityId    String?
+  entityLabel String?
+  pilotageId  String?
+  createdById String?
+  createdAt   DateTime @default(now())
+
+  file ChantierFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@index([fileId])
+  @@index([entityType, entityId])
+  @@index([pilotageId])
+}
+
+/// Commentaire / annotation (ne modifie jamais le fichier original)
+model ChantierFileComment {
+  id          String    @id @default(cuid())
+  fileId      String
+  authorId    String?
+  authorName  String?
+  content     String    @db.Text
+  pageNumber  Int?
+  visibility  String    @default("Interne BeWork")
+  status      String    @default("Ouvert")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  resolvedAt  DateTime?
+
+  file   ChantierFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  author User?        @relation("ChantierFileCommentAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([fileId, createdAt])
+  @@index([status])
+}
+
+model ChantierFileFavorite {
+  id        String   @id @default(cuid())
+  fileId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  file ChantierFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([fileId, userId])
+  @@index([userId])
 }
 
 enum ChantierFileStatus {
@@ -1788,6 +1870,11 @@ model WorksitePilotage {
   healthUpdatedAt       DateTime?
   /// ESSENTIEL | RENFORCE | COMPLET
   serviceLevel          String         @default("ESSENTIEL")
+  /// Score risque contractuel 0-100 (distinct de la santé opérationnelle)
+  contractRiskScore     Int?
+  /// FAIBLE | MODERE | ELEVE | CRITIQUE
+  contractRiskLabel     String?
+  contractRiskUpdatedAt DateTime?
   createdById           String?
   archivedAt            DateTime?
   createdAt             DateTime       @default(now())
@@ -1811,6 +1898,18 @@ model WorksitePilotage {
   reports          PilotageReport[]
   milestones       PilotageMilestone[]
   blockers         PilotageBlocker[]
+  sensitiveDeadlines PilotageSensitiveDeadline[]
+  pricingAssumptions PilotagePricingAssumption[]
+  handovers          PilotageHandover[]
+  tradeInterfaces    PilotageTradeInterface[]
+  embeddedElements   PilotageEmbeddedElement[]
+  sensitiveWorks     PilotageSensitiveWork[]
+  nonConformities    PilotageNonConformity[]
+  delayEvents        PilotageDelayEvent[]
+  meetings           PilotageMeeting[]
+  photos             PilotagePhoto[]
+  lessons            PilotageLesson[]
+  timelineEvents     PilotageTimelineEvent[]
 
   @@unique([projectId])
   @@index([clientId])
@@ -1841,6 +1940,7 @@ model PilotageMarketDocument {
   fileSize        Int?
   mimeType        String?
   uploadedById    String?
+  chantierFileId  String?
   archivedAt      DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -1848,10 +1948,12 @@ model PilotageMarketDocument {
   pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
   replaces PilotageMarketDocument?  @relation("MarketDocVersions", fields: [replacesId], references: [id], onDelete: SetNull)
   replacedBy PilotageMarketDocument[] @relation("MarketDocVersions")
+  chantierFile ChantierFile? @relation(fields: [chantierFileId], references: [id], onDelete: SetNull)
 
   @@index([pilotageId, docType])
   @@index([pilotageId, isCurrent])
   @@index([status])
+  @@index([chantierFileId])
 }
 
 model ContractObligation {
@@ -2219,6 +2321,359 @@ model PilotageBlocker {
   @@index([pilotageId, status])
   @@index([severity])
   @@index([openedAt])
+}
+
+/// Échéance contractuelle sensible — toujours « À vérifier » si issue d’une extraction
+model PilotageSensitiveDeadline {
+  id                   String    @id @default(cuid())
+  pilotageId           String
+  title                String
+  deadlineType         String
+  sourceType           String    @default("Saisie manuelle")
+  articleRef           String?
+  pageRef              String?
+  startAt              DateTime? @db.Date
+  dueAt                DateTime? @db.Date
+  calculationMode      String?
+  responsibleName      String?
+  confirmationLevel    String    @default("À vérifier")
+  priority             String    @default("Haute")
+  status               String    @default("À vérifier")
+  linkedActionId       String?
+  proofNote            String?   @db.Text
+  comment              String?   @db.Text
+  archivedAt           DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+
+  @@index([pilotageId, status])
+  @@index([dueAt])
+}
+
+/// Hypothèse de chiffrage (étude) vs réalité chantier
+model PilotagePricingAssumption {
+  id                 String    @id @default(cuid())
+  pilotageId         String
+  title              String
+  description        String?   @db.Text
+  category           String    @default("Organisation")
+  lot                String?
+  sourceType         String    @default("Saisie manuelle")
+  authorName         String?
+  assumedValue       String?
+  justification      String?   @db.Text
+  verificationStatus String    @default("Hypothèse d’étude")
+  realityObserved    String?   @db.Text
+  gapSummary         String?   @db.Text
+  impactCost         String?
+  impactDelay        String?
+  impactOrg          String?
+  decision           String?   @db.Text
+  archivedAt         DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+
+  @@index([pilotageId, verificationStatus])
+}
+
+/// Passation études → travaux
+model PilotageHandover {
+  id              String    @id @default(cuid())
+  pilotageId      String
+  title           String    @default("Passation du marché")
+  status          String    @default("À préparer")
+  meetingAt       DateTime?
+  meetingNotes    String?   @db.Text
+  preparedByName  String?
+  presentedToName String?
+  closedAt        DateTime?
+  archivedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+  items    PilotageHandoverItem[]
+
+  @@index([pilotageId, status])
+}
+
+model PilotageHandoverItem {
+  id                 String    @id @default(cuid())
+  handoverId         String
+  title              String
+  category           String    @default("Général")
+  description        String?   @db.Text
+  sourceType         String?
+  studiesOwner       String?
+  worksOwner         String?
+  transmitted        Boolean   @default(false)
+  includedInScope    Boolean?
+  validated          Boolean   @default(false)
+  comment            String?   @db.Text
+  sortOrder          Int       @default(0)
+  archivedAt         DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  handover PilotageHandover @relation(fields: [handoverId], references: [id], onDelete: Cascade)
+
+  @@index([handoverId, sortOrder])
+}
+
+/// Interface entre lots / corps d’état
+model PilotageTradeInterface {
+  id               String    @id @default(cuid())
+  pilotageId       String
+  primaryLot       String
+  relatedLot       String
+  subject          String
+  description      String?   @db.Text
+  zone             String?
+  planRef          String?
+  whoSupplies      String?
+  whoInstalls      String?
+  whoPrepares      String?
+  whoValidates     String?
+  dueAt            DateTime? @db.Date
+  linkedMilestone  String?
+  riskLevel        String    @default("Modéré")
+  status           String    @default("À définir")
+  decision         String?   @db.Text
+  proofNote        String?
+  archivedAt       DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+
+  @@index([pilotageId, status])
+}
+
+/// Réservations / incorporations (ex. gros œuvre)
+model PilotageEmbeddedElement {
+  id              String    @id @default(cuid())
+  pilotageId      String
+  reference       String?
+  title           String
+  elementType     String    @default("Réservation")
+  requestingLot   String?
+  executingLot    String?
+  building        String?
+  level           String?
+  zone            String?
+  planRef         String?
+  planIndice      String?
+  locationNote    String?
+  dueAt           DateTime? @db.Date
+  pourAt          DateTime? @db.Date
+  responsibleName String?
+  validatorName   String?
+  status          String    @default("À identifier")
+  photoUrl        String?
+  proofNote       String?
+  observation     String?   @db.Text
+  impact          String?
+  archivedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+
+  @@index([pilotageId, status])
+  @@index([pourAt])
+}
+
+/// Ouvrage sensible — conformité « selon éléments enregistrés » uniquement
+model PilotageSensitiveWork {
+  id               String    @id @default(cuid())
+  pilotageId       String
+  title            String
+  lot              String?
+  zone             String?
+  description      String?   @db.Text
+  sensitivityLevel String    @default("Élevé")
+  risks            String?   @db.Text
+  requiredDocs     String?   @db.Text
+  requiredPlans    String?   @db.Text
+  requiredVisas    String?   @db.Text
+  requiredChecks   String?   @db.Text
+  photosRequired   Boolean   @default(true)
+  responsibleName  String?
+  plannedAt        DateTime? @db.Date
+  actualAt         DateTime? @db.Date
+  status           String    @default("À préparer")
+  proofNote        String?
+  archivedAt       DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+
+  @@index([pilotageId, status])
+}
+
+model PilotageNonConformity {
+  id                String    @id @default(cuid())
+  pilotageId        String
+  reference         String?
+  lot               String?
+  zone              String?
+  description       String    @db.Text
+  detectedAt        DateTime  @default(now())
+  detectedByName    String?
+  origin            String?
+  severity          String    @default("Important")
+  rootCause         String?   @db.Text
+  correctiveAction  String?   @db.Text
+  responsibleName   String?
+  dueAt             DateTime? @db.Date
+  proofCorrection   String?
+  controllerName    String?
+  controlledAt      DateTime?
+  decision          String?
+  status            String    @default("Détectée")
+  impactCost        String?
+  impactDelay       String?
+  photoUrl          String?
+  archivedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+
+  @@index([pilotageId, status])
+  @@index([severity])
+}
+
+/// Retard / événement perturbateur — origine « enregistrée », pas attribution juridique
+model PilotageDelayEvent {
+  id                   String    @id @default(cuid())
+  pilotageId           String
+  title                String
+  description          String?   @db.Text
+  startedAt            DateTime? @db.Date
+  endedAt              DateTime? @db.Date
+  durationDaysEst      Int?
+  durationDaysActual   Int?
+  causeCategory        String    @default("À analyser")
+  presumedOrigin       String?
+  impactedMilestone    String?
+  impactedTask         String?
+  proofNote            String?
+  letterSent           Boolean   @default(false)
+  measureTaken         String?   @db.Text
+  impactCost           String?
+  impactDelay          String?
+  confirmationLevel    String    @default("À vérifier")
+  status               String    @default("Identifié")
+  archivedAt           DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+
+  @@index([pilotageId, status])
+}
+
+model PilotageMeeting {
+  id              String    @id @default(cuid())
+  pilotageId      String
+  title           String
+  meetingType     String    @default("Réunion de chantier")
+  scheduledAt     DateTime?
+  status          String    @default("À préparer")
+  participants    String?   @db.Text
+  agendaJson      Json?
+  decisionsJson   Json?
+  notes           String?   @db.Text
+  archivedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+
+  @@index([pilotageId, status])
+}
+
+model PilotagePhoto {
+  id              String    @id @default(cuid())
+  pilotageId      String
+  title           String?
+  category        String    @default("Pendant travaux")
+  caption         String?   @db.Text
+  fileUrl         String
+  lot             String?
+  zone            String?
+  building        String?
+  level           String?
+  linkedType      String?
+  linkedId        String?
+  authorName      String?
+  takenAt         DateTime?
+  visibility      String    @default("Interne entreprise cliente")
+  archivedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+
+  @@index([pilotageId, category])
+}
+
+model PilotageLesson {
+  id                 String    @id @default(cuid())
+  pilotageId         String?
+  title              String
+  description        String?   @db.Text
+  lot                String?
+  worksiteType       String?
+  cause              String?   @db.Text
+  consequence        String?   @db.Text
+  solution           String?   @db.Text
+  effectiveness      String?
+  recommendation     String?   @db.Text
+  validationStatus   String    @default("Brouillon")
+  approvedByName     String?
+  approvedAt         DateTime?
+  enrichModels       Boolean   @default(false)
+  archivedAt         DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  pilotage WorksitePilotage? @relation(fields: [pilotageId], references: [id], onDelete: SetNull)
+
+  @@index([pilotageId])
+  @@index([validationStatus])
+}
+
+/// Événement de chronologie probante (faits datés, confirmation humaine)
+model PilotageTimelineEvent {
+  id                 String    @id @default(cuid())
+  pilotageId         String
+  occurredAt         DateTime  @default(now())
+  eventType          String
+  title              String
+  description        String?   @db.Text
+  actorInternal      String?
+  actorExternal      String?
+  linkedType         String?
+  linkedId           String?
+  linkedLabel        String?
+  confirmationLevel  String    @default("À vérifier")
+  visibility         String    @default("Interne BeWork")
+  proofNote          String?
+  archivedAt         DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  pilotage WorksitePilotage @relation(fields: [pilotageId], references: [id], onDelete: Cascade)
+
+  @@index([pilotageId, occurredAt])
+  @@index([eventType])
 }
 
 /// Liens de démonstration commerciale Pilotage — isolés des données métier.

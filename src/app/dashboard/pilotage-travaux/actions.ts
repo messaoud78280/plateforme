@@ -9,11 +9,11 @@ import {
   requirePilotageAccess,
   requirePilotageSession,
 } from "@/lib/pilotage/access";
-import { computeAdminProgress, computeDoeProgress } from "@/lib/pilotage/calculations";
+import { computeDoeProgress } from "@/lib/pilotage/calculations";
 import { DEFAULT_MILESTONES, PILOTAGE_LIST_PATH } from "@/lib/pilotage/constants";
-import { countHealthSignals } from "@/lib/pilotage/health";
 import { logPilotageActivity } from "@/lib/pilotage/history";
 import { getTemplateById } from "@/lib/pilotage/templates";
+import { refreshPilotageProgress } from "./refresh-progress";
 
 function revalidatePilotage(id?: string) {
   revalidatePath(PILOTAGE_LIST_PATH);
@@ -24,57 +24,7 @@ function revalidatePilotage(id?: string) {
 }
 
 async function refreshProgress(pilotageId: string) {
-  const pilotage = await prisma.worksitePilotage.findUnique({
-    where: { id: pilotageId },
-    select: {
-      status: true,
-      actions: { where: { archivedAt: null }, select: { dueDate: true, status: true, priority: true } },
-      obligations: { where: { archivedAt: null }, select: { dueDate: true, status: true, priority: true } },
-      requiredDocuments: { where: { archivedAt: null }, select: { status: true } },
-      plans: { where: { archivedAt: null }, select: { visaDueDate: true, status: true } },
-      extraWorks: {
-        where: { archivedAt: null },
-        select: { startedWithoutValidation: true, writtenValidation: true, status: true },
-      },
-      doeItems: { where: { archivedAt: null }, select: { status: true } },
-      blockers: { where: { archivedAt: null }, select: { severity: true, status: true } },
-      milestones: { where: { archivedAt: null }, select: { status: true } },
-    },
-  });
-  if (!pilotage) return;
-
-  const doe = computeDoeProgress(pilotage.doeItems);
-  const admin = computeAdminProgress({
-    obligationsTotal: pilotage.obligations.length,
-    obligationsDone: pilotage.obligations.filter((o) => o.status === "Validée" || o.status === "Non applicable").length,
-    docsTotal: pilotage.requiredDocuments.length,
-    docsDone: pilotage.requiredDocuments.filter((d) => d.status === "Validé" || d.status === "Non applicable").length,
-    plansTotal: pilotage.plans.length,
-    plansDone: pilotage.plans.filter((p) => ["Validé", "Bon pour exécution", "Obsolète"].includes(p.status)).length,
-    doePct: doe.pct,
-  });
-  const health = countHealthSignals({
-    status: pilotage.status,
-    actions: pilotage.actions,
-    obligations: pilotage.obligations,
-    requiredDocuments: pilotage.requiredDocuments,
-    plans: pilotage.plans,
-    extraWorks: pilotage.extraWorks,
-    doeItems: pilotage.doeItems,
-    blockers: pilotage.blockers,
-    milestones: pilotage.milestones,
-  });
-
-  await prisma.worksitePilotage.update({
-    where: { id: pilotageId },
-    data: {
-      adminProgressPct: admin,
-      doeProgressPct: doe.pct,
-      healthScore: health.score,
-      healthLabel: health.label,
-      healthUpdatedAt: new Date(),
-    },
-  });
+  await refreshPilotageProgress(pilotageId);
 }
 
 function parseDate(v: FormDataEntryValue | null): Date | null {

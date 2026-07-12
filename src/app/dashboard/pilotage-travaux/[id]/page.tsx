@@ -6,8 +6,11 @@ import {
   HealthPanel,
   MilestoneTimeline,
   ProgressRing,
+  ContractRiskPanel,
 } from "@/components/pilotage/PilotageCockpit";
 import { PilotageDetailNav } from "@/components/pilotage/PilotageDetailNav";
+import { PilotageAdvancedTabs } from "@/components/pilotage/PilotageAdvancedTabs";
+import { PilotageGedPanel } from "@/components/pilotage/PilotageGedPanel";
 import {
   ActionStatusButtons,
   DoeStatusSelect,
@@ -30,6 +33,7 @@ import {
   requirePilotageAccess,
   requirePilotageSession,
 } from "@/lib/pilotage/access";
+import { ensureChantierFolders } from "@/lib/chantier-dossier/folders";
 import {
   computeDoeProgress,
   formatDateFr,
@@ -41,6 +45,9 @@ import {
   startOfDay,
   addDays,
 } from "@/lib/pilotage/calculations";
+import { computeContractRisk } from "@/lib/pilotage/contractRisk";
+import { runConsistencyChecks } from "@/lib/pilotage/consistency";
+import { detectDataQualityIssues } from "@/lib/pilotage/dataQuality";
 import { PILOTAGE_LIST_PATH, SERVICE_LEVEL_LABELS, type DetailTabId } from "@/lib/pilotage/constants";
 import { countHealthSignals } from "@/lib/pilotage/health";
 import { prisma } from "@/lib/prisma";
@@ -71,6 +78,22 @@ export default async function PilotageDetailPage({
     "vue",
     "a-traiter",
     "blocages",
+    "securisation",
+    "methode",
+    "echeances",
+    "hypotheses",
+    "retards",
+    "nc",
+    "chronologie",
+    "qualite",
+    "passation",
+    "interfaces",
+    "reservations",
+    "ouvrages",
+    "reunions",
+    "photos",
+    "rex",
+    "formation",
     "pieces",
     "obligations",
     "documents",
@@ -109,9 +132,73 @@ export default async function PilotageDetailPage({
       reports: { orderBy: { createdAt: "desc" }, take: 20 },
       milestones: { where: { archivedAt: null }, orderBy: { sortOrder: "asc" } },
       blockers: { where: { archivedAt: null }, orderBy: [{ severity: "asc" }, { openedAt: "desc" }] },
+      sensitiveDeadlines: { where: { archivedAt: null }, orderBy: [{ dueAt: "asc" }, { createdAt: "desc" }] },
+      pricingAssumptions: { where: { archivedAt: null }, orderBy: { createdAt: "desc" } },
+      handovers: {
+        where: { archivedAt: null },
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        include: { items: { where: { archivedAt: null }, orderBy: { sortOrder: "asc" } } },
+      },
+      tradeInterfaces: { where: { archivedAt: null }, orderBy: { createdAt: "desc" } },
+      embeddedElements: { where: { archivedAt: null }, orderBy: [{ pourAt: "asc" }, { createdAt: "desc" }] },
+      sensitiveWorks: { where: { archivedAt: null }, orderBy: { plannedAt: "asc" } },
+      nonConformities: { where: { archivedAt: null }, orderBy: { detectedAt: "desc" } },
+      delayEvents: { where: { archivedAt: null }, orderBy: { startedAt: "desc" } },
+      timelineEvents: { where: { archivedAt: null }, orderBy: { occurredAt: "desc" }, take: 80 },
+      meetings: { where: { archivedAt: null }, orderBy: { scheduledAt: "desc" } },
+      photos: { where: { archivedAt: null }, orderBy: { takenAt: "desc" }, take: 40 },
+      lessons: { where: { archivedAt: null }, orderBy: { createdAt: "desc" } },
     },
   });
   if (!pilotage) notFound();
+
+  await ensureChantierFolders(pilotage.projectId);
+  const [gedFolders, gedFilesRaw, gedTrashRaw, gedFavorites] = await Promise.all([
+    prisma.chantierFolder.findMany({
+      where: { projectId: pilotage.projectId },
+      orderBy: { sortOrder: "asc" },
+      select: { id: true, code: true, label: true },
+    }),
+    prisma.chantierFile.findMany({
+      where: { projectId: pilotage.projectId, deletedAt: null },
+      include: { folder: { select: { id: true, code: true, label: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 200,
+    }),
+    prisma.chantierFile.findMany({
+      where: { projectId: pilotage.projectId, deletedAt: { not: null } },
+      include: { folder: { select: { id: true, code: true, label: true } } },
+      orderBy: { deletedAt: "desc" },
+      take: 50,
+    }),
+    prisma.chantierFileFavorite.findMany({
+      where: { userId: session.user.id, file: { projectId: pilotage.projectId } },
+      select: { fileId: true },
+    }),
+  ]);
+  const favoriteIds = new Set(gedFavorites.map((f) => f.fileId));
+  const mapGedRow = (f: (typeof gedFilesRaw)[number]) => ({
+    id: f.id,
+    name: f.name,
+    fileUrl: f.fileUrl,
+    mimeType: f.mimeType,
+    fileSize: f.fileSize,
+    status: f.status,
+    category: f.category,
+    documentType: f.documentType,
+    indice: f.indice,
+    versionLabel: f.versionLabel,
+    isCurrentVersion: f.isCurrentVersion,
+    classificationStatus: f.classificationStatus,
+    previewStatus: f.previewStatus,
+    visibility: f.visibility,
+    createdAt: f.createdAt.toISOString(),
+    folder: f.folder,
+    isFavorite: favoriteIds.has(f.id),
+  });
+  const gedFiles = gedFilesRaw.map(mapGedRow);
+  const gedTrash = gedTrashRaw.map(mapGedRow);
 
   const doe = computeDoeProgress(pilotage.doeItems);
   const overdueActions = pilotage.actions.filter((a) => isActionOpen(a.status) && isOverdue(a.dueDate, a.status));
@@ -133,6 +220,63 @@ export default async function PilotageDetailPage({
     blockers: pilotage.blockers,
     milestones: pilotage.milestones,
   });
+  const now = new Date();
+  const nearReception =
+    pilotage.plannedEndDate != null &&
+    pilotage.plannedEndDate.getTime() - now.getTime() < 45 * 24 * 60 * 60 * 1000;
+  const contractRisk = computeContractRisk({
+    tsWithoutWrittenValidation: tsAlert.length,
+    overdueCriticalObligations: pilotage.obligations.filter(
+      (o) =>
+        o.priority === "Critique" &&
+        o.dueDate != null &&
+        isOverdue(o.dueDate, o.status) &&
+        !["Validée", "Non applicable"].includes(o.status),
+    ).length,
+    openCriticalBlockers: openBlockers.filter((b) => b.severity === "Critique").length,
+    contestedSituations: pilotage.situations.filter((s) => s.status === "Contestée").length,
+    incompleteSubcontractors: incompleteSt.filter(
+      (s) => s.approvalStatus !== "Agréé" || s.dossierStatus !== "Complet",
+    ).length,
+    overdueSensitiveDeadlines: pilotage.sensitiveDeadlines.filter(
+      (d) =>
+        d.status === "Dépassée" ||
+        (d.dueAt != null && d.dueAt < now && !["Traitée", "Non applicable", "Contestée"].includes(d.status)),
+    ).length,
+    openNonConformitiesCritical: pilotage.nonConformities.filter(
+      (n) => n.severity === "Critique" && !["Corrigée", "Clôturée", "Non applicable"].includes(n.status),
+    ).length,
+    openDelayEvents: pilotage.delayEvents.filter(
+      (d) => !["Résolu", "Clôturé", "Impact confirmé"].includes(d.status),
+    ).length,
+    doeMissingNearReception: nearReception
+      ? pilotage.doeItems.filter((d) => !["Reçu", "Validé", "Non applicable"].includes(d.status)).length
+      : 0,
+    unconfirmedAssumptions: pilotage.pricingAssumptions.filter((a) =>
+      ["Hypothèse d’étude", "À vérifier"].includes(a.verificationStatus),
+    ).length,
+  });
+  const consistencyIssues = runConsistencyChecks({
+    actions: pilotage.actions,
+    obligations: pilotage.obligations,
+    plans: pilotage.plans,
+    extraWorks: pilotage.extraWorks,
+    doeItems: pilotage.doeItems,
+    situations: pilotage.situations,
+    milestones: pilotage.milestones,
+    subcontractors: pilotage.subcontractors,
+    delayEvents: pilotage.delayEvents,
+    nonConformities: pilotage.nonConformities,
+  });
+  const qualityIssues = detectDataQualityIssues({
+    actions: pilotage.actions,
+    obligations: pilotage.obligations,
+    requiredDocuments: pilotage.requiredDocuments,
+    plans: pilotage.plans,
+    blockers: pilotage.blockers,
+    doeItems: pilotage.doeItems,
+    extraWorks: pilotage.extraWorks,
+  });
   const today = startOfDay();
   const weekEnd = addDays(today, 7);
   const nextMilestone = pilotage.milestones.find((m) => !["Atteint", "Annulé", "Non applicable"].includes(m.status));
@@ -147,9 +291,15 @@ export default async function PilotageDetailPage({
   const navBadges: Partial<Record<DetailTabId, number>> = {
     "a-traiter": overdueActions.length + situationsTodo.length,
     blocages: openBlockers.length,
-    documents: missingDocs.length,
+    documents: missingDocs.length + gedFiles.filter((f) => f.classificationStatus === "A_CLASSER").length,
     plans: visas.length,
     doe: doe.manquant,
+    securisation:
+      contractRisk.score >= 20
+        ? pilotage.sensitiveDeadlines.filter((d) => d.status === "À vérifier" || d.status === "Dépassée").length +
+          openBlockers.length
+        : 0,
+    qualite: qualityIssues.length + consistencyIssues.length,
   };
 
   return (
@@ -188,8 +338,9 @@ export default async function PilotageDetailPage({
             </div>
           </div>
         </div>
-        <div className="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <div className="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7">
           <HealthPanel health={health} causesHref={hrefTab("blocages")} compact />
+          <ContractRiskPanel risk={contractRisk} href={hrefTab("securisation")} compact />
           <div className="pilotage-card flex items-center p-3">
             <ProgressRing value={pilotage.adminProgressPct} label="Admin" />
           </div>
@@ -204,6 +355,29 @@ export default async function PilotageDetailPage({
       </header>
 
       <PilotageDetailNav pilotageId={id} active={tab} badges={navBadges} />
+
+      <PilotageAdvancedTabs
+        tab={tab}
+        pilotageId={id}
+        canEdit={canEdit}
+        contractRisk={contractRisk}
+        consistencyIssues={consistencyIssues}
+        qualityIssues={qualityIssues}
+        deadlines={pilotage.sensitiveDeadlines}
+        assumptions={pilotage.pricingAssumptions}
+        handovers={pilotage.handovers}
+        tradeInterfaces={pilotage.tradeInterfaces}
+        embeddedElements={pilotage.embeddedElements}
+        sensitiveWorks={pilotage.sensitiveWorks}
+        nonConformities={pilotage.nonConformities}
+        delayEvents={pilotage.delayEvents}
+        timelineEvents={pilotage.timelineEvents}
+        meetings={pilotage.meetings}
+        photos={pilotage.photos}
+        lessons={pilotage.lessons}
+        openBlockersCount={openBlockers.length}
+        tsAlertCount={tsAlert.length}
+      />
 
       {tab === "vue" && (
         <div className="grid gap-4 lg:grid-cols-3">
@@ -530,21 +704,34 @@ export default async function PilotageDetailPage({
       )}
 
       {tab === "documents" && (
-        <Panel>
-          <QuickAddRequiredDoc pilotageId={id} canEdit={canEdit} />
-          <Table
-            headers={["Document", "Catégorie", "Obligatoire", "Échéance", "Statut", "Producteur"]}
-            rows={pilotage.requiredDocuments.map((d) => [
-              d.name,
-              d.category,
-              d.isMandatory ? "Oui" : "Non",
-              formatDateFr(d.dueDate),
-              <StatusBadge key="s" status={d.status} />,
-              d.producerName ?? "—",
-            ])}
-            empty="Aucun document à remettre n’a encore été ajouté."
+        <div className="space-y-4">
+          <PilotageGedPanel
+            pilotageId={id}
+            projectId={pilotage.projectId}
+            canEdit={canEdit}
+            folders={gedFolders}
+            files={gedFiles}
+            trashFiles={gedTrash}
           />
-        </Panel>
+          <Panel>
+            <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+              Documents à remettre (suivi pilotage)
+            </h3>
+            <QuickAddRequiredDoc pilotageId={id} canEdit={canEdit} />
+            <Table
+              headers={["Document", "Catégorie", "Obligatoire", "Échéance", "Statut", "Producteur"]}
+              rows={pilotage.requiredDocuments.map((d) => [
+                d.name,
+                d.category,
+                d.isMandatory ? "Oui" : "Non",
+                formatDateFr(d.dueDate),
+                <StatusBadge key="s" status={d.status} />,
+                d.producerName ?? "—",
+              ])}
+              empty="Aucun document à remettre n’a encore été ajouté."
+            />
+          </Panel>
+        </div>
       )}
 
       {tab === "actions" && (

@@ -6,6 +6,13 @@ import {
   type HealthLabel,
   type HealthResult,
 } from "@/lib/pilotage/health";
+import {
+  CONTRACT_RISK_COLORS,
+  CONTRACT_RISK_DISCLAIMER,
+  CONTRACT_RISK_LABELS,
+  type ContractRiskLabel,
+  type ContractRiskResult,
+} from "@/lib/pilotage/contractRisk";
 import { PILOTAGE_LIST_PATH } from "@/lib/pilotage/constants";
 
 export function HealthBadge({ label }: { label: HealthLabel | string | null | undefined }) {
@@ -16,6 +23,87 @@ export function HealthBadge({ label }: { label: HealthLabel | string | null | un
     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1 ring-inset ${color}`}>
       {text}
     </span>
+  );
+}
+
+export function ContractRiskBadge({ label }: { label: ContractRiskLabel | string | null | undefined }) {
+  const key = (label ?? "FAIBLE") as ContractRiskLabel;
+  const color = CONTRACT_RISK_COLORS[key] ?? CONTRACT_RISK_COLORS.FAIBLE;
+  const text = CONTRACT_RISK_LABELS[key] ?? label ?? "—";
+  return (
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1 ring-inset ${color}`}>
+      {text}
+    </span>
+  );
+}
+
+export function ContractRiskPanel({
+  risk,
+  href,
+  compact,
+}: {
+  risk: ContractRiskResult;
+  href?: string;
+  compact?: boolean;
+}) {
+  return (
+    <div className={`pilotage-card flex gap-3 ${compact ? "p-3" : "p-4"}`}>
+      <div
+        className={`w-1 shrink-0 rounded-full ${
+          risk.label === "CRITIQUE"
+            ? "bg-red-500"
+            : risk.label === "ELEVE"
+              ? "bg-orange-500"
+              : risk.label === "MODERE"
+                ? "bg-amber-400"
+                : "bg-emerald-500"
+        }`}
+        aria-hidden
+      />
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Risque contractuel</p>
+            <div className="mt-1 flex items-center gap-2">
+              <ContractRiskBadge label={risk.label} />
+              <span className="text-lg font-bold text-[#1e3a5f]">{risk.score}</span>
+              <span className="text-xs text-slate-500">/ 100</span>
+            </div>
+          </div>
+          {href ? (
+            <Link href={href} className="text-xs font-semibold text-[#1e3a5f] hover:underline">
+              Sécurisation
+            </Link>
+          ) : null}
+        </div>
+        {!compact ? (
+          <>
+            <ul className="mt-3 space-y-1">
+              {risk.reasons.map((r) => (
+                <li key={r} className="text-xs leading-relaxed text-slate-600">
+                  · {r}
+                </li>
+              ))}
+            </ul>
+            {risk.recommendations.length > 0 ? (
+              <div className="mt-3 rounded-lg bg-slate-50 px-3 py-2">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Actions recommandées</p>
+                <ul className="mt-1 space-y-1">
+                  {risk.recommendations.slice(0, 3).map((r) => (
+                    <li key={r} className="text-xs text-slate-700">
+                      → {r}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+            <p className="mt-3 text-[10px] italic text-slate-500">{CONTRACT_RISK_DISCLAIMER}</p>
+          </>
+        ) : (
+          <p className="mt-2 text-[10px] italic text-slate-500">{CONTRACT_RISK_DISCLAIMER}</p>
+        )}
+      </div>
+    </div>
   );
 }
 

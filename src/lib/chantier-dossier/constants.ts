@@ -2,6 +2,7 @@ import type { ChantierFileStatus, ChantierStatus } from "@prisma/client";
 
 /** Rubriques créées automatiquement à l'ouverture d'un chantier. */
 export const DEFAULT_CHANTIER_FOLDERS: { code: string; label: string; sortOrder: number }[] = [
+  { code: "00", label: "Documents à classer", sortOrder: 0 },
   { code: "01", label: "Devis & avenants", sortOrder: 1 },
   { code: "02", label: "Contrats / commandes client", sortOrder: 2 },
   { code: "03", label: "Plans & pièces techniques", sortOrder: 3 },
@@ -13,6 +14,9 @@ export const DEFAULT_CHANTIER_FOLDERS: { code: string; label: string; sortOrder:
   { code: "09", label: "Facturation / situations / paiements", sortOrder: 9 },
   { code: "10", label: "Réserves / réception", sortOrder: 10 },
   { code: "11", label: "DOE / fin de chantier", sortOrder: 11 },
+  { code: "12", label: "Marché (RC, AE, CCAP, CCTP…)", sortOrder: 12 },
+  { code: "13", label: "Sécurité / méthodes", sortOrder: 13 },
+  { code: "14", label: "Qualité / contrôles", sortOrder: 14 },
 ];
 
 export const CHANTIER_STATUS_LABELS: Record<ChantierStatus, string> = {

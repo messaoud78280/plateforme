@@ -21,10 +21,11 @@ import {
 } from "@/lib/chantier-dossier/sync-mission-documents";
 import { ChantierOrphanMissionBanner } from "@/components/chantier/ChantierOrphanMissionBanner";
 import {
-  CHANTIER_STATUS_COLORS,
   CHANTIER_STATUS_LABELS,
   CHANTIER_MISSING_STATUSES,
 } from "@/lib/chantier-dossier/constants";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Badge } from "@/components/ui/Badge";
 
 export default async function ProjetDetailPage({
   params,
@@ -179,61 +180,76 @@ export default async function ProjetDetailPage({
     <div className="space-y-6">
       <BackLink href="/dashboard/projets">Retour aux chantiers</BackLink>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <a href="#dossier-chantier" className="rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e40af]">
-          Ouvrir le dossier
-        </a>
-        {canDeleteChantier ? (
-          <DeleteChantierButton
-            projectId={id}
-            projectTitle={project.title}
-            redirectTo="/dashboard/projets"
-            label="Supprimer le chantier"
-            className="px-4 py-2 text-sm"
-          />
-        ) : null}
-        {missingCount > 0 ? (
-          <Link
-            href={`/dashboard/projets/manquants?chantier=${encodeURIComponent(id)}`}
-            className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-800 hover:bg-red-100"
-          >
-            {missingCount} pièce{missingCount > 1 ? "s" : ""} à récupérer
-          </Link>
-        ) : null}
-      </div>
-
-      <div className="rounded-xl surface-metallic-light p-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">{project.title}</h1>
-            {project.description && (
-              <p className="mt-2 text-slate-600">{project.description}</p>
-            )}
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-500">
-              <span>Client : {project.client.name}</span>
-              {project.siteCity ? <span>{project.siteCity}</span> : null}
-              {project.internalManager ? (
-                <span>Responsable : {project.internalManager}</span>
-              ) : null}
-              {project.assignedTo && (
-                <span className="rounded-full bg-blue-50 px-2.5 py-0.5 font-medium text-blue-800">
-                  {isAgence ? "Agent : " : "Référent : "}{project.assignedTo.name}
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            <span
-              className={`rounded-full px-3 py-1 text-sm font-medium ${CHANTIER_STATUS_COLORS[project.chantierStatus] ?? "bg-slate-100 text-slate-800"}`}
+      <PageHeader
+        eyebrow="Dossier chantier"
+        title={project.title}
+        description={
+          [
+            project.description,
+            `Client : ${project.client.name}`,
+            project.siteCity,
+            project.internalManager ? `Responsable : ${project.internalManager}` : null,
+            project.assignedTo
+              ? `${isAgence ? "Agent" : "Référent"} : ${project.assignedTo.name}`
+              : null,
+          ]
+            .filter(Boolean)
+            .join(" · ")
+        }
+        actions={
+          <>
+            <a href="#dossier-chantier" className="btn-cc-primary">
+              Ouvrir le dossier
+            </a>
+            {missingCount > 0 ? (
+              <Link
+                href={`/dashboard/projets/manquants?chantier=${encodeURIComponent(id)}`}
+                className="btn-cc-danger"
+              >
+                {missingCount} pièce{missingCount > 1 ? "s" : ""} à récupérer
+              </Link>
+            ) : null}
+            {canDeleteChantier ? (
+              <DeleteChantierButton
+                projectId={id}
+                projectTitle={project.title}
+                redirectTo="/dashboard/projets"
+                label="Supprimer le chantier"
+                className="px-4 py-2 text-sm"
+              />
+            ) : null}
+            <Badge
+              tone={
+                project.chantierStatus === "TERMINE"
+                  ? "ok"
+                  : project.chantierStatus === "EN_ATTENTE"
+                    ? "watch"
+                    : "info"
+              }
             >
               {CHANTIER_STATUS_LABELS[project.chantierStatus] ?? project.chantierStatus}
-            </span>
+            </Badge>
             <span
               className={`rounded-full px-3 py-1 text-xs font-medium ${urgencyColors[project.urgency] ?? "bg-slate-100 text-slate-800"}`}
             >
               Urgence : {urgencyLabels[project.urgency] ?? project.urgency}
             </span>
-          </div>
+          </>
+        }
+      />
+
+      <div className="cc-card p-5 sm:p-6">
+        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-bework-muted">Contexte chantier</p>
+        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-bework-muted">
+          <span>Client : {project.client.name}</span>
+          {project.siteCity ? <span>{project.siteCity}</span> : null}
+          {project.internalManager ? <span>Responsable : {project.internalManager}</span> : null}
+          {project.assignedTo ? (
+            <span className="rounded-full bg-bework-navy-soft px-2.5 py-0.5 font-medium text-bework-navy">
+              {isAgence ? "Agent : " : "Référent : "}
+              {project.assignedTo.name}
+            </span>
+          ) : null}
         </div>
 
         {isAgence ? (

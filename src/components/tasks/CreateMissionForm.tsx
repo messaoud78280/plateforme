@@ -8,13 +8,14 @@ import {
   MISSION_TITLES_BY_TYPE,
   type MissionType,
 } from "@/lib/tasks/mission-types";
+import { Button } from "@/components/ui/Button";
+import { Drawer } from "@/components/ui/Drawer";
+import { Input, Select, Textarea } from "@/components/ui/Input";
+import { Alert } from "@/components/ui/Alert";
 
 type ClientOption = { id: string; name: string; company: string | null };
 type AgentOption = { id: string; name: string };
 type ProjectOption = { id: string; title: string; clientId: string };
-
-const fieldClass =
-  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#1d4ed8] focus:ring-2 focus:ring-[#1d4ed8]/20";
 
 type CreateMissionFormProps = {
   clients: ClientOption[];
@@ -58,7 +59,7 @@ export function CreateMissionForm({
 
   const clientProjects = useMemo(
     () => projects.filter((p) => p.clientId === clientId),
-    [projects, clientId]
+    [projects, clientId],
   );
 
   const lockedClient = Boolean(defaultClientId);
@@ -80,21 +81,12 @@ export function CreateMissionForm({
             id: p.id,
             title: p.title,
             clientId: p.clientId ?? p.client?.id ?? "",
-          }))
+          })),
         );
       })
       .catch(() => setProjects([]))
       .finally(() => setLoadingProjects(false));
   }, [open]);
-
-  useEffect(() => {
-    if (defaultClientId) setClientId(defaultClientId);
-    if (defaultProjectId) setProjectId(defaultProjectId);
-  }, [defaultClientId, defaultProjectId]);
-
-  useEffect(() => {
-    if (!lockedProject) setProjectId("");
-  }, [clientId, lockedProject]);
 
   useEffect(() => {
     if (missionType && MISSION_TITLES_BY_TYPE[missionType] && !title.trim()) {
@@ -172,169 +164,157 @@ export function CreateMissionForm({
   return (
     <>
       {!hideTrigger ? (
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="inline-flex items-center rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#1e40af]"
-        >
+        <Button type="button" onClick={() => setOpen(true)}>
           + Nouvelle mission
-        </button>
+        </Button>
       ) : null}
 
-      {open ? (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center px-4 py-6" role="dialog" aria-modal="true">
-          <button type="button" className="absolute inset-0 bg-black/40" onClick={closeModal} aria-label="Fermer" />
-          <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
-            <h2 className="text-lg font-semibold text-slate-900">Créer une mission</h2>
-            <p className="mt-1 text-sm text-slate-600">
-              {defaultProjectTitle
-                ? `Liée au chantier « ${defaultProjectTitle} ».`
-                : "La mission apparaît dans « À assigner » si aucun agent n'est choisi."}
-            </p>
+      <Drawer
+        open={open}
+        onClose={closeModal}
+        dismissible={!loading}
+        widthClass="max-w-lg"
+        title="Créer une mission"
+        description={
+          defaultProjectTitle
+            ? `Liée au chantier « ${defaultProjectTitle} ».`
+            : "La mission apparaît dans « À assigner » si aucun agent n'est choisi."
+        }
+        footer={
+          clients.length === 0 ? null : (
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button type="button" variant="secondary" disabled={loading} onClick={closeModal}>
+                Annuler
+              </Button>
+              <Button type="submit" form="create-mission-form" disabled={loading}>
+                {loading ? "Création…" : "Créer la mission"}
+              </Button>
+            </div>
+          )
+        }
+      >
+        {clients.length === 0 ? (
+          <Alert tone="watch">Aucun client enregistré.</Alert>
+        ) : (
+          <form id="create-mission-form" onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
+            <Select
+              id="mission-client"
+              label="Client *"
+              required
+              value={clientId}
+              disabled={lockedClient}
+              onChange={(e) => setClientId(e.target.value)}
+            >
+              <option value="">— Choisir un client —</option>
+              {clients.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.company ? `${c.name} — ${c.company}` : c.name}
+                </option>
+              ))}
+            </Select>
 
-            {clients.length === 0 ? (
-              <p className="mt-4 text-sm text-amber-800">Aucun client enregistré.</p>
-            ) : (
-              <form onSubmit={(e) => void handleSubmit(e)} className="mt-5 space-y-4">
-                <div>
-                  <label htmlFor="mission-client" className="mb-1 block text-xs font-semibold uppercase text-slate-500">
-                    Client *
-                  </label>
-                  <select
-                    id="mission-client"
-                    required
-                    value={clientId}
-                    disabled={lockedClient}
-                    onChange={(e) => setClientId(e.target.value)}
-                    className={fieldClass}
-                  >
-                    <option value="">— Choisir un client —</option>
-                    {clients.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.company ? `${c.name} — ${c.company}` : c.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            <Select
+              id="mission-project"
+              label="Chantier"
+              value={projectId}
+              disabled={lockedProject || !clientId || loadingProjects}
+              onChange={(e) => setProjectId(e.target.value)}
+            >
+              <option value="">{loadingProjects ? "Chargement…" : "— Aucun chantier —"}</option>
+              {clientProjects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.title}
+                </option>
+              ))}
+            </Select>
 
-                <div>
-                  <label htmlFor="mission-project" className="mb-1 block text-xs font-semibold uppercase text-slate-500">
-                    Chantier
-                  </label>
-                  <select
-                    id="mission-project"
-                    value={projectId}
-                    disabled={lockedProject || !clientId || loadingProjects}
-                    onChange={(e) => setProjectId(e.target.value)}
-                    className={fieldClass}
-                  >
-                    <option value="">{loadingProjects ? "Chargement…" : "— Aucun chantier —"}</option>
-                    {clientProjects.map((p) => (
-                      <option key={p.id} value={p.id}>{p.title}</option>
-                    ))}
-                  </select>
-                </div>
+            <Select
+              id="mission-type"
+              label="Type de mission"
+              value={missionType}
+              onChange={(e) => setMissionType(e.target.value as MissionType | "")}
+            >
+              <option value="">— Choisir —</option>
+              {MISSION_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {MISSION_TYPE_LABELS[t]}
+                </option>
+              ))}
+            </Select>
 
-                <div>
-                  <label htmlFor="mission-type" className="mb-1 block text-xs font-semibold uppercase text-slate-500">
-                    Type de mission
-                  </label>
-                  <select
-                    id="mission-type"
-                    value={missionType}
-                    onChange={(e) => setMissionType(e.target.value as MissionType | "")}
-                    className={fieldClass}
-                  >
-                    <option value="">— Choisir —</option>
-                    {MISSION_TYPES.map((t) => (
-                      <option key={t} value={t}>{MISSION_TYPE_LABELS[t]}</option>
-                    ))}
-                  </select>
-                </div>
+            <Input
+              id="mission-title"
+              label="Titre *"
+              required
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
 
-                <div>
-                  <label htmlFor="mission-title" className="mb-1 block text-xs font-semibold uppercase text-slate-500">
-                    Titre *
-                  </label>
-                  <input id="mission-title" required value={title} onChange={(e) => setTitle(e.target.value)} className={fieldClass} />
-                </div>
+            <Textarea
+              id="mission-desc"
+              label="Description"
+              rows={3}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
 
-                <div>
-                  <label htmlFor="mission-desc" className="mb-1 block text-xs font-semibold uppercase text-slate-500">
-                    Description
-                  </label>
-                  <textarea id="mission-desc" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} className={fieldClass} />
-                </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Select
+                id="mission-priority"
+                label="Priorité"
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+              >
+                <option value="STANDARD">Standard</option>
+                <option value="PRIORITAIRE">Prioritaire</option>
+                <option value="URGENT">Urgent</option>
+              </Select>
+              <Input
+                id="mission-date"
+                label="Échéance"
+                type="date"
+                value={desiredDate}
+                onChange={(e) => setDesiredDate(e.target.value)}
+              />
+            </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label htmlFor="mission-priority" className="mb-1 block text-xs font-semibold uppercase text-slate-500">
-                      Priorité
-                    </label>
-                    <select id="mission-priority" value={priority} onChange={(e) => setPriority(e.target.value)} className={fieldClass}>
-                      <option value="STANDARD">Standard</option>
-                      <option value="PRIORITAIRE">Prioritaire</option>
-                      <option value="URGENT">Urgent</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label htmlFor="mission-date" className="mb-1 block text-xs font-semibold uppercase text-slate-500">
-                      Échéance
-                    </label>
-                    <input id="mission-date" type="date" value={desiredDate} onChange={(e) => setDesiredDate(e.target.value)} className={fieldClass} />
-                  </div>
-                </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                id="mission-est"
+                label="Actions estimées"
+                type="number"
+                min={0}
+                value={estimatedActions}
+                onChange={(e) => setEstimatedActions(e.target.value)}
+                placeholder="Ex. 2"
+              />
+              <Select
+                id="mission-agent"
+                label="Agent"
+                value={assignedToId}
+                onChange={(e) => setAssignedToId(e.target.value)}
+              >
+                <option value="">— À assigner —</option>
+                {agents.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))}
+              </Select>
+            </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label htmlFor="mission-est" className="mb-1 block text-xs font-semibold uppercase text-slate-500">
-                      Actions estimées
-                    </label>
-                    <input
-                      id="mission-est"
-                      type="number"
-                      min={0}
-                      value={estimatedActions}
-                      onChange={(e) => setEstimatedActions(e.target.value)}
-                      className={fieldClass}
-                      placeholder="Ex. 2"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="mission-agent" className="mb-1 block text-xs font-semibold uppercase text-slate-500">
-                      Agent
-                    </label>
-                    <select id="mission-agent" value={assignedToId} onChange={(e) => setAssignedToId(e.target.value)} className={fieldClass}>
-                      <option value="">— À assigner —</option>
-                      {agents.map((a) => (
-                        <option key={a.id} value={a.id}>{a.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
+            <Textarea
+              id="mission-notes"
+              label="Notes internes"
+              rows={2}
+              value={agencyNotes}
+              onChange={(e) => setAgencyNotes(e.target.value)}
+            />
 
-                <div>
-                  <label htmlFor="mission-notes" className="mb-1 block text-xs font-semibold uppercase text-slate-500">
-                    Notes internes
-                  </label>
-                  <textarea id="mission-notes" rows={2} value={agencyNotes} onChange={(e) => setAgencyNotes(e.target.value)} className={fieldClass} />
-                </div>
-
-                {error ? <p className="text-sm text-red-600">{error}</p> : null}
-
-                <div className="flex flex-wrap justify-end gap-2 pt-2">
-                  <button type="button" disabled={loading} onClick={closeModal} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                    Annuler
-                  </button>
-                  <button type="submit" disabled={loading} className="rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e40af] disabled:opacity-50">
-                    {loading ? "Création…" : "Créer la mission"}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      ) : null}
+            {error ? <Alert tone="critical">{error}</Alert> : null}
+          </form>
+        )}
+      </Drawer>
     </>
   );
 }

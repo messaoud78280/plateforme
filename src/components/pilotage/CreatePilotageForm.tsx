@@ -5,6 +5,11 @@ import { useState, useTransition } from "react";
 import { createWorksitePilotage } from "@/app/dashboard/pilotage-travaux/actions";
 import { PILOTAGE_LIST_PATH } from "@/lib/pilotage/constants";
 import { PILOTAGE_TEMPLATES } from "@/lib/pilotage/templates";
+import { Card, CardHeader } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Input, Select, Textarea } from "@/components/ui/Input";
+import { Alert } from "@/components/ui/Alert";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 type ProjectOption = { id: string; title: string; clientName: string };
 type UserOption = { id: string; name: string };
@@ -28,14 +33,16 @@ export function CreatePilotageForm({
 
   if (projects.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
-        <p className="text-sm font-semibold text-slate-700">Aucun chantier disponible</p>
-        <p className="mt-1 text-sm text-slate-500">
-          Créez d’abord un chantier dans « Chantiers », ou tous les chantiers ont déjà un pilotage.
-        </p>
-        <a href="/dashboard/projets" className="mt-4 inline-flex rounded-xl bg-[#1e3a5f] px-4 py-2 text-sm font-semibold text-white">
-          Aller aux chantiers
-        </a>
+      <div className="space-y-4">
+        <EmptyState
+          title="Aucun chantier disponible"
+          description="Créez d’abord un chantier dans « Chantiers », ou tous les chantiers ont déjà un pilotage."
+        />
+        <div className="text-center">
+          <a href="/dashboard/projets" className="btn-cc-primary inline-flex">
+            Aller aux chantiers
+          </a>
+        </div>
       </div>
     );
   }
@@ -58,20 +65,19 @@ export function CreatePilotageForm({
         });
       }}
     >
-      <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
-        <h2 className="text-sm font-bold text-slate-900">1 — Chantier et marché</h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <label className="block text-sm sm:col-span-2">
-            <span className="font-semibold text-slate-700">Chantier existant *</span>
-            <select name="projectId" required className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+      <Card hover={false}>
+        <CardHeader title="1 — Chantier et marché" />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <Select name="projectId" label="Chantier existant *" required>
               <option value="">Sélectionner…</option>
               {projects.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.title} — {p.clientName}
                 </option>
               ))}
-            </select>
-          </label>
+            </Select>
+          </div>
           <Field name="internalRef" label="Référence interne" />
           <Field name="lot" label="Lot" placeholder="ex. Gros œuvre" />
           <Field name="corpsEtat" label="Corps d’état" />
@@ -81,55 +87,52 @@ export function CreatePilotageForm({
           <Field name="contractualDurationDays" label="Durée contractuelle (jours)" type="number" />
           <Field name="plannedEndDate" label="Fin prévisionnelle" type="date" />
         </div>
-      </section>
+      </Card>
 
-      <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
-        <h2 className="text-sm font-bold text-slate-900">2 — Intervenants</h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <label className="block text-sm">
-            <span className="font-semibold text-slate-700">Conducteur de travaux</span>
-            <select name="conducteurId" className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
-              <option value="">—</option>
-              {staffUsers.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="block text-sm">
-            <span className="font-semibold text-slate-700">Assistant BeWork</span>
-            <select name="assistantId" className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
-              <option value="">—</option>
-              {staffUsers.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name}
-                </option>
-              ))}
-            </select>
-          </label>
+      <Card hover={false}>
+        <CardHeader title="2 — Intervenants" />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Select name="conducteurId" label="Conducteur de travaux">
+            <option value="">—</option>
+            {staffUsers.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.name}
+              </option>
+            ))}
+          </Select>
+          <Select name="assistantId" label="Assistant BeWork">
+            <option value="">—</option>
+            {staffUsers.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.name}
+              </option>
+            ))}
+          </Select>
           <Field name="clientContactName" label="Responsable client" />
           <Field name="maitreOuvrage" label="Maître d’ouvrage" />
           <Field name="maitreOeuvre" label="Maître d’œuvre" />
           <Field name="bureauControle" label="Bureau de contrôle" />
           <Field name="coordinateurSps" label="Coordonnateur SPS" />
         </div>
-        <label className="mt-4 block text-sm">
-          <span className="font-semibold text-slate-700">Observations</span>
-          <textarea name="description" rows={3} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-        </label>
-      </section>
+        <div className="mt-4">
+          <Textarea name="description" label="Observations" rows={3} />
+        </div>
+      </Card>
 
-      <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
-        <h2 className="text-sm font-bold text-slate-900">3 — Structure initiale</h2>
-        <p className="mt-1 text-sm text-slate-600">
-          Les modèles proposent des éléments à adapter. Ils ne deviennent pas des obligations contractuelles sans validation humaine.
-        </p>
-        <label className="mt-4 flex items-start gap-2 text-sm">
+      <Card hover={false}>
+        <CardHeader
+          title="3 — Structure initiale"
+          description="Les modèles proposent des éléments à adapter. Ils ne deviennent pas des obligations contractuelles sans validation humaine."
+        />
+        <label className="flex items-start gap-2 text-sm text-bework-ink">
           <input type="checkbox" name="applyTemplate" value="1" defaultChecked className="mt-1" />
           <span>
             Générer la structure à partir d’un modèle
-            <select name="templateId" defaultValue={templateDefault} className="ml-2 rounded-lg border border-slate-200 px-2 py-1 text-sm">
+            <select
+              name="templateId"
+              defaultValue={templateDefault}
+              className="ml-2 rounded-[var(--cc-radius)] border border-[color:var(--cc-chrome-border)] px-2 py-1 text-sm"
+            >
               {PILOTAGE_TEMPLATES.map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.label}
@@ -138,21 +141,15 @@ export function CreatePilotageForm({
             </select>
           </span>
         </label>
-      </section>
+      </Card>
 
-      {error ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{error}</div>
-      ) : null}
+      {error ? <Alert tone="critical">{error}</Alert> : null}
 
       <div className="flex flex-wrap gap-3">
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-xl bg-[#1e3a5f] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#162d4a] disabled:opacity-60"
-        >
+        <Button type="submit" disabled={pending}>
           {pending ? "Création…" : "Créer le pilotage"}
-        </button>
-        <a href={PILOTAGE_LIST_PATH} className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700">
+        </Button>
+        <a href={PILOTAGE_LIST_PATH} className="btn-cc-secondary">
           Annuler
         </a>
       </div>
@@ -172,15 +169,12 @@ function Field({
   placeholder?: string;
 }) {
   return (
-    <label className="block text-sm">
-      <span className="font-semibold text-slate-700">{label}</span>
-      <input
-        name={name}
-        type={type}
-        placeholder={placeholder}
-        step={type === "number" ? "0.01" : undefined}
-        className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
-      />
-    </label>
+    <Input
+      name={name}
+      label={label}
+      type={type}
+      placeholder={placeholder}
+      step={type === "number" ? "0.01" : undefined}
+    />
   );
 }

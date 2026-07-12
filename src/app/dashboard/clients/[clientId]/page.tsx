@@ -8,6 +8,19 @@ import { AssignAgentProject } from "@/components/clients/AssignAgentProject";
 import { AssignAgentTask } from "@/components/clients/AssignAgentTask";
 import { DeleteClientButton } from "@/components/clients/DeleteClientButton";
 import { ClientCreditsBadge } from "@/components/clients/ClientCreditsBadge";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Card, CardHeader } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { KpiTile } from "@/components/ui/KpiTile";
+import {
+  DataTable,
+  DataTableBody,
+  DataTableHead,
+  DataTableRow,
+  DataTableTd,
+  DataTableTh,
+} from "@/components/ui/DataTable";
 
 const STATUS_LABELS: Record<string, string> = {
   NOUVEAU: "Nouveau",
@@ -48,14 +61,36 @@ export default async function ClientDetailPage({
     formeJuridique: string | null;
     secteurActivite: string | null;
   } | null = null;
-  let projects: { id: string; title: string; status: string; assignedToId: string | null; assignedTo: { id: string; name: string; email: string } | null }[] = [];
-  let tasks: { id: string; title: string; status: string; assignedToId: string | null; project: { id: string; title: string } | null; assignedTo: { id: string; name: string; email: string } | null }[] = [];
+  let projects: {
+    id: string;
+    title: string;
+    status: string;
+    assignedToId: string | null;
+    assignedTo: { id: string; name: string; email: string } | null;
+  }[] = [];
+  let tasks: {
+    id: string;
+    title: string;
+    status: string;
+    assignedToId: string | null;
+    project: { id: string; title: string } | null;
+    assignedTo: { id: string; name: string; email: string } | null;
+  }[] = [];
   let agents: { id: string; name: string; email: string }[] = [];
 
   try {
     const clientUser = await prisma.user.findUnique({
       where: { id: clientId },
-      select: { id: true, name: true, email: true, company: true, phone: true, formeJuridique: true, secteurActivite: true, role: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        company: true,
+        phone: true,
+        formeJuridique: true,
+        secteurActivite: true,
+        role: true,
+      },
     });
     if (!clientUser) {
       notFound();
@@ -106,192 +141,186 @@ export default async function ClientDetailPage({
 
   if (!client) notFound();
 
+  const openTasks = tasks.filter((t) => t.status !== "COMPLETE").length;
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <BackLink href="/dashboard/clients">Retour aux clients</BackLink>
 
-      <div className="flex flex-wrap items-start justify-between gap-4 rounded-xl surface-metallic-light p-6 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-black">{client.name}</h1>
-          <p className="mt-1 text-black">{client.email}</p>
-          {client.company && (
-            <p className="mt-1 text-sm text-black">Société : {client.company}</p>
-          )}
-          {client.formeJuridique && (
-            <p className="mt-1 text-sm text-black">Forme juridique : {client.formeJuridique}</p>
-          )}
-          {client.secteurActivite && (
-            <p className="mt-1 text-sm text-black">Secteur : {client.secteurActivite}</p>
-          )}
-          {client.phone && (
-            <p className="mt-1 text-sm text-black">Tél. : {client.phone}</p>
-          )}
-          <div className="mt-4 max-w-md">
-            <ClientCreditsBadge clientId={client.id} />
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Link
-            href={`/dashboard/taches?clientId=${client.id}&creerMission=1`}
-            className="rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e40af]"
-          >
-            + Créer une mission
-          </Link>
-          <DeleteClientButton
-            clientId={client.id}
-            clientName={client.name}
-            projectsCount={projects.length}
-            tasksCount={tasks.length}
-            label="Supprimer ce client"
-            className="px-3 py-1.5 text-sm"
-          />
-        </div>
+      <PageHeader
+        eyebrow="Portefeuille client"
+        title={client.company ?? client.name}
+        description={[
+          client.name !== client.company ? client.name : null,
+          client.email,
+          client.phone ? `Tél. ${client.phone}` : null,
+          client.formeJuridique,
+          client.secteurActivite,
+        ]
+          .filter(Boolean)
+          .join(" · ")}
+        actions={
+          <>
+            <Link href={`/dashboard/taches?clientId=${client.id}&creerMission=1`} className="btn-cc-primary">
+              + Créer une mission
+            </Link>
+            <DeleteClientButton
+              clientId={client.id}
+              clientName={client.name}
+              projectsCount={projects.length}
+              tasksCount={tasks.length}
+              label="Supprimer ce client"
+              className="px-3 py-1.5 text-sm"
+            />
+          </>
+        }
+      />
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        <KpiTile label="Chantiers" value={projects.length} href={`/dashboard/projets`} />
+        <KpiTile label="Missions ouvertes" value={openTasks} tone={openTasks > 0 ? "watch" : "ok"} />
+        <KpiTile label="Missions totales" value={tasks.length} />
       </div>
 
-      {/* Projets du client */}
-      <div className="rounded-xl surface-metallic-light shadow-sm">
-        <h2 className="border-b border-[#e0e4ea] px-6 py-4 text-lg font-semibold text-black">
-          Projets ({projects.length})
-        </h2>
+      <Card hover={false}>
+        <CardHeader title="Crédits & consommation" />
+        <div className="max-w-md">
+          <ClientCreditsBadge clientId={client.id} />
+        </div>
+      </Card>
+
+      <Card hover={false} className="!p-0 overflow-hidden">
+        <div className="border-b border-[color:var(--cc-chrome-border)] px-5 py-4">
+          <h2 className="font-heading text-lg font-bold text-bework-ink">Chantiers ({projects.length})</h2>
+        </div>
         {projects.length === 0 ? (
-          <p className="px-6 py-8 text-sm text-black">Aucun projet pour ce client.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[500px] text-sm">
-              <thead>
-                <tr className="border-b border-[#e0e4ea] bg-[#f8f9fb] text-black">
-                  <th className="px-6 py-3 text-left font-medium">Projet</th>
-                  <th className="px-6 py-3 text-left font-medium">Statut</th>
-                  <th className="px-6 py-3 text-left font-medium">Agent assigné</th>
-                  <th className="px-6 py-3 text-right font-medium">Accès</th>
-                </tr>
-              </thead>
-              <tbody>
-                {projects.map((project) => (
-                  <tr key={project.id} className="border-b border-[#e0e4ea] hover:bg-[#f8f9fb]">
-                    <td className="px-6 py-3">
-                      <Link
-                        href={`/dashboard/projets/${project.id}`}
-                        className="font-medium text-[#1d4ed8] hover:underline"
-                      >
-                        {project.title}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-3">
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                          project.status === "TERMINE"
-                            ? "bg-green-100 text-green-800"
-                            : project.status === "EN_COURS"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-slate-100 text-slate-700"
-                        }`}
-                      >
-                        {STATUS_LABELS[project.status] ?? project.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-3">
-                      <AssignAgentProject
-                        projectId={project.id}
-                        projectTitle={project.title}
-                        assignedToId={project.assignedToId ?? null}
-                        assignedToName={project.assignedTo?.name ?? null}
-                        agents={agents}
-                      />
-                    </td>
-                    <td className="px-6 py-3 text-right">
-                      <Link
-                        href={`/dashboard/projets/${project.id}`}
-                        className="text-[#1d4ed8] hover:underline"
-                      >
-                        Ouvrir
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="p-5">
+            <EmptyState title="Aucun chantier" description="Aucun projet pour ce client." />
           </div>
+        ) : (
+          <DataTable minWidth="560px" className="!rounded-none !border-0 !shadow-none">
+            <DataTableHead>
+              <DataTableTh>Projet</DataTableTh>
+              <DataTableTh>Statut</DataTableTh>
+              <DataTableTh>Agent assigné</DataTableTh>
+              <DataTableTh align="right">Accès</DataTableTh>
+            </DataTableHead>
+            <DataTableBody>
+              {projects.map((project) => (
+                <DataTableRow key={project.id}>
+                  <DataTableTd>
+                    <Link
+                      href={`/dashboard/projets/${project.id}`}
+                      className="font-semibold text-bework-navy hover:underline"
+                    >
+                      {project.title}
+                    </Link>
+                  </DataTableTd>
+                  <DataTableTd>
+                    <Badge
+                      tone={
+                        project.status === "TERMINE"
+                          ? "ok"
+                          : project.status === "EN_COURS"
+                            ? "info"
+                            : "neutral"
+                      }
+                    >
+                      {STATUS_LABELS[project.status] ?? project.status}
+                    </Badge>
+                  </DataTableTd>
+                  <DataTableTd>
+                    <AssignAgentProject
+                      projectId={project.id}
+                      projectTitle={project.title}
+                      assignedToId={project.assignedToId ?? null}
+                      assignedToName={project.assignedTo?.name ?? null}
+                      agents={agents}
+                    />
+                  </DataTableTd>
+                  <DataTableTd align="right">
+                    <Link
+                      href={`/dashboard/projets/${project.id}`}
+                      className="text-xs font-semibold text-bework-navy hover:underline"
+                    >
+                      Ouvrir
+                    </Link>
+                  </DataTableTd>
+                </DataTableRow>
+              ))}
+            </DataTableBody>
+          </DataTable>
         )}
-      </div>
+      </Card>
 
-      {/* Tâches du client */}
-      <div className="rounded-xl surface-metallic-light shadow-sm">
-        <h2 className="border-b border-[#e0e4ea] px-6 py-4 text-lg font-semibold text-black">
-          Tâches ({tasks.length})
-        </h2>
+      <Card hover={false} className="!p-0 overflow-hidden">
+        <div className="border-b border-[color:var(--cc-chrome-border)] px-5 py-4">
+          <h2 className="font-heading text-lg font-bold text-bework-ink">Missions ({tasks.length})</h2>
+        </div>
         {tasks.length === 0 ? (
-          <p className="px-6 py-8 text-sm text-black">Aucune tâche pour ce client.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[500px] text-sm">
-              <thead>
-                <tr className="border-b border-[#e0e4ea] bg-[#f8f9fb] text-black">
-                  <th className="px-6 py-3 text-left font-medium">Tâche</th>
-                  <th className="px-6 py-3 text-left font-medium">Projet</th>
-                  <th className="px-6 py-3 text-left font-medium">Statut</th>
-                  <th className="px-6 py-3 text-left font-medium">Agent assigné</th>
-                  <th className="px-6 py-3 text-right font-medium">Accès</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tasks.map((task) => (
-                  <tr key={task.id} className="border-b border-[#e0e4ea] hover:bg-[#f8f9fb]">
-                    <td className="px-6 py-3">
-                      <Link
-                        href={`/dashboard/taches/${task.id}`}
-                        className="font-medium text-[#1d4ed8] hover:underline"
-                      >
-                        {task.title}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-3 text-black">
-                      {task.project ? (
-                        <Link
-                          href={`/dashboard/projets/${task.project.id}`}
-                          className="text-[#1d4ed8] hover:underline"
-                        >
-                          {task.project.title}
-                        </Link>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
-                    <td className="px-6 py-3">
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                          task.status === "COMPLETE"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-slate-100 text-slate-700"
-                        }`}
-                      >
-                        {TASK_STATUS_LABELS[task.status] ?? task.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-3">
-                      <AssignAgentTask
-                        taskId={task.id}
-                        taskTitle={task.title}
-                        assignedToId={task.assignedToId ?? null}
-                        assignedToName={task.assignedTo?.name ?? null}
-                        agents={agents}
-                      />
-                    </td>
-                    <td className="px-6 py-3 text-right">
-                      <Link
-                        href={`/dashboard/taches/${task.id}`}
-                        className="text-[#1d4ed8] hover:underline"
-                      >
-                        Ouvrir
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="p-5">
+            <EmptyState title="Aucune mission" description="Aucune tâche pour ce client." />
           </div>
+        ) : (
+          <DataTable minWidth="640px" className="!rounded-none !border-0 !shadow-none">
+            <DataTableHead>
+              <DataTableTh>Mission</DataTableTh>
+              <DataTableTh>Chantier</DataTableTh>
+              <DataTableTh>Statut</DataTableTh>
+              <DataTableTh>Agent assigné</DataTableTh>
+              <DataTableTh align="right">Accès</DataTableTh>
+            </DataTableHead>
+            <DataTableBody>
+              {tasks.map((task) => (
+                <DataTableRow key={task.id}>
+                  <DataTableTd>
+                    <Link
+                      href={`/dashboard/taches/${task.id}`}
+                      className="font-semibold text-bework-navy hover:underline"
+                    >
+                      {task.title}
+                    </Link>
+                  </DataTableTd>
+                  <DataTableTd>
+                    {task.project ? (
+                      <Link
+                        href={`/dashboard/projets/${task.project.id}`}
+                        className="text-bework-navy hover:underline"
+                      >
+                        {task.project.title}
+                      </Link>
+                    ) : (
+                      <span className="text-bework-muted">—</span>
+                    )}
+                  </DataTableTd>
+                  <DataTableTd>
+                    <Badge tone={task.status === "COMPLETE" ? "ok" : "neutral"}>
+                      {TASK_STATUS_LABELS[task.status] ?? task.status}
+                    </Badge>
+                  </DataTableTd>
+                  <DataTableTd>
+                    <AssignAgentTask
+                      taskId={task.id}
+                      taskTitle={task.title}
+                      assignedToId={task.assignedToId ?? null}
+                      assignedToName={task.assignedTo?.name ?? null}
+                      agents={agents}
+                    />
+                  </DataTableTd>
+                  <DataTableTd align="right">
+                    <Link
+                      href={`/dashboard/taches/${task.id}`}
+                      className="text-xs font-semibold text-bework-navy hover:underline"
+                    >
+                      Ouvrir
+                    </Link>
+                  </DataTableTd>
+                </DataTableRow>
+              ))}
+            </DataTableBody>
+          </DataTable>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import { DocumentUploadZone } from "@/components/documents/DocumentUploadZone";
 import { BackLink } from "@/components/ui/BackLink";
 import { DocumentCard } from "@/components/documents/DocumentCard";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { FilterBar } from "@/components/ui/FilterBar";
+import { EmptyState } from "@/components/ui/EmptyState";
 import type { Document } from "@prisma/client";
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -77,10 +80,17 @@ export function DocumentsPageClient({
     router.refresh();
   };
 
+  const fieldClass =
+    "rounded-[var(--cc-radius)] border border-[color:var(--cc-chrome-border)] bg-white px-3 py-2 text-sm text-bework-ink focus:border-bework-navy focus:outline-none focus:ring-2 focus:ring-bework-navy/20";
+
   return (
     <div className="space-y-6">
       <BackLink href="/dashboard">Tableau de bord</BackLink>
-      <h1 className="text-2xl font-bold text-slate-800">Mes documents</h1>
+      <PageHeader
+        eyebrow="GED"
+        title="Mes documents"
+        description={`${total} document${total !== 1 ? "s" : ""} — dépôt et suivi des pièces.`}
+      />
 
       <DocumentUploadZone
         onUploadStart={() => setUploading(true)}
@@ -90,105 +100,75 @@ export function DocumentsPageClient({
         assignedTasks={assignedTasks}
       />
 
-      {/* Filtres */}
-      <div className="rounded-xl surface-metallic-light p-4">
-        <form
-          method="get"
-          action="/dashboard/documents"
-          className="flex flex-wrap items-center gap-4"
-        >
-          <input type="hidden" name="page" value="1" />
-          <input type="hidden" name="sort" value={currentSort} />
-          <input type="hidden" name="order" value={currentOrder} />
-          <input
-            type="text"
-            name="search"
-            defaultValue={currentSearch}
-            placeholder="Rechercher par nom..."
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          />
-          <select
-            name="category"
-            defaultValue={currentCategory}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          >
-            <option value="">Toutes catégories</option>
-            {categories.map((c) => (
-              <option key={c} value={c}>
-                {CATEGORY_LABELS[c] ?? c}
-              </option>
-            ))}
-          </select>
-          <select
-            name="statut"
-            defaultValue={currentStatut}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          >
-            <option value="">Tous statuts</option>
-            {statuts.map((s) => (
-              <option key={s} value={s}>
-                {STATUS_LABELS[s] ?? s}
-              </option>
-            ))}
-          </select>
-          <select
-            name="sort"
-            defaultValue={currentSort}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          >
-            <option value="createdAt">Date</option>
-            <option value="name">Nom</option>
-            <option value="status">Statut</option>
-            <option value="category">Catégorie</option>
-          </select>
-          <select
-            name="order"
-            defaultValue={currentOrder}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          >
-            <option value="desc">Récent d’abord</option>
-            <option value="asc">Ancien d’abord</option>
-          </select>
-          <button
-            type="submit"
-            className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
-          >
-            Filtrer
-          </button>
-        </form>
-      </div>
+      <FilterBar action="/dashboard/documents">
+        <input type="hidden" name="page" value="1" />
+        <input
+          type="text"
+          name="search"
+          defaultValue={currentSearch}
+          placeholder="Rechercher par nom…"
+          className={`${fieldClass} min-w-[180px] flex-1`}
+        />
+        <select name="category" defaultValue={currentCategory} className={fieldClass}>
+          <option value="">Toutes catégories</option>
+          {categories.map((c) => (
+            <option key={c} value={c}>
+              {CATEGORY_LABELS[c] ?? c}
+            </option>
+          ))}
+        </select>
+        <select name="statut" defaultValue={currentStatut} className={fieldClass}>
+          <option value="">Tous statuts</option>
+          {statuts.map((s) => (
+            <option key={s} value={s}>
+              {STATUS_LABELS[s] ?? s}
+            </option>
+          ))}
+        </select>
+        <select name="sort" defaultValue={currentSort} className={fieldClass}>
+          <option value="createdAt">Date</option>
+          <option value="name">Nom</option>
+          <option value="status">Statut</option>
+          <option value="category">Catégorie</option>
+        </select>
+        <select name="order" defaultValue={currentOrder} className={fieldClass}>
+          <option value="desc">Récent d’abord</option>
+          <option value="asc">Ancien d’abord</option>
+        </select>
+        <button type="submit" className="btn-cc-primary">
+          Filtrer
+        </button>
+      </FilterBar>
 
-      {/* Vue liste / grille */}
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-slate-600">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-bework-muted">
           {total} document{total !== 1 ? "s" : ""}
         </p>
-        <div className="flex gap-2">
+        <div className="flex gap-1.5">
           <button
             type="button"
             onClick={() => setViewMode("list")}
-            className={`rounded-lg px-3 py-1.5 text-sm ${viewMode === "list" ? "bg-slate-200 font-medium" : "bg-slate-100 text-slate-600"}`}
+            className={viewMode === "list" ? "btn-cc-primary !px-3 !py-1.5 text-xs" : "btn-cc-secondary !px-3 !py-1.5 text-xs"}
           >
             Liste
           </button>
           <button
             type="button"
             onClick={() => setViewMode("grid")}
-            className={`rounded-lg px-3 py-1.5 text-sm ${viewMode === "grid" ? "bg-slate-200 font-medium" : "bg-slate-100 text-slate-600"}`}
+            className={viewMode === "grid" ? "btn-cc-primary !px-3 !py-1.5 text-xs" : "btn-cc-secondary !px-3 !py-1.5 text-xs"}
           >
             Grille
           </button>
         </div>
       </div>
 
-      {uploading && (
-        <p className="text-sm text-slate-500">Envoi en cours…</p>
-      )}
+      {uploading ? <p className="text-sm text-bework-muted">Envoi en cours…</p> : null}
 
       {initialDocuments.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center text-slate-500">
-          Aucun document. Déposez des fichiers ci-dessus (PDF, JPG, PNG, DOCX, XLSX, max 10 Mo).
-        </div>
+        <EmptyState
+          title="Aucun document"
+          description="Déposez des fichiers ci-dessus (PDF, JPG, PNG, DOCX, XLSX, max 10 Mo)."
+        />
       ) : viewMode === "grid" ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {initialDocuments.map((doc) => (
@@ -203,30 +183,23 @@ export function DocumentsPageClient({
         </div>
       )}
 
-      {/* Pagination */}
-      {totalPages > 1 && (
+      {totalPages > 1 ? (
         <div className="flex items-center justify-center gap-2">
-          {page > 1 && (
-            <Link
-              href={buildUrl({ page: page - 1 })}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm hover:bg-slate-50"
-            >
+          {page > 1 ? (
+            <Link href={buildUrl({ page: page - 1 })} className="btn-cc-secondary">
               Précédent
             </Link>
-          )}
-          <span className="text-sm text-slate-600">
+          ) : null}
+          <span className="text-sm text-bework-muted">
             Page {page} / {totalPages}
           </span>
-          {page < totalPages && (
-            <Link
-              href={buildUrl({ page: page + 1 })}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm hover:bg-slate-50"
-            >
+          {page < totalPages ? (
+            <Link href={buildUrl({ page: page + 1 })} className="btn-cc-secondary">
               Suivant
             </Link>
-          )}
+          ) : null}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

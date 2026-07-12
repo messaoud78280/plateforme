@@ -10,6 +10,9 @@ import { AgentMissionsList } from "@/components/tasks/AgentMissionsList";
 import { ManagerMissionsBoard, type ManagerBoardTask } from "@/components/tasks/ManagerMissionsBoard";
 import { CreateMissionForm } from "@/components/tasks/CreateMissionForm";
 import { BackLink } from "@/components/ui/BackLink";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { KpiTile } from "@/components/ui/KpiTile";
+import { FilterBar, FilterChip } from "@/components/ui/FilterBar";
 
 export default async function TachesPage({
   searchParams,
@@ -232,57 +235,33 @@ export default async function TachesPage({
 
   if (isClient) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-6">
         <BackLink href="/dashboard">Tableau de bord</BackLink>
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">Mes missions</h1>
-            <p className="mt-1 text-slate-600">
-              Suivez l&apos;avancement de vos missions et échangez avec votre assistant.
-            </p>
-          </div>
-          <Link
-            href="/dashboard/nouvelle-demande"
-            className="rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af]"
-          >
-            + Nouvelle mission
-          </Link>
-        </div>
+        <PageHeader
+          eyebrow="Espace client"
+          title="Mes missions"
+          description="Suivez l'avancement de vos missions et échangez avec votre assistant."
+          actions={
+            <Link href="/dashboard/nouvelle-demande" className="btn-cc-primary">
+              + Nouvelle mission
+            </Link>
+          }
+        />
 
-        <div className="flex flex-wrap gap-2 mb-6">
-          <Link
-            href="/dashboard/taches"
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-              !validStatus ? "bg-slate-800 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-            }`}
-          >
+        <FilterBar as="div">
+          <FilterChip href="/dashboard/taches" active={!validStatus}>
             Toutes
-          </Link>
-          <Link
-            href="/dashboard/taches?statut=EN_ATTENTE"
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-              validStatus === "EN_ATTENTE" ? "bg-amber-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-            }`}
-          >
+          </FilterChip>
+          <FilterChip href="/dashboard/taches?statut=EN_ATTENTE" active={validStatus === "EN_ATTENTE"}>
             En attente
-          </Link>
-          <Link
-            href="/dashboard/taches?statut=EN_COURS"
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-              validStatus === "EN_COURS" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-            }`}
-          >
+          </FilterChip>
+          <FilterChip href="/dashboard/taches?statut=EN_COURS" active={validStatus === "EN_COURS"}>
             En cours
-          </Link>
-          <Link
-            href="/dashboard/taches?statut=COMPLETE"
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-              validStatus === "COMPLETE" ? "bg-green-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-            }`}
-          >
+          </FilterChip>
+          <FilterChip href="/dashboard/taches?statut=COMPLETE" active={validStatus === "COMPLETE"}>
             Terminées
-          </Link>
-        </div>
+          </FilterChip>
+        </FilterBar>
         <MesDemandesList tasks={clientTasksForList} />
       </div>
     );
@@ -305,23 +284,22 @@ export default async function TachesPage({
       }
     })();
     return (
-      <div className="space-y-8">
+      <div className="space-y-6">
         <BackLink href="/dashboard">Tableau de bord</BackLink>
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">Missions</h1>
-            <p className="mt-1 text-slate-600">
-              Tableau de gestion des missions. Créez, assignez les agents, suivez l&apos;avancement et validez les livrables.
-            </p>
-          </div>
-          <CreateMissionForm
-            clients={managerClients}
-            agents={managerAgents}
-            defaultClientId={params.clientId ?? ""}
-            defaultProjectId={params.projectId ?? ""}
-            defaultOpen={params.creerMission === "1"}
-          />
-        </div>
+        <PageHeader
+          eyebrow="Pilotage missions"
+          title="Missions"
+          description="Créez, assignez les agents, suivez l'avancement et validez les livrables."
+          actions={
+            <CreateMissionForm
+              clients={managerClients}
+              agents={managerAgents}
+              defaultClientId={params.clientId ?? ""}
+              defaultProjectId={params.projectId ?? ""}
+              defaultOpen={params.creerMission === "1"}
+            />
+          }
+        />
         <ManagerMissionsBoard
           nouvelles={boardForFilter.nouvelles}
           aAssigner={boardForFilter.aAssigner}
@@ -336,78 +314,52 @@ export default async function TachesPage({
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <BackLink href="/dashboard">Tableau de bord</BackLink>
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">{isAgent ? "Mes missions assignées" : "Mes tâches"}</h1>
-          <p className="mt-1 text-slate-600">
-            Tâches qui vous sont assignées. Indiquez le temps passé lors de la clôture pour déduire les crédits du client.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow={isAgent ? "Espace agent" : "Missions"}
+        title={isAgent ? "Mes missions assignées" : "Mes tâches"}
+        description="Tâches assignées. Indiquez le temps passé à la clôture pour déduire les crédits du client."
+      />
 
       {isAgent && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="rounded-xl surface-metallic-light p-4">
-            <p className="text-2xl font-bold text-slate-800">{agentSummary.missionsAujourdhui}</p>
-            <p className="mt-1 text-sm text-slate-600">Missions aujourd&apos;hui</p>
-          </div>
-          <div className="rounded-xl surface-metallic-light p-4">
-            <p className="text-2xl font-bold text-red-600">{agentSummary.missionsUrgentes}</p>
-            <p className="mt-1 text-sm text-slate-600">Missions urgentes</p>
-          </div>
-          <div className="rounded-xl surface-metallic-light p-4">
-            <p className="text-2xl font-bold text-blue-600">{agentSummary.missionsEnCours}</p>
-            <p className="mt-1 text-sm text-slate-600">Missions en cours</p>
-          </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <KpiTile label="Missions aujourd'hui" value={agentSummary.missionsAujourdhui} />
+          <KpiTile
+            label="Missions urgentes"
+            value={agentSummary.missionsUrgentes}
+            tone={agentSummary.missionsUrgentes > 0 ? "critical" : "ok"}
+          />
+          <KpiTile
+            label="Missions en cours"
+            value={agentSummary.missionsEnCours}
+            tone={agentSummary.missionsEnCours > 0 ? "watch" : "neutral"}
+          />
         </div>
       )}
 
       {isManager && <DepotTacheForm projects={projects} />}
 
       {(isManager || isAgent) && (
-        <div className="flex flex-wrap gap-2">
-          <a
-            href="/dashboard/taches"
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-              !validStatus ? "bg-slate-800 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-            }`}
-          >
+        <FilterBar as="div">
+          <FilterChip href="/dashboard/taches" active={!validStatus}>
             Toutes
-          </a>
-          <a
-            href="/dashboard/taches?statut=EN_ATTENTE"
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-              validStatus === "EN_ATTENTE" ? "bg-amber-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-            }`}
-          >
+          </FilterChip>
+          <FilterChip href="/dashboard/taches?statut=EN_ATTENTE" active={validStatus === "EN_ATTENTE"}>
             En attente
-          </a>
-          <a
-            href="/dashboard/taches?statut=EN_COURS"
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-              validStatus === "EN_COURS" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-            }`}
-          >
+          </FilterChip>
+          <FilterChip href="/dashboard/taches?statut=EN_COURS" active={validStatus === "EN_COURS"}>
             En cours
-          </a>
-          <a
-            href="/dashboard/taches?statut=COMPLETE"
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-              validStatus === "COMPLETE" ? "bg-green-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-            }`}
-          >
+          </FilterChip>
+          <FilterChip href="/dashboard/taches?statut=COMPLETE" active={validStatus === "COMPLETE"}>
             Terminées
-          </a>
-        </div>
+          </FilterChip>
+        </FilterBar>
       )}
 
       <section>
-        <h2 className="mb-3 text-lg font-semibold text-slate-800">
-          {isAgent
-            ? "Mes missions assignées"
-            : "Vos tâches"}
+        <h2 className="mb-3 font-heading text-lg font-bold text-bework-ink">
+          {isAgent ? "Mes missions assignées" : "Vos tâches"}
         </h2>
         {isAgent ? (
           <AgentMissionsList

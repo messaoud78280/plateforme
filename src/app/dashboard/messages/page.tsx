@@ -4,6 +4,18 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { BackLink } from "@/components/ui/BackLink";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { EmptyState } from "@/components/ui/EmptyState";
+import {
+  DataTable,
+  DataTableBody,
+  DataTableHead,
+  DataTableRow,
+  DataTableTd,
+  DataTableTh,
+} from "@/components/ui/DataTable";
 
 const STATUS_LABELS: Record<string, string> = {
   NOUVEAU: "Nouvelle",
@@ -19,7 +31,16 @@ export default async function MessagesPage() {
   }
 
   const isAgence = session.user?.role === "AGENCE" || session.user?.role === "MANAGER";
-  let contactRequests: { id: string; structure: string; contactName: string; email: string; rdvDate: Date | null; rdvTime: string | null; status: string; createdAt: Date }[] = [];
+  let contactRequests: {
+    id: string;
+    structure: string;
+    contactName: string;
+    email: string;
+    rdvDate: Date | null;
+    rdvTime: string | null;
+    status: string;
+    createdAt: Date;
+  }[] = [];
 
   try {
     contactRequests = await prisma.contactRequest.findMany({
@@ -41,108 +62,103 @@ export default async function MessagesPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <BackLink href="/dashboard">Tableau de bord</BackLink>
-      <div>
-        <h1 className="text-2xl font-bold text-black">RDV</h1>
-        <p className="mt-1 text-black">
-          {isAgence
-            ? "Consultez les demandes de contact reçues (historique des envois depuis l’ancien formulaire, le cas échéant)."
-            : "Historique des demandes de contact associées à votre compte."}
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Demandes"
+        title="RDV"
+        description={
+          isAgence
+            ? "Demandes de contact reçues (historique des envois depuis le formulaire)."
+            : "Historique des demandes de contact associées à votre compte."
+        }
+      />
 
-      <section className="rounded-xl surface-metallic-light shadow-sm">
-          <h2 className="border-b border-[#e0e4ea] px-6 py-4 text-lg font-semibold text-black">
+      <Card hover={false} className="!p-0 overflow-hidden">
+        <div className="border-b border-[color:var(--cc-chrome-border)] px-5 py-4">
+          <h2 className="font-heading text-lg font-bold text-bework-ink">
             {isAgence ? "Demandes de contact et RDV" : "Mes demandes de RDV"}
           </h2>
-          {contactRequests.length === 0 ? (
-            <p className="px-6 py-8 text-sm text-black">
-              {isAgence
-                ? "Aucune demande enregistrée pour le moment."
-                : "Aucune demande enregistrée pour le moment."}
-            </p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[500px] text-sm">
-                <thead>
-                  <tr className="border-b border-[#e0e4ea] bg-[#f8f9fb] text-black">
-                    <th className="px-6 py-3 text-left font-medium">Structure / Contact</th>
-                    <th className="px-6 py-3 text-left font-medium">Email</th>
-                    <th className="px-6 py-3 text-left font-medium">Créneau demandé</th>
-                    <th className="px-6 py-3 text-left font-medium">Statut</th>
-                    <th className="px-6 py-3 text-left font-medium">Reçu le</th>
-                    <th className="px-6 py-3 text-right font-medium">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {contactRequests.map((r) => {
-                    const rdvLabel =
-                      r.rdvDate && r.rdvTime
-                        ? `${new Date(r.rdvDate).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" })} à ${r.rdvTime.replace(":", "h")}`
-                        : r.rdvDate
-                          ? new Date(r.rdvDate).toLocaleDateString("fr-FR")
-                          : "—";
-                    return (
-                      <tr key={r.id} className="border-b border-[#e0e4ea] hover:bg-[#f8f9fb]">
-                        <td className="px-6 py-3">
-                          <span className="font-medium text-black">{r.structure}</span>
-                          <br />
-                          <span className="text-black">{r.contactName}</span>
-                        </td>
-                        <td className="px-6 py-3">
-                          <a href={`mailto:${r.email}`} className="text-[#1d4ed8] hover:underline">
-                            {r.email}
-                          </a>
-                        </td>
-                        <td className="px-6 py-3 text-black">{rdvLabel}</td>
-                        <td className="px-6 py-3">
-                          <span
-                            className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                              r.status === "CONFIRME"
-                                ? "bg-green-100 text-green-800"
-                                : r.status === "ANNULE"
-                                  ? "bg-slate-100 text-slate-600"
-                                  : "bg-blue-100 text-blue-800"
-                            }`}
-                          >
-                            {STATUS_LABELS[r.status] ?? r.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-3 text-black">
-                          {new Date(r.createdAt).toLocaleDateString("fr-FR", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })}
-                        </td>
-                        <td className="px-6 py-3 text-right">
-                          <Link
-                            href={`/dashboard/messages/demandes/${r.id}`}
-                            className="text-[#1d4ed8] hover:underline"
-                          >
-                            {isAgence ? "Voir détail" : "Détail"}
-                          </Link>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
+        </div>
+        {contactRequests.length === 0 ? (
+          <div className="p-5">
+            <EmptyState title="Aucune demande" description="Aucune demande enregistrée pour le moment." />
+          </div>
+        ) : (
+          <DataTable minWidth="640px" className="!rounded-none !border-0 !shadow-none">
+            <DataTableHead>
+              <DataTableTh>Structure / Contact</DataTableTh>
+              <DataTableTh>Email</DataTableTh>
+              <DataTableTh>Créneau demandé</DataTableTh>
+              <DataTableTh>Statut</DataTableTh>
+              <DataTableTh>Reçu le</DataTableTh>
+              <DataTableTh align="right">Action</DataTableTh>
+            </DataTableHead>
+            <DataTableBody>
+              {contactRequests.map((r) => {
+                const rdvLabel =
+                  r.rdvDate && r.rdvTime
+                    ? `${new Date(r.rdvDate).toLocaleDateString("fr-FR", {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "short",
+                      })} à ${r.rdvTime.replace(":", "h")}`
+                    : r.rdvDate
+                      ? new Date(r.rdvDate).toLocaleDateString("fr-FR")
+                      : "—";
+                return (
+                  <DataTableRow key={r.id}>
+                    <DataTableTd>
+                      <span className="font-semibold text-bework-ink">{r.structure}</span>
+                      <br />
+                      <span className="text-bework-muted">{r.contactName}</span>
+                    </DataTableTd>
+                    <DataTableTd>
+                      <a href={`mailto:${r.email}`} className="text-bework-navy hover:underline">
+                        {r.email}
+                      </a>
+                    </DataTableTd>
+                    <DataTableTd>{rdvLabel}</DataTableTd>
+                    <DataTableTd>
+                      <Badge
+                        tone={
+                          r.status === "CONFIRME" ? "ok" : r.status === "ANNULE" ? "neutral" : "info"
+                        }
+                      >
+                        {STATUS_LABELS[r.status] ?? r.status}
+                      </Badge>
+                    </DataTableTd>
+                    <DataTableTd>
+                      {new Date(r.createdAt).toLocaleDateString("fr-FR", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </DataTableTd>
+                    <DataTableTd align="right">
+                      <Link
+                        href={`/dashboard/messages/demandes/${r.id}`}
+                        className="text-xs font-semibold text-bework-navy hover:underline"
+                      >
+                        {isAgence ? "Voir détail" : "Détail"}
+                      </Link>
+                    </DataTableTd>
+                  </DataTableRow>
+                );
+              })}
+            </DataTableBody>
+          </DataTable>
+        )}
+      </Card>
 
-      <div className="rounded-xl border border-dashed border-[#c8cdd6] bg-white p-12 text-center">
-        <p className="text-black">
+      <div className="rounded-[var(--cc-radius-lg)] border border-dashed border-bework-navy/20 bg-bework-navy-soft/40 px-5 py-10 text-center">
+        <p className="font-heading text-base font-bold text-bework-ink">Messages chantier</p>
+        <p className="mx-auto mt-1.5 max-w-md text-sm text-bework-muted">
           {isAgence
             ? "Sélectionnez un projet pour voir les messages d'échange avec les clients."
             : "Consultez vos projets pour voir les messages avec l'agence."}
         </p>
-        <Link
-          href="/dashboard/projets"
-          className="mt-4 inline-block rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e40af]"
-        >
+        <Link href="/dashboard/projets" className="btn-cc-primary mt-4 inline-flex">
           Voir les projets
         </Link>
       </div>

@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { PieChart, Pie, Cell, Legend, Tooltip as PieTooltip } from "recharts";
+import { KpiTile } from "@/components/ui/KpiTile";
+import { Card, CardHeader } from "@/components/ui/Card";
+import { Alert } from "@/components/ui/Alert";
+import { TableSkeleton } from "@/components/ui/Skeleton";
 
 interface Stats {
   period: string;
@@ -34,19 +38,11 @@ export function ReportsView({ period }: { period: string }) {
   }, [period]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <p className="text-slate-500">Chargement des statistiques…</p>
-      </div>
-    );
+    return <TableSkeleton rows={4} />;
   }
 
   if (error || !stats) {
-    return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
-        <p className="text-red-700">{error || "Données indisponibles"}</p>
-      </div>
-    );
+    return <Alert tone="critical">{error || "Données indisponibles"}</Alert>;
   }
 
   const pieData = [
@@ -62,37 +58,20 @@ export function ReportsView({ period }: { period: string }) {
 
   return (
     <div className="space-y-6">
-      {/* Cartes récap */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <div className="rounded-xl surface-metallic-light p-4">
-          <p className="text-2xl font-bold text-slate-800">{stats.tasks.total}</p>
-          <p className="text-sm text-slate-500">Tâches (période)</p>
-        </div>
-        <div className="rounded-xl surface-metallic-light p-4">
-          <p className="text-2xl font-bold text-green-600">{stats.tasks.completed}</p>
-          <p className="text-sm text-slate-500">Terminées</p>
-        </div>
-        <div className="rounded-xl surface-metallic-light p-4">
-          <p className="text-2xl font-bold text-blue-600">{tauxCompletion} %</p>
-          <p className="text-sm text-slate-500">Complétion</p>
-        </div>
-        <div className="rounded-xl surface-metallic-light p-4">
-          <p className="text-2xl font-bold text-slate-800">
-            {stats.tempsMoyenJours < 1 ? "< 1" : stats.tempsMoyenJours} j
-          </p>
-          <p className="text-sm text-slate-500">Temps moyen</p>
-        </div>
-        <div className="rounded-xl surface-metallic-light p-4">
-          <p className="text-2xl font-bold text-slate-800">{stats.documents.total}</p>
-          <p className="text-sm text-slate-500">Documents</p>
-        </div>
+        <KpiTile label="Tâches (période)" value={stats.tasks.total} />
+        <KpiTile label="Terminées" value={stats.tasks.completed} tone="ok" />
+        <KpiTile label="Complétion" value={`${tauxCompletion} %`} />
+        <KpiTile
+          label="Temps moyen"
+          value={stats.tempsMoyenJours < 1 ? "< 1 j" : `${stats.tempsMoyenJours} j`}
+        />
+        <KpiTile label="Documents" value={stats.documents.total} />
       </div>
 
-      {/* Graphique évolution */}
-      <div className="rounded-xl surface-metallic-light p-6">
-        <h2 className="text-lg font-semibold text-slate-800">Évolution des tâches</h2>
-        <p className="mt-1 text-sm text-slate-500">Créées vs complétées sur la période</p>
-        <div className="mt-6 h-64">
+      <Card hover={false}>
+        <CardHeader title="Évolution des tâches" description="Créées vs complétées sur la période" />
+        <div className="mt-2 h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={stats.evolution} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
               <XAxis dataKey="label" tick={{ fontSize: 12 }} />
@@ -101,18 +80,17 @@ export function ReportsView({ period }: { period: string }) {
                 formatter={(value: number | undefined) => [value ?? 0, ""]}
                 labelFormatter={(_, payload) => payload[0]?.payload?.date}
               />
-              <Bar dataKey="creees" name="Créées" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="completees" name="Complétées" fill="#22c55e" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="creees" name="Créées" fill="#1e3a5f" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="completees" name="Complétées" fill="#059669" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </Card>
 
-      {/* Répartition par statut */}
       {pieData.length > 0 && (
-        <div className="rounded-xl surface-metallic-light p-6">
-          <h2 className="text-lg font-semibold text-slate-800">Répartition par statut</h2>
-          <div className="mt-6 h-64">
+        <Card hover={false}>
+          <CardHeader title="Répartition par statut" />
+          <div className="mt-2 h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -134,51 +112,50 @@ export function ReportsView({ period }: { period: string }) {
               </PieChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </Card>
       )}
 
-      {/* Tableau récap */}
-      <div className="rounded-xl surface-metallic-light p-6">
-        <h2 className="text-lg font-semibold text-slate-800">Récapitulatif</h2>
-        <div className="mt-4 overflow-x-auto">
+      <Card hover={false}>
+        <CardHeader title="Récapitulatif" />
+        <div className="mt-2 overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-200 text-slate-600">
+              <tr className="border-b border-[color:var(--cc-chrome-border)] text-bework-muted">
                 <th className="pb-2 font-medium">Indicateur</th>
                 <th className="pb-2 font-medium">Valeur</th>
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b border-slate-100">
-                <td className="py-2 text-slate-600">Tâches créées sur la période</td>
-                <td className="py-2 font-medium">{stats.tasks.total}</td>
+              <tr className="border-b border-bework-navy/[0.06]">
+                <td className="py-2 text-bework-muted">Tâches créées sur la période</td>
+                <td className="py-2 font-medium text-bework-ink">{stats.tasks.total}</td>
               </tr>
-              <tr className="border-b border-slate-100">
-                <td className="py-2 text-slate-600">Tâches terminées</td>
-                <td className="py-2 font-medium">{stats.tasks.completed}</td>
+              <tr className="border-b border-bework-navy/[0.06]">
+                <td className="py-2 text-bework-muted">Tâches terminées</td>
+                <td className="py-2 font-medium text-bework-ink">{stats.tasks.completed}</td>
               </tr>
-              <tr className="border-b border-slate-100">
-                <td className="py-2 text-slate-600">Taux de complétion</td>
-                <td className="py-2 font-medium">{tauxCompletion} %</td>
+              <tr className="border-b border-bework-navy/[0.06]">
+                <td className="py-2 text-bework-muted">Taux de complétion</td>
+                <td className="py-2 font-medium text-bework-ink">{tauxCompletion} %</td>
               </tr>
-              <tr className="border-b border-slate-100">
-                <td className="py-2 text-slate-600">Temps moyen de traitement</td>
-                <td className="py-2 font-medium">
+              <tr className="border-b border-bework-navy/[0.06]">
+                <td className="py-2 text-bework-muted">Temps moyen de traitement</td>
+                <td className="py-2 font-medium text-bework-ink">
                   {stats.tempsMoyenJours < 1 ? "< 1 jour" : `${stats.tempsMoyenJours} jours`}
                 </td>
               </tr>
-              <tr className="border-b border-slate-100">
-                <td className="py-2 text-slate-600">Documents déposés</td>
-                <td className="py-2 font-medium">{stats.documents.total}</td>
+              <tr className="border-b border-bework-navy/[0.06]">
+                <td className="py-2 text-bework-muted">Documents déposés</td>
+                <td className="py-2 font-medium text-bework-ink">{stats.documents.total}</td>
               </tr>
               <tr>
-                <td className="py-2 text-slate-600">Projets créés</td>
-                <td className="py-2 font-medium">{stats.projects.total}</td>
+                <td className="py-2 text-bework-muted">Projets créés</td>
+                <td className="py-2 font-medium text-bework-ink">{stats.projects.total}</td>
               </tr>
             </tbody>
           </table>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

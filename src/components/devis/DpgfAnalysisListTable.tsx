@@ -22,15 +22,12 @@ export function DpgfAnalysisListTable({ rows, lotLabels = {} }: Props) {
 
   if (rows.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center shadow-sm">
-        <p className="font-heading text-base font-semibold text-slate-800">Aucune fiche pour ces filtres</p>
-        <p className="mt-2 text-sm text-slate-500">
+      <div className="rounded-[var(--cc-radius-lg)] border border-dashed border-bework-navy/20 bg-bework-navy-soft/40 px-6 py-12 text-center">
+        <p className="font-heading text-base font-semibold text-bework-ink">Aucune fiche pour ces filtres</p>
+        <p className="mt-2 text-sm text-bework-muted">
           Créez une fiche manuellement ou analysez une ligne DPGF avec l&apos;IA.
         </p>
-        <Link
-          href="/dashboard/devis/analyse-dpgf"
-          className="mt-4 inline-flex rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-        >
+        <Link href="/dashboard/devis/analyse-dpgf" className="btn-cc-secondary mt-4 inline-flex">
           Réinitialiser les filtres
         </Link>
       </div>
@@ -39,31 +36,31 @@ export function DpgfAnalysisListTable({ rows, lotLabels = {} }: Props) {
 
   return (
     <div className="space-y-4">
-      <p className="text-xs font-medium text-slate-500">
+      <p className="text-xs font-medium text-bework-muted">
         {rows.length} fiche{rows.length > 1 ? "s" : ""} · classées par lot, famille, code fiche
       </p>
 
       {groups.map((group) => (
         <section
           key={`${group.lot}-${group.familyName}-${group.familyCode ?? "na"}`}
-          className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm"
+          className="cc-card overflow-hidden p-0"
         >
-          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-[#eff6ff]/30 px-4 py-3">
+          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[color:var(--cc-chrome-border)] bg-gradient-to-r from-bework-navy/[0.04] to-transparent px-4 py-3">
             <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#1e3a5f]/75">
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-bework-navy/80">
                 {group.lotLabel}
                 {group.familyCode ? ` · ${group.familyCode}` : ""}
               </p>
-              <h3 className="font-heading mt-0.5 text-base font-bold leading-snug text-slate-900">{group.familyName}</h3>
+              <h3 className="font-heading mt-0.5 text-base font-bold leading-snug text-bework-ink">{group.familyName}</h3>
             </div>
-            <span className="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
+            <span className="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-semibold text-bework-muted ring-1 ring-[color:var(--cc-chrome-border)]">
               {group.rows.length} fiche{group.rows.length > 1 ? "s" : ""}
             </span>
           </header>
 
           <div className="overflow-x-auto">
             <table className="min-w-full text-left text-sm">
-              <thead className="border-b border-slate-100 bg-slate-50/80 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              <thead className="border-b border-[color:var(--cc-chrome-border)] bg-[color:var(--cc-chrome)] text-[10px] font-bold uppercase tracking-wider text-bework-muted">
                 <tr>
                   <th className="px-4 py-2.5">Code</th>
                   <th className="px-4 py-2.5">Désignation</th>
@@ -75,27 +72,27 @@ export function DpgfAnalysisListTable({ rows, lotLabels = {} }: Props) {
                   <th className="px-4 py-2.5 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-bework-navy/[0.06]">
                 {group.rows.map((row) => (
-                  <tr key={row.id} className="transition hover:bg-slate-50/80">
-                    <td className="px-4 py-3 font-mono text-xs font-semibold text-[#1e3a5f]">{row.codeSheet}</td>
+                  <tr key={row.id} className="transition hover:bg-bework-navy-soft/40">
+                    <td className="px-4 py-3 font-mono text-xs font-semibold text-bework-navy">{row.codeSheet}</td>
                     <td className="max-w-sm px-4 py-3">
-                      <p className="font-medium leading-snug text-slate-900">{row.simplifiedDesignation || "—"}</p>
-                      <p className="mt-0.5 line-clamp-2 text-xs text-slate-500">{row.originalDesignation}</p>
+                      <p className="font-medium leading-snug text-bework-ink">{row.simplifiedDesignation || "—"}</p>
+                      <p className="mt-0.5 line-clamp-2 text-xs text-bework-muted">{row.originalDesignation}</p>
                     </td>
-                    <td className="max-w-xs px-4 py-3 text-slate-700">
+                    <td className="max-w-xs px-4 py-3 text-bework-ink/80">
                       <p className="line-clamp-2 text-sm">
                         {readIntervenantConcerneRaw(row.intervenantConcerne) || "À définir selon le marché"}
                       </p>
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-slate-600">{row.unit}</td>
-                    <td className="px-4 py-3 text-xs text-slate-600">
+                    <td className="px-4 py-3 font-mono text-xs text-bework-muted">{row.unit}</td>
+                    <td className="px-4 py-3 text-xs text-bework-muted">
                       {DPGF_ANALYSIS_LEVEL_LABELS[row.comprehensionLevel]}
                     </td>
                     <td className="px-4 py-3">
                       <StatusBadge status={row.status} />
                     </td>
-                    <td className="px-4 py-3 text-xs tabular-nums text-slate-500">
+                    <td className="px-4 py-3 text-xs tabular-nums text-bework-muted">
                       {row.updatedAt.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}
                     </td>
                     <td className="px-4 py-3">
@@ -133,15 +130,12 @@ function RowActions({
 }) {
   return (
     <div className="flex flex-wrap justify-end gap-1">
-      <Link
-        href={`/dashboard/devis/analyse-dpgf/${row.id}`}
-        className="rounded-lg bg-[#1e3a5f] px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-[#162d4a]"
-      >
+      <Link href={`/dashboard/devis/analyse-dpgf/${row.id}`} className="btn-cc-primary !px-2.5 !py-1.5 text-xs">
         Voir
       </Link>
       <Link
         href={`/dashboard/devis/analyse-dpgf/${row.id}/modifier`}
-        className="rounded-lg border border-[#1e3a5f]/20 bg-white px-2.5 py-1.5 text-xs font-semibold text-[#1e3a5f] hover:bg-[#1e3a5f]/5"
+        className="btn-cc-secondary !px-2.5 !py-1.5 text-xs"
       >
         Modifier
       </Link>
@@ -149,7 +143,7 @@ function RowActions({
         type="button"
         disabled={pending}
         onClick={() => onDuplicate(row.id)}
-        className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+        className="btn-cc-ghost !px-2.5 !py-1.5 text-xs disabled:opacity-50"
       >
         Dupliquer
       </button>

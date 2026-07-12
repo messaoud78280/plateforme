@@ -30,6 +30,7 @@ import { WorkItemCatalogBar } from "@/components/devis/WorkItemCatalogBar";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import { prisma } from "@/lib/prisma";
 import { listWorkItemCatalogs, resolveActiveWorkItemCatalogId } from "@/lib/work-item-catalog";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 type SearchParams = Promise<{
   q?: string;
@@ -202,55 +203,39 @@ export default async function BibliothequePage({ searchParams }: { searchParams:
 
       <WorkItemCatalogBar catalogs={catalogs} activeCatalogId={activeCatalogId} />
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="font-heading text-xl font-bold text-slate-900 sm:text-2xl">Bibliothèque ouvrages</h1>
-          <p className="mt-1 max-w-2xl text-sm text-slate-600">
-            Référentiel type BPU : filtres par corps de métier, tri, vue tableau ou cartes, regroupement et actions de masse.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-start gap-2">
-          <WorkItemMergeAnalyzeButton pendingProposals={mergeStats.pendingProposals} />
-          <HarmonizeLotsButton />
-          <RepairImportClassificationButton />
-          <Link
-            href="/dashboard/devis/bibliotheque/nettoyage"
-            className="inline-flex items-center justify-center rounded-xl border border-[#1d4ed8]/30 bg-[#eff6ff] px-4 py-2.5 text-sm font-semibold text-[#1e3a8a] shadow-sm hover:bg-[#dbeafe]"
-          >
-            Nettoyage bibliothèque
-          </Link>
-          <Link
-            href="/dashboard/devis/dce-remplissage"
-            className="inline-flex items-center justify-center rounded-xl border border-violet-200 bg-violet-50 px-4 py-2.5 text-sm font-semibold text-violet-900 shadow-sm hover:bg-violet-100"
-          >
-            DCE → BPU / DPGF
-          </Link>
-          <Link
-            href="/dashboard/devis/bibliotheque/codification"
-            className="inline-flex items-center justify-center rounded-xl border border-[#1e3a5f]/30 bg-[#1e3a5f]/5 px-4 py-2.5 text-sm font-semibold text-[#1e3a5f] shadow-sm hover:bg-[#1e3a5f]/10"
-          >
-            Codification BeWork
-          </Link>
-          <Link
-            href="/dashboard/devis/bibliotheque/recodification"
-            className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm hover:bg-slate-50"
-          >
-            Recod. Martin (legacy)
-          </Link>
-          <Link
-            href="/dashboard/devis/bibliotheque/nouveau"
-            className="inline-flex items-center justify-center rounded-xl bg-[#1e3a5f] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#152a45]"
-          >
-            Ajouter un ouvrage
-          </Link>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow="Référentiel BPU"
+        title="Bibliothèque ouvrages"
+        description="Filtres par corps de métier, tri, vue tableau ou cartes, regroupement et actions de masse."
+        actions={
+          <>
+            <WorkItemMergeAnalyzeButton pendingProposals={mergeStats.pendingProposals} />
+            <HarmonizeLotsButton />
+            <RepairImportClassificationButton />
+            <Link href="/dashboard/devis/bibliotheque/nettoyage" className="btn-cc-secondary">
+              Nettoyage
+            </Link>
+            <Link href="/dashboard/devis/dce-remplissage" className="btn-cc-intel">
+              DCE → BPU / DPGF
+            </Link>
+            <Link href="/dashboard/devis/bibliotheque/codification" className="btn-cc-secondary">
+              Codification
+            </Link>
+            <Link href="/dashboard/devis/bibliotheque/recodification" className="btn-cc-ghost">
+              Recod. Martin
+            </Link>
+            <Link href="/dashboard/devis/bibliotheque/nouveau" className="btn-cc-primary">
+              Ajouter un ouvrage
+            </Link>
+          </>
+        }
+      />
 
       <BibliothequeStatsStrip stats={stats} />
 
       <form
         method="get"
-        className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-6 xl:grid-cols-8"
+        className="cc-card grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-6 xl:grid-cols-8"
       >
         <input type="hidden" name="view" value={view} />
         {groupLots ? <input type="hidden" name="groupLots" value="1" /> : null}
@@ -468,16 +453,10 @@ export default async function BibliothequePage({ searchParams }: { searchParams:
           </select>
         </div>
         <div className="flex flex-wrap items-end gap-2 sm:col-span-2 lg:col-span-6 xl:col-span-8">
-          <button
-            type="submit"
-            className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-          >
+          <button type="submit" className="btn-cc-primary">
             Appliquer les filtres
           </button>
-          <Link
-            href="/dashboard/devis/bibliotheque"
-            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
-          >
+          <Link href="/dashboard/devis/bibliotheque" className="btn-cc-secondary">
             Réinitialiser les filtres
           </Link>
         </div>

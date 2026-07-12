@@ -4,6 +4,8 @@ import { DpgfAnalysisGeneratePanel } from "@/components/devis/DpgfAnalysisGenera
 import { DpgfAnalysisJsonImportPanel } from "@/components/devis/DpgfAnalysisJsonImportPanel";
 import { DpgfAnalysisListTable } from "@/components/devis/DpgfAnalysisListTable";
 import { DpgfAnalysisStatsStrip } from "@/components/devis/DpgfAnalysisStatsStrip";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Alert } from "@/components/ui/Alert";
 import { requireBeWorkDevisSession } from "@/lib/be-work-devis-access";
 import { getBeWorkFamilyLexiconSorted } from "@/lib/bework-devis-family-codes";
 import { isDpgfAnalysisAiAvailable } from "@/lib/dpgf-analysis/generate-sheet";
@@ -76,42 +78,32 @@ export default async function AnalyseDpgfPage({ searchParams }: { searchParams: 
 
   return (
     <div className="space-y-6">
-      <header className="space-y-2">
-        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#1e3a5f]/80">Compréhension & vigilance</p>
-        <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-900">Analyse DPGF</h1>
-        <p className="max-w-3xl text-sm leading-relaxed text-slate-600">
-          Comprendre les désignations ligne par ligne : prestation attendue, documents à vérifier, points de vigilance et
-          questions à poser. Module pédagogique —{" "}
-          <strong className="font-semibold text-slate-800">sans prix ni bibliothèque tarifaire</strong>.
-        </p>
-        <div className="flex flex-wrap gap-2 pt-1">
-          <Link
-            href="/dashboard/devis/analyse-dpgf/nouveau"
-            className="rounded-xl bg-[#1e3a5f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#162d4a]"
-          >
-            Nouvelle fiche manuelle
-          </Link>
-          <Link
-            href="/dashboard/devis/dce-remplissage"
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            DCE importé → générer depuis une ligne
-          </Link>
-          <a
-            href="#json-import"
-            className="rounded-xl border border-[#1e3a5f]/30 bg-[#eff6ff] px-4 py-2 text-sm font-semibold text-[#1e3a5f] hover:bg-[#dbeafe]"
-          >
-            Importer en JSON
-          </a>
-        </div>
-      </header>
+      <PageHeader
+        eyebrow="Compréhension & vigilance"
+        title="Analyse DPGF"
+        description={
+          <>
+            Comprendre les désignations ligne par ligne : prestation attendue, documents à vérifier, points de vigilance et
+            questions à poser. Module pédagogique —{" "}
+            <strong className="font-semibold text-bework-ink">sans prix ni bibliothèque tarifaire</strong>.
+          </>
+        }
+        actions={
+          <>
+            <Link href="/dashboard/devis/analyse-dpgf/nouveau" className="btn-cc-primary">
+              Nouvelle fiche manuelle
+            </Link>
+            <Link href="/dashboard/devis/dce-remplissage" className="btn-cc-secondary">
+              DCE importé → générer
+            </Link>
+            <a href="#outils-dpgf" className="btn-cc-ghost">
+              Outils IA / JSON
+            </a>
+          </>
+        }
+      />
 
       <DpgfAnalysisStatsStrip stats={stats} />
-
-      <div className="space-y-6">
-        <DpgfAnalysisGeneratePanel aiAvailable={aiAvailable} />
-        <DpgfAnalysisJsonImportPanel />
-      </div>
 
       <DpgfAnalysisFiltersPanel
         sp={sp}
@@ -123,12 +115,22 @@ export default async function AnalyseDpgfPage({ searchParams }: { searchParams: 
       />
 
       {rows.length >= DPGF_ANALYSIS_LIST_LIMIT ? (
-        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+        <Alert tone="watch">
           Affichage limité à {DPGF_ANALYSIS_LIST_LIMIT} fiches — affinez les filtres pour voir le détail complet.
-        </p>
+        </Alert>
       ) : null}
 
       <DpgfAnalysisListTable rows={rows} lotLabels={lotLabels} />
+
+      <details id="outils-dpgf" className="cc-card overflow-hidden">
+        <summary className="cursor-pointer px-5 py-4 font-heading text-sm font-bold text-bework-ink marker:content-none [&::-webkit-details-marker]:hidden">
+          Outils — génération IA et import JSON
+        </summary>
+        <div className="space-y-6 border-t border-[color:var(--cc-chrome-border)] p-5">
+          <DpgfAnalysisGeneratePanel aiAvailable={aiAvailable} />
+          <DpgfAnalysisJsonImportPanel />
+        </div>
+      </details>
     </div>
   );
 }

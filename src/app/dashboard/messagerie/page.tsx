@@ -4,6 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { MessagerieMissionsView } from "@/components/messagerie/MessagerieMissionsView";
 import { BackLink } from "@/components/ui/BackLink";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Alert } from "@/components/ui/Alert";
 
 export default async function MessageriePage() {
   const session = await getServerSession(authOptions);
@@ -55,21 +57,26 @@ export default async function MessageriePage() {
   return (
     <div className="space-y-6">
       <BackLink href="/dashboard">Tableau de bord</BackLink>
-      <div>
-        <h1 className="text-2xl font-bold text-black">Messagerie</h1>
-        <p className="mt-1 text-black">
-          {isClient
+      <PageHeader
+        eyebrow="Échanges chantier"
+        title="Messagerie"
+        description={
+          isClient
             ? "Échangez avec votre assistant, suivez vos demandes et envoyez des documents."
-            : "Messagerie centrée sur les missions. Gérez les échanges et le suivi des missions administratives."}
-        </p>
-        <div className="mt-3 rounded-lg border border-blue-100 bg-blue-50/50 px-4 py-3 text-sm text-slate-700">
-          <strong>Comment envoyer un message ?</strong>{" "}
-          {(isManager || isAgent) && (
-            <>Utilisez l&apos;onglet <strong>Envoyer un message</strong> pour écrire à n&apos;importe quel agent ou gérant. Sinon, </>
-          )}
-          sélectionnez une mission dans la liste du centre, puis utilisez le champ « Écrire un message » en bas à droite et le bouton <strong>Envoyer</strong>. Pour joindre un document : cliquez sur l&apos;icône trombone ou ouvrez la mission pour ajouter des pièces jointes.
-        </div>
-      </div>
+            : "Messagerie centrée sur les missions. Gérez les échanges et le suivi des missions."
+        }
+      />
+
+      <Alert tone="info" title="Comment envoyer un message ?">
+        {(isManager || isAgent) && (
+          <>
+            Utilisez l&apos;onglet <strong>Envoyer un message</strong> pour écrire à n&apos;importe quel agent ou gérant.
+            Sinon,{" "}
+          </>
+        )}
+        sélectionnez une mission dans la liste du centre, puis utilisez le champ « Écrire un message » en bas à droite et
+        le bouton <strong>Envoyer</strong>. Pour joindre un document : icône trombone ou fiche mission.
+      </Alert>
 
       <MessagerieMissionsView
         sessionUserId={session.user.id}
@@ -78,8 +85,8 @@ export default async function MessageriePage() {
         isClient={isClient}
         canChangeStatus={canChangeStatus}
         agents={agents}
-        managerId={managerId}
         recipients={recipients}
+        managerId={managerId}
       />
     </div>
   );

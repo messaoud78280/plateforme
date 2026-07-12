@@ -12,6 +12,10 @@ import { ClientAccountStatus, UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { isClientLoginAllowed } from "@/lib/client-account-approval";
 import { SkipLink } from "@/components/ui/SkipLink";
+import { EnvironmentBanner } from "@/components/system/EnvironmentBanner";
+import { RoleOnboarding } from "@/components/onboarding/RoleOnboarding";
+import { UiPreferencesProvider } from "@/components/system/UiPreferences";
+import { resolveBeWorkEnvironment } from "@/lib/environment";
 
 export const metadata: Metadata = {
   robots: SEO_NOINDEX_ROBOTS,
@@ -42,9 +46,12 @@ export default async function DashboardLayout({
     }
   }
 
+  const env = resolveBeWorkEnvironment();
+
   return (
     <div className="cc-shell">
       <SkipLink />
+      <EnvironmentBanner environment={env} />
       <header className="cc-header sticky top-0 z-40 shrink-0 overflow-visible">
         <div className="mx-auto flex h-14 max-w-site items-center justify-between gap-2 overflow-visible px-3 sm:gap-3 sm:px-4">
           <Link
@@ -75,9 +82,16 @@ export default async function DashboardLayout({
         </div>
       </header>
       <DashboardNav role={session.user?.role ?? null} />
-      <main id="contenu-principal" tabIndex={-1} className="cc-enter mx-auto max-w-site min-w-0 px-3 py-6 outline-none sm:px-4 sm:py-8">
-        {children}
-      </main>
+      <UiPreferencesProvider userId={session.user.id}>
+        <main
+          id="contenu-principal"
+          tabIndex={-1}
+          className="cc-enter mx-auto max-w-site min-w-0 px-3 py-6 outline-none sm:px-4 sm:py-8"
+        >
+          {children}
+        </main>
+        <RoleOnboarding userId={session.user.id} role={session.user.role} />
+      </UiPreferencesProvider>
     </div>
   );
 }

@@ -16,6 +16,7 @@ import { ClientDashboardContent } from "@/components/dashboard/ClientDashboardCo
 import { ManagerDashboardContent, type ManagerTaskItem, type ManagerReportItem } from "@/components/dashboard/ManagerDashboardContent";
 import { AgentDashboardContent } from "@/components/dashboard/AgentDashboardContent";
 import { BackLink } from "@/components/ui/BackLink";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
 
 export default async function DashboardPage({
@@ -633,34 +634,27 @@ export default async function DashboardPage({
       {!isManager && (
       <>
       {/* Carte de bienvenue + CTA Nouvelle demande (client) */}
-      <div className="rounded-2xl surface-metallic-light p-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-        <h1 className="text-2xl font-bold text-slate-800">
-          Bienvenue, {session.user?.name}
-        </h1>
-        <p className="mt-1 text-slate-600">
-          {isAgentRole
+      <PageHeader
+        eyebrow="BeWork Command Center"
+        title={`Bienvenue, ${session.user?.name}`}
+        description={
+          isAgentRole
             ? "Tâches qui vous sont assignées. Indiquez le temps passé à la clôture pour déduire les crédits du client."
-            : "Suivez vos documents, tâches et échanges avec l’agence."}
-        </p>
-          </div>
-          {isClient && (
-            <NouvelleDemandeTrigger initialOpen={openDemande} variant="primary" />
-          )}
-        </div>
-      </div>
+            : "Suivez vos documents, tâches et échanges avec l’agence."
+        }
+        actions={isClient ? <NouvelleDemandeTrigger initialOpen={openDemande} variant="primary" /> : undefined}
+      />
 
       {/* Section Contrat — visible pour les clients, accès à la page contrat */}
       {isClient && (
-        <section aria-label="Contrat" className="rounded-2xl surface-metallic-light p-6">
-          <h2 className="text-lg font-semibold text-slate-800">Contrat d&apos;abonnement</h2>
+        <section aria-label="Contrat" className="cc-card p-6">
+          <h2 className="font-heading text-lg font-semibold text-bework-ink">Contrat d&apos;abonnement</h2>
           {contractStatus === "SIGNED" ? (
-            <p className="mt-2 text-sm text-slate-600">
+            <p className="mt-2 text-sm text-bework-muted">
               Votre contrat a été accepté. Vous pouvez le consulter à tout moment.
             </p>
           ) : (
-            <p className="mt-2 text-sm text-slate-600">
+            <p className="mt-2 text-sm text-bework-muted">
               Pour accéder à l&apos;ensemble des services, veuillez lire et accepter le contrat d&apos;abonnement.
             </p>
           )}

@@ -24,7 +24,7 @@ export function PilotageDetailNav({
   const href = (id: string) => `${PILOTAGE_LIST_PATH}/${pilotageId}?onglet=${id}`;
 
   return (
-    <nav className="sticky top-2 z-20 rounded-xl border border-[#1e3a5f]/10 bg-white/95 p-1.5 shadow-sm backdrop-blur" aria-label="Rubriques chantier">
+    <nav className="sticky top-2 z-20 rounded-xl border border-bework-navy/10 bg-white/95 p-1.5 shadow-sm backdrop-blur" aria-label="Rubriques chantier">
       <div className="flex flex-wrap gap-1">
         {DETAIL_PRIMARY_TABS.map((t) => {
           const count = badges?.[t.id as DetailTabId];
@@ -35,8 +35,8 @@ export function PilotageDetailNav({
               href={href(t.id)}
               className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors sm:text-sm ${
                 isActive
-                  ? "bg-[#1e3a5f] text-white"
-                  : "text-slate-700 hover:bg-[color:var(--pilotage-navy-soft)]"
+                  ? "bg-bework-navy text-white shadow-sm"
+                  : "text-bework-ink/80 hover:bg-bework-navy-soft hover:text-bework-navy"
               }`}
             >
               {t.label}
@@ -58,21 +58,21 @@ export function PilotageDetailNav({
             onClick={() => setMoreOpen((v) => !v)}
             className={`inline-flex items-center rounded-lg px-3 py-2 text-xs font-semibold sm:text-sm ${
               DETAIL_MORE_TABS.some((t) => t.id === active)
-                ? "bg-[#1e3a5f] text-white"
-                : "text-slate-700 hover:bg-[color:var(--pilotage-navy-soft)]"
+                ? "bg-bework-navy text-white shadow-sm"
+                : "text-bework-ink/80 hover:bg-bework-navy-soft hover:text-bework-navy"
             }`}
             aria-expanded={moreOpen}
           >
             Plus
           </button>
           {moreOpen ? (
-            <div className="absolute right-0 z-30 mt-1 min-w-[200px] rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg">
+            <div className="absolute right-0 z-30 mt-1 min-w-[200px] rounded-xl border border-bework-navy/10 bg-white p-1.5 shadow-lg">
               {DETAIL_MORE_TABS.map((t) => (
                 <Link
                   key={t.id}
                   href={href(t.id)}
                   className={`block rounded-lg px-3 py-2 text-xs font-semibold ${
-                    active === t.id ? "bg-[color:var(--pilotage-navy-soft)] text-[#1e3a5f]" : "text-slate-700 hover:bg-slate-50"
+                    active === t.id ? "bg-bework-navy-soft text-bework-navy" : "text-bework-ink/80 hover:bg-slate-50"
                   }`}
                   onClick={() => setMoreOpen(false)}
                 >

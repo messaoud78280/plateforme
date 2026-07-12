@@ -157,6 +157,9 @@ body {
     --pilotage-transition: 0ms;
     --cc-transition: 0ms;
   }
+  .animate-pulse {
+    animation: none !important;
+  }
 }
 
 .pilotage-card {

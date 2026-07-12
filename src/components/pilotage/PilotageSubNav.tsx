@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PILOTAGE_LIST_PATH } from "@/lib/pilotage/constants";
+import { cn } from "@/lib/cn";
 
 const base =
   "inline-flex items-center rounded-lg px-3 py-2 text-xs font-semibold transition-colors sm:text-sm";
@@ -20,7 +21,7 @@ export function PilotageSubNav() {
   const pathname = usePathname();
   return (
     <nav
-      className="flex flex-wrap gap-1.5 rounded-xl border border-[#1e3a5f]/10 bg-white p-1.5 shadow-sm"
+      className="flex flex-wrap gap-1.5 rounded-xl border border-bework-navy/10 bg-white p-1.5 shadow-sm"
       aria-label="Navigation Pilotage travaux"
     >
       {links.map((l) => {
@@ -31,11 +32,13 @@ export function PilotageSubNav() {
           <Link
             key={l.href}
             href={l.href}
-            className={
+            className={cn(
+              base,
               active
-                ? `${base} bg-[color:var(--pilotage-navy)] text-white shadow-sm`
-                : `${base} text-slate-700 hover:bg-[color:var(--pilotage-navy-soft)]`
-            }
+                ? "bg-bework-navy text-white shadow-sm"
+                : "text-bework-ink/80 hover:bg-bework-navy-soft hover:text-bework-navy",
+            )}
+            aria-current={active ? "page" : undefined}
           >
             {l.label}
           </Link>

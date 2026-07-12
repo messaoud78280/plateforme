@@ -7,6 +7,10 @@ import Link from "next/link";
 import { CreateChantierForm } from "@/components/chantier/CreateChantierForm";
 import { ChantierProjectsList } from "@/components/chantier/ChantierProjectsList";
 import { BackLink } from "@/components/ui/BackLink";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { KpiTile } from "@/components/ui/KpiTile";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { FilterBar, FilterChip } from "@/components/ui/FilterBar";
 import { canDeleteChantierProject, isChantierStaff } from "@/lib/chantier-dossier/access";
 import { CHANTIER_STATUS_LABELS } from "@/lib/chantier-dossier/constants";
 
@@ -88,90 +92,88 @@ export default async function ProjetsPage({
   const byStatus = Object.fromEntries(counts.map((c) => [c.chantierStatus, c._count]));
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <BackLink href="/dashboard">Tableau de bord</BackLink>
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">Dossiers chantier</h1>
-          <p className="mt-1 text-slate-600">
-            {staff
-              ? "Classeur numérique par chantier : devis, contrats, planning, DOE…"
-              : "Vos chantiers et documents classés par rubrique."}
-          </p>
-        </div>
-        <Link
-          href="/dashboard/projets/manquants"
-          className={`rounded-lg px-4 py-2 text-sm font-semibold ${
-            missingTotal > 0
-              ? "border border-red-200 bg-red-50 text-red-800"
-              : "border border-slate-200 bg-white text-slate-700"
-          }`}
-        >
-          Pièces manquantes ({missingTotal})
-        </Link>
-      </div>
+      <PageHeader
+        eyebrow="Classeur numérique"
+        title="Dossiers chantier"
+        description={
+          staff
+            ? "Classeur numérique par chantier : devis, contrats, planning, DOE…"
+            : "Vos chantiers et documents classés par rubrique."
+        }
+        actions={
+          <Link
+            href="/dashboard/projets/manquants"
+            className={
+              missingTotal > 0
+                ? "btn-cc-danger"
+                : "btn-cc-secondary"
+            }
+          >
+            Pièces manquantes ({missingTotal})
+          </Link>
+        }
+      />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <div className="rounded-xl surface-metallic-light p-4">
-          <p className="text-2xl font-bold text-slate-800">{total}</p>
-          <p className="text-sm text-slate-500">Chantiers</p>
-        </div>
+        <KpiTile label="Chantiers" value={total} href="/dashboard/projets" />
         {(["EN_COURS", "ETUDE", "EN_ATTENTE", "RECEPTION"] as const).map((s) => (
-          <div key={s} className="rounded-xl surface-metallic-light p-4">
-            <p className="text-2xl font-bold text-slate-800">{byStatus[s] ?? 0}</p>
-            <p className="text-sm text-slate-500">{CHANTIER_STATUS_LABELS[s]}</p>
-          </div>
+          <KpiTile
+            key={s}
+            label={CHANTIER_STATUS_LABELS[s]}
+            value={byStatus[s] ?? 0}
+            href={`/dashboard/projets?statut=${s}`}
+            tone={s === "EN_ATTENTE" ? "watch" : "neutral"}
+          />
         ))}
       </div>
 
       <CreateChantierForm clients={clients} showClientPicker={staff && session.user.role !== "AGENT"} />
 
-      <div className="flex flex-wrap items-center gap-3">
-        <form method="get" className="flex min-w-0 flex-1 gap-2 sm:min-w-[200px]">
+      <FilterBar>
+        <label className="min-w-0 flex-1 text-xs">
+          <span className="mb-1 block font-semibold text-bework-muted">Recherche</span>
           <input
             type="search"
             name="recherche"
             defaultValue={params.recherche ?? ""}
-            placeholder="Rechercher chantier, ville, adresse…"
-            className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            placeholder="Chantier, ville, adresse…"
+            className="w-full rounded-[var(--cc-radius)] border border-[color:var(--cc-chrome-border)] bg-white px-3 py-2 text-sm focus:border-bework-navy focus:outline-none focus:ring-2 focus:ring-bework-navy/20"
           />
-          {params.statut ? <input type="hidden" name="statut" value={params.statut} /> : null}
-          <button
-            type="submit"
-            className="rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-          >
-            Rechercher
-          </button>
-        </form>
-        <div className="flex flex-wrap gap-1">
-          <Link
+        </label>
+        {params.statut ? <input type="hidden" name="statut" value={params.statut} /> : null}
+        <button type="submit" className="btn-cc-primary">
+          Rechercher
+        </button>
+        <div className="flex w-full flex-wrap gap-1.5 sm:w-auto">
+          <FilterChip
             href={params.recherche ? `/dashboard/projets?recherche=${encodeURIComponent(params.recherche)}` : "/dashboard/projets"}
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-              !validChantierStatus ? "bg-slate-800 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-            }`}
+            active={!validChantierStatus}
           >
             Tous
-          </Link>
+          </FilterChip>
           {CHANTIER_STATUSES.map((s) => (
-            <Link
+            <FilterChip
               key={s}
               href={`/dashboard/projets?statut=${s}${params.recherche ? `&recherche=${encodeURIComponent(params.recherche)}` : ""}`}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-                validChantierStatus === s ? "bg-slate-800 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-              }`}
+              active={validChantierStatus === s}
             >
               {CHANTIER_STATUS_LABELS[s]}
-            </Link>
+            </FilterChip>
           ))}
         </div>
-      </div>
+      </FilterBar>
 
       {projects.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
-          <p className="text-slate-600">
-            {search || validChantierStatus ? "Aucun chantier ne correspond aux critères." : "Aucun chantier pour le moment."}
-          </p>
-        </div>
+        <EmptyState
+          title={search || validChantierStatus ? "Aucun chantier trouvé" : "Aucun chantier pour le moment"}
+          description={
+            search || validChantierStatus
+              ? "Aucun chantier ne correspond aux critères. Modifiez la recherche ou le statut."
+              : "Créez un dossier chantier pour classer devis, contrats, plans et DOE."
+          }
+        />
       ) : (
         <ChantierProjectsList
           projects={projects.map((project) => ({

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { cn } from "@/lib/cn";
 
 const base =
   "inline-flex items-center rounded-lg px-3 py-2 text-xs font-semibold transition-colors sm:text-sm";
@@ -25,20 +26,24 @@ export function DevisSubNav() {
 
   return (
     <nav
-      className="flex flex-wrap gap-2 rounded-xl border border-slate-200/80 bg-white p-2 shadow-sm"
+      className="flex flex-wrap gap-1.5 rounded-xl border border-bework-navy/10 bg-white p-1.5 shadow-sm"
       aria-label="Navigation BeWork Devis"
     >
       {links.map((l) => {
-        const active = l.exact ? pathname === l.href : pathname === l.href || pathname.startsWith(`${l.href}/`);
+        const active = l.exact
+          ? pathname === l.href
+          : pathname === l.href || pathname.startsWith(`${l.href}/`);
         return (
           <Link
             key={l.href}
             href={l.href}
-            className={
+            className={cn(
+              base,
               active
-                ? `${base} bg-[#1e3a5f] text-white shadow-sm`
-                : `${base} bg-slate-50 text-slate-700 hover:bg-slate-100`
-            }
+                ? "bg-bework-navy text-white shadow-sm"
+                : "text-bework-ink/80 hover:bg-bework-navy-soft hover:text-bework-navy",
+            )}
+            aria-current={active ? "page" : undefined}
           >
             {l.label}
           </Link>

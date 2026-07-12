@@ -241,11 +241,11 @@ export default async function PilotageTravauxPage({
       <BackLink href="/dashboard">Tableau de bord</BackLink>
       <PilotageSubNav />
 
-      <header className="overflow-hidden rounded-2xl border border-[#1e3a5f]/10 bg-gradient-to-br from-[#1e3a5f] via-[#243f66] to-[#162d4a] p-6 text-white shadow-sm">
+      <header className="overflow-hidden rounded-2xl border border-bework-navy/15 bg-gradient-to-br from-bework-navy via-[#243f66] to-bework-navy-deep p-6 text-white shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/60">BeWork · Cockpit</p>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Pilotage travaux</h1>
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/60">BeWork · Command Center</p>
+            <h1 className="font-heading mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Pilotage travaux</h1>
             <p className="mt-2 text-sm leading-relaxed text-white/80">
               Supervisez les obligations, échéances, documents, blocages et jalons de tous vos chantiers.
             </p>
@@ -254,7 +254,7 @@ export default async function PilotageTravauxPage({
             {canEdit ? (
               <Link
                 href={`${PILOTAGE_LIST_PATH}/nouveau`}
-                className="rounded-lg bg-white px-3.5 py-2 text-xs font-semibold text-[#1e3a5f] shadow-sm hover:bg-slate-50"
+                className="rounded-lg bg-white px-3.5 py-2 text-xs font-semibold text-bework-navy shadow-sm hover:bg-slate-50"
               >
                 Nouveau pilotage
               </Link>
@@ -315,20 +315,20 @@ export default async function PilotageTravauxPage({
         />
       </div>
 
-      <form className="pilotage-card flex flex-wrap items-end gap-3 p-4">
-        <label className="min-w-[200px] flex-1 text-xs font-semibold text-slate-600">
+      <form method="get" className="cc-card flex flex-wrap items-end gap-3 p-4">
+        <label className="min-w-[200px] flex-1 text-xs font-semibold text-bework-muted">
           Recherche globale
           <input
             name="q"
             defaultValue={q}
             placeholder="Chantier, client, lot, référence…"
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-normal focus:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/15"
+            className="mt-1 w-full rounded-[var(--cc-radius)] border border-[color:var(--cc-chrome-border)] px-3 py-2 text-sm font-normal text-bework-ink focus:border-bework-navy focus:outline-none focus:ring-2 focus:ring-bework-navy/20"
           />
         </label>
         {(session.user.role === "MANAGER" || session.user.role === "AGENCE") && (
-          <label className="text-xs font-semibold text-slate-600">
+          <label className="text-xs font-semibold text-bework-muted">
             Client
-            <select name="client" defaultValue={clientId} className="mt-1 block rounded-lg border border-slate-200 px-3 py-2 text-sm font-normal">
+            <select name="client" defaultValue={clientId} className="mt-1 block rounded-[var(--cc-radius)] border border-[color:var(--cc-chrome-border)] px-3 py-2 text-sm font-normal text-bework-ink">
               <option value="">Tous</option>
               {clients.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -338,9 +338,9 @@ export default async function PilotageTravauxPage({
             </select>
           </label>
         )}
-        <label className="text-xs font-semibold text-slate-600">
+        <label className="text-xs font-semibold text-bework-muted">
           Statut
-          <select name="statut" defaultValue={status} className="mt-1 block rounded-lg border border-slate-200 px-3 py-2 text-sm font-normal">
+          <select name="statut" defaultValue={status} className="mt-1 block rounded-[var(--cc-radius)] border border-[color:var(--cc-chrome-border)] px-3 py-2 text-sm font-normal text-bework-ink">
             <option value="">Tous</option>
             {Object.entries(PILOTAGE_STATUS_LABELS).map(([k, v]) => (
               <option key={k} value={k}>
@@ -349,53 +349,50 @@ export default async function PilotageTravauxPage({
             ))}
           </select>
         </label>
-        <label className="flex items-center gap-2 pb-2 text-xs font-semibold text-slate-700">
+        <label className="flex items-center gap-2 pb-2 text-xs font-semibold text-bework-ink/80">
           <input type="checkbox" name="retard" value="1" defaultChecked={retard} />
           En retard
         </label>
-        <label className="flex items-center gap-2 pb-2 text-xs font-semibold text-slate-700">
+        <label className="flex items-center gap-2 pb-2 text-xs font-semibold text-bework-ink/80">
           <input type="checkbox" name="semaine" value="1" defaultChecked={week} />
           Cette semaine
         </label>
-        <label className="flex items-center gap-2 pb-2 text-xs font-semibold text-slate-700">
+        <label className="flex items-center gap-2 pb-2 text-xs font-semibold text-bework-ink/80">
           <input type="checkbox" name="urgence" value="1" defaultChecked={urg} />
           Urgences
         </label>
         <input type="hidden" name="vue" value={view} />
-        <button type="submit" className="rounded-lg bg-[#1e3a5f] px-4 py-2 text-sm font-semibold text-white">
+        <button type="submit" className="btn-cc-primary">
           Filtrer
         </button>
-        <Link href={PILOTAGE_LIST_PATH} className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">
+        <Link href={PILOTAGE_LIST_PATH} className="btn-cc-secondary">
           Réinitialiser
         </Link>
       </form>
 
       <section className="pilotage-card p-5">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-sm font-bold text-slate-900">À traiter aujourd’hui</h2>
-          <Link href={`${PILOTAGE_LIST_PATH}/a-traiter`} className="text-xs font-semibold text-[#1e3a5f] hover:underline">
+          <h2 className="text-sm font-bold text-bework-ink">À traiter aujourd’hui</h2>
+          <Link href={`${PILOTAGE_LIST_PATH}/a-traiter`} className="text-xs font-semibold text-bework-navy hover:underline">
             Voir tout
           </Link>
         </div>
         {urgentActions.length === 0 ? (
-          <p className="mt-3 text-sm text-slate-500">Aucune action urgente pour le moment.</p>
+          <p className="mt-3 text-sm text-bework-muted">Aucune action urgente pour le moment.</p>
         ) : (
-          <ul className="mt-3 divide-y divide-slate-100">
+          <ul className="mt-3 divide-y divide-[color:var(--cc-chrome-border)]">
             {urgentActions.map((a) => (
               <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-slate-900">{a.title}</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="truncate text-sm font-semibold text-bework-ink">{a.title}</p>
+                  <p className="text-xs text-bework-muted">
                     {a.chantier} · {a.client} · échéance {formatDateFr(a.dueDate)}
-                    {a.overdue ? <span className="ml-2 font-semibold text-red-700">En retard</span> : null}
+                    {a.overdue ? <span className="ml-2 font-semibold text-bework-critical">En retard</span> : null}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <StatusBadge status={a.status} />
-                  <Link
-                    href={`${PILOTAGE_LIST_PATH}/${a.pilotageId}?onglet=a-traiter`}
-                    className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-[#1e3a5f]"
-                  >
+                  <Link href={`${PILOTAGE_LIST_PATH}/${a.pilotageId}?onglet=a-traiter`} className="btn-cc-secondary !px-3 !py-1.5 text-xs">
                     Traiter
                   </Link>
                 </div>
@@ -407,23 +404,20 @@ export default async function PilotageTravauxPage({
 
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-sm font-bold text-slate-900">Chantiers pilotés ({rows.length})</h2>
+          <h2 className="text-sm font-bold text-bework-ink">Chantiers pilotés ({rows.length})</h2>
           <Suspense fallback={null}>
             <PilotageViewToggle current={view} />
           </Suspense>
         </div>
 
         {rows.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
-            <p className="text-sm font-semibold text-slate-700">Aucun pilotage chantier</p>
-            <p className="mt-1 text-sm text-slate-500">
+          <div className="rounded-[var(--cc-radius-lg)] border border-dashed border-[color:var(--cc-chrome-border)] bg-white p-10 text-center">
+            <p className="text-sm font-semibold text-bework-ink">Aucun pilotage chantier</p>
+            <p className="mt-1 text-sm text-bework-muted">
               Dès qu’un marché est obtenu, créez un pilotage pour structurer obligations, documents, jalons et DOE.
             </p>
             {canEdit ? (
-              <Link
-                href={`${PILOTAGE_LIST_PATH}/nouveau`}
-                className="mt-4 inline-flex rounded-xl bg-[#1e3a5f] px-4 py-2 text-sm font-semibold text-white"
-              >
+              <Link href={`${PILOTAGE_LIST_PATH}/nouveau`} className="btn-cc-primary mt-4 inline-flex">
                 + Nouveau pilotage
               </Link>
             ) : null}
@@ -431,7 +425,7 @@ export default async function PilotageTravauxPage({
         ) : view === "tableau" ? (
           <div className="pilotage-card overflow-x-auto">
             <table className="min-w-full text-left text-sm">
-              <thead className="border-b border-slate-100 bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              <thead className="border-b border-[color:var(--cc-chrome-border)] bg-bework-navy-soft/40 text-[11px] font-bold uppercase tracking-wider text-bework-muted">
                 <tr>
                   <th className="px-4 py-3">Chantier</th>
                   <th className="px-4 py-3">Santé</th>
@@ -443,12 +437,12 @@ export default async function PilotageTravauxPage({
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
+              <tbody className="divide-y divide-[color:var(--cc-chrome-border)]">
                 {rows.map((r) => (
-                  <tr key={r.id} className="hover:bg-slate-50/60">
+                  <tr key={r.id} className="hover:bg-bework-navy-soft/30">
                     <td className="px-4 py-3">
-                      <p className="font-semibold text-slate-900">{r.project.title}</p>
-                      <p className="text-xs text-slate-500">
+                      <p className="font-semibold text-bework-ink">{r.project.title}</p>
+                      <p className="text-xs text-bework-muted">
                         {r.project.client.company ?? r.project.client.name}
                         {r.lot ? ` · ${r.lot}` : ""}
                       </p>
@@ -458,15 +452,15 @@ export default async function PilotageTravauxPage({
                     </td>
                     <td className="px-4 py-3 tabular-nums">{r.adminProgressPct}%</td>
                     <td className="px-4 py-3 tabular-nums">{r.doeProgressPct}%</td>
-                    <td className={`px-4 py-3 tabular-nums ${r.openBlockersCount ? "font-semibold text-red-700" : ""}`}>
+                    <td className={`px-4 py-3 tabular-nums ${r.openBlockersCount ? "font-semibold text-bework-critical" : ""}`}>
                       {r.openBlockersCount}
                     </td>
-                    <td className={`px-4 py-3 tabular-nums ${r.overdueActions.length ? "font-semibold text-red-700" : ""}`}>
+                    <td className={`px-4 py-3 tabular-nums ${r.overdueActions.length ? "font-semibold text-bework-critical" : ""}`}>
                       {r.overdueActions.length}
                     </td>
-                    <td className="px-4 py-3 text-xs text-slate-600">{formatDateFr(r.nextDue)}</td>
+                    <td className="px-4 py-3 text-xs text-bework-muted">{formatDateFr(r.nextDue)}</td>
                     <td className="px-4 py-3 text-right">
-                      <Link href={`${PILOTAGE_LIST_PATH}/${r.id}`} className="text-xs font-semibold text-[#1e3a5f] hover:underline">
+                      <Link href={`${PILOTAGE_LIST_PATH}/${r.id}`} className="text-xs font-semibold text-bework-navy hover:underline">
                         Ouvrir
                       </Link>
                     </td>
@@ -486,58 +480,58 @@ export default async function PilotageTravauxPage({
                 <div
                   className={`w-1.5 shrink-0 ${
                     r.health.label === "CRITIQUE"
-                      ? "bg-red-600"
+                      ? "bg-bework-critical"
                       : r.health.label === "EN_DIFFICULTE"
                         ? "bg-orange-500"
                         : r.health.label === "A_SURVEILLER"
-                          ? "bg-amber-500"
+                          ? "bg-bework-watch"
                           : r.health.label === "TERMINE"
-                            ? "bg-slate-400"
-                            : "bg-emerald-500"
+                            ? "bg-bework-muted"
+                            : "bg-bework-ok"
                   }`}
                   aria-hidden
                 />
                 <div className="min-w-0 flex-1 p-4">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <h3 className="truncate text-base font-bold text-slate-900 group-hover:text-[#1e3a5f]">
+                      <h3 className="truncate text-base font-bold text-bework-ink group-hover:text-bework-navy">
                         {r.project.title}
                       </h3>
-                      <p className="text-sm text-slate-600">
+                      <p className="text-sm text-bework-muted">
                         {r.project.client.company ?? r.project.client.name}
                         {r.lot ? ` · ${r.lot}` : ""}
                       </p>
                     </div>
                     <HealthBadge label={r.health.label} />
                   </div>
-                  <p className="mt-2 text-xs text-slate-500">
+                  <p className="mt-2 text-xs text-bework-muted">
                     Conducteur : {r.conducteur?.name ?? "—"} · Assistant : {r.assistant?.name ?? "—"}
                   </p>
-                  <p className="mt-0.5 text-[11px] text-slate-400">
+                  <p className="mt-0.5 text-[11px] text-bework-muted/80">
                     {SERVICE_LEVEL_LABELS[r.serviceLevel] ?? r.serviceLevel}
                   </p>
                   <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Prochaine échéance</p>
-                      <p className="font-semibold text-slate-800">{formatDateFr(r.nextDue)}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-bework-muted">Prochaine échéance</p>
+                      <p className="font-semibold text-bework-ink">{formatDateFr(r.nextDue)}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Prochain jalon</p>
-                      <p className="truncate font-semibold text-slate-800">{r.nextMilestone?.title ?? "—"}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-bework-muted">Prochain jalon</p>
+                      <p className="truncate font-semibold text-bework-ink">{r.nextMilestone?.title ?? "—"}</p>
                     </div>
                   </div>
                   <div className="mt-3 flex flex-wrap items-end gap-4">
                     <ProgressBar value={r.adminProgressPct} label="Admin" />
                     <ProgressBar value={r.doeProgressPct} label="DOE" />
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Blocages</p>
-                      <p className={`text-lg font-bold ${r.openBlockersCount ? "text-red-700" : "text-slate-800"}`}>
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-bework-muted">Blocages</p>
+                      <p className={`text-lg font-bold ${r.openBlockersCount ? "text-bework-critical" : "text-bework-ink"}`}>
                         {r.openBlockersCount}
                       </p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Retards</p>
-                      <p className={`text-lg font-bold ${r.overdueActions.length ? "text-red-700" : "text-slate-800"}`}>
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-bework-muted">Retards</p>
+                      <p className={`text-lg font-bold ${r.overdueActions.length ? "text-bework-critical" : "text-bework-ink"}`}>
                         {r.overdueActions.length}
                       </p>
                     </div>

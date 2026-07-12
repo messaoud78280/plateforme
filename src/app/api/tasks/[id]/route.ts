@@ -150,7 +150,16 @@ export async function PUT(
     } = {};
     if (typeof title === "string" && title.trim()) data.title = title.trim();
     if (body.hasOwnProperty("description")) data.description = description?.trim() ?? null;
-    if (status && validStatuses.includes(status)) data.status = status;
+    // Statut réservé à BeWork (agence / agent assigné) — le client ne peut pas clôturer ou forcer A_VALIDER.
+    if (status && validStatuses.includes(status)) {
+      if (!isAgence && !isAgent) {
+        return NextResponse.json(
+          { error: "Seul BeWork peut modifier le statut de la mission." },
+          { status: 403 }
+        );
+      }
+      data.status = status;
+    }
     if (isAgence && body.hasOwnProperty("priority")) {
       const rawPriority = priority as string | null | undefined;
       const normalized = normalizeTaskPriority(rawPriority);

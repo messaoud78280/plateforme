@@ -8,14 +8,14 @@ const DEMO_EMAILS = ["agence@exemple.com", "client@exemple.com"];
 const DEMO_PASSWORD = process.env.MOT_DE_PASSE_DEMO ?? "motdepasse123";
 
 /**
- * POST /api/admin/update-demo-passwords?secret=XXX
- * &scope=demo|team|all
- * Met à jour les mots de passe démo et/ou équipe BeWork (gérantes + agents).
- * Définir UPDATE_DEMO_PASSWORDS_SECRET sur Railway, puis appeler une fois cette URL.
+ * POST /api/admin/update-demo-passwords
+ * Header obligatoire : x-secret = UPDATE_DEMO_PASSWORDS_SECRET
+ * Query : scope=demo|team|all
+ * Ne pas exposer le secret en query string (logs / historique navigateur).
  */
 export async function POST(request: Request) {
   const { searchParams } = new URL(request.url);
-  const secret = searchParams.get("secret") ?? request.headers.get("x-secret");
+  const secret = request.headers.get("x-secret");
   const expected = process.env.UPDATE_DEMO_PASSWORDS_SECRET;
   const scope = (searchParams.get("scope") ?? "all").toLowerCase();
 
@@ -67,10 +67,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message:
-        scope === "team"
-          ? `Équipe BeWork : mot de passe réinitialisé (${BEWORK_TEAM_PASSWORD}).`
-          : `Mots de passe mis à jour (scope=${scope}).`,
+      message: `Mots de passe mis à jour (scope=${scope}).`,
       details: results,
     });
   } catch (e) {
@@ -80,8 +77,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-}
-
-export async function GET(request: Request) {
-  return POST(request);
 }

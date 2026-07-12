@@ -35,3 +35,16 @@ export function canDeleteChantierProject(
   if (project.clientId === user.id) return true;
   return false;
 }
+
+/**
+ * Suppression d’une pièce du classeur : réservée au staff BeWork.
+ * Le client peut déposer, pas effacer une preuve / livrable BeWork.
+ */
+export function canDeleteChantierFile(user: SessionUser): boolean {
+  return isChantierStaff(user.role);
+}
+
+/** Changement de statut documentaire (VALIDE, A_RELANCER…) : staff uniquement. */
+export function canUpdateChantierFileStatus(user: SessionUser): boolean {
+  return isChantierStaff(user.role);
+}

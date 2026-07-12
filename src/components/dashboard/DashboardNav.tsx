@@ -72,6 +72,12 @@ export function DashboardNav({ role }: { role?: string | null }) {
             <NavLink href="/dashboard/messagerie" pathname={pathname} activeClass={active}>
               Messagerie
             </NavLink>
+            <NavLink href="/dashboard/documents" pathname={pathname} activeClass={active}>
+              Documents
+            </NavLink>
+            <NavLink href="/dashboard/equipe" pathname={pathname} activeClass={active}>
+              Équipe
+            </NavLink>
             <NavLink href="/dashboard/abonnement" pathname={pathname} activeClass={active}>
               Abonnement
             </NavLink>
@@ -147,28 +153,7 @@ export function DashboardNav({ role }: { role?: string | null }) {
               Paramètres
             </NavLink>
           </>
-        ) : (
-          <>
-            <NavLink href="/dashboard/projets" pathname={pathname} activeClass={active}>
-              Chantiers
-            </NavLink>
-            <NavLink href="/dashboard/taches" pathname={pathname} activeClass={active}>
-              Mes tâches
-            </NavLink>
-            <NavLink href="/dashboard/documents" pathname={pathname} activeClass={active}>
-              Mes documents
-            </NavLink>
-            <NavLink href="/dashboard/messagerie" pathname={pathname} activeClass={active}>
-              Messagerie
-            </NavLink>
-            <NavLink href="/dashboard/messages" pathname={pathname} activeClass={active}>
-              RDV
-            </NavLink>
-            <NavLink href="/dashboard/rapports" pathname={pathname} activeClass={active}>
-              Rapports
-            </NavLink>
-          </>
-        )}
+        ) : null}
       </div>
     </nav>
   );

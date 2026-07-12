@@ -3,7 +3,11 @@ import type { ChantierFileStatus } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
+import {
+  canAccessChantierProject,
+  canDeleteChantierFile,
+  canUpdateChantierFileStatus,
+} from "@/lib/chantier-dossier/access";
 import { createServiceRoleClient } from "@/lib/supabase";
 import { deleteChantierPdfPreview } from "@/lib/storage/chantier-pdf-preview";
 import { DOCUMENTS_BUCKET, extractStoragePathFromUrl } from "@/lib/storage/supabase-object";
@@ -46,6 +50,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   } = {};
 
   if (body.status !== undefined) {
+    if (!canUpdateChantierFileStatus(session.user)) {
+      return NextResponse.json(
+        { error: "Seul BeWork peut modifier le statut documentaire." },
+        { status: 403 }
+      );
+    }
     const s = String(body.status);
     if (!STATUSES.includes(s as ChantierFileStatus)) {
       return NextResponse.json({ error: "Statut invalide" }, { status: 400 });
@@ -92,6 +102,12 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   const access = await canAccessChantierProject(session.user, existing.projectId);
   if (!access.ok) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+  }
+  if (!canDeleteChantierFile(session.user)) {
+    return NextResponse.json(
+      { error: "La suppression des pièces du classeur est réservée à BeWork. Contactez votre assistant." },
+      { status: 403 }
+    );
   }
 
   const supabase = createServiceRoleClient();

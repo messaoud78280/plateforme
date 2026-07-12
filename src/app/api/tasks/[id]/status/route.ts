@@ -24,13 +24,20 @@ export async function PATCH(
     if (!existing) {
       return NextResponse.json({ error: "Tâche introuvable" }, { status: 404 });
     }
-    const isClient = existing.clientId === session.user.id;
+    const isClientOwner = existing.clientId === session.user.id;
     const isAssignedAgent = existing.assignedToId === session.user.id;
-    if (!isAgence && !isAgent && !isClient) {
+    if (!isAgence && !isAgent && !isClientOwner) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
     }
     if (isAgent && !isAssignedAgent) {
       return NextResponse.json({ error: "Seul l'agent assigné peut modifier cette tâche" }, { status: 403 });
+    }
+    // Le client ne pilote pas le workflow métier (évite COMPLETE / A_VALIDER côté client).
+    if (isClientOwner && !isAgence && !isAgent) {
+      return NextResponse.json(
+        { error: "Seul BeWork peut modifier le statut de la mission. Utilisez la messagerie pour une demande." },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();

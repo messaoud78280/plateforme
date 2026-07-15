@@ -26,6 +26,8 @@ export function buildLlmsTxt(): string {
   }).join("\n");
 
   const guideTitles: Record<string, string> = {
+    "/ressources/guide-claude-btp-bework":
+      "Claude IA pour le Bâtiment & les TP — 18 cas d'usage par métier (PDF 14 pages)",
     "/ressources/guide-assistants-travaux-bework":
       "Le Guide des Assistants Travaux — 12 missions d'un marché de travaux (PDF 21 pages)",
     "/ressources/guide-moe-bework": "Guide Maîtrise d'œuvre × IA — 12 missions MOE (PDF 22 pages)",

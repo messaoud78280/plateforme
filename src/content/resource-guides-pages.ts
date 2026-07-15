@@ -19,6 +19,14 @@ export const RESOURCE_GUIDE_PAGE_ITEMS: readonly ResourceGuidePageItem[] = [
     publishedTime: "2026-05-29T10:00:00+02:00",
   },
   {
+    href: "/ressources/guide-claude-btp-bework",
+    title: "Claude IA pour le Bâtiment & les TP — 18 cas d’usage par métier",
+    excerpt:
+      "PDF 14 pages : ce que Claude sait faire sur vos DCE, chantiers, écrits et équipes — 18 cas d’usage et 18 prompts à copier pour dirigeants, bureaux d’études, conducteurs de travaux, chargés d’affaires, MOE et RH BTP.",
+    publishedTime: "2026-07-15T09:00:00+02:00",
+    badge: "Guide PDF",
+  },
+  {
     href: "/ressources/guide-assistants-travaux-bework",
     title: "Le Guide des Assistants Travaux — 12 missions d’un marché de travaux",
     excerpt:

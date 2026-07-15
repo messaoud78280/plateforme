@@ -166,6 +166,13 @@ export const TUTO_PAGE_SEO: Record<string, TutoPageSeo> = {
     ),
     keywords: ["conducteur de travaux IA", "IA BTP chantier", "guide BTP"],
   },
+  "/ressources/guide-claude-btp-bework": {
+    title: "Claude IA pour le BTP : 18 cas d’usage par métier | BeWork",
+    description: tutoDesc(
+      "Guide PDF 14 pages : Claude pour le bâtiment et les TP — 18 cas d’usage et prompts à copier par métier (dirigeant, BE, conducteur, chargé d’affaires, MOE, RH).",
+    ),
+    keywords: ["Claude BTP", "IA bâtiment", "prompts BTP", "Claude chantier", "IA travaux publics"],
+  },
   "/ressources/guide-assistants-travaux-bework": {
     title: "Guide des Assistants Travaux : 12 missions marché | BeWork",
     description: tutoDesc(

@@ -19,6 +19,14 @@ export const RESOURCE_GUIDE_PAGE_ITEMS: readonly ResourceGuidePageItem[] = [
     publishedTime: "2026-05-29T10:00:00+02:00",
   },
   {
+    href: "/ressources/guide-assistants-travaux-bework",
+    title: "Le Guide des Assistants Travaux — 12 missions d’un marché de travaux",
+    excerpt:
+      "PDF 21 pages : les 12 missions administratives d’un marché de travaux (prise en main, situations, TS, DOE…), classées IA / mixte / humain — prompts Claude, checklist avant signature, ~112 h d’encadrement récupérées par mois.",
+    publishedTime: "2026-07-15T08:00:00+02:00",
+    badge: "Guide PDF",
+  },
+  {
     href: "/ressources/guide-moe-bework",
     title: "Guide Maîtrise d’œuvre × IA — 12 missions MOE (Claude)",
     excerpt:

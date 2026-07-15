@@ -13,8 +13,13 @@ export type ResourcePdfCatalogEntry = {
   href: string;
 };
 
-/** 2 guides PDF (compilation / article long) */
+/** Guides PDF (compilation / article long) */
 export const RESOURCE_PDF_GUIDES: readonly ResourcePdfCatalogEntry[] = [
+  {
+    pdfFile: "guide-assistants-travaux-bework.pdf",
+    kind: "guide",
+    href: "/ressources/guide-assistants-travaux-bework",
+  },
   {
     pdfFile: "guide-moe-bework.pdf",
     kind: "guide",

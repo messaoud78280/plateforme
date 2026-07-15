@@ -25,11 +25,15 @@ export function buildLlmsTxt(): string {
     return line(p.h1, servicePagePath(slug), p.metaDescription);
   }).join("\n");
 
+  const guideTitles: Record<string, string> = {
+    "/ressources/guide-assistants-travaux-bework":
+      "Le Guide des Assistants Travaux — 12 missions d'un marché de travaux (PDF 21 pages)",
+    "/ressources/guide-moe-bework": "Guide Maîtrise d'œuvre × IA — 12 missions MOE (PDF 22 pages)",
+    "/ressources/guide-cdt-bework": "Guide conducteur de travaux — 6 outils Claude (PDF 52 pages)",
+    "/ressources/guide-conducteur-de-travaux-ia-bework": "Guide conducteur de travaux & IA — article (PDF 8 pages)",
+  };
   const guides = RESOURCE_PDF_GUIDES.map((g) => {
-    const title =
-      g.href === "/ressources/guide-cdt-bework"
-        ? "Guide conducteur de travaux — 6 outils Claude (PDF 52 pages)"
-        : "Guide conducteur de travaux & IA — article (PDF 8 pages)";
+    const title = guideTitles[g.href] ?? g.href;
     return line(title, g.href, "Guide PDF gratuit BeWork, texte intégral + téléchargement.");
   }).join("\n");
 

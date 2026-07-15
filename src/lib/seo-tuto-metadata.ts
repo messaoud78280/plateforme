@@ -166,6 +166,13 @@ export const TUTO_PAGE_SEO: Record<string, TutoPageSeo> = {
     ),
     keywords: ["conducteur de travaux IA", "IA BTP chantier", "guide BTP"],
   },
+  "/ressources/guide-assistants-travaux-bework": {
+    title: "Guide des Assistants Travaux : 12 missions marché | BeWork",
+    description: tutoDesc(
+      "Guide PDF 21 pages : les 12 missions administratives d’un marché de travaux classées IA/mixte/humain — prompts Claude, checklist avant signature, ~112 h récupérées/mois.",
+    ),
+    keywords: ["assistant travaux", "administratif marché de travaux", "skills Claude BTP", "entreprise exécution BTP"],
+  },
   "/ressources/guide-moe-bework": {
     title: "Guide MOE × IA : 12 missions et limites (Claude) | BeWork",
     description: tutoDesc(

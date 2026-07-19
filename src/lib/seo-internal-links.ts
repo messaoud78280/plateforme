@@ -330,6 +330,11 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/ressources/memoire-technique-btp", label: "Mémoire technique" },
     { href: "/services/analyse-dce-btp", label: "Analyse DCE BeWork" },
   ],
+  "/ressources/tuto-skill-analyse-ccap-bework": [
+    { href: "/ressources/tuto-skill-analyse-dce-bework", label: "Skill analyse de DCE" },
+    { href: "/ressources/tuto-skill-analyse-express-cctp-bework", label: "Skill analyse express CCTP" },
+    { href: "/services/analyse-dce-btp", label: "Analyse DCE BeWork" },
+  ],
   "/ressources/tuto-skill-doe-bework": [
     { href: "/ressources/doe-btp", label: "Guide DOE BTP" },
     { href: "/services/doe-btp", label: "Service DOE BeWork" },

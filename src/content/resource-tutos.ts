@@ -13,6 +13,13 @@ export type ResourceTutoItem = {
 /** Titres d’entrée : alignés sur les couvertures des PDF (« Crée ton skill », « Trie tes DCE… », etc.). */
 export const RESOURCE_TUTO_ITEMS: readonly ResourceTutoItem[] = [
   {
+    title: "Tuto Crée ton skill — Analyse de CCAP",
+    desc: "Décrypter un CCAP en 20 min : délais, pénalités, RG, révision, paiement — niveaux VERT/ORANGE/ROUGE et questions de mise au point — PDF 10 pages et prompts Claude.",
+    href: "/ressources/tuto-skill-analyse-ccap-bework",
+    status: "Tuto PDF",
+    icon: "document",
+  },
+  {
     title: "Tuto Crée ton skill — Planning chantier",
     desc: "Recale ton planning en 30 min au lieu de 5 h : chemin critique, scénarios de rattrapage et note d'impact CCAG art. 19 — PDF 9 pages et prompts Claude.",
     href: "/ressources/tuto-skill-planning-chantier-bework",

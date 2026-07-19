@@ -47,6 +47,13 @@ export const TUTO_PAGE_SEO: Record<string, TutoPageSeo> = {
     ),
     keywords: ["skill DOE", "DOE BTP tutoriel", "dossier ouvrages exécutés"],
   },
+  "/ressources/tuto-skill-analyse-ccap-bework": {
+    title: "Skill analyse CCAP BTP : clauses à risque | BeWork",
+    description: tutoDesc(
+      "Skill CCAP : délais, pénalités, RG, révision et paiement — fiche VERT/ORANGE/ROUGE et questions de mise au point avant signature",
+    ),
+    keywords: ["skill analyse CCAP", "CCAP BTP", "clauses administratives marché", "pénalités travaux"],
+  },
   "/ressources/tuto-skill-analyse-dce-bework": {
     title: "Skill analyse DCE BTP : tutoriel et prompts | BeWork",
     description: tutoDesc(

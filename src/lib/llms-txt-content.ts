@@ -26,6 +26,8 @@ export function buildLlmsTxt(): string {
   }).join("\n");
 
   const guideTitles: Record<string, string> = {
+    "/ressources/guide-debloquer-claude-bework":
+      "Débloquer le vrai potentiel de Claude — Projets, MCP, Skills & Cowork (PDF 9 pages)",
     "/ressources/guide-claude-btp-bework":
       "Claude IA pour le Bâtiment & les TP — 18 cas d'usage par métier (PDF 14 pages)",
     "/ressources/guide-assistants-travaux-bework":

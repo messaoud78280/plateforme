@@ -16,6 +16,11 @@ export type ResourcePdfCatalogEntry = {
 /** Guides PDF (compilation / article long) */
 export const RESOURCE_PDF_GUIDES: readonly ResourcePdfCatalogEntry[] = [
   {
+    pdfFile: "guide-debloquer-claude-bework.pdf",
+    kind: "guide",
+    href: "/ressources/guide-debloquer-claude-bework",
+  },
+  {
     pdfFile: "guide-claude-btp-bework.pdf",
     kind: "guide",
     href: "/ressources/guide-claude-btp-bework",

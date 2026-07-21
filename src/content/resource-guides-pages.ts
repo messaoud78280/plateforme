@@ -19,6 +19,14 @@ export const RESOURCE_GUIDE_PAGE_ITEMS: readonly ResourceGuidePageItem[] = [
     publishedTime: "2026-05-29T10:00:00+02:00",
   },
   {
+    href: "/ressources/guide-debloquer-claude-bework",
+    title: "Débloquer le vrai potentiel de Claude — Projets, MCP, Skills & Cowork",
+    excerpt:
+      "PDF 9 pages : installer un environnement Claude qui travaille sur l’administratif chantier — Projets, connecteurs MCP, Skills, instructions système, 3 cas d’usage + Cowork (AO, devis, CR).",
+    publishedTime: "2026-07-21T19:00:00+02:00",
+    badge: "Guide PDF",
+  },
+  {
     href: "/ressources/guide-claude-btp-bework",
     title: "Claude IA pour le Bâtiment & les TP — 18 cas d’usage par métier",
     excerpt:

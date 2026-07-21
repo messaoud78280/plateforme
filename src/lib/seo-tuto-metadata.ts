@@ -173,6 +173,13 @@ export const TUTO_PAGE_SEO: Record<string, TutoPageSeo> = {
     ),
     keywords: ["conducteur de travaux IA", "IA BTP chantier", "guide BTP"],
   },
+  "/ressources/guide-debloquer-claude-bework": {
+    title: "Débloquer le potentiel de Claude BTP : Projets, MCP, Skills | BeWork",
+    description: tutoDesc(
+      "Guide PDF 9 pages : Projets Claude, connecteurs MCP, Skills, instructions système et cas d’usage BTP — AO, devis, CR de chantier",
+    ),
+    keywords: ["Claude Projets", "MCP Claude BTP", "Skills Claude", "Cowork Claude", "IA administratif chantier"],
+  },
   "/ressources/guide-claude-btp-bework": {
     title: "Claude IA pour le BTP : 18 cas d’usage par métier | BeWork",
     description: tutoDesc(

@@ -11,19 +11,19 @@ export const BEWORK_VALUE_PILLARS: readonly BeWorkValuePillar[] = [
   },
   {
     label: "Expertise en administration BTP",
-    detail: "Devis, relances, dossiers chantier, fournisseurs, réserves et clôture documentaire — pas du secrétariat généraliste.",
+    detail: "Candidatures, DCE, pièces marché, situations, réserves et clôture documentaire — pas du secrétariat généraliste.",
   },
   {
     label: "IA spécialisée + validation humaine",
     detail: "L’IA structure et accélère ; un Beworker garde le fil, le relationnel et le cadre. Vous validez avant tout envoi engageant.",
   },
   {
-    label: "Conformité juridique garantie",
-    detail: "Process cadré, traçabilité des livrables et relecture humaine sur les documents sensibles — dans le respect de vos engagements contractuels.",
+    label: "Contrôle documentaire et traçabilité",
+    detail: "Process cadré, relecture humaine sur les documents sensibles — validations juridiques et contractuelles restent chez vous et vos conseils.",
   },
   {
-    label: "Gain de productivité : division par 10",
-    detail: "Les tâches répétitives (relances, mise en forme, classement, synthèses) sont absorbées pour libérer du temps terrain.",
+    label: "Réduction du temps administratif répétitif",
+    detail: "Classement, synthèses, listes de pièces, échéances et relances documentaires absorbés pour libérer du temps terrain.",
   },
   {
     label: "100 % supervisé en France",

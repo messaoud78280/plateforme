@@ -13,10 +13,10 @@ function escapeXml(s: string): string {
 
 /** Flux RSS 2.0 — blog + annonce site (Google, Bing, Apple News, agrégateurs). */
 export async function GET() {
-  const channelTitle = "BeWork — Blog administratif BTP";
+  const channelTitle = "BeWork — Blog AO & administratif BTP";
   const channelLink = absoluteUrl("/blog");
   const channelDescription =
-    "Actualités et guides BeWork : administratif externalisé, conducteurs de travaux, artisans du bâtiment.";
+    "Guides BeWork : candidatures, analyse DCE, suivi admin des marchés et organisation bureau-chantier pour le BTP.";
 
   const items = BLOG_SLUGS.map((slug) => {
     const article = BLOG_ARTICLES[slug];
@@ -42,10 +42,10 @@ export async function GET() {
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <atom:link href="${escapeXml(absoluteUrl("/feed.xml"))}" rel="self" type="application/rss+xml"/>
     <item>
-      <title>BeWork — Administratif externalisé BTP</title>
+      <title>BeWork — Renfort assistants travaux BTP</title>
       <link>${escapeXml(SITE_URL)}</link>
       <guid isPermaLink="true">${escapeXml(SITE_URL)}</guid>
-      <description>Plateforme d’assistants travaux augmentés par l’IA pour artisans et conducteurs de travaux.</description>
+      <description>Assistants travaux spécialisés : préparation candidatures, analyse DCE et suivi administratif des marchés — sous validation du client.</description>
       <pubDate>${new Date().toUTCString()}</pubDate>
     </item>
 ${items}

@@ -93,6 +93,7 @@ export function buildAiTxt(): string {
 ## About
 ${BEWORK_AEO_DEFINITION}
 Slogan : « ${BEWORK_SLOGAN} »
+Accroche décision : « On tient le dossier, vous gardez la décision ».
 
 ## AI indexing policy
 BeWork autorise l'exploration, l'indexation et la citation de toutes les pages publiques de ce site par les moteurs de recherche IA et assistants (ChatGPT Search, Perplexity, Claude, Gemini, Copilot, Meta AI, You.com, Mistral, etc.) — Europe et monde.
@@ -116,7 +117,7 @@ RSS: ${absoluteUrl("/feed.xml")}
 ${priorityPages}
 
 ## Topics (entity hints)
-assistant travaux BTP, assistance technique et administrative BTP, marché public travaux, appel d'offres BTP, DCE, Chorus Pro, DOE marché public, accord-cadre logement occupé, amiante SS4, suivi administratif chantier, externalisation administrative BTP, conducteur de travaux
+assistant travaux BTP, renfort administratif BTP, préparation candidature marché public, analyse DCE, mémoire technique BTP, suivi administratif de marché, appel d'offres BTP, Chorus Pro, DOE marché public, accord-cadre logement occupé, amiante SS4, externalisation administrative BTP, conducteur de travaux
 
 ## Geographic scope
 France, Belgique, Suisse, Luxembourg — assistants francophones, supervision depuis la France.

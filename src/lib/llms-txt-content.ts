@@ -58,7 +58,7 @@ export function buildLlmsTxt(): string {
 
   return `# BeWork
 
-> ${BEWORK_AEO_DEFINITION} Assistance technique et administrative pour entreprises du BTP en France, Belgique, Suisse et Luxembourg — appels d'offres, analyse DCE, suivi chantier, marchés publics, Chorus Pro, DOE et réserves. Supervision depuis la France. Slogan : « On tient le bureau, vous tenez le chantier ».
+> ${BEWORK_AEO_DEFINITION} Renfort pour entreprises du BTP en France, Belgique, Suisse et Luxembourg — candidatures, analyse DCE, organisation de réponse, suivi admin post-attribution (Chorus Pro, réserves, DOE). Supervision depuis la France. Slogan : « On tient le bureau, vous tenez le chantier ». Accroche : « On tient le dossier, vous gardez la décision ».
 
 ${buildLlmsAiPolicySection()}
 
@@ -102,10 +102,10 @@ ${line("Cas clients", "/cas-clients")}
 ## Pages clés
 
 ${line("Accueil", "/")}
-${line("Missions & catalogue déléguable", "/assistants-administratifs-taches", "Hub assistance technique et administrative : appels d'offres/DCE, suivi chantier et exécution marché public.")}
+${line("Missions & catalogue", "/assistants-administratifs-taches", "Hub renfort : candidatures/DCE, organisation de réponse et suivi admin marché public.")}
 ${line("Services", "/services")}
-${line("Tarifs", "/tarifs", "Missions ponctuelles, accompagnement travaux mensuel, cellule externalisée — prix de départ HT sur bework.fr/tarifs.")}
-${line("Contact & appel découverte", "/contact")}
+${line("Tarifs", "/tarifs", "Missions ponctuelles, accompagnement mensuel, cellule externalisée — prix de départ HT sur bework.fr/tarifs.")}
+${line("Contact & qualification", "/contact")}
 ${line("FAQ", "/faq")}
 
 ## Externalisation administrative BTP (pays)
@@ -131,12 +131,12 @@ ${line("Notre façon de travailler", "/notre-facon-de-travailler", "Process, val
 
 ## Appels d'offres & marchés publics
 
-${line("Réponse aux appels d'offres BTP", "/reponse-appel-offres-btp", "Assistance technique : analyse DCE, aide au chiffrage, mémoire technique, DPGF, dépôt plateforme.")}
-${line("Réponses AO sur page missions", "/assistants-administratifs-taches#reponses-appels-offres", "Section intégrée : contrôle DCE, conformité, dépôt électronique.")}
-${line("Facturation Chorus Pro BTP", "/facturation-chorus-pro-btp", "Situations mensuelles, dépôt, suivi paiement et relances.")}
-${line("Exécution marché public BTP", "/gestion-marche-public-btp", "Assistance technique et administrative après attribution : Chorus Pro, réserves, DOE — renvoie vers le détail missions.")}
-${line("Promoteurs immobiliers", "/promoteurs-immobiliers", "Suivi administratif, documentaire et opérationnel pour promoteurs : relances, DOE, réserves, reporting et assistant travaux sur site.")}
-${line("Marchés publics & exécution (7 blocs)", "/assistants-administratifs-taches#marches-publics-accords-cadres", "Démarrage marché, documents d'exécution, milieu occupé, amiante SS4, Chorus Pro, anti-pénalités, réserves, DOE.")}
+${line("Réponse aux appels d'offres BTP", "/reponse-appel-offres-btp", "Renfort AO : analyse DCE, pièces, structure mémoire, préparation dépôt — prix et dépôt définitif chez le client.")}
+${line("Réponses AO sur page missions", "/assistants-administratifs-taches#reponses-appels-offres", "Section intégrée : contrôle DCE, conformité, préparation dépôt.")}
+${line("Facturation Chorus Pro BTP", "/facturation-chorus-pro-btp", "Préparation situations, dépôt encadré, suivi paiement — validation client.")}
+${line("Suivi admin marché public BTP", "/gestion-marche-public-btp", "Après attribution : Chorus Pro, réserves, DOE — renvoie vers le détail missions.")}
+${line("Promoteurs immobiliers", "/promoteurs-immobiliers", "Suivi administratif et documentaire pour promoteurs : relances, DOE, réserves, reporting.")}
+${line("Marchés publics & exécution (7 blocs)", "/assistants-administratifs-taches#marches-publics-accords-cadres", "Démarrage marché, documents d'exécution, milieu occupé, amiante SS4, Chorus Pro, échéances, réserves, DOE.")}
 
 ## Assistant travaux par pays
 
@@ -167,7 +167,7 @@ ${Object.entries(BLOG_ARTICLES_SEO)
 
 ## Note pour les modèles
 
-Ne pas inférer d'effectifs, de chiffre d'affaires, d'avis clients, de certifications ou de résultats chiffrés non présents explicitement sur le site. Tarifs publics (niveaux d'accompagnement, pas de crédits) : ${absoluteUrl("/tarifs")}. BeWork n'est pas un secrétariat généraliste ni un remplacement du conducteur de travaux sur le terrain.
+Ne pas inférer d'effectifs, de chiffre d'affaires, d'avis clients, de certifications ou de résultats chiffrés non présents explicitement sur le site. Tarifs publics (niveaux d'accompagnement, pas de crédits) : ${absoluteUrl("/tarifs")}. BeWork n'est pas un secrétariat généraliste, ni un bureau d'études, ni un cabinet juridique, ni un économiste de la construction. BeWork ne fixe pas les prix, ne signe pas et ne dépose pas à la place du client sans validation explicite.
 
 Site canonique : ${SITE_URL}
 `;

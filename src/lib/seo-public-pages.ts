@@ -238,29 +238,29 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
     ],
   },
   "/contact": {
-    title: "Contact BeWork — qualifier votre besoin administratif BTP",
+    title: "Contact BeWork — cadrer un renfort AO, DCE ou suivi de marché",
     description: metaDescriptionFrancophonie(
-      "Contactez BeWork : marchés publics, accords-cadres, chantier ou appels d'offres — qualification en quelques minutes, rappel cadré",
+      "Contactez BeWork : candidature, analyse DCE ou suivi admin de marché — qualification en quelques minutes, mission sous votre validation",
     ),
-    keywords: ["contact BeWork", "assistant travaux BTP", "marché public BTP", "qualification besoin administratif"],
+    keywords: ["contact BeWork", "renfort administratif BTP", "appel d'offres BTP", "qualification besoin AO"],
   },
   "/notre-facon-de-travailler": {
     title: "Notre façon de travailler — méthode BeWork BTP",
     description: metaDescriptionFrancophonie(
-      "Méthode BeWork : cadrage, validation humaine, traçabilité bureau-chantier pour entreprises du BTP en France, Belgique, Suisse et Luxembourg",
+      "Méthode BeWork : cadrage, validation client, relecture humaine et traçabilité — renfort dossier, pas prise en charge intégrale",
     ),
-    keywords: ["méthode BeWork", "validation humaine BTP", "process assistant travaux", "assistance technique et administrative BTP"],
+    keywords: ["méthode BeWork", "validation client BTP", "process assistant travaux", "renfort administratif BTP"],
   },
   "/assistants-administratifs-taches": {
-    title: "Missions assistant travaux BTP : AO, chantier & marchés publics | BeWork",
+    title: "Missions BeWork : renfort AO, DCE et suivi admin des marchés | BeWork",
     description: metaDescriptionFrancophonie(
-      "Catalogue missions BeWork : assistance technique et administrative — analyse DCE, suivi chantier, appels d'offres et exécution marché public (Chorus Pro, réserves, DOE)",
+      "Catalogue missions BeWork : préparation candidatures, analyse DCE, organisation de réponse et suivi admin post-attribution (Chorus Pro, réserves, DOE)",
     ),
     keywords: [
       "missions assistant travaux BTP",
-      "assistance technique BTP",
+      "renfort administratif BTP",
       "analyse DCE BTP",
-      "aide au chiffrage BTP",
+      "préparation candidature marché public",
       "gestion marché public BTP",
       "suivi documents exécution marché public",
       "facturation Chorus Pro travaux",
@@ -269,20 +269,21 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
     ],
   },
   "/reponse-appel-offres-btp": {
-    title: "Réponse aux appels d'offres BTP : DCE, chiffrage, mémoire technique | BeWork",
+    title: "Réponse aux appels d'offres BTP : analyse DCE et candidature | BeWork",
     description: metaDescriptionFrancophonie(
-      "Assistance technique aux appels d'offres BTP : analyse DCE, aide au chiffrage, mémoire technique, DPGF et dépôt plateforme — validation finale chez vous",
+      "Renfort AO BTP : analyse DCE, pièces, structure mémoire technique et préparation au dépôt — prix, choix techniques et dépôt restent chez vous",
     ),
     keywords: [
-      "assistance technique appel d'offres BTP",
-      "aide au chiffrage marché public",
+      "assistance appel d'offres BTP",
+      "analyse DCE marché public",
+      "préparation candidature BTP",
       ...SEO_KEYWORDS_APPELS_OFFRES.slice(0, 10),
     ],
   },
   "/facturation-chorus-pro-btp": {
     title: "Facturation Chorus Pro BTP : situations, dépôt et suivi | BeWork",
     description: metaDescriptionFrancophonie(
-      "Facturation Chorus Pro BTP : situations mensuelles, justificatifs, dépôt encadré, suivi paiement et relances — bloc exécution marché public BeWork",
+      "Renfort Chorus Pro BTP : préparation situations, justificatifs, dépôt encadré et suivi paiement — validation client avant envoi",
     ),
     keywords: [
       "facturation Chorus Pro BTP",
@@ -293,15 +294,14 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
     ],
   },
   "/gestion-marche-public-btp": {
-    title: "Exécution marché public BTP : Chorus Pro, réserves et DOE | BeWork",
+    title: "Suivi administratif marché public BTP : Chorus Pro, réserves, DOE | BeWork",
     description: metaDescriptionFrancophonie(
-      "Assistance technique et administrative après attribution : documents d'exécution, situations, Chorus Pro, anti-pénalités, réserves et DOE au fil de l'eau",
+      "Après attribution : renfort documents d'exécution, situations, Chorus Pro, échéances, réserves et DOE — vous gardez engagements et validations",
     ),
     keywords: [
+      "suivi administratif marché public BTP",
       "exécution marché public BTP",
-      "assistance technique marché public",
       "gestion marché public BTP",
-      "suivi administratif marché public",
       "facturation Chorus Pro travaux",
       "DOE marché public BTP",
       "suivi réserves chantier",

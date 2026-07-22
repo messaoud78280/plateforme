@@ -186,9 +186,9 @@ const homeJsonLd = {
     {
       "@type": "VideoObject",
       "@id": `${SITE_URL}/#video-presentation-bework`,
-      name: "Présentation BeWork — assistants travaux BTP augmentés par l’IA",
+      name: "Présentation BeWork — renfort assistants travaux BTP",
       description:
-        "Vidéo de présentation : dossiers chantier, devis & relances, DICT et coordination fournisseurs — service à distance, forfaits HT (France · Belgique · Suisse · Luxembourg).",
+        "Vidéo de présentation : préparation candidatures, analyse DCE et suivi administratif des marchés — renfort sous validation client (France · Belgique · Suisse · Luxembourg).",
       thumbnailUrl: [absoluteUrl("/opengraph-image")],
       uploadDate: "2026-04-11T12:00:00+02:00",
       duration: PRESENTATION_VIDEO_DURATION_ISO,

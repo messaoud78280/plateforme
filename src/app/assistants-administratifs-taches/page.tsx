@@ -267,11 +267,12 @@ export default function AssistantsAdministratifsTachesPage() {
         <section className="px-6 pt-16 pb-12 md:pt-20 md:pb-16" style={{ scrollMarginTop: "6rem" }}>
           <div className="mx-auto max-w-4xl text-center">
             <h1 className="font-heading text-balance text-3xl font-bold tracking-tight text-black md:text-4xl lg:text-5xl">
-              Missions BeWork : assistance technique et administrative sur chantiers &amp; marchés publics
+              Missions BeWork : renfort AO, DCE et suivi administratif des marchés
             </h1>
             <p className="mt-6 max-w-3xl mx-auto text-lg leading-relaxed text-black">
-              Analyse DCE, aide au chiffrage, mémoires techniques, comptes rendus, relances, réserves, DOE — et suivi
-              des marchés publics, accords-cadres et bons de commande (documents d&apos;exécution, Chorus Pro, pénalités).
+              Analyse DCE, préparation candidatures, mémoires techniques, comptes rendus, échéances, réserves, DOE —
+              et suivi admin des marchés publics, accords-cadres et bons de commande (documents d&apos;exécution, Chorus
+              Pro). Vous validez ; BeWork prépare et suit.
             </p>
             <p className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-base">
               <Link

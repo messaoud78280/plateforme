@@ -15,35 +15,29 @@ import { absoluteUrl } from "@/lib/site";
 
 export const TARIFS_PAGE_PATH = "/tarifs" as const;
 
-export const TARIFS_SEO_TITLE = "Tarifs BeWork | Assistant travaux externalisé BTP";
+export const TARIFS_SEO_TITLE = "Tarifs BeWork | Renfort assistants travaux BTP";
 
 export const TARIFS_SEO_DESCRIPTION =
-  "Tarifs BeWork : forfaits HT pour déléguer le suivi travaux BTP — ponctuel dès 150 €, accompagnement mensuel dès 590 €, cellule externalisée. Sans recrutement.";
+  "Tarifs BeWork : forfaits HT pour un renfort sur candidatures, analyse DCE et suivi admin des marchés — validation client. Ponctuel dès 150 €, mensuel dès 590 €.";
 
 export const TARIFS_SEO_KEYWORDS = [
   "tarifs assistant travaux",
-  "tarifs assistant travaux externalisé",
-  "assistant travaux externalisé",
-  "assistant administratif BTP",
+  "tarifs renfort administratif BTP",
+  "assistant travaux appels d’offres",
+  "analyse DCE tarif",
+  "suivi administratif marché BTP",
+  "assistance candidature marché public",
   "cellule travaux externalisée",
-  "suivi chantier externalisé",
-  "aide conducteur de travaux",
   "externalisation administrative BTP",
-  "assistance technique et administrative BTP tarif",
   "mission ponctuelle BTP",
   "DCE BTP",
   "DOE BTP",
-  "PPSPS BTP",
-  "compte rendu de chantier",
-  "relance devis BTP",
-  "gestion administrative marché public BTP",
   "facturation Chorus Pro travaux",
-  "DOE marché public BTP",
   ...SEO_KEYWORDS_ASSISTANT_TRAVAUX.slice(0, 6),
   ...SEO_KEYWORDS_BTP_PME.slice(0, 4),
 ] as const;
 
-export const TARIFS_H1 = "Tarifs BeWork : déléguer le suivi travaux sans recruter";
+export const TARIFS_H1 = "Tarifs BeWork : renfort assistants travaux pour AO et marchés";
 
 /** Section llms.txt — offres publiques citables par les IA. */
 export function buildLlmsTarifsOffersSection(): string {

@@ -200,15 +200,21 @@ export const SEO_KEYWORDS_HOME: string[] = [
   ...SEO_KEYWORDS_PERSONAS_BTP,
   ...SEO_KEYWORDS_GEO_SCOPE,
   ...SEO_KEYWORDS_TECHNIQUE,
-  "aide au chiffrage BTP",
-  "assistance à conduite de travaux",
+  "renfort administratif BTP",
+  "assistance appels d’offres BTP",
+  "préparation candidature marché public",
+  "analyse DCE",
+  "suivi administratif de marché",
+  "assistant travaux",
   "BeWork BTP",
   "vidéo présentation BeWork",
-  "conducteur de travaux France Belgique",
 ];
 
 /** Slogan BeWork — réutilisable contenu, OG, JSON-LD, llms.txt. */
 export const BEWORK_SLOGAN = "On tient le bureau, vous tenez le chantier.";
+
+/** Accroche complémentaire (home / AEO) — évite la lecture « prise en charge intégrale ». */
+export const BEWORK_SLOGAN_DECISION = "On tient le dossier, vous gardez la décision.";
 
 /** Phrase de positionnement citables par les IA / extraits AEO. */
 export const BEWORK_AEO_DEFINITION =
@@ -220,4 +226,11 @@ export const SEO_VALUE_PROPOSITION =
 
 /** Proposition courte (OG, Twitter). */
 export const SEO_VALUE_PROPOSITION_SHORT =
-  "Assistants travaux augmentés par l’IA — assistance technique et administrative BTP. Forfaits HT. France, Belgique, Suisse, Luxembourg.";
+  "Renfort assistants travaux BTP : candidatures, analyse DCE et suivi admin des marchés. Vous validez. FR · BE · CH · LU.";
+
+/** Title SEO / OG racine (aligné home). */
+export const SEO_SITE_TITLE_DEFAULT =
+  "Assistants travaux et appels d’offres BTP | BeWork";
+
+export const SEO_SITE_TITLE_OG =
+  "BeWork — Renfort assistants travaux pour AO, DCE et suivi des marchés BTP";

@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { MAIN_NEED_OPTIONS, MARKET_TYPE_OPTIONS } from "@/lib/contact-form-options";
+import {
+  MAIN_NEED_OPTIONS,
+  MARKET_TYPE_OPTIONS,
+  PROJECT_STAGE_OPTIONS,
+} from "@/lib/contact-form-options";
 
 const INPUT_CLASS =
   "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-[#1d4ed8] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8]/20";
@@ -40,6 +44,7 @@ export function ProspectContactForm({
           marketType: data.get("marketType"),
           tradeActivity: data.get("tradeActivity"),
           mainNeed: data.get("mainNeed"),
+          projectStage: data.get("projectStage"),
           message: data.get("message"),
           consent: data.get("consent") === "on",
           source,
@@ -143,11 +148,25 @@ export function ProspectContactForm({
 
         <div>
           <label htmlFor="mainNeed" className={LABEL_CLASS}>
-            Besoin principal <span className="text-red-600">*</span>
+            Votre besoin principal <span className="text-red-600">*</span>
           </label>
           <select id="mainNeed" name="mainNeed" required className={INPUT_CLASS}>
             <option value="">Sélectionnez…</option>
             {MAIN_NEED_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="projectStage" className={LABEL_CLASS}>
+            À quelle étape êtes-vous&nbsp;?
+          </label>
+          <select id="projectStage" name="projectStage" className={INPUT_CLASS}>
+            <option value="">Sélectionnez…</option>
+            {PROJECT_STAGE_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
                 {o.label}
               </option>
@@ -170,7 +189,7 @@ export function ProspectContactForm({
 
         <div className={variant === "compact" ? "sm:col-span-2" : "md:col-span-2"}>
           <label htmlFor="message" className={LABEL_CLASS}>
-            Message court
+            Qu&apos;attendez-vous précisément de BeWork&nbsp;?
           </label>
           <textarea
             id="message"
@@ -178,8 +197,12 @@ export function ProspectContactForm({
             rows={variant === "compact" ? 3 : 4}
             maxLength={2000}
             className={`${INPUT_CLASS} resize-y`}
-            placeholder="Précisez votre contexte (marchés en cours, délais, volume documentaire…)"
+            placeholder="Ex. préparer la candidature, classer le DCE, structurer le mémoire, suivre les échéances…"
           />
+          <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
+            Décrivez les documents disponibles, les échéances, le travail déjà réalisé et les validations que votre équipe
+            peut fournir.
+          </p>
         </div>
       </div>
 

@@ -18,32 +18,32 @@ const STEPS: {
 }[] = [
   {
     n: 1,
-    title: "Vous nous envoyez votre demande",
-    body: "Via la plateforme : devis, dossier chantier, relance, fournisseur, document — un brief court suffit pour lancer le travail.",
+    title: "Vous décrivez votre besoin",
+    body: "Candidature, DCE, mémoire, dépôt ou suivi après attribution — nous cadrons la mission et les éléments nécessaires avec vous.",
     Icon: IconInbox,
   },
   {
     n: 2,
-    title: "BeWork analyse et prépare le travail",
-    body: "Qualification, pièces attendues, priorisation et répartition vers l’assistant travaux le plus aligné avec votre contexte BTP.",
+    title: "BeWork organise le renfort",
+    body: "Un Beworker prépare le plan de travail, les pièces attendues et la répartition des tâches sous la validation de votre entreprise.",
     Icon: IconUserLink,
   },
   {
     n: 3,
-    title: "L’assistant travaux augmenté par l’IA exécute ou pré-remplit",
-    body: "Rédaction, relances, classement, pré-remplissage et suivi : le relais humain reste piloté, l’IA accélère tout ce qui est reproductible.",
+    title: "Nous préparons et structurons",
+    body: "Analyse documentaire, trames, listes de pièces, échéances et livrables préparatoires — l’IA accélère, le Beworker reste responsable du fil.",
     Icon: IconBriefcase,
   },
   {
     n: 4,
-    title: "Vous validez uniquement l’essentiel",
-    body: "Ce qui engage (prix, engagement, envoi sensible) passe par vous. Le reste est traité dans le cadre défini avec votre forfait.",
+    title: "Vous validez ce qui engage",
+    body: "Prix, choix techniques, méthodes, signature et dépôt restent chez vous. BeWork ne signe pas et ne décide pas à votre place.",
     Icon: IconCheckCircle,
   },
   {
     n: 5,
-    title: "Votre activité devient plus fluide",
-    body: "Moins de friction entre bureau et chantier : statuts visibles, pièces classées, relances qui avancent sans sacrifier le terrain.",
+    title: "Le dossier avance avec traçabilité",
+    body: "Statuts visibles, pièces classées, relances suivies — réduction du temps consacré aux tâches administratives répétitives.",
     Icon: IconChart,
   },
 ];
@@ -71,14 +71,15 @@ export function HomeHowItWorksDetailSection() {
             className="font-heading text-sm font-semibold uppercase tracking-[0.22em] md:text-base"
             style={{ color: BLUE }}
           >
-            Process BeWork
+            Fonctionnement avec un Beworker
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-slate-800 md:mt-6 md:text-xl">
-            Un seul parcours, du premier message à une organisation plus fluide — sans vous noyer dans l’administratif.
+            Nous cadrons la mission, identifions les éléments nécessaires et travaillons sous la validation de votre
+            entreprise.
           </p>
           <p className="mx-auto mt-3 max-w-3xl text-base leading-relaxed text-slate-700">
-            Vos Beworkers peuvent travailler avec vos outils existants : Excel, Google Sheets, Outlook, Gmail, Batigest, Onaya, EBP, Sage, MS Project,
-            Drive, SharePoint, Chorus Pro, PLACE/AWS, ChatGPT et Claude.
+            Vos Beworkers peuvent travailler avec vos outils existants : Excel, Google Sheets, Outlook, Gmail, Batigest,
+            Onaya, EBP, Sage, MS Project, Drive, SharePoint, Chorus Pro, PLACE/AWS, ChatGPT et Claude.
           </p>
         </header>
 

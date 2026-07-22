@@ -168,6 +168,11 @@ export function MarketingSiteFooter() {
                   DOE
                 </Link>
               </li>
+              <li>
+                <Link href="/contact" className={COL_LINK}>
+                  Conciergerie dirigeant (sur demande)
+                </Link>
+              </li>
             </ul>
           </div>
 

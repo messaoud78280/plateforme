@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { labelMainNeed, labelMarketType } from "@/lib/contact-form-options";
+import { labelMainNeed, labelMarketType, labelProjectStage } from "@/lib/contact-form-options";
 import { sendEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 
@@ -78,6 +78,7 @@ export async function POST(request: NextRequest) {
     marketType?: string;
     tradeActivity?: string;
     mainNeed?: string;
+    projectStage?: string;
     message?: string;
     consent?: boolean;
     source?: string;
@@ -100,7 +101,10 @@ export async function POST(request: NextRequest) {
   const marketType = String(body.marketType ?? "").trim();
   const tradeActivity = String(body.tradeActivity ?? "").trim();
   const mainNeed = String(body.mainNeed ?? "").trim();
-  const message = String(body.message ?? "").trim().slice(0, 2000);
+  const projectStage = String(body.projectStage ?? "").trim();
+  const rawMessage = String(body.message ?? "").trim();
+  const stageLine = projectStage ? `Étape : ${labelProjectStage(projectStage)}` : "";
+  const message = [stageLine, rawMessage].filter(Boolean).join("\n\n").slice(0, 2000);
   const source = String(body.source ?? "homepage_contact_form").trim().slice(0, 120) || "homepage_contact_form";
   const consent = body.consent === true;
 
@@ -165,6 +169,7 @@ export async function POST(request: NextRequest) {
     <li><strong>Type de marché :</strong> ${escapeHtml(labelMarketType(marketType))}</li>
     <li><strong>Corps d'état / activité :</strong> ${escapeHtml(tradeActivity || "—")}</li>
     <li><strong>Besoin principal :</strong> ${escapeHtml(labelMainNeed(mainNeed))}</li>
+    ${projectStage ? `<li><strong>Étape :</strong> ${escapeHtml(labelProjectStage(projectStage))}</li>` : ""}
     <li><strong>Date de demande :</strong> ${escapeHtml(dateLabel)}</li>
     <li><strong>Source :</strong> ${escapeHtml(source)}</li>
   </ul>

@@ -22,15 +22,15 @@ type CardConfig = {
 
 const CARDS: CardConfig[] = [
   {
-    title: "Appels d'offres & préparation des dossiers",
+    title: "Appels d'offres & candidatures",
     bullets: [
-      "Contrôle DCE et tableau de conformité",
-      "Mémoire technique et structuration AE / BPU / DQE",
-      "Aide au chiffrage et planning simplifié",
-      "Préparation et suivi du dépôt électronique",
+      "Lecture et classement du DCE",
+      "Pièces, conformité et échéances",
+      "Structuration du mémoire technique",
+      "Préparation du dossier avant votre validation",
     ],
-    footerTitle: "Dossiers AO structurés",
-    footerSub: "Moins d'oublis, plus de réponses défendables.",
+    footerTitle: "Renfort candidature",
+    footerSub: "Vous validez prix, choix techniques et dépôt.",
     Icon: IconClipboardChecks,
     FooterIcon: IconShieldMini,
     stripe: "from-[#1e40af] via-[#2563eb] to-[#3b82f6]",
@@ -43,15 +43,15 @@ const CARDS: CardConfig[] = [
     footerTitleClass: "text-[#1d4ed8]",
   },
   {
-    title: "Suivi administratif et technique des chantiers",
+    title: "Organisation de la réponse",
     bullets: [
-      "Documents d'exécution et fiches techniques",
-      "Planning administratif, comptes rendus et relances",
-      "Coordination bureau-chantier et suivi fournisseurs",
-      "Photos, preuves et points bloquants suivis",
+      "Centralisation des données et justificatifs",
+      "Trames et cohérence documentaire",
+      "Suivi des informations manquantes",
+      "Assistance dirigeants, CA, métreurs, CT",
     ],
-    footerTitle: "Visibilité terrain ↔ bureau",
-    footerSub: "Le chantier avance avec une traçabilité claire.",
+    footerTitle: "Dossier structuré",
+    footerSub: "BeWork prépare ; votre entreprise décide.",
     Icon: IconPeopleCoord,
     FooterIcon: IconTruckMini,
     stripe: "from-[#2563eb] via-[#3b82f6] to-[#60a5fa]",
@@ -64,15 +64,15 @@ const CARDS: CardConfig[] = [
     footerTitleClass: "text-[#1d4ed8]",
   },
   {
-    title: "Marchés publics, réception et clôture",
+    title: "Suivi administratif après attribution",
     bullets: [
-      "Ordres de service et calendrier contractuel",
-      "Chorus Pro, situations mensuelles et facturation",
-      "Réserves, pénalités et preuves de suivi",
-      "DOE et documents de fin de chantier",
+      "Échéances, OS et documents de démarrage",
+      "Situations, Chorus Pro et relances",
+      "CR, réserves et suivi documentaire",
+      "DOE et clôture administrative",
     ],
-    footerTitle: "Clôture sécurisée",
-    footerSub: "Moins de pénalités, moins de retard de paiement.",
+    footerTitle: "Suivi de marché",
+    footerSub: "Sans remplacer l’exécution technique chantier.",
     Icon: IconEuroDocument,
     FooterIcon: IconBarsUp,
     stripe: "from-[#3b82f6] via-[#60a5fa] to-[#93c5fd]",
@@ -109,12 +109,13 @@ export function HomeSolutionSection() {
             className="mt-5 text-[clamp(1.875rem,calc(1rem+3.8vw),3rem)] font-bold leading-[1.08] tracking-[-0.025em]"
             style={{ color: TEXT_DARK }}
           >
-            <span style={{ color: BLUE }}>BeWork</span> structure l&apos;assistance technique et administrative de vos opérations.
+            <span style={{ color: BLUE }}>BeWork</span> renforce vos équipes sur les appels d&apos;offres et le suivi des
+            marchés.
           </h2>
 
           <p className="mx-auto mt-3 max-w-2xl text-lg leading-relaxed text-slate-800 md:text-xl">
-            De la réponse aux appels d&apos;offres à la clôture du marché, BeWork accompagne la préparation, le suivi et la
-            sécurisation documentaire de vos chantiers — avec validation humaine sur tout ce qui engage.
+            En renfort de vos équipes, de la préparation de la candidature au suivi administratif du marché — avec
+            validation humaine sur tout ce qui engage. BeWork ne garantit pas l&apos;attribution d&apos;un marché.
           </p>
         </header>
 

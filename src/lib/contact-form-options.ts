@@ -6,24 +6,47 @@ export const MARKET_TYPE_OPTIONS = [
   { value: "autre", label: "Autre" },
 ] as const;
 
+/** Besoins alignés sur le positionnement renfort AO / candidatures / suivi. */
 export const MAIN_NEED_OPTIONS = [
-  { value: "suivi_administratif", label: "Suivi administratif marché" },
-  { value: "doe", label: "DOE" },
-  { value: "comptes_rendus", label: "Comptes rendus" },
-  { value: "dt_dict", label: "DT / DICT" },
-  { value: "attachements_situations", label: "Attachements / situations" },
-  { value: "relances_donneurs_ordre", label: "Relances donneurs d'ordre" },
-  { value: "autre", label: "Autre" },
+  { value: "preparation_candidature", label: "Préparation d’une candidature" },
+  { value: "analyse_classement_dce", label: "Analyse et classement d’un DCE" },
+  { value: "verification_pieces_admin", label: "Vérification des pièces administratives" },
+  { value: "assistance_memoire_technique", label: "Assistance au mémoire technique" },
+  { value: "preparation_reponse_ao", label: "Préparation d’une réponse à un appel d’offres" },
+  { value: "suivi_echeances", label: "Suivi des échéances" },
+  { value: "preparation_depot", label: "Préparation du dépôt" },
+  { value: "suivi_apres_attribution", label: "Suivi administratif après attribution" },
+  { value: "situations_chorus", label: "Situations et Chorus Pro" },
+  { value: "reserves_doe", label: "Réserves et DOE" },
+  { value: "renfort_admin_travaux", label: "Renfort administratif travaux" },
+  { value: "autre", label: "Autre besoin à préciser" },
+] as const;
+
+/** Étape du prospect dans le cycle AO / marché (optionnel, joint au message). */
+export const PROJECT_STAGE_OPTIONS = [
+  { value: "recherche_opportunite", label: "Recherche d’une opportunité" },
+  { value: "ao_identifie", label: "Appel d’offres identifié" },
+  { value: "candidature_preparation", label: "Candidature en préparation" },
+  { value: "reponse_en_cours", label: "Réponse en cours" },
+  { value: "avant_depot", label: "Dossier avant dépôt" },
+  { value: "marche_attribue", label: "Marché attribué" },
+  { value: "chantier_en_cours", label: "Chantier en cours" },
+  { value: "cloture_marche", label: "Clôture du marché" },
 ] as const;
 
 export type MarketTypeValue = (typeof MARKET_TYPE_OPTIONS)[number]["value"];
 export type MainNeedValue = (typeof MAIN_NEED_OPTIONS)[number]["value"];
+export type ProjectStageValue = (typeof PROJECT_STAGE_OPTIONS)[number]["value"];
 
 const marketLabels = Object.fromEntries(MARKET_TYPE_OPTIONS.map((o) => [o.value, o.label])) as Record<
   string,
   string
 >;
 const needLabels = Object.fromEntries(MAIN_NEED_OPTIONS.map((o) => [o.value, o.label])) as Record<string, string>;
+const stageLabels = Object.fromEntries(PROJECT_STAGE_OPTIONS.map((o) => [o.value, o.label])) as Record<
+  string,
+  string
+>;
 
 export function labelMarketType(value: string): string {
   return marketLabels[value] ?? value;
@@ -31,4 +54,8 @@ export function labelMarketType(value: string): string {
 
 export function labelMainNeed(value: string): string {
   return needLabels[value] ?? value;
+}
+
+export function labelProjectStage(value: string): string {
+  return stageLabels[value] ?? value;
 }

@@ -212,11 +212,11 @@ export const BEWORK_SLOGAN = "On tient le bureau, vous tenez le chantier.";
 
 /** Phrase de positionnement citables par les IA / extraits AEO. */
 export const BEWORK_AEO_DEFINITION =
-  "BeWork est une plateforme d’assistants travaux augmentés par l’IA pour les entreprises du BTP : assistance technique et administrative pour appels d’offres, analyse DCE, aide au chiffrage, mémoire technique, suivi de chantier, marchés publics, Chorus Pro, DOE, réserves et coordination documentaire terrain ↔ bureau.";
+  "BeWork met à disposition des assistants travaux spécialisés qui renforcent les entreprises du BTP dans la préparation des candidatures, l’analyse des DCE et le suivi administratif des marchés publics et privés. BeWork prépare, structure et suit les dossiers sous validation du client ; l’entreprise conserve prix, choix techniques, engagements contractuels et dépôt.";
 
 /** Meta description site (layout racine) — ~155 car., périmètre francophonie. */
 export const SEO_VALUE_PROPOSITION =
-  "Assistance technique et administrative BTP par assistants travaux IA : appels d'offres, DCE, mémoire technique, chantier, marchés publics, Chorus Pro, DOE. On tient le bureau, vous tenez le chantier — forfaits HT. FR · BE · CH · LU.";
+  "Assistants travaux BTP : renfort candidatures, analyse DCE et suivi administratif des marchés publics et privés. Vous validez ; BeWork prépare et suit. FR · BE · CH · LU.";
 
 /** Proposition courte (OG, Twitter). */
 export const SEO_VALUE_PROPOSITION_SHORT =

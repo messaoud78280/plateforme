@@ -19,6 +19,14 @@ export const RESOURCE_GUIDE_PAGE_ITEMS: readonly ResourceGuidePageItem[] = [
     publishedTime: "2026-05-29T10:00:00+02:00",
   },
   {
+    href: "/ressources/guide-dirigeant-btp-bework",
+    title: "Le Guide du Dirigeant BTP — 6 leviers de pilotage PME",
+    excerpt:
+      "PDF 20 pages : Go/No-Go AO, clauses à risque, rentabilité & trésorerie, réclamations, tableau de bord direction, recrutement — 24 prompts Claude, ~53 h de direction récupérées par mois.",
+    publishedTime: "2026-07-22T07:30:00+02:00",
+    badge: "Guide PDF",
+  },
+  {
     href: "/ressources/guide-debloquer-claude-bework",
     title: "Débloquer le vrai potentiel de Claude — Projets, MCP, Skills & Cowork",
     excerpt:

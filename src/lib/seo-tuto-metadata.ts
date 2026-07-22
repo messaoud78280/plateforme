@@ -173,6 +173,13 @@ export const TUTO_PAGE_SEO: Record<string, TutoPageSeo> = {
     ),
     keywords: ["conducteur de travaux IA", "IA BTP chantier", "guide BTP"],
   },
+  "/ressources/guide-dirigeant-btp-bework": {
+    title: "Guide du Dirigeant BTP : 6 leviers de pilotage PME | BeWork",
+    description: tutoDesc(
+      "Guide PDF 20 pages : Go/No-Go AO, clauses CCAP, rentabilité, réclamations, tableau de bord et recrutement — 24 prompts Claude pour dirigeants PME BTP",
+    ),
+    keywords: ["dirigeant BTP", "pilotage PME bâtiment", "Go No Go appel d’offres", "rentabilité chantier", "réclamation BTP"],
+  },
   "/ressources/guide-debloquer-claude-bework": {
     title: "Débloquer le potentiel de Claude BTP : Projets, MCP, Skills | BeWork",
     description: tutoDesc(

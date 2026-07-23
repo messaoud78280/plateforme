@@ -298,11 +298,11 @@ export default function HomePage() {
             <div className="grid items-center gap-10 text-center lg:grid-cols-[minmax(0,1.08fr)_minmax(280px,1fr)] lg:items-start lg:gap-x-10 xl:grid-cols-[minmax(0,1fr)_minmax(520px,1.15fr)] xl:gap-x-14 lg:gap-y-0 lg:text-left">
               <div className="relative z-[2] mx-auto flex w-full min-w-0 max-w-[540px] flex-col gap-5 lg:mx-0 lg:max-w-none lg:gap-4 lg:pt-10 xl:max-w-[560px]">
                 <p className="font-blueprint-note mx-auto max-w-[540px] text-sm font-semibold uppercase leading-snug tracking-[0.12em] text-[#1d4ed8] lg:mx-0 lg:max-w-none lg:text-base">
-                  Renfort opérationnel · Appels d&apos;offres &amp; marchés BTP
+                  Renfort travaux BTP · Mobilisable ponctuellement ou régulièrement
                 </p>
 
                 <h1 className="font-heading text-balance text-[clamp(1.65rem,calc(0.7rem+3vw),2.75rem)] font-bold leading-[1.1] tracking-[-0.03em] lg:max-w-[42rem]">
-                  Assistants travaux spécialisés dans les appels d&apos;offres et le suivi des marchés BTP
+                  Le renfort BTP que vous mobilisez sur vos appels d&apos;offres et vos marchés
                 </h1>
 
                 <p className="mx-auto mt-4 max-w-[540px] text-[clamp(1.2rem,calc(0.9rem+1.2vw),1.65rem)] font-bold leading-snug tracking-[-0.02em] lg:mx-0 lg:max-w-none">
@@ -311,17 +311,19 @@ export default function HomePage() {
                 </p>
 
                 <p className="mx-auto max-w-[540px] text-lg leading-[1.55] text-balance text-slate-800 lg:mx-0 lg:max-w-none lg:text-xl lg:leading-snug">
-                  BeWork renforce les entreprises du BTP dans la préparation de leurs candidatures, l&apos;analyse des
-                  dossiers de consultation et le suivi administratif des marchés publics et privés.
+                  BeWork accompagne les entreprises du BTP lors d&apos;un pic d&apos;activité, d&apos;une surcharge de
+                  travail ou d&apos;un besoin temporaire de ressources — sur vos appels d&apos;offres comme sur vos
+                  chantiers.
                 </p>
 
                 <p className="mx-auto max-w-[540px] text-base font-medium leading-snug text-slate-700 lg:mx-0 lg:max-w-none lg:text-[1.05rem]">
-                  Nous préparons, structurons et suivons les dossiers avec vos équipes. Vous conservez la validation des
-                  prix, des choix techniques et des engagements contractuels.
+                  Nos assistants travaux interviennent ponctuellement ou régulièrement, sur les missions que vous
+                  choisissez de nous confier. Vous conservez la validation des prix, des choix techniques et des
+                  engagements contractuels.
                 </p>
 
                 <p className="mx-auto max-w-[540px] text-sm font-semibold leading-snug text-slate-700 lg:mx-0 lg:max-w-none lg:text-base">
-                  On tient le dossier, vous gardez la décision · Contrôle documentaire, traçabilité et relecture humaine
+                  Un renfort mobilisable selon votre besoin, sans recrutement supplémentaire ni engagement inutile.
                 </p>
 
                 <BeWorkValuePillars variant="hero" />

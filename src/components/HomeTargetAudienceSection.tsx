@@ -76,7 +76,8 @@ export function HomeTargetAudienceSection() {
         <p className="mt-5 max-w-3xl text-lg leading-relaxed text-slate-700">
           BeWork accompagne dirigeants, conducteurs de travaux, chargés d&apos;affaires et équipes marchés lorsque la
           préparation des dossiers, le suivi technique et administratif des chantiers, ou l&apos;exécution de marchés publics
-          devient un goulet d&apos;étranglement.
+          devient un goulet d&apos;étranglement. Vous pouvez nous solliciter pour une mission précise, une période de
+          surcharge ou un accompagnement régulier.
         </p>
 
         <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:gap-5">

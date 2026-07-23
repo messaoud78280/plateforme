@@ -109,8 +109,8 @@ export function HomeSolutionSection() {
             className="mt-5 text-[clamp(1.875rem,calc(1rem+3.8vw),3rem)] font-bold leading-[1.08] tracking-[-0.025em]"
             style={{ color: TEXT_DARK }}
           >
-            <span style={{ color: BLUE }}>BeWork</span> renforce vos équipes sur les appels d&apos;offres et le suivi des
-            marchés.
+            <span style={{ color: BLUE }}>BeWork</span> renforce vos équipes, ponctuellement ou régulièrement, sur les
+            appels d&apos;offres et le suivi des marchés.
           </h2>
 
           <p className="mx-auto mt-3 max-w-2xl text-lg leading-relaxed text-slate-800 md:text-xl">

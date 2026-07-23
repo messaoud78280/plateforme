@@ -51,6 +51,7 @@ const FAMILIES = [
       "Suivi des échéances",
       "Documents de démarrage",
       "Ordres de service",
+      "Coordination des échanges fournisseurs et sous-traitants",
       "Situations de travaux",
       "Chorus Pro",
       "Comptes rendus",

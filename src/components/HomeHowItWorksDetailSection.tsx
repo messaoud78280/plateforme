@@ -31,7 +31,7 @@ const STEPS: {
   {
     n: 3,
     title: "Nous préparons et structurons",
-    body: "Analyse documentaire, trames, listes de pièces, échéances et livrables préparatoires — l’IA accélère, le Beworker reste responsable du fil.",
+    body: "Analyse des documents, structuration des informations, détection des pièces manquantes et préparation des livrables : les outils d’intelligence artificielle accélèrent le travail, chaque mission reste suivie et validée par un Beworker.",
     Icon: IconBriefcase,
   },
   {
@@ -74,8 +74,8 @@ export function HomeHowItWorksDetailSection() {
             Fonctionnement avec un Beworker
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-slate-800 md:mt-6 md:text-xl">
-            Nous cadrons la mission, identifions les éléments nécessaires et travaillons sous la validation de votre
-            entreprise.
+            Vous nous présentez votre besoin, nous définissons ensemble le périmètre de la mission, puis nos assistants
+            travaux prennent le relais en s’appuyant sur notre plateforme et nos outils d’intelligence artificielle.
           </p>
           <p className="mx-auto mt-3 max-w-3xl text-base leading-relaxed text-slate-700">
             Vos Beworkers peuvent travailler avec vos outils existants : Excel, Google Sheets, Outlook, Gmail, Batigest,

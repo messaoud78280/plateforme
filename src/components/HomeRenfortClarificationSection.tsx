@@ -1,3 +1,13 @@
+/** Situations concrètes qui justifient de solliciter BeWork en renfort. */
+const RENFORT_SITUATIONS = [
+  "Plusieurs appels d’offres à préparer en même temps",
+  "Un nouveau chantier à démarrer",
+  "Un conducteur de travaux surchargé",
+  "Des documents et des relances qui prennent du retard",
+  "Un DOE ou des réserves à clôturer",
+  "Une absence temporaire dans l’équipe",
+] as const;
+
 /**
  * Clarification immédiate — BeWork = renfort, pas remplacement.
  */
@@ -21,10 +31,24 @@ export function HomeRenfortClarificationSection() {
             BeWork agit comme un renfort de vos équipes
           </h2>
           <p className="mt-4 text-base leading-relaxed text-slate-800 md:text-[1.05rem] md:leading-relaxed">
-            Nous ne remplaçons pas votre dirigeant, votre chargé d&apos;affaires, votre conducteur de travaux, votre
-            métreur ou votre bureau d&apos;études. Nous préparons, organisons et suivons les éléments nécessaires à vos
-            candidatures et à vos marchés, sous la validation de votre entreprise.
+            Faites appel à BeWork lors d&apos;un pic d&apos;activité, d&apos;une surcharge de travail ou d&apos;un besoin
+            ponctuel de renfort. Nous ne remplaçons pas votre dirigeant, votre chargé d&apos;affaires, votre conducteur
+            de travaux, votre métreur ou votre bureau d&apos;études : nous préparons, organisons et suivons les éléments
+            nécessaires à vos candidatures et à vos marchés, sous la validation de votre entreprise.
           </p>
+          <ul
+            className="mt-5 grid gap-x-6 gap-y-2 sm:grid-cols-2"
+            aria-label="Situations qui justifient un renfort BeWork"
+          >
+            {RENFORT_SITUATIONS.map((item) => (
+              <li key={item} className="flex items-start gap-2 text-sm leading-snug text-slate-800 md:text-[0.9375rem]">
+                <span className="mt-0.5 shrink-0 font-bold text-[#1d4ed8]" aria-hidden>
+                  ·
+                </span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
           <p className="mt-4 text-sm font-medium leading-relaxed text-slate-700 md:text-base">
             BeWork n&apos;est ni un bureau d&apos;études, ni un cabinet juridique, ni un économiste de la construction,
             ni un mandataire qui engage l&apos;entreprise.{" "}

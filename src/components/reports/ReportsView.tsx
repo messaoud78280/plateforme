@@ -7,16 +7,20 @@ import { KpiTile } from "@/components/ui/KpiTile";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Alert } from "@/components/ui/Alert";
 import { TableSkeleton } from "@/components/ui/Skeleton";
+import { ClientReportingHub } from "@/components/reports/ClientReportingHub";
+import type { ClientReportingSnapshot } from "@/lib/client-reporting-insights";
 
 interface Stats {
   period: string;
   start: string;
   end: string;
+  role?: string | null;
   tasks: { total: number; completed: number; byStatus: Record<string, number> };
   documents: { total: number; byStatus: Record<string, number> };
   projects: { total: number };
   tempsMoyenJours: number;
   evolution: { date: string; label: string; creees: number; completees: number }[];
+  clientSnapshot?: ClientReportingSnapshot | null;
 }
 
 export function ReportsView({ period }: { period: string }) {
@@ -45,21 +49,29 @@ export function ReportsView({ period }: { period: string }) {
     return <Alert tone="critical">{error || "Données indisponibles"}</Alert>;
   }
 
+  const isClient = stats.role === "CLIENT";
   const pieData = [
     { name: "En attente", value: stats.tasks.byStatus.EN_ATTENTE ?? 0, color: "#f59e0b" },
-    { name: "En cours", value: stats.tasks.byStatus.EN_COURS ?? 0, color: "#3b82f6" },
+    {
+      name: "En cours",
+      value:
+        (stats.tasks.byStatus.EN_COURS ?? 0) +
+        (stats.tasks.byStatus.EN_ANALYSE ?? 0) +
+        (stats.tasks.byStatus.ASSIGNEE ?? 0),
+      color: "#3b82f6",
+    },
     { name: "Terminées", value: stats.tasks.byStatus.COMPLETE ?? 0, color: "#22c55e" },
   ].filter((d) => d.value > 0);
 
   const tauxCompletion =
-    stats.tasks.total > 0
-      ? Math.round((stats.tasks.completed / stats.tasks.total) * 100)
-      : 0;
+    stats.tasks.total > 0 ? Math.round((stats.tasks.completed / stats.tasks.total) * 100) : 0;
 
   return (
     <div className="space-y-6">
+      {isClient && stats.clientSnapshot ? <ClientReportingHub snapshot={stats.clientSnapshot} /> : null}
+
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <KpiTile label="Tâches (période)" value={stats.tasks.total} />
+        <KpiTile label={isClient ? "Missions (période)" : "Tâches (période)"} value={stats.tasks.total} />
         <KpiTile label="Terminées" value={stats.tasks.completed} tone="ok" />
         <KpiTile label="Complétion" value={`${tauxCompletion} %`} />
         <KpiTile
@@ -70,7 +82,10 @@ export function ReportsView({ period }: { period: string }) {
       </div>
 
       <Card hover={false}>
-        <CardHeader title="Évolution des tâches" description="Créées vs complétées sur la période" />
+        <CardHeader
+          title={isClient ? "Évolution de vos missions" : "Évolution des tâches"}
+          description="Créées vs terminées sur la période"
+        />
         <div className="mt-2 h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={stats.evolution} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
@@ -81,7 +96,7 @@ export function ReportsView({ period }: { period: string }) {
                 labelFormatter={(_, payload) => payload[0]?.payload?.date}
               />
               <Bar dataKey="creees" name="Créées" fill="#1e3a5f" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="completees" name="Complétées" fill="#059669" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="completees" name="Terminées" fill="#059669" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -127,11 +142,15 @@ export function ReportsView({ period }: { period: string }) {
             </thead>
             <tbody>
               <tr className="border-b border-bework-navy/[0.06]">
-                <td className="py-2 text-bework-muted">Tâches créées sur la période</td>
+                <td className="py-2 text-bework-muted">
+                  {isClient ? "Missions créées" : "Tâches créées"} sur la période
+                </td>
                 <td className="py-2 font-medium text-bework-ink">{stats.tasks.total}</td>
               </tr>
               <tr className="border-b border-bework-navy/[0.06]">
-                <td className="py-2 text-bework-muted">Tâches terminées</td>
+                <td className="py-2 text-bework-muted">
+                  {isClient ? "Missions terminées" : "Tâches terminées"}
+                </td>
                 <td className="py-2 font-medium text-bework-ink">{stats.tasks.completed}</td>
               </tr>
               <tr className="border-b border-bework-navy/[0.06]">
@@ -149,7 +168,7 @@ export function ReportsView({ period }: { period: string }) {
                 <td className="py-2 font-medium text-bework-ink">{stats.documents.total}</td>
               </tr>
               <tr>
-                <td className="py-2 text-bework-muted">Projets créés</td>
+                <td className="py-2 text-bework-muted">Chantiers créés</td>
                 <td className="py-2 font-medium text-bework-ink">{stats.projects.total}</td>
               </tr>
             </tbody>

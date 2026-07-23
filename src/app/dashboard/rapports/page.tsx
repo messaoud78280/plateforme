@@ -26,24 +26,29 @@ export default async function RapportsPage({
   }
 
   const params = await searchParams;
-  const period = params.period && ["7d", "30d", "3m", "6m", "1y"].includes(params.period)
-    ? params.period
-    : "30d";
+  const period =
+    params.period && ["7d", "30d", "3m", "6m", "1y"].includes(params.period) ? params.period : "30d";
+
+  const isClient = session.user.role === "CLIENT";
 
   return (
     <div className="space-y-6">
       <BackLink href="/dashboard">Tableau de bord</BackLink>
       <PageHeader
-        eyebrow="Pilotage activité"
-        title="Rapports"
-        description="Suivi des missions, documents et projets sur la période sélectionnée."
+        eyebrow={isClient ? "Pilotage client" : "Pilotage activité"}
+        title={isClient ? "Reporting intelligent" : "Rapports"}
+        description={
+          isClient
+            ? "Synthèse dirigeant, dossiers prioritaires, décisions et pilotage — en moins de 10 secondes."
+            : "Suivi des missions, documents et projets sur la période sélectionnée."
+        }
         actions={
           <>
             <a href={`/api/reports/export?period=${period}&format=pdf`} download className="btn-cc-secondary">
-              PDF
+              {isClient ? "PDF synthèse" : "PDF"}
             </a>
             <a href={`/api/reports/export?period=${period}&format=csv`} download className="btn-cc-secondary">
-              Excel
+              {isClient ? "Excel dossiers" : "Excel"}
             </a>
           </>
         }

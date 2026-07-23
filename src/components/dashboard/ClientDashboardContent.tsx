@@ -103,6 +103,12 @@ export function ClientDashboardContent({
           >
             Voir mes missions
           </Link>
+          <Link
+            href="/dashboard/rapports"
+            className="inline-flex items-center rounded-lg border border-[#1d4ed8]/35 bg-[#eff6ff] px-5 py-3 text-sm font-semibold text-[#1e3a8a] shadow-sm transition hover:bg-[#dbeafe]"
+          >
+            Reporting intelligent
+          </Link>
         </div>
         <div className="mt-6 pt-6 border-t border-slate-100">
           <QuickDelegationForm />

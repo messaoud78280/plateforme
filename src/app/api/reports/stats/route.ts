@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getReportStats } from "@/lib/reportStats";
+import { getClientReportingSnapshot } from "@/lib/client-reporting-insights";
 import { parseReportPeriodParam } from "@/lib/validation/reportParams";
 
 /** GET /api/reports/stats?period=7d|30d|3m|6m|1y */
@@ -16,16 +17,22 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Période invalide" }, { status: 400 });
   }
 
+  const role = session.user.role;
+  const isAgence = role === "AGENCE" || role === "MANAGER";
+  const isClient = role === "CLIENT";
+
   try {
-    const stats = await getReportStats(
-      session.user.id,
-      (session.user.role === "AGENCE" || session.user.role === "MANAGER"),
-      period
-    );
+    const [stats, clientSnapshot] = await Promise.all([
+      getReportStats(session.user.id, isAgence, period),
+      isClient ? getClientReportingSnapshot(session.user.id) : Promise.resolve(null),
+    ]);
+
     return NextResponse.json({
       ...stats,
       start: stats.start.toISOString(),
       end: stats.end.toISOString(),
+      role: role ?? null,
+      clientSnapshot,
     });
   } catch (e: unknown) {
     console.error("[reports/stats]", e);

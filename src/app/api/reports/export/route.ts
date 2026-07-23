@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getReportStats, type PeriodKey } from "@/lib/reportStats";
+import { getClientReportingSnapshot } from "@/lib/client-reporting-insights";
 import {
   parseReportExportFormatParam,
   parseReportPeriodParam,
@@ -16,9 +17,16 @@ const PERIOD_LABELS: Record<PeriodKey, string> = {
   "1y": "1 an",
 };
 
-function safeExportFilenameBase(period: PeriodKey, start: Date): string {
+function safeExportFilenameBase(period: PeriodKey, start: Date, prefix = "rapport"): string {
   const d = start.toISOString().slice(0, 10).replace(/[^0-9-]/g, "");
-  return `rapport-${period}-${d || "export"}`;
+  return `${prefix}-${period}-${d || "export"}`;
+}
+
+function ensureY(doc: jsPDF, y: number, need = 12): number {
+  const pageH = doc.internal.pageSize.getHeight();
+  if (y + need < pageH - 14) return y;
+  doc.addPage();
+  return 20;
 }
 
 /** GET /api/reports/export?period=30d&format=csv|pdf */
@@ -38,36 +46,68 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Format invalide (csv ou pdf)" }, { status: 400 });
   }
 
+  const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
+  const isClient = session.user.role === "CLIENT";
+
   try {
-    const stats = await getReportStats(
-      session.user.id,
-      (session.user.role === "AGENCE" || session.user.role === "MANAGER"),
-      period
-    );
+    const [stats, clientSnapshot] = await Promise.all([
+      getReportStats(session.user.id, isAgence, period),
+      isClient ? getClientReportingSnapshot(session.user.id) : Promise.resolve(null),
+    ]);
 
     const tauxCompletion =
-      stats.tasks.total > 0
-        ? Math.round((stats.tasks.completed / stats.tasks.total) * 100)
-        : 0;
+      stats.tasks.total > 0 ? Math.round((stats.tasks.completed / stats.tasks.total) * 100) : 0;
 
     if (format === "csv") {
-      const rows = [
-        ["Rapport", "Plateforme Client - Agence"],
+      const rows: (string | number)[][] = [
+        ["Rapport", isClient ? "BeWork — Reporting client" : "BeWork — Rapport activité"],
         ["Période", PERIOD_LABELS[period] ?? period],
         ["Du", stats.start.toLocaleDateString("fr-FR")],
         ["Au", stats.end.toLocaleDateString("fr-FR")],
         [],
         ["Indicateur", "Valeur"],
-        ["Tâches créées", String(stats.tasks.total)],
-        ["Tâches terminées", String(stats.tasks.completed)],
+        [isClient ? "Missions créées" : "Tâches créées", String(stats.tasks.total)],
+        [isClient ? "Missions terminées" : "Tâches terminées", String(stats.tasks.completed)],
         ["Taux de complétion (%)", String(tauxCompletion)],
-        ["Temps moyen de traitement (jours)", String(stats.tempsMoyenJours < 1 ? "< 1" : stats.tempsMoyenJours)],
+        [
+          "Temps moyen de traitement (jours)",
+          String(stats.tempsMoyenJours < 1 ? "< 1" : stats.tempsMoyenJours),
+        ],
         ["Documents déposés", String(stats.documents.total)],
-        ["Projets créés", String(stats.projects.total)],
+        ["Chantiers créés", String(stats.projects.total)],
       ];
-      const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(";")).join("\n");
+
+      if (clientSnapshot) {
+        rows.push(
+          [],
+          ["Synthèse dirigeant", clientSnapshot.executiveDigest.headline],
+          ...clientSnapshot.executiveDigest.bullets.map((b) => ["Point", b]),
+          [],
+          ["Dossier", "Signal", "Statut", "Attente (j)", "Prochaine action", "Date souhaitée"],
+          ...clientSnapshot.dossiers.map((d) => [
+            d.title,
+            d.flagLabel,
+            d.statusLabel,
+            String(d.daysWaiting),
+            d.nextAction,
+            d.desiredDate ?? "",
+          ]),
+          [],
+          ["Décision récente", "Libellé", "Date", "Note"],
+          ...clientSnapshot.recentDecisions.map((d) => [
+            d.title,
+            d.decisionLabel,
+            d.decidedAt ? new Date(d.decidedAt).toLocaleDateString("fr-FR") : "",
+            d.note ?? "",
+          ]),
+        );
+      }
+
+      const csv = rows
+        .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(";"))
+        .join("\n");
       const bom = "\uFEFF";
-      const fname = `${safeExportFilenameBase(period, stats.start)}.csv`;
+      const fname = `${safeExportFilenameBase(period, stats.start, isClient ? "reporting-client" : "rapport")}.csv`;
       return new NextResponse(bom + csv, {
         headers: {
           "Content-Type": "text/csv; charset=utf-8",
@@ -79,41 +119,85 @@ export async function GET(request: NextRequest) {
     // PDF
     const doc = new jsPDF();
     let y = 20;
+    const pageW = doc.internal.pageSize.getWidth();
 
     doc.setFontSize(18);
-    doc.text("Rapport d'activité", 14, y);
+    doc.text(isClient ? "Reporting client BeWork" : "Rapport d'activité", 14, y);
     y += 10;
 
     doc.setFontSize(11);
-    doc.text(`Période : ${PERIOD_LABELS[period] ?? period} (du ${stats.start.toLocaleDateString("fr-FR")} au ${stats.end.toLocaleDateString("fr-FR")})`, 14, y);
-    y += 15;
+    doc.text(
+      `Période : ${PERIOD_LABELS[period] ?? period} (du ${stats.start.toLocaleDateString("fr-FR")} au ${stats.end.toLocaleDateString("fr-FR")})`,
+      14,
+      y,
+    );
+    y += 12;
 
+    if (clientSnapshot) {
+      doc.setFontSize(12);
+      doc.text("Synthèse dirigeant", 14, y);
+      y += 7;
+      doc.setFontSize(10);
+      const headlineLines = doc.splitTextToSize(clientSnapshot.executiveDigest.headline, pageW - 28);
+      doc.text(headlineLines, 14, y);
+      y += headlineLines.length * 5 + 4;
+      for (const bullet of clientSnapshot.executiveDigest.bullets) {
+        y = ensureY(doc, y, 10);
+        const lines = doc.splitTextToSize(`• ${bullet}`, pageW - 28);
+        doc.text(lines, 14, y);
+        y += lines.length * 5 + 2;
+      }
+      y += 6;
+
+      doc.setFontSize(12);
+      y = ensureY(doc, y, 12);
+      doc.text("Dossiers prioritaires", 14, y);
+      y += 7;
+      doc.setFontSize(9);
+      for (const d of clientSnapshot.dossiers.filter((x) => x.flag !== "en_cours").slice(0, 8)) {
+        y = ensureY(doc, y, 14);
+        const line = doc.splitTextToSize(
+          `[${d.flagLabel}] ${d.title} — ${d.nextAction} (${d.daysWaiting} j)`,
+          pageW - 28,
+        );
+        doc.text(line, 14, y);
+        y += line.length * 4.5 + 3;
+      }
+      y += 6;
+    }
+
+    y = ensureY(doc, y, 20);
     doc.setFontSize(12);
-    doc.text("Récapitulatif", 14, y);
+    doc.text("Récapitulatif période", 14, y);
     y += 8;
 
     doc.setFontSize(10);
     const tableData = [
-      ["Tâches créées", String(stats.tasks.total)],
-      ["Tâches terminées", String(stats.tasks.completed)],
+      [isClient ? "Missions créées" : "Tâches créées", String(stats.tasks.total)],
+      [isClient ? "Missions terminées" : "Tâches terminées", String(stats.tasks.completed)],
       ["Taux de complétion", `${tauxCompletion} %`],
       ["Temps moyen (jours)", stats.tempsMoyenJours < 1 ? "< 1" : String(stats.tempsMoyenJours)],
       ["Documents déposés", String(stats.documents.total)],
-      ["Projets créés", String(stats.projects.total)],
+      ["Chantiers créés", String(stats.projects.total)],
     ];
-    const pageW = doc.internal.pageSize.getWidth();
     tableData.forEach(([label, value]) => {
+      y = ensureY(doc, y, 8);
       doc.text(label, 14, y);
       doc.text(value, pageW - 14 - doc.getTextWidth(value), y);
       y += 7;
     });
 
     y += 10;
-    doc.setFontSize(10);
-    doc.text(`Généré le ${new Date().toLocaleString("fr-FR")} - Plateforme Client Agence`, 14, y);
+    y = ensureY(doc, y, 10);
+    doc.setFontSize(9);
+    doc.text(
+      `Généré le ${new Date().toLocaleString("fr-FR")} — BeWork. Vous validez ; BeWork prépare et suit.`,
+      14,
+      y,
+    );
 
     const buf = Buffer.from(doc.output("arraybuffer"));
-    const fname = `${safeExportFilenameBase(period, stats.start)}.pdf`;
+    const fname = `${safeExportFilenameBase(period, stats.start, isClient ? "reporting-client" : "rapport")}.pdf`;
     return new NextResponse(buf, {
       headers: {
         "Content-Type": "application/pdf",

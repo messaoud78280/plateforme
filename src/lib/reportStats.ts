@@ -65,9 +65,9 @@ export async function getReportStats(
     }),
   ]);
 
-  const byStatus = { EN_ATTENTE: 0, EN_COURS: 0, COMPLETE: 0 };
+  const byStatus: Record<string, number> = {};
   tasksInPeriod.forEach((t) => {
-    if (t.status in byStatus) byStatus[t.status as keyof typeof byStatus]++;
+    byStatus[t.status] = (byStatus[t.status] ?? 0) + 1;
   });
 
   let tempsMoyenJours = 0;

@@ -75,6 +75,9 @@ export function DashboardNav({ role }: { role?: string | null }) {
             <NavLink href="/dashboard/documents" pathname={pathname} activeClass={active}>
               Documents
             </NavLink>
+            <NavLink href="/dashboard/rapports" pathname={pathname} activeClass={active}>
+              Reporting
+            </NavLink>
             <NavLink href="/dashboard/equipe" pathname={pathname} activeClass={active}>
               Équipe
             </NavLink>

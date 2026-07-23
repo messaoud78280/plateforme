@@ -223,58 +223,19 @@ export default function HomePage() {
 
       <main className="pt-0">
         {/* Hero → Process : photo chantier atténuée + décor plan */}
-        <div className="relative overflow-x-clip bg-[#f8fafc]">
+        <div className="relative overflow-x-clip bg-transparent">
           <HomeHeroPhotoBackground />
-          {/* Panneau métallique skew discret (ne concurrence pas la photo) */}
+          {/* Panneau métallique skew très discret */}
           <div
             aria-hidden
-            className="pointer-events-none absolute right-[-6%] top-[-12rem] -bottom-[92rem] z-[1] w-[46%] skew-x-[-12deg] opacity-[0.35] md:top-[-14rem] md:-bottom-[112rem]"
+            className="pointer-events-none absolute right-[-6%] top-[-12rem] -bottom-[92rem] z-[1] w-[42%] skew-x-[-12deg] opacity-[0.18] md:top-[-14rem] md:-bottom-[112rem]"
             style={{
-              background: "linear-gradient(135deg, #F8FAFC 0%, #D7E0EA 45%, #EEF3F8 100%)",
+              background: "linear-gradient(135deg, transparent 0%, #D7E0EA 55%, transparent 100%)",
             }}
           />
+          {/* Quadrillage plan — très léger */}
           <div
-            aria-hidden
-            className="pointer-events-none absolute right-[-6%] top-[-12rem] -bottom-[92rem] z-[1] w-[46%] skew-x-[-12deg] opacity-20 md:top-[-14rem] md:-bottom-[112rem]"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(120deg, rgba(15,23,42,0.12) 0px, rgba(15,23,42,0.12) 1px, transparent 1px, transparent 7px)",
-            }}
-          />
-          {/* Courbe métallique centrale */}
-          <div
-            className="pointer-events-none absolute inset-x-[-8%] top-[-6%] z-[2] h-[min(48vh,480px)] opacity-[0.22] md:inset-x-[-4%] md:opacity-[0.18]"
-            aria-hidden
-          >
-            <svg viewBox="0 0 1400 520" className="h-full w-full min-w-[900px]" preserveAspectRatio="xMidYMid slice">
-              <defs>
-                <linearGradient id="bework-hero-metal" x1="0%" y1="0%" x2="100%" y2="35%">
-                  <stop offset="0%" stopColor="#cbd5e1" />
-                  <stop offset="45%" stopColor="#f1f5f9" />
-                  <stop offset="100%" stopColor="#94a3b8" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M-120 440 Q 380 60 760 280 T 1520 120"
-                stroke="url(#bework-hero-metal)"
-                strokeWidth="18"
-                fill="none"
-                strokeLinecap="round"
-                opacity="0.7"
-              />
-              <path
-                d="M-120 440 Q 380 60 760 280 T 1520 120"
-                stroke="#2563eb"
-                strokeWidth="2.5"
-                fill="none"
-                strokeLinecap="round"
-                opacity="0.55"
-              />
-            </svg>
-          </div>
-          {/* Quadrillage plan — léger au-dessus de la photo */}
-          <div
-            className="pointer-events-none absolute inset-0 z-[3] bework-blueprint-grid--hero opacity-[0.35] md:opacity-[0.28]"
+            className="pointer-events-none absolute inset-0 z-[3] bework-blueprint-grid--hero opacity-[0.18] md:opacity-[0.14]"
             aria-hidden
           />
           <div className="relative z-10">

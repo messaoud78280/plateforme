@@ -6,7 +6,7 @@ const CARDS = EXTERNALISATION_ADMIN_BT_NAV;
 /** Grille 2×2 — pages SEO pays (maquette GEO accueil). */
 export function HomeGeoExternalisationCards() {
   return (
-    <section className="bg-[#f1f5f9]/90 px-6 py-12 md:py-16" aria-labelledby="geo-pays-heading">
+    <section className="bg-transparent px-6 py-12 md:py-16" aria-labelledby="geo-pays-heading">
       <div className="container-site mx-auto max-w-6xl">
         <h2 id="geo-pays-heading" className="text-2xl font-bold tracking-tight text-[#0f172a] md:text-[1.65rem]">
           Une page par pays

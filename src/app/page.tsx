@@ -216,37 +216,32 @@ const homeJsonLd = {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen min-w-0 overflow-x-clip bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9]">
+    <div className="min-h-screen min-w-0 overflow-x-clip bg-transparent">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }} />
       <MarketingSiteHeader plainBg />
 
       <main className="pt-0">
         {/* Hero → Problème → Solution → Process BeWork : un seul fond (dégradé + métallique continu) */}
-        <div className="relative overflow-x-clip bg-gradient-to-b from-white via-[#fdfefe] to-[#F8FAFC]">
-          <div
-            className="pointer-events-none absolute inset-0 z-[5] bg-gradient-to-b from-white/50 via-transparent to-transparent"
-            aria-hidden
-          />
+        <div className="relative overflow-x-clip bg-gradient-to-b from-white/40 via-[#f8fafc]/25 to-transparent">
+          {/* Panneau métallique skew + hachures (ambiance plan) */}
           <div
             aria-hidden
-            className="pointer-events-none absolute right-[-6%] top-[-12rem] -bottom-[92rem] z-0 w-[46%] skew-x-[-12deg] opacity-[0.78] md:top-[-14rem] md:-bottom-[112rem]"
+            className="pointer-events-none absolute right-[-6%] top-[-12rem] -bottom-[92rem] z-0 w-[46%] skew-x-[-12deg] opacity-[0.88] md:top-[-14rem] md:-bottom-[112rem]"
             style={{
               background: "linear-gradient(135deg, #F8FAFC 0%, #D7E0EA 45%, #EEF3F8 100%)",
             }}
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute right-[-6%] top-[-12rem] -bottom-[92rem] z-0 w-[46%] skew-x-[-12deg] opacity-30 md:top-[-14rem] md:-bottom-[112rem]"
+            className="pointer-events-none absolute right-[-6%] top-[-12rem] -bottom-[92rem] z-0 w-[46%] skew-x-[-12deg] opacity-45 md:top-[-14rem] md:-bottom-[112rem]"
             style={{
               backgroundImage:
-                "repeating-linear-gradient(120deg, rgba(15,23,42,0.14) 0px, rgba(15,23,42,0.14) 1px, transparent 1px, transparent 7px)",
+                "repeating-linear-gradient(120deg, rgba(15,23,42,0.18) 0px, rgba(15,23,42,0.18) 1px, transparent 1px, transparent 7px)",
             }}
           />
-          {/* Quadrillage plan — papier millimétré bleuté */}
-          <div className="pointer-events-none absolute inset-0 z-[3] bework-blueprint-grid--hero opacity-[0.62] md:opacity-[0.56]" aria-hidden />
           {/* Courbe métallique centrale — complète les arcs coins */}
           <div
-            className="pointer-events-none absolute inset-x-[-8%] top-[-6%] z-[4] h-[min(48vh,480px)] opacity-[0.26] md:inset-x-[-4%] md:opacity-[0.22]"
+            className="pointer-events-none absolute inset-x-[-8%] top-[-6%] z-[2] h-[min(48vh,480px)] opacity-[0.38] md:inset-x-[-4%] md:opacity-[0.34]"
             aria-hidden
           >
             <svg viewBox="0 0 1400 520" className="h-full w-full min-w-[900px]" preserveAspectRatio="xMidYMid slice">
@@ -263,18 +258,28 @@ export default function HomePage() {
                 strokeWidth="18"
                 fill="none"
                 strokeLinecap="round"
-                opacity="0.55"
+                opacity="0.7"
               />
               <path
                 d="M-120 440 Q 380 60 760 280 T 1520 120"
                 stroke="#2563eb"
-                strokeWidth="2.25"
+                strokeWidth="2.5"
                 fill="none"
                 strokeLinecap="round"
-                opacity="0.42"
+                opacity="0.55"
               />
             </svg>
           </div>
+          {/* Voile très léger en tête — lisibilité texte, grille reste dominante */}
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 z-[3] h-[min(28vh,260px)] bg-gradient-to-b from-white/30 via-transparent to-transparent"
+            aria-hidden
+          />
+          {/* Quadrillage plan — bien visible */}
+          <div
+            className="pointer-events-none absolute inset-0 z-[4] bework-blueprint-grid--hero opacity-100"
+            aria-hidden
+          />
           <div className="relative z-10">
             <div className="pointer-events-none absolute inset-0 z-[1] overflow-hidden" aria-hidden>
               <HomeBlueprintScrollDecor />
@@ -402,9 +407,9 @@ export default function HomePage() {
         </div>
 
         {/* Au-dessus du décor skew qui déborde du bloc hero — évite que le panneau gris recouvre le texte */}
-        <div className="relative z-10 overflow-x-clip bg-gradient-to-b from-[#f8fafc] via-[#f1f5f9] to-[#f1f5f9]">
-          <div className="pointer-events-none absolute inset-0 bework-blueprint-grid opacity-[0.22] md:opacity-[0.26]" aria-hidden />
-          <div className="pointer-events-none absolute right-0 top-[8%] h-[min(45%,380px)] w-[min(48%,420px)] opacity-[0.035] md:opacity-[0.045]" aria-hidden>
+        <div className="relative z-10 overflow-x-clip bg-gradient-to-b from-[#f8fafc]/55 via-[#f1f5f9]/70 to-[#f1f5f9]/85">
+          <div className="pointer-events-none absolute inset-0 bework-blueprint-grid opacity-[0.55] md:opacity-[0.62]" aria-hidden />
+          <div className="pointer-events-none absolute right-0 top-[8%] h-[min(45%,380px)] w-[min(48%,420px)] opacity-[0.08] md:opacity-[0.1]" aria-hidden>
             <svg className="h-full w-full text-slate-400" viewBox="0 0 200 200" fill="none" preserveAspectRatio="xMidYMid meet">
               <path
                 d="M20 160 L160 40 M30 170 L170 50"

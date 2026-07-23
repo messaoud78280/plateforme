@@ -6,7 +6,7 @@ export function HomeHeroMetalCorners() {
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
       {/* Coin haut-gauche */}
       <svg
-        className="absolute -left-[12%] -top-[10%] h-[min(52vh,440px)] w-[75%] max-w-[780px] opacity-[0.55] md:-left-[8%] md:opacity-[0.48]"
+        className="absolute -left-[12%] -top-[10%] h-[min(52vh,440px)] w-[75%] max-w-[780px] opacity-[0.72] md:-left-[8%] md:opacity-[0.68]"
         viewBox="0 0 640 380"
         fill="none"
         preserveAspectRatio="xMidYMid slice"
@@ -45,7 +45,7 @@ export function HomeHeroMetalCorners() {
 
       {/* Coin bas-droit */}
       <svg
-        className="absolute -bottom-[8%] -right-[10%] h-[min(48vh,400px)] w-[72%] max-w-[720px] opacity-[0.52] md:-right-[6%] md:opacity-[0.46]"
+        className="absolute -bottom-[8%] -right-[10%] h-[min(48vh,400px)] w-[72%] max-w-[720px] opacity-[0.7] md:-right-[6%] md:opacity-[0.66]"
         viewBox="0 0 640 380"
         fill="none"
         preserveAspectRatio="xMidYMid slice"

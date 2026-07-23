@@ -12,7 +12,7 @@ export function HomeBlueprintScrollDecor() {
     >
       {/* Calque planche : marges doubles, hachure de zone, échelle — très lisible mais discret */}
       <svg
-        className="absolute inset-0 h-full w-full opacity-[0.07] md:opacity-[0.095]"
+        className="absolute inset-0 h-full w-full opacity-[0.14] md:opacity-[0.18]"
         viewBox="0 0 1200 2600"
         fill="none"
         preserveAspectRatio="none"

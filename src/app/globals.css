@@ -12,10 +12,10 @@ html {
   /* Fond type papier millimétré — discret (identité plan / blueprint) */
   background-color: var(--background);
   background-image:
-    linear-gradient(to right, rgba(37, 99, 235, 0.028) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(37, 99, 235, 0.028) 1px, transparent 1px),
-    linear-gradient(to right, rgba(148, 163, 184, 0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
+    linear-gradient(to right, rgba(37, 99, 235, 0.022) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(37, 99, 235, 0.022) 1px, transparent 1px),
+    linear-gradient(to right, rgba(148, 163, 184, 0.036) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.036) 1px, transparent 1px);
   background-size:
     40px 40px,
     40px 40px,
@@ -571,10 +571,10 @@ body {
   /** Homepage — grille type plan technique (discret) */
   .bework-blueprint-grid {
     background-image:
-      linear-gradient(to right, rgba(15, 23, 42, 0.05) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(15, 23, 42, 0.05) 1px, transparent 1px),
-      linear-gradient(to right, rgba(37, 99, 235, 0.035) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(37, 99, 235, 0.035) 1px, transparent 1px);
+      linear-gradient(to right, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
+      linear-gradient(to right, rgba(37, 99, 235, 0.028) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(37, 99, 235, 0.028) 1px, transparent 1px);
     background-size: 44px 44px, 44px 44px, 11px 11px, 11px 11px;
     background-position: 0 0, 0 0, 0 0, 0 0;
   }
@@ -582,10 +582,10 @@ body {
   /** Hero — papier millimétré bleuté léger */
   .bework-blueprint-grid--hero {
     background-image:
-      linear-gradient(to right, rgba(37, 99, 235, 0.055) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(37, 99, 235, 0.055) 1px, transparent 1px),
-      linear-gradient(to right, rgba(148, 163, 184, 0.05) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+      linear-gradient(to right, rgba(37, 99, 235, 0.044) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(37, 99, 235, 0.044) 1px, transparent 1px),
+      linear-gradient(to right, rgba(148, 163, 184, 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(148, 163, 184, 0.04) 1px, transparent 1px);
     background-size:
       36px 36px,
       36px 36px,

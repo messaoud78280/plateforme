@@ -277,7 +277,7 @@ export default function HomePage() {
           />
           {/* Quadrillage plan — discret */}
           <div
-            className="pointer-events-none absolute inset-0 z-[4] bework-blueprint-grid--hero opacity-[0.28] md:opacity-[0.22]"
+            className="pointer-events-none absolute inset-0 z-[4] bework-blueprint-grid--hero opacity-[0.22] md:opacity-[0.18]"
             aria-hidden
           />
           <div className="relative z-10">
@@ -408,7 +408,7 @@ export default function HomePage() {
 
         {/* Au-dessus du décor skew qui déborde du bloc hero — évite que le panneau gris recouvre le texte */}
         <div className="relative z-10 overflow-x-clip bg-gradient-to-b from-[#f8fafc]/55 via-[#f1f5f9]/70 to-[#f1f5f9]/85">
-          <div className="pointer-events-none absolute inset-0 bework-blueprint-grid opacity-[0.2] md:opacity-[0.24]" aria-hidden />
+          <div className="pointer-events-none absolute inset-0 bework-blueprint-grid opacity-[0.16] md:opacity-[0.19]" aria-hidden />
           <div className="pointer-events-none absolute right-0 top-[8%] h-[min(45%,380px)] w-[min(48%,420px)] opacity-[0.04] md:opacity-[0.05]" aria-hidden>
             <svg className="h-full w-full text-slate-400" viewBox="0 0 200 200" fill="none" preserveAspectRatio="xMidYMid meet">
               <path

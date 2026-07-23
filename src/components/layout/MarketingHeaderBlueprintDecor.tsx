@@ -14,9 +14,9 @@ type Props = {
 };
 
 export function MarketingHeaderBlueprintDecor({ plainBg = false }: Props) {
-  const coarse = plainBg ? "opacity-[0.16] md:opacity-[0.19]" : "opacity-[0.21] md:opacity-[0.24]";
-  const fine = plainBg ? "opacity-[0.11] md:opacity-[0.14]" : "opacity-[0.14] md:opacity-[0.18]";
-  const svgLayer = plainBg ? "opacity-[0.26] md:opacity-[0.32]" : "opacity-[0.32] md:opacity-[0.38]";
+  const coarse = plainBg ? "opacity-[0.24] md:opacity-[0.29]" : "opacity-[0.31] md:opacity-[0.36]";
+  const fine = plainBg ? "opacity-[0.17] md:opacity-[0.22]" : "opacity-[0.22] md:opacity-[0.26]";
+  const svgLayer = plainBg ? "opacity-[0.38] md:opacity-[0.48]" : "opacity-[0.48] md:opacity-[0.58]";
 
   return (
     <div

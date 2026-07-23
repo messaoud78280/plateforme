@@ -26,6 +26,7 @@ export const RESOURCE_GUIDE_CATEGORIES: readonly ResourceCategory[] = [
       { href: "/ressources/analyse-dce-chiffrage-btp", label: "Analyse DCE & appui chiffrage" },
       { href: "/ressources/memoire-technique-btp", label: "Mémoire technique" },
       { href: "/ressources/chiffrage-devis-btp", label: "Chiffrage & devis" },
+      { href: "/ressources/guide-dirigeant-btp-bework", label: "Guide dirigeant — Go/No-Go & clauses" },
       { href: "/services/analyse-dce-btp", label: "Service analyse DCE" },
     ],
   },
@@ -69,6 +70,17 @@ export const RESOURCE_GUIDE_CATEGORIES: readonly ResourceCategory[] = [
       { href: "/suivi-fournisseurs-chantier", label: "Fournisseurs & achats" },
       { href: "/assistants-administratifs-taches", label: "Missions BeWork" },
       { href: "/services/assistant-conducteur-de-travaux", label: "Assistant conducteur de travaux" },
+    ],
+  },
+  {
+    id: "dirigeant-pme",
+    title: "Dirigeant PME BTP",
+    description: "Go/No-Go AO, clauses à risque, rentabilité, réclamations et recrutement.",
+    links: [
+      { href: "/ressources/guide-dirigeant-btp-bework", label: "Guide du Dirigeant BTP (PDF 20 pages)" },
+      { href: "/ressources/guide-claude-btp-bework", label: "Claude IA — 18 cas d’usage métier" },
+      { href: "/ressources/analyse-dce-btp", label: "Analyse DCE" },
+      { href: "/assistant-administratif-externalise", label: "Externalisation administrative" },
     ],
   },
 ] as const;

@@ -8,7 +8,7 @@ export function HomeHeroPlanSketchDecor() {
     <div className="absolute inset-0 overflow-hidden" aria-hidden>
       {/* Cotations & repères — trait bleu-gris façon DAO */}
       <svg
-        className="absolute left-1/2 top-0 h-[min(92vh,920px)] w-[min(145%,1480px)] -translate-x-1/2 text-[#2563eb] opacity-[0.18] motion-reduce:opacity-[0.12] sm:opacity-[0.2] md:h-full md:min-h-[640px] md:opacity-[0.22]"
+        className="absolute left-1/2 top-0 h-[min(92vh,920px)] w-[min(145%,1480px)] -translate-x-1/2 text-[#2563eb] opacity-[0.2] motion-reduce:opacity-[0.12] sm:opacity-[0.24] md:h-full md:min-h-[640px] md:opacity-[0.26]"
         viewBox="0 0 1200 780"
         preserveAspectRatio="xMidYMid slice"
       >

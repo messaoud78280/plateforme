@@ -16,6 +16,7 @@ import { HomeHeroAside } from "@/components/home/HomeHeroAside";
 import { HomeBlueprintScrollDecor } from "@/components/home/HomeBlueprintScrollDecor";
 import { HomeHeroMetalCorners } from "@/components/home/HomeHeroMetalCorners";
 import { HomeHeroPlanCartouche } from "@/components/home/HomeHeroPlanCartouche";
+import { HomeHeroPhotoBackground } from "@/components/home/HomeHeroPhotoBackground";
 import { HomeHeroPlanSketchDecor } from "@/components/home/HomeHeroPlanSketchDecor";
 import { BlueprintCotationHero } from "@/components/home/BlueprintCotationDecor";
 import { HomeGeoExternalisationCards } from "@/components/HomeGeoExternalisationCards";
@@ -221,27 +222,28 @@ export default function HomePage() {
       <MarketingSiteHeader plainBg />
 
       <main className="pt-0">
-        {/* Hero → Problème → Solution → Process BeWork : un seul fond (dégradé + métallique continu) */}
-        <div className="relative overflow-x-clip bg-gradient-to-b from-white/40 via-[#f8fafc]/25 to-transparent">
-          {/* Panneau métallique skew + hachures (ambiance plan) */}
+        {/* Hero → Process : photo chantier atténuée + décor plan */}
+        <div className="relative overflow-x-clip bg-[#f8fafc]">
+          <HomeHeroPhotoBackground />
+          {/* Panneau métallique skew discret (ne concurrence pas la photo) */}
           <div
             aria-hidden
-            className="pointer-events-none absolute right-[-6%] top-[-12rem] -bottom-[92rem] z-0 w-[46%] skew-x-[-12deg] opacity-[0.88] md:top-[-14rem] md:-bottom-[112rem]"
+            className="pointer-events-none absolute right-[-6%] top-[-12rem] -bottom-[92rem] z-[1] w-[46%] skew-x-[-12deg] opacity-[0.35] md:top-[-14rem] md:-bottom-[112rem]"
             style={{
               background: "linear-gradient(135deg, #F8FAFC 0%, #D7E0EA 45%, #EEF3F8 100%)",
             }}
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute right-[-6%] top-[-12rem] -bottom-[92rem] z-0 w-[46%] skew-x-[-12deg] opacity-45 md:top-[-14rem] md:-bottom-[112rem]"
+            className="pointer-events-none absolute right-[-6%] top-[-12rem] -bottom-[92rem] z-[1] w-[46%] skew-x-[-12deg] opacity-20 md:top-[-14rem] md:-bottom-[112rem]"
             style={{
               backgroundImage:
-                "repeating-linear-gradient(120deg, rgba(15,23,42,0.18) 0px, rgba(15,23,42,0.18) 1px, transparent 1px, transparent 7px)",
+                "repeating-linear-gradient(120deg, rgba(15,23,42,0.12) 0px, rgba(15,23,42,0.12) 1px, transparent 1px, transparent 7px)",
             }}
           />
-          {/* Courbe métallique centrale — complète les arcs coins */}
+          {/* Courbe métallique centrale */}
           <div
-            className="pointer-events-none absolute inset-x-[-8%] top-[-6%] z-[2] h-[min(48vh,480px)] opacity-[0.38] md:inset-x-[-4%] md:opacity-[0.34]"
+            className="pointer-events-none absolute inset-x-[-8%] top-[-6%] z-[2] h-[min(48vh,480px)] opacity-[0.22] md:inset-x-[-4%] md:opacity-[0.18]"
             aria-hidden
           >
             <svg viewBox="0 0 1400 520" className="h-full w-full min-w-[900px]" preserveAspectRatio="xMidYMid slice">
@@ -270,14 +272,9 @@ export default function HomePage() {
               />
             </svg>
           </div>
-          {/* Voile très léger en tête — lisibilité texte, grille reste dominante */}
+          {/* Quadrillage plan — léger au-dessus de la photo */}
           <div
-            className="pointer-events-none absolute inset-x-0 top-0 z-[3] h-[min(28vh,260px)] bg-gradient-to-b from-white/30 via-transparent to-transparent"
-            aria-hidden
-          />
-          {/* Quadrillage plan — bien visible */}
-          <div
-            className="pointer-events-none absolute inset-0 z-[4] bework-blueprint-grid--hero opacity-100"
+            className="pointer-events-none absolute inset-0 z-[3] bework-blueprint-grid--hero opacity-[0.35] md:opacity-[0.28]"
             aria-hidden
           />
           <div className="relative z-10">

@@ -48,26 +48,38 @@ export async function GET(request: NextRequest) {
 
   const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
   const isClient = session.user.role === "CLIENT";
+  const isManager = session.user.role === "MANAGER";
 
   try {
     const [stats, clientSnapshot] = await Promise.all([
       getReportStats(session.user.id, isAgence, period),
-      isClient ? getClientReportingSnapshot(session.user.id) : Promise.resolve(null),
+      isClient
+        ? getClientReportingSnapshot(session.user.id, "client")
+        : isManager
+          ? getClientReportingSnapshot(session.user.id, "ops")
+          : Promise.resolve(null),
     ]);
 
     const tauxCompletion =
       stats.tasks.total > 0 ? Math.round((stats.tasks.completed / stats.tasks.total) * 100) : 0;
+    const hasSnapshot = Boolean(clientSnapshot);
+    const reportTitle = isClient
+      ? "BeWork — Reporting client"
+      : isManager
+        ? "BeWork — Reporting activité"
+        : "BeWork — Rapport activité";
+    const filenamePrefix = isClient ? "reporting-client" : isManager ? "reporting-activite" : "rapport";
 
     if (format === "csv") {
       const rows: (string | number)[][] = [
-        ["Rapport", isClient ? "BeWork — Reporting client" : "BeWork — Rapport activité"],
+        ["Rapport", reportTitle],
         ["Période", PERIOD_LABELS[period] ?? period],
         ["Du", stats.start.toLocaleDateString("fr-FR")],
         ["Au", stats.end.toLocaleDateString("fr-FR")],
         [],
         ["Indicateur", "Valeur"],
-        [isClient ? "Missions créées" : "Tâches créées", String(stats.tasks.total)],
-        [isClient ? "Missions terminées" : "Tâches terminées", String(stats.tasks.completed)],
+        [hasSnapshot ? "Missions créées" : "Tâches créées", String(stats.tasks.total)],
+        [hasSnapshot ? "Missions terminées" : "Tâches terminées", String(stats.tasks.completed)],
         ["Taux de complétion (%)", String(tauxCompletion)],
         [
           "Temps moyen de traitement (jours)",
@@ -83,15 +95,14 @@ export async function GET(request: NextRequest) {
           ["Synthèse dirigeant", clientSnapshot.executiveDigest.headline],
           ...clientSnapshot.executiveDigest.bullets.map((b) => ["Point", b]),
           [],
-          ["Dossier", "Signal", "Statut", "Attente (j)", "Prochaine action", "Date souhaitée"],
-          ...clientSnapshot.dossiers.map((d) => [
-            d.title,
-            d.flagLabel,
-            d.statusLabel,
-            String(d.daysWaiting),
-            d.nextAction,
-            d.desiredDate ?? "",
-          ]),
+          isManager
+            ? ["Dossier", "Client", "Signal", "Statut", "Attente (j)", "Prochaine action", "Date souhaitée"]
+            : ["Dossier", "Signal", "Statut", "Attente (j)", "Prochaine action", "Date souhaitée"],
+          ...clientSnapshot.dossiers.map((d) =>
+            isManager
+              ? [d.title, d.clientName ?? "", d.flagLabel, d.statusLabel, String(d.daysWaiting), d.nextAction, d.desiredDate ?? ""]
+              : [d.title, d.flagLabel, d.statusLabel, String(d.daysWaiting), d.nextAction, d.desiredDate ?? ""],
+          ),
           [],
           ["Décision récente", "Libellé", "Date", "Note"],
           ...clientSnapshot.recentDecisions.map((d) => [
@@ -107,7 +118,7 @@ export async function GET(request: NextRequest) {
         .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(";"))
         .join("\n");
       const bom = "\uFEFF";
-      const fname = `${safeExportFilenameBase(period, stats.start, isClient ? "reporting-client" : "rapport")}.csv`;
+      const fname = `${safeExportFilenameBase(period, stats.start, filenamePrefix)}.csv`;
       return new NextResponse(bom + csv, {
         headers: {
           "Content-Type": "text/csv; charset=utf-8",
@@ -121,8 +132,13 @@ export async function GET(request: NextRequest) {
     let y = 20;
     const pageW = doc.internal.pageSize.getWidth();
 
+    const pdfTitle = isClient
+      ? "Reporting client BeWork"
+      : isManager
+        ? "Reporting activité BeWork"
+        : "Rapport d'activité";
     doc.setFontSize(18);
-    doc.text(isClient ? "Reporting client BeWork" : "Rapport d'activité", 14, y);
+    doc.text(pdfTitle, 14, y);
     y += 10;
 
     doc.setFontSize(11);
@@ -135,7 +151,7 @@ export async function GET(request: NextRequest) {
 
     if (clientSnapshot) {
       doc.setFontSize(12);
-      doc.text("Synthèse dirigeant", 14, y);
+      doc.text(isManager ? "Synthèse activité" : "Synthèse dirigeant", 14, y);
       y += 7;
       doc.setFontSize(10);
       const headlineLines = doc.splitTextToSize(clientSnapshot.executiveDigest.headline, pageW - 28);
@@ -156,8 +172,9 @@ export async function GET(request: NextRequest) {
       doc.setFontSize(9);
       for (const d of clientSnapshot.dossiers.filter((x) => x.flag !== "en_cours").slice(0, 8)) {
         y = ensureY(doc, y, 14);
+        const clientSuffix = isManager && d.clientName ? ` [${d.clientName}]` : "";
         const line = doc.splitTextToSize(
-          `[${d.flagLabel}] ${d.title} — ${d.nextAction} (${d.daysWaiting} j)`,
+          `[${d.flagLabel}] ${d.title}${clientSuffix} — ${d.nextAction} (${d.daysWaiting} j)`,
           pageW - 28,
         );
         doc.text(line, 14, y);
@@ -173,8 +190,8 @@ export async function GET(request: NextRequest) {
 
     doc.setFontSize(10);
     const tableData = [
-      [isClient ? "Missions créées" : "Tâches créées", String(stats.tasks.total)],
-      [isClient ? "Missions terminées" : "Tâches terminées", String(stats.tasks.completed)],
+      [hasSnapshot ? "Missions créées" : "Tâches créées", String(stats.tasks.total)],
+      [hasSnapshot ? "Missions terminées" : "Tâches terminées", String(stats.tasks.completed)],
       ["Taux de complétion", `${tauxCompletion} %`],
       ["Temps moyen (jours)", stats.tempsMoyenJours < 1 ? "< 1" : String(stats.tempsMoyenJours)],
       ["Documents déposés", String(stats.documents.total)],
@@ -197,7 +214,7 @@ export async function GET(request: NextRequest) {
     );
 
     const buf = Buffer.from(doc.output("arraybuffer"));
-    const fname = `${safeExportFilenameBase(period, stats.start, isClient ? "reporting-client" : "rapport")}.pdf`;
+    const fname = `${safeExportFilenameBase(period, stats.start, filenamePrefix)}.pdf`;
     return new NextResponse(buf, {
       headers: {
         "Content-Type": "application/pdf",

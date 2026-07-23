@@ -3,6 +3,8 @@ import { CLIENT_DECISION_LABELS, type ClientDecision } from "@/lib/tasks/client-
 import { missionTypeLabel } from "@/lib/tasks/mission-types";
 import { CLIENT_TASK_STATUS_LABELS, type TaskStatus } from "@/types";
 
+export type ReportingAudience = "client" | "ops";
+
 export type ClientInsightSeverity = "bloquant" | "urgent" | "a_valider" | "info";
 
 export type ClientReportingInsight = {
@@ -24,6 +26,8 @@ export type ClientReportingDossier = {
   desiredDate: string | null;
   projectTitle: string | null;
   assignedToName: string | null;
+  /** Raison sociale / nom du client — utile en vue Manager (multi-clients) */
+  clientName: string | null;
   daysWaiting: number;
   nextAction: string;
   flag: "bloquant" | "urgent" | "a_valider" | "en_cours";
@@ -58,6 +62,7 @@ export type ClientExecutiveDigest = {
 };
 
 export type ClientReportingSnapshot = {
+  audience: ReportingAudience;
   awaitingClientDecision: number;
   awaitingClientInfo: number;
   urgentOpen: number;
@@ -118,14 +123,24 @@ function nextActionFor(
   flag: ClientReportingDossier["flag"],
   t: { status: string; desiredDate: Date | null },
   today: Date,
+  audience: ReportingAudience,
 ): string {
-  if (flag === "bloquant") return "Compléter les informations / pièces manquantes";
-  if (flag === "a_valider") return "Valider, refuser ou émettre des réserves";
-  if (flag === "urgent" && t.desiredDate && t.desiredDate < today) {
-    return "Recadrer la date souhaitée avec BeWork";
+  const isOps = audience === "ops";
+  if (flag === "bloquant") {
+    return isOps ? "Relancer le client — info / pièce manquante" : "Compléter les informations / pièces manquantes";
   }
-  if (flag === "urgent") return "Suivre en priorité avec BeWork";
-  if (t.status === "A_VALIDER") return "BeWork finalise — rester disponible pour validation";
+  if (flag === "a_valider") {
+    return isOps
+      ? "Relancer le client pour validation (accepter / refuser / réserves)"
+      : "Valider, refuser ou émettre des réserves";
+  }
+  if (flag === "urgent" && t.desiredDate && t.desiredDate < today) {
+    return isOps ? "Recadrer la date souhaitée avec le client" : "Recadrer la date souhaitée avec BeWork";
+  }
+  if (flag === "urgent") return isOps ? "Suivre en priorité" : "Suivre en priorité avec BeWork";
+  if (t.status === "A_VALIDER") {
+    return isOps ? "Finaliser le livrable puis l’envoyer au client" : "BeWork finalise — rester disponible pour validation";
+  }
   return "Suivre l’avancement";
 }
 
@@ -136,61 +151,90 @@ const FLAG_LABELS: Record<ClientReportingDossier["flag"], string> = {
   en_cours: "En cours",
 };
 
-function buildExecutiveDigest(input: {
-  awaitingDecision: number;
-  awaitingInfo: number;
-  urgentOpen: number;
-  overdue: number;
-  openMissions: number;
-  activePilotages: number;
-  docsPending: number;
-  topDossiers: { title: string; flagLabel: string; nextAction: string }[];
-}): ClientExecutiveDigest {
+function buildExecutiveDigest(
+  input: {
+    awaitingDecision: number;
+    awaitingInfo: number;
+    urgentOpen: number;
+    overdue: number;
+    openMissions: number;
+    activePilotages: number;
+    docsPending: number;
+    topDossiers: { title: string; flagLabel: string; nextAction: string; clientName?: string | null }[];
+  },
+  audience: ReportingAudience,
+): ClientExecutiveDigest {
+  const isOps = audience === "ops";
   const blockers = input.awaitingInfo + input.awaitingDecision + input.overdue;
-  const headline =
-    blockers === 0
+  const headline = isOps
+    ? blockers === 0
+      ? "Situation claire : aucun dossier bloquant sur l’ensemble des clients."
+      : `${blockers} point${blockers > 1 ? "s" : ""} à traiter sur l’ensemble des dossiers clients.`
+    : blockers === 0
       ? "Situation claire : aucun point bloquant côté validation client."
       : `${blockers} point${blockers > 1 ? "s" : ""} à traiter pour sécuriser vos dossiers.`;
 
-  const bullets: string[] = [
-    `${input.openMissions} mission${input.openMissions > 1 ? "s" : ""} ouverte${input.openMissions > 1 ? "s" : ""} chez BeWork`,
-    `${input.awaitingDecision} livrable${input.awaitingDecision > 1 ? "s" : ""} à valider par votre entreprise`,
-    `${input.awaitingInfo} dossier${input.awaitingInfo > 1 ? "s" : ""} bloqué${input.awaitingInfo > 1 ? "s" : ""} faute d’information client`,
-    `${input.urgentOpen} mission${input.urgentOpen > 1 ? "s" : ""} urgente${input.urgentOpen > 1 ? "s" : ""} · ${input.overdue} date${input.overdue > 1 ? "s" : ""} souhaitée${input.overdue > 1 ? "s" : ""} dépassée${input.overdue > 1 ? "s" : ""}`,
-    `${input.activePilotages} chantier${input.activePilotages > 1 ? "s" : ""} en pilotage · ${input.docsPending} document${input.docsPending > 1 ? "s" : ""} en attente`,
-  ];
+  const bullets: string[] = isOps
+    ? [
+        `${input.openMissions} mission${input.openMissions > 1 ? "s" : ""} ouverte${input.openMissions > 1 ? "s" : ""} tous clients confondus`,
+        `${input.awaitingDecision} livrable${input.awaitingDecision > 1 ? "s" : ""} en attente de validation client`,
+        `${input.awaitingInfo} dossier${input.awaitingInfo > 1 ? "s" : ""} bloqué${input.awaitingInfo > 1 ? "s" : ""} faute d’information client — à relancer`,
+        `${input.urgentOpen} mission${input.urgentOpen > 1 ? "s" : ""} urgente${input.urgentOpen > 1 ? "s" : ""} · ${input.overdue} date${input.overdue > 1 ? "s" : ""} souhaitée${input.overdue > 1 ? "s" : ""} dépassée${input.overdue > 1 ? "s" : ""}`,
+        `${input.activePilotages} chantier${input.activePilotages > 1 ? "s" : ""} en pilotage · ${input.docsPending} document${input.docsPending > 1 ? "s" : ""} en attente`,
+      ]
+    : [
+        `${input.openMissions} mission${input.openMissions > 1 ? "s" : ""} ouverte${input.openMissions > 1 ? "s" : ""} chez BeWork`,
+        `${input.awaitingDecision} livrable${input.awaitingDecision > 1 ? "s" : ""} à valider par votre entreprise`,
+        `${input.awaitingInfo} dossier${input.awaitingInfo > 1 ? "s" : ""} bloqué${input.awaitingInfo > 1 ? "s" : ""} faute d’information client`,
+        `${input.urgentOpen} mission${input.urgentOpen > 1 ? "s" : ""} urgente${input.urgentOpen > 1 ? "s" : ""} · ${input.overdue} date${input.overdue > 1 ? "s" : ""} souhaitée${input.overdue > 1 ? "s" : ""} dépassée${input.overdue > 1 ? "s" : ""}`,
+        `${input.activePilotages} chantier${input.activePilotages > 1 ? "s" : ""} en pilotage · ${input.docsPending} document${input.docsPending > 1 ? "s" : ""} en attente`,
+      ];
 
   if (input.topDossiers.length > 0) {
     bullets.push(
-      ...input.topDossiers.slice(0, 3).map((d) => `${d.flagLabel} — ${d.title} → ${d.nextAction}`),
+      ...input.topDossiers
+        .slice(0, 3)
+        .map(
+          (d) =>
+            `${d.flagLabel} — ${d.title}${isOps && d.clientName ? ` (${d.clientName})` : ""} → ${d.nextAction}`,
+        ),
     );
   }
 
   const shareText = [
-    "Synthèse BeWork — reporting client",
+    isOps ? "Synthèse BeWork — pilotage activité" : "Synthèse BeWork — reporting client",
     headline,
     "",
     ...bullets.map((b) => `• ${b}`),
     "",
-    "BeWork prépare et suit. Votre entreprise valide prix, choix techniques et engagements.",
+    isOps
+      ? "Vue consolidée tous clients — chaque dossier reste validé par le client concerné."
+      : "BeWork prépare et suit. Votre entreprise valide prix, choix techniques et engagements.",
   ].join("\n");
 
   return { headline, bullets, shareText };
 }
 
 /**
- * Snapshot reporting client — version enrichie (pilotage décisionnel).
+ * Snapshot reporting — version enrichie (pilotage décisionnel).
+ * `audience: "client"` → dossiers d'un client (clientId requis).
+ * `audience: "ops"` → vue consolidée Manager/Agence, tous clients confondus.
  * Règles métier uniquement (pas d’hypothèse IA).
  */
-export async function getClientReportingSnapshot(clientId: string): Promise<ClientReportingSnapshot> {
+export async function getClientReportingSnapshot(
+  clientId: string,
+  audience: ReportingAudience = "client",
+): Promise<ClientReportingSnapshot> {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const now = new Date();
+  const isOps = audience === "ops";
+  const scopeWhere = isOps ? {} : { clientId };
 
   const [openTasks, pendingDocs, unreadAlerts, decidedTasks, pilotagesRaw] = await Promise.all([
     prisma.task.findMany({
       where: {
-        clientId,
+        ...scopeWhere,
         status: { in: [...OPEN_STATUSES] },
       },
       select: {
@@ -206,25 +250,26 @@ export async function getClientReportingSnapshot(clientId: string): Promise<Clie
         createdAt: true,
         project: { select: { title: true } },
         assignedTo: { select: { name: true } },
+        client: isOps ? { select: { name: true, company: true } } : undefined,
       },
       orderBy: { updatedAt: "desc" },
-      take: 200,
+      take: isOps ? 500 : 200,
     }),
     prisma.document.count({
-      where: { clientId, status: "EN_ATTENTE" },
+      where: { ...scopeWhere, status: "EN_ATTENTE" },
     }),
     prisma.alert.findMany({
       where: {
-        clientId,
+        ...scopeWhere,
         read: false,
         level: { in: ["URGENT", "WARNING"] },
       },
       select: { id: true, level: true, title: true, actionUrl: true },
-      take: 50,
+      take: isOps ? 200 : 50,
     }),
     prisma.task.findMany({
       where: {
-        clientId,
+        ...scopeWhere,
         clientDecision: { in: ["ACCEPTE", "REFUSE", "RESERVES"] },
         clientDecisionAt: { not: null },
       },
@@ -234,13 +279,14 @@ export async function getClientReportingSnapshot(clientId: string): Promise<Clie
         clientDecision: true,
         clientDecisionAt: true,
         clientDecisionNote: true,
+        client: isOps ? { select: { name: true, company: true } } : undefined,
       },
       orderBy: { clientDecisionAt: "desc" },
-      take: 10,
+      take: isOps ? 20 : 10,
     }),
     prisma.worksitePilotage.findMany({
       where: {
-        clientId,
+        ...scopeWhere,
         archivedAt: null,
         status: { not: "TERMINE" },
       },
@@ -253,7 +299,7 @@ export async function getClientReportingSnapshot(clientId: string): Promise<Clie
         project: { select: { title: true } },
       },
       orderBy: { updatedAt: "desc" },
-      take: 10,
+      take: isOps ? 30 : 10,
     }),
   ]);
 
@@ -270,8 +316,9 @@ export async function getClientReportingSnapshot(clientId: string): Promise<Clie
       id: "awaiting-decision",
       severity: "a_valider",
       title: "Livrables à valider",
-      detail:
-        awaitingDecision.length === 1
+      detail: isOps
+        ? `${awaitingDecision.length} dossier${awaitingDecision.length > 1 ? "s" : ""} transmis en attente de validation client — à relancer si besoin.`
+        : awaitingDecision.length === 1
           ? `« ${awaitingDecision[0]!.title} » attend votre décision (accepter, refuser ou réserver).`
           : `${awaitingDecision.length} dossiers transmis par BeWork attendent votre validation.`,
       href: "/dashboard/taches",
@@ -284,8 +331,9 @@ export async function getClientReportingSnapshot(clientId: string): Promise<Clie
       id: "awaiting-info",
       severity: "bloquant",
       title: "Informations manquantes",
-      detail:
-        awaitingInfo.length === 1
+      detail: isOps
+        ? `${awaitingInfo.length} mission${awaitingInfo.length > 1 ? "s" : ""} en attente d’information client — risque de retard, à relancer.`
+        : awaitingInfo.length === 1
           ? `BeWork est bloqué sur « ${awaitingInfo[0]!.title} » — une info ou une pièce manque de votre côté.`
           : `${awaitingInfo.length} missions en attente d’information client — risque de retard si non complété.`,
       href: "/dashboard/taches?statut=EN_ATTENTE_INFO",
@@ -359,7 +407,9 @@ export async function getClientReportingSnapshot(clientId: string): Promise<Clie
       id: "all-clear",
       severity: "info",
       title: "Aucun point bloquant",
-      detail: "Rien d’urgent à valider de votre côté. BeWork suit vos dossiers en cours.",
+      detail: isOps
+        ? "Rien d’urgent tous clients confondus."
+        : "Rien d’urgent à valider de votre côté. BeWork suit vos dossiers en cours.",
       href: "/dashboard/taches",
       count: 0,
     });
@@ -395,8 +445,9 @@ export async function getClientReportingSnapshot(clientId: string): Promise<Clie
         desiredDate: t.desiredDate ? t.desiredDate.toISOString().slice(0, 10) : null,
         projectTitle: t.project?.title ?? null,
         assignedToName: t.assignedTo?.name ?? null,
+        clientName: isOps ? t.client?.company ?? t.client?.name ?? null : null,
         daysWaiting: daysBetween(waitFrom, now),
-        nextAction: nextActionFor(flag, t, today),
+        nextAction: nextActionFor(flag, t, today, audience),
         flag,
         flagLabel: FLAG_LABELS[flag],
         href: `/dashboard/taches/${t.id}`,
@@ -407,9 +458,10 @@ export async function getClientReportingSnapshot(clientId: string): Promise<Clie
 
   const recentDecisions: ClientReportingDecision[] = decidedTasks.map((t) => {
     const decision = (t.clientDecision ?? "") as ClientDecision;
+    const clientSuffix = isOps ? (t.client?.company ?? t.client?.name ?? null) : null;
     return {
       id: t.id,
-      title: t.title,
+      title: clientSuffix ? `${t.title} · ${clientSuffix}` : t.title,
       decision: t.clientDecision ?? "",
       decisionLabel: CLIENT_DECISION_LABELS[decision] ?? t.clientDecision ?? "Décision",
       decidedAt: t.clientDecisionAt ? t.clientDecisionAt.toISOString() : null,
@@ -428,21 +480,30 @@ export async function getClientReportingSnapshot(clientId: string): Promise<Clie
     href: `/dashboard/pilotage-travaux/${p.id}`,
   }));
 
-  const executiveDigest = buildExecutiveDigest({
-    awaitingDecision: awaitingDecision.length,
-    awaitingInfo: awaitingInfo.length,
-    urgentOpen: urgentOpen.length,
-    overdue: overdue.length,
-    openMissions: openTasks.length,
-    activePilotages: pilotagesRaw.length,
-    docsPending: pendingDocs,
-    topDossiers: dossiers
-      .filter((d) => d.flag !== "en_cours")
-      .slice(0, 3)
-      .map((d) => ({ title: d.title, flagLabel: d.flagLabel, nextAction: d.nextAction })),
-  });
+  const executiveDigest = buildExecutiveDigest(
+    {
+      awaitingDecision: awaitingDecision.length,
+      awaitingInfo: awaitingInfo.length,
+      urgentOpen: urgentOpen.length,
+      overdue: overdue.length,
+      openMissions: openTasks.length,
+      activePilotages: pilotagesRaw.length,
+      docsPending: pendingDocs,
+      topDossiers: dossiers
+        .filter((d) => d.flag !== "en_cours")
+        .slice(0, 3)
+        .map((d) => ({
+          title: d.title,
+          flagLabel: d.flagLabel,
+          nextAction: d.nextAction,
+          clientName: d.clientName,
+        })),
+    },
+    audience,
+  );
 
   return {
+    audience,
     awaitingClientDecision: awaitingDecision.length,
     awaitingClientInfo: awaitingInfo.length,
     urgentOpen: urgentOpen.length,

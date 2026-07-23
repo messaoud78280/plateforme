@@ -50,6 +50,7 @@ export function ReportsView({ period }: { period: string }) {
   }
 
   const isClient = stats.role === "CLIENT";
+  const hasSnapshot = Boolean(stats.clientSnapshot);
   const pieData = [
     { name: "En attente", value: stats.tasks.byStatus.EN_ATTENTE ?? 0, color: "#f59e0b" },
     {
@@ -68,10 +69,10 @@ export function ReportsView({ period }: { period: string }) {
 
   return (
     <div className="space-y-6">
-      {isClient && stats.clientSnapshot ? <ClientReportingHub snapshot={stats.clientSnapshot} /> : null}
+      {stats.clientSnapshot ? <ClientReportingHub snapshot={stats.clientSnapshot} /> : null}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <KpiTile label={isClient ? "Missions (période)" : "Tâches (période)"} value={stats.tasks.total} />
+        <KpiTile label={hasSnapshot ? "Missions (période)" : "Tâches (période)"} value={stats.tasks.total} />
         <KpiTile label="Terminées" value={stats.tasks.completed} tone="ok" />
         <KpiTile label="Complétion" value={`${tauxCompletion} %`} />
         <KpiTile
@@ -83,7 +84,7 @@ export function ReportsView({ period }: { period: string }) {
 
       <Card hover={false}>
         <CardHeader
-          title={isClient ? "Évolution de vos missions" : "Évolution des tâches"}
+          title={isClient ? "Évolution de vos missions" : hasSnapshot ? "Évolution des missions" : "Évolution des tâches"}
           description="Créées vs terminées sur la période"
         />
         <div className="mt-2 h-64">
@@ -143,13 +144,13 @@ export function ReportsView({ period }: { period: string }) {
             <tbody>
               <tr className="border-b border-bework-navy/[0.06]">
                 <td className="py-2 text-bework-muted">
-                  {isClient ? "Missions créées" : "Tâches créées"} sur la période
+                  {hasSnapshot ? "Missions créées" : "Tâches créées"} sur la période
                 </td>
                 <td className="py-2 font-medium text-bework-ink">{stats.tasks.total}</td>
               </tr>
               <tr className="border-b border-bework-navy/[0.06]">
                 <td className="py-2 text-bework-muted">
-                  {isClient ? "Missions terminées" : "Tâches terminées"}
+                  {hasSnapshot ? "Missions terminées" : "Tâches terminées"}
                 </td>
                 <td className="py-2 font-medium text-bework-ink">{stats.tasks.completed}</td>
               </tr>

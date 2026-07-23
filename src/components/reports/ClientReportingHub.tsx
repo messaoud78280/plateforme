@@ -50,6 +50,7 @@ const FILTERS: { key: FilterKey; label: string }[] = [
 ];
 
 export function ClientReportingHub({ snapshot }: { snapshot: ClientReportingSnapshot }) {
+  const isOps = snapshot.audience === "ops";
   const [filter, setFilter] = useState<FilterKey>("tous");
   const [copied, setCopied] = useState(false);
   const [, startTransition] = useTransition();
@@ -72,8 +73,12 @@ export function ClientReportingHub({ snapshot }: { snapshot: ClientReportingSnap
     <div className="space-y-6">
       {/* KPIs décisionnels */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <KpiMini label="Missions ouvertes" value={snapshot.openMissions} />
-        <KpiMini label="À valider par vous" value={snapshot.awaitingClientDecision} tone="blue" />
+        <KpiMini label={isOps ? "Missions ouvertes (tous clients)" : "Missions ouvertes"} value={snapshot.openMissions} />
+        <KpiMini
+          label={isOps ? "En attente de validation client" : "À valider par vous"}
+          value={snapshot.awaitingClientDecision}
+          tone="blue"
+        />
         <KpiMini label="Info manquante" value={snapshot.awaitingClientInfo} tone="red" />
         <KpiMini label="Pilotages actifs" value={snapshot.activePilotages} tone="slate" />
       </div>
@@ -81,8 +86,12 @@ export function ClientReportingHub({ snapshot }: { snapshot: ClientReportingSnap
       {/* Synthèse dirigeant */}
       <Card hover={false}>
         <CardHeader
-          title="Synthèse dirigeant"
-          description="Vue en 10 secondes — à partager en réunion ou par message."
+          title={isOps ? "Synthèse activité" : "Synthèse dirigeant"}
+          description={
+            isOps
+              ? "Vue consolidée en 10 secondes — tous clients confondus."
+              : "Vue en 10 secondes — à partager en réunion ou par message."
+          }
         />
         <p className="mt-3 text-base font-semibold text-slate-900">{snapshot.executiveDigest.headline}</p>
         <ul className="mt-3 space-y-1.5">
@@ -114,7 +123,11 @@ export function ClientReportingHub({ snapshot }: { snapshot: ClientReportingSnap
       <Card hover={false}>
         <CardHeader
           title="Points à traiter"
-          description="Faits constatés sur vos dossiers — vous validez avant engagement."
+          description={
+            isOps
+              ? "Faits constatés sur l’ensemble des dossiers clients — à relancer ou prioriser."
+              : "Faits constatés sur vos dossiers — vous validez avant engagement."
+          }
         />
         <ul className="mt-3 space-y-3">
           {snapshot.insights.map((insight) => {
@@ -190,6 +203,7 @@ export function ClientReportingHub({ snapshot }: { snapshot: ClientReportingSnap
               <thead>
                 <tr className="border-b border-[color:var(--cc-chrome-border)] text-bework-muted">
                   <th className="pb-2 font-medium">Dossier</th>
+                  {isOps ? <th className="pb-2 font-medium">Client</th> : null}
                   <th className="pb-2 font-medium">Signal</th>
                   <th className="pb-2 font-medium">Attente</th>
                   <th className="pb-2 font-medium">Prochaine action</th>
@@ -198,7 +212,7 @@ export function ClientReportingHub({ snapshot }: { snapshot: ClientReportingSnap
               <tbody>
                 {filteredDossiers.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="py-6 text-sm text-slate-500">
+                    <td colSpan={isOps ? 5 : 4} className="py-6 text-sm text-slate-500">
                       Aucun dossier sur ce filtre.
                     </td>
                   </tr>
@@ -219,6 +233,9 @@ export function ClientReportingHub({ snapshot }: { snapshot: ClientReportingSnap
                         </p>
                         <p className="mt-0.5 text-xs text-slate-500">{dossier.statusLabel}</p>
                       </td>
+                      {isOps ? (
+                        <td className="py-3 pr-3 text-sm text-slate-700">{dossier.clientName ?? "—"}</td>
+                      ) : null}
                       <td className="py-3 pr-3">
                         <span
                           className={`inline-flex rounded-md px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide ring-1 ring-inset ${FLAG_STYLES[dossier.flag]}`}
@@ -245,7 +262,11 @@ export function ClientReportingHub({ snapshot }: { snapshot: ClientReportingSnap
           <Card hover={false}>
             <CardHeader
               title="Décisions récentes"
-              description="Accepté, réserves ou refus — traçabilité de vos validations."
+              description={
+                isOps
+                  ? "Accepté, réserves ou refus — traçabilité tous clients confondus."
+                  : "Accepté, réserves ou refus — traçabilité de vos validations."
+              }
             />
             <ul className="mt-3 space-y-3">
               {snapshot.recentDecisions.length === 0 ? (

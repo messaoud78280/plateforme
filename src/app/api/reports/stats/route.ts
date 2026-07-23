@@ -20,11 +20,16 @@ export async function GET(request: NextRequest) {
   const role = session.user.role;
   const isAgence = role === "AGENCE" || role === "MANAGER";
   const isClient = role === "CLIENT";
+  const isManager = role === "MANAGER";
 
   try {
     const [stats, clientSnapshot] = await Promise.all([
       getReportStats(session.user.id, isAgence, period),
-      isClient ? getClientReportingSnapshot(session.user.id) : Promise.resolve(null),
+      isClient
+        ? getClientReportingSnapshot(session.user.id, "client")
+        : isManager
+          ? getClientReportingSnapshot(session.user.id, "ops")
+          : Promise.resolve(null),
     ]);
 
     return NextResponse.json({

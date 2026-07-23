@@ -325,6 +325,11 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     { href: "/services/ppsps", label: "Service PPSPS BeWork" },
     { href: "/ressources/guide-cdt-bework", label: "Guide conducteur de travaux" },
   ],
+  "/ressources/tuto-skill-diuo-bework": [
+    { href: "/ressources/tuto-skill-doe-bework", label: "Skill DOE" },
+    { href: "/ressources/tuto-skill-ppsps-bework", label: "Skill PPSPS" },
+    { href: "/ressources/doe-btp", label: "Guide DOE BTP" },
+  ],
   "/ressources/tuto-skill-analyse-dce-bework": [
     { href: "/ressources/analyse-dce-btp", label: "Guide analyse DCE" },
     { href: "/ressources/memoire-technique-btp", label: "Mémoire technique" },

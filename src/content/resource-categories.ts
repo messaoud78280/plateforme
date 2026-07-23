@@ -43,10 +43,11 @@ export const RESOURCE_GUIDE_CATEGORIES: readonly ResourceCategory[] = [
   {
     id: "securite",
     title: "Sécurité chantier",
-    description: "PPSPS, DUERP et documents associés.",
+    description: "PPSPS, DUERP, DIUO et documents associés.",
     links: [
       { href: "/ressources/ppsps-btp", label: "PPSPS" },
       { href: "/ressources/tuto-skill-duerp-bework", label: "Tutoriel DUERP" },
+      { href: "/ressources/tuto-skill-diuo-bework", label: "Tutoriel DIUO (coordonnateur SPS)" },
       { href: "/services/ppsps", label: "Service PPSPS" },
     ],
   },

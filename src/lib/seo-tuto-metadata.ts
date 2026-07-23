@@ -96,6 +96,13 @@ export const TUTO_PAGE_SEO: Record<string, TutoPageSeo> = {
     ),
     keywords: ["skill DUERP", "DUERP BTP", "document unique"],
   },
+  "/ressources/tuto-skill-diuo-bework": {
+    title: "Skill DIUO BTP : tutoriel liasse coordonnateur SPS | BeWork",
+    description: tutoDesc(
+      "Skill DIUO : plans de récolement, sécurité permanente, accès et notices. PDF gratuit pour préparer ta liasse au coordonnateur SPS",
+    ),
+    keywords: ["skill DIUO", "DIUO BTP", "coordonnateur SPS", "dossier intervention ultérieure ouvrage"],
+  },
   "/ressources/tuto-skill-constat-retard-bework": {
     title: "Skill constat de retard chantier : tutoriel | BeWork",
     description: tutoDesc(

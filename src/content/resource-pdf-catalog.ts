@@ -75,6 +75,7 @@ export const RESOURCE_PDF_TUTOS: readonly ResourcePdfCatalogEntry[] = [
   { pdfFile: "tuto-skill-analyse-express-cctp-bework.pdf", kind: "tuto", href: "/ressources/tuto-skill-analyse-express-cctp-bework" },
   { pdfFile: "tuto-skill-metre-bework.pdf", kind: "tuto", href: "/ressources/tuto-skill-metre-bework" },
   { pdfFile: "tuto-skill-duerp-bework.pdf", kind: "tuto", href: "/ressources/tuto-skill-duerp-bework" },
+  { pdfFile: "tuto-skill-diuo-bework.pdf", kind: "tuto", href: "/ressources/tuto-skill-diuo-bework" },
   { pdfFile: "tuto-skill-memoire-technique-bework.pdf", kind: "tuto", href: "/ressources/tuto-skill-memoire-technique-bework" },
 ] as const;
 

@@ -125,6 +125,13 @@ export const RESOURCE_TUTO_ITEMS: readonly ResourceTutoItem[] = [
     icon: "document",
   },
   {
+    title: "Tuto Crée ton skill — Pièces DIUO pour le SPS",
+    desc: "Liasse DIUO pour le coordonnateur SPS : plans de récolement, sécurité permanente, accès et notices — PDF intégré et prompts prêts à coller.",
+    href: "/ressources/tuto-skill-diuo-bework",
+    status: "Tuto PDF",
+    icon: "document",
+  },
+  {
     title: "Tuto Crée ton skill — DOE",
     desc: "9 rubriques CCAG, sommaire .docx, checklist manquants — PDF intégré et prompts prêts à coller.",
     href: "/ressources/tuto-skill-doe-bework",

@@ -19,6 +19,14 @@ export const RESOURCE_GUIDE_PAGE_ITEMS: readonly ResourceGuidePageItem[] = [
     publishedTime: "2026-05-29T10:00:00+02:00",
   },
   {
+    href: "/ressources/guide-rh-btp-ia-bework",
+    title: "Le Guide RH du BTP augmenté par l’IA — 18 cas d’usage Claude",
+    excerpt:
+      "PDF 36 pages : de la fiche de poste au bilan social — recrutement, onboarding, plan de formation Constructys, droit social BTP et pilotage RH avec Claude, prompts prêts à coller.",
+    publishedTime: "2026-07-24T15:00:00+02:00",
+    badge: "Guide PDF",
+  },
+  {
     href: "/ressources/guide-dirigeant-btp-bework",
     title: "Le Guide du Dirigeant BTP — 6 leviers de pilotage PME",
     excerpt:

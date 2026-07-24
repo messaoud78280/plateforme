@@ -324,7 +324,7 @@ export default function RessourcesPage() {
           <ResourcesSectionHeader
             id="titre-themes"
             title="Parcourir par thème"
-            description="Raccourcis vers gestion de chantier, appels d’offres, sécurité, devis, organisation conducteur de travaux et pilotage dirigeant."
+            description="Raccourcis vers gestion de chantier, appels d’offres, sécurité, devis, organisation conducteur de travaux, pilotage dirigeant et RH BTP."
           />
           <div className="mx-auto mt-10 grid max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {RESOURCE_GUIDE_CATEGORIES.map((cat) => (

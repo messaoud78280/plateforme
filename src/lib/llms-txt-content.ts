@@ -28,6 +28,8 @@ export function buildLlmsTxt(): string {
   const guideTitles: Record<string, string> = {
     "/ressources/guide-dirigeant-btp-bework":
       "Le Guide du Dirigeant BTP — 6 leviers de pilotage PME (PDF 20 pages)",
+    "/ressources/guide-rh-btp-ia-bework":
+      "Le Guide RH du BTP augmenté par l'IA — 18 cas d'usage Claude (PDF 36 pages)",
     "/ressources/guide-debloquer-claude-bework":
       "Débloquer le vrai potentiel de Claude — Projets, MCP, Skills & Cowork (PDF 9 pages)",
     "/ressources/guide-claude-btp-bework":

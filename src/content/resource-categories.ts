@@ -84,4 +84,14 @@ export const RESOURCE_GUIDE_CATEGORIES: readonly ResourceCategory[] = [
       { href: "/assistant-administratif-externalise", label: "Externalisation administrative" },
     ],
   },
+  {
+    id: "rh-btp",
+    title: "RH & recrutement BTP",
+    description: "Fiches de poste, tri des CV, onboarding, formation Constructys et droit social.",
+    links: [
+      { href: "/ressources/guide-rh-btp-ia-bework", label: "Guide RH du BTP × IA (PDF 36 pages)" },
+      { href: "/ressources/guide-claude-btp-bework", label: "Claude IA — 18 cas d’usage métier" },
+      { href: "/ressources/guide-dirigeant-btp-bework", label: "Guide dirigeant — recrutement & marque employeur" },
+    ],
+  },
 ] as const;

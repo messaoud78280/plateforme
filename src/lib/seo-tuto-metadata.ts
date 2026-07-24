@@ -187,6 +187,13 @@ export const TUTO_PAGE_SEO: Record<string, TutoPageSeo> = {
     ),
     keywords: ["dirigeant BTP", "pilotage PME bâtiment", "Go No Go appel d’offres", "rentabilité chantier", "réclamation BTP"],
   },
+  "/ressources/guide-rh-btp-ia-bework": {
+    title: "Guide RH du BTP × IA : 18 cas d’usage Claude | BeWork",
+    description: tutoDesc(
+      "Guide PDF 36 pages : recrutement, onboarding, formation Constructys, droit social BTP et pilotage RH avec Claude — 18 cas d’usage et prompts prêts à coller",
+    ),
+    keywords: ["RH BTP", "recrutement BTP", "Claude RH", "droit social BTP", "onboarding chantier", "GEPP BTP"],
+  },
   "/ressources/guide-debloquer-claude-bework": {
     title: "Débloquer le potentiel de Claude BTP : Projets, MCP, Skills | BeWork",
     description: tutoDesc(

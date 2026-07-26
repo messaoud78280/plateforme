@@ -68,6 +68,7 @@ export const RESOURCE_GUIDE_CATEGORIES: readonly ResourceCategory[] = [
     links: [
       { href: "/ressources/guide-cdt-bework", label: "Guide conducteur de travaux (PDF 52 pages)" },
       { href: "/ressources/guide-conducteur-de-travaux-ia-bework", label: "Article guide conducteur & IA" },
+      { href: "/ressources/guide-chef-de-chantier-bework", label: "Guide chef de chantier (PDF 17 pages)" },
       { href: "/suivi-fournisseurs-chantier", label: "Fournisseurs & achats" },
       { href: "/assistants-administratifs-taches", label: "Missions BeWork" },
       { href: "/services/assistant-conducteur-de-travaux", label: "Assistant conducteur de travaux" },

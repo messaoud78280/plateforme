@@ -26,6 +26,11 @@ export const RESOURCE_PDF_GUIDES: readonly ResourcePdfCatalogEntry[] = [
     href: "/ressources/guide-rh-btp-ia-bework",
   },
   {
+    pdfFile: "guide-chef-de-chantier-bework.pdf",
+    kind: "guide",
+    href: "/ressources/guide-chef-de-chantier-bework",
+  },
+  {
     pdfFile: "guide-debloquer-claude-bework.pdf",
     kind: "guide",
     href: "/ressources/guide-debloquer-claude-bework",

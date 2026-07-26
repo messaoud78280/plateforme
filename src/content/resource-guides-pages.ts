@@ -19,6 +19,14 @@ export const RESOURCE_GUIDE_PAGE_ITEMS: readonly ResourceGuidePageItem[] = [
     publishedTime: "2026-05-29T10:00:00+02:00",
   },
   {
+    href: "/ressources/guide-chef-de-chantier-bework",
+    title: "Le Guide du Chef de Chantier — 6 outils Claude au quotidien",
+    excerpt:
+      "PDF 17 pages : accueil sécurité, mode opératoire, quart d’heure sécurité, rapport journalier, appro et auto-contrôle — pensé pour l’app Claude sur ton téléphone, dictée et photos.",
+    publishedTime: "2026-07-26T12:00:00+02:00",
+    badge: "Guide PDF",
+  },
+  {
     href: "/ressources/guide-rh-btp-ia-bework",
     title: "Le Guide RH du BTP augmenté par l’IA — 18 cas d’usage Claude",
     excerpt:

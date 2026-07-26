@@ -194,6 +194,13 @@ export const TUTO_PAGE_SEO: Record<string, TutoPageSeo> = {
     ),
     keywords: ["RH BTP", "recrutement BTP", "Claude RH", "droit social BTP", "onboarding chantier", "GEPP BTP"],
   },
+  "/ressources/guide-chef-de-chantier-bework": {
+    title: "Guide Chef de Chantier BTP : 6 outils Claude mobile | BeWork",
+    description: tutoDesc(
+      "Guide PDF 17 pages : accueil sécurité, mode opératoire, quart d’heure sécurité, rapport journalier, appro et auto-contrôle — Claude depuis le téléphone, dictée et photos",
+    ),
+    keywords: ["chef de chantier", "Claude mobile BTP", "accueil sécurité chantier", "rapport journalier chantier", "quart d’heure sécurité"],
+  },
   "/ressources/guide-debloquer-claude-bework": {
     title: "Débloquer le potentiel de Claude BTP : Projets, MCP, Skills | BeWork",
     description: tutoDesc(

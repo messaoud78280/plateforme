@@ -148,7 +148,7 @@ export function ProspectContactForm({
 
         <div>
           <label htmlFor="mainNeed" className={LABEL_CLASS}>
-            Votre besoin principal <span className="text-red-600">*</span>
+            Votre situation actuelle <span className="text-red-600">*</span>
           </label>
           <select id="mainNeed" name="mainNeed" required className={INPUT_CLASS}>
             <option value="">Sélectionnez…</option>

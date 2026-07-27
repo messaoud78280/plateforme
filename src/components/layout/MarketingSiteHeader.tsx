@@ -248,7 +248,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             </Link>
             <CalendlyBookingLink trackLocation="header-desktop" className={HEADER_BTN_PRIMARY}>
               <IconCalendar className="h-4 w-4 shrink-0 text-white" aria-hidden />
-              <span className="whitespace-nowrap">Nous contacter</span>
+              <span className="whitespace-nowrap">Parler de mon besoin</span>
             </CalendlyBookingLink>
           </div>
           <nav
@@ -328,7 +328,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             </div>
 
             <Link href="/#process-bework" className={`${NAV_LINK} whitespace-nowrap`}>
-              Process BeWork
+              Comment ça marche
             </Link>
             <Link href="/promoteurs-immobiliers" className={`${NAV_LINK} whitespace-nowrap`}>
               Promoteurs
@@ -339,6 +339,9 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_TARIFS, "header-nav")}
             >
               Tarifs
+            </Link>
+            <Link href="/notre-facon-de-travailler" className={`${NAV_LINK} whitespace-nowrap`}>
+              À propos
             </Link>
 
             <div
@@ -551,7 +554,14 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 className="flex min-h-[3rem] items-center rounded-xl border border-slate-200/90 bg-white px-4 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50 sm:px-5 sm:text-base"
                 onClick={() => setMobileOpen(false)}
               >
-                Process BeWork
+                Comment ça marche
+              </Link>
+              <Link
+                href="/notre-facon-de-travailler"
+                className="flex min-h-[3rem] items-center rounded-xl border border-slate-200/90 bg-white px-4 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50 sm:px-5 sm:text-base"
+                onClick={() => setMobileOpen(false)}
+              >
+                À propos
               </Link>
             </nav>
 
@@ -578,7 +588,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 onClick={() => setMobileOpen(false)}
               >
                 <IconCalendar className="h-[18px] w-[18px]" aria-hidden />
-                Nous contacter
+                Parler de mon besoin
               </CalendlyBookingLink>
             </div>
           </div>

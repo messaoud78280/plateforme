@@ -1,134 +1,78 @@
-import { BeWorkValuePillars } from "@/components/marketing/BeWorkValuePillars";
 import Image from "next/image";
-import Link from "next/link";
-import { useId } from "react";
+import type { JSX } from "react";
 
-/** Section crédibilité BTP — sous les tarifs, même univers visuel métallique / premium */
+const PILLARS: { title: string; body: string; Icon: () => JSX.Element }[] = [
+  {
+    title: "Expérience terrain",
+    body: "Plus de 20 ans d’expérience terrain dans le bâtiment et la tenue de marchés.",
+    Icon: IconHardHat,
+  },
+  {
+    title: "Spécialisation BTP",
+    body: "Assistants spécialisés, formés aux marchés publics et privés — pas du secrétariat généraliste.",
+    Icon: IconTarget,
+  },
+  {
+    title: "Missions suivies",
+    body: "Chaque mission reste suivie et validée par un Beworker, du cadrage à la livraison.",
+    Icon: IconCheckShield,
+  },
+  {
+    title: "IA sous contrôle humain",
+    body: "Les outils d’IA accélèrent la préparation ; un Beworker garde le fil et la validation.",
+    Icon: IconChip,
+  },
+];
+
+/** Section « preuve & crédibilité » — 4 piliers vérifiables, sans statistique inventée. */
 export function HomeCredibilitySection() {
   return (
     <section
       id="preuve-credibilite"
-      className="relative scroll-mt-28 overflow-hidden px-6 pb-14 pt-14 md:scroll-mt-32 md:pb-16 md:pt-18 lg:pt-22"
-      style={{ scrollMarginTop: "7.5rem" }}
+      className="relative scroll-mt-28 bg-transparent px-6 py-14 md:py-20 lg:py-24"
       aria-labelledby="credibility-heading"
     >
-      {/* Courbe grise — fond uniquement, derrière le contenu */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-y-0 right-0 z-0 w-[min(38%,18rem)] rounded-l-[88px] bg-gradient-to-l from-slate-200/30 via-slate-100/15 to-transparent opacity-[0.42] md:w-[min(36%,22rem)] md:rounded-l-[110px] md:opacity-35"
-      />
-
-      <div className="relative z-[1] mx-auto w-full max-w-6xl">
-        {/* Header — max 720px, aligné gauche */}
-        <header className="mb-6 text-left md:mb-7">
-          <p className="font-heading text-xs font-bold uppercase tracking-[0.22em] text-[#1d4ed8] md:text-sm">
-            Preuve &amp; crédibilité
-          </p>
+      <div className="container-site">
+        <header className="mx-auto max-w-2xl text-center">
           <h2
             id="credibility-heading"
-            className="mt-2.5 max-w-[720px] text-balance font-sans text-[1.625rem] font-bold leading-[1.2] tracking-tight text-[#0f172a] md:text-3xl lg:text-[2rem]"
+            className="font-display text-balance text-[1.75rem] font-extrabold leading-[1.12] tracking-[-0.02em] text-[#0f172a] md:text-[2.25rem]"
           >
-            Une méthode née du terrain BTP<span className="text-[#1d4ed8]">.</span>
+            Une méthode construite à partir du terrain BTP
           </h2>
-          <p className="mt-3 max-w-[720px] text-base leading-relaxed text-slate-800 md:text-[1.05rem]">
-            BeWork n&apos;est pas un outil IA générique ni un secrétariat classique. L&apos;offre s&apos;appuie sur plus de 20 ans
-            d&apos;expérience terrain dans le bâtiment, la tenue de marchés et l&apos;administratif chantier — assistants augmentés par
-            l&apos;IA, supervisés depuis la France.
+          <p className="mt-4 text-base leading-relaxed text-slate-700 md:text-lg">
+            BeWork n&apos;est pas un outil IA générique ni un secrétariat classique : assistants spécialisés,
+            supervisés depuis la France.
           </p>
         </header>
 
-        {/* 6 atouts différenciants */}
-        <BeWorkValuePillars variant="grid" className="mb-7 md:mb-8" />
-
-        {/* Fondatrice + Notre rôle */}
-        <div className="mb-7 grid gap-4 md:mb-8 md:grid-cols-2 md:items-stretch md:gap-5">
-          <article className="overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-[0_4px_24px_-8px_rgba(15,23,42,0.08)]">
-            <div className="flex h-full flex-col sm:flex-row">
-              <div className="relative h-36 w-full shrink-0 sm:h-auto sm:min-h-[148px] sm:w-[44%] sm:max-w-[200px] md:min-h-[136px]">
-                <Image
-                  src="/laure-olivie-chantier.png"
-                  alt="Laure Olivie, fondatrice de BeWork, sur chantier"
-                  fill
-                  className="object-cover object-[center_20%]"
-                  sizes="(max-width:640px) 100vw, 200px"
-                  priority={false}
-                />
-              </div>
-              <div className="flex min-w-0 flex-1 flex-col justify-center px-5 py-3 sm:py-4 md:px-6">
-                <p className="font-sans text-[15px] font-semibold leading-snug text-[#0f172a] md:text-base">
-                  Laure Olivie — fondatrice BeWork
-                </p>
-                <p className="mt-1.5 text-sm text-slate-700 md:text-base">
-                  Dirigeante BTP, 20 ans terrain en Île-de-France.
-                </p>
-                <div className="my-2.5 border-t border-slate-200/90" aria-hidden />
-                <p className="text-sm leading-relaxed text-slate-700 md:text-base">
-                  Une approche issue du réel, pas de la théorie.
-                </p>
-              </div>
-            </div>
-          </article>
-
-          <article className="flex items-center gap-4 rounded-xl border border-slate-200/90 bg-[#f4f7fa] p-4 shadow-[0_4px_24px_-8px_rgba(15,23,42,0.06)] md:max-w-xl md:justify-self-end md:gap-5 md:p-5">
-            <span
-              className="flex h-[5.75rem] w-[5.75rem] shrink-0 items-center justify-center rounded-full bg-[#e1e9f5] text-[#1d4ed8] shadow-sm shadow-blue-900/[0.04] md:h-[6.5rem] md:w-[6.5rem]"
-              aria-hidden
-            >
-              <IconTarget className="h-[2.75rem] w-[2.75rem] md:h-12 md:w-12" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <h3 className="font-sans text-base font-bold text-[#0f172a] md:text-[1.05rem]">Notre rôle</h3>
-              <div className="mt-2 h-1 w-14 rounded-sm bg-[#1d4ed8]" aria-hidden />
-              <p className="mt-2 text-sm font-semibold leading-snug text-[#0f172a] md:text-base">
-                Tenir une assistance technique et administrative fiable, dans un cadre clair et structuré.
-              </p>
-              <div className="my-2.5 border-t border-slate-300/60" aria-hidden />
-              <p className="text-sm leading-relaxed text-slate-700 md:text-base">Pas empiler des dossiers.</p>
-              <p className="mt-1 text-sm leading-relaxed text-slate-700 md:text-base">
-                Mettre en place une organisation qui tient.
-              </p>
-            </div>
-          </article>
+        <div className="mx-auto mt-10 grid max-w-5xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {PILLARS.map((p) => (
+            <article key={p.title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eff6ff] text-[#1d4ed8]" aria-hidden>
+                <p.Icon />
+              </span>
+              <h3 className="mt-4 text-[0.9375rem] font-bold leading-snug text-[#0f172a]">{p.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">{p.body}</p>
+            </article>
+          ))}
         </div>
 
-        {/* Bandeau France */}
-        <div className="mt-7 rounded-xl border border-slate-200/90 bg-white px-4 py-4 shadow-[0_2px_16px_-6px_rgba(15,23,42,0.06)] md:mt-8 md:flex md:min-h-[5.75rem] md:items-center md:px-7 md:py-5">
-          <div className="flex w-full flex-col gap-3 md:flex-row md:items-center md:gap-6">
-            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 md:gap-4">
-              <span
-                className="flex h-11 w-11 shrink-0 -translate-x-1 items-center justify-center rounded-full bg-[#eff6ff] text-[#1d4ed8] ring-1 ring-blue-100/80 md:h-12 md:w-12 md:-translate-x-1.5"
-                aria-hidden
-              >
-                <IconShield className="h-[1.625rem] w-[1.625rem] md:h-7 md:w-7" />
-              </span>
-              <div className="flex min-w-0 flex-wrap items-center gap-2 md:gap-2">
-                <p className="min-w-0 max-w-[min(100%,28rem)] text-sm font-bold leading-snug text-[#0f172a] md:text-base md:leading-snug">
-                  Société française — 100 % supervisé en France, plateforme privée et sécurisée.
-                </p>
-                <span
-                  className="shrink-0 text-[2rem] leading-none md:text-[2.25rem]"
-                  aria-hidden
-                  title="France"
-                >
-                  🇫🇷
-                </span>
-              </div>
-            </div>
-
-            <div
-              aria-hidden
-              className="hidden h-12 w-px shrink-0 self-center bg-slate-200 md:block md:h-16 md:mx-2"
+        <div className="mx-auto mt-8 flex max-w-3xl flex-col items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:text-left md:p-6">
+          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full">
+            <Image
+              src="/laure-olivie-chantier.png"
+              alt="Laure Olivie, fondatrice de BeWork, sur chantier"
+              fill
+              className="object-cover object-[center_20%]"
+              sizes="64px"
             />
-
-            <div className="flex shrink-0 md:justify-end">
-              <Link
-                href="/#process-bework"
-                className="inline-flex w-full min-h-[3rem] items-center justify-center gap-1.5 rounded-xl bg-[#1d4ed8] px-5 py-3 text-base font-semibold text-white shadow-md shadow-[#1d4ed8]/22 transition hover:bg-[#1e40af] md:w-auto md:px-7"
-              >
-                Voir le Process BeWork
-                <span aria-hidden>→</span>
-              </Link>
-            </div>
+          </div>
+          <div className="min-w-0 text-center sm:text-left">
+            <p className="text-sm font-bold text-[#0f172a]">Laure Olivié — fondatrice BeWork</p>
+            <p className="mt-1 text-sm leading-relaxed text-slate-600">
+              Dirigeante BTP, 20 ans de terrain en Île-de-France. Une approche issue du réel, pas de la théorie.
+            </p>
           </div>
         </div>
       </div>
@@ -136,51 +80,39 @@ export function HomeCredibilitySection() {
   );
 }
 
-/** Cible / rôle — tracé type Lucide Target */
-function IconTarget({ className }: { className?: string }) {
+function IconHardHat() {
   return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.65}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <circle cx="12" cy="12" r="9" />
-      <circle cx="12" cy="12" r="5" />
-      <circle cx="12" cy="12" r="1.75" fill="currentColor" stroke="none" />
-      <path d="M20 5 13.5 11.5M20 5h-4M20 5v4" />
+    <svg width={19} height={19} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} aria-hidden>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 18a8 8 0 1 1 16 0Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2 18h20M12 10V6" />
     </svg>
   );
 }
 
-/** Bouclier échiqueté (privé / sécurisé) */
-function IconShield({ className }: { className?: string }) {
-  const clipId = useId().replace(/:/g, "");
-  const d = "M12 3 5 6v6c0 5 4 9 7 9s7-4 7-9V6l-7-3Z";
+function IconTarget() {
   return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden>
-      <defs>
-        <clipPath id={clipId}>
-          <path d={d} />
-        </clipPath>
-      </defs>
-      <g clipPath={`url(#${clipId})`}>
-        <path fill="currentColor" d={d} />
-        <path fill="#ffffff" d="M12 3 19 6 12 12Z" />
-        <path fill="#ffffff" d="M5 6 12 21 12 12Z" />
-      </g>
-      <path
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.35}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d={d}
-      />
+    <svg width={19} height={19} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} aria-hidden>
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="12" r="5" />
+      <circle cx="12" cy="12" r="1.25" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function IconCheckShield() {
+  return (
+    <svg width={19} height={19} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} aria-hidden>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 22s8-4 8-10V6l-8-4-8 4v6c0 6 8 10 8 10Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="m9 12 2 2 4-4" />
+    </svg>
+  );
+}
+
+function IconChip() {
+  return (
+    <svg width={19} height={19} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} aria-hidden>
+      <rect x="6" y="6" width="12" height="12" rx="2" />
+      <path strokeLinecap="round" d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3" />
     </svg>
   );
 }

@@ -19,6 +19,8 @@ export const MAIN_NEED_OPTIONS = [
   { value: "situations_chorus", label: "Situations et Chorus Pro" },
   { value: "reserves_doe", label: "Réserves et DOE" },
   { value: "renfort_admin_travaux", label: "Renfort administratif travaux" },
+  { value: "demarrage_chantier", label: "Démarrage de chantier" },
+  { value: "conducteur_surcharge", label: "Conducteur de travaux surchargé / documents en retard" },
   { value: "autre", label: "Autre besoin à préciser" },
 ] as const;
 

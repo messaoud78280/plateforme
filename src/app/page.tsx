@@ -2,24 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ProspectContactForm } from "@/components/contact/ProspectContactForm";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
-import { HomeProblemSection } from "@/components/HomeProblemSection";
 import { HomeHowItWorksDetailSection } from "@/components/HomeHowItWorksDetailSection";
 import { HomeCredibilitySection } from "@/components/HomeCredibilitySection";
-import { HomeCallCtaBanner } from "@/components/HomeCallCtaBanner";
 import { HomePricingSection } from "@/components/HomePricingSection";
-import { HomeSolutionSection } from "@/components/HomeSolutionSection";
 import { HomeTargetAudienceSection } from "@/components/HomeTargetAudienceSection";
-import { HomeRenfortClarificationSection } from "@/components/HomeRenfortClarificationSection";
 import { HomeResponsibilitiesSplitSection } from "@/components/HomeResponsibilitiesSplitSection";
-import { HomeMissionFamiliesSection } from "@/components/HomeMissionFamiliesSection";
-import { HomeHeroAside } from "@/components/home/HomeHeroAside";
-import { HomeBlueprintScrollDecor } from "@/components/home/HomeBlueprintScrollDecor";
-import { HomeHeroMetalCorners } from "@/components/home/HomeHeroMetalCorners";
-import { HomeHeroPlanCartouche } from "@/components/home/HomeHeroPlanCartouche";
-import { HomeHeroPlanSketchDecor } from "@/components/home/HomeHeroPlanSketchDecor";
-import { BlueprintCotationHero } from "@/components/home/BlueprintCotationDecor";
+import { HomeOverloadSignalsSection } from "@/components/HomeOverloadSignalsSection";
+import { HomeLifecycleSection } from "@/components/HomeLifecycleSection";
+import { HomeResultsSection } from "@/components/HomeResultsSection";
+import { HomePlatformSection } from "@/components/HomePlatformSection";
+import { HomeConcreteCaseSection } from "@/components/HomeConcreteCaseSection";
+import { HomeHeroMissionMockup } from "@/components/home/HomeHeroMissionMockup";
 import { HomeGeoExternalisationCards } from "@/components/HomeGeoExternalisationCards";
-import { BeWorkValuePillars } from "@/components/marketing/BeWorkValuePillars";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { SeoInternalLinks } from "@/components/seo/SeoInternalLinks";
 import {
@@ -43,62 +37,40 @@ const PRESENTATION_VIDEO_DURATION_ISO = "PT13S";
 
 const PRICE_BOUNDS = getMarketingPriceBoundsLabels();
 
-const HERO_EXPERTISE_BADGES = [
-  "Appels d'offres",
-  "Analyse DCE",
-  "Candidatures",
-  "Mémoire technique",
-  "Marchés publics",
-  "Suivi administratif",
-  "Chorus Pro",
-  "DOE",
+/** Réassurances hero — 4 maximum, pas de gain chiffré non prouvé. */
+const HERO_REASSURANCES = [
+  "Spécialistes du BTP",
+  "Ponctuel ou régulier",
+  "Espace de suivi par mission",
+  "IA et contrôle humain",
 ] as const;
-
-/** Badges hero cliquables — pages missions / services. */
-const HERO_BADGE_LINKS: Partial<Record<(typeof HERO_EXPERTISE_BADGES)[number], string>> = {
-  "Appels d'offres": "/assistants-administratifs-taches#reponses-appels-offres",
-  "Analyse DCE": "/services/analyse-dce-btp",
-  Candidatures: "/assistants-administratifs-taches#reponses-appels-offres",
-  "Mémoire technique": "/ressources/memoire-technique-btp",
-  "Marchés publics": "/assistants-administratifs-taches#marches-publics-accords-cadres",
-  "Suivi administratif": "/assistants-administratifs-taches#marches-publics-accords-cadres",
-  "Chorus Pro": "/facturation-chorus-pro-btp",
-  DOE: "/services/doe-btp",
-};
-
-const HERO_BADGE_CLASS =
-  "inline-flex items-center rounded-sm border border-slate-300 border-l-[3px] border-l-[#2563eb] bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-[0.06em] text-slate-900 shadow-sm transition-colors hover:border-[#1d4ed8]/50 hover:bg-[#eff6ff] sm:text-sm";
 
 const HOME_FAQ_ITEMS = [
   {
-    q: "Qu’est-ce que BeWork pour les entreprises du BTP ?",
-    a: "BeWork met à disposition des assistants travaux spécialisés qui renforcent vos équipes sur les appels d’offres, les candidatures et le suivi administratif des marchés publics et privés. Nous préparons, structurons et suivons les dossiers sous votre validation — sans remplacer votre dirigeant, chargé d’affaires, conducteur ou bureau d’études.",
+    q: "BeWork remplace-t-il un conducteur de travaux ?",
+    a: "Non. BeWork renforce votre équipe travaux : nous préparons, organisons et suivons les dossiers qui entourent le chantier. Votre conducteur conserve le pilotage, les décisions techniques et la relation client.",
   },
   {
-    q: "BeWork réalise-t-il seul un appel d’offres de A à Z ?",
-    a: "Non. BeWork renforce la préparation et l’organisation de vos réponses : analyse documentaire du DCE, pièces, conformité, structure du mémoire, préparation au dépôt. Votre entreprise conserve les prix, les choix techniques, les engagements contractuels, la signature et le dépôt définitif.",
+    q: "Quelles tâches peut-on déléguer ?",
+    a: "Comptes rendus, documents, relances fournisseurs et sous-traitants, situations, réserves, DOE et appels d’offres — selon la mission cadrée avec vous. Prix, choix techniques et validations restent chez vous.",
   },
   {
-    q: "Quelles missions peut-on confier à BeWork ?",
-    a: "Préparation de candidatures, classement et analyse de DCE, vérification des pièces administratives, assistance à la structuration du mémoire technique, suivi des échéances, préparation du dépôt, suivi administratif après attribution (situations, Chorus Pro, réserves, DOE) — selon la mission cadrée avec vous.",
+    q: "Peut-on utiliser BeWork seulement pendant un pic d’activité ?",
+    a: "Oui. Vous pouvez solliciter BeWork pour une mission précise, une période de surcharge ponctuelle ou un accompagnement régulier, sans recrutement supplémentaire.",
   },
   {
-    q: "Est-ce que je garde la validation finale ?",
-    a: "Oui. BeWork prépare, organise et suit. Vous gardez la main sur les décisions techniques, les prix, les signatures et tout engagement contractuel. BeWork ne signe pas à votre place et ne garantit pas l’attribution d’un marché.",
+    q: "Comment suivre une mission ?",
+    a: "Chaque mission dispose d’un espace de suivi permettant de transmettre les documents, consulter l’avancement, échanger avec le Beworker et identifier la prochaine action attendue.",
   },
   {
-    q: "BeWork remplace-t-il un bureau d’études, un avocat ou un économiste ?",
-    a: "Non. BeWork fournit une assistance opérationnelle et documentaire. Les validations juridiques, techniques, financières et contractuelles restent sous la responsabilité de l’entreprise cliente et de ses conseils.",
-  },
-  {
-    q: "BeWork peut-il aider après attribution d’un marché ?",
-    a: "Oui, en renfort administratif : classement du marché, échéances, documents de démarrage, situations, Chorus Pro, CR, réserves, DOE et traçabilité des échanges — sans responsabilité de l’exécution technique du chantier.",
+    q: "BeWork peut-il travailler avec nos outils actuels ?",
+    a: "Vos Beworkers peuvent s’appuyer sur vos outils existants (Excel, Drive, SharePoint, Chorus Pro, Batigest, EBP, Sage…). Les documents échangés restent aussi accessibles dans l’espace de mission.",
   },
 ] as const;
 
-const HOME_META_TITLE = "Assistants travaux et appels d’offres BTP | BeWork";
+const HOME_META_TITLE = "Assistant travaux externalisé BTP | BeWork";
 const HOME_META_DESCRIPTION = metaDescriptionFrancophonie(
-  "BeWork renforce les entreprises du BTP dans la préparation des candidatures, l’analyse des DCE et le suivi administratif des marchés publics et privés",
+  "BeWork renforce les conducteurs de travaux et les équipes BTP sur les documents, relances, situations, DOE et appels d'offres, sans recrutement",
 );
 
 export const metadata: Metadata = {
@@ -124,7 +96,7 @@ export const metadata: Metadata = {
         url: `${SITE_URL}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: "BeWork — Assistants travaux spécialisés appels d’offres et marchés BTP",
+        alt: "BeWork — Assistant travaux externalisé : renfort conducteurs de travaux et équipes BTP",
       },
     ],
   },
@@ -142,17 +114,17 @@ const homeJsonLd = {
       "@type": "WebPage",
       "@id": `${SITE_URL}/#accueil`,
       url: SITE_URL,
-      name: "BeWork — Assistants travaux spécialisés dans les appels d’offres et le suivi des marchés BTP",
+      name: "BeWork — Assistant travaux externalisé pour conducteurs de travaux et équipes BTP",
       inLanguage: "fr-FR",
       description:
-        "BeWork renforce les entreprises du BTP dans la préparation des candidatures, l’analyse des DCE et le suivi administratif des marchés publics et privés — sous validation du client.",
+        "BeWork renforce les équipes travaux BTP sur les comptes rendus, documents, relances, situations, réserves, DOE et appels d'offres — sous validation du client.",
       isPartOf: { "@id": `${SITE_URL}/#website` },
       video: { "@id": `${SITE_URL}/#video-presentation-bework` },
       about: [
+        { "@type": "Thing", name: "Renfort conducteur de travaux" },
+        { "@type": "Thing", name: "Suivi administratif chantier" },
         { "@type": "Thing", name: "Assistance appels d’offres BTP" },
-        { "@type": "Thing", name: "Préparation candidature marché public" },
-        { "@type": "Thing", name: "Analyse DCE" },
-        { "@type": "Thing", name: "Suivi administratif de marché" },
+        { "@type": "Thing", name: "Suivi DOE et réserves" },
       ],
       speakable: {
         "@type": "SpeakableSpecification",
@@ -162,17 +134,17 @@ const homeJsonLd = {
     {
       "@type": "Service",
       "@id": `${SITE_URL}/#service-btp`,
-      name: "Assistants travaux — renfort appels d’offres et suivi des marchés BTP",
+      name: "Assistant travaux externalisé — renfort conducteurs de travaux et équipes BTP",
       description:
-        "Renfort opérationnel pour entreprises BTP : préparation de candidatures, analyse documentaire des DCE, organisation des réponses, suivi administratif des marchés publics et privés sous validation du client.",
-      serviceType: "Renfort administratif travaux — appels d’offres et suivi de marchés BTP",
-      category: "Assistance à la préparation et au suivi documentaire des marchés BTP",
+        "Renfort opérationnel pour équipes BTP : comptes rendus, documents, relances fournisseurs et sous-traitants, situations, réserves, DOE et appels d'offres, sous validation du client.",
+      serviceType: "Renfort administratif travaux — suivi de chantier et appels d'offres BTP",
+      category: "Assistance à la préparation et au suivi documentaire des chantiers et marchés BTP",
       provider: { "@id": `${SITE_URL}/#organization` },
       areaServed: jsonLdExpandedAreaServed(),
       audience: {
         "@type": "BusinessAudience",
         audienceType:
-          "PME BTP, entreprises générales, dirigeants, chargés d’affaires, conducteurs de travaux — France, Belgique, Suisse, Luxembourg",
+          "PME BTP, entreprises générales, conducteurs de travaux, chargés d’affaires et dirigeants — France, Belgique, Suisse, Luxembourg",
       },
       offers: {
         "@type": "AggregateOffer",
@@ -186,9 +158,9 @@ const homeJsonLd = {
     {
       "@type": "VideoObject",
       "@id": `${SITE_URL}/#video-presentation-bework`,
-      name: "Présentation BeWork — renfort assistants travaux BTP",
+      name: "Présentation BeWork — assistant travaux externalisé BTP",
       description:
-        "Vidéo de présentation : préparation candidatures, analyse DCE et suivi administratif des marchés — renfort sous validation client (France · Belgique · Suisse · Luxembourg).",
+        "Vidéo de présentation : renfort conducteurs de travaux, suivi de chantier et appels d'offres — sous validation client (France · Belgique · Suisse · Luxembourg).",
       thumbnailUrl: [absoluteUrl("/opengraph-image")],
       uploadDate: "2026-04-11T12:00:00+02:00",
       duration: PRESENTATION_VIDEO_DURATION_ISO,
@@ -221,213 +193,82 @@ export default function HomePage() {
       <MarketingSiteHeader plainBg />
 
       <main className="pt-0">
-        {/* Hero → Process : fond plan discret */}
-        <div className="relative overflow-x-clip bg-gradient-to-b from-white via-[#fdfefe] to-[#F8FAFC]">
-          {/* Panneau métallique skew discret */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute right-[-6%] top-[-12rem] -bottom-[92rem] z-0 w-[46%] skew-x-[-12deg] opacity-[0.55] md:top-[-14rem] md:-bottom-[112rem]"
-            style={{
-              background: "linear-gradient(135deg, #F8FAFC 0%, #D7E0EA 45%, #EEF3F8 100%)",
-            }}
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute right-[-6%] top-[-12rem] -bottom-[92rem] z-0 w-[46%] skew-x-[-12deg] opacity-20 md:top-[-14rem] md:-bottom-[112rem]"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(120deg, rgba(15,23,42,0.1) 0px, rgba(15,23,42,0.1) 1px, transparent 1px, transparent 7px)",
-            }}
-          />
-          {/* Courbe métallique centrale */}
-          <div
-            className="pointer-events-none absolute inset-x-[-8%] top-[-6%] z-[2] h-[min(48vh,480px)] opacity-[0.2] md:inset-x-[-4%] md:opacity-[0.16]"
-            aria-hidden
-          >
-            <svg viewBox="0 0 1400 520" className="h-full w-full min-w-[900px]" preserveAspectRatio="xMidYMid slice">
-              <defs>
-                <linearGradient id="bework-hero-metal" x1="0%" y1="0%" x2="100%" y2="35%">
-                  <stop offset="0%" stopColor="#cbd5e1" />
-                  <stop offset="45%" stopColor="#f1f5f9" />
-                  <stop offset="100%" stopColor="#94a3b8" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M-120 440 Q 380 60 760 280 T 1520 120"
-                stroke="url(#bework-hero-metal)"
-                strokeWidth="18"
-                fill="none"
-                strokeLinecap="round"
-                opacity="0.55"
-              />
-              <path
-                d="M-120 440 Q 380 60 760 280 T 1520 120"
-                stroke="#2563eb"
-                strokeWidth="2.25"
-                fill="none"
-                strokeLinecap="round"
-                opacity="0.35"
-              />
-            </svg>
-          </div>
-          {/* Voile léger en tête — lisibilité */}
-          <div
-            className="pointer-events-none absolute inset-x-0 top-0 z-[3] h-[min(32vh,300px)] bg-gradient-to-b from-white/40 via-transparent to-transparent"
-            aria-hidden
-          />
-          {/* Quadrillage plan — discret */}
-          <div
-            className="pointer-events-none absolute inset-0 z-[4] bework-blueprint-grid--hero opacity-[0.34] md:opacity-[0.26]"
-            aria-hidden
-          />
-          <div className="relative z-10">
-            <div className="pointer-events-none absolute inset-0 z-[1] overflow-hidden" aria-hidden>
-              <HomeBlueprintScrollDecor />
-            </div>
-            <div className="relative z-[2]">
-            {/* Hero compact premium — 1200px, grille 55/45 */}
-            <section
-              id="hero"
-              className="relative overflow-x-clip overflow-y-visible bg-transparent pb-20 pt-0 lg:pt-1"
-              style={{ scrollMarginTop: "6rem" }}
-            >
-              <HomeHeroMetalCorners />
-              <HomeHeroPlanSketchDecor />
-              <BlueprintCotationHero />
-              <div className="container-site relative z-[2]">
-            <div className="grid items-center gap-10 text-center lg:grid-cols-[minmax(0,1.08fr)_minmax(280px,1fr)] lg:items-start lg:gap-x-10 xl:grid-cols-[minmax(0,1fr)_minmax(520px,1.15fr)] xl:gap-x-14 lg:gap-y-0 lg:text-left">
-              <div className="relative z-[2] mx-auto flex w-full min-w-0 max-w-[540px] flex-col gap-5 lg:mx-0 lg:max-w-none lg:gap-4 lg:pt-10 xl:max-w-[560px]">
-                <p className="font-blueprint-note mx-auto max-w-[540px] text-sm font-semibold uppercase leading-snug tracking-[0.12em] text-[#1d4ed8] lg:mx-0 lg:max-w-none lg:text-base">
-                  Renfort travaux BTP · Mobilisable ponctuellement ou régulièrement
+        {/* Hero — 2 colonnes, fond épuré */}
+        <section id="hero" className="relative overflow-x-clip bg-white px-6 pb-16 pt-10 md:pb-20 md:pt-14 lg:pb-24 lg:pt-16">
+          <div className="container-site">
+            <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,1fr)] lg:gap-16">
+              {/* Colonne gauche */}
+              <div className="text-center lg:text-left">
+                <p className="mx-auto inline-flex items-center rounded-full border border-[#1d4ed8]/25 bg-[#eff6ff] px-4 py-1.5 text-sm font-semibold text-[#1d4ed8] lg:mx-0">
+                  Assistant travaux externalisé · Ponctuel ou régulier
                 </p>
 
-                <h1 className="font-heading text-balance text-[clamp(1.65rem,calc(0.7rem+3vw),2.75rem)] font-bold leading-[1.1] tracking-[-0.03em] lg:max-w-[42rem]">
-                  Le renfort BTP que vous mobilisez sur vos appels d&apos;offres et vos marchés
+                <h1 className="font-display mx-auto mt-6 max-w-[38rem] text-balance text-[clamp(1.85rem,calc(1rem+3.4vw),3rem)] font-extrabold leading-[1.04] tracking-[-0.025em] text-[#0f172a] lg:mx-0">
+                  Vos conducteurs pilotent les chantiers.{" "}
+                  <span className="text-[#1d4ed8]">BeWork fait avancer les dossiers qui les débordent.</span>
                 </h1>
 
-                <p className="mx-auto mt-4 max-w-[540px] text-[clamp(1.2rem,calc(0.9rem+1.2vw),1.65rem)] font-bold leading-snug tracking-[-0.02em] lg:mx-0 lg:max-w-none">
+                <p className="mx-auto mt-5 max-w-[36rem] text-lg leading-relaxed text-slate-700 lg:mx-0 lg:text-xl">
+                  Comptes rendus, documents, relances, situations, fournisseurs, réserves, DOE et appels d&apos;offres&nbsp;:
+                  un assistant travaux spécialisé renforce votre équipe lorsque la charge augmente, sans recrutement
+                  supplémentaire.
+                </p>
+
+                <p className="mx-auto mt-4 max-w-[36rem] text-lg font-bold leading-snug lg:mx-0">
                   <span className="text-[#0f172a]">On tient le bureau,</span>{" "}
-                  <span className="text-[#2563eb]">vous tenez le chantier.</span>
+                  <span className="text-[#1d4ed8]">vous tenez le chantier.</span>
                 </p>
 
-                <p className="mx-auto max-w-[540px] text-lg leading-[1.55] text-balance text-slate-800 lg:mx-0 lg:max-w-none lg:text-xl lg:leading-snug">
-                  BeWork accompagne les entreprises du BTP lors d&apos;un pic d&apos;activité, d&apos;une surcharge de
-                  travail ou d&apos;un besoin temporaire de ressources — sur vos appels d&apos;offres comme sur vos
-                  chantiers.
-                </p>
-
-                <p className="mx-auto max-w-[540px] text-base font-medium leading-snug text-slate-700 lg:mx-0 lg:max-w-none lg:text-[1.05rem]">
-                  Nos assistants travaux interviennent ponctuellement ou régulièrement, sur les missions que vous
-                  choisissez de nous confier. Vous conservez la validation des prix, des choix techniques et des
-                  engagements contractuels.
-                </p>
-
-                <p className="mx-auto max-w-[540px] text-sm font-semibold leading-snug text-slate-700 lg:mx-0 lg:max-w-none lg:text-base">
-                  Un renfort mobilisable selon votre besoin, sans recrutement supplémentaire ni engagement inutile.
-                </p>
-
-                <BeWorkValuePillars variant="hero" />
-
-                <div className="mt-4 flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:justify-start">
-                  <Link
-                    href="#missions-renfort"
-                    className="inline-flex min-h-[3rem] items-center justify-center rounded-xl bg-[#1d4ed8] px-6 text-base font-semibold text-white shadow-md transition-colors hover:bg-[#1e40af]"
-                    {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-hero-discover")}
-                  >
-                    Découvrir notre accompagnement
-                  </Link>
+                <div className="mx-auto mt-7 flex max-w-[36rem] flex-col gap-3 sm:flex-row sm:justify-center lg:mx-0 lg:justify-start">
                   <Link
                     href="#contact"
-                    className="inline-flex min-h-[3rem] items-center justify-center rounded-xl border-2 border-slate-300 bg-white px-6 text-base font-semibold text-[#1d4ed8] shadow-sm transition-colors hover:border-[#1d4ed8]/40 hover:bg-[#eff6ff]"
-                    {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-hero-exchange")}
+                    className="inline-flex h-[3.25rem] items-center justify-center rounded-2xl bg-[#1d4ed8] px-6 text-base font-semibold text-white shadow-md transition hover:bg-[#1e40af]"
+                    {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-hero-primary")}
                   >
-                    Échanger sur votre besoin
+                    Soulager mon équipe travaux
+                  </Link>
+                  <Link
+                    href="#renfort-chaque-moment"
+                    className="inline-flex h-[3.25rem] items-center justify-center rounded-2xl border-2 border-slate-200 bg-white px-6 text-base font-semibold text-[#1d4ed8] shadow-sm transition hover:border-[#1d4ed8]/40 hover:bg-[#eff6ff]"
+                  >
+                    Voir ce que je peux déléguer
                   </Link>
                 </div>
 
                 <ul
-                  className="mx-auto flex w-full max-w-[540px] flex-wrap justify-center gap-x-2 gap-y-2 lg:mx-0 lg:max-w-none lg:justify-start"
-                  aria-label="Expertises métiers"
+                  className="mx-auto mt-8 grid max-w-[34rem] grid-cols-2 gap-x-5 gap-y-2.5 lg:mx-0 lg:max-w-none"
+                  aria-label="Atouts BeWork"
                 >
-                  {HERO_EXPERTISE_BADGES.map((label) => (
-                    <li key={label}>
-                      {HERO_BADGE_LINKS[label] ? (
-                        <Link href={HERO_BADGE_LINKS[label]!} className={HERO_BADGE_CLASS}>
-                          {label}
-                        </Link>
-                      ) : (
-                        <span className={HERO_BADGE_CLASS}>{label}</span>
-                      )}
+                  {HERO_REASSURANCES.map((label) => (
+                    <li key={label} className="flex items-center gap-2 text-sm font-medium text-slate-700 lg:justify-start">
+                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#1d4ed8]" aria-hidden />
+                      {label}
                     </li>
                   ))}
                 </ul>
               </div>
 
-              <div className="relative flex w-full min-w-0 shrink-0 justify-center lg:justify-end lg:self-start">
-                <HomeHeroAside />
+              {/* Colonne droite — mockup mission */}
+              <div>
+                <HomeHeroMissionMockup />
               </div>
             </div>
-              <HomeHeroPlanCartouche />
-              </div>
-            </section>
-
-            <HomeRenfortClarificationSection />
-
-            {/* Définition Beworker (AEO — compact) */}
-            <section className="relative bg-transparent px-6 pb-8 md:pb-10">
-              <div className="container-site">
-                <div className="mx-auto max-w-4xl rounded-2xl border border-slate-200/90 bg-white p-6 shadow-[0_10px_40px_-16px_rgba(15,23,42,0.1)] ring-1 ring-slate-100/85 md:p-7">
-                  <p className="font-heading text-xs font-bold uppercase tracking-[0.2em] text-[#1d4ed8] md:text-sm">
-                    C’est quoi un Beworker&nbsp;?
-                  </p>
-                  <p className="mt-3 text-base leading-relaxed text-slate-800 md:text-[1.05rem]">
-                    Un Beworker est un assistant travaux BTP dédié à vos opérations&nbsp;: il prépare et structure les
-                    dossiers de candidature, organise les pièces, suit les échéances et coordonne les échanges
-                    documentaires. Augmenté par l&apos;IA, encadré et supervisé depuis la France — ce n&apos;est ni un
-                    chatbot, ni un secrétariat généraliste, ni un bureau d&apos;études réglementé.
-                  </p>
-                  <p className="mt-4">
-                    <BeWorkValuePillars variant="inline" />
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            <HomeProblemSection />
-            <HomeSolutionSection />
-            <HomeResponsibilitiesSplitSection />
-            <HomeMissionFamiliesSection />
-            <HomeHowItWorksDetailSection />
-            <HomePricingSection />
-            <HomeCredibilitySection />
-            <HomeGeoExternalisationCards />
-            <HomeCallCtaBanner />
-
-            <HomeTargetAudienceSection />
-            </div>
           </div>
-        </div>
+        </section>
 
-        {/* Au-dessus du décor skew qui déborde du bloc hero — évite que le panneau gris recouvre le texte */}
-        <div className="relative z-10 overflow-x-clip bg-gradient-to-b from-[#f8fafc]/55 via-[#f1f5f9]/70 to-[#f1f5f9]/85">
-          <div className="pointer-events-none absolute inset-0 bework-blueprint-grid opacity-[0.24] md:opacity-[0.29]" aria-hidden />
-          <div className="pointer-events-none absolute right-0 top-[8%] h-[min(45%,380px)] w-[min(48%,420px)] opacity-[0.04] md:opacity-[0.05]" aria-hidden>
-            <svg className="h-full w-full text-slate-400" viewBox="0 0 200 200" fill="none" preserveAspectRatio="xMidYMid meet">
-              <path
-                d="M20 160 L160 40 M30 170 L170 50"
-                stroke="currentColor"
-                strokeWidth="0.6"
-                strokeDasharray="4 4"
-                opacity="0.6"
-              />
-              <text x="24" y="36" fill="currentColor" style={{ fontFamily: "ui-monospace, monospace", fontSize: "9px" }}>
-                Axe 01
-              </text>
-            </svg>
-          </div>
-          <div className="relative z-[1]">
+        <HomeOverloadSignalsSection />
+        <HomeLifecycleSection />
+        <HomeResultsSection />
+        <HomePlatformSection />
+        <HomeHowItWorksDetailSection />
+        <HomeConcreteCaseSection />
+        <HomeResponsibilitiesSplitSection />
+        <HomePricingSection />
+        <HomeCredibilitySection />
+        <HomeTargetAudienceSection />
+
         {/* Ressources */}
-        <section id="ressources" className="relative px-6 py-24 md:py-28">
+        <section id="ressources" className="relative px-6 py-14 md:py-20 lg:py-24">
           <div className="mx-auto max-w-site">
             <div className="mb-16 max-w-2xl">
               <h2 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
@@ -484,22 +325,24 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* FAQ optimisée SEO */}
-        <section id="faq" className="px-6 py-24 md:py-28 scroll-mt-24" style={{ scrollMarginTop: "6rem" }}>
+        <HomeGeoExternalisationCards />
+
+        {/* FAQ optimisée SEO — 5 questions */}
+        <section id="faq" className="px-6 py-14 md:py-20 lg:py-24 scroll-mt-24" style={{ scrollMarginTop: "6rem" }}>
           <div className="mx-auto max-w-3xl">
             <h2 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
               Questions fréquentes
             </h2>
             <p className="mt-5 text-lg leading-relaxed text-black">
-              Cadre, périmètre et responsabilités : ce que les entreprises BTP vérifient avant de confier un renfort sur
-              leurs candidatures et le suivi administratif de leurs marchés.
+              Cadre, périmètre et responsabilités : ce que les entreprises BTP vérifient avant de confier un renfort à
+              un assistant travaux.
             </p>
             <p className="mt-4 text-base font-medium text-black">
               Tous nos tarifs sont exprimés HT, sans frais supplémentaires.
             </p>
-            <dl className="mt-12 space-y-8">
+            <dl className="mt-12 space-y-6">
               {HOME_FAQ_ITEMS.map((item, i) => (
-                <div key={i} className="card-frame rounded-xl p-6">
+                <div key={i} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                   <dt className="text-lg font-semibold text-black">{item.q}</dt>
                   <dd className="mt-3 text-black leading-relaxed">{item.a}</dd>
                 </div>
@@ -508,27 +351,37 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Contact / prospection */}
-        <section id="contact" className="px-6 py-24 md:py-28 scroll-mt-24">
-          <div className="mx-auto max-w-site rounded-2xl surface-metallic-light surface-metallic-light--soft border-2 border-[#1d4ed8]/25 p-8 text-black shadow-lg md:p-12 lg:p-14">
+        {/* CTA final / contact */}
+        <section id="contact" className="px-6 py-14 md:py-20 lg:py-24 scroll-mt-24">
+          <div className="mx-auto max-w-site rounded-2xl border-2 border-[#1d4ed8]/25 bg-white p-8 shadow-lg md:p-12 lg:p-14">
             <div className="grid gap-10 lg:grid-cols-5 lg:gap-14">
               <div className="lg:col-span-2">
-                <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-                  Échanger sur votre besoin de renfort
+                <h2 className="font-display text-3xl font-extrabold tracking-tight text-[#0f172a] md:text-4xl">
+                  Votre équipe travaux manque de temps&nbsp;?
                 </h2>
-                <p className="mt-6 text-lg leading-relaxed text-black">
-                  Indiquez votre étape (candidature, dépôt, marché attribué…) et ce que vous attendez précisément de
-                  BeWork. Nous cadrons la mission sous la validation de votre entreprise — sans engagement.
+                <p className="mt-6 text-lg leading-relaxed text-slate-700">
+                  Décrivez ce qui s&apos;accumule&nbsp;: appels d&apos;offres, comptes rendus, documents, situations,
+                  fournisseurs, réserves ou DOE. BeWork vous aide à définir une mission claire et à identifier ce qui
+                  peut être confié à un assistant travaux.
                 </p>
-                <Link
-                  href="/tarifs"
-                  className="mt-8 inline-flex rounded-lg border-2 border-[#1d4ed8] bg-white px-6 py-3 font-semibold text-black shadow-sm transition hover:bg-[#f8f9fb]"
-                  {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_TARIFS, "home-final-cta")}
-                >
-                  Consulter les forfaits
-                </Link>
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                  <Link
+                    href="#formulaire"
+                    className="inline-flex h-[3.25rem] items-center justify-center rounded-2xl bg-[#1d4ed8] px-6 text-base font-semibold text-white shadow-md transition hover:bg-[#1e40af]"
+                    {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-final-cta-primary")}
+                  >
+                    Parler de ma charge de travail
+                  </Link>
+                  <Link
+                    href="/assistants-administratifs-taches"
+                    className="inline-flex h-[3.25rem] items-center justify-center rounded-2xl border-2 border-[#1d4ed8] bg-white px-6 text-base font-semibold text-[#0f172a] shadow-sm transition hover:bg-[#f8f9fb]"
+                    {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_TARIFS, "home-final-cta-secondary")}
+                  >
+                    Voir les missions
+                  </Link>
+                </div>
               </div>
-              <div className="relative rounded-2xl border border-slate-200/90 bg-white/95 p-6 shadow-sm lg:col-span-3 md:p-8">
+              <div id="formulaire" className="relative rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-3 md:p-8">
                 <ProspectContactForm source="homepage_contact_form" variant="compact" />
               </div>
             </div>
@@ -540,8 +393,6 @@ export default function HomePage() {
             <SeoInternalLinks path="/" />
           </div>
         </section>
-          </div>
-        </div>
       </main>
 
       <MarketingSiteFooter />

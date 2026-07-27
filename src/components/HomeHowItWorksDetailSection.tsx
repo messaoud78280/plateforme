@@ -1,14 +1,6 @@
-"use client";
-
-import { type JSX } from "react";
-import { HomeClientSpacePreview } from "@/components/HomeClientSpacePreview";
-import {
-  BlueprintCotationProcessAmbient,
-  BlueprintCotationProcessRail,
-} from "@/components/home/BlueprintCotationDecor";
+import type { JSX } from "react";
 
 const BLUE = "#2563eb";
-const fontSans = "var(--font-inter), ui-sans-serif, system-ui, sans-serif";
 
 const STEPS: {
   n: number;
@@ -18,43 +10,36 @@ const STEPS: {
 }[] = [
   {
     n: 1,
-    title: "Vous décrivez votre besoin",
-    body: "Candidature, DCE, mémoire, dépôt ou suivi après attribution — nous cadrons la mission et les éléments nécessaires avec vous.",
+    title: "Vous décrivez la surcharge",
+    body: "Appel d’offres, démarrage, documents en retard, situations ou DOE : le besoin est qualifié.",
     Icon: IconInbox,
   },
   {
     n: 2,
-    title: "BeWork organise le renfort",
-    body: "Un Beworker prépare le plan de travail, les pièces attendues et la répartition des tâches sous la validation de votre entreprise.",
+    title: "Nous définissons la mission",
+    body: "Documents nécessaires, échéance, livrable et responsabilités sont cadrés.",
     Icon: IconUserLink,
   },
   {
     n: 3,
-    title: "Nous préparons et structurons",
-    body: "Analyse des documents, structuration des informations, détection des pièces manquantes et préparation des livrables : les outils d’intelligence artificielle accélèrent le travail, chaque mission reste suivie et validée par un Beworker.",
+    title: "Le Beworker prend le relais",
+    body: "Il prépare, organise, relance et suit les éléments convenus.",
     Icon: IconBriefcase,
   },
   {
     n: 4,
-    title: "Vous validez ce qui engage",
-    body: "Prix, choix techniques, méthodes, signature et dépôt restent chez vous. BeWork ne signe pas et ne décide pas à votre place.",
+    title: "Vous suivez l’avancement",
+    body: "Vous consultez les échanges, les éléments reçus et la prochaine action attendue.",
     Icon: IconCheckCircle,
-  },
-  {
-    n: 5,
-    title: "Le dossier avance avec traçabilité",
-    body: "Statuts visibles, pièces classées, relances suivies — réduction du temps consacré aux tâches administratives répétitives.",
-    Icon: IconChart,
   },
 ];
 
-/** Section « Process BeWork » — parcours aligné sur la homepage */
+/** Section « Fonctionnement » — parcours simple, 4 étapes. */
 export function HomeHowItWorksDetailSection() {
   return (
     <section
       id="process-bework"
-      className="relative scroll-mt-28 bg-transparent pt-10 pb-12 md:pt-12 md:pb-14 lg:pt-14 lg:pb-16"
-      style={{ fontFamily: fontSans }}
+      className="relative scroll-mt-28 bg-transparent px-6 py-14 md:py-20 lg:py-24"
       aria-labelledby="how-detail-heading"
     >
       {/* Ancre héritée : anciens liens / signets #comment-ca-marche */}
@@ -63,59 +48,44 @@ export function HomeHowItWorksDetailSection() {
         className="pointer-events-none absolute left-0 top-0 block h-px w-px overflow-hidden opacity-0"
         aria-hidden
       />
-      <BlueprintCotationProcessAmbient />
-      <div className="container-site relative z-[2]">
-        <header className="relative z-10 mx-auto mb-16 max-w-3xl text-center md:mb-20">
+      <div className="container-site">
+        <header className="mx-auto mb-12 max-w-2xl text-center md:mb-14">
           <h2
             id="how-detail-heading"
-            className="font-heading text-sm font-semibold uppercase tracking-[0.22em] md:text-base"
-            style={{ color: BLUE }}
+            className="font-display text-balance text-[1.75rem] font-extrabold leading-[1.12] tracking-[-0.02em] text-[#0f172a] md:text-[2.25rem]"
           >
-            Fonctionnement avec un Beworker
+            Un renfort simple à mettre en place
           </h2>
-          <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-slate-800 md:mt-6 md:text-xl">
-            Vous nous présentez votre besoin, nous définissons ensemble le périmètre de la mission, puis nos assistants
-            travaux prennent le relais en s’appuyant sur notre plateforme et nos outils d’intelligence artificielle.
-          </p>
-          <p className="mx-auto mt-3 max-w-3xl text-base leading-relaxed text-slate-700">
-            Vos Beworkers peuvent travailler avec vos outils existants : Excel, Google Sheets, Outlook, Gmail, Batigest,
-            Onaya, EBP, Sage, MS Project, Drive, SharePoint, Chorus Pro, PLACE/AWS, ChatGPT et Claude.
+          <p className="mx-auto mt-4 text-base leading-relaxed text-slate-700 md:text-lg">
+            Vous décrivez votre besoin, nous cadrons la mission, un Beworker prend le relais — vous suivez
+            l&apos;avancement.
           </p>
         </header>
 
-        <div className="relative">
-          <BlueprintCotationProcessRail className="inset-x-3 -top-5 h-12 md:inset-x-6 md:-top-6 md:h-14" />
-          <div className="relative z-10 grid items-start gap-12 lg:grid-cols-2 lg:gap-16">
-          {/* Timeline */}
-          <div className="relative pl-0">
-            <div className="absolute left-5 top-3 bottom-3 w-px bg-gradient-to-b from-slate-200 via-slate-200 to-slate-200/30" aria-hidden />
+        <ol className="mx-auto grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {STEPS.map((s) => (
+            <li key={s.n} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="flex items-center gap-3">
+                <span
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
+                  style={{ backgroundColor: BLUE }}
+                >
+                  {s.n}
+                </span>
+                <span className="shrink-0 [&_svg]:h-[18px] [&_svg]:w-[18px]" style={{ color: BLUE }} aria-hidden>
+                  <s.Icon />
+                </span>
+              </div>
+              <h3 className="mt-3.5 text-base font-bold leading-snug text-[#0f172a]">{s.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">{s.body}</p>
+            </li>
+          ))}
+        </ol>
 
-            <ol className="relative space-y-6 md:space-y-8">
-              {STEPS.map((s) => (
-                <li key={s.n} className="flex gap-3.5">
-                  <div
-                    className="relative z-[1] flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white shadow-sm shadow-blue-900/12"
-                    style={{ backgroundColor: BLUE }}
-                  >
-                    {s.n}
-                  </div>
-                  <div className="min-w-0 flex-1 pt-px">
-                    <div className="flex items-start gap-2">
-                      <span className="mt-px shrink-0 [&_svg]:h-[17px] [&_svg]:w-[17px]" style={{ color: BLUE }} aria-hidden>
-                        <s.Icon />
-                      </span>
-                      <h3 className="text-base font-semibold leading-snug text-slate-900 md:text-lg">{s.title}</h3>
-                    </div>
-                    <p className="mt-1.5 text-sm leading-relaxed text-slate-700 md:text-base">{s.body}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
-
-          <HomeClientSpacePreview />
-          </div>
-        </div>
+        <p className="mx-auto mt-8 max-w-2xl text-center text-sm leading-relaxed text-slate-600">
+          Vos Beworkers peuvent s&apos;appuyer sur vos outils existants (Excel, Drive, SharePoint, Chorus Pro, Batigest,
+          EBP, Sage…) et sur nos outils d&apos;intelligence artificielle pour accélérer la préparation.
+        </p>
       </div>
     </section>
   );
@@ -154,15 +124,6 @@ function IconCheckCircle() {
     <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.85} aria-hidden>
       <circle cx={12} cy={12} r={9} />
       <path strokeLinecap="round" strokeLinejoin="round" d="m9 12 2 2 4-4" />
-    </svg>
-  );
-}
-
-function IconChart() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.85} aria-hidden>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v18h18" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="m7 12 4-4 4 8 5-10" />
     </svg>
   );
 }

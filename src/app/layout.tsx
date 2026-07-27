@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Architects_Daughter, Geist_Mono, Inter, Rajdhani } from "next/font/google";
+import { Architects_Daughter, Geist_Mono, Inter, Manrope, Rajdhani } from "next/font/google";
 import "./globals.css";
 import { PlausibleScript } from "@/components/analytics/PlausibleScript";
 import { Providers } from "@/components/Providers";
@@ -51,6 +51,13 @@ const rajdhani = Rajdhani({
   variable: "--font-rajdhani",
   subsets: ["latin"],
   weight: ["500", "600", "700"],
+});
+
+/** Grands titres premium (refonte accueil) — usage ciblé, n’affecte pas --font-heading-family global. */
+const manrope = Manrope({
+  variable: "--font-manrope",
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
 });
 
 /** Micro-annotations façon « note sur plan » — usage très limité */
@@ -297,7 +304,7 @@ export default function RootLayout({
         <PlausibleScript />
       </head>
       <body
-        className={`${inter.variable} ${rajdhani.variable} ${architectsDaughter.variable} ${geistMono.variable} min-w-0 overflow-x-clip antialiased text-base text-black`}
+        className={`${inter.variable} ${rajdhani.variable} ${manrope.variable} ${architectsDaughter.variable} ${geistMono.variable} min-w-0 overflow-x-clip antialiased text-base text-black`}
       >
         <script
           type="application/ld+json"

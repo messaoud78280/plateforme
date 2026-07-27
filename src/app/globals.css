@@ -368,6 +368,11 @@ body {
     font-family: var(--font-heading-family);
   }
 
+  /** Grands titres premium (refonte accueil) — Manrope, usage ciblé homepage */
+  .font-display {
+    font-family: var(--font-manrope), var(--font-heading-family);
+  }
+
   /** Annotation « note sur plan » — Architects Daughter, usage ponctuel */
   .font-blueprint-note {
     font-family: var(--font-blueprint-note-family);

@@ -59,22 +59,26 @@ export default function Page() {
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
-      <h2>Comment fonctionne l’assistance à distance ?</h2>
+      <h2>Comment circulent les documents à distance</h2>
       <p>
-        Vous envoyez vos demandes via la plateforme BeWork : l&apos;équipe traite à distance et vous livre des dossiers
-        structurés. Messagerie intégrée, suivi des tâches et historique complet — adapté au rythme du terrain.
+        Les échanges passent par la plateforme BeWork : dépôt des pièces, messagerie liée à chaque dossier, statuts
+        visibles à tout moment. Aucune information ne transite par des canaux personnels non tracés — l&apos;historique
+        des échanges reste consultable dossier par dossier.
       </p>
 
-      <h2>Avantages pour les PME BTP</h2>
+      <h2>Ce qui ne demande pas de présence sur site</h2>
       <p>
-        Gain de temps, flexibilité, coût maîtrisé. Une assistance travaux à distance évite le recrutement immédiat
-        tout en gardant un interlocuteur qui comprend lots, délais chantier et pièces marché.
+        Analyse de DCE, préparation de comptes rendus à partir de vos notes ou photos de chantier, relances
+        fournisseurs par écrit, suivi de situations et de factures Chorus Pro, classement de pièces pour le DOE. À
+        l&apos;inverse, tout ce qui exige un jugement technique sur place — contrôle d&apos;exécution, réception de
+        travaux — reste de la responsabilité de votre équipe terrain.
       </p>
 
-      <h2>Qualité et supervision</h2>
+      <h2>Confidentialité et traçabilité</h2>
       <p>
-        Direction et supervision en France, process cadré et validation avant envoi engageant. BeWork ne remplace pas
-        le conducteur de travaux sur le terrain.
+        Les documents transmis restent liés au dossier et à votre compte ; l&apos;accès est limité à l&apos;équipe
+        affectée à votre mission. Chaque validation avant envoi engageant reste tracée, ce qui permet de retrouver qui
+        a approuvé quoi et quand.
       </p>
 
       <section className="not-prose" id="faq" aria-label="FAQ assistant travaux à distance" style={{ scrollMarginTop: "6rem" }}>

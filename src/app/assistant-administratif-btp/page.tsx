@@ -76,27 +76,31 @@ export default function Page() {
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
-      <h2>Missions clés pour le BTP</h2>
+      <h2>Assistant administratif ou assistant travaux : la vraie différence</h2>
       <p>
-        Analyse DCE, devis chantiers, suivi sous-traitants, relances MOE/MOA, comptes rendus, situations marché public,
-        coordination fournisseurs et classement des pièces. L&apos;assistant travaux BeWork s&apos;adapte à vos process
-        métier.
+        Un assistant administratif généraliste traite l&apos;accueil, le courrier et la facturation courante. Un
+        assistant travaux BeWork est briefé sur le vocabulaire et les contraintes du chantier : lire un DCE,
+        distinguer une pièce obligatoire d&apos;une pièce optionnelle, relancer un fournisseur sur un délai de
+        livraison ou structurer un compte rendu à partir de notes prises sur site. C&apos;est ce cadrage métier qui
+        change le résultat.
       </p>
 
-      <h2>Pourquoi les entreprises BTP choisissent BeWork ?</h2>
+      <h2>Le périmètre, concrètement</h2>
       <p>
-        Expertise chantier et marchés publics, équipe francophone, coût maîtrisé. Pas de recrutement ni
-        d&apos;infrastructure : prise en charge rapide, supervision en France, validation finale chez vous.
-      </p>
-
-      <h2>À qui s&apos;adresse ce service ?</h2>
-      <p>
-        Artisans, PME BTP, entreprises générales et titulaires de marchés publics qui veulent sécuriser le suivi
-        documentaire pour se concentrer sur le terrain. Catalogue complet sur{" "}
+        Sur la phase candidature : lecture et classement du DCE, tableau de conformité des pièces, appui à la
+        structuration du mémoire technique. Sur la phase chantier : comptes rendus, relances fournisseurs et
+        sous-traitants, suivi des situations et de la facturation Chorus Pro, préparation du DOE et des réserves. Le
+        périmètre exact se cadre avec vous avant le démarrage de la mission — catalogue complet sur{" "}
         <Link href="/assistants-administratifs-taches" className="text-[#1d4ed8] hover:underline">
           la page missions
         </Link>
         .
+      </p>
+
+      <h2>Ce qui reste chez vous</h2>
+      <p>
+        Prix, choix techniques, méthodes d&apos;exécution et signature restent de votre responsabilité et de celle de
+        vos conseils habituels. BeWork prépare et structure ; vous validez ce qui engage l&apos;entreprise.
       </p>
 
       <section className="not-prose" id="faq" aria-label="FAQ assistant administratif BTP" style={{ scrollMarginTop: "6rem" }}>

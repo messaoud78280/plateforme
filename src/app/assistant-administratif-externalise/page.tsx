@@ -58,23 +58,26 @@ export default function Page() {
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
-      <h2>Pourquoi externaliser l’assistance travaux ?</h2>
+      <h2>Externaliser plutôt que recruter : ce qui change</h2>
       <p>
-        La charge varie selon les chantiers : pics d&apos;appels d&apos;offres, relances, clôture DOE. Externaliser
-        permet de sécuriser le rythme côté bureau sans alourdir la masse salariale, avec des forfaits HT et une équipe
-        déjà opérationnelle sur le métier BTP.
+        Un recrutement engage sur la durée : charges sociales, temps de formation au poste, risque si la charge
+        retombe après un pic. Un forfait BeWork s&apos;ajuste au volume réel et peut démarrer sur un périmètre
+        restreint — une mission, un dossier — avant, éventuellement, de monter en charge. La réversibilité est plus
+        simple qu&apos;un contrat de travail.
       </p>
 
-      <h2>Que fait un assistant travaux externalisé BeWork ?</h2>
+      <h2>Comment démarre une mission externalisée</h2>
       <p>
-        Analyse DCE, structuration de comptes rendus, relances clients et fournisseurs, suivi de situations et dossiers
-        marché public, préparation de pièces chantier et tableaux de suivi — sur le périmètre cadré avec vous.
+        Premier échange pour cadrer le besoin et les documents disponibles, définition d&apos;un périmètre écrit (ce
+        qui est pris en charge, ce qui ne l&apos;est pas), puis premier livrable sur un dossier réel pour valider la
+        méthode avant d&apos;élargir. Rien n&apos;est engagé sur la durée dès le départ.
       </p>
 
-      <h2>Pour qui ?</h2>
+      <h2>Le contrôle ne change pas de camp</h2>
       <p>
-        Dirigeants et PME du bâtiment qui veulent externaliser le suivi documentaire sans recruter. Forfaits dès 590 €
-        HT/mois, équipe francophone supervisée depuis la France.
+        Externaliser la préparation documentaire ne signifie pas perdre la main : chaque pièce sensible — prix,
+        engagement contractuel, réponse à un client — repasse par une validation explicite de votre entreprise avant
+        envoi.
       </p>
 
       <section className="not-prose" id="faq" aria-label="FAQ assistant administratif externalisé" style={{ scrollMarginTop: "6rem" }}>

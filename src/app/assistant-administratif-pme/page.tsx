@@ -58,27 +58,32 @@ export default function Page() {
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
-      <h2>Pourquoi une assistance travaux pour une PME ?</h2>
+      <h2>Le point de bascule pour une PME du bâtiment</h2>
       <p>
-        Les PME manquent souvent de temps pour structurer dossiers chantier, AO et clôture marché. Une assistance
-        travaux encadrée permet de déléguer l&apos;analyse et le suivi documentaire sans charges sociales ni
-        recrutement immédiat.
+        Tant qu&apos;il y a un ou deux chantiers, le dirigeant ou le conducteur de travaux absorbe l&apos;administratif
+        entre deux visites. Dès que plusieurs chantiers et appels d&apos;offres se chevauchent, les relances prennent
+        du retard, les pièces s&apos;égarent et les dossiers de candidature se préparent dans l&apos;urgence. C&apos;est
+        ce point de bascule que BeWork vient soulager, sans attendre d&apos;avoir la taille critique pour recruter un
+        poste bureau à temps plein.
       </p>
 
-      <h2>Que fait un assistant travaux pour PME ?</h2>
+      <h2>Un périmètre qui grandit avec vous</h2>
       <p>
-        Analyse de pièces marché, relances devis et situations, comptes rendus, suivi fournisseurs, préparation DOE
-        et réserves, coordination documentaire chantier — sur vos outils et selon votre périmètre.
+        Une mission ponctuelle sur un dossier d&apos;appel d&apos;offres, puis un accompagnement mensuel si le besoin
+        se confirme : le niveau de forfait s&apos;ajuste au nombre de chantiers et de dossiers réellement suivis, pas
+        à un abonnement figé.
       </p>
 
-      <h2>Combien coûte l’accompagnement ?</h2>
+      <h2>Le comparatif avec une embauche</h2>
       <p>
-        BeWork propose des forfaits dès 590 € HT/mois. Pas de crédits ni de prix horaire opaque : niveaux
-        d&apos;accompagnement publics sur{" "}
+        Un poste administratif ou assistant travaux en interne implique salaire chargé, recrutement, formation et un
+        temps plein même sur les mois plus calmes. Un forfait BeWork se limite au périmètre cadré, sans les charges
+        fixes d&apos;une embauche — utile pour tester le gain de temps avant de décider d&apos;internaliser ou non.
+        Niveaux publics sur{" "}
         <Link href="/tarifs" className="text-[#1d4ed8] hover:underline">
           bework.fr/tarifs
         </Link>
-        , ajustés au devis selon votre volume réel.
+        .
       </p>
 
       <section className="not-prose" id="faq" aria-label="FAQ assistant administratif PME" style={{ scrollMarginTop: "6rem" }}>

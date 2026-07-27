@@ -46,7 +46,7 @@ function geoBlockResponse(request: NextRequest): NextResponse | null {
   });
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const indexNowKey = process.env.INDEXNOW_API_KEY?.trim();
   if (indexNowKey) {
     const keyMatch = request.nextUrl.pathname.match(/^\/([a-zA-Z0-9-]{8,128})\.txt$/);

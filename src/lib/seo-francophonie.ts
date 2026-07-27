@@ -34,15 +34,36 @@ export function clampMetaDescription(text: string, max = SEO_META_DESCRIPTION_MA
 
 /**
  * Description meta avec périmètre géographique (une URL canonique, plusieurs marchés).
+ *
+ * Le tag géo (ex. « FR · BE · CH · LU. ») n'est jamais coupé au milieu : si la description
+ * de base est trop longue pour laisser la place au tag en entier, on raccourcit la base
+ * (au mot le plus proche) ou, en dernier recours, on omet le tag plutôt que de produire
+ * un extrait tronqué du type « … FR · BE… » dans les résultats de recherche.
  */
 export function metaDescriptionFrancophonie(
   core: string,
   options?: { withGeoTag?: boolean; max?: number },
 ): string {
+  const max = options?.max ?? SEO_META_DESCRIPTION_MAX;
   const withTag = options?.withGeoTag !== false;
   const base = core.replace(/\s*\.\s*$/, "").trim();
-  const suffix = withTag ? ` ${SEO_GEO_SCOPE_TAG}.` : ".";
-  return clampMetaDescription(`${base}${suffix}`, options?.max);
+
+  if (!withTag) return clampMetaDescription(`${base}.`, max);
+
+  const suffix = ` ${SEO_GEO_SCOPE_TAG}.`;
+  const full = `${base}${suffix}`;
+  if (full.length <= max) return full;
+
+  const budget = max - suffix.length;
+  if (budget < SEO_META_DESCRIPTION_MIN - 20) {
+    // Pas assez de place pour une base lisible + le tag géo entier : on omet le tag.
+    return clampMetaDescription(`${base}.`, max);
+  }
+
+  const cut = base.slice(0, budget);
+  const lastSpace = cut.lastIndexOf(" ");
+  const trimmedBase = (lastSpace >= budget - 20 ? cut.slice(0, lastSpace) : cut).trimEnd();
+  return `${trimmedBase}${suffix}`;
 }
 
 /**

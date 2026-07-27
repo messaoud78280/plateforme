@@ -59,3 +59,4 @@ $CLI up --service "$SERVICE" --environment "$ENVIRONMENT"
 
 echo ""
 echo "→ Déploiement envoyé. Suivez les logs sur railway.app ou : npm run deploy:logs"
+echo "  (Notification IndexNow automatique via le hook postbuild, si INDEXNOW_API_KEY est configurée sur Railway.)"

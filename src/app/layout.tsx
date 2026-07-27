@@ -188,6 +188,13 @@ const jsonLd = {
       description:
         "Assistants travaux BTP : renfort candidatures, analyse DCE et suivi administratif des marchés publics et privés — sous validation du client. France, Belgique, Suisse, Luxembourg.",
       slogan: BEWORK_SLOGAN,
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "6 rue Henri Dunant",
+        postalCode: "78280",
+        addressLocality: "Guyancourt",
+        addressCountry: "FR",
+      },
       areaServed: jsonLdExpandedAreaServed(),
       founder: {
         "@type": "Person",

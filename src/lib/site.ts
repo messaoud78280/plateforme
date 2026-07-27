@@ -56,15 +56,24 @@ export function canonicalRequestOrigin(preferredFromRequest?: string): string {
 }
 
 /**
+ * Profils par défaut pour JSON-LD Organization.sameAs, si NEXT_PUBLIC_ORG_SAME_AS
+ * n’est pas défini en prod. À remplacer/compléter dès qu’une page LinkedIn dédiée
+ * « BeWork » (entreprise) existe — en attendant, profil de la fondatrice qui se
+ * présente publiquement comme dirigeante BeWork.
+ */
+const DEFAULT_ORG_SAME_AS = ["https://www.linkedin.com/in/laure-olivie"] as const;
+
+/**
  * URLs pour JSON-LD Organization.sameAs (LinkedIn, profil Google Business, annuaires…).
- * Définir NEXT_PUBLIC_ORG_SAME_AS en prod, URLs séparées par des virgules ou des retours à la ligne.
- * Ex. NEXT_PUBLIC_ORG_SAME_AS=https://www.linkedin.com/company/votre-page,https://...
+ * Définir NEXT_PUBLIC_ORG_SAME_AS en prod pour surcharger, URLs séparées par des virgules
+ * ou des retours à la ligne. Ex. NEXT_PUBLIC_ORG_SAME_AS=https://www.linkedin.com/company/votre-page,https://...
  */
 export function getOrgSameAs(): string[] {
   const raw = process.env.NEXT_PUBLIC_ORG_SAME_AS?.trim();
-  if (!raw) return [];
-  return raw
+  if (!raw) return [...DEFAULT_ORG_SAME_AS];
+  const fromEnv = raw
     .split(/[\n,]+/)
     .map((s) => s.trim())
     .filter((s) => s.startsWith("http"));
+  return fromEnv.length ? fromEnv : [...DEFAULT_ORG_SAME_AS];
 }

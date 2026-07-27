@@ -13,6 +13,7 @@
     "db:push": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx prisma db push",
     "db:setup": "echo '→ Création des tables...' && npm run db:push && echo '→ Création des comptes...' && npm run db:seed && echo '→ Terminé.'",
     "build": "npx prisma generate && NODE_OPTIONS=--max-old-space-size=4096 next build --webpack",
+    "postbuild": "npm run --silent seo:ping-indexnow || true",
     "start": "next start --hostname 0.0.0.0 --port ${PORT:-3000}",
     "lint": "eslint",
     "db:seed": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx prisma/seed.ts",

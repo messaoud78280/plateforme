@@ -29,11 +29,7 @@ import {
 import { SEO_KEYWORDS_HOME } from "@/lib/seo-keywords";
 import { EXTERNALISATION_ADMIN_BT_NAV } from "@/lib/externalisation-administrative-btp-geo";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
-import { SITE_URL, absoluteUrl } from "@/lib/site";
-
-/** Vidéo hero — même fichier que dans `HeroPresentationVideo` ; durée ~13 s (fichier court présentation). */
-const PRESENTATION_VIDEO_MP4 = "/video/presentation.mp4";
-const PRESENTATION_VIDEO_DURATION_ISO = "PT13S";
+import { SITE_URL } from "@/lib/site";
 
 const PRICE_BOUNDS = getMarketingPriceBoundsLabels();
 
@@ -119,7 +115,6 @@ const homeJsonLd = {
       description:
         "BeWork renforce les équipes travaux BTP sur les comptes rendus, documents, relances, situations, réserves, DOE et appels d'offres — sous validation du client.",
       isPartOf: { "@id": `${SITE_URL}/#website` },
-      video: { "@id": `${SITE_URL}/#video-presentation-bework` },
       about: [
         { "@type": "Thing", name: "Renfort conducteur de travaux" },
         { "@type": "Thing", name: "Suivi administratif chantier" },
@@ -154,22 +149,6 @@ const homeJsonLd = {
         offerCount: "5",
         description: getMarketingAggregateOfferDescription(),
       },
-    },
-    {
-      "@type": "VideoObject",
-      "@id": `${SITE_URL}/#video-presentation-bework`,
-      name: "Présentation BeWork — assistant travaux externalisé BTP",
-      description:
-        "Vidéo de présentation : renfort conducteurs de travaux, suivi de chantier et appels d'offres — sous validation client (France · Belgique · Suisse · Luxembourg).",
-      thumbnailUrl: [absoluteUrl("/opengraph-image")],
-      uploadDate: "2026-04-11T12:00:00+02:00",
-      duration: PRESENTATION_VIDEO_DURATION_ISO,
-      contentUrl: absoluteUrl(PRESENTATION_VIDEO_MP4),
-      embedUrl: `${SITE_URL}/#presentation`,
-      encodingFormat: "video/mp4",
-      inLanguage: "fr-FR",
-      isFamilyFriendly: true,
-      publisher: { "@id": `${SITE_URL}/#organization` },
     },
     {
       "@type": "FAQPage",

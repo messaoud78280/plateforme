@@ -315,7 +315,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                   </ul>
                   <div className="mt-3 border-t border-slate-200/80 px-5 pt-3">
                     <Link
-                      href="/#notre-expertise"
+                      href="/services"
                       className="inline-flex items-center gap-1 text-base font-semibold text-[#1d4ed8] transition-colors hover:text-[#1e40af]"
                       onClick={() => setSolutionsOpen(false)}
                     >
@@ -504,7 +504,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 </ul>
                 <div className="border-t border-slate-100 px-4 py-3 sm:px-5">
                   <Link
-                    href="/#notre-expertise"
+                    href="/services"
                     className="inline-flex items-center gap-1 text-sm font-semibold text-[#1d4ed8]"
                     onClick={() => setMobileOpen(false)}
                   >

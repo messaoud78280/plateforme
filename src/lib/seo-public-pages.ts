@@ -146,7 +146,7 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
     ],
   },
   "/assistant-administratif-btp": {
-    title: "Assistant travaux BTP : assistance technique et administrative | BeWork",
+    title: "Assistant administratif BTP : missions, rôle et limites | BeWork",
     description: metaDescriptionFrancophonie(
       "Assistant travaux BTP : analyse DCE, dossiers chantier, appels d'offres et marchés publics. Spécialiste bâtiment, pas prestation administrative généraliste",
     ),
@@ -361,7 +361,7 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
   "/assistant-travaux-luxembourg": {
     title: "Assistant travaux Luxembourg : assistance technique BTP | BeWork",
     description: metaDescriptionFrancophonie(
-      "Luxembourg : assistant travaux pour analyse DCE, marchés publics et dossiers chantier. Assistance BTP francophone, forfaits HT",
+      "Assistant travaux au Luxembourg : analyse DCE, dossiers chantier et relances pour artisans et PME du bâtiment. Forfaits HT, validation chez vous",
       { withGeoTag: false },
     ),
     keywords: ["assistant travaux Luxembourg", "assistance travaux BTP Luxembourg"],

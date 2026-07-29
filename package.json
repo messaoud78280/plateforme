@@ -43,6 +43,7 @@
     "@prisma/adapter-pg": "^7.4.0",
     "@prisma/client": "^5.22.0",
     "@supabase/supabase-js": "^2.95.3",
+    "@tanstack/react-virtual": "^3.14.9",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.6.2",
     "dotenv": "^17.3.1",

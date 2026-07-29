@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { DocumentPreviewModal, type DocumentPreviewItem } from "@/components/documents/DocumentPreviewModal";
 import { GedDropzone } from "@/components/pilotage/GedDropzone";
 import {
@@ -36,6 +37,11 @@ export type GedFileRow = {
 };
 
 type ViewMode = "liste" | "cartes" | "a-classer" | "en-vigueur" | "corbeille";
+
+// Au-delà de ce volume, la liste (potentiellement des mois de pièces chantier :
+// plans, PV, DOE, factures…) est virtualisée pour rester fluide au scroll.
+const VIRTUALIZE_THRESHOLD = 40;
+const ESTIMATED_ROW_HEIGHT = 68;
 
 function formatBytes(n: number | null) {
   if (!n) return "—";
@@ -79,6 +85,115 @@ export function PilotageGedPanel({
   }, [files, trashFiles, view, categoryFilter, q]);
 
   const toClassify = files.filter((f) => f.classificationStatus === "A_CLASSER").length;
+
+  const tableScrollRef = useRef<HTMLDivElement>(null);
+  const shouldVirtualizeTable = view !== "cartes" && filtered.length > VIRTUALIZE_THRESHOLD;
+  const rowVirtualizer = useVirtualizer({
+    count: shouldVirtualizeTable ? filtered.length : 0,
+    getScrollElement: () => tableScrollRef.current,
+    estimateSize: () => ESTIMATED_ROW_HEIGHT,
+    overscan: 8,
+  });
+
+  function renderFileRow(f: GedFileRow) {
+    return (
+      <tr key={f.id} className="border-t border-slate-100">
+        <td className="px-3 py-2">
+          <p className="font-semibold text-slate-900">{f.name}</p>
+          <p className="text-[11px] text-slate-500">
+            {f.folder.label}
+            {!f.isCurrentVersion ? " · Version obsolète" : ""}
+            {f.previewStatus ? ` · ${f.previewStatus}` : ""}
+          </p>
+        </td>
+        <td className="px-3 py-2 text-xs text-slate-600">{f.category ?? "—"}</td>
+        <td className="px-3 py-2 text-xs">{f.indice ?? "—"}</td>
+        <td className="px-3 py-2">
+          <StatusBadge
+            status={
+              CHANTIER_FILE_STATUS_LABELS[f.status as keyof typeof CHANTIER_FILE_STATUS_LABELS] ??
+              f.status
+            }
+          />
+        </td>
+        <td className="px-3 py-2 text-xs text-slate-500">{formatBytes(f.fileSize)}</td>
+        <td className="px-3 py-2">
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="text-xs font-semibold text-[#1e3a5f] hover:underline"
+              onClick={() =>
+                setPreview({
+                  name: f.name,
+                  url: f.fileUrl,
+                  mimeType: f.mimeType,
+                  chantierFileId: f.id,
+                })
+              }
+            >
+              Aperçu
+            </button>
+            <Link
+              href={`${PILOTAGE_LIST_PATH}/${pilotageId}/documents/${f.id}`}
+              className="text-xs font-semibold text-slate-600 hover:underline"
+            >
+              Ouvrir
+            </Link>
+            {canEdit && view === "a-classer" ? (
+              <button
+                type="button"
+                disabled={pending}
+                className="text-xs font-semibold text-emerald-700 hover:underline disabled:opacity-50"
+                onClick={() => {
+                  const fd = new FormData();
+                  fd.set("fileId", f.id);
+                  fd.set("category", f.category && f.category !== "À classer" ? f.category : "Marché");
+                  startTransition(async () => {
+                    await classifyChantierFile(fd);
+                    router.refresh();
+                  });
+                }}
+              >
+                Classer
+              </button>
+            ) : null}
+            {canEdit && view !== "corbeille" ? (
+              <button
+                type="button"
+                disabled={pending}
+                className="text-xs text-red-600 hover:underline disabled:opacity-50"
+                onClick={() => {
+                  const fd = new FormData();
+                  fd.set("fileId", f.id);
+                  startTransition(async () => {
+                    await softDeleteChantierFile(fd);
+                    router.refresh();
+                  });
+                }}
+              >
+                Corbeille
+              </button>
+            ) : null}
+            <button
+              type="button"
+              disabled={pending}
+              className="text-xs text-amber-700 hover:underline disabled:opacity-50"
+              onClick={() => {
+                const fd = new FormData();
+                fd.set("fileId", f.id);
+                startTransition(async () => {
+                  await toggleChantierFileFavorite(fd);
+                  router.refresh();
+                });
+              }}
+            >
+              {f.isFavorite ? "★" : "☆"}
+            </button>
+          </div>
+        </td>
+      </tr>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -188,119 +303,63 @@ export function PilotageGedPanel({
         </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-slate-200">
-          <table className="min-w-full text-left text-sm">
-            <thead className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500">
-              <tr>
-                <th className="px-3 py-2">Document</th>
-                <th className="px-3 py-2">Catégorie</th>
-                <th className="px-3 py-2">Indice</th>
-                <th className="px-3 py-2">Statut</th>
-                <th className="px-3 py-2">Taille</th>
-                <th className="px-3 py-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((f) => (
-                <tr key={f.id} className="border-t border-slate-100">
-                  <td className="px-3 py-2">
-                    <p className="font-semibold text-slate-900">{f.name}</p>
-                    <p className="text-[11px] text-slate-500">
-                      {f.folder.label}
-                      {!f.isCurrentVersion ? " · Version obsolète" : ""}
-                      {f.previewStatus ? ` · ${f.previewStatus}` : ""}
-                    </p>
-                  </td>
-                  <td className="px-3 py-2 text-xs text-slate-600">{f.category ?? "—"}</td>
-                  <td className="px-3 py-2 text-xs">{f.indice ?? "—"}</td>
-                  <td className="px-3 py-2">
-                    <StatusBadge
-                      status={
-                        CHANTIER_FILE_STATUS_LABELS[f.status as keyof typeof CHANTIER_FILE_STATUS_LABELS] ??
-                        f.status
-                      }
-                    />
-                  </td>
-                  <td className="px-3 py-2 text-xs text-slate-500">{formatBytes(f.fileSize)}</td>
-                  <td className="px-3 py-2">
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        className="text-xs font-semibold text-[#1e3a5f] hover:underline"
-                        onClick={() =>
-                          setPreview({
-                            name: f.name,
-                            url: f.fileUrl,
-                            mimeType: f.mimeType,
-                            chantierFileId: f.id,
-                          })
-                        }
-                      >
-                        Aperçu
-                      </button>
-                      <Link
-                        href={`${PILOTAGE_LIST_PATH}/${pilotageId}/documents/${f.id}`}
-                        className="text-xs font-semibold text-slate-600 hover:underline"
-                      >
-                        Ouvrir
-                      </Link>
-                      {canEdit && view === "a-classer" ? (
-                        <button
-                          type="button"
-                          disabled={pending}
-                          className="text-xs font-semibold text-emerald-700 hover:underline disabled:opacity-50"
-                          onClick={() => {
-                            const fd = new FormData();
-                            fd.set("fileId", f.id);
-                            fd.set("category", f.category && f.category !== "À classer" ? f.category : "Marché");
-                            startTransition(async () => {
-                              await classifyChantierFile(fd);
-                              router.refresh();
-                            });
-                          }}
-                        >
-                          Classer
-                        </button>
-                      ) : null}
-                      {canEdit && view !== "corbeille" ? (
-                        <button
-                          type="button"
-                          disabled={pending}
-                          className="text-xs text-red-600 hover:underline disabled:opacity-50"
-                          onClick={() => {
-                            const fd = new FormData();
-                            fd.set("fileId", f.id);
-                            startTransition(async () => {
-                              await softDeleteChantierFile(fd);
-                              router.refresh();
-                            });
-                          }}
-                        >
-                          Corbeille
-                        </button>
-                      ) : null}
-                      <button
-                        type="button"
-                        disabled={pending}
-                        className="text-xs text-amber-700 hover:underline disabled:opacity-50"
-                        onClick={() => {
-                          const fd = new FormData();
-                          fd.set("fileId", f.id);
-                          startTransition(async () => {
-                            await toggleChantierFileFavorite(fd);
-                            router.refresh();
-                          });
-                        }}
-                      >
-                        {f.isFavorite ? "★" : "☆"}
-                      </button>
-                    </div>
-                  </td>
+          <div
+            ref={tableScrollRef}
+            className={shouldVirtualizeTable ? "max-h-[640px] overflow-y-auto" : undefined}
+          >
+            <table className="min-w-full text-left text-sm">
+              <thead className="sticky top-0 z-10 bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500">
+                <tr>
+                  <th className="px-3 py-2">Document</th>
+                  <th className="px-3 py-2">Catégorie</th>
+                  <th className="px-3 py-2">Indice</th>
+                  <th className="px-3 py-2">Statut</th>
+                  <th className="px-3 py-2">Taille</th>
+                  <th className="px-3 py-2">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {shouldVirtualizeTable ? (
+                  <>
+                    {rowVirtualizer.getVirtualItems().length > 0 ? (
+                      <tr aria-hidden="true">
+                        <td
+                          colSpan={6}
+                          style={{ height: rowVirtualizer.getVirtualItems()[0].start, padding: 0, border: "none" }}
+                        />
+                      </tr>
+                    ) : null}
+                    {rowVirtualizer.getVirtualItems().map((virtualRow) =>
+                      renderFileRow(filtered[virtualRow.index])
+                    )}
+                    {rowVirtualizer.getVirtualItems().length > 0 ? (
+                      <tr aria-hidden="true">
+                        <td
+                          colSpan={6}
+                          style={{
+                            height:
+                              rowVirtualizer.getTotalSize() -
+                              rowVirtualizer.getVirtualItems()[rowVirtualizer.getVirtualItems().length - 1].end,
+                            padding: 0,
+                            border: "none",
+                          }}
+                        />
+                      </tr>
+                    ) : null}
+                  </>
+                ) : (
+                  filtered.map((f) => renderFileRow(f))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
+      {shouldVirtualizeTable ? (
+        <p className="text-[11px] text-slate-400">
+          {filtered.length} documents · affichage optimisé (défilement fluide sur les gros classeurs).
+        </p>
+      ) : null}
 
       <DocumentPreviewModal open={!!preview} onClose={() => setPreview(null)} item={preview} />
     </div>

@@ -56,6 +56,18 @@ npm run deploy:login:browserless
 
 ---
 
+## Relances automatiques (pièces manquantes / échéances)
+
+`POST /api/cron/relances` (header `x-secret` = `RELANCES_CRON_SECRET`) scanne les pièces
+manquantes du classeur chantier et les échéances de mission proches, puis notifie client et
+BeWork. Idempotent (pas de doublon avant 3 jours).
+
+À planifier ~1×/jour : Railway → **Cron Job** (nouveau service, même repo, commande
+`npm run notifications:run-relances`), ou tâche planifiée externe (GitHub Actions, cron-job.org)
+appelant l'URL ci-dessus avec le secret.
+
+---
+
 ## Dépannage
 
 | Erreur | Solution |

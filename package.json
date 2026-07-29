@@ -34,6 +34,7 @@
     "deploy:login:browserless": "npx --yes @railway/cli login --browserless",
     "deploy:logs": "npx --yes @railway/cli logs --service plateforme --environment production",
     "seo:ping-indexnow": "npx tsx scripts/ping-indexnow-seo.ts",
+    "notifications:run-relances": "npx tsx scripts/run-relances.ts",
     "render:conciergerie-ui": "NODE_TLS_REJECT_UNAUTHORIZED=0 tsx scripts/render-conciergerie-ui.ts"
   },
   "dependencies": {

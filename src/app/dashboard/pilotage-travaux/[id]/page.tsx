@@ -608,6 +608,19 @@ export default async function PilotageDetailPage({
                         Interne : {b.internalOwner ?? "—"} · Décideur : {b.externalDecider ?? "—"} · Prochaine action :{" "}
                         {b.nextAction ?? "—"} · Relance : {formatDateFr(b.nextFollowUpAt)}
                       </p>
+                      {b.originLabel ? (
+                        <p className="mt-1 text-[11px] font-medium text-slate-400">
+                          📎 {b.originLabel}
+                          {b.originType === "TASK" && b.originId ? (
+                            <>
+                              {" · "}
+                              <Link href={`/dashboard/taches/${b.originId}`} className="underline">
+                                Voir la mission
+                              </Link>
+                            </>
+                          ) : null}
+                        </p>
+                      ) : null}
                     </div>
                     {b.status !== "Résolu" ? <ResolveBlockerButton blockerId={b.id} canEdit={canEdit} /> : null}
                   </div>

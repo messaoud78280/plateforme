@@ -380,7 +380,7 @@ export function TaskDetailView({
 
       {/* Notes internes (gérante + agent uniquement) */}
       {(isManager || (isAgent && task.assignedToId === sessionUserId)) && (
-        <TaskInternalNotes taskId={task.id} />
+        <TaskInternalNotes taskId={task.id} projectId={task.project?.id ?? null} />
       )}
 
       {/* Messages mission (client ↔ agent) — affichés uniquement si un agent est assigné */}

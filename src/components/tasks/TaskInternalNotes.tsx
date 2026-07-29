@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createBlockerFromTaskOrigin } from "@/lib/pilotage/blocker-links";
+import { PILOTAGE_LIST_PATH } from "@/lib/pilotage/constants";
 
 type InternalComment = {
   id: string;
@@ -12,6 +15,8 @@ type InternalComment = {
 
 interface TaskInternalNotesProps {
   taskId: string;
+  /** Chantier lié à la mission — permet de signaler une note comme blocage Pilotage. */
+  projectId?: string | null;
 }
 
 function formatDate(d: string) {
@@ -24,7 +29,7 @@ function formatDate(d: string) {
   });
 }
 
-export function TaskInternalNotes({ taskId }: TaskInternalNotesProps) {
+export function TaskInternalNotes({ taskId, projectId }: TaskInternalNotesProps) {
   const router = useRouter();
   const [comments, setComments] = useState<InternalComment[]>([]);
   const [content, setContent] = useState("");
@@ -32,6 +37,36 @@ export function TaskInternalNotes({ taskId }: TaskInternalNotesProps) {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [flaggingId, setFlaggingId] = useState<string | null>(null);
+  const [blockerTitle, setBlockerTitle] = useState("");
+  const [blockerError, setBlockerError] = useState<string | null>(null);
+  const [blockerBusy, setBlockerBusy] = useState(false);
+  const [blockerLinks, setBlockerLinks] = useState<Record<string, string>>({});
+
+  function startFlagging(comment: InternalComment) {
+    setFlaggingId(comment.id);
+    setBlockerTitle(comment.content.slice(0, 120));
+    setBlockerError(null);
+  }
+
+  async function submitBlocker(comment: InternalComment) {
+    if (!blockerTitle.trim() || blockerBusy) return;
+    setBlockerBusy(true);
+    setBlockerError(null);
+    try {
+      const result = await createBlockerFromTaskOrigin({ taskId, title: blockerTitle.trim() });
+      if (result.ok) {
+        setBlockerLinks((prev) => ({ ...prev, [comment.id]: result.pilotageId }));
+        setFlaggingId(null);
+      } else {
+        setBlockerError(result.error);
+      }
+    } catch {
+      setBlockerError("Erreur réseau. Réessayez dans un instant.");
+    } finally {
+      setBlockerBusy(false);
+    }
+  }
 
   useEffect(() => {
     async function load() {
@@ -120,9 +155,59 @@ export function TaskInternalNotes({ taskId }: TaskInternalNotesProps) {
               className="rounded-lg border border-amber-100 bg-white px-4 py-2 text-sm"
             >
               <p className="whitespace-pre-wrap text-slate-800">{c.content}</p>
-              <p className="mt-1 text-xs text-slate-500">
-                {c.user.name} · {formatDate(c.createdAt)}
-              </p>
+              <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs text-slate-500">
+                  {c.user.name} · {formatDate(c.createdAt)}
+                </p>
+                {projectId ? (
+                  blockerLinks[c.id] ? (
+                    <Link
+                      href={`${PILOTAGE_LIST_PATH}/${blockerLinks[c.id]}?onglet=blocages`}
+                      className="text-xs font-semibold text-red-700 hover:underline"
+                    >
+                      ✓ Blocage créé — voir dans Pilotage
+                    </Link>
+                  ) : flaggingId !== c.id ? (
+                    <button
+                      type="button"
+                      onClick={() => startFlagging(c)}
+                      className="text-xs font-semibold text-red-700 hover:underline"
+                    >
+                      Signaler comme blocage pilotage
+                    </button>
+                  ) : null
+                ) : null}
+              </div>
+              {flaggingId === c.id ? (
+                <div className="mt-2 space-y-2 rounded-lg border border-red-200 bg-red-50/50 p-3">
+                  <label className="block text-xs font-semibold text-red-800">
+                    Titre du blocage (Pilotage travaux)
+                    <input
+                      value={blockerTitle}
+                      onChange={(e) => setBlockerTitle(e.target.value)}
+                      className="mt-1 w-full rounded-lg border border-red-200 bg-white px-3 py-1.5 text-sm"
+                    />
+                  </label>
+                  {blockerError && <p className="text-xs text-red-700">{blockerError}</p>}
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      disabled={blockerBusy || !blockerTitle.trim()}
+                      onClick={() => submitBlocker(c)}
+                      className="rounded-lg bg-red-700 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+                    >
+                      {blockerBusy ? "Création…" : "Créer le blocage"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFlaggingId(null)}
+                      className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600"
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                </div>
+              ) : null}
             </li>
           ))
         )}

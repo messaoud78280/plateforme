@@ -82,6 +82,9 @@ export default async function PilotageBlocagesPage() {
                         <StatusBadge status={b.severity} />
                       </div>
                       {b.consequence ? <p className="mt-2 text-sm text-slate-700">{b.consequence}</p> : null}
+                      {b.originLabel ? (
+                        <p className="mt-2 text-[11px] font-medium text-slate-500">📎 {b.originLabel}</p>
+                      ) : null}
                       <dl className="mt-3 grid gap-1 text-xs text-slate-600 sm:grid-cols-2">
                         <div>Interne : {b.internalOwner ?? "—"}</div>
                         <div>Décideur : {b.externalDecider ?? "—"}</div>
@@ -97,6 +100,14 @@ export default async function PilotageBlocagesPage() {
                         >
                           Ouvrir le chantier
                         </Link>
+                        {b.originType === "TASK" && b.originId ? (
+                          <Link
+                            href={`/dashboard/taches/${b.originId}`}
+                            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600"
+                          >
+                            Voir la mission d&apos;origine
+                          </Link>
+                        ) : null}
                         <ResolveBlockerButton blockerId={b.id} canEdit={canEdit} />
                       </div>
                     </article>

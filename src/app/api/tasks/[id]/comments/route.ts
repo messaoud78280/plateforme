@@ -67,8 +67,6 @@ export async function POST(
   }
 
   const { id: taskId } = await params;
-  const isManager = isManagerRole(session.user.role);
-  const isAgent = session.user.role === "AGENT" || session.user.role === "AGENCE";
 
   let body: { content?: string; isInternal?: boolean };
   try {
@@ -96,7 +94,7 @@ export async function POST(
   }
 
   const internal = Boolean(isInternal);
-  if (internal && !isManager && !isAgent) {
+  if (internal && !canReadInternalNotes(session.user.role)) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
 

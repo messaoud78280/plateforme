@@ -8,7 +8,7 @@ import {
   requirePilotageSession,
 } from "@/lib/pilotage/access";
 import { formatDateFr } from "@/lib/pilotage/calculations";
-import { PILOTAGE_LIST_PATH } from "@/lib/pilotage/constants";
+import { PILOTAGE_LIST_PATH, BLOCKER_OPEN_STATUSES, BLOCKER_SEVERITIES } from "@/lib/pilotage/constants";
 import { prisma } from "@/lib/prisma";
 import { ResolveBlockerButton } from "@/components/pilotage/PilotageQuickForms";
 
@@ -22,7 +22,7 @@ export default async function PilotageBlocagesPage() {
   const blockers = await prisma.pilotageBlocker.findMany({
     where: {
       archivedAt: null,
-      status: { in: ["Ouvert", "En cours"] },
+      status: { in: [...BLOCKER_OPEN_STATUSES] },
       pilotage: scope,
     },
     include: {
@@ -36,11 +36,16 @@ export default async function PilotageBlocagesPage() {
     take: 200,
   });
 
-  const groups = [
-    { id: "Critique", title: "Critique", className: "border-red-200 bg-red-50/40" },
-    { id: "Important", title: "Important", className: "border-orange-200 bg-orange-50/30" },
-    { id: "À surveiller", title: "À surveiller", className: "border-amber-200 bg-amber-50/30" },
-  ];
+  const groups = BLOCKER_SEVERITIES.map((id) => ({
+    id,
+    title: id,
+    className:
+      id === "Critique"
+        ? "border-red-200 bg-red-50/40"
+        : id === "Important"
+          ? "border-orange-200 bg-orange-50/30"
+          : "border-amber-200 bg-amber-50/30",
+  }));
 
   return (
     <div className="space-y-6">

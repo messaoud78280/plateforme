@@ -4,6 +4,13 @@ import {
   isOverdue,
   isVisaPending,
 } from "./calculations";
+import {
+  isBlockerCritical,
+  isBlockerOpen,
+  isDoeMissing,
+  isMilestoneBlocked,
+  isObligationDone,
+} from "./status-enums";
 
 export type HealthLabel = "CONFORME" | "A_SURVEILLER" | "EN_DIFFICULTE" | "CRITIQUE" | "TERMINE";
 
@@ -133,21 +140,21 @@ export function countHealthSignals(params: {
   const overdueActions = params.actions.filter((a) => isActionOpen(a.status) && isOverdue(a.dueDate, a.status)).length;
   const criticalObligationsOverdue = params.obligations.filter(
     (o) =>
-      o.priority === "Critique" &&
-      !["Validée", "Non applicable"].includes(o.status) &&
+      isBlockerCritical(o.priority) &&
+      !isObligationDone(o.status) &&
       isOverdue(o.dueDate, o.status),
   ).length;
   const missingDocs = params.requiredDocuments.filter((d) => isDocMissing(d.status)).length;
   const visasOverdue = params.plans.filter(
     (p) => isVisaPending(p.status) && isOverdue(p.visaDueDate, p.status),
   ).length;
-  const openBlockers = params.blockers.filter((b) => b.status === "Ouvert" || b.status === "En cours");
-  const openBlockersCritical = openBlockers.filter((b) => b.severity === "Critique").length;
+  const openBlockers = params.blockers.filter((b) => isBlockerOpen(b.status));
+  const openBlockersCritical = openBlockers.filter((b) => isBlockerCritical(b.severity)).length;
   const tsWithoutValidation = params.extraWorks.filter(
     (e) => e.startedWithoutValidation && !e.writtenValidation && !["Validé", "Refusé", "Payé"].includes(e.status),
   ).length;
-  const doeMissing = params.doeItems.filter((d) => d.status === "Manquant" || d.status === "À demander").length;
-  const blockedMilestones = params.milestones.filter((m) => m.status === "Bloqué").length;
+  const doeMissing = params.doeItems.filter((d) => isDoeMissing(d.status)).length;
+  const blockedMilestones = params.milestones.filter((m) => isMilestoneBlocked(m.status)).length;
 
   return computeHealth({
     status: params.status,

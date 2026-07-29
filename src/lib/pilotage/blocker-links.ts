@@ -17,6 +17,7 @@ import { prisma } from "@/lib/prisma";
 import { canEditPilotageOperational } from "@/lib/pilotage/access";
 import { logPilotageActivity } from "@/lib/pilotage/history";
 import { PILOTAGE_LIST_PATH } from "@/lib/pilotage/constants";
+import { parseBlockerSeverity } from "@/lib/pilotage/status-enums";
 import { refreshPilotageProgress } from "@/app/dashboard/pilotage-travaux/refresh-progress";
 
 export type CreateBlockerFromTaskResult =
@@ -79,7 +80,7 @@ export async function createBlockerFromTaskOrigin(input: {
     data: {
       pilotageId: pilotage.id,
       title,
-      severity: input.severity?.trim() || "Important",
+      severity: parseBlockerSeverity(input.severity),
       status: "Ouvert",
       originType: "TASK",
       originId: task.id,

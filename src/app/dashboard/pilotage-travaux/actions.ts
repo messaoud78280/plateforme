@@ -12,6 +12,10 @@ import {
 import { computeDoeProgress } from "@/lib/pilotage/calculations";
 import { DEFAULT_MILESTONES, PILOTAGE_LIST_PATH } from "@/lib/pilotage/constants";
 import { logPilotageActivity } from "@/lib/pilotage/history";
+import {
+  parseBlockerSeverity,
+  parseMilestoneStatus,
+} from "@/lib/pilotage/status-enums";
 import { getTemplateById } from "@/lib/pilotage/templates";
 import { refreshPilotageProgress } from "./refresh-progress";
 
@@ -761,8 +765,8 @@ export async function updateMilestoneStatus(formData: FormData) {
   if (!canEditPilotageOperational(session.user.role)) return { ok: false as const, error: "Droits insuffisants." };
 
   const milestoneId = String(formData.get("milestoneId") ?? "").trim();
-  const status = String(formData.get("status") ?? "").trim();
-  if (!milestoneId || !status) return { ok: false as const, error: "Données manquantes." };
+  const status = parseMilestoneStatus(formData.get("status"));
+  if (!milestoneId || !status) return { ok: false as const, error: "Statut de jalon invalide." };
 
   const item = await prisma.pilotageMilestone.findUnique({ where: { id: milestoneId } });
   if (!item) return { ok: false as const, error: "Jalon introuvable." };
@@ -805,7 +809,7 @@ export async function createBlocker(formData: FormData) {
     data: {
       pilotageId,
       title,
-      severity: String(formData.get("severity") ?? "Important").trim() || "Important",
+      severity: parseBlockerSeverity(formData.get("severity")),
       consequence: String(formData.get("consequence") ?? "").trim() || null,
       nextAction: String(formData.get("nextAction") ?? "").trim() || null,
       internalOwner: String(formData.get("internalOwner") ?? "").trim() || null,
@@ -813,6 +817,8 @@ export async function createBlocker(formData: FormData) {
       priority: String(formData.get("priority") ?? "Haute").trim() || "Haute",
       nextFollowUpAt: parseDate(formData.get("nextFollowUpAt")),
       status: "Ouvert",
+      originType: "MANUAL",
+      originLabel: "Saisie manuelle Pilotage",
     },
   });
   await logPilotageActivity({

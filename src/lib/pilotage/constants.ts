@@ -1,5 +1,29 @@
 /** Constantes métier Pilotage travaux — libellés FR pour UI et validation. */
 
+export {
+  BLOCKER_CLOSED_STATUSES,
+  BLOCKER_OPEN_STATUSES,
+  BLOCKER_ORIGIN_TYPES,
+  BLOCKER_SEVERITIES,
+  BLOCKER_STATUSES,
+  DOE_DONE_STATUSES,
+  DOE_MISSING_STATUSES,
+  MILESTONE_STATUSES,
+  OBLIGATION_DONE_STATUSES,
+  PILOTAGE_PRIORITIES,
+  isBlockerClosed,
+  isBlockerCritical,
+  isBlockerOpen,
+  isDoeMissing,
+  isMilestoneBlocked,
+  isMilestoneReached,
+  isObligationDone,
+  parseBlockerSeverity,
+  parseBlockerStatus,
+  parseMilestoneStatus,
+  parsePilotageEnum,
+} from "./status-enums";
+
 export const PILOTAGE_LIST_PATH = "/dashboard/pilotage-travaux";
 
 export const PILOTAGE_STATUS_LABELS: Record<string, string> = {

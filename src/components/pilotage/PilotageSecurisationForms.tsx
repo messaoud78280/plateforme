@@ -16,6 +16,7 @@ import {
   createTradeInterface,
   ensureHandoverChecklist,
 } from "@/app/dashboard/pilotage-travaux/securisation-actions";
+import { BLOCKER_SEVERITIES } from "@/lib/pilotage/constants";
 
 type Props = { pilotageId: string; canEdit: boolean };
 
@@ -312,7 +313,7 @@ export function QuickAddNonConformity({ pilotageId, canEdit }: Props) {
         { name: "reference", label: "Référence" },
         { name: "lot", label: "Lot" },
         { name: "zone", label: "Zone" },
-        { name: "severity", label: "Gravité", options: ["À surveiller", "Important", "Critique"], defaultValue: "Important" },
+        { name: "severity", label: "Gravité", options: [...BLOCKER_SEVERITIES], defaultValue: "Important" },
         { name: "responsibleName", label: "Responsable corrective" },
         { name: "dueAt", label: "Date limite", type: "date" },
       ]}

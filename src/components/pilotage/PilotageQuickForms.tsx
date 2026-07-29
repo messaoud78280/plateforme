@@ -19,7 +19,7 @@ import {
   updateMilestoneStatus,
   updatePilotageActionStatus,
 } from "@/app/dashboard/pilotage-travaux/actions";
-import { MARKET_DOC_TYPES } from "@/lib/pilotage/constants";
+import { BLOCKER_SEVERITIES, MARKET_DOC_TYPES, MILESTONE_STATUSES } from "@/lib/pilotage/constants";
 import { StatusBadge } from "./PilotageBadges";
 
 type Props = { pilotageId: string; canEdit: boolean };
@@ -35,7 +35,7 @@ export function QuickAddBlocker({ pilotageId, canEdit }: Props) {
         {
           name: "severity",
           label: "Niveau",
-          options: ["Critique", "Important", "À surveiller"],
+          options: [...BLOCKER_SEVERITIES],
           defaultValue: "Important",
         },
         { name: "consequence", label: "Conséquence" },
@@ -102,17 +102,7 @@ export function MilestoneStatusSelect({
         });
       }}
     >
-      {[
-        "Non démarré",
-        "À préparer",
-        "Prêt",
-        "En cours",
-        "Bloqué",
-        "Atteint",
-        "Reporté",
-        "Annulé",
-        "Non applicable",
-      ].map((s) => (
+      {[...MILESTONE_STATUSES].map((s) => (
         <option key={s} value={s}>
           {s}
         </option>

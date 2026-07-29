@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { computeAdminProgress, computeDoeProgress } from "@/lib/pilotage/calculations";
 import { computeContractRisk } from "@/lib/pilotage/contractRisk";
 import { countHealthSignals } from "@/lib/pilotage/health";
+import { isBlockerClosed, isBlockerCritical, isObligationDone } from "@/lib/pilotage/status-enums";
 
 /** Recalcule santé opérationnelle + risque contractuel et persiste sur le pilotage. */
 export async function refreshPilotageProgress(pilotageId: string) {
@@ -34,7 +35,7 @@ export async function refreshPilotageProgress(pilotageId: string) {
   const doe = computeDoeProgress(pilotage.doeItems);
   const admin = computeAdminProgress({
     obligationsTotal: pilotage.obligations.length,
-    obligationsDone: pilotage.obligations.filter((o) => o.status === "Validée" || o.status === "Non applicable").length,
+    obligationsDone: pilotage.obligations.filter((o) => isObligationDone(o.status)).length,
     docsTotal: pilotage.requiredDocuments.length,
     docsDone: pilotage.requiredDocuments.filter((d) => d.status === "Validé" || d.status === "Non applicable").length,
     plansTotal: pilotage.plans.length,
@@ -63,13 +64,13 @@ export async function refreshPilotageProgress(pilotageId: string) {
     ).length,
     overdueCriticalObligations: pilotage.obligations.filter(
       (o) =>
-        o.priority === "Critique" &&
+        isBlockerCritical(o.priority) &&
         o.dueDate != null &&
         o.dueDate < now &&
-        !["Validée", "Non applicable"].includes(o.status),
+        !isObligationDone(o.status),
     ).length,
     openCriticalBlockers: pilotage.blockers.filter(
-      (b) => b.severity === "Critique" && !["Résolu", "Clôturé", "Non applicable"].includes(b.status),
+      (b) => isBlockerCritical(b.severity) && !isBlockerClosed(b.status),
     ).length,
     contestedSituations: pilotage.situations.filter((s) => s.status === "Contestée").length,
     incompleteSubcontractors: pilotage.subcontractors.filter(

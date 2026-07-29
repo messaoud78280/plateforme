@@ -2,6 +2,8 @@
  * Qualité des données — anomalies structurelles (responsable, échéance, preuve…).
  */
 
+import { isBlockerOpen, isObligationDone } from "./status-enums";
+
 export type DataQualityIssue = {
   code: string;
   title: string;
@@ -50,7 +52,7 @@ export function detectDataQualityIssues(input: {
   }
 
   for (const o of input.obligations) {
-    if (["Validée", "Non applicable"].includes(o.status)) continue;
+    if (isObligationDone(o.status)) continue;
     if (!o.responsibleName) {
       out.push({
         code: "obligation-sans-responsable",
@@ -91,7 +93,7 @@ export function detectDataQualityIssues(input: {
   }
 
   for (const b of input.blockers) {
-    if (!["Ouvert", "En cours"].includes(b.status)) continue;
+    if (!isBlockerOpen(b.status)) continue;
     if (!b.nextAction) {
       out.push({
         code: "blocage-sans-action",

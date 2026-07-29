@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { getReportStats } from "@/lib/reportStats";
 import { getClientReportingSnapshot } from "@/lib/client-reporting-insights";
 import { parseReportPeriodParam } from "@/lib/validation/reportParams";
+import { isAgencyOrManager, isClientRole, isManager as isManagerRole } from "@/lib/authz";
 
 /** GET /api/reports/stats?period=7d|30d|3m|6m|1y */
 export async function GET(request: NextRequest) {
@@ -17,10 +18,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Période invalide" }, { status: 400 });
   }
 
-  const role = session.user.role;
-  const isAgence = role === "AGENCE" || role === "MANAGER";
-  const isClient = role === "CLIENT";
-  const isManager = role === "MANAGER";
+  const isAgence = isAgencyOrManager(session.user);
+  const isClient = isClientRole(session.user);
+  const isManager = isManagerRole(session.user);
 
   try {
     const [stats, clientSnapshot] = await Promise.all([
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       ...stats,
       start: stats.start.toISOString(),
       end: stats.end.toISOString(),
-      role: role ?? null,
+      role: session.user.role ?? null,
       clientSnapshot,
     });
   } catch (e: unknown) {

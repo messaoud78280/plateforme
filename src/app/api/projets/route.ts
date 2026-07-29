@@ -9,6 +9,7 @@ import {
   projectWhereForClientUser,
   resolveClientTenant,
 } from "@/lib/organization/access";
+import { isAgent, isBeworkStaff } from "@/lib/authz";
 
 const CHANTIER_STATUSES: ChantierStatus[] = ["ETUDE", "EN_COURS", "EN_ATTENTE", "RECEPTION", "TERMINE"];
 const URGENCIES: ProjectUrgency[] = ["BASSE", "MOYENNE", "HAUTE", "URGENTE"];
@@ -37,15 +38,12 @@ export async function GET() {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
 
-  const isStaff =
-    session.user.role === "AGENCE" ||
-    session.user.role === "MANAGER" ||
-    session.user.role === "AGENT";
+  const isStaff = isBeworkStaff(session.user);
 
   try {
     const projects = await prisma.project.findMany({
       where: isStaff
-        ? session.user.role === "AGENT"
+        ? isAgent(session.user)
           ? { assignedToId: session.user.id }
           : {}
         : await projectWhereForClientUser(session.user.id),
@@ -93,10 +91,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Le nom du chantier est obligatoire." }, { status: 400 });
   }
 
-  const isStaff =
-    session.user.role === "AGENCE" ||
-    session.user.role === "MANAGER" ||
-    session.user.role === "AGENT";
+  const isStaff = isBeworkStaff(session.user);
 
   let clientId = session.user.id;
   let organizationId: string | null = null;

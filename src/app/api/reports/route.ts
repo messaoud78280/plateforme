@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isAgencyOrManager } from "@/lib/authz";
 
 // GET /api/reports?projectId=xxx — liste des rapports du projet
 export async function GET(request: Request) {
@@ -24,7 +25,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Projet introuvable" }, { status: 404 });
   }
 
-  const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
+  const isAgence = isAgencyOrManager(session.user);
   const canAccess = isAgence || project.clientId === session.user.id;
   if (!canAccess) {
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
@@ -90,7 +91,7 @@ export async function POST(request: Request) {
       id: projectId,
       OR: [
         { clientId: session.user.id },
-        ...(session.user.role === "AGENCE" || session.user.role === "MANAGER" ? [{}] : []),
+        ...(isAgencyOrManager(session.user) ? [{}] : []),
       ],
     },
   });
@@ -99,7 +100,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Projet introuvable ou non autorisé" }, { status: 404 });
   }
 
-  const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
+  const isAgence = isAgencyOrManager(session.user);
   const canAccess = isAgence || project.clientId === session.user.id;
   if (!canAccess) {
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });

@@ -8,6 +8,7 @@ import {
   parseReportPeriodParam,
 } from "@/lib/validation/reportParams";
 import { jsPDF } from "jspdf";
+import { isAgencyOrManager, isClientRole, isManager as isManagerRole } from "@/lib/authz";
 
 const PERIOD_LABELS: Record<PeriodKey, string> = {
   "7d": "7 jours",
@@ -46,9 +47,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Format invalide (csv ou pdf)" }, { status: 400 });
   }
 
-  const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
-  const isClient = session.user.role === "CLIENT";
-  const isManager = session.user.role === "MANAGER";
+  const isAgence = isAgencyOrManager(session.user);
+  const isClient = isClientRole(session.user);
+  const isManager = isManagerRole(session.user);
 
   try {
     const [stats, clientSnapshot] = await Promise.all([

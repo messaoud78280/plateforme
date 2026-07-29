@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { minutesToActions } from "@/lib/actions";
 import { deductTaskCreditsIfNeeded } from "@/lib/tasks/deduct-credits";
+import { isAgencyOrManager, isAgent as isAgentRole } from "@/lib/authz";
 
 /** PATCH /api/tasks/[id]/status – Changer le statut d'une tâche (optionnel: timeSpentMinutes pour COMPLETE) */
 export async function PATCH(
@@ -16,8 +17,8 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
-  const isAgent = session.user.role === "AGENT";
+  const isAgence = isAgencyOrManager(session.user);
+  const isAgent = isAgentRole(session.user);
 
   try {
     const existing = await prisma.task.findUnique({ where: { id } });

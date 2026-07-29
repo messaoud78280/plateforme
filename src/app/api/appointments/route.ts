@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isAgencyOrManager } from "@/lib/authz";
 
 const SLOT_DURATION_MIN = 30;
 
@@ -17,7 +18,7 @@ export async function GET(request: Request) {
   const from = searchParams.get("from");
   const to = searchParams.get("to");
 
-  const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
+  const isAgence = isAgencyOrManager(session.user);
 
   try {
     const baseWhere = isAgence
@@ -85,7 +86,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
+    const isAgence = isAgencyOrManager(session.user);
     let organizerId = session.user.id;
     if (!isAgence) {
       const manager = await prisma.user.findFirst({ where: { role: "MANAGER" }, select: { id: true } });

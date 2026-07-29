@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isAgencyOrManager } from "@/lib/authz";
 
 // POST /api/reports/[id]/comments — ajouter un commentaire
 export async function POST(
@@ -36,7 +37,7 @@ export async function POST(
     return NextResponse.json({ error: "Rapport introuvable" }, { status: 404 });
   }
 
-  const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
+  const isAgence = isAgencyOrManager(session.user);
   const canAccess = isAgence || report.project.clientId === session.user.id;
   if (!canAccess) {
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });

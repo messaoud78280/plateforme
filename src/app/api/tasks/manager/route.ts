@@ -5,10 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
 import { normalizeTaskPriority } from "@/lib/tasks/priority";
 import { MISSION_TYPES, type MissionType } from "@/lib/tasks/mission-types";
-
-function isManager(role?: string | null): boolean {
-  return role === "MANAGER" || role === "AGENCE";
-}
+import { isAgencyOrManager } from "@/lib/authz";
 
 /** POST /api/tasks/manager — Créer une mission pour un client (gérant). */
 export async function POST(request: NextRequest) {
@@ -17,7 +14,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
 
-  if (!isManager(session.user.role)) {
+  if (!isAgencyOrManager(session.user)) {
     return NextResponse.json({ error: "Réservé au gérant" }, { status: 403 });
   }
 

@@ -12,6 +12,7 @@ import {
   downloadStorageObject,
   extractStoragePathFromUrl,
 } from "@/lib/storage/supabase-object";
+import { isBeworkStaff } from "@/lib/authz";
 
 const DM_MAX_BYTES = 10 * 1024 * 1024;
 
@@ -112,10 +113,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     });
   }
 
-  const isStaff =
-    session.user.role === "AGENCE" ||
-    session.user.role === "MANAGER" ||
-    session.user.role === "AGENT";
+  const isStaff = isBeworkStaff(session.user);
   if (!isStaff) {
     return NextResponse.json({ error: "Messagerie directe réservée à l’équipe" }, { status: 403 });
   }

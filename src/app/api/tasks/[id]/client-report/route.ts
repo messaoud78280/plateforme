@@ -8,6 +8,7 @@ import { absoluteUrl } from "@/lib/site";
 import { deductTaskCreditsIfNeeded, setTaskActionsUsed } from "@/lib/tasks/deduct-credits";
 import type { ClientDeliveryPayload } from "@/lib/tasks/client-delivery";
 import { isFeatureEnabled } from "@/lib/feature-flags";
+import { isAgencyOrManager } from "@/lib/authz";
 
 /** GET /api/tasks/[id]/client-report — Compte rendu client (client ou équipe) */
 export async function GET(
@@ -20,7 +21,7 @@ export async function GET(
   }
 
   const { id } = await params;
-  const isStaff = session.user.role === "MANAGER" || session.user.role === "AGENCE";
+  const isStaff = isAgencyOrManager(session.user);
 
   const task = await prisma.task.findUnique({
     where: { id },

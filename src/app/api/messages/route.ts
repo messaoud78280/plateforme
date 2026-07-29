@@ -6,6 +6,7 @@ import {
   canAccessProjectMessaging,
   projectMessageVisibilityWhere,
 } from "@/lib/messaging/access";
+import { isAgencyOrManager, isAgent } from "@/lib/authz";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -63,11 +64,11 @@ export async function POST(request: Request) {
     }
 
     const canMessage = await canAccessProjectMessaging(session.user, project);
-    if (!canMessage && session.user.role === "AGENT") {
+    if (!canMessage && isAgent(session.user)) {
       return NextResponse.json({ error: "Accès refusé à ce projet." }, { status: 403 });
     }
 
-    const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
+    const isAgence = isAgencyOrManager(session.user);
     let finalReceiverId: string;
 
     if (isAgence) {

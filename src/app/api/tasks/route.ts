@@ -10,6 +10,7 @@ import {
   resolveClientTenant,
   taskWhereForClientUser,
 } from "@/lib/organization/access";
+import { isAgencyOrManager } from "@/lib/authz";
 
 /** GET /api/tasks – Liste des tâches du client (ou toutes si agence) */
 export async function GET(request: NextRequest) {
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
 
-  const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
+  const isAgence = isAgencyOrManager(session.user);
   const { searchParams } = new URL(request.url);
   const status = searchParams.get("status") ?? undefined;
 

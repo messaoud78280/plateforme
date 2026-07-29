@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { canDeleteChantierProject } from "@/lib/chantier-dossier/access";
 import { deleteChantierProjectStorage } from "@/lib/chantier-dossier/delete-project-storage";
 import { createServiceRoleClient } from "@/lib/supabase";
+import { isAgencyOrManager } from "@/lib/authz";
 
 /** PATCH /api/projets/[id] – Mettre à jour un projet (agence : assigner un agent) */
 export async function PATCH(
@@ -17,7 +18,7 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
+  const isAgence = isAgencyOrManager(session.user);
 
   const project = await prisma.project.findUnique({ where: { id } });
   if (!project) {

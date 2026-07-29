@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { syncUserCreditsExpiry, formatCreditsExpiryLabel } from "@/lib/actions";
 import { parseClientDeliveryJson } from "@/lib/tasks/client-delivery";
 import { canViewClientCredits } from "@/lib/clients/credits-access";
+import { isAgencyOrManager } from "@/lib/authz";
 
 /** GET — Données pour préparer la transmission au client */
 export async function GET(
@@ -16,7 +17,7 @@ export async function GET(
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
 
-  const isStaff = session.user.role === "MANAGER" || session.user.role === "AGENCE";
+  const isStaff = isAgencyOrManager(session.user);
   if (!isStaff) {
     return NextResponse.json({ error: "Réservé à l'équipe BeWork" }, { status: 403 });
   }

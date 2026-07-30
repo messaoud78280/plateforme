@@ -16,6 +16,10 @@ import {
   DataTableTd,
   DataTableTh,
 } from "@/components/ui/DataTable";
+import {
+  formatAppointmentSlot,
+  listUpcomingAppointments,
+} from "@/lib/appointments/upcoming";
 
 const STATUS_LABELS: Record<string, string> = {
   NOUVEAU: "Nouvelle",
@@ -26,7 +30,7 @@ const STATUS_LABELS: Record<string, string> = {
 export default async function MessagesPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session) {
+  if (!session?.user?.id) {
     redirect("/connexion?callbackUrl=/dashboard");
   }
 
@@ -61,23 +65,85 @@ export default async function MessagesPage() {
     // Table absente ou erreur
   }
 
+  const upcoming = await listUpcomingAppointments(
+    {
+      id: session.user.id,
+      role: session.user.role,
+      email: session.user.email,
+    },
+    { take: 20 },
+  );
+
   return (
     <div className="space-y-6">
       <BackLink href="/dashboard">Tableau de bord</BackLink>
       <PageHeader
-        eyebrow="Demandes"
+        eyebrow="Agenda"
         title="RDV"
         description={
           isAgence
-            ? "Demandes de contact reçues (historique des envois depuis le formulaire)."
-            : "Historique des demandes de contact associées à votre compte."
+            ? "Prochains rendez-vous confirmés et demandes de contact à traiter."
+            : "Vos rendez-vous à venir et l’historique de vos demandes de contact."
         }
       />
 
       <Card hover={false} className="!p-0 overflow-hidden">
         <div className="border-b border-[color:var(--cc-chrome-border)] px-5 py-4">
+          <h2 className="font-heading text-lg font-bold text-bework-ink">Prochains rendez-vous</h2>
+          <p className="mt-0.5 text-sm text-bework-muted">Créneaux confirmés — à ne pas manquer.</p>
+        </div>
+        {upcoming.length === 0 ? (
+          <div className="p-5">
+            <EmptyState
+              title="Aucun RDV à venir"
+              description="Dès qu’un créneau est confirmé, il s’affiche ici."
+            />
+          </div>
+        ) : (
+          <DataTable minWidth="560px" className="!rounded-none !border-0 !shadow-none">
+            <DataTableHead>
+              <DataTableTh>Titre</DataTableTh>
+              <DataTableTh>Créneau</DataTableTh>
+              <DataTableTh>Contact</DataTableTh>
+              <DataTableTh>Chantier</DataTableTh>
+              <DataTableTh>Statut</DataTableTh>
+            </DataTableHead>
+            <DataTableBody>
+              {upcoming.map((a) => (
+                <DataTableRow key={a.id}>
+                  <DataTableTd>
+                    <span className="font-semibold text-bework-ink">{a.title}</span>
+                  </DataTableTd>
+                  <DataTableTd>{formatAppointmentSlot(a.startAt, a.endAt)}</DataTableTd>
+                  <DataTableTd>
+                    {a.clientName ?? a.clientEmail ?? "—"}
+                  </DataTableTd>
+                  <DataTableTd>
+                    {a.project ? (
+                      <Link
+                        href={`/dashboard/projets/${a.project.id}`}
+                        className="text-bework-navy hover:underline"
+                      >
+                        {a.project.title}
+                      </Link>
+                    ) : (
+                      "—"
+                    )}
+                  </DataTableTd>
+                  <DataTableTd>
+                    <Badge tone="ok">Confirmé</Badge>
+                  </DataTableTd>
+                </DataTableRow>
+              ))}
+            </DataTableBody>
+          </DataTable>
+        )}
+      </Card>
+
+      <Card hover={false} className="!p-0 overflow-hidden">
+        <div className="border-b border-[color:var(--cc-chrome-border)] px-5 py-4">
           <h2 className="font-heading text-lg font-bold text-bework-ink">
-            {isAgence ? "Demandes de contact et RDV" : "Mes demandes de RDV"}
+            {isAgence ? "Demandes de contact" : "Mes demandes de contact"}
           </h2>
         </div>
         {contactRequests.length === 0 ? (

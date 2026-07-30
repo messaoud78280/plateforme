@@ -92,3 +92,11 @@ export function projectLifecycleWrite(chantierStatus: ChantierStatus): {
     status: mapChantierToProjectStatus(chantierStatus),
   };
 }
+
+/** True si Project.status reflète déjà chantierStatus. */
+export function isProjectLifecycleInSync(
+  chantierStatus: ChantierStatus,
+  status: ProjectStatus,
+): boolean {
+  return mapChantierToProjectStatus(chantierStatus) === status;
+}

@@ -74,6 +74,9 @@ export function DashboardNav({ role }: { role?: string | null }) {
             <NavLink href="/dashboard/messagerie" pathname={pathname} activeClass={active}>
               Messagerie
             </NavLink>
+            <NavLink href="/dashboard/messages" pathname={pathname} activeClass={active}>
+              RDV
+            </NavLink>
             <NavLink href="/dashboard/documents" pathname={pathname} activeClass={active}>
               Documents
             </NavLink>
@@ -119,6 +122,9 @@ export function DashboardNav({ role }: { role?: string | null }) {
             <NavLink href="/dashboard/messagerie" pathname={pathname} activeClass={active}>
               Messagerie
             </NavLink>
+            <NavLink href="/dashboard/messages" pathname={pathname} activeClass={active}>
+              RDV
+            </NavLink>
             <NavLink href="/dashboard/rapports" pathname={pathname} activeClass={active}>
               Rapports
             </NavLink>
@@ -144,6 +150,9 @@ export function DashboardNav({ role }: { role?: string | null }) {
             ) : null}
             <NavLink href="/dashboard/messagerie" pathname={pathname} activeClass={active}>
               Messagerie
+            </NavLink>
+            <NavLink href="/dashboard/messages" pathname={pathname} activeClass={active}>
+              RDV
             </NavLink>
             <NavLink href="/dashboard/taches?statut=COMPLETE" pathname={pathname} activeClass={active}>
               Historique

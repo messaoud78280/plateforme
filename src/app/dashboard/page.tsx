@@ -16,10 +16,12 @@ import { ClientDashboardContent } from "@/components/dashboard/ClientDashboardCo
 import { ManagerDashboardContent, type ManagerTaskItem, type ManagerReportItem } from "@/components/dashboard/ManagerDashboardContent";
 import { AgentDashboardContent } from "@/components/dashboard/AgentDashboardContent";
 import { ATraiterHomeBanner } from "@/components/dashboard/ATraiterHomeBanner";
+import { UpcomingRdvSection } from "@/components/dashboard/UpcomingRdvSection";
 import { BackLink } from "@/components/ui/BackLink";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
 import { countATraiter } from "@/lib/a-traiter/collect";
+import { listUpcomingAppointments } from "@/lib/appointments/upcoming";
 
 export default async function DashboardPage({
   searchParams,
@@ -48,6 +50,15 @@ export default async function DashboardPage({
   } catch {
     aTraiterTotal = 0;
   }
+
+  const upcomingRdvs = await listUpcomingAppointments(
+    {
+      id: session.user.id,
+      role: session.user.role,
+      email: session.user.email,
+    },
+    { take: 5 },
+  );
 
   let contractStatus: "PENDING" | "SIGNED" | null = null;
   let actionsData: {
@@ -573,6 +584,7 @@ export default async function DashboardPage({
       <div className="space-y-8">
         <BackLink href="/">Retour à l&apos;accueil</BackLink>
         <ATraiterHomeBanner total={aTraiterTotal} />
+        <UpcomingRdvSection appointments={upcomingRdvs} compact />
         <ClientDashboardContent
           userName={session.user?.name ?? null}
           openDemande={openDemande}
@@ -604,6 +616,7 @@ export default async function DashboardPage({
       <div className="space-y-8">
         <BackLink href="/">Retour à l&apos;accueil</BackLink>
         <ATraiterHomeBanner total={aTraiterTotal} />
+        <UpcomingRdvSection appointments={upcomingRdvs} compact />
         <AgentDashboardContent
           userName={session.user?.name ?? null}
           missionsToday={agentData.missionsToday}
@@ -622,6 +635,7 @@ export default async function DashboardPage({
     <div className="space-y-8">
       <BackLink href="/">Retour à l&apos;accueil</BackLink>
       <ATraiterHomeBanner total={aTraiterTotal} />
+      <UpcomingRdvSection appointments={upcomingRdvs} />
       <ScrollToMessages />
 
       {/* Dashboard gérante — centre de pilotage */}

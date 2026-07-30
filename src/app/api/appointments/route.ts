@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { isAgencyOrManager } from "@/lib/authz";
+import { isAgencyOrManager, isBeworkStaff } from "@/lib/authz";
 
 const SLOT_DURATION_MIN = 30;
 
@@ -19,10 +19,12 @@ export async function GET(request: Request) {
   const to = searchParams.get("to");
 
   const isAgence = isAgencyOrManager(session.user);
+  const staff = isBeworkStaff(session.user);
 
   try {
-    const baseWhere = isAgence
-      ? { organizerId: session.user.id, status: { not: "ANNULE" as const } }
+    // Staff : agenda partagé BeWork. Client : ses RDV uniquement.
+    const baseWhere = staff
+      ? { status: { not: "ANNULE" as const } }
       : {
           status: { not: "ANNULE" as const },
           OR: [

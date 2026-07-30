@@ -22,6 +22,7 @@ import {
 } from "@/lib/pilotage/calculations";
 import { PILOTAGE_LIST_PATH, PILOTAGE_STATUS_LABELS, SERVICE_LEVEL_LABELS } from "@/lib/pilotage/constants";
 import { countHealthSignals, type HealthLabel } from "@/lib/pilotage/health";
+import { chantierStatusLabel } from "@/lib/chantier-lifecycle";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -428,6 +429,7 @@ export default async function PilotageTravauxPage({
               <thead className="border-b border-[color:var(--cc-chrome-border)] bg-bework-navy-soft/40 text-[11px] font-bold uppercase tracking-wider text-bework-muted">
                 <tr>
                   <th className="px-4 py-3">Chantier</th>
+                  <th className="px-4 py-3">Cycle</th>
                   <th className="px-4 py-3">Santé</th>
                   <th className="px-4 py-3">Admin</th>
                   <th className="px-4 py-3">DOE</th>
@@ -446,6 +448,14 @@ export default async function PilotageTravauxPage({
                         {r.project.client.company ?? r.project.client.name}
                         {r.lot ? ` · ${r.lot}` : ""}
                       </p>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col gap-1">
+                        <StatusBadge status={r.status} />
+                        <span className="text-[10px] text-bework-muted">
+                          Chantier : {chantierStatusLabel(r.project.chantierStatus)}
+                        </span>
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <HealthBadge label={r.health.label} />
@@ -502,10 +512,14 @@ export default async function PilotageTravauxPage({
                         {r.lot ? ` · ${r.lot}` : ""}
                       </p>
                     </div>
-                    <HealthBadge label={r.health.label} />
+                    <div className="flex flex-col items-end gap-1">
+                      <StatusBadge status={r.status} />
+                      <HealthBadge label={r.health.label} />
+                    </div>
                   </div>
                   <p className="mt-2 text-xs text-bework-muted">
-                    Conducteur : {r.conducteur?.name ?? "—"} · Assistant : {r.assistant?.name ?? "—"}
+                    Cycle chantier : {chantierStatusLabel(r.project.chantierStatus)} · Conducteur :{" "}
+                    {r.conducteur?.name ?? "—"} · Assistant : {r.assistant?.name ?? "—"}
                   </p>
                   <p className="mt-0.5 text-[11px] text-bework-muted/80">
                     {SERVICE_LEVEL_LABELS[r.serviceLevel] ?? r.serviceLevel}

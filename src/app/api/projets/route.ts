@@ -10,25 +10,10 @@ import {
   resolveClientTenant,
 } from "@/lib/organization/access";
 import { isAgent, isBeworkStaff } from "@/lib/authz";
+import { mapChantierToProjectStatus } from "@/lib/chantier-lifecycle";
 
 const CHANTIER_STATUSES: ChantierStatus[] = ["ETUDE", "EN_COURS", "EN_ATTENTE", "RECEPTION", "TERMINE"];
 const URGENCIES: ProjectUrgency[] = ["BASSE", "MOYENNE", "HAUTE", "URGENTE"];
-
-function mapChantierToProjectStatus(chantierStatus: ChantierStatus) {
-  switch (chantierStatus) {
-    case "ETUDE":
-      return "NOUVEAU" as const;
-    case "EN_COURS":
-      return "EN_COURS" as const;
-    case "EN_ATTENTE":
-      return "EN_ATTENTE" as const;
-    case "RECEPTION":
-    case "TERMINE":
-      return "TERMINE" as const;
-    default:
-      return "EN_COURS" as const;
-  }
-}
 
 /** GET /api/projets – Liste des projets accessibles */
 export async function GET() {

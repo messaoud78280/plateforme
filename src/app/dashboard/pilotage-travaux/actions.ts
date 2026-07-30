@@ -17,6 +17,10 @@ import {
   parseMilestoneStatus,
 } from "@/lib/pilotage/status-enums";
 import { getTemplateById } from "@/lib/pilotage/templates";
+import {
+  mapChantierToProjectStatus,
+  mapPilotageToChantierStatus,
+} from "@/lib/chantier-lifecycle";
 import { refreshPilotageProgress } from "./refresh-progress";
 
 function revalidatePilotage(id?: string) {
@@ -513,16 +517,41 @@ export async function updatePilotageStatus(
   if (!canManagePilotage(session.user.role) && !canEditPilotageOperational(session.user.role)) {
     return { ok: false, error: "Droits insuffisants." };
   }
-  const pilotage = await requirePilotageAccess({ id: session.user.id, role: session.user.role }, pilotageId);
-  const old = pilotage ? String((await prisma.worksitePilotage.findUnique({ where: { id: pilotageId }, select: { status: true } }))?.status) : "";
+  await requirePilotageAccess({ id: session.user.id, role: session.user.role }, pilotageId);
+  const current = await prisma.worksitePilotage.findUnique({
+    where: { id: pilotageId },
+    select: { status: true, projectId: true },
+  });
+  const old = current?.status ?? "";
+
+  const pilotageStatus = status as
+    | "A_PREPARER"
+    | "EN_COURS"
+    | "SOUS_SURVEILLANCE"
+    | "BLOQUE"
+    | "TERMINE"
+    | "ARCHIVE";
 
   await prisma.worksitePilotage.update({
     where: { id: pilotageId },
     data: {
-      status: status as "A_PREPARER" | "EN_COURS" | "SOUS_SURVEILLANCE" | "BLOQUE" | "TERMINE" | "ARCHIVE",
+      status: pilotageStatus,
       archivedAt: status === "ARCHIVE" ? new Date() : null,
     },
   });
+
+  // Aligne le cycle de vie chantier (évite fiche client vs pilotage contradictoires)
+  const chantierStatus = mapPilotageToChantierStatus(pilotageStatus);
+  if (chantierStatus && current?.projectId) {
+    await prisma.project.update({
+      where: { id: current.projectId },
+      data: {
+        chantierStatus,
+        status: mapChantierToProjectStatus(chantierStatus),
+      },
+    });
+  }
+
   await logPilotageActivity({
     pilotageId,
     userId: session.user.id,
@@ -534,6 +563,7 @@ export async function updatePilotageStatus(
     newValue: status,
   });
   revalidatePilotage(pilotageId);
+  revalidatePath("/dashboard/projets");
   return { ok: true };
 }
 

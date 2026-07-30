@@ -21,13 +21,10 @@ import {
   DataTableTd,
   DataTableTh,
 } from "@/components/ui/DataTable";
-
-const STATUS_LABELS: Record<string, string> = {
-  NOUVEAU: "Nouveau",
-  EN_COURS: "En cours",
-  EN_ATTENTE: "En attente",
-  TERMINE: "Terminé",
-};
+import {
+  chantierStatusBadgeTone,
+  chantierStatusLabel,
+} from "@/lib/chantier-lifecycle";
 
 const TASK_STATUS_LABELS: Record<string, string> = {
   EN_COURS: "En cours",
@@ -65,6 +62,7 @@ export default async function ClientDetailPage({
     id: string;
     title: string;
     status: string;
+    chantierStatus: string;
     assignedToId: string | null;
     assignedTo: { id: string; name: string; email: string } | null;
   }[] = [];
@@ -217,16 +215,8 @@ export default async function ClientDetailPage({
                     </Link>
                   </DataTableTd>
                   <DataTableTd>
-                    <Badge
-                      tone={
-                        project.status === "TERMINE"
-                          ? "ok"
-                          : project.status === "EN_COURS"
-                            ? "info"
-                            : "neutral"
-                      }
-                    >
-                      {STATUS_LABELS[project.status] ?? project.status}
+                    <Badge tone={chantierStatusBadgeTone(project.chantierStatus)}>
+                      {chantierStatusLabel(project.chantierStatus)}
                     </Badge>
                   </DataTableTd>
                   <DataTableTd>

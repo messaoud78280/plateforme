@@ -48,6 +48,7 @@ interface TaskDetailClientProps {
   isAgence: boolean;
   isAgent?: boolean;
   agents?: { id: string; name: string; email: string }[];
+  clientProjects?: { id: string; title: string }[];
   onTaskUpdated?: () => void | Promise<void>;
 }
 
@@ -58,6 +59,7 @@ export function TaskDetailClient({
   isAgence,
   isAgent = false,
   agents = [],
+  clientProjects = [],
   onTaskUpdated,
 }: TaskDetailClientProps) {
   const router = useRouter();
@@ -219,6 +221,7 @@ export function TaskDetailClient({
       validateSending={validateSending}
       validateError={validateError}
       onReportSent={afterTaskAction}
+      clientProjects={clientProjects}
     />
   );
 }

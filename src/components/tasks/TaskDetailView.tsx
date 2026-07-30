@@ -15,6 +15,7 @@ import { DocumentUploadZone } from "@/components/documents/DocumentUploadZone";
 import { documentDownloadHref } from "@/lib/documents/download-url";
 import { missionTypeLabel } from "@/lib/tasks/mission-types";
 import { TaskChantierDocuments } from "./TaskChantierDocuments";
+import { LinkMissionToChantier } from "./LinkMissionToChantier";
 
 interface TaskDetailViewProps {
   sessionUserId?: string;
@@ -72,6 +73,7 @@ interface TaskDetailViewProps {
   validateSending?: boolean;
   validateError?: string | null;
   onReportSent?: () => void | Promise<void>;
+  clientProjects?: { id: string; title: string }[];
 }
 
 const statusColors: Record<TaskStatus, string> = {
@@ -105,6 +107,7 @@ export function TaskDetailView({
   validateSending = false,
   validateError = null,
   onReportSent,
+  clientProjects = [],
 }: TaskDetailViewProps) {
   const [agencyNotesLocal, setAgencyNotesLocal] = useState(task.agencyNotes ?? "");
   const [savingNotes, setSavingNotes] = useState(false);
@@ -310,6 +313,15 @@ export function TaskDetailView({
             </Link>
           </p>
         )}
+        {!task.project && (isAgence || isAgent) ? (
+          <div className="mt-3">
+            <LinkMissionToChantier
+              taskId={task.id}
+              projects={clientProjects}
+              documentCount={task.documents?.length ?? 0}
+            />
+          </div>
+        ) : null}
         {task.missionType && (
           <p className="mt-1 text-sm text-slate-600">
             Type : <span className="font-medium">{missionTypeLabel(task.missionType)}</span>

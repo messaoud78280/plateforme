@@ -2,7 +2,6 @@ import { getServerSession } from "next-auth";
 import { redirect, notFound } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import Link from "next/link";
 import { TaskDetailClient } from "@/components/tasks/TaskDetailClient";
 import { BackLink } from "@/components/ui/BackLink";
 import { parseClientDeliveryJson, filterDocumentsForClient } from "@/lib/tasks/client-delivery";
@@ -122,6 +121,16 @@ export default async function TacheDetailPage({
     };
   });
 
+  let clientProjects: { id: string; title: string }[] = [];
+  if (!task.project && (isAgence || isAgent)) {
+    clientProjects = await prisma.project.findMany({
+      where: { clientId: task.clientId },
+      select: { id: true, title: true },
+      orderBy: { updatedAt: "desc" },
+      take: 50,
+    });
+  }
+
   const canEdit = isAgence || isAgent || task.clientId === session.user.id;
 
   return (
@@ -162,6 +171,7 @@ export default async function TacheDetailPage({
         isAgence={isAgence}
         isAgent={isAgent}
         agents={agents}
+        clientProjects={clientProjects}
       />
     </div>
   );

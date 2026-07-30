@@ -15,9 +15,11 @@ import { NouvelleDemandeTrigger } from "@/components/demands/NouvelleDemandeTrig
 import { ClientDashboardContent } from "@/components/dashboard/ClientDashboardContent";
 import { ManagerDashboardContent, type ManagerTaskItem, type ManagerReportItem } from "@/components/dashboard/ManagerDashboardContent";
 import { AgentDashboardContent } from "@/components/dashboard/AgentDashboardContent";
+import { ATraiterHomeBanner } from "@/components/dashboard/ATraiterHomeBanner";
 import { BackLink } from "@/components/ui/BackLink";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
+import { countATraiter } from "@/lib/a-traiter/collect";
 
 export default async function DashboardPage({
   searchParams,
@@ -36,6 +38,16 @@ export default async function DashboardPage({
   const isAgent = session.user.role === "AGENT" || session.user.role === "AGENCE";
   const isClient = session.user.role === "CLIENT";
   const clientId = session.user.id;
+
+  let aTraiterTotal = 0;
+  try {
+    aTraiterTotal = await countATraiter({
+      id: session.user.id,
+      role: session.user.role,
+    });
+  } catch {
+    aTraiterTotal = 0;
+  }
 
   let contractStatus: "PENDING" | "SIGNED" | null = null;
   let actionsData: {
@@ -560,6 +572,7 @@ export default async function DashboardPage({
     return (
       <div className="space-y-8">
         <BackLink href="/">Retour à l&apos;accueil</BackLink>
+        <ATraiterHomeBanner total={aTraiterTotal} />
         <ClientDashboardContent
           userName={session.user?.name ?? null}
           openDemande={openDemande}
@@ -590,6 +603,7 @@ export default async function DashboardPage({
     return (
       <div className="space-y-8">
         <BackLink href="/">Retour à l&apos;accueil</BackLink>
+        <ATraiterHomeBanner total={aTraiterTotal} />
         <AgentDashboardContent
           userName={session.user?.name ?? null}
           missionsToday={agentData.missionsToday}
@@ -607,6 +621,7 @@ export default async function DashboardPage({
   return (
     <div className="space-y-8">
       <BackLink href="/">Retour à l&apos;accueil</BackLink>
+      <ATraiterHomeBanner total={aTraiterTotal} />
       <ScrollToMessages />
 
       {/* Dashboard gérante — centre de pilotage */}

@@ -44,7 +44,16 @@ interface TaskDetailViewProps {
     assignedTo?: { id: string; name: string; email: string } | null;
     client?: { id: string; name: string };
     project?: { id: string; title: string } | null;
-    documents?: { id: string; name: string; fileUrl: string; fileSize: number; mimeType: string | null; createdAt?: Date }[];
+    documents?: {
+      id: string;
+      name: string;
+      fileUrl: string;
+      fileSize: number;
+      mimeType: string | null;
+      createdAt?: Date;
+      chantierFileId?: string | null;
+      chantierProjectId?: string | null;
+    }[];
   };
   onStatusChange?: (newStatus: TaskStatus, timeSpentMinutes?: number) => void;
   isAgence?: boolean;
@@ -426,11 +435,27 @@ export function TaskDetailView({
                 >
                   <div className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-medium text-slate-800">{doc.name}</span>
-                    {doc.createdAt && (
-                      <span className="mt-0.5 block text-xs text-slate-500">
-                        {new Date(doc.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-                      </span>
-                    )}
+                    <div className="mt-0.5 flex flex-wrap items-center gap-2">
+                      {doc.createdAt && (
+                        <span className="text-xs text-slate-500">
+                          {new Date(doc.createdAt).toLocaleDateString("fr-FR", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      )}
+                      {doc.chantierFileId && doc.chantierProjectId ? (
+                        <Link
+                          href={`/dashboard/projets/${doc.chantierProjectId}#dossier-chantier`}
+                          className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-800 hover:underline"
+                        >
+                          Dans le classeur
+                        </Link>
+                      ) : null}
+                    </div>
                   </div>
                   <a
                     href={documentDownloadHref(doc.id)}
@@ -465,9 +490,23 @@ export function TaskDetailView({
             {task.documents.map((doc) => (
               <li
                 key={doc.id}
-                className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2"
+                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2"
               >
-                <span className="min-w-0 truncate text-sm text-slate-800">{doc.name}</span>
+                <div className="min-w-0 flex-1">
+                  <span className="block truncate text-sm text-slate-800">{doc.name}</span>
+                  {doc.chantierFileId && doc.chantierProjectId ? (
+                    <Link
+                      href={`/dashboard/projets/${doc.chantierProjectId}#dossier-chantier`}
+                      className="mt-0.5 inline-block text-[10px] font-bold uppercase tracking-wide text-emerald-700 hover:underline"
+                    >
+                      Dans le classeur chantier
+                    </Link>
+                  ) : task.project ? (
+                    <span className="mt-0.5 block text-[10px] text-slate-400">
+                      Pièce mission — synchronisation classeur à vérifier
+                    </span>
+                  ) : null}
+                </div>
                 <a
                   href={documentDownloadHref(doc.id)}
                   target="_blank"

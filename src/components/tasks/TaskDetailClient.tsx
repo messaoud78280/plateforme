@@ -33,7 +33,16 @@ interface TaskDetailClientProps {
     assignedTo?: { id: string; name: string; email: string } | null;
     project?: { id: string; title: string } | null;
     client?: { id: string; name: string };
-    documents?: { id: string; name: string; fileUrl: string; fileSize: number; mimeType: string | null; createdAt?: Date }[];
+    documents?: {
+      id: string;
+      name: string;
+      fileUrl: string;
+      fileSize: number;
+      mimeType: string | null;
+      createdAt?: Date;
+      chantierFileId?: string | null;
+      chantierProjectId?: string | null;
+    }[];
   };
   canEdit: boolean;
   isAgence: boolean;

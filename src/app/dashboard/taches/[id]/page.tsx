@@ -96,6 +96,32 @@ export default async function TacheDetailPage({
     documentsForView = filterDocumentsForClient(documentsForView, clientReportSentAt, delivery);
   }
 
+  const docIds = documentsForView.map((d) => d.id);
+  const chantierLinks =
+    docIds.length > 0
+      ? await prisma.chantierFile.findMany({
+          where: { sourceDocumentId: { in: docIds }, deletedAt: null },
+          select: {
+            id: true,
+            sourceDocumentId: true,
+            projectId: true,
+          },
+        })
+      : [];
+  const linkByDocId = new Map(
+    chantierLinks
+      .filter((l): l is typeof l & { sourceDocumentId: string } => Boolean(l.sourceDocumentId))
+      .map((l) => [l.sourceDocumentId, l]),
+  );
+  const documentsWithGed = documentsForView.map((d) => {
+    const link = linkByDocId.get(d.id);
+    return {
+      ...d,
+      chantierFileId: link?.id ?? null,
+      chantierProjectId: link?.projectId ?? task.project?.id ?? null,
+    };
+  });
+
   const canEdit = isAgence || isAgent || task.clientId === session.user.id;
 
   return (
@@ -130,7 +156,7 @@ export default async function TacheDetailPage({
           assignedTo: task.assignedTo ?? null,
           client: task.client,
           project: task.project ?? null,
-          documents: documentsForView,
+          documents: documentsWithGed,
         }}
         canEdit={canEdit}
         isAgence={isAgence}

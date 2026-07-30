@@ -20,10 +20,12 @@ import {
   findOrphanMissionDocumentsForProject,
 } from "@/lib/chantier-dossier/sync-mission-documents";
 import { ChantierOrphanMissionBanner } from "@/components/chantier/ChantierOrphanMissionBanner";
+import { ChantierStatusSelect } from "@/components/chantier/ChantierStatusSelect";
 import {
   CHANTIER_STATUS_LABELS,
   CHANTIER_MISSING_STATUSES,
 } from "@/lib/chantier-dossier/constants";
+import { chantierStatusBadgeTone } from "@/lib/chantier-lifecycle";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 
@@ -135,9 +137,9 @@ export default async function ProjetDetailPage({
   const clientRemaining = Math.max(0, clientTotal - clientUsed);
 
   const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
+  const isStaff = isAgence || session.user.role === "AGENT";
   const canEditDossier =
-    isAgence ||
-    session.user.role === "AGENT" ||
+    isStaff ||
     project.clientId === session.user.id;
 
   const canDeleteChantier = canDeleteChantierProject(session.user, project);
@@ -218,17 +220,17 @@ export default async function ProjetDetailPage({
                 className="px-4 py-2 text-sm"
               />
             ) : null}
-            <Badge
-              tone={
-                project.chantierStatus === "TERMINE"
-                  ? "ok"
-                  : project.chantierStatus === "EN_ATTENTE"
-                    ? "watch"
-                    : "info"
-              }
-            >
-              {CHANTIER_STATUS_LABELS[project.chantierStatus] ?? project.chantierStatus}
-            </Badge>
+            {isStaff ? (
+              <ChantierStatusSelect
+                projectId={project.id}
+                value={project.chantierStatus}
+                canEdit
+              />
+            ) : (
+              <Badge tone={chantierStatusBadgeTone(project.chantierStatus)}>
+                {CHANTIER_STATUS_LABELS[project.chantierStatus] ?? project.chantierStatus}
+              </Badge>
+            )}
             <span
               className={`rounded-full px-3 py-1 text-xs font-medium ${urgencyColors[project.urgency] ?? "bg-slate-100 text-slate-800"}`}
             >

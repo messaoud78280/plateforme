@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
+import { ATraiterNavLink } from "@/components/dashboard/ATraiterNavLink";
 
 const linkBase =
   "inline-flex items-center rounded-lg text-xs font-semibold sm:text-sm transition-colors duration-[var(--cc-transition)]";
@@ -58,9 +59,7 @@ export function DashboardNav({ role }: { role?: string | null }) {
         <NavLink href="/dashboard" pathname={pathname} matchExact activeClass={active}>
           Accueil
         </NavLink>
-        <NavLink href="/dashboard/a-traiter" pathname={pathname} activeClass={active}>
-          À traiter
-        </NavLink>
+        <ATraiterNavLink activeClass={active} />
         {isClient ? (
           <>
             <NavLink href="/dashboard/taches" pathname={pathname} activeClass={active}>

@@ -328,3 +328,84 @@ export const A_TRAITER_SECTION_LABELS: Record<ATraiterSection, string> = {
   urgent: "Urgent",
   relance: "Relances / infos",
 };
+
+/** Compteur léger pour le badge nav (pas de chargement des libellés). */
+export async function countATraiter(user: {
+  id: string;
+  role?: string | null;
+}): Promise<number> {
+  const sessionUser: SessionUser = user;
+
+  if (isClientRole(sessionUser)) {
+    const taskWhere = await taskWhereForClientUser(user.id);
+    const projectWhere = await projectWhereForClientUser(user.id);
+    const [decisions, alerts, files] = await Promise.all([
+      prisma.task.count({
+        where: {
+          AND: [
+            taskWhere,
+            { status: { not: "COMPLETE" } },
+            {
+              OR: [
+                { clientDecision: "EN_ATTENTE_CLIENT" },
+                {
+                  AND: [
+                    { clientReportSentAt: { not: null } },
+                    { OR: [{ clientDecision: null }, { clientDecision: "EN_ATTENTE_CLIENT" }] },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      }),
+      prisma.alert.count({ where: { clientId: user.id, read: false } }),
+      prisma.chantierFile.count({
+        where: {
+          deletedAt: null,
+          status: { in: ["MANQUANT", "A_RELANCER"] },
+          project: projectWhere,
+        },
+      }),
+    ]);
+    return decisions + alerts + files;
+  }
+
+  if (!isAgencyOrManager(sessionUser) && !isAgent(sessionUser)) return 0;
+
+  const isDecideur = isAgencyOrManager(sessionUser);
+  const agentOnly = isAgent(sessionUser);
+  const agentFilter = agentOnly ? { assignedToId: user.id } : {};
+
+  const [toValidate, awaitingInfo, urgent, notifs, blockers] = await Promise.all([
+    isDecideur ? prisma.task.count({ where: { status: "A_VALIDER" } }) : Promise.resolve(0),
+    prisma.task.count({ where: { status: "EN_ATTENTE_INFO", ...agentFilter } }),
+    prisma.task.count({
+      where: {
+        status: { notIn: ["COMPLETE", "A_VALIDER", "EN_ATTENTE_INFO"] },
+        priority: { in: ["URGENT", "PRIORITAIRE"] },
+        ...agentFilter,
+      },
+    }),
+    prisma.notification.count({ where: { userId: user.id, read: false } }),
+    prisma.pilotageBlocker.count({
+      where: {
+        archivedAt: null,
+        status: { in: ["Ouvert", "En cours"] },
+        ...(agentOnly
+          ? {
+              pilotage: {
+                OR: [
+                  { assistantId: user.id },
+                  { conducteurId: user.id },
+                  { project: { assignedToId: user.id } },
+                ],
+              },
+            }
+          : {}),
+      },
+    }),
+  ]);
+
+  return toValidate + awaitingInfo + urgent + notifs + blockers;
+}

@@ -58,6 +58,9 @@ export function DashboardNav({ role }: { role?: string | null }) {
         <NavLink href="/dashboard" pathname={pathname} matchExact activeClass={active}>
           Accueil
         </NavLink>
+        <NavLink href="/dashboard/a-traiter" pathname={pathname} activeClass={active}>
+          À traiter
+        </NavLink>
         {isClient ? (
           <>
             <NavLink href="/dashboard/taches" pathname={pathname} activeClass={active}>

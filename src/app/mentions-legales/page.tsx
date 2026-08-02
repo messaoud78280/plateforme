@@ -23,6 +23,12 @@ export const metadata: Metadata = {
     "Mentions légales BeWork : éditeur du site, OFC CREATION D’ENTREPRISE, coordonnées et informations réglementaires.",
     images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Mentions légales — BeWork" }],
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Mentions légales | BeWork",
+    description:
+      "Mentions légales BeWork : éditeur du site, OFC CREATION D’ENTREPRISE, coordonnées et informations réglementaires.",
+  },
 };
 
 export default function MentionsLegalesPage() {

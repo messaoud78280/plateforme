@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { CasClientFeaturedCard, CasClientSimpleCard } from "@/components/cas-clients/CasClientCard";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
+import { SeoInternalLinks } from "@/components/seo/SeoInternalLinks";
 import { CAS_CLIENT_SIMPLE_CASES, CCMI_MARTIN_CASE } from "@/content/cas-clients-catalog";
 import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/seo-landing-json-ld";
@@ -82,6 +83,7 @@ export default function CasClientsPage() {
             <CasClientSimpleCard key={c.title} case={c} />
           ))}
         </section>
+        <SeoInternalLinks path={PAGE_PATH} className="mx-auto mt-16 max-w-3xl" />
       </main>
     </div>
   );

@@ -219,12 +219,12 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
   "/cas-clients": {
     title: "Cas clients BTP : assistance travaux et résultats chantier",
     description: metaDescriptionFrancophonie(
-      "Exemples concrets : dossiers structurés, devis relancés, situations cadrées, trésorerie sécurisée. Retours d’expérience d’entreprises du bâtiment avec BeWork",
+      "Cas clients BTP : dossiers structurés, devis relancés, situations cadrées. Retours d’expérience BeWork",
     ),
     keywords: ["cas clients BTP", "retour expérience BTP", "organisation chantier"],
   },
   "/faq": {
-    title: "FAQ assistant travaux BTP : marchés publics, Chorus Pro, DOE | BeWork",
+    title: "FAQ BeWork : assistant travaux, Chorus Pro, DOE",
     description: metaDescriptionFrancophonie(
       "FAQ BeWork : assistant travaux, exécution marché public, Chorus Pro, amiante SS4, DCE, DOE, forfaits et validation avant envoi",
     ),
@@ -252,7 +252,7 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
     keywords: ["méthode BeWork", "validation client BTP", "process assistant travaux", "renfort administratif BTP"],
   },
   "/assistants-administratifs-taches": {
-    title: "Missions BeWork : renfort AO, DCE et suivi admin des marchés | BeWork",
+    title: "Missions BeWork : AO, DCE et suivi de marchés",
     description: metaDescriptionFrancophonie(
       "Catalogue missions BeWork : préparation candidatures, analyse DCE, organisation de réponse et suivi admin post-attribution (Chorus Pro, réserves, DOE)",
     ),
@@ -269,7 +269,7 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
     ],
   },
   "/reponse-appel-offres-btp": {
-    title: "Réponse aux appels d'offres BTP : analyse DCE et candidature | BeWork",
+    title: "Réponse AO BTP : analyse DCE et candidature | BeWork",
     description: metaDescriptionFrancophonie(
       "Renfort AO BTP : analyse DCE, pièces, structure mémoire technique et préparation au dépôt — prix, choix techniques et dépôt restent chez vous",
     ),
@@ -294,7 +294,7 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
     ],
   },
   "/gestion-marche-public-btp": {
-    title: "Suivi administratif marché public BTP : Chorus Pro, réserves, DOE | BeWork",
+    title: "Suivi marché public BTP : Chorus Pro, DOE | BeWork",
     description: metaDescriptionFrancophonie(
       "Après attribution : renfort documents d'exécution, situations, Chorus Pro, échéances, réserves et DOE — vous gardez engagements et validations",
     ),
@@ -311,7 +311,7 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
   "/promoteurs-immobiliers": {
     title: "Assistant travaux pour promoteurs immobiliers | BeWork",
     description: metaDescriptionFrancophonie(
-      "BeWork accompagne les promoteurs immobiliers dans le suivi administratif, documentaire et opérationnel de leurs chantiers : relances entreprises, comptes rendus, DOE, réserves, reporting et assistant travaux sur site",
+      "Promoteurs immobiliers : relances entreprises, CR, DOE, réserves et reporting chantier avec assistants travaux BeWork",
     ),
     keywords: [
       "promoteur immobilier",

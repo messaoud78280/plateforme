@@ -220,17 +220,16 @@ export const BEWORK_SLOGAN_DECISION = "On tient le dossier, vous gardez la déci
 export const BEWORK_AEO_DEFINITION =
   "BeWork met à disposition des assistants travaux spécialisés qui renforcent les entreprises du BTP dans la préparation des candidatures, l’analyse des DCE et le suivi administratif des marchés publics et privés. BeWork prépare, structure et suit les dossiers sous validation du client ; l’entreprise conserve prix, choix techniques, engagements contractuels et dépôt.";
 
-/** Meta description site (layout racine) — ~155 car., périmètre francophonie. */
+/** Meta description site (layout racine) — ≤160 car., périmètre francophonie. */
 export const SEO_VALUE_PROPOSITION =
-  "Assistants travaux BTP : renfort candidatures, analyse DCE et suivi administratif des marchés publics et privés. Vous validez ; BeWork prépare et suit. FR · BE · CH · LU.";
+  "Assistants travaux BTP : candidatures, DCE et suivi admin des marchés. Vous validez ; BeWork prépare et suit. FR · BE · CH · LU.";
 
 /** Proposition courte (OG, Twitter). */
 export const SEO_VALUE_PROPOSITION_SHORT =
-  "Renfort assistants travaux BTP : candidatures, analyse DCE et suivi admin des marchés. Vous validez. FR · BE · CH · LU.";
+  "Renfort assistants travaux BTP : AO, DCE et suivi admin. Vous validez. FR · BE · CH · LU.";
 
 /** Title SEO / OG racine (aligné home). */
-export const SEO_SITE_TITLE_DEFAULT =
-  "Assistants travaux et appels d’offres BTP | BeWork";
+export const SEO_SITE_TITLE_DEFAULT = "Assistant travaux BTP externalisé | BeWork";
 
 export const SEO_SITE_TITLE_OG =
-  "BeWork — Renfort assistants travaux pour AO, DCE et suivi des marchés BTP";
+  "BeWork — Assistant travaux BTP : AO, DCE et suivi de marchés";

@@ -24,6 +24,12 @@ export const metadata: Metadata = {
       "CGV BeWork : modalités de vente des forfaits, validité des crédits (30 jours) et conditions d'utilisation.",
     images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "CGV — BeWork" }],
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Conditions générales de vente | BeWork",
+    description:
+      "CGV BeWork : modalités de vente des forfaits, validité des crédits (30 jours) et conditions d'utilisation.",
+  },
 };
 
 export default function ConditionsGeneralesVentePage() {

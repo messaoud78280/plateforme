@@ -23,6 +23,12 @@ export const metadata: Metadata = {
     "Politique de confidentialité BeWork : collecte, usage et protection de vos données personnelles sur le site et la plateforme.",
     images: [{ url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: "Politique de confidentialité — BeWork" }],
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Politique de confidentialité | BeWork",
+    description:
+      "Politique de confidentialité BeWork : collecte, usage et protection de vos données personnelles sur le site et la plateforme.",
+  },
 };
 
 export default function PolitiqueConfidentialitePage() {

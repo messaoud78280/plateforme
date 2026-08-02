@@ -11,6 +11,9 @@ import { SITE_URL, absoluteUrl } from "@/lib/site";
 
 type ChangeFreq = NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>;
 
+/** Date de contenu vitrine (évite un lastModified artificiel à chaque build). */
+const SITEMAP_STATIC_LASTMOD = new Date("2026-08-02T00:00:00.000Z");
+
 function entry(
   path: string,
   priority: number,
@@ -18,7 +21,7 @@ function entry(
 ): MetadataRoute.Sitemap[number] {
   return {
     url: `${SITE_URL}${path}`,
-    lastModified: new Date(),
+    lastModified: SITEMAP_STATIC_LASTMOD,
     changeFrequency,
     priority,
   };

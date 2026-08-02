@@ -32,6 +32,7 @@ import {
 import { SUBSCRIPTION_PRICE_TAX_LABEL } from "@/lib/subscription-plans";
 
 const defaultOgImage = absoluteUrl("/opengraph-image");
+const defaultLogoImage = absoluteUrl("/icon-512.png");
 const SITE_PRICE_LOW_FR = formatPriceLabelFr(getMarketingPriceBoundsLabels().monthlyLow);
 
 const geistMono = Geist_Mono({
@@ -189,8 +190,9 @@ const jsonLd = {
       "@type": "Organization",
       "@id": `${SITE_URL}/#organization`,
       name: "BeWork",
+      legalName: "OFC CREATION D’ENTREPRISE",
       url: SITE_URL,
-      logo: { "@type": "ImageObject", url: defaultOgImage, width: 1200, height: 630 },
+      logo: { "@type": "ImageObject", url: defaultLogoImage, width: 512, height: 512 },
       image: defaultOgImage,
       description:
         "Assistants travaux BTP : renfort candidatures, analyse DCE et suivi administratif des marchés publics et privés — sous validation du client. France, Belgique, Suisse, Luxembourg.",

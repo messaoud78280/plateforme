@@ -11,6 +11,7 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
     },
     { href: "/reponse-appel-offres-btp", label: "Réponse appels d'offres BTP" },
     { href: "/gestion-marche-public-btp", label: "Gestion marché public" },
+    { href: "/cas-clients", label: "Cas clients BTP" },
     { href: "/promoteurs-immobiliers", label: "Promoteurs immobiliers" },
     { href: "/facturation-chorus-pro-btp", label: "Chorus Pro BTP" },
     { href: "/services/analyse-dce-btp", label: "Analyse DCE BTP" },
@@ -539,5 +540,23 @@ export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
 };
 
 export function getSeoInternalLinks(path: string): SeoInternalLink[] {
-  return SEO_INTERNAL_LINKS[path] ?? [];
+  const exact = SEO_INTERNAL_LINKS[path];
+  if (exact?.length) return exact;
+
+  // Fallback cluster ressources (tutos / guides sans entrée dédiée).
+  if (
+    path.startsWith("/ressources/tuto-") ||
+    path.startsWith("/ressources/guide-") ||
+    (path.startsWith("/ressources/") && path !== "/ressources")
+  ) {
+    return [
+      { href: "/ressources/tutos", label: "Tous les tutos skills" },
+      { href: "/ressources", label: "Hub ressources BTP" },
+      { href: "/services/assistant-travaux", label: "Assistant travaux BeWork" },
+      { href: "/tarifs", label: "Tarifs" },
+      { href: "/contact", label: "Contacter BeWork" },
+    ];
+  }
+
+  return [];
 }

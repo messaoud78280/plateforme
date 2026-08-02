@@ -32,13 +32,48 @@ export function clampMetaDescription(text: string, max = SEO_META_DESCRIPTION_MA
   return `${body.trimEnd()}…`;
 }
 
+/** Mots faibles en fin de phrase — éviter « … sans FR · BE · CH · LU. » dans les SERP. */
+const WEAK_TRAILING_WORDS = new Set([
+  "a",
+  "au",
+  "aux",
+  "avec",
+  "chez",
+  "d",
+  "de",
+  "des",
+  "du",
+  "en",
+  "et",
+  "la",
+  "le",
+  "les",
+  "ou",
+  "pour",
+  "sans",
+  "sur",
+  "un",
+  "une",
+]);
+
+function trimWeakTrailingWords(text: string): string {
+  let out = text.trimEnd();
+  for (let i = 0; i < 4; i += 1) {
+    const m = out.match(/^(.*)\s+(\S+)$/);
+    if (!m) break;
+    const last = m[2].replace(/[.,;:!?…]+$/g, "").toLowerCase();
+    if (!WEAK_TRAILING_WORDS.has(last)) break;
+    out = m[1].trimEnd();
+  }
+  return out;
+}
+
 /**
  * Description meta avec périmètre géographique (une URL canonique, plusieurs marchés).
  *
  * Le tag géo (ex. « FR · BE · CH · LU. ») n'est jamais coupé au milieu : si la description
  * de base est trop longue pour laisser la place au tag en entier, on raccourcit la base
- * (au mot le plus proche) ou, en dernier recours, on omet le tag plutôt que de produire
- * un extrait tronqué du type « … FR · BE… » dans les résultats de recherche.
+ * (au mot le plus proche, sans mot faible final) ou, en dernier recours, on omet le tag.
  */
 export function metaDescriptionFrancophonie(
   core: string,
@@ -51,19 +86,26 @@ export function metaDescriptionFrancophonie(
   if (!withTag) return clampMetaDescription(`${base}.`, max);
 
   const suffix = ` ${SEO_GEO_SCOPE_TAG}.`;
-  const full = `${base}${suffix}`;
+  const baseWithStop = /[.!?…]$/.test(base) ? base : `${base}.`;
+  const full = `${baseWithStop}${suffix}`;
   if (full.length <= max) return full;
 
   const budget = max - suffix.length;
   if (budget < SEO_META_DESCRIPTION_MIN - 20) {
     // Pas assez de place pour une base lisible + le tag géo entier : on omet le tag.
-    return clampMetaDescription(`${base}.`, max);
+    return clampMetaDescription(`${baseWithStop}`, max);
   }
 
-  const cut = base.slice(0, budget);
+  const cut = base.slice(0, Math.max(0, budget - 1));
   const lastSpace = cut.lastIndexOf(" ");
-  const trimmedBase = (lastSpace >= budget - 20 ? cut.slice(0, lastSpace) : cut).trimEnd();
-  return `${trimmedBase}${suffix}`;
+  const trimmedBase = trimWeakTrailingWords(
+    lastSpace >= budget - 20 ? cut.slice(0, lastSpace) : cut,
+  );
+  if (trimmedBase.length < 40) {
+    return clampMetaDescription(`${baseWithStop}`, max);
+  }
+  const trimmedWithStop = /[.!?…]$/.test(trimmedBase) ? trimmedBase : `${trimmedBase}.`;
+  return `${trimmedWithStop}${suffix}`;
 }
 
 /**

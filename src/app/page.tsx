@@ -64,9 +64,9 @@ const HOME_FAQ_ITEMS = [
   },
 ] as const;
 
-const HOME_META_TITLE = "Assistant travaux externalisé BTP | BeWork";
+const HOME_META_TITLE = "Assistant travaux BTP externalisé | BeWork";
 const HOME_META_DESCRIPTION = metaDescriptionFrancophonie(
-  "BeWork renforce les conducteurs de travaux et les équipes BTP sur les documents, relances, situations, DOE et appels d'offres, sans recrutement",
+  "Assistants travaux BTP pour CT et équipes : documents, relances, situations, DOE et AO, sans recruter",
 );
 
 export const metadata: Metadata = {

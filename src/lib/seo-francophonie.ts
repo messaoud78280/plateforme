@@ -68,6 +68,12 @@ function trimWeakTrailingWords(text: string): string {
   return out;
 }
 
+function withSentenceStop(text: string): string {
+  const cleaned = text.replace(/[,;:\s]+$/g, "").trimEnd();
+  if (!cleaned) return text.trimEnd();
+  return /[.!?…]$/.test(cleaned) ? cleaned : `${cleaned}.`;
+}
+
 /**
  * Description meta avec périmètre géographique (une URL canonique, plusieurs marchés).
  *
@@ -83,17 +89,17 @@ export function metaDescriptionFrancophonie(
   const withTag = options?.withGeoTag !== false;
   const base = core.replace(/\s*\.\s*$/, "").trim();
 
-  if (!withTag) return clampMetaDescription(`${base}.`, max);
+  if (!withTag) return clampMetaDescription(withSentenceStop(base), max);
 
   const suffix = ` ${SEO_GEO_SCOPE_TAG}.`;
-  const baseWithStop = /[.!?…]$/.test(base) ? base : `${base}.`;
+  const baseWithStop = withSentenceStop(base);
   const full = `${baseWithStop}${suffix}`;
   if (full.length <= max) return full;
 
   const budget = max - suffix.length;
   if (budget < SEO_META_DESCRIPTION_MIN - 20) {
     // Pas assez de place pour une base lisible + le tag géo entier : on omet le tag.
-    return clampMetaDescription(`${baseWithStop}`, max);
+    return clampMetaDescription(baseWithStop, max);
   }
 
   const cut = base.slice(0, Math.max(0, budget - 1));
@@ -102,10 +108,9 @@ export function metaDescriptionFrancophonie(
     lastSpace >= budget - 20 ? cut.slice(0, lastSpace) : cut,
   );
   if (trimmedBase.length < 40) {
-    return clampMetaDescription(`${baseWithStop}`, max);
+    return clampMetaDescription(baseWithStop, max);
   }
-  const trimmedWithStop = /[.!?…]$/.test(trimmedBase) ? trimmedBase : `${trimmedBase}.`;
-  return `${trimmedWithStop}${suffix}`;
+  return `${withSentenceStop(trimmedBase)}${suffix}`;
 }
 
 /**

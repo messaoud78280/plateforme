@@ -86,10 +86,11 @@ export function MarketingSiteFooter() {
               </span>
             </Link>
             <p className="mt-4 text-base leading-relaxed text-slate-400">
-              Assistants travaux BTP — renfort candidatures, analyse DCE et suivi admin des marchés. Vous validez ; BeWork prépare et suit.
+              BeWork conçoit, déploie et fait évoluer des plateformes internes intelligentes pour les entreprises du BTP.
+              Vos équipes les utilisent au quotidien.
             </p>
             <p className="mt-4 text-xs leading-relaxed text-slate-500">
-              Société française — Pilotage supervisé depuis la France.
+              Société française — Éditeur et partenaire d&apos;évolution.
             </p>
           </div>
 
@@ -144,8 +145,8 @@ export function MarketingSiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/services/assistant-travaux" className={COL_LINK}>
-                  Assistant travaux
+                <Link href="/#plateforme" className={COL_LINK}>
+                  Plateforme interne BTP
                 </Link>
               </li>
               <li>

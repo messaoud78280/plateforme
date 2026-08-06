@@ -9,26 +9,26 @@ export type HomeClientSpaceTab = (typeof TABS)[number];
 
 const TAB_INTRO: Record<HomeClientSpaceTab, string> = {
   Demandes:
-    "Une seule file pour tout déposer : devis, dossiers chantier, relances. Chaque mission est qualifiée, attribuée à un Beworker et suivie par étapes jusqu’à livraison.",
+    "Une seule file pour tout déposer : devis, dossiers chantier, relances. Chaque dossier est qualifié, attribué à un responsable interne et suivi par étapes jusqu’à clôture.",
   Échanges:
-    "Messagerie intégrée avec votre équipe dédiée : consignes, validations devis, reprises — tout est horodaté et conserve l’historique du dossier.",
+    "Messagerie intégrée entre collaborateurs autorisés : consignes, validations devis, reprises — tout est horodaté et conserve l’historique du dossier.",
   Documents:
-    "Pièces centralisées par mission et par chantier : versions, classement, relecture avant envoi sur les courriers ou livrables sensibles.",
+    "Pièces centralisées par dossier et par chantier : versions, classement, relecture avant envoi sur les courriers ou livrables sensibles.",
 };
 
 const MESSAGES: { from: string; msg: string; time: string }[] = [
   {
-    from: "Équipe BeWork",
-    msg: "Le devis est validé côté chiffrage, je vous l'envoie pour relecture.",
+    from: "Conducteur de travaux",
+    msg: "Le devis est validé côté chiffrage, je le transmets pour relecture direction.",
     time: "10:24",
   },
   {
-    from: "Vous",
+    from: "Direction",
     msg: "Parfait — ajoutez la mention garantie décennale sur la dernière page.",
     time: "09:52",
   },
   {
-    from: "Équipe BeWork",
+    from: "Chargé d’affaires",
     msg: "Reçu. Je mets à jour et je relance le client pour signature.",
     time: "Hier 16:30",
   },
@@ -129,7 +129,7 @@ function PanelDemandes() {
           </span>
         </li>
         <li className="flex items-center justify-between rounded-lg border border-slate-100 bg-white px-2.5 py-2">
-          <span className="text-slate-700">Attribuée au Beworker</span>
+          <span className="text-slate-700">Attribuée au responsable</span>
           <span className="text-emerald-600" aria-label="Fait">
             <IconCheckSmall />
           </span>

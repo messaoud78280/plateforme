@@ -202,14 +202,14 @@ export const BEWORK_REPOSITIONING_POINTS = [
 ] as const;
 
 export const BEWORK_PRICING_CRITERIA = [
-  "Nombre de chantiers suivis",
-  "Volume de dossiers à traiter",
-  "Types de livrables attendus",
-  "Fréquence des points de suivi",
-  "Urgence des demandes",
-  "Complexité des pièces marché",
-  "Niveau de reporting attendu",
-  "Nombre d’interlocuteurs à coordonner",
+  "Nombre d’utilisateurs",
+  "Modules activés",
+  "Niveau de personnalisation",
+  "Workflows et droits d’accès",
+  "Usages d’intelligence artificielle",
+  "Intégrations avec vos outils",
+  "Volume de données et documents",
+  "Niveau d’accompagnement souhaité",
 ] as const;
 
 export const BEWORK_SCOPE_TAKEOVER = [
@@ -229,50 +229,50 @@ export const BEWORK_SCOPE_TAKEOVER = [
 ] as const;
 
 export const BEWORK_CLIENT_KEEPS = [
-  "La validation finale",
+  "L’usage quotidien de la plateforme par vos équipes",
+  "La validation finale des documents",
   "Les choix techniques",
   "Les prix, marges et arbitrages commerciaux",
   "Les décisions chantier",
-  "Les engagements contractuels",
-  "La signature des documents engageants",
+  "Les engagements contractuels et signatures",
 ] as const;
 
 export const BEWORK_TARIFS_PROCESS_STEPS = [
-  { title: "Vous réservez un appel", desc: "Premier échange pour comprendre votre organisation et vos priorités." },
-  { title: "Nous cadrons vos besoins", desc: "Volume de dossiers, chantiers, livrables et niveau de suivi attendu." },
-  { title: "Nous définissons le périmètre", desc: "Périmètre clair, livrables et fréquence de reporting." },
-  { title: "Vous recevez une proposition claire", desc: "Tarif ajusté au périmètre — pas de grille opaque à l’heure." },
-  { title: "BeWork démarre le suivi", desc: "Méthode, traçabilité et supervision humaine dès le lancement." },
+  { title: "Vous demandez une étude", desc: "Premier échange pour comprendre votre organisation et vos priorités." },
+  { title: "Nous diagnostiquons", desc: "Métiers, processus, outils existants et besoins de configuration." },
+  { title: "Nous cadrons le périmètre", desc: "Modules, workflows, rôles, IA et niveau d’accompagnement." },
+  { title: "Vous recevez une proposition", desc: "Mise en place initiale + abonnement mensuel, sans grille opaque." },
+  { title: "Déploiement et formation", desc: "Configuration, tests, formation — puis vos équipes pilotent au quotidien." },
 ] as const;
 
 export const BEWORK_TARIFS_FAQ = [
   {
-    q: "BeWork facture-t-il à l’heure ?",
-    a: "Non. BeWork fonctionne par intervention ponctuelle, mission structurée, accompagnement mensuel ou devis personnalisé. Vous achetez un périmètre clair, des livrables et un niveau de suivi, pas simplement du temps passé.",
+    q: "BeWork exécute-t-il nos missions quotidiennes ?",
+    a: "Non. BeWork conçoit, déploie et fait évoluer votre plateforme. Ce sont vos collaborateurs autorisés qui l’utilisent au quotidien pour vos marchés, chantiers, documents et validations.",
   },
   {
-    q: "Combien coûte un assistant travaux externalisé ?",
-    a: "Le coût dépend du volume de dossiers, du nombre de chantiers, des livrables attendus et du niveau de suivi demandé. BeWork propose des interventions ponctuelles à partir de 150 € HT, des missions structurées à partir de 250 € HT et des accompagnements mensuels à partir de 590 € HT.",
+    q: "Comment est calculé le tarif ?",
+    a: "Le tarif dépend du nombre d’utilisateurs, des modules, du niveau de personnalisation, des usages IA, des intégrations et du niveau d’accompagnement. Aucune grille publique fixe n’est affichée : chaque proposition suit une étude de votre organisation.",
   },
   {
-    q: "Pourquoi BeWork affiche des prix « à partir de » ?",
-    a: "Parce que chaque entreprise BTP a une organisation différente. Le tarif final dépend du périmètre réel : nombre de chantiers, fréquence de suivi, complexité des dossiers, livrables attendus et niveau de reporting.",
+    q: "Que comprend l’abonnement mensuel ?",
+    a: "L’accès à la plateforme, l’hébergement, la maintenance, la sécurité, le support et l’évolution progressive selon votre formule. Il ne donne pas droit à des développements spécifiques illimités.",
+  },
+  {
+    q: "Les développements spécifiques sont-ils inclus ?",
+    a: "Les adaptations courantes peuvent être intégrées selon votre formule. Les développements spécifiques importants font l’objet d’un cadrage et d’une proposition distincte.",
   },
   {
     q: "BeWork remplace-t-il un conducteur de travaux ?",
-    a: "Non. BeWork ne remplace pas la responsabilité technique du conducteur de travaux. BeWork l’aide à tenir le suivi bureau-chantier, les relances, les documents, les comptes rendus et les dossiers administratifs.",
+    a: "Non. BeWork ne se substitue pas à vos salariés dans l’analyse finale, la conduite des travaux ou les décisions contractuelles. La plateforme assiste ; vos professionnels valident.",
   },
   {
-    q: "Peut-on commencer sans abonnement mensuel ?",
-    a: "Oui. Une entreprise peut commencer par une intervention ponctuelle simple ou une mission structurée : analyse DCE, DOE, PPSPS, mémoire technique, compte rendu de chantier, devis ou relances.",
-  },
-  {
-    q: "Qui valide les documents avant envoi ?",
-    a: "Le client garde toujours la validation finale. BeWork prépare, structure, suit et alerte, mais les engagements contractuels, les prix, les choix techniques et les signatures restent chez l’entreprise.",
+    q: "Qui valide les analyses produites par l’IA ?",
+    a: "La validation reste sous la responsabilité des professionnels de votre entreprise. Les documents sont traités pour fournir les fonctionnalités demandées, selon les engagements de confidentialité et les paramètres des fournisseurs techniques.",
   },
   {
     q: "BeWork convient-il aux marchés publics ?",
-    a: "Oui. BeWork peut aider à structurer les pièces, analyser les DCE, préparer les mémoires techniques, suivre les documents chantier et organiser les livrables. La validation finale reste toujours chez l’entreprise.",
+    a: "Oui. La plateforme peut aider à structurer les pièces, analyser les DCE, préparer les mémoires techniques et suivre les documents chantier. La validation finale et les engagements restent chez l’entreprise.",
   },
 ] as const;
 

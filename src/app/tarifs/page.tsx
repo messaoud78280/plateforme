@@ -61,7 +61,7 @@ const INTERNAL_LINKS = [
   { href: "/#plateforme", label: "Découvrir la plateforme" },
   { href: "/#outils-ia", label: "Outils IA métier" },
   { href: "/#marches", label: "Marchés publics et privés" },
-  { href: "/#accompagnement", label: "Accompagnement humain" },
+  { href: "/#partenaire", label: "Partenaire technologique" },
   { href: "/ressources", label: "Centre de ressources BTP" },
   { href: "/notre-facon-de-travailler", label: "Notre façon de travailler" },
 ] as const;

@@ -55,9 +55,9 @@ const SOLUTION_MENU_ENTRIES: {
     icon: "calendar",
   },
   {
-    href: "/#accompagnement",
-    title: "Accompagnement humain",
-    description: "Assistants travaux en complément de la plateforme.",
+    href: "/#partenaire",
+    title: "Partenaire technologique",
+    description: "Configuration, formation, maintenance et évolution.",
     icon: "cart",
   },
 ];
@@ -333,8 +333,8 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             <Link href="/#marches" className={`${NAV_LINK} whitespace-nowrap`}>
               Marchés
             </Link>
-            <Link href="/#accompagnement" className={`${NAV_LINK} whitespace-nowrap`}>
-              Accompagnement
+            <Link href="/#partenaire" className={`${NAV_LINK} whitespace-nowrap`}>
+              Partenaire
             </Link>
             <Link href="/notre-facon-de-travailler" className={`${NAV_LINK} whitespace-nowrap`}>
               À propos
@@ -525,11 +525,11 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 Marchés publics et privés
               </Link>
               <Link
-                href="/#accompagnement"
+                href="/#partenaire"
                 className="rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-900"
                 onClick={() => setMobileOpen(false)}
               >
-                Accompagnement
+                Partenaire technologique
               </Link>
               <Link
                 href="/notre-facon-de-travailler"

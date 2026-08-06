@@ -24,16 +24,8 @@ import {
   hreflangFrancophonieLanguages,
 } from "@/lib/seo-francophonie";
 import { absoluteUrl, getOrgSameAs, SITE_URL } from "@/lib/site";
-import {
-  formatPriceLabelFr,
-  getMarketingPriceBoundsLabels,
-  getMarketingAggregateOfferDescription,
-} from "@/lib/bework-public-offers";
-import { SUBSCRIPTION_PRICE_TAX_LABEL } from "@/lib/subscription-plans";
-
 const defaultOgImage = absoluteUrl("/opengraph-image");
 const defaultLogoImage = absoluteUrl("/icon-512.png");
-const SITE_PRICE_LOW_FR = formatPriceLabelFr(getMarketingPriceBoundsLabels().monthlyLow);
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -92,13 +84,12 @@ export const metadata: Metadata = {
   publisher: "BeWork",
   category: "business",
   keywords: [
-    ...SEO_KEYWORDS_GLOBAL,
-    "renfort administratif BTP",
+    ...SEO_KEYWORDS_GLOBAL.filter((k) => !k.toLowerCase().includes("assistant") && !k.toLowerCase().includes("externalis")),
+    "plateforme interne BTP",
     "analyse DCE BTP",
     "préparation candidature marché public",
     "mémoire technique BTP",
     "suivi administratif de marché",
-    "assistant travaux appels d’offres",
     "Chorus Pro travaux",
     "suivi réserves chantier",
     "DOE marché public",
@@ -118,7 +109,7 @@ export const metadata: Metadata = {
         url: defaultOgImage,
         width: 1200,
         height: 630,
-        alt: "BeWork — Renfort assistants travaux BTP : candidatures, DCE et suivi des marchés",
+        alt: "BeWork — Plateformes internes intelligentes pour les entreprises du BTP",
       },
     ],
   },
@@ -170,11 +161,11 @@ const jsonLd = {
       url: SITE_URL,
       name: "BeWork",
       alternateName: [
-        "BeWork — assistants travaux augmentés par l’IA",
-        "BeWork — assistance technique et administrative BTP",
-        "BeWork assistant travaux BTP",
-        "BeWork appels d'offres et marchés publics",
-        "Assistants travaux BTP France Belgique Suisse Luxembourg",
+        "BeWork — plateformes internes intelligentes BTP",
+        "BeWork — éditeur et intégrateur de plateforme métier",
+        "BeWork plateforme BTP",
+        "BeWork outils IA chantiers et marchés",
+        "Plateforme interne BTP France Belgique Suisse Luxembourg",
       ],
       description: SEO_VALUE_PROPOSITION,
       inLanguage: "fr-FR",
@@ -182,7 +173,7 @@ const jsonLd = {
       image: { "@type": "ImageObject", url: defaultOgImage, width: 1200, height: 630 },
       potentialAction: {
         "@type": "ContactAction",
-        name: "Qualifier votre demande BTP via le formulaire BeWork",
+        name: "Demander une démonstration personnalisée BeWork",
         target: absoluteUrl("/contact#formulaire"),
       },
     },
@@ -194,8 +185,7 @@ const jsonLd = {
       url: SITE_URL,
       logo: { "@type": "ImageObject", url: defaultLogoImage, width: 512, height: 512 },
       image: defaultOgImage,
-      description:
-        "Assistants travaux BTP : renfort candidatures, analyse DCE et suivi administratif des marchés publics et privés — sous validation du client. France, Belgique, Suisse, Luxembourg.",
+      description: BEWORK_AEO_DEFINITION,
       slogan: BEWORK_SLOGAN,
       address: {
         "@type": "PostalAddress",
@@ -213,9 +203,9 @@ const jsonLd = {
           "Bâtiment et travaux publics",
           "Conducteurs de travaux",
           "Direction d'entreprise",
-          "Renfort administratif BTP",
+          "Plateformes métier BTP",
           "Analyse DCE et appels d'offres",
-          "Suivi administratif de marché",
+          "Pilotage documentaire chantier",
         ],
       },
       contactPoint: [
@@ -230,7 +220,7 @@ const jsonLd = {
       ...(orgSameAs.length ? { sameAs: orgSameAs } : {}),
       knowsAbout: [
         "BTP",
-        "Renfort administratif BTP",
+        "Plateforme interne BTP",
         "Analyse DCE",
         "Préparation candidature marché public",
         "Mémoire technique BTP",
@@ -243,30 +233,30 @@ const jsonLd = {
         "Appels d'offres BTP",
         "Suivi réserves chantier",
         "Coordination documentaire chantier",
-        "Intelligence artificielle appliquée aux assistants travaux BTP",
+        "Intelligence artificielle appliquée au BTP",
       ],
     },
     {
       "@type": "ProfessionalService",
       "@id": `${SITE_URL}/#service`,
-      name: "BeWork — Renfort assistants travaux BTP",
-      description: `${BEWORK_AEO_DEFINITION} ${BEWORK_SLOGAN} ${BEWORK_SLOGAN_DECISION} Forfaits ${SUBSCRIPTION_PRICE_TAX_LABEL} dès ${SITE_PRICE_LOW_FR} €.`,
+      name: "BeWork — conception et évolution de plateformes internes BTP",
+      description: `${BEWORK_AEO_DEFINITION} ${BEWORK_SLOGAN} ${BEWORK_SLOGAN_DECISION}`,
       url: SITE_URL,
       provider: { "@id": `${SITE_URL}/#organization` },
       areaServed: jsonLdExpandedAreaServed(),
       serviceType: [
-        "Renfort administratif BTP",
-        "Assistants travaux spécialisés",
-        "Analyse DCE et préparation candidatures",
-        "Organisation réponse appel d'offres BTP",
-        "Suivi administratif marché public",
-        "Facturation Chorus Pro BTP",
-        "Suivi documentaire chantier et DOE",
+        "Conception de plateforme métier BTP",
+        "Déploiement et configuration",
+        "Intégration d'outils d'intelligence artificielle",
+        "Formation et support",
+        "Maintenance et évolution continue",
+        "Analyse DCE et marchés (module plateforme)",
+        "Suivi documentaire chantier et DOE (module plateforme)",
       ],
       audience: {
         "@type": "BusinessAudience",
         audienceType:
-          "PME BTP, conducteurs de travaux, chargés d’affaires et dirigeants qui préparent des candidatures ou suivent administrativement des marchés",
+          "PME BTP, conducteurs de travaux, chargés d’affaires et dirigeants qui centralisent opérations et documents sur une plateforme interne",
       },
     },
     {
@@ -277,12 +267,13 @@ const jsonLd = {
       operatingSystem: "Web",
       url: SITE_URL,
       description:
-        "Plateforme BeWork : dépôt de missions assistants travaux, suivi documentaire et traçabilité bureau-chantier — sous validation du client.",
+        "Plateforme interne BeWork : équipes, chantiers, documents, marchés et outils IA — utilisée par les collaborateurs du client ; BeWork assure hébergement, maintenance et évolution.",
       offers: {
         "@type": "Offer",
         url: absoluteUrl("/tarifs"),
         priceCurrency: "EUR",
-        price: SITE_PRICE_LOW_FR.replace(/\s/g, ""),
+        description:
+          "Mise en place initiale et abonnement mensuel sur étude personnalisée — utilisateurs, modules, personnalisation, IA et accompagnement.",
         availability: "https://schema.org/InStock",
         seller: { "@id": `${SITE_URL}/#organization` },
       },

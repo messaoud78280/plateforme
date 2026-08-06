@@ -27,9 +27,9 @@ export function MarketingSitePreFooter() {
         </div>
 
         <div className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-          <h3 className="text-lg font-bold tracking-tight text-slate-900 sm:text-xl">Externalisation administrative BTP par pays</h3>
+          <h3 className="text-lg font-bold tracking-tight text-slate-900 sm:text-xl">Entreprises du BTP francophones</h3>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
-            Contenus distincts selon votre marché : France, Belgique, Suisse romande et Luxembourg. Ouvrez la page qui correspond à votre zone d&apos;activité.
+            Contenus et pages dédiées selon votre marché : France, Belgique, Suisse romande et Luxembourg.
           </p>
           <div className="mt-6">
             <GeoExternalisationFooterPills />

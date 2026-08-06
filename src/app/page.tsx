@@ -4,14 +4,17 @@ import { ProspectContactForm } from "@/components/contact/ProspectContactForm";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { HomeAiSpecialized } from "@/components/home/HomeAiSpecialized";
+import { HomeClientTeamsUse } from "@/components/home/HomeClientTeamsUse";
+import { HomeConfidentiality } from "@/components/home/HomeConfidentiality";
 import { HomeCoreAdaptation } from "@/components/home/HomeCoreAdaptation";
 import { HomeDeploySteps } from "@/components/home/HomeDeploySteps";
-import { HomeHumanComplement } from "@/components/home/HomeHumanComplement";
 import { HomeMarketsAnalysis } from "@/components/home/HomeMarketsAnalysis";
 import { HomeModulesGrid } from "@/components/home/HomeModulesGrid";
 import { HomeOpsContinuity } from "@/components/home/HomeOpsContinuity";
+import { HomePlatformEvolution } from "@/components/home/HomePlatformEvolution";
 import { HomePlatformHero } from "@/components/home/HomePlatformHero";
 import { HomeProblemsDispersion } from "@/components/home/HomeProblemsDispersion";
+import { HomeTechPartner } from "@/components/home/HomeTechPartner";
 import { HomeUnifiedEnvironment } from "@/components/home/HomeUnifiedEnvironment";
 import { HomePricingSection } from "@/components/HomePricingSection";
 import { SeoInternalLinks } from "@/components/seo/SeoInternalLinks";
@@ -28,29 +31,29 @@ import { SITE_URL } from "@/lib/site";
 
 const HOME_META_TITLE = "BeWork | Plateformes internes avec IA pour les entreprises du BTP";
 const HOME_META_DESCRIPTION = metaDescriptionFrancophonie(
-  "BeWork conçoit des plateformes internes intelligentes pour le BTP : chantiers, documents, marchés publics et privés, outils IA spécialisés",
+  "BeWork conçoit, déploie et fait évoluer des plateformes internes pour le BTP : chantiers, marchés, documents et outils IA utilisés par vos équipes",
 );
 
 const HOME_FAQ_ITEMS = [
   {
-    q: "BeWork est-il un développement sur mesure à partir de zéro ?",
-    a: "Non. Chaque entreprise s’appuie sur le socle technologique BeWork, complété par des modules, workflows et outils IA configurés selon son organisation. Des développements spécifiques n’interviennent que si le besoin ne peut pas être couvert par le socle.",
+    q: "BeWork exécute-t-il nos missions quotidiennes ?",
+    a: "Non. BeWork conçoit, déploie et fait évoluer votre plateforme. Ce sont vos collaborateurs autorisés qui l’utilisent au quotidien pour vos marchés, chantiers, documents et validations.",
   },
   {
-    q: "L’IA remplace-t-elle nos équipes ?",
-    a: "Non. L’IA analyse, structure, résume et assiste. Les décisions, validations et engagements restent sous le contrôle des professionnels de l’entreprise.",
+    q: "BeWork est-il un développement entièrement sur mesure ?",
+    a: "Non. Chaque entreprise s’appuie sur un socle technologique commun, complété par des modules, workflows et outils IA configurés selon son organisation. Les développements spécifiques importants font l’objet d’un cadrage distinct.",
   },
   {
-    q: "Peut-on analyser des marchés publics et privés ?",
-    a: "Oui. La plateforme permet de centraliser un dossier de consultation, classer les pièces, analyser CCTP, CCAP, DPGF et suivre la préparation de la réponse en équipe.",
+    q: "Que comprend l’abonnement mensuel ?",
+    a: "L’accès à la plateforme, l’hébergement, la maintenance, la sécurité, le support et l’évolution progressive selon votre formule. Il ne donne pas droit à des développements spécifiques illimités.",
   },
   {
-    q: "Que deviennent les assistants travaux BeWork ?",
-    a: "Ils restent disponibles en complément : renforcement d’équipes, missions ponctuelles ou suivi documentaire, lorsque la plateforme seule ne suffit pas.",
+    q: "Comment l’IA traite-t-elle nos documents ?",
+    a: "Les documents sont traités pour fournir les fonctionnalités demandées, selon les engagements de confidentialité et les paramètres des fournisseurs techniques. Vos professionnels valident les analyses.",
   },
   {
     q: "Comment démarrer ?",
-    a: "Par un diagnostic de votre fonctionnement, puis la sélection des modules et la configuration. Demandez une démonstration personnalisée pour voir le socle adapté à votre organisation.",
+    a: "Par un diagnostic de votre organisation, puis la configuration et le déploiement. Demandez une démonstration personnalisée pour voir le socle adapté à votre entreprise.",
   },
 ] as const;
 
@@ -71,6 +74,7 @@ export const metadata: Metadata = {
     "gestion chantier documentaire",
     "analyse marché public BTP",
     "outils IA BTP",
+    "éditeur plateforme BTP",
   ],
   alternates: { canonical: SITE_URL, languages: hreflangFrancophonieLanguages("/") },
   openGraph: {
@@ -112,7 +116,7 @@ const homeJsonLd = {
         { "@type": "Thing", name: "Plateforme interne BTP" },
         { "@type": "Thing", name: "Analyse de marchés publics et privés" },
         { "@type": "Thing", name: "Outils d’intelligence artificielle BTP" },
-        { "@type": "Thing", name: "Suivi de chantier et documents" },
+        { "@type": "Thing", name: "Éditeur et intégrateur de plateforme métier" },
       ],
       speakable: {
         "@type": "SpeakableSpecification",
@@ -126,14 +130,14 @@ const homeJsonLd = {
       applicationCategory: "BusinessApplication",
       operatingSystem: "Web",
       description:
-        "Socle technologique BeWork pour centraliser équipes, chantiers, documents et marchés, avec outils IA spécialisés BTP et configuration par entreprise.",
+        "Socle technologique BeWork pour centraliser équipes, chantiers, documents et marchés, avec outils IA spécialisés BTP. Utilisé par les collaborateurs du client ; BeWork assure configuration, maintenance et évolution.",
       provider: { "@id": `${SITE_URL}/#organization` },
       areaServed: jsonLdExpandedAreaServed(),
       offers: {
         "@type": "Offer",
         priceCurrency: "EUR",
         description:
-          "Tarification sur étude : utilisateurs, modules, personnalisation, outils IA et accompagnement. Demander une démonstration.",
+          "Mise en place initiale et abonnement mensuel sur étude — utilisateurs, modules, personnalisation, IA et accompagnement.",
         url: `${SITE_URL}/contact`,
       },
     },
@@ -163,15 +167,17 @@ export default function HomePage() {
         <HomeProblemsDispersion />
         <HomeUnifiedEnvironment />
         <HomeCoreAdaptation />
-        <HomeAiSpecialized />
         <HomeMarketsAnalysis />
+        <HomeAiSpecialized />
         <HomeOpsContinuity />
         <HomeModulesGrid />
+        <HomeClientTeamsUse />
+        <HomeConfidentiality />
         <HomeDeploySteps />
-        <HomeHumanComplement />
         <HomePricingSection />
+        <HomePlatformEvolution />
+        <HomeTechPartner />
 
-        {/* Centre de ressources — contenus existants conservés */}
         <section id="ressources" className="relative bg-[#f8fafc] px-6 py-14 md:py-20 lg:py-24">
           <div className="mx-auto max-w-site">
             <div className="mb-10 max-w-2xl">
@@ -179,8 +185,8 @@ export default function HomePage() {
                 Une plateforme construite avec une véritable expertise métier
               </h2>
               <p className="mt-5 text-lg leading-relaxed text-black">
-                Guides, tutoriels et skills BeWork : l&apos;expression concrète de notre connaissance des documents,
-                procédures et réalités opérationnelles du BTP.
+                Guides, tutoriels et skills : l&apos;expression de notre connaissance des documents, procédures et
+                réalités opérationnelles du BTP — intégrée à la conception de la plateforme.
               </p>
               <Link
                 href="/ressources"
@@ -222,7 +228,7 @@ export default function HomePage() {
           <div className="mx-auto max-w-3xl">
             <h2 className="text-3xl font-bold tracking-tight text-black md:text-4xl">Questions fréquentes</h2>
             <p className="mt-5 text-lg leading-relaxed text-black">
-              Socle, personnalisation, IA et accompagnement : ce que les dirigeants BTP clarifient avant une démonstration.
+              Rôle de BeWork, abonnement, IA et démarrage : ce que les dirigeants clarifient avant une démonstration.
             </p>
             <dl className="mt-12 space-y-6">
               {HOME_FAQ_ITEMS.map((item, i) => (
@@ -244,7 +250,7 @@ export default function HomePage() {
                 </h2>
                 <p className="mt-6 text-lg leading-relaxed text-slate-700">
                   Présentez-nous votre organisation, vos outils actuels et vos principales difficultés. Nous vous
-                  montrerons comment le socle BeWork peut être configuré selon vos besoins.
+                  montrerons comment le socle BeWork peut être configuré pour vos équipes.
                 </p>
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <Link

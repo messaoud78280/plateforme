@@ -3,7 +3,7 @@
  */
 
 import { BEWORK_TARIFS_FAQ } from "@/lib/bework-public-offers";
-import { SEO_KEYWORDS_ASSISTANT_TRAVAUX, SEO_KEYWORDS_BTP_PME } from "@/lib/seo-keywords";
+import { SEO_KEYWORDS_BTP_PME } from "@/lib/seo-keywords";
 import { SCHEMA_ORG_ID, buildWebPageAndBreadcrumbJsonLd } from "@/lib/schema";
 import { absoluteUrl } from "@/lib/site";
 
@@ -19,10 +19,9 @@ export const TARIFS_SEO_KEYWORDS = [
   "étude personnalisée BeWork",
   "plateforme interne BTP",
   "modules IA BTP",
-  "assistant travaux BTP",
+  "abonnement plateforme BTP",
   "analyse marché public BTP",
-  ...SEO_KEYWORDS_ASSISTANT_TRAVAUX.slice(0, 6),
-  ...SEO_KEYWORDS_BTP_PME.slice(0, 4),
+  ...SEO_KEYWORDS_BTP_PME.slice(0, 6),
 ] as const;
 
 export const TARIFS_H1 = "Une solution adaptée à votre organisation";

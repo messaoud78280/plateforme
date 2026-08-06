@@ -194,31 +194,34 @@ export const SEO_KEYWORDS_MARCHES_TRAVAUX = [
 ] as const;
 
 export const SEO_KEYWORDS_HOME: string[] = [
-  ...SEO_KEYWORDS_MARCHES_TRAVAUX,
-  ...SEO_KEYWORDS_PARTENAIRE_CORE,
+  "plateforme interne BTP",
+  "plateforme intelligente BTP",
+  "éditeur plateforme BTP",
+  "outils IA BTP",
+  "analyse marché public BTP",
+  "gestion chantier documentaire",
+  "pilotage chantier BTP",
+  ...SEO_KEYWORDS_MARCHES_TRAVAUX.filter((k) => !k.toLowerCase().includes("assistant")),
   ...SEO_KEYWORDS_BTP_PME,
   ...SEO_KEYWORDS_PERSONAS_BTP,
   ...SEO_KEYWORDS_GEO_SCOPE,
   ...SEO_KEYWORDS_TECHNIQUE,
-  "renfort administratif BTP",
-  "assistance appels d’offres BTP",
   "préparation candidature marché public",
   "analyse DCE",
   "suivi administratif de marché",
-  "assistant travaux",
   "BeWork BTP",
-  "vidéo présentation BeWork",
 ];
 
 /** Slogan BeWork — réutilisable contenu, OG, JSON-LD, llms.txt. */
-export const BEWORK_SLOGAN = "On tient le bureau, vous tenez le chantier.";
+export const BEWORK_SLOGAN = "Vos équipes pilotent. BeWork équipe la plateforme.";
 
-/** Accroche complémentaire (home / AEO) — évite la lecture « prise en charge intégrale ». */
-export const BEWORK_SLOGAN_DECISION = "On tient le dossier, vous gardez la décision.";
+/** Accroche complémentaire (home / AEO). */
+export const BEWORK_SLOGAN_DECISION =
+  "BeWork construit et fait évoluer l’environnement numérique. Vous restez maître des opérations, des données et des décisions.";
 
 /** Phrase de positionnement citables par les IA / extraits AEO. */
 export const BEWORK_AEO_DEFINITION =
-  "BeWork met à disposition des assistants travaux spécialisés qui renforcent les entreprises du BTP dans la préparation des candidatures, l’analyse des DCE et le suivi administratif des marchés publics et privés. BeWork prépare, structure et suit les dossiers sous validation du client ; l’entreprise conserve prix, choix techniques, engagements contractuels et dépôt.";
+  "BeWork conçoit, déploie et fait évoluer des plateformes internes intelligentes pour les entreprises du BTP. Chaque solution repose sur un socle technologique commun, enrichi de modules, de workflows et d’outils IA adaptés à l’organisation du client. Les collaborateurs de l’entreprise utilisent la plateforme au quotidien, tandis que BeWork assure son hébergement, sa maintenance, sa sécurité et son évolution.";
 
 /** Title SEO / OG racine (aligné home). */
 export const SEO_SITE_TITLE_DEFAULT = "BeWork | Plateformes internes avec IA pour le BTP";
@@ -228,8 +231,8 @@ export const SEO_SITE_TITLE_OG =
 
 /** Meta description site (layout racine) — ≤160 car. */
 export const SEO_VALUE_PROPOSITION =
-  "BeWork conçoit des plateformes internes intelligentes pour le BTP : chantiers, documents, marchés et outils IA. FR · BE · CH · LU.";
+  "BeWork conçoit, déploie et fait évoluer des plateformes internes BTP : vos équipes les utilisent au quotidien. FR · BE · CH · LU.";
 
 /** Proposition courte (OG, Twitter). */
 export const SEO_VALUE_PROPOSITION_SHORT =
-  "Plateformes internes BTP : socle BeWork, modules adaptés, IA métier. FR · BE · CH · LU.";
+  "Plateformes internes BTP : socle BeWork, modules adaptés, IA métier, évolution continue. FR · BE · CH · LU.";

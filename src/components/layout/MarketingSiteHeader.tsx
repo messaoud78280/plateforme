@@ -573,6 +573,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                   ))}
                 </ul>
               </MarketingDisclosure>
+            </nav>
 
               <MarketingDisclosure title="Pourquoi BeWork ?" className="border-slate-100 bg-slate-50/80">
               <div className="space-y-2 px-4 py-3 text-sm text-slate-600 sm:px-5">

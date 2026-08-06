@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { HomeProductPreview } from "@/components/home/HomeProductPreview";
-import { HOME_BTN_PRIMARY, HOME_BTN_SECONDARY } from "@/components/home/homeSectionStyles";
+import { HOME_BTN_GROUP, HOME_BTN_PRIMARY, HOME_BTN_SECONDARY } from "@/components/home/homeSectionStyles";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 
 const TRUST = [
@@ -36,13 +36,15 @@ export function HomePlatformHero() {
               votre organisation, enrichie par des outils d&apos;intelligence artificielle spécialisés.
             </p>
 
-            <div className="mx-auto mt-8 flex max-w-[36rem] flex-col gap-3 sm:flex-row sm:justify-center lg:mx-0 lg:justify-start">
+            <div
+              className={`mx-auto mt-8 w-full max-w-[36rem] ${HOME_BTN_GROUP} justify-center lg:mx-0 lg:justify-start`}
+            >
               <Link
                 href="/contact#formulaire"
                 className={HOME_BTN_PRIMARY}
                 {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-hero-demo")}
               >
-                Demander une démonstration personnalisée
+                Demander une démonstration
               </Link>
               <Link href="#plateforme" className={HOME_BTN_SECONDARY}>
                 Découvrir la plateforme

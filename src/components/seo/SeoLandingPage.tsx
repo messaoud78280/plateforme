@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
+import { CTA_GROUP, CTA_PRIMARY, CTA_SECONDARY, CTA_SOFT } from "@/components/marketing/marketingCtaStyles";
 import { GeoAeoBrief } from "@/components/seo/GeoAeoBrief";
 import { SeoInternalLinks } from "@/components/seo/SeoInternalLinks";
 import { buildWebPageAndBreadcrumbJsonLd } from "@/lib/schema";
@@ -82,26 +83,15 @@ export function SeoLandingPage({
               BeWork intervient pour artisans, conducteurs de travaux et dirigeants BTP en France, Belgique, Suisse et Luxembourg — forfaits HT cadrés
               par volume. Connexion requise pour confier une tâche depuis l’espace client.
             </p>
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <CalendlyBookingLink className="inline-flex min-h-[3rem] items-center justify-center rounded-xl bg-[#1d4ed8] px-5 py-3 text-base font-semibold text-white shadow-md shadow-[#1d4ed8]/20 transition hover:bg-[#1e40af]">
-                Réserver un appel
-              </CalendlyBookingLink>
-              <Link
-                href="/ressources"
-                className="inline-flex min-h-[3rem] items-center justify-center rounded-xl border-2 border-slate-200 bg-white px-5 py-3 text-base font-semibold text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
-              >
+            <div className={`mt-6 ${CTA_GROUP}`}>
+              <CalendlyBookingLink className={CTA_PRIMARY}>Réserver un appel</CalendlyBookingLink>
+              <Link href="/ressources" className={CTA_SECONDARY}>
                 Découvrir les ressources
               </Link>
-              <Link
-                href="/dashboard/nouvelle-demande"
-                className="inline-flex min-h-[3rem] items-center justify-center rounded-xl border-2 border-[#1d4ed8]/25 bg-[#eff6ff] px-5 py-3 text-base font-semibold text-[#1e3a8a] transition hover:bg-[#dbeafe]"
-              >
+              <Link href="/dashboard/nouvelle-demande" className={CTA_SOFT}>
                 Confier une tâche
               </Link>
-              <Link
-                href="/notre-facon-de-travailler"
-                className="inline-flex min-h-[3rem] items-center justify-center rounded-xl border-2 border-slate-200 bg-white px-5 py-3 text-base font-semibold text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
-              >
+              <Link href="/notre-facon-de-travailler" className={CTA_SECONDARY}>
                 Voir le Process BeWork
               </Link>
             </div>

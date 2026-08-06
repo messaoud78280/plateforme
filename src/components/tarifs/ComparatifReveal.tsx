@@ -24,7 +24,7 @@ export function ComparatifReveal({ children }: ComparatifRevealProps) {
         <button
           type="button"
           onClick={handleToggle}
-          className="inline-flex items-center gap-2 rounded-lg border-2 border-[#1d4ed8] bg-transparent px-6 py-3 font-semibold text-[#1d4ed8] transition-all hover:bg-[#eff6ff] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2"
+          className="inline-flex h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[#1d4ed8] bg-transparent px-5 text-sm font-semibold text-[#1d4ed8] transition hover:bg-[#eff6ff] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2 sm:h-12 sm:px-6"
           aria-expanded={open}
           aria-label={open ? "Masquer le tableau comparatif" : "Voir le tableau comparatif"}
         >

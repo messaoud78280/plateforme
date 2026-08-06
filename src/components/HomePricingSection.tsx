@@ -2,6 +2,7 @@ import Link from "next/link";
 import { HomeSectionHeader } from "@/components/home/HomeSectionHeader";
 import {
   HOME_BG_MUTED,
+  HOME_BTN_GROUP,
   HOME_BTN_PRIMARY,
   HOME_BTN_SECONDARY,
   HOME_CARD_SOFT,
@@ -82,20 +83,20 @@ export function HomePricingSection() {
           d&apos;un cadrage et d&apos;une proposition distincte.
         </p>
 
-        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <div className={`mt-8 ${HOME_BTN_GROUP} justify-center`}>
           <Link
             href="/contact#formulaire"
             className={HOME_BTN_PRIMARY}
             {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-pricing-study")}
           >
-            Demander une étude personnalisée
+            Demander une étude
           </Link>
           <Link
             href="/tarifs"
             className={HOME_BTN_SECONDARY}
             {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_TARIFS, "home-pricing-method")}
           >
-            Voir la méthode de tarification
+            Voir la tarification
           </Link>
         </div>
       </div>

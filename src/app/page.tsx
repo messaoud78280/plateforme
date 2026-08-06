@@ -16,6 +16,7 @@ import { HomePlatformHero } from "@/components/home/HomePlatformHero";
 import { HomeProblemsDispersion } from "@/components/home/HomeProblemsDispersion";
 import { HomeTechPartner } from "@/components/home/HomeTechPartner";
 import { HomeUnifiedEnvironment } from "@/components/home/HomeUnifiedEnvironment";
+import { HOME_BTN_GROUP, HOME_BTN_PRIMARY, HOME_BTN_SECONDARY, HOME_BTN_SOFT } from "@/components/home/homeSectionStyles";
 import { HomePricingSection } from "@/components/HomePricingSection";
 import { SeoInternalLinks } from "@/components/seo/SeoInternalLinks";
 import { RESOURCE_TUTO_ITEMS } from "@/content/resource-tutos";
@@ -191,9 +192,9 @@ export default function HomePage() {
               </p>
               <Link
                 href="/ressources"
-                className="mt-6 inline-flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-[#1d4ed8]/30 hover:bg-[#f8fafc]"
+                className={`mt-6 ${HOME_BTN_SECONDARY}`}
               >
-                Ouvrir le centre de ressources BTP
+                Centre de ressources
                 <span aria-hidden>→</span>
               </Link>
             </div>
@@ -214,11 +215,8 @@ export default function HomePage() {
             </ul>
 
             <div className="mt-8">
-              <Link
-                href="/ressources/tutos"
-                className="inline-flex h-11 items-center gap-2 rounded-xl border border-[#1d4ed8]/25 bg-[#eff6ff] px-4 text-sm font-semibold text-[#1e3a8a] transition hover:bg-[#dbeafe]"
-              >
-                Voir tous les tutoriels PDF
+              <Link href="/ressources/tutos" className={HOME_BTN_SOFT}>
+                Voir les tutoriels PDF
                 <span aria-hidden>→</span>
               </Link>
             </div>
@@ -260,18 +258,15 @@ export default function HomePage() {
                   Présentez-nous votre organisation, vos outils actuels et vos principales difficultés. Nous vous
                   montrerons comment le socle BeWork peut être configuré pour vos équipes.
                 </p>
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <div className={`mt-8 ${HOME_BTN_GROUP}`}>
                   <Link
                     href="#formulaire"
-                    className="inline-flex h-12 items-center justify-center rounded-xl bg-[#1d4ed8] px-6 text-base font-semibold text-white shadow-sm transition hover:bg-[#1e40af]"
+                    className={HOME_BTN_PRIMARY}
                     {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-final-demo")}
                   >
-                    Demander une démonstration personnalisée
+                    Demander une démonstration
                   </Link>
-                  <Link
-                    href="/contact"
-                    className="inline-flex h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-base font-semibold text-[#0f172a] shadow-sm transition hover:border-[#1d4ed8]/35 hover:bg-white"
-                  >
+                  <Link href="/contact" className={HOME_BTN_SECONDARY}>
                     Parler de votre projet
                   </Link>
                 </div>

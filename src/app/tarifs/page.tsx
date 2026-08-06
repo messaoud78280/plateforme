@@ -9,6 +9,7 @@ import {
   BEWORK_TARIFS_FAQ,
   BEWORK_TARIFS_PROCESS_STEPS,
 } from "@/lib/bework-public-offers";
+import { CTA_GROUP, CTA_PRIMARY, CTA_SECONDARY } from "@/components/marketing/marketingCtaStyles";
 import {
   SEO_OG_ALTERNATE_LOCALES,
   SEO_OG_LOCALE_PRIMARY,
@@ -91,17 +92,11 @@ export default function TarifsPage() {
             Aucune grille publique fixe n&apos;est affichée pour l&apos;instant : chaque déploiement repose sur une étude
             de votre organisation.
           </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
-            <CalendlyBookingLink
-              trackLocation="tarifs-hero-primary"
-              className="inline-flex min-h-[3rem] w-full items-center justify-center rounded-xl bg-[#1d4ed8] px-7 py-3 text-base font-semibold text-white shadow-md transition hover:bg-[#1e40af] sm:w-auto"
-            >
-              Demander une étude personnalisée
+          <div className={`mt-8 ${CTA_GROUP} justify-center`}>
+            <CalendlyBookingLink trackLocation="tarifs-hero-primary" className={CTA_PRIMARY}>
+              Demander une étude
             </CalendlyBookingLink>
-            <Link
-              href="/#plateforme"
-              className="inline-flex min-h-[3rem] w-full items-center justify-center rounded-xl border-2 border-slate-200 bg-white px-7 py-3 text-base font-semibold text-[#0f172a] shadow-sm transition hover:border-[#1d4ed8]/30 hover:bg-[#f8fafc] sm:w-auto"
-            >
+            <Link href="/#plateforme" className={CTA_SECONDARY}>
               Découvrir la plateforme
             </Link>
           </div>
@@ -215,17 +210,11 @@ export default function TarifsPage() {
           <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-slate-600 md:text-lg">
             Présentez votre fonctionnement actuel : nous vous montrerons comment configurer le socle BeWork.
           </p>
-          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <CalendlyBookingLink
-              trackLocation="tarifs-footer"
-              className="inline-flex min-h-[3rem] w-full items-center justify-center rounded-xl bg-[#1d4ed8] px-8 py-3 font-semibold text-white shadow-md transition hover:bg-[#1e40af] sm:w-auto"
-            >
+          <div className={`mt-6 ${CTA_GROUP} justify-center`}>
+            <CalendlyBookingLink trackLocation="tarifs-footer" className={CTA_PRIMARY}>
               Demander une démonstration
             </CalendlyBookingLink>
-            <Link
-              href="/contact"
-              className="inline-flex min-h-[3rem] w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-8 py-3 font-semibold text-[#0f172a] transition hover:bg-slate-50 sm:w-auto"
-            >
+            <Link href="/contact" className={CTA_SECONDARY}>
               Nous écrire
             </Link>
           </div>

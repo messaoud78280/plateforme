@@ -1,6 +1,7 @@
 "use client";
 
 import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
+import { CTA_PRIMARY } from "@/components/marketing/marketingCtaStyles";
 
 export function StickyCtaMobile() {
   return (
@@ -11,7 +12,7 @@ export function StickyCtaMobile() {
     >
       <CalendlyBookingLink
         trackLocation="tarifs-sticky-mobile"
-        className="flex w-full items-center justify-center rounded-lg bg-[#1d4ed8] px-6 py-3.5 text-center text-base font-semibold text-white shadow-md transition hover:bg-[#1e40af] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2"
+        className={`${CTA_PRIMARY} w-full`}
         aria-label="Demander une démonstration BeWork"
       >
         Demander une démo

@@ -25,8 +25,4 @@ export const HOME_CARD =
 export const HOME_CARD_SOFT =
   "rounded-2xl border border-slate-200/90 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]" as const;
 
-export const HOME_BTN_PRIMARY =
-  "inline-flex h-12 items-center justify-center rounded-xl bg-[#1d4ed8] px-6 text-base font-semibold text-white shadow-sm transition hover:bg-[#1e40af] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8]/50" as const;
-
-export const HOME_BTN_SECONDARY =
-  "inline-flex h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-base font-semibold text-[#0f172a] shadow-sm transition hover:border-[#1d4ed8]/35 hover:bg-[#f8fafc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8]/35" as const;
+export { CTA_PRIMARY as HOME_BTN_PRIMARY, CTA_SECONDARY as HOME_BTN_SECONDARY, CTA_SOFT as HOME_BTN_SOFT, CTA_GROUP as HOME_BTN_GROUP } from "@/components/marketing/marketingCtaStyles";

@@ -7,6 +7,7 @@ import { CalendlyBookingLink } from "@/components/CalendlyBookingLink";
 import { MarketingDisclosure } from "@/components/marketing/MarketingDisclosure";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import { MarketingHeaderBlueprintDecor } from "@/components/layout/MarketingHeaderBlueprintDecor";
+import { CTA_PRIMARY, CTA_SECONDARY } from "@/components/marketing/marketingCtaStyles";
 
 type Props = {
   /** Fond opaque (pages sur fond déjà uni) */
@@ -111,10 +112,8 @@ const REASSURANCE = [
 const NAV_LINK =
   "inline-flex items-center gap-1 rounded-lg px-3.5 py-2.5 text-base font-semibold tracking-normal text-slate-700 transition-[color,background,box-shadow] hover:bg-white/80 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8]/35";
 const NAV_LINK_OPEN = "bg-white text-[#1d4ed8] shadow-sm ring-1 ring-slate-200/70";
-const HEADER_BTN_SECONDARY =
-  "inline-flex h-11 items-center gap-2 rounded-lg border border-slate-200/90 bg-white/95 px-4 text-base font-semibold text-slate-800 shadow-sm backdrop-blur-sm transition hover:border-slate-300 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8]/35";
-const HEADER_BTN_PRIMARY =
-  "inline-flex h-11 items-center gap-2 rounded-lg bg-[#1d4ed8] px-5 text-base font-semibold text-white shadow-sm bework-cta-primary-glow transition hover:bg-[#1e40af] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1d4ed8]/50";
+const HEADER_BTN_SECONDARY = CTA_SECONDARY;
+const HEADER_BTN_PRIMARY = CTA_PRIMARY;
 
 export function MarketingSiteHeader({ plainBg = false }: Props) {
   const [scrolled, setScrolled] = useState(false);
@@ -458,14 +457,14 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             <div className="grid grid-cols-2 gap-2">
               <Link
                 href="/#plateforme"
-                className="inline-flex min-h-[3rem] items-center justify-center rounded-xl border border-[#1d4ed8]/25 bg-[#eff6ff] px-3 text-center text-sm font-semibold text-[#1d4ed8] transition hover:bg-[#eff6ff]/80"
+                className={`${HEADER_BTN_SECONDARY} w-full px-3`}
                 onClick={() => setMobileOpen(false)}
               >
                 Plateforme
               </Link>
               <Link
                 href="/contact#formulaire"
-                className="inline-flex min-h-[3rem] items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-center text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
+                className={`${HEADER_BTN_PRIMARY} w-full px-3`}
                 onClick={() => setMobileOpen(false)}
                 {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-mobile-demo")}
               >
@@ -586,7 +585,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             <div className="flex flex-col gap-2.5 pt-1">
               <Link
                 href="/connexion"
-                className="inline-flex min-h-[3rem] items-center justify-center gap-2 rounded-[10px] border border-slate-200 bg-white px-4 py-3 text-base font-medium text-black hover:bg-slate-50"
+                className={`${HEADER_BTN_SECONDARY} w-full`}
                 onClick={() => setMobileOpen(false)}
               >
                 <IconUser className="h-[18px] w-[18px] text-slate-700" aria-hidden />
@@ -594,7 +593,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               </Link>
               <CalendlyBookingLink
                 trackLocation="header-mobile-footer"
-                className="inline-flex min-h-[3rem] items-center justify-center gap-2 rounded-[10px] bg-[#1d4ed8] px-4 py-3 text-base font-semibold text-white bework-cta-primary-glow hover:bg-[#1e40af]"
+                className={`${HEADER_BTN_PRIMARY} w-full`}
                 onClick={() => setMobileOpen(false)}
               >
                 <IconCalendar className="h-[18px] w-[18px]" aria-hidden />

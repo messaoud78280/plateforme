@@ -232,7 +232,7 @@ export function ProspectContactForm({
       <button
         type="submit"
         disabled={status === "loading"}
-        className="inline-flex min-h-[3rem] w-full items-center justify-center rounded-xl bg-[#1d4ed8] px-8 text-base font-semibold text-white shadow-md shadow-[#1d4ed8]/25 transition hover:bg-[#1e40af] disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
+        className="inline-flex h-11 shrink-0 items-center justify-center whitespace-nowrap rounded-lg bg-[#1d4ed8] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1e40af] disabled:cursor-not-allowed disabled:opacity-70 sm:h-12 sm:w-auto sm:text-[0.9375rem] w-full"
       >
         {status === "loading" ? "Envoi en cours…" : "Envoyer ma demande"}
       </button>

@@ -5,6 +5,8 @@ export type SeoInternalLink = { href: string; label: string };
 export const SEO_INTERNAL_LINKS: Record<string, SeoInternalLink[]> = {
   "/": [
     { href: "/#plateforme", label: "Socle plateforme BeWork" },
+    { href: "/#modules", label: "Modules métier BTP" },
+    { href: "/#adoption", label: "Formation et adoption" },
     { href: "/#marches", label: "Analyse des marchés" },
     { href: "/#outils-ia", label: "Outils IA spécialisés BTP" },
     { href: "/#confidentialite", label: "Confidentialité et données" },

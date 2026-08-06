@@ -4,6 +4,7 @@ import { ProspectContactForm } from "@/components/contact/ProspectContactForm";
 import { MarketingSiteFooter } from "@/components/layout/MarketingSiteFooter";
 import { MarketingSiteHeader } from "@/components/layout/MarketingSiteHeader";
 import { HomeAiSpecialized } from "@/components/home/HomeAiSpecialized";
+import { HomeAdoptionSection } from "@/components/home/HomeAdoptionSection";
 import { HomeClientTeamsUse } from "@/components/home/HomeClientTeamsUse";
 import { HomeConfidentiality } from "@/components/home/HomeConfidentiality";
 import { HomeCoreAdaptation } from "@/components/home/HomeCoreAdaptation";
@@ -180,6 +181,7 @@ export default function HomePage() {
         <HomeAiSpecialized />
         <HomeOpsContinuity />
         <HomeModulesGrid />
+        <HomeAdoptionSection />
         <HomeClientTeamsUse />
         <HomeConfidentiality />
         <HomeDeploySteps />

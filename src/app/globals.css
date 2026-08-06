@@ -106,7 +106,7 @@ body {
   --radius-xl: 1rem;
 
   /* Largeur canonique du contenu (marketing + dashboard) */
-  --site-max-width: 1200px;
+  --site-max-width: 1280px;
 
   /* —— Design system Pilotage travaux (cockpit BeWork) —— */
   --pilotage-navy: #1e3a5f;

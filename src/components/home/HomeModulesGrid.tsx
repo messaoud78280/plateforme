@@ -1,3 +1,6 @@
+import { HomeSectionHeader } from "@/components/home/HomeSectionHeader";
+import { HOME_BG_MUTED, HOME_CARD, HOME_CONTENT, HOME_SECTION } from "@/components/home/homeSectionStyles";
+
 const MODULES = [
   { title: "Chantiers et affaires", desc: "Suivi des dossiers et contextes terrain." },
   { title: "Communication interne", desc: "Échanges liés aux chantiers et responsabilités." },
@@ -16,19 +19,17 @@ const MODULES = [
 /** Modules regroupés — sélection lisible. */
 export function HomeModulesGrid() {
   return (
-    <section id="modules" className="scroll-mt-24 bg-[#f8fafc] px-6 py-14 md:py-20 lg:py-24" aria-labelledby="modules-heading">
+    <section id="modules" className={`${HOME_SECTION} ${HOME_BG_MUTED}`} aria-labelledby="modules-heading">
       <div className="container-site">
-        <header className="mx-auto max-w-2xl text-center">
-          <h2 id="modules-heading" className="font-display text-balance text-[1.75rem] font-extrabold tracking-tight text-[#0f172a] md:text-[2.25rem]">
-            Des modules adaptés aux métiers du BTP
-          </h2>
-          <p className="mt-4 text-base leading-relaxed text-slate-700 md:text-lg">
-            Activez ce dont votre organisation a besoin. Disponibilité selon configuration entreprise.
-          </p>
-        </header>
-        <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <HomeSectionHeader
+          id="modules-heading"
+          eyebrow="Modules"
+          title="Des modules adaptés aux métiers du BTP"
+          lead="Activez ce dont votre organisation a besoin. Disponibilité selon configuration entreprise."
+        />
+        <ul className={`${HOME_CONTENT} grid gap-4 sm:grid-cols-2 lg:grid-cols-3`}>
           {MODULES.map((m) => (
-            <li key={m.title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <li key={m.title} className={`${HOME_CARD} p-5`}>
               <h3 className="text-base font-bold text-[#0f172a]">{m.title}</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{m.desc}</p>
             </li>

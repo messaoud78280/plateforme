@@ -1,3 +1,6 @@
+import { HomeSectionHeader } from "@/components/home/HomeSectionHeader";
+import { HOME_BG_WHITE, HOME_CARD_SOFT, HOME_CONTENT, HOME_SECTION } from "@/components/home/homeSectionStyles";
+
 const STEPS = [
   {
     title: "Diagnostic de votre fonctionnement",
@@ -20,16 +23,16 @@ const STEPS = [
 /** Méthode de déploiement en 4 étapes. */
 export function HomeDeploySteps() {
   return (
-    <section id="methode" className="scroll-mt-24 bg-white px-6 py-14 md:py-20 lg:py-24" aria-labelledby="method-heading">
+    <section id="methode" className={`${HOME_SECTION} ${HOME_BG_WHITE}`} aria-labelledby="method-heading">
       <div className="container-site">
-        <header className="mx-auto max-w-2xl text-center">
-          <h2 id="method-heading" className="font-display text-balance text-[1.75rem] font-extrabold tracking-tight text-[#0f172a] md:text-[2.25rem]">
-            Une plateforme construite autour de votre organisation
-          </h2>
-        </header>
-        <ol className="mx-auto mt-12 grid max-w-5xl gap-5 md:grid-cols-2 lg:grid-cols-4">
+        <HomeSectionHeader
+          id="method-heading"
+          eyebrow="Déploiement"
+          title="Une plateforme construite autour de votre organisation"
+        />
+        <ol className={`${HOME_CONTENT} mx-auto grid max-w-5xl gap-5 md:grid-cols-2 lg:grid-cols-4`}>
           {STEPS.map((step, i) => (
-            <li key={step.title} className="rounded-2xl border border-slate-200 bg-[#f8fafc] p-5">
+            <li key={step.title} className={`${HOME_CARD_SOFT} bg-[#f8fafc] p-5`}>
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#1d4ed8] text-sm font-bold text-white">
                 {i + 1}
               </span>

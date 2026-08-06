@@ -35,7 +35,7 @@ export function BeWorkLogo({
   taglineSub,
   priority = false,
 }: BeWorkLogoProps) {
-  const defaultTagline = "Assistance technique et administrative BTP";
+  const defaultTagline = "Plateformes intelligentes pour le BTP";
 
   const sizesAttr =
     size === "sm"
@@ -48,7 +48,7 @@ export function BeWorkLogo({
     <span className={`inline-flex flex-col ${className}`}>
       <Image
         src={LOGO_PATH}
-        alt="BeWork — assistants travaux BTP"
+        alt="BeWork — plateformes intelligentes pour le BTP"
         width={LOGO_WIDTH}
         height={LOGO_HEIGHT}
         className={`shrink-0 object-contain object-left ${imageClassBySize[size]} ${imageClassName}`}

@@ -1,3 +1,6 @@
+import { HomeSectionHeader } from "@/components/home/HomeSectionHeader";
+import { HOME_BG_MUTED, HOME_CARD_SOFT, HOME_CONTENT, HOME_SECTION } from "@/components/home/homeSectionStyles";
+
 const CORE_ITEMS = [
   "Entreprises, utilisateurs, rôles et permissions",
   "Équipes, agences, chantiers et affaires",
@@ -20,20 +23,17 @@ const CONFIG_ITEMS = [
 /** Socle commun vs adaptation entreprise. */
 export function HomeCoreAdaptation() {
   return (
-    <section id="socle" className="scroll-mt-24 bg-[#f8fafc] px-6 py-14 md:py-20 lg:py-24" aria-labelledby="core-heading">
+    <section id="socle" className={`${HOME_SECTION} ${HOME_BG_MUTED}`} aria-labelledby="core-heading">
       <div className="container-site">
-        <header className="mx-auto max-w-3xl text-center">
-          <h2 id="core-heading" className="font-display text-balance text-[1.75rem] font-extrabold tracking-tight text-[#0f172a] md:text-[2.25rem]">
-            Une base éprouvée, adaptée à votre fonctionnement
-          </h2>
-          <p className="mt-4 text-base leading-relaxed text-slate-700 md:text-lg">
-            Chaque entreprise bénéficie du socle technologique BeWork, complété par des modules, des workflows et des
-            outils IA configurés selon son organisation.
-          </p>
-        </header>
+        <HomeSectionHeader
+          id="core-heading"
+          eyebrow="Socle & adaptation"
+          title="Une base éprouvée, adaptée à votre fonctionnement"
+          lead="Chaque entreprise bénéficie du socle technologique BeWork, complété par des modules, des workflows et des outils IA configurés selon son organisation."
+        />
 
-        <div className="mx-auto mt-12 grid max-w-5xl gap-6 md:grid-cols-2">
-          <article className="rounded-2xl border-2 border-[#1d4ed8]/30 bg-white p-6 shadow-sm md:p-8">
+        <div className={`${HOME_CONTENT} mx-auto grid max-w-5xl gap-6 md:grid-cols-2`}>
+          <article className={`${HOME_CARD_SOFT} border-[#1d4ed8]/25 p-6 md:p-8`}>
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">Niveau 1</p>
             <h3 className="mt-2 text-xl font-bold text-[#0f172a]">Le socle BeWork</h3>
             <p className="mt-2 text-sm leading-relaxed text-slate-600">
@@ -49,7 +49,7 @@ export function HomeCoreAdaptation() {
             </ul>
           </article>
 
-          <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+          <article className={`${HOME_CARD_SOFT} p-6 md:p-8`}>
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Niveau 2</p>
             <h3 className="mt-2 text-xl font-bold text-[#0f172a]">Votre configuration</h3>
             <p className="mt-2 text-sm leading-relaxed text-slate-600">

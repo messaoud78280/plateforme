@@ -178,19 +178,20 @@ export default function HomePage() {
         <HomePlatformEvolution />
         <HomeTechPartner />
 
-        <section id="ressources" className="relative bg-[#f8fafc] px-6 py-14 md:py-20 lg:py-24">
-          <div className="mx-auto max-w-site">
-            <div className="mb-10 max-w-2xl">
-              <h2 className="text-3xl font-bold tracking-tight text-black md:text-4xl">
+        <section id="ressources" className="scroll-mt-24 bg-white px-6 py-20 md:py-24 lg:py-28">
+          <div className="container-site">
+            <div className="mb-14 max-w-3xl">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">Ressources</p>
+              <h2 className="font-display mt-3 text-balance text-[1.875rem] font-extrabold tracking-tight text-[#0f172a] md:text-[2.5rem]">
                 Une plateforme construite avec une véritable expertise métier
               </h2>
-              <p className="mt-5 text-lg leading-relaxed text-black">
+              <p className="mt-6 text-base leading-relaxed text-slate-600 md:text-lg">
                 Guides, tutoriels et skills : l&apos;expression de notre connaissance des documents, procédures et
                 réalités opérationnelles du BTP — intégrée à la conception de la plateforme.
               </p>
               <Link
                 href="/ressources"
-                className="mt-6 inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50"
+                className="mt-6 inline-flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-[#1d4ed8]/30 hover:bg-[#f8fafc]"
               >
                 Ouvrir le centre de ressources BTP
                 <span aria-hidden>→</span>
@@ -202,7 +203,7 @@ export default function HomePage() {
                 <li key={r.href}>
                   <Link
                     href={r.href}
-                    className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-[#1d4ed8]/35 hover:shadow"
+                    className="flex h-full flex-col rounded-2xl border border-slate-200/90 bg-[#f8fafc] p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition hover:-translate-y-0.5 hover:border-[#1d4ed8]/30 hover:bg-white hover:shadow-[0_12px_28px_-16px_rgba(29,78,216,0.28)]"
                   >
                     <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#1d4ed8]">{r.status}</span>
                     <span className="mt-2 text-sm font-bold leading-snug text-[#0f172a]">{r.title}</span>
@@ -215,7 +216,7 @@ export default function HomePage() {
             <div className="mt-8">
               <Link
                 href="/ressources/tutos"
-                className="inline-flex items-center gap-2 rounded-lg border border-[#1d4ed8]/35 bg-[#eff6ff] px-4 py-2 text-sm font-semibold text-[#1e3a8a] transition hover:bg-[#dbeafe]"
+                className="inline-flex h-11 items-center gap-2 rounded-xl border border-[#1d4ed8]/25 bg-[#eff6ff] px-4 text-sm font-semibold text-[#1e3a8a] transition hover:bg-[#dbeafe]"
               >
                 Voir tous les tutoriels PDF
                 <span aria-hidden>→</span>
@@ -224,45 +225,52 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section id="faq" className="bg-white px-6 py-14 md:py-20 lg:py-24 scroll-mt-24" style={{ scrollMarginTop: "6rem" }}>
+        <section id="faq" className="scroll-mt-24 bg-[#f4f7fb] px-6 py-20 md:py-24 lg:py-28">
           <div className="mx-auto max-w-3xl">
-            <h2 className="text-3xl font-bold tracking-tight text-black md:text-4xl">Questions fréquentes</h2>
-            <p className="mt-5 text-lg leading-relaxed text-black">
+            <p className="text-center text-xs font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">FAQ</p>
+            <h2 className="font-display mt-3 text-center text-balance text-[1.875rem] font-extrabold tracking-tight text-[#0f172a] md:text-[2.5rem]">
+              Questions fréquentes
+            </h2>
+            <p className="mt-6 text-center text-base leading-relaxed text-slate-600 md:text-lg">
               Rôle de BeWork, abonnement, IA et démarrage : ce que les dirigeants clarifient avant une démonstration.
             </p>
-            <dl className="mt-12 space-y-6">
+            <dl className="mt-14 space-y-4">
               {HOME_FAQ_ITEMS.map((item, i) => (
-                <div key={i} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                  <dt className="text-lg font-semibold text-black">{item.q}</dt>
-                  <dd className="mt-3 text-black leading-relaxed">{item.a}</dd>
+                <div
+                  key={i}
+                  className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
+                >
+                  <dt className="text-lg font-semibold text-[#0f172a]">{item.q}</dt>
+                  <dd className="mt-3 leading-relaxed text-slate-600">{item.a}</dd>
                 </div>
               ))}
             </dl>
           </div>
         </section>
 
-        <section id="contact" className="bg-[#f8fafc] px-6 py-14 md:py-20 lg:py-24 scroll-mt-24">
-          <div className="mx-auto max-w-site rounded-2xl border-2 border-[#1d4ed8]/25 bg-white p-8 shadow-lg md:p-12 lg:p-14">
+        <section id="contact" className="scroll-mt-24 bg-white px-6 py-20 md:py-24 lg:py-28">
+          <div className="container-site rounded-2xl border border-[#1d4ed8]/20 bg-[#f8fafc] p-8 shadow-[0_1px_2px_rgba(15,23,42,0.04)] md:p-12 lg:p-14">
             <div className="grid gap-10 lg:grid-cols-5 lg:gap-14">
               <div className="lg:col-span-2">
-                <h2 className="font-display text-3xl font-extrabold tracking-tight text-[#0f172a] md:text-4xl">
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">Contact</p>
+                <h2 className="font-display mt-3 text-3xl font-extrabold tracking-tight text-[#0f172a] md:text-4xl">
                   Construisons la plateforme adaptée à votre entreprise
                 </h2>
-                <p className="mt-6 text-lg leading-relaxed text-slate-700">
+                <p className="mt-6 text-base leading-relaxed text-slate-600 md:text-lg">
                   Présentez-nous votre organisation, vos outils actuels et vos principales difficultés. Nous vous
                   montrerons comment le socle BeWork peut être configuré pour vos équipes.
                 </p>
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <Link
                     href="#formulaire"
-                    className="inline-flex h-[3.25rem] items-center justify-center rounded-2xl bg-[#1d4ed8] px-6 text-base font-semibold text-white shadow-md transition hover:bg-[#1e40af]"
+                    className="inline-flex h-12 items-center justify-center rounded-xl bg-[#1d4ed8] px-6 text-base font-semibold text-white shadow-sm transition hover:bg-[#1e40af]"
                     {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-final-demo")}
                   >
                     Demander une démonstration personnalisée
                   </Link>
                   <Link
                     href="/contact"
-                    className="inline-flex h-[3.25rem] items-center justify-center rounded-2xl border-2 border-[#1d4ed8] bg-white px-6 text-base font-semibold text-[#0f172a] shadow-sm transition hover:bg-[#f8f9fb]"
+                    className="inline-flex h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-base font-semibold text-[#0f172a] shadow-sm transition hover:border-[#1d4ed8]/35 hover:bg-white"
                   >
                     Parler de votre projet
                   </Link>

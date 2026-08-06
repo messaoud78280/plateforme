@@ -1,3 +1,6 @@
+import { HomeSectionHeader } from "@/components/home/HomeSectionHeader";
+import { HOME_BG_WHITE, HOME_CONTENT, HOME_SECTION } from "@/components/home/homeSectionStyles";
+
 const OPS_ITEMS = [
   "Préparation du chantier",
   "Documents et photos",
@@ -11,18 +14,15 @@ const OPS_ITEMS = [
 /** Continuité étude → exécution → réception. */
 export function HomeOpsContinuity() {
   return (
-    <section id="suivi-chantier" className="scroll-mt-24 bg-white px-6 py-14 md:py-20 lg:py-24" aria-labelledby="ops-heading">
+    <section id="suivi-chantier" className={`${HOME_SECTION} ${HOME_BG_WHITE}`} aria-labelledby="ops-heading">
       <div className="container-site">
-        <header className="mx-auto max-w-3xl text-center">
-          <h2 id="ops-heading" className="font-display text-balance text-[1.75rem] font-extrabold tracking-tight text-[#0f172a] md:text-[2.25rem]">
-            Du marché remporté jusqu&apos;à la réception du chantier
-          </h2>
-          <p className="mt-4 text-base leading-relaxed text-slate-700 md:text-lg">
-            La plateforme accompagne la continuité entre la phase d&apos;étude et l&apos;exécution — un environnement
-            unique, pas une collection d&apos;outils isolés.
-          </p>
-        </header>
-        <ol className="mx-auto mt-10 flex max-w-4xl flex-wrap items-center justify-center gap-2 md:gap-3">
+        <HomeSectionHeader
+          id="ops-heading"
+          eyebrow="Suivi opérationnel"
+          title={<>Du marché remporté jusqu&apos;à la réception du chantier</>}
+          lead="La plateforme accompagne la continuité entre la phase d'étude et l'exécution — un environnement unique, pas une collection d'outils isolés."
+        />
+        <ol className={`${HOME_CONTENT} mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-2 md:gap-3`}>
           {OPS_ITEMS.map((item, i) => (
             <li key={item} className="flex items-center gap-2 md:gap-3">
               <span className="rounded-full border border-slate-200 bg-[#f8fafc] px-3.5 py-2 text-sm font-semibold text-[#0f172a]">

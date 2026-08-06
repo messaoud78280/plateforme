@@ -1,20 +1,22 @@
 import Link from "next/link";
+import { HomeSectionHeader } from "@/components/home/HomeSectionHeader";
+import { HOME_BG_MUTED, HOME_CARD_SOFT, HOME_CONTENT, HOME_SECTION } from "@/components/home/homeSectionStyles";
 
 const POINTS = [
   {
-    title: "Accès par rôles",
-    text: "Permissions configurables pour limiter la visibilité et les actions selon les responsabilités.",
-  },
-  {
-    title: "Isolation entre entreprises",
-    text: "Les données de chaque organisation sont séparées de celles des autres clients BeWork.",
-  },
-  {
-    title: "Hébergement principal en Europe",
+    title: "Hébergement en Europe",
     text: "Infrastructures situées au sein de l’Union européenne ou conformes aux exigences européennes applicables.",
   },
   {
-    title: "Documents et échanges sensibles",
+    title: "Accès selon les rôles",
+    text: "Permissions configurables pour limiter la visibilité et les actions selon les responsabilités.",
+  },
+  {
+    title: "Isolation des espaces clients",
+    text: "Les données de chaque organisation sont séparées de celles des autres clients BeWork.",
+  },
+  {
+    title: "Confidentialité des documents",
     text: "Marchés, prix, plans, pièces financières et échanges internes traités dans un cadre contrôlé.",
   },
 ] as const;
@@ -25,28 +27,28 @@ const POINTS = [
  */
 export function HomeConfidentiality() {
   return (
-    <section id="confidentialite" className="scroll-mt-24 bg-[#f8fafc] px-6 py-14 md:py-20 lg:py-24" aria-labelledby="privacy-heading">
+    <section id="confidentialite" className={`${HOME_SECTION} ${HOME_BG_MUTED}`} aria-labelledby="privacy-heading">
       <div className="container-site">
-        <header className="mx-auto max-w-3xl text-center">
-          <h2 id="privacy-heading" className="font-display text-balance text-[1.75rem] font-extrabold tracking-tight text-[#0f172a] md:text-[2.25rem]">
-            Vos données professionnelles restent confidentielles
-          </h2>
-          <p className="mt-4 text-base leading-relaxed text-slate-700 md:text-lg">
-            Les plateformes BeWork sont conçues pour protéger les informations sensibles des entreprises du BTP. Les
-            accès sont réservés aux utilisateurs autorisés.
-          </p>
-        </header>
+        <HomeSectionHeader
+          id="privacy-heading"
+          eyebrow="Confidentialité"
+          title="Vos données professionnelles restent confidentielles"
+          lead="Les plateformes BeWork sont conçues pour protéger les informations sensibles des entreprises du BTP. Les accès sont réservés aux utilisateurs autorisés."
+        />
 
-        <ul className="mx-auto mt-10 grid max-w-5xl gap-4 sm:grid-cols-2">
+        <ul className={`${HOME_CONTENT} mx-auto grid max-w-5xl gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5`}>
           {POINTS.map((p) => (
-            <li key={p.title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h3 className="text-base font-bold text-[#0f172a]">{p.title}</h3>
+            <li
+              key={p.title}
+              className={`${HOME_CARD_SOFT} p-5 transition hover:border-[#1d4ed8]/20`}
+            >
+              <h3 className="text-sm font-bold text-[#0f172a] md:text-base">{p.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">{p.text}</p>
             </li>
           ))}
         </ul>
 
-        <div className="mx-auto mt-8 max-w-3xl rounded-xl border border-slate-200 bg-white px-5 py-4 text-sm leading-relaxed text-slate-700">
+        <div className="mx-auto mt-10 max-w-3xl rounded-xl border border-slate-200/90 bg-white px-5 py-4 text-sm leading-relaxed text-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
           <p>
             Les documents traités par les outils d&apos;intelligence artificielle le sont uniquement pour fournir les
             fonctionnalités demandées, selon les engagements de confidentialité et les paramètres applicables aux

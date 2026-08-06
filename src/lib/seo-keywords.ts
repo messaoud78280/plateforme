@@ -220,16 +220,16 @@ export const BEWORK_SLOGAN_DECISION = "On tient le dossier, vous gardez la déci
 export const BEWORK_AEO_DEFINITION =
   "BeWork met à disposition des assistants travaux spécialisés qui renforcent les entreprises du BTP dans la préparation des candidatures, l’analyse des DCE et le suivi administratif des marchés publics et privés. BeWork prépare, structure et suit les dossiers sous validation du client ; l’entreprise conserve prix, choix techniques, engagements contractuels et dépôt.";
 
-/** Meta description site (layout racine) — ≤160 car., périmètre francophonie. */
+/** Title SEO / OG racine (aligné home). */
+export const SEO_SITE_TITLE_DEFAULT = "BeWork | Plateformes internes avec IA pour le BTP";
+
+export const SEO_SITE_TITLE_OG =
+  "BeWork — Plateformes internes intelligentes pour les entreprises du BTP";
+
+/** Meta description site (layout racine) — ≤160 car. */
 export const SEO_VALUE_PROPOSITION =
-  "Assistants travaux BTP : candidatures, DCE et suivi admin des marchés. Vous validez ; BeWork prépare et suit. FR · BE · CH · LU.";
+  "BeWork conçoit des plateformes internes intelligentes pour le BTP : chantiers, documents, marchés et outils IA. FR · BE · CH · LU.";
 
 /** Proposition courte (OG, Twitter). */
 export const SEO_VALUE_PROPOSITION_SHORT =
-  "Renfort assistants travaux BTP : AO, DCE et suivi admin. Vous validez. FR · BE · CH · LU.";
-
-/** Title SEO / OG racine (aligné home). */
-export const SEO_SITE_TITLE_DEFAULT = "Assistant travaux BTP externalisé | BeWork";
-
-export const SEO_SITE_TITLE_OG =
-  "BeWork — Assistant travaux BTP : AO, DCE et suivi de marchés";
+  "Plateformes internes BTP : socle BeWork, modules adaptés, IA métier. FR · BE · CH · LU.";

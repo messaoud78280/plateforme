@@ -13,7 +13,7 @@ type Props = {
   plainBg?: boolean;
 };
 
-type SolutionMenuIconId = "devis" | "folder" | "invoice" | "cart" | "calendar";
+type SolutionMenuIconId = "devis" | "folder" | "invoice" | "cart" | "calendar" | "document";
 
 type ResourceMenuIconId =
   | "book"
@@ -31,34 +31,34 @@ const SOLUTION_MENU_ENTRIES: {
   icon: SolutionMenuIconId;
 }[] = [
   {
-    href: "/relance-devis-btp",
-    title: "Signer plus de devis",
-    description: "Relances et suivi pour transformer vos devis en chantiers.",
-    icon: "devis",
-  },
-  {
-    href: "/dict-dt-travaux",
-    title: "Suivre vos chantiers sans retard",
-    description: "DICT, dossiers et autorisations suivis jusqu’à l’intervention.",
+    href: "/#plateforme",
+    title: "Plateforme interne",
+    description: "Équipes, chantiers, documents et tableaux de bord.",
     icon: "folder",
   },
   {
-    href: "/impayes-btp-relances",
-    title: "Facturation & encaissement",
-    description: "Situations, factures et relances pour sécuriser votre trésorerie.",
-    icon: "invoice",
+    href: "/#outils-ia",
+    title: "Solutions IA métier",
+    description: "Analyser CCTP, CCAP, DCE et préparer des CR.",
+    icon: "document",
   },
   {
-    href: "/suivi-fournisseurs-chantier",
-    title: "Piloter fournisseurs & achats",
-    description: "Prix, commandes et livraisons centralisés côté administratif.",
-    icon: "cart",
+    href: "/#marches",
+    title: "Marchés publics et privés",
+    description: "Classer, analyser et suivre les dossiers de consultation.",
+    icon: "devis",
   },
   {
-    href: "/assistants-administratifs-taches",
-    title: "Planning & coordination",
-    description: "Organisation chantier, vous validez les décisions clés.",
+    href: "/#suivi-chantier",
+    title: "Suivi opérationnel",
+    description: "Du marché remporté jusqu’à la réception.",
     icon: "calendar",
+  },
+  {
+    href: "/#accompagnement",
+    title: "Accompagnement humain",
+    description: "Assistants travaux en complément de la plateforme.",
+    icon: "cart",
   },
 ];
 
@@ -70,42 +70,42 @@ const RESOURCE_MENU_ENTRIES: {
   icon: ResourceMenuIconId;
 }[] = [
   {
-    href: "/services",
-    title: "Services BTP",
-    description: "Intentions métier : assistant travaux, conducteur de travaux, DCE, PPSPS, DOE…",
+    href: "/ressources",
+    title: "Centre de ressources BTP",
+    description: "Guides, tutoriels et contenus métier BeWork.",
     icon: "globe",
   },
   {
     href: "/ressources/tutos",
     title: "Tutoriels",
-    description: "Tutoriels PDF et formats courts — CR chantier, DCE, PPSPS, mémoires techniques, etc.",
+    description: "Tutoriels PDF — CR, DCE, PPSPS, mémoires techniques…",
     icon: "document",
   },
   {
     href: "/ressources/guides",
     title: "Guides",
-    description: "Guides PDF longs : conduite de travaux, IA & skills, organisation bureau-chantier.",
+    description: "Guides longs : conduite de travaux, IA & organisation.",
     icon: "book",
   },
   {
     href: "/blog",
     title: "Blog",
-    description: "Articles BTP : planning chantier, aléas, CCAG, relances, trésorerie, retours d’expérience.",
+    description: "Articles BTP : planning, aléas, relances, retours d’expérience.",
     icon: "newspaper",
   },
   {
     href: "/cas-clients",
     title: "Cas clients",
-    description: "Exemples concrets : relances, trésorerie, dossiers chantier.",
+    description: "Exemples concrets d’organisation bureau-chantier.",
     icon: "users",
   },
 ];
 
 const REASSURANCE = [
-  "Déploiement rapide",
-  "Pas de recrutement",
-  "Supervisé depuis la France",
-  "Plateforme simple et sécurisée",
+  "Socle BeWork commun",
+  "Configuré à votre organisation",
+  "IA spécialisée BTP",
+  "Validations humaines",
 ];
 
 const NAV_LINK =
@@ -248,7 +248,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             </Link>
             <CalendlyBookingLink trackLocation="header-desktop" className={HEADER_BTN_PRIMARY}>
               <IconCalendar className="h-4 w-4 shrink-0 text-white" aria-hidden />
-              <span className="whitespace-nowrap">Parler de mon besoin</span>
+              <span className="whitespace-nowrap">Demander une démo</span>
             </CalendlyBookingLink>
           </div>
           <nav
@@ -274,18 +274,18 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                   setResourcesOpen(false);
                 }}
               >
-                <span className="whitespace-nowrap">Solutions BTP</span>
+                <span className="whitespace-nowrap">Plateforme</span>
                 <ChevronDown accent={solutionsOpen} className={solutionsOpen ? "rotate-180" : ""} />
               </button>
 
               {solutionsOpen ? (
                 <nav
                   className="bework-header-dropdown-enter absolute left-0 top-full z-[70] mt-2.5 hidden max-h-[min(70vh,calc(100dvh-5rem))] w-[min(30rem,calc(100vw-1.25rem))] overflow-y-auto overflow-x-hidden rounded-xl border border-slate-200 bg-[#f8fafc] py-4 shadow-md shadow-slate-900/[0.08] lg:block"
-                  aria-label="Solutions BTP"
+                  aria-label="Plateforme BeWork"
                   role="menu"
                 >
                   <p className="px-5 pb-3 text-xs font-bold uppercase tracking-[0.12em] text-[#1d4ed8]/95">
-                    Nos solutions BTP
+                    Découvrir BeWork
                   </p>
                   <ul className="flex flex-col gap-3 px-3">
                     {SOLUTION_MENU_ENTRIES.map((item) => (
@@ -315,11 +315,11 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                   </ul>
                   <div className="mt-3 border-t border-slate-200/80 px-5 pt-3">
                     <Link
-                      href="/services"
+                      href="/#plateforme"
                       className="inline-flex items-center gap-1 text-base font-semibold text-[#1d4ed8] transition-colors hover:text-[#1e40af]"
                       onClick={() => setSolutionsOpen(false)}
                     >
-                      Voir toutes nos solutions
+                      Voir la plateforme
                       <span aria-hidden>→</span>
                     </Link>
                   </div>
@@ -327,18 +327,14 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               ) : null}
             </div>
 
-            <Link href="/#process-bework" className={`${NAV_LINK} whitespace-nowrap`}>
-              Comment ça marche
+            <Link href="/#outils-ia" className={`${NAV_LINK} whitespace-nowrap`}>
+              Solutions IA
             </Link>
-            <Link href="/promoteurs-immobiliers" className={`${NAV_LINK} whitespace-nowrap`}>
-              Promoteurs
+            <Link href="/#marches" className={`${NAV_LINK} whitespace-nowrap`}>
+              Marchés
             </Link>
-            <Link
-              href="/tarifs"
-              className={`${NAV_LINK} whitespace-nowrap`}
-              {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_TARIFS, "header-nav")}
-            >
-              Tarifs
+            <Link href="/#accompagnement" className={`${NAV_LINK} whitespace-nowrap`}>
+              Accompagnement
             </Link>
             <Link href="/notre-facon-de-travailler" className={`${NAV_LINK} whitespace-nowrap`}>
               À propos
@@ -356,7 +352,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                   className={`${NAV_LINK} rounded-r-none pr-2 whitespace-nowrap`}
                   onClick={() => setResourcesOpen(false)}
                 >
-                  Ressources
+                  Ressources BTP
                 </Link>
                 <button
                   type="button"
@@ -461,24 +457,24 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             {/* Liens rapides — visibles sans déplier */}
             <div className="grid grid-cols-2 gap-2">
               <Link
-                href="/promoteurs-immobiliers"
+                href="/#plateforme"
                 className="inline-flex min-h-[3rem] items-center justify-center rounded-xl border border-[#1d4ed8]/25 bg-[#eff6ff] px-3 text-center text-sm font-semibold text-[#1d4ed8] transition hover:bg-[#eff6ff]/80"
                 onClick={() => setMobileOpen(false)}
               >
-                Promoteurs
+                Plateforme
               </Link>
               <Link
-                href="/tarifs"
+                href="/contact#formulaire"
                 className="inline-flex min-h-[3rem] items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-center text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
                 onClick={() => setMobileOpen(false)}
-                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_TARIFS, "header-mobile-nav")}
+                {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-mobile-demo")}
               >
-                Tarifs
+                Demander une démo
               </Link>
             </div>
 
             <nav className="flex flex-col gap-2" aria-label="Navigation mobile">
-              <MarketingDisclosure title="Solutions BTP">
+              <MarketingDisclosure title="Plateforme">
                 <ul className="divide-y divide-slate-100">
                   {SOLUTION_MENU_ENTRIES.map((item) => (
                     <li key={item.href}>
@@ -504,17 +500,46 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 </ul>
                 <div className="border-t border-slate-100 px-4 py-3 sm:px-5">
                   <Link
-                    href="/services"
+                    href="/#methode"
                     className="inline-flex items-center gap-1 text-sm font-semibold text-[#1d4ed8]"
                     onClick={() => setMobileOpen(false)}
                   >
-                    Voir toutes nos solutions
+                    Méthode de déploiement
                     <span aria-hidden>→</span>
                   </Link>
                 </div>
               </MarketingDisclosure>
 
-              <MarketingDisclosure title="Ressources">
+              <Link
+                href="/#outils-ia"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-900"
+                onClick={() => setMobileOpen(false)}
+              >
+                Solutions IA
+              </Link>
+              <Link
+                href="/#marches"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-900"
+                onClick={() => setMobileOpen(false)}
+              >
+                Marchés publics et privés
+              </Link>
+              <Link
+                href="/#accompagnement"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-900"
+                onClick={() => setMobileOpen(false)}
+              >
+                Accompagnement
+              </Link>
+              <Link
+                href="/notre-facon-de-travailler"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-900"
+                onClick={() => setMobileOpen(false)}
+              >
+                À propos
+              </Link>
+
+              <MarketingDisclosure title="Ressources BTP">
                 <div className="px-4 py-3 sm:px-5">
                   <Link
                     href="/ressources"
@@ -549,23 +574,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 </ul>
               </MarketingDisclosure>
 
-              <Link
-                href="/#process-bework"
-                className="flex min-h-[3rem] items-center rounded-xl border border-slate-200/90 bg-white px-4 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50 sm:px-5 sm:text-base"
-                onClick={() => setMobileOpen(false)}
-              >
-                Comment ça marche
-              </Link>
-              <Link
-                href="/notre-facon-de-travailler"
-                className="flex min-h-[3rem] items-center rounded-xl border border-slate-200/90 bg-white px-4 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50 sm:px-5 sm:text-base"
-                onClick={() => setMobileOpen(false)}
-              >
-                À propos
-              </Link>
-            </nav>
-
-            <MarketingDisclosure title="Pourquoi BeWork ?" className="border-slate-100 bg-slate-50/80">
+              <MarketingDisclosure title="Pourquoi BeWork ?" className="border-slate-100 bg-slate-50/80">
               <div className="space-y-2 px-4 py-3 text-sm text-slate-600 sm:px-5">
                 {REASSURANCE.map((line) => (
                   <p key={line}>• {line}</p>
@@ -588,7 +597,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
                 onClick={() => setMobileOpen(false)}
               >
                 <IconCalendar className="h-[18px] w-[18px]" aria-hidden />
-                Parler de mon besoin
+                Demander une démo
               </CalendlyBookingLink>
             </div>
           </div>
@@ -787,6 +796,18 @@ function SolutionNavIcon({ id, className }: { id: SolutionMenuIconId; className?
           <path d="M8 6V4m8 2V4" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" />
           <path d="M4 12h17" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" />
           <path d="M8 17h8M8 19h5" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
+        </svg>
+      );
+    case "document":
+      return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+          <path
+            d="M14 3H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8l-4-5Z"
+            stroke="currentColor"
+            strokeWidth="1.55"
+            strokeLinejoin="round"
+          />
+          <path d="M14 3v5h5M9 13h6M9 17h4" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" />
         </svg>
       );
     default:

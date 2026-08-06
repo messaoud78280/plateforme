@@ -221,16 +221,16 @@ export function MarketingSiteFooter() {
           </div>
 
           <div className="flex flex-col gap-4">
-            <ColumnTitle>Tarifs &amp; espace client</ColumnTitle>
+            <ColumnTitle>Offre &amp; espace client</ColumnTitle>
             <ul className="flex flex-col gap-3">
               <li>
                 <Link href="/tarifs" className={COL_LINK}>
-                  Tarifs pilotage administratif
+                  Étude tarifaire personnalisée
                 </Link>
               </li>
               <li>
-                <Link href="/communication-digitale" className={COL_LINK}>
-                  Tarifs communication
+                <Link href="/contact#formulaire" className={COL_LINK}>
+                  Demander une démonstration
                 </Link>
               </li>
               <li>

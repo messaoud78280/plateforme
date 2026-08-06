@@ -53,7 +53,7 @@ export function HomeTechPartner() {
             BeWork ne se substitue pas à vos salariés dans l&apos;analyse finale, la conduite des travaux ou les
             décisions contractuelles.
           </p>
-          <div className="mt-7">
+          <div className="mt-7 w-full sm:w-auto">
             <Link
               href="/contact#formulaire"
               className={HOME_BTN_PRIMARY}

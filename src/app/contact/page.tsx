@@ -45,12 +45,12 @@ export default function ContactPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(contactJsonLd) }} />
       <MarketingSiteHeader plainBg />
 
-      <main className="px-4 py-12 md:py-16">
+      <main className="px-4 py-10 sm:py-12 md:py-16">
         <div className="mx-auto max-w-3xl">
-          <h1 className="font-heading text-metallic-black text-3xl font-bold tracking-tight text-balance md:text-4xl">
+          <h1 className="font-heading text-metallic-black text-[1.75rem] font-bold tracking-tight text-balance sm:text-3xl md:text-4xl">
             Contact & échange
           </h1>
-          <p className="mt-4 text-base font-medium leading-relaxed text-black md:text-lg">
+          <p className="mt-4 text-[0.9375rem] font-medium leading-relaxed text-black sm:text-base md:text-lg">
             Décrivez votre contexte en quelques champs : BeWork qualifie votre demande et vous recontacte pour un{" "}
             <strong className="font-semibold text-black">échange ciblé</strong> sur vos marchés et votre charge
             administrative.
@@ -58,21 +58,21 @@ export default function ContactPage() {
 
           <div
             id="formulaire"
-            className="relative mt-10 scroll-mt-28 rounded-2xl border border-slate-200 bg-white/95 p-6 shadow-sm md:p-8"
+            className="relative mt-8 scroll-mt-28 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm sm:mt-10 sm:p-6 md:p-8"
           >
             <ProspectContactForm source="contact_page" />
           </div>
 
-          <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
+          <div className="mt-6 flex w-full flex-col gap-2.5 sm:mt-8 sm:flex-row sm:flex-wrap sm:gap-4">
             <Link
               href="/faq"
-              className="inline-flex min-h-[3rem] items-center justify-center rounded-xl border-2 border-slate-200 bg-white px-8 py-3.5 text-center text-base font-semibold text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+              className="inline-flex h-11 w-full items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-center text-sm font-semibold text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 sm:h-12 sm:w-auto sm:rounded-xl sm:border-2 sm:px-8 sm:py-3.5 sm:text-base"
             >
               Lire la FAQ
             </Link>
             <Link
               href="/tarifs"
-              className="inline-flex min-h-[3rem] items-center justify-center rounded-xl border-2 border-slate-200 bg-white px-8 py-3.5 text-center text-base font-semibold text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+              className="inline-flex h-11 w-full items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-center text-sm font-semibold text-slate-900 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 sm:h-12 sm:w-auto sm:rounded-xl sm:border-2 sm:px-8 sm:py-3.5 sm:text-base"
               {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_TARIFS, "contact-page")}
             >
               Voir les tarifs

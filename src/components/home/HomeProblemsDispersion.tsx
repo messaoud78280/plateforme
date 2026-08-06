@@ -42,10 +42,10 @@ export function HomeProblemsDispersion() {
 
         <ul className={`${HOME_CONTENT} mx-auto grid max-w-5xl gap-5 sm:grid-cols-2 lg:gap-6`}>
           {PROBLEMS.map((p) => (
-            <li key={p.title} className={`group ${HOME_CARD} p-6 hover:-translate-y-0.5 md:p-7`}>
-              <div className="flex items-start gap-4">
+            <li key={p.title} className={`group ${HOME_CARD} p-4 hover:-translate-y-0.5 sm:p-6 md:p-7`}>
+              <div className="flex items-start gap-3 sm:gap-4">
                 <span
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#1d4ed8]/15 bg-[#eff6ff] text-[#1d4ed8] transition group-hover:bg-[#dbeafe]"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#1d4ed8]/15 bg-[#eff6ff] text-[#1d4ed8] transition group-hover:bg-[#dbeafe] sm:h-11 sm:w-11"
                   aria-hidden
                 >
                   <ProblemIcon id={p.icon} />

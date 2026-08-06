@@ -230,7 +230,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
             <BeWorkLogo
               size="sm"
               priority
-              imageClassName="h-[6.1875rem] max-w-[min(100%,25.875rem)] sm:h-[6.75rem] sm:max-w-[min(100%,30.375rem)] md:h-[7.5375rem] md:max-w-[min(100%,36rem)] lg:h-[8.4375rem] lg:max-w-[min(100%,45rem)]"
+              imageClassName="h-14 max-w-[min(calc(100vw-5.5rem),15.5rem)] sm:h-[6.75rem] sm:max-w-[min(100%,30.375rem)] md:h-[7.5375rem] md:max-w-[min(100%,36rem)] lg:h-[8.4375rem] lg:max-w-[min(100%,45rem)]"
             />
           </Link>
         </div>
@@ -446,25 +446,25 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
       {/* Menu mobile */}
       <div
         id="marketing-mobile-nav"
-        className={`fixed inset-x-0 bottom-0 top-0 z-40 bg-white pt-[calc(7.875rem+env(safe-area-inset-top,0px))] transition-[opacity,visibility] duration-200 sm:pt-[calc(8.4375rem+env(safe-area-inset-top,0px))] md:pt-[calc(9rem+env(safe-area-inset-top,0px))] lg:hidden ${
+        className={`fixed inset-x-0 bottom-0 top-0 z-40 bg-white pt-[calc(4.75rem+env(safe-area-inset-top,0px))] transition-[opacity,visibility] duration-200 sm:pt-[calc(7.25rem+env(safe-area-inset-top,0px))] md:pt-[calc(8rem+env(safe-area-inset-top,0px))] lg:hidden ${
           mobileOpen ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"
         }`}
         aria-hidden={!mobileOpen}
       >
-        <div className="h-[calc(100dvh-7.875rem-env(safe-area-inset-top,0px))] overflow-y-auto pb-10 pt-4 sm:h-[calc(100dvh-8.4375rem-env(safe-area-inset-top,0px))] md:h-[calc(100dvh-9rem-env(safe-area-inset-top,0px))]">
+        <div className="h-[calc(100dvh-4.75rem-env(safe-area-inset-top,0px))] overflow-y-auto overscroll-contain pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-3 sm:h-[calc(100dvh-7.25rem-env(safe-area-inset-top,0px))] md:h-[calc(100dvh-8rem-env(safe-area-inset-top,0px))]">
           <div className="container-site flex flex-col gap-3">
             {/* Liens rapides — visibles sans déplier */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
               <Link
                 href="/#plateforme"
-                className={`${HEADER_BTN_SECONDARY} w-full px-3`}
+                className={HEADER_BTN_SECONDARY}
                 onClick={() => setMobileOpen(false)}
               >
                 Plateforme
               </Link>
               <Link
                 href="/contact#formulaire"
-                className={`${HEADER_BTN_PRIMARY} w-full px-3`}
+                className={HEADER_BTN_PRIMARY}
                 onClick={() => setMobileOpen(false)}
                 {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "header-mobile-demo")}
               >

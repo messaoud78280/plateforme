@@ -101,9 +101,9 @@ export function HomeProductPreview() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between border-t border-slate-100 bg-white px-3.5 py-2 sm:px-4">
-        <p className="text-[10px] text-slate-500">Espace entreprise · modules selon configuration</p>
-        <p className="text-[10px] font-medium text-[#1d4ed8]">Accès par rôles</p>
+      <div className="flex items-center justify-between gap-2 border-t border-slate-100 bg-white px-3 py-2 sm:px-4">
+        <p className="min-w-0 truncate text-[10px] text-slate-500">Espace entreprise</p>
+        <p className="shrink-0 text-[10px] font-medium text-[#1d4ed8]">Accès par rôles</p>
       </div>
     </div>
   );

@@ -17,14 +17,14 @@ export function HomeSectionHeader({ id, eyebrow, title, lead, className = "" }: 
       ) : null}
       <h2
         id={id}
-        className={`font-display text-balance text-[1.875rem] font-extrabold leading-[1.15] tracking-tight text-[#0f172a] md:text-[2.5rem] ${
+        className={`font-display text-balance text-[1.625rem] font-extrabold leading-[1.15] tracking-tight text-[#0f172a] sm:text-[1.875rem] md:text-[2.5rem] ${
           eyebrow ? "mt-3" : ""
         }`}
       >
         {title}
       </h2>
       {lead ? (
-        <div className="mt-6 text-base leading-relaxed text-slate-600 md:text-lg md:leading-relaxed">{lead}</div>
+        <div className="mt-4 text-[0.9375rem] leading-relaxed text-slate-600 sm:mt-6 sm:text-base md:text-lg md:leading-relaxed">{lead}</div>
       ) : null}
     </header>
   );

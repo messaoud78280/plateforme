@@ -179,20 +179,20 @@ export default function HomePage() {
         <HomePlatformEvolution />
         <HomeTechPartner />
 
-        <section id="ressources" className="scroll-mt-24 bg-white px-6 py-20 md:py-24 lg:py-28">
+        <section id="ressources" className="scroll-mt-24 bg-white py-14 sm:py-20 md:py-24 lg:py-28">
           <div className="container-site">
-            <div className="mb-14 max-w-3xl">
+            <div className="mb-10 max-w-3xl sm:mb-14">
               <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">Ressources</p>
-              <h2 className="font-display mt-3 text-balance text-[1.875rem] font-extrabold tracking-tight text-[#0f172a] md:text-[2.5rem]">
+              <h2 className="font-display mt-3 text-balance text-[1.625rem] font-extrabold tracking-tight text-[#0f172a] sm:text-[1.875rem] md:text-[2.5rem]">
                 Une plateforme construite avec une véritable expertise métier
               </h2>
-              <p className="mt-6 text-base leading-relaxed text-slate-600 md:text-lg">
+              <p className="mt-4 text-[0.9375rem] leading-relaxed text-slate-600 sm:mt-6 sm:text-base md:text-lg">
                 Guides, tutoriels et skills : l&apos;expression de notre connaissance des documents, procédures et
                 réalités opérationnelles du BTP — intégrée à la conception de la plateforme.
               </p>
               <Link
                 href="/ressources"
-                className={`mt-6 ${HOME_BTN_SECONDARY}`}
+                className={`mt-5 sm:mt-6 ${HOME_BTN_SECONDARY}`}
               >
                 Centre de ressources
                 <span aria-hidden>→</span>
@@ -223,63 +223,66 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section id="faq" className="scroll-mt-24 bg-[#f4f7fb] px-6 py-20 md:py-24 lg:py-28">
-          <div className="mx-auto max-w-3xl">
+        <section id="faq" className="scroll-mt-24 bg-[#f4f7fb] py-14 sm:py-20 md:py-24 lg:py-28">
+          <div className="container-site mx-auto max-w-3xl">
             <p className="text-center text-xs font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">FAQ</p>
-            <h2 className="font-display mt-3 text-center text-balance text-[1.875rem] font-extrabold tracking-tight text-[#0f172a] md:text-[2.5rem]">
+            <h2 className="font-display mt-3 text-center text-balance text-[1.625rem] font-extrabold tracking-tight text-[#0f172a] sm:text-[1.875rem] md:text-[2.5rem]">
               Questions fréquentes
             </h2>
-            <p className="mt-6 text-center text-base leading-relaxed text-slate-600 md:text-lg">
+            <p className="mt-4 text-center text-[0.9375rem] leading-relaxed text-slate-600 sm:mt-6 sm:text-base md:text-lg">
               Rôle de BeWork, abonnement, IA et démarrage : ce que les dirigeants clarifient avant une démonstration.
             </p>
-            <dl className="mt-14 space-y-4">
+            <dl className="mt-10 space-y-3 sm:mt-14 sm:space-y-4">
               {HOME_FAQ_ITEMS.map((item, i) => (
                 <div
                   key={i}
-                  className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
+                  className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:p-6"
                 >
-                  <dt className="text-lg font-semibold text-[#0f172a]">{item.q}</dt>
-                  <dd className="mt-3 leading-relaxed text-slate-600">{item.a}</dd>
+                  <dt className="text-base font-semibold text-[#0f172a] sm:text-lg">{item.q}</dt>
+                  <dd className="mt-2 text-sm leading-relaxed text-slate-600 sm:mt-3 sm:text-base">{item.a}</dd>
                 </div>
               ))}
             </dl>
           </div>
         </section>
 
-        <section id="contact" className="scroll-mt-24 bg-white px-6 py-20 md:py-24 lg:py-28">
-          <div className="container-site rounded-2xl border border-[#1d4ed8]/20 bg-[#f8fafc] p-8 shadow-[0_1px_2px_rgba(15,23,42,0.04)] md:p-12 lg:p-14">
-            <div className="grid gap-10 lg:grid-cols-5 lg:gap-14">
+        <section id="contact" className="scroll-mt-24 bg-white py-14 sm:py-20 md:py-24 lg:py-28">
+          <div className="container-site">
+          <div className="rounded-2xl border border-[#1d4ed8]/20 bg-[#f8fafc] p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:p-8 md:p-12 lg:p-14">
+            <div className="grid gap-8 lg:grid-cols-5 lg:gap-14">
               <div className="lg:col-span-2">
                 <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">Contact</p>
-                <h2 className="font-display mt-3 text-3xl font-extrabold tracking-tight text-[#0f172a] md:text-4xl">
+                <h2 className="font-display mt-3 text-[1.625rem] font-extrabold tracking-tight text-[#0f172a] sm:text-3xl md:text-4xl">
                   Construisons la plateforme adaptée à votre entreprise
                 </h2>
-                <p className="mt-6 text-base leading-relaxed text-slate-600 md:text-lg">
+                <p className="mt-4 text-[0.9375rem] leading-relaxed text-slate-600 sm:mt-6 sm:text-base md:text-lg">
                   Présentez-nous votre organisation, vos outils actuels et vos principales difficultés. Nous vous
                   montrerons comment le socle BeWork peut être configuré pour vos équipes.
                 </p>
-                <div className={`mt-8 ${HOME_BTN_GROUP}`}>
+                <div className={`mt-6 sm:mt-8 ${HOME_BTN_GROUP}`}>
                   <Link
                     href="#formulaire"
                     className={HOME_BTN_PRIMARY}
                     {...plausibleTrackProps(PLAUSIBLE_EVENTS.CTA_CONTACT, "home-final-demo")}
                   >
-                    Demander une démonstration
+                    <span className="sm:hidden">Demander une démo</span>
+                    <span className="hidden sm:inline">Demander une démonstration</span>
                   </Link>
                   <Link href="/contact" className={HOME_BTN_SECONDARY}>
                     Parler de votre projet
                   </Link>
                 </div>
               </div>
-              <div id="formulaire" className="relative rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-3 md:p-8">
+              <div id="formulaire" className="relative rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6 lg:col-span-3 md:p-8">
                 <ProspectContactForm source="homepage_contact_form" variant="compact" />
               </div>
             </div>
           </div>
+          </div>
         </section>
 
-        <section className="bg-white px-6 pb-8 pt-4">
-          <div className="mx-auto max-w-site">
+        <section className="bg-white pb-8 pt-4">
+          <div className="container-site">
             <SeoInternalLinks path="/" />
           </div>
         </section>

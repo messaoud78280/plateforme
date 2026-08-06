@@ -79,20 +79,20 @@ export default function TarifsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(tarifsStructuredData) }}
       />
 
-      <main className="mx-auto max-w-site px-4 py-12 md:py-16">
+      <main className="mx-auto max-w-site px-4 py-10 sm:py-12 md:py-16">
         <section className="text-center">
-          <h1 className="font-heading text-metallic-black text-4xl font-bold tracking-tight md:text-5xl md:leading-tight">
+          <h1 className="font-heading text-metallic-black text-[1.75rem] font-bold tracking-tight sm:text-4xl md:text-5xl md:leading-tight">
             {TARIFS_H1}
           </h1>
-          <p className="mx-auto mt-5 max-w-3xl text-xl leading-relaxed text-slate-700 md:text-[1.35rem] md:leading-relaxed">
+          <p className="mx-auto mt-4 max-w-3xl text-base leading-relaxed text-slate-700 sm:mt-5 sm:text-xl md:text-[1.35rem] md:leading-relaxed">
             Le tarif dépend du nombre d&apos;utilisateurs, des modules activés, du niveau de personnalisation, des outils
             IA et de l&apos;accompagnement souhaité.
           </p>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-600 md:text-lg">
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 sm:mt-4 sm:text-base md:text-lg">
             Aucune grille publique fixe n&apos;est affichée pour l&apos;instant : chaque déploiement repose sur une étude
             de votre organisation.
           </p>
-          <div className={`mt-8 ${CTA_GROUP} justify-center`}>
+          <div className={`mx-auto mt-6 max-w-md sm:mt-8 sm:max-w-none ${CTA_GROUP} sm:justify-center`}>
             <CalendlyBookingLink trackLocation="tarifs-hero-primary" className={CTA_PRIMARY}>
               Demander une étude
             </CalendlyBookingLink>
@@ -102,9 +102,9 @@ export default function TarifsPage() {
           </div>
         </section>
 
-        <section className="mx-auto mt-14 max-w-4xl" aria-labelledby="calcul-tarif-heading">
-          <div className="rounded-2xl border border-slate-200/90 bg-white p-8 md:p-10">
-            <h2 id="calcul-tarif-heading" className="text-2xl font-bold text-[#0f172a] md:text-3xl">
+        <section className="mx-auto mt-12 max-w-4xl sm:mt-14" aria-labelledby="calcul-tarif-heading">
+          <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-8 md:p-10">
+            <h2 id="calcul-tarif-heading" className="text-xl font-bold text-[#0f172a] sm:text-2xl md:text-3xl">
               Comment est construite la proposition ?
             </h2>
             <p className="mt-4 text-base leading-relaxed text-slate-600 md:text-lg">

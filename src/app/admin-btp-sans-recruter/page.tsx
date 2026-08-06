@@ -11,27 +11,27 @@ export default function Page() {
   const faq = [
     {
       q: "Peut-on gérer une entreprise BTP sans recruter d’assistante ?",
-      a: "Oui, si vous avez une assistance bureau‑terrain structurée. L’enjeu est de tenir le suivi (devis, relances, documents, demandes) sans tout repousser au soir ou au week‑end.",
+      a: "Oui, si vous équipez le bureau d’une plateforme structurée. L’enjeu est de tenir le suivi (devis, relances, documents, demandes) sans tout repousser au soir ou au week‑end — vos équipes utilisent ; BeWork configure et fait évoluer.",
     },
     {
       q: "Quand faut-il recruter une assistante BTP ?",
-      a: "Quand le besoin devient stable et quasi quotidien, et que vous avez un volume constant nécessitant une présence interne. BeWork peut être une étape souple avant cette embauche.",
+      a: "Quand le besoin devient stable et quasi quotidien, et que vous avez un volume constant nécessitant une présence interne. La plateforme BeWork peut être une étape souple avant cette embauche.",
     },
     {
-      q: "Que peut gérer BeWork sans poste interne ?",
-      a: "Le suivi côté bureau : devis, relances, situations/factures, dossiers chantier, documents travaux, suivi fournisseurs et demandes en attente — dans un périmètre cadré.",
+      q: "Que couvre la plateforme sans poste interne dédié ?",
+      a: "Le suivi côté bureau : devis, relances, situations/factures, dossiers chantier, documents travaux, suivi fournisseurs et demandes en attente — dans un périmètre cadré au déploiement.",
     },
     {
       q: "BeWork remplace-t-elle une assistante salariée ?",
-      a: "Non. BeWork est une assistance travaux flexible et cadrée : utile quand la charge varie ou quand vous ne voulez pas recruter trop tôt. Un poste interne reste pertinent si vous avez un besoin constant à temps plein.",
+      a: "Non. BeWork est éditeur de plateforme interne BTP : utile quand la charge varie ou quand vous ne voulez pas recruter trop tôt. Un poste interne reste pertinent si vous avez un besoin constant à temps plein.",
     },
     {
       q: "Est-ce adapté à un artisan ou une petite entreprise du bâtiment ?",
-      a: "Oui : démarrage progressif, forfaits clairs et validation finale côté client. L’objectif est de sécuriser le suivi bureau‑terrain sans alourdir l’organisation.",
+      a: "Oui : démarrage progressif, périmètre clair et validation finale côté client. L’objectif est de sécuriser le suivi bureau‑terrain sans alourdir l’organisation RH.",
     },
     {
-      q: "Puis-je commencer avec un petit forfait avant d’embaucher ?",
-      a: "Oui. On peut démarrer sur un volume limité (relances, suivi simple, dossiers) puis ajuster selon vos chantiers et votre charge.",
+      q: "Puis-je commencer sur un périmètre réduit avant d’embaucher ?",
+      a: "Oui. On peut déployer d’abord sur un volume limité (relances, suivi simple, dossiers) puis élargir modules et workflows selon vos chantiers.",
     },
   ] as const;
 
@@ -47,17 +47,18 @@ export default function Page() {
 
   return (
     <SeoLandingPage
-      description="Tenir le bureau sans recruter : devis, relances, dossiers chantier et suivi bureau‑terrain avec un cadre clair et une validation finale côté client."
+      description="Tenir le bureau sans recruter : plateforme interne BeWork pour devis, relances, dossiers chantier et suivi bureau‑terrain — validation finale côté client."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "BTP sans recruter", href: PAGE_PATH },
       ]}
-      h1="Gérer vos dossiers BTP sans recruter : l’assistance travaux BeWork"
+      h1="Gérer vos dossiers BTP sans recruter : plateforme interne BeWork"
       intro={
         <>
-          Une entreprise BTP peut avoir besoin d’une vraie assistance technique et administrative avant d’avoir la charge suffisante pour recruter.
-          BeWork met en place un <strong>accompagnement travaux</strong> cadré (demandes, suivis, livrables) avec <strong>validation finale</strong>{" "}
-          côté client.
+          Une entreprise BTP peut avoir besoin d&apos;un vrai outil bureau‑terrain avant d&apos;avoir la charge
+          suffisante pour recruter. BeWork déploie une <strong>plateforme interne</strong> cadrée (demandes, suivis,
+          livrables) : vos équipes utilisent ; BeWork configure, déploie et fait évoluer — avec{" "}
+          <strong>validation finale</strong> côté client.
         </>
       }
     >
@@ -71,7 +72,8 @@ export default function Page() {
         <li>Besoin d’un cadre souple et d’un volume adaptable.</li>
       </ul>
       <p>
-        Recruter devient très pertinent quand le besoin est stable et constant. Avant ça, une assistance externe cadrée peut éviter une embauche trop tôt.
+        Recruter devient très pertinent quand le besoin est stable et constant. Avant ça, une plateforme métier cadrée
+        peut éviter une embauche trop tôt.
       </p>
 
       <h2>Ce qu’il faut quand même tenir (même quand vous êtes sur chantier)</h2>
@@ -84,12 +86,12 @@ export default function Page() {
         <li>Demandes en attente et points bloquants</li>
       </ul>
 
-      <h2>Ce que BeWork apporte sans recruter</h2>
+      <h2>Ce que la plateforme BeWork apporte sans recruter</h2>
       <ul>
-        <li>Assistance bureau‑terrain : demandes suivies, statuts et priorités</li>
-        <li>Forfait clair et périmètre cadré</li>
-        <li>Démarrage progressif et volume adaptable</li>
-        <li>Livrables préparés et traçables</li>
+        <li>Environnement bureau‑terrain : demandes suivies, statuts et priorités</li>
+        <li>Périmètre cadré au déploiement</li>
+        <li>Démarrage progressif et modules adaptables</li>
+        <li>Livrables préparés et traçables par vos équipes</li>
         <li>Validation finale côté client sur ce qui engage</li>
       </ul>
 
@@ -97,8 +99,8 @@ export default function Page() {
       <ul>
         <li>Artisan débordé entre chantier, clients et bureau</li>
         <li>PME BTP en croissance (besoin récurrent mais variable)</li>
-        <li>Conducteur de travaux sans appui bureau</li>
-        <li>Entreprise qui veut tester une assistance avant de recruter</li>
+        <li>Conducteur de travaux sans appui bureau structuré</li>
+        <li>Entreprise qui veut tester une organisation avant de recruter</li>
         <li>Surcharge ponctuelle sur plusieurs chantiers</li>
       </ul>
 
@@ -121,17 +123,17 @@ export default function Page() {
       <ul>
         <li>
           <Link href="/comparatif-assistance-travaux-btp" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
-            Comparatif recruter / externaliser / BeWork
+            Comparatif recruter / outil générique / BeWork
           </Link>
         </li>
         <li>
           <Link href="/tarifs" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
-            Découvrir les forfaits
+            Voir la tarification
           </Link>
         </li>
         <li>
           <Link href="/assistants-administratifs-taches" className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
-            Voir les missions BeWork
+            Voir les capacités plateforme
           </Link>
         </li>
         <li>
@@ -141,7 +143,7 @@ export default function Page() {
         </li>
         <li>
           <CalendlyBookingLink className="font-semibold text-[#1d4ed8] underline-offset-4 hover:underline">
-            Réserver un échange
+            Demander une démonstration
           </CalendlyBookingLink>
         </li>
       </ul>
@@ -157,4 +159,3 @@ export default function Page() {
     </SeoLandingPage>
   );
 }
-

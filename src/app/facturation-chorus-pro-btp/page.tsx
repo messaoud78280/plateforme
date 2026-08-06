@@ -13,44 +13,46 @@ export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 export default function Page() {
   const faq = [
     {
-      q: "BeWork peut-il gérer Chorus Pro pour une entreprise BTP ?",
-      a: "Oui sur le volet administratif : préparation des pièces, structuration des situations, dépôt encadré et suivi des statuts — vous gardez la validation des montants et la responsabilité du titulaire.",
+      q: "La plateforme BeWork couvre-t-elle Chorus Pro pour une entreprise BTP ?",
+      a: "Oui sur le volet administratif : préparation des pièces, structuration des situations, suivi des dépôts et des statuts — vous gardez la validation des montants et la responsabilité du titulaire. Vos équipes utilisent ; BeWork configure et fait évoluer.",
     },
     {
-      q: "BeWork peut-il préparer les situations de travaux avant facturation ?",
+      q: "Peut-on préparer les situations de travaux avant facturation dans la plateforme ?",
       a: "Oui : relevés d’avancement, pièces justificatives, cohérence avec le marché et modèles de situation — voir aussi /situation-travaux-btp.",
     },
     {
       q: "Que faire si une facture Chorus Pro est rejetée ?",
-      a: "Identifier le motif de rejet, corriger les pièces ou références, relancer le dépôt et tracer les échanges. BeWork peut structurer ce suivi ; la validation reste chez vous.",
+      a: "Identifier le motif de rejet, corriger les pièces ou références, relancer le dépôt et tracer les échanges. La plateforme structure ce suivi ; la validation reste chez vous.",
     },
     {
       q: "BeWork garantit-il le paiement des factures publiques ?",
-      a: "Non. BeWork limite les erreurs de dépôt et accélère le suivi administratif — les délais de paiement dépendent de l’acheteur public et du contrat.",
+      a: "Non. La plateforme limite les erreurs de dépôt et accélère le suivi administratif — les délais de paiement dépendent de l’acheteur public et du contrat.",
     },
   ] as const;
 
   const faqLd = buildFaqPageJsonLd(faq, PAGE_URL);
   const serviceLd = buildLandingServiceJsonLd({
-    name: "Facturation Chorus Pro BTP",
-    description: "Préparation des situations, dépôt encadré et suivi des factures publiques pour titulaires de marchés.",
+    name: "Facturation Chorus Pro BTP — plateforme BeWork",
+    description:
+      "Plateforme interne pour préparer situations, dépôts et suivi des factures publiques — validation des montants chez le titulaire.",
     pageUrl: PAGE_URL,
-    serviceType: "Facturation Chorus Pro BTP",
+    serviceType: "Plateforme facturation Chorus Pro BTP",
   });
 
   return (
     <SeoLandingPage
-      description="Facturation Chorus Pro BTP : situations, dépôt, suivi et relances de vos factures publiques — assistant travaux BeWork."
+      description="Facturation Chorus Pro BTP : situations, dépôt, suivi et relances dans la plateforme BeWork — vos équipes utilisent ; BeWork configure."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Facturation Chorus Pro BTP", href: PAGE_PATH },
       ]}
-      h1="Facturation Chorus Pro BTP : dépôt, suivi et relance de vos factures publiques"
+      h1="Facturation Chorus Pro BTP : plateforme pour dépôt, suivi et relance"
       intro={
         <>
           Titulaire d&apos;un <strong>marché public travaux</strong>, vous devez facturer dans les règles : situations,
-          pièces, dépôt <strong>Chorus Pro</strong>, suivi des statuts et relances. BeWork structure la{" "}
-          <strong>facturation marché public BTP</strong> pour éviter rejets et retards — vous validez les montants.
+          pièces, dépôt <strong>Chorus Pro</strong>, suivi des statuts et relances. BeWork déploie une{" "}
+          <strong>plateforme interne</strong> pour structurer la facturation marché public BTP et limiter rejets et
+          retards — vos équipes utilisent ; BeWork configure et fait évoluer. Vous validez les montants.
         </>
       }
     >
@@ -71,7 +73,7 @@ export default function Page() {
         <li>Conducteurs de travaux qui préparent les situations sur chantier mais n&apos;ont pas le temps du dépôt</li>
       </ul>
 
-      <h2>Ce que BeWork prend en charge</h2>
+      <h2>Ce que la plateforme structure</h2>
       <ul>
         <li>Préparation et relecture des situations de travaux</li>
         <li>Checklist pièces avant dépôt Chorus Pro</li>
@@ -82,13 +84,13 @@ export default function Page() {
 
       <h2>Comment ça se passe ?</h2>
       <ol>
-        <li>Transmission des situations et références marché.</li>
+        <li>Transmission des situations et références marché dans l&apos;environnement BeWork.</li>
         <li>Vérification de cohérence et des pièces obligatoires.</li>
-        <li>Dépôt encadré ou remise d&apos;un dossier prêt à déposer.</li>
+        <li>Dépôt encadré ou dossier prêt à déposer — selon votre circuit.</li>
         <li>Suivi des statuts et alertes en cas de rejet.</li>
       </ol>
 
-      <h2>Les erreurs que nous aidons à éviter</h2>
+      <h2>Les erreurs que la plateforme aide à éviter</h2>
       <ul>
         <li>Facture Chorus Pro rejetée pour référence ou PJ manquante</li>
         <li>Situation non alignée avec l&apos;avancement réel ou le CCAP</li>
@@ -98,8 +100,9 @@ export default function Page() {
 
       <h2>Exemple concret</h2>
       <p>
-        Situation mensuelle n°4 sur un lot VRD : BeWork reprend votre relevé, vérifie les références marché, prépare le
-        dossier de dépôt et suit le statut jusqu&apos;à traitement — vous validez le montant avant envoi.
+        Situation mensuelle n°4 sur un lot VRD : vos équipes reprennent le relevé dans la plateforme, vérifient les
+        références marché, préparent le dossier de dépôt et suivent le statut jusqu&apos;à traitement — vous validez le
+        montant avant envoi.
       </p>
 
       <h2>Liens utiles</h2>
@@ -111,7 +114,7 @@ export default function Page() {
         </li>
         <li>
           <Link href="/assistants-administratifs-taches#marches-publics-accords-cadres" className="text-[#1d4ed8] hover:underline">
-            Situations &amp; Chorus Pro — bloc exécution marché
+            Situations &amp; Chorus Pro — capacités exécution marché
           </Link>
         </li>
         <li>

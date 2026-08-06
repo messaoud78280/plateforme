@@ -13,50 +13,51 @@ export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 export default function Page() {
   const faq = [
     {
-      q: "BeWork peut-il répondre à un appel d’offres BTP ?",
-      a: "BeWork renforce la préparation : analyse DCE, structuration des pièces, trame de mémoire technique, organisation DPGF/BPU/DQE et préparation au dépôt. Go/No-go, prix, choix techniques, signature et dépôt définitif restent chez vous.",
+      q: "La plateforme BeWork aide-t-elle à répondre à un appel d’offres BTP ?",
+      a: "Oui : modules d’analyse DCE, structuration des pièces, trame de mémoire technique, organisation DPGF/BPU/DQE et préparation au dépôt. Go/No-go, prix, choix techniques, signature et dépôt définitif restent chez vous — vos équipes utilisent la plateforme.",
     },
     {
-      q: "Quelles pièces d’un marché public travaux BeWork peut-il analyser ?",
+      q: "Quelles pièces d’un marché public travaux peut-on analyser dans la plateforme ?",
       a: "RC, CCAP, CCTP, BPU, DPGF, DQE, plans, annexes techniques et règlement de consultation — avec une synthèse des points bloquants et des échéances.",
     },
     {
-      q: "BeWork rédige-t-il le mémoire technique ?",
+      q: "La plateforme aide-t-elle à rédiger le mémoire technique ?",
       a: "Oui : structuration, rédaction à partir de vos références et méthodes, mise en forme et relecture. Vous validez le contenu technique et les engagements avant dépôt.",
     },
     {
-      q: "Comment transmettre un DCE à BeWork ?",
-      a: "Via le formulaire contact ou votre espace client : déposez le dossier, précisez la date limite et le lot visé. Une première analyse peut être proposée en mission ponctuelle.",
+      q: "Comment transmettre un DCE dans l’environnement BeWork ?",
+      a: "Via le formulaire contact ou votre espace client : déposez le dossier, précisez la date limite et le lot visé. Le cadrage de déploiement précise le circuit exact.",
     },
     {
       q: "BeWork garantit-il le gain du marché ?",
-      a: "Non. BeWork sécurise la préparation, limite les oublis de pièces et structure la réponse — le résultat de l’attribution dépend du maître d’ouvrage et des offres concurrentes.",
+      a: "Non. La plateforme sécurise la préparation, limite les oublis de pièces et structure la réponse — le résultat de l’attribution dépend du maître d’ouvrage et des offres concurrentes.",
     },
   ] as const;
 
   const faqLd = buildFaqPageJsonLd(faq, PAGE_URL);
   const serviceLd = buildLandingServiceJsonLd({
-    name: "Réponse aux appels d'offres BTP",
+    name: "Réponse aux appels d'offres BTP — plateforme BeWork",
     description:
-      "Renfort AO BTP : analyse DCE, pièces, structure mémoire technique et préparation au dépôt — prix et dépôt chez le client.",
+      "Plateforme interne pour préparer les AO BTP : analyse DCE, pièces, structure mémoire technique et dépôt — prix et dépôt chez le client.",
     pageUrl: PAGE_URL,
-    serviceType: "Renfort préparation appels d'offres BTP",
+    serviceType: "Plateforme préparation appels d'offres BTP",
   });
 
   return (
     <SeoLandingPage
-      description="Renfort AO BTP : analyse DCE, pièces, structure mémoire technique et préparation au dépôt — sous votre validation."
+      description="Plateforme BeWork pour AO BTP : analyse DCE, pièces, structure mémoire technique et préparation au dépôt — sous votre validation."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Réponse appels d’offres BTP", href: PAGE_PATH },
       ]}
-      h1="Réponse aux appels d’offres BTP : analyse DCE et candidature structurée"
+      h1="Réponse aux appels d’offres BTP : plateforme pour analyser le DCE et structurer la candidature"
       intro={
         <>
           Répondre à un <strong>appel d&apos;offres BTP</strong> demande du temps : lecture du DCE, mémoire technique,
-          pièces administratives, offre financière et dépôt sur la plateforme. BeWork renforce votre{" "}
-          <strong>préparation de candidature</strong> pendant que vous tenez le terrain — vous gardez prix, choix
-          techniques et dépôt définitif.
+          pièces administratives, offre financière et dépôt sur la plateforme acheteur. BeWork déploie une{" "}
+          <strong>plateforme interne</strong> pour structurer cette préparation pendant que vous tenez le terrain —
+          vos équipes utilisent ; BeWork configure et fait évoluer. Vous gardez prix, choix techniques et dépôt
+          définitif.
         </>
       }
     >
@@ -79,7 +80,7 @@ export default function Page() {
         <li>Titulaires d&apos;accords-cadres qui doivent structurer des réponses récurrentes</li>
       </ul>
 
-      <h2>Ce que BeWork renforce</h2>
+      <h2>Ce que la plateforme structure</h2>
       <ul>
         <li>
           <Link href="/services/analyse-dce-btp" className="text-[#1d4ed8] hover:underline">
@@ -100,13 +101,13 @@ export default function Page() {
 
       <h2>Comment ça se passe ?</h2>
       <ol>
-        <li>Vous transmettez le DCE et la date limite.</li>
-        <li>BeWork analyse les pièces et propose une synthèse (délais, lots, exigences critiques).</li>
+        <li>Vous transmettez le DCE et la date limite dans l&apos;environnement BeWork.</li>
+        <li>Vos équipes analysent les pièces et produisent une synthèse (délais, lots, exigences critiques).</li>
         <li>Préparation du mémoire technique et organisation des tableaux selon votre méthode.</li>
         <li>Relecture croisée et validation de votre part avant dépôt définitif.</li>
       </ol>
 
-      <h2>Les erreurs que nous aidons à éviter</h2>
+      <h2>Les erreurs que la plateforme aide à éviter</h2>
       <ul>
         <li>Oubli de pièce obligatoire dans le règlement de consultation</li>
         <li>Mémoire technique hors sujet ou non conforme au CCTP</li>
@@ -117,20 +118,21 @@ export default function Page() {
 
       <h2>Exemple concret</h2>
       <p>
-        Un lot peinture en marché public avec délai court : BeWork extrait les exigences CCTP, prépare le plan du
-        mémoire technique, relève les points à chiffrer et suit la checklist DC1/DC2 — vous fixez le prix et déposez.
+        Un lot peinture en marché public avec délai court : la plateforme aide à extraire les exigences CCTP, préparer
+        le plan du mémoire technique, relever les points à chiffrer et suivre la checklist DC1/DC2 — vous fixez le prix
+        et déposez.
       </p>
 
       <h2>Pourquoi BeWork ?</h2>
       <p>
-        Lecture métier des pièces marché, pas de promesse de gain garanti, process cadré et tarifs publics. Après
-        attribution, voir{" "}
+        Éditeur de plateforme métier BTP, pas de promesse de gain garanti, process cadré et tarification sur étude.
+        Après attribution, voir{" "}
         <Link href="/gestion-marche-public-btp" className="text-[#1d4ed8] hover:underline">
           gestion administrative après attribution
         </Link>{" "}
         et la{" "}
         <Link href="/assistants-administratifs-taches#reponses-appels-offres" className="text-[#1d4ed8] hover:underline">
-          section réponses AO sur la page missions
+          section AO sur les capacités plateforme
         </Link>
         .
       </p>

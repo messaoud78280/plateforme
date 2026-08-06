@@ -1,4 +1,4 @@
-/** Arguments de différenciation BeWork — accueil, crédibilité, tutos, SEO/AEO. */
+/** Arguments de différenciation BeWork — accueil, crédibilité, SEO/AEO. */
 export type BeWorkValuePillar = {
   label: string;
   detail: string;
@@ -6,28 +6,34 @@ export type BeWorkValuePillar = {
 
 export const BEWORK_VALUE_PILLARS: readonly BeWorkValuePillar[] = [
   {
-    label: "Formé aux marchés publics et privés",
-    detail: "CCAG, accords-cadres, marchés privés, BPU/DPGF, situations et DOE : le périmètre administratif chantier est maîtrisé.",
+    label: "Socle plateforme configurable",
+    detail:
+      "Un socle technologique commun, adapté à l’organisation du client : modules, workflows, rôles et droits selon vos métiers BTP.",
   },
   {
-    label: "Expertise en administration BTP",
-    detail: "Candidatures, DCE, pièces marché, situations, réserves et clôture documentaire — pas du secrétariat généraliste.",
+    label: "Expertise métier marchés et chantiers",
+    detail:
+      "Candidatures, DCE, pièces marché, situations, réserves et DOE : la plateforme est conçue pour le réel administratif chantier — pas un outil générique.",
   },
   {
     label: "IA spécialisée + validation humaine",
-    detail: "L’IA structure et accélère ; un Beworker garde le fil, le relationnel et le cadre. Vous validez avant tout envoi engageant.",
+    detail:
+      "L’IA structure et accélère dans votre environnement. Vos collaborateurs restent responsables des analyses finales et des engagements contractuels.",
   },
   {
-    label: "Contrôle documentaire et traçabilité",
-    detail: "Process cadré, relecture humaine sur les documents sensibles — validations juridiques et contractuelles restent chez vous et vos conseils.",
+    label: "Confidentialité et isolation multi-entreprises",
+    detail:
+      "Accès contrôlés, traçabilité, hébergement principal en Europe selon engagements contractuels — données métier isolées par entreprise.",
   },
   {
-    label: "Réduction du temps administratif répétitif",
-    detail: "Classement, synthèses, listes de pièces, échéances et relances documentaires absorbés pour libérer du temps terrain.",
+    label: "Mise en place puis évolution continue",
+    detail:
+      "Diagnostic, configuration, formation, puis abonnement : maintenance, sécurité et évolutions selon votre formule — sans inventer de prix hors étude.",
   },
   {
-    label: "100 % supervisé en France",
-    detail: "Pilotage et encadrement depuis la France, plateforme privée sécurisée, interlocuteurs francophones pour le BTP.",
+    label: "Partenaire, pas exécutant",
+    detail:
+      "BeWork équipe et fait évoluer la plateforme. Les opérations quotidiennes restent chez vos équipes — BeWork n’est ni secrétariat exécutant ni bureau d’études.",
   },
 ] as const;
 

@@ -22,7 +22,7 @@ export const EXTERNALISATION_ADMIN_BT_NAV = [
     key: "belgique",
     href: EXTERNALISATION_ADMIN_BT_PATHS.belgique,
     title: "Belgique",
-    line: "Construction & gestion bureau",
+    line: "Construction & plateforme métier",
   },
   {
     key: "suisse",
@@ -34,6 +34,6 @@ export const EXTERNALISATION_ADMIN_BT_NAV = [
     key: "luxembourg",
     href: EXTERNALISATION_ADMIN_BT_PATHS.luxembourg,
     title: "Luxembourg",
-    line: "Externalisation PME",
+    line: "Plateforme PME BTP",
   },
 ] as const;

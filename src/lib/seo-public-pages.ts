@@ -1,6 +1,7 @@
 /**
- * Métadonnées SEO/GEO centralisées — pages vitrine, douleurs business, géo, assistants.
+ * Métadonnées SEO/GEO centralisées — repositionnement plateforme interne BTP.
  * Titles ~45–60 car. · descriptions ~140–160 car. · hreflang francophonie.
+ * URLs historiques conservées ; copy recentrée éditeur / intégrateur / outils IA pour vos équipes.
  */
 
 import { hreflangAssistantTravauxCluster } from "@/lib/assistant-travaux-geo";
@@ -10,6 +11,7 @@ import {
   SEO_KEYWORDS_APPELS_OFFRES,
   SEO_KEYWORDS_ASSISTANT_TRAVAUX,
   SEO_KEYWORDS_GEO_SCOPE,
+  SEO_KEYWORDS_PLATEFORME,
   SEO_KEYWORDS_TECHNIQUE,
 } from "@/lib/seo-keywords";
 
@@ -27,15 +29,21 @@ const villePagesSeo: Record<string, PublicPageSeo> = Object.fromEntries(
   (Object.entries(ASSISTANT_TRAVAUX_VILLE_PATHS) as [keyof typeof ASSISTANT_TRAVAUX_VILLE_PATHS, string][]).map(
     ([key, path]) => {
       const v = ASSISTANT_TRAVAUX_VILLES[key];
+      const city = v.label.split(" &")[0];
       return [
         path,
         {
-          title: `Assistant travaux ${v.label.split(" &")[0]} | BeWork`,
+          title: `Plateforme BTP ${city} | BeWork`,
           description: metaDescriptionFrancophonie(
-            `Assistant travaux ${v.label} : assistance technique et administrative BTP, devis, marchés publics et dossiers chantier à distance`,
+            `Plateforme interne BTP à ${city} : outils IA, marchés, documents et suivi chantier pour vos équipes. Éditeur BeWork — démo sur étude`,
             { withGeoTag: false },
           ),
-          keywords: [`assistant travaux ${v.label}`, "assistant BTP", "externalisation administrative BTP"],
+          keywords: [
+            `plateforme BTP ${city}`,
+            `outils IA BTP ${city}`,
+            "plateforme interne BTP",
+            "assistant travaux BTP",
+          ],
         },
       ];
     },
@@ -45,91 +53,91 @@ const villePagesSeo: Record<string, PublicPageSeo> = Object.fromEntries(
 export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
   ...villePagesSeo,
   "/relance-devis-btp": {
-    title: "Relance devis BTP : ne laissez plus vos chantiers dormir",
+    title: "Relance devis BTP : suivre et convertir vos offres",
     description: metaDescriptionFrancophonie(
-      "Relancez vos devis BTP à temps, suivez les réponses et convertissez plus d’offres. Assistants travaux BeWork : bureau tenu, vous sur chantier",
+      "Relancez vos devis BTP à temps depuis votre plateforme : suivi des réponses, alertes et historique. Vos équipes pilotent ; BeWork équipe l’outil",
     ),
-    keywords: ["relance devis BTP", "suivi devis travaux", "devis travaux", "assistant travaux BTP"],
+    keywords: ["relance devis BTP", "suivi devis travaux", "devis travaux", "plateforme BTP"],
   },
   "/devis-retard-btp": {
-    title: "Devis BTP en retard : accélérer préparation et envois",
+    title: "Devis BTP en retard : accélérer sans perdre le contrôle",
     description: metaDescriptionFrancophonie(
-      "Devis en retard ? Structurez préparation, relances et envois sans perdre vos prix. Assistant travaux IA pour artisans et conducteurs",
+      "Devis en retard ? Structurez préparation, chiffrage et envois dans une plateforme métier. Outils IA BTP — vos prix restent chez vous",
     ),
-    keywords: ["devis BTP en retard", "préparation devis BTP", "chiffrage devis BTP", "assistant travaux"],
+    keywords: ["devis BTP en retard", "préparation devis BTP", "chiffrage devis BTP", "outils IA BTP"],
   },
   "/chantier-mal-suivi": {
-    title: "Chantier mal suivi : reprendre le fil administratif",
+    title: "Chantier mal suivi : centraliser le fil documentaire",
     description: metaDescriptionFrancophonie(
-      "Chantier mal suivi côté bureau ? CR, réserves, fournisseurs et DOE structurés. Assistance travaux BTP : vous validez, BeWork suit",
+      "Chantier mal suivi côté bureau ? CR, réserves, fournisseurs et DOE dans une plateforme interne. Vos équipes valident ; BeWork équipe",
     ),
-    keywords: ["chantier mal suivi", "suivi administratif chantier", "dossiers chantier BTP"],
+    keywords: ["chantier mal suivi", "suivi administratif chantier", "dossiers chantier BTP", "plateforme chantier"],
   },
   "/facture-impayee-btp": {
     title: "Facture impayée BTP : relances et trésorerie chantier",
     description: metaDescriptionFrancophonie(
-      "Factures impayées sur chantier ? Relances cadrées, suivi encaissements et litiges remontés. Sécurisez la trésorerie sans vos soirées",
+      "Factures impayées : suivez relances, pièces et encaissements dans votre environnement BeWork. Sécurisez la trésorerie sans perdre le fil",
     ),
     keywords: ["facture impayée BTP", "relance facture BTP", "impayés chantier", "trésorerie BTP"],
   },
   "/artisan-deborde-administratif": {
-    title: "Artisan débordé : déléguer l'assistance administrative chantier BTP",
+    title: "Artisan débordé : organiser l’admin sans tout perdre",
     description: metaDescriptionFrancophonie(
-      "Artisan débordé par l’administratif ? Déléguez devis, relances et dossiers à un assistant travaux BTP, sans recruter en interne",
+      "Artisan débordé par l’administratif ? Une plateforme interne BTP pour devis, relances et dossiers — utilisée par vous, configurée par BeWork",
     ),
-    keywords: ["artisan débordé administratif", "artisan BTP administratif", "externalisation BTP"],
+    keywords: ["artisan débordé administratif", "artisan BTP administratif", "plateforme BTP artisan"],
   },
   "/impayes-btp-relances": {
     title: "Impayés BTP : relances factures et situations",
     description: metaDescriptionFrancophonie(
-      "Impayés BTP : suivez factures et situations, relancez à temps, limitez les retards de paiement. Assistance travaux chantier encadrée",
+      "Impayés BTP : suivez factures et situations, relancez à temps. Capacités de plateforme BeWork — décisions et validations restent chez vous",
     ),
     keywords: ["impayés BTP", "relance facture BTP", "situation travaux impayée"],
   },
   "/situation-travaux-btp": {
     title: "Situation de travaux BTP : structurer et facturer",
     description: metaDescriptionFrancophonie(
-      "Situations de travaux BTP : pièces, modèles et envois au fil du chantier. Assistant travaux pour facturer sans retard ni oubli",
+      "Situations de travaux BTP : modèles, pièces et suivi d’envoi dans votre plateforme. Facturer sans oubli — contrôle des montants chez vous",
     ),
     keywords: ["situation travaux BTP", "facturation chantier", "situation de travaux"],
   },
   "/dict-dt-travaux": {
     title: "DICT et DT travaux : suivi dossiers chantier BTP",
     description: metaDescriptionFrancophonie(
-      "DICT et déclarations de travaux : suivi des pièces, relances et classement. Assistant travaux BTP pendant que vous êtes sur site",
+      "DICT et déclarations de travaux : pièces, relances et classement dans une plateforme métier. Vos équipes suivent ; BeWork équipe l’outil",
     ),
     keywords: ["DICT travaux", "DT travaux BTP", "déclaration travaux", "dossier chantier"],
   },
   "/avenant-chantier": {
     title: "Avenant chantier BTP : cadrer et sécuriser le CA",
     description: metaDescriptionFrancophonie(
-      "Avenants travaux : formalisez demandes, chiffrage et preuves pour protéger vos marges. Assistance travaux, validation chez vous",
+      "Avenants travaux : formalisez demandes, chiffrage et preuves dans votre plateforme. Protégez vos marges — validations contractuelles chez vous",
     ),
     keywords: ["avenant chantier", "avenant travaux BTP", "modification marché travaux"],
   },
   "/suivi-fournisseurs-chantier": {
     title: "Suivi fournisseurs chantier : commandes et livraisons",
     description: metaDescriptionFrancophonie(
-      "Suivi fournisseurs et achats chantier : commandes, livraisons, locations et relances pour éviter les blocages terrain",
+      "Suivi fournisseurs et achats chantier : commandes, livraisons et relances centralisés pour éviter les blocages terrain",
     ),
     keywords: ["suivi fournisseurs chantier", "commandes chantier BTP", "logistique chantier"],
   },
   "/admin-btp-sans-recruter": {
-    title: "Admin BTP sans recruter : assistance travaux BeWork",
+    title: "Admin BTP sans recruter : plateforme + outils IA",
     description: metaDescriptionFrancophonie(
-      "Tenez devis, relances et dossiers chantier sans embauche. Assistants travaux IA, forfaits HT, supervision depuis la France",
+      "Gagnez en capacité admin sans embauche : plateforme interne BTP, modules adaptés et IA métier. Mise en place + abonnement — étude BeWork",
     ),
-    keywords: ["admin BTP sans recruter", "assistance travaux BTP", "externalisation chantier"],
+    keywords: ["admin BTP sans recruter", "plateforme BTP", "outils IA chantier", "digitalisation BTP"],
   },
   "/comparatif-assistance-travaux-btp": {
-    title: "Comparatif : recruter, externaliser ou BeWork pour le BTP",
+    title: "Comparatif : recruter, externaliser ou plateforme BeWork",
     description: metaDescriptionFrancophonie(
-      "Recruter en interne, prestataire administratif ou BeWork ? Comparatif périmètre BTP, DCE, marchés publics, coût et validation",
+      "Recrutement, prestataire externalisé ou plateforme interne BeWork ? Comparatif périmètre BTP, DCE, marchés, coût et contrôle des données",
     ),
     keywords: [
-      "comparatif assistant travaux BTP",
-      "recruter ou externaliser BTP",
-      "assistance travaux BTP",
+      "comparatif plateforme BTP",
+      "recruter ou digitaliser BTP",
+      "plateforme interne BTP",
       "alternative recrutement conducteur travaux",
     ],
   },
@@ -146,119 +154,118 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
     ],
   },
   "/assistant-administratif-btp": {
-    title: "Assistant administratif BTP : missions, rôle et limites | BeWork",
+    title: "Outils admin BTP : rôle, limites et plateforme | BeWork",
     description: metaDescriptionFrancophonie(
-      "Assistant travaux BTP : analyse DCE, dossiers chantier, appels d'offres et marchés publics. Spécialiste bâtiment, pas prestation administrative généraliste",
+      "Admin BTP clarifié : analyse DCE, dossiers chantier et marchés dans une plateforme interne. Outils IA pour vos équipes — pas un secrétariat générique",
     ),
-    keywords: [...SEO_KEYWORDS_ASSISTANT_TRAVAUX.slice(0, 8), "assistance technique BTP"],
+    keywords: [...SEO_KEYWORDS_ASSISTANT_TRAVAUX.slice(0, 6), ...SEO_KEYWORDS_PLATEFORME.slice(0, 4)],
   },
   "/assistant-administratif-externalise": {
-    title: "Assistant travaux externalisé pour PME et BTP | BeWork",
+    title: "Plateforme BTP plutôt qu’externaliser l’exécution | BeWork",
     description: metaDescriptionFrancophonie(
-      "Externalisez l'assistance travaux BTP : analyse DCE, dossiers chantier, relances et marchés publics. Forfaits HT clairs, validation avant engagement",
+      "Au lieu d’externaliser l’exécution : équipez vos collaborateurs d’une plateforme interne BTP (DCE, dossiers, marchés). Éditeur BeWork — démo",
     ),
-    keywords: SEO_KEYWORDS_ASSISTANT_TRAVAUX.slice(0, 10),
+    keywords: [...SEO_KEYWORDS_PLATEFORME.slice(0, 6), ...SEO_KEYWORDS_ASSISTANT_TRAVAUX.slice(0, 4)],
   },
   "/assistant-administratif-pme": {
-    title: "Assistant travaux PME : assistance chantier et marchés publics",
+    title: "Plateforme BTP pour PME : chantiers et marchés publics",
     description: metaDescriptionFrancophonie(
-      "PME du bâtiment : déléguez analyse DCE, relances, dossiers chantier et suivi marché public. Assistance travaux encadrée, francophone à distance",
+      "PME du bâtiment : centralisez DCE, relances, dossiers chantier et suivi de marché. Plateforme adaptée à votre organisation — vos équipes aux commandes",
     ),
-    keywords: ["assistant travaux PME", "assistance technique BTP PME", "assistant BTP"],
+    keywords: ["plateforme BTP PME", "outils IA BTP PME", "gestion chantier PME"],
   },
   "/assistant-administratif-distance": {
-    title: "Assistant travaux à distance | PME et BTP francophones",
+    title: "Plateforme BTP à distance | PME francophones",
     description: metaDescriptionFrancophonie(
-      "Assistant travaux à distance : analyse DCE, relances, comptes rendus et suivi dossiers chantier. Plateforme supervisée, forfaits HT publics",
+      "Plateforme métier BTP accessible à distance : DCE, dossiers, CR et suivis. Hébergement et évolution BeWork — usage quotidien par vos équipes",
     ),
-    keywords: ["assistant travaux distance", "assistant BTP distance", "assistance travaux à distance"],
+    keywords: ["plateforme BTP distance", "outils chantier à distance", "digitalisation BTP"],
   },
   "/externaliser-administratif": {
-    title: "Externaliser l'assistance travaux BTP | Assistant travaux",
+    title: "Équiper l’admin BTP sans tout externaliser | BeWork",
     description: metaDescriptionFrancophonie(
-      "Externaliser le suivi chantier : analyse DCE, devis, relances, marchés publics et DOE sans recruter. Assistance travaux spécialisée BTP",
+      "Besoin de capacité admin sans tout déléguer ? Plateforme interne + IA métier pour vos équipes. BeWork déploie et fait évoluer l’environnement",
     ),
-    keywords: ["externaliser assistance travaux", "externalisation administrative BTP", "assistant travaux"],
+    keywords: ["plateforme administrative BTP", "digitalisation administratif BTP", "outils IA chantier"],
   },
   "/externalisation-administrative-btp-france": {
-    title: "Assistance travaux BTP France | Externalisation encadrée",
+    title: "Plateforme interne BTP France | Éditeur BeWork",
     description: metaDescriptionFrancophonie(
-      "Assistance travaux BTP en France : analyse DCE, appels d'offres, situations, DOE. Assistants travaux IA, sans recruter — forfaits HT",
+      "France : déployez une plateforme interne BTP (DCE, AO, situations, DOE). Vos équipes l’utilisent — BeWork configure, héberge et fait évoluer",
       { withGeoTag: false },
     ),
-    keywords: ["assistance travaux BTP France", "assistant travaux France", ...SEO_KEYWORDS_GEO_SCOPE.slice(0, 4)],
+    keywords: ["plateforme BTP France", "éditeur BTP France", ...SEO_KEYWORDS_GEO_SCOPE.slice(0, 4)],
     hreflangLanguages: geoCluster,
   },
   "/externalisation-administrative-btp-belgique": {
-    title: "Assistance travaux BTP Belgique | BeWork",
+    title: "Plateforme BTP Belgique | BeWork",
     description: metaDescriptionFrancophonie(
-      "Belgique : assistance travaux francophone — analyse DCE, dossiers chantier, marchés publics. Wallonie, Bruxelles — forfaits HT",
+      "Belgique : plateforme métier BTP francophone — marchés, dossiers chantier, outils IA. Wallonie, Bruxelles — mise en place sur étude",
       { withGeoTag: false },
     ),
-    keywords: ["assistance travaux BTP Belgique", "assistant travaux Belgique", "BTP Wallonie"],
+    keywords: ["plateforme BTP Belgique", "outils IA BTP Belgique", "BTP Wallonie"],
     hreflangLanguages: geoCluster,
   },
   "/externalisation-administrative-btp-suisse": {
-    title: "Assistance travaux BTP Suisse romande | BeWork",
+    title: "Plateforme BTP Suisse romande | BeWork",
     description: metaDescriptionFrancophonie(
-      "Suisse romande : assistance technique et administrative chantier — dossiers, relances, pièces marché. Process cadré, validation chez vous",
+      "Suisse romande : plateforme interne pour dossiers chantier, pièces marché et suivis. Configurée pour votre organisation — usage par vos équipes",
       { withGeoTag: false },
     ),
-    keywords: ["assistance travaux BTP Suisse", "assistant travaux Suisse romande"],
+    keywords: ["plateforme BTP Suisse", "outils chantier Suisse romande"],
     hreflangLanguages: geoCluster,
   },
   "/externalisation-administrative-btp-luxembourg": {
-    title: "Assistance travaux BTP Luxembourg | BeWork",
+    title: "Plateforme BTP Luxembourg | BeWork",
     description: metaDescriptionFrancophonie(
-      "Luxembourg : assistant travaux pour analyse DCE, marchés publics et dossiers chantier. Assistance BTP francophone, forfaits HT",
+      "Luxembourg : plateforme interne BTP pour DCE, marchés et dossiers chantier. Éditeur francophone — déploiement et évolution sur étude",
       { withGeoTag: false },
     ),
-    keywords: ["assistance travaux BTP Luxembourg", "assistant travaux Luxembourg"],
+    keywords: ["plateforme BTP Luxembourg", "outils IA BTP Luxembourg"],
     hreflangLanguages: geoCluster,
   },
   "/cas-clients": {
-    title: "Cas clients BTP : assistance travaux et résultats chantier",
+    title: "Cas clients BTP : plateforme et organisation chantier",
     description: metaDescriptionFrancophonie(
-      "Cas clients BTP : dossiers structurés, devis relancés, situations cadrées. Retours d’expérience BeWork",
+      "Cas clients BTP : dossiers structurés, suivis clarifiés, organisation bureau-chantier. Retours d’expérience autour de la plateforme BeWork",
     ),
-    keywords: ["cas clients BTP", "retour expérience BTP", "organisation chantier"],
+    keywords: ["cas clients BTP", "retour expérience BTP", "plateforme chantier"],
   },
   "/faq": {
-    title: "FAQ BeWork : assistant travaux, Chorus Pro, DOE",
+    title: "FAQ BeWork : plateforme, IA, Chorus Pro, DOE",
     description: metaDescriptionFrancophonie(
-      "FAQ BeWork : assistant travaux, exécution marché public, Chorus Pro, amiante SS4, DCE, DOE, forfaits et validation avant envoi",
+      "FAQ BeWork : plateforme interne BTP, outils IA, marché public, Chorus Pro, DOE, abonnement, rôles et validations humaines",
     ),
     keywords: [
       "FAQ BeWork",
-      "assistant travaux marché public",
-      "gestion administrative marché public BTP",
+      "plateforme interne BTP",
+      "gestion marché public BTP",
       "facturation Chorus Pro BTP",
       "DOE marché public BTP",
-      "amiante SS4 logement occupé",
+      "abonnement plateforme BTP",
     ],
   },
   "/contact": {
-    title: "Contact BeWork — cadrer un renfort AO, DCE ou suivi de marché",
+    title: "Contact BeWork — démonstration plateforme BTP",
     description: metaDescriptionFrancophonie(
-      "Contactez BeWork : candidature, analyse DCE ou suivi admin de marché — qualification en quelques minutes, mission sous votre validation",
+      "Contactez BeWork : présentez votre organisation pour une démonstration ou une étude de plateforme interne BTP — modules, IA et accompagnement",
     ),
-    keywords: ["contact BeWork", "renfort administratif BTP", "appel d'offres BTP", "qualification besoin AO"],
+    keywords: ["contact BeWork", "démonstration plateforme BTP", "étude déploiement BTP"],
   },
   "/notre-facon-de-travailler": {
     title: "Notre façon de travailler — méthode BeWork BTP",
     description: metaDescriptionFrancophonie(
-      "Méthode BeWork : cadrage, validation client, relecture humaine et traçabilité — renfort dossier, pas prise en charge intégrale",
+      "Méthode BeWork : diagnostic, configuration, formation, validation humaine et évolution continue — plateforme pour vos équipes, pas exécution à leur place",
     ),
-    keywords: ["méthode BeWork", "validation client BTP", "process assistant travaux", "renfort administratif BTP"],
+    keywords: ["méthode BeWork", "déploiement plateforme BTP", "partenaire évolution BTP"],
   },
   "/assistants-administratifs-taches": {
-    title: "Missions BeWork : AO, DCE et suivi de marchés",
+    title: "Capacités plateforme BeWork : AO, DCE et marchés",
     description: metaDescriptionFrancophonie(
-      "Catalogue missions BeWork : préparation candidatures, analyse DCE, organisation de réponse et suivi admin post-attribution (Chorus Pro, réserves, DOE)",
+      "Modules et workflows BeWork : candidatures, analyse DCE, organisation de réponse et suivi post-attribution (Chorus Pro, réserves, DOE) — utilisés par vos équipes",
     ),
     keywords: [
-      "missions assistant travaux BTP",
-      "renfort administratif BTP",
+      "plateforme marchés publics BTP",
       "analyse DCE BTP",
       "préparation candidature marché public",
       "gestion marché public BTP",
@@ -271,32 +278,33 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
   "/reponse-appel-offres-btp": {
     title: "Réponse AO BTP : analyse DCE et candidature | BeWork",
     description: metaDescriptionFrancophonie(
-      "Renfort AO BTP : analyse DCE, pièces, structure mémoire technique et préparation au dépôt — prix, choix techniques et dépôt restent chez vous",
+      "Préparez vos AO BTP dans une plateforme : analyse DCE, pièces, structure mémoire technique — prix, choix techniques et dépôt restent chez vous",
     ),
     keywords: [
-      "assistance appel d'offres BTP",
+      "réponse appel d'offres BTP",
       "analyse DCE marché public",
       "préparation candidature BTP",
-      ...SEO_KEYWORDS_APPELS_OFFRES.slice(0, 10),
+      "plateforme AO BTP",
+      ...SEO_KEYWORDS_APPELS_OFFRES.slice(0, 8),
     ],
   },
   "/facturation-chorus-pro-btp": {
-    title: "Facturation Chorus Pro BTP : situations, dépôt et suivi | BeWork",
+    title: "Facturation Chorus Pro BTP : situations et suivi | BeWork",
     description: metaDescriptionFrancophonie(
-      "Renfort Chorus Pro BTP : préparation situations, justificatifs, dépôt encadré et suivi paiement — validation client avant envoi",
+      "Chorus Pro BTP : préparez situations et justificatifs dans votre plateforme, suivez dépôts et paiements — validation client avant envoi",
     ),
     keywords: [
       "facturation Chorus Pro BTP",
       "facture marché public Chorus Pro",
       "situation travaux BTP",
       "situations mensuelles marché public",
-      "assistant travaux marché public",
+      "plateforme Chorus Pro BTP",
     ],
   },
   "/gestion-marche-public-btp": {
     title: "Suivi marché public BTP : Chorus Pro, DOE | BeWork",
     description: metaDescriptionFrancophonie(
-      "Après attribution : renfort documents d'exécution, situations, Chorus Pro, échéances, réserves et DOE — vous gardez engagements et validations",
+      "Après attribution : documents d’exécution, situations, Chorus Pro, échéances, réserves et DOE dans votre plateforme — engagements chez vous",
     ),
     keywords: [
       "suivi administratif marché public BTP",
@@ -305,20 +313,18 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
       "facturation Chorus Pro travaux",
       "DOE marché public BTP",
       "suivi réserves chantier",
-      "assistant travaux marché public",
+      "plateforme marché public BTP",
     ],
   },
   "/promoteurs-immobiliers": {
-    title: "Assistant travaux pour promoteurs immobiliers | BeWork",
+    title: "Plateforme chantier pour promoteurs immobiliers | BeWork",
     description: metaDescriptionFrancophonie(
-      "Promoteurs immobiliers : relances entreprises, CR, DOE, réserves et reporting chantier avec assistants travaux BeWork",
+      "Promoteurs : relances entreprises, CR, DOE, réserves et reporting dans une plateforme interne adaptée à vos opérations immobilières",
     ),
     keywords: [
       "promoteur immobilier",
       "suivi chantier promoteur",
-      "assistant travaux",
-      "assistant travaux sur site",
-      "relais chantier",
+      "plateforme promoteur BTP",
       "suivi documentaire chantier",
       "relance entreprises chantier",
       "suivi DOE",
@@ -327,44 +333,43 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
       "opération immobilière",
       "livraison logements",
       "suivi OPR",
-      "présence chantier",
       "coordination documentaire chantier",
     ],
   },
   "/assistant-travaux-france": {
-    title: "Assistant travaux France : assistance technique BTP | BeWork",
+    title: "Plateforme travaux France | Éditeur BTP BeWork",
     description: metaDescriptionFrancophonie(
-      "Assistant travaux en France : analyse DCE, appels d'offres, situations, DOE et relances pour artisans et PME du bâtiment. Forfaits HT, validation chez vous",
+      "France : plateforme interne pour analyse DCE, AO, situations, DOE et relances. Vos équipes l’utilisent — BeWork déploie et fait évoluer",
       { withGeoTag: false },
     ),
-    keywords: ["assistant travaux France", "assistance technique BTP France", "assistant travaux BTP France"],
+    keywords: ["plateforme BTP France", "outils IA travaux France", "assistant travaux France"],
     hreflangLanguages: assistantTravauxGeoCluster,
   },
   "/assistant-travaux-belgique": {
-    title: "Assistant travaux Belgique : assistance technique BTP | BeWork",
+    title: "Plateforme travaux Belgique | BeWork",
     description: metaDescriptionFrancophonie(
-      "Belgique : assistant travaux francophone — analyse DCE, dossiers chantier et marchés publics. Assistance à distance, forfaits HT",
+      "Belgique : plateforme métier BTP francophone — DCE, dossiers chantier et marchés publics. Déploiement sur étude, usage par vos équipes",
       { withGeoTag: false },
     ),
-    keywords: ["assistant travaux Belgique", "assistance travaux BTP Belgique", "BTP Wallonie"],
+    keywords: ["plateforme BTP Belgique", "outils travaux BTP Belgique", "BTP Wallonie"],
     hreflangLanguages: assistantTravauxGeoCluster,
   },
   "/assistant-travaux-suisse": {
-    title: "Assistant travaux Suisse : assistance technique BTP | BeWork",
+    title: "Plateforme travaux Suisse | BeWork",
     description: metaDescriptionFrancophonie(
-      "Suisse romande : assistant travaux pour dossiers chantier, pièces marché et relances. Process cadré, validation chez vous",
+      "Suisse romande : plateforme pour dossiers chantier, pièces marché et relances. Configurée pour votre organisation — validations chez vous",
       { withGeoTag: false },
     ),
-    keywords: ["assistant travaux Suisse", "assistance travaux BTP Suisse romande"],
+    keywords: ["plateforme BTP Suisse", "outils travaux Suisse romande"],
     hreflangLanguages: assistantTravauxGeoCluster,
   },
   "/assistant-travaux-luxembourg": {
-    title: "Assistant travaux Luxembourg : assistance technique BTP | BeWork",
+    title: "Plateforme travaux Luxembourg | BeWork",
     description: metaDescriptionFrancophonie(
-      "Assistant travaux au Luxembourg : analyse DCE, dossiers chantier et relances pour artisans et PME du bâtiment. Forfaits HT, validation chez vous",
+      "Luxembourg : plateforme interne BTP pour DCE, dossiers et relances. Éditeur francophone — mise en place et évolution sur étude",
       { withGeoTag: false },
     ),
-    keywords: ["assistant travaux Luxembourg", "assistance travaux BTP Luxembourg"],
+    keywords: ["plateforme BTP Luxembourg", "outils travaux BTP Luxembourg"],
     hreflangLanguages: assistantTravauxGeoCluster,
   },
   "/cas-clients/ccmi-martin-audit-devis": {

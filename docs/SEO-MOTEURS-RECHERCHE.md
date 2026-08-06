@@ -1,5 +1,7 @@
 # SEO multi-moteurs — BeWork
 
+> **Repositionnement éditorial (plateforme interne BTP)** — Le copy public des landings SEO met en avant BeWork comme **éditeur de plateforme interne** : vos équipes utilisent l’outil au quotidien ; BeWork configure, déploie, héberge et fait évoluer. Éviter les formulations « Confier une tâche », « Beworker exécute », « forfaits HT assistants », « on fait à votre place ». Pas de prix inventés hors étude. Après mise en prod de ce recentrage, **ping IndexNow** (`npm run seo:ping-indexnow`) et inspection des URLs concernées (Search Console / Bing Webmaster).
+
 ## Moteurs classiques
 
 | Moteur | Crawler | Configuration BeWork |
@@ -65,8 +67,9 @@ INDEXNOW_API_KEY=cle-32-caracteres-minimum
    - `https://www.bework.fr/sitemap.xml`
    - `https://www.bework.fr/llms.txt`
    - `https://www.bework.fr/ai.txt`
-4. Ping IndexNow après déploiement majeur : `npm run seo:ping-indexnow`
-5. [Rich Results Test](https://search.google.com/test/rich-results) sur pages FAQ / missions.
+4. Ping IndexNow après déploiement majeur (y compris **recentrage copy plateforme** sur landings SEO) : `npm run seo:ping-indexnow`
+5. [Rich Results Test](https://search.google.com/test/rich-results) sur pages FAQ / capacités.
+6. Contrôle éditorial rapide : H1 / intro / FAQ / CTA des landings recentrées = plateforme interne + démonstration (pas « exécution à votre place »).
 
 ## IndexNow
 

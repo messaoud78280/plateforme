@@ -8,20 +8,20 @@ export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 
 const faq = [
   {
-    q: "Qu’est-ce qu’un assistant travaux externalisé avec BeWork ?",
-    a: "C’est une assistance technique et administrative BTP supervisée depuis la France : analyse DCE, relances, dossiers chantier, pièces marché et suivi — sans CDI ni infrastructure à votre charge. L’IA outille l’équipe pour gagner en vitesse, sous encadrement humain.",
+    q: "Qu’est-ce qu’une assistance travaux « externalisée » avec BeWork ?",
+    a: "Ce n’est pas un prestataire qui fait à votre place : BeWork déploie une plateforme interne BTP. Vos équipes y pilotent analyse DCE, relances, dossiers chantier et suivi marché — sans CDI ni infrastructure lourde à votre charge. BeWork configure, héberge et fait évoluer.",
   },
   {
-    q: "Quelles tâches peut-on externaliser tout en gardant le contrôle ?",
+    q: "Quelles capacités garder en main tout en structurant le bureau ?",
     a: "Typiquement : analyse et structuration de pièces marché, relances devis et factures chantier, comptes rendus, suivi de dossiers, checklists DOE/réserves, coordination écrite fournisseurs. Vous validez tout ce qui engage contractuellement ou financièrement.",
   },
   {
-    q: "Comment BeWork sécurise la validation des documents avant envoi ?",
-    a: "Par un circuit clair : brouillon ou proposition, repasse interne BeWork si besoin, puis validation explicite côté client sur les pièces sensibles. L’historique sur la plateforme permet de tracer qui a quoi, quand.",
+    q: "Comment la plateforme sécurise la validation avant envoi ?",
+    a: "Par un circuit clair : brouillon ou proposition, puis validation explicite côté client sur les pièces sensibles. L’historique sur la plateforme permet de tracer qui a quoi, quand.",
   },
   {
     q: "Est-ce une alternative crédible à un recrutement interne ?",
-    a: "Oui lorsque la charge est variable ou que vous voulez tester le gain de temps avant d’embaucher. BeWork est souvent plus rapide à mettre en route qu’un recrutement, avec des forfaits HT prévisibles et une montée en charge progressive.",
+    a: "Oui lorsque la charge est variable ou que vous voulez structurer le bureau avant d’embaucher. La plateforme se met en route plus vite qu’un recrutement, avec une montée en charge progressive — tarification sur étude.",
   },
 ] as const;
 
@@ -38,17 +38,18 @@ const faqJsonLd = {
 export default function Page() {
   return (
     <SeoLandingPage
-      description="Assistant travaux externalisé BeWork : analyse DCE, dossiers chantier, relances et marchés publics pour les PME BTP. Dès 590 € HT/mois. France, Belgique, Suisse, Luxembourg."
+      description="Plateforme interne BTP BeWork : structurer l’admin chantier sans recruter. Vos équipes utilisent ; BeWork configure et fait évoluer. France, Belgique, Suisse, Luxembourg."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Assistant administratif externalisé", href: PAGE_PATH },
       ]}
-      h1="Assistant administratif externalisé : en BTP, c’est une assistance travaux encadrée"
+      h1="Assistant administratif externalisé : une plateforme interne BTP, pas un exécutant"
       intro={
         <>
-          Externaliser ne signifie pas déléguer de la saisie générique : pour le bâtiment, BeWork apporte une{" "}
-          <strong>assistance technique et administrative</strong> — analyse DCE, relances, dossiers chantier, appels
-          d&apos;offres et suivi marché public. France, Belgique, Suisse, Luxembourg — dès 590 € HT/mois.{" "}
+          « Externaliser » ici ne signifie pas déléguer de la saisie générique ni faire faire à votre place : BeWork
+          déploie une <strong>plateforme interne</strong> — analyse DCE, relances, dossiers chantier, appels
+          d&apos;offres et suivi marché public. Vos équipes utilisent ; BeWork configure, déploie et fait évoluer.
+          France, Belgique, Suisse, Luxembourg.{" "}
           <Link href="/services/externalisation-administrative-btp" className="text-[#1d4ed8] hover:underline">
             Détail du service
           </Link>
@@ -58,26 +59,26 @@ export default function Page() {
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
-      <h2>Externaliser plutôt que recruter : ce qui change</h2>
+      <h2>Structurer le bureau plutôt que recruter trop tôt</h2>
       <p>
         Un recrutement engage sur la durée : charges sociales, temps de formation au poste, risque si la charge
-        retombe après un pic. Un forfait BeWork s&apos;ajuste au volume réel et peut démarrer sur un périmètre
-        restreint — une mission, un dossier — avant, éventuellement, de monter en charge. La réversibilité est plus
+        retombe après un pic. Une plateforme BeWork s&apos;ajuste au volume réel et peut démarrer sur un périmètre
+        restreint — un flux, un type de dossier — avant, éventuellement, de monter en charge. La réversibilité est plus
         simple qu&apos;un contrat de travail.
       </p>
 
-      <h2>Comment démarre une mission externalisée</h2>
+      <h2>Comment démarre le déploiement</h2>
       <p>
         Premier échange pour cadrer le besoin et les documents disponibles, définition d&apos;un périmètre écrit (ce
-        qui est pris en charge, ce qui ne l&apos;est pas), puis premier livrable sur un dossier réel pour valider la
-        méthode avant d&apos;élargir. Rien n&apos;est engagé sur la durée dès le départ.
+        qui est couvert dans la plateforme, ce qui ne l&apos;est pas), configuration des modules et du circuit de
+        validation, puis usage sur des dossiers réels pour valider la méthode avant d&apos;élargir.
       </p>
 
       <h2>Le contrôle ne change pas de camp</h2>
       <p>
-        Externaliser la préparation documentaire ne signifie pas perdre la main : chaque pièce sensible — prix,
-        engagement contractuel, réponse à un client — repasse par une validation explicite de votre entreprise avant
-        envoi.
+        Équiper le bureau ne signifie pas perdre la main : chaque pièce sensible — prix, engagement contractuel,
+        réponse à un client — repasse par une validation explicite de votre entreprise avant envoi. BeWork est
+        éditeur et partenaire technologique, pas secrétariat exécutant.
       </p>
 
       <section className="not-prose" id="faq" aria-label="FAQ assistant administratif externalisé" style={{ scrollMarginTop: "6rem" }}>

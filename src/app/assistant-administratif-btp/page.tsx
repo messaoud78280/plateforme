@@ -6,7 +6,7 @@ import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 const PAGE_PATH = "/assistant-administratif-btp";
 
 const PAGE_META_DESCRIPTION =
-  "Vous cherchez un assistant administratif BTP ? BeWork apporte une assistance technique et administrative spécialisée chantier : analyse DCE, dossiers, appels d'offres et marchés publics — sans embauche.";
+  "Vous cherchez un assistant administratif BTP ? BeWork déploie une plateforme interne : vos équipes pilotent DCE, dossiers, AO et marchés publics — BeWork configure, héberge et fait évoluer.";
 
 const baseMetadata = landingPageMetadataFromPath(PAGE_PATH);
 
@@ -25,20 +25,20 @@ export const metadata: Metadata = {
 
 const faq = [
   {
-    q: "Quelle différence entre une prestation administrative généraliste et un assistant travaux BeWork ?",
-    a: "Une prestation hors métier bâtiment traite le courrier et la saisie générique. Un assistant travaux BeWork est briefé sur les dossiers chantier : analyse DCE, relances, fournisseurs, documents travaux, réserves, marchés publics — avec validation avant envoi engageant.",
+    q: "Quelle différence entre un outil admin généraliste et la plateforme BeWork ?",
+    a: "Un outil hors métier bâtiment traite le courrier et la saisie générique. La plateforme BeWork est conçue pour les dossiers chantier : analyse DCE, relances, fournisseurs, documents travaux, réserves, marchés publics — avec circuit de validation avant envoi engageant.",
   },
   {
-    q: "BeWork peut-il aider un conducteur de travaux au quotidien ?",
-    a: "Oui, sur un périmètre cadré : préparer les suivis, structurer les comptes rendus, relancer les pièces, tenir le fil des demandes et des validations. Le conducteur de travaux garde la décision technique et la validation des points sensibles.",
+    q: "Qui utilise la plateforme au quotidien ?",
+    a: "Vos équipes (dirigeant, conducteur de travaux, bureau). Elles structurent suivis, comptes rendus, relances et pièces. BeWork configure, déploie et fait évoluer l’environnement ; la décision technique et la validation des points sensibles restent chez vous.",
   },
   {
-    q: "Quelles tâches BTP peut-on déléguer concrètement ?",
-    a: "Analyse DCE, suivi de devis et relances clients, préparation de documents chantier, relances fournisseurs, comptes rendus, suivi des listes de pièces (DOE, réserves) et situations marché public — toujours avec circuit de validation interne.",
+    q: "Quelles capacités BTP la plateforme couvre-t-elle ?",
+    a: "Analyse DCE, suivi de devis et relances clients, préparation de documents chantier, relances fournisseurs, comptes rendus, suivi des listes de pièces (DOE, réserves) et situations marché public — toujours avec validation interne.",
   },
   {
     q: "Est-ce adapté aux artisans et petites entreprises du bâtiment ?",
-    a: "Oui. Les forfaits sont conçus pour les TPE/PME qui n’ont pas une équipe bureau à plein temps : vous payez au besoin, sans recruter, avec une équipe francophone supervisée depuis la France.",
+    a: "Oui. La plateforme s’adresse aux TPE/PME sans équipe bureau à plein temps : vos collaborateurs travaillent dans un environnement métier, sans recruter pour absorber la charge documentaire. Tarification sur étude.",
   },
 ] as const;
 
@@ -55,18 +55,18 @@ const faqJsonLd = {
 export default function Page() {
   return (
     <SeoLandingPage
-      description="Assistant travaux BTP : analyse DCE, dossiers chantier, appels d'offres et marchés publics. PME BTP France, Belgique, Suisse. Dès 590 € HT/mois."
+      description="Plateforme interne BTP BeWork : analyse DCE, dossiers chantier, appels d'offres et marchés publics. Vos équipes utilisent ; BeWork configure et fait évoluer."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Assistant administratif BTP", href: PAGE_PATH },
       ]}
-      h1="Assistant administratif BTP : en pratique, un assistant travaux pour vos chantiers"
+      h1="Assistant administratif BTP : une plateforme interne pour vos dossiers chantier"
       intro={
         <>
           Beaucoup de dirigeants BTP cherchent un « assistant administratif » pour le bâtiment. BeWork répond avec une{" "}
-          <strong>assistance technique et administrative</strong> spécialisée : analyse DCE, dossiers chantier, relances,
-          appels d&apos;offres et marchés publics — pas une prestation administrative généraliste. France, Belgique,
-          Suisse et Luxembourg. Dès 590 € HT/mois. Voir aussi le{" "}
+          <strong>plateforme interne</strong> spécialisée : analyse DCE, dossiers chantier, relances, appels d&apos;offres
+          et marchés publics — pas un outil admin générique. Vos équipes utilisent au quotidien ; BeWork configure,
+          déploie et fait évoluer. France, Belgique, Suisse et Luxembourg. Voir aussi le{" "}
           <Link href="/services/assistant-travaux" className="text-[#1d4ed8] hover:underline">
             service assistant travaux
           </Link>
@@ -76,13 +76,13 @@ export default function Page() {
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
 
-      <h2>Assistant administratif ou assistant travaux : la vraie différence</h2>
+      <h2>Assistant administratif ou plateforme travaux : la vraie différence</h2>
       <p>
-        Un assistant administratif généraliste traite l&apos;accueil, le courrier et la facturation courante. Un
-        assistant travaux BeWork est briefé sur le vocabulaire et les contraintes du chantier : lire un DCE,
-        distinguer une pièce obligatoire d&apos;une pièce optionnelle, relancer un fournisseur sur un délai de
-        livraison ou structurer un compte rendu à partir de notes prises sur site. C&apos;est ce cadrage métier qui
-        change le résultat.
+        Un assistant administratif généraliste traite l&apos;accueil, le courrier et la facturation courante. La
+        plateforme BeWork est briefée sur le vocabulaire et les contraintes du chantier : lire un DCE, distinguer une
+        pièce obligatoire d&apos;une pièce optionnelle, structurer un compte rendu à partir de notes de site, suivre un
+        fournisseur. C&apos;est ce cadrage métier — dans un environnement que vos équipes pilotent — qui change le
+        résultat.
       </p>
 
       <h2>Le périmètre, concrètement</h2>
@@ -90,9 +90,9 @@ export default function Page() {
         Sur la phase candidature : lecture et classement du DCE, tableau de conformité des pièces, appui à la
         structuration du mémoire technique. Sur la phase chantier : comptes rendus, relances fournisseurs et
         sous-traitants, suivi des situations et de la facturation Chorus Pro, préparation du DOE et des réserves. Le
-        périmètre exact se cadre avec vous avant le démarrage de la mission — catalogue complet sur{" "}
+        périmètre exact se cadre avec vous au déploiement — capacités détaillées sur{" "}
         <Link href="/assistants-administratifs-taches" className="text-[#1d4ed8] hover:underline">
-          la page missions
+          la page capacités plateforme
         </Link>
         .
       </p>
@@ -100,7 +100,8 @@ export default function Page() {
       <h2>Ce qui reste chez vous</h2>
       <p>
         Prix, choix techniques, méthodes d&apos;exécution et signature restent de votre responsabilité et de celle de
-        vos conseils habituels. BeWork prépare et structure ; vous validez ce qui engage l&apos;entreprise.
+        vos conseils habituels. La plateforme aide à préparer et structurer ; vous validez ce qui engage
+        l&apos;entreprise. BeWork n&apos;exécute pas à votre place.
       </p>
 
       <section className="not-prose" id="faq" aria-label="FAQ assistant administratif BTP" style={{ scrollMarginTop: "6rem" }}>

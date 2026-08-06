@@ -6,7 +6,7 @@ export const MARKET_TYPE_OPTIONS = [
   { value: "autre", label: "Autre" },
 ] as const;
 
-/** Besoins alignés sur le positionnement renfort AO / candidatures / suivi. */
+/** Besoins alignés plateforme / AO / suivi — labels vitrine (values stables pour historique formulaires). */
 export const MAIN_NEED_OPTIONS = [
   { value: "preparation_candidature", label: "Préparation d’une candidature" },
   { value: "analyse_classement_dce", label: "Analyse et classement d’un DCE" },
@@ -18,7 +18,7 @@ export const MAIN_NEED_OPTIONS = [
   { value: "suivi_apres_attribution", label: "Suivi administratif après attribution" },
   { value: "situations_chorus", label: "Situations et Chorus Pro" },
   { value: "reserves_doe", label: "Réserves et DOE" },
-  { value: "renfort_admin_travaux", label: "Renfort administratif travaux" },
+  { value: "renfort_admin_travaux", label: "Outiller l’admin travaux (plateforme)" },
   { value: "demarrage_chantier", label: "Démarrage de chantier" },
   { value: "conducteur_surcharge", label: "Conducteur de travaux surchargé / documents en retard" },
   { value: "autre", label: "Autre besoin à préciser" },

@@ -1,38 +1,51 @@
 /**
- * Expressions cibles pour le positionnement « partenaire / prestataire administratif externalisé »
- * (réutilisées dans layout, page d’accueil et pages vitrine).
- * Google utilise surtout le contenu et les titres ; ce champ `keywords` reste un signal secondaire.
+ * Expressions cibles — positionnement éditeur / plateforme interne BTP.
+ * Google utilise surtout le contenu et les titres ; `keywords` reste un signal secondaire.
  */
 
-/** Positionnement « assistant travaux » (prioritaire sur secrétariat générique). */
+/** Niche principale : plateforme interne intelligente pour entreprises du BTP. */
+export const SEO_KEYWORDS_PLATEFORME = [
+  "plateforme interne BTP",
+  "plateforme intelligente BTP",
+  "éditeur plateforme BTP",
+  "logiciel chantier BTP",
+  "environnement numérique BTP",
+  "plateforme métier BTP",
+  "outils IA BTP",
+  "IA spécialisée BTP",
+  "centralisation documents chantier",
+  "pilotage chantier BTP",
+  "gestion documentaire BTP",
+  "workflow chantier BTP",
+] as const;
+
+/**
+ * Requêtes historiques « assistant travaux » — conservées pour capturer l’intention,
+ * reformulées vers plateforme + outils IA pour les équipes du client (pas exécution externalisée).
+ */
 export const SEO_KEYWORDS_ASSISTANT_TRAVAUX = [
-  "assistant travaux augmenté par l’IA",
   "assistant travaux BTP",
   "assistante travaux BTP",
   "assistant conducteur de travaux",
   "assistant chef de chantier",
-  "assistant chargé d’affaires BTP",
+  "outils IA conducteur de travaux",
   "gestion administrative BTP",
-  "externalisation administrative BTP",
-  "assistance technique et administrative BTP",
   "documents chantier BTP",
   "plateforme assistant BTP",
   "assistant IA BTP",
-  "assistant virtuel BTP",
-  "assistant MOA BTP",
-  "assistant maîtrise d’ouvrage",
+  "aide administrative chantier",
 ] as const;
 
+/** Partenaire d’évolution / intégrateur (remplace prestataire administratif externalisé). */
 export const SEO_KEYWORDS_PARTENAIRE_CORE = [
-  "partenaire administratif externalisé",
-  "prestataire administratif externalisé",
-  "externalisation administrative",
-  "externalisation administrative PME",
-  "externalisation administrative BTP",
-  "sous-traitance administrative",
-  "délégation administrative entreprise",
-  "assistant administratif externalisé",
-  "assistance travaux entreprise",
+  "partenaire technologique BTP",
+  "intégrateur plateforme BTP",
+  "éditeur logiciel BTP",
+  "déploiement plateforme métier",
+  "évolution plateforme chantier",
+  "accompagnement digitalisation BTP",
+  "configuration plateforme BTP",
+  "maintenance plateforme métier",
 ] as const;
 
 export const SEO_KEYWORDS_BTP_PME = [
@@ -40,7 +53,6 @@ export const SEO_KEYWORDS_BTP_PME = [
   "pilotage administratif PME",
   "gestion administrative artisan",
   "entreprise du bâtiment administratif",
-  "secrétariat externalisé BTP",
   "devis facturation chantier",
   "organisation administrative bâtiment",
   "retenue de garantie BTP",
@@ -50,43 +62,37 @@ export const SEO_KEYWORDS_BTP_PME = [
   "traçabilité chantier",
 ] as const;
 
-/** Personae terrain & direction : complète les requêtes « qui » (CT, artisans, sous-traitance). */
+/** Personae terrain & direction. */
 export const SEO_KEYWORDS_PERSONAS_BTP = [
-  "conducteur de travaux administratif",
-  "conducteurs de travaux externalisation",
+  "conducteur de travaux plateforme",
   "suivi administratif chantier",
-  "coordination administrative chantier",
-  "chef de chantier administratif",
-  "artisans du bâtiment administratif",
+  "coordination documentaire chantier",
+  "chef de chantier documents",
+  "artisans du bâtiment organisation",
   "TPE BTP gestion dossiers",
-  "sous-traitant administratif chantier",
   "entreprises du bâtiment France",
-  "secrétariat conducteur travaux",
+  "dirigeant PME BTP digitalisation",
 ] as const;
 
-/** Signaux géographiques francophones (FR + Benelux + CH) sans pages locale dédiées : renforce intentions locales. */
+/** Signaux géographiques francophones. */
 export const SEO_KEYWORDS_GEO_SCOPE = [
-  "externalisation administrative France",
-  "administratif BTP Belgique",
-  "prestataire administratif artisans Suisse",
+  "plateforme BTP France",
+  "logiciel chantier Belgique",
+  "plateforme métier BTP Suisse",
   "organisation administrative BTP Luxembourg",
-  "assistants francophones bâtiment",
   "Île-de-France BTP gestion bureau",
-  "entreprise artisanale wallonie",
-  "Suisse romande administratif chantier",
-  "assistante travaux BTP distance France",
-  "externalisation administrative PACA",
-  "BTP assistance travaux Auvergne-Rhône-Alpes",
-  "artisan bâtiment Nouvelle-Aquitaine gestion",
-  "conducteur de travaux Grand Est administratif",
-  "externalisation administrative Occitanie",
-  "gestion bureau chantier Hauts-de-France",
+  "BTP Wallonie plateforme",
+  "Suisse romande digitalisation chantier",
+  "plateforme BTP PACA",
+  "BTP Auvergne-Rhône-Alpes outils",
+  "conducteur de travaux Grand Est",
+  "BTP Occitanie plateforme",
+  "Hauts-de-France gestion chantier",
 ] as const;
 
-/** Exécution de marché public après attribution (7 blocs BeWork). */
+/** Exécution de marché public (capacités plateforme). */
 export const SEO_KEYWORDS_MARCHES_PUBLIC_EXECUTION = [
-  "gestion administrative marché public BTP",
-  "assistant travaux marché public",
+  "gestion marché public BTP",
   "suivi administratif accord-cadre travaux",
   "suivi documents exécution marché public",
   "facturation Chorus Pro travaux",
@@ -94,7 +100,6 @@ export const SEO_KEYWORDS_MARCHES_PUBLIC_EXECUTION = [
   "suivi pénalités marché public travaux",
   "amiante SS4 logement occupé",
   "suivi réserves marché public",
-  "assistant conducteur de travaux marché public",
   "tableau anti-pénalités marché public",
   "bons de commande accord-cadre BTP",
   "milieu occupé marché public travaux",
@@ -133,13 +138,10 @@ export const SEO_KEYWORDS_CHANTIER_ADMIN = [
   "suivi bons de commande travaux",
   "suivi administratif accord-cadre travaux",
   "suivi réserves marché public",
-  "externalisation administrative BTP",
-  "secrétariat BTP externalisé",
-  "assistant chantier",
   "conducteur de travaux débordé",
 ] as const;
 
-/** Techniques & intention (conversion + entités reliées aux pages piliers). */
+/** Techniques & intention. */
 export const SEO_KEYWORDS_TECHNIQUE = [
   "relance devis BTP",
   "situation travaux artisan",
@@ -151,30 +153,23 @@ export const SEO_KEYWORDS_TECHNIQUE = [
   "conformité dossiers chantier",
 ] as const;
 
-/** Liste fusionnée pour le layout racine (meta keywords — signal mineur mais cohérent avec le champ sémantique du site). */
+/** Liste fusionnée layout racine. */
 export const SEO_KEYWORDS_GLOBAL: string[] = [
+  ...SEO_KEYWORDS_PLATEFORME,
   ...SEO_KEYWORDS_PARTENAIRE_CORE,
   ...SEO_KEYWORDS_BTP_PME,
   ...SEO_KEYWORDS_PERSONAS_BTP,
-  ...SEO_KEYWORDS_GEO_SCOPE,
+  ...SEO_KEYWORDS_GEO_SCOPE.slice(0, 8),
   ...SEO_KEYWORDS_TECHNIQUE.slice(0, 6),
   "BeWork",
-  "sans recruter",
-  "forfait administratif HT",
+  "mise en place plateforme BTP",
+  "abonnement plateforme métier",
   "France Belgique Suisse Luxembourg",
-  "Île-de-France administratif BTP",
-  "rendez-vous découverte administratif",
-  "assistant administratif IA BTP",
+  "démonstration plateforme BTP",
 ];
 
-/** Meta keywords homepage : fusion optimisée (personae + géo + technique). */
-/** Marchés travaux — homepage & signaux SEO globaux assistance technique BTP. */
+/** Marchés travaux — capacités plateforme (pas prestation exécutante). */
 export const SEO_KEYWORDS_MARCHES_TRAVAUX = [
-  "assistant travaux BTP",
-  "assistance technique BTP",
-  "assistant conducteur de travaux",
-  "gestion administrative chantier",
-  "aide appel d'offres BTP",
   "analyse DCE",
   "mémoire technique BTP",
   "suivi marché public travaux",
@@ -182,37 +177,29 @@ export const SEO_KEYWORDS_MARCHES_TRAVAUX = [
   "DOE chantier",
   "Chorus Pro travaux",
   "suivi réserves chantier",
-  "assistance administrative marchés travaux",
-  "gestion administrative marchés publics BTP",
-  "suivi administratif chantier",
+  "préparation candidature marché public",
+  "suivi administratif de marché",
   "marchés privés BTP",
   "accords-cadres BTP",
   "comptes rendus chantier",
   "situations travaux",
   "coordination documentaire chantier",
+  "gestion administrative chantier",
+  "aide appel d'offres BTP",
   ...SEO_KEYWORDS_MARCHES_PUBLIC_EXECUTION.slice(0, 6),
 ] as const;
 
 export const SEO_KEYWORDS_HOME: string[] = [
-  "plateforme interne BTP",
-  "plateforme intelligente BTP",
-  "éditeur plateforme BTP",
-  "outils IA BTP",
-  "analyse marché public BTP",
-  "gestion chantier documentaire",
-  "pilotage chantier BTP",
-  ...SEO_KEYWORDS_MARCHES_TRAVAUX.filter((k) => !k.toLowerCase().includes("assistant")),
+  ...SEO_KEYWORDS_PLATEFORME,
+  ...SEO_KEYWORDS_MARCHES_TRAVAUX,
   ...SEO_KEYWORDS_BTP_PME,
   ...SEO_KEYWORDS_PERSONAS_BTP,
   ...SEO_KEYWORDS_GEO_SCOPE,
   ...SEO_KEYWORDS_TECHNIQUE,
-  "préparation candidature marché public",
-  "analyse DCE",
-  "suivi administratif de marché",
   "BeWork BTP",
 ];
 
-/** Slogan BeWork — réutilisable contenu, OG, JSON-LD, llms.txt. */
+/** Slogan BeWork — contenu, OG, JSON-LD, llms.txt. */
 export const BEWORK_SLOGAN = "Vos équipes pilotent. BeWork équipe la plateforme.";
 
 /** Accroche complémentaire (home / AEO). */

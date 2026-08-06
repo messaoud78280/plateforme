@@ -3,10 +3,10 @@ import { SITE_URL } from "@/lib/site";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "BeWork — Administratif externalisé BTP (artisans & conducteurs travaux)",
+    name: "BeWork — Plateformes internes avec IA pour le BTP",
     short_name: "BeWork",
     description:
-      "Administratif externalisé France, Belgique, Suisse, Luxembourg : artisans, conducteurs de travaux, devis et dossiers chantier — forfaits HT.",
+      "BeWork conçoit, déploie et fait évoluer des plateformes internes BTP : vos équipes les utilisent au quotidien. FR · BE · CH · LU.",
     start_url: "/",
     display: "standalone",
     background_color: "#f8f9fb",

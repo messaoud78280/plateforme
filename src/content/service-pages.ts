@@ -1,5 +1,6 @@
 /**
  * Pages services SEO — angles distincts, textes courts.
+ * Positionnement : BeWork = éditeur / intégrateur de plateforme interne BTP.
  * Le détail méthodologique reste sur /ressources/* et landings existantes.
  */
 
@@ -51,38 +52,38 @@ const BASE_SEE: ServicePageSlug[] = ["assistant-travaux", "externalisation-admin
 export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
   "assistant-travaux": {
     slug: "assistant-travaux",
-    metaTitle: "Assistant travaux BTP : assistance technique et administrative | BeWork",
+    metaTitle: "Assistant travaux BTP : plateforme interne pour vos équipes | BeWork",
     metaDescription:
-      "Assistant travaux BTP : assistance technique et administrative sur chantiers, appels d’offres et marchés publics. L’IA structure, vous validez ce qui engage votre entreprise.",
-    h1: "Assistant travaux augmenté par l’IA pour entreprises du BTP",
+      "Plateforme assistant travaux BTP : outils IA métier pour DCE, dossiers chantier et suivi documentaire. Vos équipes pilotent ; BeWork configure et fait évoluer.",
+    h1: "Assistant travaux : une plateforme interne pour structurer bureau et chantier",
     intro:
-      "BeWork apporte une assistance technique et administrative entre le bureau et le chantier : analyse DCE, documents d’exécution, suivi des échéances et coordination documentaire. L’IA accélère la structuration et la relecture ; un interlocuteur humain garde le fil et le cadre.",
+      "BeWork déploie une plateforme interne d’assistants travaux : vos équipes y analysent les DCE, préparent les livrables et suivent les échéances. L’IA structure et accélère ; les validations qui engagent restent chez vous. BeWork configure, intègre et fait évoluer l’outil.",
     enResume:
-      "Un assistant travaux accompagne les entreprises du BTP dans l’assistance technique et administrative des chantiers : appels d’offres, analyse DCE, situations, DOE, PPSPS, comptes rendus et facturation Chorus Pro — avec validation finale chez vous.",
+      "L’assistant travaux BeWork est une plateforme interne BTP : outils IA pour appels d’offres, DCE, situations, DOE, PPSPS et comptes rendus — utilisés par vos équipes, avec validation humaine avant tout engagement.",
     erreursEviter: [
       "Devis envoyés sans relance ni statut de suivi",
       "Dossiers chantier incomplets en fin de marché",
-      "Confondre prestation administrative généraliste et assistance travaux BTP",
+      "Confondre SaaS administratif générique et plateforme métier BTP",
     ],
     pourQuiBullets: [
       "Artisans, TPE et PME du bâtiment qui cumulent terrain et dossiers.",
       "Conducteurs de travaux, chefs de chantier et chargés d’affaires sous pression.",
-      "Dirigeants qui veulent sécuriser le suivi sans recruter immédiatement.",
+      "Dirigeants qui veulent outiller le suivi sans recruter immédiatement.",
     ],
     priseEnChargeBullets: [
-      "Analyse DCE, synthèse CCTP et préparation de livrables chantier (selon forfait).",
-      "Relances clients, fournisseurs et sous-traitants dans le ton de votre entreprise.",
-      "Suivi documentaire des dossiers : statuts, pièces, relances et points de vigilance.",
-      "Coordination des allers-retours documents (sous votre validation sur les engagements).",
+      "Outils IA pour analyse DCE, synthèse CCTP et préparation de livrables chantier.",
+      "Espace de suivi des relances clients, fournisseurs et sous-traitants.",
+      "Tableau de bord documentaire : statuts, pièces, points de vigilance.",
+      "Circuit de validation interne avant tout envoi engageant.",
     ],
     pourquoiParagraphs: [
-      "Le retard ne se crée pas toujours sur le terrain : il se crée quand le bureau ne suit pas. Un assistant travaux permet de faire avancer les dossiers pendant que vous êtes sur chantier ou en réunion.",
-      "L’augmentation par l’IA sert à structurer, extraire et préparer plus vite : elle ne remplace pas votre arbitrage technique, commercial ou réglementaire.",
+      "Le retard ne se crée pas toujours sur le terrain : il se crée quand le bureau ne suit pas. Une plateforme métier permet de faire avancer les dossiers pendant que vous êtes sur chantier ou en réunion.",
+      "L’IA sert à structurer, extraire et préparer plus vite : elle ne remplace pas votre arbitrage technique, commercial ou réglementaire.",
     ],
     commentSteps: [
-      "Vous choisissez un forfait adapté à votre volume (voir tarifs).",
-      "Vous déposez vos demandes et pièces sur la plateforme.",
-      "BeWork traite, suit et rend compte ; vous validez les décisions sensibles.",
+      "BeWork configure la plateforme selon votre organisation et vos flux.",
+      "Vos équipes déposent les demandes et pièces dans l’espace dédié.",
+      "Les outils IA proposent des brouillons et synthèses ; vous validez les décisions sensibles.",
     ],
     deepeningLinks: [
       { href: "/assistants-administratifs-taches", label: "Catalogue des missions" },
@@ -100,45 +101,46 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
       {
         titre: "Relances devis en attente",
         scenario: "Douze devis à relancer pendant une visite de réception.",
-        resultat: "BeWork prépare les relances, suit les réponses et remonte les blocages — vous validez avant envoi.",
+        resultat:
+          "La plateforme prépare les brouillons de relance et suit les réponses — vos équipes valident avant envoi.",
       },
     ],
     faq: [
       {
         q: "Un assistant travaux BeWork remplace un conducteur de travaux ?",
-        a: "Non. BeWork apporte une assistance technique et administrative (préparation, suivi, relances, pièces marché) pour que vous gardiez la maîtrise technique et la décision sur le chantier.",
+        a: "Non. BeWork fournit une plateforme et des outils IA métier. Vos équipes gardent la maîtrise technique et la décision sur le chantier.",
       },
       {
         q: "Que signifie « augmenté par l’IA » ?",
-        a: "Des outils d’IA assistent pour structurer les contenus, accélérer la mise en forme et réduire les oublis. Le pilotage et le relationnel restent encadrés humainement.",
+        a: "Des outils d’IA intégrés à la plateforme aident à structurer les contenus, accélérer la mise en forme et réduire les oublis. Le pilotage et la validation restent chez vous.",
       },
     ],
   },
 
   "assistant-conducteur-de-travaux": {
     slug: "assistant-conducteur-de-travaux",
-    metaTitle: "Assistant conducteur de travaux BTP | BeWork",
+    metaTitle: "Assistant conducteur de travaux : plateforme BTP | BeWork",
     metaDescription:
-      "Assistant conducteur de travaux : assistance technique et administrative — CR, relances, situations, analyse pièces marché. Validation chez vous.",
-    h1: "Assistant conducteur de travaux : dossiers et suivi quand le carnet déborde",
+      "Plateforme assistant conducteur de travaux : CR, relances, situations, pièces marché. Vos équipes utilisent les outils IA ; BeWork configure et fait évoluer.",
+    h1: "Assistant conducteur de travaux : outiller le suivi quand le carnet déborde",
     intro:
-      "Le conducteur de travaux est souvent le point de contact unique entre maîtrise d’ouvrage, entreprises et corps d’état. BeWork sécurise la partie « dossier qui doit avancer » : relances, pièces, synthèses CCTP et préparations de comptes rendus, sans empiéter sur vos arbitrages terrain.",
+      "Le conducteur de travaux est souvent le point de contact unique entre maîtrise d’ouvrage, entreprises et corps d’état. BeWork déploie une plateforme interne pour sécuriser le suivi documentaire — relances, pièces, synthèses CCTP, préparation de CR — sans empiéter sur vos arbitrages terrain.",
     pourQuiBullets: [
       "Conducteurs de travaux en entreprise générale, sous-traitance ou lot technique.",
       "Profils qui gèrent plusieurs chantiers et une charge documentaire dense.",
     ],
     priseEnChargeBullets: [
-      "Préparation de comptes rendus et synthèses de réunion (sur brief).",
-      "Suivi des demandes de documents, relances courtoises et classement.",
-      "Appui sur situations de travaux, facturation et relances (selon cadrage).",
+      "Outils de préparation de comptes rendus et synthèses de réunion.",
+      "Suivi des demandes de documents, relances et classement.",
+      "Appui sur situations de travaux, facturation et échéances.",
       "Coordination des échanges fournisseurs / locations sur la base de vos consignes.",
     ],
     pourquoiParagraphs: [
-      "Quand le conducteur passe son temps à relancer pour obtenir une pièce, le chantier avance mal. Déléguer le suivi documentaire redonne des plages pour le pilotage réel.",
+      "Quand le conducteur passe son temps à relancer pour obtenir une pièce, le chantier avance mal. Outiller le suivi documentaire redonne des plages pour le pilotage réel.",
     ],
     commentSteps: [
-      "Brief clair : priorités, interlocuteurs, jalons.",
-      "Traitement des demandes dans le cadre du forfait, avec points de reporting.",
+      "Brief clair : priorités, interlocuteurs, jalons et règles de validation.",
+      "Vos équipes traitent les demandes dans la plateforme, avec reporting.",
       "Validation finale systématique sur tout ce qui engage contractuellement ou techniquement.",
     ],
     deepeningLinks: [
@@ -149,36 +151,36 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     seeAlsoSlugs: ["conducteur-travaux-deborde", "assistant-chef-de-chantier", ...BASE_SEE],
     faq: [
       {
-        q: "BeWork peut-il rédiger des réponses à la MOA à ma place ?",
-        a: "BeWork peut préparer des brouillons et assembler les pièces. Vous gardez la validation des réponses qui engagent votre responsabilité ou votre relation contractuelle.",
+        q: "BeWork peut-elle rédiger des réponses à la MOA à ma place ?",
+        a: "La plateforme peut préparer des brouillons et assembler les pièces. Vous gardez la validation des réponses qui engagent votre responsabilité ou votre relation contractuelle.",
       },
     ],
   },
 
   "assistant-chef-de-chantier": {
     slug: "assistant-chef-de-chantier",
-    metaTitle: "Assistant chef de chantier BTP | BeWork",
+    metaTitle: "Assistant chef de chantier : plateforme BTP | BeWork",
     metaDescription:
-      "Assistant chef de chantier : documents, relances commandes et CR quand le poste est sur le terrain. Relais à distance.",
-    h1: "Assistant chef de chantier : tenir le bureau quand le poste est sur le terrain",
+      "Plateforme assistant chef de chantier : documents, relances commandes et CR. Vos équipes sur le terrain ; outils IA et validations en interne.",
+    h1: "Assistant chef de chantier : tenir le bureau depuis la plateforme",
     intro:
-      "Le chef de chantier fait tourner l’exécution : il manque souvent de disponibilité pour suivre les mails, les relances et les documents. BeWork prend en charge la partie coordination et suivi administratif, en restant aligné sur vos consignes de chantier.",
+      "Le chef de chantier fait tourner l’exécution : il manque souvent de disponibilité pour suivre les mails, les relances et les documents. BeWork déploie une plateforme interne de coordination et de suivi documentaire, alignée sur vos consignes de chantier.",
     pourQuiBullets: [
       "Chefs de chantier et adjoints en entreprise du bâtiment ou gros œuvre.",
       "Équipes où la logistique documentaire et les relances grignotent les journées.",
     ],
     priseEnChargeBullets: [
       "Suivi des commandes, livraisons et locations (sur consignes).",
-      "Relances fournisseurs et préparation de comptes rendus opérationnels.",
+      "Outils de relance fournisseurs et préparation de comptes rendus opérationnels.",
       "Préparation de dossiers et checklists avant réunion ou visite.",
     ],
     pourquoiParagraphs: [
-      "Le chef de chantier doit voir le travail réel : si le bureau monopolise la fin de journée, la qualité d’exécution baisse. Un relais distant permet de garder le cap sur l’ouvrage.",
+      "Le chef de chantier doit voir le travail réel : si le bureau monopolise la fin de journée, la qualité d’exécution baisse. Une plateforme distante permet de garder le cap sur l’ouvrage.",
     ],
     commentSteps: [
       "Identification des tâches récurrentes et des canaux de transmission.",
-      "Mise en place d’un rythme de traitement (hebdo / continu selon forfait).",
-      "Points de contrôle avec vous sur les sujets sensibles.",
+      "Configuration d’un rythme de traitement adapté à votre organisation.",
+      "Points de contrôle internes sur les sujets sensibles.",
     ],
     deepeningLinks: [
       { href: "/suivi-fournisseurs-chantier", label: "Suivi fournisseurs & achats" },
@@ -188,46 +190,46 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     faq: [
       {
         q: "Le chef de chantier garde-t-il la main sur les commandes ?",
-        a: "Oui. BeWork prépare, relance et suit ; les validations de prix, de délai et de choix techniques restent de votre ressort.",
+        a: "Oui. La plateforme prépare, propose et suit ; les validations de prix, de délai et de choix techniques restent de votre ressort.",
       },
     ],
   },
 
   "externalisation-administrative-btp": {
     slug: "externalisation-administrative-btp",
-    metaTitle: "Externalisation assistance travaux BTP | BeWork",
+    metaTitle: "Plateforme assistance travaux BTP interne | BeWork",
     metaDescription:
-      "Externalisation assistance travaux BTP : analyse DCE, dossiers chantier, marchés publics, forfaits HT, accompagnement francophone FR · BE · CH · LU.",
-    h1: "Externalisation assistance travaux BTP avec un cadre encadré",
+      "Plateforme interne BTP : analyse DCE, dossiers chantier, marchés publics. BeWork configure et fait évoluer ; vos équipes pilotent et valident.",
+    h1: "Plateforme interne d’assistance travaux BTP, cadrée et évolutive",
     intro:
-      "Externaliser le suivi chantier ne signifie pas déléguer de la saisie administrative générique : chez BeWork, c’est une assistance technique et administrative BTP — analyse DCE, dossiers chantier, appels d’offres, Chorus Pro et DOE — avec des forfaits clairs et un accompagnement supervisé depuis la France.",
+      "Mettre en place un suivi chantier structuré ne signifie pas déléguer l’exécution à un prestataire externe. BeWork configure et déploie une plateforme interne d’outils IA métier — DCE, dossiers chantier, appels d’offres, Chorus Pro, DOE — que vos équipes utilisent au quotidien, avec validation avant tout envoi engageant.",
     enResume:
-      "Externaliser l’assistance travaux, c’est déléguer analyse DCE, relances, appels d’offres, Chorus Pro, DOE et suivi documentaire à des assistants travaux encadrés — sans recruter, avec validation avant tout envoi engageant.",
+      "BeWork déploie une plateforme interne BTP pour analyse DCE, relances, appels d’offres, Chorus Pro, DOE et suivi documentaire — utilisée par vos équipes, avec validation humaine avant engagement.",
     erreursEviter: [
-      "Externaliser sans cadrage de périmètre ni circuit de validation",
-      "Attendre d’un prestataire qu’il engage le prix ou la technique à votre place",
+      "Déployer sans cadrage de périmètre ni circuit de validation",
+      "Attendre d’un outil qu’il engage le prix ou la technique à votre place",
       "Mélanger courrier générique et dossiers chantier complexes",
     ],
     pourQuiBullets: [
       "Dirigeants et responsables qui veulent structurer le suivi sans alourdir la masse salariale.",
-      "Entreprises francophones cherchant un cadre contractuel simple (forfaits HT).",
+      "Entreprises francophones cherchant un cadre clair pour outiller le bureau travaux.",
     ],
     priseEnChargeBullets: [
-      "Missions listées dans le catalogue (comptes rendus, DCE, PPSPS, relances, etc.).",
+      "Modules métier listés dans le catalogue (comptes rendus, DCE, PPSPS, relances, etc.).",
       "Coordination documentaire et suivi des échéances dans le périmètre défini.",
       "Plateforme de suivi et traçabilité des demandes.",
     ],
     pourquoiParagraphs: [
-      "Recruter pour des pics d’activité est risqué. L’externalisation cadrée permet d’absorber la charge sans figer des coûts fixes.",
-      "BeWork ne remplace pas votre expertise métier : elle libère du temps sur les tâches reproductibles et chronophages.",
+      "Recruter pour des pics d’activité est risqué. Une plateforme cadrée permet d’absorber la charge documentaire sans figer des coûts fixes.",
+      "BeWork ne remplace pas votre expertise métier : elle outille vos équipes sur les tâches reproductibles et chronophages.",
     ],
     commentSteps: [
-      "Échange pour cadrer le volume et le type de missions.",
-      "Choix du forfait et création de l’espace client.",
-      "Prise en charge rapide selon disponibilité.",
+      "Échange pour cadrer les flux, modules et règles de validation.",
+      "Configuration de l’espace et onboarding de vos équipes.",
+      "Mise en production progressive selon vos priorités métier.",
     ],
     deepeningLinks: [
-      { href: "/externaliser-administratif", label: "Approfondir l’externalisation" },
+      { href: "/externaliser-administratif", label: "Approfondir l’approche plateforme" },
       { href: "/gestion-marche-public-btp", label: "Gestion marché public" },
       { href: "/facturation-chorus-pro-btp", label: "Facturation Chorus Pro" },
       { href: "/externalisation-administrative-btp-france", label: "Page France" },
@@ -237,19 +239,19 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     faq: [
       {
         q: "BeWork est-elle présente physiquement dans chaque pays ?",
-        a: "L’accompagnement est assuré à distance, en français, avec pilotage supervisé depuis la France. Des pages pays décrivent l’adéquation avec les entreprises en France, Belgique, Suisse et Luxembourg.",
+        a: "La plateforme et l’accompagnement d’intégration sont assurés à distance, en français, avec pilotage depuis la France. Des pages pays décrivent l’adéquation avec les entreprises en France, Belgique, Suisse et Luxembourg.",
       },
     ],
   },
 
   "compte-rendu-chantier": {
     slug: "compte-rendu-chantier",
-    metaTitle: "Compte rendu de chantier BTP | BeWork",
+    metaTitle: "Compte rendu de chantier BTP : outil plateforme | BeWork",
     metaDescription:
-      "Compte rendu de chantier : structuration, relecture et relances. Préparez des CR clairs sans y passer la soirée.",
+      "Compte rendu de chantier sur plateforme BeWork : structuration IA, relecture et suivi. Vos équipes valident avant diffusion.",
     h1: "Compte rendu de chantier : structurer l’information sans y passer la soirée",
     intro:
-      "Un compte rendu utile trace les décisions, les réserves et les suites à donner. BeWork aide à transformer vos notes ou enregistrements en documents clairs, homogènes et exploitables par l’équipe, avec l’appui d’outils d’IA pour accélérer la mise en forme.",
+      "Un compte rendu utile trace les décisions, les réserves et les suites à donner. Sur la plateforme BeWork, vos équipes transforment notes ou enregistrements en documents clairs et exploitables, avec l’appui d’outils d’IA pour accélérer la mise en forme — validation avant diffusion.",
     enResume:
       "Le compte rendu de chantier formalise constatations, décisions, actions et responsables après une visite ou réunion de coordination.",
     erreursEviter: [
@@ -264,14 +266,14 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     priseEnChargeBullets: [
       "Structuration des comptes rendus selon votre modèle ou une trame BeWork.",
       "Intégration des points de vigilance, jalons et responsables identifiés.",
-      "Relances pour compléter les informations manquantes (sur brief).",
+      "Suivi des informations manquantes avant finalisation (sur brief).",
     ],
     pourquoiParagraphs: [
       "Les litiges et oublis coûtent cher : un CR régulier et lisible est un outil de pilotage autant qu’un document de preuve.",
     ],
     commentSteps: [
-      "Vous transmettez le brut (notes, vocal, points saillants).",
-      "BeWork propose une version structurée ; vous validez.",
+      "Vous déposez le brut (notes, vocal, points saillants) dans la plateforme.",
+      "L’outil IA propose une version structurée ; vos équipes valident.",
       "Archivage et diffusion selon vos règles internes.",
     ],
     deepeningLinks: [
@@ -281,31 +283,32 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     seeAlsoSlugs: ["assistant-chef-de-chantier", "doe-btp"],
     neRemplacePas: [
       "La présence sur chantier et la validation des décisions actées",
-      "La signature officielle du compte rendu à votre place",
+      "La signature officielle du compte rendu",
     ],
     casUsage: [
       {
         titre: "CR après réunion de coordination",
         scenario: "Notes vocales et photos en fin de journée, réunion le lendemain matin.",
-        resultat: "BeWork structure un CR homogène (décisions, actions, responsables, échéances) — vous validez avant diffusion.",
+        resultat:
+          "La plateforme structure un CR homogène (décisions, actions, responsables, échéances) — vous validez avant diffusion.",
       },
     ],
     faq: [
       {
         q: "BeWork signe-t-elle les comptes rendus à la place du conducteur ?",
-        a: "Non. BeWork prépare et met en forme ; la validation et l’émission officielle restent de votre responsabilité selon votre organisation.",
+        a: "Non. La plateforme prépare et met en forme ; la validation et l’émission officielle restent de votre responsabilité selon votre organisation.",
       },
     ],
   },
 
   "analyse-dce-btp": {
     slug: "analyse-dce-btp",
-    metaTitle: "Analyse DCE BTP : synthèse, risques et appui chiffrage | BeWork",
+    metaTitle: "Analyse DCE BTP : outil plateforme et synthèse | BeWork",
     metaDescription:
-      "Analyse DCE BTP : tri RC/CCAP/CCTP, synthèse des risques et points bloquants avant chiffrage et mémoire technique. Aide technique — validation et prix chez vous.",
+      "Analyse DCE BTP sur plateforme BeWork : tri RC/CCAP/CCTP, synthèse des risques avant chiffrage. Vos équipes valident ; BeWork configure l’outil.",
     h1: "Analyse DCE BTP : cadrer avant de chiffrer et d’engager vos équipes",
     intro:
-      "Un dossier de consultation peut être volumineux. BeWork aide à trier les pièces, repérer les incohérences et produire des synthèses de lecture pour accélérer votre arbitrage Go/No-go et orienter le chiffrage. L’objectif est de gagner du temps de cadrage technique et documentaire — pas de substituer votre jugement d’entreprise ni votre bureau d’études.",
+      "Un dossier de consultation peut être volumineux. Sur la plateforme BeWork, vos équipes trient les pièces, repèrent les incohérences et produisent des synthèses de lecture pour accélérer l’arbitrage Go/No-go. L’objectif est de gagner du temps de cadrage — pas de substituer votre jugement d’entreprise ni votre bureau d’études.",
     enResume:
       "Analyser un DCE, c’est lire RC, CCAP, CCTP et pièces de prix pour repérer délais, exigences techniques, interfaces lots et risques contractuels avant de chiffrer ou rédiger le mémoire technique.",
     erreursEviter: [
@@ -320,16 +323,16 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     priseEnChargeBullets: [
       "Tri et classement des pièces selon une méthode convenue.",
       "Synthèses de lecture (lots, risques apparents, interfaces, points à clarifier).",
-      "Repérage des exigences CCTP impactant le chiffrage (sans prix à votre place).",
-      "Préparation de checklists de conformité documentaire (sur brief).",
+      "Repérage des exigences CCTP impactant le chiffrage (sans fixer les prix).",
+      "Préparation de checklists de conformité documentaire.",
     ],
     pourquoiParagraphs: [
       "Répondre sans avoir lu le bon CCTP, la bonne annexe ou les pénalités du CCAP expose à des impairs techniques et financiers. Une première lecture structurée réduit ce risque avant d’engager vos équipes sur le montage d’offre.",
     ],
     commentSteps: [
-      "Réception du DCE et du calendrier cible.",
-      "Travail de structuration et de questions / remarques.",
-      "Remise pour revue interne avant décision de réponse.",
+      "Dépôt du DCE et du calendrier cible dans la plateforme.",
+      "Travail de structuration et de questions / remarques via les outils IA.",
+      "Revue interne avant décision de réponse.",
     ],
     deepeningLinks: [
       { href: "/reponse-appel-offres-btp", label: "Réponse appels d’offres" },
@@ -346,25 +349,26 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
       {
         titre: "Go / No-go avant montage d’offre",
         scenario: "DCE volumineux reçu avec délai court, équipe déjà mobilisée sur chantier.",
-        resultat: "BeWork trie les pièces et produit une synthèse de lecture (lots, risques, points à clarifier) pour votre arbitrage interne.",
+        resultat:
+          "La plateforme trie les pièces et produit une synthèse de lecture (lots, risques, points à clarifier) pour votre arbitrage interne.",
       },
     ],
     faq: [
       {
         q: "BeWork garantit-elle le résultat d’une offre ?",
-        a: "Non. BeWork fournit un appui documentaire et méthodologique ; la décision de répondre, le prix et le contenu technique final restent entièrement de votre côté.",
+        a: "Non. La plateforme fournit un appui documentaire et méthodologique ; la décision de répondre, le prix et le contenu technique final restent entièrement de votre côté.",
       },
     ],
   },
 
   ppsps: {
     slug: "ppsps",
-    metaTitle: "PPSPS BTP : aide à la rédaction | BeWork",
+    metaTitle: "PPSPS BTP : outil de structuration plateforme | BeWork",
     metaDescription:
-      "PPSPS BTP : structuration des rubriques et relecture. Vous validez les mesures de prévention et l’organisation.",
+      "PPSPS BTP sur plateforme BeWork : structuration des rubriques et relecture. Vous validez les mesures de prévention et l’organisation.",
     h1: "PPSPS : avancer sur la mise en forme sans bricoler les rubriques essentielles",
     intro:
-      "Le PPSPS doit être cohérent avec le risque réel du chantier. BeWork aide à structurer le document, intégrer vos données et accélérer la mise en page, sous réserve de vos validations sur les mesures de prévention et l’organisation des phases travaux.",
+      "Le PPSPS doit être cohérent avec le risque réel du chantier. Sur la plateforme BeWork, vos équipes structurent le document, intègrent vos données et accélèrent la mise en page — sous réserve de vos validations sur les mesures de prévention et l’organisation des phases travaux.",
     enResume:
       "Le PPSPS (plan particulier sécurité et protection santé) décrit l’organisation sécurité de votre entreprise sur un chantier donné.",
     erreursEviter: [
@@ -386,7 +390,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     ],
     commentSteps: [
       "Collecte du contexte chantier et des exigences MOA / CSPS attendues.",
-      "Rédaction / structuration en cycles courts avec relecture.",
+      "Structuration en cycles courts via la plateforme, avec relecture interne.",
       "Validation finale par votre référent sécurité ou conducteur.",
     ],
     deepeningLinks: [
@@ -405,12 +409,12 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
 
   "memoire-technique-btp": {
     slug: "memoire-technique-btp",
-    metaTitle: "Mémoire technique BTP : assistance rédactionnelle | BeWork",
+    metaTitle: "Mémoire technique BTP : outil plateforme | BeWork",
     metaDescription:
-      "Mémoire technique BTP : plan, fil rouge et relecture pour une réponse AO lisible. Assistance technique documentaire — validation contenu chez vous.",
+      "Mémoire technique BTP sur plateforme BeWork : plan, fil rouge et relecture. Outils IA métier — validation du contenu chez vous.",
     h1: "Mémoire technique BTP : un fil clair pour une réponse lisible",
     intro:
-      "Un mémoire technique doit démontrer votre méthode et votre compréhension du projet. BeWork aide à bâtir la structure, harmoniser le ton et intégrer vos contenus techniques, afin de livrer un dossier plus fluide à relire par la maîtrise d’ouvrage.",
+      "Un mémoire technique doit démontrer votre méthode et votre compréhension du projet. Sur la plateforme BeWork, vos équipes bâtissent la structure, harmonisent le ton et intègrent vos contenus techniques, pour livrer un dossier plus fluide à relire par la maîtrise d’ouvrage.",
     enResume:
       "Le mémoire technique BTP répond aux critères du règlement de consultation et démontre votre méthode, vos moyens et vos références pour le lot visé.",
     erreursEviter: [
@@ -432,7 +436,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     ],
     commentSteps: [
       "Reprise du DCE / critères de notation et de votre stratégie de réponse.",
-      "Itérations sur le plan puis sur les chapitres.",
+      "Itérations sur le plan puis sur les chapitres dans la plateforme.",
       "Relecture finale avant envoi sous votre contrôle.",
     ],
     deepeningLinks: [
@@ -444,19 +448,19 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     faq: [
       {
         q: "BeWork invente-t-elle le contenu technique ?",
-        a: "Non. BeWork s’appuie sur vos données, vos fiches méthodes et vos arbitrages. Elle aide à la structuration et à la lisibilité.",
+        a: "Non. La plateforme s’appuie sur vos données, vos fiches méthodes et vos arbitrages. Elle aide à la structuration et à la lisibilité.",
       },
     ],
   },
 
   "chiffrage-devis-btp": {
     slug: "chiffrage-devis-btp",
-    metaTitle: "Chiffrage devis BTP | BeWork",
+    metaTitle: "Chiffrage devis BTP : plateforme métier | BeWork",
     metaDescription:
-      "Chiffrage et devis BTP : montage, relances fournisseurs et suivi envois. Vous gardez prix, marges et stratégie.",
+      "Chiffrage et devis BTP sur plateforme BeWork : montage, consolidation fournisseurs et suivi. Vous gardez prix, marges et stratégie.",
     h1: "Chiffrage et devis BTP : accélérer la préparation sans perdre le contrôle des prix",
     intro:
-      "Le devis est un document commercial et technique : BeWork peut préparer les tableaux, centraliser les retours fournisseurs et suivre les relances, pendant que vous validez les taux, marges et positions commerciales.",
+      "Le devis est un document commercial et technique. Sur la plateforme BeWork, vos équipes préparent les tableaux, centralisent les retours fournisseurs et suivent les relances, pendant que vous validez les taux, marges et positions commerciales.",
     enResume:
       "Le chiffrage devis BTP transforme une consultation (plans, CCTP, visite) en offre chiffrée claire, défendable et envoyée à temps.",
     erreursEviter: [
@@ -470,15 +474,15 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     ],
     priseEnChargeBullets: [
       "Montage et mise en forme des offres (sur vos modèles).",
-      "Relances fournisseurs et consolidation des prix reçus.",
-      "Suivi des envois et des relances clients (selon cadrage).",
+      "Consolidation des prix fournisseurs reçus.",
+      "Suivi des envois et des relances clients.",
     ],
     pourquoiParagraphs: [
       "Un devis envoyé tardivement se perd souvent avant d’être comparé. Fluidifier la chaîne améliore le taux de transformation.",
     ],
     commentSteps: [
       "Définition des modèles, règles de marge et listes fournisseurs.",
-      "Traitement des dossiers dans le flux convenu.",
+      "Traitement des dossiers dans le flux plateforme convenu.",
       "Validation commerciale et technique avant envoi.",
     ],
     deepeningLinks: [
@@ -496,12 +500,12 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
 
   "doe-btp": {
     slug: "doe-btp",
-    metaTitle: "DOE BTP : constitution et livrables | BeWork",
+    metaTitle: "DOE BTP : constitution et suivi plateforme | BeWork",
     metaDescription:
-      "DOE BTP : structure des lots, suivi des pièces manquantes et mise en forme. Clôture documentaire plus prévisible.",
+      "DOE BTP sur plateforme BeWork : structure des lots, suivi des pièces manquantes et mise en forme. Clôture documentaire plus prévisible.",
     h1: "DOE BTP : avancer sur la constitution sans noyer le chantier dans l’administratif",
     intro:
-      "Le dossier des ouvrages exécutés exige rigueur et complétude. BeWork aide à structurer les chapitres, suivre les pièces manquantes et préparer les livrables selon votre format, pour que la clôture documentaire soit plus prévisible.",
+      "Le dossier des ouvrages exécutés exige rigueur et complétude. Sur la plateforme BeWork, vos équipes structurent les chapitres, suivent les pièces manquantes et préparent les livrables selon votre format, pour une clôture documentaire plus prévisible.",
     enResume:
       "Le DOE BTP regroupe les documents décrivant les ouvrages réalisés (plans as-built, notices, attestations) pour la réception et le récolement.",
     erreursEviter: [
@@ -515,7 +519,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     ],
     priseEnChargeBullets: [
       "Structuration du sommaire et des pièces par lot.",
-      "Suivi des manquants et relances internes / externes (sur brief).",
+      "Suivi des manquants et relances internes / externes.",
       "Mise en forme et harmonisation des documents fournis.",
     ],
     pourquoiParagraphs: [
@@ -523,7 +527,7 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     ],
     commentSteps: [
       "Reprise du périmètre contractuel et des exigences MOA.",
-      "Collecte et classement progressifs.",
+      "Collecte et classement progressifs dans la plateforme.",
       "Relectures et validation par vos référents.",
     ],
     deepeningLinks: [
@@ -535,21 +539,21 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     faq: [
       {
         q: "BeWork certifie-t-elle la conformité réglementaire du DOE ?",
-        a: "Non. BeWork apporte un appui de structuration et de suivi ; la conformité et la signature des livrables restent de votre responsabilité.",
+        a: "Non. La plateforme apporte un appui de structuration et de suivi ; la conformité et la signature des livrables restent de votre responsabilité.",
       },
     ],
   },
 
   "conducteur-travaux-deborde": {
     slug: "conducteur-travaux-deborde",
-    metaTitle: "Conducteur de travaux débordé : assistance bureau-chantier | BeWork",
+    metaTitle: "Conducteur de travaux débordé : plateforme bureau-chantier | BeWork",
     metaDescription:
-      "Conducteur de travaux débordé ? Assistance technique et administrative : CR, relances, situations, dossiers marché. Assistants travaux augmentés par l’IA.",
+      "Conducteur de travaux débordé ? Plateforme BeWork pour CR, relances, situations et dossiers marché. Vos équipes pilotent ; outils IA métier intégrés.",
     h1: "Conducteur de travaux débordé : faire avancer le bureau sans lâcher le chantier",
     intro:
-      "Quand le carnet déborde, ce ne sont pas seulement les mails qui s’accumulent : ce sont les relances oubliées, les pièces manquantes et les dossiers qui traînent. BeWork absorbe le suivi documentaire et technique pour redonner des plages de pilotage réel — sans remplacer vos arbitrages terrain.",
+      "Quand le carnet déborde, ce ne sont pas seulement les mails qui s’accumulent : ce sont les relances oubliées, les pièces manquantes et les dossiers qui traînent. BeWork déploie une plateforme interne pour outiller le suivi documentaire et redonner des plages de pilotage réel — sans remplacer vos arbitrages terrain.",
     enResume:
-      "Un conducteur de travaux débordé manque de temps bureau : BeWork prend l’assistance documentaire (CR, relances, situations, pièces marché) pendant qu’il tient le chantier.",
+      "Un conducteur de travaux débordé manque de temps bureau : la plateforme BeWork outille le suivi documentaire (CR, relances, situations, pièces marché) pendant qu’il tient le chantier.",
     erreursEviter: [
       "Tout garder en tête sans tableau de priorités",
       "Relances MOE ou fournisseurs repoussées chaque semaine",
@@ -560,17 +564,17 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
       "Profils en entreprise générale, sous-traitance ou lot technique sous forte charge documentaire.",
     ],
     priseEnChargeBullets: [
-      "Préparation de comptes rendus et synthèses de réunion (sur brief).",
-      "Relances MOA, MOE, fournisseurs et sous-traitants dans le ton de votre entreprise.",
-      "Suivi des situations, factures et pièces administratives (selon cadrage).",
+      "Outils de préparation de comptes rendus et synthèses de réunion.",
+      "Espace de relances MOA, MOE, fournisseurs et sous-traitants.",
+      "Suivi des situations, factures et pièces administratives.",
       "Classement et coordination documentaire terrain ↔ bureau.",
     ],
     pourquoiParagraphs: [
-      "Passer la soirée à relancer pour obtenir une attestation, c’est du temps volé au pilotage. Externaliser le relais documentaire sécurise le suivi sans diluer votre présence sur le terrain.",
+      "Passer la soirée à relancer pour obtenir une attestation, c’est du temps volé au pilotage. Outiller le suivi documentaire sécurise le suivi sans diluer votre présence sur le terrain.",
     ],
     commentSteps: [
       "Brief : priorités, interlocuteurs, jalons et règles de validation.",
-      "Traitement des demandes dans le cadre du forfait, avec reporting régulier.",
+      "Vos équipes traitent les demandes dans la plateforme, avec reporting.",
       "Validation finale systématique sur tout ce qui engage contractuellement ou techniquement.",
     ],
     deepeningLinks: [
@@ -581,52 +585,53 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
     seeAlsoSlugs: ["assistant-conducteur-de-travaux", "assistant-travaux", "compte-rendu-chantier"],
     neRemplacePas: [
       "Le pilotage opérationnel du chantier et les décisions techniques",
-      "La représentation officielle auprès du maître d’ouvrage à votre place",
+      "La représentation officielle auprès du maître d’ouvrage",
       "Le bureau d’études, le coordinateur SPS ou le maître d’œuvre",
     ],
     casUsage: [
       {
         titre: "Semaine à trois réceptions",
         scenario: "Trois réceptions la même semaine, relances fournisseurs et CR en retard.",
-        resultat: "BeWork traite les relances et prépare les CR à partir de vos notes — vous validez et signez.",
+        resultat:
+          "La plateforme prépare les relances et les CR à partir de vos notes — vous validez et signez.",
       },
     ],
     faq: [
       {
         q: "BeWork remplace-t-elle un second conducteur de travaux ?",
-        a: "Non. BeWork apporte une assistance technique et administrative documentaire. Le pilotage terrain, les arbitrages et les engagements restent les vôtres.",
+        a: "Non. BeWork fournit une plateforme et des outils IA métier. Le pilotage terrain, les arbitrages et les engagements restent les vôtres.",
       },
       {
         q: "Quelle différence avec la page « assistant conducteur de travaux » ?",
-        a: "La page « conducteur débordé » cible la situation de surcharge ; la page « assistant conducteur » détaille le périmètre mission par mission. Les deux renvoient au même service BeWork.",
+        a: "La page « conducteur débordé » cible la situation de surcharge ; la page « assistant conducteur » détaille le périmètre module par module. Les deux renvoient à la même plateforme BeWork.",
       },
     ],
   },
 
   "assistant-moex": {
     slug: "assistant-moex",
-    metaTitle: "Assistant MOEX / MOA : suivi documentaire marchés | BeWork",
+    metaTitle: "Assistant MOEX / MOA : plateforme suivi documentaire | BeWork",
     metaDescription:
-      "Assistant MOEX et MOA BTP : relances, synthèses, dossiers et coordination documentaire pour maîtrise d’œuvre et maîtrise d’ouvrage. Validation chez vous.",
+      "Plateforme assistant MOEX et MOA BTP : relances, synthèses et dossiers marché. Vos équipes pilotent ; BeWork configure et fait évoluer.",
     h1: "Assistant MOEX / MOA : sécuriser le suivi documentaire des marchés travaux",
     intro:
-      "Maîtrise d’ouvrage et maîtrise d’œuvre portent une charge documentaire dense : comptes rendus, validations, relances entreprises, pièces contractuelles. BeWork apporte une assistance technique et administrative BTP pour structurer, suivre et relancer — sans se substituer à vos compétences MOA/MOEX.",
+      "Maîtrise d’ouvrage et maîtrise d’œuvre portent une charge documentaire dense : comptes rendus, validations, relances entreprises, pièces contractuelles. BeWork déploie une plateforme interne d’outils IA métier pour structurer, suivre et relancer — sans se substituer à vos compétences MOA/MOEX.",
     pourQuiBullets: [
       "Assistants MOA, MOEX et chargés de mission en maîtrise d’ouvrage ou d’œuvre.",
       "Bureaux de maîtrise d’œuvre et AMO avec plusieurs opérations en parallèle.",
     ],
     priseEnChargeBullets: [
       "Préparation et mise en forme de comptes rendus et synthèses de réunion.",
-      "Suivi des relances entreprises, lots et pièces attendues (sur brief).",
+      "Suivi des relances entreprises, lots et pièces attendues.",
       "Classement des dossiers marché et checklists de conformité documentaire.",
-      "Appui sur réserves, PV et dossiers de clôture (selon cadrage).",
+      "Appui sur réserves, PV et dossiers de clôture.",
     ],
     pourquoiParagraphs: [
-      "Un oubli de relance ou une pièce mal classée peut retarder une validation MOA. Un relais cadré réduit ces frictions sans alourdir l’effectif permanent.",
+      "Un oubli de relance ou une pièce mal classée peut retarder une validation MOA. Une plateforme cadrée réduit ces frictions sans alourdir l’effectif permanent.",
     ],
     commentSteps: [
       "Cadrage du périmètre (opération, lots, interlocuteurs, formats).",
-      "Traitement des demandes selon le forfait et les priorités convenues.",
+      "Configuration de la plateforme selon vos priorités et circuits de validation.",
       "Validation par vos référents MOA/MOEX avant diffusion engageante.",
     ],
     deepeningLinks: [
@@ -644,25 +649,26 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
       {
         titre: "Relances entreprises avant comité de pilotage",
         scenario: "Comité dans 48 h, pièces attendues de trois lots encore manquantes.",
-        resultat: "BeWork relance, consolide les retours et prépare une synthèse des manquants — vous validez le contenu du comité.",
+        resultat:
+          "La plateforme consolide les retours et prépare une synthèse des manquants — vous validez le contenu du comité.",
       },
     ],
     faq: [
       {
         q: "BeWork peut-elle signer des documents MOA/MOEX ?",
-        a: "Non. BeWork prépare, structure et suit. La validation et la signature restent de la responsabilité de votre maîtrise d’ouvrage ou d’œuvre.",
+        a: "Non. La plateforme prépare, structure et suit. La validation et la signature restent de la responsabilité de votre maîtrise d’ouvrage ou d’œuvre.",
       },
     ],
   },
 
   "dce-bpu-dpgf": {
     slug: "dce-bpu-dpgf",
-    metaTitle: "DCE, BPU et DPGF BTP : analyse et structuration | BeWork",
+    metaTitle: "DCE, BPU et DPGF BTP : outils plateforme | BeWork",
     metaDescription:
-      "DCE, BPU et DPGF BTP : assistance technique sur pièces marché, structuration des bordereaux et synthèses avant chiffrage. Validation chez vous.",
+      "DCE, BPU et DPGF BTP sur plateforme BeWork : structuration des pièces marché et synthèses avant chiffrage. Validation chez vous.",
     h1: "DCE, BPU et DPGF : structurer les pièces marché avant de chiffrer",
     intro:
-      "Un marché mal lu se paie au chiffrage ou en exécution. BeWork aide à trier le DCE, recouper CCTP et bordereaux (BPU, DPGF, DQE), repérer les incohérences et préparer des synthèses exploitables — sans substituer votre jugement d’entreprise ni votre bureau d’études.",
+      "Un marché mal lu se paie au chiffrage ou en exécution. Sur la plateforme BeWork, vos équipes trient le DCE, recoupent CCTP et bordereaux (BPU, DPGF, DQE), repèrent les incohérences et préparent des synthèses exploitables — sans substituer votre jugement d’entreprise ni votre bureau d’études.",
     pourQuiBullets: [
       "Chargés d’affaires et conducteurs impliqués dans les réponses aux AO.",
       "PME sans bureau d’études disponible immédiatement pour la première lecture.",
@@ -677,9 +683,9 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
       "Confondre une annexe prix et le CCTP principal expose à des impairs. Une première structuration réduit ce risque avant d’engager vos équipes de chiffrage.",
     ],
     commentSteps: [
-      "Réception du DCE et du calendrier cible.",
-      "Travail de structuration, recoupement BPU/DPGF et questions / remarques.",
-      "Remise pour revue interne avant décision de réponse et chiffrage.",
+      "Dépôt du DCE et du calendrier cible dans la plateforme.",
+      "Structuration, recoupement BPU/DPGF et questions / remarques via les outils IA.",
+      "Revue interne avant décision de réponse et chiffrage.",
     ],
     deepeningLinks: [
       { href: "/services/analyse-dce-btp", label: "Service analyse DCE" },
@@ -696,13 +702,14 @@ export const SERVICE_PAGES: Record<ServicePageSlug, ServicePageDefinition> = {
       {
         titre: "BPU à recouper avec le CCTP",
         scenario: "Marché public avec DPGF volumineux et CCTP multi-lots reçu en fin de semaine.",
-        resultat: "BeWork classe les pièces, signale les écarts apparents et prépare une synthèse par lot pour orienter votre chiffrage.",
+        resultat:
+          "La plateforme classe les pièces, signale les écarts apparents et prépare une synthèse par lot pour orienter votre chiffrage.",
       },
     ],
     faq: [
       {
         q: "BeWork chiffre-t-elle les ouvrages à votre place ?",
-        a: "Non. BeWork structure et synthétise les pièces marché. Les prix, quantités et choix techniques restent validés par votre entreprise.",
+        a: "Non. La plateforme structure et synthétise les pièces marché. Les prix, quantités et choix techniques restent validés par votre entreprise.",
       },
     ],
   },

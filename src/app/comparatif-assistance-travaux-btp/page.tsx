@@ -14,37 +14,37 @@ const COMPARISON_ROWS = [
     critere: "Périmètre métier BTP",
     recruter: "Dépend du profil recruté — formation chantier nécessaire",
     generaliste: "Courrier, saisie, agenda — peu de lecture DCE/CCTP",
-    bework: "Assistance technique et administrative chantier, AO, marchés publics",
+    bework: "Plateforme interne métier : AO, DCE, chantiers, marchés publics",
   },
   {
     critere: "Analyse DCE & appels d'offres",
     recruter: "Possible si profil formé — charge à monter en interne",
     generaliste: "Hors compétence métier en pratique",
-    bework: "Synthèse RC/CCAP/CCTP, mémoire technique, checklists dépôt",
+    bework: "Modules synthèse RC/CCAP/CCTP, mémoire technique, checklists dépôt",
   },
   {
     critere: "Marchés publics & Chorus Pro",
     recruter: "À organiser en interne (process, outils)",
     generaliste: "Rarement structuré pour l'exécution MP",
-    bework: "Situations, relances, anti-pénalités, DOE — selon périmètre",
+    bework: "Situations, relances, anti-pénalités, DOE — selon modules déployés",
   },
   {
     critere: "Coût & flexibilité",
     recruter: "Coût fixe (salaire + charges) — peu adaptable aux pics",
     generaliste: "Souvent forfait horaire ou saisie — hors dossiers lourds",
-    bework: "Forfaits HT publics, montée en charge progressive",
+    bework: "Tarification sur étude, montée en charge progressive",
   },
   {
     critere: "Délai de mise en route",
     recruter: "Recrutement, onboarding, outils — plusieurs semaines/mois",
     generaliste: "Rapide mais périmètre souvent générique",
-    bework: "Cadrage + démarrage mission en jours (selon disponibilité)",
+    bework: "Diagnostic + configuration plateforme (selon périmètre)",
   },
   {
     critere: "Validation & engagement",
     recruter: "Poste interne — vigilance sur signatures engageantes",
     generaliste: "Risque d'envoi sans relecture technique",
-    bework: "Circuit explicite : BeWork prépare, vous validez avant envoi",
+    bework: "Circuit explicite : vos équipes préparent, vous validez avant envoi",
   },
 ] as const;
 
@@ -54,19 +54,19 @@ export default function Page() {
   const faq = [
     {
       q: "BeWork remplace-t-il un recrutement interne ?",
-      a: "Non. BeWork est pertinent quand la charge varie, avant une embauche, ou pour absorber pics AO et clôture marché. Un poste interne reste adapté si le besoin est stable à temps plein.",
+      a: "Non. BeWork déploie une plateforme interne pertinente quand la charge varie, avant une embauche, ou pour absorber pics AO et clôture marché. Un poste interne reste adapté si le besoin est stable à temps plein.",
     },
     {
       q: "En quoi BeWork diffère d'un prestataire administratif généraliste ?",
-      a: "BeWork lit le BTP : lots, CCTP, DCE, situations marché public, réserves, DOE. Ce n'est pas du courrier ni de la saisie générique — c'est une assistance travaux encadrée avec validation chez vous.",
+      a: "BeWork est éditeur de plateforme BTP : lots, CCTP, DCE, situations marché public, réserves, DOE. Ce n'est pas du courrier ni de la saisie générique — vos équipes utilisent l'outil ; BeWork configure et fait évoluer.",
     },
     {
-      q: "Peut-on combiner BeWork et une personne en interne ?",
-      a: "Oui. BeWork peut prendre la surcharge (appels d'offres, DOE, relances MOE) pendant que votre équipe garde le quotidien interne.",
+      q: "Peut-on combiner la plateforme et une personne en interne ?",
+      a: "Oui. La plateforme peut absorber la surcharge (appels d'offres, DOE, relances MOE) pendant que votre équipe garde le quotidien interne.",
     },
     {
-      q: "Quel budget prévoir pour démarrer ?",
-      a: "Interventions ponctuelles dès 150 € HT, missions structurées dès 250 € HT, accompagnements mensuels dès 590 € HT. Détail sur /tarifs — ajusté au devis selon votre périmètre.",
+      q: "Comment est établie la tarification ?",
+      a: "Sur étude selon modules, volume et formule. La méthode est décrite sur /tarifs — sans prix inventés hors cadrage.",
     },
   ] as const;
 
@@ -74,18 +74,18 @@ export default function Page() {
 
   return (
     <SeoLandingPage
-      description="Recruter, prestataire administratif ou BeWork ? Comparatif pour entreprises BTP : périmètre, DCE, marchés publics, coût et validation."
+      description="Recruter, outil admin générique ou plateforme BeWork ? Comparatif pour entreprises BTP : périmètre, DCE, marchés publics, coût et validation."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Comparatif assistance travaux BTP", href: PAGE_PATH },
       ]}
-      h1="Recruter, externaliser ou BeWork : le comparatif pour le BTP"
+      h1="Recruter, outil générique ou plateforme BeWork : le comparatif BTP"
       intro={
         <>
           Dirigeant ou conducteur de travaux : faut-il <strong>recruter</strong>, passer par un{" "}
-          <strong>prestataire administratif généraliste</strong>, ou structurer une{" "}
-          <strong>assistance travaux BTP</strong> avec BeWork ? Ce tableau aide à arbitrer — sans promesse de
-          « tout déléguer » : vous gardez prix, technique et signatures.
+          <strong>outil ou prestataire administratif généraliste</strong>, ou déployer une{" "}
+          <strong>plateforme interne BTP</strong> avec BeWork ? Ce tableau aide à arbitrer — sans promesse de « tout
+          faire à votre place » : vous gardez prix, technique et signatures.
         </>
       }
     >
@@ -94,8 +94,8 @@ export default function Page() {
       <SeoEnResumeBlock>
         <p>
           <strong>Quand choisir BeWork ?</strong> Charge variable, pics d&apos;appels d&apos;offres, marchés publics à
-          suivre, conducteurs saturés — et besoin d&apos;un interlocuteur qui comprend DCE, Chorus Pro et DOE, pas une
-          saisie générique.
+          suivre, conducteurs saturés — et besoin d&apos;un environnement qui comprend DCE, Chorus Pro et DOE, pas une
+          saisie générique. Vos équipes utilisent ; BeWork configure et fait évoluer.
         </p>
       </SeoEnResumeBlock>
 
@@ -111,10 +111,10 @@ export default function Page() {
                 Recruter en interne
               </th>
               <th scope="col" className="p-3 font-semibold text-black">
-                Prestataire admin. généraliste
+                Prestataire / outil admin. généraliste
               </th>
               <th scope="col" className="p-3 font-semibold text-[#1d4ed8]">
-                BeWork — assistance travaux
+                BeWork — plateforme interne
               </th>
             </tr>
           </thead>
@@ -140,7 +140,7 @@ export default function Page() {
         <li>Volume constant de flux internes (RH, accueil, comptabilité courante)</li>
       </ul>
 
-      <h2>Quand un prestataire généraliste suffit</h2>
+      <h2>Quand un outil ou prestataire généraliste suffit</h2>
       <ul>
         <li>Flux administratif hors chantier (courrier, facturation simple hors BTP)</li>
         <li>Pas de dossiers marché public, DCE ou clôture DOE</li>
@@ -151,19 +151,19 @@ export default function Page() {
         <li>Appels d&apos;offres, analyse DCE, mémoires techniques</li>
         <li>Exécution marché public : situations, Chorus Pro, réserves, DOE</li>
         <li>Conducteurs débordés sur plusieurs chantiers</li>
-        <li>PME qui veut tester avant d&apos;embaucher</li>
+        <li>PME qui veut structurer avant d&apos;embaucher</li>
       </ul>
 
       <h2>Aller plus loin</h2>
       <ul>
         <li>
           <Link href="/tarifs" className="text-[#1d4ed8] hover:underline">
-            Tarifs et forfaits
+            Méthode de tarification
           </Link>
         </li>
         <li>
           <Link href="/assistants-administratifs-taches" className="text-[#1d4ed8] hover:underline">
-            Catalogue des missions
+            Capacités plateforme
           </Link>
         </li>
         <li>
@@ -178,12 +178,12 @@ export default function Page() {
         </li>
         <li>
           <CalendlyBookingLink className="text-[#1d4ed8] hover:underline">
-            Réserver un échange
+            Demander une démonstration
           </CalendlyBookingLink>
         </li>
       </ul>
 
-      <h2>FAQ — choisir son mode d&apos;accompagnement</h2>
+      <h2>FAQ — choisir son mode d&apos;organisation</h2>
       <dl>
         {faq.map((item) => (
           <div key={item.q} className="mb-6">

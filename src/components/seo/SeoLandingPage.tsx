@@ -80,27 +80,31 @@ export function SeoLandingPage({
           <div className="mt-14 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
             <h2 className="font-heading text-[1.35rem] font-bold leading-snug text-black md:text-2xl">Passer à l’action</h2>
             <p className="mt-3 text-base leading-relaxed text-slate-700">
-              BeWork intervient pour artisans, conducteurs de travaux et dirigeants BTP en France, Belgique, Suisse et Luxembourg — forfaits HT cadrés
-              par volume. Connexion requise pour confier une tâche depuis l’espace client.
+              BeWork conçoit et fait évoluer des plateformes internes pour artisans, conducteurs de travaux et dirigeants BTP
+              en France, Belgique, Suisse et Luxembourg. Vos équipes utilisent la plateforme au quotidien ; BeWork assure
+              configuration, hébergement, sécurité et évolution.
             </p>
             <div className={`mt-6 ${CTA_GROUP}`}>
-              <CalendlyBookingLink className={CTA_PRIMARY}>Réserver un appel</CalendlyBookingLink>
-              <Link href="/ressources" className={CTA_SECONDARY}>
-                Découvrir les ressources
+              <CalendlyBookingLink className={CTA_PRIMARY}>
+                <span className="sm:hidden">Demander une démo</span>
+                <span className="hidden sm:inline">Demander une démonstration</span>
+              </CalendlyBookingLink>
+              <Link href="/#plateforme" className={CTA_SECONDARY}>
+                Découvrir la plateforme
               </Link>
-              <Link href="/dashboard/nouvelle-demande" className={CTA_SOFT}>
-                Confier une tâche
+              <Link href="/tarifs" className={CTA_SOFT}>
+                Voir la tarification
               </Link>
               <Link href="/notre-facon-de-travailler" className={CTA_SECONDARY}>
-                Voir le Process BeWork
+                Notre façon de travailler
               </Link>
             </div>
             <p className="mt-5 text-sm text-slate-600">
-              <Link href="/tarifs" className="font-semibold text-[#1d4ed8] underline underline-offset-2 hover:text-[#1e40af]">
-                Consulter les forfaits
+              <Link href="/contact#formulaire" className="font-semibold text-[#1d4ed8] underline underline-offset-2 hover:text-[#1e40af]">
+                Demander une étude
               </Link>
               {" · "}
-              <Link href="/inscription" className="font-semibold text-[#1d4ed8] underline underline-offset-2 hover:text-[#1e40af]">
+              <Link href="/connexion" className="font-semibold text-[#1d4ed8] underline underline-offset-2 hover:text-[#1e40af]">
                 Accès client
               </Link>
             </p>

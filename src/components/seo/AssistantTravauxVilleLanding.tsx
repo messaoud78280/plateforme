@@ -31,7 +31,7 @@ export function AssistantTravauxVilleLanding({ villeKey }: { villeKey: Assistant
 
   return (
     <SeoLandingPage
-      description={`Assistant travaux ${content.label} : assistance technique et administrative BTP à distance, devis, marchés publics et dossiers chantier.`}
+      description={`Plateforme BTP ${content.label} : outils travaux pour vos équipes — devis, marchés publics et dossiers chantier. Éditeur BeWork.`}
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Assistant travaux", href: "/services/assistant-travaux" },
@@ -40,7 +40,8 @@ export function AssistantTravauxVilleLanding({ villeKey }: { villeKey: Assistant
       h1={content.h1}
       intro={
         <>
-          {content.introLead} BeWork propose un <strong>assistant travaux</strong> externalisé pour le BTP —{" "}
+          {content.introLead} BeWork est l&apos;<strong>éditeur d&apos;une plateforme interne BTP</strong> —{" "}
+          <strong>vos équipes l&apos;utilisent</strong> au quotidien ; BeWork configure et fait évoluer, avec{" "}
           <strong>validation finale</strong> chez vous avant tout envoi engageant.
         </>
       }
@@ -49,8 +50,9 @@ export function AssistantTravauxVilleLanding({ villeKey }: { villeKey: Assistant
 
       <SeoEnResumeBlock>
         <p>
-          <strong>Assistant travaux à {content.label.split(" &")[0]}</strong> : assistance technique et administrative pour devis,
-          appels d&apos;offres, situations, DOE et relances — spécialisé BTP, pas secrétariat générique.
+          <strong>Plateforme travaux à {content.label.split(" &")[0]}</strong> : outils métier pour devis, appels
+          d&apos;offres, situations, DOE et relances — spécialisés BTP, utilisés par vos collaborateurs, pas un
+          secrétariat générique externalisé.
         </p>
       </SeoEnResumeBlock>
 
@@ -62,7 +64,7 @@ export function AssistantTravauxVilleLanding({ villeKey }: { villeKey: Assistant
       <h2>Exemple concret</h2>
       <p>{content.casUsage}</p>
 
-      <h2>Ce que BeWork prend en charge</h2>
+      <h2>Ce que la plateforme couvre</h2>
       <ul>
         <li>Devis, relances et suivi des réponses clients</li>
         <li>Analyse DCE et réponse aux appels d&apos;offres</li>
@@ -73,15 +75,19 @@ export function AssistantTravauxVilleLanding({ villeKey }: { villeKey: Assistant
       <h2>Maillage {content.pays}</h2>
       <p>
         <Link href={paysHub} className="text-[#1d4ed8] hover:underline">
-          Assistant travaux {content.pays}
+          Plateforme travaux {content.pays}
         </Link>
         {" · "}
         <Link href="/externalisation-administrative-btp-france" className="text-[#1d4ed8] hover:underline">
-          Externalisation administrative BTP
+          Plateforme administrative BTP
         </Link>
         {" · "}
         <Link href="/tarifs" className="text-[#1d4ed8] hover:underline">
           Tarifs
+        </Link>
+        {" · "}
+        <Link href="/contact#formulaire" className="text-[#1d4ed8] hover:underline">
+          Demander une étude
         </Link>
       </p>
 

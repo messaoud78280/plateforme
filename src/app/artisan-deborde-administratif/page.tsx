@@ -13,15 +13,15 @@ export default function Page() {
   const faq = [
     {
       q: "Est-ce que BeWork remplace un commercial ou un comptable ?",
-      a: "Non. Nous sécurisons la chaîne opérationnelle : devis à préparer ou relancer, factures et situations, dossiers chantier et relances cadrées. Vous gardez prix, technique, validation des envois sensibles et liaison avec votre expertise comptable.",
+      a: "Non. La plateforme sécurise la chaîne opérationnelle : devis à préparer ou relancer, factures et situations, dossiers chantier et relances cadrées. Vous gardez prix, technique, validation des envois sensibles et liaison avec votre expertise comptable.",
     },
     {
       q: "Comment ça évite de perdre des chantiers pendant la saison ?",
       a: "Les demandes passent par une plateforme privée avec statuts — elles ne vivent plus uniquement dans votre tête ou une boîte mail saturée. Une file claire évite oublis, doubles relances improvisées ou devis envoyés trop tard après une série de chantiers urgents.",
     },
     {
-      q: "Puis-je limiter les sujets délégués au début ?",
-      a: "Oui. Au rendez-vous découverte, on cale un périmètre réaliste (ex. uniquement relances clients + situations) puis vous élargissez quand vous voyez les délais gagner terrain.",
+      q: "Puis-je limiter les modules activés au début ?",
+      a: "Oui. Au diagnostic, on cale un périmètre réaliste (ex. uniquement relances clients + situations) puis vous élargissez quand vous voyez les délais gagner terrain.",
     },
   ] as const;
 
@@ -37,7 +37,7 @@ export default function Page() {
 
   return (
     <SeoLandingPage
-      description="Artisan sous l’eau administrativement : où ça fait mal, pourquoi, et comment BeWork remet un rythme de bureau aligné sur le chantier."
+      description="Artisan sous l’eau administrativement : où ça fait mal, pourquoi, et comment une plateforme interne BeWork remet un rythme de bureau aligné sur le chantier."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Artisan débordé — administratif", href: PAGE_PATH },
@@ -45,10 +45,11 @@ export default function Page() {
       h1="Artisan débordé par l’administratif — quand le bureau coupe le chantier"
       intro={
         <>
-          Vous passez vos journées sur les ouvrages. Le soir, il reste devis à finir, factures à vérifier, mails fournisseur
-          sans réponse et relances qui attendent encore. Ce n’est pas une question de courage : vous jonglez déjà trois
-          rôles. BeWork est une agence de pilotage administratif pour le BTP — une équipe terrain + des outils — pour exécuter
-          ce flux au même niveau d’exigence que votre réalisation chantier (France, Belgique, Suisse, Luxembourg francophones).
+          Vous passez vos journées sur les ouvrages. Le soir, il reste devis à finir, factures à vérifier, mails
+          fournisseur sans réponse et relances qui attendent encore. Ce n’est pas une question de courage : vous
+          jonglez déjà trois rôles. BeWork déploie une <strong>plateforme interne BTP</strong> — vos équipes
+          l&apos;utilisent au quotidien ; BeWork configure, déploie et fait évoluer (France, Belgique, Suisse,
+          Luxembourg francophones).
         </>
       }
     >
@@ -81,14 +82,14 @@ export default function Page() {
       <h2>Comment BeWork vous aide</h2>
       <p>
         Vous créez vos demandes sur une plateforme privée sécurisée (devis, factures, relances, dossiers chantier).
-        Une équipe encadrée prend en charge l&apos;exécution jusqu’à statuts clairement suivis ; l’IA accélère le tri,
-        les recherches répétitives et la mise en forme — vous conservez décisions sensibles et validation des envois qui
-        engagent. Le pilotage est supervisé depuis la France, avec un ton BTP : concret, sans blabla.
+        Vos équipes tiennent les statuts et les livrables ; l’IA accélère le tri, les recherches répétitives et la mise
+        en forme — vous conservez décisions sensibles et validation des envois qui engagent. BeWork configure et fait
+        évoluer l&apos;environnement, sans exécuter à votre place.
       </p>
 
       <h2>Bénéfices concrets</h2>
       <ul>
-        <li>Des soirées plus courtes côté bureau — la file est tenue par quelqu’un d’autre que vous seul.</li>
+        <li>Des soirées plus courtes côté bureau — la file est visible et tenue, pas uniquement dans votre tête.</li>
         <li>Une image plus pro (réponses plus rapides, relances propres, rangement par chantier).</li>
         <li>Une structure qui tient quand un ouvrier part en congé ou qu’un client double la surface à traiter.</li>
       </ul>
@@ -105,13 +106,13 @@ export default function Page() {
 
       <div className="not-prose my-10 flex flex-wrap gap-4">
         <CalendlyBookingLink className="inline-flex rounded-lg bg-[#1d4ed8] px-6 py-3 font-bold text-white hover:bg-[#1e40af]">
-          Réserver un appel
+          Demander une démonstration
         </CalendlyBookingLink>
         <Link
           href="/tarifs"
           className="inline-flex rounded-lg border-2 border-[#1d4ed8] px-6 py-3 font-bold text-[#1d4ed8] hover:bg-[#eff6ff]"
         >
-          Voir les forfaits
+          Voir la tarification
         </Link>
       </div>
 

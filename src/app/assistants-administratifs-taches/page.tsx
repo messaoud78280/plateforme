@@ -12,7 +12,6 @@ import {
   MARCHES_PUBLICS_FAQ,
   MarchesPublicsAccordsCadresSection,
 } from "@/components/marketing/MarchesPublicsAccordsCadresSection";
-import { BEWORK_MARKETING_PRICE_LINE_SHORT } from "@/lib/bework-public-offers";
 import { landingPageMetadataFromPath } from "@/lib/seo-landing-metadata";
 import { getPublicPageSeo } from "@/lib/seo-public-pages";
 import { SeoInternalLinks } from "@/components/seo/SeoInternalLinks";
@@ -169,9 +168,9 @@ const nonFait = [
 ];
 
 const commentCaMarche = [
-  { step: 1, title: "Cadrage chantier", desc: "On définit vos types de demandes (devis, dossiers chantier, fournisseurs…), vos outils et vos règles de validation." },
-  { step: 2, title: "Mise en route", desc: "On met en place les modèles (mails, tableaux), les accès et le circuit de validation. Vous gardez la main sur les points sensibles." },
-  { step: 3, title: "Suivi & cadence", desc: "Votre Beworker exécute, relance, structure et vous remonte les arbitrages. Points réguliers et ajustements selon la charge." },
+  { step: 1, title: "Diagnostic & cadrage", desc: "On définit vos flux (devis, dossiers chantier, marchés…), vos outils et vos règles de validation." },
+  { step: 2, title: "Configuration plateforme", desc: "Modules, modèles, rôles et circuit de validation. Vous gardez la main sur les points sensibles." },
+  { step: 3, title: "Usage & évolution", desc: "Vos équipes utilisent la plateforme au quotidien. BeWork assure maintenance, sécurité et évolutions selon votre formule." },
 ];
 
 const reassurance = [
@@ -183,28 +182,28 @@ const reassurance = [
 const faqItems = [
   ...MARCHES_PUBLICS_FAQ,
   {
-    q: "Quelles missions peut gérer un assistant travaux BeWork ?",
-    a: "Les missions qui doivent avancer côté bureau : relances devis, suivi client, dossiers chantier, DICT/DT, fournisseurs, comptes rendus, réserves, DOE et tableaux de suivi.",
+    q: "Quelles capacités couvre la plateforme BeWork ?",
+    a: "Les flux bureau-chantier : relances devis, suivi client, dossiers chantier, DICT/DT, fournisseurs, comptes rendus, réserves, DOE et tableaux de suivi — utilisés par vos équipes dans l’environnement BeWork.",
   },
   {
     q: "BeWork peut-elle préparer un DOE ou un PPSPS ?",
-    a: "Oui, sur un périmètre cadré : organisation des pièces, checklists, relances documents, mise au propre et compilation. Vous validez les éléments sensibles avant diffusion.",
+    a: "Oui, sur un périmètre cadré dans la plateforme : organisation des pièces, checklists, relances documents, mise au propre et compilation. Vous validez les éléments sensibles avant diffusion.",
   },
   {
     q: "BeWork peut-elle analyser un DCE ou un CCTP ?",
-    a: "Oui : contrôle des pièces, tableaux de conformité, mémoire technique et dépôt électronique sont détaillés dans la section « Réponses aux appels d’offres » de cette page. Pour une synthèse CCTP ou un arbitrage interne, voir aussi le catalogue « Synthèse technique ». Vous gardez toujours la validation du prix et du contenu technique.",
+    a: "Oui : contrôle des pièces, tableaux de conformité, mémoire technique et dépôt électronique sont détaillés dans la section « Réponses aux appels d’offres » de cette page. Vous gardez toujours la validation du prix et du contenu technique.",
   },
   {
     q: "Est-ce que BeWork peut relancer mes devis et mes clients ?",
-    a: "Oui : relances devis, relances de pièces, relances de validation, suivi des réponses. On tient la cadence et on vous remonte ce qui doit être arbitré.",
+    a: "Vos équipes pilotent relances et suivis dans la plateforme (statuts, pièces, rappels). BeWork équipe l’outil ; les arbitrages restent chez vous.",
   },
   {
     q: "Qui valide les documents avant envoi ?",
-    a: "Vous. BeWork prépare, met en forme, organise et propose ; vous validez les prix, choix techniques, engagements contractuels, signatures et réponses sensibles.",
+    a: "Vous. La plateforme aide à préparer, mettre en forme et organiser ; vous validez les prix, choix techniques, engagements contractuels, signatures et réponses sensibles.",
   },
   {
     q: "BeWork remplace-t-elle un conducteur de travaux ou un bureau d’études ?",
-    a: "Non. BeWork apporte une assistance technique et administrative bureau-chantier pour tenir vos dossiers, relances et documents. Les décisions techniques et responsabilités restent chez vous (ou vos partenaires habilités).",
+    a: "Non. BeWork déploie une plateforme interne BTP. Les décisions techniques et responsabilités restent chez vous (ou vos partenaires habilités).",
   },
 ];
 
@@ -267,12 +266,12 @@ export default function AssistantsAdministratifsTachesPage() {
         <section className="px-6 pt-16 pb-12 md:pt-20 md:pb-16" style={{ scrollMarginTop: "6rem" }}>
           <div className="mx-auto max-w-4xl text-center">
             <h1 className="font-heading text-balance text-3xl font-bold tracking-tight text-black md:text-4xl lg:text-5xl">
-              Missions BeWork : renfort AO, DCE et suivi administratif des marchés
+              Capacités plateforme BeWork : AO, DCE et suivi des marchés
             </h1>
             <p className="mt-6 max-w-3xl mx-auto text-lg leading-relaxed text-black">
               Analyse DCE, préparation candidatures, mémoires techniques, comptes rendus, échéances, réserves, DOE —
               et suivi admin des marchés publics, accords-cadres et bons de commande (documents d&apos;exécution, Chorus
-              Pro). Vous validez ; BeWork prépare et suit.
+              Pro). Vos équipes utilisent la plateforme ; BeWork configure et fait évoluer. Vous validez les engagements.
             </p>
             <p className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-base">
               <Link
@@ -351,10 +350,10 @@ export default function AssistantsAdministratifsTachesPage() {
         <section className="px-6 py-12 md:py-16" aria-labelledby="catalogue-heading">
           <div className="mx-auto max-w-site">
             <h2 id="catalogue-heading" className="text-2xl font-bold tracking-tight text-black md:text-3xl">
-              Les missions BeWork (version chantier)
+              Capacités plateforme BeWork (version chantier)
             </h2>
             <p className="mt-4 max-w-2xl text-black leading-relaxed">
-              Un aperçu structuré des missions côté chantier et bureau. Pour la{" "}
+              Un aperçu structuré des modules et workflows côté chantier et bureau. Pour la{" "}
               <Link href={`#${APPELS_OFFRES_ANCHOR}`} className="font-semibold text-[#1d4ed8] underline-offset-2 hover:underline">
                 préparation d&apos;appel d&apos;offres avant dépôt
               </Link>
@@ -468,7 +467,8 @@ export default function AssistantsAdministratifsTachesPage() {
               Ce que nous ne faisons pas
             </h2>
             <p className="mt-4 text-black leading-relaxed">
-              Cadre clair dès le rendez-vous découverte pour éviter tout malentendu. L&apos;assistant exécute des missions définies avec vous ; les actes engageant votre responsabilité restent sous votre contrôle.
+              Cadre clair dès la démonstration pour éviter tout malentendu. La plateforme outille des flux définis avec vous ;
+              les actes engageant votre responsabilité restent sous votre contrôle.
             </p>
             <ul className="mt-6 space-y-3">
               {nonFait.map((item) => (
@@ -485,7 +485,7 @@ export default function AssistantsAdministratifsTachesPage() {
         <section className="px-6 py-12 md:py-16" aria-labelledby="process-heading">
           <div className="mx-auto max-w-site">
             <h2 id="process-heading" className="text-2xl font-bold tracking-tight text-black md:text-3xl">
-              Le flux côté missions (résumé)
+              Le flux de déploiement (résumé)
             </h2>
             <div className="mt-8 grid gap-6 md:grid-cols-3">
               {commentCaMarche.map((item) => (
@@ -580,25 +580,25 @@ export default function AssistantsAdministratifsTachesPage() {
         <section className="px-6 py-16 md:py-20">
           <div className="mx-auto max-w-4xl rounded-2xl border-2 border-[#1d4ed8]/30 bg-[#eff6ff] p-8 text-center md:p-12">
             <h2 className="text-2xl font-bold text-black md:text-3xl">
-              {BEWORK_MARKETING_PRICE_LINE_SHORT} — sans recrutement
+              Une plateforme métier pour vos équipes — sans recruter
             </h2>
             <p className="mt-4 text-black">
-              Une assistance travaux bureau-terrain, avec des assistants travaux augmentés par l’IA pour trier, synthétiser et structurer. Vous gardez la validation
-              finale.
+              BeWork configure et fait évoluer votre environnement numérique BTP : outils IA pour trier, synthétiser et
+              structurer. Vos collaborateurs restent aux commandes ; vous gardez la validation finale.
             </p>
             <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
               <CalendlyBookingLink
                 className="w-full rounded-lg bg-[#1d4ed8] px-8 py-4 text-center font-semibold text-white shadow-md transition hover:bg-[#1e40af] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:ring-offset-2 sm:w-auto"
-                aria-label="Demander un rendez-vous"
+                aria-label="Demander une démonstration"
               >
-                Demander un RDV
+                Demander une démonstration
               </CalendlyBookingLink>
               <Link
                 href="/tarifs"
                 className="w-full rounded-lg surface-metallic-light px-8 py-4 text-center font-semibold text-[#1e293b] transition hover:bg-[#f8f9fb] sm:w-auto"
-                aria-label="Voir les tarifs BeWork"
+                aria-label="Voir la tarification BeWork"
               >
-                Voir les tarifs
+                Voir la tarification
               </Link>
             </div>
           </div>

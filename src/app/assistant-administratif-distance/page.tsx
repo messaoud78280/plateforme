@@ -8,20 +8,20 @@ export const metadata = landingPageMetadataFromPath(PAGE_PATH);
 
 const faq = [
   {
-    q: "Comment fonctionne un assistant travaux à distance avec BeWork ?",
-    a: "Vous déposez vos demandes sur la plateforme (messagerie, tâches, pièces) : l’assistant traite à distance, documente l’avancement et rend des livrables clairs. Idéal quand vous êtes sur chantier : le bureau suit sans dépendre d’un présentiel.",
+    q: "Comment fonctionne une plateforme travaux à distance avec BeWork ?",
+    a: "Vos équipes déposent demandes et pièces sur la plateforme (messagerie, tâches, documents) : elles structurent l’avancement et produisent des livrables clairs depuis n’importe où. Idéal quand vous êtes sur chantier : le bureau suit sans dépendre d’un présentiel.",
   },
   {
-    q: "Quelles tâches peuvent être gérées sans présence sur chantier ?",
+    q: "Quelles capacités peuvent être gérées sans présence sur chantier ?",
     a: "Analyse DCE, préparation de relances et mails chantier, structuration de dossiers, suivi de devis et situations, classement de pièces, tableaux de suivi, coordination écrite fournisseurs — tout ce qui ne nécessite pas une présence physique sur site.",
   },
   {
-    q: "Comment transmettre les demandes à BeWork ?",
-    a: "Via la plateforme BeWork (tâches et échanges), en joignant notes, PDF, captures ou liens vers vos outils selon ce que vous autorisez. L’essentiel est un brief court : objectif, deadline, niveau de validation attendu.",
+    q: "Comment transmettre les demandes dans la plateforme ?",
+    a: "Via l’environnement BeWork (tâches et échanges), en joignant notes, PDF, captures ou liens vers vos outils selon ce que vous autorisez. L’essentiel est un brief court : objectif, deadline, niveau de validation attendu.",
   },
   {
     q: "Le client garde-t-il la validation finale sur les documents ?",
-    a: "Oui. BeWork prépare, structure et relance ; vous validez avant envoi tout ce qui engage votre entreprise : prix, formulation contractuelle, engagement technique ou réponse sensible au client final.",
+    a: "Oui. La plateforme aide à préparer, structurer et suivre ; vous validez avant envoi tout ce qui engage votre entreprise : prix, formulation contractuelle, engagement technique ou réponse sensible au client final.",
   },
 ] as const;
 
@@ -38,18 +38,17 @@ const faqJsonLd = {
 export default function Page() {
   return (
     <SeoLandingPage
-      description="Assistant travaux à distance pour PME BTP : analyse DCE, relances, comptes rendus et suivi dossiers chantier. Plateforme supervisée depuis la France. Dès 590 € HT/mois."
+      description="Plateforme BTP accessible à distance : analyse DCE, relances, comptes rendus et suivi dossiers. Vos équipes utilisent ; BeWork configure et fait évoluer."
       breadcrumbItems={[
         { name: "Accueil", href: "/" },
         { name: "Assistant travaux à distance", href: PAGE_PATH },
       ]}
-      h1="Assistant travaux à distance : renfort gestion travaux BTP sans présence bureau"
+      h1="Assistant travaux à distance : plateforme BTP accessible hors bureau"
       intro={
         <>
-          L&apos;assistant travaux BeWork travaille depuis la plateforme, supervisé depuis la France. Analyse DCE,
-          relances, comptes rendus et suivi documentaire chantier — une{" "}
-          <strong>assistance technique et administrative</strong> à distance, pas une prestation de saisie générique.
-          France, Belgique, Suisse et Luxembourg. Dès 590 € HT/mois.{" "}
+          La plateforme BeWork est accessible à distance : analyse DCE, relances, comptes rendus et suivi documentaire
+          chantier — une <strong>plateforme interne</strong> métier, pas une prestation de saisie générique. Vos
+          équipes utilisent ; BeWork configure, déploie et fait évoluer. France, Belgique, Suisse et Luxembourg.{" "}
           <Link href="/services/assistant-travaux" className="text-[#1d4ed8] hover:underline">
             Service assistant travaux
           </Link>
@@ -76,9 +75,8 @@ export default function Page() {
 
       <h2>Confidentialité et traçabilité</h2>
       <p>
-        Les documents transmis restent liés au dossier et à votre compte ; l&apos;accès est limité à l&apos;équipe
-        affectée à votre mission. Chaque validation avant envoi engageant reste tracée, ce qui permet de retrouver qui
-        a approuvé quoi et quand.
+        Les documents transmis restent liés au dossier et à votre compte ; l&apos;accès est limité aux rôles autorisés.
+        Chaque validation avant envoi engageant reste tracée, ce qui permet de retrouver qui a approuvé quoi et quand.
       </p>
 
       <section className="not-prose" id="faq" aria-label="FAQ assistant travaux à distance" style={{ scrollMarginTop: "6rem" }}>

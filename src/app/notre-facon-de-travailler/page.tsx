@@ -14,19 +14,19 @@ import { absoluteUrl } from "@/lib/site";
 const pageUrl = absoluteUrl("/notre-facon-de-travailler");
 const ogImage = absoluteUrl("/opengraph-image");
 
-const METHODE_TITLE = "Notre méthode BeWork : brief, préparation, validation BTP";
+const METHODE_TITLE = "Notre méthode BeWork : déploiement plateforme interne BTP";
 const METHODE_DESCRIPTION =
-  "Méthode BeWork pour le BTP : brief, qualification, préparation, suivi et validation par vous avant tout envoi engageant. Process tracé, supervision FR.";
+  "Méthode BeWork : cadrage, configuration plateforme, usage par vos équipes, validation avant envoi engageant. Éditeur BTP — pas un exécutant.";
 
 export const metadata: Metadata = {
   title: { absolute: METHODE_TITLE },
   description: METHODE_DESCRIPTION,
   keywords: [
-    "méthode assistant travaux BTP",
-    "process externalisation administrative BTP",
+    "méthode plateforme BTP",
+    "déploiement plateforme interne BTP",
     "validation chantier",
-    "assistance technique et administrative BTP",
-    "assistant travaux BeWork",
+    "plateforme assistance travaux BeWork",
+    "éditeur BeWork",
   ],
   alternates: { canonical: pageUrl, languages: hreflangFrancophonieLanguages("/notre-facon-de-travailler") },
   openGraph: {
@@ -74,8 +74,8 @@ const methodeJsonLd = {
 const METHOD_STEPS = [
   {
     step: 1,
-    title: "Vous envoyez vos demandes",
-    desc: "Vous transmettez vos demandes via la plateforme (ou le canal cadré au démarrage). Plus c’est précis, plus ça avance vite.",
+    title: "Cadrage & diagnostic",
+    desc: "On définit vos flux (devis, dossiers chantier, marchés…), vos outils et vos règles de validation. BeWork configure ; vos équipes resteront les utilisatrices.",
     bullets: [
       "Devis, relances, situations",
       "Documents travaux & pièces chantier",
@@ -85,14 +85,14 @@ const METHOD_STEPS = [
   },
   {
     step: 2,
-    title: "BeWork analyse et qualifie",
-    desc: "On trie, on clarifie, on identifie ce qu’il manque et on qualifie le livrable attendu avant d’exécuter.",
+    title: "Configuration plateforme",
+    desc: "Modules, modèles, rôles et circuit de validation. Rien n’est inventé comme certitude hors cadrage — le périmètre est écrit.",
     bullets: ["Urgence & impact chantier", "Infos manquantes", "Type de livrable", "Besoin de validation"],
   },
   {
     step: 3,
-    title: "BeWork prépare le travail",
-    desc: "On prépare des livrables propres et actionnables : brouillons, synthèses, checklists, tableaux — sous supervision humaine.",
+    title: "Vos équipes préparent dans la plateforme",
+    desc: "Vos collaborateurs produisent brouillons, synthèses, checklists et tableaux — l’IA accélère, vous gardez la main.",
     bullets: [
       "Brouillons de mails / relances",
       "Tableaux de suivi (statuts, prochaines actions)",
@@ -102,14 +102,14 @@ const METHOD_STEPS = [
   },
   {
     step: 4,
-    title: "BeWork suit l’avancement",
-    desc: "On tient la cadence : relances, échéances, demandes en attente, points bloquants, et on remonte ce qui doit être arbitré.",
+    title: "Suivi d’avancement dans l’outil",
+    desc: "Statuts, relances, échéances, demandes en attente et points bloquants restent visibles — pour arbitrer à temps.",
     bullets: ["Statuts & échéances", "Relances", "Pièces en attente", "Points bloquants"],
   },
   {
     step: 5,
     title: "Vous validez ce qui engage",
-    desc: "Vous gardez la main sur les décisions qui engagent votre entreprise. BeWork prépare et vous fait valider avant envoi sur les points sensibles.",
+    desc: "Vous gardez la main sur les décisions qui engagent votre entreprise. La plateforme aide à préparer ; BeWork n’exécute pas à votre place.",
     bullets: ["Prix & marges", "Choix techniques", "Arbitrages chantier", "Signatures & engagements"],
   },
   {
@@ -122,28 +122,28 @@ const METHOD_STEPS = [
 
 const FAQ_ITEMS = [
   {
-    q: "Comment envoyer une demande à BeWork ?",
-    a: "Via la plateforme BeWork (ou le canal défini au démarrage). L’idéal : un objectif clair, le contexte chantier, les pièces jointes et la date limite si elle existe.",
+    q: "Comment démarrer avec la plateforme BeWork ?",
+    a: "Diagnostic, cadrage du périmètre, configuration des modules et formation. Ensuite vos équipes utilisent l’environnement au quotidien ; BeWork assure maintenance, sécurité et évolutions.",
   },
   {
-    q: "Comment BeWork priorise les demandes ?",
-    a: "Selon l’urgence, l’impact terrain et les échéances (démarrage, livraison, client, fournisseur). Les urgences doivent être signalées explicitement.",
+    q: "Comment prioriser les demandes dans la plateforme ?",
+    a: "Selon l’urgence, l’impact terrain et les échéances (démarrage, livraison, client, fournisseur). Les urgences doivent être signalées explicitement dans l’outil.",
   },
   {
-    q: "Quels documents faut-il fournir ?",
-    a: "Tout ce qui permet d’agir sans aller-retour : devis existant, CCTP/DCE, coordonnées, photos, pièces chantier, références, délais, et vos consignes de validation.",
+    q: "Quels documents faut-il fournir au déploiement ?",
+    a: "Tout ce qui permet de configurer sans aller-retour : devis types, CCTP/DCE exemples, coordonnées, pièces chantier types, références, délais, et vos consignes de validation.",
   },
   {
     q: "Est-ce que je dois tout valider ?",
-    a: "Vous validez ce qui engage votre entreprise : prix, choix techniques, signatures, engagements contractuels, réponses sensibles. BeWork prépare et vous fait valider avant diffusion si nécessaire.",
+    a: "Vous validez ce qui engage votre entreprise : prix, choix techniques, signatures, engagements contractuels, réponses sensibles. La plateforme aide à préparer ; vous diffusez après validation.",
   },
   {
     q: "Comment suivre l’avancement des demandes ?",
-    a: "Avec des statuts et un suivi sur la plateforme : demandes en cours, en attente, bloquées, livrées. BeWork remonte aussi les points bloquants et arbitrages.",
+    a: "Avec des statuts sur la plateforme : demandes en cours, en attente, bloquées, livrées. Les points bloquants et arbitrages restent visibles pour vos équipes.",
   },
   {
     q: "Quel rôle joue l’IA dans la méthode BeWork ?",
-    a: "L’IA aide à trier, synthétiser, reformuler, repérer les points clés et préparer des brouillons. Il y a une supervision humaine, et vous gardez la validation finale sur ce qui engage.",
+    a: "L’IA aide à trier, synthétiser, reformuler, repérer les points clés et préparer des brouillons dans votre environnement. Vous gardez la validation finale sur ce qui engage.",
   },
   {
     q: "Les échanges et documents sont-ils traçables ?",
@@ -199,11 +199,11 @@ export default function NotreFaconDeTravaillerPage() {
             Méthode BeWork
           </p>
           <h1 className="font-heading mt-3 text-3xl font-bold tracking-tight text-black md:text-4xl md:leading-tight">
-            Notre façon de travailler : une assistance travaux claire et suivie
+            Notre façon de travailler : plateforme interne BTP, usage par vos équipes
           </h1>
           <p className="mx-auto mt-5 max-w-3xl text-base leading-relaxed text-slate-700 md:text-lg">
-            Vous envoyez vos demandes, BeWork les analyse, prépare les livrables, suit les échéances et vous laisse valider ce qui engage votre
-            entreprise.
+            BeWork configure, déploie et fait évoluer une plateforme métier. Vos équipes l&apos;utilisent au quotidien
+            pour préparer, suivre et valider — sans que BeWork exécute à votre place.
           </p>
           <a
             href="#etapes"
@@ -216,8 +216,8 @@ export default function NotreFaconDeTravaillerPage() {
         <div className="mx-auto mt-16 max-w-5xl space-y-16 md:mt-24 md:space-y-20">
           <SectionShell id="etapes" title="Les étapes (concrètes) de la méthode BeWork" className="mx-auto max-w-5xl">
             <p className="mt-4 max-w-3xl text-sm leading-relaxed text-slate-700 md:text-base">
-              Cette page décrit notre méthode de travail (réception → analyse → préparation → suivi → validation → traçabilité). Elle complète la home et
-              les pages “Missions” et “Tarifs”, sans refaire leur contenu.
+              Cette page décrit la méthode (cadrage → configuration → usage → suivi → validation → traçabilité). Elle
+              complète la home et les pages capacités / tarification, sans refaire leur contenu.
             </p>
 
             <div className="mt-8 grid gap-4 md:grid-cols-2">
@@ -298,8 +298,8 @@ export default function NotreFaconDeTravaillerPage() {
                   "Les urgences doivent être signalées clairement (impact chantier, échéance).",
                   "Les demandes simples peuvent être traitées rapidement si les infos sont complètes.",
                   "Les dossiers longs (DOE, DCE/CCTP, PPSPS…) nécessitent un cadrage et parfois un découpage.",
-                  "Les délais dépendent du forfait, du volume en cours et des informations fournies.",
-                  "On vous propose une estimation (et un point de validation) avant d’aller trop loin sur une demande lourde.",
+                  "Les délais dépendent du périmètre déployé, du volume en cours et des informations fournies.",
+                  "On propose une estimation (et un point de validation) avant d’aller trop loin sur un dossier lourd.",
                 ].map((t) => (
                   <li key={t} className="flex items-start gap-2">
                     <span className="mt-0.5 text-[#1d4ed8]" aria-hidden>
@@ -373,20 +373,20 @@ export default function NotreFaconDeTravaillerPage() {
 
         {/* CTA */}
         <div className="mx-auto mt-20 max-w-3xl rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm md:mt-24 md:p-10">
-          <h2 className="text-xl font-bold text-black md:text-2xl">On fait le point sur votre organisation ?</h2>
+          <h2 className="text-xl font-bold text-black md:text-2xl">On fait le point sur votre plateforme ?</h2>
           <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-slate-700 md:text-base">
-            Un échange suffit pour cadrer votre besoin, votre circuit de validation et les priorités.
+            Un échange suffit pour cadrer vos flux, votre circuit de validation et le périmètre de déploiement.
           </p>
           <div className="mt-6 flex flex-col items-stretch gap-3 sm:flex-row sm:justify-center sm:gap-4">
             <CalendlyBookingLink className="inline-flex justify-center rounded-lg bg-[#1d4ed8] px-6 py-3 font-semibold text-white transition hover:bg-[#1e40af]">
-              <span className="sm:hidden">Rendez-vous découverte</span>
-              <span className="hidden sm:inline">Demander un rendez-vous découverte</span>
+              <span className="sm:hidden">Demander une démo</span>
+              <span className="hidden sm:inline">Demander une démonstration</span>
             </CalendlyBookingLink>
             <Link
               href="/assistants-administratifs-taches"
               className="inline-flex justify-center rounded-lg border border-slate-200 bg-white px-6 py-3 font-semibold text-slate-900 transition hover:bg-slate-50"
             >
-              Voir les missions
+              Voir les capacités
             </Link>
             <Link
               href="/promoteurs-immobiliers"

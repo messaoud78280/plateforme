@@ -16,7 +16,15 @@ import { HomePlatformHero } from "@/components/home/HomePlatformHero";
 import { HomeProblemsDispersion } from "@/components/home/HomeProblemsDispersion";
 import { HomeTechPartner } from "@/components/home/HomeTechPartner";
 import { HomeUnifiedEnvironment } from "@/components/home/HomeUnifiedEnvironment";
-import { HOME_BTN_GROUP, HOME_BTN_PRIMARY, HOME_BTN_SECONDARY, HOME_BTN_SOFT } from "@/components/home/homeSectionStyles";
+import { HomeSectionHeader } from "@/components/home/HomeSectionHeader";
+import {
+  HOME_BTN_GROUP,
+  HOME_BTN_PRIMARY,
+  HOME_BTN_SECONDARY,
+  HOME_BTN_SOFT,
+  HOME_CONTENT,
+  HOME_SECTION,
+} from "@/components/home/homeSectionStyles";
 import { HomePricingSection } from "@/components/HomePricingSection";
 import { SeoInternalLinks } from "@/components/seo/SeoInternalLinks";
 import { RESOURCE_TUTO_ITEMS } from "@/content/resource-tutos";
@@ -179,27 +187,23 @@ export default function HomePage() {
         <HomePlatformEvolution />
         <HomeTechPartner />
 
-        <section id="ressources" className="scroll-mt-24 bg-white py-14 sm:py-20 md:py-24 lg:py-28">
+        <section id="ressources" className={`${HOME_SECTION} bg-white`} aria-labelledby="ressources-heading">
           <div className="container-site">
-            <div className="mb-10 max-w-3xl sm:mb-14">
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">Ressources</p>
-              <h2 className="font-display mt-3 text-balance text-[1.625rem] font-extrabold tracking-tight text-[#0f172a] sm:text-[1.875rem] md:text-[2.5rem]">
-                Une plateforme construite avec une véritable expertise métier
-              </h2>
-              <p className="mt-4 text-[0.9375rem] leading-relaxed text-slate-600 sm:mt-6 sm:text-base md:text-lg">
-                Guides, tutoriels et skills : l&apos;expression de notre connaissance des documents, procédures et
-                réalités opérationnelles du BTP — intégrée à la conception de la plateforme.
-              </p>
-              <Link
-                href="/ressources"
-                className={`mt-5 sm:mt-6 ${HOME_BTN_SECONDARY}`}
-              >
+            <HomeSectionHeader
+              id="ressources-heading"
+              eyebrow="Ressources"
+              title="Une plateforme construite avec une véritable expertise métier"
+              lead="Guides, tutoriels et skills : l'expression de notre connaissance des documents, procédures et réalités opérationnelles du BTP — intégrée à la conception de la plateforme."
+            />
+
+            <div className={`${HOME_CONTENT} flex justify-center`}>
+              <Link href="/ressources" className={HOME_BTN_SECONDARY}>
                 Centre de ressources
                 <span aria-hidden>→</span>
               </Link>
             </div>
 
-            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <ul className="mt-8 grid gap-4 sm:mt-10 sm:grid-cols-2 lg:grid-cols-4">
               {FEATURED_RESOURCES.map((r) => (
                 <li key={r.href}>
                   <Link
@@ -214,7 +218,7 @@ export default function HomePage() {
               ))}
             </ul>
 
-            <div className="mt-8">
+            <div className="mt-8 flex justify-center">
               <Link href="/ressources/tutos" className={HOME_BTN_SOFT}>
                 Voir les tutoriels PDF
                 <span aria-hidden>→</span>
@@ -223,16 +227,15 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section id="faq" className="scroll-mt-24 bg-[#f4f7fb] py-14 sm:py-20 md:py-24 lg:py-28">
-          <div className="container-site mx-auto max-w-3xl">
-            <p className="text-center text-xs font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">FAQ</p>
-            <h2 className="font-display mt-3 text-center text-balance text-[1.625rem] font-extrabold tracking-tight text-[#0f172a] sm:text-[1.875rem] md:text-[2.5rem]">
-              Questions fréquentes
-            </h2>
-            <p className="mt-4 text-center text-[0.9375rem] leading-relaxed text-slate-600 sm:mt-6 sm:text-base md:text-lg">
-              Rôle de BeWork, abonnement, IA et démarrage : ce que les dirigeants clarifient avant une démonstration.
-            </p>
-            <dl className="mt-10 space-y-3 sm:mt-14 sm:space-y-4">
+        <section id="faq" className={`${HOME_SECTION} bg-[#f4f7fb]`} aria-labelledby="faq-heading">
+          <div className="container-site">
+            <HomeSectionHeader
+              id="faq-heading"
+              eyebrow="FAQ"
+              title="Questions fréquentes"
+              lead="Rôle de BeWork, abonnement, IA et démarrage : ce que les dirigeants clarifient avant une démonstration."
+            />
+            <dl className={`${HOME_CONTENT} mx-auto max-w-3xl space-y-3 sm:space-y-4`}>
               {HOME_FAQ_ITEMS.map((item, i) => (
                 <div
                   key={i}

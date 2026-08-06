@@ -8,6 +8,7 @@ export type { BeWorkValuePillar } from "@/lib/bework-value-pillars";
 export {
   BEWORK_AEO_DEFINITION,
   BEWORK_SLOGAN,
+  BEWORK_SLOGAN_DECISION,
   SEO_KEYWORDS_GLOBAL,
   SEO_KEYWORDS_HOME,
   SEO_KEYWORDS_PARTENAIRE_CORE,

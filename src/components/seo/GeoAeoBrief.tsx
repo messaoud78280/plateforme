@@ -33,11 +33,11 @@ export function GeoAeoBrief({ className = "" }: Props) {
       </dl>
       <p className="mt-6 text-sm text-slate-600">
         <Link href="/tarifs" className="font-semibold text-[#1d4ed8] underline underline-offset-2 hover:text-[#1e40af]">
-          Voir les forfaits HT
+          Voir la tarification
         </Link>
         {" · "}
         <Link href="/contact" className="font-semibold text-[#1d4ed8] underline underline-offset-2 hover:text-[#1e40af]">
-          Contact & appel découverte
+          Demander une démonstration
         </Link>
         {" · "}
         <Link href="/faq" className="font-semibold text-[#1d4ed8] underline underline-offset-2 hover:text-[#1e40af]">

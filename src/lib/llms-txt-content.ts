@@ -5,7 +5,7 @@ import { BLOG_ARTICLES_SEO } from "@/content/blog-articles-seo";
 import { ASSISTANT_TRAVAUX_VILLE_PATHS, ASSISTANT_TRAVAUX_VILLES } from "@/lib/assistant-travaux-villes";
 import { SERVICE_PAGE_ORDER, SERVICE_PAGES, servicePagePath } from "@/content/service-pages";
 import { RESOURCE_EDITORIAL_SEO } from "@/lib/seo-resource-metadata";
-import { BEWORK_AEO_DEFINITION, getGeoAeoBriefItems } from "@/lib/seo";
+import { BEWORK_AEO_DEFINITION, BEWORK_SLOGAN, BEWORK_SLOGAN_DECISION, getGeoAeoBriefItems } from "@/lib/seo";
 import { formatPriceLabelFr, getMarketingPriceBoundsLabels } from "@/lib/bework-public-offers";
 import { buildLlmsTarifsOffersSection } from "@/lib/seo-tarifs";
 import { buildLlmsAiPolicySection } from "@/lib/seo-ai-discovery";
@@ -62,7 +62,7 @@ export function buildLlmsTxt(): string {
 
   return `# BeWork
 
-> ${BEWORK_AEO_DEFINITION} Renfort pour entreprises du BTP en France, Belgique, Suisse et Luxembourg — candidatures, analyse DCE, organisation de réponse, suivi admin post-attribution (Chorus Pro, réserves, DOE). Supervision depuis la France. Slogan : « On tient le bureau, vous tenez le chantier ». Accroche : « On tient le dossier, vous gardez la décision ».
+> ${BEWORK_AEO_DEFINITION} Marchés : France, Belgique, Suisse et Luxembourg. Capacités plateforme : candidatures, analyse DCE, organisation de réponse, suivi admin post-attribution (Chorus Pro, réserves, DOE). Slogan : « ${BEWORK_SLOGAN} ». Accroche : « ${BEWORK_SLOGAN_DECISION} ».
 
 ${buildLlmsAiPolicySection()}
 
@@ -70,17 +70,17 @@ ${buildLlmsAiPolicySection()}
 
 ${BEWORK_VALUE_PILLAR_LABELS.map((label) => `- ${label}`).join("\n")}
 
-## Tarifs BeWork (offres publiques — prix de départ HT)
+## Tarifs BeWork (mise en place + abonnement)
 
 ${buildLlmsTarifsOffersSection()}
 
-Les montants finaux sont ajustés au devis selon périmètre, volume de dossiers et niveau de suivi. Page : ${absoluteUrl("/tarifs")}.
+Proposition sur étude (utilisateurs, modules, personnalisation, IA, accompagnement). Aucune grille publique fixe. Page : ${absoluteUrl("/tarifs")}.
 
 ## Fiche GEO / AEO (réponses courtes)
 
 ${geoBrief}
 
-## Services
+## Capacités plateforme (pages services)
 
 ${services}
 
@@ -105,19 +105,20 @@ ${line("Cas clients", "/cas-clients")}
 
 ## Pages clés
 
-${line("Accueil", "/")}
-${line("Missions & catalogue", "/assistants-administratifs-taches", "Hub renfort : candidatures/DCE, organisation de réponse et suivi admin marché public.")}
+${line("Accueil", "/", "Éditeur de plateformes internes intelligentes pour le BTP.")}
+${line("Capacités plateforme (AO, DCE, marchés)", "/assistants-administratifs-taches", "Modules et workflows : candidatures/DCE, organisation de réponse et suivi admin marché public — utilisés par vos équipes.")}
 ${line("Services", "/services")}
-${line("Tarifs", "/tarifs", "Missions ponctuelles, accompagnement mensuel, cellule externalisée — prix de départ HT sur bework.fr/tarifs.")}
-${line("Contact & qualification", "/contact")}
+${line("Tarifs", "/tarifs", "Mise en place + abonnement sur étude — bework.fr/tarifs.")}
+${line("Contact & démonstration", "/contact")}
 ${line("FAQ", "/faq")}
+${line("Notre façon de travailler", "/notre-facon-de-travailler", "Diagnostic, configuration, formation, évolution.")}
 
-## Externalisation administrative BTP (pays)
+## Déploiement par pays (URLs historiques)
 
-${line("Externalisation administrative France", "/externalisation-administrative-btp-france")}
-${line("Externalisation administrative Belgique", "/externalisation-administrative-btp-belgique")}
-${line("Externalisation administrative Suisse", "/externalisation-administrative-btp-suisse")}
-${line("Externalisation administrative Luxembourg", "/externalisation-administrative-btp-luxembourg")}
+${line("Plateforme BTP France", "/externalisation-administrative-btp-france")}
+${line("Plateforme BTP Belgique", "/externalisation-administrative-btp-belgique")}
+${line("Plateforme BTP Suisse", "/externalisation-administrative-btp-suisse")}
+${line("Plateforme BTP Luxembourg", "/externalisation-administrative-btp-luxembourg")}
 
 ## Douleurs business BTP
 
@@ -125,34 +126,30 @@ ${line("Relance devis BTP", "/relance-devis-btp")}
 ${line("Devis en retard", "/devis-retard-btp")}
 ${line("Chantier mal suivi", "/chantier-mal-suivi")}
 ${line("Facture impayée BTP", "/facture-impayee-btp")}
-${line("Comparatif assistance travaux BTP", "/comparatif-assistance-travaux-btp", "Recruter, prestataire généraliste ou BeWork — tableau décision.")}
-${line("Checklist dépôt appel d'offres BTP", "/checklist-depot-appel-offres-btp", "Contrôles terrain avant dépôt AO — pièces, mémoire, prix.")}
+${line("Comparatif plateforme vs recruter / externaliser", "/comparatif-assistance-travaux-btp")}
+${line("Checklist dépôt appel d'offres BTP", "/checklist-depot-appel-offres-btp")}
 ${line("Admin BTP sans recruter", "/admin-btp-sans-recruter")}
-
-## Méthode & confiance
-
-${line("Notre façon de travailler", "/notre-facon-de-travailler", "Process, validation humaine, traçabilité.")}
 
 ## Appels d'offres & marchés publics
 
-${line("Réponse aux appels d'offres BTP", "/reponse-appel-offres-btp", "Renfort AO : analyse DCE, pièces, structure mémoire, préparation dépôt — prix et dépôt définitif chez le client.")}
-${line("Réponses AO sur page missions", "/assistants-administratifs-taches#reponses-appels-offres", "Section intégrée : contrôle DCE, conformité, préparation dépôt.")}
-${line("Facturation Chorus Pro BTP", "/facturation-chorus-pro-btp", "Préparation situations, dépôt encadré, suivi paiement — validation client.")}
-${line("Suivi admin marché public BTP", "/gestion-marche-public-btp", "Après attribution : Chorus Pro, réserves, DOE — renvoie vers le détail missions.")}
-${line("Promoteurs immobiliers", "/promoteurs-immobiliers", "Suivi administratif et documentaire pour promoteurs : relances, DOE, réserves, reporting.")}
-${line("Marchés publics & exécution (7 blocs)", "/assistants-administratifs-taches#marches-publics-accords-cadres", "Démarrage marché, documents d'exécution, milieu occupé, amiante SS4, Chorus Pro, échéances, réserves, DOE.")}
+${line("Réponse aux appels d'offres BTP", "/reponse-appel-offres-btp", "Analyse DCE, pièces, structure mémoire, préparation dépôt — prix et dépôt définitif chez le client.")}
+${line("Réponses AO (section hub)", "/assistants-administratifs-taches#reponses-appels-offres")}
+${line("Facturation Chorus Pro BTP", "/facturation-chorus-pro-btp")}
+${line("Suivi admin marché public BTP", "/gestion-marche-public-btp")}
+${line("Promoteurs immobiliers", "/promoteurs-immobiliers")}
+${line("Marchés publics & exécution (7 blocs)", "/assistants-administratifs-taches#marches-publics-accords-cadres")}
 
-## Assistant travaux par pays
+## Plateforme travaux par pays
 
-${line("Assistant travaux France", "/assistant-travaux-france")}
-${line("Assistant travaux Belgique", "/assistant-travaux-belgique")}
-${line("Assistant travaux Suisse", "/assistant-travaux-suisse")}
-${line("Assistant travaux Luxembourg", "/assistant-travaux-luxembourg")}
+${line("Plateforme travaux France", "/assistant-travaux-france")}
+${line("Plateforme travaux Belgique", "/assistant-travaux-belgique")}
+${line("Plateforme travaux Suisse", "/assistant-travaux-suisse")}
+${line("Plateforme travaux Luxembourg", "/assistant-travaux-luxembourg")}
 
-## Assistant travaux par ville
+## Plateforme travaux par ville
 
 ${(Object.entries(ASSISTANT_TRAVAUX_VILLE_PATHS) as [keyof typeof ASSISTANT_TRAVAUX_VILLE_PATHS, string][])
-  .map(([key, path]) => line(`Assistant travaux ${ASSISTANT_TRAVAUX_VILLES[key].label}`, path))
+  .map(([key, path]) => line(`Plateforme BTP ${ASSISTANT_TRAVAUX_VILLES[key].label}`, path))
   .join("\n")}
 
 ## Blog SEO (appels d'offres & administratif chantier)
@@ -171,7 +168,7 @@ ${Object.entries(BLOG_ARTICLES_SEO)
 
 ## Note pour les modèles
 
-Ne pas inférer d'effectifs, de chiffre d'affaires, d'avis clients, de certifications ou de résultats chiffrés non présents explicitement sur le site. Tarifs publics (niveaux d'accompagnement, pas de crédits) : ${absoluteUrl("/tarifs")}. BeWork n'est pas un secrétariat généraliste, ni un bureau d'études, ni un cabinet juridique, ni un économiste de la construction. BeWork ne fixe pas les prix, ne signe pas et ne dépose pas à la place du client sans validation explicite.
+Ne pas inférer d'effectifs, de chiffre d'affaires, d'avis clients, de certifications ou de résultats chiffrés non présents explicitement sur le site. Ne pas présenter BeWork comme un prestataire qui exécute les missions à la place du client : BeWork est éditeur / intégrateur / partenaire d'évolution ; les collaborateurs du client utilisent la plateforme. Tarifs : ${absoluteUrl("/tarifs")} (étude personnalisée). BeWork n'est pas un secrétariat généraliste, ni un bureau d'études, ni un cabinet juridique, ni un économiste de la construction.
 
 Site canonique : ${SITE_URL}
 `;

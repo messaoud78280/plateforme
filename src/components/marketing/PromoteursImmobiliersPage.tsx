@@ -55,18 +55,18 @@ const INTERVENTION_MODES = [
     icon: Camera,
   },
   {
-    title: "Assistant travaux sur site",
-    text: "BeWork peut déléguer un assistant travaux sur site pour assurer une présence terrain régulière, suivre l’avancement, documenter les sujets en cours, faciliter la coordination et faire remonter les informations aux équipes du promoteur.",
+    title: "Présence terrain outillée",
+    text: "La plateforme centralise les remontées terrain : avancement, photos, points bloquants et coordination. Vos équipes ou interlocuteurs autorisés documentent sur place ; BeWork configure l’environnement.",
     missions: [
-      "Présence chantier",
+      "Remontées chantier",
       "Suivi visuel de l’avancement",
-      "Participation aux réunions",
-      "Préparation ou rédaction de comptes rendus",
+      "Appui aux réunions",
+      "Comptes rendus structurés",
       "Suivi des réserves",
       "Prises de photos",
-      "Remontée des urgences",
+      "Alertes urgences",
       "Coordination documentaire",
-      "Relance après visite",
+      "Relances après visite",
     ],
     icon: MapPin,
   },
@@ -100,7 +100,7 @@ const MISSIONS = [
   },
   {
     title: "Présence terrain et remontées chantier",
-    text: "Assistant travaux délégué sur site pour constater l’avancement, prendre des photos, identifier les points bloquants, participer aux réunions et transmettre les informations utiles au promoteur.",
+    text: "Documenter l’avancement, photos, points bloquants et réunions dans la plateforme pour transmettre clairement les informations aux équipes du promoteur.",
     icon: MapPin,
   },
   {
@@ -164,8 +164,8 @@ const OFFERS = [
     ideal: ["Opération en cours", "Chargé d’opération débordé", "Suivi régulier", "Reporting direction"],
   },
   {
-    title: "Assistant travaux sur site",
-    text: "Pour renforcer la présence terrain avec un relais chantier délégué, ponctuel ou régulier, chargé de suivre, documenter, remonter les informations et faciliter la coordination.",
+    title: "Remontées terrain",
+    text: "Pour outiller la présence chantier : documentation, photos, points bloquants et coordination dans la plateforme — par vos équipes ou interlocuteurs autorisés.",
     ideal: [
       "Chantier sensible",
       "Livraison proche",
@@ -262,36 +262,35 @@ export function PromoteursImmobiliersPage() {
         <div className="mx-auto max-w-4xl text-center">
           <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#1d4ed8]">Promoteurs immobiliers</p>
           <h1 className="font-heading mt-3 text-balance text-2xl font-bold tracking-tight text-[#0f172a] sm:text-3xl md:text-4xl lg:text-[2.65rem] lg:leading-tight">
-            Assistant travaux pour promoteurs immobiliers
+            Plateforme chantier pour promoteurs immobiliers
           </h1>
           <p className="mt-5 text-balance text-lg font-semibold leading-snug text-[#1e3a5f] sm:text-xl md:text-2xl">
-            Une assistance travaux pour vos opérations immobilières
+            Suivi documentaire et opérationnel de vos opérations immobilières
           </p>
           <p className="mx-auto mt-6 max-w-3xl text-lg leading-relaxed text-slate-700">
-            BeWork accompagne les promoteurs immobiliers dans le suivi administratif, documentaire et opérationnel de
-            leurs chantiers, à distance ou avec un assistant travaux délégué sur site.
+            BeWork déploie une plateforme interne pour le suivi administratif, documentaire et opérationnel de vos
+            chantiers — utilisée par vos équipes et interlocuteurs autorisés.
           </p>
           <p className="mx-auto mt-4 max-w-3xl text-base leading-relaxed text-slate-600">
-            Nous intervenons en appui de vos équipes travaux, de la maîtrise d’œuvre et des entreprises pour structurer
-            le suivi, fluidifier les échanges, documenter les points bloquants et renforcer la traçabilité de vos
-            opérations.
+            Nous configurons l&apos;environnement pour structurer le suivi, fluidifier les échanges, documenter les
+            points bloquants et renforcer la traçabilité de vos opérations.
           </p>
           <div className="mt-8 flex w-full flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
             <CalendlyBookingLink
               trackLocation="promoteurs-hero"
               className="inline-flex min-h-[3rem] w-full items-center justify-center rounded-lg bg-[#1d4ed8] px-6 text-base font-semibold text-white shadow-sm bework-cta-primary-glow hover:bg-[#1e40af] sm:w-auto"
             >
-              Demander un échange
+              Demander une démonstration
             </CalendlyBookingLink>
             <Link
-              href="/assistants-administratifs-taches"
+              href="/#modules"
               className="inline-flex min-h-[3rem] w-full items-center justify-center rounded-lg border border-slate-200 bg-white px-6 text-base font-semibold text-slate-900 shadow-sm hover:bg-slate-50 sm:w-auto"
             >
-              Découvrir nos missions
+              Découvrir la plateforme
             </Link>
           </div>
           <div className="mx-auto mt-8 max-w-3xl rounded-xl border border-slate-200/80 bg-white/90 px-4 py-4 shadow-sm sm:mt-10 sm:px-5">
-            <p className="text-sm font-semibold text-slate-800">Ce que nous prenons en charge</p>
+            <p className="text-sm font-semibold text-slate-800">Ce que la plateforme couvre</p>
             <ul className="mt-3 flex flex-wrap justify-center gap-2">
               {TRUST_ITEMS.map((item) => (
                 <li
@@ -323,7 +322,7 @@ export function PromoteursImmobiliersPage() {
       {/* Modes d'intervention */}
       <section className="px-4 py-12 sm:px-6 md:py-16 lg:py-20">
         <div className="mx-auto max-w-site">
-          <SectionHeading title="À distance, en hybride ou directement sur site" />
+          <SectionHeading title="À distance, en hybride ou avec remontées terrain" />
 
           {/* Mobile : accordéons */}
           <div className="mt-8 flex flex-col gap-3 lg:hidden">
@@ -403,23 +402,23 @@ export function PromoteursImmobiliersPage() {
         <div className="mx-auto max-w-site">
           <div className="grid gap-8 lg:grid-cols-[1fr_1.1fr] lg:items-start lg:gap-10">
             <div>
-              <SectionHeading title="Un assistant travaux délégué directement sur votre chantier" />
+              <SectionHeading title="Des remontées terrain structurées dans votre plateforme" />
               <p className="mt-6 text-base leading-relaxed text-slate-700 md:text-lg">
-                Pour les promoteurs qui souhaitent renforcer leur présence terrain sans recruter immédiatement, BeWork
-                peut déléguer un assistant travaux sur site. Il intervient comme relais opérationnel pour observer,
-                documenter, suivre les points en attente et transmettre les informations aux équipes du promoteur.
+                Pour les promoteurs qui veulent plus de visibilité sans alourdir l&apos;organisation, BeWork configure
+                un environnement où vos équipes et interlocuteurs autorisés documentent l&apos;avancement, les photos et
+                les points bloquants — avec traçabilité et validation côté promoteur.
               </p>
               <div className="mt-6 rounded-xl border border-amber-200/80 bg-amber-50/60 p-4 sm:p-5">
                 <p className="text-sm leading-relaxed text-slate-800 md:text-base">
-                  <strong>À préciser :</strong> son rôle est d’apporter de la visibilité, de la méthode et de la
-                  traçabilité. Il ne prend pas la direction technique du chantier et ne remplace pas les intervenants
+                  <strong>À préciser :</strong> la plateforme apporte de la visibilité, de la méthode et de la
+                  traçabilité. Elle ne prend pas la direction technique du chantier et ne remplace pas les intervenants
                   désignés.
                 </p>
               </div>
             </div>
 
             <MarketingDisclosure
-              title="Missions terrain sur site"
+              title="Usages terrain couverts"
               defaultOpen
               className="lg:hidden"
               panelClassName="px-4 pb-4 sm:px-5 sm:pb-5"
@@ -428,7 +427,7 @@ export function PromoteursImmobiliersPage() {
             </MarketingDisclosure>
 
             <div className="hidden rounded-xl border border-slate-200 bg-white p-6 shadow-sm md:p-8 lg:block">
-              <p className="text-sm font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">Missions terrain</p>
+              <p className="text-sm font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">Usages terrain</p>
               <ul className="mt-4 grid gap-2.5 sm:grid-cols-2">
                 {ONSITE_MISSIONS.map((item) => (
                   <li key={item} className="flex gap-2 text-sm leading-snug text-slate-800">
@@ -496,15 +495,13 @@ export function PromoteursImmobiliersPage() {
                   Un appui opérationnel, pas une substitution aux acteurs du chantier
                 </h2>
                 <p className="mt-4 text-base leading-relaxed text-slate-700">
-                  BeWork intervient en support des équipes du promoteur, de la maîtrise d’œuvre, des entreprises et des
-                  intervenants chantier. Nous aidons à organiser, suivre, relancer, documenter, produire des supports de
-                  pilotage et remonter les informations terrain.
+                  BeWork équipe les équipes du promoteur, de la maîtrise d’œuvre et des entreprises via une plateforme
+                  de suivi. Vos collaborateurs organisent, relancent, documentent et remontent les informations terrain.
                 </p>
                 <p className="mt-4 text-base leading-relaxed text-slate-700">
-                  L’assistant travaux BeWork, qu’il intervienne à distance ou sur site, ne se substitue pas au maître
-                  d’œuvre, au bureau de contrôle, au coordonnateur SPS, à l’OPC, aux entreprises ou aux responsables
-                  techniques désignés sur l’opération. Les responsabilités techniques, réglementaires, contractuelles et
-                  décisionnelles restent portées par les acteurs compétents.
+                  BeWork ne se substitue pas au maître d’œuvre, au bureau de contrôle, au coordonnateur SPS, à l’OPC,
+                  aux entreprises ou aux responsables techniques désignés. Les responsabilités techniques,
+                  réglementaires, contractuelles et décisionnelles restent portées par les acteurs compétents.
                 </p>
               </div>
             </div>
@@ -549,8 +546,8 @@ export function PromoteursImmobiliersPage() {
       <section className="px-4 py-12 sm:px-6 md:py-16 lg:py-20">
         <div className="mx-auto max-w-site">
           <SectionHeading
-            title="Une assistance flexible selon vos opérations"
-            intro="BeWork peut intervenir ponctuellement sur une opération, en renfort sur une phase critique ou de manière récurrente pour accompagner plusieurs chantiers. Nos interventions peuvent être 100 % à distance, hybrides ou inclure un assistant travaux délégué sur site."
+            title="Une plateforme adaptable à vos opérations"
+            intro="Composez votre plateforme selon les opérations : modules documentaires, remontées terrain, reporting. Déploiement progressif, à distance, avec formation des équipes du promoteur."
           />
 
           <div className="mt-8 flex flex-col gap-3 lg:hidden">
@@ -620,8 +617,8 @@ export function PromoteursImmobiliersPage() {
             Vous gérez plusieurs opérations immobilières ? BeWork peut vous faire gagner du temps.
           </h2>
           <p className="mt-5 text-lg leading-relaxed text-blue-100">
-            Parlons de vos opérations, de vos points bloquants et du niveau d’appui dont vous avez besoin : suivi à
-            distance, renfort hybride ou assistant travaux sur site.
+            Parlons de vos opérations, de vos points bloquants et des modules utiles : suivi documentaire, remontées
+            terrain et reporting dans une plateforme dédiée.
           </p>
           <div className="mt-8 flex w-full flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
             <CalendlyBookingLink

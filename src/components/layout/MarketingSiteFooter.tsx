@@ -125,8 +125,18 @@ export function MarketingSiteFooter() {
                 </Link>
               </li>
               <li>
+                <Link href="/#plateforme" className={COL_LINK}>
+                  Plateforme interne BTP
+                </Link>
+              </li>
+              <li>
+                <Link href="/#modules" className={COL_LINK}>
+                  Composez votre plateforme
+                </Link>
+              </li>
+              <li>
                 <Link href="/assistants-administratifs-taches" className={COL_LINK}>
-                  Missions &amp; périmètre
+                  Capacités plateforme
                 </Link>
               </li>
               <li>
@@ -136,17 +146,12 @@ export function MarketingSiteFooter() {
               </li>
               <li>
                 <Link href="/externaliser-administratif" className={COL_LINK}>
-                  Externaliser l&apos;administratif
+                  Équiper l&apos;admin BTP
                 </Link>
               </li>
               <li>
                 <Link href="/services" className={COL_LINK}>
-                  Services BTP (hub)
-                </Link>
-              </li>
-              <li>
-                <Link href="/#plateforme" className={COL_LINK}>
-                  Plateforme interne BTP
+                  Capacités métier (hub)
                 </Link>
               </li>
               <li>
@@ -171,14 +176,14 @@ export function MarketingSiteFooter() {
               </li>
               <li>
                 <Link href="/contact" className={COL_LINK}>
-                  Conciergerie dirigeant (sur demande)
+                  Demander une démonstration
                 </Link>
               </li>
             </ul>
           </div>
 
           <div className="flex flex-col gap-4">
-            <ColumnTitle>Externalisation par pays</ColumnTitle>
+            <ColumnTitle>Déploiement par pays</ColumnTitle>
             <ul className="flex flex-col gap-3">
               {EXTERNALISATION_ADMIN_BT_NAV.map((z) => (
                 <li key={z.href}>

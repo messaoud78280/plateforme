@@ -248,11 +248,11 @@ export default function AnalyseDceChiffrageBtpPage() {
           <li>Soulager le dirigeant, le chargé d&apos;affaires ou le conducteur de travaux</li>
         </ul>
         <p>
-          BeWork peut intervenir ponctuellement sur un dossier, ou régulièrement comme{" "}
-          <Link href="/services/assistant-travaux">renfort administratif travaux</Link>.
+          BeWork peut outiller un dossier ponctuel ou un usage régulier via la{" "}
+          <Link href="/services/assistant-travaux">plateforme assistant travaux</Link>.
         </p>
 
-        <h2>Une mission test possible</h2>
+        <h2>Une démonstration possible</h2>
         <p>Pour découvrir la méthode, il est possible de commencer par :</p>
         <ul>
           <li>l&apos;analyse d&apos;un lot ou d&apos;un extrait de DCE ;</li>
@@ -263,9 +263,9 @@ export default function AnalyseDceChiffrageBtpPage() {
 
         <h2>Notre cadre d&apos;intervention</h2>
         <p>
-          BeWork intervient comme assistant travaux externalisé. Nos livrables sont des bases de travail professionnelles ; la
-          validation finale reste toujours du côté de l&apos;entreprise. Prix, quantités, méthodes, marges, fournisseurs, délais et
-          engagements contractuels doivent être vérifiés avant remise officielle.
+          BeWork est éditeur de plateforme interne BTP. Les livrables préparés dans l&apos;outil sont des bases de travail
+          professionnelles ; la validation finale reste toujours du côté de l&apos;entreprise. Prix, quantités, méthodes,
+          marges, fournisseurs, délais et engagements contractuels doivent être vérifiés avant remise officielle.
         </p>
 
         <h2>Conclusion</h2>

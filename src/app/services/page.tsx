@@ -16,9 +16,9 @@ import { absoluteUrl } from "@/lib/site";
 
 const path = "/services";
 const url = absoluteUrl(path);
-const title = "Services BeWork — assistants travaux augmentés par l’IA (BTP)";
+const title = "Capacités BeWork — plateforme interne BTP et outils IA métier";
 const description = metaDescriptionFrancophonie(
-  "Hub services BeWork : assistant travaux, conducteur débordé, MOEX, DCE/BPU, CR, PPSPS, devis, DOE. Pages par intention et ressources métier",
+  "Hub BeWork : modules plateforme (DCE, CR, PPSPS, DOE, marchés). Vos équipes utilisent ; BeWork configure et fait évoluer",
 );
 
 export const metadata: Metadata = {
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
 
 const jsonLd = buildWebPageAndBreadcrumbJsonLd({
   pagePath: path,
-  h1: "Services BeWork pour le BTP",
+  h1: "Capacités de la plateforme BeWork",
   description,
   breadcrumbItems: [
     { name: "Accueil", href: "/" },
@@ -74,18 +74,20 @@ export default function ServicesHubPage() {
               <li className="font-medium text-slate-900">Services</li>
             </ol>
           </nav>
-          <h1 className="font-heading text-3xl font-bold tracking-tight text-black md:text-[2.35rem]">Services BeWork pour le BTP</h1>
+          <h1 className="font-heading text-3xl font-bold tracking-tight text-black md:text-[2.35rem]">Capacités de la plateforme BeWork</h1>
           <p className="mt-6 text-lg leading-relaxed text-slate-700">
-            Chaque page répond à une intention précise (métier ou mission) et renvoie vers les ressources détaillées lorsqu’elles existent. BeWork est un{" "}
-            <strong>service francophone à distance</strong>, piloté depuis la France, pour entreprises du bâtiment en France, Belgique, Suisse et Luxembourg.
+            Chaque page présente une capacité métier de la plateforme (module, workflow ou outil IA) et renvoie vers les
+            ressources détaillées. BeWork est un{" "}
+            <strong>éditeur de plateformes internes BTP</strong> pour entreprises en France, Belgique, Suisse et
+            Luxembourg.
           </p>
           <p className="mt-4 text-base leading-relaxed text-slate-600">
-            <span className="font-semibold text-slate-800">En résumé :</span> assistants travaux augmentés par l’IA pour structurer le suivi ; vous gardez la
-            validation sur tout ce qui engage.{" "}
+            <span className="font-semibold text-slate-800">En résumé :</span> vos équipes utilisent la plateforme au
+            quotidien ; BeWork configure, forme et fait évoluer l&apos;environnement.{" "}
             <Link href="/promoteurs-immobiliers" className="font-semibold text-[#1d4ed8] hover:underline">
               Promoteurs immobiliers
             </Link>{" "}
-            : suivi documentaire, relances entreprises, réserves, DOE et assistant travaux sur site.
+            : suivi documentaire, relances, réserves et DOE dans un environnement adapté à vos opérations.
           </p>
 
           <ul className="mt-12 grid gap-4 sm:grid-cols-2">
@@ -97,7 +99,7 @@ export default function ServicesHubPage() {
                     href={`/services/${slug}`}
                     className="flex h-full flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow"
                   >
-                    <span className="text-sm font-bold text-[#1d4ed8]">Service</span>
+                    <span className="text-sm font-bold text-[#1d4ed8]">Capacité</span>
                     <span className="mt-2 text-base font-semibold leading-snug text-slate-900">{p.h1}</span>
                     <span className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-600">{p.intro}</span>
                     <span className="mt-4 text-sm font-semibold text-[#1d4ed8]">Lire la page →</span>
@@ -110,11 +112,11 @@ export default function ServicesHubPage() {
           <div className="mt-14 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
             <p className="text-base font-semibold text-slate-900">Passer à l’action</p>
             <p className="mt-2 text-sm leading-relaxed text-slate-600">
-              Forfaits HT, espace client et appel découverte pour cadrer le volume avec votre réalité chantier.
+              Mise en place et abonnement sur étude. Demandez une démonstration pour composer votre plateforme.
             </p>
             <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <CalendlyBookingLink className="inline-flex min-h-[2.75rem] items-center justify-center rounded-lg bg-[#1d4ed8] px-5 text-sm font-semibold text-white hover:bg-[#1e40af]">
-                Réserver un appel
+                Demander une démonstration
               </CalendlyBookingLink>
               <Link
                 href="/tarifs"

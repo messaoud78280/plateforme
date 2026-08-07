@@ -255,7 +255,7 @@ export default function TutoSkillPlanningChantierPage() {
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
               <CalendlyBookingLink className="inline-flex min-h-[3rem] shrink-0 items-center justify-center rounded-xl bg-[#1d4ed8] px-7 text-[0.9375rem] font-semibold text-white shadow-md shadow-[#1d4ed8]/25 transition hover:bg-[#1e40af] md:text-base">
-                Faire appel à un Beworker
+                Demander une démonstration
               </CalendlyBookingLink>
               <a
                 href={pdfPath}
@@ -306,15 +306,15 @@ export default function TutoSkillPlanningChantierPage() {
 
           <aside
             className="mb-14 rounded-2xl border border-[#1d4ed8]/22 bg-gradient-to-br from-[#eff6ff] to-white p-6 shadow-sm shadow-[#1d4ed8]/06 sm:flex sm:flex-row sm:items-center sm:justify-between sm:gap-8 sm:p-8"
-            aria-label="Faire appel à un Beworker"
+            aria-label="Demander une démonstration"
           >
             <div className="min-w-0 sm:flex-1">
               <p className="text-base font-semibold text-slate-900 md:text-[1.05rem]">
                 Pas le temps de construire et de maintenir ce skill ?
               </p>
               <p className="mt-2 text-sm leading-relaxed text-slate-600 md:text-[0.9375rem]">
-                Confiez vos plannings, vos aléas et vos notes terrain à un Beworker : on recale, on rédige la note d’impact CCAG et on relance la
-                MOA pendant que vous tenez le chantier.
+                Intégrez ces usages planning dans votre plateforme BeWork : vos équipes gèrent aléas et notes terrain
+                dans un environnement unique, pendant que vous tenez le chantier.
               </p>
             </div>
             <div className="mt-5 shrink-0 sm:mt-0">
@@ -517,9 +517,9 @@ export default function TutoSkillPlanningChantierPage() {
               </dl>
 
               <p className="mt-14 text-xl font-semibold uppercase tracking-wide text-slate-900">Pas le temps de le faire vous-même ?</p>
-              <p className="mt-10 text-xl font-semibold uppercase tracking-wide text-slate-900">Faire appel à un Beworker</p>
+              <p className="mt-10 text-xl font-semibold uppercase tracking-wide text-slate-900">Découvrir la plateforme</p>
               <p className="mt-3 text-[1.0625rem] font-medium text-slate-800">
-                Assistants travaux BTP · Relais dossiers chantier · Augmentés par l’IA
+                Plateforme interne BTP · Outils IA métier · Formation et déploiement
               </p>
 
               <p className="mt-10 text-2xl font-bold uppercase tracking-tight text-slate-900">

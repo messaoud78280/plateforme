@@ -28,8 +28,8 @@ export function HomeCoreAdaptation() {
         <HomeSectionHeader
           id="core-heading"
           eyebrow="Socle & adaptation"
-          title="Une base éprouvée, adaptée à votre fonctionnement"
-          lead="Chaque entreprise bénéficie du socle technologique BeWork, complété par des modules, des workflows et des outils IA configurés selon son organisation."
+          title="Un socle technologique adapté à votre fonctionnement"
+          lead="Chaque entreprise dispose d’un environnement BeWork propre : socle technologique commun, complété par des modules, des workflows et des outils IA configurés selon son organisation."
         />
 
         <div className={`${HOME_CONTENT} mx-auto grid max-w-5xl gap-6 md:grid-cols-2`}>
@@ -37,7 +37,8 @@ export function HomeCoreAdaptation() {
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">Niveau 1</p>
             <h3 className="mt-2 text-xl font-bold text-[#0f172a]">Le socle BeWork</h3>
             <p className="mt-2 text-sm leading-relaxed text-slate-600">
-              La base commune, maintenue et sécurisée par BeWork — partagée par toutes les entreprises.
+              Un socle logiciel commun maintenu par BeWork, avec un environnement et des accès propres à chaque
+              entreprise.
             </p>
             <ul className="mt-5 space-y-2.5">
               {CORE_ITEMS.map((item) => (

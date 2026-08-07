@@ -14,12 +14,12 @@ const PILLARS: { title: string; body: string; Icon: () => JSX.Element }[] = [
   },
   {
     title: "Missions suivies",
-    body: "Chaque mission reste suivie et validée par un Beworker, du cadrage à la livraison.",
+    body: "Chaque usage reste suivi et validé dans la plateforme, du cadrage à la livraison.",
     Icon: IconCheckShield,
   },
   {
     title: "IA sous contrôle humain",
-    body: "Les outils d’IA accélèrent la préparation ; un Beworker garde le fil et la validation.",
+    body: "Les outils d’IA accélèrent la préparation ; vos équipes gardent le fil et la validation.",
     Icon: IconChip,
   },
 ];

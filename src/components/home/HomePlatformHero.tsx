@@ -28,12 +28,12 @@ export function HomePlatformHero() {
             </p>
 
             <h1 className="font-display mx-auto mt-4 max-w-[20ch] text-balance text-[1.875rem] font-extrabold leading-[1.12] tracking-[-0.03em] text-[#0f172a] sm:mt-6 sm:max-w-[22ch] sm:text-[2.625rem] md:text-[3.25rem] lg:mx-0 lg:max-w-[18ch] lg:text-[3.5rem] xl:text-[3.75rem]">
-              La plateforme interne intelligente de votre entreprise du BTP
+              Votre plateforme interne BTP, adaptée à votre organisation et augmentée par l&apos;IA
             </h1>
 
             <p className="mx-auto mt-4 max-w-[34rem] text-[0.9375rem] leading-relaxed text-slate-600 sm:mt-6 sm:text-lg lg:mx-0 lg:text-[1.125rem] lg:leading-[1.7]">
-              BeWork centralise vos équipes, vos chantiers, vos documents et vos marchés dans une plateforme adaptée à
-              votre organisation, enrichie par des outils d&apos;intelligence artificielle spécialisés.
+              Centralisez vos équipes, vos chantiers, vos documents et vos marchés. BeWork configure votre plateforme,
+              forme vos équipes et la fait évoluer avec vos besoins.
             </p>
 
             <div

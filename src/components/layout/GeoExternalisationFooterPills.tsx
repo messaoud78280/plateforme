@@ -9,7 +9,7 @@ export function GeoExternalisationFooterPills() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-wrap gap-2" aria-label="Externalisation administrative BTP par pays">
+    <nav className="flex flex-wrap gap-2" aria-label="Déploiement plateforme BTP par pays">
       {EXTERNALISATION_ADMIN_BT_NAV.map((z) => {
         const active = pathname === z.href;
         return (

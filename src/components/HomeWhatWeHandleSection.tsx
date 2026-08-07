@@ -79,7 +79,7 @@ export function HomeWhatWeHandleSection() {
             </h3>
             <p className="mt-3 text-base leading-relaxed text-slate-800 md:text-[1.05rem]">
               Multi-chantiers, relances MOE / MOA, validations en attente, pièces manquantes, pénalités à anticiper&nbsp;: votre
-              Beworker structure le suivi, relance les bons interlocuteurs et vous fait valider avant tout engagement.
+              La plateforme structure le suivi, aide à relancer les bons interlocuteurs et fait valider avant tout engagement.
             </p>
             <ul className="mt-5 grid gap-2 text-sm font-semibold text-slate-800 sm:grid-cols-2 lg:grid-cols-3 md:text-base">
               {[

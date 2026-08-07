@@ -38,9 +38,8 @@ export default function PolitiqueConfidentialitePage() {
       h1="Politique de confidentialité"
       intro={
         <>
-          La présente politique a pour objet d’informer les utilisateurs du site BeWork sur les traitements de données personnelles susceptibles
-          d’être mis en œuvre dans le cadre de la consultation du site ou de l’utilisation des services proposés. Elle est rédigée de manière générale ;
-          certaines précisions pourront être complétées après validation juridique ou selon l’évolution des outils effectivement déployés.
+          La présente politique informe les utilisateurs du site BeWork sur les traitements de données personnelles
+          susceptibles d’être mis en œuvre lors de la consultation du site ou de l’utilisation des services proposés.
         </>
       }
       breadcrumbItems={[
@@ -119,7 +118,15 @@ export default function PolitiqueConfidentialitePage() {
         <li>certaines données peuvent être conservées plus longtemps lorsque la loi l’exige.</li>
       </ul>
       <p>
-        <strong>Ces durées sont données à titre indicatif et pourront être ajustées après validation juridique.</strong>
+        Ces durées sont indicatives. Pour toute question sur la conservation de vos données, contactez{" "}
+        <a
+          href="mailto:contact@bework.fr"
+          className="font-medium text-[#1d4ed8] underline-offset-2 hover:underline"
+          {...plausibleTrackProps(PLAUSIBLE_EVENTS.CLICK_EMAIL, "politique-confidentialite-duree")}
+        >
+          contact@bework.fr
+        </a>
+        .
       </p>
 
       <h2>6. Destinataires des données</h2>
@@ -134,26 +141,44 @@ export default function PolitiqueConfidentialitePage() {
         selon la configuration effectivement déployée.
       </p>
       <p>
-        <strong>Éléments techniques identifiés dans le code du projet</strong> (selon configuration effective en production)&nbsp;:
+        Selon la configuration effectivement déployée en production, les traitements techniques peuvent notamment
+        impliquer&nbsp;:
       </p>
       <ul>
         <li>
-          <strong>Base de données</strong> (comptes, données métier)&nbsp;: PostgreSQL via Prisma ; le dépôt prévoit couramment un hébergement de base
-          chez <strong>Supabase</strong> lorsque les variables d’environnement pointent vers ce prestataire.
+          <strong>Base de données</strong> (comptes, données métier)&nbsp;: PostgreSQL (Prisma). Lorsque les variables
+          d&apos;environnement pointent vers ce prestataire, l&apos;hébergement de base peut être assuré via{" "}
+          <strong>Supabase</strong>.
         </li>
         <li>
-          <strong>Envoi d’e-mails transactionnels</strong> : <strong>Brevo</strong> (API), lorsque les clés et paramètres d’expéditeur sont configurés.
+          <strong>Envoi d&apos;e-mails transactionnels</strong>&nbsp;: <strong>Brevo</strong> (API), lorsque les clés et
+          paramètres d&apos;expéditeur sont configurés.
         </li>
         <li>
-          <strong>Formulaire de contact</strong> : les demandes saisies sur le site sont enregistrées dans la base BeWork et traitées par l&apos;équipe
-          (voir finalités ci-dessus).
+          <strong>Formulaire de contact</strong>&nbsp;: les demandes saisies sur le site sont enregistrées dans la base
+          BeWork et traitées par l&apos;équipe (voir finalités ci-dessus).
         </li>
         <li>
-          <strong>Authentification</strong> des espaces connectés&nbsp;: <strong>NextAuth.js</strong> (cookies de session).
+          <strong>Authentification</strong> des espaces connectés&nbsp;: <strong>NextAuth.js</strong> (cookies de
+          session).
+        </li>
+        <li>
+          <strong>Fonctions d&apos;intelligence artificielle</strong> (lorsque activées)&nbsp;: appels à des API de
+          modèles de langage (notamment OpenAI) pour certaines fonctionnalités métier de la plateforme. Les données
+          transmises dépendent de la fonction utilisée ; les utilisateurs restent responsables de ne pas y inclure de
+          données inutiles.
         </li>
       </ul>
       <p>
-        <span className="font-mono text-[0.95em]">[À compléter : autres outils — analytics, CRM, etc. — si applicable]</span>
+        La liste des sous-traitants techniques peut évoluer. Pour toute demande de précision, contactez{" "}
+        <a
+          href="mailto:contact@bework.fr"
+          className="font-medium text-[#1d4ed8] underline-offset-2 hover:underline"
+          {...plausibleTrackProps(PLAUSIBLE_EVENTS.CLICK_EMAIL, "politique-confidentialite-outils")}
+        >
+          contact@bework.fr
+        </a>
+        .
       </p>
 
       <h2>8. Droits des utilisateurs</h2>

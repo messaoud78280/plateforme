@@ -79,7 +79,7 @@ export default function Page() {
         <Link href="/tarifs" className="text-[#1d4ed8] hover:underline">
           bework.fr/tarifs
         </Link>
-        . Pas de recrutement immédiat : le périmètre s&apos;ajuste à votre organisation réelle.
+        . Une plateforme dimensionnée à votre organisation réelle, sans embauche immédiate.
       </p>
 
       <section className="not-prose" id="faq" aria-label="FAQ externaliser son administratif" style={{ scrollMarginTop: "6rem" }}>

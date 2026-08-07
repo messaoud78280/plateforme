@@ -163,13 +163,13 @@ export async function POST(request: NextRequest) {
   <p>Une demande a été envoyée depuis le formulaire BeWork.</p>
 
   <ul style="list-style: none; padding: 0;">
-    <li><strong>Nom / entreprise :</strong> ${escapeHtml(companyName)}</li>
+    <li><strong>Entreprise :</strong> ${escapeHtml(companyName)}</li>
     <li><strong>Email :</strong> <a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></li>
     ${phone ? `<li><strong>Téléphone :</strong> ${escapeHtml(phone)}</li>` : ""}
-    <li><strong>Type de marché :</strong> ${escapeHtml(labelMarketType(marketType))}</li>
-    <li><strong>Corps d'état / activité :</strong> ${escapeHtml(tradeActivity || "—")}</li>
+    <li><strong>Effectif :</strong> ${escapeHtml(labelMarketType(marketType))}</li>
+    <li><strong>Activité :</strong> ${escapeHtml(tradeActivity || "—")}</li>
     <li><strong>Besoin principal :</strong> ${escapeHtml(labelMainNeed(mainNeed))}</li>
-    ${projectStage ? `<li><strong>Étape :</strong> ${escapeHtml(labelProjectStage(projectStage))}</li>` : ""}
+    ${projectStage ? `<li><strong>Outils actuels :</strong> ${escapeHtml(labelProjectStage(projectStage))}</li>` : ""}
     <li><strong>Date de demande :</strong> ${escapeHtml(dateLabel)}</li>
     <li><strong>Source :</strong> ${escapeHtml(source)}</li>
   </ul>

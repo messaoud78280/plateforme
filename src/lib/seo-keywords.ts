@@ -200,11 +200,11 @@ export const SEO_KEYWORDS_HOME: string[] = [
 ];
 
 /** Slogan BeWork — contenu, OG, JSON-LD, llms.txt. */
-export const BEWORK_SLOGAN = "Vos équipes pilotent. BeWork équipe la plateforme.";
+export const BEWORK_SLOGAN = "Vos équipes pilotent. BeWork fait évoluer leur plateforme.";
 
 /** Accroche complémentaire (home / AEO). */
 export const BEWORK_SLOGAN_DECISION =
-  "BeWork construit et fait évoluer l’environnement numérique. Vous restez maître des opérations, des données et des décisions.";
+  "BeWork configure, forme et fait évoluer l’environnement numérique. Vous restez maître des opérations, des données et des décisions.";
 
 /** Phrase de positionnement citables par les IA / extraits AEO. */
 export const BEWORK_AEO_DEFINITION =

@@ -36,31 +36,31 @@ const FAQ_RECHERCHE_IA_CAT = {
   items: [
     {
       q: "Qu’est-ce qu’un assistant travaux ?",
-      a: "Un assistant travaux (parfois dit « assistante travaux » ou assistante BTP) aide l’entreprise à structurer et suivre tout ce qui touche aux chantiers au-delà du courant administratif : devis, relances, pièces, comptes rendus, réserves, DOE, parfois lecture des pièces marché, avec une logique priorités / échéances / impact terrain. BeWork propose ce rôle en externalisation, augmenté par l’IA, avec validation de votre part avant tout envoi engageant.",
+      a: "Dans le langage courant, « assistant travaux » désigne souvent l’aide bureau-chantier (devis, relances, pièces, CR, DOE). Chez BeWork, cela correspond à des capacités de la plateforme interne : vos équipes structurent et suivent ces dossiers dans l’outil ; BeWork configure, forme et fait évoluer la solution — sans exécuter les missions à leur place.",
     },
     {
       q: "Quelle différence entre assistant travaux BTP et assistante administrative ?",
-      a: "Une assistante administrative généraliste traite le flux courant (accueil, courrier générique, facturation hors chantier). Un assistant travaux BTP travaille sur les dossiers chantier : références chantier, lots, délais, documents techniques, relances client ou fournisseur, traçabilité et livrables adaptés au rythme du terrain. BeWork est pensée comme assistants travaux augmentés par l’IA : périmètre chantier, pas secrétariat généraliste.",
+      a: "Une assistante administrative généraliste traite le flux courant. Les usages « travaux » portent sur les dossiers chantier (lots, délais, documents techniques, traçabilité). La plateforme BeWork est conçue pour ces usages métier BTP, pas comme un secrétariat généraliste.",
     },
     {
       q: "Comment externaliser la gestion administrative d’un chantier ?",
-      a: "En trois temps : (1) lister ce qui peut sortir du terrain (relances, classement, pièces, suivis), (2) fixer un cadre avec un prestataire — canal d’échange, priorités, validation avant envoi, (3) transmettre consignes et documents de façon régulière. BeWork apporte une assistance technique et administrative BTP : missions détaillées sur la page dédiée, possibilité d’externalisation par zone (France, voisins, Europe) selon votre organisation.",
+      a: "Plutôt que d’externaliser l’exécution, BeWork propose d’équiper vos équipes d’une plateforme interne : (1) cadrer les flux à outiller, (2) configurer modules et validations, (3) former et déployer progressivement. Vos collaborateurs restent aux commandes ; BeWork assure configuration, hébergement et évolution.",
     },
     {
       q: "Qui peut aider un conducteur de travaux à préparer un PPSPS ?",
-      a: "La responsabilité du PPSPS incombe à l’employeur ; le conducteur de travaux ou les personnes désignées peuvent rassembler le contenu opérationnel, et le coordinateur SPS peut commenter ou exiger des compléments sur chantier. BeWork ne remplace pas la validation sécurité : elle peut structurer le dossier, les checklists et la mise en forme à partir de vos consignes — vous ou votre référent sécurité validez le document final.",
+      a: "La responsabilité du PPSPS incombe à l’employeur. Dans BeWork, vos équipes structurent le dossier, les checklists et la mise en forme grâce aux outils de la plateforme — vous ou votre référent sécurité validez le document final.",
     },
     {
       q: "Comment gagner du temps sur les comptes rendus de chantier ?",
-      a: "Utilisez un modèle court (décisions, actions, responsable, échéance), envoyez dans les 24 h, reliez les photos ou vocaux au texte. BeWork peut reprendre vos notes brutes pour livrer un compte rendu propre et homogène, à vous de valider avant diffusion. Un pas-à-pas plus détaillé est disponible dans le tuto « compte rendu de chantier » sur /ressources.",
+      a: "Utilisez un modèle court (décisions, actions, responsable, échéance) et reliez photos ou notes au texte. Dans BeWork, vos équipes préparent et suivent les CR dans la plateforme ; vous validez avant diffusion. Un pas-à-pas est disponible dans le tuto « compte rendu de chantier » sur /ressources.",
     },
     {
       q: "Comment analyser rapidement un DCE ?",
-      a: "Priorisez d’abord le règlement de consultation (délais, lots, modalités), recoupez CCTP et pièces de prix (DQE, bordereaux) pour repérer les exigences critiques et les manquants, puis tranchez un Go / No-go avant un chiffrage lourd. BeWork peut accélérer l’étape de tri et de synthèse des pièces ; la décision d’engagement reste la vôtre. Voir le tuto « analyse DCE » sur /ressources.",
+      a: "Priorisez le règlement de consultation, recoupez CCTP et pièces de prix, puis tranchez un Go / No-go. Les outils IA BeWork aident vos équipes à trier et synthétiser les pièces ; la décision d’engagement reste la vôtre. Voir le tuto « analyse DCE » sur /ressources.",
     },
     {
       q: "Comment préparer un DOE sans perdre de temps ?",
-      a: "Collectez les pièces au fil de l’eau (plans as-built, notices, attestations) avec une arborescence et des noms de fichiers clairs, et tenez une liste des manquants pour relancer tôt. BeWork peut organiser le classement, les relances fournisseurs et la compilation des lots — vous validez le contenu transmis au maître d’ouvrage. Le tuto « DOE BTP » sur /ressources détaille le déroulé.",
+      a: "Collectez les pièces au fil de l’eau avec une arborescence claire et une liste des manquants. Dans BeWork, vos équipes organisent classement et relances dans la plateforme — vous validez le contenu transmis au maître d’ouvrage. Le tuto « DOE BTP » sur /ressources détaille le déroulé.",
     },
   ],
 } as const;
@@ -70,47 +70,47 @@ const FAQ_APPELS_OFFRES_CAT = {
   items: [
     {
       q: "BeWork peut-il répondre à un appel d'offres BTP ?",
-      a: "Oui sur le volet administratif et documentaire : analyse DCE (RC, CCAP, CCTP, BPU, DPGF), structuration des pièces, mémoire technique et suivi du dépôt. La décision Go/No-go, le prix et la signature restent chez vous. Voir /reponse-appel-offres-btp.",
+      a: "La plateforme aide vos équipes sur l’analyse DCE (RC, CCAP, CCTP, BPU, DPGF), la structuration des pièces et le suivi du dépôt. La décision Go/No-go, le prix et la signature restent chez vous. Voir /reponse-appel-offres-btp.",
     },
     {
       q: "BeWork peut-il rédiger un mémoire technique ?",
-      a: "Oui : plan, rédaction à partir de vos références et méthodes, mise en forme et relecture. Vous validez le contenu technique avant dépôt. Service détaillé sur /services/memoire-technique-btp.",
+      a: "Vos équipes préparent plan, rédaction et mise en forme dans la plateforme à partir de vos références. Vous validez le contenu technique avant dépôt. Détail : /services/memoire-technique-btp.",
     },
     {
       q: "BeWork peut-il gérer Chorus Pro ?",
-      a: "Oui sur la préparation des situations, le dépôt encadré, le suivi des statuts et les relances administratives — vous gardez la validation des montants. Voir /facturation-chorus-pro-btp.",
+      a: "La plateforme accompagne la préparation des situations, le suivi des statuts et les relances administratives — vous gardez la validation des montants. Voir /facturation-chorus-pro-btp.",
     },
     {
       q: "BeWork peut-il aider une entreprise déjà titulaire d'un marché public ?",
-      a: "Oui : suivi administratif après attribution en 7 blocs — démarrage marché, documents d'exécution, milieu occupé, amiante SS4, situations Chorus Pro, réserves, DOE. Détail sur /assistants-administratifs-taches#marches-publics-accords-cadres et /gestion-marche-public-btp.",
+      a: "Oui via les modules de suivi post-attribution : documents d'exécution, situations, réserves, DOE. Détail sur /assistants-administratifs-taches#marches-publics-accords-cadres et /gestion-marche-public-btp.",
     },
     {
-      q: "Comment transmettre un DCE à BeWork ?",
-      a: "Via le formulaire /contact ou votre espace client : déposez le dossier, précisez la date limite et le lot visé. Une première analyse peut être proposée en intervention ponctuelle (à partir de 150 € HT) ou en mission structurée (à partir de 250 € HT).",
+      q: "Comment démarrer une analyse DCE dans BeWork ?",
+      a: "Via /contact : présentez votre organisation et le type de dossiers à traiter. BeWork compose ensuite votre plateforme (modules, droits, IA) lors de la démonstration / étude.",
     },
     {
-      q: "Quels documents BeWork peut-il analyser ?",
-      a: "DCE et pièces marché (RC, CCAP, CCTP, BPU, DPGF, DQE), dossiers chantier (CR, PPSPS, DOE, DICT), devis, situations, factures et correspondances fournisseurs — selon périmètre cadré.",
+      q: "Quels documents la plateforme peut-elle aider à analyser ?",
+      a: "DCE et pièces marché (RC, CCAP, CCTP, BPU, DPGF, DQE), dossiers chantier (CR, PPSPS, DOE, DICT), devis, situations et correspondances — selon les modules activés.",
     },
     {
       q: "BeWork peut-il suivre les bons de commande d'un accord-cadre ?",
-      a: "Oui sur le suivi administratif : échéances, pièces attendues, relances et traçabilité des bons émis — intégré au bloc exécution marché public (logement occupé, ECF, SS4, facturation). Voir /assistants-administratifs-taches#marches-publics-accords-cadres.",
+      a: "Oui côté outillage : échéances, pièces attendues, relances et traçabilité dans votre environnement. Voir /assistants-administratifs-taches#marches-publics-accords-cadres.",
     },
     {
       q: "BeWork peut-il limiter les pénalités sur un marché public ?",
-      a: "BeWork ne supprime pas les pénalités contractuelles, mais structure un tableau anti-pénalités : délais documents, réunions, réserves, facturation, DOE — avec alertes et relances. Selon le CCAP, les retards peuvent générer des pénalités journalières ou forfaitaires.",
+      a: "BeWork ne supprime pas les pénalités contractuelles. La plateforme peut structurer un tableau d’alertes (délais documents, réserves, facturation, DOE) pour vos équipes. Selon le CCAP, les retards peuvent générer des pénalités.",
     },
     {
       q: "BeWork intervient-il en France ?",
-      a: "Oui, partout en France à distance. Pages dédiées : /assistant-travaux-france et /externalisation-administrative-btp-france.",
+      a: "Oui : déploiement et accompagnement pour entreprises en France. Pages : /assistant-travaux-france et /externalisation-administrative-btp-france.",
     },
     {
       q: "BeWork travaille-t-il avec la Belgique, la Suisse et le Luxembourg ?",
-      a: "Oui, en français et à distance pour l'assistance travaux chantier. Pages pays : assistant travaux et externalisation administrative BTP par pays (BE, CH, LU).",
+      a: "Oui, en français, pour le déploiement de plateformes internes BTP. Pages pays : plateforme travaux et déploiement par pays (BE, CH, LU).",
     },
     {
       q: "BeWork s'adresse-t-il aux artisans et aux PME du BTP ?",
-      a: "Oui : artisans, TPE, PME, conducteurs de travaux et chargés d'affaires qui veulent déléguer l'administratif chantier sans recruter — forfaits sur /tarifs.",
+      a: "Oui : artisans, TPE, PME, conducteurs de travaux et chargés d'affaires qui veulent outiller leurs équipes sans alourdir immédiatement la masse salariale. Méthode de tarification sur /tarifs.",
     },
   ],
 } as const;
@@ -173,7 +173,7 @@ const FAQ_CATEGORIES = [
       },
       {
         q: "Qui valide les documents avant envoi ?",
-        a: "Vous. BeWork prépare et propose ; vous validez les prix, choix techniques, signatures, engagements contractuels et réponses sensibles.",
+        a: "Vous. Vos équipes préparent dans la plateforme ; vous validez les prix, choix techniques, signatures, engagements contractuels et réponses sensibles.",
       },
     ],
   },
@@ -182,19 +182,19 @@ const FAQ_CATEGORIES = [
     items: [
       {
         q: "Comment sont présentés les tarifs BeWork ?",
-        a: "Par niveau d’accompagnement : intervention ponctuelle (à partir de 150 € HT), mission structurée (à partir de 250 € HT), accompagnement travaux mensuel (à partir de 590 € HT), cellule externalisée ou sur devis. Les prix affichés sont des points de départ — le détail est ajusté selon votre périmètre.",
+        a: "Sans grille publique fixe : mise en place initiale + abonnement mensuel, sur étude (utilisateurs, modules, personnalisation, IA, accompagnement). Vous recevez une proposition claire correspondant au périmètre retenu. Détail : /tarifs.",
       },
       {
         q: "BeWork facture-t-il à l’heure ?",
-        a: "Non sur le site vitrine : vous achetez un périmètre, des livrables et un niveau de suivi (intervention, mission structurée, forfait mensuel ou sur devis). Voir bework.fr/tarifs pour le détail des offres.",
+        a: "Non sur la vitrine : la proposition repose sur le périmètre de plateforme et le niveau d’accompagnement. Voir /tarifs.",
       },
       {
         q: "Puis-je commencer sans abonnement mensuel ?",
-        a: "Oui, par une intervention ponctuelle ou une mission structurée : analyse DCE, DOE, PPSPS, mémoire technique, compte rendu, devis ou relances.",
+        a: "Le modèle standard combine mise en place puis abonnement. Une démonstration et une étude permettent de cadrer le périmètre avant engagement.",
       },
       {
         q: "Que se passe-t-il si le périmètre évolue ?",
-        a: "On ajuste la proposition avec vous : périmètre, fréquence de suivi et livrables — avec un point de validation avant d’étendre la mission.",
+        a: "Les adaptations courantes peuvent être intégrées selon votre formule. Les développements spécifiques importants font l’objet d’un cadrage et d’une proposition distincte.",
       },
     ],
   },
@@ -203,15 +203,15 @@ const FAQ_CATEGORIES = [
     items: [
       {
         q: "Quel rôle joue l’IA chez BeWork ?",
-        a: "L’IA aide à trier, synthétiser, reformuler, repérer les points clés et préparer des brouillons. Il y a une supervision humaine, et vous gardez la validation finale sur ce qui engage.",
+        a: "L’IA aide vos équipes à trier, synthétiser, reformuler et préparer des brouillons dans la plateforme. Vous gardez la validation finale sur ce qui engage.",
       },
       {
         q: "Mes documents sont-ils confidentiels ?",
-        a: "Oui : accès encadrés, échanges professionnels et cadre de traitement clair. Les modalités sont définies au démarrage.",
+        a: "Chaque entreprise dispose d’un environnement et d’accès propres. Les modalités sont précisées au démarrage ; voir aussi /politique-confidentialite.",
       },
       {
         q: "Qui garde la responsabilité des décisions ?",
-        a: "Vous. BeWork prépare, structure et suit, mais ne prend pas de décisions techniques/juridiques à votre place.",
+        a: "Vous. BeWork configure et fait évoluer la plateforme, mais ne prend pas de décisions techniques ou juridiques à votre place.",
       },
       {
         q: "Quelles sont les limites de l’intervention BeWork ?",

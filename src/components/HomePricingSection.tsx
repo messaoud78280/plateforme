@@ -12,18 +12,18 @@ import {
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 
 const SETUP = [
-  "Diagnostic et cadrage fonctionnel",
-  "Sélection et configuration des modules",
-  "Rôles, permissions et workflows",
-  "Outils IA, tests, formation et déploiement",
+  "Nombre de modules et niveau de configuration",
+  "Workflows, rôles et permissions",
+  "Intégrations et reprise éventuelle de données",
+  "Formation des équipes et déploiement",
 ] as const;
 
 const SUBSCRIPTION = [
-  "Accès, hébergement et sauvegardes",
-  "Maintenance corrective et mises à jour",
-  "Sécurité et support",
-  "Ajustements de configuration selon formule",
-  "Amélioration progressive et nouveaux modules selon l’offre",
+  "Plateforme, hébergement et sauvegardes",
+  "Maintenance, mises à jour et support",
+  "Fonctions IA selon formule",
+  "Ajustements courants de configuration",
+  "Évolution continue selon l’offre",
 ] as const;
 
 /**
@@ -45,7 +45,7 @@ export function HomePricingSection() {
           <article className={`${HOME_CARD_SOFT} border-[#1d4ed8]/25 bg-white p-6 md:p-8`}>
             <h3 className="text-lg font-bold text-[#0f172a]">Mise en place initiale</h3>
             <p className="mt-2 text-sm text-slate-600">
-              Phase projet : du diagnostic au déploiement. Tarif selon le périmètre.
+              Du diagnostic au déploiement. Vous recevez une proposition claire correspondant au périmètre retenu.
             </p>
             <ul className="mt-4 space-y-2">
               {SETUP.map((item) => (

@@ -22,7 +22,7 @@ export function HomeClientTeamsUse() {
         <HomeSectionHeader
           id="teams-heading"
           eyebrow="Vos équipes"
-          title="Vos équipes pilotent. BeWork équipe la plateforme."
+          title="Vos équipes pilotent. BeWork fait évoluer leur plateforme."
           lead={
             <>
               <p>
@@ -30,8 +30,8 @@ export function HomeClientTeamsUse() {
                 utilisent la plateforme au quotidien — marchés, chantiers, documents, validations et outils IA.
               </p>
               <p className="mt-3 text-sm font-medium text-[#1d4ed8]">
-                BeWork construit et fait évoluer l&apos;environnement numérique. Vous restez maître des opérations, des
-                données et des décisions.
+                BeWork configure, forme et fait évoluer l&apos;environnement numérique. Vous restez maître des
+                opérations, des données et des décisions.
               </p>
             </>
           }

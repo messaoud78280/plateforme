@@ -21,7 +21,7 @@ export function HomeUnifiedEnvironment() {
           id="solution-heading"
           eyebrow="Plateforme"
           title="Un environnement unique pour organiser toute votre activité"
-          lead="BeWork relie l'information à un chantier, une affaire, une tâche ou un responsable — au lieu de la laisser se perdre entre plusieurs outils."
+          lead="BeWork relie l'information à un chantier, une affaire ou un responsable — au lieu de la disperser entre plusieurs outils."
         />
         <ul className={`${HOME_CONTENT} mx-auto grid max-w-4xl gap-3 sm:grid-cols-2 md:grid-cols-4`}>
           {PILLARS.map((label) => (

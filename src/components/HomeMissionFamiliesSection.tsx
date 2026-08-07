@@ -85,7 +85,7 @@ export function HomeMissionFamiliesSection() {
             En renfort de vos équipes, de la préparation de la candidature au suivi administratif du marché
           </h2>
           <p className="mt-4 text-base leading-relaxed text-slate-700 md:text-lg">
-            Trois familles de missions. Pas de prise en charge intégrale « clé en main » : un Beworker prépare,
+            Trois familles d'usages. Pas de prise en charge intégrale « clé en main » : la plateforme aide à préparer,
             structure et suit, sous votre validation.
           </p>
         </div>

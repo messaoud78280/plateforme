@@ -253,9 +253,9 @@ export const PUBLIC_PAGE_SEO: Record<string, PublicPageSeo> = {
     keywords: ["contact BeWork", "démonstration plateforme BTP", "étude déploiement BTP"],
   },
   "/notre-facon-de-travailler": {
-    title: "Notre façon de travailler — méthode BeWork BTP",
+    title: "Notre façon de travailler — méthode de déploiement BeWork",
     description: metaDescriptionFrancophonie(
-      "Méthode BeWork : diagnostic, configuration, formation, validation humaine et évolution continue — plateforme pour vos équipes, pas exécution à leur place",
+      "Méthode BeWork : diagnostic, composition, configuration, formation, déploiement et évolution — plateforme pour vos équipes",
     ),
     keywords: ["méthode BeWork", "déploiement plateforme BTP", "partenaire évolution BTP"],
   },

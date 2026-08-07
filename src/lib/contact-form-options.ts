@@ -1,39 +1,39 @@
 export const MARKET_TYPE_OPTIONS = [
-  { value: "marche_public", label: "Marché public" },
-  { value: "marche_prive", label: "Marché privé" },
-  { value: "accord_cadre", label: "Accord-cadre" },
-  { value: "contrat_recurrent", label: "Contrat récurrent" },
-  { value: "autre", label: "Autre" },
+  { value: "1_5", label: "1 à 5 collaborateurs" },
+  { value: "6_20", label: "6 à 20 collaborateurs" },
+  { value: "21_50", label: "21 à 50 collaborateurs" },
+  { value: "51_plus", label: "Plus de 50 collaborateurs" },
+  { value: "autre", label: "Autre / à préciser" },
 ] as const;
 
-/** Besoins alignés plateforme / AO / suivi — labels vitrine (values stables pour historique formulaires). */
+/** Besoins plateforme — values stables pour historique formulaires (réinterprétées). */
 export const MAIN_NEED_OPTIONS = [
-  { value: "preparation_candidature", label: "Préparation d’une candidature" },
-  { value: "analyse_classement_dce", label: "Analyse et classement d’un DCE" },
-  { value: "verification_pieces_admin", label: "Vérification des pièces administratives" },
-  { value: "assistance_memoire_technique", label: "Assistance au mémoire technique" },
-  { value: "preparation_reponse_ao", label: "Préparation d’une réponse à un appel d’offres" },
-  { value: "suivi_echeances", label: "Suivi des échéances" },
-  { value: "preparation_depot", label: "Préparation du dépôt" },
-  { value: "suivi_apres_attribution", label: "Suivi administratif après attribution" },
-  { value: "situations_chorus", label: "Situations et Chorus Pro" },
-  { value: "reserves_doe", label: "Réserves et DOE" },
-  { value: "renfort_admin_travaux", label: "Outiller l’admin travaux (plateforme)" },
-  { value: "demarrage_chantier", label: "Démarrage de chantier" },
-  { value: "conducteur_surcharge", label: "Conducteur de travaux surchargé / documents en retard" },
+  { value: "preparation_candidature", label: "Gestion des chantiers" },
+  { value: "analyse_classement_dce", label: "Communication interne" },
+  { value: "verification_pieces_admin", label: "Gestion documentaire" },
+  { value: "assistance_memoire_technique", label: "Marchés publics et privés" },
+  { value: "preparation_reponse_ao", label: "Analyse CCTP / CCAP" },
+  { value: "suivi_echeances", label: "Comptes rendus" },
+  { value: "preparation_depot", label: "IA documentaire" },
+  { value: "suivi_apres_attribution", label: "Tâches et validations" },
+  { value: "situations_chorus", label: "Réserves et DOE" },
+  { value: "reserves_doe", label: "Tableaux de bord" },
+  { value: "renfort_admin_travaux", label: "Suivi financier" },
+  { value: "demarrage_chantier", label: "Fournisseurs / sous-traitants" },
+  { value: "conducteur_surcharge", label: "Déploiement plateforme complète" },
   { value: "autre", label: "Autre besoin à préciser" },
 ] as const;
 
-/** Étape du prospect dans le cycle AO / marché (optionnel, joint au message). */
+/** Outils actuels (réutilise le champ projectStage côté API). */
 export const PROJECT_STAGE_OPTIONS = [
-  { value: "recherche_opportunite", label: "Recherche d’une opportunité" },
-  { value: "ao_identifie", label: "Appel d’offres identifié" },
-  { value: "candidature_preparation", label: "Candidature en préparation" },
-  { value: "reponse_en_cours", label: "Réponse en cours" },
-  { value: "avant_depot", label: "Dossier avant dépôt" },
-  { value: "marche_attribue", label: "Marché attribué" },
-  { value: "chantier_en_cours", label: "Chantier en cours" },
-  { value: "cloture_marche", label: "Clôture du marché" },
+  { value: "recherche_opportunite", label: "Email / messagerie" },
+  { value: "ao_identifie", label: "WhatsApp / SMS" },
+  { value: "candidature_preparation", label: "Excel / tableurs" },
+  { value: "reponse_en_cours", label: "Drive / SharePoint" },
+  { value: "avant_depot", label: "ERP / logiciel métier" },
+  { value: "marche_attribue", label: "Logiciel chantier" },
+  { value: "chantier_en_cours", label: "Plusieurs outils dispersés" },
+  { value: "cloture_marche", label: "Autre" },
 ] as const;
 
 export type MarketTypeValue = (typeof MARKET_TYPE_OPTIONS)[number]["value"];

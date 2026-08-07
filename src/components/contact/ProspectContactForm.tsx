@@ -90,7 +90,7 @@ export function ProspectContactForm({
       <div className={gridClass}>
         <div className={variant === "compact" ? "sm:col-span-2" : "md:col-span-2"}>
           <label htmlFor="companyName" className={LABEL_CLASS}>
-            Nom / entreprise <span className="text-red-600">*</span>
+            Entreprise <span className="text-red-600">*</span>
           </label>
           <input
             id="companyName"
@@ -134,7 +134,7 @@ export function ProspectContactForm({
 
         <div>
           <label htmlFor="marketType" className={LABEL_CLASS}>
-            Type de marché <span className="text-red-600">*</span>
+            Nombre de collaborateurs <span className="text-red-600">*</span>
           </label>
           <select id="marketType" name="marketType" required className={INPUT_CLASS}>
             <option value="">Sélectionnez…</option>
@@ -148,7 +148,7 @@ export function ProspectContactForm({
 
         <div>
           <label htmlFor="mainNeed" className={LABEL_CLASS}>
-            Votre situation actuelle <span className="text-red-600">*</span>
+            Besoin principal <span className="text-red-600">*</span>
           </label>
           <select id="mainNeed" name="mainNeed" required className={INPUT_CLASS}>
             <option value="">Sélectionnez…</option>
@@ -162,7 +162,7 @@ export function ProspectContactForm({
 
         <div>
           <label htmlFor="projectStage" className={LABEL_CLASS}>
-            À quelle étape êtes-vous&nbsp;?
+            Outils utilisés aujourd&apos;hui
           </label>
           <select id="projectStage" name="projectStage" className={INPUT_CLASS}>
             <option value="">Sélectionnez…</option>
@@ -176,7 +176,7 @@ export function ProspectContactForm({
 
         <div className={variant === "compact" ? "sm:col-span-2" : "md:col-span-2"}>
           <label htmlFor="tradeActivity" className={LABEL_CLASS}>
-            Corps d&apos;état / activité
+            Activité / corps d&apos;état
           </label>
           <input
             id="tradeActivity"
@@ -189,7 +189,7 @@ export function ProspectContactForm({
 
         <div className={variant === "compact" ? "sm:col-span-2" : "md:col-span-2"}>
           <label htmlFor="message" className={LABEL_CLASS}>
-            Qu&apos;attendez-vous précisément de BeWork&nbsp;?
+            Quelle est aujourd&apos;hui votre principale difficulté&nbsp;?
           </label>
           <textarea
             id="message"
@@ -197,11 +197,10 @@ export function ProspectContactForm({
             rows={variant === "compact" ? 3 : 4}
             maxLength={2000}
             className={`${INPUT_CLASS} resize-y`}
-            placeholder="Ex. préparer la candidature, classer le DCE, structurer le mémoire, suivre les échéances…"
+            placeholder="Ex. documents dispersés, suivi chantier difficile, marchés publics chronophages…"
           />
           <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
-            Décrivez les documents disponibles, les échéances, le travail déjà réalisé et les validations que votre équipe
-            peut fournir.
+            Indiquez aussi le nombre d&apos;utilisateurs envisagés si vous le connaissez.
           </p>
         </div>
       </div>
@@ -234,7 +233,7 @@ export function ProspectContactForm({
         disabled={status === "loading"}
         className="inline-flex h-11 shrink-0 items-center justify-center whitespace-nowrap rounded-lg bg-[#1d4ed8] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1e40af] disabled:cursor-not-allowed disabled:opacity-70 sm:h-12 sm:w-auto sm:text-[0.9375rem] w-full"
       >
-        {status === "loading" ? "Envoi en cours…" : "Envoyer ma demande"}
+        {status === "loading" ? "Envoi en cours…" : "Demander une démonstration personnalisée"}
       </button>
     </form>
   );

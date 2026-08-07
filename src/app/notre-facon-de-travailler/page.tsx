@@ -14,9 +14,9 @@ import { absoluteUrl } from "@/lib/site";
 const pageUrl = absoluteUrl("/notre-facon-de-travailler");
 const ogImage = absoluteUrl("/opengraph-image");
 
-const METHODE_TITLE = "Notre méthode BeWork : déploiement plateforme interne BTP";
+const METHODE_TITLE = "Notre méthode de déploiement | Plateforme interne BTP BeWork";
 const METHODE_DESCRIPTION =
-  "Méthode BeWork : cadrage, configuration plateforme, usage par vos équipes, validation avant envoi engageant. Éditeur BTP — pas un exécutant.";
+  "Diagnostic, composition, configuration, tests, formation, déploiement et évolution : la méthode BeWork pour votre plateforme interne BTP.";
 
 export const metadata: Metadata = {
   title: { absolute: METHODE_TITLE },
@@ -74,49 +74,50 @@ const methodeJsonLd = {
 const METHOD_STEPS = [
   {
     step: 1,
-    title: "Cadrage & diagnostic",
-    desc: "On définit vos flux (devis, dossiers chantier, marchés…), vos outils et vos règles de validation. BeWork configure ; vos équipes resteront les utilisatrices.",
+    title: "Diagnostic de votre organisation",
+    desc: "Nous analysons votre fonctionnement, vos équipes, vos outils, vos chantiers, vos documents, vos circuits de validation et vos principales difficultés.",
     bullets: [
-      "Devis, relances, situations",
-      "Documents travaux & pièces chantier",
-      "DICT/DT, fournisseurs, locations",
-      "DOE, réserves, planning (selon périmètre)",
+      "Fonctionnement & outils actuels",
+      "Équipes et responsabilités",
+      "Documents et validations",
+      "Difficultés prioritaires",
     ],
   },
   {
     step: 2,
-    title: "Configuration plateforme",
-    desc: "Modules, modèles, rôles et circuit de validation. Rien n’est inventé comme certitude hors cadrage — le périmètre est écrit.",
-    bullets: ["Urgence & impact chantier", "Infos manquantes", "Type de livrable", "Besoin de validation"],
+    title: "Composition de votre plateforme",
+    desc: "À partir du socle BeWork, nous définissons ensemble les modules, rôles, permissions, workflows, outils IA, tableaux de bord et éventuelles intégrations.",
+    bullets: ["Modules métier", "Rôles & permissions", "Workflows", "Outils IA & tableaux de bord"],
   },
   {
     step: 3,
-    title: "Vos équipes préparent dans la plateforme",
-    desc: "Vos collaborateurs produisent brouillons, synthèses, checklists et tableaux — l’IA accélère, vous gardez la main.",
-    bullets: [
-      "Brouillons de mails / relances",
-      "Tableaux de suivi (statuts, prochaines actions)",
-      "Comptes rendus mis au propre",
-      "Synthèses DCE/CCTP & checklists",
-    ],
+    title: "Configuration",
+    desc: "Nous adaptons l’environnement aux méthodes de travail de votre entreprise — sans reconstruire une application à zéro.",
+    bullets: ["Paramétrage", "Modèles & formulaires", "Droits d’accès", "Intégrations si besoin"],
   },
   {
     step: 4,
-    title: "Suivi d’avancement dans l’outil",
-    desc: "Statuts, relances, échéances, demandes en attente et points bloquants restent visibles — pour arbitrer à temps.",
-    bullets: ["Statuts & échéances", "Relances", "Pièces en attente", "Points bloquants"],
+    title: "Tests",
+    desc: "La plateforme est testée avec des utilisateurs pilotes et quelques cas réels avant élargissement.",
+    bullets: ["Groupe pilote", "Cas réels", "Ajustements", "Validation terrain"],
   },
   {
     step: 5,
-    title: "Vous validez ce qui engage",
-    desc: "Vous gardez la main sur les décisions qui engagent votre entreprise. La plateforme aide à préparer ; BeWork n’exécute pas à votre place.",
-    bullets: ["Prix & marges", "Choix techniques", "Arbitrages chantier", "Signatures & engagements"],
+    title: "Formation",
+    desc: "Chaque catégorie d’utilisateur apprend uniquement les fonctions nécessaires à son rôle.",
+    bullets: ["Par métier", "Parcours ciblés", "Prise en main", "Support de démarrage"],
   },
   {
     step: 6,
-    title: "Tout reste traçable",
-    desc: "Chaque demande, échange et document est suivi et retrouvé. Objectif : continuité, propreté et moins de pertes d’info entre bureau et chantier.",
-    bullets: ["Échanges datés", "Historique accessible", "Documents classés", "Meilleure continuité"],
+    title: "Déploiement",
+    desc: "La plateforme est progressivement utilisée par vos équipes sur les chantiers et dossiers retenus.",
+    bullets: ["Lancement progressif", "Usage quotidien", "Accompagnement", "Points de suivi"],
+  },
+  {
+    step: 7,
+    title: "Suivi et évolution",
+    desc: "BeWork maintient, sécurise et améliore la plateforme au fil de vos besoins. Les développements spécifiques importants font l’objet d’un cadrage distinct.",
+    bullets: ["Maintenance & sécurité", "Support", "Ajustements courants", "Évolution continue"],
   },
 ] as const;
 
@@ -199,11 +200,11 @@ export default function NotreFaconDeTravaillerPage() {
             Méthode BeWork
           </p>
           <h1 className="font-heading mt-3 text-3xl font-bold tracking-tight text-black md:text-4xl md:leading-tight">
-            Notre façon de travailler : plateforme interne BTP, usage par vos équipes
+            Notre méthode de déploiement
           </h1>
           <p className="mx-auto mt-5 max-w-3xl text-base leading-relaxed text-slate-700 md:text-lg">
-            BeWork configure, déploie et fait évoluer une plateforme métier. Vos équipes l&apos;utilisent au quotidien
-            pour préparer, suivre et valider — sans que BeWork exécute à votre place.
+            BeWork configure, déploie et fait évoluer votre plateforme interne. Vos équipes l&apos;utilisent au
+            quotidien — BeWork n&apos;exécute pas leurs missions à leur place.
           </p>
           <a
             href="#etapes"
@@ -214,10 +215,10 @@ export default function NotreFaconDeTravaillerPage() {
         </header>
 
         <div className="mx-auto mt-16 max-w-5xl space-y-16 md:mt-24 md:space-y-20">
-          <SectionShell id="etapes" title="Les étapes (concrètes) de la méthode BeWork" className="mx-auto max-w-5xl">
+          <SectionShell id="etapes" title="Les étapes de déploiement" className="mx-auto max-w-5xl">
             <p className="mt-4 max-w-3xl text-sm leading-relaxed text-slate-700 md:text-base">
-              Cette page décrit la méthode (cadrage → configuration → usage → suivi → validation → traçabilité). Elle
-              complète la home et les pages capacités / tarification, sans refaire leur contenu.
+              Du diagnostic à l&apos;évolution continue : une méthode claire pour que vos collaborateurs adoptent
+              réellement la plateforme.
             </p>
 
             <div className="mt-8 grid gap-4 md:grid-cols-2">
@@ -294,12 +295,12 @@ export default function NotreFaconDeTravaillerPage() {
             <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-7">
               <ul className="grid gap-2 text-sm leading-relaxed text-slate-800 sm:grid-cols-2" role="list">
                 {[
-                  "Les demandes sont traitées selon l’urgence et la complexité.",
-                  "Les urgences doivent être signalées clairement (impact chantier, échéance).",
-                  "Les demandes simples peuvent être traitées rapidement si les infos sont complètes.",
-                  "Les dossiers longs (DOE, DCE/CCTP, PPSPS…) nécessitent un cadrage et parfois un découpage.",
-                  "Les délais dépendent du périmètre déployé, du volume en cours et des informations fournies.",
-                  "On propose une estimation (et un point de validation) avant d’aller trop loin sur un dossier lourd.",
+                  "Le calendrier de déploiement dépend du périmètre, du nombre d’utilisateurs et des intégrations.",
+                  "Un groupe pilote permet de valider avant l’élargissement à toutes les équipes.",
+                  "Les urgences métier restent gérées par vos équipes dans la plateforme.",
+                  "Les dossiers complexes (DOE, DCE, PPSPS…) sont traités dans l’outil par vos collaborateurs.",
+                  "BeWork estime les étapes de configuration et de formation avant démarrage.",
+                  "Les développements spécifiques importants font l’objet d’un cadrage distinct.",
                 ].map((t) => (
                   <li key={t} className="flex items-start gap-2">
                     <span className="mt-0.5 text-[#1d4ed8]" aria-hidden>

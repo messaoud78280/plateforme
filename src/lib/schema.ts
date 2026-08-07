@@ -87,7 +87,7 @@ export function buildServiceOfferingJsonLd(d: ServicePageDefinition, pageUrl: st
     name: d.h1,
     description: d.metaDescription,
     url: pageUrl,
-    serviceType: "Assistant travaux BTP augmenté par l’IA",
+    serviceType: "Plateforme interne BTP avec outils IA métier",
     provider: { "@id": SCHEMA_ORG_ID },
     areaServed: jsonLdExpandedAreaServed(),
     audience: {

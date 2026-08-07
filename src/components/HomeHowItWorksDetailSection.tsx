@@ -22,7 +22,7 @@ const STEPS: {
   },
   {
     n: 3,
-    title: "Le Beworker prend le relais",
+    title: "La plateforme prend le relais",
     body: "Il prépare, organise, relance et suit les éléments convenus.",
     Icon: IconBriefcase,
   },
@@ -57,7 +57,7 @@ export function HomeHowItWorksDetailSection() {
             Un renfort simple à mettre en place
           </h2>
           <p className="mx-auto mt-4 text-base leading-relaxed text-slate-700 md:text-lg">
-            Vous décrivez votre besoin, nous cadrons la mission, un Beworker prend le relais — vous suivez
+            Vous décrivez votre besoin, nous cadrons le déploiement, vos équipes prennent le relais — vous suivez
             l&apos;avancement.
           </p>
         </header>
@@ -83,7 +83,7 @@ export function HomeHowItWorksDetailSection() {
         </ol>
 
         <p className="mx-auto mt-8 max-w-2xl text-center text-sm leading-relaxed text-slate-600">
-          Vos Beworkers peuvent s&apos;appuyer sur vos outils existants (Excel, Drive, SharePoint, Chorus Pro, Batigest,
+          Vos équipes peuvent s&apos;appuyer sur vos outils existants (Excel, Drive, SharePoint, Chorus Pro, Batigest,
           EBP, Sage…) et sur nos outils d&apos;intelligence artificielle pour accélérer la préparation.
         </p>
       </div>

@@ -18,7 +18,7 @@ export function HomePlatformSection() {
               Un assistant travaux, avec un espace de suivi par mission
             </h2>
             <p className="mt-4 text-base leading-relaxed text-slate-700 md:text-lg">
-              Votre Beworker réalise le travail convenu. L&apos;espace de mission vous permet de transmettre les
+              Vos équipes réalisent le travail dans la plateforme. L&apos;espace partagé vous permet de transmettre les
               éléments, consulter l&apos;avancement et identifier ce qui nécessite votre intervention.
             </p>
 
@@ -35,7 +35,7 @@ export function HomePlatformSection() {
 
             <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3.5 text-sm leading-relaxed text-slate-700">
               Les outils d&apos;intelligence artificielle facilitent le classement, la recherche, les synthèses et la
-              préparation des livrables. Chaque mission reste suivie par un Beworker.
+              préparation des livrables. Chaque dossier reste suivi dans l'environnement BeWork.
             </p>
           </div>
 

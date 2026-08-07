@@ -14,8 +14,8 @@ export function MarketingSitePreFooter() {
             Ressources &amp; bonnes pratiques
           </h2>
           <p className="mt-3 text-base leading-relaxed text-slate-600 sm:text-[1.05rem]">
-            Tutoriels PDF, guides et hub ressources pour structurer l&apos;administratif chantier : relances et trésorerie, dossiers travaux et relation
-            clients, sans perdre les équipes terrain.
+            Tutoriels PDF, guides et hub ressources pour structurer documents, marchés et suivi chantier dans votre
+            plateforme BeWork — sans perdre les équipes terrain.
           </p>
           <Link
             href="/ressources"

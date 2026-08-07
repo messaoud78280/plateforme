@@ -241,7 +241,7 @@ export const BEWORK_TARIFS_PROCESS_STEPS = [
   { title: "Vous demandez une étude", desc: "Premier échange pour comprendre votre organisation et vos priorités." },
   { title: "Nous diagnostiquons", desc: "Métiers, processus, outils existants et besoins de configuration." },
   { title: "Nous cadrons le périmètre", desc: "Modules, workflows, rôles, IA et niveau d’accompagnement." },
-  { title: "Vous recevez une proposition", desc: "Mise en place initiale + abonnement mensuel, sans grille opaque." },
+  { title: "Vous recevez une proposition", desc: "Mise en place initiale + abonnement mensuel. Vous recevez une proposition claire correspondant au périmètre retenu." },
   { title: "Déploiement et formation", desc: "Configuration, tests, formation — puis vos équipes pilotent au quotidien." },
 ] as const;
 

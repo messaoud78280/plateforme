@@ -338,12 +338,12 @@ export const BLOG_ARTICLES: Record<string, BlogArticle> = {
       {
         type: "p",
         content:
-          "C'est précisément le rôle d'une assistance travaux. Pendant que vous tenez le terrain, nous tenons le bureau : recalage de planning, chiffrage des scénarios, note d'impact, suivi des aléas. Vous gardez la décision — c'est votre métier. Nous vous rendons le temps de la prendre.",
+          "C'est précisément le rôle d'une plateforme travaux. Pendant que vous tenez le terrain, vos équipes tiennent le bureau dans un environnement unique : recalage de planning, chiffrage des scénarios, note d'impact, suivi des aléas. Vous gardez la décision — c'est votre métier.",
       },
       {
         type: "p",
         content:
-          "Augmentés par l'intelligence artificielle et supervisés par des humains en France, nos assistants travaux livrent des dossiers exploitables en trois à cinq jours. Sans recrutement à faire, sans risque RH.",
+          "Augmentés par l'intelligence artificielle dans votre plateforme BeWork, vos équipes préparent des dossiers exploitables plus vite. Sans alourdir immédiatement la masse salariale.",
       },
 
       {

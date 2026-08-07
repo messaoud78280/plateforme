@@ -4,19 +4,6 @@ import Link from "next/link";
 import { Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 
-function IconShield({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} aria-hidden>
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12 2.25l7.5 4.125V12c0 5.25-3.75 9.75-7.5 9.75S4.5 17.25 4.5 12V6.375L12 2.25Z"
-      />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 12l1.5 1.5L15.75 9" />
-    </svg>
-  );
-}
-
 function IconBriefcase({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden>
@@ -53,6 +40,18 @@ function IconBuilding({ className }: { className?: string }) {
   );
 }
 
+function IconSpark({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.785L16.5 21.75l-.394-.965a1.5 1.5 0 00-1.037-1.037l-.965-.394.965-.394a1.5 1.5 0 001.037-1.037l.394-.965.394.965a1.5 1.5 0 001.037 1.037l.965.394-.965.394a1.5 1.5 0 00-1.037 1.037z"
+      />
+    </svg>
+  );
+}
+
 const ACCES = [
   {
     slug: "gerante",
@@ -60,8 +59,9 @@ const ACCES = [
     title: "Espace Gérante / Managers",
     description: "Accès réservé à la gérante et aux managers de l'agence.",
     emphasis: "Pilotage global, suivi des chantiers et performance.",
-    accent: "blue",
+    accent: "blue" as const,
     path: "/connexion/gerante",
+    cta: "Se connecter →",
     Icon: IconBriefcase,
   },
   {
@@ -70,8 +70,9 @@ const ACCES = [
     title: "Espace Agents",
     description: "Accès pour les agents opérationnels.",
     emphasis: "Traitement des missions, coordination et suivi opérationnel.",
-    accent: "violet",
+    accent: "violet" as const,
     path: "/connexion/agents",
+    cta: "Se connecter →",
     Icon: IconUser,
   },
   {
@@ -80,11 +81,23 @@ const ACCES = [
     title: "Espace Clients",
     description: "Accès pour les clients de l'agence.",
     emphasis: "Suivi de vos demandes, échanges et avancement en temps réel.",
-    accent: "green",
+    accent: "green" as const,
     path: "/connexion/clients",
+    cta: "Se connecter →",
     Icon: IconBuilding,
   },
-] as const;
+  {
+    slug: "demo",
+    badge: "Connexion démonstration",
+    title: "Espace Démo BeWork",
+    description: "Découvrez une plateforme interne BTP configurée selon les besoins de votre entreprise.",
+    emphasis: "Chantiers, planning, documents, commandes, alertes, pilotage et outils IA.",
+    accent: "slate" as const,
+    path: "/connexion/demo",
+    cta: "Accéder à la démonstration →",
+    Icon: IconSpark,
+  },
+];
 
 type Accent = (typeof ACCES)[number]["accent"];
 
@@ -103,6 +116,14 @@ function getAccent(acc: Accent) {
       iconWrap: "bg-[color:var(--client-50)] text-[color:var(--client-700)] border-[#bbf7d0]",
       emphasis: "text-[color:var(--client-700)]",
       link: "text-[color:var(--client-700)]",
+    } as const;
+  }
+  if (acc === "slate") {
+    return {
+      badge: "bg-slate-100 text-slate-800 border-slate-200",
+      iconWrap: "bg-slate-100 text-slate-800 border-slate-200",
+      emphasis: "text-slate-800",
+      link: "text-slate-800",
     } as const;
   }
   return {
@@ -142,7 +163,7 @@ function ConnexionChoice() {
       />
 
       <div className="container-site relative z-10">
-        <div className="mx-auto w-full max-w-4xl">
+        <div className="mx-auto w-full max-w-6xl">
           <div className="rounded-3xl border border-slate-200/80 bg-white/85 p-8 shadow-[0_18px_55px_-28px_rgba(15,23,42,0.18)] ring-1 ring-slate-100/80 backdrop-blur-[2px] md:p-10">
             <header className="mb-8 border-b border-[#c8d0dc]/60 pb-6 text-center">
               <h1 className="font-sans text-[1.9rem] font-extrabold leading-tight tracking-tight text-slate-950 md:text-[2.4rem]">
@@ -153,7 +174,7 @@ function ConnexionChoice() {
               </p>
             </header>
 
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {ACCES.map((acc) => {
                 const { Icon } = acc;
                 const a = getAccent(acc.accent);
@@ -180,7 +201,7 @@ function ConnexionChoice() {
                     <p className="text-sm leading-relaxed text-slate-700">{acc.description}</p>
                     <p className={`mt-3 text-sm font-semibold leading-relaxed ${a.emphasis}`}>{acc.emphasis}</p>
                     <span className={`mt-4 text-xs font-semibold transition group-hover:opacity-90 ${a.link}`}>
-                      Se connecter →
+                      {acc.cta}
                     </span>
                   </Link>
                 );

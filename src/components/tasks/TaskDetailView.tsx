@@ -16,6 +16,8 @@ import { documentDownloadHref } from "@/lib/documents/download-url";
 import { missionTypeLabel } from "@/lib/tasks/mission-types";
 import { TaskChantierDocuments } from "./TaskChantierDocuments";
 import { LinkMissionToChantier } from "./LinkMissionToChantier";
+import { BonDeCommandeWorkflow } from "./BonDeCommandeWorkflow";
+import { isBonDeCommandeCategory } from "@/lib/demo-environment/bon-commande";
 
 interface TaskDetailViewProps {
   sessionUserId?: string;
@@ -42,6 +44,7 @@ interface TaskDetailViewProps {
     desiredDate?: Date | string | null;
     estimatedActions?: string | number | null;
     missionType?: string | null;
+    suppliersJson?: { name?: string; contact?: string }[] | null;
     assignedTo?: { id: string; name: string; email: string } | null;
     client?: { id: string; name: string };
     project?: { id: string; title: string } | null;
@@ -74,6 +77,7 @@ interface TaskDetailViewProps {
   validateError?: string | null;
   onReportSent?: () => void | Promise<void>;
   clientProjects?: { id: string; title: string }[];
+  isDemo?: boolean;
 }
 
 const statusColors: Record<TaskStatus, string> = {
@@ -108,6 +112,7 @@ export function TaskDetailView({
   validateError = null,
   onReportSent,
   clientProjects = [],
+  isDemo = false,
 }: TaskDetailViewProps) {
   const [agencyNotesLocal, setAgencyNotesLocal] = useState(task.agencyNotes ?? "");
   const [savingNotes, setSavingNotes] = useState(false);
@@ -137,6 +142,17 @@ export function TaskDetailView({
 
   return (
     <div className="space-y-6">
+      {isBonDeCommandeCategory(task.category) ? (
+        <BonDeCommandeWorkflow
+          taskId={task.id}
+          status={task.status}
+          desiredDate={task.desiredDate}
+          suppliers={task.suppliersJson}
+          description={task.description}
+          canAdvance={Boolean(isDemo || isAgence || isAgent)}
+        />
+      ) : null}
+
       {/* Raccourcis (gérante) */}
       {isManager && (
         <div className="flex flex-wrap gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3">

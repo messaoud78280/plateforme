@@ -92,6 +92,8 @@ model User {
   pilotageActionsAssigned    PilotageAction[]   @relation("PilotageActionAssignee")
   pilotageActionsCreated     PilotageAction[]   @relation("PilotageActionCreator")
   demoPilotageLinksCreated  DemoPilotageLink[] @relation("DemoPilotageLinkCreatedBy")
+  demoEnvironmentsOwned     DemoEnvironment[]  @relation("DemoEnvironmentRootUser")
+  demoEnvironmentsCreated   DemoEnvironment[]  @relation("DemoEnvironmentCreatedBy")
 
   // Organisation multi-utilisateurs
   organizationsOwned     Organization[]       @relation("OrganizationOwner")
@@ -175,10 +177,11 @@ model Organization {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  owner    User                 @relation("OrganizationOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
-  members  OrganizationMember[]
-  projects Project[]
-  tasks    Task[]
+  owner            User                 @relation("OrganizationOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  members          OrganizationMember[]
+  projects         Project[]
+  tasks            Task[]
+  demoEnvironment  DemoEnvironment?
 
   @@index([ownerUserId])
   @@unique([ownerUserId])
@@ -2766,4 +2769,48 @@ model DemoPilotageLink {
   @@index([expiresAt])
   @@index([createdById])
   @@index([prospectCompany])
+}
+
+/// Environnement de démonstration commerciale plateforme (1 prospect = 1 tenant isolé).
+/// Réutilise User CLIENT + Organization ; n’expose jamais de données clients réels.
+model DemoEnvironment {
+  id              String    @id @default(cuid())
+  companyName     String
+  internalName    String
+  sector          String?
+  employeeCount   Int?
+  logoUrl         String?
+  /// PME_BTP | CHANTIER_TERRAIN | MARCHES_ETUDES | ENTREPRISE_GENERALE
+  templateKey     String    @default("PME_BTP")
+  /// Modules visibles (string[])
+  modulesEnabled  Json
+  /// Profils fictifs affichés [{ name, roleLabel }]
+  rolesConfig     Json?
+  /// Terminologie optionnelle { projectsLabel?: string }
+  terminology     Json?
+  meetingAt       DateTime?
+  startsAt        DateTime  @default(now())
+  expiresAt       DateTime
+  /// ACTIVE | DISABLED | EXPIRED | ARCHIVED
+  status          String    @default("ACTIVE")
+  lastLoginAt     DateTime?
+  /// Identifiant public (ex. abc-etancheite) — email technique = {id}@demo.bework.local
+  loginIdentifier String    @unique
+  rootUserId      String    @unique
+  organizationId  String?   @unique
+  seedVersion     String    @default("v1")
+  notes           String?   @db.Text
+  createdById     String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  rootUser     User          @relation("DemoEnvironmentRootUser", fields: [rootUserId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  createdBy    User?         @relation("DemoEnvironmentCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([expiresAt])
+  @@index([createdById])
+  @@index([companyName])
+  @@index([templateKey])
 }

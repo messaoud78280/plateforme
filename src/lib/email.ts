@@ -53,6 +53,12 @@ export async function sendEmail(params: {
   html: string;
   replyTo?: string;
 }): Promise<SendEmailResult> {
+  // Comptes démo : jamais d’email externe réel
+  const rawTo = Array.isArray(params.to) ? params.to : [params.to];
+  if (rawTo.some((e) => String(e).toLowerCase().includes("@demo.bework.local"))) {
+    return { ok: true, provider: "brevo", messageId: "demo-blocked" };
+  }
+
   const apiKey = (process.env.BREVO_API_KEY ?? "").trim();
   if (!apiKey) {
     console.error("[Email] Brevo: BREVO_API_KEY manquant.");

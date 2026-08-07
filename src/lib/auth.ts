@@ -9,18 +9,28 @@ import { sendEmail } from "@/lib/email";
 import { isClientLoginAllowed } from "@/lib/client-account-approval";
 import { gateAllows, parseTeamLoginGate } from "@/lib/auth-team-login";
 import { canonicalRequestOrigin } from "@/lib/site";
+import { resolveDemoAccessForUser } from "@/lib/demo-environment/access";
+import { isDemoEmail, toDemoEmail } from "@/lib/demo-environment/constants";
+
+function resolveCredentialsEmail(raw: string, gate: string | null): string {
+  const trimmed = raw.trim().toLowerCase();
+  if (gate === "demo" && !trimmed.includes("@")) {
+    return toDemoEmail(trimmed);
+  }
+  return trimmed;
+}
 
 export const authOptions: NextAuthOptions = {
   adapter: prismaAdapterCaseInsensitiveEmail(prisma),
   providers: [
     EmailProvider({
-      // 24h pour utiliser le lien (option B)
       maxAge: 24 * 60 * 60,
-      // Envoi via l'API Brevo (pas de SMTP / nodemailer).
-      // NextAuth utilise seulement ce callback pour envoyer le lien.
       from: process.env.EMAIL_FROM,
       async sendVerificationRequest({ identifier, url }) {
         const emailNorm = identifier.trim().toLowerCase();
+        if (isDemoEmail(emailNorm)) {
+          throw new Error("Connexion magique indisponible pour les comptes de démonstration");
+        }
         const existing = await prisma.user.findFirst({
           where: { email: { equals: emailNorm, mode: "insensitive" } },
           select: { role: true, accountStatus: true },
@@ -74,13 +84,22 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials?.password) return null;
 
         try {
-          const email = credentials.email.trim().toLowerCase();
+          const gate = parseTeamLoginGate(credentials.gate);
+          const email = resolveCredentialsEmail(credentials.email, gate);
           const user = await prisma.user.findFirst({
             where: { email: { equals: email, mode: "insensitive" } },
           });
 
           if (!user?.password) return null;
           if (!(await bcrypt.compare(credentials.password, user.password))) {
+            return null;
+          }
+
+          if (gate === "demo") {
+            const access = await resolveDemoAccessForUser(user.id);
+            if (!access.ok) return null;
+          } else if (isDemoEmail(user.email)) {
+            // Les comptes démo ne passent que par le portail démo
             return null;
           }
 
@@ -102,13 +121,34 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user, credentials }) {
       const role = (user as { role?: string }).role;
+      const email = (user as { email?: string }).email;
       const gate = parseTeamLoginGate(credentials?.gate);
-      if (gate && role && !gateAllows(role, gate)) {
+      if (gate && role && !gateAllows(role, gate, email)) {
         return `/connexion/${gate}?error=wrong_gate`;
       }
 
       const userId = (user as { id?: string }).id;
       if (!userId) return true;
+
+      if (gate === "demo" || isDemoEmail(email)) {
+        const access = await resolveDemoAccessForUser(userId);
+        if (!access.ok) {
+          const err =
+            access.reason === "expired"
+              ? "demo_expired"
+              : access.reason === "disabled"
+                ? "demo_disabled"
+                : access.reason === "not_started"
+                  ? "demo_not_started"
+                  : "demo_invalid";
+          return `/connexion/demo?error=${err}`;
+        }
+        await prisma.demoEnvironment.update({
+          where: { id: access.demo.id },
+          data: { lastLoginAt: new Date() },
+        });
+        return true;
+      }
 
       const dbUser = await prisma.user.findUnique({
         where: { id: userId },
@@ -131,17 +171,43 @@ export const authOptions: NextAuthOptions = {
         const u = user as unknown as Record<string, unknown>;
         token.contractStatus = typeof u.contractStatus === "string" ? u.contractStatus : undefined;
         token.accountStatus = typeof u.accountStatus === "string" ? u.accountStatus : undefined;
+        token.email = typeof u.email === "string" ? u.email : token.email;
       } else if (token.id && !token.role) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { role: true, contractStatus: true, accountStatus: true },
+          select: { role: true, contractStatus: true, accountStatus: true, email: true },
         });
         if (dbUser) {
           token.role = dbUser.role;
           token.contractStatus = dbUser.contractStatus;
           token.accountStatus = dbUser.accountStatus;
+          token.email = dbUser.email;
         }
       }
+
+      // Métadonnées démo (revalidées périodiquement via présence email)
+      const email = (token.email as string | undefined) ?? undefined;
+      if (token.id && (isDemoEmail(email) || token.isDemo)) {
+        const access = await resolveDemoAccessForUser(token.id as string);
+        if (access.ok) {
+          token.isDemo = true;
+          token.demoEnvironmentId = access.demo.id;
+          token.demoCompanyName = access.demo.companyName;
+          token.demoModules = Array.isArray(access.demo.modulesEnabled)
+            ? (access.demo.modulesEnabled as string[]).filter((x) => typeof x === "string")
+            : [];
+        } else {
+          token.isDemo = true;
+          token.demoExpired = true;
+        }
+      } else {
+        token.isDemo = false;
+        token.demoEnvironmentId = undefined;
+        token.demoCompanyName = undefined;
+        token.demoModules = undefined;
+        token.demoExpired = undefined;
+      }
+
       return token;
     },
     async session({ session, token }) {
@@ -150,6 +216,11 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role as string;
         session.user.contractStatus = token.contractStatus as string;
         session.user.accountStatus = token.accountStatus as string;
+        session.user.isDemo = Boolean(token.isDemo);
+        session.user.demoEnvironmentId = token.demoEnvironmentId as string | undefined;
+        session.user.demoCompanyName = token.demoCompanyName as string | undefined;
+        session.user.demoModules = token.demoModules as string[] | undefined;
+        session.user.demoExpired = Boolean(token.demoExpired);
       }
       return session;
     },
@@ -169,7 +240,7 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 jours
+    maxAge: 30 * 24 * 60 * 60,
   },
   secret: process.env.NEXTAUTH_SECRET,
   trustHost: true,

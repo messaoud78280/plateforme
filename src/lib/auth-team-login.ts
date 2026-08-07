@@ -1,6 +1,7 @@
-import { isAgentRole, isClient, isManager } from "@/types";
+import { isClient, isAgentRole, isManager } from "@/types";
+import { isDemoEmail } from "@/lib/demo-environment/constants";
 
-export type TeamLoginGate = "gerante" | "agents" | "clients";
+export type TeamLoginGate = "gerante" | "agents" | "clients" | "demo";
 
 /** Évite de renvoyer vers /connexion après login (boucle). */
 export function safeTeamLoginRedirect(raw: string): string {
@@ -12,12 +13,16 @@ export function safeTeamLoginRedirect(raw: string): string {
 
 export function parseTeamLoginGate(raw: unknown): TeamLoginGate | null {
   const value = typeof raw === "string" ? raw.trim() : "";
-  if (value === "gerante" || value === "agents" || value === "clients") return value;
+  if (value === "gerante" || value === "agents" || value === "clients" || value === "demo") {
+    return value;
+  }
   return null;
 }
 
-export function gateAllows(role: string, gate: TeamLoginGate): boolean {
-  if (gate === "gerante") return isManager(role);
-  if (gate === "agents") return isAgentRole(role);
-  return isClient(role);
+export function gateAllows(role: string, gate: TeamLoginGate, email?: string | null): boolean {
+  if (gate === "gerante") return isManager(role) && !isDemoEmail(email);
+  if (gate === "agents") return isAgentRole(role) && !isDemoEmail(email);
+  if (gate === "demo") return isClient(role);
+  // Portail clients : comptes clients réels uniquement (pas les démos)
+  return isClient(role) && !isDemoEmail(email);
 }

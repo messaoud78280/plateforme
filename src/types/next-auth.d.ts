@@ -10,6 +10,11 @@ declare module "next-auth" {
       contractStatus?: string;
       accountStatus?: string;
       image?: string | null;
+      isDemo?: boolean;
+      demoEnvironmentId?: string;
+      demoCompanyName?: string;
+      demoModules?: string[];
+      demoExpired?: boolean;
     };
   }
 }
@@ -20,5 +25,11 @@ declare module "next-auth/jwt" {
     role: string;
     contractStatus?: string;
     accountStatus?: string;
+    email?: string;
+    isDemo?: boolean;
+    demoEnvironmentId?: string;
+    demoCompanyName?: string;
+    demoModules?: string[];
+    demoExpired?: boolean;
   }
 }

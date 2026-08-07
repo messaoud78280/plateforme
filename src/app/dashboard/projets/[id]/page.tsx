@@ -9,6 +9,7 @@ import { ProjectAssignAgent } from "@/components/projects/ProjectAssignAgent";
 import { ProjectPpspsSection } from "@/components/projects/ProjectPpspsSection";
 import { ProjectReportsSection } from "@/components/projects/ProjectReportsSection";
 import { ChantierDossierSection } from "@/components/chantier/ChantierDossierSection";
+import { ChantierCockpit } from "@/components/chantier/ChantierCockpit";
 import { canAccessBeWorkSkills } from "@/lib/be-work-skills-access";
 import { canAccessChantierProject, canDeleteChantierProject } from "@/lib/chantier-dossier/access";
 import { projectMessageVisibilityWhere } from "@/lib/messaging/access";
@@ -28,6 +29,7 @@ import {
 import { chantierStatusBadgeTone } from "@/lib/chantier-lifecycle";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Badge } from "@/components/ui/Badge";
+import { TaskStatus } from "@prisma/client";
 
 export default async function ProjetDetailPage({
   params,
@@ -66,6 +68,7 @@ export default async function ProjetDetailPage({
         title: true,
         status: true,
         priority: true,
+        category: true,
         missionType: true,
         desiredDate: true,
         actionsUsed: true,
@@ -132,16 +135,19 @@ export default async function ProjetDetailPage({
   }));
 
   const projectActionsUsed = actionsConsumed._sum.actionsUsed ?? 0;
-  const clientTotal = project?.client && "monthlyActionsTotal" in project.client ? (project.client as { monthlyActionsTotal: number }).monthlyActionsTotal : 0;
-  const clientUsed = project?.client && "monthlyActionsUsed" in project.client ? (project.client as { monthlyActionsUsed: number }).monthlyActionsUsed : 0;
+  const clientTotal =
+    project?.client && "monthlyActionsTotal" in project.client
+      ? (project.client as { monthlyActionsTotal: number }).monthlyActionsTotal
+      : 0;
+  const clientUsed =
+    project?.client && "monthlyActionsUsed" in project.client
+      ? (project.client as { monthlyActionsUsed: number }).monthlyActionsUsed
+      : 0;
   const clientRemaining = Math.max(0, clientTotal - clientUsed);
 
   const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
   const isStaff = isAgence || session.user.role === "AGENT";
-  const canEditDossier =
-    isStaff ||
-    project.clientId === session.user.id;
-
+  const canEditDossier = isStaff || project.clientId === session.user.id;
   const canDeleteChantier = canDeleteChantierProject(session.user, project);
 
   let agents: { id: string; name: string; email: string }[] = [];
@@ -165,6 +171,16 @@ export default async function ProjetDetailPage({
     assignedTo: m.assignedTo,
   }));
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const openTasks = chantierMissions.filter((t) => t.status !== TaskStatus.COMPLETE);
+  const overdue = openTasks.filter((t) => t.desiredDate && t.desiredDate < today);
+  const ordersPending = openTasks.filter(
+    (t) =>
+      (t.category ?? "").toLowerCase().includes("bon de commande") &&
+      t.status === TaskStatus.A_VALIDER,
+  );
+
   const urgencyLabels: Record<string, string> = {
     BASSE: "Basse",
     MOYENNE: "Moyenne",
@@ -178,12 +194,226 @@ export default async function ProjetDetailPage({
     URGENTE: "bg-red-100 text-red-800",
   };
 
+  const attentionItems = [
+    ...ordersPending.map((t) => ({
+      id: t.id,
+      title: t.title,
+      subtitle: "Bon de commande à valider",
+      href: `/dashboard/taches/${t.id}`,
+      tone: "critical" as const,
+    })),
+    ...overdue.slice(0, 4).map((t) => ({
+      id: `ov-${t.id}`,
+      title: t.title,
+      subtitle: "Échéance dépassée",
+      href: `/dashboard/taches/${t.id}`,
+      tone: "watch" as const,
+    })),
+    ...(missingCount > 0
+      ? [
+          {
+            id: "missing-docs",
+            title: `${missingCount} pièce${missingCount > 1 ? "s" : ""} manquante${missingCount > 1 ? "s" : ""}`,
+            subtitle: "Classeur chantier",
+            href: `/dashboard/projets/manquants?chantier=${encodeURIComponent(id)}`,
+            tone: "watch" as const,
+          },
+        ]
+      : []),
+  ].slice(0, 6);
+
+  const contextCard = (
+    <div className="cc-card p-5 sm:p-6">
+      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-bework-muted">Contexte chantier</p>
+      <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-bework-muted">
+        <span>Client : {project.client.name}</span>
+        {project.siteCity ? <span>{project.siteCity}</span> : null}
+        {project.internalManager ? <span>Responsable : {project.internalManager}</span> : null}
+        {project.assignedTo ? (
+          <span className="rounded-full bg-bework-navy-soft px-2.5 py-0.5 font-medium text-bework-navy">
+            {isAgence ? "Agent : " : "Référent : "}
+            {project.assignedTo.name}
+          </span>
+        ) : null}
+      </div>
+
+      {isAgence ? (
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-600">
+          <span className="rounded-full bg-[#1d4ed8]/10 px-3 py-1 font-medium text-[#1d4ed8]">
+            Actions consommées (BeWork) : {projectActionsUsed}
+          </span>
+          <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">
+            Client : {clientUsed}/{clientTotal} actions (mois)
+          </span>
+          <span className="rounded-full bg-green-100 px-3 py-1 font-medium text-green-800">
+            Restant : {clientRemaining}
+          </span>
+        </div>
+      ) : null}
+
+      <div className="mt-6 grid gap-4 border-t border-slate-100 pt-6 sm:grid-cols-2 lg:grid-cols-3">
+        {project.siteAddress ? (
+          <div>
+            <p className="text-xs font-medium uppercase text-slate-500">Adresse chantier</p>
+            <p className="text-slate-800">{project.siteAddress}</p>
+          </div>
+        ) : null}
+        {project.plannedStartDate ? (
+          <div>
+            <p className="text-xs font-medium uppercase text-slate-500">Démarrage prévu</p>
+            <p className="text-slate-800">{new Date(project.plannedStartDate).toLocaleDateString("fr-FR")}</p>
+          </div>
+        ) : project.dateSouhaitee ? (
+          <div>
+            <p className="text-xs font-medium uppercase text-slate-500">Date souhaitée (début)</p>
+            <p className="text-slate-800">{new Date(project.dateSouhaitee).toLocaleDateString("fr-FR")}</p>
+          </div>
+        ) : null}
+        {project.plannedEndDate ? (
+          <div>
+            <p className="text-xs font-medium uppercase text-slate-500">Fin prévue</p>
+            <p className="text-slate-800">{new Date(project.plannedEndDate).toLocaleDateString("fr-FR")}</p>
+          </div>
+        ) : project.deadline ? (
+          <div>
+            <p className="text-xs font-medium uppercase text-slate-500">Deadline</p>
+            <p className="text-slate-800">{new Date(project.deadline).toLocaleDateString("fr-FR")}</p>
+          </div>
+        ) : null}
+        {project.signedQuoteAmount != null ? (
+          <div>
+            <p className="text-xs font-medium uppercase text-slate-500">Devis signé</p>
+            <p className="font-semibold text-slate-800">
+              {Number(project.signedQuoteAmount).toLocaleString("fr-FR", {
+                style: "currency",
+                currency: "EUR",
+                maximumFractionDigits: 0,
+              })}{" "}
+              HT
+            </p>
+          </div>
+        ) : null}
+      </div>
+
+      {project.notes ? (
+        <div className="mt-4 border-t border-slate-100 pt-4">
+          <p className="text-xs font-medium uppercase text-slate-500">Instructions / détails importants</p>
+          <p className="mt-1 whitespace-pre-wrap text-slate-700">{project.notes}</p>
+        </div>
+      ) : null}
+    </div>
+  );
+
+  const tachesPanel = (
+    <ProjectMissionsSection
+      projectId={id}
+      projectTitle={project.title}
+      clientId={project.clientId}
+      clientName={project.client.name}
+      missions={missionsRows}
+      agents={agents.map((a) => ({ id: a.id, name: a.name }))}
+      isAgence={isAgence}
+    />
+  );
+
+  const documentsPanel = (
+    <div className="space-y-4">
+      {syncBanner ? (
+        <p className="rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-800">
+          {syncBanner.synced} pièce{syncBanner.synced > 1 ? "s" : ""} importée
+          {syncBanner.synced > 1 ? "s" : ""} depuis les missions liées à ce chantier.
+        </p>
+      ) : null}
+      <ChantierOrphanMissionBanner projectId={id} orphans={orphanMissions} />
+      <div id="dossier-chantier">
+        <ChantierDossierSection projectId={id} folders={dossierFolders} canEdit={canEditDossier} />
+      </div>
+      {project.documents.length > 0 ? (
+        <div className="rounded-xl surface-metallic-light p-6">
+          <h2 className="mb-4 text-lg font-semibold text-slate-800">
+            Pièces jointes ({project.documents.length})
+          </h2>
+          <ul className="space-y-2">
+            {project.documents.map((doc) => (
+              <li
+                key={doc.id}
+                className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2"
+              >
+                <span className="truncate text-sm text-slate-800">{doc.name}</span>
+                <a
+                  href={doc.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium text-blue-600 hover:underline"
+                >
+                  Télécharger
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </div>
+  );
+
+  const messagesPanel = (
+    <div className="rounded-xl surface-metallic-light p-6">
+      <h2 className="mb-4 text-lg font-semibold text-slate-800">Messages</h2>
+      <div className="space-y-4">
+        {project.messages.length === 0 ? (
+          <p className="text-slate-500">Aucun message pour le moment.</p>
+        ) : (
+          project.messages.map((msg) => {
+            const isFromMe = msg.senderId === session.user?.id;
+            return (
+              <div
+                key={msg.id}
+                className={`rounded-lg p-4 ${isFromMe ? "ml-8 bg-blue-50" : "mr-8 bg-slate-100"}`}
+              >
+                <p className="text-sm font-medium text-slate-700">
+                  {msg.sender.name} → {msg.receiver.name}
+                </p>
+                <p className="mt-1 text-slate-800">{msg.content}</p>
+                <p className="mt-2 text-xs text-slate-500">
+                  {new Date(msg.createdAt).toLocaleString("fr-FR")}
+                </p>
+              </div>
+            );
+          })
+        )}
+      </div>
+      <MessageForm
+        projectId={project.id}
+        clientId={project.clientId}
+        client={project.client ? { id: project.client.id, name: project.client.name } : undefined}
+        isAgence={isAgence}
+        sessionUserId={session.user.id}
+      />
+    </div>
+  );
+
+  const pilotagePanel = (
+    <div className="space-y-4">
+      <ProjectAssignAgent
+        projectId={project.id}
+        assignedToId={project.assignedToId ?? null}
+        assignedTo={project.assignedTo ?? null}
+        agents={agents}
+        isAgence={isAgence}
+      />
+      <ProjectReportsSection projectId={project.id} isAgence={isAgence} />
+      {canAccessBeWorkSkills(session.user.role) ? (
+        <ProjectPpspsSection projectId={project.id} projectTitle={project.title} />
+      ) : null}
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       <BackLink href="/dashboard/projets">Retour aux chantiers</BackLink>
 
       <PageHeader
-        eyebrow="Dossier chantier"
+        eyebrow="Cockpit chantier"
         title={project.title}
         description={
           [
@@ -200,9 +430,6 @@ export default async function ProjetDetailPage({
         }
         actions={
           <>
-            <a href="#dossier-chantier" className="btn-cc-primary">
-              Ouvrir le dossier
-            </a>
             {missingCount > 0 ? (
               <Link
                 href={`/dashboard/projets/manquants?chantier=${encodeURIComponent(id)}`}
@@ -221,11 +448,7 @@ export default async function ProjetDetailPage({
               />
             ) : null}
             {isStaff ? (
-              <ChantierStatusSelect
-                projectId={project.id}
-                value={project.chantierStatus}
-                canEdit
-              />
+              <ChantierStatusSelect projectId={project.id} value={project.chantierStatus} canEdit />
             ) : (
               <Badge tone={chantierStatusBadgeTone(project.chantierStatus)}>
                 {CHANTIER_STATUS_LABELS[project.chantierStatus] ?? project.chantierStatus}
@@ -240,194 +463,39 @@ export default async function ProjetDetailPage({
         }
       />
 
-      <div className="cc-card p-5 sm:p-6">
-        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-bework-muted">Contexte chantier</p>
-        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-bework-muted">
-          <span>Client : {project.client.name}</span>
-          {project.siteCity ? <span>{project.siteCity}</span> : null}
-          {project.internalManager ? <span>Responsable : {project.internalManager}</span> : null}
-          {project.assignedTo ? (
-            <span className="rounded-full bg-bework-navy-soft px-2.5 py-0.5 font-medium text-bework-navy">
-              {isAgence ? "Agent : " : "Référent : "}
-              {project.assignedTo.name}
-            </span>
-          ) : null}
-        </div>
-
-        {isAgence ? (
-          <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-600">
-            <span className="rounded-full bg-[#1d4ed8]/10 px-3 py-1 font-medium text-[#1d4ed8]">
-              Actions consommées (BeWork) : {projectActionsUsed}
-            </span>
-            <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">
-              Client : {clientUsed}/{clientTotal} actions (mois)
-            </span>
-            <span className="rounded-full bg-green-100 px-3 py-1 font-medium text-green-800">
-              Restant : {clientRemaining}
-            </span>
-          </div>
-        ) : null}
-
-        <div className="mt-6 grid gap-4 border-t border-slate-100 pt-6 sm:grid-cols-2 lg:grid-cols-3">
-          {project.siteAddress ? (
-            <div>
-              <p className="text-xs font-medium uppercase text-slate-500">Adresse chantier</p>
-              <p className="text-slate-800">{project.siteAddress}</p>
-            </div>
-          ) : null}
-          {project.plannedStartDate ? (
-            <div>
-              <p className="text-xs font-medium uppercase text-slate-500">Démarrage prévu</p>
-              <p className="text-slate-800">{new Date(project.plannedStartDate).toLocaleDateString("fr-FR")}</p>
-            </div>
-          ) : project.dateSouhaitee ? (
-            <div>
-              <p className="text-xs font-medium uppercase text-slate-500">Date souhaitée (début)</p>
-              <p className="text-slate-800">{new Date(project.dateSouhaitee).toLocaleDateString("fr-FR")}</p>
-            </div>
-          ) : null}
-          {project.plannedEndDate ? (
-            <div>
-              <p className="text-xs font-medium uppercase text-slate-500">Fin prévue</p>
-              <p className="text-slate-800">{new Date(project.plannedEndDate).toLocaleDateString("fr-FR")}</p>
-            </div>
-          ) : project.deadline ? (
-            <div>
-              <p className="text-xs font-medium uppercase text-slate-500">Deadline</p>
-              <p className="text-slate-800">{new Date(project.deadline).toLocaleDateString("fr-FR")}</p>
-            </div>
-          ) : null}
-          {project.signedQuoteAmount != null ? (
-            <div>
-              <p className="text-xs font-medium uppercase text-slate-500">Devis signé</p>
-              <p className="font-semibold text-slate-800">
-                {Number(project.signedQuoteAmount).toLocaleString("fr-FR", {
-                  style: "currency",
-                  currency: "EUR",
-                  maximumFractionDigits: 0,
-                })}{" "}
-                HT
-              </p>
-            </div>
-          ) : null}
-        </div>
-
-        {project.notes && (
-          <div className="mt-4 border-t border-slate-100 pt-4">
-            <p className="text-xs font-medium uppercase text-slate-500">Instructions / détails importants</p>
-            <p className="mt-1 whitespace-pre-wrap text-slate-700">{project.notes}</p>
-          </div>
-        )}
-      </div>
-
-      {missingCount > 0 ? (
-        <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-4">
-          <h2 className="text-sm font-semibold text-amber-900">À traiter sur ce chantier</h2>
-          <p className="mt-1 text-sm text-amber-800">
-            {missingCount} pièce{missingCount > 1 ? "s" : ""} manquante{missingCount > 1 ? "s" : ""} dans le classeur.
-          </p>
-          <Link
-            href={`/dashboard/projets/manquants?chantier=${encodeURIComponent(id)}`}
-            className="mt-2 inline-block text-sm font-medium text-amber-900 underline"
-          >
-            Voir les pièces à récupérer →
-          </Link>
-        </div>
-      ) : null}
-
-      <ProjectMissionsSection
-        projectId={id}
-        projectTitle={project.title}
-        clientId={project.clientId}
-        clientName={project.client.name}
-        missions={missionsRows}
-        agents={agents.map((a) => ({ id: a.id, name: a.name }))}
-        isAgence={isAgence}
+      <ChantierCockpit
+        stats={[
+          {
+            label: "Tâches ouvertes",
+            value: openTasks.length,
+            tone: openTasks.length > 0 ? "watch" : "ok",
+          },
+          {
+            label: "En retard",
+            value: overdue.length,
+            tone: overdue.length > 0 ? "critical" : "neutral",
+          },
+          {
+            label: "BC à valider",
+            value: ordersPending.length,
+            tone: ordersPending.length > 0 ? "critical" : "neutral",
+          },
+          {
+            label: "Pièces manquantes",
+            value: missingCount,
+            tone: missingCount > 0 ? "watch" : "ok",
+            href: missingCount > 0 ? `/dashboard/projets/manquants?chantier=${encodeURIComponent(id)}` : undefined,
+          },
+        ]}
+        attentionItems={attentionItems}
+        panels={{
+          overview: contextCard,
+          taches: tachesPanel,
+          documents: documentsPanel,
+          messages: messagesPanel,
+          pilotage: pilotagePanel,
+        }}
       />
-
-      {syncBanner ? (
-        <p className="rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-800">
-          {syncBanner.synced} pièce{syncBanner.synced > 1 ? "s" : ""} importée
-          {syncBanner.synced > 1 ? "s" : ""} depuis les missions liées à ce chantier.
-        </p>
-      ) : null}
-      <ChantierOrphanMissionBanner projectId={id} orphans={orphanMissions} />
-      <ChantierDossierSection projectId={id} folders={dossierFolders} canEdit={canEditDossier} />
-
-      {/* Référent (client) ou gestion agent (agence) */}
-      <ProjectAssignAgent
-          projectId={project.id}
-          assignedToId={project.assignedToId ?? null}
-          assignedTo={project.assignedTo ?? null}
-          agents={agents}
-          isAgence={isAgence}
-        />
-
-      {/* Reporting hebdomadaire / journalier */}
-      <ProjectReportsSection projectId={project.id} isAgence={isAgence} />
-
-      {canAccessBeWorkSkills(session.user.role) ? (
-        <ProjectPpspsSection projectId={project.id} projectTitle={project.title} />
-      ) : null}
-
-      {project.documents.length > 0 && (
-        <div className="rounded-xl surface-metallic-light p-6">
-          <h2 className="mb-4 text-lg font-semibold text-slate-800">Pièces jointes ({project.documents.length})</h2>
-          <ul className="space-y-2">
-            {project.documents.map((doc) => (
-              <li key={doc.id} className="flex items-center justify-between gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
-                <span className="truncate text-sm text-slate-800">{doc.name}</span>
-                <a
-                  href={doc.fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm font-medium text-blue-600 hover:underline"
-                >
-                  Télécharger
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <div className="rounded-xl surface-metallic-light p-6">
-        <h2 className="mb-4 text-lg font-semibold text-slate-800">Messages</h2>
-
-        <div className="space-y-4">
-          {project.messages.length === 0 ? (
-            <p className="text-slate-500">Aucun message pour le moment.</p>
-          ) : (
-            project.messages.map((msg) => {
-              const isFromMe = msg.senderId === session.user?.id;
-              return (
-                <div
-                  key={msg.id}
-                  className={`rounded-lg p-4 ${
-                    isFromMe ? "ml-8 bg-blue-50" : "mr-8 bg-slate-100"
-                  }`}
-                >
-                  <p className="text-sm font-medium text-slate-700">
-                    {msg.sender.name} → {msg.receiver.name}
-                  </p>
-                  <p className="mt-1 text-slate-800">{msg.content}</p>
-                  <p className="mt-2 text-xs text-slate-500">
-                    {new Date(msg.createdAt).toLocaleString("fr-FR")}
-                  </p>
-                </div>
-              );
-            })
-          )}
-        </div>
-
-        <MessageForm
-          projectId={project.id}
-          clientId={project.clientId}
-          client={project.client ? { id: project.client.id, name: project.client.name } : undefined}
-          isAgence={isAgence}
-          sessionUserId={session.user.id}
-        />
-      </div>
     </div>
   );
 }

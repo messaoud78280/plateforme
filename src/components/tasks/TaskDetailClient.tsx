@@ -30,6 +30,7 @@ interface TaskDetailClientProps {
     desiredDate?: Date | string | null;
     estimatedActions?: string | number | null;
     missionType?: string | null;
+    suppliersJson?: { name?: string; contact?: string }[] | null;
     assignedTo?: { id: string; name: string; email: string } | null;
     project?: { id: string; title: string } | null;
     client?: { id: string; name: string };
@@ -50,6 +51,7 @@ interface TaskDetailClientProps {
   agents?: { id: string; name: string; email: string }[];
   clientProjects?: { id: string; title: string }[];
   onTaskUpdated?: () => void | Promise<void>;
+  isDemo?: boolean;
 }
 
 export function TaskDetailClient({
@@ -61,6 +63,7 @@ export function TaskDetailClient({
   agents = [],
   clientProjects = [],
   onTaskUpdated,
+  isDemo = false,
 }: TaskDetailClientProps) {
   const router = useRouter();
   const [correctionNote, setCorrectionNote] = useState("");
@@ -222,6 +225,7 @@ export function TaskDetailClient({
       validateError={validateError}
       onReportSent={afterTaskAction}
       clientProjects={clientProjects}
+      isDemo={isDemo}
     />
   );
 }

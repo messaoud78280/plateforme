@@ -35,14 +35,38 @@ export default async function DemonstrationsAdminPage() {
       <BackLink href="/dashboard">Tableau de bord</BackLink>
       <PageHeader
         eyebrow="Espace commercial"
-        title="Démonstrations Pilotage travaux"
-        description="Espace isolé : données fictives uniquement. Générez un lien temporaire pour un prospect ou présentez en partage d’écran."
+        title="Démonstrations"
+        description="Liens Pilotage isolés et plateformes démo multi-tenant pour les rendez-vous commerciaux."
         actions={
-          <Link href="/demo/pilotage-travaux" className="btn-cc-primary">
-            Lancer une démo (mode rendez-vous)
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/dashboard/demonstrations/plateformes" className="btn-cc-primary">
+              Plateformes démo
+            </Link>
+            <Link href="/demo/pilotage-travaux" className="btn-cc-secondary">
+              Démo Pilotage (RDV)
+            </Link>
+          </div>
         }
       />
+
+      <div className="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-bework-ink">
+        <p className="font-semibold">Nouveau — Plateformes de démonstration</p>
+        <p className="mt-1 text-bework-muted">
+          Créez un environnement complet (identité, modules, données fictives, expiration) accessible via{" "}
+          <Link href="/connexion/demo" className="font-semibold text-[#1d4ed8] hover:underline">
+            /connexion/demo
+          </Link>
+          .
+        </p>
+        <Link
+          href="/dashboard/demonstrations/plateformes/nouvelle"
+          className="mt-2 inline-flex text-sm font-semibold text-[#1d4ed8] hover:underline"
+        >
+          Créer une démonstration →
+        </Link>
+      </div>
+
+      <h2 className="text-base font-bold text-bework-ink">Liens Pilotage travaux (scénario isolé)</h2>
 
       <CreateDemoLinkForm scenarios={DEMO_SCENARIO_LIST.map((s) => ({ id: s.id, label: s.label }))} />
 

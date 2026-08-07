@@ -22,6 +22,8 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
 import { countATraiter } from "@/lib/a-traiter/collect";
 import { listUpcomingAppointments } from "@/lib/appointments/upcoming";
+import { DemoHomeDashboard } from "@/components/demo-environment/DemoHomeDashboard";
+import { collectDemoHomeData } from "@/lib/demo-environment/dashboard-stats";
 
 export default async function DashboardPage({
   searchParams,
@@ -577,6 +579,20 @@ export default async function DashboardPage({
     } catch {
       // ignore
     }
+  }
+
+  if (isClient && session.user.isDemo) {
+    const home = await collectDemoHomeData(clientId);
+    return (
+      <DemoHomeDashboard
+        companyName={session.user.demoCompanyName ?? "Votre entreprise"}
+        firstName={home.firstName}
+        stats={home.stats}
+        inbox={home.inbox}
+        projects={home.projects}
+        modules={session.user.demoModules ?? []}
+      />
+    );
   }
 
   if (isClient) {

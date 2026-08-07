@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { TaskDetailClient } from "@/components/tasks/TaskDetailClient";
 import { BackLink } from "@/components/ui/BackLink";
 import { parseClientDeliveryJson, filterDocumentsForClient } from "@/lib/tasks/client-delivery";
+import { parseSuppliersJson } from "@/lib/demo-environment/bon-commande";
+import { isDemoEmail } from "@/lib/demo-environment/constants";
 
 export default async function TacheDetailPage({
   params,
@@ -51,6 +53,27 @@ export default async function TacheDetailPage({
         documents: { orderBy: { createdAt: "asc" }, select: { id: true, name: true, fileUrl: true, fileSize: true, mimeType: true, createdAt: true } },
       },
     });
+    // Ensure métier fields for BC workflow
+    if (task) {
+      const extra = await prisma.task.findUnique({
+        where: { id },
+        select: {
+          category: true,
+          priority: true,
+          desiredDate: true,
+          estimatedActions: true,
+          missionType: true,
+          suppliersJson: true,
+          clientReport: true,
+          clientReportSentAt: true,
+          clientDecision: true,
+          creditsDeductedAt: true,
+          clientDeliveryJson: true,
+          organizationId: true,
+        },
+      });
+      if (extra) Object.assign(task, extra);
+    }
     if (session.user.role === "AGENCE" || session.user.role === "MANAGER") {
       agents = await prisma.user.findMany({
         where: { role: { in: ["AGENCE", "AGENT"] } },
@@ -162,6 +185,7 @@ export default async function TacheDetailPage({
           desiredDate: (task as { desiredDate?: Date | null }).desiredDate ?? null,
           estimatedActions: (task as { estimatedActions?: number | null }).estimatedActions ?? null,
           missionType: (task as { missionType?: string | null }).missionType ?? null,
+          suppliersJson: parseSuppliersJson((task as { suppliersJson?: unknown }).suppliersJson),
           assignedTo: task.assignedTo ?? null,
           client: task.client,
           project: task.project ?? null,
@@ -172,6 +196,7 @@ export default async function TacheDetailPage({
         isAgent={isAgent}
         agents={agents}
         clientProjects={clientProjects}
+        isDemo={Boolean(session.user.isDemo || isDemoEmail(session.user.email))}
       />
     </div>
   );

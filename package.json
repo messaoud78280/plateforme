@@ -26,7 +26,7 @@
     "db:backfill-project-lifecycle": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/backfill-project-lifecycle-status.ts",
     "db:normalize-work-item-lots": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/normalize-work-item-lots.ts",
     "db:harmonize-lots-remote": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/run-remote-harmonization.ts --apply",
-    "test:bework-family-codes": "npx tsx scripts/test-bework-family-codes.ts",
+    "test:demo-environment": "node --import tsx scripts/test-demo-environment.ts",
     "db:cleanup-chantier-resources": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/run-chantier-resource-cleanup.ts",
     "db:sync-chantier-from-library": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/sync-library-to-chantier.ts",
     "db:studio": "prisma studio",

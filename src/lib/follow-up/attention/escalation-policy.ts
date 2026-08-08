@@ -76,17 +76,29 @@ export function resolveLevelEscalationPolicy(
   return base;
 }
 
-/** Épisode = jour d’entrée dans l’étape (timeline statut). Permet un nouvel INITIAL plus tard. */
+/**
+ * Épisode d’attention : identifiant unique de la transition statut courante.
+ * Priorité : id de l’événement timeline (cuid) — deux entrées le même jour = deux épisodes.
+ * Fallback : timestamp ms de occurredAt (sans id).
+ */
+export function episodeKeyFromStatusTransition(opts: {
+  eventId?: string | null;
+  occurredAt?: Date | string | null;
+}): string {
+  const id = opts.eventId?.trim();
+  if (id) return id;
+  if (opts.occurredAt == null || opts.occurredAt === "") return "na";
+  const d =
+    opts.occurredAt instanceof Date ? opts.occurredAt : new Date(opts.occurredAt);
+  if (Number.isNaN(d.getTime())) return "na";
+  return `t${d.getTime()}`;
+}
+
+/** @deprecated Préférer episodeKeyFromStatusTransition({ eventId }). */
 export function episodeKeyFromStatusEnteredAt(
   statusEnteredAt: Date | string | null | undefined,
 ): string {
-  if (!statusEnteredAt) return "na";
-  const d = statusEnteredAt instanceof Date ? statusEnteredAt : new Date(statusEnteredAt);
-  if (Number.isNaN(d.getTime())) return "na";
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+  return episodeKeyFromStatusTransition({ occurredAt: statusEnteredAt });
 }
 
 export type AttentionDedupeParts = {

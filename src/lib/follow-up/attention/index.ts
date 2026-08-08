@@ -36,6 +36,7 @@ export {
 export {
   DEFAULT_ESCALATION_BY_LEVEL,
   resolveLevelEscalationPolicy,
+  episodeKeyFromStatusTransition,
   episodeKeyFromStatusEnteredAt,
   buildStagedAttentionDedupeKey,
   buildLegacyAttentionDedupeKey,
@@ -52,3 +53,8 @@ export {
   processAttentionEscalations,
   resolveEscalationRecipient,
 } from "@/lib/follow-up/attention/process-escalations";
+export {
+  canSimulateAttentionNow,
+  resolveAttentionProcessNow,
+} from "@/lib/follow-up/attention/resolve-now";
+export { runAttentionEscalationScheduler } from "@/lib/follow-up/attention/scheduler";

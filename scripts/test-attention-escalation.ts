@@ -11,7 +11,7 @@ import {
   buildLegacyAttentionDedupeKey,
   buildStagedAttentionDedupeKey,
   DEFAULT_ESCALATION_BY_LEVEL,
-  episodeKeyFromStatusEnteredAt,
+  episodeKeyFromStatusTransition,
   resolveLevelEscalationPolicy,
 } from "../src/lib/follow-up/attention/escalation-policy";
 import { buildAttentionDedupeKey } from "../src/lib/follow-up/attention/notify-policy";
@@ -22,7 +22,8 @@ const SHEET = "alpha";
 const CODE = "BILLING_PENDING";
 const REASON = "Travaux terminés — facturation à préparer.";
 const ENTERED = new Date("2026-08-01T08:00:00.000Z");
-const EPISODE = episodeKeyFromStatusEnteredAt(ENTERED);
+/** Id timeline fictif — épisode unique même si même jour. */
+const EPISODE = "evt_alpha_status_1";
 
 function staged(
   userId: string,
@@ -56,6 +57,7 @@ function base(overrides: Partial<Parameters<typeof evaluateAttentionEscalation>[
     level: "IMPORTANT",
     primaryReason: REASON,
     statusEnteredAt: ENTERED,
+    statusEpisodeKey: EPISODE,
     responsibleId: JULIE,
     escalateToId: MARC,
     responsibleName: "Julie Martin",
@@ -305,7 +307,7 @@ function testLegacyInitialAccepted() {
 }
 
 function testEpisodeAllowsNewCycle() {
-  const oldEpisode = "2026-06-01";
+  const oldEpisode = "evt_old_transition";
   const oldInitial = buildStagedAttentionDedupeKey({
     userId: JULIE,
     sheetId: SHEET,
@@ -323,6 +325,19 @@ function testEpisodeAllowsNewCycle() {
   });
   assert.equal(r.action, "NONE");
   assert.equal(r.debug?.hasInitial, false);
+}
+
+function testSameDayDistinctEpisodes() {
+  const a = episodeKeyFromStatusTransition({
+    eventId: "evt_morning",
+    occurredAt: new Date("2026-08-01T09:00:00.000Z"),
+  });
+  const b = episodeKeyFromStatusTransition({
+    eventId: "evt_evening",
+    occurredAt: new Date("2026-08-01T18:00:00.000Z"),
+  });
+  assert.notEqual(a, b);
+  assert.equal(a, "evt_morning");
 }
 
 function testDefaultsCentralized() {
@@ -348,6 +363,7 @@ const tests: [string, () => void][] = [
   ["WorkflowStep override", testWorkflowStepOverrides],
   ["legacy INITIAL", testLegacyInitialAccepted],
   ["épisode nouveau cycle", testEpisodeAllowsNewCycle],
+  ["même jour → épisodes distincts", testSameDayDistinctEpisodes],
   ["defaults centralisés", testDefaultsCentralized],
 ];
 

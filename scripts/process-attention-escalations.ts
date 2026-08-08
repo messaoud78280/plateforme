@@ -1,5 +1,6 @@
 /**
- * W3-C2A — Déclenchement manuel rappels / escalades (pas de cron).
+ * W3-C2A — Déclenchement manuel rappels / escalades (script local).
+ * Pour la prod planifiée : utiliser notifications:run-attention-escalations (cron secret).
  *
  * Usage :
  *   npx tsx scripts/process-attention-escalations.ts
@@ -7,6 +8,7 @@
  *   npx tsx scripts/process-attention-escalations.ts --owner=<userId> --org=<orgId>
  */
 import { processAttentionEscalations } from "../src/lib/follow-up/attention/process-escalations";
+import { resolveAttentionProcessNow } from "../src/lib/follow-up/attention/resolve-now";
 
 function arg(name: string): string | undefined {
   const prefix = `--${name}=`;
@@ -16,19 +18,41 @@ function arg(name: string): string | undefined {
 
 async function main() {
   const nowRaw = arg("now");
-  const now = nowRaw ? new Date(nowRaw) : undefined;
-  if (nowRaw && now && Number.isNaN(now.getTime())) {
+  const resolved = resolveAttentionProcessNow({
+    requestedNow: nowRaw,
+    // Script CLI : simulation autorisée hors production stricte
+    forceRealNow: false,
+  });
+  if (nowRaw && resolved.rejectedSimulation) {
+    console.error(
+      "Simulation --now refusée en production. Utilisez démo/dev ou ATTENTION_ALLOW_SIMULATED_NOW=true.",
+    );
+    process.exit(1);
+  }
+  if (nowRaw && Number.isNaN(new Date(nowRaw).getTime())) {
     console.error("now invalide");
     process.exit(1);
   }
 
+  const org = arg("org");
   const result = await processAttentionEscalations({
-    now,
+    now: resolved.now,
     ownerUserId: arg("owner"),
-    organizationId: arg("org") ?? undefined,
+    ...(org !== undefined ? { organizationId: org } : {}),
   });
 
-  console.log(JSON.stringify({ ok: true, now: now?.toISOString() ?? "system", ...result }, null, 2));
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        now: resolved.now.toISOString(),
+        simulatedNow: resolved.simulated,
+        ...result,
+      },
+      null,
+      2,
+    ),
+  );
 }
 
 main().catch((e) => {

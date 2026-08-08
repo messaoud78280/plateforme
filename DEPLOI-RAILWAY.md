@@ -68,6 +68,40 @@ appelant l'URL ci-dessus avec le secret.
 
 ---
 
+## Anti-oubli fiches (rappels / escalades) — W3-C2B
+
+`POST /api/cron/attention-escalations` (header `x-secret` = `ATTENTION_CRON_SECRET`)
+appelle uniquement `processAttentionEscalations` (heure serveur réelle). Pas d’email / push.
+
+### Variables Railway (service web)
+
+| Variable | Description |
+|----------|-------------|
+| `ATTENTION_CRON_SECRET` | Secret long aléatoire (jamais `NEXT_PUBLIC_*`) |
+| `SITE_URL` ou `NEXT_PUBLIC_SITE_URL` | URL canonique (ex. `https://www.bework.fr`) pour le script cron |
+
+### Configuration manuelle Railway
+
+1. Variables → ajouter `ATTENTION_CRON_SECRET` (valeur aléatoire).
+2. **New** → **Cron Job** (ou service cron) sur le même projet :
+   - Schedule : `0 * * * *` (toutes les heures)
+   - Start command : `npm run notifications:run-attention-escalations`
+   - Même variables d’environnement que le service web (`ATTENTION_CRON_SECRET`, `SITE_URL` / `NEXT_PUBLIC_SITE_URL`)
+3. Alternative HTTP externe : `POST https://www.bework.fr/api/cron/attention-escalations` avec header `x-secret`.
+
+### Test
+
+```bash
+curl -X POST "$SITE_URL/api/cron/attention-escalations" \
+  -H "x-secret: $ATTENTION_CRON_SECRET" \
+  -H "content-type: application/json" \
+  -d '{}'
+```
+
+Sans secret / mauvais secret → `401`. Logs : chercher `Attention scheduler` dans `npm run deploy:logs`.
+
+---
+
 ## Dépannage
 
 | Erreur | Solution |

@@ -7,7 +7,7 @@ import { URGENCY_LABELS } from "@/lib/follow-up/types";
 import {
   buildLegacyAttentionDedupeKey,
   buildStagedAttentionDedupeKey,
-  episodeKeyFromStatusEnteredAt,
+  episodeKeyFromStatusTransition,
   hoursBetween,
   resolveLevelEscalationPolicy,
   type EscalationStage,
@@ -28,6 +28,8 @@ export type EvaluateAttentionEscalationInput = {
   level: UrgencyLevel | string;
   primaryReason: string;
   statusEnteredAt?: Date | string | null;
+  /** Id événement timeline statut (cuid) — préféré pour l’épisode. */
+  statusEpisodeKey?: string | null;
   responsibleId: string;
   /** Direction / superviseur interne du même tenant — null = pas d’escalade possible. */
   escalateToId: string | null;
@@ -92,7 +94,9 @@ export function evaluateAttentionEscalation(
 
   if (!policy) return empty();
 
-  const episode = episodeKeyFromStatusEnteredAt(input.statusEnteredAt);
+  const episode =
+    input.statusEpisodeKey?.trim() ||
+    episodeKeyFromStatusTransition({ occurredAt: input.statusEnteredAt });
   const base = {
     userId: input.responsibleId,
     sheetId: input.sheetId,

@@ -10,7 +10,7 @@ import { loadAttentionForSheets } from "@/lib/follow-up/attention/batch";
 import {
   buildLegacyAttentionDedupeKey,
   buildStagedAttentionDedupeKey,
-  episodeKeyFromStatusEnteredAt,
+  episodeKeyFromStatusTransition,
 } from "@/lib/follow-up/attention/escalation-policy";
 import {
   notificationTypeForAttentionLevel,
@@ -90,7 +90,7 @@ export async function syncAttentionNotificationsForSheets(
   const ownerId = opts?.thresholdsOwnerUserId ?? sheets[0]?.ownerUserId;
   const settings = ownerId ? await getFollowUpSettings(ownerId) : undefined;
 
-  const { byId, statusEnteredAt } = await loadAttentionForSheets({
+  const { byId, statusEnteredAt, statusEpisodeKey } = await loadAttentionForSheets({
     sheets: sheets.map((s) => ({
       id: s.id,
       status: s.status,
@@ -125,7 +125,9 @@ export async function syncAttentionNotificationsForSheets(
 
     const level = attention.effectiveUrgency as UrgencyLevel;
     const enteredIso = statusEnteredAt.get(sheet.id) ?? null;
-    const episode = episodeKeyFromStatusEnteredAt(enteredIso);
+    const episode =
+      statusEpisodeKey.get(sheet.id) ??
+      episodeKeyFromStatusTransition({ occurredAt: enteredIso });
     const dedupeKey = buildStagedAttentionDedupeKey({
       userId: recipientId,
       sheetId: sheet.id,

@@ -51,12 +51,17 @@ export function DemoConducteurHome({
   alerts: AlertItem[];
   projects: ProjectCard[];
 }) {
+  const terrainTodos = [
+    { id: "photos", title: "Photos à transmettre", href: "/dashboard/messagerie" },
+    { id: "cr", title: "Compte rendu à compléter", href: projects[0] ? `/dashboard/projets/${projects[0].id}` : "/dashboard/a-traiter" },
+  ];
+
   return (
     <div className="space-y-6 pb-24">
       <div>
         <p className="text-xs font-bold uppercase tracking-wide text-bework-muted">{companyName}</p>
         <h1 className="text-2xl font-extrabold text-[#1e3a5f]">Bonjour {firstName}</h1>
-        <p className="mt-1 text-sm text-slate-600">Votre journée terrain — chantiers et actions à traiter.</p>
+        <p className="mt-1 text-sm text-slate-600">Votre journée terrain — sans l’administration.</p>
       </div>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -67,7 +72,7 @@ export function DemoConducteurHome({
           <ul className="mt-3 space-y-3">
             {agenda.map((a) => (
               <li key={a.id} className="flex gap-3 border-b border-slate-50 pb-3 last:border-0">
-                <span className="w-14 shrink-0 text-sm font-semibold text-[#1d4ed8]">
+                <span className="w-14 shrink-0 text-sm font-semibold tabular-nums text-[#1d4ed8]">
                   {a.startAt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
                 </span>
                 <span>
@@ -86,29 +91,27 @@ export function DemoConducteurHome({
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">À traiter</h2>
         <ul className="mt-3 space-y-2">
-          {alerts.slice(0, 5).map((al) => (
-            <li key={al.id}>
+          {terrainTodos.map((t) => (
+            <li key={t.id}>
               <Link
-                href={al.actionUrl || "/dashboard/a-traiter"}
-                className="flex gap-2 rounded-lg border border-slate-100 px-3 py-2 hover:bg-slate-50"
+                href={t.href}
+                className="block rounded-lg border border-slate-100 px-3 py-2.5 font-medium text-slate-800 hover:bg-slate-50"
               >
-                <span>
-                  {al.level === "CRITICAL" || al.level === "ERROR"
-                    ? "🔴"
-                    : al.level === "WARNING"
-                      ? "🟠"
-                      : "🟡"}
-                </span>
-                <span>
-                  <span className="font-medium text-slate-800">{al.title}</span>
-                  <span className="block text-xs text-slate-500">{al.message}</span>
-                </span>
+                {t.title}
               </Link>
             </li>
           ))}
-          {alerts.length === 0 ? (
-            <li className="text-sm text-slate-500">Rien d’urgent — bon chantier.</li>
-          ) : null}
+          {alerts.slice(0, 3).map((al) => (
+            <li key={al.id}>
+              <Link
+                href={al.actionUrl || "/dashboard/a-traiter"}
+                className="block rounded-lg border border-amber-100 bg-amber-50/40 px-3 py-2 hover:bg-amber-50"
+              >
+                <span className="font-medium text-slate-800">{al.title}</span>
+                <span className="block text-xs text-slate-500">{al.message}</span>
+              </Link>
+            </li>
+          ))}
         </ul>
       </section>
 
@@ -157,7 +160,7 @@ export function DemoClientHome({
       <div>
         <h1 className="text-2xl font-extrabold text-[#1e3a5f]">Bonjour {firstName}</h1>
         <p className="mt-1 text-sm text-slate-600">
-          Vos opérations partagées avec {hostCompany}.
+          Ce que {hostCompany} partage avec vous — dates, documents et messages.
         </p>
       </div>
 

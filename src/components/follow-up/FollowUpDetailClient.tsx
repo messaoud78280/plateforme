@@ -207,7 +207,7 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
       >
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 className="text-xl font-extrabold uppercase tracking-wide text-slate-900">{sheet.title}</h1>
+            <h1 className="text-xl font-extrabold tracking-tight text-slate-900">{sheet.title}</h1>
             <p className="mt-1 text-sm text-slate-700">
               {sheet.osNumber ? `OS n°${sheet.osNumber}` : null}
               {sheet.osNumber && sheet.orderNumber ? " · " : null}
@@ -216,26 +216,48 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
             {sheet.workObject && <p className="mt-2 text-sm text-slate-800">{sheet.workObject}</p>}
             {sheet.siteAddress && <p className="mt-1 text-xs text-slate-600">{sheet.siteAddress}</p>}
           </div>
-          <div className="flex flex-col items-end gap-2">
-            <span className={cn("rounded-md px-2 py-1 text-xs font-bold", urgency.badge)}>
+        </div>
+
+        {/* Infos essentielles — visibles immédiatement */}
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="rounded-lg bg-white/85 p-3 ring-1 ring-slate-200/60">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Statut</p>
+            <p className="mt-1 text-sm font-bold text-slate-900">{sheet.statusLabel}</p>
+          </div>
+          <div className="rounded-lg bg-white/85 p-3 ring-1 ring-slate-200/60">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Urgence</p>
+            <p className="mt-1 flex items-center gap-1.5 text-sm font-bold text-slate-900">
+              <span className={cn("h-2 w-2 rounded-full", urgency.dot)} aria-hidden />
               {urgencyLabel}
-            </span>
-            <span className="rounded bg-white/80 px-2 py-0.5 text-[10px] font-bold uppercase">
-              {sheet.statusLabel}
-            </span>
+            </p>
+          </div>
+          <div className="rounded-lg bg-white/85 p-3 ring-1 ring-slate-200/60 sm:col-span-2 lg:col-span-1">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
+              Prochaine action
+            </p>
+            <p className="mt-1 text-sm font-bold text-slate-900">
+              {sheet.nextActionDone ? "Terminée" : sheet.nextAction || "—"}
+            </p>
+          </div>
+          <div className="rounded-lg bg-white/85 p-3 ring-1 ring-slate-200/60">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Responsable</p>
+            <p className="mt-1 text-sm font-bold text-slate-900">{sheet.assignee?.name ?? "—"}</p>
+          </div>
+          <div className="rounded-lg bg-white/85 p-3 ring-1 ring-slate-200/60">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Échéance</p>
+            <p className="mt-1 text-sm font-bold text-slate-900">{sheet.nextActionAtLabel}</p>
+            {sheet.delayLabel ? (
+              <p className="mt-0.5 text-xs font-bold text-red-700">En retard de {sheet.delayLabel}</p>
+            ) : null}
           </div>
         </div>
 
         {showAttention ? (
-          <div className="mt-4 rounded-lg border border-slate-200/80 bg-white/80 px-3 py-2.5">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
-              Attention requise
+          <div className="mt-3 rounded-lg border border-amber-200/80 bg-amber-50/90 px-3 py-2.5">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-amber-900/70">
+              Pourquoi BeWork alerte
             </p>
-            <p className="mt-1 flex items-center gap-1.5 text-xs font-bold text-slate-900">
-              <span className={cn("h-2 w-2 rounded-full", urgency.dot)} aria-hidden />
-              {urgencyLabel}
-            </p>
-            <p className="mt-1 text-sm text-slate-800">{attention.primaryReason}</p>
+            <p className="mt-1 text-sm font-medium text-slate-900">{attention.primaryReason}</p>
             {attention.attentionItems.length > 1 ? (
               <ul className="mt-1.5 space-y-0.5 text-[11px] text-slate-600">
                 {attention.attentionItems.slice(1, 4).map((it) => (
@@ -245,29 +267,6 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
             ) : null}
           </div>
         ) : null}
-
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-lg bg-white/70 p-3">
-            <p className="text-[10px] font-bold uppercase text-slate-500">Prochaine action</p>
-            <p className="mt-1 text-sm font-semibold text-slate-900">
-              {sheet.nextActionDone ? "✓ Terminée" : sheet.nextAction || "—"}
-            </p>
-          </div>
-          <div className="rounded-lg bg-white/70 p-3">
-            <p className="text-[10px] font-bold uppercase text-slate-500">Échéance</p>
-            <p className="mt-1 text-sm font-semibold text-slate-900">{sheet.nextActionAtLabel}</p>
-            {sheet.delayLabel && (
-              <p className="text-xs font-bold text-red-700">Retard : {sheet.delayLabel}</p>
-            )}
-          </div>
-          <div className="rounded-lg bg-white/70 p-3">
-            <p className="text-[10px] font-bold uppercase text-slate-500">Responsable</p>
-            <p className="mt-1 text-sm font-semibold text-slate-900">{sheet.assignee?.name ?? "—"}</p>
-            {sheet.postponeCount > 0 && (
-              <p className="text-[11px] text-amber-800">{sheet.postponeCount} report(s) — à surveiller</p>
-            )}
-          </div>
-        </div>
       </header>
 
       {!sheet.nextActionDone && sheet.nextAction && (
@@ -592,34 +591,34 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-2xl border border-slate-200 bg-white p-4">
           <h2 className="text-sm font-bold text-slate-900">Chronologie</h2>
-          <ol className="mt-4 space-y-3">
-            {sheet.timeline.map((t) => {
-              const past = new Date(t.occurredAt) <= new Date();
-              const done = t.kind === "termine" || t.kind === "creation";
+          <p className="mt-1 text-xs text-slate-500">L’histoire du dossier, dans l’ordre.</p>
+          <ol className="mt-4 space-y-0">
+            {sheet.timeline.map((t, idx) => {
+              const d = new Date(t.occurredAt);
+              const dayLabel = d.toLocaleDateString("fr-FR", {
+                day: "numeric",
+                month: "long",
+              });
+              const prev = idx > 0 ? new Date(sheet.timeline[idx - 1]!.occurredAt) : null;
+              const prevDay = prev
+                ? prev.toLocaleDateString("fr-FR", { day: "numeric", month: "long" })
+                : null;
+              const showDay = dayLabel !== prevDay;
               return (
-                <li key={t.id} className="flex gap-3">
-                  <span
-                    className={cn(
-                      "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
-                      past || done
-                        ? "bg-emerald-100 text-emerald-800"
-                        : "border-2 border-slate-300 text-slate-400",
-                    )}
-                  >
-                    {past || done ? "✓" : "○"}
-                  </span>
-                  <div>
-                    <p className="text-xs font-semibold text-slate-500">
-                      {new Date(t.occurredAt).toLocaleString("fr-FR", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                      {t.authorName ? ` · ${t.authorName}` : ""}
+                <li key={t.id}>
+                  {showDay ? (
+                    <p className="mb-2 mt-4 first:mt-0 text-[11px] font-bold uppercase tracking-wide text-[#1e3a5f]">
+                      {dayLabel}
                     </p>
-                    <p className="text-sm font-medium text-slate-900">{t.label}</p>
-                    {t.detail && <p className="text-xs text-slate-600">{t.detail}</p>}
+                  ) : null}
+                  <div className="mb-3 flex gap-3 border-l-2 border-slate-100 pl-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-slate-900">{t.label}</p>
+                      {t.detail ? <p className="mt-0.5 text-xs text-slate-600">{t.detail}</p> : null}
+                      {t.authorName ? (
+                        <p className="mt-0.5 text-[11px] text-slate-400">{t.authorName}</p>
+                      ) : null}
+                    </div>
                   </div>
                 </li>
               );
@@ -631,20 +630,30 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
         </section>
 
         <section className="rounded-2xl border border-slate-200 bg-white p-4">
-          <h2 className="text-sm font-bold text-slate-900">Événements agenda liés</h2>
+          <h2 className="text-sm font-bold text-slate-900">Agenda lié</h2>
           <ul className="mt-4 space-y-2">
             {sheet.agendaEvents.map((e) => (
-              <li key={e.id} className="rounded-lg border border-slate-100 px-3 py-2">
-                <p className="text-sm font-semibold text-slate-900">{e.title}</p>
-                <p className="text-xs text-slate-500">
-                  {e.type} ·{" "}
-                  {new Date(e.startAt).toLocaleString("fr-FR", {
-                    day: "numeric",
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
+              <li key={e.id}>
+                <Link
+                  href="/dashboard/agenda"
+                  className="block rounded-lg border border-slate-100 px-3 py-2 transition hover:border-[#1e3a5f]/30 hover:bg-slate-50"
+                >
+                  <p className="text-sm font-semibold text-slate-900">{e.title}</p>
+                  <p className="text-xs text-slate-500">
+                    {e.type === "LIVRAISON"
+                      ? "Livraison"
+                      : e.type === "INTERVENTION"
+                        ? "Intervention"
+                        : e.type}{" "}
+                    ·{" "}
+                    {new Date(e.startAt).toLocaleString("fr-FR", {
+                      day: "numeric",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </Link>
               </li>
             ))}
             {sheet.agendaEvents.length === 0 && (

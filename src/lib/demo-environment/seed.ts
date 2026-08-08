@@ -44,7 +44,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
       organizationId,
       siteAddress: "12 avenue Victor Hugo",
       siteCity: "Lyon",
-      internalManager: "Sophie Martin",
+      internalManager: "Karim Benali",
       urgency: ProjectUrgency.HAUTE,
       plannedStartDate: daysFromNow(-20),
       plannedEndDate: daysFromNow(45),
@@ -79,7 +79,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
       clientId,
       organizationId,
       siteCity: "Saint-Priest",
-      internalManager: "Thomas Leroy",
+      internalManager: "Julie Martin",
       urgency: ProjectUrgency.BASSE,
       plannedStartDate: daysFromNow(10),
       plannedEndDate: daysFromNow(90),
@@ -91,7 +91,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
     data: [
       {
         title: "Relancer le fournisseur pour les plans terrasse",
-        description: "Responsable fictif : Sophie Martin — priorité haute. Ancien post-it bureau.",
+        description: "Responsable : Karim Benali — priorité haute. Ancien post-it bureau.",
         status: TaskStatus.EN_COURS,
         priority: "URGENT",
         clientId,

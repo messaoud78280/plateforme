@@ -197,21 +197,46 @@ export async function ensureKanbanReadabilityDemo(opts: {
   );
 
   if (victorOs) {
-    await patchSheet({
-      sheetId: victorOs.id,
-      authorId: opts.rootUserId,
-      status: "INTERVENTION_PREVUE",
-      nextAction: "Préparer l’intervention",
-      nextActionAt: new Date(2026, 7, 17, 8, 0, 0),
-      assigneeId: karimId,
-      urgencyOverride: null,
-      title: "Résidence Victor Hugo",
-      workObject: "OS-4587 — Réfection étanchéité terrasse",
-      clientName: "ABC Promotion",
-      daysInStep: 2,
-      fromLabel: "Fournisseur",
-      toLabel: "Intervention",
+    // Démo : reste en attente Point.P pour montrer confirmation fournisseur → agenda.
+    // Ne pas forcer INTERVENTION_PREVUE (conflit avec le parcours fournisseur).
+    const current = await prisma.followUpSheet.findUnique({
+      where: { id: victorOs.id },
+      select: { status: true },
     });
+    const keepAdvanced =
+      current &&
+      ["INTERVENTION_PREVUE", "EN_COURS", "TRAVAUX_TERMINES", "A_FACTURER", "FACTURE", "TERMINE"].includes(
+        current.status,
+      );
+    if (!keepAdvanced) {
+      await patchSheet({
+        sheetId: victorOs.id,
+        authorId: opts.rootUserId,
+        status: "ATTENTE_FOURNISSEUR",
+        nextAction: "Attendre confirmation livraison Point.P",
+        nextActionAt: new Date(2026, 7, 11, 7, 30, 0),
+        assigneeId: karimId,
+        urgencyOverride: null,
+        title: "Résidence Victor Hugo — OS-4587",
+        workObject: "OS-4587 — Réfection étanchéité terrasse",
+        clientName: "ABC Promotion",
+        daysInStep: 2,
+        fromLabel: "Commande",
+        toLabel: "Attente fournisseur",
+      });
+    } else {
+      await prisma.followUpSheet.update({
+        where: { id: victorOs.id },
+        data: {
+          title: "Résidence Victor Hugo — OS-4587",
+          workObject: "OS-4587 — Réfection étanchéité terrasse",
+          clientName: "ABC Promotion",
+          osNumber: "4587",
+          orderNumber: "BC-2026-043",
+          assigneeId: karimId,
+        },
+      });
+    }
   }
 
   if (avenant) {
@@ -256,19 +281,42 @@ export async function ensureKanbanReadabilityDemo(opts: {
       sheetId: alpha.id,
       authorId: opts.rootUserId,
       status: "A_FACTURER",
-      nextAction: "Préparer facture",
-      // Échéance lointaine : l’urgence vient du délai d’étape / facturation, pas d’un override
-      nextActionAt: daysAgo(-10),
+      nextAction: "Préparer facturation",
+      // Échéance passée : l’urgence vient du délai d’étape / facturation (W3-A), pas d’un override
+      nextActionAt: daysAgo(3),
       urgencyOverride: null,
       // W3-C1 : Julie (admin) reçoit la notif — pas Marc (direction)
       assigneeId: julieId,
       title: "Immeuble Alpha",
-      workObject: "Travaux terminés — facturation",
+      workObject: "Travaux terminés — facturation à préparer",
       clientName: "ABC Promotion",
       daysInStep: 5,
       fromLabel: "Travaux terminés",
       toLabel: "À facturer",
     });
+
+    // Chronologie lisible pour la démo anti-oubli (idempotente via labels)
+    const alphaStory = [
+      { label: "Travaux terminés", detail: "Karim — intervention clôturée", days: 5, kind: "statut" },
+      { label: "Dossier passé à facturer", detail: "Responsable : Julie Martin", days: 5, kind: "statut" },
+      { label: "Rappel facturation", detail: "Toujours non facturé — rappel à Julie", days: 2, kind: "alerte" },
+    ];
+    for (const ev of alphaStory) {
+      const exists = await prisma.followUpTimelineEvent.findFirst({
+        where: { sheetId: alpha.id, label: ev.label },
+        select: { id: true },
+      });
+      if (!exists) {
+        await appendFollowUpTimeline({
+          sheetId: alpha.id,
+          authorId: opts.rootUserId,
+          kind: ev.kind,
+          label: ev.label,
+          detail: ev.detail,
+          occurredAt: daysAgo(ev.days),
+        });
+      }
+    }
   }
 
   // À planifier — entité distincte (pas un doublon Victor Hugo)

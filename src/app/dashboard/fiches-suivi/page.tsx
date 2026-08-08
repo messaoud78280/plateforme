@@ -29,7 +29,9 @@ export default async function FichesSuiviPage({
 
   const sp = await searchParams;
   const filter = sp.filter;
-  const view = sp.view === "tableau" ? "tableau" : "liste";
+  // Démo Direction : tableau post-it par défaut (storytelling chantier)
+  const preferKanban = Boolean(session.user.isDemo) && sp.view !== "liste";
+  const view = sp.view === "tableau" || preferKanban ? "tableau" : "liste";
   const accessWhere = await followUpSheetAccessWhere(session.user);
   const ownerUserId = await resolveFollowUpOwnerUserId(session.user.id);
   const settings = await getFollowUpSettings(ownerUserId);

@@ -88,6 +88,17 @@ export async function ensureVictorHugoCoherence(opts: {
       detail: "ABC Promotion — Réfection étanchéité terrasse",
     });
   } else {
+    // Ne pas écraser un statut déjà avancé (évite le conflit avec le Kanban / terrain)
+    const statusLocked = new Set([
+      "INTERVENTION_PREVUE",
+      "EN_COURS",
+      "TRAVAUX_TERMINES",
+      "A_FACTURER",
+      "FACTURE",
+      "TERMINE",
+      "AVENANT",
+      "ARCHIVE",
+    ]);
     sheet = await prisma.followUpSheet.update({
       where: { id: sheet.id },
       data: {
@@ -97,11 +108,7 @@ export async function ensureVictorHugoCoherence(opts: {
         osNumber: "4587",
         orderNumber: "BC-2026-043",
         assigneeId,
-        // Ne pas écraser un statut déjà avancé (travaux terminés / facturation)
-        ...(sheet.status === "TRAVAUX_TERMINES" ||
-        sheet.status === "A_FACTURER" ||
-        sheet.status === "FACTURE" ||
-        sheet.status === "TERMINE"
+        ...(statusLocked.has(sheet.status)
           ? {}
           : {
               status: "ATTENTE_FOURNISSEUR" as const,
@@ -112,6 +119,44 @@ export async function ensureVictorHugoCoherence(opts: {
             }),
       },
     });
+  }
+
+  // Chronologie storytelling (idempotente) — une histoire lisible pour la démo
+  const vhStory: { label: string; detail: string; at: Date; kind: string }[] = [
+    {
+      label: "OS reçu",
+      detail: "OS-4587 — ABC Promotion",
+      at: new Date(2026, 7, 8, 9, 0, 0),
+      kind: "creation",
+    },
+    {
+      label: "Intervention planifiée",
+      detail: "Karim — 17 août",
+      at: new Date(2026, 7, 9, 11, 0, 0),
+      kind: "statut",
+    },
+    {
+      label: "Commande fournisseur créée",
+      detail: "BC-2026-043 — Point.P · 40 rouleaux membrane EPDM",
+      at: new Date(2026, 7, 10, 10, 0, 0),
+      kind: "commande",
+    },
+  ];
+  for (const ev of vhStory) {
+    const exists = await prisma.followUpTimelineEvent.findFirst({
+      where: { sheetId: sheet.id, label: ev.label },
+      select: { id: true },
+    });
+    if (!exists) {
+      await appendFollowUpTimeline({
+        sheetId: sheet.id,
+        authorId: opts.rootUserId,
+        kind: ev.kind,
+        label: ev.label,
+        detail: ev.detail,
+        occurredAt: ev.at,
+      });
+    }
   }
 
   // —— 2. BC-2026-043 (Task unique liée à la fiche) ——

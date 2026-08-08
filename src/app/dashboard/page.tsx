@@ -719,6 +719,7 @@ export default async function DashboardPage({
         stats={home.stats}
         inbox={home.inbox}
         projects={home.projects}
+        agendaToday={home.agendaToday}
         modules={session.user.demoModules ?? []}
       />
     );

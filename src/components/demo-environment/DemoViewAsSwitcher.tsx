@@ -65,7 +65,7 @@ export function DemoViewAsSwitcher() {
       >
         {personas.map((p) => (
           <option key={p.key} value={p.key}>
-            {p.label}
+            {p.label} — {p.name.split(" ")[0]}
           </option>
         ))}
       </select>

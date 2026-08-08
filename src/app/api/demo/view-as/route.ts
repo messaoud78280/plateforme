@@ -95,6 +95,20 @@ export async function POST(request: NextRequest) {
       organizationId: demo.organizationId,
       loginIdentifier: demo.loginIdentifier,
     });
+    // Réaligner Kanban / Alpha / Julie après cohérence (sans écraser les statuts avancés)
+    const { listDemoPersonaUsers } = await import("@/lib/demo-environment/seed-personas");
+    const personaList = await listDemoPersonaUsers({
+      rootUserId: demoRootUserId,
+      loginIdentifier: demo.loginIdentifier,
+    });
+    const karim = personaList.find((p) => p.key === "conducteur");
+    const { ensureKanbanReadabilityDemo } = await import("@/lib/demo-environment/kanban-readability");
+    await ensureKanbanReadabilityDemo({
+      rootUserId: demoRootUserId,
+      organizationId: demo.organizationId,
+      karimUserId: karim?.id ?? null,
+      loginIdentifier: demo.loginIdentifier,
+    });
   } catch (e) {
     console.error("[view-as] coherence:", e);
   }
@@ -197,16 +211,7 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  try {
-    const { ensureVictorHugoCoherence } = await import("@/lib/demo-environment/coherence-victor-hugo");
-    await ensureVictorHugoCoherence({
-      rootUserId: demo.rootUserId,
-      organizationId: demo.organizationId,
-      loginIdentifier: demo.loginIdentifier,
-    });
-  } catch (e) {
-    console.error("[view-as GET] coherence:", e);
-  }
+  // GET : lecture seule — pas de réécriture métier (évite conflits Kanban / statuts)
 
   const currentKey =
     (typeof token?.demoViewAs === "string" && isDemoPersonaKey(token.demoViewAs)

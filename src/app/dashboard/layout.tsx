@@ -35,7 +35,12 @@ function roleLabel(
   personType?: string | null,
   permissionProfile?: string | null
 ) {
-  if (isDemo) return "Direction";
+  if (isDemo) {
+    if (permissionProfile && permissionProfile in PERMISSION_PROFILE_LABELS) {
+      return PERMISSION_PROFILE_LABELS[permissionProfile as PermissionProfileKey];
+    }
+    return personaHomeLabel(personType, permissionProfile);
+  }
   if (role === "MANAGER") return "Direction BeWork";
   if (role === "AGENCE") return "Agence";
   if (role === "AGENT") return "Agent";

@@ -51,10 +51,10 @@ export type CreateDemoEnvironmentResult =
 
 const DEFAULT_FICTIONAL_ROLES = [
   { name: "Marc Dupont", roleLabel: "Direction" },
-  { name: "Sophie Martin", roleLabel: "Conductrice de travaux" },
-  { name: "Karim Benali", roleLabel: "Chef de chantier" },
-  { name: "Laura Bernard", roleLabel: "Administration" },
-  { name: "Thomas Leroy", roleLabel: "Études de prix" },
+  { name: "Karim Benali", roleLabel: "Conducteur de travaux" },
+  { name: "Julie Martin", roleLabel: "Administratif" },
+  { name: "Sophie Martin", roleLabel: "Client — ABC Promotion" },
+  { name: "Thomas Bernard", roleLabel: "Fournisseur — Point.P" },
 ];
 
 function resolveModules(templateKey: DemoTemplateKey, modules?: string[]): DemoModuleKey[] {
@@ -172,7 +172,7 @@ export async function createDemoEnvironment(
     });
     await prisma.demoEnvironment.update({
       where: { id: result.demo.id },
-      data: { seedVersion: "v2-personas" },
+      data: { seedVersion: "v3-notify-w3c1" },
     });
 
     return {

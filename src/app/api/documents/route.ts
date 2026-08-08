@@ -23,7 +23,31 @@ export async function GET(request: Request) {
   const sort = searchParams.get("sort") ?? "createdAt";
   const order = searchParams.get("order") ?? "desc";
 
-  const where: Record<string, unknown> = { clientId: session.user.id };
+  const { projectWhereForClientUser, canClientAccessProject } = await import(
+    "@/lib/organization/access"
+  );
+  const { userHasProjectScope } = await import("@/lib/equipe-acces/project-access");
+
+  // Owner legacy : ses docs ; membre/externe : docs des chantiers accessibles avec scope documents
+  const projectWhere = await projectWhereForClientUser(session.user.id);
+  const accessibleProjects = await prisma.project.findMany({
+    where: projectWhere,
+    select: { id: true, clientId: true, organizationId: true },
+    take: 200,
+  });
+  const docProjectIds: string[] = [];
+  for (const p of accessibleProjects) {
+    if (await userHasProjectScope(session.user.id, p, "documents")) {
+      docProjectIds.push(p.id);
+    }
+  }
+
+  const where: Record<string, unknown> = {
+    OR: [
+      { clientId: session.user.id },
+      ...(docProjectIds.length ? [{ projectId: { in: docProjectIds } }] : []),
+    ],
+  };
   if (search) {
     where.name = { contains: search, mode: "insensitive" };
   }
@@ -34,6 +58,13 @@ export async function GET(request: Request) {
     where.status = status;
   }
   if (projectId) {
+    const project = accessibleProjects.find((p) => p.id === projectId);
+    if (!project || !(await canClientAccessProject(session.user.id, project))) {
+      return NextResponse.json({ error: "Chantier inaccessible" }, { status: 403 });
+    }
+    if (!(await userHasProjectScope(session.user.id, project, "documents"))) {
+      return NextResponse.json({ error: "Documents non autorisés sur ce chantier" }, { status: 403 });
+    }
     where.projectId = projectId;
   }
 

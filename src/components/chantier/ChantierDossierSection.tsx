@@ -23,8 +23,14 @@ export type ChantierFolderWithFiles = {
     comment: string | null;
     createdAt: string;
     addedBy: { name: string } | null;
+    visibility?: string | null;
   }[];
 };
+
+const VISIBILITY_OPTIONS = [
+  { value: "Interne entreprise cliente", label: "Interne" },
+  { value: "Intervenants autorisés", label: "Partagé" },
+] as const;
 
 export function ChantierDossierSection({
   projectId,
@@ -43,12 +49,19 @@ export function ChantierDossierSection({
   const [shareFile, setShareFile] = useState<{ id: string; name: string } | null>(null);
 
   async function uploadToFolder(folderId: string, file: File) {
+    const share = window.confirm(
+      "Rendre ce document visible aux partenaires externes du chantier ?\n\nOK = Partagé · Annuler = Interne uniquement"
+    );
     setBusy(folderId);
     setError("");
     const fd = new FormData();
     fd.set("projectId", projectId);
     fd.set("folderId", folderId);
     fd.set("file", file);
+    fd.set(
+      "visibility",
+      share ? "Intervenants autorisés" : "Interne entreprise cliente"
+    );
     try {
       const res = await fetch("/api/chantier/files/upload", { method: "POST", body: fd });
       const data = await res.json();
@@ -56,6 +69,20 @@ export function ChantierDossierSection({
       else router.refresh();
     } catch {
       setError("Erreur réseau");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function updateVisibility(fileId: string, visibility: string) {
+    setBusy(fileId);
+    try {
+      await fetch(`/api/chantier/files/${fileId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ visibility }),
+      });
+      router.refresh();
     } finally {
       setBusy(null);
     }
@@ -248,6 +275,35 @@ export function ChantierDossierSection({
                             ) : null}
                           </div>
                           <div className="flex flex-wrap items-center gap-2">
+                            {canEdit ? (
+                              <select
+                                value={
+                                  file.visibility === "Intervenants autorisés" ||
+                                  file.visibility === "BeWork et entreprise cliente" ||
+                                  file.visibility === "Partage temporaire"
+                                    ? "Intervenants autorisés"
+                                    : "Interne entreprise cliente"
+                                }
+                                disabled={busy === file.id}
+                                onChange={(e) => void updateVisibility(file.id, e.target.value)}
+                                className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-700"
+                                title="Visibilité INTERNE / PARTAGÉ"
+                              >
+                                {VISIBILITY_OPTIONS.map((o) => (
+                                  <option key={o.value} value={o.value}>
+                                    {o.label}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+                                {file.visibility === "Intervenants autorisés" ||
+                                file.visibility === "BeWork et entreprise cliente" ||
+                                file.visibility === "Partage temporaire"
+                                  ? "Partagé"
+                                  : "Interne"}
+                              </span>
+                            )}
                             <span
                               className={`rounded-full px-2 py-0.5 text-xs font-semibold ${CHANTIER_FILE_STATUS_COLORS[file.status]}`}
                             >

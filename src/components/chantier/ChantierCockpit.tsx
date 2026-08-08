@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 
@@ -9,6 +9,7 @@ export type ChantierCockpitTabId =
   | "taches"
   | "documents"
   | "messages"
+  | "partage"
   | "pilotage";
 
 const TABS: { id: ChantierCockpitTabId; label: string }[] = [
@@ -16,6 +17,7 @@ const TABS: { id: ChantierCockpitTabId; label: string }[] = [
   { id: "taches", label: "Tâches" },
   { id: "documents", label: "Documents" },
   { id: "messages", label: "Échanges" },
+  { id: "partage", label: "Partage" },
   { id: "pilotage", label: "Pilotage" },
 ];
 
@@ -39,13 +41,25 @@ export function ChantierCockpit({
   attentionItems,
   panels,
   defaultTab = "overview",
+  hiddenTabs,
 }: {
   stats: ChantierOverviewStat[];
   attentionItems: ChantierOverviewItem[];
-  panels: Record<ChantierCockpitTabId, ReactNode>;
+  panels: Partial<Record<ChantierCockpitTabId, ReactNode>>;
   defaultTab?: ChantierCockpitTabId;
+  /** Onglets masqués (ex. Partage pour un externe). */
+  hiddenTabs?: ChantierCockpitTabId[];
 }) {
+  const visibleTabs = useMemo(
+    () => TABS.filter((t) => !hiddenTabs?.includes(t.id) && panels[t.id] != null),
+    [hiddenTabs, panels]
+  );
   const [tab, setTab] = useState<ChantierCockpitTabId>(defaultTab);
+  useEffect(() => {
+    if (!visibleTabs.some((t) => t.id === tab) && visibleTabs[0]) {
+      setTab(visibleTabs[0].id);
+    }
+  }, [visibleTabs, tab]);
   const active = useMemo(() => panels[tab], [panels, tab]);
 
   const toneClass = {
@@ -68,7 +82,7 @@ export function ChantierCockpit({
         role="tablist"
         aria-label="Sections chantier"
       >
-        {TABS.map((t) => (
+        {visibleTabs.map((t) => (
           <button
             key={t.id}
             type="button"

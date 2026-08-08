@@ -87,7 +87,9 @@ export async function canAccessProjectMessaging(
 ): Promise<boolean> {
   if (user.role === "CLIENT") {
     const { canClientAccessProject } = await import("@/lib/organization/access");
-    return canClientAccessProject(user.id, project);
+    if (!(await canClientAccessProject(user.id, project))) return false;
+    const { userHasProjectScope } = await import("@/lib/equipe-acces/project-access");
+    return userHasProjectScope(user.id, project, "messages");
   }
   if (isStaffAgent(user.role)) return project.assignedToId === user.id;
 

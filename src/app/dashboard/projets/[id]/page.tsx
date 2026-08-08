@@ -10,9 +10,12 @@ import { ProjectPpspsSection } from "@/components/projects/ProjectPpspsSection";
 import { ProjectReportsSection } from "@/components/projects/ProjectReportsSection";
 import { ChantierDossierSection } from "@/components/chantier/ChantierDossierSection";
 import { ChantierCockpit } from "@/components/chantier/ChantierCockpit";
+import { ChantierSharePanel } from "@/components/chantier/ChantierSharePanel";
 import { canAccessBeWorkSkills } from "@/lib/be-work-skills-access";
 import { canAccessChantierProject, canDeleteChantierProject } from "@/lib/chantier-dossier/access";
 import { projectMessageVisibilityWhere } from "@/lib/messaging/access";
+import { isSharedVisibility, userHasProjectScope } from "@/lib/equipe-acces/project-access";
+import { canManageEquipe, isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
 import { ProjectMissionsSection, type ChantierMissionRow } from "@/components/projects/ProjectMissionsSection";
 import { DeleteChantierButton } from "@/components/chantier/DeleteChantierButton";
 import { ensureChantierFolders } from "@/lib/chantier-dossier/folders";
@@ -43,6 +46,14 @@ export default async function ProjetDetailPage({
     redirect("/connexion?callbackUrl=/dashboard");
   }
 
+  const channelFilterEarly =
+    session.user.role === "CLIENT"
+      ? await (async () => {
+          const { projectMessageChannelFilter } = await import("@/lib/messaging/access");
+          return projectMessageChannelFilter(session.user.id, session.user.role);
+        })()
+      : null;
+
   const [project, actionsConsumed, chantierMissions] = await Promise.all([
     prisma.project.findUnique({
       where: { id },
@@ -50,7 +61,12 @@ export default async function ProjetDetailPage({
         client: true,
         assignedTo: { select: { id: true, name: true, email: true } },
         messages: {
-          where: projectMessageVisibilityWhere(session.user.id),
+          where: {
+            ...projectMessageVisibilityWhere(session.user.id),
+            ...(channelFilterEarly
+              ? { channel: { in: channelFilterEarly.channels } }
+              : {}),
+          },
           include: { sender: true, receiver: true },
           orderBy: { createdAt: "asc" },
         },
@@ -101,17 +117,39 @@ export default async function ProjetDetailPage({
     ? await findOrphanMissionDocumentsForProject(id).catch(() => [])
     : [];
 
+  const portalUser =
+    session.user.role === "CLIENT"
+      ? await prisma.user.findUnique({
+          where: { id: session.user.id },
+          select: { personType: true, permissionProfile: true },
+        })
+      : null;
+  const isExternalViewer = isExternalPortalUser(portalUser?.personType);
+  const projectScopeCtx = {
+    id,
+    clientId: project.clientId,
+    organizationId: project.organizationId,
+  };
+  const canSeeDocuments =
+    session.user.role !== "CLIENT" ||
+    (await userHasProjectScope(session.user.id, projectScopeCtx, "documents"));
+  const canSeeMessages =
+    session.user.role !== "CLIENT" ||
+    (await userHasProjectScope(session.user.id, projectScopeCtx, "messages"));
+
   const [chantierFolders, missingCount, upcomingAgenda] = await Promise.all([
-    prisma.chantierFolder.findMany({
-      where: { projectId: id },
-      orderBy: { sortOrder: "asc" },
-      include: {
-        files: {
-          orderBy: { createdAt: "desc" },
-          include: { addedBy: { select: { name: true } } },
-        },
-      },
-    }),
+    canSeeDocuments
+      ? prisma.chantierFolder.findMany({
+          where: { projectId: id },
+          orderBy: { sortOrder: "asc" },
+          include: {
+            files: {
+              orderBy: { createdAt: "desc" },
+              include: { addedBy: { select: { name: true } } },
+            },
+          },
+        })
+      : Promise.resolve([]),
     prisma.chantierFile.count({
       where: { projectId: id, status: { in: CHANTIER_MISSING_STATUSES } },
     }),
@@ -131,17 +169,23 @@ export default async function ProjetDetailPage({
     id: folder.id,
     code: folder.code,
     label: folder.label,
-    files: folder.files.map((f) => ({
-      id: f.id,
-      name: f.name,
-      fileUrl: f.fileUrl,
-      mimeType: f.mimeType,
-      documentType: f.documentType,
-      status: f.status,
-      comment: f.comment,
-      createdAt: f.createdAt.toISOString(),
-      addedBy: f.addedBy,
-    })),
+    files: folder.files
+      .filter((f) => {
+        if (!isExternalViewer) return true;
+        return isSharedVisibility(f.visibility);
+      })
+      .map((f) => ({
+        id: f.id,
+        name: f.name,
+        fileUrl: f.fileUrl,
+        mimeType: f.mimeType,
+        documentType: f.documentType,
+        status: f.status,
+        comment: f.comment,
+        createdAt: f.createdAt.toISOString(),
+        addedBy: f.addedBy,
+        visibility: f.visibility,
+      })),
   }));
 
   const projectActionsUsed = actionsConsumed._sum.actionsUsed ?? 0;
@@ -157,7 +201,18 @@ export default async function ProjetDetailPage({
 
   const isAgence = session.user.role === "AGENCE" || session.user.role === "MANAGER";
   const isStaff = isAgence || session.user.role === "AGENT";
-  const canEditDossier = isStaff || project.clientId === session.user.id;
+  const canEditDossier =
+    isStaff ||
+    project.clientId === session.user.id ||
+    (session.user.role === "CLIENT" &&
+      !isExternalViewer &&
+      canManageEquipe(portalUser?.personType, portalUser?.permissionProfile));
+  const canManageShare =
+    isAgence ||
+    project.clientId === session.user.id ||
+    (session.user.role === "CLIENT" &&
+      !isExternalViewer &&
+      canManageEquipe(portalUser?.personType, portalUser?.permissionProfile));
   const canDeleteChantier = canDeleteChantierProject(session.user, project);
 
   let agents: { id: string; name: string; email: string }[] = [];
@@ -361,8 +416,19 @@ export default async function ProjetDetailPage({
     />
   );
 
-  const documentsPanel = (
+  const documentsPanel = !canSeeDocuments ? (
+    <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-950">
+      Documents non inclus dans votre périmètre sur ce chantier. Demandez un accès « documents » au
+      conducteur.
+    </div>
+  ) : (
     <div className="space-y-4">
+      {isExternalViewer ? (
+        <p className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-xs text-slate-600">
+          Seules les pièces marquées comme partagées sont visibles. Les documents internes
+          entreprise restent masqués.
+        </p>
+      ) : null}
       {syncBanner ? (
         <p className="rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-800">
           {syncBanner.synced} pièce{syncBanner.synced > 1 ? "s" : ""} importée
@@ -373,7 +439,7 @@ export default async function ProjetDetailPage({
       <div id="dossier-chantier">
         <ChantierDossierSection projectId={id} folders={dossierFolders} canEdit={canEditDossier} />
       </div>
-      {project.documents.length > 0 ? (
+      {!isExternalViewer && project.documents.length > 0 ? (
         <div className="rounded-xl surface-metallic-light p-6">
           <h2 className="mb-4 text-lg font-semibold text-slate-800">
             Pièces jointes ({project.documents.length})
@@ -401,9 +467,17 @@ export default async function ProjetDetailPage({
     </div>
   );
 
-  const messagesPanel = (
+  const messagesPanel = !canSeeMessages ? (
+    <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-950">
+      Messagerie non incluse dans votre périmètre sur ce chantier.
+    </div>
+  ) : (
     <div className="rounded-xl surface-metallic-light p-6">
       <h2 className="mb-4 text-lg font-semibold text-slate-800">Messages</h2>
+      <p className="mb-3 text-xs text-slate-500">
+        Pour les fils INTERNE / CLIENT / FOURNISSEUR, utilisez aussi Communication → onglet
+        Chantiers.
+      </p>
       <div className="space-y-4">
         {project.messages.length === 0 ? (
           <p className="text-slate-500">Aucun message pour le moment.</p>
@@ -417,6 +491,9 @@ export default async function ProjetDetailPage({
               >
                 <p className="text-sm font-medium text-slate-700">
                   {msg.sender.name} → {msg.receiver.name}
+                  {"channel" in msg && msg.channel ? (
+                    <span className="ml-2 text-xs text-slate-400">({String(msg.channel)})</span>
+                  ) : null}
                 </p>
                 <p className="mt-1 text-slate-800">{msg.content}</p>
                 <p className="mt-2 text-xs text-slate-500">
@@ -436,6 +513,8 @@ export default async function ProjetDetailPage({
       />
     </div>
   );
+
+  const partagePanel = canManageShare ? <ChantierSharePanel projectId={id} /> : null;
 
   const pilotagePanel = (
     <div className="space-y-4">
@@ -533,11 +612,13 @@ export default async function ProjetDetailPage({
           },
         ]}
         attentionItems={attentionItems}
+        hiddenTabs={canManageShare ? undefined : ["partage"]}
         panels={{
           overview: contextCard,
           taches: tachesPanel,
           documents: documentsPanel,
           messages: messagesPanel,
+          partage: partagePanel,
           pilotage: pilotagePanel,
         }}
       />

@@ -22,7 +22,9 @@ async function assertProjectAccess(userId: string, projectId: string, staff: boo
     select: { id: true, clientId: true, organizationId: true },
   });
   if (!project) return false;
-  return canClientAccessProject(userId, project);
+  if (!(await canClientAccessProject(userId, project))) return false;
+  const { userHasProjectScope } = await import("@/lib/equipe-acces/project-access");
+  return userHasProjectScope(userId, project, "agenda");
 }
 
 function parseDate(value: string | null): Date | null {

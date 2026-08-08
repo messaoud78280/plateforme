@@ -47,6 +47,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     comment?: string | null;
     name?: string;
     documentType?: string | null;
+    visibility?: string;
   } = {};
 
   if (body.status !== undefined) {
@@ -73,11 +74,25 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (body.documentType !== undefined) {
     data.documentType = body.documentType ? String(body.documentType).trim() || null : null;
   }
+  if (body.visibility !== undefined) {
+    const v = String(body.visibility).trim();
+    const allowed = [
+      "Interne entreprise cliente",
+      "Interne BeWork",
+      "Intervenants autorisés",
+      "BeWork et entreprise cliente",
+      "Partage temporaire",
+    ];
+    if (!allowed.includes(v)) {
+      return NextResponse.json({ error: "Visibilité invalide" }, { status: 400 });
+    }
+    data.visibility = v;
+  }
 
   const updated = await prisma.chantierFile.update({
     where: { id },
     data,
-    select: { id: true, status: true, name: true },
+    select: { id: true, status: true, name: true, visibility: true },
   });
 
   return NextResponse.json(updated);

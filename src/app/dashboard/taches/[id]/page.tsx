@@ -101,7 +101,7 @@ export default async function TacheDetailPage({
     } else if (task.project) {
       const project = await prisma.project.findUnique({
         where: { id: task.project.id },
-        select: { clientId: true, organizationId: true },
+        select: { id: true, clientId: true, organizationId: true },
       });
       if (project) canAccess = await canClientAccessProject(session.user.id, project);
     }

@@ -46,12 +46,27 @@ model User {
   actionsResetAt      DateTime? // expiration des crédits en cours (J+30 après achat/crédit)
   invitedById         String?   // utilisateur qui a invité (équipe)
   teamRole            String?   // ADMIN | USER | SUPERVISEUR (si membre d'une équipe)
+  /// Type métier dans l’écosystème entreprise (V1 Utilisateurs & accès)
+  personType          String?   // INTERNAL | CLIENT_EXT | SUPPLIER | SUBCONTRACTOR | MOE | CONTROL_OFFICE | PARTNER
+  /// Statut d’accès plateforme
+  accessStatus        String    @default("ACTIVE") // ACTIVE | INVITED | SUSPENDED | DISABLED
+  /// Profil de permissions prédéfini
+  permissionProfile   String?   // DIRECTION | ADMINISTRATIF | CONDUCTEUR | CHEF_CHANTIER | CLIENT | FOURNISSEUR | SOUS_TRAITANT | PARTENAIRE
+  jobTitle            String?   // Fonction affichée
+  mustChangePassword  Boolean   @default(false)
+  lastLoginAt         DateTime?
+  externalOrganizationId String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
   invitedBy           User?     @relation("TeamMembers", fields: [invitedById], references: [id], onDelete: SetNull)
   invitedUsers        User[]    @relation("TeamMembers")
+  externalOrganization ExternalOrganization? @relation("ExternalOrgPeople", fields: [externalOrganizationId], references: [id], onDelete: SetNull)
+  projectAccesses     ProjectAccess[] @relation("ProjectAccessUser")
+  projectAccessesGranted ProjectAccess[] @relation("ProjectAccessGrantedBy")
+  accessAuditsAsActor AccessAuditLog[] @relation("AccessAuditActor")
+  accessAuditsAsTarget AccessAuditLog[] @relation("AccessAuditTarget")
   approvedBy          User?     @relation("ApprovedClients", fields: [approvedById], references: [id], onDelete: SetNull)
   clientsApproved     User[]    @relation("ApprovedClients")
   invitationsSent     Invitation[]
@@ -161,17 +176,79 @@ model VerificationToken {
 model Invitation {
   id          String   @id @default(cuid())
   email       String
-  role        String   // ADMIN | USER | SUPERVISEUR
+  role        String   // ADMIN | USER | SUPERVISEUR (legacy org member)
   invitedById String
   token       String   @unique
   status      InvitationStatus @default(PENDING)
   expiresAt   DateTime
   createdAt   DateTime @default(now())
+  /// V1 Utilisateurs & accès
+  personType         String?
+  permissionProfile  String?
+  firstName          String?
+  lastName           String?
+  companyName        String?
+  phone              String?
+  jobTitle           String?
+  projectIdsJson     Json?
+  externalOrganizationId String?
 
   invitedBy   User     @relation(fields: [invitedById], references: [id], onDelete: Cascade)
 
   @@index([invitedById])
   @@index([email, status])
+}
+
+/// Organisation externe (fournisseur, client, sous-traitant…) rattachée au tenant BeWork.
+model ExternalOrganization {
+  id                 String   @id @default(cuid())
+  hostOrganizationId String
+  name               String
+  type               String   // CLIENT_EXT | SUPPLIER | SUBCONTRACTOR | MOE | CONTROL_OFFICE | PARTNER
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  hostOrganization Organization @relation(fields: [hostOrganizationId], references: [id], onDelete: Cascade)
+  people           User[]       @relation("ExternalOrgPeople")
+
+  @@index([hostOrganizationId])
+  @@index([hostOrganizationId, type])
+}
+
+/// Accès explicite d’un utilisateur à un chantier (périmètre).
+model ProjectAccess {
+  id          String   @id @default(cuid())
+  projectId   String
+  userId      String
+  scopesJson  Json?    // { messages, documents, agenda, deliveries }
+  grantedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User    @relation("ProjectAccessUser", fields: [userId], references: [id], onDelete: Cascade)
+  grantedBy User?   @relation("ProjectAccessGrantedBy", fields: [grantedById], references: [id], onDelete: SetNull)
+
+  @@unique([projectId, userId])
+  @@index([userId])
+  @@index([projectId])
+}
+
+/// Journal des accès / modifications sensibles.
+model AccessAuditLog {
+  id             String   @id @default(cuid())
+  organizationId String?
+  actorUserId    String?
+  targetUserId   String?
+  action         String
+  detail         String?  @db.Text
+  createdAt      DateTime @default(now())
+
+  actor  User? @relation("AccessAuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  target User? @relation("AccessAuditTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([targetUserId, createdAt])
 }
 
 enum InvitationStatus {
@@ -194,6 +271,7 @@ model Organization {
   projects         Project[]
   tasks            Task[]
   demoEnvironment  DemoEnvironment?
+  externalOrganizations ExternalOrganization[]
 
   @@index([ownerUserId])
   @@unique([ownerUserId])
@@ -366,6 +444,7 @@ model Project {
   chantierFolders ChantierFolder[]
   chantierFiles   ChantierFile[]
   worksitePilotages WorksitePilotage[]
+  projectAccesses ProjectAccess[]
 
   @@index([organizationId])
 }

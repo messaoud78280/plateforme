@@ -69,20 +69,23 @@ export async function getUserOrganizationIds(userId: string): Promise<string[]> 
 
 /**
  * Filtre Prisma Project pour un utilisateur CLIENT (lui + orgs).
+ * Externes (personType ≠ INTERNAL) : uniquement ProjectAccess + clientId.
  */
 export async function projectWhereForClientUser(
   userId: string
 ): Promise<Prisma.ProjectWhereInput> {
+  const { projectWhereWithScopedAccess } = await import("@/lib/equipe-acces/project-access");
+
   if (!isFeatureEnabled("organizationMultiUser")) {
-    return { clientId: userId };
+    return projectWhereWithScopedAccess(userId, { clientId: userId });
   }
   const orgIds = await getUserOrganizationIds(userId);
   if (orgIds.length === 0) {
-    return { clientId: userId };
+    return projectWhereWithScopedAccess(userId, { clientId: userId });
   }
-  return {
+  return projectWhereWithScopedAccess(userId, {
     OR: [{ clientId: userId }, { organizationId: { in: orgIds } }],
-  };
+  });
 }
 
 /**
@@ -101,24 +104,18 @@ export async function taskWhereForClientUser(userId: string): Promise<Prisma.Tas
   };
 }
 
-/** Vérifie qu’un projet est accessible au client (owner ou membre org). */
+/** Vérifie qu’un projet est accessible au client (owner, membre interne org, ou ProjectAccess). */
 export async function canClientAccessProject(
   userId: string,
-  project: { clientId: string; organizationId?: string | null }
+  project: { id?: string; clientId: string; organizationId?: string | null }
 ): Promise<boolean> {
-  if (project.clientId === userId) return true;
-  if (!isFeatureEnabled("organizationMultiUser")) return false;
-  if (!project.organizationId) return false;
-  const membership = await prisma.organizationMember.findUnique({
-    where: {
-      organizationId_userId: {
-        organizationId: project.organizationId,
-        userId,
-      },
-    },
-    select: { id: true },
-  });
-  return Boolean(membership);
+  const { canAccessProjectForPortalUser } = await import("@/lib/equipe-acces/project-access");
+  if (!isFeatureEnabled("organizationMultiUser")) {
+    if (project.clientId === userId) return true;
+    if (!project.id) return false;
+    return canAccessProjectForPortalUser(userId, project);
+  }
+  return canAccessProjectForPortalUser(userId, project);
 }
 
 /** Ajoute un membre à l’organisation du propriétaire (après invitation). */

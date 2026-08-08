@@ -2,9 +2,11 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
-import { buildCreditsGrantUpdate } from "@/lib/credits-lifecycle";
-import { addMemberToOwnerOrganization } from "@/lib/organization/access";
+import { addMemberToOwnerOrganization, ensureOrganizationForOwner } from "@/lib/organization/access";
+import { mapProfileToOrgRole } from "@/lib/equipe-acces/admin";
+import { setUserProjectAccesses } from "@/lib/equipe-acces/project-access";
+import { logAccessAction } from "@/lib/equipe-acces/audit";
+import { defaultProfileForPersonType, type PersonType } from "@/lib/equipe-acces/types";
 
 export async function POST(request: Request) {
   try {
@@ -34,28 +36,81 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    const personType = (inv.personType as PersonType | null) ?? "INTERNAL";
+    const permissionProfile =
+      inv.permissionProfile ?? defaultProfileForPersonType(personType);
+    const displayName =
+      name.trim() ||
+      [inv.firstName, inv.lastName].filter(Boolean).join(" ") ||
+      inv.email.split("@")[0];
+
     const hashedPassword = await bcrypt.hash(password, 12);
     const user = await prisma.user.create({
       data: {
         email: inv.email,
         password: hashedPassword,
-        name: name.trim(),
+        name: displayName,
         role: UserRole.CLIENT,
+        company: inv.companyName,
+        phone: inv.phone,
+        jobTitle: inv.jobTitle,
         invitedById: inv.invitedById,
         teamRole: inv.role,
-        subscriptionPlan: "STANDARD",
-        ...buildCreditsGrantUpdate(SUBSCRIPTION_PLANS.STANDARD.actionsIncluded),
+        personType,
+        permissionProfile,
+        accessStatus: "ACTIVE",
+        mustChangePassword: false,
+        externalOrganizationId: inv.externalOrganizationId,
+        // Pas de crédits propres — rattachement à l’entreprise invitante
+        subscriptionPlan: null,
+        monthlyActionsTotal: 0,
+        monthlyActionsUsed: 0,
       },
     });
+
     await prisma.invitation.update({
       where: { id: inv.id },
       data: { status: "ACCEPTED" },
     });
+
     try {
       await addMemberToOwnerOrganization(inv.invitedById, user.id, inv.role);
+      const organizationId = await ensureOrganizationForOwner(inv.invitedById);
+      if (organizationId) {
+        const orgRole = mapProfileToOrgRole(permissionProfile, personType);
+        await prisma.organizationMember.update({
+          where: {
+            organizationId_userId: { organizationId, userId: user.id },
+          },
+          data: { role: orgRole },
+        });
+
+        const projectIds = Array.isArray(inv.projectIdsJson)
+          ? (inv.projectIdsJson as unknown[]).filter((x): x is string => typeof x === "string")
+          : [];
+        if (personType !== "INTERNAL" || projectIds.length > 0) {
+          await setUserProjectAccesses({
+            userId: user.id,
+            projectIds,
+            grantedById: inv.invitedById,
+            permissionProfile,
+            organizationId,
+          });
+        }
+
+        await logAccessAction({
+          organizationId,
+          actorUserId: user.id,
+          targetUserId: user.id,
+          action: "INVITE_ACCEPTED",
+          detail: JSON.stringify({ invitationId: inv.id, personType }),
+        });
+      }
     } catch (e) {
       console.error("Organization member after invite:", e);
     }
+
     return NextResponse.json({ success: true });
   } catch (e) {
     console.error("Accept invitation:", e);

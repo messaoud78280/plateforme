@@ -5,18 +5,22 @@ import { getRolePartLabel } from "@/types";
 import { ChangePasswordForm } from "@/components/settings/ChangePasswordForm";
 import { LogoutButton } from "@/components/LogoutButton";
 
-export default async function PreferencesSecuritePage() {
+type Props = { searchParams?: Promise<{ mustChangePassword?: string }> };
+
+export default async function PreferencesSecuritePage({ searchParams }: Props) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
     redirect("/connexion?callbackUrl=/dashboard/parametres/securite");
   }
 
+  const sp = (await searchParams) ?? {};
+  const forceChange = sp.mustChangePassword === "1";
+
   const role = session.user.role ?? "CLIENT";
   const roleLabel = getRolePartLabel(role);
   const isManager = role === "MANAGER";
   const isAgent = role === "AGENT" || role === "AGENCE";
-  const isClient = role === "CLIENT";
   const isCoteAgence = isManager || isAgent;
 
   return (
@@ -25,7 +29,7 @@ export default async function PreferencesSecuritePage() {
         Préférences de sécurité
       </h2>
       <div className="space-y-8">
-        <ChangePasswordForm />
+        <ChangePasswordForm forceChange={forceChange} />
         <div className="border-t border-[#e2e8f0] pt-6">
           <p className="mb-2 text-sm font-medium text-black">Session</p>
           <div className="flex flex-wrap items-center gap-4">

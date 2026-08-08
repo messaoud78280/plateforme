@@ -78,9 +78,17 @@ export function projectMessageVisibilityWhere(userId: string): Prisma.MessageWhe
 
 export async function canAccessProjectMessaging(
   user: MessagingUser,
-  project: { id: string; clientId: string; assignedToId: string | null }
+  project: {
+    id: string;
+    clientId: string;
+    assignedToId: string | null;
+    organizationId?: string | null;
+  }
 ): Promise<boolean> {
-  if (user.role === "CLIENT") return project.clientId === user.id;
+  if (user.role === "CLIENT") {
+    const { canClientAccessProject } = await import("@/lib/organization/access");
+    return canClientAccessProject(user.id, project);
+  }
   if (isStaffAgent(user.role)) return project.assignedToId === user.id;
 
   if (isManagerRole(user.role)) {

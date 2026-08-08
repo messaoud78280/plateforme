@@ -84,7 +84,7 @@ export function DashboardNav({ role }: { role?: string | null }) {
               Reporting
             </NavLink>
             <NavLink href="/dashboard/equipe" pathname={pathname} activeClass={active}>
-              Équipe
+              Équipe & partenaires
             </NavLink>
             <NavLink href="/dashboard/abonnement" pathname={pathname} activeClass={active}>
               Abonnement

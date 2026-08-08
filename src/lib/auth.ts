@@ -95,6 +95,11 @@ export const authOptions: NextAuthOptions = {
             return null;
           }
 
+          const accessStatus = (user as { accessStatus?: string }).accessStatus;
+          if (accessStatus === "SUSPENDED" || accessStatus === "DISABLED") {
+            return null;
+          }
+
           if (gate === "demo") {
             const access = await resolveDemoAccessForUser(user.id);
             if (!access.ok) return null;
@@ -103,6 +108,13 @@ export const authOptions: NextAuthOptions = {
             return null;
           }
 
+          prisma.user
+            .update({
+              where: { id: user.id },
+              data: { lastLoginAt: new Date() },
+            })
+            .catch(() => undefined);
+
           return {
             id: user.id,
             email: user.email,
@@ -110,6 +122,9 @@ export const authOptions: NextAuthOptions = {
             role: user.role,
             contractStatus: user.contractStatus,
             accountStatus: user.accountStatus,
+            mustChangePassword: Boolean(
+              (user as { mustChangePassword?: boolean }).mustChangePassword
+            ),
           };
         } catch (err) {
           console.error("[Auth] Erreur base de données:", err);
@@ -152,14 +167,22 @@ export const authOptions: NextAuthOptions = {
 
       const dbUser = await prisma.user.findUnique({
         where: { id: userId },
-        select: { role: true, accountStatus: true },
+        select: { role: true, accountStatus: true, accessStatus: true, mustChangePassword: true },
       });
+
+      if (dbUser?.accessStatus === "SUSPENDED" || dbUser?.accessStatus === "DISABLED") {
+        return "/connexion/clients?error=account_disabled";
+      }
 
       if (dbUser?.role === UserRole.CLIENT && !isClientLoginAllowed(dbUser.accountStatus)) {
         if (dbUser.accountStatus === ClientAccountStatus.REJECTED) {
           return "/connexion/clients?error=account_rejected";
         }
         return "/connexion/clients?error=account_pending";
+      }
+
+      if (dbUser?.mustChangePassword) {
+        return "/dashboard/parametres/securite?mustChangePassword=1";
       }
 
       return true;
@@ -172,16 +195,24 @@ export const authOptions: NextAuthOptions = {
         token.contractStatus = typeof u.contractStatus === "string" ? u.contractStatus : undefined;
         token.accountStatus = typeof u.accountStatus === "string" ? u.accountStatus : undefined;
         token.email = typeof u.email === "string" ? u.email : token.email;
+        token.mustChangePassword = Boolean(u.mustChangePassword);
       } else if (token.id && !token.role) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { role: true, contractStatus: true, accountStatus: true, email: true },
+          select: {
+            role: true,
+            contractStatus: true,
+            accountStatus: true,
+            email: true,
+            mustChangePassword: true,
+          },
         });
         if (dbUser) {
           token.role = dbUser.role;
           token.contractStatus = dbUser.contractStatus;
           token.accountStatus = dbUser.accountStatus;
           token.email = dbUser.email;
+          token.mustChangePassword = dbUser.mustChangePassword;
         }
       }
 

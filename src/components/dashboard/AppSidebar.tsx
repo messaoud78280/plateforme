@@ -68,7 +68,7 @@ function buildSections(role: string | null | undefined): NavSection[] {
         items: [
           { href: "/dashboard/documents", label: "Documents", icon: FileText },
           { href: "/dashboard/messagerie", label: "Communication", icon: MessageSquare },
-          { href: "/dashboard/equipe", label: "Équipe", icon: Users },
+          { href: "/dashboard/equipe", label: "Équipe & partenaires", icon: Users },
         ],
       },
       {

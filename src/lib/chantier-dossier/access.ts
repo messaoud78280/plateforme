@@ -10,7 +10,7 @@ export function isChantierStaff(role?: string | null) {
 export async function canAccessChantierProject(user: SessionUser, projectId: string) {
   const project = await prisma.project.findUnique({
     where: { id: projectId },
-    select: { clientId: true, assignedToId: true, organizationId: true },
+    select: { id: true, clientId: true, assignedToId: true, organizationId: true },
   });
   if (!project) return { ok: false as const, project: null };
 
@@ -20,10 +20,7 @@ export async function canAccessChantierProject(user: SessionUser, projectId: str
   if (user.role === "AGENT" && project.assignedToId === user.id) {
     return { ok: true as const, project };
   }
-  if (project.clientId === user.id) {
-    return { ok: true as const, project };
-  }
-  if (project.organizationId) {
+  if (user.role === "CLIENT") {
     const { canClientAccessProject } = await import("@/lib/organization/access");
     if (await canClientAccessProject(user.id, project)) {
       return { ok: true as const, project };

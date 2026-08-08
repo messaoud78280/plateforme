@@ -13,9 +13,10 @@ export default async function EquipePage() {
     <div className="space-y-8">
       <BackLink href="/dashboard">Tableau de bord</BackLink>
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Inviter un membre de l&apos;équipe</h1>
+        <h1 className="text-2xl font-bold text-[#1e3a5f]">Équipe & partenaires</h1>
         <p className="mt-1 text-slate-600">
-          Ajoutez des collaborateurs et définissez leur rôle (Administrateur, Utilisateur ou Superviseur).
+          Gérez le personnel, les clients, fournisseurs et partenaires — avec un périmètre chantier
+          clair pour éviter les fuites d&apos;accès.
         </p>
       </div>
       <EquipeSection />

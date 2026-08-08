@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 
-export function ChangePasswordForm() {
+type Props = { forceChange?: boolean };
+
+export function ChangePasswordForm({ forceChange = false }: Props) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -51,6 +53,11 @@ export function ChangePasswordForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {forceChange ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+          Mot de passe temporaire détecté — choisissez un nouveau mot de passe avant de continuer.
+        </div>
+      ) : null}
       <div>
         <label htmlFor="current-password" className="mb-1 block text-sm font-medium text-slate-700">
           Mot de passe actuel

@@ -14,7 +14,7 @@ async function assertProjectAccess(userId: string, projectId: string, staff: boo
   if (staff) return true;
   const project = await prisma.project.findUnique({
     where: { id: projectId },
-    select: { clientId: true, organizationId: true },
+    select: { id: true, clientId: true, organizationId: true },
   });
   if (!project) return false;
   return canClientAccessProject(userId, project);

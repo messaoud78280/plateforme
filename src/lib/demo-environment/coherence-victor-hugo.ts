@@ -5,6 +5,7 @@
  */
 import { prisma } from "@/lib/prisma";
 import { appendFollowUpTimeline } from "@/lib/follow-up/timeline";
+import { syncPurchaseOrderDeliveryEvent } from "@/lib/purchase-orders/sync-delivery";
 import { demoPersonaEmail } from "./personas";
 
 const DELIVERY_AT = new Date(2026, 7, 11, 7, 30, 0, 0); // 11 août 2026 07:30
@@ -424,66 +425,29 @@ export async function ensureVictorHugoCoherence(opts: {
   }
   purchaseOrderId = po.id;
 
-  // —— 3. UNE livraison agenda liée fiche + BC ——
-  let delivery = await prisma.agendaEvent.findFirst({
-    where: {
-      projectId: project.id,
-      type: "LIVRAISON",
-      OR: [{ taskId: bc.id }, { followUpSheetId: sheet.id }, { title: { contains: "membrane" } }, { title: { contains: "Point.P" } }],
-      status: { not: "ANNULE" },
-    },
-    orderBy: { createdAt: "asc" },
+  // —— 3. UNE livraison agenda = sync idempotent CDE-2B (source = PurchaseOrder) ——
+  const sync = await syncPurchaseOrderDeliveryEvent({
+    orderId: po.id,
+    actorUserId: opts.rootUserId,
   });
+  let delivery = sync.eventId
+    ? await prisma.agendaEvent.findUnique({ where: { id: sync.eventId } })
+    : null;
 
-  if (!delivery) {
-    delivery = await prisma.agendaEvent.create({
-      data: {
-        title: "Livraison Point.P — membrane EPDM (BC-2026-043)",
-        type: "LIVRAISON",
-        status: "PLANIFIE",
-        startAt: DELIVERY_AT,
-        endAt: DELIVERY_END,
-        location: "Résidence Victor Hugo — aire livraison",
-        description: "40 rouleaux membrane EPDM — créneau demandé 07:30",
-        ownerUserId: opts.rootUserId,
-        createdById: opts.rootUserId,
-        organizationId: opts.organizationId,
-        projectId: project.id,
-        followUpSheetId: sheet.id,
-        taskId: bc.id,
-        purchaseOrderId: purchaseOrderId ?? undefined,
-      },
-    });
-  } else {
-    delivery = await prisma.agendaEvent.update({
-      where: { id: delivery.id },
-      data: {
-        title: "Livraison Point.P — membrane EPDM (BC-2026-043)",
-        type: "LIVRAISON",
-        startAt: delivery.status === "TERMINE" || delivery.status === "CONFIRME" ? delivery.startAt : DELIVERY_AT,
-        endAt: delivery.status === "TERMINE" || delivery.status === "CONFIRME" ? delivery.endAt : DELIVERY_END,
-        followUpSheetId: sheet.id,
-        taskId: bc.id,
-        projectId: project.id,
-        purchaseOrderId: purchaseOrderId ?? undefined,
-        location: "Résidence Victor Hugo — aire livraison",
-      },
-    });
-  }
-
-  // Annuler les autres livraisons membrane / Point.P du même chantier (une seule vérité)
+  // Annuler les orphelins membrane / Point.P du même chantier (hors événement syncé)
   const otherDeliveries = await prisma.agendaEvent.findMany({
     where: {
       projectId: project.id,
       type: "LIVRAISON",
-      id: { not: delivery.id },
       status: { not: "ANNULE" },
+      ...(delivery ? { id: { not: delivery.id } } : {}),
       OR: [
         { title: { contains: "membrane" } },
         { title: { contains: "Point.P" } },
         { title: { contains: "BC-2026-043" } },
         { taskId: bc.id },
         { followUpSheetId: sheet.id },
+        { purchaseOrderId: po.id },
       ],
     },
     select: { id: true },
@@ -492,6 +456,27 @@ export async function ensureVictorHugoCoherence(opts: {
     await prisma.agendaEvent.update({
       where: { id: o.id },
       data: { status: "ANNULE", description: "Doublon annulé — une seule livraison BC-2026-043." },
+    });
+  }
+  if (!delivery) {
+    // Garde-fou : événement minimal si sync noop (ne devrait pas arriver avec DELIVERY_AT)
+    delivery = await prisma.agendaEvent.create({
+      data: {
+        title: "Livraison POINT.P (BC-2026-043)",
+        type: "LIVRAISON",
+        status: "PLANIFIE",
+        startAt: DELIVERY_AT,
+        endAt: DELIVERY_END,
+        location: "Résidence Victor Hugo — aire livraison",
+        ownerUserId: opts.rootUserId,
+        createdById: opts.rootUserId,
+        organizationId: opts.organizationId,
+        projectId: project.id,
+        followUpSheetId: sheet.id,
+        taskId: bc.id,
+        purchaseOrderId: po.id,
+        responsibleId: assigneeId,
+      },
     });
   }
 
@@ -671,13 +656,14 @@ export async function applySupplierDeliveryConfirm(opts: {
     },
   });
 
-  // Aligner PurchaseOrder métier (CDE-2A) — sans écraser requestedDeliveryAt
+  // Aligner PurchaseOrder + Agenda via sync CDE-2B (une seule livraison)
   const linkedPo = await prisma.purchaseOrder.findFirst({
     where: {
       OR: [{ legacyTaskId: task.id }, { number: "BC-2026-043", organizationId: task.organizationId ?? undefined }],
     },
     select: { id: true },
   });
+  let delivery: { id: string } | null = null;
   if (linkedPo) {
     await prisma.purchaseOrder.update({
       where: { id: linkedPo.id },
@@ -688,6 +674,8 @@ export async function applySupplierDeliveryConfirm(opts: {
         proposedDeliveryAt: null,
         proposedDeliveryComment: null,
         sharedWithSupplier: true,
+        legacyTaskId: task.id,
+        followUpSheetId: sheetId,
       },
     });
     await prisma.purchaseOrderEvent.create({
@@ -699,62 +687,40 @@ export async function applySupplierDeliveryConfirm(opts: {
         actorUserId: opts.actorUserId,
       },
     });
+    const synced = await syncPurchaseOrderDeliveryEvent({
+      orderId: linkedPo.id,
+      actorUserId: opts.actorUserId,
+      postSystemMessage: true,
+      systemMessage: `✓ Livraison confirmée — 11 août 07:30\nBC-2026-043 · Point.P\n[Voir la commande](/dashboard/commandes/${linkedPo.id})`,
+    });
+    delivery = synced.eventId ? { id: synced.eventId } : null;
   }
 
-  let delivery = await prisma.agendaEvent.findFirst({
-    where: {
-      projectId: task.projectId,
-      type: "LIVRAISON",
-      status: { not: "ANNULE" },
-      OR: [{ taskId: task.id }, ...(sheetId ? [{ followUpSheetId: sheetId }] : [])],
-    },
-    orderBy: { createdAt: "asc" },
-  });
+  if (!delivery) {
+    delivery = await prisma.agendaEvent.findFirst({
+      where: {
+        projectId: task.projectId,
+        type: "LIVRAISON",
+        status: { not: "ANNULE" },
+        OR: [{ taskId: task.id }, ...(sheetId ? [{ followUpSheetId: sheetId }] : [])],
+      },
+      orderBy: { createdAt: "asc" },
+      select: { id: true },
+    });
+  }
 
   if (delivery) {
-    delivery = await prisma.agendaEvent.update({
-      where: { id: delivery.id },
-      data: {
-        status: "CONFIRME",
-        startAt: DELIVERY_AT,
-        endAt: DELIVERY_END,
-        taskId: task.id,
-        followUpSheetId: sheetId,
-        title: "Livraison Point.P — membrane EPDM (BC-2026-043)",
-        description: `Confirmée par ${opts.actorName}`,
-      },
-    });
-  } else {
-    delivery = await prisma.agendaEvent.create({
-      data: {
-        title: "Livraison Point.P — membrane EPDM (BC-2026-043)",
+    await prisma.agendaEvent.updateMany({
+      where: {
+        projectId: task.projectId!,
         type: "LIVRAISON",
-        status: "CONFIRME",
-        startAt: DELIVERY_AT,
-        endAt: DELIVERY_END,
-        location: "Résidence Victor Hugo — aire livraison",
-        description: `Confirmée par ${opts.actorName}`,
-        ownerUserId: opts.rootUserId,
-        createdById: opts.actorUserId,
-        organizationId: task.organizationId,
-        projectId: task.projectId,
-        followUpSheetId: sheetId,
-        taskId: task.id,
+        id: { not: delivery.id },
+        status: { not: "ANNULE" },
+        OR: [{ taskId: task.id }, ...(sheetId ? [{ followUpSheetId: sheetId }] : [])],
       },
+      data: { status: "ANNULE", description: "Doublon annulé après confirmation fournisseur." },
     });
   }
-
-  // Annuler doublons
-  await prisma.agendaEvent.updateMany({
-    where: {
-      projectId: task.projectId,
-      type: "LIVRAISON",
-      id: { not: delivery.id },
-      status: { not: "ANNULE" },
-      OR: [{ taskId: task.id }, ...(sheetId ? [{ followUpSheetId: sheetId }] : [])],
-    },
-    data: { status: "ANNULE", description: "Doublon annulé après confirmation fournisseur." },
-  });
 
   if (sheetId) {
     await prisma.followUpSheet.update({
@@ -776,17 +742,29 @@ export async function applySupplierDeliveryConfirm(opts: {
     });
   }
 
-  await prisma.taskMessage.create({
-    data: {
+  // Évite doublon si sync a déjà posté un SYSTEM
+  const alreadySystem = await prisma.taskMessage.findFirst({
+    where: {
       taskId: task.id,
-      senderId: opts.actorUserId,
-      receiverId: opts.rootUserId,
-      content: `✅ Livraison confirmée pour le 11/08/2026 à 07:30 — ${opts.actorName} (Point.P).`,
       kind: "SYSTEM",
+      content: { contains: "Livraison confirmée" },
+      createdAt: { gte: new Date(Date.now() - 60_000) },
     },
+    select: { id: true },
   });
+  if (!alreadySystem) {
+    await prisma.taskMessage.create({
+      data: {
+        taskId: task.id,
+        senderId: opts.actorUserId,
+        receiverId: opts.rootUserId,
+        content: `✅ Livraison confirmée pour le 11/08/2026 à 07:30 — ${opts.actorName} (Point.P).`,
+        kind: "SYSTEM",
+      },
+    });
+  }
 
-  return { deliveryId: delivery.id, sheetId };
+  return { deliveryId: delivery?.id ?? null, sheetId };
 }
 
 /** Travaux terminés terrain → fiche À FACTURER + intervention TERMINE. */

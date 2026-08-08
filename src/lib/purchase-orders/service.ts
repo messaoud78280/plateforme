@@ -6,6 +6,8 @@ import {
   canTransitionPurchaseOrder,
   PURCHASE_ORDER_STATUS_LABELS,
 } from "@/lib/purchase-orders/status";
+import { syncPurchaseOrderDeliveryEvent } from "@/lib/purchase-orders/sync-delivery";
+import { createNotification } from "@/lib/notifications";
 
 export type CreatePurchaseOrderLineInput = {
   designation: string;
@@ -148,6 +150,13 @@ export async function createPurchaseOrder(input: CreatePurchaseOrderInput) {
     actorUserId: input.requestedById,
   });
 
+  if (input.requestedDeliveryAt) {
+    await syncPurchaseOrderDeliveryEvent({
+      orderId: order.id,
+      actorUserId: input.requestedById,
+    });
+  }
+
   return order;
 }
 
@@ -194,6 +203,64 @@ export async function transitionPurchaseOrder(opts: {
     actorUserId: opts.actorUserId,
   });
 
+  if (
+    opts.toStatus === "ANNULEE" ||
+    opts.toStatus === "CONFIRMEE" ||
+    opts.toStatus === "A_CONFIRMER" ||
+    opts.toStatus === "LIVRAISON_PROGRAMMEE" ||
+    opts.confirmedDeliveryAt !== undefined
+  ) {
+    await syncPurchaseOrderDeliveryEvent({
+      orderId: order.id,
+      actorUserId: opts.actorUserId,
+    });
+  }
+
+  if (opts.toStatus === "ANNULEE") {
+    const full = await prisma.purchaseOrder.findUnique({
+      where: { id: order.id },
+      select: {
+        number: true,
+        requestedById: true,
+        responsibleId: true,
+        sharedWithSupplier: true,
+        externalOrganizationId: true,
+      },
+    });
+    if (full) {
+      const ids = new Set<string>([full.requestedById]);
+      if (full.responsibleId) ids.add(full.responsibleId);
+      for (const userId of ids) {
+        await createNotification({
+          userId,
+          type: "DELIVERY_CHECK",
+          title: `Commande annulée — ${full.number}`,
+          message: "La livraison associée a été retirée de l’agenda actif.",
+          actionUrl: `/dashboard/commandes/${order.id}`,
+        });
+      }
+      if (full.sharedWithSupplier) {
+        const suppliers = await prisma.user.findMany({
+          where: {
+            externalOrganizationId: full.externalOrganizationId,
+            OR: [{ personType: "SUPPLIER" }, { permissionProfile: "FOURNISSEUR" }],
+          },
+          select: { id: true },
+          take: 20,
+        });
+        for (const u of suppliers) {
+          await createNotification({
+            userId: u.id,
+            type: "DELIVERY_CHECK",
+            title: `Commande annulée — ${full.number}`,
+            message: "Cette commande a été annulée par l’entreprise.",
+            actionUrl: `/dashboard/commandes/${order.id}`,
+          });
+        }
+      }
+    }
+  }
+
   return updated;
 }
 
@@ -232,4 +299,10 @@ export const purchaseOrderDetailInclude = {
   requestedBy: { select: { id: true, name: true } },
   responsible: { select: { id: true, name: true } },
   validator: { select: { id: true, name: true } },
+  agendaEvents: {
+    where: { type: "LIVRAISON", status: { not: "ANNULE" } },
+    orderBy: { startAt: "asc" as const },
+    take: 1,
+    select: { id: true, startAt: true, status: true, title: true },
+  },
 } satisfies Prisma.PurchaseOrderInclude;

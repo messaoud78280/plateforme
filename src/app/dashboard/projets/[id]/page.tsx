@@ -137,7 +137,7 @@ export default async function ProjetDetailPage({
     session.user.role !== "CLIENT" ||
     (await userHasProjectScope(session.user.id, projectScopeCtx, "messages"));
 
-  const [chantierFolders, missingCount, upcomingAgenda] = await Promise.all([
+  const [chantierFolders, missingCount, upcomingAgenda, nextDelivery] = await Promise.all([
     canSeeDocuments
       ? prisma.chantierFolder.findMany({
           where: { projectId: id },
@@ -163,6 +163,37 @@ export default async function ProjetDetailPage({
       take: 5,
       select: { id: true, title: true, startAt: true, type: true },
     }).catch(() => [] as { id: string; title: string; startAt: Date; type: string }[]),
+    prisma.agendaEvent
+      .findFirst({
+        where: {
+          projectId: id,
+          type: "LIVRAISON",
+          status: { not: "ANNULE" },
+          startAt: { gte: new Date(Date.now() - 3600_000) },
+        },
+        orderBy: { startAt: "asc" },
+        select: {
+          id: true,
+          title: true,
+          startAt: true,
+          status: true,
+          purchaseOrderId: true,
+          purchaseOrder: {
+            select: {
+              id: true,
+              number: true,
+              subject: true,
+              externalOrganization: { select: { name: true, tradeName: true } },
+              lines: {
+                take: 1,
+                orderBy: { sortOrder: "asc" },
+                select: { designation: true, quantity: true, unit: true },
+              },
+            },
+          },
+        },
+      })
+      .catch(() => null),
   ]);
 
   const dossierFolders = chantierFolders.map((folder) => ({
@@ -373,6 +404,62 @@ export default async function ProjetDetailPage({
           <p className="mt-1 whitespace-pre-wrap text-slate-700">{project.notes}</p>
         </div>
       ) : null}
+      {nextDelivery && !isExternalViewer ? (
+        <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50/60 p-4">
+          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-amber-900">
+            Prochaine livraison
+          </p>
+          <p className="mt-1 text-sm font-bold text-slate-900">
+            {nextDelivery.startAt.toLocaleString("fr-FR", {
+              day: "numeric",
+              month: "long",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+            {nextDelivery.status === "PLANIFIE" ? (
+              <span className="ml-2 text-xs font-semibold text-amber-800">À confirmer</span>
+            ) : (
+              <span className="ml-2 text-xs font-semibold text-emerald-800">Confirmée</span>
+            )}
+          </p>
+          {nextDelivery.purchaseOrder ? (
+            <>
+              <p className="mt-1 text-sm text-slate-700">
+                {nextDelivery.purchaseOrder.externalOrganization.tradeName ||
+                  nextDelivery.purchaseOrder.externalOrganization.name}
+                {" · "}
+                {nextDelivery.purchaseOrder.number}
+              </p>
+              {nextDelivery.purchaseOrder.lines[0] ? (
+                <p className="text-xs text-slate-600">
+                  {Number(nextDelivery.purchaseOrder.lines[0].quantity)}{" "}
+                  {nextDelivery.purchaseOrder.lines[0].unit}{" "}
+                  {nextDelivery.purchaseOrder.lines[0].designation}
+                </p>
+              ) : (
+                <p className="text-xs text-slate-600">{nextDelivery.purchaseOrder.subject}</p>
+              )}
+              <div className="mt-2 flex flex-wrap gap-3">
+                <Link
+                  href={`/dashboard/commandes/${nextDelivery.purchaseOrder.id}`}
+                  className="text-xs font-semibold text-[#1d4ed8] hover:underline"
+                >
+                  Voir la commande →
+                </Link>
+                <Link
+                  href={`/dashboard/agenda?event=${nextDelivery.id}`}
+                  className="text-xs font-semibold text-[#1d4ed8] hover:underline"
+                >
+                  Voir dans l’agenda →
+                </Link>
+              </div>
+            </>
+          ) : (
+            <p className="mt-1 text-sm text-slate-700">{nextDelivery.title}</p>
+          )}
+        </div>
+      ) : null}
+
       {upcomingAgenda.length > 0 ? (
         <div className="mt-6 border-t border-slate-100 pt-5">
           <div className="flex items-center justify-between gap-3">

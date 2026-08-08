@@ -34,9 +34,9 @@ function quickLinks(
 ): { href: string; label: string; hint: string }[] {
   if (personType === "SUPPLIER") {
     return [
-      { href: "/dashboard/commandes", label: "Commandes", hint: "À confirmer et livraisons" },
+      { href: "/dashboard/commandes", label: "Commandes", hint: "À confirmer" },
+      { href: "/dashboard/livraisons", label: "Livraisons", hint: "Vos créneaux uniquement" },
       { href: "/dashboard/messagerie", label: "Messages", hint: "Fil fournisseur uniquement" },
-      { href: "/dashboard/documents", label: "Documents", hint: "Pièces partagées" },
     ];
   }
   if (personType === "CLIENT_EXT") {

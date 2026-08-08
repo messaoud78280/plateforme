@@ -20,6 +20,7 @@ import {
   supplierActionsForStatus,
 } from "../src/lib/purchase-orders/supplier-ui";
 import { sanitizeOrderForSupplier } from "../src/lib/purchase-orders/supplier-collaboration";
+import { resolveDeliverySchedule } from "../src/lib/purchase-orders/sync-delivery";
 
 function testTotals() {
   assert.equal(lineTotalHt({ quantity: 40, unitPriceHt: 106.5 }), 4260);
@@ -118,13 +119,71 @@ function testSupplierCollaborationUi() {
   assert.equal("discountHt" in sanitized, false);
 }
 
+function testDeliveryScheduleSync() {
+  const requested = new Date(2026, 7, 11, 7, 30);
+  const confirmed = new Date(2026, 7, 11, 9, 0);
+  const proposed = new Date(2026, 7, 11, 10, 30);
+
+  const pending = resolveDeliverySchedule({
+    status: "A_CONFIRMER",
+    requestedDeliveryAt: requested,
+    confirmedDeliveryAt: null,
+    proposedDeliveryAt: proposed,
+    proposedDeliveryStatus: "PENDING",
+  });
+  assert.equal(pending.action, "upsert");
+  assert.equal(pending.startAt?.getTime(), requested.getTime());
+  assert.equal(pending.agendaStatus, "PLANIFIE");
+  assert.equal(pending.visualLabel, "PROPOSITION");
+
+  const afterConfirm = resolveDeliverySchedule({
+    status: "CONFIRMEE",
+    requestedDeliveryAt: requested,
+    confirmedDeliveryAt: confirmed,
+    proposedDeliveryAt: null,
+    proposedDeliveryStatus: "NONE",
+  });
+  assert.equal(afterConfirm.startAt?.getTime(), confirmed.getTime());
+  assert.equal(afterConfirm.agendaStatus, "CONFIRME");
+
+  // Proposition après confirmation : agenda reste sur confirmée
+  const proposeAfter = resolveDeliverySchedule({
+    status: "CONFIRMEE",
+    requestedDeliveryAt: requested,
+    confirmedDeliveryAt: confirmed,
+    proposedDeliveryAt: proposed,
+    proposedDeliveryStatus: "PENDING",
+  });
+  assert.equal(proposeAfter.startAt?.getTime(), confirmed.getTime());
+  assert.equal(proposeAfter.agendaStatus, "CONFIRME");
+
+  const refused = resolveDeliverySchedule({
+    status: "REFUSEE",
+    requestedDeliveryAt: requested,
+    confirmedDeliveryAt: null,
+    proposedDeliveryAt: null,
+    proposedDeliveryStatus: "NONE",
+  });
+  assert.equal(refused.action, "cancel");
+
+  const cancelled = resolveDeliverySchedule({
+    status: "ANNULEE",
+    requestedDeliveryAt: requested,
+    confirmedDeliveryAt: confirmed,
+    proposedDeliveryAt: null,
+    proposedDeliveryStatus: "NONE",
+  });
+  assert.equal(cancelled.action, "cancel");
+}
+
 function main() {
   testTotals();
   testNumbering();
   testStatusTransitions();
   testPermissions();
   testSupplierCollaborationUi();
-  console.log("OK — test:purchase-orders (CDE-1 + CDE-2A)");
+  testDeliveryScheduleSync();
+  console.log("OK — test:purchase-orders (CDE-1 + CDE-2A + CDE-2B)");
 }
 
 main();

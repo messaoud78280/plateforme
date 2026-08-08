@@ -6,6 +6,7 @@ import {
   REFUSE_REASONS,
   type SupplierRefuseReasonKey,
 } from "@/lib/purchase-orders/supplier-ui";
+import { syncPurchaseOrderDeliveryEvent } from "@/lib/purchase-orders/sync-delivery";
 
 export type { SupplierRefuseReasonKey };
 export { REFUSE_REASONS };
@@ -167,6 +168,11 @@ export async function sharePurchaseOrderWithSupplier(opts: {
     message: "Une commande vous a été partagée. Merci de confirmer ou proposer un créneau.",
   });
 
+  await syncPurchaseOrderDeliveryEvent({
+    orderId: order.id,
+    actorUserId: opts.actorUserId,
+  });
+
   return updated;
 }
 
@@ -216,8 +222,15 @@ export async function supplierConfirmPurchaseOrder(opts: {
     number: order.number,
     requestedById: order.requestedById,
     responsibleId: order.responsibleId,
-    title: `${opts.supplierOrgName} a confirmé ${order.number}`,
-    message: `Livraison confirmée : ${fmtSlot(confirmedAt)}`,
+    title: `${opts.supplierOrgName} a confirmé la livraison`,
+    message: `${order.number} — ${fmtSlot(confirmedAt)}`,
+  });
+
+  await syncPurchaseOrderDeliveryEvent({
+    orderId: order.id,
+    actorUserId: opts.actorUserId,
+    postSystemMessage: true,
+    systemMessage: `✓ Livraison confirmée — ${fmtSlot(confirmedAt)}\n${order.number} · ${opts.supplierOrgName}\n[Voir la commande](/dashboard/commandes/${order.id})`,
   });
 
   return updated;
@@ -278,9 +291,19 @@ export async function supplierProposeDelivery(opts: {
     number: order.number,
     requestedById: order.requestedById,
     responsibleId: order.responsibleId,
-    title: `${opts.supplierOrgName} propose une nouvelle heure`,
+    title: `${opts.supplierOrgName} propose une nouvelle heure de livraison`,
     message: `${order.number} : ${fmtSlot(opts.proposedDeliveryAt)} au lieu de ${fmtSlot(order.requestedDeliveryAt)}`,
     type: "CLIENT_DECISION",
+  });
+
+  // Agenda confirmé / demandé inchangé ; description peut mentionner la proposition
+  await syncPurchaseOrderDeliveryEvent({
+    orderId: order.id,
+    actorUserId: opts.actorUserId,
+    postSystemMessage: Boolean(order.legacyTaskId),
+    systemMessage: order.legacyTaskId
+      ? `POINT.P propose une modification de livraison — ${fmtSlot(order.requestedDeliveryAt)} → ${fmtSlot(opts.proposedDeliveryAt)}\n[Voir la commande](/dashboard/commandes/${order.id})`
+      : null,
   });
 
   return updated;
@@ -338,6 +361,11 @@ export async function supplierRefusePurchaseOrder(opts: {
     type: "CLIENT_DECISION",
   });
 
+  await syncPurchaseOrderDeliveryEvent({
+    orderId: order.id,
+    actorUserId: opts.actorUserId,
+  });
+
   return updated;
 }
 
@@ -388,8 +416,15 @@ export async function acceptSupplierDeliveryProposal(opts: {
   await notifySupplierUsers({
     supplierOrganizationId: order.externalOrganizationId,
     orderId: order.id,
-    title: `Proposition acceptée — ${order.number}`,
-    message: `${supplierName} : créneau confirmé ${fmtSlot(order.proposedDeliveryAt)}`,
+    title: `Votre proposition de livraison a été acceptée`,
+    message: `${order.number} — créneau confirmé ${fmtSlot(order.proposedDeliveryAt)}`,
+  });
+
+  await syncPurchaseOrderDeliveryEvent({
+    orderId: order.id,
+    actorUserId: opts.actorUserId,
+    postSystemMessage: true,
+    systemMessage: `✓ Livraison confirmée — ${fmtSlot(order.proposedDeliveryAt)}\n${order.number} · ${supplierName}\nAcceptée par ${opts.actorName}\n[Voir la commande](/dashboard/commandes/${order.id})`,
   });
 
   return updated;
@@ -439,6 +474,11 @@ export async function refuseSupplierDeliveryProposal(opts: {
     orderId: order.id,
     title: `Proposition refusée — ${order.number}`,
     message: "Votre créneau n’a pas été accepté. Vous pouvez proposer une autre date.",
+  });
+
+  await syncPurchaseOrderDeliveryEvent({
+    orderId: order.id,
+    actorUserId: opts.actorUserId,
   });
 
   return updated;

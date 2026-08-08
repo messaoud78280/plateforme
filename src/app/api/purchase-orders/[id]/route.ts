@@ -10,6 +10,8 @@ import {
 import { purchaseOrderDetailInclude } from "@/lib/purchase-orders/service";
 import { computeOrderAmountHt } from "@/lib/purchase-orders/totals";
 import { sanitizeOrderForSupplier } from "@/lib/purchase-orders/supplier-collaboration";
+import { syncPurchaseOrderDeliveryEvent } from "@/lib/purchase-orders/sync-delivery";
+import { createNotification } from "@/lib/notifications";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -78,7 +80,14 @@ export async function PATCH(req: Request, ctx: Ctx) {
 
   const existing = await prisma.purchaseOrder.findFirst({
     where: { id, organizationId: orgId },
-    select: { id: true },
+    select: {
+      id: true,
+      number: true,
+      confirmedDeliveryAt: true,
+      sharedWithSupplier: true,
+      externalOrganizationId: true,
+      requestedDeliveryAt: true,
+    },
   });
   if (!existing) {
     return NextResponse.json({ error: "Introuvable" }, { status: 404 });
@@ -87,6 +96,15 @@ export async function PATCH(req: Request, ctx: Ctx) {
   const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
   if (!body) {
     return NextResponse.json({ error: "Corps invalide" }, { status: 400 });
+  }
+
+  // Modification de la date demandée après confirmation : ne pas toucher confirmedDeliveryAt
+  if (
+    body.requestedDeliveryAt !== undefined &&
+    existing.confirmedDeliveryAt &&
+    body.confirmedDeliveryAt === undefined
+  ) {
+    delete body.confirmedDeliveryAt;
   }
 
   if (Array.isArray(body.lines)) {
@@ -172,6 +190,43 @@ export async function PATCH(req: Request, ctx: Ctx) {
       actorUserId: session.user.id,
     },
   });
+
+  const deliveryTouched =
+    body.requestedDeliveryAt !== undefined ||
+    body.confirmedDeliveryAt !== undefined ||
+    body.responsibleId !== undefined ||
+    body.deliveryAddress !== undefined;
+
+  if (deliveryTouched) {
+    await syncPurchaseOrderDeliveryEvent({
+      orderId: id,
+      actorUserId: session.user.id,
+    });
+  }
+
+  if (
+    body.requestedDeliveryAt !== undefined &&
+    existing.sharedWithSupplier &&
+    !existing.confirmedDeliveryAt
+  ) {
+    const suppliers = await prisma.user.findMany({
+      where: {
+        externalOrganizationId: existing.externalOrganizationId,
+        OR: [{ personType: "SUPPLIER" }, { permissionProfile: "FOURNISSEUR" }],
+      },
+      select: { id: true },
+      take: 20,
+    });
+    for (const u of suppliers) {
+      await createNotification({
+        userId: u.id,
+        type: "DELIVERY_CHECK",
+        title: `Date demandée modifiée — ${existing.number}`,
+        message: "L’entreprise a mis à jour le créneau demandé. Merci de confirmer à nouveau.",
+        actionUrl: `/dashboard/commandes/${id}`,
+      });
+    }
+  }
 
   return NextResponse.json({ ok: true, order });
 }

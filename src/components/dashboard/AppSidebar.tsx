@@ -64,6 +64,7 @@ function buildSections(role: string | null | undefined): NavSection[] {
           { href: "/dashboard/agenda", label: "Agenda", icon: Calendar },
           { href: "/dashboard/taches", label: "Tâches", icon: ClipboardList },
           { href: "/dashboard/commandes", label: "Commandes", icon: Briefcase },
+          { href: "/dashboard/livraisons", label: "Livraisons", icon: CalendarDays },
           { href: "/dashboard/fournisseurs", label: "Fournisseurs", icon: Building2 },
         ],
       },
@@ -229,6 +230,13 @@ export function AppSidebar({
             return false;
           }
           if (!isHrefAllowedForPersona(item.href, personType, permissionProfile)) {
+            return false;
+          }
+          if (
+            item.href === "/dashboard/livraisons" &&
+            personType !== "SUPPLIER" &&
+            permissionProfile !== "FOURNISSEUR"
+          ) {
             return false;
           }
         }

@@ -73,6 +73,12 @@ type OrderDetail = {
     createdAt: string;
   }[];
   documents: { id: string; kind: string; name: string }[];
+  agendaEvents?: {
+    id: string;
+    startAt: string;
+    status: string;
+    title: string;
+  }[];
 };
 
 function fmtDate(iso: string | null) {
@@ -538,7 +544,27 @@ export function PurchaseOrderDetailClient({
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-2xl border border-slate-200 bg-white p-5">
           <h2 className="text-sm font-bold text-slate-900">Livraison</h2>
-          <p className="mt-2 text-sm text-slate-700">
+          <dl className="mt-2 space-y-1 text-sm text-slate-700">
+            <div>
+              <dt className="text-[10px] font-bold uppercase text-slate-500">Demandée</dt>
+              <dd>{fmtDate(order.requestedDeliveryAt)}</dd>
+            </div>
+            <div>
+              <dt className="text-[10px] font-bold uppercase text-slate-500">Confirmée</dt>
+              <dd>
+                {order.confirmedDeliveryAt ? fmtDate(order.confirmedDeliveryAt) : "En attente"}
+              </dd>
+            </div>
+            {!isSupplierView ? (
+              <div>
+                <dt className="text-[10px] font-bold uppercase text-slate-500">
+                  Responsable réception
+                </dt>
+                <dd>{order.responsible?.name ?? "—"}</dd>
+              </div>
+            ) : null}
+          </dl>
+          <p className="mt-3 text-sm text-slate-700">
             {order.deliveryAddress ||
               [order.project?.siteAddress, order.project?.siteCity].filter(Boolean).join(", ") ||
               "Adresse chantier"}
@@ -550,6 +576,14 @@ export function PurchaseOrderDetailClient({
             <p className="mt-3 text-xs font-semibold text-violet-800">
               Proposition en cours : {fmtDate(order.proposedDeliveryAt)}
             </p>
+          ) : null}
+          {!isSupplierView && order.agendaEvents?.[0] ? (
+            <Link
+              href={`/dashboard/agenda?event=${order.agendaEvents[0].id}`}
+              className="mt-3 inline-block text-xs font-semibold text-[#1d4ed8]"
+            >
+              Voir dans l’agenda →
+            </Link>
           ) : null}
         </section>
 

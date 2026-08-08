@@ -345,10 +345,10 @@ export function DemoFournisseurHome({
           </ul>
         )}
         <Link
-          href="/dashboard/commandes"
+          href="/dashboard/livraisons"
           className="mt-3 inline-block text-sm font-semibold text-[#1d4ed8]"
         >
-          Toutes les commandes →
+          Toutes les livraisons →
         </Link>
       </section>
 

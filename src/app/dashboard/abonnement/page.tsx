@@ -3,8 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getPlan, SUBSCRIPTION_PRICE_DISCLAIMER, SUBSCRIPTION_PRICE_TAX_LABEL, CREDITS_VALIDITY_NOTICE } from "@/lib/subscription-plans";
-import { syncUserCreditsExpiry, formatCreditsExpiryLabel } from "@/lib/credits-lifecycle";
+import { getPlan, SUBSCRIPTION_PRICE_DISCLAIMER, SUBSCRIPTION_PRICE_TAX_LABEL } from "@/lib/subscription-plans";
 import { BackLink } from "@/components/ui/BackLink";
 import { TARIFS_PLANS } from "@/lib/tarifs-plans";
 
@@ -13,14 +12,6 @@ const PLAN_LABELS: Record<string, string> = {
   STANDARD: "Suivi",
   STANDARD_PLUS: "Renfort",
   PREMIUM: "Pilotage",
-};
-
-const SOURCE_LABELS: Record<string, string> = {
-  SUBSCRIPTION: "Souscription",
-  ONE_TIME: "Achat unique (historique)",
-  RENEWAL: "Renouvellement",
-  ADMIN: "Ajustement",
-  TASK_DEDUCTION: "Tâche terminée",
 };
 
 export default async function AbonnementPage() {
@@ -33,47 +24,35 @@ export default async function AbonnementPage() {
   type TaskWithActionsItem = {
     id: string;
     title: string;
-    timeSpentMinutes: number | null;
-    actionsUsed: number | null;
     completedAt: Date | null;
-    projectId: string | null;
     project: { title: string } | null;
     assignedTo: { name: string } | null;
   };
 
-  let user: { subscriptionPlan: string | null; monthlyActionsTotal: number | null; monthlyActionsUsed: number | null; actionsResetAt: Date | null } | null = null;
+  let user: { subscriptionPlan: string | null } | null = null;
   let tasksWithActions: TaskWithActionsItem[] = [];
   let subscriptions: Awaited<ReturnType<typeof prisma.subscription.findMany>> = [];
   let payments: Awaited<ReturnType<typeof prisma.payment.findMany>> = [];
-  let actionsTransactions: Awaited<ReturnType<typeof prisma.actionsTransaction.findMany>> = [];
 
   try {
-    await syncUserCreditsExpiry(session.user.id);
-    const [userResult, tasksResult, subsResult, payResult, actionsResult] = await Promise.all([
+    const [userResult, tasksResult, subsResult, payResult] = await Promise.all([
       prisma.user.findUnique({
         where: { id: session.user.id },
         select: {
           subscriptionPlan: true,
-          monthlyActionsTotal: true,
-          monthlyActionsUsed: true,
-          actionsResetAt: true,
         },
       }),
       prisma.task.findMany({
         where: {
           clientId: session.user.id,
           status: "COMPLETE",
-          actionsUsed: { not: null, gt: 0 },
         },
         orderBy: { completedAt: "desc" },
-        take: 100,
+        take: 50,
         select: {
           id: true,
           title: true,
-          timeSpentMinutes: true,
-          actionsUsed: true,
           completedAt: true,
-          projectId: true,
           project: { select: { title: true } },
           assignedTo: { select: { name: true } },
         },
@@ -88,47 +67,18 @@ export default async function AbonnementPage() {
         orderBy: { createdAt: "desc" },
         take: 20,
       }),
-      prisma.actionsTransaction.findMany({
-        where: { userId: session.user.id },
-        orderBy: { createdAt: "desc" },
-        take: 50,
-      }),
     ]);
     user = userResult;
     tasksWithActions = tasksResult;
     subscriptions = subsResult;
     payments = payResult;
-    actionsTransactions = actionsResult;
   } catch (err) {
     console.error("[Abonnement] Erreur chargement données:", err);
-    // Données de base depuis User si possible
     try {
       user = await prisma.user.findUnique({
         where: { id: session.user.id },
         select: {
           subscriptionPlan: true,
-          monthlyActionsTotal: true,
-          monthlyActionsUsed: true,
-          actionsResetAt: true,
-        },
-      });
-      tasksWithActions = await prisma.task.findMany({
-        where: {
-          clientId: session.user.id,
-          status: "COMPLETE",
-          actionsUsed: { not: null, gt: 0 },
-        },
-        orderBy: { completedAt: "desc" },
-        take: 100,
-        select: {
-          id: true,
-          title: true,
-          timeSpentMinutes: true,
-          actionsUsed: true,
-          completedAt: true,
-          projectId: true,
-          project: { select: { title: true } },
-          assignedTo: { select: { name: true } },
         },
       });
     } catch {
@@ -138,11 +88,6 @@ export default async function AbonnementPage() {
 
   const activeSub = subscriptions.find((s) => s.status === "ACTIVE");
   const planName = user?.subscriptionPlan ? (getPlan(user.subscriptionPlan)?.name ?? PLAN_LABELS[user.subscriptionPlan] ?? user.subscriptionPlan) : "—";
-  const total = user?.monthlyActionsTotal ?? 0;
-  const used = user?.monthlyActionsUsed ?? 0;
-  const remaining = Math.max(0, total - used);
-  const percent = total > 0 ? Math.min(100, (used / total) * 100) : 0;
-  const creditsExpiryLabel = formatCreditsExpiryLabel(user?.actionsResetAt ?? null);
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
@@ -152,7 +97,7 @@ export default async function AbonnementPage() {
       <section className="rounded-2xl surface-metallic-light p-6">
         <h2 className="text-lg font-semibold text-slate-800">Formules disponibles</h2>
         <p className="mt-1 text-sm text-slate-600">
-          Choisissez une formule ou demandez un devis personnalisé pour un volume sur mesure.
+          Choisissez une formule d&apos;abonnement ou demandez un devis personnalisé pour un volume sur mesure.
         </p>
         <p className="mt-2 text-xs font-medium text-slate-700">
           {SUBSCRIPTION_PRICE_DISCLAIMER}
@@ -191,17 +136,16 @@ export default async function AbonnementPage() {
               </Link>
             </div>
           ))}
-          {/* Formule Devis */}
           <div className="relative rounded-xl border-2 border-slate-300 bg-white p-4">
             <h3 className="font-semibold text-slate-800">Devis personnalisé</h3>
-            <p className="mt-1 text-sm text-slate-600">Volume sur mesure, solution dédiée.</p>
+            <p className="mt-1 text-sm text-slate-600">Volume sur mesure, solution dédiée — hors forfait standard.</p>
             <ul className="mt-2 space-y-1 text-xs text-slate-600">
               <li>• Sur mesure</li>
               <li>• 3 périmètres ou plus</li>
               <li>• Full-time possible</li>
             </ul>
             <Link
-              href="/contact"
+              href="/contact?sujet=Demande+de+devis+personnalisé"
               className="mt-3 block w-full rounded-lg border-2 border-slate-300 py-2 text-center text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
               Demander un devis
@@ -210,34 +154,26 @@ export default async function AbonnementPage() {
         </div>
       </section>
 
-      {/* Bloc Abonnement et crédits — formule, KPIs, 3 CTA */}
       <section className="rounded-2xl surface-metallic-light p-6">
-        <h2 className="text-lg font-semibold text-slate-800">Abonnement et crédits</h2>
-        <p className="mt-2 text-xs leading-relaxed text-slate-600">{CREDITS_VALIDITY_NOTICE}</p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <h2 className="text-lg font-semibold text-slate-800">Mon abonnement</h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Plus de compteur de crédits : votre accès BeWork repose sur l&apos;abonnement, les prestations
+          hors forfait sur devis personnalisé.
+        </p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Formule active</p>
             <p className="mt-0.5 font-semibold text-slate-800">{planName}</p>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Crédits totaux</p>
-            <p className="mt-0.5 font-semibold text-slate-800">{total}</p>
-          </div>
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Crédits utilisés</p>
-            <p className="mt-0.5 font-semibold text-slate-800">{used}</p>
-          </div>
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Crédits restants</p>
-            <p className="mt-0.5 font-semibold text-[#1d4ed8]">{remaining}</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Statut</p>
+            <p className="mt-0.5">
+              <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${activeSub ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-600"}`}>
+                {activeSub ? "Abonnement actif" : "Aucun abonnement actif"}
+              </span>
+            </p>
           </div>
         </div>
-        {creditsExpiryLabel && total > 0 && (
-          <p className="mt-3 text-sm text-slate-600">
-            Validité des crédits en cours :{" "}
-            <span className="font-medium text-slate-800">jusqu&apos;au {creditsExpiryLabel}</span>
-          </p>
-        )}
         {activeSub?.renewsAt && (
           <p className="mt-3 text-sm text-slate-600">
             Date de renouvellement :{" "}
@@ -250,45 +186,25 @@ export default async function AbonnementPage() {
             </span>
           </p>
         )}
-        <div className="mt-4">
-          <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200">
-            <div
-              className="h-full rounded-full bg-[#1d4ed8] transition-all"
-              style={{ width: `${percent}%` }}
-              role="progressbar"
-              aria-valuenow={used}
-              aria-valuemin={0}
-              aria-valuemax={total}
-            />
-          </div>
-          <p className="mt-1.5 text-xs text-slate-500">
-            {used} / {total} crédits utilisés sur la période en cours
-          </p>
-        </div>
         <div className="mt-6 flex flex-wrap gap-3">
-          <a
-            href="#suivi-credits"
-            className="inline-flex rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e40af]"
-          >
-            Voir le suivi des crédits
-          </a>
           <Link
             href="/dashboard/abonnement/souscrire"
-            className="inline-flex rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            className="inline-flex rounded-lg bg-[#1e3a5f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#152a45]"
           >
             Changer de formule
+          </Link>
+          <Link
+            href="/contact?sujet=Demande+de+devis+personnalisé"
+            className="inline-flex rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Demander un devis
           </Link>
           <Link
             href="/contract"
             className="inline-flex rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
-            Gérer mon abonnement
+            Voir le contrat
           </Link>
-        </div>
-        <div className="mt-3">
-          <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${activeSub ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-600"}`}>
-            {activeSub ? "Abonnement actif" : "Aucun abonnement actif"}
-          </span>
         </div>
       </section>
 
@@ -304,14 +220,13 @@ export default async function AbonnementPage() {
                 <th className="px-4 py-3 font-semibold text-slate-800">Formule</th>
                 <th className="px-4 py-3 font-semibold text-slate-800">Date</th>
                 <th className="px-4 py-3 font-semibold text-slate-800">Montant</th>
-                <th className="px-4 py-3 font-semibold text-slate-800">Crédits ajoutés</th>
                 <th className="px-4 py-3 font-semibold text-slate-800">Statut</th>
               </tr>
             </thead>
             <tbody>
               {payments.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={4} className="px-4 py-8 text-center text-slate-500">
                     Aucun paiement pour le moment.
                   </td>
                 </tr>
@@ -323,7 +238,6 @@ export default async function AbonnementPage() {
                       {new Date(p.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" })}
                     </td>
                     <td className="px-4 py-3 text-slate-700">{Number(p.amount)} €</td>
-                    <td className="px-4 py-3 text-slate-700">{p.actionsCredited}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
                         p.status === "PAID" ? "bg-green-100 text-green-800" :
@@ -341,72 +255,25 @@ export default async function AbonnementPage() {
         </div>
       </section>
 
-      {/* Historique des mouvements de crédits */}
       <section className="rounded-2xl surface-metallic-light">
         <h2 className="border-b border-slate-200 px-6 py-4 text-lg font-semibold text-slate-800">
-          Historique des mouvements de crédits
+          Missions terminées
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50">
+                <th className="px-4 py-3 font-semibold text-slate-800">Mission</th>
                 <th className="px-4 py-3 font-semibold text-slate-800">Date</th>
-                <th className="px-4 py-3 font-semibold text-slate-800">Type</th>
-                <th className="px-4 py-3 font-semibold text-slate-800">Source</th>
-                <th className="px-4 py-3 font-semibold text-slate-800">Montant</th>
-                <th className="px-4 py-3 font-semibold text-slate-800">Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              {actionsTransactions.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
-                    Aucune transaction pour le moment.
-                  </td>
-                </tr>
-              ) : (
-                actionsTransactions.map((t) => (
-                  <tr key={t.id} className="border-b border-slate-100">
-                    <td className="px-4 py-3 text-slate-700">
-                      {new Date(t.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-                    </td>
-                    <td className="px-4 py-3 text-slate-700">{t.type}</td>
-                    <td className="px-4 py-3 text-slate-700">{SOURCE_LABELS[t.source] ?? t.source}</td>
-                    <td className={`px-4 py-3 font-medium ${t.amount >= 0 ? "text-green-700" : "text-red-700"}`}>
-                      {t.amount >= 0 ? "+" : ""}{t.amount}
-                    </td>
-                    <td className="px-4 py-3 text-slate-600">{t.description ?? "—"}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* Suivi des crédits (tâches) */}
-      <section id="suivi-credits" className="scroll-mt-6">
-        <h2 className="text-xl font-bold text-slate-800">Suivi des crédits</h2>
-        <p className="mt-1 text-sm text-slate-600">
-          Historique des tâches terminées avec déduction de crédits. Minimum 1 crédit par demande.
-        </p>
-        <div className="mt-4 overflow-x-auto rounded-xl surface-metallic-light">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-slate-200 bg-slate-50">
-                <th className="px-4 py-3 font-semibold text-slate-800">Demande</th>
-                <th className="px-4 py-3 font-semibold text-slate-800">Date</th>
-                <th className="px-4 py-3 font-semibold text-slate-800">Statut</th>
-                <th className="px-4 py-3 font-semibold text-slate-800">Crédits utilisés</th>
-                <th className="px-4 py-3 font-semibold text-slate-800">Projet</th>
-                <th className="px-4 py-3 font-semibold text-slate-800">Assistante</th>
+                <th className="px-4 py-3 font-semibold text-slate-800">Chantier</th>
+                <th className="px-4 py-3 font-semibold text-slate-800">Assistant</th>
               </tr>
             </thead>
             <tbody>
               {tasksWithActions.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
-                    Aucune tâche avec crédits déduits pour le moment.
+                  <td colSpan={4} className="px-4 py-8 text-center text-slate-500">
+                    Aucune mission terminée pour le moment.
                   </td>
                 </tr>
               ) : (
@@ -416,8 +283,6 @@ export default async function AbonnementPage() {
                     <td className="px-4 py-3 text-slate-700">
                       {t.completedAt ? new Date(t.completedAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" }) : "—"}
                     </td>
-                    <td className="px-4 py-3 text-slate-600">Terminé</td>
-                    <td className="px-4 py-3 font-medium text-[#1d4ed8]">{t.actionsUsed ?? 0} crédit{(t.actionsUsed ?? 0) > 1 ? "s" : ""}</td>
                     <td className="px-4 py-3 text-slate-600">{t.project?.title ?? "—"}</td>
                     <td className="px-4 py-3 text-slate-600">{t.assignedTo?.name ?? "—"}</td>
                   </tr>

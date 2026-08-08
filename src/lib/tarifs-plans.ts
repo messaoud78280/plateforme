@@ -109,7 +109,7 @@ export const TARIFS_SUR_DEVIS = {
   creditsMinutes: CREDIT_MINUTES,
   includes: [
     "Périmètre sur mesure",
-    "Crédits adaptés à votre volume",
+    "Volume adapté à votre activité",
     "Interlocuteur dédié",
   ] as const,
   results: [

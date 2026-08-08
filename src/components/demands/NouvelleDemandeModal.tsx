@@ -291,7 +291,7 @@ export function NouvelleDemandeModal({ open, onClose }: Props) {
 
               <div className="rounded-xl border border-blue-100 bg-blue-50/60 p-4">
                 <p className="text-sm text-slate-700">
-                  Les crédits seront évalués par votre assistant après réception, en fonction du temps de traitement estimé.
+                  Le traitement s&apos;inscrit dans votre abonnement ou fera l&apos;objet d&apos;un devis personnalisé si hors forfait.
                 </p>
               </div>
 

@@ -352,7 +352,7 @@ export function TaskDetailView({
         )}
         {!isAgence && !isAgent && task.actionsUsed == null && (
           <p className="mt-3 text-sm text-slate-500">
-            Crédits : en cours d&apos;évaluation par votre assistant.
+            Mission suivie dans le cadre de votre abonnement ou devis.
           </p>
         )}
         {task.description && (

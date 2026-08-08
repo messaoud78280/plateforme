@@ -35,7 +35,8 @@ type Props = {
   actionsRemaining: number;
 };
 
-export function NouvelleDemandeForm({ actionsRemaining }: Props) {
+export function NouvelleDemandeForm({ actionsRemaining: _actionsRemaining }: Props) {
+  void _actionsRemaining;
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState("");
@@ -223,8 +224,8 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
           </h2>
           <p className="mt-2 text-slate-600">
             {firstRequest
-              ? "Votre première demande a été envoyée. Votre assistant l'analyse et évalue le nombre de crédits nécessaires."
-              : "Votre assistant analyse la mission et vous confirme le nombre de crédits avant traitement."}
+              ? "Votre première demande a été envoyée. Votre assistant l'analyse et vous recontacte selon votre abonnement ou devis."
+              : "Votre assistant analyse la mission et vous confirme le traitement selon votre formule ou devis."}
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
@@ -262,10 +263,6 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
           <p className="mt-1 text-slate-600">
             Décrivez la mission que vous souhaitez confier à votre assistant.
           </p>
-        </div>
-        <div className="flex shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5">
-          <span className="text-sm font-medium text-slate-600">Crédits restants ce mois-ci</span>
-          <span className="text-lg font-bold text-[#1d4ed8]">{actionsRemaining}</span>
         </div>
       </header>
 
@@ -520,7 +517,7 @@ export function NouvelleDemandeForm({ actionsRemaining }: Props) {
         <section className="rounded-2xl surface-metallic-light p-6">
           <h2 className="text-base font-semibold text-slate-800 mb-4">4. Date limite souhaitée</h2>
           <p className="mb-4 text-sm text-slate-500">
-            Les crédits seront évalués par votre assistant après réception de la mission, en fonction du temps de traitement estimé.
+            Le traitement s&apos;inscrit dans votre abonnement ou fera l&apos;objet d&apos;un devis personnalisé si hors forfait.
           </p>
           <div>
             <label htmlFor="nd-desired-date" className="mb-1.5 block text-sm font-medium text-slate-700">

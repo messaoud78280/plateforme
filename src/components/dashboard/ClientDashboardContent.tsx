@@ -1,11 +1,10 @@
 import Link from "next/link";
-import { MINUTES_PER_ACTION } from "@/lib/actions";
-import { ActionsWidget } from "@/components/dashboard/ActionsWidget";
 import { QuickDelegationForm } from "@/components/dashboard/QuickDelegationForm";
 import { MissionHistorySection } from "@/components/missions/MissionHistorySection";
 import { CopiloteAdmin } from "@/components/dashboard/CopiloteAdmin";
 import { CLIENT_TASK_STATUS_LABELS, type TaskStatus } from "@/types";
 import { DeleteTaskButton } from "@/components/tasks/DeleteTaskButton";
+import { getPlan } from "@/lib/subscription-plans";
 
 function formatMessageDate(d: Date) {
   const date = new Date(d);
@@ -80,9 +79,10 @@ export function ClientDashboardContent({
   recentDocuments,
   recentActivities,
 }: ClientDashboardContentProps) {
-  const remaining = Math.max(0, actionsData.monthlyActionsTotal - actionsData.monthlyActionsUsed);
-  const tempsMoyenLabel =
-    tempsMoyenJours < 1 ? "Réponse moyenne : < 2h" : `Réponse moyenne : ${Math.round(tempsMoyenJours)} j`;
+  const planName = actionsData.subscriptionPlan
+    ? (getPlan(actionsData.subscriptionPlan)?.name ?? actionsData.subscriptionPlan)
+    : "—";
+  void tempsMoyenJours;
 
   return (
     <div className="space-y-8 pb-12">
@@ -131,10 +131,14 @@ export function ClientDashboardContent({
       {/* 3 indicateurs principaux */}
       <section className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-xl surface-metallic-light p-5">
-          <p className="text-sm font-medium text-slate-500">Crédits restants</p>
-          <p className="mt-1 text-2xl font-bold text-slate-800">
-            {remaining} <span className="text-lg font-normal text-slate-500">/ {actionsData.monthlyActionsTotal}</span>
-          </p>
+          <p className="text-sm font-medium text-slate-500">Formule</p>
+          <p className="mt-1 text-2xl font-bold text-slate-800">{planName}</p>
+          <Link
+            href="/dashboard/abonnement"
+            className="mt-1 block text-sm font-medium text-[color:var(--client-700)] hover:underline"
+          >
+            Gérer l&apos;abonnement →
+          </Link>
         </div>
         <div className="rounded-xl surface-metallic-light p-5">
           <p className="text-sm font-medium text-slate-500">Missions en cours</p>
@@ -152,16 +156,27 @@ export function ClientDashboardContent({
         </div>
       </section>
 
-      {/* Communication digitale */}
-
-      {/* Barre de progression des crédits */}
-      <ActionsWidget
-        subscriptionPlan={actionsData.subscriptionPlan}
-        monthlyActionsTotal={actionsData.monthlyActionsTotal}
-        monthlyActionsUsed={actionsData.monthlyActionsUsed}
-        renewsAt={actionsData.renewsAt}
-        creditsExpiresAt={actionsData.creditsExpiresAt ?? null}
-      />
+      <section className="rounded-2xl border border-[#1e3a5f]/15 bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-[#1e3a5f]">Abonnement & devis personnalisé</h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Plus de compteur de crédits : le suivi repose sur votre abonnement, les prestations hors
+          forfait sur devis personnalisé.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Link
+            href="/dashboard/abonnement/souscrire"
+            className="rounded-lg bg-[#1e3a5f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#152a45]"
+          >
+            Voir les formules
+          </Link>
+          <Link
+            href="/contact?sujet=Demande+de+devis+personnalisé"
+            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Demander un devis
+          </Link>
+        </div>
+      </section>
 
       {/* Activité récente */}
       <section className="rounded-2xl surface-metallic-light p-6">
@@ -343,20 +358,17 @@ export function ClientDashboardContent({
           )}
         </section>
 
-        {/* Activité récente ou temps économisé */}
         <section className="rounded-2xl surface-metallic-light">
           <div className="border-b border-slate-200 px-6 py-4">
-            <h2 className="text-lg font-semibold text-slate-800">Temps économisé</h2>
+            <h2 className="text-lg font-semibold text-slate-800">Missions terminées</h2>
             <p className="mt-0.5 text-sm text-slate-500">Ce mois-ci</p>
           </div>
           <div className="px-6 py-4">
-            <p className="text-2xl font-bold text-[color:var(--client-700)]">{actionsData.monthlyActionsUsed} crédits</p>
-            <p className="text-sm text-slate-600">≈ {Math.round((actionsData.monthlyActionsUsed * MINUTES_PER_ACTION) / 60)} h économisées</p>
+            <p className="text-2xl font-bold text-[color:var(--client-700)]">{tasksCompleteesCeMois}</p>
+            <p className="text-sm text-slate-600">missions clôturées</p>
           </div>
         </section>
       </div>
-
-      {/* Abonnement : déjà couvert par ActionsWidget avec liens */}
     </div>
   );
 }

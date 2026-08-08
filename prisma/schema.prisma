@@ -619,11 +619,15 @@ model Message {
   senderId   String
   receiverId String
   read       Boolean  @default(false)
+  /// Fil chantier V2 : INTERNE | CLIENT | FOURNISSEUR
+  channel    String   @default("CLIENT")
   createdAt  DateTime @default(now())
 
   project  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   sender   User    @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
   receiver User    @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, channel, createdAt])
 }
 
 // Documents déposés par les clients (optionnellement liés à un projet ou une tâche)

@@ -105,6 +105,30 @@ export async function canAccessProjectMessaging(
   return false;
 }
 
+/** Charge personType et calcule les canaux visibles + filtre Message. */
+export async function projectMessageChannelFilter(
+  userId: string,
+  role?: string | null
+): Promise<{ personType: string | null; channels: string[]; where: Prisma.MessageWhereInput }> {
+  const {
+    visibleMessageChannels,
+  } = await import("@/lib/equipe-acces/nav-by-persona");
+  const dbUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { personType: true },
+  });
+  const personType = dbUser?.personType ?? null;
+  const channels = visibleMessageChannels(personType, role);
+  return {
+    personType,
+    channels,
+    where: {
+      channel: { in: channels },
+      OR: [{ senderId: userId }, { receiverId: userId }],
+    },
+  };
+}
+
 /** Filtre strict : l'utilisateur doit être expéditeur ou destinataire. */
 export function directMessageParticipantWhere(userId: string) {
   return {

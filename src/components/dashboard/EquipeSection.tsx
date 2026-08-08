@@ -85,6 +85,15 @@ export function EquipeSection() {
   const [showForm, setShowForm] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [editPersonType, setEditPersonType] = useState<PersonType>("INTERNAL");
+  const [editProfile, setEditProfile] = useState<PermissionProfileKey>("CONDUCTEUR");
+  const [editJobTitle, setEditJobTitle] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editCompany, setEditCompany] = useState("");
+  const [editProjectIds, setEditProjectIds] = useState<string[]>([]);
+  const [auditLogs, setAuditLogs] = useState<
+    { id: string; action: string; detail: string | null; createdAt: string; actor: { name: string } | null }[]
+  >([]);
 
   // Formulaire ajout
   const [personType, setPersonType] = useState<PersonType>("INTERNAL");
@@ -162,6 +171,26 @@ export function EquipeSection() {
   );
 
   const selected = members.find((m) => m.id === selectedId) ?? null;
+
+  useEffect(() => {
+    if (!selected) {
+      setAuditLogs([]);
+      return;
+    }
+    setEditPersonType((selected.personType as PersonType) || "INTERNAL");
+    setEditProfile(
+      (selected.permissionProfile as PermissionProfileKey) ||
+        defaultProfileForPersonType((selected.personType as PersonType) || "INTERNAL")
+    );
+    setEditJobTitle(selected.jobTitle ?? "");
+    setEditPhone(selected.phone ?? "");
+    setEditCompany(selected.company ?? selected.externalOrganization?.name ?? "");
+    setEditProjectIds(selected.projects.map((p) => p.id));
+    fetch(`/api/equipe/${selected.id}/audit`)
+      .then((r) => (r.ok ? r.json() : { logs: [] }))
+      .then((d) => setAuditLogs(Array.isArray(d.logs) ? d.logs : []))
+      .catch(() => setAuditLogs([]));
+  }, [selectedId]); // eslint-disable-line react-hooks/exhaustive-deps -- sync on selection
 
   function resetForm() {
     setEmail("");
@@ -628,7 +657,7 @@ export function EquipeSection() {
             )}
           </section>
 
-          <aside className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:sticky lg:top-4 lg:self-start">
+          <aside className="max-h-[80vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:sticky lg:top-4 lg:self-start">
             {!selected ? (
               <p className="text-sm text-slate-500">
                 Sélectionnez un utilisateur pour voir la fiche et les actions.
@@ -638,53 +667,115 @@ export function EquipeSection() {
                 <div>
                   <h3 className="text-base font-semibold text-[#1e3a5f]">{selected.name}</h3>
                   <p className="text-sm text-slate-500">{selected.email}</p>
-                  {selected.externalOrganization ? (
-                    <p className="mt-1 text-sm text-slate-600">
-                      {selected.externalOrganization.name}
-                    </p>
-                  ) : selected.company ? (
-                    <p className="mt-1 text-sm text-slate-600">{selected.company}</p>
-                  ) : null}
-                  {selected.jobTitle ? (
-                    <p className="text-sm text-slate-500">{selected.jobTitle}</p>
-                  ) : null}
+                  <p className="mt-1 text-xs text-slate-400">
+                    Dernière connexion :{" "}
+                    {selected.lastLoginAt
+                      ? new Date(selected.lastLoginAt).toLocaleString("fr-FR")
+                      : "jamais"}
+                  </p>
                 </div>
-                <dl className="space-y-1 text-sm">
-                  <div className="flex justify-between gap-2">
-                    <dt className="text-slate-500">Type</dt>
-                    <dd>
-                      {PERSON_TYPE_LABELS[(selected.personType as PersonType) || "INTERNAL"]}
-                    </dd>
-                  </div>
-                  <div className="flex justify-between gap-2">
-                    <dt className="text-slate-500">Profil</dt>
-                    <dd>
-                      {selected.permissionProfile
-                        ? PERMISSION_PROFILE_LABELS[
-                            selected.permissionProfile as PermissionProfileKey
-                          ]
-                        : "—"}
-                    </dd>
-                  </div>
-                  <div className="flex justify-between gap-2">
-                    <dt className="text-slate-500">Dernière connexion</dt>
-                    <dd>
-                      {selected.lastLoginAt
-                        ? new Date(selected.lastLoginAt).toLocaleDateString("fr-FR")
-                        : "Jamais"}
-                    </dd>
-                  </div>
-                </dl>
-                {selected.projects.length > 0 ? (
-                  <div>
-                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                      Chantiers partagés
+
+                {!selected.isOwner ? (
+                  <div className="space-y-3 rounded-xl border border-slate-100 bg-slate-50/80 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                      Modifier l’accès
                     </p>
-                    <ul className="mt-1 space-y-0.5 text-sm text-slate-700">
-                      {selected.projects.map((p) => (
-                        <li key={p.id}>· {p.title}</li>
-                      ))}
-                    </ul>
+                    <label className="block text-xs font-medium text-slate-600">
+                      Type
+                      <select
+                        value={editPersonType}
+                        onChange={(e) => {
+                          const t = e.target.value as PersonType;
+                          setEditPersonType(t);
+                          setEditProfile(defaultProfileForPersonType(t));
+                        }}
+                        className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm"
+                      >
+                        {PERSON_TYPES.map((t) => (
+                          <option key={t} value={t}>
+                            {PERSON_TYPE_LABELS[t]}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="block text-xs font-medium text-slate-600">
+                      Profil
+                      <select
+                        value={editProfile}
+                        onChange={(e) => setEditProfile(e.target.value as PermissionProfileKey)}
+                        className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm"
+                      >
+                        {profilesForPersonType(editPersonType).map((p) => (
+                          <option key={p} value={p}>
+                            {PERMISSION_PROFILE_LABELS[p]}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="block text-xs font-medium text-slate-600">
+                      Fonction
+                      <input
+                        value={editJobTitle}
+                        onChange={(e) => setEditJobTitle(e.target.value)}
+                        className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm"
+                      />
+                    </label>
+                    <label className="block text-xs font-medium text-slate-600">
+                      Téléphone
+                      <input
+                        value={editPhone}
+                        onChange={(e) => setEditPhone(e.target.value)}
+                        className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm"
+                      />
+                    </label>
+                    <label className="block text-xs font-medium text-slate-600">
+                      Organisation
+                      <input
+                        value={editCompany}
+                        onChange={(e) => setEditCompany(e.target.value)}
+                        className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm"
+                      />
+                    </label>
+                    <div>
+                      <p className="text-xs font-medium text-slate-600">Chantiers partagés</p>
+                      <ul className="mt-1 max-h-28 space-y-0.5 overflow-y-auto rounded-lg border border-slate-200 bg-white p-1">
+                        {projects.map((p) => (
+                          <li key={p.id}>
+                            <label className="flex cursor-pointer items-center gap-2 rounded px-1.5 py-1 text-xs hover:bg-slate-50">
+                              <input
+                                type="checkbox"
+                                checked={editProjectIds.includes(p.id)}
+                                onChange={() =>
+                                  setEditProjectIds((prev) =>
+                                    prev.includes(p.id)
+                                      ? prev.filter((x) => x !== p.id)
+                                      : [...prev, p.id]
+                                  )
+                                }
+                              />
+                              {p.title}
+                            </label>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={actionLoading}
+                      onClick={() =>
+                        patchMember(selected.id, {
+                          personType: editPersonType,
+                          permissionProfile: editProfile,
+                          jobTitle: editJobTitle,
+                          phone: editPhone,
+                          companyName: editCompany,
+                          projectIds: editProjectIds,
+                        })
+                      }
+                      className="w-full rounded-lg bg-[#1d4ed8] px-3 py-2 text-sm font-semibold text-white"
+                    >
+                      Enregistrer la fiche
+                    </button>
                   </div>
                 ) : null}
 
@@ -702,7 +793,8 @@ export function EquipeSection() {
                         Suspendre
                       </button>
                     ) : null}
-                    {selected.accessStatus === "SUSPENDED" ? (
+                    {selected.accessStatus === "SUSPENDED" ||
+                    selected.accessStatus === "DISABLED" ? (
                       <button
                         type="button"
                         disabled={actionLoading}
@@ -731,18 +823,7 @@ export function EquipeSection() {
                       >
                         Désactiver
                       </button>
-                    ) : (
-                      <button
-                        type="button"
-                        disabled={actionLoading}
-                        onClick={() =>
-                          patchMember(selected.id, { accessStatus: "ACTIVE" })
-                        }
-                        className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-900"
-                      >
-                        Réactiver
-                      </button>
-                    )}
+                    ) : null}
                     <button
                       type="button"
                       disabled={actionLoading}
@@ -757,6 +838,26 @@ export function EquipeSection() {
                     Compte propriétaire — actions limitées (pas de suspension).
                   </p>
                 )}
+
+                <div className="border-t border-slate-100 pt-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    Historique accès
+                  </p>
+                  {auditLogs.length === 0 ? (
+                    <p className="mt-2 text-xs text-slate-500">Aucun événement enregistré.</p>
+                  ) : (
+                    <ul className="mt-2 max-h-36 space-y-1.5 overflow-y-auto text-xs text-slate-600">
+                      {auditLogs.map((log) => (
+                        <li key={log.id} className="rounded border border-slate-100 bg-slate-50 px-2 py-1.5">
+                          <span className="font-medium text-slate-800">{log.action}</span>
+                          {log.actor?.name ? ` · ${log.actor.name}` : ""}
+                          <br />
+                          {new Date(log.createdAt).toLocaleString("fr-FR")}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </div>
             )}
           </aside>

@@ -24,6 +24,9 @@ import { countATraiter } from "@/lib/a-traiter/collect";
 import { listUpcomingAppointments } from "@/lib/appointments/upcoming";
 import { DemoHomeDashboard } from "@/components/demo-environment/DemoHomeDashboard";
 import { collectDemoHomeData } from "@/lib/demo-environment/dashboard-stats";
+import { PersonaHomeDashboard } from "@/components/dashboard/PersonaHomeDashboard";
+import { isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
+import { projectWhereForClientUser } from "@/lib/organization/access";
 
 export default async function DashboardPage({
   searchParams,
@@ -596,6 +599,33 @@ export default async function DashboardPage({
   }
 
   if (isClient) {
+    const portalUser = await prisma.user.findUnique({
+      where: { id: clientId },
+      select: { personType: true, permissionProfile: true },
+    });
+    if (isExternalPortalUser(portalUser?.personType)) {
+      const projectWhere = await projectWhereForClientUser(clientId);
+      const sharedProjects = await prisma.project.findMany({
+        where: projectWhere,
+        select: {
+          id: true,
+          title: true,
+          siteCity: true,
+          chantierStatus: true,
+        },
+        orderBy: { updatedAt: "desc" },
+        take: 12,
+      });
+      return (
+        <PersonaHomeDashboard
+          userName={session.user?.name ?? null}
+          personType={portalUser?.personType ?? null}
+          permissionProfile={portalUser?.permissionProfile ?? null}
+          projects={sharedProjects}
+        />
+      );
+    }
+
     return (
       <div className="space-y-8">
         <BackLink href="/">Retour à l&apos;accueil</BackLink>

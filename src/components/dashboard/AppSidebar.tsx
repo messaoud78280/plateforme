@@ -31,6 +31,10 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { isNavHrefAllowedForDemo } from "@/lib/demo-environment/nav-modules";
+import {
+  canManageEquipe,
+  isHrefAllowedForPersona,
+} from "@/lib/equipe-acces/nav-by-persona";
 
 type NavItem = {
   href: string;
@@ -174,6 +178,8 @@ export function AppSidebar({
   companyName,
   isDemo,
   demoModules,
+  personType,
+  permissionProfile,
 }: {
   role?: string | null;
   userName?: string | null;
@@ -181,6 +187,8 @@ export function AppSidebar({
   companyName?: string | null;
   isDemo?: boolean;
   demoModules?: string[] | null;
+  personType?: string | null;
+  permissionProfile?: string | null;
 }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(() => {
@@ -209,8 +217,21 @@ export function AppSidebar({
     .map((section) => ({
       ...section,
       items: section.items.filter((item) => {
-        if (!isDemo) return true;
-        return isNavHrefAllowedForDemo(item.href, demoModules ?? []);
+        if (isDemo && !isNavHrefAllowedForDemo(item.href, demoModules ?? [])) {
+          return false;
+        }
+        if (role === "CLIENT") {
+          if (
+            item.href === "/dashboard/equipe" &&
+            !canManageEquipe(personType, permissionProfile)
+          ) {
+            return false;
+          }
+          if (!isHrefAllowedForPersona(item.href, personType, permissionProfile)) {
+            return false;
+          }
+        }
+        return true;
       }),
     }))
     .filter((s) => s.items.length > 0);

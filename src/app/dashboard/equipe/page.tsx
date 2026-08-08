@@ -1,13 +1,23 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { EquipeSection } from "@/components/dashboard/EquipeSection";
 import { BackLink } from "@/components/ui/BackLink";
+import { canManageEquipe } from "@/lib/equipe-acces/nav-by-persona";
 
 export default async function EquipePage() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect("/connexion?callbackUrl=/dashboard/equipe");
   if (session.user.role !== "CLIENT") redirect("/dashboard");
+
+  const me = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { personType: true, permissionProfile: true },
+  });
+  if (!canManageEquipe(me?.personType, me?.permissionProfile)) {
+    redirect("/dashboard");
+  }
 
   return (
     <div className="space-y-8">

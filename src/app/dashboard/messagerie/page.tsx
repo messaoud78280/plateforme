@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { MessagerieMissionsView } from "@/components/messagerie/MessagerieMissionsView";
+import { MessagerieHub } from "@/components/messagerie/MessagerieHub";
+import { isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
 
 export default async function MessageriePage() {
   const session = await getServerSession(authOptions);
@@ -18,6 +20,7 @@ export default async function MessageriePage() {
   let agents: { id: string; name: string; role?: string }[] = [];
   let recipients: { id: string; name: string; role: string }[] = [];
   let managerId: string | null = null;
+  let personType: string | null = null;
 
   try {
     if (isManager || isAgent) {
@@ -46,7 +49,6 @@ export default async function MessageriePage() {
         .filter((r) => r.id !== session.user.id)
         .sort((a, b) => a.name.localeCompare(b.name));
 
-      // Staff : aussi les clients des missions
       const clients = await prisma.user.findMany({
         where: {
           role: "CLIENT",
@@ -73,7 +75,12 @@ export default async function MessageriePage() {
       }
       recipients.sort((a, b) => a.name.localeCompare(b.name));
     } else if (isClient) {
-      // Client : contacts = agents assignés + gérants
+      const me = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { personType: true },
+      });
+      personType = me?.personType ?? null;
+
       const [assignedAgents, managers] = await Promise.all([
         prisma.user.findMany({
           where: {
@@ -97,7 +104,6 @@ export default async function MessageriePage() {
         ...managers.map((m) => ({ ...m, role: "gérant" as const })),
       ].filter((r) => r.id !== session.user.id);
 
-      // Fallback démo : au moins un agent/gérant visible
       if (recipients.length === 0) {
         const anyStaff = await prisma.user.findMany({
           where: { role: { in: ["AGENCE", "AGENT", "MANAGER"] } },
@@ -121,19 +127,24 @@ export default async function MessageriePage() {
   }
 
   const canChangeStatus = isManager || isAgent;
+  const external = isExternalPortalUser(personType);
 
   return (
     <div className="-mx-3 -mb-6 -mt-2 flex h-[calc(100dvh-11rem)] min-h-[420px] min-w-0 flex-col overflow-hidden bg-[#111b21] sm:-mx-5 sm:-mb-8 sm:h-[calc(100dvh-12rem)]">
-      <MessagerieMissionsView
-        sessionUserId={session.user.id}
-        isAgence={isManager}
-        isAgent={isAgent}
-        isClient={isClient}
-        canChangeStatus={canChangeStatus}
-        agents={agents}
-        recipients={recipients}
-        managerId={managerId}
-      />
+      <Suspense fallback={<p className="p-4 text-sm text-slate-300">Chargement messagerie…</p>}>
+        <MessagerieHub
+          sessionUserId={session.user.id}
+          isAgence={isManager}
+          isAgent={isAgent}
+          isClient={isClient}
+          canChangeStatus={canChangeStatus}
+          agents={agents}
+          recipients={recipients}
+          managerId={managerId}
+          preferChantiers={external}
+          hideNewDemande={external}
+        />
+      </Suspense>
     </div>
   );
 }

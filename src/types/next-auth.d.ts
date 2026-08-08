@@ -9,6 +9,8 @@ declare module "next-auth" {
       role: string;
       contractStatus?: string;
       accountStatus?: string;
+      personType?: string | null;
+      permissionProfile?: string | null;
       image?: string | null;
       isDemo?: boolean;
       demoEnvironmentId?: string;
@@ -25,6 +27,9 @@ declare module "next-auth/jwt" {
     role: string;
     contractStatus?: string;
     accountStatus?: string;
+    personType?: string | null;
+    permissionProfile?: string | null;
+    mustChangePassword?: boolean;
     email?: string;
     isDemo?: boolean;
     demoEnvironmentId?: string;

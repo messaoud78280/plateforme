@@ -4,14 +4,29 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { documentDownloadHref } from "@/lib/documents/download-url";
 
+type MessageChannel = "INTERNE" | "CLIENT" | "FOURNISSEUR";
+
 type MessageItem = {
   id: string;
   content: string;
   read: boolean;
+  channel?: string;
   createdAt: string;
   project: { id: string; title: string };
   sender: { id: string; name: string };
   receiver: { id: string; name: string };
+};
+
+const CHANNEL_LABELS: Record<MessageChannel, string> = {
+  INTERNE: "Interne",
+  CLIENT: "Client",
+  FOURNISSEUR: "Fournisseur",
+};
+
+const CHANNEL_HINT: Record<MessageChannel, string> = {
+  INTERNE: "Visible uniquement par le personnel interne — ne pas y mettre le client ou un fournisseur.",
+  CLIENT: "Fil partagé avec le client du chantier.",
+  FOURNISSEUR: "Fil partagé avec les fournisseurs du chantier.",
 };
 
 type ProjectItem = {
@@ -89,38 +104,78 @@ function Avatar({ name, isMe }: { name: string; isMe: boolean }) {
   );
 }
 
-export function MessagerieView({ sessionUserId }: { sessionUserId: string }) {
+export function MessagerieView({
+  sessionUserId,
+  initialProjectId,
+  initialChannel,
+  hideNewDemande,
+}: {
+  sessionUserId: string;
+  initialProjectId?: string | null;
+  initialChannel?: string | null;
+  hideNewDemande?: boolean;
+}) {
   const [messages, setMessages] = useState<MessageItem[]>([]);
   const [projects, setProjects] = useState<ProjectItem[]>([]);
+  const [allowedChannels, setAllowedChannels] = useState<MessageChannel[]>(["CLIENT"]);
+  const [channel, setChannel] = useState<MessageChannel>(
+    initialChannel === "INTERNE" || initialChannel === "FOURNISSEUR" || initialChannel === "CLIENT"
+      ? initialChannel
+      : "CLIENT"
+  );
   const [projectDocuments, setProjectDocuments] = useState<DocumentItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedProjectId, setSelectedProjectId] = useState<string>("");
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(initialProjectId ?? "");
   const [sendContent, setSendContent] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [assistantTyping, setAssistantTyping] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  async function loadMessages(ch: MessageChannel) {
+    const res = await fetch(`/api/messages?meta=1&channel=${ch}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    setMessages(Array.isArray(data.messages) ? data.messages : []);
+    if (Array.isArray(data.channels) && data.channels.length) {
+      setAllowedChannels(data.channels as MessageChannel[]);
+      if (!data.channels.includes(ch)) {
+        setChannel(data.channels[0] as MessageChannel);
+      }
+    }
+  }
+
   useEffect(() => {
     async function load() {
       try {
         const [msgRes, projRes] = await Promise.all([
-          fetch("/api/messages"),
+          fetch(`/api/messages?meta=1&channel=${channel}`),
           fetch("/api/projets"),
         ]);
         let msgList: MessageItem[] = [];
         if (msgRes.ok) {
-          msgList = await msgRes.json();
+          const data = await msgRes.json();
+          msgList = Array.isArray(data.messages) ? data.messages : [];
           setMessages(msgList);
+          if (Array.isArray(data.channels) && data.channels.length) {
+            setAllowedChannels(data.channels as MessageChannel[]);
+            if (!data.channels.includes(channel)) {
+              setChannel(data.channels[0] as MessageChannel);
+            }
+          }
         }
         if (projRes.ok) {
           const projs = await projRes.json();
-          setProjects(projs);
-          const projectIdsWithMessages = [...new Set(msgList.map((m) => m.project.id))];
-          const firstConversation = projectIdsWithMessages.length > 0
-            ? projs.find((p: ProjectItem) => projectIdsWithMessages.includes(p.id))
-            : projs[0];
-          if (firstConversation) setSelectedProjectId(firstConversation.id);
+          const list = Array.isArray(projs) ? projs : projs.projects ?? [];
+          setProjects(list);
+          if (!selectedProjectId) {
+            const projectIdsWithMessages = [...new Set(msgList.map((m) => m.project.id))];
+            const firstConversation =
+              projectIdsWithMessages.length > 0
+                ? list.find((p: ProjectItem) => projectIdsWithMessages.includes(p.id))
+                : list[0];
+            if (firstConversation) setSelectedProjectId(firstConversation.id);
+          }
         }
       } catch {
         setError("Erreur lors du chargement.");
@@ -129,7 +184,13 @@ export function MessagerieView({ sessionUserId }: { sessionUserId: string }) {
       }
     }
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- charge initiale
   }, []);
+
+  useEffect(() => {
+    if (loading) return;
+    loadMessages(channel).catch(() => undefined);
+  }, [channel]);
 
   useEffect(() => {
     if (!selectedProjectId) {
@@ -158,7 +219,9 @@ export function MessagerieView({ sessionUserId }: { sessionUserId: string }) {
     .sort((a, b) => (new Date(lastMessageByProject[b.id] ?? 0).getTime() - new Date(lastMessageByProject[a.id] ?? 0).getTime()));
   const selectedProject = projects.find((p) => p.id === selectedProjectId);
   const conversationMessages = selectedProjectId
-    ? allMessages.filter((m) => m.project.id === selectedProjectId)
+    ? allMessages.filter(
+        (m) => m.project.id === selectedProjectId && (m.channel ?? "CLIENT") === channel
+      )
     : [];
 
   useEffect(() => {
@@ -192,9 +255,15 @@ export function MessagerieView({ sessionUserId }: { sessionUserId: string }) {
     setSending(true);
     setAssistantTyping(true);
     try {
-      const body: { projectId: string; content: string; receiverId?: string } = {
+      const body: {
+        projectId: string;
+        content: string;
+        channel: MessageChannel;
+        receiverId?: string;
+      } = {
         projectId: selectedProjectId,
         content,
+        channel,
       };
       if (recipientForProject) body.receiverId = recipientForProject.id;
 
@@ -212,8 +281,7 @@ export function MessagerieView({ sessionUserId }: { sessionUserId: string }) {
         return;
       }
       setSendContent("");
-      const refresh = await fetch("/api/messages");
-      if (refresh.ok) setMessages(await refresh.json());
+      await loadMessages(channel);
       setTimeout(() => setAssistantTyping(false), 800);
     } catch {
       setError("Erreur de connexion.");
@@ -240,8 +308,24 @@ export function MessagerieView({ sessionUserId }: { sessionUserId: string }) {
       {/* Colonne gauche : conversations */}
       <aside className="flex w-80 shrink-0 flex-col border-r border-slate-200 bg-slate-50/60">
         <div className="border-b border-slate-200 p-4">
-          <h2 className="text-sm font-semibold text-slate-800">Conversations</h2>
-          <p className="mt-0.5 text-xs text-slate-500">Vos demandes et échanges</p>
+          <h2 className="text-sm font-semibold text-slate-800">Chantiers</h2>
+          <p className="mt-0.5 text-xs text-slate-500">Fils par chantier</p>
+          <div className="mt-3 flex flex-wrap gap-1">
+            {allowedChannels.map((ch) => (
+              <button
+                key={ch}
+                type="button"
+                onClick={() => setChannel(ch)}
+                className={`rounded-md px-2 py-1 text-xs font-semibold ${
+                  channel === ch
+                    ? "bg-[#1e3a5f] text-white"
+                    : "bg-white text-slate-600 border border-slate-200"
+                }`}
+              >
+                {CHANNEL_LABELS[ch]}
+              </button>
+            ))}
+          </div>
         </div>
         <ul className="flex-1 overflow-y-auto">
           {conversationsList.length === 0 ? (
@@ -286,14 +370,16 @@ export function MessagerieView({ sessionUserId }: { sessionUserId: string }) {
             })
           )}
         </ul>
-        <div className="border-t border-slate-200 p-3">
-          <Link
-            href="/dashboard/nouvelle-demande"
-            className="block w-full rounded-lg bg-[#1d4ed8] py-2.5 text-center text-sm font-medium text-white hover:bg-[#1e40af]"
-          >
-            Créer une demande
-          </Link>
-        </div>
+        {!hideNewDemande ? (
+          <div className="border-t border-slate-200 p-3">
+            <Link
+              href="/dashboard/nouvelle-demande"
+              className="block w-full rounded-lg bg-[#1d4ed8] py-2.5 text-center text-sm font-medium text-white hover:bg-[#1e40af]"
+            >
+              Créer une demande
+            </Link>
+          </div>
+        ) : null}
       </aside>
 
       {/* Zone centrale : chat */}
@@ -305,6 +391,18 @@ export function MessagerieView({ sessionUserId }: { sessionUserId: string }) {
               {recipientForProject && (
                 <p className="text-xs text-slate-500">Assistant : {recipientForProject.name}</p>
               )}
+              <div
+                className={`mt-2 rounded-lg border px-3 py-2 text-xs ${
+                  channel === "INTERNE"
+                    ? "border-violet-200 bg-violet-50 text-violet-900"
+                    : channel === "FOURNISSEUR"
+                      ? "border-amber-200 bg-amber-50 text-amber-950"
+                      : "border-sky-200 bg-sky-50 text-sky-950"
+                }`}
+              >
+                <strong>Partagé avec — fil {CHANNEL_LABELS[channel]}.</strong>{" "}
+                {CHANNEL_HINT[channel]}
+              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4">

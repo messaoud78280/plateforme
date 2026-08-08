@@ -122,6 +122,9 @@ export const authOptions: NextAuthOptions = {
             role: user.role,
             contractStatus: user.contractStatus,
             accountStatus: user.accountStatus,
+            personType: (user as { personType?: string | null }).personType ?? null,
+            permissionProfile:
+              (user as { permissionProfile?: string | null }).permissionProfile ?? null,
             mustChangePassword: Boolean(
               (user as { mustChangePassword?: boolean }).mustChangePassword
             ),
@@ -196,7 +199,26 @@ export const authOptions: NextAuthOptions = {
         token.accountStatus = typeof u.accountStatus === "string" ? u.accountStatus : undefined;
         token.email = typeof u.email === "string" ? u.email : token.email;
         token.mustChangePassword = Boolean(u.mustChangePassword);
-      } else if (token.id && !token.role) {
+        token.personType =
+          typeof u.personType === "string" || u.personType === null
+            ? (u.personType as string | null)
+            : undefined;
+        token.permissionProfile =
+          typeof u.permissionProfile === "string" || u.permissionProfile === null
+            ? (u.permissionProfile as string | null)
+            : undefined;
+        // Enrichir depuis la DB si absents (magic link)
+        if (token.personType === undefined || token.permissionProfile === undefined) {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: user.id },
+            select: { personType: true, permissionProfile: true },
+          });
+          if (dbUser) {
+            token.personType = dbUser.personType;
+            token.permissionProfile = dbUser.permissionProfile;
+          }
+        }
+      } else if (token.id && (!token.role || token.personType === undefined)) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
           select: {
@@ -205,6 +227,8 @@ export const authOptions: NextAuthOptions = {
             accountStatus: true,
             email: true,
             mustChangePassword: true,
+            personType: true,
+            permissionProfile: true,
           },
         });
         if (dbUser) {
@@ -213,6 +237,8 @@ export const authOptions: NextAuthOptions = {
           token.accountStatus = dbUser.accountStatus;
           token.email = dbUser.email;
           token.mustChangePassword = dbUser.mustChangePassword;
+          token.personType = dbUser.personType;
+          token.permissionProfile = dbUser.permissionProfile;
         }
       }
 
@@ -247,6 +273,9 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role as string;
         session.user.contractStatus = token.contractStatus as string;
         session.user.accountStatus = token.accountStatus as string;
+        session.user.personType = (token.personType as string | null | undefined) ?? null;
+        session.user.permissionProfile =
+          (token.permissionProfile as string | null | undefined) ?? null;
         session.user.isDemo = Boolean(token.isDemo);
         session.user.demoEnvironmentId = token.demoEnvironmentId as string | undefined;
         session.user.demoCompanyName = token.demoCompanyName as string | undefined;

@@ -19,6 +19,7 @@ export type FollowUpCardData = {
   urgencyLabel: string;
   assignee?: { name: string } | null;
   delayLabel?: string | null;
+  postponeCount?: number;
 };
 
 export function FollowUpPostItCard({ sheet }: { sheet: FollowUpCardData }) {
@@ -70,6 +71,11 @@ export function FollowUpPostItCard({ sheet }: { sheet: FollowUpCardData }) {
         <span className="rounded bg-white/70 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide">
           {sheet.statusLabel}
         </span>
+        {(sheet.postponeCount ?? 0) >= 3 ? (
+          <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-800">
+            {sheet.postponeCount} reports
+          </span>
+        ) : null}
       </div>
       {sheet.nextAction && !sheet.nextActionDone && (
         <p className="mt-3 border-t border-black/10 pt-2 text-xs">

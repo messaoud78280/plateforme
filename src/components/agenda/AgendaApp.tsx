@@ -14,6 +14,7 @@ import {
   addYears,
   formatDayTitle,
   formatMonthYear,
+  isSameDay,
   rangeForView,
   startOfDay,
   startOfMonth,
@@ -248,6 +249,43 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
       /* ignore */
     }
   }
+
+  async function handleStatusChange(status: "PLANIFIE" | "CONFIRME" | "TERMINE" | "ANNULE") {
+    if (!selectedEvent || selectedEvent.readOnly) return;
+    const realId = selectedEvent.id.includes("__")
+      ? selectedEvent.id.split("__")[0]!
+      : selectedEvent.id;
+    try {
+      const res = await fetch(`/api/agenda/events/${realId}`, {
+        method: "PATCH",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.event) {
+        if (status === "ANNULE") {
+          setEvents((prev) =>
+            prev.filter((e) => e.id !== selectedEvent.id && !e.id.startsWith(`${realId}__`)),
+          );
+          setSelectedEventId(null);
+        } else {
+          upsertEvent({ ...data.event, readOnly: false, source: "agenda" });
+        }
+        void loadEvents();
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  const todayEvents = useMemo(() => {
+    const today = startOfDay(new Date());
+    return events
+      .filter((e) => e.status !== "ANNULE" && isSameDay(new Date(e.startAt), today))
+      .sort((a, b) => a.startAt.localeCompare(b.startAt));
+  }, [events]);
 
   function handleDuplicate() {
     if (!selectedEvent || selectedEvent.readOnly) return;
@@ -491,11 +529,13 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
           cursor={cursor}
           selectedEvent={selectedEvent}
           currentUserId={currentUserId}
+          todayEvents={todayEvents}
           onCursorChange={setCursor}
           onSelectDay={(d) => {
             setCursor(startOfDay(d));
             setView("day");
           }}
+          onSelectEvent={setSelectedEventId}
           onEdit={() => {
             if (selectedEvent?.readOnly) return;
             setEditOpen(true);
@@ -503,6 +543,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
           onDuplicate={handleDuplicate}
           onDelete={handleDelete}
           onRsvp={handleRsvp}
+          onStatusChange={handleStatusChange}
         />
       </div>
 
@@ -520,12 +561,14 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
               cursor={cursor}
               selectedEvent={selectedEvent}
               currentUserId={currentUserId}
+              todayEvents={todayEvents}
               onCursorChange={setCursor}
               onSelectDay={(d) => {
                 setCursor(startOfDay(d));
                 setView("day");
                 setPanelOpen(false);
               }}
+              onSelectEvent={setSelectedEventId}
               onEdit={() => {
                 if (selectedEvent?.readOnly) return;
                 setEditOpen(true);
@@ -539,9 +582,8 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
                 await handleDelete();
                 setPanelOpen(false);
               }}
-              onRsvp={async (status) => {
-                await handleRsvp(status);
-              }}
+              onRsvp={handleRsvp}
+              onStatusChange={handleStatusChange}
             />
           </div>
         </div>
@@ -562,6 +604,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
         }
         projects={projects}
         teamUsers={teamUsers}
+        existingEvents={events}
         onClose={() => {
           setCreateOpen(false);
           setDraft(null);
@@ -581,6 +624,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
         event={selectedEvent}
         projects={projects}
         teamUsers={teamUsers}
+        existingEvents={events}
         onClose={() => setEditOpen(false)}
         onSaved={(ev) => {
           upsertEvent(ev);

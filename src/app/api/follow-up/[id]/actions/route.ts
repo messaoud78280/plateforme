@@ -7,8 +7,9 @@ import { canAccessFollowUpSheet, followUpSheetInclude } from "@/lib/follow-up/ac
 import { serializeFollowUpSheet } from "@/lib/follow-up/serialize";
 import { appendFollowUpTimeline } from "@/lib/follow-up/timeline";
 import { getFollowUpSettings } from "@/lib/follow-up/settings";
-import { colorKeyForStatus } from "@/lib/follow-up/types";
+import { colorKeyForStatus, NEXT_ACTION_SUGGESTIONS } from "@/lib/follow-up/types";
 import { resolveAgendaOwnerUserId } from "@/lib/agenda/access";
+import type { FollowUpSheetStatus } from "@prisma/client";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -18,7 +19,8 @@ type ActionBody = {
     | "postpone"
     | "set_next"
     | "quick_event"
-    | "quick_status";
+    | "quick_status"
+    | "mark_piece_recue";
   postpone?: "tomorrow" | "2days" | "1week" | "custom";
   customDate?: string;
   nextAction?: string;
@@ -27,6 +29,7 @@ type ActionBody = {
   eventTitle?: string;
   eventStartAt?: string;
   status?: string;
+  nextStatus?: string;
 };
 
 function addDays(d: Date, n: number) {
@@ -62,6 +65,84 @@ export async function POST(request: Request, ctx: Ctx) {
         kind: "termine",
         label: "Action terminée",
         detail: sheet.nextAction ?? undefined,
+      });
+
+      const suggestions = NEXT_ACTION_SUGGESTIONS[sheet.status] ?? [
+        { label: "Définir la prochaine action", dueInDays: 1 },
+      ];
+
+      // Si l'utilisateur envoie déjà la suite dans le même appel
+      if (body.nextAction?.trim()) {
+        const at = body.nextActionAt
+          ? new Date(body.nextActionAt)
+          : addDays(new Date(), suggestions[0]?.dueInDays ?? 1);
+        at.setHours(9, 0, 0, 0);
+        const statusUpdate =
+          body.nextStatus &&
+          [
+            "NOUVEAU",
+            "A_ANALYSER",
+            "A_PLANIFIER",
+            "PLANIFIE",
+            "COMMANDE_FOURNISSEUR",
+            "COMMANDE_PASSEE",
+            "ATTENTE_FOURNISSEUR",
+            "INTERVENTION_PREVUE",
+            "EN_COURS",
+            "TRAVAUX_TERMINES",
+            "CR_A_RECUPERER",
+            "AVENANT",
+            "A_FACTURER",
+            "FACTURE",
+            "ATTENTE_REGLEMENT",
+            "TERMINE",
+          ].includes(body.nextStatus)
+            ? (body.nextStatus as FollowUpSheetStatus)
+            : undefined;
+
+        await prisma.followUpSheet.update({
+          where: { id },
+          data: {
+            nextAction: body.nextAction.trim(),
+            nextActionAt: at,
+            nextActionDone: false,
+            ...(statusUpdate
+              ? { status: statusUpdate, colorKey: colorKeyForStatus(statusUpdate) }
+              : {}),
+          },
+        });
+        await appendFollowUpTimeline({
+          sheetId: id,
+          authorId: session.user.id,
+          kind: "action",
+          label: `Prochaine action : ${body.nextAction.trim()}`,
+          occurredAt: at,
+        });
+      }
+
+      const refreshed = await prisma.followUpSheet.findUnique({
+        where: { id },
+        include: followUpSheetInclude,
+      });
+      const settings = await getFollowUpSettings(sheet.ownerUserId);
+      return NextResponse.json({
+        ...serializeFollowUpSheet(refreshed!, settings.thresholds),
+        suggestions,
+        needsNextAction: !body.nextAction?.trim(),
+      });
+    } else if (body.action === "mark_piece_recue") {
+      const notes = sheet.notes?.includes("#ok")
+        ? sheet.notes
+        : `${sheet.notes ? sheet.notes + "\n" : ""}#ok pièce reçue`.trim();
+      await prisma.followUpSheet.update({
+        where: { id },
+        data: { notes },
+      });
+      await appendFollowUpTimeline({
+        sheetId: id,
+        authorId: session.user.id,
+        kind: "document",
+        label: "Pièce / document reçu",
       });
     } else if (body.action === "postpone") {
       const from = sheet.nextActionAt ?? new Date();

@@ -193,6 +193,38 @@ function evaluateBusinessRules(sheet: SheetRow, rules: AlertRuleConfig[], now: D
     });
   }
 
+  const reportRule = byId("trop_de_reports");
+  if (reportRule && sheet.postponeCount >= Math.max(1, reportRule.delayHours)) {
+    hits.push({
+      rule: reportRule,
+      title: `${site} — trop de reports`,
+      message: `Action reportée ${sheet.postponeCount} fois. Risque d’oubli / retard — à traiter.`,
+    });
+  }
+
+  const docRule = byId("document_manquant");
+  if (
+    docRule &&
+    ["NOUVEAU", "A_ANALYSER", "A_PLANIFIER"].includes(sheet.status) &&
+    sheet.receivedAt &&
+    hoursSince(sheet.receivedAt, now) >= docRule.delayHours
+  ) {
+    const notes = (sheet.notes ?? "").toLowerCase();
+    const hasDocFlag =
+      notes.includes("#ok") ||
+      notes.includes("pièce reçue") ||
+      notes.includes("document reçu") ||
+      notes.includes("plans reçus");
+    if (!hasDocFlag) {
+      hits.push({
+        rule: docRule,
+        title: `${site} — document à vérifier`,
+        message:
+          "Dossier récent sans confirmation de pièce reçue (plans, OS, attestation…). Ajoutez « pièce reçue » dans les notes ou #ok pour lever l’alerte.",
+      });
+    }
+  }
+
   return hits;
 }
 

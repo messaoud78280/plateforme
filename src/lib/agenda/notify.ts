@@ -96,3 +96,66 @@ export async function processAgendaReminders(now = new Date()) {
   }
   return { notified };
 }
+
+/** Événements passés encore PLANIFIE → alerte (ne pas laisser un RDV sans clôture). */
+export async function processAgendaUnclosed(now = new Date()) {
+  const since = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const events = await prisma.agendaEvent.findMany({
+    where: {
+      status: "PLANIFIE",
+      endAt: { lt: now, gte: since },
+    },
+    include: {
+      project: { select: { title: true } },
+      followUpSheet: { select: { id: true, title: true } },
+    },
+    take: 150,
+    orderBy: { endAt: "asc" },
+  });
+
+  let notified = 0;
+  const stale = new Date(now.getTime() - 20 * 60 * 60 * 1000);
+
+  for (const event of events) {
+    const actionUrl = `/dashboard/agenda?event=${event.id}`;
+    const already = await prisma.notification.findFirst({
+      where: {
+        type: "AGENDA_UNCLOSED",
+        actionUrl,
+        createdAt: { gte: stale },
+      },
+      select: { id: true },
+    });
+    if (already) continue;
+
+    const when = event.endAt.toLocaleString("fr-FR", {
+      dateStyle: "short",
+      timeStyle: "short",
+    });
+    const ficheBit = event.followUpSheet
+      ? ` Mettre à jour la fiche « ${event.followUpSheet.title} ».`
+      : "";
+    const message = `« ${event.title} » terminé le ${when} mais encore « Planifié ».${
+      event.project?.title ? ` · ${event.project.title}.` : ""
+    }${ficheBit}`;
+
+    const targets = new Set<string>([event.createdById, event.ownerUserId]);
+    if (event.responsibleId) targets.add(event.responsibleId);
+
+    for (const userId of targets) {
+      await createNotification({
+        userId,
+        type: "AGENDA_UNCLOSED",
+        title: "Événement à clôturer",
+        message,
+        actionUrl: event.followUpSheet
+          ? `/dashboard/fiches-suivi/${event.followUpSheet.id}`
+          : actionUrl,
+      });
+      notified += 1;
+    }
+  }
+
+  return { notified };
+}
+

@@ -20,12 +20,15 @@ type Props = {
   cursor: Date;
   selectedEvent: AgendaEventDTO | null;
   currentUserId?: string;
+  todayEvents?: AgendaEventDTO[];
   onCursorChange: (d: Date) => void;
   onSelectDay: (d: Date) => void;
+  onSelectEvent?: (id: string) => void;
   onEdit: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
   onRsvp?: (status: "ACCEPTE" | "REFUSE") => void;
+  onStatusChange?: (status: "PLANIFIE" | "CONFIRME" | "TERMINE" | "ANNULE") => void;
 };
 
 const WEEKDAYS = ["L", "M", "M", "J", "V", "S", "D"];
@@ -34,12 +37,15 @@ export function AgendaSidePanel({
   cursor,
   selectedEvent,
   currentUserId,
+  todayEvents = [],
   onCursorChange,
   onSelectDay,
+  onSelectEvent,
   onEdit,
   onDuplicate,
   onDelete,
   onRsvp,
+  onStatusChange,
 }: Props) {
   const month = startOfMonth(cursor);
   const days = monthGrid(cursor);
@@ -111,7 +117,57 @@ export function AgendaSidePanel({
 
       <div className="flex-1 overflow-y-auto p-4">
         {!selectedEvent || !start || !end || !meta ? (
-          <p className="text-sm text-slate-400">Aucun événement sélectionné</p>
+          <div className="space-y-3">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                Ma journée chantier
+              </p>
+              <p className="mt-0.5 text-sm font-semibold text-[#1e3a5f]">
+                {today.toLocaleDateString("fr-FR", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                })}
+              </p>
+            </div>
+            {todayEvents.length === 0 ? (
+              <p className="text-sm text-slate-400">Rien de planifié aujourd’hui.</p>
+            ) : (
+              <ul className="space-y-2">
+                {todayEvents.map((ev) => {
+                  const s = new Date(ev.startAt);
+                  return (
+                    <li key={ev.id}>
+                      <button
+                        type="button"
+                        onClick={() => onSelectEvent?.(ev.id)}
+                        className="w-full rounded-lg border border-slate-100 px-2.5 py-2 text-left hover:border-[#1e3a5f]/30 hover:bg-slate-50"
+                      >
+                        <p className="text-[11px] font-semibold text-slate-500">
+                          {ev.allDay ? "Journée" : formatTime(s)}
+                          {ev.urgencyLabel ? ` · ${ev.urgencyLabel}` : ""}
+                        </p>
+                        <p className="truncate text-sm font-semibold text-slate-900">{ev.title}</p>
+                        {ev.followUpSheet || ev.href?.includes("fiches-suivi") ? (
+                          <Link
+                            href={
+                              ev.href ||
+                              `/dashboard/fiches-suivi/${ev.followUpSheet?.id ?? ev.followUpSheetId}`
+                            }
+                            className="mt-0.5 inline-block text-[11px] font-semibold text-[#1d4ed8]"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Ouvrir fiche
+                          </Link>
+                        ) : null}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            <p className="text-[11px] text-slate-400">Sélectionnez un événement pour le clôturer.</p>
+          </div>
         ) : (
           <div className="space-y-4">
             <div>
@@ -275,6 +331,37 @@ export function AgendaSidePanel({
                 )
               ) : (
                 <>
+                  {onStatusChange && !selectedEvent.readOnly ? (
+                    <div className="mb-1 flex w-full flex-wrap gap-1.5">
+                      {selectedEvent.status !== "CONFIRME" ? (
+                        <button
+                          type="button"
+                          onClick={() => onStatusChange("CONFIRME")}
+                          className="rounded-lg border border-sky-200 bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-900 hover:bg-sky-100"
+                        >
+                          Confirmé
+                        </button>
+                      ) : null}
+                      {selectedEvent.status !== "TERMINE" ? (
+                        <button
+                          type="button"
+                          onClick={() => onStatusChange("TERMINE")}
+                          className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-900 hover:bg-emerald-100"
+                        >
+                          Terminé
+                        </button>
+                      ) : null}
+                      {selectedEvent.status !== "ANNULE" ? (
+                        <button
+                          type="button"
+                          onClick={() => onStatusChange("ANNULE")}
+                          className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                        >
+                          Annulé
+                        </button>
+                      ) : null}
+                    </div>
+                  ) : null}
                   {currentUserId &&
                   onRsvp &&
                   (selectedEvent.attendees.some((a) => a.user.id === currentUserId) ||

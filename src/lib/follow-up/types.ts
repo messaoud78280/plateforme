@@ -31,7 +31,8 @@ export type AlertRuleId =
   | "travaux_sans_facturation"
   | "facture_echeance"
   | "document_manquant"
-  | "action_depassee";
+  | "action_depassee"
+  | "trop_de_reports";
 
 export type AlertRuleConfig = {
   id: AlertRuleId;
@@ -115,6 +116,16 @@ export const DEFAULT_ALERT_RULES: AlertRuleConfig[] = [
     urgency: "IMPORTANT",
     notifyAssignee: true,
     notifyOwner: false,
+  },
+  {
+    id: "trop_de_reports",
+    label: "Trop de reports",
+    description: "Action reportée X fois ou plus → alerte dirigeant",
+    enabled: true,
+    delayHours: 3,
+    urgency: "IMPORTANT",
+    notifyAssignee: true,
+    notifyOwner: true,
   },
   {
     id: "action_depassee",
@@ -283,3 +294,68 @@ export function colorKeyForStatus(status: FollowUpSheetStatus): string {
       return "jaune";
   }
 }
+
+/** Suggestions de prochaine action après « Marquer comme fait » */
+export const NEXT_ACTION_SUGGESTIONS: Record<
+  string,
+  { label: string; nextStatus?: FollowUpSheetStatus; dueInDays: number }[]
+> = {
+  NOUVEAU: [
+    { label: "Analyser le dossier / OS", dueInDays: 1 },
+    { label: "Programmer l’intervention", nextStatus: "A_PLANIFIER", dueInDays: 2 },
+  ],
+  A_ANALYSER: [
+    { label: "Programmer l’intervention", nextStatus: "A_PLANIFIER", dueInDays: 2 },
+  ],
+  A_PLANIFIER: [
+    { label: "Confirmer la date d’intervention", nextStatus: "PLANIFIE", dueInDays: 1 },
+    { label: "Passer la commande fournisseur", nextStatus: "COMMANDE_FOURNISSEUR", dueInDays: 1 },
+  ],
+  PLANIFIE: [
+    { label: "Passer la commande fournisseur", nextStatus: "COMMANDE_FOURNISSEUR", dueInDays: 1 },
+    { label: "Préparer l’intervention", nextStatus: "INTERVENTION_PREVUE", dueInDays: 1 },
+  ],
+  COMMANDE_FOURNISSEUR: [
+    { label: "Confirmer la commande fournisseur", nextStatus: "COMMANDE_PASSEE", dueInDays: 1 },
+  ],
+  COMMANDE_PASSEE: [
+    { label: "Suivre livraison fournisseur", nextStatus: "ATTENTE_FOURNISSEUR", dueInDays: 2 },
+  ],
+  ATTENTE_FOURNISSEUR: [
+    { label: "Préparer l’intervention", nextStatus: "INTERVENTION_PREVUE", dueInDays: 1 },
+  ],
+  INTERVENTION_PREVUE: [
+    { label: "Réaliser l’intervention", nextStatus: "EN_COURS", dueInDays: 0 },
+    { label: "Récupérer le compte rendu", nextStatus: "CR_A_RECUPERER", dueInDays: 1 },
+  ],
+  EN_COURS: [
+    { label: "Clôturer les travaux", nextStatus: "TRAVAUX_TERMINES", dueInDays: 0 },
+  ],
+  TRAVAUX_TERMINES: [
+    { label: "Récupérer le compte rendu", nextStatus: "CR_A_RECUPERER", dueInDays: 1 },
+    { label: "Préparer la facturation", nextStatus: "A_FACTURER", dueInDays: 2 },
+  ],
+  CR_A_RECUPERER: [
+    { label: "Préparer la facturation", nextStatus: "A_FACTURER", dueInDays: 2 },
+  ],
+  AVENANT: [
+    { label: "Relancer validation client", dueInDays: 3 },
+  ],
+  A_FACTURER: [
+    { label: "Émettre la facture", nextStatus: "FACTURE", dueInDays: 2 },
+  ],
+  FACTURE: [
+    { label: "Suivre le règlement", nextStatus: "ATTENTE_REGLEMENT", dueInDays: 30 },
+  ],
+  ATTENTE_REGLEMENT: [
+    { label: "Clôturer le dossier", nextStatus: "TERMINE", dueInDays: 7 },
+  ],
+};
+
+export const QUICK_STATUS_TRANSITIONS: { status: FollowUpSheetStatus; label: string }[] = [
+  { status: "COMMANDE_PASSEE", label: "Commande passée" },
+  { status: "EN_COURS", label: "En cours" },
+  { status: "TRAVAUX_TERMINES", label: "Travaux terminés" },
+  { status: "A_FACTURER", label: "À facturer" },
+];
+

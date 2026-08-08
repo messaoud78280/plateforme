@@ -104,6 +104,9 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
       ? (sheet.reminderOffsets as number[])
       : [...DEFAULT_REMINDER_OFFSETS_HOURS],
   );
+  const [suggestions, setSuggestions] = useState<
+    { label: string; nextStatus?: string; dueInDays: number }[] | null
+  >(null);
 
   const color = POSTIT_COLORS[sheet.colorKey] ?? POSTIT_COLORS.jaune;
   const urgency = URGENCY_STYLES[sheet.urgency as keyof typeof URGENCY_STYLES] ?? URGENCY_STYLES.NORMAL;
@@ -124,10 +127,16 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
       });
       const data = await res.json();
       if (res.ok) {
-        const next = data.sheet ?? data;
-        setSheet(next);
-        setNextDraft(next.nextAction ?? "");
-        setNextAtDraft(toLocalInput(next.nextActionAt));
+        if (payload.action === "done" && data.needsNextAction && Array.isArray(data.suggestions)) {
+          setSuggestions(data.suggestions);
+          setSheet({ ...sheet, nextActionDone: true });
+        } else {
+          const next = data.sheet ?? data;
+          setSheet(next);
+          setNextDraft(next.nextAction ?? "");
+          setNextAtDraft(toLocalInput(next.nextActionAt));
+          setSuggestions(null);
+        }
         router.refresh();
       }
     } finally {
@@ -239,6 +248,14 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
           >
             Reporter
           </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => runAction({ action: "mark_piece_recue" })}
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-800 hover:bg-slate-50"
+          >
+            Pièce reçue
+          </button>
           {postponeOpen && (
             <div className="flex w-full flex-wrap items-end gap-2 border-t border-slate-100 pt-3">
               {(
@@ -285,6 +302,43 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
           )}
         </section>
       )}
+
+      {suggestions ? (
+        <section className="rounded-2xl border border-emerald-200 bg-emerald-50/40 p-4">
+          <h2 className="text-sm font-bold text-emerald-950">Action terminée — quelle suite ?</h2>
+          <p className="mt-1 text-xs text-emerald-900/80">
+            Sans prochaine action, BeWork ne pourra plus vous alerter. Choisissez une suite :
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {suggestions.map((s) => (
+              <button
+                key={s.label}
+                type="button"
+                disabled={busy}
+                onClick={() => {
+                  const due = new Date();
+                  due.setDate(due.getDate() + (s.dueInDays ?? 1));
+                  due.setHours(9, 0, 0, 0);
+                  void (async () => {
+                    await runAction({
+                      action: "set_next",
+                      nextAction: s.label,
+                      nextActionAt: due.toISOString(),
+                    });
+                    if (s.nextStatus) {
+                      await runAction({ action: "quick_status", status: s.nextStatus });
+                    }
+                    setSuggestions(null);
+                  })();
+                }}
+                className="rounded-lg bg-white px-3 py-2 text-xs font-semibold text-slate-800 shadow-sm ring-1 ring-emerald-200"
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-4">
         <h2 className="text-sm font-bold text-slate-900">Prochaine action</h2>

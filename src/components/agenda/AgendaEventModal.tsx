@@ -7,6 +7,7 @@ import {
   AGENDA_REMINDER_OPTIONS,
 } from "@/lib/agenda/types";
 import { parseFrenchAgendaQuick } from "@/lib/agenda/quick-parse";
+import { findAgendaConflicts } from "@/lib/agenda/conflicts";
 import type { AgendaEventDTO, AgendaProjectOption, AgendaQuickCreateDraft, AgendaUserOption } from "./agenda-types";
 
 type Props = {
@@ -16,6 +17,7 @@ type Props = {
   draft?: AgendaQuickCreateDraft | null;
   projects: AgendaProjectOption[];
   teamUsers: AgendaUserOption[];
+  existingEvents?: AgendaEventDTO[];
   onClose: () => void;
   onSaved: (event: AgendaEventDTO) => void;
 };
@@ -46,6 +48,7 @@ export function AgendaEventModal({
   draft,
   projects,
   teamUsers,
+  existingEvents = [],
   onClose,
   onSaved,
 }: Props) {
@@ -114,6 +117,20 @@ export function AgendaEventModal({
   }, [open, mode, event, draft]);
 
   if (!open) return null;
+
+  const conflictPreview =
+    start && end
+      ? findAgendaConflicts(
+          {
+            id: mode === "edit" ? event?.id : null,
+            startAt: fromLocalInput(start, allDay, false),
+            endAt: fromLocalInput(end, allDay, true),
+            responsibleId: responsibleId || null,
+            projectId: projectId || null,
+          },
+          existingEvents,
+        )
+      : [];
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -202,6 +219,7 @@ export function AgendaEventModal({
                 setAllDay(parsed.allDay);
                 setStart(toLocalInput(parsed.startAt.toISOString(), parsed.allDay));
                 setEnd(toLocalInput(parsed.endAt.toISOString(), parsed.allDay));
+                if (parsed.type) setType(parsed.type);
               }}
               placeholder="Ex. Réunion chantier demain 9h30"
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#1d4ed8]"
@@ -328,6 +346,19 @@ export function AgendaEventModal({
               )}
             </div>
           </div>
+
+          {conflictPreview.length > 0 ? (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
+              <p className="font-bold">Chevauchement détecté (avertissement)</p>
+              <ul className="mt-1 list-disc pl-4">
+                {conflictPreview.slice(0, 3).map((c) => (
+                  <li key={c.otherId}>
+                    « {c.otherTitle} » — même {c.reason === "responsable" ? "responsable" : "chantier"}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
 
           <div>
             <label className="mb-1 block text-xs font-semibold text-slate-600">Lieu</label>

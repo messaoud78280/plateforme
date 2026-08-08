@@ -9,6 +9,7 @@ import { cn } from "@/lib/cn";
 type Sheet = FollowUpCardData & {
   status: string;
   clientName?: string | null;
+  nextActionAt?: string | null;
 };
 
 type Props = {
@@ -17,6 +18,7 @@ type Props = {
 };
 
 type GroupMode = "none" | "urgency" | "status";
+type DayPreset = "all" | "today" | "overdue";
 
 const URGENCY_ORDER = ["CRITIQUE", "URGENT", "IMPORTANT", "A_SURVEILLER", "NORMAL"];
 
@@ -26,13 +28,30 @@ export function FollowUpBoard({ sheets, activeFilter }: Props) {
   const [status, setStatus] = useState<string>("all");
   const [groupBy, setGroupBy] = useState<GroupMode>("none");
   const [mineOnly, setMineOnly] = useState(false);
+  const [dayPreset, setDayPreset] = useState<DayPreset>(
+    activeFilter === "today" ? "today" : activeFilter === "overdue" ? "overdue" : "all",
+  );
 
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
+    const now = new Date();
+    const startToday = new Date(now);
+    startToday.setHours(0, 0, 0, 0);
+    const endToday = new Date(now);
+    endToday.setHours(23, 59, 59, 999);
+
     return sheets.filter((s) => {
       if (urgency !== "all" && s.urgency !== urgency) return false;
       if (status !== "all" && s.status !== status) return false;
       if (mineOnly && !s.assignee) return false;
+      if (dayPreset === "overdue" && !s.delayLabel) return false;
+      if (dayPreset === "today") {
+        if (s.nextActionDone) return false;
+        const raw = (s as Sheet & { nextActionAt?: string | null }).nextActionAt;
+        if (!raw) return false;
+        const d = new Date(raw);
+        if (d < startToday || d > endToday) return false;
+      }
       if (!query) return true;
       const hay = [
         s.title,
@@ -49,7 +68,7 @@ export function FollowUpBoard({ sheets, activeFilter }: Props) {
         .toLowerCase();
       return hay.includes(query);
     });
-  }, [sheets, q, urgency, status, mineOnly]);
+  }, [sheets, q, urgency, status, mineOnly, dayPreset]);
 
   const groups = useMemo(() => {
     if (groupBy === "none") return [{ key: "all", label: "Toutes les fiches", items: filtered }];
@@ -84,6 +103,18 @@ export function FollowUpBoard({ sheets, activeFilter }: Props) {
             placeholder="Chantier, OS, action, responsable…"
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
           />
+        </label>
+        <label className="space-y-1">
+          <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Journée</span>
+          <select
+            value={dayPreset}
+            onChange={(e) => setDayPreset(e.target.value as DayPreset)}
+            className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          >
+            <option value="all">Toutes</option>
+            <option value="today">Aujourd’hui</option>
+            <option value="overdue">En retard</option>
+          </select>
         </label>
         <label className="space-y-1">
           <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Urgence</span>

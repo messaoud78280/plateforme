@@ -7,23 +7,29 @@ import { followUpSheetAccessWhere, resolveFollowUpOwnerUserId } from "@/lib/foll
 import { getFollowUpSettings } from "@/lib/follow-up/settings";
 import { serializeFollowUpSheet } from "@/lib/follow-up/serialize";
 import { FollowUpBoard } from "@/components/follow-up/FollowUpBoard";
+import { FollowUpKanban } from "@/components/follow-up/FollowUpKanban";
+import { FollowUpViewToggle } from "@/components/follow-up/FollowUpViewToggle";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { BackLink } from "@/components/ui/BackLink";
+import { ensureOrganizationForOwner } from "@/lib/organization/access";
+import { ensureDefaultWorkflow } from "@/lib/workflow/service";
 
 export const dynamic = "force-dynamic";
 
 export default async function FichesSuiviPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string }>;
+  searchParams: Promise<{ filter?: string; view?: string }>;
 }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect("/connexion?callbackUrl=/dashboard/fiches-suivi");
 
   const sp = await searchParams;
   const filter = sp.filter;
+  const view = sp.view === "tableau" ? "tableau" : "liste";
   const accessWhere = await followUpSheetAccessWhere(session.user);
-  const settings = await getFollowUpSettings(await resolveFollowUpOwnerUserId(session.user.id));
+  const ownerUserId = await resolveFollowUpOwnerUserId(session.user.id);
+  const settings = await getFollowUpSettings(ownerUserId);
   const now = new Date();
   const startToday = new Date(now);
   startToday.setHours(0, 0, 0, 0);
@@ -86,7 +92,7 @@ export default async function FichesSuiviPage({
     {
       label: "Urgences",
       value: allItems.filter((i) => i.urgency === "URGENT" || i.urgency === "CRITIQUE").length,
-      href: "/dashboard/fiches-suivi?filter=urgent",
+      href: `/dashboard/fiches-suivi?view=${view}&filter=urgent`,
       emphasize: true,
     },
     {
@@ -96,7 +102,7 @@ export default async function FichesSuiviPage({
         const d = new Date(i.nextActionAt);
         return d >= startToday && d <= endToday;
       }).length,
-      href: "/dashboard/fiches-suivi?filter=today",
+      href: `/dashboard/fiches-suivi?view=${view}&filter=today`,
     },
     {
       label: "Cette semaine",
@@ -105,12 +111,12 @@ export default async function FichesSuiviPage({
         const d = new Date(i.nextActionAt);
         return d >= startToday && d <= endWeek;
       }).length,
-      href: "/dashboard/fiches-suivi?filter=week",
+      href: `/dashboard/fiches-suivi?view=${view}&filter=week`,
     },
     {
       label: "En retard",
       value: allItems.filter((i) => i.delayLabel).length,
-      href: "/dashboard/fiches-suivi?filter=overdue",
+      href: `/dashboard/fiches-suivi?view=${view}&filter=overdue`,
       emphasize: true,
     },
     {
@@ -121,42 +127,72 @@ export default async function FichesSuiviPage({
           i.status === "COMMANDE_FOURNISSEUR" ||
           (i.nextAction ?? "").toLowerCase().includes("commander"),
       ).length,
-      href: "/dashboard/fiches-suivi?filter=non-preparees",
+      href: `/dashboard/fiches-suivi?view=${view}&filter=non-preparees`,
     },
     {
       label: "À planifier",
       value: allItems.filter((i) =>
         ["NOUVEAU", "A_PLANIFIER", "A_ANALYSER"].includes(i.status),
       ).length,
-      href: "/dashboard/fiches-suivi?filter=a-planifier",
+      href: `/dashboard/fiches-suivi?view=${view}&filter=a-planifier`,
     },
     {
       label: "À facturer",
       value: allItems.filter((i) => i.status === "A_FACTURER" || i.status === "TRAVAUX_TERMINES")
         .length,
-      href: "/dashboard/fiches-suivi?filter=a-facturer",
+      href: `/dashboard/fiches-suivi?view=${view}&filter=a-facturer`,
     },
     {
       label: "Avenants",
       value: allItems.filter((i) => i.status === "AVENANT").length,
-      href: "/dashboard/fiches-suivi?filter=avenant",
+      href: `/dashboard/fiches-suivi?view=${view}&filter=avenant`,
     },
   ];
 
+  let kanbanColumns: { statusKey: string; label: string; colorKey: string; sortOrder: number }[] =
+    [];
+  if (view === "tableau") {
+    const orgId = await ensureOrganizationForOwner(ownerUserId);
+    if (orgId) {
+      const workflow = await ensureDefaultWorkflow(orgId);
+      kanbanColumns = workflow.steps
+        .filter((s) => s.statusKey !== "ARCHIVE")
+        .slice()
+        .sort((a, b) => a.sortOrder - b.sortOrder)
+        .map((s) => ({
+          statusKey: s.statusKey,
+          label: s.label,
+          colorKey: s.colorKey,
+          sortOrder: s.sortOrder,
+        }));
+    }
+  }
+
   return (
-    <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
+    <div
+      className={`mx-auto space-y-6 px-4 py-6 sm:px-6 ${
+        view === "tableau" ? "max-w-[100vw]" : "max-w-6xl"
+      }`}
+    >
       <BackLink href="/dashboard">Tableau de bord</BackLink>
       <PageHeader
         eyebrow="Suivi opérationnel"
         title="Fiches de suivi"
-        description="Mur de post-it numérique : 1 OS / 1 commande = 1 fiche. Filtrez, regroupez, agissez."
+        description={
+          view === "tableau"
+            ? "Tableau de suivi : chaque colonne = une étape de votre processus métier."
+            : "Mur de post-it numérique : 1 OS / 1 commande = 1 fiche. Filtrez, regroupez, agissez."
+        }
         actions={
-          <Link
-            href="/dashboard/fiches-suivi/nouvelle"
-            className="rounded-xl bg-[#1e3a5f] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#16304f]"
-          >
-            + Nouvelle fiche
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <FollowUpViewToggle view={view} filter={filter} />
+            <Link
+              href="/dashboard/fiches-suivi/nouvelle"
+              className="rounded-xl bg-[#1e3a5f] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#16304f]"
+            >
+              + Nouvelle fiche
+            </Link>
+          </div>
         }
       />
 
@@ -188,6 +224,18 @@ export default async function FichesSuiviPage({
             + Nouvelle fiche
           </Link>
         </div>
+      ) : view === "tableau" ? (
+        kanbanColumns.length === 0 ? (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-8 text-sm text-amber-950">
+            Aucun processus métier trouvé. Configurez-le dans{" "}
+            <Link href="/dashboard/parametres/processus" className="font-semibold underline">
+              Paramètres → Processus métier
+            </Link>
+            .
+          </div>
+        ) : (
+          <FollowUpKanban columns={kanbanColumns} sheets={items} />
+        )
       ) : (
         <FollowUpBoard sheets={items} activeFilter={filter} />
       )}

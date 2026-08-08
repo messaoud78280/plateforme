@@ -90,10 +90,16 @@ function nextIntervention(sheet: SheetRow) {
     .sort((a, b) => a.startAt.getTime() - b.startAt.getTime())[0];
 }
 
+function pendingDeliveries(sheet: SheetRow) {
+  return (sheet.agendaEvents ?? []).filter(
+    (e) => e.type === "LIVRAISON" && e.status !== "ANNULE" && e.status !== "TERMINE",
+  );
+}
+
 function nextDelivery(sheet: SheetRow) {
   const now = Date.now();
-  return (sheet.agendaEvents ?? [])
-    .filter((e) => e.type === "LIVRAISON" && e.status !== "ANNULE" && e.startAt.getTime() >= now - 3600000)
+  return pendingDeliveries(sheet)
+    .filter((e) => e.startAt.getTime() >= now - 3600000)
     .sort((a, b) => a.startAt.getTime() - b.startAt.getTime())[0];
 }
 
@@ -136,11 +142,32 @@ function evaluateBusinessRules(sheet: SheetRow, rules: AlertRuleConfig[], now: D
   const delivery = nextDelivery(sheet);
   if (livRule && delivery) {
     const h = hoursUntil(delivery.startAt, now);
-    if (h >= 0 && h <= livRule.delayHours && delivery.status !== "CONFIRME") {
+    if (h >= 0 && h <= livRule.delayHours && delivery.status !== "CONFIRME" && delivery.status !== "TERMINE") {
       hits.push({
         rule: livRule,
         title: `${site} — livraison non confirmée`,
         message: `Livraison prévue sous ${Math.max(1, Math.round(h))} h, non confirmée.`,
+      });
+    }
+  }
+
+  // Livraison passée non reçue (complète processDeliveryAlerts côté agenda)
+  if (livRule) {
+    const overdue = pendingDeliveries(sheet)
+      .filter((e) => e.startAt < now && e.status !== "TERMINE")
+      .sort((a, b) => a.startAt.getTime() - b.startAt.getTime())[0];
+    if (overdue && hoursSince(overdue.startAt, now) >= 1.5) {
+      const late = hoursSince(overdue.startAt, now);
+      hits.push({
+        rule: {
+          ...livRule,
+          urgency: late >= 4 ? "CRITIQUE" : "URGENT",
+        },
+        title: `${site} — livraison à vérifier`,
+        message:
+          late >= 4
+            ? `Livraison non confirmée depuis ${Math.round(late)} h.`
+            : `Livraison prévue non marquée reçue (${Math.round(late)} h).`,
       });
     }
   }

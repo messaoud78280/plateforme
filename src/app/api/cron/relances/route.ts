@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createNotification, notifyManagers } from "@/lib/notifications";
-import { processAgendaReminders, processAgendaUnclosed } from "@/lib/agenda/notify";
+import { processAgendaReminders, processAgendaUnclosed, processDeliveryAlerts } from "@/lib/agenda/notify";
 import { processFollowUpAlerts } from "@/lib/follow-up/process-alerts";
 
 /**
@@ -186,6 +186,14 @@ export async function POST(request: NextRequest) {
     errors.push(`agenda non clôturés: ${e instanceof Error ? e.message : String(e)}`);
   }
 
+  let deliveryAlerts = 0;
+  try {
+    const r = await processDeliveryAlerts(now);
+    deliveryAlerts = r.notified;
+  } catch (e) {
+    errors.push(`livraisons: ${e instanceof Error ? e.message : String(e)}`);
+  }
+
   let followUpAlerts = 0;
   try {
     const r = await processFollowUpAlerts(now);
@@ -200,6 +208,7 @@ export async function POST(request: NextRequest) {
     deadlineNotified,
     agendaReminders,
     agendaUnclosed,
+    deliveryAlerts,
     followUpAlerts,
     errors,
     ranAt: now.toISOString(),

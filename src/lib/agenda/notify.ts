@@ -159,3 +159,95 @@ export async function processAgendaUnclosed(now = new Date()) {
   return { notified };
 }
 
+/**
+ * Livraisons passées non marquées reçues (TERMINE).
+ * ORANGE ~1h30 après l’heure prévue, ROUGE ~4h — avec lien message d’origine si présent.
+ */
+export async function processDeliveryAlerts(now = new Date()) {
+  const since = new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000);
+  const events = await prisma.agendaEvent.findMany({
+    where: {
+      type: "LIVRAISON",
+      status: { in: ["PLANIFIE", "CONFIRME"] },
+      startAt: { lt: now, gte: since },
+    },
+    include: {
+      project: { select: { title: true } },
+      followUpSheet: { select: { id: true, title: true } },
+    },
+    take: 120,
+    orderBy: { startAt: "asc" },
+  });
+
+  let notified = 0;
+  const stale = new Date(now.getTime() - 18 * 60 * 60 * 1000);
+
+  for (const event of events) {
+    const hoursLate = (now.getTime() - event.startAt.getTime()) / (1000 * 60 * 60);
+    if (hoursLate < 1.5) continue;
+
+    const level = hoursLate >= 4 ? "ROUGE" : "ORANGE";
+    const notifType = level === "ROUGE" ? "DELIVERY_MISSING" : "DELIVERY_CHECK";
+    const actionUrl = `/dashboard/agenda?event=${event.id}`;
+
+    const already = await prisma.notification.findFirst({
+      where: { type: notifType, actionUrl, createdAt: { gte: stale } },
+      select: { id: true },
+    });
+    if (already) continue;
+
+    let messageHref: string | null = null;
+    if (event.sourceMessageKind === "TASK" && event.sourceMessageId) {
+      const tm = await prisma.taskMessage.findUnique({
+        where: { id: event.sourceMessageId },
+        select: { taskId: true },
+      });
+      if (tm) {
+        messageHref = `/dashboard/messagerie?task=${tm.taskId}&messageId=${event.sourceMessageId}`;
+      }
+    }
+
+    const site = event.project?.title ? ` · ${event.project.title}` : "";
+    const title =
+      level === "ROUGE"
+        ? "Livraison non confirmée"
+        : "Livraison à vérifier";
+    const message = `« ${event.title} » prévue ${event.startAt.toLocaleString("fr-FR", {
+      dateStyle: "short",
+      timeStyle: "short",
+    })}${site}. Toujours pas marquée reçue (${Math.round(hoursLate)} h).${
+      messageHref ? " Voir le message fournisseur." : ""
+    }`;
+
+    const targets = new Set<string>([event.createdById, event.ownerUserId]);
+    if (event.responsibleId) targets.add(event.responsibleId);
+
+    for (const userId of targets) {
+      await createNotification({
+        userId,
+        type: notifType,
+        title,
+        message,
+        actionUrl: messageHref || (event.followUpSheet
+          ? `/dashboard/fiches-suivi/${event.followUpSheet.id}`
+          : actionUrl),
+      });
+      notified += 1;
+    }
+
+    if (event.followUpSheetId && hoursLate >= 1.5) {
+      await prisma.followUpSheet.update({
+        where: { id: event.followUpSheetId },
+        data: {
+          nextAction: `Vérifier réception : ${event.title}`,
+          nextActionAt: now,
+          nextActionDone: false,
+          urgencyOverride: level === "ROUGE" ? "CRITIQUE" : "URGENT",
+        },
+      }).catch(() => {});
+    }
+  }
+
+  return { notified };
+}
+

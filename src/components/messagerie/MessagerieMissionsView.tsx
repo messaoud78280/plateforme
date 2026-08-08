@@ -7,6 +7,8 @@ import { DeleteTaskButton } from "@/components/tasks/DeleteTaskButton";
 import { documentDownloadHref } from "@/lib/documents/download-url";
 import { SignedFileLink } from "@/components/files/SignedFileLink";
 import { MessageBeworkActions } from "@/components/messagerie/MessageBeworkActions";
+import { ConversationDossierPanel } from "@/components/messagerie/ConversationDossierPanel";
+import { badgeIcon } from "@/lib/messagerie/message-links";
 
 const STATUS_LABELS: Record<string, string> = {
   NOUVEAU: "Nouvelle",
@@ -25,6 +27,7 @@ type TaskMessageItem = {
   read: boolean;
   isInternal: boolean;
   kind?: string;
+  linkedBadges?: string[];
   createdAt: string;
   sender: { id: string; name: string };
   receiver: { id: string; name: string };
@@ -883,7 +886,13 @@ export function MessagerieMissionsView({
             <div className="shrink-0 border-b border-slate-200 bg-white px-4 py-3">
               <div className="flex items-start justify-between gap-3">
                 <h3 className="min-w-0 flex-1 truncate font-semibold text-slate-800">{selectedMission.title}</h3>
-                <DeleteTaskButton taskId={selectedTaskId} />
+                <div className="flex shrink-0 items-center gap-2">
+                  <ConversationDossierPanel
+                    taskId={selectedTaskId}
+                    projectId={selectedMission.projectId}
+                  />
+                  <DeleteTaskButton taskId={selectedTaskId} />
+                </div>
               </div>
               <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-slate-600">
                 <span>Client : {selectedMission.client.name}</span>
@@ -951,7 +960,34 @@ export function MessagerieMissionsView({
                               content={m.content}
                               isMe={isMe}
                               agents={agents}
+                              initialBadges={m.linkedBadges}
+                              onLinked={(badge) => {
+                                setMessages((prev) =>
+                                  prev.map((x) =>
+                                    x.id === m.id
+                                      ? {
+                                          ...x,
+                                          linkedBadges: Array.from(
+                                            new Set([...(x.linkedBadges ?? []), badge]),
+                                          ),
+                                        }
+                                      : x,
+                                  ),
+                                );
+                              }}
                             />
+                          ) : null}
+                          {(m.linkedBadges?.length ?? 0) > 0 ? (
+                            <div className={`mt-0.5 flex flex-wrap gap-1 ${isMe ? "justify-end" : ""}`}>
+                              {m.linkedBadges!.map((b) => (
+                                <span
+                                  key={b}
+                                  className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800"
+                                >
+                                  {badgeIcon(b)} {b}
+                                </span>
+                              ))}
+                            </div>
                           ) : null}
                           <p className="mt-1 text-xs text-slate-400">{formatMessageTime(m.createdAt)}</p>
                         </div>

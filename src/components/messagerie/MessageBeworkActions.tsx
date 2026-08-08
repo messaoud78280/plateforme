@@ -10,6 +10,7 @@ type Props = {
   content: string;
   isMe?: boolean;
   agents?: { id: string; name: string }[];
+  initialBadges?: string[];
   onLinked?: (badge: string) => void;
 };
 
@@ -19,6 +20,7 @@ export function MessageBeworkActions({
   content,
   isMe,
   agents = [],
+  initialBadges = [],
   onLinked,
 }: Props) {
   const router = useRouter();
@@ -37,7 +39,9 @@ export function MessageBeworkActions({
   const [rappelOpen, setRappelOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
   const [assigneeId, setAssigneeId] = useState(agents[0]?.id ?? "");
-  const [msg, setMsg] = useState<string | null>(null);
+  const [msg, setMsg] = useState<string | null>(
+    initialBadges[0] ? `✓ ${initialBadges[0]}` : null,
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -89,6 +93,7 @@ export function MessageBeworkActions({
       setOpen(false);
       setPreview(null);
       setRappelOpen(false);
+      setAssignOpen(false);
       setMsg(data.badge ? `✓ ${data.badge}` : "OK");
       onLinked?.(data.badge || "Traité");
       router.refresh();

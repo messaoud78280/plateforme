@@ -9,6 +9,7 @@ import {
   isStaffAgent,
   taskMessageVisibilityWhere,
 } from "@/lib/messaging/access";
+import { badgeFromMeta } from "@/lib/messagerie/message-links";
 
 /** GET /api/tasks/[id]/messages — Messages de la tâche (filtrés par participant). */
 export async function GET(
@@ -45,7 +46,36 @@ export async function GET(
       orderBy: { createdAt: "asc" },
     });
 
-    return NextResponse.json(messages);
+    const ids = messages.map((m) => m.id);
+    const links =
+      ids.length > 0
+        ? await prisma.messageAction.findMany({
+            where: {
+              sourceMessageKind: "TASK",
+              sourceMessageId: { in: ids },
+            },
+            select: { sourceMessageId: true, type: true, metaJson: true, status: true },
+            take: 200,
+          })
+        : [];
+
+    const badgesByMessage: Record<string, string[]> = {};
+    for (const l of links) {
+      if (l.type === "LINK" || l.status === "OPEN") {
+        const badge = badgeFromMeta(l.metaJson, l.type);
+        if (!badgesByMessage[l.sourceMessageId]) badgesByMessage[l.sourceMessageId] = [];
+        if (!badgesByMessage[l.sourceMessageId]!.includes(badge)) {
+          badgesByMessage[l.sourceMessageId]!.push(badge);
+        }
+      }
+    }
+
+    return NextResponse.json(
+      messages.map((m) => ({
+        ...m,
+        linkedBadges: badgesByMessage[m.id] ?? [],
+      })),
+    );
   } catch (e) {
     console.error(e);
     return NextResponse.json(

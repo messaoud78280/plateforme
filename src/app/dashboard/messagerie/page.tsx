@@ -3,8 +3,6 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { MessagerieMissionsView } from "@/components/messagerie/MessagerieMissionsView";
-import { BackLink } from "@/components/ui/BackLink";
-import { PageHeader } from "@/components/ui/PageHeader";
 
 export default async function MessageriePage() {
   const session = await getServerSession(authOptions);
@@ -54,14 +52,7 @@ export default async function MessageriePage() {
   const canChangeStatus = isManager || isAgent;
 
   return (
-    <div className="space-y-6">
-      <BackLink href="/dashboard">Tableau de bord</BackLink>
-      <PageHeader
-        eyebrow="Échanges chantier"
-        title="Messagerie"
-        description="Discutez comme dans WhatsApp — transformez un message en action BeWork quand c’est important."
-      />
-
+    <div className="-mx-4 -mb-6 -mt-2 flex h-[calc(100dvh-3.5rem)] min-h-[520px] flex-col overflow-hidden bg-[#111b21] sm:-mx-6 lg:h-[calc(100dvh-4rem)]">
       <MessagerieMissionsView
         sessionUserId={session.user.id}
         isAgence={isManager}

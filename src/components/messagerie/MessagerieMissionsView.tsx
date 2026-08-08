@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, type CSSProperties } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { DeleteTaskButton } from "@/components/tasks/DeleteTaskButton";
@@ -9,6 +9,7 @@ import { SignedFileLink } from "@/components/files/SignedFileLink";
 import { MessageBeworkActions } from "@/components/messagerie/MessageBeworkActions";
 import { ConversationDossierPanel } from "@/components/messagerie/ConversationDossierPanel";
 import { badgeIcon } from "@/lib/messagerie/message-links";
+import { WA_CHAT_BG, waBubbleTime, waListTime } from "@/components/messagerie/wa-theme";
 
 const STATUS_LABELS: Record<string, string> = {
   NOUVEAU: "Nouvelle",
@@ -77,57 +78,73 @@ const NAV_ITEMS: { id: FilterId; label: string }[] = [
 ];
 
 function railIcon(id: FilterId) {
+  const common = "h-6 w-6";
   switch (id) {
     case "inbox":
-      return "💬";
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
+        </svg>
+      );
     case "messages-directs":
-      return "👤";
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+        </svg>
+      );
     case "envoyer":
-      return "✏️";
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="currentColor">
+          <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+        </svg>
+      );
     case "mes-missions":
-      return "📋";
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.81-1h12l.94 1H5.12z" />
+        </svg>
+      );
     case "en-attente-client":
-      return "⏳";
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="currentColor">
+          <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
+        </svg>
+      );
     case "en-cours":
-      return "▶️";
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="currentColor">
+          <path d="M8 5v14l11-7z" />
+        </svg>
+      );
     case "terminees":
-      return "✅";
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+        </svg>
+      );
     default:
-      return "•";
+      return <span>•</span>;
   }
 }
 
 function formatRelativeTime(d: string) {
-  const date = new Date(d);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMin = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-  if (diffMin < 1) return "À l'instant";
-  if (diffMin < 60) return `il y a ${diffMin} min`;
-  if (diffHours < 24) return `il y a ${diffHours}h`;
-  if (diffDays < 7) return `il y a ${diffDays} j`;
-  return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+  return waListTime(d);
 }
 
 function formatMessageTime(d: string) {
-  const date = new Date(d);
-  const now = new Date();
-  const isToday = date.toDateString() === now.toDateString();
-  if (isToday) return date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
-  return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  return waBubbleTime(d);
 }
 
-function Avatar({ name, size = "md" }: { name: string; size?: "sm" | "md" }) {
+function Avatar({ name, size = "md" }: { name: string; size?: "sm" | "md" | "lg" }) {
   const initials = name
     .split(" ")
     .map((n) => n[0])
     .join("")
     .toUpperCase()
     .slice(0, 2);
-  const dim = size === "sm" ? "h-10 w-10 text-[11px]" : "h-11 w-11 text-xs";
-  const hues = ["bg-[#00a884]", "bg-[#027eb5]", "bg-[#7d4cdb]", "bg-[#e56717]", "bg-[#128c7e]"];
+  const dim =
+    size === "lg" ? "h-12 w-12 text-sm" : size === "sm" ? "h-12 w-12 text-[13px]" : "h-10 w-10 text-xs";
+  const hues = ["bg-[#00a884]", "bg-[#027eb5]", "bg-[#7d4cdb]", "bg-[#e56717]", "bg-[#128c7e]", "bg-[#d3396d]"];
   const hue = hues[(name.charCodeAt(0) + name.length) % hues.length];
   return (
     <div
@@ -137,12 +154,6 @@ function Avatar({ name, size = "md" }: { name: string; size?: "sm" | "md" }) {
     </div>
   );
 }
-
-/** Fond type WhatsApp (motif discret, sans image externe). */
-const CHAT_BG_STYLE: CSSProperties = {
-  backgroundColor: "#efeae2",
-  backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23d4cfc7' fill-opacity='0.35'%3E%3Ccircle cx='8' cy='8' r='1.2'/%3E%3Ccircle cx='32' cy='22' r='1'/%3E%3Ccircle cx='48' cy='40' r='1.3'/%3E%3Ccircle cx='18' cy='48' r='1'/%3E%3C/g%3E%3C/svg%3E")`,
-};
 
 interface MessagerieMissionsViewProps {
   sessionUserId: string;
@@ -569,7 +580,7 @@ export function MessagerieMissionsView({
 
   if (loading) {
     return (
-      <div className="flex h-[calc(100vh-12rem)] items-center justify-center rounded-xl border border-[#d1d7db] bg-[#f0f2f5]">
+      <div className="flex h-full items-center justify-center bg-[#f0f2f5]">
         <p className="text-[#667781]">Chargement…</p>
       </div>
     );
@@ -581,20 +592,19 @@ export function MessagerieMissionsView({
       type="button"
       title={label}
       onClick={() => setFilter(id)}
-      className={`flex w-full flex-col items-center gap-0.5 rounded-lg px-1 py-2 text-[9px] font-medium transition ${
-        active ? "bg-[#00a884]/15 text-[#008069]" : "text-[#54656f] hover:bg-black/5"
+      className={`flex h-12 w-12 items-center justify-center rounded-full transition ${
+        active ? "bg-[#00a884]/20 text-[#008069]" : "text-[#54656f] hover:bg-black/5"
       }`}
     >
-      <span className="text-base leading-none">{railIcon(id)}</span>
-      <span className="max-w-[52px] truncate">{label.split(" ")[0]}</span>
+      {railIcon(id)}
     </button>
   );
 
   return (
-    <div className="flex h-[calc(100vh-12rem)] overflow-hidden rounded-xl border border-[#d1d7db] bg-[#f0f2f5] shadow-sm">
-      {/* Rail type WhatsApp */}
-      <aside className="flex w-[58px] shrink-0 flex-col items-center border-r border-[#d1d7db] bg-[#f0f2f5] py-2">
-        <div className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-1">
+    <div className="mx-auto flex h-full w-full max-w-[1600px] overflow-hidden bg-[#f0f2f5] shadow-2xl">
+      {/* Rail icônes — comme WhatsApp */}
+      <aside className="flex w-[59px] shrink-0 flex-col items-center border-r border-[#d1d7db] bg-[#f0f2f5] py-3">
+        <div className="flex flex-1 flex-col items-center gap-1 overflow-y-auto">
           {navItems.map((item) => railBtn(item.id, item.label, filter === item.id))}
         </div>
       </aside>
@@ -729,15 +739,22 @@ export function MessagerieMissionsView({
           <div className="flex min-w-0 flex-1 flex-col">
             {selectedDirectContactId && selectedDirectContact ? (
               <>
-                <div className="shrink-0 border-b border-slate-200 bg-white px-4 py-3">
-                  <h3 className="font-semibold text-slate-800">
-                    {(selectedDirectContact as { name?: string } | undefined)?.name ?? "Contact"}
-                  </h3>
+                <div className="flex shrink-0 items-center gap-3 border-b border-[#d1d7db] bg-[#f0f2f5] px-4 py-2">
+                  <Avatar
+                    name={(selectedDirectContact as { name?: string } | undefined)?.name ?? "Contact"}
+                    size="sm"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate text-[16px] font-medium text-[#111b21]">
+                      {(selectedDirectContact as { name?: string } | undefined)?.name ?? "Contact"}
+                    </h3>
+                    <p className="text-[13px] text-[#667781]">Message direct</p>
+                  </div>
                 </div>
-                <div className="flex-1 overflow-y-auto p-4">
-                  <div className="space-y-4">
+                <div className="flex-1 overflow-y-auto px-4 py-3" style={WA_CHAT_BG}>
+                  <div className="space-y-1.5">
                     {loadingDirectThread ? (
-                      <p className="text-sm text-slate-500">Chargement de la conversation…</p>
+                      <p className="text-sm text-[#667781]">Chargement…</p>
                     ) : null}
                     {selectedDirectThread.map((m) => {
                       const isMe = m.sender.id === sessionUserId;
@@ -745,10 +762,9 @@ export function MessagerieMissionsView({
                         <div
                           key={m.id}
                           id={`msg-${m.id}`}
-                          className={`flex gap-3 ${isMe ? "flex-row-reverse" : ""}`}
+                          className={`flex ${isMe ? "justify-end" : "justify-start"}`}
                         >
-                          <Avatar name={m.sender.name} />
-                          <div className={`flex max-w-[80%] flex-col ${isMe ? "items-end" : "items-start"}`}>
+                          <div className={`flex max-w-[75%] flex-col ${isMe ? "items-end" : "items-start"}`}>
                             <div
                               className={`rounded-lg px-2.5 py-1.5 shadow-sm ${
                                 isMe ? "rounded-tr-sm bg-[#d9fdd3] text-[#111b21]" : "rounded-tl-sm bg-white text-[#111b21]"
@@ -789,7 +805,7 @@ export function MessagerieMissionsView({
                     })}
                   </div>
                 </div>
-                <div className="shrink-0 border-t border-slate-200 bg-slate-50/60 p-4">
+                <div className="shrink-0 bg-[#f0f2f5] px-3 py-2.5">
                   <form onSubmit={handleReplyDirect} className="space-y-2">
                     <input
                       id={replyFileId}
@@ -802,47 +818,49 @@ export function MessagerieMissionsView({
                     {replyAttachments.length > 0 && (
                       <div className="flex flex-wrap gap-2">
                         {replyAttachments.map((a, i) => (
-                          <span key={i} className="flex items-center gap-1 rounded bg-slate-100 px-2 py-1 text-xs text-slate-700">
+                          <span key={i} className="flex items-center gap-1 rounded-full bg-white px-2 py-1 text-xs text-[#111b21]">
                             {a.name}
-                            <button type="button" onClick={() => setReplyAttachments((p) => p.filter((_, j) => j !== i))} className="text-slate-500 hover:text-red-600">×</button>
+                            <button type="button" onClick={() => setReplyAttachments((p) => p.filter((_, j) => j !== i))} className="text-[#667781] hover:text-red-600">×</button>
                           </span>
                         ))}
                       </div>
                     )}
-                    <div className="flex gap-2">
+                    <div className="flex items-end gap-2">
+                      <label
+                        htmlFor={replyFileId}
+                        className={`mb-0.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-[#54656f] hover:bg-[#e9edef] ${(uploadingAttach || sendingReply) ? "pointer-events-none opacity-50" : ""}`}
+                        title="Joindre"
+                      >
+                        <svg className="h-7 w-7" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                        </svg>
+                      </label>
                       <textarea
                         value={replyDirectContent}
                         onChange={(e) => setReplyDirectContent(e.target.value)}
-                        placeholder="Répondre…"
-                        rows={2}
+                        placeholder="Tapez un message"
+                        rows={1}
                         disabled={sendingReply}
-                        className="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-60"
+                        className="min-h-[44px] max-h-32 min-w-0 flex-1 resize-none rounded-[24px] border-0 bg-white px-4 py-3 text-[15px] text-[#111b21] placeholder:text-[#667781] focus:outline-none disabled:opacity-60"
                       />
-                      <div className="flex shrink-0 flex-col gap-2">
-                        <label
-                          htmlFor={replyFileId}
-                          className={`cursor-pointer rounded-lg border border-slate-300 bg-white p-2.5 text-slate-600 hover:bg-slate-50 ${(uploadingAttach || sendingReply) ? "pointer-events-none opacity-50" : ""}`}
-                          title="Joindre un fichier"
-                        >
-                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
-                        </label>
-                        <button
-                          type="submit"
-                          disabled={sendingReply || (!replyDirectContent.trim() && replyAttachments.length === 0)}
-                      className="shrink-0 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-                    >
-                            {sendingReply ? "Envoi…" : "Envoyer"}
-                        </button>
-                      </div>
+                      <button
+                        type="submit"
+                        disabled={sendingReply || (!replyDirectContent.trim() && replyAttachments.length === 0)}
+                        className="mb-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#00a884] text-white hover:bg-[#008f72] disabled:opacity-40"
+                      >
+                        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                        </svg>
+                      </button>
                     </div>
                   </form>
                 </div>
               </>
             ) : (
-              <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
-                <p className="text-sm font-medium text-slate-700">Sélectionnez une conversation</p>
-                <p className="mt-2 max-w-sm text-sm text-slate-500">
-                  Cliquez sur une conversation dans la liste à gauche pour afficher les messages et répondre.
+              <div className="flex flex-1 flex-col items-center justify-center bg-[#f0f2f5] p-8 text-center">
+                <p className="text-lg font-medium text-[#41525d]">BeWork Messagerie</p>
+                <p className="mt-2 max-w-sm text-sm text-[#667781]">
+                  Sélectionnez une conversation à gauche.
                 </p>
               </div>
             )}
@@ -850,18 +868,37 @@ export function MessagerieMissionsView({
         </>
       ) : (
       <>
-      <aside className="flex w-[360px] shrink-0 flex-col border-r border-[#d1d7db] bg-white">
+      <aside className="flex w-[min(100%,420px)] shrink-0 flex-col border-r border-[#d1d7db] bg-white">
         <div className="border-b border-[#e9edef] px-4 pb-3 pt-3">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-[#111b21]">Discussions</h2>
+            <h2 className="text-[22px] font-bold tracking-tight text-[#111b21]">Discussions</h2>
+            <button
+              type="button"
+              title="Nouvelle discussion"
+              onClick={() => setFilter(showEnvoyerTab ? "envoyer" : "inbox")}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-[#54656f] hover:bg-[#f0f2f5]"
+            >
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
+              </svg>
+            </button>
           </div>
-          <input
-            type="search"
-            value={listSearch}
-            onChange={(e) => setListSearch(e.target.value)}
-            placeholder="Rechercher"
-            className="w-full rounded-lg border-0 bg-[#f0f2f5] px-3 py-2 text-sm text-[#111b21] placeholder:text-[#667781] focus:outline-none focus:ring-1 focus:ring-[#00a884]"
-          />
+          <div className="relative">
+            <svg
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#54656f]"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+            </svg>
+            <input
+              type="search"
+              value={listSearch}
+              onChange={(e) => setListSearch(e.target.value)}
+              placeholder="Rechercher"
+              className="w-full rounded-lg border-0 bg-[#f0f2f5] py-2 pl-10 pr-3 text-[14px] text-[#111b21] placeholder:text-[#667781] focus:outline-none focus:ring-1 focus:ring-[#00a884]"
+            />
+          </div>
         </div>
         <ul className="flex-1 overflow-y-auto">
           {filteredMissions.length === 0 ? (
@@ -933,35 +970,43 @@ export function MessagerieMissionsView({
       <div className="flex min-w-0 flex-1 flex-col">
         {selectedMission ? (
           <>
-            <div className="flex shrink-0 items-center gap-3 border-b border-[#d1d7db] bg-[#f0f2f5] px-4 py-2.5">
+            <div className="flex shrink-0 items-center gap-3 border-b border-[#d1d7db] bg-[#f0f2f5] px-4 py-2">
               <Avatar name={selectedMission.client.name || selectedMission.title} size="sm" />
               <div className="min-w-0 flex-1">
                 <h3 className="truncate text-[16px] font-medium text-[#111b21]">{selectedMission.title}</h3>
-                <p className="truncate text-[12px] text-[#667781]">
+                <p className="truncate text-[13px] text-[#667781]">
                   {selectedMission.client.name}
                   {selectedMission.assignedTo ? ` · ${selectedMission.assignedTo.name}` : ""}
                   {" · "}
                   {STATUS_LABELS[selectedMission.status] ?? selectedMission.status}
                 </p>
               </div>
-              <div className="flex shrink-0 items-center gap-2">
-                {selectedMission.projectId ? (
-                  <Link
-                    href={`/dashboard/projets/${selectedMission.projectId}`}
-                    className="hidden text-xs font-semibold text-[#00a884] hover:underline sm:inline"
-                  >
-                    Dossier chantier
-                  </Link>
-                ) : null}
+              <div className="flex shrink-0 items-center gap-1 text-[#54656f]">
                 <ConversationDossierPanel
                   taskId={selectedTaskId}
                   projectId={selectedMission.projectId}
                 />
+                {selectedMission.projectId ? (
+                  <Link
+                    href={`/dashboard/projets/${selectedMission.projectId}`}
+                    className="hidden rounded-full p-2 hover:bg-[#e9edef] sm:inline-flex"
+                    title="Dossier chantier"
+                  >
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
+                    </svg>
+                  </Link>
+                ) : null}
+                <button type="button" className="rounded-full p-2 hover:bg-[#e9edef]" title="Rechercher" tabIndex={-1}>
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                  </svg>
+                </button>
                 <DeleteTaskButton taskId={selectedTaskId} />
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-4 py-3" style={CHAT_BG_STYLE}>
+            <div className="flex-1 overflow-y-auto px-4 py-3" style={WA_CHAT_BG}>
               {loadingMessages ? (
                 <p className="text-sm text-[#667781]">Chargement…</p>
               ) : (
@@ -1075,7 +1120,7 @@ export function MessagerieMissionsView({
               )}
             </div>
 
-            <div className="shrink-0 bg-[#f0f2f5] px-3 py-2">
+            <div className="shrink-0 bg-[#f0f2f5] px-3 py-2.5">
               {(isAgence || isAgent) && (
                 <label className="mb-1.5 flex items-center gap-2 px-1 text-xs text-[#667781]">
                   <input
@@ -1090,36 +1135,52 @@ export function MessagerieMissionsView({
               <form onSubmit={handleSend} className="flex items-end gap-2">
                 <Link
                   href={`/dashboard/taches/${selectedTaskId}#documents-section`}
-                  className="mb-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-2xl text-[#54656f] hover:bg-[#e9edef]"
+                  className="mb-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#54656f] hover:bg-[#e9edef]"
                   title="Joindre"
                 >
-                  +
+                  <svg className="h-7 w-7" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                  </svg>
                 </Link>
-                <textarea
-                  value={sendContent}
-                  onChange={(e) => setSendContent(e.target.value)}
-                  placeholder="Tapez un message"
-                  rows={1}
-                  className="min-h-[42px] max-h-28 min-w-0 flex-1 resize-none rounded-3xl border-0 bg-white px-4 py-2.5 text-[15px] text-[#111b21] placeholder:text-[#667781] focus:outline-none focus:ring-1 focus:ring-[#00a884]"
-                  disabled={sending}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      if (sendContent.trim() && !sending) {
-                        void (e.currentTarget.form as HTMLFormElement | null)?.requestSubmit();
+                <div className="relative min-w-0 flex-1">
+                  <textarea
+                    value={sendContent}
+                    onChange={(e) => setSendContent(e.target.value)}
+                    placeholder="Tapez un message"
+                    rows={1}
+                    className="min-h-[44px] max-h-32 w-full resize-none rounded-[24px] border-0 bg-white py-3 pl-4 pr-10 text-[15px] text-[#111b21] placeholder:text-[#667781] focus:outline-none"
+                    disabled={sending}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        if (sendContent.trim() && !sending) {
+                          void (e.currentTarget.form as HTMLFormElement | null)?.requestSubmit();
+                        }
                       }
-                    }
-                  }}
-                />
+                    }}
+                  />
+                  <span
+                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xl text-[#54656f]"
+                    aria-hidden
+                  >
+                    🙂
+                  </span>
+                </div>
                 <button
                   type="submit"
                   disabled={sending || !sendContent.trim()}
-                  className="mb-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#00a884] text-white hover:bg-[#008f72] disabled:opacity-40"
-                  title="Envoyer"
+                  className="mb-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#00a884] text-white hover:bg-[#008f72] disabled:bg-[#00a884]/40"
+                  title={sendContent.trim() ? "Envoyer" : "Message"}
                 >
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                  </svg>
+                  {sendContent.trim() ? (
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                    </svg>
+                  ) : (
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z" />
+                    </svg>
+                  )}
                 </button>
               </form>
 

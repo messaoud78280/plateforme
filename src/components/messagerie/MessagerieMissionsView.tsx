@@ -57,6 +57,7 @@ type DirectMessageItem = {
   id: string;
   content: string;
   read: boolean;
+  senderId?: string;
   receiverId?: string;
   attachmentsJson?: { name: string; fileUrl: string; fileSize: number; mimeType?: string }[] | null;
   createdAt: string;
@@ -334,9 +335,18 @@ export function MessagerieMissionsView({
     let cancelled = false;
     setMessages([]);
     setLoadingMessages(true);
-    fetch(`/api/tasks/${selectedTaskId}/messages`)
-      .then((r) => (r.ok ? r.json() : []))
-      .then((data) => {
+
+    // Optimistic WhatsApp : badge vert disparaît dès l’ouverture
+    setMissions((prev) =>
+      prev.map((m) => (m.id === selectedTaskId ? { ...m, unreadCount: 0 } : m)),
+    );
+
+    const taskId = selectedTaskId;
+    Promise.all([
+      fetch(`/api/tasks/${taskId}/messages`).then((r) => (r.ok ? r.json() : [])),
+      fetch(`/api/tasks/${taskId}/messages/read`, { method: "POST" }).catch(() => null),
+    ])
+      .then(([data]) => {
         if (cancelled) return;
         setMessages(Array.isArray(data) ? data : []);
       })
@@ -359,20 +369,49 @@ export function MessagerieMissionsView({
   // Marquer comme lus les messages directs du contact sélectionné
   useEffect(() => {
     if (filter !== "messages-directs" || !selectedDirectContactId) return;
+    const contactId = selectedDirectContactId;
     fetch("/api/messages/direct/read", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ otherUserId: selectedDirectContactId }),
+      body: JSON.stringify({ otherUserId: contactId }),
     })
       .then((r) => {
         if (r.ok) return refreshDirectIndex();
-        return [];
+        return null;
       })
       .then((data) => {
-        if (Array.isArray(data)) setDirectMessages(data);
+        if (Array.isArray(data)) {
+          setDirectMessages(
+            data.map((m) =>
+              (m.receiverId ?? m.receiver.id) === sessionUserId &&
+              (m.senderId ?? m.sender.id) === contactId
+                ? { ...m, read: true }
+                : m,
+            ),
+          );
+        } else {
+          // Optimistic si refresh échoue
+          setDirectMessages((prev) =>
+            prev.map((m) =>
+              (m.receiverId ?? m.receiver.id) === sessionUserId &&
+              (m.senderId ?? m.sender.id) === contactId
+                ? { ...m, read: true }
+                : m,
+            ),
+          );
+        }
       })
-      .catch(() => {});
-  }, [filter, selectedDirectContactId]);
+      .catch(() => {
+        setDirectMessages((prev) =>
+          prev.map((m) =>
+            (m.receiverId ?? m.receiver.id) === sessionUserId &&
+            (m.senderId ?? m.sender.id) === contactId
+              ? { ...m, read: true }
+              : m,
+          ),
+        );
+      });
+  }, [filter, selectedDirectContactId, sessionUserId]);
 
   // Deep-link ?task=&messageId= / ?tab=messages-directs&with=&messageId=
   useEffect(() => {
@@ -1047,12 +1086,23 @@ export function MessagerieMissionsView({
                         {m.lastMessage ? formatRelativeTime(m.lastMessage.createdAt) : ""}
                       </span>
                     </div>
-                    <p className="truncate text-[13px] text-[#667781]">{m.client.name}</p>
+                    <p className="mt-0.5 truncate text-[13px] text-[#667781]">
+                      {m.assignedTo?.name
+                        ? `${m.assignedTo.name.split(" ")[0]} · `
+                        : ""}
+                      {STATUS_LABELS[m.status] ?? m.status}
+                    </p>
                     {m.lastMessage ? (
-                      <p className="mt-0.5 truncate text-[13px] text-[#667781]">
-                        {m.lastMessage.sender.id === sessionUserId ? "Vous : " : ""}
-                        {m.lastMessage.content.slice(0, 48)}
-                        {m.lastMessage.content.length > 48 ? "…" : ""}
+                      <p
+                        className={`mt-0.5 truncate text-[13px] ${
+                          m.unreadCount > 0 ? "font-semibold text-[#111b21]" : "text-[#667781]"
+                        }`}
+                      >
+                        {m.lastMessage.sender.id === sessionUserId
+                          ? "Vous : "
+                          : `${m.lastMessage.sender.name.split(/\s+/)[0] ?? ""} : `}
+                        {m.lastMessage.content.slice(0, 52)}
+                        {m.lastMessage.content.length > 52 ? "…" : ""}
                       </p>
                     ) : null}
                     <div className="mt-1 flex flex-wrap items-center gap-1.5">

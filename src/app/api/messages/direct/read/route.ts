@@ -11,8 +11,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
 
-  if (!isManagerRole(session.user.role) && !isStaffAgent(session.user.role)) {
-    return NextResponse.json({ error: "Réservé aux gérants et agents" }, { status: 403 });
+  // Client, agent et direction : même logique WhatsApp (ouvrir = lu)
+  const role = session.user.role;
+  const allowed =
+    isManagerRole(role) || isStaffAgent(role) || role === "CLIENT";
+  if (!allowed) {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
 
   try {

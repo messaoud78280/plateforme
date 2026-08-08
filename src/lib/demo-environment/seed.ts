@@ -800,8 +800,10 @@ export async function seedDemoDirectConversations(opts: {
   // Évite les doublons si on ré-enrichit sans clear complet
   const existing = await prisma.directMessage.count({
     where: {
-      OR: [{ senderId: clientId }, { receiverId: clientId }],
-      content: { contains: "[démo]" },
+      OR: [
+        { senderId: clientId, receiverId: { in: [sophieId, karimId, lauraId] } },
+        { receiverId: clientId, senderId: { in: [sophieId, karimId, lauraId] } },
+      ],
     },
   });
   if (existing > 0) return;
@@ -818,22 +820,21 @@ export async function seedDemoDirectConversations(opts: {
         senderId: sophieId,
         receiverId: clientId,
         content:
-          "[démo] Bonjour Marc, je suis Sophie (conductrice). On peut suivre Victor Hugo ici — photos et PDF bienvenus.",
+          "Bonjour Marc 👋 Sophie à l’agence. On peut suivre Victor Hugo ici — photos et PDF bienvenus.",
         read: false,
         createdAt: hoursAgo(26),
       },
       {
         senderId: clientId,
         receiverId: sophieId,
-        content: "[démo] Parfait Sophie. Je vous envoie les plans terrasse dès que le fournisseur répond.",
+        content: "Parfait Sophie. Je vous envoie les plans terrasse dès que le fournisseur répond.",
         read: true,
         createdAt: hoursAgo(24),
       },
       {
         senderId: sophieId,
         receiverId: clientId,
-        content:
-          "[démo] Reçu. Je relance Étanchéité Plus cet après-midi et je vous confirme la date de pose.",
+        content: "Reçu. Je relance Étanchéité Plus cet après-midi et je vous confirme la date de pose.",
         read: false,
         createdAt: hoursAgo(5),
       },
@@ -841,14 +842,14 @@ export async function seedDemoDirectConversations(opts: {
         senderId: karimId,
         receiverId: clientId,
         content:
-          "[démo] Karim — chantier République : nacelle OK pour jeudi. Besoin de votre validation accès livraison ?",
+          "Karim — chantier République : nacelle OK pour jeudi. Vous validez l’accès livraison côté cour ?",
         read: false,
         createdAt: hoursAgo(8),
       },
       {
         senderId: clientId,
         receiverId: karimId,
-        content: "[démo] Accès validé côté cour, 7h–16h. Merci Karim.",
+        content: "Accès validé côté cour, 7h–16h. Merci Karim.",
         read: true,
         createdAt: hoursAgo(6),
       },
@@ -856,15 +857,14 @@ export async function seedDemoDirectConversations(opts: {
         senderId: lauraId,
         receiverId: clientId,
         content:
-          "[démo] Laura (admin) — les BC-2026-043 et 038 sont prêts pour validation. Je reste dispo pour les pièces jointes.",
+          "Laura (admin) — BC membrane et isolant prêts pour validation. Dites-moi si je joins les BL.",
         read: false,
         createdAt: hoursAgo(3),
       },
       {
         senderId: lauraId,
         receiverId: clientId,
-        content:
-          "[démo] Pensez aussi à déposer le PV de réception partielle Alpha dans Documents quand vous l’aurez.",
+        content: "Pensez aussi au PV de réception partielle Alpha quand vous l’aurez 👍",
         read: false,
         createdAt: hoursAgo(1),
       },
@@ -899,19 +899,13 @@ export async function enrichDemoTaskThreads(opts: {
     const count = await prisma.taskMessage.count({ where: { taskId: t.id } });
     if (count >= 2) continue;
 
-    const marker = `[démo-thread-${t.id.slice(-6)}]`;
-    const already = await prisma.taskMessage.count({
-      where: { taskId: t.id, content: { contains: marker } },
-    });
-    if (already > 0) continue;
-
     await prisma.taskMessage.createMany({
       data: [
         {
           taskId: t.id,
           senderId: assignee,
           receiverId: clientId,
-          content: `${marker} Bonjour, je prends en charge « ${t.title} ». Écrivez-moi ici pour toute précision (texte, photo, PDF).`,
+          content: coherentOpener(t.title, assignee === sophieId ? "Sophie" : assignee === karimId ? "Karim" : "Laura"),
           kind: "USER",
           createdAt: daysFromNow(-4),
         },
@@ -919,13 +913,49 @@ export async function enrichDemoTaskThreads(opts: {
           taskId: t.id,
           senderId: clientId,
           receiverId: assignee,
-          content: `${marker} Merci, c’est noté. Je reste disponible si vous avez besoin d’un document.`,
+          content: coherentClientReply(t.title),
           kind: "USER",
           createdAt: daysFromNow(-3),
+          read: true,
         },
       ],
     });
   }
+}
+
+function coherentOpener(title: string, who: string): string {
+  if (title.includes("membrane") || title.includes("POINT.P") || title.includes("BC-2026-043")) {
+    return `Bonjour Marc, ${who} ici. Votre commande membrane est prête.\nLivraison possible mardi 7h30 sur Victor Hugo — vous validez ?`;
+  }
+  if (title.includes("Isolant") || title.includes("038")) {
+    return `Hello, livraison isolant prévue sous 48h. Je vous confirme le créneau dès réception du BL.`;
+  }
+  if (title.includes("029") || title.includes("Accessoires")) {
+    return `Petit point : accessoires relevés en retard côté fournisseur. Je propose un report — OK pour vous ?`;
+  }
+  if (title.includes("nacelle") || title.includes("République")) {
+    return `Nacelle République : devis reçu. Besoin de votre validation accès cour pour jeudi.`;
+  }
+  if (title.includes("compte rendu") || title.includes("visite")) {
+    return `CR visite Victor Hugo prêt. Vous pouvez le valider dès que vous avez 2 minutes.`;
+  }
+  if (title.includes("Relancer") || title.includes("plans terrasse")) {
+    return `Je suis sur la relance fournisseur pour les plans terrasse. Vous avez une date limite côté chantier ?`;
+  }
+  return `Bonjour, je prends en charge « ${title} ». Écrivez-moi ici pour toute précision (texte, photo, PDF).`;
+}
+
+function coherentClientReply(title: string): string {
+  if (title.includes("membrane") || title.includes("POINT.P") || title.includes("043")) {
+    return `Oui, mardi 7h30 sur Victor Hugo — aire livraison côté rue. Merci !`;
+  }
+  if (title.includes("nacelle") || title.includes("République")) {
+    return `Accès cour OK 7h–16h. Merci.`;
+  }
+  if (title.includes("Relancer") || title.includes("plans")) {
+    return `Idéalement avant la semaine prochaine, sinon on bloque la pose.`;
+  }
+  return `Merci, c’est noté. Je reste dispo si vous avez besoin d’un document.`;
 }
 
 /** Enrichit messagerie d’un client démo existant (sans tout réinitialiser). */
@@ -937,13 +967,18 @@ export async function enrichExistingDemoMessaging(clientId: string) {
 
   await prisma.directMessage.deleteMany({
     where: {
-      OR: [{ senderId: clientId }, { receiverId: clientId }],
-      content: { contains: "[démo]" },
+      OR: [
+        { senderId: clientId, receiverId: { in: [sophie, karim, laura] } },
+        { receiverId: clientId, senderId: { in: [sophie, karim, laura] } },
+      ],
     },
   });
 
   await seedDemoDirectConversations({ clientId, sophieId: sophie, karimId: karim, lauraId: laura });
   await enrichDemoTaskThreads({ clientId, sophieId: sophie, karimId: karim, lauraId: laura });
+
+  // Remplace les vieux messages « [démo-thread-…] » par des échanges naturels
+  await rewriteDemoTaskConversations({ clientId, sophieId: sophie, karimId: karim, lauraId: laura });
 
   return {
     staff: staff.map((s) => ({ name: s.name, id: s.id })),
@@ -954,6 +989,118 @@ export async function enrichExistingDemoMessaging(clientId: string) {
       where: { OR: [{ senderId: clientId }, { receiverId: clientId }] },
     }),
   };
+}
+
+/** Réécrit les fils mission démo (cohérence chantier, esprit WhatsApp). */
+export async function rewriteDemoTaskConversations(opts: {
+  clientId: string;
+  sophieId: string;
+  karimId: string;
+  lauraId: string;
+}) {
+  const { clientId, sophieId, karimId, lauraId } = opts;
+  const tasks = await prisma.task.findMany({
+    where: { clientId },
+    select: { id: true, title: true, assignedToId: true },
+  });
+
+  for (const t of tasks) {
+    const assignee =
+      t.assignedToId ??
+      (t.title.includes("République") || t.title.includes("nacelle")
+        ? karimId
+        : t.title.includes("BC-") || t.title.includes("POINT.P")
+          ? lauraId
+          : sophieId);
+
+    await prisma.taskMessage.deleteMany({ where: { taskId: t.id } });
+
+    const who =
+      assignee === sophieId ? "Sophie" : assignee === karimId ? "Karim" : "Laura";
+
+    const thread = demoThreadForTitle(t.title, who);
+    await prisma.taskMessage.createMany({
+      data: thread.map((msg, i) => ({
+        taskId: t.id,
+        senderId: msg.fromClient ? clientId : assignee,
+        receiverId: msg.fromClient ? assignee : clientId,
+        content: msg.content,
+        kind: "USER" as const,
+        read: msg.fromClient ? true : false,
+        createdAt: daysFromNow(-(thread.length - i)),
+      })),
+    });
+  }
+}
+
+function demoThreadForTitle(
+  title: string,
+  who: string,
+): { fromClient: boolean; content: string }[] {
+  if (title.includes("membrane") || title.includes("POINT.P") || title.includes("043")) {
+    return [
+      {
+        fromClient: false,
+        content: `Bonjour Marc, ${who} à l’agence 👋\nVotre commande de 40 rouleaux est prête.`,
+      },
+      {
+        fromClient: false,
+        content: `Livraison possible mardi 7h30 sur Victor Hugo — aire livraison.\nVous validez ?`,
+      },
+      {
+        fromClient: true,
+        content: `Oui c’est bon pour mardi 7h30.\nOn prévoit quelqu’un sur place.`,
+      },
+      {
+        fromClient: false,
+        content: `Parfait, je confirme au fournisseur et je vous envoie le BL dès qu’il est dispo.`,
+      },
+    ];
+  }
+  if (title.includes("Isolant") || title.includes("038")) {
+    return [
+      { fromClient: false, content: `Isolant thermique : départ usine aujourd’hui.` },
+      { fromClient: false, content: `Livraison sous 48h sur Victor Hugo. Je vous confirme le créneau demain matin.` },
+      { fromClient: true, content: `OK merci. Prévenez-moi dès que le BL est dispo.` },
+    ];
+  }
+  if (title.includes("029") || title.includes("Accessoires")) {
+    return [
+      { fromClient: false, content: `Accessoires relevés : le fournisseur annonce un retard.` },
+      { fromClient: false, content: `Je propose un report de 3 jours. Ça passe pour le planning ?` },
+      { fromClient: true, content: `Oui, reportez. Tenez-moi au courant dès confirmation.` },
+    ];
+  }
+  if (title.includes("nacelle") || title.includes("République")) {
+    return [
+      { fromClient: false, content: `Nacelle République : devis reçu, dispo jeudi.` },
+      { fromClient: false, content: `Besoin de votre validation accès cour (7h–16h).` },
+      { fromClient: true, content: `Accès cour validé 7h–16h. Merci Karim.` },
+      { fromClient: false, content: `Top, je bloque la réservation ✅` },
+    ];
+  }
+  if (title.includes("compte rendu") || title.includes("visite")) {
+    return [
+      { fromClient: false, content: `CR visite Victor Hugo prêt.` },
+      { fromClient: false, content: `Vous pouvez le valider quand vous avez 2 minutes — onglet Documents.` },
+      { fromClient: true, content: `Je regarde ça cet après-midi. Merci Sophie.` },
+    ];
+  }
+  if (title.includes("Relancer") || title.includes("plans terrasse")) {
+    return [
+      { fromClient: false, content: `Je suis sur la relance fournisseur pour les plans terrasse.` },
+      { fromClient: false, content: `Vous avez une date limite côté chantier ?` },
+      { fromClient: true, content: `Idéalement avant la semaine prochaine — sinon on bloque la pose.` },
+      { fromClient: false, content: `Compris. Je relance aujourd’hui et je vous joins le mail fournisseur.` },
+    ];
+  }
+  return [
+    {
+      fromClient: false,
+      content: `Bonjour, je prends en charge « ${title} ».\nÉcrivez-moi ici pour toute précision (texte, photo, PDF).`,
+    },
+    { fromClient: true, content: `Merci, c’est noté. Je reste dispo si besoin.` },
+  ];
 }
 
 /** Supprime uniquement les données métier du tenant démo (pas le User / Organization / DemoEnvironment). */

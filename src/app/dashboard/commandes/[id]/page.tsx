@@ -9,6 +9,8 @@ import {
 } from "@/lib/purchase-orders/access";
 import { purchaseOrderDetailInclude } from "@/lib/purchase-orders/service";
 import { sanitizeOrderForSupplier } from "@/lib/purchase-orders/supplier-collaboration";
+import { getPurchaseOrderReceivingState } from "@/lib/purchase-orders/receiving";
+import { canReceivePurchaseOrder } from "@/lib/purchase-orders/receiving";
 import { PurchaseOrderDetailClient } from "@/components/purchase-orders/PurchaseOrderDetailClient";
 
 export const dynamic = "force-dynamic";
@@ -54,12 +56,18 @@ export default async function CommandeDetailPage({
     ? sanitizeOrderForSupplier(order as unknown as Record<string, unknown>)
     : order;
   const serialized = JSON.parse(JSON.stringify(payload));
+  const receiving = await getPurchaseOrderReceivingState(order.id);
 
   return (
     <PurchaseOrderDetailClient
       order={serialized}
       canAct={isInternalPurchaseOrderActor(session.user)}
+      canReceive={
+        isInternalPurchaseOrderActor(session.user) &&
+        canReceivePurchaseOrder(session.user)
+      }
       isSupplierView={isSupplier}
+      receiving={receiving}
     />
   );
 }

@@ -183,11 +183,16 @@ export default async function ProjetDetailPage({
               id: true,
               number: true,
               subject: true,
+              status: true,
               externalOrganization: { select: { name: true, tradeName: true } },
               lines: {
-                take: 1,
                 orderBy: { sortOrder: "asc" },
-                select: { designation: true, quantity: true, unit: true },
+                select: {
+                  designation: true,
+                  quantity: true,
+                  unit: true,
+                  receivedQty: true,
+                },
               },
             },
           },
@@ -432,6 +437,7 @@ export default async function ProjetDetailPage({
               </p>
               {nextDelivery.purchaseOrder.lines[0] ? (
                 <p className="text-xs text-slate-600">
+                  {Number(nextDelivery.purchaseOrder.lines[0].receivedQty)} /{" "}
                   {Number(nextDelivery.purchaseOrder.lines[0].quantity)}{" "}
                   {nextDelivery.purchaseOrder.lines[0].unit}{" "}
                   {nextDelivery.purchaseOrder.lines[0].designation}
@@ -439,6 +445,17 @@ export default async function ProjetDetailPage({
               ) : (
                 <p className="text-xs text-slate-600">{nextDelivery.purchaseOrder.subject}</p>
               )}
+              {(() => {
+                const rem = nextDelivery.purchaseOrder.lines.reduce(
+                  (s, l) => s + Math.max(0, Number(l.quantity) - Number(l.receivedQty)),
+                  0,
+                );
+                return rem > 0 ? (
+                  <p className="mt-1 text-xs font-semibold text-amber-800">
+                    {rem} restant{rem > 1 ? "s" : ""} à livrer
+                  </p>
+                ) : null;
+              })()}
               <div className="mt-2 flex flex-wrap gap-3">
                 <Link
                   href={`/dashboard/commandes/${nextDelivery.purchaseOrder.id}`}
@@ -446,6 +463,16 @@ export default async function ProjetDetailPage({
                 >
                   Voir la commande →
                 </Link>
+                {["CONFIRMEE", "LIVRAISON_PROGRAMMEE", "PARTIELLEMENT_RECUE"].includes(
+                  nextDelivery.purchaseOrder.status,
+                ) ? (
+                  <Link
+                    href={`/dashboard/commandes/${nextDelivery.purchaseOrder.id}/reception`}
+                    className="rounded-md bg-[#1e3a5f] px-2.5 py-1 text-xs font-bold text-white"
+                  >
+                    Réceptionner
+                  </Link>
+                ) : null}
                 <Link
                   href={`/dashboard/agenda?event=${nextDelivery.id}`}
                   className="text-xs font-semibold text-[#1d4ed8] hover:underline"

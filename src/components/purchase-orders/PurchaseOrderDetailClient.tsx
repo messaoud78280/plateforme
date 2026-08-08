@@ -79,7 +79,37 @@ type OrderDetail = {
     status: string;
     title: string;
   }[];
+  receipts?: {
+    id: string;
+    receivedAt: string;
+    status: string;
+    deliveryNoteNumber: string | null;
+    commentShared: string | null;
+    receivedBy: { id: string; name: string };
+    documents: { id: string; name: string; fileUrl: string | null }[];
+  }[];
 };
+
+type ReceivingState = {
+  totalOrdered: number;
+  totalReceivedConforming: number;
+  totalRemaining: number;
+  totalDamaged: number;
+  totalRefused: number;
+  fullyReceived: boolean;
+  partiallyReceived: boolean;
+  hasIssues: boolean;
+  lines: {
+    orderLineId: string;
+    designation: string;
+    unit: string;
+    ordered: number;
+    receivedConforming: number;
+    remaining: number;
+    damaged: number;
+    refused: number;
+  }[];
+} | null;
 
 function fmtDate(iso: string | null) {
   if (!iso) return "—";
@@ -101,11 +131,15 @@ function money(v: string | number | null) {
 export function PurchaseOrderDetailClient({
   order: initial,
   canAct,
+  canReceive = false,
   isSupplierView = false,
+  receiving = null,
 }: {
   order: OrderDetail;
   canAct: boolean;
+  canReceive?: boolean;
   isSupplierView?: boolean;
+  receiving?: ReceivingState;
 }) {
   const router = useRouter();
   const [order, setOrder] = useState(initial);
@@ -529,17 +563,55 @@ export function PurchaseOrderDetailClient({
       <section className="rounded-2xl border border-slate-200 bg-white p-5">
         <h2 className="text-sm font-bold text-slate-900">Articles</h2>
         <ul className="mt-3 divide-y divide-slate-100">
-          {order.lines.map((l) => (
-            <li key={l.id} className="flex flex-wrap justify-between gap-2 py-2.5 text-sm">
-              <span className="font-medium text-slate-900">{l.designation}</span>
-              <span className="text-slate-600">
-                {Number(l.quantity)} {l.unit}
-                {!isSupplierView && l.unitPriceHt != null ? ` · ${money(l.unitPriceHt)} / u` : ""}
-              </span>
-            </li>
-          ))}
+          {order.lines.map((l) => {
+            const rs = receiving?.lines.find((x) => x.orderLineId === l.id);
+            return (
+              <li key={l.id} className="flex flex-wrap justify-between gap-2 py-2.5 text-sm">
+                <span className="font-medium text-slate-900">{l.designation}</span>
+                <span className="text-slate-600">
+                  {rs
+                    ? `${rs.receivedConforming} / ${rs.ordered} ${l.unit}`
+                    : `${Number(l.quantity)} ${l.unit}`}
+                  {rs && rs.remaining > 0 ? ` · reste ${rs.remaining}` : ""}
+                  {!isSupplierView && l.unitPriceHt != null ? ` · ${money(l.unitPriceHt)} / u` : ""}
+                </span>
+              </li>
+            );
+          })}
         </ul>
       </section>
+
+      {order.receipts && order.receipts.length > 0 ? (
+        <section className="rounded-2xl border border-slate-200 bg-white p-5">
+          <h2 className="text-sm font-bold text-slate-900">Réceptions</h2>
+          <ul className="mt-3 space-y-3">
+            {order.receipts.map((r) => (
+              <li key={r.id} className="rounded-lg border border-slate-100 px-3 py-2 text-sm">
+                <p className="font-semibold text-slate-900">
+                  {fmtDate(r.receivedAt)} — {r.receivedBy.name}
+                </p>
+                <p className="text-xs text-slate-500">
+                  {r.status}
+                  {r.deliveryNoteNumber ? ` · BL ${r.deliveryNoteNumber}` : ""}
+                </p>
+                {r.commentShared && (isSupplierView || true) ? (
+                  <p className="mt-1 text-xs text-slate-600">{r.commentShared}</p>
+                ) : null}
+                {r.documents?.[0]?.fileUrl ? (
+                  <a
+                    href={r.documents[0].fileUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-1 inline-block text-xs font-semibold text-[#1d4ed8]"
+                  >
+                    Voir le BL →
+                  </a>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-2xl border border-slate-200 bg-white p-5">
@@ -577,14 +649,56 @@ export function PurchaseOrderDetailClient({
               Proposition en cours : {fmtDate(order.proposedDeliveryAt)}
             </p>
           ) : null}
-          {!isSupplierView && order.agendaEvents?.[0] ? (
-            <Link
-              href={`/dashboard/agenda?event=${order.agendaEvents[0].id}`}
-              className="mt-3 inline-block text-xs font-semibold text-[#1d4ed8]"
-            >
-              Voir dans l’agenda →
-            </Link>
+          {receiving ? (
+            <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50 p-3">
+              <p className="text-[10px] font-bold uppercase text-slate-500">Réception</p>
+              <p className="mt-1 text-sm font-bold text-slate-900">
+                {receiving.totalReceivedConforming} / {receiving.totalOrdered} reçus
+              </p>
+              {receiving.totalRemaining > 0 ? (
+                <p className="text-xs font-semibold text-amber-800">
+                  {receiving.totalRemaining} restant à livrer
+                </p>
+              ) : (
+                <p className="text-xs font-semibold text-emerald-800">Tout reçu</p>
+              )}
+              {receiving.hasIssues ? (
+                <p className="mt-1 text-xs text-red-700">
+                  Anomalies : {receiving.totalDamaged} endommagé(s), {receiving.totalRefused}{" "}
+                  refusé(s)
+                </p>
+              ) : null}
+              {order.receipts?.[0] ? (
+                <p className="mt-2 text-xs text-slate-600">
+                  Dernière : {fmtDate(order.receipts[0].receivedAt)} —{" "}
+                  {order.receipts[0].receivedBy.name}
+                  {order.receipts[0].deliveryNoteNumber
+                    ? ` · BL ${order.receipts[0].deliveryNoteNumber}`
+                    : ""}
+                </p>
+              ) : null}
+            </div>
           ) : null}
+
+          <div className="mt-3 flex flex-wrap gap-3">
+            {!isSupplierView && order.agendaEvents?.[0] ? (
+              <Link
+                href={`/dashboard/agenda?event=${order.agendaEvents[0].id}`}
+                className="text-xs font-semibold text-[#1d4ed8]"
+              >
+                Voir dans l’agenda →
+              </Link>
+            ) : null}
+            {canReceive &&
+            !["ANNULEE", "CLOTUREE", "BROUILLON", "RECUE"].includes(order.status) ? (
+              <Link
+                href={`/dashboard/commandes/${order.id}/reception`}
+                className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white"
+              >
+                Réceptionner
+              </Link>
+            ) : null}
+          </div>
         </section>
 
         <section className="rounded-2xl border border-slate-200 bg-white p-5">

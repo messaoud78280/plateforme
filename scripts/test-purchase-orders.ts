@@ -21,6 +21,7 @@ import {
 } from "../src/lib/purchase-orders/supplier-ui";
 import { sanitizeOrderForSupplier } from "../src/lib/purchase-orders/supplier-collaboration";
 import { resolveDeliverySchedule } from "../src/lib/purchase-orders/sync-delivery";
+import { conformingQty, canReceivePurchaseOrder } from "../src/lib/purchase-orders/receiving";
 
 function testTotals() {
   assert.equal(lineTotalHt({ quantity: 40, unitPriceHt: 106.5 }), 4260);
@@ -176,6 +177,23 @@ function testDeliveryScheduleSync() {
   assert.equal(cancelled.action, "cancel");
 }
 
+function testReceivingMath() {
+  assert.equal(conformingQty(40, 0, 0), 40);
+  assert.equal(conformingQty(40, 3, 0), 37);
+  assert.equal(conformingQty(30, 0, 5), 25);
+  assert.equal(conformingQty(10, 10, 0), 0);
+
+  assert.equal(canReceivePurchaseOrder({ personType: "INTERNAL" }), true);
+  assert.equal(canReceivePurchaseOrder({ personType: "SUPPLIER" }), false);
+  assert.equal(canReceivePurchaseOrder({ permissionProfile: "FOURNISSEUR" }), false);
+  assert.equal(canReceivePurchaseOrder({ personType: "CLIENT_EXT" }), false);
+
+  // Plus de boutons statut « marquer reçue » sans vraie réception
+  const receiveActions = actionsForPurchaseOrderStatus("CONFIRMEE").map((a) => a.action);
+  assert.ok(!receiveActions.includes("receive"));
+  assert.ok(!receiveActions.includes("partial_receive"));
+}
+
 function main() {
   testTotals();
   testNumbering();
@@ -183,7 +201,8 @@ function main() {
   testPermissions();
   testSupplierCollaborationUi();
   testDeliveryScheduleSync();
-  console.log("OK — test:purchase-orders (CDE-1 + CDE-2A + CDE-2B)");
+  testReceivingMath();
+  console.log("OK — test:purchase-orders (CDE-1 → CDE-3A)");
 }
 
 main();

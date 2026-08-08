@@ -68,6 +68,7 @@ model User {
   purchaseOrdersResponsible PurchaseOrder[] @relation("PurchaseOrderResponsible")
   purchaseOrdersValidator   PurchaseOrder[] @relation("PurchaseOrderValidator")
   purchaseOrderEvents       PurchaseOrderEvent[] @relation("PurchaseOrderEventActor")
+  purchaseOrderReceipts     PurchaseOrderReceipt[] @relation("PurchaseOrderReceiptReceivedBy")
   projectAccesses     ProjectAccess[] @relation("ProjectAccessUser")
   projectAccessesGranted ProjectAccess[] @relation("ProjectAccessGrantedBy")
   accessAuditsAsActor AccessAuditLog[] @relation("AccessAuditActor")
@@ -346,6 +347,7 @@ model PurchaseOrder {
   lines     PurchaseOrderLine[]
   events    PurchaseOrderEvent[]
   documents PurchaseOrderDocument[]
+  receipts  PurchaseOrderReceipt[]
   agendaEvents AgendaEvent[]
 
   @@unique([organizationId, number])
@@ -365,15 +367,64 @@ model PurchaseOrderLine {
   unit           String   @default("U")
   unitPriceHt    Decimal? @db.Decimal(14, 2)
   tvaRate        Decimal? @db.Decimal(5, 2)
-  /// Quantité reçue (livraison partielle)
+  /// Cumul quantités reçues conformes (cache — source = ReceiptLines)
   receivedQty    Decimal  @default(0) @db.Decimal(14, 3)
   sortOrder      Int      @default(0)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  order PurchaseOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order        PurchaseOrder             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  receiptLines PurchaseOrderReceiptLine[]
 
   @@index([orderId])
+}
+
+/// Réception chantier (plusieurs réceptions possibles par commande).
+model PurchaseOrderReceipt {
+  id                     String   @id @default(cuid())
+  organizationId         String
+  purchaseOrderId        String
+  receivedAt             DateTime @default(now())
+  receivedById           String
+  /// COMPLETE | PARTIAL | WITH_ISSUES | REFUSED | CANCELLED
+  status                 String
+  deliveryNoteNumber     String?
+  commentShared          String?  @db.Text
+  commentInternal        String?  @db.Text
+  agendaEventId          String?
+  cancelledAt            DateTime?
+  cancelledById          String?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  organization  Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  purchaseOrder PurchaseOrder         @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  receivedBy    User                  @relation("PurchaseOrderReceiptReceivedBy", fields: [receivedById], references: [id], onDelete: Cascade)
+  lines         PurchaseOrderReceiptLine[]
+  documents     PurchaseOrderDocument[]
+
+  @@index([organizationId, receivedAt])
+  @@index([purchaseOrderId, receivedAt])
+  @@index([receivedById])
+}
+
+model PurchaseOrderReceiptLine {
+  id              String   @id @default(cuid())
+  receiptId       String
+  orderLineId     String
+  receivedQty     Decimal  @db.Decimal(14, 3)
+  damagedQty      Decimal  @default(0) @db.Decimal(14, 3)
+  refusedQty      Decimal  @default(0) @db.Decimal(14, 3)
+  /// ENDOMMAGE | MAUVAISE_REF | NON_CONFORME | AUTRE
+  refuseReason    String?
+  comment         String?
+  createdAt       DateTime @default(now())
+
+  receipt   PurchaseOrderReceipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  orderLine PurchaseOrderLine    @relation(fields: [orderLineId], references: [id], onDelete: Cascade)
+
+  @@index([receiptId])
+  @@index([orderLineId])
 }
 
 model PurchaseOrderEvent {
@@ -394,15 +445,18 @@ model PurchaseOrderEvent {
 model PurchaseOrderDocument {
   id        String   @id @default(cuid())
   orderId   String
+  receiptId String?
   /// DEVIS | BC | CONFIRMATION | BL | FICHE_TECHNIQUE | FACTURE | AUTRE
   kind      String
   name      String
   fileUrl   String?
   createdAt DateTime @default(now())
 
-  order PurchaseOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order   PurchaseOrder         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  receipt PurchaseOrderReceipt? @relation(fields: [receiptId], references: [id], onDelete: SetNull)
 
   @@index([orderId])
+  @@index([receiptId])
 }
 
 /// Accès explicite d’un utilisateur à un chantier (périmètre).
@@ -464,6 +518,7 @@ model Organization {
   externalOrganizations ExternalOrganization[]
   workflows             WorkflowDefinition[]
   purchaseOrders        PurchaseOrder[]
+  purchaseOrderReceipts PurchaseOrderReceipt[]
 
   @@index([ownerUserId])
   @@unique([ownerUserId])

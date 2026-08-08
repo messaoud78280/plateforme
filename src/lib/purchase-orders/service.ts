@@ -305,4 +305,22 @@ export const purchaseOrderDetailInclude = {
     take: 1,
     select: { id: true, startAt: true, status: true, title: true },
   },
+  receipts: {
+    where: { cancelledAt: null },
+    orderBy: { receivedAt: "desc" as const },
+    take: 10,
+    select: {
+      id: true,
+      receivedAt: true,
+      status: true,
+      deliveryNoteNumber: true,
+      commentShared: true,
+      receivedBy: { select: { id: true, name: true } },
+      documents: {
+        where: { kind: "BL" },
+        take: 3,
+        select: { id: true, name: true, fileUrl: true },
+      },
+    },
+  },
 } satisfies Prisma.PurchaseOrderInclude;

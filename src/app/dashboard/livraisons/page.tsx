@@ -48,9 +48,9 @@ export default async function LivraisonsFournisseurPage() {
       organization: { select: { name: true } },
       project: { select: { title: true } },
       lines: {
-        take: 1,
+        take: 3,
         orderBy: { sortOrder: "asc" },
-        select: { designation: true, quantity: true, unit: true },
+        select: { designation: true, quantity: true, unit: true, receivedQty: true },
       },
     },
     orderBy: [{ confirmedDeliveryAt: "asc" }, { requestedDeliveryAt: "asc" }],
@@ -63,17 +63,10 @@ export default async function LivraisonsFournisseurPage() {
   );
   const confirmees = orders.filter(
     (o) =>
-      ["CONFIRMEE", "LIVRAISON_PROGRAMMEE"].includes(o.status) &&
-      (o.confirmedDeliveryAt?.getTime() ?? 0) >= now - 3600_000,
+      ["CONFIRMEE", "LIVRAISON_PROGRAMMEE", "PARTIELLEMENT_RECUE"].includes(o.status) &&
+      o.status !== "RECUE",
   );
-  const passees = orders.filter((o) => {
-    const at = o.confirmedDeliveryAt ?? o.requestedDeliveryAt;
-    return (
-      at != null &&
-      at.getTime() < now - 3600_000 &&
-      !["A_CONFIRMER", "ENVOYEE_FOURNISSEUR"].includes(o.status)
-    );
-  });
+  const passees = orders.filter((o) => o.status === "RECUE" || o.status === "CLOTUREE");
 
   function Card({
     o,
@@ -100,16 +93,21 @@ export default async function LivraisonsFournisseurPage() {
         ) : null}
         <p className="mt-1 text-sm text-slate-600">
           {o.number}
-          {line ? ` · ${Number(line.quantity)} ${line.unit} ${line.designation}` : ` · ${o.subject}`}
+          {line
+            ? ` · ${Number(line.receivedQty)} / ${Number(line.quantity)} ${line.unit} ${line.designation}`
+            : ` · ${o.subject}`}
         </p>
+        {(() => {
+          const rem = o.lines.reduce(
+            (s, l) => s + Math.max(0, Number(l.quantity) - Number(l.receivedQty)),
+            0,
+          );
+          return rem > 0 && o.status === "PARTIELLEMENT_RECUE" ? (
+            <p className="mt-1 text-xs font-semibold text-amber-800">{rem} restant à livrer</p>
+          ) : null;
+        })()}
         <p className="mt-2 text-xs font-bold uppercase text-[#1e3a5f]">
-          {o.status === "REFUSEE"
-            ? "Refusée"
-            : o.confirmedDeliveryAt
-              ? "Confirmée"
-              : o.proposedDeliveryStatus === "PENDING"
-                ? "Proposition envoyée"
-                : PURCHASE_ORDER_STATUS_LABELS[o.status]}
+          {PURCHASE_ORDER_STATUS_LABELS[o.status] ?? o.status}
         </p>
         <Link
           href={`/dashboard/commandes/${o.id}`}

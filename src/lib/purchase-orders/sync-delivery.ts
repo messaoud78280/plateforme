@@ -261,51 +261,58 @@ export async function syncPurchaseOrderDeliveryEvent(opts: {
     order.organization.ownerUserId || order.requestedById;
   const actorId = opts.actorUserId || order.requestedById;
 
+  const payload = {
+    title,
+    description,
+    location: location ?? undefined,
+    type: "LIVRAISON" as const,
+    status: schedule.agendaStatus,
+    startAt: schedule.startAt,
+    endAt: schedule.endAt,
+    organizationId: order.organizationId,
+    projectId: order.projectId ?? undefined,
+    followUpSheetId: order.followUpSheetId ?? undefined,
+    taskId: order.legacyTaskId ?? undefined,
+    purchaseOrderId: order.id,
+    responsibleId: order.responsibleId ?? undefined,
+    colorKey: schedule.agendaStatus === "CONFIRME" ? "livraison" : "watch",
+  };
+
   let eventId: string;
   if (existing) {
     await prisma.agendaEvent.update({
       where: { id: existing.id },
-      data: {
-        title,
-        description,
-        location: location ?? undefined,
-        type: "LIVRAISON",
-        status: schedule.agendaStatus,
-        startAt: schedule.startAt,
-        endAt: schedule.endAt,
-        organizationId: order.organizationId,
-        projectId: order.projectId ?? undefined,
-        followUpSheetId: order.followUpSheetId ?? undefined,
-        taskId: order.legacyTaskId ?? undefined,
-        purchaseOrderId: order.id,
-        responsibleId: order.responsibleId ?? undefined,
-        colorKey: schedule.agendaStatus === "CONFIRME" ? "livraison" : "watch",
-      },
+      data: payload,
     });
     eventId = existing.id;
   } else {
-    const created = await prisma.agendaEvent.create({
-      data: {
-        title,
-        description,
-        location: location ?? undefined,
-        type: "LIVRAISON",
-        status: schedule.agendaStatus,
-        startAt: schedule.startAt,
-        endAt: schedule.endAt,
-        organizationId: order.organizationId,
-        ownerUserId,
-        createdById: actorId,
-        projectId: order.projectId ?? undefined,
-        followUpSheetId: order.followUpSheetId ?? undefined,
-        taskId: order.legacyTaskId ?? undefined,
-        purchaseOrderId: order.id,
-        responsibleId: order.responsibleId ?? undefined,
-        colorKey: schedule.agendaStatus === "CONFIRME" ? "livraison" : "watch",
-      },
-      select: { id: true },
-    });
-    eventId = created.id;
+    try {
+      const created = await prisma.agendaEvent.create({
+        data: {
+          ...payload,
+          ownerUserId,
+          createdById: actorId,
+        },
+        select: { id: true },
+      });
+      eventId = created.id;
+    } catch (e) {
+      // Concurrence / index unique partiel : reprendre l’événement existant
+      const raced = await prisma.agendaEvent.findFirst({
+        where: {
+          purchaseOrderId: order.id,
+          type: "LIVRAISON",
+          status: { not: "ANNULE" },
+        },
+        select: { id: true },
+      });
+      if (!raced) throw e;
+      await prisma.agendaEvent.update({
+        where: { id: raced.id },
+        data: payload,
+      });
+      eventId = raced.id;
+    }
   }
 
   // Dédupliquer : tout autre LIVRAISON actif pour cette PO → ANNULE

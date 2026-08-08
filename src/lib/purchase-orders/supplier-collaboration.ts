@@ -110,6 +110,14 @@ export function sanitizeOrderForSupplier<T extends Record<string, unknown>>(orde
   delete (clone as { validator?: unknown }).validator;
   delete (clone as { validatorId?: unknown }).validatorId;
   delete (clone as { discountHt?: unknown }).discountHt;
+  const withReceipts = clone as unknown as { receipts?: unknown };
+  if (Array.isArray(withReceipts.receipts)) {
+    withReceipts.receipts = withReceipts.receipts.map((r) => {
+      if (!r || typeof r !== "object") return r;
+      const { commentInternal: _i, ...rest } = r as Record<string, unknown>;
+      return rest;
+    });
+  }
   return clone;
 }
 

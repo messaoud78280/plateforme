@@ -95,17 +95,18 @@ export function actionsForPurchaseOrderStatus(
       next: "LIVRAISON_PROGRAMMEE",
       from: ["CONFIRMEE", "A_CONFIRMER"],
     },
+    // CDE-3A : réception réelle via /reception (plus de bouton statut seul)
     {
       action: "partial_receive",
       label: "Marquer partiellement reçue",
       next: "PARTIELLEMENT_RECUE",
-      from: ["CONFIRMEE", "LIVRAISON_PROGRAMMEE"],
+      from: [],
     },
     {
       action: "receive",
       label: "Marquer reçue",
       next: "RECUE",
-      from: ["CONFIRMEE", "LIVRAISON_PROGRAMMEE", "PARTIELLEMENT_RECUE"],
+      from: [],
     },
     {
       action: "close",

@@ -225,7 +225,7 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
       <div
         className={`container-site relative z-10 grid grid-cols-[1fr_auto] items-center gap-x-4 font-sans lg:grid-cols-[auto_minmax(0,1fr)] lg:items-center lg:gap-x-8 ${barPy}`}
       >
-        <div className="relative z-20 col-start-1 row-start-1 shrink-0 justify-self-start">
+        <div className="relative z-20 col-start-1 row-start-1 flex shrink-0 flex-col items-start gap-1.5 justify-self-start">
           <Link
             href="/"
             className="group inline-flex items-center transition-opacity hover:opacity-90"
@@ -233,6 +233,9 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
           >
             <BeWorkLogo size="sm" priority />
           </Link>
+          <p className="inline-flex max-w-full items-center rounded-full border border-[#1d4ed8]/20 bg-[#eff6ff] px-2.5 py-0.5 text-[10px] font-semibold tracking-wide text-[#1d4ed8] sm:px-3 sm:text-[11px]">
+            Éditeur de plateforme métier BTP
+          </p>
         </div>
 
         {/* Desktop : 2 lignes — CTAs au-dessus, nav en dessous */}

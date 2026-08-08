@@ -23,11 +23,7 @@ export function HomePlatformHero() {
       <div className="container-site relative">
         <div className="grid items-center gap-8 sm:gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)] lg:gap-16 xl:gap-20">
           <div className="text-center lg:text-left">
-            <p className="mx-auto inline-flex max-w-full items-center rounded-full border border-[#1d4ed8]/20 bg-[#eff6ff] px-3 py-1 text-[11px] font-semibold tracking-wide text-[#1d4ed8] sm:px-3.5 sm:text-sm lg:mx-0">
-              Éditeur de plateforme métier BTP
-            </p>
-
-            <h1 className="font-display mx-auto mt-4 max-w-[20ch] text-balance text-[1.875rem] font-extrabold leading-[1.12] tracking-[-0.03em] text-[#0f172a] sm:mt-6 sm:max-w-[22ch] sm:text-[2.625rem] md:text-[3.25rem] lg:mx-0 lg:max-w-[18ch] lg:text-[3.5rem] xl:text-[3.75rem]">
+            <h1 className="font-display mx-auto max-w-[20ch] text-balance text-[1.875rem] font-extrabold leading-[1.12] tracking-[-0.03em] text-[#0f172a] sm:max-w-[22ch] sm:text-[2.625rem] md:text-[3.25rem] lg:mx-0 lg:max-w-[18ch] lg:text-[3.5rem] xl:text-[3.75rem]">
               Votre plateforme interne BTP, adaptée à votre organisation et augmentée par l&apos;IA
             </h1>
 

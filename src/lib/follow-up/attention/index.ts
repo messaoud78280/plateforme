@@ -21,3 +21,15 @@ export {
   hoursBetween,
   toDate,
 } from "@/lib/follow-up/attention/dates";
+export {
+  shouldNotifyAttentionLevel,
+  notificationTypeForAttentionLevel,
+  buildAttentionDedupeKey,
+  ATTENTION_NOTIFY_MIN_LEVEL,
+} from "@/lib/follow-up/attention/notify-policy";
+export {
+  syncAttentionNotificationsForSheets,
+  syncAttentionNotificationsForOwner,
+  syncAttentionNotificationsForSheetId,
+  resolveAttentionRecipient,
+} from "@/lib/follow-up/attention/sync-notifications";

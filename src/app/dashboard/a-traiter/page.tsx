@@ -10,7 +10,9 @@ import {
 } from "@/lib/a-traiter/collect";
 import { ATTENTION_URGENCY_ORDER } from "@/lib/a-traiter/attention-board";
 import { URGENCY_LABELS, URGENCY_STYLES } from "@/lib/follow-up/types";
-import { canEditFollowUpBoard } from "@/lib/follow-up/access";
+import { canEditFollowUpBoard, resolveFollowUpOwnerUserId } from "@/lib/follow-up/access";
+import { syncAttentionNotificationsForOwner } from "@/lib/follow-up/attention/sync-notifications";
+import { isAgencyOrManager, isAgent } from "@/lib/authz";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { BackLink } from "@/components/ui/BackLink";
 import { ATraiterAttentionBoard } from "@/components/a-traiter/ATraiterAttentionBoard";
@@ -73,6 +75,22 @@ export default async function ATraiterPage() {
     role: session.user.role,
     personType: session.user.personType ?? null,
   });
+
+  // W3-C1 : sync idempotente des notifications internes (pas de cron)
+  const external =
+    session.user.personType === "CLIENT_EXT" || session.user.personType === "SUPPLIER";
+  if (!external && (isAgencyOrManager(session.user) || isAgent(session.user) || session.user.role === "CLIENT")) {
+    try {
+      const ownerUserId = await resolveFollowUpOwnerUserId(session.user.id);
+      const agentOnly = isAgent(session.user) && !isAgencyOrManager(session.user);
+      await syncAttentionNotificationsForOwner({
+        ownerUserId,
+        assigneeOnlyId: agentOnly ? session.user.id : null,
+      });
+    } catch (e) {
+      console.error("[a-traiter] syncAttentionNotifications:", e);
+    }
+  }
 
   const canEdit = canEditFollowUpBoard(session.user);
   const empty = snapshot.total === 0;

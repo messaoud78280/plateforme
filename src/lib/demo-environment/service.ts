@@ -243,10 +243,11 @@ export async function enrichDemoPersonas(demoId: string): Promise<{ ok: true } |
     rootUserId: demo.rootUserId,
     organizationId: demo.organizationId,
     karimUserId: karim?.id ?? null,
+    loginIdentifier: demo.loginIdentifier,
   });
   await prisma.demoEnvironment.update({
     where: { id: demoId },
-    data: { seedVersion: "v3-attention-w3a" },
+    data: { seedVersion: "v3-notify-w3c1" },
   });
   return { ok: true };
 }

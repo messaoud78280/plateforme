@@ -186,6 +186,16 @@ export async function PATCH(request: Request, ctx: Ctx) {
     });
   }
 
+  // W3-C1 : recalcule diagnostics → notifie le responsable si nouvel état / aggravation
+  try {
+    const { syncAttentionNotificationsForSheetId } = await import(
+      "@/lib/follow-up/attention/sync-notifications"
+    );
+    await syncAttentionNotificationsForSheetId(id);
+  } catch (e) {
+    console.error("[follow-up PATCH] syncAttentionNotifications:", e);
+  }
+
   const settings = await getFollowUpSettings(sheet.ownerUserId);
   return NextResponse.json(serializeFollowUpSheet(sheet, settings.thresholds));
 }

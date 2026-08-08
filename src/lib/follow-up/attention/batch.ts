@@ -7,8 +7,8 @@ import {
   evaluateFollowUpAttention,
   serializeAttentionResult,
   type SerializedAttention,
-  type AttentionWorkflowStep,
-} from "@/lib/follow-up/attention";
+} from "@/lib/follow-up/attention/evaluate";
+import type { AttentionWorkflowStep } from "@/lib/follow-up/attention/types";
 import type { UrgencyThresholds } from "@/lib/follow-up/types";
 import { URGENCY_LABELS } from "@/lib/follow-up/types";
 

@@ -36,21 +36,34 @@ function bucketFor(item: InboxItem): PriorityBucket {
   if (
     t.includes("URGENT") ||
     t.includes("FOLLOWUP_URGENT") ||
-    title.includes("URGENT") ||
+    title.startsWith("URGENT") ||
     title.includes("RETARD")
   ) {
     return "URGENT";
   }
   if (
+    t.includes("FOLLOWUP_ATTENTION") ||
     t.includes("FOLLOWUP") ||
     t.includes("DEADLINE") ||
     t.includes("MISSING") ||
-    title.includes("RAPPEL") ||
-    title.includes("IMPORTANT")
+    title.startsWith("IMPORTANT") ||
+    title.includes("RAPPEL")
   ) {
     return "IMPORTANT";
   }
   return "INFORMATION";
+}
+
+function dayBucket(iso: string): "Aujourd’hui" | "Hier" | "Plus ancien" {
+  const d = new Date(iso);
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const day = new Date(d);
+  day.setHours(0, 0, 0, 0);
+  const diff = Math.round((start.getTime() - day.getTime()) / 86400000);
+  if (diff <= 0) return "Aujourd’hui";
+  if (diff === 1) return "Hier";
+  return "Plus ancien";
 }
 
 const BUCKET_ORDER: PriorityBucket[] = ["CRITIQUE", "URGENT", "IMPORTANT", "INFORMATION"];
@@ -88,14 +101,27 @@ export function NotificationsDropdown() {
   }, [loadInbox]);
 
   const grouped = useMemo(() => {
-    const map = new Map<PriorityBucket, InboxItem[]>();
-    for (const b of BUCKET_ORDER) map.set(b, []);
+    const dayOrder = ["Aujourd’hui", "Hier", "Plus ancien"] as const;
+    const byDay = new Map<string, InboxItem[]>();
+    for (const d of dayOrder) byDay.set(d, []);
     for (const item of items) {
-      map.get(bucketFor(item))!.push(item);
+      byDay.get(dayBucket(item.createdAt))!.push(item);
     }
-    return BUCKET_ORDER.map((b) => ({ bucket: b, items: map.get(b)! })).filter(
-      (g) => g.items.length > 0,
-    );
+    return dayOrder
+      .map((day) => {
+        const dayItems = byDay.get(day) ?? [];
+        const byPriority = new Map<PriorityBucket, InboxItem[]>();
+        for (const b of BUCKET_ORDER) byPriority.set(b, []);
+        for (const item of dayItems) {
+          byPriority.get(bucketFor(item))!.push(item);
+        }
+        const priorityGroups = BUCKET_ORDER.map((b) => ({
+          bucket: b,
+          items: byPriority.get(b)!,
+        })).filter((g) => g.items.length > 0);
+        return { day, priorityGroups };
+      })
+      .filter((g) => g.priorityGroups.length > 0);
   }, [items]);
 
   const actionCount = useMemo(
@@ -186,62 +212,69 @@ export function NotificationsDropdown() {
         </p>
       ) : (
         <div className="max-h-96 overflow-y-auto">
-          {grouped.map((group) => (
-            <div key={group.bucket}>
-              <p
-                className={`sticky top-0 border-b border-slate-50 bg-slate-50/95 px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider ${BUCKET_STYLE[group.bucket]}`}
-              >
-                {group.bucket}
+          {grouped.map((dayGroup) => (
+            <div key={dayGroup.day}>
+              <p className="sticky top-0 z-[1] border-b border-slate-100 bg-white px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                {dayGroup.day}
               </p>
-              <ul>
-                {group.items.map((item) => (
-                  <li
-                    key={`${item.source}-${item.id}`}
-                    className={`border-b border-slate-50 ${!item.read ? "bg-blue-50/40" : ""}`}
+              {dayGroup.priorityGroups.map((group) => (
+                <div key={`${dayGroup.day}-${group.bucket}`}>
+                  <p
+                    className={`border-b border-slate-50 bg-slate-50/95 px-4 py-1 text-[10px] font-bold uppercase tracking-wider ${BUCKET_STYLE[group.bucket]}`}
                   >
-                    <div className="flex gap-2 px-4 py-3">
-                      <div className="min-w-0 flex-1">
-                        {item.actionUrl ? (
-                          <Link
-                            href={item.actionUrl}
-                            className="block text-left transition hover:opacity-90"
-                          >
-                            <NotifContent item={item} />
-                          </Link>
-                        ) : (
-                          <NotifContent item={item} />
-                        )}
-                        {item.actionUrl ? (
-                          <Link
-                            href={item.actionUrl}
-                            className="mt-1 inline-block text-[11px] font-semibold text-[#1e3a5f]"
-                          >
-                            Voir la fiche →
-                          </Link>
-                        ) : null}
-                        {item.actionUrl?.includes("/dashboard/fiches-suivi/") ? (
-                          <div className="mt-1">
-                            <FollowUpInlineActions
-                              sheetId={item.actionUrl.split("/").pop() || ""}
-                              compact
-                            />
+                    {group.bucket}
+                  </p>
+                  <ul>
+                    {group.items.map((item) => (
+                      <li
+                        key={`${item.source}-${item.id}`}
+                        className={`border-b border-slate-50 ${!item.read ? "bg-blue-50/40" : ""}`}
+                      >
+                        <div className="flex gap-2 px-4 py-3">
+                          <div className="min-w-0 flex-1">
+                            {item.actionUrl ? (
+                              <Link
+                                href={item.actionUrl}
+                                className="block text-left transition hover:opacity-90"
+                              >
+                                <NotifContent item={item} />
+                              </Link>
+                            ) : (
+                              <NotifContent item={item} />
+                            )}
+                            {item.actionUrl ? (
+                              <Link
+                                href={item.actionUrl}
+                                className="mt-1 inline-block text-[11px] font-semibold text-[#1e3a5f]"
+                              >
+                                Voir →
+                              </Link>
+                            ) : null}
+                            {item.actionUrl?.includes("/dashboard/fiches-suivi/") ? (
+                              <div className="mt-1">
+                                <FollowUpInlineActions
+                                  sheetId={item.actionUrl.split("/").pop() || ""}
+                                  compact
+                                />
+                              </div>
+                            ) : null}
                           </div>
-                        ) : null}
-                      </div>
-                      {!item.read && (
-                        <button
-                          type="button"
-                          onClick={() => void markOneRead(item)}
-                          className="shrink-0 self-start text-[10px] font-medium text-slate-500 hover:text-[#1d4ed8]"
-                          title="Marquer comme lu"
-                        >
-                          Lu
-                        </button>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
+                          {!item.read && (
+                            <button
+                              type="button"
+                              onClick={() => void markOneRead(item)}
+                              className="shrink-0 self-start text-[10px] font-medium text-slate-500 hover:text-[#1d4ed8]"
+                              title="Marquer comme lu"
+                            >
+                              Lu
+                            </button>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
           ))}
         </div>

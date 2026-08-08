@@ -795,11 +795,13 @@ model TaskComment {
 model Notification {
   id        String   @id @default(cuid())
   userId    String
-  type      String   // NEW_TASK, TASK_ASSIGNED, MESSAGE_RECEIVED, TASK_COMPLETED, TASK_TO_VALIDATE, etc.
+  type      String   // NEW_TASK, TASK_ASSIGNED, MESSAGE_RECEIVED, TASK_COMPLETED, TASK_TO_VALIDATE, FOLLOWUP_*, etc.
   title     String
   message   String
   read      Boolean  @default(false)
   actionUrl String?
+  /// Clé stable de déduplication (ex. ATTENTION:userId:sheetId:CODE:LEVEL). Null = notif classique.
+  dedupeKey String?  @unique
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

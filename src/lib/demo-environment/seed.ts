@@ -780,6 +780,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
       rootUserId: clientId,
       organizationId,
       karimUserId: karim?.id ?? null,
+      loginIdentifier,
     });
   } catch (e) {
     console.error("[demo-seed] kanban readability:", e);

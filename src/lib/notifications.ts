@@ -20,6 +20,7 @@ type NotificationType =
   | "FOLLOWUP_REMINDER"
   | "FOLLOWUP_URGENT"
   | "FOLLOWUP_CRITICAL"
+  | "FOLLOWUP_ATTENTION"
   | "MESSAGE_ACTION_ASSIGNED";
 
 export async function createNotification(params: {
@@ -28,8 +29,26 @@ export async function createNotification(params: {
   title: string;
   message: string;
   actionUrl?: string | null;
+  /** Si fourni : upsert / ignore les doublons (W3-C1). */
+  dedupeKey?: string | null;
 }) {
   try {
+    if (params.dedupeKey) {
+      await prisma.notification.upsert({
+        where: { dedupeKey: params.dedupeKey },
+        create: {
+          userId: params.userId,
+          type: params.type,
+          title: params.title,
+          message: params.message,
+          actionUrl: params.actionUrl ?? undefined,
+          dedupeKey: params.dedupeKey,
+        },
+        // Ne pas réécrire : préserve lu/non lu et évite le spam
+        update: {},
+      });
+      return;
+    }
     await prisma.notification.create({
       data: {
         userId: params.userId,

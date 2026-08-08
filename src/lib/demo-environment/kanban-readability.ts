@@ -1,11 +1,15 @@
 /**
- * W2-C — Distribue les fiches ABC existantes pour un tableau Kanban lisible.
- * Pas de doublon Victor Hugo. Pas d’alertes automatiques.
+ * W2-C / W3 — Distribue les fiches ABC pour un Kanban lisible + destinataires notifs.
+ * Pas de doublon Victor Hugo. Pas d’urgence forcée.
  */
 import type { FollowUpSheetStatus, FollowUpUrgency } from "@prisma/client";
+import { OrganizationMemberRole, UserRole } from "@prisma/client";
+import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { appendFollowUpTimeline } from "@/lib/follow-up/timeline";
 import { colorKeyForStatus } from "@/lib/follow-up/types";
+import { syncAttentionNotificationsForOwner } from "@/lib/follow-up/attention/sync-notifications";
+import { demoPersonaEmail } from "@/lib/demo-environment/personas";
 
 function daysAgo(n: number): Date {
   const d = new Date();
@@ -87,12 +91,78 @@ async function patchSheet(opts: {
   });
 }
 
+/** Julie Martin — administratif interne (reçoit les notifs facturation, pas Marc). */
+async function ensureJulieAdministratif(opts: {
+  rootUserId: string;
+  organizationId: string;
+  loginIdentifier?: string | null;
+}): Promise<string> {
+  const login = opts.loginIdentifier?.trim() || "bework-demo";
+  const email = demoPersonaEmail(login, "julie");
+  const root = await prisma.user.findUnique({
+    where: { id: opts.rootUserId },
+    select: { password: true },
+  });
+  const passwordHash = root?.password || (await bcrypt.hash("BeWorkDemo2026!", 12));
+
+  const existing = await prisma.user.findUnique({ where: { email } });
+  const julie = existing
+    ? await prisma.user.update({
+        where: { id: existing.id },
+        data: {
+          name: "Julie Martin",
+          personType: "INTERNAL",
+          permissionProfile: "ADMINISTRATIF",
+          accessStatus: "ACTIVE",
+          jobTitle: "Responsable administratif",
+          teamRole: "USER",
+          invitedById: opts.rootUserId,
+          password: passwordHash,
+        },
+        select: { id: true },
+      })
+    : await prisma.user.create({
+        data: {
+          email,
+          password: passwordHash,
+          name: "Julie Martin",
+          role: UserRole.CLIENT,
+          personType: "INTERNAL",
+          permissionProfile: "ADMINISTRATIF",
+          accessStatus: "ACTIVE",
+          jobTitle: "Responsable administratif",
+          teamRole: "USER",
+          invitedById: opts.rootUserId,
+        },
+        select: { id: true },
+      });
+
+  await prisma.organizationMember.upsert({
+    where: {
+      organizationId_userId: {
+        organizationId: opts.organizationId,
+        userId: julie.id,
+      },
+    },
+    create: {
+      organizationId: opts.organizationId,
+      userId: julie.id,
+      role: OrganizationMemberRole.MEMBER,
+    },
+    update: { role: OrganizationMemberRole.MEMBER },
+  });
+
+  return julie.id;
+}
+
 export async function ensureKanbanReadabilityDemo(opts: {
   rootUserId: string;
   organizationId: string;
   karimUserId?: string | null;
+  loginIdentifier?: string | null;
 }): Promise<void> {
   const karimId = opts.karimUserId ?? opts.rootUserId;
+  const julieId = await ensureJulieAdministratif(opts);
 
   const sheets = await prisma.followUpSheet.findMany({
     where: {
@@ -190,7 +260,8 @@ export async function ensureKanbanReadabilityDemo(opts: {
       // Échéance lointaine : l’urgence vient du délai d’étape / facturation, pas d’un override
       nextActionAt: daysAgo(-10),
       urgencyOverride: null,
-      assigneeId: opts.rootUserId,
+      // W3-C1 : Julie (admin) reçoit la notif — pas Marc (direction)
+      assigneeId: julieId,
       title: "Immeuble Alpha",
       workObject: "Travaux terminés — facturation",
       clientName: "ABC Promotion",
@@ -281,5 +352,15 @@ export async function ensureKanbanReadabilityDemo(opts: {
       fromLabel: "OS reçu",
       toLabel: "À planifier",
     });
+  }
+
+  // W3-C1 : créer les notifications internes (idempotent)
+  try {
+    await syncAttentionNotificationsForOwner({
+      ownerUserId: opts.rootUserId,
+      organizationId: opts.organizationId,
+    });
+  } catch (e) {
+    console.error("[demo] syncAttentionNotifications:", e);
   }
 }

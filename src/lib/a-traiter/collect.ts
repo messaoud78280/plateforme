@@ -7,11 +7,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { isAgencyOrManager, isAgent, isClientRole, type SessionUser } from "@/lib/authz";
-import {
-  taskWhereForClientUser,
-  projectWhereForClientUser,
-  ensureOrganizationForOwner,
-} from "@/lib/organization/access";
+import { taskWhereForClientUser, projectWhereForClientUser } from "@/lib/organization/access";
 import { isBlockerCritical, isBlockerOpen } from "@/lib/pilotage/status-enums";
 import { PILOTAGE_LIST_PATH } from "@/lib/pilotage/constants";
 import {
@@ -20,6 +16,7 @@ import {
 } from "@/lib/follow-up/access";
 import { getFollowUpSettings } from "@/lib/follow-up/settings";
 import { loadAttentionForSheets } from "@/lib/follow-up/attention/batch";
+import { ensureOrganizationForOwner } from "@/lib/organization/access";
 import {
   buildAttentionCard,
   countAttentionByUrgency,
@@ -489,7 +486,7 @@ async function collectFollowUpAttentionCards(
 
     if (sheets.length === 0) return [];
 
-    const attentionMap = await loadAttentionForSheets({
+    const { byId: attentionMap, statusEnteredAt } = await loadAttentionForSheets({
       sheets: sheets.map((s) => ({
         id: s.id,
         status: s.status,
@@ -521,6 +518,7 @@ async function collectFollowUpAttentionCards(
           assigneeId: s.assigneeId,
           assigneeName: s.assignee?.name ?? null,
           projectTitle: s.project?.title ?? null,
+          statusEnteredAt: statusEnteredAt.get(s.id) ?? null,
           relatedTaskId: s.tasks[0]?.id ?? null,
         },
         attention,

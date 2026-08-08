@@ -203,7 +203,7 @@ export default async function FichesSuiviPage({
     }));
 
     // W3-A : un seul batch (timeline déjà chargée + agenda + steps) — pas de N+1
-    const attentionMap = await loadAttentionForSheets({
+    const { byId: attentionMap } = await loadAttentionForSheets({
       sheets: withEntered.map((i) => ({
         id: i.id,
         status: i.status,

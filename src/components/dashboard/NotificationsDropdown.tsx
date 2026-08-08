@@ -27,10 +27,31 @@ function formatNotifDate(iso: string) {
   });
 }
 
+function kindLabel(item: InboxItem): "ESCALADE" | "RAPPEL" | "ALERTE" | null {
+  const t = (item.type ?? "").toUpperCase();
+  const title = (item.title ?? "").toUpperCase();
+  if (t.includes("ESCALATION") || title.startsWith("ESCALADE")) return "ESCALADE";
+  if (t.includes("REMINDER") || title.startsWith("RAPPEL")) return "RAPPEL";
+  if (
+    t.includes("FOLLOWUP_ATTENTION") ||
+    t.includes("FOLLOWUP_URGENT") ||
+    t.includes("FOLLOWUP_CRITICAL")
+  ) {
+    return "ALERTE";
+  }
+  return null;
+}
+
 function bucketFor(item: InboxItem): PriorityBucket {
   const t = (item.type ?? "").toUpperCase();
   const title = item.title.toUpperCase();
-  if (t.includes("CRITICAL") || t.includes("CRITIQUE") || title.includes("CRITIQUE")) {
+  if (
+    t.includes("ESCALATION") ||
+    t.includes("CRITICAL") ||
+    t.includes("CRITIQUE") ||
+    title.includes("CRITIQUE") ||
+    title.startsWith("ESCALADE")
+  ) {
     return "CRITIQUE";
   }
   if (
@@ -43,10 +64,12 @@ function bucketFor(item: InboxItem): PriorityBucket {
   }
   if (
     t.includes("FOLLOWUP_ATTENTION") ||
+    t.includes("FOLLOWUP_REMINDER") ||
     t.includes("FOLLOWUP") ||
     t.includes("DEADLINE") ||
     t.includes("MISSING") ||
     title.startsWith("IMPORTANT") ||
+    title.startsWith("RAPPEL") ||
     title.includes("RAPPEL")
   ) {
     return "IMPORTANT";
@@ -289,10 +312,26 @@ export function NotificationsDropdown() {
 }
 
 function NotifContent({ item }: { item: InboxItem }) {
+  const kind = kindLabel(item);
+  const kindStyle =
+    kind === "ESCALADE"
+      ? "bg-red-100 text-red-800"
+      : kind === "RAPPEL"
+        ? "bg-amber-100 text-amber-900"
+        : kind === "ALERTE"
+          ? "bg-orange-100 text-orange-900"
+          : null;
   return (
     <>
+      {kind && kindStyle ? (
+        <span
+          className={`mb-1 inline-block rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${kindStyle}`}
+        >
+          {kind}
+        </span>
+      ) : null}
       <p className="text-sm font-medium text-slate-800">{item.title}</p>
-      <p className="mt-0.5 line-clamp-2 text-xs text-slate-600">{item.message}</p>
+      <p className="mt-0.5 line-clamp-2 whitespace-pre-line text-xs text-slate-600">{item.message}</p>
       <p className="mt-1 text-xs text-slate-400">{formatNotifDate(item.createdAt)}</p>
     </>
   );

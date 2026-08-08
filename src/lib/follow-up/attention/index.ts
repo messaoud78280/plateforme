@@ -33,3 +33,22 @@ export {
   syncAttentionNotificationsForSheetId,
   resolveAttentionRecipient,
 } from "@/lib/follow-up/attention/sync-notifications";
+export {
+  DEFAULT_ESCALATION_BY_LEVEL,
+  resolveLevelEscalationPolicy,
+  episodeKeyFromStatusEnteredAt,
+  buildStagedAttentionDedupeKey,
+  buildLegacyAttentionDedupeKey,
+} from "@/lib/follow-up/attention/escalation-policy";
+export type { EscalationStage, LevelEscalationPolicy } from "@/lib/follow-up/attention/escalation-policy";
+export {
+  evaluateAttentionEscalation,
+} from "@/lib/follow-up/attention/evaluate-escalation";
+export type {
+  EvaluateAttentionEscalationInput,
+  EvaluateAttentionEscalationResult,
+} from "@/lib/follow-up/attention/evaluate-escalation";
+export {
+  processAttentionEscalations,
+  resolveEscalationRecipient,
+} from "@/lib/follow-up/attention/process-escalations";

@@ -29,7 +29,7 @@ export default async function FicheSuiviDetailPage({ params }: Props) {
   const settings = await getFollowUpSettings(sheet.ownerUserId);
   const data = serializeFollowUpSheet(sheet, settings.thresholds);
 
-  const attentionMap = await loadAttentionForSheets({
+  const { byId: attentionMap } = await loadAttentionForSheets({
     sheets: [
       {
         id: data.id,

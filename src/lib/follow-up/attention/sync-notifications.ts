@@ -1,11 +1,18 @@
 /**
  * W3-C1 — Synchronisation idempotente des notifications internes d’attention.
  * Ne recalcule pas les règles métier : consomme evaluateFollowUpAttention / loadAttentionForSheets.
+ *
+ * Clé INITIAL (épisode) : ATTENTION:user:sheet:code:level:episode:INITIAL
+ * Compat : si une clé legacy W3-C1 existe pour le même épisode → pas de doublon.
  */
 import { prisma } from "@/lib/prisma";
 import { loadAttentionForSheets } from "@/lib/follow-up/attention/batch";
 import {
-  buildAttentionDedupeKey,
+  buildLegacyAttentionDedupeKey,
+  buildStagedAttentionDedupeKey,
+  episodeKeyFromStatusEnteredAt,
+} from "@/lib/follow-up/attention/escalation-policy";
+import {
   notificationTypeForAttentionLevel,
   shouldNotifyAttentionLevel,
 } from "@/lib/follow-up/attention/notify-policy";
@@ -65,12 +72,12 @@ export type SyncAttentionResult = {
 };
 
 /**
- * Pour chaque fiche : diagnostique W3-A → crée au plus une notif par (user, sheet, code, level).
+ * Pour chaque fiche : diagnostique W3-A → crée au plus une notif INITIAL par épisode.
  * Idempotent : N appels avec le même état = même base.
  */
 export async function syncAttentionNotificationsForSheets(
   sheets: SheetNotifyRow[],
-  opts?: { thresholdsOwnerUserId?: string | null },
+  opts?: { thresholdsOwnerUserId?: string | null; now?: Date },
 ): Promise<SyncAttentionResult> {
   const result: SyncAttentionResult = {
     examined: sheets.length,
@@ -83,7 +90,7 @@ export async function syncAttentionNotificationsForSheets(
   const ownerId = opts?.thresholdsOwnerUserId ?? sheets[0]?.ownerUserId;
   const settings = ownerId ? await getFollowUpSettings(ownerId) : undefined;
 
-  const byId = await loadAttentionForSheets({
+  const { byId, statusEnteredAt } = await loadAttentionForSheets({
     sheets: sheets.map((s) => ({
       id: s.id,
       status: s.status,
@@ -94,6 +101,7 @@ export async function syncAttentionNotificationsForSheets(
     })),
     organizationId: sheets[0]?.organizationId ?? null,
     thresholds: settings?.thresholds,
+    now: opts?.now,
   });
 
   for (const sheet of sheets) {
@@ -116,7 +124,17 @@ export async function syncAttentionNotificationsForSheets(
     }
 
     const level = attention.effectiveUrgency as UrgencyLevel;
-    const dedupeKey = buildAttentionDedupeKey({
+    const enteredIso = statusEnteredAt.get(sheet.id) ?? null;
+    const episode = episodeKeyFromStatusEnteredAt(enteredIso);
+    const dedupeKey = buildStagedAttentionDedupeKey({
+      userId: recipientId,
+      sheetId: sheet.id,
+      code: primary.code,
+      level,
+      episode,
+      stage: "INITIAL",
+    });
+    const legacyKey = buildLegacyAttentionDedupeKey({
       userId: recipientId,
       sheetId: sheet.id,
       code: primary.code,
@@ -129,13 +147,26 @@ export async function syncAttentionNotificationsForSheets(
     const actionUrl = `/dashboard/fiches-suivi/${sheet.id}`;
 
     try {
-      const existing = await prisma.notification.findUnique({
+      const existingStaged = await prisma.notification.findUnique({
         where: { dedupeKey },
         select: { id: true },
       });
-      if (existing) {
+      if (existingStaged) {
         result.unchanged += 1;
         continue;
+      }
+
+      // Compat W3-C1 : legacy = INITIAL de l’épisode courant uniquement
+      const legacy = await prisma.notification.findUnique({
+        where: { dedupeKey: legacyKey },
+        select: { id: true, createdAt: true },
+      });
+      if (legacy) {
+        const enteredMs = enteredIso ? new Date(enteredIso).getTime() : 0;
+        if (!enteredIso || legacy.createdAt.getTime() >= enteredMs - 60_000) {
+          result.unchanged += 1;
+          continue;
+        }
       }
 
       await prisma.notification.create({
@@ -150,7 +181,6 @@ export async function syncAttentionNotificationsForSheets(
       });
       result.created += 1;
     } catch (e: unknown) {
-      // Course concurrente : contrainte unique → considéré inchangé
       const code =
         e && typeof e === "object" && "code" in e
           ? String((e as { code?: string }).code)
@@ -174,6 +204,7 @@ export async function syncAttentionNotificationsForOwner(opts: {
   /** Si true, ne synchronise que les fiches assignées à cet utilisateur (conducteur). */
   assigneeOnlyId?: string | null;
   take?: number;
+  now?: Date;
 }): Promise<SyncAttentionResult> {
   const sheets = await prisma.followUpSheet.findMany({
     where: {
@@ -200,6 +231,7 @@ export async function syncAttentionNotificationsForOwner(opts: {
 
   return syncAttentionNotificationsForSheets(sheets, {
     thresholdsOwnerUserId: opts.ownerUserId,
+    now: opts.now,
   });
 }
 

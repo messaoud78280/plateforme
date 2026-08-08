@@ -7,10 +7,15 @@ import {
   evaluateFollowUpAttention,
   serializeAttentionResult,
   type SerializedAttention,
-} from "@/lib/follow-up/attention/evaluate";
-import type { AttentionWorkflowStep } from "@/lib/follow-up/attention/types";
+  type AttentionWorkflowStep,
+} from "@/lib/follow-up/attention";
 import type { UrgencyThresholds } from "@/lib/follow-up/types";
 import { URGENCY_LABELS } from "@/lib/follow-up/types";
+
+export type AttentionBatchResult = {
+  byId: Map<string, SerializedAttention>;
+  statusEnteredAt: Map<string, string>;
+};
 
 export async function loadAttentionForSheets(opts: {
   sheets: {
@@ -27,10 +32,12 @@ export async function loadAttentionForSheets(opts: {
   workflowSteps?: AttentionWorkflowStep[];
   thresholds?: UrgencyThresholds;
   now?: Date;
-}): Promise<Map<string, SerializedAttention>> {
+}): Promise<AttentionBatchResult> {
   const out = new Map<string, SerializedAttention>();
   const sheetIds = opts.sheets.map((s) => s.id);
-  if (sheetIds.length === 0) return out;
+  if (sheetIds.length === 0) {
+    return { byId: out, statusEnteredAt: new Map() };
+  }
 
   const statusEnteredAt = new Map<string, string>();
   for (const s of opts.sheets) {
@@ -85,6 +92,7 @@ export async function loadAttentionForSheets(opts: {
       delayHours: s.delayHours,
       alertOrangeHours: s.alertOrangeHours,
       alertRedHours: s.alertRedHours,
+      reminderHours: s.reminderHours,
       escalateHours: s.escalateHours,
     }));
   }
@@ -119,7 +127,7 @@ export async function loadAttentionForSheets(opts: {
     out.set(sheet.id, serializeAttentionResult(result));
   }
 
-  return out;
+  return { byId: out, statusEnteredAt };
 }
 
 export function urgencyLabelFor(level: string): string {

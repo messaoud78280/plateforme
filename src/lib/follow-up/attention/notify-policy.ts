@@ -19,7 +19,10 @@ export function notificationTypeForAttentionLevel(
   return "FOLLOWUP_ATTENTION";
 }
 
-/** Identité stable : destinataire + fiche + code primaire + niveau effectif. */
+/**
+ * Clé legacy W3-C1 (sans épisode / stage).
+ * Les nouvelles notifs INITIAL utilisent buildStagedAttentionDedupeKey (épisode).
+ */
 export function buildAttentionDedupeKey(opts: {
   userId: string;
   sheetId: string;

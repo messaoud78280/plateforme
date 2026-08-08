@@ -57,6 +57,8 @@ export type AttentionWorkflowStep = {
   delayHours?: number | null;
   alertOrangeHours?: number | null;
   alertRedHours?: number | null;
+  /** W1 / W3-C2A — délai avant rappel (heures). */
+  reminderHours?: number | null;
   escalateHours?: number | null;
 };
 

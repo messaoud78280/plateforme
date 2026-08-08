@@ -11,7 +11,7 @@ import {
 } from "@/lib/messaging/access";
 
 function canUseDirectMessages(role?: string | null): boolean {
-  return isManagerRole(role) || isStaffAgent(role);
+  return isManagerRole(role) || isStaffAgent(role) || role === "CLIENT";
 }
 
 const messageInclude = {
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       const other = await prisma.user.findFirst({
         where: {
           id: otherUserId,
-          role: { in: ["AGENCE", "AGENT", "MANAGER"] },
+          role: { in: ["AGENCE", "AGENT", "MANAGER", "CLIENT"] },
         },
         select: { id: true },
       });
@@ -112,7 +112,7 @@ export async function POST(request: Request) {
     const receiver = await prisma.user.findFirst({
       where: {
         id: receiverId,
-        role: { in: ["AGENCE", "AGENT", "MANAGER"] },
+        role: { in: ["AGENCE", "AGENT", "MANAGER", "CLIENT"] },
       },
     });
 
@@ -121,6 +121,27 @@ export async function POST(request: Request) {
         { error: "Destinataire invalide." },
         { status: 400 }
       );
+    }
+
+    // Client : uniquement vers agent / gérant lié à ses missions
+    if (session.user.role === "CLIENT") {
+      if (!["AGENCE", "AGENT", "MANAGER"].includes(receiver.role)) {
+        return NextResponse.json({ error: "Destinataire non autorisé." }, { status: 403 });
+      }
+      const linked = await prisma.task.findFirst({
+        where: {
+          clientId: session.user.id,
+          OR: [{ assignedToId: receiver.id }, { createdById: receiver.id }],
+        },
+        select: { id: true },
+      });
+      const isManager = receiver.role === "MANAGER";
+      if (!linked && !isManager) {
+        return NextResponse.json(
+          { error: "Ce contact n’est pas lié à vos missions." },
+          { status: 403 },
+        );
+      }
     }
 
     const message = await prisma.directMessage.create({

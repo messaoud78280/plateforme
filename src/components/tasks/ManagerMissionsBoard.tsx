@@ -12,18 +12,18 @@ import { missionTypeLabel, MISSION_TYPES, MISSION_TYPE_LABELS } from "@/lib/task
 const FILTER_ALL = "";
 const FILTER_UNASSIGNED = "__none__";
 
-/** Priorité : 3 niveaux visibles (Urgent, Normal, Faible) */
+/** Priorité : Urgent / Prioritaire / Normal */
 const PRIORITY_STYLES: Record<string, { label: string; borderClass: string; badgeClass: string }> = {
   URGENT: { label: "Urgent", borderClass: "border-l-red-500", badgeClass: "bg-red-500/15 text-red-700 font-semibold px-2.5 py-1 rounded-md text-xs" },
-  PRIORITAIRE: { label: "Normal", borderClass: "border-l-blue-400", badgeClass: "bg-blue-500/15 text-blue-700 font-medium px-2.5 py-1 rounded-md text-xs" },
-  STANDARD: { label: "Normal", borderClass: "border-l-blue-400", badgeClass: "bg-blue-500/15 text-blue-700 font-medium px-2.5 py-1 rounded-md text-xs" },
-  "": { label: "Faible", borderClass: "border-l-slate-300", badgeClass: "bg-slate-200/80 text-slate-600 font-medium px-2.5 py-1 rounded-md text-xs" },
+  PRIORITAIRE: { label: "Prioritaire", borderClass: "border-l-amber-400", badgeClass: "bg-amber-500/15 text-amber-800 font-medium px-2.5 py-1 rounded-md text-xs" },
+  STANDARD: { label: "Normal", borderClass: "border-l-slate-300", badgeClass: "bg-slate-200/80 text-slate-600 font-medium px-2.5 py-1 rounded-md text-xs" },
+  "": { label: "Normal", borderClass: "border-l-slate-300", badgeClass: "bg-slate-200/80 text-slate-600 font-medium px-2.5 py-1 rounded-md text-xs" },
 };
 
 const PRIORITY_OPTIONS: { value: string; label: string }[] = [
   { value: "URGENT", label: "Urgent" },
+  { value: "PRIORITAIRE", label: "Prioritaire" },
   { value: "STANDARD", label: "Normal" },
-  { value: "", label: "Faible" },
 ];
 
 type AgentOption = { id: string; name: string; email?: string };

@@ -18,8 +18,9 @@ export default async function MessageriePage() {
   let agents: { id: string; name: string; role?: string }[] = [];
   let recipients: { id: string; name: string; role: string }[] = [];
   let managerId: string | null = null;
-  if (isManager || isAgent) {
-    try {
+
+  try {
+    if (isManager || isAgent) {
       const [agentsRes, managersRes, managerFirst] = await Promise.all([
         prisma.user.findMany({
           where: { role: { in: ["AGENCE", "AGENT"] } },
@@ -44,15 +45,85 @@ export default async function MessageriePage() {
       ]
         .filter((r) => r.id !== session.user.id)
         .sort((a, b) => a.name.localeCompare(b.name));
-    } catch {
-      // ignore
+
+      // Staff : aussi les clients des missions
+      const clients = await prisma.user.findMany({
+        where: {
+          role: "CLIENT",
+          OR: [
+            {
+              tasks: {
+                some:
+                  isManager || session.user.role === "AGENCE"
+                    ? {}
+                    : { assignedToId: session.user.id },
+              },
+            },
+          ],
+        },
+        select: { id: true, name: true },
+        take: 80,
+        orderBy: { name: "asc" },
+      });
+      for (const c of clients) {
+        if (c.id === session.user.id) continue;
+        if (!recipients.some((r) => r.id === c.id)) {
+          recipients.push({ id: c.id, name: c.name, role: "client" });
+        }
+      }
+      recipients.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (isClient) {
+      // Client : contacts = agents assignés + gérants
+      const [assignedAgents, managers] = await Promise.all([
+        prisma.user.findMany({
+          where: {
+            role: { in: ["AGENCE", "AGENT"] },
+            tasksAssigned: { some: { clientId: session.user.id } },
+          },
+          select: { id: true, name: true },
+          orderBy: { name: "asc" },
+        }),
+        prisma.user.findMany({
+          where: { role: "MANAGER" },
+          select: { id: true, name: true },
+          orderBy: { name: "asc" },
+          take: 20,
+        }),
+      ]);
+      agents = assignedAgents;
+      managerId = managers[0]?.id ?? null;
+      recipients = [
+        ...assignedAgents.map((a) => ({ ...a, role: "agent" as const })),
+        ...managers.map((m) => ({ ...m, role: "gérant" as const })),
+      ].filter((r) => r.id !== session.user.id);
+
+      // Fallback démo : au moins un agent/gérant visible
+      if (recipients.length === 0) {
+        const anyStaff = await prisma.user.findMany({
+          where: { role: { in: ["AGENCE", "AGENT", "MANAGER"] } },
+          select: { id: true, name: true, role: true },
+          take: 15,
+          orderBy: { name: "asc" },
+        });
+        recipients = anyStaff
+          .filter((u) => u.id !== session.user.id)
+          .map((u) => ({
+            id: u.id,
+            name: u.name,
+            role: u.role === "MANAGER" ? "gérant" : "agent",
+          }));
+        agents = anyStaff.filter((u) => u.role !== "MANAGER").map((u) => ({ id: u.id, name: u.name }));
+        managerId = anyStaff.find((u) => u.role === "MANAGER")?.id ?? null;
+      }
     }
+  } catch {
+    // ignore
   }
 
   const canChangeStatus = isManager || isAgent;
 
   return (
-    <div className="-mx-4 -mb-6 -mt-2 flex h-[calc(100dvh-3.5rem)] min-h-[520px] flex-col overflow-hidden bg-[#111b21] sm:-mx-6 lg:h-[calc(100dvh-4rem)]">
+    <div className="-mx-3 -mb-6 -mt-2 flex h-[calc(100dvh-11rem)] min-h-[420px] min-w-0 flex-col overflow-hidden bg-[#111b21] sm:-mx-5 sm:-mb-8 sm:h-[calc(100dvh-12rem)]">
       <MessagerieMissionsView
         sessionUserId={session.user.id}
         isAgence={isManager}

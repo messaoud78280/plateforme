@@ -180,7 +180,7 @@ export function MessagerieMissionsView({
   const router = useRouter();
   const [missions, setMissions] = useState<MissionItem[]>([]);
   const [filter, setFilter] = useState<FilterId>(
-    isAgence || isAgent ? "messages-directs" : "inbox",
+    isClient ? "inbox" : "messages-directs",
   );
   const [selectedTaskId, setSelectedTaskId] = useState<string>("");
   const [messages, setMessages] = useState<TaskMessageItem[]>([]);
@@ -212,8 +212,12 @@ export function MessagerieMissionsView({
   const highlightMessageId = useRef<string | null>(null);
 
   const selectedMission = missions.find((m) => m.id === selectedTaskId);
-  const showEnvoyerTab = isAgence || isAgent;
-  const navItems = showEnvoyerTab ? NAV_ITEMS : NAV_ITEMS.filter((i) => i.id !== "envoyer" && i.id !== "messages-directs");
+  const showEnvoyerTab = isAgence || isAgent || isClient;
+  const navItems = NAV_ITEMS.filter((i) => {
+    if (i.id === "envoyer") return showEnvoyerTab;
+    if (i.id === "messages-directs") return true; // Contacts pour tous
+    return true;
+  });
 
   const myDirectMessages = directMessages.filter(
     (m) => m.sender.id === sessionUserId || m.receiver.id === sessionUserId
@@ -291,10 +295,14 @@ export function MessagerieMissionsView({
       refreshDirectIndex()
         .then((data) => {
           setDirectMessages(data);
-          if (!selectedDirectContactId && data.length > 0) {
-            const first = data[0] as DirectMessageItem;
-            const other = first.sender.id === sessionUserId ? first.receiver : first.sender;
-            if (other?.id && other.id !== sessionUserId) setSelectedDirectContactId(other.id);
+          if (!selectedDirectContactId) {
+            if (data.length > 0) {
+              const first = data[0] as DirectMessageItem;
+              const other = first.sender.id === sessionUserId ? first.receiver : first.sender;
+              if (other?.id && other.id !== sessionUserId) setSelectedDirectContactId(other.id);
+            } else if (recipients[0]?.id) {
+              setSelectedDirectContactId(recipients[0].id);
+            }
           }
         })
         .finally(() => setLoadingDirectMessages(false));
@@ -323,13 +331,21 @@ export function MessagerieMissionsView({
       setMessages([]);
       return;
     }
+    let cancelled = false;
+    setMessages([]);
     setLoadingMessages(true);
     fetch(`/api/tasks/${selectedTaskId}/messages`)
       .then((r) => (r.ok ? r.json() : []))
       .then((data) => {
+        if (cancelled) return;
         setMessages(Array.isArray(data) ? data : []);
       })
-      .finally(() => setLoadingMessages(false));
+      .finally(() => {
+        if (!cancelled) setLoadingMessages(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [selectedTaskId]);
 
   useEffect(() => {
@@ -638,17 +654,17 @@ export function MessagerieMissionsView({
   );
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-[1600px] overflow-hidden bg-[#f0f2f5] shadow-2xl">
+    <div className="mx-auto flex h-full min-h-0 w-full max-w-[1600px] overflow-hidden bg-[#f0f2f5] shadow-2xl">
       {/* Rail icônes — comme WhatsApp */}
       <aside className="flex w-[59px] shrink-0 flex-col items-center border-r border-[#d1d7db] bg-[#f0f2f5] py-3">
-        <div className="flex flex-1 flex-col items-center gap-1 overflow-y-auto">
+        <div className="flex min-h-0 flex-1 flex-col items-center gap-1 overflow-y-auto">
           {navItems.map((item) => railBtn(item.id, item.label, filter === item.id))}
         </div>
       </aside>
 
       {/* Colonne liste / formulaire */}
       {filter === "envoyer" ? (
-        <div className="flex min-w-0 flex-1 flex-col overflow-y-auto bg-white p-6">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto bg-white p-6">
           <h2 className="mb-4 text-lg font-semibold text-[#111b21]">Nouveau message</h2>
           <p className="mb-4 text-sm text-[#667781]">
             Choisissez un destinataire et écrivez votre message.
@@ -727,7 +743,7 @@ export function MessagerieMissionsView({
         </div>
       ) : filter === "messages-directs" ? (
         <>
-          <aside className="flex w-[min(100%,420px)] shrink-0 flex-col border-r border-[#d1d7db] bg-white">
+          <aside className="flex min-h-0 w-[min(100%,420px)] shrink-0 flex-col overflow-hidden border-r border-[#d1d7db] bg-white">
             <div className="border-b border-[#e9edef] px-4 pb-3 pt-3">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="text-[22px] font-bold tracking-tight text-[#111b21]">Contacts</h2>
@@ -811,7 +827,7 @@ export function MessagerieMissionsView({
               )}
             </ul>
           </aside>
-          <div className="flex min-w-0 flex-1 flex-col">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
             {selectedDirectContactId && selectedDirectContact ? (
               <>
                 <div className="flex shrink-0 items-center gap-3 border-b border-[#d1d7db] bg-[#f0f2f5] px-4 py-2">
@@ -826,10 +842,18 @@ export function MessagerieMissionsView({
                     <p className="text-[13px] text-[#667781]">Message direct</p>
                   </div>
                 </div>
-                <div className="flex-1 overflow-y-auto px-4 py-3" style={WA_CHAT_BG}>
+                <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3" style={WA_CHAT_BG}>
                   <div className="space-y-1.5">
                     {loadingDirectThread ? (
                       <p className="text-sm text-[#667781]">Chargement…</p>
+                    ) : null}
+                    {!loadingDirectThread && selectedDirectThread.length === 0 ? (
+                      <div className="flex h-full items-center justify-center py-16">
+                        <p className="rounded-lg bg-[#fff5c4] px-4 py-2 text-[13px] text-[#54656f] shadow-sm">
+                          Début de la conversation avec{" "}
+                          {(selectedDirectContact as { name?: string })?.name ?? "ce contact"}.
+                        </p>
+                      </div>
                     ) : null}
                     {selectedDirectThread.map((m) => {
                       const isMe = m.sender.id === sessionUserId;
@@ -880,7 +904,7 @@ export function MessagerieMissionsView({
                     })}
                   </div>
                 </div>
-                <div className="shrink-0 bg-[#f0f2f5] px-3 py-2.5">
+                <div className="z-20 shrink-0 border-t border-[#d1d7db] bg-[#f0f2f5] px-3 py-2.5">
                   <form onSubmit={handleReplyDirect} className="space-y-2">
                     <input
                       id={replyFileId}
@@ -943,20 +967,30 @@ export function MessagerieMissionsView({
         </>
       ) : (
       <>
-      <aside className="flex w-[min(100%,420px)] shrink-0 flex-col border-r border-[#d1d7db] bg-white">
+      <aside className="flex min-h-0 w-[min(100%,420px)] shrink-0 flex-col overflow-hidden border-r border-[#d1d7db] bg-white">
         <div className="border-b border-[#e9edef] px-4 pb-3 pt-3">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-[22px] font-bold tracking-tight text-[#111b21]">Discussions</h2>
-            <button
-              type="button"
-              title="Nouvelle discussion"
-              onClick={() => setFilter(showEnvoyerTab ? "envoyer" : "inbox")}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-[#54656f] hover:bg-[#f0f2f5]"
-            >
-              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
-              </svg>
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                title="Contacts"
+                onClick={() => setFilter("messages-directs")}
+                className="rounded-full px-3 py-1.5 text-xs font-semibold text-[#008069] hover:bg-[#e7f8f3]"
+              >
+                Contacts
+              </button>
+              <button
+                type="button"
+                title="Nouvelle discussion"
+                onClick={() => setFilter(showEnvoyerTab ? "envoyer" : "inbox")}
+                className="flex h-9 w-9 items-center justify-center rounded-full text-[#54656f] hover:bg-[#f0f2f5]"
+              >
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
+                </svg>
+              </button>
+            </div>
           </div>
           <div className="relative">
             <svg
@@ -1042,7 +1076,7 @@ export function MessagerieMissionsView({
       </aside>
 
       {/* Colonne droite : conversation type WhatsApp */}
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         {selectedMission ? (
           <>
             <div className="flex shrink-0 items-center gap-3 border-b border-[#d1d7db] bg-[#f0f2f5] px-4 py-2">
@@ -1082,7 +1116,7 @@ export function MessagerieMissionsView({
             </div>
 
             <div
-              className="relative flex-1 overflow-y-auto px-4 py-3"
+              className="relative min-h-0 flex-1 overflow-y-auto px-4 py-3"
               style={WA_CHAT_BG}
               onDragOver={(e) => {
                 e.preventDefault();
@@ -1250,7 +1284,7 @@ export function MessagerieMissionsView({
               )}
             </div>
 
-            <div className="shrink-0 bg-[#f0f2f5] px-3 py-2.5">
+            <div className="z-20 shrink-0 border-t border-[#d1d7db] bg-[#f0f2f5] px-3 py-2.5">
               {(isAgence || isAgent) && (
                 <label className="mb-1.5 flex items-center gap-2 px-1 text-xs text-[#667781]">
                   <input

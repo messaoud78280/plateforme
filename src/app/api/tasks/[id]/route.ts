@@ -161,14 +161,19 @@ export async function PUT(
       }
       data.status = status;
     }
-    if (isAgence && body.hasOwnProperty("priority")) {
+    // Priorité : direction / agent assigné / client (signaler l’urgence sur sa mission)
+    if (body.hasOwnProperty("priority")) {
+      const canSetPriority = isAgence || isAssignedAgent || isClient;
+      if (!canSetPriority) {
+        return NextResponse.json({ error: "Non autorisé à modifier la priorité." }, { status: 403 });
+      }
       const rawPriority = priority as string | null | undefined;
       const normalized = normalizeTaskPriority(rawPriority);
-      data.priority =
-        normalized ?? (rawPriority == null || rawPriority === "" ? "STANDARD" : null);
       if (rawPriority != null && rawPriority !== "" && normalized === null) {
         return NextResponse.json({ error: "Priorité invalide" }, { status: 400 });
       }
+      data.priority =
+        normalized ?? (rawPriority == null || rawPriority === "" ? "STANDARD" : null);
     }
     if (status === "COMPLETE") data.completedAt = new Date();
     if (status && status !== "COMPLETE") data.completedAt = null;

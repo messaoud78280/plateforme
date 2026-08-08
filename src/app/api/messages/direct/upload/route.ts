@@ -28,9 +28,11 @@ export async function POST(request: Request) {
   }
 
   const role = session.user.role;
-  const allowed = role === "MANAGER" || role === "AGENT" || role === "AGENCE";
+  // Messagerie WhatsApp : client, agent et gérant peuvent joindre photos / PDF
+  const allowed =
+    role === "MANAGER" || role === "AGENT" || role === "AGENCE" || role === "CLIENT";
   if (!allowed) {
-    return NextResponse.json({ error: "Réservé aux gérants et agents" }, { status: 403 });
+    return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
 
   const supabase = createServiceRoleClient();

@@ -193,6 +193,7 @@ export default async function TachesPage({
             where: {
               assignedToId: session.user.id,
               status: { notIn: ["COMPLETE"] },
+              priority: "URGENT",
             },
           }),
           prisma.task.count({
@@ -227,9 +228,13 @@ export default async function TachesPage({
         title: t.title,
         description: t.description,
         status: t.status,
+        priority: (t as { priority?: string | null }).priority ?? null,
+        missionType: (t as { missionType?: string | null }).missionType ?? null,
+        desiredDate: (t as { desiredDate?: Date | null }).desiredDate ?? null,
         createdAt: t.createdAt,
+        updatedAt: t.updatedAt,
         actionsUsed: t.actionsUsed,
-        estimatedActions: (t as { estimatedActions?: string | null }).estimatedActions ?? null,
+        estimatedActions: (t as { estimatedActions?: number | string | null }).estimatedActions ?? null,
         correctionNote: t.correctionNote ?? null,
         project: t.project ?? null,
         assignedTo: t.assignedTo ? { id: t.assignedTo.id, name: t.assignedTo.name } : null,
@@ -243,28 +248,21 @@ export default async function TachesPage({
         <PageHeader
           eyebrow="Espace client"
           title="Mes missions"
-          description="Suivez l'avancement de vos missions et échangez avec votre assistant."
+          description="V2 missions : priorité en 1 clic, vues Liste / Chantiers / Tableau, alertes échéance. Ouvrez Message pour écrire à l’équipe."
           actions={
-            <Link href="/dashboard/nouvelle-demande" className="btn-cc-primary">
-              + Nouvelle mission
-            </Link>
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href="/dashboard/messagerie"
+                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Communication
+              </Link>
+              <Link href="/dashboard/nouvelle-demande" className="btn-cc-primary">
+                + Nouvelle mission
+              </Link>
+            </div>
           }
         />
-
-        <FilterBar as="div">
-          <FilterChip href="/dashboard/taches" active={!validStatus}>
-            Toutes
-          </FilterChip>
-          <FilterChip href="/dashboard/taches?statut=EN_ATTENTE" active={validStatus === "EN_ATTENTE"}>
-            En attente
-          </FilterChip>
-          <FilterChip href="/dashboard/taches?statut=EN_COURS" active={validStatus === "EN_COURS"}>
-            En cours
-          </FilterChip>
-          <FilterChip href="/dashboard/taches?statut=COMPLETE" active={validStatus === "COMPLETE"}>
-            Terminées
-          </FilterChip>
-        </FilterBar>
         <MesDemandesList tasks={clientTasksForList} />
       </div>
     );
@@ -343,7 +341,7 @@ export default async function TachesPage({
 
       {isManager && <DepotTacheForm projects={projects} />}
 
-      {(isManager || isAgent) && (
+      {isManager && (
         <FilterBar as="div">
           <FilterChip href="/dashboard/taches" active={!validStatus}>
             Toutes
@@ -366,13 +364,30 @@ export default async function TachesPage({
         </h2>
         {isAgent ? (
           <AgentMissionsList
-            missions={(tasks as unknown as { id: string; title: string; status: string; priority: string | null; createdAt: Date; client: { id: string; name: string } }[]).map((t) => ({
+            missions={(
+              tasks as unknown as {
+                id: string;
+                title: string;
+                status: string;
+                priority: string | null;
+                missionType: string | null;
+                desiredDate: Date | null;
+                createdAt: Date;
+                updatedAt: Date;
+                client: { id: string; name: string };
+                project: { id: string; title: string } | null;
+              }[]
+            ).map((t) => ({
               id: t.id,
               title: t.title,
               status: t.status,
               priority: t.priority,
+              missionType: t.missionType,
+              desiredDate: t.desiredDate,
               createdAt: t.createdAt,
+              updatedAt: t.updatedAt,
               client: t.client,
+              project: t.project ?? null,
             }))}
           />
         ) : (

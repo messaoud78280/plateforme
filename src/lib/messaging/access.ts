@@ -39,10 +39,9 @@ export function taskMessageVisibilityRelationWhere(
   user: MessagingUser
 ): Prisma.TaskMessageWhereInput {
   if (user.role === "CLIENT") {
-    return {
-      isInternal: false,
-      ...participantTaskMessageWhere(user.id),
-    };
+    // Fil public de la mission (pas seulement « destinataire = moi »),
+    // sinon la conversation paraît vide alors que l’équipe a déjà répondu.
+    return { isInternal: false };
   }
   // Gérant / Agence / Agent : fil complet une fois l’accès mission validé
   // (sinon le gérant voit la mission mais une conversation vide).

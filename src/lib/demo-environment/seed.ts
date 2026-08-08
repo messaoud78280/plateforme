@@ -572,12 +572,19 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
 
   void ficheAlpha;
 
+  // —— Contacts & messagerie démo (clients + équipe BeWork) ——
+  const staffContacts = await ensureDemoMessagingStaff();
+  const primaryStaff = staffContacts[0]?.id ?? clientId;
+  const sophie = staffContacts.find((s) => s.key === "sophie")?.id ?? primaryStaff;
+  const karim = staffContacts.find((s) => s.key === "karim")?.id ?? primaryStaff;
+  const laura = staffContacts.find((s) => s.key === "laura")?.id ?? primaryStaff;
+
   // —— Scénario messagerie Action BeWork (Point.P / Victor Hugo) ——
   const agentUser = await prisma.user.findFirst({
     where: { role: { in: ["AGENT", "AGENCE", "MANAGER"] }, id: { not: clientId } },
     select: { id: true },
   });
-  const staffId = agentUser?.id ?? clientId;
+  const staffId = sophie || agentUser?.id || clientId;
 
   const taskBc043 = await prisma.task.findFirst({
     where: {
@@ -700,9 +707,252 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
     });
   }
 
+  // Conversations directes multi-contacts (onglet Contacts)
+  await seedDemoDirectConversations({
+    clientId,
+    sophieId: sophie,
+    karimId: karim,
+    lauraId: laura,
+  });
+
+  // Assignation diversifiée + fils mission plus riches
+  await enrichDemoTaskThreads({
+    clientId,
+    sophieId: sophie,
+    karimId: karim,
+    lauraId: laura,
+  });
+
   return {
     projectIds: [projectVictor.id, projectRepublique.id, projectAlpha.id],
     companyLabel: companyName,
+  };
+}
+
+const DEMO_STAFF_CONTACTS = [
+  {
+    key: "sophie" as const,
+    email: "sophie.martin.demo@bework.internal",
+    name: "Sophie Martin",
+    role: "AGENT" as const,
+    service: "Conductrice de travaux — Agence Démo",
+  },
+  {
+    key: "karim" as const,
+    email: "karim.benali.demo@bework.internal",
+    name: "Karim Benali",
+    role: "AGENT" as const,
+    service: "Chef de chantier — Agence Démo",
+  },
+  {
+    key: "laura" as const,
+    email: "laura.bernard.demo@bework.internal",
+    name: "Laura Bernard",
+    role: "AGENCE" as const,
+    service: "Administration — Agence Démo",
+  },
+];
+
+/** Crée / réutilise 3 contacts fictifs BeWork pour tester la messagerie côté client. */
+export async function ensureDemoMessagingStaff(): Promise<
+  { key: "sophie" | "karim" | "laura"; id: string; name: string }[]
+> {
+  const bcrypt = await import("bcryptjs");
+  const password = await bcrypt.hash("DemoStaffNeverLogin!", 10);
+  const out: { key: "sophie" | "karim" | "laura"; id: string; name: string }[] = [];
+
+  for (const contact of DEMO_STAFF_CONTACTS) {
+    const existing = await prisma.user.findUnique({
+      where: { email: contact.email },
+      select: { id: true, name: true },
+    });
+    if (existing) {
+      out.push({ key: contact.key, id: existing.id, name: existing.name });
+      continue;
+    }
+    const created = await prisma.user.create({
+      data: {
+        email: contact.email,
+        password,
+        name: contact.name,
+        role: contact.role,
+        company: "BeWork — Agence Démo",
+        service: contact.service,
+        accountStatus: "APPROVED",
+        contractStatus: "SIGNED",
+      },
+      select: { id: true, name: true },
+    });
+    out.push({ key: contact.key, id: created.id, name: created.name });
+  }
+
+  return out;
+}
+
+export async function seedDemoDirectConversations(opts: {
+  clientId: string;
+  sophieId: string;
+  karimId: string;
+  lauraId: string;
+}) {
+  const { clientId, sophieId, karimId, lauraId } = opts;
+
+  // Évite les doublons si on ré-enrichit sans clear complet
+  const existing = await prisma.directMessage.count({
+    where: {
+      OR: [{ senderId: clientId }, { receiverId: clientId }],
+      content: { contains: "[démo]" },
+    },
+  });
+  if (existing > 0) return;
+
+  const hoursAgo = (h: number) => {
+    const d = new Date();
+    d.setHours(d.getHours() - h);
+    return d;
+  };
+
+  await prisma.directMessage.createMany({
+    data: [
+      {
+        senderId: sophieId,
+        receiverId: clientId,
+        content:
+          "[démo] Bonjour Marc, je suis Sophie (conductrice). On peut suivre Victor Hugo ici — photos et PDF bienvenus.",
+        read: false,
+        createdAt: hoursAgo(26),
+      },
+      {
+        senderId: clientId,
+        receiverId: sophieId,
+        content: "[démo] Parfait Sophie. Je vous envoie les plans terrasse dès que le fournisseur répond.",
+        read: true,
+        createdAt: hoursAgo(24),
+      },
+      {
+        senderId: sophieId,
+        receiverId: clientId,
+        content:
+          "[démo] Reçu. Je relance Étanchéité Plus cet après-midi et je vous confirme la date de pose.",
+        read: false,
+        createdAt: hoursAgo(5),
+      },
+      {
+        senderId: karimId,
+        receiverId: clientId,
+        content:
+          "[démo] Karim — chantier République : nacelle OK pour jeudi. Besoin de votre validation accès livraison ?",
+        read: false,
+        createdAt: hoursAgo(8),
+      },
+      {
+        senderId: clientId,
+        receiverId: karimId,
+        content: "[démo] Accès validé côté cour, 7h–16h. Merci Karim.",
+        read: true,
+        createdAt: hoursAgo(6),
+      },
+      {
+        senderId: lauraId,
+        receiverId: clientId,
+        content:
+          "[démo] Laura (admin) — les BC-2026-043 et 038 sont prêts pour validation. Je reste dispo pour les pièces jointes.",
+        read: false,
+        createdAt: hoursAgo(3),
+      },
+      {
+        senderId: lauraId,
+        receiverId: clientId,
+        content:
+          "[démo] Pensez aussi à déposer le PV de réception partielle Alpha dans Documents quand vous l’aurez.",
+        read: false,
+        createdAt: hoursAgo(1),
+      },
+    ],
+  });
+}
+
+export async function enrichDemoTaskThreads(opts: {
+  clientId: string;
+  sophieId: string;
+  karimId: string;
+  lauraId: string;
+}) {
+  const { clientId, sophieId, karimId, lauraId } = opts;
+
+  const tasks = await prisma.task.findMany({
+    where: { clientId },
+    select: { id: true, title: true, projectId: true },
+  });
+
+  for (const t of tasks) {
+    let assignee = sophieId;
+    if (t.title.includes("République") || t.title.includes("nacelle")) assignee = karimId;
+    if (t.title.includes("BC-") || t.title.includes("POINT.P")) assignee = lauraId;
+    if (t.title.includes("Alpha")) assignee = sophieId;
+
+    await prisma.task.update({
+      where: { id: t.id },
+      data: { assignedToId: assignee },
+    });
+
+    const count = await prisma.taskMessage.count({ where: { taskId: t.id } });
+    if (count >= 2) continue;
+
+    const marker = `[démo-thread-${t.id.slice(-6)}]`;
+    const already = await prisma.taskMessage.count({
+      where: { taskId: t.id, content: { contains: marker } },
+    });
+    if (already > 0) continue;
+
+    await prisma.taskMessage.createMany({
+      data: [
+        {
+          taskId: t.id,
+          senderId: assignee,
+          receiverId: clientId,
+          content: `${marker} Bonjour, je prends en charge « ${t.title} ». Écrivez-moi ici pour toute précision (texte, photo, PDF).`,
+          kind: "USER",
+          createdAt: daysFromNow(-4),
+        },
+        {
+          taskId: t.id,
+          senderId: clientId,
+          receiverId: assignee,
+          content: `${marker} Merci, c’est noté. Je reste disponible si vous avez besoin d’un document.`,
+          kind: "USER",
+          createdAt: daysFromNow(-3),
+        },
+      ],
+    });
+  }
+}
+
+/** Enrichit messagerie d’un client démo existant (sans tout réinitialiser). */
+export async function enrichExistingDemoMessaging(clientId: string) {
+  const staff = await ensureDemoMessagingStaff();
+  const sophie = staff.find((s) => s.key === "sophie")!.id;
+  const karim = staff.find((s) => s.key === "karim")!.id;
+  const laura = staff.find((s) => s.key === "laura")!.id;
+
+  await prisma.directMessage.deleteMany({
+    where: {
+      OR: [{ senderId: clientId }, { receiverId: clientId }],
+      content: { contains: "[démo]" },
+    },
+  });
+
+  await seedDemoDirectConversations({ clientId, sophieId: sophie, karimId: karim, lauraId: laura });
+  await enrichDemoTaskThreads({ clientId, sophieId: sophie, karimId: karim, lauraId: laura });
+
+  return {
+    staff: staff.map((s) => ({ name: s.name, id: s.id })),
+    directCount: await prisma.directMessage.count({
+      where: { OR: [{ senderId: clientId }, { receiverId: clientId }] },
+    }),
+    taskMessageCount: await prisma.taskMessage.count({
+      where: { OR: [{ senderId: clientId }, { receiverId: clientId }] },
+    }),
   };
 }
 
@@ -710,6 +960,9 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
 export async function clearDemoEnvironmentData(clientId: string) {
   await prisma.$transaction([
     prisma.messageAction.deleteMany({ where: { createdById: clientId } }),
+    prisma.directMessage.deleteMany({
+      where: { OR: [{ senderId: clientId }, { receiverId: clientId }] },
+    }),
     prisma.agendaEventAttendee.deleteMany({
       where: { event: { ownerUserId: clientId } },
     }),

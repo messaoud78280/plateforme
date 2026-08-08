@@ -26,7 +26,7 @@ export type ATraiterItem = {
   title: string;
   meta: string;
   href: string;
-  source: "mission" | "alerte" | "piece" | "blocage" | "notification" | "fiche";
+  source: "mission" | "alerte" | "piece" | "blocage" | "notification" | "fiche" | "message";
   createdAt: Date;
   urgencyLabel?: string;
   assigneeName?: string | null;
@@ -338,6 +338,76 @@ async function collectForStaff(
     items,
     agentOnly ? userId : null,
   );
+  await collectMessageActions(userId, items);
+}
+
+async function collectMessageActions(userId: string, items: ATraiterItem[]) {
+  try {
+    const now = new Date();
+    const actions = await prisma.messageAction.findMany({
+      where: {
+        status: "OPEN",
+        type: { in: ["REMINDER", "ASSIGN"] },
+        OR: [{ assigneeId: userId }, { createdById: userId, type: "REMINDER" }],
+      },
+      select: {
+        id: true,
+        title: true,
+        type: true,
+        priority: true,
+        dueAt: true,
+        createdAt: true,
+        sourceMessageKind: true,
+        sourceMessageId: true,
+        metaJson: true,
+      },
+      orderBy: { dueAt: "asc" },
+      take: 40,
+    });
+
+    for (const a of actions) {
+      const meta = (a.metaJson ?? {}) as {
+        deepLink?: string;
+        excerpt?: string;
+        projectTitle?: string;
+      };
+      const overdue = a.dueAt != null && a.dueAt < now;
+      const section: ATraiterSection =
+        a.priority === "URGENT" || overdue
+          ? "bloquant"
+          : a.priority === "IMPORTANT"
+            ? "urgent"
+            : "relance";
+      const href =
+        meta.deepLink ||
+        (a.sourceMessageKind === "TASK"
+          ? `/dashboard/messagerie?messageId=${a.sourceMessageId}`
+          : `/dashboard/messagerie?tab=messages-directs&messageId=${a.sourceMessageId}`);
+
+      push(items, {
+        id: `msg-action-${a.id}`,
+        section,
+        title: a.title,
+        meta:
+          a.type === "REMINDER"
+            ? `Rappel message${meta.projectTitle ? ` · ${meta.projectTitle}` : ""}`
+            : `Assigné depuis messagerie${meta.projectTitle ? ` · ${meta.projectTitle}` : ""}`,
+        href,
+        source: "message",
+        createdAt: a.dueAt ?? a.createdAt,
+        dueLabel: a.dueAt
+          ? a.dueAt.toLocaleString("fr-FR", {
+              day: "numeric",
+              month: "short",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : null,
+      });
+    }
+  } catch (e) {
+    console.error("collectMessageActions:", e);
+  }
 }
 
 async function collectFollowUpSheets(
@@ -482,7 +552,7 @@ export async function countATraiter(user: {
   const agentFilter = agentOnly ? { assignedToId: user.id } : {};
 
   const accessWhere = await followUpSheetAccessWhere({ id: user.id, role: user.role });
-  const [toValidate, awaitingInfo, urgent, notifs, blockers, fiches] = await Promise.all([
+  const [toValidate, awaitingInfo, urgent, notifs, blockers, fiches, msgActions] = await Promise.all([
     isDecideur ? prisma.task.count({ where: { status: "A_VALIDER" } }) : Promise.resolve(0),
     prisma.task.count({ where: { status: "EN_ATTENTE_INFO", ...agentFilter } }),
     prisma.task.count({
@@ -527,7 +597,14 @@ export async function countATraiter(user: {
         ],
       },
     }),
+    prisma.messageAction.count({
+      where: {
+        status: "OPEN",
+        type: { in: ["REMINDER", "ASSIGN"] },
+        OR: [{ assigneeId: user.id }, { createdById: user.id, type: "REMINDER" }],
+      },
+    }),
   ]);
 
-  return toValidate + awaitingInfo + urgent + notifs + blockers + fiches;
+  return toValidate + awaitingInfo + urgent + notifs + blockers + fiches + msgActions;
 }

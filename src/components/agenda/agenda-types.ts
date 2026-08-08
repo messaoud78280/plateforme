@@ -10,6 +10,10 @@ export type AgendaEventDTO = {
   allDay: boolean;
   projectId: string | null;
   followUpSheetId?: string | null;
+  /** Lien vers le message d’origine (Action BeWork). */
+  sourceMessageKind?: string | null;
+  sourceMessageId?: string | null;
+  sourceMessageHref?: string | null;
   responsibleId: string | null;
   reminderMinutes: number | null;
   recurrence: string | null;

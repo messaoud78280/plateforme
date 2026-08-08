@@ -315,6 +315,21 @@ export function AgendaSidePanel({
                   <dd className="whitespace-pre-wrap text-slate-700">{selectedEvent.description}</dd>
                 </div>
               ) : null}
+              {selectedEvent.sourceMessageHref ? (
+                <div>
+                  <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                    Message d’origine
+                  </dt>
+                  <dd>
+                    <Link
+                      href={selectedEvent.sourceMessageHref}
+                      className="font-medium text-[#1d4ed8] hover:underline"
+                    >
+                      Voir le message d’origine
+                    </Link>
+                  </dd>
+                </div>
+              ) : null}
             </dl>
 
             <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-4">

@@ -78,6 +78,18 @@ export async function GET(request: Request) {
       take: 500,
     });
 
+    const sourceTaskIds = events
+      .filter((e) => e.sourceMessageKind === "TASK" && e.sourceMessageId)
+      .map((e) => e.sourceMessageId as string);
+    const taskMsgs =
+      sourceTaskIds.length > 0
+        ? await prisma.taskMessage.findMany({
+            where: { id: { in: sourceTaskIds } },
+            select: { id: true, taskId: true },
+          })
+        : [];
+    const taskByMsg = new Map(taskMsgs.map((m) => [m.id, m.taskId]));
+
     const agendaEvents = events.flatMap((e) => {
       const expanded =
         from && to
@@ -102,6 +114,15 @@ export async function GET(request: Request) {
           : computeUrgencyFromDue(occ.startAt instanceof Date ? occ.startAt : new Date(String(occ.startAt)), {
               nextActionDone: e.status === "TERMINE",
             });
+        let sourceMessageHref: string | null = null;
+        if (e.sourceMessageKind === "TASK" && e.sourceMessageId) {
+          const taskId = taskByMsg.get(e.sourceMessageId);
+          sourceMessageHref = taskId
+            ? `/dashboard/messagerie?task=${taskId}&messageId=${e.sourceMessageId}`
+            : `/dashboard/messagerie?messageId=${e.sourceMessageId}`;
+        } else if (e.sourceMessageKind === "DIRECT" && e.sourceMessageId) {
+          sourceMessageHref = `/dashboard/messagerie?tab=messages-directs&messageId=${e.sourceMessageId}`;
+        }
         return {
           ...occ,
           startAt: occ.startAt instanceof Date ? occ.startAt.toISOString() : String(occ.startAt),
@@ -111,6 +132,9 @@ export async function GET(request: Request) {
           href: sheet ? `/dashboard/fiches-suivi/${sheet.id}` : (null as string | null),
           followUpSheetId: sheet?.id ?? e.followUpSheetId ?? null,
           followUpSheet: sheet ? { id: sheet.id, title: sheet.title } : null,
+          sourceMessageKind: e.sourceMessageKind ?? null,
+          sourceMessageId: e.sourceMessageId ?? null,
+          sourceMessageHref,
           urgency,
           urgencyLabel: URGENCY_LABELS[urgency],
           isOccurrence: occ.id.includes("__"),

@@ -572,6 +572,102 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
 
   void ficheAlpha;
 
+  // —— Scénario messagerie Action BeWork (Point.P / Victor Hugo) ——
+  const agentUser = await prisma.user.findFirst({
+    where: { role: { in: ["AGENT", "AGENCE", "MANAGER"] }, id: { not: clientId } },
+    select: { id: true },
+  });
+  const staffId = agentUser?.id ?? clientId;
+
+  const taskBc043 = await prisma.task.findFirst({
+    where: {
+      clientId,
+      title: { contains: "BC-2026-043" },
+    },
+    select: { id: true },
+  });
+  const taskRelance = await prisma.task.findFirst({
+    where: {
+      clientId,
+      title: { contains: "Relancer le fournisseur" },
+    },
+    select: { id: true },
+  });
+  const taskCr = await prisma.task.findFirst({
+    where: {
+      clientId,
+      title: { contains: "compte rendu de visite Victor Hugo" },
+    },
+    select: { id: true },
+  });
+
+  if (taskBc043) {
+    await prisma.task.update({
+      where: { id: taskBc043.id },
+      data: {
+        assignedToId: staffId,
+        title: "POINT.P — Résidence Victor Hugo (BC-2026-043)",
+        suppliersJson: [{ name: "Point.P (fictif)", contact: "livraisons@pointp.demo" }],
+      },
+    });
+    await prisma.taskMessage.createMany({
+      data: [
+        {
+          taskId: taskBc043.id,
+          senderId: staffId,
+          receiverId: clientId,
+          content:
+            "Bonjour, votre commande de 40 rouleaux est prête.\nLivraison possible mardi 11 août à 7h30.",
+          kind: "USER",
+          createdAt: daysFromNow(-1),
+        },
+        {
+          taskId: taskBc043.id,
+          senderId: clientId,
+          receiverId: staffId,
+          content: "Merci. On valide mardi 7h30 sur Victor Hugo — aire livraison.",
+          kind: "USER",
+          createdAt: daysFromNow(-1),
+        },
+      ],
+    });
+  }
+
+  if (taskRelance) {
+    await prisma.task.update({
+      where: { id: taskRelance.id },
+      data: { assignedToId: staffId },
+    });
+    await prisma.taskMessage.create({
+      data: {
+        taskId: taskRelance.id,
+        senderId: clientId,
+        receiverId: staffId,
+        content:
+          "Pendant que vous êtes sur place, pouvez-vous également reprendre les 20 m² de terrasse côté cour ?",
+        kind: "USER",
+        createdAt: daysFromNow(-2),
+      },
+    });
+  }
+
+  if (taskCr) {
+    await prisma.task.update({
+      where: { id: taskCr.id },
+      data: { assignedToId: staffId },
+    });
+    await prisma.taskMessage.create({
+      data: {
+        taskId: taskCr.id,
+        senderId: staffId,
+        receiverId: clientId,
+        content: "Victor Hugo terminé, tout est OK.",
+        kind: "USER",
+        createdAt: daysFromNow(0),
+      },
+    });
+  }
+
   return {
     projectIds: [projectVictor.id, projectRepublique.id, projectAlpha.id],
     companyLabel: companyName,
@@ -581,6 +677,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
 /** Supprime uniquement les données métier du tenant démo (pas le User / Organization / DemoEnvironment). */
 export async function clearDemoEnvironmentData(clientId: string) {
   await prisma.$transaction([
+    prisma.messageAction.deleteMany({ where: { createdById: clientId } }),
     prisma.agendaEventAttendee.deleteMany({
       where: { event: { ownerUserId: clientId } },
     }),

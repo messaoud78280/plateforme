@@ -6,6 +6,7 @@ import Link from "next/link";
 import { DeleteTaskButton } from "@/components/tasks/DeleteTaskButton";
 import { documentDownloadHref } from "@/lib/documents/download-url";
 import { SignedFileLink } from "@/components/files/SignedFileLink";
+import { MessageBeworkActions } from "@/components/messagerie/MessageBeworkActions";
 
 const STATUS_LABELS: Record<string, string> = {
   NOUVEAU: "Nouvelle",
@@ -23,6 +24,7 @@ type TaskMessageItem = {
   content: string;
   read: boolean;
   isInternal: boolean;
+  kind?: string;
   createdAt: string;
   sender: { id: string; name: string };
   receiver: { id: string; name: string };
@@ -33,6 +35,7 @@ type MissionItem = {
   title: string;
   status: string;
   priority: string | null;
+  projectId?: string | null;
   client: { id: string; name: string };
   assignedTo: { id: string; name: string } | null;
   lastMessage: {
@@ -153,6 +156,7 @@ export function MessagerieMissionsView({
   const directFileId = "direct-file-input";
   const replyFileId = "reply-file-input";
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const highlightMessageId = useRef<string | null>(null);
 
   const selectedMission = missions.find((m) => m.id === selectedTaskId);
   const showEnvoyerTab = isAgence || isAgent;
@@ -291,6 +295,44 @@ export function MessagerieMissionsView({
       })
       .catch(() => {});
   }, [filter, selectedDirectContactId]);
+
+  // Deep-link ?task=&messageId= / ?tab=messages-directs&with=&messageId=
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab");
+    const task = params.get("task");
+    const messageId = params.get("messageId");
+    const withUser = params.get("with");
+    if (tab === "messages-directs") {
+      setFilter("messages-directs");
+      if (withUser) setSelectedDirectContactId(withUser);
+    }
+    if (task) setSelectedTaskId(task);
+    if (messageId) highlightMessageId.current = messageId;
+
+    if (messageId && !task && tab !== "messages-directs") {
+      void fetch(`/api/messages/locate?kind=TASK&id=${encodeURIComponent(messageId)}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => {
+          if (d?.taskId) setSelectedTaskId(d.taskId);
+        })
+        .catch(() => {});
+    }
+  }, []);
+
+  useEffect(() => {
+    const mid = highlightMessageId.current;
+    if (!mid) return;
+    const t = window.setTimeout(() => {
+      const el = document.getElementById(`msg-${mid}`);
+      if (!el) return;
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.classList.add("ring-2", "ring-amber-400", "rounded-2xl");
+      highlightMessageId.current = null;
+    }, 350);
+    return () => window.clearTimeout(t);
+  }, [messages, directThreadMessages, selectedTaskId, selectedDirectContactId]);
 
   // Rafraîchissement automatique des messages directs (toutes les 7 s)
   useEffect(() => {
@@ -663,6 +705,7 @@ export function MessagerieMissionsView({
                       return (
                         <div
                           key={m.id}
+                          id={`msg-${m.id}`}
                           className={`flex gap-3 ${isMe ? "flex-row-reverse" : ""}`}
                         >
                           <Avatar name={m.sender.name} />
@@ -691,6 +734,13 @@ export function MessagerieMissionsView({
                                 </div>
                               )}
                             </div>
+                            <MessageBeworkActions
+                              messageId={m.id}
+                              messageKind="DIRECT"
+                              content={m.content || ""}
+                              isMe={isMe}
+                              agents={agents}
+                            />
                             <p className="mt-1 text-xs text-slate-400">{formatMessageTime(m.createdAt)}</p>
                           </div>
                         </div>
@@ -851,6 +901,14 @@ export function MessagerieMissionsView({
                 >
                   {STATUS_LABELS[selectedMission.status] ?? selectedMission.status}
                 </span>
+                {selectedMission.projectId ? (
+                  <Link
+                    href={`/dashboard/projets/${selectedMission.projectId}`}
+                    className="text-xs font-semibold text-[#1d4ed8] hover:underline"
+                  >
+                    Voir le dossier chantier
+                  </Link>
+                ) : null}
               </div>
             </div>
 
@@ -862,26 +920,39 @@ export function MessagerieMissionsView({
                 <div className="space-y-4">
                   {visibleMessages.map((m) => {
                     const isMe = m.sender.id === sessionUserId;
+                    const isSystem = m.kind === "SYSTEM";
                     return (
                       <div
                         key={m.id}
+                        id={`msg-${m.id}`}
                         className={`flex gap-3 ${isMe ? "flex-row-reverse" : ""}`}
                       >
                         <Avatar name={m.sender.name} />
                         <div className={`flex max-w-[80%] flex-col ${isMe ? "items-end" : "items-start"}`}>
                           <div
                             className={`rounded-2xl px-4 py-2.5 ${
-                              isMe
-                                ? "rounded-tr-md bg-blue-600 text-white"
-                                : "rounded-tl-md bg-slate-100 text-slate-800"
+                              isSystem
+                                ? "rounded-md border border-emerald-200 bg-emerald-50 text-emerald-950"
+                                : isMe
+                                  ? "rounded-tr-md bg-blue-600 text-white"
+                                  : "rounded-tl-md bg-slate-100 text-slate-800"
                             } ${m.isInternal ? "border border-amber-300" : ""}`}
                           >
                             <p className="text-xs font-medium opacity-90">
-                              {m.sender.name}
+                              {isSystem ? "BeWork" : m.sender.name}
                               {m.isInternal && " (note interne)"}
                             </p>
                             <p className="mt-0.5 whitespace-pre-wrap break-words text-sm">{m.content}</p>
                           </div>
+                          {!isSystem ? (
+                            <MessageBeworkActions
+                              messageId={m.id}
+                              messageKind="TASK"
+                              content={m.content}
+                              isMe={isMe}
+                              agents={agents}
+                            />
+                          ) : null}
                           <p className="mt-1 text-xs text-slate-400">{formatMessageTime(m.createdAt)}</p>
                         </div>
                       </div>

@@ -47,6 +47,7 @@ const SOURCE_LABELS: Record<ATraiterItem["source"], string> = {
   blocage: "Pilotage",
   notification: "Notif.",
   fiche: "Fiche",
+  message: "Message",
 };
 
 function formatWhen(d: Date) {

@@ -69,6 +69,7 @@ export async function GET(request: NextRequest) {
       title: t.title,
       status: t.status,
       priority: (t as { priority?: string | null }).priority ?? null,
+      projectId: t.projectId ?? null,
       client: t.client,
       assignedTo: t.assignedTo,
       lastMessage: t.taskMessages[0]

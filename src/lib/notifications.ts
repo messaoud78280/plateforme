@@ -17,7 +17,8 @@ type NotificationType =
   | "AGENDA_UNCLOSED"
   | "FOLLOWUP_REMINDER"
   | "FOLLOWUP_URGENT"
-  | "FOLLOWUP_CRITICAL";
+  | "FOLLOWUP_CRITICAL"
+  | "MESSAGE_ACTION_ASSIGNED";
 
 export async function createNotification(params: {
   userId: string;

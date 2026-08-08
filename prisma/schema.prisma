@@ -82,6 +82,9 @@ model User {
   followUpSheetsAssigned FollowUpSheet[] @relation("FollowUpSheetAssignee")
   followUpTimelineAuthored FollowUpTimelineEvent[] @relation("FollowUpTimelineAuthor")
   followUpAlertSettings FollowUpAlertSettings? @relation("FollowUpAlertSettingsOwner")
+  messageActionsAssigned MessageAction[] @relation("MessageActionAssignee")
+  messageActionsCreated  MessageAction[] @relation("MessageActionCreatedBy")
+  messageActionsCompleted MessageAction[] @relation("MessageActionCompletedBy")
   reportsAuthored       Report[]      @relation("ReportAuthor")
   reportComments        ReportComment[]
   subscriptions         Subscription[]
@@ -614,6 +617,9 @@ model Task {
   // Mémoire des missions (contacts et fournisseurs pour relance)
   contactsJson    Json?    // [{ name, email, role }]
   suppliersJson   Json?    // [{ name, contact }]
+  /// Provenance messagerie : TASK | DIRECT | PROJECT
+  sourceMessageKind String?
+  sourceMessageId   String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
@@ -628,6 +634,7 @@ model Task {
   chantierFiles ChantierFile[]
 
   @@index([organizationId])
+  @@index([sourceMessageKind, sourceMessageId])
 }
 
 enum TaskStatus {
@@ -649,6 +656,8 @@ model DirectMessage {
   content        String
   attachmentsJson Json?   // [{ name, fileUrl, fileSize, mimeType }]
   read           Boolean  @default(false)
+  kind           String   @default("USER") // USER | SYSTEM
+  payloadJson    Json?
   createdAt      DateTime @default(now())
 
   sender   User @relation("DirectMessagesSent", fields: [senderId], references: [id], onDelete: Cascade)
@@ -667,6 +676,8 @@ model TaskMessage {
   content    String
   read       Boolean  @default(false)
   isInternal Boolean  @default(false)  // true = visible uniquement gérante/agent
+  kind       String   @default("USER") // USER | SYSTEM
+  payloadJson Json?
   createdAt  DateTime @default(now())
 
   task    Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
@@ -899,6 +910,9 @@ model AgendaEvent {
   recurrenceRule  String?
   colorKey        String?
   externalUid     String?           // sync future Google / Outlook / ICS
+  /// Provenance messagerie : TASK | DIRECT | PROJECT
+  sourceMessageKind String?
+  sourceMessageId   String?
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 
@@ -914,6 +928,7 @@ model AgendaEvent {
   @@index([projectId, startAt])
   @@index([followUpSheetId, startAt])
   @@index([type, startAt])
+  @@index([sourceMessageKind, sourceMessageId])
 }
 
 model AgendaEventAttendee {
@@ -986,6 +1001,9 @@ model FollowUpSheet {
   reminderOffsets   Json?
   postponedFromAt   DateTime?
   postponeCount     Int                @default(0)
+  /// Provenance messagerie : TASK | DIRECT | PROJECT
+  sourceMessageKind String?
+  sourceMessageId   String?
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
 
@@ -1001,6 +1019,7 @@ model FollowUpSheet {
   @@index([projectId])
   @@index([organizationId, status])
   @@index([nextActionAt])
+  @@index([sourceMessageKind, sourceMessageId])
 }
 
 model FollowUpTimelineEvent {
@@ -1017,6 +1036,36 @@ model FollowUpTimelineEvent {
   author User?         @relation("FollowUpTimelineAuthor", fields: [authorId], references: [id], onDelete: SetNull)
 
   @@index([sheetId, occurredAt])
+}
+
+/// Action légère issue d'un message (rappel / assignation) — sans dupliquer Agenda/Task/Fiche.
+model MessageAction {
+  id                String    @id @default(cuid())
+  sourceMessageKind String    // TASK | DIRECT | PROJECT
+  sourceMessageId   String
+  type              String    // REMINDER | ASSIGN | LINK
+  status            String    @default("OPEN") // OPEN | DONE | CANCELLED
+  title             String
+  assigneeId        String?
+  dueAt             DateTime?
+  priority          String?   // STANDARD | IMPORTANT | URGENT
+  createdById       String
+  agendaEventId     String?
+  taskId            String?
+  followUpSheetId   String?
+  metaJson          Json?
+  createdAt         DateTime  @default(now())
+  completedAt       DateTime?
+  completedById     String?
+
+  assignee    User? @relation("MessageActionAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  createdBy   User  @relation("MessageActionCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  completedBy User? @relation("MessageActionCompletedBy", fields: [completedById], references: [id], onDelete: SetNull)
+
+  @@index([assigneeId, status, dueAt])
+  @@index([createdById, status])
+  @@index([sourceMessageKind, sourceMessageId])
+  @@index([status, dueAt])
 }
 
 // Seuils d'urgence + regles metier (alertes / rappels) — 1 config par compte proprietaire.

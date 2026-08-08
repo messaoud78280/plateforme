@@ -18,24 +18,24 @@ const SECTION_STYLES: Record<
   { border: string; badge: string; empty: string }
 > = {
   bloquant: {
-    border: "border-red-200",
-    badge: "bg-red-100 text-red-800",
-    empty: "Aucun point bloquant.",
-  },
-  a_valider: {
-    border: "border-violet-200",
-    badge: "bg-violet-100 text-violet-800",
-    empty: "Rien à valider pour le moment.",
+    border: "border-red-900/30",
+    badge: "bg-red-950 text-white",
+    empty: "Aucune situation critique.",
   },
   urgent: {
-    border: "border-amber-200",
-    badge: "bg-amber-100 text-amber-900",
+    border: "border-red-200",
+    badge: "bg-red-100 text-red-900",
     empty: "Aucun élément urgent.",
   },
+  a_valider: {
+    border: "border-orange-200",
+    badge: "bg-orange-100 text-orange-900",
+    empty: "Rien d’important en attente.",
+  },
   relance: {
-    border: "border-slate-200",
-    badge: "bg-slate-100 text-slate-700",
-    empty: "Aucune relance en attente.",
+    border: "border-yellow-200",
+    badge: "bg-yellow-100 text-yellow-900",
+    empty: "Rien à anticiper pour le moment.",
   },
 };
 
@@ -45,6 +45,7 @@ const SOURCE_LABELS: Record<ATraiterItem["source"], string> = {
   piece: "Pièce",
   blocage: "Pilotage",
   notification: "Notif.",
+  fiche: "Fiche",
 };
 
 function formatWhen(d: Date) {
@@ -77,7 +78,7 @@ export default async function ATraiterPage() {
       <PageHeader
         eyebrow="Pilotage quotidien"
         title="À traiter"
-        description="Tout ce qui demande une action de votre part : bloquant, à valider, urgent et relances — un seul endroit."
+        description="Centre opérationnel : critique, urgent, important et à anticiper — fiches de suivi, missions et alertes."
         actions={
           <span className="rounded-full bg-[#1e3a5f] px-3 py-1.5 text-xs font-bold text-white">
             {snapshot.total} point{snapshot.total === 1 ? "" : "s"}
@@ -142,10 +143,21 @@ export default async function ATraiterPage() {
                           <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600">
                             {SOURCE_LABELS[item.source]}
                           </span>
+                          {item.urgencyLabel ? (
+                            <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${style.badge}`}>
+                              {item.urgencyLabel}
+                            </span>
+                          ) : null}
                           <p className="truncate text-sm font-semibold text-slate-900">{item.title}</p>
                         </div>
                         <p className="mt-1 text-xs text-slate-600">{item.meta}</p>
-                        <p className="mt-1 text-[11px] text-slate-400">{formatWhen(item.createdAt)}</p>
+                        <p className="mt-1 text-[11px] text-slate-400">
+                          {item.dueLabel && item.dueLabel !== "—"
+                            ? `Échéance : ${item.dueLabel}`
+                            : formatWhen(item.createdAt)}
+                          {item.delayLabel ? ` · Retard ${item.delayLabel}` : ""}
+                          {item.assigneeName ? ` · ${item.assigneeName}` : ""}
+                        </p>
                       </div>
                       <span className="shrink-0 text-xs font-semibold text-[#1e3a5f]">Ouvrir →</span>
                     </Link>

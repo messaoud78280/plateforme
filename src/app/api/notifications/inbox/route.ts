@@ -12,6 +12,7 @@ export type InboxItemDto = {
   read: boolean;
   actionUrl: string | null;
   createdAt: string;
+  type?: string;
 };
 
 /** GET /api/notifications/inbox — Liste récente + compteur non lues */
@@ -37,6 +38,7 @@ export async function GET() {
           read: true,
           actionUrl: true,
           createdAt: true,
+          type: true,
         },
       }),
       prisma.notification.count({ where: { userId, read: false } }),
@@ -52,6 +54,7 @@ export async function GET() {
               read: true,
               actionUrl: true,
               createdAt: true,
+              level: true,
             },
           })
         : Promise.resolve([]),
@@ -69,6 +72,7 @@ export async function GET() {
         read: n.read,
         actionUrl: n.actionUrl,
         createdAt: n.createdAt.toISOString(),
+        type: n.type,
       })),
       ...alerts.map((a) => ({
         id: a.id,
@@ -78,6 +82,7 @@ export async function GET() {
         read: a.read,
         actionUrl: a.actionUrl,
         createdAt: a.createdAt.toISOString(),
+        type: a.level,
       })),
     ];
 

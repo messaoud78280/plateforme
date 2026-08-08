@@ -446,6 +446,132 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
     ],
   });
 
+  // Fiches de suivi (post-it numériques) — 1 OS / 1 commande = 1 fiche
+  const ficheVictor = await prisma.followUpSheet.create({
+    data: {
+      ownerUserId: clientId,
+      createdById: clientId,
+      assigneeId: clientId,
+      organizationId,
+      projectId: projectVictor.id,
+      title: "Résidence Victor Hugo",
+      clientName: "Résidence Victor Hugo",
+      siteAddress: "12 avenue Victor Hugo, Lyon",
+      workObject: "Réfection étanchéité terrasse",
+      osNumber: "4587",
+      receivedAt: daysFromNow(-4),
+      status: "COMMANDE_FOURNISSEUR",
+      colorKey: "orange",
+      nextAction: "Commander la membrane EPDM",
+      nextActionAt: daysFromNow(-1),
+      nextActionDone: false,
+      reminderOffsets: [168, 72, 24, 2],
+      notes: "Ancien post-it bureau — scénario démo.",
+    },
+  });
+  await prisma.followUpTimelineEvent.createMany({
+    data: [
+      {
+        sheetId: ficheVictor.id,
+        authorId: clientId,
+        kind: "creation",
+        label: "OS reçu",
+        detail: "OS n°4587",
+        occurredAt: daysFromNow(-4),
+      },
+      {
+        sheetId: ficheVictor.id,
+        authorId: clientId,
+        kind: "action",
+        label: "Prochaine action : Commander la membrane EPDM",
+        occurredAt: daysFromNow(-3),
+      },
+      {
+        sheetId: ficheVictor.id,
+        kind: "alerte",
+        label: "Échéance dépassée",
+        detail: "Action non réalisée à l’heure prévue",
+        occurredAt: daysFromNow(-1),
+      },
+    ],
+  });
+
+  const ficheRepublique = await prisma.followUpSheet.create({
+    data: {
+      ownerUserId: clientId,
+      createdById: clientId,
+      assigneeId: clientId,
+      organizationId,
+      projectId: projectRepublique.id,
+      title: "Chantier République",
+      clientName: "Chantier République",
+      workObject: "Avenant n°2 — validation client",
+      orderNumber: "AV-2026-02",
+      receivedAt: daysFromNow(-12),
+      status: "AVENANT",
+      colorKey: "violet",
+      nextAction: "Relancer validation client avenant n°2",
+      nextActionAt: daysFromNow(1),
+      nextActionDone: false,
+      reminderOffsets: [72, 24],
+    },
+  });
+  await prisma.followUpTimelineEvent.create({
+    data: {
+      sheetId: ficheRepublique.id,
+      authorId: clientId,
+      kind: "creation",
+      label: "Avenant envoyé",
+      detail: "En attente de réponse client",
+      occurredAt: daysFromNow(-9),
+    },
+  });
+
+  const ficheAlpha = await prisma.followUpSheet.create({
+    data: {
+      ownerUserId: clientId,
+      createdById: clientId,
+      assigneeId: clientId,
+      organizationId,
+      projectId: projectAlpha.id,
+      title: "Immeuble Alpha",
+      clientName: "Immeuble Alpha",
+      workObject: "Travaux terminés — facturation",
+      status: "A_FACTURER",
+      colorKey: "vert",
+      nextAction: "Préparer la facturation",
+      nextActionAt: daysFromNow(0),
+      nextActionDone: false,
+      receivedAt: daysFromNow(-30),
+    },
+  });
+
+  // Lier un événement agenda à la fiche Victor Hugo
+  await prisma.agendaEvent.create({
+    data: {
+      title: "Intervention étanchéité — Victor Hugo",
+      type: "INTERVENTION",
+      startAt: (() => {
+        const d = daysFromNow(2);
+        d.setHours(8, 0, 0, 0);
+        return d;
+      })(),
+      endAt: (() => {
+        const d = daysFromNow(2);
+        d.setHours(12, 0, 0, 0);
+        return d;
+      })(),
+      ownerUserId: clientId,
+      createdById: clientId,
+      organizationId,
+      projectId: projectVictor.id,
+      followUpSheetId: ficheVictor.id,
+      responsibleId: clientId,
+    },
+  });
+
+  void ficheAlpha;
+
   return {
     projectIds: [projectVictor.id, projectRepublique.id, projectAlpha.id],
     companyLabel: companyName,
@@ -459,6 +585,10 @@ export async function clearDemoEnvironmentData(clientId: string) {
       where: { event: { ownerUserId: clientId } },
     }),
     prisma.agendaEvent.deleteMany({ where: { ownerUserId: clientId } }),
+    prisma.followUpTimelineEvent.deleteMany({
+      where: { sheet: { ownerUserId: clientId } },
+    }),
+    prisma.followUpSheet.deleteMany({ where: { ownerUserId: clientId } }),
     prisma.appointment.deleteMany({ where: { clientId } }),
     prisma.alert.deleteMany({ where: { clientId } }),
     prisma.document.deleteMany({ where: { clientId } }),

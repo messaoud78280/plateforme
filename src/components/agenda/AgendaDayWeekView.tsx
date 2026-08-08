@@ -14,6 +14,7 @@ import {
   startOfWeek,
 } from "@/lib/agenda/dates";
 import { agendaTypeMeta } from "@/lib/agenda/types";
+import { URGENCY_STYLES } from "@/lib/follow-up/types";
 import type { AgendaEventDTO, AgendaQuickCreateDraft } from "./agenda-types";
 
 type Props = {
@@ -409,13 +410,19 @@ export function AgendaDayWeekView({
                   const height = Math.max(18, minutesToY(clampedEnd) - top);
                   const meta = agendaTypeMeta(ev.type);
                   const selected = ev.id === selectedEventId;
+                  const urgencyStyle =
+                    ev.urgency && URGENCY_STYLES[ev.urgency as keyof typeof URGENCY_STYLES]
+                      ? URGENCY_STYLES[ev.urgency as keyof typeof URGENCY_STYLES]
+                      : null;
 
                   return (
                     <div
                       key={ev.id}
-                      className={`absolute left-1 right-1 z-10 overflow-hidden rounded-md border px-1.5 py-0.5 text-left ${
+                      className={`absolute left-1 right-1 z-10 overflow-hidden rounded-md border border-l-[3px] px-1.5 py-0.5 text-left ${
                         ev.readOnly ? "cursor-pointer" : "cursor-grab active:cursor-grabbing"
-                      } ${selected ? "ring-2 ring-[#1d4ed8] ring-offset-1" : ""}`}
+                      } ${selected ? "ring-2 ring-[#1d4ed8] ring-offset-1" : ""} ${
+                        urgencyStyle?.bar ?? "border-l-slate-300"
+                      }`}
                       style={{
                         top,
                         height,
@@ -432,13 +439,23 @@ export function AgendaDayWeekView({
                         onSelectEvent(ev.id);
                       }}
                     >
-                      <p className="truncate text-[11px] font-semibold leading-tight">
-                        {ev.readOnly ? "↳ " : ""}
-                        {ev.title}
-                      </p>
+                      <div className="flex items-start gap-1">
+                        {urgencyStyle ? (
+                          <span
+                            className={`mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full ${urgencyStyle.dot}`}
+                            title={ev.urgencyLabel ?? undefined}
+                            aria-label={ev.urgencyLabel ?? undefined}
+                          />
+                        ) : null}
+                        <p className="truncate text-[11px] font-semibold leading-tight">
+                          {ev.readOnly ? "↳ " : ""}
+                          {ev.title}
+                        </p>
+                      </div>
                       {height > 28 ? (
                         <p className="truncate text-[10px] opacity-80">
                           {formatTime(start)} – {formatTime(end)}
+                          {ev.urgencyLabel ? ` · ${ev.urgencyLabel}` : ""}
                         </p>
                       ) : null}
                       {!ev.readOnly ? (

@@ -77,6 +77,16 @@ export const agendaEventInclude = {
   project: { select: { id: true, title: true, siteCity: true, siteAddress: true } },
   responsible: { select: { id: true, name: true, email: true } },
   createdBy: { select: { id: true, name: true, email: true } },
+  followUpSheet: {
+    select: {
+      id: true,
+      title: true,
+      nextActionAt: true,
+      nextActionDone: true,
+      urgencyOverride: true,
+      status: true,
+    },
+  },
   attendees: {
     include: { user: { select: { id: true, name: true, email: true } } },
   },

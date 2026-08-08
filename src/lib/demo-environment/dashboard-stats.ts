@@ -1,5 +1,6 @@
 import { TaskStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { computeUrgencyFromDue } from "@/lib/follow-up/urgency";
 
 export type DemoHomeStats = {
   urgentActions: number;
@@ -9,6 +10,12 @@ export type DemoHomeStats = {
   missingDocuments: number;
   projectsWithoutRecentCr: number;
   overdueTasks: number;
+  followUpUrgent: number;
+  followUpToday: number;
+  followUpWeek: number;
+  followUpToInvoice: number;
+  followUpAvenant: number;
+  followUpUnprepared: number;
 };
 
 export type DemoHomeItem = {
@@ -52,7 +59,7 @@ export async function collectDemoHomeData(clientId: string): Promise<{
   const today = startOfDay();
   const weekEnd = endOfWeek();
 
-  const [tasks, docs, projects, user] = await Promise.all([
+  const [tasks, docs, projects, user, sheets] = await Promise.all([
     prisma.task.findMany({
       where: { clientId, status: { not: TaskStatus.COMPLETE } },
       select: {
@@ -88,6 +95,22 @@ export async function collectDemoHomeData(clientId: string): Promise<{
       where: { id: clientId },
       select: { name: true },
     }),
+    prisma.followUpSheet.findMany({
+      where: {
+        ownerUserId: clientId,
+        status: { notIn: ["TERMINE", "ARCHIVE"] },
+      },
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        nextAction: true,
+        nextActionAt: true,
+        nextActionDone: true,
+        urgencyOverride: true,
+      },
+      take: 40,
+    }),
   ]);
 
   const orders = tasks.filter((t) => (t.category ?? "").toLowerCase().includes("bon de commande"));
@@ -122,9 +145,58 @@ export async function collectDemoHomeData(clientId: string): Promise<{
   );
   const projectsWithoutRecentCr = crOpenProjectIds.size;
 
+  const followUpUrgent = sheets.filter((s) => {
+    if (s.nextActionDone) return false;
+    const u = computeUrgencyFromDue(s.nextActionAt, {
+      nextActionDone: s.nextActionDone,
+      override: s.urgencyOverride,
+    });
+    return u === "URGENT" || u === "CRITIQUE" || u === "IMPORTANT";
+  }).length;
+
+  const followUpToday = sheets.filter((s) => {
+    if (!s.nextActionAt || s.nextActionDone) return false;
+    return s.nextActionAt >= today && s.nextActionAt <= new Date(today.getTime() + 86400000 - 1);
+  }).length;
+
+  const followUpWeek = sheets.filter((s) => {
+    if (!s.nextActionAt || s.nextActionDone) return false;
+    return s.nextActionAt >= today && s.nextActionAt <= weekEnd;
+  }).length;
+
+  const followUpToInvoice = sheets.filter(
+    (s) => s.status === "A_FACTURER" || s.status === "TRAVAUX_TERMINES",
+  ).length;
+
+  const followUpAvenant = sheets.filter((s) => s.status === "AVENANT").length;
+
+  const followUpUnprepared = sheets.filter(
+    (s) =>
+      s.status === "INTERVENTION_PREVUE" ||
+      s.status === "COMMANDE_FOURNISSEUR" ||
+      (s.nextAction ?? "").toLowerCase().includes("commander"),
+  ).length;
+
   const inbox: DemoHomeItem[] = [];
 
+  for (const s of sheets.slice(0, 4)) {
+    if (s.nextActionDone) continue;
+    const u = computeUrgencyFromDue(s.nextActionAt, {
+      nextActionDone: s.nextActionDone,
+      override: s.urgencyOverride,
+    });
+    if (u === "NORMAL") continue;
+    inbox.push({
+      id: `fiche-${s.id}`,
+      tone: u === "CRITIQUE" || u === "URGENT" ? "critical" : "watch",
+      title: s.title,
+      subtitle: s.nextAction ?? "Action à traiter",
+      href: `/dashboard/fiches-suivi/${s.id}`,
+    });
+  }
+
   for (const t of orders.filter((x) => x.status === TaskStatus.A_VALIDER).slice(0, 3)) {
+    if (inbox.length >= 6) break;
     inbox.push({
       id: t.id,
       tone: "critical",
@@ -135,6 +207,7 @@ export async function collectDemoHomeData(clientId: string): Promise<{
   }
 
   for (const t of tasks.filter((x) => x.desiredDate && x.desiredDate < today).slice(0, 3)) {
+    if (inbox.length >= 6) break;
     if (inbox.some((i) => i.id === t.id)) continue;
     inbox.push({
       id: t.id,
@@ -146,6 +219,7 @@ export async function collectDemoHomeData(clientId: string): Promise<{
   }
 
   for (const d of docs.slice(0, 2)) {
+    if (inbox.length >= 6) break;
     inbox.push({
       id: d.id,
       tone: "watch",
@@ -156,7 +230,8 @@ export async function collectDemoHomeData(clientId: string): Promise<{
   }
 
   for (const t of tasks.filter((x) => (x.category ?? "").toLowerCase().includes("compte rendu")).slice(0, 1)) {
-    if (inbox.some((i) => i.id === t.id)) continue;
+    if (inbox.length >= 6) break;
+    if (inbox.some((i) => i.id === t.id || i.id === `cr-${t.id}`)) continue;
     inbox.push({
       id: `cr-${t.id}`,
       tone: "info",
@@ -170,13 +245,19 @@ export async function collectDemoHomeData(clientId: string): Promise<{
 
   return {
     stats: {
-      urgentActions,
+      urgentActions: Math.max(urgentActions, followUpUrgent),
       ordersToValidate,
       lateDeliveries,
-      deadlinesThisWeek,
+      deadlinesThisWeek: Math.max(deadlinesThisWeek, followUpWeek),
       missingDocuments,
       projectsWithoutRecentCr,
       overdueTasks,
+      followUpUrgent,
+      followUpToday,
+      followUpWeek,
+      followUpToInvoice,
+      followUpAvenant,
+      followUpUnprepared,
     },
     inbox: inbox.slice(0, 6),
     projects: projects.map((p) => ({

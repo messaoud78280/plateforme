@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createNotification, notifyManagers } from "@/lib/notifications";
 import { processAgendaReminders } from "@/lib/agenda/notify";
+import { processFollowUpAlerts } from "@/lib/follow-up/process-alerts";
 
 /**
  * POST /api/cron/relances
@@ -177,11 +178,20 @@ export async function POST(request: NextRequest) {
     errors.push(`agenda rappels: ${e instanceof Error ? e.message : String(e)}`);
   }
 
+  let followUpAlerts = 0;
+  try {
+    const r = await processFollowUpAlerts(now);
+    followUpAlerts = r.notified;
+  } catch (e) {
+    errors.push(`fiches suivi alertes: ${e instanceof Error ? e.message : String(e)}`);
+  }
+
   return NextResponse.json({
     ok: errors.length === 0,
     missingPieceNotified,
     deadlineNotified,
     agendaReminders,
+    followUpAlerts,
     errors,
     ranAt: now.toISOString(),
   });

@@ -77,6 +77,11 @@ model User {
   agendaEventsCreated   AgendaEvent[] @relation("AgendaEventCreatedBy")
   agendaEventsResponsible AgendaEvent[] @relation("AgendaEventResponsible")
   agendaEventAttendances AgendaEventAttendee[]
+  followUpSheetsOwned   FollowUpSheet[] @relation("FollowUpSheetOwner")
+  followUpSheetsCreated FollowUpSheet[] @relation("FollowUpSheetCreatedBy")
+  followUpSheetsAssigned FollowUpSheet[] @relation("FollowUpSheetAssignee")
+  followUpTimelineAuthored FollowUpTimelineEvent[] @relation("FollowUpTimelineAuthor")
+  followUpAlertSettings FollowUpAlertSettings? @relation("FollowUpAlertSettingsOwner")
   reportsAuthored       Report[]      @relation("ReportAuthor")
   reportComments        ReportComment[]
   subscriptions         Subscription[]
@@ -352,6 +357,7 @@ model Project {
   activities Activity[]
   appointments Appointment[]
   agendaEvents AgendaEvent[]
+  followUpSheets FollowUpSheet[]
   reports Report[]
   skillPpspsSessions SkillPpspsSession[]
   chantierFolders ChantierFolder[]
@@ -886,6 +892,7 @@ model AgendaEvent {
   allDay          Boolean           @default(false)
   projectId       String?
   appointmentId   String?           @unique
+  followUpSheetId String?
   responsibleId   String?
   reminderMinutes Int?
   recurrence      String?           // NONE | DAILY | WEEKLY | MONTHLY | YEARLY | CUSTOM
@@ -899,11 +906,13 @@ model AgendaEvent {
   createdBy   User                 @relation("AgendaEventCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
   responsible User?                @relation("AgendaEventResponsible", fields: [responsibleId], references: [id], onDelete: SetNull)
   project     Project?             @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  followUpSheet FollowUpSheet?     @relation(fields: [followUpSheetId], references: [id], onDelete: SetNull)
   attendees   AgendaEventAttendee[]
 
   @@index([ownerUserId, startAt])
   @@index([organizationId, startAt])
   @@index([projectId, startAt])
+  @@index([followUpSheetId, startAt])
   @@index([type, startAt])
 }
 
@@ -919,6 +928,108 @@ model AgendaEventAttendee {
 
   @@unique([eventId, userId])
   @@index([userId])
+}
+
+// Fiche de suivi (remplace post-it bureau : 1 OS / 1 commande = 1 fiche)
+enum FollowUpSheetStatus {
+  NOUVEAU
+  A_ANALYSER
+  A_PLANIFIER
+  PLANIFIE
+  COMMANDE_FOURNISSEUR
+  COMMANDE_PASSEE
+  ATTENTE_FOURNISSEUR
+  INTERVENTION_PREVUE
+  EN_COURS
+  TRAVAUX_TERMINES
+  CR_A_RECUPERER
+  AVENANT
+  A_FACTURER
+  FACTURE
+  ATTENTE_REGLEMENT
+  TERMINE
+  ARCHIVE
+}
+
+enum FollowUpUrgency {
+  NORMAL
+  A_SURVEILLER
+  IMPORTANT
+  URGENT
+  CRITIQUE
+}
+
+model FollowUpSheet {
+  id                String             @id @default(cuid())
+  organizationId    String?
+  ownerUserId       String
+  createdById       String
+  assigneeId        String?
+  projectId         String?
+  reference         String?
+  clientName        String?
+  marketLabel       String?
+  siteAddress       String?
+  title             String
+  workObject        String?
+  orderNumber       String?
+  osNumber          String?
+  receivedAt        DateTime?
+  amountHt          Decimal?           @db.Decimal(14, 2)
+  status            FollowUpSheetStatus @default(NOUVEAU)
+  colorKey          String             @default("bleu")
+  nextAction        String?
+  nextActionAt      DateTime?
+  nextActionDone    Boolean            @default(false)
+  urgencyOverride   FollowUpUrgency?
+  notes             String?            @db.Text
+  reminderOffsets   Json?
+  postponedFromAt   DateTime?
+  postponeCount     Int                @default(0)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  owner     User   @relation("FollowUpSheetOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  createdBy User   @relation("FollowUpSheetCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  assignee  User?  @relation("FollowUpSheetAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  timeline  FollowUpTimelineEvent[]
+  agendaEvents AgendaEvent[]
+
+  @@index([ownerUserId, status])
+  @@index([assigneeId, nextActionAt])
+  @@index([projectId])
+  @@index([organizationId, status])
+  @@index([nextActionAt])
+}
+
+model FollowUpTimelineEvent {
+  id          String   @id @default(cuid())
+  sheetId     String
+  authorId    String?
+  kind        String
+  label       String
+  detail      String?  @db.Text
+  occurredAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  sheet  FollowUpSheet @relation(fields: [sheetId], references: [id], onDelete: Cascade)
+  author User?         @relation("FollowUpTimelineAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([sheetId, occurredAt])
+}
+
+// Seuils d'urgence + regles metier (alertes / rappels) — 1 config par compte proprietaire.
+model FollowUpAlertSettings {
+  id              String   @id @default(cuid())
+  ownerUserId     String   @unique
+  thresholdsJson  Json?
+  rulesJson       Json?
+  escalateJson    Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  owner User @relation("FollowUpAlertSettingsOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
 }
 
 // Pièces jointes sur un rendez-vous

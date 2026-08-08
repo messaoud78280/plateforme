@@ -13,7 +13,10 @@ type NotificationType =
   | "DELIVERABLE_UPLOADED"
   | "CLIENT_DECISION"
   | "AGENDA_INVITE"
-  | "AGENDA_REMINDER";
+  | "AGENDA_REMINDER"
+  | "FOLLOWUP_REMINDER"
+  | "FOLLOWUP_URGENT"
+  | "FOLLOWUP_CRITICAL";
 
 export async function createNotification(params: {
   userId: string;

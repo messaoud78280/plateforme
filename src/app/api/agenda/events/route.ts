@@ -10,6 +10,8 @@ import { AGENDA_EVENT_TYPES } from "@/lib/agenda/types";
 import { prisma } from "@/lib/prisma";
 import { canClientAccessProject } from "@/lib/organization/access";
 import { isBeworkStaff } from "@/lib/authz";
+import { computeUrgencyFromDue } from "@/lib/follow-up/urgency";
+import { URGENCY_LABELS } from "@/lib/follow-up/types";
 
 const VALID_TYPES: Set<string> = new Set(AGENDA_EVENT_TYPES.map((t) => t.id));
 
@@ -90,15 +92,30 @@ export async function GET(request: Request) {
             )
           : [{ ...e, occurrenceStart: e.startAt.toISOString() }];
 
-      return expanded.map((occ) => ({
-        ...occ,
-        startAt: occ.startAt instanceof Date ? occ.startAt.toISOString() : String(occ.startAt),
-        endAt: occ.endAt instanceof Date ? occ.endAt.toISOString() : String(occ.endAt),
-        readOnly: false as const,
-        source: "agenda" as const,
-        href: null as string | null,
-        isOccurrence: occ.id.includes("__"),
-      }));
+      return expanded.map((occ) => {
+        const sheet = "followUpSheet" in e ? e.followUpSheet : null;
+        const urgency = sheet
+          ? computeUrgencyFromDue(sheet.nextActionAt ?? occ.startAt, {
+              nextActionDone: sheet.nextActionDone,
+              override: sheet.urgencyOverride,
+            })
+          : computeUrgencyFromDue(occ.startAt instanceof Date ? occ.startAt : new Date(String(occ.startAt)), {
+              nextActionDone: e.status === "TERMINE",
+            });
+        return {
+          ...occ,
+          startAt: occ.startAt instanceof Date ? occ.startAt.toISOString() : String(occ.startAt),
+          endAt: occ.endAt instanceof Date ? occ.endAt.toISOString() : String(occ.endAt),
+          readOnly: false as const,
+          source: "agenda" as const,
+          href: sheet ? `/dashboard/fiches-suivi/${sheet.id}` : (null as string | null),
+          followUpSheetId: sheet?.id ?? e.followUpSheetId ?? null,
+          followUpSheet: sheet ? { id: sheet.id, title: sheet.title } : null,
+          urgency,
+          urgencyLabel: URGENCY_LABELS[urgency],
+          isOccurrence: occ.id.includes("__"),
+        };
+      });
     });
 
     let linked: Awaited<ReturnType<typeof listLinkedAgendaItems>> = [];
@@ -180,6 +197,10 @@ export async function POST(request: Request) {
         endAt,
         allDay: Boolean(body.allDay),
         projectId,
+        followUpSheetId:
+          typeof body.followUpSheetId === "string" && body.followUpSheetId
+            ? body.followUpSheetId
+            : null,
         responsibleId:
           typeof body.responsibleId === "string" && body.responsibleId ? body.responsibleId : null,
         reminderMinutes:

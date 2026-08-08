@@ -87,11 +87,48 @@ export function DemoHomeDashboard({
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <StatCard
-            value={stats.urgentActions}
-            label="Actions urgentes"
-            href="/dashboard/taches"
-            emphasize={stats.urgentActions > 0 ? "critical" : "neutral"}
+            value={stats.followUpUrgent ?? stats.urgentActions}
+            label="Urgences"
+            href="/dashboard/fiches-suivi?filter=urgent"
+            emphasize={(stats.followUpUrgent ?? stats.urgentActions) > 0 ? "critical" : "neutral"}
           />
+          <StatCard
+            value={stats.followUpToday ?? 0}
+            label="Actions à réaliser aujourd’hui"
+            href="/dashboard/fiches-suivi?filter=today"
+            emphasize={(stats.followUpToday ?? 0) > 0 ? "watch" : "neutral"}
+          />
+          <StatCard
+            value={stats.followUpWeek ?? stats.deadlinesThisWeek}
+            label="Actions cette semaine"
+            href="/dashboard/fiches-suivi"
+            emphasize={(stats.followUpWeek ?? 0) > 0 ? "watch" : "neutral"}
+          />
+          <StatCard
+            value={stats.followUpUnprepared ?? 0}
+            label="Interventions non préparées"
+            href="/dashboard/fiches-suivi?filter=urgent"
+            emphasize={(stats.followUpUnprepared ?? 0) > 0 ? "critical" : "neutral"}
+          />
+          <StatCard
+            value={stats.followUpToInvoice ?? 0}
+            label="Dossiers à facturer"
+            href="/dashboard/fiches-suivi?filter=a-facturer"
+          />
+          <StatCard
+            value={stats.followUpAvenant ?? 0}
+            label="Avenants sans réponse"
+            href="/dashboard/fiches-suivi?filter=avenant"
+            emphasize={(stats.followUpAvenant ?? 0) > 0 ? "watch" : "neutral"}
+          />
+          {showOrders ? (
+            <StatCard
+              value={stats.lateDeliveries}
+              label="Commande en retard"
+              href="/dashboard/taches"
+              emphasize={stats.lateDeliveries > 0 ? "critical" : "neutral"}
+            />
+          ) : null}
           {showOrders ? (
             <StatCard
               value={stats.ordersToValidate}
@@ -100,20 +137,6 @@ export function DemoHomeDashboard({
               emphasize={stats.ordersToValidate > 0 ? "watch" : "neutral"}
             />
           ) : null}
-          {showOrders ? (
-            <StatCard
-              value={stats.lateDeliveries}
-              label="Livraison en retard"
-              href="/dashboard/taches"
-              emphasize={stats.lateDeliveries > 0 ? "critical" : "neutral"}
-            />
-          ) : null}
-          <StatCard
-            value={stats.deadlinesThisWeek}
-            label="Échéances cette semaine"
-            href="/dashboard/messages"
-            emphasize={stats.deadlinesThisWeek > 0 ? "watch" : "neutral"}
-          />
           {showDocs ? (
             <StatCard
               value={stats.missingDocuments}
@@ -122,19 +145,6 @@ export function DemoHomeDashboard({
               emphasize={stats.missingDocuments > 0 ? "watch" : "neutral"}
             />
           ) : null}
-          {showProjects ? (
-            <StatCard
-              value={stats.projectsWithoutRecentCr}
-              label="Chantier sans compte rendu récent"
-              href="/dashboard/projets"
-            />
-          ) : null}
-          <StatCard
-            value={stats.overdueTasks}
-            label="Tâches en retard"
-            href="/dashboard/taches"
-            emphasize={stats.overdueTasks > 0 ? "critical" : "neutral"}
-          />
         </div>
       </section>
 

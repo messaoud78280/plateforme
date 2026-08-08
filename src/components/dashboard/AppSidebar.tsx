@@ -24,6 +24,7 @@ import {
   PanelLeft,
   Settings,
   Sparkles,
+  StickyNote,
   Users,
   Wallet,
   X,
@@ -53,6 +54,7 @@ function buildSections(role: string | null | undefined): NavSection[] {
         items: [
           { href: "/dashboard", label: "Accueil", exact: true, icon: Home },
           { href: "/dashboard/a-traiter", label: "À traiter", icon: AlertCircle },
+          { href: "/dashboard/fiches-suivi", label: "Fiches suivi", icon: StickyNote },
           { href: "/dashboard/projets", label: "Chantiers", icon: FolderKanban },
           { href: "/dashboard/messages", label: "Planning", icon: CalendarDays },
           { href: "/dashboard/agenda", label: "Agenda", icon: Calendar },
@@ -111,6 +113,7 @@ function buildSections(role: string | null | undefined): NavSection[] {
           { href: "/dashboard/messagerie", label: "Messagerie", icon: MessageSquare },
           { href: "/dashboard/messages", label: "RDV", icon: CalendarDays },
           { href: "/dashboard/agenda", label: "Agenda", icon: Calendar },
+          { href: "/dashboard/fiches-suivi", label: "Fiches suivi", icon: StickyNote },
         ],
       },
       {

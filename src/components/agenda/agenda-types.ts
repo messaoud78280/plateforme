@@ -9,6 +9,7 @@ export type AgendaEventDTO = {
   endAt: string;
   allDay: boolean;
   projectId: string | null;
+  followUpSheetId?: string | null;
   responsibleId: string | null;
   reminderMinutes: number | null;
   recurrence: string | null;
@@ -16,10 +17,13 @@ export type AgendaEventDTO = {
   readOnly?: boolean;
   source?: "agenda" | "task" | "project_start" | "project_end" | "appointment";
   href?: string | null;
+  urgency?: string | null;
+  urgencyLabel?: string | null;
   project: { id: string; title: string; siteCity: string | null; siteAddress: string | null } | null;
   responsible: { id: string; name: string; email: string } | null;
   createdBy: { id: string; name: string; email: string };
   attendees: { id: string; status: string; user: { id: string; name: string; email: string } }[];
+  followUpSheet?: { id: string; title: string } | null;
 };
 
 export type AgendaProjectOption = { id: string; title: string };

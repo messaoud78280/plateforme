@@ -101,6 +101,7 @@ export const agendaEventInclude = {
       number: true,
       subject: true,
       status: true,
+      sharedWithSupplier: true,
       requestedDeliveryAt: true,
       confirmedDeliveryAt: true,
       proposedDeliveryAt: true,

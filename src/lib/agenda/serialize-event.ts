@@ -11,6 +11,7 @@ export type AgendaPurchaseOrderSummary = {
   number: string;
   subject: string;
   status: string;
+  sharedWithSupplier: boolean;
   supplierName: string | null;
   linesSummary: string | null;
   requestedDeliveryAt: string | null;
@@ -18,6 +19,8 @@ export type AgendaPurchaseOrderSummary = {
   proposedDeliveryAt: string | null;
   proposedDeliveryStatus: string | null;
   deliveryVisual: "A_CONFIRMER" | "CONFIRMEE" | "PROPOSITION" | "ANNULEE" | null;
+  /** Confirmée fournisseur → drag agenda bloqué (AGENDA-V2A.1). */
+  agendaRescheduleLocked: boolean;
   canOpen: boolean;
   canReceive: boolean;
   legacyTaskId: string | null;
@@ -28,6 +31,7 @@ type PoInclude = {
   number: string;
   subject: string;
   status: PurchaseOrderStatus | string;
+  sharedWithSupplier?: boolean;
   requestedDeliveryAt: Date | null;
   confirmedDeliveryAt: Date | null;
   proposedDeliveryAt: Date | null;
@@ -66,11 +70,15 @@ export function serializePurchaseOrderForAgenda(
     String(po.status),
   );
 
+  const shared = Boolean(po.sharedWithSupplier);
+  const agendaRescheduleLocked = Boolean(po.confirmedDeliveryAt) && shared;
+
   return {
     id: po.id,
     number: po.number,
     subject: po.subject,
     status: String(po.status),
+    sharedWithSupplier: shared,
     supplierName:
       po.externalOrganization?.tradeName || po.externalOrganization?.name || null,
     linesSummary,
@@ -79,6 +87,7 @@ export function serializePurchaseOrderForAgenda(
     proposedDeliveryAt: po.proposedDeliveryAt?.toISOString() ?? null,
     proposedDeliveryStatus: po.proposedDeliveryStatus,
     deliveryVisual: schedule.visualLabel,
+    agendaRescheduleLocked,
     canOpen,
     canReceive: canOpen && !closed,
     legacyTaskId: po.legacyTaskId,

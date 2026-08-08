@@ -359,52 +359,147 @@ export async function countActiveDeliveryEvents(orderId: string): Promise<number
 }
 
 /**
- * AGENDA-V2A — Déplacement agenda d’une livraison liée :
- * met à jour la date métier PurchaseOrder puis re-sync (jamais Agenda seul).
+ * AGENDA-V2A.1 — Décision pure : peut-on déplacer une livraison depuis l’Agenda ?
+ *
+ * proposedDeliveryAt / proposedDeliveryStatus = proposition FOURNISSEUR → ABC.
+ * Ne pas les réutiliser pour une contre-proposition ABC → fournisseur
+ * (futur : modèle DeliveryProposal dédié).
+ */
+export type AgendaDeliveryRescheduleDecision =
+  | {
+      action: "update_requested";
+      field: "requestedDeliveryAt";
+    }
+  | {
+      action: "update_confirmed_internal";
+      field: "confirmedDeliveryAt";
+    }
+  | {
+      action: "block_supplier_confirmed";
+      code: "SUPPLIER_CONFIRMED_LOCKED";
+      confirmedAt: Date;
+      supplierName: string;
+      message: string;
+    }
+  | {
+      action: "block_closed";
+      code: "DELIVERY_CLOSED";
+      message: string;
+    };
+
+export function decideAgendaDeliveryReschedule(order: {
+  status: PurchaseOrderStatus | string;
+  confirmedDeliveryAt: Date | null;
+  sharedWithSupplier: boolean;
+  supplierName?: string | null;
+}): AgendaDeliveryRescheduleDecision {
+  if (["ANNULEE", "REFUSEE", "CLOTUREE", "RECUE"].includes(String(order.status))) {
+    return {
+      action: "block_closed",
+      code: "DELIVERY_CLOSED",
+      message: "Cette livraison ne peut plus être déplacée",
+    };
+  }
+
+  const supplier = (order.supplierName || "Le fournisseur").trim() || "Le fournisseur";
+
+  // Confirmée + collaboration fournisseur : jamais écraser confirmedDeliveryAt unilatéralement
+  if (order.confirmedDeliveryAt && order.sharedWithSupplier) {
+    const when = fmtShort(order.confirmedDeliveryAt);
+    return {
+      action: "block_supplier_confirmed",
+      code: "SUPPLIER_CONFIRMED_LOCKED",
+      confirmedAt: order.confirmedDeliveryAt,
+      supplierName: supplier,
+      message: `Cette livraison a déjà été confirmée par ${supplier} à ${when}.\n\nPour éviter une divergence avec le fournisseur, son horaire ne peut pas être modifié directement depuis l’Agenda.\n\nGérez la modification depuis la commande (messagerie / validation fournisseur).`,
+    };
+  }
+
+  // Confirmée mais sans collab fournisseur (interne) → maj confirmed
+  if (order.confirmedDeliveryAt && !order.sharedWithSupplier) {
+    return { action: "update_confirmed_internal", field: "confirmedDeliveryAt" };
+  }
+
+  // Non confirmée → date demandée uniquement
+  return { action: "update_requested", field: "requestedDeliveryAt" };
+}
+
+/**
+ * AGENDA-V2A / V2A.1 — Déplacement agenda d’une livraison liée :
+ * PurchaseOrder d’abord, Agenda ensuite. Jamais Agenda seul.
  */
 export async function reschedulePurchaseOrderDeliveryFromAgenda(opts: {
   orderId: string;
   newStartAt: Date;
   actorUserId: string;
   actorName?: string;
-}): Promise<{ ok: true; eventId: string | null } | { ok: false; error: string }> {
+}): Promise<
+  | { ok: true; eventId: string | null; field: "requestedDeliveryAt" | "confirmedDeliveryAt" }
+  | {
+      ok: false;
+      error: string;
+      code?: "SUPPLIER_CONFIRMED_LOCKED" | "DELIVERY_CLOSED";
+      confirmedAt?: string;
+      supplierName?: string;
+      purchaseOrderId?: string;
+      orderUrl?: string;
+    }
+> {
   const order = await prisma.purchaseOrder.findUnique({
     where: { id: opts.orderId },
     select: {
       id: true,
       number: true,
       status: true,
+      sharedWithSupplier: true,
       confirmedDeliveryAt: true,
       requestedDeliveryAt: true,
+      externalOrganizationId: true,
+      externalOrganization: { select: { name: true, tradeName: true } },
     },
   });
   if (!order) return { ok: false, error: "Commande introuvable" };
-  if (["ANNULEE", "REFUSEE", "CLOTUREE", "RECUE"].includes(order.status)) {
-    return { ok: false, error: "Cette livraison ne peut plus être déplacée" };
+
+  const supplierName =
+    order.externalOrganization.tradeName || order.externalOrganization.name;
+  const decision = decideAgendaDeliveryReschedule({
+    status: order.status,
+    confirmedDeliveryAt: order.confirmedDeliveryAt,
+    sharedWithSupplier: order.sharedWithSupplier,
+    supplierName,
+  });
+
+  if (decision.action === "block_closed") {
+    return { ok: false, error: decision.message, code: decision.code };
   }
 
-  const data: {
-    confirmedDeliveryAt?: Date;
-    requestedDeliveryAt?: Date;
-  } = {};
-
-  if (order.confirmedDeliveryAt) {
-    data.confirmedDeliveryAt = opts.newStartAt;
-  } else {
-    data.requestedDeliveryAt = opts.newStartAt;
+  if (decision.action === "block_supplier_confirmed") {
+    return {
+      ok: false,
+      error: decision.message,
+      code: decision.code,
+      confirmedAt: decision.confirmedAt.toISOString(),
+      supplierName: decision.supplierName,
+      purchaseOrderId: order.id,
+      orderUrl: `/dashboard/commandes/${order.id}`,
+    };
   }
 
+  const field = decision.field;
   await prisma.purchaseOrder.update({
     where: { id: order.id },
-    data,
+    data: { [field]: opts.newStartAt },
   });
 
   await prisma.purchaseOrderEvent.create({
     data: {
       orderId: order.id,
       kind: "delivery_reschedule",
-      label: "Livraison reportée",
-      detail: `${opts.actorName ?? "Agenda"} — nouveau créneau ${fmtShort(opts.newStartAt)} (via agenda)`,
+      label:
+        field === "requestedDeliveryAt"
+          ? "Date demandée modifiée"
+          : "Livraison reportée (interne)",
+      detail: `${opts.actorName ?? "Agenda"} — ${field === "requestedDeliveryAt" ? "demandée" : "confirmée interne"} : ${fmtShort(opts.newStartAt)} (via agenda)`,
       actorUserId: opts.actorUserId,
     },
   });
@@ -413,8 +508,32 @@ export async function reschedulePurchaseOrderDeliveryFromAgenda(opts: {
     orderId: order.id,
     actorUserId: opts.actorUserId,
     postSystemMessage: true,
-    systemMessage: `↻ Livraison reportée — ${fmtShort(opts.newStartAt)}\n${order.number}\n[Voir la commande](/dashboard/commandes/${order.id})`,
+    systemMessage: `↻ ${
+      field === "requestedDeliveryAt" ? "Date de livraison demandée" : "Livraison"
+    } reportée — ${fmtShort(opts.newStartAt)}\n${order.number}\n[Voir la commande](/dashboard/commandes/${order.id})`,
   });
 
-  return { ok: true, eventId: synced.eventId };
+  // Informer le fournisseur si commande partagée et date demandée modifiée
+  if (field === "requestedDeliveryAt" && order.sharedWithSupplier) {
+    const { createNotification } = await import("@/lib/notifications");
+    const users = await prisma.user.findMany({
+      where: {
+        externalOrganizationId: order.externalOrganizationId,
+        OR: [{ personType: "SUPPLIER" }, { permissionProfile: "FOURNISSEUR" }],
+      },
+      select: { id: true },
+      take: 20,
+    });
+    for (const u of users) {
+      await createNotification({
+        userId: u.id,
+        type: "DELIVERY_CHECK",
+        title: `Date demandée modifiée — ${order.number}`,
+        message: `Nouveau créneau demandé : ${fmtShort(opts.newStartAt)}`,
+        actionUrl: `/dashboard/commandes/${order.id}`,
+      });
+    }
+  }
+
+  return { ok: true, eventId: synced.eventId, field };
 }

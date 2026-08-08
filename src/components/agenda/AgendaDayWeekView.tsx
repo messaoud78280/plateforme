@@ -186,7 +186,21 @@ export function AgendaDayWeekView({
             ...(linked ? { confirmLinkedReschedule: true } : {}),
           }),
         });
-        if (!res.ok) return;
+        if (!res.ok) {
+          // Garde-fou serveur (ex. confirmée fournisseur) — ne pas appliquer le preview
+          try {
+            const err = await res.json();
+            if (err?.error === "SUPPLIER_CONFIRMED_LOCKED" && err?.orderUrl) {
+              const go = window.confirm(
+                `${err.message || "Livraison confirmée — modification bloquée."}\n\nOK = Voir la commande\nAnnuler`,
+              );
+              if (go) window.location.href = String(err.orderUrl);
+            }
+          } catch {
+            /* ignore */
+          }
+          return;
+        }
         const data = await res.json();
         onEventMovedRef.current(data.event as AgendaEventDTO);
       } catch {

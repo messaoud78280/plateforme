@@ -102,7 +102,18 @@ export async function PATCH(request: Request, ctx: Ctx) {
         actorName: actor?.name ?? undefined,
       });
       if (!result.ok) {
-        return NextResponse.json({ error: result.error }, { status: 400 });
+        const status = result.code === "SUPPLIER_CONFIRMED_LOCKED" ? 409 : 400;
+        return NextResponse.json(
+          {
+            error: result.code ?? "RESCHEDULE_DENIED",
+            message: result.error,
+            confirmedAt: result.confirmedAt ?? null,
+            supplierName: result.supplierName ?? null,
+            purchaseOrderId: result.purchaseOrderId ?? existing.purchaseOrderId,
+            orderUrl: result.orderUrl ?? `/dashboard/commandes/${existing.purchaseOrderId}`,
+          },
+          { status },
+        );
       }
       const refreshed = await canAccessEvent(session.user, id);
       if (!refreshed) return NextResponse.json({ error: "Introuvable" }, { status: 404 });

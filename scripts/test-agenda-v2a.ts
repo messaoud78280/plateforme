@@ -11,7 +11,10 @@ import {
   serializePurchaseOrderForAgenda,
   AGENDA_LAYER_FILTERS,
 } from "../src/lib/agenda/serialize-event";
-import { resolveDeliverySchedule } from "../src/lib/purchase-orders/sync-delivery";
+import {
+  decideAgendaDeliveryReschedule,
+  resolveDeliverySchedule,
+} from "../src/lib/purchase-orders/sync-delivery";
 import type { AgendaEventDTO } from "../src/components/agenda/agenda-types";
 
 function ev(partial: Partial<AgendaEventDTO> & { id: string; title: string }): AgendaEventDTO {
@@ -140,6 +143,71 @@ function testProposalNotConfirmedVisual() {
   assert.equal(s.startAt?.getHours(), 7);
 }
 
+function testRescheduleUnconfirmedAllowed() {
+  const d = decideAgendaDeliveryReschedule({
+    status: "A_CONFIRMER",
+    confirmedDeliveryAt: null,
+    sharedWithSupplier: true,
+    supplierName: "Point.P",
+  });
+  assert.equal(d.action, "update_requested");
+}
+
+function testRescheduleSupplierConfirmedBlocked() {
+  const confirmed = new Date(2026, 7, 11, 9, 0);
+  const d = decideAgendaDeliveryReschedule({
+    status: "CONFIRMEE",
+    confirmedDeliveryAt: confirmed,
+    sharedWithSupplier: true,
+    supplierName: "Point.P",
+  });
+  assert.equal(d.action, "block_supplier_confirmed");
+  if (d.action === "block_supplier_confirmed") {
+    assert.equal(d.code, "SUPPLIER_CONFIRMED_LOCKED");
+    assert.match(d.message, /Point\.P/);
+    assert.match(d.message, /confirmée/);
+  }
+}
+
+function testRescheduleInternalConfirmedAllowed() {
+  const d = decideAgendaDeliveryReschedule({
+    status: "CONFIRMEE",
+    confirmedDeliveryAt: new Date(2026, 7, 11, 9, 0),
+    sharedWithSupplier: false,
+    supplierName: "Stock interne",
+  });
+  assert.equal(d.action, "update_confirmed_internal");
+}
+
+function testRescheduleClosedBlocked() {
+  const d = decideAgendaDeliveryReschedule({
+    status: "RECUE",
+    confirmedDeliveryAt: new Date(2026, 7, 11, 9, 0),
+    sharedWithSupplier: true,
+    supplierName: "Point.P",
+  });
+  assert.equal(d.action, "block_closed");
+}
+
+function testSerializeLockedFlag() {
+  const po = serializePurchaseOrderForAgenda({
+    id: "po1",
+    number: "BC-2026-043",
+    subject: "EPDM",
+    status: "CONFIRMEE",
+    sharedWithSupplier: true,
+    requestedDeliveryAt: new Date(2026, 7, 11, 7, 30),
+    confirmedDeliveryAt: new Date(2026, 7, 11, 9),
+    proposedDeliveryAt: null,
+    proposedDeliveryStatus: "ACCEPTED",
+    legacyTaskId: null,
+    externalOrganization: { name: "POINT.P", tradeName: "Point.P" },
+    lines: [],
+  });
+  assert.equal(po!.agendaRescheduleLocked, true);
+  assert.equal(po!.sharedWithSupplier, true);
+}
+
 const tests: [string, () => void][] = [
   ["livraison à confirmer", testDeliveryVisualUnconfirmed],
   ["livraison confirmée", testDeliveryVisualConfirmed],
@@ -147,6 +215,11 @@ const tests: [string, () => void][] = [
   ["conflit responsable", testConflictResponsible],
   ["couches types", testLayersCoverTypes],
   ["proposition ≠ confirmée", testProposalNotConfirmedVisual],
+  ["V2A.1 non confirmée → requested", testRescheduleUnconfirmedAllowed],
+  ["V2A.1 confirmée fournisseur → bloqué", testRescheduleSupplierConfirmedBlocked],
+  ["V2A.1 confirmée interne → ok", testRescheduleInternalConfirmedAllowed],
+  ["V2A.1 reçue → bloqué", testRescheduleClosedBlocked],
+  ["V2A.1 flag agendaRescheduleLocked", testSerializeLockedFlag],
 ];
 
 let failed = 0;

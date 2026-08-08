@@ -249,11 +249,43 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
     startAt: Date,
     _endAt: Date,
   ): Promise<boolean> {
-    const poLabel = ev.purchaseOrder?.number ?? "la commande";
+    const po = ev.purchaseOrder;
+    const poLabel = po?.number ?? "la commande";
+    const supplier = po?.supplierName || "Le fournisseur";
+    const confirmedAt = po?.confirmedDeliveryAt
+      ? new Date(po.confirmedDeliveryAt)
+      : null;
+    const locked =
+      po?.agendaRescheduleLocked ||
+      (Boolean(confirmedAt) && Boolean(po?.sharedWithSupplier));
+
+    // AGENDA-V2A.1 — date confirmée fournisseur : bloquer + orienter vers la commande
+    if (locked && confirmedAt) {
+      const when = confirmedAt.toLocaleString("fr-FR", {
+        day: "numeric",
+        month: "long",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      const nextWhen = startAt.toLocaleString("fr-FR", {
+        day: "numeric",
+        month: "long",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      const goToOrder = window.confirm(
+        `MODIFIER UNE LIVRAISON CONFIRMÉE\n\n${supplier} a confirmé :\n${when}\n\nNouvel horaire demandé :\n${nextWhen}\n\nCette livraison a déjà été confirmée par ${supplier}.\nPour éviter une divergence avec le fournisseur, son horaire ne peut pas être modifié directement depuis l’Agenda.\n\nOK = Continuer depuis la commande\nAnnuler = rester sur l’Agenda`,
+      );
+      if (goToOrder && po?.id) {
+        window.location.href = `/dashboard/commandes/${po.id}`;
+      }
+      return false;
+    }
+
     const old = formatTime(new Date(ev.startAt));
     const next = formatTime(startAt);
     return window.confirm(
-      `Modifier la livraison ?\n\n${poLabel}\nCréneau actuel : ${old}\nNouveau créneau : ${next}\n\nLa commande fournisseur sera mise à jour (pas seulement l’agenda).`,
+      `Modifier la livraison ?\n\n${poLabel}\nCréneau actuel : ${old}\nNouveau créneau : ${next}\n\nLa date demandée sur la commande sera mise à jour (pas seulement l’agenda).`,
     );
   }
 

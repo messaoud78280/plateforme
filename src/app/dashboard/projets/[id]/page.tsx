@@ -101,7 +101,7 @@ export default async function ProjetDetailPage({
     ? await findOrphanMissionDocumentsForProject(id).catch(() => [])
     : [];
 
-  const [chantierFolders, missingCount] = await Promise.all([
+  const [chantierFolders, missingCount, upcomingAgenda] = await Promise.all([
     prisma.chantierFolder.findMany({
       where: { projectId: id },
       orderBy: { sortOrder: "asc" },
@@ -115,6 +115,16 @@ export default async function ProjetDetailPage({
     prisma.chantierFile.count({
       where: { projectId: id, status: { in: CHANTIER_MISSING_STATUSES } },
     }),
+    prisma.agendaEvent.findMany({
+      where: {
+        projectId: id,
+        status: { not: "ANNULE" },
+        startAt: { gte: new Date() },
+      },
+      orderBy: { startAt: "asc" },
+      take: 5,
+      select: { id: true, title: true, startAt: true, type: true },
+    }).catch(() => [] as { id: string; title: string; startAt: Date; type: string }[]),
   ]);
 
   const dossierFolders = chantierFolders.map((folder) => ({
@@ -220,7 +230,14 @@ export default async function ProjetDetailPage({
           },
         ]
       : []),
-  ].slice(0, 6);
+    ...upcomingAgenda.slice(0, 3).map((ev) => ({
+      id: `ag-${ev.id}`,
+      title: ev.title,
+      subtitle: `Agenda · ${ev.startAt.toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}`,
+      href: `/dashboard/agenda`,
+      tone: "info" as const,
+    })),
+  ].slice(0, 8);
 
   const contextCard = (
     <div className="cc-card p-5 sm:p-6">
@@ -301,6 +318,34 @@ export default async function ProjetDetailPage({
           <p className="mt-1 whitespace-pre-wrap text-slate-700">{project.notes}</p>
         </div>
       ) : null}
+      {upcomingAgenda.length > 0 ? (
+        <div className="mt-6 border-t border-slate-100 pt-5">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-bework-muted">
+              Prochains événements
+            </p>
+            <Link href="/dashboard/agenda" className="text-xs font-semibold text-[#1d4ed8] hover:underline">
+              Ouvrir l&apos;agenda →
+            </Link>
+          </div>
+          <ul className="mt-3 space-y-2">
+            {upcomingAgenda.map((ev) => (
+              <li key={ev.id} className="flex items-baseline justify-between gap-3 text-sm">
+                <span className="font-medium text-slate-800">{ev.title}</span>
+                <span className="shrink-0 text-xs text-slate-500">
+                  {ev.startAt.toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <div className="mt-6 border-t border-slate-100 pt-5">
+          <Link href="/dashboard/agenda" className="text-sm font-semibold text-[#1d4ed8] hover:underline">
+            Planifier un événement sur ce chantier →
+          </Link>
+        </div>
+      )}
     </div>
   );
 

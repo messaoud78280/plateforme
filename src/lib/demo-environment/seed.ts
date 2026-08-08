@@ -330,6 +330,122 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
     ],
   });
 
+  const atHour = (base: Date, h: number, m = 0) => {
+    const d = new Date(base);
+    d.setHours(h, m, 0, 0);
+    return d;
+  };
+  const today = new Date();
+  const tomorrow = daysFromNow(1);
+  const inTwo = daysFromNow(2);
+  const inThree = daysFromNow(3);
+
+  const org = await prisma.organization.findFirst({
+    where: { ownerUserId: clientId },
+    select: { id: true },
+  });
+
+  await prisma.agendaEvent.createMany({
+    data: [
+      {
+        title: "Livraison membrane EPDM",
+        type: "LIVRAISON",
+        startAt: atHour(today, 8),
+        endAt: atHour(today, 9),
+        ownerUserId: clientId,
+        createdById: clientId,
+        organizationId: org?.id ?? null,
+        projectId: projectVictor.id,
+        location: "Résidence Victor Hugo — aire livraison",
+        description: "Données fictives de démonstration BeWork",
+      },
+      {
+        title: "Réunion de chantier",
+        type: "REUNION_CHANTIER",
+        startAt: atHour(today, 9, 30),
+        endAt: atHour(today, 10, 30),
+        ownerUserId: clientId,
+        createdById: clientId,
+        organizationId: org?.id ?? null,
+        projectId: projectVictor.id,
+        location: "Base vie Victor Hugo",
+      },
+      {
+        title: "Rendez-vous fournisseur Point.P",
+        type: "RDV_FOURNISSEUR",
+        startAt: atHour(today, 11),
+        endAt: atHour(today, 12),
+        ownerUserId: clientId,
+        createdById: clientId,
+        organizationId: org?.id ?? null,
+        location: "Point.P",
+      },
+      {
+        title: "Visite chantier République",
+        type: "VISITE_CHANTIER",
+        startAt: atHour(today, 14),
+        endAt: atHour(today, 15, 30),
+        ownerUserId: clientId,
+        createdById: clientId,
+        organizationId: org?.id ?? null,
+        projectId: projectRepublique.id,
+      },
+      {
+        title: "Validation situation n°4",
+        type: "SITUATION",
+        startAt: atHour(today, 16, 30),
+        endAt: atHour(today, 17, 30),
+        ownerUserId: clientId,
+        createdById: clientId,
+        organizationId: org?.id ?? null,
+        projectId: projectAlpha.id,
+        description: "Revue situation Immeuble Alpha — fictif démo",
+      },
+      {
+        title: "Livraison isolant",
+        type: "LIVRAISON",
+        startAt: atHour(tomorrow, 8),
+        endAt: atHour(tomorrow, 10),
+        ownerUserId: clientId,
+        createdById: clientId,
+        organizationId: org?.id ?? null,
+        projectId: projectVictor.id,
+      },
+      {
+        title: "Réunion de chantier — Victor Hugo",
+        type: "REUNION_CHANTIER",
+        startAt: atHour(tomorrow, 9),
+        endAt: atHour(tomorrow, 10),
+        ownerUserId: clientId,
+        createdById: clientId,
+        organizationId: org?.id ?? null,
+        projectId: projectVictor.id,
+        recurrence: "WEEKLY",
+      },
+      {
+        title: "Contrôle étanchéité République",
+        type: "CONTROLE",
+        startAt: atHour(inTwo, 10),
+        endAt: atHour(inTwo, 12),
+        ownerUserId: clientId,
+        createdById: clientId,
+        organizationId: org?.id ?? null,
+        projectId: projectRepublique.id,
+      },
+      {
+        title: "Échéance DOE — Alpha",
+        type: "ECHEANCE",
+        startAt: atHour(inThree, 9),
+        endAt: atHour(inThree, 9, 30),
+        allDay: false,
+        ownerUserId: clientId,
+        createdById: clientId,
+        organizationId: org?.id ?? null,
+        projectId: projectAlpha.id,
+      },
+    ],
+  });
+
   return {
     projectIds: [projectVictor.id, projectRepublique.id, projectAlpha.id],
     companyLabel: companyName,
@@ -339,6 +455,10 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
 /** Supprime uniquement les données métier du tenant démo (pas le User / Organization / DemoEnvironment). */
 export async function clearDemoEnvironmentData(clientId: string) {
   await prisma.$transaction([
+    prisma.agendaEventAttendee.deleteMany({
+      where: { event: { ownerUserId: clientId } },
+    }),
+    prisma.agendaEvent.deleteMany({ where: { ownerUserId: clientId } }),
     prisma.appointment.deleteMany({ where: { clientId } }),
     prisma.alert.deleteMany({ where: { clientId } }),
     prisma.document.deleteMany({ where: { clientId } }),

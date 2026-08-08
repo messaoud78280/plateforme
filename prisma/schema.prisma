@@ -73,6 +73,10 @@ model User {
   alerts             Alert[]
   appointmentsOrganized Appointment[] @relation("AppointmentOrganizer")
   appointmentsAsClient  Appointment[] @relation("AppointmentClient")
+  agendaEventsOwned     AgendaEvent[] @relation("AgendaEventOwner")
+  agendaEventsCreated   AgendaEvent[] @relation("AgendaEventCreatedBy")
+  agendaEventsResponsible AgendaEvent[] @relation("AgendaEventResponsible")
+  agendaEventAttendances AgendaEventAttendee[]
   reportsAuthored       Report[]      @relation("ReportAuthor")
   reportComments        ReportComment[]
   subscriptions         Subscription[]
@@ -347,6 +351,7 @@ model Project {
   metrics    Metric[]
   activities Activity[]
   appointments Appointment[]
+  agendaEvents AgendaEvent[]
   reports Report[]
   skillPpspsSessions SkillPpspsSession[]
   chantierFolders ChantierFolder[]
@@ -828,6 +833,92 @@ enum AppointmentStatus {
   CONFIRME
   ANNULE
   TERMINE
+}
+
+// Agenda entreprise BTP (distinct des RDV Calendly / Appointment)
+enum AgendaEventType {
+  REUNION_CHANTIER
+  VISITE_CHANTIER
+  RDV_CLIENT
+  RDV_FOURNISSEUR
+  LIVRAISON
+  INTERVENTION
+  ECHEANCE
+  ADMINISTRATIF
+  COMMANDE
+  FACTURATION
+  SITUATION
+  RECEPTION
+  LEVEE_RESERVES
+  CONTROLE
+  FORMATION
+  CONGE
+  INTERNE
+  AUTRE
+}
+
+enum AgendaEventStatus {
+  PLANIFIE
+  CONFIRME
+  TERMINE
+  ANNULE
+}
+
+enum AgendaAttendeeStatus {
+  INVITE
+  ACCEPTE
+  REFUSE
+  EN_ATTENTE
+}
+
+model AgendaEvent {
+  id              String            @id @default(cuid())
+  organizationId  String?
+  ownerUserId     String
+  createdById     String
+  title           String
+  description     String?           @db.Text
+  location        String?
+  type            AgendaEventType   @default(AUTRE)
+  status          AgendaEventStatus @default(PLANIFIE)
+  startAt         DateTime
+  endAt           DateTime
+  allDay          Boolean           @default(false)
+  projectId       String?
+  appointmentId   String?           @unique
+  responsibleId   String?
+  reminderMinutes Int?
+  recurrence      String?           // NONE | DAILY | WEEKLY | MONTHLY | YEARLY | CUSTOM
+  recurrenceRule  String?
+  colorKey        String?
+  externalUid     String?           // sync future Google / Outlook / ICS
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  owner       User                 @relation("AgendaEventOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  createdBy   User                 @relation("AgendaEventCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  responsible User?                @relation("AgendaEventResponsible", fields: [responsibleId], references: [id], onDelete: SetNull)
+  project     Project?             @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  attendees   AgendaEventAttendee[]
+
+  @@index([ownerUserId, startAt])
+  @@index([organizationId, startAt])
+  @@index([projectId, startAt])
+  @@index([type, startAt])
+}
+
+model AgendaEventAttendee {
+  id        String               @id @default(cuid())
+  eventId   String
+  userId    String
+  status    AgendaAttendeeStatus @default(EN_ATTENTE)
+  createdAt DateTime             @default(now())
+
+  event AgendaEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([userId])
 }
 
 // Pièces jointes sur un rendez-vous

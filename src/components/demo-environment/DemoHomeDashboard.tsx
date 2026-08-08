@@ -107,7 +107,7 @@ export function DemoHomeDashboard({
           <StatCard
             value={stats.followUpUnprepared ?? 0}
             label="Interventions non préparées"
-            href="/dashboard/fiches-suivi?filter=urgent"
+            href="/dashboard/fiches-suivi?filter=non-preparees"
             emphasize={(stats.followUpUnprepared ?? 0) > 0 ? "critical" : "neutral"}
           />
           <StatCard

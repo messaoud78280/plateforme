@@ -10,6 +10,7 @@ import {
 } from "@/lib/a-traiter/collect";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { BackLink } from "@/components/ui/BackLink";
+import { FollowUpInlineActions } from "@/components/follow-up/FollowUpInlineActions";
 
 export const dynamic = "force-dynamic";
 
@@ -132,37 +133,42 @@ export default async function ATraiterPage() {
               <p className="text-sm text-slate-500">{style.empty}</p>
             ) : (
               <ul className="space-y-2">
-                {list.map((item) => (
-                  <li key={item.id}>
-                    <Link
-                      href={item.href}
-                      className={`flex flex-wrap items-start justify-between gap-3 rounded-xl border bg-white p-4 shadow-sm transition hover:border-[#1e3a5f]/40 hover:shadow ${style.border}`}
-                    >
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600">
-                            {SOURCE_LABELS[item.source]}
-                          </span>
-                          {item.urgencyLabel ? (
-                            <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${style.badge}`}>
-                              {item.urgencyLabel}
-                            </span>
-                          ) : null}
-                          <p className="truncate text-sm font-semibold text-slate-900">{item.title}</p>
-                        </div>
-                        <p className="mt-1 text-xs text-slate-600">{item.meta}</p>
-                        <p className="mt-1 text-[11px] text-slate-400">
-                          {item.dueLabel && item.dueLabel !== "—"
-                            ? `Échéance : ${item.dueLabel}`
-                            : formatWhen(item.createdAt)}
-                          {item.delayLabel ? ` · Retard ${item.delayLabel}` : ""}
-                          {item.assigneeName ? ` · ${item.assigneeName}` : ""}
-                        </p>
+                {list.map((item) => {
+                  const ficheId = item.source === "fiche" ? item.id.replace(/^fiche-/, "") : null;
+                  return (
+                    <li key={item.id}>
+                      <div
+                        className={`rounded-xl border bg-white p-4 shadow-sm transition hover:border-[#1e3a5f]/40 hover:shadow ${style.border}`}
+                      >
+                        <Link href={item.href} className="flex flex-wrap items-start justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600">
+                                {SOURCE_LABELS[item.source]}
+                              </span>
+                              {item.urgencyLabel ? (
+                                <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${style.badge}`}>
+                                  {item.urgencyLabel}
+                                </span>
+                              ) : null}
+                              <p className="truncate text-sm font-semibold text-slate-900">{item.title}</p>
+                            </div>
+                            <p className="mt-1 text-xs text-slate-600">{item.meta}</p>
+                            <p className="mt-1 text-[11px] text-slate-400">
+                              {item.dueLabel && item.dueLabel !== "—"
+                                ? `Échéance : ${item.dueLabel}`
+                                : formatWhen(item.createdAt)}
+                              {item.delayLabel ? ` · Retard ${item.delayLabel}` : ""}
+                              {item.assigneeName ? ` · ${item.assigneeName}` : ""}
+                            </p>
+                          </div>
+                          <span className="shrink-0 text-xs font-semibold text-[#1e3a5f]">Ouvrir →</span>
+                        </Link>
+                        {ficheId ? <FollowUpInlineActions sheetId={ficheId} /> : null}
                       </div>
-                      <span className="shrink-0 text-xs font-semibold text-[#1e3a5f]">Ouvrir →</span>
-                    </Link>
-                  </li>
-                ))}
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </section>

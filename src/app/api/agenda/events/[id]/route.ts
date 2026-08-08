@@ -84,6 +84,8 @@ export async function PATCH(request: Request, ctx: Ctx) {
       data.reminderMinutes = body.reminderMinutes;
     }
     if (typeof body.recurrence === "string") data.recurrence = body.recurrence;
+    if (body.followUpSheetId === null) data.followUpSheetId = null;
+    else if (typeof body.followUpSheetId === "string") data.followUpSheetId = body.followUpSheetId;
 
     if (data.startAt && data.endAt && (data.endAt as Date) <= (data.startAt as Date)) {
       return NextResponse.json({ error: "Horaires invalides" }, { status: 400 });

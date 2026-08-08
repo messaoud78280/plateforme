@@ -2,9 +2,16 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
-import { POSTIT_COLORS, STATUS_LABELS, URGENCY_STYLES } from "@/lib/follow-up/types";
+import {
+  DEFAULT_REMINDER_OFFSETS_HOURS,
+  POSTIT_COLORS,
+  STATUS_LABELS,
+  URGENCY_STYLES,
+} from "@/lib/follow-up/types";
+
+type TeamUser = { id: string; name: string; email: string };
 
 type Sheet = {
   id: string;
@@ -14,6 +21,7 @@ type Sheet = {
   orderNumber: string | null;
   workObject: string | null;
   siteAddress: string | null;
+  amountHt: number | null;
   status: string;
   statusLabel: string;
   colorKey: string;
@@ -26,6 +34,8 @@ type Sheet = {
   delayLabel: string | null;
   notes: string | null;
   postponeCount: number;
+  reminderOffsets: unknown;
+  assigneeId: string | null;
   assignee: { id: string; name: string } | null;
   timeline: {
     id: string;
@@ -53,14 +63,56 @@ const QUICK_EVENTS = [
   { type: "ECHEANCE", label: "Ajouter une relance" },
 ] as const;
 
+const REMINDER_PRESETS = [
+  { hours: 168, label: "7 j" },
+  { hours: 72, label: "3 j" },
+  { hours: 24, label: "24 h" },
+  { hours: 2, label: "2 h" },
+];
+
+function toLocalInput(iso: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
   const router = useRouter();
   const [sheet, setSheet] = useState(initial);
   const [busy, setBusy] = useState(false);
   const [postponeOpen, setPostponeOpen] = useState(false);
+  const [customDate, setCustomDate] = useState("");
   const [nextDraft, setNextDraft] = useState(sheet.nextAction ?? "");
+  const [nextAtDraft, setNextAtDraft] = useState(toLocalInput(sheet.nextActionAt));
+  const [team, setTeam] = useState<TeamUser[]>([]);
+  const [edit, setEdit] = useState({
+    title: sheet.title,
+    clientName: sheet.clientName ?? "",
+    workObject: sheet.workObject ?? "",
+    siteAddress: sheet.siteAddress ?? "",
+    osNumber: sheet.osNumber ?? "",
+    orderNumber: sheet.orderNumber ?? "",
+    notes: sheet.notes ?? "",
+    amountHt: sheet.amountHt != null ? String(sheet.amountHt) : "",
+    assigneeId: sheet.assigneeId ?? "",
+    status: sheet.status,
+  });
+  const [reminders, setReminders] = useState<number[]>(
+    Array.isArray(sheet.reminderOffsets)
+      ? (sheet.reminderOffsets as number[])
+      : [...DEFAULT_REMINDER_OFFSETS_HOURS],
+  );
+
   const color = POSTIT_COLORS[sheet.colorKey] ?? POSTIT_COLORS.jaune;
   const urgency = URGENCY_STYLES[sheet.urgency as keyof typeof URGENCY_STYLES] ?? URGENCY_STYLES.NORMAL;
+
+  useEffect(() => {
+    void fetch("/api/follow-up/options")
+      .then((r) => r.json())
+      .then((d) => setTeam(Array.isArray(d.teamUsers) ? d.teamUsers : []));
+  }, []);
 
   async function runAction(payload: Record<string, unknown>) {
     setBusy(true);
@@ -72,12 +124,33 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
       });
       const data = await res.json();
       if (res.ok) {
-        setSheet(data.sheet ?? data);
+        const next = data.sheet ?? data;
+        setSheet(next);
+        setNextDraft(next.nextAction ?? "");
+        setNextAtDraft(toLocalInput(next.nextActionAt));
         router.refresh();
       }
     } finally {
       setBusy(false);
       setPostponeOpen(false);
+    }
+  }
+
+  async function savePatch(body: Record<string, unknown>) {
+    setBusy(true);
+    try {
+      const res = await fetch(`/api/follow-up/${sheet.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSheet(data);
+        router.refresh();
+      }
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -88,10 +161,10 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
           ← Fiches de suivi
         </Link>
         <Link
-          href={`/dashboard/agenda?followUp=${sheet.id}`}
+          href="/dashboard/agenda"
           className="text-xs font-semibold text-slate-600 hover:underline"
         >
-          Voir dans l’agenda
+          Ouvrir l’agenda
         </Link>
       </div>
 
@@ -142,7 +215,7 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
             <p className="text-[10px] font-bold uppercase text-slate-500">Responsable</p>
             <p className="mt-1 text-sm font-semibold text-slate-900">{sheet.assignee?.name ?? "—"}</p>
             {sheet.postponeCount > 0 && (
-              <p className="text-[11px] text-amber-800">{sheet.postponeCount} report(s)</p>
+              <p className="text-[11px] text-amber-800">{sheet.postponeCount} report(s) — à surveiller</p>
             )}
           </div>
         </div>
@@ -167,7 +240,7 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
             Reporter
           </button>
           {postponeOpen && (
-            <div className="flex w-full flex-wrap gap-2 border-t border-slate-100 pt-3">
+            <div className="flex w-full flex-wrap items-end gap-2 border-t border-slate-100 pt-3">
               {(
                 [
                   ["tomorrow", "Demain"],
@@ -185,13 +258,36 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
                   {label}
                 </button>
               ))}
+              <label className="space-y-1 text-xs">
+                <span className="font-semibold text-slate-600">Choisir une date</span>
+                <input
+                  type="datetime-local"
+                  value={customDate}
+                  onChange={(e) => setCustomDate(e.target.value)}
+                  className="block rounded-md border border-slate-200 px-2 py-1.5 text-xs"
+                />
+              </label>
+              <button
+                type="button"
+                disabled={busy || !customDate}
+                onClick={() =>
+                  runAction({
+                    action: "postpone",
+                    postpone: "custom",
+                    customDate: new Date(customDate).toISOString(),
+                  })
+                }
+                className="rounded-md bg-[#1e3a5f] px-2.5 py-1.5 text-xs font-bold text-white disabled:opacity-50"
+              >
+                Reporter à cette date
+              </button>
             </div>
           )}
         </section>
       )}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-4">
-        <h2 className="text-sm font-bold text-slate-900">Modifier la prochaine action</h2>
+        <h2 className="text-sm font-bold text-slate-900">Prochaine action</h2>
         <div className="mt-2 flex flex-wrap gap-2">
           <input
             value={nextDraft}
@@ -199,15 +295,177 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
             className="min-w-[200px] flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
             placeholder="Ex. Commander membrane EPDM"
           />
+          <input
+            type="datetime-local"
+            value={nextAtDraft}
+            onChange={(e) => setNextAtDraft(e.target.value)}
+            className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          />
           <button
             type="button"
             disabled={busy || !nextDraft.trim()}
-            onClick={() => runAction({ action: "set_next", nextAction: nextDraft.trim() })}
+            onClick={() =>
+              runAction({
+                action: "set_next",
+                nextAction: nextDraft.trim(),
+                nextActionAt: nextAtDraft ? new Date(nextAtDraft).toISOString() : undefined,
+              })
+            }
             className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white"
           >
             Enregistrer
           </button>
         </div>
+        <div className="mt-3">
+          <p className="text-[10px] font-bold uppercase text-slate-500">Rappels avant échéance</p>
+          <div className="mt-1.5 flex flex-wrap gap-2">
+            {REMINDER_PRESETS.map((p) => {
+              const on = reminders.includes(p.hours);
+              return (
+                <button
+                  key={p.hours}
+                  type="button"
+                  disabled={busy}
+                  onClick={() => {
+                    const next = on
+                      ? reminders.filter((h) => h !== p.hours)
+                      : [...reminders, p.hours].sort((a, b) => b - a);
+                    setReminders(next);
+                    void savePatch({ reminderOffsets: next });
+                  }}
+                  className={cn(
+                    "rounded-md px-2.5 py-1 text-xs font-semibold",
+                    on ? "bg-[#1e3a5f] text-white" : "bg-slate-100 text-slate-700",
+                  )}
+                >
+                  {p.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-4">
+        <h2 className="text-sm font-bold text-slate-900">Compléter la fiche</h2>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <label className="space-y-1 text-xs">
+            <span className="font-semibold text-slate-600">Titre / chantier</span>
+            <input
+              value={edit.title}
+              onChange={(e) => setEdit({ ...edit, title: e.target.value })}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="space-y-1 text-xs">
+            <span className="font-semibold text-slate-600">Client</span>
+            <input
+              value={edit.clientName}
+              onChange={(e) => setEdit({ ...edit, clientName: e.target.value })}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="space-y-1 text-xs sm:col-span-2">
+            <span className="font-semibold text-slate-600">Objet des travaux</span>
+            <input
+              value={edit.workObject}
+              onChange={(e) => setEdit({ ...edit, workObject: e.target.value })}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="space-y-1 text-xs">
+            <span className="font-semibold text-slate-600">N° OS</span>
+            <input
+              value={edit.osNumber}
+              onChange={(e) => setEdit({ ...edit, osNumber: e.target.value })}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="space-y-1 text-xs">
+            <span className="font-semibold text-slate-600">N° commande</span>
+            <input
+              value={edit.orderNumber}
+              onChange={(e) => setEdit({ ...edit, orderNumber: e.target.value })}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="space-y-1 text-xs">
+            <span className="font-semibold text-slate-600">Montant HT (€)</span>
+            <input
+              type="number"
+              value={edit.amountHt}
+              onChange={(e) => setEdit({ ...edit, amountHt: e.target.value })}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="space-y-1 text-xs">
+            <span className="font-semibold text-slate-600">Responsable</span>
+            <select
+              value={edit.assigneeId}
+              onChange={(e) => setEdit({ ...edit, assigneeId: e.target.value })}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            >
+              <option value="">—</option>
+              {team.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.name || u.email}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="space-y-1 text-xs sm:col-span-2">
+            <span className="font-semibold text-slate-600">Adresse</span>
+            <input
+              value={edit.siteAddress}
+              onChange={(e) => setEdit({ ...edit, siteAddress: e.target.value })}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="space-y-1 text-xs sm:col-span-2">
+            <span className="font-semibold text-slate-600">Statut</span>
+            <select
+              value={edit.status}
+              onChange={(e) => setEdit({ ...edit, status: e.target.value })}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            >
+              {Object.entries(STATUS_LABELS).map(([k, v]) => (
+                <option key={k} value={k}>
+                  {v}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="space-y-1 text-xs sm:col-span-2">
+            <span className="font-semibold text-slate-600">Notes</span>
+            <textarea
+              value={edit.notes}
+              onChange={(e) => setEdit({ ...edit, notes: e.target.value })}
+              rows={3}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            />
+          </label>
+        </div>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() =>
+            void savePatch({
+              title: edit.title,
+              clientName: edit.clientName || null,
+              workObject: edit.workObject || null,
+              siteAddress: edit.siteAddress || null,
+              osNumber: edit.osNumber || null,
+              orderNumber: edit.orderNumber || null,
+              notes: edit.notes || null,
+              amountHt: edit.amountHt === "" ? null : Number(edit.amountHt),
+              assigneeId: edit.assigneeId || null,
+              status: edit.status,
+            })
+          }
+          className="mt-3 rounded-lg bg-[#1e3a5f] px-4 py-2 text-xs font-bold text-white disabled:opacity-50"
+        >
+          Enregistrer la fiche
+        </button>
       </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -234,29 +492,7 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
               + {q.label}
             </button>
           ))}
-          {(
-            [
-              ["A_PLANIFIER", "À planifier"],
-              ["AVENANT", "Avenant"],
-              ["A_FACTURER", "À facturer"],
-              ["TRAVAUX_TERMINES", "Travaux terminés"],
-            ] as const
-          ).map(([st, label]) => (
-            <button
-              key={st}
-              type="button"
-              disabled={busy}
-              onClick={() => runAction({ action: "quick_status", status: st })}
-              className="rounded-lg bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700"
-            >
-              Statut : {label}
-            </button>
-          ))}
         </div>
-        <p className="mt-2 text-[11px] text-slate-500">
-          Statuts disponibles :{" "}
-          {Object.values(STATUS_LABELS).slice(0, 8).join(" · ")}…
-        </p>
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -264,16 +500,16 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
           <h2 className="text-sm font-bold text-slate-900">Chronologie</h2>
           <ol className="mt-4 space-y-3">
             {sheet.timeline.map((t) => {
-              const done = ["termine", "creation", "statut", "agenda", "alerte"].includes(t.kind)
-                ? t.kind === "termine" || t.kind === "creation"
-                : false;
               const past = new Date(t.occurredAt) <= new Date();
+              const done = t.kind === "termine" || t.kind === "creation";
               return (
                 <li key={t.id} className="flex gap-3">
                   <span
                     className={cn(
                       "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
-                      past || done ? "bg-emerald-100 text-emerald-800" : "border-2 border-slate-300 text-slate-400",
+                      past || done
+                        ? "bg-emerald-100 text-emerald-800"
+                        : "border-2 border-slate-300 text-slate-400",
                     )}
                   >
                     {past || done ? "✓" : "○"}
@@ -321,12 +557,6 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
               <li className="text-sm text-slate-500">Aucun événement. Utilisez les actions rapides.</li>
             )}
           </ul>
-          {sheet.notes && (
-            <div className="mt-4 border-t border-slate-100 pt-3">
-              <p className="text-[10px] font-bold uppercase text-slate-500">Notes</p>
-              <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700">{sheet.notes}</p>
-            </div>
-          )}
         </section>
       </div>
     </div>

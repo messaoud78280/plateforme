@@ -61,8 +61,18 @@ export function AgendaEventModal({
   const [description, setDescription] = useState("");
   const [reminderMinutes, setReminderMinutes] = useState<number | "">("");
   const [recurrence, setRecurrence] = useState("NONE");
+  const [followUpSheetId, setFollowUpSheetId] = useState("");
+  const [followUpOptions, setFollowUpOptions] = useState<{ id: string; label: string }[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!open) return;
+    void fetch("/api/follow-up/options")
+      .then((r) => r.json())
+      .then((d) => setFollowUpOptions(Array.isArray(d.sheets) ? d.sheets : []))
+      .catch(() => setFollowUpOptions([]));
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -80,6 +90,7 @@ export function AgendaEventModal({
       setDescription(event.description ?? "");
       setReminderMinutes(event.reminderMinutes ?? "");
       setRecurrence(event.recurrence ?? "NONE");
+      setFollowUpSheetId(event.followUpSheetId ?? event.followUpSheet?.id ?? "");
       return;
     }
     const startIso = draft?.startAt ?? new Date().toISOString();
@@ -99,6 +110,7 @@ export function AgendaEventModal({
     setDescription("");
     setReminderMinutes(15);
     setRecurrence("NONE");
+    setFollowUpSheetId("");
   }, [open, mode, event, draft]);
 
   if (!open) return null;
@@ -129,6 +141,7 @@ export function AgendaEventModal({
         description: description.trim() || null,
         reminderMinutes: reminderMinutes === "" ? null : Number(reminderMinutes),
         recurrence,
+        followUpSheetId: followUpSheetId || null,
       };
 
       const url =
@@ -252,6 +265,32 @@ export function AgendaEventModal({
                 ))}
               </select>
             </div>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-slate-600">Fiche de suivi</label>
+            <select
+              value={followUpSheetId}
+              onChange={(e) => setFollowUpSheetId(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#1d4ed8]"
+            >
+              <option value="">Aucune</option>
+              {followUpOptions.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+            {followUpSheetId ? (
+              <a
+                href={`/dashboard/fiches-suivi/${followUpSheetId}`}
+                className="mt-1 inline-block text-[11px] font-semibold text-[#1d4ed8] hover:underline"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Ouvrir la fiche →
+              </a>
+            ) : null}
           </div>
 
           <div>

@@ -118,26 +118,16 @@ function evaluateBusinessRules(sheet: SheetRow, rules: AlertRuleConfig[], now: D
   if (cmdRule && intervention) {
     const h = hoursUntil(intervention.startAt, now);
     if (h >= 0 && h <= cmdRule.delayHours) {
-      const hasOrder = hasAgendaType(sheet, ["COMMANDE"]) ||
-        ["COMMANDE_PASSEE", "ATTENTE_FOURNISSEUR", "EN_COURS", "INTERVENTION_PREVUE"].includes(
-          sheet.status as FollowUpSheetStatus,
-        );
-      if (!hasOrder && sheet.status === "INTERVENTION_PREVUE") {
-        // still alert if no commande event and status suggests missing order path
-      }
-      if (!hasAgendaType(sheet, ["COMMANDE"]) && sheet.status !== "COMMANDE_PASSEE" && sheet.status !== "ATTENTE_FOURNISSEUR") {
-        if (
-          sheet.status === "INTERVENTION_PREVUE" ||
-          sheet.status === "A_PLANIFIER" ||
-          sheet.status === "PLANIFIE" ||
-          sheet.status === "COMMANDE_FOURNISSEUR"
-        ) {
-          hits.push({
-            rule: cmdRule,
-            title: `${site} — commande fournisseur manquante`,
-            message: `Intervention dans ${Math.max(1, Math.round(h))} h sans commande fournisseur enregistrée.`,
-          });
-        }
+      const hasOrderEvent = hasAgendaType(sheet, ["COMMANDE"]);
+      const orderDone = ["COMMANDE_PASSEE", "ATTENTE_FOURNISSEUR", "EN_COURS"].includes(
+        sheet.status as FollowUpSheetStatus,
+      );
+      if (!hasOrderEvent && !orderDone) {
+        hits.push({
+          rule: cmdRule,
+          title: `${site} — commande fournisseur manquante`,
+          message: `Intervention dans ${Math.max(1, Math.round(h))} h sans commande fournisseur enregistrée.`,
+        });
       }
     }
   }

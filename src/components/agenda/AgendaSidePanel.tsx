@@ -182,6 +182,36 @@ export function AgendaSidePanel({
                   </dd>
                 </div>
               ) : null}
+              {(selectedEvent.followUpSheet || selectedEvent.followUpSheetId || selectedEvent.href?.includes("fiches-suivi")) ? (
+                <div>
+                  <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                    Fiche de suivi
+                  </dt>
+                  <dd>
+                    <Link
+                      href={
+                        selectedEvent.href ||
+                        `/dashboard/fiches-suivi/${selectedEvent.followUpSheet?.id ?? selectedEvent.followUpSheetId}`
+                      }
+                      className="font-medium text-[#1d4ed8] hover:underline"
+                    >
+                      {selectedEvent.followUpSheet?.title ?? "Ouvrir la fiche"}
+                    </Link>
+                    {selectedEvent.urgencyLabel ? (
+                      <span className="mt-0.5 block text-xs font-semibold text-slate-600">
+                        Urgence : {selectedEvent.urgencyLabel}
+                      </span>
+                    ) : null}
+                  </dd>
+                </div>
+              ) : selectedEvent.urgencyLabel ? (
+                <div>
+                  <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                    Urgence
+                  </dt>
+                  <dd className="text-sm font-semibold text-slate-700">{selectedEvent.urgencyLabel}</dd>
+                </div>
+              ) : null}
               {selectedEvent.responsible ? (
                 <div>
                   <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">

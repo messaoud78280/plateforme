@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { HeaderDropdown } from "@/components/ui/HeaderDropdown";
+import { FollowUpInlineActions } from "@/components/follow-up/FollowUpInlineActions";
 
 type InboxItem = {
   id: string;
@@ -217,6 +218,14 @@ export function NotificationsDropdown() {
                           >
                             Voir la fiche →
                           </Link>
+                        ) : null}
+                        {item.actionUrl?.includes("/dashboard/fiches-suivi/") ? (
+                          <div className="mt-1">
+                            <FollowUpInlineActions
+                              sheetId={item.actionUrl.split("/").pop() || ""}
+                              compact
+                            />
+                          </div>
                         ) : null}
                       </div>
                       {!item.read && (

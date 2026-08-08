@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { followUpSheetAccessWhere, resolveFollowUpOwnerUserId } from "@/lib/follow-up/access";
 import { getFollowUpSettings } from "@/lib/follow-up/settings";
 import { serializeFollowUpSheet } from "@/lib/follow-up/serialize";
-import { FollowUpPostItCard } from "@/components/follow-up/FollowUpPostItCard";
+import { FollowUpBoard } from "@/components/follow-up/FollowUpBoard";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { BackLink } from "@/components/ui/BackLink";
 
@@ -29,26 +29,14 @@ export default async function FichesSuiviPage({
   startToday.setHours(0, 0, 0, 0);
   const endToday = new Date(now);
   endToday.setHours(23, 59, 59, 999);
+  const endWeek = new Date(startToday);
+  const day = endWeek.getDay();
+  endWeek.setDate(endWeek.getDate() + (day === 0 ? 0 : 7 - day));
+  endWeek.setHours(23, 59, 59, 999);
 
-  const sheets = await prisma.followUpSheet.findMany({
+  const allSheets = await prisma.followUpSheet.findMany({
     where: {
-      AND: [
-        accessWhere,
-        { status: { not: "ARCHIVE" } },
-        ...(filter === "overdue"
-          ? [{ nextActionDone: false, nextActionAt: { lt: now } }]
-          : []),
-        ...(filter === "today"
-          ? [{ nextActionDone: false, nextActionAt: { gte: startToday, lte: endToday } }]
-          : []),
-        ...(filter === "a-facturer"
-          ? [{ status: { in: ["A_FACTURER" as const, "TRAVAUX_TERMINES" as const] } }]
-          : []),
-        ...(filter === "avenant" ? [{ status: "AVENANT" as const }] : []),
-        ...(filter === "a-planifier"
-          ? [{ status: { in: ["NOUVEAU" as const, "A_PLANIFIER" as const, "A_ANALYSER" as const] } }]
-          : []),
-      ],
+      AND: [accessWhere, { status: { not: "ARCHIVE" } }],
     },
     include: {
       assignee: { select: { id: true, name: true, email: true } },
@@ -58,21 +46,52 @@ export default async function FichesSuiviPage({
     take: 200,
   });
 
-  let items = sheets.map((s) => serializeFollowUpSheet(s, settings.thresholds));
-  if (filter === "urgent") {
-    items = items.filter((i) => ["IMPORTANT", "URGENT", "CRITIQUE"].includes(i.urgency));
+  const allItems = allSheets.map((s) => serializeFollowUpSheet(s, settings.thresholds));
+
+  let items = allItems;
+  if (filter === "overdue") {
+    items = allItems.filter((i) => i.delayLabel != null);
+  } else if (filter === "today") {
+    items = allItems.filter((i) => {
+      if (!i.nextActionAt || i.nextActionDone) return false;
+      const d = new Date(i.nextActionAt);
+      return d >= startToday && d <= endToday;
+    });
+  } else if (filter === "week") {
+    items = allItems.filter((i) => {
+      if (!i.nextActionAt || i.nextActionDone) return false;
+      const d = new Date(i.nextActionAt);
+      return d >= startToday && d <= endWeek;
+    });
+  } else if (filter === "a-facturer") {
+    items = allItems.filter((i) => i.status === "A_FACTURER" || i.status === "TRAVAUX_TERMINES");
+  } else if (filter === "avenant") {
+    items = allItems.filter((i) => i.status === "AVENANT");
+  } else if (filter === "a-planifier") {
+    items = allItems.filter((i) =>
+      ["NOUVEAU", "A_PLANIFIER", "A_ANALYSER"].includes(i.status),
+    );
+  } else if (filter === "urgent") {
+    items = allItems.filter((i) => ["IMPORTANT", "URGENT", "CRITIQUE"].includes(i.urgency));
+  } else if (filter === "non-preparees") {
+    items = allItems.filter(
+      (i) =>
+        i.status === "INTERVENTION_PREVUE" ||
+        i.status === "COMMANDE_FOURNISSEUR" ||
+        (i.nextAction ?? "").toLowerCase().includes("commander"),
+    );
   }
 
   const counters = [
     {
       label: "Urgences",
-      value: items.filter((i) => i.urgency === "URGENT" || i.urgency === "CRITIQUE").length,
+      value: allItems.filter((i) => i.urgency === "URGENT" || i.urgency === "CRITIQUE").length,
       href: "/dashboard/fiches-suivi?filter=urgent",
       emphasize: true,
     },
     {
       label: "Aujourd’hui",
-      value: items.filter((i) => {
+      value: allItems.filter((i) => {
         if (!i.nextActionAt || i.nextActionDone) return false;
         const d = new Date(i.nextActionAt);
         return d >= startToday && d <= endToday;
@@ -80,24 +99,46 @@ export default async function FichesSuiviPage({
       href: "/dashboard/fiches-suivi?filter=today",
     },
     {
+      label: "Cette semaine",
+      value: allItems.filter((i) => {
+        if (!i.nextActionAt || i.nextActionDone) return false;
+        const d = new Date(i.nextActionAt);
+        return d >= startToday && d <= endWeek;
+      }).length,
+      href: "/dashboard/fiches-suivi?filter=week",
+    },
+    {
       label: "En retard",
-      value: items.filter((i) => i.delayLabel).length,
+      value: allItems.filter((i) => i.delayLabel).length,
       href: "/dashboard/fiches-suivi?filter=overdue",
       emphasize: true,
     },
     {
+      label: "Non préparées",
+      value: allItems.filter(
+        (i) =>
+          i.status === "INTERVENTION_PREVUE" ||
+          i.status === "COMMANDE_FOURNISSEUR" ||
+          (i.nextAction ?? "").toLowerCase().includes("commander"),
+      ).length,
+      href: "/dashboard/fiches-suivi?filter=non-preparees",
+    },
+    {
       label: "À planifier",
-      value: items.filter((i) => ["NOUVEAU", "A_PLANIFIER", "A_ANALYSER"].includes(i.status)).length,
+      value: allItems.filter((i) =>
+        ["NOUVEAU", "A_PLANIFIER", "A_ANALYSER"].includes(i.status),
+      ).length,
       href: "/dashboard/fiches-suivi?filter=a-planifier",
     },
     {
       label: "À facturer",
-      value: items.filter((i) => i.status === "A_FACTURER" || i.status === "TRAVAUX_TERMINES").length,
+      value: allItems.filter((i) => i.status === "A_FACTURER" || i.status === "TRAVAUX_TERMINES")
+        .length,
       href: "/dashboard/fiches-suivi?filter=a-facturer",
     },
     {
       label: "Avenants",
-      value: items.filter((i) => i.status === "AVENANT").length,
+      value: allItems.filter((i) => i.status === "AVENANT").length,
       href: "/dashboard/fiches-suivi?filter=avenant",
     },
   ];
@@ -108,7 +149,7 @@ export default async function FichesSuiviPage({
       <PageHeader
         eyebrow="Suivi opérationnel"
         title="Fiches de suivi"
-        description="1 commande / 1 OS = 1 fiche. Remplace les post-it : prochaine action, responsable, échéance, alertes."
+        description="Mur de post-it numérique : 1 OS / 1 commande = 1 fiche. Filtrez, regroupez, agissez."
         actions={
           <Link
             href="/dashboard/fiches-suivi/nouvelle"
@@ -119,14 +160,14 @@ export default async function FichesSuiviPage({
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid gap-3 sm:grid-cols-4 lg:grid-cols-8">
         {counters.map((c) => (
           <Link
-            key={c.href}
+            key={c.href + c.label}
             href={c.href}
             className={`rounded-xl border bg-white px-3 py-3 shadow-sm transition hover:border-[#1e3a5f]/30 ${
               c.emphasize && c.value > 0 ? "border-red-200 bg-red-50/50" : "border-slate-200"
-            }`}
+            } ${filter && c.href.includes(`filter=${filter}`) ? "ring-2 ring-[#1e3a5f]/30" : ""}`}
           >
             <p className="text-2xl font-extrabold tabular-nums text-slate-900">{c.value}</p>
             <p className="text-xs font-medium text-slate-600">{c.label}</p>
@@ -134,7 +175,7 @@ export default async function FichesSuiviPage({
         ))}
       </div>
 
-      {items.length === 0 ? (
+      {allItems.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 px-6 py-14 text-center">
           <p className="text-sm font-semibold text-slate-800">Aucune fiche pour le moment</p>
           <p className="mt-1 text-xs text-slate-500">
@@ -148,11 +189,7 @@ export default async function FichesSuiviPage({
           </Link>
         </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((s) => (
-            <FollowUpPostItCard key={s.id} sheet={s} />
-          ))}
-        </div>
+        <FollowUpBoard sheets={items} activeFilter={filter} />
       )}
     </div>
   );

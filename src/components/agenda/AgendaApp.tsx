@@ -99,6 +99,43 @@ export function AgendaApp({ projects, teamUsers, currentUserId: _currentUserId }
     void loadEvents();
   }, [loadEvents]);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      if (e.key === "t" || e.key === "T") {
+        e.preventDefault();
+        setCursor(startOfDay(new Date()));
+      }
+      if (e.key === "n" || e.key === "N") {
+        e.preventDefault();
+        setDraft(null);
+        setDuplicateFrom(null);
+        setCreateOpen(true);
+      }
+      if (e.key === "1") setView("day");
+      if (e.key === "2") setView("week");
+      if (e.key === "3") setView("month");
+      if (e.key === "4") setView("year");
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        if (view === "day") setCursor((c) => addDays(c, -1));
+        else if (view === "week") setCursor((c) => addDays(c, -7));
+        else if (view === "month") setCursor((c) => addMonths(c, -1));
+        else setCursor((c) => addYears(c, -1));
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        if (view === "day") setCursor((c) => addDays(c, 1));
+        else if (view === "week") setCursor((c) => addDays(c, 7));
+        else if (view === "month") setCursor((c) => addMonths(c, 1));
+        else setCursor((c) => addYears(c, 1));
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [view]);
+
   const selectedEvent = useMemo(
     () => events.find((e) => e.id === selectedEventId) ?? null,
     [events, selectedEventId],
@@ -156,7 +193,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId: _currentUserId }
   }
 
   async function handleDelete() {
-    if (!selectedEvent) return;
+    if (!selectedEvent || selectedEvent.readOnly) return;
     if (!window.confirm("Supprimer cet événement ?")) return;
     try {
       const res = await fetch(`/api/agenda/events/${selectedEvent.id}`, {
@@ -172,7 +209,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId: _currentUserId }
   }
 
   function handleDuplicate() {
-    if (!selectedEvent) return;
+    if (!selectedEvent || selectedEvent.readOnly) return;
     setDuplicateFrom(selectedEvent);
     setDraft({
       startAt: selectedEvent.startAt,
@@ -263,6 +300,13 @@ export function AgendaApp({ projects, teamUsers, currentUserId: _currentUserId }
             >
               <PanelRight className="h-4 w-4" />
             </button>
+            <a
+              href="/api/agenda/export.ics"
+              className="inline-flex items-center rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+              title="Exporter en .ics (Google / Outlook / Apple)"
+            >
+              .ics
+            </a>
             <button
               type="button"
               onClick={() => openCreate()}
@@ -410,7 +454,10 @@ export function AgendaApp({ projects, teamUsers, currentUserId: _currentUserId }
             setCursor(startOfDay(d));
             setView("day");
           }}
-          onEdit={() => setEditOpen(true)}
+          onEdit={() => {
+            if (selectedEvent?.readOnly) return;
+            setEditOpen(true);
+          }}
           onDuplicate={handleDuplicate}
           onDelete={handleDelete}
         />

@@ -413,9 +413,9 @@ export function AgendaDayWeekView({
                   return (
                     <div
                       key={ev.id}
-                      className={`absolute left-1 right-1 z-10 cursor-grab overflow-hidden rounded-md border px-1.5 py-0.5 text-left active:cursor-grabbing ${
-                        selected ? "ring-2 ring-[#1d4ed8] ring-offset-1" : ""
-                      }`}
+                      className={`absolute left-1 right-1 z-10 overflow-hidden rounded-md border px-1.5 py-0.5 text-left ${
+                        ev.readOnly ? "cursor-pointer" : "cursor-grab active:cursor-grabbing"
+                      } ${selected ? "ring-2 ring-[#1d4ed8] ring-offset-1" : ""}`}
                       style={{
                         top,
                         height,
@@ -423,22 +423,30 @@ export function AgendaDayWeekView({
                         borderColor: meta.colors.border,
                         color: meta.colors.text,
                       }}
-                      onPointerDown={(e) => startMove(e, ev, dayIndex)}
+                      onPointerDown={(e) => {
+                        if (ev.readOnly) return;
+                        startMove(e, ev, dayIndex);
+                      }}
                       onClick={(e) => {
                         e.stopPropagation();
                         onSelectEvent(ev.id);
                       }}
                     >
-                      <p className="truncate text-[11px] font-semibold leading-tight">{ev.title}</p>
+                      <p className="truncate text-[11px] font-semibold leading-tight">
+                        {ev.readOnly ? "↳ " : ""}
+                        {ev.title}
+                      </p>
                       {height > 28 ? (
                         <p className="truncate text-[10px] opacity-80">
                           {formatTime(start)} – {formatTime(end)}
                         </p>
                       ) : null}
-                      <div
-                        className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize"
-                        onPointerDown={(e) => startResize(e, ev, dayIndex)}
-                      />
+                      {!ev.readOnly ? (
+                        <div
+                          className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize"
+                          onPointerDown={(e) => startResize(e, ev, dayIndex)}
+                        />
+                      ) : null}
                     </div>
                   );
                 })}

@@ -219,27 +219,42 @@ export function AgendaSidePanel({
             </dl>
 
             <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-4">
-              <button
-                type="button"
-                onClick={onEdit}
-                className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#162d4a]"
-              >
-                Modifier
-              </button>
-              <button
-                type="button"
-                onClick={onDuplicate}
-                className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                Dupliquer
-              </button>
-              <button
-                type="button"
-                onClick={onDelete}
-                className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50"
-              >
-                Supprimer
-              </button>
+              {selectedEvent.readOnly ? (
+                selectedEvent.href ? (
+                  <Link
+                    href={selectedEvent.href}
+                    className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#162d4a]"
+                  >
+                    Ouvrir la source
+                  </Link>
+                ) : (
+                  <p className="text-xs text-slate-500">Échéance liée — non modifiable ici</p>
+                )
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={onEdit}
+                    className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#162d4a]"
+                  >
+                    Modifier
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onDuplicate}
+                    className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    Dupliquer
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onDelete}
+                    className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50"
+                  >
+                    Supprimer
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}

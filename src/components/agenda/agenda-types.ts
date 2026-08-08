@@ -12,6 +12,10 @@ export type AgendaEventDTO = {
   responsibleId: string | null;
   reminderMinutes: number | null;
   recurrence: string | null;
+  /** Présent si l’item vient d’une tâche / jalon / RDV (non éditable dans l’agenda). */
+  readOnly?: boolean;
+  source?: "agenda" | "task" | "project_start" | "project_end" | "appointment";
+  href?: string | null;
   project: { id: string; title: string; siteCity: string | null; siteAddress: string | null } | null;
   responsible: { id: string; name: string; email: string } | null;
   createdBy: { id: string; name: string; email: string };

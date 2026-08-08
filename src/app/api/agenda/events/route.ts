@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import type { AgendaEventType } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { agendaEventAccessWhere, agendaEventInclude, resolveAgendaOwnerUserId } from "@/lib/agenda/access";
+import { listLinkedAgendaItems } from "@/lib/agenda/linked-sources";
 import { AGENDA_EVENT_TYPES } from "@/lib/agenda/types";
 import { prisma } from "@/lib/prisma";
 import { canClientAccessProject } from "@/lib/organization/access";
@@ -26,7 +27,7 @@ function parseDate(value: string | null): Date | null {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
-/** GET /api/agenda/events?from=&to=&scope=&projectId=&q=&type= */
+/** GET /api/agenda/events?from=&to=&scope=&projectId=&q=&type=&linked=1 */
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -40,6 +41,7 @@ export async function GET(request: Request) {
   const projectId = searchParams.get("projectId");
   const type = searchParams.get("type");
   const q = searchParams.get("q")?.trim();
+  const includeLinked = searchParams.get("linked") !== "0";
 
   try {
     const accessWhere = await agendaEventAccessWhere(session.user, {
@@ -72,7 +74,34 @@ export async function GET(request: Request) {
       take: 500,
     });
 
-    return NextResponse.json({ events });
+    const agendaEvents = events.map((e) => ({
+      ...e,
+      readOnly: false as const,
+      source: "agenda" as const,
+      href: null as string | null,
+    }));
+
+    let linked: Awaited<ReturnType<typeof listLinkedAgendaItems>> = [];
+    if (includeLinked && from && to) {
+      linked = await listLinkedAgendaItems(session.user, {
+        from,
+        to,
+        projectId: projectId || null,
+        q: q || null,
+      });
+      if (type) linked = linked.filter((i) => i.type === type);
+      if (scope === "mine") {
+        linked = linked.filter(
+          (i) => i.responsibleId === session.user!.id || i.createdBy.id === session.user!.id,
+        );
+      }
+    }
+
+    const merged = [...agendaEvents, ...linked].sort(
+      (a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime(),
+    );
+
+    return NextResponse.json({ events: merged });
   } catch (error) {
     console.error("GET /api/agenda/events", error);
     return NextResponse.json({ error: "Erreur chargement agenda" }, { status: 500 });

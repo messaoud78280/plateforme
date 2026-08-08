@@ -46,7 +46,7 @@ const VIEW_LABELS: { id: AgendaView; label: string }[] = [
   { id: "year", label: "Année" },
 ];
 
-export function AgendaApp({ projects, teamUsers, currentUserId: _currentUserId }: Props) {
+export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
   const [view, setView] = useState<AgendaView>("week");
   const [cursor, setCursor] = useState(() => startOfDay(new Date()));
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
@@ -98,6 +98,21 @@ export function AgendaApp({ projects, teamUsers, currentUserId: _currentUserId }
   useEffect(() => {
     void loadEvents();
   }, [loadEvents]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const eventId = params.get("event");
+    const projectId = params.get("projectId");
+    if (eventId) {
+      setSelectedEventId(eventId);
+      setPanelOpen(true);
+      setView("day");
+    }
+    if (projectId) {
+      setFiltersOpen(true);
+    }
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -194,15 +209,41 @@ export function AgendaApp({ projects, teamUsers, currentUserId: _currentUserId }
 
   async function handleDelete() {
     if (!selectedEvent || selectedEvent.readOnly) return;
+    const realId = selectedEvent.id.includes("__")
+      ? selectedEvent.id.split("__")[0]!
+      : selectedEvent.id;
     if (!window.confirm("Supprimer cet événement ?")) return;
     try {
-      const res = await fetch(`/api/agenda/events/${selectedEvent.id}`, {
+      const res = await fetch(`/api/agenda/events/${realId}`, {
         method: "DELETE",
         credentials: "same-origin",
       });
       if (!res.ok) return;
-      setEvents((prev) => prev.filter((e) => e.id !== selectedEvent.id));
+      setEvents((prev) => prev.filter((e) => e.id !== selectedEvent.id && !e.id.startsWith(`${realId}__`)));
       setSelectedEventId(null);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  async function handleRsvp(status: "ACCEPTE" | "REFUSE") {
+    if (!selectedEvent || selectedEvent.readOnly) return;
+    const realId = selectedEvent.id.includes("__")
+      ? selectedEvent.id.split("__")[0]!
+      : selectedEvent.id;
+    try {
+      const res = await fetch(`/api/agenda/events/${realId}/rsvp`, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.event) {
+        upsertEvent({ ...data.event, readOnly: false, source: "agenda" });
+        void loadEvents();
+      }
     } catch {
       /* ignore */
     }
@@ -449,6 +490,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId: _currentUserId }
         <AgendaSidePanel
           cursor={cursor}
           selectedEvent={selectedEvent}
+          currentUserId={currentUserId}
           onCursorChange={setCursor}
           onSelectDay={(d) => {
             setCursor(startOfDay(d));
@@ -460,6 +502,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId: _currentUserId }
           }}
           onDuplicate={handleDuplicate}
           onDelete={handleDelete}
+          onRsvp={handleRsvp}
         />
       </div>
 
@@ -476,6 +519,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId: _currentUserId }
             <AgendaSidePanel
               cursor={cursor}
               selectedEvent={selectedEvent}
+              currentUserId={currentUserId}
               onCursorChange={setCursor}
               onSelectDay={(d) => {
                 setCursor(startOfDay(d));
@@ -483,6 +527,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId: _currentUserId }
                 setPanelOpen(false);
               }}
               onEdit={() => {
+                if (selectedEvent?.readOnly) return;
                 setEditOpen(true);
                 setPanelOpen(false);
               }}
@@ -490,7 +535,13 @@ export function AgendaApp({ projects, teamUsers, currentUserId: _currentUserId }
                 handleDuplicate();
                 setPanelOpen(false);
               }}
-              onDelete={handleDelete}
+              onDelete={async () => {
+                await handleDelete();
+                setPanelOpen(false);
+              }}
+              onRsvp={async (status) => {
+                await handleRsvp(status);
+              }}
             />
           </div>
         </div>

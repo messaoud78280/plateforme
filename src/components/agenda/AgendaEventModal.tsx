@@ -6,6 +6,7 @@ import {
   AGENDA_RECURRENCE_OPTIONS,
   AGENDA_REMINDER_OPTIONS,
 } from "@/lib/agenda/types";
+import { parseFrenchAgendaQuick } from "@/lib/agenda/quick-parse";
 import type { AgendaEventDTO, AgendaProjectOption, AgendaQuickCreateDraft, AgendaUserOption } from "./agenda-types";
 
 type Props = {
@@ -180,8 +181,17 @@ export function AgendaEventModal({
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              onBlur={() => {
+                if (mode !== "create" || !title.trim()) return;
+                const parsed = parseFrenchAgendaQuick(title);
+                if (!parsed) return;
+                setTitle(parsed.title);
+                setAllDay(parsed.allDay);
+                setStart(toLocalInput(parsed.startAt.toISOString(), parsed.allDay));
+                setEnd(toLocalInput(parsed.endAt.toISOString(), parsed.allDay));
+              }}
+              placeholder="Ex. Réunion chantier demain 9h30"
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#1d4ed8]"
-              placeholder="Réunion de chantier…"
               autoFocus
             />
           </div>

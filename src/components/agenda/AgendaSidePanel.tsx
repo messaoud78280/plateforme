@@ -19,11 +19,13 @@ import type { AgendaEventDTO } from "./agenda-types";
 type Props = {
   cursor: Date;
   selectedEvent: AgendaEventDTO | null;
+  currentUserId?: string;
   onCursorChange: (d: Date) => void;
   onSelectDay: (d: Date) => void;
   onEdit: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
+  onRsvp?: (status: "ACCEPTE" | "REFUSE") => void;
 };
 
 const WEEKDAYS = ["L", "M", "M", "J", "V", "S", "D"];
@@ -31,11 +33,13 @@ const WEEKDAYS = ["L", "M", "M", "J", "V", "S", "D"];
 export function AgendaSidePanel({
   cursor,
   selectedEvent,
+  currentUserId,
   onCursorChange,
   onSelectDay,
   onEdit,
   onDuplicate,
   onDelete,
+  onRsvp,
 }: Props) {
   const month = startOfMonth(cursor);
   const days = monthGrid(cursor);
@@ -195,7 +199,16 @@ export function AgendaSidePanel({
                   </dt>
                   <dd className="space-y-0.5 text-slate-700">
                     {selectedEvent.attendees.map((a) => (
-                      <div key={a.id}>{a.user.name || a.user.email}</div>
+                      <div key={a.id} className="flex items-center justify-between gap-2">
+                        <span>{a.user.name || a.user.email}</span>
+                        <span className="text-[10px] font-semibold uppercase text-slate-400">
+                          {a.status === "ACCEPTE"
+                            ? "Accepté"
+                            : a.status === "REFUSE"
+                              ? "Refusé"
+                              : "En attente"}
+                        </span>
+                      </div>
                     ))}
                   </dd>
                 </div>
@@ -232,6 +245,27 @@ export function AgendaSidePanel({
                 )
               ) : (
                 <>
+                  {currentUserId &&
+                  onRsvp &&
+                  (selectedEvent.attendees.some((a) => a.user.id === currentUserId) ||
+                    selectedEvent.responsibleId === currentUserId) ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => onRsvp("ACCEPTE")}
+                        className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100"
+                      >
+                        Accepter
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onRsvp("REFUSE")}
+                        className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                      >
+                        Refuser
+                      </button>
+                    </>
+                  ) : null}
                   <button
                     type="button"
                     onClick={onEdit}

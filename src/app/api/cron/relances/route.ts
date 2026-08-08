@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createNotification, notifyManagers } from "@/lib/notifications";
+import { processAgendaReminders } from "@/lib/agenda/notify";
 
 /**
  * POST /api/cron/relances
@@ -168,10 +169,19 @@ export async function POST(request: NextRequest) {
     errors.push(`scan échéances: ${e instanceof Error ? e.message : String(e)}`);
   }
 
+  let agendaReminders = 0;
+  try {
+    const r = await processAgendaReminders(now);
+    agendaReminders = r.notified;
+  } catch (e) {
+    errors.push(`agenda rappels: ${e instanceof Error ? e.message : String(e)}`);
+  }
+
   return NextResponse.json({
     ok: errors.length === 0,
     missingPieceNotified,
     deadlineNotified,
+    agendaReminders,
     errors,
     ranAt: now.toISOString(),
   });

@@ -4,6 +4,8 @@ import type { AgendaEventType } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { agendaEventAccessWhere, agendaEventInclude, resolveAgendaOwnerUserId } from "@/lib/agenda/access";
 import { listLinkedAgendaItems } from "@/lib/agenda/linked-sources";
+import { notifyAgendaInvitees } from "@/lib/agenda/notify";
+import { expandRecurrenceForRange } from "@/lib/agenda/recurrence";
 import { AGENDA_EVENT_TYPES } from "@/lib/agenda/types";
 import { prisma } from "@/lib/prisma";
 import { canClientAccessProject } from "@/lib/organization/access";
@@ -74,12 +76,30 @@ export async function GET(request: Request) {
       take: 500,
     });
 
-    const agendaEvents = events.map((e) => ({
-      ...e,
-      readOnly: false as const,
-      source: "agenda" as const,
-      href: null as string | null,
-    }));
+    const agendaEvents = events.flatMap((e) => {
+      const expanded =
+        from && to
+          ? expandRecurrenceForRange(
+              {
+                ...e,
+                startAt: e.startAt,
+                endAt: e.endAt,
+              },
+              from,
+              to,
+            )
+          : [{ ...e, occurrenceStart: e.startAt.toISOString() }];
+
+      return expanded.map((occ) => ({
+        ...occ,
+        startAt: occ.startAt instanceof Date ? occ.startAt.toISOString() : String(occ.startAt),
+        endAt: occ.endAt instanceof Date ? occ.endAt.toISOString() : String(occ.endAt),
+        readOnly: false as const,
+        source: "agenda" as const,
+        href: null as string | null,
+        isOccurrence: occ.id.includes("__"),
+      }));
+    });
 
     let linked: Awaited<ReturnType<typeof listLinkedAgendaItems>> = [];
     if (includeLinked && from && to) {
@@ -179,6 +199,8 @@ export async function POST(request: Request) {
       },
       include: agendaEventInclude,
     });
+
+    void notifyAgendaInvitees(event.id);
 
     return NextResponse.json({ event }, { status: 201 });
   } catch (error) {

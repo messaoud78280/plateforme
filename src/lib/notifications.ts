@@ -11,7 +11,9 @@ type NotificationType =
   | "DEADLINE_NEAR"
   | "REPORT_CREATED"
   | "DELIVERABLE_UPLOADED"
-  | "CLIENT_DECISION";
+  | "CLIENT_DECISION"
+  | "AGENDA_INVITE"
+  | "AGENDA_REMINDER";
 
 export async function createNotification(params: {
   userId: string;

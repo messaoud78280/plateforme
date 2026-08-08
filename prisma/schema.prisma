@@ -678,6 +678,7 @@ model TaskMessage {
   isInternal Boolean  @default(false)  // true = visible uniquement gérante/agent
   kind       String   @default("USER") // USER | SYSTEM
   payloadJson Json?
+  attachmentsJson Json? // [{ name, fileUrl, fileSize, mimeType }]
   createdAt  DateTime @default(now())
 
   task    Task @relation(fields: [taskId], references: [id], onDelete: Cascade)

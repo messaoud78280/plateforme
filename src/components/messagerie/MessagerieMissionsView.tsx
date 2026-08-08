@@ -29,6 +29,7 @@ type TaskMessageItem = {
   isInternal: boolean;
   kind?: string;
   linkedBadges?: string[];
+  attachmentsJson?: { name: string; fileUrl: string; fileSize: number; mimeType?: string }[] | null;
   createdAt: string;
   sender: { id: string; name: string };
   receiver: { id: string; name: string };
@@ -68,9 +69,9 @@ type AttachmentItem = { name: string; fileUrl: string; fileSize: number; mimeTyp
 type FilterId = "envoyer" | "messages-directs" | "inbox" | "mes-missions" | "en-attente-client" | "en-cours" | "terminees";
 
 const NAV_ITEMS: { id: FilterId; label: string }[] = [
-  { id: "envoyer", label: "Envoyer un message" },
-  { id: "messages-directs", label: "Messages directs" },
-  { id: "inbox", label: "Boîte de réception" },
+  { id: "messages-directs", label: "Contacts" },
+  { id: "inbox", label: "Discussions" },
+  { id: "envoyer", label: "Nouveau" },
   { id: "mes-missions", label: "Mes missions" },
   { id: "en-attente-client", label: "En attente client" },
   { id: "en-cours", label: "En cours" },
@@ -178,7 +179,9 @@ export function MessagerieMissionsView({
 }: MessagerieMissionsViewProps) {
   const router = useRouter();
   const [missions, setMissions] = useState<MissionItem[]>([]);
-  const [filter, setFilter] = useState<FilterId>("inbox");
+  const [filter, setFilter] = useState<FilterId>(
+    isAgence || isAgent ? "messages-directs" : "inbox",
+  );
   const [selectedTaskId, setSelectedTaskId] = useState<string>("");
   const [messages, setMessages] = useState<TaskMessageItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -198,10 +201,13 @@ export function MessagerieMissionsView({
   const [sendingReply, setSendingReply] = useState(false);
   const [directAttachments, setDirectAttachments] = useState<AttachmentItem[]>([]);
   const [replyAttachments, setReplyAttachments] = useState<AttachmentItem[]>([]);
+  const [missionAttachments, setMissionAttachments] = useState<AttachmentItem[]>([]);
   const [uploadingAttach, setUploadingAttach] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
   const [listSearch, setListSearch] = useState("");
   const directFileId = "direct-file-input";
   const replyFileId = "reply-file-input";
+  const missionFileId = "mission-file-input";
   const chatEndRef = useRef<HTMLDivElement>(null);
   const highlightMessageId = useRef<string | null>(null);
 
@@ -213,14 +219,14 @@ export function MessagerieMissionsView({
     (m) => m.sender.id === sessionUserId || m.receiver.id === sessionUserId
   );
 
-  // Conversations directes : regroupées par contact, avec dernier message et non-lus
+  // Conversations directes : contacts connus + destinataires (même sans message)
   const directConversations = (() => {
-    const byOther = new Map<string, { user: { id: string; name: string }; lastMessage: DirectMessageItem; unread: number }>();
+    const byOther = new Map<string, { user: { id: string; name: string }; lastMessage: DirectMessageItem | null; unread: number }>();
     for (const m of myDirectMessages) {
       const other = m.sender.id === sessionUserId ? m.receiver : m.sender;
       if (other.id === sessionUserId) continue;
       const existing = byOther.get(other.id);
-      const isNewer = !existing || new Date(m.createdAt) > new Date(existing.lastMessage.createdAt);
+      const isNewer = !existing?.lastMessage || new Date(m.createdAt) > new Date(existing.lastMessage.createdAt);
       const isToMe = (m.receiverId ?? m.receiver.id) === sessionUserId;
       const unreadIncr = isToMe && !m.read ? 1 : 0;
       if (!existing) {
@@ -231,9 +237,18 @@ export function MessagerieMissionsView({
         byOther.set(other.id, { ...existing, unread: existing.unread + 1 });
       }
     }
-    return Array.from(byOther.values()).sort(
-      (a, b) => new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime()
-    );
+    for (const r of recipients) {
+      if (r.id === sessionUserId) continue;
+      if (!byOther.has(r.id)) {
+        byOther.set(r.id, { user: { id: r.id, name: r.name }, lastMessage: null, unread: 0 });
+      }
+    }
+    return Array.from(byOther.values()).sort((a, b) => {
+      const ta = a.lastMessage ? new Date(a.lastMessage.createdAt).getTime() : 0;
+      const tb = b.lastMessage ? new Date(b.lastMessage.createdAt).getTime() : 0;
+      if (tb !== ta) return tb - ta;
+      return a.user.name.localeCompare(b.user.name);
+    });
   })();
 
   const selectedDirectThread = directThreadMessages;
@@ -412,50 +427,60 @@ export function MessagerieMissionsView({
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
     const content = sendContent.trim();
-    if (!content || !selectedTaskId || sending) return;
+    if ((!content && missionAttachments.length === 0) || !selectedTaskId || sending) return;
 
     setSending(true);
     try {
-    const body: { content: string; receiverId?: string; isInternal?: boolean } = {
-      content,
-      isInternal: internalNote && (isAgence || isAgent),
-    };
-    if (internalNote) {
-      if (isAgence && selectedMission?.assignedTo) {
-        body.receiverId = selectedMission.assignedTo.id;
-      } else if (isAgent && managerId) {
-        body.receiverId = managerId;
+      const body: {
+        content: string;
+        receiverId?: string;
+        isInternal?: boolean;
+        attachments?: AttachmentItem[];
+      } = {
+        content,
+        isInternal: internalNote && (isAgence || isAgent),
+        attachments: missionAttachments,
+      };
+      if (internalNote) {
+        if (isAgence && selectedMission?.assignedTo) {
+          body.receiverId = selectedMission.assignedTo.id;
+        } else if (isAgent && managerId) {
+          body.receiverId = managerId;
+        }
       }
-    }
 
       const res = await fetch(`/api/tasks/${selectedTaskId}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
+      const data = await res.json().catch(() => ({}));
 
       if (res.ok) {
         setSendContent("");
+        setMissionAttachments([]);
         const refresh = await fetch(`/api/tasks/${selectedTaskId}/messages`);
         if (refresh.ok) setMessages(await refresh.json());
-        const listRes = await fetch(`/api/tasks/messagerie?filter=${filter}`);
+        const listRes = await fetch(`/api/tasks/messagerie?filter=${filter === "messages-directs" ? "inbox" : filter}`);
         if (listRes.ok) setMissions(await listRes.json());
         router.refresh();
+      } else {
+        alert(data?.error ?? "Impossible d’envoyer le message");
       }
+    } catch {
+      alert("Erreur réseau — réessayez");
     } finally {
       setSending(false);
     }
   }
 
-  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>, setAttachments: React.Dispatch<React.SetStateAction<AttachmentItem[]>>) {
-    const input = e.target;
-    const files = input.files;
-    if (!files?.length) return;
+  async function uploadFiles(files: FileList | File[], setAttachments: React.Dispatch<React.SetStateAction<AttachmentItem[]>>) {
+    const list = Array.from(files);
+    if (!list.length) return;
     setUploadingAttach(true);
     const uploaded: AttachmentItem[] = [];
     try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
+      for (const file of list) {
         if (!(file instanceof File) || !file.size) continue;
         const fd = new FormData();
         fd.append("file", file);
@@ -463,12 +488,17 @@ export function MessagerieMissionsView({
           const res = await fetch("/api/messages/direct/upload", { method: "POST", body: fd });
           const data = await res.json().catch(() => ({}));
           if (res.ok && data.fileUrl) {
-            uploaded.push({ name: data.name ?? file.name, fileUrl: data.fileUrl, fileSize: data.fileSize ?? file.size, mimeType: data.mimeType });
+            uploaded.push({
+              name: data.name ?? file.name,
+              fileUrl: data.fileUrl,
+              fileSize: data.fileSize ?? file.size,
+              mimeType: data.mimeType ?? file.type,
+            });
           } else {
             alert(data?.error ?? `Erreur lors du téléchargement de "${file.name}"`);
           }
         } catch {
-          alert(`Erreur réseau pour "${file.name}". Vérifiez votre connexion.`);
+          alert(`Erreur réseau pour "${file.name}".`);
         }
       }
       if (uploaded.length > 0) {
@@ -476,8 +506,15 @@ export function MessagerieMissionsView({
       }
     } finally {
       setUploadingAttach(false);
-      input.value = "";
     }
+  }
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>, setAttachments: React.Dispatch<React.SetStateAction<AttachmentItem[]>>) {
+    const input = e.target;
+    const files = input.files;
+    if (!files?.length) return;
+    await uploadFiles(files, setAttachments);
+    input.value = "";
   }
 
   async function handleReplyDirect(e: React.FormEvent) {
@@ -690,45 +727,83 @@ export function MessagerieMissionsView({
         </div>
       ) : filter === "messages-directs" ? (
         <>
-          <aside className="flex w-80 shrink-0 flex-col border-r border-slate-200 bg-white">
-            <div className="border-b border-slate-200 p-3">
-              <h2 className="text-sm font-semibold text-slate-800">Conversations</h2>
+          <aside className="flex w-[min(100%,420px)] shrink-0 flex-col border-r border-[#d1d7db] bg-white">
+            <div className="border-b border-[#e9edef] px-4 pb-3 pt-3">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-[22px] font-bold tracking-tight text-[#111b21]">Contacts</h2>
+                <button
+                  type="button"
+                  title="Nouveau message"
+                  onClick={() => setFilter("envoyer")}
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-[#54656f] hover:bg-[#f0f2f5]"
+                >
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                  </svg>
+                </button>
+              </div>
+              <input
+                type="search"
+                value={listSearch}
+                onChange={(e) => setListSearch(e.target.value)}
+                placeholder="Rechercher un contact"
+                className="w-full rounded-lg border-0 bg-[#f0f2f5] px-3 py-2 text-[14px] text-[#111b21] placeholder:text-[#667781] focus:outline-none focus:ring-1 focus:ring-[#00a884]"
+              />
             </div>
             <ul className="flex-1 overflow-y-auto">
               {loadingDirectMessages ? (
-                <li className="p-4 text-sm text-slate-500">Chargement…</li>
-              ) : directConversations.length === 0 ? (
+                <li className="p-4 text-sm text-[#667781]">Chargement…</li>
+              ) : directConversations.filter((c) =>
+                  !listSearch.trim() ||
+                  c.user.name.toLowerCase().includes(listSearch.toLowerCase()),
+                ).length === 0 ? (
                 <li className="p-4 text-center">
-                  <p className="text-sm text-slate-600">Aucun message direct</p>
-                  <p className="mt-1 text-xs text-slate-500">Utilisez « Envoyer un message » pour démarrer une conversation.</p>
+                  <p className="text-sm text-[#111b21]">Aucun contact</p>
+                  <p className="mt-1 text-xs text-[#667781]">Ajoutez des membres d’équipe ou créez un message.</p>
+                  <button
+                    type="button"
+                    onClick={() => setFilter("envoyer")}
+                    className="mt-3 rounded-full bg-[#00a884] px-4 py-2 text-sm font-medium text-white"
+                  >
+                    Nouveau message
+                  </button>
                 </li>
               ) : (
-                directConversations.map((conv) => (
+                directConversations
+                  .filter(
+                    (c) =>
+                      !listSearch.trim() ||
+                      c.user.name.toLowerCase().includes(listSearch.toLowerCase()),
+                  )
+                  .map((conv) => (
                   <li key={conv.user.id}>
                     <button
                       type="button"
                       onClick={() => setSelectedDirectContactId(conv.user.id)}
-                      className={`w-full border-l-2 px-4 py-3 text-left transition ${
-                        selectedDirectContactId === conv.user.id
-                          ? "border-blue-600 bg-blue-50/60"
-                          : "border-transparent hover:bg-slate-50"
+                      className={`flex w-full gap-3 px-3 py-3 text-left transition ${
+                        selectedDirectContactId === conv.user.id ? "bg-[#f0f2f5]" : "hover:bg-[#f5f6f6]"
                       }`}
                     >
-                      <p className="truncate text-sm font-semibold text-slate-800">{conv.user.name}</p>
-                      <p className="mt-0.5 truncate text-xs text-slate-500">
-                        {conv.lastMessage.sender.id === sessionUserId ? "Vous : " : ""}
-                        {conv.lastMessage.content.slice(0, 50)}
-                        {conv.lastMessage.content.length > 50 ? "…" : ""}
-                      </p>
-                      <div className="mt-1.5 flex items-center gap-2">
+                      <Avatar name={conv.user.name} size="sm" />
+                      <div className="min-w-0 flex-1 border-b border-[#f0f2f5] pb-3">
+                        <div className="flex items-baseline justify-between gap-2">
+                          <p className="truncate text-[15px] font-medium text-[#111b21]">{conv.user.name}</p>
+                          {conv.lastMessage ? (
+                            <span className="text-[11px] text-[#667781]">
+                              {formatRelativeTime(conv.lastMessage.createdAt)}
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="mt-0.5 truncate text-[13px] text-[#667781]">
+                          {conv.lastMessage
+                            ? `${conv.lastMessage.sender.id === sessionUserId ? "Vous : " : ""}${conv.lastMessage.content.slice(0, 50)}${conv.lastMessage.content.length > 50 ? "…" : ""}`
+                            : "Appuyez pour discuter"}
+                        </p>
                         {conv.unread > 0 && (
-                          <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-blue-600 px-1.5 text-[10px] font-medium text-white">
+                          <span className="mt-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#00a884] px-1.5 text-[10px] font-bold text-white">
                             {conv.unread}
                           </span>
                         )}
-                        <span className="text-[10px] text-slate-400">
-                          {formatRelativeTime(conv.lastMessage.createdAt)}
-                        </span>
                       </div>
                     </button>
                   </li>
@@ -1006,14 +1081,41 @@ export function MessagerieMissionsView({
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-4 py-3" style={WA_CHAT_BG}>
+            <div
+              className="relative flex-1 overflow-y-auto px-4 py-3"
+              style={WA_CHAT_BG}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDragOver(true);
+              }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDragOver(false);
+                if (e.dataTransfer.files?.length) {
+                  void uploadFiles(e.dataTransfer.files, setMissionAttachments);
+                }
+              }}
+            >
+              {dragOver ? (
+                <div className="pointer-events-none absolute inset-4 z-10 flex items-center justify-center rounded-2xl border-2 border-dashed border-[#00a884] bg-[#d9fdd3]/70 text-sm font-semibold text-[#008069]">
+                  Déposez photos ou documents ici
+                </div>
+              ) : null}
               {loadingMessages ? (
                 <p className="text-sm text-[#667781]">Chargement…</p>
+              ) : visibleMessages.length === 0 ? (
+                <div className="flex h-full flex-col items-center justify-center text-center">
+                  <p className="rounded-lg bg-[#fff5c4] px-4 py-2 text-[13px] text-[#54656f] shadow-sm">
+                    Aucun message pour l’instant — écrivez le premier, ou joignez une photo / un PDF.
+                  </p>
+                </div>
               ) : (
                 <div className="space-y-1.5">
                   {visibleMessages.map((m) => {
                     const isMe = m.sender.id === sessionUserId;
                     const isSystem = m.kind === "SYSTEM";
+                    const atts = Array.isArray(m.attachmentsJson) ? m.attachmentsJson : [];
                     return (
                       <div
                         key={m.id}
@@ -1036,16 +1138,44 @@ export function MessagerieMissionsView({
                             {isSystem ? (
                               <p className="text-[12px] font-medium">BeWork · {m.content}</p>
                             ) : (
-                              <p className="whitespace-pre-wrap break-words text-[14.2px] leading-[19px]">
-                                {m.content}
-                                {m.isInternal ? " (interne)" : ""}
-                              </p>
+                              <>
+                                {m.content && !atts.some((a) => a.name === m.content) ? (
+                                  <p className="whitespace-pre-wrap break-words text-[14.2px] leading-[19px]">
+                                    {m.content}
+                                    {m.isInternal ? " (interne)" : ""}
+                                  </p>
+                                ) : null}
+                                {atts.length > 0 ? (
+                                  <div className="mt-1.5 space-y-1.5">
+                                    {atts.map((a, i) => {
+                                      const isImg = (a.mimeType || "").startsWith("image/") || /\.(jpe?g|png|gif|webp)$/i.test(a.name);
+                                      return isImg ? (
+                                        <a key={i} href={a.fileUrl} target="_blank" rel="noopener noreferrer" className="block">
+                                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                                          <img
+                                            src={a.fileUrl}
+                                            alt={a.name}
+                                            className="max-h-56 max-w-full rounded-lg object-cover"
+                                          />
+                                        </a>
+                                      ) : (
+                                        <SignedFileLink
+                                          key={i}
+                                          url={a.fileUrl}
+                                          className="flex items-center gap-2 rounded-lg bg-black/5 px-2 py-2 text-xs text-[#111b21]"
+                                        >
+                                          📄 {a.name}
+                                          <span className="text-[10px] text-[#667781]">
+                                            {a.fileSize ? `${Math.max(1, Math.round(a.fileSize / 1024))} Ko` : ""}
+                                          </span>
+                                        </SignedFileLink>
+                                      );
+                                    })}
+                                  </div>
+                                ) : null}
+                              </>
                             )}
-                            <p
-                              className={`mt-0.5 flex items-center justify-end gap-1 text-[11px] ${
-                                isMe ? "text-[#667781]" : "text-[#667781]"
-                              }`}
-                            >
+                            <p className="mt-0.5 flex items-center justify-end gap-1 text-[11px] text-[#667781]">
                               {formatMessageTime(m.createdAt)}
                               {isMe && !isSystem ? (
                                 <span className="text-[#53bdeb]" title="Envoyé">
@@ -1100,7 +1230,7 @@ export function MessagerieMissionsView({
 
               {selectedMission.documents.length > 0 && (
                 <div className="mt-4 rounded-lg bg-white/80 p-3 shadow-sm">
-                  <h4 className="mb-2 text-xs font-semibold text-[#54656f]">Documents joints</h4>
+                  <h4 className="mb-2 text-xs font-semibold text-[#54656f]">Documents mission</h4>
                   <ul className="space-y-1">
                     {selectedMission.documents.map((d) => (
                       <li key={d.id}>
@@ -1132,28 +1262,55 @@ export function MessagerieMissionsView({
                   Note interne
                 </label>
               )}
+              <input
+                id={missionFileId}
+                type="file"
+                accept="image/*,.pdf,.jpg,.jpeg,.png,.gif,.webp,.docx,.xlsx,.xls,.csv,.txt,.doc"
+                className="sr-only"
+                multiple
+                onChange={(e) => handleFileUpload(e, setMissionAttachments)}
+              />
+              {missionAttachments.length > 0 && (
+                <div className="mb-2 flex flex-wrap gap-2 px-1">
+                  {missionAttachments.map((a, i) => (
+                    <span
+                      key={i}
+                      className="flex items-center gap-1 rounded-full bg-white px-2 py-1 text-xs text-[#111b21] shadow-sm"
+                    >
+                      {(a.mimeType || "").startsWith("image/") ? "🖼️" : "📄"} {a.name}
+                      <button
+                        type="button"
+                        onClick={() => setMissionAttachments((p) => p.filter((_, j) => j !== i))}
+                        className="text-[#667781] hover:text-red-600"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
               <form onSubmit={handleSend} className="flex items-end gap-2">
-                <Link
-                  href={`/dashboard/taches/${selectedTaskId}#documents-section`}
-                  className="mb-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#54656f] hover:bg-[#e9edef]"
-                  title="Joindre"
+                <label
+                  htmlFor={missionFileId}
+                  className={`mb-0.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-[#54656f] hover:bg-[#e9edef] ${uploadingAttach || sending ? "pointer-events-none opacity-50" : ""}`}
+                  title="Joindre photo ou document"
                 >
                   <svg className="h-7 w-7" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
                   </svg>
-                </Link>
+                </label>
                 <div className="relative min-w-0 flex-1">
                   <textarea
                     value={sendContent}
                     onChange={(e) => setSendContent(e.target.value)}
-                    placeholder="Tapez un message"
+                    placeholder={uploadingAttach ? "Téléchargement…" : "Tapez un message"}
                     rows={1}
                     className="min-h-[44px] max-h-32 w-full resize-none rounded-[24px] border-0 bg-white py-3 pl-4 pr-10 text-[15px] text-[#111b21] placeholder:text-[#667781] focus:outline-none"
                     disabled={sending}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault();
-                        if (sendContent.trim() && !sending) {
+                        if ((sendContent.trim() || missionAttachments.length > 0) && !sending) {
                           void (e.currentTarget.form as HTMLFormElement | null)?.requestSubmit();
                         }
                       }
@@ -1168,11 +1325,11 @@ export function MessagerieMissionsView({
                 </div>
                 <button
                   type="submit"
-                  disabled={sending || !sendContent.trim()}
+                  disabled={sending || (!sendContent.trim() && missionAttachments.length === 0)}
                   className="mb-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#00a884] text-white hover:bg-[#008f72] disabled:bg-[#00a884]/40"
-                  title={sendContent.trim() ? "Envoyer" : "Message"}
+                  title={sendContent.trim() || missionAttachments.length ? "Envoyer" : "Message"}
                 >
-                  {sendContent.trim() ? (
+                  {sendContent.trim() || missionAttachments.length > 0 ? (
                     <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
                     </svg>

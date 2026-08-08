@@ -85,7 +85,7 @@ export async function GET(
   }
 }
 
-/** POST /api/tasks/[id]/messages — Envoyer un message (client ↔ agent si assigné, ou interne gérante ↔ agent) */
+/** POST /api/tasks/[id]/messages — Envoyer un message (texte + pièces jointes). */
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -98,20 +98,26 @@ export async function POST(
   const { id: taskId } = await params;
   const isManager = isManagerRole(session.user.role);
   const isAgent = isStaffAgent(session.user.role);
+  const isAgenceRole = session.user.role === "AGENCE";
 
   try {
     const body = await request.json();
-    const { content, receiverId, isInternal } = body as {
+    const { content, receiverId, isInternal, attachments } = body as {
       content?: string;
       receiverId?: string;
       isInternal?: boolean;
+      attachments?: { name: string; fileUrl: string; fileSize: number; mimeType?: string }[];
     };
 
-    if (!content || typeof content !== "string" || !content.trim()) {
-      return NextResponse.json({ error: "Contenu requis" }, { status: 400 });
+    const text = typeof content === "string" ? content.trim() : "";
+    const files = Array.isArray(attachments)
+      ? attachments.filter((a) => a?.fileUrl && a?.name)
+      : [];
+    if (!text && files.length === 0) {
+      return NextResponse.json({ error: "Écrivez un message ou joignez un fichier." }, { status: 400 });
     }
 
-    const task = await prisma.task.findUnique({
+    let task = await prisma.task.findUnique({
       where: { id: taskId },
       include: { client: { select: { name: true } }, assignedTo: { select: { id: true, name: true } } },
     });
@@ -125,44 +131,62 @@ export async function POST(
     }
 
     const isClient = task.clientId === session.user.id;
-    const isAssignedAgent = task.assignedToId === session.user.id;
+    let assignedToId = task.assignedToId;
 
+    // Auto-affectation agent si client écrit sur une mission sans responsable
+    if (isClient && !assignedToId) {
+      const agent = await prisma.user.findFirst({
+        where: { role: { in: ["AGENT", "AGENCE"] } },
+        orderBy: { name: "asc" },
+        select: { id: true },
+      });
+      if (agent) {
+        task = await prisma.task.update({
+          where: { id: taskId },
+          data: { assignedToId: agent.id },
+          include: { client: { select: { name: true } }, assignedTo: { select: { id: true, name: true } } },
+        });
+        assignedToId = agent.id;
+      }
+    }
+
+    const isAssignedAgent = assignedToId === session.user.id;
     let receiverIdFinal: string;
     const internal = Boolean(isInternal) && (isManager || isAgent);
 
     if (isClient) {
-      if (!task.assignedToId) {
+      if (!assignedToId) {
         return NextResponse.json(
-          { error: "La messagerie est disponible une fois un agent assigné à cette mission." },
-          { status: 400 }
+          { error: "Aucun agent disponible pour cette conversation. Contactez votre entreprise." },
+          { status: 400 },
         );
       }
       if (internal) {
         return NextResponse.json({ error: "Le client ne peut pas envoyer de message interne." }, { status: 403 });
       }
-      receiverIdFinal = task.assignedToId;
-    } else if (isAgent && isAssignedAgent) {
+      receiverIdFinal = assignedToId;
+    } else if ((isAgent && isAssignedAgent) || isAgenceRole || isManager) {
       if (internal) {
         const rid = typeof receiverId === "string" ? receiverId : null;
-        const manager = rid ? await prisma.user.findFirst({ where: { id: rid, role: "MANAGER" } }) : null;
-        if (!manager) {
-          return NextResponse.json({ error: "Destinataire invalide pour message interne." }, { status: 400 });
+        if (isManager && rid) {
+          const agent = await prisma.user.findFirst({
+            where: { id: rid, role: { in: ["AGENCE", "AGENT"] } },
+          });
+          if (!agent) {
+            return NextResponse.json({ error: "Destinataire invalide." }, { status: 400 });
+          }
+          receiverIdFinal = agent.id;
+        } else if (isAgent && rid) {
+          const manager = await prisma.user.findFirst({ where: { id: rid, role: "MANAGER" } });
+          if (!manager) {
+            return NextResponse.json({ error: "Destinataire invalide pour message interne." }, { status: 400 });
+          }
+          receiverIdFinal = manager.id;
+        } else {
+          receiverIdFinal = assignedToId || task.clientId;
         }
-        receiverIdFinal = manager.id;
       } else {
         receiverIdFinal = task.clientId;
-      }
-    } else if (isManager) {
-      if (internal && receiverId) {
-        const agent = await prisma.user.findFirst({ where: { id: receiverId, role: { in: ["AGENCE", "AGENT"] } } });
-        if (!agent) {
-          return NextResponse.json({ error: "Destinataire invalide." }, { status: 400 });
-        }
-        receiverIdFinal = agent.id;
-      } else if (!internal && task.clientId) {
-        receiverIdFinal = task.clientId;
-      } else {
-        return NextResponse.json({ error: "Destinataire requis." }, { status: 400 });
       }
     } else {
       return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
@@ -173,8 +197,9 @@ export async function POST(
         taskId,
         senderId: session.user.id,
         receiverId: receiverIdFinal,
-        content: content.trim(),
+        content: text || (files.length === 1 ? files[0]!.name : `${files.length} fichiers`),
         isInternal: internal,
+        attachmentsJson: files.length > 0 ? files : undefined,
       },
       include: {
         sender: { select: { id: true, name: true } },
@@ -189,7 +214,7 @@ export async function POST(
       message: internal
         ? `Message interne sur la mission « ${task.title} ».`
         : `${session.user?.name ?? "Quelqu'un"} vous a envoyé un message sur la mission « ${task.title} ».`,
-      actionUrl: `/dashboard/taches/${taskId}`,
+      actionUrl: `/dashboard/messagerie?task=${taskId}&messageId=${message.id}`,
     });
 
     return NextResponse.json(message);

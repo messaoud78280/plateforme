@@ -633,6 +633,38 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
     });
   }
 
+  // Messages sur les autres BC pour que la messagerie ne soit pas vide
+  const otherBcs = await prisma.task.findMany({
+    where: {
+      clientId,
+      OR: [
+        { title: { contains: "BC-2026-038" } },
+        { title: { contains: "BC-2026-029" } },
+        { title: { contains: "BC-2026-041" } },
+      ],
+    },
+    select: { id: true, title: true },
+  });
+  for (const t of otherBcs) {
+    await prisma.task.update({
+      where: { id: t.id },
+      data: { assignedToId: staffId },
+    });
+    const existing = await prisma.taskMessage.count({ where: { taskId: t.id } });
+    if (existing === 0) {
+      await prisma.taskMessage.create({
+        data: {
+          taskId: t.id,
+          senderId: staffId,
+          receiverId: clientId,
+          content: `Bonjour, suite sur « ${t.title} » — n’hésitez pas à m’écrire ici (texte, photo ou PDF).`,
+          kind: "USER",
+          createdAt: daysFromNow(-3),
+        },
+      });
+    }
+  }
+
   if (taskRelance) {
     await prisma.task.update({
       where: { id: taskRelance.id },

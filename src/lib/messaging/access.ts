@@ -24,20 +24,12 @@ export function taskMessagerieWhere(user: MessagingUser): Prisma.TaskWhereInput 
   if (user.role === "CLIENT") {
     return { clientId: user.id };
   }
-  if (isStaffAgent(user.role)) {
+  if (user.role === "AGENT") {
     return { assignedToId: user.id };
   }
-  if (isManagerRole(user.role)) {
-    return {
-      OR: [
-        { assignedToId: user.id },
-        {
-          taskMessages: {
-            some: participantTaskMessageWhere(user.id),
-          },
-        },
-      ],
-    };
+  // MANAGER + AGENCE : vue entreprise (pas seulement les fils où ils ont déjà écrit)
+  if (isManagerRole(user.role) || user.role === "AGENCE") {
+    return {};
   }
   return { id: { in: [] } };
 }
@@ -52,7 +44,9 @@ export function taskMessageVisibilityRelationWhere(
       ...participantTaskMessageWhere(user.id),
     };
   }
-  return participantTaskMessageWhere(user.id);
+  // Gérant / Agence / Agent : fil complet une fois l’accès mission validé
+  // (sinon le gérant voit la mission mais une conversation vide).
+  return {};
 }
 
 /** Messages d'une mission visibles par l'utilisateur (requête directe). */
@@ -60,7 +54,10 @@ export function taskMessageVisibilityWhere(
   user: MessagingUser,
   taskId: string
 ): Prisma.TaskMessageWhereInput {
-  return { taskId, ...taskMessageVisibilityRelationWhere(user) };
+  const visibility = taskMessageVisibilityRelationWhere(user);
+  return Object.keys(visibility).length === 0
+    ? { taskId }
+    : { taskId, ...visibility };
 }
 
 export async function canAccessTaskThread(

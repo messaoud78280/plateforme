@@ -1,15 +1,14 @@
 import Image from "next/image";
 
-/** Logo blueprint (BeWork + baseline) — fichier source 1024 px */
-const LOGO_PATH = "/BeWork.logo.blueprint.png";
-/** Dimensions intrinsèques du fichier (évite déformation + layout shift) */
-const LOGO_WIDTH = 1024;
-const LOGO_HEIGHT = 341;
+/** Logo wordmark header BeWork (Be noir + Work bleu) */
+const LOGO_PATH = "/BeWork.logo.wordmark.png";
+/** Ratio intrinsèque du fichier (évite déformation) */
+const LOGO_RATIO = 968 / 209;
 
 interface BeWorkLogoProps {
   className?: string;
   size?: "sm" | "md" | "lg";
-  /** Permet d’overrider uniquement la taille de l’image (ex. header plus grand) */
+  /** Permet d’overrider uniquement la taille de l’image (ex. header) */
   imageClassName?: string;
   showTagline?: boolean;
   /** Ligne principale du sous-titre (ex. positionnement métier) */
@@ -20,10 +19,26 @@ interface BeWorkLogoProps {
   priority?: boolean;
 }
 
-const imageClassBySize: Record<NonNullable<BeWorkLogoProps["size"]>, string> = {
-  sm: "h-11 w-auto max-w-[min(100%,14rem)] sm:h-12 sm:max-w-[min(100%,16rem)] md:h-[3.25rem] md:max-w-[min(100%,18rem)]",
-  md: "h-12 w-auto max-w-[min(100%,18rem)] md:h-14 md:max-w-[min(100%,22rem)] lg:h-16 lg:max-w-[min(100%,26rem)]",
-  lg: "h-14 w-auto max-w-[min(100%,22rem)] md:h-16 md:max-w-[min(100%,28rem)] lg:h-[4.5rem] lg:max-w-[min(100%,32rem)]",
+/** Hauteur CSS + largeur layout (évite que Next/Image force 968px et passe sous la nav) */
+const sizeBox: Record<
+  NonNullable<BeWorkLogoProps["size"]>,
+  { heightClass: string; heightPx: number; sizes: string }
+> = {
+  sm: {
+    heightClass: "h-10 sm:h-11",
+    heightPx: 44,
+    sizes: "200px",
+  },
+  md: {
+    heightClass: "h-12 md:h-14",
+    heightPx: 56,
+    sizes: "(max-width:768px) 220px, 280px",
+  },
+  lg: {
+    heightClass: "h-14 md:h-16 lg:h-[4.5rem]",
+    heightPx: 72,
+    sizes: "(max-width:768px) 280px, 360px",
+  },
 };
 
 export function BeWorkLogo({
@@ -36,23 +51,20 @@ export function BeWorkLogo({
   priority = false,
 }: BeWorkLogoProps) {
   const defaultTagline = "Plateformes intelligentes pour le BTP";
-
-  const sizesAttr =
-    size === "sm"
-      ? "(max-width:640px) min(100vw,1024px), (max-width:1024px) min(90vw,1024px), 1024px"
-      : size === "md"
-        ? "(max-width:768px) min(92vw,420px), min(720px,48vw)"
-        : "(max-width:768px) min(92vw,480px), min(840px,52vw)";
+  const box = sizeBox[size];
+  const displayHeight = box.heightPx;
+  const displayWidth = Math.round(displayHeight * LOGO_RATIO);
+  const override = imageClassName.trim();
 
   return (
     <span className={`inline-flex flex-col ${className}`}>
       <Image
         src={LOGO_PATH}
         alt="BeWork — plateformes intelligentes pour le BTP"
-        width={LOGO_WIDTH}
-        height={LOGO_HEIGHT}
-        className={`shrink-0 object-contain object-left ${imageClassBySize[size]} ${imageClassName}`}
-        sizes={sizesAttr}
+        width={displayWidth}
+        height={displayHeight}
+        className={`block shrink-0 object-contain object-left ${override || box.heightClass} ${override ? "" : "w-auto"}`}
+        sizes={override ? "(max-width:640px) 156px, 200px" : box.sizes}
         quality={100}
         priority={priority}
       />

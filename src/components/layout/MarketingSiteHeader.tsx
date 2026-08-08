@@ -223,21 +223,22 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
     >
       <MarketingHeaderBlueprintDecor plainBg={plainBg} />
       <div
-        className={`container-site relative z-10 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 lg:grid-cols-[auto_1fr] lg:items-start lg:gap-x-6 ${barPy} font-sans`}
+        className={`container-site relative z-10 grid grid-cols-[1fr_auto] items-center gap-x-4 font-sans lg:grid-cols-[auto_minmax(0,1fr)] lg:items-center lg:gap-x-8 ${barPy}`}
       >
-        <div className="min-w-0 justify-self-start self-center lg:col-start-1 lg:row-start-1 lg:self-start">
-          <Link href="/" className="group inline-block max-w-full transition-opacity hover:opacity-90" aria-label="BeWork — Accueil">
-            <BeWorkLogo
-              size="sm"
-              priority
-              imageClassName="h-14 max-w-[min(calc(100vw-5.5rem),15.5rem)] sm:h-[6.75rem] sm:max-w-[min(100%,30.375rem)] md:h-[7.5375rem] md:max-w-[min(100%,36rem)] lg:h-[8.4375rem] lg:max-w-[min(100%,45rem)]"
-            />
+        <div className="relative z-20 col-start-1 row-start-1 shrink-0 justify-self-start">
+          <Link
+            href="/"
+            className="group inline-flex items-center transition-opacity hover:opacity-90"
+            aria-label="BeWork — Accueil"
+          >
+            <BeWorkLogo size="sm" priority />
           </Link>
         </div>
 
-        <div className="hidden min-w-0 flex-col items-end gap-y-2.5 lg:col-start-2 lg:row-start-1 lg:flex">
+        {/* Desktop : 2 lignes — CTAs au-dessus, nav en dessous */}
+        <div className="hidden min-w-0 flex-col items-end gap-2 lg:col-start-2 lg:row-start-1 lg:flex">
           <div
-            className="flex shrink-0 flex-wrap items-center justify-end gap-2 whitespace-nowrap"
+            className="flex shrink-0 items-center gap-2 whitespace-nowrap"
             role="group"
             aria-label="Compte et prise de rendez-vous"
           >
@@ -250,8 +251,9 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
               <span className="whitespace-nowrap">Demander une démo</span>
             </CalendlyBookingLink>
           </div>
+
           <nav
-            className="relative flex max-w-full flex-wrap items-center justify-end gap-x-1 gap-y-1 rounded-xl border border-slate-200/55 bg-white/50 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_1px_2px_rgba(15,23,42,0.04)] backdrop-blur-md"
+            className="relative flex max-w-full flex-wrap items-center justify-end gap-x-0.5 gap-y-1 rounded-xl border border-slate-200/70 bg-white/95 p-1 shadow-sm"
             aria-label="Navigation principale"
           >
             <div
@@ -446,12 +448,12 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
       {/* Menu mobile */}
       <div
         id="marketing-mobile-nav"
-        className={`fixed inset-x-0 bottom-0 top-0 z-40 bg-white pt-[calc(4.75rem+env(safe-area-inset-top,0px))] transition-[opacity,visibility] duration-200 sm:pt-[calc(7.25rem+env(safe-area-inset-top,0px))] md:pt-[calc(8rem+env(safe-area-inset-top,0px))] lg:hidden ${
+        className={`fixed inset-x-0 bottom-0 top-0 z-40 bg-white pt-[calc(4.5rem+env(safe-area-inset-top,0px))] transition-[opacity,visibility] duration-200 lg:hidden ${
           mobileOpen ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"
         }`}
         aria-hidden={!mobileOpen}
       >
-        <div className="h-[calc(100dvh-4.75rem-env(safe-area-inset-top,0px))] overflow-y-auto overscroll-contain pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-3 sm:h-[calc(100dvh-7.25rem-env(safe-area-inset-top,0px))] md:h-[calc(100dvh-8rem-env(safe-area-inset-top,0px))]">
+        <div className="h-[calc(100dvh-4.5rem-env(safe-area-inset-top,0px))] overflow-y-auto overscroll-contain pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-3">
           <div className="container-site flex flex-col gap-3">
             {/* Liens rapides — visibles sans déplier */}
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">

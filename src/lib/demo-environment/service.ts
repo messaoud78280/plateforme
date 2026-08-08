@@ -207,7 +207,7 @@ export async function resetDemoEnvironment(demoId: string): Promise<{ ok: true }
     });
     await prisma.demoEnvironment.update({
       where: { id: demoId },
-      data: { seedVersion: "v2-personas" },
+      data: { seedVersion: "v3-coherence" },
     });
   }
   return { ok: true };
@@ -224,11 +224,22 @@ export async function enrichDemoPersonas(demoId: string): Promise<{ ok: true } |
     loginIdentifier: demo.loginIdentifier,
     companyName: demo.companyName,
   });
+  const { ensureVictorHugoCoherence } = await import("./coherence-victor-hugo");
+  await ensureVictorHugoCoherence({
+    rootUserId: demo.rootUserId,
+    organizationId: demo.organizationId,
+    loginIdentifier: demo.loginIdentifier,
+  });
   await prisma.demoEnvironment.update({
     where: { id: demoId },
-    data: { seedVersion: "v2-personas" },
+    data: { seedVersion: "v3-coherence" },
   });
   return { ok: true };
+}
+
+/** Phase 0 — câble la chaîne Victor Hugo sur une démo déjà seedée. */
+export async function enrichDemoCoherence(demoId: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  return enrichDemoPersonas(demoId);
 }
 
 export async function resetDemoPassword(

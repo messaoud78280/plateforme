@@ -4,12 +4,13 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
 import { isBonDeCommandeCategory } from "@/lib/demo-environment/bon-commande";
+import { applySupplierDeliveryConfirm } from "@/lib/demo-environment/coherence-victor-hugo";
 
 type Ctx = { params: Promise<{ id: string }> };
 
 /**
  * Actions fournisseur démo : confirm | propose
- * Met à jour BC, agenda, alerte Direction, notification.
+ * Une seule livraison agenda ; fiche OS mise à jour.
  */
 export async function POST(request: Request, context: Ctx) {
   const session = await getServerSession(authOptions);
@@ -36,6 +37,7 @@ export async function POST(request: Request, context: Ctx) {
       category: true,
       projectId: true,
       description: true,
+      followUpSheetId: true,
     },
   });
   if (!task || (!isBonDeCommandeCategory(task.category) && !task.title.includes("POINT.P"))) {
@@ -44,47 +46,24 @@ export async function POST(request: Request, context: Ctx) {
 
   try {
     if (action === "confirm") {
-      await prisma.task.update({
-        where: { id: task.id },
-        data: {
-          status: "EN_ATTENTE_INFO",
-          description: `${task.description ?? ""}\n\n[Démo] Point.P (Thomas Bernard) a confirmé la livraison — créneau demandé maintenu.`.trim(),
-        },
+      const result = await applySupplierDeliveryConfirm({
+        rootUserId: rootId,
+        taskId: task.id,
+        actorUserId: session.user.id,
+        actorName: session.user.name ?? "Thomas Bernard",
       });
 
-      if (task.projectId) {
-        const start = new Date();
-        start.setDate(start.getDate() + 2);
-        start.setHours(7, 30, 0, 0);
-        const end = new Date(start);
-        end.setHours(8, 30, 0, 0);
-        await prisma.agendaEvent.create({
-          data: {
-            title: `Livraison Point.P — ${task.title.slice(0, 40)}`,
-            type: "LIVRAISON",
-            startAt: start,
-            endAt: end,
-            location: "Résidence Victor Hugo — aire livraison",
-            ownerUserId: rootId,
-            createdById: session.user.id,
-            projectId: task.projectId,
-            organizationId: (
-              await prisma.project.findUnique({
-                where: { id: task.projectId },
-                select: { organizationId: true },
-              })
-            )?.organizationId,
-          },
-        });
-      }
+      const sheetUrl = result?.sheetId
+        ? `/dashboard/fiches-suivi/${result.sheetId}`
+        : "/dashboard/commandes";
 
       await prisma.alert.create({
         data: {
           title: "Point.P a confirmé la livraison",
-          message: `${task.title} — créneau confirmé par Thomas Bernard.`,
+          message: `${task.title} — créneau 11/08 07:30 confirmé. Une seule livraison en agenda.`,
           level: "INFO",
           clientId: rootId,
-          actionUrl: `/dashboard/commandes`,
+          actionUrl: sheetUrl,
         },
       });
 
@@ -93,7 +72,7 @@ export async function POST(request: Request, context: Ctx) {
         type: "MESSAGE_RECEIVED",
         title: "Livraison confirmée",
         message: `Point.P a confirmé : ${task.title}`,
-        actionUrl: "/dashboard/commandes",
+        actionUrl: sheetUrl,
       });
 
       const conducteur = await prisma.user.findFirst({
@@ -106,27 +85,46 @@ export async function POST(request: Request, context: Ctx) {
           type: "DELIVERY_CHECK",
           title: "Livraison Point.P confirmée",
           message: task.title,
-          actionUrl: "/dashboard/commandes",
+          actionUrl: sheetUrl,
         });
       }
 
-      return NextResponse.json({ ok: true, action: "confirm" });
+      return NextResponse.json({
+        ok: true,
+        action: "confirm",
+        deliveryId: result?.deliveryId ?? null,
+        sheetId: result?.sheetId ?? null,
+      });
     }
 
-    // propose autre heure → alerte à valider côté direction
+    // propose autre heure → alerte à valider côté direction (pas de nouvelle livraison)
     await prisma.task.update({
       where: { id: task.id },
       data: {
         description: `${task.description ?? ""}\n\n[Démo] Point.P propose ${proposedTime} au lieu de 07:30 — en attente validation ABC Étanchéité.`.trim(),
       },
     });
+
+    if (task.followUpSheetId) {
+      await prisma.followUpSheet.update({
+        where: { id: task.followUpSheetId },
+        data: {
+          nextAction: `Valider proposition livraison ${proposedTime}`,
+          nextActionDone: false,
+          colorKey: "orange",
+        },
+      });
+    }
+
     await prisma.alert.create({
       data: {
         title: "Modification livraison à valider",
         message: `Point.P propose ${proposedTime} au lieu de 07:30 pour ${task.title}.`,
         level: "WARNING",
         clientId: rootId,
-        actionUrl: `/dashboard/commandes`,
+        actionUrl: task.followUpSheetId
+          ? `/dashboard/fiches-suivi/${task.followUpSheetId}`
+          : "/dashboard/commandes",
       },
     });
     await createNotification({

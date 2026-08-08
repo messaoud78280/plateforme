@@ -703,6 +703,8 @@ model Task {
   /// Provenance messagerie : TASK | DIRECT | PROJECT
   sourceMessageKind String?
   sourceMessageId   String?
+  /// Affaire / fiche de suivi (OS) — lien métier Task ↔ FollowUpSheet
+  followUpSheetId String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
@@ -711,13 +713,16 @@ model Task {
   project    Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
   assignedTo User?        @relation("AssignedTasks", fields: [assignedToId], references: [id], onDelete: SetNull)
   createdBy  User?        @relation("TasksCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  followUpSheet FollowUpSheet? @relation(fields: [followUpSheetId], references: [id], onDelete: SetNull)
   comments   TaskComment[]
   documents  Document[]
   taskMessages TaskMessage[]
   chantierFiles ChantierFile[]
+  agendaEvents AgendaEvent[]
 
   @@index([organizationId])
   @@index([sourceMessageKind, sourceMessageId])
+  @@index([followUpSheetId])
 }
 
 enum TaskStatus {
@@ -988,6 +993,8 @@ model AgendaEvent {
   projectId       String?
   appointmentId   String?           @unique
   followUpSheetId String?
+  /// Commande / mission liée (ex. BC → livraison unique)
+  taskId          String?
   responsibleId   String?
   reminderMinutes Int?
   recurrence      String?           // NONE | DAILY | WEEKLY | MONTHLY | YEARLY | CUSTOM
@@ -1005,12 +1012,14 @@ model AgendaEvent {
   responsible User?                @relation("AgendaEventResponsible", fields: [responsibleId], references: [id], onDelete: SetNull)
   project     Project?             @relation(fields: [projectId], references: [id], onDelete: SetNull)
   followUpSheet FollowUpSheet?     @relation(fields: [followUpSheetId], references: [id], onDelete: SetNull)
+  task        Task?                @relation(fields: [taskId], references: [id], onDelete: SetNull)
   attendees   AgendaEventAttendee[]
 
   @@index([ownerUserId, startAt])
   @@index([organizationId, startAt])
   @@index([projectId, startAt])
   @@index([followUpSheetId, startAt])
+  @@index([taskId, startAt])
   @@index([type, startAt])
   @@index([sourceMessageKind, sourceMessageId])
 }
@@ -1097,6 +1106,7 @@ model FollowUpSheet {
   project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
   timeline  FollowUpTimelineEvent[]
   agendaEvents AgendaEvent[]
+  tasks     Task[]
 
   @@index([ownerUserId, status])
   @@index([assigneeId, nextActionAt])

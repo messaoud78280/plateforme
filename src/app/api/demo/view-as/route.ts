@@ -88,6 +88,17 @@ export async function POST(request: NextRequest) {
     });
   }
 
+  try {
+    const { ensureVictorHugoCoherence } = await import("@/lib/demo-environment/coherence-victor-hugo");
+    await ensureVictorHugoCoherence({
+      rootUserId: demoRootUserId,
+      organizationId: demo.organizationId,
+      loginIdentifier: demo.loginIdentifier,
+    });
+  } catch (e) {
+    console.error("[view-as] coherence:", e);
+  }
+
   let targetKey: DemoPersonaKey = "direction";
   if (personaRaw === null || personaRaw === "direction" || personaRaw === "") {
     targetKey = "direction";
@@ -184,6 +195,17 @@ export async function GET(request: NextRequest) {
       rootUserId: demo.rootUserId,
       loginIdentifier: demo.loginIdentifier,
     });
+  }
+
+  try {
+    const { ensureVictorHugoCoherence } = await import("@/lib/demo-environment/coherence-victor-hugo");
+    await ensureVictorHugoCoherence({
+      rootUserId: demo.rootUserId,
+      organizationId: demo.organizationId,
+      loginIdentifier: demo.loginIdentifier,
+    });
+  } catch (e) {
+    console.error("[view-as GET] coherence:", e);
   }
 
   const currentKey =

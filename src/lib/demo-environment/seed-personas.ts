@@ -167,7 +167,7 @@ export async function seedDemoPersonaUsers(opts: {
     }
   }
 
-  // Aligner BC-2026-043 sur Point.P
+  // Aligner BC-2026-043 sur Point.P (le lien fiche est finalisé par coherence-victor-hugo)
   const bc = await prisma.task.findFirst({
     where: {
       clientId: opts.rootUserId,
@@ -179,12 +179,20 @@ export async function seedDemoPersonaUsers(opts: {
     select: { id: true },
   });
   if (bc) {
+    const sheet = await prisma.followUpSheet.findFirst({
+      where: {
+        organizationId: opts.organizationId,
+        osNumber: "4587",
+        NOT: { status: "AVENANT" },
+      },
+      select: { id: true },
+    });
     await prisma.task.update({
       where: { id: bc.id },
       data: {
         title: "POINT.P — Résidence Victor Hugo (BC-2026-043)",
         description:
-          "Fournisseur Point.P — 40 rouleaux membrane EPDM. Livraison demandée 11 août 07:30. Montant indicatif 4 260 € HT. Contact : Thomas Bernard.",
+          "Fournisseur Point.P — 40 rouleaux membrane EPDM. Livraison demandée 11 août 2026 07:30. Montant indicatif 4 260 € HT. Contact : Thomas Bernard.",
         suppliersJson: [
           {
             name: "Point.P",
@@ -194,6 +202,7 @@ export async function seedDemoPersonaUsers(opts: {
         ],
         status: "EN_ATTENTE_INFO",
         category: "Bon de commande",
+        ...(sheet ? { followUpSheetId: sheet.id } : {}),
       },
     });
   }

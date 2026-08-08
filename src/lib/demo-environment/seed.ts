@@ -449,6 +449,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
   });
 
   // Fiches de suivi (post-it numériques) — 1 OS / 1 commande = 1 fiche
+  // Fiche OS-4587 — finalisée / liée BC+livraison+intervention par ensureVictorHugoCoherence
   const ficheVictor = await prisma.followUpSheet.create({
     data: {
       ownerUserId: clientId,
@@ -456,19 +457,20 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
       assigneeId: clientId,
       organizationId,
       projectId: projectVictor.id,
-      title: "Résidence Victor Hugo",
-      clientName: "Résidence Victor Hugo",
+      title: "Résidence Victor Hugo — OS-4587",
+      clientName: "ABC Promotion",
       siteAddress: "12 avenue Victor Hugo, Lyon",
       workObject: "Réfection étanchéité terrasse",
       osNumber: "4587",
+      orderNumber: "BC-2026-043",
       receivedAt: daysFromNow(-4),
-      status: "COMMANDE_FOURNISSEUR",
+      status: "ATTENTE_FOURNISSEUR",
       colorKey: "orange",
-      nextAction: "Commander la membrane EPDM",
-      nextActionAt: daysFromNow(-1),
+      nextAction: "Attendre confirmation livraison Point.P",
+      nextActionAt: daysFromNow(3),
       nextActionDone: false,
       reminderOffsets: [168, 72, 24, 2],
-      notes: "Ancien post-it bureau — scénario démo.",
+      notes: "Affaire centrale démo — chaîne métier unique.",
     },
   });
   await prisma.followUpTimelineEvent.createMany({
@@ -477,22 +479,22 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         sheetId: ficheVictor.id,
         authorId: clientId,
         kind: "creation",
-        label: "OS reçu",
-        detail: "OS n°4587",
+        label: "OS-4587 reçu",
+        detail: "ABC Promotion — Réfection étanchéité terrasse",
         occurredAt: daysFromNow(-4),
       },
       {
         sheetId: ficheVictor.id,
         authorId: clientId,
         kind: "action",
-        label: "Prochaine action : Commander la membrane EPDM",
-        occurredAt: daysFromNow(-3),
+        label: "Intervention planifiée — 17 août 08:00 (Karim Benali)",
+        occurredAt: daysFromNow(-2),
       },
       {
         sheetId: ficheVictor.id,
-        kind: "alerte",
-        label: "Échéance dépassée",
-        detail: "Action non réalisée à l’heure prévue",
+        authorId: clientId,
+        kind: "action",
+        label: "BC-2026-043 envoyé à Point.P — livraison 11 août 07:30",
         occurredAt: daysFromNow(-1),
       },
     ],
@@ -717,18 +719,27 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
     lauraId: laura,
   });
 
+  // Assignation diversifiée + fils mission plus riches
+  await enrichDemoTaskThreads({
+    clientId,
+    sophieId: sophie,
+    karimId: karim,
+    lauraId: laura,
+  });
+
+  const loginIdentifier =
+    opts.loginIdentifier ||
+    (
+      await prisma.demoEnvironment.findFirst({
+        where: { rootUserId: clientId },
+        select: { loginIdentifier: true },
+      })
+    )?.loginIdentifier ||
+    "bework-demo";
+
   // —— 4 personas loginables (Direction / Conducteur / Client / Fournisseur) ——
   try {
     const { seedDemoPersonaUsers } = await import("./seed-personas");
-    const loginIdentifier =
-      opts.loginIdentifier ||
-      (
-        await prisma.demoEnvironment.findFirst({
-          where: { rootUserId: clientId },
-          select: { loginIdentifier: true },
-        })
-      )?.loginIdentifier ||
-      "bework-demo";
     await seedDemoPersonaUsers({
       rootUserId: clientId,
       organizationId,
@@ -739,34 +750,16 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
     console.error("[demo-seed] personas:", e);
   }
 
-  // Assignation diversifiée + fils mission plus riches
-  await enrichDemoTaskThreads({
-    clientId,
-    sophieId: sophie,
-    karimId: karim,
-    lauraId: laura,
-  });
-
-  // —— 4 personas loginables (Direction / Conducteur / Client / Fournisseur) ——
+  // —— Phase 0 : une seule chaîne métier Victor Hugo ——
   try {
-    const { seedDemoPersonaUsers } = await import("./seed-personas");
-    const loginIdentifier =
-      opts.loginIdentifier ||
-      (
-        await prisma.demoEnvironment.findFirst({
-          where: { rootUserId: clientId },
-          select: { loginIdentifier: true },
-        })
-      )?.loginIdentifier ||
-      "bework-demo";
-    await seedDemoPersonaUsers({
+    const { ensureVictorHugoCoherence } = await import("./coherence-victor-hugo");
+    await ensureVictorHugoCoherence({
       rootUserId: clientId,
       organizationId,
       loginIdentifier,
-      companyName,
     });
   } catch (e) {
-    console.error("[demo-seed] personas:", e);
+    console.error("[demo-seed] coherence Victor Hugo:", e);
   }
 
   return {

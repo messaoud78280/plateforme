@@ -4,13 +4,13 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
 import { projectWhereForClientUser } from "@/lib/organization/access";
+import { applyTerrainTravauxTermines } from "@/lib/demo-environment/coherence-victor-hugo";
 
 const ACTIONS = ["photo", "termine", "reserve", "blocage"] as const;
 type TerrainAction = (typeof ACTIONS)[number];
 
 /**
- * Actions terrain démo (conducteur) — trace factuelle + alerte Direction.
- * Pas d’automatisation contractuelle : validation humaine requise.
+ * Actions terrain démo (conducteur) — branchées sur la fiche OS quand pertinent.
  */
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
@@ -45,48 +45,96 @@ export async function POST(request: Request) {
     });
   } else {
     project = await prisma.project.findFirst({
-      where: projectWhere,
+      where: {
+        AND: [projectWhere, { title: { contains: "Victor Hugo" } }],
+      },
       select: { id: true, title: true },
-      orderBy: { updatedAt: "desc" },
     });
+    if (!project) {
+      project = await prisma.project.findFirst({
+        where: projectWhere,
+        select: { id: true, title: true },
+        orderBy: { updatedAt: "desc" },
+      });
+    }
   }
 
   const siteLabel = project?.title ?? "Chantier";
   const actor = session.user.name ?? "Conducteur";
 
-  const labels: Record<TerrainAction, { title: string; level: "INFO" | "WARNING" | "URGENT"; msg: string }> = {
-    photo: {
-      title: `Photo terrain — ${siteLabel}`,
-      level: "INFO",
-      msg: `${actor} a signalé un ajout photo/document sur ${siteLabel}.${note ? ` Note : ${note}` : " À déposer dans Documents."}`,
-    },
-    termine: {
-      title: `Tâche terminée — ${siteLabel}`,
-      level: "INFO",
-      msg: `${actor} a marqué une action comme terminée sur ${siteLabel}.${note ? ` ${note}` : ""}`,
-    },
-    reserve: {
-      title: `Réserve signalée — ${siteLabel}`,
-      level: "WARNING",
-      msg: `${actor} a signalé une réserve sur ${siteLabel}.${note ? ` ${note}` : " Détail à préciser avant réception."}`,
-    },
-    blocage: {
-      title: `Blocage chantier — ${siteLabel}`,
-      level: "URGENT",
-      msg: `${actor} signale un blocage sur ${siteLabel}.${note ? ` ${note}` : " Impact planning à évaluer."}`,
-    },
-  };
-
-  const L = labels[action];
-
   try {
+    if (action === "termine" && project) {
+      const result = await applyTerrainTravauxTermines({
+        rootUserId: rootId,
+        projectId: project.id,
+        actorUserId: session.user.id,
+        actorName: actor,
+        note: note || "Terrasse terminée. RAS.",
+      });
+
+      const sheetUrl = result.sheetId
+        ? `/dashboard/fiches-suivi/${result.sheetId}`
+        : `/dashboard/projets/${project.id}`;
+
+      await prisma.alert.create({
+        data: {
+          title: `Travaux terminés — ${siteLabel}`,
+          message: `${actor} : ${note || "Terrasse terminée. RAS."} Prochaine action : préparer la facturation.`,
+          level: "INFO",
+          clientId: rootId,
+          actionUrl: sheetUrl,
+        },
+      });
+
+      await createNotification({
+        userId: rootId,
+        type: "TASK_COMPLETED",
+        title: "Travaux terminés — à facturer",
+        message: `${siteLabel} — prochaine action : préparer la facturation.`,
+        actionUrl: sheetUrl,
+      });
+
+      return NextResponse.json({
+        ok: true,
+        action,
+        projectId: project.id,
+        sheetId: result.sheetId,
+        redirect: sheetUrl,
+      });
+    }
+
+    if (action === "termine") {
+      return NextResponse.json({ error: "Chantier introuvable pour clôture terrain" }, { status: 404 });
+    }
+
+    const labels = {
+      photo: {
+        title: `Photo terrain — ${siteLabel}`,
+        level: "INFO" as const,
+        msg: `${actor} a signalé un ajout photo/document sur ${siteLabel}.${note ? ` Note : ${note}` : " À déposer dans Documents."}`,
+      },
+      reserve: {
+        title: `Réserve signalée — ${siteLabel}`,
+        level: "WARNING" as const,
+        msg: `${actor} a signalé une réserve sur ${siteLabel}.${note ? ` ${note}` : " Détail à préciser avant réception."}`,
+      },
+      blocage: {
+        title: `Blocage chantier — ${siteLabel}`,
+        level: "URGENT" as const,
+        msg: `${actor} signale un blocage sur ${siteLabel}.${note ? ` ${note}` : " Impact planning à évaluer."}`,
+      },
+    };
+
+    const L = labels[action];
+    const actionUrl = project ? `/dashboard/projets/${project.id}` : "/dashboard/a-traiter";
+
     await prisma.alert.create({
       data: {
         title: L.title,
         message: L.msg,
         level: L.level,
         clientId: rootId,
-        actionUrl: project ? `/dashboard/projets/${project.id}` : "/dashboard/a-traiter",
+        actionUrl,
       },
     });
 
@@ -96,33 +144,36 @@ export async function POST(request: Request) {
         type: "MESSAGE_RECEIVED",
         title: L.title,
         message: L.msg,
-        actionUrl: project ? `/dashboard/projets/${project.id}` : "/dashboard/a-traiter",
+        actionUrl,
       });
     }
 
-    if (action === "termine" && project) {
-      await prisma.task.create({
-        data: {
-          title: `Terrain — action terminée (${actor})`,
-          description: note ?? `Signalement terrain sur ${siteLabel} — à valider.`,
-          status: "COMPLETE",
-          category: "Compte rendu chantier",
-          clientId: rootId,
+    if (project && (action === "reserve" || action === "blocage")) {
+      const sheet = await prisma.followUpSheet.findFirst({
+        where: {
           projectId: project.id,
+          OR: [{ osNumber: "4587" }, { title: { contains: "Victor Hugo" } }],
+          NOT: { status: "AVENANT" },
         },
-      }).catch(() => null);
+        select: { id: true },
+      });
+      if (sheet) {
+        const { appendFollowUpTimeline } = await import("@/lib/follow-up/timeline");
+        await appendFollowUpTimeline({
+          sheetId: sheet.id,
+          authorId: session.user.id,
+          kind: "terrain",
+          label: L.title,
+          detail: L.msg,
+        });
+      }
     }
 
     return NextResponse.json({
       ok: true,
       action,
       projectId: project?.id ?? null,
-      redirect:
-        action === "photo"
-          ? "/dashboard/documents"
-          : project
-            ? `/dashboard/projets/${project.id}`
-            : "/dashboard/a-traiter",
+      redirect: action === "photo" ? "/dashboard/documents" : actionUrl,
     });
   } catch (e) {
     console.error("terrain-action", e);

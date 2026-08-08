@@ -357,3 +357,64 @@ export async function countActiveDeliveryEvents(orderId: string): Promise<number
     },
   });
 }
+
+/**
+ * AGENDA-V2A — Déplacement agenda d’une livraison liée :
+ * met à jour la date métier PurchaseOrder puis re-sync (jamais Agenda seul).
+ */
+export async function reschedulePurchaseOrderDeliveryFromAgenda(opts: {
+  orderId: string;
+  newStartAt: Date;
+  actorUserId: string;
+  actorName?: string;
+}): Promise<{ ok: true; eventId: string | null } | { ok: false; error: string }> {
+  const order = await prisma.purchaseOrder.findUnique({
+    where: { id: opts.orderId },
+    select: {
+      id: true,
+      number: true,
+      status: true,
+      confirmedDeliveryAt: true,
+      requestedDeliveryAt: true,
+    },
+  });
+  if (!order) return { ok: false, error: "Commande introuvable" };
+  if (["ANNULEE", "REFUSEE", "CLOTUREE", "RECUE"].includes(order.status)) {
+    return { ok: false, error: "Cette livraison ne peut plus être déplacée" };
+  }
+
+  const data: {
+    confirmedDeliveryAt?: Date;
+    requestedDeliveryAt?: Date;
+  } = {};
+
+  if (order.confirmedDeliveryAt) {
+    data.confirmedDeliveryAt = opts.newStartAt;
+  } else {
+    data.requestedDeliveryAt = opts.newStartAt;
+  }
+
+  await prisma.purchaseOrder.update({
+    where: { id: order.id },
+    data,
+  });
+
+  await prisma.purchaseOrderEvent.create({
+    data: {
+      orderId: order.id,
+      kind: "delivery_reschedule",
+      label: "Livraison reportée",
+      detail: `${opts.actorName ?? "Agenda"} — nouveau créneau ${fmtShort(opts.newStartAt)} (via agenda)`,
+      actorUserId: opts.actorUserId,
+    },
+  });
+
+  const synced = await syncPurchaseOrderDeliveryEvent({
+    orderId: order.id,
+    actorUserId: opts.actorUserId,
+    postSystemMessage: true,
+    systemMessage: `↻ Livraison reportée — ${fmtShort(opts.newStartAt)}\n${order.number}\n[Voir la commande](/dashboard/commandes/${order.id})`,
+  });
+
+  return { ok: true, eventId: synced.eventId };
+}

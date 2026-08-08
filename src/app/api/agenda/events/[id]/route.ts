@@ -3,10 +3,13 @@ import { getServerSession } from "next-auth";
 import type { AgendaEventType, AgendaEventStatus } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { agendaEventAccessWhere, agendaEventInclude } from "@/lib/agenda/access";
+import { serializePurchaseOrderForAgenda } from "@/lib/agenda/serialize-event";
 import { AGENDA_EVENT_TYPES } from "@/lib/agenda/types";
 import { prisma } from "@/lib/prisma";
 import { canClientAccessProject } from "@/lib/organization/access";
 import { isBeworkStaff } from "@/lib/authz";
+import { isInternalPurchaseOrderActor } from "@/lib/purchase-orders/access";
+import { reschedulePurchaseOrderDeliveryFromAgenda } from "@/lib/purchase-orders/sync-delivery";
 
 const VALID_TYPES: Set<string> = new Set(AGENDA_EVENT_TYPES.map((t) => t.id));
 
@@ -41,7 +44,14 @@ export async function GET(_request: Request, ctx: Ctx) {
   const { id } = await ctx.params;
   const event = await canAccessEvent(session.user, id);
   if (!event) return NextResponse.json({ error: "Introuvable" }, { status: 404 });
-  return NextResponse.json({ event });
+  const canOpenPo = isInternalPurchaseOrderActor(session.user);
+  return NextResponse.json({
+    event: {
+      ...event,
+      purchaseOrder: serializePurchaseOrderForAgenda(event.purchaseOrder, { canOpen: canOpenPo }),
+      linkedPurchaseOrder: Boolean(event.purchaseOrderId),
+    },
+  });
 }
 
 /** PATCH /api/agenda/events/[id] */
@@ -58,10 +68,70 @@ export async function PATCH(request: Request, ctx: Ctx) {
     const body = (await request.json()) as Record<string, unknown>;
     const data: Record<string, unknown> = {};
 
+    const linkedPo =
+      Boolean(existing.purchaseOrderId) && existing.type === "LIVRAISON";
+    const timesChanging =
+      typeof body.startAt === "string" || typeof body.endAt === "string";
+
+    // Livraison liée commande : jamais modifier AgendaEvent seul
+    if (linkedPo && timesChanging) {
+      if (body.confirmLinkedReschedule !== true) {
+        return NextResponse.json(
+          {
+            error: "CONFIRM_LINKED_RESCHEDULE",
+            message:
+              "Cette livraison est liée à une commande. Confirmez le report pour mettre à jour la commande.",
+            purchaseOrderId: existing.purchaseOrderId,
+            currentStartAt: existing.startAt.toISOString(),
+          },
+          { status: 409 },
+        );
+      }
+      const newStart = typeof body.startAt === "string" ? new Date(body.startAt) : existing.startAt;
+      if (Number.isNaN(newStart.getTime())) {
+        return NextResponse.json({ error: "Horaires invalides" }, { status: 400 });
+      }
+      const actor = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { name: true },
+      });
+      const result = await reschedulePurchaseOrderDeliveryFromAgenda({
+        orderId: existing.purchaseOrderId!,
+        newStartAt: newStart,
+        actorUserId: session.user.id,
+        actorName: actor?.name ?? undefined,
+      });
+      if (!result.ok) {
+        return NextResponse.json({ error: result.error }, { status: 400 });
+      }
+      const refreshed = await canAccessEvent(session.user, id);
+      if (!refreshed) return NextResponse.json({ error: "Introuvable" }, { status: 404 });
+      const canOpenPo = isInternalPurchaseOrderActor(session.user);
+      return NextResponse.json({
+        event: {
+          ...refreshed,
+          purchaseOrder: serializePurchaseOrderForAgenda(refreshed.purchaseOrder, {
+            canOpen: canOpenPo,
+          }),
+          linkedPurchaseOrder: true,
+          readOnly: false,
+          source: "agenda",
+        },
+      });
+    }
+
     if (typeof body.title === "string" && body.title.trim()) data.title = body.title.trim();
     if (typeof body.description === "string" || body.description === null) data.description = body.description;
     if (typeof body.location === "string" || body.location === null) data.location = body.location;
-    if (typeof body.type === "string" && VALID_TYPES.has(body.type)) data.type = body.type as AgendaEventType;
+    if (typeof body.type === "string" && VALID_TYPES.has(body.type)) {
+      if (body.type === "LIVRAISON" && !existing.purchaseOrderId) {
+        return NextResponse.json(
+          { error: "Impossible de convertir un événement en livraison sans commande." },
+          { status: 400 },
+        );
+      }
+      data.type = body.type as AgendaEventType;
+    }
     if (typeof body.status === "string") data.status = body.status as AgendaEventStatus;
     if (typeof body.allDay === "boolean") data.allDay = body.allDay;
     if (typeof body.startAt === "string") {
@@ -109,7 +179,16 @@ export async function PATCH(request: Request, ctx: Ctx) {
       include: agendaEventInclude,
     });
 
-    return NextResponse.json({ event });
+    const canOpenPo = isInternalPurchaseOrderActor(session.user);
+    return NextResponse.json({
+      event: {
+        ...event,
+        purchaseOrder: serializePurchaseOrderForAgenda(event.purchaseOrder, {
+          canOpen: canOpenPo,
+        }),
+        linkedPurchaseOrder: Boolean(event.purchaseOrderId),
+      },
+    });
   } catch (error) {
     console.error("PATCH /api/agenda/events/[id]", error);
     return NextResponse.json({ error: "Erreur mise à jour" }, { status: 500 });

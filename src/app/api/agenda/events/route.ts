@@ -10,10 +10,15 @@ import { AGENDA_EVENT_TYPES } from "@/lib/agenda/types";
 import { prisma } from "@/lib/prisma";
 import { canClientAccessProject } from "@/lib/organization/access";
 import { isBeworkStaff } from "@/lib/authz";
-import { computeUrgencyFromDue } from "@/lib/follow-up/urgency";
-import { URGENCY_LABELS } from "@/lib/follow-up/types";
+import {
+  buildAgendaUrgency,
+  serializePurchaseOrderForAgenda,
+} from "@/lib/agenda/serialize-event";
+import { isInternalPurchaseOrderActor } from "@/lib/purchase-orders/access";
 
 const VALID_TYPES: Set<string> = new Set(AGENDA_EVENT_TYPES.map((t) => t.id));
+/** Création manuelle interdite — livraisons = PurchaseOrder. */
+const MANUAL_CREATE_BLOCKED = new Set(["LIVRAISON"]);
 
 async function assertProjectAccess(userId: string, projectId: string, staff: boolean) {
   if (staff) return true;
@@ -69,6 +74,23 @@ export async function GET(request: Request) {
                     { description: { contains: q, mode: "insensitive" as const } },
                     { location: { contains: q, mode: "insensitive" as const } },
                     { project: { title: { contains: q, mode: "insensitive" as const } } },
+                    { responsible: { name: { contains: q, mode: "insensitive" as const } } },
+                    {
+                      purchaseOrder: {
+                        OR: [
+                          { number: { contains: q, mode: "insensitive" as const } },
+                          { subject: { contains: q, mode: "insensitive" as const } },
+                          {
+                            externalOrganization: {
+                              OR: [
+                                { name: { contains: q, mode: "insensitive" as const } },
+                                { tradeName: { contains: q, mode: "insensitive" as const } },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
                   ],
                 },
               ]
@@ -91,6 +113,7 @@ export async function GET(request: Request) {
           })
         : [];
     const taskByMsg = new Map(taskMsgs.map((m) => [m.id, m.taskId]));
+    const canOpenPo = isInternalPurchaseOrderActor(session.user);
 
     const agendaEvents = events.flatMap((e) => {
       const expanded =
@@ -108,14 +131,13 @@ export async function GET(request: Request) {
 
       return expanded.map((occ) => {
         const sheet = "followUpSheet" in e ? e.followUpSheet : null;
-        const urgency = sheet
-          ? computeUrgencyFromDue(sheet.nextActionAt ?? occ.startAt, {
-              nextActionDone: sheet.nextActionDone,
-              override: sheet.urgencyOverride,
-            })
-          : computeUrgencyFromDue(occ.startAt instanceof Date ? occ.startAt : new Date(String(occ.startAt)), {
-              nextActionDone: e.status === "TERMINE",
-            });
+        const startDate =
+          occ.startAt instanceof Date ? occ.startAt : new Date(String(occ.startAt));
+        const { urgency, urgencyLabel } = buildAgendaUrgency({
+          startAt: startDate,
+          status: e.status,
+          followUpSheet: sheet,
+        });
         let sourceMessageHref: string | null = null;
         if (e.sourceMessageKind === "TASK" && e.sourceMessageId) {
           const taskId = taskByMsg.get(e.sourceMessageId);
@@ -125,20 +147,33 @@ export async function GET(request: Request) {
         } else if (e.sourceMessageKind === "DIRECT" && e.sourceMessageId) {
           sourceMessageHref = `/dashboard/messagerie?tab=messages-directs&messageId=${e.sourceMessageId}`;
         }
+        const poSummary = serializePurchaseOrderForAgenda(
+          "purchaseOrder" in e ? e.purchaseOrder : null,
+          { canOpen: canOpenPo },
+        );
+        const linkedPo = Boolean(e.purchaseOrderId);
         return {
           ...occ,
           startAt: occ.startAt instanceof Date ? occ.startAt.toISOString() : String(occ.startAt),
           endAt: occ.endAt instanceof Date ? occ.endAt.toISOString() : String(occ.endAt),
           readOnly: false as const,
+          linkedPurchaseOrder: linkedPo,
+          purchaseOrderId: e.purchaseOrderId ?? null,
+          purchaseOrder: poSummary,
+          deliveryVisual: poSummary?.deliveryVisual ?? null,
           source: "agenda" as const,
-          href: sheet ? `/dashboard/fiches-suivi/${sheet.id}` : (null as string | null),
+          href: sheet
+            ? `/dashboard/fiches-suivi/${sheet.id}`
+            : poSummary?.canOpen
+              ? `/dashboard/commandes/${poSummary.id}`
+              : (null as string | null),
           followUpSheetId: sheet?.id ?? e.followUpSheetId ?? null,
           followUpSheet: sheet ? { id: sheet.id, title: sheet.title } : null,
           sourceMessageKind: e.sourceMessageKind ?? null,
           sourceMessageId: e.sourceMessageId ?? null,
           sourceMessageHref,
           urgency,
-          urgencyLabel: URGENCY_LABELS[urgency],
+          urgencyLabel,
           isOccurrence: occ.id.includes("__"),
         };
       });
@@ -154,8 +189,9 @@ export async function GET(request: Request) {
       });
       if (type) linked = linked.filter((i) => i.type === type);
       if (scope === "mine") {
+        const uid = session.user!.id;
         linked = linked.filter(
-          (i) => i.responsibleId === session.user!.id || i.createdBy.id === session.user!.id,
+          (i) => i.responsibleId === uid || i.createdBy.id === uid,
         );
       }
     }
@@ -198,6 +234,15 @@ export async function POST(request: Request) {
       typeof body.type === "string" && VALID_TYPES.has(body.type)
         ? (body.type as AgendaEventType)
         : "AUTRE";
+    if (MANUAL_CREATE_BLOCKED.has(type)) {
+      return NextResponse.json(
+        {
+          error:
+            "Les livraisons se créent depuis une commande fournisseur — pas depuis l’agenda.",
+        },
+        { status: 400 },
+      );
+    }
     const projectId = typeof body.projectId === "string" && body.projectId ? body.projectId : null;
     const attendeeIds = Array.isArray(body.attendeeIds)
       ? body.attendeeIds.filter((x): x is string => typeof x === "string")

@@ -25,6 +25,12 @@ type Props = {
   onSelectEvent: (id: string) => void;
   onQuickCreate: (draft: AgendaQuickCreateDraft) => void;
   onEventMoved: (event: AgendaEventDTO) => void;
+  /** Livraison liée PO : confirmer avant PATCH métier. */
+  onConfirmLinkedReschedule?: (
+    event: AgendaEventDTO,
+    startAt: Date,
+    endAt: Date,
+  ) => Promise<boolean>;
 };
 
 type DragState =
@@ -71,6 +77,7 @@ export function AgendaDayWeekView({
   onSelectEvent,
   onQuickCreate,
   onEventMoved,
+  onConfirmLinkedReschedule,
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [now, setNow] = useState(() => new Date());
@@ -83,6 +90,10 @@ export function AgendaDayWeekView({
   const previewRef = useRef<{ eventId: string; startAt: Date; endAt: Date } | null>(null);
   const onEventMovedRef = useRef(onEventMoved);
   onEventMovedRef.current = onEventMoved;
+  const eventsRef = useRef(events);
+  eventsRef.current = events;
+  const confirmLinkedRef = useRef(onConfirmLinkedReschedule);
+  confirmLinkedRef.current = onConfirmLinkedReschedule;
 
   const days = useMemo(() => {
     if (mode === "day") return [startOfDay(cursor)];
@@ -144,15 +155,35 @@ export function AgendaDayWeekView({
   }
 
   useEffect(() => {
-    async function patchTimes(eventId: string, startAt: Date, endAt: Date) {
+    async function patchTimes(
+      eventId: string,
+      startAt: Date,
+      endAt: Date,
+      kind: "move" | "resize",
+    ) {
       try {
-        const res = await fetch(`/api/agenda/events/${eventId}`, {
+        const baseId = eventId.includes("__") ? eventId.split("__")[0]! : eventId;
+        const ev = eventsRef.current.find((e) => e.id === eventId || e.id === baseId);
+        const linked = Boolean(ev?.linkedPurchaseOrder || ev?.purchaseOrderId);
+        // Resize interdit sur livraison liée (durée pilotée métier)
+        if (linked && kind === "resize") return;
+        if (linked) {
+          const ok = confirmLinkedRef.current
+            ? await confirmLinkedRef.current(ev!, startAt, endAt)
+            : window.confirm(
+                `Modifier la livraison liée à la commande ?\n\nNouveau créneau : ${startAt.toLocaleString("fr-FR")}`,
+              );
+          if (!ok) return;
+        }
+
+        const res = await fetch(`/api/agenda/events/${baseId}`, {
           method: "PATCH",
           credentials: "same-origin",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             startAt: startAt.toISOString(),
             endAt: endAt.toISOString(),
+            ...(linked ? { confirmLinkedReschedule: true } : {}),
           }),
         });
         if (!res.ok) return;
@@ -221,7 +252,7 @@ export function AgendaDayWeekView({
       }
       previewRef.current = null;
       setPreview(null);
-      void patchTimes(p.eventId, p.startAt, p.endAt);
+      void patchTimes(p.eventId, p.startAt, p.endAt, d.kind);
     }
 
     window.addEventListener("pointermove", onPointerMove);
@@ -414,6 +445,12 @@ export function AgendaDayWeekView({
                     ev.urgency && URGENCY_STYLES[ev.urgency as keyof typeof URGENCY_STYLES]
                       ? URGENCY_STYLES[ev.urgency as keyof typeof URGENCY_STYLES]
                       : null;
+                  const done = ev.status === "TERMINE";
+                  const unconfirmed =
+                    ev.deliveryVisual === "A_CONFIRMER" ||
+                    ev.deliveryVisual === "PROPOSITION" ||
+                    (ev.type === "LIVRAISON" && ev.status === "PLANIFIE");
+                  const linkedPo = Boolean(ev.linkedPurchaseOrder || ev.purchaseOrderId);
 
                   return (
                     <div
@@ -422,6 +459,8 @@ export function AgendaDayWeekView({
                         ev.readOnly ? "cursor-pointer" : "cursor-grab active:cursor-grabbing"
                       } ${selected ? "ring-2 ring-[#1d4ed8] ring-offset-1" : ""} ${
                         urgencyStyle?.bar ?? "border-l-slate-300"
+                      } ${done ? "opacity-55" : ""} ${
+                        unconfirmed ? "border-dashed" : ""
                       }`}
                       style={{
                         top,
@@ -440,7 +479,7 @@ export function AgendaDayWeekView({
                       }}
                     >
                       <div className="flex items-start gap-1">
-                        {urgencyStyle ? (
+                        {urgencyStyle && ev.urgency && ev.urgency !== "NORMAL" ? (
                           <span
                             className={`mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full ${urgencyStyle.dot}`}
                             title={ev.urgencyLabel ?? undefined}
@@ -454,11 +493,20 @@ export function AgendaDayWeekView({
                       </div>
                       {height > 28 ? (
                         <p className="truncate text-[10px] opacity-80">
-                          {formatTime(start)} – {formatTime(end)}
-                          {ev.urgencyLabel ? ` · ${ev.urgencyLabel}` : ""}
+                          {formatTime(start)}
+                          {unconfirmed
+                            ? ev.deliveryVisual === "PROPOSITION"
+                              ? " · proposé"
+                              : " · à confirmer"
+                            : done
+                              ? " · terminée"
+                              : ""}
+                          {ev.responsible?.name && mode === "day"
+                            ? ` · ${ev.responsible.name.split(" ")[0]}`
+                            : ""}
                         </p>
                       ) : null}
-                      {!ev.readOnly ? (
+                      {!ev.readOnly && !linkedPo ? (
                         <div
                           className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize"
                           onPointerDown={(e) => startResize(e, ev, dayIndex)}

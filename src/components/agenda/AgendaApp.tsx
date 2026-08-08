@@ -20,7 +20,13 @@ import {
   startOfMonth,
   startOfWeek,
 } from "@/lib/agenda/dates";
-import { AGENDA_EVENT_TYPES, type AgendaScope } from "@/lib/agenda/types";
+import {
+  findAgendaConflicts,
+  formatAgendaConflictWarning,
+} from "@/lib/agenda/conflicts";
+import { AGENDA_LAYER_FILTERS, type AgendaLayerId } from "@/lib/agenda/serialize-event";
+import type { AgendaScope } from "@/lib/agenda/types";
+import { formatTime } from "@/lib/agenda/dates";
 import type {
   AgendaEventDTO,
   AgendaProjectOption,
@@ -47,6 +53,13 @@ const VIEW_LABELS: { id: AgendaView; label: string }[] = [
   { id: "year", label: "Année" },
 ];
 
+const QUICK_TYPES = [
+  { type: "REUNION_CHANTIER", label: "Réunion chantier" },
+  { type: "INTERVENTION", label: "Intervention" },
+  { type: "RDV_CLIENT", label: "Rendez-vous" },
+  { type: "ECHEANCE", label: "Échéance" },
+] as const;
+
 export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
   const [view, setView] = useState<AgendaView>("week");
   const [cursor, setCursor] = useState(() => startOfDay(new Date()));
@@ -56,13 +69,22 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
   const [search, setSearch] = useState("");
   const [searchDebounced, setSearchDebounced] = useState("");
   const [scope, setScope] = useState<AgendaScope>("all");
-  const [typeFilter, setTypeFilter] = useState("");
+  const [projectFilter, setProjectFilter] = useState("");
+  const [layers, setLayers] = useState<Set<AgendaLayerId> | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [draft, setDraft] = useState<AgendaQuickCreateDraft | null>(null);
+  const [quickType, setQuickType] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [duplicateFrom, setDuplicateFrom] = useState<AgendaEventDTO | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(max-width: 640px)").matches) {
+      setView("day");
+    }
+  }, []);
 
   useEffect(() => {
     const t = setTimeout(() => setSearchDebounced(search.trim()), 250);
@@ -79,7 +101,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
         scope,
       });
       if (searchDebounced) params.set("q", searchDebounced);
-      if (typeFilter) params.set("type", typeFilter);
+      if (projectFilter) params.set("projectId", projectFilter);
       const res = await fetch(`/api/agenda/events?${params}`, {
         credentials: "same-origin",
       });
@@ -94,7 +116,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
     } finally {
       setLoading(false);
     }
-  }, [view, cursor, scope, searchDebounced, typeFilter]);
+  }, [view, cursor, scope, searchDebounced, projectFilter]);
 
   useEffect(() => {
     void loadEvents();
@@ -111,6 +133,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
       setView("day");
     }
     if (projectId) {
+      setProjectFilter(projectId);
       setFiltersOpen(true);
     }
   }, []);
@@ -152,10 +175,38 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [view]);
 
+  const visibleEvents = useMemo(() => {
+    if (!layers || layers.size === 0) return events;
+    const allowed = new Set<string>();
+    for (const layer of AGENDA_LAYER_FILTERS) {
+      if (layers.has(layer.id)) {
+        for (const t of layer.types) allowed.add(t);
+      }
+    }
+    // Si aucune couche cochée → tout (évite liste vide accidentelle)
+    if (allowed.size === 0) return events;
+    return events.filter((e) => allowed.has(e.type));
+  }, [events, layers]);
+
   const selectedEvent = useMemo(
-    () => events.find((e) => e.id === selectedEventId) ?? null,
-    [events, selectedEventId],
+    () => visibleEvents.find((e) => e.id === selectedEventId) ?? events.find((e) => e.id === selectedEventId) ?? null,
+    [visibleEvents, events, selectedEventId],
   );
+
+  const conflictWarning = useMemo(() => {
+    if (!selectedEvent || selectedEvent.status === "TERMINE") return null;
+    const conflicts = findAgendaConflicts(
+      {
+        id: selectedEvent.id,
+        startAt: selectedEvent.startAt,
+        endAt: selectedEvent.endAt,
+        responsibleId: selectedEvent.responsibleId,
+        projectId: selectedEvent.projectId,
+      },
+      visibleEvents,
+    );
+    return formatAgendaConflictWarning(conflicts, selectedEvent.responsible?.name);
+  }, [selectedEvent, visibleEvents]);
 
   const title = useMemo(() => {
     if (view === "day") {
@@ -186,10 +237,35 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
     setCursor(startOfDay(new Date()));
   }
 
-  function openCreate(d?: AgendaQuickCreateDraft) {
+  function openCreate(d?: AgendaQuickCreateDraft, typeHint?: string | null) {
     setDuplicateFrom(null);
     setDraft(d ?? null);
+    setQuickType(typeHint ?? null);
     setCreateOpen(true);
+  }
+
+  async function confirmLinkedReschedule(
+    ev: AgendaEventDTO,
+    startAt: Date,
+    _endAt: Date,
+  ): Promise<boolean> {
+    const poLabel = ev.purchaseOrder?.number ?? "la commande";
+    const old = formatTime(new Date(ev.startAt));
+    const next = formatTime(startAt);
+    return window.confirm(
+      `Modifier la livraison ?\n\n${poLabel}\nCréneau actuel : ${old}\nNouveau créneau : ${next}\n\nLa commande fournisseur sera mise à jour (pas seulement l’agenda).`,
+    );
+  }
+
+  function toggleLayer(id: AgendaLayerId) {
+    setLayers((prev) => {
+      const next = new Set(prev ?? AGENDA_LAYER_FILTERS.map((l) => l.id));
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      // Toutes cochées → null (pas de filtre)
+      if (next.size === AGENDA_LAYER_FILTERS.length) return null;
+      return next;
+    });
   }
 
   function handleSelectEvent(id: string) {
@@ -282,10 +358,10 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
 
   const todayEvents = useMemo(() => {
     const today = startOfDay(new Date());
-    return events
+    return visibleEvents
       .filter((e) => e.status !== "ANNULE" && isSameDay(new Date(e.startAt), today))
       .sort((a, b) => a.startAt.localeCompare(b.startAt));
-  }, [events]);
+  }, [visibleEvents]);
 
   function handleDuplicate() {
     if (!selectedEvent || selectedEvent.readOnly) return;
@@ -363,7 +439,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
               type="button"
               onClick={() => setFiltersOpen((o) => !o)}
               className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-semibold ${
-                filtersOpen || scope !== "all" || typeFilter
+                filtersOpen || scope !== "all" || projectFilter || layers
                   ? "border-[#1d4ed8]/40 bg-blue-50 text-[#1d4ed8]"
                   : "border-slate-200 text-slate-600 hover:bg-slate-50"
               }`}
@@ -418,62 +494,98 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
         </div>
 
         {filtersOpen ? (
-          <div className="flex flex-wrap items-center gap-3 border-b border-slate-200/80 bg-slate-50/80 px-4 py-2.5">
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11px] font-semibold uppercase text-slate-400">Portée</span>
-              {(
-                [
-                  { id: "mine", label: "Moi" },
-                  { id: "team", label: "Équipe" },
-                  { id: "all", label: "Tout" },
-                ] as const
-              ).map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => setScope(s.id)}
-                  className={`rounded-md px-2.5 py-1 text-xs font-semibold ${
-                    scope === s.id
-                      ? "bg-white text-[#1e3a5f] shadow-sm"
-                      : "text-slate-500 hover:bg-white/60"
-                  }`}
+          <div className="space-y-2 border-b border-slate-200/80 bg-slate-50/80 px-4 py-2.5">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] font-semibold uppercase text-slate-400">Portée</span>
+                {(
+                  [
+                    { id: "mine", label: "Moi" },
+                    { id: "team", label: "Équipe" },
+                    { id: "all", label: "Tout" },
+                  ] as const
+                ).map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => setScope(s.id)}
+                    className={`rounded-md px-2.5 py-1 text-xs font-semibold ${
+                      scope === s.id
+                        ? "bg-white text-[#1e3a5f] shadow-sm"
+                        : "text-slate-500 hover:bg-white/60"
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] font-semibold uppercase text-slate-400">Chantier</span>
+                <select
+                  value={projectFilter}
+                  onChange={(e) => setProjectFilter(e.target.value)}
+                  className="max-w-[180px] rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs outline-none"
                 >
-                  {s.label}
+                  <option value="">Tous</option>
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="relative md:hidden">
+                <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Point.P, BC, chantier…"
+                  className="w-44 rounded-lg border border-slate-200 py-1 pl-7 pr-2 text-xs outline-none"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setFiltersOpen(false)}
+                className="ml-auto rounded-md p-1 text-slate-400 hover:bg-white"
+                aria-label="Fermer les filtres"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-[11px] font-semibold uppercase text-slate-400">Couches</span>
+              {AGENDA_LAYER_FILTERS.map((layer) => {
+                const active = !layers || layers.has(layer.id);
+                return (
+                  <button
+                    key={layer.id}
+                    type="button"
+                    onClick={() => toggleLayer(layer.id)}
+                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                      active
+                        ? "bg-white text-[#1e3a5f] shadow-sm ring-1 ring-slate-200"
+                        : "text-slate-400 line-through"
+                    }`}
+                  >
+                    {active ? "✓ " : ""}
+                    {layer.label}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-[11px] font-semibold uppercase text-slate-400">Créer</span>
+              {QUICK_TYPES.map((q) => (
+                <button
+                  key={q.type}
+                  type="button"
+                  onClick={() => openCreate(undefined, q.type)}
+                  className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:border-[#1e3a5f]/30"
+                >
+                  + {q.label}
                 </button>
               ))}
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11px] font-semibold uppercase text-slate-400">Type</span>
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value)}
-                className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs outline-none"
-              >
-                <option value="">Tous</option>
-                {AGENDA_EVENT_TYPES.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="relative md:hidden">
-              <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Rechercher…"
-                className="w-40 rounded-lg border border-slate-200 py-1 pl-7 pr-2 text-xs outline-none"
-              />
-            </div>
-            <button
-              type="button"
-              onClick={() => setFiltersOpen(false)}
-              className="ml-auto rounded-md p-1 text-slate-400 hover:bg-white"
-              aria-label="Fermer les filtres"
-            >
-              <X className="h-4 w-4" />
-            </button>
           </div>
         ) : null}
 
@@ -488,18 +600,19 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
             <AgendaDayWeekView
               mode={view}
               cursor={cursor}
-              events={events}
+              events={visibleEvents}
               selectedEventId={selectedEventId}
               onSelectEvent={handleSelectEvent}
               onQuickCreate={openCreate}
               onEventMoved={upsertEvent}
+              onConfirmLinkedReschedule={confirmLinkedReschedule}
             />
           ) : null}
 
           {view === "month" ? (
             <AgendaMonthView
               cursor={cursor}
-              events={events}
+              events={visibleEvents}
               selectedEventId={selectedEventId}
               onSelectEvent={handleSelectEvent}
               onOpenDay={(d) => {
@@ -513,7 +626,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
           {view === "year" ? (
             <AgendaYearView
               cursor={cursor}
-              events={events}
+              events={visibleEvents}
               onOpenMonth={(d) => {
                 setCursor(startOfMonth(d));
                 setView("month");
@@ -530,6 +643,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
           selectedEvent={selectedEvent}
           currentUserId={currentUserId}
           todayEvents={todayEvents}
+          conflictWarning={conflictWarning}
           onCursorChange={setCursor}
           onSelectDay={(d) => {
             setCursor(startOfDay(d));
@@ -537,7 +651,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
           }}
           onSelectEvent={setSelectedEventId}
           onEdit={() => {
-            if (selectedEvent?.readOnly) return;
+            if (selectedEvent?.readOnly || selectedEvent?.linkedPurchaseOrder) return;
             setEditOpen(true);
           }}
           onDuplicate={handleDuplicate}
@@ -547,7 +661,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
         />
       </div>
 
-      {/* Mobile side panel overlay */}
+      {/* Mobile side panel — bottom sheet */}
       {panelOpen ? (
         <div className="fixed inset-0 z-40 lg:hidden">
           <button
@@ -556,35 +670,41 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
             aria-label="Fermer"
             onClick={() => setPanelOpen(false)}
           />
-          <div className="absolute inset-y-0 right-0 w-[300px] bg-white shadow-xl">
-            <AgendaSidePanel
-              cursor={cursor}
-              selectedEvent={selectedEvent}
-              currentUserId={currentUserId}
-              todayEvents={todayEvents}
-              onCursorChange={setCursor}
-              onSelectDay={(d) => {
-                setCursor(startOfDay(d));
-                setView("day");
-                setPanelOpen(false);
-              }}
-              onSelectEvent={setSelectedEventId}
-              onEdit={() => {
-                if (selectedEvent?.readOnly) return;
-                setEditOpen(true);
-                setPanelOpen(false);
-              }}
-              onDuplicate={() => {
-                handleDuplicate();
-                setPanelOpen(false);
-              }}
-              onDelete={async () => {
-                await handleDelete();
-                setPanelOpen(false);
-              }}
-              onRsvp={handleRsvp}
-              onStatusChange={handleStatusChange}
-            />
+          <div className="absolute inset-x-0 bottom-0 max-h-[85dvh] overflow-hidden rounded-t-2xl bg-white shadow-xl">
+            <div className="flex justify-center py-2">
+              <span className="h-1 w-10 rounded-full bg-slate-200" />
+            </div>
+            <div className="max-h-[80dvh] overflow-y-auto">
+              <AgendaSidePanel
+                cursor={cursor}
+                selectedEvent={selectedEvent}
+                currentUserId={currentUserId}
+                todayEvents={todayEvents}
+                conflictWarning={conflictWarning}
+                onCursorChange={setCursor}
+                onSelectDay={(d) => {
+                  setCursor(startOfDay(d));
+                  setView("day");
+                  setPanelOpen(false);
+                }}
+                onSelectEvent={setSelectedEventId}
+                onEdit={() => {
+                  if (selectedEvent?.readOnly || selectedEvent?.linkedPurchaseOrder) return;
+                  setEditOpen(true);
+                  setPanelOpen(false);
+                }}
+                onDuplicate={() => {
+                  handleDuplicate();
+                  setPanelOpen(false);
+                }}
+                onDelete={async () => {
+                  await handleDelete();
+                  setPanelOpen(false);
+                }}
+                onRsvp={handleRsvp}
+                onStatusChange={handleStatusChange}
+              />
+            </div>
           </div>
         </div>
       ) : null}
@@ -593,6 +713,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
         open={createOpen}
         mode="create"
         draft={draft}
+        defaultType={quickType}
         event={
           duplicateFrom
             ? {
@@ -604,17 +725,19 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
         }
         projects={projects}
         teamUsers={teamUsers}
-        existingEvents={events}
+        existingEvents={visibleEvents}
         onClose={() => {
           setCreateOpen(false);
           setDraft(null);
           setDuplicateFrom(null);
+          setQuickType(null);
         }}
         onSaved={(ev) => {
           upsertEvent(ev);
           setCreateOpen(false);
           setDraft(null);
           setDuplicateFrom(null);
+          setQuickType(null);
         }}
       />
 

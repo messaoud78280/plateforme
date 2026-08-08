@@ -522,6 +522,52 @@ export async function ensureVictorHugoCoherence(opts: {
     });
   }
 
+  // —— 4b. AGENDA-V2A — journée métier cohérente (livraison + réunion + échéance) ——
+  const REUNION_AT = new Date(2026, 7, 11, 10, 30, 0, 0);
+  const REUNION_END = new Date(2026, 7, 11, 11, 30, 0, 0);
+  const ECHEANCE_AT = new Date(2026, 7, 11, 17, 0, 0, 0);
+  const ECHEANCE_END = new Date(2026, 7, 11, 17, 30, 0, 0);
+
+  let reunion = await prisma.agendaEvent.findFirst({
+    where: {
+      projectId: project.id,
+      type: "REUNION_CHANTIER",
+      status: { not: "ANNULE" },
+      title: { contains: "Réunion chantier" },
+    },
+    select: { id: true },
+  });
+  if (!reunion) {
+    reunion = await prisma.agendaEvent.create({
+      data: {
+        title: "Réunion chantier — Victor Hugo",
+        type: "REUNION_CHANTIER",
+        status: "CONFIRME",
+        startAt: REUNION_AT,
+        endAt: REUNION_END,
+        location: "Résidence Victor Hugo — baraque de chantier",
+        ownerUserId: opts.rootUserId,
+        createdById: opts.rootUserId,
+        organizationId: opts.organizationId,
+        projectId: project.id,
+        followUpSheetId: sheet.id,
+        responsibleId: assigneeId,
+        description: "Point livraison EPDM + préparation intervention.",
+      },
+      select: { id: true },
+    });
+  } else {
+    await prisma.agendaEvent.update({
+      where: { id: reunion.id },
+      data: {
+        startAt: REUNION_AT,
+        endAt: REUNION_END,
+        followUpSheetId: sheet.id,
+        responsibleId: assigneeId,
+      },
+    });
+  }
+
   // —— 5. Avenant n°02 sur le MÊME chantier (pas République) ——
   let avenant = await prisma.followUpSheet.findFirst({
     where: {
@@ -574,6 +620,42 @@ export async function ensureVictorHugoCoherence(opts: {
       await prisma.followUpSheet.update({
         where: { id: avenant.id },
         data: { sourceMessageKind: "PROJECT", sourceMessageId: msg.id },
+      });
+    }
+  }
+
+  // Échéance avenant le jour de la livraison (17:00)
+  if (avenant) {
+    const echeance = await prisma.agendaEvent.findFirst({
+      where: {
+        projectId: project.id,
+        type: "ECHEANCE",
+        followUpSheetId: avenant.id,
+        status: { not: "ANNULE" },
+      },
+      select: { id: true },
+    });
+    if (!echeance) {
+      await prisma.agendaEvent.create({
+        data: {
+          title: "Échéance avenant n°02",
+          type: "ECHEANCE",
+          status: "PLANIFIE",
+          startAt: ECHEANCE_AT,
+          endAt: ECHEANCE_END,
+          ownerUserId: opts.rootUserId,
+          createdById: opts.rootUserId,
+          organizationId: opts.organizationId,
+          projectId: project.id,
+          followUpSheetId: avenant.id,
+          responsibleId: opts.rootUserId,
+          description: "Chiffrer l’avenant — 20 m² terrasse côté cour.",
+        },
+      });
+    } else {
+      await prisma.agendaEvent.update({
+        where: { id: echeance.id },
+        data: { startAt: ECHEANCE_AT, endAt: ECHEANCE_END },
       });
     }
   }

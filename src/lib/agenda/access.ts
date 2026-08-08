@@ -20,16 +20,33 @@ export async function resolveAgendaOwnerUserId(userId: string): Promise<string> 
   return user.id;
 }
 
+function mineClause(userId: string): Prisma.AgendaEventWhereInput {
+  return {
+    OR: [
+      { responsibleId: userId },
+      { attendees: { some: { userId } } },
+      { createdById: userId },
+      { ownerUserId: userId },
+    ],
+  };
+}
+
 export async function agendaEventAccessWhere(
   sessionUser: SessionUser,
   opts?: { scope?: "mine" | "team" | "all"; projectId?: string | null },
 ): Promise<Prisma.AgendaEventWhereInput> {
   const staff = isBeworkStaff(sessionUser);
   if (staff) {
-    return {
+    const base: Prisma.AgendaEventWhereInput = {
       status: { not: "ANNULE" },
       ...(opts?.projectId ? { projectId: opts.projectId } : {}),
     };
+    // Moi = responsable / participant / créateur (pas seulement createdBy)
+    if (opts?.scope === "mine") {
+      return { AND: [base, mineClause(sessionUser.id)] };
+    }
+    // team ≈ all pour le staff BeWork (pas de second tenant)
+    return base;
   }
 
   const ownerUserId = await resolveAgendaOwnerUserId(sessionUser.id);
@@ -57,16 +74,7 @@ export async function agendaEventAccessWhere(
 
   if (opts?.scope === "mine") {
     return {
-      AND: [
-        base,
-        {
-          OR: [
-            { createdById: sessionUser.id },
-            { responsibleId: sessionUser.id },
-            { attendees: { some: { userId: sessionUser.id } } },
-          ],
-        },
-      ],
+      AND: [base, mineClause(sessionUser.id)],
     };
   }
 
@@ -85,6 +93,25 @@ export const agendaEventInclude = {
       nextActionDone: true,
       urgencyOverride: true,
       status: true,
+    },
+  },
+  purchaseOrder: {
+    select: {
+      id: true,
+      number: true,
+      subject: true,
+      status: true,
+      requestedDeliveryAt: true,
+      confirmedDeliveryAt: true,
+      proposedDeliveryAt: true,
+      proposedDeliveryStatus: true,
+      legacyTaskId: true,
+      externalOrganization: { select: { name: true, tradeName: true } },
+      lines: {
+        orderBy: { sortOrder: "asc" as const },
+        take: 4,
+        select: { designation: true, quantity: true, unit: true },
+      },
     },
   },
   attendees: {

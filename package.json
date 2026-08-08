@@ -34,6 +34,7 @@
     "test:attention-scheduler": "npx tsx scripts/test-attention-scheduler.ts",
     "test:purchase-orders": "npx tsx scripts/test-purchase-orders.ts",
     "test:purchase-order-attention": "npx tsx scripts/test-purchase-order-attention.ts",
+    "test:agenda-v2a": "npx tsx scripts/test-agenda-v2a.ts",
     "process:attention-escalations": "npx tsx scripts/process-attention-escalations.ts",
     "notifications:run-attention-escalations": "npx tsx scripts/run-attention-escalations.ts",
     "db:cleanup-chantier-resources": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/run-chantier-resource-cleanup.ts",

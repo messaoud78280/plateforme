@@ -7,14 +7,22 @@ import {
   AGENDA_REMINDER_OPTIONS,
 } from "@/lib/agenda/types";
 import { parseFrenchAgendaQuick } from "@/lib/agenda/quick-parse";
-import { findAgendaConflicts } from "@/lib/agenda/conflicts";
+import {
+  findAgendaConflicts,
+  formatAgendaConflictWarning,
+} from "@/lib/agenda/conflicts";
+import { formatTime } from "@/lib/agenda/dates";
 import type { AgendaEventDTO, AgendaProjectOption, AgendaQuickCreateDraft, AgendaUserOption } from "./agenda-types";
+
+const CREATABLE_TYPES = AGENDA_EVENT_TYPES.filter((t) => t.id !== "LIVRAISON");
 
 type Props = {
   open: boolean;
   mode: "create" | "edit";
   event?: AgendaEventDTO | null;
   draft?: AgendaQuickCreateDraft | null;
+  /** Type prérempli (raccourcis + Réunion / Intervention…). */
+  defaultType?: string | null;
   projects: AgendaProjectOption[];
   teamUsers: AgendaUserOption[];
   existingEvents?: AgendaEventDTO[];
@@ -46,6 +54,7 @@ export function AgendaEventModal({
   mode,
   event,
   draft,
+  defaultType = null,
   projects,
   teamUsers,
   existingEvents = [],
@@ -105,7 +114,11 @@ export function AgendaEventModal({
     setAllDay(isAllDay);
     setStart(toLocalInput(startIso, isAllDay));
     setEnd(toLocalInput(endIso, isAllDay));
-    setType("REUNION_CHANTIER");
+    setType(
+      defaultType && CREATABLE_TYPES.some((t) => t.id === defaultType)
+        ? defaultType
+        : "REUNION_CHANTIER",
+    );
     setProjectId("");
     setResponsibleId("");
     setAttendeeIds([]);
@@ -114,7 +127,7 @@ export function AgendaEventModal({
     setReminderMinutes(15);
     setRecurrence("NONE");
     setFollowUpSheetId("");
-  }, [open, mode, event, draft]);
+  }, [open, mode, event, draft, defaultType]);
 
   if (!open) return null;
 
@@ -261,7 +274,7 @@ export function AgendaEventModal({
                 onChange={(e) => setType(e.target.value)}
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#1d4ed8]"
               >
-                {AGENDA_EVENT_TYPES.map((t) => (
+                {(mode === "create" ? CREATABLE_TYPES : AGENDA_EVENT_TYPES).map((t) => (
                   <option key={t.id} value={t.id}>
                     {t.label}
                   </option>
@@ -349,14 +362,23 @@ export function AgendaEventModal({
 
           {conflictPreview.length > 0 ? (
             <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
-              <p className="font-bold">Chevauchement détecté (avertissement)</p>
+              <p className="font-bold">
+                {formatAgendaConflictWarning(
+                  conflictPreview,
+                  teamUsers.find((u) => u.id === responsibleId)?.name,
+                )}
+              </p>
               <ul className="mt-1 list-disc pl-4">
                 {conflictPreview.slice(0, 3).map((c) => (
                   <li key={c.otherId}>
-                    « {c.otherTitle} » — même {c.reason === "responsable" ? "responsable" : "chantier"}
+                    {c.otherStartAt ? `${formatTime(new Date(c.otherStartAt))} — ` : ""}
+                    {c.otherTitle}
                   </li>
                 ))}
               </ul>
+              <p className="mt-1.5 text-[11px] text-amber-800">
+                Vous pouvez enregistrer quand même ou modifier l’horaire.
+              </p>
             </div>
           ) : null}
 

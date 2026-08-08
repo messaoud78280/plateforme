@@ -63,6 +63,11 @@ model User {
   invitedBy           User?     @relation("TeamMembers", fields: [invitedById], references: [id], onDelete: SetNull)
   invitedUsers        User[]    @relation("TeamMembers")
   externalOrganization ExternalOrganization? @relation("ExternalOrgPeople", fields: [externalOrganizationId], references: [id], onDelete: SetNull)
+  externalOrgContacts ExternalOrgContact[] @relation("ExternalOrgContactUser")
+  purchaseOrdersRequested  PurchaseOrder[] @relation("PurchaseOrderRequestedBy")
+  purchaseOrdersResponsible PurchaseOrder[] @relation("PurchaseOrderResponsible")
+  purchaseOrdersValidator   PurchaseOrder[] @relation("PurchaseOrderValidator")
+  purchaseOrderEvents       PurchaseOrderEvent[] @relation("PurchaseOrderEventActor")
   projectAccesses     ProjectAccess[] @relation("ProjectAccessUser")
   projectAccessesGranted ProjectAccess[] @relation("ProjectAccessGrantedBy")
   accessAuditsAsActor AccessAuditLog[] @relation("AccessAuditActor")
@@ -205,14 +210,192 @@ model ExternalOrganization {
   hostOrganizationId String
   name               String
   type               String   // CLIENT_EXT | SUPPLIER | SUBCONTRACTOR | MOE | CONTROL_OFFICE | PARTNER
+  /// Nom commercial (ex. Point.P)
+  tradeName          String?
+  siret              String?
+  address            String?
+  city               String?
+  zipCode            String?
+  phone              String?
+  email              String?
+  website            String?
+  /// Familles de produits / activité
+  activity           String?
+  paymentTerms       String?
+  deliveryTerms      String?
+  notes              String?  @db.Text
+  /// ACTIVE | INACTIVE
+  status             String   @default("ACTIVE")
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
   hostOrganization Organization @relation(fields: [hostOrganizationId], references: [id], onDelete: Cascade)
   people           User[]       @relation("ExternalOrgPeople")
+  contacts         ExternalOrgContact[]
+  purchaseOrders   PurchaseOrder[]
 
   @@index([hostOrganizationId])
   @@index([hostOrganizationId, type])
+  @@index([hostOrganizationId, name])
+}
+
+/// Contact rattaché à une organisation externe (plusieurs contacts ≠ plusieurs fournisseurs).
+model ExternalOrgContact {
+  id                     String   @id @default(cuid())
+  externalOrganizationId String
+  firstName              String
+  lastName               String
+  jobTitle               String?
+  email                  String?
+  phone                  String?
+  /// Compte BeWork éventuel (accès collaboratif)
+  userId                 String?
+  isPrimary              Boolean  @default(false)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  externalOrganization ExternalOrganization @relation(fields: [externalOrganizationId], references: [id], onDelete: Cascade)
+  user                 User?                @relation("ExternalOrgContactUser", fields: [userId], references: [id], onDelete: SetNull)
+  purchaseOrders       PurchaseOrder[]      @relation("PurchaseOrderContact")
+
+  @@index([externalOrganizationId])
+  @@index([userId])
+  @@index([email])
+}
+
+/// Statuts métier commande chantier (CDE-1).
+enum PurchaseOrderStatus {
+  BROUILLON
+  A_VALIDER
+  VALIDEE
+  ENVOYEE_FOURNISSEUR
+  A_CONFIRMER
+  CONFIRMEE
+  LIVRAISON_PROGRAMMEE
+  PARTIELLEMENT_RECUE
+  RECUE
+  CLOTUREE
+  ANNULEE
+  REFUSEE
+}
+
+/// Commande chantier — objet métier (pas un PDF, pas une Task).
+model PurchaseOrder {
+  id                       String              @id @default(cuid())
+  organizationId           String
+  /// Référence unique dans le tenant — ex. BC-2026-0043
+  number                   String
+  status                   PurchaseOrderStatus @default(BROUILLON)
+  subject                  String
+  projectId                String?
+  followUpSheetId          String?
+  externalOrganizationId   String
+  contactId                String?
+  requestedById            String
+  /// Qui réceptionne la livraison
+  responsibleId            String?
+  validatorId              String?
+  /// Pont démo / legacy vers Task « Bon de commande »
+  legacyTaskId             String?             @unique
+
+  requestedDeliveryAt      DateTime?
+  confirmedDeliveryAt      DateTime?
+  /// CHANTIER | AGENCE | AUTRE
+  deliveryPlaceType        String              @default("CHANTIER")
+  deliveryAddress          String?
+
+  supplierRef              String?
+  quoteRef                 String?
+  quoteDate                DateTime?
+  amountHt                 Decimal?            @db.Decimal(14, 2)
+  tvaRate                  Decimal?            @db.Decimal(5, 2)
+  discountHt               Decimal?            @db.Decimal(14, 2)
+  deliveryFeesHt           Decimal?            @db.Decimal(14, 2)
+  paymentTerms             String?
+  deliveryInstructions     String?             @db.Text
+  siteContactName          String?
+  siteContactPhone         String?
+  partialDeliveryAllowed   Boolean             @default(true)
+  internalNotes            String?             @db.Text
+  supplierNotes            String?             @db.Text
+  /// NORMAL | IMPORTANT | URGENT
+  urgency                  String?
+  /// Visible par le compte fournisseur uniquement si true
+  sharedWithSupplier       Boolean             @default(false)
+
+  createdAt                DateTime            @default(now())
+  updatedAt                DateTime            @updatedAt
+
+  organization         Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project              Project?             @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  followUpSheet        FollowUpSheet?       @relation(fields: [followUpSheetId], references: [id], onDelete: SetNull)
+  externalOrganization ExternalOrganization @relation(fields: [externalOrganizationId], references: [id], onDelete: Restrict)
+  contact              ExternalOrgContact?  @relation("PurchaseOrderContact", fields: [contactId], references: [id], onDelete: SetNull)
+  requestedBy          User                 @relation("PurchaseOrderRequestedBy", fields: [requestedById], references: [id], onDelete: Cascade)
+  responsible          User?                @relation("PurchaseOrderResponsible", fields: [responsibleId], references: [id], onDelete: SetNull)
+  validator            User?                @relation("PurchaseOrderValidator", fields: [validatorId], references: [id], onDelete: SetNull)
+  legacyTask           Task?                @relation("PurchaseOrderLegacyTask", fields: [legacyTaskId], references: [id], onDelete: SetNull)
+
+  lines     PurchaseOrderLine[]
+  events    PurchaseOrderEvent[]
+  documents PurchaseOrderDocument[]
+  agendaEvents AgendaEvent[]
+
+  @@unique([organizationId, number])
+  @@index([organizationId, status])
+  @@index([projectId])
+  @@index([followUpSheetId])
+  @@index([externalOrganizationId])
+  @@index([requestedById])
+  @@index([responsibleId])
+}
+
+model PurchaseOrderLine {
+  id             String   @id @default(cuid())
+  orderId        String
+  designation    String
+  quantity       Decimal  @db.Decimal(14, 3)
+  unit           String   @default("U")
+  unitPriceHt    Decimal? @db.Decimal(14, 2)
+  tvaRate        Decimal? @db.Decimal(5, 2)
+  /// Quantité reçue (livraison partielle)
+  receivedQty    Decimal  @default(0) @db.Decimal(14, 3)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  order PurchaseOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+model PurchaseOrderEvent {
+  id          String   @id @default(cuid())
+  orderId     String
+  kind        String
+  label       String
+  detail      String?  @db.Text
+  actorUserId String?
+  createdAt   DateTime @default(now())
+
+  order PurchaseOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  actor User?         @relation("PurchaseOrderEventActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([orderId, createdAt])
+}
+
+model PurchaseOrderDocument {
+  id        String   @id @default(cuid())
+  orderId   String
+  /// DEVIS | BC | CONFIRMATION | BL | FICHE_TECHNIQUE | FACTURE | AUTRE
+  kind      String
+  name      String
+  fileUrl   String?
+  createdAt DateTime @default(now())
+
+  order PurchaseOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
 }
 
 /// Accès explicite d’un utilisateur à un chantier (périmètre).
@@ -273,6 +456,7 @@ model Organization {
   demoEnvironment  DemoEnvironment?
   externalOrganizations ExternalOrganization[]
   workflows             WorkflowDefinition[]
+  purchaseOrders        PurchaseOrder[]
 
   @@index([ownerUserId])
   @@unique([ownerUserId])
@@ -440,6 +624,7 @@ model Project {
   appointments Appointment[]
   agendaEvents AgendaEvent[]
   followUpSheets FollowUpSheet[]
+  purchaseOrders PurchaseOrder[]
   reports Report[]
   skillPpspsSessions SkillPpspsSession[]
   chantierFolders ChantierFolder[]
@@ -720,6 +905,7 @@ model Task {
   taskMessages TaskMessage[]
   chantierFiles ChantierFile[]
   agendaEvents AgendaEvent[]
+  purchaseOrderAsLegacy PurchaseOrder? @relation("PurchaseOrderLegacyTask")
 
   @@index([organizationId])
   @@index([sourceMessageKind, sourceMessageId])
@@ -998,6 +1184,8 @@ model AgendaEvent {
   followUpSheetId String?
   /// Commande / mission liée (ex. BC → livraison unique)
   taskId          String?
+  /// Commande chantier CDE-1
+  purchaseOrderId String?
   responsibleId   String?
   reminderMinutes Int?
   recurrence      String?           // NONE | DAILY | WEEKLY | MONTHLY | YEARLY | CUSTOM
@@ -1016,6 +1204,7 @@ model AgendaEvent {
   project     Project?             @relation(fields: [projectId], references: [id], onDelete: SetNull)
   followUpSheet FollowUpSheet?     @relation(fields: [followUpSheetId], references: [id], onDelete: SetNull)
   task        Task?                @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  purchaseOrder PurchaseOrder?     @relation(fields: [purchaseOrderId], references: [id], onDelete: SetNull)
   attendees   AgendaEventAttendee[]
 
   @@index([ownerUserId, startAt])
@@ -1023,6 +1212,7 @@ model AgendaEvent {
   @@index([projectId, startAt])
   @@index([followUpSheetId, startAt])
   @@index([taskId, startAt])
+  @@index([purchaseOrderId, startAt])
   @@index([type, startAt])
   @@index([sourceMessageKind, sourceMessageId])
 }
@@ -1113,6 +1303,7 @@ model FollowUpSheet {
   timeline  FollowUpTimelineEvent[]
   agendaEvents AgendaEvent[]
   tasks     Task[]
+  purchaseOrders PurchaseOrder[]
 
   @@index([ownerUserId, status])
   @@index([assigneeId, nextActionAt])

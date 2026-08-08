@@ -5,7 +5,6 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { BackLink } from "@/components/ui/BackLink";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import {
   DataTable,
@@ -15,161 +14,146 @@ import {
   DataTableTd,
   DataTableTh,
 } from "@/components/ui/DataTable";
-import { mapTaskStatusToBcStep, BC_STEPS } from "@/lib/demo-environment/bon-commande";
-import type { TaskStatus } from "@/types";
-import { taskWhereForClientUser } from "@/lib/organization/access";
-import { SupplierOrderActions } from "@/components/demo-environment/SupplierOrderActions";
-import { Suspense } from "react";
+import {
+  canListPurchaseOrders,
+  isInternalPurchaseOrderActor,
+  resolvePurchaseOrderOrgId,
+} from "@/lib/purchase-orders/access";
+import { PURCHASE_ORDER_STATUS_LABELS } from "@/lib/purchase-orders/status";
 
 export const dynamic = "force-dynamic";
-
-function stepLabel(status: string) {
-  const key = mapTaskStatusToBcStep(status as TaskStatus);
-  return BC_STEPS.find((s) => s.key === key)?.label ?? status;
-}
 
 export default async function CommandesPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect("/connexion?callbackUrl=/dashboard/commandes");
+  if (!canListPurchaseOrders(session.user)) redirect("/dashboard");
 
-  const isStaff =
-    session.user.role === "MANAGER" ||
-    session.user.role === "AGENCE" ||
-    session.user.role === "AGENT";
+  const orgId = await resolvePurchaseOrderOrgId(session.user);
+  const canCreate = isInternalPurchaseOrderActor(session.user);
 
-  const isSupplierDemo =
-    Boolean(session.user.isDemo) &&
-    (session.user.personType === "SUPPLIER" || session.user.permissionProfile === "FOURNISSEUR");
-  const demoRootId = session.user.demoRootUserId ?? session.user.id;
+  const isSupplier =
+    session.user.personType === "SUPPLIER" ||
+    session.user.permissionProfile === "FOURNISSEUR";
 
-  const where = isStaff
-    ? {
-        category: { contains: "Bon de commande", mode: "insensitive" as const },
-      }
-    : isSupplierDemo
-      ? {
-          clientId: demoRootId,
-          OR: [
-            { category: { contains: "Bon de commande", mode: "insensitive" as const } },
-            { title: { contains: "POINT.P" } },
-            { title: { contains: "BC-2026" } },
-          ],
-        }
-      : {
-          AND: [
-            await taskWhereForClientUser(session.user.id),
-            { category: { contains: "Bon de commande", mode: "insensitive" as const } },
-          ],
-        };
+  let supplierOrgId: string | null = null;
+  if (isSupplier) {
+    const u = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { externalOrganizationId: true },
+    });
+    supplierOrgId = u?.externalOrganizationId ?? null;
+  }
 
-  const orders = await prisma.task.findMany({
-    where,
-    select: {
-      id: true,
-      title: true,
-      status: true,
-      desiredDate: true,
-      description: true,
-      project: { select: { id: true, title: true } },
-      suppliersJson: true,
-      updatedAt: true,
-    },
-    orderBy: { updatedAt: "desc" },
-    take: 50,
-  });
+  const orders =
+    orgId == null
+      ? []
+      : await prisma.purchaseOrder.findMany({
+          where: {
+            organizationId: orgId,
+            ...(isSupplier && supplierOrgId
+              ? { sharedWithSupplier: true, externalOrganizationId: supplierOrgId }
+              : isSupplier
+                ? { id: "__none__" }
+                : {}),
+          },
+          select: {
+            id: true,
+            number: true,
+            subject: true,
+            status: true,
+            amountHt: true,
+            requestedDeliveryAt: true,
+            project: { select: { title: true } },
+            externalOrganization: { select: { name: true, tradeName: true } },
+            responsible: { select: { name: true } },
+          },
+          orderBy: { updatedAt: "desc" },
+          take: 80,
+        });
 
   return (
     <div className="space-y-6">
       <BackLink href="/dashboard">Tableau de bord</BackLink>
-      <PageHeader
-        eyebrow="Gestion"
-        title="Bons de commande"
-        description="Suivi Demande → Validation → Commande → Livraison. Données fictives en démonstration."
-      />
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <PageHeader
+          eyebrow="Chantier"
+          title="Commandes"
+          description="Demandes fournisseur liées à vos chantiers — simples à créer, suivies jusqu’à la réception."
+        />
+        <div className="flex flex-wrap gap-2">
+          {canCreate ? (
+            <Link
+              href="/dashboard/fournisseurs"
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700"
+            >
+              Fournisseurs
+            </Link>
+          ) : null}
+          {canCreate ? (
+            <Link
+              href="/dashboard/commandes/nouvelle"
+              className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white"
+            >
+              + Nouvelle commande
+            </Link>
+          ) : null}
+        </div>
+      </div>
 
       {orders.length === 0 ? (
         <EmptyState
           title="Aucune commande"
-          description="Les bons de commande du chantier apparaîtront ici."
+          description={
+            canCreate
+              ? "Créez une commande pour un chantier en quelques champs."
+              : "Les commandes partagées avec vous apparaîtront ici."
+          }
         />
       ) : (
-        <Suspense fallback={<p className="text-sm text-slate-500">Chargement…</p>}>
-          <DataTable minWidth="880px">
-            <DataTableHead>
-              <DataTableTh>Commande</DataTableTh>
-              <DataTableTh>Chantier</DataTableTh>
-              <DataTableTh>Fournisseur</DataTableTh>
-              <DataTableTh>Livraison</DataTableTh>
-              <DataTableTh>Statut</DataTableTh>
-              <DataTableTh>Action</DataTableTh>
-            </DataTableHead>
-            <DataTableBody>
-              {orders.map((o) => {
-                const supplier =
-                  Array.isArray(o.suppliersJson) &&
-                  o.suppliersJson[0] &&
-                  typeof o.suppliersJson[0] === "object"
-                    ? String((o.suppliersJson[0] as { name?: string }).name ?? "—")
-                    : "—";
-                const late =
-                  o.desiredDate &&
-                  o.desiredDate < new Date(new Date().setHours(0, 0, 0, 0)) &&
-                  o.status !== "COMPLETE";
-                return (
-                  <DataTableRow key={o.id}>
-                    <DataTableTd>
-                      <p className="font-semibold text-bework-ink">{o.title}</p>
-                    </DataTableTd>
-                    <DataTableTd>
-                      {o.project ? (
-                        <Link
-                          href={`/dashboard/projets/${o.project.id}`}
-                          className="text-sm font-medium text-[#1d4ed8] hover:underline"
-                        >
-                          {o.project.title}
-                        </Link>
-                      ) : (
-                        "—"
-                      )}
-                    </DataTableTd>
-                    <DataTableTd>
-                      <span className="text-sm">{supplier}</span>
-                    </DataTableTd>
-                    <DataTableTd>
-                      <span className={late ? "text-sm font-semibold text-red-700" : "text-sm"}>
-                        {o.desiredDate
-                          ? o.desiredDate.toLocaleDateString("fr-FR", {
-                              day: "numeric",
-                              month: "short",
-                            })
-                          : "—"}
-                      </span>
-                    </DataTableTd>
-                    <DataTableTd>
-                      <Badge
-                        tone={late ? "critical" : o.status === "A_VALIDER" ? "watch" : "neutral"}
-                      >
-                        {stepLabel(o.status)}
-                      </Badge>
-                    </DataTableTd>
-                    <DataTableTd>
-                      {isSupplierDemo ? (
-                        <SupplierOrderActions orderId={o.id} />
-                      ) : (
-                        <Link
-                          href={`/dashboard/taches/${o.id}`}
-                          className="text-sm font-semibold text-[#1d4ed8] hover:underline"
-                        >
-                          Ouvrir
-                        </Link>
-                      )}
-                    </DataTableTd>
-                  </DataTableRow>
-                );
-              })}
-            </DataTableBody>
-          </DataTable>
-        </Suspense>
+        <DataTable minWidth="880px">
+          <DataTableHead>
+            <DataTableTh>Référence</DataTableTh>
+            <DataTableTh>Objet</DataTableTh>
+            <DataTableTh>Chantier</DataTableTh>
+            <DataTableTh>Fournisseur</DataTableTh>
+            <DataTableTh>Statut</DataTableTh>
+            <DataTableTh>Livraison</DataTableTh>
+          </DataTableHead>
+          <DataTableBody>
+            {orders.map((o) => (
+              <DataTableRow key={o.id}>
+                <DataTableTd>
+                  <Link
+                    href={`/dashboard/commandes/${o.id}`}
+                    className="font-semibold text-[#1e3a5f] hover:underline"
+                  >
+                    {o.number}
+                  </Link>
+                </DataTableTd>
+                <DataTableTd>{o.subject}</DataTableTd>
+                <DataTableTd>{o.project?.title ?? "—"}</DataTableTd>
+                <DataTableTd>
+                  {o.externalOrganization.tradeName || o.externalOrganization.name}
+                </DataTableTd>
+                <DataTableTd>
+                  <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold">
+                    {PURCHASE_ORDER_STATUS_LABELS[o.status]}
+                  </span>
+                </DataTableTd>
+                <DataTableTd>
+                  {o.requestedDeliveryAt
+                    ? new Date(o.requestedDeliveryAt).toLocaleString("fr-FR", {
+                        day: "numeric",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : "—"}
+                </DataTableTd>
+              </DataTableRow>
+            ))}
+          </DataTableBody>
+        </DataTable>
       )}
     </div>
   );

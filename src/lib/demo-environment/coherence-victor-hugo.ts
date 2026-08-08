@@ -16,6 +16,7 @@ export type CoherenceResult = {
   projectId: string;
   sheetId: string;
   bcTaskId: string;
+  purchaseOrderId: string | null;
   deliveryEventId: string;
   interventionEventId: string;
   avenantSheetId: string | null;
@@ -35,15 +36,20 @@ export async function ensureVictorHugoCoherence(opts: {
       organizationId: opts.organizationId,
       title: { contains: "Victor Hugo" },
     },
-    select: { id: true, title: true },
+    select: { id: true, title: true, siteAddress: true, siteCity: true },
   });
   if (!project) return null;
 
   const karimEmail = demoPersonaEmail(opts.loginIdentifier, "karim");
   const sophieEmail = demoPersonaEmail(opts.loginIdentifier, "sophie");
-  const [karim, sophie] = await Promise.all([
+  const thomasEmail = demoPersonaEmail(opts.loginIdentifier, "thomas");
+  const [karim, sophie, thomas] = await Promise.all([
     prisma.user.findUnique({ where: { email: karimEmail }, select: { id: true, name: true } }),
     prisma.user.findUnique({ where: { email: sophieEmail }, select: { id: true, name: true } }),
+    prisma.user.findUnique({
+      where: { email: thomasEmail },
+      select: { id: true, name: true, externalOrganizationId: true },
+    }),
   ]);
   const assigneeId = karim?.id ?? opts.rootUserId;
 
@@ -226,6 +232,160 @@ export async function ensureVictorHugoCoherence(opts: {
     });
   }
 
+  // —— 2b. PurchaseOrder métier BC-2026-043 (CDE-1) — même vérité que la Task legacy ——
+  let purchaseOrderId: string | null = null;
+  let pointPId = thomas?.externalOrganizationId ?? null;
+  if (!pointPId) {
+    const found = await prisma.externalOrganization.findFirst({
+      where: {
+        hostOrganizationId: opts.organizationId,
+        type: "SUPPLIER",
+        OR: [
+          { name: { contains: "Point.P", mode: "insensitive" } },
+          { tradeName: { contains: "Point.P", mode: "insensitive" } },
+        ],
+      },
+      select: { id: true },
+    });
+    pointPId = found?.id ?? null;
+  }
+  if (!pointPId) {
+    const created = await prisma.externalOrganization.create({
+      data: {
+        hostOrganizationId: opts.organizationId,
+        name: "POINT.P",
+        tradeName: "POINT.P",
+        type: "SUPPLIER",
+        activity: "Fournitures bâtiment",
+        status: "ACTIVE",
+      },
+      select: { id: true },
+    });
+    pointPId = created.id;
+  } else {
+    await prisma.externalOrganization.update({
+      where: { id: pointPId },
+      data: {
+        tradeName: "POINT.P",
+        activity: "Fournitures bâtiment",
+        status: "ACTIVE",
+      },
+    });
+  }
+
+  let thomasContact = await prisma.externalOrgContact.findFirst({
+    where: {
+      externalOrganizationId: pointPId,
+      OR: [
+        { lastName: { contains: "Bernard", mode: "insensitive" } },
+        ...(thomas?.id ? [{ userId: thomas.id }] : []),
+      ],
+    },
+    select: { id: true },
+  });
+  if (!thomasContact) {
+    thomasContact = await prisma.externalOrgContact.create({
+      data: {
+        externalOrganizationId: pointPId,
+        firstName: "Thomas",
+        lastName: "Bernard",
+        jobTitle: "Commercial",
+        userId: thomas?.id ?? undefined,
+        isPrimary: true,
+      },
+      select: { id: true },
+    });
+  }
+
+  const deliveryAddress =
+    [project.siteAddress, project.siteCity].filter(Boolean).join(", ") ||
+    "12 avenue Victor Hugo, Lyon";
+
+  let po = await prisma.purchaseOrder.findFirst({
+    where: {
+      organizationId: opts.organizationId,
+      OR: [{ number: "BC-2026-043" }, { legacyTaskId: bc.id }],
+    },
+    select: { id: true },
+  });
+
+  if (!po) {
+    po = await prisma.purchaseOrder.create({
+      data: {
+        organizationId: opts.organizationId,
+        number: "BC-2026-043",
+        status: "A_CONFIRMER",
+        subject: "40 rouleaux membrane EPDM — Résidence Victor Hugo",
+        projectId: project.id,
+        followUpSheetId: sheet.id,
+        externalOrganizationId: pointPId,
+        contactId: thomasContact.id,
+        requestedById: opts.rootUserId,
+        responsibleId: karim?.id ?? opts.rootUserId,
+        legacyTaskId: bc.id,
+        requestedDeliveryAt: DELIVERY_AT,
+        deliveryPlaceType: "CHANTIER",
+        deliveryAddress,
+        amountHt: 4260,
+        sharedWithSupplier: true,
+        urgency: "IMPORTANT",
+        lines: {
+          create: [
+            {
+              designation: "Membrane EPDM",
+              quantity: 40,
+              unit: "U",
+              unitPriceHt: 106.5,
+              sortOrder: 0,
+            },
+          ],
+        },
+        events: {
+          create: {
+            kind: "created",
+            label: "Commande créée",
+            detail: "BC-2026-043 — démo Victor Hugo",
+            actorUserId: opts.rootUserId,
+          },
+        },
+      },
+      select: { id: true },
+    });
+  } else {
+    await prisma.purchaseOrder.update({
+      where: { id: po.id },
+      data: {
+        number: "BC-2026-043",
+        status: "A_CONFIRMER",
+        subject: "40 rouleaux membrane EPDM — Résidence Victor Hugo",
+        projectId: project.id,
+        followUpSheetId: sheet.id,
+        externalOrganizationId: pointPId,
+        contactId: thomasContact.id,
+        responsibleId: karim?.id ?? opts.rootUserId,
+        legacyTaskId: bc.id,
+        requestedDeliveryAt: DELIVERY_AT,
+        deliveryAddress,
+        sharedWithSupplier: true,
+        amountHt: 4260,
+      },
+    });
+    const lineCount = await prisma.purchaseOrderLine.count({ where: { orderId: po.id } });
+    if (lineCount === 0) {
+      await prisma.purchaseOrderLine.create({
+        data: {
+          orderId: po.id,
+          designation: "Membrane EPDM",
+          quantity: 40,
+          unit: "U",
+          unitPriceHt: 106.5,
+          sortOrder: 0,
+        },
+      });
+    }
+  }
+  purchaseOrderId = po.id;
+
   // —— 3. UNE livraison agenda liée fiche + BC ——
   let delivery = await prisma.agendaEvent.findFirst({
     where: {
@@ -253,6 +413,7 @@ export async function ensureVictorHugoCoherence(opts: {
         projectId: project.id,
         followUpSheetId: sheet.id,
         taskId: bc.id,
+        purchaseOrderId: purchaseOrderId ?? undefined,
       },
     });
   } else {
@@ -266,6 +427,7 @@ export async function ensureVictorHugoCoherence(opts: {
         followUpSheetId: sheet.id,
         taskId: bc.id,
         projectId: project.id,
+        purchaseOrderId: purchaseOrderId ?? undefined,
         location: "Résidence Victor Hugo — aire livraison",
       },
     });
@@ -421,6 +583,7 @@ export async function ensureVictorHugoCoherence(opts: {
     projectId: project.id,
     sheetId: sheet.id,
     bcTaskId: bc.id,
+    purchaseOrderId,
     deliveryEventId: delivery.id,
     interventionEventId: intervention.id,
     avenantSheetId: avenant?.id ?? null,

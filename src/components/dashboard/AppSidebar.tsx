@@ -64,6 +64,7 @@ function buildSections(role: string | null | undefined): NavSection[] {
           { href: "/dashboard/agenda", label: "Agenda", icon: Calendar },
           { href: "/dashboard/taches", label: "Tâches", icon: ClipboardList },
           { href: "/dashboard/commandes", label: "Commandes", icon: Briefcase },
+          { href: "/dashboard/fournisseurs", label: "Fournisseurs", icon: Building2 },
         ],
       },
       {

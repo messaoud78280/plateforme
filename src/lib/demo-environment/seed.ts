@@ -762,6 +762,14 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
     console.error("[demo-seed] coherence Victor Hugo:", e);
   }
 
+  // —— Processus métier par défaut (Chantier standard) ——
+  try {
+    const { ensureDefaultWorkflow } = await import("@/lib/workflow/service");
+    await ensureDefaultWorkflow(organizationId);
+  } catch (e) {
+    console.error("[demo-seed] workflow:", e);
+  }
+
   return {
     projectIds: [projectVictor.id, projectRepublique.id, projectAlpha.id],
     companyLabel: companyName,

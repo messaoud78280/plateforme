@@ -8,6 +8,7 @@ const sections = [
   { label: "Informations personnelles", href: "/dashboard/parametres/informations" },
   { label: "Paramètres et préférences", href: "/dashboard/parametres/preferences" },
   { label: "Alertes et rappels", href: "/dashboard/parametres/alertes" },
+  { label: "Processus métier", href: "/dashboard/parametres/processus" },
   { label: "Transfert d'appels", href: "/dashboard/parametres/transfert-appels" },
   { label: "Préférences de sécurité", href: "/dashboard/parametres/securite" },
 ];

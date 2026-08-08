@@ -8,6 +8,11 @@ import { colorKeyForStatus } from "@/lib/follow-up/types";
 import { serializeFollowUpSheet } from "@/lib/follow-up/serialize";
 import { appendFollowUpTimeline } from "@/lib/follow-up/timeline";
 import { getFollowUpSettings } from "@/lib/follow-up/settings";
+import {
+  getWorkflowForSheet,
+  resolveStatusLabel,
+  transitionDefaultsFromWorkflow,
+} from "@/lib/workflow/service";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -99,9 +104,24 @@ export async function PATCH(request: Request, ctx: Ctx) {
     data.nextActionDone = Boolean(body.nextActionDone);
   }
   if (body.status && VALID_STATUS.has(String(body.status))) {
-    data.status = String(body.status) as FollowUpSheetStatus;
-    if (body.colorKey === undefined) {
-      data.colorKey = colorKeyForStatus(data.status as FollowUpSheetStatus);
+    const nextStatus = String(body.status) as FollowUpSheetStatus;
+    data.status = nextStatus;
+    if (String(body.status) !== existing.status) {
+      const workflow = await getWorkflowForSheet({
+        workflowId: existing.workflowId,
+        organizationId: existing.organizationId,
+        ownerUserId: existing.ownerUserId,
+      });
+      const defaults = transitionDefaultsFromWorkflow(nextStatus, workflow, {
+        keepNextAction: body.nextAction !== undefined,
+        keepColor: body.colorKey !== undefined,
+      });
+      if (defaults.colorKey !== undefined) data.colorKey = defaults.colorKey;
+      if (defaults.nextAction !== undefined) data.nextAction = defaults.nextAction;
+      if (defaults.nextActionAt !== undefined) data.nextActionAt = defaults.nextActionAt;
+      if (defaults.nextActionDone !== undefined) data.nextActionDone = defaults.nextActionDone;
+    } else if (body.colorKey === undefined) {
+      data.colorKey = colorKeyForStatus(nextStatus);
     }
   }
   if (body.urgencyOverride !== undefined) {
@@ -125,11 +145,18 @@ export async function PATCH(request: Request, ctx: Ctx) {
   });
 
   if (body.status && String(body.status) !== existing.status) {
+    const workflow = await getWorkflowForSheet({
+      workflowId: sheet.workflowId,
+      organizationId: sheet.organizationId,
+      ownerUserId: sheet.ownerUserId,
+    });
+    const label = resolveStatusLabel(String(body.status), workflow);
     await appendFollowUpTimeline({
       sheetId: id,
       authorId: session.user.id,
       kind: "statut",
-      label: `Statut → ${String(body.status)}`,
+      label: `Statut → ${label}`,
+      detail: String(body.status),
     });
   }
   if (body.nextAction && String(body.nextAction) !== (existing.nextAction ?? "")) {

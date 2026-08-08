@@ -230,6 +230,8 @@ export async function enrichDemoPersonas(demoId: string): Promise<{ ok: true } |
     organizationId: demo.organizationId,
     loginIdentifier: demo.loginIdentifier,
   });
+  const { ensureDefaultWorkflow } = await import("@/lib/workflow/service");
+  await ensureDefaultWorkflow(demo.organizationId);
   await prisma.demoEnvironment.update({
     where: { id: demoId },
     data: { seedVersion: "v3-coherence" },

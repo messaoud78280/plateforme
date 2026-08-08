@@ -272,6 +272,7 @@ model Organization {
   tasks            Task[]
   demoEnvironment  DemoEnvironment?
   externalOrganizations ExternalOrganization[]
+  workflows             WorkflowDefinition[]
 
   @@index([ownerUserId])
   @@unique([ownerUserId])
@@ -1094,6 +1095,8 @@ model FollowUpSheet {
   reminderOffsets   Json?
   postponedFromAt   DateTime?
   postponeCount     Int                @default(0)
+  /// Processus métier org (optionnel — sinon workflow par défaut)
+  workflowId        String?
   /// Provenance messagerie : TASK | DIRECT | PROJECT
   sourceMessageKind String?
   sourceMessageId   String?
@@ -1104,6 +1107,7 @@ model FollowUpSheet {
   createdBy User   @relation("FollowUpSheetCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
   assignee  User?  @relation("FollowUpSheetAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
   project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  workflow  WorkflowDefinition? @relation(fields: [workflowId], references: [id], onDelete: SetNull)
   timeline  FollowUpTimelineEvent[]
   agendaEvents AgendaEvent[]
   tasks     Task[]
@@ -1112,6 +1116,7 @@ model FollowUpSheet {
   @@index([assigneeId, nextActionAt])
   @@index([projectId])
   @@index([organizationId, status])
+  @@index([workflowId])
   @@index([nextActionAt])
   @@index([sourceMessageKind, sourceMessageId])
 }
@@ -1173,6 +1178,58 @@ model FollowUpAlertSettings {
   updatedAt       DateTime @updatedAt
 
   owner User @relation("FollowUpAlertSettingsOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+}
+
+
+/// Processus métier configurable — étapes = FollowUpSheetStatus (pas de 2e moteur).
+model WorkflowDefinition {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  description    String?  @db.Text
+  /// CHANTIER_STANDARD | MAINTENANCE | TRAVAUX_AVENANT | CUSTOM
+  templateKey    String?
+  isDefault      Boolean  @default(false)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  steps        WorkflowStep[]
+  sheets       FollowUpSheet[]
+
+  @@index([organizationId, isDefault])
+  @@index([organizationId, templateKey])
+}
+
+/// Étape d’un processus — statusKey = valeur FollowUpSheetStatus.
+model WorkflowStep {
+  id                   String   @id @default(cuid())
+  workflowId           String
+  statusKey            String
+  label                String
+  description          String?  @db.Text
+  colorKey             String   @default("jaune")
+  sortOrder            Int      @default(0)
+  visibleOnBoard       Boolean  @default(true)
+  /// DIRECTION | ADMINISTRATIF | CONDUCTEUR | ACHATS | COMPTABILITE
+  defaultRole          String?
+  defaultAssigneeId    String?
+  delayHours           Int?
+  reminderHours        Int?
+  alertOrangeHours     Int?
+  alertRedHours        Int?
+  escalateHours        Int?
+  nextActionLabel      String?
+  nextActionDelayHours Int?
+  initialUrgency       String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  workflow WorkflowDefinition @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@unique([workflowId, statusKey])
+  @@index([workflowId, sortOrder])
 }
 
 // Pièces jointes sur un rendez-vous

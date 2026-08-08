@@ -117,15 +117,15 @@ export function MessageBeworkActions({
         onClick={() => setOpen((v) => !v)}
         className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold ${
           isMe
-            ? "bg-white/20 text-white hover:bg-white/30"
-            : "bg-slate-200/80 text-slate-700 hover:bg-slate-300"
+            ? "bg-black/5 text-[#008069] hover:bg-black/10"
+            : "bg-white/70 text-[#54656f] hover:bg-white"
         }`}
         title="Action BeWork"
       >
-        ⚡ Action BeWork
+        ⚡
       </button>
       {msg ? (
-        <span className={`ml-1 text-[10px] font-semibold ${isMe ? "text-white/90" : "text-emerald-700"}`}>
+        <span className={`ml-1 text-[10px] font-semibold ${isMe ? "text-[#008069]" : "text-[#008069]"}`}>
           {msg}
         </span>
       ) : null}

@@ -5,7 +5,6 @@ import { prisma } from "@/lib/prisma";
 import { MessagerieMissionsView } from "@/components/messagerie/MessagerieMissionsView";
 import { BackLink } from "@/components/ui/BackLink";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Alert } from "@/components/ui/Alert";
 
 export default async function MessageriePage() {
   const session = await getServerSession(authOptions);
@@ -60,23 +59,8 @@ export default async function MessageriePage() {
       <PageHeader
         eyebrow="Échanges chantier"
         title="Messagerie"
-        description={
-          isClient
-            ? "Échangez avec votre assistant, suivez vos demandes et envoyez des documents."
-            : "Messagerie centrée sur les missions. Gérez les échanges et le suivi des missions."
-        }
+        description="Discutez comme dans WhatsApp — transformez un message en action BeWork quand c’est important."
       />
-
-      <Alert tone="info" title="Comment envoyer un message ?">
-        {(isManager || isAgent) && (
-          <>
-            Utilisez l&apos;onglet <strong>Envoyer un message</strong> pour écrire à n&apos;importe quel agent ou gérant.
-            Sinon,{" "}
-          </>
-        )}
-        sélectionnez une mission dans la liste du centre, puis utilisez le champ « Écrire un message » en bas à droite et
-        le bouton <strong>Envoyer</strong>. Pour joindre un document : icône trombone ou fiche mission.
-      </Alert>
 
       <MessagerieMissionsView
         sessionUserId={session.user.id}

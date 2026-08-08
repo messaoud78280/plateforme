@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { DeleteTaskButton } from "@/components/tasks/DeleteTaskButton";
@@ -76,6 +76,27 @@ const NAV_ITEMS: { id: FilterId; label: string }[] = [
   { id: "terminees", label: "Terminées" },
 ];
 
+function railIcon(id: FilterId) {
+  switch (id) {
+    case "inbox":
+      return "💬";
+    case "messages-directs":
+      return "👤";
+    case "envoyer":
+      return "✏️";
+    case "mes-missions":
+      return "📋";
+    case "en-attente-client":
+      return "⏳";
+    case "en-cours":
+      return "▶️";
+    case "terminees":
+      return "✅";
+    default:
+      return "•";
+  }
+}
+
 function formatRelativeTime(d: string) {
   const date = new Date(d);
   const now = new Date();
@@ -98,19 +119,30 @@ function formatMessageTime(d: string) {
   return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 }
 
-function Avatar({ name }: { name: string }) {
+function Avatar({ name, size = "md" }: { name: string; size?: "sm" | "md" }) {
   const initials = name
     .split(" ")
     .map((n) => n[0])
     .join("")
     .toUpperCase()
     .slice(0, 2);
+  const dim = size === "sm" ? "h-10 w-10 text-[11px]" : "h-11 w-11 text-xs";
+  const hues = ["bg-[#00a884]", "bg-[#027eb5]", "bg-[#7d4cdb]", "bg-[#e56717]", "bg-[#128c7e]"];
+  const hue = hues[(name.charCodeAt(0) + name.length) % hues.length];
   return (
-    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-500 text-xs font-semibold text-white">
+    <div
+      className={`flex ${dim} shrink-0 items-center justify-center rounded-full font-semibold text-white ${hue}`}
+    >
       {initials}
     </div>
   );
 }
+
+/** Fond type WhatsApp (motif discret, sans image externe). */
+const CHAT_BG_STYLE: CSSProperties = {
+  backgroundColor: "#efeae2",
+  backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23d4cfc7' fill-opacity='0.35'%3E%3Ccircle cx='8' cy='8' r='1.2'/%3E%3Ccircle cx='32' cy='22' r='1'/%3E%3Ccircle cx='48' cy='40' r='1.3'/%3E%3Ccircle cx='18' cy='48' r='1'/%3E%3C/g%3E%3C/svg%3E")`,
+};
 
 interface MessagerieMissionsViewProps {
   sessionUserId: string;
@@ -156,6 +188,7 @@ export function MessagerieMissionsView({
   const [directAttachments, setDirectAttachments] = useState<AttachmentItem[]>([]);
   const [replyAttachments, setReplyAttachments] = useState<AttachmentItem[]>([]);
   const [uploadingAttach, setUploadingAttach] = useState(false);
+  const [listSearch, setListSearch] = useState("");
   const directFileId = "direct-file-input";
   const replyFileId = "reply-file-input";
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -526,52 +559,56 @@ export function MessagerieMissionsView({
 
   const visibleMessages = messages.filter((m) => !m.isInternal || isAgence || isAgent);
 
+  const filteredMissions = listSearch.trim()
+    ? missions.filter(
+        (m) =>
+          m.title.toLowerCase().includes(listSearch.toLowerCase()) ||
+          m.client.name.toLowerCase().includes(listSearch.toLowerCase()),
+      )
+    : missions;
+
   if (loading) {
     return (
-      <div className="flex h-[calc(100vh-14rem)] items-center justify-center rounded-2xl surface-metallic-light">
-        <p className="text-slate-500">Chargement de la messagerie...</p>
+      <div className="flex h-[calc(100vh-12rem)] items-center justify-center rounded-xl border border-[#d1d7db] bg-[#f0f2f5]">
+        <p className="text-[#667781]">Chargement…</p>
       </div>
     );
   }
 
+  const railBtn = (id: FilterId, label: string, active: boolean) => (
+    <button
+      key={id}
+      type="button"
+      title={label}
+      onClick={() => setFilter(id)}
+      className={`flex w-full flex-col items-center gap-0.5 rounded-lg px-1 py-2 text-[9px] font-medium transition ${
+        active ? "bg-[#00a884]/15 text-[#008069]" : "text-[#54656f] hover:bg-black/5"
+      }`}
+    >
+      <span className="text-base leading-none">{railIcon(id)}</span>
+      <span className="max-w-[52px] truncate">{label.split(" ")[0]}</span>
+    </button>
+  );
+
   return (
-    <div className="flex h-[calc(100vh-14rem)] overflow-hidden rounded-2xl surface-metallic-light">
-      {/* Colonne gauche : navigation */}
-      <aside className="flex w-56 shrink-0 flex-col border-r border-slate-200 bg-slate-50/80">
-        <div className="border-b border-slate-200 p-4">
-          <h2 className="text-sm font-semibold text-slate-800">Filtres</h2>
+    <div className="flex h-[calc(100vh-12rem)] overflow-hidden rounded-xl border border-[#d1d7db] bg-[#f0f2f5] shadow-sm">
+      {/* Rail type WhatsApp */}
+      <aside className="flex w-[58px] shrink-0 flex-col items-center border-r border-[#d1d7db] bg-[#f0f2f5] py-2">
+        <div className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-1">
+          {navItems.map((item) => railBtn(item.id, item.label, filter === item.id))}
         </div>
-        <nav className="flex-1 overflow-y-auto p-2">
-          <ul className="space-y-0.5">
-            {navItems.map((item) => (
-              <li key={item.id}>
-                <button
-                  type="button"
-                  onClick={() => setFilter(item.id)}
-                  className={`w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium transition ${
-                    filter === item.id
-                      ? "bg-blue-100 text-blue-800"
-                      : "text-slate-700 hover:bg-slate-100"
-                  }`}
-                >
-                  {item.label}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </nav>
       </aside>
 
-      {/* Colonne centre : liste des missions OU formulaire Envoyer un message */}
+      {/* Colonne liste / formulaire */}
       {filter === "envoyer" ? (
-        <div className="flex min-w-0 flex-1 flex-col overflow-y-auto p-6">
-          <h2 className="mb-4 text-lg font-semibold text-slate-800">Envoyer un message</h2>
-          <p className="mb-4 text-sm text-slate-600">
-            Choisissez un destinataire (agent ou gérant) et écrivez votre message. Il recevra une notification.
+        <div className="flex min-w-0 flex-1 flex-col overflow-y-auto bg-white p-6">
+          <h2 className="mb-4 text-lg font-semibold text-[#111b21]">Nouveau message</h2>
+          <p className="mb-4 text-sm text-[#667781]">
+            Choisissez un destinataire et écrivez votre message.
           </p>
           <form onSubmit={handleSendDirect} className="space-y-4">
             <div>
-              <label htmlFor="recipient" className="mb-1.5 block text-sm font-medium text-slate-700">
+              <label htmlFor="recipient" className="mb-1.5 block text-sm font-medium text-[#111b21]">
                 Destinataire
               </label>
               <select
@@ -579,7 +616,7 @@ export function MessagerieMissionsView({
                 value={directRecipientId}
                 onChange={(e) => setDirectRecipientId(e.target.value)}
                 required
-                className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="w-full rounded-lg border border-[#d1d7db] px-4 py-2.5 text-sm text-[#111b21] focus:border-[#00a884] focus:outline-none focus:ring-2 focus:ring-[#00a884]/20"
               >
                 <option value="">Sélectionner un agent ou gérant…</option>
                 {recipients
@@ -592,17 +629,17 @@ export function MessagerieMissionsView({
               </select>
             </div>
             <div>
-              <label htmlFor="direct-content" className="mb-1.5 block text-sm font-medium text-slate-700">
+              <label htmlFor="direct-content" className="mb-1.5 block text-sm font-medium text-[#111b21]">
                 Message
               </label>
               <textarea
                 id="direct-content"
                 value={directContent}
                 onChange={(e) => setDirectContent(e.target.value)}
-                placeholder="Écrivez votre message…"
+                placeholder="Tapez un message"
                 rows={5}
                 disabled={sendingDirect}
-                className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-60"
+                className="w-full rounded-lg border border-[#d1d7db] px-4 py-2.5 text-sm placeholder:text-[#8696a0] focus:border-[#00a884] focus:outline-none focus:ring-2 focus:ring-[#00a884]/20 disabled:opacity-60"
               />
             </div>
             <div>
@@ -617,15 +654,14 @@ export function MessagerieMissionsView({
               <div className="flex flex-wrap items-center gap-2">
                 <label
                   htmlFor={directFileId}
-                  className={`flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 ${(uploadingAttach || sendingDirect) ? "pointer-events-none opacity-50" : ""}`}
+                  className={`flex cursor-pointer items-center gap-2 rounded-full border border-[#d1d7db] bg-white px-3 py-2 text-sm text-[#54656f] hover:bg-[#f0f2f5] ${(uploadingAttach || sendingDirect) ? "pointer-events-none opacity-50" : ""}`}
                 >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
-                  {uploadingAttach ? "Téléchargement…" : "Joindre un fichier"}
+                  + {uploadingAttach ? "Téléchargement…" : "Joindre"}
                 </label>
                 {directAttachments.map((a, i) => (
-                  <span key={i} className="flex items-center gap-1 rounded bg-slate-100 px-2 py-1 text-xs text-slate-700">
+                  <span key={i} className="flex items-center gap-1 rounded-full bg-[#f0f2f5] px-2 py-1 text-xs text-[#111b21]">
                     {a.name}
-                    <button type="button" onClick={() => setDirectAttachments((p) => p.filter((_, j) => j !== i))} className="text-slate-500 hover:text-red-600">×</button>
+                    <button type="button" onClick={() => setDirectAttachments((p) => p.filter((_, j) => j !== i))} className="text-[#667781] hover:text-red-600">×</button>
                   </span>
                 ))}
               </div>
@@ -633,13 +669,13 @@ export function MessagerieMissionsView({
             <button
               type="submit"
               disabled={sendingDirect || (!directContent.trim() && directAttachments.length === 0) || !directRecipientId}
-              className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              className="rounded-full bg-[#00a884] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#008f72] disabled:opacity-50"
             >
               {sendingDirect ? "Envoi…" : "Envoyer"}
             </button>
           </form>
           {recipients.length === 0 && (
-            <p className="mt-4 text-sm text-slate-500">Aucun agent ou gérant disponible.</p>
+            <p className="mt-4 text-sm text-[#667781]">Aucun agent ou gérant disponible.</p>
           )}
         </div>
       ) : filter === "messages-directs" ? (
@@ -714,28 +750,31 @@ export function MessagerieMissionsView({
                           <Avatar name={m.sender.name} />
                           <div className={`flex max-w-[80%] flex-col ${isMe ? "items-end" : "items-start"}`}>
                             <div
-                              className={`rounded-2xl px-4 py-2.5 ${
-                                isMe ? "rounded-tr-md bg-blue-600 text-white" : "rounded-tl-md bg-slate-100 text-slate-800"
+                              className={`rounded-lg px-2.5 py-1.5 shadow-sm ${
+                                isMe ? "rounded-tr-sm bg-[#d9fdd3] text-[#111b21]" : "rounded-tl-sm bg-white text-[#111b21]"
                               }`}
                             >
-                              <p className="text-xs font-medium opacity-90">{m.sender.name}</p>
-                              {m.content && <p className="mt-0.5 whitespace-pre-wrap break-words text-sm">{m.content}</p>}
+                              {!isMe ? (
+                                <p className="text-[12px] font-semibold text-[#00a884]">{m.sender.name}</p>
+                              ) : null}
+                              {m.content && <p className="whitespace-pre-wrap break-words text-[14.2px]">{m.content}</p>}
                               {Array.isArray(m.attachmentsJson) && m.attachmentsJson.length > 0 && (
                                 <div className="mt-2 space-y-1">
                                   {m.attachmentsJson.map((a, i) => (
                                     <SignedFileLink
                                       key={i}
                                       url={a.fileUrl}
-                                      className={`flex items-center gap-2 rounded px-2 py-1 text-xs ${
-                                        isMe ? "bg-blue-500/50 text-white" : "bg-slate-200/80 text-slate-800"
-                                      }`}
+                                      className="flex items-center gap-2 rounded bg-black/5 px-2 py-1 text-xs text-[#111b21]"
                                     >
-                                      <svg className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                      {a.name}
+                                      📄 {a.name}
                                     </SignedFileLink>
                                   ))}
                                 </div>
                               )}
+                              <p className="mt-0.5 flex justify-end gap-1 text-[11px] text-[#667781]">
+                                {formatMessageTime(m.createdAt)}
+                                {isMe ? <span className="text-[#53bdeb]">✓✓</span> : null}
+                              </p>
                             </div>
                             <MessageBeworkActions
                               messageId={m.id}
@@ -744,7 +783,6 @@ export function MessagerieMissionsView({
                               isMe={isMe}
                               agents={agents}
                             />
-                            <p className="mt-1 text-xs text-slate-400">{formatMessageTime(m.createdAt)}</p>
                           </div>
                         </div>
                       );
@@ -812,64 +850,77 @@ export function MessagerieMissionsView({
         </>
       ) : (
       <>
-      <aside className="flex w-80 shrink-0 flex-col border-r border-slate-200 bg-white">
-        <div className="border-b border-slate-200 p-3">
-          <h2 className="text-sm font-semibold text-slate-800">Missions</h2>
+      <aside className="flex w-[360px] shrink-0 flex-col border-r border-[#d1d7db] bg-white">
+        <div className="border-b border-[#e9edef] px-4 pb-3 pt-3">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-[#111b21]">Discussions</h2>
+          </div>
+          <input
+            type="search"
+            value={listSearch}
+            onChange={(e) => setListSearch(e.target.value)}
+            placeholder="Rechercher"
+            className="w-full rounded-lg border-0 bg-[#f0f2f5] px-3 py-2 text-sm text-[#111b21] placeholder:text-[#667781] focus:outline-none focus:ring-1 focus:ring-[#00a884]"
+          />
         </div>
         <ul className="flex-1 overflow-y-auto">
-          {missions.length === 0 ? (
+          {filteredMissions.length === 0 ? (
             <li className="p-4">
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-center">
-                <p className="text-sm font-medium text-slate-700">Aucune mission</p>
-                <p className="mt-1 text-xs text-slate-500">
+              <div className="rounded-xl bg-[#f0f2f5] p-4 text-center">
+                <p className="text-sm font-medium text-[#111b21]">Aucune discussion</p>
+                <p className="mt-1 text-xs text-[#667781]">
                   {isClient
-                    ? "Créez une mission pour démarrer une conversation et échanger avec votre assistant."
+                    ? "Créez une mission pour démarrer une conversation."
                     : isAgent
-                      ? "Aucune mission ne vous est assignée. La gérante vous attribuera des missions."
-                      : "Les missions apparaissent lorsque les clients déposent des demandes."}
+                      ? "Aucune mission assignée pour le moment."
+                      : "Les discussions apparaissent avec les missions."}
                 </p>
                 <Link
                   href={isClient ? "/dashboard/nouvelle-demande" : "/dashboard/taches"}
-                  className="mt-3 inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                  className="mt-3 inline-flex items-center justify-center rounded-full bg-[#00a884] px-4 py-2 text-sm font-medium text-white hover:bg-[#008f72]"
                 >
                   {isClient ? "Créer une mission" : "Voir les missions"}
                 </Link>
               </div>
             </li>
           ) : (
-            missions.map((m) => (
+            filteredMissions.map((m) => (
               <li key={m.id}>
                 <button
                   type="button"
                   onClick={() => setSelectedTaskId(m.id)}
-                  className={`w-full border-l-2 px-4 py-3 text-left transition ${
-                    selectedTaskId === m.id
-                      ? "border-blue-600 bg-blue-50/60"
-                      : "border-transparent hover:bg-slate-50"
+                  className={`flex w-full gap-3 px-3 py-3 text-left transition ${
+                    selectedTaskId === m.id ? "bg-[#f0f2f5]" : "hover:bg-[#f5f6f6]"
                   }`}
                 >
-                  <p className="truncate text-sm font-semibold text-slate-800">{m.title}</p>
-                  <p className="mt-0.5 truncate text-xs text-slate-500">{m.client.name}</p>
-                  {m.lastMessage && (
-                    <p className="mt-0.5 truncate text-xs text-slate-400">
-                      {m.lastMessage.sender.name} : {m.lastMessage.content.slice(0, 40)}
-                      {m.lastMessage.content.length > 40 ? "…" : ""}
-                    </p>
-                  )}
-                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                    {(m.priority === "URGENT" || m.priority === "PRIORITAIRE") && (
-                      <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-800">
-                        {m.priority === "URGENT" ? "Urgent" : "Prioritaire"}
+                  <Avatar name={m.client.name || m.title} size="sm" />
+                  <div className="min-w-0 flex-1 border-b border-[#f0f2f5] pb-3">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <p className="truncate text-[15px] font-medium text-[#111b21]">{m.title}</p>
+                      <span className="shrink-0 text-[11px] text-[#667781]">
+                        {m.lastMessage ? formatRelativeTime(m.lastMessage.createdAt) : ""}
                       </span>
-                    )}
-                    {m.unreadCount > 0 && (
-                      <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-blue-600 px-1.5 text-[10px] font-medium text-white">
-                        {m.unreadCount}
-                      </span>
-                    )}
-                    <span className="text-[10px] text-slate-400">
-                      {m.lastMessage ? formatRelativeTime(m.lastMessage.createdAt) : "—"}
-                    </span>
+                    </div>
+                    <p className="truncate text-[13px] text-[#667781]">{m.client.name}</p>
+                    {m.lastMessage ? (
+                      <p className="mt-0.5 truncate text-[13px] text-[#667781]">
+                        {m.lastMessage.sender.id === sessionUserId ? "Vous : " : ""}
+                        {m.lastMessage.content.slice(0, 48)}
+                        {m.lastMessage.content.length > 48 ? "…" : ""}
+                      </p>
+                    ) : null}
+                    <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                      {(m.priority === "URGENT" || m.priority === "PRIORITAIRE") && (
+                        <span className="rounded px-1.5 py-0.5 text-[10px] font-medium text-[#ea0038]">
+                          {m.priority === "URGENT" ? "Urgent" : "Prioritaire"}
+                        </span>
+                      )}
+                      {m.unreadCount > 0 && (
+                        <span className="ml-auto inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#00a884] px-1.5 text-[10px] font-bold text-white">
+                          {m.unreadCount}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </button>
               </li>
@@ -878,55 +929,43 @@ export function MessagerieMissionsView({
         </ul>
       </aside>
 
-      {/* Colonne droite : conversation */}
+      {/* Colonne droite : conversation type WhatsApp */}
       <div className="flex min-w-0 flex-1 flex-col">
         {selectedMission ? (
           <>
-            {/* En-tête mission */}
-            <div className="shrink-0 border-b border-slate-200 bg-white px-4 py-3">
-              <div className="flex items-start justify-between gap-3">
-                <h3 className="min-w-0 flex-1 truncate font-semibold text-slate-800">{selectedMission.title}</h3>
-                <div className="flex shrink-0 items-center gap-2">
-                  <ConversationDossierPanel
-                    taskId={selectedTaskId}
-                    projectId={selectedMission.projectId}
-                  />
-                  <DeleteTaskButton taskId={selectedTaskId} />
-                </div>
-              </div>
-              <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-slate-600">
-                <span>Client : {selectedMission.client.name}</span>
-                {selectedMission.assignedTo && (
-                  <span>Agent : {selectedMission.assignedTo.name}</span>
-                )}
-                <span
-                  className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                    selectedMission.status === "COMPLETE"
-                      ? "bg-green-100 text-green-800"
-                      : selectedMission.status === "A_VALIDER"
-                        ? "bg-violet-100 text-violet-800"
-                        : "bg-slate-100 text-slate-700"
-                  }`}
-                >
+            <div className="flex shrink-0 items-center gap-3 border-b border-[#d1d7db] bg-[#f0f2f5] px-4 py-2.5">
+              <Avatar name={selectedMission.client.name || selectedMission.title} size="sm" />
+              <div className="min-w-0 flex-1">
+                <h3 className="truncate text-[16px] font-medium text-[#111b21]">{selectedMission.title}</h3>
+                <p className="truncate text-[12px] text-[#667781]">
+                  {selectedMission.client.name}
+                  {selectedMission.assignedTo ? ` · ${selectedMission.assignedTo.name}` : ""}
+                  {" · "}
                   {STATUS_LABELS[selectedMission.status] ?? selectedMission.status}
-                </span>
+                </p>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
                 {selectedMission.projectId ? (
                   <Link
                     href={`/dashboard/projets/${selectedMission.projectId}`}
-                    className="text-xs font-semibold text-[#1d4ed8] hover:underline"
+                    className="hidden text-xs font-semibold text-[#00a884] hover:underline sm:inline"
                   >
-                    Voir le dossier chantier
+                    Dossier chantier
                   </Link>
                 ) : null}
+                <ConversationDossierPanel
+                  taskId={selectedTaskId}
+                  projectId={selectedMission.projectId}
+                />
+                <DeleteTaskButton taskId={selectedTaskId} />
               </div>
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto px-4 py-3" style={CHAT_BG_STYLE}>
               {loadingMessages ? (
-                <p className="text-sm text-slate-500">Chargement…</p>
+                <p className="text-sm text-[#667781]">Chargement…</p>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-1.5">
                   {visibleMessages.map((m) => {
                     const isMe = m.sender.id === sessionUserId;
                     const isSystem = m.kind === "SYSTEM";
@@ -934,24 +973,41 @@ export function MessagerieMissionsView({
                       <div
                         key={m.id}
                         id={`msg-${m.id}`}
-                        className={`flex gap-3 ${isMe ? "flex-row-reverse" : ""}`}
+                        className={`flex ${isMe ? "justify-end" : "justify-start"}`}
                       >
-                        <Avatar name={m.sender.name} />
-                        <div className={`flex max-w-[80%] flex-col ${isMe ? "items-end" : "items-start"}`}>
+                        <div className={`flex max-w-[78%] flex-col ${isMe ? "items-end" : "items-start"}`}>
                           <div
-                            className={`rounded-2xl px-4 py-2.5 ${
+                            className={`relative rounded-lg px-2.5 py-1.5 shadow-sm ${
                               isSystem
-                                ? "rounded-md border border-emerald-200 bg-emerald-50 text-emerald-950"
+                                ? "mx-auto rounded-md bg-[#fff5c4] text-center text-[#54656f]"
                                 : isMe
-                                  ? "rounded-tr-md bg-blue-600 text-white"
-                                  : "rounded-tl-md bg-slate-100 text-slate-800"
-                            } ${m.isInternal ? "border border-amber-300" : ""}`}
+                                  ? "rounded-tr-sm bg-[#d9fdd3] text-[#111b21]"
+                                  : "rounded-tl-sm bg-white text-[#111b21]"
+                            } ${m.isInternal ? "ring-1 ring-amber-400" : ""}`}
                           >
-                            <p className="text-xs font-medium opacity-90">
-                              {isSystem ? "BeWork" : m.sender.name}
-                              {m.isInternal && " (note interne)"}
+                            {!isSystem && !isMe ? (
+                              <p className="text-[12px] font-semibold text-[#00a884]">{m.sender.name}</p>
+                            ) : null}
+                            {isSystem ? (
+                              <p className="text-[12px] font-medium">BeWork · {m.content}</p>
+                            ) : (
+                              <p className="whitespace-pre-wrap break-words text-[14.2px] leading-[19px]">
+                                {m.content}
+                                {m.isInternal ? " (interne)" : ""}
+                              </p>
+                            )}
+                            <p
+                              className={`mt-0.5 flex items-center justify-end gap-1 text-[11px] ${
+                                isMe ? "text-[#667781]" : "text-[#667781]"
+                              }`}
+                            >
+                              {formatMessageTime(m.createdAt)}
+                              {isMe && !isSystem ? (
+                                <span className="text-[#53bdeb]" title="Envoyé">
+                                  ✓✓
+                                </span>
+                              ) : null}
                             </p>
-                            <p className="mt-0.5 whitespace-pre-wrap break-words text-sm">{m.content}</p>
                           </div>
                           {!isSystem ? (
                             <MessageBeworkActions
@@ -982,14 +1038,13 @@ export function MessagerieMissionsView({
                               {m.linkedBadges!.map((b) => (
                                 <span
                                   key={b}
-                                  className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800"
+                                  className="rounded-full bg-white/80 px-1.5 py-0.5 text-[10px] font-semibold text-[#008069] shadow-sm"
                                 >
                                   {badgeIcon(b)} {b}
                                 </span>
                               ))}
                             </div>
                           ) : null}
-                          <p className="mt-1 text-xs text-slate-400">{formatMessageTime(m.createdAt)}</p>
                         </div>
                       </div>
                     );
@@ -998,10 +1053,9 @@ export function MessagerieMissionsView({
                 </div>
               )}
 
-              {/* Documents joints */}
               {selectedMission.documents.length > 0 && (
-                <div className="mt-6 border-t border-slate-200 pt-4">
-                  <h4 className="mb-2 text-sm font-semibold text-slate-800">Documents joints</h4>
+                <div className="mt-4 rounded-lg bg-white/80 p-3 shadow-sm">
+                  <h4 className="mb-2 text-xs font-semibold text-[#54656f]">Documents joints</h4>
                   <ul className="space-y-1">
                     {selectedMission.documents.map((d) => (
                       <li key={d.id}>
@@ -1009,11 +1063,9 @@ export function MessagerieMissionsView({
                           href={documentDownloadHref(d.id)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                          className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-[#111b21] hover:bg-[#f0f2f5]"
                         >
-                          <svg className="h-4 w-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
+                          <span className="text-[#00a884]">📄</span>
                           <span className="truncate">{d.name}</span>
                         </a>
                       </li>
@@ -1023,56 +1075,61 @@ export function MessagerieMissionsView({
               )}
             </div>
 
-            {/* Zone d'écriture et actions */}
-            <div className="shrink-0 border-t border-slate-200 bg-slate-50/60 p-4">
+            <div className="shrink-0 bg-[#f0f2f5] px-3 py-2">
               {(isAgence || isAgent) && (
-                <label className="mb-2 flex items-center gap-2 text-sm">
+                <label className="mb-1.5 flex items-center gap-2 px-1 text-xs text-[#667781]">
                   <input
                     type="checkbox"
                     checked={internalNote}
                     onChange={(e) => setInternalNote(e.target.checked)}
-                    className="rounded border-slate-300"
+                    className="rounded border-[#d1d7db]"
                   />
-                  Note interne (visible uniquement gérante/agent)
+                  Note interne
                 </label>
               )}
-              <form onSubmit={handleSend} className="flex gap-2">
+              <form onSubmit={handleSend} className="flex items-end gap-2">
+                <Link
+                  href={`/dashboard/taches/${selectedTaskId}#documents-section`}
+                  className="mb-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-2xl text-[#54656f] hover:bg-[#e9edef]"
+                  title="Joindre"
+                >
+                  +
+                </Link>
                 <textarea
                   value={sendContent}
                   onChange={(e) => setSendContent(e.target.value)}
-                  placeholder="Écrire un message..."
-                  rows={2}
-                  className="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  placeholder="Tapez un message"
+                  rows={1}
+                  className="min-h-[42px] max-h-28 min-w-0 flex-1 resize-none rounded-3xl border-0 bg-white px-4 py-2.5 text-[15px] text-[#111b21] placeholder:text-[#667781] focus:outline-none focus:ring-1 focus:ring-[#00a884]"
                   disabled={sending}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      if (sendContent.trim() && !sending) {
+                        void (e.currentTarget.form as HTMLFormElement | null)?.requestSubmit();
+                      }
+                    }
+                  }}
                 />
-                <div className="flex shrink-0 flex-col gap-2">
-                  <Link
-                    href={`/dashboard/taches/${selectedTaskId}#documents-section`}
-                    className="flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
-                    title="Joindre un document"
-                  >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                    </svg>
-                    <span>Joindre</span>
-                  </Link>
-                  <button
-                    type="submit"
-                    disabled={sending || !sendContent.trim()}
-                    className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-                  >
-                    Envoyer
-                  </button>
-                </div>
+                <button
+                  type="submit"
+                  disabled={sending || !sendContent.trim()}
+                  className="mb-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#00a884] text-white hover:bg-[#008f72] disabled:opacity-40"
+                  title="Envoyer"
+                >
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                  </svg>
+                </button>
               </form>
 
               {canChangeStatus && (
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="mt-2 flex flex-wrap gap-2 px-1">
                   <select
                     onChange={(e) => e.target.value && handleStatusChange(e.target.value)}
-                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700"
+                    className="rounded-lg border border-[#d1d7db] bg-white px-2 py-1 text-xs text-[#54656f]"
                   >
-                    <option value="">Changer le statut</option>
+                    <option value="">Statut mission</option>
                     <option value="EN_ATTENTE">En attente</option>
                     <option value="EN_COURS">En cours</option>
                     <option value="EN_ATTENTE_INFO">En attente client</option>
@@ -1081,7 +1138,7 @@ export function MessagerieMissionsView({
                   </select>
                   <Link
                     href={`/dashboard/taches/${selectedTaskId}`}
-                    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                    className="rounded-lg px-2 py-1 text-xs font-medium text-[#00a884] hover:underline"
                   >
                     Ouvrir la mission
                   </Link>
@@ -1090,30 +1147,11 @@ export function MessagerieMissionsView({
             </div>
           </>
         ) : (
-          <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
-            {missions.length === 0 ? (
-              <>
-                <p className="text-sm font-medium text-slate-700">Aucune conversation pour l&apos;instant</p>
-                <p className="mt-2 max-w-sm text-sm text-slate-500">
-                  {isClient
-                    ? "Créez une mission depuis « Nouvelle mission » pour pouvoir envoyer des messages, joindre des pièces jointes et suivre les échanges avec votre assistant."
-                    : "Une fois des missions assignées ou disponibles, sélectionnez-en une ici pour voir la conversation, envoyer des messages et joindre des documents."}
-                </p>
-                <Link
-                  href={isClient ? "/dashboard/nouvelle-demande" : "/dashboard/taches"}
-                  className="mt-4 inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                >
-                  {isClient ? "Créer une mission" : "Voir les missions"}
-                </Link>
-              </>
-            ) : (
-              <>
-                <p className="text-sm font-medium text-slate-700">Sélectionnez une mission</p>
-                <p className="mt-2 max-w-sm text-sm text-slate-500">
-                  Cliquez sur une mission dans la liste à gauche pour afficher la conversation. Vous pourrez alors envoyer des messages, joindre des pièces jointes (bouton trombone) et gérer le statut.
-                </p>
-              </>
-            )}
+          <div className="flex flex-1 flex-col items-center justify-center bg-[#f0f2f5] p-8 text-center">
+            <p className="text-lg font-medium text-[#41525d]">BeWork Messagerie</p>
+            <p className="mt-2 max-w-sm text-sm text-[#667781]">
+              Sélectionnez une discussion à gauche pour afficher la conversation.
+            </p>
           </div>
         )}
       </div>

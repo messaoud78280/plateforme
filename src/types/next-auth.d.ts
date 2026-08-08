@@ -17,6 +17,9 @@ declare module "next-auth" {
       demoCompanyName?: string;
       demoModules?: string[];
       demoExpired?: boolean;
+      /** Root Marc — pour revenir de « Voir comme… ». */
+      demoRootUserId?: string;
+      demoViewAs?: string | null;
     };
   }
 }
@@ -36,5 +39,7 @@ declare module "next-auth/jwt" {
     demoCompanyName?: string;
     demoModules?: string[];
     demoExpired?: boolean;
+    demoRootUserId?: string;
+    demoViewAs?: string | null;
   }
 }

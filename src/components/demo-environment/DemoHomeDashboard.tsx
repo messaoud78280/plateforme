@@ -79,6 +79,20 @@ export function DemoHomeDashboard({
           Voici ce qui demande votre attention aujourd’hui. Ce qui était dispersé entre emails, Excel et post-it
           devient une information attribuée et suivie.
         </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Link
+            href="/dashboard/demo/visibilite"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-[#1e3a5f] hover:border-[#1d4ed8]"
+          >
+            Qui voit quoi ?
+          </Link>
+          <Link
+            href="/dashboard/demo/visibilite"
+            className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-semibold text-white"
+          >
+            Prévisualiser un espace
+          </Link>
+        </div>
       </header>
 
       <section aria-labelledby="demo-today">

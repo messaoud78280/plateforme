@@ -1,5 +1,6 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { EquipeSection } from "@/components/dashboard/EquipeSection";
@@ -28,6 +29,16 @@ export default async function EquipePage() {
           Gérez le personnel, les clients, fournisseurs et partenaires — avec un périmètre chantier
           clair pour éviter les fuites d&apos;accès.
         </p>
+        {session.user.isDemo ? (
+          <p className="mt-3">
+            <Link
+              href="/dashboard/demo/visibilite"
+              className="text-sm font-semibold text-[#1d4ed8] hover:underline"
+            >
+              Qui voit quoi ? · Prévisualiser un espace →
+            </Link>
+          </p>
+        ) : null}
       </div>
       <EquipeSection />
     </div>

@@ -22,6 +22,8 @@ export type SeedDemoOptions = {
   companyName: string;
   sector?: string | null;
   includeMarches?: boolean;
+  /** Identifiant login (ex. bework-demo) pour emails personas. */
+  loginIdentifier?: string | null;
 };
 
 /**
@@ -715,6 +717,28 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
     lauraId: laura,
   });
 
+  // —— 4 personas loginables (Direction / Conducteur / Client / Fournisseur) ——
+  try {
+    const { seedDemoPersonaUsers } = await import("./seed-personas");
+    const loginIdentifier =
+      opts.loginIdentifier ||
+      (
+        await prisma.demoEnvironment.findFirst({
+          where: { rootUserId: clientId },
+          select: { loginIdentifier: true },
+        })
+      )?.loginIdentifier ||
+      "bework-demo";
+    await seedDemoPersonaUsers({
+      rootUserId: clientId,
+      organizationId,
+      loginIdentifier,
+      companyName,
+    });
+  } catch (e) {
+    console.error("[demo-seed] personas:", e);
+  }
+
   // Assignation diversifiée + fils mission plus riches
   await enrichDemoTaskThreads({
     clientId,
@@ -722,6 +746,28 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
     karimId: karim,
     lauraId: laura,
   });
+
+  // —— 4 personas loginables (Direction / Conducteur / Client / Fournisseur) ——
+  try {
+    const { seedDemoPersonaUsers } = await import("./seed-personas");
+    const loginIdentifier =
+      opts.loginIdentifier ||
+      (
+        await prisma.demoEnvironment.findFirst({
+          where: { rootUserId: clientId },
+          select: { loginIdentifier: true },
+        })
+      )?.loginIdentifier ||
+      "bework-demo";
+    await seedDemoPersonaUsers({
+      rootUserId: clientId,
+      organizationId,
+      loginIdentifier,
+      companyName,
+    });
+  } catch (e) {
+    console.error("[demo-seed] personas:", e);
+  }
 
   return {
     projectIds: [projectVictor.id, projectRepublique.id, projectAlpha.id],

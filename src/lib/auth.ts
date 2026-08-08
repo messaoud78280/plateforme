@@ -253,6 +253,9 @@ export const authOptions: NextAuthOptions = {
           token.demoModules = Array.isArray(access.demo.modulesEnabled)
             ? (access.demo.modulesEnabled as string[]).filter((x) => typeof x === "string")
             : [];
+          if (!token.demoRootUserId) {
+            token.demoRootUserId = access.demo.rootUserId;
+          }
         } else {
           token.isDemo = true;
           token.demoExpired = true;
@@ -263,6 +266,8 @@ export const authOptions: NextAuthOptions = {
         token.demoCompanyName = undefined;
         token.demoModules = undefined;
         token.demoExpired = undefined;
+        token.demoRootUserId = undefined;
+        token.demoViewAs = undefined;
       }
 
       return token;
@@ -281,6 +286,10 @@ export const authOptions: NextAuthOptions = {
         session.user.demoCompanyName = token.demoCompanyName as string | undefined;
         session.user.demoModules = token.demoModules as string[] | undefined;
         session.user.demoExpired = Boolean(token.demoExpired);
+        session.user.demoRootUserId = token.demoRootUserId as string | undefined;
+        session.user.demoViewAs = (token.demoViewAs as string | null | undefined) ?? null;
+        if (typeof token.name === "string") session.user.name = token.name;
+        if (typeof token.email === "string") session.user.email = token.email;
       }
       return session;
     },

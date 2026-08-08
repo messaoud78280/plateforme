@@ -168,6 +168,11 @@ export async function createDemoEnvironment(
       companyName,
       sector: input.sector,
       includeMarches: modulesEnabled.includes("marches"),
+      loginIdentifier,
+    });
+    await prisma.demoEnvironment.update({
+      where: { id: result.demo.id },
+      data: { seedVersion: "v2-personas" },
     });
 
     return {
@@ -198,8 +203,31 @@ export async function resetDemoEnvironment(demoId: string): Promise<{ ok: true }
       companyName: demo.companyName,
       sector: demo.sector,
       includeMarches: modules.includes("marches"),
+      loginIdentifier: demo.loginIdentifier,
+    });
+    await prisma.demoEnvironment.update({
+      where: { id: demoId },
+      data: { seedVersion: "v2-personas" },
     });
   }
+  return { ok: true };
+}
+
+/** Enrichit une démo existante avec les 4 personas (sans tout re-seeder). */
+export async function enrichDemoPersonas(demoId: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const demo = await prisma.demoEnvironment.findUnique({ where: { id: demoId } });
+  if (!demo?.organizationId) return { ok: false, error: "Démonstration introuvable." };
+  const { seedDemoPersonaUsers } = await import("./seed-personas");
+  await seedDemoPersonaUsers({
+    rootUserId: demo.rootUserId,
+    organizationId: demo.organizationId,
+    loginIdentifier: demo.loginIdentifier,
+    companyName: demo.companyName,
+  });
+  await prisma.demoEnvironment.update({
+    where: { id: demoId },
+    data: { seedVersion: "v2-personas" },
+  });
   return { ok: true };
 }
 

@@ -13,6 +13,7 @@ import { isClientLoginAllowed } from "@/lib/client-account-approval";
 import { SkipLink } from "@/components/ui/SkipLink";
 import { EnvironmentBanner } from "@/components/system/EnvironmentBanner";
 import { DemoTenantBanner } from "@/components/demo-environment/DemoTenantBanner";
+import { DemoViewAsSwitcher } from "@/components/demo-environment/DemoViewAsSwitcher";
 import { RoleOnboarding } from "@/components/onboarding/RoleOnboarding";
 import { UiPreferencesProvider } from "@/components/system/UiPreferences";
 import { resolveBeWorkEnvironment } from "@/lib/environment";
@@ -144,6 +145,7 @@ export default async function DashboardLayout({
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+            {isDemo ? <DemoViewAsSwitcher /> : null}
             {session.user?.role === "CLIENT" && !isDemo && !external ? (
               <a href="/dashboard/nouvelle-demande" className="btn-cc-primary !text-xs sm:!text-sm">
                 + Nouvelle mission

@@ -25,8 +25,15 @@ import { listUpcomingAppointments } from "@/lib/appointments/upcoming";
 import { DemoHomeDashboard } from "@/components/demo-environment/DemoHomeDashboard";
 import { collectDemoHomeData } from "@/lib/demo-environment/dashboard-stats";
 import { PersonaHomeDashboard } from "@/components/dashboard/PersonaHomeDashboard";
+import {
+  DemoClientHome,
+  DemoConducteurHome,
+  DemoFournisseurHome,
+  resolveDemoPersonaKey,
+} from "@/components/demo-environment/DemoPersonaHomes";
 import { isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
 import { projectWhereForClientUser } from "@/lib/organization/access";
+import { isBonDeCommandeCategory } from "@/lib/demo-environment/bon-commande";
 
 export default async function DashboardPage({
   searchParams,
@@ -585,10 +592,123 @@ export default async function DashboardPage({
   }
 
   if (isClient && session.user.isDemo) {
+    const portal = await prisma.user.findUnique({
+      where: { id: clientId },
+      select: { personType: true, permissionProfile: true, name: true },
+    });
+    const personaKey = resolveDemoPersonaKey(portal?.permissionProfile, portal?.personType);
+    const hostName = session.user.demoCompanyName ?? "ABC Étanchéité";
+    const firstName = (portal?.name ?? session.user.name ?? "vous").split(" ")[0] ?? "vous";
+    const projectWhere = await projectWhereForClientUser(clientId);
+
+    if (personaKey === "conducteur") {
+      const alertOwnerId = session.user.demoRootUserId ?? clientId;
+      const [projects, agenda, alerts] = await Promise.all([
+        prisma.project.findMany({
+          where: projectWhere,
+          select: { id: true, title: true, chantierStatus: true, siteCity: true },
+          orderBy: { updatedAt: "desc" },
+          take: 8,
+        }),
+        prisma.agendaEvent.findMany({
+          where: {
+            project: projectWhere,
+            status: { not: "ANNULE" },
+            startAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) },
+            endAt: { lte: new Date(new Date().setHours(23, 59, 59, 999)) },
+          },
+          select: { id: true, title: true, startAt: true, location: true },
+          orderBy: { startAt: "asc" },
+          take: 8,
+        }).catch(() => []),
+        prisma.alert.findMany({
+          where: { clientId: { in: [clientId, alertOwnerId] } },
+          orderBy: { createdAt: "desc" },
+          take: 8,
+          select: { id: true, title: true, message: true, level: true, actionUrl: true },
+        }),
+      ]);
+      return (
+        <DemoConducteurHome
+          firstName={firstName}
+          companyName={hostName}
+          agenda={agenda}
+          alerts={alerts}
+          projects={projects}
+        />
+      );
+    }
+
+    if (personaKey === "client") {
+      const [projects, agenda, docs, pendingTasks] = await Promise.all([
+        prisma.project.findMany({
+          where: projectWhere,
+          select: { id: true, title: true, chantierStatus: true, siteCity: true },
+          take: 6,
+        }),
+        prisma.agendaEvent.findMany({
+          where: { project: projectWhere, status: { not: "ANNULE" }, startAt: { gte: new Date() } },
+          select: { id: true, title: true, startAt: true, location: true },
+          orderBy: { startAt: "asc" },
+          take: 5,
+        }).catch(() => []),
+        prisma.chantierFile.findMany({
+          where: {
+            project: projectWhere,
+            visibility: { in: ["Intervenants autorisés", "BeWork et entreprise cliente", "Partage temporaire"] },
+            deletedAt: null,
+          },
+          select: { id: true, name: true },
+          take: 5,
+          orderBy: { createdAt: "desc" },
+        }),
+        prisma.task.findMany({
+          where: { project: projectWhere, status: { in: ["A_VALIDER", "EN_ATTENTE"] } },
+          select: { id: true, title: true, status: true, description: true },
+          take: 5,
+        }),
+      ]);
+      return (
+        <DemoClientHome
+          firstName={firstName}
+          hostCompany={hostName}
+          projects={projects}
+          agenda={agenda}
+          docs={docs}
+          pendingTasks={pendingTasks}
+        />
+      );
+    }
+
+    if (personaKey === "fournisseur") {
+      const rootId = session.user.demoRootUserId ?? clientId;
+      const orders = await prisma.task.findMany({
+        where: {
+          clientId: rootId,
+          OR: [
+            { title: { contains: "POINT.P" } },
+            { title: { contains: "BC-2026" } },
+            { category: { contains: "Bon de commande" } },
+          ],
+        },
+        select: { id: true, title: true, status: true, description: true, category: true },
+        orderBy: { updatedAt: "desc" },
+        take: 12,
+      });
+      const bcOrders = orders.filter((o) => isBonDeCommandeCategory(o.category) || o.title.includes("POINT.P"));
+      return (
+        <DemoFournisseurHome
+          firstName={firstName}
+          hostCompany={hostName}
+          orders={bcOrders}
+        />
+      );
+    }
+
     const home = await collectDemoHomeData(clientId);
     return (
       <DemoHomeDashboard
-        companyName={session.user.demoCompanyName ?? "Votre entreprise"}
+        companyName={hostName}
         firstName={home.firstName}
         stats={home.stats}
         inbox={home.inbox}

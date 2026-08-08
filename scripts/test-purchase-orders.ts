@@ -1,5 +1,5 @@
 /**
- * Tests CDE-1 — commandes / totaux / statuts / permissions / numérotation
+ * Tests CDE-1 + CDE-2A — commandes / fournisseur / permissions
  * Exécuter : npm run test:purchase-orders
  */
 import assert from "node:assert/strict";
@@ -15,6 +15,11 @@ import {
   isInternalPurchaseOrderActor,
   isSupplierPurchaseOrderActor,
 } from "../src/lib/purchase-orders/access";
+import {
+  REFUSE_REASONS,
+  supplierActionsForStatus,
+} from "../src/lib/purchase-orders/supplier-ui";
+import { sanitizeOrderForSupplier } from "../src/lib/purchase-orders/supplier-collaboration";
 
 function testTotals() {
   assert.equal(lineTotalHt({ quantity: 40, unitPriceHt: 106.5 }), 4260);
@@ -77,12 +82,49 @@ function testPermissions() {
   assert.equal(isSupplierPurchaseOrderActor({ id: "1", personType: "INTERNAL" }), false);
 }
 
+function testSupplierCollaborationUi() {
+  const open = supplierActionsForStatus("A_CONFIRMER", "NONE");
+  assert.equal(open.canConfirm, true);
+  assert.equal(open.canPropose, true);
+  assert.equal(open.canRefuse, true);
+
+  const pending = supplierActionsForStatus("A_CONFIRMER", "PENDING");
+  assert.equal(pending.canConfirm, false);
+  assert.equal(pending.proposalPending, true);
+  assert.equal(pending.canPropose, true);
+
+  const refusedProp = supplierActionsForStatus("A_CONFIRMER", "REFUSED");
+  assert.equal(refusedProp.proposalRefused, true);
+  assert.equal(refusedProp.canConfirm, true);
+
+  assert.ok(REFUSE_REASONS.some((r) => r.key === "STOCK"));
+
+  const share = actionsForPurchaseOrderStatus("BROUILLON").find((a) => a.action === "send_supplier");
+  assert.ok(share);
+  assert.equal(share.label, "Partager avec le fournisseur");
+  assert.equal(share.next, "A_CONFIRMER");
+
+  const sanitized = sanitizeOrderForSupplier({
+    id: "1",
+    number: "BC-2026-043",
+    internalNotes: "marge 12%",
+    validator: { id: "x" },
+    discountHt: 100,
+    subject: "Membrane",
+  });
+  assert.equal(sanitized.subject, "Membrane");
+  assert.equal("internalNotes" in sanitized, false);
+  assert.equal("validator" in sanitized, false);
+  assert.equal("discountHt" in sanitized, false);
+}
+
 function main() {
   testTotals();
   testNumbering();
   testStatusTransitions();
   testPermissions();
-  console.log("OK — test:purchase-orders (CDE-1)");
+  testSupplierCollaborationUi();
+  console.log("OK — test:purchase-orders (CDE-1 + CDE-2A)");
 }
 
 main();

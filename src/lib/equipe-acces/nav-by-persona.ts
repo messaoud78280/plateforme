@@ -56,8 +56,8 @@ const ALLOWED_HREFS: Record<PersonaNavKey, string[] | null> = {
   FOURNISSEUR: [
     "/dashboard",
     "/dashboard/commandes",
-    "/dashboard/documents",
     "/dashboard/messagerie",
+    "/dashboard/documents",
     "/dashboard/parametres",
   ],
   SOUS_TRAITANT: [

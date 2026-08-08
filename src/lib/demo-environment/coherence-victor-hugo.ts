@@ -328,6 +328,11 @@ export async function ensureVictorHugoCoherence(opts: {
         deliveryAddress,
         amountHt: 4260,
         sharedWithSupplier: true,
+        proposedDeliveryStatus: "NONE",
+        proposedDeliveryAt: null,
+        proposedDeliveryComment: null,
+        confirmedDeliveryAt: null,
+        supplierRefuseReason: null,
         urgency: "IMPORTANT",
         lines: {
           create: [
@@ -341,22 +346,46 @@ export async function ensureVictorHugoCoherence(opts: {
           ],
         },
         events: {
-          create: {
-            kind: "created",
-            label: "Commande créée",
-            detail: "BC-2026-043 — démo Victor Hugo",
-            actorUserId: opts.rootUserId,
-          },
+          create: [
+            {
+              kind: "created",
+              label: "Commande créée",
+              detail: "BC-2026-043 — démo Victor Hugo",
+              actorUserId: opts.rootUserId,
+            },
+            {
+              kind: "shared",
+              label: "Commande partagée fournisseur",
+              detail: "POINT.P — Thomas Bernard",
+              actorUserId: opts.rootUserId,
+            },
+          ],
         },
       },
       select: { id: true },
     });
   } else {
+    const existingPo = await prisma.purchaseOrder.findUnique({
+      where: { id: po.id },
+      select: {
+        status: true,
+        proposedDeliveryStatus: true,
+        confirmedDeliveryAt: true,
+      },
+    });
+    // Ne pas écraser une confirmation / proposition déjà jouée en démo live
+    const preserveSupplierProgress =
+      existingPo?.status === "CONFIRMEE" ||
+      existingPo?.status === "REFUSEE" ||
+      existingPo?.proposedDeliveryStatus === "PENDING" ||
+      existingPo?.proposedDeliveryStatus === "ACCEPTED" ||
+      Boolean(existingPo?.confirmedDeliveryAt);
+
     await prisma.purchaseOrder.update({
       where: { id: po.id },
       data: {
         number: "BC-2026-043",
-        status: "A_CONFIRMER",
+        ...(preserveSupplierProgress ? {} : { status: "A_CONFIRMER" as const }),
         subject: "40 rouleaux membrane EPDM — Résidence Victor Hugo",
         projectId: project.id,
         followUpSheetId: sheet.id,
@@ -368,6 +397,15 @@ export async function ensureVictorHugoCoherence(opts: {
         deliveryAddress,
         sharedWithSupplier: true,
         amountHt: 4260,
+        ...(preserveSupplierProgress
+          ? {}
+          : {
+              proposedDeliveryStatus: "NONE",
+              proposedDeliveryAt: null,
+              proposedDeliveryComment: null,
+              confirmedDeliveryAt: null,
+              supplierRefuseReason: null,
+            }),
       },
     });
     const lineCount = await prisma.purchaseOrderLine.count({ where: { orderId: po.id } });
@@ -632,6 +670,36 @@ export async function applySupplierDeliveryConfirm(opts: {
       description: `${task.description ?? ""}\n\n[Démo] ${opts.actorName} a confirmé la livraison — créneau 11/08 07:30 maintenu.`.trim(),
     },
   });
+
+  // Aligner PurchaseOrder métier (CDE-2A) — sans écraser requestedDeliveryAt
+  const linkedPo = await prisma.purchaseOrder.findFirst({
+    where: {
+      OR: [{ legacyTaskId: task.id }, { number: "BC-2026-043", organizationId: task.organizationId ?? undefined }],
+    },
+    select: { id: true },
+  });
+  if (linkedPo) {
+    await prisma.purchaseOrder.update({
+      where: { id: linkedPo.id },
+      data: {
+        status: "CONFIRMEE",
+        confirmedDeliveryAt: DELIVERY_AT,
+        proposedDeliveryStatus: "NONE",
+        proposedDeliveryAt: null,
+        proposedDeliveryComment: null,
+        sharedWithSupplier: true,
+      },
+    });
+    await prisma.purchaseOrderEvent.create({
+      data: {
+        orderId: linkedPo.id,
+        kind: "supplier_confirm",
+        label: "Commande confirmée",
+        detail: `${opts.actorName} — livraison confirmée : 11 août 07:30 (chemin démo legacy)`,
+        actorUserId: opts.actorUserId,
+      },
+    });
+  }
 
   let delivery = await prisma.agendaEvent.findFirst({
     where: {

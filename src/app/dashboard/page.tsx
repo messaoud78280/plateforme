@@ -33,8 +33,6 @@ import {
 } from "@/components/demo-environment/DemoPersonaHomes";
 import { isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
 import { projectWhereForClientUser } from "@/lib/organization/access";
-import { isBonDeCommandeCategory } from "@/lib/demo-environment/bon-commande";
-
 export default async function DashboardPage({
   searchParams,
 }: {
@@ -687,26 +685,62 @@ export default async function DashboardPage({
     }
 
     if (personaKey === "fournisseur") {
-      const rootId = session.user.demoRootUserId ?? clientId;
-      const orders = await prisma.task.findMany({
-        where: {
-          clientId: rootId,
-          OR: [
-            { title: { contains: "POINT.P" } },
-            { title: { contains: "BC-2026" } },
-            { category: { contains: "Bon de commande" } },
-          ],
-        },
-        select: { id: true, title: true, status: true, description: true, category: true },
-        orderBy: { updatedAt: "desc" },
-        take: 12,
+      const supplierUser = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { externalOrganizationId: true },
       });
-      const bcOrders = orders.filter((o) => isBonDeCommandeCategory(o.category) || o.title.includes("POINT.P"));
+      const rootId = session.user.demoRootUserId ?? clientId;
+      const hostOrg = await prisma.organization.findUnique({
+        where: { ownerUserId: rootId },
+        select: { id: true, name: true },
+      });
+      const purchaseOrders =
+        supplierUser?.externalOrganizationId && hostOrg
+          ? await prisma.purchaseOrder.findMany({
+              where: {
+                organizationId: hostOrg.id,
+                externalOrganizationId: supplierUser.externalOrganizationId,
+                sharedWithSupplier: true,
+              },
+              select: {
+                id: true,
+                number: true,
+                subject: true,
+                status: true,
+                requestedDeliveryAt: true,
+                project: { select: { title: true } },
+                lines: {
+                  take: 1,
+                  orderBy: { sortOrder: "asc" },
+                  select: { designation: true, quantity: true, unit: true },
+                },
+                organization: { select: { name: true } },
+              },
+              orderBy: { updatedAt: "desc" },
+              take: 12,
+            })
+          : [];
+      const orders = purchaseOrders.map((o) => {
+        const line = o.lines[0];
+        return {
+          id: o.id,
+          title: o.number,
+          number: o.number,
+          subject: o.subject,
+          status: o.status,
+          projectTitle: o.project?.title ?? null,
+          hostCompany: o.organization.name,
+          requestedDeliveryAt: o.requestedDeliveryAt,
+          lineSummary: line
+            ? `${Number(line.quantity)} ${line.unit} ${line.designation}`
+            : o.subject,
+        };
+      });
       return (
         <DemoFournisseurHome
           firstName={firstName}
           hostCompany={hostName}
-          orders={bcOrders}
+          orders={orders}
         />
       );
     }

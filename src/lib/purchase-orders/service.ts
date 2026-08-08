@@ -201,6 +201,7 @@ export const purchaseOrderDetailInclude = {
   lines: { orderBy: { sortOrder: "asc" as const } },
   events: { orderBy: { createdAt: "desc" as const }, take: 40 },
   documents: { orderBy: { createdAt: "desc" as const }, take: 20 },
+  organization: { select: { id: true, name: true } },
   externalOrganization: {
     select: {
       id: true,
@@ -209,6 +210,16 @@ export const purchaseOrderDetailInclude = {
       phone: true,
       email: true,
       activity: true,
+      contacts: {
+        orderBy: [{ isPrimary: "desc" as const }, { lastName: "asc" as const }],
+        take: 12,
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          jobTitle: true,
+        },
+      },
     },
   },
   contact: {

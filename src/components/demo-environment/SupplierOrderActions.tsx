@@ -1,13 +1,14 @@
 "use client";
 
+/**
+ * Actions démo legacy — préférer la fiche PurchaseOrder (/dashboard/commandes/[id]).
+ * Conservé pour compatibilité liens éventuels.
+ */
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export function SupplierOrderActions({ orderId }: { orderId: string }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const highlight =
-    searchParams.get("confirm") === orderId || searchParams.get("propose") === orderId;
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
 
@@ -15,13 +16,18 @@ export function SupplierOrderActions({ orderId }: { orderId: string }) {
     setBusy(true);
     setMsg("");
     try {
-      const res = await fetch(`/api/demo/bon-commande/${orderId}/supplier`, {
+      const res = await fetch(`/api/purchase-orders/${orderId}/supplier`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action,
-          proposedTime: action === "propose" ? "09:00" : undefined,
-        }),
+        body: JSON.stringify(
+          action === "confirm"
+            ? { action: "confirm" }
+            : {
+                action: "propose",
+                proposedDeliveryAt: new Date(2026, 7, 11, 9, 0, 0, 0).toISOString(),
+                comment: "Notre camion ne peut pas être sur site avant 9h.",
+              },
+        ),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -29,8 +35,8 @@ export function SupplierOrderActions({ orderId }: { orderId: string }) {
       } else {
         setMsg(
           action === "confirm"
-            ? "Livraison confirmée — ABC Étanchéité a été notifié."
-            : "Proposition 09:00 envoyée — en attente de validation."
+            ? "Livraison confirmée — l’entreprise a été notifiée."
+            : "Proposition 09:00 envoyée — en attente de validation.",
         );
         router.refresh();
       }
@@ -41,7 +47,7 @@ export function SupplierOrderActions({ orderId }: { orderId: string }) {
   }
 
   return (
-    <div className={`mt-2 space-y-2 ${highlight ? "rounded-lg ring-2 ring-amber-400 p-2" : ""}`}>
+    <div className="mt-2 space-y-2">
       <div className="flex flex-wrap gap-2">
         <button
           type="button"

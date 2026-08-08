@@ -8,6 +8,7 @@ import {
   resolvePurchaseOrderOrgId,
 } from "@/lib/purchase-orders/access";
 import { purchaseOrderDetailInclude } from "@/lib/purchase-orders/service";
+import { sanitizeOrderForSupplier } from "@/lib/purchase-orders/supplier-collaboration";
 import { PurchaseOrderDetailClient } from "@/components/purchase-orders/PurchaseOrderDetailClient";
 
 export const dynamic = "force-dynamic";
@@ -49,12 +50,16 @@ export default async function CommandeDetailPage({
     }
   }
 
-  const serialized = JSON.parse(JSON.stringify(order));
+  const payload = isSupplier
+    ? sanitizeOrderForSupplier(order as unknown as Record<string, unknown>)
+    : order;
+  const serialized = JSON.parse(JSON.stringify(payload));
 
   return (
     <PurchaseOrderDetailClient
       order={serialized}
       canAct={isInternalPurchaseOrderActor(session.user)}
+      isSupplierView={isSupplier}
     />
   );
 }

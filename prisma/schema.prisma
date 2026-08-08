@@ -300,6 +300,13 @@ model PurchaseOrder {
 
   requestedDeliveryAt      DateTime?
   confirmedDeliveryAt      DateTime?
+  /// Proposition fournisseur (≠ date demandée ; n’écrit pas confirmed tant qu’acceptée)
+  proposedDeliveryAt       DateTime?
+  proposedDeliveryComment  String?             @db.Text
+  /// NONE | PENDING | ACCEPTED | REFUSED
+  proposedDeliveryStatus   String              @default("NONE")
+  /// Motif de refus commande fournisseur
+  supplierRefuseReason     String?
   /// CHANTIER | AGENCE | AUTRE
   deliveryPlaceType        String              @default("CHANTIER")
   deliveryAddress          String?

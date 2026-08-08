@@ -9,6 +9,7 @@ import {
 } from "@/lib/purchase-orders/access";
 import { purchaseOrderDetailInclude } from "@/lib/purchase-orders/service";
 import { computeOrderAmountHt } from "@/lib/purchase-orders/totals";
+import { sanitizeOrderForSupplier } from "@/lib/purchase-orders/supplier-collaboration";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -52,6 +53,9 @@ export async function GET(_req: Request, ctx: Ctx) {
     if (u?.externalOrganizationId !== order.externalOrganizationId) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
     }
+    return NextResponse.json({
+      order: sanitizeOrderForSupplier(order as unknown as Record<string, unknown>),
+    });
   }
 
   return NextResponse.json({ order });

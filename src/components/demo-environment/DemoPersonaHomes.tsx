@@ -16,6 +16,13 @@ type OrderItem = {
   title: string;
   status: string;
   description?: string | null;
+  /** Champs PurchaseOrder (CDE-2A) */
+  number?: string;
+  subject?: string;
+  projectTitle?: string | null;
+  hostCompany?: string | null;
+  requestedDeliveryAt?: string | Date | null;
+  lineSummary?: string | null;
 };
 
 const STATUS: Record<string, string> = {
@@ -242,7 +249,11 @@ export function DemoFournisseurHome({
   unreadHint?: number;
 }) {
   const toConfirm = orders.filter((o) =>
-    ["EN_ATTENTE_INFO", "A_VALIDER", "EN_COURS", "ASSIGNEE"].includes(o.status)
+    ["A_CONFIRMER", "ENVOYEE_FOURNISSEUR", "EN_ATTENTE_INFO", "A_VALIDER"].includes(o.status),
+  );
+  const upcoming = orders.filter(
+    (o) =>
+      ["CONFIRMEE", "LIVRAISON_PROGRAMMEE"].includes(o.status) && o.requestedDeliveryAt,
   );
 
   return (
@@ -254,29 +265,49 @@ export function DemoFournisseurHome({
       </div>
 
       <section className="rounded-2xl border border-amber-200 bg-amber-50/60 p-5">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-amber-900">À confirmer</h2>
+        <h2 className="text-sm font-bold uppercase tracking-wide text-amber-900">
+          À confirmer
+          {toConfirm.length > 0 ? (
+            <span className="ml-2 font-semibold normal-case text-amber-800">
+              · {toConfirm.length} commande{toConfirm.length > 1 ? "s" : ""}
+            </span>
+          ) : null}
+        </h2>
         {toConfirm.length === 0 ? (
           <p className="mt-3 text-sm text-amber-900/80">Aucune commande en attente.</p>
         ) : (
           <ul className="mt-3 space-y-3">
             {toConfirm.map((o) => (
               <li key={o.id} className="rounded-xl border border-amber-200 bg-white p-4">
-                <p className="font-semibold text-slate-900">{o.title}</p>
-                {o.description ? (
-                  <p className="mt-1 line-clamp-2 text-xs text-slate-600">{o.description}</p>
+                <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+                  {o.number || o.title}
+                </p>
+                <p className="mt-1 font-semibold text-slate-900">
+                  {o.hostCompany || hostCompany}
+                </p>
+                {o.projectTitle ? (
+                  <p className="text-sm text-slate-700">{o.projectTitle}</p>
                 ) : null}
-                <div className="mt-3 flex flex-wrap gap-2">
+                <p className="mt-1 text-sm text-slate-600">
+                  {o.lineSummary || o.subject || o.description || o.title}
+                </p>
+                {o.requestedDeliveryAt ? (
+                  <p className="mt-2 text-xs font-semibold text-slate-800">
+                    Livraison demandée :{" "}
+                    {new Date(o.requestedDeliveryAt).toLocaleString("fr-FR", {
+                      day: "numeric",
+                      month: "long",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                ) : null}
+                <div className="mt-3">
                   <Link
-                    href={`/dashboard/commandes?confirm=${o.id}`}
+                    href={`/dashboard/commandes/${o.id}`}
                     className="rounded-lg bg-[#1d4ed8] px-3 py-1.5 text-xs font-semibold text-white"
                   >
-                    Confirmer la livraison
-                  </Link>
-                  <Link
-                    href={`/dashboard/commandes?propose=${o.id}`}
-                    className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700"
-                  >
-                    Proposer une autre date
+                    Voir la commande
                   </Link>
                 </div>
               </li>
@@ -286,13 +317,52 @@ export function DemoFournisseurHome({
       </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">
+          Prochaines livraisons
+        </h2>
+        {upcoming.length === 0 ? (
+          <p className="mt-3 text-sm text-slate-500">Aucune livraison confirmée pour l’instant.</p>
+        ) : (
+          <ul className="mt-3 space-y-2 text-sm">
+            {upcoming.map((o) => (
+              <li key={o.id}>
+                <Link
+                  href={`/dashboard/commandes/${o.id}`}
+                  className="font-semibold text-[#1d4ed8] hover:underline"
+                >
+                  {o.number || o.title}
+                </Link>
+                {o.requestedDeliveryAt
+                  ? ` — ${new Date(o.requestedDeliveryAt).toLocaleString("fr-FR", {
+                      day: "numeric",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}`
+                  : ""}
+              </li>
+            ))}
+          </ul>
+        )}
+        <Link
+          href="/dashboard/commandes"
+          className="mt-3 inline-block text-sm font-semibold text-[#1d4ed8]"
+        >
+          Toutes les commandes →
+        </Link>
+      </section>
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">Messages</h2>
         <p className="mt-2 text-sm text-slate-600">
           {unreadHint && unreadHint > 0
             ? `${unreadHint} nouveau(x) message(s) — ${hostCompany}`
             : `Échanges avec ${hostCompany}`}
         </p>
-        <Link href="/dashboard/messagerie?view=chantiers&channel=FOURNISSEUR" className="mt-2 inline-block text-sm font-semibold text-[#1d4ed8]">
+        <Link
+          href="/dashboard/messagerie?view=chantiers&channel=FOURNISSEUR"
+          className="mt-2 inline-block text-sm font-semibold text-[#1d4ed8]"
+        >
           Ouvrir la messagerie →
         </Link>
       </section>

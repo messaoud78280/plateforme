@@ -50,7 +50,9 @@ export type PurchaseOrderAction =
   | "partial_receive"
   | "receive"
   | "close"
-  | "cancel";
+  | "cancel"
+  | "accept_proposal"
+  | "refuse_proposal";
 
 export function actionsForPurchaseOrderStatus(
   status: PurchaseOrderStatus,
@@ -71,9 +73,9 @@ export function actionsForPurchaseOrderStatus(
     { action: "refuse", label: "Refuser", next: "REFUSEE", from: ["A_VALIDER", "A_CONFIRMER"] },
     {
       action: "send_supplier",
-      label: "Envoyer au fournisseur",
-      next: "ENVOYEE_FOURNISSEUR",
-      from: ["VALIDEE", "BROUILLON"],
+      label: "Partager avec le fournisseur",
+      next: "A_CONFIRMER",
+      from: ["VALIDEE", "BROUILLON", "ENVOYEE_FOURNISSEUR", "A_CONFIRMER"],
     },
     {
       action: "mark_to_confirm",

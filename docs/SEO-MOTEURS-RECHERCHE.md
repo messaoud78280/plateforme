@@ -1,6 +1,6 @@
 # SEO multi-moteurs — BeWork
 
-> **Repositionnement éditorial (plateforme interne BTP)** — Le copy public des landings SEO met en avant BeWork comme **éditeur de plateforme interne** : vos équipes utilisent l’outil au quotidien ; BeWork configure, déploie, héberge et fait évoluer. Éviter les formulations « Confier une tâche », « Beworker exécute », « forfaits HT assistants », « on fait à votre place ». Pas de prix inventés hors étude. Après mise en prod de ce recentrage, **ping IndexNow** (`npm run seo:ping-indexnow`) et inspection des URLs concernées (Search Console / Bing Webmaster).
+> **Signature officielle** — « **Plateformes internes intelligentes pour le BTP** » (`BEWORK_BRAND_SIGNATURE` dans `src/lib/seo-keywords.ts`). Le copy public met en avant BeWork comme éditeur / intégrateur : vos équipes utilisent l’outil au quotidien ; BeWork configure, déploie, héberge et fait évoluer. Éviter les formulations « Confier une tâche », « Beworker exécute », « forfaits HT assistants », « on fait à votre place ». Pas de prix inventés hors étude. Après mise en prod, **ping IndexNow** (`npm run seo:ping-indexnow`) et inspection des URLs concernées (Search Console / Bing Webmaster).
 
 ## Moteurs classiques
 

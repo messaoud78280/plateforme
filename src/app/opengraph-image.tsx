@@ -1,8 +1,8 @@
 import { ImageResponse } from "next/og";
 import { BEWORK_OG_CONTENT_TYPE, BEWORK_OG_SIZE, BeWorkOgLayout } from "@/lib/bework-og-layout";
+import { BEWORK_BRAND_SIGNATURE } from "@/lib/seo-keywords";
 
-export const alt =
-  "BeWork — Plateformes internes intelligentes pour les entreprises du BTP";
+export const alt = `BeWork — ${BEWORK_BRAND_SIGNATURE}`;
 export const size = BEWORK_OG_SIZE;
 export const contentType = BEWORK_OG_CONTENT_TYPE;
 
@@ -10,7 +10,7 @@ export default function OpenGraphImage() {
   return new ImageResponse(
     (
       <BeWorkOgLayout
-        title="Plateformes internes avec IA pour le BTP"
+        title={BEWORK_BRAND_SIGNATURE}
         subtitle="Socle BeWork · modules adaptés · formation · évolution continue"
       />
     ),

@@ -1,12 +1,12 @@
 import type { MetadataRoute } from "next";
+import { BEWORK_BRAND_SIGNATURE, SEO_VALUE_PROPOSITION } from "@/lib/seo-keywords";
 import { SITE_URL } from "@/lib/site";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "BeWork — Plateformes internes avec IA pour le BTP",
+    name: `BeWork — ${BEWORK_BRAND_SIGNATURE}`,
     short_name: "BeWork",
-    description:
-      "BeWork conçoit, déploie et fait évoluer des plateformes internes BTP : vos équipes les utilisent au quotidien. FR · BE · CH · LU.",
+    description: SEO_VALUE_PROPOSITION,
     start_url: "/",
     display: "standalone",
     background_color: "#f8f9fb",

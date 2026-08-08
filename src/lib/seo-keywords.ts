@@ -3,10 +3,12 @@
  * Google utilise surtout le contenu et les titres ; `keywords` reste un signal secondaire.
  */
 
-/** Niche principale : plateforme interne intelligente pour entreprises du BTP. */
+/** Niche principale : plateformes internes intelligentes pour le BTP. */
 export const SEO_KEYWORDS_PLATEFORME = [
+  "plateformes internes intelligentes pour le BTP",
   "plateforme interne BTP",
   "plateforme intelligente BTP",
+  "plateformes internes BTP",
   "éditeur plateforme BTP",
   "logiciel chantier BTP",
   "environnement numérique BTP",
@@ -199,6 +201,12 @@ export const SEO_KEYWORDS_HOME: string[] = [
   "BeWork BTP",
 ];
 
+/**
+ * Signature courte officielle BeWork (header, titres SEO, OG, JSON-LD, llms.txt).
+ * Formulation exacte — ne pas altérer (singulier, « métiers », « IA », etc.).
+ */
+export const BEWORK_BRAND_SIGNATURE = "Plateformes internes intelligentes pour le BTP";
+
 /** Slogan BeWork — contenu, OG, JSON-LD, llms.txt. */
 export const BEWORK_SLOGAN = "Vos équipes pilotent. BeWork fait évoluer leur plateforme.";
 
@@ -211,15 +219,14 @@ export const BEWORK_AEO_DEFINITION =
   "BeWork conçoit, déploie et fait évoluer des plateformes internes intelligentes pour les entreprises du BTP. Chaque solution repose sur un socle technologique commun, enrichi de modules, de workflows et d’outils IA adaptés à l’organisation du client. Les collaborateurs de l’entreprise utilisent la plateforme au quotidien, tandis que BeWork assure son hébergement, sa maintenance, sa sécurité et son évolution.";
 
 /** Title SEO / OG racine (aligné home). */
-export const SEO_SITE_TITLE_DEFAULT = "BeWork | Plateformes internes avec IA pour le BTP";
+export const SEO_SITE_TITLE_DEFAULT = `BeWork | ${BEWORK_BRAND_SIGNATURE}`;
 
-export const SEO_SITE_TITLE_OG =
-  "BeWork — Plateformes internes intelligentes pour les entreprises du BTP";
+export const SEO_SITE_TITLE_OG = `BeWork — ${BEWORK_BRAND_SIGNATURE}`;
 
 /** Meta description site (layout racine) — ≤160 car. */
 export const SEO_VALUE_PROPOSITION =
-  "BeWork conçoit, déploie et fait évoluer des plateformes internes BTP : vos équipes les utilisent au quotidien. FR · BE · CH · LU.";
+  "BeWork : plateformes internes intelligentes pour le BTP — conçues, déployées et évolutives. Vos équipes les utilisent au quotidien. FR · BE · CH · LU.";
 
 /** Proposition courte (OG, Twitter). */
 export const SEO_VALUE_PROPOSITION_SHORT =
-  "Plateformes internes BTP : socle BeWork, modules adaptés, IA métier, évolution continue. FR · BE · CH · LU.";
+  "Plateformes internes intelligentes pour le BTP : socle BeWork, modules adaptés, IA métier, évolution continue. FR · BE · CH · LU.";

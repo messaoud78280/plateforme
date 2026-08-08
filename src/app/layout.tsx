@@ -7,6 +7,7 @@ import {
   SEO_KEYWORDS_GLOBAL,
   SEO_VALUE_PROPOSITION,
   SEO_VALUE_PROPOSITION_SHORT,
+  BEWORK_BRAND_SIGNATURE,
   BEWORK_SLOGAN,
   BEWORK_SLOGAN_DECISION,
   BEWORK_AEO_DEFINITION,
@@ -84,6 +85,7 @@ export const metadata: Metadata = {
   publisher: "BeWork",
   category: "business",
   keywords: [
+    BEWORK_BRAND_SIGNATURE,
     ...SEO_KEYWORDS_GLOBAL.filter((k) => !k.toLowerCase().includes("assistant") && !k.toLowerCase().includes("externalis")),
     "plateforme interne BTP",
     "analyse DCE BTP",
@@ -109,7 +111,7 @@ export const metadata: Metadata = {
         url: defaultOgImage,
         width: 1200,
         height: 630,
-        alt: "BeWork — Plateformes internes intelligentes pour les entreprises du BTP",
+        alt: `BeWork — ${BEWORK_BRAND_SIGNATURE}`,
       },
     ],
   },
@@ -161,7 +163,7 @@ const jsonLd = {
       url: SITE_URL,
       name: "BeWork",
       alternateName: [
-        "BeWork — plateformes internes intelligentes BTP",
+        `BeWork — ${BEWORK_BRAND_SIGNATURE}`,
         "BeWork — éditeur et intégrateur de plateforme métier",
         "BeWork plateforme BTP",
         "BeWork outils IA chantiers et marchés",
@@ -186,7 +188,7 @@ const jsonLd = {
       logo: { "@type": "ImageObject", url: defaultLogoImage, width: 512, height: 512 },
       image: defaultOgImage,
       description: BEWORK_AEO_DEFINITION,
-      slogan: BEWORK_SLOGAN,
+      slogan: `${BEWORK_BRAND_SIGNATURE}. ${BEWORK_SLOGAN}`,
       address: {
         "@type": "PostalAddress",
         streetAddress: "6 rue Henri Dunant",
@@ -239,12 +241,13 @@ const jsonLd = {
     {
       "@type": "ProfessionalService",
       "@id": `${SITE_URL}/#service`,
-      name: "BeWork — conception et évolution de plateformes internes BTP",
+      name: `BeWork — ${BEWORK_BRAND_SIGNATURE}`,
       description: `${BEWORK_AEO_DEFINITION} ${BEWORK_SLOGAN} ${BEWORK_SLOGAN_DECISION}`,
       url: SITE_URL,
       provider: { "@id": `${SITE_URL}/#organization` },
       areaServed: jsonLdExpandedAreaServed(),
       serviceType: [
+        BEWORK_BRAND_SIGNATURE,
         "Conception de plateforme métier BTP",
         "Déploiement et configuration",
         "Intégration d'outils d'intelligence artificielle",
@@ -266,8 +269,7 @@ const jsonLd = {
       applicationCategory: "BusinessApplication",
       operatingSystem: "Web",
       url: SITE_URL,
-      description:
-        "Plateforme interne BeWork : équipes, chantiers, documents, marchés et outils IA — utilisée par les collaborateurs du client ; BeWork assure hébergement, maintenance et évolution.",
+      description: `${BEWORK_BRAND_SIGNATURE} : équipes, chantiers, documents, marchés et outils IA — utilisée par les collaborateurs du client ; BeWork assure hébergement, maintenance et évolution.`,
       offers: {
         "@type": "Offer",
         url: absoluteUrl("/tarifs"),

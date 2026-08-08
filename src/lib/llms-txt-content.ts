@@ -5,7 +5,13 @@ import { BLOG_ARTICLES_SEO } from "@/content/blog-articles-seo";
 import { ASSISTANT_TRAVAUX_VILLE_PATHS, ASSISTANT_TRAVAUX_VILLES } from "@/lib/assistant-travaux-villes";
 import { SERVICE_PAGE_ORDER, SERVICE_PAGES, servicePagePath } from "@/content/service-pages";
 import { RESOURCE_EDITORIAL_SEO } from "@/lib/seo-resource-metadata";
-import { BEWORK_AEO_DEFINITION, BEWORK_SLOGAN, BEWORK_SLOGAN_DECISION, getGeoAeoBriefItems } from "@/lib/seo";
+import {
+  BEWORK_AEO_DEFINITION,
+  BEWORK_BRAND_SIGNATURE,
+  BEWORK_SLOGAN,
+  BEWORK_SLOGAN_DECISION,
+  getGeoAeoBriefItems,
+} from "@/lib/seo";
 import { formatPriceLabelFr, getMarketingPriceBoundsLabels } from "@/lib/bework-public-offers";
 import { buildLlmsTarifsOffersSection } from "@/lib/seo-tarifs";
 import { buildLlmsAiPolicySection } from "@/lib/seo-ai-discovery";
@@ -62,7 +68,7 @@ export function buildLlmsTxt(): string {
 
   return `# BeWork
 
-> ${BEWORK_AEO_DEFINITION} Marchés : France, Belgique, Suisse et Luxembourg. Capacités plateforme : candidatures, analyse DCE, organisation de réponse, suivi admin post-attribution (Chorus Pro, réserves, DOE). Slogan : « ${BEWORK_SLOGAN} ». Accroche : « ${BEWORK_SLOGAN_DECISION} ».
+> Signature : « ${BEWORK_BRAND_SIGNATURE} ». ${BEWORK_AEO_DEFINITION} Marchés : France, Belgique, Suisse et Luxembourg. Capacités plateforme : candidatures, analyse DCE, organisation de réponse, suivi admin post-attribution (Chorus Pro, réserves, DOE). Slogan : « ${BEWORK_SLOGAN} ». Accroche : « ${BEWORK_SLOGAN_DECISION} ».
 
 ${buildLlmsAiPolicySection()}
 
@@ -105,7 +111,7 @@ ${line("Cas clients", "/cas-clients")}
 
 ## Pages clés
 
-${line("Accueil", "/", "Éditeur de plateformes internes intelligentes pour le BTP.")}
+${line("Accueil", "/", "Plateformes internes intelligentes pour le BTP.")}
 ${line("Capacités plateforme (AO, DCE, marchés)", "/assistants-administratifs-taches", "Modules et workflows : candidatures/DCE, organisation de réponse et suivi admin marché public — utilisés par vos équipes.")}
 ${line("Services", "/services")}
 ${line("Tarifs", "/tarifs", "Mise en place + abonnement sur étude — bework.fr/tarifs.")}

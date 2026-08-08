@@ -9,7 +9,7 @@ const TRUST = [
   "Confidentialité renforcée",
 ] as const;
 
-/** Hero — plateforme interne ; BeWork = éditeur / intégrateur. */
+/** Hero — plateformes internes intelligentes pour le BTP. */
 export function HomePlatformHero() {
   return (
     <section

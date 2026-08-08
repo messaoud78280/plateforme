@@ -135,8 +135,8 @@ export default function Page() {
 
       <h2>Pourquoi BeWork ?</h2>
       <p>
-        Éditeur de plateforme BTP terrain et administrative, pas de remplacement du conducteur de travaux, process
-        cadré et validation avant envoi. Avant attribution, voir{" "}
+        Plateformes internes intelligentes pour le BTP — terrain et administratif, sans remplacement du conducteur de
+        travaux, process cadré et validation avant envoi. Avant attribution, voir{" "}
         <Link href="/reponse-appel-offres-btp" className="text-[#1d4ed8] hover:underline">
           réponse aux appels d&apos;offres
         </Link>{" "}

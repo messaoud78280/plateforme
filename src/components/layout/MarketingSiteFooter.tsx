@@ -5,6 +5,7 @@ import { MarketingSitePreFooter } from "@/components/layout/MarketingSitePreFoot
 import { BTP_PAIN_PAGE_CLUSTER } from "@/lib/btp-pain-pages";
 import { EXTERNALISATION_ADMIN_BT_NAV } from "@/lib/externalisation-administrative-btp-geo";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
+import { BEWORK_BRAND_SIGNATURE } from "@/lib/seo-keywords";
 import { SITE_URL, getOrgSameAs } from "@/lib/site";
 
 const COL_LINK =
@@ -85,9 +86,10 @@ export function MarketingSiteFooter() {
                 Be<span className="text-[color:var(--accent-500)]">Work</span>
               </span>
             </Link>
-            <p className="mt-4 text-base leading-relaxed text-slate-400">
-              BeWork conçoit, déploie et fait évoluer des plateformes internes intelligentes pour les entreprises du BTP.
-              Vos équipes les utilisent au quotidien.
+            <p className="mt-3 text-sm font-medium leading-snug text-slate-300">{BEWORK_BRAND_SIGNATURE}</p>
+            <p className="mt-3 text-base leading-relaxed text-slate-400">
+              BeWork conçoit, déploie et fait évoluer ces plateformes pour les entreprises du BTP. Vos équipes les
+              utilisent au quotidien.
             </p>
             <p className="mt-4 text-xs leading-relaxed text-slate-500">
               Société française — Éditeur et partenaire d&apos;évolution.

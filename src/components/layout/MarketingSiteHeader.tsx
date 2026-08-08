@@ -8,6 +8,7 @@ import { MarketingDisclosure } from "@/components/marketing/MarketingDisclosure"
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import { MarketingHeaderBlueprintDecor } from "@/components/layout/MarketingHeaderBlueprintDecor";
 import { CTA_PRIMARY, CTA_SECONDARY } from "@/components/marketing/marketingCtaStyles";
+import { BEWORK_BRAND_SIGNATURE } from "@/lib/seo-keywords";
 
 type Props = {
   /** Fond opaque (pages sur fond déjà uni) */
@@ -233,8 +234,8 @@ export function MarketingSiteHeader({ plainBg = false }: Props) {
           >
             <BeWorkLogo size="sm" priority />
           </Link>
-          <p className="inline-flex max-w-full items-center rounded-full border border-[#1d4ed8]/20 bg-[#eff6ff] px-2.5 py-0.5 text-[10px] font-semibold tracking-wide text-[#1d4ed8] sm:px-3 sm:text-[11px]">
-            Éditeur de plateforme métier BTP
+          <p className="max-w-[11.5rem] text-[10px] font-medium leading-snug tracking-tight text-[#1d4ed8]/90 sm:max-w-none sm:whitespace-nowrap sm:text-[11px]">
+            {BEWORK_BRAND_SIGNATURE}
           </p>
         </div>
 

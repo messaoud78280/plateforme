@@ -88,8 +88,8 @@ export function AssistantTravauxGeoLanding({ geoKey }: { geoKey: AssistantTravau
 
       <h2>Pourquoi BeWork ?</h2>
       <p>
-        Éditeur de plateforme métier BTP (pas prestation administrative généraliste), outils IA pour accélérer le tri et
-        la mise en forme, accompagnement de déploiement et modalités sur{" "}
+        Plateformes internes intelligentes pour le BTP (pas prestation administrative généraliste), outils IA pour
+        accélérer le tri et la mise en forme, accompagnement de déploiement et modalités sur{" "}
         <Link href="/tarifs" className="text-[#1d4ed8] hover:underline">
           bework.fr/tarifs
         </Link>

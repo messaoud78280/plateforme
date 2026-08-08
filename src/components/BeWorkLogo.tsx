@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { BEWORK_BRAND_SIGNATURE } from "@/lib/seo-keywords";
 
 /** Logo wordmark header BeWork (Be noir + Work bleu) */
 const LOGO_PATH = "/BeWork.logo.wordmark.png";
@@ -50,7 +51,7 @@ export function BeWorkLogo({
   taglineSub,
   priority = false,
 }: BeWorkLogoProps) {
-  const defaultTagline = "Plateformes intelligentes pour le BTP";
+  const defaultTagline = BEWORK_BRAND_SIGNATURE;
   const box = sizeBox[size];
   const displayHeight = box.heightPx;
   const displayWidth = Math.round(displayHeight * LOGO_RATIO);

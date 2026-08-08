@@ -125,7 +125,8 @@ export default function Page() {
 
       <h2>Pourquoi BeWork ?</h2>
       <p>
-        Éditeur de plateforme métier BTP, pas de promesse de gain garanti, process cadré et tarification sur étude.
+        Plateformes internes intelligentes pour le BTP — pas de promesse de gain garanti, process cadré et tarification
+        sur étude.
         Après attribution, voir{" "}
         <Link href="/gestion-marche-public-btp" className="text-[#1d4ed8] hover:underline">
           gestion administrative après attribution

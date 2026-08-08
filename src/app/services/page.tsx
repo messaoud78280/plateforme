@@ -77,9 +77,8 @@ export default function ServicesHubPage() {
           <h1 className="font-heading text-3xl font-bold tracking-tight text-black md:text-[2.35rem]">Capacités de la plateforme BeWork</h1>
           <p className="mt-6 text-lg leading-relaxed text-slate-700">
             Chaque page présente une capacité métier de la plateforme (module, workflow ou outil IA) et renvoie vers les
-            ressources détaillées. BeWork est un{" "}
-            <strong>éditeur de plateformes internes BTP</strong> pour entreprises en France, Belgique, Suisse et
-            Luxembourg.
+            ressources détaillées. BeWork propose des{" "}
+            <strong>plateformes internes intelligentes pour le BTP</strong> — France, Belgique, Suisse et Luxembourg.
           </p>
           <p className="mt-4 text-base leading-relaxed text-slate-600">
             <span className="font-semibold text-slate-800">En résumé :</span> vos équipes utilisent la plateforme au

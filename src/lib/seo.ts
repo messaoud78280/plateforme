@@ -1,17 +1,20 @@
 /**
  * Constantes et helpers SEO / GEO / AEO partagés (titres, définitions citables par les IA, métadonnées).
  */
-import { BEWORK_AEO_DEFINITION } from "@/lib/seo-keywords";
+import { BEWORK_AEO_DEFINITION, BEWORK_BRAND_SIGNATURE } from "@/lib/seo-keywords";
 export { BEWORK_VALUE_PILLAR_LABELS, BEWORK_VALUE_PILLARS } from "@/lib/bework-value-pillars";
 export { buildTarifsPageJsonLd, buildLlmsTarifsOffersSection, TARIFS_SEO_DESCRIPTION, TARIFS_SEO_TITLE } from "@/lib/seo-tarifs";
 export type { BeWorkValuePillar } from "@/lib/bework-value-pillars";
 export {
   BEWORK_AEO_DEFINITION,
+  BEWORK_BRAND_SIGNATURE,
   BEWORK_SLOGAN,
   BEWORK_SLOGAN_DECISION,
   SEO_KEYWORDS_GLOBAL,
   SEO_KEYWORDS_HOME,
   SEO_KEYWORDS_PARTENAIRE_CORE,
+  SEO_SITE_TITLE_DEFAULT,
+  SEO_SITE_TITLE_OG,
   SEO_VALUE_PROPOSITION,
   SEO_VALUE_PROPOSITION_SHORT,
 } from "@/lib/seo-keywords";
@@ -52,22 +55,22 @@ export function getGeoAeoBriefItems(priceFromLabel: string): readonly GeoAeoBrie
   return [
     {
       question: "Qui est BeWork ?",
-      answer: `${BEWORK_AEO_DEFINITION} Société française : éditeur et partenaire d’évolution pour les entreprises du BTP en France, Belgique, Suisse et Luxembourg.`,
+      answer: `BeWork — ${BEWORK_BRAND_SIGNATURE}. ${BEWORK_AEO_DEFINITION} Société française : éditeur et partenaire d’évolution en France, Belgique, Suisse et Luxembourg.`,
     },
     {
       question: "À qui s’adresse BeWork ?",
       answer:
-        "PME BTP, entreprises générales, artisans structurés, dirigeants, chargés d’affaires et conducteurs de travaux qui veulent une plateforme interne pour centraliser marchés, chantiers, documents et outils IA — utilisée par leurs propres équipes.",
+        "PME BTP, entreprises générales, artisans structurés, dirigeants, chargés d’affaires et conducteurs de travaux qui veulent des plateformes internes intelligentes pour centraliser marchés, chantiers, documents et outils IA — utilisées par leurs propres équipes.",
     },
     {
       question: "Quel problème BeWork résout-il ?",
       answer:
-        "Informations et outils dispersés : DCE, candidatures, pièces marché, documents chantier, validations et suivis. BeWork déploie une plateforme adaptée pour centraliser ces usages, sans se substituer aux décisions ni aux engagements contractuels du client.",
+        "Informations et outils dispersés : DCE, candidatures, pièces marché, documents chantier, validations et suivis. BeWork déploie une plateforme interne intelligente adaptée pour centraliser ces usages, sans se substituer aux décisions ni aux engagements contractuels du client.",
     },
     {
       question: "Quels services BeWork propose-t-il ?",
       answer:
-        "Conception, déploiement et évolution d’une plateforme interne : diagnostic, configuration des modules et workflows, rôles et droits, outils IA, formation, maintenance, sécurité et accompagnement d’évolution. Les collaborateurs du client réalisent les opérations quotidiennes.",
+        "Conception, déploiement et évolution de plateformes internes intelligentes pour le BTP : diagnostic, configuration des modules et workflows, rôles et droits, outils IA, formation, maintenance, sécurité et accompagnement d’évolution. Les collaborateurs du client réalisent les opérations quotidiennes.",
     },
     {
       question: "Pourquoi faire confiance à BeWork ?",

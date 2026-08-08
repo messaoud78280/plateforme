@@ -35,13 +35,13 @@ import {
   hreflangFrancophonieLanguages,
   metaDescriptionFrancophonie,
 } from "@/lib/seo-francophonie";
-import { SEO_KEYWORDS_HOME } from "@/lib/seo-keywords";
+import { BEWORK_BRAND_SIGNATURE, SEO_KEYWORDS_HOME, SEO_SITE_TITLE_DEFAULT } from "@/lib/seo-keywords";
 import { PLAUSIBLE_EVENTS, plausibleTrackProps } from "@/lib/plausible";
 import { SITE_URL } from "@/lib/site";
 
-const HOME_META_TITLE = "BeWork | Plateformes internes avec IA pour les entreprises du BTP";
+const HOME_META_TITLE = SEO_SITE_TITLE_DEFAULT;
 const HOME_META_DESCRIPTION = metaDescriptionFrancophonie(
-  "BeWork conçoit, déploie et fait évoluer des plateformes internes pour le BTP : chantiers, marchés, documents et outils IA utilisés par vos équipes",
+  "BeWork — plateformes internes intelligentes pour le BTP : chantiers, marchés, documents et outils IA utilisés par vos équipes",
 );
 
 const HOME_FAQ_ITEMS = [
@@ -79,6 +79,7 @@ export const metadata: Metadata = {
   },
   keywords: [
     ...SEO_KEYWORDS_HOME,
+    BEWORK_BRAND_SIGNATURE,
     "plateforme interne BTP",
     "plateforme intelligente BTP",
     "gestion chantier documentaire",
@@ -100,7 +101,7 @@ export const metadata: Metadata = {
         url: `${SITE_URL}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: "BeWork — Plateformes internes intelligentes pour les entreprises du BTP",
+        alt: `BeWork — ${BEWORK_BRAND_SIGNATURE}`,
       },
     ],
   },
@@ -118,11 +119,12 @@ const homeJsonLd = {
       "@type": "WebPage",
       "@id": `${SITE_URL}/#accueil`,
       url: SITE_URL,
-      name: "BeWork — Plateformes internes intelligentes pour les entreprises du BTP",
+      name: `BeWork — ${BEWORK_BRAND_SIGNATURE}`,
       inLanguage: "fr-FR",
       description: HOME_META_DESCRIPTION,
       isPartOf: { "@id": `${SITE_URL}/#website` },
       about: [
+        { "@type": "Thing", name: BEWORK_BRAND_SIGNATURE },
         { "@type": "Thing", name: "Plateforme interne BTP" },
         { "@type": "Thing", name: "Analyse de marchés publics et privés" },
         { "@type": "Thing", name: "Outils d’intelligence artificielle BTP" },

@@ -84,3 +84,47 @@ export function formatDueLabel(nextActionAt: Date | null | undefined): string {
     minute: "2-digit",
   });
 }
+
+/** Libellé échéance compact pour Kanban (données existantes uniquement). */
+export function formatKanbanDueLabel(
+  nextActionAt: Date | null | undefined,
+  now = new Date(),
+): string | null {
+  if (!nextActionAt) return null;
+  const startToday = new Date(now);
+  startToday.setHours(0, 0, 0, 0);
+  const startDue = new Date(nextActionAt);
+  startDue.setHours(0, 0, 0, 0);
+  const dayDiff = Math.round((startDue.getTime() - startToday.getTime()) / 86400000);
+  if (dayDiff === 0) return "Aujourd’hui";
+  if (dayDiff === 1) return "Demain";
+  if (dayDiff === -1) return "En retard de 1 jour";
+  if (dayDiff < -1) return `En retard de ${-dayDiff} jours`;
+  return nextActionAt.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+}
+
+/**
+ * Temps dans l’étape depuis un changement de statut (timeline).
+ * Ne pas appeler avec updatedAt générique.
+ */
+export function formatDaysInStepLabel(
+  statusEnteredAt: Date | null | undefined,
+  now = new Date(),
+): string | null {
+  if (!statusEnteredAt) return null;
+  const startEntered = new Date(statusEnteredAt);
+  startEntered.setHours(0, 0, 0, 0);
+  const startToday = new Date(now);
+  startToday.setHours(0, 0, 0, 0);
+  const days = Math.round((startToday.getTime() - startEntered.getTime()) / 86400000);
+  if (days <= 0) return "Aujourd’hui";
+  if (days === 1) return "Depuis 1 jour";
+  return `Depuis ${days} jours`;
+}
+
+export function initialsFromName(name: string | null | undefined): string {
+  if (!name?.trim()) return "?";
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
+  return `${parts[0]![0] ?? ""}${parts[parts.length - 1]![0] ?? ""}`.toUpperCase();
+}

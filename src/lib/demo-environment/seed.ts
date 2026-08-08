@@ -770,6 +770,21 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
     console.error("[demo-seed] workflow:", e);
   }
 
+  // —— W2-C : répartition lisible du tableau de suivi ——
+  try {
+    const { listDemoPersonaUsers } = await import("./seed-personas");
+    const personas = await listDemoPersonaUsers({ rootUserId: clientId, loginIdentifier });
+    const karim = personas.find((p) => p.key === "conducteur");
+    const { ensureKanbanReadabilityDemo } = await import("./kanban-readability");
+    await ensureKanbanReadabilityDemo({
+      rootUserId: clientId,
+      organizationId,
+      karimUserId: karim?.id ?? null,
+    });
+  } catch (e) {
+    console.error("[demo-seed] kanban readability:", e);
+  }
+
   return {
     projectIds: [projectVictor.id, projectRepublique.id, projectAlpha.id],
     companyLabel: companyName,

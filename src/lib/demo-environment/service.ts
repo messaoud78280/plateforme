@@ -232,9 +232,21 @@ export async function enrichDemoPersonas(demoId: string): Promise<{ ok: true } |
   });
   const { ensureDefaultWorkflow } = await import("@/lib/workflow/service");
   await ensureDefaultWorkflow(demo.organizationId);
+  const { listDemoPersonaUsers } = await import("./seed-personas");
+  const personas = await listDemoPersonaUsers({
+    rootUserId: demo.rootUserId,
+    loginIdentifier: demo.loginIdentifier,
+  });
+  const karim = personas.find((p) => p.key === "conducteur");
+  const { ensureKanbanReadabilityDemo } = await import("./kanban-readability");
+  await ensureKanbanReadabilityDemo({
+    rootUserId: demo.rootUserId,
+    organizationId: demo.organizationId,
+    karimUserId: karim?.id ?? null,
+  });
   await prisma.demoEnvironment.update({
     where: { id: demoId },
-    data: { seedVersion: "v3-coherence" },
+    data: { seedVersion: "v3-kanban-w2c" },
   });
   return { ok: true };
 }

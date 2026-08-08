@@ -152,6 +152,7 @@ export default async function FichesSuiviPage({
 
   let kanbanColumns: { statusKey: string; label: string; colorKey: string; sortOrder: number }[] =
     [];
+  let kanbanSheets = items;
   if (view === "tableau") {
     const orgId = await ensureOrganizationForOwner(ownerUserId);
     if (orgId) {
@@ -167,6 +168,26 @@ export default async function FichesSuiviPage({
           sortOrder: s.sortOrder,
         }));
     }
+
+    // Temps dans l’étape = dernière transition statut (timeline), jamais updatedAt seul
+    const sheetIds = items.map((i) => i.id);
+    const statusEnteredAt = new Map<string, string>();
+    if (sheetIds.length > 0) {
+      const statusEvents = await prisma.followUpTimelineEvent.findMany({
+        where: { sheetId: { in: sheetIds }, kind: "statut" },
+        select: { sheetId: true, occurredAt: true },
+        orderBy: { occurredAt: "desc" },
+      });
+      for (const e of statusEvents) {
+        if (!statusEnteredAt.has(e.sheetId)) {
+          statusEnteredAt.set(e.sheetId, e.occurredAt.toISOString());
+        }
+      }
+    }
+    kanbanSheets = items.map((i) => ({
+      ...i,
+      statusEnteredAt: statusEnteredAt.get(i.id) ?? null,
+    }));
   }
 
   return (
@@ -237,8 +258,9 @@ export default async function FichesSuiviPage({
         ) : (
           <FollowUpKanban
             columns={kanbanColumns}
-            sheets={items}
+            sheets={kanbanSheets}
             canEdit={canEditFollowUpBoard(session.user)}
+            currentUserId={session.user.id}
           />
         )
       ) : (

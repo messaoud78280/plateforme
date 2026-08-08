@@ -13,6 +13,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { BackLink } from "@/components/ui/BackLink";
 import { ensureOrganizationForOwner } from "@/lib/organization/access";
 import { ensureDefaultWorkflow } from "@/lib/workflow/service";
+import { canEditFollowUpBoard } from "@/lib/follow-up/access";
 
 export const dynamic = "force-dynamic";
 
@@ -234,7 +235,11 @@ export default async function FichesSuiviPage({
             .
           </div>
         ) : (
-          <FollowUpKanban columns={kanbanColumns} sheets={items} />
+          <FollowUpKanban
+            columns={kanbanColumns}
+            sheets={items}
+            canEdit={canEditFollowUpBoard(session.user)}
+          />
         )
       ) : (
         <FollowUpBoard sheets={items} activeFilter={filter} />

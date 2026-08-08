@@ -3,7 +3,11 @@ import { getServerSession } from "next-auth";
 import type { FollowUpSheetStatus, FollowUpUrgency } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { canAccessFollowUpSheet, followUpSheetInclude } from "@/lib/follow-up/access";
+import {
+  canAccessFollowUpSheet,
+  canEditFollowUpSheet,
+  followUpSheetInclude,
+} from "@/lib/follow-up/access";
 import { colorKeyForStatus } from "@/lib/follow-up/types";
 import { serializeFollowUpSheet } from "@/lib/follow-up/serialize";
 import { appendFollowUpTimeline } from "@/lib/follow-up/timeline";
@@ -66,6 +70,12 @@ export async function PATCH(request: Request, ctx: Ctx) {
   const { id } = await ctx.params;
   if (!(await canAccessFollowUpSheet(session.user, id))) {
     return NextResponse.json({ error: "Introuvable" }, { status: 404 });
+  }
+  if (!(await canEditFollowUpSheet(session.user, id))) {
+    return NextResponse.json(
+      { error: "Cette transition n’est pas autorisée." },
+      { status: 403 },
+    );
   }
 
   const body = (await request.json()) as Record<string, unknown>;
@@ -150,13 +160,20 @@ export async function PATCH(request: Request, ctx: Ctx) {
       organizationId: sheet.organizationId,
       ownerUserId: sheet.ownerUserId,
     });
-    const label = resolveStatusLabel(String(body.status), workflow);
+    const fromLabel = resolveStatusLabel(existing.status, workflow);
+    const toLabel = resolveStatusLabel(String(body.status), workflow);
+    const source =
+      body.source === "kanban" || body.source === "tableau"
+        ? "Source : Tableau de suivi"
+        : body.source === "menu"
+          ? "Source : Menu changer d’étape"
+          : null;
     await appendFollowUpTimeline({
       sheetId: id,
       authorId: session.user.id,
       kind: "statut",
-      label: `Statut → ${label}`,
-      detail: String(body.status),
+      label: `${fromLabel} → ${toLabel}`,
+      detail: [existing.status, "→", String(body.status), source].filter(Boolean).join(" "),
     });
   }
   if (body.nextAction && String(body.nextAction) !== (existing.nextAction ?? "")) {

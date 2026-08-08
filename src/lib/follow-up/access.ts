@@ -41,6 +41,32 @@ export async function canAccessFollowUpSheet(
   return Boolean(found);
 }
 
+/**
+ * Modification fiche (statut Kanban, etc.) : accès + non externe.
+ * La sécurité ne repose pas sur le seul masquage UI.
+ */
+export async function canEditFollowUpSheet(
+  sessionUser: SessionUser & { personType?: string | null; role?: string | null },
+  sheetId: string,
+): Promise<boolean> {
+  if (!(await canAccessFollowUpSheet(sessionUser, sheetId))) return false;
+  const personType = sessionUser.personType;
+  if (personType && personType !== "INTERNAL") return false;
+  // Staff BeWork : lecture large, pas d’édition métier client
+  if (isBeworkStaff(sessionUser)) return false;
+  return true;
+}
+
+/** Droit global d’éditer des fiches (pour activer le DnD côté UI). */
+export function canEditFollowUpBoard(
+  sessionUser: { personType?: string | null; role?: string | null },
+): boolean {
+  const personType = sessionUser.personType;
+  if (personType && personType !== "INTERNAL") return false;
+  if (isBeworkStaff(sessionUser)) return false;
+  return true;
+}
+
 export const followUpSheetInclude = {
   assignee: { select: { id: true, name: true, email: true } },
   createdBy: { select: { id: true, name: true, email: true } },

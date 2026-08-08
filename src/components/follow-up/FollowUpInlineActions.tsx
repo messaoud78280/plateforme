@@ -97,7 +97,7 @@ export function FollowUpInlineActions({
         onClick={() => void run({ action: "done" })}
         className="rounded-md bg-emerald-600 px-2 py-1 text-[10px] font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
       >
-        Fait
+        Marquer comme fait
       </button>
       <button
         type="button"

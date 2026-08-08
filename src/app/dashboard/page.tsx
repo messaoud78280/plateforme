@@ -20,7 +20,7 @@ import { UpcomingRdvSection } from "@/components/dashboard/UpcomingRdvSection";
 import { BackLink } from "@/components/ui/BackLink";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
-import { countATraiter } from "@/lib/a-traiter/collect";
+import { summarizeATraiter } from "@/lib/a-traiter/collect";
 import { listUpcomingAppointments } from "@/lib/appointments/upcoming";
 import { DemoHomeDashboard } from "@/components/demo-environment/DemoHomeDashboard";
 import { collectDemoHomeData } from "@/lib/demo-environment/dashboard-stats";
@@ -53,15 +53,21 @@ export default async function DashboardPage({
   const isClient = session.user.role === "CLIENT";
   const clientId = session.user.id;
 
-  let aTraiterTotal = 0;
+  let aTraiterSummary = {
+    total: 0,
+    hotCount: 0,
+    attentionCounts: { CRITIQUE: 0, URGENT: 0, IMPORTANT: 0, A_SURVEILLER: 0 },
+  };
   try {
-    aTraiterTotal = await countATraiter({
+    aTraiterSummary = await summarizeATraiter({
       id: session.user.id,
       role: session.user.role,
+      personType: session.user.personType ?? null,
     });
   } catch {
-    aTraiterTotal = 0;
+    /* ignore */
   }
+  const aTraiterTotal = aTraiterSummary.total;
 
   const upcomingRdvs = await listUpcomingAppointments(
     {
@@ -749,7 +755,12 @@ export default async function DashboardPage({
     return (
       <div className="space-y-8">
         <BackLink href="/">Retour à l&apos;accueil</BackLink>
-        <ATraiterHomeBanner total={aTraiterTotal} />
+        <ATraiterHomeBanner
+          total={aTraiterTotal}
+          critique={aTraiterSummary.attentionCounts.CRITIQUE}
+          urgent={aTraiterSummary.attentionCounts.URGENT}
+          important={aTraiterSummary.attentionCounts.IMPORTANT}
+        />
         <UpcomingRdvSection appointments={upcomingRdvs} compact />
         <ClientDashboardContent
           userName={session.user?.name ?? null}
@@ -781,7 +792,12 @@ export default async function DashboardPage({
     return (
       <div className="space-y-8">
         <BackLink href="/">Retour à l&apos;accueil</BackLink>
-        <ATraiterHomeBanner total={aTraiterTotal} />
+        <ATraiterHomeBanner
+          total={aTraiterTotal}
+          critique={aTraiterSummary.attentionCounts.CRITIQUE}
+          urgent={aTraiterSummary.attentionCounts.URGENT}
+          important={aTraiterSummary.attentionCounts.IMPORTANT}
+        />
         <UpcomingRdvSection appointments={upcomingRdvs} compact />
         <AgentDashboardContent
           userName={session.user?.name ?? null}
@@ -800,7 +816,12 @@ export default async function DashboardPage({
   return (
     <div className="space-y-8">
       <BackLink href="/">Retour à l&apos;accueil</BackLink>
-      <ATraiterHomeBanner total={aTraiterTotal} />
+      <ATraiterHomeBanner
+        total={aTraiterTotal}
+        critique={aTraiterSummary.attentionCounts.CRITIQUE}
+        urgent={aTraiterSummary.attentionCounts.URGENT}
+        important={aTraiterSummary.attentionCounts.IMPORTANT}
+      />
       <UpcomingRdvSection appointments={upcomingRdvs} />
       <ScrollToMessages />
 

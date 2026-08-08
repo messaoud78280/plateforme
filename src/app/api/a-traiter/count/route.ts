@@ -14,6 +14,7 @@ export async function GET() {
     const total = await countATraiter({
       id: session.user.id,
       role: session.user.role,
+      personType: session.user.personType ?? null,
     });
     return NextResponse.json({ total });
   } catch (e) {

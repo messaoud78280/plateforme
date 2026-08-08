@@ -28,6 +28,7 @@
     "db:harmonize-lots-remote": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/run-remote-harmonization.ts --apply",
     "test:demo-environment": "node --import tsx scripts/test-demo-environment.ts",
     "test:follow-up-attention": "npx tsx scripts/test-follow-up-attention.ts",
+    "test:a-traiter-board": "npx tsx scripts/test-a-traiter-board.ts",
     "db:cleanup-chantier-resources": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/run-chantier-resource-cleanup.ts",
     "db:sync-chantier-from-library": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/sync-library-to-chantier.ts",
     "db:studio": "prisma studio",

@@ -1,13 +1,17 @@
 /**
  * Boîte « À traiter » unifiée — une seule vue pour savoir qui doit agir.
- * Agrège missions (validation client / A_VALIDER), alertes, pièces manquantes
- * et blocages critiques Pilotage. Pas de 4e messagerie : ce sont des actions
- * avec lien vers le bon écran métier.
+ *
+ * W3-B : les fiches de suivi passent par evaluateFollowUpAttention (W3-A).
+ * Les autres sources (missions, pièces, blocages…) restent agrégées à part.
  */
 
 import { prisma } from "@/lib/prisma";
 import { isAgencyOrManager, isAgent, isClientRole, type SessionUser } from "@/lib/authz";
-import { taskWhereForClientUser, projectWhereForClientUser } from "@/lib/organization/access";
+import {
+  taskWhereForClientUser,
+  projectWhereForClientUser,
+  ensureOrganizationForOwner,
+} from "@/lib/organization/access";
 import { isBlockerCritical, isBlockerOpen } from "@/lib/pilotage/status-enums";
 import { PILOTAGE_LIST_PATH } from "@/lib/pilotage/constants";
 import {
@@ -15,8 +19,14 @@ import {
   resolveFollowUpOwnerUserId,
 } from "@/lib/follow-up/access";
 import { getFollowUpSettings } from "@/lib/follow-up/settings";
-import { computeUrgencyFromDue, formatDelay, formatDueLabel } from "@/lib/follow-up/urgency";
-import { URGENCY_LABELS } from "@/lib/follow-up/types";
+import { loadAttentionForSheets } from "@/lib/follow-up/attention/batch";
+import {
+  buildAttentionCard,
+  countAttentionByUrgency,
+  countHotAttention,
+  sortAttentionCards,
+  type ATraiterAttentionCard,
+} from "@/lib/a-traiter/attention-board";
 
 export type ATraiterSection = "bloquant" | "a_valider" | "urgent" | "relance";
 
@@ -26,7 +36,7 @@ export type ATraiterItem = {
   title: string;
   meta: string;
   href: string;
-  source: "mission" | "alerte" | "piece" | "blocage" | "notification" | "fiche" | "message";
+  source: "mission" | "alerte" | "piece" | "blocage" | "notification" | "message";
   createdAt: Date;
   urgencyLabel?: string;
   assigneeName?: string | null;
@@ -35,6 +45,11 @@ export type ATraiterItem = {
 };
 
 export type ATraiterSnapshot = {
+  /** Diagnostics W3-A (une carte par fiche, sans NORMAL). */
+  attentionCards: ATraiterAttentionCard[];
+  attentionCounts: ReturnType<typeof countAttentionByUrgency>;
+  hotCount: number;
+  /** Missions, pièces, blocages… (hors fiches). */
   items: ATraiterItem[];
   counts: Record<ATraiterSection, number>;
   total: number;
@@ -53,16 +68,32 @@ function push(items: ATraiterItem[], item: ATraiterItem) {
 export async function collectATraiter(user: {
   id: string;
   role?: string | null;
+  personType?: string | null;
 }): Promise<ATraiterSnapshot> {
   const items: ATraiterItem[] = [];
   const sessionUser: SessionUser = user;
 
-  if (isClientRole(sessionUser)) {
+  // Externes (client / fournisseur hors propriétaire org) : pas le centre interne complet
+  const externalPortal =
+    user.personType === "CLIENT_EXT" || user.personType === "SUPPLIER";
+
+  if (isClientRole(sessionUser) && !externalPortal) {
     await collectForClient(user.id, items);
-    await collectFollowUpSheets({ id: user.id, role: user.role }, items, null);
   } else if (isAgencyOrManager(sessionUser) || isAgent(sessionUser)) {
     await collectForStaff(user.id, sessionUser, items);
+  } else if (isClientRole(sessionUser) && externalPortal) {
+    // Portail externe : uniquement validations / pièces qui le concernent
+    await collectForClient(user.id, items);
   }
+
+  const agentOnly = isAgent(sessionUser) && !isAgencyOrManager(sessionUser);
+  const attentionCards =
+    externalPortal
+      ? []
+      : await collectFollowUpAttentionCards(
+          { id: user.id, role: user.role },
+          agentOnly ? user.id : null,
+        );
 
   items.sort((a, b) => {
     const sa = SECTION_ORDER.indexOf(a.section);
@@ -74,7 +105,18 @@ export async function collectATraiter(user: {
   const counts = emptyCounts();
   for (const it of items) counts[it.section] += 1;
 
-  return { items, counts, total: items.length };
+  const attentionCounts = countAttentionByUrgency(attentionCards);
+  const hotCount = countHotAttention(attentionCards);
+  const total = attentionCards.length + items.length;
+
+  return {
+    attentionCards,
+    attentionCounts,
+    hotCount,
+    items,
+    counts,
+    total,
+  };
 }
 
 async function collectForClient(userId: string, items: ATraiterItem[]) {
@@ -333,11 +375,6 @@ async function collectForStaff(
     });
   }
 
-  await collectFollowUpSheets(
-    { id: userId, role: sessionUser?.role },
-    items,
-    agentOnly ? userId : null,
-  );
   await collectMessageActions(userId, items);
 }
 
@@ -410,72 +447,91 @@ async function collectMessageActions(userId: string, items: ATraiterItem[]) {
   }
 }
 
-async function collectFollowUpSheets(
+/** Fiches → diagnostics W3-A (batch, une carte / fiche, sans NORMAL). */
+async function collectFollowUpAttentionCards(
   sessionUser: { id: string; role?: string | null },
-  items: ATraiterItem[],
   assigneeOnlyId: string | null,
-) {
+): Promise<ATraiterAttentionCard[]> {
   try {
     const accessWhere = await followUpSheetAccessWhere(sessionUser);
-    const settings = await getFollowUpSettings(await resolveFollowUpOwnerUserId(sessionUser.id));
+    const ownerUserId = await resolveFollowUpOwnerUserId(sessionUser.id);
+    const settings = await getFollowUpSettings(ownerUserId);
+    const orgId = await ensureOrganizationForOwner(ownerUserId);
+
     const sheets = await prisma.followUpSheet.findMany({
       where: {
         AND: [
           accessWhere,
           { status: { notIn: ["TERMINE", "ARCHIVE"] } },
-          { nextActionDone: false },
-          { nextAction: { not: null } },
           ...(assigneeOnlyId ? [{ assigneeId: assigneeOnlyId }] : []),
         ],
       },
       select: {
         id: true,
         title: true,
+        clientName: true,
+        osNumber: true,
+        orderNumber: true,
+        workObject: true,
         nextAction: true,
         nextActionAt: true,
+        nextActionDone: true,
         urgencyOverride: true,
-        updatedAt: true,
-        assignee: { select: { name: true } },
+        status: true,
+        assigneeId: true,
+        assignee: { select: { id: true, name: true } },
+        project: { select: { title: true } },
+        tasks: { select: { id: true }, take: 1, orderBy: { updatedAt: "desc" } },
       },
-      orderBy: { nextActionAt: "asc" },
-      take: 60,
+      orderBy: { updatedAt: "desc" },
+      take: 120,
     });
 
-    for (const s of sheets) {
-      const urgency = computeUrgencyFromDue(s.nextActionAt, {
-        nextActionDone: false,
-        override: s.urgencyOverride,
-        thresholds: settings.thresholds,
-      });
-      if (urgency === "NORMAL") continue;
+    if (sheets.length === 0) return [];
 
-      const section: ATraiterSection =
-        urgency === "CRITIQUE"
-          ? "bloquant"
-          : urgency === "URGENT"
-            ? "urgent"
-            : urgency === "IMPORTANT"
-              ? "a_valider"
-              : "relance";
-
-      push(items, {
-        id: `fiche-${s.id}`,
-        section,
+    const attentionMap = await loadAttentionForSheets({
+      sheets: sheets.map((s) => ({
+        id: s.id,
+        status: s.status,
         title: s.title,
-        meta: s.nextAction
-          ? `${s.nextAction}${s.assignee?.name ? ` · ${s.assignee.name}` : ""}`
-          : "Action à traiter",
-        href: `/dashboard/fiches-suivi/${s.id}`,
-        source: "fiche",
-        createdAt: s.nextActionAt ?? s.updatedAt,
-        urgencyLabel: URGENCY_LABELS[urgency],
-        assigneeName: s.assignee?.name ?? null,
-        dueLabel: formatDueLabel(s.nextActionAt),
-        delayLabel: formatDelay(s.nextActionAt),
+        nextActionAt: s.nextActionAt?.toISOString() ?? null,
+        nextActionDone: s.nextActionDone,
+        urgencyOverride: s.urgencyOverride,
+      })),
+      organizationId: orgId,
+      thresholds: settings.thresholds,
+    });
+
+    const cards: ATraiterAttentionCard[] = [];
+    for (const s of sheets) {
+      const attention = attentionMap.get(s.id);
+      if (!attention) continue;
+      const card = buildAttentionCard({
+        sheet: {
+          id: s.id,
+          title: s.title,
+          clientName: s.clientName,
+          osNumber: s.osNumber,
+          orderNumber: s.orderNumber,
+          workObject: s.workObject,
+          nextAction: s.nextAction,
+          nextActionDone: s.nextActionDone,
+          nextActionAt: s.nextActionAt?.toISOString() ?? null,
+          status: s.status,
+          assigneeId: s.assigneeId,
+          assigneeName: s.assignee?.name ?? null,
+          projectTitle: s.project?.title ?? null,
+          relatedTaskId: s.tasks[0]?.id ?? null,
+        },
+        attention,
       });
+      if (card) cards.push(card);
     }
+
+    return cards.sort(sortAttentionCards);
   } catch (e) {
-    console.error("collectFollowUpSheets:", e);
+    console.error("collectFollowUpAttentionCards:", e);
+    return [];
   }
 }
 
@@ -486,125 +542,32 @@ export const A_TRAITER_SECTION_LABELS: Record<ATraiterSection, string> = {
   relance: "À anticiper",
 };
 
-/** Compteur léger pour le badge nav (pas de chargement des libellés). */
+/**
+ * Badge nav : URGENT + CRITIQUE (diagnostics W3-A) + autres points bloquants/urgents.
+ * Réutilise le même moteur que la page (pas de second calcul d’urgence).
+ */
 export async function countATraiter(user: {
   id: string;
   role?: string | null;
+  personType?: string | null;
 }): Promise<number> {
-  const sessionUser: SessionUser = user;
+  const snapshot = await collectATraiter(user);
+  const otherHot = snapshot.items.filter(
+    (i) => i.section === "bloquant" || i.section === "urgent",
+  ).length;
+  return snapshot.hotCount + otherHot;
+}
 
-  if (isClientRole(sessionUser)) {
-    const taskWhere = await taskWhereForClientUser(user.id);
-    const projectWhere = await projectWhereForClientUser(user.id);
-    const accessWhere = await followUpSheetAccessWhere({ id: user.id, role: user.role });
-    const [decisions, alerts, files, fiches] = await Promise.all([
-      prisma.task.count({
-        where: {
-          AND: [
-            taskWhere,
-            { status: { not: "COMPLETE" } },
-            {
-              OR: [
-                { clientDecision: "EN_ATTENTE_CLIENT" },
-                {
-                  AND: [
-                    { clientReportSentAt: { not: null } },
-                    { OR: [{ clientDecision: null }, { clientDecision: "EN_ATTENTE_CLIENT" }] },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      }),
-      prisma.alert.count({ where: { clientId: user.id, read: false } }),
-      prisma.chantierFile.count({
-        where: {
-          deletedAt: null,
-          status: { in: ["MANQUANT", "A_RELANCER"] },
-          project: projectWhere,
-        },
-      }),
-      prisma.followUpSheet.count({
-        where: {
-          AND: [
-            accessWhere,
-            { status: { notIn: ["TERMINE", "ARCHIVE"] } },
-            { nextActionDone: false },
-            { nextAction: { not: null } },
-            {
-              OR: [
-                { nextActionAt: { lte: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000) } },
-                { urgencyOverride: { in: ["IMPORTANT", "URGENT", "CRITIQUE"] } },
-              ],
-            },
-          ],
-        },
-      }),
-    ]);
-    return decisions + alerts + files + fiches;
-  }
-
-  if (!isAgencyOrManager(sessionUser) && !isAgent(sessionUser)) return 0;
-
-  const isDecideur = isAgencyOrManager(sessionUser);
-  const agentOnly = isAgent(sessionUser);
-  const agentFilter = agentOnly ? { assignedToId: user.id } : {};
-
-  const accessWhere = await followUpSheetAccessWhere({ id: user.id, role: user.role });
-  const [toValidate, awaitingInfo, urgent, notifs, blockers, fiches, msgActions] = await Promise.all([
-    isDecideur ? prisma.task.count({ where: { status: "A_VALIDER" } }) : Promise.resolve(0),
-    prisma.task.count({ where: { status: "EN_ATTENTE_INFO", ...agentFilter } }),
-    prisma.task.count({
-      where: {
-        status: { notIn: ["COMPLETE", "A_VALIDER", "EN_ATTENTE_INFO"] },
-        priority: { in: ["URGENT", "PRIORITAIRE"] },
-        ...agentFilter,
-      },
-    }),
-    prisma.notification.count({ where: { userId: user.id, read: false } }),
-    prisma.pilotageBlocker.count({
-      where: {
-        archivedAt: null,
-        status: { in: ["Ouvert", "En cours"] },
-        ...(agentOnly
-          ? {
-              pilotage: {
-                OR: [
-                  { assistantId: user.id },
-                  { conducteurId: user.id },
-                  { project: { assignedToId: user.id } },
-                ],
-              },
-            }
-          : {}),
-      },
-    }),
-    prisma.followUpSheet.count({
-      where: {
-        AND: [
-          accessWhere,
-          { status: { notIn: ["TERMINE", "ARCHIVE"] } },
-          { nextActionDone: false },
-          { nextAction: { not: null } },
-          {
-            OR: [
-              { nextActionAt: { lte: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000) } },
-              { urgencyOverride: { in: ["IMPORTANT", "URGENT", "CRITIQUE"] } },
-            ],
-          },
-          ...(agentOnly ? [{ assigneeId: user.id }] : []),
-        ],
-      },
-    }),
-    prisma.messageAction.count({
-      where: {
-        status: "OPEN",
-        type: { in: ["REMINDER", "ASSIGN"] },
-        OR: [{ assigneeId: user.id }, { createdById: user.id, type: "REMINDER" }],
-      },
-    }),
-  ]);
-
-  return toValidate + awaitingInfo + urgent + notifs + blockers + fiches + msgActions;
+/** Compteurs détaillés pour le bandeau Accueil (léger). */
+export async function summarizeATraiter(user: {
+  id: string;
+  role?: string | null;
+  personType?: string | null;
+}) {
+  const snapshot = await collectATraiter(user);
+  return {
+    total: snapshot.total,
+    hotCount: snapshot.hotCount,
+    attentionCounts: snapshot.attentionCounts,
+  };
 }

@@ -230,6 +230,14 @@ export async function enrichDemoPersonas(demoId: string): Promise<{ ok: true } |
     organizationId: demo.organizationId,
     loginIdentifier: demo.loginIdentifier,
   });
+  const { ensurePurchaseOrderAttentionDemoScenarios } = await import(
+    "./purchase-order-attention-demo"
+  );
+  await ensurePurchaseOrderAttentionDemoScenarios({
+    rootUserId: demo.rootUserId,
+    organizationId: demo.organizationId,
+    loginIdentifier: demo.loginIdentifier,
+  });
   const { ensureDefaultWorkflow } = await import("@/lib/workflow/service");
   await ensureDefaultWorkflow(demo.organizationId);
   const { listDemoPersonaUsers } = await import("./seed-personas");

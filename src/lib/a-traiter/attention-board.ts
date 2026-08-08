@@ -1,11 +1,13 @@
 /**
- * W3-B — Transformation / tri / filtre des diagnostics W3-A pour « À traiter ».
- * Pure, sans I/O. Ne recalcule pas l’urgence (utilise evaluateFollowUpAttention).
+ * W3-B — Transformation / tri / filtre des diagnostics pour « À traiter ».
+ * Pure, sans I/O. Agrège FollowUpSheet + PurchaseOrder (CDE-3B1).
  */
 import type { UrgencyLevel } from "@/lib/follow-up/types";
 import { urgencyRank } from "@/lib/follow-up/urgency";
 import type { AttentionCode, SerializedAttention } from "@/lib/follow-up/attention";
 import { formatKanbanDueLabel } from "@/lib/follow-up/urgency";
+
+export type AttentionSubjectType = "FOLLOW_UP" | "PURCHASE_ORDER";
 
 export type AttentionProblemCategory =
   | "ECHEANCE"
@@ -13,7 +15,11 @@ export type AttentionProblemCategory =
   | "FACTURATION"
   | "AVENANT"
   | "LIVRAISON"
-  | "INTERVENTION";
+  | "INTERVENTION"
+  | "COMMANDE"
+  | "CONFIRMATION"
+  | "RECEPTION"
+  | "BL";
 
 export const ATTENTION_CATEGORY_LABELS: Record<AttentionProblemCategory, string> = {
   ECHEANCE: "Échéance",
@@ -22,6 +28,10 @@ export const ATTENTION_CATEGORY_LABELS: Record<AttentionProblemCategory, string>
   AVENANT: "Avenant",
   LIVRAISON: "Livraison",
   INTERVENTION: "Intervention",
+  COMMANDE: "Commande fournisseur",
+  CONFIRMATION: "Confirmation",
+  RECEPTION: "Réception",
+  BL: "BL",
 };
 
 export const ATTENTION_URGENCY_ORDER: UrgencyLevel[] = [
@@ -32,6 +42,9 @@ export const ATTENTION_URGENCY_ORDER: UrgencyLevel[] = [
 ];
 
 export type ATraiterAttentionCard = {
+  subjectType: AttentionSubjectType;
+  subjectId: string;
+  /** Alias subjectId — conservé pour les actions FollowUp existantes. */
   sheetId: string;
   title: string;
   clientName: string | null;
@@ -55,6 +68,10 @@ export type ATraiterAttentionCard = {
   categoryLabel: string;
   relatedAgendaId: string | null;
   relatedTaskId: string | null;
+  actionUrl: string;
+  actionLabel: string;
+  /** Texte additionnel searchable (désignations, etc.). */
+  searchExtra?: string | null;
 };
 
 export function attentionCodeToCategory(code: AttentionCode | string): AttentionProblemCategory {
@@ -72,9 +89,19 @@ export function attentionCodeToCategory(code: AttentionCode | string): Attention
       return "AVENANT";
     case "DELIVERY_UNCONFIRMED":
     case "DELIVERY_OVERDUE":
+    case "DELIVERY_NOT_RECEIVED":
+    case "PARTIAL_DELIVERY_PENDING":
       return "LIVRAISON";
     case "INTERVENTION_PREP":
       return "INTERVENTION";
+    case "SUPPLIER_NO_RESPONSE":
+      return "COMMANDE";
+    case "SUPPLIER_REFUSED":
+      return "CONFIRMATION";
+    case "RECEIPT_ISSUE":
+      return "RECEPTION";
+    case "DELIVERY_NOTE_MISSING":
+      return "BL";
     default:
       return "SUIVI";
   }
@@ -112,6 +139,8 @@ export function buildAttentionCard(opts: {
     null;
 
   return {
+    subjectType: "FOLLOW_UP",
+    subjectId: sheet.id,
     sheetId: sheet.id,
     title: sheet.title,
     clientName: sheet.clientName ?? null,
@@ -138,6 +167,81 @@ export function buildAttentionCard(opts: {
     categoryLabel: ATTENTION_CATEGORY_LABELS[category],
     relatedAgendaId: relatedAgenda,
     relatedTaskId: sheet.relatedTaskId ?? null,
+    actionUrl: `/dashboard/fiches-suivi/${sheet.id}`,
+    actionLabel: "Voir la fiche",
+  };
+}
+
+export function buildPurchaseOrderAttentionCard(opts: {
+  order: {
+    id: string;
+    number: string;
+    subject: string;
+    supplierName?: string | null;
+    projectTitle?: string | null;
+    status: string;
+    responsibleId?: string | null;
+    responsibleName?: string | null;
+    lineDesignations?: string[];
+    agendaEventId?: string | null;
+    confirmedDeliveryAt?: string | null;
+    requestedDeliveryAt?: string | null;
+  };
+  attention: SerializedAttention;
+  now?: Date;
+}): ATraiterAttentionCard | null {
+  const { order, attention } = opts;
+  if (attention.effectiveUrgency === "NORMAL") return null;
+  if (!attention.primaryReason && attention.attentionItems.length === 0) return null;
+
+  const primary = attention.attentionItems[0];
+  const category = attentionCodeToCategory(primary?.code ?? "SUPPLIER_NO_RESPONSE");
+  const dueAt =
+    order.confirmedDeliveryAt ||
+    order.requestedDeliveryAt ||
+    primary?.dueAt ||
+    null;
+
+  const relatedAgenda =
+    order.agendaEventId ||
+    attention.attentionItems.find((i) => i.relatedEntity?.type === "agenda")?.relatedEntity
+      ?.id ||
+    null;
+
+  const canReceive =
+    primary?.code === "DELIVERY_NOT_RECEIVED" ||
+    primary?.code === "PARTIAL_DELIVERY_PENDING" ||
+    primary?.code === "RECEIPT_ISSUE";
+
+  return {
+    subjectType: "PURCHASE_ORDER",
+    subjectId: order.id,
+    sheetId: order.id,
+    title: `${order.number} — ${order.supplierName || "Fournisseur"}`,
+    clientName: order.supplierName ?? null,
+    projectTitle: order.projectTitle ?? null,
+    osNumber: null,
+    orderNumber: order.number,
+    workObject: order.subject,
+    nextAction: canReceive ? "Réceptionner" : "Voir la commande",
+    nextActionDone: false,
+    assigneeId: order.responsibleId ?? null,
+    assigneeName: order.responsibleName ?? null,
+    nextActionAt: dueAt,
+    dueLabel: formatKanbanDueLabel(dueAt ? new Date(dueAt) : null, opts.now),
+    status: order.status,
+    statusEnteredAt: null,
+    effectiveUrgency: attention.effectiveUrgency,
+    primaryReason: attention.primaryReason,
+    attentionItems: attention.attentionItems,
+    otherReasonsCount: Math.max(0, attention.attentionItems.length - 1),
+    category,
+    categoryLabel: ATTENTION_CATEGORY_LABELS[category],
+    relatedAgendaId: relatedAgenda,
+    relatedTaskId: null,
+    actionUrl: `/dashboard/commandes/${order.id}`,
+    actionLabel: "Voir la commande",
+    searchExtra: (order.lineDesignations ?? []).join(" "),
   };
 }
 
@@ -145,8 +249,12 @@ export function sortAttentionCards(a: ATraiterAttentionCard, b: ATraiterAttentio
   const ur = urgencyRank(b.effectiveUrgency) - urgencyRank(a.effectiveUrgency);
   if (ur !== 0) return ur;
 
-  const aOverdue = a.attentionItems.some((i) => i.code === "DUE_OVERDUE");
-  const bOverdue = b.attentionItems.some((i) => i.code === "DUE_OVERDUE");
+  const aOverdue = a.attentionItems.some(
+    (i) => i.code === "DUE_OVERDUE" || i.code === "DELIVERY_NOT_RECEIVED",
+  );
+  const bOverdue = b.attentionItems.some(
+    (i) => i.code === "DUE_OVERDUE" || i.code === "DELIVERY_NOT_RECEIVED",
+  );
   if (aOverdue !== bOverdue) return aOverdue ? -1 : 1;
 
   const da = a.nextActionAt ? new Date(a.nextActionAt).getTime() : Number.POSITIVE_INFINITY;
@@ -208,6 +316,7 @@ export function filterAttentionCards(
       c.nextAction,
       c.assigneeName,
       c.primaryReason,
+      c.searchExtra,
     ]
       .filter(Boolean)
       .join(" ")

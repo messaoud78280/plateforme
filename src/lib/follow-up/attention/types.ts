@@ -12,10 +12,17 @@ export type AttentionCode =
   | "AVENANT_WAITING"
   | "DELIVERY_UNCONFIRMED"
   | "DELIVERY_OVERDUE"
-  | "INTERVENTION_PREP";
+  | "INTERVENTION_PREP"
+  /** CDE-3B1 — commandes / livraisons / réceptions */
+  | "SUPPLIER_NO_RESPONSE"
+  | "SUPPLIER_REFUSED"
+  | "DELIVERY_NOT_RECEIVED"
+  | "PARTIAL_DELIVERY_PENDING"
+  | "RECEIPT_ISSUE"
+  | "DELIVERY_NOTE_MISSING";
 
 export type AttentionRelatedEntity = {
-  type: "agenda" | "task" | "sheet";
+  type: "agenda" | "task" | "sheet" | "purchase_order";
   id: string;
   label?: string;
 };

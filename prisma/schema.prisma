@@ -367,7 +367,8 @@ model PurchaseOrderLine {
   unit           String   @default("U")
   unitPriceHt    Decimal? @db.Decimal(14, 2)
   tvaRate        Decimal? @db.Decimal(5, 2)
-  /// Cumul quantités reçues conformes (cache — source = ReceiptLines)
+  /// CACHE UI uniquement — source de vérité = PurchaseOrderReceiptLine (non annulées).
+  /// Recalculé par refreshLineCaches() après chaque réception. Ne jamais alerter dessus.
   receivedQty    Decimal  @default(0) @db.Decimal(14, 3)
   sortOrder      Int      @default(0)
   createdAt      DateTime @default(now())

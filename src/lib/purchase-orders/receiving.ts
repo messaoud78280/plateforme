@@ -1,5 +1,9 @@
 /**
  * CDE-3A — Réception chantier : état quantités + création / annulation de réceptions.
+ *
+ * Source de vérité quantités = PurchaseOrderReceiptLine (réceptions non annulées).
+ * PurchaseOrderLine.receivedQty = cache UI/listes uniquement — jamais pour alertes critiques.
+ * Après chaque mutation de réception, refreshLineCaches() recalcule ce cache.
  */
 import type { PurchaseOrderStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
@@ -130,15 +134,18 @@ export async function getPurchaseOrderReceivingState(
   };
 }
 
-async function refreshLineCaches(orderId: string) {
+/** Recalcule le cache receivedQty depuis les réceptions actives (transactionnel). */
+export async function refreshLineCaches(orderId: string) {
   const state = await getPurchaseOrderReceivingState(orderId);
   if (!state) return null;
-  for (const line of state.lines) {
-    await prisma.purchaseOrderLine.update({
-      where: { id: line.orderLineId },
-      data: { receivedQty: line.receivedConforming },
-    });
-  }
+  await prisma.$transaction(
+    state.lines.map((line) =>
+      prisma.purchaseOrderLine.update({
+        where: { id: line.orderLineId },
+        data: { receivedQty: line.receivedConforming },
+      }),
+    ),
+  );
   return state;
 }
 

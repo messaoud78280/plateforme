@@ -1,8 +1,9 @@
 /**
  * Boîte « À traiter » unifiée — une seule vue pour savoir qui doit agir.
  *
- * W3-B : les fiches de suivi passent par evaluateFollowUpAttention (W3-A).
+ * W3-B : fiches → evaluateFollowUpAttention ; commandes → evaluatePurchaseOrderAttention (CDE-3B1).
  * Les autres sources (missions, pièces, blocages…) restent agrégées à part.
+ * Portail fournisseur / client externe : pas de diagnostics internes commandes.
  */
 
 import { prisma } from "@/lib/prisma";
@@ -19,11 +20,17 @@ import { loadAttentionForSheets } from "@/lib/follow-up/attention/batch";
 import { ensureOrganizationForOwner } from "@/lib/organization/access";
 import {
   buildAttentionCard,
+  buildPurchaseOrderAttentionCard,
   countAttentionByUrgency,
   countHotAttention,
   sortAttentionCards,
   type ATraiterAttentionCard,
 } from "@/lib/a-traiter/attention-board";
+import { loadPurchaseOrderAttention } from "@/lib/purchase-orders/attention/batch";
+import {
+  isInternalPurchaseOrderActor,
+  resolvePurchaseOrderOrgId,
+} from "@/lib/purchase-orders/access";
 
 export type ATraiterSection = "bloquant" | "a_valider" | "urgent" | "relance";
 
@@ -87,8 +94,13 @@ export async function collectATraiter(user: {
   const attentionCards =
     externalPortal
       ? []
-      : await collectFollowUpAttentionCards(
-          { id: user.id, role: user.role },
+      : await collectUnifiedAttentionCards(
+          {
+            id: user.id,
+            role: user.role,
+            personType: user.personType,
+            permissionProfile: (user as { permissionProfile?: string | null }).permissionProfile,
+          },
           agentOnly ? user.id : null,
         );
 
@@ -444,6 +456,23 @@ async function collectMessageActions(userId: string, items: ATraiterItem[]) {
   }
 }
 
+/** Fiches + commandes → une seule liste triée (sans NORMAL). */
+async function collectUnifiedAttentionCards(
+  sessionUser: {
+    id: string;
+    role?: string | null;
+    personType?: string | null;
+    permissionProfile?: string | null;
+  },
+  assigneeOnlyId: string | null,
+): Promise<ATraiterAttentionCard[]> {
+  const [followUpCards, purchaseOrderCards] = await Promise.all([
+    collectFollowUpAttentionCards(sessionUser, assigneeOnlyId),
+    collectPurchaseOrderAttentionCards(sessionUser, assigneeOnlyId),
+  ]);
+  return [...followUpCards, ...purchaseOrderCards].sort(sortAttentionCards);
+}
+
 /** Fiches → diagnostics W3-A (batch, une carte / fiche, sans NORMAL). */
 async function collectFollowUpAttentionCards(
   sessionUser: { id: string; role?: string | null },
@@ -526,9 +555,59 @@ async function collectFollowUpAttentionCards(
       if (card) cards.push(card);
     }
 
-    return cards.sort(sortAttentionCards);
+    return cards;
   } catch (e) {
     console.error("collectFollowUpAttentionCards:", e);
+    return [];
+  }
+}
+
+/** Commandes → diagnostics CDE-3B1 (batch, une carte / commande, sans NORMAL). */
+async function collectPurchaseOrderAttentionCards(
+  sessionUser: {
+    id: string;
+    role?: string | null;
+    personType?: string | null;
+    permissionProfile?: string | null;
+  },
+  assigneeOnlyId: string | null,
+): Promise<ATraiterAttentionCard[]> {
+  try {
+    if (!isInternalPurchaseOrderActor(sessionUser)) return [];
+
+    const orgId = await resolvePurchaseOrderOrgId(sessionUser);
+    if (!orgId) return [];
+
+    const rows = await loadPurchaseOrderAttention({
+      organizationId: orgId,
+      actorUserId: assigneeOnlyId,
+      take: 120,
+    });
+
+    const cards: ATraiterAttentionCard[] = [];
+    for (const row of rows) {
+      const card = buildPurchaseOrderAttentionCard({
+        order: {
+          id: row.id,
+          number: row.number,
+          subject: row.subject,
+          supplierName: row.supplierName,
+          projectTitle: row.projectTitle,
+          status: row.status,
+          responsibleId: row.responsibleId,
+          responsibleName: row.responsibleName,
+          lineDesignations: row.lineDesignations,
+          agendaEventId: row.agendaEventId,
+          confirmedDeliveryAt: row.confirmedDeliveryAt?.toISOString() ?? null,
+          requestedDeliveryAt: row.requestedDeliveryAt?.toISOString() ?? null,
+        },
+        attention: row.attention,
+      });
+      if (card) cards.push(card);
+    }
+    return cards;
+  } catch (e) {
+    console.error("collectPurchaseOrderAttentionCards:", e);
     return [];
   }
 }

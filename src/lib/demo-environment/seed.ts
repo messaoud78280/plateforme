@@ -762,6 +762,20 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
     console.error("[demo-seed] coherence Victor Hugo:", e);
   }
 
+  // —— CDE-3B1 : situations attention commandes (À traiter) ——
+  try {
+    const { ensurePurchaseOrderAttentionDemoScenarios } = await import(
+      "./purchase-order-attention-demo"
+    );
+    await ensurePurchaseOrderAttentionDemoScenarios({
+      rootUserId: clientId,
+      organizationId,
+      loginIdentifier,
+    });
+  } catch (e) {
+    console.error("[demo-seed] attention commandes:", e);
+  }
+
   // —— Processus métier par défaut (Chantier standard) ——
   try {
     const { ensureDefaultWorkflow } = await import("@/lib/workflow/service");

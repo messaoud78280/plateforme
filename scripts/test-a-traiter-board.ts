@@ -133,11 +133,12 @@ function testFilterMineAndSearch() {
 
   const mine = filterAttentionCards(cards, { mineOnly: true, currentUserId: "karim" });
   assert.equal(mine.length, 1);
-  assert.equal(mine[0]!.sheetId, "a");
+  assert.equal(mine[0]!.subjectId, "a");
+  assert.equal(mine[0]!.subjectType, "FOLLOW_UP");
 
   const search = filterAttentionCards(cards, { q: "jardin" });
   assert.equal(search.length, 1);
-  assert.equal(search[0]!.sheetId, "b");
+  assert.equal(search[0]!.subjectId, "b");
 }
 
 function testGroupAndHot() {

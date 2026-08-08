@@ -80,7 +80,7 @@ export function ATraiterAttentionBoard({ cards, currentUserId, canEdit }: Props)
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Chantier, OS, client…"
+            placeholder="Chantier, BC, fournisseur, OS…"
             className="mt-1 w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-normal text-slate-800"
           />
         </label>
@@ -191,18 +191,21 @@ export function ATraiterAttentionBoard({ cards, currentUserId, canEdit }: Props)
                 </span>
               </div>
               <ul className="space-y-2">
-                {g.items.map((card) => (
-                  <li key={card.sheetId}>
-                    <AttentionCard
-                      card={card}
-                      canEdit={canEdit}
-                      expanded={expandedId === card.sheetId}
-                      onToggleReasons={() =>
-                        setExpandedId((id) => (id === card.sheetId ? null : card.sheetId))
-                      }
-                    />
-                  </li>
-                ))}
+                {g.items.map((card) => {
+                  const key = `${card.subjectType}:${card.subjectId}`;
+                  return (
+                    <li key={key}>
+                      <AttentionCard
+                        card={card}
+                        canEdit={canEdit}
+                        expanded={expandedId === key}
+                        onToggleReasons={() =>
+                          setExpandedId((id) => (id === key ? null : key))
+                        }
+                      />
+                    </li>
+                  );
+                })}
               </ul>
             </section>
           );
@@ -298,17 +301,28 @@ function AttentionCard({
 
       <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-2.5">
         <Link
-          href={`/dashboard/fiches-suivi/${card.sheetId}`}
+          href={card.actionUrl}
           className="rounded-lg bg-[#1e3a5f] px-2.5 py-1.5 text-[11px] font-bold text-white hover:bg-[#16304f]"
         >
-          Voir la fiche
+          {card.actionLabel}
         </Link>
-        <Link
-          href={`/dashboard/fiches-suivi?view=tableau`}
-          className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50"
-        >
-          Voir dans le tableau
-        </Link>
+        {card.subjectType === "FOLLOW_UP" ? (
+          <Link
+            href={`/dashboard/fiches-suivi?view=tableau`}
+            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50"
+          >
+            Voir dans le tableau
+          </Link>
+        ) : null}
+        {card.subjectType === "PURCHASE_ORDER" &&
+        (card.category === "LIVRAISON" || card.category === "RECEPTION") ? (
+          <Link
+            href={`/dashboard/commandes/${card.subjectId}/reception`}
+            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50"
+          >
+            Réceptionner
+          </Link>
+        ) : null}
         {card.relatedAgendaId ? (
           <Link
             href="/dashboard/agenda"
@@ -317,15 +331,18 @@ function AttentionCard({
             Voir l’agenda
           </Link>
         ) : null}
-        {card.relatedTaskId ? (
+        {card.subjectType === "FOLLOW_UP" && card.relatedTaskId ? (
           <Link
             href={`/dashboard/taches/${card.relatedTaskId}`}
             className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50"
           >
-            Voir la commande
+            Voir la mission
           </Link>
         ) : null}
-        {canEdit && !card.nextActionDone && card.nextAction ? (
+        {card.subjectType === "FOLLOW_UP" &&
+        canEdit &&
+        !card.nextActionDone &&
+        card.nextAction ? (
           <FollowUpInlineActions sheetId={card.sheetId} compact />
         ) : null}
       </div>

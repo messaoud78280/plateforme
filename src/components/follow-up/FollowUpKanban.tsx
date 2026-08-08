@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { FollowUpUrgency } from "@prisma/client";
 import { POSTIT_COLORS, URGENCY_STYLES } from "@/lib/follow-up/types";
 import type { FollowUpCardData } from "@/components/follow-up/FollowUpPostItCard";
 import { cn } from "@/lib/cn";
@@ -35,7 +36,8 @@ function StepAccent({ colorKey }: { colorKey: string }) {
 
 function KanbanCard({ sheet }: { sheet: Sheet }) {
   const border = POSTIT_COLORS[sheet.colorKey]?.border ?? "border-slate-200";
-  const urgency = URGENCY_STYLES[sheet.urgency] ?? URGENCY_STYLES.NORMAL;
+  const urgencyKey = sheet.urgency as FollowUpUrgency;
+  const urgency = URGENCY_STYLES[urgencyKey] ?? URGENCY_STYLES.NORMAL;
   const ref = sheet.osNumber
     ? `OS-${sheet.osNumber}`
     : sheet.orderNumber

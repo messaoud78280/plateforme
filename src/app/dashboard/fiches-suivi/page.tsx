@@ -14,6 +14,8 @@ import { BackLink } from "@/components/ui/BackLink";
 import { ensureOrganizationForOwner } from "@/lib/organization/access";
 import { ensureDefaultWorkflow } from "@/lib/workflow/service";
 import { canEditFollowUpBoard } from "@/lib/follow-up/access";
+import { loadAttentionForSheets, urgencyLabelFor } from "@/lib/follow-up/attention/batch";
+import { URGENCY_LABELS } from "@/lib/follow-up/types";
 
 export const dynamic = "force-dynamic";
 
@@ -155,10 +157,20 @@ export default async function FichesSuiviPage({
   let kanbanSheets = items;
   if (view === "tableau") {
     const orgId = await ensureOrganizationForOwner(ownerUserId);
+    let workflowSteps: {
+      statusKey: string;
+      label: string;
+      colorKey: string;
+      sortOrder: number;
+      delayHours: number | null;
+      alertOrangeHours: number | null;
+      alertRedHours: number | null;
+      escalateHours: number | null;
+    }[] = [];
     if (orgId) {
       const workflow = await ensureDefaultWorkflow(orgId);
-      kanbanColumns = workflow.steps
-        .filter((s) => s.statusKey !== "ARCHIVE")
+      workflowSteps = workflow.steps.filter((s) => s.statusKey !== "ARCHIVE");
+      kanbanColumns = workflowSteps
         .slice()
         .sort((a, b) => a.sortOrder - b.sortOrder)
         .map((s) => ({
@@ -184,10 +196,46 @@ export default async function FichesSuiviPage({
         }
       }
     }
-    kanbanSheets = items.map((i) => ({
+
+    const withEntered = items.map((i) => ({
       ...i,
       statusEnteredAt: statusEnteredAt.get(i.id) ?? null,
     }));
+
+    // W3-A : un seul batch (timeline déjà chargée + agenda + steps) — pas de N+1
+    const attentionMap = await loadAttentionForSheets({
+      sheets: withEntered.map((i) => ({
+        id: i.id,
+        status: i.status,
+        title: i.title,
+        nextActionAt: i.nextActionAt,
+        nextActionDone: i.nextActionDone,
+        urgencyOverride: i.urgencyOverride,
+        statusEnteredAt: i.statusEnteredAt,
+      })),
+      organizationId: orgId,
+      workflowSteps: workflowSteps.map((s) => ({
+        statusKey: s.statusKey,
+        label: s.label,
+        delayHours: s.delayHours,
+        alertOrangeHours: s.alertOrangeHours,
+        alertRedHours: s.alertRedHours,
+        escalateHours: s.escalateHours,
+      })),
+      thresholds: settings.thresholds,
+    });
+
+    kanbanSheets = withEntered.map((i) => {
+      const attention = attentionMap.get(i.id);
+      if (!attention) return i;
+      const level = attention.effectiveUrgency;
+      return {
+        ...i,
+        urgency: level,
+        urgencyLabel: URGENCY_LABELS[level] ?? urgencyLabelFor(level),
+        attention,
+      };
+    });
   }
 
   return (

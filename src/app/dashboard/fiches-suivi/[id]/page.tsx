@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { canAccessFollowUpSheet, followUpSheetInclude } from "@/lib/follow-up/access";
 import { getFollowUpSettings } from "@/lib/follow-up/settings";
 import { serializeFollowUpSheet } from "@/lib/follow-up/serialize";
+import { loadAttentionForSheets, urgencyLabelFor } from "@/lib/follow-up/attention/batch";
+import { URGENCY_LABELS } from "@/lib/follow-up/types";
 import { FollowUpDetailClient } from "@/components/follow-up/FollowUpDetailClient";
 
 export const dynamic = "force-dynamic";
@@ -27,5 +29,31 @@ export default async function FicheSuiviDetailPage({ params }: Props) {
   const settings = await getFollowUpSettings(sheet.ownerUserId);
   const data = serializeFollowUpSheet(sheet, settings.thresholds);
 
-  return <FollowUpDetailClient sheet={data} />;
+  const attentionMap = await loadAttentionForSheets({
+    sheets: [
+      {
+        id: data.id,
+        status: data.status,
+        title: data.title,
+        nextActionAt: data.nextActionAt,
+        nextActionDone: data.nextActionDone,
+        urgencyOverride: data.urgencyOverride,
+      },
+    ],
+    organizationId: sheet.organizationId,
+    thresholds: settings.thresholds,
+  });
+  const attention = attentionMap.get(data.id);
+  const level = attention?.effectiveUrgency ?? data.urgency;
+
+  return (
+    <FollowUpDetailClient
+      sheet={{
+        ...data,
+        urgency: level,
+        urgencyLabel: URGENCY_LABELS[level] ?? urgencyLabelFor(level),
+        attention: attention ?? null,
+      }}
+    />
+  );
 }

@@ -246,7 +246,7 @@ export async function enrichDemoPersonas(demoId: string): Promise<{ ok: true } |
   });
   await prisma.demoEnvironment.update({
     where: { id: demoId },
-    data: { seedVersion: "v3-kanban-w2c" },
+    data: { seedVersion: "v3-attention-w3a" },
   });
   return { ok: true };
 }

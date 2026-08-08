@@ -23,15 +23,27 @@ async function ensureStatutEntry(opts: {
 }) {
   const existing = await prisma.followUpTimelineEvent.findFirst({
     where: { sheetId: opts.sheetId, kind: "statut" },
+    orderBy: { occurredAt: "desc" },
     select: { id: true },
   });
-  if (existing) return;
+  if (existing) {
+    // Recaler la date pour que le moteur W3-A calcule à partir de dates réelles
+    await prisma.followUpTimelineEvent.update({
+      where: { id: existing.id },
+      data: {
+        occurredAt: opts.occurredAt,
+        label: `${opts.fromLabel} → ${opts.toLabel}`,
+        detail: "Répartition démo — attention calculée (W3-A)",
+      },
+    });
+    return;
+  }
   await appendFollowUpTimeline({
     sheetId: opts.sheetId,
     authorId: opts.authorId,
     kind: "statut",
     label: `${opts.fromLabel} → ${opts.toLabel}`,
-    detail: "Répartition démo tableau de suivi",
+    detail: "Répartition démo — attention calculée (W3-A)",
     occurredAt: opts.occurredAt,
   });
 }
@@ -138,13 +150,14 @@ export async function ensureKanbanReadabilityDemo(opts: {
       authorId: opts.rootUserId,
       status: "AVENANT",
       nextAction: "En attente client",
-      nextActionAt: new Date(2026, 7, 20, 12, 0, 0),
-      urgencyOverride: "IMPORTANT",
+      nextActionAt: new Date(2026, 7, 25, 12, 0, 0),
+      urgencyOverride: null,
       assigneeId: opts.rootUserId,
       title: "Avenant n°02 — Victor Hugo",
       workObject: "20 m² terrasse côté cour",
       clientName: "ABC Promotion",
-      daysInStep: 5,
+      // ~6 j > delayHours 120 → attention calculée (pas d’urgence forcée)
+      daysInStep: 6,
       fromLabel: "Intervention",
       toLabel: "Avenant",
     });
@@ -156,7 +169,7 @@ export async function ensureKanbanReadabilityDemo(opts: {
       authorId: opts.rootUserId,
       status: "TRAVAUX_TERMINES",
       nextAction: "Préparer le dossier de facturation",
-      nextActionAt: daysAgo(0),
+      nextActionAt: daysAgo(-5),
       urgencyOverride: null,
       assigneeId: karimId,
       title: "Chantier République",
@@ -174,13 +187,14 @@ export async function ensureKanbanReadabilityDemo(opts: {
       authorId: opts.rootUserId,
       status: "A_FACTURER",
       nextAction: "Préparer facture",
-      nextActionAt: daysAgo(0),
-      urgencyOverride: "URGENT",
+      // Échéance lointaine : l’urgence vient du délai d’étape / facturation, pas d’un override
+      nextActionAt: daysAgo(-10),
+      urgencyOverride: null,
       assigneeId: opts.rootUserId,
       title: "Immeuble Alpha",
       workObject: "Travaux terminés — facturation",
       clientName: "ABC Promotion",
-      daysInStep: 3,
+      daysInStep: 5,
       fromLabel: "Travaux terminés",
       toLabel: "À facturer",
     });
@@ -225,13 +239,14 @@ export async function ensureKanbanReadabilityDemo(opts: {
         siteAddress: "4 allée des Jardins, Villeurbanne",
         workObject: "OS reçu — étanchéité toiture-terrasse",
         osNumber: "4612",
-        receivedAt: daysAgo(1),
+        receivedAt: daysAgo(4),
         status: "A_PLANIFIER",
         colorKey: colorKeyForStatus("A_PLANIFIER"),
         nextAction: "Programmer l’intervention",
-        nextActionAt: daysAgo(-2),
+        nextActionAt: daysAgo(-5),
         nextActionDone: false,
-        notes: "Fiche démo — colonne À planifier (W2-C).",
+        urgencyOverride: null,
+        notes: "Fiche démo — À planifier (attention calculée W3-A).",
       },
     });
     await appendFollowUpTimeline({
@@ -240,14 +255,14 @@ export async function ensureKanbanReadabilityDemo(opts: {
       kind: "creation",
       label: "OS reçu",
       detail: "Résidence Les Jardins — à planifier",
-      occurredAt: daysAgo(1),
+      occurredAt: daysAgo(4),
     });
     await ensureStatutEntry({
       sheetId: ficheJardins.id,
       authorId: opts.rootUserId,
       fromLabel: "OS reçu",
       toLabel: "À planifier",
-      occurredAt: daysAgo(1),
+      occurredAt: daysAgo(2),
     });
   } else {
     await patchSheet({
@@ -255,13 +270,14 @@ export async function ensureKanbanReadabilityDemo(opts: {
       authorId: opts.rootUserId,
       status: "A_PLANIFIER",
       nextAction: "Programmer l’intervention",
-      nextActionAt: daysAgo(-2),
+      nextActionAt: daysAgo(-5),
       assigneeId: karimId,
       urgencyOverride: null,
       title: "Résidence Les Jardins",
       workObject: "OS reçu — étanchéité toiture-terrasse",
       clientName: "ABC Promotion",
-      daysInStep: 1,
+      // 2 j ≈ delayHours 48 → IMPORTANT (calculé, non forcé)
+      daysInStep: 2,
       fromLabel: "OS reçu",
       toLabel: "À planifier",
     });

@@ -8,10 +8,19 @@ import {
   DEFAULT_REMINDER_OFFSETS_HOURS,
   POSTIT_COLORS,
   STATUS_LABELS,
+  URGENCY_LABELS,
   URGENCY_STYLES,
 } from "@/lib/follow-up/types";
 
 type TeamUser = { id: string; name: string; email: string };
+
+type AttentionSerialized = {
+  effectiveUrgency: string;
+  computedUrgency: string;
+  manualUrgency: string | null;
+  primaryReason: string | null;
+  attentionItems: { code: string; level: string; reason: string }[];
+};
 
 type Sheet = {
   id: string;
@@ -52,6 +61,7 @@ type Sheet = {
     startAt: string;
     status: string;
   }[];
+  attention?: AttentionSerialized | null;
 };
 
 const QUICK_EVENTS = [
@@ -109,7 +119,17 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
   >(null);
 
   const color = POSTIT_COLORS[sheet.colorKey] ?? POSTIT_COLORS.jaune;
-  const urgency = URGENCY_STYLES[sheet.urgency as keyof typeof URGENCY_STYLES] ?? URGENCY_STYLES.NORMAL;
+  const effectiveUrgency =
+    (sheet.attention?.effectiveUrgency as keyof typeof URGENCY_STYLES | undefined) ??
+    (sheet.urgency as keyof typeof URGENCY_STYLES);
+  const urgency = URGENCY_STYLES[effectiveUrgency] ?? URGENCY_STYLES.NORMAL;
+  const urgencyLabel =
+    URGENCY_LABELS[effectiveUrgency as keyof typeof URGENCY_LABELS] ?? sheet.urgencyLabel;
+  const attention = sheet.attention;
+  const showAttention =
+    attention &&
+    attention.effectiveUrgency !== "NORMAL" &&
+    (attention.primaryReason || attention.attentionItems.length > 0);
 
   useEffect(() => {
     void fetch("/api/follow-up/options")
@@ -198,13 +218,33 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
           </div>
           <div className="flex flex-col items-end gap-2">
             <span className={cn("rounded-md px-2 py-1 text-xs font-bold", urgency.badge)}>
-              {sheet.urgencyLabel}
+              {urgencyLabel}
             </span>
             <span className="rounded bg-white/80 px-2 py-0.5 text-[10px] font-bold uppercase">
               {sheet.statusLabel}
             </span>
           </div>
         </div>
+
+        {showAttention ? (
+          <div className="mt-4 rounded-lg border border-slate-200/80 bg-white/80 px-3 py-2.5">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
+              Attention requise
+            </p>
+            <p className="mt-1 flex items-center gap-1.5 text-xs font-bold text-slate-900">
+              <span className={cn("h-2 w-2 rounded-full", urgency.dot)} aria-hidden />
+              {urgencyLabel}
+            </p>
+            <p className="mt-1 text-sm text-slate-800">{attention.primaryReason}</p>
+            {attention.attentionItems.length > 1 ? (
+              <ul className="mt-1.5 space-y-0.5 text-[11px] text-slate-600">
+                {attention.attentionItems.slice(1, 4).map((it) => (
+                  <li key={it.code + it.reason}>· {it.reason}</li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        ) : null}
 
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
           <div className="rounded-lg bg-white/70 p-3">

@@ -66,6 +66,8 @@ export function serializeFollowUpSheet(
     urgency: urgency as FollowUpUrgency,
     urgencyLabel: URGENCY_LABELS[urgency],
     urgencyStyles: URGENCY_STYLES[urgency],
+    /** Urgence posée manuellement — le moteur W3 combine avec le calcul auto. */
+    urgencyOverride: sheet.urgencyOverride ?? null,
     delayLabel: delay,
     notes: sheet.notes,
     reminderOffsets: sheet.reminderOffsets,

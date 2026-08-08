@@ -4,11 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { FollowUpUrgency } from "@prisma/client";
-import {
-  POSTIT_COLORS,
-  URGENCY_LABELS,
-  URGENCY_STYLES,
-} from "@/lib/follow-up/types";
+import { POSTIT_COLORS, URGENCY_LABELS, URGENCY_STYLES } from "@/lib/follow-up/types";
 import {
   formatDaysInStepLabel,
   formatKanbanDueLabel,
@@ -16,6 +12,7 @@ import {
   urgencyRank,
 } from "@/lib/follow-up/urgency";
 import type { FollowUpCardData } from "@/components/follow-up/FollowUpPostItCard";
+import type { SerializedAttention } from "@/lib/follow-up/attention";
 import { cn } from "@/lib/cn";
 
 export type KanbanColumn = {
@@ -34,6 +31,8 @@ export type KanbanSheet = FollowUpCardData & {
   /** ISO — dernière transition statut (timeline), sinon null */
   statusEnteredAt?: string | null;
   assigneeId?: string | null;
+  /** W3-A — diagnostic d’attention (calculé serveur). */
+  attention?: SerializedAttention | null;
 };
 
 type Props = {
@@ -91,8 +90,12 @@ async function patchStatus(
 }
 
 function sortSheets(a: KanbanSheet, b: KanbanSheet): number {
-  const ua = urgencyRank((a.urgency as FollowUpUrgency) || "NORMAL");
-  const ub = urgencyRank((b.urgency as FollowUpUrgency) || "NORMAL");
+  const ua = urgencyRank(
+    ((a.attention?.effectiveUrgency ?? a.urgency) as FollowUpUrgency) || "NORMAL",
+  );
+  const ub = urgencyRank(
+    ((b.attention?.effectiveUrgency ?? b.urgency) as FollowUpUrgency) || "NORMAL",
+  );
   if (ub !== ua) return ub - ua;
   const da = a.nextActionAt ? new Date(a.nextActionAt).getTime() : Number.POSITIVE_INFINITY;
   const db = b.nextActionAt ? new Date(b.nextActionAt).getTime() : Number.POSITIVE_INFINITY;
@@ -116,8 +119,13 @@ function KanbanCard({
   dragging: boolean;
 }) {
   const border = POSTIT_COLORS[sheet.colorKey]?.border ?? "border-slate-200";
-  const urgencyKey = sheet.urgency as FollowUpUrgency;
+  const urgencyKey = (sheet.attention?.effectiveUrgency ?? sheet.urgency) as FollowUpUrgency;
   const urgency = URGENCY_STYLES[urgencyKey] ?? URGENCY_STYLES.NORMAL;
+  const primaryReason = sheet.attention?.primaryReason ?? null;
+  const urgencyLabel =
+    sheet.attention != null
+      ? (URGENCY_LABELS[urgencyKey] ?? sheet.urgencyLabel)
+      : sheet.urgencyLabel;
   const ref = sheet.osNumber
     ? `OS-${sheet.osNumber}`
     : sheet.orderNumber
@@ -276,9 +284,12 @@ function KanbanCard({
           title="Urgence BeWork (distincte de l’étape)"
         >
           <span className={cn("h-1.5 w-1.5 rounded-full", urgency.dot)} aria-hidden />
-          {sheet.urgencyLabel}
+          {urgencyLabel}
         </span>
       </div>
+      {primaryReason && urgencyKey !== "NORMAL" ? (
+        <p className="mt-1 text-[11px] leading-snug text-slate-600 line-clamp-2">{primaryReason}</p>
+      ) : null}
     </div>
   );
 }
@@ -362,7 +373,10 @@ export function FollowUpKanban({
   ]);
 
   const summary = useMemo(() => {
-    const urgent = filtered.filter((s) => s.urgency === "URGENT" || s.urgency === "CRITIQUE").length;
+    const urgent = filtered.filter((s) => {
+    const u = s.attention?.effectiveUrgency ?? s.urgency;
+    return u === "URGENT" || u === "CRITIQUE";
+  }).length;
     const aFacturer = filtered.filter(
       (s) => s.status === "A_FACTURER" || s.status === "TRAVAUX_TERMINES",
     ).length;

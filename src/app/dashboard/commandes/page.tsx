@@ -2,25 +2,91 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCachedServerSession } from "@/lib/auth/cached-session";
 import { prisma } from "@/lib/prisma";
-import { BackLink } from "@/components/ui/BackLink";
-import { PageHeader } from "@/components/ui/PageHeader";
 import { EmptyState } from "@/components/ui/EmptyState";
-import {
-  DataTable,
-  DataTableBody,
-  DataTableHead,
-  DataTableRow,
-  DataTableTd,
-  DataTableTh,
-} from "@/components/ui/DataTable";
 import {
   canListPurchaseOrders,
   isInternalPurchaseOrderActor,
+  isSupplierPurchaseOrderActor,
   resolvePurchaseOrderOrgId,
 } from "@/lib/purchase-orders/access";
 import { PURCHASE_ORDER_STATUS_LABELS } from "@/lib/purchase-orders/status";
+import { loadPurchaseOrdersListView } from "@/lib/purchase-orders/list-view";
+import { PurchaseOrdersListClient } from "@/components/purchase-orders/PurchaseOrdersListClient";
 
 export const dynamic = "force-dynamic";
+
+/** Portail fournisseur — liste volontairement simple (≠ pilotage interne V2C). */
+async function SupplierOrdersSimple({
+  orgId,
+  supplierOrgId,
+}: {
+  orgId: string;
+  supplierOrgId: string;
+}) {
+  const orders = await prisma.purchaseOrder.findMany({
+    where: {
+      organizationId: orgId,
+      sharedWithSupplier: true,
+      externalOrganizationId: supplierOrgId,
+    },
+    select: {
+      id: true,
+      number: true,
+      subject: true,
+      status: true,
+      requestedDeliveryAt: true,
+      confirmedDeliveryAt: true,
+      project: { select: { title: true } },
+    },
+    orderBy: { updatedAt: "desc" },
+    take: 80,
+  });
+
+  return (
+    <div className="space-y-4">
+      <header>
+        <h1 className="text-xl font-extrabold text-[#1e3a5f]">Commandes</h1>
+        <p className="mt-1 text-sm text-slate-600">Vos commandes partagées à confirmer ou suivre.</p>
+      </header>
+      {orders.length === 0 ? (
+        <EmptyState
+          title="Aucune commande partagée"
+          description="Les commandes que l’entreprise partage avec vous apparaîtront ici."
+        />
+      ) : (
+        <ul className="space-y-2">
+          {orders.map((o) => {
+            const when = o.confirmedDeliveryAt ?? o.requestedDeliveryAt;
+            return (
+              <li key={o.id}>
+                <Link
+                  href={`/dashboard/commandes/${o.id}`}
+                  className="block rounded-xl border border-slate-200 bg-white px-4 py-3 hover:border-[#1e3a5f]/30"
+                >
+                  <p className="font-bold text-slate-900">{o.number}</p>
+                  <p className="text-sm text-slate-700">{o.subject}</p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {o.project?.title ?? "—"}
+                    {" · "}
+                    {PURCHASE_ORDER_STATUS_LABELS[o.status]}
+                    {when
+                      ? ` · ${when.toLocaleString("fr-FR", {
+                          day: "numeric",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}`
+                      : ""}
+                  </p>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 export default async function CommandesPage() {
   const session = await getCachedServerSession();
@@ -29,131 +95,48 @@ export default async function CommandesPage() {
 
   const orgId = await resolvePurchaseOrderOrgId(session.user);
   const canCreate = isInternalPurchaseOrderActor(session.user);
+  const isSupplier = isSupplierPurchaseOrderActor(session.user);
 
-  const isSupplier =
-    session.user.personType === "SUPPLIER" ||
-    session.user.permissionProfile === "FOURNISSEUR";
-
-  let supplierOrgId: string | null = null;
   if (isSupplier) {
     const u = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: { externalOrganizationId: true },
     });
-    supplierOrgId = u?.externalOrganizationId ?? null;
-  }
-
-  const orders =
-    orgId == null
-      ? []
-      : await prisma.purchaseOrder.findMany({
-          where: {
-            organizationId: orgId,
-            ...(isSupplier && supplierOrgId
-              ? { sharedWithSupplier: true, externalOrganizationId: supplierOrgId }
-              : isSupplier
-                ? { id: "__none__" }
-                : {}),
-          },
-          select: {
-            id: true,
-            number: true,
-            subject: true,
-            status: true,
-            amountHt: true,
-            requestedDeliveryAt: true,
-            project: { select: { title: true } },
-            externalOrganization: { select: { name: true, tradeName: true } },
-            responsible: { select: { name: true } },
-          },
-          orderBy: { updatedAt: "desc" },
-          take: 80,
-        });
-
-  return (
-    <div className="space-y-6">
-      <BackLink href="/dashboard">Tableau de bord</BackLink>
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <PageHeader
-          eyebrow="Chantier"
-          title="Commandes"
-          description="Demandes fournisseur liées à vos chantiers — simples à créer, suivies jusqu’à la réception."
-        />
-        <div className="flex flex-wrap gap-2">
-          {canCreate ? (
-            <Link
-              href="/dashboard/fournisseurs"
-              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700"
-            >
-              Fournisseurs
-            </Link>
-          ) : null}
-          {canCreate ? (
-            <Link
-              href="/dashboard/commandes/nouvelle"
-              className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white"
-            >
-              + Nouvelle commande
-            </Link>
-          ) : null}
-        </div>
-      </div>
-
-      {orders.length === 0 ? (
+    if (!orgId || !u?.externalOrganizationId) {
+      return (
         <EmptyState
           title="Aucune commande"
-          description={
-            canCreate
-              ? "Créez une commande pour un chantier en quelques champs."
-              : "Les commandes partagées avec vous apparaîtront ici."
-          }
+          description="Les commandes partagées avec vous apparaîtront ici."
         />
-      ) : (
-        <DataTable minWidth="880px">
-          <DataTableHead>
-            <DataTableTh>Référence</DataTableTh>
-            <DataTableTh>Objet</DataTableTh>
-            <DataTableTh>Chantier</DataTableTh>
-            <DataTableTh>Fournisseur</DataTableTh>
-            <DataTableTh>Statut</DataTableTh>
-            <DataTableTh>Livraison</DataTableTh>
-          </DataTableHead>
-          <DataTableBody>
-            {orders.map((o) => (
-              <DataTableRow key={o.id}>
-                <DataTableTd>
-                  <Link
-                    href={`/dashboard/commandes/${o.id}`}
-                    className="font-semibold text-[#1e3a5f] hover:underline"
-                  >
-                    {o.number}
-                  </Link>
-                </DataTableTd>
-                <DataTableTd>{o.subject}</DataTableTd>
-                <DataTableTd>{o.project?.title ?? "—"}</DataTableTd>
-                <DataTableTd>
-                  {o.externalOrganization.tradeName || o.externalOrganization.name}
-                </DataTableTd>
-                <DataTableTd>
-                  <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold">
-                    {PURCHASE_ORDER_STATUS_LABELS[o.status]}
-                  </span>
-                </DataTableTd>
-                <DataTableTd>
-                  {o.requestedDeliveryAt
-                    ? new Date(o.requestedDeliveryAt).toLocaleString("fr-FR", {
-                        day: "numeric",
-                        month: "short",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
-                    : "—"}
-                </DataTableTd>
-              </DataTableRow>
-            ))}
-          </DataTableBody>
-        </DataTable>
-      )}
-    </div>
+      );
+    }
+    return (
+      <SupplierOrdersSimple orgId={orgId} supplierOrgId={u.externalOrganizationId} />
+    );
+  }
+
+  if (!orgId) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-xl font-extrabold text-[#1e3a5f]">Commandes</h1>
+        <EmptyState
+          title="Organisation introuvable"
+          description="Impossible d’afficher les commandes pour le moment."
+        />
+      </div>
+    );
+  }
+
+  const { rows, summary } = await loadPurchaseOrdersListView({
+    organizationId: orgId,
+  });
+
+  return (
+    <PurchaseOrdersListClient
+      rows={rows}
+      summary={summary}
+      canCreate={canCreate}
+      canOpenSupplier={canCreate}
+    />
   );
 }

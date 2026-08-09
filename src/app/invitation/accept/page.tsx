@@ -20,19 +20,25 @@ export default async function AcceptInvitationPage({
       </div>
     );
   }
-  let invitation: { id: string; email: string; role: string; status: string; expiresAt: Date } | null = null;
-  try {
-    const inv = await prisma.invitation.findUnique({
-      where: { token },
-      select: { id: true, email: true, role: true, status: true, expiresAt: true },
-    });
-    if (inv && inv.status === "PENDING" && inv.expiresAt > new Date()) {
-      invitation = inv;
-    }
-  } catch {
-    // table may not exist
-  }
-  if (!invitation) {
+
+  const inv = await prisma.invitation.findUnique({
+    where: { token },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      status: true,
+      expiresAt: true,
+      permissionProfile: true,
+      companyName: true,
+      firstName: true,
+      lastName: true,
+      projectIdsJson: true,
+      invitedBy: { select: { company: true, name: true } },
+    },
+  });
+
+  if (!inv || inv.status !== "PENDING" || inv.expiresAt <= new Date()) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center">
@@ -41,15 +47,36 @@ export default async function AcceptInvitationPage({
       </div>
     );
   }
+
   if (session?.user?.id) {
     redirect("/dashboard");
   }
+
+  const projectIds = Array.isArray(inv.projectIdsJson)
+    ? (inv.projectIdsJson as unknown[]).filter((x): x is string => typeof x === "string")
+    : [];
+  const projects =
+    projectIds.length > 0
+      ? await prisma.project.findMany({
+          where: { id: { in: projectIds } },
+          select: { title: true },
+          take: 12,
+        })
+      : [];
+
+  const inviteeName = [inv.firstName, inv.lastName].filter(Boolean).join(" ");
+  const companyName = inv.companyName || inv.invitedBy.company || inv.invitedBy.name;
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
       <AcceptInvitationForm
         token={token}
-        email={invitation.email}
-        role={invitation.role}
+        email={inv.email}
+        role={inv.role}
+        permissionProfile={inv.permissionProfile}
+        companyName={companyName}
+        projectTitles={projects.map((p) => p.title)}
+        inviteeName={inviteeName || null}
       />
     </div>
   );

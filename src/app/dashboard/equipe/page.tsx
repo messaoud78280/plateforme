@@ -26,8 +26,8 @@ export default async function EquipePage() {
       <div>
         <h1 className="text-2xl font-bold text-[#1e3a5f]">Équipe & partenaires</h1>
         <p className="mt-1 text-slate-600">
-          Gérez le personnel, les clients, fournisseurs et partenaires — avec un périmètre chantier
-          clair pour éviter les fuites d&apos;accès.
+          Qui a accès à BeWork, avec quel rôle, et sur quels chantiers — sans manipuler de
+          permissions techniques.
         </p>
         {session.user.isDemo ? (
           <p className="mt-3">

@@ -20,6 +20,7 @@ type TeamRow = {
   jobTitle: string | null;
   permissionProfile: string | null;
   personType: string | null;
+  accessStatus: string | null;
 };
 
 export default async function PlanningPage() {
@@ -42,6 +43,7 @@ export default async function PlanningPage() {
     jobTitle: true,
     permissionProfile: true,
     personType: true,
+    accessStatus: true,
   } as const;
 
   const rawUsers: TeamRow[] = staff

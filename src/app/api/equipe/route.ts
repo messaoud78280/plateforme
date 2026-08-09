@@ -75,11 +75,25 @@ export async function GET() {
     ]);
 
     return NextResponse.json({
-      members: members.map((m) => ({
-        ...m,
-        isOwner: m.id === ctx.ownerUserId,
-        projects: m.projectAccesses.map((pa) => pa.project),
-      })),
+      members: members.map((m) => {
+        const pt = m.personType ?? "INTERNAL";
+        const projects = m.projectAccesses.map((pa) => pa.project);
+        const allChantiers =
+          pt === "INTERNAL" && projects.length === 0;
+        return {
+          ...m,
+          isOwner: m.id === ctx.ownerUserId,
+          projects,
+          allChantiers,
+          accessLabel: allChantiers
+            ? "Tous les chantiers"
+            : projects.length === 0
+              ? "Aucun chantier"
+              : projects.length === 1
+                ? projects[0].title
+                : `${projects.length} chantiers`,
+        };
+      }),
       invitations,
       projects,
       organizationId: ctx.organizationId,
@@ -147,6 +161,7 @@ export async function POST(request: Request) {
         email: result.email,
         acceptUrl: result.acceptUrl,
         expiresAt: result.expiresAt,
+        emailSent: Boolean(result.emailSent),
       });
     }
     return NextResponse.json({

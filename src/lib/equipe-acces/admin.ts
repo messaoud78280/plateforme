@@ -37,6 +37,7 @@ export async function requireEquipeAdmin(): Promise<
       teamRole: true,
       accessStatus: true,
       personType: true,
+      permissionProfile: true,
     },
   });
   if (!actor) {
@@ -44,6 +45,9 @@ export async function requireEquipeAdmin(): Promise<
   }
   if (actor.accessStatus === "SUSPENDED" || actor.accessStatus === "DISABLED") {
     return { ok: false, status: 403, error: "Compte suspendu ou désactivé" };
+  }
+  if (actor.personType && actor.personType !== "INTERNAL") {
+    return { ok: false, status: 403, error: "Réservé aux administrateurs de l’entreprise" };
   }
 
   const ownerUserId = actor.invitedById ?? actor.id;
@@ -60,12 +64,15 @@ export async function requireEquipeAdmin(): Promise<
   });
 
   const isOwner = !actor.invitedById && actor.id === ownerUserId;
-  const teamAdmin =
-    actor.teamRole === "ADMIN" || actor.teamRole === "SUPERVISEUR";
   const orgAdmin =
     membership?.role === "OWNER" || membership?.role === "ADMIN";
+  const profileAdmin =
+    actor.permissionProfile === "DIRECTION" ||
+    actor.permissionProfile === "ADMINISTRATIF" ||
+    (!actor.permissionProfile && (isOwner || actor.teamRole === "ADMIN"));
 
-  if (!isOwner && !orgAdmin && !teamAdmin) {
+  // V2A : Direction / Administratif / owner org — pas Conducteur (même si teamRole SUPERVISEUR)
+  if (!isOwner && !orgAdmin && !profileAdmin) {
     return {
       ok: false,
       status: 403,

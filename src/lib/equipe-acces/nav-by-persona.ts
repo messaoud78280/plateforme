@@ -138,12 +138,10 @@ export function canManageEquipe(
   permissionProfile: string | null | undefined
 ): boolean {
   if (isExternalPortalUser(personType)) return false;
-  if (!permissionProfile) return true; // owner / legacy
-  return (
-    permissionProfile === "DIRECTION" ||
-    permissionProfile === "ADMINISTRATIF" ||
-    permissionProfile === "CONDUCTEUR"
-  );
+  // Owner / legacy sans profil : OK
+  if (!permissionProfile) return true;
+  // V2A : Direction & Administratif uniquement (pas Conducteur)
+  return permissionProfile === "DIRECTION" || permissionProfile === "ADMINISTRATIF";
 }
 
 /** Channel messagerie chantier selon le type de personne. */

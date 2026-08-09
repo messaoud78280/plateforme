@@ -27,7 +27,7 @@ export type AccessStatus = (typeof ACCESS_STATUSES)[number];
 
 export const ACCESS_STATUS_LABELS: Record<AccessStatus, string> = {
   ACTIVE: "Actif",
-  INVITED: "Invitation en attente",
+  INVITED: "Invitation envoyée",
   SUSPENDED: "Suspendu",
   DISABLED: "Désactivé",
 };

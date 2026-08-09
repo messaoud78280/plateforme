@@ -3,10 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ACCESS_STATUS_LABELS,
-  PERSON_TYPE_LABELS,
   PERMISSION_PROFILE_LABELS,
-  PERSON_TYPES,
-  defaultProfileForPersonType,
   personTypesForTab,
   profilesForPersonType,
   type AccessStatus,
@@ -14,6 +11,12 @@ import {
   type PersonType,
   type PermissionProfileKey,
 } from "@/lib/equipe-acces/types";
+import {
+  ADD_PERSON_KINDS,
+  INTERNAL_JOB_OPTIONS,
+  PROFILE_CAPABILITIES,
+  type AddPersonKind,
+} from "@/lib/equipe-acces/profile-capabilities";
 
 type ProjectOpt = { id: string; title: string; siteCity?: string | null };
 
@@ -27,29 +30,28 @@ type Member = {
   personType: string | null;
   permissionProfile: string | null;
   accessStatus: string;
-  teamRole: string | null;
   lastLoginAt: string | null;
-  mustChangePassword: boolean;
-  createdAt: string;
-  invitedById: string | null;
   isOwner: boolean;
   externalOrganization: { id: string; name: string; type: string } | null;
   projects: { id: string; title: string }[];
+  allChantiers?: boolean;
+  accessLabel?: string;
 };
 
 type InvitationItem = {
   id: string;
   email: string;
-  role: string;
   status: string;
   expiresAt: string;
+  createdAt?: string;
   personType?: string | null;
   permissionProfile?: string | null;
   companyName?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
 };
 
 const TABS: { id: EquipeTab; label: string }[] = [
-  { id: "tous", label: "Tous" },
   { id: "personnel", label: "Personnel" },
   { id: "clients", label: "Clients" },
   { id: "fournisseurs", label: "Fournisseurs" },
@@ -58,14 +60,20 @@ const TABS: { id: EquipeTab; label: string }[] = [
   { id: "invitations", label: "Invitations" },
 ];
 
-function statusBadgeClass(status: string): string {
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return (name.slice(0, 2) || "?").toUpperCase();
+}
+
+function statusClass(status: string): string {
   switch (status) {
     case "ACTIVE":
       return "bg-emerald-50 text-emerald-800 border-emerald-200";
     case "INVITED":
-      return "bg-amber-50 text-amber-800 border-amber-200";
+      return "bg-amber-50 text-amber-900 border-amber-200";
     case "SUSPENDED":
-      return "bg-orange-50 text-orange-800 border-orange-200";
+      return "bg-orange-50 text-orange-900 border-orange-200";
     case "DISABLED":
       return "bg-slate-100 text-slate-600 border-slate-200";
     default:
@@ -73,42 +81,60 @@ function statusBadgeClass(status: string): string {
   }
 }
 
+function profileLabel(p: string | null | undefined): string {
+  if (!p) return "—";
+  return PERMISSION_PROFILE_LABELS[p as PermissionProfileKey] ?? p;
+}
+
+function chantiersLine(m: Member): string {
+  if (m.allChantiers || (m.personType === "INTERNAL" && m.projects.length === 0)) {
+    return m.isOwner || m.permissionProfile === "DIRECTION"
+      ? "Accès global"
+      : "Tous les chantiers";
+  }
+  if (m.projects.length === 0) return "Aucun chantier";
+  return m.projects.map((p) => p.title).join(" · ");
+}
+
 export function EquipeSection() {
-  const [tab, setTab] = useState<EquipeTab>("tous");
+  const [tab, setTab] = useState<EquipeTab>("personnel");
   const [q, setQ] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [members, setMembers] = useState<Member[]>([]);
   const [invitations, setInvitations] = useState<InvitationItem[]>([]);
   const [projects, setProjects] = useState<ProjectOpt[]>([]);
   const [loadingList, setLoadingList] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [showForm, setShowForm] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [actionLoading, setActionLoading] = useState(false);
-  const [editPersonType, setEditPersonType] = useState<PersonType>("INTERNAL");
-  const [editProfile, setEditProfile] = useState<PermissionProfileKey>("CONDUCTEUR");
-  const [editJobTitle, setEditJobTitle] = useState("");
-  const [editPhone, setEditPhone] = useState("");
-  const [editCompany, setEditCompany] = useState("");
-  const [editProjectIds, setEditProjectIds] = useState<string[]>([]);
-  const [auditLogs, setAuditLogs] = useState<
-    { id: string; action: string; detail: string | null; createdAt: string; actor: { name: string } | null }[]
-  >([]);
+  const [acceptUrl, setAcceptUrl] = useState("");
 
-  // Formulaire ajout
-  const [personType, setPersonType] = useState<PersonType>("INTERNAL");
-  const [permissionProfile, setPermissionProfile] = useState<PermissionProfileKey>("CONDUCTEUR");
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [wizardStep, setWizardStep] = useState<1 | 2>(1);
+  const [addKind, setAddKind] = useState<AddPersonKind | null>(null);
+  const [jobKey, setJobKey] = useState<string>("CONDUCTEUR");
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [phone, setPhone] = useState("");
-  const [jobTitle, setJobTitle] = useState("");
+  const [jobTitleCustom, setJobTitleCustom] = useState("");
+  const [allChantiers, setAllChantiers] = useState(true);
   const [projectIds, setProjectIds] = useState<string[]>([]);
-  const [mode, setMode] = useState<"invite" | "create">("invite");
   const [loading, setLoading] = useState(false);
-  const [tempPassword, setTempPassword] = useState("");
-  const [acceptUrl, setAcceptUrl] = useState("");
+
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [editProfile, setEditProfile] = useState<PermissionProfileKey>("CONDUCTEUR");
+  const [editProjectIds, setEditProjectIds] = useState<string[]>([]);
+  const [editAllChantiers, setEditAllChantiers] = useState(false);
+  const [workload, setWorkload] = useState<{
+    tasks: number;
+    orders: number;
+    events: number;
+    total: number;
+  } | null>(null);
+  const [reassignTo, setReassignTo] = useState("");
 
   const load = useCallback(async () => {
     setLoadingList(true);
@@ -132,90 +158,115 @@ export function EquipeSection() {
   }, []);
 
   useEffect(() => {
-    load();
+    void load();
   }, [load]);
-
-  useEffect(() => {
-    setPermissionProfile(defaultProfileForPersonType(personType));
-  }, [personType]);
 
   const filteredMembers = useMemo(() => {
     const types = personTypesForTab(tab);
     const query = q.trim().toLowerCase();
     return members.filter((m) => {
       if (types) {
-        const pt = m.personType ?? (m.isOwner || !m.invitedById ? "INTERNAL" : "INTERNAL");
+        const pt = m.personType ?? "INTERNAL";
         if (!types.includes(pt as PersonType)) return false;
       }
+      if (statusFilter !== "ALL" && m.accessStatus !== statusFilter) return false;
       if (!query) return true;
-      const hay = [
-        m.name,
-        m.email,
-        m.company,
-        m.jobTitle,
-        m.externalOrganization?.name,
-      ]
+      const hay = [m.name, m.email, m.company, m.jobTitle, m.externalOrganization?.name]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
       return hay.includes(query);
     });
-  }, [members, tab, q]);
+  }, [members, tab, q, statusFilter]);
 
   const pendingInvites = useMemo(
     () =>
       invitations.filter(
-        (i) => i.status === "PENDING" && new Date(i.expiresAt) > new Date()
+        (i) => i.status === "PENDING" && new Date(i.expiresAt) > new Date(),
       ),
-    [invitations]
+    [invitations],
   );
 
   const selected = members.find((m) => m.id === selectedId) ?? null;
+  const activeInternals = members.filter(
+    (m) =>
+      m.accessStatus === "ACTIVE" &&
+      (m.personType ?? "INTERNAL") === "INTERNAL" &&
+      m.id !== selectedId,
+  );
 
   useEffect(() => {
     if (!selected) {
-      setAuditLogs([]);
+      setWorkload(null);
       return;
     }
-    setEditPersonType((selected.personType as PersonType) || "INTERNAL");
     setEditProfile(
-      (selected.permissionProfile as PermissionProfileKey) ||
-        defaultProfileForPersonType((selected.personType as PersonType) || "INTERNAL")
+      (selected.permissionProfile as PermissionProfileKey) || "CONDUCTEUR",
     );
-    setEditJobTitle(selected.jobTitle ?? "");
-    setEditPhone(selected.phone ?? "");
-    setEditCompany(selected.company ?? selected.externalOrganization?.name ?? "");
     setEditProjectIds(selected.projects.map((p) => p.id));
-    fetch(`/api/equipe/${selected.id}/audit`)
-      .then((r) => (r.ok ? r.json() : { logs: [] }))
-      .then((d) => setAuditLogs(Array.isArray(d.logs) ? d.logs : []))
-      .catch(() => setAuditLogs([]));
-  }, [selectedId]); // eslint-disable-line react-hooks/exhaustive-deps -- sync on selection
+    setEditAllChantiers(Boolean(selected.allChantiers) || selected.projects.length === 0);
+    setShowAdvanced(false);
+    void fetch(`/api/equipe/${selected.id}/workload`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setWorkload(d && typeof d.total === "number" ? d : null))
+      .catch(() => setWorkload(null));
+  }, [selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  function resetForm() {
+  function resetWizard() {
+    setWizardStep(1);
+    setAddKind(null);
+    setJobKey("CONDUCTEUR");
     setEmail("");
     setFirstName("");
     setLastName("");
     setCompanyName("");
     setPhone("");
-    setJobTitle("");
+    setJobTitleCustom("");
+    setAllChantiers(true);
     setProjectIds([]);
-    setMode("invite");
-    setPersonType("INTERNAL");
-    setTempPassword("");
+  }
+
+  function openWizard() {
+    resetWizard();
+    setWizardOpen(true);
+    setError("");
+    setSuccess("");
     setAcceptUrl("");
   }
 
-  async function handleAdd(e: React.FormEvent) {
+  async function submitInvite(e: React.FormEvent) {
     e.preventDefault();
+    if (!addKind) return;
     setError("");
     setSuccess("");
-    setTempPassword("");
     setAcceptUrl("");
     if (!email.trim()) {
       setError("Indiquez l’email.");
       return;
     }
+    const kindDef = ADD_PERSON_KINDS.find((k) => k.key === addKind)!;
+    const personType = kindDef.personType;
+    let permissionProfile: PermissionProfileKey = profilesForPersonType(personType)[0];
+    let jobTitle = "";
+    if (personType === "INTERNAL") {
+      const job = INTERNAL_JOB_OPTIONS.find((j) => j.key === jobKey) ?? INTERNAL_JOB_OPTIONS[1];
+      permissionProfile = job.profile;
+      jobTitle =
+        job.key === "AUTRE" || job.key === "CHARGE_AFFAIRES"
+          ? jobTitleCustom.trim() || job.label
+          : job.label;
+    }
+
+    const ids =
+      personType === "INTERNAL" && allChantiers
+        ? []
+        : projectIds;
+
+    if (personType !== "INTERNAL" && personType !== "SUPPLIER" && ids.length === 0) {
+      setError("Sélectionnez au moins un chantier accessible.");
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch("/api/equipe", {
@@ -230,25 +281,24 @@ export function EquipeSection() {
           jobTitle,
           personType,
           permissionProfile,
-          projectIds,
-          mode,
+          projectIds: ids,
+          mode: "invite",
         }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Erreur lors de l’ajout.");
+        setError(data.error ?? "Invitation impossible.");
         setLoading(false);
         return;
       }
-      if (data.kind === "create" && data.temporaryPassword) {
-        setTempPassword(data.temporaryPassword);
-        setSuccess(data.message ?? "Compte créé.");
-      } else {
-        setAcceptUrl(data.acceptUrl ?? "");
-        setSuccess(`Invitation prête pour ${data.email}.`);
-      }
-      resetForm();
-      setShowForm(false);
+      setAcceptUrl(data.acceptUrl ?? "");
+      setSuccess(
+        data.emailSent
+          ? `Invitation envoyée à ${data.email}.`
+          : `Invitation prête pour ${data.email} (e-mail non envoyé — partagez le lien).`,
+      );
+      setWizardOpen(false);
+      resetWizard();
       await load();
     } catch {
       setError("Erreur de connexion.");
@@ -267,30 +317,10 @@ export function EquipeSection() {
         body: JSON.stringify(body),
       });
       const data = await res.json();
-      if (!res.ok) {
-        setError(data.error ?? "Action impossible.");
-      } else {
+      if (!res.ok) setError(data.error ?? "Action impossible.");
+      else {
         setSuccess("Mise à jour enregistrée.");
         await load();
-      }
-    } catch {
-      setError("Erreur de connexion.");
-    }
-    setActionLoading(false);
-  }
-
-  async function resetPassword(userId: string) {
-    setActionLoading(true);
-    setError("");
-    setTempPassword("");
-    try {
-      const res = await fetch(`/api/equipe/${userId}/reset-password`, { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error ?? "Réinitialisation impossible.");
-      } else {
-        setTempPassword(data.temporaryPassword ?? "");
-        setSuccess(data.message ?? "Mot de passe réinitialisé.");
       }
     } catch {
       setError("Erreur de connexion.");
@@ -301,13 +331,11 @@ export function EquipeSection() {
   async function resendInvite(id: string) {
     setActionLoading(true);
     setError("");
-    setAcceptUrl("");
     try {
       const res = await fetch(`/api/equipe/invitations/${id}/resend`, { method: "POST" });
       const data = await res.json();
-      if (!res.ok) {
-        setError(data.error ?? "Renvoi impossible.");
-      } else {
+      if (!res.ok) setError(data.error ?? "Renvoi impossible.");
+      else {
         setAcceptUrl(data.acceptUrl ?? "");
         setSuccess(`Lien renouvelé pour ${data.email}.`);
         await load();
@@ -318,32 +346,76 @@ export function EquipeSection() {
     setActionLoading(false);
   }
 
-  function toggleProject(id: string) {
-    setProjectIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
+  async function cancelInvite(id: string) {
+    if (!window.confirm("Annuler cette invitation ? Le lien ne fonctionnera plus.")) return;
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/equipe/invitations/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) setError(data.error ?? "Annulation impossible.");
+      else {
+        setSuccess("Invitation annulée.");
+        await load();
+      }
+    } catch {
+      setError("Erreur de connexion.");
+    }
+    setActionLoading(false);
   }
 
-  const profileOptions = profilesForPersonType(personType);
+  async function reassignThenDisable() {
+    if (!selected) return;
+    if (workload && workload.total > 0 && !reassignTo) {
+      setError("Choisissez à qui réaffecter les éléments ouverts, ou réaffectez d’abord.");
+      return;
+    }
+    setActionLoading(true);
+    setError("");
+    try {
+      if (reassignTo && workload && workload.total > 0) {
+        const res = await fetch(`/api/equipe/${selected.id}/reassign`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ toUserId: reassignTo }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          setError(data.error ?? "Réaffectation impossible.");
+          setActionLoading(false);
+          return;
+        }
+      }
+      await patchMember(selected.id, { accessStatus: "DISABLED" });
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  const caps =
+    selected?.permissionProfile &&
+    PROFILE_CAPABILITIES[selected.permissionProfile as PermissionProfileKey];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-2">
+        <div className="flex max-w-full gap-1 overflow-x-auto pb-1">
           {TABS.map((t) => (
             <button
               key={t.id}
               type="button"
-              onClick={() => setTab(t.id)}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+              onClick={() => {
+                setTab(t.id);
+                setSelectedId(null);
+              }}
+              className={`shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
                 tab === t.id
                   ? "bg-[#1e3a5f] text-white"
-                  : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
               }`}
             >
               {t.label}
               {t.id === "invitations" && pendingInvites.length > 0 ? (
-                <span className="ml-1.5 rounded-full bg-amber-400/90 px-1.5 text-xs text-slate-900">
+                <span className="ml-1.5 rounded-full bg-amber-400 px-1.5 text-[10px] font-bold text-slate-900">
                   {pendingInvites.length}
                 </span>
               ) : null}
@@ -353,511 +425,583 @@ export function EquipeSection() {
         {tab !== "invitations" ? (
           <button
             type="button"
-            onClick={() => {
-              setShowForm((v) => !v);
-              setError("");
-              setSuccess("");
-            }}
-            className="rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e40af]"
+            onClick={openWizard}
+            className="shrink-0 rounded-lg bg-[#1d4ed8] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e40af]"
           >
-            {showForm ? "Fermer" : "+ Ajouter"}
+            + Ajouter
           </button>
         ) : null}
       </div>
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       {success ? (
-        <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
           <p>{success}</p>
           {acceptUrl ? (
-            <>
-              <p className="mt-2 font-medium">Lien à partager :</p>
-              <p className="mt-1 break-all font-mono text-xs">{acceptUrl}</p>
-            </>
-          ) : null}
-          {tempPassword ? (
-            <>
-              <p className="mt-2 font-medium">Mot de passe temporaire (à copier maintenant) :</p>
-              <p className="mt-1 break-all font-mono text-sm font-semibold">{tempPassword}</p>
-            </>
+            <p className="mt-2 break-all font-mono text-xs text-emerald-800">{acceptUrl}</p>
           ) : null}
         </div>
       ) : null}
 
-      {showForm ? (
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#1e3a5f]">Ajouter un utilisateur</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Type → infos → profil → chantiers partagés. Les externes ne voient que les chantiers
-            sélectionnés.
-          </p>
-          <form onSubmit={handleAdd} className="mt-4 grid gap-4 sm:grid-cols-2">
+      {wizardOpen ? (
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <div className="flex items-start justify-between gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Type</label>
-              <select
-                value={personType}
-                onChange={(e) => setPersonType(e.target.value as PersonType)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800"
-              >
-                {PERSON_TYPES.map((t) => (
-                  <option key={t} value={t}>
-                    {PERSON_TYPE_LABELS[t]}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Profil</label>
-              <select
-                value={permissionProfile}
-                onChange={(e) => setPermissionProfile(e.target.value as PermissionProfileKey)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-800"
-              >
-                {profileOptions.map((p) => (
-                  <option key={p} value={p}>
-                    {PERMISSION_PROFILE_LABELS[p]}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Prénom</label>
-              <input
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Nom</label>
-              <input
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2"
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium text-slate-700">Email *</label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
-                Organisation / entreprise
-              </label>
-              <input
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                placeholder={personType === "INTERNAL" ? "Optionnel" : "Ex. Point.P, ABC Promotion"}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Fonction</label>
-              <input
-                value={jobTitle}
-                onChange={(e) => setJobTitle(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Téléphone</label>
-              <input
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Mode d’accès</label>
-              <select
-                value={mode}
-                onChange={(e) => setMode(e.target.value as "invite" | "create")}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2"
-              >
-                <option value="invite">Invitation par lien</option>
-                <option value="create">Créer + mot de passe temporaire</option>
-              </select>
-            </div>
-
-            <div className="sm:col-span-2">
-              <p className="mb-2 text-sm font-medium text-slate-700">
-                Chantiers partagés
-                {personType !== "INTERNAL" ? (
-                  <span className="ml-1 text-amber-700">(obligatoire pour externe)</span>
-                ) : (
-                  <span className="ml-1 text-slate-400">(optionnel — sinon accès org)</span>
-                )}
+              <h2 className="text-lg font-semibold text-[#1e3a5f]">Ajouter quelqu’un</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                {wizardStep === 1
+                  ? "Quel type de personne souhaitez-vous ajouter ?"
+                  : "Renseignez les informations, puis envoyez l’invitation."}
               </p>
-              {projects.length === 0 ? (
-                <p className="text-sm text-slate-500">Aucun chantier — créez-en un d’abord.</p>
-              ) : (
-                <ul className="max-h-40 space-y-1 overflow-y-auto rounded-lg border border-slate-200 p-2">
-                  {projects.map((p) => (
-                    <li key={p.id}>
-                      <label className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-slate-50">
-                        <input
-                          type="checkbox"
-                          checked={projectIds.includes(p.id)}
-                          onChange={() => toggleProject(p.id)}
-                        />
-                        <span>
-                          {p.title}
-                          {p.siteCity ? (
-                            <span className="text-slate-400"> · {p.siteCity}</span>
-                          ) : null}
-                        </span>
-                      </label>
-                    </li>
-                  ))}
-                </ul>
-              )}
             </div>
+            <button
+              type="button"
+              onClick={() => setWizardOpen(false)}
+              className="text-sm text-slate-500 hover:text-slate-800"
+            >
+              Fermer
+            </button>
+          </div>
 
-            <div className="sm:col-span-2 flex justify-end gap-2">
+          {wizardStep === 1 ? (
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {ADD_PERSON_KINDS.map((k) => (
+                <button
+                  key={k.key}
+                  type="button"
+                  onClick={() => {
+                    setAddKind(k.key);
+                    setAllChantiers(k.key === "collaborateur");
+                    setWizardStep(2);
+                  }}
+                  className="rounded-xl border border-slate-200 bg-slate-50/80 p-4 text-left transition hover:border-[#1d4ed8]/40 hover:bg-white"
+                >
+                  <p className="font-semibold text-[#1e3a5f]">{k.label}</p>
+                  <p className="mt-1 text-xs text-slate-500">{k.hint}</p>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <form onSubmit={submitInvite} className="mt-5 space-y-4">
               <button
                 type="button"
-                onClick={() => setShowForm(false)}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700"
+                onClick={() => setWizardStep(1)}
+                className="text-xs font-medium text-[#1d4ed8] hover:underline"
               >
-                Annuler
+                ← Changer le type
               </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="rounded-lg bg-[#1d4ed8] px-5 py-2 text-sm font-semibold text-white disabled:opacity-50"
-              >
-                {loading ? "Enregistrement…" : mode === "invite" ? "Envoyer l’invitation" : "Créer le compte"}
-              </button>
-            </div>
-          </form>
+
+              {addKind !== "collaborateur" ? (
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-slate-700">
+                    Entreprise
+                  </label>
+                  <input
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    placeholder={
+                      addKind === "fournisseur"
+                        ? "Ex. Point.P"
+                        : addKind === "client"
+                          ? "Ex. ABC Promotion"
+                          : "Nom de l’entreprise"
+                    }
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    required={addKind === "client" || addKind === "fournisseur"}
+                  />
+                </div>
+              ) : null}
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-slate-700">Prénom</label>
+                  <input
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-slate-700">Nom</label>
+                  <input
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">Email</label>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2"
+                />
+              </div>
+
+              {addKind === "collaborateur" ? (
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-slate-700">Fonction</label>
+                  <select
+                    value={jobKey}
+                    onChange={(e) => setJobKey(e.target.value)}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2"
+                  >
+                    {INTERNAL_JOB_OPTIONS.map((j) => (
+                      <option key={j.key} value={j.key}>
+                        {j.label}
+                      </option>
+                    ))}
+                  </select>
+                  {jobKey === "AUTRE" || jobKey === "CHARGE_AFFAIRES" ? (
+                    <input
+                      value={jobTitleCustom}
+                      onChange={(e) => setJobTitleCustom(e.target.value)}
+                      placeholder="Précisez la fonction"
+                      className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2"
+                    />
+                  ) : null}
+                  {jobKey && PROFILE_CAPABILITIES[
+                    INTERNAL_JOB_OPTIONS.find((j) => j.key === jobKey)?.profile ?? "CONDUCTEUR"
+                  ] ? (
+                    <ul className="mt-3 space-y-1 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                      {PROFILE_CAPABILITIES[
+                        INTERNAL_JOB_OPTIONS.find((j) => j.key === jobKey)!.profile
+                      ]
+                        .filter((c) => c.allowed)
+                        .slice(0, 6)
+                        .map((c) => (
+                          <li key={c.label}>✓ {c.label}</li>
+                        ))}
+                    </ul>
+                  ) : null}
+                </div>
+              ) : null}
+
+              {addKind === "fournisseur" ? (
+                <p className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                  Accès limité aux commandes de cette entreprise, livraisons concernées, documents
+                  explicitement partagés et conversations fournisseur — pas au planning interne.
+                </p>
+              ) : null}
+              {addKind === "client" ? (
+                <p className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                  Ce client ne verra que les données explicitement partagées avec lui.
+                </p>
+              ) : null}
+
+              {addKind !== "fournisseur" ? (
+                <div>
+                  <p className="mb-2 text-sm font-medium text-slate-700">Accès aux chantiers</p>
+                  {addKind === "collaborateur" ? (
+                    <div className="mb-3 space-y-2">
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="radio"
+                          checked={allChantiers}
+                          onChange={() => setAllChantiers(true)}
+                        />
+                        Tous les chantiers
+                      </label>
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="radio"
+                          checked={!allChantiers}
+                          onChange={() => setAllChantiers(false)}
+                        />
+                        Uniquement certains chantiers
+                      </label>
+                    </div>
+                  ) : null}
+                  {!allChantiers || addKind !== "collaborateur" ? (
+                    <ul className="max-h-40 space-y-1 overflow-y-auto rounded-lg border border-slate-200 p-2">
+                      {projects.map((p) => (
+                        <li key={p.id}>
+                          <label className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-slate-50">
+                            <input
+                              type="checkbox"
+                              checked={projectIds.includes(p.id)}
+                              onChange={() =>
+                                setProjectIds((prev) =>
+                                  prev.includes(p.id)
+                                    ? prev.filter((x) => x !== p.id)
+                                    : [...prev, p.id],
+                                )
+                              }
+                            />
+                            {p.title}
+                            {p.siteCity ? (
+                              <span className="text-slate-400"> · {p.siteCity}</span>
+                            ) : null}
+                          </label>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+              ) : null}
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setWizardOpen(false)}
+                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="rounded-lg bg-[#1d4ed8] px-5 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                >
+                  {loading ? "Envoi…" : "Envoyer l’invitation"}
+                </button>
+              </div>
+            </form>
+          )}
         </section>
       ) : null}
 
       {tab === "invitations" ? (
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#1e3a5f]">Invitations en attente</h2>
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="text-base font-semibold text-[#1e3a5f]">Invitations en attente</h2>
           {loadingList ? (
-            <p className="mt-4 text-slate-500">Chargement…</p>
+            <p className="mt-4 text-sm text-slate-500">Chargement…</p>
           ) : pendingInvites.length === 0 ? (
-            <p className="mt-4 text-slate-500">Aucune invitation en attente.</p>
+            <p className="mt-4 text-sm text-slate-500">Aucune invitation en attente.</p>
           ) : (
             <ul className="mt-4 divide-y divide-slate-100">
-              {pendingInvites.map((inv) => (
-                <li
-                  key={inv.id}
-                  className="flex flex-wrap items-center justify-between gap-3 py-3"
-                >
-                  <div>
-                    <p className="font-medium text-slate-800">{inv.email}</p>
-                    <p className="text-sm text-slate-500">
-                      {inv.personType
-                        ? PERSON_TYPE_LABELS[inv.personType as PersonType] ?? inv.personType
-                        : "Personnel"}
-                      {inv.companyName ? ` · ${inv.companyName}` : ""}
-                      {" · Expire le "}
-                      {new Date(inv.expiresAt).toLocaleDateString("fr-FR")}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    disabled={actionLoading}
-                    onClick={() => resendInvite(inv.id)}
-                    className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              {pendingInvites.map((inv) => {
+                const name = [inv.firstName, inv.lastName].filter(Boolean).join(" ") || inv.email;
+                return (
+                  <li
+                    key={inv.id}
+                    className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between"
                   >
-                    Renvoyer le lien
-                  </button>
-                </li>
-              ))}
+                    <div className="min-w-0">
+                      <p className="font-medium text-slate-900">{name}</p>
+                      <p className="text-sm text-slate-500">{inv.email}</p>
+                      <p className="mt-0.5 text-xs text-slate-400">
+                        {profileLabel(inv.permissionProfile)}
+                        {inv.companyName ? ` · ${inv.companyName}` : ""}
+                        {" · Expire le "}
+                        {new Date(inv.expiresAt).toLocaleDateString("fr-FR")}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 gap-2">
+                      <button
+                        type="button"
+                        disabled={actionLoading}
+                        onClick={() => void resendInvite(inv.id)}
+                        className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium"
+                      >
+                        Renvoyer
+                      </button>
+                      <button
+                        type="button"
+                        disabled={actionLoading}
+                        onClick={() => void cancelInvite(inv.id)}
+                        className="rounded-lg border border-red-200 px-3 py-1.5 text-sm font-medium text-red-700"
+                      >
+                        Annuler
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </section>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="mb-4 flex flex-wrap items-center gap-3">
-              <h2 className="text-lg font-semibold text-[#1e3a5f]">Utilisateurs</h2>
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(280px,340px)]">
+          <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+            <div className="mb-4 flex flex-wrap gap-2">
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Rechercher nom, email, org…"
-                className="ml-auto min-w-[200px] flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                placeholder="Rechercher…"
+                className="min-w-[160px] flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm"
               />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              >
+                <option value="ALL">Tous les statuts</option>
+                <option value="ACTIVE">Actif</option>
+                <option value="INVITED">Invitation envoyée</option>
+                <option value="SUSPENDED">Suspendu</option>
+                <option value="DISABLED">Désactivé</option>
+              </select>
             </div>
+
             {loadingList ? (
-              <p className="text-slate-500">Chargement…</p>
+              <p className="text-sm text-slate-500">Chargement…</p>
             ) : filteredMembers.length === 0 ? (
-              <p className="text-slate-500">Aucun utilisateur dans cet onglet.</p>
+              <p className="text-sm text-slate-500">Personne dans cet onglet.</p>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[560px] text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-200 text-slate-500">
-                      <th className="pb-2 font-medium">Nom</th>
-                      <th className="pb-2 font-medium">Type</th>
-                      <th className="pb-2 font-medium">Profil</th>
-                      <th className="pb-2 font-medium">Statut</th>
-                      <th className="pb-2 font-medium">Chantiers</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredMembers.map((m) => {
-                      const pt = (m.personType as PersonType) || "INTERNAL";
-                      const st = m.accessStatus as AccessStatus;
-                      return (
-                        <tr
-                          key={m.id}
-                          onClick={() => setSelectedId(m.id)}
-                          className={`cursor-pointer border-b border-slate-50 hover:bg-slate-50 ${
-                            selectedId === m.id ? "bg-blue-50/60" : ""
-                          }`}
-                        >
-                          <td className="py-3 pr-2">
-                            <p className="font-medium text-slate-800">
-                              {m.name}
-                              {m.isOwner ? (
-                                <span className="ml-1 text-xs text-slate-400">(compte)</span>
-                              ) : null}
-                            </p>
-                            <p className="text-xs text-slate-500">{m.email}</p>
-                          </td>
-                          <td className="py-3 pr-2 text-slate-600">
-                            {PERSON_TYPE_LABELS[pt] ?? pt}
-                          </td>
-                          <td className="py-3 pr-2 text-slate-600">
-                            {m.permissionProfile
-                              ? PERMISSION_PROFILE_LABELS[
-                                  m.permissionProfile as PermissionProfileKey
-                                ] ?? m.permissionProfile
-                              : "—"}
-                          </td>
-                          <td className="py-3 pr-2">
+              <ul className="divide-y divide-slate-100">
+                {filteredMembers.map((m) => {
+                  const st = m.accessStatus as AccessStatus;
+                  return (
+                    <li key={m.id}>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedId(m.id)}
+                        className={`flex w-full items-start gap-3 px-1 py-3.5 text-left transition hover:bg-slate-50 ${
+                          selectedId === m.id ? "bg-blue-50/70" : ""
+                        }`}
+                      >
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1e3a5f] text-xs font-bold text-white">
+                          {initials(m.name)}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="flex flex-wrap items-center gap-2">
+                            <span className="font-semibold text-slate-900">{m.name}</span>
                             <span
-                              className={`inline-block rounded-md border px-2 py-0.5 text-xs font-medium ${statusBadgeClass(st)}`}
+                              className={`rounded-md border px-1.5 py-0.5 text-[10px] font-medium ${statusClass(st)}`}
                             >
                               {ACCESS_STATUS_LABELS[st] ?? st}
                             </span>
-                          </td>
-                          <td className="py-3 text-slate-600">
-                            {pt === "INTERNAL" && m.projects.length === 0
-                              ? "Org"
-                              : m.projects.length}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                          </span>
+                          <span className="mt-0.5 block text-sm text-slate-600">
+                            {m.jobTitle || profileLabel(m.permissionProfile)}
+                            {m.externalOrganization?.name
+                              ? ` · ${m.externalOrganization.name}`
+                              : m.company
+                                ? ` · ${m.company}`
+                                : ""}
+                          </span>
+                          <span className="mt-0.5 block truncate text-xs text-slate-400">
+                            {chantiersLine(m)}
+                          </span>
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
             )}
           </section>
 
-          <aside className="max-h-[80vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:sticky lg:top-4 lg:self-start">
+          <aside className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:sticky lg:top-4 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
             {!selected ? (
               <p className="text-sm text-slate-500">
-                Sélectionnez un utilisateur pour voir la fiche et les actions.
+                Sélectionnez une personne pour voir sa fiche.
               </p>
             ) : (
               <div className="space-y-4">
-                <div>
-                  <h3 className="text-base font-semibold text-[#1e3a5f]">{selected.name}</h3>
-                  <p className="text-sm text-slate-500">{selected.email}</p>
-                  <p className="mt-1 text-xs text-slate-400">
-                    Dernière connexion :{" "}
-                    {selected.lastLoginAt
-                      ? new Date(selected.lastLoginAt).toLocaleString("fr-FR")
-                      : "jamais"}
-                  </p>
+                <div className="flex items-start gap-3">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#1e3a5f] text-sm font-bold text-white">
+                    {initials(selected.name)}
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-[#1e3a5f]">{selected.name}</h3>
+                    <p className="text-sm text-slate-600">
+                      {selected.jobTitle || profileLabel(selected.permissionProfile)}
+                    </p>
+                    <p className="truncate text-xs text-slate-400">{selected.email}</p>
+                  </div>
                 </div>
 
-                {!selected.isOwner ? (
-                  <div className="space-y-3 rounded-xl border border-slate-100 bg-slate-50/80 p-3">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                      Modifier l’accès
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                    Accès
+                  </p>
+                  <p className="mt-1 text-sm text-slate-700">{chantiersLine(selected)}</p>
+                </div>
+
+                {caps ? (
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                      Ce qu’elle peut faire
                     </p>
-                    <label className="block text-xs font-medium text-slate-600">
-                      Type
-                      <select
-                        value={editPersonType}
-                        onChange={(e) => {
-                          const t = e.target.value as PersonType;
-                          setEditPersonType(t);
-                          setEditProfile(defaultProfileForPersonType(t));
-                        }}
-                        className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm"
-                      >
-                        {PERSON_TYPES.map((t) => (
-                          <option key={t} value={t}>
-                            {PERSON_TYPE_LABELS[t]}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <label className="block text-xs font-medium text-slate-600">
-                      Profil
-                      <select
-                        value={editProfile}
-                        onChange={(e) => setEditProfile(e.target.value as PermissionProfileKey)}
-                        className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm"
-                      >
-                        {profilesForPersonType(editPersonType).map((p) => (
-                          <option key={p} value={p}>
-                            {PERMISSION_PROFILE_LABELS[p]}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <label className="block text-xs font-medium text-slate-600">
-                      Fonction
-                      <input
-                        value={editJobTitle}
-                        onChange={(e) => setEditJobTitle(e.target.value)}
-                        className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm"
-                      />
-                    </label>
-                    <label className="block text-xs font-medium text-slate-600">
-                      Téléphone
-                      <input
-                        value={editPhone}
-                        onChange={(e) => setEditPhone(e.target.value)}
-                        className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm"
-                      />
-                    </label>
-                    <label className="block text-xs font-medium text-slate-600">
-                      Organisation
-                      <input
-                        value={editCompany}
-                        onChange={(e) => setEditCompany(e.target.value)}
-                        className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm"
-                      />
-                    </label>
-                    <div>
-                      <p className="text-xs font-medium text-slate-600">Chantiers partagés</p>
-                      <ul className="mt-1 max-h-28 space-y-0.5 overflow-y-auto rounded-lg border border-slate-200 bg-white p-1">
-                        {projects.map((p) => (
-                          <li key={p.id}>
-                            <label className="flex cursor-pointer items-center gap-2 rounded px-1.5 py-1 text-xs hover:bg-slate-50">
-                              <input
-                                type="checkbox"
-                                checked={editProjectIds.includes(p.id)}
-                                onChange={() =>
-                                  setEditProjectIds((prev) =>
-                                    prev.includes(p.id)
-                                      ? prev.filter((x) => x !== p.id)
-                                      : [...prev, p.id]
-                                  )
-                                }
-                              />
-                              {p.title}
-                            </label>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <button
-                      type="button"
-                      disabled={actionLoading}
-                      onClick={() =>
-                        patchMember(selected.id, {
-                          personType: editPersonType,
-                          permissionProfile: editProfile,
-                          jobTitle: editJobTitle,
-                          phone: editPhone,
-                          companyName: editCompany,
-                          projectIds: editProjectIds,
-                        })
-                      }
-                      className="w-full rounded-lg bg-[#1d4ed8] px-3 py-2 text-sm font-semibold text-white"
-                    >
-                      Enregistrer la fiche
-                    </button>
+                    <ul className="mt-2 space-y-1 text-sm text-slate-700">
+                      {caps.map((c) => (
+                        <li key={c.label} className={c.allowed ? "" : "text-slate-400 line-through"}>
+                          {c.allowed ? "✓" : "–"} {c.label}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 ) : null}
 
                 {!selected.isOwner ? (
-                  <div className="flex flex-col gap-2 border-t border-slate-100 pt-4">
-                    {selected.accessStatus === "ACTIVE" ? (
-                      <button
-                        type="button"
-                        disabled={actionLoading}
-                        onClick={() =>
-                          patchMember(selected.id, { accessStatus: "SUSPENDED" })
-                        }
-                        className="rounded-lg border border-orange-200 bg-orange-50 px-3 py-2 text-sm font-medium text-orange-900"
-                      >
-                        Suspendre
-                      </button>
-                    ) : null}
-                    {selected.accessStatus === "SUSPENDED" ||
-                    selected.accessStatus === "DISABLED" ? (
-                      <button
-                        type="button"
-                        disabled={actionLoading}
-                        onClick={() =>
-                          patchMember(selected.id, { accessStatus: "ACTIVE" })
-                        }
-                        className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-900"
-                      >
-                        Réactiver
-                      </button>
-                    ) : null}
-                    {selected.accessStatus !== "DISABLED" ? (
-                      <button
-                        type="button"
-                        disabled={actionLoading}
-                        onClick={() => {
-                          if (
-                            window.confirm(
-                              "Désactiver cet accès ? La personne ne pourra plus se connecter."
-                            )
-                          ) {
-                            patchMember(selected.id, { accessStatus: "DISABLED" });
-                          }
-                        }}
-                        className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700"
-                      >
-                        Désactiver
-                      </button>
-                    ) : null}
+                  <>
                     <button
                       type="button"
-                      disabled={actionLoading}
-                      onClick={() => resetPassword(selected.id)}
-                      className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-sm font-medium text-white"
+                      onClick={() => setShowAdvanced((v) => !v)}
+                      className="text-xs font-medium text-[#1d4ed8] hover:underline"
                     >
-                      Réinitialiser le mot de passe
+                      {showAdvanced ? "Masquer" : "Paramètres avancés"}
                     </button>
-                  </div>
+                    {showAdvanced ? (
+                      <div className="space-y-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
+                        <label className="block text-xs font-medium text-slate-600">
+                          Profil
+                          <select
+                            value={editProfile}
+                            onChange={(e) =>
+                              setEditProfile(e.target.value as PermissionProfileKey)
+                            }
+                            className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm"
+                          >
+                            {profilesForPersonType(
+                              (selected.personType as PersonType) || "INTERNAL",
+                            ).map((p) => (
+                              <option key={p} value={p}>
+                                {PERMISSION_PROFILE_LABELS[p]}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        {(selected.personType ?? "INTERNAL") === "INTERNAL" ? (
+                          <div className="space-y-1 text-xs">
+                            <label className="flex items-center gap-2">
+                              <input
+                                type="radio"
+                                checked={editAllChantiers}
+                                onChange={() => setEditAllChantiers(true)}
+                              />
+                              Tous les chantiers
+                            </label>
+                            <label className="flex items-center gap-2">
+                              <input
+                                type="radio"
+                                checked={!editAllChantiers}
+                                onChange={() => setEditAllChantiers(false)}
+                              />
+                              Chantiers sélectionnés
+                            </label>
+                          </div>
+                        ) : null}
+                        {!editAllChantiers ||
+                        (selected.personType ?? "INTERNAL") !== "INTERNAL" ? (
+                          <ul className="max-h-28 space-y-0.5 overflow-y-auto rounded-lg border border-slate-200 bg-white p-1 text-xs">
+                            {projects.map((p) => (
+                              <li key={p.id}>
+                                <label className="flex cursor-pointer items-center gap-2 px-1 py-1">
+                                  <input
+                                    type="checkbox"
+                                    checked={editProjectIds.includes(p.id)}
+                                    onChange={() =>
+                                      setEditProjectIds((prev) =>
+                                        prev.includes(p.id)
+                                          ? prev.filter((x) => x !== p.id)
+                                          : [...prev, p.id],
+                                      )
+                                    }
+                                  />
+                                  {p.title}
+                                </label>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : null}
+                        <button
+                          type="button"
+                          disabled={actionLoading}
+                          onClick={() =>
+                            void patchMember(selected.id, {
+                              permissionProfile: editProfile,
+                              projectIds:
+                                editAllChantiers &&
+                                (selected.personType ?? "INTERNAL") === "INTERNAL"
+                                  ? []
+                                  : editProjectIds,
+                            })
+                          }
+                          className="w-full rounded-lg bg-[#1d4ed8] px-3 py-2 text-sm font-semibold text-white"
+                        >
+                          Enregistrer
+                        </button>
+                      </div>
+                    ) : null}
+
+                    {workload && workload.total > 0 ? (
+                      <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950">
+                        <p className="font-medium">Éléments encore rattachés</p>
+                        <ul className="mt-1 text-xs">
+                          {workload.tasks > 0 ? <li>{workload.tasks} tâche(s)</li> : null}
+                          {workload.orders > 0 ? <li>{workload.orders} commande(s)</li> : null}
+                          {workload.events > 0 ? (
+                            <li>{workload.events} événement(s) futur(s)</li>
+                          ) : null}
+                        </ul>
+                        <label className="mt-2 block text-xs font-medium">
+                          Réaffecter à
+                          <select
+                            value={reassignTo}
+                            onChange={(e) => setReassignTo(e.target.value)}
+                            className="mt-1 w-full rounded-lg border border-amber-300 bg-white px-2 py-1.5"
+                          >
+                            <option value="">Choisir…</option>
+                            {activeInternals.map((m) => (
+                              <option key={m.id} value={m.id}>
+                                {m.name}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      </div>
+                    ) : null}
+
+                    <div className="flex flex-col gap-2 border-t border-slate-100 pt-3">
+                      {selected.accessStatus === "ACTIVE" ? (
+                        <button
+                          type="button"
+                          disabled={actionLoading}
+                          onClick={() =>
+                            void patchMember(selected.id, { accessStatus: "SUSPENDED" })
+                          }
+                          className="rounded-lg border border-orange-200 bg-orange-50 px-3 py-2 text-sm font-medium text-orange-900"
+                        >
+                          Suspendre
+                        </button>
+                      ) : null}
+                      {selected.accessStatus === "SUSPENDED" ||
+                      selected.accessStatus === "DISABLED" ? (
+                        <button
+                          type="button"
+                          disabled={actionLoading}
+                          onClick={() =>
+                            void patchMember(selected.id, { accessStatus: "ACTIVE" })
+                          }
+                          className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-900"
+                        >
+                          Réactiver
+                        </button>
+                      ) : null}
+                      {selected.accessStatus !== "DISABLED" ? (
+                        <button
+                          type="button"
+                          disabled={actionLoading}
+                          onClick={() => {
+                            if (
+                              window.confirm(
+                                "Désactiver l’accès ? L’historique est conservé.",
+                              )
+                            ) {
+                              void reassignThenDisable();
+                            }
+                          }}
+                          className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700"
+                        >
+                          Désactiver l’accès
+                        </button>
+                      ) : null}
+                    </div>
+                  </>
                 ) : (
                   <p className="border-t border-slate-100 pt-3 text-xs text-slate-500">
-                    Compte propriétaire — actions limitées (pas de suspension).
+                    Compte Direction — actions limitées.
                   </p>
                 )}
-
-                <div className="border-t border-slate-100 pt-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                    Historique accès
-                  </p>
-                  {auditLogs.length === 0 ? (
-                    <p className="mt-2 text-xs text-slate-500">Aucun événement enregistré.</p>
-                  ) : (
-                    <ul className="mt-2 max-h-36 space-y-1.5 overflow-y-auto text-xs text-slate-600">
-                      {auditLogs.map((log) => (
-                        <li key={log.id} className="rounded border border-slate-100 bg-slate-50 px-2 py-1.5">
-                          <span className="font-medium text-slate-800">{log.action}</span>
-                          {log.actor?.name ? ` · ${log.actor.name}` : ""}
-                          <br />
-                          {new Date(log.createdAt).toLocaleString("fr-FR")}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
               </div>
             )}
           </aside>

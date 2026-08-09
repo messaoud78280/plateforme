@@ -50,11 +50,13 @@ export type PlanningTeamUser = {
   personType?: string | null;
 };
 
-/** Ressource planifiable interne — exclut client / fournisseur / sous-traitant. */
+/** Ressource planifiable interne — exclut client / fournisseur / sous-traitant / inactifs. */
 export function isPlanifiableUser(u: {
   personType?: string | null;
   permissionProfile?: string | null;
+  accessStatus?: string | null;
 }): boolean {
+  if (u.accessStatus === "DISABLED" || u.accessStatus === "SUSPENDED") return false;
   const pt = u.personType ?? "INTERNAL";
   if (pt === "CLIENT_EXT" || pt === "SUPPLIER" || pt === "SUBCONTRACTOR") return false;
   const pp = u.permissionProfile ?? "";

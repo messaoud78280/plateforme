@@ -42,6 +42,27 @@ export async function PATCH(request: Request, context: Ctx) {
       }
     }
 
+    const { wouldRemoveLastEquipeAdmin } = await import("@/lib/equipe-acces/last-admin");
+    if (
+      await wouldRemoveLastEquipeAdmin({
+        ownerUserId: gate.ctx.ownerUserId,
+        organizationId: gate.ctx.organizationId,
+        targetUserId: userId,
+        nextAccessStatus:
+          typeof body.accessStatus === "string" ? body.accessStatus : undefined,
+        nextPermissionProfile:
+          typeof body.permissionProfile === "string" ? body.permissionProfile : undefined,
+      })
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Impossible : ce serait le dernier administrateur capable de gérer les accès. Transférez d’abord le rôle Direction ou Administratif.",
+        },
+        { status: 400 }
+      );
+    }
+
     const data: {
       accessStatus?: string;
       permissionProfile?: string;

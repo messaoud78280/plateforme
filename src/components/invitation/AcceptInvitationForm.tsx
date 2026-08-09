@@ -3,21 +3,41 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { PERMISSION_PROFILE_LABELS, type PermissionProfileKey } from "@/lib/equipe-acces/types";
 
-const ROLE_LABELS: Record<string, string> = {
-  ADMIN: "Administrateur",
-  USER: "Utilisateur",
-  SUPERVISEUR: "Superviseur",
+type Props = {
+  token: string;
+  email: string;
+  role: string;
+  permissionProfile?: string | null;
+  companyName?: string | null;
+  projectTitles?: string[];
+  inviteeName?: string | null;
 };
 
-type Props = { token: string; email: string; role: string };
-
-export function AcceptInvitationForm({ token, email, role }: Props) {
+export function AcceptInvitationForm({
+  token,
+  email,
+  role,
+  permissionProfile,
+  companyName,
+  projectTitles = [],
+  inviteeName,
+}: Props) {
   const router = useRouter();
-  const [name, setName] = useState("");
+  const [name, setName] = useState(inviteeName ?? "");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const roleLabel =
+    permissionProfile && permissionProfile in PERMISSION_PROFILE_LABELS
+      ? PERMISSION_PROFILE_LABELS[permissionProfile as PermissionProfileKey]
+      : role === "ADMIN"
+        ? "Direction"
+        : role === "SUPERVISEUR"
+          ? "Conducteur de travaux"
+          : "Collaborateur";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -39,7 +59,12 @@ export function AcceptInvitationForm({ token, email, role }: Props) {
         setLoading(false);
         return;
       }
-      router.push("/connexion?accepted=1");
+      const q = new URLSearchParams({
+        role: roleLabel,
+        company: companyName ?? "",
+        projects: projectTitles.slice(0, 8).join(" · "),
+      });
+      router.push(`/invitation/bienvenue?${q.toString()}`);
       router.refresh();
     } catch {
       setError("Erreur de connexion.");
@@ -48,11 +73,26 @@ export function AcceptInvitationForm({ token, email, role }: Props) {
   }
 
   return (
-    <div className="w-full max-w-md rounded-2xl surface-metallic-light p-8">
-      <h1 className="text-xl font-bold text-slate-800">Rejoindre l&apos;équipe</h1>
+    <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+      <h1 className="text-xl font-bold text-[#1e3a5f]">Activer votre compte</h1>
       <p className="mt-2 text-sm text-slate-600">
-        Vous avez été invité en tant que <strong>{ROLE_LABELS[role] ?? role}</strong>.
+        {companyName ? (
+          <>
+            Bienvenue chez <strong>{companyName}</strong>.
+          </>
+        ) : (
+          "Vous avez été invité à rejoindre BeWork."
+        )}
       </p>
+      <p className="mt-2 text-sm text-slate-600">
+        Votre rôle : <strong>{roleLabel}</strong>
+      </p>
+      {projectTitles.length > 0 ? (
+        <p className="mt-1 text-sm text-slate-500">
+          Accès : {projectTitles.slice(0, 5).join(" · ")}
+          {projectTitles.length > 5 ? "…" : ""}
+        </p>
+      ) : null}
       <p className="mt-1 text-sm text-slate-500">Email : {email}</p>
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
@@ -88,7 +128,7 @@ export function AcceptInvitationForm({ token, email, role }: Props) {
           disabled={loading}
           className="w-full rounded-lg bg-[#1d4ed8] py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af] disabled:opacity-50"
         >
-          {loading ? "Création du compte…" : "Accepter et créer mon compte"}
+          {loading ? "Création du compte…" : "Créer mon mot de passe"}
         </button>
       </form>
       <p className="mt-4 text-center text-sm text-slate-500">

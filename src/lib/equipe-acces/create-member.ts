@@ -54,6 +54,7 @@ export async function addEquipeMember(
       email: string;
       acceptUrl: string;
       expiresAt: Date;
+      emailSent?: boolean;
     }
   | {
       ok: true;
@@ -136,6 +137,23 @@ export async function addEquipeMember(
       action: "INVITE_SENT",
       detail: JSON.stringify({ email, personType: raw.personType, profile }),
     });
+
+    let emailSent = false;
+    try {
+      const { sendEquipeInvitationEmail } = await import("./invite-email");
+      const mail = await sendEquipeInvitationEmail({
+        to: email,
+        inviteeName: displayName,
+        companyName: raw.companyName,
+        permissionProfile: profile,
+        acceptUrl,
+        expiresAt,
+      });
+      emailSent = mail.sent;
+    } catch (e) {
+      console.error("[equipe] invite email:", e);
+    }
+
     return {
       ok: true,
       kind: "invite",
@@ -143,6 +161,7 @@ export async function addEquipeMember(
       email,
       acceptUrl,
       expiresAt,
+      emailSent,
     };
   }
 

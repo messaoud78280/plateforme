@@ -83,6 +83,14 @@ export async function GET(request: NextRequest) {
       documents: [] as { id: string; name: string; fileUrl: string }[],
     }));
 
+    // Tri WhatsApp : conversation au dernier message en tête (pas seulement updatedAt tâche)
+    result.sort((a, b) => {
+      const ta = a.lastMessage ? new Date(a.lastMessage.createdAt).getTime() : 0;
+      const tb = b.lastMessage ? new Date(b.lastMessage.createdAt).getTime() : 0;
+      if (tb !== ta) return tb - ta;
+      return 0;
+    });
+
     return NextResponse.json(result);
   } catch (e) {
     console.error(e);

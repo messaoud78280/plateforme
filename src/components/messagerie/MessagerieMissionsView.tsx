@@ -67,18 +67,48 @@ type DirectMessageItem = {
 type AttachmentItem = { name: string; fileUrl: string; fileSize: number; mimeType?: string };
 
 type FilterId = "envoyer" | "messages-directs" | "inbox" | "mes-missions" | "en-attente-client" | "en-cours" | "terminees";
+type ListChip = "tous" | "non-lus" | "internes" | "externes";
 
-const NAV_ITEMS: { id: FilterId; label: string }[] = [
+const PRIMARY_NAV: { id: FilterId; label: string }[] = [
+  { id: "inbox", label: "Conversations" },
   { id: "messages-directs", label: "Contacts" },
-  { id: "inbox", label: "Discussions" },
   { id: "envoyer", label: "Nouveau" },
+];
+
+const MORE_NAV: { id: FilterId; label: string }[] = [
   { id: "mes-missions", label: "Mes missions" },
   { id: "en-attente-client", label: "En attente client" },
   { id: "en-cours", label: "En cours" },
   { id: "terminees", label: "Terminées" },
 ];
 
-function railIcon(id: FilterId) {
+function sortMissionsByLastMessage(list: MissionItem[]): MissionItem[] {
+  return [...list].sort((a, b) => {
+    const ta = a.lastMessage ? new Date(a.lastMessage.createdAt).getTime() : 0;
+    const tb = b.lastMessage ? new Date(b.lastMessage.createdAt).getTime() : 0;
+    return tb - ta;
+  });
+}
+
+function bumpMissionWithMessage(
+  list: MissionItem[],
+  taskId: string,
+  lastMessage: MissionItem["lastMessage"],
+  unreadDelta = 0,
+): MissionItem[] {
+  const next = list.map((m) =>
+    m.id === taskId
+      ? {
+          ...m,
+          lastMessage: lastMessage ?? m.lastMessage,
+          unreadCount: Math.max(0, m.unreadCount + unreadDelta),
+        }
+      : m,
+  );
+  return sortMissionsByLastMessage(next);
+}
+
+function railIcon(id: FilterId | "more") {
   const common = "h-6 w-6";
   switch (id) {
     case "inbox":
@@ -96,35 +126,17 @@ function railIcon(id: FilterId) {
     case "envoyer":
       return (
         <svg className={common} viewBox="0 0 24 24" fill="currentColor">
-          <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
         </svg>
       );
-    case "mes-missions":
+    case "more":
       return (
         <svg className={common} viewBox="0 0 24 24" fill="currentColor">
-          <path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.81-1h12l.94 1H5.12z" />
-        </svg>
-      );
-    case "en-attente-client":
-      return (
-        <svg className={common} viewBox="0 0 24 24" fill="currentColor">
-          <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
-        </svg>
-      );
-    case "en-cours":
-      return (
-        <svg className={common} viewBox="0 0 24 24" fill="currentColor">
-          <path d="M8 5v14l11-7z" />
-        </svg>
-      );
-    case "terminees":
-      return (
-        <svg className={common} viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+          <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
         </svg>
       );
     default:
-      return <span>•</span>;
+      return <span className="text-xs font-bold">•••</span>;
   }
 }
 
@@ -178,9 +190,10 @@ export function MessagerieMissionsView({
   recipients = [],
 }: MessagerieMissionsViewProps) {
   const [missions, setMissions] = useState<MissionItem[]>([]);
-  const [filter, setFilter] = useState<FilterId>(
-    isClient ? "inbox" : "messages-directs",
-  );
+  const [filter, setFilter] = useState<FilterId>("inbox");
+  const [listChip, setListChip] = useState<ListChip>("tous");
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [headerMenuOpen, setHeaderMenuOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string>("");
   const [messages, setMessages] = useState<TaskMessageItem[]>([]);
   const messagesRef = useRef<TaskMessageItem[]>([]);
@@ -219,11 +232,11 @@ export function MessagerieMissionsView({
 
   const selectedMission = missions.find((m) => m.id === selectedTaskId);
   const showEnvoyerTab = isAgence || isAgent || isClient;
-  const navItems = NAV_ITEMS.filter((i) => {
+  const primaryNav = PRIMARY_NAV.filter((i) => {
     if (i.id === "envoyer") return showEnvoyerTab;
-    if (i.id === "messages-directs") return true; // Contacts pour tous
     return true;
   });
+  const moreNavActive = MORE_NAV.some((i) => i.id === filter);
 
   const myDirectMessages = directMessages.filter(
     (m) => m.sender.id === sessionUserId || m.receiver.id === sessionUserId
@@ -320,9 +333,10 @@ export function MessagerieMissionsView({
         const res = await fetch(`/api/tasks/messagerie?filter=${filter}`);
         if (res.ok) {
           const data = await res.json();
-          setMissions(Array.isArray(data) ? data : []);
-          if (!selectedTaskId && data?.length > 0) {
-            setSelectedTaskId(data[0].id);
+          const list = Array.isArray(data) ? (data as MissionItem[]) : [];
+          setMissions(sortMissionsByLastMessage(list));
+          if (!selectedTaskId && list.length > 0) {
+            setSelectedTaskId(list[0]!.id);
           }
         }
       } finally {
@@ -479,7 +493,7 @@ export function MessagerieMissionsView({
     return () => clearInterval(interval);
   }, [filter, selectedDirectContactId]);
 
-  // Poll incrémental mission (nouveaux messages seulement)
+  // Poll incrémental mission (nouveaux messages seulement) + remonter conversation
   useEffect(() => {
     if (!selectedTaskId || filter === "envoyer" || filter === "messages-directs") return;
     const interval = setInterval(() => {
@@ -491,16 +505,45 @@ export function MessagerieMissionsView({
         .then((r) => (r.ok ? r.json() : []))
         .then((data) => {
           if (!Array.isArray(data) || data.length === 0) return;
+          const newest = data[data.length - 1] as TaskMessageItem;
           setMessages((prev) => {
             const seen = new Set(prev.map((m) => m.id));
             const add = data.filter((m: TaskMessageItem) => !seen.has(m.id));
             return add.length ? [...prev, ...add] : prev;
           });
+          setMissions((prev) =>
+            bumpMissionWithMessage(
+              prev,
+              selectedTaskId,
+              {
+                id: newest.id,
+                content: newest.content,
+                createdAt: newest.createdAt,
+                sender: newest.sender,
+              },
+              newest.sender.id === sessionUserId ? 0 : 0,
+            ),
+          );
         })
         .catch(() => {});
     }, 7000);
     return () => clearInterval(interval);
-  }, [selectedTaskId, filter]);
+  }, [selectedTaskId, filter, sessionUserId]);
+
+  // Poll liste conversations (ordre lastMessage) sans refresh page
+  useEffect(() => {
+    if (filter === "envoyer" || filter === "messages-directs") return;
+    const interval = setInterval(() => {
+      fetch(`/api/tasks/messagerie?filter=${filter}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          if (!Array.isArray(data)) return;
+          setMissions(sortMissionsByLastMessage(data as MissionItem[]));
+        })
+        .catch(() => {});
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [filter]);
 
   useEffect(() => {
     if (!stickToBottomRef.current) return;
@@ -573,19 +616,12 @@ export function MessagerieMissionsView({
     stickToBottomRef.current = true;
     setMessages((prev) => [...prev, optimistic]);
     setMissions((prev) =>
-      prev.map((m) =>
-        m.id === selectedTaskId
-          ? {
-              ...m,
-              lastMessage: {
-                id: tempId,
-                content: optimistic.content,
-                createdAt: optimistic.createdAt,
-                sender: optimistic.sender,
-              },
-            }
-          : m,
-      ),
+      bumpMissionWithMessage(prev, selectedTaskId, {
+        id: tempId,
+        content: optimistic.content,
+        createdAt: optimistic.createdAt,
+        sender: optimistic.sender,
+      }),
     );
 
     try {
@@ -621,19 +657,12 @@ export function MessagerieMissionsView({
           prev.map((m) => (m.id === tempId ? { ...data, linkedBadges: [] } : m)),
         );
         setMissions((prev) =>
-          prev.map((m) =>
-            m.id === selectedTaskId
-              ? {
-                  ...m,
-                  lastMessage: {
-                    id: data.id,
-                    content: data.content,
-                    createdAt: data.createdAt,
-                    sender: data.sender ?? optimistic.sender,
-                  },
-                }
-              : m,
-          ),
+          bumpMissionWithMessage(prev, selectedTaskId, {
+            id: data.id,
+            content: data.content,
+            createdAt: data.createdAt,
+            sender: data.sender ?? optimistic.sender,
+          }),
         );
       } else {
         setMessages((prev) =>
@@ -841,13 +870,22 @@ export function MessagerieMissionsView({
 
   const visibleMessages = messages.filter((m) => !m.isInternal || isAgence || isAgent);
 
-  const filteredMissions = listSearch.trim()
-    ? missions.filter(
+  const filteredMissions = (() => {
+    let list = missions;
+    if (listChip === "non-lus") list = list.filter((m) => m.unreadCount > 0);
+    // internes / externes : missions = externes (client) ; contacts = internes (rail)
+    if (listSearch.trim()) {
+      const q = listSearch.toLowerCase();
+      list = list.filter(
         (m) =>
-          m.title.toLowerCase().includes(listSearch.toLowerCase()) ||
-          m.client.name.toLowerCase().includes(listSearch.toLowerCase()),
-      )
-    : missions;
+          m.title.toLowerCase().includes(q) ||
+          m.client.name.toLowerCase().includes(q) ||
+          (m.assignedTo?.name ?? "").toLowerCase().includes(q) ||
+          (m.lastMessage?.content ?? "").toLowerCase().includes(q),
+      );
+    }
+    return sortMissionsByLastMessage(list);
+  })();
 
   if (loading) {
     return (
@@ -862,7 +900,12 @@ export function MessagerieMissionsView({
       key={id}
       type="button"
       title={label}
-      onClick={() => setFilter(id)}
+      onClick={() => {
+        setFilter(id);
+        setMoreOpen(false);
+        if (id === "messages-directs") setListChip("internes");
+        if (id === "inbox") setListChip("tous");
+      }}
       className={`flex h-12 w-12 items-center justify-center rounded-full transition ${
         active ? "bg-[#00a884]/20 text-[#008069]" : "text-[#54656f] hover:bg-black/5"
       }`}
@@ -873,19 +916,54 @@ export function MessagerieMissionsView({
 
   return (
     <div className="mx-auto flex h-full min-h-0 w-full max-w-[1600px] overflow-hidden bg-[#f0f2f5] shadow-2xl">
-      {/* Rail icônes — comme WhatsApp */}
-      <aside className="flex w-[59px] shrink-0 flex-col items-center border-r border-[#d1d7db] bg-[#f0f2f5] py-3">
+      {/* Rail — desktop uniquement, 3 actions + Plus */}
+      <aside className="relative hidden w-[59px] shrink-0 flex-col items-center border-r border-[#d1d7db] bg-[#f0f2f5] py-3 md:flex">
         <div className="flex min-h-0 flex-1 flex-col items-center gap-1 overflow-y-auto">
-          {navItems.map((item) => railBtn(item.id, item.label, filter === item.id))}
+          {primaryNav.map((item) =>
+            railBtn(item.id, item.label, filter === item.id),
+          )}
+          <button
+            type="button"
+            title="Plus"
+            onClick={() => setMoreOpen((v) => !v)}
+            className={`flex h-12 w-12 items-center justify-center rounded-full transition ${
+              moreOpen || moreNavActive ? "bg-[#00a884]/20 text-[#008069]" : "text-[#54656f] hover:bg-black/5"
+            }`}
+          >
+            {railIcon("more")}
+          </button>
         </div>
+        {moreOpen ? (
+          <div className="absolute bottom-16 left-14 z-40 w-52 rounded-xl border border-[#d1d7db] bg-white py-1 shadow-lg">
+            <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-[#667781]">
+              Vues
+            </p>
+            {MORE_NAV.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => {
+                  setFilter(item.id);
+                  setMoreOpen(false);
+                  setListChip("tous");
+                }}
+                className={`block w-full px-3 py-2 text-left text-sm ${
+                  filter === item.id ? "bg-[#e7f8f3] font-semibold text-[#008069]" : "text-[#111b21] hover:bg-[#f5f6f6]"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        ) : null}
       </aside>
 
       {/* Colonne liste / formulaire */}
       {filter === "envoyer" ? (
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto bg-white p-6">
-          <h2 className="mb-4 text-lg font-semibold text-[#111b21]">Nouveau message</h2>
+          <h2 className="mb-4 text-lg font-semibold text-[#111b21]">+ Nouveau message</h2>
           <p className="mb-4 text-sm text-[#667781]">
-            Choisissez un destinataire et écrivez votre message.
+            À qui souhaitez-vous écrire ?
           </p>
           <form onSubmit={handleSendDirect} className="space-y-4">
             <div>
@@ -899,14 +977,22 @@ export function MessagerieMissionsView({
                 required
                 className="w-full rounded-lg border border-[#d1d7db] px-4 py-2.5 text-sm text-[#111b21] focus:border-[#00a884] focus:outline-none focus:ring-2 focus:ring-[#00a884]/20"
               >
-                <option value="">Sélectionner un agent ou gérant…</option>
+                <option value="">Rechercher un contact…</option>
                 {recipients
                   .filter((r) => r.id !== sessionUserId)
-                  .map((r) => (
-                    <option key={r.id} value={r.id}>
-                      {r.name} ({r.role})
-                    </option>
-                  ))}
+                  .map((r) => {
+                    const kind =
+                      r.role === "client"
+                        ? "Client · Externe"
+                        : r.role === "gérant" || r.role === "agent"
+                          ? "Interne"
+                          : r.role;
+                    return (
+                      <option key={r.id} value={r.id}>
+                        {r.name} — {kind}
+                      </option>
+                    );
+                  })}
               </select>
             </div>
             <div>
@@ -967,7 +1053,7 @@ export function MessagerieMissionsView({
             }`}
           >
             <div className="border-b border-[#e9edef] px-4 pb-3 pt-3">
-              <div className="mb-3 flex items-center justify-between">
+              <div className="mb-1 flex items-center justify-between">
                 <h2 className="text-[22px] font-bold tracking-tight text-[#111b21]">Contacts</h2>
                 <button
                   type="button"
@@ -980,6 +1066,7 @@ export function MessagerieMissionsView({
                   </svg>
                 </button>
               </div>
+              <p className="mb-3 text-xs font-semibold text-violet-800">🔒 Internes</p>
               <input
                 type="search"
                 value={listSearch}
@@ -1076,7 +1163,7 @@ export function MessagerieMissionsView({
                     <h3 className="truncate text-[16px] font-medium text-[#111b21]">
                       {(selectedDirectContact as { name?: string } | undefined)?.name ?? "Contact"}
                     </h3>
-                    <p className="text-[13px] text-[#667781]">🔒 Interne · Message direct</p>
+                    <p className="text-[13px] font-medium text-violet-800">🔒 Interne</p>
                   </div>
                 </div>
                 <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3" style={WA_CHAT_BG}>
@@ -1098,7 +1185,7 @@ export function MessagerieMissionsView({
                         <div
                           key={m.id}
                           id={`msg-${m.id}`}
-                          className={`flex ${isMe ? "justify-end" : "justify-start"}`}
+                          className={`group flex ${isMe ? "justify-end" : "justify-start"}`}
                         >
                           <div className={`flex max-w-[75%] flex-col ${isMe ? "items-end" : "items-start"}`}>
                             <div
@@ -1217,29 +1304,31 @@ export function MessagerieMissionsView({
       >
         <div className="border-b border-[#e9edef] px-4 pb-3 pt-3">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-[22px] font-bold tracking-tight text-[#111b21]">Discussions</h2>
+            <h2 className="text-[22px] font-bold tracking-tight text-[#111b21]">Messagerie</h2>
             <div className="flex items-center gap-1">
               <button
                 type="button"
                 title="Contacts"
-                onClick={() => setFilter("messages-directs")}
-                className="rounded-full px-3 py-1.5 text-xs font-semibold text-[#008069] hover:bg-[#e7f8f3]"
+                onClick={() => {
+                  setFilter("messages-directs");
+                  setListChip("internes");
+                }}
+                className="rounded-full px-3 py-1.5 text-xs font-semibold text-[#008069] hover:bg-[#e7f8f3] md:hidden"
               >
                 Contacts
               </button>
               <button
                 type="button"
-                title="Nouvelle discussion"
+                title="+ Nouveau message"
                 onClick={() => setFilter(showEnvoyerTab ? "envoyer" : "inbox")}
-                className="flex h-9 w-9 items-center justify-center rounded-full text-[#54656f] hover:bg-[#f0f2f5]"
+                className="flex h-9 items-center gap-1 rounded-full bg-[#00a884] px-3 text-sm font-semibold text-white hover:bg-[#008f72]"
               >
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
-                </svg>
+                <span className="text-lg leading-none">+</span>
+                <span className="hidden sm:inline">Nouveau</span>
               </button>
             </div>
           </div>
-          <div className="relative">
+          <div className="relative mb-2">
             <svg
               className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#54656f]"
               viewBox="0 0 24 24"
@@ -1251,9 +1340,36 @@ export function MessagerieMissionsView({
               type="search"
               value={listSearch}
               onChange={(e) => setListSearch(e.target.value)}
-              placeholder="Rechercher"
+              placeholder="Rechercher personne, chantier, message…"
               className="w-full rounded-lg border-0 bg-[#f0f2f5] py-2 pl-10 pr-3 text-[14px] text-[#111b21] placeholder:text-[#667781] focus:outline-none focus:ring-1 focus:ring-[#00a884]"
             />
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {(
+              [
+                ["tous", "Tous"],
+                ["non-lus", "Non lus"],
+                ["internes", "Internes"],
+                ["externes", "Externes"],
+              ] as const
+            ).map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => {
+                  setListChip(id);
+                  if (id === "internes") setFilter("messages-directs");
+                  else setFilter("inbox");
+                }}
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  listChip === id
+                    ? "bg-[#111b21] text-white"
+                    : "bg-[#f0f2f5] text-[#54656f] hover:bg-[#e9edef]"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
         </div>
         <ul className="flex-1 overflow-y-auto">
@@ -1277,7 +1393,9 @@ export function MessagerieMissionsView({
               </div>
             </li>
           ) : (
-            filteredMissions.map((m) => (
+            filteredMissions.map((m) => {
+              const unread = m.unreadCount > 0;
+              return (
               <li key={m.id}>
                 <button
                   type="button"
@@ -1289,24 +1407,37 @@ export function MessagerieMissionsView({
                     selectedTaskId === m.id ? "bg-[#f0f2f5]" : "hover:bg-[#f5f6f6]"
                   }`}
                 >
-                  <Avatar name={m.client.name || m.title} size="sm" />
+                  <div className="relative">
+                    <Avatar name={m.client.name || m.title} size="sm" />
+                    {unread ? (
+                      <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[#00a884] ring-2 ring-white" />
+                    ) : null}
+                  </div>
                   <div className="min-w-0 flex-1 border-b border-[#f0f2f5] pb-3">
                     <div className="flex items-baseline justify-between gap-2">
-                      <p className="truncate text-[15px] font-medium text-[#111b21]">{m.title}</p>
-                      <span className="shrink-0 text-[11px] text-[#667781]">
+                      <p
+                        className={`truncate text-[15px] ${
+                          unread ? "font-bold text-[#111b21]" : "font-medium text-[#111b21]"
+                        }`}
+                      >
+                        {m.title}
+                      </p>
+                      <span
+                        className={`shrink-0 text-[11px] ${
+                          unread ? "font-semibold text-[#00a884]" : "text-[#667781]"
+                        }`}
+                      >
                         {m.lastMessage ? formatRelativeTime(m.lastMessage.createdAt) : ""}
                       </span>
                     </div>
-                    <p className="mt-0.5 truncate text-[13px] text-[#667781]">
-                      {m.assignedTo?.name
-                        ? `${m.assignedTo.name.split(" ")[0]} · `
-                        : ""}
-                      {STATUS_LABELS[m.status] ?? m.status}
+                    <p className="mt-0.5 truncate text-[12px] text-[#8696a0]">
+                      Client · Externe
+                      {m.client.name ? ` · ${m.client.name}` : ""}
                     </p>
                     {m.lastMessage ? (
                       <p
                         className={`mt-0.5 truncate text-[13px] ${
-                          m.unreadCount > 0 ? "font-semibold text-[#111b21]" : "text-[#667781]"
+                          unread ? "font-semibold text-[#111b21]" : "text-[#667781]"
                         }`}
                       >
                         {m.lastMessage.sender.id === sessionUserId
@@ -1322,7 +1453,7 @@ export function MessagerieMissionsView({
                           {m.priority === "URGENT" ? "Urgent" : "Prioritaire"}
                         </span>
                       )}
-                      {m.unreadCount > 0 && (
+                      {unread && (
                         <span className="ml-auto inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#00a884] px-1.5 text-[10px] font-bold text-white">
                           {m.unreadCount}
                         </span>
@@ -1331,7 +1462,8 @@ export function MessagerieMissionsView({
                   </div>
                 </button>
               </li>
-            ))
+            );
+            })
           )}
         </ul>
       </aside>
@@ -1344,7 +1476,7 @@ export function MessagerieMissionsView({
       >
         {selectedMission ? (
           <>
-            <div className="flex shrink-0 items-center gap-3 border-b border-[#d1d7db] bg-[#f0f2f5] px-4 py-2">
+            <div className="relative flex shrink-0 items-center gap-3 border-b border-[#d1d7db] bg-[#f0f2f5] px-4 py-2">
               <button
                 type="button"
                 className="rounded-full p-2 text-[#54656f] hover:bg-[#e9edef] md:hidden"
@@ -1360,44 +1492,42 @@ export function MessagerieMissionsView({
                   {selectedMission.client.name}
                   {selectedMission.assignedTo ? ` · ${selectedMission.assignedTo.name}` : ""}
                   {" · "}
-                  {STATUS_LABELS[selectedMission.status] ?? selectedMission.status}
+                  <span className="font-semibold text-orange-700">Client · Externe</span>
                 </p>
-                <div className="mt-1 flex flex-wrap gap-1.5">
-                  <span className="inline-flex items-center rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-semibold text-violet-900">
-                    🔒 Interne
-                  </span>
-                  {selectedMission.projectId ? (
-                    <Link
-                      href={`/dashboard/projets/${selectedMission.projectId}`}
-                      className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700 hover:bg-slate-200"
-                    >
-                      Voir le chantier
-                    </Link>
-                  ) : null}
-                </div>
               </div>
-              <div className="flex shrink-0 items-center gap-1 text-[#54656f]">
-                <ConversationDossierPanel
-                  taskId={selectedTaskId}
-                  projectId={selectedMission.projectId}
-                />
-                {selectedMission.projectId ? (
-                  <Link
-                    href={`/dashboard/projets/${selectedMission.projectId}`}
-                    className="hidden rounded-full p-2 hover:bg-[#e9edef] sm:inline-flex"
-                    title="Dossier chantier"
-                  >
-                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
-                    </svg>
-                  </Link>
-                ) : null}
-                <button type="button" className="rounded-full p-2 hover:bg-[#e9edef]" title="Rechercher" tabIndex={-1}>
+              <div className="relative flex shrink-0 items-center gap-1 text-[#54656f]">
+                <button
+                  type="button"
+                  className="rounded-full p-2 hover:bg-[#e9edef]"
+                  title="Plus"
+                  onClick={() => setHeaderMenuOpen((v) => !v)}
+                >
                   <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                    <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
                   </svg>
                 </button>
-                <DeleteTaskButton taskId={selectedTaskId} />
+                {headerMenuOpen ? (
+                  <div className="absolute right-0 top-11 z-40 w-52 rounded-xl border border-[#d1d7db] bg-white py-1 shadow-lg">
+                    {selectedMission.projectId ? (
+                      <Link
+                        href={`/dashboard/projets/${selectedMission.projectId}`}
+                        className="block px-3 py-2 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
+                        onClick={() => setHeaderMenuOpen(false)}
+                      >
+                        Voir le chantier
+                      </Link>
+                    ) : null}
+                    <div className="border-t border-[#f0f2f5] px-2 py-1">
+                      <ConversationDossierPanel
+                        taskId={selectedTaskId}
+                        projectId={selectedMission.projectId}
+                      />
+                    </div>
+                    <div className="border-t border-[#f0f2f5] px-2 py-1">
+                      <DeleteTaskButton taskId={selectedTaskId} />
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </div>
 
@@ -1459,7 +1589,7 @@ export function MessagerieMissionsView({
                       <div
                         key={m.id}
                         id={`msg-${m.id}`}
-                        className={`flex ${isMe ? "justify-end" : "justify-start"}`}
+                        className={`group flex ${isMe ? "justify-end" : "justify-start"}`}
                       >
                         <div className={`flex max-w-[78%] flex-col ${isMe ? "items-end" : "items-start"}`}>
                           <div
@@ -1652,7 +1782,7 @@ export function MessagerieMissionsView({
                   <textarea
                     value={sendContent}
                     onChange={(e) => setSendContent(e.target.value)}
-                    placeholder={uploadingAttach ? "Téléchargement…" : "Tapez un message"}
+                    placeholder="Écrire un message..."
                     rows={1}
                     className="min-h-[44px] max-h-32 w-full resize-none rounded-[24px] border-0 bg-white py-3 pl-4 pr-10 text-[15px] text-[#111b21] placeholder:text-[#667781] focus:outline-none"
                     disabled={sending}

@@ -108,7 +108,7 @@ export function MessageBeworkActions({
   }
 
   return (
-    <div className="relative mt-1">
+    <div className={`relative mt-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 ${open ? "opacity-100" : ""}`}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -119,7 +119,7 @@ export function MessageBeworkActions({
         }`}
         title="Action BeWork"
       >
-        ⚡
+        ⚡ Action BeWork
       </button>
       {msg ? (
         <span className={`ml-1 text-[10px] font-semibold ${isMe ? "text-[#008069]" : "text-[#008069]"}`}>

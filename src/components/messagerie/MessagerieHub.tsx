@@ -42,7 +42,7 @@ export function MessagerieHub(props: Props) {
             view === "missions" ? "bg-[#1d4ed8] text-white" : "text-slate-300 hover:bg-white/10"
           }`}
         >
-          Missions
+          Conversations
         </button>
         <button
           type="button"
@@ -53,10 +53,10 @@ export function MessagerieHub(props: Props) {
         >
           Chantiers
         </button>
-        <p className="ml-auto hidden text-xs text-slate-400 sm:block">
+        <p className="ml-auto hidden max-w-md truncate text-xs text-slate-400 sm:block">
           {view === "chantiers"
-            ? "Fils INTERNE / CLIENT / FOURNISSEUR — ne mélangez pas les interlocuteurs"
-            : "Conversations missions et messages directs"}
+            ? "Fils chantier : Interne · Client · Fournisseur — ne mélangez pas"
+            : "Messages récents en haut · comme WhatsApp"}
         </p>
       </div>
       <div className="min-h-0 flex-1 overflow-hidden">

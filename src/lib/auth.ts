@@ -242,7 +242,7 @@ export const authOptions: NextAuthOptions = {
         }
       }
 
-      // Métadonnées démo (revalidées périodiquement via présence email)
+      // Métadonnées démo (revalidées à chaque JWT) + nom affiché (évite Marc figé après apply-brand)
       const email = (token.email as string | undefined) ?? undefined;
       if (token.id && (isDemoEmail(email) || token.isDemo)) {
         const access = await resolveDemoAccessForUser(token.id as string);
@@ -255,6 +255,16 @@ export const authOptions: NextAuthOptions = {
             : [];
           if (!token.demoRootUserId) {
             token.demoRootUserId = access.demo.rootUserId;
+          }
+          // Lecture légère : synchro identité visible (Denis / profil) sans ensure* métier
+          const demoUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { name: true, personType: true, permissionProfile: true },
+          });
+          if (demoUser?.name) token.name = demoUser.name;
+          if (demoUser) {
+            token.personType = demoUser.personType;
+            token.permissionProfile = demoUser.permissionProfile;
           }
         } else {
           token.isDemo = true;

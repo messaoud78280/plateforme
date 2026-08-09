@@ -209,10 +209,10 @@ export function PurchaseOrdersListClient({
   return (
     <div className="space-y-4">
       <header className="space-y-1">
-        <h1 className="text-xl font-extrabold tracking-tight text-[#1e3a5f] sm:text-2xl">
+        <h1 className="text-[1.75rem] font-semibold tracking-tight text-bework-ink sm:text-[1.875rem]">
           Commandes
         </h1>
-        <p className="text-sm text-slate-600">
+        <p className="text-[0.9375rem] text-bework-muted">
           Suivez vos commandes fournisseurs, de l’envoi jusqu’à la réception.
         </p>
       </header>
@@ -243,20 +243,20 @@ export function PurchaseOrdersListClient({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Rechercher une commande, un fournisseur, un chantier…"
-          className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#1e3a5f]/40 focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/10"
+          className="bw-search min-w-0 flex-1"
         />
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => setFiltersOpen((v) => !v)}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            className="btn-cc-secondary !min-h-10 !px-3 !text-xs"
           >
             Filtres
           </button>
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortId)}
-            className="rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs font-semibold text-slate-700"
+            className="min-h-10 rounded-[var(--cc-radius)] border border-[color:var(--cc-chrome-border)] bg-white px-2 text-xs font-medium text-bework-ink"
             aria-label="Trier"
           >
             <option value="attention">Attention</option>
@@ -265,18 +265,12 @@ export function PurchaseOrdersListClient({
             <option value="number">Référence</option>
           </select>
           {canCreate ? (
-            <Link
-              href="/dashboard/fournisseurs"
-              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-            >
+            <Link href="/dashboard/fournisseurs" className="btn-cc-ghost !text-xs">
               Fournisseurs
             </Link>
           ) : null}
           {canCreate ? (
-            <Link
-              href="/dashboard/commandes/nouvelle"
-              className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white hover:bg-[#152a45]"
-            >
+            <Link href="/dashboard/commandes/nouvelle" className="btn-cc-primary !min-h-10 !text-xs">
               + Nouvelle commande
             </Link>
           ) : null}
@@ -325,10 +319,10 @@ export function PurchaseOrdersListClient({
       ) : (
         <>
           {/* Desktop table */}
-          <div className="hidden overflow-hidden rounded-xl border border-slate-200 bg-white md:block">
-            <table className="w-full min-w-[880px] border-collapse text-left text-sm">
+          <div className="cc-list-surface hidden md:block">
+            <table className="w-full min-w-[880px] border-collapse text-left text-[0.875rem]">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/80 text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                <tr className="border-b border-[color:var(--cc-border)] text-[12px] font-medium text-bework-muted">
                   <th className="px-3 py-2.5">Fournisseur / Réf.</th>
                   <th className="px-3 py-2.5">Chantier</th>
                   <th className="px-3 py-2.5">Objet</th>
@@ -354,10 +348,10 @@ export function PurchaseOrdersListClient({
                           router.push(`/dashboard/commandes/${row.id}`);
                         }
                       }}
-                      className="cursor-pointer border-b border-slate-100 last:border-b-0 hover:bg-slate-50/90"
+                      className="cc-list-row cursor-pointer border-b border-[color:var(--cc-border)] last:border-b-0"
                     >
                       <td className="px-3 py-3 align-top">
-                        <p className="text-[13px] font-extrabold uppercase tracking-wide text-[#1e3a5f]">
+                        <p className="text-[13px] font-semibold uppercase tracking-wide text-bework-navy">
                           {canOpenSupplier ? (
                             <Link
                               href={`/dashboard/fournisseurs/${row.supplierId}`}

@@ -1,6 +1,10 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
+/**
+ * DESIGN-SYSTEM-V3 — header de page compact.
+ * Pas de grosse card décorative : typographie + espace.
+ */
 export function PageHeader({
   eyebrow,
   title,
@@ -15,24 +19,24 @@ export function PageHeader({
   className?: string;
 }) {
   return (
-    <header className={cn("cc-card overflow-hidden p-0", className)}>
-      <div className="border-b border-bework-navy/10 bg-gradient-to-r from-bework-navy/[0.05] via-transparent to-bework-cyan/[0.04] px-5 py-4 sm:px-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="min-w-0">
-            {eyebrow ? (
-              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-bework-muted">
-                {eyebrow}
-              </p>
-            ) : null}
-            <h1 className="font-heading mt-1 text-2xl font-bold tracking-tight text-bework-ink sm:text-3xl">
-              {title}
-            </h1>
-            {description ? (
-              <p className="mt-1 max-w-2xl text-sm text-bework-muted">{description}</p>
-            ) : null}
-          </div>
-          {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
+    <header className={cn("space-y-1", className)}>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="min-w-0">
+          {eyebrow ? (
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-bework-muted">
+              {eyebrow}
+            </p>
+          ) : null}
+          <h1 className="mt-0.5 text-[1.75rem] font-semibold tracking-tight text-bework-ink sm:text-[1.875rem]">
+            {title}
+          </h1>
+          {description ? (
+            <p className="mt-1 max-w-2xl text-[0.9375rem] leading-relaxed text-bework-muted">
+              {description}
+            </p>
+          ) : null}
         </div>
+        {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
       </div>
     </header>
   );

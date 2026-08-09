@@ -94,7 +94,7 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-dvh bg-[#f1f5f9]">
+    <div className="flex min-h-dvh bg-[color:var(--cc-surface-muted)]">
       <SkipLink />
       <AppSidebar
         role={session.user?.role ?? null}
@@ -111,16 +111,16 @@ export default async function DashboardLayout({
         {isDemo ? (
           <DemoTenantBanner companyName={companyName} expiresAt={demoExpiresIso} />
         ) : null}
-        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-3 border-b border-slate-200/80 bg-white/90 px-3 backdrop-blur-sm sm:px-5">
+        <header className="cc-header sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-3 px-3 sm:px-5">
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-bework-ink">
+            <p className="truncate text-[0.9375rem] font-semibold tracking-tight text-bework-ink">
               {isDemo && companyName
                 ? companyName
                 : external
                   ? personaHomeLabel(personType, permissionProfile)
                   : "Espace de travail"}
             </p>
-            <p className="truncate text-[11px] text-bework-muted">
+            <p className="truncate text-[12px] font-medium text-bework-muted">
               {isDemo ? "Démonstration BeWork" : "BeWork"}
             </p>
           </div>

@@ -11,9 +11,9 @@ export function DataTable({
   minWidth?: string;
 }) {
   return (
-    <div className={cn("cc-card overflow-hidden p-0", className)}>
+    <div className={cn("cc-list-surface", className)}>
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm" style={{ minWidth }}>
+        <table className="w-full text-left text-[0.875rem]" style={{ minWidth }}>
           {children}
         </table>
       </div>
@@ -24,7 +24,7 @@ export function DataTable({
 export function DataTableHead({ children }: { children: ReactNode }) {
   return (
     <thead>
-      <tr className="border-b border-[color:var(--cc-chrome-border)] bg-[color:var(--cc-chrome)] text-bework-ink">
+      <tr className="border-b border-[color:var(--cc-border)] text-bework-ink">
         {children}
       </tr>
     </thead>
@@ -43,7 +43,7 @@ export function DataTableTh({
   return (
     <th
       className={cn(
-        "px-4 py-3 text-[11px] font-bold uppercase tracking-[0.08em] text-bework-muted sm:px-5",
+        "px-4 py-3 text-[12px] font-medium text-bework-muted sm:px-5",
         align === "center" && "text-center",
         align === "right" && "text-right",
         className,
@@ -55,7 +55,7 @@ export function DataTableTh({
 }
 
 export function DataTableBody({ children }: { children: ReactNode }) {
-  return <tbody className="divide-y divide-bework-navy/[0.06]">{children}</tbody>;
+  return <tbody className="divide-y divide-[color:var(--cc-border)]">{children}</tbody>;
 }
 
 export function DataTableRow({
@@ -66,7 +66,7 @@ export function DataTableRow({
   className?: string;
 }) {
   return (
-    <tr className={cn("bg-white transition-colors hover:bg-bework-navy-soft/50", className)}>
+    <tr className={cn("cc-list-row bg-white", className)}>
       {children}
     </tr>
   );

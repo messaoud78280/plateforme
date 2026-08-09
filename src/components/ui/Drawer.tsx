@@ -50,7 +50,7 @@ export function Drawer({
     <div className="fixed inset-0 z-[80]" role="presentation">
       <button
         type="button"
-        className="absolute inset-0 bg-[color:var(--cc-ink)]/40 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-[color:var(--cc-ink)]/30 backdrop-blur-[4px]"
         onClick={() => dismissible && onClose()}
         aria-label="Fermer"
       />
@@ -59,16 +59,16 @@ export function Drawer({
         aria-modal="true"
         aria-labelledby={title ? "cc-drawer-title" : undefined}
         className={cn(
-          "absolute inset-y-0 flex w-full flex-col border-[color:var(--cc-chrome-border)] bg-white shadow-[var(--cc-shadow-hover)]",
+          "absolute inset-y-0 flex w-full flex-col border-[color:var(--cc-border)] bg-white shadow-[var(--cc-shadow-hover)]",
           side === "right" ? "right-0 border-l" : "left-0 border-r",
           widthClass,
           className,
         )}
       >
         {(title || description) && (
-          <div className="shrink-0 border-b border-bework-navy/10 px-5 py-4">
+          <div className="shrink-0 border-b border-[color:var(--cc-border)] px-5 py-4">
             {title ? (
-              <h2 id="cc-drawer-title" className="font-heading text-lg font-bold tracking-tight text-bework-ink">
+              <h2 id="cc-drawer-title" className="text-lg font-semibold tracking-tight text-bework-ink">
                 {title}
               </h2>
             ) : null}
@@ -77,7 +77,7 @@ export function Drawer({
         )}
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">{children}</div>
         {footer ? (
-          <div className="shrink-0 border-t border-[color:var(--cc-chrome-border)] bg-[color:var(--cc-chrome)]/60 px-5 py-3">
+          <div className="shrink-0 border-t border-[color:var(--cc-border)] bg-[color:var(--cc-chrome)]/50 px-5 py-3">
             {footer}
           </div>
         ) : null}

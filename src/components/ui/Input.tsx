@@ -2,7 +2,7 @@ import type { InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes 
 import { cn } from "@/lib/cn";
 
 const fieldClass =
-  "w-full rounded-[var(--cc-radius)] border border-[color:var(--cc-chrome-border)] bg-white px-3 py-2 text-sm text-bework-ink shadow-sm transition placeholder:text-bework-muted/70 focus:border-bework-navy focus:outline-none focus:ring-2 focus:ring-bework-navy/20 disabled:opacity-60";
+  "w-full min-h-[var(--cc-btn-h)] rounded-[var(--cc-radius)] border border-[color:var(--cc-chrome-border)] bg-white px-3 py-2 text-[0.875rem] text-bework-ink shadow-none transition-[border-color,box-shadow] duration-200 placeholder:text-bework-muted/65 focus:border-bework-navy/40 focus:outline-none focus:ring-2 focus:ring-bework-accent/25 disabled:opacity-60";
 
 export function Input({
   label,

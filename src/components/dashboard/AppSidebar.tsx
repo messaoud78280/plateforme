@@ -258,18 +258,18 @@ export function AppSidebar({
     <>
       <div
         className={cn(
-          "flex items-center gap-3 border-b border-slate-200/70 px-3.5 py-4",
+          "flex items-center gap-3 border-b border-[color:var(--cc-border)] px-3.5 py-4",
           collapsed && "justify-center px-2",
         )}
       >
         <Link href="/dashboard" className="flex min-w-0 items-center gap-2.5" onClick={() => setMobileOpen(false)}>
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-b from-bework-navy to-[#0f2744] text-[11px] font-extrabold tracking-wide text-white shadow-sm">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--cc-radius)] bg-bework-navy text-[11px] font-bold tracking-wide text-white">
             BW
           </span>
           {!collapsed ? (
             <span className="min-w-0">
-              <span className="block truncate text-sm font-extrabold tracking-tight text-bework-navy">BeWork</span>
-              <span className="block truncate text-[11px] font-medium text-bework-muted">
+              <span className="block truncate text-sm font-semibold tracking-tight text-bework-navy">BeWork</span>
+              <span className="block truncate text-[12px] font-medium text-bework-muted">
                 {companyName ?? (isDemo ? "Démonstration" : "Plateforme interne")}
               </span>
             </span>
@@ -291,7 +291,7 @@ export function AppSidebar({
         {sections.map((section) => (
           <div key={section.id}>
             {!collapsed ? (
-              <p className="mb-1.5 px-2.5 text-[10px] font-bold uppercase tracking-[0.14em] text-bework-muted">
+              <p className="mb-1.5 px-2.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-bework-muted/90">
                 {section.label}
               </p>
             ) : null}
@@ -313,18 +313,18 @@ export function AppSidebar({
                       }}
                       prefetch
                       className={cn(
-                        "flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm font-semibold transition-colors duration-75 active:scale-[0.98]",
+                        "flex items-center gap-2.5 rounded-[var(--cc-radius)] px-2.5 py-2 text-[0.875rem] font-medium transition-[background,color,transform] duration-150 active:scale-[0.98]",
                         collapsed && "justify-center px-2",
                         active
-                          ? "bg-bework-navy text-white shadow-sm"
+                          ? "bg-bework-navy text-white"
                           : pending
-                            ? "bg-bework-navy/10 text-bework-navy ring-1 ring-bework-navy/20"
-                            : "text-bework-ink/75 hover:bg-white hover:text-bework-navy hover:shadow-sm",
+                            ? "bg-bework-navy/10 text-bework-navy"
+                            : "text-bework-ink/70 hover:bg-white/80 hover:text-bework-navy",
                       )}
                       aria-current={active ? "page" : undefined}
                       aria-busy={pending || undefined}
                     >
-                      <Icon className={cn("h-4 w-4 shrink-0", active ? "opacity-95" : "opacity-70")} />
+                      <Icon className={cn("h-4 w-4 shrink-0 stroke-[1.75]", active ? "opacity-95" : "opacity-65")} />
                       {!collapsed ? <span className="truncate">{item.label}</span> : null}
                       {!collapsed && item.href === "/dashboard/messagerie" ? (
                         <MessagerieNavBadge active={active} />
@@ -338,20 +338,20 @@ export function AppSidebar({
         ))}
       </nav>
 
-      <div className={cn("border-t border-slate-200/70 p-3", collapsed && "px-2")}>
+      <div className={cn("border-t border-[color:var(--cc-border)] p-3", collapsed && "px-2")}>
         <div
           className={cn(
-            "mb-2 flex items-center gap-2.5 rounded-xl border border-slate-100 bg-white px-2.5 py-2 shadow-sm",
-            collapsed && "justify-center border-0 bg-transparent px-0 shadow-none",
+            "mb-2 flex items-center gap-2.5 rounded-[var(--cc-radius)] bg-white/70 px-2.5 py-2",
+            collapsed && "justify-center bg-transparent px-0",
           )}
         >
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-bework-navy/10 text-[11px] font-bold text-bework-navy">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-bework-navy/10 text-[11px] font-semibold text-bework-navy">
             {initials}
           </span>
           {!collapsed ? (
             <span className="min-w-0">
-              <span className="block truncate text-xs font-bold text-bework-ink">{userName ?? "Utilisateur"}</span>
-              <span className="block truncate text-[10px] text-bework-muted">
+              <span className="block truncate text-xs font-semibold text-bework-ink">{userName ?? "Utilisateur"}</span>
+              <span className="block truncate text-[11px] text-bework-muted">
                 {isDemo ? "Direction · Démo" : userRoleLabel ?? role ?? ""}
               </span>
             </span>
@@ -403,7 +403,7 @@ export function AppSidebar({
             aria-label="Fermer le menu"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="absolute inset-y-0 left-0 flex w-[272px] flex-col bg-[#f8fafc] shadow-2xl">
+          <aside className="absolute inset-y-0 left-0 flex w-[272px] flex-col bg-[color:var(--cc-surface-muted)] shadow-[var(--cc-shadow-hover)]">
             {navBody}
           </aside>
         </div>
@@ -411,8 +411,8 @@ export function AppSidebar({
 
       <aside
         className={cn(
-          "sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-slate-200/80 bg-[#f8fafc] lg:flex",
-          collapsed ? "w-[76px]" : "w-[260px]",
+          "sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-[color:var(--cc-border)] bg-[color:var(--cc-surface-muted)] lg:flex",
+          collapsed ? "w-[76px]" : "w-[252px]",
         )}
       >
         {navBody}

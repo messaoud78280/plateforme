@@ -55,7 +55,7 @@ export function Modal({
     <div className="fixed inset-0 z-[80] flex items-center justify-center px-4 py-6 sm:px-6" role="presentation">
       <button
         type="button"
-        className="absolute inset-0 bg-[color:var(--cc-ink)]/40 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-[color:var(--cc-ink)]/30 backdrop-blur-[4px] supports-[not(backdrop-filter)]:bg-[color:var(--cc-ink)]/45"
         onClick={() => dismissible && onClose()}
         aria-label="Fermer"
       />
@@ -64,15 +64,15 @@ export function Modal({
         aria-modal="true"
         aria-labelledby={title ? "cc-modal-title" : undefined}
         className={cn(
-          "relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-[var(--cc-radius-lg)] border border-[color:var(--cc-chrome-border)] bg-white shadow-[var(--cc-shadow-hover)]",
+          "relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-[var(--cc-radius-panel,var(--radius-xl))] border border-[color:var(--cc-border)] bg-white shadow-[var(--cc-shadow-hover)]",
           sizeClass[size],
           className,
         )}
       >
         {(title || description) && (
-          <div className="shrink-0 border-b border-bework-navy/10 bg-gradient-to-r from-bework-navy/[0.04] via-transparent to-transparent px-5 py-4 sm:px-6">
+          <div className="shrink-0 border-b border-[color:var(--cc-border)] px-5 py-4 sm:px-6">
             {title ? (
-              <h2 id="cc-modal-title" className="font-heading text-lg font-bold tracking-tight text-bework-ink">
+              <h2 id="cc-modal-title" className="text-lg font-semibold tracking-tight text-bework-ink">
                 {title}
               </h2>
             ) : null}

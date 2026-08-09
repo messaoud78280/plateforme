@@ -88,14 +88,14 @@ export function ATraiterAttentionBoard({ cards, currentUserId, canEdit }: Props)
 
   return (
     <div className="space-y-4" data-demo-target="a-traiter-board">
-      <div className="flex flex-wrap items-end gap-2 rounded-xl border border-slate-200 bg-white p-3">
-        <label className="min-w-[140px] flex-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+      <div className="flex flex-wrap items-end gap-2 rounded-[var(--cc-radius-lg)] border border-[color:var(--cc-border)] bg-white p-3 shadow-[var(--cc-shadow)]">
+        <label className="min-w-[140px] flex-1 text-[11px] font-semibold uppercase tracking-wide text-bework-muted">
           Recherche
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Chantier, BC, fournisseur, OS…"
-            className="mt-1 w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-normal text-slate-800"
+            className="bw-search mt-1"
           />
         </label>
         <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
@@ -328,7 +328,7 @@ function AttentionCard({
       <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-2.5">
         <Link
           href={card.actionUrl}
-          className="rounded-lg bg-[#1e3a5f] px-2.5 py-1.5 text-[11px] font-bold text-white hover:bg-[#16304f]"
+          className="btn-cc-primary !min-h-8 !px-2.5 !text-[11px]"
         >
           {card.actionLabel}
         </Link>

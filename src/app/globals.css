@@ -9,18 +9,12 @@ html {
   overflow-x: clip;
   /* smooth sur tout le html + ancre # peut provoquer un scroll bloquant vers le haut (Chrome) ; les ancres utilisent scroll-padding-top. */
   scroll-behavior: auto;
-  /* Fond type papier millimétré — discret (identité plan / blueprint) */
+  /* DESIGN-SYSTEM-V3 — fond application calme (grille blueprint très atténuée) */
   background-color: var(--background);
   background-image:
-    linear-gradient(to right, rgba(37, 99, 235, 0.034) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(37, 99, 235, 0.034) 1px, transparent 1px),
-    linear-gradient(to right, rgba(148, 163, 184, 0.054) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(148, 163, 184, 0.054) 1px, transparent 1px);
-  background-size:
-    40px 40px,
-    40px 40px,
-    8px 8px,
-    8px 8px;
+    linear-gradient(to right, rgba(30, 58, 95, 0.018) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(30, 58, 95, 0.018) 1px, transparent 1px);
+  background-size: 48px 48px;
   background-attachment: local;
 }
 
@@ -32,10 +26,11 @@ body {
   font-family: var(--font-family);
 }
 :root {
-  --background: #f8fafc;
-  --foreground: #000000;
+  /* DESIGN-SYSTEM-V3 — BeWork × principes Apple (pas d’imitation littérale) */
+  --background: #f5f7fa;
+  --foreground: #0f172a;
 
-  /* Neutres (clair, lisible) */
+  /* Neutres */
   --metal-50: #f8fafc;
   --metal-100: #f9fafb;
   --metal-200: #f1f5f9;
@@ -44,14 +39,14 @@ body {
   --metal-500: #64748b;
   --metal-700: #334155;
   --metal-800: #1e293b;
-  --metal-900: #000000;
+  --metal-900: #0f172a;
 
-  /* Accent futuriste (bleu acier) */
+  /* Accent électrique — ponctuel */
   --accent-500: #2563eb;
   --accent-600: #1d4ed8;
   --accent-700: #1e40af;
 
-  /* Accent Agents (violet/rose) */
+  /* Accent Agents (violet) — usage rare */
   --agent-50: #f5f3ff;
   --agent-500: #a855f7;
   --agent-600: #7c3aed;
@@ -62,53 +57,62 @@ body {
   --client-600: #16a34a;
   --client-700: #166534;
 
-  /* Primary (aligné accent) */
   --primary-50: #eff6ff;
   --primary-500: #3b82f6;
   --primary-700: #1d4ed8;
 
-  /* Success / Warning / Error */
-  --success-500: #22c55e;
-  --warning-500: #f59e0b;
-  --error-500: #ef4444;
+  --success-500: #059669;
+  --warning-500: #d97706;
+  --error-500: #dc2626;
 
-  /* Cadres / cartes — sobres, neutres */
-  --card-border: #e5e7eb;
-  --card-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
-  --card-shadow-hover: 0 10px 28px rgba(15, 23, 42, 0.08);
+  /* Cadres / cartes */
+  --card-border: rgba(15, 23, 42, 0.06);
+  --card-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), 0 4px 16px rgba(15, 23, 42, 0.03);
+  --card-shadow-hover: 0 2px 8px rgba(15, 23, 42, 0.05), 0 12px 28px rgba(30, 58, 95, 0.06);
 
-  /* Typography — Inter corps, Rajdhani titres (variables injectées par layout.tsx) */
-  --font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-heading-family: var(--font-rajdhani), ui-sans-serif, system-ui, sans-serif;
+  /*
+   * Typographie — stack système d’abord (lisibilité native), Inter en fallback.
+   * Titres : Inter / système (Rajdhani conservé via .font-heading si besoin marketing).
+   */
+  --font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", var(--font-inter), ui-sans-serif, system-ui,
+    sans-serif;
+  --font-heading-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", var(--font-inter), var(--font-rajdhani),
+    ui-sans-serif, system-ui, sans-serif;
   --font-blueprint-note-family: var(--font-blueprint-note), cursive;
-  --heading-1: 2.125rem;
-  --heading-2: 1.625rem;
-  --heading-3: 1.375rem;
-  --body: 1.0625rem;
-  --small: 0.9375rem;
+  --heading-1: 1.875rem; /* 30px */
+  --heading-2: 1.25rem; /* 20px */
+  --heading-3: 1rem; /* 16px */
+  --body: 0.9375rem; /* 15px */
+  --small: 0.8125rem; /* 13px */
 
-  /* Spacing */
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
+  /* Spacing — grille 4 / 8 / 12 / 16 / 24 / 32 / 48 */
+  --spacing-xs: 0.25rem; /* 4 */
+  --spacing-sm: 0.5rem; /* 8 */
+  --spacing-md: 1rem; /* 16 */
+  --spacing-lg: 1.5rem; /* 24 */
+  --spacing-xl: 2rem; /* 32 */
+  --spacing-2xl: 3rem; /* 48 */
+  --space-3: 0.75rem; /* 12 */
 
-  /* Shadows – légers, pro */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
-  --shadow-lg: 0 12px 28px rgba(15, 23, 42, 0.08);
+  /* Shadows — plates, diffuses */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.05);
+  --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.07);
 
-  /* Radius – épuré */
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
+  /* Radius V3 — contrôles 10 · cards 15 · panels 18 */
+  --radius-sm: 0.5rem; /* 8 */
+  --radius-md: 0.625rem; /* 10 — contrôles */
+  --radius-lg: 0.9375rem; /* 15 — cards */
+  --radius-xl: 1.125rem; /* 18 — modales */
 
-  /* Largeur canonique du contenu (marketing + dashboard) */
+  /* Largeurs */
   --site-max-width: 1280px;
+  --dashboard-max-width: 1520px;
+  --dashboard-comfort-width: 1400px;
 
-  /* AGENDA-V2B — densité (surchargée par data-agenda-zoom sur le shell) */
+  /* AGENDA-V2B */
   --agenda-hour-h: 64px;
   --agenda-event-fs: 12px;
   --agenda-event-title-fs: 12.5px;
@@ -117,48 +121,49 @@ body {
   --agenda-week-label: 0.6875rem;
   --agenda-panel-w: 300px;
 
-  /* —— Design system Pilotage travaux (cockpit BeWork) —— */
+  /* —— Pilotage / Command Center —— */
   --pilotage-navy: #1e3a5f;
   --pilotage-navy-deep: #162d4a;
   --pilotage-navy-soft: #eef2f7;
   --pilotage-slate: #64748b;
-  --pilotage-bg: #f4f6f9;
+  --pilotage-bg: #f5f7fa;
   --pilotage-ok: #059669;
   --pilotage-watch: #d97706;
   --pilotage-critical: #dc2626;
   --pilotage-intel: #6d28d9;
-  --pilotage-radius: 0.875rem;
-  --pilotage-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(30, 58, 95, 0.04);
-  --pilotage-shadow-hover: 0 4px 16px rgba(30, 58, 95, 0.1);
-  --pilotage-transition: 160ms ease;
+  --pilotage-radius: var(--radius-lg);
+  --pilotage-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), 0 6px 20px rgba(30, 58, 95, 0.04);
+  --pilotage-shadow-hover: 0 4px 18px rgba(30, 58, 95, 0.08);
+  --pilotage-transition: 160ms cubic-bezier(0.25, 0.1, 0.25, 1);
 
-  /* —— BeWork Command Center (design system global) —— */
   --cc-navy: var(--pilotage-navy);
   --cc-navy-deep: var(--pilotage-navy-deep);
   --cc-navy-soft: var(--pilotage-navy-soft);
   --cc-ink: #0f172a;
-  --cc-ink-muted: #475569;
+  --cc-ink-muted: #64748b;
   --cc-surface: #ffffff;
-  --cc-surface-muted: #f4f6f9;
+  --cc-surface-muted: #f5f7fa;
   --cc-chrome: #f7f8fb;
-  --cc-chrome-border: #d5dae3;
-  --cc-border: rgba(30, 58, 95, 0.1);
-  --cc-border-strong: rgba(30, 58, 95, 0.18);
-  --cc-accent: var(--accent-600);
-  --cc-accent-hover: var(--accent-700);
+  --cc-chrome-border: rgba(15, 23, 42, 0.08);
+  --cc-border: rgba(30, 58, 95, 0.08);
+  --cc-border-strong: rgba(30, 58, 95, 0.14);
+  --cc-accent: var(--accent-500);
+  --cc-accent-hover: var(--accent-600);
   --cc-cyan: #0891b2;
   --cc-intel: var(--pilotage-intel);
   --cc-ok: var(--pilotage-ok);
   --cc-watch: var(--pilotage-watch);
   --cc-critical: var(--pilotage-critical);
-  --cc-radius: 0.75rem;
-  --cc-radius-lg: 0.875rem;
-  --cc-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 6px 20px rgba(30, 58, 95, 0.05);
-  --cc-shadow-hover: 0 4px 18px rgba(30, 58, 95, 0.1);
-  --cc-transition: 180ms ease;
-  --cc-focus-ring: 0 0 0 3px rgba(30, 58, 95, 0.22);
-  --cc-glass: rgba(255, 255, 255, 0.78);
-  --cc-glass-border: rgba(255, 255, 255, 0.55);
+  --cc-radius: var(--radius-md);
+  --cc-radius-lg: var(--radius-lg);
+  --cc-radius-panel: var(--radius-xl);
+  --cc-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), 0 4px 16px rgba(30, 58, 95, 0.04);
+  --cc-shadow-hover: 0 2px 8px rgba(15, 23, 42, 0.05), 0 10px 28px rgba(30, 58, 95, 0.07);
+  --cc-transition: 180ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  --cc-focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.22);
+  --cc-glass: rgba(255, 255, 255, 0.72);
+  --cc-glass-border: rgba(255, 255, 255, 0.5);
+  --cc-btn-h: 2.5rem; /* 40px */
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -203,20 +208,24 @@ body {
   flex-shrink: 0;
 }
 
-/* —— Command Center surfaces —— */
+/* —— Command Center surfaces (V3) —— */
 .cc-shell {
   min-height: 100vh;
-  background:
-    linear-gradient(180deg, rgba(30, 58, 95, 0.03), transparent 180px),
-    var(--cc-surface-muted);
+  background: var(--cc-surface-muted);
   color: var(--cc-ink);
 }
 
 .cc-header {
   border-bottom: 1px solid var(--cc-chrome-border);
-  background: color-mix(in srgb, var(--cc-chrome) 92%, white);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: saturate(160%) blur(12px);
+  -webkit-backdrop-filter: saturate(160%) blur(12px);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .cc-header {
+    background: #ffffff;
+  }
 }
 
 .cc-card {
@@ -224,12 +233,30 @@ body {
   border: 1px solid var(--cc-border);
   background: var(--cc-surface);
   box-shadow: var(--cc-shadow);
-  transition: box-shadow var(--cc-transition), border-color var(--cc-transition), transform var(--cc-transition);
+  transition:
+    box-shadow var(--cc-transition),
+    border-color var(--cc-transition);
 }
 
 .cc-card:hover {
   border-color: var(--cc-border-strong);
   box-shadow: var(--cc-shadow-hover);
+}
+
+/** Surface liste — séparateurs, peu de boîtes */
+.cc-list-surface {
+  border-radius: var(--cc-radius-lg);
+  border: 1px solid var(--cc-border);
+  background: var(--cc-surface);
+  box-shadow: var(--cc-shadow);
+  overflow: hidden;
+}
+
+.cc-list-row {
+  transition: background var(--cc-transition);
+}
+.cc-list-row:hover {
+  background: color-mix(in srgb, var(--cc-navy-soft) 55%, white);
 }
 
 .cc-glass {
@@ -240,12 +267,21 @@ body {
   box-shadow: var(--cc-shadow);
 }
 
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .cc-glass {
+    background: #ffffff;
+  }
+}
+
 .cc-kpi {
   border-radius: var(--cc-radius-lg);
   border: 1px solid var(--cc-border);
   background: var(--cc-surface);
   padding: 1rem 1.125rem;
-  transition: border-color var(--cc-transition), background var(--cc-transition), box-shadow var(--cc-transition);
+  transition:
+    border-color var(--cc-transition),
+    background var(--cc-transition),
+    box-shadow var(--cc-transition);
 }
 
 .cc-kpi:hover {
@@ -255,6 +291,29 @@ body {
 
 .cc-focus:focus-visible {
   outline: none;
+  box-shadow: var(--cc-focus-ring);
+}
+
+/** Recherche locale unifiée */
+.bw-search {
+  width: 100%;
+  min-height: var(--cc-btn-h);
+  border-radius: var(--cc-radius);
+  border: 1px solid var(--cc-chrome-border);
+  background: var(--cc-surface);
+  padding: 0.5rem 0.875rem;
+  font-size: 0.875rem;
+  color: var(--cc-ink);
+  transition:
+    border-color var(--cc-transition),
+    box-shadow var(--cc-transition);
+}
+.bw-search::placeholder {
+  color: color-mix(in srgb, var(--cc-ink-muted) 75%, white);
+}
+.bw-search:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--cc-navy) 35%, var(--cc-chrome-border));
   box-shadow: var(--cc-focus-ring);
 }
 
@@ -395,27 +454,31 @@ body {
     font-variant-numeric: tabular-nums;
   }
 
-  /** Boutons Command Center */
+  /** Boutons Command Center V3 */
   .btn-cc-primary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.375rem;
+    min-height: var(--cc-btn-h);
     border-radius: var(--cc-radius);
     background: var(--cc-navy);
     color: #fff;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-weight: 600;
     line-height: 1.25;
-    padding: 0.5rem 0.875rem;
-    box-shadow: 0 1px 2px rgba(30, 58, 95, 0.2);
-    transition: background var(--cc-transition), box-shadow var(--cc-transition), transform var(--cc-transition);
+    padding: 0.5rem 1rem;
+    box-shadow: none;
+    transition:
+      background var(--cc-transition),
+      transform var(--cc-transition),
+      opacity var(--cc-transition);
   }
   .btn-cc-primary:hover {
     background: var(--cc-navy-deep);
   }
   .btn-cc-primary:active:not(:disabled) {
-    transform: translateY(1px);
+    transform: scale(0.98);
   }
   .btn-cc-primary:focus-visible {
     outline: none;
@@ -431,18 +494,25 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.375rem;
+    min-height: var(--cc-btn-h);
     border-radius: var(--cc-radius);
     border: 1px solid var(--cc-border-strong);
     background: var(--cc-surface);
     color: var(--cc-navy);
-    font-size: 0.8125rem;
-    font-weight: 600;
+    font-size: 0.875rem;
+    font-weight: 500;
     line-height: 1.25;
-    padding: 0.5rem 0.875rem;
-    transition: background var(--cc-transition), border-color var(--cc-transition);
+    padding: 0.5rem 1rem;
+    transition:
+      background var(--cc-transition),
+      border-color var(--cc-transition),
+      transform var(--cc-transition);
   }
   .btn-cc-secondary:hover {
     background: var(--cc-navy-soft);
+  }
+  .btn-cc-secondary:active:not(:disabled) {
+    transform: scale(0.98);
   }
   .btn-cc-secondary:focus-visible {
     outline: none;
@@ -454,14 +524,17 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.375rem;
+    min-height: 2.25rem;
     border-radius: var(--cc-radius);
     background: transparent;
     color: var(--cc-ink-muted);
-    font-size: 0.8125rem;
-    font-weight: 600;
+    font-size: 0.875rem;
+    font-weight: 500;
     line-height: 1.25;
-    padding: 0.5rem 0.75rem;
-    transition: background var(--cc-transition), color var(--cc-transition);
+    padding: 0.375rem 0.625rem;
+    transition:
+      background var(--cc-transition),
+      color var(--cc-transition);
   }
   .btn-cc-ghost:hover {
     background: var(--cc-navy-soft);
@@ -473,14 +546,15 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.375rem;
+    min-height: var(--cc-btn-h);
     border-radius: var(--cc-radius);
-    background: color-mix(in srgb, var(--cc-critical) 12%, white);
+    background: color-mix(in srgb, var(--cc-critical) 10%, white);
     color: var(--cc-critical);
-    border: 1px solid color-mix(in srgb, var(--cc-critical) 28%, white);
-    font-size: 0.8125rem;
+    border: 1px solid color-mix(in srgb, var(--cc-critical) 22%, white);
+    font-size: 0.875rem;
     font-weight: 600;
     line-height: 1.25;
-    padding: 0.5rem 0.875rem;
+    padding: 0.5rem 1rem;
   }
 
   .btn-cc-intel {
@@ -488,26 +562,41 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.375rem;
+    min-height: var(--cc-btn-h);
     border-radius: var(--cc-radius);
-    background: linear-gradient(135deg, var(--cc-navy), color-mix(in srgb, var(--cc-intel) 55%, var(--cc-navy)));
+    background: var(--cc-navy);
     color: #fff;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-weight: 600;
     line-height: 1.25;
-    padding: 0.5rem 0.875rem;
-    box-shadow: 0 1px 2px rgba(30, 58, 95, 0.18);
+    padding: 0.5rem 1rem;
   }
 
-  /** Badges statut unifiés */
+  .btn-cc-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: transparent;
+    border: 0;
+    color: var(--cc-navy);
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0;
+    transition: opacity var(--cc-transition);
+  }
+  .btn-cc-link:hover {
+    opacity: 0.8;
+  }
+
+  /** Badges statut unifiés — sobres */
   .badge-cc {
     display: inline-flex;
     align-items: center;
     border-radius: 999px;
-    padding: 0.15rem 0.55rem;
-    font-size: 0.6875rem;
-    font-weight: 650;
+    padding: 0.2rem 0.55rem;
+    font-size: 0.75rem;
+    font-weight: 500;
     letter-spacing: 0.01em;
-    ring: 1px;
   }
   .badge-cc-neutral {
     background: #f1f5f9;
@@ -559,6 +648,14 @@ body {
 
   .max-w-site {
     max-width: var(--site-max-width);
+  }
+
+  .max-w-dashboard {
+    max-width: var(--dashboard-max-width);
+  }
+
+  .max-w-dashboard-comfort {
+    max-width: var(--dashboard-comfort-width);
   }
 
   /**

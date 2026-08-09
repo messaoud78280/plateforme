@@ -316,17 +316,13 @@ export function TasksOperationalList({
     <div className="mx-auto w-full max-w-[1400px] space-y-4 px-1 sm:px-2 xl:max-w-[1520px]">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-xl font-extrabold tracking-tight text-[#1e3a5f] sm:text-2xl">
+          <h1 className="text-[1.75rem] font-semibold tracking-tight text-bework-ink sm:text-[1.875rem]">
             Tâches
           </h1>
-          <p className="mt-1 text-sm text-slate-600">Suivez le travail attribué à l’équipe.</p>
+          <p className="mt-1 text-[0.9375rem] text-bework-muted">Suivez le travail attribué à l’équipe.</p>
         </div>
         {canCreate ? (
-          <button
-            type="button"
-            onClick={() => setCreateOpen(true)}
-            className="inline-flex rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white hover:bg-[#152a45]"
-          >
+          <button type="button" onClick={() => setCreateOpen(true)} className="btn-cc-primary !min-h-10 !text-xs">
             + Nouvelle tâche
           </button>
         ) : null}
@@ -349,13 +345,13 @@ export function TasksOperationalList({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Rechercher une tâche…"
-          className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#1e3a5f]/40 focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/10"
+          className="bw-search min-w-0 flex-1"
         />
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => setFiltersOpen((v) => !v)}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            className="btn-cc-secondary !min-h-10 !px-3 !text-xs"
           >
             Filtres
           </button>
@@ -479,7 +475,7 @@ export function TasksOperationalList({
       ) : (
         <>
           {/* Desktop */}
-          <ul className="hidden space-y-0 divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white md:block">
+          <ul className="cc-list-surface hidden divide-y divide-[color:var(--cc-border)] md:block">
             {filtered.map((row) => (
               <li key={row.id}>
                 <div
@@ -492,10 +488,10 @@ export function TasksOperationalList({
                       router.push(`/dashboard/taches/${row.id}`);
                     }
                   }}
-                  className="flex cursor-pointer items-start gap-4 px-4 py-3.5 transition hover:bg-slate-50/80"
+                  className="cc-list-row flex cursor-pointer items-start gap-4 px-4 py-3.5"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="text-[15px] font-semibold uppercase tracking-tight text-[#1e3a5f]">
+                    <p className="text-[0.9375rem] font-semibold tracking-tight text-bework-ink">
                       {row.title}
                     </p>
                     <p className="mt-0.5 text-sm text-slate-600">
@@ -531,10 +527,7 @@ export function TasksOperationalList({
                       ) : null}
                     </div>
                     <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                      <Link
-                        href={`/dashboard/taches/${row.id}`}
-                        className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#152a45]"
-                      >
+                      <Link href={`/dashboard/taches/${row.id}`} className="btn-cc-primary !min-h-8 !px-3 !text-xs">
                         Ouvrir
                       </Link>
                       <RowMenu row={row} />

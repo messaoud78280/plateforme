@@ -56,8 +56,6 @@ const STATUS_BADGES: Record<string, { label: string; className: string }> = {
   EN_ATTENTE_CLIENT: { label: "Action client", className: "bg-amber-100 text-amber-900" },
 };
 
-const PROGRESS_STEPS = ["Reçue", "En cours", "À valider", "Terminé"] as const;
-
 const BOARD_COLUMNS: { id: string; label: string; match: (t: DemandeTaskItem) => boolean }[] = [
   {
     id: "a_traiter",
@@ -90,13 +88,6 @@ function getStatusBadge(task: DemandeTaskItem) {
     return STATUS_BADGES.EN_ATTENTE_CLIENT!;
   }
   return STATUS_BADGES[task.status] ?? STATUS_BADGES.NOUVEAU!;
-}
-
-function getProgressIndex(task: DemandeTaskItem): number {
-  if (task.status === "COMPLETE") return 3;
-  if (task.status === "A_VALIDER") return 2;
-  if (["EN_COURS", "EN_ANALYSE", "ASSIGNEE", "EN_ATTENTE_INFO"].includes(task.status)) return 1;
-  return 0;
 }
 
 function isBlocking(task: DemandeTaskItem): boolean {
@@ -133,7 +124,6 @@ function MissionCard({
   compact?: boolean;
 }) {
   const badge = getStatusBadge(task);
-  const progressIndex = getProgressIndex(task);
   const prio = coerceTaskPriority(task.priority);
   const overdue = isOverdue(task.desiredDate, task.status);
   const blocking = isBlocking(task);
@@ -180,7 +170,7 @@ function MissionCard({
                 {task.missionType ? (
                   <span className="font-medium text-slate-600">{missionTypeLabel(task.missionType)}</span>
                 ) : null}
-                <span>{task.assignedTo?.name ?? "Non assigné"} · assistant</span>
+                <span>{task.assignedTo?.name ?? "Non assigné"}</span>
                 <span>Créée {formatShortDate(task.createdAt)}</span>
                 {task.desiredDate ? (
                   <span className={overdue ? "font-semibold text-red-600" : ""}>
@@ -189,26 +179,10 @@ function MissionCard({
                 ) : null}
               </div>
               {chantierUrl ? (
-                <p className="mt-1.5 text-xs">
-                  <Link href={chantierUrl} className="font-medium text-[#1e3a5f] hover:underline">
-                    Chantier : {task.project!.title}
-                  </Link>
-                </p>
+                <p className="mt-1.5 text-xs text-slate-600">{task.project!.title}</p>
               ) : (
                 <p className="mt-1.5 text-xs text-slate-400">Aucun chantier lié</p>
               )}
-              <div className="mt-2.5 flex flex-wrap gap-1">
-                {PROGRESS_STEPS.map((step, i) => (
-                  <span
-                    key={step}
-                    className={`rounded px-2 py-0.5 text-[10px] font-semibold ${
-                      i <= progressIndex ? "bg-[#1e3a5f]/10 text-[#1e3a5f]" : "bg-slate-100 text-slate-400"
-                    }`}
-                  >
-                    {step}
-                  </span>
-                ))}
-              </div>
             </>
           ) : (
             <p className="mt-1 text-[11px] text-slate-500">
@@ -216,56 +190,54 @@ function MissionCard({
               {task.desiredDate ? ` · ${formatShortDate(task.desiredDate)}` : ""}
             </p>
           )}
-
-          <div className="mt-2">
-            <MissionPriorityControl
-              taskId={task.id}
-              priority={task.priority}
-              onUpdated={(p) => onPriorityUpdated(task.id, p)}
-            />
-          </div>
         </div>
 
         {!compact ? (
-          <div className="flex shrink-0 flex-wrap items-center gap-1.5 sm:flex-col sm:items-stretch lg:flex-row lg:items-center">
+          <div className="flex shrink-0 items-center gap-1.5">
             <Link
               href={detailUrl}
               className="inline-flex items-center justify-center rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-semibold text-white hover:bg-[#152a45]"
             >
-              Voir détail
+              Ouvrir
             </Link>
-            <Link
-              href={messagerieUrl}
-              className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-            >
-              Message
-            </Link>
-            <Link
-              href={docsUrl}
-              className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-            >
-              Documents
-            </Link>
-            {chantierUrl ? (
-              <Link
-                href={chantierUrl}
-                className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                Chantier
-              </Link>
-            ) : null}
-            <DeleteTaskButton
-              taskId={task.id}
-              confirmText="Supprimer cette mission ? Cette opération est irréversible."
-            />
+            <div className="relative">
+              <details className="relative">
+                <summary className="list-none cursor-pointer rounded-md px-2 py-1 text-sm text-slate-500 hover:bg-slate-100 [&::-webkit-details-marker]:hidden">
+                  •••
+                </summary>
+                <div className="absolute right-0 z-20 mt-1 w-48 rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+                  <Link href={messagerieUrl} className="block px-3 py-2 text-sm hover:bg-slate-50">
+                    Message
+                  </Link>
+                  <Link href={docsUrl} className="block px-3 py-2 text-sm hover:bg-slate-50">
+                    Documents
+                  </Link>
+                  {chantierUrl ? (
+                    <Link href={chantierUrl} className="block px-3 py-2 text-sm hover:bg-slate-50">
+                      Voir chantier
+                    </Link>
+                  ) : null}
+                  <div className="border-t border-slate-100 px-2 py-1">
+                    <MissionPriorityControl
+                      taskId={task.id}
+                      priority={task.priority}
+                      onUpdated={(p) => onPriorityUpdated(task.id, p)}
+                    />
+                  </div>
+                  <div className="border-t border-slate-100 px-2 py-1">
+                    <DeleteTaskButton
+                      taskId={task.id}
+                      confirmText="Supprimer cette tâche ? Cette opération est irréversible."
+                    />
+                  </div>
+                </div>
+              </details>
+            </div>
           </div>
         ) : (
           <div className="flex flex-wrap gap-1.5">
             <Link href={detailUrl} className="text-xs font-semibold text-[#1e3a5f] hover:underline">
               Ouvrir
-            </Link>
-            <Link href={messagerieUrl} className="text-xs font-semibold text-slate-600 hover:underline">
-              Message
             </Link>
           </div>
         )}
@@ -396,67 +368,14 @@ export function MesDemandesList({ tasks: initialTasks }: MesDemandesListProps) {
 
   return (
     <div className="space-y-4">
-      {(counts.urgentes > 0 || counts.overdue > 0) && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
-          <p className="font-semibold">Points d’attention</p>
-          <p className="mt-0.5 text-red-800/90">
-            {counts.urgentes > 0 ? `${counts.urgentes} mission${counts.urgentes > 1 ? "s" : ""} urgente${counts.urgentes > 1 ? "s" : ""}` : null}
-            {counts.urgentes > 0 && counts.overdue > 0 ? " · " : null}
-            {counts.overdue > 0
-              ? `${counts.overdue} échéance${counts.overdue > 1 ? "s" : ""} dépassée${counts.overdue > 1 ? "s" : ""}`
-              : null}
-            {" — "}
-            classez par priorité ou ouvrez le chantier concerné.
-          </p>
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <button
-          type="button"
-          onClick={() => {
-            setFilter("a_traiter");
-            setPriorityFilter("toutes");
-          }}
-          className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left shadow-sm transition hover:border-[#1e3a5f]/30"
-        >
-          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">À traiter</p>
-          <p className="mt-0.5 text-xl font-bold text-[#1e3a5f]">{counts.aTraiter}</p>
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setFilter("toutes");
-            setPriorityFilter("URGENT");
-          }}
-          className="rounded-xl border border-red-100 bg-red-50/80 px-3 py-2.5 text-left shadow-sm transition hover:border-red-300"
-        >
-          <p className="text-[11px] font-medium uppercase tracking-wide text-red-700/80">Urgentes</p>
-          <p className="mt-0.5 text-xl font-bold text-red-700">{counts.urgentes}</p>
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setFilter("en_cours");
-            setPriorityFilter("toutes");
-          }}
-          className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left shadow-sm transition hover:border-[#1e3a5f]/30"
-        >
-          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">En cours</p>
-          <p className="mt-0.5 text-xl font-bold text-[#1e3a5f]">{counts.enCours}</p>
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setFilter("a_valider");
-            setPriorityFilter("toutes");
-          }}
-          className="rounded-xl border border-violet-100 bg-violet-50/70 px-3 py-2.5 text-left shadow-sm transition hover:border-violet-300"
-        >
-          <p className="text-[11px] font-medium uppercase tracking-wide text-violet-700/80">À valider</p>
-          <p className="mt-0.5 text-xl font-bold text-violet-800">{counts.aValider}</p>
-        </button>
-      </div>
+      <p className="flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium text-slate-600">
+        <span className="tabular-nums text-slate-900">{counts.aTraiter} à faire</span>
+        <span className="tabular-nums">{counts.enCours} en cours</span>
+        {counts.overdue > 0 ? (
+          <span className="tabular-nums text-red-700">{counts.overdue} en retard</span>
+        ) : null}
+        <span className="tabular-nums">{counts.aValider} à valider</span>
+      </p>
 
       <div className="rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm sm:p-4">
         <div className="flex flex-col gap-3">
@@ -554,7 +473,7 @@ export function MesDemandesList({ tasks: initialTasks }: MesDemandesListProps) {
               </select>
               <input
                 type="search"
-                placeholder="Rechercher (titre, chantier, assistant…)"
+                placeholder="Rechercher (titre, chantier, responsable…)"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-sm placeholder:text-slate-400 focus:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/15 sm:w-64"
@@ -566,9 +485,9 @@ export function MesDemandesList({ tasks: initialTasks }: MesDemandesListProps) {
 
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center">
-          <p className="text-slate-600">Aucune mission ne correspond à vos critères.</p>
+          <p className="text-slate-600">Aucune tâche ne correspond à vos critères.</p>
           <Link href="/dashboard/nouvelle-demande" className="btn-cc-primary mt-4 inline-flex">
-            + Nouvelle mission
+            + Nouvelle demande
           </Link>
         </div>
       ) : viewMode === "tableau" ? (
@@ -612,7 +531,7 @@ export function MesDemandesList({ tasks: initialTasks }: MesDemandesListProps) {
                   )}
                 </h3>
                 <span className="text-xs text-slate-500">
-                  {group.items.length} mission{group.items.length > 1 ? "s" : ""}
+                  {group.items.length} tâche{group.items.length > 1 ? "s" : ""}
                 </span>
               </div>
               <ul className="space-y-2.5">

@@ -128,7 +128,7 @@ export default async function DashboardLayout({
             {isDemo ? <DemoViewAsSwitcher /> : null}
             {session.user?.role === "CLIENT" && !isDemo && !external ? (
               <Link href="/dashboard/nouvelle-demande" className="btn-cc-primary !text-xs sm:!text-sm">
-                + Nouvelle mission
+                + Nouvelle tâche
               </Link>
             ) : null}
             <GlobalSearchTrigger />

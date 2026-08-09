@@ -63,7 +63,7 @@ export function DashboardNav({ role }: { role?: string | null }) {
         {isClient ? (
           <>
             <NavLink href="/dashboard/taches" pathname={pathname} activeClass={active}>
-              Mes missions
+              Tâches
             </NavLink>
             <NavLink href="/dashboard/projets" pathname={pathname} activeClass={activeClassClient}>
               Chantiers
@@ -114,7 +114,7 @@ export function DashboardNav({ role }: { role?: string | null }) {
               Démos
             </NavLink>
             <NavLink href="/dashboard/taches" pathname={pathname} activeClass={active}>
-              Missions
+              Tâches
             </NavLink>
             <NavLink href="/dashboard/agents" pathname={pathname} activeClass={active}>
               Agents
@@ -147,7 +147,7 @@ export function DashboardNav({ role }: { role?: string | null }) {
         ) : isAgent ? (
           <>
             <NavLink href="/dashboard/taches" pathname={pathname} activeClass={active}>
-              Mes missions
+              Tâches
             </NavLink>
             <NavLink href="/dashboard/projets" pathname={pathname} activeClass={active}>
               Chantiers

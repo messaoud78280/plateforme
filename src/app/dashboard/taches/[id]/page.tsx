@@ -182,7 +182,7 @@ export default async function TacheDetailPage({
 
   return (
     <div className="space-y-6">
-      <BackLink href="/dashboard/taches">Retour aux missions</BackLink>
+      <BackLink href="/dashboard/taches">Retour aux tâches</BackLink>
 
       {sourceMessageHref ? (
         <div className="rounded-xl border border-[#cfe8de] bg-[#e7f8f3] px-4 py-3 text-sm text-[#0b3d32]">

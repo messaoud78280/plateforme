@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
       category,
       priority,
       desiredDate,
+      assignedToId,
     } = body as {
       title: string;
       description?: string;
@@ -76,6 +77,7 @@ export async function POST(request: NextRequest) {
       category?: string | null;
       priority?: string | null;
       desiredDate?: string | null;
+      assignedToId?: string | null;
     };
 
     if (!title || typeof title !== "string" || title.trim().length === 0) {
@@ -110,6 +112,33 @@ export async function POST(request: NextRequest) {
 
     const priorityNormalized = normalizeTaskPriority(priority) ?? "STANDARD";
 
+    /** Assignation interne (TACHES-V2A) — pas de vocabulaire mission client. */
+    let assignedId: string | null = null;
+    let initialStatus: "NOUVEAU" | "ASSIGNEE" = "NOUVEAU";
+    const isInternal =
+      session.user.personType === "INTERNAL" ||
+      session.user.personType == null ||
+      (session.user.permissionProfile &&
+        ["DIRECTION", "ADMINISTRATIF", "CONDUCTEUR", "CHEF_CHANTIER"].includes(
+          session.user.permissionProfile,
+        ));
+    if (isInternal && typeof assignedToId === "string" && assignedToId.trim()) {
+      const candidate = await prisma.user.findFirst({
+        where: {
+          id: assignedToId.trim(),
+          OR: [
+            { personType: "INTERNAL" },
+            { role: { in: ["AGENT", "AGENCE", "MANAGER", "CLIENT"] } },
+          ],
+        },
+        select: { id: true },
+      });
+      if (candidate) {
+        assignedId = candidate.id;
+        initialStatus = "ASSIGNEE";
+      }
+    }
+
     const countBefore = await prisma.task.count({
       where: { clientId: tenant.clientId },
     });
@@ -117,13 +146,15 @@ export async function POST(request: NextRequest) {
       data: {
         title: title.trim(),
         description: description?.trim() ?? null,
-        status: "NOUVEAU",
+        status: initialStatus,
         clientId: tenant.clientId,
         organizationId,
         projectId: projectIdValid,
         desiredDate: desiredDateValid,
         category: typeof category === "string" && category.trim() ? category.trim() : null,
         priority: priorityNormalized,
+        assignedToId: assignedId,
+        createdById: session.user.id,
       },
     });
     try {

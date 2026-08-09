@@ -104,7 +104,7 @@ function buildSections(role: string | null | undefined): NavSection[] {
           { href: "/dashboard/planning", label: "Planning", icon: CalendarDays },
           { href: "/dashboard/agenda", label: "Agenda", icon: Calendar },
           { href: "/dashboard/clients", label: "Clients", icon: Building2 },
-          { href: "/dashboard/taches", label: "Missions", icon: ClipboardList },
+          { href: "/dashboard/taches", label: "Tâches", icon: ClipboardList },
         ],
       },
       {
@@ -147,7 +147,7 @@ function buildSections(role: string | null | undefined): NavSection[] {
           { href: "/dashboard/projets", label: "Chantiers", icon: FolderKanban },
           { href: "/dashboard/planning", label: "Planning", icon: CalendarDays },
           { href: "/dashboard/agenda", label: "Agenda", icon: Calendar },
-          { href: "/dashboard/taches", label: "Mes missions", icon: ClipboardList },
+          { href: "/dashboard/taches", label: "Tâches", icon: ClipboardList },
           { href: "/dashboard/pilotage-travaux", label: "Pilotage", icon: LayoutDashboard },
         ],
       },

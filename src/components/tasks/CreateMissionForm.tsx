@@ -165,7 +165,7 @@ export function CreateMissionForm({
     <>
       {!hideTrigger ? (
         <Button type="button" onClick={() => setOpen(true)}>
-          + Nouvelle mission
+          + Nouvelle tâche
         </Button>
       ) : null}
 
@@ -174,11 +174,11 @@ export function CreateMissionForm({
         onClose={closeModal}
         dismissible={!loading}
         widthClass="max-w-lg"
-        title="Créer une mission"
+        title="Créer une tâche"
         description={
           defaultProjectTitle
             ? `Liée au chantier « ${defaultProjectTitle} ».`
-            : "La mission apparaît dans « À assigner » si aucun agent n'est choisi."
+            : "La tâche apparaît dans « À assigner » si aucun responsable n'est choisi."
         }
         footer={
           clients.length === 0 ? null : (

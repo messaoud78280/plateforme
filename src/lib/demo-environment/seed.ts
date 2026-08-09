@@ -909,6 +909,14 @@ export async function seedDemoDirectConversations(opts: {
   });
 }
 
+/**
+ * TACHES-V2A — Assignation démo.
+ * - Laura Bernard (@bework.internal) : legacy support, masquée messagerie ; ne plus lui
+ *   attribuer les BC (PurchaseOrder = source officielle ; Task BC masquée en liste).
+ * - Sophie Lefèvre : staff BeWork (≠ Sophie Martin CLIENT_EXT ABC Promotion).
+ * - Personas internes (Karim Benali / Julie Martin) privilégiés pour les tâches visibles.
+ * - BC / POINT.P → Karim (persona ou staff) pour historique TaskMessage uniquement.
+ */
 export async function enrichDemoTaskThreads(opts: {
   clientId: string;
   sophieId: string;
@@ -916,6 +924,28 @@ export async function enrichDemoTaskThreads(opts: {
   lauraId: string;
 }) {
   const { clientId, sophieId, karimId, lauraId } = opts;
+  void lauraId; // conservé pour signature / conversations directes legacy
+
+  const [personaKarim, personaJulie] = await Promise.all([
+    prisma.user.findFirst({
+      where: {
+        name: "Karim Benali",
+        personType: "INTERNAL",
+        permissionProfile: "CONDUCTEUR",
+      },
+      select: { id: true },
+    }),
+    prisma.user.findFirst({
+      where: {
+        name: "Julie Martin",
+        personType: "INTERNAL",
+        permissionProfile: "ADMINISTRATIF",
+      },
+      select: { id: true },
+    }),
+  ]);
+  const karimPersonaId = personaKarim?.id ?? karimId;
+  const juliePersonaId = personaJulie?.id ?? sophieId;
 
   const tasks = await prisma.task.findMany({
     where: { clientId },
@@ -923,10 +953,12 @@ export async function enrichDemoTaskThreads(opts: {
   });
 
   for (const t of tasks) {
-    let assignee = sophieId;
-    if (t.title.includes("République") || t.title.includes("nacelle")) assignee = karimId;
-    if (t.title.includes("BC-") || t.title.includes("POINT.P")) assignee = lauraId;
-    if (t.title.includes("Alpha")) assignee = sophieId;
+    let assignee = juliePersonaId;
+    if (t.title.includes("République") || t.title.includes("nacelle")) assignee = karimPersonaId;
+    if (t.title.includes("Relancer") || t.title.includes("plans")) assignee = karimPersonaId;
+    // BC legacy : plus Laura — PO officielle ailleurs ; Task conservée hors liste moderne
+    if (t.title.includes("BC-") || t.title.includes("POINT.P")) assignee = karimPersonaId;
+    if (t.title.includes("Alpha")) assignee = juliePersonaId;
 
     await prisma.task.update({
       where: { id: t.id },
@@ -944,11 +976,15 @@ export async function enrichDemoTaskThreads(opts: {
           receiverId: clientId,
           content: coherentOpener(
             t.title,
-            assignee === sophieId
-              ? "Sophie Lefèvre"
-              : assignee === karimId
-                ? "Karim Adjaili"
-                : "Laura Bernard",
+            assignee === karimPersonaId
+              ? "Karim Benali"
+              : assignee === juliePersonaId
+                ? "Julie Martin"
+                : assignee === sophieId
+                  ? "Sophie Lefèvre"
+                  : assignee === karimId
+                    ? "Karim Adjaili"
+                    : "Équipe BeWork",
           ),
           kind: "USER",
           createdAt: daysFromNow(-4),
@@ -1051,11 +1087,12 @@ export async function rewriteDemoTaskConversations(opts: {
   for (const t of tasks) {
     const assignee =
       t.assignedToId ??
-      (t.title.includes("République") || t.title.includes("nacelle")
+      (t.title.includes("République") ||
+      t.title.includes("nacelle") ||
+      t.title.includes("BC-") ||
+      t.title.includes("POINT.P")
         ? karimId
-        : t.title.includes("BC-") || t.title.includes("POINT.P")
-          ? lauraId
-          : sophieId);
+        : sophieId);
 
     await prisma.taskMessage.deleteMany({ where: { taskId: t.id } });
 
@@ -1064,7 +1101,9 @@ export async function rewriteDemoTaskConversations(opts: {
         ? "Sophie Lefèvre"
         : assignee === karimId
           ? "Karim Adjaili"
-          : "Laura Bernard";
+          : assignee === lauraId
+            ? "Laura Bernard"
+            : "Équipe BeWork";
 
     const thread = demoThreadForTitle(t.title, who);
     await prisma.taskMessage.createMany({

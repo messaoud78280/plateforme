@@ -18,10 +18,12 @@ export function CreatePilotageForm({
   projects,
   staffUsers,
   defaultTemplateId,
+  defaultProjectId,
 }: {
   projects: ProjectOption[];
   staffUsers: UserOption[];
   defaultTemplateId?: string;
+  defaultProjectId?: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -69,7 +71,16 @@ export function CreatePilotageForm({
         <CardHeader title="1 — Chantier et marché" />
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <Select name="projectId" label="Chantier existant *" required>
+            <Select
+              name="projectId"
+              label="Chantier existant *"
+              required
+              defaultValue={
+                defaultProjectId && projects.some((p) => p.id === defaultProjectId)
+                  ? defaultProjectId
+                  : ""
+              }
+            >
               <option value="">Sélectionner…</option>
               {projects.map((p) => (
                 <option key={p.id} value={p.id}>

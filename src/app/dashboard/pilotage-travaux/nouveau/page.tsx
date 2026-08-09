@@ -23,6 +23,8 @@ export default async function NouveauPilotagePage({
   const sp = await searchParams;
   const modeleRaw = sp.modele;
   const defaultTemplateId = Array.isArray(modeleRaw) ? modeleRaw[0] : modeleRaw;
+  const projectRaw = sp.projectId;
+  const defaultProjectId = Array.isArray(projectRaw) ? projectRaw[0] : projectRaw;
 
   const existingIds = (
     await prisma.worksitePilotage.findMany({
@@ -57,9 +59,10 @@ export default async function NouveauPilotagePage({
     <div className="mx-auto max-w-3xl space-y-6">
       <BackLink href={PILOTAGE_LIST_PATH}>Pilotage travaux</BackLink>
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Mise en route du marché</h1>
+        <h1 className="text-2xl font-bold text-slate-800">Suivi contractuel du chantier</h1>
         <p className="mt-1 text-sm text-slate-600">
-          Structurez obligations, documents, jalons et DOE dès l’attribution. Les éléments du modèle restent à vérifier.
+          Optionnel : obligations, visas, DOE et jalons marché sur un chantier déjà existant. Le chantier
+          n’est pas recréé.
         </p>
       </div>
       <CreatePilotageForm
@@ -70,6 +73,7 @@ export default async function NouveauPilotagePage({
         }))}
         staffUsers={staffUsers}
         defaultTemplateId={defaultTemplateId}
+        defaultProjectId={defaultProjectId}
       />
     </div>
   );

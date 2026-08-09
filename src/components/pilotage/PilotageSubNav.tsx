@@ -8,20 +8,19 @@ import { cn } from "@/lib/cn";
 const base =
   "inline-flex items-center rounded-lg px-3 py-2 text-xs font-semibold transition-colors sm:text-sm";
 
+/** Navigation principale : vue Project. Chemins contractuels / modèles en secondaire. */
 const links = [
   { href: PILOTAGE_LIST_PATH, label: "Portefeuille", exact: true },
-  { href: `${PILOTAGE_LIST_PATH}/a-traiter`, label: "À traiter" },
-  { href: `${PILOTAGE_LIST_PATH}/blocages`, label: "Blocages" },
-  { href: `${PILOTAGE_LIST_PATH}/calendrier`, label: "Calendrier" },
-  { href: `${PILOTAGE_LIST_PATH}/modeles`, label: "Modèles" },
-  { href: `${PILOTAGE_LIST_PATH}/nouveau`, label: "Nouveau pilotage" },
+  { href: "/dashboard/a-traiter", label: "À traiter", external: true },
+  { href: "/dashboard/agenda", label: "Agenda", external: true },
+  { href: "/dashboard/projets", label: "Chantiers", external: true },
 ];
 
 export function PilotageSubNav() {
   const pathname = usePathname();
   return (
     <nav
-      className="flex flex-wrap gap-1.5 rounded-xl border border-bework-navy/10 bg-white p-1.5 shadow-sm"
+      className="flex flex-wrap gap-1.5"
       aria-label="Navigation Pilotage travaux"
     >
       {links.map((l) => {
@@ -35,8 +34,8 @@ export function PilotageSubNav() {
             className={cn(
               base,
               active
-                ? "bg-bework-navy text-white shadow-sm"
-                : "text-bework-ink/80 hover:bg-bework-navy-soft hover:text-bework-navy",
+                ? "bg-[#eef2f7] text-[#1e3a5f]"
+                : "text-bework-ink/70 hover:bg-slate-50 hover:text-bework-navy",
             )}
             aria-current={active ? "page" : undefined}
           >

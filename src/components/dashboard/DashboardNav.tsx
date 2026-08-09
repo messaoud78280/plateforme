@@ -74,6 +74,12 @@ export function DashboardNav({ role }: { role?: string | null }) {
             <NavLink href="/dashboard/messagerie" pathname={pathname} activeClass={active}>
               Messagerie
             </NavLink>
+            <NavLink href="/dashboard/planning" pathname={pathname} activeClass={active}>
+              Planning
+            </NavLink>
+            <NavLink href="/dashboard/agenda" pathname={pathname} activeClass={active}>
+              Agenda
+            </NavLink>
             <NavLink href="/dashboard/messages" pathname={pathname} activeClass={active}>
               RDV
             </NavLink>
@@ -122,6 +128,12 @@ export function DashboardNav({ role }: { role?: string | null }) {
             <NavLink href="/dashboard/messagerie" pathname={pathname} activeClass={active}>
               Messagerie
             </NavLink>
+            <NavLink href="/dashboard/planning" pathname={pathname} activeClass={active}>
+              Planning
+            </NavLink>
+            <NavLink href="/dashboard/agenda" pathname={pathname} activeClass={active}>
+              Agenda
+            </NavLink>
             <NavLink href="/dashboard/messages" pathname={pathname} activeClass={active}>
               RDV
             </NavLink>
@@ -150,6 +162,12 @@ export function DashboardNav({ role }: { role?: string | null }) {
             ) : null}
             <NavLink href="/dashboard/messagerie" pathname={pathname} activeClass={active}>
               Messagerie
+            </NavLink>
+            <NavLink href="/dashboard/planning" pathname={pathname} activeClass={active}>
+              Planning
+            </NavLink>
+            <NavLink href="/dashboard/agenda" pathname={pathname} activeClass={active}>
+              Agenda
             </NavLink>
             <NavLink href="/dashboard/messages" pathname={pathname} activeClass={active}>
               RDV

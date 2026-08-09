@@ -78,14 +78,28 @@ export default async function MessagesPage() {
     <div className="space-y-6">
       <BackLink href="/dashboard">Tableau de bord</BackLink>
       <PageHeader
-        eyebrow="Agenda"
-        title="RDV"
+        eyebrow="RDV"
+        title="Rendez-vous & contact"
         description={
           isAgence
-            ? "Prochains rendez-vous confirmés et demandes de contact à traiter."
-            : "Vos rendez-vous à venir et l’historique de vos demandes de contact."
+            ? "Ancienne vue RDV — prochains créneaux et demandes de contact. Le Planning opérationnel et l’Agenda sont des modules séparés."
+            : "Vos rendez-vous à venir et l’historique de vos demandes de contact. Pour Qui / Où / Quand → Planning. Pour le calendrier → Agenda."
         }
       />
+      <div className="flex flex-wrap gap-2">
+        <Link
+          href="/dashboard/planning"
+          className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-bold text-white"
+        >
+          Ouvrir le Planning
+        </Link>
+        <Link
+          href="/dashboard/agenda"
+          className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-[#1e3a5f]"
+        >
+          Ouvrir l’Agenda
+        </Link>
+      </div>
 
       <Card hover={false} className="!p-0 overflow-hidden">
         <div className="border-b border-[color:var(--cc-chrome-border)] px-5 py-4">

@@ -767,6 +767,10 @@ export default async function DashboardPage({
       );
     }
 
+    // Internes démo (Marc Direction, Karim Conducteur, Julie Administratif) :
+    // AccueilOpsHome unique — scope Moi (conducteur) / Équipe (direction & administratif).
+    // Portails Client / Fournisseur restent volontaires (branches ci-dessus).
+
     const defaultScope =
       personaKey === "conducteur" ||
       portal?.permissionProfile === "CONDUCTEUR" ||

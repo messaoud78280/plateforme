@@ -79,10 +79,13 @@ export async function collectATraiter(
     role?: string | null;
     personType?: string | null;
   },
-  opts?: { light?: boolean; countOnly?: boolean },
+  opts?: { light?: boolean; countOnly?: boolean; homePreview?: boolean; mineOnly?: boolean },
 ): Promise<ATraiterSnapshot> {
-  return withPerfLog(`collectATraiter${opts?.countOnly ? ":count" : opts?.light ? ":light" : ""}`, async () => {
-  const light = Boolean(opts?.light) || Boolean(opts?.countOnly);
+  return withPerfLog(
+    `collectATraiter${opts?.countOnly ? ":count" : opts?.homePreview ? ":home" : opts?.light ? ":light" : ""}`,
+    async () => {
+  const homePreview = Boolean(opts?.homePreview);
+  const light = Boolean(opts?.light) || Boolean(opts?.countOnly) || homePreview;
   const countOnly = Boolean(opts?.countOnly);
   const items: ATraiterItem[] = [];
   const sessionUser: SessionUser = user;
@@ -91,7 +94,8 @@ export async function collectATraiter(
   const externalPortal =
     user.personType === "CLIENT_EXT" || user.personType === "SUPPLIER";
 
-  if (!countOnly) {
+  // Accueil : attention seule (pas collectForStaff/Client — PERF)
+  if (!countOnly && !homePreview) {
     if (isClientRole(sessionUser) && !externalPortal) {
       await collectForClient(user.id, items);
     } else if (isAgencyOrManager(sessionUser) || isAgent(sessionUser)) {
@@ -102,8 +106,9 @@ export async function collectATraiter(
   }
 
   const agentOnly = isAgent(sessionUser) && !isAgencyOrManager(sessionUser);
+  const mineOnly = Boolean(opts?.mineOnly) || agentOnly;
   /** Plafond d’échantillon attention pour le badge — jamais présenté comme exact si atteint. */
-  const attentionTake = countOnly ? 200 : undefined;
+  const attentionTake = countOnly ? 200 : homePreview ? 12 : undefined;
   const attentionResult =
     externalPortal
       ? { cards: [] as ATraiterAttentionCard[], capped: false }
@@ -114,14 +119,16 @@ export async function collectATraiter(
             personType: user.personType,
             permissionProfile: (user as { permissionProfile?: string | null }).permissionProfile,
           },
-          agentOnly ? user.id : null,
+          mineOnly ? user.id : null,
           light,
           attentionTake,
         );
   const attentionCards = attentionResult.cards;
-  const attentionCapped = Boolean(countOnly && attentionResult.capped);
+  const attentionCapped = Boolean(
+    (countOnly || homePreview) && attentionResult.capped,
+  );
 
-  if (!countOnly) {
+  if (!countOnly && !homePreview) {
     items.sort((a, b) => {
       const sa = SECTION_ORDER.indexOf(a.section);
       const sb = SECTION_ORDER.indexOf(b.section);
@@ -135,27 +142,31 @@ export async function collectATraiter(
     const hotBuckets = await collectHotCountBuckets(user.id, sessionUser, externalPortal);
     counts.bloquant = hotBuckets.bloquant;
     counts.urgent = hotBuckets.urgent;
-  } else {
+  } else if (!homePreview) {
     for (const it of items) counts[it.section] += 1;
   }
 
   const attentionCounts = countAttentionByUrgency(attentionCards);
   const hotCount = countHotAttention(attentionCards);
-  const total = attentionCards.length + (countOnly
-    ? counts.bloquant + counts.urgent + counts.a_valider + counts.relance
-    : items.length);
 
   return {
     attentionCards: countOnly
       ? attentionCards.filter(
           (c) => c.effectiveUrgency === "CRITIQUE" || c.effectiveUrgency === "URGENT",
         )
-      : attentionCards,
+      : homePreview
+        ? attentionCards.slice(0, 5)
+        : attentionCards,
     attentionCounts,
     hotCount,
     items,
     counts,
-    total,
+    total: homePreview
+      ? attentionCards.length
+      : attentionCards.length +
+        (countOnly
+          ? counts.bloquant + counts.urgent + counts.a_valider + counts.relance
+          : items.length),
     attentionCapped,
   };
   });
@@ -776,7 +787,7 @@ export async function summarizeATraiter(user: {
   }>(key);
   if (cached) return cached;
 
-  const snapshot = await collectATraiter(user, { light: true });
+  const snapshot = await collectATraiter(user, { homePreview: true });
   const summary = {
     total: snapshot.total,
     hotCount: snapshot.hotCount,
@@ -786,12 +797,25 @@ export async function summarizeATraiter(user: {
   ttlSet(
     `a-traiter-count:${user.id}`,
     {
-      total:
-        snapshot.hotCount +
-        snapshot.items.filter((i) => i.section === "bloquant" || i.section === "urgent").length,
-      capped: false,
+      total: snapshot.hotCount,
+      capped: Boolean(snapshot.attentionCapped),
     },
     30_000,
   );
   return summary;
+}
+
+/** Accueil V2A — cartes attention (max 5) sans collect staff/client. */
+export async function previewATraiterForHome(
+  user: {
+    id: string;
+    role?: string | null;
+    personType?: string | null;
+  },
+  opts?: { mineOnly?: boolean },
+) {
+  return collectATraiter(user, {
+    homePreview: true,
+    mineOnly: opts?.mineOnly,
+  });
 }

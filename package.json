@@ -30,6 +30,7 @@
     "test:follow-up-attention": "npx tsx scripts/test-follow-up-attention.ts",
     "test:a-traiter-board": "npx tsx scripts/test-a-traiter-board.ts",
     "test:chantier-cockpit-ops": "npx tsx scripts/test-chantier-cockpit-ops.ts",
+    "test:accueil-ops": "npx tsx scripts/test-accueil-ops.ts",
     "test:attention-notifications": "npx tsx scripts/test-attention-notifications.ts",
     "test:attention-escalation": "npx tsx scripts/test-attention-escalation.ts",
     "test:attention-scheduler": "npx tsx scripts/test-attention-scheduler.ts",

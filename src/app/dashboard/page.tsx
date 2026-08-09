@@ -23,8 +23,6 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { SUBSCRIPTION_PLANS } from "@/lib/subscription-plans";
 import { summarizeATraiter } from "@/lib/a-traiter/collect";
 import { listUpcomingAppointments } from "@/lib/appointments/upcoming";
-import { DemoHomeDashboard } from "@/components/demo-environment/DemoHomeDashboard";
-import { collectDemoHomeData } from "@/lib/demo-environment/dashboard-stats";
 import { PersonaHomeDashboard } from "@/components/dashboard/PersonaHomeDashboard";
 import {
   DemoClientHome,
@@ -34,14 +32,17 @@ import {
 } from "@/components/demo-environment/DemoPersonaHomes";
 import { isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
 import { projectWhereForClientUser } from "@/lib/organization/access";
+import { loadAccueilOps } from "@/lib/accueil/load-accueil-ops";
+import { AccueilOpsHome } from "@/components/dashboard/AccueilOpsHome";
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ open?: string }>;
+  searchParams: Promise<{ open?: string; vue?: string }>;
 }) {
   const session = await getServerSession(authOptions);
   const params = await searchParams;
   const openDemande = params?.open === "demande";
+  const vueParam = params?.vue;
 
   if (!session?.user?.id) {
     redirect("/connexion?callbackUrl=/dashboard");
@@ -51,6 +52,53 @@ export default async function DashboardPage({
   const isAgent = session.user.role === "AGENT" || session.user.role === "AGENCE";
   const isClient = session.user.role === "CLIENT";
   const clientId = session.user.id;
+
+  // ACCUEIL-V2A — tour de contrôle (hors démo / portail externe)
+  if (!session.user.isDemo && (isClient || isManager || isAgent)) {
+    const portalUser = await prisma.user.findUnique({
+      where: { id: clientId },
+      select: { personType: true, permissionProfile: true, name: true },
+    });
+
+    if (isClient && isExternalPortalUser(portalUser?.personType)) {
+      const projectWhere = await projectWhereForClientUser(clientId);
+      const sharedProjects = await prisma.project.findMany({
+        where: projectWhere,
+        select: {
+          id: true,
+          title: true,
+          siteCity: true,
+          chantierStatus: true,
+        },
+        orderBy: { updatedAt: "desc" },
+        take: 12,
+      });
+      return (
+        <PersonaHomeDashboard
+          userName={session.user?.name ?? null}
+          personType={portalUser?.personType ?? null}
+          permissionProfile={portalUser?.permissionProfile ?? null}
+          projects={sharedProjects}
+        />
+      );
+    }
+
+    const scope =
+      vueParam === "moi" ? "mine" : vueParam === "equipe" ? "team" : undefined;
+    const ops = await loadAccueilOps({
+      userId: session.user.id,
+      role: session.user.role,
+      personType: portalUser?.personType ?? session.user.personType ?? null,
+      permissionProfile: portalUser?.permissionProfile ?? null,
+      name: portalUser?.name ?? session.user.name ?? null,
+      scope,
+    });
+    return (
+      <div className="mx-auto max-w-6xl space-y-4 px-1 sm:px-0">
+        <AccueilOpsHome ops={ops} />
+      </div>
+    );
+  }
 
   let aTraiterSummary = {
     total: 0,
@@ -755,17 +803,18 @@ export default async function DashboardPage({
       );
     }
 
-    const home = await collectDemoHomeData(clientId);
+    const homeOps = await loadAccueilOps({
+      userId: clientId,
+      role: session.user.role,
+      personType: portal?.personType ?? null,
+      permissionProfile: portal?.permissionProfile ?? "DIRECTION",
+      name: portal?.name ?? session.user.name ?? null,
+      scope: vueParam === "moi" ? "mine" : vueParam === "equipe" ? "team" : "team",
+    });
     return (
-      <DemoHomeDashboard
-        companyName={hostName}
-        firstName={home.firstName}
-        stats={home.stats}
-        inbox={home.inbox}
-        projects={home.projects}
-        agendaToday={home.agendaToday}
-        modules={session.user.demoModules ?? []}
-      />
+      <div className="mx-auto max-w-6xl space-y-4 px-1 sm:px-0">
+        <AccueilOpsHome ops={homeOps} />
+      </div>
     );
   }
 

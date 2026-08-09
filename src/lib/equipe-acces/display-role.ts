@@ -1,6 +1,8 @@
 /**
- * Libellé métier affiché dans header / sidebar.
+ * Libellé métier affiché dans header / sidebar / listes.
  * Ne pas confondre avec UserRole NextAuth (CLIENT / AGENT / MANAGER).
+ * TACHES-V2A.1 — privilégier profil métier / jobTitle, jamais « Agent » générique
+ * si un libellé plus utile existe.
  */
 import {
   PERMISSION_PROFILE_LABELS,
@@ -13,16 +15,27 @@ export function displayUserRoleLabel(opts: {
   role?: string | null;
   personType?: string | null;
   permissionProfile?: string | null;
+  jobTitle?: string | null;
 }): string {
-  const { role, personType, permissionProfile } = opts;
+  const { role, personType, permissionProfile, jobTitle } = opts;
 
   if (permissionProfile && permissionProfile in PERMISSION_PROFILE_LABELS) {
     return PERMISSION_PROFILE_LABELS[permissionProfile as PermissionProfileKey];
   }
 
+  const jt = jobTitle?.trim();
+  if (jt) return jt;
+
   if (role === "MANAGER") return "Direction BeWork";
+
+  /** Staff / agents internes sans profil → métier par défaut, pas « Agent ». */
+  if (personType === "INTERNAL" || personType == null) {
+    if (role === "AGENCE") return "Administratif";
+    if (role === "AGENT") return "Conducteur de travaux";
+  }
+
   if (role === "AGENCE") return "Agence";
-  if (role === "AGENT") return "Agent";
+  if (role === "AGENT") return "Conducteur de travaux";
 
   if (personType && personType in PERSON_TYPE_LABELS) {
     const pt = personType as PersonType;

@@ -27,13 +27,23 @@ type Props = {
   canCreate: boolean;
 };
 
+function initials(name: string | null): string {
+  if (!name?.trim()) return "?";
+  return name
+    .split(/\s+/)
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
 function RowMenu({ row }: { row: TaskListRow }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="relative" onClick={(e) => e.stopPropagation()}>
       <button
         type="button"
-        className="rounded-md px-2 py-1 text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+        className="rounded-[var(--cc-radius)] px-2 py-1 text-sm text-bework-muted hover:bg-bework-navy-soft hover:text-bework-ink"
         aria-label="Actions"
         onClick={() => setOpen((v) => !v)}
       >
@@ -47,29 +57,29 @@ function RowMenu({ row }: { row: TaskListRow }) {
             aria-label="Fermer"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute right-0 z-20 mt-1 w-48 rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+          <div className="absolute right-0 z-20 mt-1 w-48 rounded-[var(--cc-radius-lg)] border border-[color:var(--cc-border)] bg-white py-1 shadow-[var(--cc-shadow-hover)]">
             <Link
               href={`/dashboard/taches/${row.id}`}
-              className="block px-3 py-2 text-sm text-slate-800 hover:bg-slate-50"
+              className="block px-3 py-2 text-sm text-bework-ink hover:bg-bework-navy-soft/60"
             >
               Ouvrir
             </Link>
             <Link
               href={`/dashboard/messagerie?task=${encodeURIComponent(row.id)}`}
-              className="block px-3 py-2 text-sm text-slate-800 hover:bg-slate-50"
+              className="block px-3 py-2 text-sm text-bework-ink hover:bg-bework-navy-soft/60"
             >
               Message
             </Link>
             <Link
               href={`/dashboard/taches/${row.id}#documents`}
-              className="block px-3 py-2 text-sm text-slate-800 hover:bg-slate-50"
+              className="block px-3 py-2 text-sm text-bework-ink hover:bg-bework-navy-soft/60"
             >
               Documents
             </Link>
             {row.projectId ? (
               <Link
                 href={`/dashboard/projets/${row.projectId}`}
-                className="block px-3 py-2 text-sm text-slate-800 hover:bg-slate-50"
+                className="block px-3 py-2 text-sm text-bework-ink hover:bg-bework-navy-soft/60"
               >
                 Voir chantier
               </Link>
@@ -137,30 +147,30 @@ function CreateTaskPanel({
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="rounded-[var(--cc-radius-lg)] border border-[color:var(--cc-border)] bg-white p-4 shadow-[var(--cc-shadow)]">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-bold text-[#1e3a5f]">Nouvelle tâche</h2>
-        <button type="button" onClick={onClose} className="text-xs text-slate-500 hover:text-slate-800">
+        <h2 className="text-sm font-semibold text-bework-ink">Nouvelle tâche</h2>
+        <button type="button" onClick={onClose} className="btn-cc-ghost !min-h-8 !text-xs">
           Fermer
         </button>
       </div>
       <form onSubmit={submit} className="grid gap-3 sm:grid-cols-2">
-        <label className="sm:col-span-2 block text-xs font-semibold text-slate-600">
+        <label className="sm:col-span-2 block text-xs font-semibold text-bework-muted">
           Titre
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            className="bw-search mt-1"
             placeholder="Ex. Relancer le fournisseur pour les plans terrasse"
             required
           />
         </label>
-        <label className="block text-xs font-semibold text-slate-600">
+        <label className="block text-xs font-semibold text-bework-muted">
           Responsable
           <select
             value={assigneeId}
             onChange={(e) => setAssigneeId(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            className="bw-search mt-1"
           >
             <option value="">À assigner</option>
             {assignees.map((a) => (
@@ -171,12 +181,12 @@ function CreateTaskPanel({
             ))}
           </select>
         </label>
-        <label className="block text-xs font-semibold text-slate-600">
+        <label className="block text-xs font-semibold text-bework-muted">
           Chantier
           <select
             value={projectId}
             onChange={(e) => setProjectId(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            className="bw-search mt-1"
           >
             <option value="">Aucun</option>
             {projects.map((p) => (
@@ -186,50 +196,42 @@ function CreateTaskPanel({
             ))}
           </select>
         </label>
-        <label className="block text-xs font-semibold text-slate-600">
+        <label className="block text-xs font-semibold text-bework-muted">
           Échéance
           <input
             type="date"
             value={desiredDate}
             onChange={(e) => setDesiredDate(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            className="bw-search mt-1"
           />
         </label>
-        <label className="block text-xs font-semibold text-slate-600">
+        <label className="block text-xs font-semibold text-bework-muted">
           Priorité
           <select
             value={priority}
             onChange={(e) => setPriority(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            className="bw-search mt-1"
           >
             <option value="STANDARD">Normale</option>
             <option value="PRIORITAIRE">Prioritaire</option>
             <option value="URGENT">Urgente</option>
           </select>
         </label>
-        <label className="sm:col-span-2 block text-xs font-semibold text-slate-600">
+        <label className="sm:col-span-2 block text-xs font-semibold text-bework-muted">
           Description (optionnel)
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-[var(--cc-radius)] border border-[color:var(--cc-chrome-border)] px-3 py-2 text-sm"
           />
         </label>
         {error ? <p className="sm:col-span-2 text-xs text-red-600">{error}</p> : null}
         <div className="sm:col-span-2 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600"
-          >
+          <button type="button" onClick={onClose} className="btn-cc-secondary !min-h-9 !text-xs">
             Annuler
           </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white hover:bg-[#152a45] disabled:opacity-60"
-          >
+          <button type="submit" disabled={loading} className="btn-cc-primary !min-h-9 !text-xs">
             {loading ? "Création…" : "Créer la tâche"}
           </button>
         </div>
@@ -319,50 +321,54 @@ export function TasksOperationalList({
           <h1 className="text-[1.75rem] font-semibold tracking-tight text-bework-ink sm:text-[1.875rem]">
             Tâches
           </h1>
-          <p className="mt-1 text-[0.9375rem] text-bework-muted">Suivez le travail attribué à l’équipe.</p>
+          <p className="mt-1 text-[0.9375rem] text-bework-muted">
+            Suivez le travail attribué à l’équipe.
+          </p>
+          {rows.length > 0 ? (
+            <p className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px] text-bework-muted">
+              <span className="font-semibold tabular-nums text-bework-ink">
+                {summary.totalOpen} tâche{summary.totalOpen > 1 ? "s" : ""}
+              </span>
+              {summary.enRetard > 0 ? (
+                <span className="font-medium tabular-nums text-red-700">
+                  · {summary.enRetard} en retard
+                </span>
+              ) : null}
+              <span className="text-bework-muted/80">
+                · {summary.aFaire} à faire · {summary.enCours} en cours · {summary.aValider} à
+                valider
+              </span>
+            </p>
+          ) : null}
         </div>
         {canCreate ? (
-          <button type="button" onClick={() => setCreateOpen(true)} className="btn-cc-primary !min-h-10 !text-xs">
+          <button
+            type="button"
+            onClick={() => setCreateOpen(true)}
+            className="btn-cc-primary !min-h-10 shrink-0 !text-xs"
+          >
             + Nouvelle tâche
           </button>
         ) : null}
       </header>
 
-      {rows.length > 0 ? (
-        <p className="flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium text-slate-600">
-          <span className="tabular-nums text-slate-900">{summary.aFaire} à faire</span>
-          <span className="tabular-nums">{summary.enCours} en cours</span>
-          {summary.enRetard > 0 ? (
-            <span className="tabular-nums text-red-700">{summary.enRetard} en retard</span>
-          ) : null}
-          <span className="tabular-nums">{summary.aValider} à valider</span>
-        </p>
-      ) : null}
-
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
         <input
           type="search"
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Rechercher une tâche…"
-          className="bw-search min-w-0 flex-1"
+          className="bw-search min-w-0 w-full lg:max-w-[min(100%,28rem)] lg:flex-[0_1_55%]"
         />
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setFiltersOpen((v) => !v)}
-            className="btn-cc-secondary !min-h-10 !px-3 !text-xs"
-          >
-            Filtres
-          </button>
+        <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
           {canViewTeam ? (
-            <div className="flex rounded-lg border border-slate-200 p-0.5">
+            <div className="flex rounded-[var(--cc-radius)] border border-[color:var(--cc-border)] p-0.5">
               <button
                 type="button"
                 onClick={() => changeScope("mine")}
                 className={cn(
-                  "rounded-md px-2.5 py-1 text-xs font-semibold",
-                  scope === "mine" ? "bg-[#1e3a5f] text-white" : "text-slate-600",
+                  "rounded-[8px] px-2.5 py-1.5 text-xs font-medium transition-colors",
+                  scope === "mine" ? "bg-bework-navy text-white" : "text-bework-muted hover:text-bework-ink",
                 )}
               >
                 Mes tâches
@@ -371,34 +377,43 @@ export function TasksOperationalList({
                 type="button"
                 onClick={() => changeScope("team")}
                 className={cn(
-                  "rounded-md px-2.5 py-1 text-xs font-semibold",
-                  scope === "team" ? "bg-[#1e3a5f] text-white" : "text-slate-600",
+                  "rounded-[8px] px-2.5 py-1.5 text-xs font-medium transition-colors",
+                  scope === "team" ? "bg-bework-navy text-white" : "text-bework-muted hover:text-bework-ink",
                 )}
               >
                 Équipe
               </button>
             </div>
           ) : null}
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as SortId)}
-            className="rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs font-semibold text-slate-700"
-            aria-label="Trier"
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((v) => !v)}
+            className="btn-cc-secondary !min-h-10 !px-3 !text-xs"
           >
-            <option value="default">Retard / priorité</option>
-            <option value="priority">Priorité</option>
-            <option value="due">Échéance</option>
-            <option value="created">Création</option>
-          </select>
+            Filtres
+          </button>
+          <label className="inline-flex items-center gap-1.5 text-xs text-bework-muted">
+            <span className="font-medium">Trier :</span>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortId)}
+              className="min-h-10 rounded-[var(--cc-radius)] border border-[color:var(--cc-chrome-border)] bg-white px-2 text-xs font-medium text-bework-ink"
+            >
+              <option value="default">Retard / priorité</option>
+              <option value="priority">Priorité</option>
+              <option value="due">Échéance</option>
+              <option value="created">Création</option>
+            </select>
+          </label>
         </div>
       </div>
 
       {filtersOpen ? (
-        <div className="flex flex-wrap gap-2 rounded-xl border border-slate-200 bg-white p-3">
+        <div className="flex flex-wrap gap-2 rounded-[var(--cc-radius-lg)] border border-[color:var(--cc-border)] bg-white p-3">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-            className="rounded-lg border border-slate-200 px-2 py-1.5 text-xs"
+            className="rounded-[var(--cc-radius)] border border-[color:var(--cc-chrome-border)] px-2 py-1.5 text-xs"
           >
             <option value="all">Statut — tous</option>
             <option value="a_faire">À faire</option>
@@ -410,7 +425,7 @@ export function TasksOperationalList({
           <select
             value={assigneeFilter}
             onChange={(e) => setAssigneeFilter(e.target.value)}
-            className="rounded-lg border border-slate-200 px-2 py-1.5 text-xs"
+            className="rounded-[var(--cc-radius)] border border-[color:var(--cc-chrome-border)] px-2 py-1.5 text-xs"
           >
             <option value="">Responsable — tous</option>
             {assignees.map((a) => (
@@ -422,7 +437,7 @@ export function TasksOperationalList({
           <select
             value={projectFilter}
             onChange={(e) => setProjectFilter(e.target.value)}
-            className="rounded-lg border border-slate-200 px-2 py-1.5 text-xs"
+            className="rounded-[var(--cc-radius)] border border-[color:var(--cc-chrome-border)] px-2 py-1.5 text-xs"
           >
             <option value="">Chantier — tous</option>
             {projects.map((p) => (
@@ -434,7 +449,7 @@ export function TasksOperationalList({
           <select
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
-            className="rounded-lg border border-slate-200 px-2 py-1.5 text-xs"
+            className="rounded-[var(--cc-radius)] border border-[color:var(--cc-chrome-border)] px-2 py-1.5 text-xs"
           >
             <option value="">Priorité — toutes</option>
             <option value="URGENT">Urgente</option>
@@ -453,28 +468,27 @@ export function TasksOperationalList({
       ) : null}
 
       {rows.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-200 bg-white px-5 py-10 text-center">
-          <p className="text-sm font-semibold text-slate-900">Aucune tâche en cours.</p>
-          <p className="mt-1 text-sm text-slate-600">
+        <div className="rounded-[var(--cc-radius-lg)] border border-dashed border-[color:var(--cc-border)] bg-white px-5 py-10 text-center">
+          <p className="text-sm font-semibold text-bework-ink">Aucune tâche en cours.</p>
+          <p className="mt-1 text-sm text-bework-muted">
             Créez une tâche pour suivre un travail attribué à l’équipe.
           </p>
           {canCreate ? (
             <button
               type="button"
               onClick={() => setCreateOpen(true)}
-              className="mt-4 inline-flex rounded-lg bg-[#1e3a5f] px-4 py-2 text-sm font-semibold text-white"
+              className="btn-cc-primary mt-4 !text-sm"
             >
               + Créer une tâche
             </button>
           ) : null}
         </div>
       ) : filtered.length === 0 ? (
-        <p className="rounded-xl border border-slate-200 bg-white px-4 py-6 text-center text-sm text-slate-600">
+        <p className="px-1 py-6 text-center text-sm text-bework-muted">
           Aucune tâche ne correspond à vos critères.
         </p>
       ) : (
         <>
-          {/* Desktop */}
           <ul className="cc-list-surface hidden divide-y divide-[color:var(--cc-border)] md:block">
             {filtered.map((row) => (
               <li key={row.id}>
@@ -488,81 +502,110 @@ export function TasksOperationalList({
                       router.push(`/dashboard/taches/${row.id}`);
                     }
                   }}
-                  className="cc-list-row flex cursor-pointer items-start gap-4 px-4 py-3.5"
+                  className="cc-list-row group grid cursor-pointer grid-cols-[minmax(0,1.6fr)_minmax(9rem,0.9fr)_minmax(7.5rem,0.7fr)_auto_auto] items-center gap-3 px-4 py-3.5"
                 >
-                  <div className="min-w-0 flex-1">
+                  <div className="min-w-0">
                     <p className="text-[0.9375rem] font-semibold tracking-tight text-bework-ink">
                       {row.title}
                     </p>
-                    <p className="mt-0.5 text-sm text-slate-600">
+                    <p className="mt-0.5 text-[13px] text-bework-muted">
                       {row.projectTitleShort ?? row.projectTitle ?? "Sans chantier"}
                     </p>
-                    <p className="mt-1 text-xs text-slate-500">
-                      {row.assigneeName ?? "Non assigné"}
-                      {row.assigneeRoleLabel ? (
-                        <span className="text-slate-400"> · {row.assigneeRoleLabel}</span>
-                      ) : null}
-                      <span className="mx-1.5 text-slate-300">·</span>
-                      <span className={row.isOverdue ? "font-semibold text-red-700" : ""}>
-                        Échéance : {row.dueLabel.toLowerCase()}
+                  </div>
+
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-bework-navy/10 text-[10px] font-semibold text-bework-navy">
+                        {initials(row.assigneeName)}
                       </span>
+                      <div className="min-w-0">
+                        <p className="truncate text-[13px] font-medium text-bework-ink">
+                          {row.assigneeName ?? "Non assigné"}
+                        </p>
+                        {row.assigneeRoleLabel ? (
+                          <p className="truncate text-[12px] text-bework-muted">{row.assigneeRoleLabel}</p>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="min-w-0">
+                    <p
+                      className={cn(
+                        "text-[13px] font-medium",
+                        row.isOverdue ? "text-red-700" : "text-bework-ink",
+                      )}
+                    >
+                      {row.dueLabel}
                     </p>
                   </div>
-                  <div className="flex shrink-0 flex-col items-end gap-1.5">
-                    <div className="flex flex-wrap items-center justify-end gap-1.5">
-                      <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
-                        {row.statusLabel}
+
+                  <div className="flex flex-wrap items-center justify-end gap-1.5">
+                    <span className="badge-cc badge-cc-neutral">{row.statusLabel}</span>
+                    {row.priority !== "STANDARD" ? (
+                      <span
+                        className={cn(
+                          "badge-cc",
+                          row.priority === "URGENT" ? "badge-cc-critical" : "badge-cc-watch",
+                        )}
+                      >
+                        {row.priorityLabel}
                       </span>
-                      {row.priority !== "STANDARD" ? (
-                        <span
-                          className={cn(
-                            "rounded-md px-2 py-0.5 text-[11px] font-semibold",
-                            row.priority === "URGENT"
-                              ? "bg-red-50 text-red-800"
-                              : "bg-amber-50 text-amber-900",
-                          )}
-                        >
-                          {row.priorityLabel}
-                        </span>
-                      ) : null}
-                    </div>
-                    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                      <Link href={`/dashboard/taches/${row.id}`} className="btn-cc-primary !min-h-8 !px-3 !text-xs">
-                        Ouvrir
-                      </Link>
-                      <RowMenu row={row} />
-                    </div>
+                    ) : null}
+                  </div>
+
+                  <div
+                    className="flex items-center gap-0.5 justify-self-end"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <span
+                      className="px-1 text-lg font-light text-bework-muted opacity-0 transition-opacity group-hover:opacity-100"
+                      aria-hidden
+                    >
+                      ›
+                    </span>
+                    <RowMenu row={row} />
                   </div>
                 </div>
               </li>
             ))}
           </ul>
 
-          {/* Mobile */}
           <ul className="space-y-2 md:hidden">
             {filtered.map((row) => (
               <li key={row.id}>
                 <Link
                   href={`/dashboard/taches/${row.id}`}
-                  className="block rounded-xl border border-slate-200 bg-white px-4 py-3"
+                  className="block rounded-[var(--cc-radius-lg)] border border-[color:var(--cc-border)] bg-white px-4 py-3"
                 >
-                  <p className="text-sm font-bold text-[#1e3a5f]">{row.title}</p>
-                  <p className="mt-1 text-xs text-slate-600">
+                  <p className="text-sm font-semibold text-bework-ink">{row.title}</p>
+                  <p className="mt-0.5 text-[13px] text-bework-muted">
                     {row.projectTitleShort ?? "Sans chantier"}
-                    {row.assigneeName ? ` · ${row.assigneeName}` : ""}
                   </p>
-                  <p className="mt-1.5 flex flex-wrap items-center gap-2 text-xs">
-                    <span className={row.isOverdue ? "font-semibold text-red-700" : "text-slate-600"}>
-                      {row.dueLabel}
-                    </span>
-                    <span className="rounded bg-slate-100 px-1.5 py-0.5 font-semibold text-slate-700">
-                      {row.statusLabel}
-                    </span>
+                  <p className="mt-2 text-[13px] font-medium text-bework-ink">
+                    {row.assigneeName ?? "Non assigné"}
+                  </p>
+                  <p
+                    className={cn(
+                      "mt-1 text-[13px]",
+                      row.isOverdue ? "font-medium text-red-700" : "text-bework-muted",
+                    )}
+                  >
+                    {row.dueLabel}
+                  </p>
+                  <p className="mt-2 flex flex-wrap gap-1.5 text-[12px]">
+                    <span className="badge-cc badge-cc-neutral">{row.statusLabel}</span>
                     {row.priority !== "STANDARD" ? (
-                      <span className="font-semibold text-amber-900">{row.priorityLabel}</span>
+                      <span
+                        className={cn(
+                          "badge-cc",
+                          row.priority === "URGENT" ? "badge-cc-critical" : "badge-cc-watch",
+                        )}
+                      >
+                        {row.priorityLabel}
+                      </span>
                     ) : null}
                   </p>
-                  <span className="mt-2 inline-block text-xs font-semibold text-[#1e3a5f]">Ouvrir</span>
                 </Link>
               </li>
             ))}

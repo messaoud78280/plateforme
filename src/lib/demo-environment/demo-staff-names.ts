@@ -102,6 +102,13 @@ export async function ensureDemoStaffDisplayNames(): Promise<{
     if (!existing) continue;
     if (!existing.email.endsWith("@bework.internal")) continue;
 
+    const profile = contact.role === "AGENCE" ? "ADMINISTRATIF" : "CONDUCTEUR";
+    const jobTitle =
+      contact.key === "laura"
+        ? "Support administratif"
+        : contact.key === "sophie"
+          ? "Conductrice de travaux"
+          : "Conducteur de travaux";
     if (
       existing.name !== contact.name ||
       existing.service !== contact.service ||
@@ -113,11 +120,24 @@ export async function ensureDemoStaffDisplayNames(): Promise<{
           name: contact.name,
           service: contact.service,
           company: contact.company,
+          personType: "INTERNAL",
+          permissionProfile: profile,
+          jobTitle,
         },
       });
       if (existing.name !== contact.name) {
         renamed.push({ email: contact.email, from: existing.name, to: contact.name });
       }
+    } else {
+      /** Même sans renommage : corriger profil métier legacy (Agent sans profil). */
+      await prisma.user.update({
+        where: { id: existing.id },
+        data: {
+          personType: "INTERNAL",
+          permissionProfile: profile,
+          jobTitle,
+        },
+      });
     }
   }
 

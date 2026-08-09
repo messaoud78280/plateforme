@@ -641,40 +641,13 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
     }
   }
 
-  if (taskRelance) {
-    await prisma.task.update({
-      where: { id: taskRelance.id },
-      data: { assignedToId: staffId },
-    });
-    await prisma.taskMessage.create({
-      data: {
-        taskId: taskRelance.id,
-        senderId: clientId,
-        receiverId: staffId,
-        content:
-          "Pendant que vous êtes sur place, pouvez-vous également reprendre les 20 m² de terrasse côté cour ?",
-        kind: "USER",
-        createdAt: daysFromNow(-2),
-      },
-    });
-  }
-
-  if (taskCr) {
-    await prisma.task.update({
-      where: { id: taskCr.id },
-      data: { assignedToId: staffId },
-    });
-    await prisma.taskMessage.create({
-      data: {
-        taskId: taskCr.id,
-        senderId: staffId,
-        receiverId: clientId,
-        content: "Victor Hugo terminé, tout est OK.",
-        kind: "USER",
-        createdAt: daysFromNow(0),
-      },
-    });
-  }
+  /**
+   * TACHES-V2A.1 — Ne pas assigner Relance / CR au staff Sophie avant enrich :
+   * enrichDemoTaskThreads attribue Karim Benali / Julie Martin (personas).
+   * Messages créés après enrich si besoin.
+   */
+  void taskRelance;
+  void taskCr;
 
   // Conversations directes multi-contacts (onglet Contacts)
   await seedDemoDirectConversations({
@@ -794,11 +767,30 @@ export async function ensureDemoMessagingStaff(): Promise<
   const out: { key: DemoStaffKey; id: string; name: string }[] = [];
 
   for (const contact of DEMO_STAFF_CONTACTS) {
+    const profile = contact.role === "AGENCE" ? "ADMINISTRATIF" : "CONDUCTEUR";
+    const jobTitle =
+      contact.key === "laura"
+        ? "Support administratif"
+        : contact.key === "sophie"
+          ? "Conductrice de travaux"
+          : "Conducteur de travaux";
     const existing = await prisma.user.findUnique({
       where: { email: contact.email },
       select: { id: true, name: true },
     });
     if (existing) {
+      /** TACHES-V2A.1 — réaligner nom + profil métier (évite Sophie Martin / Agent). */
+      await prisma.user.update({
+        where: { id: existing.id },
+        data: {
+          name: contact.name,
+          service: contact.service,
+          company: contact.company,
+          personType: "INTERNAL",
+          permissionProfile: profile,
+          jobTitle,
+        },
+      });
       out.push({ key: contact.key, id: existing.id, name: contact.name });
       continue;
     }
@@ -813,7 +805,8 @@ export async function ensureDemoMessagingStaff(): Promise<
         accountStatus: "APPROVED",
         contractStatus: "SIGNED",
         personType: "INTERNAL",
-        permissionProfile: contact.role === "AGENCE" ? "ADMINISTRATIF" : "CONDUCTEUR",
+        permissionProfile: profile,
+        jobTitle,
       },
       select: { id: true, name: true },
     });
@@ -926,24 +919,35 @@ export async function enrichDemoTaskThreads(opts: {
   const { clientId, sophieId, karimId, lauraId } = opts;
   void lauraId; // conservé pour signature / conversations directes legacy
 
+  await ensureDemoStaffDisplayNames();
+
   const [personaKarim, personaJulie] = await Promise.all([
     prisma.user.findFirst({
       where: {
-        name: "Karim Benali",
         personType: "INTERNAL",
         permissionProfile: "CONDUCTEUR",
+        OR: [
+          { name: "Karim Benali" },
+          { email: { contains: "+karim@" } },
+          { email: { endsWith: "+karim@demo.bework.local" } },
+        ],
       },
       select: { id: true },
     }),
     prisma.user.findFirst({
       where: {
-        name: "Julie Martin",
         personType: "INTERNAL",
         permissionProfile: "ADMINISTRATIF",
+        OR: [
+          { name: "Julie Martin" },
+          { email: { contains: "+julie@" } },
+          { email: { endsWith: "+julie@demo.bework.local" } },
+        ],
       },
       select: { id: true },
     }),
   ]);
+  /** Jamais CLIENT_EXT Sophie Martin ; staff Lefèvre uniquement en fallback messagerie. */
   const karimPersonaId = personaKarim?.id ?? karimId;
   const juliePersonaId = personaJulie?.id ?? sophieId;
 

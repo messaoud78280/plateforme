@@ -36,6 +36,8 @@ export type TaskListRow = {
 };
 
 export type TaskListSummary = {
+  /** Tâches ouvertes (hors terminées) — total distinct des dimensions. */
+  totalOpen: number;
   aFaire: number;
   enCours: number;
   enRetard: number;
@@ -198,6 +200,7 @@ export async function loadTasksListView(opts: LoadTasksListViewOpts): Promise<{
           role: true,
           personType: true,
           permissionProfile: true,
+          jobTitle: true,
         },
       },
     },
@@ -213,6 +216,7 @@ export async function loadTasksListView(opts: LoadTasksListViewOpts): Promise<{
           role: t.assignedTo.role,
           personType: t.assignedTo.personType,
           permissionProfile: t.assignedTo.permissionProfile,
+          jobTitle: t.assignedTo.jobTitle,
         })
       : null;
     return {
@@ -244,6 +248,7 @@ export async function loadTasksListView(opts: LoadTasksListViewOpts): Promise<{
 
   const open = rows.filter((r) => r.statusBucket !== "terminee");
   const summary: TaskListSummary = {
+    totalOpen: open.length,
     aFaire: open.filter((r) => r.statusBucket === "a_faire").length,
     enCours: open.filter((r) => r.statusBucket === "en_cours").length,
     enRetard: open.filter((r) => r.isOverdue).length,
@@ -291,6 +296,7 @@ export async function loadTasksListView(opts: LoadTasksListViewOpts): Promise<{
               role: true,
               personType: true,
               permissionProfile: true,
+              jobTitle: true,
             },
           },
         },
@@ -308,6 +314,7 @@ export async function loadTasksListView(opts: LoadTasksListViewOpts): Promise<{
           role: u.role,
           personType: u.personType,
           permissionProfile: u.permissionProfile,
+          jobTitle: u.jobTitle,
         }),
       }));
     if (fromMembers.length > 0) assignees = fromMembers;

@@ -26,8 +26,8 @@ assert.match(page, /Mes demandes/);
 assert.match(legacy, /purchaseOrderAsLegacy/);
 assert.match(legacy, /Bon de commande/);
 assert.match(listView, /excludeLegacyPurchaseOrderTasksWhere/);
-assert.match(listView, /evaluatePurchaseOrderAttention|displayUserRoleLabel/);
 assert.match(listView, /displayUserRoleLabel/);
+assert.match(listView, /totalOpen/);
 
 assert.match(ui, /Nouvelle tâche/);
 assert.match(ui, /Mes tâches/);

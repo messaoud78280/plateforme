@@ -139,6 +139,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
     const params = new URLSearchParams(window.location.search);
     const eventId = params.get("event");
     const projectId = params.get("projectId");
+    const wantNew = params.get("new") === "1";
     if (eventId) {
       setSelectedEventId(eventId);
       setPanelOpen(true);
@@ -147,6 +148,17 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
     if (projectId) {
       setProjectFilter(projectId);
       setFiltersOpen(true);
+    }
+    if (wantNew) {
+      const start = new Date();
+      start.setMinutes(0, 0, 0);
+      const end = new Date(start.getTime() + 60 * 60 * 1000);
+      setDraft({
+        startAt: start.toISOString(),
+        endAt: end.toISOString(),
+        projectId: projectId || null,
+      });
+      setCreateOpen(true);
     }
   }, []);
 

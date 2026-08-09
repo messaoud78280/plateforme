@@ -46,4 +46,5 @@ export type AgendaQuickCreateDraft = {
   startAt: string;
   endAt: string;
   allDay?: boolean;
+  projectId?: string | null;
 };

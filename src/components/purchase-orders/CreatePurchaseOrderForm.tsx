@@ -20,12 +20,20 @@ const emptyLine = (): Line => ({ designation: "", quantity: "1", unit: "U", unit
 export function CreatePurchaseOrderForm({
   projects,
   team,
+  defaultProjectId,
 }: {
   projects: ProjectOpt[];
   team: TeamOpt[];
+  defaultProjectId?: string | null;
 }) {
   const router = useRouter();
-  const [projectId, setProjectId] = useState(projects[0]?.id ?? "");
+  const initialProject =
+    (defaultProjectId && projects.some((p) => p.id === defaultProjectId)
+      ? defaultProjectId
+      : null) ??
+    projects[0]?.id ??
+    "";
+  const [projectId, setProjectId] = useState(initialProject);
   const [supplierId, setSupplierId] = useState("");
   const [contactId, setContactId] = useState<string | null>(null);
   const [supplierQ, setSupplierQ] = useState("");

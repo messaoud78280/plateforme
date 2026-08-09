@@ -121,7 +121,7 @@ export function AgendaEventModal({
         ? defaultType
         : "REUNION_CHANTIER",
     );
-    setProjectId("");
+    setProjectId(draft?.projectId ?? "");
     setResponsibleId("");
     setAttendeeIds([]);
     setLocation("");

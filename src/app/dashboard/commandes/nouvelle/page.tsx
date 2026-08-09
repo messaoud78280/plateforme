@@ -13,10 +13,16 @@ import { projectWhereForClientUser } from "@/lib/organization/access";
 
 export const dynamic = "force-dynamic";
 
-export default async function NouvelleCommandePage() {
+export default async function NouvelleCommandePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ projectId?: string }>;
+}) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect("/connexion?callbackUrl=/dashboard/commandes/nouvelle");
   if (!isInternalPurchaseOrderActor(session.user)) redirect("/dashboard/commandes");
+
+  const { projectId: projectIdParam } = await searchParams;
 
   const orgId = await resolvePurchaseOrderOrgId(session.user);
   if (!orgId) redirect("/dashboard/commandes");
@@ -53,7 +59,11 @@ export default async function NouvelleCommandePage() {
         title="Nouvelle commande"
         description="Préparez une demande fournisseur en quelques champs — le reste peut attendre."
       />
-      <CreatePurchaseOrderForm projects={projects} team={team} />
+      <CreatePurchaseOrderForm
+        projects={projects}
+        team={team}
+        defaultProjectId={projectIdParam ?? null}
+      />
     </div>
   );
 }

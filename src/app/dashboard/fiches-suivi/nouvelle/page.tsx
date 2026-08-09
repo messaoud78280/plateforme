@@ -11,9 +11,15 @@ import { projectWhereForClientUser } from "@/lib/organization/access";
 
 export const dynamic = "force-dynamic";
 
-export default async function NouvelleFichePage() {
+export default async function NouvelleFichePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ projectId?: string }>;
+}) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect("/connexion?callbackUrl=/dashboard/fiches-suivi/nouvelle");
+
+  const { projectId: projectIdParam } = await searchParams;
 
   const ownerUserId = await resolveFollowUpOwnerUserId(session.user.id);
   const projects = await prisma.project.findMany({
@@ -36,7 +42,7 @@ export default async function NouvelleFichePage() {
         title="Nouvelle fiche"
         description="Client, chantier, OS ou commande, objet — puis créez. Le reste s’ajoute ensuite."
       />
-      <FollowUpCreateForm projects={projects} />
+      <FollowUpCreateForm projects={projects} defaultProjectId={projectIdParam ?? null} />
     </div>
   );
 }

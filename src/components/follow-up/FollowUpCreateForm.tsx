@@ -5,8 +5,10 @@ import { useState } from "react";
 
 export function FollowUpCreateForm({
   projects,
+  defaultProjectId,
 }: {
   projects: { id: string; title: string }[];
+  defaultProjectId?: string | null;
 }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
@@ -104,7 +106,11 @@ export function FollowUpCreateForm({
       {projects.length > 0 && (
         <label className="block space-y-1">
           <span className="text-xs font-semibold text-slate-700">Chantier lié (optionnel)</span>
-          <select name="projectId" className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm">
+          <select
+            name="projectId"
+            defaultValue={defaultProjectId ?? ""}
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          >
             <option value="">—</option>
             {projects.map((p) => (
               <option key={p.id} value={p.id}>

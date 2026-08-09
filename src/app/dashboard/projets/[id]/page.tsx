@@ -25,15 +25,22 @@ import {
 } from "@/lib/chantier-dossier/sync-mission-documents";
 import { ChantierOrphanMissionBanner } from "@/components/chantier/ChantierOrphanMissionBanner";
 import { ChantierStatusSelect } from "@/components/chantier/ChantierStatusSelect";
-import {
-  CHANTIER_STATUS_LABELS,
-  CHANTIER_MISSING_STATUSES,
-} from "@/lib/chantier-dossier/constants";
-import { chantierStatusBadgeTone } from "@/lib/chantier-lifecycle";
-import { PageHeader } from "@/components/ui/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { TaskStatus } from "@prisma/client";
 import { ProjectMessagerieLinks } from "@/components/messagerie/MessagerieContextLinks";
+import {
+  chantierStatusDisplayLabel,
+  loadChantierCockpitOps,
+} from "@/lib/chantier/cockpit-ops";
+import {
+  ChantierOpsOverview,
+  ChantierQuickActions,
+} from "@/components/chantier/ChantierOpsOverview";
+import { projectTeamHref } from "@/lib/messagerie/resolve-conversation";
+import {
+  CHANTIER_MISSING_STATUSES,
+} from "@/lib/chantier-dossier/constants";
+import { chantierStatusBadgeTone } from "@/lib/chantier-lifecycle";
 
 export default async function ProjetDetailPage({
   params,
@@ -45,6 +52,18 @@ export default async function ProjetDetailPage({
 
   if (!session?.user?.id) {
     redirect("/connexion?callbackUrl=/dashboard");
+  }
+
+  const actorProfile = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { personType: true, permissionProfile: true },
+  });
+  // Fournisseur : pas de cockpit chantier interne
+  if (
+    actorProfile?.personType === "SUPPLIER" ||
+    actorProfile?.permissionProfile === "FOURNISSEUR"
+  ) {
+    redirect("/dashboard");
   }
 
   const channelFilterEarly =
@@ -69,9 +88,10 @@ export default async function ProjetDetailPage({
               : {}),
           },
           include: { sender: true, receiver: true },
-          orderBy: { createdAt: "asc" },
+          orderBy: { createdAt: "desc" },
+          take: 40,
         },
-        documents: { orderBy: { createdAt: "asc" } },
+        documents: { orderBy: { createdAt: "desc" }, take: 30 },
       },
     }),
     prisma.task.aggregate({
@@ -120,10 +140,7 @@ export default async function ProjetDetailPage({
 
   const portalUser =
     session.user.role === "CLIENT"
-      ? await prisma.user.findUnique({
-          where: { id: session.user.id },
-          select: { personType: true, permissionProfile: true },
-        })
+      ? actorProfile
       : null;
   const isExternalViewer = isExternalPortalUser(portalUser?.personType);
   const projectScopeCtx = {
@@ -138,7 +155,7 @@ export default async function ProjetDetailPage({
     session.user.role !== "CLIENT" ||
     (await userHasProjectScope(session.user.id, projectScopeCtx, "messages"));
 
-  const [chantierFolders, missingCount, upcomingAgenda, nextDelivery] = await Promise.all([
+  const [chantierFolders, missingCount, ops] = await Promise.all([
     canSeeDocuments
       ? prisma.chantierFolder.findMany({
           where: { projectId: id },
@@ -146,6 +163,7 @@ export default async function ProjetDetailPage({
           include: {
             files: {
               orderBy: { createdAt: "desc" },
+              take: 40,
               include: { addedBy: { select: { name: true } } },
             },
           },
@@ -154,52 +172,14 @@ export default async function ProjetDetailPage({
     prisma.chantierFile.count({
       where: { projectId: id, status: { in: CHANTIER_MISSING_STATUSES } },
     }),
-    prisma.agendaEvent.findMany({
-      where: {
-        projectId: id,
-        status: { not: "ANNULE" },
-        startAt: { gte: new Date() },
-      },
-      orderBy: { startAt: "asc" },
-      take: 5,
-      select: { id: true, title: true, startAt: true, type: true },
-    }).catch(() => [] as { id: string; title: string; startAt: Date; type: string }[]),
-    prisma.agendaEvent
-      .findFirst({
-        where: {
-          projectId: id,
-          type: "LIVRAISON",
-          status: { not: "ANNULE" },
-          startAt: { gte: new Date(Date.now() - 3600_000) },
-        },
-        orderBy: { startAt: "asc" },
-        select: {
-          id: true,
-          title: true,
-          startAt: true,
-          status: true,
-          purchaseOrderId: true,
-          purchaseOrder: {
-            select: {
-              id: true,
-              number: true,
-              subject: true,
-              status: true,
-              externalOrganization: { select: { name: true, tradeName: true } },
-              lines: {
-                orderBy: { sortOrder: "asc" },
-                select: {
-                  designation: true,
-                  quantity: true,
-                  unit: true,
-                  receivedQty: true,
-                },
-              },
-            },
-          },
-        },
-      })
-      .catch(() => null),
+    loadChantierCockpitOps({
+      projectId: id,
+      projectTitle: project.title,
+      externalViewer: isExternalViewer,
+    }).catch((e) => {
+      console.error("[ProjetDetail] cockpit ops:", e);
+      return null;
+    }),
   ]);
 
   const dossierFolders = chantierFolders.map((folder) => ({
@@ -283,19 +263,6 @@ export default async function ProjetDetailPage({
       t.status === TaskStatus.A_VALIDER,
   );
 
-  const urgencyLabels: Record<string, string> = {
-    BASSE: "Basse",
-    MOYENNE: "Moyenne",
-    HAUTE: "Haute",
-    URGENTE: "Urgente",
-  };
-  const urgencyColors: Record<string, string> = {
-    BASSE: "bg-slate-100 text-slate-800",
-    MOYENNE: "bg-blue-100 text-blue-800",
-    HAUTE: "bg-amber-100 text-amber-800",
-    URGENTE: "bg-red-100 text-red-800",
-  };
-
   const attentionItems = [
     ...ordersPending.map((t) => ({
       id: t.id,
@@ -322,77 +289,51 @@ export default async function ProjetDetailPage({
           },
         ]
       : []),
-    ...upcomingAgenda.slice(0, 3).map((ev) => ({
-      id: `ag-${ev.id}`,
-      title: ev.title,
-      subtitle: `Agenda · ${ev.startAt.toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}`,
-      href: `/dashboard/agenda`,
-      tone: "info" as const,
-    })),
   ].slice(0, 8);
 
+  const responsibleLabel =
+    project.assignedTo?.name ||
+    project.internalManager ||
+    null;
+
   const contextCard = (
-    <div className="cc-card p-5 sm:p-6">
-      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-bework-muted">Contexte chantier</p>
-      <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-bework-muted">
-        <span>Client : {project.client.name}</span>
-        {project.siteCity ? <span>{project.siteCity}</span> : null}
-        {project.internalManager ? <span>Responsable : {project.internalManager}</span> : null}
-        {project.assignedTo ? (
-          <span className="rounded-full bg-bework-navy-soft px-2.5 py-0.5 font-medium text-bework-navy">
-            {isAgence ? "Agent : " : "Référent : "}
-            {project.assignedTo.name}
-          </span>
-        ) : null}
-      </div>
-
-      {isAgence ? (
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-600">
-          <span className="rounded-full bg-[#1d4ed8]/10 px-3 py-1 font-medium text-[#1d4ed8]">
-            Actions consommées (BeWork) : {projectActionsUsed}
-          </span>
-          <span className="rounded-full bg-slate-100 px-3 py-1 font-medium text-slate-700">
-            Client : {clientUsed}/{clientTotal} actions (mois)
-          </span>
-          <span className="rounded-full bg-green-100 px-3 py-1 font-medium text-green-800">
-            Restant : {clientRemaining}
-          </span>
-        </div>
-      ) : null}
-
-      <div className="mt-6 grid gap-4 border-t border-slate-100 pt-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="rounded-xl border border-slate-200/90 bg-white p-4 sm:p-5">
+      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+        Contexte chantier
+      </p>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 text-sm text-slate-700">
         {project.siteAddress ? (
           <div>
-            <p className="text-xs font-medium uppercase text-slate-500">Adresse chantier</p>
-            <p className="text-slate-800">{project.siteAddress}</p>
+            <p className="text-[10px] font-bold uppercase text-slate-400">Adresse</p>
+            <p>{project.siteAddress}</p>
           </div>
         ) : null}
         {project.plannedStartDate ? (
           <div>
-            <p className="text-xs font-medium uppercase text-slate-500">Démarrage prévu</p>
-            <p className="text-slate-800">{new Date(project.plannedStartDate).toLocaleDateString("fr-FR")}</p>
+            <p className="text-[10px] font-bold uppercase text-slate-400">Démarrage</p>
+            <p>{new Date(project.plannedStartDate).toLocaleDateString("fr-FR")}</p>
           </div>
         ) : project.dateSouhaitee ? (
           <div>
-            <p className="text-xs font-medium uppercase text-slate-500">Date souhaitée (début)</p>
-            <p className="text-slate-800">{new Date(project.dateSouhaitee).toLocaleDateString("fr-FR")}</p>
+            <p className="text-[10px] font-bold uppercase text-slate-400">Date souhaitée</p>
+            <p>{new Date(project.dateSouhaitee).toLocaleDateString("fr-FR")}</p>
           </div>
         ) : null}
         {project.plannedEndDate ? (
           <div>
-            <p className="text-xs font-medium uppercase text-slate-500">Fin prévue</p>
-            <p className="text-slate-800">{new Date(project.plannedEndDate).toLocaleDateString("fr-FR")}</p>
+            <p className="text-[10px] font-bold uppercase text-slate-400">Fin prévue</p>
+            <p>{new Date(project.plannedEndDate).toLocaleDateString("fr-FR")}</p>
           </div>
         ) : project.deadline ? (
           <div>
-            <p className="text-xs font-medium uppercase text-slate-500">Deadline</p>
-            <p className="text-slate-800">{new Date(project.deadline).toLocaleDateString("fr-FR")}</p>
+            <p className="text-[10px] font-bold uppercase text-slate-400">Deadline</p>
+            <p>{new Date(project.deadline).toLocaleDateString("fr-FR")}</p>
           </div>
         ) : null}
         {project.signedQuoteAmount != null ? (
           <div>
-            <p className="text-xs font-medium uppercase text-slate-500">Devis signé</p>
-            <p className="font-semibold text-slate-800">
+            <p className="text-[10px] font-bold uppercase text-slate-400">Devis signé</p>
+            <p className="font-semibold">
               {Number(project.signedQuoteAmount).toLocaleString("fr-FR", {
                 style: "currency",
                 currency: "EUR",
@@ -403,119 +344,17 @@ export default async function ProjetDetailPage({
           </div>
         ) : null}
       </div>
-
       {project.notes ? (
-        <div className="mt-4 border-t border-slate-100 pt-4">
-          <p className="text-xs font-medium uppercase text-slate-500">Instructions / détails importants</p>
-          <p className="mt-1 whitespace-pre-wrap text-slate-700">{project.notes}</p>
-        </div>
+        <p className="mt-3 whitespace-pre-wrap border-t border-slate-100 pt-3 text-sm text-slate-600">
+          {project.notes}
+        </p>
       ) : null}
-      {nextDelivery && !isExternalViewer ? (
-        <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50/60 p-4">
-          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-amber-900">
-            Prochaine livraison
-          </p>
-          <p className="mt-1 text-sm font-bold text-slate-900">
-            {nextDelivery.startAt.toLocaleString("fr-FR", {
-              day: "numeric",
-              month: "long",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-            {nextDelivery.status === "PLANIFIE" ? (
-              <span className="ml-2 text-xs font-semibold text-amber-800">À confirmer</span>
-            ) : (
-              <span className="ml-2 text-xs font-semibold text-emerald-800">Confirmée</span>
-            )}
-          </p>
-          {nextDelivery.purchaseOrder ? (
-            <>
-              <p className="mt-1 text-sm text-slate-700">
-                {nextDelivery.purchaseOrder.externalOrganization.tradeName ||
-                  nextDelivery.purchaseOrder.externalOrganization.name}
-                {" · "}
-                {nextDelivery.purchaseOrder.number}
-              </p>
-              {nextDelivery.purchaseOrder.lines[0] ? (
-                <p className="text-xs text-slate-600">
-                  {Number(nextDelivery.purchaseOrder.lines[0].receivedQty)} /{" "}
-                  {Number(nextDelivery.purchaseOrder.lines[0].quantity)}{" "}
-                  {nextDelivery.purchaseOrder.lines[0].unit}{" "}
-                  {nextDelivery.purchaseOrder.lines[0].designation}
-                </p>
-              ) : (
-                <p className="text-xs text-slate-600">{nextDelivery.purchaseOrder.subject}</p>
-              )}
-              {(() => {
-                const rem = nextDelivery.purchaseOrder.lines.reduce(
-                  (s, l) => s + Math.max(0, Number(l.quantity) - Number(l.receivedQty)),
-                  0,
-                );
-                return rem > 0 ? (
-                  <p className="mt-1 text-xs font-semibold text-amber-800">
-                    {rem} restant{rem > 1 ? "s" : ""} à livrer
-                  </p>
-                ) : null;
-              })()}
-              <div className="mt-2 flex flex-wrap gap-3">
-                <Link
-                  href={`/dashboard/commandes/${nextDelivery.purchaseOrder.id}`}
-                  className="text-xs font-semibold text-[#1d4ed8] hover:underline"
-                >
-                  Voir la commande →
-                </Link>
-                {["CONFIRMEE", "LIVRAISON_PROGRAMMEE", "PARTIELLEMENT_RECUE"].includes(
-                  nextDelivery.purchaseOrder.status,
-                ) ? (
-                  <Link
-                    href={`/dashboard/commandes/${nextDelivery.purchaseOrder.id}/reception`}
-                    className="rounded-md bg-[#1e3a5f] px-2.5 py-1 text-xs font-bold text-white"
-                  >
-                    Réceptionner
-                  </Link>
-                ) : null}
-                <Link
-                  href={`/dashboard/agenda?event=${nextDelivery.id}`}
-                  className="text-xs font-semibold text-[#1d4ed8] hover:underline"
-                >
-                  Voir dans l’agenda →
-                </Link>
-              </div>
-            </>
-          ) : (
-            <p className="mt-1 text-sm text-slate-700">{nextDelivery.title}</p>
-          )}
-        </div>
+      {isAgence ? (
+        <p className="mt-3 text-xs text-slate-500">
+          Actions BeWork : {projectActionsUsed} · Client {clientUsed}/{clientTotal} (restant{" "}
+          {clientRemaining})
+        </p>
       ) : null}
-
-      {upcomingAgenda.length > 0 ? (
-        <div className="mt-6 border-t border-slate-100 pt-5">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-bework-muted">
-              Prochains événements
-            </p>
-            <Link href="/dashboard/agenda" className="text-xs font-semibold text-[#1d4ed8] hover:underline">
-              Ouvrir l&apos;agenda →
-            </Link>
-          </div>
-          <ul className="mt-3 space-y-2">
-            {upcomingAgenda.map((ev) => (
-              <li key={ev.id} className="flex items-baseline justify-between gap-3 text-sm">
-                <span className="font-medium text-slate-800">{ev.title}</span>
-                <span className="shrink-0 text-xs text-slate-500">
-                  {ev.startAt.toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : (
-        <div className="mt-6 border-t border-slate-100 pt-5">
-          <Link href="/dashboard/agenda" className="text-sm font-semibold text-[#1d4ed8] hover:underline">
-            Planifier un événement sur ce chantier →
-          </Link>
-        </div>
-      )}
     </div>
   );
 
@@ -597,7 +436,7 @@ export default async function ProjetDetailPage({
         {project.messages.length === 0 ? (
           <p className="text-slate-500">Aucun message pour le moment.</p>
         ) : (
-          project.messages.map((msg) => {
+          [...project.messages].reverse().map((msg) => {
             const isFromMe = msg.senderId === session.user?.id;
             return (
               <div
@@ -648,60 +487,92 @@ export default async function ProjetDetailPage({
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <BackLink href="/dashboard/projets">Retour aux chantiers</BackLink>
 
-      <PageHeader
-        eyebrow="Cockpit chantier"
-        title={project.title}
-        description={
-          [
-            project.description,
-            `Client : ${project.client.name}`,
-            project.siteCity,
-            project.internalManager ? `Responsable : ${project.internalManager}` : null,
-            project.assignedTo
-              ? `${isAgence ? "Agent" : "Référent"} : ${project.assignedTo.name}`
-              : null,
-          ]
-            .filter(Boolean)
-            .join(" · ")
-        }
-        actions={
-          <>
-            <ProjectMessagerieLinks projectId={project.id} />
-            {missingCount > 0 ? (
+      <header className="rounded-xl border border-slate-200/90 bg-white px-4 py-4 sm:px-5 sm:py-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+              Chantier
+            </p>
+            <h1 className="mt-1 text-xl font-extrabold tracking-tight text-slate-950 sm:text-2xl">
+              {project.title}
+            </h1>
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-600">
+              <span className="font-medium text-slate-800">{project.client.name}</span>
+              <span className="text-slate-300">·</span>
+              {isStaff ? (
+                <ChantierStatusSelect projectId={project.id} value={project.chantierStatus} canEdit />
+              ) : (
+                <Badge tone={chantierStatusBadgeTone(project.chantierStatus)}>
+                  {chantierStatusDisplayLabel(project.chantierStatus)}
+                </Badge>
+              )}
+              {responsibleLabel ? (
+                <>
+                  <span className="text-slate-300">·</span>
+                  <span>
+                    Responsable : <strong className="font-semibold text-slate-900">{responsibleLabel}</strong>
+                  </span>
+                </>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {!isExternalViewer ? (
               <Link
-                href={`/dashboard/projets/manquants?chantier=${encodeURIComponent(id)}`}
-                className="btn-cc-danger"
+                href={projectTeamHref(project.id)}
+                className="inline-flex rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-[#1e3a5f] hover:bg-slate-50"
               >
-                {missingCount} pièce{missingCount > 1 ? "s" : ""} à récupérer
+                Message équipe
               </Link>
             ) : null}
-            {canDeleteChantier ? (
-              <DeleteChantierButton
-                projectId={id}
-                projectTitle={project.title}
-                redirectTo="/dashboard/projets"
-                label="Supprimer le chantier"
-                className="px-4 py-2 text-sm"
-              />
-            ) : null}
-            {isStaff ? (
-              <ChantierStatusSelect projectId={project.id} value={project.chantierStatus} canEdit />
-            ) : (
-              <Badge tone={chantierStatusBadgeTone(project.chantierStatus)}>
-                {CHANTIER_STATUS_LABELS[project.chantierStatus] ?? project.chantierStatus}
-              </Badge>
-            )}
-            <span
-              className={`rounded-full px-3 py-1 text-xs font-medium ${urgencyColors[project.urgency] ?? "bg-slate-100 text-slate-800"}`}
+            <Link
+              href={ops?.links.agenda ?? `/dashboard/agenda?projectId=${encodeURIComponent(id)}`}
+              className="inline-flex rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-[#1e3a5f] hover:bg-slate-50"
             >
-              Urgence : {urgencyLabels[project.urgency] ?? project.urgency}
-            </span>
-          </>
-        }
-      />
+              Agenda
+            </Link>
+            {ops && !isExternalViewer ? (
+              <ChantierQuickActions ops={ops} canCreate={isStaff} />
+            ) : null}
+            <details className="relative">
+              <summary className="list-none cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
+                •••
+              </summary>
+              <div className="absolute right-0 z-20 mt-1 min-w-[200px] rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
+                {!isExternalViewer ? (
+                  <div className="border-b border-slate-100 px-2 py-2">
+                    <ProjectMessagerieLinks projectId={project.id} />
+                  </div>
+                ) : null}
+                {missingCount > 0 ? (
+                  <Link
+                    href={`/dashboard/projets/manquants?chantier=${encodeURIComponent(id)}`}
+                    className="block px-3.5 py-2 text-sm text-red-700 hover:bg-red-50"
+                  >
+                    {missingCount} pièce{missingCount > 1 ? "s" : ""} manquante
+                    {missingCount > 1 ? "s" : ""}
+                  </Link>
+                ) : null}
+                {canDeleteChantier ? (
+                  <div className="px-2 py-1">
+                    <DeleteChantierButton
+                      projectId={id}
+                      projectTitle={project.title}
+                      redirectTo="/dashboard/projets"
+                      label="Supprimer le chantier"
+                      className="w-full px-2 py-2 text-left text-sm"
+                    />
+                  </div>
+                ) : null}
+              </div>
+            </details>
+          </div>
+        </div>
+      </header>
 
       <ChantierCockpit
         stats={[
@@ -724,10 +595,21 @@ export default async function ProjetDetailPage({
             label: "Pièces manquantes",
             value: missingCount,
             tone: missingCount > 0 ? "watch" : "ok",
-            href: missingCount > 0 ? `/dashboard/projets/manquants?chantier=${encodeURIComponent(id)}` : undefined,
+            href:
+              missingCount > 0
+                ? `/dashboard/projets/manquants?chantier=${encodeURIComponent(id)}`
+                : undefined,
           },
         ]}
         attentionItems={attentionItems}
+        opsOverview={
+          ops ? (
+            <ChantierOpsOverview
+              ops={ops}
+              mode={isExternalViewer ? "external" : "internal"}
+            />
+          ) : undefined
+        }
         hiddenTabs={canManageShare ? undefined : ["partage"]}
         panels={{
           overview: contextCard,

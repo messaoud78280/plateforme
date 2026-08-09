@@ -81,13 +81,7 @@ type DirectMessageItem = {
 type AttachmentItem = { name: string; fileUrl: string; fileSize: number; mimeType?: string };
 
 type FilterId = "envoyer" | "messages-directs" | "inbox" | "mes-missions" | "en-attente-client" | "en-cours" | "terminees";
-type ListChip = "tous" | "non-lus" | "internes" | "clients" | "fournisseurs";
-
-const PRIMARY_NAV: { id: FilterId; label: string }[] = [
-  { id: "inbox", label: "Conversations" },
-  { id: "messages-directs", label: "Contacts" },
-  { id: "envoyer", label: "Nouveau" },
-];
+type ListChip = "tous" | "non-lus" | "internes" | "externes" | "clients" | "fournisseurs";
 
 const MORE_NAV: { id: FilterId; label: string }[] = [
   { id: "mes-missions", label: "Mes missions" },
@@ -95,6 +89,28 @@ const MORE_NAV: { id: FilterId; label: string }[] = [
   { id: "en-cours", label: "En cours" },
   { id: "terminees", label: "Terminées" },
 ];
+
+const PINS_KEY = "bework.msg.pins";
+const PINS_MAX = 5;
+
+function loadPins(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(PINS_KEY);
+    const arr = raw ? (JSON.parse(raw) as string[]) : [];
+    return Array.isArray(arr) ? arr.slice(0, PINS_MAX) : [];
+  } catch {
+    return [];
+  }
+}
+
+function savePins(ids: string[]) {
+  try {
+    localStorage.setItem(PINS_KEY, JSON.stringify(ids.slice(0, PINS_MAX)));
+  } catch {
+    /* ignore */
+  }
+}
 
 function sortMissionsByLastMessage(list: MissionItem[]): MissionItem[] {
   return [...list].sort((a, b) => {
@@ -122,38 +138,6 @@ function bumpMissionWithMessage(
   return sortMissionsByLastMessage(next);
 }
 
-function railIcon(id: FilterId | "more") {
-  const common = "h-6 w-6";
-  switch (id) {
-    case "inbox":
-      return (
-        <svg className={common} viewBox="0 0 24 24" fill="currentColor">
-          <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
-        </svg>
-      );
-    case "messages-directs":
-      return (
-        <svg className={common} viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-        </svg>
-      );
-    case "envoyer":
-      return (
-        <svg className={common} viewBox="0 0 24 24" fill="currentColor">
-          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-        </svg>
-      );
-    case "more":
-      return (
-        <svg className={common} viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
-        </svg>
-      );
-    default:
-      return <span className="text-xs font-bold">•••</span>;
-  }
-}
-
 function formatRelativeTime(d: string) {
   return waListTime(d);
 }
@@ -179,6 +163,104 @@ function Avatar({ name, size = "md" }: { name: string; size?: "sm" | "md" | "lg"
     >
       {initials}
     </div>
+  );
+}
+
+function MissionRow({
+  m,
+  selected,
+  sessionUserId,
+  pinned,
+  onSelect,
+  onTogglePin,
+  formatRelativeTime: fmt,
+}: {
+  m: MissionItem;
+  selected: boolean;
+  sessionUserId: string;
+  pinned: boolean;
+  onSelect: () => void;
+  onTogglePin: () => void;
+  formatRelativeTime: (d: string) => string;
+}) {
+  const unread = m.unreadCount > 0;
+  return (
+    <li>
+      <div
+        className={`flex w-full gap-2 px-2 py-2 transition ${
+          selected ? "bg-[#f0f2f5]" : "hover:bg-[#f5f6f6]"
+        }`}
+      >
+        <button type="button" onClick={onSelect} className="flex min-w-0 flex-1 gap-3 px-1 py-1 text-left">
+          <div className="relative">
+            <Avatar name={m.client.name || m.title} size="sm" />
+            {unread ? (
+              <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[#00a884] ring-2 ring-white" />
+            ) : null}
+          </div>
+          <div className="min-w-0 flex-1 border-b border-[#f0f2f5] pb-3">
+            <div className="flex items-baseline justify-between gap-2">
+              <p
+                className={`truncate text-[15px] ${
+                  unread ? "font-bold text-[#111b21]" : "font-medium text-[#111b21]"
+                }`}
+              >
+                {m.title}
+              </p>
+              <span
+                className={`shrink-0 text-[11px] ${
+                  unread ? "font-semibold text-[#00a884]" : "text-[#667781]"
+                }`}
+              >
+                {m.lastMessage ? fmt(m.lastMessage.createdAt) : ""}
+              </span>
+            </div>
+            <p className="mt-0.5 truncate text-[12px] font-semibold text-orange-700">
+              Client · Externe
+              {m.client.name ? ` · ${m.client.name}` : ""}
+            </p>
+            {m.lastMessage ? (
+              <p
+                className={`mt-0.5 truncate text-[13px] ${
+                  unread ? "font-semibold text-[#111b21]" : "text-[#667781]"
+                }`}
+              >
+                {m.lastMessage.sender.id === sessionUserId
+                  ? "Vous : "
+                  : `${m.lastMessage.sender.name.split(/\s+/)[0] ?? ""} : `}
+                {m.lastMessage.content.slice(0, 52)}
+                {m.lastMessage.content.length > 52 ? "…" : ""}
+              </p>
+            ) : null}
+            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              {(m.priority === "URGENT" || m.priority === "PRIORITAIRE") && (
+                <span className="rounded px-1.5 py-0.5 text-[10px] font-medium text-[#ea0038]">
+                  {m.priority === "URGENT" ? "Urgent" : "Prioritaire"}
+                </span>
+              )}
+              {unread && (
+                <span className="ml-auto inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#00a884] px-1.5 text-[10px] font-bold text-white">
+                  {m.unreadCount}
+                </span>
+              )}
+            </div>
+          </div>
+        </button>
+        <button
+          type="button"
+          title={pinned ? "Désépingler" : "Épingler"}
+          onClick={(e) => {
+            e.stopPropagation();
+            onTogglePin();
+          }}
+          className={`mt-2 h-8 w-8 shrink-0 rounded-full text-sm ${
+            pinned ? "text-[#00a884]" : "text-[#c5c9cc] hover:text-[#54656f]"
+          }`}
+        >
+          📌
+        </button>
+      </div>
+    </li>
   );
 }
 
@@ -239,18 +321,23 @@ export function MessagerieMissionsView({
   const [uploadingAttach, setUploadingAttach] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [listSearch, setListSearch] = useState("");
+  const [recipientSearch, setRecipientSearch] = useState("");
+  const [pinnedIds, setPinnedIds] = useState<string[]>([]);
+  const [attachMenuOpen, setAttachMenuOpen] = useState(false);
+  const [pendingNewCount, setPendingNewCount] = useState(0);
   const directFileId = "direct-file-input";
   const replyFileId = "reply-file-input";
   const missionFileId = "mission-file-input";
+  const missionPhotoId = "mission-photo-input";
   const chatEndRef = useRef<HTMLDivElement>(null);
   const highlightMessageId = useRef<string | null>(null);
 
+  useEffect(() => {
+    setPinnedIds(loadPins());
+  }, []);
+
   const selectedMission = missions.find((m) => m.id === selectedTaskId);
   const showEnvoyerTab = isAgence || isAgent || isClient;
-  const primaryNav = PRIMARY_NAV.filter((i) => {
-    if (i.id === "envoyer") return showEnvoyerTab;
-    return true;
-  });
   const moreNavActive = MORE_NAV.some((i) => i.id === filter);
 
   const myDirectMessages = directMessages.filter(
@@ -361,7 +448,7 @@ export function MessagerieMissionsView({
     load();
   }, [filter]);
 
-  // Realtime : remonter la conversation + rafraîchir le fil ouvert
+  // Realtime : remonter la conversation + rafraîchir le fil ouvert (TASK + DIRECT)
   useEffect(() => {
     return subscribeMessagerieEvents((ev) => {
       if (ev.kind === "TASK" && ev.conversationKey.startsWith("TASK:")) {
@@ -369,7 +456,6 @@ export function MessagerieMissionsView({
         setMissions((prev) => {
           const idx = prev.findIndex((m) => m.id === taskId);
           if (idx < 0) {
-            // nouvelle conversation inconnue → reload liste léger
             void fetch("/api/tasks/messagerie?filter=inbox")
               .then((r) => r.json())
               .then((data) => {
@@ -393,6 +479,9 @@ export function MessagerieMissionsView({
           return next;
         });
         if (selectedTaskId === taskId) {
+          if (!stickToBottomRef.current) {
+            setPendingNewCount((n) => n + 1);
+          }
           void fetch(`/api/tasks/${taskId}/messages?take=30&after=${encodeURIComponent(ev.at)}`)
             .then((r) => (r.ok ? r.json() : null))
             .then((data) => {
@@ -406,8 +495,20 @@ export function MessagerieMissionsView({
             });
         }
       }
+      if (ev.kind === "DIRECT" && ev.conversationKey.startsWith("DIRECT:")) {
+        const otherId =
+          ev.senderId === sessionUserId ? ev.receiverId : ev.senderId;
+        void refreshDirectIndex().then((data) => setDirectMessages(data));
+        if (
+          filter === "messages-directs" &&
+          selectedDirectContactId &&
+          (selectedDirectContactId === otherId || selectedDirectContactId === ev.senderId)
+        ) {
+          void refreshDirectThread(selectedDirectContactId);
+        }
+      }
     });
-  }, [selectedTaskId]);
+  }, [selectedTaskId, selectedDirectContactId, filter, sessionUserId]);
 
   useEffect(() => {
     if (!selectedTaskId) {
@@ -419,6 +520,7 @@ export function MessagerieMissionsView({
     setHasMoreMessages(false);
     setLoadingMessages(true);
     stickToBottomRef.current = true;
+    setPendingNewCount(0);
     setMobileShowThread(true);
 
     // Optimistic WhatsApp : badge vert disparaît dès l’ouverture
@@ -936,7 +1038,7 @@ export function MessagerieMissionsView({
   const filteredMissions = (() => {
     let list = missions;
     if (listChip === "non-lus") list = list.filter((m) => m.unreadCount > 0);
-    // internes / externes : missions = externes (client) ; contacts = internes (rail)
+    // externes / clients : fils mission (client) ; internes → vue Contacts
     if (listSearch.trim()) {
       const q = listSearch.toLowerCase();
       list = list.filter(
@@ -950,6 +1052,25 @@ export function MessagerieMissionsView({
     return sortMissionsByLastMessage(list);
   })();
 
+  const pinnedMissions = filteredMissions.filter((m) => pinnedIds.includes(m.id));
+  const recentMissions = filteredMissions.filter((m) => !pinnedIds.includes(m.id));
+
+  function togglePin(taskId: string) {
+    setPinnedIds((prev) => {
+      const next = prev.includes(taskId)
+        ? prev.filter((id) => id !== taskId)
+        : [taskId, ...prev.filter((id) => id !== taskId)].slice(0, PINS_MAX);
+      savePins(next);
+      return next;
+    });
+  }
+
+  function scrollToLatest() {
+    stickToBottomRef.current = true;
+    setPendingNewCount(0);
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }
+
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center bg-[#f0f2f5]">
@@ -958,70 +1079,9 @@ export function MessagerieMissionsView({
     );
   }
 
-  const railBtn = (id: FilterId, label: string, active: boolean) => (
-    <button
-      key={id}
-      type="button"
-      title={label}
-      onClick={() => {
-        setFilter(id);
-        setMoreOpen(false);
-        if (id === "messages-directs") setListChip("internes");
-        if (id === "inbox") setListChip("tous");
-      }}
-      className={`flex h-12 w-12 items-center justify-center rounded-full transition ${
-        active ? "bg-[#00a884]/20 text-[#008069]" : "text-[#54656f] hover:bg-black/5"
-      }`}
-    >
-      {railIcon(id)}
-    </button>
-  );
-
   return (
     <div className="mx-auto flex h-full min-h-0 w-full max-w-[1600px] overflow-hidden bg-[#f0f2f5] shadow-2xl">
-      {/* Rail — desktop uniquement, 3 actions + Plus */}
-      <aside className="relative hidden w-[59px] shrink-0 flex-col items-center border-r border-[#d1d7db] bg-[#f0f2f5] py-3 md:flex">
-        <div className="flex min-h-0 flex-1 flex-col items-center gap-1 overflow-y-auto">
-          {primaryNav.map((item) =>
-            railBtn(item.id, item.label, filter === item.id),
-          )}
-          <button
-            type="button"
-            title="Plus"
-            onClick={() => setMoreOpen((v) => !v)}
-            className={`flex h-12 w-12 items-center justify-center rounded-full transition ${
-              moreOpen || moreNavActive ? "bg-[#00a884]/20 text-[#008069]" : "text-[#54656f] hover:bg-black/5"
-            }`}
-          >
-            {railIcon("more")}
-          </button>
-        </div>
-        {moreOpen ? (
-          <div className="absolute bottom-16 left-14 z-40 w-52 rounded-xl border border-[#d1d7db] bg-white py-1 shadow-lg">
-            <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-[#667781]">
-              Vues
-            </p>
-            {MORE_NAV.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => {
-                  setFilter(item.id);
-                  setMoreOpen(false);
-                  setListChip("tous");
-                }}
-                className={`block w-full px-3 py-2 text-left text-sm ${
-                  filter === item.id ? "bg-[#e7f8f3] font-semibold text-[#008069]" : "text-[#111b21] hover:bg-[#f5f6f6]"
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        ) : null}
-      </aside>
-
-      {/* Colonne liste / formulaire */}
+      {/* Pas de rail d’icônes abstraites — navigation dans la colonne liste */}
       {filter === "envoyer" ? (
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto bg-white p-6">
           <h2 className="mb-4 text-lg font-semibold text-[#111b21]">+ Nouveau message</h2>
@@ -1030,19 +1090,25 @@ export function MessagerieMissionsView({
           </p>
           <form onSubmit={handleSendDirect} className="space-y-4">
             <div>
-              <label htmlFor="recipient" className="mb-1.5 block text-sm font-medium text-[#111b21]">
+              <label htmlFor="recipient-search" className="mb-1.5 block text-sm font-medium text-[#111b21]">
                 Destinataire
               </label>
-              <select
-                id="recipient"
-                value={directRecipientId}
-                onChange={(e) => setDirectRecipientId(e.target.value)}
-                required
-                className="w-full rounded-lg border border-[#d1d7db] px-4 py-2.5 text-sm text-[#111b21] focus:border-[#00a884] focus:outline-none focus:ring-2 focus:ring-[#00a884]/20"
-              >
-                <option value="">Rechercher un contact…</option>
+              <input
+                id="recipient-search"
+                type="search"
+                value={recipientSearch}
+                onChange={(e) => setRecipientSearch(e.target.value)}
+                placeholder="Karim, Point.P, ABC Promotion, Victor Hugo…"
+                className="mb-2 w-full rounded-lg border border-[#d1d7db] px-4 py-2.5 text-sm text-[#111b21] focus:border-[#00a884] focus:outline-none focus:ring-2 focus:ring-[#00a884]/20"
+              />
+              <ul className="max-h-48 overflow-y-auto rounded-lg border border-[#d1d7db]">
                 {recipients
                   .filter((r) => r.id !== sessionUserId)
+                  .filter((r) => {
+                    if (!recipientSearch.trim()) return true;
+                    const q = recipientSearch.toLowerCase();
+                    return r.name.toLowerCase().includes(q) || r.role.toLowerCase().includes(q);
+                  })
                   .map((r) => {
                     const kind =
                       r.role === "client"
@@ -1050,13 +1116,33 @@ export function MessagerieMissionsView({
                         : r.role === "gérant" || r.role === "agent"
                           ? "Interne"
                           : r.role;
+                    const selected = directRecipientId === r.id;
                     return (
-                      <option key={r.id} value={r.id}>
-                        {r.name} — {kind}
-                      </option>
+                      <li key={r.id}>
+                        <button
+                          type="button"
+                          onClick={() => setDirectRecipientId(r.id)}
+                          className={`flex w-full items-center justify-between px-3 py-2.5 text-left text-sm ${
+                            selected ? "bg-[#e7f8f3]" : "hover:bg-[#f5f6f6]"
+                          }`}
+                        >
+                          <span className="font-medium text-[#111b21]">{r.name}</span>
+                          <span
+                            className={`text-[11px] font-semibold ${
+                              kind.includes("Externe") ? "text-orange-700" : "text-violet-800"
+                            }`}
+                          >
+                            {kind.includes("Interne") ? "🔒 " : ""}
+                            {kind}
+                          </span>
+                        </button>
+                      </li>
                     );
                   })}
-              </select>
+              </ul>
+              {!directRecipientId ? (
+                <p className="mt-1 text-xs text-red-600">Choisissez un destinataire</p>
+              ) : null}
             </div>
             <div>
               <label htmlFor="direct-content" className="mb-1.5 block text-sm font-medium text-[#111b21]">
@@ -1366,17 +1452,17 @@ export function MessagerieMissionsView({
         }`}
       >
         <div className="border-b border-[#e9edef] px-4 pb-3 pt-3">
-          <div className="mb-3 flex items-center justify-between">
+          <div className="mb-3 flex items-center justify-between gap-2">
             <h2 className="text-[22px] font-bold tracking-tight text-[#111b21]">Messagerie</h2>
-            <div className="flex items-center gap-1">
+            <div className="relative flex items-center gap-1">
               <button
                 type="button"
-                title="Contacts"
+                title="Contacts internes"
                 onClick={() => {
                   setFilter("messages-directs");
                   setListChip("internes");
                 }}
-                className="rounded-full px-3 py-1.5 text-xs font-semibold text-[#008069] hover:bg-[#e7f8f3] md:hidden"
+                className="rounded-full px-3 py-1.5 text-xs font-semibold text-[#008069] hover:bg-[#e7f8f3]"
               >
                 Contacts
               </button>
@@ -1389,6 +1475,51 @@ export function MessagerieMissionsView({
                 <span className="text-lg leading-none">+</span>
                 <span className="hidden sm:inline">Nouveau</span>
               </button>
+              <button
+                type="button"
+                title="Plus"
+                onClick={() => setMoreOpen((v) => !v)}
+                className={`rounded-full px-2.5 py-1.5 text-xs font-bold ${
+                  moreOpen || moreNavActive ? "bg-[#e7f8f3] text-[#008069]" : "text-[#54656f] hover:bg-[#f0f2f5]"
+                }`}
+              >
+                •••
+              </button>
+              {moreOpen ? (
+                <div className="absolute right-0 top-10 z-40 w-52 rounded-xl border border-[#d1d7db] bg-white py-1 shadow-lg">
+                  <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-[#667781]">
+                    Vues missions
+                  </p>
+                  {MORE_NAV.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        setFilter(item.id);
+                        setMoreOpen(false);
+                        setListChip("tous");
+                      }}
+                      className={`block w-full px-3 py-2 text-left text-sm ${
+                        filter === item.id
+                          ? "bg-[#e7f8f3] font-semibold text-[#008069]"
+                          : "text-[#111b21] hover:bg-[#f5f6f6]"
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      router.push("/dashboard/messagerie?view=chantiers");
+                      setMoreOpen(false);
+                    }}
+                    className="block w-full border-t border-[#f0f2f5] px-3 py-2 text-left text-sm text-[#111b21] hover:bg-[#f5f6f6]"
+                  >
+                    Fils chantier
+                  </button>
+                </div>
+              ) : null}
             </div>
           </div>
           <div className="relative mb-2">
@@ -1403,7 +1534,7 @@ export function MessagerieMissionsView({
               type="search"
               value={listSearch}
               onChange={(e) => setListSearch(e.target.value)}
-              placeholder="Rechercher personne, chantier, message…"
+              placeholder="Rechercher…"
               className="w-full rounded-lg border-0 bg-[#f0f2f5] py-2 pl-10 pr-3 text-[14px] text-[#111b21] placeholder:text-[#667781] focus:outline-none focus:ring-1 focus:ring-[#00a884]"
             />
           </div>
@@ -1413,31 +1544,19 @@ export function MessagerieMissionsView({
                 ["tous", "Tous"],
                 ["non-lus", "Non lus"],
                 ["internes", "Internes"],
-                ["clients", "Clients"],
-                ["fournisseurs", "Fournisseurs"],
+                ["externes", "Externes"],
               ] as const
             ).map(([id, label]) => (
               <button
                 key={id}
                 type="button"
                 onClick={() => {
-                  if (id === "fournisseurs") {
-                    router.push(
-                      "/dashboard/messagerie?view=chantiers&channel=FOURNISSEUR",
-                    );
-                    return;
-                  }
-                  if (id === "clients") {
-                    setListChip("clients");
-                    setFilter("inbox");
-                    return;
-                  }
                   setListChip(id);
                   if (id === "internes") setFilter("messages-directs");
                   else setFilter("inbox");
                 }}
                 className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                  listChip === id
+                  listChip === id || (id === "externes" && (listChip === "clients" || listChip === "fournisseurs"))
                     ? "bg-[#111b21] text-white"
                     : "bg-[#f0f2f5] text-[#54656f] hover:bg-[#e9edef]"
                 }`}
@@ -1446,6 +1565,33 @@ export function MessagerieMissionsView({
               </button>
             ))}
           </div>
+          {listChip === "externes" || listChip === "clients" || listChip === "fournisseurs" ? (
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setListChip("clients");
+                  setFilter("inbox");
+                }}
+                className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                  listChip === "clients" || listChip === "externes"
+                    ? "bg-orange-100 text-orange-800"
+                    : "text-[#667781] hover:bg-[#f0f2f5]"
+                }`}
+              >
+                Clients
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  router.push("/dashboard/messagerie?view=chantiers&channel=FOURNISSEUR");
+                }}
+                className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold text-[#667781] hover:bg-[#f0f2f5]"
+              >
+                Fournisseurs
+              </button>
+            </div>
+          ) : null}
         </div>
         <ul className="flex-1 overflow-y-auto">
           {filteredMissions.length === 0 ? (
@@ -1468,77 +1614,48 @@ export function MessagerieMissionsView({
               </div>
             </li>
           ) : (
-            filteredMissions.map((m) => {
-              const unread = m.unreadCount > 0;
-              return (
-              <li key={m.id}>
-                <button
-                  type="button"
-                  onClick={() => {
+            <>
+              {pinnedMissions.length > 0 ? (
+                <li className="sticky top-0 z-10 bg-[#f0f2f5] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-[#667781]">
+                  Épinglées
+                </li>
+              ) : null}
+              {pinnedMissions.map((m) => (
+                <MissionRow
+                  key={`pin-${m.id}`}
+                  m={m}
+                  selected={selectedTaskId === m.id}
+                  sessionUserId={sessionUserId}
+                  pinned
+                  onSelect={() => {
                     setSelectedTaskId(m.id);
                     setMobileShowThread(true);
                   }}
-                  className={`flex w-full gap-3 px-3 py-3 text-left transition ${
-                    selectedTaskId === m.id ? "bg-[#f0f2f5]" : "hover:bg-[#f5f6f6]"
-                  }`}
-                >
-                  <div className="relative">
-                    <Avatar name={m.client.name || m.title} size="sm" />
-                    {unread ? (
-                      <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[#00a884] ring-2 ring-white" />
-                    ) : null}
-                  </div>
-                  <div className="min-w-0 flex-1 border-b border-[#f0f2f5] pb-3">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <p
-                        className={`truncate text-[15px] ${
-                          unread ? "font-bold text-[#111b21]" : "font-medium text-[#111b21]"
-                        }`}
-                      >
-                        {m.title}
-                      </p>
-                      <span
-                        className={`shrink-0 text-[11px] ${
-                          unread ? "font-semibold text-[#00a884]" : "text-[#667781]"
-                        }`}
-                      >
-                        {m.lastMessage ? formatRelativeTime(m.lastMessage.createdAt) : ""}
-                      </span>
-                    </div>
-                    <p className="mt-0.5 truncate text-[12px] text-[#8696a0]">
-                      Client · Externe
-                      {m.client.name ? ` · ${m.client.name}` : ""}
-                    </p>
-                    {m.lastMessage ? (
-                      <p
-                        className={`mt-0.5 truncate text-[13px] ${
-                          unread ? "font-semibold text-[#111b21]" : "text-[#667781]"
-                        }`}
-                      >
-                        {m.lastMessage.sender.id === sessionUserId
-                          ? "Vous : "
-                          : `${m.lastMessage.sender.name.split(/\s+/)[0] ?? ""} : `}
-                        {m.lastMessage.content.slice(0, 52)}
-                        {m.lastMessage.content.length > 52 ? "…" : ""}
-                      </p>
-                    ) : null}
-                    <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                      {(m.priority === "URGENT" || m.priority === "PRIORITAIRE") && (
-                        <span className="rounded px-1.5 py-0.5 text-[10px] font-medium text-[#ea0038]">
-                          {m.priority === "URGENT" ? "Urgent" : "Prioritaire"}
-                        </span>
-                      )}
-                      {unread && (
-                        <span className="ml-auto inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#00a884] px-1.5 text-[10px] font-bold text-white">
-                          {m.unreadCount}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </button>
-              </li>
-            );
-            })
+                  onTogglePin={() => togglePin(m.id)}
+                  formatRelativeTime={formatRelativeTime}
+                />
+              ))}
+              {pinnedMissions.length > 0 ? (
+                <li className="sticky top-0 z-10 bg-[#f0f2f5] px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-[#667781]">
+                  Récentes
+                </li>
+              ) : null}
+              {recentMissions.map((m) => (
+                <MissionRow
+                  key={m.id}
+                  m={m}
+                  selected={selectedTaskId === m.id}
+                  sessionUserId={sessionUserId}
+                  pinned={false}
+                  onSelect={() => {
+                    setSelectedTaskId(m.id);
+                    setMobileShowThread(true);
+                  }}
+                  onTogglePin={() => togglePin(m.id)}
+                  formatRelativeTime={formatRelativeTime}
+                />
+              ))}
+            </>
           )}
         </ul>
       </aside>
@@ -1583,6 +1700,18 @@ export function MessagerieMissionsView({
                 </button>
                 {headerMenuOpen ? (
                   <div className="absolute right-0 top-11 z-40 w-52 rounded-xl border border-[#d1d7db] bg-white py-1 shadow-lg">
+                    <button
+                      type="button"
+                      className="block w-full px-3 py-2 text-left text-sm text-[#111b21] hover:bg-[#f5f6f6]"
+                      onClick={() => {
+                        togglePin(selectedTaskId);
+                        setHeaderMenuOpen(false);
+                      }}
+                    >
+                      {pinnedIds.includes(selectedTaskId)
+                        ? "Désépingler la conversation"
+                        : "Épingler la conversation"}
+                    </button>
                     {selectedMission.projectId ? (
                       <Link
                         href={`/dashboard/projets/${selectedMission.projectId}`}
@@ -1614,6 +1743,7 @@ export function MessagerieMissionsView({
                 const el = e.currentTarget;
                 const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
                 stickToBottomRef.current = nearBottom;
+                if (nearBottom) setPendingNewCount(0);
                 if (el.scrollTop < 48) void loadOlderMessages();
               }}
               onDragOver={(e) => {
@@ -1632,6 +1762,18 @@ export function MessagerieMissionsView({
               {dragOver ? (
                 <div className="pointer-events-none absolute inset-4 z-10 flex items-center justify-center rounded-2xl border-2 border-dashed border-[#00a884] bg-[#d9fdd3]/70 text-sm font-semibold text-[#008069]">
                   Déposez photos ou documents ici
+                </div>
+              ) : null}
+              {pendingNewCount > 0 ? (
+                <div className="sticky bottom-3 z-20 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={scrollToLatest}
+                    className="rounded-full bg-[#00a884] px-3 py-1.5 text-xs font-bold text-white shadow-lg"
+                  >
+                    ↓ {pendingNewCount} nouveau{pendingNewCount > 1 ? "x" : ""} message
+                    {pendingNewCount > 1 ? "s" : ""}
+                  </button>
                 </div>
               ) : null}
               {hasMoreMessages ? (
@@ -1805,6 +1947,9 @@ export function MessagerieMissionsView({
             </div>
 
             <div className="z-20 shrink-0 border-t border-[#d1d7db] bg-[#f0f2f5] px-3 py-2.5">
+              <p className="mb-1.5 px-1 text-[11px] font-semibold text-orange-700">
+                Message à {selectedMission.client.name || "client"} · EXTERNE
+              </p>
               {(isAgence || isAgent) && (
                 <label className="mb-1.5 flex items-center gap-2 px-1 text-xs text-[#667781]">
                   <input
@@ -1813,13 +1958,21 @@ export function MessagerieMissionsView({
                     onChange={(e) => setInternalNote(e.target.checked)}
                     className="rounded border-[#d1d7db]"
                   />
-                  Note interne
+                  Note interne (non visible client)
                 </label>
               )}
               <input
                 id={missionFileId}
                 type="file"
-                accept="image/*,.pdf,.jpg,.jpeg,.png,.gif,.webp,.docx,.xlsx,.xls,.csv,.txt,.doc"
+                accept=".pdf,.docx,.xlsx,.xls,.csv,.txt,.doc"
+                className="sr-only"
+                multiple
+                onChange={(e) => handleFileUpload(e, setMissionAttachments)}
+              />
+              <input
+                id={missionPhotoId}
+                type="file"
+                accept="image/*"
                 className="sr-only"
                 multiple
                 onChange={(e) => handleFileUpload(e, setMissionAttachments)}
@@ -1844,22 +1997,50 @@ export function MessagerieMissionsView({
                 </div>
               )}
               <form onSubmit={handleSend} className="flex items-end gap-2">
-                <label
-                  htmlFor={missionFileId}
-                  className={`mb-0.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-[#54656f] hover:bg-[#e9edef] ${uploadingAttach || sending ? "pointer-events-none opacity-50" : ""}`}
-                  title="Joindre photo ou document"
-                >
-                  <svg className="h-7 w-7" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-                  </svg>
-                </label>
+                <div className="relative mb-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setAttachMenuOpen((v) => !v)}
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#54656f] hover:bg-[#e9edef]"
+                    title="Joindre"
+                  >
+                    <svg className="h-7 w-7" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                    </svg>
+                  </button>
+                  {attachMenuOpen ? (
+                    <div className="absolute bottom-12 left-0 z-30 w-40 overflow-hidden rounded-xl border border-[#d1d7db] bg-white shadow-lg">
+                      <label
+                        htmlFor={missionPhotoId}
+                        className="block cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
+                        onClick={() => setAttachMenuOpen(false)}
+                      >
+                        Photo
+                      </label>
+                      <label
+                        htmlFor={missionFileId}
+                        className="block cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
+                        onClick={() => setAttachMenuOpen(false)}
+                      >
+                        Document
+                      </label>
+                      <label
+                        htmlFor={missionPhotoId}
+                        className="block cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
+                        onClick={() => setAttachMenuOpen(false)}
+                      >
+                        Image
+                      </label>
+                    </div>
+                  ) : null}
+                </div>
                 <div className="relative min-w-0 flex-1">
                   <textarea
                     value={sendContent}
                     onChange={(e) => setSendContent(e.target.value)}
                     placeholder="Écrire un message..."
                     rows={1}
-                    className="min-h-[44px] max-h-32 w-full resize-none rounded-[24px] border-0 bg-white py-3 pl-4 pr-10 text-[15px] text-[#111b21] placeholder:text-[#667781] focus:outline-none"
+                    className="min-h-[44px] max-h-32 w-full resize-none rounded-[24px] border-0 bg-white py-3 pl-4 pr-4 text-[15px] text-[#111b21] placeholder:text-[#667781] focus:outline-none"
                     disabled={sending}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey) {
@@ -1870,28 +2051,26 @@ export function MessagerieMissionsView({
                       }
                     }}
                   />
-                  <span
-                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xl text-[#54656f]"
-                    aria-hidden
-                  >
-                    🙂
-                  </span>
                 </div>
+                <button
+                  type="button"
+                  disabled
+                  title="Vocal — prévu MESSAGERIE-V2C"
+                  className="mb-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#c5c9cc]"
+                >
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z" />
+                  </svg>
+                </button>
                 <button
                   type="submit"
                   disabled={sending || (!sendContent.trim() && missionAttachments.length === 0)}
                   className="mb-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#00a884] text-white hover:bg-[#008f72] disabled:bg-[#00a884]/40"
-                  title={sendContent.trim() || missionAttachments.length ? "Envoyer" : "Message"}
+                  title="Envoyer"
                 >
-                  {sendContent.trim() || missionAttachments.length > 0 ? (
-                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                    </svg>
-                  ) : (
-                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z" />
-                    </svg>
-                  )}
+                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                  </svg>
                 </button>
               </form>
 

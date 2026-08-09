@@ -494,12 +494,20 @@ export function AgendaSidePanel({
                   Fiche
                 </Link>
               ) : null}
-              {po?.legacyTaskId ? (
+              {po?.canOpen || po?.id ? (
                 <Link
-                  href={`/dashboard/messagerie?task=${po.legacyTaskId}`}
+                  href={
+                    po.id && selectedEvent.project?.id
+                      ? `/dashboard/messagerie?view=chantiers&project=${encodeURIComponent(selectedEvent.project.id)}&channel=FOURNISSEUR`
+                      : po.legacyTaskId
+                        ? `/dashboard/messagerie?task=${po.legacyTaskId}`
+                        : `/dashboard/messagerie?view=chantiers&channel=FOURNISSEUR`
+                  }
                   className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                 >
-                  Message fournisseur
+                  {po.supplierName
+                    ? `💬 Contacter ${po.supplierName}`
+                    : "💬 Contacter le fournisseur"}
                 </Link>
               ) : selectedEvent.sourceMessageHref ? (
                 <Link

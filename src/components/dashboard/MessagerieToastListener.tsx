@@ -51,8 +51,8 @@ export function MessagerieToastListener() {
       }
       setToast({
         id: ev.conversationKey,
-        title: ev.title,
-        preview: `${ev.senderName} : ${ev.preview}`,
+        title: `${ev.senderName}${ev.title ? ` — ${ev.title}` : ""}`,
+        preview: ev.preview,
         href: ev.href,
         at: ev.at,
       });

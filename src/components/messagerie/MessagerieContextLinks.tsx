@@ -9,20 +9,20 @@ import {
 } from "@/lib/messagerie/resolve-conversation";
 
 const btn =
-  "inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-[#1e3a5f] shadow-sm hover:bg-slate-50";
+  "inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-[#1e3a5f] shadow-sm hover:bg-slate-50";
 
-/** Raccourcis Messagerie depuis un chantier. */
+/** Raccourcis Messagerie depuis un chantier — ouvre le fil existant (pas de doublon). */
 export function ProjectMessagerieLinks({ projectId }: { projectId: string }) {
   return (
     <div className="flex flex-wrap gap-2">
       <Link href={projectTeamHref(projectId)} className={btn}>
-        Message équipe
+        💬 Équipe chantier
       </Link>
       <Link href={projectClientHref(projectId)} className={btn}>
-        Message client
+        💬 Client
       </Link>
       <Link href={projectSupplierHref(projectId)} className={btn}>
-        Message fournisseur
+        💬 Fournisseur
       </Link>
     </div>
   );
@@ -42,8 +42,8 @@ export function PurchaseOrderMessagerieLink({
     supplierName,
   });
   const label = supplierName
-    ? `Message ${supplierName}`
-    : "Contacter le fournisseur";
+    ? `💬 Contacter ${supplierName}`
+    : "💬 Contacter le fournisseur";
   return (
     <Link href={href} className={btn}>
       {label}
@@ -62,7 +62,7 @@ export function FollowUpMessagerieLink({
       href={resolveConversationHref({ kind: "follow_up", projectId })}
       className={btn}
     >
-      Message équipe
+      💬 Équipe chantier
     </Link>
   );
 }

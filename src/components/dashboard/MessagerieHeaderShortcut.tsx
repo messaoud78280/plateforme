@@ -69,11 +69,11 @@ export function MessagerieHeaderShortcut() {
     >
       <div className="px-3 py-2">
         <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-          Messagerie
+          Messages non lus
         </p>
         <p className="mt-0.5 text-sm font-semibold text-slate-900">
           {total > 0
-            ? `${total} conversation${total > 1 ? "s" : ""} non lue${total > 1 ? "s" : ""}`
+            ? `${total} conversation${total > 1 ? "s" : ""}`
             : "Aucun message non lu"}
         </p>
       </div>

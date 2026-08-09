@@ -13,6 +13,11 @@ import { badgeFromMeta } from "@/lib/messagerie/message-links";
 import { broadcastMessagerieToUser } from "@/lib/messagerie/broadcast";
 import { formatMediaPreview, type MsgAttachment } from "@/lib/messagerie/media-preview";
 import { ttlInvalidatePrefix } from "@/lib/perf/ttl-cache";
+import {
+  makeReplyExcerpt,
+  mergeReplyIntoPayload,
+  type MessageReplyMeta,
+} from "@/lib/messagerie/message-reply";
 
 /** GET /api/tasks/[id]/messages — Messages de la tâche (filtrés par participant).
  * Query : take (défaut 50, max 100) · before=<ISO> (charger plus ancien) · after=<ISO|id> (poll incrémental)
@@ -162,11 +167,12 @@ export async function POST(
 
   try {
     const body = await request.json();
-    const { content, receiverId, isInternal, attachments } = body as {
+    const { content, receiverId, isInternal, attachments, replyTo } = body as {
       content?: string;
       receiverId?: string;
       isInternal?: boolean;
       attachments?: { name: string; fileUrl: string; fileSize: number; mimeType?: string }[];
+      replyTo?: MessageReplyMeta | null;
     };
 
     const text = typeof content === "string" ? content.trim() : "";
@@ -252,6 +258,15 @@ export async function POST(
       return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
     }
 
+    let payloadJson: Record<string, unknown> | undefined;
+    if (replyTo && typeof replyTo.id === "string") {
+      payloadJson = mergeReplyIntoPayload(null, {
+        id: replyTo.id,
+        senderName: replyTo.senderName || "Message",
+        excerpt: makeReplyExcerpt(replyTo.excerpt || ""),
+      });
+    }
+
     const message = await prisma.taskMessage.create({
       data: {
         taskId,
@@ -260,6 +275,7 @@ export async function POST(
         content: text || (files.length === 1 ? files[0]!.name : `${files.length} fichiers`),
         isInternal: internal,
         attachmentsJson: files.length > 0 ? files : undefined,
+        ...(payloadJson ? { payloadJson: payloadJson as object } : {}),
       },
       include: {
         sender: { select: { id: true, name: true } },

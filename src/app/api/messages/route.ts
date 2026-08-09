@@ -15,6 +15,11 @@ import {
 import { broadcastMessagerieToUser } from "@/lib/messagerie/broadcast";
 import { ttlInvalidatePrefix } from "@/lib/perf/ttl-cache";
 import { formatMediaPreview, type MsgAttachment } from "@/lib/messagerie/media-preview";
+import {
+  encodeReplyIntoContent,
+  makeReplyExcerpt,
+  type MessageReplyMeta,
+} from "@/lib/messagerie/message-reply";
 
 const VALID_CHANNELS = new Set(["INTERNE", "CLIENT", "FOURNISSEUR"]);
 
@@ -111,10 +116,24 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { projectId, content, receiverId: bodyReceiverId } = body;
+    const { projectId, content, receiverId: bodyReceiverId, replyTo } = body as {
+      projectId?: string;
+      content?: string;
+      receiverId?: string;
+      channel?: string;
+      attachments?: unknown;
+      replyTo?: MessageReplyMeta | null;
+    };
     const channelRaw = typeof body.channel === "string" ? body.channel : null;
     const attachments = normalizeAttachments(body.attachments);
-    const text = typeof content === "string" ? content.trim() : "";
+    let text = typeof content === "string" ? content.trim() : "";
+    if (replyTo && typeof replyTo.id === "string" && text) {
+      text = encodeReplyIntoContent(text, {
+        id: replyTo.id,
+        senderName: replyTo.senderName || "Message",
+        excerpt: makeReplyExcerpt(replyTo.excerpt || ""),
+      });
+    }
 
     if (!projectId || (!text && attachments.length === 0)) {
       return NextResponse.json(

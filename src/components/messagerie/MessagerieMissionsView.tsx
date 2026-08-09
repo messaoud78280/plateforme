@@ -27,6 +27,33 @@ import {
   resolveMessagingPartyType,
   type MessagingPartyType,
 } from "@/lib/messagerie/party-type";
+import {
+  getReplyFromPayload,
+  makeReplyExcerpt,
+  type MessageReplyMeta,
+} from "@/lib/messagerie/message-reply";
+import { getReactionsFromPayload } from "@/lib/messagerie/message-reactions";
+import {
+  isMessageImportant,
+  isMessagePinnedPersonal,
+  setMessagesImportant,
+  toggleMessageImportant,
+  toggleMessagePinnedPersonal,
+} from "@/lib/messagerie/message-personal-flags";
+import { scopeFromPartyExternal, scopeFromTaskInternal } from "@/lib/messagerie/forward-safety";
+import { MessageExpandableBody } from "@/components/messagerie/MessageExpandableBody";
+import {
+  MessageReplyComposerBanner,
+  MessageReplyQuote,
+} from "@/components/messagerie/MessageReplyQuote";
+import { MessageBubbleChrome } from "@/components/messagerie/MessageBubbleChrome";
+import { MessageInfosPanel } from "@/components/messagerie/MessageInfosPanel";
+import {
+  MessageForwardDialog,
+  type ForwardDestOption,
+} from "@/components/messagerie/MessageForwardDialog";
+import { MessageSelectionBar } from "@/components/messagerie/MessageSelectionBar";
+import type { MessageMenuActionId } from "@/components/messagerie/MessageContextMenu";
 
 const MessageBeworkActions = dynamic(
   () =>
@@ -60,6 +87,7 @@ type TaskMessageItem = {
   kind?: string;
   linkedBadges?: string[];
   attachmentsJson?: MsgAttachment[] | null;
+  payloadJson?: unknown;
   createdAt: string;
   sender: { id: string; name: string };
   receiver: { id: string; name: string };
@@ -124,6 +152,7 @@ type DirectMessageItem = {
   senderId?: string;
   receiverId?: string;
   attachmentsJson?: MsgAttachment[] | null;
+  payloadJson?: unknown;
   createdAt: string;
   sender: { id: string; name: string };
   receiver: { id: string; name: string };
@@ -395,10 +424,39 @@ export function MessagerieMissionsView({
   const [directAttachMenuOpen, setDirectAttachMenuOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const highlightMessageId = useRef<string | null>(null);
+  const [replyTarget, setReplyTarget] = useState<MessageReplyMeta | null>(null);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedMsgIds, setSelectedMsgIds] = useState<Set<string>>(new Set());
+  const [personalTick, setPersonalTick] = useState(0);
+  const [copiedHint, setCopiedHint] = useState(false);
+  const [infosOpen, setInfosOpen] = useState(false);
+  const [infosData, setInfosData] = useState<{
+    senderName: string;
+    conversationLabel: string;
+    partyLabel: string;
+    sentAt: string;
+    attachmentSummary?: string;
+    replyToLabel?: string | null;
+  } | null>(null);
+  const [forwardOpen, setForwardOpen] = useState(false);
+  const [forwardSource, setForwardSource] = useState<{
+    kind: "DIRECT" | "TASK";
+    id: string;
+    scope: "INTERNAL" | "EXTERNAL";
+  } | null>(null);
+  const [threadMsgFilter, setThreadMsgFilter] = useState<"all" | "important" | "pinned">("all");
+  const [flashMsgId, setFlashMsgId] = useState<string | null>(null);
 
   useEffect(() => {
     setPinnedIds(loadPins());
   }, []);
+
+  useEffect(() => {
+    setReplyTarget(null);
+    setSelectionMode(false);
+    setSelectedMsgIds(new Set());
+    setThreadMsgFilter("all");
+  }, [selectedTaskId, selectedDirectContactId]);
 
   const selectedMission = missions.find((m) => m.id === selectedTaskId);
   const showEnvoyerTab = isAgence || isAgent || isClient;
@@ -845,12 +903,14 @@ export function MessagerieMissionsView({
         : `c-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const tempId = `temp-${clientMessageId}`;
     const previewContent = formatMediaPreview(content, attachments) || content || "Pièce jointe";
+    const replySnapshot = replyTarget;
     const optimistic: TaskMessageItem = {
       id: tempId,
       content: previewContent,
       read: false,
       isInternal: Boolean(internalNote && (isAgence || isAgent)),
       attachmentsJson: attachments.length > 0 ? attachments : null,
+      payloadJson: replySnapshot ? { replyTo: replySnapshot } : undefined,
       createdAt: new Date().toISOString(),
       sender: { id: sessionUserId, name: "Vous" },
       receiver: {
@@ -864,6 +924,7 @@ export function MessagerieMissionsView({
     setSending(true);
     setSendContent("");
     setMissionAttachments([]);
+    setReplyTarget(null);
     stickToBottomRef.current = true;
     setMessages((prev) => [...prev, optimistic]);
     setMissions((prev) =>
@@ -882,11 +943,13 @@ export function MessagerieMissionsView({
         isInternal?: boolean;
         attachments?: AttachmentItem[];
         clientMessageId?: string;
+        replyTo?: MessageReplyMeta;
       } = {
         content,
         isInternal: internalNote && (isAgence || isAgent),
         attachments,
         clientMessageId,
+        ...(replySnapshot ? { replyTo: replySnapshot } : {}),
       };
       if (internalNote) {
         if (isAgence && selectedMission?.assignedTo) {
@@ -1025,6 +1088,7 @@ export function MessagerieMissionsView({
     if (sendLockRef.current) return;
     sendLockRef.current = true;
 
+    const replySnapshot = replyTarget;
     const tempId = `temp-d-${Date.now()}`;
     const preview =
       formatMediaPreview(content, attachments) || content || "Pièce jointe";
@@ -1035,6 +1099,7 @@ export function MessagerieMissionsView({
       senderId: sessionUserId,
       receiverId: selectedDirectContactId,
       attachmentsJson: hasAttachments ? attachments : null,
+      payloadJson: replySnapshot ? { replyTo: replySnapshot } : undefined,
       createdAt: new Date().toISOString(),
       sender: { id: sessionUserId, name: "Vous" },
       receiver: {
@@ -1046,6 +1111,7 @@ export function MessagerieMissionsView({
     setSendingReply(true);
     setReplyDirectContent("");
     setReplyAttachments([]);
+    setReplyTarget(null);
     setDirectThreadMessages((prev) => [...prev, optimistic]);
     setDirectMessages((prev) => [optimistic, ...prev]);
     stickToBottomRef.current = true;
@@ -1058,6 +1124,7 @@ export function MessagerieMissionsView({
           content: content || "",
           receiverId: selectedDirectContactId,
           attachments: hasAttachments ? attachments : undefined,
+          ...(replySnapshot ? { replyTo: replySnapshot } : {}),
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -1153,7 +1220,222 @@ export function MessagerieMissionsView({
     }
   }
 
-  const visibleMessages = messages.filter((m) => !m.isInternal || isAgence || isAgent);
+  function jumpToMessage(messageId: string) {
+    highlightMessageId.current = messageId;
+    setFlashMsgId(messageId);
+    const el = document.getElementById(`msg-${messageId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      window.setTimeout(() => setFlashMsgId(null), 1600);
+      return;
+    }
+    // Message plus ancien : charger une page supplémentaire si possible
+    if (selectedTaskId) {
+      const oldest = messages[0]?.createdAt;
+      if (oldest) {
+        void fetch(
+          `/api/tasks/${selectedTaskId}/messages?take=50&before=${encodeURIComponent(oldest)}`,
+        )
+          .then((r) => (r.ok ? r.json() : []))
+          .then((data) => {
+            if (!Array.isArray(data) || !data.length) return;
+            setMessages((prev) => {
+              const seen = new Set(prev.map((x) => x.id));
+              const older = (data as TaskMessageItem[]).filter((x) => !seen.has(x.id));
+              return older.length ? [...older, ...prev] : prev;
+            });
+            window.setTimeout(() => {
+              document.getElementById(`msg-${messageId}`)?.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+              setFlashMsgId(messageId);
+              window.setTimeout(() => setFlashMsgId(null), 1600);
+            }, 200);
+          });
+      }
+    }
+  }
+
+  async function reactToMessage(
+    kind: "DIRECT" | "TASK",
+    messageId: string,
+    emoji: string | null,
+  ) {
+    const applyLocal = (payload: unknown) => {
+      const reactions = getReactionsFromPayload(payload);
+      if (kind === "TASK") {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === messageId
+              ? {
+                  ...m,
+                  payloadJson: { ...(m.payloadJson as object), reactions },
+                }
+              : m,
+          ),
+        );
+      } else {
+        setDirectThreadMessages((prev) =>
+          prev.map((m) =>
+            m.id === messageId
+              ? {
+                  ...m,
+                  payloadJson: { ...(m.payloadJson as object), reactions },
+                }
+              : m,
+          ),
+        );
+      }
+    };
+
+    const list = kind === "TASK" ? messages : directThreadMessages;
+    const current = list.find((m) => m.id === messageId);
+    const prevMap = getReactionsFromPayload(current?.payloadJson);
+    const optimistic = { ...prevMap };
+    if (!emoji) delete optimistic[sessionUserId];
+    else optimistic[sessionUserId] = emoji;
+    applyLocal({ reactions: optimistic });
+
+    try {
+      const res = await fetch("/api/messages/react", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messageKind: kind, messageId, emoji }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        applyLocal({ reactions: prevMap });
+        return;
+      }
+      applyLocal({ reactions: data.reactions ?? optimistic });
+    } catch {
+      applyLocal({ reactions: prevMap });
+    }
+  }
+
+  function copyMessageText(text: string) {
+    if (!text.trim()) return;
+    void navigator.clipboard?.writeText(text).then(() => {
+      setCopiedHint(true);
+      window.setTimeout(() => setCopiedHint(false), 1500);
+    });
+  }
+
+  function handleMessageMenuAction(
+    kind: "DIRECT" | "TASK",
+    m: TaskMessageItem | DirectMessageItem,
+    action: MessageMenuActionId,
+    ctx: {
+      conversationLabel: string;
+      partyLabel: string;
+      isInternalScope: boolean;
+    },
+  ) {
+    const content = m.content || "";
+    const atts = Array.isArray(m.attachmentsJson) ? m.attachmentsJson : [];
+    if (action === "reply") {
+      setReplyTarget({
+        id: m.id,
+        senderName: m.sender.name,
+        excerpt: makeReplyExcerpt(content || (atts[0]?.name ?? "Pièce jointe")),
+      });
+      return;
+    }
+    if (action === "important") {
+      toggleMessageImportant(kind, m.id);
+      setPersonalTick((t) => t + 1);
+      return;
+    }
+    if (action === "pin") {
+      toggleMessagePinnedPersonal(kind, m.id);
+      setPersonalTick((t) => t + 1);
+      return;
+    }
+    if (action === "copy") {
+      copyMessageText(content);
+      return;
+    }
+    if (action === "select") {
+      setSelectionMode(true);
+      setSelectedMsgIds(new Set([m.id]));
+      return;
+    }
+    if (action === "forward") {
+      setForwardSource({
+        kind,
+        id: m.id,
+        scope: ctx.isInternalScope ? "INTERNAL" : "EXTERNAL",
+      });
+      setForwardOpen(true);
+      return;
+    }
+    if (action === "infos") {
+      const reply = getReplyFromPayload(
+        "payloadJson" in m ? m.payloadJson : null,
+      );
+      setInfosData({
+        senderName: m.sender.name,
+        conversationLabel: ctx.conversationLabel,
+        partyLabel: ctx.partyLabel,
+        sentAt: new Date(m.createdAt).toLocaleString("fr-FR", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        attachmentSummary: atts.length
+          ? `${atts.length} pièce${atts.length > 1 ? "s" : ""} jointe${atts.length > 1 ? "s" : ""}`
+          : undefined,
+        replyToLabel: reply
+          ? `${reply.senderName} — ${reply.excerpt}`
+          : null,
+      });
+      setInfosOpen(true);
+      return;
+    }
+    if (action === "bework") {
+      // Ouverture via MessageBeworkActions déjà sous la bulle — focus discret
+      document
+        .querySelector(`[data-bework-for="${m.id}"] button`)
+        ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    }
+  }
+
+  const forwardDestinations: ForwardDestOption[] = (() => {
+    const dests: ForwardDestOption[] = [];
+    for (const c of directConversations) {
+      dests.push({
+        id: c.user.id,
+        kind: "DIRECT",
+        label: c.user.name,
+        sublabel: "🔒 Interne",
+        scope: "INTERNAL",
+      });
+    }
+    for (const mission of missions.slice(0, 40)) {
+      const party = partyForMission(mission);
+      dests.push({
+        id: mission.id,
+        kind: "TASK",
+        label: mission.title,
+        sublabel: formatPartyBadge(party),
+        scope: scopeFromPartyExternal(party.external),
+      });
+    }
+    return dests;
+  })();
+
+  void personalTick;
+
+  const visibleMessages = messages
+    .filter((m) => !m.isInternal || isAgence || isAgent)
+    .filter((m) => {
+      if (threadMsgFilter === "important") return isMessageImportant("TASK", m.id);
+      if (threadMsgFilter === "pinned") return isMessagePinnedPersonal("TASK", m.id);
+      return true;
+    });
 
   const filteredMissions = (() => {
     let list = missions;
@@ -1590,50 +1872,140 @@ export function MessagerieMissionsView({
                         </p>
                       </div>
                     ) : null}
-                    {selectedDirectThread.map((m) => {
+                    <MessageSelectionBar
+                      count={selectionMode ? selectedMsgIds.size : 0}
+                      onImportant={() => {
+                        setMessagesImportant(
+                          [...selectedMsgIds].map((id) => ({ kind: "DIRECT", messageId: id })),
+                          true,
+                        );
+                        setPersonalTick((t) => t + 1);
+                        setSelectionMode(false);
+                        setSelectedMsgIds(new Set());
+                      }}
+                      onForward={() => {
+                        const first = [...selectedMsgIds][0];
+                        if (!first) return;
+                        setForwardSource({ kind: "DIRECT", id: first, scope: "INTERNAL" });
+                        setForwardOpen(true);
+                      }}
+                      onCancel={() => {
+                        setSelectionMode(false);
+                        setSelectedMsgIds(new Set());
+                      }}
+                    />
+                    {selectedDirectThread
+                      .filter((m) => {
+                        if (threadMsgFilter === "important")
+                          return isMessageImportant("DIRECT", m.id);
+                        if (threadMsgFilter === "pinned")
+                          return isMessagePinnedPersonal("DIRECT", m.id);
+                        return true;
+                      })
+                      .map((m) => {
                       const isMe = m.sender.id === sessionUserId;
+                      const atts = Array.isArray(m.attachmentsJson)
+                        ? (m.attachmentsJson as MsgAttachment[])
+                        : [];
+                      const reply = getReplyFromPayload(m.payloadJson);
+                      const reactions = getReactionsFromPayload(m.payloadJson);
+                      const hasText = Boolean(m.content?.trim());
                       return (
                         <div
                           key={m.id}
                           id={`msg-${m.id}`}
-                          className={`group flex ${isMe ? "justify-end" : "justify-start"}`}
+                          className={`flex ${isMe ? "justify-end" : "justify-start"}`}
                         >
                           <div className={`flex max-w-[75%] flex-col ${isMe ? "items-end" : "items-start"}`}>
-                            <div
-                              className={`rounded-lg px-2.5 py-1.5 shadow-sm ${
-                                isMe ? "rounded-tr-sm bg-[#d9fdd3] text-[#111b21]" : "rounded-tl-sm bg-white text-[#111b21]"
-                              }`}
-                            >
-                              {!isMe ? (
-                                <p className="text-[12px] font-semibold text-[#00a884]">{m.sender.name}</p>
-                              ) : null}
-                              {m.content && <p className="whitespace-pre-wrap break-words text-[14.2px]">{m.content}</p>}
-                              {Array.isArray(m.attachmentsJson) && m.attachmentsJson.length > 0 ? (
-                                <MessagerieAttachmentsBlock
-                                  messageKind="DIRECT"
-                                  messageId={m.id}
-                                  attachments={m.attachmentsJson as MsgAttachment[]}
-                                  isMe={isMe}
-                                />
-                              ) : null}
-                              <p className="mt-0.5 flex justify-end gap-1 text-[11px] text-[#667781]">
-                                {formatMessageTime(m.createdAt)}
-                                {isMe ? <span className="text-[#53bdeb]">✓✓</span> : null}
-                              </p>
-                            </div>
-                            <MessageBeworkActions
+                            <MessageBubbleChrome
                               messageId={m.id}
-                              messageKind="DIRECT"
-                              content={m.content || ""}
-                              hasMedia={
-                                Array.isArray(m.attachmentsJson) &&
-                                (m.attachmentsJson as MsgAttachment[]).some(
-                                  (a) => isAudioAttachment(a) || isImageAttachment(a),
-                                )
-                              }
                               isMe={isMe}
-                              agents={agents}
-                            />
+                              myUserId={sessionUserId}
+                              capabilities={{
+                                reply: true,
+                                react: true,
+                                bework: true,
+                                important: true,
+                                pin: true,
+                                forward: true,
+                                copy: hasText,
+                                infos: true,
+                                delete: false,
+                                select: true,
+                              }}
+                              isImportant={isMessageImportant("DIRECT", m.id)}
+                              isPinned={isMessagePinnedPersonal("DIRECT", m.id)}
+                              selectionMode={selectionMode}
+                              selected={selectedMsgIds.has(m.id)}
+                              highlighted={flashMsgId === m.id}
+                              reactions={reactions}
+                              onToggleSelect={() => {
+                                setSelectedMsgIds((prev) => {
+                                  const next = new Set(prev);
+                                  if (next.has(m.id)) next.delete(m.id);
+                                  else next.add(m.id);
+                                  return next;
+                                });
+                              }}
+                              onAction={(id) =>
+                                handleMessageMenuAction("DIRECT", m, id, {
+                                  conversationLabel:
+                                    (selectedDirectContact as { name?: string })?.name ??
+                                    "Message direct",
+                                  partyLabel: "🔒 Interne",
+                                  isInternalScope: true,
+                                })
+                              }
+                              onReact={(emoji) => void reactToMessage("DIRECT", m.id, emoji)}
+                              footer={
+                                <div data-bework-for={m.id}>
+                                  <MessageBeworkActions
+                                    messageId={m.id}
+                                    messageKind="DIRECT"
+                                    content={m.content || ""}
+                                    hasMedia={atts.some(
+                                      (a) => isAudioAttachment(a) || isImageAttachment(a),
+                                    )}
+                                    isMe={isMe}
+                                    agents={agents}
+                                  />
+                                </div>
+                              }
+                            >
+                              <div
+                                className={`rounded-lg px-2.5 py-1.5 shadow-sm ${
+                                  isMe
+                                    ? "rounded-tr-sm bg-[#d9fdd3] text-[#111b21]"
+                                    : "rounded-tl-sm bg-white text-[#111b21]"
+                                }`}
+                              >
+                                {!isMe ? (
+                                  <p className="text-[12px] font-semibold text-[#00a884]">
+                                    {m.sender.name}
+                                  </p>
+                                ) : null}
+                                {reply ? (
+                                  <MessageReplyQuote reply={reply} onJump={jumpToMessage} />
+                                ) : null}
+                                {hasText ? <MessageExpandableBody text={m.content} /> : null}
+                                {atts.length > 0 ? (
+                                  <MessagerieAttachmentsBlock
+                                    messageKind="DIRECT"
+                                    messageId={m.id}
+                                    attachments={atts}
+                                    isMe={isMe}
+                                  />
+                                ) : null}
+                                <p className="mt-0.5 flex justify-end gap-1 text-[11px] text-[#667781]">
+                                  {formatMessageTime(m.createdAt)}
+                                  {isMe ? (
+                                    <span className="text-[#53bdeb]" title="Envoyé">
+                                      ✓
+                                    </span>
+                                  ) : null}
+                                </p>
+                              </div>
+                            </MessageBubbleChrome>
                           </div>
                         </div>
                       );
@@ -1641,6 +2013,12 @@ export function MessagerieMissionsView({
                   </div>
                 </div>
                 <div className="z-20 shrink-0 border-t border-[#d1d7db] bg-[#f0f2f5] px-3 py-2.5">
+                  {replyTarget ? (
+                    <MessageReplyComposerBanner
+                      reply={replyTarget}
+                      onClear={() => setReplyTarget(null)}
+                    />
+                  ) : null}
                   <p className="mb-1.5 px-1 text-[11px] font-semibold text-violet-800">
                     🔒 Message interne
                   </p>
@@ -2147,6 +2525,28 @@ export function MessagerieMissionsView({
                         ? "Désépingler la conversation"
                         : "Épingler la conversation"}
                     </button>
+                    <button
+                      type="button"
+                      className="block w-full px-3 py-2 text-left text-sm text-[#111b21] hover:bg-[#f5f6f6]"
+                      onClick={() => {
+                        setThreadMsgFilter((f) => (f === "pinned" ? "all" : "pinned"));
+                        setHeaderMenuOpen(false);
+                      }}
+                    >
+                      {threadMsgFilter === "pinned"
+                        ? "Tous les messages"
+                        : "Messages épinglés"}
+                    </button>
+                    <button
+                      type="button"
+                      className="block w-full px-3 py-2 text-left text-sm text-[#111b21] hover:bg-[#f5f6f6]"
+                      onClick={() => {
+                        setThreadMsgFilter((f) => (f === "important" ? "all" : "important"));
+                        setHeaderMenuOpen(false);
+                      }}
+                    >
+                      {threadMsgFilter === "important" ? "Tous les messages" : "Importants"}
+                    </button>
                     {selectedMission.projectId ? (
                       <Link
                         href={`/dashboard/projets/${selectedMission.projectId}`}
@@ -2233,126 +2633,229 @@ export function MessagerieMissionsView({
                 </div>
               ) : (
                 <div className="space-y-1.5">
+                  <MessageSelectionBar
+                    count={selectionMode ? selectedMsgIds.size : 0}
+                    onImportant={() => {
+                      setMessagesImportant(
+                        [...selectedMsgIds].map((id) => ({ kind: "TASK", messageId: id })),
+                        true,
+                      );
+                      setPersonalTick((t) => t + 1);
+                      setSelectionMode(false);
+                      setSelectedMsgIds(new Set());
+                    }}
+                    onForward={() => {
+                      const first = [...selectedMsgIds][0];
+                      if (!first) return;
+                      const src = messages.find((x) => x.id === first);
+                      setForwardSource({
+                        kind: "TASK",
+                        id: first,
+                        scope: scopeFromTaskInternal(Boolean(src?.isInternal)),
+                      });
+                      setForwardOpen(true);
+                    }}
+                    onCancel={() => {
+                      setSelectionMode(false);
+                      setSelectedMsgIds(new Set());
+                    }}
+                  />
+                  {threadMsgFilter !== "all" ? (
+                    <p className="px-1 text-[11px] font-semibold text-[#1e3a5f]">
+                      Filtre : {threadMsgFilter === "pinned" ? "Messages épinglés" : "Importants"}{" "}
+                      <button
+                        type="button"
+                        className="underline"
+                        onClick={() => setThreadMsgFilter("all")}
+                      >
+                        Afficher tout
+                      </button>
+                    </p>
+                  ) : null}
                   {visibleMessages.map((m) => {
                     const isMe = m.sender.id === sessionUserId;
                     const isSystem = m.kind === "SYSTEM";
                     const atts = Array.isArray(m.attachmentsJson) ? m.attachmentsJson : [];
+                    const reply = getReplyFromPayload(m.payloadJson);
+                    const reactions = getReactionsFromPayload(m.payloadJson);
+                    const hasText = Boolean(
+                      m.content && !atts.some((a) => a.name === m.content),
+                    );
+                    const party = selectedMission
+                      ? partyForMission(selectedMission)
+                      : resolveMessagingPartyType({});
+                    if (isSystem) {
+                      return (
+                        <div key={m.id} id={`msg-${m.id}`} className="flex justify-center">
+                          <div className="rounded-md bg-[#fff5c4] px-2.5 py-1.5 text-center text-[#54656f] shadow-sm">
+                            <p className="text-[12px] font-medium">BeWork · {m.content}</p>
+                          </div>
+                        </div>
+                      );
+                    }
                     return (
                       <div
                         key={m.id}
                         id={`msg-${m.id}`}
-                        className={`group flex ${isMe ? "justify-end" : "justify-start"}`}
+                        className={`flex ${isMe ? "justify-end" : "justify-start"}`}
                       >
                         <div className={`flex max-w-[78%] flex-col ${isMe ? "items-end" : "items-start"}`}>
-                          <div
-                            className={`relative rounded-lg px-2.5 py-1.5 shadow-sm ${
-                              isSystem
-                                ? "mx-auto rounded-md bg-[#fff5c4] text-center text-[#54656f]"
-                                : isMe
-                                  ? "rounded-tr-sm bg-[#d9fdd3] text-[#111b21]"
-                                  : "rounded-tl-sm bg-white text-[#111b21]"
-                            } ${m.isInternal ? "ring-1 ring-amber-400" : ""}`}
-                          >
-                            {!isSystem && !isMe ? (
-                              <p className="text-[12px] font-semibold text-[#00a884]">{m.sender.name}</p>
-                            ) : null}
-                            {isSystem ? (
-                              <p className="text-[12px] font-medium">BeWork · {m.content}</p>
-                            ) : (
+                          <MessageBubbleChrome
+                            messageId={m.id}
+                            isMe={isMe}
+                            myUserId={sessionUserId}
+                            capabilities={{
+                              reply: true,
+                              react: true,
+                              bework: true,
+                              important: true,
+                              pin: true,
+                              forward: true,
+                              copy: hasText,
+                              infos: true,
+                              delete: false,
+                              select: true,
+                            }}
+                            isImportant={isMessageImportant("TASK", m.id)}
+                            isPinned={isMessagePinnedPersonal("TASK", m.id)}
+                            selectionMode={selectionMode}
+                            selected={selectedMsgIds.has(m.id)}
+                            highlighted={flashMsgId === m.id}
+                            reactions={reactions}
+                            onToggleSelect={() => {
+                              setSelectedMsgIds((prev) => {
+                                const next = new Set(prev);
+                                if (next.has(m.id)) next.delete(m.id);
+                                else next.add(m.id);
+                                return next;
+                              });
+                            }}
+                            onAction={(id) =>
+                              handleMessageMenuAction("TASK", m, id, {
+                                conversationLabel: selectedMission?.title ?? "Mission",
+                                partyLabel: m.isInternal
+                                  ? "🔒 Interne"
+                                  : formatPartyBadge(party),
+                                isInternalScope: m.isInternal || !party.external,
+                              })
+                            }
+                            onReact={(emoji) => void reactToMessage("TASK", m.id, emoji)}
+                            footer={
                               <>
-                                {m.content && !atts.some((a) => a.name === m.content) ? (
-                                  <p className="whitespace-pre-wrap break-words text-[14.2px] leading-[19px]">
-                                    {m.content}
-                                    {m.isInternal ? " (interne)" : ""}
-                                  </p>
-                                ) : null}
-                                {atts.length > 0 ? (
-                                  <MessagerieAttachmentsBlock
-                                    messageKind="TASK"
+                                <div data-bework-for={m.id}>
+                                  <MessageBeworkActions
                                     messageId={m.id}
-                                    attachments={atts}
+                                    messageKind="TASK"
+                                    content={m.content}
+                                    hasMedia={atts.some(
+                                      (a) => isAudioAttachment(a) || isImageAttachment(a),
+                                    )}
                                     isMe={isMe}
-                                  />
-                                ) : null}
-                              </>
-                            )}
-                            <p className="mt-0.5 flex items-center justify-end gap-1 text-[11px] text-[#667781]">
-                              {formatMessageTime(m.createdAt)}
-                              {isMe && !isSystem ? (
-                                m.kind === "pending" ? (
-                                  <span className="text-[#8696a0]" title="Envoi…">
-                                    Envoi…
-                                  </span>
-                                ) : m.kind === "failed" ? (
-                                  <button
-                                    type="button"
-                                    className="font-medium text-red-600 underline"
-                                    title="Échec — Réessayer"
-                                    onClick={() => {
-                                      const attsRetry = Array.isArray(m.attachmentsJson)
-                                        ? m.attachmentsJson
-                                        : [];
-                                      const text = (m.content || "")
-                                        .replace(/\s*—\s*Échec$/i, "")
-                                        .trim();
-                                      setMessages((prev) => prev.filter((x) => x.id !== m.id));
-                                      void sendMissionMessage(
-                                        text.startsWith("🎤") || text.startsWith("📷") || text.startsWith("📎")
-                                          ? ""
-                                          : text,
-                                        attsRetry,
+                                    agents={agents}
+                                    initialBadges={m.linkedBadges}
+                                    onLinked={(badge) => {
+                                      setMessages((prev) =>
+                                        prev.map((x) =>
+                                          x.id === m.id
+                                            ? {
+                                                ...x,
+                                                linkedBadges: Array.from(
+                                                  new Set([...(x.linkedBadges ?? []), badge]),
+                                                ),
+                                              }
+                                            : x,
+                                        ),
                                       );
                                     }}
+                                  />
+                                </div>
+                                {(m.linkedBadges?.length ?? 0) > 0 ? (
+                                  <div
+                                    className={`mt-0.5 flex flex-wrap gap-1 ${isMe ? "justify-end" : ""}`}
                                   >
-                                    Échec — Réessayer
-                                  </button>
-                                ) : (
-                                  <span className="text-[#53bdeb]" title="Envoyé">
-                                    ✓✓
-                                  </span>
-                                )
+                                    {m.linkedBadges!.map((b) => (
+                                      <span
+                                        key={b}
+                                        className="rounded-full bg-white/80 px-1.5 py-0.5 text-[10px] font-semibold text-[#008069] shadow-sm"
+                                      >
+                                        {badgeIcon(b)} {b}
+                                      </span>
+                                    ))}
+                                  </div>
+                                ) : null}
+                              </>
+                            }
+                          >
+                            <div
+                              className={`relative rounded-lg px-2.5 py-1.5 shadow-sm ${
+                                isMe
+                                  ? "rounded-tr-sm bg-[#d9fdd3] text-[#111b21]"
+                                  : "rounded-tl-sm bg-white text-[#111b21]"
+                              } ${m.isInternal ? "ring-1 ring-amber-400" : ""}`}
+                            >
+                              {!isMe ? (
+                                <p className="text-[12px] font-semibold text-[#00a884]">
+                                  {m.sender.name}
+                                </p>
                               ) : null}
-                            </p>
-                          </div>
-                          {!isSystem ? (
-                            <MessageBeworkActions
-                              messageId={m.id}
-                              messageKind="TASK"
-                              content={m.content}
-                              hasMedia={atts.some(
-                                (a) => isAudioAttachment(a) || isImageAttachment(a),
-                              )}
-                              isMe={isMe}
-                              agents={agents}
-                              initialBadges={m.linkedBadges}
-                              onLinked={(badge) => {
-                                setMessages((prev) =>
-                                  prev.map((x) =>
-                                    x.id === m.id
-                                      ? {
-                                          ...x,
-                                          linkedBadges: Array.from(
-                                            new Set([...(x.linkedBadges ?? []), badge]),
-                                          ),
-                                        }
-                                      : x,
-                                  ),
-                                );
-                              }}
-                            />
-                          ) : null}
-                          {(m.linkedBadges?.length ?? 0) > 0 ? (
-                            <div className={`mt-0.5 flex flex-wrap gap-1 ${isMe ? "justify-end" : ""}`}>
-                              {m.linkedBadges!.map((b) => (
-                                <span
-                                  key={b}
-                                  className="rounded-full bg-white/80 px-1.5 py-0.5 text-[10px] font-semibold text-[#008069] shadow-sm"
-                                >
-                                  {badgeIcon(b)} {b}
-                                </span>
-                              ))}
+                              {reply ? (
+                                <MessageReplyQuote reply={reply} onJump={jumpToMessage} />
+                              ) : null}
+                              {hasText ? (
+                                <MessageExpandableBody
+                                  text={m.content}
+                                  suffix={m.isInternal ? " (interne)" : undefined}
+                                />
+                              ) : null}
+                              {atts.length > 0 ? (
+                                <MessagerieAttachmentsBlock
+                                  messageKind="TASK"
+                                  messageId={m.id}
+                                  attachments={atts}
+                                  isMe={isMe}
+                                />
+                              ) : null}
+                              <p className="mt-0.5 flex items-center justify-end gap-1 text-[11px] text-[#667781]">
+                                {formatMessageTime(m.createdAt)}
+                                {isMe ? (
+                                  m.kind === "pending" ? (
+                                    <span className="text-[#8696a0]" title="Envoi…">
+                                      Envoi…
+                                    </span>
+                                  ) : m.kind === "failed" ? (
+                                    <button
+                                      type="button"
+                                      className="font-medium text-red-600 underline"
+                                      title="Échec — Réessayer"
+                                      onClick={() => {
+                                        const attsRetry = Array.isArray(m.attachmentsJson)
+                                          ? m.attachmentsJson
+                                          : [];
+                                        const text = (m.content || "")
+                                          .replace(/\s*—\s*Échec$/i, "")
+                                          .trim();
+                                        setMessages((prev) => prev.filter((x) => x.id !== m.id));
+                                        void sendMissionMessage(
+                                          text.startsWith("🎤") ||
+                                            text.startsWith("📷") ||
+                                            text.startsWith("📎")
+                                            ? ""
+                                            : text,
+                                          attsRetry,
+                                        );
+                                      }}
+                                    >
+                                      Échec — Réessayer
+                                    </button>
+                                  ) : (
+                                    <span className="text-[#53bdeb]" title="Envoyé">
+                                      ✓
+                                    </span>
+                                  )
+                                ) : null}
+                              </p>
                             </div>
-                          ) : null}
+                          </MessageBubbleChrome>
                         </div>
                       </div>
                     );
@@ -2384,6 +2887,12 @@ export function MessagerieMissionsView({
             </div>
 
             <div className="z-20 shrink-0 border-t border-[#d1d7db] bg-[#f0f2f5] px-3 py-2.5">
+              {replyTarget ? (
+                <MessageReplyComposerBanner
+                  reply={replyTarget}
+                  onClear={() => setReplyTarget(null)}
+                />
+              ) : null}
               <p
                 className={`mb-1.5 px-1 text-[11px] font-semibold ${messagingPartyToneClass(
                   partyForMission(selectedMission).partyType,
@@ -2644,6 +3153,56 @@ export function MessagerieMissionsView({
       </div>
       </>
       )}
+
+      <MessageInfosPanel
+        open={infosOpen}
+        onClose={() => setInfosOpen(false)}
+        data={infosData}
+      />
+      <MessageForwardDialog
+        open={forwardOpen}
+        onClose={() => {
+          setForwardOpen(false);
+          setForwardSource(null);
+        }}
+        sourceScope={forwardSource?.scope ?? "INTERNAL"}
+        destinations={forwardDestinations.filter(
+          (d) =>
+            !(
+              forwardSource &&
+              d.kind === forwardSource.kind &&
+              ((d.kind === "TASK" && d.id === selectedTaskId) ||
+                (d.kind === "DIRECT" && d.id === selectedDirectContactId))
+            ),
+        )}
+        onConfirm={async (dest, confirmExternal) => {
+          if (!forwardSource) throw new Error("Message source manquant");
+          const res = await fetch("/api/messages/forward", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              sourceKind: forwardSource.kind,
+              sourceMessageId: forwardSource.id,
+              destKind: dest.kind,
+              destId: dest.id,
+              confirmExternal,
+            }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.status === 409 && data?.needsConfirm) {
+            throw new Error(data.error || "Confirmation requise");
+          }
+          if (!res.ok) throw new Error(data?.error || "Transfert impossible");
+          if (data.attachmentsOmitted && data.omitReason) {
+            alert(data.omitReason);
+          }
+        }}
+      />
+      {copiedHint ? (
+        <div className="fixed bottom-6 left-1/2 z-[100] -translate-x-1/2 rounded-full bg-[#1e3a5f] px-4 py-2 text-sm font-medium text-white shadow-lg">
+          Copié
+        </div>
+      ) : null}
     </div>
   );
 }

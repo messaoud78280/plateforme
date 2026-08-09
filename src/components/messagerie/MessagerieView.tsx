@@ -16,6 +16,30 @@ import { compressImageForMessagerie } from "@/lib/messagerie/compress-image";
 import { MESSAGERIE_MEDIA_MAX_BYTES } from "@/lib/messagerie/media-storage";
 import { subscribeMessagerieEvents } from "@/lib/perf/messagerie-unread-bus";
 import { documentDownloadHref } from "@/lib/documents/download-url";
+import {
+  makeReplyExcerpt,
+  parseContentWithReply,
+  type MessageReplyMeta,
+} from "@/lib/messagerie/message-reply";
+import {
+  isMessageImportant,
+  isMessagePinnedPersonal,
+  toggleMessageImportant,
+  toggleMessagePinnedPersonal,
+} from "@/lib/messagerie/message-personal-flags";
+import { MessageExpandableBody } from "@/components/messagerie/MessageExpandableBody";
+import {
+  MessageReplyComposerBanner,
+  MessageReplyQuote,
+} from "@/components/messagerie/MessageReplyQuote";
+import { MessageBubbleChrome } from "@/components/messagerie/MessageBubbleChrome";
+import { MessageInfosPanel } from "@/components/messagerie/MessageInfosPanel";
+import type { MessageMenuActionId } from "@/components/messagerie/MessageContextMenu";
+import { scopeFromChannel } from "@/lib/messagerie/forward-safety";
+import {
+  MessageForwardDialog,
+  type ForwardDestOption,
+} from "@/components/messagerie/MessageForwardDialog";
 
 type MessageChannel = "INTERNE" | "CLIENT" | "FOURNISSEUR";
 
@@ -153,6 +177,22 @@ export function MessagerieView({
   );
   const sendLockRef = useRef(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const [replyTarget, setReplyTarget] = useState<MessageReplyMeta | null>(null);
+  const [personalTick, setPersonalTick] = useState(0);
+  const [copiedHint, setCopiedHint] = useState(false);
+  const [infosOpen, setInfosOpen] = useState(false);
+  const [infosData, setInfosData] = useState<{
+    senderName: string;
+    conversationLabel: string;
+    partyLabel: string;
+    sentAt: string;
+    attachmentSummary?: string;
+    replyToLabel?: string | null;
+  } | null>(null);
+  const [forwardOpen, setForwardOpen] = useState(false);
+  const [forwardSourceId, setForwardSourceId] = useState<string | null>(null);
+  const [flashMsgId, setFlashMsgId] = useState<string | null>(null);
+  void personalTick;
 
   useEffect(() => {
     if (
@@ -372,9 +412,11 @@ export function MessagerieView({
         name: recipientForProject?.name ?? "",
       },
     };
+    const replySnapshot = replyTarget;
     setSending(true);
     setSendContent("");
     setAttachments([]);
+    setReplyTarget(null);
     setMessages((prev) => [optimistic, ...prev]);
     try {
       const body: {
@@ -383,11 +425,13 @@ export function MessagerieView({
         channel: MessageChannel;
         receiverId?: string;
         attachments?: MsgAttachment[];
+        replyTo?: MessageReplyMeta;
       } = {
         projectId: selectedProjectId,
         content,
         channel,
         attachments: atts.length ? atts : undefined,
+        ...(replySnapshot ? { replyTo: replySnapshot } : {}),
       };
       if (recipientForProject) body.receiverId = recipientForProject.id;
 
@@ -554,46 +598,148 @@ export function MessagerieView({
                 {conversationMessages.map((m) => {
                   const isMe = m.sender.id === sessionUserId;
                   const atts = Array.isArray(m.attachmentsJson) ? m.attachmentsJson : [];
+                  const parsed = parseContentWithReply(m.content || "");
+                  const hasText =
+                    Boolean(parsed.body) && !atts.some((a) => a.name === m.content);
+                  const ch = (m.channel as MessageChannel) || channel;
                   return (
                     <div
                       key={m.id}
-                      className={`group flex gap-3 ${isMe ? "flex-row-reverse" : ""}`}
+                      id={`msg-${m.id}`}
+                      className={`flex gap-3 ${isMe ? "flex-row-reverse" : ""}`}
                     >
                       <Avatar name={m.sender.name} isMe={isMe} />
                       <div
                         className={`flex max-w-[75%] flex-col ${isMe ? "items-end" : "items-start"}`}
                       >
-                        <div
-                          className={`rounded-2xl px-4 py-2.5 ${
-                            isMe
-                              ? "rounded-tr-md bg-[#1d4ed8] text-white"
-                              : "rounded-tl-md bg-slate-100 text-slate-800"
-                          }`}
-                        >
-                          <p className="text-xs font-medium opacity-90">{m.sender.name}</p>
-                          {m.content && !atts.some((a) => a.name === m.content) ? (
-                            <p className="mt-0.5 whitespace-pre-wrap break-words text-sm">
-                              {m.content}
-                            </p>
-                          ) : null}
-                          {atts.length > 0 ? (
-                            <MessagerieAttachmentsBlock
-                              messageKind="PROJECT"
+                        <MessageBubbleChrome
+                          messageId={m.id}
+                          isMe={isMe}
+                          myUserId={sessionUserId}
+                          capabilities={{
+                            reply: true,
+                            react: false,
+                            bework: true,
+                            important: true,
+                            pin: true,
+                            forward: true,
+                            copy: hasText,
+                            infos: true,
+                            delete: false,
+                            select: false,
+                          }}
+                          isImportant={isMessageImportant("PROJECT", m.id)}
+                          isPinned={isMessagePinnedPersonal("PROJECT", m.id)}
+                          selectionMode={false}
+                          selected={false}
+                          highlighted={flashMsgId === m.id}
+                          onToggleSelect={() => {}}
+                          onAction={(action: MessageMenuActionId) => {
+                            if (action === "reply") {
+                              setReplyTarget({
+                                id: m.id,
+                                senderName: m.sender.name,
+                                excerpt: makeReplyExcerpt(
+                                  parsed.body || atts[0]?.name || "Pièce jointe",
+                                ),
+                              });
+                              return;
+                            }
+                            if (action === "important") {
+                              toggleMessageImportant("PROJECT", m.id);
+                              setPersonalTick((t) => t + 1);
+                              return;
+                            }
+                            if (action === "pin") {
+                              toggleMessagePinnedPersonal("PROJECT", m.id);
+                              setPersonalTick((t) => t + 1);
+                              return;
+                            }
+                            if (action === "copy" && parsed.body) {
+                              void navigator.clipboard?.writeText(parsed.body).then(() => {
+                                setCopiedHint(true);
+                                window.setTimeout(() => setCopiedHint(false), 1500);
+                              });
+                              return;
+                            }
+                            if (action === "forward") {
+                              setForwardSourceId(m.id);
+                              setForwardOpen(true);
+                              return;
+                            }
+                            if (action === "infos") {
+                              setInfosData({
+                                senderName: m.sender.name,
+                                conversationLabel: m.project.title,
+                                partyLabel: CHANNEL_LABELS[ch],
+                                sentAt: new Date(m.createdAt).toLocaleString("fr-FR", {
+                                  day: "numeric",
+                                  month: "long",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }),
+                                attachmentSummary: atts.length
+                                  ? `${atts.length} pièce(s) jointe(s)`
+                                  : undefined,
+                                replyToLabel: parsed.reply
+                                  ? `${parsed.reply.senderName} — ${parsed.reply.excerpt}`
+                                  : null,
+                              });
+                              setInfosOpen(true);
+                            }
+                          }}
+                          onReact={() => {}}
+                          footer={
+                            <MessageBeworkActions
                               messageId={m.id}
-                              attachments={atts}
+                              messageKind="PROJECT"
+                              content={parsed.body || m.content}
+                              hasMedia={atts.some(
+                                (a) => isAudioAttachment(a) || isImageAttachment(a),
+                              )}
                               isMe={isMe}
                             />
-                          ) : null}
-                        </div>
-                        <MessageBeworkActions
-                          messageId={m.id}
-                          messageKind="PROJECT"
-                          content={m.content}
-                          hasMedia={atts.some(
-                            (a) => isAudioAttachment(a) || isImageAttachment(a),
-                          )}
-                          isMe={isMe}
-                        />
+                          }
+                        >
+                          <div
+                            className={`rounded-2xl px-4 py-2.5 ${
+                              isMe
+                                ? "rounded-tr-md bg-[#1d4ed8] text-white"
+                                : "rounded-tl-md bg-slate-100 text-slate-800"
+                            }`}
+                          >
+                            <p className="text-xs font-medium opacity-90">{m.sender.name}</p>
+                            {parsed.reply ? (
+                              <div className={isMe ? "text-white/90" : ""}>
+                                <MessageReplyQuote
+                                  reply={parsed.reply}
+                                  onJump={(id) => {
+                                    setFlashMsgId(id);
+                                    document
+                                      .getElementById(`msg-${id}`)
+                                      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+                                    window.setTimeout(() => setFlashMsgId(null), 1600);
+                                  }}
+                                />
+                              </div>
+                            ) : null}
+                            {hasText ? (
+                              <MessageExpandableBody
+                                text={parsed.body}
+                                className={isMe ? "text-white" : ""}
+                              />
+                            ) : null}
+                            {atts.length > 0 ? (
+                              <MessagerieAttachmentsBlock
+                                messageKind="PROJECT"
+                                messageId={m.id}
+                                attachments={atts}
+                                isMe={isMe}
+                              />
+                            ) : null}
+                          </div>
+                        </MessageBubbleChrome>
                         <p className="mt-1 text-xs text-slate-400">
                           {formatMessageTime(m.createdAt)}
                         </p>
@@ -606,6 +752,12 @@ export function MessagerieView({
             </div>
 
             <div className="shrink-0 border-t border-slate-200 p-4">
+              {replyTarget ? (
+                <MessageReplyComposerBanner
+                  reply={replyTarget}
+                  onClear={() => setReplyTarget(null)}
+                />
+              ) : null}
               <p
                 className={`mb-2 rounded-lg px-3 py-1.5 text-xs font-semibold ${
                   channel === "INTERNE"
@@ -922,6 +1074,59 @@ export function MessagerieView({
           </div>
         )}
       </aside>
+
+      <MessageInfosPanel
+        open={infosOpen}
+        onClose={() => setInfosOpen(false)}
+        data={infosData}
+      />
+      <MessageForwardDialog
+        open={forwardOpen}
+        onClose={() => {
+          setForwardOpen(false);
+          setForwardSourceId(null);
+        }}
+        sourceScope={scopeFromChannel(channel)}
+        destinations={
+          projects
+            .filter((p) => p.id !== selectedProjectId)
+            .slice(0, 30)
+            .map(
+              (p): ForwardDestOption => ({
+                id: p.id,
+                kind: "PROJECT",
+                label: p.title,
+                sublabel: CHANNEL_LABELS[channel],
+                scope: scopeFromChannel(channel),
+              }),
+            )
+        }
+        onConfirm={async (dest, confirmExternal) => {
+          if (!forwardSourceId) throw new Error("Message source manquant");
+          const res = await fetch("/api/messages/forward", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              sourceKind: "PROJECT",
+              sourceMessageId: forwardSourceId,
+              destKind: dest.kind,
+              destId: dest.id,
+              channel,
+              confirmExternal,
+            }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.status === 409 && data?.needsConfirm) {
+            throw new Error(data.error || "Confirmation requise");
+          }
+          if (!res.ok) throw new Error(data?.error || "Transfert impossible");
+        }}
+      />
+      {copiedHint ? (
+        <div className="fixed bottom-6 left-1/2 z-[100] -translate-x-1/2 rounded-full bg-[#1e3a5f] px-4 py-2 text-sm font-medium text-white shadow-lg">
+          Copié
+        </div>
+      ) : null}
     </div>
   );
 }

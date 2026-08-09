@@ -12,6 +12,11 @@ import {
 import { broadcastMessagerieToUser } from "@/lib/messagerie/broadcast";
 import { ttlInvalidatePrefix } from "@/lib/perf/ttl-cache";
 import { formatMediaPreview, type MsgAttachment } from "@/lib/messagerie/media-preview";
+import {
+  makeReplyExcerpt,
+  mergeReplyIntoPayload,
+  type MessageReplyMeta,
+} from "@/lib/messagerie/message-reply";
 
 function canUseDirectMessages(role?: string | null): boolean {
   return isManagerRole(role) || isStaffAgent(role) || role === "CLIENT";
@@ -96,10 +101,11 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { content, receiverId, attachments } = body as {
+    const { content, receiverId, attachments, replyTo } = body as {
       content?: string;
       receiverId?: string;
       attachments?: { name: string; fileUrl: string; fileSize: number; mimeType?: string }[];
+      replyTo?: MessageReplyMeta | null;
     };
 
     const hasContent = typeof content === "string" && content.trim().length > 0;
@@ -147,12 +153,22 @@ export async function POST(request: Request) {
       }
     }
 
+    let payloadJson: Record<string, unknown> | undefined;
+    if (replyTo && typeof replyTo.id === "string") {
+      payloadJson = mergeReplyIntoPayload(null, {
+        id: replyTo.id,
+        senderName: replyTo.senderName || "Message",
+        excerpt: makeReplyExcerpt(replyTo.excerpt || ""),
+      });
+    }
+
     const message = await prisma.directMessage.create({
       data: {
         senderId: session.user.id,
         receiverId: receiver.id,
         content: hasContent ? content.trim() : "",
         attachmentsJson: hasAttachments ? attachments : undefined,
+        ...(payloadJson ? { payloadJson: payloadJson as object } : {}),
       },
       include: messageInclude,
     });

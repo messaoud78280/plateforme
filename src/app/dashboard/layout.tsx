@@ -6,6 +6,7 @@ import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { UserAccountDropdown } from "@/components/dashboard/UserAccountDropdown";
 import { NotificationsDropdown } from "@/components/dashboard/NotificationsDropdown";
 import { MessagerieHeaderShortcut } from "@/components/dashboard/MessagerieHeaderShortcut";
+import { GlobalSearchTrigger } from "@/components/dashboard/GlobalSearch";
 import { MessagerieToastListener } from "@/components/dashboard/MessagerieToastListener";
 import { MobileBottomNav } from "@/components/dashboard/MobileBottomNav";
 import { PrefetchMainRoutes } from "@/components/dashboard/PrefetchMainRoutes";
@@ -151,6 +152,7 @@ export default async function DashboardLayout({
                 + Nouvelle mission
               </Link>
             ) : null}
+            <GlobalSearchTrigger />
             <MessagerieHeaderShortcut />
             <NotificationsDropdown />
             <OutilsCommunication />

@@ -439,7 +439,7 @@ function testBoardCardAndSearch() {
   assert.ok(card);
   assert.equal(card!.subjectType, "PURCHASE_ORDER");
   assert.equal(card!.title, "Point.P — BC-2026-043");
-  assert.equal(card!.actionUrl, "/dashboard/commandes/po-1");
+  assert.equal(card!.actionUrl, "/dashboard/commandes/po-1?focus=delivery");
   assert.equal(attentionCodeToCategory("SUPPLIER_NO_RESPONSE"), "COMMANDE");
   assert.equal(attentionCodeToCategory("RECEIPT_ISSUE"), "RECEPTION");
   assert.equal(attentionCodeToCategory("SUPPLIER_PROPOSAL_PENDING"), "CONFIRMATION");

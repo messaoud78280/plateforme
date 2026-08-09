@@ -145,7 +145,14 @@ export function DemoCommercialTour() {
         const current = await fetchCurrentDemoPersona();
         if (current !== needPersona) {
           setPhase("busy");
-          setBusyMsg(`Basculement vers ${needPersona}…`);
+          const labels: Record<string, string> = {
+            direction: "Direction — Marc",
+            conducteur: "Conducteur — Karim",
+            administratif: "Administratif — Julie",
+            client: "Client — Sophie",
+            fournisseur: "Fournisseur — Thomas",
+          };
+          setBusyMsg(`Basculement vers ${labels[needPersona] ?? needPersona}…`);
           const sw = await switchDemoPersona(needPersona);
           if (!sw.ok) {
             setBusyMsg(sw.error ?? "Impossible de changer de persona");

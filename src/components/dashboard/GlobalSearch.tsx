@@ -93,6 +93,15 @@ function readRecents(): RecentItem[] {
   }
 }
 
+/** Après « Voir comme », ne pas proposer Planning / Pilotage à Thomas. */
+function clearRecentsOnPersonaChange() {
+  try {
+    localStorage.removeItem(RECENTS_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 function pushRecent(item: Pick<GlobalSearchItem, "id" | "title" | "subtitle" | "href" | "kind">) {
   try {
     const prev = readRecents().filter((r) => r.href !== item.href);
@@ -133,11 +142,17 @@ export function GlobalSearchTrigger() {
     function onOpenSearch() {
       setOpen(true);
     }
+    function onPersonaChanged() {
+      clearRecentsOnPersonaChange();
+      setOpen(false);
+    }
     window.addEventListener("keydown", onKey);
     window.addEventListener("bework:open-global-search", onOpenSearch);
+    window.addEventListener("bework:persona-changed", onPersonaChanged);
     return () => {
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("bework:open-global-search", onOpenSearch);
+      window.removeEventListener("bework:persona-changed", onPersonaChanged);
     };
   }, []);
 

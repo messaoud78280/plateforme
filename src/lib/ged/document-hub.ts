@@ -268,7 +268,12 @@ export async function loadDocumentHub(opts: {
         visibility: visibilityShort(f.visibility),
         authorName: f.addedBy?.name ?? null,
         createdAt: f.createdAt.toISOString(),
-        href: `/dashboard/projets/${f.projectId}#tab-documents`,
+        href:
+          isSupplier || external
+            ? poLink?.entityId
+              ? `/dashboard/commandes/${poLink.entityId}?focus=documents`
+              : `/dashboard/documents?q=${encodeURIComponent(f.name)}`
+            : `/dashboard/projets/${f.projectId}#tab-documents`,
         mimeHint: f.mimeType,
         isCurrentVersion: f.isCurrentVersion,
       };

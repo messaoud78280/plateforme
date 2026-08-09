@@ -79,9 +79,15 @@ function testDynamicFilter() {
   const withOrder = stepsForMode("complete").filter((s) => stepAvailable(s, ctxFull));
   const withoutOrder = stepsForMode("complete").filter((s) => stepAvailable(s, ctxEmpty));
   assert.ok(withOrder.some((s) => s.id === "complete-commande"));
+  assert.ok(withOrder.some((s) => s.id === "complete-reception"));
+  assert.ok(withOrder.some((s) => s.id === "complete-reliquat"));
   assert.ok(!withoutOrder.some((s) => s.id === "complete-commande"));
   assert.ok(!withoutOrder.some((s) => s.id === "complete-messagerie"));
+  assert.ok(!withoutOrder.some((s) => s.id === "complete-reception"));
   assert.ok(withoutOrder.some((s) => s.id === "complete-accueil"));
+  const noPartial = { ...ctxFull, hasPartialReceipt: false, receivedQty: 0 };
+  const withoutPartial = stepsForMode("complete").filter((s) => stepAvailable(s, noPartial));
+  assert.ok(!withoutPartial.some((s) => s.id === "complete-reliquat"));
   console.log("ok filtre étapes selon contexte live");
 }
 

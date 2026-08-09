@@ -595,7 +595,8 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
           taskId: taskBc043.id,
           senderId: clientId,
           receiverId: staffId,
-          content: "Merci. On valide mardi 7h30 sur Victor Hugo — aire livraison.",
+          content:
+            "Créneau demandé : mardi 7h30, aire livraison Victor Hugo. En attente de confirmation Point.P.",
           kind: "USER",
           createdAt: daysFromNow(-1),
         },
@@ -884,7 +885,7 @@ export async function seedDemoDirectConversations(opts: {
       {
         senderId: sophieId,
         receiverId: clientId,
-        content: "Reçu. Je relance Étanchéité Plus cet après-midi et je vous confirme la date de pose.",
+        content: "Reçu. Je relance Point.P cet après-midi et je vous confirme la date de pose.",
         read: false,
         createdAt: hoursAgo(5),
       },
@@ -1159,15 +1160,23 @@ export async function clearDemoEnvironmentData(clientId: string) {
     where: { rootUserId: clientId },
     select: { organizationId: true },
   });
-  const memberIds = demo?.organizationId
+  const orgId = demo?.organizationId ?? null;
+  const memberIds = orgId
     ? (
         await prisma.organizationMember.findMany({
-          where: { organizationId: demo.organizationId },
+          where: { organizationId: orgId },
           select: { userId: true },
         })
       ).map((m) => m.userId)
     : [];
   const userIds = [...new Set([clientId, ...memberIds])];
+
+  // Commandes avant projets : sinon BC-2026-043 / 051–054 survivent (projectId → SetNull)
+  // et le reset commercial ment (« Point.P n’a pas confirmé » alors que CONFIRMEE/PARTIEL).
+  if (orgId) {
+    await prisma.purchaseOrder.deleteMany({ where: { organizationId: orgId } });
+    await prisma.agendaEvent.deleteMany({ where: { organizationId: orgId } });
+  }
 
   await prisma.$transaction([
     prisma.messageAction.deleteMany({ where: { createdById: clientId } }),

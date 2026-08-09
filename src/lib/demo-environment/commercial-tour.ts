@@ -97,7 +97,7 @@ export const EXPRESS_TOUR_STEPS: DemoTourStepDef[] = [
   {
     id: "express-a-traiter",
     title: "À traiter",
-    body: "Une livraison doit être confirmée. BeWork sait qu’une action manque.",
+    body: "Une action manque sur la commande Point.P. BeWork l’a détectée automatiquement.",
     tip: "L’alerte vient du moteur de commande, pas d’une saisie manuelle.",
     persona: "direction",
     href: "/dashboard/a-traiter",
@@ -155,7 +155,7 @@ export const COMPLETE_TOUR_STEPS: DemoTourStepDef[] = [
   {
     id: "complete-a-traiter",
     title: "À traiter",
-    body: "Point.P n’a pas confirmé. BeWork l’a détecté automatiquement.",
+    body: "BeWork a détecté une action manquante sur la commande Point.P — sans saisie manuelle.",
     tip: "Préférer la carte BC-2026-043 si elle est présente sur le board.",
     persona: "direction",
     href: "/dashboard/a-traiter",
@@ -210,12 +210,12 @@ export const COMPLETE_TOUR_STEPS: DemoTourStepDef[] = [
   {
     id: "complete-reception",
     title: "Réception",
-    body: "La réception reste liée à la commande. Si l’état le permet, montrer le reliquat réel (ex. 30 reçus sur 40).",
+    body: "La réception reste liée à la commande. Montrer le reliquat réel si l’état le permet.",
     tip: "Ne jamais falsifier les quantités si l’état seed ne le permet pas.",
     persona: "direction",
     hrefKey: "receptionHref",
     actionLabel: "Voir la réception",
-    require: ["order"],
+    require: ["order", "partial"],
   },
   {
     id: "complete-reliquat",
@@ -225,6 +225,7 @@ export const COMPLETE_TOUR_STEPS: DemoTourStepDef[] = [
     persona: "direction",
     href: "/dashboard/a-traiter",
     actionLabel: "Voir À traiter",
+    require: ["partial"],
   },
   {
     id: "complete-documents",

@@ -137,7 +137,7 @@ export default async function DashboardLayout({
               role="group"
               aria-label="Messagerie et notifications"
             >
-              <MessagerieHeaderShortcut />
+              <MessagerieHeaderShortcut key={session.user.id} />
               <NotificationsDropdown key={session.user.id} userId={session.user.id} />
             </div>
             <OutilsCommunication />

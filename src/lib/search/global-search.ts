@@ -15,7 +15,11 @@ import {
 import { searchSuppliers } from "@/lib/suppliers/service";
 import { PURCHASE_ORDER_STATUS_LABELS } from "@/lib/purchase-orders/status";
 import { resolveConversationHref } from "@/lib/messagerie/resolve-conversation";
-import { isExternalPortalUser, isHrefAllowedForPersona } from "@/lib/equipe-acces/nav-by-persona";
+import {
+  defaultMessageChannelForPerson,
+  isExternalPortalUser,
+  isHrefAllowedForPersona,
+} from "@/lib/equipe-acces/nav-by-persona";
 import { withPerfLog } from "@/lib/perf/server-timing";
 
 export type SearchResultKind =
@@ -394,38 +398,42 @@ export async function searchGlobal(opts: {
           })
         : Promise.resolve([]);
 
-    const tasksPromise = prisma.task.findMany({
-      where: {
-        AND: [
-          {
-            OR: [
-              { project: projectWhere },
-              { clientId: opts.user.id },
-              { assignedToId: opts.user.id },
-              ...(orgId ? [{ organizationId: orgId }] : []),
-            ],
-          },
-          {
-            OR: [
-              { title: contains(q) },
-              { description: contains(q) },
-              { project: { title: contains(q) } },
-            ],
-          },
-        ],
-      },
-      select: {
-        id: true,
-        title: true,
-        status: true,
-        desiredDate: true,
-        updatedAt: true,
-        assignedTo: { select: { name: true } },
-        project: { select: { title: true } },
-      },
-      orderBy: { updatedAt: "desc" },
-      take,
-    });
+    // Externes : pas d’org hôte, pas de tâches chantier (fuite CR / missions internes).
+    const tasksPromise =
+      supplier || opts.user.personType === "CLIENT_EXT"
+        ? Promise.resolve([])
+        : prisma.task.findMany({
+            where: {
+              AND: [
+                {
+                  OR: [
+                    { project: projectWhere },
+                    { clientId: opts.user.id },
+                    { assignedToId: opts.user.id },
+                    ...(orgId ? [{ organizationId: orgId }] : []),
+                  ],
+                },
+                {
+                  OR: [
+                    { title: contains(q) },
+                    { description: contains(q) },
+                    { project: { title: contains(q) } },
+                  ],
+                },
+              ],
+            },
+            select: {
+              id: true,
+              title: true,
+              status: true,
+              desiredDate: true,
+              updatedAt: true,
+              assignedTo: { select: { name: true } },
+              project: { select: { title: true } },
+            },
+            orderBy: { updatedAt: "desc" },
+            take,
+          });
 
     const followUpsPromise = internal
       ? prisma.followUpSheet.findMany({
@@ -491,23 +499,79 @@ export async function searchGlobal(opts: {
           take,
         });
 
+    let supplierExtOrgId: string | null = null;
+    let supplierOrderIds: string[] = [];
+    if (supplier) {
+      const u = await prisma.user.findUnique({
+        where: { id: opts.user.id },
+        select: { externalOrganizationId: true },
+      });
+      supplierExtOrgId = u?.externalOrganizationId ?? null;
+      if (supplierExtOrgId) {
+        supplierOrderIds = (
+          await prisma.purchaseOrder.findMany({
+            where: {
+              externalOrganizationId: supplierExtOrgId,
+              sharedWithSupplier: true,
+            },
+            select: { id: true },
+            take: 120,
+          })
+        ).map((o) => o.id);
+      }
+    }
+
+    const supplierFileFilter =
+      supplier && supplierExtOrgId
+        ? {
+            OR: [
+              { visibility: { contains: "intervenant", mode: "insensitive" as const } },
+              { visibility: { contains: "temporaire", mode: "insensitive" as const } },
+              {
+                links: {
+                  some: {
+                    entityType: "supplier",
+                    entityId: supplierExtOrgId,
+                  },
+                },
+              },
+              ...(supplierOrderIds.length > 0
+                ? [
+                    {
+                      links: {
+                        some: {
+                          entityType: "purchase_order",
+                          entityId: { in: supplierOrderIds },
+                        },
+                      },
+                    },
+                  ]
+                : []),
+            ],
+          }
+        : null;
+
+    const clientFileFilter = {
+      OR: [
+        { visibility: { contains: "client", mode: "insensitive" as const } },
+        { visibility: { contains: "Partage", mode: "insensitive" as const } },
+        { visibility: { contains: "Intervenants", mode: "insensitive" as const } },
+      ],
+    };
+
     const chantierFilesPromise = prisma.chantierFile.findMany({
       where: {
         deletedAt: null,
         isCurrentVersion: true,
         project: projectWhere,
         AND: [
-          ...(external
-            ? [
-                {
-                  OR: [
-                    { visibility: { contains: "client", mode: "insensitive" as const } },
-                    { visibility: { contains: "Partage", mode: "insensitive" as const } },
-                    { visibility: { contains: "Intervenants", mode: "insensitive" as const } },
-                  ],
-                },
-              ]
-            : []),
+          ...(supplier
+            ? supplierFileFilter
+              ? [supplierFileFilter]
+              : [{ id: "__none__" }]
+            : external
+              ? [clientFileFilter]
+              : []),
           {
             OR: [
               { name: contains(q) },
@@ -530,36 +594,49 @@ export async function searchGlobal(opts: {
         project: { select: { title: true } },
         links: {
           take: 2,
-          select: { entityType: true, entityLabel: true },
+          select: { entityType: true, entityLabel: true, entityId: true },
         },
       },
       orderBy: { updatedAt: "desc" },
       take,
     });
 
-    const agendaPromise = prisma.agendaEvent.findMany({
-      where: {
-        project: projectWhere,
-        status: { not: "ANNULE" },
-        OR: [
-          { title: contains(q) },
-          { description: contains(q) },
-          { location: contains(q) },
-          { project: { title: contains(q) } },
-          { purchaseOrder: { number: contains(q) } },
-        ],
-      },
-      select: {
-        id: true,
-        title: true,
-        type: true,
-        startAt: true,
-        updatedAt: true,
-        project: { select: { title: true } },
-      },
-      orderBy: { startAt: "desc" },
-      take,
-    });
+    const canSeeAgenda = isHrefAllowedForPersona(
+      "/dashboard/agenda",
+      opts.user.personType,
+      opts.user.permissionProfile,
+    );
+    const canSeeProjects = isHrefAllowedForPersona(
+      "/dashboard/projets",
+      opts.user.personType,
+      opts.user.permissionProfile,
+    );
+
+    const agendaPromise = canSeeAgenda
+      ? prisma.agendaEvent.findMany({
+          where: {
+            project: projectWhere,
+            status: { not: "ANNULE" },
+            OR: [
+              { title: contains(q) },
+              { description: contains(q) },
+              { location: contains(q) },
+              { project: { title: contains(q) } },
+              { purchaseOrder: { number: contains(q) } },
+            ],
+          },
+          select: {
+            id: true,
+            title: true,
+            type: true,
+            startAt: true,
+            updatedAt: true,
+            project: { select: { title: true } },
+          },
+          orderBy: { startAt: "desc" },
+          take,
+        })
+      : Promise.resolve([]);
 
     // Conversations : projets match + commandes fournisseur match (pas contenu messages)
     const conversationsPromise = prisma.project.findMany({
@@ -631,21 +708,23 @@ export async function searchGlobal(opts: {
 
     const items: GlobalSearchItem[] = [];
 
-    for (const p of projects) {
-      const clientLabel = p.client.company || p.client.name;
-      const s =
-        scoreMatch(q, p.title, p.siteCity, p.siteAddress, clientLabel) +
-        recencyBoost(p.updatedAt, now) +
-        (p.chantierStatus === "EN_COURS" ? 3 : 0);
-      items.push({
-        id: `project:${p.id}`,
-        kind: "project",
-        title: p.title,
-        subtitle: `Chantier${clientLabel ? ` · ${clientLabel}` : ""}`,
-        meta: p.siteCity,
-        href: `/dashboard/projets/${p.id}`,
-        score: s,
-      });
+    if (canSeeProjects) {
+      for (const p of projects) {
+        const clientLabel = p.client.company || p.client.name;
+        const s =
+          scoreMatch(q, p.title, p.siteCity, p.siteAddress, clientLabel) +
+          recencyBoost(p.updatedAt, now) +
+          (p.chantierStatus === "EN_COURS" ? 3 : 0);
+        items.push({
+          id: `project:${p.id}`,
+          kind: "project",
+          title: p.title,
+          subtitle: `Chantier${clientLabel ? ` · ${clientLabel}` : ""}`,
+          meta: p.siteCity,
+          href: `/dashboard/projets/${p.id}`,
+          score: s,
+        });
+      }
     }
 
     for (const o of orders) {
@@ -742,13 +821,21 @@ export async function searchGlobal(opts: {
         f.links.find((l) => l.entityType === "purchase_order")?.entityLabel ||
         f.links.find((l) => l.entityType === "supplier")?.entityLabel ||
         f.category;
+      const poLink = f.links.find((l) => l.entityType === "purchase_order");
+      const docHref = supplier
+        ? poLink?.entityId
+          ? `/dashboard/commandes/${poLink.entityId}?focus=documents`
+          : `/dashboard/documents?q=${encodeURIComponent(f.name)}`
+        : canSeeProjects
+          ? `/dashboard/projets/${f.projectId}#tab-documents`
+          : `/dashboard/documents?q=${encodeURIComponent(f.name)}`;
       items.push({
         id: `chantier_file:${f.id}`,
         kind: "document",
         title: f.name,
         subtitle: `Document${f.project?.title ? ` · ${f.project.title}` : ""}`,
         meta: [f.documentType || ctx].filter(Boolean).join(" · ") || null,
-        href: `/dashboard/projets/${f.projectId}#tab-documents`,
+        href: docHref,
         score:
           scoreMatch(q, f.name, f.documentType, f.category, f.emitterName, f.project?.title) +
           recencyBoost(f.updatedAt, now) +
@@ -774,9 +861,10 @@ export async function searchGlobal(opts: {
       });
     }
 
+    const defaultChannel = defaultMessageChannelForPerson(opts.user.personType);
     for (const p of convProjects) {
       const po = p.purchaseOrders[0];
-      if (po) {
+      if (po && (internal || supplier)) {
         const supplierName =
           po.externalOrganization.tradeName || po.externalOrganization.name;
         items.push({
@@ -793,16 +881,22 @@ export async function searchGlobal(opts: {
           score: scoreMatch(q, supplierName, p.title) + recencyBoost(p.updatedAt, now) + 2,
         });
       } else {
+        // Jamais proposer le fil INTERNE à un portail externe.
         items.push({
-          id: `conversation:int:${p.id}`,
+          id: `conversation:${defaultChannel.toLowerCase()}:${p.id}`,
           kind: "conversation",
           title: p.title,
-          subtitle: "Conversation chantier",
-          meta: "Interne",
+          subtitle:
+            defaultChannel === "CLIENT"
+              ? "Conversation client"
+              : defaultChannel === "FOURNISSEUR"
+                ? "Conversation fournisseur"
+                : "Conversation chantier",
+          meta: defaultChannel === "INTERNE" ? "Interne" : "Externe",
           href: resolveConversationHref({
             kind: "project_channel",
             projectId: p.id,
-            channel: "INTERNE",
+            channel: defaultChannel,
           }),
           score: scoreMatch(q, p.title) + recencyBoost(p.updatedAt, now),
         });

@@ -688,11 +688,8 @@ export default async function DashboardPage({
           take: 5,
           orderBy: { createdAt: "desc" },
         }),
-        prisma.task.findMany({
-          where: { project: projectWhere, status: { in: ["A_VALIDER", "EN_ATTENTE"] } },
-          select: { id: true, title: true, status: true, description: true },
-          take: 5,
-        }),
+        // Pas de tâches chantier internes (CR, etc.) — fuite portail client.
+        Promise.resolve([] as { id: string; title: string; status: string; description: string | null }[]),
       ]);
       return (
         <DemoClientHome

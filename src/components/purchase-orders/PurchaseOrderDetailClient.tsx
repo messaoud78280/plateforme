@@ -93,7 +93,7 @@ type OrderDetail = {
     deliveryNoteNumber: string | null;
     commentShared: string | null;
     receivedBy: { id: string; name: string };
-    documents: { id: string; name: string; fileUrl: string | null }[];
+    documents: { id: string; name: string; fileUrl?: string | null }[];
   }[];
 };
 
@@ -646,9 +646,9 @@ export function PurchaseOrderDetailClient({
                 {r.commentShared && (isSupplierView || true) ? (
                   <p className="mt-1 text-xs text-slate-600">{r.commentShared}</p>
                 ) : null}
-                {r.documents?.[0]?.fileUrl ? (
+                {r.documents?.[0]?.id ? (
                   <a
-                    href={r.documents[0].fileUrl}
+                    href={`/api/ged/files/purchase-order-document/${r.documents[0].id}?redirect=1`}
                     target="_blank"
                     rel="noreferrer"
                     className="mt-1 inline-block text-xs font-semibold text-[#1d4ed8]"
@@ -775,7 +775,14 @@ export function PurchaseOrderDetailClient({
             <ul className="mt-2 space-y-1 text-sm">
               {order.documents.map((d) => (
                 <li key={d.id}>
-                  {d.kind} — {d.name}
+                  <a
+                    href={`/api/ged/files/purchase-order-document/${d.id}?redirect=1`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-medium text-[#1d4ed8] hover:underline"
+                  >
+                    {d.kind} — {d.name}
+                  </a>
                 </li>
               ))}
             </ul>

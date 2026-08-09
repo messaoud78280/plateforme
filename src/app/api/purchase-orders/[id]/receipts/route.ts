@@ -12,7 +12,7 @@ import {
   getPurchaseOrderReceivingState,
 } from "@/lib/purchase-orders/receiving";
 import { createServiceRoleClient } from "@/lib/supabase";
-import { DOCUMENTS_BUCKET } from "@/lib/storage/supabase-object";
+import { buildDocumentsStorageRef, DOCUMENTS_BUCKET } from "@/lib/storage/supabase-object";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -74,7 +74,7 @@ export async function GET(_req: Request, ctx: Ctx) {
       },
       documents: {
         where: { kind: "BL" },
-        select: { id: true, name: true, fileUrl: true, kind: true },
+        select: { id: true, name: true, kind: true },
       },
     },
   });
@@ -141,8 +141,7 @@ export async function POST(req: Request, ctx: Ctx) {
         if (error) {
           return NextResponse.json({ error: `Upload BL : ${error.message}` }, { status: 500 });
         }
-        const { data: urlData } = supabase.storage.from(DOCUMENTS_BUCKET).getPublicUrl(path);
-        blFileUrl = urlData.publicUrl;
+        blFileUrl = buildDocumentsStorageRef(path);
         blFileName = f.name;
       }
     } else {

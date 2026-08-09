@@ -8,7 +8,7 @@ import {
   MISSION_DOCUMENT_MAX_BYTES,
   missionDocumentRejectReason,
 } from "@/lib/storage/document-upload-policy";
-import { DOCUMENTS_BUCKET } from "@/lib/storage/supabase-object";
+import { buildDocumentsStorageRef, DOCUMENTS_BUCKET } from "@/lib/storage/supabase-object";
 import { syncMissionDocumentToChantier } from "@/lib/chantier-dossier/sync-mission-documents";
 
 const CATEGORY_MAP: Record<string, "FACTURE" | "CONTRAT" | "RH" | "FISCAL" | "AUTRE"> = {
@@ -133,8 +133,7 @@ export async function POST(request: Request) {
       continue;
     }
 
-    const { data: urlData } = supabase.storage.from(DOCUMENTS_BUCKET).getPublicUrl(storagePath);
-    const fileUrl = urlData.publicUrl;
+    const fileUrl = buildDocumentsStorageRef(storagePath);
 
     const doc = await prisma.document.create({
       data: {

@@ -8,6 +8,7 @@ import { projectWhereForClientUser } from "@/lib/organization/access";
 import {
   canListPurchaseOrders,
   isInternalPurchaseOrderActor,
+  isSupplierPurchaseOrderActor,
   resolvePurchaseOrderOrgId,
   type PurchaseOrderSessionUser,
 } from "@/lib/purchase-orders/access";
@@ -133,26 +134,32 @@ export async function loadDocumentHub(opts: {
       project: opts.projectId
         ? { id: opts.projectId, AND: [projectWhere] }
         : projectWhere,
-      ...(external
-        ? {
-            OR: [
-              { visibility: { contains: "client", mode: "insensitive" as const } },
-              { visibility: { contains: "Partage", mode: "insensitive" as const } },
-              { visibility: { contains: "Intervenants", mode: "insensitive" as const } },
-            ],
-          }
-        : {}),
-      ...(search
-        ? {
-            OR: [
-              { name: { contains: search, mode: "insensitive" as const } },
-              { documentType: { contains: search, mode: "insensitive" as const } },
-              { category: { contains: search, mode: "insensitive" as const } },
-              { emitterName: { contains: search, mode: "insensitive" as const } },
-              { project: { title: { contains: search, mode: "insensitive" as const } } },
-            ],
-          }
-        : {}),
+      AND: [
+        ...(external
+          ? [
+              {
+                OR: [
+                  { visibility: { contains: "client", mode: "insensitive" as const } },
+                  { visibility: { contains: "Partage", mode: "insensitive" as const } },
+                  { visibility: { contains: "Intervenants", mode: "insensitive" as const } },
+                ],
+              },
+            ]
+          : []),
+        ...(search
+          ? [
+              {
+                OR: [
+                  { name: { contains: search, mode: "insensitive" as const } },
+                  { documentType: { contains: search, mode: "insensitive" as const } },
+                  { category: { contains: search, mode: "insensitive" as const } },
+                  { emitterName: { contains: search, mode: "insensitive" as const } },
+                  { project: { title: { contains: search, mode: "insensitive" as const } } },
+                ],
+              },
+            ]
+          : []),
+      ],
     };
 
     const [chantierFiles, chantierTotal] = await Promise.all([
@@ -226,40 +233,59 @@ export async function loadDocumentHub(opts: {
       orgId &&
       (group === "all" || group === "commandes" || group === "fournisseurs")
     ) {
-      const poDocs = await prisma.purchaseOrderDocument.findMany({
-        where: {
-          order: {
-            organizationId: orgId,
-            ...(opts.projectId ? { projectId: opts.projectId } : {}),
-          },
-          ...(search
-            ? {
-                OR: [
-                  { name: { contains: search, mode: "insensitive" } },
-                  { order: { number: { contains: search, mode: "insensitive" } } },
-                ],
-              }
-            : {}),
-        },
-        orderBy: { createdAt: "desc" },
-        take: 30,
-        select: {
-          id: true,
-          name: true,
-          kind: true,
-          fileUrl: true,
-          createdAt: true,
-          order: {
-            select: {
-              id: true,
-              number: true,
-              projectId: true,
-              project: { select: { title: true } },
-              externalOrganization: { select: { tradeName: true, name: true } },
-            },
-          },
-        },
-      });
+      const supplierActor = isSupplierPurchaseOrderActor(opts.user);
+      let supplierExtOrgId: string | null = null;
+      if (supplierActor) {
+        const u = await prisma.user.findUnique({
+          where: { id: opts.user.id },
+          select: { externalOrganizationId: true },
+        });
+        supplierExtOrgId = u?.externalOrganizationId ?? null;
+      }
+
+      const poDocs =
+        supplierActor && !supplierExtOrgId
+          ? []
+          : await prisma.purchaseOrderDocument.findMany({
+              where: {
+                order: {
+                  organizationId: orgId,
+                  ...(opts.projectId ? { projectId: opts.projectId } : {}),
+                  ...(supplierActor && supplierExtOrgId
+                    ? {
+                        sharedWithSupplier: true,
+                        externalOrganizationId: supplierExtOrgId,
+                      }
+                    : {}),
+                },
+                ...(search
+                  ? {
+                      OR: [
+                        { name: { contains: search, mode: "insensitive" } },
+                        { order: { number: { contains: search, mode: "insensitive" } } },
+                      ],
+                    }
+                  : {}),
+              },
+              orderBy: { createdAt: "desc" },
+              take: 30,
+              select: {
+                id: true,
+                name: true,
+                kind: true,
+                fileUrl: true,
+                createdAt: true,
+                order: {
+                  select: {
+                    id: true,
+                    number: true,
+                    projectId: true,
+                    project: { select: { title: true } },
+                    externalOrganization: { select: { tradeName: true, name: true } },
+                  },
+                },
+              },
+            });
 
       const linked = await prisma.chantierFileLink.findMany({
         where: {
@@ -284,7 +310,7 @@ export async function loadDocumentHub(opts: {
             projectId: d.order.projectId,
             projectTitle: d.order.project?.title ?? null,
             contextLabel: `${d.order.number} · ${supplier}`,
-            visibility: "Interne",
+            visibility: supplierActor ? "Partagé fournisseur" : "Interne",
             authorName: null,
             createdAt: d.createdAt.toISOString(),
             href: `/dashboard/commandes/${d.order.id}${d.kind === "BL" ? "?focus=receiving" : "?focus=documents"}`,

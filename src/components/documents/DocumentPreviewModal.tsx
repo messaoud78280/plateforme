@@ -49,7 +49,7 @@ function inferKind(item: DocumentPreviewItem): PreviewKind {
   return "unknown";
 }
 
-async function getSignedUrl(url: string): Promise<string> {
+async function getSignedUrl(url: string): Promise<string | null> {
   try {
     const res = await fetch("/api/files/signed-url", {
       method: "POST",
@@ -58,9 +58,9 @@ async function getSignedUrl(url: string): Promise<string> {
     });
     const data = await res.json();
     if (res.ok && data?.signedUrl) return String(data.signedUrl);
-    return url;
+    return null;
   } catch {
-    return url;
+    return null;
   }
 }
 
@@ -144,20 +144,24 @@ export function DocumentPreviewModal({
       } else if (item.url) {
         const signed = await getSignedUrl(item.url);
         if (cancelled) return;
-        setPreviewUrl(signed);
+        if (!signed) {
+          setError("Accès refusé ou aperçu indisponible.");
+        } else {
+          setPreviewUrl(signed);
 
-        if (kind === "text") {
-          try {
-            const resp = await fetch(signed);
-            const t = await resp.text();
-            if (!cancelled) setTextContent(t);
-          } catch {
-            if (!cancelled) setError("Impossible de charger l’aperçu texte.");
+          if (kind === "text") {
+            try {
+              const resp = await fetch(signed);
+              const t = await resp.text();
+              if (!cancelled) setTextContent(t);
+            } catch {
+              if (!cancelled) setError("Impossible de charger l’aperçu texte.");
+            }
           }
-        }
 
-        if (kind === "office" && canUseMicrosoftOfficeViewer(mime, lowerName)) {
-          if (!cancelled) setOfficeEmbedUrl(microsoftEmbedUrl(signed));
+          if (kind === "office" && canUseMicrosoftOfficeViewer(mime, lowerName)) {
+            if (!cancelled) setOfficeEmbedUrl(microsoftEmbedUrl(signed));
+          }
         }
       }
 

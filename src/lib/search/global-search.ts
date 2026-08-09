@@ -449,41 +449,58 @@ export async function searchGlobal(opts: {
         })
       : Promise.resolve([]);
 
-    const documentsPromise = prisma.document.findMany({
-      where: {
-        AND: [
-          {
-            OR: [{ project: projectWhere }, { clientId: opts.user.id }],
+    const documentsPromise = external
+      ? Promise.resolve([])
+      : prisma.document.findMany({
+          where: {
+            AND: [
+              {
+                OR: [{ project: projectWhere }, { clientId: opts.user.id }],
+              },
+              {
+                OR: [{ name: contains(q) }, { project: { title: contains(q) } }],
+              },
+            ],
           },
-          {
-            OR: [{ name: contains(q) }, { project: { title: contains(q) } }],
+          select: {
+            id: true,
+            name: true,
+            category: true,
+            updatedAt: true,
+            projectId: true,
+            project: { select: { id: true, title: true } },
+            taskId: true,
           },
-        ],
-      },
-      select: {
-        id: true,
-        name: true,
-        category: true,
-        updatedAt: true,
-        projectId: true,
-        project: { select: { id: true, title: true } },
-        taskId: true,
-      },
-      orderBy: { updatedAt: "desc" },
-      take,
-    });
+          orderBy: { updatedAt: "desc" },
+          take,
+        });
 
     const chantierFilesPromise = prisma.chantierFile.findMany({
       where: {
         deletedAt: null,
         isCurrentVersion: true,
         project: projectWhere,
-        OR: [
-          { name: contains(q) },
-          { documentType: contains(q) },
-          { category: contains(q) },
-          { emitterName: contains(q) },
-          { project: { title: contains(q) } },
+        AND: [
+          ...(external
+            ? [
+                {
+                  OR: [
+                    { visibility: { contains: "client", mode: "insensitive" as const } },
+                    { visibility: { contains: "Partage", mode: "insensitive" as const } },
+                    { visibility: { contains: "Intervenants", mode: "insensitive" as const } },
+                  ],
+                },
+              ]
+            : []),
+          {
+            OR: [
+              { name: contains(q) },
+              { documentType: contains(q) },
+              { category: contains(q) },
+              { emitterName: contains(q) },
+              { project: { title: contains(q) } },
+            ],
+          },
         ],
       },
       select: {

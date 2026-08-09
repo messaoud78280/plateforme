@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { createServiceRoleClient } from "@/lib/supabase";
-import { DOCUMENTS_BUCKET, downloadStorageObject, extractStoragePathFromUrl } from "@/lib/storage/supabase-object";
+import { DOCUMENTS_BUCKET, buildDocumentsStorageRef, downloadStorageObject, extractStoragePathFromUrl } from "@/lib/storage/supabase-object";
 import { ensureChantierFolders } from "@/lib/chantier-dossier/folders";
 import { MISSION_TYPE_FOLDER_CODE, type MissionType } from "@/lib/tasks/mission-types";
 import { isFeatureEnabled } from "@/lib/feature-flags";
@@ -135,15 +135,13 @@ export async function syncMissionDocumentToChantier(
     return { ok: false, error: uploadError.message };
   }
 
-  const { data: urlData } = supabase.storage.from(DOCUMENTS_BUCKET).getPublicUrl(targetPath);
-
   const created = await prisma.chantierFile.create({
     data: {
       projectId,
       folderId: folder.id,
       clientId: doc.clientId,
       name: doc.name,
-      fileUrl: urlData.publicUrl,
+      fileUrl: buildDocumentsStorageRef(targetPath),
       storagePath: targetPath,
       fileSize: doc.fileSize,
       mimeType: doc.mimeType,

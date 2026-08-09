@@ -2,19 +2,18 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
-import { createServiceRoleClient } from "@/lib/supabase";
 import {
-  DOCUMENTS_BUCKET,
-  downloadStorageObject,
-  extractStoragePathFromUrl,
-} from "@/lib/storage/supabase-object";
+  issueDocumentSignedUrl,
+  resolveDocumentAccess,
+  streamDocumentBytes,
+} from "@/lib/ged/resolve-document-access";
 import {
   ensureChantierPdfPreview,
   fileExtension,
-  isDirectPreviewable,
   needsPdfConversion,
 } from "@/lib/storage/chantier-pdf-preview";
+import { createServiceRoleClient } from "@/lib/supabase";
+import { DOCUMENTS_BUCKET } from "@/lib/storage/supabase-object";
 
 export const maxDuration = 120;
 
@@ -32,49 +31,69 @@ function conversionHint(name: string): string {
   return "La conversion en PDF a échoué. Essayez d’exporter le document en PDF puis de le redéposer.";
 }
 
-/** GET — Aperçu inline : PDF/images/texte natifs, ou PDF généré (LibreOffice / ConvertAPI). */
+/** GET — Aperçu / téléchargement après ACL GED-V2A.1 (visibilité + scope). */
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const forceOriginal = new URL(request.url).searchParams.get("download") === "original";
+  const asRedirect = new URL(request.url).searchParams.get("redirect") === "1";
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
 
   const { id } = await params;
-  const file = await prisma.chantierFile.findUnique({
-    where: { id },
-    select: { projectId: true, fileUrl: true, mimeType: true, name: true, fileSize: true },
-  });
-  if (!file?.fileUrl) {
-    return NextResponse.json({ error: "Fichier introuvable" }, { status: 404 });
+
+  const access = await resolveDocumentAccess(
+    {
+      id: session.user.id,
+      role: session.user.role,
+      personType: session.user.personType ?? null,
+      permissionProfile: session.user.permissionProfile ?? null,
+      isDemo: Boolean(session.user.isDemo),
+      demoRootUserId: session.user.demoRootUserId ?? null,
+    },
+    { kind: "CHANTIER_FILE", id },
+  );
+
+  if (!access.ok) {
+    return NextResponse.json({ error: access.error }, { status: access.status });
   }
 
-  const access = await canAccessChantierProject(session.user, file.projectId);
-  if (!access.ok) {
-    return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+  if (asRedirect) {
+    const signed = await issueDocumentSignedUrl(access);
+    if ("error" in signed) {
+      return NextResponse.json({ error: signed.error }, { status: signed.status });
+    }
+    return NextResponse.redirect(signed.url);
   }
+
+  const fileMeta = await prisma.chantierFile.findUnique({
+    where: { id },
+    select: { projectId: true, fileSize: true },
+  });
 
   const supabase = createServiceRoleClient();
-  if (!supabase) {
-    return NextResponse.json({ error: "Stockage non configuré" }, { status: 503 });
-  }
-
-  if (!forceOriginal && needsPdfConversion(file.mimeType, file.name)) {
+  if (
+    supabase &&
+    !forceOriginal &&
+    access.bucket === DOCUMENTS_BUCKET &&
+    fileMeta &&
+    needsPdfConversion(access.mimeType, access.fileName)
+  ) {
     const converted = await ensureChantierPdfPreview({
       supabase,
-      projectId: file.projectId,
+      projectId: fileMeta.projectId,
       fileId: id,
-      fileUrl: file.fileUrl,
-      name: file.name,
-      mimeType: file.mimeType,
-      fileSize: file.fileSize,
+      fileUrl: access.storedUrl,
+      name: access.fileName,
+      mimeType: access.mimeType,
+      fileSize: fileMeta.fileSize,
     });
     if (converted) {
       return new NextResponse(new Uint8Array(converted.pdf), {
         status: 200,
         headers: {
           "Content-Type": "application/pdf",
-          "Content-Disposition": inlineFilename(file.name, true),
+          "Content-Disposition": inlineFilename(access.fileName, true),
           "Cache-Control": "private, max-age=300",
           "X-BeWork-Preview": converted.cached ? "cached" : "converted",
         },
@@ -83,29 +102,24 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     return NextResponse.json(
       {
         error: "Aperçu PDF indisponible pour ce format",
-        hint: conversionHint(file.name),
+        hint: conversionHint(access.fileName),
       },
-      { status: 422 }
+      { status: 422 },
     );
   }
 
-  const path = extractStoragePathFromUrl(file.fileUrl, DOCUMENTS_BUCKET);
-  if (!path) {
-    return NextResponse.json({ error: "Chemin stockage invalide" }, { status: 400 });
-  }
-
-  const downloaded = await downloadStorageObject(supabase, DOCUMENTS_BUCKET, path);
+  const downloaded = await streamDocumentBytes(access);
   if (!downloaded) {
     return NextResponse.json({ error: "Impossible de lire le fichier" }, { status: 502 });
   }
 
-  const contentType = file.mimeType || downloaded.contentType || "application/octet-stream";
+  const contentType = access.mimeType || downloaded.contentType || "application/octet-stream";
 
   return new NextResponse(downloaded.blob, {
     status: 200,
     headers: {
       "Content-Type": contentType,
-      "Content-Disposition": inlineFilename(file.name),
+      "Content-Disposition": inlineFilename(access.fileName),
       "Cache-Control": "private, max-age=120",
     },
   });

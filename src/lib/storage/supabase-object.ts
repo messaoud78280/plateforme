@@ -2,10 +2,32 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const DOCUMENTS_BUCKET = "documents";
 
-/** Extrait le chemin objet Supabase depuis une URL public/sign. */
+/** Référence opaque GED (nouveaux uploads) — pas une URL publique. */
+export function buildDocumentsStorageRef(path: string): string {
+  return `storage://${DOCUMENTS_BUCKET}/${path.replace(/^\/+/, "")}`;
+}
+
+/**
+ * Extrait le chemin objet Supabase depuis :
+ * - storage://bucket/path (nouveau)
+ * - URL public/sign historique
+ */
 export function extractStoragePathFromUrl(url: string, bucket: string): string | null {
+  const raw = String(url || "").trim();
+  if (!raw) return null;
+
+  if (raw.startsWith("storage://")) {
+    const rest = raw.slice("storage://".length);
+    const slash = rest.indexOf("/");
+    if (slash <= 0) return null;
+    const b = rest.slice(0, slash);
+    const path = decodeURIComponent(rest.slice(slash + 1));
+    if (b !== bucket || !path) return null;
+    return path;
+  }
+
   try {
-    const s = new URL(url).toString();
+    const s = new URL(raw).toString();
     const idx = s.indexOf("/storage/v1/object/");
     if (idx === -1) return null;
     const tail = s.slice(idx);

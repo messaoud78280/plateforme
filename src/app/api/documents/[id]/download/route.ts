@@ -1,16 +1,15 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { canAccessDocument } from "@/lib/documents/access";
-import { createServiceRoleClient } from "@/lib/supabase";
-import { DOCUMENTS_BUCKET } from "@/lib/storage/supabase-object";
-import { resolveDownloadUrl } from "@/lib/storage/signed-url";
+import {
+  issueDocumentSignedUrl,
+  resolveDocumentAccess,
+} from "@/lib/ged/resolve-document-access";
 
-/** GET — Téléchargement sécurisé via URL signée (bucket privé). */
+/** GET — Téléchargement legacy Document après ACL GED-V2A.1 (pas de fallback public). */
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -18,34 +17,26 @@ export async function GET(
   }
 
   const { id } = await params;
-  const doc = await prisma.document.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      name: true,
-      fileUrl: true,
-      clientId: true,
-      task: { select: { clientId: true, assignedToId: true } },
+  const access = await resolveDocumentAccess(
+    {
+      id: session.user.id,
+      role: session.user.role,
+      personType: session.user.personType ?? null,
+      permissionProfile: session.user.permissionProfile ?? null,
+      isDemo: Boolean(session.user.isDemo),
+      demoRootUserId: session.user.demoRootUserId ?? null,
     },
-  });
+    { kind: "LEGACY_DOCUMENT", id },
+  );
 
-  if (!doc) {
-    return NextResponse.json({ error: "Document introuvable" }, { status: 404 });
+  if (!access.ok) {
+    return NextResponse.json({ error: access.error }, { status: access.status });
   }
 
-  if (!canAccessDocument(session.user, doc)) {
-    return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+  const signed = await issueDocumentSignedUrl(access, 15 * 60);
+  if ("error" in signed) {
+    return NextResponse.json({ error: signed.error }, { status: signed.status });
   }
 
-  const supabase = createServiceRoleClient();
-  if (!supabase) {
-    return NextResponse.redirect(doc.fileUrl);
-  }
-
-  const resolved = await resolveDownloadUrl(supabase, doc.fileUrl, {
-    bucket: DOCUMENTS_BUCKET,
-    expiresIn: 60 * 60,
-  });
-
-  return NextResponse.redirect(resolved.url);
+  return NextResponse.redirect(signed.url);
 }

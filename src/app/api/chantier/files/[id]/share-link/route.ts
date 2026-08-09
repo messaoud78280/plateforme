@@ -6,6 +6,10 @@ import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
 import { buildChantierShareMessage } from "@/lib/chantier-dossier/share-external";
 import { createServiceRoleClient } from "@/lib/supabase";
 import { DOCUMENTS_BUCKET, extractStoragePathFromUrl } from "@/lib/storage/supabase-object";
+import {
+  isMessagerieMediaPath,
+  parseMessagerieStorageRef,
+} from "@/lib/messagerie/media-storage";
 
 const SHARE_LINK_SECONDS = 24 * 60 * 60;
 
@@ -42,13 +46,21 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "Stockage non configuré" }, { status: 503 });
   }
 
-  const path = extractStoragePathFromUrl(file.fileUrl, DOCUMENTS_BUCKET);
+  const parsedMsg = parseMessagerieStorageRef(file.fileUrl);
+  let bucket = DOCUMENTS_BUCKET;
+  let path: string | null = null;
+  if (parsedMsg && isMessagerieMediaPath(parsedMsg.bucket, parsedMsg.path)) {
+    bucket = parsedMsg.bucket;
+    path = parsedMsg.path;
+  } else {
+    path = extractStoragePathFromUrl(file.fileUrl, DOCUMENTS_BUCKET);
+  }
   if (!path) {
     return NextResponse.json({ error: "Impossible de générer un lien de partage" }, { status: 500 });
   }
 
   const { data, error } = await supabase.storage
-    .from(DOCUMENTS_BUCKET)
+    .from(bucket)
     .createSignedUrl(path, SHARE_LINK_SECONDS);
 
   if (error || !data?.signedUrl) {

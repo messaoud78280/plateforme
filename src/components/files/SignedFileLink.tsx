@@ -9,11 +9,17 @@ type Props = {
   className?: string;
   bucket?: string;
   title?: string;
+  /** Contexte ACL messagerie (optionnel). */
+  messageKind?: "TASK" | "DIRECT" | "PROJECT";
+  messageId?: string;
+  /** Ressource GED explicite (préféré). */
+  resourceKind?: "CHANTIER_FILE" | "PURCHASE_ORDER_DOCUMENT" | "LEGACY_DOCUMENT";
+  resourceId?: string;
 };
 
 /**
- * Lien fichier : demande une URL signée puis ouvre l’onglet.
- * Si la signature échoue, ouvre l’URL stockée (compatibilité).
+ * Lien fichier : URL signée après ACL serveur.
+ * Ne retombe plus sur l’URL publique stockée en cas d’échec.
  */
 export function SignedFileLink({
   url,
@@ -21,32 +27,77 @@ export function SignedFileLink({
   className,
   bucket = DOCUMENTS_BUCKET,
   title,
+  messageKind,
+  messageId,
+  resourceKind,
+  resourceId,
 }: Props) {
   const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
 
   async function openSigned(e: React.MouseEvent) {
     e.preventDefault();
     if (!url || busy) return;
     setBusy(true);
+    setErr(null);
     try {
+      if (resourceKind && resourceId) {
+        const res = await fetch("/api/ged/access", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ kind: resourceKind, id: resourceId, expiresIn: 15 * 60 }),
+        });
+        const data = (await res.json().catch(() => ({}))) as {
+          signedUrl?: string;
+          error?: string;
+        };
+        if (!res.ok || !data.signedUrl) {
+          setErr(data.error || "Accès refusé");
+          return;
+        }
+        window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+        return;
+      }
+
       const res = await fetch("/api/files/signed-url", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url, bucket, expiresIn: 15 * 60 }),
+        body: JSON.stringify({
+          url,
+          bucket,
+          expiresIn: 15 * 60,
+          messageKind,
+          messageId,
+        }),
       });
-      const data = (await res.json().catch(() => ({}))) as { signedUrl?: string };
-      const target = data.signedUrl || url;
-      window.open(target, "_blank", "noopener,noreferrer");
+      const data = (await res.json().catch(() => ({}))) as {
+        signedUrl?: string;
+        error?: string;
+      };
+      if (!res.ok || !data.signedUrl) {
+        setErr(data.error || "Accès refusé");
+        return;
+      }
+      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
     } catch {
-      window.open(url, "_blank", "noopener,noreferrer");
+      setErr("Ouverture impossible");
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <a href={url} onClick={(e) => void openSigned(e)} className={className} title={title} rel="noopener noreferrer">
-      {busy ? "Ouverture…" : children}
-    </a>
+    <span className="inline-flex flex-col items-start gap-0.5">
+      <button
+        type="button"
+        onClick={(e) => void openSigned(e)}
+        className={className}
+        title={title ?? (err || undefined)}
+        disabled={busy}
+      >
+        {busy ? "Ouverture…" : children}
+      </button>
+      {err ? <span className="text-[10px] font-medium text-red-600">{err}</span> : null}
+    </span>
   );
 }

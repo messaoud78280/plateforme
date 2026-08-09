@@ -8,6 +8,7 @@ import { createServiceRoleClient } from "@/lib/supabase";
 import { canAccessChantierProject } from "@/lib/chantier-dossier/access";
 import { ensureChantierFolders } from "@/lib/chantier-dossier/folders";
 import { ensureChantierPdfPreview, needsPdfConversion } from "@/lib/storage/chantier-pdf-preview";
+import { buildDocumentsStorageRef } from "@/lib/storage/supabase-object";
 import {
   GED_MAX_BYTES,
   previewModeLabel,
@@ -157,7 +158,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Échec de l'envoi du fichier" }, { status: 500 });
   }
 
-  const { data: urlData } = supabase.storage.from("documents").getPublicUrl(storagePath);
+  // GED-V2A.1 — référence opaque (pas d’URL publique pour nouveaux uploads)
+  const storedRef = buildDocumentsStorageRef(storagePath);
   const previewMode = resolveGedPreviewMode(displayName, file.type || null);
   const classificationStatus = classifyLater || folder.code === "00" ? "A_CLASSER" : "CLASSE";
 
@@ -180,7 +182,7 @@ export async function POST(request: Request) {
         folderId,
         clientId: access.project.clientId,
         name: displayName,
-        fileUrl: urlData.publicUrl,
+        fileUrl: storedRef,
         fileSize: file.size,
         mimeType: file.type || null,
         documentType,
@@ -232,7 +234,7 @@ export async function POST(request: Request) {
             emitter: emitterName,
             status: "Reçu",
             isCurrent: true,
-            fileUrl: urlData.publicUrl,
+            fileUrl: storedRef,
             fileName: displayName,
             fileSize: file.size,
             mimeType: file.type || null,
@@ -250,7 +252,7 @@ export async function POST(request: Request) {
             supabase,
             projectId,
             fileId: created.id,
-            fileUrl: urlData.publicUrl,
+            fileUrl: storedRef,
             name: displayName,
             mimeType: file.type || null,
             fileSize: file.size,

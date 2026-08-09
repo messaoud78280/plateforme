@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createServiceRoleClient } from "@/lib/supabase";
-import { DOCUMENTS_BUCKET } from "@/lib/storage/supabase-object";
-import { resolveDownloadUrl } from "@/lib/storage/signed-url";
+import {
+  issueDocumentSignedUrl,
+  resolveDocumentAccessByStoredUrl,
+} from "@/lib/ged/resolve-document-access";
 import {
   isMessagerieMediaPath,
   parseMessagerieStorageRef,
@@ -12,7 +14,8 @@ import { canAccessMessagerieMedia, type MessagerieMessageKind } from "@/lib/mess
 
 /**
  * POST — URL signée temporaire.
- * Médias messagerie (bucket messagerie / dm/) : ACL conversation obligatoire.
+ * GED-V2A.1 : plus de signature « URL seule » sur documents.
+ * ACL via résolution ressource DB (ou messagerie messageKind/messageId).
  */
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
@@ -26,6 +29,8 @@ export async function POST(request: Request) {
     expiresIn?: number;
     messageKind?: string;
     messageId?: string;
+    resourceKind?: string;
+    resourceId?: string;
   };
   try {
     body = (await request.json()) as typeof body;
@@ -36,56 +41,67 @@ export async function POST(request: Request) {
   const url = String(body.url ?? "").trim();
   if (!url) return NextResponse.json({ error: "URL requise" }, { status: 400 });
 
+  const user = {
+    id: session.user.id,
+    role: session.user.role,
+    personType: session.user.personType ?? null,
+    permissionProfile: session.user.permissionProfile ?? null,
+    isDemo: Boolean(session.user.isDemo),
+    demoRootUserId: session.user.demoRootUserId ?? null,
+  };
+
+  const expiresIn = Math.min(20 * 60, Math.max(60, Number(body.expiresIn ?? 15 * 60)));
+
+  // Chemin messagerie explicite (compat MessagerieSecureMedia)
   const parsed = parseMessagerieStorageRef(url);
   if (parsed && isMessagerieMediaPath(parsed.bucket, parsed.path)) {
     const messageKind = body.messageKind as MessagerieMessageKind | undefined;
     const messageId = String(body.messageId ?? "").trim();
-    if (!messageKind || !messageId || !["TASK", "DIRECT", "PROJECT"].includes(messageKind)) {
-      return NextResponse.json(
-        {
-          error:
-            "Ce fichier messagerie nécessite messageKind et messageId (ACL conversation).",
-        },
-        { status: 403 },
+    if (messageKind && messageId && ["TASK", "DIRECT", "PROJECT"].includes(messageKind)) {
+      const access = await canAccessMessagerieMedia(
+        { id: session.user.id, role: session.user.role },
+        { messageKind, messageId, fileUrl: url },
       );
+      if (!access.ok) {
+        return NextResponse.json({ error: access.error }, { status: access.status });
+      }
+      const supabase = createServiceRoleClient();
+      if (!supabase) {
+        return NextResponse.json({ error: "Stockage indisponible" }, { status: 503 });
+      }
+      const { data, error } = await supabase.storage
+        .from(access.bucket)
+        .createSignedUrl(access.path, expiresIn);
+      if (error || !data?.signedUrl) {
+        return NextResponse.json({ error: "Signature impossible" }, { status: 500 });
+      }
+      return NextResponse.json({
+        signedUrl: data.signedUrl,
+        fallback: false,
+        signed: true,
+      });
     }
-    const access = await canAccessMessagerieMedia(
-      { id: session.user.id, role: session.user.role },
-      { messageKind, messageId, fileUrl: url },
-    );
-    if (!access.ok) {
-      return NextResponse.json({ error: access.error }, { status: access.status });
-    }
-    const supabase = createServiceRoleClient();
-    if (!supabase) {
-      return NextResponse.json({ error: "Stockage indisponible" }, { status: 503 });
-    }
-    const expiresIn = Math.min(60 * 60, Math.max(60, Number(body.expiresIn ?? 15 * 60)));
-    const { data, error } = await supabase.storage
-      .from(access.bucket)
-      .createSignedUrl(access.path, expiresIn);
-    if (error || !data?.signedUrl) {
-      return NextResponse.json({ error: "Signature impossible" }, { status: 500 });
-    }
-    return NextResponse.json({
-      signedUrl: data.signedUrl,
-      fallback: false,
-      signed: true,
-    });
   }
 
-  const bucket = String(body.bucket ?? DOCUMENTS_BUCKET).trim() || DOCUMENTS_BUCKET;
-  const expiresIn = Math.min(60 * 60, Math.max(60, Number(body.expiresIn ?? 10 * 60)));
+  const access = await resolveDocumentAccessByStoredUrl(user, url, {
+    messageKind: body.messageKind as MessagerieMessageKind | undefined,
+    messageId: body.messageId ? String(body.messageId) : undefined,
+  });
 
-  const supabase = createServiceRoleClient();
-  if (!supabase) {
-    return NextResponse.json({ signedUrl: url, fallback: true, signed: false });
+  if (!access.ok) {
+    return NextResponse.json({ error: access.error }, { status: access.status });
   }
 
-  const resolved = await resolveDownloadUrl(supabase, url, { bucket, expiresIn });
+  const signed = await issueDocumentSignedUrl(access, expiresIn);
+  if ("error" in signed) {
+    return NextResponse.json({ error: signed.error }, { status: signed.status });
+  }
+
   return NextResponse.json({
-    signedUrl: resolved.url,
-    fallback: resolved.fallback,
-    signed: resolved.signed,
+    signedUrl: signed.url,
+    fallback: false,
+    signed: true,
+    kind: access.kind,
+    resourceId: access.resourceId,
   });
 }

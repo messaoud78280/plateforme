@@ -8,6 +8,7 @@ import {
 } from "@/lib/purchase-orders/status";
 import { syncPurchaseOrderDeliveryEvent } from "@/lib/purchase-orders/sync-delivery";
 import { createNotification } from "@/lib/notifications";
+import { safeSyncPurchaseOrderAttentionAfterMutation } from "@/lib/purchase-orders/attention/sync-notifications";
 
 export type CreatePurchaseOrderLineInput = {
   designation: string;
@@ -260,6 +261,8 @@ export async function transitionPurchaseOrder(opts: {
       }
     }
   }
+
+  await safeSyncPurchaseOrderAttentionAfterMutation(order.id);
 
   return updated;
 }

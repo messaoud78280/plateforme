@@ -7,6 +7,7 @@ import {
   type SupplierRefuseReasonKey,
 } from "@/lib/purchase-orders/supplier-ui";
 import { syncPurchaseOrderDeliveryEvent } from "@/lib/purchase-orders/sync-delivery";
+import { safeSyncPurchaseOrderAttentionAfterMutation } from "@/lib/purchase-orders/attention/sync-notifications";
 
 export type { SupplierRefuseReasonKey };
 export { REFUSE_REASONS };
@@ -181,6 +182,8 @@ export async function sharePurchaseOrderWithSupplier(opts: {
     actorUserId: opts.actorUserId,
   });
 
+  await safeSyncPurchaseOrderAttentionAfterMutation(order.id);
+
   return updated;
 }
 
@@ -240,6 +243,8 @@ export async function supplierConfirmPurchaseOrder(opts: {
     postSystemMessage: true,
     systemMessage: `✓ Livraison confirmée — ${fmtSlot(confirmedAt)}\n${order.number} · ${opts.supplierOrgName}\n[Voir la commande](/dashboard/commandes/${order.id})`,
   });
+
+  await safeSyncPurchaseOrderAttentionAfterMutation(order.id);
 
   return updated;
 }
@@ -314,6 +319,8 @@ export async function supplierProposeDelivery(opts: {
       : null,
   });
 
+  await safeSyncPurchaseOrderAttentionAfterMutation(order.id);
+
   return updated;
 }
 
@@ -373,6 +380,8 @@ export async function supplierRefusePurchaseOrder(opts: {
     orderId: order.id,
     actorUserId: opts.actorUserId,
   });
+
+  await safeSyncPurchaseOrderAttentionAfterMutation(order.id);
 
   return updated;
 }
@@ -435,6 +444,8 @@ export async function acceptSupplierDeliveryProposal(opts: {
     systemMessage: `✓ Livraison confirmée — ${fmtSlot(order.proposedDeliveryAt)}\n${order.number} · ${supplierName}\nAcceptée par ${opts.actorName}\n[Voir la commande](/dashboard/commandes/${order.id})`,
   });
 
+  await safeSyncPurchaseOrderAttentionAfterMutation(order.id);
+
   return updated;
 }
 
@@ -488,6 +499,8 @@ export async function refuseSupplierDeliveryProposal(opts: {
     orderId: order.id,
     actorUserId: opts.actorUserId,
   });
+
+  await safeSyncPurchaseOrderAttentionAfterMutation(order.id);
 
   return updated;
 }

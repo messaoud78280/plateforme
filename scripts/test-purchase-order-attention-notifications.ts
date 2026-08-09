@@ -295,13 +295,93 @@ function testRecidiveNewEpisode() {
 function testActionUrls() {
   assert.equal(
     purchaseOrderAttentionActionUrl(PO, "SUPPLIER_PROPOSAL_PENDING"),
-    `/dashboard/commandes/${PO}?focus=proposition`,
+    `/dashboard/commandes/${PO}?focus=proposal`,
   );
   assert.equal(
     purchaseOrderAttentionActionUrl(PO, "RECEIPT_ISSUE"),
-    `/dashboard/commandes/${PO}/reception`,
+    `/dashboard/commandes/${PO}?focus=receiving`,
   );
-  assert.equal(purchaseOrderAttentionActionUrl(PO, "ORDER_NOT_SENT"), `/dashboard/commandes/${PO}`);
+  assert.equal(
+    purchaseOrderAttentionActionUrl(PO, "PARTIAL_RECEIPT_PENDING"),
+    `/dashboard/commandes/${PO}?focus=receiving`,
+  );
+  assert.equal(
+    purchaseOrderAttentionActionUrl(PO, "DELIVERY_OVERDUE"),
+    `/dashboard/commandes/${PO}?focus=receiving`,
+  );
+  assert.equal(
+    purchaseOrderAttentionActionUrl(PO, "DELIVERY_NOTE_MISSING"),
+    `/dashboard/commandes/${PO}?focus=documents`,
+  );
+  assert.equal(
+    purchaseOrderAttentionActionUrl(PO, "DELIVERY_UNCONFIRMED"),
+    `/dashboard/commandes/${PO}?focus=delivery`,
+  );
+  assert.equal(
+    purchaseOrderAttentionActionUrl(PO, "ORDER_NOT_SENT"),
+    `/dashboard/commandes/${PO}?focus=delivery`,
+  );
+}
+
+function testImmediateMutationSignals() {
+  // Refus → URGENT notifyable immédiatement
+  const refused = evaluatePurchaseOrderAttention(
+    baseOrder({
+      status: "REFUSEE",
+      supplierRefuseReason: "Stock insuffisant",
+      refuseEventId: "evt_refuse_1",
+      confirmedDeliveryAt: null,
+    }),
+    { now: NOW },
+  );
+  assert.equal(refused.attentionItems[0]?.code, "SUPPLIER_REFUSED");
+  assert.ok(shouldNotifyAttentionLevel(refused.effectiveUrgency));
+  assert.equal(
+    purchaseOrderAttentionActionUrl(PO, "SUPPLIER_REFUSED"),
+    `/dashboard/commandes/${PO}?focus=delivery`,
+  );
+
+  // Proposition → notification immediate
+  const proposed = evaluatePurchaseOrderAttention(
+    baseOrder({
+      status: "A_CONFIRMER",
+      proposedDeliveryStatus: "PENDING",
+      proposedDeliveryAt: atLocal(2026, 7, 11, 10),
+      proposeEventId: "evt_propose_1",
+    }),
+    { now: NOW },
+  );
+  assert.equal(proposed.attentionItems[0]?.code, "SUPPLIER_PROPOSAL_PENDING");
+  assert.ok(shouldNotifyAttentionLevel(proposed.effectiveUrgency));
+
+  // Acceptation → plus de proposition pending
+  const accepted = evaluatePurchaseOrderAttention(
+    baseOrder({
+      status: "CONFIRMEE",
+      proposedDeliveryStatus: "ACCEPTED",
+      confirmedDeliveryAt: atLocal(2026, 7, 11, 10),
+      proposedDeliveryAt: atLocal(2026, 7, 11, 10),
+    }),
+    { now: NOW },
+  );
+  assert.ok(!accepted.attentionItems.some((i) => i.code === "SUPPLIER_PROPOSAL_PENDING"));
+}
+
+function testMutationThenCronDedupeSameKey() {
+  const order = baseOrder({
+    status: "REFUSEE",
+    supplierRefuseReason: "Stock",
+    refuseEventId: "evt_r",
+  });
+  const attention = evaluatePurchaseOrderAttention(order, { now: NOW });
+  const primary = attention.attentionItems[0]!;
+  const snap = computeReceivingSnapshot(order);
+  const episode = purchaseOrderAttentionEpisodeKey(order, primary.code, snap);
+  const key = poKey(KARIM, primary.code, attention.effectiveUrgency, episode, "INITIAL");
+  // Deux sync (mutation + cron) → même clé INITIAL
+  assert.equal(key, poKey(KARIM, primary.code, attention.effectiveUrgency, episode, "INITIAL"));
+  assert.ok(key.startsWith("ATTENTION:PURCHASE_ORDER:"));
+  assert.ok(key.endsWith(":INITIAL"));
 }
 
 function testScenarioBc043Pipeline() {
@@ -383,6 +463,8 @@ const tests: [string, () => void][] = [
   ["résolution stoppe le code", testResolutionStops],
   ["récidive nouvel épisode", testRecidiveNewEpisode],
   ["actionUrl contextuelle", testActionUrls],
+  ["mutation immédiate refus/proposition/accept", testImmediateMutationSignals],
+  ["mutation + cron même dedupe INITIAL", testMutationThenCronDedupeSameKey],
   ["scénario BC-2026-043 pipeline", testScenarioBc043Pipeline],
 ];
 

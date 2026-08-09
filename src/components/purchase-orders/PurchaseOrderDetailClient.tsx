@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   actionsForPurchaseOrderStatus,
   PURCHASE_ORDER_STATUS_LABELS,
@@ -13,6 +13,13 @@ import {
 import type { PurchaseOrderStatus } from "@prisma/client";
 import { PurchaseOrderMessagerieLink } from "@/components/messagerie/MessagerieContextLinks";
 
+const FOCUS_IDS: Record<string, string> = {
+  proposal: "po-focus-proposal",
+  proposition: "po-focus-proposal",
+  receiving: "po-focus-receiving",
+  documents: "po-focus-documents",
+  delivery: "po-focus-delivery",
+};
 type OrderDetail = {
   id: string;
   number: string;
@@ -150,6 +157,36 @@ export function PurchaseOrderDetailClient({
   const [proposeComment, setProposeComment] = useState("");
   const [refuseKey, setRefuseKey] = useState<string>("STOCK");
   const [shareContactId, setShareContactId] = useState(order.contact?.id ?? "");
+  const [focusHighlight, setFocusHighlight] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const raw = (params.get("focus") || "").trim().toLowerCase();
+    const elId = FOCUS_IDS[raw];
+    if (!elId) return;
+
+    const run = () => {
+      let el = document.getElementById(elId);
+      if (!el && elId === "po-focus-proposal") {
+        el = document.getElementById("po-focus-delivery");
+      }
+      if (!el) return;
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      setFocusHighlight(el.id);
+      window.setTimeout(() => setFocusHighlight(null), 2200);
+      const url = new URL(window.location.href);
+      url.searchParams.delete("focus");
+      window.history.replaceState({}, "", url.pathname + url.search + url.hash);
+    };
+
+    const t = window.setTimeout(run, 80);
+    return () => window.clearTimeout(t);
+  }, [order.id]);
+
+  const focusRing = (id: string) =>
+    focusHighlight === id
+      ? "ring-2 ring-[#1e3a5f]/35 ring-offset-2 transition-shadow duration-500"
+      : "";
 
   const supplierActs = supplierActionsForStatus(
     order.status,
@@ -322,7 +359,10 @@ export function PurchaseOrderDetailClient({
 
       {/* Proposition en attente — côté entreprise */}
       {!isSupplierView && order.proposedDeliveryStatus === "PENDING" ? (
-        <section className="rounded-2xl border border-violet-200 bg-violet-50/70 p-5">
+        <section
+          id="po-focus-proposal"
+          className={`rounded-2xl border border-violet-200 bg-violet-50/70 p-5 ${focusRing("po-focus-proposal")}`}
+        >
           <h2 className="text-sm font-bold text-violet-950">
             {supplierLabel} propose une modification
           </h2>
@@ -587,9 +627,12 @@ export function PurchaseOrderDetailClient({
         </ul>
       </section>
 
-      {order.receipts && order.receipts.length > 0 ? (
-        <section className="rounded-2xl border border-slate-200 bg-white p-5">
-          <h2 className="text-sm font-bold text-slate-900">Réceptions</h2>
+      <section
+        id="po-focus-receiving"
+        className={`rounded-2xl border border-slate-200 bg-white p-5 ${focusRing("po-focus-receiving")}`}
+      >
+        <h2 className="text-sm font-bold text-slate-900">Réceptions</h2>
+        {order.receipts && order.receipts.length > 0 ? (
           <ul className="mt-3 space-y-3">
             {order.receipts.map((r) => (
               <li key={r.id} className="rounded-lg border border-slate-100 px-3 py-2 text-sm">
@@ -616,11 +659,25 @@ export function PurchaseOrderDetailClient({
               </li>
             ))}
           </ul>
-        </section>
-      ) : null}
+        ) : (
+          <p className="mt-2 text-sm text-slate-500">Aucune réception enregistrée.</p>
+        )}
+        {canReceive &&
+        !["ANNULEE", "CLOTUREE", "BROUILLON", "RECUE"].includes(order.status) ? (
+          <Link
+            href={`/dashboard/commandes/${order.id}/reception`}
+            className="mt-3 inline-flex rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white"
+          >
+            Réceptionner
+          </Link>
+        ) : null}
+      </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded-2xl border border-slate-200 bg-white p-5">
+        <section
+          id="po-focus-delivery"
+          className={`rounded-2xl border border-slate-200 bg-white p-5 ${focusRing("po-focus-delivery")}`}
+        >
           <h2 className="text-sm font-bold text-slate-900">Livraison</h2>
           <dl className="mt-2 space-y-1 text-sm text-slate-700">
             <div>
@@ -707,7 +764,10 @@ export function PurchaseOrderDetailClient({
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-5">
+        <section
+          id="po-focus-documents"
+          className={`rounded-2xl border border-slate-200 bg-white p-5 ${focusRing("po-focus-documents")}`}
+        >
           <h2 className="text-sm font-bold text-slate-900">Documents</h2>
           {order.documents.length === 0 ? (
             <p className="mt-2 text-sm text-slate-500">Aucun document pour l’instant.</p>

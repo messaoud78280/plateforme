@@ -15,6 +15,7 @@ import {
   evaluatePurchaseOrderAttention,
 } from "@/lib/purchase-orders/attention/evaluate";
 import { purchaseOrderAttentionEpisodeKey } from "@/lib/purchase-orders/attention/episode";
+import { loadPurchaseOrderAttentionInput } from "@/lib/purchase-orders/attention/load-input";
 import type { PurchaseOrderAttentionInput } from "@/lib/purchase-orders/attention/types";
 import type { SyncAttentionResult } from "@/lib/follow-up/attention/sync-notifications";
 
@@ -23,24 +24,43 @@ function isInternalPerson(personType: string | null | undefined): boolean {
   return personType === "INTERNAL";
 }
 
+/** Focus UI stables (sections réelles dans PurchaseOrderDetailClient). */
+export type PurchaseOrderAttentionFocus =
+  | "proposal"
+  | "receiving"
+  | "documents"
+  | "delivery";
+
+export function purchaseOrderAttentionFocusForCode(
+  code: string | null | undefined,
+): PurchaseOrderAttentionFocus | null {
+  switch (code) {
+    case "SUPPLIER_PROPOSAL_PENDING":
+      return "proposal";
+    case "RECEIPT_ISSUE":
+    case "PARTIAL_RECEIPT_PENDING":
+    case "DELIVERY_OVERDUE":
+      return "receiving";
+    case "DELIVERY_NOTE_MISSING":
+      return "documents";
+    case "DELIVERY_UNCONFIRMED":
+    case "SUPPLIER_NO_RESPONSE":
+    case "SUPPLIER_REFUSED":
+    case "ORDER_NOT_SENT":
+      return "delivery";
+    default:
+      return null;
+  }
+}
+
 /** Action URL contextualisée selon le code primary. */
 export function purchaseOrderAttentionActionUrl(
   orderId: string,
   code: string | null | undefined,
 ): string {
   const base = `/dashboard/commandes/${orderId}`;
-  switch (code) {
-    case "SUPPLIER_PROPOSAL_PENDING":
-      return `${base}?focus=proposition`;
-    case "RECEIPT_ISSUE":
-    case "PARTIAL_RECEIPT_PENDING":
-    case "DELIVERY_OVERDUE":
-      return `${base}/reception`;
-    case "DELIVERY_NOTE_MISSING":
-      return `${base}?focus=documents`;
-    default:
-      return base;
-  }
+  const focus = purchaseOrderAttentionFocusForCode(code);
+  return focus ? `${base}?focus=${focus}` : base;
 }
 
 /**
@@ -159,4 +179,35 @@ export async function syncAttentionNotificationsForPurchaseOrders(
   }
 
   return result;
+}
+
+/**
+ * CDE-3B2.1 — Sync INITIAL ciblée sur une commande (post-mutation).
+ * Idempotente via dedupeKey — le cron horaire ne recréera pas le même INITIAL.
+ */
+export async function syncAttentionNotificationsForPurchaseOrderId(
+  orderId: string,
+  opts?: { now?: Date },
+): Promise<SyncAttentionResult> {
+  const input = await loadPurchaseOrderAttentionInput(orderId);
+  if (!input) {
+    return { examined: 0, created: 0, skipped: 0, unchanged: 0 };
+  }
+  return syncAttentionNotificationsForPurchaseOrders([input], {
+    now: opts?.now,
+  });
+}
+
+/**
+ * Ne doit jamais faire échouer la mutation métier.
+ * INITIAL / aggravation immédiate uniquement — pas de rappel ni escalade.
+ */
+export async function safeSyncPurchaseOrderAttentionAfterMutation(
+  orderId: string,
+): Promise<void> {
+  try {
+    await syncAttentionNotificationsForPurchaseOrderId(orderId);
+  } catch (e) {
+    console.error("[PO syncAttention after mutation]", orderId, e);
+  }
 }

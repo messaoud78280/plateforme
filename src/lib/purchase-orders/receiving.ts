@@ -9,6 +9,7 @@ import type { PurchaseOrderStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
 import { syncPurchaseOrderDeliveryEvent } from "@/lib/purchase-orders/sync-delivery";
+import { safeSyncPurchaseOrderAttentionAfterMutation } from "@/lib/purchase-orders/attention/sync-notifications";
 
 export type ReceiptLineInput = {
   orderLineId: string;
@@ -423,6 +424,8 @@ export async function createPurchaseOrderReceipt(opts: {
     }
   }
 
+  await safeSyncPurchaseOrderAttentionAfterMutation(order.id);
+
   return { receipt, state };
 }
 
@@ -505,6 +508,8 @@ export async function cancelPurchaseOrderReceipt(opts: {
       });
     }
   }
+
+  await safeSyncPurchaseOrderAttentionAfterMutation(receipt.purchaseOrderId);
 
   return { state };
 }

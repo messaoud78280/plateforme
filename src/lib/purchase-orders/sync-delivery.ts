@@ -5,6 +5,7 @@
  */
 import type { AgendaEventStatus, PurchaseOrderStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { safeSyncPurchaseOrderAttentionAfterMutation } from "@/lib/purchase-orders/attention/sync-notifications";
 
 const DEFAULT_DURATION_MS = 60 * 60 * 1000;
 
@@ -534,6 +535,8 @@ export async function reschedulePurchaseOrderDeliveryFromAgenda(opts: {
       });
     }
   }
+
+  await safeSyncPurchaseOrderAttentionAfterMutation(order.id);
 
   return { ok: true, eventId: synced.eventId, field };
 }

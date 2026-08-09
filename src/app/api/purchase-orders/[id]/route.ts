@@ -12,6 +12,7 @@ import { computeOrderAmountHt } from "@/lib/purchase-orders/totals";
 import { sanitizeOrderForSupplier } from "@/lib/purchase-orders/supplier-collaboration";
 import { syncPurchaseOrderDeliveryEvent } from "@/lib/purchase-orders/sync-delivery";
 import { createNotification } from "@/lib/notifications";
+import { safeSyncPurchaseOrderAttentionAfterMutation } from "@/lib/purchase-orders/attention/sync-notifications";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -226,6 +227,15 @@ export async function PATCH(req: Request, ctx: Ctx) {
         actionUrl: `/dashboard/commandes/${id}`,
       });
     }
+  }
+
+  const attentionTouched =
+    body.responsibleId !== undefined ||
+    body.requestedDeliveryAt !== undefined ||
+    body.confirmedDeliveryAt !== undefined;
+
+  if (attentionTouched) {
+    await safeSyncPurchaseOrderAttentionAfterMutation(id);
   }
 
   return NextResponse.json({ ok: true, order });

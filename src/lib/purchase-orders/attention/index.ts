@@ -13,10 +13,14 @@ export {
   type PurchaseOrderAttentionBatchRow,
 } from "@/lib/purchase-orders/attention/batch";
 export { purchaseOrderAttentionEpisodeKey } from "@/lib/purchase-orders/attention/episode";
+export { loadPurchaseOrderAttentionInput } from "@/lib/purchase-orders/attention/load-input";
 export {
   syncAttentionNotificationsForPurchaseOrders,
+  syncAttentionNotificationsForPurchaseOrderId,
+  safeSyncPurchaseOrderAttentionAfterMutation,
   resolvePurchaseOrderNotificationRecipient,
   purchaseOrderAttentionActionUrl,
+  purchaseOrderAttentionFocusForCode,
 } from "@/lib/purchase-orders/attention/sync-notifications";
 export { processPurchaseOrderAttentionEscalations } from "@/lib/purchase-orders/attention/process-escalations";
 export type {

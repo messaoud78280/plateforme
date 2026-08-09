@@ -4,6 +4,9 @@ import { OutilsCommunication } from "@/components/OutilsCommunication";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { UserAccountDropdown } from "@/components/dashboard/UserAccountDropdown";
 import { NotificationsDropdown } from "@/components/dashboard/NotificationsDropdown";
+import { MessagerieHeaderShortcut } from "@/components/dashboard/MessagerieHeaderShortcut";
+import { MessagerieToastListener } from "@/components/dashboard/MessagerieToastListener";
+import { MobileBottomNav } from "@/components/dashboard/MobileBottomNav";
 import { ClientAccountStatus, UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { isClientLoginAllowed } from "@/lib/client-account-approval";
@@ -155,6 +158,7 @@ export default async function DashboardLayout({
                 + Nouvelle mission
               </a>
             ) : null}
+            <MessagerieHeaderShortcut />
             <NotificationsDropdown />
             <OutilsCommunication />
             <UserAccountDropdown
@@ -168,11 +172,13 @@ export default async function DashboardLayout({
           <main
             id="contenu-principal"
             tabIndex={-1}
-            className="cc-enter mx-auto w-full max-w-site min-w-0 flex-1 px-3 py-6 outline-none sm:px-5 sm:py-8"
+            className="cc-enter mx-auto w-full max-w-site min-w-0 flex-1 px-3 py-6 pb-24 outline-none sm:px-5 sm:py-8 lg:pb-8"
           >
             {children}
           </main>
           <RoleOnboarding userId={session.user.id} role={session.user.role} />
+          <MessagerieToastListener />
+          <MobileBottomNav />
         </UiPreferencesProvider>
       </div>
     </div>

@@ -12,6 +12,7 @@ import {
   supplierActionsForStatus,
 } from "@/lib/purchase-orders/supplier-ui";
 import type { PurchaseOrderStatus } from "@prisma/client";
+import { PurchaseOrderMessagerieLink } from "@/components/messagerie/MessagerieContextLinks";
 
 type OrderDetail = {
   id: string;
@@ -266,6 +267,15 @@ export function PurchaseOrderDetailClient({
               : PURCHASE_ORDER_STATUS_LABELS[order.status]}
           </span>
         </div>
+
+        {!isSupplierView && order.project?.id ? (
+          <div className="mt-3">
+            <PurchaseOrderMessagerieLink
+              projectId={order.project.id}
+              supplierName={supplierLabel}
+            />
+          </div>
+        ) : null}
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-lg bg-slate-50 p-3">

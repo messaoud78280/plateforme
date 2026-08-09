@@ -11,6 +11,7 @@ import {
   URGENCY_LABELS,
   URGENCY_STYLES,
 } from "@/lib/follow-up/types";
+import { FollowUpMessagerieLink } from "@/components/messagerie/MessagerieContextLinks";
 
 type TeamUser = { id: string; name: string; email: string };
 
@@ -46,6 +47,7 @@ type Sheet = {
   reminderOffsets: unknown;
   assigneeId: string | null;
   assignee: { id: string; name: string } | null;
+  projectId: string | null;
   timeline: {
     id: string;
     kind: string;
@@ -216,6 +218,7 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
             {sheet.workObject && <p className="mt-2 text-sm text-slate-800">{sheet.workObject}</p>}
             {sheet.siteAddress && <p className="mt-1 text-xs text-slate-600">{sheet.siteAddress}</p>}
           </div>
+          <FollowUpMessagerieLink projectId={sheet.projectId} />
         </div>
 
         {/* Infos essentielles — visibles immédiatement */}

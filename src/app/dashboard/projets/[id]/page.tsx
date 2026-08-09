@@ -33,6 +33,7 @@ import { chantierStatusBadgeTone } from "@/lib/chantier-lifecycle";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { TaskStatus } from "@prisma/client";
+import { ProjectMessagerieLinks } from "@/components/messagerie/MessagerieContextLinks";
 
 export default async function ProjetDetailPage({
   params,
@@ -668,6 +669,7 @@ export default async function ProjetDetailPage({
         }
         actions={
           <>
+            <ProjectMessagerieLinks projectId={project.id} />
             {missingCount > 0 ? (
               <Link
                 href={`/dashboard/projets/manquants?chantier=${encodeURIComponent(id)}`}

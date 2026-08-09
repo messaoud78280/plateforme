@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { MessagerieMissionsView } from "@/components/messagerie/MessagerieMissionsView";
 import { MessagerieView } from "@/components/messagerie/MessagerieView";
@@ -31,6 +31,12 @@ export function MessagerieHub(props: Props) {
   }, [viewParam, props.preferChantiers]);
 
   const [view, setView] = useState<"missions" | "chantiers">(initialView);
+
+  useEffect(() => {
+    if (viewParam === "chantiers" || viewParam === "missions") {
+      setView(viewParam);
+    }
+  }, [viewParam]);
 
   return (
     <div className="flex h-full min-h-0 flex-col">

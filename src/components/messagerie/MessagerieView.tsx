@@ -19,8 +19,8 @@ type MessageItem = {
 
 const CHANNEL_LABELS: Record<MessageChannel, string> = {
   INTERNE: "🔒 Interne",
-  CLIENT: "🟠 Externe — Client",
-  FOURNISSEUR: "🟠 Externe — Fournisseur",
+  CLIENT: "Client · Externe",
+  FOURNISSEUR: "Fournisseur · Externe",
 };
 
 const CHANNEL_HINT: Record<MessageChannel, string> = {
@@ -130,6 +130,20 @@ export function MessagerieView({
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (
+      initialChannel === "INTERNE" ||
+      initialChannel === "FOURNISSEUR" ||
+      initialChannel === "CLIENT"
+    ) {
+      setChannel(initialChannel);
+    }
+  }, [initialChannel]);
+
+  useEffect(() => {
+    if (initialProjectId) setSelectedProjectId(initialProjectId);
+  }, [initialProjectId]);
 
   async function loadMessages(ch: MessageChannel) {
     const res = await fetch(`/api/messages?meta=1&channel=${ch}`);

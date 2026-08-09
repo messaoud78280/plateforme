@@ -16,6 +16,7 @@ import { ClientDashboardContent } from "@/components/dashboard/ClientDashboardCo
 import { ManagerDashboardContent, type ManagerTaskItem, type ManagerReportItem } from "@/components/dashboard/ManagerDashboardContent";
 import { AgentDashboardContent } from "@/components/dashboard/AgentDashboardContent";
 import { ATraiterHomeBanner } from "@/components/dashboard/ATraiterHomeBanner";
+import { MessagesHomeBanner } from "@/components/dashboard/MessagesHomeBanner";
 import { UpcomingRdvSection } from "@/components/dashboard/UpcomingRdvSection";
 import { BackLink } from "@/components/ui/BackLink";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -796,6 +797,7 @@ export default async function DashboardPage({
           urgent={aTraiterSummary.attentionCounts.URGENT}
           important={aTraiterSummary.attentionCounts.IMPORTANT}
         />
+        <MessagesHomeBanner />
         <UpcomingRdvSection appointments={upcomingRdvs} compact />
         <ClientDashboardContent
           userName={session.user?.name ?? null}
@@ -833,6 +835,7 @@ export default async function DashboardPage({
           urgent={aTraiterSummary.attentionCounts.URGENT}
           important={aTraiterSummary.attentionCounts.IMPORTANT}
         />
+        <MessagesHomeBanner />
         <UpcomingRdvSection appointments={upcomingRdvs} compact />
         <AgentDashboardContent
           userName={session.user?.name ?? null}
@@ -857,6 +860,7 @@ export default async function DashboardPage({
         urgent={aTraiterSummary.attentionCounts.URGENT}
         important={aTraiterSummary.attentionCounts.IMPORTANT}
       />
+      <MessagesHomeBanner />
       <UpcomingRdvSection appointments={upcomingRdvs} />
       <ScrollToMessages />
 

@@ -3,7 +3,7 @@
 import type { ComponentType } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
 import {
   AlertCircle,
@@ -19,7 +19,6 @@ import {
   Home,
   LayoutDashboard,
   LogOut,
-  Menu,
   MessageSquare,
   PanelLeft,
   Settings,
@@ -59,13 +58,14 @@ function buildSections(role: string | null | undefined): NavSection[] {
         items: [
           { href: "/dashboard", label: "Accueil", exact: true, icon: Home },
           { href: "/dashboard/a-traiter", label: "À traiter", icon: AlertCircle },
-          { href: "/dashboard/fiches-suivi", label: "Fiches suivi", icon: StickyNote },
+          { href: "/dashboard/messagerie", label: "Messagerie", icon: MessageSquare },
           { href: "/dashboard/projets", label: "Chantiers", icon: FolderKanban },
           { href: "/dashboard/messages", label: "Planning", icon: CalendarDays },
           { href: "/dashboard/agenda", label: "Agenda", icon: Calendar },
-          { href: "/dashboard/taches", label: "Tâches", icon: ClipboardList },
           { href: "/dashboard/commandes", label: "Commandes", icon: Briefcase },
+          { href: "/dashboard/taches", label: "Tâches", icon: ClipboardList },
           { href: "/dashboard/livraisons", label: "Livraisons", icon: CalendarDays },
+          { href: "/dashboard/fiches-suivi", label: "Fiches suivi", icon: StickyNote },
           { href: "/dashboard/fournisseurs", label: "Fournisseurs", icon: Building2 },
         ],
       },
@@ -74,7 +74,6 @@ function buildSections(role: string | null | undefined): NavSection[] {
         label: "Gestion",
         items: [
           { href: "/dashboard/documents", label: "Documents", icon: FileText },
-          { href: "/dashboard/messagerie", label: "Messagerie", icon: MessageSquare },
           { href: "/dashboard/equipe", label: "Équipe & partenaires", icon: Users },
         ],
       },
@@ -106,8 +105,9 @@ function buildSections(role: string | null | undefined): NavSection[] {
         items: [
           { href: "/dashboard", label: "Accueil", exact: true, icon: Home },
           { href: "/dashboard/a-traiter", label: "À traiter", icon: AlertCircle },
-          { href: "/dashboard/clients", label: "Clients", icon: Building2 },
+          { href: "/dashboard/messagerie", label: "Messagerie", icon: MessageSquare },
           { href: "/dashboard/projets", label: "Chantiers", icon: FolderKanban },
+          { href: "/dashboard/clients", label: "Clients", icon: Building2 },
           { href: "/dashboard/taches", label: "Missions", icon: ClipboardList },
         ],
       },
@@ -117,7 +117,6 @@ function buildSections(role: string | null | undefined): NavSection[] {
         items: [
           { href: "/dashboard/agents", label: "Agents", icon: Users },
           { href: "/dashboard/pilotage-travaux", label: "Pilotage", icon: LayoutDashboard },
-          { href: "/dashboard/messagerie", label: "Messagerie", icon: MessageSquare },
           { href: "/dashboard/messages", label: "RDV", icon: CalendarDays },
           { href: "/dashboard/agenda", label: "Agenda", icon: Calendar },
           { href: "/dashboard/fiches-suivi", label: "Fiches suivi", icon: StickyNote },
@@ -148,8 +147,11 @@ function buildSections(role: string | null | undefined): NavSection[] {
         label: "Principal",
         items: [
           { href: "/dashboard", label: "Accueil", exact: true, icon: Home },
+          { href: "/dashboard/a-traiter", label: "À traiter", icon: AlertCircle },
+          { href: "/dashboard/messagerie", label: "Messagerie", icon: MessageSquare },
           { href: "/dashboard/taches", label: "Mes missions", icon: ClipboardList },
           { href: "/dashboard/projets", label: "Chantiers", icon: FolderKanban },
+          { href: "/dashboard/agenda", label: "Agenda", icon: Calendar },
           { href: "/dashboard/pilotage-travaux", label: "Pilotage", icon: LayoutDashboard },
         ],
       },
@@ -160,9 +162,7 @@ function buildSections(role: string | null | undefined): NavSection[] {
           ...(role === "AGENCE"
             ? [{ href: "/dashboard/demonstrations", label: "Démos", icon: PanelLeft }]
             : []),
-          { href: "/dashboard/messagerie", label: "Messagerie", icon: MessageSquare },
           { href: "/dashboard/messages", label: "RDV", icon: CalendarDays },
-          { href: "/dashboard/agenda", label: "Agenda", icon: Calendar },
           { href: "/dashboard/devis", label: "Analyses", icon: FileText },
           { href: "/dashboard/skills", label: "Skills", icon: Sparkles },
           { href: "/dashboard/parametres", label: "Paramètres", icon: Settings },
@@ -375,16 +375,17 @@ export function AppSidebar({
     </>
   );
 
+  useEffect(() => {
+    function onOpen() {
+      setMobileOpen(true);
+    }
+    window.addEventListener("bework:open-sidebar", onOpen);
+    return () => window.removeEventListener("bework:open-sidebar", onOpen);
+  }, []);
+
   return (
     <>
-      <button
-        type="button"
-        className="fixed bottom-4 left-4 z-50 flex h-11 w-11 items-center justify-center rounded-full bg-bework-navy text-white shadow-lg ring-4 ring-white/80 lg:hidden"
-        onClick={() => setMobileOpen(true)}
-        aria-label="Ouvrir le menu"
-      >
-        <Menu className="h-5 w-5" />
-      </button>
+      {/* FAB remplacé par barre basse MobileBottomNav (Plus) */}
 
       {mobileOpen ? (
         <div className="fixed inset-0 z-50 lg:hidden">

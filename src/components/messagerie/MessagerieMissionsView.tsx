@@ -67,7 +67,7 @@ type DirectMessageItem = {
 type AttachmentItem = { name: string; fileUrl: string; fileSize: number; mimeType?: string };
 
 type FilterId = "envoyer" | "messages-directs" | "inbox" | "mes-missions" | "en-attente-client" | "en-cours" | "terminees";
-type ListChip = "tous" | "non-lus" | "internes" | "externes";
+type ListChip = "tous" | "non-lus" | "internes" | "clients" | "fournisseurs";
 
 const PRIMARY_NAV: { id: FilterId; label: string }[] = [
   { id: "inbox", label: "Conversations" },
@@ -1350,13 +1350,24 @@ export function MessagerieMissionsView({
                 ["tous", "Tous"],
                 ["non-lus", "Non lus"],
                 ["internes", "Internes"],
-                ["externes", "Externes"],
+                ["clients", "Clients"],
+                ["fournisseurs", "Fournisseurs"],
               ] as const
             ).map(([id, label]) => (
               <button
                 key={id}
                 type="button"
                 onClick={() => {
+                  if (id === "fournisseurs") {
+                    window.location.href =
+                      "/dashboard/messagerie?view=chantiers&channel=FOURNISSEUR";
+                    return;
+                  }
+                  if (id === "clients") {
+                    setListChip("clients");
+                    setFilter("inbox");
+                    return;
+                  }
                   setListChip(id);
                   if (id === "internes") setFilter("messages-directs");
                   else setFilter("inbox");

@@ -19,6 +19,7 @@ import { DemoTenantBanner } from "@/components/demo-environment/DemoTenantBanner
 import { DemoViewAsSwitcher } from "@/components/demo-environment/DemoViewAsSwitcher";
 import { RoleOnboarding } from "@/components/onboarding/RoleOnboarding";
 import { UiPreferencesProvider } from "@/components/system/UiPreferences";
+import { DashboardMain } from "@/components/dashboard/DashboardMain";
 import { resolveBeWorkEnvironment } from "@/lib/environment";
 import { resolveDemoAccessForUser } from "@/lib/demo-environment/access";
 import { isDemoEmail } from "@/lib/demo-environment/constants";
@@ -163,13 +164,7 @@ export default async function DashboardLayout({
         <UiPreferencesProvider userId={session.user.id}>
           <PrefetchMainRoutes />
           <MessagerieRealtimeBootstrap userId={session.user.id} />
-          <main
-            id="contenu-principal"
-            tabIndex={-1}
-            className="cc-enter mx-auto w-full max-w-site min-w-0 flex-1 px-3 py-6 pb-24 outline-none sm:px-5 sm:py-8 lg:pb-8"
-          >
-            {children}
-          </main>
+          <DashboardMain>{children}</DashboardMain>
           <RoleOnboarding userId={session.user.id} role={session.user.role} />
           <MessagerieToastListener />
           <MobileBottomNav />

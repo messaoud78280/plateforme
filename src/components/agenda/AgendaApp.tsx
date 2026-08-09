@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
 import {
   Filter,
   MoreHorizontal,
@@ -28,6 +28,15 @@ import {
   formatAgendaConflictWarning,
 } from "@/lib/agenda/conflicts";
 import { AGENDA_LAYER_FILTERS, type AgendaLayerId } from "@/lib/agenda/serialize-event";
+import {
+  DEFAULT_AGENDA_ZOOM,
+  agendaHourPx,
+  nextAgendaZoom,
+  prevAgendaZoom,
+  readAgendaZoom,
+  writeAgendaZoom,
+  type AgendaZoomLevel,
+} from "@/lib/agenda/zoom";
 import type { AgendaScope } from "@/lib/agenda/types";
 import { summarizePeriod } from "@/lib/agenda/period-summary";
 import { canTrustPeriodSummary } from "@/lib/agenda/fetch-lite";
@@ -83,6 +92,9 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
   const [quickType, setQuickType] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [panelCollapsed, setPanelCollapsed] = useState(false);
+  const [zoom, setZoom] = useState<AgendaZoomLevel>(DEFAULT_AGENDA_ZOOM);
+  const [zoomReady, setZoomReady] = useState(false);
+  const [navOrigin, setNavOrigin] = useState<{ view: AgendaView; cursor: string } | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
   const [duplicateFrom, setDuplicateFrom] = useState<AgendaEventDTO | null>(null);
 
@@ -91,6 +103,25 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
     if (window.matchMedia("(max-width: 640px)").matches) {
       setView("day");
     }
+    setZoom(readAgendaZoom());
+    setZoomReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!zoomReady) return;
+    writeAgendaZoom(zoom);
+  }, [zoom, zoomReady]);
+
+  useEffect(() => {
+    const onPop = (e: PopStateEvent) => {
+      const st = e.state as { agendaView?: AgendaView; agendaDate?: string } | null;
+      if (!st?.agendaView && !st?.agendaDate) return;
+      if (st.agendaView) setView(st.agendaView);
+      if (st.agendaDate) setCursor(startOfDay(new Date(st.agendaDate)));
+      setNavOrigin(null);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
   }, []);
 
   useEffect(() => {
@@ -259,6 +290,18 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
     return formatMonthYear(cursor);
   }, [view, cursor]);
 
+  function pushAgendaHistory(nextView: AgendaView, nextCursor: Date) {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    url.searchParams.set("view", nextView);
+    url.searchParams.set("date", nextCursor.toISOString().slice(0, 10));
+    window.history.pushState(
+      { agendaView: nextView, agendaDate: nextCursor.toISOString() },
+      "",
+      url.pathname + "?" + url.searchParams.toString(),
+    );
+  }
+
   function navigate(dir: -1 | 1) {
     if (view === "day") setCursor((c) => addDays(c, dir));
     else if (view === "week") setCursor((c) => addDays(c, dir * 7));
@@ -270,6 +313,20 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
     setCursor(startOfDay(new Date()));
     setSelectedEventId(null);
     setPanelOpen(true);
+    setNavOrigin(null);
+  }
+
+  function setZoomLevel(next: AgendaZoomLevel) {
+    setZoom(next);
+  }
+
+  function goBackContext() {
+    if (!navOrigin) return;
+    const d = startOfDay(new Date(navOrigin.cursor));
+    setView(navOrigin.view);
+    setCursor(d);
+    setNavOrigin(null);
+    setSelectedEventId(null);
   }
 
   const periodSummary = useMemo(() => summarizePeriod(visibleEvents), [visibleEvents]);
@@ -392,10 +449,23 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
   }
 
   function openDayView(d: Date) {
-    setCursor(startOfDay(d));
+    const day = startOfDay(d);
+    if (view !== "day") {
+      setNavOrigin({ view, cursor: cursor.toISOString() });
+      pushAgendaHistory("day", day);
+    }
+    setCursor(day);
     setSelectedEventId(null);
     setView("day");
     setPanelOpen(true);
+  }
+
+  function openMonthFromYear(d: Date) {
+    const m = startOfMonth(d);
+    setNavOrigin({ view: "year", cursor: cursor.toISOString() });
+    pushAgendaHistory("month", m);
+    setCursor(m);
+    setView("month");
   }
 
   function upsertEvent(event: AgendaEventDTO) {
@@ -499,36 +569,72 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
     setCreateOpen(true);
   }
 
+  const hourPx = agendaHourPx(zoom);
+  const backLabel =
+    navOrigin?.view === "year"
+      ? String(new Date(navOrigin.cursor).getFullYear())
+      : navOrigin?.view === "month"
+        ? formatMonthYear(new Date(navOrigin.cursor))
+        : navOrigin?.view === "week"
+          ? "Semaine"
+          : null;
+
   return (
-    <div className="-mx-3 -my-6 flex h-[calc(100dvh-4.5rem)] min-h-[560px] bg-white sm:-mx-5 sm:-my-8">
-      <div className="flex min-w-0 flex-1 flex-col">
-        {/* Toolbar */}
-        <div className="flex flex-wrap items-center gap-3 border-b border-slate-200/80 px-4 py-3">
-          <div className="flex items-center gap-1.5">
+    <div
+      className="flex h-[calc(100dvh-4.5rem)] min-h-[560px] w-full bg-[#eef2f7]/80"
+      data-agenda-zoom={zoom}
+      style={
+        {
+          "--agenda-hour-h": `${hourPx}px`,
+          "--agenda-event-fs": `${Math.max(11, Math.round(12 * (zoom / 100)))}px`,
+          "--agenda-event-title-fs": `${Math.max(11.5, 12.5 * (zoom / 100))}px`,
+          "--agenda-cell-pad": `${Math.max(0.25, 0.35 * (zoom / 100))}rem`,
+          "--agenda-day-num": `${Math.max(0.75, 0.8125 * (zoom / 100))}rem`,
+          "--agenda-week-label": `${Math.max(0.625, 0.6875 * (zoom / 100))}rem`,
+          "--agenda-panel-w": "300px",
+        } as CSSProperties
+      }
+    >
+      <div className="m-2 flex min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm sm:m-3 lg:m-3 lg:mr-2">
+        {/* Ligne 1 — période + vues */}
+        <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 px-3 py-2 sm:px-4">
+          <div className="flex items-center gap-1">
+            {navOrigin && backLabel ? (
+              <button
+                type="button"
+                onClick={goBackContext}
+                className="mr-1 inline-flex h-9 items-center gap-1 rounded-lg px-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 hover:text-[#1e3a5f]"
+                title={`Retour · ${backLabel}`}
+              >
+                ← {backLabel}
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="rounded-lg px-2.5 py-1.5 text-lg text-slate-500 hover:bg-slate-100"
-              aria-label="Précédent"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-xl font-semibold text-slate-600 hover:bg-slate-100 hover:text-[#1e3a5f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#1d4ed8]"
+              aria-label="Période précédente"
+              title="Période précédente"
             >
               ‹
             </button>
             <button
               type="button"
               onClick={() => navigate(1)}
-              className="rounded-lg px-2.5 py-1.5 text-lg text-slate-500 hover:bg-slate-100"
-              aria-label="Suivant"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-xl font-semibold text-slate-600 hover:bg-slate-100 hover:text-[#1e3a5f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#1d4ed8]"
+              aria-label="Période suivante"
+              title="Période suivante"
             >
               ›
             </button>
             <button
               type="button"
               onClick={goToday}
-              className="ml-1 rounded-lg border border-[#1e3a5f]/25 bg-[#1e3a5f]/[0.06] px-3 py-1.5 text-xs font-semibold text-[#1e3a5f] hover:bg-[#1e3a5f]/10"
+              className="ml-0.5 h-9 rounded-lg border border-[#1e3a5f]/30 bg-[#1e3a5f]/[0.07] px-3 text-xs font-semibold text-[#1e3a5f] hover:bg-[#1e3a5f]/12"
             >
               Aujourd&apos;hui
             </button>
-            <h1 className="ml-2 text-base font-semibold capitalize text-[#1e3a5f] sm:text-lg">
+            <h1 className="ml-2 text-base font-bold capitalize tracking-tight text-[#1e3a5f] sm:text-lg">
               {title}
             </h1>
           </div>
@@ -550,14 +656,55 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
             ))}
           </div>
 
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+            <div
+              className="hidden items-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50 md:inline-flex"
+              role="group"
+              aria-label="Taille d’affichage"
+            >
+              <button
+                type="button"
+                disabled={!prevAgendaZoom(zoom)}
+                onClick={() => {
+                  const n = prevAgendaZoom(zoom);
+                  if (n) setZoomLevel(n);
+                }}
+                className="inline-flex h-8 w-8 items-center justify-center text-sm font-bold text-slate-600 hover:bg-white disabled:opacity-30"
+                title="Réduire"
+                aria-label="Réduire"
+              >
+                −
+              </button>
+              <button
+                type="button"
+                onClick={() => setZoomLevel(DEFAULT_AGENDA_ZOOM)}
+                className="h-8 min-w-[3.25rem] border-x border-slate-200 px-1.5 text-[11px] font-bold tabular-nums text-slate-700 hover:bg-white"
+                title="Réinitialiser l’affichage"
+                aria-label="Réinitialiser l’affichage"
+              >
+                {zoom}&nbsp;%
+              </button>
+              <button
+                type="button"
+                disabled={!nextAgendaZoom(zoom)}
+                onClick={() => {
+                  const n = nextAgendaZoom(zoom);
+                  if (n) setZoomLevel(n);
+                }}
+                className="inline-flex h-8 w-8 items-center justify-center text-sm font-bold text-slate-600 hover:bg-white disabled:opacity-30"
+                title="Agrandir"
+                aria-label="Agrandir"
+              >
+                +
+              </button>
+            </div>
             <div className="relative hidden md:block">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Rechercher…"
-                className="w-44 rounded-lg border border-slate-200 py-1.5 pl-8 pr-3 text-sm outline-none focus:border-[#1d4ed8] lg:w-56"
+                className="w-28 rounded-lg border border-slate-200 py-1.5 pl-8 pr-2 text-sm outline-none transition-[width] focus:w-44 focus:border-[#1d4ed8] lg:w-36 lg:focus:w-52"
               />
             </div>
             <button
@@ -612,6 +759,45 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
                     role="menu"
                     className="absolute right-0 z-40 mt-1 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
                   >
+                    <div className="border-b border-slate-100 px-3 py-2 md:hidden">
+                      <p className="mb-1.5 text-[11px] font-semibold uppercase text-slate-400">
+                        Taille d’affichage
+                      </p>
+                      <div className="inline-flex overflow-hidden rounded-lg border border-slate-200">
+                        <button
+                          type="button"
+                          role="menuitem"
+                          disabled={!prevAgendaZoom(zoom)}
+                          onClick={() => {
+                            const n = prevAgendaZoom(zoom);
+                            if (n) setZoomLevel(n);
+                          }}
+                          className="px-3 py-1.5 text-sm font-bold disabled:opacity-30"
+                        >
+                          −
+                        </button>
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => setZoomLevel(DEFAULT_AGENDA_ZOOM)}
+                          className="border-x border-slate-200 px-3 py-1.5 text-xs font-bold"
+                        >
+                          {zoom} %
+                        </button>
+                        <button
+                          type="button"
+                          role="menuitem"
+                          disabled={!nextAgendaZoom(zoom)}
+                          onClick={() => {
+                            const n = nextAgendaZoom(zoom);
+                            if (n) setZoomLevel(n);
+                          }}
+                          className="px-3 py-1.5 text-sm font-bold disabled:opacity-30"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
                     <a
                       role="menuitem"
                       href="/api/agenda/export.ics"
@@ -670,10 +856,8 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
                 onClick={() => setScope(s.id)}
                 className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition-colors ${
                   scope === s.id
-                    ? scope !== "all"
-                      ? "bg-white text-[#1e3a5f] shadow-sm"
-                      : "bg-slate-100/80 text-slate-600"
-                    : "text-slate-400 hover:text-slate-600"
+                    ? "bg-white text-[#1e3a5f] shadow-sm ring-1 ring-[#1e3a5f]/20"
+                    : "text-slate-500 hover:bg-white/80 hover:text-slate-700"
                 }`}
               >
                 {s.label}
@@ -689,12 +873,12 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
                 key={layer.id}
                 type="button"
                 onClick={() => toggleLayer(layer.id)}
-                className={`rounded-full px-2 py-0.5 text-[11px] font-semibold transition-colors ${
+                className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition-colors ${
                   filtering && active
-                    ? "bg-[#1e3a5f]/10 text-[#1e3a5f] ring-1 ring-[#1e3a5f]/25"
+                    ? "bg-[#1e3a5f] text-white shadow-sm"
                     : active
-                      ? "text-slate-500 hover:bg-slate-100"
-                      : "text-slate-300 line-through"
+                      ? "bg-slate-100/80 text-slate-600 hover:bg-slate-200/80 hover:text-slate-800"
+                      : "text-slate-300 line-through decoration-slate-300"
                 }`}
               >
                 {layer.label}
@@ -787,8 +971,8 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
 
         {/* Résumé période — uniquement si jeu de données complet */}
         {!loading && eventsComplete && periodSummary.total > 0 ? (
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 border-b border-slate-100 px-4 py-1.5 text-[11px] text-slate-500">
-            <span className="font-semibold uppercase tracking-wide text-slate-400">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 border-b border-slate-200/80 bg-slate-50/60 px-4 py-1.5 text-[12px] text-slate-600">
+            <span className="font-bold uppercase tracking-wide text-[#1e3a5f]/70">
               {view === "year"
                 ? cursor.getFullYear()
                 : view === "month"
@@ -888,6 +1072,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
               cursor={cursor}
               events={visibleEvents}
               selectedEventId={selectedEventId}
+              pxPerHour={hourPx}
               onSelectEvent={handleSelectEvent}
               onQuickCreate={(d, typeHint) => openCreate(d, typeHint)}
               onEventMoved={upsertEvent}
@@ -901,6 +1086,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
               events={visibleEvents}
               selectedEventId={selectedEventId}
               selectedDay={cursor}
+              zoom={zoom}
               onSelectEvent={handleSelectEvent}
               onSelectDay={selectDayKeepView}
               onOpenDay={openDayView}
@@ -913,10 +1099,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
               cursor={cursor}
               events={visibleEvents}
               selectedDay={cursor}
-              onOpenMonth={(d) => {
-                setCursor(startOfMonth(d));
-                setView("month");
-              }}
+              onOpenMonth={openMonthFromYear}
               onSelectDay={selectDayKeepView}
               onOpenDay={openDayView}
             />
@@ -925,8 +1108,23 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
       </div>
 
       {/* Desktop side panel */}
-      {!panelCollapsed ? (
-        <div className="hidden lg:block">
+      {panelCollapsed ? (
+        <div className="m-3 ml-0 hidden shrink-0 lg:flex">
+          <button
+            type="button"
+            onClick={() => setPanelCollapsed(false)}
+            className="flex h-full min-h-[120px] w-9 flex-col items-center justify-start gap-2 rounded-xl border border-slate-200/80 bg-white py-3 text-slate-500 shadow-sm hover:bg-slate-50 hover:text-[#1e3a5f]"
+            aria-label="Afficher le panneau"
+            title="Afficher le panneau"
+          >
+            <PanelRight className="h-4 w-4" />
+            <span className="rotate-180 text-[10px] font-semibold tracking-wide [writing-mode:vertical-rl]">
+              Contexte
+            </span>
+          </button>
+        </div>
+      ) : (
+        <div className="m-3 ml-0 hidden overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm lg:block">
           <AgendaSidePanel
             cursor={cursor}
             view={view}
@@ -949,7 +1147,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
             onStatusChange={handleStatusChange}
           />
         </div>
-      ) : null}
+      )}
 
       {/* Mobile side panel — bottom sheet */}
       {panelOpen ? (

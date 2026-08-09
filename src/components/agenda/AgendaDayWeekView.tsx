@@ -27,6 +27,8 @@ type Props = {
   cursor: Date;
   events: AgendaEventDTO[];
   selectedEventId: string | null;
+  /** Hauteur px d’une heure (zoom densité V2B.2). */
+  pxPerHour?: number;
   onSelectEvent: (id: string) => void;
   onQuickCreate: (draft: AgendaQuickCreateDraft, typeHint?: string | null) => void;
   onEventMoved: (event: AgendaEventDTO) => void;
@@ -73,12 +75,14 @@ export function AgendaDayWeekView({
   cursor,
   events,
   selectedEventId,
+  pxPerHour = PX_PER_HOUR,
   onSelectEvent,
   onQuickCreate,
   onEventMoved,
   onConfirmLinkedReschedule,
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const hourPxRef = useRef(pxPerHour);
   const [now, setNow] = useState(() => new Date());
   const [extended, setExtended] = useState(false);
   const autoExtendedRef = useRef(false);
@@ -109,15 +113,15 @@ export function AgendaDayWeekView({
   const gridTopMin = hourStart * 60;
   const gridBottomMin = (hourEnd + 1) * 60;
   const totalHours = hourEnd - hourStart + 1;
-  const gridHeight = totalHours * PX_PER_HOUR;
+  const gridHeight = totalHours * pxPerHour;
 
   const yToMinutes = useCallback(
-    (y: number) => gridTopMin + (y / PX_PER_HOUR) * 60,
-    [gridTopMin],
+    (y: number) => gridTopMin + (y / pxPerHour) * 60,
+    [gridTopMin, pxPerHour],
   );
   const minutesToY = useCallback(
-    (mins: number) => ((mins - gridTopMin) / 60) * PX_PER_HOUR,
-    [gridTopMin],
+    (mins: number) => ((mins - gridTopMin) / 60) * pxPerHour,
+    [gridTopMin, pxPerHour],
   );
 
   const days = useMemo(() => {
@@ -157,13 +161,24 @@ export function AgendaDayWeekView({
     }
   }, [events]);
 
+  // Scroll initial vers l’heure actuelle ; conserver la zone visible au zoom
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
+    const prevPx = hourPxRef.current;
+    if (prevPx !== pxPerHour && prevPx > 0) {
+      const midY = el.scrollTop + el.clientHeight / 2;
+      const midMins = gridTopMin + (midY / prevPx) * 60;
+      const newY = ((midMins - gridTopMin) / 60) * pxPerHour;
+      el.scrollTop = Math.max(0, newY - el.clientHeight / 2);
+      hourPxRef.current = pxPerHour;
+      return;
+    }
+    hourPxRef.current = pxPerHour;
     const mins = minutesSinceMidnight(new Date());
     const y = minutesToY(Math.max(gridTopMin, Math.min(mins, gridBottomMin - 60)));
     el.scrollTop = Math.max(0, y - 80);
-  }, [minutesToY, gridTopMin, gridBottomMin, extended]);
+  }, [minutesToY, gridTopMin, gridBottomMin, extended, pxPerHour]);
 
   const allDayEvents = useMemo(
     () =>
@@ -265,7 +280,7 @@ export function AgendaDayWeekView({
       const bottomMin = ((extended ? EXTENDED_HOUR_END : WORK_HOUR_END) + 1) * 60;
 
       if (d.kind === "move") {
-        const deltaMins = snapMinutes((deltaY / PX_PER_HOUR) * 60);
+        const deltaMins = snapMinutes((deltaY / hourPxRef.current) * 60);
         let startMins = snapMinutes(d.originStart + deltaMins);
         startMins = Math.max(topMin, Math.min(bottomMin - 15, startMins));
         const durationMins = d.durationMs / 60_000;
@@ -285,7 +300,7 @@ export function AgendaDayWeekView({
         previewRef.current = next;
         setPreview(next);
       } else {
-        const deltaMins = snapMinutes((deltaY / PX_PER_HOUR) * 60);
+        const deltaMins = snapMinutes((deltaY / hourPxRef.current) * 60);
         let endMins = snapMinutes(d.originEnd + deltaMins);
         endMins = Math.max(d.startMs + 15, Math.min(bottomMin, endMins));
         const day = currentDays[d.dayIndex]!;
@@ -666,7 +681,7 @@ export function AgendaDayWeekView({
             {hours.map((h) => (
               <div
                 key={h}
-                className="absolute right-2 -translate-y-1/2 text-[10px] font-medium text-slate-400"
+                className="absolute right-2 -translate-y-1/2 text-[11px] font-semibold tabular-nums text-slate-500"
                 style={{ top: minutesToY(h * 60) }}
               >
                 {String(h).padStart(2, "0")}:00
@@ -711,7 +726,7 @@ export function AgendaDayWeekView({
                     const clampedStart = Math.max(startMins, gridTopMin);
                     const clampedEnd = Math.min(endMins, gridBottomMin);
                     const top = minutesToY(clampedStart);
-                    const height = Math.max(22, minutesToY(clampedEnd) - top);
+                    const height = Math.max(Math.round(pxPerHour * 0.35), minutesToY(clampedEnd) - top);
                     const meta = agendaTypeMeta(ev.type);
                     const selected = ev.id === selectedEventId;
                     const lines = agendaEventCardLines(ev, { start, end });
@@ -725,7 +740,7 @@ export function AgendaDayWeekView({
                       <div
                         key={ev.id}
                         data-agenda-event
-                        className={`absolute left-1 right-1 z-10 overflow-hidden rounded-md border border-l-[3px] px-1.5 py-0.5 text-left ${
+                        className={`absolute left-1 right-1 z-10 overflow-hidden rounded-md border border-l-[3px] px-1.5 py-1 text-left shadow-sm transition hover:shadow ${
                           ev.readOnly ? "cursor-pointer" : "cursor-grab active:cursor-grabbing"
                         } ${selected ? "ring-2 ring-[#1e3a5f]/40 ring-offset-1" : ""} ${
                           lines.done ? "opacity-50" : ""
@@ -753,12 +768,12 @@ export function AgendaDayWeekView({
                               title={ev.urgencyLabel ?? undefined}
                             />
                           ) : null}
-                          <p className="truncate text-[10px] font-bold uppercase leading-tight tracking-wide opacity-90">
+                          <p className="truncate text-[11px] font-bold uppercase leading-tight tracking-wide opacity-90">
                             {lines.eyebrow}
                           </p>
                         </div>
                         {height > 28 ? (
-                          <p className="truncate text-[11px] font-semibold leading-tight">
+                          <p className="truncate text-[12px] font-semibold leading-tight">
                             {lines.title}
                           </p>
                         ) : null}

@@ -108,6 +108,15 @@ body {
   /* Largeur canonique du contenu (marketing + dashboard) */
   --site-max-width: 1280px;
 
+  /* AGENDA-V2B — densité (surchargée par data-agenda-zoom sur le shell) */
+  --agenda-hour-h: 64px;
+  --agenda-event-fs: 12px;
+  --agenda-event-title-fs: 12.5px;
+  --agenda-cell-pad: 0.35rem;
+  --agenda-day-num: 0.8125rem;
+  --agenda-week-label: 0.6875rem;
+  --agenda-panel-w: 300px;
+
   /* —— Design system Pilotage travaux (cockpit BeWork) —— */
   --pilotage-navy: #1e3a5f;
   --pilotage-navy-deep: #162d4a;

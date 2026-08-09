@@ -72,20 +72,20 @@ function MiniMonth({
   const weekLabel = isoWeekLabel(days[0]!);
 
   return (
-    <div className="rounded-2xl p-3 transition-colors hover:bg-slate-50/80">
+    <div className="rounded-xl border border-transparent p-3 transition-colors hover:border-slate-200/80 hover:bg-slate-50/80">
       <button
         type="button"
         onClick={() => onOpenMonth(monthDate)}
         className="mb-2 flex w-full items-center justify-between text-left"
       >
-        <span className="text-sm font-semibold capitalize text-[#1e3a5f] hover:underline">
+        <span className="text-sm font-semibold capitalize text-[#1e3a5f] hover:underline xl:text-[15px]">
           {MONTH_NAMES[monthIndex]}
         </span>
-        <span className="text-[10px] font-medium text-slate-300">{weekLabel}</span>
+        <span className="text-[11px] font-semibold tabular-nums text-slate-400">{weekLabel}</span>
       </button>
       <div className="grid grid-cols-7 gap-0 text-center">
         {WEEKDAYS.map((d, i) => (
-          <div key={`${d}-${i}`} className="py-0.5 text-[9px] font-semibold text-slate-300">
+          <div key={`${d}-${i}`} className="py-0.5 text-[10px] font-semibold text-slate-400">
             {d}
           </div>
         ))}
@@ -114,14 +114,14 @@ function MiniMonth({
                 if (!inMonth) return;
                 onOpenDay(day);
               }}
-              className={`relative flex h-7 flex-col items-center justify-start rounded-md pt-0.5 text-[10px] transition-colors ${
+              className={`relative flex h-8 flex-col items-center justify-start rounded-md pt-0.5 text-[11px] transition-colors xl:h-9 xl:text-[12px] ${
                 !inMonth
                   ? "cursor-default text-transparent"
                   : isToday
                     ? "font-semibold text-white"
                     : selected
                       ? "bg-slate-100 font-semibold text-[#1e3a5f]"
-                      : "text-slate-600 hover:bg-slate-100/80"
+                      : "text-slate-700 hover:bg-slate-100/80"
               }`}
             >
               {isToday ? (
@@ -178,8 +178,8 @@ export function AgendaYearView({
   const activity = useMemo(() => dayActivityIndex(events), [events]);
 
   return (
-    <div className="h-full overflow-y-auto p-3 sm:p-4">
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="h-full overflow-y-auto p-3 sm:p-4 lg:px-5 lg:py-5">
+      <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:gap-3">
         {Array.from({ length: 12 }, (_, i) => (
           <MiniMonth
             key={i}

@@ -16,6 +16,8 @@ import {
 import { agendaEventCardLines } from "@/lib/agenda/event-card";
 import { eventsForDay } from "@/lib/agenda/period-summary";
 import { agendaTypeMeta } from "@/lib/agenda/types";
+import type { AgendaZoomLevel } from "@/lib/agenda/zoom";
+import { agendaMonthMaxEvents } from "@/lib/agenda/zoom";
 import type { AgendaEventDTO, AgendaQuickCreateDraft } from "./agenda-types";
 
 type Props = {
@@ -23,6 +25,7 @@ type Props = {
   events: AgendaEventDTO[];
   selectedEventId: string | null;
   selectedDay: Date;
+  zoom?: AgendaZoomLevel;
   onSelectEvent: (id: string) => void;
   onSelectDay: (d: Date) => void;
   onOpenDay: (d: Date) => void;
@@ -36,6 +39,7 @@ export function AgendaMonthView({
   events,
   selectedEventId,
   selectedDay,
+  zoom = 100,
   onSelectEvent,
   onSelectDay,
   onOpenDay,
@@ -44,6 +48,7 @@ export function AgendaMonthView({
   const days = monthGrid(cursor);
   const month = startOfMonth(cursor);
   const today = new Date();
+  const maxVisible = agendaMonthMaxEvents(zoom);
   const weeks = useMemo(() => {
     const rows: Date[][] = [];
     for (let i = 0; i < 6; i++) rows.push(days.slice(i * 7, i * 7 + 7));
@@ -62,16 +67,19 @@ export function AgendaMonthView({
     return list;
   }, [events, month]);
 
+  const showTwoLines = zoom >= 100;
+  const eventFs = zoom >= 120 ? "text-[13px]" : zoom >= 100 ? "text-[12px]" : "text-[11px]";
+
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col bg-white">
       {/* Desktop / tablette : grille */}
       <div className="hidden h-full min-h-0 flex-col md:flex">
-        <div className="grid grid-cols-[28px_repeat(7,minmax(0,1fr))] border-b border-slate-200/80">
+        <div className="grid grid-cols-[36px_repeat(7,minmax(0,1fr))] border-b border-slate-200">
           <div className="py-2" />
           {WEEKDAYS.map((d) => (
             <div
               key={d}
-              className="px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wide text-slate-400"
+              className="px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wide text-slate-500"
             >
               {d}
             </div>
@@ -81,14 +89,17 @@ export function AgendaMonthView({
           {weeks.map((week, wi) => (
             <div
               key={wi}
-              className="grid min-h-0 grid-cols-[28px_repeat(7,minmax(0,1fr))] border-b border-slate-100"
+              className="grid min-h-0 grid-cols-[36px_repeat(7,minmax(0,1fr))] border-b border-slate-200/80"
             >
-              <div className="flex items-start justify-center pt-2 text-[9px] font-semibold text-slate-300">
+              <div
+                className="flex items-start justify-center pt-2.5 text-[11px] font-semibold tabular-nums text-slate-400"
+                title="Semaine ISO"
+              >
                 {isoWeekLabel(week[0] ?? startOfWeek(month))}
               </div>
               {week.map((day) => {
                 const dayEvents = eventsForDay(events, day);
-                const visible = dayEvents.slice(0, 2);
+                const visible = dayEvents.slice(0, maxVisible);
                 const more = dayEvents.length - visible.length;
                 const inMonth = isSameMonth(day, month);
                 const isToday = isSameDay(day, today);
@@ -98,13 +109,13 @@ export function AgendaMonthView({
                 return (
                   <div
                     key={day.toISOString()}
-                    className={`min-h-0 border-r border-slate-100 p-1 ${
+                    className={`min-h-0 border-r border-slate-200/70 p-[var(--agenda-cell-pad,0.35rem)] ${
                       !inMonth
-                        ? "bg-slate-50/50"
+                        ? "bg-slate-50/70"
                         : selected
                           ? "bg-slate-50"
                           : weekend
-                            ? "bg-slate-50/30"
+                            ? "bg-slate-50/40"
                             : "bg-white"
                     }`}
                     onClick={() => onSelectDay(day)}
@@ -113,31 +124,39 @@ export function AgendaMonthView({
                       onOpenDay(day);
                     }}
                   >
-                    <div className="mb-0.5 flex items-center justify-between px-0.5">
+                    <div className="mb-1 flex items-center justify-between px-0.5">
                       <span
-                        className={`flex h-6 w-6 items-center justify-center rounded-full text-xs ${
+                        className={`flex h-7 w-7 items-center justify-center rounded-full text-[var(--agenda-day-num,0.8125rem)] ${
                           isToday
-                            ? "bg-[#1e3a5f] font-semibold text-white"
+                            ? "bg-[#1e3a5f] font-bold text-white"
                             : selected
-                              ? "font-semibold text-[#1e3a5f] ring-1 ring-[#1e3a5f]/30"
+                              ? "font-bold text-[#1e3a5f] ring-2 ring-[#1e3a5f]/35"
                               : inMonth
-                                ? "text-slate-700"
-                                : "text-slate-300"
+                                ? "font-semibold text-slate-800"
+                                : "font-medium text-slate-300"
                         }`}
                       >
                         {day.getDate()}
                       </span>
                     </div>
-                    <div className="space-y-0.5">
+                    <div className="space-y-1">
                       {visible.map((ev) => {
                         const meta = agendaTypeMeta(ev.type);
                         const selectedEv = ev.id === selectedEventId;
                         const lines = agendaEventCardLines(ev);
                         const time = ev.allDay ? "" : formatTime(new Date(ev.startAt));
-                        const label =
+                        const primary =
                           ev.type === "LIVRAISON" && ev.purchaseOrder?.supplierName
                             ? ev.purchaseOrder.supplierName
-                            : ev.title;
+                            : lines.title;
+                        const siteLine = ev.project?.title?.split(/[—–|-]/)[0]?.trim() ?? null;
+                        const showSite =
+                          Boolean(siteLine) &&
+                          (ev.type === "LIVRAISON" ||
+                            ev.type === "REUNION_CHANTIER" ||
+                            ev.type === "VISITE_CHANTIER" ||
+                            ev.type === "INTERVENTION");
+
                         return (
                           <button
                             key={ev.id}
@@ -146,21 +165,42 @@ export function AgendaMonthView({
                               e.stopPropagation();
                               onSelectEvent(ev.id);
                             }}
-                            className={`block w-full truncate rounded px-1 py-0.5 text-left text-[10px] font-medium ${
-                              selectedEv ? "ring-1 ring-[#1d4ed8]" : ""
+                            className={`block w-full rounded-md px-1.5 py-1 text-left shadow-sm transition hover:-translate-y-px hover:shadow ${
+                              selectedEv ? "ring-2 ring-[#1d4ed8]/50" : ""
                             } ${lines.done ? "opacity-50" : ""} ${
-                              lines.unconfirmed ? "border border-dashed border-orange-400/60" : ""
+                              lines.unconfirmed
+                                ? "border border-dashed border-orange-400/70"
+                                : "border border-transparent"
                             }`}
                             style={{
                               backgroundColor: meta.colors.bg,
                               color: meta.colors.text,
-                              borderLeft: `2px solid ${meta.colors.border}`,
+                              borderLeft: `3px solid ${meta.colors.border}`,
                             }}
-                            title={`${lines.eyebrow} — ${lines.title}${lines.meta ? ` · ${lines.meta}` : ""}`}
+                            title={`${time ? `${time} · ` : ""}${lines.eyebrow} — ${lines.title}${lines.meta ? ` · ${lines.meta}` : ""}`}
                           >
-                            {lines.done ? "✓ " : lines.unconfirmed ? "… " : ""}
-                            {time ? `${time} ` : ""}
-                            {label}
+                            <span className={`block truncate font-semibold leading-tight ${eventFs}`}>
+                              {lines.done ? "✓ " : lines.unconfirmed ? "… " : ""}
+                              {time ? (
+                                <span className="font-bold tabular-nums opacity-90">{time}</span>
+                              ) : null}
+                              {time ? "  " : ""}
+                              {primary}
+                            </span>
+                            {showTwoLines && showSite ? (
+                              <span className="mt-0.5 block truncate text-[11px] font-medium leading-tight opacity-80">
+                                {siteLine}
+                              </span>
+                            ) : showTwoLines && lines.meta && !showSite ? (
+                              <span className="mt-0.5 block truncate text-[11px] font-medium leading-tight opacity-80">
+                                {lines.meta}
+                              </span>
+                            ) : null}
+                            {showTwoLines && zoom >= 110 && lines.unconfirmed ? (
+                              <span className="mt-0.5 block truncate text-[10px] font-semibold text-amber-800/90">
+                                À confirmer
+                              </span>
+                            ) : null}
                           </button>
                         );
                       })}
@@ -171,9 +211,9 @@ export function AgendaMonthView({
                             e.stopPropagation();
                             onOpenDay(day);
                           }}
-                          className="px-1 text-[10px] font-medium text-slate-400 hover:text-[#1e3a5f]"
+                          className="w-full rounded-md px-1.5 py-0.5 text-left text-[11px] font-semibold text-[#1e3a5f]/80 underline-offset-2 hover:bg-slate-100 hover:text-[#1e3a5f] hover:underline"
                         >
-                          +{more} autres
+                          + {more} autres
                         </button>
                       ) : null}
                     </div>
@@ -239,7 +279,6 @@ export function AgendaMonthView({
       </div>
 
       <p className="sr-only">{formatMonthYear(cursor)}</p>
-      {/* double-clic créneau vide — accessible via panneau + Nouveau */}
       <button
         type="button"
         className="sr-only"

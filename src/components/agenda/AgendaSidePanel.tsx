@@ -155,7 +155,9 @@ export function AgendaSidePanel({
             : "Rien de planifié ce jour.";
 
   return (
-    <aside className="flex h-full w-full shrink-0 flex-col border-l border-slate-200/60 bg-white lg:w-[280px]">
+    <aside
+      className="flex h-full w-full shrink-0 flex-col border-l border-slate-200/80 bg-white lg:w-[var(--agenda-panel-w,300px)] xl:w-[320px]"
+    >
       {/* Mini calendrier — replié par défaut, poids léger */}
       <div className="border-b border-slate-100 px-3 py-2">
         <button
@@ -226,9 +228,9 @@ export function AgendaSidePanel({
 
       <div className="flex-1 overflow-y-auto p-3">
         {!selectedEvent || !start || !end || !meta ? (
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
                 {panelTitle}
               </p>
               {view === "day" || view === "week" ? (
@@ -244,18 +246,18 @@ export function AgendaSidePanel({
               ) : null}
             </div>
             {panelList.length === 0 ? (
-              <p className="rounded-lg border border-dashed border-slate-200 px-3 py-4 text-center text-sm text-slate-400">
+              <p className="rounded-lg border border-dashed border-slate-200 px-3 py-3 text-center text-sm text-slate-400">
                 {emptyHint}
               </p>
             ) : (
-              <ul className="relative space-y-0 border-l border-slate-200 pl-3">
+              <ul className="relative space-y-0 border-l-2 border-slate-200 pl-3">
                 {panelList.map((ev) => {
                   const s = new Date(ev.startAt);
                   const lines = agendaEventCardLines(ev);
                   const showDate = view === "year" || view === "month";
                   return (
-                    <li key={ev.id} className="relative pb-3 last:pb-0">
-                      <span className="absolute -left-[15px] top-1.5 h-2 w-2 rounded-full bg-slate-300" />
+                    <li key={ev.id} className="relative pb-2.5 last:pb-0">
+                      <span className="absolute -left-[17px] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-slate-400" />
                       <button
                         type="button"
                         onClick={() => onSelectEvent?.(ev.id)}
@@ -264,7 +266,7 @@ export function AgendaSidePanel({
                         }`}
                       >
                         <div className="flex gap-2">
-                          <span className="w-12 shrink-0 text-[11px] font-bold tabular-nums text-slate-500">
+                          <span className="w-[3.25rem] shrink-0 text-[11px] font-bold uppercase tabular-nums text-slate-600">
                             {showDate
                               ? s.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })
                               : ev.allDay
@@ -272,11 +274,11 @@ export function AgendaSidePanel({
                                 : formatTime(s)}
                           </span>
                           <span className="min-w-0">
-                            <span className="block truncate text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                            <span className="block truncate text-[10px] font-bold uppercase tracking-wide text-slate-500">
                               {lines.eyebrow}
                               {isDeliveryUnconfirmed(ev) ? " ⚠" : ""}
                             </span>
-                            <span className="block truncate text-sm font-semibold text-slate-900">
+                            <span className="block truncate text-[13px] font-semibold text-slate-900">
                               {lines.title}
                             </span>
                             {lines.meta ? (
@@ -300,10 +302,19 @@ export function AgendaSidePanel({
             )}
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                {onClearSelection ? (
+                  <button
+                    type="button"
+                    onClick={onClearSelection}
+                    className="mb-2 inline-flex items-center gap-1 rounded-md px-1 py-0.5 text-[11px] font-semibold text-slate-500 hover:bg-slate-100 hover:text-[#1e3a5f]"
+                  >
+                    ← Retour
+                  </button>
+                ) : null}
+                <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
                   <span
                     className="inline-block rounded px-2 py-0.5 text-[11px] font-semibold"
                     style={{
@@ -347,9 +358,11 @@ export function AgendaSidePanel({
                 <button
                   type="button"
                   onClick={onClearSelection}
-                  className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-slate-400 hover:bg-slate-50 hover:text-slate-600"
+                  className="shrink-0 rounded-md px-2 py-1 text-sm font-semibold text-slate-400 hover:bg-slate-50 hover:text-slate-700"
+                  aria-label="Fermer le détail"
+                  title="Fermer"
                 >
-                  Aujourd’hui
+                  ×
                 </button>
               ) : null}
             </div>

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { createWorksitePilotage } from "@/app/dashboard/pilotage-travaux/actions";
-import { PILOTAGE_LIST_PATH } from "@/lib/pilotage/constants";
+import { projectContractuelTabHref } from "@/lib/pilotage/project-links";
 import { PILOTAGE_TEMPLATES } from "@/lib/pilotage/templates";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -38,7 +38,7 @@ export function CreatePilotageForm({
       <div className="space-y-4">
         <EmptyState
           title="Aucun chantier disponible"
-          description="Créez d’abord un chantier dans « Chantiers », ou tous les chantiers ont déjà un pilotage."
+          description="Créez d’abord un chantier dans « Chantiers », ou tous ont déjà un suivi contractuel."
         />
         <div className="text-center">
           <a href="/dashboard/projets" className="btn-cc-primary inline-flex">
@@ -62,7 +62,7 @@ export function CreatePilotageForm({
             setError(res.error);
             return;
           }
-          router.push(`${PILOTAGE_LIST_PATH}/${res.id}`);
+          router.push(projectContractuelTabHref(res.projectId));
           router.refresh();
         });
       }}
@@ -158,9 +158,9 @@ export function CreatePilotageForm({
 
       <div className="flex flex-wrap gap-3">
         <Button type="submit" disabled={pending}>
-          {pending ? "Création…" : "Créer le pilotage"}
+          {pending ? "Activation…" : "Activer le suivi contractuel"}
         </Button>
-        <a href={PILOTAGE_LIST_PATH} className="btn-cc-secondary">
+        <a href="/dashboard/pilotage-travaux" className="btn-cc-secondary">
           Annuler
         </a>
       </div>

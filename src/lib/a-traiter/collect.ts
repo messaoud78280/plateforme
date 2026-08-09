@@ -420,7 +420,9 @@ async function collectForStaff(
             status: true,
             openedAt: true,
             pilotageId: true,
-            pilotage: { select: { project: { select: { title: true } } } },
+            pilotage: {
+              select: { project: { select: { id: true, title: true } } },
+            },
           },
           orderBy: { openedAt: "asc" },
           take: 40,
@@ -487,8 +489,8 @@ async function collectForStaff(
       id: `blocker-${b.id}`,
       section: critical ? "bloquant" : "urgent",
       title: b.title,
-      meta: `Blocage ${b.severity} · ${b.pilotage.project.title}`,
-      href: `${PILOTAGE_LIST_PATH}/${b.pilotageId}?onglet=blocages`,
+      meta: `${b.pilotage.project.title} · Blocage ${b.severity}`,
+      href: `/dashboard/projets/${b.pilotage.project.id}/suivi-contractuel?onglet=blocages`,
       source: "blocage",
       createdAt: b.openedAt,
     });

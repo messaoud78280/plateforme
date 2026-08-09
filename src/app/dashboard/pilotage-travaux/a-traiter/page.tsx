@@ -56,7 +56,7 @@ export default async function PilotageATraiterPage() {
   for (const p of pilotages) {
     const chantier = p.project.title;
     const client = p.project.client.company ?? p.project.client.name;
-    const base = `${PILOTAGE_LIST_PATH}/${p.id}`;
+    const base = `/dashboard/projets/${p.project.id}/suivi-contractuel`;
 
     for (const a of p.actions) {
       if (!isActionOpen(a.status)) continue;

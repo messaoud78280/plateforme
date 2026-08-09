@@ -41,6 +41,9 @@ import {
   CHANTIER_MISSING_STATUSES,
 } from "@/lib/chantier-dossier/constants";
 import { chantierStatusBadgeTone } from "@/lib/chantier-lifecycle";
+import { ChantierContractuelPanel } from "@/components/chantier/ChantierContractuelPanel";
+import { canEditPilotageOperational } from "@/lib/pilotage/access";
+import { isActionOpen, isVisaPending, isOverdue } from "@/lib/pilotage/calculations";
 
 export default async function ProjetDetailPage({
   params,
@@ -155,7 +158,12 @@ export default async function ProjetDetailPage({
     session.user.role !== "CLIENT" ||
     (await userHasProjectScope(session.user.id, projectScopeCtx, "messages"));
 
-  const [chantierFolders, missingCount, ops] = await Promise.all([
+  const canSeeContractuel =
+    !isExternalViewer &&
+    actorProfile?.personType !== "CLIENT_EXT" &&
+    actorProfile?.personType !== "SUPPLIER";
+
+  const [chantierFolders, missingCount, ops, contractuelRaw] = await Promise.all([
     canSeeDocuments
       ? prisma.chantierFolder.findMany({
           where: { projectId: id },
@@ -180,6 +188,36 @@ export default async function ProjetDetailPage({
       console.error("[ProjetDetail] cockpit ops:", e);
       return null;
     }),
+    // Summary légère — pas le détail contractuel complet
+    canSeeContractuel
+      ? prisma.worksitePilotage.findUnique({
+          where: { projectId: id },
+          select: {
+            id: true,
+            archivedAt: true,
+            blockers: {
+              where: { archivedAt: null, status: { in: ["Ouvert", "En cours"] } },
+              select: { severity: true },
+            },
+            obligations: {
+              where: { archivedAt: null, status: { notIn: ["Validée", "Non applicable"] } },
+              select: { id: true },
+            },
+            plans: {
+              where: { archivedAt: null },
+              select: { status: true, visaDueDate: true },
+            },
+            doeItems: {
+              where: { archivedAt: null },
+              select: { status: true },
+            },
+            actions: {
+              where: { archivedAt: null },
+              select: { status: true, dueDate: true },
+            },
+          },
+        })
+      : Promise.resolve(null),
   ]);
 
   const dossierFolders = chantierFolders.map((folder) => ({
@@ -470,7 +508,7 @@ export default async function ProjetDetailPage({
 
   const partagePanel = canManageShare ? <ChantierSharePanel projectId={id} /> : null;
 
-  const pilotagePanel = (
+  const organisationPanel = (
     <div className="space-y-4">
       <ProjectAssignAgent
         projectId={project.id}
@@ -485,6 +523,37 @@ export default async function ProjetDetailPage({
       ) : null}
     </div>
   );
+
+  const contractuelActive =
+    contractuelRaw && !contractuelRaw.archivedAt ? contractuelRaw : null;
+  const contractuelPanel = canSeeContractuel ? (
+    <ChantierContractuelPanel
+      projectId={project.id}
+      projectTitle={project.title}
+      canEdit={canEditPilotageOperational(session.user.role)}
+      summary={
+        contractuelActive
+          ? {
+              pilotageId: contractuelActive.id,
+              openBlockers: contractuelActive.blockers.length,
+              criticalBlockers: contractuelActive.blockers.filter(
+                (b) => b.severity === "Critique",
+              ).length,
+              openObligations: contractuelActive.obligations.length,
+              visasPending: contractuelActive.plans.filter(
+                (pl) => isVisaPending(pl.status) || isOverdue(pl.visaDueDate, pl.status),
+              ).length,
+              doeIncomplete: contractuelActive.doeItems.filter(
+                (d) => d.status !== "Conforme" && d.status !== "Non applicable",
+              ).length,
+              doeTotal: contractuelActive.doeItems.length,
+              openActions: contractuelActive.actions.filter((a) => isActionOpen(a.status))
+                .length,
+            }
+          : null
+      }
+    />
+  ) : null;
 
   return (
     <div className="space-y-5">
@@ -617,7 +686,8 @@ export default async function ProjetDetailPage({
           documents: documentsPanel,
           messages: messagesPanel,
           partage: partagePanel,
-          pilotage: pilotagePanel,
+          contractuel: contractuelPanel,
+          pilotage: organisationPanel,
         }}
       />
     </div>

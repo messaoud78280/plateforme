@@ -54,7 +54,7 @@ export default async function PilotageModelesPage() {
                   href={`${PILOTAGE_LIST_PATH}/nouveau?modele=${t.id}`}
                   className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-semibold text-white"
                 >
-                  Utiliser
+                  Appliquer au chantier
                 </Link>
                 <span className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-500">
                   Aperçu catalogue

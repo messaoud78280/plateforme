@@ -24,12 +24,16 @@ import {
 import { refreshPilotageProgress } from "./refresh-progress";
 import { normalizeIncomingDocumentsRef } from "@/lib/storage/documents-ref-migrate";
 
-function revalidatePilotage(id?: string) {
+function revalidatePilotage(id?: string, projectId?: string) {
   revalidatePath(PILOTAGE_LIST_PATH);
   revalidatePath(`${PILOTAGE_LIST_PATH}/a-traiter`);
   revalidatePath(`${PILOTAGE_LIST_PATH}/blocages`);
   revalidatePath(`${PILOTAGE_LIST_PATH}/calendrier`);
   if (id) revalidatePath(`${PILOTAGE_LIST_PATH}/${id}`);
+  if (projectId) {
+    revalidatePath(`/dashboard/projets/${projectId}`);
+    revalidatePath(`/dashboard/projets/${projectId}/suivi-contractuel`);
+  }
 }
 
 async function refreshProgress(pilotageId: string) {
@@ -49,10 +53,12 @@ function parseDecimal(v: FormDataEntryValue | null): Prisma.Decimal | null {
   return new Prisma.Decimal(n);
 }
 
-export async function createWorksitePilotage(formData: FormData): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
+export async function createWorksitePilotage(
+  formData: FormData,
+): Promise<{ ok: true; id: string; projectId: string } | { ok: false; error: string }> {
   const session = await requirePilotageSession();
   if (!canEditPilotageOperational(session.user.role)) {
-    return { ok: false, error: "Vous n’avez pas les droits pour créer un pilotage." };
+    return { ok: false, error: "Vous n’avez pas les droits pour activer le suivi contractuel." };
   }
 
   const projectId = String(formData.get("projectId") ?? "").trim();
@@ -70,7 +76,7 @@ export async function createWorksitePilotage(formData: FormData): Promise<{ ok: 
 
   const existing = await prisma.worksitePilotage.findUnique({ where: { projectId } });
   if (existing && !existing.archivedAt) {
-    return { ok: false, error: "Ce chantier a déjà un pilotage actif." };
+    return { ok: false, error: "Ce chantier a déjà un suivi contractuel actif." };
   }
 
   const startDate = parseDate(formData.get("startDate"));
@@ -131,7 +137,9 @@ export async function createWorksitePilotage(formData: FormData): Promise<{ ok: 
       entityType: "pilotage",
       entityId: pilotage.id,
       entityLabel: project.title,
-      comment: existing ? "Pilotage archivé réactivé" : "Pilotage chantier créé",
+      comment: existing
+        ? "Suivi contractuel archivé réactivé"
+        : "Suivi contractuel activé (modèle marché)",
     });
 
     if (applyTemplate && !existing) {
@@ -142,11 +150,108 @@ export async function createWorksitePilotage(formData: FormData): Promise<{ ok: 
     }
 
     await refreshProgress(pilotage.id);
-    revalidatePilotage(pilotage.id);
-    return { ok: true, id: pilotage.id };
+    revalidatePilotage(pilotage.id, project.id);
+    return { ok: true, id: pilotage.id, projectId: project.id };
   } catch (e) {
     console.error("createWorksitePilotage:", e);
-    return { ok: false, error: "Impossible de créer le pilotage. Réessayez." };
+    return { ok: false, error: "Impossible d’activer le suivi contractuel. Réessayez." };
+  }
+}
+
+/**
+ * PILOTAGE-V2A.1 — Activation légère du suivi contractuel.
+ * Ne redemande pas nom / client / adresse / responsable (source = Project).
+ */
+export async function activateContractualFollowUp(
+  projectId: string,
+): Promise<{ ok: true; id: string; projectId: string } | { ok: false; error: string }> {
+  const session = await requirePilotageSession();
+  if (
+    session.user.personType === "CLIENT_EXT" ||
+    session.user.personType === "SUPPLIER" ||
+    session.user.permissionProfile === "FOURNISSEUR"
+  ) {
+    return { ok: false, error: "Accès réservé à l’équipe interne." };
+  }
+  if (!canEditPilotageOperational(session.user.role)) {
+    return { ok: false, error: "Vous n’avez pas les droits pour activer le suivi contractuel." };
+  }
+
+  const pid = projectId.trim();
+  if (!pid) return { ok: false, error: "Chantier obligatoire." };
+
+  const project = await prisma.project.findUnique({
+    where: { id: pid },
+    select: {
+      id: true,
+      clientId: true,
+      title: true,
+      assignedToId: true,
+      plannedStartDate: true,
+      plannedEndDate: true,
+      signedQuoteAmount: true,
+      internalManager: true,
+    },
+  });
+  if (!project) return { ok: false, error: "Chantier introuvable." };
+
+  if (session.user.role === "CLIENT" && project.clientId !== session.user.id) {
+    return { ok: false, error: "Chantier non autorisé." };
+  }
+  if (session.user.role === "AGENT" && project.assignedToId !== session.user.id) {
+    return { ok: false, error: "Chantier non autorisé." };
+  }
+
+  const existing = await prisma.worksitePilotage.findUnique({ where: { projectId: pid } });
+  if (existing && !existing.archivedAt) {
+    return { ok: true, id: existing.id, projectId: pid };
+  }
+
+  try {
+    const pilotage = existing
+      ? await prisma.worksitePilotage.update({
+          where: { id: existing.id },
+          data: {
+            archivedAt: null,
+            clientId: project.clientId,
+            conducteurId: project.assignedToId,
+            startDate: project.plannedStartDate,
+            plannedEndDate: project.plannedEndDate,
+            marketAmountHt: project.signedQuoteAmount,
+            status: "A_PREPARER",
+          },
+        })
+      : await prisma.worksitePilotage.create({
+          data: {
+            projectId: project.id,
+            clientId: project.clientId,
+            conducteurId: project.assignedToId,
+            startDate: project.plannedStartDate,
+            plannedEndDate: project.plannedEndDate,
+            marketAmountHt: project.signedQuoteAmount,
+            status: "A_PREPARER",
+            createdById: session.user.id,
+            description: null,
+          },
+        });
+
+    await logPilotageActivity({
+      pilotageId: pilotage.id,
+      userId: session.user.id,
+      userName: session.user.name,
+      actionType: existing ? "réactivation" : "création",
+      entityType: "pilotage",
+      entityId: pilotage.id,
+      entityLabel: project.title,
+      comment: "Suivi contractuel activé depuis le chantier (extension Project)",
+    });
+
+    await refreshProgress(pilotage.id);
+    revalidatePilotage(pilotage.id, project.id);
+    return { ok: true, id: pilotage.id, projectId: project.id };
+  } catch (e) {
+    console.error("activateContractualFollowUp:", e);
+    return { ok: false, error: "Impossible d’activer le suivi contractuel." };
   }
 }
 

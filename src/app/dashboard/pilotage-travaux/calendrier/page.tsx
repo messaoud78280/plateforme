@@ -21,7 +21,7 @@ export default async function PilotageCalendrierPage() {
   const pilotages = await prisma.worksitePilotage.findMany({
     where: scope,
     include: {
-      project: { select: { title: true } },
+      project: { select: { id: true, title: true } },
       actions: {
         where: { archivedAt: null, dueDate: { gte: from, lte: to } },
         select: { id: true, title: true, dueDate: true, status: true, priority: true },
@@ -58,6 +58,7 @@ export default async function PilotageCalendrierPage() {
 
   for (const p of pilotages) {
     const chantier = p.project.title;
+    const base = `/dashboard/projets/${p.project.id}/suivi-contractuel`;
     for (const a of p.actions) {
       if (!a.dueDate) continue;
       events.push({
@@ -67,7 +68,7 @@ export default async function PilotageCalendrierPage() {
         title: a.title,
         chantier,
         status: a.status,
-        href: `${PILOTAGE_LIST_PATH}/${p.id}?onglet=actions`,
+        href: `${base}?onglet=a-traiter`,
       });
     }
     for (const o of p.obligations) {
@@ -79,7 +80,7 @@ export default async function PilotageCalendrierPage() {
         title: o.title,
         chantier,
         status: o.status,
-        href: `${PILOTAGE_LIST_PATH}/${p.id}?onglet=obligations`,
+        href: `${base}?onglet=a-traiter`,
       });
     }
     for (const pl of p.plans) {
@@ -91,7 +92,7 @@ export default async function PilotageCalendrierPage() {
         title: `${pl.reference} — ${pl.title}`,
         chantier,
         status: pl.status,
-        href: `${PILOTAGE_LIST_PATH}/${p.id}?onglet=plans`,
+        href: `${base}?onglet=plans`,
       });
     }
     for (const m of p.milestones) {
@@ -103,7 +104,7 @@ export default async function PilotageCalendrierPage() {
         title: m.title,
         chantier,
         status: m.status,
-        href: `${PILOTAGE_LIST_PATH}/${p.id}?onglet=jalons`,
+        href: `${base}?onglet=jalons`,
       });
     }
     for (const b of p.blockers) {
@@ -115,7 +116,7 @@ export default async function PilotageCalendrierPage() {
         title: b.title,
         chantier,
         status: b.severity,
-        href: `${PILOTAGE_LIST_PATH}/${p.id}?onglet=blocages`,
+        href: `${base}?onglet=blocages`,
       });
     }
   }
@@ -127,9 +128,10 @@ export default async function PilotageCalendrierPage() {
       <BackLink href={PILOTAGE_LIST_PATH}>Portefeuille</BackLink>
       <PilotageSubNav />
       <header>
-        <h1 className="text-2xl font-bold text-slate-900">Calendrier de pilotage</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Échéances contractuelles</h1>
         <p className="mt-1 text-sm text-slate-600">
-          Vue liste portefeuille : actions, obligations, visas, jalons et relances sur 45 jours.
+          Obligations, visas, jalons et relances contractuelles sur 45 jours (distinct de l&apos;Agenda
+          chantier). Ouvre le suivi contractuel du chantier concerné.
         </p>
       </header>
       <section className="pilotage-card overflow-hidden">

@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createBlockerFromTaskOrigin } from "@/lib/pilotage/blocker-links";
-import { PILOTAGE_LIST_PATH } from "@/lib/pilotage/constants";
 
 type InternalComment = {
   id: string;
@@ -162,10 +161,10 @@ export function TaskInternalNotes({ taskId, projectId }: TaskInternalNotesProps)
                 {projectId ? (
                   blockerLinks[c.id] ? (
                     <Link
-                      href={`${PILOTAGE_LIST_PATH}/${blockerLinks[c.id]}?onglet=blocages`}
+                      href={`/dashboard/projets/${projectId}/suivi-contractuel?onglet=blocages`}
                       className="text-xs font-semibold text-red-700 hover:underline"
                     >
-                      ✓ Blocage créé — voir dans Pilotage
+                      ✓ Blocage créé — voir sur le chantier
                     </Link>
                   ) : flaggingId !== c.id ? (
                     <button

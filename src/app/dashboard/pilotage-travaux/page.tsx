@@ -109,7 +109,7 @@ export default async function PilotageTravauxPage({
                     href={`${PILOTAGE_LIST_PATH}/calendrier`}
                     className="block px-3 py-2 text-sm text-slate-800 hover:bg-slate-50"
                   >
-                    Calendrier contractuel
+                    Échéances contractuelles
                   </Link>
                 </div>
               </details>

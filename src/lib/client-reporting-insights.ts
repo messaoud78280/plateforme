@@ -296,7 +296,7 @@ export async function getClientReportingSnapshot(
         healthLabel: true,
         healthScore: true,
         plannedEndDate: true,
-        project: { select: { title: true } },
+        project: { select: { id: true, title: true } },
       },
       orderBy: { updatedAt: "desc" },
       take: isOps ? 30 : 10,
@@ -477,7 +477,7 @@ export async function getClientReportingSnapshot(
     healthLabel: p.healthLabel,
     healthScore: p.healthScore,
     plannedEndDate: p.plannedEndDate ? p.plannedEndDate.toISOString().slice(0, 10) : null,
-    href: `/dashboard/pilotage-travaux/${p.id}`,
+    href: `/dashboard/projets/${p.project.id}`,
   }));
 
   const executiveDigest = buildExecutiveDigest(

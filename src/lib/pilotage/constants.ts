@@ -100,8 +100,8 @@ export const DETAIL_PRIMARY_TABS = [
   { id: "methode", label: "Méthode", icon: "method" },
   { id: "documents", label: "GED documents", icon: "doc" },
   { id: "plans", label: "Plans et visas", icon: "plan" },
-  { id: "calendrier", label: "Calendrier", icon: "calendar" },
-  { id: "doe", label: "DOE", icon: "doe" },
+  { id: "calendrier", label: "Échéances contractuelles", icon: "calendar" },
+  { id: "doe", label: "DOE (complétude)", icon: "doe" },
 ] as const;
 
 /** Menu Plus */
@@ -156,12 +156,12 @@ export const DETAIL_TABS = [
   { id: "documents", label: "GED documents" },
   { id: "actions", label: "Actions et relances" },
   { id: "plans", label: "Plans et visas" },
-  { id: "calendrier", label: "Calendrier" },
+  { id: "calendrier", label: "Échéances contractuelles" },
   { id: "jalons", label: "Jalons" },
   { id: "sous-traitants", label: "Sous-traitants" },
   { id: "situations", label: "Situations" },
   { id: "ts", label: "Travaux supplémentaires" },
-  { id: "doe", label: "DOE" },
+  { id: "doe", label: "DOE (complétude)" },
   { id: "rapports", label: "Rapports" },
   { id: "historique", label: "Historique" },
 ] as const;

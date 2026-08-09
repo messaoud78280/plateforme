@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { BackLink } from "@/components/ui/BackLink";
+import { projectContractuelTabHref } from "@/lib/pilotage/project-links";
 import { ProgressBar, StatusBadge } from "@/components/pilotage/PilotageBadges";
 import {
   HealthPanel,
@@ -71,9 +72,16 @@ export default async function PilotageDetailPage({
   const session = await requirePilotageSession();
   const { id } = await params;
   const sp = await searchParams;
-  await requirePilotageAccess({ id: session.user.id, role: session.user.role }, id);
+  const accessPilotage = await requirePilotageAccess(
+    { id: session.user.id, role: session.user.role },
+    id,
+  );
 
   const tabRaw = first(sp, "onglet") ?? "vue";
+  // V2A.1 — vue d’ensemble silo → cockpit Project (suivi contractuel)
+  if (!tabRaw || tabRaw === "vue") {
+    redirect(projectContractuelTabHref(accessPilotage.project.id));
+  }
   const validTabs = [
     "vue",
     "a-traiter",
@@ -302,22 +310,31 @@ export default async function PilotageDetailPage({
     qualite: qualityIssues.length + consistencyIssues.length,
   };
 
+  const projectHref = projectContractuelTabHref(pilotage.project.id);
+
   return (
     <div className="space-y-5">
-      <BackLink href={PILOTAGE_LIST_PATH}>Pilotage travaux</BackLink>
+      <BackLink href={projectHref}>Retour au chantier</BackLink>
 
       <header className="pilotage-card overflow-hidden p-0">
         <div className="border-b border-slate-100 bg-gradient-to-r from-[#1e3a5f]/5 to-transparent px-5 py-4">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
-                {pilotage.project.client.company ?? pilotage.project.client.name}
+                Suivi contractuel · {pilotage.project.client.company ?? pilotage.project.client.name}
                 {pilotage.lot ? ` · ${pilotage.lot}` : ""}
               </p>
               <div className="mt-1 flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-bold text-slate-900">{pilotage.project.title}</h1>
+                <h1 className="text-2xl font-bold text-slate-900">
+                  <Link href={projectHref} className="hover:text-[#1e3a5f] hover:underline">
+                    {pilotage.project.title}
+                  </Link>
+                </h1>
                 <StatusBadge status={pilotage.status} />
               </div>
+              <p className="mt-1 text-xs text-slate-500">
+                Extension du chantier — pas un second dossier.
+              </p>
               <p className="mt-1 text-xs text-slate-500">
                 Conducteur : {pilotage.conducteur?.name ?? "—"} · Assistant : {pilotage.assistant?.name ?? "—"} ·{" "}
                 {formatDateFr(pilotage.startDate)} → {formatDateFr(pilotage.plannedEndDate)}
@@ -573,6 +590,9 @@ export default async function PilotageDetailPage({
 
       {tab === "blocages" && (
         <Panel>
+          <p className="mb-3 text-xs text-slate-500">
+            Rattachés au chantier « {pilotage.project.title} » — pas à un dossier Pilotage séparé.
+          </p>
           <QuickAddBlocker pilotageId={id} canEdit={canEdit} />
           <div className="mt-4 grid gap-3">
             {pilotage.blockers.length === 0 ? (
@@ -598,7 +618,9 @@ export default async function PilotageDetailPage({
                     />
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-semibold text-slate-900">{b.title}</p>
+                        <p className="font-semibold text-slate-900">
+                          {pilotage.project.title} — Blocage : {b.title}
+                        </p>
                         <StatusBadge status={b.severity} />
                         <StatusBadge status={b.status} />
                         <span className="text-[11px] text-slate-500">{days} j</span>
@@ -656,7 +678,11 @@ export default async function PilotageDetailPage({
 
       {tab === "calendrier" && (
         <Panel>
-          <h2 className="text-sm font-bold text-slate-900">Échéances du chantier</h2>
+          <h2 className="text-sm font-bold text-slate-900">Échéances contractuelles</h2>
+          <p className="mb-3 text-xs text-slate-500">
+            Source PilotageAction / obligations / visas — distinct de l&apos;Agenda chantier
+            (AgendaEvent). Fusion future à évaluer.
+          </p>
           <Table
             headers={["Date", "Type", "Élément", "Statut"]}
             rows={[
@@ -769,6 +795,10 @@ export default async function PilotageDetailPage({
 
       {tab === "plans" && (
         <Panel>
+          <p className="mb-3 text-xs text-slate-500">
+            Registre des plans / visas (PlanRegister) rattaché à ce chantier. Workflow visa complet :
+            limite actuelle — suivi des échéances et statuts, pas un circuit d’approbation exhaustif.
+          </p>
           <QuickAddPlan pilotageId={id} canEdit={canEdit} />
           <Table
             headers={["Réf.", "Titre", "Indice", "Visa attendu", "Statut"]}
@@ -843,6 +873,10 @@ export default async function PilotageDetailPage({
 
       {tab === "doe" && (
         <Panel>
+          <p className="mb-3 text-xs text-slate-500">
+            DoeItem = suivi de complétude / conformité DOE. Les fichiers se gèrent dans GED /
+            Documents du chantier — pas un second DOE concurrent.
+          </p>
           <div className="mb-4 flex flex-wrap gap-4 rounded-xl bg-slate-50 p-4">
             <ProgressBar value={doe.pct} label="Complétude DOE" />
             <MiniStat label="Conformes" value={doe.conforme} />

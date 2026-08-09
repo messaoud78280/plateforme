@@ -51,8 +51,10 @@ export default async function PilotageBlocagesPage() {
     <div className="space-y-6">
       <BackLink href={PILOTAGE_LIST_PATH}>Portefeuille</BackLink>
       <PilotageSubNav />
-      <header className="overflow-hidden rounded-2xl border border-red-200/60 bg-gradient-to-br from-red-50 via-white to-orange-50 p-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-red-700/70">Centre de commandement</p>
+      <header className="overflow-hidden rounded-2xl border border-red-200/60 bg-white p-6">
+        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-red-700/70">
+          Blocages contractuels
+        </p>
         <h1 className="mt-1 text-2xl font-bold text-slate-900">Blocages et décisions attendues</h1>
         <p className="mt-2 max-w-2xl text-sm text-slate-600">
           Agrégation des points qui freinent le marché : obligations critiques, visas, TS, jalons et décisions externes.
@@ -78,9 +80,11 @@ export default async function PilotageBlocagesPage() {
                     <article key={b.id} className={`pilotage-card border p-4 ${g.className}`}>
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <div>
-                          <p className="font-semibold text-slate-900">{b.title}</p>
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                            {b.pilotage.project.title}
+                          </p>
+                          <p className="font-semibold text-slate-900">Blocage : {b.title}</p>
                           <p className="text-xs text-slate-600">
-                            {b.pilotage.project.title} ·{" "}
                             {b.pilotage.project.client.company ?? b.pilotage.project.client.name}
                           </p>
                         </div>
@@ -100,10 +104,10 @@ export default async function PilotageBlocagesPage() {
                       </dl>
                       <div className="mt-3 flex flex-wrap gap-2">
                         <Link
-                          href={`${PILOTAGE_LIST_PATH}/${b.pilotageId}?onglet=blocages`}
+                          href={`/dashboard/projets/${b.pilotage.project.id}/suivi-contractuel?onglet=blocages`}
                           className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-[#1e3a5f]"
                         >
-                          Ouvrir le chantier
+                          Ouvrir {b.pilotage.project.title}
                         </Link>
                         {b.originType === "TASK" && b.originId ? (
                           <Link

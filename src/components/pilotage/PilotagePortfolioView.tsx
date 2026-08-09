@@ -238,21 +238,17 @@ function PilotageRow({
           </div>
         </div>
         <div className="pointer-events-auto flex shrink-0 flex-col items-end justify-between gap-2">
-          {canConfigureContractuel && row.contract ? (
+          {canConfigureContractuel ? (
             <Link
-              href={`/dashboard/pilotage-travaux/${row.contract.pilotageId}`}
+              href={
+                row.contract
+                  ? `/dashboard/projets/${row.id}#tab-contractuel`
+                  : `/dashboard/projets/${row.id}/suivi-contractuel`
+              }
               className="text-[11px] font-medium text-slate-400 opacity-0 transition group-hover:opacity-100 hover:text-[#1e3a5f]"
               onClick={(e) => e.stopPropagation()}
             >
-              Suivi contractuel
-            </Link>
-          ) : canConfigureContractuel ? (
-            <Link
-              href={`/dashboard/pilotage-travaux/nouveau?projectId=${row.id}`}
-              className="text-[11px] font-medium text-slate-400 opacity-0 transition group-hover:opacity-100 hover:text-[#1e3a5f]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              Configurer suivi
+              {row.contract ? "Suivi contractuel" : "Activer suivi"}
             </Link>
           ) : null}
           <span className="text-lg font-light text-slate-300 group-hover:text-[#1e3a5f]">›</span>

@@ -81,17 +81,13 @@ export default async function ProjetsPage({
     summary.enCours > 0 ? `${summary.enCours} en cours` : null,
     summary.etude > 0 ? `${summary.etude} étude${summary.etude > 1 ? "s" : ""}` : null,
     summary.enAttente > 0 ? `${summary.enAttente} en attente` : null,
-    summary.reception > 0 ? `${summary.reception} réception` : null,
-    summary.withAttention > 0
-      ? `${summary.withAttention} à surveiller`
-      : null,
   ].filter(Boolean);
 
   return (
     <div className="space-y-5">
       <PageHeader
         title="Chantiers"
-        description="Suivez vos chantiers et repérez immédiatement ceux qui nécessitent votre attention."
+        description="Repérez immédiatement les chantiers qui demandent votre attention."
         actions={
           <CreateChantierForm
             clients={clients}
@@ -101,7 +97,12 @@ export default async function ProjetsPage({
       />
 
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[13px] text-bework-muted">
-        <p className="font-medium text-slate-600">{summaryParts.join(" · ")}</p>
+        <p className="text-slate-500">{summaryParts.join(" · ")}</p>
+        {summary.withAttention > 0 ? (
+          <span className="font-semibold text-amber-900">
+            {summary.withAttention} à surveiller
+          </span>
+        ) : null}
         {summary.missingPieces > 0 ? (
           <Link
             href="/dashboard/projets/manquants"

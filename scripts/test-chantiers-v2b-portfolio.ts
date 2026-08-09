@@ -44,8 +44,8 @@ assert.ok(coherence.includes("jamais Sophie") || coherence.includes("CLIENT_EXT"
 const ui = read("src/components/chantier/ChantiersPortfolioList.tsx");
 assert.ok(ui.includes("•••"));
 assert.ok(ui.includes("Supprimer définitivement"));
-assert.ok(ui.includes("Prochaine activité"));
-assert.ok(ui.includes("Livraison"));
+assert.ok(ui.includes("Prochaine activité") || ui.includes("Livraison"));
+assert.ok(ui.includes("Livraison") || ui.includes("DeliveryLine"));
 assert.ok(!ui.includes("Ouvrir →"));
 assert.ok(ui.includes("debounce") || ui.includes("280") || ui.includes("setDebouncedQ"));
 

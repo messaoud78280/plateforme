@@ -49,8 +49,9 @@ function primarySignalFor(row: PortfolioProjectRow, contract: PilotageContractSi
   if (contract && contract.criticalBlockers > 0) {
     return `${contract.criticalBlockers} blocage${contract.criticalBlockers > 1 ? "s" : ""} critique${contract.criticalBlockers > 1 ? "s" : ""}`;
   }
+  if (row.primaryAttentionReason) return row.primaryAttentionReason;
   if (row.attentionLabel) return row.attentionLabel;
-  if (row.nextDelivery?.statusHint) {
+  if (row.nextDelivery?.phase === "requested" || row.nextDelivery?.phase === "proposed") {
     return `${row.nextDelivery.supplierName} — ${row.nextDelivery.statusHint}`;
   }
   if (row.overdueTasks > 0) {
@@ -162,7 +163,8 @@ export async function loadPilotagePortfolio(opts: {
 
     const weekDeadlines = rows.filter((r) => r.weekDeadline).length;
     const deliveriesToConfirm = rows.filter(
-      (r) => r.nextDelivery?.statusHint === "À confirmer" || r.nextDelivery?.statusHint === "Proposition fournisseur",
+      (r) =>
+        r.nextDelivery?.phase === "requested" || r.nextDelivery?.phase === "proposed",
     ).length;
 
     return {

@@ -1,5 +1,5 @@
 /**
- * CHANTIERS-V2B — Projection portefeuille batch.
+ * CHANTIERS-V2B / V2B.1 — Projection portefeuille batch.
  * Pas de loadChantierCockpitOps × N. Réutilise attention / agenda / PO / tasks.
  */
 import { TaskStatus, type ChantierStatus, type PurchaseOrderStatus } from "@prisma/client";
@@ -10,6 +10,11 @@ import { displayUserRoleLabel } from "@/lib/equipe-acces/display-role";
 import { CHANTIER_STATUS_LABELS } from "@/lib/chantier-dossier/constants";
 import { canDeleteChantierProject } from "@/lib/chantier-dossier/access";
 import { withPerfLog } from "@/lib/perf/server-timing";
+import {
+  isSameDeliveryAsAgendaEvent,
+  resolvePortfolioDelivery,
+  type PortfolioDeliverySnapshot,
+} from "@/lib/chantier/portfolio-delivery";
 
 const PO_WATCH: PurchaseOrderStatus[] = [
   "A_VALIDER",
@@ -42,23 +47,27 @@ export type PortfolioProjectRow = {
   criticalCount: number;
   urgentCount: number;
   attentionLevel: PortfolioAttentionLevel;
+  /** Libellé court type « À traiter » — pas « 3 urgents » opaque */
   attentionLabel: string | null;
+  /** Raison principale (FollowUp / PO attention) */
+  primaryAttentionReason: string | null;
+  /** Points restants après la raison principale */
+  attentionOtherCount: number;
   nextEvent: {
     id: string;
     title: string;
     startAt: string;
     href: string;
   } | null;
-  nextDelivery: {
-    id: string;
-    supplierName: string;
-    at: string;
-    statusHint: string | null;
-    href: string;
-  } | null;
+  nextDelivery: PortfolioDeliverySnapshot | null;
   openTasks: number;
   overdueTasks: number;
   documentsCount: number;
+  /**
+   * Dernière activité métier (max tâches / agenda / commandes).
+   * Pas project.updatedAt seul (évite bruit sync technique).
+   */
+  lastActivityAt: string;
   updatedAt: string;
   canDelete: boolean;
   href: string;
@@ -99,13 +108,20 @@ function isInternalAssignee(u: {
   role?: string | null;
   accessStatus?: string | null;
 }): boolean {
-  if (u.accessStatus === "DISABLED" || u.accessStatus === "REVOKED") return false;
+  if (u.accessStatus === "DISABLED" || u.accessStatus === "SUSPENDED") return false;
   if (u.personType === "CLIENT_EXT" || u.personType === "SUPPLIER") return false;
   if (u.personType === "SUBCONTRACTOR" || u.personType === "PARTNER") return false;
   if (u.personType === "INTERNAL") return true;
   if (u.role === "MANAGER" || u.role === "AGENCE" || u.role === "AGENT") return true;
   // CLIENT + profil interne (personas démo)
   return u.personType == null || u.personType === "INTERNAL";
+}
+
+function urgencyRank(u: string): number {
+  if (u === "CRITIQUE") return 3;
+  if (u === "URGENT") return 2;
+  if (u === "IMPORTANT") return 1;
+  return 0;
 }
 
 function locationLabel(address: string | null, city: string | null): string | null {
@@ -125,11 +141,11 @@ function attentionLevel(crit: number, urg: number, n: number): PortfolioAttentio
   return "none";
 }
 
-function attentionLabel(level: PortfolioAttentionLevel, n: number): string | null {
+function attentionHeadline(level: PortfolioAttentionLevel, n: number): string | null {
   if (level === "none" || n <= 0) return null;
-  if (level === "critical") return n === 1 ? "Critique" : `${n} critiques`;
-  if (level === "urgent") return n === 1 ? "Urgent" : `${n} urgents`;
-  return n === 1 ? "1 point à traiter" : `${n} points à traiter`;
+  if (level === "critical") return "Critique";
+  if (level === "urgent") return "À traiter";
+  return "À surveiller";
 }
 
 export async function loadProjectsPortfolio(opts: {
@@ -218,8 +234,17 @@ export async function loadProjectsPortfolio(opts: {
       ),
     ];
 
-    const [openTasksByProject, overdueByProject, nextEvents, nextDeliveries, clientAccess, sheets] =
-      await Promise.all([
+    const [
+      openTasksByProject,
+      overdueByProject,
+      nextEvents,
+      nextDeliveries,
+      clientAccess,
+      sheets,
+      taskActivity,
+      agendaActivity,
+      poActivity,
+    ] = await Promise.all([
         projectIds.length
           ? prisma.task.groupBy({
               by: ["projectId"],
@@ -255,6 +280,7 @@ export async function loadProjectsPortfolio(opts: {
                 title: true,
                 startAt: true,
                 type: true,
+                purchaseOrderId: true,
               },
             })
           : Promise.resolve([]),
@@ -266,6 +292,7 @@ export async function loadProjectsPortfolio(opts: {
                 OR: [
                   { confirmedDeliveryAt: { gte: day0, lte: soon } },
                   { requestedDeliveryAt: { gte: day0, lte: soon } },
+                  { proposedDeliveryAt: { gte: day0, lte: soon } },
                 ],
               },
               orderBy: [{ confirmedDeliveryAt: "asc" }, { requestedDeliveryAt: "asc" }],
@@ -276,6 +303,7 @@ export async function loadProjectsPortfolio(opts: {
                 status: true,
                 confirmedDeliveryAt: true,
                 requestedDeliveryAt: true,
+                proposedDeliveryAt: true,
                 proposedDeliveryStatus: true,
                 externalOrganization: { select: { name: true, tradeName: true } },
               },
@@ -307,6 +335,27 @@ export async function loadProjectsPortfolio(opts: {
                 urgencyOverride: true,
               },
               take: 200,
+            })
+          : Promise.resolve([]),
+        projectIds.length
+          ? prisma.task.groupBy({
+              by: ["projectId"],
+              where: { projectId: { in: projectIds } },
+              _max: { updatedAt: true },
+            })
+          : Promise.resolve([]),
+        projectIds.length
+          ? prisma.agendaEvent.groupBy({
+              by: ["projectId"],
+              where: { projectId: { in: projectIds }, status: { not: "ANNULE" } },
+              _max: { updatedAt: true },
+            })
+          : Promise.resolve([]),
+        projectIds.length
+          ? prisma.purchaseOrder.groupBy({
+              by: ["projectId"],
+              where: { projectId: { in: projectIds } },
+              _max: { updatedAt: true },
             })
           : Promise.resolve([]),
       ]);
@@ -341,13 +390,36 @@ export async function loadProjectsPortfolio(opts: {
       overdueByProject.filter((r) => r.projectId).map((r) => [r.projectId!, r._count._all]),
     );
 
-    const attentionByProject = new Map<string, { n: number; crit: number; urg: number }>();
-    function bumpAttention(pid: string | null | undefined, urgency: string) {
+    type AttAgg = {
+      n: number;
+      crit: number;
+      urg: number;
+      primaryReason: string | null;
+      primaryRank: number;
+    };
+    const attentionByProject = new Map<string, AttAgg>();
+    function bumpAttention(
+      pid: string | null | undefined,
+      urgency: string,
+      reason?: string | null,
+    ) {
       if (!pid || urgency === "NORMAL") return;
-      const cur = attentionByProject.get(pid) ?? { n: 0, crit: 0, urg: 0 };
+      const cur = attentionByProject.get(pid) ?? {
+        n: 0,
+        crit: 0,
+        urg: 0,
+        primaryReason: null,
+        primaryRank: 0,
+      };
       cur.n += 1;
       if (urgency === "CRITIQUE") cur.crit += 1;
       else if (urgency === "URGENT") cur.urg += 1;
+      const rank = urgencyRank(urgency);
+      const r = reason?.trim();
+      if (r && (rank > cur.primaryRank || !cur.primaryReason)) {
+        cur.primaryReason = r;
+        cur.primaryRank = rank;
+      }
       attentionByProject.set(pid, cur);
     }
 
@@ -355,19 +427,29 @@ export async function loadProjectsPortfolio(opts: {
       if (!s.projectId) continue;
       const att = sheetAttention.byId.get(s.id);
       if (!att) continue;
-      bumpAttention(s.projectId, att.effectiveUrgency);
+      bumpAttention(s.projectId, att.effectiveUrgency, att.primaryReason);
     }
 
     for (const batch of poAttBatches) {
       for (const row of batch) {
         if (!row.projectId || !projectIds.includes(row.projectId)) continue;
-        bumpAttention(row.projectId, row.attention.effectiveUrgency);
+        bumpAttention(
+          row.projectId,
+          row.attention.effectiveUrgency,
+          row.attention.primaryReason,
+        );
       }
     }
 
     const nextByProject = new Map<
       string,
-      { id: string; title: string; startAt: Date }
+      {
+        id: string;
+        title: string;
+        startAt: Date;
+        type: string | null;
+        purchaseOrderId: string | null;
+      }
     >();
     for (const ev of nextEvents) {
       if (!ev.projectId || nextByProject.has(ev.projectId)) continue;
@@ -375,36 +457,39 @@ export async function loadProjectsPortfolio(opts: {
         id: ev.id,
         title: ev.title,
         startAt: ev.startAt,
+        type: ev.type,
+        purchaseOrderId: ev.purchaseOrderId,
       });
     }
 
-    const nextDeliveryByProject = new Map<
-      string,
-      {
-        id: string;
-        supplierName: string;
-        at: Date;
-        statusHint: string | null;
-      }
-    >();
+    const nextDeliveryByProject = new Map<string, PortfolioDeliverySnapshot>();
     for (const o of nextDeliveries) {
       if (!o.projectId || nextDeliveryByProject.has(o.projectId)) continue;
-      const when = o.confirmedDeliveryAt ?? o.requestedDeliveryAt;
-      if (!when) continue;
       const supplier =
         o.externalOrganization.tradeName?.trim() ||
         o.externalOrganization.name?.trim() ||
         "Fournisseur";
-      let statusHint: string | null = null;
-      if (!o.confirmedDeliveryAt && o.requestedDeliveryAt) statusHint = "À confirmer";
-      if (o.proposedDeliveryStatus === "PENDING") statusHint = "Proposition fournisseur";
-      nextDeliveryByProject.set(o.projectId, {
+      const snap = resolvePortfolioDelivery({
         id: o.id,
+        status: o.status,
+        confirmedDeliveryAt: o.confirmedDeliveryAt,
+        requestedDeliveryAt: o.requestedDeliveryAt,
+        proposedDeliveryAt: o.proposedDeliveryAt,
+        proposedDeliveryStatus: o.proposedDeliveryStatus,
         supplierName: supplier,
-        at: when,
-        statusHint,
       });
+      if (snap) nextDeliveryByProject.set(o.projectId, snap);
     }
+
+    const lastActivityByProject = new Map<string, Date>();
+    function bumpActivity(pid: string | null | undefined, d: Date | null | undefined) {
+      if (!pid || !d) return;
+      const cur = lastActivityByProject.get(pid);
+      if (!cur || d > cur) lastActivityByProject.set(pid, d);
+    }
+    for (const r of taskActivity) bumpActivity(r.projectId, r._max.updatedAt);
+    for (const r of agendaActivity) bumpActivity(r.projectId, r._max.updatedAt);
+    for (const r of poActivity) bumpActivity(r.projectId, r._max.updatedAt);
 
     const clientExtByProject = new Map<string, string>();
     for (const a of clientAccess) {
@@ -426,12 +511,22 @@ export async function loadProjectsPortfolio(opts: {
     const total = counts.reduce((acc, c) => acc + c._count, 0);
 
     const rows: PortfolioProjectRow[] = projects.map((p) => {
-      const att = attentionByProject.get(p.id) ?? { n: 0, crit: 0, urg: 0 };
+      const att = attentionByProject.get(p.id) ?? {
+        n: 0,
+        crit: 0,
+        urg: 0,
+        primaryReason: null,
+        primaryRank: 0,
+      };
       const level = attentionLevel(att.crit, att.urg, att.n);
       const openTasks = openMap.get(p.id) ?? 0;
       const overdueTasks = overdueMap.get(p.id) ?? 0;
-      const next = nextByProject.get(p.id);
-      const del = nextDeliveryByProject.get(p.id);
+      const nextRaw = nextByProject.get(p.id);
+      const del = nextDeliveryByProject.get(p.id) ?? null;
+
+      // Dédup : si l’agenda « prochaine activité » EST la livraison PO → un seul bloc
+      const sameDelivery = isSameDeliveryAsAgendaEvent(del, nextRaw ?? null);
+      const next = nextRaw && !sameDelivery ? nextRaw : null;
 
       let responsibleName: string | null = null;
       let responsibleRoleLabel: string | null = null;
@@ -454,7 +549,7 @@ export async function loadProjectsPortfolio(opts: {
           (p.client.personType === "CLIENT_EXT" && im === p.client.name);
         if (!looksExternal) {
           responsibleName = im;
-          responsibleRoleLabel = "Responsable chantier";
+          responsibleRoleLabel = "Conducteur de travaux";
           responsibleSource = "internalManager";
         }
       }
@@ -476,6 +571,10 @@ export async function loadProjectsPortfolio(opts: {
         (next ? 1 : 0) +
         (ACTIVE_STATUSES.includes(p.chantierStatus) ? 0.5 : 0);
 
+      const lastAct = lastActivityByProject.get(p.id) ?? p.updatedAt;
+      const primaryReason = att.primaryReason;
+      const otherCount = primaryReason ? Math.max(0, att.n - 1) : 0;
+
       return {
         id: p.id,
         title: p.title,
@@ -492,7 +591,9 @@ export async function loadProjectsPortfolio(opts: {
         criticalCount: att.crit,
         urgentCount: att.urg,
         attentionLevel: level,
-        attentionLabel: attentionLabel(level, att.n),
+        attentionLabel: attentionHeadline(level, att.n),
+        primaryAttentionReason: primaryReason,
+        attentionOtherCount: otherCount,
         nextEvent: next
           ? {
               id: next.id,
@@ -501,18 +602,11 @@ export async function loadProjectsPortfolio(opts: {
               href: `/dashboard/agenda?event=${next.id}`,
             }
           : null,
-        nextDelivery: del
-          ? {
-              id: del.id,
-              supplierName: del.supplierName,
-              at: del.at.toISOString(),
-              statusHint: del.statusHint,
-              href: `/dashboard/commandes/${del.id}`,
-            }
-          : null,
+        nextDelivery: del,
         openTasks,
         overdueTasks,
         documentsCount: p._count.chantierFiles,
+        lastActivityAt: lastAct.toISOString(),
         updatedAt: p.updatedAt.toISOString(),
         canDelete: canDeleteChantierProject(opts.user, p),
         href: `/dashboard/projets/${p.id}`,

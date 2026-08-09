@@ -8,10 +8,11 @@ import { appendFollowUpTimeline } from "@/lib/follow-up/timeline";
 import { syncPurchaseOrderDeliveryEvent } from "@/lib/purchase-orders/sync-delivery";
 import { demoPersonaEmail } from "./personas";
 
-const DELIVERY_AT = new Date(2026, 7, 11, 7, 30, 0, 0); // 11 août 2026 07:30
-const DELIVERY_END = new Date(2026, 7, 11, 8, 30, 0, 0);
-const INTERVENTION_AT = new Date(2026, 7, 17, 8, 0, 0, 0); // 17 août 2026 08:00
-const INTERVENTION_END = new Date(2026, 7, 17, 12, 0, 0, 0);
+/** Heures Europe/Paris explicites — évite 07:30 UTC → 09:30 affiché sur serveur UTC. */
+const DELIVERY_AT = new Date("2026-08-11T07:30:00+02:00");
+const DELIVERY_END = new Date("2026-08-11T08:30:00+02:00");
+const INTERVENTION_AT = new Date("2026-08-17T08:00:00+02:00");
+const INTERVENTION_END = new Date("2026-08-17T12:00:00+02:00");
 
 export type CoherenceResult = {
   projectId: string;

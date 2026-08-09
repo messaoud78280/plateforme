@@ -62,7 +62,7 @@ function stripProjectFromSubject(subject: string, projectTitle: string | null): 
     }
   }
   // Variante fréquente seed démo
-  s = s.replace(/\s*[—–-]\s*Résidence Victor Hugo\s*/gi, " ").trim();
+  s = s.replace(/\s*[—–-]\s*Résidence (?:Victor Hugo|Les Lilas)\s*/gi, " ").trim();
   return s || subject.trim();
 }
 

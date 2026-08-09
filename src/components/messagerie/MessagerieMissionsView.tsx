@@ -1632,7 +1632,7 @@ export function MessagerieMissionsView({
                 type="search"
                 value={recipientSearch}
                 onChange={(e) => setRecipientSearch(e.target.value)}
-                placeholder="Rechercher Karim, Point.P, ABC Promotion, Victor Hugo…"
+                placeholder="Rechercher Karim, Point.P, Horizon Copro, Les Lilas…"
                 autoFocus
                 className="mb-3 w-full rounded-xl border border-[#d1d7db] px-4 py-3 text-sm text-[#111b21] focus:border-[#1e3a5f] focus:outline-none focus:ring-2 focus:ring-[#1e3a5f]/15"
               />

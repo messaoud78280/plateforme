@@ -504,7 +504,7 @@ export function PlanningBoard({ teamUsers, projects, currentUserId }: Props) {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Karim, Victor Hugo…"
+                placeholder="Karim, Les Lilas…"
                 className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-800"
               />
             </label>

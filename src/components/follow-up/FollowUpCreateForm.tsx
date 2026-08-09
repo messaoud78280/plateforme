@@ -61,7 +61,7 @@ export function FollowUpCreateForm({
         <input
           name="clientName"
           required
-          placeholder="Résidence Victor Hugo"
+          placeholder="Résidence Les Lilas"
           className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
         />
       </label>

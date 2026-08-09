@@ -161,7 +161,7 @@ function CreateTaskPanel({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="bw-search mt-1"
-            placeholder="Ex. Relancer le fournisseur pour les plans terrasse"
+            placeholder="Ex. Relancer Point.P — confirmation livraison membrane"
             required
           />
         </label>

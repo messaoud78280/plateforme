@@ -64,7 +64,7 @@ export const DEMO_PERSONAS: Record<DemoPersonaKey, DemoPersonaDef> = {
     key: "client",
     label: "Client",
     name: "Sophie Martin",
-    company: "ABC Promotion",
+    company: "Syndic Horizon Copro",
     jobTitle: "Responsable opérations",
     personType: "CLIENT_EXT",
     permissionProfile: "CLIENT",
@@ -143,7 +143,7 @@ export function personaRightsSummary(key: DemoPersonaKey): {
         {
           section: "Partagé uniquement",
           items: [
-            { label: "Chantiers partagés (ex. Victor Hugo)", allowed: true },
+            { label: "Chantiers partagés (ex. Résidence Les Lilas)", allowed: true },
             { label: "Conversation CLIENT", allowed: true },
             { label: "Documents partagés", allowed: true },
             { label: "Fil INTERNE / fournisseurs", allowed: false },

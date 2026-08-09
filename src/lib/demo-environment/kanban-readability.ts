@@ -1,6 +1,6 @@
 /**
  * W2-C / W3 — Distribue les fiches ABC pour un Kanban lisible + destinataires notifs.
- * Pas de doublon Victor Hugo. Pas d’urgence forcée.
+ * Pas de doublon Les Lilas. Pas d’urgence forcée.
  */
 import type { FollowUpSheetStatus, FollowUpUrgency } from "@prisma/client";
 import { OrganizationMemberRole, UserRole } from "@prisma/client";
@@ -186,14 +186,18 @@ export async function ensureKanbanReadabilityDemo(opts: {
 
   const avenant =
     sheets.find((s) => s.title.toLowerCase().includes("avenant")) ??
-    sheets.find((s) => (s.orderNumber ?? "").includes("AV-") && s.title.includes("Victor")) ??
-    sheets.find((s) => s.status === "AVENANT" && s.title.includes("Victor Hugo")) ??
+    sheets.find(
+      (s) =>
+        (s.orderNumber ?? "").includes("AV-") &&
+        (s.title.includes("Lilas") || s.title.includes("Victor")),
+    ) ??
+    sheets.find((s) => s.status === "AVENANT" && s.title.includes("Les Lilas")) ??
     sheets.find((s) => s.status === "AVENANT");
 
   const victorOs = sheets.find(
     (s) =>
       s.id !== avenant?.id &&
-      (s.osNumber === "4587" || s.title.includes("Victor Hugo")) &&
+      (s.osNumber === "4587" || s.title.includes("Les Lilas")) &&
       !s.title.toLowerCase().includes("avenant"),
   );
   const alpha = sheets.find((s) => s.title.includes("Alpha"));
@@ -222,9 +226,9 @@ export async function ensureKanbanReadabilityDemo(opts: {
         nextActionAt: new Date(2026, 7, 11, 7, 30, 0),
         assigneeId: karimId,
         urgencyOverride: null,
-        title: "Résidence Victor Hugo — OS-4587",
-        workObject: "OS-4587 — Réfection étanchéité terrasse",
-        clientName: "ABC Promotion",
+        title: "Résidence Les Lilas — OS-4587",
+        workObject: "OS-4587 — Réfection étanchéité terrasse inaccessible",
+        clientName: "Syndic Horizon Copro",
         daysInStep: 2,
         fromLabel: "Commande",
         toLabel: "Attente fournisseur",
@@ -233,9 +237,9 @@ export async function ensureKanbanReadabilityDemo(opts: {
       await prisma.followUpSheet.update({
         where: { id: victorOs.id },
         data: {
-          title: "Résidence Victor Hugo — OS-4587",
-          workObject: "OS-4587 — Réfection étanchéité terrasse",
-          clientName: "ABC Promotion",
+          title: "Résidence Les Lilas — OS-4587",
+          workObject: "OS-4587 — Réfection étanchéité terrasse inaccessible",
+          clientName: "Syndic Horizon Copro",
           osNumber: "4587",
           orderNumber: "BC-2026-043",
           assigneeId: karimId,
@@ -253,9 +257,9 @@ export async function ensureKanbanReadabilityDemo(opts: {
       nextActionAt: new Date(2026, 7, 25, 12, 0, 0),
       urgencyOverride: null,
       assigneeId: opts.rootUserId,
-      title: "Avenant n°02 — Victor Hugo",
+      title: "Avenant n°02 — Les Lilas",
       workObject: "20 m² terrasse côté cour",
-      clientName: "ABC Promotion",
+      clientName: "Syndic Horizon Copro",
       // ~6 j > delayHours 120 → attention calculée (pas d’urgence forcée)
       daysInStep: 6,
       fromLabel: "Intervention",
@@ -274,7 +278,7 @@ export async function ensureKanbanReadabilityDemo(opts: {
       assigneeId: karimId,
       title: "Chantier République",
       workObject: "Travaux terminés récemment",
-      clientName: "ABC Promotion",
+      clientName: "Syndic Horizon Copro",
       daysInStep: 1,
       fromLabel: "Intervention",
       toLabel: "Travaux terminés",
@@ -294,7 +298,7 @@ export async function ensureKanbanReadabilityDemo(opts: {
       assigneeId: julieId,
       title: "Immeuble Alpha",
       workObject: "Travaux terminés — facturation à préparer",
-      clientName: "ABC Promotion",
+      clientName: "Syndic Horizon Copro",
       daysInStep: 5,
       fromLabel: "Travaux terminés",
       toLabel: "À facturer",
@@ -359,7 +363,7 @@ export async function ensureKanbanReadabilityDemo(opts: {
         organizationId: opts.organizationId,
         projectId: jardins.id,
         title: "Résidence Les Jardins",
-        clientName: "ABC Promotion",
+        clientName: "Syndic Horizon Copro",
         siteAddress: "4 allée des Jardins, Villeurbanne",
         workObject: "OS reçu — étanchéité toiture-terrasse",
         osNumber: "4612",
@@ -399,7 +403,7 @@ export async function ensureKanbanReadabilityDemo(opts: {
       urgencyOverride: null,
       title: "Résidence Les Jardins",
       workObject: "OS reçu — étanchéité toiture-terrasse",
-      clientName: "ABC Promotion",
+      clientName: "Syndic Horizon Copro",
       // 2 j ≈ delayHours 48 → IMPORTANT (calculé, non forcé)
       daysInStep: 2,
       fromLabel: "OS reçu",

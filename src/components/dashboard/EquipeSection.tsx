@@ -503,7 +503,7 @@ export function EquipeSection() {
                       addKind === "fournisseur"
                         ? "Ex. Point.P"
                         : addKind === "client"
-                          ? "Ex. ABC Promotion"
+                          ? "Ex. Syndic Horizon Copro"
                           : "Nom de l’entreprise"
                     }
                     className="w-full rounded-lg border border-slate-300 px-3 py-2"

@@ -9,6 +9,7 @@ import {
   demoPersonaEmail,
   type DemoPersonaKey,
 } from "./personas";
+import { matchesDemoProjectTitle } from "./scenario";
 
 export type SeedPersonasResult = {
   users: Record<DemoPersonaKey, { id: string; email: string; name: string }>;
@@ -58,10 +59,10 @@ export async function seedDemoPersonaUsers(opts: {
     where: { organizationId: opts.organizationId },
     select: { id: true, title: true },
   });
-  const victor = projects.find((p) => p.title.includes("Victor Hugo"));
-  const republique = projects.find((p) => p.title.includes("République"));
-  const alpha = projects.find((p) => p.title.includes("Alpha"));
-  const jardins = projects.find((p) => p.title.includes("Jardins"));
+  const victor = projects.find((p) => matchesDemoProjectTitle(p.title, "primary"));
+  const republique = projects.find((p) => matchesDemoProjectTitle(p.title, "waiting"));
+  const alpha = projects.find((p) => matchesDemoProjectTitle(p.title, "study"));
+  const jardins = projects.find((p) => matchesDemoProjectTitle(p.title, "calm"));
 
   const users = {} as SeedPersonasResult["users"];
   users.direction = { id: root.id, email: root.email, name: DEMO_PERSONAS.direction.name };
@@ -208,9 +209,9 @@ export async function seedDemoPersonaUsers(opts: {
     await prisma.task.update({
       where: { id: bc.id },
       data: {
-        title: "POINT.P — Résidence Victor Hugo (BC-2026-043)",
+        title: "POINT.P — Résidence Les Lilas (BC-2026-043)",
         description:
-          "Fournisseur Point.P — 40 rouleaux membrane EPDM. Livraison demandée 11 août 2026 07:30. Montant indicatif 4 260 € HT. Contact : Thomas Bernard.",
+          "Fournisseur Point.P — 40 rouleaux membrane bitume autoprotégée. Livraison demandée 11 août 2026 07:30. Montant indicatif 4 260 € HT. Contact : Thomas Bernard.",
         suppliersJson: [
           {
             name: "Point.P",
@@ -225,7 +226,7 @@ export async function seedDemoPersonaUsers(opts: {
     });
   }
 
-  // Documents partagés Victor Hugo pour client / fournisseur
+  // Documents partagés Les Lilas pour client / fournisseur
   if (victor) {
     const sharedFiles = await prisma.chantierFile.findMany({
       where: { projectId: victor.id, deletedAt: null },

@@ -231,7 +231,7 @@ export function CreatePurchaseOrderForm({
           <input
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
-            placeholder="Ex. Membrane EPDM terrasse"
+            placeholder="Ex. Membrane bitume terrasse"
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
           />
         </label>

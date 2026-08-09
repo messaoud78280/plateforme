@@ -4,10 +4,11 @@
  */
 
 import type { DemoPersonaKey } from "./personas";
+import { DEMO_SCENARIO, DEMO_SCENARIO_ORDER_NUMBER } from "./scenario";
 
 export const DEMO_COMMERCIAL_TOUR_STORAGE_KEY = "bework-demo-commercial-tour-v1";
 
-export const DEMO_SCENARIO_ORDER_NUMBER = "BC-2026-043";
+export { DEMO_SCENARIO_ORDER_NUMBER };
 
 export type DemoTourMode = "express" | "complete";
 
@@ -97,7 +98,7 @@ export const EXPRESS_TOUR_STEPS: DemoTourStepDef[] = [
   {
     id: "express-a-traiter",
     title: "À traiter",
-    body: "Une action manque sur la commande Point.P. BeWork l’a détectée automatiquement.",
+    body: `Une action manque sur la commande ${DEMO_SCENARIO.supplierName} (membrane bitume). BeWork l’a détectée automatiquement.`,
     tip: "L’alerte vient du moteur de commande, pas d’une saisie manuelle.",
     persona: "direction",
     href: "/dashboard/a-traiter",
@@ -156,7 +157,7 @@ export const COMPLETE_TOUR_STEPS: DemoTourStepDef[] = [
     id: "complete-a-traiter",
     title: "À traiter",
     body: "BeWork a détecté une action manquante sur la commande Point.P — sans saisie manuelle.",
-    tip: "Préférer la carte BC-2026-043 si elle est présente sur le board.",
+    tip: `Préférer la carte ${DEMO_SCENARIO_ORDER_NUMBER} si elle est présente sur le board.`,
     persona: "direction",
     href: "/dashboard/a-traiter",
     actionLabel: "Ouvrir À traiter",
@@ -168,7 +169,7 @@ export const COMPLETE_TOUR_STEPS: DemoTourStepDef[] = [
     body: "Une information a été saisie une fois. BeWork connaît déjà le chantier, le fournisseur, la date, le responsable et la réception.",
     persona: "direction",
     hrefKey: "orderHref",
-    actionLabel: "Ouvrir BC-2026-043",
+    actionLabel: `Ouvrir ${DEMO_SCENARIO_ORDER_NUMBER}`,
     require: ["order"],
   },
   {
@@ -240,7 +241,7 @@ export const COMPLETE_TOUR_STEPS: DemoTourStepDef[] = [
     id: "complete-cmdk",
     title: "Recherche ⌘K",
     body: "Vous ne cherchez plus dans quel menu se trouve l’information.",
-    tip: "Demander ⌘K / Ctrl+K puis suggérer « Point.P Victor Hugo ».",
+    tip: `Demander ⌘K / Ctrl+K puis suggérer « ${DEMO_SCENARIO.supplierName} ${DEMO_SCENARIO.projects.primary.title} ».`,
     persona: "direction",
     promptSearch: true,
     actionLabel: "Ouvrir la recherche",
@@ -268,7 +269,7 @@ export const COMPLETE_TOUR_STEPS: DemoTourStepDef[] = [
   {
     id: "complete-synthese",
     title: "Une information, plusieurs vues",
-    body: "BC-2026-043 circule dans Commande, Chantier, Agenda, À traiter, Recherche, portail fournisseur et Documents — sans doublon.",
+    body: `${DEMO_SCENARIO_ORDER_NUMBER} circule dans Commande, Chantier, Agenda, À traiter, Recherche, portail fournisseur et Documents — sans doublon.`,
     tip: "BeWork fait circuler l’information et évite qu’une action soit oubliée.",
     persona: "direction",
     hrefKey: "orderHref",

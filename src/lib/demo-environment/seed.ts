@@ -13,6 +13,7 @@ import {
   type DemoStaffKey,
 } from "./demo-staff-names";
 import { demoBrandContactFirstName } from "./brand";
+import { DEMO_SCENARIO, demoScenarioProject } from "./scenario";
 
 function daysFromNow(n: number): Date {
   const d = new Date();
@@ -39,16 +40,20 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
   const { clientId, organizationId, companyName, sector, includeMarches } = opts;
   const métier = sector?.trim() || "BTP";
 
+  const primary = demoScenarioProject("primary");
+  const waiting = demoScenarioProject("waiting");
+  const study = demoScenarioProject("study");
+
   const projectVictor = await prisma.project.create({
     data: {
-      title: "Résidence Victor Hugo",
-      description: `Chantier ${métier} — rénovation étanchéité toiture-terrasse et points singuliers. Données fictives de démonstration.`,
+      title: primary.title,
+      description: primary.description,
       status: ProjectStatus.EN_COURS,
       chantierStatus: ChantierStatus.EN_COURS,
       clientId,
       organizationId,
-      siteAddress: "12 avenue Victor Hugo",
-      siteCity: "Lyon",
+      siteAddress: primary.siteAddress,
+      siteCity: primary.siteCity,
       internalManager: "Karim Benali",
       urgency: ProjectUrgency.HAUTE,
       plannedStartDate: daysFromNow(-20),
@@ -59,14 +64,14 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
 
   const projectRepublique = await prisma.project.create({
     data: {
-      title: "Chantier République",
-      description: "Réfection façade et accès nacelle — données fictives.",
+      title: waiting.title,
+      description: waiting.description,
       status: ProjectStatus.EN_COURS,
       chantierStatus: ChantierStatus.EN_ATTENTE,
       clientId,
       organizationId,
-      siteAddress: "8 place de la République",
-      siteCity: "Villeurbanne",
+      siteAddress: waiting.siteAddress,
+      siteCity: waiting.siteCity,
       internalManager: "Karim Benali",
       urgency: ProjectUrgency.MOYENNE,
       plannedStartDate: daysFromNow(-5),
@@ -77,13 +82,14 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
 
   const projectAlpha = await prisma.project.create({
     data: {
-      title: "Immeuble Alpha — Lot couverture",
-      description: "Maintenance annuelle couverture — données fictives.",
+      title: study.title,
+      description: study.description,
       status: ProjectStatus.EN_COURS,
       chantierStatus: ChantierStatus.ETUDE,
       clientId,
       organizationId,
-      siteCity: "Saint-Priest",
+      siteAddress: study.siteAddress,
+      siteCity: study.siteCity,
       internalManager: "Julie Martin",
       urgency: ProjectUrgency.BASSE,
       plannedStartDate: daysFromNow(10),
@@ -91,12 +97,13 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
     },
   });
 
-  // Tâches / « post-its » digitalisés + bons de commande (catégorie métier)
+  // Tâches crédibles étanchéité — scénario SETRIM (données fictives)
   await prisma.task.createMany({
     data: [
       {
-        title: "Relancer le fournisseur pour les plans terrasse",
-        description: "Responsable : Karim Benali — priorité haute. Ancien post-it bureau.",
+        title: "Relancer Point.P — confirmation livraison membrane",
+        description:
+          "Responsable : Karim Benali — priorité haute. BC membrane bitume Les Lilas sans confirmation fournisseur.",
         status: TaskStatus.EN_COURS,
         priority: "URGENT",
         clientId,
@@ -106,9 +113,8 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         desiredDate: daysFromNow(-2),
       },
       {
-        title: "BC-2026-043 — 40 rouleaux membrane d'étanchéité",
-        description:
-          "Fournisseur fictif Étanchéité Plus. Chantier Résidence Victor Hugo. Montant indicatif 4 260 € HT. Statut : à valider.",
+        title: `${DEMO_SCENARIO.orderNumber} — ${DEMO_SCENARIO.materials.subject}`,
+        description: `Fournisseur ${DEMO_SCENARIO.supplierName}. Chantier ${primary.title}. Montant indicatif 4 260 € HT. Statut : à valider.`,
         status: TaskStatus.A_VALIDER,
         priority: "PRIORITAIRE",
         clientId,
@@ -116,11 +122,11 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         projectId: projectVictor.id,
         category: "Bon de commande",
         desiredDate: daysFromNow(5),
-        suppliersJson: [{ name: "Étanchéité Plus (fictif)", contact: "commandes@etancheite-plus.demo" }],
+        suppliersJson: [{ name: `${DEMO_SCENARIO.supplierName} (fictif)`, contact: "livraisons@pointp.demo" }],
       },
       {
-        title: "BC-2026-038 — Isolant thermique",
-        description: "Commandé — livraison prévue. Fournisseur fictif Isolant Rhône.",
+        title: "BC-2026-038 — Isolant sous membrane",
+        description: "Commandé — livraison prévue. Fournisseur fictif Isolant Île-de-France.",
         status: TaskStatus.EN_COURS,
         priority: "STANDARD",
         clientId,
@@ -128,12 +134,12 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         projectId: projectVictor.id,
         category: "Bon de commande",
         desiredDate: daysFromNow(2),
-        suppliersJson: [{ name: "Isolant Rhône (fictif)", contact: "livraisons@isolant-rhone.demo" }],
+        suppliersJson: [{ name: "Isolant Île-de-France (fictif)", contact: "livraisons@isolant-idf.demo" }],
       },
       {
-        title: "BC-2026-029 — Accessoires relevés",
+        title: "BC-2026-029 — Accessoires relevés / solins",
         description:
-          "Commande secondaire accessoires (legacy seed). Scénario livraison Point.P principal = BC-2026-043.",
+          "Commande secondaire accessoires (seed). Scénario livraison Point.P principal = BC-2026-043.",
         status: TaskStatus.EN_ATTENTE_INFO,
         priority: "URGENT",
         clientId,
@@ -152,11 +158,11 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         projectId: projectVictor.id,
         category: "Bon de commande",
         desiredDate: daysFromNow(8),
-        suppliersJson: [{ name: "Étanchéité Plus (fictif)", contact: "commandes@etancheite-plus.demo" }],
+        suppliersJson: [{ name: `${DEMO_SCENARIO.supplierName} (fictif)`, contact: "livraisons@pointp.demo" }],
       },
       {
-        title: "Location d'une nacelle pour le chantier République",
-        description: "Demande administrative interne — workflow Demande → À valider.",
+        title: "Valider accès livraison — Parking République",
+        description: "Demande administrative — créneau camion / zone livraison parking à confirmer.",
         status: TaskStatus.A_VALIDER,
         priority: "PRIORITAIRE",
         clientId,
@@ -166,8 +172,8 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         desiredDate: daysFromNow(3),
       },
       {
-        title: "Rédiger le compte rendu de visite Victor Hugo",
-        description: "Aucun CR récent — alerte tableau de bord.",
+        title: "Rédiger le compte rendu de visite Les Lilas",
+        description: "CR visite terrasse / relevés — à compléter avant pose membrane.",
         status: TaskStatus.EN_ATTENTE,
         priority: "PRIORITAIRE",
         clientId,
@@ -177,19 +183,19 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         desiredDate: daysFromNow(0),
       },
       {
-        title: "Transmettre les fiches techniques avant le 22",
-        description: "Extrait document : transmission avant échéance fictive.",
+        title: "Transmettre fiches techniques résine avant le 22",
+        description: "Documents fournisseur résine balcons — échéance fictive.",
         status: TaskStatus.EN_COURS,
         priority: "STANDARD",
         clientId,
         organizationId,
-        projectId: projectRepublique.id,
+        projectId: projectAlpha.id,
         category: "Document manquant",
         desiredDate: daysFromNow(7),
       },
       {
-        title: "Planifier l'intervention du 30",
-        description: "Action extraite d’un document fictif — à valider avant création définitive.",
+        title: "Planifier diagnostic recherche de fuites",
+        description: "Parking République — test fumigène / mise en eau à caler (données fictives).",
         status: TaskStatus.NOUVEAU,
         priority: "STANDARD",
         clientId,
@@ -199,8 +205,8 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         desiredDate: daysFromNow(14),
       },
       {
-        title: "Contrôle réception partielle Alpha",
-        description: "Échéance planning démo.",
+        title: "Préparer devis résine balcons Alpha",
+        description: "Étude calme — chiffrage résine, pas d’urgence chantier.",
         status: TaskStatus.EN_ATTENTE,
         priority: "STANDARD",
         clientId,
@@ -235,7 +241,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
   await prisma.document.createMany({
     data: [
       {
-        name: "Devis étanchéité Victor Hugo (fictif).pdf",
+        name: "Devis étanchéité Les Lilas (fictif).pdf",
         category: DocumentCategory.CONTRAT,
         fileUrl: "/demo-assets/placeholder-document.pdf",
         fileSize: 120_000,
@@ -245,7 +251,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         projectId: projectVictor.id,
       },
       {
-        name: "Fiche technique membrane (manquante)",
+        name: "Fiche technique membrane bitume (manquante)",
         category: DocumentCategory.AUTRE,
         fileUrl: "/demo-assets/placeholder-document.pdf",
         fileSize: 1_024,
@@ -270,7 +276,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
   await prisma.appointment.createMany({
     data: [
       {
-        title: "Réunion de chantier — Victor Hugo",
+        title: "Réunion de chantier — Les Lilas",
         startAt: daysFromNow(1),
         endAt: new Date(daysFromNow(1).getTime() + 60 * 60 * 1000),
         organizerId: clientId,
@@ -279,7 +285,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         notes: "Données fictives de démonstration",
       },
       {
-        title: "Livraison isolant — Victor Hugo",
+        title: "Livraison isolant — Les Lilas",
         startAt: daysFromNow(2),
         endAt: new Date(daysFromNow(2).getTime() + 2 * 60 * 60 * 1000),
         organizerId: clientId,
@@ -287,7 +293,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         projectId: projectVictor.id,
       },
       {
-        title: "Visite contrôle République",
+        title: "Visite contrôle Parking République",
         startAt: daysFromNow(5),
         endAt: new Date(daysFromNow(5).getTime() + 90 * 60 * 1000),
         organizerId: clientId,
@@ -315,7 +321,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
   await prisma.agendaEvent.createMany({
     data: [
       {
-        title: "Livraison membrane EPDM",
+        title: "Livraison membrane bitume",
         type: "LIVRAISON",
         startAt: atHour(today, 8),
         endAt: atHour(today, 9),
@@ -323,7 +329,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         createdById: clientId,
         organizationId: org?.id ?? null,
         projectId: projectVictor.id,
-        location: "Résidence Victor Hugo — aire livraison",
+        location: "Résidence Les Lilas — aire livraison",
         description: "Données fictives de démonstration BeWork",
       },
       {
@@ -335,7 +341,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         createdById: clientId,
         organizationId: org?.id ?? null,
         projectId: projectVictor.id,
-        location: "Base vie Victor Hugo",
+        location: "Base vie Les Lilas",
       },
       {
         title: "Rendez-vous fournisseur Point.P",
@@ -348,7 +354,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         location: "Point.P",
       },
       {
-        title: "Visite chantier République",
+        title: "Visite Parking République",
         type: "VISITE_CHANTIER",
         startAt: atHour(today, 14),
         endAt: atHour(today, 15, 30),
@@ -366,7 +372,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         createdById: clientId,
         organizationId: org?.id ?? null,
         projectId: projectAlpha.id,
-        description: "Revue situation Immeuble Alpha — fictif démo",
+        description: "Revue étude résine Balcons Alpha — fictif démo",
       },
       {
         title: "Livraison isolant",
@@ -379,7 +385,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         projectId: projectVictor.id,
       },
       {
-        title: "Réunion de chantier — Victor Hugo",
+        title: "Réunion de chantier — Les Lilas",
         type: "REUNION_CHANTIER",
         startAt: atHour(tomorrow, 9),
         endAt: atHour(tomorrow, 10),
@@ -390,7 +396,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         recurrence: "WEEKLY",
       },
       {
-        title: "Contrôle étanchéité République",
+        title: "Contrôle étanchéité Parking République",
         type: "CONTROLE",
         startAt: atHour(inTwo, 10),
         endAt: atHour(inTwo, 12),
@@ -400,7 +406,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         projectId: projectRepublique.id,
       },
       {
-        title: "Échéance DOE — Alpha",
+        title: "Échéance documents — Alpha",
         type: "ECHEANCE",
         startAt: atHour(inThree, 9),
         endAt: atHour(inThree, 9, 30),
@@ -422,10 +428,10 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
       assigneeId: clientId,
       organizationId,
       projectId: projectVictor.id,
-      title: "Résidence Victor Hugo — OS-4587",
-      clientName: "ABC Promotion",
-      siteAddress: "12 avenue Victor Hugo, Lyon",
-      workObject: "Réfection étanchéité terrasse",
+      title: "Résidence Les Lilas — OS-4587",
+      clientName: "Syndic Horizon Copro",
+      siteAddress: "18 rue des Lilas, Aubervilliers",
+      workObject: "Réfection étanchéité terrasse inaccessible",
       osNumber: "4587",
       orderNumber: "BC-2026-043",
       receivedAt: daysFromNow(-4),
@@ -445,7 +451,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
         authorId: clientId,
         kind: "creation",
         label: "OS-4587 reçu",
-        detail: "ABC Promotion — Réfection étanchéité terrasse",
+        detail: "Syndic Horizon Copro — Réfection étanchéité terrasse inaccessible",
         occurredAt: daysFromNow(-4),
       },
       {
@@ -472,8 +478,8 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
       assigneeId: clientId,
       organizationId,
       projectId: projectRepublique.id,
-      title: "Chantier République",
-      clientName: "Chantier République",
+      title: "Parking République",
+      clientName: "Parking République",
       workObject: "Avenant n°2 — validation client",
       orderNumber: "AV-2026-02",
       receivedAt: daysFromNow(-12),
@@ -503,8 +509,8 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
       assigneeId: clientId,
       organizationId,
       projectId: projectAlpha.id,
-      title: "Immeuble Alpha",
-      clientName: "Immeuble Alpha",
+      title: "Balcons Alpha — Résine",
+      clientName: "Balcons Alpha",
       workObject: "Travaux terminés — facturation",
       status: "A_FACTURER",
       colorKey: "vert",
@@ -515,10 +521,10 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
     },
   });
 
-  // Lier un événement agenda à la fiche Victor Hugo
+  // Lier un événement agenda à la fiche Les Lilas
   await prisma.agendaEvent.create({
     data: {
-      title: "Intervention étanchéité — Victor Hugo",
+      title: "Intervention étanchéité — Les Lilas",
       type: "INTERVENTION",
       startAt: (() => {
         const d = daysFromNow(2);
@@ -548,7 +554,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
   const karim = staffContacts.find((s) => s.key === "karim")?.id ?? primaryStaff;
   const laura = staffContacts.find((s) => s.key === "laura")?.id ?? primaryStaff;
 
-  // —— Scénario messagerie Action BeWork (Point.P / Victor Hugo) ——
+  // —— Scénario messagerie Action BeWork (Point.P / Les Lilas) ——
   const agentUser = await prisma.user.findFirst({
     where: { role: { in: ["AGENT", "AGENCE", "MANAGER"] }, id: { not: clientId } },
     select: { id: true },
@@ -572,7 +578,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
   const taskCr = await prisma.task.findFirst({
     where: {
       clientId,
-      title: { contains: "compte rendu de visite Victor Hugo" },
+      title: { contains: "compte rendu de visite Les Lilas" },
     },
     select: { id: true },
   });
@@ -582,7 +588,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
       where: { id: taskBc043.id },
       data: {
         assignedToId: staffId,
-        title: "POINT.P — Résidence Victor Hugo (BC-2026-043)",
+        title: "POINT.P — Résidence Les Lilas (BC-2026-043)",
         suppliersJson: [{ name: "Point.P (fictif)", contact: "livraisons@pointp.demo" }],
       },
     });
@@ -602,7 +608,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
           senderId: clientId,
           receiverId: staffId,
           content:
-            "Créneau demandé : mardi 7h30, aire livraison Victor Hugo. En attente de confirmation Point.P.",
+            "Créneau demandé : mardi 7h30, aire livraison Les Lilas (côté rue). En attente de confirmation Point.P.",
           kind: "USER",
           createdAt: daysFromNow(-1),
         },
@@ -703,7 +709,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
     console.error("[demo-seed] cleanup legacy inbox:", e);
   }
 
-  // —— Phase 0 : une seule chaîne métier Victor Hugo ——
+  // —— Phase 0 : une seule chaîne métier Les Lilas ——
   try {
     const { ensureVictorHugoCoherence } = await import("./coherence-victor-hugo");
     await ensureVictorHugoCoherence({
@@ -712,7 +718,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
       loginIdentifier,
     });
   } catch (e) {
-    console.error("[demo-seed] coherence Victor Hugo:", e);
+    console.error("[demo-seed] coherence Les Lilas:", e);
   }
 
   // —— CDE-3B1 : situations attention commandes (À traiter) ——
@@ -850,7 +856,7 @@ export async function seedDemoDirectConversations(opts: {
         senderId: sophieId,
         receiverId: clientId,
         content:
-          `Bonjour ${demoBrandContactFirstName()} 👋 Sophie Lefèvre (agence BeWork). On peut suivre Victor Hugo ici — photos et PDF bienvenus.`,
+          `Bonjour ${demoBrandContactFirstName()} 👋 Sophie Lefèvre (agence BeWork). On peut suivre la terrasse Les Lilas ici — photos et PDF bienvenus.`,
         read: false,
         createdAt: hoursAgo(26),
       },
@@ -858,7 +864,7 @@ export async function seedDemoDirectConversations(opts: {
         senderId: clientId,
         receiverId: sophieId,
         content:
-          "Parfait Sophie Lefèvre. Je vous envoie les plans terrasse dès que le fournisseur répond.",
+          "Parfait Sophie Lefèvre. Je vous envoie les plans / fiches dès que Point.P confirme.",
         read: true,
         createdAt: hoursAgo(24),
       },
@@ -873,7 +879,7 @@ export async function seedDemoDirectConversations(opts: {
         senderId: karimId,
         receiverId: clientId,
         content:
-          "Karim Adjaili — chantier République : nacelle OK pour jeudi. Vous validez l’accès livraison côté cour ?",
+          "Karim Adjaili — Parking République : accès camion OK jeudi. Vous validez le créneau livraison ?",
         read: false,
         createdAt: hoursAgo(8),
       },
@@ -888,7 +894,7 @@ export async function seedDemoDirectConversations(opts: {
         senderId: lauraId,
         receiverId: clientId,
         content:
-          "Laura Bernard (support BeWork legacy) — BC membrane et isolant prêts. Julie côté ABC peut aussi suivre.",
+          "Laura Bernard (support BeWork legacy) — BC membrane et isolant prêts. Julie côté SETRIM peut aussi suivre.",
         read: false,
         createdAt: hoursAgo(3),
       },
@@ -907,7 +913,7 @@ export async function seedDemoDirectConversations(opts: {
  * TACHES-V2A — Assignation démo.
  * - Laura Bernard (@bework.internal) : legacy support, masquée messagerie ; ne plus lui
  *   attribuer les BC (PurchaseOrder = source officielle ; Task BC masquée en liste).
- * - Sophie Lefèvre : staff BeWork (≠ Sophie Martin CLIENT_EXT ABC Promotion).
+ * - Sophie Lefèvre : staff BeWork (≠ Sophie Martin CLIENT_EXT Syndic Horizon Copro).
  * - Personas internes (Karim Benali / Julie Martin) privilégiés pour les tâches visibles.
  * - BC / POINT.P → Karim (persona ou staff) pour historique TaskMessage uniquement.
  */
@@ -959,8 +965,14 @@ export async function enrichDemoTaskThreads(opts: {
 
   for (const t of tasks) {
     let assignee = juliePersonaId;
-    if (t.title.includes("République") || t.title.includes("nacelle")) assignee = karimPersonaId;
-    if (t.title.includes("Relancer") || t.title.includes("plans")) assignee = karimPersonaId;
+    if (
+      t.title.includes("République") ||
+      t.title.includes("Parking") ||
+      t.title.includes("Lilas") ||
+      t.title.includes("Relancer")
+    ) {
+      assignee = karimPersonaId;
+    }
     // BC legacy : plus Laura — PO officielle ailleurs ; Task conservée hors liste moderne
     if (t.title.includes("BC-") || t.title.includes("POINT.P")) assignee = karimPersonaId;
     if (t.title.includes("Alpha")) assignee = juliePersonaId;
@@ -1010,7 +1022,7 @@ export async function enrichDemoTaskThreads(opts: {
 
 function coherentOpener(title: string, who: string): string {
   if (title.includes("membrane") || title.includes("POINT.P") || title.includes("BC-2026-043")) {
-    return `Bonjour ${demoBrandContactFirstName()}, ${who} ici. Votre commande membrane est prête.\nLivraison possible mardi 7h30 sur Victor Hugo — vous validez ?`;
+    return `Bonjour ${demoBrandContactFirstName()}, ${who} ici. Votre commande membrane bitume est prête.\nLivraison possible mardi 7h30 sur Les Lilas — vous validez ?`;
   }
   if (title.includes("Isolant") || title.includes("038")) {
     return `Hello, livraison isolant prévue sous 48h. Je vous confirme le créneau dès réception du BL.`;
@@ -1018,23 +1030,23 @@ function coherentOpener(title: string, who: string): string {
   if (title.includes("029") || title.includes("Accessoires")) {
     return `Petit point : accessoires relevés en retard côté fournisseur. Je propose un report — OK pour vous ?`;
   }
-  if (title.includes("nacelle") || title.includes("République")) {
-    return `Nacelle République : devis reçu. Besoin de votre validation accès cour pour jeudi.`;
+  if (title.includes("Parking") || title.includes("nacelle") || title.includes("République")) {
+    return `Accès livraison Parking République : devis reçu. Besoin de votre validation accès cour pour jeudi.`;
   }
   if (title.includes("compte rendu") || title.includes("visite")) {
-    return `CR visite Victor Hugo prêt. Vous pouvez le valider dès que vous avez 2 minutes.`;
+    return `CR visite Les Lilas prêt. Vous pouvez le valider dès que vous avez 2 minutes.`;
   }
-  if (title.includes("Relancer") || title.includes("plans terrasse")) {
-    return `Je suis sur la relance fournisseur pour les plans terrasse. Vous avez une date limite côté chantier ?`;
+  if (title.includes("Relancer") || title.includes("confirmation livraison")) {
+    return `Je relance Point.P pour la confirmation livraison membrane bitume Les Lilas. Vous avez une date limite côté chantier ?`;
   }
   return `Bonjour, je prends en charge « ${title} ». Écrivez-moi ici pour toute précision (texte, photo, PDF).`;
 }
 
 function coherentClientReply(title: string): string {
   if (title.includes("membrane") || title.includes("POINT.P") || title.includes("043")) {
-    return `Oui, mardi 7h30 sur Victor Hugo — aire livraison côté rue. Merci !`;
+    return `Oui, mardi 7h30 sur Les Lilas — aire livraison côté rue. Merci !`;
   }
-  if (title.includes("nacelle") || title.includes("République")) {
+  if (title.includes("Parking") || title.includes("nacelle") || title.includes("République")) {
     return `Accès cour OK 7h–16h. Merci.`;
   }
   if (title.includes("Relancer") || title.includes("plans")) {
@@ -1093,7 +1105,9 @@ export async function rewriteDemoTaskConversations(opts: {
     const assignee =
       t.assignedToId ??
       (t.title.includes("République") ||
-      t.title.includes("nacelle") ||
+      t.title.includes("Parking") ||
+      t.title.includes("Lilas") ||
+      t.title.includes("Relancer") ||
       t.title.includes("BC-") ||
       t.title.includes("POINT.P")
         ? karimId
@@ -1137,7 +1151,7 @@ function demoThreadForTitle(
       },
       {
         fromClient: false,
-        content: `Livraison possible mardi 7h30 sur Victor Hugo — aire livraison.\nVous validez ?`,
+        content: `Livraison possible mardi 7h30 sur Les Lilas — aire livraison.\nVous validez ?`,
       },
       {
         fromClient: true,
@@ -1152,7 +1166,7 @@ function demoThreadForTitle(
   if (title.includes("Isolant") || title.includes("038")) {
     return [
       { fromClient: false, content: `Isolant thermique : départ usine aujourd’hui.` },
-      { fromClient: false, content: `Livraison sous 48h sur Victor Hugo. Je vous confirme le créneau demain matin.` },
+      { fromClient: false, content: `Livraison sous 48h sur Les Lilas. Je vous confirme le créneau demain matin.` },
       { fromClient: true, content: `OK merci. Prévenez-moi dès que le BL est dispo.` },
     ];
   }
@@ -1163,9 +1177,9 @@ function demoThreadForTitle(
       { fromClient: true, content: `Oui, reportez. Tenez-moi au courant dès confirmation.` },
     ];
   }
-  if (title.includes("nacelle") || title.includes("République")) {
+  if (title.includes("Parking") || title.includes("nacelle") || title.includes("République")) {
     return [
-      { fromClient: false, content: `Nacelle République : devis reçu, dispo jeudi.` },
+      { fromClient: false, content: `Accès livraison Parking République : devis reçu, dispo jeudi.` },
       { fromClient: false, content: `Besoin de votre validation accès cour (7h–16h).` },
       { fromClient: true, content: `Accès cour validé 7h–16h. Merci Karim.` },
       { fromClient: false, content: `Top, je bloque la réservation ✅` },
@@ -1173,14 +1187,14 @@ function demoThreadForTitle(
   }
   if (title.includes("compte rendu") || title.includes("visite")) {
     return [
-      { fromClient: false, content: `CR visite Victor Hugo prêt.` },
+      { fromClient: false, content: `CR visite Les Lilas prêt.` },
       { fromClient: false, content: `Vous pouvez le valider quand vous avez 2 minutes — onglet Documents.` },
       { fromClient: true, content: `Je regarde ça cet après-midi. Merci Sophie.` },
     ];
   }
-  if (title.includes("Relancer") || title.includes("plans terrasse")) {
+  if (title.includes("Relancer") || title.includes("confirmation livraison")) {
     return [
-      { fromClient: false, content: `Je suis sur la relance fournisseur pour les plans terrasse.` },
+      { fromClient: false, content: `Je relance Point.P pour la confirmation livraison membrane bitume Les Lilas.` },
       { fromClient: false, content: `Vous avez une date limite côté chantier ?` },
       { fromClient: true, content: `Idéalement avant la semaine prochaine — sinon on bloque la pose.` },
       { fromClient: false, content: `Compris. Je relance aujourd’hui et je vous joins le mail fournisseur.` },

@@ -1,6 +1,6 @@
 /**
  * CDE-3B1 — Situations démo pour le moteur d’attention commandes.
- * Pas de doublon BC-2026-043 / Victor Hugo : on enrichit 043 + crée des BC compagnons.
+ * Pas de doublon BC-2026-043 / Les Lilas : on enrichit 043 + crée des BC compagnons.
  */
 import { prisma } from "@/lib/prisma";
 import { demoPersonaEmail } from "./personas";
@@ -29,7 +29,7 @@ export async function ensurePurchaseOrderAttentionDemoScenarios(opts: {
   const project = await prisma.project.findFirst({
     where: {
       organizationId: opts.organizationId,
-      title: { contains: "Victor Hugo" },
+      OR: [{ title: { contains: "Les Lilas" } }, { title: { contains: "Victor Hugo" } }],
     },
     select: { id: true, title: true },
   });
@@ -179,7 +179,7 @@ export async function ensurePurchaseOrderAttentionDemoScenarios(opts: {
   await upsertDemoOrder({
     organizationId: opts.organizationId,
     number: "BC-2026-053",
-    subject: "Colle EPDM — livraison planifiée",
+    subject: "Colle bitume — livraison planifiée",
     projectId: project?.id ?? null,
     supplierId: pointP.id,
     requestedById: opts.rootUserId,
@@ -190,7 +190,7 @@ export async function ensurePurchaseOrderAttentionDemoScenarios(opts: {
     requestedDeliveryAt: hoursFromNow(120),
     confirmedDeliveryAt: hoursFromNow(120),
     proposedDeliveryStatus: "ACCEPTED",
-    line: { designation: "Colle EPDM", quantity: 8, unit: "U" },
+    line: { designation: "Colle bitume", quantity: 8, unit: "U" },
   });
   configured.push("BC-2026-053 NORMAL");
 

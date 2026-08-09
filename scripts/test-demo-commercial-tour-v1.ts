@@ -23,7 +23,7 @@ const ctxFull: DemoCommercialContext = {
   orderNumber: DEMO_SCENARIO_ORDER_NUMBER,
   orderStatus: "PARTIELLEMENT_RECUE",
   projectId: "proj_1",
-  projectTitle: "Résidence Victor Hugo",
+  projectTitle: "Résidence Les Lilas",
   supplierName: "Point.P",
   agendaEventId: "ev_1",
   orderedQty: 40,

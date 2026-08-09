@@ -19,6 +19,7 @@ function testPersonasUnchanged() {
   assert.equal(DEMO_PERSONAS.conducteur.name, "Karim Benali");
   assert.equal(DEMO_PERSONAS.administratif.name, "Julie Martin");
   assert.equal(DEMO_PERSONAS.client.name, "Sophie Martin");
+  assert.equal(DEMO_PERSONAS.client.company, "Syndic Horizon Copro");
   assert.equal(DEMO_PERSONAS.fournisseur.name, "Thomas Bernard");
   assert.deepEqual([...DEMO_PERSONA_CANONICAL_NAMES], [
     "Denis Buret",

@@ -51,11 +51,11 @@ export default async function DemoVisibilitePage() {
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">
-          Scénario collab (Victor Hugo)
+          Scénario collab (Les Lilas)
         </h2>
         <ul className="mt-3 space-y-2 text-sm text-slate-700">
-          <li>· Client (Sophie) : voit uniquement les chantiers partagés — pas le fil interne.</li>
-          <li>· Fournisseur (Thomas / Point.P) : confirme BC-2026-043 — Direction est alertée.</li>
+          <li>· Client (Sophie / Syndic Horizon Copro) : voit uniquement les chantiers partagés — pas le fil interne.</li>
+          <li>· Fournisseur (Thomas / Point.P) : confirme BC-2026-043 (membrane bitume Les Lilas) — Direction est alertée.</li>
           <li>· Conducteur (Karim) : actions terrain sur chantiers affectés.</li>
           <li>· Administratif (Julie) : documents, BL, facturation, commandes — Accueil Ops.</li>
           <li>· Direction (Denis) : vision globale, avenants, à facturer, équipe.</li>

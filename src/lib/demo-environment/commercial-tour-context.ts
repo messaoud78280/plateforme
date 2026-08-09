@@ -1,5 +1,5 @@
 /**
- * Résolution live du scénario commercial (BC-2026-043 / Victor Hugo / Point.P).
+ * Résolution live du scénario commercial (BC-2026-043 / Les Lilas / Point.P).
  * Lecture seule — aucune mutation.
  */
 
@@ -9,6 +9,7 @@ import {
   DEMO_SCENARIO_ORDER_NUMBER,
   type DemoCommercialContext,
 } from "./commercial-tour";
+import { DEMO_SCENARIO, demoProjectTitleWhere } from "./scenario";
 
 export async function loadDemoCommercialContext(
   organizationId: string,
@@ -52,19 +53,20 @@ export async function loadDemoCommercialContext(
   });
 
   if (!order) {
-    // Fallback chantier Victor Hugo seul (parcours adapté, pas d’invention commande)
+    // Fallback chantier principal seul (parcours adapté, pas d’invention commande)
     const project = await prisma.project.findFirst({
-      where: { organizationId, title: { contains: "Victor Hugo" } },
+      where: { organizationId, ...demoProjectTitleWhere("primary") },
       select: { id: true, title: true },
     });
     if (!project) return empty;
+    const q = DEMO_SCENARIO.projects.primary.matchToken;
     return {
       ...empty,
       projectId: project.id,
       projectTitle: project.title,
       chantierHref: `/dashboard/projets/${project.id}`,
       messagerieHref: projectSupplierHref(project.id),
-      documentsHref: `/dashboard/documents?q=${encodeURIComponent("Victor Hugo")}`,
+      documentsHref: `/dashboard/documents?q=${encodeURIComponent(q)}`,
       agendaHref: "/dashboard/agenda",
     };
   }

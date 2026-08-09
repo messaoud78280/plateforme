@@ -1,5 +1,5 @@
 /**
- * Phase 0 — Cohérence métier Victor Hugo.
+ * Phase 0 — Cohérence métier Les Lilas (SETRIM démo).
  * Une affaire (FollowUpSheet OS-4587) relie BC, livraison unique, intervention.
  * Idempotent : peut être rappelé sur démos déjà seedées.
  */
@@ -7,6 +7,12 @@ import { prisma } from "@/lib/prisma";
 import { appendFollowUpTimeline } from "@/lib/follow-up/timeline";
 import { syncPurchaseOrderDeliveryEvent } from "@/lib/purchase-orders/sync-delivery";
 import { demoPersonaEmail } from "./personas";
+import {
+  DEMO_SCENARIO,
+  demoPrimarySheetTitle,
+  demoProjectTitleWhere,
+  isDemoPrimaryOrderTitle,
+} from "./scenario";
 
 /** Heures Europe/Paris explicites — évite 07:30 UTC → 09:30 affiché sur serveur UTC. */
 const DELIVERY_AT = new Date("2026-08-11T07:30:00+02:00");
@@ -25,7 +31,7 @@ export type CoherenceResult = {
 };
 
 function isBc043(title: string) {
-  return title.includes("BC-2026-043") || (title.includes("POINT.P") && title.includes("Victor Hugo"));
+  return isDemoPrimaryOrderTitle(title);
 }
 
 export async function ensureVictorHugoCoherence(opts: {
@@ -36,7 +42,7 @@ export async function ensureVictorHugoCoherence(opts: {
   const project = await prisma.project.findFirst({
     where: {
       organizationId: opts.organizationId,
-      title: { contains: "Victor Hugo" },
+      ...demoProjectTitleWhere("primary"),
     },
     select: { id: true, title: true, siteAddress: true, siteCity: true },
   });
@@ -74,13 +80,18 @@ export async function ensureVictorHugoCoherence(opts: {
   let sheet = await prisma.followUpSheet.findFirst({
     where: {
       projectId: project.id,
-      OR: [{ osNumber: "4587" }, { title: { contains: "Victor Hugo" } }],
+      OR: [
+        { osNumber: DEMO_SCENARIO.osNumber },
+        { title: { contains: DEMO_SCENARIO.projects.primary.matchToken } },
+        { title: { contains: "Victor Hugo" } },
+      ],
       NOT: { status: "AVENANT" },
     },
     orderBy: { createdAt: "asc" },
   });
 
   if (!sheet) {
+    const siteFull = `${DEMO_SCENARIO.projects.primary.siteAddress}, ${DEMO_SCENARIO.projects.primary.siteCity}`;
     sheet = await prisma.followUpSheet.create({
       data: {
         ownerUserId: opts.rootUserId,
@@ -88,16 +99,16 @@ export async function ensureVictorHugoCoherence(opts: {
         assigneeId,
         organizationId: opts.organizationId,
         projectId: project.id,
-        title: "Résidence Victor Hugo — OS-4587",
-        clientName: "ABC Promotion",
-        siteAddress: "12 avenue Victor Hugo, Lyon",
-        workObject: "Réfection étanchéité terrasse",
-        osNumber: "4587",
-        orderNumber: "BC-2026-043",
+        title: demoPrimarySheetTitle(),
+        clientName: DEMO_SCENARIO.client.name,
+        siteAddress: siteFull,
+        workObject: DEMO_SCENARIO.projects.primary.workObject,
+        osNumber: DEMO_SCENARIO.osNumber,
+        orderNumber: DEMO_SCENARIO.orderNumber,
         receivedAt: new Date(2026, 7, 1),
         status: "ATTENTE_FOURNISSEUR",
         colorKey: "orange",
-        nextAction: "Attendre confirmation livraison Point.P",
+        nextAction: `Attendre confirmation livraison ${DEMO_SCENARIO.supplierName}`,
         nextActionAt: DELIVERY_AT,
         nextActionDone: false,
         notes: "Affaire centrale démo — une seule chaîne métier.",
@@ -107,8 +118,8 @@ export async function ensureVictorHugoCoherence(opts: {
       sheetId: sheet.id,
       authorId: opts.rootUserId,
       kind: "creation",
-      label: "OS-4587 reçu",
-      detail: "ABC Promotion — Réfection étanchéité terrasse",
+      label: `OS-${DEMO_SCENARIO.osNumber} reçu`,
+      detail: `${DEMO_SCENARIO.client.name} — ${DEMO_SCENARIO.projects.primary.workObject}`,
     });
   } else {
     // Ne pas écraser un statut déjà avancé (évite le conflit avec le Kanban / terrain)
@@ -125,17 +136,17 @@ export async function ensureVictorHugoCoherence(opts: {
     sheet = await prisma.followUpSheet.update({
       where: { id: sheet.id },
       data: {
-        title: "Résidence Victor Hugo — OS-4587",
-        clientName: "ABC Promotion",
-        workObject: sheet.workObject || "Réfection étanchéité terrasse",
-        osNumber: "4587",
-        orderNumber: "BC-2026-043",
+        title: demoPrimarySheetTitle(),
+        clientName: DEMO_SCENARIO.client.name,
+        workObject: sheet.workObject || DEMO_SCENARIO.projects.primary.workObject,
+        osNumber: DEMO_SCENARIO.osNumber,
+        orderNumber: DEMO_SCENARIO.orderNumber,
         assigneeId,
         ...(statusLocked.has(sheet.status)
           ? {}
           : {
               status: "ATTENTE_FOURNISSEUR" as const,
-              nextAction: "Attendre confirmation livraison Point.P",
+              nextAction: `Attendre confirmation livraison ${DEMO_SCENARIO.supplierName}`,
               nextActionAt: DELIVERY_AT,
               nextActionDone: false,
               colorKey: "orange",
@@ -148,7 +159,7 @@ export async function ensureVictorHugoCoherence(opts: {
   const vhStory: { label: string; detail: string; at: Date; kind: string }[] = [
     {
       label: "OS reçu",
-      detail: "OS-4587 — ABC Promotion",
+      detail: "OS-4587 — Syndic Horizon Copro",
       at: new Date(2026, 7, 8, 9, 0, 0),
       kind: "creation",
     },
@@ -160,7 +171,7 @@ export async function ensureVictorHugoCoherence(opts: {
     },
     {
       label: "Commande fournisseur créée",
-      detail: "BC-2026-043 — Point.P · 40 rouleaux membrane EPDM",
+      detail: "BC-2026-043 — Point.P · 40 rouleaux membrane bitume autoprotégée",
       at: new Date(2026, 7, 10, 10, 0, 0),
       kind: "commande",
     },
@@ -195,9 +206,9 @@ export async function ensureVictorHugoCoherence(opts: {
   if (!bc) {
     bc = await prisma.task.create({
       data: {
-        title: "POINT.P — Résidence Victor Hugo (BC-2026-043)",
+        title: "POINT.P — Résidence Les Lilas (BC-2026-043)",
         description:
-          "Fournisseur Point.P — 40 rouleaux membrane EPDM. Livraison demandée 11 août 2026 07:30. Montant indicatif 4 260 € HT. Contact : Thomas Bernard.",
+          "Fournisseur Point.P — 40 rouleaux membrane bitume autoprotégée. Livraison demandée 11 août 2026 07:30. Montant indicatif 4 260 € HT. Contact : Thomas Bernard.",
         status: "EN_ATTENTE_INFO",
         priority: "PRIORITAIRE",
         clientId: opts.rootUserId,
@@ -213,7 +224,7 @@ export async function ensureVictorHugoCoherence(opts: {
     bc = await prisma.task.update({
       where: { id: bc.id },
       data: {
-        title: "POINT.P — Résidence Victor Hugo (BC-2026-043)",
+        title: "POINT.P — Résidence Les Lilas (BC-2026-043)",
         followUpSheetId: sheet.id,
         projectId: project.id,
         category: "Bon de commande",
@@ -222,7 +233,7 @@ export async function ensureVictorHugoCoherence(opts: {
         description:
           bc.description?.includes("40 rouleaux")
             ? bc.description
-            : "Fournisseur Point.P — 40 rouleaux membrane EPDM. Livraison demandée 11 août 2026 07:30. Montant indicatif 4 260 € HT. Contact : Thomas Bernard.",
+            : "Fournisseur Point.P — 40 rouleaux membrane bitume autoprotégée. Livraison demandée 11 août 2026 07:30. Montant indicatif 4 260 € HT. Contact : Thomas Bernard.",
       },
     });
   }
@@ -316,7 +327,7 @@ export async function ensureVictorHugoCoherence(opts: {
 
   const deliveryAddress =
     [project.siteAddress, project.siteCity].filter(Boolean).join(", ") ||
-    "12 avenue Victor Hugo, Lyon";
+    "18 rue des Lilas, Aubervilliers";
 
   let po = await prisma.purchaseOrder.findFirst({
     where: {
@@ -332,7 +343,7 @@ export async function ensureVictorHugoCoherence(opts: {
         organizationId: opts.organizationId,
         number: "BC-2026-043",
         status: "A_CONFIRMER",
-        subject: "40 rouleaux membrane EPDM — Résidence Victor Hugo",
+        subject: "40 rouleaux membrane bitume autoprotégée — Résidence Les Lilas",
         projectId: project.id,
         followUpSheetId: sheet.id,
         externalOrganizationId: pointPId,
@@ -354,7 +365,7 @@ export async function ensureVictorHugoCoherence(opts: {
         lines: {
           create: [
             {
-              designation: "Membrane EPDM",
+              designation: "Membrane bitume autoprotégée",
               quantity: 40,
               unit: "U",
               unitPriceHt: 106.5,
@@ -367,7 +378,7 @@ export async function ensureVictorHugoCoherence(opts: {
             {
               kind: "created",
               label: "Commande créée",
-              detail: "BC-2026-043 — démo Victor Hugo",
+              detail: "BC-2026-043 — démo Les Lilas",
               actorUserId: opts.rootUserId,
             },
             {
@@ -403,7 +414,7 @@ export async function ensureVictorHugoCoherence(opts: {
       data: {
         number: "BC-2026-043",
         ...(preserveSupplierProgress ? {} : { status: "A_CONFIRMER" as const }),
-        subject: "40 rouleaux membrane EPDM — Résidence Victor Hugo",
+        subject: "40 rouleaux membrane bitume autoprotégée — Résidence Les Lilas",
         projectId: project.id,
         followUpSheetId: sheet.id,
         externalOrganizationId: pointPId,
@@ -430,7 +441,7 @@ export async function ensureVictorHugoCoherence(opts: {
       await prisma.purchaseOrderLine.create({
         data: {
           orderId: po.id,
-          designation: "Membrane EPDM",
+          designation: "Membrane bitume autoprotégée",
           quantity: 40,
           unit: "U",
           unitPriceHt: 106.5,
@@ -483,7 +494,7 @@ export async function ensureVictorHugoCoherence(opts: {
         status: "PLANIFIE",
         startAt: DELIVERY_AT,
         endAt: DELIVERY_END,
-        location: "Résidence Victor Hugo — aire livraison",
+        location: "Résidence Les Lilas — aire livraison",
         ownerUserId: opts.rootUserId,
         createdById: opts.rootUserId,
         organizationId: opts.organizationId,
@@ -510,12 +521,12 @@ export async function ensureVictorHugoCoherence(opts: {
   if (!intervention) {
     intervention = await prisma.agendaEvent.create({
       data: {
-        title: "Intervention étanchéité — Victor Hugo",
+        title: "Intervention étanchéité — Les Lilas",
         type: "INTERVENTION",
         status: "PLANIFIE",
         startAt: INTERVENTION_AT,
         endAt: INTERVENTION_END,
-        location: "Résidence Victor Hugo — terrasse",
+        location: "Résidence Les Lilas — terrasse",
         ownerUserId: opts.rootUserId,
         createdById: opts.rootUserId,
         organizationId: opts.organizationId,
@@ -533,7 +544,7 @@ export async function ensureVictorHugoCoherence(opts: {
         endAt: INTERVENTION_END,
         followUpSheetId: sheet.id,
         responsibleId: assigneeId,
-        title: "Intervention étanchéité — Victor Hugo",
+        title: "Intervention étanchéité — Les Lilas",
       },
     });
   }
@@ -556,19 +567,19 @@ export async function ensureVictorHugoCoherence(opts: {
   if (!reunion) {
     reunion = await prisma.agendaEvent.create({
       data: {
-        title: "Réunion chantier — Victor Hugo",
+        title: "Réunion chantier — Les Lilas",
         type: "REUNION_CHANTIER",
         status: "CONFIRME",
         startAt: REUNION_AT,
         endAt: REUNION_END,
-        location: "Résidence Victor Hugo — baraque de chantier",
+        location: "Résidence Les Lilas — baraque de chantier",
         ownerUserId: opts.rootUserId,
         createdById: opts.rootUserId,
         organizationId: opts.organizationId,
         projectId: project.id,
         followUpSheetId: sheet.id,
         responsibleId: assigneeId,
-        description: "Point livraison EPDM + préparation intervention.",
+        description: "Point livraison membrane bitume + préparation intervention.",
       },
       select: { id: true },
     });
@@ -599,8 +610,8 @@ export async function ensureVictorHugoCoherence(opts: {
         assigneeId: opts.rootUserId,
         organizationId: opts.organizationId,
         projectId: project.id,
-        title: "Avenant n°02 — Victor Hugo",
-        clientName: "ABC Promotion",
+        title: "Avenant n°02 — Les Lilas",
+        clientName: "Syndic Horizon Copro",
         workObject: "20 m² terrasse côté cour",
         orderNumber: "AV-2026-02",
         osNumber: "4587",
@@ -876,7 +887,7 @@ export async function applyTerrainTravauxTermines(opts: {
   const sheet = await prisma.followUpSheet.findFirst({
     where: {
       projectId: opts.projectId,
-      OR: [{ osNumber: "4587" }, { title: { contains: "Victor Hugo" } }],
+      OR: [{ osNumber: "4587" }, { title: { contains: "Les Lilas" } }],
       NOT: { status: "AVENANT" },
     },
     orderBy: { createdAt: "asc" },

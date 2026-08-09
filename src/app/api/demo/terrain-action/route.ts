@@ -46,7 +46,15 @@ export async function POST(request: Request) {
   } else {
     project = await prisma.project.findFirst({
       where: {
-        AND: [projectWhere, { title: { contains: "Victor Hugo" } }],
+        AND: [
+          projectWhere,
+          {
+            OR: [
+              { title: { contains: "Les Lilas" } },
+              { title: { contains: "Victor Hugo" } },
+            ],
+          },
+        ],
       },
       select: { id: true, title: true },
     });
@@ -152,7 +160,7 @@ export async function POST(request: Request) {
       const sheet = await prisma.followUpSheet.findFirst({
         where: {
           projectId: project.id,
-          OR: [{ osNumber: "4587" }, { title: { contains: "Victor Hugo" } }],
+          OR: [{ osNumber: "4587" }, { title: { contains: "Les Lilas" } }],
           NOT: { status: "AVENANT" },
         },
         select: { id: true },

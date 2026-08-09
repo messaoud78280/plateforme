@@ -385,7 +385,7 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
             value={nextDraft}
             onChange={(e) => setNextDraft(e.target.value)}
             className="min-w-[200px] flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"
-            placeholder="Ex. Commander membrane EPDM"
+            placeholder="Ex. Commander membrane bitume"
           />
           <input
             type="datetime-local"

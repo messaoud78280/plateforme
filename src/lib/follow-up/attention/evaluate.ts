@@ -217,6 +217,8 @@ function ruleDelivery(
     .sort((a, b) => a.startAt.getTime() - b.startAt.getTime());
 
   for (const d of deliveries) {
+    // CDE-3B1 — livraisons liées PurchaseOrder : le moteur commande est la source
+    if (d.purchaseOrderId) continue;
     const hoursUntil = hoursBetween(now, d.startAt);
     const label = d.title || "Livraison";
 
@@ -373,6 +375,7 @@ export function serializeAttentionResult(result: FollowUpAttentionResult) {
       code: it.code as AttentionCode,
       level: it.level,
       reason: it.reason,
+      actionLabel: it.actionLabel ?? null,
       dueAt: it.dueAt?.toISOString() ?? null,
       overdueByHours: it.overdueByHours ?? null,
       relatedEntity: it.relatedEntity ?? null,

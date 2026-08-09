@@ -98,6 +98,7 @@ export async function loadAttentionForSheets(opts: {
       status: true,
       title: true,
       startAt: true,
+      purchaseOrderId: true,
     },
   });
 
@@ -147,6 +148,7 @@ export async function loadAttentionForSheets(opts: {
           status: e.status,
           title: e.title,
           startAt: e.startAt,
+          purchaseOrderId: e.purchaseOrderId,
         })),
         thresholds: opts.thresholds,
       },

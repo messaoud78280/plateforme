@@ -9,6 +9,7 @@ import {
   groupAttentionCards,
   type ATraiterAttentionCard,
   type AttentionProblemCategory,
+  type AttentionSubjectType,
 } from "@/lib/a-traiter/attention-board";
 import { URGENCY_LABELS, URGENCY_STYLES, type UrgencyLevel } from "@/lib/follow-up/types";
 import { FollowUpInlineActions } from "@/components/follow-up/FollowUpInlineActions";
@@ -28,6 +29,7 @@ export function ATraiterAttentionBoard({ cards, currentUserId, canEdit }: Props)
   const [clientName, setClientName] = useState<string>("all");
   const [projectTitle, setProjectTitle] = useState<string>("all");
   const [category, setCategory] = useState<AttentionProblemCategory | "all">("all");
+  const [subjectType, setSubjectType] = useState<AttentionSubjectType | "all">("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const assignees = useMemo(() => {
@@ -64,8 +66,20 @@ export function ATraiterAttentionBoard({ cards, currentUserId, canEdit }: Props)
         clientName,
         projectTitle,
         category,
+        subjectType,
       }),
-    [cards, q, mineOnly, currentUserId, urgency, assigneeId, clientName, projectTitle, category],
+    [
+      cards,
+      q,
+      mineOnly,
+      currentUserId,
+      urgency,
+      assigneeId,
+      clientName,
+      projectTitle,
+      category,
+      subjectType,
+    ],
   );
 
   const groups = useMemo(() => groupAttentionCards(filtered), [filtered]);
@@ -83,6 +97,18 @@ export function ATraiterAttentionBoard({ cards, currentUserId, canEdit }: Props)
             placeholder="Chantier, BC, fournisseur, OS…"
             className="mt-1 w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-normal text-slate-800"
           />
+        </label>
+        <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+          Source
+          <select
+            value={subjectType}
+            onChange={(e) => setSubjectType(e.target.value as AttentionSubjectType | "all")}
+            className="mt-1 block rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+          >
+            <option value="all">Tous</option>
+            <option value="FOLLOW_UP">Fiches</option>
+            <option value="PURCHASE_ORDER">Commandes</option>
+          </select>
         </label>
         <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
           Urgence
@@ -315,7 +341,9 @@ function AttentionCard({
           </Link>
         ) : null}
         {card.subjectType === "PURCHASE_ORDER" &&
-        (card.category === "LIVRAISON" || card.category === "RECEPTION") ? (
+        (card.category === "LIVRAISON" ||
+          card.category === "RECEPTION" ||
+          card.category === "BL") ? (
           <Link
             href={`/dashboard/commandes/${card.subjectId}/reception`}
             className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50"
@@ -323,9 +351,17 @@ function AttentionCard({
             Réceptionner
           </Link>
         ) : null}
+        {card.subjectType === "PURCHASE_ORDER" && card.supplierMessageUrl ? (
+          <Link
+            href={card.supplierMessageUrl}
+            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50"
+          >
+            {card.clientName ? `Message ${card.clientName}` : "Message fournisseur"}
+          </Link>
+        ) : null}
         {card.relatedAgendaId ? (
           <Link
-            href="/dashboard/agenda"
+            href={`/dashboard/agenda?event=${encodeURIComponent(card.relatedAgendaId)}`}
             className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50"
           >
             Voir l’agenda

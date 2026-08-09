@@ -10,6 +10,8 @@ export type PurchaseOrderAttentionCode = Extract<
   AttentionCode,
   | "SUPPLIER_NO_RESPONSE"
   | "SUPPLIER_REFUSED"
+  | "SUPPLIER_PROPOSAL_PENDING"
+  | "ORDER_NOT_SENT"
   | "DELIVERY_UNCONFIRMED"
   | "DELIVERY_NOT_RECEIVED"
   | "PARTIAL_DELIVERY_PENDING"

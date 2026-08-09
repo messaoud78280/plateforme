@@ -36,6 +36,7 @@ export type PurchaseOrderAttentionBatchRow = {
   proposedDeliveryStatus: string;
   supplierRefuseReason: string | null;
   supplierName: string | null;
+  projectId: string | null;
   projectTitle: string | null;
   responsibleId: string | null;
   responsibleName: string | null;
@@ -61,6 +62,7 @@ export async function loadPurchaseOrderAttention(opts: {
   const now = opts.now ?? new Date();
   const policy = opts.policy ?? DEFAULT_PURCHASE_ORDER_ATTENTION_POLICY;
   const light = Boolean(opts.light);
+  void light; // réservé : take déjà plafonné côté collect ; lignes/docs toujours complets pour qty/BL
 
   const orders = await prisma.purchaseOrder.findMany({
     where: {
@@ -91,10 +93,10 @@ export async function loadPurchaseOrderAttention(opts: {
       responsible: { select: { id: true, name: true } },
       requestedBy: { select: { id: true, name: true } },
       externalOrganization: { select: { name: true, tradeName: true } },
-      project: { select: { title: true } },
+      project: { select: { id: true, title: true } },
       lines: {
-        orderBy: { sortOrder: "asc" },
-        take: light ? 8 : undefined,
+        orderBy: { sortOrder: "asc" as const },
+        // Toujours toutes les lignes — le snapshot qty ne doit pas être tronqué (badge / board)
         select: {
           id: true,
           designation: true,
@@ -109,9 +111,11 @@ export async function loadPurchaseOrderAttention(opts: {
           cancelledAt: true,
           status: true,
           deliveryNoteNumber: true,
-          documents: light
-            ? false
-            : { select: { id: true, kind: true }, take: 5 },
+          documents: {
+            where: { kind: "BL" },
+            select: { id: true },
+            take: 1,
+          },
           lines: {
             select: {
               orderLineId: true,
@@ -181,9 +185,7 @@ export async function loadPurchaseOrderAttention(opts: {
         cancelledAt: r.cancelledAt,
         status: r.status,
         deliveryNoteNumber: r.deliveryNoteNumber,
-        hasBlDocument: Array.isArray(r.documents)
-          ? r.documents.some((d: { kind: string }) => d.kind === "BL")
-          : false,
+        hasBlDocument: r.documents.length > 0,
       })),
       receiptLines,
       agendaEventId: o.agendaEvents[0]?.id ?? null,
@@ -207,6 +209,7 @@ export async function loadPurchaseOrderAttention(opts: {
       proposedDeliveryStatus: o.proposedDeliveryStatus,
       supplierRefuseReason: o.supplierRefuseReason,
       supplierName: input.supplierName,
+      projectId: o.project?.id ?? null,
       projectTitle: input.projectTitle,
       responsibleId: responsible.id,
       responsibleName: responsible.name,

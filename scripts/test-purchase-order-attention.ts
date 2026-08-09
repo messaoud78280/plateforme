@@ -116,7 +116,7 @@ function testE_deliveryTomorrowUnconfirmed() {
   );
   const item = r.attentionItems.find((i) => i.code === "DELIVERY_UNCONFIRMED");
   assert.ok(item);
-  assert.equal(item!.level, "IMPORTANT");
+  assert.equal(item!.level, "URGENT");
 }
 
 function testF_deliveryOverdueUnconfirmed() {
@@ -147,13 +147,29 @@ function testG_confirmedFutureNormal() {
 function testH_deliveryNotReceived() {
   const r = evalOrder(
     baseOrder({
-      confirmedDeliveryAt: atLocal(2026, 7, 9, 8), // 4 h ago
+      confirmedDeliveryAt: atLocal(2026, 7, 8, 8), // ~28 h ago → URGENT
+      requestedDeliveryAt: atLocal(2026, 7, 8, 8),
+      receipts: [],
+      receiptLines: [],
+    }),
+  );
+  const item = r.attentionItems.find((i) => i.code === "DELIVERY_NOT_RECEIVED");
+  assert.ok(item);
+  assert.equal(item!.level, "URGENT");
+}
+
+function testH2_deliveryNotReceivedSameDayImportant() {
+  const r = evalOrder(
+    baseOrder({
+      confirmedDeliveryAt: atLocal(2026, 7, 9, 8), // 4 h ago → IMPORTANT
       requestedDeliveryAt: atLocal(2026, 7, 9, 8),
       receipts: [],
       receiptLines: [],
     }),
   );
-  assert.ok(r.attentionItems.some((i) => i.code === "DELIVERY_NOT_RECEIVED"));
+  const item = r.attentionItems.find((i) => i.code === "DELIVERY_NOT_RECEIVED");
+  assert.ok(item);
+  assert.equal(item!.level, "IMPORTANT");
 }
 
 function testI_partialJustReceivedNoAlert() {
@@ -213,7 +229,9 @@ function testJ_partialAged() {
   );
   const item = r.attentionItems.find((i) => i.code === "PARTIAL_DELIVERY_PENDING");
   assert.ok(item);
+  assert.match(item!.reason, /30 \/ 40/);
   assert.match(item!.reason, /10/);
+  assert.equal(item!.level, "URGENT");
 }
 
 function testK_receiptIssue() {
@@ -420,14 +438,21 @@ function testBoardCardAndSearch() {
   });
   assert.ok(card);
   assert.equal(card!.subjectType, "PURCHASE_ORDER");
+  assert.equal(card!.title, "Point.P — BC-2026-043");
   assert.equal(card!.actionUrl, "/dashboard/commandes/po-1");
   assert.equal(attentionCodeToCategory("SUPPLIER_NO_RESPONSE"), "COMMANDE");
   assert.equal(attentionCodeToCategory("RECEIPT_ISSUE"), "RECEPTION");
+  assert.equal(attentionCodeToCategory("SUPPLIER_PROPOSAL_PENDING"), "CONFIRMATION");
+  assert.equal(attentionCodeToCategory("ORDER_NOT_SENT"), "COMMANDE");
 
   const found = filterAttentionCards([card!], { q: "epdm" });
   assert.equal(found.length, 1);
   const found2 = filterAttentionCards([card!], { q: "victor" });
   assert.equal(found2.length, 1);
+  const onlyPo = filterAttentionCards([card!], { subjectType: "PURCHASE_ORDER" });
+  assert.equal(onlyPo.length, 1);
+  const onlyFu = filterAttentionCards([card!], { subjectType: "FOLLOW_UP" });
+  assert.equal(onlyFu.length, 0);
   const normal = buildPurchaseOrderAttentionCard({
     order: {
       id: "po-ok",
@@ -467,25 +492,99 @@ function testCancelledReceiptIgnored() {
   assert.equal(snap.activeReceiptCount, 0);
 }
 
+function testQ_proposalPending() {
+  const r = evalOrder(
+    baseOrder({
+      status: "A_CONFIRMER",
+      confirmedDeliveryAt: null,
+      proposedDeliveryStatus: "PENDING",
+      proposedDeliveryAt: atLocal(2026, 7, 8, 10),
+      requestedDeliveryAt: atLocal(2026, 7, 12, 7, 30),
+    }),
+  );
+  const item = r.attentionItems.find((i) => i.code === "SUPPLIER_PROPOSAL_PENDING");
+  assert.ok(item);
+  assert.equal(item!.level, "URGENT"); // > 24 h
+  assert.ok(!r.attentionItems.some((i) => i.code === "DELIVERY_UNCONFIRMED"));
+}
+
+function testR_orderNotSent() {
+  const r = evalOrder(
+    baseOrder({
+      status: "VALIDEE",
+      sharedWithSupplier: false,
+      sharedWithSupplierAt: null,
+      confirmedDeliveryAt: null,
+      proposedDeliveryStatus: "NONE",
+      requestedDeliveryAt: atLocal(2026, 7, 10, 7, 30), // demain
+    }),
+  );
+  const item = r.attentionItems.find((i) => i.code === "ORDER_NOT_SENT");
+  assert.ok(item);
+  assert.ok(item!.level === "URGENT" || item!.level === "CRITIQUE");
+}
+
+function testS_fullyReceivedNoDeliveryAlerts() {
+  const r = evalOrder(
+    baseOrder({
+      status: "RECUE",
+      confirmedDeliveryAt: atLocal(2026, 7, 5, 9),
+      receipts: [
+        {
+          id: "r1",
+          receivedAt: atLocal(2026, 7, 5, 10),
+          cancelledAt: null,
+          status: "COMPLETE",
+          deliveryNoteNumber: "BL-1",
+          hasBlDocument: true,
+        },
+      ],
+      receiptLines: [
+        {
+          orderLineId: LINE_ID,
+          receiptId: "r1",
+          receivedQty: 40,
+          damagedQty: 0,
+          refusedQty: 0,
+        },
+      ],
+    }),
+  );
+  assert.ok(!r.attentionItems.some((i) => i.code === "DELIVERY_NOT_RECEIVED"));
+  assert.ok(!r.attentionItems.some((i) => i.code === "PARTIAL_DELIVERY_PENDING"));
+  assert.ok(!r.attentionItems.some((i) => i.code === "DELIVERY_UNCONFIRMED"));
+}
+
+function testT_cancelledNoAlert() {
+  const r = evalOrder(baseOrder({ status: "ANNULEE" }));
+  assert.equal(r.attentionItems.length, 0);
+  assert.equal(r.effectiveUrgency, "NORMAL");
+}
+
 const tests: [string, () => void][] = [
   ["A normale → NORMAL", testA_normalHealthy],
   ["B partagée récente → pas sans réponse", testB_sharedRecentNoAlert],
   ["C partagée > 48 h → SUPPLIER_NO_RESPONSE", testC_supplierNoResponse],
   ["D livraison lointaine → pas unconfirmed", testD_deliveryFarUnconfirmedNormal],
-  ["E demain non confirmée → IMPORTANT", testE_deliveryTomorrowUnconfirmed],
+  ["E demain non confirmée → URGENT", testE_deliveryTomorrowUnconfirmed],
   ["F demandée dépassée → CRITIQUE", testF_deliveryOverdueUnconfirmed],
   ["G confirmée future → NORMAL", testG_confirmedFutureNormal],
-  ["H passée sans réception → DELIVERY_NOT_RECEIVED", testH_deliveryNotReceived],
+  ["H passée sans réception → DELIVERY_NOT_RECEIVED URGENT", testH_deliveryNotReceived],
+  ["H2 retard récent → IMPORTANT", testH2_deliveryNotReceivedSameDayImportant],
   ["I 30/40 récent → pas PARTIAL pending", testI_partialJustReceivedNoAlert],
-  ["J 30/40 ancien → PARTIAL_DELIVERY_PENDING", testJ_partialAged],
+  ["J 30/40 ancien → PARTIAL URGENT", testJ_partialAged],
   ["K endommagés → RECEIPT_ISSUE", testK_receiptIssue],
   ["L BL absent récent → ok", testL_blMissingRecentOk],
   ["M BL absent après délai → DELIVERY_NOTE_MISSING", testM_blMissingAged],
   ["N plusieurs problèmes → primary max", testN_multipleProblemsPrimary],
   ["O refus fournisseur → SUPPLIER_REFUSED", testO_supplierRefused],
   ["P aucune donnée → aucun faux positif", testP_noDataNoFalsePositive],
-  ["carte À traiter + recherche", testBoardCardAndSearch],
+  ["carte À traiter + filtre source", testBoardCardAndSearch],
   ["réception annulée ignorée", testCancelledReceiptIgnored],
+  ["Q proposition PENDING → SUPPLIER_PROPOSAL_PENDING", testQ_proposalPending],
+  ["R non envoyée + livraison proche → ORDER_NOT_SENT", testR_orderNotSent],
+  ["S entièrement reçue → plus d’alerte livraison", testS_fullyReceivedNoDeliveryAlerts],
+  ["T annulée → aucune alerte", testT_cancelledNoAlert],
 ];
 
 let failed = 0;

@@ -711,6 +711,7 @@ async function collectPurchaseOrderAttentionCards(
           number: row.number,
           subject: row.subject,
           supplierName: row.supplierName,
+          projectId: row.projectId,
           projectTitle: row.projectTitle,
           status: row.status,
           responsibleId: row.responsibleId,
@@ -719,6 +720,7 @@ async function collectPurchaseOrderAttentionCards(
           agendaEventId: row.agendaEventId,
           confirmedDeliveryAt: row.confirmedDeliveryAt?.toISOString() ?? null,
           requestedDeliveryAt: row.requestedDeliveryAt?.toISOString() ?? null,
+          sharedWithSupplier: row.sharedWithSupplier,
         },
         attention: row.attention,
       });

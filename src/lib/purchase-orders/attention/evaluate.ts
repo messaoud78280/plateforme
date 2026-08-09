@@ -1,6 +1,10 @@
 /**
  * CDE-3B1 — Moteur d’attention commandes (pur, sans I/O, sans notification).
- * Source quantités = receipt lines actives (pas le cache receivedQty).
+ *
+ * Source quantités reçues (retenue) :
+ *   PurchaseOrderReceiptLine sur réceptions actives (cancelledAt = null)
+ *   qty conforme = received − damaged − refused
+ *   ≠ PurchaseOrderLine.receivedQty (cache UI uniquement — peut diverger hors transaction globale)
  */
 import type { UrgencyLevel } from "@/lib/follow-up/types";
 import { maxUrgency, urgencyRank } from "@/lib/follow-up/urgency";
@@ -13,20 +17,21 @@ import {
   DEFAULT_PURCHASE_ORDER_ATTENTION_POLICY,
   type PurchaseOrderAttentionPolicy,
 } from "@/lib/purchase-orders/attention/policy";
-
-/** Aligné sur receiving.ts — évite d’importer le module I/O. */
-function conformingQty(received: number, damaged: number, refused: number): number {
-  return Math.max(0, received - damaged - refused);
-}
 import type {
   EvaluatePurchaseOrderAttentionContext,
+  PurchaseOrderAttentionCode,
   PurchaseOrderAttentionInput,
   PurchaseOrderAttentionItem,
   PurchaseOrderAttentionResult,
   PurchaseOrderReceivingSnapshot,
 } from "@/lib/purchase-orders/attention/types";
 
-const CLOSED = new Set(["ANNULEE", "CLOTUREE", "BROUILLON", "RECUE"]);
+/** Aligné sur receiving.ts — évite d’importer le module I/O. */
+function conformingQty(received: number, damaged: number, refused: number): number {
+  return Math.max(0, received - damaged - refused);
+}
+
+const TERMINAL = new Set(["ANNULEE", "CLOTUREE", "BROUILLON"]);
 const AWAITING_SUPPLIER = new Set(["ENVOYEE_FOURNISSEUR", "A_CONFIRMER"]);
 
 function n(v: unknown): number {
@@ -36,11 +41,6 @@ function n(v: unknown): number {
 
 function supplierLabel(order: PurchaseOrderAttentionInput): string {
   return (order.supplierName || "Le fournisseur").trim() || "Le fournisseur";
-}
-
-function formatQty(q: number, unit: string, designation: string): string {
-  const qty = Number.isInteger(q) ? String(q) : q.toFixed(1).replace(/\.0$/, "");
-  return `${qty} ${unit} ${designation}`.trim();
 }
 
 function formatWhenFr(d: Date): string {
@@ -59,6 +59,35 @@ function formatDaysSince(hours: number): string {
   }
   const days = Math.max(1, Math.round(hours / 24));
   return days === 1 ? "1 jour" : `${days} jours`;
+}
+
+export function purchaseOrderAttentionActionLabel(
+  code: PurchaseOrderAttentionCode | string,
+  supplierName?: string | null,
+): string {
+  const name = (supplierName || "le fournisseur").trim();
+  switch (code) {
+    case "SUPPLIER_NO_RESPONSE":
+      return `Relancer ${name}`;
+    case "SUPPLIER_PROPOSAL_PENDING":
+      return "Examiner la proposition";
+    case "SUPPLIER_REFUSED":
+      return `Replanifier / Contacter ${name}`;
+    case "ORDER_NOT_SENT":
+      return "Envoyer au fournisseur";
+    case "DELIVERY_UNCONFIRMED":
+      return "Voir la commande";
+    case "DELIVERY_NOT_RECEIVED":
+      return "Réceptionner / Contacter fournisseur";
+    case "PARTIAL_DELIVERY_PENDING":
+      return "Voir réception";
+    case "RECEIPT_ISSUE":
+      return "Traiter l’anomalie";
+    case "DELIVERY_NOTE_MISSING":
+      return "Ajouter le BL";
+    default:
+      return "Voir la commande";
+  }
 }
 
 /** État réception depuis les lignes de réception actives (pas le cache ligne). */
@@ -135,20 +164,36 @@ function pickPrimary(items: PurchaseOrderAttentionItem[]): PurchaseOrderAttentio
   return items.slice().sort((a, b) => urgencyRank(b.level) - urgencyRank(a.level))[0] ?? null;
 }
 
+function withAction(
+  item: PurchaseOrderAttentionItem,
+  order: PurchaseOrderAttentionInput,
+): PurchaseOrderAttentionItem {
+  return {
+    ...item,
+    actionLabel: purchaseOrderAttentionActionLabel(item.code, order.supplierName),
+  };
+}
+
 function ruleSupplierRefused(
   order: PurchaseOrderAttentionInput,
 ): PurchaseOrderAttentionItem | null {
-  if (order.status !== "REFUSEE") return null;
-  const name = supplierLabel(order);
+  const refusedStatus = order.status === "REFUSEE";
   const motif = order.supplierRefuseReason?.trim();
-  return {
-    code: "SUPPLIER_REFUSED",
-    level: "URGENT",
-    reason: motif
-      ? `${name} a refusé la commande. Motif : ${motif}.`
-      : `${name} a refusé la commande.`,
-    relatedEntity: { type: "purchase_order", id: order.id, label: order.number },
-  };
+  if (!refusedStatus && !motif) return null;
+  if (!refusedStatus && order.confirmedDeliveryAt) return null;
+
+  const name = supplierLabel(order);
+  return withAction(
+    {
+      code: "SUPPLIER_REFUSED",
+      level: "URGENT",
+      reason: motif
+        ? `${name} a refusé la livraison demandée. Motif : ${motif}.`
+        : `${name} a refusé la livraison demandée.`,
+      relatedEntity: { type: "purchase_order", id: order.id, label: order.number },
+    },
+    order,
+  );
 }
 
 function ruleSupplierNoResponse(
@@ -159,31 +204,89 @@ function ruleSupplierNoResponse(
   if (!order.sharedWithSupplier) return null;
   if (!AWAITING_SUPPLIER.has(String(order.status))) return null;
   if (order.confirmedDeliveryAt) return null;
-  if (order.status === "REFUSEE") return null;
+  if (order.status === "REFUSEE" || order.supplierRefuseReason?.trim()) return null;
 
   const proposed = (order.proposedDeliveryStatus || "NONE").toUpperCase();
-  // Proposition ou refus de proposition = réponse fournisseur
   if (proposed === "PENDING" || proposed === "ACCEPTED" || proposed === "REFUSED") {
     return null;
   }
 
   const sharedAt = toDate(order.sharedWithSupplierAt);
-  if (!sharedAt) {
-    // Pas de timestamp fiable → pas d’alerte (évite faux positif sur updatedAt)
-    return null;
-  }
+  if (!sharedAt) return null;
 
   const hours = hoursBetween(sharedAt, now);
   if (hours < policy.supplierResponseHours) return null;
 
   const name = supplierLabel(order);
-  return {
-    code: "SUPPLIER_NO_RESPONSE",
-    level: hours >= policy.supplierResponseHours * 2 ? "URGENT" : "IMPORTANT",
-    reason: `${name} n’a pas répondu à la commande depuis ${formatDaysSince(hours)}.`,
-    overdueByHours: hours - policy.supplierResponseHours,
-    relatedEntity: { type: "purchase_order", id: order.id, label: order.number },
-  };
+  return withAction(
+    {
+      code: "SUPPLIER_NO_RESPONSE",
+      level: hours >= policy.supplierResponseHours * 2 ? "URGENT" : "IMPORTANT",
+      reason: `${name} n’a pas répondu à la demande de confirmation.`,
+      overdueByHours: hours - policy.supplierResponseHours,
+      relatedEntity: { type: "purchase_order", id: order.id, label: order.number },
+    },
+    order,
+  );
+}
+
+function ruleSupplierProposalPending(
+  order: PurchaseOrderAttentionInput,
+  now: Date,
+  policy: PurchaseOrderAttentionPolicy,
+): PurchaseOrderAttentionItem | null {
+  if (TERMINAL.has(String(order.status)) || order.status === "REFUSEE") return null;
+  const proposed = (order.proposedDeliveryStatus || "NONE").toUpperCase();
+  if (proposed !== "PENDING") return null;
+
+  const proposedAt = toDate(order.proposedDeliveryAt) ?? toDate(order.sharedWithSupplierAt);
+  const hours = proposedAt ? hoursBetween(proposedAt, now) : 0;
+  const name = supplierLabel(order);
+  const when = toDate(order.proposedDeliveryAt);
+
+  return withAction(
+    {
+      code: "SUPPLIER_PROPOSAL_PENDING",
+      level: hours >= policy.proposalPendingUrgentHours ? "URGENT" : "IMPORTANT",
+      reason: when
+        ? `${name} a proposé un créneau (${formatWhenFr(when)}) — réponse ABC en attente.`
+        : `${name} a proposé un créneau — réponse ABC en attente.`,
+      dueAt: when,
+      overdueByHours: Math.max(0, hours - policy.proposalPendingUrgentHours),
+      relatedEntity: { type: "purchase_order", id: order.id, label: order.number },
+    },
+    order,
+  );
+}
+
+function ruleOrderNotSent(
+  order: PurchaseOrderAttentionInput,
+  now: Date,
+  policy: PurchaseOrderAttentionPolicy,
+): PurchaseOrderAttentionItem | null {
+  if (order.sharedWithSupplier) return null;
+  if (TERMINAL.has(String(order.status)) || order.status === "REFUSEE") return null;
+  if (order.status === "BROUILLON") return null;
+  if (["RECUE", "PARTIELLEMENT_RECUE", "CLOTUREE"].includes(String(order.status))) {
+    return null;
+  }
+
+  const requested = toDate(order.requestedDeliveryAt);
+  if (!requested) return null;
+  const hoursUntil = hoursBetween(now, requested);
+  if (hoursUntil > policy.orderNotSentWarningHours) return null;
+
+  const name = supplierLabel(order);
+  return withAction(
+    {
+      code: "ORDER_NOT_SENT",
+      level: hoursUntil < 0 || hoursUntil <= 24 ? "CRITIQUE" : "URGENT",
+      reason: `Commande non envoyée à ${name} — livraison demandée ${formatWhenFr(requested)}.`,
+      dueAt: requested,
+      relatedEntity: { type: "purchase_order", id: order.id, label: order.number },
+    },
+    order,
+  );
 }
 
 function ruleDeliveryUnconfirmed(
@@ -191,12 +294,11 @@ function ruleDeliveryUnconfirmed(
   now: Date,
   policy: PurchaseOrderAttentionPolicy,
 ): PurchaseOrderAttentionItem | null {
-  if (CLOSED.has(String(order.status)) || order.status === "REFUSEE") return null;
+  if (TERMINAL.has(String(order.status)) || order.status === "REFUSEE") return null;
+  if (order.status === "RECUE") return null;
   if (order.confirmedDeliveryAt) return null;
   const requested = toDate(order.requestedDeliveryAt);
   if (!requested) return null;
-  // Si le fournisseur a déjà proposé un créneau, ce n’est plus « sans confirmation »
-  // au sens « ignoré » — la confirmation interne reste ouverte mais hors cette règle.
   const proposed = (order.proposedDeliveryStatus || "NONE").toUpperCase();
   if (proposed === "PENDING") return null;
 
@@ -205,60 +307,69 @@ function ruleDeliveryUnconfirmed(
   const name = supplierLabel(order);
   const when = formatWhenFr(requested);
 
-  if (hoursUntil < 0) {
-    return {
-      code: "DELIVERY_UNCONFIRMED",
-      level: "CRITIQUE",
-      reason: `Livraison demandée ${when} — toujours non confirmée par ${name}.`,
-      dueAt: requested,
-      overdueByHours: -hoursUntil,
-      relatedEntity: { type: "purchase_order", id: order.id, label: order.number },
-    };
+  if (hoursUntil < 0 || dayDiff === 0) {
+    return withAction(
+      {
+        code: "DELIVERY_UNCONFIRMED",
+        level: "CRITIQUE",
+        reason:
+          dayDiff === 0 && hoursUntil >= 0
+            ? `Livraison demandée aujourd’hui — toujours à confirmer par ${name}.`
+            : `Livraison demandée ${when} — toujours non confirmée par ${name}.`,
+        dueAt: requested,
+        overdueByHours: hoursUntil < 0 ? -hoursUntil : 0,
+        relatedEntity: { type: "purchase_order", id: order.id, label: order.number },
+      },
+      order,
+    );
   }
 
-  if (dayDiff === 0) {
-    return {
-      code: "DELIVERY_UNCONFIRMED",
-      level: "URGENT",
-      reason: `Livraison demandée aujourd’hui à ${requested.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })} — toujours non confirmée par ${name}.`,
-      dueAt: requested,
-      relatedEntity: { type: "purchase_order", id: order.id, label: order.number },
-    };
+  if (hoursUntil <= policy.unconfirmedDeliveryUrgentHours || dayDiff === 1) {
+    return withAction(
+      {
+        code: "DELIVERY_UNCONFIRMED",
+        level: "URGENT",
+        reason:
+          dayDiff === 1
+            ? `Livraison demain — toujours à confirmer par ${name}.`
+            : `Livraison demandée ${when} — toujours à confirmer par ${name}.`,
+        dueAt: requested,
+        relatedEntity: { type: "purchase_order", id: order.id, label: order.number },
+      },
+      order,
+    );
   }
 
-  if (dayDiff === 1) {
-    return {
-      code: "DELIVERY_UNCONFIRMED",
-      level: "IMPORTANT",
-      reason: `Livraison demandée demain à ${requested.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })} — toujours non confirmée par ${name}.`,
-      dueAt: requested,
-      relatedEntity: { type: "purchase_order", id: order.id, label: order.number },
-    };
-  }
-
-  if (hoursUntil <= policy.unconfirmedDeliveryWarningHours) {
-    return {
-      code: "DELIVERY_UNCONFIRMED",
-      level: "A_SURVEILLER",
-      reason: `Livraison demandée ${when} — toujours non confirmée par ${name}.`,
-      dueAt: requested,
-      relatedEntity: { type: "purchase_order", id: order.id, label: order.number },
-    };
+  if (hoursUntil <= policy.unconfirmedDeliveryImportantHours) {
+    return withAction(
+      {
+        code: "DELIVERY_UNCONFIRMED",
+        level: "IMPORTANT",
+        reason: `Livraison demandée ${when} — toujours à confirmer par ${name}.`,
+        dueAt: requested,
+        relatedEntity: { type: "purchase_order", id: order.id, label: order.number },
+      },
+      order,
+    );
   }
 
   return null;
 }
 
-function ruleDeliveryNotReceived(
+/** Livraison confirmée dépassée sans réception (ou sans qty conforme). */
+function ruleDeliveryOverdue(
   order: PurchaseOrderAttentionInput,
   snap: PurchaseOrderReceivingSnapshot,
   now: Date,
   policy: PurchaseOrderAttentionPolicy,
 ): PurchaseOrderAttentionItem | null {
-  if (CLOSED.has(String(order.status)) || order.status === "REFUSEE") return null;
+  if (TERMINAL.has(String(order.status)) || order.status === "REFUSEE") return null;
+  if (snap.fullyReceived || order.status === "RECUE") return null;
+  // Réception partielle → règle PARTIAL, pas « non livrée »
+  if (snap.activeReceiptCount > 0) return null;
+
   const confirmed = toDate(order.confirmedDeliveryAt);
   if (!confirmed) return null;
-  if (snap.activeReceiptCount > 0) return null;
 
   const hoursAfter = hoursBetween(confirmed, now);
   if (hoursAfter < policy.deliveryGraceHours) return null;
@@ -266,20 +377,22 @@ function ruleDeliveryNotReceived(
   const name = supplierLabel(order);
   const when = formatWhenFr(confirmed);
   let level: UrgencyLevel = "IMPORTANT";
-  if (hoursAfter >= policy.deliveryNotReceivedUrgentHours * 6) level = "CRITIQUE";
-  else if (hoursAfter >= policy.deliveryNotReceivedUrgentHours) level = "URGENT";
-  else if (hoursAfter < policy.deliveryNotReceivedUrgentHours) level = "A_SURVEILLER";
+  if (hoursAfter >= policy.deliveryOverdueCriticalHours) level = "CRITIQUE";
+  else if (hoursAfter >= policy.deliveryOverdueUrgentHours) level = "URGENT";
 
-  return {
-    code: "DELIVERY_NOT_RECEIVED",
-    level,
-    reason: `Livraison ${name} prévue à ${when} — aucune réception enregistrée.`,
-    dueAt: confirmed,
-    overdueByHours: hoursAfter,
-    relatedEntity: order.agendaEventId
-      ? { type: "agenda", id: order.agendaEventId, label: order.number }
-      : { type: "purchase_order", id: order.id, label: order.number },
-  };
+  return withAction(
+    {
+      code: "DELIVERY_NOT_RECEIVED",
+      level,
+      reason: `Livraison ${name} prévue à ${when} — aucune quantité reçue.`,
+      dueAt: confirmed,
+      overdueByHours: hoursAfter,
+      relatedEntity: order.agendaEventId
+        ? { type: "agenda", id: order.agendaEventId, label: order.number }
+        : { type: "purchase_order", id: order.id, label: order.number },
+    },
+    order,
+  );
 }
 
 function rulePartialPending(
@@ -288,25 +401,31 @@ function rulePartialPending(
   now: Date,
   policy: PurchaseOrderAttentionPolicy,
 ): PurchaseOrderAttentionItem | null {
-  if (CLOSED.has(String(order.status)) || order.status === "REFUSEE") return null;
+  if (TERMINAL.has(String(order.status)) || order.status === "REFUSEE") return null;
+  if (snap.fullyReceived || order.status === "RECUE") return null;
   if (!snap.partiallyReceived || snap.totalRemaining <= 0) return null;
   if (!snap.lastActiveReceiptAt) return null;
 
   const hoursSince = hoursBetween(snap.lastActiveReceiptAt, now);
-  if (hoursSince < policy.partialReceiptReminderHours) return null;
+  if (hoursSince < policy.partialReceiptImportantHours) return null;
 
-  const remainingLine = snap.lineSummaries.find((l) => l.remaining > 0);
-  const detail = remainingLine
-    ? formatQty(snap.totalRemaining, remainingLine.unit, remainingLine.designation)
-    : `${snap.totalRemaining} unité(s)`;
+  let level: UrgencyLevel = "IMPORTANT";
+  if (hoursSince >= policy.partialReceiptUrgentHours) level = "URGENT";
 
-  return {
-    code: "PARTIAL_DELIVERY_PENDING",
-    level: hoursSince >= policy.partialReceiptReminderHours * 2 ? "IMPORTANT" : "A_SURVEILLER",
-    reason: `${detail} restent à livrer depuis ${formatDaysSince(hoursSince)}.`,
-    overdueByHours: hoursSince - policy.partialReceiptReminderHours,
-    relatedEntity: { type: "purchase_order", id: order.id, label: order.number },
-  };
+  const received = Math.round(snap.totalReceivedConforming);
+  const ordered = Math.round(snap.totalOrdered);
+  const remaining = Math.round(snap.totalRemaining);
+
+  return withAction(
+    {
+      code: "PARTIAL_DELIVERY_PENDING",
+      level,
+      reason: `${received} / ${ordered} reçus — ${remaining} restent à livrer depuis ${formatDaysSince(hoursSince)}.`,
+      overdueByHours: hoursSince - policy.partialReceiptImportantHours,
+      relatedEntity: { type: "purchase_order", id: order.id, label: order.number },
+    },
+    order,
+  );
 }
 
 function ruleReceiptIssue(
@@ -323,13 +442,13 @@ function ruleReceiptIssue(
   const allBad =
     snap.totalReceivedConforming === 0 && issueQty > 0 && snap.activeReceiptCount > 0;
 
-  let level: UrgencyLevel = "IMPORTANT";
-  if (allBad || ratio >= policy.receiptIssueUrgentRatio) level = "URGENT";
+  let level: UrgencyLevel = "URGENT";
+  if (allBad || ratio >= Math.max(policy.receiptIssueUrgentRatio, 0.5)) level = "CRITIQUE";
 
   const parts: string[] = [];
   if (snap.totalDamaged > 0) {
     parts.push(
-      `${snap.totalDamaged} ${snap.totalDamaged > 1 ? "unités signalées endommagées" : "unité signalée endommagée"}`,
+      `${snap.totalDamaged} ${snap.totalDamaged > 1 ? "unités endommagées" : "unité endommagée"}`,
     );
   }
   if (snap.totalRefused > 0) {
@@ -338,12 +457,15 @@ function ruleReceiptIssue(
     );
   }
 
-  return {
-    code: "RECEIPT_ISSUE",
-    level,
-    reason: `${parts.join(" et ")} lors de la réception.`,
-    relatedEntity: { type: "purchase_order", id: order.id, label: order.number },
-  };
+  return withAction(
+    {
+      code: "RECEIPT_ISSUE",
+      level,
+      reason: `${parts.join(" et ")} à la réception.`,
+      relatedEntity: { type: "purchase_order", id: order.id, label: order.number },
+    },
+    order,
+  );
 }
 
 function ruleDeliveryNoteMissing(
@@ -352,12 +474,11 @@ function ruleDeliveryNoteMissing(
   policy: PurchaseOrderAttentionPolicy,
 ): PurchaseOrderAttentionItem | null {
   if (!policy.deliveryNoteMissingEnabled) return null;
-  if (CLOSED.has(String(order.status)) && order.status !== "RECUE") return null;
+  if (TERMINAL.has(String(order.status)) && order.status !== "RECUE") return null;
 
   const active = order.receipts.filter((r) => !toDate(r.cancelledAt));
   if (active.length === 0) return null;
 
-  // Réception la plus ancienne sans BL (n° ni document)
   const missing = active
     .filter((r) => !r.deliveryNoteNumber?.trim() && !r.hasBlDocument)
     .map((r) => ({ r, at: toDate(r.receivedAt) }))
@@ -367,15 +488,36 @@ function ruleDeliveryNoteMissing(
   if (missing.length === 0) return null;
   const oldest = missing[0]!;
   const hours = hoursBetween(oldest.at, now);
-  if (hours < policy.deliveryNoteGraceHours) return null;
+  if (hours < policy.deliveryNoteImportantHours) {
+    // Grâce courte : WATCH après ~12 h si déjà > 12 h
+    if (hours >= 12) {
+      return withAction(
+        {
+          code: "DELIVERY_NOTE_MISSING",
+          level: "A_SURVEILLER",
+          reason: `Réception enregistrée — bon de livraison manquant.`,
+          overdueByHours: hours,
+          relatedEntity: { type: "purchase_order", id: order.id, label: order.number },
+        },
+        order,
+      );
+    }
+    return null;
+  }
 
-  return {
-    code: "DELIVERY_NOTE_MISSING",
-    level: hours >= policy.deliveryNoteGraceHours * 3 ? "IMPORTANT" : "A_SURVEILLER",
-    reason: `Réception enregistrée ${formatDaysSince(hours)} — bon de livraison manquant.`,
-    overdueByHours: hours - policy.deliveryNoteGraceHours,
-    relatedEntity: { type: "purchase_order", id: order.id, label: order.number },
-  };
+  let level: UrgencyLevel = "IMPORTANT";
+  if (hours >= policy.deliveryNoteUrgentHours) level = "URGENT";
+
+  return withAction(
+    {
+      code: "DELIVERY_NOTE_MISSING",
+      level,
+      reason: `Réception enregistrée depuis ${formatDaysSince(hours)} — bon de livraison manquant.`,
+      overdueByHours: hours - policy.deliveryNoteImportantHours,
+      relatedEntity: { type: "purchase_order", id: order.id, label: order.number },
+    },
+    order,
+  );
 }
 
 /**
@@ -390,7 +532,7 @@ export function evaluatePurchaseOrderAttention(
   const policy = context.policy ?? DEFAULT_PURCHASE_ORDER_ATTENTION_POLICY;
   const items: PurchaseOrderAttentionItem[] = [];
 
-  if (order.status === "ANNULEE" || order.status === "CLOTUREE" || order.status === "BROUILLON") {
+  if (TERMINAL.has(String(order.status))) {
     return {
       effectiveUrgency: "NORMAL",
       computedUrgency: "NORMAL",
@@ -405,17 +547,26 @@ export function evaluatePurchaseOrderAttention(
   const refused = ruleSupplierRefused(order);
   if (refused) items.push(refused);
 
+  const proposal = ruleSupplierProposalPending(order, now, policy);
+  if (proposal) items.push(proposal);
+
   const noResponse = ruleSupplierNoResponse(order, now, policy);
   if (noResponse) items.push(noResponse);
 
-  const unconfirmed = ruleDeliveryUnconfirmed(order, now, policy);
-  if (unconfirmed) items.push(unconfirmed);
+  const notSent = ruleOrderNotSent(order, now, policy);
+  if (notSent) items.push(notSent);
 
-  const notReceived = ruleDeliveryNotReceived(order, snap, now, policy);
-  if (notReceived) items.push(notReceived);
+  // Livraison entièrement reçue → plus d’alertes livraison / partiel / non confirmée
+  if (!snap.fullyReceived && order.status !== "RECUE") {
+    const unconfirmed = ruleDeliveryUnconfirmed(order, now, policy);
+    if (unconfirmed) items.push(unconfirmed);
 
-  const partial = rulePartialPending(order, snap, now, policy);
-  if (partial) items.push(partial);
+    const overdue = ruleDeliveryOverdue(order, snap, now, policy);
+    if (overdue) items.push(overdue);
+
+    const partial = rulePartialPending(order, snap, now, policy);
+    if (partial) items.push(partial);
+  }
 
   const issue = ruleReceiptIssue(order, snap, policy);
   if (issue) items.push(issue);

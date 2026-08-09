@@ -19,7 +19,9 @@ export type AttentionCode =
   | "DELIVERY_NOT_RECEIVED"
   | "PARTIAL_DELIVERY_PENDING"
   | "RECEIPT_ISSUE"
-  | "DELIVERY_NOTE_MISSING";
+  | "DELIVERY_NOTE_MISSING"
+  | "SUPPLIER_PROPOSAL_PENDING"
+  | "ORDER_NOT_SENT";
 
 export type AttentionRelatedEntity = {
   type: "agenda" | "task" | "sheet" | "purchase_order";
@@ -31,6 +33,8 @@ export type FollowUpAttentionItem = {
   code: AttentionCode;
   level: UrgencyLevel;
   reason: string;
+  /** Action principale suggérée (CDE-3B1). */
+  actionLabel?: string;
   dueAt?: Date | null;
   overdueByHours?: number | null;
   relatedEntity?: AttentionRelatedEntity | null;
@@ -75,6 +79,8 @@ export type AttentionAgendaEvent = {
   status: string;
   title: string;
   startAt: Date | string;
+  /** Si lié à une PO, le moteur commande prend le relais (anti-doublon CDE-3B1). */
+  purchaseOrderId?: string | null;
 };
 
 /**

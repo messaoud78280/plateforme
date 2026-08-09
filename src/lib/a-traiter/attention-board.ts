@@ -48,6 +48,7 @@ export type ATraiterAttentionCard = {
   sheetId: string;
   title: string;
   clientName: string | null;
+  projectId: string | null;
   projectTitle: string | null;
   osNumber: string | null;
   orderNumber: string | null;
@@ -70,6 +71,8 @@ export type ATraiterAttentionCard = {
   relatedTaskId: string | null;
   actionUrl: string;
   actionLabel: string;
+  /** Lien messagerie fournisseur si chantier connu. */
+  supplierMessageUrl: string | null;
   /** Texte additionnel searchable (désignations, etc.). */
   searchExtra?: string | null;
 };
@@ -95,8 +98,10 @@ export function attentionCodeToCategory(code: AttentionCode | string): Attention
     case "INTERVENTION_PREP":
       return "INTERVENTION";
     case "SUPPLIER_NO_RESPONSE":
+    case "ORDER_NOT_SENT":
       return "COMMANDE";
     case "SUPPLIER_REFUSED":
+    case "SUPPLIER_PROPOSAL_PENDING":
       return "CONFIRMATION";
     case "RECEIPT_ISSUE":
       return "RECEPTION";
@@ -144,6 +149,7 @@ export function buildAttentionCard(opts: {
     sheetId: sheet.id,
     title: sheet.title,
     clientName: sheet.clientName ?? null,
+    projectId: null,
     projectTitle: sheet.projectTitle ?? null,
     osNumber: sheet.osNumber ?? null,
     orderNumber: sheet.orderNumber ?? null,
@@ -169,6 +175,7 @@ export function buildAttentionCard(opts: {
     relatedTaskId: sheet.relatedTaskId ?? null,
     actionUrl: `/dashboard/fiches-suivi/${sheet.id}`,
     actionLabel: "Voir la fiche",
+    supplierMessageUrl: null,
   };
 }
 
@@ -178,6 +185,7 @@ export function buildPurchaseOrderAttentionCard(opts: {
     number: string;
     subject: string;
     supplierName?: string | null;
+    projectId?: string | null;
     projectTitle?: string | null;
     status: string;
     responsibleId?: string | null;
@@ -186,6 +194,7 @@ export function buildPurchaseOrderAttentionCard(opts: {
     agendaEventId?: string | null;
     confirmedDeliveryAt?: string | null;
     requestedDeliveryAt?: string | null;
+    sharedWithSupplier?: boolean;
   };
   attention: SerializedAttention;
   now?: Date;
@@ -213,17 +222,29 @@ export function buildPurchaseOrderAttentionCard(opts: {
     primary?.code === "PARTIAL_DELIVERY_PENDING" ||
     primary?.code === "RECEIPT_ISSUE";
 
+  const actionLabel =
+    primary?.actionLabel ||
+    (canReceive ? "Réceptionner" : "Voir la commande");
+
+  const supplierMessageUrl =
+    order.sharedWithSupplier && order.projectId
+      ? `/dashboard/messagerie?view=chantiers&project=${encodeURIComponent(order.projectId)}&channel=FOURNISSEUR`
+      : order.sharedWithSupplier
+        ? `/dashboard/messagerie?view=chantiers&channel=FOURNISSEUR`
+        : null;
+
   return {
     subjectType: "PURCHASE_ORDER",
     subjectId: order.id,
     sheetId: order.id,
-    title: `${order.number} — ${order.supplierName || "Fournisseur"}`,
+    title: `${order.supplierName || "Fournisseur"} — ${order.number}`,
     clientName: order.supplierName ?? null,
+    projectId: order.projectId ?? null,
     projectTitle: order.projectTitle ?? null,
     osNumber: null,
     orderNumber: order.number,
     workObject: order.subject,
-    nextAction: canReceive ? "Réceptionner" : "Voir la commande",
+    nextAction: actionLabel,
     nextActionDone: false,
     assigneeId: order.responsibleId ?? null,
     assigneeName: order.responsibleName ?? null,
@@ -240,7 +261,8 @@ export function buildPurchaseOrderAttentionCard(opts: {
     relatedAgendaId: relatedAgenda,
     relatedTaskId: null,
     actionUrl: `/dashboard/commandes/${order.id}`,
-    actionLabel: "Voir la commande",
+    actionLabel: primary?.actionLabel || "Voir la commande",
+    supplierMessageUrl,
     searchExtra: (order.lineDesignations ?? []).join(" "),
   };
 }
@@ -275,6 +297,8 @@ export type AttentionBoardFilters = {
   clientName?: string | "all";
   projectTitle?: string | "all";
   category?: AttentionProblemCategory | "all";
+  /** Tous | Fiches | Commandes */
+  subjectType?: AttentionSubjectType | "all";
 };
 
 export function filterAttentionCards(
@@ -284,6 +308,13 @@ export function filterAttentionCards(
   const q = (filters.q ?? "").trim().toLowerCase();
   return cards.filter((c) => {
     if (filters.mineOnly && filters.currentUserId && c.assigneeId !== filters.currentUserId) {
+      return false;
+    }
+    if (
+      filters.subjectType &&
+      filters.subjectType !== "all" &&
+      c.subjectType !== filters.subjectType
+    ) {
       return false;
     }
     if (filters.urgency && filters.urgency !== "all" && c.effectiveUrgency !== filters.urgency) {

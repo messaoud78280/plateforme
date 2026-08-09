@@ -23,7 +23,17 @@ function att(
     computedUrgency: level,
     manualUrgency: null,
     primaryReason: reason,
-    attentionItems: [{ code, level, reason, dueAt: null, overdueByHours: null, relatedEntity: null }],
+    attentionItems: [
+      {
+        code,
+        level,
+        reason,
+        actionLabel: null,
+        dueAt: null,
+        overdueByHours: null,
+        relatedEntity: null,
+      },
+    ],
   };
 }
 
@@ -97,6 +107,7 @@ function testOneCardMultipleReasons() {
           code: "BILLING_PENDING",
           level: "URGENT",
           reason: "Travaux terminés depuis 5 jours — facturation à préparer",
+          actionLabel: null,
           dueAt: null,
           overdueByHours: 120,
           relatedEntity: null,
@@ -105,6 +116,7 @@ function testOneCardMultipleReasons() {
           code: "DUE_TODAY",
           level: "URGENT",
           reason: "Échéance aujourd’hui",
+          actionLabel: null,
           dueAt: null,
           overdueByHours: null,
           relatedEntity: null,

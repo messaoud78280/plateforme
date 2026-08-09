@@ -6,6 +6,7 @@ export {
   evaluatePurchaseOrderAttention,
   computeReceivingSnapshot,
   resolvePurchaseOrderAttentionResponsible,
+  purchaseOrderAttentionActionLabel,
 } from "@/lib/purchase-orders/attention/evaluate";
 export {
   loadPurchaseOrderAttention,

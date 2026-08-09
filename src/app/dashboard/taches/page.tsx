@@ -64,7 +64,7 @@ export default async function TachesPage({
     session.user.personType === "CLIENT_EXT" || session.user.permissionProfile === "CLIENT";
   const operational = isOperationalInternalUser(session.user);
 
-  // —— Vue interne opérationnelle (Marc / Karim / Julie…) ——
+  // —— Vue interne opérationnelle (Denis / Karim / Julie…) ——
   if (operational && !isManager) {
     const preferMine =
       session.user.permissionProfile === "CONDUCTEUR" ||

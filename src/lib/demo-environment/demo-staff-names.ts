@@ -4,14 +4,15 @@
  */
 
 import { prisma } from "@/lib/prisma";
+import { DEMO_PERSONAS } from "./personas";
 
 /** Personas démo — ne jamais renommer ces comptes (@demo.bework.local). */
 export const DEMO_PERSONA_CANONICAL_NAMES = [
-  "Marc Dupont",
-  "Karim Benali",
-  "Julie Martin",
-  "Sophie Martin",
-  "Thomas Bernard",
+  DEMO_PERSONAS.direction.name,
+  DEMO_PERSONAS.conducteur.name,
+  DEMO_PERSONAS.administratif.name,
+  DEMO_PERSONAS.client.name,
+  DEMO_PERSONAS.fournisseur.name,
 ] as const;
 
 export type DemoStaffKey = "sophie" | "karim" | "laura";
@@ -60,7 +61,7 @@ export const DEMO_STAFF_CONTACTS: DemoStaffContactDef[] = [
     email: "laura.bernard.demo@bework.internal",
     name: "Laura Bernard",
     role: "AGENCE",
-    service: "Support admin BeWork (legacy — Julie = Administratif ABC)",
+    service: "Support admin BeWork (legacy — Julie = Administratif démo)",
     company: "BeWork — Agence Démo",
     /** Masquée des surfaces DEMO principales pour ne pas concurrencer Julie. */
     showInDemoMessaging: false,

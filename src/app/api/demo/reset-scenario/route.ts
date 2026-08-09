@@ -31,7 +31,7 @@ export async function POST() {
 
   if (!isInternalDirection && !isRoot) {
     return NextResponse.json(
-      { error: "Réinitialisation réservée à Direction — Marc." },
+      { error: "Réinitialisation réservée à Direction — Denis." },
       { status: 403 },
     );
   }

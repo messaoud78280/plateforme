@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
+import { DEMO_BRAND } from "@/lib/demo-environment/brand";
 import { isBonDeCommandeCategory } from "@/lib/demo-environment/bon-commande";
 import { applySupplierDeliveryConfirm } from "@/lib/demo-environment/coherence-victor-hugo";
 
@@ -101,7 +102,7 @@ export async function POST(request: Request, context: Ctx) {
     await prisma.task.update({
       where: { id: task.id },
       data: {
-        description: `${task.description ?? ""}\n\n[Démo] Point.P propose ${proposedTime} au lieu de 07:30 — en attente validation ABC Étanchéité.`.trim(),
+        description: `${task.description ?? ""}\n\n[Démo] Point.P propose ${proposedTime} au lieu de 07:30 — en attente validation ${DEMO_BRAND.companyName}.`.trim(),
       },
     });
 

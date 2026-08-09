@@ -14,19 +14,20 @@ import {
 import { DEMO_PERSONAS } from "../src/lib/demo-environment/personas";
 
 function testPersonasUnchanged() {
-  assert.equal(DEMO_PERSONAS.direction.name, "Marc Dupont");
+  assert.equal(DEMO_PERSONAS.direction.name, "Denis Buret");
+  assert.equal(DEMO_PERSONAS.direction.company, "SETRIM");
   assert.equal(DEMO_PERSONAS.conducteur.name, "Karim Benali");
   assert.equal(DEMO_PERSONAS.administratif.name, "Julie Martin");
   assert.equal(DEMO_PERSONAS.client.name, "Sophie Martin");
   assert.equal(DEMO_PERSONAS.fournisseur.name, "Thomas Bernard");
   assert.deepEqual([...DEMO_PERSONA_CANONICAL_NAMES], [
-    "Marc Dupont",
+    "Denis Buret",
     "Karim Benali",
     "Julie Martin",
     "Sophie Martin",
     "Thomas Bernard",
   ]);
-  console.log("ok personas inchangées");
+  console.log("ok personas SETRIM / Denis + équipe fictive");
 }
 
 function testStaffNamesDistinct() {

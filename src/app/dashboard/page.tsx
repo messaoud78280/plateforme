@@ -30,6 +30,7 @@ import {
   resolveDemoPersonaKey,
 } from "@/components/demo-environment/DemoPersonaHomes";
 import { isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
+import { DEMO_BRAND } from "@/lib/demo-environment/brand";
 import { projectWhereForClientUser } from "@/lib/organization/access";
 import { loadAccueilOps } from "@/lib/accueil/load-accueil-ops";
 import { AccueilOpsHome } from "@/components/dashboard/AccueilOpsHome";
@@ -658,7 +659,7 @@ export default async function DashboardPage({
       select: { personType: true, permissionProfile: true, name: true },
     });
     const personaKey = resolveDemoPersonaKey(portal?.permissionProfile, portal?.personType);
-    const hostName = session.user.demoCompanyName ?? "ABC Étanchéité";
+    const hostName = session.user.demoCompanyName ?? DEMO_BRAND.companyName;
     const firstName = (portal?.name ?? session.user.name ?? "vous").split(" ")[0] ?? "vous";
     const projectWhere = await projectWhereForClientUser(clientId);
 
@@ -764,7 +765,7 @@ export default async function DashboardPage({
       );
     }
 
-    // Internes démo (Marc Direction, Karim Conducteur, Julie Administratif) :
+    // Internes démo (Denis Direction, Karim Conducteur, Julie Administratif) :
     // AccueilOpsHome unique — scope Moi (conducteur) / Équipe (direction & administratif).
     // Portails Client / Fournisseur restent volontaires (branches ci-dessus).
 

@@ -17,6 +17,13 @@ import {
 } from "./constants";
 import { addDays, generateLoginIdentifier, generateSecureDemoPassword } from "./credentials";
 import { clearDemoEnvironmentData, seedDemoEnvironmentData } from "./seed";
+import {
+  DEMO_BRAND,
+  demoBrandContactFullName,
+  demoBrandDefaultLogoUrl,
+  resolveDemoCompanyName,
+} from "./brand";
+import { DEMO_PERSONAS } from "./personas";
 
 export type CreateDemoEnvironmentInput = {
   companyName: string;
@@ -50,11 +57,11 @@ export type CreateDemoEnvironmentResult =
   | { ok: false; error: string };
 
 const DEFAULT_FICTIONAL_ROLES = [
-  { name: "Marc Dupont", roleLabel: "Direction" },
-  { name: "Karim Benali", roleLabel: "Conducteur de travaux" },
-  { name: "Julie Martin", roleLabel: "Administratif" },
-  { name: "Sophie Martin", roleLabel: "Client — ABC Promotion" },
-  { name: "Thomas Bernard", roleLabel: "Fournisseur — Point.P" },
+  { name: DEMO_PERSONAS.direction.name, roleLabel: DEMO_PERSONAS.direction.label },
+  { name: DEMO_PERSONAS.conducteur.name, roleLabel: DEMO_PERSONAS.conducteur.label },
+  { name: DEMO_PERSONAS.administratif.name, roleLabel: DEMO_PERSONAS.administratif.label },
+  { name: DEMO_PERSONAS.client.name, roleLabel: `Client — ${DEMO_PERSONAS.client.company}` },
+  { name: DEMO_PERSONAS.fournisseur.name, roleLabel: `Fournisseur — ${DEMO_PERSONAS.fournisseur.company}` },
 ];
 
 function resolveModules(templateKey: DemoTemplateKey, modules?: string[]): DemoModuleKey[] {
@@ -67,7 +74,7 @@ function resolveModules(templateKey: DemoTemplateKey, modules?: string[]): DemoM
 export async function createDemoEnvironment(
   input: CreateDemoEnvironmentInput,
 ): Promise<CreateDemoEnvironmentResult> {
-  const companyName = input.companyName.trim();
+  const companyName = resolveDemoCompanyName(input.companyName.trim());
   if (companyName.length < 2) {
     return { ok: false, error: "Nom de l’entreprise requis." };
   }
@@ -110,10 +117,11 @@ export async function createDemoEnvironment(
         data: {
           email,
           password: hashed,
-          name: "Marc Dupont",
+          name: demoBrandContactFullName(),
           role: UserRole.CLIENT,
           company: companyName,
-          service: "Direction",
+          service: DEMO_BRAND.contactRoleLabel,
+          jobTitle: DEMO_BRAND.contactRoleLabel,
           formeJuridique: "SAS",
           secteurActivite: input.sector?.trim() || undefined,
           accountStatus: ClientAccountStatus.APPROVED,
@@ -142,7 +150,7 @@ export async function createDemoEnvironment(
           internalName,
           sector: input.sector?.trim() || null,
           employeeCount: input.employeeCount ?? null,
-          logoUrl: input.logoUrl?.trim() || null,
+          logoUrl: demoBrandDefaultLogoUrl(input.logoUrl),
           templateKey,
           modulesEnabled,
           rolesConfig: DEFAULT_FICTIONAL_ROLES,
@@ -194,20 +202,53 @@ export async function resetDemoEnvironment(demoId: string): Promise<{ ok: true }
   const demo = await prisma.demoEnvironment.findUnique({ where: { id: demoId } });
   if (!demo) return { ok: false, error: "Démonstration introuvable." };
 
+  const companyName = resolveDemoCompanyName(demo.companyName);
+  const logoUrl = demoBrandDefaultLogoUrl(demo.logoUrl);
+  const internalName =
+    demo.internalName?.includes("ABC") || !demo.internalName?.trim()
+      ? `Démo — ${companyName}`
+      : demo.internalName;
+
+  if (
+    companyName !== demo.companyName ||
+    logoUrl !== demo.logoUrl ||
+    internalName !== demo.internalName
+  ) {
+    await prisma.demoEnvironment.update({
+      where: { id: demoId },
+      data: { companyName, logoUrl, internalName },
+    });
+  }
+  if (demo.organizationId && companyName !== demo.companyName) {
+    await prisma.organization.update({
+      where: { id: demo.organizationId },
+      data: { name: companyName },
+    });
+  }
+  await prisma.user.update({
+    where: { id: demo.rootUserId },
+    data: {
+      name: demoBrandContactFullName(),
+      company: companyName,
+      service: DEMO_BRAND.contactRoleLabel,
+      jobTitle: DEMO_BRAND.contactRoleLabel,
+    },
+  });
+
   await clearDemoEnvironmentData(demo.rootUserId);
   if (demo.organizationId) {
     const modules = Array.isArray(demo.modulesEnabled) ? (demo.modulesEnabled as string[]) : [];
     await seedDemoEnvironmentData({
       clientId: demo.rootUserId,
       organizationId: demo.organizationId,
-      companyName: demo.companyName,
+      companyName,
       sector: demo.sector,
       includeMarches: modules.includes("marches"),
       loginIdentifier: demo.loginIdentifier,
     });
     await prisma.demoEnvironment.update({
       where: { id: demoId },
-      data: { seedVersion: "v4-demo-cleanup" },
+      data: { seedVersion: "v5-setrim-brand", companyName, logoUrl, internalName },
     });
   }
   return { ok: true };
@@ -217,12 +258,33 @@ export async function resetDemoEnvironment(demoId: string): Promise<{ ok: true }
 export async function enrichDemoPersonas(demoId: string): Promise<{ ok: true } | { ok: false; error: string }> {
   const demo = await prisma.demoEnvironment.findUnique({ where: { id: demoId } });
   if (!demo?.organizationId) return { ok: false, error: "Démonstration introuvable." };
+
+  const companyName = resolveDemoCompanyName(demo.companyName);
+  const logoUrl = demoBrandDefaultLogoUrl(demo.logoUrl);
+  if (companyName !== demo.companyName || logoUrl !== demo.logoUrl) {
+    await prisma.demoEnvironment.update({
+      where: { id: demoId },
+      data: {
+        companyName,
+        logoUrl,
+        internalName:
+          demo.internalName?.includes("ABC") || !demo.internalName?.trim()
+            ? `Démo — ${companyName}`
+            : demo.internalName,
+      },
+    });
+    await prisma.organization.update({
+      where: { id: demo.organizationId },
+      data: { name: companyName },
+    });
+  }
+
   const { seedDemoPersonaUsers } = await import("./seed-personas");
   await seedDemoPersonaUsers({
     rootUserId: demo.rootUserId,
     organizationId: demo.organizationId,
     loginIdentifier: demo.loginIdentifier,
-    companyName: demo.companyName,
+    companyName,
   });
   const { ensureDemoStaffDisplayNames } = await import("./demo-staff-names");
   await ensureDemoStaffDisplayNames();

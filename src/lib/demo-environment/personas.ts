@@ -1,4 +1,9 @@
-/** Personas démo ABC Étanchéité (specs 158–196). */
+/** Personas démo — identité entreprise via DEMO_BRAND (SETRIM-DEMO-V1). */
+
+import {
+  DEMO_BRAND,
+  demoBrandContactFullName,
+} from "./brand";
 
 export const DEMO_PERSONA_KEYS = [
   "direction",
@@ -22,13 +27,15 @@ export type DemoPersonaDef = {
   externalOrgType?: "CLIENT_EXT" | "SUPPLIER";
 };
 
+const HOST_COMPANY = DEMO_BRAND.companyName;
+
 export const DEMO_PERSONAS: Record<DemoPersonaKey, DemoPersonaDef> = {
   direction: {
     key: "direction",
     label: "Direction",
-    name: "Marc Dupont",
-    company: "ABC Étanchéité",
-    jobTitle: "Directeur",
+    name: demoBrandContactFullName(),
+    company: HOST_COMPANY,
+    jobTitle: DEMO_BRAND.contactRoleLabel,
     personType: "INTERNAL",
     permissionProfile: "DIRECTION",
     emailSuffix: null,
@@ -37,7 +44,7 @@ export const DEMO_PERSONAS: Record<DemoPersonaKey, DemoPersonaDef> = {
     key: "conducteur",
     label: "Conducteur de travaux",
     name: "Karim Benali",
-    company: "ABC Étanchéité",
+    company: HOST_COMPANY,
     jobTitle: "Conducteur de travaux",
     personType: "INTERNAL",
     permissionProfile: "CONDUCTEUR",
@@ -47,7 +54,7 @@ export const DEMO_PERSONAS: Record<DemoPersonaKey, DemoPersonaDef> = {
     key: "administratif",
     label: "Administratif",
     name: "Julie Martin",
-    company: "ABC Étanchéité",
+    company: HOST_COMPANY,
     jobTitle: "Responsable administratif",
     personType: "INTERNAL",
     permissionProfile: "ADMINISTRATIF",

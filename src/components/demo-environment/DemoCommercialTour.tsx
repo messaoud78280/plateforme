@@ -146,7 +146,7 @@ export function DemoCommercialTour() {
         if (current !== needPersona) {
           setPhase("busy");
           const labels: Record<string, string> = {
-            direction: "Direction — Marc",
+            direction: "Direction — Denis",
             conducteur: "Conducteur — Karim",
             administratif: "Administratif — Julie",
             client: "Client — Sophie",
@@ -313,7 +313,7 @@ export function DemoCommercialTour() {
                 className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left transition hover:border-[#1e3a5f]/40 hover:bg-white"
               >
                 <span className="block text-sm font-bold text-slate-900">Démo express</span>
-                <span className="text-xs text-slate-500">~5 min · Marc → problème → Point.P → Thomas</span>
+                <span className="text-xs text-slate-500">~5 min · Denis → problème → Point.P → Thomas</span>
               </button>
               <button
                 type="button"

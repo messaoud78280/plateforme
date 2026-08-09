@@ -23,7 +23,7 @@ export type WorkflowTemplate = {
   steps: WorkflowTemplateStep[];
 };
 
-/** Template ABC Étanchéité / chantier standard — clés = FollowUpSheetStatus. */
+/** Template chantier standard démo PME BTP — clés = FollowUpSheetStatus. */
 export const TEMPLATE_CHANTIER_STANDARD: WorkflowTemplate = {
   templateKey: "CHANTIER_STANDARD",
   name: "Chantier standard",

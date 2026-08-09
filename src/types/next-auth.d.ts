@@ -17,7 +17,7 @@ declare module "next-auth" {
       demoCompanyName?: string;
       demoModules?: string[];
       demoExpired?: boolean;
-      /** Root Marc — pour revenir de « Voir comme… ». */
+      /** Root Direction (Denis) — pour revenir de « Voir comme… ». */
       demoRootUserId?: string;
       demoViewAs?: string | null;
     };

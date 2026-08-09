@@ -1,10 +1,12 @@
 "use client";
 
 import type { ComponentType } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
+import { DEMO_BRAND } from "@/lib/demo-environment/brand";
 import {
   AlertCircle,
   Briefcase,
@@ -179,6 +181,7 @@ export function AppSidebar({
   demoModules,
   personType,
   permissionProfile,
+  demoLogoUrl,
 }: {
   role?: string | null;
   userName?: string | null;
@@ -188,6 +191,7 @@ export function AppSidebar({
   demoModules?: string[] | null;
   personType?: string | null;
   permissionProfile?: string | null;
+  demoLogoUrl?: string | null;
 }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(() => {
@@ -254,6 +258,10 @@ export function AppSidebar({
     .slice(0, 2)
     .toUpperCase();
 
+  const demoCompanyLabel = companyName?.trim() || DEMO_BRAND.companyDisplayName;
+  const brandLogo = isDemo ? demoLogoUrl || DEMO_BRAND.logoPath : null;
+  const companyInitial = (demoCompanyLabel[0] || "S").toUpperCase();
+
   const navBody = (
     <>
       <div
@@ -263,15 +271,50 @@ export function AppSidebar({
         )}
       >
         <Link href="/dashboard" className="flex min-w-0 items-center gap-2.5" onClick={() => setMobileOpen(false)}>
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--cc-radius)] bg-bework-navy text-[11px] font-bold tracking-wide text-white">
-            BW
-          </span>
+          {isDemo ? (
+            brandLogo && !collapsed ? (
+              <span className="relative flex h-9 w-[7.5rem] shrink-0 items-center overflow-hidden rounded-[var(--cc-radius)] bg-white ring-1 ring-[color:var(--cc-border)]">
+                <Image
+                  src={brandLogo}
+                  alt={demoCompanyLabel}
+                  width={120}
+                  height={36}
+                  className="h-8 w-auto max-w-[7.25rem] object-contain object-left px-1.5"
+                  priority
+                />
+              </span>
+            ) : (
+              <span
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--cc-radius)] bg-bework-navy text-[11px] font-bold tracking-wide text-white"
+                title={brandLogo ? demoCompanyLabel : "Logo officiel à fournir"}
+              >
+                {companyInitial}
+              </span>
+            )
+          ) : (
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--cc-radius)] bg-bework-navy text-[11px] font-bold tracking-wide text-white">
+              BW
+            </span>
+          )}
           {!collapsed ? (
             <span className="min-w-0">
-              <span className="block truncate text-sm font-semibold tracking-tight text-bework-navy">BeWork</span>
-              <span className="block truncate text-[12px] font-medium text-bework-muted">
-                {companyName ?? (isDemo ? "Démonstration" : "Plateforme interne")}
-              </span>
+              {isDemo ? (
+                <>
+                  <span className="block truncate text-sm font-semibold tracking-tight text-bework-navy">
+                    {demoCompanyLabel}
+                  </span>
+                  <span className="block truncate text-[12px] font-medium text-bework-muted">
+                    {DEMO_BRAND.productSecondaryLabel}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="block truncate text-sm font-semibold tracking-tight text-bework-navy">BeWork</span>
+                  <span className="block truncate text-[12px] font-medium text-bework-muted">
+                    {companyName ?? "Plateforme interne"}
+                  </span>
+                </>
+              )}
             </span>
           ) : null}
         </Link>
@@ -352,7 +395,7 @@ export function AppSidebar({
             <span className="min-w-0">
               <span className="block truncate text-xs font-semibold text-bework-ink">{userName ?? "Utilisateur"}</span>
               <span className="block truncate text-[11px] text-bework-muted">
-                {isDemo ? "Direction · Démo" : userRoleLabel ?? role ?? ""}
+                {userRoleLabel ?? (isDemo ? DEMO_BRAND.contactRoleLabel : role ?? "")}
               </span>
             </span>
           ) : null}

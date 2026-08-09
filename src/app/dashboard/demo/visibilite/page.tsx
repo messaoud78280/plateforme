@@ -4,6 +4,7 @@ import Link from "next/link";
 import { authOptions } from "@/lib/auth";
 import { BackLink } from "@/components/ui/BackLink";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { DEMO_BRAND } from "@/lib/demo-environment/brand";
 import {
   DEMO_PERSONA_KEYS,
   DEMO_PERSONAS,
@@ -19,7 +20,7 @@ export default async function DemoVisibilitePage() {
   if (!session?.user?.id) redirect("/connexion?callbackUrl=/dashboard/demo/visibilite");
   if (!session.user.isDemo) redirect("/dashboard");
 
-  const company = session.user.demoCompanyName ?? "ABC Étanchéité";
+  const company = session.user.demoCompanyName ?? DEMO_BRAND.companyName;
 
   return (
     <div className="space-y-8">
@@ -57,7 +58,7 @@ export default async function DemoVisibilitePage() {
           <li>· Fournisseur (Thomas / Point.P) : confirme BC-2026-043 — Direction est alertée.</li>
           <li>· Conducteur (Karim) : actions terrain sur chantiers affectés.</li>
           <li>· Administratif (Julie) : documents, BL, facturation, commandes — Accueil Ops.</li>
-          <li>· Direction (Marc) : vision globale, avenants, à facturer, équipe.</li>
+          <li>· Direction (Denis) : vision globale, avenants, à facturer, équipe.</li>
         </ul>
         <Link
           href="/dashboard/commandes"

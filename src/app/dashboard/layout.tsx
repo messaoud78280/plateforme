@@ -24,6 +24,7 @@ import { UiPreferencesProvider } from "@/components/system/UiPreferences";
 import { DashboardMain } from "@/components/dashboard/DashboardMain";
 import { resolveBeWorkEnvironment } from "@/lib/environment";
 import { resolveDemoAccessForUser } from "@/lib/demo-environment/access";
+import { DEMO_BRAND } from "@/lib/demo-environment/brand";
 import { isDemoEmail } from "@/lib/demo-environment/constants";
 import {
   isExternalPortalUser,
@@ -105,6 +106,7 @@ export default async function DashboardLayout({
         demoModules={session.user.demoModules ?? null}
         personType={personType}
         permissionProfile={permissionProfile}
+        demoLogoUrl={isDemo ? DEMO_BRAND.logoPath : null}
       />
       <div className="flex min-w-0 flex-1 flex-col">
         <EnvironmentBanner environment={env} />
@@ -121,7 +123,7 @@ export default async function DashboardLayout({
                   : "Espace de travail"}
             </p>
             <p className="truncate text-[12px] font-medium text-bework-muted">
-              {isDemo ? "Démonstration BeWork" : "BeWork"}
+              {isDemo ? DEMO_BRAND.productSecondaryLabel : "BeWork"}
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">

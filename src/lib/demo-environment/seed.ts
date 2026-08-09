@@ -12,6 +12,7 @@ import {
   ensureDemoStaffDisplayNames,
   type DemoStaffKey,
 } from "./demo-staff-names";
+import { demoBrandContactFirstName } from "./brand";
 
 function daysFromNow(n: number): Date {
   const d = new Date();
@@ -849,7 +850,7 @@ export async function seedDemoDirectConversations(opts: {
         senderId: sophieId,
         receiverId: clientId,
         content:
-          "Bonjour Marc 👋 Sophie Lefèvre (agence BeWork). On peut suivre Victor Hugo ici — photos et PDF bienvenus.",
+          `Bonjour ${demoBrandContactFirstName()} 👋 Sophie Lefèvre (agence BeWork). On peut suivre Victor Hugo ici — photos et PDF bienvenus.`,
         read: false,
         createdAt: hoursAgo(26),
       },
@@ -1009,7 +1010,7 @@ export async function enrichDemoTaskThreads(opts: {
 
 function coherentOpener(title: string, who: string): string {
   if (title.includes("membrane") || title.includes("POINT.P") || title.includes("BC-2026-043")) {
-    return `Bonjour Marc, ${who} ici. Votre commande membrane est prête.\nLivraison possible mardi 7h30 sur Victor Hugo — vous validez ?`;
+    return `Bonjour ${demoBrandContactFirstName()}, ${who} ici. Votre commande membrane est prête.\nLivraison possible mardi 7h30 sur Victor Hugo — vous validez ?`;
   }
   if (title.includes("Isolant") || title.includes("038")) {
     return `Hello, livraison isolant prévue sous 48h. Je vous confirme le créneau dès réception du BL.`;
@@ -1132,7 +1133,7 @@ function demoThreadForTitle(
     return [
       {
         fromClient: false,
-        content: `Bonjour Marc, ${who} à l’agence 👋\nVotre commande de 40 rouleaux est prête.`,
+        content: `Bonjour ${demoBrandContactFirstName()}, ${who} à l’agence 👋\nVotre commande de 40 rouleaux est prête.`,
       },
       {
         fromClient: false,

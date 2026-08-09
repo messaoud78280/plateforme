@@ -91,7 +91,7 @@ async function patchSheet(opts: {
   });
 }
 
-/** Julie Martin — administratif interne (reçoit les notifs facturation, pas Marc). */
+/** Julie Martin — administratif interne (reçoit les notifs facturation, pas Direction). */
 async function ensureJulieAdministratif(opts: {
   rootUserId: string;
   organizationId: string;
@@ -290,7 +290,7 @@ export async function ensureKanbanReadabilityDemo(opts: {
       // Échéance passée : l’urgence vient du délai d’étape / facturation (W3-A), pas d’un override
       nextActionAt: daysAgo(3),
       urgencyOverride: null,
-      // W3-C1 : Julie (admin) reçoit la notif — pas Marc (direction)
+      // W3-C1 : Julie (admin) reçoit la notif — pas Direction
       assigneeId: julieId,
       title: "Immeuble Alpha",
       workObject: "Travaux terminés — facturation à préparer",

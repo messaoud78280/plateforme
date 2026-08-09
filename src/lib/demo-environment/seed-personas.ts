@@ -84,12 +84,15 @@ export async function seedDemoPersonaUsers(opts: {
         : OrganizationMemberRole.VIEWER;
 
     const existing = await prisma.user.findUnique({ where: { email } });
+    const companyForUser =
+      def.personType === "INTERNAL" ? opts.companyName : def.company;
+
     const user = existing
       ? await prisma.user.update({
           where: { id: existing.id },
           data: {
             name: def.name,
-            company: def.company,
+            company: companyForUser,
             jobTitle: def.jobTitle,
             personType: def.personType,
             permissionProfile: def.permissionProfile,
@@ -110,7 +113,7 @@ export async function seedDemoPersonaUsers(opts: {
             password: passwordHash,
             name: def.name,
             role: UserRole.CLIENT,
-            company: def.company,
+            company: companyForUser,
             jobTitle: def.jobTitle,
             personType: def.personType,
             permissionProfile: def.permissionProfile,

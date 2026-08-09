@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
+import { DEMO_BRAND } from "@/lib/demo-environment/brand";
 import {
   DEMO_MODULE_KEYS,
   DEMO_MODULE_LABELS,
@@ -53,11 +54,22 @@ export function CreatePlatformDemoForm() {
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block text-sm">
             <span className="mb-1 block font-semibold">Nom de l’entreprise</span>
-            <input name="companyName" required className="w-full rounded-lg border border-slate-200 px-3 py-2" placeholder="ABC Étanchéité" />
+            <input
+              name="companyName"
+              required
+              defaultValue={DEMO_BRAND.companyName}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2"
+              placeholder={DEMO_BRAND.companyName}
+            />
           </label>
           <label className="block text-sm">
             <span className="mb-1 block font-semibold">Nom interne de la démonstration</span>
-            <input name="internalName" className="w-full rounded-lg border border-slate-200 px-3 py-2" placeholder="Démo — ABC Étanchéité" />
+            <input
+              name="internalName"
+              defaultValue={`Démo — ${DEMO_BRAND.companyName}`}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2"
+              placeholder={`Démo — ${DEMO_BRAND.companyName}`}
+            />
           </label>
           <label className="block text-sm">
             <span className="mb-1 block font-semibold">Secteur / corps d’état</span>
@@ -75,7 +87,13 @@ export function CreatePlatformDemoForm() {
           </label>
           <label className="block text-sm sm:col-span-2">
             <span className="mb-1 block font-semibold">URL logo (optionnel)</span>
-            <input name="logoUrl" type="url" className="w-full rounded-lg border border-slate-200 px-3 py-2" placeholder="https://…" />
+            <input
+              name="logoUrl"
+              type="text"
+              defaultValue={DEMO_BRAND.logoPath ?? ""}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2"
+              placeholder={DEMO_BRAND.logoPath ?? "/brands/…"}
+            />
           </label>
           <label className="block text-sm">
             <span className="mb-1 block font-semibold">Date du rendez-vous</span>
@@ -103,7 +121,7 @@ export function CreatePlatformDemoForm() {
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block text-sm">
             <span className="mb-1 block font-semibold">Identifiant (vide = auto)</span>
-            <input name="loginIdentifier" className="w-full rounded-lg border border-slate-200 px-3 py-2" placeholder="abc-etancheite" />
+            <input name="loginIdentifier" className="w-full rounded-lg border border-slate-200 px-3 py-2" placeholder="setrim" />
           </label>
           <label className="block text-sm">
             <span className="mb-1 block font-semibold">Mot de passe (vide = auto sécurisé)</span>

@@ -62,7 +62,7 @@ function testExpressShape() {
   assert.ok(EXPRESS_TOUR_STEPS.some((s) => s.persona === "fournisseur"));
   assert.equal(EXPRESS_TOUR_STEPS.at(-1)?.finale, true);
   assert.ok(!EXPRESS_TOUR_STEPS.some((s) => s.persona === "client"));
-  console.log("ok express 5–6 étapes Marc→Thomas→Marc");
+  console.log("ok express 5–6 étapes Denis→Thomas→Denis");
 }
 
 function testCompleteShape() {

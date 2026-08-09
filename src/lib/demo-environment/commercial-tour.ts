@@ -127,7 +127,7 @@ export const EXPRESS_TOUR_STEPS: DemoTourStepDef[] = [
     id: "express-resolution",
     title: "Quand c’est réglé",
     body: "Lorsque le problème est résolu, BeWork arrête automatiquement les rappels.",
-    tip: "Revenir en Direction — Marc via le switch existant.",
+    tip: "Revenir en Direction — Denis via le switch existant.",
     persona: "direction",
     href: "/dashboard",
     actionLabel: "Revenir à Direction",
@@ -145,7 +145,7 @@ export const COMPLETE_TOUR_STEPS: DemoTourStepDef[] = [
   {
     id: "complete-accueil",
     title: "Accueil Direction",
-    body: "Marc n’a pas besoin d’ouvrir chaque chantier pour savoir où sont les problèmes.",
+    body: "Denis n’a pas besoin d’ouvrir chaque chantier pour savoir où sont les problèmes.",
     tip: "À traiter · Aujourd’hui · Chantiers à surveiller.",
     persona: "direction",
     href: "/dashboard",

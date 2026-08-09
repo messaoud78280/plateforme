@@ -538,10 +538,10 @@ export function MessagerieView({
               <div
                 className={`mt-2 rounded-lg border px-3 py-2 text-sm font-semibold ${
                   channel === "INTERNE"
-                    ? "border-violet-300 bg-violet-100 text-violet-950"
+                    ? "border-slate-300 bg-slate-100 text-slate-800"
                     : channel === "FOURNISSEUR"
-                      ? "border-amber-300 bg-amber-100 text-amber-950"
-                      : "border-orange-300 bg-orange-100 text-orange-950"
+                      ? "border-amber-200 bg-amber-50 text-amber-900"
+                      : "border-sky-200 bg-sky-50 text-sky-900"
                 }`}
               >
                 {CHANNEL_LABELS[channel]}
@@ -607,16 +607,18 @@ export function MessagerieView({
 
             <div className="shrink-0 border-t border-slate-200 p-4">
               <p
-                className={`mb-2 rounded-lg px-3 py-1.5 text-xs font-bold ${
+                className={`mb-2 rounded-lg px-3 py-1.5 text-xs font-semibold ${
                   channel === "INTERNE"
-                    ? "bg-violet-100 text-violet-900"
-                    : "bg-orange-100 text-orange-900"
+                    ? "bg-slate-100 text-slate-700"
+                    : channel === "FOURNISSEUR"
+                      ? "bg-amber-50 text-amber-900"
+                      : "bg-sky-50 text-sky-900"
                 }`}
               >
                 {channel === "INTERNE"
-                  ? `Message interne · ${selectedProject.title}`
+                  ? `Message INTERNE · ${selectedProject.title}`
                   : channel === "FOURNISSEUR"
-                    ? `Message fournisseur · EXTERNE · ${selectedProject.title}`
+                    ? `Message à Point.P / fournisseur · EXTERNE · ${selectedProject.title}`
                     : `Message client · EXTERNE · ${selectedProject.title}`}
               </p>
               <div className="mb-2 flex flex-wrap gap-1">

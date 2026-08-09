@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { isDemoEmail } from "@/lib/demo-environment/constants";
 import {
+  DEMO_PERSONA_KEYS,
   DEMO_PERSONAS,
   isDemoPersonaKey,
   type DemoPersonaKey,
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
     rootUserId: demoRootUserId,
     loginIdentifier: demo.loginIdentifier,
   });
-  if (personas.length < 5) {
+  if (personas.length < DEMO_PERSONA_KEYS.length) {
     await seedDemoPersonaUsers({
       rootUserId: demoRootUserId,
       organizationId: demo.organizationId,
@@ -176,7 +177,7 @@ export async function GET(request: NextRequest) {
     rootUserId: demo.rootUserId,
     loginIdentifier: demo.loginIdentifier,
   });
-  if (personas.length < 5) {
+  if (personas.length < DEMO_PERSONA_KEYS.length) {
     await seedDemoPersonaUsers({
       rootUserId: demo.rootUserId,
       organizationId: demo.organizationId,

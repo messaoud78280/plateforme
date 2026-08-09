@@ -34,6 +34,7 @@
     "test:attention-scheduler": "npx tsx scripts/test-attention-scheduler.ts",
     "test:purchase-orders": "npx tsx scripts/test-purchase-orders.ts",
     "test:purchase-order-attention": "npx tsx scripts/test-purchase-order-attention.ts",
+    "test:purchase-order-attention-notifications": "npx tsx scripts/test-purchase-order-attention-notifications.ts",
     "test:agenda-v2a": "npx tsx scripts/test-agenda-v2a.ts",
     "test:messagerie-v2c-media": "npx tsx scripts/test-messagerie-v2c-media.ts",
     "test:messagerie-v2c1-hardening": "npx tsx scripts/test-messagerie-v2c1-hardening.ts",

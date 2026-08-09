@@ -16,8 +16,7 @@ export type AttentionCode =
   /** CDE-3B1 — commandes / livraisons / réceptions */
   | "SUPPLIER_NO_RESPONSE"
   | "SUPPLIER_REFUSED"
-  | "DELIVERY_NOT_RECEIVED"
-  | "PARTIAL_DELIVERY_PENDING"
+  | "PARTIAL_RECEIPT_PENDING"
   | "RECEIPT_ISSUE"
   | "DELIVERY_NOTE_MISSING"
   | "SUPPLIER_PROPOSAL_PENDING"

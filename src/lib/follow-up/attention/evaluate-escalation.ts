@@ -12,6 +12,7 @@ import {
   resolveLevelEscalationPolicy,
   type EscalationStage,
   type WorkflowStepTiming,
+  type AttentionSubjectType,
 } from "@/lib/follow-up/attention/escalation-policy";
 
 export type ExistingAttentionNotif = {
@@ -22,6 +23,7 @@ export type ExistingAttentionNotif = {
 };
 
 export type EvaluateAttentionEscalationInput = {
+  /** Alias historique — subjectId fiche ou commande. */
   sheetId: string;
   sheetTitle: string;
   code: string;
@@ -37,6 +39,8 @@ export type EvaluateAttentionEscalationInput = {
   workflowStep?: WorkflowStepTiming | null;
   existingNotifications: ExistingAttentionNotif[];
   now?: Date;
+  /** CDE-3B2 — défaut FOLLOW_UP (clés legacy). */
+  subjectType?: AttentionSubjectType;
 };
 
 export type EvaluateAttentionEscalationResult = {
@@ -46,7 +50,12 @@ export type EvaluateAttentionEscalationResult = {
   problemReason: string;
   escalationReason: string | null;
   dedupeKey: string | null;
-  notificationType: "FOLLOWUP_REMINDER" | "FOLLOWUP_ESCALATION" | null;
+  notificationType:
+    | "FOLLOWUP_REMINDER"
+    | "FOLLOWUP_ESCALATION"
+    | "PURCHASE_ORDER_REMINDER"
+    | "PURCHASE_ORDER_ESCALATION"
+    | null;
   title: string | null;
   message: string | null;
   nextCheckAt: Date | null;
@@ -97,21 +106,26 @@ export function evaluateAttentionEscalation(
   const episode =
     input.statusEpisodeKey?.trim() ||
     episodeKeyFromStatusTransition({ occurredAt: input.statusEnteredAt });
+  const subjectType: AttentionSubjectType = input.subjectType ?? "FOLLOW_UP";
   const base = {
     userId: input.responsibleId,
     sheetId: input.sheetId,
     code: input.code,
     level: String(input.level),
     episode,
+    subjectType,
   };
 
   const initialKey = buildStagedAttentionDedupeKey({ ...base, stage: "INITIAL" });
-  const legacyInitial = buildLegacyAttentionDedupeKey({
-    userId: input.responsibleId,
-    sheetId: input.sheetId,
-    code: input.code,
-    level: String(input.level),
-  });
+  const legacyInitial =
+    subjectType === "FOLLOW_UP"
+      ? buildLegacyAttentionDedupeKey({
+          userId: input.responsibleId,
+          sheetId: input.sheetId,
+          code: input.code,
+          level: String(input.level),
+        })
+      : null;
   const r1Key = buildStagedAttentionDedupeKey({ ...base, stage: "REMINDER_1" });
   const r2Key = buildStagedAttentionDedupeKey({ ...base, stage: "REMINDER_2" });
   const escKey = input.escalateToId
@@ -125,7 +139,7 @@ export function evaluateAttentionEscalation(
   // INITIAL : clé épisode, ou legacy W3-C1 si créée dans l’épisode courant
   const entered = input.statusEnteredAt ? toDate(input.statusEnteredAt) : null;
   let initial = findNotif(input.existingNotifications, [initialKey]);
-  if (!initial) {
+  if (!initial && legacyInitial) {
     const legacy = findNotif(input.existingNotifications, [legacyInitial]);
     if (legacy) {
       if (!entered || toDate(legacy.createdAt).getTime() >= entered.getTime() - 60_000) {
@@ -133,7 +147,7 @@ export function evaluateAttentionEscalation(
       }
     }
   }
-  if (!initial && entered) {
+  if (!initial && entered && subjectType === "FOLLOW_UP") {
     initial = input.existingNotifications.find((n) => {
       if (n.userId !== input.responsibleId) return false;
       const key = n.dedupeKey ?? "";
@@ -160,6 +174,13 @@ export function evaluateAttentionEscalation(
     hasReminder2,
     hasEscalation,
   };
+
+  const remindType =
+    subjectType === "PURCHASE_ORDER" ? "PURCHASE_ORDER_REMINDER" : "FOLLOWUP_REMINDER";
+  const escalateType =
+    subjectType === "PURCHASE_ORDER"
+      ? "PURCHASE_ORDER_ESCALATION"
+      : "FOLLOWUP_ESCALATION";
 
   // Pas d’INITIAL (W3-C1) → ne pas inventer de rappel
   if (!initial) {
@@ -200,7 +221,7 @@ export function evaluateAttentionEscalation(
       problemReason: input.primaryReason,
       escalationReason,
       dedupeKey: escKey,
-      notificationType: "FOLLOWUP_ESCALATION",
+      notificationType: escalateType,
       title: `Escalade · ${levelLabel} · ${input.sheetTitle}`,
       message: `${input.primaryReason}\n\n${escalationReason}`,
       nextCheckAt: null,
@@ -228,7 +249,7 @@ export function evaluateAttentionEscalation(
       problemReason: input.primaryReason,
       escalationReason: null,
       dedupeKey: r2Key,
-      notificationType: "FOLLOWUP_REMINDER",
+      notificationType: remindType,
       title: `Rappel · ${levelLabel} · ${input.sheetTitle}`,
       message: `${input.primaryReason}\n\nToujours en attente — 2ᵉ rappel.`,
       nextCheckAt:
@@ -239,15 +260,13 @@ export function evaluateAttentionEscalation(
     };
   }
 
-  // REMINDER_1 — pas si on est déjà au-delà du seuil d’escalade sans destinataire d’escalade
-  // (évite rappel + escalade le même tick : escalade gérée plus haut)
+  // REMINDER_1
   if (
     policy.maxReminders >= 1 &&
     policy.reminder1AfterHours > 0 &&
     !hasReminder1 &&
     hours >= policy.reminder1AfterHours
   ) {
-    // Si escalade due au même moment et destinataire dispo → déjà géré. Sinon rappel.
     const escalateDue =
       input.escalateToId &&
       policy.escalateAfterHours > 0 &&
@@ -263,7 +282,7 @@ export function evaluateAttentionEscalation(
       problemReason: input.primaryReason,
       escalationReason: null,
       dedupeKey: r1Key,
-      notificationType: "FOLLOWUP_REMINDER",
+      notificationType: remindType,
       title: `Rappel · ${levelLabel} · ${input.sheetTitle}`,
       message: `${input.primaryReason}\n\nToujours à traiter.`,
       nextCheckAt: (() => {

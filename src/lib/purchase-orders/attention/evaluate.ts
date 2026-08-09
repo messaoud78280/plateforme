@@ -77,9 +77,9 @@ export function purchaseOrderAttentionActionLabel(
       return "Envoyer au fournisseur";
     case "DELIVERY_UNCONFIRMED":
       return "Voir la commande";
-    case "DELIVERY_NOT_RECEIVED":
+    case "DELIVERY_OVERDUE":
       return "Réceptionner / Contacter fournisseur";
-    case "PARTIAL_DELIVERY_PENDING":
+    case "PARTIAL_RECEIPT_PENDING":
       return "Voir réception";
     case "RECEIPT_ISSUE":
       return "Traiter l’anomalie";
@@ -382,7 +382,7 @@ function ruleDeliveryOverdue(
 
   return withAction(
     {
-      code: "DELIVERY_NOT_RECEIVED",
+      code: "DELIVERY_OVERDUE",
       level,
       reason: `Livraison ${name} prévue à ${when} — aucune quantité reçue.`,
       dueAt: confirmed,
@@ -418,7 +418,7 @@ function rulePartialPending(
 
   return withAction(
     {
-      code: "PARTIAL_DELIVERY_PENDING",
+      code: "PARTIAL_RECEIPT_PENDING",
       level,
       reason: `${received} / ${ordered} reçus — ${remaining} restent à livrer depuis ${formatDaysSince(hoursSince)}.`,
       overdueByHours: hoursSince - policy.partialReceiptImportantHours,

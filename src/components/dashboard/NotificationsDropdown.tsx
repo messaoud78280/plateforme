@@ -35,7 +35,10 @@ function kindLabel(item: InboxItem): "ESCALADE" | "RAPPEL" | "ALERTE" | null {
   if (
     t.includes("FOLLOWUP_ATTENTION") ||
     t.includes("FOLLOWUP_URGENT") ||
-    t.includes("FOLLOWUP_CRITICAL")
+    t.includes("FOLLOWUP_CRITICAL") ||
+    t.includes("PURCHASE_ORDER_ATTENTION") ||
+    t.includes("PURCHASE_ORDER_URGENT") ||
+    t.includes("PURCHASE_ORDER_CRITICAL")
   ) {
     return "ALERTE";
   }
@@ -66,6 +69,7 @@ function bucketFor(item: InboxItem): PriorityBucket {
     t.includes("FOLLOWUP_ATTENTION") ||
     t.includes("FOLLOWUP_REMINDER") ||
     t.includes("FOLLOWUP") ||
+    t.includes("PURCHASE_ORDER") ||
     t.includes("DEADLINE") ||
     t.includes("MISSING") ||
     title.startsWith("IMPORTANT") ||

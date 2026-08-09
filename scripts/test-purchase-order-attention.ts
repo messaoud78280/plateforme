@@ -153,7 +153,7 @@ function testH_deliveryNotReceived() {
       receiptLines: [],
     }),
   );
-  const item = r.attentionItems.find((i) => i.code === "DELIVERY_NOT_RECEIVED");
+  const item = r.attentionItems.find((i) => i.code === "DELIVERY_OVERDUE");
   assert.ok(item);
   assert.equal(item!.level, "URGENT");
 }
@@ -167,7 +167,7 @@ function testH2_deliveryNotReceivedSameDayImportant() {
       receiptLines: [],
     }),
   );
-  const item = r.attentionItems.find((i) => i.code === "DELIVERY_NOT_RECEIVED");
+  const item = r.attentionItems.find((i) => i.code === "DELIVERY_OVERDUE");
   assert.ok(item);
   assert.equal(item!.level, "IMPORTANT");
 }
@@ -198,7 +198,7 @@ function testI_partialJustReceivedNoAlert() {
       ],
     }),
   );
-  assert.ok(!r.attentionItems.some((i) => i.code === "PARTIAL_DELIVERY_PENDING"));
+  assert.ok(!r.attentionItems.some((i) => i.code === "PARTIAL_RECEIPT_PENDING"));
 }
 
 function testJ_partialAged() {
@@ -227,7 +227,7 @@ function testJ_partialAged() {
       ],
     }),
   );
-  const item = r.attentionItems.find((i) => i.code === "PARTIAL_DELIVERY_PENDING");
+  const item = r.attentionItems.find((i) => i.code === "PARTIAL_RECEIPT_PENDING");
   assert.ok(item);
   assert.match(item!.reason, /30 \/ 40/);
   assert.match(item!.reason, /10/);
@@ -550,8 +550,8 @@ function testS_fullyReceivedNoDeliveryAlerts() {
       ],
     }),
   );
-  assert.ok(!r.attentionItems.some((i) => i.code === "DELIVERY_NOT_RECEIVED"));
-  assert.ok(!r.attentionItems.some((i) => i.code === "PARTIAL_DELIVERY_PENDING"));
+  assert.ok(!r.attentionItems.some((i) => i.code === "DELIVERY_OVERDUE"));
+  assert.ok(!r.attentionItems.some((i) => i.code === "PARTIAL_RECEIPT_PENDING"));
   assert.ok(!r.attentionItems.some((i) => i.code === "DELIVERY_UNCONFIRMED"));
 }
 
@@ -569,7 +569,7 @@ const tests: [string, () => void][] = [
   ["E demain non confirmée → URGENT", testE_deliveryTomorrowUnconfirmed],
   ["F demandée dépassée → CRITIQUE", testF_deliveryOverdueUnconfirmed],
   ["G confirmée future → NORMAL", testG_confirmedFutureNormal],
-  ["H passée sans réception → DELIVERY_NOT_RECEIVED URGENT", testH_deliveryNotReceived],
+  ["H passée sans réception → DELIVERY_OVERDUE URGENT", testH_deliveryNotReceived],
   ["H2 retard récent → IMPORTANT", testH2_deliveryNotReceivedSameDayImportant],
   ["I 30/40 récent → pas PARTIAL pending", testI_partialJustReceivedNoAlert],
   ["J 30/40 ancien → PARTIAL URGENT", testJ_partialAged],

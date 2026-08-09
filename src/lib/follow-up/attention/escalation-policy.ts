@@ -1,11 +1,14 @@
 /**
  * W3-C2A — Politique centralisée rappel / escalade (pas de cron, pas d’email).
  * Les délais WorkflowStep priment ; sinon défauts ci-dessous.
+ * CDE-3B2 : même politique pour PurchaseOrder (subjectType).
  */
 import type { UrgencyLevel } from "@/lib/follow-up/types";
 import { urgencyRank } from "@/lib/follow-up/urgency";
 
 export type EscalationStage = "INITIAL" | "REMINDER_1" | "REMINDER_2" | "ESCALATION";
+
+export type AttentionSubjectType = "FOLLOW_UP" | "PURCHASE_ORDER";
 
 export type LevelEscalationPolicy = {
   /** Heures après INITIAL avant REMINDER_1 (0 = pas de rappel). */
@@ -103,21 +106,31 @@ export function episodeKeyFromStatusEnteredAt(
 
 export type AttentionDedupeParts = {
   userId: string;
+  /** subjectId : fiche FollowUp ou PurchaseOrder */
   sheetId: string;
   code: string;
   level: string;
   episode: string;
   stage?: EscalationStage;
+  /**
+   * FOLLOW_UP (défaut) → format legacy W3 inchangé.
+   * PURCHASE_ORDER → préfixe sourceType (CDE-3B2).
+   */
+  subjectType?: AttentionSubjectType;
 };
 
 /**
  * Clés :
- * - INITIAL (W3-C1 étendu) : ATTENTION:user:sheet:code:level:episode:INITIAL
+ * - FOLLOW_UP INITIAL : ATTENTION:user:sheet:code:level:episode:INITIAL
+ * - PURCHASE_ORDER : ATTENTION:PURCHASE_ORDER:user:poId:code:level:episode:stage
  * - legacy W3-C1 : ATTENTION:user:sheet:code:level
- * - rappel / escalade : …:REMINDER_1 | REMINDER_2 | ESCALATION
  */
 export function buildStagedAttentionDedupeKey(parts: AttentionDedupeParts): string {
   const stage = parts.stage ?? "INITIAL";
+  const subjectType = parts.subjectType ?? "FOLLOW_UP";
+  if (subjectType === "PURCHASE_ORDER") {
+    return `ATTENTION:PURCHASE_ORDER:${parts.userId}:${parts.sheetId}:${parts.code}:${parts.level}:${parts.episode}:${stage}`;
+  }
   return `ATTENTION:${parts.userId}:${parts.sheetId}:${parts.code}:${parts.level}:${parts.episode}:${stage}`;
 }
 

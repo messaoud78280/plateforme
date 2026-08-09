@@ -13,8 +13,8 @@ export type PurchaseOrderAttentionCode = Extract<
   | "SUPPLIER_PROPOSAL_PENDING"
   | "ORDER_NOT_SENT"
   | "DELIVERY_UNCONFIRMED"
-  | "DELIVERY_NOT_RECEIVED"
-  | "PARTIAL_DELIVERY_PENDING"
+  | "DELIVERY_OVERDUE"
+  | "PARTIAL_RECEIPT_PENDING"
   | "RECEIPT_ISSUE"
   | "DELIVERY_NOTE_MISSING"
 >;
@@ -51,6 +51,12 @@ export type PurchaseOrderAttentionInput = {
   sharedWithSupplier: boolean;
   /** Date fiable du partage (event kind=shared) — jamais updatedAt. */
   sharedWithSupplierAt?: Date | string | null;
+  /** Id event kind=shared (épisode SUPPLIER_NO_RESPONSE). */
+  sharedEventId?: string | null;
+  /** Id event kind=supplier_propose. */
+  proposeEventId?: string | null;
+  /** Id event kind=supplier_refuse. */
+  refuseEventId?: string | null;
   requestedDeliveryAt?: Date | string | null;
   confirmedDeliveryAt?: Date | string | null;
   proposedDeliveryAt?: Date | string | null;

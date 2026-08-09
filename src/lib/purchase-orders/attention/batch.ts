@@ -127,10 +127,12 @@ export async function loadPurchaseOrderAttention(opts: {
         },
       },
       events: {
-        where: { kind: "shared" },
+        where: {
+          kind: { in: ["shared", "supplier_propose", "supplier_refuse"] },
+        },
         orderBy: { createdAt: "desc" },
-        take: 1,
-        select: { createdAt: true },
+        take: 10,
+        select: { id: true, kind: true, createdAt: true },
       },
       agendaEvents: {
         where: { type: "LIVRAISON", status: { not: "ANNULE" } },
@@ -155,13 +157,20 @@ export async function loadPurchaseOrderAttention(opts: {
       })),
     );
 
+    const sharedEv = o.events.find((e) => e.kind === "shared");
+    const proposeEv = o.events.find((e) => e.kind === "supplier_propose");
+    const refuseEv = o.events.find((e) => e.kind === "supplier_refuse");
+
     const input = {
       id: o.id,
       number: o.number,
       status: o.status,
       subject: o.subject,
       sharedWithSupplier: o.sharedWithSupplier,
-      sharedWithSupplierAt: o.events[0]?.createdAt ?? null,
+      sharedWithSupplierAt: sharedEv?.createdAt ?? null,
+      sharedEventId: sharedEv?.id ?? null,
+      proposeEventId: proposeEv?.id ?? null,
+      refuseEventId: refuseEv?.id ?? null,
       requestedDeliveryAt: o.requestedDeliveryAt,
       confirmedDeliveryAt: o.confirmedDeliveryAt,
       proposedDeliveryAt: o.proposedDeliveryAt,

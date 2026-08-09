@@ -92,8 +92,7 @@ export function attentionCodeToCategory(code: AttentionCode | string): Attention
       return "AVENANT";
     case "DELIVERY_UNCONFIRMED":
     case "DELIVERY_OVERDUE":
-    case "DELIVERY_NOT_RECEIVED":
-    case "PARTIAL_DELIVERY_PENDING":
+    case "PARTIAL_RECEIPT_PENDING":
       return "LIVRAISON";
     case "INTERVENTION_PREP":
       return "INTERVENTION";
@@ -218,8 +217,8 @@ export function buildPurchaseOrderAttentionCard(opts: {
     null;
 
   const canReceive =
-    primary?.code === "DELIVERY_NOT_RECEIVED" ||
-    primary?.code === "PARTIAL_DELIVERY_PENDING" ||
+    primary?.code === "DELIVERY_OVERDUE" ||
+    primary?.code === "PARTIAL_RECEIPT_PENDING" ||
     primary?.code === "RECEIPT_ISSUE";
 
   const actionLabel =
@@ -272,10 +271,10 @@ export function sortAttentionCards(a: ATraiterAttentionCard, b: ATraiterAttentio
   if (ur !== 0) return ur;
 
   const aOverdue = a.attentionItems.some(
-    (i) => i.code === "DUE_OVERDUE" || i.code === "DELIVERY_NOT_RECEIVED",
+    (i) => i.code === "DUE_OVERDUE" || i.code === "DELIVERY_OVERDUE",
   );
   const bOverdue = b.attentionItems.some(
-    (i) => i.code === "DUE_OVERDUE" || i.code === "DELIVERY_NOT_RECEIVED",
+    (i) => i.code === "DUE_OVERDUE" || i.code === "DELIVERY_OVERDUE",
   );
   if (aOverdue !== bOverdue) return aOverdue ? -1 : 1;
 

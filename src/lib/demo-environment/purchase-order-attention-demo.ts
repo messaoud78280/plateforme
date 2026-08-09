@@ -103,7 +103,7 @@ export async function ensurePurchaseOrderAttentionDemoScenarios(opts: {
         actorUserId: responsibleId,
       },
     });
-    configured.push("BC-2026-043 PARTIAL_DELIVERY_PENDING");
+    configured.push("BC-2026-043 PARTIAL_RECEIPT_PENDING");
   } else if (vh?.receipts.length) {
     configured.push("BC-2026-043 (réceptions existantes conservées)");
   }

@@ -26,7 +26,6 @@ import { listUpcomingAppointments } from "@/lib/appointments/upcoming";
 import { PersonaHomeDashboard } from "@/components/dashboard/PersonaHomeDashboard";
 import {
   DemoClientHome,
-  DemoConducteurHome,
   DemoFournisseurHome,
   resolveDemoPersonaKey,
 } from "@/components/demo-environment/DemoPersonaHomes";
@@ -663,43 +662,8 @@ export default async function DashboardPage({
     const firstName = (portal?.name ?? session.user.name ?? "vous").split(" ")[0] ?? "vous";
     const projectWhere = await projectWhereForClientUser(clientId);
 
-    if (personaKey === "conducteur") {
-      const alertOwnerId = session.user.demoRootUserId ?? clientId;
-      const [projects, agenda, alerts] = await Promise.all([
-        prisma.project.findMany({
-          where: projectWhere,
-          select: { id: true, title: true, chantierStatus: true, siteCity: true },
-          orderBy: { updatedAt: "desc" },
-          take: 8,
-        }),
-        prisma.agendaEvent.findMany({
-          where: {
-            project: projectWhere,
-            status: { not: "ANNULE" },
-            startAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) },
-            endAt: { lte: new Date(new Date().setHours(23, 59, 59, 999)) },
-          },
-          select: { id: true, title: true, startAt: true, location: true },
-          orderBy: { startAt: "asc" },
-          take: 8,
-        }).catch(() => []),
-        prisma.alert.findMany({
-          where: { clientId: { in: [clientId, alertOwnerId] } },
-          orderBy: { createdAt: "desc" },
-          take: 8,
-          select: { id: true, title: true, message: true, level: true, actionUrl: true },
-        }),
-      ]);
-      return (
-        <DemoConducteurHome
-          firstName={firstName}
-          companyName={hostName}
-          agenda={agenda}
-          alerts={alerts}
-          projects={projects}
-        />
-      );
-    }
+    // Conducteur (Karim) : même Accueil Ops V2A que Direction — scope Moi par défaut.
+    // Portails Client / Fournisseur restent volontaires (branches ci-dessous).
 
     if (personaKey === "client") {
       const [projects, agenda, docs, pendingTasks] = await Promise.all([
@@ -803,13 +767,20 @@ export default async function DashboardPage({
       );
     }
 
+    const defaultScope =
+      personaKey === "conducteur" ||
+      portal?.permissionProfile === "CONDUCTEUR" ||
+      portal?.permissionProfile === "CHEF_CHANTIER"
+        ? "mine"
+        : "team";
     const homeOps = await loadAccueilOps({
       userId: clientId,
       role: session.user.role,
       personType: portal?.personType ?? null,
       permissionProfile: portal?.permissionProfile ?? "DIRECTION",
       name: portal?.name ?? session.user.name ?? null,
-      scope: vueParam === "moi" ? "mine" : vueParam === "equipe" ? "team" : "team",
+      scope:
+        vueParam === "moi" ? "mine" : vueParam === "equipe" ? "team" : defaultScope,
     });
     return (
       <div className="mx-auto w-full max-w-[1400px] space-y-4 px-1 sm:px-2 xl:max-w-[1520px]">

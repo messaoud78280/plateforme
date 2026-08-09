@@ -80,13 +80,15 @@ export function DemoViewAsSwitcher() {
           value={current ?? "direction"}
           disabled={busy}
           onChange={(e) => void onChange(e.target.value)}
-          className="max-w-[160px] rounded-md border border-amber-300 bg-white px-2 py-1 text-xs font-semibold text-slate-800 disabled:opacity-70"
+          className="max-w-[220px] rounded-md border border-amber-300 bg-white px-2 py-1 text-xs font-semibold text-slate-800 disabled:opacity-70 sm:max-w-[240px]"
           title={companyName ? `Démo ${companyName}` : "Basculer le profil démo"}
           aria-busy={busy}
         >
           {personas.map((p) => (
             <option key={p.key} value={p.key}>
-              {p.label} — {p.name.split(" ")[0]}
+              {p.key === "conducteur"
+                ? `Conducteur — ${p.name.split(" ")[0]}`
+                : `${p.label} — ${p.name.split(" ")[0]}`}
             </option>
           ))}
         </select>

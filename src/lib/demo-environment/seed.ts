@@ -127,7 +127,8 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
       },
       {
         title: "BC-2026-029 — Accessoires relevés",
-        description: "Livraison en retard (scénario démo).",
+        description:
+          "Commande secondaire accessoires (legacy seed). Scénario livraison Point.P principal = BC-2026-043.",
         status: TaskStatus.EN_ATTENTE_INFO,
         priority: "URGENT",
         clientId,
@@ -221,32 +222,11 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
     });
   }
 
+  // Pas d’alertes génériques parallèles (« 3 actions urgentes », BC-2026-029, etc.) :
+  // le board À traiter / W3-CDE produit les vraies cartes métier (ex. BC-2026-043 Point.P).
+  // BC-2026-029 reste une Task seed secondaire (accessoires) — pas le scénario livraison principal.
   await prisma.alert.createMany({
     data: [
-      {
-        title: "Action urgente",
-        message: "3 actions urgentes à traiter aujourd’hui (données fictives).",
-        level: AlertLevel.URGENT,
-        clientId,
-        actionUrl: "/dashboard/taches",
-        read: false,
-      },
-      {
-        title: "Commandes à valider",
-        message: "2 bons de commande attendent une validation.",
-        level: AlertLevel.WARNING,
-        clientId,
-        actionUrl: "/dashboard/taches",
-        read: false,
-      },
-      {
-        title: "Livraison en retard",
-        message: "BC-2026-029 — livraison non confirmée (scénario démo).",
-        level: AlertLevel.URGENT,
-        clientId,
-        actionUrl: "/dashboard/taches",
-        read: false,
-      },
       {
         title: "Documents manquants",
         message: "2 documents manquants sur Chantier République.",

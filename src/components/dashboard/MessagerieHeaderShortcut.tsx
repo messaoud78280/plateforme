@@ -56,9 +56,11 @@ export function MessagerieHeaderShortcut() {
           }}
           className="relative shrink-0 rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-800"
           aria-label={total > 0 ? `Messagerie, ${total} non lus` : "Messagerie"}
+          title="Messagerie"
+          data-header-slot="messagerie"
           aria-expanded={expanded}
         >
-          <MessageSquare className="h-5 w-5" />
+          <MessageSquare className="h-5 w-5" aria-hidden />
           {total > 0 ? (
             <span className="absolute -right-0.5 -top-0.5 inline-flex min-w-[1.1rem] items-center justify-center rounded-full bg-[#00a884] px-1 text-[10px] font-bold text-white">
               {total > 99 ? "99+" : total}

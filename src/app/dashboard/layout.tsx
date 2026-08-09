@@ -131,8 +131,14 @@ export default async function DashboardLayout({
               </Link>
             ) : null}
             <GlobalSearchTrigger />
-            <MessagerieHeaderShortcut />
-            <NotificationsDropdown key={session.user.id} userId={session.user.id} />
+            <div
+              className="flex items-center gap-0.5"
+              role="group"
+              aria-label="Messagerie et notifications"
+            >
+              <MessagerieHeaderShortcut />
+              <NotificationsDropdown key={session.user.id} userId={session.user.id} />
+            </div>
             <OutilsCommunication />
             <UserAccountDropdown
               key={session.user.id}

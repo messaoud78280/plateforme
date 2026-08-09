@@ -6,6 +6,7 @@ import type { UrgencyLevel } from "@/lib/follow-up/types";
 import { urgencyRank } from "@/lib/follow-up/urgency";
 import type { AttentionCode, SerializedAttention } from "@/lib/follow-up/attention";
 import { formatKanbanDueLabel } from "@/lib/follow-up/urgency";
+import { purchaseOrderAttentionActionUrl } from "@/lib/purchase-orders/attention/sync-notifications";
 
 export type AttentionSubjectType = "FOLLOW_UP" | "PURCHASE_ORDER";
 
@@ -259,7 +260,7 @@ export function buildPurchaseOrderAttentionCard(opts: {
     categoryLabel: ATTENTION_CATEGORY_LABELS[category],
     relatedAgendaId: relatedAgenda,
     relatedTaskId: null,
-    actionUrl: `/dashboard/commandes/${order.id}`,
+    actionUrl: purchaseOrderAttentionActionUrl(order.id, primary?.code),
     actionLabel: primary?.actionLabel || "Voir la commande",
     supplierMessageUrl,
     searchExtra: (order.lineDesignations ?? []).join(" "),

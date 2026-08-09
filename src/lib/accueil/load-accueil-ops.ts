@@ -8,6 +8,7 @@ import { previewATraiterForHome } from "@/lib/a-traiter/collect";
 import type { ATraiterAttentionCard } from "@/lib/a-traiter/attention-board";
 import { projectWhereForClientUser } from "@/lib/organization/access";
 import { PURCHASE_ORDER_STATUS_LABELS } from "@/lib/purchase-orders/status";
+import { purchaseOrderAttentionActionUrl } from "@/lib/purchase-orders/attention/sync-notifications";
 import { withPerfLog } from "@/lib/perf/server-timing";
 
 const PO_WATCH: PurchaseOrderStatus[] = [
@@ -46,8 +47,10 @@ export type AccueilChantierWatch = {
   title: string;
   attentionCount: number;
   criticalCount: number;
+  urgentCount: number;
   overdueTasks: number;
   nextEventLabel: string | null;
+  nextDeliveryLabel: string | null;
 };
 
 export type AccueilOrderItem = {
@@ -56,8 +59,11 @@ export type AccueilOrderItem = {
   supplierName: string;
   projectTitle: string | null;
   deliveryAt: string | null;
+  deliveryLabel: string | null;
   statusLabel: string;
+  receiptLabel: string | null;
   hasIssue: boolean;
+  href: string;
 };
 
 export type AccueilTaskItem = {
@@ -102,6 +108,7 @@ export type AccueilOpsSummary = {
     nouvelEvenement: string;
     nouvelleFiche: string;
     nouvelleCommande: string;
+    nouveauDocument: string;
   };
 };
 
@@ -259,6 +266,10 @@ export async function loadAccueilOps(opts: {
             sharedWithSupplier: true,
             project: { select: { title: true } },
             externalOrganization: { select: { name: true, tradeName: true } },
+            lines: {
+              select: { quantity: true, receivedQty: true },
+              take: 40,
+            },
           },
         }),
         prisma.task.findMany({
@@ -299,7 +310,7 @@ export async function loadAccueilOps(opts: {
     const projectIds = projects.map((p) => p.id);
 
     // Agrégats batch chantiers (pas de cockpit × N)
-    const [overdueByProject, nextEvents] = await Promise.all([
+    const [overdueByProject, nextEvents, nextDeliveries] = await Promise.all([
       projectIds.length
         ? prisma.task.groupBy({
             by: ["projectId"],
@@ -327,6 +338,26 @@ export async function loadAccueilOps(opts: {
             },
           })
         : Promise.resolve([]),
+      projectIds.length
+        ? prisma.purchaseOrder.findMany({
+            where: {
+              projectId: { in: projectIds },
+              status: { in: PO_WATCH },
+              OR: [
+                { confirmedDeliveryAt: { gte: day0, lte: soon } },
+                { requestedDeliveryAt: { gte: day0, lte: soon } },
+              ],
+            },
+            orderBy: [{ confirmedDeliveryAt: "asc" }, { requestedDeliveryAt: "asc" }],
+            take: 40,
+            select: {
+              projectId: true,
+              confirmedDeliveryAt: true,
+              requestedDeliveryAt: true,
+              externalOrganization: { select: { name: true, tradeName: true } },
+            },
+          })
+        : Promise.resolve([]),
     ]);
 
     const overdueMap = new Map(
@@ -335,14 +366,13 @@ export async function loadAccueilOps(opts: {
         .map((r) => [r.projectId!, r._count._all]),
     );
 
-    const attentionByProject = new Map<string, { n: number; crit: number }>();
+    const attentionByProject = new Map<string, { n: number; crit: number; urg: number }>();
     for (const c of attentionSnap.attentionCards) {
       if (!c.projectId) continue;
-      const cur = attentionByProject.get(c.projectId) ?? { n: 0, crit: 0 };
+      const cur = attentionByProject.get(c.projectId) ?? { n: 0, crit: 0, urg: 0 };
       cur.n += 1;
-      if (c.effectiveUrgency === "CRITIQUE" || c.effectiveUrgency === "URGENT") {
-        cur.crit += 1;
-      }
+      if (c.effectiveUrgency === "CRITIQUE") cur.crit += 1;
+      else if (c.effectiveUrgency === "URGENT") cur.urg += 1;
       attentionByProject.set(c.projectId, cur);
     }
 
@@ -356,12 +386,34 @@ export async function loadAccueilOps(opts: {
       });
     }
 
+    const nextDeliveryByProject = new Map<string, string>();
+    for (const o of nextDeliveries) {
+      if (!o.projectId || nextDeliveryByProject.has(o.projectId)) continue;
+      const when = o.confirmedDeliveryAt ?? o.requestedDeliveryAt;
+      if (!when) continue;
+      const supplier = o.externalOrganization.tradeName || o.externalOrganization.name;
+      const whenLabel = when.toLocaleDateString("fr-FR", {
+        day: "numeric",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      nextDeliveryByProject.set(o.projectId, `Livraison ${supplier} · ${whenLabel}`);
+    }
+
     const chantiersScored = projects
       .map((p) => {
-        const att = attentionByProject.get(p.id) ?? { n: 0, crit: 0 };
+        const att = attentionByProject.get(p.id) ?? { n: 0, crit: 0, urg: 0 };
         const overdue = overdueMap.get(p.id) ?? 0;
         const next = nextByProject.get(p.id);
-        const score = att.crit * 10 + att.n * 3 + overdue * 4 + (next ? 1 : 0);
+        const nextDeliveryLabel = nextDeliveryByProject.get(p.id) ?? null;
+        const score =
+          att.crit * 10 +
+          att.urg * 6 +
+          att.n * 3 +
+          overdue * 4 +
+          (nextDeliveryLabel ? 2 : 0) +
+          (next ? 1 : 0);
         const nextEventLabel = next
           ? `${next.startAt.toLocaleDateString("fr-FR", {
               day: "numeric",
@@ -375,8 +427,10 @@ export async function loadAccueilOps(opts: {
           title: p.title,
           attentionCount: att.n,
           criticalCount: att.crit,
+          urgentCount: att.urg,
           overdueTasks: overdue,
           nextEventLabel,
+          nextDeliveryLabel,
           score,
         };
       })
@@ -396,6 +450,52 @@ export async function loadAccueilOps(opts: {
       "REFUSEE",
     ]);
 
+    function focusCodeForOrder(o: (typeof ordersRaw)[number]): string | null {
+      if (o.proposedDeliveryStatus === "PENDING") return "SUPPLIER_PROPOSAL_PENDING";
+      if (o.status === "PARTIELLEMENT_RECUE") return "PARTIAL_RECEIPT_PENDING";
+      if (o.status === "A_CONFIRMER" || o.status === "ENVOYEE_FOURNISSEUR") {
+        return "DELIVERY_UNCONFIRMED";
+      }
+      if (o.status === "REFUSEE") return "SUPPLIER_REFUSED";
+      if (o.status === "A_VALIDER") return "ORDER_NOT_SENT";
+      return null;
+    }
+
+    function receiptLabelFor(o: (typeof ordersRaw)[number]): string | null {
+      if (!o.lines.length) return null;
+      const ordered = o.lines.reduce((s, l) => s + Number(l.quantity), 0);
+      const received = o.lines.reduce((s, l) => s + Number(l.receivedQty), 0);
+      if (ordered <= 0) return null;
+      if (o.status === "PARTIELLEMENT_RECUE" || (received > 0 && received < ordered)) {
+        return `${Math.round(received)} / ${Math.round(ordered)} reçus`;
+      }
+      return null;
+    }
+
+    function deliveryLabelFor(delivery: Date | null | undefined): string | null {
+      if (!delivery) return null;
+      const diff = Math.round(
+        (startOfDay(delivery).getTime() - day0.getTime()) / 86400000,
+      );
+      const time = delivery.toLocaleTimeString("fr-FR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      if (diff === 0) return `Aujourd’hui ${time}`;
+      if (diff === 1) return `Demain ${time}`;
+      if (diff < 0) return `En retard · ${fmtShort(delivery)}`;
+      return fmtShort(delivery);
+    }
+
+    function fmtShort(d: Date) {
+      return d.toLocaleString("fr-FR", {
+        day: "numeric",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+
     const ordersScored = ordersRaw.map((o) => {
       const delivery = o.confirmedDeliveryAt ?? o.requestedDeliveryAt;
       let score = 0;
@@ -403,6 +503,7 @@ export async function loadAccueilOps(opts: {
       if (o.status === "PARTIELLEMENT_RECUE") score += 20;
       if (o.proposedDeliveryStatus === "PENDING") score += 30;
       if (delivery && delivery >= day0 && delivery <= soon) score += 25;
+      if (delivery && delivery < day0 && issueStatuses.has(o.status)) score += 35;
       return { o, score, delivery };
     });
     ordersScored.sort((a, b) => b.score - a.score);
@@ -450,16 +551,26 @@ export async function loadAccueilOps(opts: {
         projectTitle: e.project?.title ?? null,
       })),
       chantiers: chantiersScored,
-      orders: ordersScored.slice(0, 3).map(({ o, delivery }) => ({
-        id: o.id,
-        number: o.number,
-        supplierName: o.externalOrganization.tradeName || o.externalOrganization.name,
-        projectTitle: o.project?.title ?? null,
-        deliveryAt: delivery?.toISOString() ?? null,
-        statusLabel: PURCHASE_ORDER_STATUS_LABELS[o.status] ?? o.status,
-        hasIssue: issueStatuses.has(o.status),
-      })),
-      tasks: tasksSorted.slice(0, 4).map((t) => {
+      orders: ordersScored.slice(0, 3).map(({ o, delivery }) => {
+        const focusCode = focusCodeForOrder(o);
+        const statusExtra =
+          o.proposedDeliveryStatus === "PENDING"
+            ? "À confirmer"
+            : PURCHASE_ORDER_STATUS_LABELS[o.status] ?? o.status;
+        return {
+          id: o.id,
+          number: o.number,
+          supplierName: o.externalOrganization.tradeName || o.externalOrganization.name,
+          projectTitle: o.project?.title ?? null,
+          deliveryAt: delivery?.toISOString() ?? null,
+          deliveryLabel: deliveryLabelFor(delivery),
+          statusLabel: statusExtra,
+          receiptLabel: receiptLabelFor(o),
+          hasIssue: issueStatuses.has(o.status) || o.proposedDeliveryStatus === "PENDING",
+          href: purchaseOrderAttentionActionUrl(o.id, focusCode),
+        };
+      }),
+      tasks: tasksSorted.slice(0, 5).map((t) => {
         const desired = t.desiredDate?.toISOString() ?? null;
         return {
           id: t.id,
@@ -483,6 +594,7 @@ export async function loadAccueilOps(opts: {
         nouvelEvenement: "/dashboard/agenda?new=1",
         nouvelleFiche: "/dashboard/fiches-suivi/nouvelle",
         nouvelleCommande: "/dashboard/commandes/nouvelle",
+        nouveauDocument: "/dashboard/documents",
       },
     };
   });

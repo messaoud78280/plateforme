@@ -94,7 +94,7 @@ export default async function DashboardPage({
       scope,
     });
     return (
-      <div className="mx-auto max-w-6xl space-y-4 px-1 sm:px-0">
+      <div className="mx-auto w-full max-w-[1400px] space-y-4 px-1 sm:px-2 xl:max-w-[1520px]">
         <AccueilOpsHome ops={ops} />
       </div>
     );
@@ -812,7 +812,7 @@ export default async function DashboardPage({
       scope: vueParam === "moi" ? "mine" : vueParam === "equipe" ? "team" : "team",
     });
     return (
-      <div className="mx-auto max-w-6xl space-y-4 px-1 sm:px-0">
+      <div className="mx-auto w-full max-w-[1400px] space-y-4 px-1 sm:px-2 xl:max-w-[1520px]">
         <AccueilOpsHome ops={homeOps} />
       </div>
     );

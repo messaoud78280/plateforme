@@ -13,44 +13,38 @@ function fmtTime(iso: string) {
   });
 }
 
-function fmtDayTime(iso: string) {
-  return new Date(iso).toLocaleString("fr-FR", {
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+function urgencyTone(u: string) {
+  if (u === "CRITIQUE") return "border-l-red-600 bg-red-50/40";
+  if (u === "URGENT") return "border-l-red-500 bg-red-50/25";
+  if (u === "IMPORTANT") return "border-l-amber-500 bg-amber-50/30";
+  return "border-l-slate-300 bg-slate-50/40";
 }
 
-function urgencyDot(u: string) {
-  if (u === "CRITIQUE") return "bg-red-600";
-  if (u === "URGENT") return "bg-red-500";
-  if (u === "IMPORTANT") return "bg-amber-500";
-  return "bg-slate-400";
+function urgencyLabel(u: string) {
+  if (u === "CRITIQUE" || u === "URGENT" || u === "IMPORTANT") return u;
+  return null;
 }
 
 function agendaIcon(type: string) {
   if (type === "LIVRAISON") return "🚚";
   if (type === "INTERVENTION") return "🔧";
   if (type.includes("REUNION") || type === "REUNION_CHANTIER") return "👥";
-  return "📅";
+  return "·";
 }
 
-function Section({
+function SideSection({
   title,
   count,
   action,
   children,
-  className,
 }: {
   title: string;
   count?: number | string;
   action?: { href: string; label: string };
   children: React.ReactNode;
-  className?: string;
 }) {
   return (
-    <section className={cn("rounded-xl border border-slate-200/90 bg-white p-4", className)}>
+    <section className="border-b border-slate-200/80 pb-4 last:border-b-0 last:pb-0">
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">
           {title}
@@ -67,7 +61,7 @@ function Section({
           </Link>
         ) : null}
       </div>
-      <div className="mt-3">{children}</div>
+      <div className="mt-2.5">{children}</div>
     </section>
   );
 }
@@ -86,9 +80,10 @@ function QuickActionMenu({ links }: { links: AccueilOpsSummary["links"] }) {
 
   const items = [
     { label: "Créer une tâche", href: links.nouvelleTache },
-    { label: "Agenda", href: links.nouvelEvenement },
-    { label: "Fiche de suivi", href: links.nouvelleFiche },
-    { label: "Commande", href: links.nouvelleCommande },
+    { label: "Créer un événement", href: links.nouvelEvenement },
+    { label: "Créer une commande", href: links.nouvelleCommande },
+    { label: "Ajouter un document", href: links.nouveauDocument },
+    { label: "Créer une fiche", href: links.nouvelleFiche },
     { label: "Nouveau message", href: links.messagerie },
   ];
 
@@ -97,17 +92,17 @@ function QuickActionMenu({ links }: { links: AccueilOpsSummary["links"] }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center rounded-lg bg-[#1e3a5f] px-3 py-2 text-xs font-bold text-white hover:bg-[#16304f]"
+        className="inline-flex min-h-10 items-center rounded-lg bg-[#1e3a5f] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#16304f]"
       >
         + Action
       </button>
       {open ? (
-        <div className="absolute right-0 z-20 mt-1.5 min-w-[200px] rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
+        <div className="absolute right-0 z-20 mt-1.5 min-w-[210px] rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
           {items.map((it) => (
             <Link
               key={it.label}
               href={it.href}
-              className="block px-3.5 py-2 text-sm text-slate-800 hover:bg-slate-50"
+              className="block px-3.5 py-2.5 text-sm text-slate-800 hover:bg-slate-50"
               onClick={() => setOpen(false)}
             >
               {it.label}
@@ -126,11 +121,18 @@ export function AccueilOpsHome({
   ops: AccueilOpsSummary;
   scopeHrefBase?: string;
 }) {
+  const scopeHint =
+    ops.canSwitchScope && ops.scope === "team"
+      ? "Vue Équipe"
+      : ops.canSwitchScope && ops.scope === "mine"
+        ? "Vue Moi"
+        : null;
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-950">
+          <h1 className="text-2xl font-extrabold tracking-tight text-[#1e3a5f] sm:text-[1.75rem]">
             Bonjour {ops.firstName}
           </h1>
           <p className="mt-1 text-sm capitalize text-slate-500">{ops.dateLabel}</p>
@@ -169,44 +171,62 @@ export function AccueilOpsHome({
         </div>
       </header>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.65fr)_minmax(280px,0.9fr)] lg:gap-8 xl:grid-cols-[minmax(0,1.75fr)_minmax(300px,0.85fr)]">
         {/* Colonne principale */}
-        <div className="space-y-4">
-          <Section
-            title="À traiter"
-            count={ops.attentionTotal}
-            action={{ href: ops.links.aTraiter, label: "Voir tout" }}
-          >
+        <div className="space-y-6">
+          {/* 1 — À TRAITER (héros) */}
+          <section className="rounded-2xl border border-[#1e3a5f]/15 bg-white p-4 shadow-sm sm:p-5">
+            <div className="flex items-baseline justify-between gap-3">
+              <h2 className="text-sm font-extrabold uppercase tracking-[0.12em] text-[#1e3a5f]">
+                À traiter
+                <span className="ml-2.5 tabular-nums text-slate-900">{ops.attentionTotal}</span>
+                {scopeHint ? (
+                  <span className="ml-2 text-[10px] font-semibold normal-case tracking-normal text-slate-400">
+                    · {scopeHint}
+                  </span>
+                ) : null}
+              </h2>
+              <Link
+                href={ops.links.aTraiter}
+                className="text-xs font-semibold text-[#1d4ed8] hover:underline"
+              >
+                Voir tout →
+              </Link>
+            </div>
+
             {ops.attention.length === 0 ? (
-              <p className="text-sm font-medium text-emerald-800">
+              <p className="mt-4 text-sm font-medium text-emerald-800">
                 ✓ Rien d’urgent à traiter.
               </p>
             ) : (
-              <ul className="divide-y divide-slate-100">
+              <ul className="mt-3 space-y-2">
                 {ops.attention.map((item) => (
                   <li key={item.id}>
                     <Link
                       href={item.href}
-                      className="flex items-start gap-3 py-2.5 hover:bg-slate-50/80"
+                      className={cn(
+                        "flex items-start justify-between gap-3 rounded-xl border-l-[3px] px-3 py-2.5 transition hover:bg-white",
+                        urgencyTone(item.urgency),
+                      )}
                     >
-                      <span
-                        className={cn(
-                          "mt-1.5 h-2 w-2 shrink-0 rounded-full",
-                          urgencyDot(item.urgency),
-                        )}
-                      />
                       <span className="min-w-0">
-                        <span className="block text-sm font-semibold text-slate-900">
+                        {urgencyLabel(item.urgency) ? (
+                          <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                            {urgencyLabel(item.urgency)}
+                          </span>
+                        ) : null}
+                        <span className="block text-sm font-bold text-slate-950">
                           {item.title}
                         </span>
-                        <span className="mt-0.5 block text-xs text-slate-500">
-                          {item.reason}
-                        </span>
                         {item.projectTitle ? (
-                          <span className="mt-0.5 block text-[11px] text-slate-400">
+                          <span className="mt-0.5 block text-xs font-medium text-slate-600">
                             {item.projectTitle}
                           </span>
                         ) : null}
+                        <span className="mt-0.5 block text-xs text-slate-500">{item.reason}</span>
+                      </span>
+                      <span className="shrink-0 self-center text-xs font-bold text-[#1d4ed8]">
+                        Voir
                       </span>
                     </Link>
                   </li>
@@ -215,31 +235,48 @@ export function AccueilOpsHome({
             )}
             {ops.attentionCapped ? (
               <p className="mt-2 text-[11px] text-slate-400">
-                Aperçu limité — le board complet peut en contenir davantage.
+                Aperçu Accueil — le board À traiter peut en contenir davantage.
               </p>
             ) : null}
-          </Section>
+          </section>
 
-          <Section
-            title={ops.agendaTitle}
-            action={{ href: ops.links.agenda, label: "Voir Agenda" }}
-          >
+          {/* 2 — AUJOURD’HUI */}
+          <section>
+            <div className="flex items-baseline justify-between gap-3 border-b border-slate-200 pb-2">
+              <h2 className="text-sm font-extrabold uppercase tracking-[0.12em] text-[#1e3a5f]">
+                {ops.agendaTitle}
+              </h2>
+              <Link
+                href={ops.links.agenda}
+                className="text-xs font-semibold text-[#1d4ed8] hover:underline"
+              >
+                Voir Agenda
+              </Link>
+            </div>
             {ops.agenda.length === 0 ? (
-              <p className="text-sm text-slate-500">Aucun événement proche.</p>
+              <p className="mt-3 text-sm text-slate-500">Aucun événement proche.</p>
             ) : (
-              <ul className="space-y-2.5">
+              <ul className="mt-3 space-y-0">
                 {ops.agenda.map((ev) => (
-                  <li key={ev.id} className="flex gap-3 text-sm">
-                    <span className="w-12 shrink-0 tabular-nums font-semibold text-slate-700">
-                      {fmtTime(ev.startAt)}
+                  <li
+                    key={ev.id}
+                    className="flex gap-3 border-b border-slate-100 py-2.5 last:border-b-0"
+                  >
+                    <span className="w-12 shrink-0 pt-0.5 text-sm font-bold tabular-nums text-slate-800">
+                      {ops.agendaTitle === "Prochainement"
+                        ? new Date(ev.startAt).toLocaleDateString("fr-FR", {
+                            day: "numeric",
+                            month: "short",
+                          })
+                        : fmtTime(ev.startAt)}
                     </span>
-                    <span className="min-w-0">
-                      <span className="mr-1" aria-hidden>
+                    <span className="min-w-0 flex-1">
+                      <span className="mr-1.5 text-sm" aria-hidden>
                         {agendaIcon(ev.type)}
                       </span>
                       <Link
                         href={`/dashboard/agenda?event=${ev.id}`}
-                        className="font-semibold text-slate-900 hover:underline"
+                        className="text-sm font-bold text-slate-950 hover:underline"
                       >
                         {ev.title}
                       </Link>
@@ -253,87 +290,102 @@ export function AccueilOpsHome({
                 ))}
               </ul>
             )}
-          </Section>
+          </section>
 
+          {/* 3 — CHANTIERS */}
           {ops.chantiers.length > 0 ? (
-            <Section
-              title="Chantiers à surveiller"
-              action={{ href: ops.links.projets, label: "Voir chantiers" }}
-            >
-              <ul className="space-y-3">
-                {ops.chantiers.map((c) => (
-                  <li key={c.id} className="rounded-lg border border-slate-100 px-3 py-2.5">
-                    <div className="flex items-baseline justify-between gap-2">
+            <section>
+              <div className="flex items-baseline justify-between gap-3 border-b border-slate-200 pb-2">
+                <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">
+                  Chantiers à surveiller
+                </h2>
+                <Link
+                  href={ops.links.projets}
+                  className="text-xs font-semibold text-[#1d4ed8] hover:underline"
+                >
+                  Voir chantiers
+                </Link>
+              </div>
+              <ul className="mt-3 space-y-3">
+                {ops.chantiers.map((c) => {
+                  const signals = [
+                    c.attentionCount > 0 ? `${c.attentionCount} À traiter` : null,
+                    c.criticalCount > 0
+                      ? `${c.criticalCount} critique${c.criticalCount > 1 ? "s" : ""}`
+                      : null,
+                    c.urgentCount > 0
+                      ? `${c.urgentCount} urgent${c.urgentCount > 1 ? "s" : ""}`
+                      : null,
+                    c.overdueTasks > 0
+                      ? `${c.overdueTasks} tâche${c.overdueTasks > 1 ? "s" : ""} en retard`
+                      : null,
+                    c.nextDeliveryLabel,
+                    c.nextEventLabel && !c.nextDeliveryLabel ? c.nextEventLabel : null,
+                  ].filter(Boolean);
+                  return (
+                    <li
+                      key={c.id}
+                      className="flex flex-col gap-2 rounded-xl border border-slate-200/90 bg-white px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold uppercase tracking-wide text-slate-900">
+                          {c.title}
+                        </p>
+                        <p className="mt-1 text-xs leading-relaxed text-slate-600">
+                          {signals.join(" · ")}
+                        </p>
+                      </div>
                       <Link
                         href={`/dashboard/projets/${c.id}`}
-                        className="text-sm font-bold text-slate-900 hover:underline"
+                        className="shrink-0 text-xs font-bold text-[#1d4ed8] hover:underline"
                       >
-                        {c.title}
+                        Ouvrir le chantier
                       </Link>
-                      <Link
-                        href={`/dashboard/projets/${c.id}`}
-                        className="text-xs font-semibold text-[#1d4ed8] hover:underline"
-                      >
-                        Ouvrir
-                      </Link>
-                    </div>
-                    <p className="mt-1 text-xs text-slate-600">
-                      {[
-                        c.attentionCount > 0
-                          ? `${c.attentionCount} À traiter`
-                          : null,
-                        c.criticalCount > 0
-                          ? `${c.criticalCount} critique${c.criticalCount > 1 ? "s" : ""}`
-                          : null,
-                        c.overdueTasks > 0
-                          ? `${c.overdueTasks} tâche${c.overdueTasks > 1 ? "s" : ""} en retard`
-                          : null,
-                        c.nextEventLabel,
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </p>
-                  </li>
-                ))}
+                    </li>
+                  );
+                })}
               </ul>
-            </Section>
+            </section>
           ) : null}
 
           {ops.teamToday.length > 0 ? (
-            <Section title="Équipe aujourd’hui" className="hidden lg:block">
-              <ul className="space-y-1.5 text-sm">
+            <section className="hidden lg:block">
+              <h2 className="border-b border-slate-200 pb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                Équipe aujourd’hui
+              </h2>
+              <ul className="mt-2 space-y-1.5 text-sm">
                 {ops.teamToday.map((t) => (
                   <li key={t.id}>
-                    <span className="font-semibold text-slate-900">{t.name}</span>
+                    <span className="font-semibold text-slate-800">{t.name}</span>
                     {t.projectTitle ? (
                       <span className="text-slate-500"> — {t.projectTitle}</span>
                     ) : null}
                   </li>
                 ))}
               </ul>
-            </Section>
+            </section>
           ) : null}
         </div>
 
         {/* Colonne secondaire */}
-        <div className="space-y-4">
+        <aside className="space-y-0 rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 lg:sticky lg:top-4 lg:self-start">
           <MessagesHomeBanner />
 
           {ops.orders.length > 0 ? (
-            <Section
+            <SideSection
               title="Commandes & livraisons"
-              action={{ href: ops.links.commandes, label: "Voir Commandes" }}
+              action={{ href: ops.links.commandes, label: "Voir" }}
             >
-              <ul className="space-y-2.5">
+              <ul className="space-y-2">
                 {ops.orders.map((o) => (
                   <li key={o.id}>
                     <Link
-                      href={`/dashboard/commandes/${o.id}`}
-                      className="block rounded-lg border border-slate-100 px-3 py-2 hover:border-[#1e3a5f]/25"
+                      href={o.href}
+                      className="block rounded-lg px-2 py-1.5 hover:bg-slate-50"
                     >
                       <div className="flex items-baseline justify-between gap-2">
                         <span className="text-sm font-bold text-slate-900">
-                          {o.supplierName} — {o.number}
+                          {o.supplierName}
                         </span>
                         <span
                           className={cn(
@@ -344,24 +396,29 @@ export function AccueilOpsHome({
                           {o.statusLabel}
                         </span>
                       </div>
-                      {o.projectTitle ? (
-                        <p className="mt-0.5 text-xs text-slate-500">{o.projectTitle}</p>
+                      <p className="text-xs text-slate-500">
+                        {[o.number, o.projectTitle].filter(Boolean).join(" · ")}
+                      </p>
+                      {o.deliveryLabel ? (
+                        <p className="mt-0.5 text-xs font-medium text-slate-700">
+                          {o.deliveryLabel}
+                        </p>
                       ) : null}
-                      {o.deliveryAt ? (
-                        <p className="mt-0.5 text-xs text-slate-600">
-                          {fmtDayTime(o.deliveryAt)}
+                      {o.receiptLabel ? (
+                        <p className="mt-0.5 text-xs font-semibold text-slate-700">
+                          {o.receiptLabel}
                         </p>
                       ) : null}
                     </Link>
                   </li>
                 ))}
               </ul>
-            </Section>
+            </SideSection>
           ) : null}
 
-          <Section
+          <SideSection
             title="Mes tâches"
-            action={{ href: ops.links.taches, label: "Voir toutes" }}
+            action={{ href: ops.links.taches, label: "Voir" }}
           >
             {ops.tasks.length === 0 ? (
               <p className="text-sm text-slate-500">Aucune tâche prioritaire.</p>
@@ -369,12 +426,13 @@ export function AccueilOpsHome({
               <ul className="space-y-2">
                 {ops.tasks.map((t) => (
                   <li key={t.id}>
-                    <Link href={`/dashboard/taches/${t.id}`} className="block text-sm">
-                      <span className="font-semibold text-slate-900">{t.title}</span>
+                    <Link
+                      href={`/dashboard/taches/${t.id}`}
+                      className="block rounded-lg px-2 py-1.5 hover:bg-slate-50"
+                    >
+                      <span className="text-sm font-semibold text-slate-900">{t.title}</span>
                       <span className="mt-0.5 block text-xs text-slate-500">
-                        {[t.projectTitle, t.assigneeName, t.dueLabel]
-                          .filter(Boolean)
-                          .join(" · ")}
+                        {[t.projectTitle, t.dueLabel].filter(Boolean).join(" · ")}
                         {t.overdue ? (
                           <span className="ml-1.5 font-semibold text-red-700">Retard</span>
                         ) : null}
@@ -384,8 +442,8 @@ export function AccueilOpsHome({
                 ))}
               </ul>
             )}
-          </Section>
-        </div>
+          </SideSection>
+        </aside>
       </div>
     </div>
   );

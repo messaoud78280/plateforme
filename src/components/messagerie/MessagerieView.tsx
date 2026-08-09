@@ -2,6 +2,19 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { AudioMessagePlayer } from "@/components/messagerie/AudioMessagePlayer";
+import { VoiceRecorderPanel } from "@/components/messagerie/VoiceRecorderPanel";
+import { PhotoPreviewGrid } from "@/components/messagerie/PhotoPreviewGrid";
+import { MessageBeworkActions } from "@/components/messagerie/MessageBeworkActions";
+import {
+  formatMediaPreview,
+  isAudioAttachment,
+  isImageAttachment,
+  type MsgAttachment,
+} from "@/lib/messagerie/media-preview";
+import { compressImageForMessagerie } from "@/lib/messagerie/compress-image";
+import { subscribeMessagerieEvents } from "@/lib/perf/messagerie-unread-bus";
+import { SignedFileLink } from "@/components/files/SignedFileLink";
 import { documentDownloadHref } from "@/lib/documents/download-url";
 
 type MessageChannel = "INTERNE" | "CLIENT" | "FOURNISSEUR";
@@ -11,6 +24,7 @@ type MessageItem = {
   content: string;
   read: boolean;
   channel?: string;
+  attachmentsJson?: MsgAttachment[] | null;
   createdAt: string;
   project: { id: string; title: string };
   sender: { id: string; name: string };
@@ -129,6 +143,15 @@ export function MessagerieView({
   const [sendContent, setSendContent] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const [attachments, setAttachments] = useState<MsgAttachment[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<string | null>(null);
+  const [voiceOpen, setVoiceOpen] = useState(false);
+  const [attachMenuOpen, setAttachMenuOpen] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState<{ files: File[]; comment: string } | null>(
+    null,
+  );
+  const sendLockRef = useRef(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -260,17 +283,76 @@ export function MessagerieView({
     ? selectedProject.assignedTo
     : null;
 
-  async function handleSend(e: React.FormEvent) {
-    e.preventDefault();
-    const content = sendContent.trim();
-    if (!content || !selectedProjectId || sending) return;
+  useEffect(() => {
+    return subscribeMessagerieEvents((ev) => {
+      if (ev.kind !== "PROJECT") return;
+      if (!selectedProjectId || !ev.href.includes(selectedProjectId)) return;
+      void loadMessages(channel);
+    });
+  }, [selectedProjectId, channel]);
+
+  async function uploadFiles(
+    files: FileList | File[],
+    opts?: { durationSec?: number },
+  ): Promise<MsgAttachment[]> {
+    const list = Array.from(files);
+    if (!list.length) return [];
+    setUploading(true);
+    setUploadProgress(`Envoi… 0/${list.length}`);
+    const uploaded: MsgAttachment[] = [];
+    try {
+      let i = 0;
+      for (const raw of list) {
+        i += 1;
+        if (!(raw instanceof File) || !raw.size) continue;
+        setUploadProgress(`Envoi… ${i}/${list.length}`);
+        let file = raw;
+        if (file.type.startsWith("image/")) {
+          file = await compressImageForMessagerie(file);
+        }
+        const fd = new FormData();
+        fd.append("file", file);
+        if (opts?.durationSec != null) fd.append("durationSec", String(opts.durationSec));
+        try {
+          const res = await fetch("/api/messages/direct/upload", { method: "POST", body: fd });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok && data.fileUrl) {
+            uploaded.push({
+              name: data.name ?? file.name,
+              fileUrl: data.fileUrl,
+              fileSize: data.fileSize ?? file.size,
+              mimeType: data.mimeType ?? file.type,
+              kind: data.kind,
+              durationSec: data.durationSec ?? opts?.durationSec,
+            });
+          } else {
+            setError(data?.error ?? `Échec de l’envoi de « ${file.name} »`);
+          }
+        } catch {
+          setError(`Échec réseau pour « ${file.name} ». Réessayez.`);
+        }
+      }
+      if (uploaded.length) setAttachments((prev) => [...prev, ...uploaded]);
+      return uploaded;
+    } finally {
+      setUploading(false);
+      setUploadProgress(null);
+    }
+  }
+
+  async function sendMessage(content: string, atts: MsgAttachment[]) {
+    if ((!content && atts.length === 0) || !selectedProjectId || sending) return;
+    if (sendLockRef.current) return;
+    sendLockRef.current = true;
     setError("");
     const tempId = `temp-${Date.now()}`;
+    const preview = formatMediaPreview(content, atts) || content || "Pièce jointe";
     const optimistic: MessageItem = {
       id: tempId,
-      content,
+      content: preview,
       read: false,
       channel,
+      attachmentsJson: atts.length ? atts : null,
       createdAt: new Date().toISOString(),
       project: {
         id: selectedProjectId,
@@ -284,6 +366,7 @@ export function MessagerieView({
     };
     setSending(true);
     setSendContent("");
+    setAttachments([]);
     setMessages((prev) => [optimistic, ...prev]);
     try {
       const body: {
@@ -291,10 +374,12 @@ export function MessagerieView({
         content: string;
         channel: MessageChannel;
         receiverId?: string;
+        attachments?: MsgAttachment[];
       } = {
         projectId: selectedProjectId,
         content,
         channel,
+        attachments: atts.length ? atts : undefined,
       };
       if (recipientForProject) body.receiverId = recipientForProject.id;
 
@@ -308,19 +393,35 @@ export function MessagerieView({
       if (!res.ok) {
         setMessages((prev) => prev.filter((m) => m.id !== tempId));
         setSendContent(content);
-        setError(data.error ?? "Erreur lors de l'envoi.");
+        setAttachments(atts);
+        setError(data.error ?? "Échec de l’envoi — réessayez.");
         return;
       }
       setMessages((prev) =>
-        prev.map((m) => (m.id === tempId ? { ...data, channel: data.channel ?? channel } : m)),
+        prev.map((m) =>
+          m.id === tempId
+            ? {
+                ...data,
+                channel: data.channel ?? channel,
+                attachmentsJson: data.attachmentsJson ?? atts,
+              }
+            : m,
+        ),
       );
     } catch {
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
       setSendContent(content);
-      setError("Erreur de connexion.");
+      setAttachments(atts);
+      setError("Erreur de connexion — média conservé, réessayez.");
     } finally {
       setSending(false);
+      sendLockRef.current = false;
     }
+  }
+
+  async function handleSend(e: React.FormEvent) {
+    e.preventDefault();
+    await sendMessage(sendContent.trim(), attachments);
   }
 
   function setQuickReply(text: string) {
@@ -382,8 +483,11 @@ export function MessagerieView({
                     <p className="truncate text-sm font-semibold text-slate-800">{p.title}</p>
                     {lastMsg && (
                       <p className="mt-0.5 truncate text-xs text-slate-500">
-                        {lastMsg.sender.name} : {lastMsg.content.slice(0, 40)}
-                        {lastMsg.content.length > 40 ? "…" : ""}
+                        {lastMsg.sender.name} :{" "}
+                        {formatMediaPreview(
+                          lastMsg.content,
+                          lastMsg.attachmentsJson ?? null,
+                        ).slice(0, 40)}
                       </p>
                     )}
                     <div className="mt-1 flex items-center justify-between">
@@ -441,10 +545,11 @@ export function MessagerieView({
               <div className="space-y-4">
                 {conversationMessages.map((m) => {
                   const isMe = m.sender.id === sessionUserId;
+                  const atts = Array.isArray(m.attachmentsJson) ? m.attachmentsJson : [];
                   return (
                     <div
                       key={m.id}
-                      className={`flex gap-3 ${isMe ? "flex-row-reverse" : ""}`}
+                      className={`group flex gap-3 ${isMe ? "flex-row-reverse" : ""}`}
                     >
                       <Avatar name={m.sender.name} isMe={isMe} />
                       <div
@@ -458,8 +563,70 @@ export function MessagerieView({
                           }`}
                         >
                           <p className="text-xs font-medium opacity-90">{m.sender.name}</p>
-                          <p className="mt-0.5 whitespace-pre-wrap break-words text-sm">{m.content}</p>
+                          {m.content && !atts.some((a) => a.name === m.content) ? (
+                            <p className="mt-0.5 whitespace-pre-wrap break-words text-sm">
+                              {m.content}
+                            </p>
+                          ) : null}
+                          {atts.length > 0 ? (
+                            <div className={`mt-2 space-y-1.5 ${isMe ? "text-white" : ""}`}>
+                              {atts.filter(isAudioAttachment).map((a, i) => (
+                                <AudioMessagePlayer
+                                  key={`a-${i}`}
+                                  src={a.fileUrl}
+                                  durationSec={a.durationSec}
+                                />
+                              ))}
+                              <div
+                                className={`grid gap-1.5 ${
+                                  atts.filter(isImageAttachment).length > 1
+                                    ? "grid-cols-2"
+                                    : "grid-cols-1"
+                                }`}
+                              >
+                                {atts.filter(isImageAttachment).map((a, i) => (
+                                  <a
+                                    key={`i-${i}`}
+                                    href={a.fileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block"
+                                  >
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                      src={a.fileUrl}
+                                      alt={a.name}
+                                      loading="lazy"
+                                      className="max-h-48 w-full rounded-lg object-cover"
+                                    />
+                                  </a>
+                                ))}
+                              </div>
+                              {atts
+                                .filter((a) => !isAudioAttachment(a) && !isImageAttachment(a))
+                                .map((a, i) => (
+                                  <SignedFileLink
+                                    key={`f-${i}`}
+                                    url={a.fileUrl}
+                                    className={`flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs ${
+                                      isMe ? "bg-white/15 text-white" : "bg-black/5 text-slate-800"
+                                    }`}
+                                  >
+                                    📄 {a.name}
+                                  </SignedFileLink>
+                                ))}
+                            </div>
+                          ) : null}
                         </div>
+                        <MessageBeworkActions
+                          messageId={m.id}
+                          messageKind="PROJECT"
+                          content={m.content}
+                          hasMedia={atts.some(
+                            (a) => isAudioAttachment(a) || isImageAttachment(a),
+                          )}
+                          isMe={isMe}
+                        />
                         <p className="mt-1 text-xs text-slate-400">
                           {formatMessageTime(m.createdAt)}
                         </p>
@@ -472,6 +639,19 @@ export function MessagerieView({
             </div>
 
             <div className="shrink-0 border-t border-slate-200 p-4">
+              <p
+                className={`mb-2 rounded-lg px-3 py-1.5 text-xs font-bold ${
+                  channel === "INTERNE"
+                    ? "bg-violet-100 text-violet-900"
+                    : "bg-orange-100 text-orange-900"
+                }`}
+              >
+                {channel === "INTERNE"
+                  ? `Message interne · ${selectedProject.title}`
+                  : channel === "FOURNISSEUR"
+                    ? `Message fournisseur · EXTERNE · ${selectedProject.title}`
+                    : `Message client · EXTERNE · ${selectedProject.title}`}
+              </p>
               <div className="mb-2 flex flex-wrap gap-1">
                 {QUICK_REPLIES.map((text) => (
                   <button
@@ -484,8 +664,161 @@ export function MessagerieView({
                   </button>
                 ))}
               </div>
+              <input
+                id="chantier-camera-input"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="sr-only"
+                onChange={(e) => {
+                  const files = e.target.files;
+                  if (!files?.length) return;
+                  setPhotoPreview({ files: Array.from(files).slice(0, 6), comment: "" });
+                  setAttachMenuOpen(false);
+                  e.target.value = "";
+                }}
+              />
+              <input
+                id="chantier-photo-input"
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                multiple
+                onChange={(e) => {
+                  const files = e.target.files;
+                  if (!files?.length) return;
+                  setPhotoPreview({ files: Array.from(files).slice(0, 6), comment: "" });
+                  setAttachMenuOpen(false);
+                  e.target.value = "";
+                }}
+              />
+              <input
+                id="chantier-doc-input"
+                type="file"
+                accept=".pdf,.docx,.xlsx,.xls,.csv,.txt,.doc"
+                className="sr-only"
+                multiple
+                onChange={(e) => {
+                  if (e.target.files?.length) void uploadFiles(e.target.files);
+                  setAttachMenuOpen(false);
+                  e.target.value = "";
+                }}
+              />
+              {uploadProgress ? (
+                <p className="mb-2 text-xs font-semibold text-[#1d4ed8]">{uploadProgress}</p>
+              ) : null}
+              {voiceOpen ? (
+                <div className="mb-2">
+                  <VoiceRecorderPanel
+                    sending={uploading || sending}
+                    onCancel={() => setVoiceOpen(false)}
+                    onSend={async (file, durationSec) => {
+                      const uploaded = await uploadFiles([file], { durationSec });
+                      setVoiceOpen(false);
+                      if (uploaded.length) await sendMessage("", uploaded);
+                    }}
+                  />
+                </div>
+              ) : null}
+              {photoPreview ? (
+                <div className="mb-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+                  <p className="mb-2 text-sm font-semibold text-slate-800">
+                    Aperçu · {photoPreview.files.length} photo
+                    {photoPreview.files.length > 1 ? "s" : ""}
+                  </p>
+                  <PhotoPreviewGrid files={photoPreview.files} />
+                  <input
+                    value={photoPreview.comment}
+                    onChange={(e) =>
+                      setPhotoPreview((p) => (p ? { ...p, comment: e.target.value } : p))
+                    }
+                    placeholder="Commentaire (optionnel)"
+                    className="mb-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPhotoPreview(null)}
+                      className="rounded-full border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-600"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      type="button"
+                      disabled={uploading || sending}
+                      onClick={async () => {
+                        if (!photoPreview) return;
+                        const comment = photoPreview.comment.trim();
+                        const uploaded = await uploadFiles(photoPreview.files);
+                        setPhotoPreview(null);
+                        if (uploaded.length) await sendMessage(comment, uploaded);
+                      }}
+                      className="rounded-full bg-[#1d4ed8] px-4 py-1.5 text-sm font-bold text-white disabled:opacity-50"
+                    >
+                      Envoyer
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+              {attachments.length > 0 ? (
+                <div className="mb-2 flex flex-wrap gap-2">
+                  {attachments.map((a, i) => (
+                    <span
+                      key={i}
+                      className="flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-xs"
+                    >
+                      {isAudioAttachment(a) ? "🎤" : isImageAttachment(a) ? "📷" : "📄"} {a.name}
+                      <button
+                        type="button"
+                        onClick={() => setAttachments((p) => p.filter((_, j) => j !== i))}
+                        className="text-slate-500 hover:text-red-600"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              ) : null}
               <form onSubmit={handleSend} className="flex gap-2">
-                <div className="flex min-w-0 flex-1 items-end gap-2">
+                <div className="relative flex min-w-0 flex-1 items-end gap-2">
+                  <div className="relative mb-0.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setVoiceOpen(false);
+                        setAttachMenuOpen((v) => !v);
+                      }}
+                      className="flex h-11 w-11 items-center justify-center rounded-full text-slate-600 hover:bg-slate-100"
+                      title="Joindre"
+                    >
+                      <svg className="h-7 w-7" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                      </svg>
+                    </button>
+                    {attachMenuOpen ? (
+                      <div className="absolute bottom-12 left-0 z-30 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+                        <label
+                          htmlFor="chantier-camera-input"
+                          className="block cursor-pointer px-3 py-2.5 text-sm hover:bg-slate-50"
+                        >
+                          Prendre une photo
+                        </label>
+                        <label
+                          htmlFor="chantier-photo-input"
+                          className="block cursor-pointer px-3 py-2.5 text-sm hover:bg-slate-50"
+                        >
+                          Choisir une photo
+                        </label>
+                        <label
+                          htmlFor="chantier-doc-input"
+                          className="block cursor-pointer px-3 py-2.5 text-sm hover:bg-slate-50"
+                          onClick={() => setAttachMenuOpen(false)}
+                        >
+                          Document
+                        </label>
+                      </div>
+                    ) : null}
+                  </div>
                   <textarea
                     value={sendContent}
                     onChange={(e) => setSendContent(e.target.value)}
@@ -496,25 +829,31 @@ export function MessagerieView({
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault();
-                        if (sendContent.trim() && !sending) {
+                        if ((sendContent.trim() || attachments.length > 0) && !sending) {
                           void (e.currentTarget.form as HTMLFormElement | null)?.requestSubmit();
                         }
                       }
                     }}
                   />
-                  <Link
-                    href="/dashboard/documents"
-                    className="shrink-0 rounded-lg border border-slate-300 bg-white p-2.5 text-slate-600 hover:bg-slate-50"
-                    title="Joindre un document"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAttachMenuOpen(false);
+                      setVoiceOpen((v) => !v);
+                    }}
+                    className={`mb-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${
+                      voiceOpen ? "bg-[#1d4ed8] text-white" : "text-slate-600 hover:bg-slate-100"
+                    }`}
+                    title="Message vocal"
                   >
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z" />
                     </svg>
-                  </Link>
+                  </button>
                   <button
                     type="submit"
-                    disabled={sending || !sendContent.trim()}
-                    className="shrink-0 rounded-xl bg-[#1d4ed8] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af] disabled:opacity-50"
+                    disabled={sending || (!sendContent.trim() && attachments.length === 0)}
+                    className="mb-0.5 shrink-0 rounded-xl bg-[#1d4ed8] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#1e40af] disabled:opacity-50"
                   >
                     Envoyer
                   </button>

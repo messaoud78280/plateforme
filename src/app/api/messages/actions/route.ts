@@ -73,6 +73,32 @@ async function loadSource(kind: string, id: string) {
       senderName: m.sender.name,
     };
   }
+  if (kind === "PROJECT") {
+    const m = await prisma.message.findUnique({
+      where: { id },
+      include: {
+        sender: { select: { id: true, name: true } },
+        project: {
+          select: {
+            id: true,
+            title: true,
+            clientId: true,
+            organizationId: true,
+          },
+        },
+      },
+    });
+    if (!m) return null;
+    return {
+      content: m.content,
+      taskId: null as string | null,
+      projectId: m.projectId,
+      projectTitle: m.project.title,
+      clientId: m.project.clientId,
+      organizationId: m.project.organizationId ?? null,
+      senderName: m.sender.name,
+    };
+  }
   return null;
 }
 
@@ -107,8 +133,11 @@ export async function GET(request: Request) {
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
-  const content = new URL(request.url).searchParams.get("content") ?? "";
-  const suggestions = suggestBeworkActions(content);
+  const url = new URL(request.url);
+  const content = url.searchParams.get("content") ?? "";
+  const suggestions = suggestBeworkActions(content, {
+    media: url.searchParams.get("media") === "1",
+  });
   const schedule = parseMessageSchedule(content);
   return NextResponse.json({ suggestions, schedule });
 }
@@ -143,6 +172,7 @@ export async function POST(request: Request) {
   const allDay = body.allDay ?? schedule.allDay;
   const deepLink = messagerieDeepLink(body.sourceMessageKind, body.sourceMessageId, {
     taskId: source.taskId,
+    projectId: source.projectId,
   });
 
   try {
@@ -258,19 +288,26 @@ export async function POST(request: Request) {
       });
     }
 
-    if (body.action === "tache" || body.action === "commande") {
+    if (body.action === "tache" || body.action === "commande" || body.action === "reserve") {
       const clientId = source.clientId ?? ownerUserId;
       const task = await prisma.task.create({
         data: {
           title:
             body.action === "commande"
               ? `Commande — ${title.slice(0, 80)}`
-              : title.slice(0, 120),
+              : body.action === "reserve"
+                ? `Réserve — ${title.slice(0, 80)}`
+                : title.slice(0, 120),
           description: `Créé depuis message messagerie.\n\n« ${source.content.slice(0, 800)} »`,
           clientId,
           organizationId: source.organizationId ?? undefined,
           projectId: source.projectId ?? undefined,
-          category: body.action === "commande" ? "Bon de commande" : "Tâche chantier",
+          category:
+            body.action === "commande"
+              ? "Bon de commande"
+              : body.action === "reserve"
+                ? "Réserve chantier"
+                : "Tâche chantier",
           priority: body.priority === "URGENT" ? "URGENT" : "PRIORITAIRE",
           desiredDate: body.dueAt ? new Date(body.dueAt) : startAt,
           assignedToId: body.assigneeId || session.user.id,
@@ -287,12 +324,19 @@ export async function POST(request: Request) {
           sourceMessageId: body.sourceMessageId,
           type: "LINK",
           status: "DONE",
-          title: "Tâche créée",
+          title: body.action === "reserve" ? "Réserve créée" : "Tâche créée",
           createdById: session.user.id,
           taskId: task.id,
           completedAt: new Date(),
           completedById: session.user.id,
-          metaJson: { badge: body.action === "commande" ? "Commande" : "Tâche" },
+          metaJson: {
+            badge:
+              body.action === "commande"
+                ? "Commande"
+                : body.action === "reserve"
+                  ? "Réserve"
+                  : "Tâche",
+          },
         },
       });
 
@@ -300,7 +344,13 @@ export async function POST(request: Request) {
         await postSystemTaskMessage({
           taskId: source.taskId,
           actorId: session.user.id,
-          content: `✓ ${body.action === "commande" ? "Commande" : "Tâche"} créée — ${task.title}`,
+          content: `✓ ${
+            body.action === "commande"
+              ? "Commande"
+              : body.action === "reserve"
+                ? "Réserve"
+                : "Tâche"
+          } créée — ${task.title}`,
           payload: { taskId: task.id },
         });
       }
@@ -309,7 +359,12 @@ export async function POST(request: Request) {
         ok: true,
         taskId: task.id,
         href: `/dashboard/taches/${task.id}`,
-        badge: body.action === "commande" ? "Commande" : "Tâche",
+        badge:
+          body.action === "commande"
+            ? "Commande"
+            : body.action === "reserve"
+              ? "Réserve"
+              : "Tâche",
       });
     }
 

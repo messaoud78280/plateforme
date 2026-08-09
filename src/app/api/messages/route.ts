@@ -14,8 +14,39 @@ import {
 } from "@/lib/equipe-acces/nav-by-persona";
 import { broadcastMessagerieToUser } from "@/lib/messagerie/broadcast";
 import { ttlInvalidatePrefix } from "@/lib/perf/ttl-cache";
+import { formatMediaPreview, type MsgAttachment } from "@/lib/messagerie/media-preview";
 
 const VALID_CHANNELS = new Set(["INTERNE", "CLIENT", "FOURNISSEUR"]);
+
+type IncomingAttachment = {
+  name?: string;
+  fileUrl?: string;
+  fileSize?: number;
+  mimeType?: string;
+  kind?: string;
+  durationSec?: number;
+};
+
+function normalizeAttachments(raw: unknown): MsgAttachment[] {
+  if (!Array.isArray(raw)) return [];
+  return (raw as IncomingAttachment[])
+    .filter((a) => a && typeof a.fileUrl === "string" && a.fileUrl.length > 0)
+    .slice(0, 8)
+    .map((a) => ({
+      name: typeof a.name === "string" && a.name ? a.name : "fichier",
+      fileUrl: a.fileUrl as string,
+      fileSize: typeof a.fileSize === "number" ? a.fileSize : 0,
+      mimeType: typeof a.mimeType === "string" ? a.mimeType : undefined,
+      kind:
+        a.kind === "audio" || a.kind === "image" || a.kind === "file"
+          ? a.kind
+          : undefined,
+      durationSec:
+        typeof a.durationSec === "number" && Number.isFinite(a.durationSec)
+          ? a.durationSec
+          : undefined,
+    }));
+}
 
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
@@ -82,10 +113,12 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { projectId, content, receiverId: bodyReceiverId } = body;
     const channelRaw = typeof body.channel === "string" ? body.channel : null;
+    const attachments = normalizeAttachments(body.attachments);
+    const text = typeof content === "string" ? content.trim() : "";
 
-    if (!projectId || !content?.trim()) {
+    if (!projectId || (!text && attachments.length === 0)) {
       return NextResponse.json(
-        { error: "Projet et contenu requis." },
+        { error: "Projet et contenu ou pièce jointe requis." },
         { status: 400 }
       );
     }
@@ -165,15 +198,28 @@ export async function POST(request: Request) {
       }
     }
 
+    const storedContent =
+      text ||
+      formatMediaPreview("", attachments) ||
+      "Pièce jointe";
+
     const message = await prisma.message.create({
       data: {
-        content: content.trim(),
+        content: storedContent,
         projectId,
         senderId: session.user.id,
         receiverId: finalReceiverId,
         channel,
+        ...(attachments.length > 0 ? { attachmentsJson: attachments } : {}),
+      },
+      include: {
+        project: { select: { id: true, title: true } },
+        sender: { select: { id: true, name: true } },
+        receiver: { select: { id: true, name: true } },
       },
     });
+
+    const preview = formatMediaPreview(text, attachments).slice(0, 80);
 
     if (!isAgence) {
       try {
@@ -194,7 +240,7 @@ export async function POST(request: Request) {
 
     if (isAgence && finalReceiverId) {
       try {
-        const excerpt = content.trim().slice(0, 80) + (content.trim().length > 80 ? "…" : "");
+        const excerpt = preview + (preview.length >= 80 ? "…" : "");
         await prisma.alert.create({
           data: {
             title: "Message chantier",
@@ -216,7 +262,7 @@ export async function POST(request: Request) {
         senderId: session.user.id,
         senderName: sender?.name ?? session.user?.name ?? "Quelqu'un",
         title: project.title,
-        preview: content.trim().slice(0, 80),
+        preview,
         href: `/dashboard/messagerie?view=chantiers&project=${projectId}&channel=${channel}`,
         at: message.createdAt.toISOString(),
         kind: "PROJECT",

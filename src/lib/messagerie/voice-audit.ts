@@ -1,21 +1,21 @@
 /**
- * Audit vocal Messagerie — MESSAGERIE-V2B (pas d’implémentation).
+ * Audit vocal Messagerie — MESSAGERIE-V2C livré.
  *
- * État actuel :
- * - Aucun MediaRecorder / upload audio dans le composer
- * - Pièces jointes : images + docs via /api/messages/direct/upload
- * - Bouton 🎤 UI présent (désactivé) pour ancrer le réflexe WhatsApp
+ * Implémenté :
+ * - MediaRecorder (webm/opus, mp4/Safari)
+ * - Upload via /api/messages/direct/upload (audio autorisé)
+ * - durationSec dans attachmentsJson (pas de migration)
+ * - Player compact + un seul audio à la fois
+ * - Permissions micro (messages FR)
  *
- * Cible MESSAGERIE-V2C :
- * - Enregistrer → préécouter → envoyer (réflexes WhatsApp)
- * - Stockage audio court (durée max, compression)
- * - Lecture inline dans la bulle
- * - Permissions micro + fallback desktop
- *
- * Ne pas démarrer V2C sans validation produit.
+ * Hors scope (dette V2D / plus tard) :
+ * - Transcription IA
+ * - Résumé / traduction
+ * - Appels audio/vidéo
+ * - Messagerie offline complète
  */
 export const MESSAGERIE_VOICE_AUDIT = {
-  status: "not_implemented" as const,
-  plannedIn: "MESSAGERIE-V2C",
-  composerMic: "disabled_placeholder",
+  status: "implemented_v2c" as const,
+  plannedNext: "MESSAGERIE-V2D (transcription optionnelle)",
+  composerMic: "enabled",
 };

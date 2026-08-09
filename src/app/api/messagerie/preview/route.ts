@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ttlGet, ttlSet } from "@/lib/perf/ttl-cache";
 import { resolveConversationHref } from "@/lib/messagerie/resolve-conversation";
+import { formatMediaPreview, type MsgAttachment } from "@/lib/messagerie/media-preview";
 
 export type MessageriePreviewItem = {
   id: string;
@@ -39,6 +40,7 @@ export async function GET() {
         select: {
           id: true,
           content: true,
+          attachmentsJson: true,
           createdAt: true,
           taskId: true,
           sender: { select: { name: true } },
@@ -52,6 +54,7 @@ export async function GET() {
         select: {
           id: true,
           content: true,
+          attachmentsJson: true,
           createdAt: true,
           senderId: true,
           sender: { select: { name: true } },
@@ -64,6 +67,7 @@ export async function GET() {
         select: {
           id: true,
           content: true,
+          attachmentsJson: true,
           createdAt: true,
           projectId: true,
           channel: true,
@@ -82,7 +86,10 @@ export async function GET() {
         byKey.set(key, {
           id: key,
           title: m.task.title,
-          preview: `${m.sender.name.split(" ")[0] ?? ""} : ${m.content.slice(0, 60)}`,
+          preview: `${m.sender.name.split(" ")[0] ?? ""} : ${formatMediaPreview(
+            m.content,
+            m.attachmentsJson as MsgAttachment[] | null,
+          )}`,
           at: m.createdAt.toISOString(),
           href: resolveConversationHref({ kind: "task", taskId: m.taskId, messageId: m.id }),
           kind: "TASK",
@@ -100,7 +107,10 @@ export async function GET() {
         byKey.set(key, {
           id: key,
           title: m.sender.name,
-          preview: m.content.slice(0, 72),
+          preview: formatMediaPreview(
+            m.content,
+            m.attachmentsJson as MsgAttachment[] | null,
+          ),
           at: m.createdAt.toISOString(),
           href: resolveConversationHref({
             kind: "direct",
@@ -126,7 +136,10 @@ export async function GET() {
         byKey.set(key, {
           id: key,
           title: m.project.title,
-          preview: `${m.sender.name.split(" ")[0] ?? ""} : ${m.content.slice(0, 60)}`,
+          preview: `${m.sender.name.split(" ")[0] ?? ""} : ${formatMediaPreview(
+            m.content,
+            m.attachmentsJson as MsgAttachment[] | null,
+          )}`,
           at: m.createdAt.toISOString(),
           href: resolveConversationHref({
             kind: "project_channel",

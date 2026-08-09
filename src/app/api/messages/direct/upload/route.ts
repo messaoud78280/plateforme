@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createServiceRoleClient } from "@/lib/supabase";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15 MB (audio + photos chantier)
 const ALLOWED_TYPES = [
   "application/pdf",
   "image/jpeg",
@@ -18,6 +18,14 @@ const ALLOWED_TYPES = [
   "text/csv",
   "text/plain",
   "application/octet-stream",
+  "audio/webm",
+  "audio/ogg",
+  "audio/mpeg",
+  "audio/mp4",
+  "audio/aac",
+  "audio/wav",
+  "audio/x-m4a",
+  "audio/mp3",
 ];
 
 /** POST /api/messages/direct/upload — Upload d'une pièce jointe pour message direct */
@@ -56,17 +64,49 @@ export async function POST(request: Request) {
   }
 
   if (file.size > MAX_FILE_SIZE) {
-    return NextResponse.json({ error: "Fichier trop volumineux (max 10 MB)" }, { status: 400 });
+    return NextResponse.json({ error: "Fichier trop volumineux (max 15 Mo)" }, { status: 400 });
   }
 
   const mime = file.type || "application/octet-stream";
   const ext = file.name.split(".").pop()?.toLowerCase();
-  const allowedExts = ["pdf", "jpg", "jpeg", "png", "gif", "webp", "docx", "xlsx", "xls", "csv", "txt", "doc"];
-  const mimeOk = ALLOWED_TYPES.includes(mime);
+  const allowedExts = [
+    "pdf",
+    "jpg",
+    "jpeg",
+    "png",
+    "gif",
+    "webp",
+    "docx",
+    "xlsx",
+    "xls",
+    "csv",
+    "txt",
+    "doc",
+    "webm",
+    "ogg",
+    "mp3",
+    "m4a",
+    "aac",
+    "wav",
+    "mp4",
+  ];
+  const mimeOk =
+    ALLOWED_TYPES.includes(mime) ||
+    mime.startsWith("audio/") ||
+    mime.startsWith("image/");
   const extOk = ext && allowedExts.includes(ext);
   if (!mimeOk && !extOk) {
-    return NextResponse.json({ error: "Type de fichier non accepté (PDF, images, DOCX, XLSX, CSV, TXT)" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Type non accepté (photo, vocal, PDF, documents)" },
+      { status: 400 },
+    );
   }
+
+  const durationRaw = formData.get("durationSec");
+  const durationSec =
+    typeof durationRaw === "string" && durationRaw !== ""
+      ? Math.max(0, Math.round(Number(durationRaw)))
+      : undefined;
 
   const bucket = "documents";
   const storagePath = `dm/${session.user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
@@ -84,10 +124,20 @@ export async function POST(request: Request) {
   const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(storagePath);
   const fileUrl = urlData.publicUrl;
 
+  const kind = mime.startsWith("audio/")
+    ? "audio"
+    : mime.startsWith("image/")
+      ? "image"
+      : "file";
+
   return NextResponse.json({
     name: file.name,
     fileUrl,
     fileSize: file.size,
     mimeType: mime,
+    kind,
+    ...(durationSec != null && Number.isFinite(durationSec)
+      ? { durationSec }
+      : {}),
   });
 }

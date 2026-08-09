@@ -11,6 +11,7 @@ import {
 } from "@/lib/messaging/access";
 import { badgeFromMeta } from "@/lib/messagerie/message-links";
 import { broadcastMessagerieToUser } from "@/lib/messagerie/broadcast";
+import { formatMediaPreview, type MsgAttachment } from "@/lib/messagerie/media-preview";
 import { ttlInvalidatePrefix } from "@/lib/perf/ttl-cache";
 
 /** GET /api/tasks/[id]/messages — Messages de la tâche (filtrés par participant).
@@ -283,7 +284,10 @@ export async function POST(
       senderId: session.user.id,
       senderName: session.user?.name ?? "Quelqu'un",
       title: task.title,
-      preview: message.content.slice(0, 80),
+      preview: formatMediaPreview(
+        message.content,
+        message.attachmentsJson as MsgAttachment[] | null,
+      ),
       href: `/dashboard/messagerie?task=${taskId}&messageId=${message.id}`,
       at: message.createdAt.toISOString(),
       kind: "TASK",

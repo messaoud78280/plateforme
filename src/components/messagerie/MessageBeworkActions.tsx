@@ -5,9 +5,10 @@ import type { BeworkActionId, BeworkActionSuggestion } from "@/lib/messagerie/be
 
 type Props = {
   messageId: string;
-  messageKind: "TASK" | "DIRECT";
+  messageKind: "TASK" | "DIRECT" | "PROJECT";
   content: string;
   isMe?: boolean;
+  hasMedia?: boolean;
   agents?: { id: string; name: string }[];
   initialBadges?: string[];
   onLinked?: (badge: string) => void;
@@ -18,6 +19,7 @@ export function MessageBeworkActions({
   messageKind,
   content,
   isMe,
+  hasMedia = false,
   agents = [],
   initialBadges = [],
   onLinked,
@@ -43,10 +45,12 @@ export function MessageBeworkActions({
 
   useEffect(() => {
     if (!open) return;
-    void fetch(`/api/messages/actions?content=${encodeURIComponent(content)}`)
+    void fetch(
+      `/api/messages/actions?content=${encodeURIComponent(content)}${hasMedia ? "&media=1" : ""}`,
+    )
       .then((r) => r.json())
       .then((d) => setSuggestions(Array.isArray(d.suggestions) ? d.suggestions : []));
-  }, [open, content]);
+  }, [open, content, hasMedia]);
 
   const preferred = useMemo(
     () => suggestions.filter((s) => s.preferred).slice(0, 3),

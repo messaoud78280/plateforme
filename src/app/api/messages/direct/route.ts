@@ -11,6 +11,7 @@ import {
 } from "@/lib/messaging/access";
 import { broadcastMessagerieToUser } from "@/lib/messagerie/broadcast";
 import { ttlInvalidatePrefix } from "@/lib/perf/ttl-cache";
+import { formatMediaPreview, type MsgAttachment } from "@/lib/messagerie/media-preview";
 
 function canUseDirectMessages(role?: string | null): boolean {
   return isManagerRole(role) || isStaffAgent(role) || role === "CLIENT";
@@ -171,7 +172,10 @@ export async function POST(request: Request) {
       senderId: session.user.id,
       senderName: session.user?.name ?? "Quelqu'un",
       title: session.user?.name ?? "Message direct",
-      preview: (message.content || "Pièce jointe").slice(0, 80),
+      preview: formatMediaPreview(
+        message.content,
+        message.attachmentsJson as MsgAttachment[] | null,
+      ),
       href: `/dashboard/messagerie?tab=messages-directs&with=${session.user.id}`,
       at: message.createdAt.toISOString(),
       kind: "DIRECT",

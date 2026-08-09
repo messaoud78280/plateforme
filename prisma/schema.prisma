@@ -870,6 +870,8 @@ model Message {
   read       Boolean  @default(false)
   /// Fil chantier V2 : INTERNE | CLIENT | FOURNISSEUR
   channel    String   @default("CLIENT")
+  /// Pièces jointes messagerie V2C : [{ name, fileUrl, fileSize, mimeType, kind?, durationSec? }]
+  attachmentsJson Json?
   createdAt  DateTime @default(now())
 
   project  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)

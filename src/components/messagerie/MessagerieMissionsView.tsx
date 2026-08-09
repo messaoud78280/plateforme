@@ -10,6 +10,16 @@ import { SignedFileLink } from "@/components/files/SignedFileLink";
 import { badgeIcon } from "@/lib/messagerie/message-links";
 import { WA_CHAT_BG, waBubbleTime, waListTime } from "@/components/messagerie/wa-theme";
 import { subscribeMessagerieEvents } from "@/lib/perf/messagerie-unread-bus";
+import { compressImageForMessagerie } from "@/lib/messagerie/compress-image";
+import {
+  formatMediaPreview,
+  isAudioAttachment,
+  isImageAttachment,
+  type MsgAttachment,
+} from "@/lib/messagerie/media-preview";
+import { VoiceRecorderPanel } from "@/components/messagerie/VoiceRecorderPanel";
+import { AudioMessagePlayer } from "@/components/messagerie/AudioMessagePlayer";
+import { PhotoPreviewGrid } from "@/components/messagerie/PhotoPreviewGrid";
 
 const MessageBeworkActions = dynamic(
   () =>
@@ -42,7 +52,7 @@ type TaskMessageItem = {
   isInternal: boolean;
   kind?: string;
   linkedBadges?: string[];
-  attachmentsJson?: { name: string; fileUrl: string; fileSize: number; mimeType?: string }[] | null;
+  attachmentsJson?: MsgAttachment[] | null;
   createdAt: string;
   sender: { id: string; name: string };
   receiver: { id: string; name: string };
@@ -72,13 +82,13 @@ type DirectMessageItem = {
   read: boolean;
   senderId?: string;
   receiverId?: string;
-  attachmentsJson?: { name: string; fileUrl: string; fileSize: number; mimeType?: string }[] | null;
+  attachmentsJson?: MsgAttachment[] | null;
   createdAt: string;
   sender: { id: string; name: string };
   receiver: { id: string; name: string };
 };
 
-type AttachmentItem = { name: string; fileUrl: string; fileSize: number; mimeType?: string };
+type AttachmentItem = MsgAttachment;
 
 type FilterId = "envoyer" | "messages-directs" | "inbox" | "mes-missions" | "en-attente-client" | "en-cours" | "terminees";
 type ListChip = "tous" | "non-lus" | "internes" | "externes" | "clients" | "fournisseurs";
@@ -228,8 +238,7 @@ function MissionRow({
                 {m.lastMessage.sender.id === sessionUserId
                   ? "Vous : "
                   : `${m.lastMessage.sender.name.split(/\s+/)[0] ?? ""} : `}
-                {m.lastMessage.content.slice(0, 52)}
-                {m.lastMessage.content.length > 52 ? "…" : ""}
+                {formatMediaPreview(m.lastMessage.content, null)}
               </p>
             ) : null}
             <div className="mt-1 flex flex-wrap items-center gap-1.5">
@@ -325,10 +334,20 @@ export function MessagerieMissionsView({
   const [pinnedIds, setPinnedIds] = useState<string[]>([]);
   const [attachMenuOpen, setAttachMenuOpen] = useState(false);
   const [pendingNewCount, setPendingNewCount] = useState(0);
+  const [voiceOpen, setVoiceOpen] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<string | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<{
+    files: File[];
+    comment: string;
+  } | null>(null);
+  const sendLockRef = useRef(false);
   const directFileId = "direct-file-input";
-  const replyFileId = "reply-file-input";
   const missionFileId = "mission-file-input";
   const missionPhotoId = "mission-photo-input";
+  const replyPhotoId = "reply-photo-input";
+  const replyCameraId = "reply-camera-input";
+  const replyDocId = "reply-doc-input";
+  const [directAttachMenuOpen, setDirectAttachMenuOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const highlightMessageId = useRef<string | null>(null);
 
@@ -495,14 +514,31 @@ export function MessagerieMissionsView({
             });
         }
       }
-      if (ev.kind === "DIRECT" && ev.conversationKey.startsWith("DIRECT:")) {
+      if (ev.kind === "DIRECT") {
         const otherId =
           ev.senderId === sessionUserId ? ev.receiverId : ev.senderId;
+        // Bump local immédiat (sans attendre le re-fetch)
+        setDirectMessages((prev) => {
+          const optimistic: DirectMessageItem = {
+            id: `rt-${ev.at}`,
+            content: ev.preview,
+            read: false,
+            senderId: ev.senderId,
+            receiverId: ev.receiverId,
+            createdAt: ev.at,
+            sender: { id: ev.senderId, name: ev.senderName },
+            receiver: { id: otherId, name: "" },
+          };
+          const withoutDup = prev.filter((m) => m.id !== optimistic.id);
+          return [optimistic, ...withoutDup];
+        });
         void refreshDirectIndex().then((data) => setDirectMessages(data));
         if (
           filter === "messages-directs" &&
           selectedDirectContactId &&
-          (selectedDirectContactId === otherId || selectedDirectContactId === ev.senderId)
+          (selectedDirectContactId === otherId ||
+            selectedDirectContactId === ev.senderId ||
+            selectedDirectContactId === ev.receiverId)
         ) {
           void refreshDirectThread(selectedDirectContactId);
         }
@@ -750,20 +786,26 @@ export function MessagerieMissionsView({
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
-    const content = sendContent.trim();
-    if ((!content && missionAttachments.length === 0) || !selectedTaskId || sending) return;
+    await sendMissionMessage(sendContent.trim(), missionAttachments);
+  }
+
+  async function sendMissionMessage(content: string, attachments: AttachmentItem[]) {
+    if ((!content && attachments.length === 0) || !selectedTaskId || sending) return;
+    if (sendLockRef.current) return;
+    sendLockRef.current = true;
 
     const clientMessageId =
       typeof crypto !== "undefined" && "randomUUID" in crypto
         ? crypto.randomUUID()
         : `c-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const tempId = `temp-${clientMessageId}`;
+    const previewContent = formatMediaPreview(content, attachments) || content || "Pièce jointe";
     const optimistic: TaskMessageItem = {
       id: tempId,
-      content: content || (missionAttachments.length === 1 ? missionAttachments[0]!.name : `${missionAttachments.length} fichiers`),
+      content: previewContent,
       read: false,
       isInternal: Boolean(internalNote && (isAgence || isAgent)),
-      attachmentsJson: missionAttachments.length > 0 ? missionAttachments : null,
+      attachmentsJson: attachments.length > 0 ? attachments : null,
       createdAt: new Date().toISOString(),
       sender: { id: sessionUserId, name: "Vous" },
       receiver: {
@@ -776,14 +818,13 @@ export function MessagerieMissionsView({
 
     setSending(true);
     setSendContent("");
-    const savedAttachments = missionAttachments;
     setMissionAttachments([]);
     stickToBottomRef.current = true;
     setMessages((prev) => [...prev, optimistic]);
     setMissions((prev) =>
       bumpMissionWithMessage(prev, selectedTaskId, {
         id: tempId,
-        content: optimistic.content,
+        content: previewContent,
         createdAt: optimistic.createdAt,
         sender: optimistic.sender,
       }),
@@ -799,7 +840,7 @@ export function MessagerieMissionsView({
       } = {
         content,
         isInternal: internalNote && (isAgence || isAgent),
-        attachments: savedAttachments,
+        attachments,
         clientMessageId,
       };
       if (internalNote) {
@@ -824,7 +865,10 @@ export function MessagerieMissionsView({
         setMissions((prev) =>
           bumpMissionWithMessage(prev, selectedTaskId, {
             id: data.id,
-            content: data.content,
+            content: formatMediaPreview(
+              data.content,
+              Array.isArray(data.attachmentsJson) ? data.attachmentsJson : attachments,
+            ),
             createdAt: data.createdAt,
             sender: data.sender ?? optimistic.sender,
           }),
@@ -836,8 +880,8 @@ export function MessagerieMissionsView({
           ),
         );
         setSendContent(content);
-        setMissionAttachments(savedAttachments);
-        alert(data?.error ?? "Impossible d’envoyer le message");
+        setMissionAttachments(attachments);
+        alert(data?.error ?? "Échec de l’envoi — réessayez");
       }
     } catch {
       setMessages((prev) =>
@@ -846,23 +890,39 @@ export function MessagerieMissionsView({
         ),
       );
       setSendContent(content);
-      setMissionAttachments(savedAttachments);
+      setMissionAttachments(attachments);
       alert("Erreur réseau — réessayez");
     } finally {
       setSending(false);
+      sendLockRef.current = false;
     }
   }
 
-  async function uploadFiles(files: FileList | File[], setAttachments: React.Dispatch<React.SetStateAction<AttachmentItem[]>>) {
+  async function uploadFiles(
+    files: FileList | File[],
+    setAttachments: React.Dispatch<React.SetStateAction<AttachmentItem[]>>,
+    opts?: { durationSec?: number },
+  ): Promise<AttachmentItem[]> {
     const list = Array.from(files);
-    if (!list.length) return;
+    if (!list.length) return [];
     setUploadingAttach(true);
+    setUploadProgress(`Envoi… 0/${list.length}`);
     const uploaded: AttachmentItem[] = [];
     try {
-      for (const file of list) {
-        if (!(file instanceof File) || !file.size) continue;
+      let i = 0;
+      for (const raw of list) {
+        i += 1;
+        if (!(raw instanceof File) || !raw.size) continue;
+        setUploadProgress(`Envoi… ${i}/${list.length}`);
+        let file = raw;
+        if (file.type.startsWith("image/")) {
+          file = await compressImageForMessagerie(file);
+        }
         const fd = new FormData();
         fd.append("file", file);
+        if (opts?.durationSec != null) {
+          fd.append("durationSec", String(opts.durationSec));
+        }
         try {
           const res = await fetch("/api/messages/direct/upload", { method: "POST", body: fd });
           const data = await res.json().catch(() => ({}));
@@ -872,19 +932,23 @@ export function MessagerieMissionsView({
               fileUrl: data.fileUrl,
               fileSize: data.fileSize ?? file.size,
               mimeType: data.mimeType ?? file.type,
+              kind: data.kind,
+              durationSec: data.durationSec ?? opts?.durationSec,
             });
           } else {
-            alert(data?.error ?? `Erreur lors du téléchargement de "${file.name}"`);
+            alert(data?.error ?? `Échec de l’envoi de « ${file.name} »`);
           }
         } catch {
-          alert(`Erreur réseau pour "${file.name}".`);
+          alert(`Échec réseau pour « ${file.name} ». Réessayez.`);
         }
       }
       if (uploaded.length > 0) {
         setAttachments((prev) => [...prev, ...uploaded]);
       }
+      return uploaded;
     } finally {
       setUploadingAttach(false);
+      setUploadProgress(null);
     }
   }
 
@@ -898,23 +962,26 @@ export function MessagerieMissionsView({
 
   async function handleReplyDirect(e: React.FormEvent) {
     e.preventDefault();
-    const content = replyDirectContent.trim();
+    await sendDirectReply(replyDirectContent.trim(), replyAttachments);
+  }
+
+  async function sendDirectReply(content: string, attachments: AttachmentItem[]) {
     const hasContent = content.length > 0;
-    const hasAttachments = replyAttachments.length > 0;
+    const hasAttachments = attachments.length > 0;
     if ((!hasContent && !hasAttachments) || !selectedDirectContactId || sendingReply) return;
+    if (sendLockRef.current) return;
+    sendLockRef.current = true;
 
     const tempId = `temp-d-${Date.now()}`;
+    const preview =
+      formatMediaPreview(content, attachments) || content || "Pièce jointe";
     const optimistic: DirectMessageItem = {
       id: tempId,
-      content:
-        content ||
-        (replyAttachments.length === 1
-          ? replyAttachments[0]!.name
-          : `${replyAttachments.length} fichiers`),
+      content: preview,
       read: false,
       senderId: sessionUserId,
       receiverId: selectedDirectContactId,
-      attachmentsJson: hasAttachments ? replyAttachments : null,
+      attachmentsJson: hasAttachments ? attachments : null,
       createdAt: new Date().toISOString(),
       sender: { id: sessionUserId, name: "Vous" },
       receiver: {
@@ -925,7 +992,6 @@ export function MessagerieMissionsView({
 
     setSendingReply(true);
     setReplyDirectContent("");
-    const savedAttachments = replyAttachments;
     setReplyAttachments([]);
     setDirectThreadMessages((prev) => [...prev, optimistic]);
     setDirectMessages((prev) => [optimistic, ...prev]);
@@ -938,7 +1004,7 @@ export function MessagerieMissionsView({
         body: JSON.stringify({
           content: content || "",
           receiverId: selectedDirectContactId,
-          attachments: hasAttachments ? savedAttachments : undefined,
+          attachments: hasAttachments ? attachments : undefined,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -952,16 +1018,17 @@ export function MessagerieMissionsView({
       } else {
         setDirectThreadMessages((prev) => prev.filter((m) => m.id !== tempId));
         setReplyDirectContent(content);
-        setReplyAttachments(savedAttachments);
-        alert(data?.error ?? "Erreur lors de l'envoi");
+        setReplyAttachments(attachments);
+        alert(data?.error ?? "Échec de l’envoi — réessayez");
       }
     } catch {
       setDirectThreadMessages((prev) => prev.filter((m) => m.id !== tempId));
       setReplyDirectContent(content);
-      setReplyAttachments(savedAttachments);
+      setReplyAttachments(attachments);
       alert("Erreur réseau — réessayez");
     } finally {
       setSendingReply(false);
+      sendLockRef.current = false;
     }
   }
 
@@ -1273,7 +1340,12 @@ export function MessagerieMissionsView({
                         </div>
                         <p className="mt-0.5 truncate text-[13px] text-[#667781]">
                           {conv.lastMessage
-                            ? `${conv.lastMessage.sender.id === sessionUserId ? "Vous : " : ""}${conv.lastMessage.content.slice(0, 50)}${conv.lastMessage.content.length > 50 ? "…" : ""}`
+                            ? `${conv.lastMessage.sender.id === sessionUserId ? "Vous : " : ""}${formatMediaPreview(
+                                conv.lastMessage.content,
+                                Array.isArray(conv.lastMessage.attachmentsJson)
+                                  ? (conv.lastMessage.attachmentsJson as MsgAttachment[])
+                                  : null,
+                              )}`
                             : "Appuyez pour discuter"}
                         </p>
                         {conv.unread > 0 && (
@@ -1348,15 +1420,45 @@ export function MessagerieMissionsView({
                               {m.content && <p className="whitespace-pre-wrap break-words text-[14.2px]">{m.content}</p>}
                               {Array.isArray(m.attachmentsJson) && m.attachmentsJson.length > 0 && (
                                 <div className="mt-2 space-y-1">
-                                  {m.attachmentsJson.map((a, i) => (
-                                    <SignedFileLink
-                                      key={i}
-                                      url={a.fileUrl}
-                                      className="flex items-center gap-2 rounded bg-black/5 px-2 py-1 text-xs text-[#111b21]"
-                                    >
-                                      📄 {a.name}
-                                    </SignedFileLink>
-                                  ))}
+                                  {(m.attachmentsJson as MsgAttachment[])
+                                    .filter(isAudioAttachment)
+                                    .map((a, i) => (
+                                      <AudioMessagePlayer
+                                        key={`da-${i}`}
+                                        src={a.fileUrl}
+                                        durationSec={a.durationSec}
+                                      />
+                                    ))}
+                                  {(m.attachmentsJson as MsgAttachment[])
+                                    .filter(isImageAttachment)
+                                    .map((a, i) => (
+                                      <a
+                                        key={`di-${i}`}
+                                        href={a.fileUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="block"
+                                      >
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
+                                          src={a.fileUrl}
+                                          alt={a.name}
+                                          loading="lazy"
+                                          className="max-h-56 max-w-full rounded-lg object-cover"
+                                        />
+                                      </a>
+                                    ))}
+                                  {(m.attachmentsJson as MsgAttachment[])
+                                    .filter((a) => !isAudioAttachment(a) && !isImageAttachment(a))
+                                    .map((a, i) => (
+                                      <SignedFileLink
+                                        key={`df-${i}`}
+                                        url={a.fileUrl}
+                                        className="flex items-center gap-2 rounded bg-black/5 px-2 py-1 text-xs text-[#111b21]"
+                                      >
+                                        📄 {a.name}
+                                      </SignedFileLink>
+                                    ))}
                                 </div>
                               )}
                               <p className="mt-0.5 flex justify-end gap-1 text-[11px] text-[#667781]">
@@ -1368,6 +1470,12 @@ export function MessagerieMissionsView({
                               messageId={m.id}
                               messageKind="DIRECT"
                               content={m.content || ""}
+                              hasMedia={
+                                Array.isArray(m.attachmentsJson) &&
+                                (m.attachmentsJson as MsgAttachment[]).some(
+                                  (a) => isAudioAttachment(a) || isImageAttachment(a),
+                                )
+                              }
                               isMe={isMe}
                               agents={agents}
                             />
@@ -1378,35 +1486,178 @@ export function MessagerieMissionsView({
                   </div>
                 </div>
                 <div className="z-20 shrink-0 border-t border-[#d1d7db] bg-[#f0f2f5] px-3 py-2.5">
-                  <form onSubmit={handleReplyDirect} className="space-y-2">
-                    <input
-                      id={replyFileId}
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.docx,.xlsx,.xls,.csv,.txt,.doc"
-                      className="sr-only"
-                      multiple
-                      onChange={(e) => handleFileUpload(e, setReplyAttachments)}
-                    />
+                  <p className="mb-1.5 px-1 text-[11px] font-semibold text-violet-800">
+                    🔒 Message interne
+                  </p>
+                  <input
+                    id={replyCameraId}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="sr-only"
+                    onChange={(e) => {
+                      const files = e.target.files;
+                      if (!files?.length) return;
+                      setPhotoPreview({ files: Array.from(files).slice(0, 6), comment: "" });
+                      setDirectAttachMenuOpen(false);
+                      e.target.value = "";
+                    }}
+                  />
+                  <input
+                    id={replyPhotoId}
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    multiple
+                    onChange={(e) => {
+                      const files = e.target.files;
+                      if (!files?.length) return;
+                      setPhotoPreview({ files: Array.from(files).slice(0, 6), comment: "" });
+                      setDirectAttachMenuOpen(false);
+                      e.target.value = "";
+                    }}
+                  />
+                  <input
+                    id={replyDocId}
+                    type="file"
+                    accept=".pdf,.docx,.xlsx,.xls,.csv,.txt,.doc"
+                    className="sr-only"
+                    multiple
+                    onChange={(e) => {
+                      if (e.target.files?.length) {
+                        void uploadFiles(e.target.files, setReplyAttachments);
+                      }
+                      setDirectAttachMenuOpen(false);
+                      e.target.value = "";
+                    }}
+                  />
+                  {uploadProgress ? (
+                    <p className="mb-1.5 px-1 text-xs font-semibold text-[#008069]">{uploadProgress}</p>
+                  ) : null}
+                  {voiceOpen && filter === "messages-directs" ? (
+                    <div className="mb-2">
+                      <VoiceRecorderPanel
+                        sending={uploadingAttach || sendingReply}
+                        onCancel={() => setVoiceOpen(false)}
+                        onSend={async (file, durationSec) => {
+                          const uploaded = await uploadFiles([file], setReplyAttachments, {
+                            durationSec,
+                          });
+                          setVoiceOpen(false);
+                          if (uploaded.length) {
+                            await sendDirectReply("", uploaded);
+                          }
+                        }}
+                      />
+                    </div>
+                  ) : null}
+                  {photoPreview && filter === "messages-directs" ? (
+                    <div className="mb-2 rounded-2xl border border-[#d1d7db] bg-white p-3 shadow-sm">
+                      <p className="mb-2 text-sm font-semibold text-[#111b21]">
+                        Aperçu · {photoPreview.files.length} photo
+                        {photoPreview.files.length > 1 ? "s" : ""}
+                      </p>
+                      <PhotoPreviewGrid files={photoPreview.files} />
+                      <input
+                        value={photoPreview.comment}
+                        onChange={(e) =>
+                          setPhotoPreview((p) => (p ? { ...p, comment: e.target.value } : p))
+                        }
+                        placeholder="Commentaire (optionnel)"
+                        className="mb-2 w-full rounded-lg border border-[#d1d7db] px-3 py-2 text-sm"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setPhotoPreview(null)}
+                          className="rounded-full border border-[#d1d7db] px-3 py-1.5 text-sm font-semibold text-[#54656f]"
+                        >
+                          Annuler
+                        </button>
+                        <button
+                          type="button"
+                          disabled={uploadingAttach || sendingReply}
+                          onClick={async () => {
+                            if (!photoPreview) return;
+                            const comment = photoPreview.comment.trim();
+                            const uploaded = await uploadFiles(
+                              photoPreview.files,
+                              setReplyAttachments,
+                            );
+                            setPhotoPreview(null);
+                            if (uploaded.length) {
+                              await sendDirectReply(comment, uploaded);
+                            }
+                          }}
+                          className="rounded-full bg-[#00a884] px-4 py-1.5 text-sm font-bold text-white disabled:opacity-50"
+                        >
+                          Envoyer
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+                  <form id="direct-reply-form" onSubmit={handleReplyDirect} className="space-y-2">
                     {replyAttachments.length > 0 && (
                       <div className="flex flex-wrap gap-2">
                         {replyAttachments.map((a, i) => (
-                          <span key={i} className="flex items-center gap-1 rounded-full bg-white px-2 py-1 text-xs text-[#111b21]">
+                          <span
+                            key={i}
+                            className="flex items-center gap-1 rounded-full bg-white px-2 py-1 text-xs text-[#111b21]"
+                          >
+                            {isAudioAttachment(a) ? "🎤" : isImageAttachment(a) ? "📷" : "📄"}{" "}
                             {a.name}
-                            <button type="button" onClick={() => setReplyAttachments((p) => p.filter((_, j) => j !== i))} className="text-[#667781] hover:text-red-600">×</button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setReplyAttachments((p) => p.filter((_, j) => j !== i))
+                              }
+                              className="text-[#667781] hover:text-red-600"
+                            >
+                              ×
+                            </button>
                           </span>
                         ))}
                       </div>
                     )}
                     <div className="flex items-end gap-2">
-                      <label
-                        htmlFor={replyFileId}
-                        className={`mb-0.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-[#54656f] hover:bg-[#e9edef] ${(uploadingAttach || sendingReply) ? "pointer-events-none opacity-50" : ""}`}
-                        title="Joindre"
-                      >
-                        <svg className="h-7 w-7" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-                        </svg>
-                      </label>
+                      <div className="relative mb-0.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setVoiceOpen(false);
+                            setDirectAttachMenuOpen((v) => !v);
+                          }}
+                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#54656f] hover:bg-[#e9edef]"
+                          title="Joindre"
+                        >
+                          <svg className="h-7 w-7" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                          </svg>
+                        </button>
+                        {directAttachMenuOpen ? (
+                          <div className="absolute bottom-12 left-0 z-30 w-48 overflow-hidden rounded-xl border border-[#d1d7db] bg-white shadow-lg">
+                            <label
+                              htmlFor={replyCameraId}
+                              className="block cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
+                            >
+                              Prendre une photo
+                            </label>
+                            <label
+                              htmlFor={replyPhotoId}
+                              className="block cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
+                            >
+                              Choisir une photo
+                            </label>
+                            <label
+                              htmlFor={replyDocId}
+                              className="block cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
+                              onClick={() => setDirectAttachMenuOpen(false)}
+                            >
+                              Document
+                            </label>
+                          </div>
+                        ) : null}
+                      </div>
                       <textarea
                         value={replyDirectContent}
                         onChange={(e) => setReplyDirectContent(e.target.value)}
@@ -1422,8 +1673,26 @@ export function MessagerieMissionsView({
                         className="min-h-[44px] max-h-32 min-w-0 flex-1 resize-none rounded-[24px] border-0 bg-white px-4 py-3 text-[15px] text-[#111b21] placeholder:text-[#667781] focus:outline-none disabled:opacity-60"
                       />
                       <button
+                        type="button"
+                        onClick={() => {
+                          setDirectAttachMenuOpen(false);
+                          setVoiceOpen((v) => !v);
+                        }}
+                        className={`mb-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${
+                          voiceOpen ? "bg-[#00a884] text-white" : "text-[#54656f] hover:bg-[#e9edef]"
+                        }`}
+                        title="Message vocal"
+                      >
+                        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z" />
+                        </svg>
+                      </button>
+                      <button
                         type="submit"
-                        disabled={sendingReply || (!replyDirectContent.trim() && replyAttachments.length === 0)}
+                        disabled={
+                          sendingReply ||
+                          (!replyDirectContent.trim() && replyAttachments.length === 0)
+                        }
                         className="mb-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#00a884] text-white hover:bg-[#008f72] disabled:opacity-40"
                       >
                         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
@@ -1833,30 +2102,54 @@ export function MessagerieMissionsView({
                                 ) : null}
                                 {atts.length > 0 ? (
                                   <div className="mt-1.5 space-y-1.5">
-                                    {atts.map((a, i) => {
-                                      const isImg = (a.mimeType || "").startsWith("image/") || /\.(jpe?g|png|gif|webp)$/i.test(a.name);
-                                      return isImg ? (
-                                        <a key={i} href={a.fileUrl} target="_blank" rel="noopener noreferrer" className="block">
+                                    {atts.filter(isAudioAttachment).map((a, i) => (
+                                      <AudioMessagePlayer
+                                        key={`a-${i}`}
+                                        src={a.fileUrl}
+                                        durationSec={a.durationSec}
+                                      />
+                                    ))}
+                                    <div
+                                      className={`grid gap-1.5 ${
+                                        atts.filter(isImageAttachment).length > 1
+                                          ? "grid-cols-2"
+                                          : "grid-cols-1"
+                                      }`}
+                                    >
+                                      {atts.filter(isImageAttachment).map((a, i) => (
+                                        <a
+                                          key={`i-${i}`}
+                                          href={a.fileUrl}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="block"
+                                        >
                                           {/* eslint-disable-next-line @next/next/no-img-element */}
                                           <img
                                             src={a.fileUrl}
                                             alt={a.name}
-                                            className="max-h-56 max-w-full rounded-lg object-cover"
+                                            loading="lazy"
+                                            className="max-h-56 w-full rounded-lg object-cover"
                                           />
                                         </a>
-                                      ) : (
+                                      ))}
+                                    </div>
+                                    {atts
+                                      .filter((a) => !isAudioAttachment(a) && !isImageAttachment(a))
+                                      .map((a, i) => (
                                         <SignedFileLink
-                                          key={i}
+                                          key={`f-${i}`}
                                           url={a.fileUrl}
                                           className="flex items-center gap-2 rounded-lg bg-black/5 px-2 py-2 text-xs text-[#111b21]"
                                         >
                                           📄 {a.name}
                                           <span className="text-[10px] text-[#667781]">
-                                            {a.fileSize ? `${Math.max(1, Math.round(a.fileSize / 1024))} Ko` : ""}
+                                            {a.fileSize
+                                              ? `${Math.max(1, Math.round(a.fileSize / 1024))} Ko`
+                                              : ""}
                                           </span>
                                         </SignedFileLink>
-                                      );
-                                    })}
+                                      ))}
                                   </div>
                                 ) : null}
                               </>
@@ -1885,6 +2178,9 @@ export function MessagerieMissionsView({
                               messageId={m.id}
                               messageKind="TASK"
                               content={m.content}
+                              hasMedia={atts.some(
+                                (a) => isAudioAttachment(a) || isImageAttachment(a),
+                              )}
                               isMe={isMe}
                               agents={agents}
                               initialBadges={m.linkedBadges}
@@ -1975,8 +2271,93 @@ export function MessagerieMissionsView({
                 accept="image/*"
                 className="sr-only"
                 multiple
-                onChange={(e) => handleFileUpload(e, setMissionAttachments)}
+                onChange={(e) => {
+                  const files = e.target.files;
+                  if (!files?.length) return;
+                  setPhotoPreview({ files: Array.from(files).slice(0, 6), comment: "" });
+                  setAttachMenuOpen(false);
+                  e.target.value = "";
+                }}
               />
+              <input
+                id="mission-camera-input"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="sr-only"
+                onChange={(e) => {
+                  const files = e.target.files;
+                  if (!files?.length) return;
+                  setPhotoPreview({ files: Array.from(files).slice(0, 6), comment: "" });
+                  setAttachMenuOpen(false);
+                  e.target.value = "";
+                }}
+              />
+              {uploadProgress ? (
+                <p className="mb-1.5 px-1 text-xs font-semibold text-[#008069]">{uploadProgress}</p>
+              ) : null}
+              {voiceOpen ? (
+                <div className="mb-2">
+                  <VoiceRecorderPanel
+                    sending={uploadingAttach || sending}
+                    onCancel={() => setVoiceOpen(false)}
+                    onSend={async (file, durationSec) => {
+                      const uploaded = await uploadFiles([file], setMissionAttachments, {
+                        durationSec,
+                      });
+                      setVoiceOpen(false);
+                      if (uploaded.length) {
+                        await sendMissionMessage("", uploaded);
+                      }
+                    }}
+                  />
+                </div>
+              ) : null}
+              {photoPreview ? (
+                <div className="mb-2 rounded-2xl border border-[#d1d7db] bg-white p-3 shadow-sm">
+                  <p className="mb-2 text-sm font-semibold text-[#111b21]">
+                    Aperçu · {photoPreview.files.length} photo
+                    {photoPreview.files.length > 1 ? "s" : ""}
+                  </p>
+                  <PhotoPreviewGrid files={photoPreview.files} />
+                  <input
+                    value={photoPreview.comment}
+                    onChange={(e) =>
+                      setPhotoPreview((p) => (p ? { ...p, comment: e.target.value } : p))
+                    }
+                    placeholder="Commentaire (optionnel)"
+                    className="mb-2 w-full rounded-lg border border-[#d1d7db] px-3 py-2 text-sm"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPhotoPreview(null)}
+                      className="rounded-full border border-[#d1d7db] px-3 py-1.5 text-sm font-semibold text-[#54656f]"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      type="button"
+                      disabled={uploadingAttach || sending}
+                      onClick={async () => {
+                        if (!photoPreview) return;
+                        const comment = photoPreview.comment.trim();
+                        const uploaded = await uploadFiles(
+                          photoPreview.files,
+                          setMissionAttachments,
+                        );
+                        setPhotoPreview(null);
+                        if (uploaded.length) {
+                          await sendMissionMessage(comment, uploaded);
+                        }
+                      }}
+                      className="rounded-full bg-[#00a884] px-4 py-1.5 text-sm font-bold text-white disabled:opacity-50"
+                    >
+                      Envoyer
+                    </button>
+                  </div>
+                </div>
+              ) : null}
               {missionAttachments.length > 0 && (
                 <div className="mb-2 flex flex-wrap gap-2 px-1">
                   {missionAttachments.map((a, i) => (
@@ -1984,7 +2365,7 @@ export function MessagerieMissionsView({
                       key={i}
                       className="flex items-center gap-1 rounded-full bg-white px-2 py-1 text-xs text-[#111b21] shadow-sm"
                     >
-                      {(a.mimeType || "").startsWith("image/") ? "🖼️" : "📄"} {a.name}
+                      {isAudioAttachment(a) ? "🎤" : isImageAttachment(a) ? "🖼️" : "📄"} {a.name}
                       <button
                         type="button"
                         onClick={() => setMissionAttachments((p) => p.filter((_, j) => j !== i))}
@@ -1996,11 +2377,14 @@ export function MessagerieMissionsView({
                   ))}
                 </div>
               )}
-              <form onSubmit={handleSend} className="flex items-end gap-2">
+              <form id="mission-send-form" onSubmit={handleSend} className="flex items-end gap-2">
                 <div className="relative mb-0.5">
                   <button
                     type="button"
-                    onClick={() => setAttachMenuOpen((v) => !v)}
+                    onClick={() => {
+                      setVoiceOpen(false);
+                      setAttachMenuOpen((v) => !v);
+                    }}
                     className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#54656f] hover:bg-[#e9edef]"
                     title="Joindre"
                   >
@@ -2009,13 +2393,18 @@ export function MessagerieMissionsView({
                     </svg>
                   </button>
                   {attachMenuOpen ? (
-                    <div className="absolute bottom-12 left-0 z-30 w-40 overflow-hidden rounded-xl border border-[#d1d7db] bg-white shadow-lg">
+                    <div className="absolute bottom-12 left-0 z-30 w-48 overflow-hidden rounded-xl border border-[#d1d7db] bg-white shadow-lg">
+                      <label
+                        htmlFor="mission-camera-input"
+                        className="block cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
+                      >
+                        Prendre une photo
+                      </label>
                       <label
                         htmlFor={missionPhotoId}
                         className="block cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
-                        onClick={() => setAttachMenuOpen(false)}
                       >
-                        Photo
+                        Choisir une photo
                       </label>
                       <label
                         htmlFor={missionFileId}
@@ -2023,13 +2412,6 @@ export function MessagerieMissionsView({
                         onClick={() => setAttachMenuOpen(false)}
                       >
                         Document
-                      </label>
-                      <label
-                        htmlFor={missionPhotoId}
-                        className="block cursor-pointer px-3 py-2.5 text-sm text-[#111b21] hover:bg-[#f5f6f6]"
-                        onClick={() => setAttachMenuOpen(false)}
-                      >
-                        Image
                       </label>
                     </div>
                   ) : null}
@@ -2054,9 +2436,14 @@ export function MessagerieMissionsView({
                 </div>
                 <button
                   type="button"
-                  disabled
-                  title="Vocal — prévu MESSAGERIE-V2C"
-                  className="mb-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#c5c9cc]"
+                  onClick={() => {
+                    setAttachMenuOpen(false);
+                    setVoiceOpen((v) => !v);
+                  }}
+                  className={`mb-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${
+                    voiceOpen ? "bg-[#00a884] text-white" : "text-[#54656f] hover:bg-[#e9edef]"
+                  }`}
+                  title="Message vocal"
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z" />

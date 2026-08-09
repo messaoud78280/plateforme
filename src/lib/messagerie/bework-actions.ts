@@ -14,7 +14,8 @@ export type BeworkActionId =
   | "facturer"
   | "rappel"
   | "assigner"
-  | "fiche";
+  | "fiche"
+  | "reserve";
 
 export type BeworkActionSuggestion = {
   id: BeworkActionId;
@@ -25,6 +26,14 @@ export type BeworkActionSuggestion = {
 };
 
 const RULES: { re: RegExp; actions: BeworkActionSuggestion[] }[] = [
+  {
+    re: /\b(r[ée]serve|d[ée]faut|reprise|non[- ]conforme|malfa[çc]on)\b/i,
+    actions: [
+      { id: "reserve", label: "Créer une réserve", preferred: true },
+      { id: "tache", label: "Créer une tâche" },
+      { id: "fiche", label: "Ajouter à une fiche" },
+    ],
+  },
   {
     re: /\b(livr(e|aison|er)|rouleaux?|matériaux|materiaux)\b/i,
     actions: [
@@ -68,6 +77,7 @@ const RULES: { re: RegExp; actions: BeworkActionSuggestion[] }[] = [
 ];
 
 const DEFAULT_ACTIONS: BeworkActionSuggestion[] = [
+  { id: "reserve", label: "Créer une réserve" },
   { id: "agenda", label: "Ajouter à l’agenda", agendaType: "AUTRE" },
   { id: "tache", label: "Créer une tâche" },
   { id: "intervention", label: "Programmer une intervention", agendaType: "INTERVENTION" },
@@ -78,6 +88,15 @@ const DEFAULT_ACTIONS: BeworkActionSuggestion[] = [
   { id: "rappel", label: "Me rappeler ce message" },
   { id: "assigner", label: "Assigner à…" },
   { id: "facturer", label: "À facturer", followUpStatus: "A_FACTURER" },
+];
+
+/** Actions toujours proposées pour un média (photo / vocal) sans IA. */
+export const MEDIA_DEFAULT_ACTIONS: BeworkActionSuggestion[] = [
+  { id: "reserve", label: "Créer une réserve", preferred: true },
+  { id: "tache", label: "Créer une tâche", preferred: true },
+  { id: "fiche", label: "Ajouter à une fiche" },
+  { id: "rappel", label: "Créer un rappel" },
+  { id: "agenda", label: "Ajouter à l’agenda", agendaType: "AUTRE" },
 ];
 
 /** Parse dates FR simples dans le message (demain, mardi, 11 août, 7h30…). */
@@ -143,7 +162,26 @@ export function parseMessageSchedule(content: string, now = new Date()): {
   return { title, startAt, endAt, allDay };
 }
 
-export function suggestBeworkActions(content: string): BeworkActionSuggestion[] {
+export function suggestBeworkActions(
+  content: string,
+  opts?: { media?: boolean },
+): BeworkActionSuggestion[] {
+  if (opts?.media) {
+    const seen = new Set<BeworkActionId>();
+    const list: BeworkActionSuggestion[] = [];
+    for (const a of MEDIA_DEFAULT_ACTIONS) {
+      if (seen.has(a.id)) continue;
+      seen.add(a.id);
+      list.push(a);
+    }
+    for (const a of DEFAULT_ACTIONS) {
+      if (seen.has(a.id)) continue;
+      seen.add(a.id);
+      list.push(a);
+    }
+    return list;
+  }
+
   const preferred: BeworkActionSuggestion[] = [];
   const seen = new Set<BeworkActionId>();
 
@@ -160,12 +198,19 @@ export function suggestBeworkActions(content: string): BeworkActionSuggestion[] 
   return [...preferred, ...rest];
 }
 
-export function messagerieDeepLink(kind: string, messageId: string, ctx?: { taskId?: string | null }) {
+export function messagerieDeepLink(
+  kind: string,
+  messageId: string,
+  ctx?: { taskId?: string | null; projectId?: string | null },
+) {
   if (kind === "TASK" && ctx?.taskId) {
     return `/dashboard/messagerie?task=${ctx.taskId}&messageId=${messageId}`;
   }
   if (kind === "DIRECT") {
     return `/dashboard/messagerie?tab=messages-directs&messageId=${messageId}`;
+  }
+  if (kind === "PROJECT" && ctx?.projectId) {
+    return `/dashboard/messagerie?view=chantiers&project=${ctx.projectId}&messageId=${messageId}`;
   }
   return `/dashboard/messagerie?messageId=${messageId}`;
 }

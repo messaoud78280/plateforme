@@ -1,21 +1,22 @@
 /**
- * Audit vocal Messagerie — MESSAGERIE-V2C livré.
+ * Audit vocal Messagerie — MESSAGERIE-V2C + V2C.1 hardening.
  *
  * Implémenté :
- * - MediaRecorder (webm/opus, mp4/Safari)
- * - Upload via /api/messages/direct/upload (audio autorisé)
- * - durationSec dans attachmentsJson (pas de migration)
+ * - MediaRecorder (isTypeSupported : webm/opus → mp4 Safari)
+ * - Upload bucket privé `messagerie` + refs storage://
+ * - Signed URL après ACL conversation (/api/messagerie/media)
  * - Player compact + un seul audio à la fois
- * - Permissions micro (messages FR)
+ * - Limite 120 s + message FR si micro refusé
  *
- * Hors scope (dette V2D / plus tard) :
- * - Transcription IA
- * - Résumé / traduction
+ * Hors scope (dette V2D) :
+ * - Transcription IA / résumé
  * - Appels audio/vidéo
- * - Messagerie offline complète
+ * - Offline complet
+ * - Purge URLs publiques legacy dm/ dans bucket documents
  */
 export const MESSAGERIE_VOICE_AUDIT = {
-  status: "implemented_v2c" as const,
+  status: "implemented_v2c1" as const,
   plannedNext: "MESSAGERIE-V2D (transcription optionnelle)",
   composerMic: "enabled",
+  mediaAcl: "signed_url_after_conversation_acl",
 };

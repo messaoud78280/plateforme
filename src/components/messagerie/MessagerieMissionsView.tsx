@@ -6,7 +6,6 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { DeleteTaskButton } from "@/components/tasks/DeleteTaskButton";
 import { documentDownloadHref } from "@/lib/documents/download-url";
-import { SignedFileLink } from "@/components/files/SignedFileLink";
 import { badgeIcon } from "@/lib/messagerie/message-links";
 import { WA_CHAT_BG, waBubbleTime, waListTime } from "@/components/messagerie/wa-theme";
 import { subscribeMessagerieEvents } from "@/lib/perf/messagerie-unread-bus";
@@ -18,8 +17,9 @@ import {
   type MsgAttachment,
 } from "@/lib/messagerie/media-preview";
 import { VoiceRecorderPanel } from "@/components/messagerie/VoiceRecorderPanel";
-import { AudioMessagePlayer } from "@/components/messagerie/AudioMessagePlayer";
 import { PhotoPreviewGrid } from "@/components/messagerie/PhotoPreviewGrid";
+import { MessagerieAttachmentsBlock } from "@/components/messagerie/MessagerieSecureMedia";
+import { MESSAGERIE_MEDIA_MAX_BYTES } from "@/lib/messagerie/media-storage";
 
 const MessageBeworkActions = dynamic(
   () =>
@@ -876,7 +876,7 @@ export function MessagerieMissionsView({
       } else {
         setMessages((prev) =>
           prev.map((m) =>
-            m.id === tempId ? { ...m, kind: "failed", content: `${m.content} — Échec` } : m,
+            m.id === tempId ? { ...m, kind: "failed" } : m,
           ),
         );
         setSendContent(content);
@@ -886,7 +886,7 @@ export function MessagerieMissionsView({
     } catch {
       setMessages((prev) =>
         prev.map((m) =>
-          m.id === tempId ? { ...m, kind: "failed", content: `${m.content} — Échec` } : m,
+          m.id === tempId ? { ...m, kind: "failed" } : m,
         ),
       );
       setSendContent(content);
@@ -915,6 +915,12 @@ export function MessagerieMissionsView({
         if (!(raw instanceof File) || !raw.size) continue;
         setUploadProgress(`Envoi… ${i}/${list.length}`);
         let file = raw;
+        if (file.size > MESSAGERIE_MEDIA_MAX_BYTES) {
+          alert(
+            `« ${file.name} » dépasse 15 Mo. Compressez la photo ou raccourcissez le vocal, puis réessayez.`,
+          );
+          continue;
+        }
         if (file.type.startsWith("image/")) {
           file = await compressImageForMessagerie(file);
         }
@@ -934,6 +940,8 @@ export function MessagerieMissionsView({
               mimeType: data.mimeType ?? file.type,
               kind: data.kind,
               durationSec: data.durationSec ?? opts?.durationSec,
+              bucket: data.bucket,
+              storagePath: data.storagePath,
             });
           } else {
             alert(data?.error ?? `Échec de l’envoi de « ${file.name} »`);
@@ -1418,49 +1426,14 @@ export function MessagerieMissionsView({
                                 <p className="text-[12px] font-semibold text-[#00a884]">{m.sender.name}</p>
                               ) : null}
                               {m.content && <p className="whitespace-pre-wrap break-words text-[14.2px]">{m.content}</p>}
-                              {Array.isArray(m.attachmentsJson) && m.attachmentsJson.length > 0 && (
-                                <div className="mt-2 space-y-1">
-                                  {(m.attachmentsJson as MsgAttachment[])
-                                    .filter(isAudioAttachment)
-                                    .map((a, i) => (
-                                      <AudioMessagePlayer
-                                        key={`da-${i}`}
-                                        src={a.fileUrl}
-                                        durationSec={a.durationSec}
-                                      />
-                                    ))}
-                                  {(m.attachmentsJson as MsgAttachment[])
-                                    .filter(isImageAttachment)
-                                    .map((a, i) => (
-                                      <a
-                                        key={`di-${i}`}
-                                        href={a.fileUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="block"
-                                      >
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img
-                                          src={a.fileUrl}
-                                          alt={a.name}
-                                          loading="lazy"
-                                          className="max-h-56 max-w-full rounded-lg object-cover"
-                                        />
-                                      </a>
-                                    ))}
-                                  {(m.attachmentsJson as MsgAttachment[])
-                                    .filter((a) => !isAudioAttachment(a) && !isImageAttachment(a))
-                                    .map((a, i) => (
-                                      <SignedFileLink
-                                        key={`df-${i}`}
-                                        url={a.fileUrl}
-                                        className="flex items-center gap-2 rounded bg-black/5 px-2 py-1 text-xs text-[#111b21]"
-                                      >
-                                        📄 {a.name}
-                                      </SignedFileLink>
-                                    ))}
-                                </div>
-                              )}
+                              {Array.isArray(m.attachmentsJson) && m.attachmentsJson.length > 0 ? (
+                                <MessagerieAttachmentsBlock
+                                  messageKind="DIRECT"
+                                  messageId={m.id}
+                                  attachments={m.attachmentsJson as MsgAttachment[]}
+                                  isMe={isMe}
+                                />
+                              ) : null}
                               <p className="mt-0.5 flex justify-end gap-1 text-[11px] text-[#667781]">
                                 {formatMessageTime(m.createdAt)}
                                 {isMe ? <span className="text-[#53bdeb]">✓✓</span> : null}
@@ -2101,56 +2074,12 @@ export function MessagerieMissionsView({
                                   </p>
                                 ) : null}
                                 {atts.length > 0 ? (
-                                  <div className="mt-1.5 space-y-1.5">
-                                    {atts.filter(isAudioAttachment).map((a, i) => (
-                                      <AudioMessagePlayer
-                                        key={`a-${i}`}
-                                        src={a.fileUrl}
-                                        durationSec={a.durationSec}
-                                      />
-                                    ))}
-                                    <div
-                                      className={`grid gap-1.5 ${
-                                        atts.filter(isImageAttachment).length > 1
-                                          ? "grid-cols-2"
-                                          : "grid-cols-1"
-                                      }`}
-                                    >
-                                      {atts.filter(isImageAttachment).map((a, i) => (
-                                        <a
-                                          key={`i-${i}`}
-                                          href={a.fileUrl}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="block"
-                                        >
-                                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                                          <img
-                                            src={a.fileUrl}
-                                            alt={a.name}
-                                            loading="lazy"
-                                            className="max-h-56 w-full rounded-lg object-cover"
-                                          />
-                                        </a>
-                                      ))}
-                                    </div>
-                                    {atts
-                                      .filter((a) => !isAudioAttachment(a) && !isImageAttachment(a))
-                                      .map((a, i) => (
-                                        <SignedFileLink
-                                          key={`f-${i}`}
-                                          url={a.fileUrl}
-                                          className="flex items-center gap-2 rounded-lg bg-black/5 px-2 py-2 text-xs text-[#111b21]"
-                                        >
-                                          📄 {a.name}
-                                          <span className="text-[10px] text-[#667781]">
-                                            {a.fileSize
-                                              ? `${Math.max(1, Math.round(a.fileSize / 1024))} Ko`
-                                              : ""}
-                                          </span>
-                                        </SignedFileLink>
-                                      ))}
-                                  </div>
+                                  <MessagerieAttachmentsBlock
+                                    messageKind="TASK"
+                                    messageId={m.id}
+                                    attachments={atts}
+                                    isMe={isMe}
+                                  />
                                 ) : null}
                               </>
                             )}
@@ -2159,12 +2088,31 @@ export function MessagerieMissionsView({
                               {isMe && !isSystem ? (
                                 m.kind === "pending" ? (
                                   <span className="text-[#8696a0]" title="Envoi…">
-                                    …
+                                    Envoi…
                                   </span>
                                 ) : m.kind === "failed" ? (
-                                  <span className="font-medium text-red-600" title="Échec">
-                                    Échec
-                                  </span>
+                                  <button
+                                    type="button"
+                                    className="font-medium text-red-600 underline"
+                                    title="Échec — Réessayer"
+                                    onClick={() => {
+                                      const attsRetry = Array.isArray(m.attachmentsJson)
+                                        ? m.attachmentsJson
+                                        : [];
+                                      const text = (m.content || "")
+                                        .replace(/\s*—\s*Échec$/i, "")
+                                        .trim();
+                                      setMessages((prev) => prev.filter((x) => x.id !== m.id));
+                                      void sendMissionMessage(
+                                        text.startsWith("🎤") || text.startsWith("📷") || text.startsWith("📎")
+                                          ? ""
+                                          : text,
+                                        attsRetry,
+                                      );
+                                    }}
+                                  >
+                                    Échec — Réessayer
+                                  </button>
                                 ) : (
                                   <span className="text-[#53bdeb]" title="Envoyé">
                                     ✓✓

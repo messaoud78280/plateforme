@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { AudioMessagePlayer } from "@/components/messagerie/AudioMessagePlayer";
 import { VoiceRecorderPanel } from "@/components/messagerie/VoiceRecorderPanel";
 import { PhotoPreviewGrid } from "@/components/messagerie/PhotoPreviewGrid";
 import { MessageBeworkActions } from "@/components/messagerie/MessageBeworkActions";
+import { MessagerieAttachmentsBlock } from "@/components/messagerie/MessagerieSecureMedia";
 import {
   formatMediaPreview,
   isAudioAttachment,
@@ -13,8 +13,8 @@ import {
   type MsgAttachment,
 } from "@/lib/messagerie/media-preview";
 import { compressImageForMessagerie } from "@/lib/messagerie/compress-image";
+import { MESSAGERIE_MEDIA_MAX_BYTES } from "@/lib/messagerie/media-storage";
 import { subscribeMessagerieEvents } from "@/lib/perf/messagerie-unread-bus";
-import { SignedFileLink } from "@/components/files/SignedFileLink";
 import { documentDownloadHref } from "@/lib/documents/download-url";
 
 type MessageChannel = "INTERNE" | "CLIENT" | "FOURNISSEUR";
@@ -307,6 +307,12 @@ export function MessagerieView({
         if (!(raw instanceof File) || !raw.size) continue;
         setUploadProgress(`Envoi… ${i}/${list.length}`);
         let file = raw;
+        if (file.size > MESSAGERIE_MEDIA_MAX_BYTES) {
+          setError(
+            `« ${file.name} » dépasse 15 Mo. Compressez la photo ou raccourcissez le vocal, puis réessayez.`,
+          );
+          continue;
+        }
         if (file.type.startsWith("image/")) {
           file = await compressImageForMessagerie(file);
         }
@@ -324,6 +330,8 @@ export function MessagerieView({
               mimeType: data.mimeType ?? file.type,
               kind: data.kind,
               durationSec: data.durationSec ?? opts?.durationSec,
+              bucket: data.bucket,
+              storagePath: data.storagePath,
             });
           } else {
             setError(data?.error ?? `Échec de l’envoi de « ${file.name} »`);
@@ -569,53 +577,12 @@ export function MessagerieView({
                             </p>
                           ) : null}
                           {atts.length > 0 ? (
-                            <div className={`mt-2 space-y-1.5 ${isMe ? "text-white" : ""}`}>
-                              {atts.filter(isAudioAttachment).map((a, i) => (
-                                <AudioMessagePlayer
-                                  key={`a-${i}`}
-                                  src={a.fileUrl}
-                                  durationSec={a.durationSec}
-                                />
-                              ))}
-                              <div
-                                className={`grid gap-1.5 ${
-                                  atts.filter(isImageAttachment).length > 1
-                                    ? "grid-cols-2"
-                                    : "grid-cols-1"
-                                }`}
-                              >
-                                {atts.filter(isImageAttachment).map((a, i) => (
-                                  <a
-                                    key={`i-${i}`}
-                                    href={a.fileUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="block"
-                                  >
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img
-                                      src={a.fileUrl}
-                                      alt={a.name}
-                                      loading="lazy"
-                                      className="max-h-48 w-full rounded-lg object-cover"
-                                    />
-                                  </a>
-                                ))}
-                              </div>
-                              {atts
-                                .filter((a) => !isAudioAttachment(a) && !isImageAttachment(a))
-                                .map((a, i) => (
-                                  <SignedFileLink
-                                    key={`f-${i}`}
-                                    url={a.fileUrl}
-                                    className={`flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs ${
-                                      isMe ? "bg-white/15 text-white" : "bg-black/5 text-slate-800"
-                                    }`}
-                                  >
-                                    📄 {a.name}
-                                  </SignedFileLink>
-                                ))}
-                            </div>
+                            <MessagerieAttachmentsBlock
+                              messageKind="PROJECT"
+                              messageId={m.id}
+                              attachments={atts}
+                              isMe={isMe}
+                            />
                           ) : null}
                         </div>
                         <MessageBeworkActions

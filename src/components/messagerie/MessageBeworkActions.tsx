@@ -42,6 +42,7 @@ export function MessageBeworkActions({
   const [msg, setMsg] = useState<string | null>(
     initialBadges[0] ? `✓ ${initialBadges[0]}` : null,
   );
+  const [resultHref, setResultHref] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -97,6 +98,7 @@ export function MessageBeworkActions({
       setRappelOpen(false);
       setAssignOpen(false);
       setMsg(data.badge ? `✓ ${data.badge}` : "OK");
+      setResultHref(typeof data.href === "string" ? data.href : null);
       onLinked?.(data.badge || "Traité");
     } catch {
       setMsg("Erreur réseau");
@@ -128,6 +130,14 @@ export function MessageBeworkActions({
       {msg ? (
         <span className={`ml-1 text-[10px] font-semibold ${isMe ? "text-[#008069]" : "text-[#008069]"}`}>
           {msg}
+          {resultHref ? (
+            <>
+              {" · "}
+              <a href={resultHref} className="underline">
+                Voir
+              </a>
+            </>
+          ) : null}
         </span>
       ) : null}
 

@@ -1,5 +1,6 @@
 import { getServerSession } from "next-auth";
 import { redirect, notFound } from "next/navigation";
+import Link from "next/link";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { TaskDetailClient } from "@/components/tasks/TaskDetailClient";
@@ -7,6 +8,7 @@ import { BackLink } from "@/components/ui/BackLink";
 import { parseClientDeliveryJson, filterDocumentsForClient } from "@/lib/tasks/client-delivery";
 import { parseSuppliersJson } from "@/lib/demo-environment/bon-commande";
 import { isDemoEmail } from "@/lib/demo-environment/constants";
+import { messagerieDeepLink } from "@/lib/messagerie/bework-actions";
 
 export default async function TacheDetailPage({
   params,
@@ -70,6 +72,8 @@ export default async function TacheDetailPage({
           creditsDeductedAt: true,
           clientDeliveryJson: true,
           organizationId: true,
+          sourceMessageKind: true,
+          sourceMessageId: true,
         },
       });
       if (extra) Object.assign(task, extra);
@@ -155,10 +159,39 @@ export default async function TacheDetailPage({
   }
 
   const canEdit = isAgence || isAgent || task.clientId === session.user.id;
+  const sourceKind = (task as { sourceMessageKind?: string | null }).sourceMessageKind;
+  const sourceId = (task as { sourceMessageId?: string | null }).sourceMessageId;
+  const sourceHref =
+    sourceKind && sourceId
+      ? messagerieDeepLink(sourceKind, sourceId, {
+          taskId: sourceKind === "TASK" ? undefined : undefined,
+          projectId: task.project?.id ?? null,
+        })
+      : null;
+  // Pour TASK source, résoudre le taskId du message source si besoin
+  let sourceMessageHref = sourceHref;
+  if (sourceKind === "TASK" && sourceId) {
+    const srcMsg = await prisma.taskMessage.findUnique({
+      where: { id: sourceId },
+      select: { taskId: true },
+    });
+    if (srcMsg?.taskId) {
+      sourceMessageHref = messagerieDeepLink("TASK", sourceId, { taskId: srcMsg.taskId });
+    }
+  }
 
   return (
     <div className="space-y-6">
       <BackLink href="/dashboard/taches">Retour aux missions</BackLink>
+
+      {sourceMessageHref ? (
+        <div className="rounded-xl border border-[#cfe8de] bg-[#e7f8f3] px-4 py-3 text-sm text-[#0b3d32]">
+          <p className="font-semibold">Source : Message Messagerie</p>
+          <Link href={sourceMessageHref} className="mt-1 inline-block font-medium text-[#008069] underline">
+            Voir le message
+          </Link>
+        </div>
+      ) : null}
 
       <TaskDetailClient
         sessionUserId={session.user.id}

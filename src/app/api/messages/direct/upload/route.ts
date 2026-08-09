@@ -2,8 +2,12 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createServiceRoleClient } from "@/lib/supabase";
+import {
+  MESSAGERIE_MEDIA_BUCKET,
+  MESSAGERIE_MEDIA_MAX_BYTES,
+  buildMessagerieStorageRef,
+} from "@/lib/messagerie/media-storage";
 
-const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15 MB (audio + photos chantier)
 const ALLOWED_TYPES = [
   "application/pdf",
   "image/jpeg",
@@ -28,7 +32,7 @@ const ALLOWED_TYPES = [
   "audio/mp3",
 ];
 
-/** POST /api/messages/direct/upload — Upload d'une pièce jointe pour message direct */
+/** POST /api/messages/direct/upload — Upload PJ messagerie → bucket privé. */
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -36,7 +40,6 @@ export async function POST(request: Request) {
   }
 
   const role = session.user.role;
-  // Messagerie WhatsApp : client, agent et gérant peuvent joindre photos / PDF
   const allowed =
     role === "MANAGER" || role === "AGENT" || role === "AGENCE" || role === "CLIENT";
   if (!allowed) {
@@ -46,8 +49,11 @@ export async function POST(request: Request) {
   const supabase = createServiceRoleClient();
   if (!supabase) {
     return NextResponse.json(
-      { error: "Stockage non configuré. Ajoutez SUPABASE_SERVICE_ROLE_KEY dans .env.local (Supabase → Settings → API → service_role)" },
-      { status: 503 }
+      {
+        error:
+          "Stockage non configuré. Ajoutez SUPABASE_SERVICE_ROLE_KEY dans .env.local (Supabase → Settings → API → service_role)",
+      },
+      { status: 503 },
     );
   }
 
@@ -63,8 +69,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Aucun fichier envoyé" }, { status: 400 });
   }
 
-  if (file.size > MAX_FILE_SIZE) {
-    return NextResponse.json({ error: "Fichier trop volumineux (max 15 Mo)" }, { status: 400 });
+  if (file.size > MESSAGERIE_MEDIA_MAX_BYTES) {
+    return NextResponse.json(
+      {
+        error:
+          "Ce fichier dépasse 15 Mo. Compressez la photo ou raccourcissez le vocal, puis réessayez.",
+      },
+      { status: 400 },
+    );
   }
 
   const mime = file.type || "application/octet-stream";
@@ -91,13 +103,11 @@ export async function POST(request: Request) {
     "mp4",
   ];
   const mimeOk =
-    ALLOWED_TYPES.includes(mime) ||
-    mime.startsWith("audio/") ||
-    mime.startsWith("image/");
+    ALLOWED_TYPES.includes(mime) || mime.startsWith("audio/") || mime.startsWith("image/");
   const extOk = ext && allowedExts.includes(ext);
   if (!mimeOk && !extOk) {
     return NextResponse.json(
-      { error: "Type non accepté (photo, vocal, PDF, documents)" },
+      { error: "Type non accepté (photo, vocal, PDF, documents)." },
       { status: 400 },
     );
   }
@@ -108,21 +118,24 @@ export async function POST(request: Request) {
       ? Math.max(0, Math.round(Number(durationRaw)))
       : undefined;
 
-  const bucket = "documents";
-  const storagePath = `dm/${session.user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+  const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+  const storagePath = `v2c/${session.user.id}/${Date.now()}-${safeName}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
-  const { error: uploadError } = await supabase.storage.from(bucket).upload(storagePath, buffer, {
-    contentType: mime,
-    upsert: false,
-  });
+  const { error: uploadError } = await supabase.storage
+    .from(MESSAGERIE_MEDIA_BUCKET)
+    .upload(storagePath, buffer, {
+      contentType: mime,
+      upsert: false,
+    });
 
   if (uploadError) {
-    return NextResponse.json({ error: `Erreur upload : ${uploadError.message}` }, { status: 500 });
+    console.error("[messagerie upload]", uploadError.message);
+    return NextResponse.json(
+      { error: "Échec de l’envoi du fichier. Vérifiez la connexion et réessayez." },
+      { status: 500 },
+    );
   }
-
-  const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(storagePath);
-  const fileUrl = urlData.publicUrl;
 
   const kind = mime.startsWith("audio/")
     ? "audio"
@@ -130,14 +143,16 @@ export async function POST(request: Request) {
       ? "image"
       : "file";
 
+  const fileUrl = buildMessagerieStorageRef(MESSAGERIE_MEDIA_BUCKET, storagePath);
+
   return NextResponse.json({
     name: file.name,
     fileUrl,
     fileSize: file.size,
     mimeType: mime,
     kind,
-    ...(durationSec != null && Number.isFinite(durationSec)
-      ? { durationSec }
-      : {}),
+    bucket: MESSAGERIE_MEDIA_BUCKET,
+    storagePath,
+    ...(durationSec != null && Number.isFinite(durationSec) ? { durationSec } : {}),
   });
 }

@@ -4,11 +4,14 @@
 
 export type MsgAttachment = {
   name: string;
+  /** Référence opaque `storage://bucket/path` ou URL legacy. */
   fileUrl: string;
   fileSize: number;
   mimeType?: string;
   durationSec?: number;
   kind?: "image" | "audio" | "file";
+  bucket?: string;
+  storagePath?: string;
 };
 
 export function isAudioAttachment(a: MsgAttachment): boolean {

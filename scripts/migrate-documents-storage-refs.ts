@@ -443,6 +443,9 @@ async function main() {
   console.log(`Orphelins (fichier absent): ${totals.orphans}`);
   console.log(`Erreurs: ${totals.errors}`);
   console.log(`Copies physiques: 0 (référence seule)`);
+  console.log(
+    `[documents-migrate] scanned=${analyzed} already_storage_ref=${totals.A_STORAGE_REF} converted=${totals.converted} external_skipped=${totals.C_EXTERNAL} missing=${totals.orphans} errors=${totals.errors}`,
+  );
 
   if (orphans.length) {
     console.log("\n=== ORPHELINS (enregistrements conservés) ===");

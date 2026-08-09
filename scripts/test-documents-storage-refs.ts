@@ -4,6 +4,7 @@
 import assert from "node:assert/strict";
 import {
   classifyDocumentsRef,
+  normalizeIncomingDocumentsRef,
   toDocumentsStorageRef,
 } from "../src/lib/storage/documents-ref-migrate";
 import { extractStoragePathFromUrl, buildDocumentsStorageRef } from "../src/lib/storage/supabase-object";
@@ -46,6 +47,12 @@ function test() {
   assert.equal(path, "chantiers/abc/plan.pdf");
   const ref = buildDocumentsStorageRef(path!);
   assert.equal(extractStoragePathFromUrl(ref, "documents"), path);
+
+  assert.equal(normalizeIncomingDocumentsRef(pub), "storage://documents/chantiers/abc/plan.pdf");
+  assert.equal(
+    normalizeIncomingDocumentsRef("/demo-assets/placeholder-document.pdf"),
+    "/demo-assets/placeholder-document.pdf",
+  );
 
   console.log("✓ test-documents-storage-refs OK");
 }

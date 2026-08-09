@@ -22,6 +22,7 @@ import {
   mapPilotageToChantierStatus,
 } from "@/lib/chantier-lifecycle";
 import { refreshPilotageProgress } from "./refresh-progress";
+import { normalizeIncomingDocumentsRef } from "@/lib/storage/documents-ref-migrate";
 
 function revalidatePilotage(id?: string) {
   revalidatePath(PILOTAGE_LIST_PATH);
@@ -414,7 +415,7 @@ export async function createMarketDocument(
       emitter: String(formData.get("emitter") ?? "").trim() || null,
       status: String(formData.get("status") ?? "Reçu").trim() || "Reçu",
       comment: String(formData.get("comment") ?? "").trim() || null,
-      fileUrl: String(formData.get("fileUrl") ?? "").trim() || null,
+      fileUrl: normalizeIncomingDocumentsRef(String(formData.get("fileUrl") ?? "")) || null,
       uploadedById: session.user.id,
       isCurrent: true,
     },

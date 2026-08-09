@@ -11,6 +11,7 @@ import { PILOTAGE_LIST_PATH } from "@/lib/pilotage/constants";
 import { logPilotageActivity } from "@/lib/pilotage/history";
 import { HANDOVER_CHECKLIST_DEFAULT } from "@/lib/pilotage/methodLibrary";
 import { refreshPilotageProgress } from "./refresh-progress";
+import { normalizeIncomingDocumentsRef } from "@/lib/storage/documents-ref-migrate";
 
 function revalidatePilotage(id: string) {
   revalidatePath(PILOTAGE_LIST_PATH);
@@ -503,7 +504,7 @@ export async function createMeetingPreparation(formData: FormData) {
 
 export async function createPilotagePhoto(formData: FormData) {
   const pilotageId = String(formData.get("pilotageId") ?? "").trim();
-  const fileUrl = String(formData.get("fileUrl") ?? "").trim();
+  const fileUrl = normalizeIncomingDocumentsRef(String(formData.get("fileUrl") ?? ""));
   if (!pilotageId || !fileUrl) return { ok: false as const, error: "URL photo et chantier obligatoires." };
   const g = await guardEdit(pilotageId);
   if (!g.ok || !g.session) return { ok: false as const, error: g.error };

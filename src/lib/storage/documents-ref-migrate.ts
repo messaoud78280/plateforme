@@ -99,3 +99,16 @@ export function toDocumentsStorageRef(raw: string | null | undefined): string | 
   }
   return null;
 }
+
+/**
+ * Normalise une valeur saisie (formulaire Pilotage, etc.) avant persistance.
+ * - URL publique / path nu documents → storage://documents/...
+ * - storage://documents|messagerie déjà OK → inchangé
+ * - externe / demo-assets → inchangé (pas de bypass ACL automatique)
+ */
+export function normalizeIncomingDocumentsRef(raw: string | null | undefined): string | null {
+  const original = String(raw ?? "").trim();
+  if (!original) return null;
+  const converted = toDocumentsStorageRef(original);
+  return converted ?? original;
+}

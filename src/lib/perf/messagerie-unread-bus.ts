@@ -146,6 +146,11 @@ export function attachMessagerieRealtime(userId: string) {
   // Une seule subscription logique / user (même si Broadcast pas encore SUBSCRIBED)
   if (subscribedUserId === userId && supabaseChannel) return;
 
+  // Changement de persona : reset cache unread pour éviter flash Karim → Thomas
+  if (subscribedUserId && subscribedUserId !== userId) {
+    resetMessagerieUnreadCache();
+  }
+
   const sb = createBrowserClient();
   if (!sb) {
     broadcastReady = false;
@@ -181,6 +186,36 @@ export function attachMessagerieRealtime(userId: string) {
 
   // En attendant SUBSCRIBED, SSE peut resynchroniser le badge
   ensureTransport();
+  void getMessagerieUnread(true);
+}
+
+/** Remet le compteur à 0 avant rechargement (switch persona démo). */
+export function resetMessagerieUnreadCache() {
+  lastTotal = 0;
+  lastFetchAt = 0;
+  inflight = null;
+  seenEventKeys.clear();
+  for (const l of unreadListeners) l(0);
+}
+
+/**
+ * Switch « Voir comme » : détache channel + cache, puis le bootstrap
+ * ré-attache avec le nouvel userId après refresh RSC.
+ */
+export function resetMessagerieUnreadForPersonaSwitch() {
+  stopSse();
+  if (pollTimer != null) {
+    window.clearInterval(pollTimer);
+    pollTimer = null;
+  }
+  if (supabaseChannel) {
+    const sb = createBrowserClient();
+    if (sb) void sb.removeChannel(supabaseChannel);
+    supabaseChannel = null;
+  }
+  subscribedUserId = null;
+  broadcastReady = false;
+  resetMessagerieUnreadCache();
 }
 
 export function subscribeMessagerieUnread(listener: UnreadListener): () => void {

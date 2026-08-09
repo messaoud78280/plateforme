@@ -28,40 +28,13 @@ import {
   isExternalPortalUser,
   personaHomeLabel,
 } from "@/lib/equipe-acces/nav-by-persona";
-import { PERMISSION_PROFILE_LABELS, PERSON_TYPE_LABELS, type PermissionProfileKey, type PersonType } from "@/lib/equipe-acces/types";
+import { displayUserRoleLabel } from "@/lib/equipe-acces/display-role";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   robots: SEO_NOINDEX_ROBOTS,
 };
-
-function roleLabel(
-  role?: string | null,
-  isDemo?: boolean,
-  personType?: string | null,
-  permissionProfile?: string | null
-) {
-  if (isDemo) {
-    if (permissionProfile && permissionProfile in PERMISSION_PROFILE_LABELS) {
-      return PERMISSION_PROFILE_LABELS[permissionProfile as PermissionProfileKey];
-    }
-    return personaHomeLabel(personType, permissionProfile);
-  }
-  if (role === "MANAGER") return "Direction BeWork";
-  if (role === "AGENCE") return "Agence";
-  if (role === "AGENT") return "Agent";
-  if (role === "CLIENT") {
-    if (permissionProfile && permissionProfile in PERMISSION_PROFILE_LABELS) {
-      return PERMISSION_PROFILE_LABELS[permissionProfile as PermissionProfileKey];
-    }
-    if (personType && personType in PERSON_TYPE_LABELS) {
-      return PERSON_TYPE_LABELS[personType as PersonType];
-    }
-    return personaHomeLabel(personType, permissionProfile);
-  }
-  return role ?? "";
-}
 
 export default async function DashboardLayout({
   children,
@@ -107,6 +80,11 @@ export default async function DashboardLayout({
   const isDemo = Boolean(session.user.isDemo);
   const companyName = session.user.demoCompanyName ?? null;
   const external = isExternalPortalUser(personType);
+  const userRoleLabel = displayUserRoleLabel({
+    role: session.user?.role,
+    personType,
+    permissionProfile,
+  });
 
   let demoExpiresIso: string | null = null;
   if (isDemo && session.user.demoEnvironmentId) {
@@ -120,7 +98,7 @@ export default async function DashboardLayout({
       <AppSidebar
         role={session.user?.role ?? null}
         userName={session.user?.name ?? null}
-        userRoleLabel={roleLabel(session.user?.role, isDemo, personType, permissionProfile)}
+        userRoleLabel={userRoleLabel}
         companyName={companyName ?? dbCompany}
         isDemo={isDemo}
         demoModules={session.user.demoModules ?? null}
@@ -154,18 +132,20 @@ export default async function DashboardLayout({
             ) : null}
             <GlobalSearchTrigger />
             <MessagerieHeaderShortcut />
-            <NotificationsDropdown />
+            <NotificationsDropdown key={session.user.id} userId={session.user.id} />
             <OutilsCommunication />
             <UserAccountDropdown
+              key={session.user.id}
               userName={session.user?.name ?? null}
               userRole={session.user?.role ?? null}
+              roleLabel={userRoleLabel}
               userCompany={companyName ?? dbCompany ?? null}
             />
           </div>
         </header>
         <UiPreferencesProvider userId={session.user.id}>
           <PrefetchMainRoutes />
-          <MessagerieRealtimeBootstrap userId={session.user.id} />
+          <MessagerieRealtimeBootstrap key={session.user.id} userId={session.user.id} />
           <DashboardMain>{children}</DashboardMain>
           <RoleOnboarding userId={session.user.id} role={session.user.role} />
           <MessagerieToastListener />

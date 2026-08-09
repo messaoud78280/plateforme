@@ -88,30 +88,8 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  try {
-    const { ensureVictorHugoCoherence } = await import("@/lib/demo-environment/coherence-victor-hugo");
-    await ensureVictorHugoCoherence({
-      rootUserId: demoRootUserId,
-      organizationId: demo.organizationId,
-      loginIdentifier: demo.loginIdentifier,
-    });
-    // Réaligner Kanban / Alpha / Julie après cohérence (sans écraser les statuts avancés)
-    const { listDemoPersonaUsers } = await import("@/lib/demo-environment/seed-personas");
-    const personaList = await listDemoPersonaUsers({
-      rootUserId: demoRootUserId,
-      loginIdentifier: demo.loginIdentifier,
-    });
-    const karim = personaList.find((p) => p.key === "conducteur");
-    const { ensureKanbanReadabilityDemo } = await import("@/lib/demo-environment/kanban-readability");
-    await ensureKanbanReadabilityDemo({
-      rootUserId: demoRootUserId,
-      organizationId: demo.organizationId,
-      karimUserId: karim?.id ?? null,
-      loginIdentifier: demo.loginIdentifier,
-    });
-  } catch (e) {
-    console.error("[view-as] coherence:", e);
-  }
+  // Pas de cohérence Victor Hugo / Kanban ici : trop lourd sur le hot path « Voir comme ».
+  // Ces ensure* restent sur le seed démo uniquement.
 
   let targetKey: DemoPersonaKey = "direction";
   if (personaRaw === null || personaRaw === "direction" || personaRaw === "") {

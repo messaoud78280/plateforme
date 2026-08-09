@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { ttlInvalidatePrefix } from "@/lib/perf/ttl-cache";
 
 /** PATCH /api/alerts/[id] — Marquer une alerte comme lue */
 export async function PATCH(
@@ -26,6 +27,7 @@ export async function PATCH(
     if (updated.count === 0) {
       return NextResponse.json({ error: "Alerte introuvable" }, { status: 404 });
     }
+    ttlInvalidatePrefix(`notif-unread:${session.user.id}`);
     return NextResponse.json({ success: true });
   } catch (e) {
     console.error(e);

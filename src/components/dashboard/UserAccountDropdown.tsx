@@ -33,13 +33,26 @@ const staffDesignSystemItem = {
 
 interface UserAccountDropdownProps {
   userName: string | null | undefined;
+  /** Rôle NextAuth (menu staff) */
   userRole?: string | null;
+  /** Libellé métier affiché (permissionProfile) — source unique côté layout */
+  roleLabel?: string | null;
   userCompany?: string | null;
 }
 
-export function UserAccountDropdown({ userName, userRole, userCompany }: UserAccountDropdownProps) {
+export function UserAccountDropdown({
+  userName,
+  userRole,
+  roleLabel: roleLabelProp,
+  userCompany,
+}: UserAccountDropdownProps) {
   const roleLabel =
-    userRole === "MANAGER" ? "Gérant" : userRole === "AGENCE" || userRole === "AGENT" ? "Agent" : "Client";
+    roleLabelProp?.trim() ||
+    (userRole === "MANAGER"
+      ? "Gérant"
+      : userRole === "AGENCE" || userRole === "AGENT"
+        ? "Agent"
+        : "Client");
   const menuItems =
     userRole === "MANAGER" || userRole === "AGENCE"
       ? [staffDesignSystemItem, ...baseMenuItems]

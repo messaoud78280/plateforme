@@ -101,7 +101,9 @@ const BUCKET_STYLE: Record<PriorityBucket, string> = {
   INFORMATION: "text-slate-600",
 };
 
-export function NotificationsDropdown() {
+const PERSONA_CHANGED = "bework:persona-changed";
+
+export function NotificationsDropdown({ userId }: { userId?: string }) {
   const [items, setItems] = useState<InboxItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -132,11 +134,23 @@ export function NotificationsDropdown() {
     }
   }, []);
 
+  const resetForPersona = useCallback(() => {
+    setItems([]);
+    setUnreadCount(0);
+    void loadUnreadOnly();
+  }, [loadUnreadOnly]);
+
   useEffect(() => {
     void loadUnreadOnly();
     const interval = setInterval(() => void loadUnreadOnly(), 60_000);
     return () => clearInterval(interval);
-  }, [loadUnreadOnly]);
+  }, [loadUnreadOnly, userId]);
+
+  useEffect(() => {
+    const onPersona = () => resetForPersona();
+    window.addEventListener(PERSONA_CHANGED, onPersona);
+    return () => window.removeEventListener(PERSONA_CHANGED, onPersona);
+  }, [resetForPersona]);
 
   const grouped = useMemo(() => {
     const dayOrder = ["Aujourd’hui", "Hier", "Plus ancien"] as const;
@@ -162,27 +176,23 @@ export function NotificationsDropdown() {
       .filter((g) => g.priorityGroups.length > 0);
   }, [items]);
 
-  const actionCount = useMemo(
-    () =>
-      items.filter((i) => {
-        if (i.read) return false;
-        const b = bucketFor(i);
-        return b === "CRITIQUE" || b === "URGENT" || b === "IMPORTANT";
-      }).length,
-    [items],
-  );
-
   async function markOneRead(item: InboxItem) {
+    if (item.read) return;
+    // Optimistic UI
+    setItems((prev) => prev.map((i) => (i.id === item.id && i.source === item.source ? { ...i, read: true } : i)));
+    setUnreadCount((c) => Math.max(0, c - 1));
     const url =
       item.source === "alert"
         ? `/api/alerts/${item.id}`
         : `/api/notifications/${item.id}`;
     const res = await fetch(url, { method: "PATCH" });
-    if (res.ok) await loadInbox();
+    if (!res.ok) await loadInbox();
   }
 
   async function markAllRead() {
     setLoading(true);
+    setItems((prev) => prev.map((i) => ({ ...i, read: true })));
+    setUnreadCount(0);
     try {
       await Promise.all([
         fetch("/api/notifications/read-all", { method: "POST" }),
@@ -194,7 +204,8 @@ export function NotificationsDropdown() {
     }
   }
 
-  const badge = actionCount > 0 ? actionCount : unreadCount;
+  // Badge = exactement le nombre de non lues (persona active via session)
+  const badge = unreadCount;
 
   return (
     <HeaderDropdown
@@ -207,6 +218,7 @@ export function NotificationsDropdown() {
           type="button"
           onClick={() => {
             onClick();
+            // Ouvrir ≠ lire : charge seulement l’inbox
             if (!expanded) void loadInbox();
           }}
           className="relative shrink-0 rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-800"
@@ -269,10 +281,20 @@ export function NotificationsDropdown() {
                         className={`border-b border-slate-50 ${!item.read ? "bg-blue-50/40" : ""}`}
                       >
                         <div className="flex gap-2 px-4 py-3">
+                          {!item.read ? (
+                            <span
+                              className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#1d4ed8]"
+                              title="Non lu"
+                              aria-hidden
+                            />
+                          ) : (
+                            <span className="mt-1.5 h-2 w-2 shrink-0" aria-hidden />
+                          )}
                           <div className="min-w-0 flex-1">
                             {item.actionUrl ? (
                               <Link
                                 href={item.actionUrl}
+                                onClick={() => void markOneRead(item)}
                                 className="block text-left transition hover:opacity-90"
                               >
                                 <NotifContent item={item} />
@@ -283,6 +305,7 @@ export function NotificationsDropdown() {
                             {item.actionUrl ? (
                               <Link
                                 href={item.actionUrl}
+                                onClick={() => void markOneRead(item)}
                                 className="mt-1 inline-block text-[11px] font-semibold text-[#1e3a5f]"
                               >
                                 Voir →
@@ -297,16 +320,20 @@ export function NotificationsDropdown() {
                               </div>
                             ) : null}
                           </div>
-                          {!item.read && (
-                            <button
-                              type="button"
-                              onClick={() => void markOneRead(item)}
-                              className="shrink-0 self-start text-[10px] font-medium text-slate-500 hover:text-[#1d4ed8]"
-                              title="Marquer comme lu"
-                            >
-                              Lu
-                            </button>
-                          )}
+                          <div className="shrink-0 self-start text-right">
+                            {!item.read ? (
+                              <button
+                                type="button"
+                                onClick={() => void markOneRead(item)}
+                                className="text-[10px] font-medium text-[#1d4ed8] hover:underline"
+                                title="Marquer comme lu"
+                              >
+                                Marquer comme lu
+                              </button>
+                            ) : (
+                              <span className="text-[10px] text-slate-400">Lu</span>
+                            )}
+                          </div>
                         </div>
                       </li>
                     ))}
@@ -338,14 +365,23 @@ function NotifContent({ item }: { item: InboxItem }) {
           : null;
   return (
     <>
-      {kind && kindStyle ? (
-        <span
-          className={`mb-1 inline-block rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${kindStyle}`}
-        >
-          {kind}
-        </span>
-      ) : null}
-      <p className="text-sm font-medium text-slate-800">{item.title}</p>
+      <div className="mb-1 flex flex-wrap items-center gap-1.5">
+        {kind && kindStyle ? (
+          <span
+            className={`inline-block rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${kindStyle}`}
+          >
+            {kind}
+          </span>
+        ) : null}
+        {!item.read ? (
+          <span className="inline-block rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-800">
+            Nouveau
+          </span>
+        ) : null}
+      </div>
+      <p className={`text-sm ${!item.read ? "font-semibold text-slate-900" : "font-medium text-slate-800"}`}>
+        {item.title}
+      </p>
       <p className="mt-0.5 line-clamp-2 whitespace-pre-line text-xs text-slate-600">{item.message}</p>
       <p className="mt-1 text-xs text-slate-400">{formatNotifDate(item.createdAt)}</p>
     </>

@@ -303,6 +303,28 @@ export async function createPurchaseOrderReceipt(opts: {
     include: { lines: true, documents: true },
   });
 
+  // GED-V2A — même fichier BL visible chantier / Documents (pas de copie binaire)
+  if (opts.blFileUrl) {
+    const blDoc = receipt.documents.find((d) => d.kind === "BL");
+    if (blDoc?.fileUrl) {
+      try {
+        const { linkPurchaseOrderBlToChantier } = await import(
+          "@/lib/ged/link-po-bl-to-chantier"
+        );
+        await linkPurchaseOrderBlToChantier({
+          orderId: order.id,
+          receiptId: receipt.id,
+          purchaseOrderDocumentId: blDoc.id,
+          fileUrl: blDoc.fileUrl,
+          fileName: blDoc.name,
+          addedById: opts.receivedById,
+        });
+      } catch {
+        /* ne bloque pas la réception */
+      }
+    }
+  }
+
   const state = await deriveOrderStatusAfterReceipt(order.id);
   const supplierName =
     order.externalOrganization.tradeName || order.externalOrganization.name;

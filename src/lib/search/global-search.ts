@@ -473,6 +473,37 @@ export async function searchGlobal(opts: {
       take,
     });
 
+    const chantierFilesPromise = prisma.chantierFile.findMany({
+      where: {
+        deletedAt: null,
+        isCurrentVersion: true,
+        project: projectWhere,
+        OR: [
+          { name: contains(q) },
+          { documentType: contains(q) },
+          { category: contains(q) },
+          { emitterName: contains(q) },
+          { project: { title: contains(q) } },
+        ],
+      },
+      select: {
+        id: true,
+        name: true,
+        documentType: true,
+        category: true,
+        emitterName: true,
+        updatedAt: true,
+        projectId: true,
+        project: { select: { title: true } },
+        links: {
+          take: 2,
+          select: { entityType: true, entityLabel: true },
+        },
+      },
+      orderBy: { updatedAt: "desc" },
+      take,
+    });
+
     const agendaPromise = prisma.agendaEvent.findMany({
       where: {
         project: projectWhere,
@@ -549,6 +580,7 @@ export async function searchGlobal(opts: {
       tasks,
       followUps,
       documents,
+      chantierFiles,
       agenda,
       convProjects,
     ] = await Promise.all([
@@ -559,6 +591,7 @@ export async function searchGlobal(opts: {
       tasksPromise,
       followUpsPromise,
       documentsPromise,
+      chantierFilesPromise,
       agendaPromise,
       conversationsPromise,
     ]);
@@ -668,6 +701,25 @@ export async function searchGlobal(opts: {
         meta: d.category,
         href,
         score: scoreMatch(q, d.name, d.project?.title) + recencyBoost(d.updatedAt, now),
+      });
+    }
+
+    for (const f of chantierFiles) {
+      const ctx =
+        f.links.find((l) => l.entityType === "purchase_order")?.entityLabel ||
+        f.links.find((l) => l.entityType === "supplier")?.entityLabel ||
+        f.category;
+      items.push({
+        id: `chantier_file:${f.id}`,
+        kind: "document",
+        title: f.name,
+        subtitle: `Document${f.project?.title ? ` · ${f.project.title}` : ""}`,
+        meta: [f.documentType || ctx].filter(Boolean).join(" · ") || null,
+        href: `/dashboard/projets/${f.projectId}#tab-documents`,
+        score:
+          scoreMatch(q, f.name, f.documentType, f.category, f.emitterName, f.project?.title) +
+          recencyBoost(f.updatedAt, now) +
+          3,
       });
     }
 

@@ -15,7 +15,8 @@ export type BeworkActionId =
   | "rappel"
   | "assigner"
   | "fiche"
-  | "reserve";
+  | "reserve"
+  | "document";
 
 export type BeworkActionSuggestion = {
   id: BeworkActionId;
@@ -92,6 +93,7 @@ const DEFAULT_ACTIONS: BeworkActionSuggestion[] = [
 
 /** Actions toujours proposées pour un média (photo / vocal) sans IA. */
 export const MEDIA_DEFAULT_ACTIONS: BeworkActionSuggestion[] = [
+  { id: "document", label: "Ajouter aux documents", preferred: true },
   { id: "reserve", label: "Créer une réserve", preferred: true },
   { id: "tache", label: "Créer une tâche", preferred: true },
   { id: "fiche", label: "Ajouter à une fiche" },

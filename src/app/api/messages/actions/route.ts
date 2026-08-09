@@ -55,6 +55,7 @@ async function loadSource(kind: string, id: string) {
       clientId: m.task.clientId,
       organizationId: m.task.organizationId,
       senderName: m.sender.name,
+      attachmentsJson: m.attachmentsJson,
     };
   }
   if (kind === "DIRECT") {
@@ -71,6 +72,7 @@ async function loadSource(kind: string, id: string) {
       clientId: null as string | null,
       organizationId: null as string | null,
       senderName: m.sender.name,
+      attachmentsJson: m.attachmentsJson,
     };
   }
   if (kind === "PROJECT") {
@@ -97,6 +99,7 @@ async function loadSource(kind: string, id: string) {
       clientId: m.project.clientId,
       organizationId: m.project.organizationId ?? null,
       senderName: m.sender.name,
+      attachmentsJson: m.attachmentsJson,
     };
   }
   return null;
@@ -494,6 +497,53 @@ export async function POST(request: Request) {
             : body.action === "facturer"
               ? "Facturation"
               : "Fiche",
+      });
+    }
+
+    if (body.action === "document") {
+      if (!source.projectId || !source.clientId) {
+        return NextResponse.json(
+          {
+            error:
+              "Associez d’abord ce message à un chantier pour l’ajouter aux documents.",
+          },
+          { status: 400 },
+        );
+      }
+      const atts = Array.isArray(source.attachmentsJson)
+        ? (source.attachmentsJson as Array<{
+            name?: string;
+            fileUrl?: string;
+            fileSize?: number;
+            mimeType?: string | null;
+          }>)
+        : [];
+      const first = atts.find((a) => a.fileUrl);
+      if (!first?.fileUrl) {
+        return NextResponse.json(
+          { error: "Aucune pièce jointe à ajouter aux documents." },
+          { status: 400 },
+        );
+      }
+      const { linkMessageAttachmentToChantier } = await import(
+        "@/lib/ged/link-message-to-chantier"
+      );
+      const linked = await linkMessageAttachmentToChantier({
+        projectId: source.projectId,
+        clientId: source.clientId,
+        addedById: session.user.id,
+        messageKind: body.sourceMessageKind,
+        messageId: body.sourceMessageId,
+        attachment: first,
+      });
+      if (!linked.ok) {
+        return NextResponse.json({ error: linked.error }, { status: 400 });
+      }
+      return NextResponse.json({
+        ok: true,
+        badge: "Document",
+        href: `/dashboard/projets/${source.projectId}#tab-documents`,
+        chantierFileId: linked.chantierFileId,
       });
     }
 

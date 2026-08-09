@@ -237,6 +237,28 @@ export async function seedDemoPersonaUsers(opts: {
     }
   }
 
+  // CHANTIERS-V2B — responsable interne = assignedTo (jamais CLIENT_EXT / Sophie)
+  if (users.conducteur) {
+    for (const p of [victor, republique, jardins].filter(Boolean)) {
+      await prisma.project.update({
+        where: { id: p!.id },
+        data: {
+          assignedToId: users.conducteur.id,
+          internalManager: users.conducteur.name,
+        },
+      });
+    }
+  }
+  if (users.administratif && alpha) {
+    await prisma.project.update({
+      where: { id: alpha.id },
+      data: {
+        assignedToId: users.administratif.id,
+        internalManager: users.administratif.name,
+      },
+    });
+  }
+
   return { users };
 }
 

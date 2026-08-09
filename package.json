@@ -46,6 +46,7 @@
     "test:equipe-acces-v2a": "npx tsx scripts/test-equipe-acces-v2a.ts",
     "test:messagerie-v2c2-legacy-migrate": "npx tsx scripts/test-messagerie-v2c2-legacy-migrate.ts",
     "test:messagerie-v2c4-actions": "npx tsx scripts/test-messagerie-v2c4-actions.ts",
+    "test:chantiers-v2b-portfolio": "npx tsx scripts/test-chantiers-v2b-portfolio.ts",
     "process:attention-escalations": "npx tsx scripts/process-attention-escalations.ts",
     "notifications:run-attention-escalations": "npx tsx scripts/run-attention-escalations.ts",
     "db:cleanup-chantier-resources": "NODE_TLS_REJECT_UNAUTHORIZED=0 npx tsx scripts/run-chantier-resource-cleanup.ts",

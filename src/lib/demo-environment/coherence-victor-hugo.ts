@@ -45,13 +45,28 @@ export async function ensureVictorHugoCoherence(opts: {
   const sophieEmail = demoPersonaEmail(opts.loginIdentifier, "sophie");
   const thomasEmail = demoPersonaEmail(opts.loginIdentifier, "thomas");
   const [karim, sophie, thomas] = await Promise.all([
-    prisma.user.findUnique({ where: { email: karimEmail }, select: { id: true, name: true } }),
+    prisma.user.findUnique({
+      where: { email: karimEmail },
+      select: { id: true, name: true, personType: true },
+    }),
     prisma.user.findUnique({ where: { email: sophieEmail }, select: { id: true, name: true } }),
     prisma.user.findUnique({
       where: { email: thomasEmail },
       select: { id: true, name: true, externalOrganizationId: true },
     }),
   ]);
+
+  // CHANTIERS-V2B — responsable = Karim (INTERNAL), jamais Sophie CLIENT_EXT
+  if (karim && (karim.personType === "INTERNAL" || !karim.personType)) {
+    await prisma.project.update({
+      where: { id: project.id },
+      data: {
+        assignedToId: karim.id,
+        internalManager: karim.name ?? "Karim Benali",
+      },
+    });
+  }
+
   const assigneeId = karim?.id ?? opts.rootUserId;
 
   // —— 1. Fiche principale OS-4587 ——

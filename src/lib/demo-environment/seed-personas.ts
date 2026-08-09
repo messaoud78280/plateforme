@@ -3,14 +3,21 @@ import { OrganizationMemberRole, UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { findOrCreateExternalOrganization } from "@/lib/equipe-acces/external-org";
 import { upsertSingleProjectAccess, scopesForProfile } from "@/lib/equipe-acces/project-access";
-import { DEMO_PERSONAS, demoPersonaEmail, type DemoPersonaKey } from "./personas";
+import {
+  DEMO_PERSONA_KEYS,
+  DEMO_PERSONAS,
+  demoPersonaEmail,
+  type DemoPersonaKey,
+} from "./personas";
 
 export type SeedPersonasResult = {
   users: Record<DemoPersonaKey, { id: string; email: string; name: string }>;
 };
 
+const NON_ROOT_KEYS = DEMO_PERSONA_KEYS.filter((k) => k !== "direction");
+
 /**
- * Crée / met à jour les 4 personas démo dans l’org (vrais Users + ProjectAccess).
+ * Crée / met à jour les personas démo dans l’org (vrais Users + ProjectAccess).
  * Idempotent. Mot de passe partagé avec le root pour les bascules démo.
  */
 export async function seedDemoPersonaUsers(opts: {
@@ -54,11 +61,12 @@ export async function seedDemoPersonaUsers(opts: {
   const victor = projects.find((p) => p.title.includes("Victor Hugo"));
   const republique = projects.find((p) => p.title.includes("République"));
   const alpha = projects.find((p) => p.title.includes("Alpha"));
+  const jardins = projects.find((p) => p.title.includes("Jardins"));
 
   const users = {} as SeedPersonasResult["users"];
   users.direction = { id: root.id, email: root.email, name: DEMO_PERSONAS.direction.name };
 
-  for (const key of ["conducteur", "client", "fournisseur"] as const) {
+  for (const key of NON_ROOT_KEYS) {
     const def = DEMO_PERSONAS[key];
     const email = demoPersonaEmail(opts.loginIdentifier, def.emailSuffix);
     let externalOrganizationId: string | null = null;
@@ -69,6 +77,11 @@ export async function seedDemoPersonaUsers(opts: {
         personType: def.externalOrgType,
       });
     }
+
+    const memberRole =
+      key === "conducteur" || key === "administratif"
+        ? OrganizationMemberRole.MEMBER
+        : OrganizationMemberRole.VIEWER;
 
     const existing = await prisma.user.findUnique({ where: { email } });
     const user = existing
@@ -121,25 +134,27 @@ export async function seedDemoPersonaUsers(opts: {
       create: {
         organizationId: opts.organizationId,
         userId: user.id,
-        role:
-          key === "conducteur" ? OrganizationMemberRole.MEMBER : OrganizationMemberRole.VIEWER,
+        role: memberRole,
       },
-      update: {
-        role:
-          key === "conducteur" ? OrganizationMemberRole.MEMBER : OrganizationMemberRole.VIEWER,
-      },
+      update: { role: memberRole },
     });
 
     users[key] = user;
 
     const scopes = scopesForProfile(def.permissionProfile);
-    if (key === "conducteur") {
-      for (const p of [victor, republique, alpha].filter(Boolean)) {
+    if (key === "conducteur" || key === "administratif") {
+      const targets = [victor, republique, alpha, jardins].filter(Boolean);
+      for (const p of targets) {
         await upsertSingleProjectAccess({
           projectId: p!.id,
           userId: user.id,
           grantedById: opts.rootUserId,
-          scopes: { messages: true, documents: true, agenda: true, deliveries: true },
+          scopes: {
+            messages: true,
+            documents: true,
+            agenda: true,
+            deliveries: true,
+          },
         });
       }
     } else if (key === "client" && victor) {
@@ -230,7 +245,7 @@ export async function listDemoPersonaUsers(opts: {
   loginIdentifier: string;
 }): Promise<{ key: DemoPersonaKey; id: string; name: string; email: string }[]> {
   const out: { key: DemoPersonaKey; id: string; name: string; email: string }[] = [];
-  for (const key of Object.keys(DEMO_PERSONAS) as DemoPersonaKey[]) {
+  for (const key of DEMO_PERSONA_KEYS) {
     const def = DEMO_PERSONAS[key];
     const row =
       key === "direction"
@@ -243,7 +258,7 @@ export async function listDemoPersonaUsers(opts: {
             select: { email: true, id: true, name: true },
           });
     if (row) {
-      out.push({ key, id: row.id, name: row.name, email: row.email });
+      out.push({ key, id: row.id, name: row.name ?? def.name, email: row.email });
     }
   }
   return out;

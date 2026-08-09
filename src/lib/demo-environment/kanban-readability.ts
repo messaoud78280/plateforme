@@ -9,7 +9,7 @@ import { prisma } from "@/lib/prisma";
 import { appendFollowUpTimeline } from "@/lib/follow-up/timeline";
 import { colorKeyForStatus } from "@/lib/follow-up/types";
 import { syncAttentionNotificationsForOwner } from "@/lib/follow-up/attention/sync-notifications";
-import { demoPersonaEmail } from "@/lib/demo-environment/personas";
+import { demoPersonaEmail, DEMO_PERSONAS } from "@/lib/demo-environment/personas";
 
 function daysAgo(n: number): Date {
   const d = new Date();
@@ -98,7 +98,8 @@ async function ensureJulieAdministratif(opts: {
   loginIdentifier?: string | null;
 }): Promise<string> {
   const login = opts.loginIdentifier?.trim() || "bework-demo";
-  const email = demoPersonaEmail(login, "julie");
+  const def = DEMO_PERSONAS.administratif;
+  const email = demoPersonaEmail(login, def.emailSuffix);
   const root = await prisma.user.findUnique({
     where: { id: opts.rootUserId },
     select: { password: true },
@@ -110,11 +111,12 @@ async function ensureJulieAdministratif(opts: {
     ? await prisma.user.update({
         where: { id: existing.id },
         data: {
-          name: "Julie Martin",
-          personType: "INTERNAL",
-          permissionProfile: "ADMINISTRATIF",
+          name: def.name,
+          company: def.company,
+          personType: def.personType,
+          permissionProfile: def.permissionProfile,
           accessStatus: "ACTIVE",
-          jobTitle: "Responsable administratif",
+          jobTitle: def.jobTitle,
           teamRole: "USER",
           invitedById: opts.rootUserId,
           password: passwordHash,
@@ -125,14 +127,17 @@ async function ensureJulieAdministratif(opts: {
         data: {
           email,
           password: passwordHash,
-          name: "Julie Martin",
+          name: def.name,
           role: UserRole.CLIENT,
-          personType: "INTERNAL",
-          permissionProfile: "ADMINISTRATIF",
+          company: def.company,
+          personType: def.personType,
+          permissionProfile: def.permissionProfile,
           accessStatus: "ACTIVE",
-          jobTitle: "Responsable administratif",
+          jobTitle: def.jobTitle,
           teamRole: "USER",
           invitedById: opts.rootUserId,
+          accountStatus: "APPROVED",
+          contractStatus: "SIGNED",
         },
         select: { id: true },
       });

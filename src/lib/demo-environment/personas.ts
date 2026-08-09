@@ -1,6 +1,12 @@
 /** Personas démo ABC Étanchéité (specs 158–196). */
 
-export const DEMO_PERSONA_KEYS = ["direction", "conducteur", "client", "fournisseur"] as const;
+export const DEMO_PERSONA_KEYS = [
+  "direction",
+  "conducteur",
+  "administratif",
+  "client",
+  "fournisseur",
+] as const;
 export type DemoPersonaKey = (typeof DEMO_PERSONA_KEYS)[number];
 
 export type DemoPersonaDef = {
@@ -10,7 +16,7 @@ export type DemoPersonaDef = {
   company: string;
   jobTitle: string;
   personType: "INTERNAL" | "CLIENT_EXT" | "SUPPLIER";
-  permissionProfile: "DIRECTION" | "CONDUCTEUR" | "CLIENT" | "FOURNISSEUR";
+  permissionProfile: "DIRECTION" | "CONDUCTEUR" | "ADMINISTRATIF" | "CLIENT" | "FOURNISSEUR";
   /** Suffixe email : {login}+{suffix}@demo.bework.local — direction = root (pas de suffixe). */
   emailSuffix: string | null;
   externalOrgType?: "CLIENT_EXT" | "SUPPLIER";
@@ -36,6 +42,16 @@ export const DEMO_PERSONAS: Record<DemoPersonaKey, DemoPersonaDef> = {
     personType: "INTERNAL",
     permissionProfile: "CONDUCTEUR",
     emailSuffix: "karim",
+  },
+  administratif: {
+    key: "administratif",
+    label: "Administratif",
+    name: "Julie Martin",
+    company: "ABC Étanchéité",
+    jobTitle: "Responsable administratif",
+    personType: "INTERNAL",
+    permissionProfile: "ADMINISTRATIF",
+    emailSuffix: "julie",
   },
   client: {
     key: "client",
@@ -99,6 +115,19 @@ export function personaRightsSummary(key: DemoPersonaKey): {
             { label: "Documents chantier", allowed: true },
             { label: "Équipe & partenaires", allowed: false },
             { label: "Finances / marges", allowed: false },
+          ],
+        },
+      ];
+    case "administratif":
+      return [
+        {
+          section: "Bureau chantier",
+          items: [
+            { label: "Documents / BL / facturation", allowed: true },
+            { label: "Commandes & relances admin", allowed: true },
+            { label: "Messagerie INTERNE", allowed: true },
+            { label: "Équipe & partenaires", allowed: true },
+            { label: "Pilotage terrain (conducteur)", allowed: false },
           ],
         },
       ];

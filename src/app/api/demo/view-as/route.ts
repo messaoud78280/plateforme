@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
     rootUserId: demoRootUserId,
     loginIdentifier: demo.loginIdentifier,
   });
-  if (personas.length < 4) {
+  if (personas.length < 5) {
     await seedDemoPersonaUsers({
       rootUserId: demoRootUserId,
       organizationId: demo.organizationId,
@@ -176,7 +176,7 @@ export async function GET(request: NextRequest) {
     rootUserId: demo.rootUserId,
     loginIdentifier: demo.loginIdentifier,
   });
-  if (personas.length < 4) {
+  if (personas.length < 5) {
     await seedDemoPersonaUsers({
       rootUserId: demo.rootUserId,
       organizationId: demo.organizationId,

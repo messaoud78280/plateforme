@@ -88,7 +88,9 @@ export function DemoViewAsSwitcher() {
             <option key={p.key} value={p.key}>
               {p.key === "conducteur"
                 ? `Conducteur — ${p.name.split(" ")[0]}`
-                : `${p.label} — ${p.name.split(" ")[0]}`}
+                : p.key === "administratif"
+                  ? `Administratif — ${p.name.split(" ")[0]}`
+                  : `${p.label} — ${p.name.split(" ")[0]}`}
             </option>
           ))}
         </select>

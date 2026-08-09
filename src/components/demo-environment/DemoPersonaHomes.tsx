@@ -274,5 +274,6 @@ export function resolveDemoPersonaKey(
   if (permissionProfile === "FOURNISSEUR" || personType === "SUPPLIER") return "fournisseur";
   if (permissionProfile === "CLIENT" || personType === "CLIENT_EXT") return "client";
   if (permissionProfile === "CONDUCTEUR" || permissionProfile === "CHEF_CHANTIER") return "conducteur";
+  if (permissionProfile === "ADMINISTRATIF") return "administratif";
   return "direction";
 }

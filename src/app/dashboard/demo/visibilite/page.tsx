@@ -27,7 +27,7 @@ export default async function DemoVisibilitePage() {
       <PageHeader
         eyebrow="Démonstration"
         title="Qui voit quoi ?"
-        description={`Droits par persona sur l’environnement ${company}. Une seule plateforme — quatre regards distincts.`}
+        description={`Droits par persona sur l’environnement ${company}. Une seule plateforme — cinq regards distincts.`}
       />
 
       <section className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5">
@@ -56,6 +56,7 @@ export default async function DemoVisibilitePage() {
           <li>· Client (Sophie) : voit uniquement les chantiers partagés — pas le fil interne.</li>
           <li>· Fournisseur (Thomas / Point.P) : confirme BC-2026-043 — Direction est alertée.</li>
           <li>· Conducteur (Karim) : actions terrain sur chantiers affectés.</li>
+          <li>· Administratif (Julie) : documents, BL, facturation, commandes — Accueil Ops.</li>
           <li>· Direction (Marc) : vision globale, avenants, à facturer, équipe.</li>
         </ul>
         <Link

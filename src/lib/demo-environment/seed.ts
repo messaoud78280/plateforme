@@ -1,5 +1,4 @@
 import {
-  AlertLevel,
   ChantierStatus,
   DocumentCategory,
   DocumentStatus,
@@ -222,29 +221,9 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
     });
   }
 
-  // Pas d’alertes génériques parallèles (« 3 actions urgentes », BC-2026-029, etc.) :
-  // le board À traiter / W3-CDE produit les vraies cartes métier (ex. BC-2026-043 Point.P).
-  // BC-2026-029 reste une Task seed secondaire (accessoires) — pas le scénario livraison principal.
-  await prisma.alert.createMany({
-    data: [
-      {
-        title: "Documents manquants",
-        message: "2 documents manquants sur Chantier République.",
-        level: AlertLevel.WARNING,
-        clientId,
-        actionUrl: "/dashboard/documents",
-        read: false,
-      },
-      {
-        title: "Compte rendu",
-        message: "1 chantier sans compte rendu récent (Victor Hugo).",
-        level: AlertLevel.INFO,
-        clientId,
-        actionUrl: `/dashboard/projets/${projectVictor.id}`,
-        read: false,
-      },
-    ],
-  });
+  // Inbox Accueil / cloche : pas d’Alert seed génériques.
+  // Les notifications métier viennent de FollowUp Attention + PurchaseOrder Attention (W3/CDE).
+  // BC-2026-029 reste une Task seed secondaire (accessoires) — scénario livraison principal = BC-2026-043.
 
   // Documents métadonnées (URL placeholder locale — pas de fichier réel)
   await prisma.document.createMany({
@@ -717,7 +696,7 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
     )?.loginIdentifier ||
     "bework-demo";
 
-  // —— 4 personas loginables (Direction / Conducteur / Client / Fournisseur) ——
+  // —— Personas loginables (Direction / Conducteur / Administratif / Client / Fournisseur) ——
   try {
     const { seedDemoPersonaUsers } = await import("./seed-personas");
     await seedDemoPersonaUsers({
@@ -728,6 +707,20 @@ export async function seedDemoEnvironmentData(opts: SeedDemoOptions) {
     });
   } catch (e) {
     console.error("[demo-seed] personas:", e);
+  }
+
+  // —— Purge inbox legacy si un seed partiel a laissé d’anciennes Alert ——
+  try {
+    const demoRow = await prisma.demoEnvironment.findFirst({
+      where: { rootUserId: clientId },
+      select: { id: true },
+    });
+    if (demoRow) {
+      const { purgeDemoLegacyInbox } = await import("./cleanup-legacy-inbox");
+      await purgeDemoLegacyInbox(demoRow.id);
+    }
+  } catch (e) {
+    console.error("[demo-seed] cleanup legacy inbox:", e);
   }
 
   // —— Phase 0 : une seule chaîne métier Victor Hugo ——
@@ -1162,10 +1155,24 @@ function demoThreadForTitle(
 
 /** Supprime uniquement les données métier du tenant démo (pas le User / Organization / DemoEnvironment). */
 export async function clearDemoEnvironmentData(clientId: string) {
+  const demo = await prisma.demoEnvironment.findFirst({
+    where: { rootUserId: clientId },
+    select: { organizationId: true },
+  });
+  const memberIds = demo?.organizationId
+    ? (
+        await prisma.organizationMember.findMany({
+          where: { organizationId: demo.organizationId },
+          select: { userId: true },
+        })
+      ).map((m) => m.userId)
+    : [];
+  const userIds = [...new Set([clientId, ...memberIds])];
+
   await prisma.$transaction([
     prisma.messageAction.deleteMany({ where: { createdById: clientId } }),
     prisma.directMessage.deleteMany({
-      where: { OR: [{ senderId: clientId }, { receiverId: clientId }] },
+      where: { OR: [{ senderId: { in: userIds } }, { receiverId: { in: userIds } }] },
     }),
     prisma.agendaEventAttendee.deleteMany({
       where: { event: { ownerUserId: clientId } },
@@ -1176,7 +1183,8 @@ export async function clearDemoEnvironmentData(clientId: string) {
     }),
     prisma.followUpSheet.deleteMany({ where: { ownerUserId: clientId } }),
     prisma.appointment.deleteMany({ where: { clientId } }),
-    prisma.alert.deleteMany({ where: { clientId } }),
+    prisma.alert.deleteMany({ where: { clientId: { in: userIds } } }),
+    prisma.notification.deleteMany({ where: { userId: { in: userIds } } }),
     prisma.document.deleteMany({ where: { clientId } }),
     prisma.task.deleteMany({ where: { clientId } }),
     prisma.project.deleteMany({ where: { clientId } }),

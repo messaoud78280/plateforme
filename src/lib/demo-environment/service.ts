@@ -207,13 +207,13 @@ export async function resetDemoEnvironment(demoId: string): Promise<{ ok: true }
     });
     await prisma.demoEnvironment.update({
       where: { id: demoId },
-      data: { seedVersion: "v3-coherence" },
+      data: { seedVersion: "v4-demo-cleanup" },
     });
   }
   return { ok: true };
 }
 
-/** Enrichit une démo existante avec les 4 personas (sans tout re-seeder). */
+/** Enrichit une démo existante avec les 5 personas (sans tout re-seeder). */
 export async function enrichDemoPersonas(demoId: string): Promise<{ ok: true } | { ok: false; error: string }> {
   const demo = await prisma.demoEnvironment.findUnique({ where: { id: demoId } });
   if (!demo?.organizationId) return { ok: false, error: "Démonstration introuvable." };
@@ -224,6 +224,8 @@ export async function enrichDemoPersonas(demoId: string): Promise<{ ok: true } |
     loginIdentifier: demo.loginIdentifier,
     companyName: demo.companyName,
   });
+  const { purgeDemoLegacyInbox } = await import("./cleanup-legacy-inbox");
+  await purgeDemoLegacyInbox(demoId);
   const { ensureVictorHugoCoherence } = await import("./coherence-victor-hugo");
   await ensureVictorHugoCoherence({
     rootUserId: demo.rootUserId,
@@ -255,7 +257,7 @@ export async function enrichDemoPersonas(demoId: string): Promise<{ ok: true } |
   });
   await prisma.demoEnvironment.update({
     where: { id: demoId },
-    data: { seedVersion: "v3-notify-w3c1" },
+    data: { seedVersion: "v4-demo-cleanup" },
   });
   return { ok: true };
 }

@@ -117,11 +117,22 @@ export function NotificationsDropdown() {
     }
   }, []);
 
+  const loadUnreadOnly = useCallback(async () => {
+    try {
+      const res = await fetch("/api/notifications/unread-count", { cache: "no-store" });
+      if (!res.ok) return;
+      const data = (await res.json()) as { unreadCount?: number };
+      setUnreadCount(typeof data.unreadCount === "number" ? data.unreadCount : 0);
+    } catch {
+      // ignore
+    }
+  }, []);
+
   useEffect(() => {
-    loadInbox();
-    const interval = setInterval(loadInbox, 60_000);
+    void loadUnreadOnly();
+    const interval = setInterval(() => void loadUnreadOnly(), 60_000);
     return () => clearInterval(interval);
-  }, [loadInbox]);
+  }, [loadUnreadOnly]);
 
   const grouped = useMemo(() => {
     const dayOrder = ["Aujourd’hui", "Hier", "Plus ancien"] as const;

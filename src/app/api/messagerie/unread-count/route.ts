@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { ttlGet, ttlSet } from "@/lib/perf/ttl-cache";
 
 /**
  * GET /api/messagerie/unread-count
  * Convention badge sidebar : nombre de conversations avec au moins 1 message non lu
  * (missions TaskMessage + directs DirectMessage + chantiers Message).
+ * Cache TTL 20 s — PERF-V1.
  */
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -15,6 +17,9 @@ export async function GET() {
   }
 
   const userId = session.user.id;
+  const cacheKey = `msg-unread:${userId}`;
+  const cached = ttlGet<{ total: number; conversations: number; messages: number }>(cacheKey);
+  if (cached) return NextResponse.json(cached);
 
   try {
     const [taskUnread, directUnread, projectUnread] = await Promise.all([
@@ -42,12 +47,13 @@ export async function GET() {
       directUnread.reduce((s, r) => s + r._count.id, 0) +
       projectUnread.reduce((s, r) => s + r._count.id, 0);
 
-    return NextResponse.json({
-      /** Convention UI : conversations avec non-lus */
+    const payload = {
       total: conversations,
       conversations,
       messages,
-    });
+    };
+    ttlSet(cacheKey, payload, 20_000);
+    return NextResponse.json(payload);
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: "Erreur compteur" }, { status: 500 });

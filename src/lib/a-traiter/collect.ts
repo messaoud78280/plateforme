@@ -31,6 +31,7 @@ import {
   isInternalPurchaseOrderActor,
   resolvePurchaseOrderOrgId,
 } from "@/lib/purchase-orders/access";
+import { ttlGet, ttlSet } from "@/lib/perf/ttl-cache";
 
 export type ATraiterSection = "bloquant" | "a_valider" | "urgent" | "relance";
 
@@ -69,11 +70,15 @@ function push(items: ATraiterItem[], item: ATraiterItem) {
   items.push(item);
 }
 
-export async function collectATraiter(user: {
-  id: string;
-  role?: string | null;
-  personType?: string | null;
-}): Promise<ATraiterSnapshot> {
+export async function collectATraiter(
+  user: {
+    id: string;
+    role?: string | null;
+    personType?: string | null;
+  },
+  opts?: { light?: boolean },
+): Promise<ATraiterSnapshot> {
+  const light = Boolean(opts?.light);
   const items: ATraiterItem[] = [];
   const sessionUser: SessionUser = user;
 
@@ -102,6 +107,7 @@ export async function collectATraiter(user: {
             permissionProfile: (user as { permissionProfile?: string | null }).permissionProfile,
           },
           agentOnly ? user.id : null,
+          light,
         );
 
   items.sort((a, b) => {
@@ -465,10 +471,11 @@ async function collectUnifiedAttentionCards(
     permissionProfile?: string | null;
   },
   assigneeOnlyId: string | null,
+  light = false,
 ): Promise<ATraiterAttentionCard[]> {
   const [followUpCards, purchaseOrderCards] = await Promise.all([
-    collectFollowUpAttentionCards(sessionUser, assigneeOnlyId),
-    collectPurchaseOrderAttentionCards(sessionUser, assigneeOnlyId),
+    collectFollowUpAttentionCards(sessionUser, assigneeOnlyId, light),
+    collectPurchaseOrderAttentionCards(sessionUser, assigneeOnlyId, light),
   ]);
   return [...followUpCards, ...purchaseOrderCards].sort(sortAttentionCards);
 }
@@ -477,6 +484,7 @@ async function collectUnifiedAttentionCards(
 async function collectFollowUpAttentionCards(
   sessionUser: { id: string; role?: string | null },
   assigneeOnlyId: string | null,
+  light = false,
 ): Promise<ATraiterAttentionCard[]> {
   try {
     const accessWhere = await followUpSheetAccessWhere(sessionUser);
@@ -510,7 +518,7 @@ async function collectFollowUpAttentionCards(
         tasks: { select: { id: true }, take: 1, orderBy: { updatedAt: "desc" } },
       },
       orderBy: { updatedAt: "desc" },
-      take: 120,
+      take: light ? 40 : 120,
     });
 
     if (sheets.length === 0) return [];
@@ -571,6 +579,7 @@ async function collectPurchaseOrderAttentionCards(
     permissionProfile?: string | null;
   },
   assigneeOnlyId: string | null,
+  light = false,
 ): Promise<ATraiterAttentionCard[]> {
   try {
     if (!isInternalPurchaseOrderActor(sessionUser)) return [];
@@ -581,7 +590,8 @@ async function collectPurchaseOrderAttentionCards(
     const rows = await loadPurchaseOrderAttention({
       organizationId: orgId,
       actorUserId: assigneeOnlyId,
-      take: 120,
+      take: light ? 40 : 120,
+      light,
     });
 
     const cards: ATraiterAttentionCard[] = [];
@@ -621,30 +631,49 @@ export const A_TRAITER_SECTION_LABELS: Record<ATraiterSection, string> = {
 
 /**
  * Badge nav : URGENT + CRITIQUE (diagnostics W3-A) + autres points bloquants/urgents.
- * Réutilise le même moteur que la page (pas de second calcul d’urgence).
+ * Cache TTL 20 s — PERF-V1 (évite recalcul complet à chaque navigation).
  */
 export async function countATraiter(user: {
   id: string;
   role?: string | null;
   personType?: string | null;
 }): Promise<number> {
-  const snapshot = await collectATraiter(user);
+  const key = `a-traiter-count:${user.id}`;
+  const cached = ttlGet<number>(key);
+  if (typeof cached === "number") return cached;
+
+  const snapshot = await collectATraiter(user, { light: true });
   const otherHot = snapshot.items.filter(
     (i) => i.section === "bloquant" || i.section === "urgent",
   ).length;
-  return snapshot.hotCount + otherHot;
+  const total = snapshot.hotCount + otherHot;
+  ttlSet(key, total, 20_000);
+  return total;
 }
 
-/** Compteurs détaillés pour le bandeau Accueil (léger). */
+/** Compteurs détaillés pour le bandeau Accueil (léger + cache 20 s). */
 export async function summarizeATraiter(user: {
   id: string;
   role?: string | null;
   personType?: string | null;
 }) {
-  const snapshot = await collectATraiter(user);
-  return {
+  const key = `a-traiter-summary:${user.id}`;
+  const cached = ttlGet<{
+    total: number;
+    hotCount: number;
+    attentionCounts: ReturnType<typeof countAttentionByUrgency>;
+  }>(key);
+  if (cached) return cached;
+
+  const snapshot = await collectATraiter(user, { light: true });
+  const summary = {
     total: snapshot.total,
     hotCount: snapshot.hotCount,
     attentionCounts: snapshot.attentionCounts,
   };
+  ttlSet(key, summary, 20_000);
+  ttlSet(`a-traiter-count:${user.id}`, snapshot.hotCount + snapshot.items.filter(
+    (i) => i.section === "bloquant" || i.section === "urgent",
+  ).length, 20_000);
+  return summary;
 }

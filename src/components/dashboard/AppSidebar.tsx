@@ -306,8 +306,9 @@ export function AppSidebar({
                       href={item.href}
                       title={item.label}
                       onClick={() => setMobileOpen(false)}
+                      prefetch
                       className={cn(
-                        "flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm font-semibold transition-colors duration-150",
+                        "flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm font-semibold transition-colors duration-75 active:scale-[0.98]",
                         collapsed && "justify-center px-2",
                         active
                           ? "bg-bework-navy text-white shadow-sm"

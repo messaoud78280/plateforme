@@ -119,3 +119,38 @@ export const agendaEventInclude = {
     include: { user: { select: { id: true, name: true, email: true } } },
   },
 } satisfies Prisma.AgendaEventInclude;
+
+/** Liste calendrier — sans lignes PO (panneau détail charge le BC si besoin). */
+export const agendaEventListInclude = {
+  project: { select: { id: true, title: true, siteCity: true, siteAddress: true } },
+  responsible: { select: { id: true, name: true, email: true } },
+  createdBy: { select: { id: true, name: true, email: true } },
+  followUpSheet: {
+    select: {
+      id: true,
+      title: true,
+      nextActionAt: true,
+      nextActionDone: true,
+      urgencyOverride: true,
+      status: true,
+    },
+  },
+  purchaseOrder: {
+    select: {
+      id: true,
+      number: true,
+      subject: true,
+      status: true,
+      sharedWithSupplier: true,
+      requestedDeliveryAt: true,
+      confirmedDeliveryAt: true,
+      proposedDeliveryAt: true,
+      proposedDeliveryStatus: true,
+      legacyTaskId: true,
+      externalOrganization: { select: { name: true, tradeName: true } },
+    },
+  },
+  attendees: {
+    include: { user: { select: { id: true, name: true, email: true } } },
+  },
+} satisfies Prisma.AgendaEventInclude;

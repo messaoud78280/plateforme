@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 import { QUICK_STATUS_TRANSITIONS } from "@/lib/follow-up/types";
@@ -15,7 +14,6 @@ export function FollowUpInlineActions({
   sheetId: string;
   compact?: boolean;
 }) {
-  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
@@ -39,7 +37,6 @@ export function FollowUpInlineActions({
         } else {
           setSuggestions(null);
           setMsg("OK");
-          router.refresh();
         }
       } else {
         setMsg("Erreur");
@@ -78,7 +75,6 @@ export function FollowUpInlineActions({
       if (res.ok) {
         setSuggestions(null);
         setMsg("OK");
-        router.refresh();
       }
     } finally {
       setBusy(false);

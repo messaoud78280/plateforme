@@ -54,10 +54,13 @@ export async function loadPurchaseOrderAttention(opts: {
   take?: number;
   now?: Date;
   policy?: PurchaseOrderAttentionPolicy;
+  /** PERF-V1 : moins de lignes / docs pour badge & accueil */
+  light?: boolean;
 }): Promise<PurchaseOrderAttentionBatchRow[]> {
   const take = opts.take ?? 120;
   const now = opts.now ?? new Date();
   const policy = opts.policy ?? DEFAULT_PURCHASE_ORDER_ATTENTION_POLICY;
+  const light = Boolean(opts.light);
 
   const orders = await prisma.purchaseOrder.findMany({
     where: {
@@ -91,6 +94,7 @@ export async function loadPurchaseOrderAttention(opts: {
       project: { select: { title: true } },
       lines: {
         orderBy: { sortOrder: "asc" },
+        take: light ? 8 : undefined,
         select: {
           id: true,
           designation: true,
@@ -105,7 +109,9 @@ export async function loadPurchaseOrderAttention(opts: {
           cancelledAt: true,
           status: true,
           deliveryNoteNumber: true,
-          documents: { select: { id: true, kind: true }, take: 5 },
+          documents: light
+            ? false
+            : { select: { id: true, kind: true }, take: 5 },
           lines: {
             select: {
               orderLineId: true,
@@ -175,7 +181,9 @@ export async function loadPurchaseOrderAttention(opts: {
         cancelledAt: r.cancelledAt,
         status: r.status,
         deliveryNoteNumber: r.deliveryNoteNumber,
-        hasBlDocument: r.documents.some((d) => d.kind === "BL"),
+        hasBlDocument: Array.isArray(r.documents)
+          ? r.documents.some((d: { kind: string }) => d.kind === "BL")
+          : false,
       })),
       receiptLines,
       agendaEventId: o.agendaEvents[0]?.id ?? null,

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import type { BeworkActionId, BeworkActionSuggestion } from "@/lib/messagerie/bework-actions";
 
 type Props = {
@@ -23,7 +22,6 @@ export function MessageBeworkActions({
   initialBadges = [],
   onLinked,
 }: Props) {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [suggestions, setSuggestions] = useState<BeworkActionSuggestion[]>([]);
   const [busy, setBusy] = useState(false);
@@ -96,7 +94,6 @@ export function MessageBeworkActions({
       setAssignOpen(false);
       setMsg(data.badge ? `✓ ${data.badge}` : "OK");
       onLinked?.(data.badge || "Traité");
-      router.refresh();
     } catch {
       setMsg("Erreur réseau");
     } finally {

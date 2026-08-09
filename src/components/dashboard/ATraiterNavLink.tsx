@@ -26,12 +26,12 @@ export function ATraiterNavLink({ activeClass }: { activeClass: string }) {
     }
 
     void load();
-    const timer = window.setInterval(() => void load(), 60_000);
+    const timer = window.setInterval(() => void load(), 45_000);
     return () => {
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [pathname]);
+  }, []);
 
   const inactiveClass =
     "inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-bework-ink/80 transition-colors hover:bg-bework-navy-soft hover:text-bework-navy sm:text-sm";

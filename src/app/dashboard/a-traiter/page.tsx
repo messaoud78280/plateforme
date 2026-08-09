@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { after } from "next/server";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
@@ -76,20 +77,24 @@ export default async function ATraiterPage() {
     personType: session.user.personType ?? null,
   });
 
-  // W3-C1 : sync idempotente des notifications internes (pas de cron)
+  // W3-C1 : sync hors chemin critique de rendu (PERF-V1)
   const external =
     session.user.personType === "CLIENT_EXT" || session.user.personType === "SUPPLIER";
   if (!external && (isAgencyOrManager(session.user) || isAgent(session.user) || session.user.role === "CLIENT")) {
-    try {
-      const ownerUserId = await resolveFollowUpOwnerUserId(session.user.id);
-      const agentOnly = isAgent(session.user) && !isAgencyOrManager(session.user);
-      await syncAttentionNotificationsForOwner({
-        ownerUserId,
-        assigneeOnlyId: agentOnly ? session.user.id : null,
-      });
-    } catch (e) {
-      console.error("[a-traiter] syncAttentionNotifications:", e);
-    }
+    const userId = session.user.id;
+    const role = session.user.role;
+    after(async () => {
+      try {
+        const ownerUserId = await resolveFollowUpOwnerUserId(userId);
+        const agentOnly = isAgent({ role }) && !isAgencyOrManager({ role });
+        await syncAttentionNotificationsForOwner({
+          ownerUserId,
+          assigneeOnlyId: agentOnly ? userId : null,
+        });
+      } catch (e) {
+        console.error("[a-traiter] syncAttentionNotifications:", e);
+      }
+    });
   }
 
   const canEdit = canEditFollowUpBoard(session.user);

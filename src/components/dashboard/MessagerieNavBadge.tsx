@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 
 /** Badge non-lus Messagerie (conversations avec messages non lus). */
 export function MessagerieNavBadge({ active }: { active?: boolean }) {
-  const pathname = usePathname();
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
@@ -24,12 +22,12 @@ export function MessagerieNavBadge({ active }: { active?: boolean }) {
     }
 
     void load();
-    const timer = window.setInterval(() => void load(), 30_000);
+    const timer = window.setInterval(() => void load(), 45_000);
     return () => {
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [pathname]);
+  }, []);
 
   if (total <= 0) return null;
 

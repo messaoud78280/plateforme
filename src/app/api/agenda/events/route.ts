@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import type { AgendaEventType } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
-import { agendaEventAccessWhere, agendaEventInclude, resolveAgendaOwnerUserId } from "@/lib/agenda/access";
+import { agendaEventAccessWhere, agendaEventInclude, agendaEventListInclude, resolveAgendaOwnerUserId } from "@/lib/agenda/access";
 import { listLinkedAgendaItems } from "@/lib/agenda/linked-sources";
 import { notifyAgendaInvitees } from "@/lib/agenda/notify";
 import { expandRecurrenceForRange } from "@/lib/agenda/recurrence";
@@ -52,7 +52,10 @@ export async function GET(request: Request) {
   const projectId = searchParams.get("projectId");
   const type = searchParams.get("type");
   const q = searchParams.get("q")?.trim();
-  const includeLinked = searchParams.get("linked") !== "0";
+  const includeLinked = searchParams.get("linked") === "1";
+  const rangeMs = from && to ? to.getTime() - from.getTime() : 0;
+  const yearLike = rangeMs > 1000 * 60 * 60 * 24 * 120; // > ~4 mois
+  const take = yearLike ? 200 : 500;
 
   try {
     const accessWhere = await agendaEventAccessWhere(session.user, {
@@ -97,9 +100,9 @@ export async function GET(request: Request) {
             : []),
         ],
       },
-      include: agendaEventInclude,
+      include: agendaEventListInclude,
       orderBy: { startAt: "asc" },
-      take: 500,
+      take,
     });
 
     const sourceTaskIds = events

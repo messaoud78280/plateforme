@@ -1,8 +1,5 @@
-import type { Metadata } from "next";
+import { getCachedServerSession } from "@/lib/auth/cached-session";
 import { SEO_NOINDEX_ROBOTS } from "@/lib/seo-search-engines";
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/auth";
 import { OutilsCommunication } from "@/components/OutilsCommunication";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { UserAccountDropdown } from "@/components/dashboard/UserAccountDropdown";
@@ -24,6 +21,8 @@ import {
   personaHomeLabel,
 } from "@/lib/equipe-acces/nav-by-persona";
 import { PERMISSION_PROFILE_LABELS, PERSON_TYPE_LABELS, type PermissionProfileKey, type PersonType } from "@/lib/equipe-acces/types";
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   robots: SEO_NOINDEX_ROBOTS,
@@ -61,7 +60,7 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions);
+  const session = await getCachedServerSession();
 
   if (!session) {
     redirect("/connexion?callbackUrl=/dashboard");

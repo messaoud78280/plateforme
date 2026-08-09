@@ -15,7 +15,9 @@ import {
   addYears,
   formatDayTitle,
   formatMonthYear,
+  formatTime,
   isSameDay,
+  isoWeekLabel,
   rangeForView,
   startOfDay,
   startOfMonth,
@@ -27,7 +29,7 @@ import {
 } from "@/lib/agenda/conflicts";
 import { AGENDA_LAYER_FILTERS, type AgendaLayerId } from "@/lib/agenda/serialize-event";
 import type { AgendaScope } from "@/lib/agenda/types";
-import { formatTime } from "@/lib/agenda/dates";
+import { summarizePeriod } from "@/lib/agenda/period-summary";
 import type {
   AgendaEventDTO,
   AgendaProjectOption,
@@ -105,6 +107,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
       });
       if (searchDebounced) params.set("q", searchDebounced);
       if (projectFilter) params.set("projectId", projectFilter);
+      if (view === "year") params.set("lite", "1");
       const res = await fetch(`/api/agenda/events?${params}`, {
         credentials: "same-origin",
       });
@@ -148,6 +151,14 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
       if (e.key === "t" || e.key === "T") {
         e.preventDefault();
         setCursor(startOfDay(new Date()));
+        setSelectedEventId(null);
+        setPanelOpen(true);
+      }
+      if (e.key === "Escape") {
+        setSelectedEventId(null);
+        setMoreOpen(false);
+        setFiltersOpen(false);
+        setPanelOpen(false);
       }
       if (e.key === "n" || e.key === "N") {
         e.preventDefault();
@@ -219,11 +230,12 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
     if (view === "week") {
       const mon = startOfWeek(cursor);
       const sun = addDays(mon, 6);
+      const week = isoWeekLabel(mon);
       const sameMonth = mon.getMonth() === sun.getMonth();
       if (sameMonth) {
-        return `${mon.getDate()} – ${sun.getDate()} ${formatMonthYear(mon)}`;
+        return `${week} · ${mon.getDate()} – ${sun.getDate()} ${formatMonthYear(mon)}`;
       }
-      return `${mon.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} – ${sun.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}`;
+      return `${week} · ${mon.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} – ${sun.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}`;
     }
     if (view === "year") return String(cursor.getFullYear());
     return formatMonthYear(cursor);
@@ -238,6 +250,20 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
 
   function goToday() {
     setCursor(startOfDay(new Date()));
+    setSelectedEventId(null);
+    setPanelOpen(true);
+  }
+
+  const periodSummary = useMemo(() => summarizePeriod(visibleEvents), [visibleEvents]);
+  const filtersActive =
+    scope !== "all" || Boolean(projectFilter) || Boolean(layers) || Boolean(searchDebounced);
+
+  function resetFilters() {
+    setScope("all");
+    setProjectFilter("");
+    setLayers(null);
+    setSearch("");
+    setSearchDebounced("");
   }
 
   function openCreate(d?: AgendaQuickCreateDraft, typeHint?: string | null) {
@@ -307,6 +333,51 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
     setSelectedEventId(id);
     setPanelOpen(true);
     setPanelCollapsed(false);
+    if (view === "year") {
+      const baseId = id.includes("__") ? id.split("__")[0]! : id;
+      void (async () => {
+        try {
+          const res = await fetch(`/api/agenda/events/${baseId}`, {
+            credentials: "same-origin",
+          });
+          if (!res.ok) return;
+          const data = await res.json();
+          if (data.event) {
+            upsertEvent({
+              ...data.event,
+              startAt:
+                data.event.startAt instanceof Date
+                  ? data.event.startAt.toISOString()
+                  : String(data.event.startAt),
+              endAt:
+                data.event.endAt instanceof Date
+                  ? data.event.endAt.toISOString()
+                  : String(data.event.endAt),
+              readOnly: false,
+              source: "agenda",
+              linkedPurchaseOrder: Boolean(data.event.purchaseOrderId || data.event.purchaseOrder),
+              deliveryVisual: data.event.purchaseOrder?.deliveryVisual ?? null,
+            });
+          }
+        } catch {
+          /* ignore */
+        }
+      })();
+    }
+  }
+
+  function selectDayKeepView(d: Date) {
+    setCursor(startOfDay(d));
+    setSelectedEventId(null);
+    setPanelOpen(true);
+    setPanelCollapsed(false);
+  }
+
+  function openDayView(d: Date) {
+    setCursor(startOfDay(d));
+    setSelectedEventId(null);
+    setView("day");
+    setPanelOpen(true);
   }
 
   function upsertEvent(event: AgendaEventDTO) {
@@ -557,9 +628,17 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
           </div>
         </div>
 
-        {/* Portée + couches — toujours visibles, compact */}
-        <div className="flex flex-wrap items-center gap-2 border-b border-slate-200/80 px-4 py-2">
-          <div className="flex items-center gap-1 rounded-lg bg-slate-100 p-0.5">
+        {/* Portée + couches — poids léger si rien d’actif */}
+        <div
+          className={`flex flex-wrap items-center gap-2 border-b border-slate-200/60 px-4 py-1.5 ${
+            filtersActive ? "bg-slate-50/40" : ""
+          }`}
+        >
+          <div
+            className={`flex items-center gap-1 rounded-lg p-0.5 ${
+              scope !== "all" ? "bg-slate-100" : "bg-transparent"
+            }`}
+          >
             {(
               [
                 { id: "mine", label: "Moi" },
@@ -571,42 +650,56 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
                 key={s.id}
                 type="button"
                 onClick={() => setScope(s.id)}
-                className={`rounded-md px-2.5 py-1 text-[11px] font-semibold ${
+                className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition-colors ${
                   scope === s.id
-                    ? "bg-white text-[#1e3a5f] shadow-sm"
-                    : "text-slate-500 hover:text-slate-700"
+                    ? scope !== "all"
+                      ? "bg-white text-[#1e3a5f] shadow-sm"
+                      : "bg-slate-100/80 text-slate-600"
+                    : "text-slate-400 hover:text-slate-600"
                 }`}
               >
                 {s.label}
               </button>
             ))}
           </div>
-          <div className="h-4 w-px bg-slate-200" />
+          <div className="h-4 w-px bg-slate-200/80" />
           {AGENDA_LAYER_FILTERS.map((layer) => {
             const active = !layers || layers.has(layer.id);
+            const filtering = Boolean(layers);
             return (
               <button
                 key={layer.id}
                 type="button"
                 onClick={() => toggleLayer(layer.id)}
-                className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                  active
-                    ? "bg-slate-100 text-[#1e3a5f]"
-                    : "text-slate-300 line-through"
+                className={`rounded-full px-2 py-0.5 text-[11px] font-semibold transition-colors ${
+                  filtering && active
+                    ? "bg-[#1e3a5f]/10 text-[#1e3a5f] ring-1 ring-[#1e3a5f]/25"
+                    : active
+                      ? "text-slate-500 hover:bg-slate-100"
+                      : "text-slate-300 line-through"
                 }`}
               >
                 {layer.label}
+                {filtering && active ? " ✓" : ""}
               </button>
             );
           })}
           <div className="ml-auto flex items-center gap-1.5">
-            <span className="hidden text-[11px] font-semibold uppercase text-slate-400 sm:inline">
+            <span
+              className={`hidden text-[11px] font-semibold uppercase sm:inline ${
+                projectFilter ? "text-[#1e3a5f]" : "text-slate-400"
+              }`}
+            >
               Chantier
             </span>
             <select
               value={projectFilter}
               onChange={(e) => setProjectFilter(e.target.value)}
-              className="max-w-[140px] rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] outline-none sm:max-w-[180px]"
+              className={`max-w-[140px] rounded-lg bg-white px-2 py-1 text-[11px] outline-none sm:max-w-[180px] ${
+                projectFilter
+                  ? "border border-[#1e3a5f]/35 font-semibold text-[#1e3a5f]"
+                  : "border border-transparent text-slate-500 hover:border-slate-200"
+              }`}
             >
               <option value="">Tous</option>
               {projects.map((p) => (
@@ -617,6 +710,95 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
             </select>
           </div>
         </div>
+
+        {filtersActive ? (
+          <div className="flex flex-wrap items-center gap-1.5 border-b border-slate-200/60 px-4 py-1.5">
+            {scope !== "all" ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#1e3a5f]/10 px-2 py-0.5 text-[11px] font-semibold text-[#1e3a5f]">
+                {scope === "mine" ? "Moi" : "Équipe"}
+                <button type="button" onClick={() => setScope("all")} aria-label="Retirer">
+                  ×
+                </button>
+              </span>
+            ) : null}
+            {projectFilter ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#1e3a5f]/10 px-2 py-0.5 text-[11px] font-semibold text-[#1e3a5f]">
+                Chantier : {projects.find((p) => p.id === projectFilter)?.title ?? "…"}
+                <button type="button" onClick={() => setProjectFilter("")} aria-label="Retirer">
+                  ×
+                </button>
+              </span>
+            ) : null}
+            {layers
+              ? AGENDA_LAYER_FILTERS.filter((l) => layers.has(l.id)).map((l) => (
+                  <span
+                    key={l.id}
+                    className="inline-flex items-center gap-1 rounded-full bg-[#1e3a5f]/10 px-2 py-0.5 text-[11px] font-semibold text-[#1e3a5f]"
+                  >
+                    {l.label} ✓
+                    <button type="button" onClick={() => toggleLayer(l.id)} aria-label="Retirer">
+                      ×
+                    </button>
+                  </span>
+                ))
+              : null}
+            {searchDebounced ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#1e3a5f]/10 px-2 py-0.5 text-[11px] font-semibold text-[#1e3a5f]">
+                « {searchDebounced} »
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch("");
+                    setSearchDebounced("");
+                  }}
+                  aria-label="Retirer"
+                >
+                  ×
+                </button>
+              </span>
+            ) : null}
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="ml-1 text-[11px] font-semibold text-slate-500 underline-offset-2 hover:text-[#1e3a5f] hover:underline"
+            >
+              Réinitialiser
+            </button>
+          </div>
+        ) : null}
+
+        {/* Résumé période compact */}
+        {!loading && periodSummary.total > 0 ? (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 border-b border-slate-100 px-4 py-1.5 text-[11px] text-slate-500">
+            <span className="font-semibold uppercase tracking-wide text-slate-400">
+              {view === "year"
+                ? cursor.getFullYear()
+                : view === "month"
+                  ? formatMonthYear(cursor)
+                  : view === "week"
+                    ? isoWeekLabel(startOfWeek(cursor))
+                    : "Jour"}
+            </span>
+            <span className="font-semibold text-slate-700">{periodSummary.total} événements</span>
+            {periodSummary.interventions > 0 ? (
+              <span>{periodSummary.interventions} interventions</span>
+            ) : null}
+            {periodSummary.livraisons > 0 ? (
+              <span>{periodSummary.livraisons} livraisons</span>
+            ) : null}
+            {periodSummary.echeances > 0 ? (
+              <span>{periodSummary.echeances} échéances</span>
+            ) : null}
+            {periodSummary.reunions > 0 ? (
+              <span>{periodSummary.reunions} réunions</span>
+            ) : null}
+            {periodSummary.aConfirmer > 0 ? (
+              <span className="font-medium text-amber-700">
+                {periodSummary.aConfirmer} à confirmer
+              </span>
+            ) : null}
+          </div>
+        ) : null}
 
         {/* Mobile view switcher */}
         <div className="flex border-b border-slate-200/80 px-4 py-2 sm:hidden">
@@ -700,11 +882,10 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
               cursor={cursor}
               events={visibleEvents}
               selectedEventId={selectedEventId}
+              selectedDay={cursor}
               onSelectEvent={handleSelectEvent}
-              onOpenDay={(d) => {
-                setCursor(startOfDay(d));
-                setView("day");
-              }}
+              onSelectDay={selectDayKeepView}
+              onOpenDay={openDayView}
               onQuickCreate={openCreate}
             />
           ) : null}
@@ -713,10 +894,13 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
             <AgendaYearView
               cursor={cursor}
               events={visibleEvents}
+              selectedDay={cursor}
               onOpenMonth={(d) => {
                 setCursor(startOfMonth(d));
                 setView("month");
               }}
+              onSelectDay={selectDayKeepView}
+              onOpenDay={openDayView}
             />
           ) : null}
         </div>
@@ -727,16 +911,15 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
         <div className="hidden lg:block">
           <AgendaSidePanel
             cursor={cursor}
+            view={view}
             selectedEvent={selectedEvent}
             currentUserId={currentUserId}
             todayEvents={todayEvents}
+            periodEvents={visibleEvents}
             conflictWarning={conflictWarning}
             onCursorChange={setCursor}
-            onSelectDay={(d) => {
-              setCursor(startOfDay(d));
-              setView("day");
-            }}
-            onSelectEvent={setSelectedEventId}
+            onSelectDay={selectDayKeepView}
+            onSelectEvent={handleSelectEvent}
             onClearSelection={() => setSelectedEventId(null)}
             onEdit={() => {
               if (selectedEvent?.readOnly || selectedEvent?.linkedPurchaseOrder) return;
@@ -766,17 +949,17 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
             <div className="max-h-[80dvh] overflow-y-auto">
               <AgendaSidePanel
                 cursor={cursor}
+                view={view}
                 selectedEvent={selectedEvent}
                 currentUserId={currentUserId}
                 todayEvents={todayEvents}
+                periodEvents={visibleEvents}
                 conflictWarning={conflictWarning}
                 onCursorChange={setCursor}
                 onSelectDay={(d) => {
-                  setCursor(startOfDay(d));
-                  setView("day");
-                  setPanelOpen(false);
+                  selectDayKeepView(d);
                 }}
-                onSelectEvent={setSelectedEventId}
+                onSelectEvent={handleSelectEvent}
                 onClearSelection={() => setSelectedEventId(null)}
                 onEdit={() => {
                   if (selectedEvent?.readOnly || selectedEvent?.linkedPurchaseOrder) return;

@@ -62,6 +62,39 @@ export function isSameMonth(a: Date, b: Date): boolean {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
 }
 
+/** Numéro de semaine ISO (lundi → dimanche). */
+export function isoWeekNumber(d: Date): number {
+  const date = startOfDay(d);
+  const day = (date.getDay() + 6) % 7; // 0 = lundi
+  date.setDate(date.getDate() - day + 3);
+  const firstThursday = new Date(date.getFullYear(), 0, 4);
+  const firstDay = (firstThursday.getDay() + 6) % 7;
+  firstThursday.setDate(firstThursday.getDate() - firstDay + 3);
+  return 1 + Math.round((date.getTime() - firstThursday.getTime()) / (7 * 24 * 60 * 60 * 1000));
+}
+
+export function isoWeekLabel(d: Date): string {
+  return `S${isoWeekNumber(d)}`;
+}
+
+export function isWeekend(d: Date): boolean {
+  const day = d.getDay();
+  return day === 0 || day === 6;
+}
+
+/** True si un événement chevauche la journée civile. */
+export function eventOverlapsDay(
+  startAt: string | Date,
+  endAt: string | Date,
+  day: Date,
+): boolean {
+  const s = startAt instanceof Date ? startAt : new Date(startAt);
+  const e = endAt instanceof Date ? endAt : new Date(endAt);
+  const dayStart = startOfDay(day);
+  const dayEnd = endOfDay(day);
+  return s <= dayEnd && e >= dayStart;
+}
+
 export function minutesSinceMidnight(d: Date): number {
   return d.getHours() * 60 + d.getMinutes();
 }

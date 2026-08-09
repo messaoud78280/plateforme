@@ -1,12 +1,24 @@
 "use client";
 
-import { isSameDay, isSameMonth, monthGrid, startOfMonth } from "@/lib/agenda/dates";
+import { useMemo } from "react";
+import {
+  isSameDay,
+  isSameMonth,
+  isoWeekLabel,
+  monthGrid,
+  startOfMonth,
+} from "@/lib/agenda/dates";
+import { dayActivityIndex, dayKey } from "@/lib/agenda/period-summary";
+import { agendaTypeMeta } from "@/lib/agenda/types";
 import type { AgendaEventDTO } from "./agenda-types";
 
 type Props = {
   cursor: Date;
   events: AgendaEventDTO[];
+  selectedDay: Date;
   onOpenMonth: (d: Date) => void;
+  onSelectDay: (d: Date) => void;
+  onOpenDay: (d: Date) => void;
 };
 
 const WEEKDAYS = ["L", "M", "M", "J", "V", "S", "D"];
@@ -25,43 +37,52 @@ const MONTH_NAMES = [
   "décembre",
 ];
 
+const TYPE_DOT: Record<string, string> = {
+  LIVRAISON: "#f97316",
+  INTERVENTION: "#10b981",
+  VISITE_CHANTIER: "#10b981",
+  REUNION_CHANTIER: "#3b82f6",
+  RDV_CLIENT: "#3b82f6",
+  RDV_FOURNISSEUR: "#f97316",
+  ECHEANCE: "#ef4444",
+  SITUATION: "#ef4444",
+};
+
 function MiniMonth({
   year,
   monthIndex,
-  events,
+  activity,
+  selectedDay,
   onOpenMonth,
+  onSelectDay,
+  onOpenDay,
 }: {
   year: number;
   monthIndex: number;
-  events: AgendaEventDTO[];
+  activity: Map<string, { count: number; types: Set<string> }>;
+  selectedDay: Date;
   onOpenMonth: (d: Date) => void;
+  onSelectDay: (d: Date) => void;
+  onOpenDay: (d: Date) => void;
 }) {
   const monthDate = new Date(year, monthIndex, 1);
   const days = monthGrid(monthDate);
   const month = startOfMonth(monthDate);
   const today = new Date();
-
-  function hasEvent(day: Date) {
-    return events.some((ev) => {
-      const s = new Date(ev.startAt);
-      const e = new Date(ev.endAt);
-      const dayStart = new Date(day);
-      dayStart.setHours(0, 0, 0, 0);
-      const dayEnd = new Date(day);
-      dayEnd.setHours(23, 59, 59, 999);
-      return s <= dayEnd && e >= dayStart;
-    });
-  }
+  const weekLabel = isoWeekLabel(days[0]!);
 
   return (
-    <button
-      type="button"
-      onClick={() => onOpenMonth(monthDate)}
-      className="rounded-xl p-3 text-left transition-colors hover:bg-slate-50"
-    >
-      <p className="mb-2 text-sm font-semibold capitalize text-[#1d4ed8]">
-        {MONTH_NAMES[monthIndex]}
-      </p>
+    <div className="rounded-2xl p-3 transition-colors hover:bg-slate-50/80">
+      <button
+        type="button"
+        onClick={() => onOpenMonth(monthDate)}
+        className="mb-2 flex w-full items-center justify-between text-left"
+      >
+        <span className="text-sm font-semibold capitalize text-[#1e3a5f] hover:underline">
+          {MONTH_NAMES[monthIndex]}
+        </span>
+        <span className="text-[10px] font-medium text-slate-300">{weekLabel}</span>
+      </button>
       <div className="grid grid-cols-7 gap-0 text-center">
         {WEEKDAYS.map((d, i) => (
           <div key={`${d}-${i}`} className="py-0.5 text-[9px] font-semibold text-slate-300">
@@ -70,44 +91,105 @@ function MiniMonth({
         ))}
         {days.map((day) => {
           const inMonth = isSameMonth(day, month);
-          const isToday = isSameDay(day, today);
-          const marked = inMonth && hasEvent(day);
+          const isToday = inMonth && isSameDay(day, today);
+          const selected = inMonth && isSameDay(day, selectedDay);
+          const info = inMonth ? activity.get(dayKey(day)) : undefined;
+          const count = info?.count ?? 0;
+          const typeColors = info
+            ? Array.from(info.types)
+                .slice(0, 3)
+                .map((t) => TYPE_DOT[t] ?? agendaTypeMeta(t).colors.border)
+            : [];
+
           return (
-            <div
+            <button
+              type="button"
               key={day.toISOString()}
-              className={`relative flex h-5 items-center justify-center text-[10px] ${
-                isToday
-                  ? "rounded-full bg-[#1d4ed8] font-semibold text-white"
-                  : inMonth
-                    ? "text-slate-600"
-                    : "text-slate-200"
+              disabled={!inMonth}
+              onClick={() => {
+                if (!inMonth) return;
+                onSelectDay(day);
+              }}
+              onDoubleClick={() => {
+                if (!inMonth) return;
+                onOpenDay(day);
+              }}
+              className={`relative flex h-7 flex-col items-center justify-start rounded-md pt-0.5 text-[10px] transition-colors ${
+                !inMonth
+                  ? "cursor-default text-transparent"
+                  : isToday
+                    ? "font-semibold text-white"
+                    : selected
+                      ? "bg-slate-100 font-semibold text-[#1e3a5f]"
+                      : "text-slate-600 hover:bg-slate-100/80"
               }`}
             >
-              {day.getDate()}
-              {marked && !isToday ? (
-                <span className="absolute bottom-0 left-1/2 h-0.5 w-0.5 -translate-x-1/2 rounded-full bg-[#1d4ed8]" />
-              ) : null}
-            </div>
+              {isToday ? (
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#1e3a5f]">
+                  {day.getDate()}
+                </span>
+              ) : (
+                <span className={inMonth ? "" : "invisible"}>{day.getDate()}</span>
+              )}
+              {inMonth && count > 0 ? (
+                <span className="mt-0.5 flex h-1.5 items-center justify-center gap-0.5">
+                  {count === 1 ? (
+                    <span
+                      className="h-1 w-1 rounded-full"
+                      style={{ backgroundColor: typeColors[0] ?? "#1d4ed8" }}
+                    />
+                  ) : count === 2 ? (
+                    <>
+                      <span
+                        className="h-1 w-1 rounded-full"
+                        style={{ backgroundColor: typeColors[0] ?? "#1d4ed8" }}
+                      />
+                      <span
+                        className="h-1 w-1 rounded-full"
+                        style={{ backgroundColor: typeColors[1] ?? "#64748b" }}
+                      />
+                    </>
+                  ) : (
+                    <span className="text-[8px] font-semibold leading-none text-slate-400">
+                      +{count}
+                    </span>
+                  )}
+                </span>
+              ) : (
+                <span className="h-1.5" />
+              )}
+            </button>
           );
         })}
       </div>
-    </button>
+    </div>
   );
 }
 
-export function AgendaYearView({ cursor, events, onOpenMonth }: Props) {
+export function AgendaYearView({
+  cursor,
+  events,
+  selectedDay,
+  onOpenMonth,
+  onSelectDay,
+  onOpenDay,
+}: Props) {
   const year = cursor.getFullYear();
+  const activity = useMemo(() => dayActivityIndex(events), [events]);
 
   return (
-    <div className="h-full overflow-y-auto p-4">
-      <div className="mx-auto grid max-w-4xl grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="h-full overflow-y-auto p-3 sm:p-4">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {Array.from({ length: 12 }, (_, i) => (
           <MiniMonth
             key={i}
             year={year}
             monthIndex={i}
-            events={events}
+            activity={activity}
+            selectedDay={selectedDay}
             onOpenMonth={onOpenMonth}
+            onSelectDay={onSelectDay}
+            onOpenDay={onOpenDay}
           />
         ))}
       </div>

@@ -12,6 +12,7 @@ import {
   hoursList,
   isOutsideWorkHours,
   isSameDay,
+  isoWeekLabel,
   minutesSinceMidnight,
   startOfDay,
   startOfWeek,
@@ -534,7 +535,13 @@ export function AgendaDayWeekView({
   return (
     <div className="relative flex h-full flex-col">
       <div className="flex border-b border-slate-200/80">
-        <div className="w-14 shrink-0" />
+        <div className="flex w-14 shrink-0 flex-col items-center justify-center gap-0.5">
+          {mode === "week" ? (
+            <span className="text-[10px] font-bold tabular-nums text-[#1e3a5f]/70">
+              {isoWeekLabel(days[0]!)}
+            </span>
+          ) : null}
+        </div>
         <div className={`grid flex-1 ${mode === "week" ? "grid-cols-7" : "grid-cols-1"}`}>
           {days.map((d) => {
             const isToday = isSameDay(d, now);

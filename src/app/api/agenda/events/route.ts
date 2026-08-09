@@ -2,10 +2,16 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import type { AgendaEventType } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
-import { agendaEventAccessWhere, agendaEventInclude, agendaEventListInclude, resolveAgendaOwnerUserId } from "@/lib/agenda/access";
+import {
+  agendaEventAccessWhere,
+  agendaEventInclude,
+  agendaEventListInclude,
+  agendaEventLiteInclude,
+  resolveAgendaOwnerUserId,
+} from "@/lib/agenda/access";
 import { listLinkedAgendaItems } from "@/lib/agenda/linked-sources";
 import { notifyAgendaInvitees } from "@/lib/agenda/notify";
-import { expandRecurrenceForRange } from "@/lib/agenda/recurrence";
+import { expandRecurrenceForRange, type RecurringSeed } from "@/lib/agenda/recurrence";
 import { AGENDA_EVENT_TYPES } from "@/lib/agenda/types";
 import { prisma } from "@/lib/prisma";
 import { canClientAccessProject } from "@/lib/organization/access";
@@ -38,7 +44,7 @@ function parseDate(value: string | null): Date | null {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
-/** GET /api/agenda/events?from=&to=&scope=&projectId=&q=&type=&linked=1 */
+/** GET /api/agenda/events?from=&to=&scope=&projectId=&q=&type=&linked=1&lite=1 */
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -53,9 +59,10 @@ export async function GET(request: Request) {
   const type = searchParams.get("type");
   const q = searchParams.get("q")?.trim();
   const includeLinked = searchParams.get("linked") === "1";
+  const lite = searchParams.get("lite") === "1";
   const rangeMs = from && to ? to.getTime() - from.getTime() : 0;
   const yearLike = rangeMs > 1000 * 60 * 60 * 24 * 120; // > ~4 mois
-  const take = yearLike ? 200 : 500;
+  const take = lite || yearLike ? 800 : 500;
 
   try {
     const accessWhere = await agendaEventAccessWhere(session.user, {
@@ -100,14 +107,16 @@ export async function GET(request: Request) {
             : []),
         ],
       },
-      include: agendaEventListInclude,
+      include: lite ? agendaEventLiteInclude : agendaEventListInclude,
       orderBy: { startAt: "asc" },
       take,
     });
 
-    const sourceTaskIds = events
-      .filter((e) => e.sourceMessageKind === "TASK" && e.sourceMessageId)
-      .map((e) => e.sourceMessageId as string);
+    const sourceTaskIds = lite
+      ? []
+      : events
+          .filter((e) => e.sourceMessageKind === "TASK" && e.sourceMessageId)
+          .map((e) => e.sourceMessageId as string);
     const taskMsgs =
       sourceTaskIds.length > 0
         ? await prisma.taskMessage.findMany({
@@ -119,18 +128,65 @@ export async function GET(request: Request) {
     const canOpenPo = isInternalPurchaseOrderActor(session.user);
 
     const agendaEvents = events.flatMap((e) => {
+      const projectForSeed =
+        e.project == null
+          ? null
+          : {
+              id: e.project.id,
+              title: e.project.title,
+              siteCity: "siteCity" in e.project ? (e.project.siteCity as string | null) : null,
+              siteAddress:
+                "siteAddress" in e.project ? (e.project.siteAddress as string | null) : null,
+            };
+      const responsibleForSeed =
+        e.responsible == null
+          ? null
+          : {
+              id: e.responsible.id,
+              name: e.responsible.name ?? "",
+              email: "email" in e.responsible ? String(e.responsible.email ?? "") : "",
+            };
+      const seed: RecurringSeed = {
+        id: e.id,
+        title: e.title,
+        description: e.description,
+        location: e.location,
+        type: e.type,
+        status: e.status,
+        startAt: e.startAt,
+        endAt: e.endAt,
+        allDay: e.allDay,
+        projectId: e.projectId,
+        responsibleId: e.responsibleId,
+        reminderMinutes: e.reminderMinutes,
+        recurrence: e.recurrence,
+        project: projectForSeed,
+        responsible: responsibleForSeed,
+        createdBy: { id: e.createdById, name: "", email: "" },
+        attendees: [],
+      };
+      if (!lite && "attendees" in e && Array.isArray(e.attendees)) {
+        seed.attendees = e.attendees.map((a) => ({
+          id: a.id,
+          status: a.status,
+          user: {
+            id: a.user.id,
+            name: a.user.name ?? "",
+            email: a.user.email ?? "",
+          },
+        }));
+      }
+      if (!lite && "createdBy" in e) {
+        const cb = (e as { createdBy?: { id: string; name: string | null; email: string } })
+          .createdBy;
+        if (cb) {
+          seed.createdBy = { id: cb.id, name: cb.name ?? "", email: cb.email ?? "" };
+        }
+      }
       const expanded =
         from && to
-          ? expandRecurrenceForRange(
-              {
-                ...e,
-                startAt: e.startAt,
-                endAt: e.endAt,
-              },
-              from,
-              to,
-            )
-          : [{ ...e, occurrenceStart: e.startAt.toISOString() }];
+          ? expandRecurrenceForRange(seed, from, to)
+          : [{ ...seed, occurrenceStart: e.startAt.toISOString() }];
 
       return expanded.map((occ) => {
         const sheet = "followUpSheet" in e ? e.followUpSheet : null;
@@ -142,12 +198,12 @@ export async function GET(request: Request) {
           followUpSheet: sheet,
         });
         let sourceMessageHref: string | null = null;
-        if (e.sourceMessageKind === "TASK" && e.sourceMessageId) {
+        if (!lite && e.sourceMessageKind === "TASK" && e.sourceMessageId) {
           const taskId = taskByMsg.get(e.sourceMessageId);
           sourceMessageHref = taskId
             ? `/dashboard/messagerie?task=${taskId}&messageId=${e.sourceMessageId}`
             : `/dashboard/messagerie?messageId=${e.sourceMessageId}`;
-        } else if (e.sourceMessageKind === "DIRECT" && e.sourceMessageId) {
+        } else if (!lite && e.sourceMessageKind === "DIRECT" && e.sourceMessageId) {
           sourceMessageHref = `/dashboard/messagerie?tab=messages-directs&messageId=${e.sourceMessageId}`;
         }
         const poSummary = serializePurchaseOrderForAgenda(
@@ -155,10 +211,40 @@ export async function GET(request: Request) {
           { canOpen: canOpenPo },
         );
         const linkedPo = Boolean(e.purchaseOrderId);
+        const sheetTitle =
+          sheet && "title" in sheet && typeof sheet.title === "string" ? sheet.title : null;
+        const project =
+          e.project == null
+            ? null
+            : {
+                id: e.project.id,
+                title: e.project.title,
+                siteCity: "siteCity" in e.project ? (e.project.siteCity as string | null) : null,
+                siteAddress:
+                  "siteAddress" in e.project ? (e.project.siteAddress as string | null) : null,
+              };
+        const responsible =
+          e.responsible == null
+            ? null
+            : {
+                id: e.responsible.id,
+                name: e.responsible.name ?? "",
+                email: "email" in e.responsible ? String(e.responsible.email ?? "") : "",
+              };
+        const createdBy =
+          lite || !("createdBy" in e) || !e.createdBy
+            ? { id: e.createdById, name: "", email: "" }
+            : e.createdBy;
         return {
           ...occ,
           startAt: occ.startAt instanceof Date ? occ.startAt.toISOString() : String(occ.startAt),
           endAt: occ.endAt instanceof Date ? occ.endAt.toISOString() : String(occ.endAt),
+          description: lite ? null : "description" in occ ? occ.description : null,
+          location: lite ? null : "location" in occ ? occ.location : null,
+          project,
+          responsible,
+          createdBy,
+          attendees: lite ? [] : "attendees" in e ? e.attendees : [],
           readOnly: false as const,
           linkedPurchaseOrder: linkedPo,
           purchaseOrderId: e.purchaseOrderId ?? null,
@@ -171,9 +257,9 @@ export async function GET(request: Request) {
               ? `/dashboard/commandes/${poSummary.id}`
               : (null as string | null),
           followUpSheetId: sheet?.id ?? e.followUpSheetId ?? null,
-          followUpSheet: sheet ? { id: sheet.id, title: sheet.title } : null,
-          sourceMessageKind: e.sourceMessageKind ?? null,
-          sourceMessageId: e.sourceMessageId ?? null,
+          followUpSheet: sheet ? { id: sheet.id, title: sheetTitle ?? "Fiche" } : null,
+          sourceMessageKind: lite ? null : (e.sourceMessageKind ?? null),
+          sourceMessageId: lite ? null : (e.sourceMessageId ?? null),
           sourceMessageHref,
           urgency,
           urgencyLabel,

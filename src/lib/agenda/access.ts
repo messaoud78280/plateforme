@@ -155,3 +155,33 @@ export const agendaEventListInclude = {
     include: { user: { select: { id: true, name: true, email: true } } },
   },
 } satisfies Prisma.AgendaEventInclude;
+
+/** Vue Année — projection légère (marqueurs / panneau, pas de N+1 PO). */
+export const agendaEventLiteInclude = {
+  project: { select: { id: true, title: true } },
+  responsible: { select: { id: true, name: true } },
+  followUpSheet: {
+    select: {
+      id: true,
+      nextActionAt: true,
+      nextActionDone: true,
+      urgencyOverride: true,
+      status: true,
+    },
+  },
+  purchaseOrder: {
+    select: {
+      id: true,
+      number: true,
+      subject: true,
+      status: true,
+      sharedWithSupplier: true,
+      requestedDeliveryAt: true,
+      confirmedDeliveryAt: true,
+      proposedDeliveryAt: true,
+      proposedDeliveryStatus: true,
+      legacyTaskId: true,
+      externalOrganization: { select: { name: true, tradeName: true } },
+    },
+  },
+} satisfies Prisma.AgendaEventInclude;

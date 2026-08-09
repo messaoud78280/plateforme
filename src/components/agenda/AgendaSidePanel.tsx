@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import type { AgendaEventDTO, AgendaView } from "./agenda-types";
+import { pickKeyEvents, eventsForDay as eventsOnDay } from "@/lib/agenda/period-summary";
 import {
+  addDays,
   addMonths,
   formatMonthYear,
   formatTime,
@@ -10,6 +13,7 @@ import {
   isSameMonth,
   monthGrid,
   startOfMonth,
+  startOfWeek,
 } from "@/lib/agenda/dates";
 import { agendaEventCardLines, isDeliveryUnconfirmed } from "@/lib/agenda/event-card";
 import {
@@ -18,13 +22,14 @@ import {
 } from "@/lib/agenda/types";
 import { AGENDA_STATUS_LABELS } from "@/lib/agenda/serialize-event";
 import { URGENCY_STYLES } from "@/lib/follow-up/types";
-import type { AgendaEventDTO } from "./agenda-types";
 
 type Props = {
   cursor: Date;
+  view?: AgendaView;
   selectedEvent: AgendaEventDTO | null;
   currentUserId?: string;
   todayEvents?: AgendaEventDTO[];
+  periodEvents?: AgendaEventDTO[];
   conflictWarning?: string | null;
   onCursorChange: (d: Date) => void;
   onSelectDay: (d: Date) => void;
@@ -62,9 +67,11 @@ function formatShortDt(iso: string | null | undefined): string | null {
 
 export function AgendaSidePanel({
   cursor,
+  view = "day",
   selectedEvent,
   currentUserId,
   todayEvents = [],
+  periodEvents = [],
   conflictWarning = null,
   onCursorChange,
   onSelectDay,
@@ -98,6 +105,54 @@ export function AgendaSidePanel({
       : null;
 
   const todaySlice = todayEvents.slice(0, TODAY_MAX);
+  const panelList =
+    view === "year"
+      ? pickKeyEvents(periodEvents.length ? periodEvents : todayEvents, 7)
+      : view === "month"
+        ? pickKeyEvents(
+            (periodEvents.length ? periodEvents : todayEvents).filter((ev) => {
+              const s = new Date(ev.startAt);
+              return s.getMonth() === cursor.getMonth() && s.getFullYear() === cursor.getFullYear();
+            }),
+            8,
+          )
+        : view === "week"
+          ? (() => {
+              const mon = startOfWeek(cursor);
+              const sun = addDays(mon, 6);
+              sun.setHours(23, 59, 59, 999);
+              return (periodEvents.length ? periodEvents : todayEvents)
+                .filter((ev) => {
+                  const s = new Date(ev.startAt);
+                  return s >= mon && s <= sun;
+                })
+                .slice(0, TODAY_MAX);
+            })()
+          : isSameDay(cursor, today)
+            ? todaySlice
+            : eventsOnDay(periodEvents.length ? periodEvents : todayEvents, cursor).slice(0, TODAY_MAX);
+
+  const panelTitle =
+    view === "year"
+      ? "À venir"
+      : view === "month"
+        ? `Dates clés — ${formatMonthYear(cursor)}`
+        : view === "week"
+          ? "Cette semaine"
+          : isSameDay(cursor, today)
+            ? "Aujourd’hui"
+            : "Journée sélectionnée";
+
+  const emptyHint =
+    view === "year"
+      ? "Aucune date importante à venir dans cette année."
+      : view === "month"
+        ? "Aucune date clé ce mois-ci."
+        : view === "week"
+          ? "Rien de planifié cette semaine."
+          : isSameDay(cursor, today)
+            ? "Rien de planifié aujourd’hui."
+            : "Rien de planifié ce jour.";
 
   return (
     <aside className="flex h-full w-full shrink-0 flex-col border-l border-slate-200/60 bg-white lg:w-[280px]">
@@ -174,25 +229,30 @@ export function AgendaSidePanel({
           <div className="space-y-3">
             <div>
               <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">
-                Aujourd’hui
+                {panelTitle}
               </p>
-              <p className="mt-0.5 text-sm font-semibold capitalize text-[#1e3a5f]">
-                {today.toLocaleDateString("fr-FR", {
-                  weekday: "long",
-                  day: "numeric",
-                  month: "long",
-                })}
-              </p>
+              {view === "day" || view === "week" ? (
+                <p className="mt-0.5 text-sm font-semibold capitalize text-[#1e3a5f]">
+                  {view === "week"
+                    ? `${startOfWeek(cursor).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} – ${addDays(startOfWeek(cursor), 6).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}`
+                    : cursor.toLocaleDateString("fr-FR", {
+                        weekday: "long",
+                        day: "numeric",
+                        month: "long",
+                      })}
+                </p>
+              ) : null}
             </div>
-            {todaySlice.length === 0 ? (
+            {panelList.length === 0 ? (
               <p className="rounded-lg border border-dashed border-slate-200 px-3 py-4 text-center text-sm text-slate-400">
-                Rien de planifié aujourd’hui.
+                {emptyHint}
               </p>
             ) : (
               <ul className="relative space-y-0 border-l border-slate-200 pl-3">
-                {todaySlice.map((ev) => {
+                {panelList.map((ev) => {
                   const s = new Date(ev.startAt);
                   const lines = agendaEventCardLines(ev);
+                  const showDate = view === "year" || view === "month";
                   return (
                     <li key={ev.id} className="relative pb-3 last:pb-0">
                       <span className="absolute -left-[15px] top-1.5 h-2 w-2 rounded-full bg-slate-300" />
@@ -204,12 +264,17 @@ export function AgendaSidePanel({
                         }`}
                       >
                         <div className="flex gap-2">
-                          <span className="w-10 shrink-0 text-[11px] font-bold tabular-nums text-slate-500">
-                            {ev.allDay ? "Jour" : formatTime(s)}
+                          <span className="w-12 shrink-0 text-[11px] font-bold tabular-nums text-slate-500">
+                            {showDate
+                              ? s.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })
+                              : ev.allDay
+                                ? "Jour"
+                                : formatTime(s)}
                           </span>
                           <span className="min-w-0">
                             <span className="block truncate text-[10px] font-bold uppercase tracking-wide text-slate-400">
                               {lines.eyebrow}
+                              {isDeliveryUnconfirmed(ev) ? " ⚠" : ""}
                             </span>
                             <span className="block truncate text-sm font-semibold text-slate-900">
                               {lines.title}
@@ -233,11 +298,6 @@ export function AgendaSidePanel({
                 })}
               </ul>
             )}
-            {todayEvents.length > TODAY_MAX ? (
-              <p className="text-[11px] text-slate-400">
-                +{todayEvents.length - TODAY_MAX} autres — ouvrir la vue Jour
-              </p>
-            ) : null}
           </div>
         ) : (
           <div className="space-y-4">

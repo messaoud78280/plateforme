@@ -1,13 +1,20 @@
 "use client";
 
+import { useMemo } from "react";
 import {
   formatMonthYear,
+  formatTime,
   isSameDay,
   isSameMonth,
+  isWeekend,
+  isoWeekLabel,
   monthGrid,
+  startOfDay,
   startOfMonth,
+  startOfWeek,
 } from "@/lib/agenda/dates";
 import { agendaEventCardLines } from "@/lib/agenda/event-card";
+import { eventsForDay } from "@/lib/agenda/period-summary";
 import { agendaTypeMeta } from "@/lib/agenda/types";
 import type { AgendaEventDTO, AgendaQuickCreateDraft } from "./agenda-types";
 
@@ -15,7 +22,9 @@ type Props = {
   cursor: Date;
   events: AgendaEventDTO[];
   selectedEventId: string | null;
+  selectedDay: Date;
   onSelectEvent: (id: string) => void;
+  onSelectDay: (d: Date) => void;
   onOpenDay: (d: Date) => void;
   onQuickCreate: (draft: AgendaQuickCreateDraft) => void;
 };
@@ -26,116 +35,224 @@ export function AgendaMonthView({
   cursor,
   events,
   selectedEventId,
+  selectedDay,
   onSelectEvent,
+  onSelectDay,
   onOpenDay,
   onQuickCreate,
 }: Props) {
   const days = monthGrid(cursor);
   const month = startOfMonth(cursor);
   const today = new Date();
+  const weeks = useMemo(() => {
+    const rows: Date[][] = [];
+    for (let i = 0; i < 6; i++) rows.push(days.slice(i * 7, i * 7 + 7));
+    return rows;
+  }, [days]);
 
-  function eventsForDay(day: Date) {
-    return events.filter((ev) => {
-      const s = new Date(ev.startAt);
-      const e = new Date(ev.endAt);
-      const dayStart = new Date(day);
-      dayStart.setHours(0, 0, 0, 0);
-      const dayEnd = new Date(day);
-      dayEnd.setHours(23, 59, 59, 999);
-      return s <= dayEnd && e >= dayStart;
-    });
-  }
+  /** Liste mobile lisible */
+  const monthDaysWithEvents = useMemo(() => {
+    const list: { day: Date; items: AgendaEventDTO[] }[] = [];
+    const end = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+    for (let d = new Date(month); d <= end; d.setDate(d.getDate() + 1)) {
+      const day = startOfDay(d);
+      const items = eventsForDay(events, day);
+      if (items.length) list.push({ day: new Date(day), items });
+    }
+    return list;
+  }, [events, month]);
 
   return (
     <div className="flex h-full flex-col">
-      <div className="grid grid-cols-7 border-b border-slate-200/80">
-        {WEEKDAYS.map((d) => (
-          <div
-            key={d}
-            className="px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wide text-slate-400"
-          >
-            {d}
-          </div>
-        ))}
-      </div>
-      <div className="grid flex-1 grid-cols-7 grid-rows-6">
-        {days.map((day) => {
-          const dayEvents = eventsForDay(day);
-          const visible = dayEvents.slice(0, 3);
-          const more = dayEvents.length - visible.length;
-          const inMonth = isSameMonth(day, month);
-          const isToday = isSameDay(day, today);
-
-          return (
+      {/* Desktop / tablette : grille */}
+      <div className="hidden h-full min-h-0 flex-col md:flex">
+        <div className="grid grid-cols-[28px_repeat(7,minmax(0,1fr))] border-b border-slate-200/80">
+          <div className="py-2" />
+          {WEEKDAYS.map((d) => (
             <div
-              key={day.toISOString()}
-              className={`min-h-0 border-b border-r border-slate-100 p-1.5 ${
-                inMonth ? (isToday ? "bg-[#1e3a5f]/[0.03]" : "bg-white") : "bg-slate-50/60"
-              }`}
-              onClick={() => onOpenDay(day)}
-              onDoubleClick={(e) => {
-                e.stopPropagation();
-                const start = new Date(day);
-                start.setHours(9, 0, 0, 0);
-                const end = new Date(day);
-                end.setHours(10, 0, 0, 0);
-                onQuickCreate({ startAt: start.toISOString(), endAt: end.toISOString() });
-              }}
+              key={d}
+              className="px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wide text-slate-400"
             >
-              <div className="mb-1 flex justify-end">
-                <span
-                  className={`flex h-6 w-6 items-center justify-center rounded-full text-xs ${
-                    isToday
-                      ? "bg-[#1e3a5f] font-semibold text-white"
-                      : inMonth
-                        ? "text-slate-700"
-                        : "text-slate-300"
-                  }`}
-                >
-                  {day.getDate()}
-                </span>
-              </div>
-              <div className="space-y-0.5">
-                {visible.map((ev) => {
-                  const meta = agendaTypeMeta(ev.type);
-                  const selected = ev.id === selectedEventId;
-                  const lines = agendaEventCardLines(ev);
-                  return (
-                    <button
-                      key={ev.id}
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSelectEvent(ev.id);
-                      }}
-                      className={`block w-full truncate rounded px-1 py-0.5 text-left text-[10px] font-medium ${
-                        selected ? "ring-1 ring-[#1d4ed8]" : ""
-                      } ${lines.done ? "opacity-50" : ""} ${
-                        lines.unconfirmed ? "border border-dashed border-orange-400/60" : ""
-                      }`}
-                      style={{
-                        backgroundColor: meta.colors.bg,
-                        color: meta.colors.text,
-                        borderLeft: `2px solid ${meta.colors.border}`,
-                      }}
-                      title={`${lines.eyebrow} — ${lines.title}${lines.meta ? ` · ${lines.meta}` : ""}`}
-                    >
-                      {lines.done ? "✓ " : lines.unconfirmed ? "… " : ""}
-                      {ev.type === "LIVRAISON" && ev.purchaseOrder?.supplierName
-                        ? ev.purchaseOrder.supplierName
-                        : ev.title}
-                    </button>
-                  );
-                })}
-                {more > 0 ? (
-                  <p className="px-1 text-[10px] font-medium text-slate-400">+{more} autres</p>
-                ) : null}
-              </div>
+              {d}
             </div>
-          );
-        })}
+          ))}
+        </div>
+        <div className="grid flex-1 grid-rows-6">
+          {weeks.map((week, wi) => (
+            <div
+              key={wi}
+              className="grid min-h-0 grid-cols-[28px_repeat(7,minmax(0,1fr))] border-b border-slate-100"
+            >
+              <div className="flex items-start justify-center pt-2 text-[9px] font-semibold text-slate-300">
+                {isoWeekLabel(week[0] ?? startOfWeek(month))}
+              </div>
+              {week.map((day) => {
+                const dayEvents = eventsForDay(events, day);
+                const visible = dayEvents.slice(0, 2);
+                const more = dayEvents.length - visible.length;
+                const inMonth = isSameMonth(day, month);
+                const isToday = isSameDay(day, today);
+                const selected = isSameDay(day, selectedDay);
+                const weekend = isWeekend(day);
+
+                return (
+                  <div
+                    key={day.toISOString()}
+                    className={`min-h-0 border-r border-slate-100 p-1 ${
+                      !inMonth
+                        ? "bg-slate-50/50"
+                        : selected
+                          ? "bg-slate-50"
+                          : weekend
+                            ? "bg-slate-50/30"
+                            : "bg-white"
+                    }`}
+                    onClick={() => onSelectDay(day)}
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      onOpenDay(day);
+                    }}
+                  >
+                    <div className="mb-0.5 flex items-center justify-between px-0.5">
+                      <span
+                        className={`flex h-6 w-6 items-center justify-center rounded-full text-xs ${
+                          isToday
+                            ? "bg-[#1e3a5f] font-semibold text-white"
+                            : selected
+                              ? "font-semibold text-[#1e3a5f] ring-1 ring-[#1e3a5f]/30"
+                              : inMonth
+                                ? "text-slate-700"
+                                : "text-slate-300"
+                        }`}
+                      >
+                        {day.getDate()}
+                      </span>
+                    </div>
+                    <div className="space-y-0.5">
+                      {visible.map((ev) => {
+                        const meta = agendaTypeMeta(ev.type);
+                        const selectedEv = ev.id === selectedEventId;
+                        const lines = agendaEventCardLines(ev);
+                        const time = ev.allDay ? "" : formatTime(new Date(ev.startAt));
+                        const label =
+                          ev.type === "LIVRAISON" && ev.purchaseOrder?.supplierName
+                            ? ev.purchaseOrder.supplierName
+                            : ev.title;
+                        return (
+                          <button
+                            key={ev.id}
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onSelectEvent(ev.id);
+                            }}
+                            className={`block w-full truncate rounded px-1 py-0.5 text-left text-[10px] font-medium ${
+                              selectedEv ? "ring-1 ring-[#1d4ed8]" : ""
+                            } ${lines.done ? "opacity-50" : ""} ${
+                              lines.unconfirmed ? "border border-dashed border-orange-400/60" : ""
+                            }`}
+                            style={{
+                              backgroundColor: meta.colors.bg,
+                              color: meta.colors.text,
+                              borderLeft: `2px solid ${meta.colors.border}`,
+                            }}
+                            title={`${lines.eyebrow} — ${lines.title}${lines.meta ? ` · ${lines.meta}` : ""}`}
+                          >
+                            {lines.done ? "✓ " : lines.unconfirmed ? "… " : ""}
+                            {time ? `${time} ` : ""}
+                            {label}
+                          </button>
+                        );
+                      })}
+                      {more > 0 ? (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpenDay(day);
+                          }}
+                          className="px-1 text-[10px] font-medium text-slate-400 hover:text-[#1e3a5f]"
+                        >
+                          +{more} autres
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
       </div>
+
+      {/* Mobile : liste agenda */}
+      <div className="flex-1 overflow-y-auto md:hidden">
+        {monthDaysWithEvents.length === 0 ? (
+          <p className="p-6 text-center text-sm text-slate-400">
+            Aucun événement en {formatMonthYear(cursor)}.
+          </p>
+        ) : (
+          <ul className="divide-y divide-slate-100">
+            {monthDaysWithEvents.map(({ day, items }) => (
+              <li key={day.toISOString()} className="px-4 py-3">
+                <button
+                  type="button"
+                  onClick={() => onOpenDay(day)}
+                  className="mb-2 text-left text-sm font-semibold capitalize text-[#1e3a5f]"
+                >
+                  {day.toLocaleDateString("fr-FR", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                  })}
+                </button>
+                <ul className="space-y-1">
+                  {items.slice(0, 4).map((ev) => {
+                    const meta = agendaTypeMeta(ev.type);
+                    return (
+                      <li key={ev.id}>
+                        <button
+                          type="button"
+                          onClick={() => onSelectEvent(ev.id)}
+                          className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm hover:bg-slate-50"
+                        >
+                          <span
+                            className="h-2 w-2 shrink-0 rounded-full"
+                            style={{ backgroundColor: meta.colors.border }}
+                          />
+                          <span className="w-12 shrink-0 text-xs text-slate-400">
+                            {ev.allDay ? "Jour" : formatTime(new Date(ev.startAt))}
+                          </span>
+                          <span className="truncate font-medium text-slate-700">{ev.title}</span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                  {items.length > 4 ? (
+                    <li className="px-2 text-xs text-slate-400">+{items.length - 4} autres</li>
+                  ) : null}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
       <p className="sr-only">{formatMonthYear(cursor)}</p>
+      {/* double-clic créneau vide — accessible via panneau + Nouveau */}
+      <button
+        type="button"
+        className="sr-only"
+        onClick={() => {
+          const start = new Date(selectedDay);
+          start.setHours(9, 0, 0, 0);
+          const end = new Date(selectedDay);
+          end.setHours(10, 0, 0, 0);
+          onQuickCreate({ startAt: start.toISOString(), endAt: end.toISOString() });
+        }}
+      >
+        Créer
+      </button>
     </div>
   );
 }

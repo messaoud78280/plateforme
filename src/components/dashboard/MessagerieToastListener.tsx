@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useMessagerieUnread } from "@/hooks/useMessagerieUnread";
+import { subscribeMessagerieEvents } from "@/lib/perf/messagerie-unread-bus";
+import type { MessagerieRealtimePayload } from "@/lib/messagerie/broadcast";
 
 type PreviewItem = {
   id: string;
@@ -16,8 +18,7 @@ type PreviewItem = {
 const SEEN_KEY = "bework.msg.toast.seen";
 
 /**
- * Toast discret hors Messagerie lorsqu’un nouveau message arrive.
- * Réutilise /api/messagerie/preview uniquement si badge non-lus > 0 (PERF-V1A).
+ * Toast discret — alimenté par broadcast/SSE, pas un poll 20 s.
  */
 export function MessagerieToastListener() {
   const pathname = usePathname();
@@ -36,47 +37,29 @@ export function MessagerieToastListener() {
   }, []);
 
   useEffect(() => {
-    if (onMessagerie || unread <= 0) {
-      if (onMessagerie) setToast(null);
-      return;
-    }
-
-    let cancelled = false;
-
-    async function poll() {
+    return subscribeMessagerieEvents((ev: MessagerieRealtimePayload) => {
+      if (onMessagerie) return;
+      const key = `${ev.conversationKey}:${ev.at}`;
+      if (knownRef.current.has(key)) return;
+      knownRef.current.add(key);
       try {
-        const res = await fetch("/api/messagerie/preview", { cache: "no-store" });
-        if (!res.ok || cancelled) return;
-        const data = (await res.json()) as { items?: PreviewItem[] };
-        const items = Array.isArray(data.items) ? data.items : [];
-        if (items.length === 0) return;
-
-        // Première charge : mémoriser sans toast
-        if (knownRef.current.size === 0) {
-          for (const it of items) knownRef.current.add(`${it.id}:${it.at}`);
-          sessionStorage.setItem(SEEN_KEY, JSON.stringify([...knownRef.current]));
-          return;
-        }
-
-        const newest = items[0]!;
-        const key = `${newest.id}:${newest.at}`;
-        if (!knownRef.current.has(key)) {
-          knownRef.current.add(key);
-          sessionStorage.setItem(SEEN_KEY, JSON.stringify([...knownRef.current].slice(-40)));
-          if (!cancelled) setToast(newest);
-        }
+        sessionStorage.setItem(SEEN_KEY, JSON.stringify([...knownRef.current].slice(-40)));
       } catch {
         // ignore
       }
-    }
+      setToast({
+        id: ev.conversationKey,
+        title: ev.title,
+        preview: `${ev.senderName} : ${ev.preview}`,
+        href: ev.href,
+        at: ev.at,
+      });
+    });
+  }, [onMessagerie]);
 
-    void poll();
-    const t = window.setInterval(() => void poll(), 45_000);
-    return () => {
-      cancelled = true;
-      window.clearInterval(t);
-    };
-  }, [onMessagerie, pathname, unread]);
+  useEffect(() => {
+    if (onMessagerie) setToast(null);
+  }, [onMessagerie, unread]);
 
   useEffect(() => {
     if (!toast) return;

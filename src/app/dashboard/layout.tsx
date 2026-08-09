@@ -9,6 +9,7 @@ import { MessagerieHeaderShortcut } from "@/components/dashboard/MessagerieHeade
 import { MessagerieToastListener } from "@/components/dashboard/MessagerieToastListener";
 import { MobileBottomNav } from "@/components/dashboard/MobileBottomNav";
 import { PrefetchMainRoutes } from "@/components/dashboard/PrefetchMainRoutes";
+import { MessagerieRealtimeBootstrap } from "@/components/dashboard/MessagerieRealtimeBootstrap";
 import { ClientAccountStatus, UserRole } from "@prisma/client";
 import { isClientLoginAllowed } from "@/lib/client-account-approval";
 import { getCachedClientGate, getCachedDemoExpiry } from "@/lib/auth/cached-dashboard-user";
@@ -161,6 +162,7 @@ export default async function DashboardLayout({
         </header>
         <UiPreferencesProvider userId={session.user.id}>
           <PrefetchMainRoutes />
+          <MessagerieRealtimeBootstrap userId={session.user.id} />
           <main
             id="contenu-principal"
             tabIndex={-1}

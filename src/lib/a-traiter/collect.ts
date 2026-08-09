@@ -32,6 +32,7 @@ import {
   resolvePurchaseOrderOrgId,
 } from "@/lib/purchase-orders/access";
 import { ttlGet, ttlSet } from "@/lib/perf/ttl-cache";
+import { withPerfLog } from "@/lib/perf/server-timing";
 
 export type ATraiterSection = "bloquant" | "a_valider" | "urgent" | "relance";
 
@@ -76,9 +77,11 @@ export async function collectATraiter(
     role?: string | null;
     personType?: string | null;
   },
-  opts?: { light?: boolean },
+  opts?: { light?: boolean; countOnly?: boolean },
 ): Promise<ATraiterSnapshot> {
-  const light = Boolean(opts?.light);
+  return withPerfLog(`collectATraiter${opts?.countOnly ? ":count" : opts?.light ? ":light" : ""}`, async () => {
+  const light = Boolean(opts?.light) || Boolean(opts?.countOnly);
+  const countOnly = Boolean(opts?.countOnly);
   const items: ATraiterItem[] = [];
   const sessionUser: SessionUser = user;
 
@@ -86,13 +89,14 @@ export async function collectATraiter(
   const externalPortal =
     user.personType === "CLIENT_EXT" || user.personType === "SUPPLIER";
 
-  if (isClientRole(sessionUser) && !externalPortal) {
-    await collectForClient(user.id, items);
-  } else if (isAgencyOrManager(sessionUser) || isAgent(sessionUser)) {
-    await collectForStaff(user.id, sessionUser, items);
-  } else if (isClientRole(sessionUser) && externalPortal) {
-    // Portail externe : uniquement validations / pièces qui le concernent
-    await collectForClient(user.id, items);
+  if (!countOnly) {
+    if (isClientRole(sessionUser) && !externalPortal) {
+      await collectForClient(user.id, items);
+    } else if (isAgencyOrManager(sessionUser) || isAgent(sessionUser)) {
+      await collectForStaff(user.id, sessionUser, items);
+    } else if (isClientRole(sessionUser) && externalPortal) {
+      await collectForClient(user.id, items);
+    }
   }
 
   const agentOnly = isAgent(sessionUser) && !isAgencyOrManager(sessionUser);
@@ -108,30 +112,112 @@ export async function collectATraiter(
           },
           agentOnly ? user.id : null,
           light,
+          countOnly ? 20 : undefined,
         );
 
-  items.sort((a, b) => {
-    const sa = SECTION_ORDER.indexOf(a.section);
-    const sb = SECTION_ORDER.indexOf(b.section);
-    if (sa !== sb) return sa - sb;
-    return b.createdAt.getTime() - a.createdAt.getTime();
-  });
+  if (!countOnly) {
+    items.sort((a, b) => {
+      const sa = SECTION_ORDER.indexOf(a.section);
+      const sb = SECTION_ORDER.indexOf(b.section);
+      if (sa !== sb) return sa - sb;
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    });
+  }
 
   const counts = emptyCounts();
-  for (const it of items) counts[it.section] += 1;
+  if (countOnly) {
+    const hotBuckets = await collectHotCountBuckets(user.id, sessionUser, externalPortal);
+    counts.bloquant = hotBuckets.bloquant;
+    counts.urgent = hotBuckets.urgent;
+  } else {
+    for (const it of items) counts[it.section] += 1;
+  }
 
   const attentionCounts = countAttentionByUrgency(attentionCards);
   const hotCount = countHotAttention(attentionCards);
-  const total = attentionCards.length + items.length;
+  const total = attentionCards.length + (countOnly
+    ? counts.bloquant + counts.urgent + counts.a_valider + counts.relance
+    : items.length);
 
   return {
-    attentionCards,
+    attentionCards: countOnly
+      ? attentionCards.filter(
+          (c) => c.effectiveUrgency === "CRITIQUE" || c.effectiveUrgency === "URGENT",
+        )
+      : attentionCards,
     attentionCounts,
     hotCount,
     items,
     counts,
     total,
   };
+  });
+}
+
+/** Compteurs SQL hot pour badge — sans findMany détail. */
+async function collectHotCountBuckets(
+  userId: string,
+  sessionUser: SessionUser,
+  externalPortal: boolean,
+): Promise<{ bloquant: number; urgent: number }> {
+  try {
+    if (isClientRole(sessionUser)) {
+      const projectWhere = await projectWhereForClientUser(userId);
+      const [alertUrgentN, missingN] = await Promise.all([
+        prisma.alert.count({
+          where: { clientId: userId, read: false, level: { in: ["URGENT", "WARNING"] } },
+        }),
+        prisma.chantierFile.count({
+          where: {
+            deletedAt: null,
+            status: { in: ["MANQUANT", "A_RELANCER"] },
+            project: projectWhere,
+          },
+        }),
+      ]);
+      return { bloquant: 0, urgent: alertUrgentN + missingN };
+    }
+
+    if (externalPortal) return { bloquant: 0, urgent: 0 };
+
+    const isDecideur = isAgencyOrManager(sessionUser);
+    const agentOnly = isAgent(sessionUser) && !isDecideur;
+
+    const [urgentTasksN, blockersN] = await Promise.all([
+      prisma.task.count({
+        where: {
+          status: { notIn: ["COMPLETE"] },
+          priority: { in: ["URGENT", "PRIORITAIRE"] },
+          ...(agentOnly ? { assignedToId: userId } : {}),
+        },
+      }),
+      isDecideur || agentOnly
+        ? prisma.pilotageBlocker.count({
+            where: {
+              archivedAt: null,
+              status: { in: ["Ouvert", "En cours"] },
+              severity: "Critique",
+              ...(agentOnly
+                ? {
+                    pilotage: {
+                      OR: [
+                        { assistantId: userId },
+                        { conducteurId: userId },
+                        { project: { assignedToId: userId } },
+                      ],
+                    },
+                  }
+                : {}),
+            },
+          })
+        : Promise.resolve(0),
+    ]);
+
+    return { bloquant: blockersN, urgent: urgentTasksN };
+  } catch (e) {
+    console.error("collectHotCountBuckets:", e);
+    return { bloquant: 0, urgent: 0 };
+  }
 }
 
 async function collectForClient(userId: string, items: ATraiterItem[]) {
@@ -472,10 +558,11 @@ async function collectUnifiedAttentionCards(
   },
   assigneeOnlyId: string | null,
   light = false,
+  takeOverride?: number,
 ): Promise<ATraiterAttentionCard[]> {
   const [followUpCards, purchaseOrderCards] = await Promise.all([
-    collectFollowUpAttentionCards(sessionUser, assigneeOnlyId, light),
-    collectPurchaseOrderAttentionCards(sessionUser, assigneeOnlyId, light),
+    collectFollowUpAttentionCards(sessionUser, assigneeOnlyId, light, takeOverride),
+    collectPurchaseOrderAttentionCards(sessionUser, assigneeOnlyId, light, takeOverride),
   ]);
   return [...followUpCards, ...purchaseOrderCards].sort(sortAttentionCards);
 }
@@ -485,12 +572,14 @@ async function collectFollowUpAttentionCards(
   sessionUser: { id: string; role?: string | null },
   assigneeOnlyId: string | null,
   light = false,
+  takeOverride?: number,
 ): Promise<ATraiterAttentionCard[]> {
   try {
     const accessWhere = await followUpSheetAccessWhere(sessionUser);
     const ownerUserId = await resolveFollowUpOwnerUserId(sessionUser.id);
     const settings = await getFollowUpSettings(ownerUserId);
     const orgId = await ensureOrganizationForOwner(ownerUserId);
+    const take = takeOverride ?? (light ? 40 : 120);
 
     const sheets = await prisma.followUpSheet.findMany({
       where: {
@@ -518,7 +607,7 @@ async function collectFollowUpAttentionCards(
         tasks: { select: { id: true }, take: 1, orderBy: { updatedAt: "desc" } },
       },
       orderBy: { updatedAt: "desc" },
-      take: light ? 40 : 120,
+      take,
     });
 
     if (sheets.length === 0) return [];
@@ -580,6 +669,7 @@ async function collectPurchaseOrderAttentionCards(
   },
   assigneeOnlyId: string | null,
   light = false,
+  takeOverride?: number,
 ): Promise<ATraiterAttentionCard[]> {
   try {
     if (!isInternalPurchaseOrderActor(sessionUser)) return [];
@@ -590,7 +680,7 @@ async function collectPurchaseOrderAttentionCards(
     const rows = await loadPurchaseOrderAttention({
       organizationId: orgId,
       actorUserId: assigneeOnlyId,
-      take: light ? 40 : 120,
+      take: takeOverride ?? (light ? 40 : 120),
       light,
     });
 
@@ -630,8 +720,9 @@ export const A_TRAITER_SECTION_LABELS: Record<ATraiterSection, string> = {
 };
 
 /**
- * Badge nav : URGENT + CRITIQUE (diagnostics W3-A) + autres points bloquants/urgents.
- * Cache TTL 20 s — PERF-V1 (évite recalcul complet à chaque navigation).
+ * Badge nav : URGENT + CRITIQUE + hot items.
+ * COUNT léger (countOnly) — pas le même chargement que la page À traiter.
+ * Cache TTL 30 s — PERF-V1B.
  */
 export async function countATraiter(user: {
   id: string;
@@ -642,16 +733,14 @@ export async function countATraiter(user: {
   const cached = ttlGet<number>(key);
   if (typeof cached === "number") return cached;
 
-  const snapshot = await collectATraiter(user, { light: true });
-  const otherHot = snapshot.items.filter(
-    (i) => i.section === "bloquant" || i.section === "urgent",
-  ).length;
+  const snapshot = await collectATraiter(user, { light: true, countOnly: true });
+  const otherHot = snapshot.counts.bloquant + snapshot.counts.urgent;
   const total = snapshot.hotCount + otherHot;
-  ttlSet(key, total, 20_000);
+  ttlSet(key, total, 30_000);
   return total;
 }
 
-/** Compteurs détaillés pour le bandeau Accueil (léger + cache 20 s). */
+/** Compteurs détaillés pour le bandeau Accueil (léger + cache 30 s). */
 export async function summarizeATraiter(user: {
   id: string;
   role?: string | null;
@@ -671,9 +760,12 @@ export async function summarizeATraiter(user: {
     hotCount: snapshot.hotCount,
     attentionCounts: snapshot.attentionCounts,
   };
-  ttlSet(key, summary, 20_000);
-  ttlSet(`a-traiter-count:${user.id}`, snapshot.hotCount + snapshot.items.filter(
-    (i) => i.section === "bloquant" || i.section === "urgent",
-  ).length, 20_000);
+  ttlSet(key, summary, 30_000);
+  ttlSet(
+    `a-traiter-count:${user.id}`,
+    snapshot.hotCount +
+      snapshot.items.filter((i) => i.section === "bloquant" || i.section === "urgent").length,
+    30_000,
+  );
   return summary;
 }

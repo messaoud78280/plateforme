@@ -2,14 +2,27 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { DeleteTaskButton } from "@/components/tasks/DeleteTaskButton";
 import { documentDownloadHref } from "@/lib/documents/download-url";
 import { SignedFileLink } from "@/components/files/SignedFileLink";
-import { MessageBeworkActions } from "@/components/messagerie/MessageBeworkActions";
-import { ConversationDossierPanel } from "@/components/messagerie/ConversationDossierPanel";
 import { badgeIcon } from "@/lib/messagerie/message-links";
 import { WA_CHAT_BG, waBubbleTime, waListTime } from "@/components/messagerie/wa-theme";
+import { subscribeMessagerieEvents } from "@/lib/perf/messagerie-unread-bus";
+
+const MessageBeworkActions = dynamic(
+  () =>
+    import("@/components/messagerie/MessageBeworkActions").then((m) => m.MessageBeworkActions),
+  { ssr: false },
+);
+const ConversationDossierPanel = dynamic(
+  () =>
+    import("@/components/messagerie/ConversationDossierPanel").then(
+      (m) => m.ConversationDossierPanel,
+    ),
+  { ssr: false },
+);
 
 const STATUS_LABELS: Record<string, string> = {
   NOUVEAU: "Nouvelle",
@@ -347,6 +360,54 @@ export function MessagerieMissionsView({
     }
     load();
   }, [filter]);
+
+  // Realtime : remonter la conversation + rafraîchir le fil ouvert
+  useEffect(() => {
+    return subscribeMessagerieEvents((ev) => {
+      if (ev.kind === "TASK" && ev.conversationKey.startsWith("TASK:")) {
+        const taskId = ev.conversationKey.slice(5);
+        setMissions((prev) => {
+          const idx = prev.findIndex((m) => m.id === taskId);
+          if (idx < 0) {
+            // nouvelle conversation inconnue → reload liste léger
+            void fetch("/api/tasks/messagerie?filter=inbox")
+              .then((r) => r.json())
+              .then((data) => {
+                if (Array.isArray(data)) setMissions(sortMissionsByLastMessage(data));
+              });
+            return prev;
+          }
+          const item = prev[idx]!;
+          const next = [...prev];
+          next.splice(idx, 1);
+          next.unshift({
+            ...item,
+            unreadCount: selectedTaskId === taskId ? item.unreadCount : item.unreadCount + 1,
+            lastMessage: {
+              id: `rt-${ev.at}`,
+              content: ev.preview,
+              createdAt: ev.at,
+              sender: { id: ev.senderId, name: ev.senderName },
+            },
+          });
+          return next;
+        });
+        if (selectedTaskId === taskId) {
+          void fetch(`/api/tasks/${taskId}/messages?take=30&after=${encodeURIComponent(ev.at)}`)
+            .then((r) => (r.ok ? r.json() : null))
+            .then((data) => {
+              const list = Array.isArray(data) ? data : data?.messages;
+              if (Array.isArray(list) && list.length) {
+                setMessages((prev) => {
+                  const ids = new Set(prev.map((m) => m.id));
+                  return [...prev, ...list.filter((m: { id: string }) => !ids.has(m.id))];
+                });
+              }
+            });
+        }
+      }
+    });
+  }, [selectedTaskId]);
 
   useEffect(() => {
     if (!selectedTaskId) {

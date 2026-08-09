@@ -12,6 +12,8 @@ import {
   defaultMessageChannelForPerson,
   type MessageChannel,
 } from "@/lib/equipe-acces/nav-by-persona";
+import { broadcastMessagerieToUser } from "@/lib/messagerie/broadcast";
+import { ttlInvalidatePrefix } from "@/lib/perf/ttl-cache";
 
 const VALID_CHANNELS = new Set(["INTERNE", "CLIENT", "FOURNISSEUR"]);
 
@@ -204,6 +206,22 @@ export async function POST(request: Request) {
       } catch (alertErr) {
         console.error("Création alerte (message assistant):", alertErr);
       }
+    }
+
+    if (finalReceiverId && finalReceiverId !== session.user.id) {
+      ttlInvalidatePrefix(`msg-unread:${finalReceiverId}`);
+      ttlInvalidatePrefix(`msg-preview:${finalReceiverId}`);
+      void broadcastMessagerieToUser({
+        receiverId: finalReceiverId,
+        senderId: session.user.id,
+        senderName: sender?.name ?? session.user?.name ?? "Quelqu'un",
+        title: project.title,
+        preview: content.trim().slice(0, 80),
+        href: `/dashboard/messagerie?view=chantiers&project=${projectId}&channel=${channel}`,
+        at: message.createdAt.toISOString(),
+        kind: "PROJECT",
+        conversationKey: `PROJECT:${projectId}:${channel}`,
+      });
     }
 
     return NextResponse.json(message);

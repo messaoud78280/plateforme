@@ -17,6 +17,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { BackLink } from "@/components/ui/BackLink";
 import { ATraiterAttentionBoard } from "@/components/a-traiter/ATraiterAttentionBoard";
 import { cn } from "@/lib/cn";
+import { withPerfLog } from "@/lib/perf/server-timing";
 
 export const dynamic = "force-dynamic";
 
@@ -70,11 +71,13 @@ export default async function ATraiterPage() {
     redirect("/connexion?callbackUrl=/dashboard/a-traiter");
   }
 
-  const snapshot = await collectATraiter({
-    id: session.user.id,
-    role: session.user.role,
-    personType: session.user.personType ?? null,
-  });
+  const snapshot = await withPerfLog("collectATraiter:page", () =>
+    collectATraiter({
+      id: session.user.id,
+      role: session.user.role,
+      personType: session.user.personType ?? null,
+    }),
+  );
 
   // W3-C1 : sync hors chemin critique de rendu (PERF-V1)
   const external =

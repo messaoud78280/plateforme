@@ -10,6 +10,8 @@ import {
   taskMessageVisibilityWhere,
 } from "@/lib/messaging/access";
 import { badgeFromMeta } from "@/lib/messagerie/message-links";
+import { broadcastMessagerieToUser } from "@/lib/messagerie/broadcast";
+import { ttlInvalidatePrefix } from "@/lib/perf/ttl-cache";
 
 /** GET /api/tasks/[id]/messages — Messages de la tâche (filtrés par participant).
  * Query : take (défaut 50, max 100) · before=<ISO> (charger plus ancien) · after=<ISO|id> (poll incrémental)
@@ -272,6 +274,20 @@ export async function POST(
         ? `Message interne sur la mission « ${task.title} ».`
         : `${session.user?.name ?? "Quelqu'un"} vous a envoyé un message sur la mission « ${task.title} ».`,
       actionUrl: `/dashboard/messagerie?task=${taskId}&messageId=${message.id}`,
+    });
+
+    ttlInvalidatePrefix(`msg-unread:${receiverIdFinal}`);
+    ttlInvalidatePrefix(`msg-preview:${receiverIdFinal}`);
+    void broadcastMessagerieToUser({
+      receiverId: receiverIdFinal,
+      senderId: session.user.id,
+      senderName: session.user?.name ?? "Quelqu'un",
+      title: task.title,
+      preview: message.content.slice(0, 80),
+      href: `/dashboard/messagerie?task=${taskId}&messageId=${message.id}`,
+      at: message.createdAt.toISOString(),
+      kind: "TASK",
+      conversationKey: `TASK:${taskId}`,
     });
 
     return NextResponse.json(message);

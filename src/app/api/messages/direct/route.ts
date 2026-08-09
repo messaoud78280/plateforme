@@ -9,6 +9,8 @@ import {
   isManagerRole,
   isStaffAgent,
 } from "@/lib/messaging/access";
+import { broadcastMessagerieToUser } from "@/lib/messagerie/broadcast";
+import { ttlInvalidatePrefix } from "@/lib/perf/ttl-cache";
 
 function canUseDirectMessages(role?: string | null): boolean {
   return isManagerRole(role) || isStaffAgent(role) || role === "CLIENT";
@@ -160,6 +162,20 @@ export async function POST(request: Request) {
       title: "Nouveau message",
       message: `${session.user?.name ?? "Quelqu'un"} vous a envoyé un message direct.`,
       actionUrl: "/dashboard/messagerie?tab=messages-directs",
+    });
+
+    ttlInvalidatePrefix(`msg-unread:${receiver.id}`);
+    ttlInvalidatePrefix(`msg-preview:${receiver.id}`);
+    void broadcastMessagerieToUser({
+      receiverId: receiver.id,
+      senderId: session.user.id,
+      senderName: session.user?.name ?? "Quelqu'un",
+      title: session.user?.name ?? "Message direct",
+      preview: (message.content || "Pièce jointe").slice(0, 80),
+      href: `/dashboard/messagerie?tab=messages-directs&with=${session.user.id}`,
+      at: message.createdAt.toISOString(),
+      kind: "DIRECT",
+      conversationKey: `DIRECT:${session.user.id}`,
     });
 
     return NextResponse.json(message);

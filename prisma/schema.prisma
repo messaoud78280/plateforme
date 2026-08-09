@@ -1005,6 +1005,7 @@ model DirectMessage {
   @@index([senderId])
   @@index([receiverId])
   @@index([receiverId, read])
+  @@index([receiverId, createdAt])
 }
 
 // Messages sur une tâche (client ↔ agent quand assigné, ou interne gérante ↔ agent)
@@ -1028,6 +1029,7 @@ model TaskMessage {
   @@index([taskId])
   @@index([taskId, createdAt])
   @@index([receiverId])
+  @@index([receiverId, read])
 }
 
 // Commentaires sur tâches (optionnellement internes = invisibles client)
@@ -1060,6 +1062,7 @@ model Notification {
 
   @@index([userId])
   @@index([read])
+  @@index([userId, read, createdAt])
 }
 
 // Factures

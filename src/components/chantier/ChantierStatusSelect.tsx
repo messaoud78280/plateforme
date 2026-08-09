@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import type { ChantierStatus } from "@prisma/client";
 import { CHANTIER_STATUS_LABELS } from "@/lib/chantier-dossier/constants";
@@ -17,7 +16,6 @@ export function ChantierStatusSelect({
   value: ChantierStatus;
   canEdit: boolean;
 }) {
-  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [local, setLocal] = useState(value);
@@ -47,7 +45,6 @@ export function ChantierStatusSelect({
           setError(data.error ?? "Mise à jour impossible.");
           return;
         }
-        router.refresh();
       } catch {
         setLocal(value);
         setError("Erreur réseau.");

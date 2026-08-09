@@ -32,7 +32,7 @@ export function DeleteTaskButton({
       const res = await fetch(`/api/tasks/${taskId}`, { method: "DELETE" });
       if (res.ok) {
         onDeleted?.();
-        router.refresh();
+        if (!onDeleted) router.push("/dashboard/taches");
       }
     } finally {
       setLoading(false);

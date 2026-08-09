@@ -240,16 +240,25 @@ export default async function DashboardPage({
           where: {
             OR: [{ receiverId: clientId }, { senderId: clientId }],
           },
-          include: {
+          select: {
+            id: true,
+            content: true,
+            createdAt: true,
+            receiverId: true,
             project: { select: { id: true, title: true } },
             sender: { select: { id: true, name: true } },
           },
           orderBy: { createdAt: "desc" },
-          take: 5,
+          take: 3,
         }),
         prisma.document.findMany({
           where: { clientId },
-          include: {
+          select: {
+            id: true,
+            name: true,
+            createdAt: true,
+            category: true,
+            fileUrl: true,
             task: { select: { id: true, title: true } },
           },
           orderBy: { createdAt: "desc" },
@@ -272,7 +281,7 @@ export default async function DashboardPage({
         id: d.id,
         name: d.name,
         createdAt: d.createdAt,
-        category: (d as { category?: string | null }).category ?? undefined,
+        category: d.category ?? undefined,
         task: d.task,
         fileUrl: d.fileUrl,
       }));

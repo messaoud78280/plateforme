@@ -18,15 +18,15 @@ type MessageItem = {
 };
 
 const CHANNEL_LABELS: Record<MessageChannel, string> = {
-  INTERNE: "Interne",
-  CLIENT: "Client",
-  FOURNISSEUR: "Fournisseur",
+  INTERNE: "🔒 Interne",
+  CLIENT: "🟠 Externe — Client",
+  FOURNISSEUR: "🟠 Externe — Fournisseur",
 };
 
 const CHANNEL_HINT: Record<MessageChannel, string> = {
-  INTERNE: "Visible uniquement par le personnel interne — ne pas y mettre le client ou un fournisseur.",
-  CLIENT: "Fil partagé avec le client du chantier.",
-  FOURNISSEUR: "Fil partagé avec les fournisseurs du chantier.",
+  INTERNE: "Visible uniquement par le personnel interne. Ne pas y écrire pour le client ou un fournisseur.",
+  CLIENT: "Fil partagé avec le client du chantier uniquement.",
+  FOURNISSEUR: "Fil partagé avec les fournisseurs du chantier uniquement.",
 };
 
 type ProjectItem = {
@@ -129,7 +129,6 @@ export function MessagerieView({
   const [sendContent, setSendContent] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
-  const [assistantTyping, setAssistantTyping] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   async function loadMessages(ch: MessageChannel) {
@@ -252,8 +251,26 @@ export function MessagerieView({
     const content = sendContent.trim();
     if (!content || !selectedProjectId || sending) return;
     setError("");
+    const tempId = `temp-${Date.now()}`;
+    const optimistic: MessageItem = {
+      id: tempId,
+      content,
+      read: false,
+      channel,
+      createdAt: new Date().toISOString(),
+      project: {
+        id: selectedProjectId,
+        title: selectedProject?.title ?? "",
+      },
+      sender: { id: sessionUserId, name: "Vous" },
+      receiver: {
+        id: recipientForProject?.id ?? "",
+        name: recipientForProject?.name ?? "",
+      },
+    };
     setSending(true);
-    setAssistantTyping(true);
+    setSendContent("");
+    setMessages((prev) => [optimistic, ...prev]);
     try {
       const body: {
         projectId: string;
@@ -275,17 +292,18 @@ export function MessagerieView({
 
       const data = await res.json();
       if (!res.ok) {
+        setMessages((prev) => prev.filter((m) => m.id !== tempId));
+        setSendContent(content);
         setError(data.error ?? "Erreur lors de l'envoi.");
-        setSending(false);
-        setAssistantTyping(false);
         return;
       }
-      setSendContent("");
-      await loadMessages(channel);
-      setTimeout(() => setAssistantTyping(false), 800);
+      setMessages((prev) =>
+        prev.map((m) => (m.id === tempId ? { ...data, channel: data.channel ?? channel } : m)),
+      );
     } catch {
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
+      setSendContent(content);
       setError("Erreur de connexion.");
-      setAssistantTyping(false);
     } finally {
       setSending(false);
     }
@@ -392,16 +410,16 @@ export function MessagerieView({
                 <p className="text-xs text-slate-500">Assistant : {recipientForProject.name}</p>
               )}
               <div
-                className={`mt-2 rounded-lg border px-3 py-2 text-xs ${
+                className={`mt-2 rounded-lg border px-3 py-2 text-sm font-semibold ${
                   channel === "INTERNE"
-                    ? "border-violet-200 bg-violet-50 text-violet-900"
+                    ? "border-violet-300 bg-violet-100 text-violet-950"
                     : channel === "FOURNISSEUR"
-                      ? "border-amber-200 bg-amber-50 text-amber-950"
-                      : "border-sky-200 bg-sky-50 text-sky-950"
+                      ? "border-amber-300 bg-amber-100 text-amber-950"
+                      : "border-orange-300 bg-orange-100 text-orange-950"
                 }`}
               >
-                <strong>Partagé avec — fil {CHANNEL_LABELS[channel]}.</strong>{" "}
-                {CHANNEL_HINT[channel]}
+                {CHANNEL_LABELS[channel]}
+                <p className="mt-1 text-xs font-normal opacity-90">{CHANNEL_HINT[channel]}</p>
               </div>
             </div>
 
@@ -435,14 +453,6 @@ export function MessagerieView({
                     </div>
                   );
                 })}
-                {assistantTyping && (
-                  <div className="flex gap-3">
-                    <Avatar name={recipientForProject?.name ?? "Assistant"} isMe={false} />
-                    <div className="rounded-2xl rounded-tl-md bg-slate-100 px-4 py-2.5">
-                      <p className="text-xs italic text-slate-500">Assistant en train d'écrire...</p>
-                    </div>
-                  </div>
-                )}
                 <div ref={chatEndRef} />
               </div>
             </div>
@@ -469,6 +479,14 @@ export function MessagerieView({
                     rows={2}
                     className="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm placeholder:text-slate-400 focus:border-[#1d4ed8] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8]/20"
                     disabled={sending}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        if (sendContent.trim() && !sending) {
+                          void (e.currentTarget.form as HTMLFormElement | null)?.requestSubmit();
+                        }
+                      }
+                    }}
                   />
                   <Link
                     href="/dashboard/documents"

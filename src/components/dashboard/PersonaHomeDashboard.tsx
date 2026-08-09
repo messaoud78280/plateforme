@@ -36,14 +36,14 @@ function quickLinks(
     return [
       { href: "/dashboard/commandes", label: "Commandes", hint: "À confirmer" },
       { href: "/dashboard/livraisons", label: "Livraisons", hint: "Vos créneaux uniquement" },
-      { href: "/dashboard/messagerie", label: "Messages", hint: "Fil fournisseur uniquement" },
+      { href: "/dashboard/messagerie", label: "Messagerie", hint: "Fil fournisseur uniquement" },
     ];
   }
   if (personType === "CLIENT_EXT") {
     return [
       { href: "/dashboard/projets", label: "Chantiers", hint: "Vos chantiers partagés" },
       { href: "/dashboard/documents", label: "Documents", hint: "Pièces à valider / reçues" },
-      { href: "/dashboard/messagerie", label: "Communication", hint: "Échanges client" },
+      { href: "/dashboard/messagerie", label: "Messagerie", hint: "Échanges client" },
       { href: "/dashboard/agenda", label: "Agenda", hint: "RDV et échéances" },
     ];
   }
@@ -51,14 +51,14 @@ function quickLinks(
     return [
       { href: "/dashboard/projets", label: "Chantiers", hint: "Vos interventions" },
       { href: "/dashboard/agenda", label: "Agenda", hint: "Planning terrain" },
-      { href: "/dashboard/messagerie", label: "Communication", hint: "Échanges chantier" },
+      { href: "/dashboard/messagerie", label: "Messagerie", hint: "Échanges chantier" },
       { href: "/dashboard/documents", label: "Documents", hint: "Plans et pièces partagés" },
     ];
   }
   return [
     { href: "/dashboard/projets", label: "Chantiers", hint: "Périmètre partagé" },
     { href: "/dashboard/documents", label: "Documents", hint: "Pièces visibles" },
-    { href: "/dashboard/messagerie", label: "Communication", hint: "Fil partagé" },
+    { href: "/dashboard/messagerie", label: "Messagerie", hint: "Fil partagé" },
     { href: "/dashboard/parametres", label: "Paramètres", hint: "Compte et sécurité" },
   ];
 }

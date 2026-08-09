@@ -255,7 +255,7 @@ export default async function TachesPage({
                 href="/dashboard/messagerie"
                 className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
               >
-                Communication
+                Messagerie
               </Link>
               <Link href="/dashboard/nouvelle-demande" className="btn-cc-primary">
                 + Nouvelle mission

@@ -57,7 +57,7 @@ export const DEMO_MODULE_LABELS: Record<DemoModuleKey, string> = {
   alertes: "Alertes",
   commandes: "Bons de commande",
   documents: "Documents",
-  communication: "Communication",
+  communication: "Messagerie",
   fournisseurs: "Fournisseurs",
   sous_traitants: "Sous-traitants",
   administratif: "Administratif",

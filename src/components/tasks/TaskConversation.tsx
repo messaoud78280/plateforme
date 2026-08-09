@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 type MessageItem = {
   id: string;
@@ -27,7 +26,6 @@ interface TaskConversationProps {
 }
 
 export function TaskConversation({ projectId, projectTitle, sessionUserId }: TaskConversationProps) {
-  const router = useRouter();
   const [messages, setMessages] = useState<MessageItem[]>([]);
   const [content, setContent] = useState("");
   const [sending, setSending] = useState(false);
@@ -36,12 +34,12 @@ export function TaskConversation({ projectId, projectTitle, sessionUserId }: Tas
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch("/api/messages");
+        const res = await fetch(`/api/messages?projectId=${encodeURIComponent(projectId)}`);
         if (res.ok) {
           const data = await res.json();
-          const forProject = (data as MessageItem[]).filter((m) => m.project.id === projectId);
-          forProject.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-          setMessages(forProject);
+          const list = (Array.isArray(data) ? data : []) as MessageItem[];
+          list.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+          setMessages(list);
         }
       } finally {
         setLoading(false);
@@ -53,24 +51,35 @@ export function TaskConversation({ projectId, projectTitle, sessionUserId }: Tas
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
     if (!content.trim() || sending) return;
+    const text = content.trim();
+    const tempId = `temp-${Date.now()}`;
+    const optimistic: MessageItem = {
+      id: tempId,
+      content: text,
+      createdAt: new Date().toISOString(),
+      project: { id: projectId, title: projectTitle },
+      sender: { id: sessionUserId, name: "Vous" },
+      receiver: { id: "", name: "" },
+    };
     setSending(true);
+    setContent("");
+    setMessages((prev) => [...prev, optimistic]);
     try {
       const res = await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectId, content: content.trim() }),
+        body: JSON.stringify({ projectId, content: text }),
       });
-      if (res.ok) {
-        setContent("");
-        const refresh = await fetch("/api/messages");
-        if (refresh.ok) {
-          const data = await refresh.json();
-          const forProject = (data as MessageItem[]).filter((m) => m.project.id === projectId);
-          forProject.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-          setMessages(forProject);
-        }
-        router.refresh();
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data?.id) {
+        setMessages((prev) => prev.map((m) => (m.id === tempId ? { ...data } : m)));
+      } else {
+        setMessages((prev) => prev.filter((m) => m.id !== tempId));
+        setContent(text);
       }
+    } catch {
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
+      setContent(text);
     } finally {
       setSending(false);
     }
@@ -79,15 +88,15 @@ export function TaskConversation({ projectId, projectTitle, sessionUserId }: Tas
   if (loading) {
     return (
       <div className="rounded-xl surface-metallic-light p-6">
-        <h2 className="mb-4 text-lg font-semibold text-slate-800">Conversation</h2>
-        <p className="text-sm text-slate-500">Chargement des messages...</p>
+        <h2 className="mb-4 text-lg font-semibold text-slate-800">Messagerie</h2>
+        <p className="text-sm text-slate-500">Chargement des messages…</p>
       </div>
     );
   }
 
   return (
     <div className="rounded-xl surface-metallic-light p-6">
-      <h2 className="mb-4 text-lg font-semibold text-slate-800">Conversation liée à la demande</h2>
+      <h2 className="mb-4 text-lg font-semibold text-slate-800">Messagerie liée à la demande</h2>
       <p className="mb-4 text-sm text-slate-500">Projet : {projectTitle}</p>
 
       <div className="max-h-[320px] space-y-3 overflow-y-auto rounded-lg border border-slate-100 bg-slate-50/50 p-4">
@@ -120,6 +129,14 @@ export function TaskConversation({ projectId, projectTitle, sessionUserId }: Tas
           rows={2}
           className="min-w-0 flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-[#1d4ed8] focus:outline-none focus:ring-2 focus:ring-[#1d4ed8]/20"
           disabled={sending}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              if (content.trim() && !sending) {
+                void (e.currentTarget.form as HTMLFormElement | null)?.requestSubmit();
+              }
+            }
+          }}
         />
         <button
           type="submit"

@@ -35,6 +35,7 @@ import {
   canManageEquipe,
   isHrefAllowedForPersona,
 } from "@/lib/equipe-acces/nav-by-persona";
+import { MessagerieNavBadge } from "@/components/dashboard/MessagerieNavBadge";
 
 type NavItem = {
   href: string;
@@ -73,7 +74,7 @@ function buildSections(role: string | null | undefined): NavSection[] {
         label: "Gestion",
         items: [
           { href: "/dashboard/documents", label: "Documents", icon: FileText },
-          { href: "/dashboard/messagerie", label: "Communication", icon: MessageSquare },
+          { href: "/dashboard/messagerie", label: "Messagerie", icon: MessageSquare },
           { href: "/dashboard/equipe", label: "Équipe & partenaires", icon: Users },
         ],
       },
@@ -316,6 +317,9 @@ export function AppSidebar({
                     >
                       <Icon className={cn("h-4 w-4 shrink-0", active ? "opacity-95" : "opacity-70")} />
                       {!collapsed ? <span className="truncate">{item.label}</span> : null}
+                      {!collapsed && item.href === "/dashboard/messagerie" ? (
+                        <MessagerieNavBadge active={active} />
+                      ) : null}
                     </Link>
                   </li>
                 );

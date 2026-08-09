@@ -3,7 +3,7 @@ import { HOME_BG_MUTED, HOME_CARD, HOME_CONTENT, HOME_SECTION } from "@/componen
 
 const MODULES = [
   { title: "Chantiers et affaires", desc: "Suivi des dossiers et contextes terrain." },
-  { title: "Communication interne", desc: "Échanges liés aux chantiers et responsabilités." },
+  { title: "Messagerie", desc: "Échanges liés aux chantiers et responsabilités." },
   { title: "Documents et GED", desc: "Pièces, photos et historique consultable." },
   { title: "Marchés publics et privés", desc: "Analyse collaborative des dossiers." },
   { title: "Analyse IA", desc: "CCTP, CCAP, DPGF et documents métier." },

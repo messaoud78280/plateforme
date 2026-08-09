@@ -589,7 +589,7 @@ export default async function ProjetDetailPage({
     <div className="rounded-xl surface-metallic-light p-6">
       <h2 className="mb-4 text-lg font-semibold text-slate-800">Messages</h2>
       <p className="mb-3 text-xs text-slate-500">
-        Pour les fils INTERNE / CLIENT / FOURNISSEUR, utilisez aussi Communication → onglet
+        Pour les fils INTERNE / CLIENT / FOURNISSEUR, utilisez aussi Messagerie → onglet
         Chantiers.
       </p>
       <div className="space-y-4">

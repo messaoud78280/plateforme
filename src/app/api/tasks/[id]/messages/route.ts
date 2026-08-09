@@ -11,9 +11,11 @@ import {
 } from "@/lib/messaging/access";
 import { badgeFromMeta } from "@/lib/messagerie/message-links";
 
-/** GET /api/tasks/[id]/messages — Messages de la tâche (filtrés par participant). */
+/** GET /api/tasks/[id]/messages — Messages de la tâche (filtrés par participant).
+ * Query : take (défaut 50, max 100) · before=<ISO> (charger plus ancien) · after=<ISO|id> (poll incrémental)
+ */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
@@ -22,6 +24,11 @@ export async function GET(
   }
 
   const { id: taskId } = await params;
+  const { searchParams } = new URL(request.url);
+  const takeRaw = Number(searchParams.get("take") ?? 50);
+  const take = Math.min(100, Math.max(1, Number.isFinite(takeRaw) ? takeRaw : 50));
+  const before = searchParams.get("before");
+  const after = searchParams.get("after");
 
   try {
     const task = await prisma.task.findUnique({
@@ -37,14 +44,61 @@ export async function GET(
       return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
     }
 
-    const messages = await prisma.taskMessage.findMany({
-      where: taskMessageVisibilityWhere(session.user, taskId),
+    const visibility = taskMessageVisibilityWhere(session.user, taskId);
+
+    // Poll incrémental : messages plus récents que `after` (ISO ou message id)
+    if (after) {
+      let createdAfter: Date | null = null;
+      const asDate = new Date(after);
+      if (!Number.isNaN(asDate.getTime()) && after.includes("-") && after.length >= 20) {
+        createdAfter = asDate;
+      } else {
+        const pivot = await prisma.taskMessage.findFirst({
+          where: { id: after, taskId },
+          select: { createdAt: true },
+        });
+        createdAfter = pivot?.createdAt ?? null;
+      }
+
+      if (!createdAfter) {
+        return NextResponse.json([]);
+      }
+
+      const newer = await prisma.taskMessage.findMany({
+        where: {
+          AND: [visibility, { createdAt: { gt: createdAfter } }],
+        },
+        include: {
+          sender: { select: { id: true, name: true } },
+          receiver: { select: { id: true, name: true } },
+        },
+        orderBy: { createdAt: "asc" },
+        take,
+      });
+      return NextResponse.json(newer.map((m) => ({ ...m, linkedBadges: [] as string[] })));
+    }
+
+    const beforeDate = before ? new Date(before) : null;
+    const messagesDesc = await prisma.taskMessage.findMany({
+      where: {
+        AND: [
+          visibility,
+          beforeDate && !Number.isNaN(beforeDate.getTime())
+            ? { createdAt: { lt: beforeDate } }
+            : {},
+        ],
+      },
       include: {
         sender: { select: { id: true, name: true } },
         receiver: { select: { id: true, name: true } },
       },
-      orderBy: { createdAt: "asc" },
+      orderBy: { createdAt: "desc" },
+      take: take + 1,
     });
+
+    const hasMore = messagesDesc.length > take;
+    const slice = hasMore ? messagesDesc.slice(0, take) : messagesDesc;
+    const messages = slice.reverse();
 
     const ids = messages.map((m) => m.id);
     const links =
@@ -70,12 +124,15 @@ export async function GET(
       }
     }
 
-    return NextResponse.json(
-      messages.map((m) => ({
-        ...m,
-        linkedBadges: badgesByMessage[m.id] ?? [],
-      })),
-    );
+    const mapped = messages.map((m) => ({
+      ...m,
+      linkedBadges: badgesByMessage[m.id] ?? [],
+    }));
+
+    // Compat clients existants : tableau ; meta en header
+    const res = NextResponse.json(mapped);
+    res.headers.set("X-Has-More", hasMore ? "1" : "0");
+    return res;
   } catch (e) {
     console.error(e);
     return NextResponse.json(

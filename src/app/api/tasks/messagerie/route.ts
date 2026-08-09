@@ -45,7 +45,6 @@ export async function GET(request: NextRequest) {
           take: 1,
           include: { sender: { select: { id: true, name: true } } },
         },
-        documents: { select: { id: true, name: true, fileUrl: true } },
       },
       orderBy: { updatedAt: "desc" },
       take: 50,
@@ -81,7 +80,7 @@ export async function GET(request: NextRequest) {
           }
         : null,
       unreadCount: unreadMap.get(t.id) ?? 0,
-      documents: t.documents,
+      documents: [] as { id: string; name: string; fileUrl: string }[],
     }));
 
     return NextResponse.json(result);

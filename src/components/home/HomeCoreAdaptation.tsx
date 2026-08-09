@@ -5,7 +5,7 @@ const CORE_ITEMS = [
   "Entreprises, utilisateurs, rôles et permissions",
   "Équipes, agences, chantiers et affaires",
   "Tâches, échéances, validations et historique",
-  "Communication interne et notifications",
+  "Messagerie et notifications",
   "Documents, photos et moteur de recherche",
   "Tableaux de bord et accès ordinateur / mobile",
   "Outils IA intégrés au socle",

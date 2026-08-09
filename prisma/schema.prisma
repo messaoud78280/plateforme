@@ -877,6 +877,7 @@ model Message {
   receiver User    @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@index([projectId, channel, createdAt])
+  @@index([receiverId, read])
 }
 
 // Documents déposés par les clients (optionnellement liés à un projet ou une tâche)
@@ -1003,6 +1004,7 @@ model DirectMessage {
 
   @@index([senderId])
   @@index([receiverId])
+  @@index([receiverId, read])
 }
 
 // Messages sur une tâche (client ↔ agent quand assigné, ou interne gérante ↔ agent)
@@ -1024,6 +1026,7 @@ model TaskMessage {
   receiver User @relation("TaskMessagesReceived", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@index([taskId])
+  @@index([taskId, createdAt])
   @@index([receiverId])
 }
 

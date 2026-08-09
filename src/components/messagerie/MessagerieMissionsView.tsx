@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { DeleteTaskButton } from "@/components/tasks/DeleteTaskButton";
 import { documentDownloadHref } from "@/lib/documents/download-url";
@@ -178,15 +177,21 @@ export function MessagerieMissionsView({
   managerId,
   recipients = [],
 }: MessagerieMissionsViewProps) {
-  const router = useRouter();
   const [missions, setMissions] = useState<MissionItem[]>([]);
   const [filter, setFilter] = useState<FilterId>(
     isClient ? "inbox" : "messages-directs",
   );
   const [selectedTaskId, setSelectedTaskId] = useState<string>("");
   const [messages, setMessages] = useState<TaskMessageItem[]>([]);
+  const messagesRef = useRef<TaskMessageItem[]>([]);
+  messagesRef.current = messages;
+  const [hasMoreMessages, setHasMoreMessages] = useState(false);
+  const [loadingOlder, setLoadingOlder] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [mobileShowThread, setMobileShowThread] = useState(false);
+  const stickToBottomRef = useRef(true);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
   const [sendContent, setSendContent] = useState("");
   const [sending, setSending] = useState(false);
   const [internalNote, setInternalNote] = useState(false);
@@ -334,7 +339,10 @@ export function MessagerieMissionsView({
     }
     let cancelled = false;
     setMessages([]);
+    setHasMoreMessages(false);
     setLoadingMessages(true);
+    stickToBottomRef.current = true;
+    setMobileShowThread(true);
 
     // Optimistic WhatsApp : badge vert disparaît dès l’ouverture
     setMissions((prev) =>
@@ -343,12 +351,20 @@ export function MessagerieMissionsView({
 
     const taskId = selectedTaskId;
     Promise.all([
-      fetch(`/api/tasks/${taskId}/messages`).then((r) => (r.ok ? r.json() : [])),
+      fetch(`/api/tasks/${taskId}/messages?take=50`).then(async (r) => {
+        if (!r.ok) return { messages: [] as TaskMessageItem[], hasMore: false };
+        const messages = await r.json();
+        return {
+          messages: Array.isArray(messages) ? messages : [],
+          hasMore: r.headers.get("X-Has-More") === "1",
+        };
+      }),
       fetch(`/api/tasks/${taskId}/messages/read`, { method: "POST" }).catch(() => null),
     ])
-      .then(([data]) => {
+      .then(([payload]) => {
         if (cancelled) return;
-        setMessages(Array.isArray(data) ? data : []);
+        setMessages(payload.messages);
+        setHasMoreMessages(payload.hasMore);
       })
       .finally(() => {
         if (!cancelled) setLoadingMessages(false);
@@ -463,38 +479,127 @@ export function MessagerieMissionsView({
     return () => clearInterval(interval);
   }, [filter, selectedDirectContactId]);
 
-  // Rafraîchissement automatique des messages mission (toutes les 7 s)
+  // Poll incrémental mission (nouveaux messages seulement)
   useEffect(() => {
     if (!selectedTaskId || filter === "envoyer" || filter === "messages-directs") return;
     const interval = setInterval(() => {
-      fetch(`/api/tasks/${selectedTaskId}/messages`)
+      const last = messagesRef.current[messagesRef.current.length - 1];
+      const q = last?.id
+        ? `?after=${encodeURIComponent(last.id)}&take=30`
+        : "?take=50";
+      fetch(`/api/tasks/${selectedTaskId}/messages${q}`)
         .then((r) => (r.ok ? r.json() : []))
-        .then((data) => setMessages(Array.isArray(data) ? data : []))
+        .then((data) => {
+          if (!Array.isArray(data) || data.length === 0) return;
+          setMessages((prev) => {
+            const seen = new Set(prev.map((m) => m.id));
+            const add = data.filter((m: TaskMessageItem) => !seen.has(m.id));
+            return add.length ? [...prev, ...add] : prev;
+          });
+        })
         .catch(() => {});
     }, 7000);
     return () => clearInterval(interval);
   }, [selectedTaskId, filter]);
 
   useEffect(() => {
+    if (!stickToBottomRef.current) return;
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length, directThreadMessages.length]);
+
+  async function loadOlderMessages() {
+    if (!selectedTaskId || loadingOlder || !hasMoreMessages || messages.length === 0) return;
+    const oldest = messages[0];
+    if (!oldest?.createdAt) return;
+    const el = chatScrollRef.current;
+    const prevHeight = el?.scrollHeight ?? 0;
+    setLoadingOlder(true);
+    stickToBottomRef.current = false;
+    try {
+      const res = await fetch(
+        `/api/tasks/${selectedTaskId}/messages?take=50&before=${encodeURIComponent(oldest.createdAt)}`,
+      );
+      if (!res.ok) return;
+      const older = await res.json();
+      if (!Array.isArray(older) || older.length === 0) {
+        setHasMoreMessages(false);
+        return;
+      }
+      setHasMoreMessages(res.headers.get("X-Has-More") === "1");
+      setMessages((prev) => {
+        const seen = new Set(prev.map((m) => m.id));
+        const add = older.filter((m: TaskMessageItem) => !seen.has(m.id));
+        return [...add, ...prev];
+      });
+      requestAnimationFrame(() => {
+        if (!el) return;
+        el.scrollTop = el.scrollHeight - prevHeight;
+      });
+    } finally {
+      setLoadingOlder(false);
+    }
+  }
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
     const content = sendContent.trim();
     if ((!content && missionAttachments.length === 0) || !selectedTaskId || sending) return;
 
+    const clientMessageId =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `c-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const tempId = `temp-${clientMessageId}`;
+    const optimistic: TaskMessageItem = {
+      id: tempId,
+      content: content || (missionAttachments.length === 1 ? missionAttachments[0]!.name : `${missionAttachments.length} fichiers`),
+      read: false,
+      isInternal: Boolean(internalNote && (isAgence || isAgent)),
+      attachmentsJson: missionAttachments.length > 0 ? missionAttachments : null,
+      createdAt: new Date().toISOString(),
+      sender: { id: sessionUserId, name: "Vous" },
+      receiver: {
+        id: selectedMission?.client?.id ?? "",
+        name: selectedMission?.client?.name ?? "",
+      },
+      linkedBadges: [],
+      kind: "pending",
+    };
+
     setSending(true);
+    setSendContent("");
+    const savedAttachments = missionAttachments;
+    setMissionAttachments([]);
+    stickToBottomRef.current = true;
+    setMessages((prev) => [...prev, optimistic]);
+    setMissions((prev) =>
+      prev.map((m) =>
+        m.id === selectedTaskId
+          ? {
+              ...m,
+              lastMessage: {
+                id: tempId,
+                content: optimistic.content,
+                createdAt: optimistic.createdAt,
+                sender: optimistic.sender,
+              },
+            }
+          : m,
+      ),
+    );
+
     try {
       const body: {
         content: string;
         receiverId?: string;
         isInternal?: boolean;
         attachments?: AttachmentItem[];
+        clientMessageId?: string;
       } = {
         content,
         isInternal: internalNote && (isAgence || isAgent),
-        attachments: missionAttachments,
+        attachments: savedAttachments,
+        clientMessageId,
       };
       if (internalNote) {
         if (isAgence && selectedMission?.assignedTo) {
@@ -511,18 +616,43 @@ export function MessagerieMissionsView({
       });
       const data = await res.json().catch(() => ({}));
 
-      if (res.ok) {
-        setSendContent("");
-        setMissionAttachments([]);
-        const refresh = await fetch(`/api/tasks/${selectedTaskId}/messages`);
-        if (refresh.ok) setMessages(await refresh.json());
-        const listRes = await fetch(`/api/tasks/messagerie?filter=${filter === "messages-directs" ? "inbox" : filter}`);
-        if (listRes.ok) setMissions(await listRes.json());
-        router.refresh();
+      if (res.ok && data?.id) {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === tempId ? { ...data, linkedBadges: [] } : m)),
+        );
+        setMissions((prev) =>
+          prev.map((m) =>
+            m.id === selectedTaskId
+              ? {
+                  ...m,
+                  lastMessage: {
+                    id: data.id,
+                    content: data.content,
+                    createdAt: data.createdAt,
+                    sender: data.sender ?? optimistic.sender,
+                  },
+                }
+              : m,
+          ),
+        );
       } else {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === tempId ? { ...m, kind: "failed", content: `${m.content} — Échec` } : m,
+          ),
+        );
+        setSendContent(content);
+        setMissionAttachments(savedAttachments);
         alert(data?.error ?? "Impossible d’envoyer le message");
       }
     } catch {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === tempId ? { ...m, kind: "failed", content: `${m.content} — Échec` } : m,
+        ),
+      );
+      setSendContent(content);
+      setMissionAttachments(savedAttachments);
       alert("Erreur réseau — réessayez");
     } finally {
       setSending(false);
@@ -578,7 +708,35 @@ export function MessagerieMissionsView({
     const hasContent = content.length > 0;
     const hasAttachments = replyAttachments.length > 0;
     if ((!hasContent && !hasAttachments) || !selectedDirectContactId || sendingReply) return;
+
+    const tempId = `temp-d-${Date.now()}`;
+    const optimistic: DirectMessageItem = {
+      id: tempId,
+      content:
+        content ||
+        (replyAttachments.length === 1
+          ? replyAttachments[0]!.name
+          : `${replyAttachments.length} fichiers`),
+      read: false,
+      senderId: sessionUserId,
+      receiverId: selectedDirectContactId,
+      attachmentsJson: hasAttachments ? replyAttachments : null,
+      createdAt: new Date().toISOString(),
+      sender: { id: sessionUserId, name: "Vous" },
+      receiver: {
+        id: selectedDirectContactId,
+        name: selectedDirectContact?.name ?? "",
+      },
+    };
+
     setSendingReply(true);
+    setReplyDirectContent("");
+    const savedAttachments = replyAttachments;
+    setReplyAttachments([]);
+    setDirectThreadMessages((prev) => [...prev, optimistic]);
+    setDirectMessages((prev) => [optimistic, ...prev]);
+    stickToBottomRef.current = true;
+
     try {
       const res = await fetch("/api/messages/direct", {
         method: "POST",
@@ -586,20 +744,28 @@ export function MessagerieMissionsView({
         body: JSON.stringify({
           content: content || "",
           receiverId: selectedDirectContactId,
-          attachments: hasAttachments ? replyAttachments : undefined,
+          attachments: hasAttachments ? savedAttachments : undefined,
         }),
       });
-      if (res.ok) {
-        setReplyDirectContent("");
-        setReplyAttachments([]);
-        const list = await refreshDirectIndex();
-        setDirectMessages(list);
-        await refreshDirectThread(selectedDirectContactId);
-        router.refresh();
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data?.id) {
+        setDirectThreadMessages((prev) =>
+          prev.map((m) => (m.id === tempId ? { ...data } : m)),
+        );
+        setDirectMessages((prev) =>
+          prev.map((m) => (m.id === tempId ? { ...data } : m)),
+        );
       } else {
-        const err = await res.json().catch(() => ({}));
-        alert(err?.error ?? "Erreur lors de l'envoi");
+        setDirectThreadMessages((prev) => prev.filter((m) => m.id !== tempId));
+        setReplyDirectContent(content);
+        setReplyAttachments(savedAttachments);
+        alert(data?.error ?? "Erreur lors de l'envoi");
       }
+    } catch {
+      setDirectThreadMessages((prev) => prev.filter((m) => m.id !== tempId));
+      setReplyDirectContent(content);
+      setReplyAttachments(savedAttachments);
+      alert("Erreur réseau — réessayez");
     } finally {
       setSendingReply(false);
     }
@@ -625,10 +791,14 @@ export function MessagerieMissionsView({
       });
 
       if (res.ok) {
+        const recipientId = directRecipientId;
         setDirectContent("");
         setDirectRecipientId("");
         setDirectAttachments([]);
-        router.refresh();
+        setFilter("messages-directs");
+        setSelectedDirectContactId(recipientId);
+        const list = await refreshDirectIndex();
+        setDirectMessages(list);
       } else {
         const err = await res.json().catch(() => ({}));
         alert(err?.error ?? "Erreur lors de l'envoi");
@@ -653,10 +823,19 @@ export function MessagerieMissionsView({
       if (res.ok) {
         const listRes = await fetch(`/api/tasks/messagerie?filter=${filter}`);
         if (listRes.ok) setMissions(await listRes.json());
-        router.refresh();
       }
     } catch {
       // ignore
+    }
+  }
+
+  function onComposerKeyDown(
+    e: React.KeyboardEvent<HTMLTextAreaElement>,
+    submit: () => void,
+  ) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      submit();
     }
   }
 
@@ -782,7 +961,11 @@ export function MessagerieMissionsView({
         </div>
       ) : filter === "messages-directs" ? (
         <>
-          <aside className="flex min-h-0 w-[min(100%,420px)] shrink-0 flex-col overflow-hidden border-r border-[#d1d7db] bg-white">
+          <aside
+            className={`min-h-0 w-full shrink-0 flex-col overflow-hidden border-r border-[#d1d7db] bg-white md:flex md:w-[min(100%,420px)] ${
+              mobileShowThread && selectedDirectContactId ? "hidden" : "flex"
+            }`}
+          >
             <div className="border-b border-[#e9edef] px-4 pb-3 pt-3">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="text-[22px] font-bold tracking-tight text-[#111b21]">Contacts</h2>
@@ -834,7 +1017,10 @@ export function MessagerieMissionsView({
                   <li key={conv.user.id}>
                     <button
                       type="button"
-                      onClick={() => setSelectedDirectContactId(conv.user.id)}
+                      onClick={() => {
+                        setSelectedDirectContactId(conv.user.id);
+                        setMobileShowThread(true);
+                      }}
                       className={`flex w-full gap-3 px-3 py-3 text-left transition ${
                         selectedDirectContactId === conv.user.id ? "bg-[#f0f2f5]" : "hover:bg-[#f5f6f6]"
                       }`}
@@ -866,10 +1052,22 @@ export function MessagerieMissionsView({
               )}
             </ul>
           </aside>
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <div
+            className={`min-h-0 min-w-0 flex-1 flex-col ${
+              mobileShowThread && selectedDirectContactId ? "flex" : "hidden md:flex"
+            }`}
+          >
             {selectedDirectContactId && selectedDirectContact ? (
               <>
                 <div className="flex shrink-0 items-center gap-3 border-b border-[#d1d7db] bg-[#f0f2f5] px-4 py-2">
+                  <button
+                    type="button"
+                    className="rounded-full p-2 text-[#54656f] hover:bg-[#e9edef] md:hidden"
+                    aria-label="Retour"
+                    onClick={() => setMobileShowThread(false)}
+                  >
+                    ←
+                  </button>
                   <Avatar
                     name={(selectedDirectContact as { name?: string } | undefined)?.name ?? "Contact"}
                     size="sm"
@@ -878,7 +1076,7 @@ export function MessagerieMissionsView({
                     <h3 className="truncate text-[16px] font-medium text-[#111b21]">
                       {(selectedDirectContact as { name?: string } | undefined)?.name ?? "Contact"}
                     </h3>
-                    <p className="text-[13px] text-[#667781]">Message direct</p>
+                    <p className="text-[13px] text-[#667781]">🔒 Interne · Message direct</p>
                   </div>
                 </div>
                 <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3" style={WA_CHAT_BG}>
@@ -976,7 +1174,13 @@ export function MessagerieMissionsView({
                       <textarea
                         value={replyDirectContent}
                         onChange={(e) => setReplyDirectContent(e.target.value)}
-                        placeholder="Tapez un message"
+                        onKeyDown={(e) =>
+                          onComposerKeyDown(e, () => {
+                            const form = e.currentTarget.form;
+                            if (form) form.requestSubmit();
+                          })
+                        }
+                        placeholder="Écrire un message..."
                         rows={1}
                         disabled={sendingReply}
                         className="min-h-[44px] max-h-32 min-w-0 flex-1 resize-none rounded-[24px] border-0 bg-white px-4 py-3 text-[15px] text-[#111b21] placeholder:text-[#667781] focus:outline-none disabled:opacity-60"
@@ -1006,7 +1210,11 @@ export function MessagerieMissionsView({
         </>
       ) : (
       <>
-      <aside className="flex min-h-0 w-[min(100%,420px)] shrink-0 flex-col overflow-hidden border-r border-[#d1d7db] bg-white">
+      <aside
+        className={`min-h-0 w-full shrink-0 flex-col overflow-hidden border-r border-[#d1d7db] bg-white md:flex md:w-[min(100%,420px)] ${
+          mobileShowThread && selectedTaskId ? "hidden" : "flex"
+        }`}
+      >
         <div className="border-b border-[#e9edef] px-4 pb-3 pt-3">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-[22px] font-bold tracking-tight text-[#111b21]">Discussions</h2>
@@ -1073,7 +1281,10 @@ export function MessagerieMissionsView({
               <li key={m.id}>
                 <button
                   type="button"
-                  onClick={() => setSelectedTaskId(m.id)}
+                  onClick={() => {
+                    setSelectedTaskId(m.id);
+                    setMobileShowThread(true);
+                  }}
                   className={`flex w-full gap-3 px-3 py-3 text-left transition ${
                     selectedTaskId === m.id ? "bg-[#f0f2f5]" : "hover:bg-[#f5f6f6]"
                   }`}
@@ -1126,10 +1337,22 @@ export function MessagerieMissionsView({
       </aside>
 
       {/* Colonne droite : conversation type WhatsApp */}
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <div
+        className={`min-h-0 min-w-0 flex-1 flex-col ${
+          mobileShowThread && selectedTaskId ? "flex" : "hidden md:flex"
+        }`}
+      >
         {selectedMission ? (
           <>
             <div className="flex shrink-0 items-center gap-3 border-b border-[#d1d7db] bg-[#f0f2f5] px-4 py-2">
+              <button
+                type="button"
+                className="rounded-full p-2 text-[#54656f] hover:bg-[#e9edef] md:hidden"
+                aria-label="Retour"
+                onClick={() => setMobileShowThread(false)}
+              >
+                ←
+              </button>
               <Avatar name={selectedMission.client.name || selectedMission.title} size="sm" />
               <div className="min-w-0 flex-1">
                 <h3 className="truncate text-[16px] font-medium text-[#111b21]">{selectedMission.title}</h3>
@@ -1139,6 +1362,19 @@ export function MessagerieMissionsView({
                   {" · "}
                   {STATUS_LABELS[selectedMission.status] ?? selectedMission.status}
                 </p>
+                <div className="mt-1 flex flex-wrap gap-1.5">
+                  <span className="inline-flex items-center rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-semibold text-violet-900">
+                    🔒 Interne
+                  </span>
+                  {selectedMission.projectId ? (
+                    <Link
+                      href={`/dashboard/projets/${selectedMission.projectId}`}
+                      className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700 hover:bg-slate-200"
+                    >
+                      Voir le chantier
+                    </Link>
+                  ) : null}
+                </div>
               </div>
               <div className="flex shrink-0 items-center gap-1 text-[#54656f]">
                 <ConversationDossierPanel
@@ -1166,8 +1402,15 @@ export function MessagerieMissionsView({
             </div>
 
             <div
+              ref={chatScrollRef}
               className="relative min-h-0 flex-1 overflow-y-auto px-4 py-3"
               style={WA_CHAT_BG}
+              onScroll={(e) => {
+                const el = e.currentTarget;
+                const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+                stickToBottomRef.current = nearBottom;
+                if (el.scrollTop < 48) void loadOlderMessages();
+              }}
               onDragOver={(e) => {
                 e.preventDefault();
                 setDragOver(true);
@@ -1184,6 +1427,18 @@ export function MessagerieMissionsView({
               {dragOver ? (
                 <div className="pointer-events-none absolute inset-4 z-10 flex items-center justify-center rounded-2xl border-2 border-dashed border-[#00a884] bg-[#d9fdd3]/70 text-sm font-semibold text-[#008069]">
                   Déposez photos ou documents ici
+                </div>
+              ) : null}
+              {hasMoreMessages ? (
+                <div className="mb-3 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => void loadOlderMessages()}
+                    disabled={loadingOlder}
+                    className="rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-[#54656f] shadow-sm hover:bg-white disabled:opacity-50"
+                  >
+                    {loadingOlder ? "Chargement…" : "Messages précédents"}
+                  </button>
                 </div>
               ) : null}
               {loadingMessages ? (
@@ -1262,9 +1517,19 @@ export function MessagerieMissionsView({
                             <p className="mt-0.5 flex items-center justify-end gap-1 text-[11px] text-[#667781]">
                               {formatMessageTime(m.createdAt)}
                               {isMe && !isSystem ? (
-                                <span className="text-[#53bdeb]" title="Envoyé">
-                                  ✓✓
-                                </span>
+                                m.kind === "pending" ? (
+                                  <span className="text-[#8696a0]" title="Envoi…">
+                                    …
+                                  </span>
+                                ) : m.kind === "failed" ? (
+                                  <span className="font-medium text-red-600" title="Échec">
+                                    Échec
+                                  </span>
+                                ) : (
+                                  <span className="text-[#53bdeb]" title="Envoyé">
+                                    ✓✓
+                                  </span>
+                                )
                               ) : null}
                             </p>
                           </div>

@@ -1,7 +1,6 @@
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { authOptions } from "@/lib/auth";
+import { getCachedServerSession } from "@/lib/auth/cached-session";
 import { prisma } from "@/lib/prisma";
 import { BackLink } from "@/components/ui/BackLink";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -24,7 +23,7 @@ import { PURCHASE_ORDER_STATUS_LABELS } from "@/lib/purchase-orders/status";
 export const dynamic = "force-dynamic";
 
 export default async function CommandesPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getCachedServerSession();
   if (!session?.user?.id) redirect("/connexion?callbackUrl=/dashboard/commandes");
   if (!canListPurchaseOrders(session.user)) redirect("/dashboard");
 

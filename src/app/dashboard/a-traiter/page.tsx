@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { after } from "next/server";
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/auth";
+import { getCachedServerSession } from "@/lib/auth/cached-session";
 import {
   A_TRAITER_SECTION_LABELS,
   collectATraiter,
@@ -66,7 +65,7 @@ function formatWhen(d: Date) {
 }
 
 export default async function ATraiterPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getCachedServerSession();
   if (!session?.user?.id) {
     redirect("/connexion?callbackUrl=/dashboard/a-traiter");
   }

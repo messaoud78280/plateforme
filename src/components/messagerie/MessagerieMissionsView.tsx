@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { DeleteTaskButton } from "@/components/tasks/DeleteTaskButton";
 import { documentDownloadHref } from "@/lib/documents/download-url";
 import { SignedFileLink } from "@/components/files/SignedFileLink";
@@ -189,6 +190,7 @@ export function MessagerieMissionsView({
   managerId,
   recipients = [],
 }: MessagerieMissionsViewProps) {
+  const router = useRouter();
   const [missions, setMissions] = useState<MissionItem[]>([]);
   const [filter, setFilter] = useState<FilterId>("inbox");
   const [listChip, setListChip] = useState<ListChip>("tous");
@@ -1359,8 +1361,9 @@ export function MessagerieMissionsView({
                 type="button"
                 onClick={() => {
                   if (id === "fournisseurs") {
-                    window.location.href =
-                      "/dashboard/messagerie?view=chantiers&channel=FOURNISSEUR";
+                    router.push(
+                      "/dashboard/messagerie?view=chantiers&channel=FOURNISSEUR",
+                    );
                     return;
                   }
                   if (id === "clients") {

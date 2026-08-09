@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
 import {
@@ -91,7 +90,6 @@ function toLocalInput(iso: string | null): string {
 }
 
 export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
-  const router = useRouter();
   const [sheet, setSheet] = useState(initial);
   const [busy, setBusy] = useState(false);
   const [postponeOpen, setPostponeOpen] = useState(false);
@@ -159,7 +157,6 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
           setNextAtDraft(toLocalInput(next.nextActionAt));
           setSuggestions(null);
         }
-        router.refresh();
       }
     } finally {
       setBusy(false);
@@ -178,7 +175,6 @@ export function FollowUpDetailClient({ sheet: initial }: { sheet: Sheet }) {
       const data = await res.json();
       if (res.ok) {
         setSheet(data);
-        router.refresh();
       }
     } finally {
       setBusy(false);

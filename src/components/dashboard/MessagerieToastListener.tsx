@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useMessagerieUnread } from "@/hooks/useMessagerieUnread";
 
 type PreviewItem = {
   id: string;
@@ -16,13 +17,14 @@ const SEEN_KEY = "bework.msg.toast.seen";
 
 /**
  * Toast discret hors Messagerie lorsqu’un nouveau message arrive.
- * Réutilise /api/messagerie/preview — pas de double notification DB.
+ * Réutilise /api/messagerie/preview uniquement si badge non-lus > 0 (PERF-V1A).
  */
 export function MessagerieToastListener() {
   const pathname = usePathname();
   const onMessagerie = pathname?.startsWith("/dashboard/messagerie");
   const [toast, setToast] = useState<PreviewItem | null>(null);
   const knownRef = useRef<Set<string>>(new Set());
+  const unread = useMessagerieUnread();
 
   useEffect(() => {
     try {
@@ -34,8 +36,8 @@ export function MessagerieToastListener() {
   }, []);
 
   useEffect(() => {
-    if (onMessagerie) {
-      setToast(null);
+    if (onMessagerie || unread <= 0) {
+      if (onMessagerie) setToast(null);
       return;
     }
 
@@ -69,12 +71,12 @@ export function MessagerieToastListener() {
     }
 
     void poll();
-    const t = window.setInterval(() => void poll(), 20_000);
+    const t = window.setInterval(() => void poll(), 45_000);
     return () => {
       cancelled = true;
       window.clearInterval(t);
     };
-  }, [onMessagerie, pathname]);
+  }, [onMessagerie, pathname, unread]);
 
   useEffect(() => {
     if (!toast) return;

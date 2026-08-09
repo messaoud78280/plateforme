@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getCachedServerSession } from "@/lib/auth/cached-session";
 import { SEO_NOINDEX_ROBOTS } from "@/lib/seo-search-engines";
 import { OutilsCommunication } from "@/components/OutilsCommunication";
@@ -7,9 +8,10 @@ import { NotificationsDropdown } from "@/components/dashboard/NotificationsDropd
 import { MessagerieHeaderShortcut } from "@/components/dashboard/MessagerieHeaderShortcut";
 import { MessagerieToastListener } from "@/components/dashboard/MessagerieToastListener";
 import { MobileBottomNav } from "@/components/dashboard/MobileBottomNav";
+import { PrefetchMainRoutes } from "@/components/dashboard/PrefetchMainRoutes";
 import { ClientAccountStatus, UserRole } from "@prisma/client";
-import { prisma } from "@/lib/prisma";
 import { isClientLoginAllowed } from "@/lib/client-account-approval";
+import { getCachedClientGate, getCachedDemoExpiry } from "@/lib/auth/cached-dashboard-user";
 import { SkipLink } from "@/components/ui/SkipLink";
 import { EnvironmentBanner } from "@/components/system/EnvironmentBanner";
 import { DemoTenantBanner } from "@/components/demo-environment/DemoTenantBanner";
@@ -85,15 +87,7 @@ export default async function DashboardLayout({
   let dbCompany: string | null = null;
 
   if (session.user?.role === UserRole.CLIENT) {
-    const client = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: {
-        accountStatus: true,
-        company: true,
-        personType: true,
-        permissionProfile: true,
-      },
-    });
+    const client = await getCachedClientGate(session.user.id);
     if (client && !isClientLoginAllowed(client.accountStatus)) {
       redirect(
         client.accountStatus === ClientAccountStatus.REJECTED
@@ -113,10 +107,7 @@ export default async function DashboardLayout({
 
   let demoExpiresIso: string | null = null;
   if (isDemo && session.user.demoEnvironmentId) {
-    const demo = await prisma.demoEnvironment.findUnique({
-      where: { id: session.user.demoEnvironmentId },
-      select: { expiresAt: true, companyName: true },
-    });
+    const demo = await getCachedDemoExpiry(session.user.demoEnvironmentId);
     demoExpiresIso = demo?.expiresAt?.toISOString() ?? null;
   }
 
@@ -154,9 +145,9 @@ export default async function DashboardLayout({
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             {isDemo ? <DemoViewAsSwitcher /> : null}
             {session.user?.role === "CLIENT" && !isDemo && !external ? (
-              <a href="/dashboard/nouvelle-demande" className="btn-cc-primary !text-xs sm:!text-sm">
+              <Link href="/dashboard/nouvelle-demande" className="btn-cc-primary !text-xs sm:!text-sm">
                 + Nouvelle mission
-              </a>
+              </Link>
             ) : null}
             <MessagerieHeaderShortcut />
             <NotificationsDropdown />
@@ -169,6 +160,7 @@ export default async function DashboardLayout({
           </div>
         </header>
         <UiPreferencesProvider userId={session.user.id}>
+          <PrefetchMainRoutes />
           <main
             id="contenu-principal"
             tabIndex={-1}

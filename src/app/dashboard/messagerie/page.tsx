@@ -1,13 +1,12 @@
 import { Suspense } from "react";
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/auth";
+import { getCachedServerSession } from "@/lib/auth/cached-session";
 import { prisma } from "@/lib/prisma";
 import { MessagerieHub } from "@/components/messagerie/MessagerieHub";
 import { isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
 
 export default async function MessageriePage() {
-  const session = await getServerSession(authOptions);
+  const session = await getCachedServerSession();
 
   if (!session?.user?.id) {
     redirect("/connexion?callbackUrl=/dashboard");

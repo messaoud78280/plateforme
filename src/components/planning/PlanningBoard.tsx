@@ -84,7 +84,6 @@ export function PlanningBoard({ teamUsers, currentUserId }: Props) {
         from: from.toISOString(),
         to: to.toISOString(),
         scope: "all",
-        linked: "1",
       });
       const res = await fetch(`/api/agenda/events?${qs}`, { cache: "no-store" });
       if (!res.ok) {

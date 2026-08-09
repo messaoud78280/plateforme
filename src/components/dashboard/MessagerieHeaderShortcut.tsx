@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { MessageSquare } from "lucide-react";
 import { HeaderDropdown } from "@/components/ui/HeaderDropdown";
 import { cn } from "@/lib/cn";
+import { useMessagerieUnread } from "@/hooks/useMessagerieUnread";
 
 type PreviewItem = {
   id: string;
@@ -24,28 +25,21 @@ function formatAt(iso: string) {
   return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 }
 
-/** Raccourci header 💬 — messages ≠ notifications métier. */
+/** Raccourci header 💬 — badge via poll partagé ; aperçu au clic uniquement. */
 export function MessagerieHeaderShortcut() {
-  const [total, setTotal] = useState(0);
+  const total = useMessagerieUnread();
   const [items, setItems] = useState<PreviewItem[]>([]);
 
-  const load = useCallback(async () => {
+  const loadPreview = useCallback(async () => {
     try {
       const res = await fetch("/api/messagerie/preview", { cache: "no-store" });
       if (!res.ok) return;
-      const data = (await res.json()) as { total?: number; items?: PreviewItem[] };
-      setTotal(typeof data.total === "number" ? data.total : 0);
+      const data = (await res.json()) as { items?: PreviewItem[] };
       setItems(Array.isArray(data.items) ? data.items : []);
     } catch {
       // silencieux
     }
   }, []);
-
-  useEffect(() => {
-    void load();
-    const t = window.setInterval(() => void load(), 45_000);
-    return () => window.clearInterval(t);
-  }, [load]);
 
   return (
     <HeaderDropdown
@@ -58,7 +52,7 @@ export function MessagerieHeaderShortcut() {
           type="button"
           onClick={() => {
             onClick();
-            if (!expanded) void load();
+            if (!expanded) void loadPreview();
           }}
           className="relative shrink-0 rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-800"
           aria-label={total > 0 ? `Messagerie, ${total} non lus` : "Messagerie"}
@@ -87,10 +81,7 @@ export function MessagerieHeaderShortcut() {
         <ul className="max-h-72 overflow-y-auto border-t border-slate-100">
           {items.map((it) => (
             <li key={it.id}>
-              <Link
-                href={it.href}
-                className="block px-3 py-2.5 hover:bg-slate-50"
-              >
+              <Link href={it.href} className="block px-3 py-2.5 hover:bg-slate-50">
                 <div className="flex items-baseline justify-between gap-2">
                   <p className="truncate text-sm font-bold text-slate-900">{it.title}</p>
                   <span className="shrink-0 text-[11px] font-semibold text-[#00a884]">

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 import {
   AlertCircle,
   Calendar,
@@ -11,6 +10,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { useMessagerieUnread } from "@/hooks/useMessagerieUnread";
 
 const TABS = [
   { href: "/dashboard", label: "Accueil", icon: Home, exact: true },
@@ -22,27 +22,7 @@ const TABS = [
 /** Barre basse mobile — Messagerie en un tap. */
 export function MobileBottomNav() {
   const pathname = usePathname();
-  const [msgBadge, setMsgBadge] = useState(0);
-
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      try {
-        const res = await fetch("/api/messagerie/unread-count", { cache: "no-store" });
-        if (!res.ok) return;
-        const data = (await res.json()) as { total?: number };
-        if (!cancelled) setMsgBadge(typeof data.total === "number" ? data.total : 0);
-      } catch {
-        // ignore
-      }
-    }
-    void load();
-    const t = window.setInterval(() => void load(), 45_000);
-    return () => {
-      cancelled = true;
-      window.clearInterval(t);
-    };
-  }, [pathname]);
+  const msgBadge = useMessagerieUnread();
 
   return (
     <nav

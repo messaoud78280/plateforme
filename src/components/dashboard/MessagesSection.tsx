@@ -125,7 +125,6 @@ export function MessagesSection({ isAgence, sessionUserId, variant = "rdv" }: Me
       setMessages((prev) =>
         prev.map((m) => (m.id === id ? { ...m, read: true } : m))
       );
-      router.refresh();
     } catch {
       // ignore
     }
@@ -182,7 +181,6 @@ export function MessagesSection({ isAgence, sessionUserId, variant = "rdv" }: Me
       const refresh = await fetch("/api/messages");
       if (refresh.ok) setMessages(await refresh.json());
       setActiveTab("tous");
-      router.refresh();
     } catch {
       setError("Erreur de connexion.");
     } finally {
@@ -313,7 +311,6 @@ export function MessagesSection({ isAgence, sessionUserId, variant = "rdv" }: Me
                         setSendContent("");
                         const refresh = await fetch("/api/messages");
                         if (refresh.ok) setMessages(await refresh.json());
-                        router.refresh();
                       } else {
                         const data = await res.json();
                         setError(data.error || "Erreur envoi");

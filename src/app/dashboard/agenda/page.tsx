@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/auth";
+import { getCachedServerSession } from "@/lib/auth/cached-session";
 import { isBeworkStaff } from "@/lib/authz";
 import { resolveAgendaOwnerUserId } from "@/lib/agenda/access";
 import { projectWhereForClientUser } from "@/lib/organization/access";
@@ -13,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AgendaPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getCachedServerSession();
   if (!session?.user?.id) {
     redirect("/connexion?callbackUrl=/dashboard/agenda");
   }

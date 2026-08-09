@@ -199,6 +199,11 @@ export function AppSidebar({
     }
   });
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
+
+  useEffect(() => {
+    setPendingHref(null);
+  }, [pathname]);
 
   function toggleCollapsed() {
     setCollapsed((v) => {
@@ -296,21 +301,28 @@ export function AppSidebar({
                 const active = item.exact
                   ? pathname === item.href
                   : pathname === item.href || pathname.startsWith(item.href + "/");
+                const pending = pendingHref === item.href;
                 return (
                   <li key={item.href}>
                     <Link
                       href={item.href}
                       title={item.label}
-                      onClick={() => setMobileOpen(false)}
+                      onClick={() => {
+                        setMobileOpen(false);
+                        if (!active) setPendingHref(item.href);
+                      }}
                       prefetch
                       className={cn(
                         "flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm font-semibold transition-colors duration-75 active:scale-[0.98]",
                         collapsed && "justify-center px-2",
                         active
                           ? "bg-bework-navy text-white shadow-sm"
-                          : "text-bework-ink/75 hover:bg-white hover:text-bework-navy hover:shadow-sm",
+                          : pending
+                            ? "bg-bework-navy/10 text-bework-navy ring-1 ring-bework-navy/20"
+                            : "text-bework-ink/75 hover:bg-white hover:text-bework-navy hover:shadow-sm",
                       )}
                       aria-current={active ? "page" : undefined}
+                      aria-busy={pending || undefined}
                     >
                       <Icon className={cn("h-4 w-4 shrink-0", active ? "opacity-95" : "opacity-70")} />
                       {!collapsed ? <span className="truncate">{item.label}</span> : null}

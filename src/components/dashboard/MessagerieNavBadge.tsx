@@ -1,33 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
+import { useMessagerieUnread } from "@/hooks/useMessagerieUnread";
 
-/** Badge non-lus Messagerie (conversations avec messages non lus). */
+/** Badge non-lus Messagerie (conversations) — poll partagé PERF-V1A. */
 export function MessagerieNavBadge({ active }: { active?: boolean }) {
-  const [total, setTotal] = useState(0);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      try {
-        const res = await fetch("/api/messagerie/unread-count", { cache: "no-store" });
-        if (!res.ok) return;
-        const data = (await res.json()) as { total?: number };
-        if (!cancelled) setTotal(typeof data.total === "number" ? data.total : 0);
-      } catch {
-        // silencieux
-      }
-    }
-
-    void load();
-    const timer = window.setInterval(() => void load(), 45_000);
-    return () => {
-      cancelled = true;
-      window.clearInterval(timer);
-    };
-  }, []);
+  const total = useMessagerieUnread();
 
   if (total <= 0) return null;
 

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   actionsForPurchaseOrderStatus,
@@ -142,7 +141,6 @@ export function PurchaseOrderDetailClient({
   isSupplierView?: boolean;
   receiving?: ReceivingState;
 }) {
-  const router = useRouter();
   const [order, setOrder] = useState(initial);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -169,7 +167,6 @@ export function PurchaseOrderDetailClient({
     const refreshed = await fetch(`/api/purchase-orders/${order.id}`);
     const body = await refreshed.json();
     if (body.order) setOrder(body.order);
-    router.refresh();
   }
 
   async function runInternal(action: string, extra?: Record<string, unknown>) {
@@ -204,7 +201,6 @@ export function PurchaseOrderDetailClient({
       if (!res.ok) throw new Error(data.error || "Erreur");
       if (data.order) setOrder(data.order);
       setMode("none");
-      router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur");
     } finally {

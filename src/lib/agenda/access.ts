@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { Prisma } from "@prisma/client";
 import { isBeworkStaff } from "@/lib/authz";
 import { projectWhereForClientUser } from "@/lib/organization/access";
@@ -9,8 +10,8 @@ type SessionUser = {
   email?: string | null;
 };
 
-/** Propriétaire tenant CLIENT (compte principal ou owner d’org). */
-export async function resolveAgendaOwnerUserId(userId: string): Promise<string> {
+/** Propriétaire tenant CLIENT — mis en cache par requête RSC (PERF-V1A). */
+export const resolveAgendaOwnerUserId = cache(async (userId: string): Promise<string> => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { id: true, role: true, invitedById: true },
@@ -18,7 +19,7 @@ export async function resolveAgendaOwnerUserId(userId: string): Promise<string> 
   if (!user) return userId;
   if (user.role === "CLIENT" && user.invitedById) return user.invitedById;
   return user.id;
-}
+});
 
 function mineClause(userId: string): Prisma.AgendaEventWhereInput {
   return {

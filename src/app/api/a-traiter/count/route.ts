@@ -11,14 +11,14 @@ export async function GET() {
   }
 
   try {
-    const total = await countATraiter({
+    const { total, capped } = await countATraiter({
       id: session.user.id,
       role: session.user.role,
       personType: session.user.personType ?? null,
     });
-    return NextResponse.json({ total });
+    return NextResponse.json({ total, capped });
   } catch (e) {
     console.error("[a-traiter/count]", e);
-    return NextResponse.json({ total: 0 });
+    return NextResponse.json({ total: 0, capped: false });
   }
 }

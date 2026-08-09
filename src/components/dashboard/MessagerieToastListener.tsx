@@ -18,7 +18,8 @@ type PreviewItem = {
 const SEEN_KEY = "bework.msg.toast.seen";
 
 /**
- * Toast discret — alimenté par broadcast/SSE, pas un poll 20 s.
+ * Toast discret — alimenté uniquement par Broadcast (bus dédupliqué).
+ * SSE ne pousse pas d’événements métier (resync unread seulement).
  */
 export function MessagerieToastListener() {
   const pathname = usePathname();
@@ -40,6 +41,7 @@ export function MessagerieToastListener() {
     return subscribeMessagerieEvents((ev: MessagerieRealtimePayload) => {
       if (onMessagerie) return;
       const key = `${ev.conversationKey}:${ev.at}`;
+      // Dédup déjà faite au bus ; garde sessionStorage pour refresh page
       if (knownRef.current.has(key)) return;
       knownRef.current.add(key);
       try {

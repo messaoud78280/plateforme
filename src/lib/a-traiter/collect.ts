@@ -59,6 +59,8 @@ export type ATraiterSnapshot = {
   items: ATraiterItem[];
   counts: Record<ATraiterSection, number>;
   total: number;
+  /** true si l’échantillon attention a atteint le plafond (badge non exact). */
+  attentionCapped?: boolean;
 };
 
 const SECTION_ORDER: ATraiterSection[] = ["bloquant", "urgent", "a_valider", "relance"];
@@ -100,9 +102,11 @@ export async function collectATraiter(
   }
 
   const agentOnly = isAgent(sessionUser) && !isAgencyOrManager(sessionUser);
-  const attentionCards =
+  /** Plafond d’échantillon attention pour le badge — jamais présenté comme exact si atteint. */
+  const attentionTake = countOnly ? 200 : undefined;
+  const attentionResult =
     externalPortal
-      ? []
+      ? { cards: [] as ATraiterAttentionCard[], capped: false }
       : await collectUnifiedAttentionCards(
           {
             id: user.id,
@@ -112,8 +116,10 @@ export async function collectATraiter(
           },
           agentOnly ? user.id : null,
           light,
-          countOnly ? 20 : undefined,
+          attentionTake,
         );
+  const attentionCards = attentionResult.cards;
+  const attentionCapped = Boolean(countOnly && attentionResult.capped);
 
   if (!countOnly) {
     items.sort((a, b) => {
@@ -150,6 +156,7 @@ export async function collectATraiter(
     items,
     counts,
     total,
+    attentionCapped,
   };
   });
 }
@@ -559,12 +566,19 @@ async function collectUnifiedAttentionCards(
   assigneeOnlyId: string | null,
   light = false,
   takeOverride?: number,
-): Promise<ATraiterAttentionCard[]> {
-  const [followUpCards, purchaseOrderCards] = await Promise.all([
+): Promise<{ cards: ATraiterAttentionCard[]; capped: boolean }> {
+  const [followUp, purchaseOrder] = await Promise.all([
     collectFollowUpAttentionCards(sessionUser, assigneeOnlyId, light, takeOverride),
     collectPurchaseOrderAttentionCards(sessionUser, assigneeOnlyId, light, takeOverride),
   ]);
-  return [...followUpCards, ...purchaseOrderCards].sort(sortAttentionCards);
+  const take = takeOverride ?? (light ? 40 : 120);
+  const capped =
+    typeof takeOverride === "number" &&
+    (followUp.sampled >= take || purchaseOrder.sampled >= take);
+  return {
+    cards: [...followUp.cards, ...purchaseOrder.cards].sort(sortAttentionCards),
+    capped,
+  };
 }
 
 /** Fiches → diagnostics W3-A (batch, une carte / fiche, sans NORMAL). */
@@ -573,7 +587,7 @@ async function collectFollowUpAttentionCards(
   assigneeOnlyId: string | null,
   light = false,
   takeOverride?: number,
-): Promise<ATraiterAttentionCard[]> {
+): Promise<{ cards: ATraiterAttentionCard[]; sampled: number }> {
   try {
     const accessWhere = await followUpSheetAccessWhere(sessionUser);
     const ownerUserId = await resolveFollowUpOwnerUserId(sessionUser.id);
@@ -606,11 +620,15 @@ async function collectFollowUpAttentionCards(
         project: { select: { title: true } },
         tasks: { select: { id: true }, take: 1, orderBy: { updatedAt: "desc" } },
       },
-      orderBy: { updatedAt: "desc" },
+      orderBy: [
+        { urgencyOverride: "desc" },
+        { nextActionAt: "asc" },
+        { updatedAt: "desc" },
+      ],
       take,
     });
 
-    if (sheets.length === 0) return [];
+    if (sheets.length === 0) return { cards: [], sampled: 0 };
 
     const { byId: attentionMap, statusEnteredAt } = await loadAttentionForSheets({
       sheets: sheets.map((s) => ({
@@ -652,10 +670,10 @@ async function collectFollowUpAttentionCards(
       if (card) cards.push(card);
     }
 
-    return cards;
+    return { cards, sampled: sheets.length };
   } catch (e) {
     console.error("collectFollowUpAttentionCards:", e);
-    return [];
+    return { cards: [], sampled: 0 };
   }
 }
 
@@ -670,17 +688,18 @@ async function collectPurchaseOrderAttentionCards(
   assigneeOnlyId: string | null,
   light = false,
   takeOverride?: number,
-): Promise<ATraiterAttentionCard[]> {
+): Promise<{ cards: ATraiterAttentionCard[]; sampled: number }> {
   try {
-    if (!isInternalPurchaseOrderActor(sessionUser)) return [];
+    if (!isInternalPurchaseOrderActor(sessionUser)) return { cards: [], sampled: 0 };
 
     const orgId = await resolvePurchaseOrderOrgId(sessionUser);
-    if (!orgId) return [];
+    if (!orgId) return { cards: [], sampled: 0 };
 
+    const take = takeOverride ?? (light ? 40 : 120);
     const rows = await loadPurchaseOrderAttention({
       organizationId: orgId,
       actorUserId: assigneeOnlyId,
-      take: takeOverride ?? (light ? 40 : 120),
+      take,
       light,
     });
 
@@ -705,10 +724,10 @@ async function collectPurchaseOrderAttentionCards(
       });
       if (card) cards.push(card);
     }
-    return cards;
+    return { cards, sampled: rows.length };
   } catch (e) {
     console.error("collectPurchaseOrderAttentionCards:", e);
-    return [];
+    return { cards: [], sampled: 0 };
   }
 }
 
@@ -721,23 +740,24 @@ export const A_TRAITER_SECTION_LABELS: Record<ATraiterSection, string> = {
 
 /**
  * Badge nav : URGENT + CRITIQUE + hot items.
- * COUNT léger (countOnly) — pas le même chargement que la page À traiter.
- * Cache TTL 30 s — PERF-V1B.
+ * COUNT léger (countOnly). Si l’échantillon attention est plafonné → capped=true
+ * (le UI doit afficher N+ , jamais un sous-compte présenté comme exact).
  */
 export async function countATraiter(user: {
   id: string;
   role?: string | null;
   personType?: string | null;
-}): Promise<number> {
+}): Promise<{ total: number; capped: boolean }> {
   const key = `a-traiter-count:${user.id}`;
-  const cached = ttlGet<number>(key);
-  if (typeof cached === "number") return cached;
+  const cached = ttlGet<{ total: number; capped: boolean }>(key);
+  if (cached && typeof cached.total === "number") return cached;
 
   const snapshot = await collectATraiter(user, { light: true, countOnly: true });
   const otherHot = snapshot.counts.bloquant + snapshot.counts.urgent;
   const total = snapshot.hotCount + otherHot;
-  ttlSet(key, total, 30_000);
-  return total;
+  const payload = { total, capped: Boolean(snapshot.attentionCapped) };
+  ttlSet(key, payload, 30_000);
+  return payload;
 }
 
 /** Compteurs détaillés pour le bandeau Accueil (léger + cache 30 s). */
@@ -763,8 +783,12 @@ export async function summarizeATraiter(user: {
   ttlSet(key, summary, 30_000);
   ttlSet(
     `a-traiter-count:${user.id}`,
-    snapshot.hotCount +
-      snapshot.items.filter((i) => i.section === "bloquant" || i.section === "urgent").length,
+    {
+      total:
+        snapshot.hotCount +
+        snapshot.items.filter((i) => i.section === "bloquant" || i.section === "urgent").length,
+      capped: false,
+    },
     30_000,
   );
   return summary;

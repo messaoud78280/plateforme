@@ -20,9 +20,17 @@ ok(collect.includes("countOnly"), "countATraiter via countOnly");
 ok(collect.includes("collectHotCountBuckets"), "buckets SQL hot pour badge");
 
 const bus = fs.readFileSync("src/lib/perf/messagerie-unread-bus.ts", "utf8");
-ok(bus.includes("EventSource"), "SSE principal");
+ok(bus.includes("broadcastReady"), "Broadcast = chemin principal");
+ok(bus.includes("stopSse"), "SSE coupé quand Broadcast SUBSCRIBED");
+ok(bus.includes("seenEventKeys") || bus.includes("eventKey"), "dédup événements");
 ok(bus.includes("90_000") || bus.includes("FALLBACK_POLL_MS"), "poll fallback rare");
-ok(bus.includes("attachMessagerieRealtime"), "broadcast Supabase optionnel");
+ok(bus.includes("attachMessagerieRealtime"), "subscription Broadcast unique");
+ok(bus.includes("EventSource"), "SSE secours présent");
+
+const countRoute = fs.readFileSync("src/app/api/a-traiter/count/route.ts", "utf8");
+ok(countRoute.includes("capped"), "API count expose capped");
+ok(collect.includes("attentionCapped") || collect.includes("capped"), "attention plafonnée signalée");
+ok(collect.includes("200"), "échantillon attention badge ≥ 200");
 
 ok(fs.existsSync("src/app/api/messagerie/live/route.ts"), "route SSE live");
 ok(

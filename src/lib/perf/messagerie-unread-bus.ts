@@ -1,9 +1,13 @@
 "use client";
 
 /**
- * Bus Messagerie unique — PERF-V1B.
- * REALTIME principal : SSE /api/messagerie/live (+ broadcast Supabase si dispo)
- * FALLBACK : poll 90 s
+ * Bus Messagerie unique — contrôle post-V1B.
+ *
+ * PRINCIPAL : Supabase Broadcast (immédiat) quand disponible
+ * SECOURS   : SSE /api/messagerie/live (resync ~2,5 s) si Broadcast indisponible
+ * FILET     : poll 90 s
+ *
+ * Une seule subscription logique / user. Déduplication des événements.
  */
 
 import { createBrowserClient } from "@/lib/supabase";
@@ -23,8 +27,12 @@ let sse: EventSource | null = null;
 let pollTimer: number | null = null;
 let supabaseChannel: RealtimeChannel | null = null;
 let subscribedUserId: string | null = null;
+/** Broadcast connecté → SSE ne doit pas être le chemin principal. */
+let broadcastReady = false;
 
+const seenEventKeys = new Set<string>();
 const FALLBACK_POLL_MS = 90_000;
+const SSE_INTERVAL_HINT_MS = 2_500;
 const STALE_MS = 5_000;
 
 async function fetchUnread(): Promise<number> {
@@ -40,7 +48,18 @@ function emitUnread(total: number) {
   for (const l of unreadListeners) l(total);
 }
 
+function eventKey(ev: MessagerieRealtimePayload) {
+  return `${ev.conversationKey}:${ev.at}:${ev.senderId}`;
+}
+
 function emitEvent(ev: MessagerieRealtimePayload) {
+  const key = eventKey(ev);
+  if (seenEventKeys.has(key)) return;
+  seenEventKeys.add(key);
+  if (seenEventKeys.size > 80) {
+    const first = seenEventKeys.values().next().value;
+    if (first) seenEventKeys.delete(first);
+  }
   for (const l of eventListeners) l(ev);
   void getMessagerieUnread(true);
 }
@@ -65,48 +84,74 @@ export async function getMessagerieUnread(force = false): Promise<number> {
   return inflight;
 }
 
-function ensureTransport() {
-  if (typeof window === "undefined") return;
-
-  if (!sse || sse.readyState === EventSource.CLOSED) {
-    try {
-      sse = new EventSource("/api/messagerie/live");
-      sse.onmessage = (msg) => {
-        try {
-          const data = JSON.parse(msg.data) as { type?: string; total?: number };
-          if (data.type === "unread" && typeof data.total === "number") {
-            emitUnread(data.total);
-          }
-        } catch {
-          // ignore
-        }
-      };
-      sse.onerror = () => {
-        // filet poll si SSE coupe
-        if (pollTimer == null) {
-          pollTimer = window.setInterval(() => void getMessagerieUnread(true), FALLBACK_POLL_MS);
-        }
-      };
-    } catch {
-      if (pollTimer == null) {
-        pollTimer = window.setInterval(() => void getMessagerieUnread(true), FALLBACK_POLL_MS);
-      }
-    }
+function stopSse() {
+  if (sse) {
+    sse.close();
+    sse = null;
   }
+}
 
+function startSse() {
+  if (typeof window === "undefined") return;
+  if (sse && sse.readyState !== EventSource.CLOSED) return;
+  try {
+    sse = new EventSource("/api/messagerie/live");
+    sse.onmessage = (msg) => {
+      try {
+        const data = JSON.parse(msg.data) as { type?: string; total?: number };
+        // SSE = resync compteur uniquement (pas de toast / pas d’event métier)
+        if (data.type === "unread" && typeof data.total === "number") {
+          emitUnread(data.total);
+        }
+      } catch {
+        // ignore
+      }
+    };
+    sse.onerror = () => {
+      ensurePollFallback();
+    };
+  } catch {
+    ensurePollFallback();
+  }
+}
+
+function ensurePollFallback() {
+  if (typeof window === "undefined") return;
   if (pollTimer == null) {
-    // resync rare même si SSE OK (reconnexion / dérive)
     pollTimer = window.setInterval(() => void getMessagerieUnread(true), FALLBACK_POLL_MS);
   }
 }
 
-/** Abonnement broadcast Supabase (optionnel) — une seule channel / user. */
+/**
+ * Transport :
+ * - Broadcast prêt → pas de SSE agressif (poll 90 s seulement)
+ * - sinon → SSE secours
+ */
+function ensureTransport() {
+  if (typeof window === "undefined") return;
+
+  if (broadcastReady) {
+    stopSse();
+    ensurePollFallback();
+    return;
+  }
+
+  startSse();
+  ensurePollFallback();
+}
+
+/** Abonnement Broadcast — chemin principal immédiat. */
 export function attachMessagerieRealtime(userId: string) {
   if (typeof window === "undefined" || !userId) return;
+  // Une seule subscription logique / user (même si Broadcast pas encore SUBSCRIBED)
   if (subscribedUserId === userId && supabaseChannel) return;
 
   const sb = createBrowserClient();
-  if (!sb) return;
+  if (!sb) {
+    broadcastReady = false;
+    ensureTransport();
+    return;
+  }
 
   if (supabaseChannel) {
     void sb.removeChannel(supabaseChannel);
@@ -114,13 +159,28 @@ export function attachMessagerieRealtime(userId: string) {
   }
 
   subscribedUserId = userId;
+  broadcastReady = false;
   const ch = sb.channel(`messagerie-user-${userId}`);
   ch.on("broadcast", { event: "new_message" }, ({ payload }) => {
     const p = payload as MessagerieRealtimePayload;
     if (p?.receiverId === userId) emitEvent(p);
   });
-  ch.subscribe();
+  ch.subscribe((status) => {
+    if (status === "SUBSCRIBED") {
+      broadcastReady = true;
+      // Broadcast OK : SSE n’est plus le chemin principal
+      stopSse();
+      ensurePollFallback();
+    }
+    if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+      broadcastReady = false;
+      ensureTransport();
+    }
+  });
   supabaseChannel = ch;
+
+  // En attendant SUBSCRIBED, SSE peut resynchroniser le badge
+  ensureTransport();
 }
 
 export function subscribeMessagerieUnread(listener: UnreadListener): () => void {
@@ -149,10 +209,7 @@ export function subscribeMessagerieEvents(listener: EventListener): () => void {
 }
 
 function teardown() {
-  if (sse) {
-    sse.close();
-    sse = null;
-  }
+  stopSse();
   if (pollTimer != null) {
     window.clearInterval(pollTimer);
     pollTimer = null;
@@ -163,8 +220,19 @@ function teardown() {
     supabaseChannel = null;
     subscribedUserId = null;
   }
+  broadcastReady = false;
 }
 
 export function useMessagerieUnreadTotal(): number {
   return lastTotal;
+}
+
+/** Exposé pour tests / debug. */
+export function __messagerieBusDebug() {
+  return {
+    broadcastReady,
+    hasSse: Boolean(sse),
+    sseIntervalHintMs: SSE_INTERVAL_HINT_MS,
+    seenEvents: seenEventKeys.size,
+  };
 }

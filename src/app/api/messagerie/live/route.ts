@@ -7,8 +7,10 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 /**
- * SSE Messagerie — push immédiat quand le compteur non-lus change.
- * Poll serveur 2.5 s (invisible au client) ; filet client 90 s si SSE coupe.
+ * SSE Messagerie — SECOURS / resynchronisation du badge unread.
+ * Chemin principal client = Supabase Broadcast (immédiat).
+ * Ici : tick serveur 2,5 s uniquement quand le client ouvre ce flux
+ * (Broadcast indisponible ou en attente de SUBSCRIBED).
  */
 export async function GET() {
   const session = await getServerSession(authOptions);

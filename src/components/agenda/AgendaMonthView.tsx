@@ -7,6 +7,7 @@ import {
   monthGrid,
   startOfMonth,
 } from "@/lib/agenda/dates";
+import { agendaEventCardLines } from "@/lib/agenda/event-card";
 import { agendaTypeMeta } from "@/lib/agenda/types";
 import type { AgendaEventDTO, AgendaQuickCreateDraft } from "./agenda-types";
 
@@ -69,7 +70,7 @@ export function AgendaMonthView({
             <div
               key={day.toISOString()}
               className={`min-h-0 border-b border-r border-slate-100 p-1.5 ${
-                inMonth ? "bg-white" : "bg-slate-50/60"
+                inMonth ? (isToday ? "bg-[#1e3a5f]/[0.03]" : "bg-white") : "bg-slate-50/60"
               }`}
               onClick={() => onOpenDay(day)}
               onDoubleClick={(e) => {
@@ -85,7 +86,7 @@ export function AgendaMonthView({
                 <span
                   className={`flex h-6 w-6 items-center justify-center rounded-full text-xs ${
                     isToday
-                      ? "bg-[#1d4ed8] font-semibold text-white"
+                      ? "bg-[#1e3a5f] font-semibold text-white"
                       : inMonth
                         ? "text-slate-700"
                         : "text-slate-300"
@@ -98,6 +99,7 @@ export function AgendaMonthView({
                 {visible.map((ev) => {
                   const meta = agendaTypeMeta(ev.type);
                   const selected = ev.id === selectedEventId;
+                  const lines = agendaEventCardLines(ev);
                   return (
                     <button
                       key={ev.id}
@@ -108,15 +110,20 @@ export function AgendaMonthView({
                       }}
                       className={`block w-full truncate rounded px-1 py-0.5 text-left text-[10px] font-medium ${
                         selected ? "ring-1 ring-[#1d4ed8]" : ""
+                      } ${lines.done ? "opacity-50" : ""} ${
+                        lines.unconfirmed ? "border border-dashed border-orange-400/60" : ""
                       }`}
                       style={{
                         backgroundColor: meta.colors.bg,
                         color: meta.colors.text,
                         borderLeft: `2px solid ${meta.colors.border}`,
                       }}
-                      title={ev.title}
+                      title={`${lines.eyebrow} — ${lines.title}${lines.meta ? ` · ${lines.meta}` : ""}`}
                     >
-                      {ev.title}
+                      {lines.done ? "✓ " : lines.unconfirmed ? "… " : ""}
+                      {ev.type === "LIVRAISON" && ev.purchaseOrder?.supplierName
+                        ? ev.purchaseOrder.supplierName
+                        : ev.title}
                     </button>
                   );
                 })}

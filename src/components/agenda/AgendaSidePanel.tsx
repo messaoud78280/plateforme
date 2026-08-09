@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
   addMonths,
@@ -10,6 +11,7 @@ import {
   monthGrid,
   startOfMonth,
 } from "@/lib/agenda/dates";
+import { agendaEventCardLines, isDeliveryUnconfirmed } from "@/lib/agenda/event-card";
 import {
   AGENDA_REMINDER_OPTIONS,
   agendaTypeMeta,
@@ -27,6 +29,7 @@ type Props = {
   onCursorChange: (d: Date) => void;
   onSelectDay: (d: Date) => void;
   onSelectEvent?: (id: string) => void;
+  onClearSelection?: () => void;
   onEdit: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
@@ -35,6 +38,7 @@ type Props = {
 };
 
 const WEEKDAYS = ["L", "M", "M", "J", "V", "S", "D"];
+const TODAY_MAX = 8;
 
 function deliveryStatusLabel(ev: AgendaEventDTO): string {
   if (ev.deliveryVisual === "PROPOSITION") return "Proposition fournisseur";
@@ -42,6 +46,18 @@ function deliveryStatusLabel(ev: AgendaEventDTO): string {
   if (ev.deliveryVisual === "CONFIRMEE" || ev.status === "CONFIRME") return "Confirmée";
   if (ev.status === "TERMINE") return "Réceptionnée / terminée";
   return AGENDA_STATUS_LABELS[ev.status] ?? ev.status;
+}
+
+function formatShortDt(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleString("fr-FR", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export function AgendaSidePanel({
@@ -53,12 +69,14 @@ export function AgendaSidePanel({
   onCursorChange,
   onSelectDay,
   onSelectEvent,
+  onClearSelection,
   onEdit,
   onDuplicate,
   onDelete,
   onRsvp,
   onStatusChange,
 }: Props) {
+  const [miniOpen, setMiniOpen] = useState(false);
   const month = startOfMonth(cursor);
   const days = monthGrid(cursor);
   const today = new Date();
@@ -79,61 +97,79 @@ export function AgendaSidePanel({
       ? URGENCY_STYLES[selectedEvent.urgency as keyof typeof URGENCY_STYLES]
       : null;
 
+  const todaySlice = todayEvents.slice(0, TODAY_MAX);
+
   return (
-    <aside className="flex h-full w-full shrink-0 flex-col border-l border-slate-200/60 bg-white lg:w-[300px]">
-      <div className="border-b border-slate-100 p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => onCursorChange(addMonths(month, -1))}
-            className="rounded-md px-2 py-1 text-slate-500 hover:bg-slate-100"
-            aria-label="Mois précédent"
-          >
-            ‹
-          </button>
-          <p className="text-sm font-semibold capitalize text-[#1e3a5f]">{formatMonthYear(month)}</p>
-          <button
-            type="button"
-            onClick={() => onCursorChange(addMonths(month, 1))}
-            className="rounded-md px-2 py-1 text-slate-500 hover:bg-slate-100"
-            aria-label="Mois suivant"
-          >
-            ›
-          </button>
-        </div>
-        <div className="grid grid-cols-7 gap-0.5 text-center">
-          {WEEKDAYS.map((d, i) => (
-            <div key={`${d}-${i}`} className="py-1 text-[10px] font-semibold text-slate-400">
-              {d}
-            </div>
-          ))}
-          {days.map((day) => {
-            const inMonth = isSameMonth(day, month);
-            const isToday = isSameDay(day, today);
-            const selected = isSameDay(day, cursor);
-            return (
+    <aside className="flex h-full w-full shrink-0 flex-col border-l border-slate-200/60 bg-white lg:w-[280px]">
+      {/* Mini calendrier — replié par défaut, poids léger */}
+      <div className="border-b border-slate-100 px-3 py-2">
+        <button
+          type="button"
+          onClick={() => setMiniOpen((o) => !o)}
+          className="flex w-full items-center justify-between rounded-lg px-1 py-1 text-left hover:bg-slate-50"
+        >
+          <span className="text-[11px] font-semibold capitalize text-slate-500">
+            {formatMonthYear(month)}
+          </span>
+          <span className="text-[10px] font-semibold text-slate-400">
+            {miniOpen ? "Replier" : "Calendrier"}
+          </span>
+        </button>
+        {miniOpen ? (
+          <div className="mt-1 pb-1">
+            <div className="mb-1 flex items-center justify-between">
               <button
-                key={day.toISOString()}
                 type="button"
-                onClick={() => onSelectDay(day)}
-                className={`mx-auto flex h-7 w-7 items-center justify-center rounded-full text-xs ${
-                  isToday
-                    ? "bg-[#1d4ed8] font-semibold text-white"
-                    : selected
-                      ? "bg-slate-200 font-semibold text-[#1e3a5f]"
-                      : inMonth
-                        ? "text-slate-700 hover:bg-slate-100"
-                        : "text-slate-300 hover:bg-slate-50"
-                }`}
+                onClick={() => onCursorChange(addMonths(month, -1))}
+                className="rounded-md px-2 py-0.5 text-slate-400 hover:bg-slate-100"
+                aria-label="Mois précédent"
               >
-                {day.getDate()}
+                ‹
               </button>
-            );
-          })}
-        </div>
+              <button
+                type="button"
+                onClick={() => onCursorChange(addMonths(month, 1))}
+                className="rounded-md px-2 py-0.5 text-slate-400 hover:bg-slate-100"
+                aria-label="Mois suivant"
+              >
+                ›
+              </button>
+            </div>
+            <div className="grid grid-cols-7 gap-0 text-center">
+              {WEEKDAYS.map((d, i) => (
+                <div key={`${d}-${i}`} className="py-0.5 text-[9px] font-semibold text-slate-400">
+                  {d}
+                </div>
+              ))}
+              {days.map((day) => {
+                const inMonth = isSameMonth(day, month);
+                const isToday = isSameDay(day, today);
+                const selected = isSameDay(day, cursor);
+                return (
+                  <button
+                    key={day.toISOString()}
+                    type="button"
+                    onClick={() => onSelectDay(day)}
+                    className={`mx-auto flex h-6 w-6 items-center justify-center rounded-full text-[11px] ${
+                      isToday
+                        ? "bg-[#1e3a5f] font-semibold text-white"
+                        : selected
+                          ? "bg-slate-200 font-semibold text-[#1e3a5f]"
+                          : inMonth
+                            ? "text-slate-600 hover:bg-slate-100"
+                            : "text-slate-300"
+                    }`}
+                  >
+                    {day.getDate()}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-3">
         {!selectedEvent || !start || !end || !meta ? (
           <div className="space-y-3">
             <div>
@@ -148,39 +184,46 @@ export function AgendaSidePanel({
                 })}
               </p>
             </div>
-            {todayEvents.length === 0 ? (
-              <p className="text-sm text-slate-400">Rien de planifié aujourd’hui.</p>
+            {todaySlice.length === 0 ? (
+              <p className="rounded-lg border border-dashed border-slate-200 px-3 py-4 text-center text-sm text-slate-400">
+                Rien de planifié aujourd’hui.
+              </p>
             ) : (
-              <ul className="space-y-1.5">
-                {todayEvents.map((ev) => {
+              <ul className="relative space-y-0 border-l border-slate-200 pl-3">
+                {todaySlice.map((ev) => {
                   const s = new Date(ev.startAt);
-                  const tMeta = agendaTypeMeta(ev.type);
+                  const lines = agendaEventCardLines(ev);
                   return (
-                    <li key={ev.id}>
+                    <li key={ev.id} className="relative pb-3 last:pb-0">
+                      <span className="absolute -left-[15px] top-1.5 h-2 w-2 rounded-full bg-slate-300" />
                       <button
                         type="button"
                         onClick={() => onSelectEvent?.(ev.id)}
-                        className="w-full rounded-xl px-2.5 py-2 text-left transition hover:bg-slate-50"
+                        className={`w-full rounded-lg px-2 py-1.5 text-left transition hover:bg-slate-50 ${
+                          lines.done ? "opacity-55" : ""
+                        }`}
                       >
                         <div className="flex gap-2">
-                          <span className="w-11 shrink-0 pt-0.5 text-[11px] font-semibold tabular-nums text-slate-500">
+                          <span className="w-10 shrink-0 text-[11px] font-bold tabular-nums text-slate-500">
                             {ev.allDay ? "Jour" : formatTime(s)}
                           </span>
                           <span className="min-w-0">
-                            <span
-                              className="mb-0.5 inline-block rounded px-1 py-px text-[9px] font-bold uppercase tracking-wide"
-                              style={{
-                                backgroundColor: tMeta.colors.bg,
-                                color: tMeta.colors.text,
-                              }}
-                            >
-                              {tMeta.label}
+                            <span className="block truncate text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                              {lines.eyebrow}
                             </span>
-                            <p className="truncate text-sm font-semibold text-slate-900">{ev.title}</p>
-                            {ev.responsible?.name ? (
-                              <p className="truncate text-[11px] text-slate-500">
-                                {ev.responsible.name}
-                              </p>
+                            <span className="block truncate text-sm font-semibold text-slate-900">
+                              {lines.title}
+                            </span>
+                            {lines.meta ? (
+                              <span
+                                className={`block truncate text-[11px] ${
+                                  isDeliveryUnconfirmed(ev)
+                                    ? "font-medium text-amber-700"
+                                    : "text-slate-500"
+                                }`}
+                              >
+                                {lines.meta}
+                              </span>
                             ) : null}
                           </span>
                         </div>
@@ -190,42 +233,64 @@ export function AgendaSidePanel({
                 })}
               </ul>
             )}
-            <p className="text-[11px] text-slate-400">Sélectionnez un événement pour le contexte.</p>
+            {todayEvents.length > TODAY_MAX ? (
+              <p className="text-[11px] text-slate-400">
+                +{todayEvents.length - TODAY_MAX} autres — ouvrir la vue Jour
+              </p>
+            ) : null}
           </div>
         ) : (
           <div className="space-y-4">
-            <div>
-              <div className="mb-2 flex flex-wrap items-center gap-1.5">
-                <span
-                  className="inline-block rounded px-2 py-0.5 text-[11px] font-semibold"
-                  style={{
-                    backgroundColor: meta.colors.bg,
-                    color: meta.colors.text,
-                    border: `1px solid ${meta.colors.border}`,
-                  }}
-                >
-                  {meta.label}
-                </span>
-                <span className="rounded bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
-                  {selectedEvent.type === "LIVRAISON"
-                    ? deliveryStatusLabel(selectedEvent)
-                    : AGENDA_STATUS_LABELS[selectedEvent.status] ?? selectedEvent.status}
-                </span>
-                {urgencyStyle && selectedEvent.urgencyLabel ? (
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <div className="mb-2 flex flex-wrap items-center gap-1.5">
                   <span
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${urgencyStyle.badge}`}
+                    className="inline-block rounded px-2 py-0.5 text-[11px] font-semibold"
+                    style={{
+                      backgroundColor: meta.colors.bg,
+                      color: meta.colors.text,
+                      border: `1px solid ${meta.colors.border}`,
+                    }}
                   >
-                    {selectedEvent.urgencyLabel}
+                    {meta.label}
                   </span>
+                  <span
+                    className={`rounded px-2 py-0.5 text-[11px] font-semibold ${
+                      isDeliveryUnconfirmed(selectedEvent)
+                        ? "bg-amber-50 text-amber-800 ring-1 ring-dashed ring-amber-300"
+                        : "bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    {selectedEvent.type === "LIVRAISON"
+                      ? deliveryStatusLabel(selectedEvent)
+                      : AGENDA_STATUS_LABELS[selectedEvent.status] ?? selectedEvent.status}
+                  </span>
+                  {urgencyStyle && selectedEvent.urgencyLabel ? (
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${urgencyStyle.badge}`}
+                    >
+                      <span className={`h-1.5 w-1.5 rounded-full ${urgencyStyle.dot}`} />
+                      {selectedEvent.urgencyLabel}
+                    </span>
+                  ) : null}
+                </div>
+                <h3 className="text-base font-semibold leading-snug text-[#1e3a5f]">
+                  {po?.supplierName && selectedEvent.type === "LIVRAISON"
+                    ? po.supplierName
+                    : selectedEvent.title}
+                </h3>
+                {po?.supplierName && selectedEvent.type === "LIVRAISON" ? (
+                  <p className="mt-0.5 text-xs text-slate-500">{selectedEvent.title}</p>
                 ) : null}
               </div>
-              <h3 className="text-base font-semibold leading-snug text-[#1e3a5f]">
-                {po?.supplierName && selectedEvent.type === "LIVRAISON"
-                  ? po.supplierName
-                  : selectedEvent.title}
-              </h3>
-              {po?.supplierName && selectedEvent.type === "LIVRAISON" ? (
-                <p className="mt-0.5 text-xs text-slate-500">{selectedEvent.title}</p>
+              {onClearSelection ? (
+                <button
+                  type="button"
+                  onClick={onClearSelection}
+                  className="shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-slate-400 hover:bg-slate-50 hover:text-slate-600"
+                >
+                  Aujourd’hui
+                </button>
               ) : null}
             </div>
 
@@ -257,10 +322,33 @@ export function AgendaSidePanel({
                 </dd>
               </div>
 
+              {po ? (
+                <>
+                  {formatShortDt(po.requestedDeliveryAt) ? (
+                    <div>
+                      <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                        Date demandée
+                      </dt>
+                      <dd className="text-slate-700">{formatShortDt(po.requestedDeliveryAt)}</dd>
+                    </div>
+                  ) : null}
+                  {formatShortDt(po.confirmedDeliveryAt) ? (
+                    <div>
+                      <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                        Date confirmée
+                      </dt>
+                      <dd className="font-medium text-emerald-800">
+                        {formatShortDt(po.confirmedDeliveryAt)}
+                      </dd>
+                    </div>
+                  ) : null}
+                </>
+              ) : null}
+
               {selectedEvent.project ? (
                 <div>
                   <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                    Où / Chantier
+                    Chantier
                   </dt>
                   <dd>
                     <Link
@@ -288,19 +376,20 @@ export function AgendaSidePanel({
               ) : null}
 
               {po ? (
-                <>
-                  <div>
-                    <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                      Commande
-                    </dt>
-                    <dd className="font-semibold text-slate-800">{po.number}</dd>
-                    {po.linesSummary ? (
-                      <dd className="mt-0.5 text-xs text-slate-600">{po.linesSummary}</dd>
-                    ) : (
-                      <dd className="mt-0.5 text-xs text-slate-500">{po.subject}</dd>
-                    )}
-                  </div>
-                </>
+                <div>
+                  <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                    Commande / BC
+                  </dt>
+                  <dd className="font-semibold text-slate-800">{po.number}</dd>
+                  {po.supplierName ? (
+                    <dd className="text-xs text-slate-600">{po.supplierName}</dd>
+                  ) : null}
+                  {po.linesSummary ? (
+                    <dd className="mt-0.5 text-xs text-slate-600">{po.linesSummary}</dd>
+                  ) : (
+                    <dd className="mt-0.5 text-xs text-slate-500">{po.subject}</dd>
+                  )}
+                </div>
               ) : null}
 
               {selectedEvent.responsible ? (
@@ -316,8 +405,7 @@ export function AgendaSidePanel({
                 </div>
               ) : null}
 
-              {selectedEvent.attendees.length > 0 &&
-              selectedEvent.type !== "LIVRAISON" ? (
+              {selectedEvent.attendees.length > 0 && selectedEvent.type !== "LIVRAISON" ? (
                 <div>
                   <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
                     Avec qui
@@ -369,15 +457,8 @@ export function AgendaSidePanel({
               ) : null}
             </dl>
 
-            <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-4">
-              {po?.canOpen ? (
-                <Link
-                  href={`/dashboard/commandes/${po.id}`}
-                  className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#162d4a]"
-                >
-                  Voir la commande
-                </Link>
-              ) : null}
+            {/* Liens rapides — uniquement si relation */}
+            <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-3">
               {po?.canReceive ? (
                 <Link
                   href={`/dashboard/commandes/${po.id}/reception`}
@@ -386,12 +467,20 @@ export function AgendaSidePanel({
                   Réceptionner
                 </Link>
               ) : null}
+              {po?.canOpen ? (
+                <Link
+                  href={`/dashboard/commandes/${po.id}`}
+                  className="rounded-lg bg-[#1e3a5f] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#162d4a]"
+                >
+                  Voir commande
+                </Link>
+              ) : null}
               {selectedEvent.project ? (
                 <Link
                   href={`/dashboard/projets/${selectedEvent.project.id}`}
                   className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                 >
-                  Voir le chantier
+                  Chantier
                 </Link>
               ) : null}
               {(selectedEvent.followUpSheet || selectedEvent.followUpSheetId) && !po ? (
@@ -402,7 +491,7 @@ export function AgendaSidePanel({
                   }
                   className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                 >
-                  Voir la fiche
+                  Fiche
                 </Link>
               ) : null}
               {po?.legacyTaskId ? (
@@ -417,7 +506,7 @@ export function AgendaSidePanel({
                   href={selectedEvent.sourceMessageHref}
                   className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                 >
-                  Voir le message
+                  Message
                 </Link>
               ) : null}
 

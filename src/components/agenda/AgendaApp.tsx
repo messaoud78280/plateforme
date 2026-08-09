@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Filter,
+  MoreHorizontal,
   PanelRight,
   Plus,
   Search,
@@ -77,6 +78,8 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
   const [draft, setDraft] = useState<AgendaQuickCreateDraft | null>(null);
   const [quickType, setQuickType] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
+  const [panelCollapsed, setPanelCollapsed] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [duplicateFrom, setDuplicateFrom] = useState<AgendaEventDTO | null>(null);
 
   useEffect(() => {
@@ -303,6 +306,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
   function handleSelectEvent(id: string) {
     setSelectedEventId(id);
     setPanelOpen(true);
+    setPanelCollapsed(false);
   }
 
   function upsertEvent(event: AgendaEventDTO) {
@@ -431,7 +435,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
             <button
               type="button"
               onClick={goToday}
-              className="ml-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              className="ml-1 rounded-lg border border-[#1e3a5f]/25 bg-[#1e3a5f]/[0.06] px-3 py-1.5 text-xs font-semibold text-[#1e3a5f] hover:bg-[#1e3a5f]/10"
             >
               Aujourd&apos;hui
             </button>
@@ -487,13 +491,61 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
             >
               <PanelRight className="h-4 w-4" />
             </button>
-            <a
-              href="/api/agenda/export.ics"
-              className="inline-flex items-center rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-              title="Exporter en .ics (Google / Outlook / Apple)"
+            <button
+              type="button"
+              onClick={() => setPanelCollapsed((c) => !c)}
+              className="hidden rounded-lg border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-50 lg:inline-flex"
+              aria-label={panelCollapsed ? "Afficher le panneau" : "Replier le panneau"}
+              title={panelCollapsed ? "Afficher le panneau" : "Replier le panneau"}
             >
-              .ics
-            </a>
+              <PanelRight className="h-4 w-4" />
+            </button>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setMoreOpen((o) => !o)}
+                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                aria-expanded={moreOpen}
+                aria-haspopup="menu"
+              >
+                <MoreHorizontal className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Plus</span>
+              </button>
+              {moreOpen ? (
+                <>
+                  <button
+                    type="button"
+                    className="fixed inset-0 z-30 cursor-default"
+                    aria-label="Fermer"
+                    onClick={() => setMoreOpen(false)}
+                  />
+                  <div
+                    role="menu"
+                    className="absolute right-0 z-40 mt-1 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
+                  >
+                    <a
+                      role="menuitem"
+                      href="/api/agenda/export.ics"
+                      onClick={() => setMoreOpen(false)}
+                      className="block px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                    >
+                      Exporter le calendrier
+                      <span className="mt-0.5 block text-[11px] font-normal text-slate-400">
+                        Fichier .ics (Apple, Google, Outlook)
+                      </span>
+                    </a>
+                    <p
+                      role="menuitem"
+                      className="cursor-default border-t border-slate-100 px-3 py-2 text-sm text-slate-400"
+                      title="Import calendrier externe non branché (volontaire)"
+                    >
+                      Importer un calendrier
+                      <span className="mt-0.5 block text-[11px]">Bientôt</span>
+                    </p>
+                  </div>
+                </>
+              ) : null}
+            </div>
             <button
               type="button"
               onClick={() => openCreate()}
@@ -502,6 +554,67 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
               <Plus className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Nouveau</span>
             </button>
+          </div>
+        </div>
+
+        {/* Portée + couches — toujours visibles, compact */}
+        <div className="flex flex-wrap items-center gap-2 border-b border-slate-200/80 px-4 py-2">
+          <div className="flex items-center gap-1 rounded-lg bg-slate-100 p-0.5">
+            {(
+              [
+                { id: "mine", label: "Moi" },
+                { id: "team", label: "Équipe" },
+                { id: "all", label: "Tout" },
+              ] as const
+            ).map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => setScope(s.id)}
+                className={`rounded-md px-2.5 py-1 text-[11px] font-semibold ${
+                  scope === s.id
+                    ? "bg-white text-[#1e3a5f] shadow-sm"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+          <div className="h-4 w-px bg-slate-200" />
+          {AGENDA_LAYER_FILTERS.map((layer) => {
+            const active = !layers || layers.has(layer.id);
+            return (
+              <button
+                key={layer.id}
+                type="button"
+                onClick={() => toggleLayer(layer.id)}
+                className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                  active
+                    ? "bg-slate-100 text-[#1e3a5f]"
+                    : "text-slate-300 line-through"
+                }`}
+              >
+                {layer.label}
+              </button>
+            );
+          })}
+          <div className="ml-auto flex items-center gap-1.5">
+            <span className="hidden text-[11px] font-semibold uppercase text-slate-400 sm:inline">
+              Chantier
+            </span>
+            <select
+              value={projectFilter}
+              onChange={(e) => setProjectFilter(e.target.value)}
+              className="max-w-[140px] rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] outline-none sm:max-w-[180px]"
+            >
+              <option value="">Tous</option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.title}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
@@ -528,44 +641,6 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
         {filtersOpen ? (
           <div className="space-y-2 border-b border-slate-200/80 bg-slate-50/80 px-4 py-2.5">
             <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-semibold uppercase text-slate-400">Portée</span>
-                {(
-                  [
-                    { id: "mine", label: "Moi" },
-                    { id: "team", label: "Équipe" },
-                    { id: "all", label: "Tout" },
-                  ] as const
-                ).map((s) => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => setScope(s.id)}
-                    className={`rounded-md px-2.5 py-1 text-xs font-semibold ${
-                      scope === s.id
-                        ? "bg-white text-[#1e3a5f] shadow-sm"
-                        : "text-slate-500 hover:bg-white/60"
-                    }`}
-                  >
-                    {s.label}
-                  </button>
-                ))}
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-semibold uppercase text-slate-400">Chantier</span>
-                <select
-                  value={projectFilter}
-                  onChange={(e) => setProjectFilter(e.target.value)}
-                  className="max-w-[180px] rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs outline-none"
-                >
-                  <option value="">Tous</option>
-                  {projects.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
               <div className="relative md:hidden">
                 <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
                 <input
@@ -575,6 +650,19 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
                   className="w-44 rounded-lg border border-slate-200 py-1 pl-7 pr-2 text-xs outline-none"
                 />
               </div>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[11px] font-semibold uppercase text-slate-400">Créer</span>
+                {QUICK_TYPES.map((q) => (
+                  <button
+                    key={q.type}
+                    type="button"
+                    onClick={() => openCreate(undefined, q.type)}
+                    className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:border-[#1e3a5f]/30"
+                  >
+                    + {q.label}
+                  </button>
+                ))}
+              </div>
               <button
                 type="button"
                 onClick={() => setFiltersOpen(false)}
@@ -583,40 +671,6 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
               >
                 <X className="h-4 w-4" />
               </button>
-            </div>
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[11px] font-semibold uppercase text-slate-400">Couches</span>
-              {AGENDA_LAYER_FILTERS.map((layer) => {
-                const active = !layers || layers.has(layer.id);
-                return (
-                  <button
-                    key={layer.id}
-                    type="button"
-                    onClick={() => toggleLayer(layer.id)}
-                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                      active
-                        ? "bg-white text-[#1e3a5f] shadow-sm ring-1 ring-slate-200"
-                        : "text-slate-400 line-through"
-                    }`}
-                  >
-                    {active ? "✓ " : ""}
-                    {layer.label}
-                  </button>
-                );
-              })}
-            </div>
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[11px] font-semibold uppercase text-slate-400">Créer</span>
-              {QUICK_TYPES.map((q) => (
-                <button
-                  key={q.type}
-                  type="button"
-                  onClick={() => openCreate(undefined, q.type)}
-                  className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:border-[#1e3a5f]/30"
-                >
-                  + {q.label}
-                </button>
-              ))}
             </div>
           </div>
         ) : null}
@@ -635,7 +689,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
               events={visibleEvents}
               selectedEventId={selectedEventId}
               onSelectEvent={handleSelectEvent}
-              onQuickCreate={openCreate}
+              onQuickCreate={(d, typeHint) => openCreate(d, typeHint)}
               onEventMoved={upsertEvent}
               onConfirmLinkedReschedule={confirmLinkedReschedule}
             />
@@ -669,29 +723,32 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
       </div>
 
       {/* Desktop side panel */}
-      <div className="hidden lg:block">
-        <AgendaSidePanel
-          cursor={cursor}
-          selectedEvent={selectedEvent}
-          currentUserId={currentUserId}
-          todayEvents={todayEvents}
-          conflictWarning={conflictWarning}
-          onCursorChange={setCursor}
-          onSelectDay={(d) => {
-            setCursor(startOfDay(d));
-            setView("day");
-          }}
-          onSelectEvent={setSelectedEventId}
-          onEdit={() => {
-            if (selectedEvent?.readOnly || selectedEvent?.linkedPurchaseOrder) return;
-            setEditOpen(true);
-          }}
-          onDuplicate={handleDuplicate}
-          onDelete={handleDelete}
-          onRsvp={handleRsvp}
-          onStatusChange={handleStatusChange}
-        />
-      </div>
+      {!panelCollapsed ? (
+        <div className="hidden lg:block">
+          <AgendaSidePanel
+            cursor={cursor}
+            selectedEvent={selectedEvent}
+            currentUserId={currentUserId}
+            todayEvents={todayEvents}
+            conflictWarning={conflictWarning}
+            onCursorChange={setCursor}
+            onSelectDay={(d) => {
+              setCursor(startOfDay(d));
+              setView("day");
+            }}
+            onSelectEvent={setSelectedEventId}
+            onClearSelection={() => setSelectedEventId(null)}
+            onEdit={() => {
+              if (selectedEvent?.readOnly || selectedEvent?.linkedPurchaseOrder) return;
+              setEditOpen(true);
+            }}
+            onDuplicate={handleDuplicate}
+            onDelete={handleDelete}
+            onRsvp={handleRsvp}
+            onStatusChange={handleStatusChange}
+          />
+        </div>
+      ) : null}
 
       {/* Mobile side panel — bottom sheet */}
       {panelOpen ? (
@@ -720,6 +777,7 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
                   setPanelOpen(false);
                 }}
                 onSelectEvent={setSelectedEventId}
+                onClearSelection={() => setSelectedEventId(null)}
                 onEdit={() => {
                   if (selectedEvent?.readOnly || selectedEvent?.linkedPurchaseOrder) return;
                   setEditOpen(true);

@@ -77,6 +77,7 @@ export function AgendaEventModal({
   const [followUpOptions, setFollowUpOptions] = useState<{ id: string; label: string }[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -89,6 +90,7 @@ export function AgendaEventModal({
   useEffect(() => {
     if (!open) return;
     setError("");
+    setDetailsOpen(mode === "edit");
     if (event && (mode === "edit" || event.id === "")) {
       setTitle(event.title);
       setAllDay(event.allDay);
@@ -219,53 +221,6 @@ export function AgendaEventModal({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3">
-          <div>
-            <label className="mb-1 block text-xs font-semibold text-slate-600">Titre *</label>
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              onBlur={() => {
-                if (mode !== "create" || !title.trim()) return;
-                const parsed = parseFrenchAgendaQuick(title);
-                if (!parsed) return;
-                setTitle(parsed.title);
-                setAllDay(parsed.allDay);
-                setStart(toLocalInput(parsed.startAt.toISOString(), parsed.allDay));
-                setEnd(toLocalInput(parsed.endAt.toISOString(), parsed.allDay));
-                if (parsed.type) setType(parsed.type);
-              }}
-              placeholder="Ex. Réunion chantier demain 9h30"
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#1d4ed8]"
-              autoFocus
-            />
-          </div>
-
-          <label className="flex items-center gap-2 text-sm text-slate-700">
-            <input type="checkbox" checked={allDay} onChange={(e) => setAllDay(e.target.checked)} />
-            Journée entière
-          </label>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-600">Début</label>
-              <input
-                type={allDay ? "date" : "datetime-local"}
-                value={start}
-                onChange={(e) => setStart(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#1d4ed8]"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-600">Fin</label>
-              <input
-                type={allDay ? "date" : "datetime-local"}
-                value={end}
-                onChange={(e) => setEnd(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#1d4ed8]"
-              />
-            </div>
-          </div>
-
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="mb-1 block text-xs font-semibold text-slate-600">Type</label>
@@ -299,29 +254,54 @@ export function AgendaEventModal({
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-semibold text-slate-600">Fiche de suivi</label>
-            <select
-              value={followUpSheetId}
-              onChange={(e) => setFollowUpSheetId(e.target.value)}
+            <label className="mb-1 block text-xs font-semibold text-slate-600">Titre *</label>
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onBlur={() => {
+                if (mode !== "create" || !title.trim()) return;
+                const parsed = parseFrenchAgendaQuick(title);
+                if (!parsed) return;
+                setTitle(parsed.title);
+                setAllDay(parsed.allDay);
+                setStart(toLocalInput(parsed.startAt.toISOString(), parsed.allDay));
+                setEnd(toLocalInput(parsed.endAt.toISOString(), parsed.allDay));
+                if (parsed.type) setType(parsed.type);
+              }}
+              placeholder="Ex. Réunion chantier demain 9h30"
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#1d4ed8]"
-            >
-              <option value="">Aucune</option>
-              {followUpOptions.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-            {followUpSheetId ? (
-              <a
-                href={`/dashboard/fiches-suivi/${followUpSheetId}`}
-                className="mt-1 inline-block text-[11px] font-semibold text-[#1d4ed8] hover:underline"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Ouvrir la fiche →
-              </a>
-            ) : null}
+              autoFocus
+            />
+          </div>
+
+          <label className="flex items-center gap-2 text-sm text-slate-700">
+            <input type="checkbox" checked={allDay} onChange={(e) => setAllDay(e.target.checked)} />
+            Toute la journée
+          </label>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-slate-600">
+                {allDay ? "Date" : "Début"}
+              </label>
+              <input
+                type={allDay ? "date" : "datetime-local"}
+                value={start}
+                onChange={(e) => setStart(e.target.value)}
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#1d4ed8]"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-slate-600">
+                {allDay ? "Fin" : "Heure de fin"}
+              </label>
+              <input
+                type={allDay ? "date" : "datetime-local"}
+                value={end}
+                onChange={(e) => setEnd(e.target.value)}
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#1d4ed8]"
+              />
+            </div>
           </div>
 
           <div>
@@ -338,26 +318,6 @@ export function AgendaEventModal({
                 </option>
               ))}
             </select>
-          </div>
-
-          <div>
-            <label className="mb-1 block text-xs font-semibold text-slate-600">Participants</label>
-            <div className="max-h-28 space-y-1 overflow-y-auto rounded-lg border border-slate-200 p-2">
-              {teamUsers.length === 0 ? (
-                <p className="text-xs text-slate-400">Aucun collaborateur</p>
-              ) : (
-                teamUsers.map((u) => (
-                  <label key={u.id} className="flex items-center gap-2 text-sm text-slate-700">
-                    <input
-                      type="checkbox"
-                      checked={attendeeIds.includes(u.id)}
-                      onChange={() => toggleAttendee(u.id)}
-                    />
-                    <span className="truncate">{u.name || u.email}</span>
-                  </label>
-                ))
-              )}
-            </div>
           </div>
 
           {conflictPreview.length > 0 ? (
@@ -382,59 +342,117 @@ export function AgendaEventModal({
             </div>
           ) : null}
 
-          <div>
-            <label className="mb-1 block text-xs font-semibold text-slate-600">Lieu</label>
-            <input
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#1d4ed8]"
-              placeholder="Adresse chantier, bureau…"
-            />
-          </div>
+          <button
+            type="button"
+            onClick={() => setDetailsOpen((o) => !o)}
+            className="text-xs font-semibold text-[#1d4ed8] hover:underline"
+          >
+            {detailsOpen ? "Moins de détails" : "Plus de détails"}
+          </button>
 
-          <div>
-            <label className="mb-1 block text-xs font-semibold text-slate-600">Description</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-              className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#1d4ed8]"
-            />
-          </div>
+          {detailsOpen ? (
+            <div className="space-y-3 border-t border-slate-100 pt-3">
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-600">Fiche de suivi</label>
+                <select
+                  value={followUpSheetId}
+                  onChange={(e) => setFollowUpSheetId(e.target.value)}
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#1d4ed8]"
+                >
+                  <option value="">Aucune</option>
+                  {followUpOptions.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
+                {followUpSheetId ? (
+                  <a
+                    href={`/dashboard/fiches-suivi/${followUpSheetId}`}
+                    className="mt-1 inline-block text-[11px] font-semibold text-[#1d4ed8] hover:underline"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Ouvrir la fiche →
+                  </a>
+                ) : null}
+              </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-600">Rappel</label>
-              <select
-                value={reminderMinutes === "" ? "" : String(reminderMinutes)}
-                onChange={(e) =>
-                  setReminderMinutes(e.target.value === "" ? "" : Number(e.target.value))
-                }
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#1d4ed8]"
-              >
-                <option value="">Aucun</option>
-                {AGENDA_REMINDER_OPTIONS.map((o) => (
-                  <option key={o.minutes} value={o.minutes}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-600">Participants</label>
+                <div className="max-h-28 space-y-1 overflow-y-auto rounded-lg border border-slate-200 p-2">
+                  {teamUsers.length === 0 ? (
+                    <p className="text-xs text-slate-400">Aucun collaborateur</p>
+                  ) : (
+                    teamUsers.map((u) => (
+                      <label key={u.id} className="flex items-center gap-2 text-sm text-slate-700">
+                        <input
+                          type="checkbox"
+                          checked={attendeeIds.includes(u.id)}
+                          onChange={() => toggleAttendee(u.id)}
+                        />
+                        <span className="truncate">{u.name || u.email}</span>
+                      </label>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-600">Lieu</label>
+                <input
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#1d4ed8]"
+                  placeholder="Adresse chantier, bureau…"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-600">Description</label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                  className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#1d4ed8]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-600">Rappel</label>
+                  <select
+                    value={reminderMinutes === "" ? "" : String(reminderMinutes)}
+                    onChange={(e) =>
+                      setReminderMinutes(e.target.value === "" ? "" : Number(e.target.value))
+                    }
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#1d4ed8]"
+                  >
+                    <option value="">Aucun</option>
+                    {AGENDA_REMINDER_OPTIONS.map((o) => (
+                      <option key={o.minutes} value={o.minutes}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-600">Récurrence</label>
+                  <select
+                    value={recurrence}
+                    onChange={(e) => setRecurrence(e.target.value)}
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#1d4ed8]"
+                  >
+                    {AGENDA_RECURRENCE_OPTIONS.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-600">Récurrence</label>
-              <select
-                value={recurrence}
-                onChange={(e) => setRecurrence(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#1d4ed8]"
-              >
-                {AGENDA_RECURRENCE_OPTIONS.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+          ) : null}
 
           {error ? <p className="text-sm text-red-600">{error}</p> : null}
 

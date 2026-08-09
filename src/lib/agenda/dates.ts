@@ -108,10 +108,32 @@ export function rangeForView(
   };
 }
 
-export const HOUR_START = 6;
-export const HOUR_END = 22;
-export const PX_PER_HOUR = 56;
+/**
+ * Horaires chantier BTP (AGENDA-V2A.2).
+ * Pas de préférences entreprise en DB → défaut 07:00–19:00.
+ * Plage étendue 06:00–22:00 accessible à la demande.
+ */
+export const WORK_HOUR_START = 7;
+export const WORK_HOUR_END = 19;
+export const EXTENDED_HOUR_START = 6;
+export const EXTENDED_HOUR_END = 22;
 
-export function hoursList(): number[] {
-  return Array.from({ length: HOUR_END - HOUR_START + 1 }, (_, i) => HOUR_START + i);
+/** Compat : alias de la plage travail (grille par défaut). */
+export const HOUR_START = WORK_HOUR_START;
+export const HOUR_END = WORK_HOUR_END;
+
+/** Densité un peu plus haute pour une lecture opérationnelle. */
+export const PX_PER_HOUR = 64;
+
+export function hoursList(
+  from: number = WORK_HOUR_START,
+  to: number = WORK_HOUR_END,
+): number[] {
+  return Array.from({ length: to - from + 1 }, (_, i) => from + i);
+}
+
+/** True si un horaire sort de la plage travail affichée. */
+export function isOutsideWorkHours(d: Date): boolean {
+  const m = minutesSinceMidnight(d);
+  return m < WORK_HOUR_START * 60 || m >= (WORK_HOUR_END + 1) * 60;
 }

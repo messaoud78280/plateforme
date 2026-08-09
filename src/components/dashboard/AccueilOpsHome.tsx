@@ -175,7 +175,10 @@ export function AccueilOpsHome({
         {/* Colonne principale */}
         <div className="space-y-6">
           {/* 1 — À TRAITER (héros) */}
-          <section className="rounded-2xl border border-[#1e3a5f]/15 bg-white p-4 shadow-sm sm:p-5">
+          <section
+            data-demo-target="accueil-a-traiter"
+            className="rounded-2xl border border-[#1e3a5f]/15 bg-white p-4 shadow-sm sm:p-5"
+          >
             <div className="flex items-baseline justify-between gap-3">
               <h2 className="text-sm font-extrabold uppercase tracking-[0.12em] text-[#1e3a5f]">
                 À traiter
@@ -241,7 +244,7 @@ export function AccueilOpsHome({
           </section>
 
           {/* 2 — AUJOURD’HUI */}
-          <section>
+          <section data-demo-target="accueil-aujourdhui">
             <div className="flex items-baseline justify-between gap-3 border-b border-slate-200 pb-2">
               <h2 className="text-sm font-extrabold uppercase tracking-[0.12em] text-[#1e3a5f]">
                 {ops.agendaTitle}
@@ -294,7 +297,7 @@ export function AccueilOpsHome({
 
           {/* 3 — CHANTIERS */}
           {ops.chantiers.length > 0 ? (
-            <section>
+            <section data-demo-target="accueil-chantiers">
               <div className="flex items-baseline justify-between gap-3 border-b border-slate-200 pb-2">
                 <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">
                   Chantiers à surveiller

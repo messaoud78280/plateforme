@@ -18,6 +18,7 @@ import { SkipLink } from "@/components/ui/SkipLink";
 import { EnvironmentBanner } from "@/components/system/EnvironmentBanner";
 import { DemoTenantBanner } from "@/components/demo-environment/DemoTenantBanner";
 import { DemoViewAsSwitcher } from "@/components/demo-environment/DemoViewAsSwitcher";
+import { DemoCommercialTour } from "@/components/demo-environment/DemoCommercialTour";
 import { RoleOnboarding } from "@/components/onboarding/RoleOnboarding";
 import { UiPreferencesProvider } from "@/components/system/UiPreferences";
 import { DashboardMain } from "@/components/dashboard/DashboardMain";
@@ -162,6 +163,7 @@ export default async function DashboardLayout({
             personType={personType}
             permissionProfile={permissionProfile}
           />
+          {isDemo ? <DemoCommercialTour /> : null}
         </UiPreferencesProvider>
       </div>
     </div>

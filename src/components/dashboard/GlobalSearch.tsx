@@ -130,8 +130,15 @@ export function GlobalSearchTrigger() {
         setOpen(true);
       }
     }
+    function onOpenSearch() {
+      setOpen(true);
+    }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("bework:open-global-search", onOpenSearch);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("bework:open-global-search", onOpenSearch);
+    };
   }, []);
 
   const hint = isMac() ? "⌘K" : "Ctrl+K";

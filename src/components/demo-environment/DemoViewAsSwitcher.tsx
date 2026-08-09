@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { resetMessagerieUnreadForPersonaSwitch } from "@/lib/perf/messagerie-unread-bus";
 
 type PersonaOpt = { key: string; label: string; name: string };
 
@@ -33,24 +32,28 @@ export function DemoViewAsSwitcher() {
     load();
   }, [load]);
 
+  useEffect(() => {
+    function onPersonaChanged(e: Event) {
+      const detail = (e as CustomEvent<{ persona?: string }>).detail;
+      if (detail?.persona) setCurrent(detail.persona);
+      else void load();
+    }
+    window.addEventListener(PERSONA_CHANGED, onPersonaChanged);
+    return () => window.removeEventListener(PERSONA_CHANGED, onPersonaChanged);
+  }, [load]);
+
   async function onChange(persona: string) {
     if (persona === current || loading || pending) return;
     setLoading(true);
     setCurrent(persona); // feedback immédiat du sélecteur
     try {
-      const res = await fetch("/api/demo/view-as", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ persona }),
-      });
-      if (res.ok) {
-        const data = (await res.json()) as { user?: { id?: string } };
-        resetMessagerieUnreadForPersonaSwitch();
-        window.dispatchEvent(
-          new CustomEvent(PERSONA_CHANGED, {
-            detail: { persona, userId: data.user?.id },
-          }),
-        );
+      const { switchDemoPersona } = await import(
+        "@/lib/demo-environment/switch-persona-client"
+      );
+      const result = await switchDemoPersona(
+        persona as import("@/lib/demo-environment/personas").DemoPersonaKey,
+      );
+      if (result.ok) {
         // Soft refresh RSC (cookie session déjà maj) — pas de full reload
         startTransition(() => {
           router.replace("/dashboard");

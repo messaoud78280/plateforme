@@ -87,7 +87,7 @@ export function ATraiterAttentionBoard({ cards, currentUserId, canEdit }: Props)
   if (cards.length === 0) return null;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-demo-target="a-traiter-board">
       <div className="flex flex-wrap items-end gap-2 rounded-xl border border-slate-200 bg-white p-3">
         <label className="min-w-[140px] flex-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
           Recherche

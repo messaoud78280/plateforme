@@ -5,7 +5,12 @@ import { prisma } from "@/lib/prisma";
 import { projectWhereForClientUser } from "@/lib/organization/access";
 import { isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
 import { isInternalPurchaseOrderActor } from "@/lib/purchase-orders/access";
-import { loadDocumentHub, type HubGroup } from "@/lib/ged/document-hub";
+import { loadDocumentHub } from "@/lib/ged/document-hub";
+import {
+  hubGroupsForPersona,
+  type HubGroup,
+  type HubSort,
+} from "@/lib/ged/document-hub-ui";
 import { DocumentsHubClient } from "./DocumentsHubClient";
 import { DocumentsPageClient } from "./DocumentsPageClient";
 
@@ -22,6 +27,8 @@ const HUB_GROUPS = new Set<HubGroup>([
   "doe",
   "photos",
 ]);
+
+const HUB_SORTS = new Set<HubSort>(["recent", "oldest", "name", "type"]);
 
 export default async function DocumentsPage({
   searchParams,
@@ -46,7 +53,7 @@ export default async function DocumentsPage({
   const role = session.user.role ?? "CLIENT";
   const dbUser = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { personType: true, permissionProfile: true, name: true },
+    select: { personType: true, permissionProfile: true, name: true, company: true },
   });
 
   const external = isExternalPortalUser(dbUser?.personType);
@@ -57,16 +64,31 @@ export default async function DocumentsPage({
     permissionProfile: dbUser?.permissionProfile,
   });
 
-  // GED-V2A hub pour internes / équipe ; legacy Document pour clients purs hors portail
-  const useHub = params.hub !== "0" && (internal || external || role === "AGENT" || role === "AGENCE" || role === "MANAGER");
+  const useHub =
+    params.hub !== "0" &&
+    (internal || external || role === "AGENT" || role === "AGENCE" || role === "MANAGER");
 
   if (useHub) {
+    const allowedGroups = hubGroupsForPersona(
+      dbUser?.personType,
+      dbUser?.permissionProfile,
+    );
     const groupParam = (params.group ?? "all") as HubGroup;
-    const group = HUB_GROUPS.has(groupParam) ? groupParam : "all";
+    const group = allowedGroups.some((g) => g.id === groupParam)
+      ? groupParam
+      : HUB_GROUPS.has(groupParam) && !external
+        ? groupParam
+        : "all";
     const search = (params.q ?? params.search ?? "").trim();
     const page = Math.max(1, parseInt(params.page ?? "1", 10) || 1);
+    const sortParam = (params.sort ?? "recent") as HubSort;
+    const sort = HUB_SORTS.has(sortParam) ? sortParam : "recent";
 
     const projectWhere = await projectWhereForClientUser(session.user.id);
+    const hostCompany =
+      session.user.demoCompanyName ??
+      (external ? "ABC Étanchéité" : null);
+
     const [hub, projects] = await Promise.all([
       loadDocumentHub({
         user: {
@@ -79,6 +101,7 @@ export default async function DocumentsPage({
         page,
         group,
         search,
+        sort,
       }),
       prisma.project.findMany({
         where: projectWhere,
@@ -89,22 +112,24 @@ export default async function DocumentsPage({
     ]);
 
     return (
-      <div className="mx-auto w-full max-w-[1400px] px-1 sm:px-2">
-        <DocumentsHubClient
-          items={hub.items}
-          total={hub.total}
-          page={hub.page}
-          pageSize={hub.pageSize}
-          group={group}
-          search={search}
-          projects={projects}
-          canUploadChantier={!external}
-        />
-      </div>
+      <DocumentsHubClient
+        items={hub.items}
+        total={hub.total}
+        page={hub.page}
+        pageSize={hub.pageSize}
+        group={group}
+        search={search}
+        sort={sort}
+        groups={hub.groups}
+        projects={projects}
+        canUploadChantier={!external}
+        personType={dbUser?.personType}
+        permissionProfile={dbUser?.permissionProfile}
+        hostCompany={hostCompany}
+      />
     );
   }
 
-  // —— Legacy Document (clients admin / fallback) ——
   const isClient = role === "CLIENT";
   const isAgent = role === "AGENT";
   const isAgence = role === "AGENCE" || role === "MANAGER";

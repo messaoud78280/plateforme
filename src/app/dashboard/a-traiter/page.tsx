@@ -18,6 +18,7 @@ import { BackLink } from "@/components/ui/BackLink";
 import { ATraiterAttentionBoard } from "@/components/a-traiter/ATraiterAttentionBoard";
 import { cn } from "@/lib/cn";
 import { withPerfLog } from "@/lib/perf/server-timing";
+import { assertDashboardHrefAllowed } from "@/lib/equipe-acces/assert-dashboard-access";
 
 export const dynamic = "force-dynamic";
 
@@ -70,6 +71,12 @@ export default async function ATraiterPage() {
   if (!session?.user?.id) {
     redirect("/connexion?callbackUrl=/dashboard/a-traiter");
   }
+
+  assertDashboardHrefAllowed({
+    href: "/dashboard/a-traiter",
+    personType: session.user.personType,
+    permissionProfile: session.user.permissionProfile,
+  });
 
   const snapshot = await withPerfLog("collectATraiter:page", () =>
     collectATraiter({

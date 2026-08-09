@@ -6,6 +6,7 @@ import { resolveAgendaOwnerUserId } from "@/lib/agenda/access";
 import { projectWhereForClientUser } from "@/lib/organization/access";
 import { prisma } from "@/lib/prisma";
 import { AgendaApp } from "@/components/agenda/AgendaApp";
+import { assertDashboardHrefAllowed } from "@/lib/equipe-acces/assert-dashboard-access";
 
 export const metadata: Metadata = {
   title: "Agenda",
@@ -16,6 +17,12 @@ export default async function AgendaPage() {
   if (!session?.user?.id) {
     redirect("/connexion?callbackUrl=/dashboard/agenda");
   }
+
+  assertDashboardHrefAllowed({
+    href: "/dashboard/agenda",
+    personType: session.user.personType,
+    permissionProfile: session.user.permissionProfile,
+  });
 
   const staff = isBeworkStaff(session.user);
   const ownerUserId = await resolveAgendaOwnerUserId(session.user.id);

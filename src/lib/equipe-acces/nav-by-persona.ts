@@ -32,6 +32,8 @@ const ALLOWED_HREFS: Record<PersonaNavKey, string[] | null> = {
     "/dashboard/commandes",
     "/dashboard/documents",
     "/dashboard/messagerie",
+    "/dashboard/fiches-suivi",
+    "/dashboard/livraisons",
     "/dashboard/parametres",
   ],
   CHEF_CHANTIER: [
@@ -44,6 +46,7 @@ const ALLOWED_HREFS: Record<PersonaNavKey, string[] | null> = {
     "/dashboard/taches",
     "/dashboard/documents",
     "/dashboard/messagerie",
+    "/dashboard/fiches-suivi",
     "/dashboard/parametres",
   ],
   CLIENT: [
@@ -103,7 +106,11 @@ export function isHrefAllowedForPersona(
   const key = resolvePersonaNavKey(personType, permissionProfile);
   const allowed = ALLOWED_HREFS[key];
   if (allowed === null) return true;
-  return allowed.some((a) => href === a || href.startsWith(a + "/"));
+  // Important : « /dashboard » ne doit PAS matcher « /dashboard/planning » (préfixe).
+  return allowed.some((a) => {
+    if (a === "/dashboard") return href === "/dashboard" || href === "/dashboard/";
+    return href === a || href.startsWith(`${a}/`);
+  });
 }
 
 export function personaHomeLabel(

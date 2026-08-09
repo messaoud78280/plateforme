@@ -16,6 +16,7 @@ import { ensureDefaultWorkflow } from "@/lib/workflow/service";
 import { canEditFollowUpBoard } from "@/lib/follow-up/access";
 import { loadAttentionForSheets, urgencyLabelFor } from "@/lib/follow-up/attention/batch";
 import { URGENCY_LABELS } from "@/lib/follow-up/types";
+import { assertDashboardHrefAllowed } from "@/lib/equipe-acces/assert-dashboard-access";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,12 @@ export default async function FichesSuiviPage({
 }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) redirect("/connexion?callbackUrl=/dashboard/fiches-suivi");
+
+  assertDashboardHrefAllowed({
+    href: "/dashboard/fiches-suivi",
+    personType: session.user.personType,
+    permissionProfile: session.user.permissionProfile,
+  });
 
   const sp = await searchParams;
   const filter = sp.filter;

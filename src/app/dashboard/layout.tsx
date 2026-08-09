@@ -150,12 +150,18 @@ export default async function DashboardLayout({
           </div>
         </header>
         <UiPreferencesProvider userId={session.user.id}>
-          <PrefetchMainRoutes />
+          <PrefetchMainRoutes
+            personType={personType}
+            permissionProfile={permissionProfile}
+          />
           <MessagerieRealtimeBootstrap key={session.user.id} userId={session.user.id} />
           <DashboardMain>{children}</DashboardMain>
           <RoleOnboarding userId={session.user.id} role={session.user.role} />
           <MessagerieToastListener />
-          <MobileBottomNav />
+          <MobileBottomNav
+            personType={personType}
+            permissionProfile={permissionProfile}
+          />
         </UiPreferencesProvider>
       </div>
     </div>

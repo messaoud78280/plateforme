@@ -27,6 +27,14 @@ export async function requirePilotageSession() {
   if (!canAccessPilotageModule(session.user.role)) {
     redirect("/dashboard");
   }
+  const { assertDashboardHrefAllowed } = await import(
+    "@/lib/equipe-acces/assert-dashboard-access"
+  );
+  assertDashboardHrefAllowed({
+    href: "/dashboard/pilotage-travaux",
+    personType: session.user.personType,
+    permissionProfile: session.user.permissionProfile,
+  });
   return session;
 }
 

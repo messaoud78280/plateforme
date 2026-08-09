@@ -14,6 +14,7 @@ import { FilterBar, FilterChip } from "@/components/ui/FilterBar";
 import { canDeleteChantierProject, isChantierStaff } from "@/lib/chantier-dossier/access";
 import { CHANTIER_STATUS_LABELS } from "@/lib/chantier-dossier/constants";
 import { projectWhereForClientUser } from "@/lib/organization/access";
+import { assertDashboardHrefAllowed } from "@/lib/equipe-acces/assert-dashboard-access";
 
 const CHANTIER_STATUSES: ChantierStatus[] = ["ETUDE", "EN_COURS", "EN_ATTENTE", "RECEPTION", "TERMINE"];
 
@@ -27,6 +28,12 @@ export default async function ProjetsPage({
   if (!session?.user?.id) {
     redirect("/connexion?callbackUrl=/dashboard");
   }
+
+  assertDashboardHrefAllowed({
+    href: "/dashboard/projets",
+    personType: session.user.personType,
+    permissionProfile: session.user.permissionProfile,
+  });
 
   const staff = isChantierStaff(session.user.role);
   const params = await searchParams;

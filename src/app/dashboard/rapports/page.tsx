@@ -5,6 +5,7 @@ import { ReportsView } from "@/components/reports/ReportsView";
 import { BackLink } from "@/components/ui/BackLink";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { FilterBar, FilterChip } from "@/components/ui/FilterBar";
+import { assertDashboardHrefAllowed } from "@/lib/equipe-acces/assert-dashboard-access";
 
 const PERIODS = [
   { key: "7d", label: "7 jours" },
@@ -24,6 +25,12 @@ export default async function RapportsPage({
   if (!session?.user?.id) {
     redirect("/connexion?callbackUrl=/dashboard/rapports");
   }
+
+  assertDashboardHrefAllowed({
+    href: "/dashboard/rapports",
+    personType: session.user.personType,
+    permissionProfile: session.user.permissionProfile,
+  });
 
   const params = await searchParams;
   const period =

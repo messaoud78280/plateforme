@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { isHrefAllowedForPersona } from "@/lib/equipe-acces/nav-by-persona";
 
 const PREFETCH_HREFS = [
   "/dashboard",
@@ -11,15 +12,24 @@ const PREFETCH_HREFS = [
   "/dashboard/planning",
   "/dashboard/agenda",
   "/dashboard/commandes",
+  "/dashboard/documents",
+  "/dashboard/livraisons",
 ] as const;
 
-/** Prefetch ciblé des pages principales — pas toute l’app (PERF-V1A). */
-export function PrefetchMainRoutes() {
+/** Prefetch ciblé des pages autorisées pour le persona — pas toute l’app (PERF-V1A). */
+export function PrefetchMainRoutes({
+  personType,
+  permissionProfile,
+}: {
+  personType?: string | null;
+  permissionProfile?: string | null;
+}) {
   const router = useRouter();
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
       for (const href of PREFETCH_HREFS) {
+        if (!isHrefAllowedForPersona(href, personType, permissionProfile)) continue;
         try {
           router.prefetch(href);
         } catch {
@@ -28,7 +38,7 @@ export function PrefetchMainRoutes() {
       }
     }, 500);
     return () => window.clearTimeout(timer);
-  }, [router]);
+  }, [router, personType, permissionProfile]);
 
   return null;
 }

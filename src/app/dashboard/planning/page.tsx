@@ -8,6 +8,7 @@ import { PlanningBoard } from "@/components/planning/PlanningBoard";
 import { isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
 import { isPlanifiableUser } from "@/lib/planning/board";
 import { projectWhereForClientUser } from "@/lib/organization/access";
+import { assertDashboardHrefAllowed } from "@/lib/equipe-acces/assert-dashboard-access";
 
 export const metadata: Metadata = {
   title: "Planning",
@@ -28,6 +29,12 @@ export default async function PlanningPage() {
   if (!session?.user?.id) {
     redirect("/connexion?callbackUrl=/dashboard/planning");
   }
+
+  assertDashboardHrefAllowed({
+    href: "/dashboard/planning",
+    personType: session.user.personType,
+    permissionProfile: session.user.permissionProfile,
+  });
 
   if (isExternalPortalUser(session.user.personType)) {
     redirect("/dashboard");

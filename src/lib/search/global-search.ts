@@ -15,7 +15,7 @@ import {
 import { searchSuppliers } from "@/lib/suppliers/service";
 import { PURCHASE_ORDER_STATUS_LABELS } from "@/lib/purchase-orders/status";
 import { resolveConversationHref } from "@/lib/messagerie/resolve-conversation";
-import { isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
+import { isExternalPortalUser, isHrefAllowedForPersona } from "@/lib/equipe-acces/nav-by-persona";
 import { withPerfLog } from "@/lib/perf/server-timing";
 
 export type SearchResultKind =
@@ -208,20 +208,8 @@ export async function searchGlobal(opts: {
     const internal = isInternalPurchaseOrderActor(opts.user);
     const supplier = isSupplierPurchaseOrderActor(opts.user);
 
-    const actionsEmpty = ACTION_ITEMS.filter((a) => !a.internalOnly || internal).map(
-      (a): GlobalSearchItem => ({
-        id: a.id,
-        kind: "action",
-        title: a.title,
-        subtitle: "Action rapide",
-        meta: null,
-        href: a.href,
-        score: 0,
-      }),
-    );
-
     const navEmpty = NAV_ITEMS.filter((n) => {
-      if (external && (n.id === "nav-atraiter" || n.id === "nav-fournisseurs" || n.id === "nav-planning")) {
+      if (!isHrefAllowedForPersona(n.href, opts.user.personType, opts.user.permissionProfile)) {
         return false;
       }
       if (!canListPurchaseOrders(opts.user) && n.id === "nav-commandes") return false;
@@ -238,6 +226,24 @@ export async function searchGlobal(opts: {
       }),
     );
 
+    const actionsEmpty = ACTION_ITEMS.filter((a) => {
+      if (a.internalOnly && !internal) return false;
+      if (external && !isHrefAllowedForPersona(a.href.split("?")[0]!, opts.user.personType, opts.user.permissionProfile)) {
+        return false;
+      }
+      return true;
+    }).map(
+      (a): GlobalSearchItem => ({
+        id: a.id,
+        kind: "action",
+        title: a.title,
+        subtitle: "Action rapide",
+        meta: null,
+        href: a.href,
+        score: 0,
+      }),
+    );
+
     if (q.length < 2) {
       return { query: q, items: [], actions: actionsEmpty, nav: navEmpty };
     }
@@ -247,6 +253,16 @@ export async function searchGlobal(opts: {
     // Actions / nav filtrés par texte
     const actions = ACTION_ITEMS.filter((a) => {
       if (a.internalOnly && !internal) return false;
+      if (
+        external &&
+        !isHrefAllowedForPersona(
+          a.href.split("?")[0]!,
+          opts.user.personType,
+          opts.user.permissionProfile,
+        )
+      ) {
+        return false;
+      }
       return a.keywords.some((k) => norm(k).includes(qn) || qn.includes(norm(k))) ||
         scoreMatch(q, a.title) > 0;
     }).map(
@@ -262,7 +278,7 @@ export async function searchGlobal(opts: {
     );
 
     const nav = NAV_ITEMS.filter((n) => {
-      if (external && (n.id === "nav-atraiter" || n.id === "nav-fournisseurs" || n.id === "nav-planning")) {
+      if (!isHrefAllowedForPersona(n.href, opts.user.personType, opts.user.permissionProfile)) {
         return false;
       }
       if (!canListPurchaseOrders(opts.user) && n.id === "nav-commandes") return false;

@@ -14,34 +14,15 @@ import {
 } from "@/lib/purchase-orders/access";
 import { isExternalPortalUser } from "@/lib/equipe-acces/nav-by-persona";
 import { withPerfLog } from "@/lib/perf/server-timing";
+import {
+  hubGroupsForPersona,
+  type HubDocumentItem,
+  type HubGroup,
+  type HubSort,
+} from "@/lib/ged/document-hub-ui";
 
-export type HubGroup =
-  | "all"
-  | "chantiers"
-  | "administratif"
-  | "commandes"
-  | "fournisseurs"
-  | "doe"
-  | "photos";
-
-export type HubDocSource = "chantier" | "purchase_order" | "legacy";
-
-export type HubDocumentItem = {
-  id: string;
-  source: HubDocSource;
-  title: string;
-  typeLabel: string;
-  group: HubGroup;
-  projectId: string | null;
-  projectTitle: string | null;
-  contextLabel: string | null;
-  visibility: string;
-  authorName: string | null;
-  createdAt: string;
-  href: string;
-  mimeHint: string | null;
-  isCurrentVersion: boolean;
-};
+export type { HubGroup, HubSort, HubDocumentItem } from "@/lib/ged/document-hub-ui";
+export { hubGroupsForPersona, hubEmptyCopy } from "@/lib/ged/document-hub-ui";
 
 export type HubListResult = {
   items: HubDocumentItem[];
@@ -52,16 +33,6 @@ export type HubListResult = {
 };
 
 const PAGE_SIZE = 50;
-
-const GROUP_DEFS: { id: HubGroup; label: string }[] = [
-  { id: "all", label: "Tous" },
-  { id: "chantiers", label: "Chantiers" },
-  { id: "administratif", label: "Administratif" },
-  { id: "commandes", label: "Commandes" },
-  { id: "fournisseurs", label: "Fournisseurs" },
-  { id: "doe", label: "DOE" },
-  { id: "photos", label: "Photos" },
-];
 
 function inferGroup(opts: {
   category?: string | null;
@@ -105,7 +76,11 @@ function typeLabel(opts: {
 
 function visibilityShort(v: string | null | undefined): string {
   const s = (v ?? "").toLowerCase();
+  if (s.includes("point.p") || (s.includes("fournisseur") && s.includes("partag"))) {
+    return "Partagé fournisseur";
+  }
   if (s.includes("partage") && s.includes("client")) return "Partagé client";
+  if (s.includes("intervenant")) return "Partagé intervenants";
   if (s.includes("partage") || s.includes("temporaire")) return "Partagé";
   if (s.includes("interne")) return "Interne";
   return v?.trim() || "Interne";
@@ -117,15 +92,90 @@ export async function loadDocumentHub(opts: {
   group?: HubGroup;
   search?: string;
   projectId?: string;
+  sort?: HubSort;
 }): Promise<HubListResult> {
   return withPerfLog("loadDocumentHub", async () => {
     const page = Math.max(1, opts.page ?? 1);
     const group = opts.group ?? "all";
     const search = (opts.search ?? "").trim();
+    const sort = opts.sort ?? "recent";
     const external = isExternalPortalUser(opts.user.personType);
     const internal = isInternalPurchaseOrderActor(opts.user);
+    const isSupplier =
+      opts.user.personType === "SUPPLIER" || opts.user.permissionProfile === "FOURNISSEUR";
     const projectWhere = await projectWhereForClientUser(opts.user.id);
     const orgId = await resolvePurchaseOrderOrgId(opts.user);
+
+    let supplierExtOrgId: string | null = null;
+    let supplierOrderIds: string[] = [];
+    if (external && isSupplier) {
+      const u = await prisma.user.findUnique({
+        where: { id: opts.user.id },
+        select: { externalOrganizationId: true },
+      });
+      supplierExtOrgId = u?.externalOrganizationId ?? null;
+      if (supplierExtOrgId) {
+        supplierOrderIds = (
+          await prisma.purchaseOrder.findMany({
+            where: { externalOrganizationId: supplierExtOrgId },
+            select: { id: true },
+            take: 120,
+          })
+        ).map((o) => o.id);
+      }
+    }
+
+    const externalVisibilityFilter =
+      external && isSupplier
+        ? {
+            OR: [
+              { visibility: { contains: "intervenant", mode: "insensitive" as const } },
+              { visibility: { contains: "temporaire", mode: "insensitive" as const } },
+              ...(supplierExtOrgId
+                ? [
+                    {
+                      links: {
+                        some: {
+                          entityType: "supplier",
+                          entityId: supplierExtOrgId,
+                        },
+                      },
+                    },
+                  ]
+                : []),
+              ...(supplierOrderIds.length > 0
+                ? [
+                    {
+                      links: {
+                        some: {
+                          entityType: "purchase_order",
+                          entityId: { in: supplierOrderIds },
+                        },
+                      },
+                    },
+                  ]
+                : []),
+            ],
+          }
+        : external
+          ? {
+              OR: [
+                {
+                  visibility: {
+                    in: [
+                      "BeWork et entreprise cliente",
+                      "Intervenants autorisés",
+                      "Partage temporaire",
+                      "PARTAGE",
+                      "PARTAGÉ",
+                    ],
+                  },
+                },
+                { visibility: { contains: "Partage", mode: "insensitive" as const } },
+                { visibility: { contains: "client", mode: "insensitive" as const } },
+              ],
+            }
+          : null;
 
     const chantierWhere = {
       deletedAt: null,
@@ -135,17 +185,7 @@ export async function loadDocumentHub(opts: {
         ? { id: opts.projectId, AND: [projectWhere] }
         : projectWhere,
       AND: [
-        ...(external
-          ? [
-              {
-                OR: [
-                  { visibility: { contains: "client", mode: "insensitive" as const } },
-                  { visibility: { contains: "Partage", mode: "insensitive" as const } },
-                  { visibility: { contains: "Intervenants", mode: "insensitive" as const } },
-                ],
-              },
-            ]
-          : []),
+        ...(externalVisibilityFilter ? [externalVisibilityFilter] : []),
         ...(search
           ? [
               {
@@ -162,10 +202,19 @@ export async function loadDocumentHub(opts: {
       ],
     };
 
+    const orderBy =
+      sort === "oldest"
+        ? { createdAt: "asc" as const }
+        : sort === "name"
+          ? { name: "asc" as const }
+          : sort === "type"
+            ? { documentType: "asc" as const }
+            : { createdAt: "desc" as const };
+
     const [chantierFiles, chantierTotal] = await Promise.all([
       prisma.chantierFile.findMany({
         where: chantierWhere,
-        orderBy: { createdAt: "desc" },
+        orderBy,
         skip: (page - 1) * PAGE_SIZE,
         take: PAGE_SIZE,
         select: {
@@ -234,14 +283,6 @@ export async function loadDocumentHub(opts: {
       (group === "all" || group === "commandes" || group === "fournisseurs")
     ) {
       const supplierActor = isSupplierPurchaseOrderActor(opts.user);
-      let supplierExtOrgId: string | null = null;
-      if (supplierActor) {
-        const u = await prisma.user.findUnique({
-          where: { id: opts.user.id },
-          select: { externalOrganizationId: true },
-        });
-        supplierExtOrgId = u?.externalOrganizationId ?? null;
-      }
 
       const poDocs =
         supplierActor && !supplierExtOrgId
@@ -371,16 +412,22 @@ export async function loadDocumentHub(opts: {
         }));
     }
 
-    const merged = [...items, ...orphanPo, ...legacy]
-      .filter((it) => group === "all" || it.group === group)
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    const merged = [...items, ...orphanPo, ...legacy].filter(
+      (it) => group === "all" || it.group === group,
+    );
+    merged.sort((a, b) => {
+      if (sort === "name") return a.title.localeCompare(b.title, "fr");
+      if (sort === "type") return a.typeLabel.localeCompare(b.typeLabel, "fr");
+      if (sort === "oldest") return a.createdAt.localeCompare(b.createdAt);
+      return b.createdAt.localeCompare(a.createdAt);
+    });
 
     return {
       items: merged,
       total: chantierTotal + (page === 1 ? orphanPo.length + legacy.length : 0),
       page,
       pageSize: PAGE_SIZE,
-      groups: GROUP_DEFS,
+      groups: hubGroupsForPersona(opts.user.personType, opts.user.permissionProfile),
     };
   });
 }

@@ -1,20 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { HubDocumentItem, HubGroup } from "@/lib/ged/document-hub";
+import type { HubDocumentItem, HubGroup, HubSort } from "@/lib/ged/document-hub-ui";
+import { hubEmptyCopy } from "@/lib/ged/document-hub-ui";
 import { cn } from "@/lib/cn";
-
-const GROUP_LABELS: Record<HubGroup, string> = {
-  all: "Tous",
-  chantiers: "Chantiers",
-  administratif: "Administratif",
-  commandes: "Commandes",
-  fournisseurs: "Fournisseurs",
-  doe: "DOE",
-  photos: "Photos",
-};
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString("fr-FR", {
@@ -24,15 +15,30 @@ function fmtDate(iso: string) {
   });
 }
 
-function typeIcon(type: string) {
+function typeBadge(type: string) {
   const t = type.toUpperCase();
-  if (t === "BL") return "📦";
-  if (t === "PHOTO" || t.includes("PHOTO")) return "🖼";
-  if (t === "PLAN") return "🗺";
-  if (t === "DOE") return "📁";
-  if (t.includes("PDF")) return "📄";
-  return "📎";
+  if (t === "BL") return "BON DE LIVRAISON";
+  if (t === "PHOTO" || t.includes("PHOTO")) return "PHOTO";
+  if (t === "PLAN") return "PLAN";
+  if (t === "DOE") return "DOE";
+  return t;
 }
+
+function visibilityLabel(v: string) {
+  const s = v.toLowerCase();
+  if (s.includes("interne")) return { text: "Interne", lock: true };
+  if (s.includes("client")) return { text: v, lock: false };
+  if (s.includes("fournisseur") || s.includes("point")) return { text: v, lock: false };
+  if (s.includes("partag")) return { text: v, lock: false };
+  return { text: v || "Interne", lock: true };
+}
+
+const SORT_OPTIONS: { id: HubSort; label: string }[] = [
+  { id: "recent", label: "Plus récents" },
+  { id: "oldest", label: "Plus anciens" },
+  { id: "name", label: "Nom" },
+  { id: "type", label: "Type" },
+];
 
 export function DocumentsHubClient({
   items,
@@ -41,8 +47,13 @@ export function DocumentsHubClient({
   pageSize,
   group,
   search,
+  sort,
+  groups,
   projects,
   canUploadChantier,
+  personType,
+  permissionProfile,
+  hostCompany,
 }: {
   items: HubDocumentItem[];
   total: number;
@@ -50,215 +61,234 @@ export function DocumentsHubClient({
   pageSize: number;
   group: HubGroup;
   search: string;
+  sort: HubSort;
+  groups: { id: HubGroup; label: string }[];
   projects: { id: string; title: string }[];
   canUploadChantier: boolean;
+  personType?: string | null;
+  permissionProfile?: string | null;
+  hostCompany?: string | null;
 }) {
   const router = useRouter();
-  const [filtersOpen, setFiltersOpen] = useState(Boolean(search || group !== "all"));
+  const [pending, startTransition] = useTransition();
+  const [q, setQ] = useState(search);
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
-  const chips = useMemo(() => {
-    const c: { key: string; label: string; clear: string }[] = [];
-    if (group !== "all") {
-      c.push({ key: "group", label: GROUP_LABELS[group], clear: "group=" });
-    }
-    if (search) {
-      c.push({ key: "q", label: `« ${search} »`, clear: "q=" });
-    }
-    return c;
-  }, [group, search]);
+  const isSupplier =
+    personType === "SUPPLIER" || permissionProfile === "FOURNISSEUR";
+  const isClient =
+    personType === "CLIENT_EXT" || permissionProfile === "CLIENT";
+  const external = isSupplier || isClient;
+
+  const empty = hubEmptyCopy({
+    group,
+    personType,
+    permissionProfile,
+    hostCompany,
+  });
+
+  useEffect(() => {
+    setQ(search);
+  }, [search]);
+
+  useEffect(() => {
+    if (q === search) return;
+    const t = window.setTimeout(() => {
+      go({ q, page: "1" });
+    }, 320);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- debounce search only
+  }, [q]);
 
   function go(updates: Record<string, string>) {
     const p = new URLSearchParams();
     const nextGroup = updates.group ?? group;
     const nextQ = updates.q !== undefined ? updates.q : search;
+    const nextSort = updates.sort ?? sort;
     const nextPage = updates.page ?? "1";
     if (nextGroup && nextGroup !== "all") p.set("group", nextGroup);
     if (nextQ) p.set("q", nextQ);
+    if (nextSort && nextSort !== "recent") p.set("sort", nextSort);
     if (nextPage !== "1") p.set("page", nextPage);
-    router.push(`/dashboard/documents?${p.toString()}`);
+    const qs = p.toString();
+    startTransition(() => {
+      router.push(qs ? `/dashboard/documents?${qs}` : "/dashboard/documents");
+    });
   }
 
+  const title = isSupplier
+    ? "Documents partagés"
+    : isClient
+      ? "Documents partagés"
+      : "Documents";
+
+  const subtitle = isSupplier
+    ? `Documents échangés avec ${hostCompany?.trim() || "votre client"} dans le cadre de vos commandes et livraisons.`
+    : isClient
+      ? `Documents que ${hostCompany?.trim() || "votre entreprise"} partage avec vous.`
+      : "Tous vos documents BTP, reliés à leurs chantiers et opérations.";
+
+  const groupLabel = useMemo(
+    () => groups.find((g) => g.id === group)?.label ?? "Tous",
+    [groups, group],
+  );
+
   return (
-    <div className="space-y-5">
+    <div className="mx-auto w-full max-w-[1400px] space-y-5 px-1 sm:px-2 xl:max-w-[1520px]">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
-            GED BeWork
+        <div className="min-w-0">
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#1e3a5f]/70">
+            {external ? "Espace collaboratif" : "GED BeWork"}
           </p>
-          <h1 className="text-2xl font-extrabold tracking-tight text-[#1e3a5f]">Documents</h1>
-          <p className="mt-1 text-sm text-slate-600">
-            Un fichier, plusieurs contextes — chantier, commande, réception.
-          </p>
+          <div className="mt-0.5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <h1 className="text-2xl font-extrabold tracking-tight text-[#1e3a5f] sm:text-[1.75rem]">
+              {title}
+            </h1>
+            <span className="tabular-nums text-sm font-bold text-slate-500">
+              {total}
+            </span>
+          </div>
+          <p className="mt-1 max-w-2xl text-sm text-slate-600">{subtitle}</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {canUploadChantier && projects[0] ? (
-            <Link
-              href={`/dashboard/projets/${projects[0].id}#tab-documents`}
-              className="inline-flex min-h-10 items-center rounded-lg bg-[#1e3a5f] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#16304f]"
-            >
-              + Ajouter un document
-            </Link>
-          ) : (
-            <Link
-              href="/dashboard/projets"
-              className="inline-flex min-h-10 items-center rounded-lg bg-[#1e3a5f] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#16304f]"
-            >
-              + Ajouter via un chantier
-            </Link>
-          )}
-        </div>
+        {canUploadChantier && projects[0] ? (
+          <Link
+            href={`/dashboard/projets/${projects[0].id}#tab-documents`}
+            className="inline-flex min-h-10 shrink-0 items-center rounded-lg bg-[#1e3a5f] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#16304f]"
+          >
+            + Ajouter un document
+          </Link>
+        ) : null}
       </header>
 
-      <form
-        className="flex flex-col gap-2 sm:flex-row sm:items-center"
-        onSubmit={(e) => {
-          e.preventDefault();
-          const fd = new FormData(e.currentTarget);
-          go({ q: String(fd.get("q") ?? ""), page: "1" });
-        }}
-      >
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <input
-          name="q"
-          defaultValue={search}
-          placeholder="Rechercher un document…"
-          className="min-h-10 flex-1 rounded-xl border border-slate-200 bg-white px-3.5 text-sm outline-none focus:border-[#1d4ed8]"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              go({ q, page: "1" });
+            }
+          }}
+          placeholder="Rechercher un plan, BL, CCTP, fournisseur, chantier…"
+          className="min-h-10 flex-1 rounded-xl border border-slate-200 bg-white px-3.5 text-sm outline-none ring-[#1d4ed8]/20 focus:border-[#1d4ed8] focus:ring-2"
+          aria-label="Rechercher dans les documents"
         />
-        <button
-          type="button"
-          onClick={() => setFiltersOpen((v) => !v)}
-          className="min-h-10 rounded-xl border border-slate-200 px-3 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-        >
-          Filtres
-        </button>
-        <button
-          type="submit"
-          className="min-h-10 rounded-xl bg-slate-900 px-4 text-xs font-bold text-white hover:bg-slate-800"
-        >
-          Chercher
-        </button>
-      </form>
-
-      <div className="flex flex-wrap gap-1.5">
-        {(Object.keys(GROUP_LABELS) as HubGroup[]).map((g) => (
-          <button
-            key={g}
-            type="button"
-            onClick={() => go({ group: g, page: "1" })}
-            className={cn(
-              "rounded-full px-3 py-1.5 text-xs font-semibold transition",
-              group === g
-                ? "bg-[#1e3a5f] text-white"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200",
-            )}
+        <label className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600">
+          <span className="text-slate-400">Trier</span>
+          <select
+            value={sort}
+            onChange={(e) => go({ sort: e.target.value, page: "1" })}
+            className="bg-transparent text-slate-800 outline-none"
+            aria-label="Trier les documents"
           >
-            {GROUP_LABELS[g]}
-          </button>
-        ))}
+            {SORT_OPTIONS.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
-      {filtersOpen ? (
-        <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-3">
-          <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">
-            Chantier rapide
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {projects.slice(0, 8).map((p) => (
-              <Link
-                key={p.id}
-                href={`/dashboard/projets/${p.id}#tab-documents`}
-                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:border-[#1e3a5f]/30"
-              >
-                {p.title}
-              </Link>
-            ))}
-            {projects.length === 0 ? (
-              <p className="text-xs text-slate-500">Aucun chantier accessible.</p>
-            ) : null}
-          </div>
-        </div>
-      ) : null}
-
-      {chips.length > 0 ? (
-        <div className="flex flex-wrap gap-1.5">
-          {chips.map((c) => (
-            <button
-              key={c.key}
-              type="button"
-              onClick={() => {
-                if (c.key === "group") go({ group: "all", page: "1" });
-                if (c.key === "q") go({ q: "", page: "1" });
-              }}
-              className="rounded-full bg-[#1e3a5f]/10 px-2.5 py-1 text-[11px] font-semibold text-[#1e3a5f]"
-            >
-              {c.label} ×
-            </button>
-          ))}
-        </div>
-      ) : null}
-
-      <div className="flex items-center justify-between text-sm text-slate-500">
-        <span>
-          {total} document{total !== 1 ? "s" : ""}
+      <div className="flex flex-wrap items-center gap-1.5 border-b border-slate-200/80 pb-3">
+        {groups.map((g) => (
+          <button
+            key={g.id}
+            type="button"
+            onClick={() => go({ group: g.id, page: "1" })}
+            className={cn(
+              "rounded-lg px-3 py-2 text-xs font-bold transition",
+              group === g.id
+                ? "bg-[#1e3a5f] text-white shadow-sm"
+                : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50 hover:text-slate-900",
+            )}
+          >
+            {g.label}
+          </button>
+        ))}
+        <span className="ml-auto hidden text-xs font-semibold text-slate-400 sm:inline">
+          {groupLabel}
+          {pending ? " · …" : ""}
         </span>
-        <span className="text-xs">Plus récents d’abord</span>
       </div>
 
       {items.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 px-4 py-10 text-center">
-          <p className="text-sm font-medium text-slate-600">Aucun document dans cette vue.</p>
-          <p className="mt-1 text-xs text-slate-400">
-            Ajoutez un fichier depuis un chantier ou une réception commande.
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white/70 px-5 py-8 text-center sm:py-10">
+          <p className="text-sm font-semibold text-slate-800">{empty.title}</p>
+          <p className="mx-auto mt-1.5 max-w-md text-xs leading-relaxed text-slate-500">
+            {empty.body}
           </p>
           {canUploadChantier && projects[0] ? (
             <Link
               href={`/dashboard/projets/${projects[0].id}#tab-documents`}
-              className="mt-4 inline-flex text-sm font-semibold text-[#1d4ed8] hover:underline"
+              className="mt-4 inline-flex rounded-lg bg-[#1e3a5f] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#16304f]"
             >
-              Ajouter un document
+              + Ajouter un document
             </Link>
           ) : null}
         </div>
       ) : (
-        <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-          {items.map((it) => (
-            <li key={it.id}>
-              <Link
-                href={it.href}
-                className="flex items-start gap-3 px-3 py-3 hover:bg-slate-50 sm:px-4"
-              >
-                <span className="mt-0.5 w-7 shrink-0 text-center text-base" aria-hidden>
-                  {typeIcon(it.typeLabel)}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-bold text-slate-900">
-                    {it.title}
+        <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          {items.map((it) => {
+            const vis = visibilityLabel(it.visibility);
+            return (
+              <li key={it.id}>
+                <Link
+                  href={it.href}
+                  className="flex items-start gap-3 px-3 py-3.5 transition hover:bg-slate-50/90 sm:px-5"
+                >
+                  <span
+                    className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-[10px] font-extrabold uppercase tracking-wide text-slate-600"
+                    aria-hidden
+                  >
+                    {it.typeLabel.slice(0, 3)}
                   </span>
-                  <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-500">
-                    <span className="font-semibold uppercase tracking-wide text-slate-600">
-                      {it.typeLabel}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-bold text-slate-950">
+                      {it.title}
                     </span>
-                    {it.projectTitle ? <span>{it.projectTitle}</span> : null}
-                    {it.contextLabel ? <span>{it.contextLabel}</span> : null}
+                    <span className="mt-0.5 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                      {typeBadge(it.typeLabel)}
+                    </span>
+                    <span className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-slate-600">
+                      {it.projectTitle ? (
+                        <span className="font-semibold text-slate-800">{it.projectTitle}</span>
+                      ) : null}
+                      {it.projectTitle && it.contextLabel ? (
+                        <span className="text-slate-300" aria-hidden>
+                          ›
+                        </span>
+                      ) : null}
+                      {it.contextLabel ? <span>{it.contextLabel}</span> : null}
+                    </span>
+                    <span className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] text-slate-400">
+                      <span>{fmtDate(it.createdAt)}</span>
+                      <span
+                        className={cn(
+                          "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-semibold",
+                          vis.lock
+                            ? "bg-slate-100 text-slate-700"
+                            : "bg-emerald-50 text-emerald-800",
+                        )}
+                      >
+                        {vis.lock ? <span aria-hidden>🔒</span> : null}
+                        {vis.text}
+                      </span>
+                    </span>
                   </span>
-                  <span className="mt-1 block text-[11px] text-slate-400">
-                    {fmtDate(it.createdAt)}
-                    {it.authorName ? ` · ${it.authorName}` : ""}
-                    {" · "}
-                    {it.visibility}
-                    {it.source === "purchase_order" ? " · Commande" : null}
-                    {it.source === "legacy" ? " · Mission" : null}
-                    {!it.isCurrentVersion ? " · Obsolète" : null}
+                  <span className="shrink-0 self-center text-xs font-bold text-[#1d4ed8]">
+                    Ouvrir
                   </span>
-                </span>
-              </Link>
-            </li>
-          ))}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       )}
 
       {totalPages > 1 ? (
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-center gap-2 pb-2">
           <button
             type="button"
             disabled={page <= 1}
@@ -281,10 +311,12 @@ export function DocumentsHubClient({
         </div>
       ) : null}
 
-      <p className="text-[11px] text-slate-400">
-        Les pièces jointes Messagerie restent dans la conversation tant qu’elles ne sont pas
-        explicitement ajoutées aux documents.
-      </p>
+      {!external ? (
+        <p className="pb-2 text-[11px] text-slate-400">
+          Les pièces jointes Messagerie restent dans la conversation tant qu’elles ne sont pas
+          explicitement ajoutées aux documents.
+        </p>
+      ) : null}
     </div>
   );
 }

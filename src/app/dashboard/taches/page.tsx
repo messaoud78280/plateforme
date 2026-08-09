@@ -14,6 +14,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { KpiTile } from "@/components/ui/KpiTile";
 import { FilterBar, FilterChip } from "@/components/ui/FilterBar";
 import { projectWhereForClientUser, taskWhereForClientUser } from "@/lib/organization/access";
+import { assertDashboardHrefAllowed } from "@/lib/equipe-acces/assert-dashboard-access";
 
 export default async function TachesPage({
   searchParams,
@@ -31,6 +32,12 @@ export default async function TachesPage({
   if (!session?.user?.id) {
     redirect("/connexion?callbackUrl=/dashboard");
   }
+
+  assertDashboardHrefAllowed({
+    href: "/dashboard/taches",
+    personType: session.user.personType,
+    permissionProfile: session.user.permissionProfile,
+  });
 
   const isManager = session.user.role === "MANAGER";
   const isAgent = session.user.role === "AGENT" || session.user.role === "AGENCE";

@@ -20,6 +20,15 @@ export function agendaMonthMaxEvents(zoom: AgendaZoomLevel): number {
   return zoom >= 120 ? 3 : 2;
 }
 
+/**
+ * Hauteur minimale d’une ligne semaine (vue Mois).
+ * Base ~100 px @ 100 % — le zoom augmente réellement la taille ;
+ * le scroll vertical apparaît si 6 × min > viewport (pas de clipping).
+ */
+export function agendaMonthRowMinPx(zoom: AgendaZoomLevel): number {
+  return Math.round(100 * (zoom / 100));
+}
+
 export function clampAgendaZoom(n: number): AgendaZoomLevel {
   let best: AgendaZoomLevel = DEFAULT_AGENDA_ZOOM;
   let bestDist = Infinity;

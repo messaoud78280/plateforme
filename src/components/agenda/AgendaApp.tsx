@@ -1059,7 +1059,12 @@ export function AgendaApp({ projects, teamUsers, currentUserId }: Props) {
           </div>
         ) : null}
 
-        <div className="relative min-h-0 flex-1">
+        {/*
+          Conteneur calendrier : hauteur contrainte (parent overflow-hidden).
+          Jour/Semaine/Année gèrent leur propre scroll interne.
+          Mois : scroll via data-agenda-month-scroll (AGENDA-V2B.3).
+        */}
+        <div className="relative min-h-0 flex-1 overflow-hidden">
           {loading ? (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 text-sm text-slate-400">
               Chargement…

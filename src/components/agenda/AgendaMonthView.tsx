@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   formatMonthYear,
   formatTime,
@@ -17,7 +17,7 @@ import { agendaEventCardLines } from "@/lib/agenda/event-card";
 import { eventsForDay } from "@/lib/agenda/period-summary";
 import { agendaTypeMeta } from "@/lib/agenda/types";
 import type { AgendaZoomLevel } from "@/lib/agenda/zoom";
-import { agendaMonthMaxEvents } from "@/lib/agenda/zoom";
+import { agendaMonthMaxEvents, agendaMonthRowMinPx } from "@/lib/agenda/zoom";
 import type { AgendaEventDTO, AgendaQuickCreateDraft } from "./agenda-types";
 
 type Props = {
@@ -49,6 +49,10 @@ export function AgendaMonthView({
   const month = startOfMonth(cursor);
   const today = new Date();
   const maxVisible = agendaMonthMaxEvents(zoom);
+  const rowMinPx = agendaMonthRowMinPx(zoom);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const monthKey = `${month.getFullYear()}-${month.getMonth()}`;
+
   const weeks = useMemo(() => {
     const rows: Date[][] = [];
     for (let i = 0; i < 6; i++) rows.push(days.slice(i * 7, i * 7 + 7));
@@ -67,14 +71,20 @@ export function AgendaMonthView({
     return list;
   }, [events, month]);
 
+  /** Nouveau mois → remonter en haut de la grille (évite scroll fantôme du mois précédent). */
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollTop = 0;
+  }, [monthKey]);
+
   const showTwoLines = zoom >= 100;
   const eventFs = zoom >= 120 ? "text-[13px]" : zoom >= 100 ? "text-[12px]" : "text-[11px]";
 
   return (
-    <div className="flex h-full flex-col bg-white">
-      {/* Desktop / tablette : grille */}
+    <div className="flex h-full min-h-0 flex-col bg-white">
+      {/* Desktop / tablette : grille — scroll interne si zoom > hauteur dispo */}
       <div className="hidden h-full min-h-0 flex-col md:flex">
-        <div className="grid grid-cols-[36px_repeat(7,minmax(0,1fr))] border-b border-slate-200">
+        <div className="grid shrink-0 grid-cols-[36px_repeat(7,minmax(0,1fr))] border-b border-slate-200 bg-white">
           <div className="py-2" />
           {WEEKDAYS.map((d) => (
             <div
@@ -85,143 +95,161 @@ export function AgendaMonthView({
             </div>
           ))}
         </div>
-        <div className="grid flex-1 grid-rows-6">
-          {weeks.map((week, wi) => (
-            <div
-              key={wi}
-              className="grid min-h-0 grid-cols-[36px_repeat(7,minmax(0,1fr))] border-b border-slate-200/80"
-            >
+
+        {/*
+          AGENDA-V2B.3 — zone de scroll unique de la vue Mois.
+          Parent AgendaApp = overflow-hidden (hauteur viewport).
+          Ici : overflow-y-auto + min-h-0 + rows minmax(zoom, 1fr) + min-h-full
+          → à 100 % le mois remplit l’écran ; à 130 % on scroll jusqu’à la dernière semaine.
+        */}
+        <div
+          ref={scrollRef}
+          className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden"
+          data-agenda-month-scroll
+        >
+          <div
+            className="grid min-h-full"
+            style={{
+              gridTemplateRows: `repeat(${weeks.length}, minmax(${rowMinPx}px, 1fr))`,
+            }}
+          >
+            {weeks.map((week, wi) => (
               <div
-                className="flex items-start justify-center pt-2.5 text-[11px] font-semibold tabular-nums text-slate-400"
-                title="Semaine ISO"
+                key={wi}
+                className="grid grid-cols-[36px_repeat(7,minmax(0,1fr))] border-b border-slate-200/80"
               >
-                {isoWeekLabel(week[0] ?? startOfWeek(month))}
-              </div>
-              {week.map((day) => {
-                const dayEvents = eventsForDay(events, day);
-                const visible = dayEvents.slice(0, maxVisible);
-                const more = dayEvents.length - visible.length;
-                const inMonth = isSameMonth(day, month);
-                const isToday = isSameDay(day, today);
-                const selected = isSameDay(day, selectedDay);
-                const weekend = isWeekend(day);
+                <div
+                  className="flex items-start justify-center pt-2.5 text-[11px] font-semibold tabular-nums text-slate-400"
+                  title="Semaine ISO"
+                >
+                  {isoWeekLabel(week[0] ?? startOfWeek(month))}
+                </div>
+                {week.map((day) => {
+                  const dayEvents = eventsForDay(events, day);
+                  const visible = dayEvents.slice(0, maxVisible);
+                  const more = dayEvents.length - visible.length;
+                  const inMonth = isSameMonth(day, month);
+                  const isToday = isSameDay(day, today);
+                  const selected = isSameDay(day, selectedDay);
+                  const weekend = isWeekend(day);
 
-                return (
-                  <div
-                    key={day.toISOString()}
-                    className={`min-h-0 border-r border-slate-200/70 p-[var(--agenda-cell-pad,0.35rem)] ${
-                      !inMonth
-                        ? "bg-slate-50/70"
-                        : selected
-                          ? "bg-slate-50"
-                          : weekend
-                            ? "bg-slate-50/40"
-                            : "bg-white"
-                    }`}
-                    onClick={() => onSelectDay(day)}
-                    onDoubleClick={(e) => {
-                      e.stopPropagation();
-                      onOpenDay(day);
-                    }}
-                  >
-                    <div className="mb-1 flex items-center justify-between px-0.5">
-                      <span
-                        className={`flex h-7 w-7 items-center justify-center rounded-full text-[var(--agenda-day-num,0.8125rem)] ${
-                          isToday
-                            ? "bg-[#1e3a5f] font-bold text-white"
-                            : selected
-                              ? "font-bold text-[#1e3a5f] ring-2 ring-[#1e3a5f]/35"
-                              : inMonth
-                                ? "font-semibold text-slate-800"
-                                : "font-medium text-slate-300"
-                        }`}
-                      >
-                        {day.getDate()}
-                      </span>
-                    </div>
-                    <div className="space-y-1">
-                      {visible.map((ev) => {
-                        const meta = agendaTypeMeta(ev.type);
-                        const selectedEv = ev.id === selectedEventId;
-                        const lines = agendaEventCardLines(ev);
-                        const time = ev.allDay ? "" : formatTime(new Date(ev.startAt));
-                        const primary =
-                          ev.type === "LIVRAISON" && ev.purchaseOrder?.supplierName
-                            ? ev.purchaseOrder.supplierName
-                            : lines.title;
-                        const siteLine = ev.project?.title?.split(/[—–|-]/)[0]?.trim() ?? null;
-                        const showSite =
-                          Boolean(siteLine) &&
-                          (ev.type === "LIVRAISON" ||
-                            ev.type === "REUNION_CHANTIER" ||
-                            ev.type === "VISITE_CHANTIER" ||
-                            ev.type === "INTERVENTION");
+                  return (
+                    <div
+                      key={day.toISOString()}
+                      className={`overflow-hidden border-r border-slate-200/70 p-[var(--agenda-cell-pad,0.35rem)] ${
+                        !inMonth
+                          ? "bg-slate-50/70"
+                          : selected
+                            ? "bg-slate-50"
+                            : weekend
+                              ? "bg-slate-50/40"
+                              : "bg-white"
+                      }`}
+                      onClick={() => onSelectDay(day)}
+                      onDoubleClick={(e) => {
+                        e.stopPropagation();
+                        onOpenDay(day);
+                      }}
+                    >
+                      <div className="mb-1 flex items-center justify-between px-0.5">
+                        <span
+                          className={`flex h-7 w-7 items-center justify-center rounded-full text-[var(--agenda-day-num,0.8125rem)] ${
+                            isToday
+                              ? "bg-[#1e3a5f] font-bold text-white"
+                              : selected
+                                ? "font-bold text-[#1e3a5f] ring-2 ring-[#1e3a5f]/35"
+                                : inMonth
+                                  ? "font-semibold text-slate-800"
+                                  : "font-medium text-slate-300"
+                          }`}
+                        >
+                          {day.getDate()}
+                        </span>
+                      </div>
+                      <div className="space-y-1">
+                        {visible.map((ev) => {
+                          const meta = agendaTypeMeta(ev.type);
+                          const selectedEv = ev.id === selectedEventId;
+                          const lines = agendaEventCardLines(ev);
+                          const time = ev.allDay ? "" : formatTime(new Date(ev.startAt));
+                          const primary =
+                            ev.type === "LIVRAISON" && ev.purchaseOrder?.supplierName
+                              ? ev.purchaseOrder.supplierName
+                              : lines.title;
+                          const siteLine = ev.project?.title?.split(/[—–|-]/)[0]?.trim() ?? null;
+                          const showSite =
+                            Boolean(siteLine) &&
+                            (ev.type === "LIVRAISON" ||
+                              ev.type === "REUNION_CHANTIER" ||
+                              ev.type === "VISITE_CHANTIER" ||
+                              ev.type === "INTERVENTION");
 
-                        return (
+                          return (
+                            <button
+                              key={ev.id}
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onSelectEvent(ev.id);
+                              }}
+                              className={`block w-full rounded-md px-1.5 py-1 text-left shadow-sm transition hover:-translate-y-px hover:shadow ${
+                                selectedEv ? "ring-2 ring-[#1d4ed8]/50" : ""
+                              } ${lines.done ? "opacity-50" : ""} ${
+                                lines.unconfirmed
+                                  ? "border border-dashed border-orange-400/70"
+                                  : "border border-transparent"
+                              }`}
+                              style={{
+                                backgroundColor: meta.colors.bg,
+                                color: meta.colors.text,
+                                borderLeft: `3px solid ${meta.colors.border}`,
+                              }}
+                              title={`${time ? `${time} · ` : ""}${lines.eyebrow} — ${lines.title}${lines.meta ? ` · ${lines.meta}` : ""}`}
+                            >
+                              <span className={`block truncate font-semibold leading-tight ${eventFs}`}>
+                                {lines.done ? "✓ " : lines.unconfirmed ? "… " : ""}
+                                {time ? (
+                                  <span className="font-bold tabular-nums opacity-90">{time}</span>
+                                ) : null}
+                                {time ? "  " : ""}
+                                {primary}
+                              </span>
+                              {showTwoLines && showSite ? (
+                                <span className="mt-0.5 block truncate text-[11px] font-medium leading-tight opacity-80">
+                                  {siteLine}
+                                </span>
+                              ) : showTwoLines && lines.meta && !showSite ? (
+                                <span className="mt-0.5 block truncate text-[11px] font-medium leading-tight opacity-80">
+                                  {lines.meta}
+                                </span>
+                              ) : null}
+                              {showTwoLines && zoom >= 110 && lines.unconfirmed ? (
+                                <span className="mt-0.5 block truncate text-[10px] font-semibold text-amber-800/90">
+                                  À confirmer
+                                </span>
+                              ) : null}
+                            </button>
+                          );
+                        })}
+                        {more > 0 ? (
                           <button
-                            key={ev.id}
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              onSelectEvent(ev.id);
+                              onOpenDay(day);
                             }}
-                            className={`block w-full rounded-md px-1.5 py-1 text-left shadow-sm transition hover:-translate-y-px hover:shadow ${
-                              selectedEv ? "ring-2 ring-[#1d4ed8]/50" : ""
-                            } ${lines.done ? "opacity-50" : ""} ${
-                              lines.unconfirmed
-                                ? "border border-dashed border-orange-400/70"
-                                : "border border-transparent"
-                            }`}
-                            style={{
-                              backgroundColor: meta.colors.bg,
-                              color: meta.colors.text,
-                              borderLeft: `3px solid ${meta.colors.border}`,
-                            }}
-                            title={`${time ? `${time} · ` : ""}${lines.eyebrow} — ${lines.title}${lines.meta ? ` · ${lines.meta}` : ""}`}
+                            className="w-full rounded-md px-1.5 py-0.5 text-left text-[11px] font-semibold text-[#1e3a5f]/80 underline-offset-2 hover:bg-slate-100 hover:text-[#1e3a5f] hover:underline"
                           >
-                            <span className={`block truncate font-semibold leading-tight ${eventFs}`}>
-                              {lines.done ? "✓ " : lines.unconfirmed ? "… " : ""}
-                              {time ? (
-                                <span className="font-bold tabular-nums opacity-90">{time}</span>
-                              ) : null}
-                              {time ? "  " : ""}
-                              {primary}
-                            </span>
-                            {showTwoLines && showSite ? (
-                              <span className="mt-0.5 block truncate text-[11px] font-medium leading-tight opacity-80">
-                                {siteLine}
-                              </span>
-                            ) : showTwoLines && lines.meta && !showSite ? (
-                              <span className="mt-0.5 block truncate text-[11px] font-medium leading-tight opacity-80">
-                                {lines.meta}
-                              </span>
-                            ) : null}
-                            {showTwoLines && zoom >= 110 && lines.unconfirmed ? (
-                              <span className="mt-0.5 block truncate text-[10px] font-semibold text-amber-800/90">
-                                À confirmer
-                              </span>
-                            ) : null}
+                            + {more} autres
                           </button>
-                        );
-                      })}
-                      {more > 0 ? (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onOpenDay(day);
-                          }}
-                          className="w-full rounded-md px-1.5 py-0.5 text-left text-[11px] font-semibold text-[#1e3a5f]/80 underline-offset-2 hover:bg-slate-100 hover:text-[#1e3a5f] hover:underline"
-                        >
-                          + {more} autres
-                        </button>
-                      ) : null}
+                        ) : null}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          ))}
+                  );
+                })}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
